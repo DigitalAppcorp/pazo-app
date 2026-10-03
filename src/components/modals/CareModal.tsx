@@ -27,7 +27,7 @@ export const CareModal = ({
   const [newTitle, setNewTitle] = useState('')
   const [newType, setNewType] = useState<CareItem['type']>('veterinaria')
   const [newDate, setNewDate] = useState('2026-11-05')
-  const [newTime, setNewTime] = useState('11:00 AM')
+  const [newTime] = useState('11:00 AM')
 
   if (!isOpen) return null
 
@@ -78,11 +78,10 @@ export const CareModal = ({
               setActiveTab('proximos')
               setIsAddingNew(false)
             }}
-            className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'proximos' && !isAddingNew
+            className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === 'proximos' && !isAddingNew
                 ? 'bg-[#204E4A] text-[#E1E53F]'
                 : 'text-[#5C7470] hover:text-[#204E4A]'
-            }`}
+              }`}
           >
             {lang === 'es' ? 'Próximos' : 'Upcoming'}
           </button>
@@ -91,11 +90,10 @@ export const CareModal = ({
               setActiveTab('historial')
               setIsAddingNew(false)
             }}
-            className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'historial'
+            className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === 'historial'
                 ? 'bg-[#204E4A] text-[#E1E53F]'
                 : 'text-[#5C7470] hover:text-[#204E4A]'
-            }`}
+              }`}
           >
             {lang === 'es' ? 'Historial' : 'History'}
           </button>
@@ -104,11 +102,10 @@ export const CareModal = ({
               setActiveTab('documentos')
               setIsAddingNew(false)
             }}
-            className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'documentos'
+            className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === 'documentos'
                 ? 'bg-[#204E4A] text-[#E1E53F]'
                 : 'text-[#5C7470] hover:text-[#204E4A]'
-            }`}
+              }`}
           >
             {lang === 'es' ? 'Docs' : 'Docs'}
           </button>
