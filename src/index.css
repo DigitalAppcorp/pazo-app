@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Palo Seco', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.015em;
+    background-color: #EFECE4;
+  }
+
+  /* Toda fuente que sea en negrita con la fuente Sans-serif (Palo Seco) */
+  b, strong, .font-bold, .font-extrabold, .font-black, [class*="font-semibold"], [class*="font-bold"], [class*="font-extrabold"] {
+    font-family: 'Palo Seco', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+
+  /* Todos los textos de la app tengan un Outer margin de 2 pixeles */
+  h1, h2, h3, h4, h5, h6, p, label {
+    margin: 2px !important;
+  }
+
+  /* En todos los campos de escritura el Placeholder Color tenga de Opacity un 60% */
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 0.6 !important;
+    color: #5C7470 !important;
+  }
+
+  /* Cero contornos en toda la app: botones, contenedores, inputs y tarjetas */
+  button, input, textarea, select, div, article, nav, header, main, section {
+    border-width: 0px !important;
+    border-style: none !important;
+    border-color: transparent !important;
+    outline: none !important;
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSoft {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.85;
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-up-delayed {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
+  opacity: 0;
+}
+
+.animate-slide-up-delayed-2 {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.24s forwards;
+  opacity: 0;
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulseSoft 3s ease-in-out infinite;
+}
+
+/* Sombra sutil Pazo para reemplazar contornos */
+.soft-card {
+  box-shadow: 0 4px 20px -2px rgba(32, 78, 74, 0.06), 0 2px 6px -1px rgba(32, 78, 74, 0.04);
+}
+
+.soft-button {
+  box-shadow: 0 4px 14px -1px rgba(32, 78, 74, 0.08);
+}
+
+/* Scrollbars limpios */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(32, 78, 74, 0.15);
+  border-radius: 9999px;
+}
