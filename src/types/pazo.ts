@@ -18,6 +18,7 @@ export interface Pet {
 
 export interface PostComment {
   id: string
+  authorPetId?: string
   authorName: string
   authorPet: string
   authorAvatar: string
@@ -43,6 +44,8 @@ export interface Post {
   isLiked?: boolean
   isSaved?: boolean
   comments: PostComment[]
+  commentsCount?: number
+  commentsLoaded?: boolean
 }
 
 export interface Community {
