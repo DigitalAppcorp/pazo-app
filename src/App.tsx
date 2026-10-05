@@ -842,6 +842,7 @@ function PazoMain() {
           <PublicProfileView
             targetPetId={selectedPublicProfileId}
             currentPetId={currentPet?.id}
+            ownedPetIds={pets.map((pet) => pet.id)}
             onClose={() => setSelectedPublicProfileId(null)}
             lang={lang}
           />
@@ -1070,6 +1071,7 @@ function PazoMain() {
                       onLoadComments={loadCommentsForPost}
                       lang={lang}
                       currentPetId={currentPet?.id}
+                      ownedPetIds={pets.map((pet) => pet.id)}
                       onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                     />
                   )}
