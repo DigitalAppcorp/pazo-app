@@ -269,11 +269,11 @@ function PazoMain() {
           const recommendedPosts = recommendedData || []
 
           const formattedFollowed: Post[] = (followedPosts || []).map((p: any) => ({
-            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
           }))
 
           const formattedRecommended: Post[] = (recommendedPosts || []).map((p: any) => ({
-            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
           }))
 
           // Consulta RPC de recomendaciones personalizadas del motor de inteligencia
@@ -288,7 +288,7 @@ function PazoMain() {
               console.error('Error fetching recommended posts:', recommendedError)
             } else if (recommendedData) {
               formattedRpcRecommended = recommendedData.map((p: any) => ({
-                id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+                id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
               }))
             }
           }
@@ -300,7 +300,7 @@ function PazoMain() {
           if (smartFeed.length === 0) {
             const { data: fallbackPosts } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(10)
             smartFeed = (fallbackPosts || []).map((p: any) => ({
-              id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+              id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
             }))
           }
 
