@@ -496,6 +496,7 @@ function PazoMain() {
     tabScrollPositionsRef.current.inicio = 0
     activePetIdRef.current = pet.id
     setCurrentPet(pet)
+    setProfilePosts([])
     setSelectedPublicProfileId(null)
     void loadFeedForPet(pet)
   }
