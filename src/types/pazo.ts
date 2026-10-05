@@ -4,13 +4,15 @@ export interface Pet {
   id: string
   name: string
   species: Species
-  breed: string
+  breed?: string
   age: string
   photoUrl: string
-  gender: 'macho' | 'hembra'
+  gender?: 'macho' | 'hembra'
   weight?: string
   dietPlan?: string
   bio?: string
+  zone?: string
+  interests?: string[]
   isLost?: boolean
   qrId: string
   lastSeenLocation?: string
