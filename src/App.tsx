@@ -4,7 +4,6 @@ import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import {
   fetchNotifications,
-  markAllNotificationsRead,
   markNotificationRead,
 } from './services/rescueService'
 import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
@@ -857,15 +856,6 @@ function PazoMain() {
     }
   }
 
-  const handleMarkAllNotificationsRead = async () => {
-    try {
-      await markAllNotificationsRead()
-      setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })))
-    } catch (error) {
-      console.error('Error marking notifications as read:', error)
-    }
-  }
-
   useEffect(() => {
     if (user?.id && !isOnboardingActive) {
       void refreshNotifications()
@@ -877,13 +867,32 @@ function PazoMain() {
   const unreadMessages = conversations.filter((c) => c.isRequest).length
   const unreadNotifications = notifications.filter((n) => !n.read).length
   const lostPets = pets.filter((pet) => pet.isLost)
+  const lostPetIds = new Set(lostPets.map((pet) => pet.id))
+  const newestUnreadLostPetSighting = notifications.find(
+    (notification) =>
+      !notification.read
+      && notification.category === 'comunidad'
+      && Boolean(notification.sourceId)
+      && Boolean(notification.petId)
+      && lostPetIds.has(notification.petId as string)
+  )
+
+  const reminderPet =
+    (newestUnreadLostPetSighting?.petId
+      ? pets.find((pet) => pet.id === newestUnreadLostPetSighting.petId)
+      : undefined)
+    || (currentPet.isLost ? currentPet : lostPets[0])
 
   const handleOpenLostAlertReminder = () => {
-    const targetPet = currentPet.isLost ? currentPet : lostPets[0]
-    if (!targetPet) return
+    if (newestUnreadLostPetSighting?.sourceId) {
+      void handleOpenNotification(newestUnreadLostPetSighting)
+      return
+    }
 
-    if (targetPet.id !== currentPet.id) {
-      selectActivePet(targetPet)
+    if (!reminderPet) return
+
+    if (reminderPet.id !== currentPet.id) {
+      selectActivePet(reminderPet)
     }
 
     setIsAlertOpen(true)
@@ -1153,25 +1162,33 @@ function PazoMain() {
               unreadNotificationsCount={unreadNotifications}
             />
 
-            {lostPets.length > 0 && (
+            {lostPets.length > 0 && reminderPet && (
               <button
                 type="button"
                 onClick={handleOpenLostAlertReminder}
-                className="mx-4 mt-3 rounded-2xl bg-[#FFF2EE] border border-[#EC7357]/30 px-4 py-3 flex items-center gap-3 text-left cursor-pointer shrink-0"
+                className="mx-4 mt-3 rounded-2xl bg-[#FFF2EE] border border-[#EC7357]/25 px-4 py-3 flex items-center gap-3 text-left cursor-pointer shrink-0"
               >
                 <span className="w-8 h-8 rounded-full bg-[#EC7357] text-white flex items-center justify-center font-black shrink-0">
                   !
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-xs font-black text-[#204E4A]">
-                    {lostPets.length === 1
-                      ? `${lostPets[0].name} sigue reportado como perdido`
-                      : `${lostPets.length} mascotas tienen alertas activas`}
+                    {newestUnreadLostPetSighting
+                      ? (lang === 'es'
+                          ? `Hay un nuevo avistamiento de ${reminderPet.name}`
+                          : `There is a new sighting of ${reminderPet.name}`)
+                      : (lang === 'es'
+                          ? `Seguimos esperando que ${reminderPet.name} vuelva pronto y esté bien`
+                          : `We hope ${reminderPet.name} comes home safe soon`)}
                   </span>
-                  <span className="block text-[10px] text-[#5C7470] mt-0.5">
-                    {lang === 'es'
-                      ? 'Toca aquí para revisar o finalizar la alerta.'
-                      : 'Tap here to review or resolve the alert.'}
+                  <span className="block text-[10px] text-[#5C7470] mt-0.5 leading-relaxed">
+                    {newestUnreadLostPetSighting
+                      ? (lang === 'es'
+                          ? 'Alguien reportó haberlo visto. Toca aquí para ver los detalles.'
+                          : 'Someone reported seeing them. Tap here to view the details.')
+                      : (lang === 'es'
+                          ? 'La alerta seguirá activa y te avisaremos si alguien reporta un avistamiento.'
+                          : 'The alert will stay active and we will notify you if someone reports a sighting.')}
                   </span>
                 </span>
                 <span className="font-black text-[#EC7357]">›</span>
@@ -1351,7 +1368,6 @@ function PazoMain() {
               isOpen={isNotificationsOpen}
               onClose={() => setIsNotificationsOpen(false)}
               notifications={notifications}
-              onMarkAllRead={handleMarkAllNotificationsRead}
               onOpenNotification={handleOpenNotification}
               lang={lang}
             />
