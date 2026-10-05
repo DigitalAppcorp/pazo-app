@@ -231,7 +231,8 @@ BEFORE INSERT ON public.interactions
 FOR EACH ROW
 EXECUTE FUNCTION private.guard_comment_interaction_insert();
 
--- comments_count es un cache derivado; clientes no deben modificarlo.
-REVOKE UPDATE (comments_count) ON TABLE public.posts FROM anon, authenticated;
+-- comments_count es un cache derivado y posts.comments queda como legado de solo lectura.
+-- Desde esta fase, los clientes escriben comentarios únicamente en post_comments.
+REVOKE UPDATE (comments_count, comments) ON TABLE public.posts FROM anon, authenticated;
 
 COMMIT;
