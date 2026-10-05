@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-05  
-**Estado general:** núcleo social estable hasta Fase 5. Fase 6 congelada en PR borrador hasta aprobación de esta hoja.
+**Estado general:** núcleo social y sistema de rescate estable hasta Fase 6. Fase 7 es la siguiente.
 
 ---
 
@@ -255,7 +255,7 @@ Actualmente el núcleo persistente usa, entre otras:
 # 6. Nueva Ruta Maestra — MVP social útil
 
 ## Fase 6 — Pasaporte QR, mascota perdida y avistamientos
-**Estado: SIGUIENTE / CONGELADA HASTA APROBAR ESTA HOJA**
+**Estado: COMPLETADA**
 
 ### Objetivo
 Convertir el sistema de rescate que hoy es visual en una utilidad real.
@@ -281,26 +281,26 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 - email transaccional;
 - red de rescates externos.
 
-### Estado técnico actual
-Existe PR borrador **#6** en `feat/rescue-passport-alerts`.
-
-Trabajo ya preparado en ese PR:
-- backend SQL versionado;
-- UI pública;
-- QR;
-- alertas;
-- notificaciones de avistamiento.
-
-**NO se ha aplicado la migración de Fase 6 a Supabase.**
-
-Bloqueos antes de continuar:
-- aprobar esta hoja maestra;
-- sincronizar `package-lock.json` para la dependencia QR;
-- `npm run build` local;
-- revisar SQL;
-- autorización explícita;
-- aplicar;
-- pruebas end-to-end.
+### Estado técnico final
+- PR #6 implementado y validado;
+- backend 6A, 6B y 6C aplicado en Supabase PAZO;
+- QR real y token revocable por mascota;
+- alerta perdida persistente y resoluble;
+- avistamientos públicos con nombre/teléfono privados para el dueño;
+- notificaciones reales y detalle accionable;
+- recordatorio empático persistente de mascota perdida;
+- acceso directo al avistamiento nuevo desde el recordatorio;
+- notificaciones nuevas/vistas diferenciadas;
+- Feed con paginación por desplazamiento en bloques de 10;
+- Notificaciones con paginación por desplazamiento en bloques de 10;
+- badge de no leídas calculado sin descargar todas las filas;
+- recomendaciones paginadas sin solapamiento;
+- RLS/ownership/privacidad validados;
+- builds locales aprobados;
+- prueba visual/end-to-end aprobada por Product Owner;
+- datos visuales de prueba limpiados de Supabase;
+- Pancho quedó con `is_lost=false` y sin ubicación de prueba;
+- Advisors revisados; sin problemas nuevos introducidos por 6C.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
@@ -316,7 +316,7 @@ Bloqueos antes de continuar:
 ---
 
 ## Fase 7 — Comunidades reales
-**Estado: PLANIFICADA**
+**Estado: SIGUIENTE**
 
 Hoy `ExploreView` usa comunidades mock.
 
@@ -535,6 +535,13 @@ El rediseño debe hacerse por bloques y no como cambio masivo ciego:
 
 Cada bloque se prueba antes de continuar para evitar propagar una dirección visual incorrecta a toda la app.
 
+### Pendientes visuales heredados de Fase 6
+- animación de un perrito en estado de alerta al activar/buscar una mascota perdida;
+- títulos visuales personalizados para cada tipo de alerta/notificación;
+- revisar la presentación final de etiquetas, encabezados y jerarquía visual del sistema de rescate.
+
+Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de rescate.
+
 ### Definition of Done
 - todas las pantallas incluidas en Beta siguen una misma línea gráfica;
 - no quedan estilos claramente pertenecientes a prototipos anteriores;
@@ -692,7 +699,7 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - algunos flujos del menú Crear anuncian “próximamente”.
 - bundle ya ha mostrado warning de chunk >500 kB; atender en Fase 15.
 - Leaked Password Protection pendiente en Supabase Auth.
-- PR #6 está congelado hasta aprobación de esta hoja.
+- Fase 6 cerrada; PR #6 fusionado al completar esta actualización.
 
 ---
 
@@ -712,19 +719,12 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-Una vez que Brandon apruebe esta hoja:
+1. cerrar y fusionar PR #6 a `main`;
+2. sincronizar el entorno local con `main`;
+3. comenzar **Fase 7 — Comunidades reales**;
+4. antes de programar Fase 7, resolver la **DECISIÓN PENDIENTE** sobre quién puede crear comunidades;
+5. auditar `ExploreView`, mocks actuales y cualquier estructura existente relacionada;
+6. definir esquema/RLS/flujo de Join/Leave;
+7. crear rama específica de Fase 7.
 
-1. fusionar/documentar esta hoja en `main`;
-2. reanudar **Fase 6** desde el PR #6 existente;
-3. sincronizar dependencia QR + lockfile;
-4. build local;
-5. auditoría SQL;
-6. pedir autorización para Supabase;
-7. aplicar y probar;
-8. prueba visual;
-9. merge;
-10. actualizar esta hoja a:
-   - Fase 6 = COMPLETADA;
-   - Fase 7 = SIGUIENTE.
-
-**No comenzar Fase 7 antes de cerrar Fase 6.**
+**No comenzar Fase 8 antes de cerrar Fase 7.**

@@ -120,4 +120,7 @@ export interface PazoNotification {
   category: 'todas' | 'cuidados' | 'comunidad'
   timeAgo: string
   read: boolean
+  createdAt?: string
+  petId?: string | null
+  sourceId?: string | null
 }

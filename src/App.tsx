@@ -2,7 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
-import type { Pet, Post, Community, CareItem, Conversation } from './types/pazo'
+import {
+  fetchLatestUnreadSightingNotification,
+  fetchNotifications,
+  fetchUnreadNotificationCount,
+  markNotificationRead,
+} from './services/rescueService'
+import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
@@ -11,7 +17,6 @@ import {
   INITIAL_CARE_ITEMS,
   INITIAL_DOCS,
   INITIAL_CONVERSATIONS,
-  INITIAL_NOTIFICATIONS,
 } from './data/mockData'
 
 import { BottomNav, type NavTab } from './components/BottomNav'
@@ -22,6 +27,7 @@ import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
+import { PublicRescueView } from './components/views/PublicRescueView'
 
 import { CreateModal } from './components/modals/CreateModal'
 import { CreatePostModal } from './components/modals/CreatePostModal'
@@ -31,10 +37,53 @@ import { CareModal } from './components/modals/CareModal'
 import { AlertModal } from './components/modals/AlertModal'
 import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
+import { SightingDetailModal } from './components/modals/SightingDetailModal'
+
+const getPublicRescueRoute = () => {
+  const match = window.location.hash.match(
+    /^#\/rescue\/([0-9a-f-]{36})(?:\?from=(preview))?$/i
+  )
+
+  return {
+    token: match?.[1] || null,
+    fromPreview: match?.[2] === 'preview',
+  }
+}
+
+const FEED_PAGE_SIZE = 10
+const NOTIFICATIONS_PAGE_SIZE = 10
+
+interface FeedPaginationState {
+  petId: string
+  socialPetIds: string[]
+  socialOffset: number
+  recommendationOffset: number
+  socialExhausted: boolean
+  recommendationExhausted: boolean
+}
+
+const EMPTY_FEED_PAGINATION: FeedPaginationState = {
+  petId: '',
+  socialPetIds: [],
+  socialOffset: 0,
+  recommendationOffset: 0,
+  socialExhausted: false,
+  recommendationExhausted: false,
+}
 
 function PazoMain() {
   const { user, loading, signIn } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
+  const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
+
+  useEffect(() => {
+    const syncPublicRoute = () => {
+      setPublicRescueRoute(getPublicRescueRoute())
+    }
+
+    window.addEventListener('hashchange', syncPublicRoute)
+    return () => window.removeEventListener('hashchange', syncPublicRoute)
+  }, [])
 
   const [showSplash, setShowSplash] = useState(true)
 
@@ -53,15 +102,20 @@ function PazoMain() {
 
   const [showFounderModal, setShowFounderModal] = useState(false)
   const [isFeedLoading, setIsFeedLoading] = useState(true)
+  const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
+  const [hasMoreFeed, setHasMoreFeed] = useState(true)
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const activePetIdRef = useRef(INITIAL_PETS[0].id)
   const [posts, setPosts] = useState<Post[]>([])
+  const [profilePosts, setProfilePosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
   const commentingPostIdsRef = useRef<Set<string>>(new Set())
   const feedLoadVersionRef = useRef(0)
+  const feedLoadMoreInFlightRef = useRef(false)
+  const feedPaginationRef = useRef<FeedPaginationState>({ ...EMPTY_FEED_PAGINATION })
   const ownedPetIdsRef = useRef<string[]>([])
   const mainScrollRef = useRef<HTMLElement | null>(null)
   const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
@@ -75,7 +129,13 @@ function PazoMain() {
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
   const [docs] = useState(INITIAL_DOCS)
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<PazoNotification[]>([])
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const [hasMoreNotifications, setHasMoreNotifications] = useState(true)
+  const [isNotificationsLoadingMore, setIsNotificationsLoadingMore] = useState(false)
+  const [latestUnreadLostPetSighting, setLatestUnreadLostPetSighting] = useState<PazoNotification | null>(null)
+  const notificationOffsetRef = useRef(0)
+  const notificationLoadInFlightRef = useRef(false)
 
   const [activeTab, setActiveTab] = useState<NavTab>('inicio')
 
@@ -100,6 +160,7 @@ function PazoMain() {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
   const blendFeeds = (followed: Post[], recommended: Post[]): Post[] => {
     if (!followed || followed.length === 0) return recommended
@@ -205,199 +266,228 @@ function PazoMain() {
     }
   }
 
-  const loadFeedForPet = async (pet: Pet) => {
-    const loadVersion = ++feedLoadVersionRef.current
-    setIsFeedLoading(true)
+  const formatPostRow = (post: any, isRecommended: boolean): Post => ({
+    id: post.id,
+    petId: post.pet_id,
+    petName: post.pet_name,
+    petSpecies: post.pet_species,
+    petAvatar: post.pet_avatar,
+    location: post.location,
+    timeAgo: 'Hace un momento',
+    createdAt: post.created_at,
+    isRecommended,
+    tags: post.tags || [],
+    text: post.text,
+    photoUrl: post.photo_url,
+    likes: post.likes || 0,
+    isLiked: false,
+    isSaved: false,
+    comments: [],
+    commentsCount: post.comments_count ?? (post.comments || []).length,
+    commentsLoaded: false,
+  })
+
+  const loadFeedPageForPet = async (pet: Pet, reset: boolean) => {
+    const loadVersion = reset
+      ? ++feedLoadVersionRef.current
+      : feedLoadVersionRef.current
+
+    if (reset) {
+      setIsFeedLoading(true)
+      setHasMoreFeed(true)
+      feedPaginationRef.current = {
+        ...EMPTY_FEED_PAGINATION,
+        petId: pet.id,
+      }
+    }
 
     try {
-      const userInterests =
-        pet.interests?.filter((interest) => interest.trim().length > 0) || []
-      const ownedPetIds =
-        ownedPetIdsRef.current.length > 0
-          ? ownedPetIdsRef.current
-          : [pet.id]
+      let pagination = feedPaginationRef.current
 
-      const { data: follows, error: followsError } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', pet.id)
+      if (reset || pagination.petId !== pet.id) {
+        const ownedPetIds =
+          ownedPetIdsRef.current.length > 0
+            ? ownedPetIdsRef.current
+            : [pet.id]
 
-      if (followsError) {
-        console.error('Error fetching follows:', followsError)
+        const { data: follows, error: followsError } = await supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', pet.id)
+
+        if (followsError) {
+          console.error('Error fetching follows for feed pagination:', followsError)
+        }
+
+        const followingIds = follows?.map((follow) => follow.following_id) || []
+
+        pagination = {
+          petId: pet.id,
+          socialPetIds: Array.from(
+            new Set([...ownedPetIds, ...followingIds].filter(Boolean))
+          ),
+          socialOffset: 0,
+          recommendationOffset: 0,
+          socialExhausted: false,
+          recommendationExhausted: false,
+        }
+
+        feedPaginationRef.current = pagination
       }
 
-      const followingIds = follows?.map((follow) => follow.following_id) || []
-
-      const { data: ownPostsData, error: ownPostsError } = await supabase
-        .from('posts')
-        .select('*')
-        .in('pet_id', ownedPetIds)
-        .order('created_at', { ascending: false })
-
-      if (ownPostsError) {
-        console.error('Error fetching own posts:', ownPostsError)
-      }
-
-      let followedPostsData: any[] = []
-      if (followingIds.length > 0) {
-        const { data: followedData, error: followedError } = await supabase
+      let socialRows: any[] = []
+      if (!pagination.socialExhausted && pagination.socialPetIds.length > 0) {
+        const { data, error } = await supabase
           .from('posts')
           .select('*')
-          .in('pet_id', followingIds)
+          .in('pet_id', pagination.socialPetIds)
           .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(
+            pagination.socialOffset,
+            pagination.socialOffset + FEED_PAGE_SIZE - 1
+          )
 
-        if (followedError) {
-          console.error('Error fetching followed posts:', followedError)
-        } else if (followedData) {
-          followedPostsData = followedData
+        if (error) {
+          throw error
         }
+
+        socialRows = data || []
       }
 
-      const chronologicalPosts = [
-        ...(ownPostsData || []),
-        ...followedPostsData,
-      ]
-        .filter((post, index, allPosts) =>
-          allPosts.findIndex((candidate) => candidate.id === post.id) === index
-        )
-        .sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      let recommendationRows: any[] = []
+      if (!pagination.recommendationExhausted) {
+        const { data, error } = await supabase.rpc(
+          'get_recommended_posts_page',
+          {
+            p_actor_pet_id: pet.id,
+            p_limit: FEED_PAGE_SIZE,
+            p_offset: pagination.recommendationOffset,
+          }
         )
 
-      const excludedIds = Array.from(
-        new Set([...followingIds, ...ownedPetIds].filter(Boolean))
+        if (error) {
+          throw error
+        }
+
+        recommendationRows = data || []
+      }
+
+      const socialPosts = socialRows.map((post) => formatPostRow(post, false))
+      const recommendedPosts = recommendationRows.map((post) =>
+        formatPostRow(post, true)
       )
 
-      let recommendedData: any[] = []
-      if (userInterests.length > 0) {
-        let recommendedQuery = supabase
-          .from('posts')
-          .select('*')
-          .overlaps('tags', userInterests)
-          .order('likes', { ascending: false })
-          .limit(6)
+      const page = blendFeeds(socialPosts, recommendedPosts)
+        .slice(0, FEED_PAGE_SIZE)
 
-        if (excludedIds.length > 0) {
-          recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
-        }
+      const consumedSocial = page.filter((post) => !post.isRecommended).length
+      const consumedRecommendations = page.filter((post) => post.isRecommended).length
 
-        const { data: tagRecommendedData, error: recommendedError } = await recommendedQuery
+      pagination.socialOffset += consumedSocial
+      pagination.recommendationOffset += consumedRecommendations
 
-        if (recommendedError) {
-          console.error('Error fetching tag recommendations:', recommendedError)
-        } else {
-          recommendedData = tagRecommendedData || []
-        }
+      if (
+        socialRows.length === 0
+        || (
+          socialRows.length < FEED_PAGE_SIZE
+          && consumedSocial >= socialRows.length
+        )
+      ) {
+        pagination.socialExhausted = true
       }
 
-      const formatPost = (post: any, isRecommended: boolean): Post => ({
-        id: post.id,
-        petId: post.pet_id,
-        petName: post.pet_name,
-        petSpecies: post.pet_species,
-        petAvatar: post.pet_avatar,
-        location: post.location,
-        timeAgo: 'Hace un momento',
-        createdAt: post.created_at,
-        isRecommended,
-        tags: post.tags || [],
-        text: post.text,
-        photoUrl: post.photo_url,
-        likes: post.likes || 0,
-        isLiked: false,
-        isSaved: false,
-        comments: [],
-        commentsCount: post.comments_count ?? (post.comments || []).length,
-        commentsLoaded: false,
-      })
-
-      const formattedFollowed = chronologicalPosts.map((post) => formatPost(post, false))
-      const formattedRecommended = (recommendedData || []).map((post: any) => formatPost(post, true))
-
-      let formattedRpcRecommended: Post[] = []
-      const { data: rpcRecommendedData, error: rpcRecommendedError } = await supabase.rpc(
-        'get_recommended_posts',
-        {
-          p_actor_pet_id: pet.id,
-          p_limit: 10,
-        }
-      )
-
-      if (rpcRecommendedError) {
-        console.error('Error fetching personalized recommendations:', rpcRecommendedError)
-      } else if (rpcRecommendedData) {
-        formattedRpcRecommended = rpcRecommendedData.map((post: any) => formatPost(post, true))
+      if (
+        recommendationRows.length === 0
+        || (
+          recommendationRows.length < FEED_PAGE_SIZE
+          && consumedRecommendations >= recommendationRows.length
+        )
+      ) {
+        pagination.recommendationExhausted = true
       }
 
-      const excludedRecommendationPetIds = new Set(excludedIds)
-      const primaryRecommendations = (
-        formattedRpcRecommended.length > 0
-          ? formattedRpcRecommended
-          : formattedRecommended
-      ).filter((post) => !excludedRecommendationPetIds.has(post.petId))
+      feedPaginationRef.current = pagination
 
-      let genericRecommendations: Post[] = []
-      if (primaryRecommendations.length < 4) {
-        let genericQuery = supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10)
-
-        if (excludedIds.length > 0) {
-          genericQuery = genericQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
-        }
-
-        const { data: genericData, error: genericError } = await genericQuery
-
-        if (genericError) {
-          console.error('Error fetching cold-start recommendations:', genericError)
-        } else {
-          genericRecommendations = (genericData || []).map((post: any) => formatPost(post, true))
-        }
-      }
-
-      const recommendationIds = new Set<string>()
-      const recommendationsLayer = [
-        ...primaryRecommendations,
-        ...genericRecommendations,
-      ].filter((post) => {
-        if (recommendationIds.has(post.id)) return false
-        recommendationIds.add(post.id)
-        return true
-      })
-
-      let smartFeed = blendFeeds(formattedFollowed, recommendationsLayer)
-
-      if (smartFeed.length === 0) {
-        const { data: fallbackPosts, error: fallbackError } = await supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10)
-
-        if (fallbackError) {
-          console.error('Error fetching fallback posts:', fallbackError)
-        }
-
-        smartFeed = (fallbackPosts || []).map((post: any) => formatPost(post, true))
-      }
-
-      const enrichedFeed = await enrichPostsWithInteractions(smartFeed, pet.id)
+      const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
 
       if (feedLoadVersionRef.current !== loadVersion) return
-      setPosts(enrichedFeed)
+
+      if (reset) {
+        setPosts(enrichedPage)
+      } else {
+        setPosts((previousPosts) => {
+          const existingIds = new Set(previousPosts.map((post) => post.id))
+          const uniqueNext = enrichedPage.filter((post) => !existingIds.has(post.id))
+          return [...previousPosts, ...uniqueNext]
+        })
+      }
+
+      setHasMoreFeed(
+        !(pagination.socialExhausted && pagination.recommendationExhausted)
+      )
     } catch (error) {
-      console.error(`Error loading feed for pet ${pet.id}:`, error)
-      if (feedLoadVersionRef.current === loadVersion) {
+      console.error(`Error loading feed page for pet ${pet.id}:`, error)
+
+      if (reset && feedLoadVersionRef.current === loadVersion) {
         setPosts([])
+        setHasMoreFeed(false)
       }
     } finally {
-      if (feedLoadVersionRef.current === loadVersion) {
+      if (reset && feedLoadVersionRef.current === loadVersion) {
         setIsFeedLoading(false)
       }
     }
   }
+
+  const loadFeedForPet = async (pet: Pet) => {
+    await loadFeedPageForPet(pet, true)
+  }
+
+  const loadMoreFeed = async () => {
+    if (
+      feedLoadMoreInFlightRef.current
+      || isFeedLoading
+      || !hasMoreFeed
+      || activePetIdRef.current !== currentPet.id
+    ) {
+      return
+    }
+
+    feedLoadMoreInFlightRef.current = true
+    setIsFeedLoadingMore(true)
+
+    try {
+      await loadFeedPageForPet(currentPet, false)
+    } finally {
+      feedLoadMoreInFlightRef.current = false
+      setIsFeedLoadingMore(false)
+    }
+  }
+
+  const loadProfilePostsForPet = async (petId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('pet_id', petId)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+
+      if (error) throw error
+
+      if (activePetIdRef.current !== petId) return
+      setProfilePosts((data || []).map((post) => formatPostRow(post, false)))
+    } catch (error) {
+      console.error('Error loading pet profile posts:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'mascota' && currentPet?.id) {
+      void loadProfilePostsForPet(currentPet.id)
+    }
+  }, [activeTab, currentPet?.id])
 
   const selectActivePet = (pet: Pet) => {
     if (!user?.id) return
@@ -406,6 +496,7 @@ function PazoMain() {
     tabScrollPositionsRef.current.inicio = 0
     activePetIdRef.current = pet.id
     setCurrentPet(pet)
+    setProfilePosts([])
     setSelectedPublicProfileId(null)
     void loadFeedForPet(pet)
   }
@@ -735,7 +826,17 @@ function PazoMain() {
   }
 
   const handlePostCreated = (newPost: Post) => {
+    if (
+      feedPaginationRef.current.petId === currentPet.id
+      && feedPaginationRef.current.socialPetIds.includes(newPost.petId)
+    ) {
+      feedPaginationRef.current.socialOffset += 1
+    }
+
     setPosts((prevPosts) => [newPost, ...prevPosts])
+    setProfilePosts((prevPosts) =>
+      newPost.petId === currentPet.id ? [newPost, ...prevPosts] : prevPosts
+    )
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
   }
@@ -793,12 +894,155 @@ function PazoMain() {
     )
   }
 
-  const handleMarkAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  const refreshLostPetSightingReminder = async () => {
+    const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
+
+    try {
+      const latest = await fetchLatestUnreadSightingNotification(lostPetIds)
+      setLatestUnreadLostPetSighting(latest)
+    } catch (error) {
+      console.error('Error loading latest unread lost-pet sighting:', error)
+    }
   }
 
+  const refreshNotifications = async () => {
+    if (!user?.id || notificationLoadInFlightRef.current) return
+
+    notificationLoadInFlightRef.current = true
+
+    try {
+      const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
+      const [latest, unreadCount, latestLostPetSighting] = await Promise.all([
+        fetchNotifications(0, NOTIFICATIONS_PAGE_SIZE),
+        fetchUnreadNotificationCount(),
+        fetchLatestUnreadSightingNotification(lostPetIds),
+      ])
+
+      setNotifications(latest)
+      setUnreadNotificationCount(unreadCount)
+      setLatestUnreadLostPetSighting(latestLostPetSighting)
+      notificationOffsetRef.current = latest.length
+      setHasMoreNotifications(latest.length === NOTIFICATIONS_PAGE_SIZE)
+    } catch (error) {
+      console.error('Error loading notifications:', error)
+    } finally {
+      notificationLoadInFlightRef.current = false
+    }
+  }
+
+  const loadMoreNotifications = async () => {
+    if (
+      !user?.id
+      || notificationLoadInFlightRef.current
+      || !hasMoreNotifications
+    ) {
+      return
+    }
+
+    notificationLoadInFlightRef.current = true
+    setIsNotificationsLoadingMore(true)
+
+    try {
+      const nextPage = await fetchNotifications(
+        notificationOffsetRef.current,
+        NOTIFICATIONS_PAGE_SIZE
+      )
+
+      notificationOffsetRef.current += nextPage.length
+      setHasMoreNotifications(nextPage.length === NOTIFICATIONS_PAGE_SIZE)
+
+      setNotifications((previous) => {
+        const existingIds = new Set(previous.map((notification) => notification.id))
+        const uniqueNext = nextPage.filter(
+          (notification) => !existingIds.has(notification.id)
+        )
+        return [...previous, ...uniqueNext]
+      })
+    } catch (error) {
+      console.error('Error loading more notifications:', error)
+    } finally {
+      notificationLoadInFlightRef.current = false
+      setIsNotificationsLoadingMore(false)
+    }
+  }
+
+  const handleOpenNotifications = () => {
+    setIsNotificationsOpen(true)
+    void refreshNotifications()
+  }
+
+  const handleOpenNotification = async (notification: PazoNotification) => {
+    if (!notification.sourceId) return
+
+    setIsNotificationsOpen(false)
+    setSelectedSightingId(notification.sourceId)
+
+    if (!notification.read) {
+      try {
+        await markNotificationRead(notification.id)
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === notification.id ? { ...item, read: true } : item
+          )
+        )
+        setUnreadNotificationCount((count) => Math.max(0, count - 1))
+
+        if (latestUnreadLostPetSighting?.id === notification.id) {
+          setLatestUnreadLostPetSighting(null)
+          void refreshLostPetSightingReminder()
+        }
+      } catch (error) {
+        console.error('Error marking notification as read:', error)
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (user?.id && !isOnboardingActive) {
+      void refreshNotifications()
+    } else if (!user?.id) {
+      setNotifications([])
+      setUnreadNotificationCount(0)
+      setLatestUnreadLostPetSighting(null)
+      notificationOffsetRef.current = 0
+      setHasMoreNotifications(true)
+    }
+  }, [user?.id, isOnboardingActive, pets.length])
+
   const unreadMessages = conversations.filter((c) => c.isRequest).length
-  const unreadNotifications = notifications.filter((n) => !n.read).length
+  const unreadNotifications = unreadNotificationCount
+  const lostPets = pets.filter((pet) => pet.isLost)
+
+  const reminderPet =
+    (latestUnreadLostPetSighting?.petId
+      ? pets.find((pet) => pet.id === latestUnreadLostPetSighting.petId)
+      : undefined)
+    || (currentPet.isLost ? currentPet : lostPets[0])
+
+  const handleOpenLostAlertReminder = () => {
+    if (latestUnreadLostPetSighting?.sourceId) {
+      void handleOpenNotification(latestUnreadLostPetSighting)
+      return
+    }
+
+    if (!reminderPet) return
+
+    if (reminderPet.id !== currentPet.id) {
+      selectActivePet(reminderPet)
+    }
+
+    setIsAlertOpen(true)
+  }
+
+  if (publicRescueRoute.token) {
+    return (
+      <PublicRescueView
+        token={publicRescueRoute.token}
+        fromPreview={publicRescueRoute.fromPreview}
+        onBack={() => window.history.back()}
+      />
+    )
+  }
 
   if (showSplash || loading) {
     return (
@@ -1049,12 +1293,62 @@ function PazoMain() {
               lang={lang}
               onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
               onOpenMessages={() => setIsMessagesOpen(true)}
-              onOpenNotifications={() => setIsNotificationsOpen(true)}
+              onOpenNotifications={handleOpenNotifications}
               unreadMessagesCount={unreadMessages}
               unreadNotificationsCount={unreadNotifications}
             />
 
-            <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-4 sm:p-5 relative">
+            {lostPets.length > 0 && reminderPet && (
+              <button
+                type="button"
+                onClick={handleOpenLostAlertReminder}
+                className="mx-4 mt-3 rounded-2xl bg-[#FFF2EE] border border-[#EC7357]/25 px-4 py-3 flex items-center gap-3 text-left cursor-pointer shrink-0"
+              >
+                <span className="w-8 h-8 rounded-full bg-[#EC7357] text-white flex items-center justify-center font-black shrink-0">
+                  !
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-xs font-black text-[#204E4A]">
+                    {latestUnreadLostPetSighting
+                      ? (lang === 'es'
+                          ? `Hay un nuevo avistamiento de ${reminderPet.name}`
+                          : `There is a new sighting of ${reminderPet.name}`)
+                      : (lang === 'es'
+                          ? `Seguimos esperando que ${reminderPet.name} vuelva pronto y esté bien`
+                          : `We hope ${reminderPet.name} comes home safe soon`)}
+                  </span>
+                  <span className="block text-[10px] text-[#5C7470] mt-0.5 leading-relaxed">
+                    {latestUnreadLostPetSighting
+                      ? (lang === 'es'
+                          ? 'Alguien reportó haberlo visto. Toca aquí para ver los detalles.'
+                          : 'Someone reported seeing them. Tap here to view the details.')
+                      : (lang === 'es'
+                          ? 'Estamos alerta y te avisaremos si alguien reporta un avistamiento.'
+                          : 'We are staying alert and will notify you if someone reports a sighting.')}
+                  </span>
+                </span>
+                <span className="font-black text-[#EC7357]">›</span>
+              </button>
+            )}
+
+            <main
+              ref={mainScrollRef}
+              className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
+              onScroll={(event) => {
+                const element = event.currentTarget
+                tabScrollPositionsRef.current[activeTab] = element.scrollTop
+
+                if (
+                  activeTab === 'inicio'
+                  && hasMoreFeed
+                  && !isFeedLoading
+                  && !isFeedLoadingMore
+                  && element.scrollHeight - element.scrollTop - element.clientHeight < 700
+                ) {
+                  void loadMoreFeed()
+                }
+              }}
+            >
               {isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
@@ -1063,17 +1357,24 @@ function PazoMain() {
               ) : (
                 <>
                   {activeTab === 'inicio' && (
-                    <HomeView
-                      posts={posts}
-                      onLikePost={handleLikePost}
-                      onSavePost={handleSavePost}
-                      onAddComment={handleAddComment}
-                      onLoadComments={loadCommentsForPost}
-                      lang={lang}
-                      currentPetId={currentPet?.id}
-                      ownedPetIds={pets.map((pet) => pet.id)}
-                      onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
-                    />
+                    <>
+                      <HomeView
+                        posts={posts}
+                        onLikePost={handleLikePost}
+                        onSavePost={handleSavePost}
+                        onAddComment={handleAddComment}
+                        onLoadComments={loadCommentsForPost}
+                        lang={lang}
+                        currentPetId={currentPet?.id}
+                        ownedPetIds={pets.map((pet) => pet.id)}
+                        onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                      />
+                      {isFeedLoadingMore && (
+                        <div className="py-5 flex justify-center">
+                          <div className="w-6 h-6 border-2 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {activeTab === 'explorar' && (
@@ -1112,7 +1413,7 @@ function PazoMain() {
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
                       lang={lang}
-                      userPosts={posts.filter((p) => p.petId === currentPet.id)}
+                      userPosts={profilePosts}
                     />
                   )}
                 </>
@@ -1205,6 +1506,13 @@ function PazoMain() {
               isOpen={isAlertOpen}
               onClose={() => setIsAlertOpen(false)}
               pet={currentPet}
+              onPetUpdated={(updatedPet) => {
+                activePetIdRef.current = updatedPet.id
+                setCurrentPet(updatedPet)
+                setPets((prevPets) =>
+                  prevPets.map((pet) => pet.id === updatedPet.id ? updatedPet : pet)
+                )
+              }}
               lang={lang}
             />
 
@@ -1220,7 +1528,16 @@ function PazoMain() {
               isOpen={isNotificationsOpen}
               onClose={() => setIsNotificationsOpen(false)}
               notifications={notifications}
-              onMarkAllRead={handleMarkAllNotificationsRead}
+              onOpenNotification={handleOpenNotification}
+              onLoadMore={() => void loadMoreNotifications()}
+              hasMore={hasMoreNotifications}
+              isLoadingMore={isNotificationsLoadingMore}
+              lang={lang}
+            />
+
+            <SightingDetailModal
+              sightingId={selectedSightingId}
+              onClose={() => setSelectedSightingId(null)}
               lang={lang}
             />
           </div>
