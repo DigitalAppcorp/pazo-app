@@ -209,11 +209,3 @@ export const fetchNotifications = async (): Promise<PazoNotification[]> => {
   }))
 }
 
-export const markAllNotificationsRead = async (): Promise<void> => {
-  const { error } = await supabase
-    .from('notifications')
-    .update({ read_at: new Date().toISOString() })
-    .is('read_at', null)
-
-  if (error) throw error
-}
