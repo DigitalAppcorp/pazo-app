@@ -62,6 +62,14 @@ function PazoMain() {
   const savingPostIdsRef = useRef<Set<string>>(new Set())
   const commentingPostIdsRef = useRef<Set<string>>(new Set())
   const feedLoadVersionRef = useRef(0)
+  const ownedPetIdsRef = useRef<string[]>([])
+  const mainScrollRef = useRef<HTMLElement | null>(null)
+  const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
+    inicio: 0,
+    explorar: 0,
+    mapa: 0,
+    mascota: 0,
+  })
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
@@ -70,6 +78,16 @@ function PazoMain() {
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)
 
   const [activeTab, setActiveTab] = useState<NavTab>('inicio')
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const scrollContainer = mainScrollRef.current
+      if (!scrollContainer) return
+      scrollContainer.scrollTop = tabScrollPositionsRef.current[activeTab] ?? 0
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [activeTab])
 
   // Estado global para la pantalla exclusiva de perfil público
   const [selectedPublicProfileId, setSelectedPublicProfileId] = useState<string | null>(null)
@@ -192,10 +210,12 @@ function PazoMain() {
     setIsFeedLoading(true)
 
     try {
-      let userInterests: string[] = ['Comunidades de gatos', 'Lugares aptos para mascotas']
-      if (pet.interests && Array.isArray(pet.interests) && pet.interests.length > 0) {
-        userInterests = pet.interests
-      }
+      const userInterests =
+        pet.interests?.filter((interest) => interest.trim().length > 0) || []
+      const ownedPetIds =
+        ownedPetIdsRef.current.length > 0
+          ? ownedPetIdsRef.current
+          : [pet.id]
 
       const { data: follows, error: followsError } = await supabase
         .from('follows')
@@ -211,7 +231,7 @@ function PazoMain() {
       const { data: ownPostsData, error: ownPostsError } = await supabase
         .from('posts')
         .select('*')
-        .eq('pet_id', pet.id)
+        .in('pet_id', ownedPetIds)
         .order('created_at', { ascending: false })
 
       if (ownPostsError) {
@@ -244,22 +264,30 @@ function PazoMain() {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
 
-      const excludedIds = [...followingIds, pet.id].filter(Boolean)
-      let recommendedQuery = supabase
-        .from('posts')
-        .select('*')
-        .overlaps('tags', userInterests)
-        .order('likes', { ascending: false })
-        .limit(3)
+      const excludedIds = Array.from(
+        new Set([...followingIds, ...ownedPetIds].filter(Boolean))
+      )
 
-      if (excludedIds.length > 0) {
-        recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
-      }
+      let recommendedData: any[] = []
+      if (userInterests.length > 0) {
+        let recommendedQuery = supabase
+          .from('posts')
+          .select('*')
+          .overlaps('tags', userInterests)
+          .order('likes', { ascending: false })
+          .limit(6)
 
-      const { data: recommendedData, error: recommendedError } = await recommendedQuery
+        if (excludedIds.length > 0) {
+          recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
+        }
 
-      if (recommendedError) {
-        console.error('Error fetching tag recommendations:', recommendedError)
+        const { data: tagRecommendedData, error: recommendedError } = await recommendedQuery
+
+        if (recommendedError) {
+          console.error('Error fetching tag recommendations:', recommendedError)
+        } else {
+          recommendedData = tagRecommendedData || []
+        }
       }
 
       const formatPost = (post: any, isRecommended: boolean): Post => ({
@@ -301,8 +329,41 @@ function PazoMain() {
         formattedRpcRecommended = rpcRecommendedData.map((post: any) => formatPost(post, true))
       }
 
-      const recommendationsLayer =
-        formattedRpcRecommended.length > 0 ? formattedRpcRecommended : formattedRecommended
+      const primaryRecommendations =
+        formattedRpcRecommended.length > 0
+          ? formattedRpcRecommended
+          : formattedRecommended
+
+      let genericRecommendations: Post[] = []
+      if (primaryRecommendations.length < 4) {
+        let genericQuery = supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (excludedIds.length > 0) {
+          genericQuery = genericQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
+        }
+
+        const { data: genericData, error: genericError } = await genericQuery
+
+        if (genericError) {
+          console.error('Error fetching cold-start recommendations:', genericError)
+        } else {
+          genericRecommendations = (genericData || []).map((post: any) => formatPost(post, true))
+        }
+      }
+
+      const recommendationIds = new Set<string>()
+      const recommendationsLayer = [
+        ...primaryRecommendations,
+        ...genericRecommendations,
+      ].filter((post) => {
+        if (recommendationIds.has(post.id)) return false
+        recommendationIds.add(post.id)
+        return true
+      })
 
       let smartFeed = blendFeeds(formattedFollowed, recommendationsLayer)
 
@@ -317,7 +378,7 @@ function PazoMain() {
           console.error('Error fetching fallback posts:', fallbackError)
         }
 
-        smartFeed = (fallbackPosts || []).map((post: any) => formatPost(post, false))
+        smartFeed = (fallbackPosts || []).map((post: any) => formatPost(post, true))
       }
 
       const enrichedFeed = await enrichPostsWithInteractions(smartFeed, pet.id)
@@ -340,6 +401,7 @@ function PazoMain() {
     if (!user?.id) return
 
     localStorage.setItem(`active_pet_${user.id}`, pet.id)
+    tabScrollPositionsRef.current.inicio = 0
     activePetIdRef.current = pet.id
     setCurrentPet(pet)
     setSelectedPublicProfileId(null)
@@ -364,6 +426,7 @@ function PazoMain() {
 
         if (ownedPets.length > 0) {
           setIsOnboardingActive(false)
+          ownedPetIdsRef.current = ownedPets.map((pet) => pet.id)
           setPets(ownedPets)
 
           const storedActivePetId = localStorage.getItem(`active_pet_${user.id}`)
@@ -383,6 +446,7 @@ function PazoMain() {
 
           await loadFeedForPet(activePet)
         } else {
+          ownedPetIdsRef.current = []
           setPets([])
           setAuthMode('onboarding')
           setInitialOnboardingStep('A03')
@@ -793,6 +857,7 @@ function PazoMain() {
               }}
               onQuickDemo={() => setIsDemoUser(true)}
               onComplete={(newPet) => {
+                ownedPetIdsRef.current = [newPet.id]
                 setPets([newPet])
                 activePetIdRef.current = newPet.id
                 setCurrentPet(newPet)
@@ -986,7 +1051,7 @@ function PazoMain() {
               unreadNotificationsCount={unreadNotifications}
             />
 
-            <main className="flex-1 overflow-y-auto p-4 sm:p-5 relative">
+            <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-4 sm:p-5 relative">
               {isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
@@ -1053,7 +1118,15 @@ function PazoMain() {
             <BottomNav
               activeTab={activeTab}
               onSelectTab={(tab) => {
-                setActiveTab(tab)
+                const scrollContainer = mainScrollRef.current
+                if (scrollContainer) {
+                  tabScrollPositionsRef.current[activeTab] = scrollContainer.scrollTop
+                }
+
+                if (tab !== activeTab) {
+                  setActiveTab(tab)
+                }
+
                 if (tab === 'mapa') {
                   trackInteraction('feature_map_tab', 'place', 'view')
                 }
@@ -1093,6 +1166,9 @@ function PazoMain() {
               isOpen={isAddPetOpen}
               onClose={() => setIsAddPetOpen(false)}
               onPetCreated={(newPet) => {
+                ownedPetIdsRef.current = Array.from(
+                  new Set([...ownedPetIdsRef.current, newPet.id])
+                )
                 setPets((prevPets) => {
                   if (prevPets.some((pet) => pet.id === newPet.id)) return prevPets
                   return [...prevPets, newPet]
