@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import type { Pet, Post, Community, CareItem, Conversation } from './types/pazo'
@@ -55,6 +55,8 @@ function PazoMain() {
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [posts, setPosts] = useState<Post[]>([])
+  const likingPostIdsRef = useRef<Set<string>>(new Set())
+  const savingPostIdsRef = useRef<Set<string>>(new Set())
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
@@ -114,6 +116,55 @@ function PazoMain() {
     }
 
     return blended
+  }
+
+  const enrichPostsWithInteractions = async (postsList: Post[], petId?: string): Promise<Post[]> => {
+    if (postsList.length === 0) return postsList
+
+    if (!petId) {
+      return postsList.map((post) => ({
+        ...post,
+        isLiked: false,
+        isSaved: false,
+      }))
+    }
+
+    try {
+      const postIds = postsList.map((post) => post.id)
+      const { data: interactionsData, error } = await supabase
+        .from('interactions')
+        .select('target_id, action_type')
+        .eq('actor_pet_id', petId)
+        .eq('target_type', 'post')
+        .in('action_type', ['like', 'save'])
+        .in('target_id', postIds)
+
+      if (error) throw error
+
+      const likedPostIds = new Set<string>()
+      const savedPostIds = new Set<string>()
+
+      interactionsData?.forEach((interaction) => {
+        if (interaction.action_type === 'like') {
+          likedPostIds.add(interaction.target_id)
+        } else if (interaction.action_type === 'save') {
+          savedPostIds.add(interaction.target_id)
+        }
+      })
+
+      return postsList.map((post) => ({
+        ...post,
+        isLiked: likedPostIds.has(post.id),
+        isSaved: savedPostIds.has(post.id),
+      }))
+    } catch (err) {
+      console.error('Error cargando estados de interacciones (Like/Save):', err)
+      return postsList.map((post) => ({
+        ...post,
+        isLiked: false,
+        isSaved: false,
+      }))
+    }
   }
 
   const trackInteraction = async (targetId: string, targetType: 'post' | 'community' | 'place' | 'profile', actionType: 'like' | 'comment' | 'join' | 'view') => {
@@ -252,7 +303,8 @@ function PazoMain() {
             }))
           }
 
-          setPosts(smartFeed)
+          const enrichedFeed = await enrichPostsWithInteractions(smartFeed, myPet.id)
+          setPosts(enrichedFeed)
           setIsFeedLoading(false)
 
         } else {
@@ -287,54 +339,91 @@ function PazoMain() {
   }
 
   const handleLikePost = async (postId: string) => {
-    // Guarda previa estricta
-    if (!currentPet?.id || !postId) return
+    if (!currentPet?.id) return
+    if (likingPostIdsRef.current.has(postId)) return
 
-    const targetPost = posts.find((p) => p.id === postId)
-    if (!targetPost) return
+    const postToUpdate = posts.find((post) => post.id === postId)
+    if (!postToUpdate) return
 
-    const newIsLiked = !targetPost.isLiked
-    const newLikesCount = newIsLiked ? targetPost.likes + 1 : targetPost.likes - 1
+    likingPostIdsRef.current.add(postId)
 
-    // 1. Actualización optimista del estado local
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        return {
-          ...p,
-          isLiked: newIsLiked,
-          likes: newLikesCount,
-        }
-      })
+    const previousIsLiked = postToUpdate.isLiked ?? false
+    const previousLikes = postToUpdate.likes
+    const newIsLiked = !previousIsLiked
+    const newLikes = newIsLiked ? previousLikes + 1 : Math.max(0, previousLikes - 1)
+    const actionType = newIsLiked ? 'like' : 'unlike'
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, isLiked: newIsLiked, likes: newLikes }
+          : post
+      )
     )
 
-    // 2. Persistencia en background (no bloqueante)
-    supabase
-      .from('posts')
-      .update({ likes: newLikesCount })
-      .eq('id', postId)
-      .then(({ error }) => {
-        if (error) console.error('Error updating likes in DB:', error)
-      })
-
-    // 3. Registro de señal analítica e inteligente
-    if (newIsLiked) {
-      trackInteraction(postId, 'post', 'like')
-
-      supabase.rpc('register_interaction_signal', {
+    try {
+      const { error } = await supabase.rpc('register_interaction_signal', {
         p_actor_pet_id: currentPet.id,
         p_target_id: postId,
-        p_action_type: 'like'
-      }).then(({ error }) => {
-        if (error) console.error('Error registering like signal:', error)
+        p_action_type: actionType,
       })
+
+      if (error) throw error
+    } catch (err) {
+      console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, isLiked: previousIsLiked, likes: previousLikes }
+            : post
+        )
+      )
+    } finally {
+      likingPostIdsRef.current.delete(postId)
     }
   }
 
-  const handleSavePost = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, isSaved: !p.isSaved } : p))
+  const handleSavePost = async (postId: string) => {
+    if (!currentPet?.id) return
+    if (savingPostIdsRef.current.has(postId)) return
+
+    const postToUpdate = posts.find((post) => post.id === postId)
+    if (!postToUpdate) return
+
+    savingPostIdsRef.current.add(postId)
+
+    const previousIsSaved = postToUpdate.isSaved ?? false
+    const newIsSaved = !previousIsSaved
+    const actionType = newIsSaved ? 'save' : 'unsave'
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, isSaved: newIsSaved }
+          : post
+      )
     )
+
+    try {
+      const { error } = await supabase.rpc('register_interaction_signal', {
+        p_actor_pet_id: currentPet.id,
+        p_target_id: postId,
+        p_action_type: actionType,
+      })
+
+      if (error) throw error
+    } catch (err) {
+      console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, isSaved: previousIsSaved }
+            : post
+        )
+      )
+    } finally {
+      savingPostIdsRef.current.delete(postId)
+    }
   }
 
   const handleAddComment = async (postId: string, text: string) => {
