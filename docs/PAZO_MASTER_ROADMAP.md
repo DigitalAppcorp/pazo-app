@@ -294,12 +294,20 @@ Trabajo ya preparado en ese PR:
 **NO se ha aplicado la migración de Fase 6 a Supabase.**
 
 Bloqueos antes de continuar:
-- sincronizar `package-lock.json` para la dependencia QR;
 - `npm run build` local;
-- revisar SQL;
-- autorización explícita;
-- aplicar;
-- pruebas end-to-end.
+- autorización explícita para aplicar Supabase;
+- aplicar migración;
+- pruebas SQL/RLS;
+- pruebas end-to-end y visuales.
+
+Preflight ya completado:
+- rama sincronizada con `main`;
+- dependencia QR mínima y lockfile sincronizado;
+- SQL revisado;
+- token QR revocable/rotatorio;
+- acceso anónimo a `owner_id` y `last_seen_location` preparado para revocarse;
+- perfil social desacoplado de esos campos para no romper modo demo;
+- mutaciones de alerta forzadas a pasar por RPC controlada.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
