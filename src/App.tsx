@@ -56,6 +56,7 @@ function PazoMain() {
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
+  const activePetIdRef = useRef(INITIAL_PETS[0].id)
   const [posts, setPosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
@@ -339,6 +340,7 @@ function PazoMain() {
     if (!user?.id) return
 
     localStorage.setItem(`active_pet_${user.id}`, pet.id)
+    activePetIdRef.current = pet.id
     setCurrentPet(pet)
     setSelectedPublicProfileId(null)
     void loadFeedForPet(pet)
@@ -369,6 +371,7 @@ function PazoMain() {
             ownedPets.find((pet) => pet.id === storedActivePetId)
             || ownedPets[0]
 
+          activePetIdRef.current = activePet.id
           setCurrentPet(activePet)
           localStorage.setItem(`active_pet_${user.id}`, activePet.id)
 
@@ -413,12 +416,14 @@ function PazoMain() {
 
   const handleLikePost = async (postId: string) => {
     if (!currentPet?.id) return
-    if (likingPostIdsRef.current.has(postId)) return
+    const actorPetId = currentPet.id
+    const operationKey = `${actorPetId}:${postId}`
+    if (likingPostIdsRef.current.has(operationKey)) return
 
     const postToUpdate = posts.find((post) => post.id === postId)
     if (!postToUpdate) return
 
-    likingPostIdsRef.current.add(postId)
+    likingPostIdsRef.current.add(operationKey)
 
     const previousIsLiked = postToUpdate.isLiked ?? false
     const previousLikes = postToUpdate.likes
@@ -436,7 +441,7 @@ function PazoMain() {
 
     try {
       const { error } = await supabase.rpc('register_interaction_signal', {
-        p_actor_pet_id: currentPet.id,
+        p_actor_pet_id: actorPetId,
         p_target_id: postId,
         p_action_type: actionType,
       })
@@ -444,26 +449,30 @@ function PazoMain() {
       if (error) throw error
     } catch (err) {
       console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? { ...post, isLiked: previousIsLiked, likes: previousLikes }
-            : post
+      if (activePetIdRef.current === actorPetId) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? { ...post, isLiked: previousIsLiked, likes: previousLikes }
+              : post
+          )
         )
-      )
+      }
     } finally {
-      likingPostIdsRef.current.delete(postId)
+      likingPostIdsRef.current.delete(operationKey)
     }
   }
 
   const handleSavePost = async (postId: string) => {
     if (!currentPet?.id) return
-    if (savingPostIdsRef.current.has(postId)) return
+    const actorPetId = currentPet.id
+    const operationKey = `${actorPetId}:${postId}`
+    if (savingPostIdsRef.current.has(operationKey)) return
 
     const postToUpdate = posts.find((post) => post.id === postId)
     if (!postToUpdate) return
 
-    savingPostIdsRef.current.add(postId)
+    savingPostIdsRef.current.add(operationKey)
 
     const previousIsSaved = postToUpdate.isSaved ?? false
     const newIsSaved = !previousIsSaved
@@ -479,7 +488,7 @@ function PazoMain() {
 
     try {
       const { error } = await supabase.rpc('register_interaction_signal', {
-        p_actor_pet_id: currentPet.id,
+        p_actor_pet_id: actorPetId,
         p_target_id: postId,
         p_action_type: actionType,
       })
@@ -487,15 +496,17 @@ function PazoMain() {
       if (error) throw error
     } catch (err) {
       console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? { ...post, isSaved: previousIsSaved }
-            : post
+      if (activePetIdRef.current === actorPetId) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? { ...post, isSaved: previousIsSaved }
+              : post
+          )
         )
-      )
+      }
     } finally {
-      savingPostIdsRef.current.delete(postId)
+      savingPostIdsRef.current.delete(operationKey)
     }
   }
 
@@ -562,12 +573,14 @@ function PazoMain() {
   const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
     const trimmedText = text.trim()
     if (!currentPet?.id || !postId || !trimmedText) return false
-    if (commentingPostIdsRef.current.has(postId)) return false
+    const actorPet = currentPet
+    const operationKey = `${actorPet.id}:${postId}`
+    if (commentingPostIdsRef.current.has(operationKey)) return false
 
     const targetPost = posts.find((post) => post.id === postId)
     if (!targetPost) return false
 
-    commentingPostIdsRef.current.add(postId)
+    commentingPostIdsRef.current.add(operationKey)
 
     const previousComments = targetPost.comments
     const previousCommentsCount = targetPost.commentsCount ?? targetPost.comments.length
@@ -576,10 +589,10 @@ function PazoMain() {
 
     const optimisticComment = {
       id: temporaryId,
-      authorPetId: currentPet.id,
-      authorName: currentPet.name,
-      authorPet: currentPet.species,
-      authorAvatar: currentPet.photoUrl,
+      authorPetId: actorPet.id,
+      authorName: actorPet.name,
+      authorPet: actorPet.species,
+      authorAvatar: actorPet.photoUrl,
       text: trimmedText,
       timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
       createdAt,
@@ -603,7 +616,7 @@ function PazoMain() {
         .from('post_comments')
         .insert({
           post_id: postId,
-          author_pet_id: currentPet.id,
+          author_pet_id: actorPet.id,
           body: trimmedText,
         })
         .select('id, created_at')
@@ -611,43 +624,47 @@ function PazoMain() {
 
       if (error) throw error
 
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                comments: post.comments.map((comment) =>
-                  comment.id === temporaryId
-                    ? {
-                        ...comment,
-                        id: data.id,
-                        createdAt: data.created_at,
-                      }
-                    : comment
-                ),
-              }
-            : post
+      if (activePetIdRef.current === actorPet.id) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  comments: post.comments.map((comment) =>
+                    comment.id === temporaryId
+                      ? {
+                          ...comment,
+                          id: data.id,
+                          createdAt: data.created_at,
+                        }
+                      : comment
+                  ),
+                }
+              : post
+          )
         )
-      )
+      }
 
       return true
     } catch (err) {
       console.error(`Error creando comentario en el post ${postId}:`, err)
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                comments: previousComments,
-                commentsCount: previousCommentsCount,
-                commentsLoaded: targetPost.commentsLoaded ?? false,
-              }
-            : post
+      if (activePetIdRef.current === actorPet.id) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  comments: previousComments,
+                  commentsCount: previousCommentsCount,
+                  commentsLoaded: targetPost.commentsLoaded ?? false,
+                }
+              : post
+          )
         )
-      )
+      }
       return false
     } finally {
-      commentingPostIdsRef.current.delete(postId)
+      commentingPostIdsRef.current.delete(operationKey)
     }
   }
 
@@ -777,6 +794,7 @@ function PazoMain() {
               onQuickDemo={() => setIsDemoUser(true)}
               onComplete={(newPet) => {
                 setPets([newPet])
+                activePetIdRef.current = newPet.id
                 setCurrentPet(newPet)
                 if (user?.id) {
                   localStorage.setItem(`active_pet_${user.id}`, newPet.id)
