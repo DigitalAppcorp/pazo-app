@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
+import { updatePetProfile } from '../../services/petService'
 import type { Pet, CareItem, PrivateDoc, Post } from '../../types/pazo'
 import {
   IconPaw,
@@ -13,6 +14,7 @@ interface PetViewProps {
   currentPet: Pet
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
+  onPetUpdated: (pet: Pet) => void
   careItems: CareItem[]
   onToggleCompleteCare: (careId: string) => void
   docs: PrivateDoc[]
@@ -27,6 +29,7 @@ export const PetView = ({
   currentPet,
   availablePets,
   onSelectPet,
+  onPetUpdated,
   careItems,
   onToggleCompleteCare,
   docs,
@@ -40,96 +43,115 @@ export const PetView = ({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
+  const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [editForm, setEditForm] = useState({
+  const interestOptions = [
+    'Comunidades de gatos',
+    'Lugares aptos para mascotas',
+    'Actividades y encuentros',
+    'Nutrición y alimentación natural',
+  ]
+
+  const buildEditForm = () => ({
     name: currentPet.name || '',
     bio: currentPet.bio || '',
+    breed: currentPet.breed || '',
+    gender: currentPet.gender || '',
     weight: currentPet.weight || '',
     dietPlan: currentPet.dietPlan || '',
     age: currentPet.age || '',
+    zone: currentPet.zone || '',
+    interests: currentPet.interests || [],
     photoUrl: currentPet.photoUrl,
   })
+
+  const [editForm, setEditForm] = useState(buildEditForm)
 
   const nextPendingCare = careItems.find((c) => !c.completed)
 
   const handleEditClick = () => {
-    setEditForm({
-      name: currentPet.name || '',
-      bio: currentPet.bio || '',
-      weight: currentPet.weight || '',
-      dietPlan: currentPet.dietPlan || '',
-      age: currentPet.age || '',
-      photoUrl: currentPet.photoUrl,
-    })
+    setEditForm(buildEditForm())
+    setEditPhotoFile(null)
     setIsEditing(true)
   }
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      if (file.size > 5 * 1024 * 1024) {
-        alert(lang === 'es' ? 'La imagen debe ser menor a 5MB.' : 'Image must be less than 5MB.')
-        return
-      }
-      const previewUrl = URL.createObjectURL(file)
-      setEditForm({ ...editForm, photoUrl: previewUrl })
+  const handleCancelEdit = () => {
+    if (editForm.photoUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(editForm.photoUrl)
     }
+    setEditPhotoFile(null)
+    setIsEditing(false)
+  }
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert(lang === 'es' ? 'La imagen debe ser menor a 5MB.' : 'Image must be less than 5MB.')
+      e.target.value = ''
+      return
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      alert(lang === 'es' ? 'Usa una imagen JPG, PNG o WEBP.' : 'Use a JPG, PNG, or WEBP image.')
+      e.target.value = ''
+      return
+    }
+
+    if (editForm.photoUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(editForm.photoUrl)
+    }
+
+    setEditPhotoFile(file)
+    setEditForm((prev) => ({ ...prev, photoUrl: URL.createObjectURL(file) }))
+  }
+
+  const toggleEditInterest = (interest: string) => {
+    setEditForm((prev) => ({
+      ...prev,
+      interests: prev.interests.includes(interest)
+        ? prev.interests.filter((item) => item !== interest)
+        : [...prev.interests, interest],
+    }))
   }
 
   const handleSaveProfile = async () => {
+    if (isSaving) return
+    if (!editForm.name.trim()) {
+      alert(lang === 'es' ? 'El nombre de la mascota es obligatorio.' : 'Pet name is required.')
+      return
+    }
+
     setIsSaving(true)
-    let finalPhotoUrl = editForm.photoUrl
 
     try {
-      if (editForm.photoUrl.startsWith('blob:')) {
-        const fileInput = fileInputRef.current
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-          const file = fileInput.files[0]
-          const fileExt = file.name.split('.').pop()
-          const fileName = `${currentPet.id}-${Date.now()}.${fileExt}`
-          const filePath = `avatars/${fileName}`
-
-          const { error: uploadError } = await supabase.storage
-            .from('post-photos')
-            .upload(filePath, file)
-
-          if (uploadError) throw uploadError
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('post-photos')
-            .getPublicUrl(filePath)
-
-          finalPhotoUrl = publicUrl
-        }
-      }
-
-      const { error: updateError } = await supabase
-        .from('pets')
-        .update({
-          name: editForm.name,
-          bio: editForm.bio,
-          weight: editForm.weight,
-          dietPlan: editForm.dietPlan,
-          age: editForm.age,
-          photo_url: finalPhotoUrl,
-        })
-        .eq('id', currentPet.id)
-
-      if (updateError) throw updateError
-
-      const updatedPet: Pet = {
-        ...currentPet,
+      const updatedPet = await updatePetProfile({
+        petId: currentPet.id,
         name: editForm.name,
+        species: currentPet.species,
+        age: editForm.age,
+        photoUrl: currentPet.photoUrl,
+        photoFile: editPhotoFile,
         bio: editForm.bio,
+        breed: editForm.breed,
+        gender: editForm.gender === 'macho' || editForm.gender === 'hembra'
+          ? editForm.gender
+          : undefined,
+        zone: editForm.zone,
+        interests: editForm.interests,
         weight: editForm.weight,
         dietPlan: editForm.dietPlan,
-        age: editForm.age,
-        photoUrl: finalPhotoUrl,
-      }
-      onSelectPet(updatedPet)
-      setIsEditing(false)
+      })
 
+      if (editForm.photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(editForm.photoUrl)
+      }
+
+      setEditPhotoFile(null)
+      onPetUpdated(updatedPet)
+      setIsEditing(false)
     } catch (error: any) {
       alert(lang === 'es' ? `Error al guardar: ${error.message}` : `Error saving: ${error.message}`)
     } finally {
@@ -165,7 +187,7 @@ export const PetView = ({
           </h2>
           {!isEditing && (
             <p className="text-xs text-[#5C7470]">
-              {currentPet.species.toUpperCase()} • {currentPet.age} • {currentPet.breed}
+              {currentPet.species.toUpperCase()} • {currentPet.age}{currentPet.breed ? ` • ${currentPet.breed}` : ''}
             </p>
           )}
         </div>
@@ -191,7 +213,7 @@ export const PetView = ({
           </div>
         ) : (
           <button
-            onClick={() => setIsEditing(false)}
+            onClick={handleCancelEdit}
             className="text-xs font-bold text-[#5C7470] bg-white border border-[#204E4A]/10 px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs"
           >
             {lang === 'es' ? 'Cancelar' : 'Cancel'}
