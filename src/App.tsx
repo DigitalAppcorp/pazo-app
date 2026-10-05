@@ -906,6 +906,7 @@ function PazoMain() {
                       onLikePost={handleLikePost}
                       onSavePost={handleSavePost}
                       onAddComment={handleAddComment}
+                      onLoadComments={loadCommentsForPost}
                       lang={lang}
                       currentPetId={currentPet?.id}
                       onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
