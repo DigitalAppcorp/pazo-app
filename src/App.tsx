@@ -109,6 +109,7 @@ function PazoMain() {
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const activePetIdRef = useRef(INITIAL_PETS[0].id)
   const [posts, setPosts] = useState<Post[]>([])
+  const [profilePosts, setProfilePosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
   const commentingPostIdsRef = useRef<Set<string>>(new Set())
@@ -464,6 +465,30 @@ function PazoMain() {
     }
   }
 
+  const loadProfilePostsForPet = async (petId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('pet_id', petId)
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+
+      if (error) throw error
+
+      if (activePetIdRef.current !== petId) return
+      setProfilePosts((data || []).map((post) => formatPostRow(post, false)))
+    } catch (error) {
+      console.error('Error loading pet profile posts:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'mascota' && currentPet?.id) {
+      void loadProfilePostsForPet(currentPet.id)
+    }
+  }, [activeTab, currentPet?.id])
+
   const selectActivePet = (pet: Pet) => {
     if (!user?.id) return
 
@@ -800,7 +825,17 @@ function PazoMain() {
   }
 
   const handlePostCreated = (newPost: Post) => {
+    if (
+      feedPaginationRef.current.petId === currentPet.id
+      && feedPaginationRef.current.socialPetIds.includes(newPost.petId)
+    ) {
+      feedPaginationRef.current.socialOffset += 1
+    }
+
     setPosts((prevPosts) => [newPost, ...prevPosts])
+    setProfilePosts((prevPosts) =>
+      newPost.petId === currentPet.id ? [newPost, ...prevPosts] : prevPosts
+    )
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
   }
@@ -1295,7 +1330,24 @@ function PazoMain() {
               </button>
             )}
 
-            <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-4 sm:p-5 relative">
+            <main
+              ref={mainScrollRef}
+              className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
+              onScroll={(event) => {
+                const element = event.currentTarget
+                tabScrollPositionsRef.current[activeTab] = element.scrollTop
+
+                if (
+                  activeTab === 'inicio'
+                  && hasMoreFeed
+                  && !isFeedLoading
+                  && !isFeedLoadingMore
+                  && element.scrollHeight - element.scrollTop - element.clientHeight < 700
+                ) {
+                  void loadMoreFeed()
+                }
+              }}
+            >
               {isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
@@ -1304,17 +1356,24 @@ function PazoMain() {
               ) : (
                 <>
                   {activeTab === 'inicio' && (
-                    <HomeView
-                      posts={posts}
-                      onLikePost={handleLikePost}
-                      onSavePost={handleSavePost}
-                      onAddComment={handleAddComment}
-                      onLoadComments={loadCommentsForPost}
-                      lang={lang}
-                      currentPetId={currentPet?.id}
-                      ownedPetIds={pets.map((pet) => pet.id)}
-                      onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
-                    />
+                    <>
+                      <HomeView
+                        posts={posts}
+                        onLikePost={handleLikePost}
+                        onSavePost={handleSavePost}
+                        onAddComment={handleAddComment}
+                        onLoadComments={loadCommentsForPost}
+                        lang={lang}
+                        currentPetId={currentPet?.id}
+                        ownedPetIds={pets.map((pet) => pet.id)}
+                        onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                      />
+                      {isFeedLoadingMore && (
+                        <div className="py-5 flex justify-center">
+                          <div className="w-6 h-6 border-2 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {activeTab === 'explorar' && (
@@ -1353,7 +1412,7 @@ function PazoMain() {
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
                       lang={lang}
-                      userPosts={posts.filter((p) => p.petId === currentPet.id)}
+                      userPosts={profilePosts}
                     />
                   )}
                 </>
@@ -1469,6 +1528,9 @@ function PazoMain() {
               onClose={() => setIsNotificationsOpen(false)}
               notifications={notifications}
               onOpenNotification={handleOpenNotification}
+              onLoadMore={() => void loadMoreNotifications()}
+              hasMore={hasMoreNotifications}
+              isLoadingMore={isNotificationsLoadingMore}
               lang={lang}
             />
 
