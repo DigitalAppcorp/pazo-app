@@ -223,19 +223,43 @@ function PazoMain() {
           const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', myPet.id)
           const followingIds = follows?.map(f => f.following_id) || []
 
-          // 1. Consulta segura para followedPosts: abortar si no hay followingIds
+          // El feed "Siguiendo" incluye también las publicaciones propias.
+          // Sin esto, un post recién creado aparecía por estado local pero desaparecía al recargar.
+          const { data: ownPostsData, error: ownPostsError } = await supabase
+            .from('posts')
+            .select('*')
+            .eq('pet_id', myPet.id)
+            .order('created_at', { ascending: false })
+
+          if (ownPostsError) {
+            console.error('Error fetching own posts:', ownPostsError)
+          }
+
           let followedPostsData: any[] = []
-          if (followingIds && followingIds.length > 0) {
+          if (followingIds.length > 0) {
             const { data: fData, error: fError } = await supabase
               .from('posts')
               .select('*')
               .in('pet_id', followingIds)
               .order('created_at', { ascending: false })
 
-            if (!fError && fData) {
+            if (fError) {
+              console.error('Error fetching followed posts:', fError)
+            } else if (fData) {
               followedPostsData = fData
             }
           }
+
+          const chronologicalPosts = [
+            ...(ownPostsData || []),
+            ...followedPostsData,
+          ]
+            .filter((post, index, allPosts) =>
+              allPosts.findIndex((candidate) => candidate.id === post.id) === index
+            )
+            .sort((a, b) =>
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )
 
           // 2. Consulta segura para recommendedPosts: construcción dinámica del query
           const excludedIds = [...followingIds, myPet.id].filter(Boolean)
@@ -257,7 +281,7 @@ function PazoMain() {
             console.error('Error fetching recommended posts:', recommendedError)
           }
 
-          const followedPosts = followedPostsData
+          const followedPosts = chronologicalPosts
           const recommendedPosts = recommendedData || []
 
           const formattedFollowed: Post[] = (followedPosts || []).map((p: any) => ({
