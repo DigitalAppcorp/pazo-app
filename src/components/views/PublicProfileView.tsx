@@ -40,7 +40,7 @@ export const PublicProfileView = ({
       try {
         const { data: petData, error: petError } = await supabase
           .from('pets')
-          .select('*')
+          .select('id,owner_id,name,species,age,photo_url,created_at,bio,breed,gender,is_lost,last_seen_location')
           .eq('id', targetPetId)
           .maybeSingle()
 
@@ -88,16 +88,16 @@ export const PublicProfileView = ({
           id: petData.id,
           name: petData.name,
           species: petData.species || 'perro',
-          breed: petData.breed || '',
+          breed: petData.breed || undefined,
           age: petData.age || 'Desconocida',
-          gender: petData.gender || 'macho',
-          weight: petData.weight || '-- kg',
-          dietPlan: petData.dietPlan || 'No especificada',
-          bio: petData.bio || `Perfil oficial de ${petData.name} en Pazo.`,
+          gender: petData.gender === 'macho' || petData.gender === 'hembra'
+            ? petData.gender
+            : undefined,
+          bio: petData.bio || undefined,
           photoUrl: petData.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
-          qrId: `PAZO-QR-${petData.name.toUpperCase()}`,
+          qrId: `PAZO-QR-${petData.id}`,
           isLost: petData.is_lost || false,
-          lastSeenLocation: petData.location || '',
+          lastSeenLocation: petData.is_lost ? (petData.last_seen_location || undefined) : undefined,
         }
 
         if (isMounted) setPetProfile(mappedPet)
@@ -358,19 +358,9 @@ export const PublicProfileView = ({
                       <span className="font-bold text-[#5C7470]">
                         {lang === 'es' ? 'Género' : 'Gender'}
                       </span>
-                      <span className="font-black text-sm sm:text-base text-[#204E4A] capitalize break-words">{petProfile.gender}</span>
-                    </div>
-                    <div className="flex flex-col p-5 bg-white/60 backdrop-blur-sm rounded-[1.5rem] border border-white/80 space-y-1 shadow-sm overflow-hidden">
-                      <span className="font-bold text-[#5C7470]">
-                        {lang === 'es' ? 'Peso' : 'Weight'}
+                      <span className="font-black text-sm sm:text-base text-[#204E4A] capitalize break-words">
+                        {petProfile.gender || (lang === 'es' ? 'Sin especificar' : 'Not specified')}
                       </span>
-                      <span className="font-black text-sm sm:text-base text-[#204E4A] break-words">{petProfile.weight}</span>
-                    </div>
-                    <div className="flex flex-col p-5 bg-white/60 backdrop-blur-sm rounded-[1.5rem] border border-white/80 space-y-1 shadow-sm overflow-hidden">
-                      <span className="font-bold text-[#5C7470]">
-                        {lang === 'es' ? 'Plan de Dieta' : 'Diet Plan'}
-                      </span>
-                      <span className="font-black text-sm sm:text-base text-[#204E4A] break-words">{petProfile.dietPlan}</span>
                     </div>
                   </div>
                 </div>
