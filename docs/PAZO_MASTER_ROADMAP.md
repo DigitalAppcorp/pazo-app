@@ -114,6 +114,8 @@ Estas reglas no deben romperse sin una decisión explícita de arquitectura.
 - Toda persistencia debe sobrevivir recarga `F5`.
 - Operaciones optimistas deben soportar rollback y cambio rápido de mascota.
 - Las pruebas de seguridad no sustituyen las pruebas visuales, y viceversa.
+- Durante una fase de rediseño visual, la funcionalidad existente debe mantenerse intacta salvo aprobación explícita del Product Owner.
+- Cambios puramente estéticos no deben introducir nuevas dependencias de backend, alterar contratos de datos ni modificar reglas de negocio.
 
 ---
 
@@ -462,7 +464,89 @@ Que “Explorar” encuentre contenido real, no solo tarjetas mock.
 
 ---
 
-## Fase 13 — Confianza, moderación y privacidad
+## Fase 13 — Rediseño visual y sistema de interfaz
+**Estado: PLANIFICADA**
+
+### Objetivo
+Elevar la calidad visual de PAZO sin alterar las funcionalidades ya aprobadas.
+
+Esta fase permite rediseñar pantallas completas o componentes individuales manteniendo intactos sus contratos funcionales.
+
+### Alcance
+- auditoría visual completa de todas las pantallas;
+- jerarquía visual;
+- tipografía;
+- espaciado;
+- grid;
+- márgenes;
+- botones;
+- inputs;
+- tarjetas;
+- contenedores;
+- modales;
+- navegación;
+- header;
+- tabs;
+- estados seleccionados;
+- estados vacíos;
+- loaders;
+- errores;
+- feedback visual;
+- iconografía;
+- sombras;
+- bordes;
+- radios;
+- densidad visual;
+- responsive móvil/escritorio;
+- microinteracciones y animaciones;
+- consistencia entre módulos;
+- creación o consolidación de design tokens;
+- componentes UI reutilizables cuando reduzcan inconsistencias.
+
+### Regla principal
+**Rediseño visual ≠ cambio funcional.**
+
+Durante esta fase:
+- no cambiar reglas de negocio;
+- no cambiar ownership ni RLS;
+- no cambiar contratos de Supabase;
+- no cambiar qué hace un botón;
+- no eliminar funciones existentes;
+- no introducir nuevas funcionalidades sin aprobación explícita;
+- no modificar flujos UX funcionales solo porque “se verían mejor”.
+
+Si una propuesta visual requiere cambiar comportamiento, navegación, información mostrada o estructura funcional, debe registrarse como **DECISIÓN PENDIENTE** y aprobarse por separado.
+
+### Método de trabajo
+El rediseño debe hacerse por bloques y no como cambio masivo ciego:
+
+1. definir sistema visual base;
+2. aprobar componentes principales;
+3. rediseñar navegación y layout global;
+4. rediseñar Feed;
+5. perfiles;
+6. Explore;
+7. mapa/lugares;
+8. cuidados;
+9. mensajería;
+10. modales y flujos secundarios;
+11. estados vacíos/error/loading;
+12. revisión responsive y accesibilidad.
+
+Cada bloque se prueba antes de continuar para evitar propagar una dirección visual incorrecta a toda la app.
+
+### Definition of Done
+- todas las pantallas incluidas en Beta siguen una misma línea gráfica;
+- no quedan estilos claramente pertenecientes a prototipos anteriores;
+- botones, inputs, cards y contenedores tienen reglas consistentes;
+- mobile y desktop mantienen buena jerarquía;
+- funcionalidades existentes siguen pasando las mismas pruebas;
+- no aparecen regresiones de Feed, navegación, formularios o modales;
+- Product Owner aprueba visualmente la interfaz final.
+
+---
+
+## Fase 14 — Confianza, moderación y privacidad
 **Estado: OBLIGATORIA ANTES DE BETA PÚBLICA**
 
 ### Alcance
@@ -481,7 +565,7 @@ Que “Explorar” encuentre contenido real, no solo tarjetas mock.
 
 ---
 
-## Fase 14 — PWA, rendimiento y preparación de Beta
+## Fase 15 — PWA, rendimiento y preparación de Beta
 **Estado: PLANIFICADA**
 
 ### Alcance
@@ -512,7 +596,7 @@ La aplicación puede entregarse a usuarios beta sin depender de mocks en el núc
 
 No llamar “MVP listo” hasta que:
 
-- Fases 6 a 14 definidas como requeridas para Beta estén completadas o explícitamente descartadas por Product Owner;
+- Fases 6 a 15 definidas como requeridas para Beta estén completadas o explícitamente descartadas por Product Owner;
 - no existan mocks visibles en funcionalidades incluidas en Beta;
 - RLS esté auditado;
 - build de producción pase;
@@ -527,7 +611,7 @@ No llamar “MVP listo” hasta que:
 
 Estas funciones pertenecen al concepto original de PAZO, pero no deben entrar automáticamente en una fase sin especificación funcional.
 
-## Fase 15 — Monetización base
+## Fase 16 — Monetización base
 **Estado: BACKLOG**
 
 - membresías;
@@ -541,7 +625,7 @@ Estas funciones pertenecen al concepto original de PAZO, pero no deben entrar au
 
 Antes de implementar, decidir producto y precios.
 
-## Fase 16 — Parejas / Matches de mascotas
+## Fase 17 — Parejas / Matches de mascotas
 **Estado: BACKLOG**
 
 Idea original:
@@ -556,7 +640,7 @@ Idea original:
 - consentimiento;
 - qué parte es paga.
 
-## Fase 17 — Adopciones
+## Fase 18 — Adopciones
 **Estado: BACKLOG**
 
 - organizaciones/perfiles autorizados;
@@ -566,7 +650,7 @@ Idea original:
 - estados;
 - moderación y verificación.
 
-## Fase 18 — Servicios para mascotas
+## Fase 19 — Servicios para mascotas
 **Estado: BACKLOG**
 
 - paseadores;
@@ -580,7 +664,7 @@ Idea original:
 
 Debe dividirse en subfases antes de programar.
 
-## Fase 19 — Tiendas / negocios / publicidad
+## Fase 20 — Tiendas / negocios / publicidad
 **Estado: BACKLOG**
 
 - tiendas;
@@ -606,7 +690,7 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - Care/Docs son mock/local.
 - Messages son mock/local.
 - algunos flujos del menú Crear anuncian “próximamente”.
-- bundle ya ha mostrado warning de chunk >500 kB; atender en Fase 14.
+- bundle ya ha mostrado warning de chunk >500 kB; atender en Fase 15.
 - Leaked Password Protection pendiente en Supabase Auth.
 - PR #6 está congelado hasta aprobación de esta hoja.
 
