@@ -59,6 +59,7 @@ function PazoMain() {
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
   const commentingPostIdsRef = useRef<Set<string>>(new Set())
+  const feedLoadVersionRef = useRef(0)
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
@@ -183,10 +184,168 @@ function PazoMain() {
     }
   }
 
+  const loadFeedForPet = async (pet: Pet) => {
+    const loadVersion = ++feedLoadVersionRef.current
+    setIsFeedLoading(true)
+
+    try {
+      let userInterests: string[] = ['Comunidades de gatos', 'Lugares aptos para mascotas']
+      if (pet.interests && Array.isArray(pet.interests) && pet.interests.length > 0) {
+        userInterests = pet.interests
+      }
+
+      const { data: follows, error: followsError } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', pet.id)
+
+      if (followsError) {
+        console.error('Error fetching follows:', followsError)
+      }
+
+      const followingIds = follows?.map((follow) => follow.following_id) || []
+
+      const { data: ownPostsData, error: ownPostsError } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('pet_id', pet.id)
+        .order('created_at', { ascending: false })
+
+      if (ownPostsError) {
+        console.error('Error fetching own posts:', ownPostsError)
+      }
+
+      let followedPostsData: any[] = []
+      if (followingIds.length > 0) {
+        const { data: followedData, error: followedError } = await supabase
+          .from('posts')
+          .select('*')
+          .in('pet_id', followingIds)
+          .order('created_at', { ascending: false })
+
+        if (followedError) {
+          console.error('Error fetching followed posts:', followedError)
+        } else if (followedData) {
+          followedPostsData = followedData
+        }
+      }
+
+      const chronologicalPosts = [
+        ...(ownPostsData || []),
+        ...followedPostsData,
+      ]
+        .filter((post, index, allPosts) =>
+          allPosts.findIndex((candidate) => candidate.id === post.id) === index
+        )
+        .sort((a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+
+      const excludedIds = [...followingIds, pet.id].filter(Boolean)
+      let recommendedQuery = supabase
+        .from('posts')
+        .select('*')
+        .overlaps('tags', userInterests)
+        .order('likes', { ascending: false })
+        .limit(3)
+
+      if (excludedIds.length > 0) {
+        recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
+      }
+
+      const { data: recommendedData, error: recommendedError } = await recommendedQuery
+
+      if (recommendedError) {
+        console.error('Error fetching tag recommendations:', recommendedError)
+      }
+
+      const formatPost = (post: any, isRecommended: boolean): Post => ({
+        id: post.id,
+        petId: post.pet_id,
+        petName: post.pet_name,
+        petSpecies: post.pet_species,
+        petAvatar: post.pet_avatar,
+        location: post.location,
+        timeAgo: 'Hace un momento',
+        createdAt: post.created_at,
+        isRecommended,
+        tags: post.tags || [],
+        text: post.text,
+        photoUrl: post.photo_url,
+        likes: post.likes || 0,
+        isLiked: false,
+        isSaved: false,
+        comments: [],
+        commentsCount: post.comments_count ?? (post.comments || []).length,
+        commentsLoaded: false,
+      })
+
+      const formattedFollowed = chronologicalPosts.map((post) => formatPost(post, false))
+      const formattedRecommended = (recommendedData || []).map((post: any) => formatPost(post, true))
+
+      let formattedRpcRecommended: Post[] = []
+      const { data: rpcRecommendedData, error: rpcRecommendedError } = await supabase.rpc(
+        'get_recommended_posts',
+        {
+          p_actor_pet_id: pet.id,
+          p_limit: 10,
+        }
+      )
+
+      if (rpcRecommendedError) {
+        console.error('Error fetching personalized recommendations:', rpcRecommendedError)
+      } else if (rpcRecommendedData) {
+        formattedRpcRecommended = rpcRecommendedData.map((post: any) => formatPost(post, true))
+      }
+
+      const recommendationsLayer =
+        formattedRpcRecommended.length > 0 ? formattedRpcRecommended : formattedRecommended
+
+      let smartFeed = blendFeeds(formattedFollowed, recommendationsLayer)
+
+      if (smartFeed.length === 0) {
+        const { data: fallbackPosts, error: fallbackError } = await supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        if (fallbackError) {
+          console.error('Error fetching fallback posts:', fallbackError)
+        }
+
+        smartFeed = (fallbackPosts || []).map((post: any) => formatPost(post, false))
+      }
+
+      const enrichedFeed = await enrichPostsWithInteractions(smartFeed, pet.id)
+
+      if (feedLoadVersionRef.current !== loadVersion) return
+      setPosts(enrichedFeed)
+    } catch (error) {
+      console.error(`Error loading feed for pet ${pet.id}:`, error)
+      if (feedLoadVersionRef.current === loadVersion) {
+        setPosts([])
+      }
+    } finally {
+      if (feedLoadVersionRef.current === loadVersion) {
+        setIsFeedLoading(false)
+      }
+    }
+  }
+
+  const selectActivePet = (pet: Pet) => {
+    if (!user?.id) return
+
+    localStorage.setItem(`active_pet_${user.id}`, pet.id)
+    setCurrentPet(pet)
+    setSelectedPublicProfileId(null)
+    void loadFeedForPet(pet)
+  }
+
   useEffect(() => {
     if (!loading && user) {
       const initApp = async () => {
-        if (!user?.id) return
+        if (!user.id) return
         setIsFeedLoading(true)
 
         let ownedPets: Pet[] = []
@@ -199,15 +358,17 @@ function PazoMain() {
           return
         }
 
-        const myPet = ownedPets[0]
-
-        if (myPet) {
+        if (ownedPets.length > 0) {
           setIsOnboardingActive(false)
+          setPets(ownedPets)
 
-          // Fase 3 estabiliza la primera mascota real. El flujo para añadir/cambiar
-          // múltiples mascotas se implementará de forma completa en una fase posterior.
-          setPets([myPet])
-          setCurrentPet(myPet)
+          const storedActivePetId = localStorage.getItem(`active_pet_${user.id}`)
+          const activePet =
+            ownedPets.find((pet) => pet.id === storedActivePetId)
+            || ownedPets[0]
+
+          setCurrentPet(activePet)
+          localStorage.setItem(`active_pet_${user.id}`, activePet.id)
 
           const hasSeenPitch = localStorage.getItem(`pitch_seen_${user.id}`)
           if (!hasSeenPitch) {
@@ -215,116 +376,9 @@ function PazoMain() {
             localStorage.setItem(`pitch_seen_${user.id}`, 'true')
           }
 
-          let userInterests: string[] = ['Comunidades de gatos', 'Lugares aptos para mascotas']
-          if (myPet.interests && Array.isArray(myPet.interests) && myPet.interests.length > 0) {
-            userInterests = myPet.interests
-          }
-
-          const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', myPet.id)
-          const followingIds = follows?.map(f => f.following_id) || []
-
-          // El feed "Siguiendo" incluye también las publicaciones propias.
-          // Sin esto, un post recién creado aparecía por estado local pero desaparecía al recargar.
-          const { data: ownPostsData, error: ownPostsError } = await supabase
-            .from('posts')
-            .select('*')
-            .eq('pet_id', myPet.id)
-            .order('created_at', { ascending: false })
-
-          if (ownPostsError) {
-            console.error('Error fetching own posts:', ownPostsError)
-          }
-
-          let followedPostsData: any[] = []
-          if (followingIds.length > 0) {
-            const { data: fData, error: fError } = await supabase
-              .from('posts')
-              .select('*')
-              .in('pet_id', followingIds)
-              .order('created_at', { ascending: false })
-
-            if (fError) {
-              console.error('Error fetching followed posts:', fError)
-            } else if (fData) {
-              followedPostsData = fData
-            }
-          }
-
-          const chronologicalPosts = [
-            ...(ownPostsData || []),
-            ...followedPostsData,
-          ]
-            .filter((post, index, allPosts) =>
-              allPosts.findIndex((candidate) => candidate.id === post.id) === index
-            )
-            .sort((a, b) =>
-              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            )
-
-          // 2. Consulta segura para recommendedPosts: construcción dinámica del query
-          const excludedIds = [...followingIds, myPet.id].filter(Boolean)
-          let recommendedQuery = supabase
-            .from('posts')
-            .select('*')
-            .overlaps('tags', userInterests)
-            .order('likes', { ascending: false })
-            .limit(3)
-
-          // Aplicar el .not() ÚNICAMENTE si hay IDs para excluir, evitando el error HTTP 406
-          if (excludedIds && excludedIds.length > 0) {
-            recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
-          }
-
-          const { data: recommendedData, error: recommendedError } = await recommendedQuery
-
-          if (recommendedError) {
-            console.error('Error fetching recommended posts:', recommendedError)
-          }
-
-          const followedPosts = chronologicalPosts
-          const recommendedPosts = recommendedData || []
-
-          const formattedFollowed: Post[] = (followedPosts || []).map((p: any) => ({
-            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
-          }))
-
-          const formattedRecommended: Post[] = (recommendedPosts || []).map((p: any) => ({
-            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
-          }))
-
-          // Consulta RPC de recomendaciones personalizadas del motor de inteligencia
-          let formattedRpcRecommended: Post[] = []
-          if (myPet?.id) {
-            const { data: recommendedData, error: recommendedError } = await supabase.rpc('get_recommended_posts', {
-              p_actor_pet_id: myPet.id,
-              p_limit: 10
-            })
-
-            if (recommendedError) {
-              console.error('Error fetching recommended posts:', recommendedError)
-            } else if (recommendedData) {
-              formattedRpcRecommended = recommendedData.map((p: any) => ({
-                id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
-              }))
-            }
-          }
-
-          // Mezclar con deduplicación: RPC si disponible, fallback a tag-based
-          const recommendationsLayer = formattedRpcRecommended.length > 0 ? formattedRpcRecommended : formattedRecommended
-          let smartFeed = blendFeeds(formattedFollowed, recommendationsLayer)
-
-          if (smartFeed.length === 0) {
-            const { data: fallbackPosts } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(10)
-            smartFeed = (fallbackPosts || []).map((p: any) => ({
-              id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
-            }))
-          }
-
-          const enrichedFeed = await enrichPostsWithInteractions(smartFeed, myPet.id)
-          setPosts(enrichedFeed)
-          setIsFeedLoading(false)
-
+          await loadFeedForPet(activePet)
         } else {
+          setPets([])
           setAuthMode('onboarding')
           setInitialOnboardingStep('A03')
           setIsOnboardingActive(true)
@@ -332,7 +386,7 @@ function PazoMain() {
         }
       }
 
-      initApp()
+      void initApp()
     }
   }, [user, loading])
 
@@ -722,7 +776,11 @@ function PazoMain() {
               onComplete={(newPet) => {
                 setPets([newPet])
                 setCurrentPet(newPet)
+                if (user?.id) {
+                  localStorage.setItem(`active_pet_${user.id}`, newPet.id)
+                }
                 setIsOnboardingActive(false)
+                void loadFeedForPet(newPet)
               }}
             />
           ) : (
@@ -950,7 +1008,7 @@ function PazoMain() {
                     <PetView
                       currentPet={currentPet}
                       availablePets={pets}
-                      onSelectPet={(p) => setCurrentPet(p)}
+                      onSelectPet={selectActivePet}
                       onPetUpdated={(updatedPet) => {
                         setCurrentPet(updatedPet)
                         setPets((prevPets) =>
