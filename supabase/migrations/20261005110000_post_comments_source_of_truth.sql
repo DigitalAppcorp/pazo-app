@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS public.post_comments (
   body text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   legacy_id text UNIQUE,
-  applied_learning boolean NOT NULL DEFAULT false,
-  target_tags text[] DEFAULT NULL,
   CONSTRAINT post_comments_body_length
     CHECK (char_length(btrim(body)) BETWEEN 1 AND 1000)
 );
@@ -34,18 +32,14 @@ INSERT INTO public.post_comments (
   author_pet_id,
   body,
   created_at,
-  legacy_id,
-  applied_learning,
-  target_tags
+  legacy_id
 )
 SELECT
   p.id,
   pet.id,
   btrim(c ->> 'text'),
   COALESCE(NULLIF(c ->> 'createdAt', '')::timestamptz, p.created_at),
-  c ->> 'id',
-  false,
-  NULL
+  c ->> 'id'
 FROM public.posts p
 CROSS JOIN LATERAL jsonb_array_elements(p.comments) c
 JOIN public.pets pet
@@ -113,31 +107,15 @@ GRANT ALL ON TABLE public.post_comments TO service_role;
 CREATE OR REPLACE FUNCTION private.normalize_post_comment_before_insert()
 RETURNS trigger
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = ''
 AS $function$
-DECLARE
-  v_tags text[];
 BEGIN
   NEW.body := btrim(NEW.body);
 
   IF NEW.body = '' OR char_length(NEW.body) > 1000 THEN
     RAISE EXCEPTION 'Comentario inválido.';
   END IF;
-
-  SELECT p.tags
-  INTO v_tags
-  FROM public.posts p
-  WHERE p.id = NEW.post_id;
-
-  IF NOT FOUND THEN
-    RAISE EXCEPTION USING
-      ERRCODE = '23503',
-      MESSAGE = 'Target post does not exist.';
-  END IF;
-
-  NEW.target_tags := COALESCE(v_tags, ARRAY[]::text[]);
-  NEW.applied_learning := COALESCE(array_length(NEW.target_tags, 1), 0) > 0;
 
   RETURN NEW;
 END;
@@ -153,16 +131,25 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $function$
+DECLARE
+  v_tags text[];
 BEGIN
   IF TG_OP = 'INSERT' THEN
     UPDATE public.posts
     SET comments_count = GREATEST(0, COALESCE(comments_count, 0) + 1)
     WHERE id = NEW.post_id;
 
-    IF NEW.applied_learning THEN
+    SELECT p.tags
+    INTO v_tags
+    FROM public.posts p
+    WHERE p.id = NEW.post_id;
+
+    v_tags := COALESCE(v_tags, ARRAY[]::text[]);
+
+    IF COALESCE(array_length(v_tags, 1), 0) > 0 THEN
       PERFORM private.adjust_pet_learning_tags(
         NEW.author_pet_id,
-        NEW.target_tags,
+        v_tags,
         5
       );
     END IF;
@@ -188,14 +175,8 @@ BEGIN
     SET comments_count = GREATEST(0, COALESCE(comments_count, 0) - 1)
     WHERE id = OLD.post_id;
 
-    IF OLD.applied_learning THEN
-      PERFORM private.adjust_pet_learning_tags(
-        OLD.author_pet_id,
-        OLD.target_tags,
-        -5
-      );
-    END IF;
-
+    -- El aprendizaje de "comment" es histórico/cumulativo.
+    -- Borrar el texto no deshace el hecho de que el usuario interactuó.
     RETURN OLD;
   END IF;
 
