@@ -487,55 +487,96 @@ function PazoMain() {
     }
   }
 
-  const handleAddComment = async (postId: string, text: string) => {
-    // Guarda previa estricta (incluyendo texto vacío)
-    if (!currentPet?.id || !postId || !text.trim()) return
+  const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    const trimmedText = text.trim()
+    if (!currentPet?.id || !postId || !trimmedText) return false
+    if (commentingPostIdsRef.current.has(postId)) return false
 
-    const targetPost = posts.find((p) => p.id === postId)
-    if (!targetPost) return
+    const targetPost = posts.find((post) => post.id === postId)
+    if (!targetPost) return false
 
-    const newComment = {
-      id: `c-${Date.now()}`,
+    commentingPostIdsRef.current.add(postId)
+
+    const previousComments = targetPost.comments
+    const previousCommentsCount = targetPost.commentsCount ?? targetPost.comments.length
+    const temporaryId = `temp-comment-${crypto.randomUUID()}`
+    const createdAt = new Date().toISOString()
+
+    const optimisticComment = {
+      id: temporaryId,
+      authorPetId: currentPet.id,
       authorName: currentPet.name,
       authorPet: currentPet.species,
       authorAvatar: currentPet.photoUrl,
-      text: text.trim(),
+      text: trimmedText,
       timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
-      createdAt: new Date().toISOString(),
+      createdAt,
     }
 
-    const updatedComments = [...targetPost.comments, newComment]
-
-    // 1. Actualización optimista del estado local
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        return {
-          ...p,
-          comments: updatedComments,
-        }
-      })
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: [...post.comments, optimisticComment],
+              commentsCount: (post.commentsCount ?? post.comments.length) + 1,
+              commentsLoaded: true,
+            }
+          : post
+      )
     )
 
-    // 2. Persistencia en background (no bloqueante)
-    supabase
-      .from('posts')
-      .update({ comments: updatedComments })
-      .eq('id', postId)
-      .then(({ error }) => {
-        if (error) console.error('Error updating comments in DB:', error)
-      })
+    try {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .insert({
+          post_id: postId,
+          author_pet_id: currentPet.id,
+          body: trimmedText,
+        })
+        .select('id, created_at')
+        .single()
 
-    // 3. Registro de señal analítica e inteligente
-    trackInteraction(postId, 'post', 'comment')
+      if (error) throw error
 
-    supabase.rpc('register_interaction_signal', {
-      p_actor_pet_id: currentPet.id,
-      p_target_id: postId,
-      p_action_type: 'comment'
-    }).then(({ error }) => {
-      if (error) console.error('Error registering comment signal:', error)
-    })
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === temporaryId
+                    ? {
+                        ...comment,
+                        id: data.id,
+                        createdAt: data.created_at,
+                      }
+                    : comment
+                ),
+              }
+            : post
+        )
+      )
+
+      return true
+    } catch (err) {
+      console.error(`Error creando comentario en el post ${postId}:`, err)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: previousComments,
+                commentsCount: previousCommentsCount,
+                commentsLoaded: targetPost.commentsLoaded ?? false,
+              }
+            : post
+        )
+      )
+      return false
+    } finally {
+      commentingPostIdsRef.current.delete(postId)
+    }
   }
 
   const handlePostCreated = (newPost: Post) => {
