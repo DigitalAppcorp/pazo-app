@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
-import { supabase } from '../../services/supabaseClient'
+import { createPetProfile } from '../../services/petService'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04' | 'A05'
@@ -43,17 +43,27 @@ export const OnboardingView = ({
   const [petPhoto, setPetPhoto] = useState(
     'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=600&auto=format&fit=crop'
   )
+  const [petPhotoFile, setPetPhotoFile] = useState<File | null>(null)
+  const [isSubmittingPet, setIsSubmittingPet] = useState(false)
 
-  // Manejador seguro para abrir la galería del dispositivo y convertir la imagen
   const handleGalleryPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPetPhoto(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert(lang === 'es' ? 'La imagen debe ser menor a 5MB.' : 'Image must be less than 5MB.')
+      e.target.value = ''
+      return
     }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      alert(lang === 'es' ? 'Usa una imagen JPG, PNG o WEBP.' : 'Use a JPG, PNG, or WEBP image.')
+      e.target.value = ''
+      return
+    }
+
+    setPetPhotoFile(file)
+    setPetPhoto(URL.createObjectURL(file))
   }
 
   const [zone, setZone] = useState('Los Ángeles')
@@ -86,54 +96,37 @@ export const OnboardingView = ({
   }
 
   const handleFinishOnboarding = async () => {
-    // 1. Verificamos quién es el usuario actual
-    const { data: { user } } = await supabase.auth.getUser();
+    if (isSubmittingPet) return
 
-    if (!user) {
-      alert('Error de sesión: No se encontró un usuario activo.');
-      return;
+    const normalizedName = petName.trim()
+    if (!normalizedName) {
+      alert(lang === 'es' ? 'Escribe el nombre de tu mascota.' : 'Enter your pet\'s name.')
+      return
     }
 
-    // 2. Inyectamos los datos reales en la nueva tabla 'pets'
-    const { data: petData, error } = await supabase.from('pets').insert({
-      owner_id: user.id,
-      name: petName || 'Luna',
-      species: petSpecies,
-      age: petAge || '3 años',
-      photo_url: petPhoto,
-      zone: zone,
-      interests: interests,
-    }).select().single();
+    setIsSubmittingPet(true)
 
-    // 3. Capturamos cualquier fallo de red o de seguridad
-    if (error) {
-      alert(`Hubo un problema al guardar tu mascota: ${error.message}`);
-      return; // Detenemos el flujo aquí para proteger la integridad
+    try {
+      const createdPet = await createPetProfile({
+        name: normalizedName,
+        species: petSpecies,
+        age: petAge,
+        photoUrl: petPhoto,
+        photoFile: petPhotoFile,
+        zone,
+        interests,
+      })
+
+      onComplete(createdPet)
+    } catch (error: any) {
+      alert(
+        lang === 'es'
+          ? `Hubo un problema al guardar tu mascota: ${error.message}`
+          : `There was a problem saving your pet: ${error.message}`
+      )
+    } finally {
+      setIsSubmittingPet(false)
     }
-
-    // 4. Solo si el guardado fue exitoso, sellamos el pasaporte en el JWT
-    await supabase.auth.updateUser({
-      data: { onboarding_completed: true }
-    });
-
-    // 5. Construimos el objeto local para que la vista de React reaccione
-    const newPet: Pet = {
-      id: petData.id, // Ahora usamos el ID real generado por la base de datos
-      name: petData.name,
-      species: petData.species as Species,
-      breed: petData.species === 'gato' ? 'Europeo común' : 'Mascota querida', // Simulado temporalmente
-      age: petData.age,
-      gender: 'hembra',
-      weight: petData.species === 'gato' ? '4.2 kg' : '15 kg',
-      dietPlan: 'Dieta B.A.R.F natural',
-      bio: 'Compañera inseparable y llena de curiosidad.',
-      photoUrl: petData.photo_url,
-      qrId: `PAZO-QR-${(petData.name).toUpperCase()}-2026`,
-      isLost: false,
-    }
-
-    // 6. ¡Liberamos al usuario hacia el Feed!
-    onComplete(newPet)
   }
 
   return (
@@ -344,7 +337,7 @@ export const OnboardingView = ({
                   <span>📷 Cambiar fotografía</span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleGalleryPhotoChange}
                     className="hidden"
                   />
@@ -552,9 +545,12 @@ export const OnboardingView = ({
           <div className="pb-2 space-y-2">
             <button
               onClick={handleFinishOnboarding}
-              className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold py-4 rounded-full text-sm shadow-[0_8px_25px_rgba(225,229,63,0.38)] cursor-pointer transition-all"
+              disabled={isSubmittingPet}
+              className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] disabled:opacity-60 text-[#204E4A] font-extrabold py-4 rounded-full text-sm shadow-[0_8px_25px_rgba(225,229,63,0.38)] cursor-pointer transition-all"
             >
-              Descubrir Pazo →
+              {isSubmittingPet
+                ? (lang === 'es' ? 'Guardando mascota...' : 'Saving pet...')
+                : (lang === 'es' ? 'Descubrir Pazo →' : 'Discover Pazo →')}
             </button>
             <p className="text-[10px] text-center text-[#5C7470]">
               Podrás cambiar estos ajustes en cualquier momento desde tu perfil.
