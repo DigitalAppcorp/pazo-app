@@ -30,10 +30,26 @@ export const CreatePostModal = ({
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            setImageFile(file)
-            setPhotoPreview(URL.createObjectURL(file))
+        if (!file) return
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert(lang === 'es' ? 'La imagen debe ser menor a 5MB.' : 'Image must be less than 5MB.')
+            e.target.value = ''
+            return
         }
+
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            alert(lang === 'es' ? 'Usa una imagen JPG, PNG o WEBP.' : 'Use a JPG, PNG, or WEBP image.')
+            e.target.value = ''
+            return
+        }
+
+        if (photoPreview.startsWith('blob:')) {
+            URL.revokeObjectURL(photoPreview)
+        }
+
+        setImageFile(file)
+        setPhotoPreview(URL.createObjectURL(file))
     }
 
     // Analizador de texto universal: Extrae palabras clave limpias de cualquier frase escrita
@@ -66,110 +82,123 @@ export const CreatePostModal = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // 1. Cláusula de guarda inicial
         if (!currentPet?.id) {
             alert(lang === 'es' ? 'Por favor, selecciona una mascota válida primero.' : 'Please select a valid pet first.')
             return
         }
 
         if (!text.trim() && !imageFile) return
-
         setIsSubmitting(true)
 
+        let uploadedPath: string | null = null
+
         try {
+            const {
+                data: { user },
+                error: userError,
+            } = await supabase.auth.getUser()
+
+            if (userError) throw userError
+            if (!user) throw new Error(lang === 'es' ? 'No hay una sesión activa.' : 'No active session.')
+
             let finalPhotoUrl = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'
 
             if (imageFile) {
-                const fileExt = imageFile.name.split('.').pop()
-                const fileName = `${currentPet.id}-${Date.now()}.${fileExt}`
+                const extension =
+                    imageFile.type === 'image/png'
+                        ? 'png'
+                        : imageFile.type === 'image/webp'
+                            ? 'webp'
+                            : 'jpg'
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                uploadedPath = `${user.id}/${currentPet.id}/${crypto.randomUUID()}.${extension}`
+
+                const { error: uploadError } = await supabase.storage
                     .from('post-photos')
-                    .upload(fileName, imageFile, {
+                    .upload(uploadedPath, imageFile, {
                         cacheControl: '3600',
-                        upsert: false
+                        upsert: false,
+                        contentType: imageFile.type,
                     })
 
-                // 3. Control de Errores en Storage
-                if (uploadError) {
-                    console.error('Error uploading photo:', uploadError)
-                    alert(lang === 'es' ? 'Hubo un error al subir la foto. Inténtalo de nuevo.' : 'Error uploading photo. Please try again.')
-                    setIsSubmitting(false)
-                    return
-                }
+                if (uploadError) throw uploadError
 
-                if (uploadData) {
-                    const { data: publicUrlData } = supabase.storage
-                        .from('post-photos')
-                        .getPublicUrl(fileName)
+                const { data: publicUrlData } = supabase.storage
+                    .from('post-photos')
+                    .getPublicUrl(uploadedPath)
 
-                    finalPhotoUrl = publicUrlData.publicUrl
-                }
+                finalPhotoUrl = publicUrlData.publicUrl
             }
 
-            // Generación unificada de etiquetas con las variables reales
             const smartTags = typeof generateSmartTags === 'function' ? generateSmartTags(text) : []
             const universalTags = typeof generateUniversalTags === 'function' ? generateUniversalTags(text) : []
             const combinedTags = Array.from(new Set([...smartTags, ...universalTags]))
 
+            // El backend normaliza user_id, nombre/especie/avatar de la mascota
+            // y fuerza contadores de interacción a cero.
             const postPayload = {
                 pet_id: currentPet.id,
-                pet_name: currentPet.name,
-                pet_species: currentPet.species,
-                pet_avatar: currentPet.photoUrl,
-                location: currentPet?.lastSeenLocation || 'Los Ángeles, CA',
+                location: 'Los Ángeles, CA',
                 text: text.trim(),
                 photo_url: finalPhotoUrl,
                 tags: combinedTags,
-                likes: 0,
-                comments: []
             }
 
-            // 2. Corrección de Inserción (Eliminación de .single())
-            const { data, error } = await supabase
+            const { data: newPostData, error } = await supabase
                 .from('posts')
                 .insert(postPayload)
                 .select()
+                .single()
 
-            if (error) {
-                console.error('Error creating post:', error)
-                alert(lang === 'es' ? 'Error al publicar. Inténtalo de nuevo.' : 'Error creating post. Please try again.')
-                setIsSubmitting(false)
-                return
+            if (error) throw error
+
+            const newPost: Post = {
+                id: newPostData.id,
+                petId: newPostData.pet_id,
+                petName: newPostData.pet_name,
+                petSpecies: newPostData.pet_species,
+                petAvatar: newPostData.pet_avatar,
+                location: newPostData.location,
+                timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
+                createdAt: newPostData.created_at,
+                isRecommended: false,
+                tags: newPostData.tags || [],
+                text: newPostData.text,
+                photoUrl: newPostData.photo_url,
+                likes: newPostData.likes || 0,
+                isLiked: false,
+                isSaved: false,
+                comments: [],
+                commentsCount: newPostData.comments_count || 0,
+                commentsLoaded: false,
             }
 
-            // Toma segura del primer elemento del arreglo retornado
-            if (data && data.length > 0) {
-                const newPostData = data[0]
+            onPostCreated(newPost)
 
-                const newPost: Post = {
-                    id: newPostData.id,
-                    petId: newPostData.pet_id,
-                    petName: newPostData.pet_name,
-                    petSpecies: newPostData.pet_species,
-                    petAvatar: newPostData.pet_avatar,
-                    location: newPostData.location,
-                    timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
-                    createdAt: newPostData.created_at,
-                    isRecommended: false,
-                    tags: newPostData.tags || [],
-                    text: newPostData.text,
-                    photoUrl: newPostData.photo_url,
-                    likes: newPostData.likes || 0,
-                    isLiked: false,
-                    isSaved: false,
-                    comments: newPostData.comments || []
+            if (photoPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(photoPreview)
+            }
+
+            setText('')
+            setImageFile(null)
+            setPhotoPreview('')
+        } catch (err: any) {
+            if (uploadedPath) {
+                const { error: cleanupError } = await supabase.storage
+                    .from('post-photos')
+                    .remove([uploadedPath])
+
+                if (cleanupError) {
+                    console.error('Error cleaning failed post upload:', cleanupError)
                 }
-
-                onPostCreated(newPost)
-                // Reseteo usando los nombres reales de los setters del componente
-                setText('')
-                setImageFile(null)
-                setPhotoPreview('')
             }
-        } catch (err) {
-            console.error('Unexpected error:', err)
-            alert(lang === 'es' ? 'Ocurrió un error inesperado.' : 'An unexpected error occurred.')
+
+            console.error('Error creating post:', err)
+            alert(
+                lang === 'es'
+                    ? `No se pudo publicar: ${err.message || 'error inesperado'}`
+                    : `Could not publish: ${err.message || 'unexpected error'}`
+            )
         } finally {
             setIsSubmitting(false)
         }
@@ -208,6 +237,9 @@ export const CreatePostModal = ({
                                 <button
                                     type="button"
                                     onClick={() => {
+                                        if (photoPreview.startsWith('blob:')) {
+                                            URL.revokeObjectURL(photoPreview)
+                                        }
                                         setPhotoPreview('')
                                         setImageFile(null)
                                     }}
@@ -224,7 +256,7 @@ export const CreatePostModal = ({
                                 </span>
                                 <input
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/jpeg,image/png,image/webp"
                                     onChange={handlePhotoChange}
                                     className="hidden"
                                 />
