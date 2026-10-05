@@ -8,7 +8,8 @@ interface HomeViewProps {
   posts: Post[]
   onLikePost: (postId: string) => void
   onSavePost: (postId: string) => void
-  onAddComment: (postId: string, text: string) => void
+  onAddComment: (postId: string, text: string) => Promise<boolean>
+  onLoadComments: (postId: string) => Promise<boolean>
   lang: 'es' | 'en'
   currentPetId?: string
   onSelectPetProfile: (petId: string) => void
@@ -91,18 +92,44 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
 }
 
 export const HomeView = ({
-  posts, onLikePost, onSavePost, onAddComment, lang, currentPetId = '', onSelectPetProfile,
+  posts, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', onSelectPetProfile,
 }: HomeViewProps) => {
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
+  const [loadingCommentsPostId, setLoadingCommentsPostId] = useState<string | null>(null)
   const [newCommentText, setNewCommentText] = useState('')
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [hasVotedNearby, setHasVotedNearby] = useState(false)
   const [isSubmittingNearby, setIsSubmittingNearby] = useState(false)
 
-  const handleSendComment = (postId: string) => {
-    if (!newCommentText.trim()) return
-    onAddComment(postId, newCommentText.trim())
-    setNewCommentText('')
+  const handleToggleComments = async (postId: string) => {
+    if (activeCommentsPostId === postId) {
+      setActiveCommentsPostId(null)
+      return
+    }
+
+    if (loadingCommentsPostId) return
+
+    setLoadingCommentsPostId(postId)
+    try {
+      const loaded = await onLoadComments(postId)
+      if (loaded) setActiveCommentsPostId(postId)
+    } finally {
+      setLoadingCommentsPostId(null)
+    }
+  }
+
+  const handleSendComment = async (postId: string) => {
+    const trimmedText = newCommentText.trim()
+    if (!trimmedText || isSubmittingComment) return
+
+    setIsSubmittingComment(true)
+    try {
+      const success = await onAddComment(postId, trimmedText)
+      if (success) setNewCommentText('')
+    } finally {
+      setIsSubmittingComment(false)
+    }
   }
 
   const handleSelectNearby = async () => {
