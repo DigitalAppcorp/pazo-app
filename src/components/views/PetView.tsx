@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
-import type { Pet, CareItem, PrivateDoc } from '../../types/pazo'
+import type { Pet, CareItem, PrivateDoc, Post } from '../../types/pazo'
 import {
   IconPaw,
   IconCalendar,
@@ -20,6 +20,7 @@ interface PetViewProps {
   onOpenCareAgenda: () => void
   onOpenLostAlert: () => void
   lang: 'es' | 'en'
+  userPosts?: Post[]
 }
 
 export const PetView = ({
@@ -33,13 +34,14 @@ export const PetView = ({
   onOpenCareAgenda,
   onOpenLostAlert,
   lang,
+  userPosts = [],
 }: PetViewProps) => {
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Estado local para los campos editables (incluyendo el nombre)
   const [editForm, setEditForm] = useState({
     name: currentPet.name || '',
     bio: currentPet.bio || '',
@@ -49,10 +51,8 @@ export const PetView = ({
     photoUrl: currentPet.photoUrl,
   })
 
-  // Próximo cuidado pendiente
   const nextPendingCare = careItems.find((c) => !c.completed)
 
-  // Manejador para iniciar el modo edición y precargar los valores actuales
   const handleEditClick = () => {
     setEditForm({
       name: currentPet.name || '',
@@ -65,7 +65,6 @@ export const PetView = ({
     setIsEditing(true)
   }
 
-  // Manejar el cambio de fotografía localmente (previsualización antes de guardar)
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
@@ -78,7 +77,6 @@ export const PetView = ({
     }
   }
 
-  // Guardar los cambios en Supabase (Incluyendo subida de foto y nombre)
   const handleSaveProfile = async () => {
     setIsSaving(true)
     let finalPhotoUrl = editForm.photoUrl
@@ -106,7 +104,6 @@ export const PetView = ({
         }
       }
 
-      // Actualizamos el registro de la mascota en Supabase (Nombre, bio, peso, dieta, edad y foto)
       const { error: updateError } = await supabase
         .from('pets')
         .update({
@@ -140,7 +137,14 @@ export const PetView = ({
     }
   }
 
-  // Función amable para funciones que están por venir (Puerta Falsa)
+  const handleLogout = async () => {
+    const confirmMsg = lang === 'es' ? '¿Estás seguro de cerrar sesión?' : 'Are you sure you want to log out?'
+    if (window.confirm(confirmMsg)) {
+      await supabase.auth.signOut()
+      window.location.reload()
+    }
+  }
+
   const handleFeatureSoon = (featureName: string) => {
     alert(
       lang === 'es'
@@ -151,7 +155,6 @@ export const PetView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-6">
-      {/* Cabecera dinámica */}
       <div className="flex justify-between items-center px-1">
         <div>
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block shadow-xs">
@@ -171,10 +174,19 @@ export const PetView = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPetPicker(!showPetPicker)}
-              className="text-xs font-bold text-[#204E4A] bg-white hover:bg-neutral-50 px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+              className="text-xs font-bold text-[#204E4A] bg-white hover:bg-neutral-50 px-3.5 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
             >
               <span>{lang === 'es' ? 'Cambiar' : 'Switch'}</span>
               <span className="text-[10px]">▾</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+              title={lang === 'es' ? 'Cerrar sesión' : 'Log out'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
             </button>
           </div>
         ) : (
@@ -187,7 +199,6 @@ export const PetView = ({
         )}
       </div>
 
-      {/* Menú desplegable para alternar o agregar mascotas */}
       {showPetPicker && !isEditing && (
         <div className="p-3 bg-white rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
           <div className="flex justify-between items-center px-2">
@@ -240,7 +251,6 @@ export const PetView = ({
         </div>
       )}
 
-      {/* Tarjeta Principal de Identidad */}
       <div className="p-5 bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
         {!isEditing && (
           <button
@@ -362,14 +372,56 @@ export const PetView = ({
         </div>
       </div>
 
-      {/* Bloques de Acción Inferiores */}
       {!isEditing && (
-        <div className="space-y-3">
+        <div className="flex bg-white p-1 rounded-2xl border border-[#204E4A]/10 shadow-xs">
+          <button
+            onClick={() => setActiveTab('menu')}
+            className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'menu' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
+          >
+            {lang === 'es' ? 'Menú y Utilidades' : 'Menu & Utilities'}
+          </button>
+          <button
+            onClick={() => setActiveTab('myposts')}
+            className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'myposts' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
+          >
+            {lang === 'es' ? `Mis Publicaciones (${userPosts.length})` : `My Posts (${userPosts.length})`}
+          </button>
+        </div>
+      )}
+
+      {!isEditing && activeTab === 'myposts' ? (
+        <div className="space-y-3 animate-fade-in">
+          {userPosts.length === 0 ? (
+            <div className="bg-white rounded-[2rem] p-8 text-center border border-[#204E4A]/10 shadow-xs">
+              <p className="text-xs text-[#5C7470] font-medium">
+                {lang === 'es'
+                  ? `Aún no has compartido historias de ${currentPet.name}.`
+                  : `You haven't shared any stories for ${currentPet.name} yet.`}
+              </p>
+            </div>
+          ) : (
+            userPosts.map((post) => (
+              <div key={post.id} className="bg-white rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-[#5C7470] font-bold">{post.timeAgo}</span>
+                  <span className="text-[10px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold">♥ {post.likes}</span>
+                </div>
+                <p className="text-xs text-[#204E4A] font-medium">{post.text}</p>
+                {post.photoUrl && (
+                  <div className="w-full h-44 rounded-2xl overflow-hidden shadow-xs">
+                    <img src={post.photoUrl} alt="User post" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      ) : !isEditing && (
+        <div className="space-y-3 animate-fade-in">
           <h3 className="font-extrabold text-sm text-[#204E4A] px-1">
             {lang === 'es' ? `Todo sobre ${currentPet.name}` : `All about ${currentPet.name}`}
           </h3>
 
-          {/* 1. Pasaporte y QR */}
           <div
             onClick={onOpenQRPassport}
             className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
@@ -394,7 +446,6 @@ export const PetView = ({
             </span>
           </div>
 
-          {/* 2. Cuidados y Documentos */}
           <div
             onClick={onOpenCareAgenda}
             className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
@@ -419,7 +470,6 @@ export const PetView = ({
             </span>
           </div>
 
-          {/* Próximo Cuidado Pendiente Rápido */}
           {nextPendingCare && (
             <div className="p-4 bg-[#FAF8F5] rounded-[2rem] flex justify-between items-center shadow-xs">
               <div className="space-y-0.5">
@@ -444,7 +494,6 @@ export const PetView = ({
             </div>
           )}
 
-          {/* 3. Botón de Emergencia Crítico */}
           <div className="pt-2">
             <button
               onClick={onOpenLostAlert}

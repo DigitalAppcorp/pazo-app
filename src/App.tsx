@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import type { Pet, Post, Community, CareItem, Conversation } from './types/pazo'
@@ -20,6 +20,7 @@ import { ExploreView } from './components/views/ExploreView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
 import { OnboardingView } from './components/views/OnboardingView'
+import { PublicProfileView } from './components/views/PublicProfileView'
 
 import { CreateModal } from './components/modals/CreateModal'
 import { CreatePostModal } from './components/modals/CreatePostModal'
@@ -54,6 +55,8 @@ function PazoMain() {
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [posts, setPosts] = useState<Post[]>([])
+  const likingPostIdsRef = useRef<Set<string>>(new Set())
+  const savingPostIdsRef = useRef<Set<string>>(new Set())
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
@@ -63,6 +66,9 @@ function PazoMain() {
 
   const [activeTab, setActiveTab] = useState<NavTab>('inicio')
 
+  // Estado global para la pantalla exclusiva de perfil público
+  const [selectedPublicProfileId, setSelectedPublicProfileId] = useState<string | null>(null)
+
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
@@ -71,9 +77,96 @@ function PazoMain() {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
 
-  // ---------------------------------------------------------------------------
-  // HELPER GLOBAL DE RASTREO SILENCIOSO (Para afinidad, algoritmos y futuros Ads)
-  // ---------------------------------------------------------------------------
+  const blendFeeds = (followed: Post[], recommended: Post[]): Post[] => {
+    if (!followed || followed.length === 0) return recommended
+    if (!recommended || recommended.length === 0) return followed
+
+    // Crear un Set con los IDs de las publicaciones seguidas para evitar duplicados
+    const followedIds = new Set(followed.map(p => p.id))
+
+    // Filtrar recomendaciones que ya existan en el feed de seguidos
+    const filteredRecommended = recommended.filter(p => !followedIds.has(p.id))
+
+    const blended: Post[] = []
+    let recIndex = 0
+
+    // Calcular frecuencia dinámica de inyección basada en el tamaño del feed de seguidos
+    const frequency = followed.length <= 3 ? 2 : 4
+
+    for (let i = 0; i < followed.length; i++) {
+      blended.push(followed[i])
+
+      // Inyectar un post recomendado cada 'frequency' posts de seguidos
+      if ((i + 1) % frequency === 0 && recIndex < filteredRecommended.length) {
+        blended.push({
+          ...filteredRecommended[recIndex],
+          isRecommended: true
+        } as Post)
+        recIndex++
+      }
+    }
+
+    // Si sobraron recomendaciones filtradas y el feed es corto, añadirlas al final
+    while (recIndex < filteredRecommended.length) {
+      blended.push({
+        ...filteredRecommended[recIndex],
+        isRecommended: true
+      } as Post)
+      recIndex++
+    }
+
+    return blended
+  }
+
+  const enrichPostsWithInteractions = async (postsList: Post[], petId?: string): Promise<Post[]> => {
+    if (postsList.length === 0) return postsList
+
+    if (!petId) {
+      return postsList.map((post) => ({
+        ...post,
+        isLiked: false,
+        isSaved: false,
+      }))
+    }
+
+    try {
+      const postIds = postsList.map((post) => post.id)
+      const { data: interactionsData, error } = await supabase
+        .from('interactions')
+        .select('target_id, action_type')
+        .eq('actor_pet_id', petId)
+        .eq('target_type', 'post')
+        .in('action_type', ['like', 'save'])
+        .in('target_id', postIds)
+
+      if (error) throw error
+
+      const likedPostIds = new Set<string>()
+      const savedPostIds = new Set<string>()
+
+      interactionsData?.forEach((interaction) => {
+        if (interaction.action_type === 'like') {
+          likedPostIds.add(interaction.target_id)
+        } else if (interaction.action_type === 'save') {
+          savedPostIds.add(interaction.target_id)
+        }
+      })
+
+      return postsList.map((post) => ({
+        ...post,
+        isLiked: likedPostIds.has(post.id),
+        isSaved: savedPostIds.has(post.id),
+      }))
+    } catch (err) {
+      console.error('Error cargando estados de interacciones (Like/Save):', err)
+      return postsList.map((post) => ({
+        ...post,
+        isLiked: false,
+        isSaved: false,
+      }))
+    }
+  }
+
   const trackInteraction = async (targetId: string, targetType: 'post' | 'community' | 'place' | 'profile', actionType: 'like' | 'comment' | 'join' | 'view') => {
     try {
       if (!currentPet?.id) return
@@ -91,32 +184,28 @@ function PazoMain() {
   useEffect(() => {
     if (!loading && user) {
       const initApp = async () => {
+        if (!user?.id) return
         setIsFeedLoading(true)
 
-        // 1. LA VERDAD ABSOLUTA: Consultamos directamente a Supabase si este usuario ya registró una mascota
         const { data: myPet, error: petError } = await supabase
           .from('pets')
           .select('*')
           .eq('owner_id', user.id)
           .maybeSingle()
 
-        // AGREGAR ESTO PARA DEPURAR:
-        console.log("=== DEBUG DE SESIÓN ===")
-        console.log("1. ID del usuario logueado:", user.id)
-        console.log("2. Mascota encontrada:", myPet)
-        console.log("3. Error de Supabase:", petError)
+        if (petError) {
+          console.error('Error fetching pet profile:', petError)
+        }
+
         if (myPet) {
-          // --- EL USUARIO YA TIENE MASCOTA REGISTRADA ---
           setIsOnboardingActive(false)
 
-          // Mostrar modal de fundadores si no lo ha visto en este dispositivo
           const hasSeenPitch = localStorage.getItem(`pitch_seen_${user.id}`)
           if (!hasSeenPitch) {
             setShowFounderModal(true)
             localStorage.setItem(`pitch_seen_${user.id}`, 'true')
           }
 
-          // Armar el objeto Pet con los datos reales de la nube
           const realPet: Pet = {
             id: myPet.id,
             name: myPet.name,
@@ -138,14 +227,45 @@ function PazoMain() {
             userInterests = myPet.interests
           }
 
-          // Cargar el Feed del usuario
-          const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', user.id)
+          const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', myPet.id)
           const followingIds = follows?.map(f => f.following_id) || []
 
-          const { data: followedPosts } = await supabase.from('posts').select('*').in('pet_id', followingIds.length > 0 ? followingIds : ['none']).order('created_at', { ascending: false }).limit(10)
+          // 1. Consulta segura para followedPosts: abortar si no hay followingIds
+          let followedPostsData: any[] = []
+          if (followingIds && followingIds.length > 0) {
+            const { data: fData, error: fError } = await supabase
+              .from('posts')
+              .select('*')
+              .in('pet_id', followingIds)
+              .order('created_at', { ascending: false })
 
+            if (!fError && fData) {
+              followedPostsData = fData
+            }
+          }
+
+          // 2. Consulta segura para recommendedPosts: construcción dinámica del query
           const excludedIds = [...followingIds, myPet.id].filter(Boolean)
-          const { data: recommendedPosts } = await supabase.from('posts').select('*').not('pet_id', 'in', `(${excludedIds.length > 0 ? excludedIds.join(',') : 'none'})`).overlaps('tags', userInterests).order('likes', { ascending: false }).limit(3)
+          let recommendedQuery = supabase
+            .from('posts')
+            .select('*')
+            .overlaps('tags', userInterests)
+            .order('likes', { ascending: false })
+            .limit(3)
+
+          // Aplicar el .not() ÚNICAMENTE si hay IDs para excluir, evitando el error HTTP 406
+          if (excludedIds && excludedIds.length > 0) {
+            recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
+          }
+
+          const { data: recommendedData, error: recommendedError } = await recommendedQuery
+
+          if (recommendedError) {
+            console.error('Error fetching recommended posts:', recommendedError)
+          }
+
+          const followedPosts = followedPostsData
+          const recommendedPosts = recommendedData || []
 
           const formattedFollowed: Post[] = (followedPosts || []).map((p: any) => ({
             id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
@@ -155,12 +275,26 @@ function PazoMain() {
             id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
           }))
 
-          let smartFeed = [...formattedFollowed]
-          if (formattedRecommended.length > 0 && smartFeed.length >= 2) {
-            smartFeed.splice(2, 0, formattedRecommended[0])
-          } else {
-            smartFeed.push(...formattedRecommended)
+          // Consulta RPC de recomendaciones personalizadas del motor de inteligencia
+          let formattedRpcRecommended: Post[] = []
+          if (myPet?.id) {
+            const { data: recommendedData, error: recommendedError } = await supabase.rpc('get_recommended_posts', {
+              p_actor_pet_id: myPet.id,
+              p_limit: 10
+            })
+
+            if (recommendedError) {
+              console.error('Error fetching recommended posts:', recommendedError)
+            } else if (recommendedData) {
+              formattedRpcRecommended = recommendedData.map((p: any) => ({
+                id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+              }))
+            }
           }
+
+          // Mezclar con deduplicación: RPC si disponible, fallback a tag-based
+          const recommendationsLayer = formattedRpcRecommended.length > 0 ? formattedRpcRecommended : formattedRecommended
+          let smartFeed = blendFeeds(formattedFollowed, recommendationsLayer)
 
           if (smartFeed.length === 0) {
             const { data: fallbackPosts } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(10)
@@ -169,12 +303,11 @@ function PazoMain() {
             }))
           }
 
-          setPosts(smartFeed)
+          const enrichedFeed = await enrichPostsWithInteractions(smartFeed, myPet.id)
+          setPosts(enrichedFeed)
           setIsFeedLoading(false)
 
         } else {
-          // --- NO HAY MASCOTA REGISTRADA EN SUPABASE ---
-          // Solo si es un usuario verdaderamente nuevo que no completó el formulario, lo enviamos al Onboarding
           setAuthMode('onboarding')
           setInitialOnboardingStep('A03')
           setIsOnboardingActive(true)
@@ -206,41 +339,97 @@ function PazoMain() {
   }
 
   const handleLikePost = async (postId: string) => {
-    const targetPost = posts.find((p) => p.id === postId)
-    if (!targetPost) return
+    if (!currentPet?.id) return
+    if (likingPostIdsRef.current.has(postId)) return
 
-    const newIsLiked = !targetPost.isLiked
-    const newLikesCount = newIsLiked ? targetPost.likes + 1 : targetPost.likes - 1
+    const postToUpdate = posts.find((post) => post.id === postId)
+    if (!postToUpdate) return
 
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        return {
-          ...p,
-          isLiked: newIsLiked,
-          likes: newLikesCount,
-        }
-      })
+    likingPostIdsRef.current.add(postId)
+
+    const previousIsLiked = postToUpdate.isLiked ?? false
+    const previousLikes = postToUpdate.likes
+    const newIsLiked = !previousIsLiked
+    const newLikes = newIsLiked ? previousLikes + 1 : Math.max(0, previousLikes - 1)
+    const actionType = newIsLiked ? 'like' : 'unlike'
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, isLiked: newIsLiked, likes: newLikes }
+          : post
+      )
     )
 
-    await supabase
-      .from('posts')
-      .update({ likes: newLikesCount })
-      .eq('id', postId)
+    try {
+      const { error } = await supabase.rpc('register_interaction_signal', {
+        p_actor_pet_id: currentPet.id,
+        p_target_id: postId,
+        p_action_type: actionType,
+      })
 
-    if (newIsLiked) {
-      trackInteraction(postId, 'post', 'like')
+      if (error) throw error
+    } catch (err) {
+      console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, isLiked: previousIsLiked, likes: previousLikes }
+            : post
+        )
+      )
+    } finally {
+      likingPostIdsRef.current.delete(postId)
     }
   }
 
-  const handleSavePost = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, isSaved: !p.isSaved } : p))
+  const handleSavePost = async (postId: string) => {
+    if (!currentPet?.id) return
+    if (savingPostIdsRef.current.has(postId)) return
+
+    const postToUpdate = posts.find((post) => post.id === postId)
+    if (!postToUpdate) return
+
+    savingPostIdsRef.current.add(postId)
+
+    const previousIsSaved = postToUpdate.isSaved ?? false
+    const newIsSaved = !previousIsSaved
+    const actionType = newIsSaved ? 'save' : 'unsave'
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, isSaved: newIsSaved }
+          : post
+      )
     )
+
+    try {
+      const { error } = await supabase.rpc('register_interaction_signal', {
+        p_actor_pet_id: currentPet.id,
+        p_target_id: postId,
+        p_action_type: actionType,
+      })
+
+      if (error) throw error
+    } catch (err) {
+      console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? { ...post, isSaved: previousIsSaved }
+            : post
+        )
+      )
+    } finally {
+      savingPostIdsRef.current.delete(postId)
+    }
   }
 
   const handleAddComment = async (postId: string, text: string) => {
-    if (!text.trim()) return
+    // Guarda previa estricta (incluyendo texto vacío)
+    if (!currentPet?.id || !postId || !text.trim()) return
+
     const targetPost = posts.find((p) => p.id === postId)
     if (!targetPost) return
 
@@ -249,13 +438,14 @@ function PazoMain() {
       authorName: currentPet.name,
       authorPet: currentPet.species,
       authorAvatar: currentPet.photoUrl,
-      text,
+      text: text.trim(),
       timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
       createdAt: new Date().toISOString(),
     }
 
     const updatedComments = [...targetPost.comments, newComment]
 
+    // 1. Actualización optimista del estado local
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id !== postId) return p
@@ -266,12 +456,25 @@ function PazoMain() {
       })
     )
 
-    await supabase
+    // 2. Persistencia en background (no bloqueante)
+    supabase
       .from('posts')
       .update({ comments: updatedComments })
       .eq('id', postId)
+      .then(({ error }) => {
+        if (error) console.error('Error updating comments in DB:', error)
+      })
 
+    // 3. Registro de señal analítica e inteligente
     trackInteraction(postId, 'post', 'comment')
+
+    supabase.rpc('register_interaction_signal', {
+      p_actor_pet_id: currentPet.id,
+      p_target_id: postId,
+      p_action_type: 'comment'
+    }).then(({ error }) => {
+      if (error) console.error('Error registering comment signal:', error)
+    })
   }
 
   const handlePostCreated = (newPost: Post) => {
@@ -280,7 +483,6 @@ function PazoMain() {
     setActiveTab('inicio')
   }
 
-  // CORREGIDO: Eliminada la variable muerta y limpiada la lógica de unión
   const handleToggleJoinCommunity = (commId: string) => {
     setCommunities((prev) =>
       prev.map((c) => {
@@ -377,6 +579,16 @@ function PazoMain() {
   return (
     <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
       <div className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
+
+        {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
+        {selectedPublicProfileId && (
+          <PublicProfileView
+            targetPetId={selectedPublicProfileId}
+            currentPetId={currentPet?.id}
+            onClose={() => setSelectedPublicProfileId(null)}
+            lang={lang}
+          />
+        )}
 
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (
@@ -593,6 +805,8 @@ function PazoMain() {
                       onSavePost={handleSavePost}
                       onAddComment={handleAddComment}
                       lang={lang}
+                      currentPetId={currentPet?.id}
+                      onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                     />
                   )}
 
@@ -600,9 +814,7 @@ function PazoMain() {
                     <ExploreView
                       communities={communities}
                       onToggleJoinCommunity={handleToggleJoinCommunity}
-                      onSelectPetProfile={(petName) => {
-                        alert(`Abriendo perfil público de ${petName}`)
-                      }}
+                      onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                       lang={lang}
                     />
                   )}
@@ -627,6 +839,7 @@ function PazoMain() {
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
                       lang={lang}
+                      userPosts={posts.filter((p) => p.petId === currentPet.id)}
                     />
                   )}
                 </>
@@ -635,7 +848,12 @@ function PazoMain() {
 
             <BottomNav
               activeTab={activeTab}
-              onSelectTab={(tab) => setActiveTab(tab)}
+              onSelectTab={(tab) => {
+                setActiveTab(tab)
+                if (tab === 'mapa') {
+                  trackInteraction('feature_map_tab', 'place', 'view')
+                }
+              }}
               onOpenCreate={() => setIsCreateMenuOpen(true)}
               labels={{
                 inicio: lang === 'es' ? 'Inicio' : 'Home',
