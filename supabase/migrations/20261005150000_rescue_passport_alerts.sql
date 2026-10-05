@@ -191,6 +191,9 @@ CREATE TABLE IF NOT EXISTS public.pet_sightings (
 CREATE INDEX IF NOT EXISTS idx_pet_sightings_pet_created
 ON public.pet_sightings (pet_id, created_at DESC);
 
+CREATE INDEX IF NOT EXISTS idx_pet_sightings_alert_id
+ON public.pet_sightings (alert_id);
+
 ALTER TABLE public.pet_sightings ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "pet_sightings_owner_select" ON public.pet_sightings;
@@ -235,6 +238,9 @@ ON public.notifications (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
 ON public.notifications (user_id, created_at DESC)
 WHERE read_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_notifications_pet_id
+ON public.notifications (pet_id);
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
