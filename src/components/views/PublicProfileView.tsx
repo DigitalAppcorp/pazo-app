@@ -42,7 +42,7 @@ export const PublicProfileView = ({
       try {
         const { data: petData, error: petError } = await supabase
           .from('pets')
-          .select('id,owner_id,name,species,age,photo_url,created_at,bio,breed,gender,is_lost,last_seen_location')
+          .select('id,name,species,age,photo_url,created_at,bio,breed,gender,is_lost')
           .eq('id', targetPetId)
           .maybeSingle()
 
@@ -74,16 +74,17 @@ export const PublicProfileView = ({
           setFollowingCount(following)
         }
 
-        if (petData.owner_id) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('is_founder')
-            .eq('id', petData.owner_id)
-            .maybeSingle()
+        const { data: founderStatus, error: founderError } = await supabase.rpc(
+          'get_pet_founder_status',
+          { p_pet_id: targetPetId }
+        )
 
-          if (profileData?.is_founder && isMounted) {
-            setIsFounder(true)
-          }
+        if (founderError) {
+          console.error('Error fetching founder status:', founderError)
+        }
+
+        if (isMounted) {
+          setIsFounder(Boolean(founderStatus))
         }
 
         const mappedPet: Pet = {
@@ -99,7 +100,6 @@ export const PublicProfileView = ({
           photoUrl: petData.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
           qrId: `PAZO-QR-${petData.id}`,
           isLost: petData.is_lost || false,
-          lastSeenLocation: petData.is_lost ? (petData.last_seen_location || undefined) : undefined,
         }
 
         if (isMounted) setPetProfile(mappedPet)
@@ -236,11 +236,9 @@ export const PublicProfileView = ({
                   </span>
                 </div>
 
-                {(petProfile.breed || petProfile.lastSeenLocation) && (
+                {petProfile.breed && (
                   <p className="text-base text-[#5C7470] font-bold">
-                    {petProfile.breed && <span>{petProfile.breed}</span>}
-                    {petProfile.breed && petProfile.lastSeenLocation && <span className="mx-2 opacity-30">|</span>}
-                    {petProfile.lastSeenLocation && <span>📍 {petProfile.lastSeenLocation}</span>}
+                    {petProfile.breed}
                   </p>
                 )}
 
