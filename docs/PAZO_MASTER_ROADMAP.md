@@ -291,13 +291,11 @@ Trabajo ya preparado en ese PR:
 - alertas;
 - notificaciones de avistamiento.
 
-**NO se ha aplicado la migración de Fase 6 a Supabase.**
+**Backend de Fase 6A, 6B y 6C aplicado en Supabase PAZO.**
 
 Bloqueos antes de continuar:
-- `npm run build` local después de paginación;
-- autorización explícita para aplicar migración 6C;
-- aplicar/probar RPC paginada del Feed;
 - prueba visual de infinite scroll del Feed;
+- prueba visual de paginación de Notificaciones cuando existan más de 10;
 - prueba visual/end-to-end final de Fase 6;
 - limpieza de datos de prueba visual generados;
 - merge a `main`.
@@ -335,7 +333,11 @@ Preflight ya completado:
 - Feed preparado para infinite scroll en páginas de 10 tarjetas;
 - posts propios/seguidos y recomendaciones usan offsets independientes para evitar saltos al mezclar fuentes;
 - “Mis Publicaciones” desacoplado del Feed paginado para no mostrar conteos incompletos;
-- migración 6C preparada con RPC paginada de recomendaciones; pendiente de autorización antes de aplicarse.
+- migración 6C aplicada: RPC paginada de recomendaciones con limit/offset;
+- página 1 (10) + página 2 (3) verificadas sin solapamiento;
+- ownership de RPC 6C validado: usuario ajeno bloqueado;
+- RPC 6C es SECURITY INVOKER y anon no puede ejecutarla;
+- Advisors posteriores a 6C sin problemas nuevos.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
