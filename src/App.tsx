@@ -927,6 +927,12 @@ function PazoMain() {
                       currentPet={currentPet}
                       availablePets={pets}
                       onSelectPet={(p) => setCurrentPet(p)}
+                      onPetUpdated={(updatedPet) => {
+                        setCurrentPet(updatedPet)
+                        setPets((prevPets) =>
+                          prevPets.map((pet) => pet.id === updatedPet.id ? updatedPet : pet)
+                        )
+                      }}
                       careItems={careItems}
                       onToggleCompleteCare={handleToggleCompleteCare}
                       docs={docs}
