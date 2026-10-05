@@ -390,7 +390,34 @@ GRANT EXECUTE ON FUNCTION public.resolve_lost_pet_alert(uuid)
 TO authenticated;
 
 -- -----------------------------------------------------------------------------
--- 6. RPC pública: consultar pasaporte de rescate por token
+-- 6. RPC pública: estado fundador sin exponer owner_id
+-- -----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION public.get_pet_founder_status(
+  p_pet_id uuid
+)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+  SELECT COALESCE((
+    SELECT pr.is_founder
+    FROM public.pets p
+    JOIN public.profiles pr ON pr.id = p.owner_id
+    WHERE p.id = p_pet_id
+    LIMIT 1
+  ), false);
+$function$;
+
+ALTER FUNCTION public.get_pet_founder_status(uuid) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.get_pet_founder_status(uuid)
+FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_pet_founder_status(uuid)
+TO anon, authenticated;
+
+-- -----------------------------------------------------------------------------
+-- 7. RPC pública: consultar pasaporte de rescate por token
 -- -----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.get_public_pet_rescue_profile(
@@ -443,7 +470,7 @@ GRANT EXECUTE ON FUNCTION public.get_public_pet_rescue_profile(uuid)
 TO anon, authenticated;
 
 -- -----------------------------------------------------------------------------
--- 7. RPC pública: enviar avistamiento + crear notificación privada
+-- 8. RPC pública: enviar avistamiento + crear notificación privada
 -- -----------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.submit_pet_sighting(
