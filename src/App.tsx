@@ -265,197 +265,202 @@ function PazoMain() {
     }
   }
 
-  const loadFeedForPet = async (pet: Pet) => {
-    const loadVersion = ++feedLoadVersionRef.current
-    setIsFeedLoading(true)
+  const formatPostRow = (post: any, isRecommended: boolean): Post => ({
+    id: post.id,
+    petId: post.pet_id,
+    petName: post.pet_name,
+    petSpecies: post.pet_species,
+    petAvatar: post.pet_avatar,
+    location: post.location,
+    timeAgo: 'Hace un momento',
+    createdAt: post.created_at,
+    isRecommended,
+    tags: post.tags || [],
+    text: post.text,
+    photoUrl: post.photo_url,
+    likes: post.likes || 0,
+    isLiked: false,
+    isSaved: false,
+    comments: [],
+    commentsCount: post.comments_count ?? (post.comments || []).length,
+    commentsLoaded: false,
+  })
+
+  const loadFeedPageForPet = async (pet: Pet, reset: boolean) => {
+    const loadVersion = reset
+      ? ++feedLoadVersionRef.current
+      : feedLoadVersionRef.current
+
+    if (reset) {
+      setIsFeedLoading(true)
+      setHasMoreFeed(true)
+      feedPaginationRef.current = {
+        ...EMPTY_FEED_PAGINATION,
+        petId: pet.id,
+      }
+    }
 
     try {
-      const userInterests =
-        pet.interests?.filter((interest) => interest.trim().length > 0) || []
-      const ownedPetIds =
-        ownedPetIdsRef.current.length > 0
-          ? ownedPetIdsRef.current
-          : [pet.id]
+      let pagination = feedPaginationRef.current
 
-      const { data: follows, error: followsError } = await supabase
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', pet.id)
+      if (reset || pagination.petId !== pet.id) {
+        const ownedPetIds =
+          ownedPetIdsRef.current.length > 0
+            ? ownedPetIdsRef.current
+            : [pet.id]
 
-      if (followsError) {
-        console.error('Error fetching follows:', followsError)
+        const { data: follows, error: followsError } = await supabase
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', pet.id)
+
+        if (followsError) {
+          console.error('Error fetching follows for feed pagination:', followsError)
+        }
+
+        const followingIds = follows?.map((follow) => follow.following_id) || []
+
+        pagination = {
+          petId: pet.id,
+          socialPetIds: Array.from(
+            new Set([...ownedPetIds, ...followingIds].filter(Boolean))
+          ),
+          socialOffset: 0,
+          recommendationOffset: 0,
+          socialExhausted: false,
+          recommendationExhausted: false,
+        }
+
+        feedPaginationRef.current = pagination
       }
 
-      const followingIds = follows?.map((follow) => follow.following_id) || []
-
-      const { data: ownPostsData, error: ownPostsError } = await supabase
-        .from('posts')
-        .select('*')
-        .in('pet_id', ownedPetIds)
-        .order('created_at', { ascending: false })
-
-      if (ownPostsError) {
-        console.error('Error fetching own posts:', ownPostsError)
-      }
-
-      let followedPostsData: any[] = []
-      if (followingIds.length > 0) {
-        const { data: followedData, error: followedError } = await supabase
+      let socialRows: any[] = []
+      if (!pagination.socialExhausted && pagination.socialPetIds.length > 0) {
+        const { data, error } = await supabase
           .from('posts')
           .select('*')
-          .in('pet_id', followingIds)
+          .in('pet_id', pagination.socialPetIds)
           .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .range(
+            pagination.socialOffset,
+            pagination.socialOffset + FEED_PAGE_SIZE - 1
+          )
 
-        if (followedError) {
-          console.error('Error fetching followed posts:', followedError)
-        } else if (followedData) {
-          followedPostsData = followedData
+        if (error) {
+          throw error
         }
+
+        socialRows = data || []
       }
 
-      const chronologicalPosts = [
-        ...(ownPostsData || []),
-        ...followedPostsData,
-      ]
-        .filter((post, index, allPosts) =>
-          allPosts.findIndex((candidate) => candidate.id === post.id) === index
-        )
-        .sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      let recommendationRows: any[] = []
+      if (!pagination.recommendationExhausted) {
+        const { data, error } = await supabase.rpc(
+          'get_recommended_posts_page',
+          {
+            p_actor_pet_id: pet.id,
+            p_limit: FEED_PAGE_SIZE,
+            p_offset: pagination.recommendationOffset,
+          }
         )
 
-      const excludedIds = Array.from(
-        new Set([...followingIds, ...ownedPetIds].filter(Boolean))
+        if (error) {
+          throw error
+        }
+
+        recommendationRows = data || []
+      }
+
+      const socialPosts = socialRows.map((post) => formatPostRow(post, false))
+      const recommendedPosts = recommendationRows.map((post) =>
+        formatPostRow(post, true)
       )
 
-      let recommendedData: any[] = []
-      if (userInterests.length > 0) {
-        let recommendedQuery = supabase
-          .from('posts')
-          .select('*')
-          .overlaps('tags', userInterests)
-          .order('likes', { ascending: false })
-          .limit(6)
+      const page = blendFeeds(socialPosts, recommendedPosts)
+        .slice(0, FEED_PAGE_SIZE)
 
-        if (excludedIds.length > 0) {
-          recommendedQuery = recommendedQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
-        }
+      const consumedSocial = page.filter((post) => !post.isRecommended).length
+      const consumedRecommendations = page.filter((post) => post.isRecommended).length
 
-        const { data: tagRecommendedData, error: recommendedError } = await recommendedQuery
+      pagination.socialOffset += consumedSocial
+      pagination.recommendationOffset += consumedRecommendations
 
-        if (recommendedError) {
-          console.error('Error fetching tag recommendations:', recommendedError)
-        } else {
-          recommendedData = tagRecommendedData || []
-        }
+      if (
+        socialRows.length === 0
+        || (
+          socialRows.length < FEED_PAGE_SIZE
+          && consumedSocial >= socialRows.length
+        )
+      ) {
+        pagination.socialExhausted = true
       }
 
-      const formatPost = (post: any, isRecommended: boolean): Post => ({
-        id: post.id,
-        petId: post.pet_id,
-        petName: post.pet_name,
-        petSpecies: post.pet_species,
-        petAvatar: post.pet_avatar,
-        location: post.location,
-        timeAgo: 'Hace un momento',
-        createdAt: post.created_at,
-        isRecommended,
-        tags: post.tags || [],
-        text: post.text,
-        photoUrl: post.photo_url,
-        likes: post.likes || 0,
-        isLiked: false,
-        isSaved: false,
-        comments: [],
-        commentsCount: post.comments_count ?? (post.comments || []).length,
-        commentsLoaded: false,
-      })
-
-      const formattedFollowed = chronologicalPosts.map((post) => formatPost(post, false))
-      const formattedRecommended = (recommendedData || []).map((post: any) => formatPost(post, true))
-
-      let formattedRpcRecommended: Post[] = []
-      const { data: rpcRecommendedData, error: rpcRecommendedError } = await supabase.rpc(
-        'get_recommended_posts',
-        {
-          p_actor_pet_id: pet.id,
-          p_limit: 10,
-        }
-      )
-
-      if (rpcRecommendedError) {
-        console.error('Error fetching personalized recommendations:', rpcRecommendedError)
-      } else if (rpcRecommendedData) {
-        formattedRpcRecommended = rpcRecommendedData.map((post: any) => formatPost(post, true))
+      if (
+        recommendationRows.length === 0
+        || (
+          recommendationRows.length < FEED_PAGE_SIZE
+          && consumedRecommendations >= recommendationRows.length
+        )
+      ) {
+        pagination.recommendationExhausted = true
       }
 
-      const excludedRecommendationPetIds = new Set(excludedIds)
-      const primaryRecommendations = (
-        formattedRpcRecommended.length > 0
-          ? formattedRpcRecommended
-          : formattedRecommended
-      ).filter((post) => !excludedRecommendationPetIds.has(post.petId))
+      feedPaginationRef.current = pagination
 
-      let genericRecommendations: Post[] = []
-      if (primaryRecommendations.length < 4) {
-        let genericQuery = supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10)
-
-        if (excludedIds.length > 0) {
-          genericQuery = genericQuery.not('pet_id', 'in', `(${excludedIds.join(',')})`)
-        }
-
-        const { data: genericData, error: genericError } = await genericQuery
-
-        if (genericError) {
-          console.error('Error fetching cold-start recommendations:', genericError)
-        } else {
-          genericRecommendations = (genericData || []).map((post: any) => formatPost(post, true))
-        }
-      }
-
-      const recommendationIds = new Set<string>()
-      const recommendationsLayer = [
-        ...primaryRecommendations,
-        ...genericRecommendations,
-      ].filter((post) => {
-        if (recommendationIds.has(post.id)) return false
-        recommendationIds.add(post.id)
-        return true
-      })
-
-      let smartFeed = blendFeeds(formattedFollowed, recommendationsLayer)
-
-      if (smartFeed.length === 0) {
-        const { data: fallbackPosts, error: fallbackError } = await supabase
-          .from('posts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10)
-
-        if (fallbackError) {
-          console.error('Error fetching fallback posts:', fallbackError)
-        }
-
-        smartFeed = (fallbackPosts || []).map((post: any) => formatPost(post, true))
-      }
-
-      const enrichedFeed = await enrichPostsWithInteractions(smartFeed, pet.id)
+      const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
 
       if (feedLoadVersionRef.current !== loadVersion) return
-      setPosts(enrichedFeed)
+
+      if (reset) {
+        setPosts(enrichedPage)
+      } else {
+        setPosts((previousPosts) => {
+          const existingIds = new Set(previousPosts.map((post) => post.id))
+          const uniqueNext = enrichedPage.filter((post) => !existingIds.has(post.id))
+          return [...previousPosts, ...uniqueNext]
+        })
+      }
+
+      setHasMoreFeed(
+        !(pagination.socialExhausted && pagination.recommendationExhausted)
+      )
     } catch (error) {
-      console.error(`Error loading feed for pet ${pet.id}:`, error)
-      if (feedLoadVersionRef.current === loadVersion) {
+      console.error(`Error loading feed page for pet ${pet.id}:`, error)
+
+      if (reset && feedLoadVersionRef.current === loadVersion) {
         setPosts([])
+        setHasMoreFeed(false)
       }
     } finally {
-      if (feedLoadVersionRef.current === loadVersion) {
+      if (reset && feedLoadVersionRef.current === loadVersion) {
         setIsFeedLoading(false)
       }
+    }
+  }
+
+  const loadFeedForPet = async (pet: Pet) => {
+    await loadFeedPageForPet(pet, true)
+  }
+
+  const loadMoreFeed = async () => {
+    if (
+      feedLoadMoreInFlightRef.current
+      || isFeedLoading
+      || !hasMoreFeed
+      || activePetIdRef.current !== currentPet.id
+    ) {
+      return
+    }
+
+    feedLoadMoreInFlightRef.current = true
+    setIsFeedLoadingMore(true)
+
+    try {
+      await loadFeedPageForPet(currentPet, false)
+    } finally {
+      feedLoadMoreInFlightRef.current = false
+      setIsFeedLoadingMore(false)
     }
   }
 
