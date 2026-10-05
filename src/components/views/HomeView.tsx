@@ -266,9 +266,11 @@ const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, on
           <button className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold" title="Opciones">&bull;&bull;&bull;</button>
         </div>
       </div>
-      <div className="w-full aspect-[4/3] bg-neutral-100 overflow-hidden relative">
-        <img src={post.photoUrl} alt={post.text} className="w-full h-full object-cover" />
-      </div>
+      {post.photoUrl && (
+        <div className="w-full aspect-[4/3] bg-neutral-100 overflow-hidden relative">
+          <img src={post.photoUrl} alt={post.text} className="w-full h-full object-cover" />
+        </div>
+      )}
       <div className="p-4 pt-3 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
