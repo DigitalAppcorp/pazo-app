@@ -25,6 +25,7 @@ import { PublicProfileView } from './components/views/PublicProfileView'
 
 import { CreateModal } from './components/modals/CreateModal'
 import { CreatePostModal } from './components/modals/CreatePostModal'
+import { AddPetModal } from './components/modals/AddPetModal'
 import { PassportModal } from './components/modals/PassportModal'
 import { CareModal } from './components/modals/CareModal'
 import { AlertModal } from './components/modals/AlertModal'
@@ -74,6 +75,7 @@ function PazoMain() {
 
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
+  const [isAddPetOpen, setIsAddPetOpen] = useState(false)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
@@ -1015,6 +1017,7 @@ function PazoMain() {
                           prevPets.map((pet) => pet.id === updatedPet.id ? updatedPet : pet)
                         )
                       }}
+                      onAddPet={() => setIsAddPetOpen(true)}
                       careItems={careItems}
                       onToggleCompleteCare={handleToggleCompleteCare}
                       docs={docs}
@@ -1065,6 +1068,20 @@ function PazoMain() {
               onClose={() => setIsCreatePostOpen(false)}
               currentPet={currentPet}
               onPostCreated={handlePostCreated}
+              lang={lang}
+            />
+
+            <AddPetModal
+              isOpen={isAddPetOpen}
+              onClose={() => setIsAddPetOpen(false)}
+              onPetCreated={(newPet) => {
+                setPets((prevPets) => {
+                  if (prevPets.some((pet) => pet.id === newPet.id)) return prevPets
+                  return [...prevPets, newPet]
+                })
+                selectActivePet(newPet)
+                setIsAddPetOpen(false)
+              }}
               lang={lang}
             />
 
