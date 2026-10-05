@@ -324,6 +324,7 @@ export const PetView = ({
                     className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] font-bold focus:outline-none focus:border-[#E1E53F]"
                   />
                 </div>
+
                 <div>
                   <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Biografía corta</label>
                   <input
@@ -333,9 +334,35 @@ export const PetView = ({
                     className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
                   />
                 </div>
+
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Peso</label>
+                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Raza</label>
+                    <input
+                      type="text"
+                      value={editForm.breed}
+                      onChange={(e) => setEditForm({ ...editForm, breed: e.target.value })}
+                      placeholder={lang === 'es' ? 'Opcional' : 'Optional'}
+                      className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Género</label>
+                    <select
+                      value={editForm.gender}
+                      onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                      className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
+                    >
+                      <option value="">{lang === 'es' ? 'Sin especificar' : 'Not specified'}</option>
+                      <option value="macho">{lang === 'es' ? 'Macho' : 'Male'}</option>
+                      <option value="hembra">{lang === 'es' ? 'Hembra' : 'Female'}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Peso · privado</label>
                     <input
                       type="text"
                       value={editForm.weight}
@@ -353,8 +380,9 @@ export const PetView = ({
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Dieta / Plan</label>
+                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Dieta / Plan · privado</label>
                   <input
                     type="text"
                     value={editForm.dietPlan}
@@ -362,10 +390,44 @@ export const PetView = ({
                     className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
                   />
                 </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Zona aproximada · privada</label>
+                  <input
+                    type="text"
+                    value={editForm.zone}
+                    onChange={(e) => setEditForm({ ...editForm, zone: e.target.value })}
+                    placeholder={lang === 'es' ? 'Ciudad o zona general' : 'City or general area'}
+                    className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-[#5C7470] block mb-1">Intereses · privados</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {interestOptions.map((interest) => {
+                      const selected = editForm.interests.includes(interest)
+                      return (
+                        <button
+                          key={interest}
+                          type="button"
+                          onClick={() => toggleEditInterest(interest)}
+                          className={`text-[9px] font-bold px-2.5 py-1.5 rounded-full transition-colors cursor-pointer ${selected
+                            ? 'bg-[#204E4A] text-[#E1E53F]'
+                            : 'bg-[#FAF8F5] text-[#5C7470]'
+                            }`}
+                        >
+                          {interest}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving}
-                  className="w-full bg-[#204E4A] text-white font-bold text-xs py-2 rounded-xl mt-2 flex items-center justify-center cursor-pointer"
+                  className="w-full bg-[#204E4A] disabled:opacity-60 text-white font-bold text-xs py-2.5 rounded-xl mt-2 flex items-center justify-center cursor-pointer"
                 >
                   {isSaving ? (lang === 'es' ? 'Guardando...' : 'Saving...') : (lang === 'es' ? 'Guardar Cambios' : 'Save Changes')}
                 </button>
