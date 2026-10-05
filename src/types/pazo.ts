@@ -41,7 +41,7 @@ export interface Post {
   isRecommended?: boolean // Soporte nativo para el motor algorítmico tipo Instagram
   tags?: string[]         // <--- Añadido para asociar intereses y categorías al post
   text: string
-  photoUrl: string
+  photoUrl?: string | null
   likes: number
   isLiked?: boolean
   isSaved?: boolean
