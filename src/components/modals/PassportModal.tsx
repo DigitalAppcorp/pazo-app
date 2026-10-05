@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import qrcode from 'qrcode-generator'
 import type { Pet } from '../../types/pazo'
-import { buildPublicRescueUrl, getPetPublicToken } from '../../services/rescueService'
+import {
+  buildPublicRescueUrl,
+  getPetPublicToken,
+  rotatePetPublicToken,
+} from '../../services/rescueService'
 import { IconShield, IconClose } from '../icons/PazoIcons'
 
 interface PassportModalProps {
@@ -55,6 +59,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
   const [publicUrl, setPublicUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isRotating, setIsRotating] = useState(false)
   const qrContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -106,6 +111,35 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
       if (err?.name !== 'AbortError') {
         console.error('Error sharing rescue link:', err)
       }
+    }
+  }
+
+  const handleRotateQr = async () => {
+    if (isRotating) return
+
+    const confirmed = window.confirm(
+      lang === 'es'
+        ? 'El QR anterior dejará de funcionar. ¿Deseas generar uno nuevo?'
+        : 'The previous QR will stop working. Generate a new one?'
+    )
+
+    if (!confirmed) return
+
+    setIsRotating(true)
+    setError('')
+
+    try {
+      const token = await rotatePetPublicToken(pet.id)
+      setPublicUrl(buildPublicRescueUrl(token))
+    } catch (err: any) {
+      console.error('Error rotating pet QR:', err)
+      setError(
+        lang === 'es'
+          ? 'No se pudo regenerar el QR.'
+          : 'Could not regenerate QR.'
+      )
+    } finally {
+      setIsRotating(false)
     }
   }
 
@@ -210,6 +244,15 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
             >
               {lang === 'es' ? 'Compartir' : 'Share'}
             </button>
+          <button
+            onClick={handleRotateQr}
+            disabled={!publicUrl || isRotating}
+            className="w-full mt-2 text-[10px] font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 cursor-pointer"
+          >
+            {isRotating
+              ? (lang === 'es' ? 'Regenerando…' : 'Regenerating…')
+              : (lang === 'es' ? 'Regenerar QR e invalidar el anterior' : 'Regenerate QR and invalidate previous link')}
+          </button>
           </div>
         </div>
       </div>
