@@ -7,6 +7,9 @@ interface NotificationsModalProps {
   onClose: () => void
   notifications: PazoNotification[]
   onOpenNotification: (notification: PazoNotification) => void
+  onLoadMore: () => void
+  hasMore: boolean
+  isLoadingMore: boolean
   lang: 'es' | 'en'
 }
 
@@ -15,6 +18,9 @@ export const NotificationsModal = ({
   onClose,
   notifications,
   onOpenNotification,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
   lang,
 }: NotificationsModalProps) => {
   const [filter, setFilter] = useState<'todas' | 'cuidados' | 'comunidad'>('todas')
@@ -27,7 +33,18 @@ export const NotificationsModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm bg-white rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto soft-card">
+      <div
+        className="w-full max-w-sm bg-white rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto soft-card"
+        onScroll={(event) => {
+          const element = event.currentTarget
+          const distanceToBottom =
+            element.scrollHeight - element.scrollTop - element.clientHeight
+
+          if (distanceToBottom < 180 && hasMore && !isLoadingMore) {
+            onLoadMore()
+          }
+        }}
+      >
         <div className="flex justify-between items-center pb-2">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
@@ -133,6 +150,12 @@ export const NotificationsModal = ({
             })
           )}
         </div>
+
+        {isLoadingMore && (
+          <div className="py-2 flex justify-center">
+            <div className="w-5 h-5 border-2 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
+          </div>
+        )}
 
       </div>
     </div>
