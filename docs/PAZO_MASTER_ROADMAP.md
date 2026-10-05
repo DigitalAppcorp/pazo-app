@@ -294,10 +294,9 @@ Trabajo ya preparado en ese PR:
 **NO se ha aplicado la migración de Fase 6 a Supabase.**
 
 Bloqueos antes de continuar:
-- autorización explícita para aplicar Supabase;
-- aplicar migración;
-- pruebas SQL/RLS;
-- pruebas end-to-end y visuales.
+- pruebas end-to-end y visuales;
+- limpieza de datos de prueba visual si se generan;
+- merge a `main`.
 
 Preflight ya completado:
 - rama sincronizada con `main`;
@@ -307,7 +306,14 @@ Preflight ya completado:
 - token QR revocable/rotatorio;
 - acceso anónimo a `owner_id` y `last_seen_location` preparado para revocarse;
 - perfil social desacoplado de esos campos para no romper modo demo;
-- mutaciones de alerta forzadas a pasar por RPC controlada.
+- mutaciones de alerta forzadas a pasar por RPC controlada;
+- migración aplicada en Supabase PAZO;
+- pruebas funcionales SQL aprobadas con `ROLLBACK`;
+- aislamiento RLS owner/non-owner aprobado;
+- rotación de QR validada;
+- privacidad anon validada;
+- índices FK añadidos y Performance Advisor sin FKs no indexadas;
+- advertencias SECURITY DEFINER revisadas y aceptadas como endpoints intencionales de Fase 6.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
