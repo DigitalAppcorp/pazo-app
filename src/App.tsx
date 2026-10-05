@@ -329,10 +329,12 @@ function PazoMain() {
         formattedRpcRecommended = rpcRecommendedData.map((post: any) => formatPost(post, true))
       }
 
-      const primaryRecommendations =
+      const excludedRecommendationPetIds = new Set(excludedIds)
+      const primaryRecommendations = (
         formattedRpcRecommended.length > 0
           ? formattedRpcRecommended
           : formattedRecommended
+      ).filter((post) => !excludedRecommendationPetIds.has(post.petId))
 
       let genericRecommendations: Post[] = []
       if (primaryRecommendations.length < 4) {
