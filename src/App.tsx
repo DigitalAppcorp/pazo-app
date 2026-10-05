@@ -427,6 +427,66 @@ function PazoMain() {
     }
   }
 
+  const loadCommentsForPost = async (postId: string): Promise<boolean> => {
+    const targetPost = posts.find((post) => post.id === postId)
+    if (!targetPost) return false
+    if (targetPost.commentsLoaded) return true
+
+    try {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .select(`
+          id,
+          post_id,
+          body,
+          created_at,
+          author_pet_id,
+          author:pets!post_comments_author_pet_id_fkey (
+            name,
+            species,
+            photo_url
+          )
+        `)
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      const loadedComments = (data || []).map((row: any) => {
+        const author = Array.isArray(row.author) ? row.author[0] : row.author
+
+        return {
+          id: row.id,
+          authorPetId: row.author_pet_id,
+          authorName: author?.name || (lang === 'es' ? 'Mascota' : 'Pet'),
+          authorPet: author?.species || 'otro',
+          authorAvatar: author?.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
+          text: row.body,
+          timeAgo: lang === 'es' ? 'Reciente' : 'Recent',
+          createdAt: row.created_at,
+        }
+      })
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: loadedComments,
+                commentsCount: loadedComments.length,
+                commentsLoaded: true,
+              }
+            : post
+        )
+      )
+
+      return true
+    } catch (err) {
+      console.error(`Error cargando comentarios del post ${postId}:`, err)
+      return false
+    }
+  }
+
   const handleAddComment = async (postId: string, text: string) => {
     // Guarda previa estricta (incluyendo texto vacío)
     if (!currentPet?.id || !postId || !text.trim()) return
