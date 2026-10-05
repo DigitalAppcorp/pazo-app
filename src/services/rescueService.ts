@@ -22,6 +22,18 @@ export interface ActiveLostPetAlert {
   createdAt: string
 }
 
+export interface SightingDetail {
+  id: string
+  petId: string
+  petName: string
+  petPhotoUrl?: string | null
+  reporterName?: string | null
+  reporterPhone?: string | null
+  message: string
+  locationText?: string | null
+  createdAt: string
+}
+
 export const getPetPublicToken = async (petId: string): Promise<string> => {
   const { data, error } = await supabase
     .from('pet_public_links')
@@ -70,11 +82,15 @@ export const fetchPublicRescueProfile = async (token: string): Promise<PublicRes
 
 export const submitPublicSighting = async (
   token: string,
+  reporterName: string,
+  reporterPhone: string,
   message: string,
   location?: string
 ): Promise<string> => {
   const { data, error } = await supabase.rpc('submit_pet_sighting', {
     p_token: token,
+    p_reporter_name: reporterName.trim(),
+    p_reporter_phone: reporterPhone.trim(),
     p_message: message.trim(),
     p_location: location?.trim() || null,
   })
@@ -125,6 +141,45 @@ export const resolveLostPetAlert = async (petId: string): Promise<void> => {
   const { error } = await supabase.rpc('resolve_lost_pet_alert', {
     p_pet_id: petId,
   })
+
+  if (error) throw error
+}
+
+export const fetchSightingDetail = async (sightingId: string): Promise<SightingDetail> => {
+  const { data: sighting, error: sightingError } = await supabase
+    .from('pet_sightings')
+    .select('id,pet_id,reporter_name,reporter_phone,message,location_text,created_at')
+    .eq('id', sightingId)
+    .single()
+
+  if (sightingError) throw sightingError
+
+  const { data: pet, error: petError } = await supabase
+    .from('pets')
+    .select('id,name,photo_url')
+    .eq('id', sighting.pet_id)
+    .single()
+
+  if (petError) throw petError
+
+  return {
+    id: sighting.id,
+    petId: sighting.pet_id,
+    petName: pet.name,
+    petPhotoUrl: pet.photo_url,
+    reporterName: sighting.reporter_name,
+    reporterPhone: sighting.reporter_phone,
+    message: sighting.message,
+    locationText: sighting.location_text,
+    createdAt: sighting.created_at,
+  }
+}
+
+export const markNotificationRead = async (notificationId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', notificationId)
 
   if (error) throw error
 }
