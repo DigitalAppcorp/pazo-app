@@ -294,10 +294,10 @@ Trabajo ya preparado en ese PR:
 **NO se ha aplicado la migración de Fase 6 a Supabase.**
 
 Bloqueos antes de continuar:
-- aplicar migración 6B de contacto privado del reportante;
-- validar build después de feedback visual;
-- repetir prueba end-to-end de avistamiento con nombre/teléfono;
-- limpieza de datos de prueba visual si se generan;
+- prueba visual/end-to-end final con nombre/teléfono;
+- validar detalle accionable de notificación;
+- validar recordatorio persistente de mascota perdida;
+- limpieza de datos de prueba visual generados;
 - merge a `main`.
 
 Preflight ya completado:
@@ -316,6 +316,12 @@ Preflight ya completado:
 - privacidad anon validada;
 - índices FK añadidos y Performance Advisor sin FKs no indexadas;
 - advertencias SECURITY DEFINER revisadas y aceptadas como endpoints intencionales de Fase 6.
+- migración 6B aplicada: nombre/teléfono privados del reportante;
+- nueva RPC de avistamiento exige nombre y teléfono;
+- versión antigua de submit_pet_sighting retirada;
+- pruebas 6B con ROLLBACK aprobadas;
+- dueño puede leer contacto y usuario ajeno no;
+- no quedaron residuos de pruebas 6B.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
