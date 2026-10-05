@@ -6,16 +6,17 @@ interface FollowButtonProps {
     targetPetId: string
     lang?: 'es' | 'en'
     variant?: 'default' | 'profile'
+    canFollow?: boolean
     onFollowChange?: (newIsFollowing: boolean) => void
 }
 
-export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant = 'default', onFollowChange }: FollowButtonProps) => {
+export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant = 'default', canFollow = true, onFollowChange }: FollowButtonProps) => {
     const [isFollowing, setIsFollowing] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isPending, setIsPending] = useState<boolean>(false)
 
     useEffect(() => {
-        if (!currentPetId || !targetPetId || currentPetId === targetPetId) {
+        if (!canFollow || !currentPetId || !targetPetId || currentPetId === targetPetId) {
             setIsFollowing(false)
             setIsLoading(false)
             return
@@ -43,10 +44,10 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
         }
 
         checkFollowStatus()
-    }, [currentPetId, targetPetId])
+    }, [canFollow, currentPetId, targetPetId])
 
     const handleToggleFollow = async () => {
-        if (isLoading || isPending || !currentPetId || !targetPetId) return
+        if (!canFollow || isLoading || isPending || !currentPetId || !targetPetId) return
 
         const previousState = isFollowing
         const newState = !previousState
@@ -82,8 +83,8 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
         }
     }
 
-    // Regla 1: No puedes seguirte a ti mismo
-    if (currentPetId === targetPetId) return null
+    // Regla 1: No puedes seguirte a ti mismo ni a otra mascota de tu misma cuenta
+    if (!canFollow || currentPetId === targetPetId) return null
     // Regla 2: Evitar parpadeos mientras carga
     if (isLoading) return null
     // Regla 3: En feed/default, si ya lo sigo el botón desaparece. En perfil, siempre visible.
