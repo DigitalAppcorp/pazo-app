@@ -294,9 +294,11 @@ Trabajo ya preparado en ese PR:
 **NO se ha aplicado la migración de Fase 6 a Supabase.**
 
 Bloqueos antes de continuar:
-- prueba visual/end-to-end final con nombre/teléfono;
-- validar detalle accionable de notificación;
-- validar recordatorio persistente de mascota perdida;
+- `npm run build` local después de paginación;
+- autorización explícita para aplicar migración 6C;
+- aplicar/probar RPC paginada del Feed;
+- prueba visual de infinite scroll del Feed;
+- prueba visual/end-to-end final de Fase 6;
 - limpieza de datos de prueba visual generados;
 - merge a `main`.
 
@@ -327,6 +329,13 @@ Preflight ya completado:
 - notificaciones nuevas/vistas diferenciadas visualmente;
 - abrir una notificación la marca como leída;
 - acción global “Marcar todas como leídas” retirada por redundante.
+- copy del recordatorio ajustado a “Estamos alerta y te avisaremos si alguien reporta un avistamiento.”;
+- notificaciones paginadas en bloques de 10 mediante desplazamiento;
+- conteo de no leídas separado para evitar descargar filas solo por el badge;
+- Feed preparado para infinite scroll en páginas de 10 tarjetas;
+- posts propios/seguidos y recomendaciones usan offsets independientes para evitar saltos al mezclar fuentes;
+- “Mis Publicaciones” desacoplado del Feed paginado para no mostrar conteos incompletos;
+- migración 6C preparada con RPC paginada de recomendaciones; pendiente de autorización antes de aplicarse.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
