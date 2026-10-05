@@ -57,6 +57,7 @@ const PazoQr = ({ value, title }: { value: string; title: string }) => {
 
 export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps) => {
   const [publicUrl, setPublicUrl] = useState('')
+  const [publicToken, setPublicToken] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isRotating, setIsRotating] = useState(false)
@@ -73,7 +74,10 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
 
       try {
         const token = await getPetPublicToken(pet.id)
-        if (active) setPublicUrl(buildPublicRescueUrl(token))
+        if (active) {
+          setPublicToken(token)
+          setPublicUrl(buildPublicRescueUrl(token))
+        }
       } catch (err) {
         console.error('Error loading pet QR link:', err)
         if (active) {
@@ -130,6 +134,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
 
     try {
       const token = await rotatePetPublicToken(pet.id)
+      setPublicToken(token)
       setPublicUrl(buildPublicRescueUrl(token))
     } catch (err: any) {
       console.error('Error rotating pet QR:', err)
@@ -205,8 +210,8 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
             </span>
             <span className="text-[10px] text-[#5C7470] block mt-1">
               {lang === 'es'
-                ? 'Este QR abre una ficha pública sin mostrar teléfono ni domicilio.'
-                : 'This QR opens a public page without exposing phone or home address.'}
+                ? 'Pon este QR en su placa o collar.'
+                : 'Place this QR on their tag or collar.'}
             </span>
           </div>
         </div>
@@ -215,14 +220,17 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
           <IconShield size={16} className="text-[#204E4A] shrink-0 mt-0.5" />
           <span>
             {lang === 'es'
-              ? 'Quien escanee el collar puede enviar un aviso privado a través de Pazo. El enlace usa un token público independiente del ID de tu cuenta.'
-              : 'Anyone scanning the tag can send you a private notice through Pazo. The link uses a public token separate from your account ID.'}
+              ? `Si alguien encuentra a ${pet.name}, puede escanear este QR y enviarte un aviso.`
+              : `If someone finds ${pet.name}, they can scan this QR and send you a notice.`}
           </span>
         </div>
 
         <div className="space-y-2">
           <button
-            onClick={() => publicUrl && window.open(publicUrl, '_blank', 'noopener,noreferrer')}
+            onClick={() => {
+              if (!publicToken) return
+              window.location.href = buildPublicRescueUrl(publicToken, 'preview')
+            }}
             disabled={!publicUrl}
             className="w-full bg-[#204E4A] disabled:opacity-50 text-[#E1E53F] font-extrabold py-3.5 rounded-full text-xs shadow-md cursor-pointer"
           >
