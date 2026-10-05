@@ -12,6 +12,7 @@ interface HomeViewProps {
   onLoadComments: (postId: string) => Promise<boolean>
   lang: 'es' | 'en'
   currentPetId?: string
+  ownedPetIds: string[]
   onSelectPetProfile: (petId: string) => void
 }
 
@@ -92,7 +93,7 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
 }
 
 export const HomeView = ({
-  posts, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', onSelectPetProfile,
+  posts, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
@@ -199,6 +200,7 @@ export const HomeView = ({
               key={post.id}
               post={post}
               currentPetId={currentPetId}
+              ownedPetIds={ownedPetIds}
               lang={lang}
               isCommentsOpen={activeCommentsPostId === post.id}
               newCommentText={newCommentText}
@@ -221,6 +223,7 @@ export const HomeView = ({
 interface PostCardProps {
   post: Post
   currentPetId: string
+  ownedPetIds: string[]
   lang: 'es' | 'en'
   isCommentsOpen: boolean
   newCommentText: string
@@ -234,7 +237,7 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, currentPetId)
@@ -262,7 +265,12 @@ const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, on
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <FollowButton currentPetId={currentPetId} targetPetId={post.petId} lang={lang} />
+          <FollowButton
+            currentPetId={currentPetId}
+            targetPetId={post.petId}
+            canFollow={!ownedPetIds.includes(post.petId)}
+            lang={lang}
+          />
           <button className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold" title="Opciones">&bull;&bull;&bull;</button>
         </div>
       </div>
