@@ -45,8 +45,11 @@ export const getPetPublicToken = async (petId: string): Promise<string> => {
   return data.public_token
 }
 
-export const buildPublicRescueUrl = (token: string) =>
-  `${window.location.origin}${window.location.pathname}#/rescue/${token}`
+export const buildPublicRescueUrl = (
+  token: string,
+  source?: 'preview'
+) =>
+  `${window.location.origin}${window.location.pathname}#/rescue/${token}${source === 'preview' ? '?from=preview' : ''}`
 
 export const rotatePetPublicToken = async (petId: string): Promise<string> => {
   const { data, error } = await supabase.rpc('rotate_pet_public_link', {
