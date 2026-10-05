@@ -2,7 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
-import { fetchNotifications, markAllNotificationsRead } from './services/rescueService'
+import {
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from './services/rescueService'
 import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
@@ -32,19 +36,27 @@ import { CareModal } from './components/modals/CareModal'
 import { AlertModal } from './components/modals/AlertModal'
 import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
+import { SightingDetailModal } from './components/modals/SightingDetailModal'
+
+const getPublicRescueRoute = () => {
+  const match = window.location.hash.match(
+    /^#\/rescue\/([0-9a-f-]{36})(?:\?from=(preview))?$/i
+  )
+
+  return {
+    token: match?.[1] || null,
+    fromPreview: match?.[2] === 'preview',
+  }
+}
 
 function PazoMain() {
   const { user, loading, signIn } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
-  const [publicRescueToken, setPublicRescueToken] = useState<string | null>(() => {
-    const match = window.location.hash.match(/^#\/rescue\/([0-9a-f-]{36})$/i)
-    return match?.[1] || null
-  })
+  const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
 
   useEffect(() => {
     const syncPublicRoute = () => {
-      const match = window.location.hash.match(/^#\/rescue\/([0-9a-f-]{36})$/i)
-      setPublicRescueToken(match?.[1] || null)
+      setPublicRescueRoute(getPublicRescueRoute())
     }
 
     window.addEventListener('hashchange', syncPublicRoute)
@@ -115,6 +127,7 @@ function PazoMain() {
   const [isAlertOpen, setIsAlertOpen] = useState(false)
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
   const blendFeeds = (followed: Post[], recommended: Post[]): Post[] => {
     if (!followed || followed.length === 0) return recommended
@@ -824,6 +837,26 @@ function PazoMain() {
     void refreshNotifications()
   }
 
+  const handleOpenNotification = async (notification: PazoNotification) => {
+    if (!notification.sourceId) return
+
+    setIsNotificationsOpen(false)
+    setSelectedSightingId(notification.sourceId)
+
+    if (!notification.read) {
+      try {
+        await markNotificationRead(notification.id)
+        setNotifications((prev) =>
+          prev.map((item) =>
+            item.id === notification.id ? { ...item, read: true } : item
+          )
+        )
+      } catch (error) {
+        console.error('Error marking notification as read:', error)
+      }
+    }
+  }
+
   const handleMarkAllNotificationsRead = async () => {
     try {
       await markAllNotificationsRead()
@@ -843,9 +876,27 @@ function PazoMain() {
 
   const unreadMessages = conversations.filter((c) => c.isRequest).length
   const unreadNotifications = notifications.filter((n) => !n.read).length
+  const lostPets = pets.filter((pet) => pet.isLost)
 
-  if (publicRescueToken) {
-    return <PublicRescueView token={publicRescueToken} />
+  const handleOpenLostAlertReminder = () => {
+    const targetPet = currentPet.isLost ? currentPet : lostPets[0]
+    if (!targetPet) return
+
+    if (targetPet.id !== currentPet.id) {
+      selectActivePet(targetPet)
+    }
+
+    setIsAlertOpen(true)
+  }
+
+  if (publicRescueRoute.token) {
+    return (
+      <PublicRescueView
+        token={publicRescueRoute.token}
+        fromPreview={publicRescueRoute.fromPreview}
+        onBack={() => window.history.back()}
+      />
+    )
   }
 
   if (showSplash || loading) {
@@ -1102,6 +1153,31 @@ function PazoMain() {
               unreadNotificationsCount={unreadNotifications}
             />
 
+            {lostPets.length > 0 && (
+              <button
+                type="button"
+                onClick={handleOpenLostAlertReminder}
+                className="mx-4 mt-3 rounded-2xl bg-[#FFF2EE] border border-[#EC7357]/30 px-4 py-3 flex items-center gap-3 text-left cursor-pointer shrink-0"
+              >
+                <span className="w-8 h-8 rounded-full bg-[#EC7357] text-white flex items-center justify-center font-black shrink-0">
+                  !
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-xs font-black text-[#204E4A]">
+                    {lostPets.length === 1
+                      ? `${lostPets[0].name} sigue reportado como perdido`
+                      : `${lostPets.length} mascotas tienen alertas activas`}
+                  </span>
+                  <span className="block text-[10px] text-[#5C7470] mt-0.5">
+                    {lang === 'es'
+                      ? 'Toca aquí para revisar o finalizar la alerta.'
+                      : 'Tap here to review or resolve the alert.'}
+                  </span>
+                </span>
+                <span className="font-black text-[#EC7357]">›</span>
+              </button>
+            )}
+
             <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-4 sm:p-5 relative">
               {isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
@@ -1276,6 +1352,13 @@ function PazoMain() {
               onClose={() => setIsNotificationsOpen(false)}
               notifications={notifications}
               onMarkAllRead={handleMarkAllNotificationsRead}
+              onOpenNotification={handleOpenNotification}
+              lang={lang}
+            />
+
+            <SightingDetailModal
+              sightingId={selectedSightingId}
+              onClose={() => setSelectedSightingId(null)}
               lang={lang}
             />
           </div>
