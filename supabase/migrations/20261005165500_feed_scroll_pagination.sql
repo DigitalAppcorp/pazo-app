@@ -71,16 +71,20 @@ BEGIN
       WHERE f.follower_id = p_actor_pet_id
         AND f.following_id = candidate.pet_id
     )
-    AND NOT EXISTS (
-      SELECT 1
-      FROM public.interactions i
-      WHERE i.actor_pet_id = p_actor_pet_id
-        AND i.target_id = candidate.id
-        AND i.target_type = 'post'
-        AND i.action_type IN ('impression', 'view', 'like')
-        AND i.created_at > now() - interval '48 hours'
-    )
   ORDER BY
+    CASE
+      WHEN EXISTS (
+        SELECT 1
+        FROM public.interactions i
+        WHERE i.actor_pet_id = p_actor_pet_id
+          AND i.target_id = candidate.id
+          AND i.target_type = 'post'
+          AND i.action_type IN ('impression', 'view', 'like')
+          AND i.created_at > now() - interval '48 hours'
+      )
+      THEN 1
+      ELSE 0
+    END ASC,
     CASE
       WHEN COALESCE(array_length(v_combined, 1), 0) > 0
        AND candidate.tags && v_combined
