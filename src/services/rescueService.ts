@@ -187,25 +187,63 @@ export const markNotificationRead = async (notificationId: string): Promise<void
   if (error) throw error
 }
 
-export const fetchNotifications = async (): Promise<PazoNotification[]> => {
+const mapNotificationRow = (row: any): PazoNotification => ({
+  id: row.id,
+  title: row.title,
+  subtitle: row.body,
+  category: row.type === 'sighting' ? 'comunidad' : 'todas',
+  timeAgo: 'Reciente',
+  read: Boolean(row.read_at),
+  createdAt: row.created_at,
+  petId: row.pet_id,
+  sourceId: row.source_id,
+})
+
+export const fetchNotifications = async (
+  offset = 0,
+  limit = 10
+): Promise<PazoNotification[]> => {
+  const safeOffset = Math.max(0, offset)
+  const safeLimit = Math.min(Math.max(1, limit), 50)
+
   const { data, error } = await supabase
     .from('notifications')
     .select('id,type,title,body,read_at,created_at,pet_id,source_id')
     .order('created_at', { ascending: false })
-    .limit(100)
+    .order('id', { ascending: false })
+    .range(safeOffset, safeOffset + safeLimit - 1)
 
   if (error) throw error
+  return (data || []).map(mapNotificationRow)
+}
 
-  return (data || []).map((row: any) => ({
-    id: row.id,
-    title: row.title,
-    subtitle: row.body,
-    category: row.type === 'sighting' ? 'comunidad' : 'todas',
-    timeAgo: 'Reciente',
-    read: Boolean(row.read_at),
-    createdAt: row.created_at,
-    petId: row.pet_id,
-    sourceId: row.source_id,
-  }))
+export const fetchUnreadNotificationCount = async (): Promise<number> => {
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .is('read_at', null)
+
+  if (error) throw error
+  return count || 0
+}
+
+export const fetchLatestUnreadSightingNotification = async (
+  petIds: string[]
+): Promise<PazoNotification | null> => {
+  if (petIds.length === 0) return null
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('id,type,title,body,read_at,created_at,pet_id,source_id')
+    .eq('type', 'sighting')
+    .is('read_at', null)
+    .in('pet_id', petIds)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  return data ? mapNotificationRow(data) : null
 }
 
