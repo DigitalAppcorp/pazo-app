@@ -236,6 +236,7 @@ interface PostCardProps {
 
 const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
+  const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, currentPetId)
 
   return (
@@ -278,7 +279,7 @@ const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, on
               </svg>
               <span>{post.likes}</span>
             </button>
-            <button onClick={() => onToggleComments(post.id)} className="flex items-center gap-1.5 text-xs font-bold text-[#5C7470] hover:text-[#204E4A] transition-colors cursor-pointer">
+            <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="flex items-center gap-1.5 text-xs font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M5 9c0-1.7 1.3-3 3-3 1.1 0 2 .6 2.5 1.5C9.5 8.2 8.5 9.8 8.5 12v1C6.5 13 5 11.3 5 9z" />
                 <path d="M19 9c0-1.7-1.3-3-3-3-1.1 0-2 .6-2.5 1.5 1 0.7 2 2.3 2 4.5v1c2 0 3.5-1.7 3.5-3.5z" />
@@ -286,7 +287,7 @@ const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, on
                 <circle cx="12" cy="13" r="1.8" fill="white" /><circle cx="12" cy="12.2" r="0.6" fill="currentColor" />
                 <path d="M21 10l2-.5m-.5 3l2 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
               </svg>
-              <span>{post.comments.length}</span>
+              <span>{isCommentsLoading ? '...' : displayCommentsCount}</span>
             </button>
           </div>
           <button onClick={() => onSavePost(post.id)} className="text-[#5C7470] hover:text-[#204E4A] transition-colors cursor-pointer" title={post.isSaved ? 'Guardado' : 'Guardar publicacion'}>
@@ -297,9 +298,9 @@ const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, on
           <span onClick={() => onSelectPetProfile(post.petId)} className="font-extrabold mr-1.5 cursor-pointer hover:underline">{post.petName}:</span>
           {post.text}
         </p>
-        {post.comments.length > 0 && !isCommentsOpen && (
-          <button onClick={() => onToggleComments(post.id)} className="text-[11px] font-semibold text-[#5C7470] hover:text-[#204E4A] transition-colors cursor-pointer block pt-1">
-            {lang === 'es' ? `Ver ${post.comments.length} comentario${post.comments.length > 1 ? 's' : ''}...` : `View all ${post.comments.length} comment${post.comments.length > 1 ? 's' : ''}...`}
+        {displayCommentsCount > 0 && !isCommentsOpen && (
+          <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="text-[11px] font-semibold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer block pt-1">
+            {lang === 'es' ? `Ver ${displayCommentsCount} comentario${displayCommentsCount > 1 ? 's' : ''}...` : `View all ${displayCommentsCount} comment${displayCommentsCount > 1 ? 's' : ''}...`}
           </button>
         )}
         {isCommentsOpen && (
@@ -311,17 +312,17 @@ const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, on
                   <div className="flex-1 bg-[#FAF8F5] p-2.5 rounded-2xl shadow-xs">
                     <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
                     <span className="text-[#5C7470]">{comment.text}</span>
-                    <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{comment.timeAgo}</span>
+                    <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex gap-2 pt-1">
-              <input type="text" value={newCommentText} onChange={(e) => onCommentTextChange(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') onSendComment(post.id) }}
+              <input type="text" value={newCommentText} disabled={isSubmittingComment} onChange={(e) => onCommentTextChange(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !isSubmittingComment) onSendComment(post.id) }}
                 placeholder={lang === 'es' ? 'Anadir un comentario...' : 'Add a comment...'}
-                className="flex-1 text-xs bg-[#FAF8F5] rounded-full px-4 py-2.5 text-[#204E4A] shadow-xs focus:bg-white" />
-              <button onClick={() => onSendComment(post.id)} disabled={!newCommentText.trim()} className="bg-[#204E4A] hover:bg-[#183d3a] disabled:opacity-40 text-[#E1E53F] px-4 py-2 rounded-full text-xs font-bold cursor-pointer transition-colors shadow-xs">
-                {lang === 'es' ? 'Enviar' : 'Send'}
+                className="flex-1 text-xs bg-[#FAF8F5] disabled:opacity-60 rounded-full px-4 py-2.5 text-[#204E4A] shadow-xs focus:bg-white" />
+              <button onClick={() => onSendComment(post.id)} disabled={!newCommentText.trim() || isSubmittingComment} className="bg-[#204E4A] hover:bg-[#183d3a] disabled:opacity-40 text-[#E1E53F] px-4 py-2 rounded-full text-xs font-bold cursor-pointer transition-colors shadow-xs">
+                {isSubmittingComment ? (lang === 'es' ? 'Enviando...' : 'Sending...') : (lang === 'es' ? 'Enviar' : 'Send')}
               </button>
             </div>
           </div>
