@@ -3,7 +3,9 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import {
+  fetchLatestUnreadSightingNotification,
   fetchNotifications,
+  fetchUnreadNotificationCount,
   markNotificationRead,
 } from './services/rescueService'
 import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
@@ -48,6 +50,27 @@ const getPublicRescueRoute = () => {
   }
 }
 
+const FEED_PAGE_SIZE = 10
+const NOTIFICATIONS_PAGE_SIZE = 10
+
+interface FeedPaginationState {
+  petId: string
+  socialPetIds: string[]
+  socialOffset: number
+  recommendationOffset: number
+  socialExhausted: boolean
+  recommendationExhausted: boolean
+}
+
+const EMPTY_FEED_PAGINATION: FeedPaginationState = {
+  petId: '',
+  socialPetIds: [],
+  socialOffset: 0,
+  recommendationOffset: 0,
+  socialExhausted: false,
+  recommendationExhausted: false,
+}
+
 function PazoMain() {
   const { user, loading, signIn } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
@@ -79,6 +102,8 @@ function PazoMain() {
 
   const [showFounderModal, setShowFounderModal] = useState(false)
   const [isFeedLoading, setIsFeedLoading] = useState(true)
+  const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
+  const [hasMoreFeed, setHasMoreFeed] = useState(true)
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
@@ -88,6 +113,8 @@ function PazoMain() {
   const savingPostIdsRef = useRef<Set<string>>(new Set())
   const commentingPostIdsRef = useRef<Set<string>>(new Set())
   const feedLoadVersionRef = useRef(0)
+  const feedLoadMoreInFlightRef = useRef(false)
+  const feedPaginationRef = useRef<FeedPaginationState>({ ...EMPTY_FEED_PAGINATION })
   const ownedPetIdsRef = useRef<string[]>([])
   const mainScrollRef = useRef<HTMLElement | null>(null)
   const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
@@ -102,6 +129,12 @@ function PazoMain() {
   const [docs] = useState(INITIAL_DOCS)
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
   const [notifications, setNotifications] = useState<PazoNotification[]>([])
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const [hasMoreNotifications, setHasMoreNotifications] = useState(true)
+  const [isNotificationsLoadingMore, setIsNotificationsLoadingMore] = useState(false)
+  const [latestUnreadLostPetSighting, setLatestUnreadLostPetSighting] = useState<PazoNotification | null>(null)
+  const notificationOffsetRef = useRef(0)
+  const notificationLoadInFlightRef = useRef(false)
 
   const [activeTab, setActiveTab] = useState<NavTab>('inicio')
 
