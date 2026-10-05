@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
-import type { Pet, Post, Community, CareItem, Conversation } from './types/pazo'
+import { fetchNotifications, markAllNotificationsRead } from './services/rescueService'
+import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
@@ -11,7 +12,6 @@ import {
   INITIAL_CARE_ITEMS,
   INITIAL_DOCS,
   INITIAL_CONVERSATIONS,
-  INITIAL_NOTIFICATIONS,
 } from './data/mockData'
 
 import { BottomNav, type NavTab } from './components/BottomNav'
@@ -22,6 +22,7 @@ import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
+import { PublicRescueView } from './components/views/PublicRescueView'
 
 import { CreateModal } from './components/modals/CreateModal'
 import { CreatePostModal } from './components/modals/CreatePostModal'
@@ -35,6 +36,20 @@ import { NotificationsModal } from './components/modals/NotificationsModal'
 function PazoMain() {
   const { user, loading, signIn } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
+  const [publicRescueToken, setPublicRescueToken] = useState<string | null>(() => {
+    const match = window.location.hash.match(/^#\/rescue\/([0-9a-f-]{36})$/i)
+    return match?.[1] || null
+  })
+
+  useEffect(() => {
+    const syncPublicRoute = () => {
+      const match = window.location.hash.match(/^#\/rescue\/([0-9a-f-]{36})$/i)
+      setPublicRescueToken(match?.[1] || null)
+    }
+
+    window.addEventListener('hashchange', syncPublicRoute)
+    return () => window.removeEventListener('hashchange', syncPublicRoute)
+  }, [])
 
   const [showSplash, setShowSplash] = useState(true)
 
@@ -75,7 +90,7 @@ function PazoMain() {
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
   const [docs] = useState(INITIAL_DOCS)
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<PazoNotification[]>([])
 
   const [activeTab, setActiveTab] = useState<NavTab>('inicio')
 
@@ -793,12 +808,45 @@ function PazoMain() {
     )
   }
 
-  const handleMarkAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  const refreshNotifications = async () => {
+    if (!user?.id) return
+
+    try {
+      const latest = await fetchNotifications()
+      setNotifications(latest)
+    } catch (error) {
+      console.error('Error loading notifications:', error)
+    }
   }
+
+  const handleOpenNotifications = () => {
+    setIsNotificationsOpen(true)
+    void refreshNotifications()
+  }
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await markAllNotificationsRead()
+      setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })))
+    } catch (error) {
+      console.error('Error marking notifications as read:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (user?.id && !isOnboardingActive) {
+      void refreshNotifications()
+    } else if (!user?.id) {
+      setNotifications([])
+    }
+  }, [user?.id, isOnboardingActive])
 
   const unreadMessages = conversations.filter((c) => c.isRequest).length
   const unreadNotifications = notifications.filter((n) => !n.read).length
+
+  if (publicRescueToken) {
+    return <PublicRescueView token={publicRescueToken} />
+  }
 
   if (showSplash || loading) {
     return (
@@ -1049,7 +1097,7 @@ function PazoMain() {
               lang={lang}
               onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
               onOpenMessages={() => setIsMessagesOpen(true)}
-              onOpenNotifications={() => setIsNotificationsOpen(true)}
+              onOpenNotifications={handleOpenNotifications}
               unreadMessagesCount={unreadMessages}
               unreadNotificationsCount={unreadNotifications}
             />
@@ -1205,6 +1253,13 @@ function PazoMain() {
               isOpen={isAlertOpen}
               onClose={() => setIsAlertOpen(false)}
               pet={currentPet}
+              onPetUpdated={(updatedPet) => {
+                activePetIdRef.current = updatedPet.id
+                setCurrentPet(updatedPet)
+                setPets((prevPets) =>
+                  prevPets.map((pet) => pet.id === updatedPet.id ? updatedPet : pet)
+                )
+              }}
               lang={lang}
             />
 
