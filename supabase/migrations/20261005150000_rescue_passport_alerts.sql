@@ -6,6 +6,14 @@ BEGIN;
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
+-- 0. Privacidad adicional para visitantes anónimos
+-- -----------------------------------------------------------------------------
+
+REVOKE SELECT (owner_id, last_seen_location)
+ON TABLE public.pets
+FROM anon;
+
+-- -----------------------------------------------------------------------------
 -- 1. Enlace público revocable por mascota
 -- -----------------------------------------------------------------------------
 
@@ -68,6 +76,54 @@ AFTER INSERT ON public.pets
 FOR EACH ROW
 EXECUTE FUNCTION private.ensure_pet_public_link();
 
+CREATE OR REPLACE FUNCTION public.rotate_pet_public_link(
+  p_pet_id uuid
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  v_token uuid;
+BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN
+    RAISE EXCEPTION 'Authentication required.';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.pets p
+    WHERE p.id = p_pet_id
+      AND p.owner_id = (SELECT auth.uid())
+  ) THEN
+    RAISE EXCEPTION 'Pet not found or not owned by authenticated user.';
+  END IF;
+
+  UPDATE public.pet_public_links
+  SET
+    public_token = gen_random_uuid(),
+    enabled = true,
+    rotated_at = now()
+  WHERE pet_id = p_pet_id
+  RETURNING public_token INTO v_token;
+
+  IF v_token IS NULL THEN
+    INSERT INTO public.pet_public_links (pet_id)
+    VALUES (p_pet_id)
+    RETURNING public_token INTO v_token;
+  END IF;
+
+  RETURN v_token;
+END;
+$function$;
+
+ALTER FUNCTION public.rotate_pet_public_link(uuid) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.rotate_pet_public_link(uuid)
+FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.rotate_pet_public_link(uuid)
+TO authenticated;
+
 -- -----------------------------------------------------------------------------
 -- 2. Alertas de mascota perdida
 -- -----------------------------------------------------------------------------
@@ -98,8 +154,6 @@ ON public.lost_pet_alerts (pet_id, created_at DESC);
 ALTER TABLE public.lost_pet_alerts ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "lost_pet_alerts_owner_select" ON public.lost_pet_alerts;
-DROP POLICY IF EXISTS "lost_pet_alerts_owner_insert" ON public.lost_pet_alerts;
-DROP POLICY IF EXISTS "lost_pet_alerts_owner_update" ON public.lost_pet_alerts;
 
 CREATE POLICY "lost_pet_alerts_owner_select"
 ON public.lost_pet_alerts
@@ -113,39 +167,8 @@ USING (
   )
 );
 
-CREATE POLICY "lost_pet_alerts_owner_insert"
-ON public.lost_pet_alerts
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets p
-    WHERE p.id = pet_id
-      AND p.owner_id = (SELECT auth.uid())
-  )
-);
-
-CREATE POLICY "lost_pet_alerts_owner_update"
-ON public.lost_pet_alerts
-FOR UPDATE
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM public.pets p
-    WHERE p.id = pet_id
-      AND p.owner_id = (SELECT auth.uid())
-  )
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.pets p
-    WHERE p.id = pet_id
-      AND p.owner_id = (SELECT auth.uid())
-  )
-);
-
 REVOKE ALL PRIVILEGES ON TABLE public.lost_pet_alerts FROM PUBLIC, anon, authenticated;
-GRANT SELECT, INSERT, UPDATE ON TABLE public.lost_pet_alerts TO authenticated;
+GRANT SELECT ON TABLE public.lost_pet_alerts TO authenticated;
 GRANT ALL ON TABLE public.lost_pet_alerts TO service_role;
 
 -- -----------------------------------------------------------------------------
@@ -248,12 +271,16 @@ CREATE OR REPLACE FUNCTION public.activate_lost_pet_alert(
 )
 RETURNS uuid
 LANGUAGE plpgsql
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = ''
 AS $function$
 DECLARE
   v_alert_id uuid;
 BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN
+    RAISE EXCEPTION 'Authentication required.';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM public.pets p
@@ -265,6 +292,14 @@ BEGIN
 
   IF char_length(btrim(COALESCE(p_last_seen_location,''))) < 2 THEN
     RAISE EXCEPTION 'Last seen location is required.';
+  END IF;
+
+  IF p_last_seen_at IS NULL THEN
+    RAISE EXCEPTION 'Last seen date and time are required.';
+  END IF;
+
+  IF p_last_seen_at > now() + interval '10 minutes' THEN
+    RAISE EXCEPTION 'Last seen date and time cannot be in the future.';
   END IF;
 
   UPDATE public.lost_pet_alerts
@@ -314,10 +349,14 @@ CREATE OR REPLACE FUNCTION public.resolve_lost_pet_alert(
 )
 RETURNS boolean
 LANGUAGE plpgsql
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = ''
 AS $function$
 BEGIN
+  IF (SELECT auth.uid()) IS NULL THEN
+    RAISE EXCEPTION 'Authentication required.';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1
     FROM public.pets p
@@ -491,11 +530,14 @@ BEGIN
     v_pet_id,
     'sighting',
     'Nuevo aviso sobre ' || v_pet_name,
-    CASE
-      WHEN v_location IS NOT NULL
-        THEN v_message || ' · Ubicación: ' || v_location
-      ELSE v_message
-    END,
+    left(
+      CASE
+        WHEN v_location IS NOT NULL
+          THEN v_message || ' · Ubicación: ' || v_location
+        ELSE v_message
+      END,
+      1200
+    ),
     v_sighting_id
   );
 
