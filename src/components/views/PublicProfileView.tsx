@@ -327,18 +327,28 @@ export const PublicProfileView = ({
                       {petPosts.map((post) => (
                         <div
                           key={post.id}
-                          className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-[0_4px_20px_rgba(32,78,74,0.08)] relative group bg-neutral-100 cursor-pointer"
+                          className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-[0_4px_20px_rgba(32,78,74,0.08)] relative group bg-[#204E4A] cursor-pointer"
                         >
-                          <img
-                            src={post.photoUrl}
-                            alt={post.text}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                          />
-                          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-4 sm:p-5">
-                            <p className="text-white text-sm sm:text-base font-medium z-10 relative line-clamp-3 leading-snug drop-shadow-md">
-                              {post.text}
-                            </p>
-                          </div>
+                          {post.photoUrl ? (
+                            <>
+                              <img
+                                src={post.photoUrl}
+                                alt={post.text}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                              />
+                              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-4 sm:p-5">
+                                <p className="text-white text-sm sm:text-base font-medium z-10 relative line-clamp-3 leading-snug drop-shadow-md">
+                                  {post.text}
+                                </p>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full h-full p-5 sm:p-6 flex items-end bg-gradient-to-br from-[#204E4A] to-[#163B38]">
+                              <p className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-6">
+                                {post.text}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
