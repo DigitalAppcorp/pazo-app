@@ -247,7 +247,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
           <button
             onClick={handleRotateQr}
             disabled={!publicUrl || isRotating}
-            className="w-full mt-2 text-[10px] font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 cursor-pointer"
+            className="col-span-2 w-full mt-1 text-[10px] font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 cursor-pointer"
           >
             {isRotating
               ? (lang === 'es' ? 'Regenerando…' : 'Regenerating…')
