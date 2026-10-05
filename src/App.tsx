@@ -227,7 +227,7 @@ function PazoMain() {
             userInterests = myPet.interests
           }
 
-          const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', user.id)
+          const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', myPet.id)
           const followingIds = follows?.map(f => f.following_id) || []
 
           // 1. Consulta segura para followedPosts: abortar si no hay followingIds
