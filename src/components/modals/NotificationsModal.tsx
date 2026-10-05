@@ -6,7 +6,6 @@ interface NotificationsModalProps {
   isOpen: boolean
   onClose: () => void
   notifications: PazoNotification[]
-  onMarkAllRead: () => void
   onOpenNotification: (notification: PazoNotification) => void
   lang: 'es' | 'en'
 }
@@ -15,7 +14,6 @@ export const NotificationsModal = ({
   isOpen,
   onClose,
   notifications,
-  onMarkAllRead,
   onOpenNotification,
   lang,
 }: NotificationsModalProps) => {
@@ -95,8 +93,12 @@ export const NotificationsModal = ({
                   type="button"
                   onClick={() => canOpen && onOpenNotification(item)}
                   disabled={!canOpen}
-                  className={`w-full text-left p-3.5 bg-[#FAF8F5] rounded-2xl flex items-start gap-3 text-xs soft-card ${
-                    canOpen ? 'cursor-pointer hover:bg-[#F4F1EC]' : 'cursor-default'
+                  className={`w-full text-left p-3.5 rounded-2xl flex items-start gap-3 text-xs border transition-all ${
+                    item.read
+                      ? 'bg-[#FAF8F5]/45 border-transparent'
+                      : 'bg-[#E1E53F]/12 border-[#E1E53F]/30 shadow-[0_4px_16px_rgba(32,78,74,0.05)]'
+                  } ${
+                    canOpen ? 'cursor-pointer hover:bg-[#E1E53F]/18' : 'cursor-default'
                   }`}
                 >
                   <span className="text-base mt-0.5">
@@ -105,9 +107,17 @@ export const NotificationsModal = ({
                       : <IconChat size={16} />}
                   </span>
                   <div className="flex-1">
-                    <span className="font-extrabold text-[#204E4A] block">
-                      {item.title}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-[#204E4A] block">
+                        {item.title}
+                      </span>
+                      {!item.read && (
+                        <span
+                          className="w-2 h-2 rounded-full bg-[#E1E53F] shrink-0"
+                          aria-label={lang === 'es' ? 'Nuevo' : 'New'}
+                        />
+                      )}
+                    </div>
                     <span className="text-[11px] text-[#5C7470] block mt-0.5">
                       {item.subtitle}
                     </span>
@@ -124,12 +134,6 @@ export const NotificationsModal = ({
           )}
         </div>
 
-        <button
-          onClick={onMarkAllRead}
-          className="w-full py-2.5 text-xs font-bold text-[#5C7470] hover:text-[#204E4A] transition-colors cursor-pointer"
-        >
-          {lang === 'es' ? 'Marcar todas como leídas' : 'Mark all as read'}
-        </button>
       </div>
     </div>
   )
