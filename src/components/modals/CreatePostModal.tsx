@@ -101,7 +101,7 @@ export const CreatePostModal = ({
             if (userError) throw userError
             if (!user) throw new Error(lang === 'es' ? 'No hay una sesión activa.' : 'No active session.')
 
-            let finalPhotoUrl = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'
+            let finalPhotoUrl: string | null = null
 
             if (imageFile) {
                 const extension =
