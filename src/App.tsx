@@ -858,14 +858,75 @@ function PazoMain() {
     )
   }
 
-  const refreshNotifications = async () => {
-    if (!user?.id) return
+  const refreshLostPetSightingReminder = async () => {
+    const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
 
     try {
-      const latest = await fetchNotifications()
+      const latest = await fetchLatestUnreadSightingNotification(lostPetIds)
+      setLatestUnreadLostPetSighting(latest)
+    } catch (error) {
+      console.error('Error loading latest unread lost-pet sighting:', error)
+    }
+  }
+
+  const refreshNotifications = async () => {
+    if (!user?.id || notificationLoadInFlightRef.current) return
+
+    notificationLoadInFlightRef.current = true
+
+    try {
+      const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
+      const [latest, unreadCount, latestLostPetSighting] = await Promise.all([
+        fetchNotifications(0, NOTIFICATIONS_PAGE_SIZE),
+        fetchUnreadNotificationCount(),
+        fetchLatestUnreadSightingNotification(lostPetIds),
+      ])
+
       setNotifications(latest)
+      setUnreadNotificationCount(unreadCount)
+      setLatestUnreadLostPetSighting(latestLostPetSighting)
+      notificationOffsetRef.current = latest.length
+      setHasMoreNotifications(latest.length === NOTIFICATIONS_PAGE_SIZE)
     } catch (error) {
       console.error('Error loading notifications:', error)
+    } finally {
+      notificationLoadInFlightRef.current = false
+    }
+  }
+
+  const loadMoreNotifications = async () => {
+    if (
+      !user?.id
+      || notificationLoadInFlightRef.current
+      || !hasMoreNotifications
+    ) {
+      return
+    }
+
+    notificationLoadInFlightRef.current = true
+    setIsNotificationsLoadingMore(true)
+
+    try {
+      const nextPage = await fetchNotifications(
+        notificationOffsetRef.current,
+        NOTIFICATIONS_PAGE_SIZE
+      )
+
+      notificationOffsetRef.current += nextPage.length
+      setHasMoreNotifications(nextPage.length === NOTIFICATIONS_PAGE_SIZE)
+
+      setNotifications((previous) => {
+        const existingIds = new Set(previous.map((notification) => notification.id))
+        const uniqueNext = nextPage.filter(
+          (notification) => !existingIds.has(notification.id)
+        )
+        return [...previous, ...uniqueNext]
+      })
+    } catch (error) {
+      console.error('Error loading more notifications:', error)
+    } finally {
+      notificationLoadInFlightRef.current = false
+      setIsNotificationsLoadingMore(false)
     }
   }
 
@@ -888,6 +949,12 @@ function PazoMain() {
             item.id === notification.id ? { ...item, read: true } : item
           )
         )
+        setUnreadNotificationCount((count) => Math.max(0, count - 1))
+
+        if (latestUnreadLostPetSighting?.id === notification.id) {
+          setLatestUnreadLostPetSighting(null)
+          void refreshLostPetSightingReminder()
+        }
       } catch (error) {
         console.error('Error marking notification as read:', error)
       }
@@ -899,31 +966,26 @@ function PazoMain() {
       void refreshNotifications()
     } else if (!user?.id) {
       setNotifications([])
+      setUnreadNotificationCount(0)
+      setLatestUnreadLostPetSighting(null)
+      notificationOffsetRef.current = 0
+      setHasMoreNotifications(true)
     }
-  }, [user?.id, isOnboardingActive])
+  }, [user?.id, isOnboardingActive, pets.length])
 
   const unreadMessages = conversations.filter((c) => c.isRequest).length
-  const unreadNotifications = notifications.filter((n) => !n.read).length
+  const unreadNotifications = unreadNotificationCount
   const lostPets = pets.filter((pet) => pet.isLost)
-  const lostPetIds = new Set(lostPets.map((pet) => pet.id))
-  const newestUnreadLostPetSighting = notifications.find(
-    (notification) =>
-      !notification.read
-      && notification.category === 'comunidad'
-      && Boolean(notification.sourceId)
-      && Boolean(notification.petId)
-      && lostPetIds.has(notification.petId as string)
-  )
 
   const reminderPet =
-    (newestUnreadLostPetSighting?.petId
-      ? pets.find((pet) => pet.id === newestUnreadLostPetSighting.petId)
+    (latestUnreadLostPetSighting?.petId
+      ? pets.find((pet) => pet.id === latestUnreadLostPetSighting.petId)
       : undefined)
     || (currentPet.isLost ? currentPet : lostPets[0])
 
   const handleOpenLostAlertReminder = () => {
-    if (newestUnreadLostPetSighting?.sourceId) {
-      void handleOpenNotification(newestUnreadLostPetSighting)
+    if (latestUnreadLostPetSighting?.sourceId) {
+      void handleOpenNotification(latestUnreadLostPetSighting)
       return
     }
 
@@ -1211,7 +1273,7 @@ function PazoMain() {
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-xs font-black text-[#204E4A]">
-                    {newestUnreadLostPetSighting
+                    {latestUnreadLostPetSighting
                       ? (lang === 'es'
                           ? `Hay un nuevo avistamiento de ${reminderPet.name}`
                           : `There is a new sighting of ${reminderPet.name}`)
@@ -1220,13 +1282,13 @@ function PazoMain() {
                           : `We hope ${reminderPet.name} comes home safe soon`)}
                   </span>
                   <span className="block text-[10px] text-[#5C7470] mt-0.5 leading-relaxed">
-                    {newestUnreadLostPetSighting
+                    {latestUnreadLostPetSighting
                       ? (lang === 'es'
                           ? 'Alguien reportó haberlo visto. Toca aquí para ver los detalles.'
                           : 'Someone reported seeing them. Tap here to view the details.')
                       : (lang === 'es'
-                          ? 'La alerta seguirá activa y te avisaremos si alguien reporta un avistamiento.'
-                          : 'The alert will stay active and we will notify you if someone reports a sighting.')}
+                          ? 'Estamos alerta y te avisaremos si alguien reporta un avistamiento.'
+                          : 'We are staying alert and will notify you if someone reports a sighting.')}
                   </span>
                 </span>
                 <span className="font-black text-[#EC7357]">›</span>
