@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import QRCode from 'react-qr-code'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import qrcode from 'qrcode-generator'
 import type { Pet } from '../../types/pazo'
 import { buildPublicRescueUrl, getPetPublicToken } from '../../services/rescueService'
 import { IconShield, IconClose } from '../icons/PazoIcons'
@@ -9,6 +9,46 @@ interface PassportModalProps {
   onClose: () => void
   pet: Pet
   lang: 'es' | 'en'
+}
+
+const PazoQr = ({ value, title }: { value: string; title: string }) => {
+  const matrix = useMemo(() => {
+    const qr = qrcode(0, 'M')
+    qr.addData(value, 'Byte')
+    qr.make()
+
+    const size = qr.getModuleCount()
+    const cells: Array<{ row: number; col: number }> = []
+
+    for (let row = 0; row < size; row += 1) {
+      for (let col = 0; col < size; col += 1) {
+        if (qr.isDark(row, col)) cells.push({ row, col })
+      }
+    }
+
+    return { size, cells }
+  }, [value])
+
+  const margin = 4
+  const viewBoxSize = matrix.size + margin * 2
+
+  return (
+    <svg
+      viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
+      role="img"
+      aria-label={title}
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: '100%', height: '100%' }}
+    >
+      <title>{title}</title>
+      <rect width={viewBoxSize} height={viewBoxSize} fill="#FFFFFF" />
+      <g transform={`translate(${margin} ${margin})`} fill="#204E4A">
+        {matrix.cells.map(({ row, col }) => (
+          <rect key={`${row}-${col}`} x={col} y={row} width="1" height="1" />
+        ))}
+      </g>
+    </svg>
+  )
 }
 
 export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps) => {
@@ -117,15 +157,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
                 {lang === 'es' ? 'Generando QR…' : 'Generating QR…'}
               </span>
             ) : publicUrl ? (
-              <QRCode
-                value={publicUrl}
-                size={256}
-                level="M"
-                bgColor="#FFFFFF"
-                fgColor="#204E4A"
-                style={{ width: '100%', height: '100%' }}
-                title={`Pazo · ${pet.name}`}
-              />
+              <PazoQr value={publicUrl} title={`Pazo · ${pet.name}`} />
             ) : (
               <span className="text-xs font-bold text-[#EC7357]">
                 {error || (lang === 'es' ? 'QR no disponible' : 'QR unavailable')}
