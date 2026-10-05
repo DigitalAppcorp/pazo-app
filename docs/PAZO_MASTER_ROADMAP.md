@@ -316,31 +316,41 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 ---
 
 ## Fase 7 — Comunidades reales
-**Estado: SIGUIENTE**
+**Estado: SIGUIENTE — SUBFASE 7.0 EN DEFINICIÓN**
+
+**Sub-ruta canónica:** `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`
 
 Hoy `ExploreView` usa comunidades mock.
 
 ### Objetivo
 Convertir Comunidades en un módulo persistente.
 
-### Alcance mínimo
-- tabla communities;
-- membresías por mascota;
-- descubrir comunidades;
-- buscar;
-- Join/Leave real;
-- conteo real;
-- perfil/pantalla de comunidad;
-- comunidades por especie/intereses;
-- creación persistente si se aprueba.
+### Decisiones ya confirmadas
+- cualquier usuario puede crear comunidades;
+- no se requiere membresía paga para crear una comunidad;
+- el creador se convierte en propietario/administrador inicial;
+- una futura membresía puede desbloquear herramientas adicionales aún no definidas;
+- la administración básica no debe quedar bloqueada por pago.
 
-### DECISIÓN PENDIENTE antes de programar
-Definir quién puede crear una comunidad:
-- cualquier usuario;
-- solo cuentas verificadas/moderadores;
-- creación abierta con revisión.
+### Estado actual
+Antes de programar se debe completar **Subfase 7.0 — Definición de producto**.
 
-No inventar esa decisión.
+La sub-ruta de Fase 7 define y registra:
+- identidad de membresía;
+- tipos de comunidad;
+- roles;
+- permisos;
+- contenido;
+- Join/Leave;
+- moderación local;
+- eventos;
+- campos;
+- notificaciones;
+- descubrimiento;
+- ciclo de vida;
+- puntos de extensión premium.
+
+No crear esquema definitivo ni implementar comportamiento de Comunidades hasta cerrar las decisiones críticas de 7.0.
 
 ---
 
@@ -719,12 +729,11 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-1. cerrar y fusionar PR #6 a `main`;
-2. sincronizar el entorno local con `main`;
-3. comenzar **Fase 7 — Comunidades reales**;
-4. antes de programar Fase 7, resolver la **DECISIÓN PENDIENTE** sobre quién puede crear comunidades;
-5. auditar `ExploreView`, mocks actuales y cualquier estructura existente relacionada;
-6. definir esquema/RLS/flujo de Join/Leave;
-7. crear rama específica de Fase 7.
-
-**No comenzar Fase 8 antes de cerrar Fase 7.**
+1. usar `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md` como documento canónico de Fase 7;
+2. completar **Subfase 7.0 — Definición de producto** antes de programar;
+3. resolver primero la identidad de participación: cuenta, mascota o híbrido;
+4. continuar las decisiones en el orden definido por la sub-ruta;
+5. cuando 7.0 esté cerrada, auditar `ExploreView`, mocks y estructuras existentes;
+6. diseñar esquema/RLS/roles basados únicamente en decisiones aprobadas;
+7. crear rama de implementación de Fase 7;
+8. no comenzar Fase 8 antes de cerrar Fase 7.
