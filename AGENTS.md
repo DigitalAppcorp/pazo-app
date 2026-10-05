@@ -9,5 +9,6 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 5. Para Supabase: auditar primero, versionar la migración, pedir autorización antes de aplicarla y verificar después.
 6. No declarar una fase COMPLETADA hasta que esté merged en `main`, el backend correspondiente esté aplicado y las pruebas hayan sido aprobadas.
 7. Después de cerrar una fase, actualizar `docs/PAZO_MASTER_ROADMAP.md`.
+8. En fases de rediseño visual, preservar la funcionalidad y los contratos de datos existentes; cualquier cambio de comportamiento requiere aprobación explícita del Product Owner.
 
 La hoja maestra es la fuente canónica del estado y orden de desarrollo de PAZO.
