@@ -322,6 +322,11 @@ Preflight ya completado:
 - pruebas 6B con ROLLBACK aprobadas;
 - dueño puede leer contacto y usuario ajeno no;
 - no quedaron residuos de pruebas 6B.
+- recordatorio de mascota perdida ajustado a tono empático;
+- recordatorio promueve avistamiento no leído como acceso directo;
+- notificaciones nuevas/vistas diferenciadas visualmente;
+- abrir una notificación la marca como leída;
+- acción global “Marcar todas como leídas” retirada por redundante.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
