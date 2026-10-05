@@ -294,7 +294,9 @@ Trabajo ya preparado en ese PR:
 **NO se ha aplicado la migración de Fase 6 a Supabase.**
 
 Bloqueos antes de continuar:
-- pruebas end-to-end y visuales;
+- aplicar migración 6B de contacto privado del reportante;
+- validar build después de feedback visual;
+- repetir prueba end-to-end de avistamiento con nombre/teléfono;
 - limpieza de datos de prueba visual si se generan;
 - merge a `main`.
 
@@ -547,6 +549,13 @@ El rediseño debe hacerse por bloques y no como cambio masivo ciego:
 12. revisión responsive y accesibilidad.
 
 Cada bloque se prueba antes de continuar para evitar propagar una dirección visual incorrecta a toda la app.
+
+### Pendientes visuales heredados de Fase 6
+- animación de un perrito en estado de alerta al activar/buscar una mascota perdida;
+- títulos visuales personalizados para cada tipo de alerta/notificación;
+- revisar la presentación final de etiquetas, encabezados y jerarquía visual del sistema de rescate.
+
+Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de rescate.
 
 ### Definition of Done
 - todas las pantallas incluidas en Beta siguen una misma línea gráfica;
