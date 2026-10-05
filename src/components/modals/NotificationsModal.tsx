@@ -7,6 +7,7 @@ interface NotificationsModalProps {
   onClose: () => void
   notifications: PazoNotification[]
   onMarkAllRead: () => void
+  onOpenNotification: (notification: PazoNotification) => void
   lang: 'es' | 'en'
 }
 
@@ -15,6 +16,7 @@ export const NotificationsModal = ({
   onClose,
   notifications,
   onMarkAllRead,
+  onOpenNotification,
   lang,
 }: NotificationsModalProps) => {
   const [filter, setFilter] = useState<'todas' | 'cuidados' | 'comunidad'>('todas')
@@ -45,7 +47,6 @@ export const NotificationsModal = ({
           </button>
         </div>
 
-        {/* Categorías de notificaciones (N01 en PDF) */}
         <div className="flex gap-1.5 p-1 bg-[#FAF8F5] rounded-full">
           <button
             onClick={() => setFilter('todas')}
@@ -79,28 +80,47 @@ export const NotificationsModal = ({
           </button>
         </div>
 
-        {/* Lista de Notificaciones */}
         <div className="space-y-2.5">
           {filtered.length === 0 ? (
             <p className="text-xs text-[#5C7470] text-center py-8">
               {lang === 'es' ? 'No tienes avisos pendientes.' : 'No pending alerts.'}
             </p>
           ) : (
-            filtered.map((item) => (
-              <div
-                key={item.id}
-                className="p-3.5 bg-[#FAF8F5] rounded-2xl flex items-start gap-3 text-xs soft-card"
-              >
-                <span className="text-base mt-0.5">
-                  {item.category === 'cuidados' ? <IconCalendar size={16} /> : <IconChat size={16} />}
-                </span>
-                <div className="flex-1">
-                  <span className="font-extrabold text-[#204E4A] block">{item.title}</span>
-                  <span className="text-[11px] text-[#5C7470] block mt-0.5">{item.subtitle}</span>
-                  <span className="text-[9px] text-[#5C7470]/60 block mt-1">{item.timeAgo}</span>
-                </div>
-              </div>
-            ))
+            filtered.map((item) => {
+              const canOpen = item.category === 'comunidad' && Boolean(item.sourceId)
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => canOpen && onOpenNotification(item)}
+                  disabled={!canOpen}
+                  className={`w-full text-left p-3.5 bg-[#FAF8F5] rounded-2xl flex items-start gap-3 text-xs soft-card ${
+                    canOpen ? 'cursor-pointer hover:bg-[#F4F1EC]' : 'cursor-default'
+                  }`}
+                >
+                  <span className="text-base mt-0.5">
+                    {item.category === 'cuidados'
+                      ? <IconCalendar size={16} />
+                      : <IconChat size={16} />}
+                  </span>
+                  <div className="flex-1">
+                    <span className="font-extrabold text-[#204E4A] block">
+                      {item.title}
+                    </span>
+                    <span className="text-[11px] text-[#5C7470] block mt-0.5">
+                      {item.subtitle}
+                    </span>
+                    <span className="text-[9px] text-[#5C7470]/60 block mt-1">
+                      {item.timeAgo}
+                    </span>
+                  </div>
+                  {canOpen && (
+                    <span className="text-[#5C7470] font-black mt-1">›</span>
+                  )}
+                </button>
+              )
+            })
           )}
         </div>
 
