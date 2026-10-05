@@ -57,6 +57,7 @@ function PazoMain() {
   const [posts, setPosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
+  const commentingPostIdsRef = useRef<Set<string>>(new Set())
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
@@ -268,11 +269,11 @@ function PazoMain() {
           const recommendedPosts = recommendedData || []
 
           const formattedFollowed: Post[] = (followedPosts || []).map((p: any) => ({
-            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
           }))
 
           const formattedRecommended: Post[] = (recommendedPosts || []).map((p: any) => ({
-            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+            id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
           }))
 
           // Consulta RPC de recomendaciones personalizadas del motor de inteligencia
@@ -287,7 +288,7 @@ function PazoMain() {
               console.error('Error fetching recommended posts:', recommendedError)
             } else if (recommendedData) {
               formattedRpcRecommended = recommendedData.map((p: any) => ({
-                id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+                id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: true, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
               }))
             }
           }
@@ -299,7 +300,7 @@ function PazoMain() {
           if (smartFeed.length === 0) {
             const { data: fallbackPosts } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(10)
             smartFeed = (fallbackPosts || []).map((p: any) => ({
-              id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: p.comments || [],
+              id: p.id, petId: p.pet_id, petName: p.pet_name, petSpecies: p.pet_species, petAvatar: p.pet_avatar, location: p.location, timeAgo: 'Hace un momento', createdAt: p.created_at, isRecommended: false, tags: p.tags || [], text: p.text, photoUrl: p.photo_url, likes: p.likes || 0, isLiked: false, isSaved: false, comments: [], commentsCount: p.comments_count ?? (p.comments || []).length, commentsLoaded: false,
             }))
           }
 
@@ -426,55 +427,156 @@ function PazoMain() {
     }
   }
 
-  const handleAddComment = async (postId: string, text: string) => {
-    // Guarda previa estricta (incluyendo texto vacío)
-    if (!currentPet?.id || !postId || !text.trim()) return
+  const loadCommentsForPost = async (postId: string): Promise<boolean> => {
+    const targetPost = posts.find((post) => post.id === postId)
+    if (!targetPost) return false
+    if (targetPost.commentsLoaded) return true
 
-    const targetPost = posts.find((p) => p.id === postId)
-    if (!targetPost) return
+    try {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .select(`
+          id,
+          post_id,
+          body,
+          created_at,
+          author_pet_id,
+          author:pets!post_comments_author_pet_id_fkey (
+            name,
+            species,
+            photo_url
+          )
+        `)
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true })
 
-    const newComment = {
-      id: `c-${Date.now()}`,
+      if (error) throw error
+
+      const loadedComments = (data || []).map((row: any) => {
+        const author = Array.isArray(row.author) ? row.author[0] : row.author
+
+        return {
+          id: row.id,
+          authorPetId: row.author_pet_id,
+          authorName: author?.name || (lang === 'es' ? 'Mascota' : 'Pet'),
+          authorPet: author?.species || 'otro',
+          authorAvatar: author?.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
+          text: row.body,
+          timeAgo: lang === 'es' ? 'Reciente' : 'Recent',
+          createdAt: row.created_at,
+        }
+      })
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: loadedComments,
+                commentsCount: loadedComments.length,
+                commentsLoaded: true,
+              }
+            : post
+        )
+      )
+
+      return true
+    } catch (err) {
+      console.error(`Error cargando comentarios del post ${postId}:`, err)
+      return false
+    }
+  }
+
+  const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    const trimmedText = text.trim()
+    if (!currentPet?.id || !postId || !trimmedText) return false
+    if (commentingPostIdsRef.current.has(postId)) return false
+
+    const targetPost = posts.find((post) => post.id === postId)
+    if (!targetPost) return false
+
+    commentingPostIdsRef.current.add(postId)
+
+    const previousComments = targetPost.comments
+    const previousCommentsCount = targetPost.commentsCount ?? targetPost.comments.length
+    const temporaryId = `temp-comment-${crypto.randomUUID()}`
+    const createdAt = new Date().toISOString()
+
+    const optimisticComment = {
+      id: temporaryId,
+      authorPetId: currentPet.id,
       authorName: currentPet.name,
       authorPet: currentPet.species,
       authorAvatar: currentPet.photoUrl,
-      text: text.trim(),
+      text: trimmedText,
       timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
-      createdAt: new Date().toISOString(),
+      createdAt,
     }
 
-    const updatedComments = [...targetPost.comments, newComment]
-
-    // 1. Actualización optimista del estado local
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        return {
-          ...p,
-          comments: updatedComments,
-        }
-      })
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: [...post.comments, optimisticComment],
+              commentsCount: (post.commentsCount ?? post.comments.length) + 1,
+              commentsLoaded: true,
+            }
+          : post
+      )
     )
 
-    // 2. Persistencia en background (no bloqueante)
-    supabase
-      .from('posts')
-      .update({ comments: updatedComments })
-      .eq('id', postId)
-      .then(({ error }) => {
-        if (error) console.error('Error updating comments in DB:', error)
-      })
+    try {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .insert({
+          post_id: postId,
+          author_pet_id: currentPet.id,
+          body: trimmedText,
+        })
+        .select('id, created_at')
+        .single()
 
-    // 3. Registro de señal analítica e inteligente
-    trackInteraction(postId, 'post', 'comment')
+      if (error) throw error
 
-    supabase.rpc('register_interaction_signal', {
-      p_actor_pet_id: currentPet.id,
-      p_target_id: postId,
-      p_action_type: 'comment'
-    }).then(({ error }) => {
-      if (error) console.error('Error registering comment signal:', error)
-    })
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: post.comments.map((comment) =>
+                  comment.id === temporaryId
+                    ? {
+                        ...comment,
+                        id: data.id,
+                        createdAt: data.created_at,
+                      }
+                    : comment
+                ),
+              }
+            : post
+        )
+      )
+
+      return true
+    } catch (err) {
+      console.error(`Error creando comentario en el post ${postId}:`, err)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: previousComments,
+                commentsCount: previousCommentsCount,
+                commentsLoaded: targetPost.commentsLoaded ?? false,
+              }
+            : post
+        )
+      )
+      return false
+    } finally {
+      commentingPostIdsRef.current.delete(postId)
+    }
   }
 
   const handlePostCreated = (newPost: Post) => {
@@ -804,6 +906,7 @@ function PazoMain() {
                       onLikePost={handleLikePost}
                       onSavePost={handleSavePost}
                       onAddComment={handleAddComment}
+                      onLoadComments={loadCommentsForPost}
                       lang={lang}
                       currentPetId={currentPet?.id}
                       onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
