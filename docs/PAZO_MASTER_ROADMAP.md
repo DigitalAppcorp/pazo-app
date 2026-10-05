@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-05  
-**Estado general:** núcleo social estable hasta Fase 5. Fase 6 en curso.
+**Estado general:** núcleo social y sistema de rescate estable hasta Fase 6. Fase 7 es la siguiente.
 
 ---
 
@@ -255,7 +255,7 @@ Actualmente el núcleo persistente usa, entre otras:
 # 6. Nueva Ruta Maestra — MVP social útil
 
 ## Fase 6 — Pasaporte QR, mascota perdida y avistamientos
-**Estado: EN CURSO**
+**Estado: COMPLETADA**
 
 ### Objetivo
 Convertir el sistema de rescate que hoy es visual en una utilidad real.
@@ -281,63 +281,26 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 - email transaccional;
 - red de rescates externos.
 
-### Estado técnico actual
-Existe PR borrador **#6** en `feat/rescue-passport-alerts`.
-
-Trabajo ya preparado en ese PR:
-- backend SQL versionado;
-- UI pública;
-- QR;
-- alertas;
-- notificaciones de avistamiento.
-
-**Backend de Fase 6A, 6B y 6C aplicado en Supabase PAZO.**
-
-Bloqueos antes de continuar:
-- prueba visual de infinite scroll del Feed;
-- prueba visual de paginación de Notificaciones cuando existan más de 10;
-- prueba visual/end-to-end final de Fase 6;
-- limpieza de datos de prueba visual generados;
-- merge a `main`.
-
-Preflight ya completado:
-- rama sincronizada con `main`;
-- `npm ci` y `npm run build` local aprobados;
-- dependencia QR mínima y lockfile sincronizado;
-- SQL revisado;
-- token QR revocable/rotatorio;
-- acceso anónimo a `owner_id` y `last_seen_location` preparado para revocarse;
-- perfil social desacoplado de esos campos para no romper modo demo;
-- mutaciones de alerta forzadas a pasar por RPC controlada;
-- migración aplicada en Supabase PAZO;
-- pruebas funcionales SQL aprobadas con `ROLLBACK`;
-- aislamiento RLS owner/non-owner aprobado;
-- rotación de QR validada;
-- privacidad anon validada;
-- índices FK añadidos y Performance Advisor sin FKs no indexadas;
-- advertencias SECURITY DEFINER revisadas y aceptadas como endpoints intencionales de Fase 6.
-- migración 6B aplicada: nombre/teléfono privados del reportante;
-- nueva RPC de avistamiento exige nombre y teléfono;
-- versión antigua de submit_pet_sighting retirada;
-- pruebas 6B con ROLLBACK aprobadas;
-- dueño puede leer contacto y usuario ajeno no;
-- no quedaron residuos de pruebas 6B.
-- recordatorio de mascota perdida ajustado a tono empático;
-- recordatorio promueve avistamiento no leído como acceso directo;
-- notificaciones nuevas/vistas diferenciadas visualmente;
-- abrir una notificación la marca como leída;
-- acción global “Marcar todas como leídas” retirada por redundante.
-- copy del recordatorio ajustado a “Estamos alerta y te avisaremos si alguien reporta un avistamiento.”;
-- notificaciones paginadas en bloques de 10 mediante desplazamiento;
-- conteo de no leídas separado para evitar descargar filas solo por el badge;
-- Feed preparado para infinite scroll en páginas de 10 tarjetas;
-- posts propios/seguidos y recomendaciones usan offsets independientes para evitar saltos al mezclar fuentes;
-- “Mis Publicaciones” desacoplado del Feed paginado para no mostrar conteos incompletos;
-- migración 6C aplicada: RPC paginada de recomendaciones con limit/offset;
-- página 1 (10) + página 2 (3) verificadas sin solapamiento;
-- ownership de RPC 6C validado: usuario ajeno bloqueado;
-- RPC 6C es SECURITY INVOKER y anon no puede ejecutarla;
-- Advisors posteriores a 6C sin problemas nuevos.
+### Estado técnico final
+- PR #6 implementado y validado;
+- backend 6A, 6B y 6C aplicado en Supabase PAZO;
+- QR real y token revocable por mascota;
+- alerta perdida persistente y resoluble;
+- avistamientos públicos con nombre/teléfono privados para el dueño;
+- notificaciones reales y detalle accionable;
+- recordatorio empático persistente de mascota perdida;
+- acceso directo al avistamiento nuevo desde el recordatorio;
+- notificaciones nuevas/vistas diferenciadas;
+- Feed con paginación por desplazamiento en bloques de 10;
+- Notificaciones con paginación por desplazamiento en bloques de 10;
+- badge de no leídas calculado sin descargar todas las filas;
+- recomendaciones paginadas sin solapamiento;
+- RLS/ownership/privacidad validados;
+- builds locales aprobados;
+- prueba visual/end-to-end aprobada por Product Owner;
+- datos visuales de prueba limpiados de Supabase;
+- Pancho quedó con `is_lost=false` y sin ubicación de prueba;
+- Advisors revisados; sin problemas nuevos introducidos por 6C.
 
 ### Definition of Done
 - escanear QR desde otro dispositivo abre la mascota correcta;
@@ -353,7 +316,7 @@ Preflight ya completado:
 ---
 
 ## Fase 7 — Comunidades reales
-**Estado: PLANIFICADA**
+**Estado: SIGUIENTE**
 
 Hoy `ExploreView` usa comunidades mock.
 
@@ -736,7 +699,7 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - algunos flujos del menú Crear anuncian “próximamente”.
 - bundle ya ha mostrado warning de chunk >500 kB; atender en Fase 15.
 - Leaked Password Protection pendiente en Supabase Auth.
-- PR #6 está congelado hasta aprobación de esta hoja.
+- Fase 6 cerrada; PR #6 fusionado al completar esta actualización.
 
 ---
 
@@ -756,19 +719,12 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-Una vez que Brandon apruebe esta hoja:
+1. cerrar y fusionar PR #6 a `main`;
+2. sincronizar el entorno local con `main`;
+3. comenzar **Fase 7 — Comunidades reales**;
+4. antes de programar Fase 7, resolver la **DECISIÓN PENDIENTE** sobre quién puede crear comunidades;
+5. auditar `ExploreView`, mocks actuales y cualquier estructura existente relacionada;
+6. definir esquema/RLS/flujo de Join/Leave;
+7. crear rama específica de Fase 7.
 
-1. fusionar/documentar esta hoja en `main`;
-2. reanudar **Fase 6** desde el PR #6 existente;
-3. sincronizar dependencia QR + lockfile;
-4. build local;
-5. auditoría SQL;
-6. pedir autorización para Supabase;
-7. aplicar y probar;
-8. prueba visual;
-9. merge;
-10. actualizar esta hoja a:
-   - Fase 6 = COMPLETADA;
-   - Fase 7 = SIGUIENTE.
-
-**No comenzar Fase 7 antes de cerrar Fase 6.**
+**No comenzar Fase 8 antes de cerrar Fase 7.**
