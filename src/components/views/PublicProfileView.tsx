@@ -7,6 +7,7 @@ import { IconPaw } from '../icons/PazoIcons'
 interface PublicProfileViewProps {
   targetPetId: string
   currentPetId?: string
+  ownedPetIds: string[]
   onClose: () => void
   lang: 'es' | 'en'
 }
@@ -14,6 +15,7 @@ interface PublicProfileViewProps {
 export const PublicProfileView = ({
   targetPetId,
   currentPetId,
+  ownedPetIds,
   onClose,
   lang,
 }: PublicProfileViewProps) => {
@@ -255,6 +257,7 @@ export const PublicProfileView = ({
                   <FollowButton
                     currentPetId={currentPetId || ''}
                     targetPetId={petProfile.id}
+                    canFollow={!ownedPetIds.includes(petProfile.id)}
                     lang={lang}
                     variant="profile" // Obliga al estilo de perfil sin que se oculte
                     onFollowChange={(isFollowing) => {

@@ -15,6 +15,7 @@ interface PetViewProps {
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
   onPetUpdated: (pet: Pet) => void
+  onAddPet: () => void
   careItems: CareItem[]
   onToggleCompleteCare: (careId: string) => void
   docs: PrivateDoc[]
@@ -30,6 +31,7 @@ export const PetView = ({
   availablePets,
   onSelectPet,
   onPetUpdated,
+  onAddPet,
   careItems,
   onToggleCompleteCare,
   docs,
@@ -167,14 +169,6 @@ export const PetView = ({
     }
   }
 
-  const handleFeatureSoon = (featureName: string) => {
-    alert(
-      lang === 'es'
-        ? `🐾 ¡Pronto podrás ${featureName}! Estamos trabajando con mucho cariño para traértelo muy pronto.`
-        : `🐾 ${featureName} is coming soon! We're crafting it with love to release it shortly.`
-    )
-  }
-
   return (
     <div className="space-y-4 animate-slide-up pb-6">
       <div className="flex justify-between items-center px-1">
@@ -228,7 +222,7 @@ export const PetView = ({
               {lang === 'es' ? 'Tus mascotas registradas' : 'Your registered pets'}
             </span>
             <button
-              onClick={() => handleFeatureSoon(lang === 'es' ? 'añadir otra mascota a tu cuenta' : 'add another pet')}
+              onClick={onAddPet}
               className="text-[11px] font-extrabold text-[#204E4A] hover:underline cursor-pointer"
             >
               + {lang === 'es' ? 'Añadir otra' : 'Add another'}
