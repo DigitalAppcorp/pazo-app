@@ -294,7 +294,6 @@ Trabajo ya preparado en ese PR:
 **NO se ha aplicado la migración de Fase 6 a Supabase.**
 
 Bloqueos antes de continuar:
-- `npm run build` local;
 - autorización explícita para aplicar Supabase;
 - aplicar migración;
 - pruebas SQL/RLS;
@@ -302,6 +301,7 @@ Bloqueos antes de continuar:
 
 Preflight ya completado:
 - rama sincronizada con `main`;
+- `npm ci` y `npm run build` local aprobados;
 - dependencia QR mínima y lockfile sincronizado;
 - SQL revisado;
 - token QR revocable/rotatorio;
