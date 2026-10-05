@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
+import { fetchOwnedPets } from './services/petService'
 import type { Pet, Post, Community, CareItem, Conversation } from './types/pazo'
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
@@ -188,18 +189,25 @@ function PazoMain() {
         if (!user?.id) return
         setIsFeedLoading(true)
 
-        const { data: myPet, error: petError } = await supabase
-          .from('pets')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle()
+        let ownedPets: Pet[] = []
 
-        if (petError) {
-          console.error('Error fetching pet profile:', petError)
+        try {
+          ownedPets = await fetchOwnedPets(user.id)
+        } catch (petError) {
+          console.error('Error fetching pet profiles:', petError)
+          setIsFeedLoading(false)
+          return
         }
+
+        const myPet = ownedPets[0]
 
         if (myPet) {
           setIsOnboardingActive(false)
+
+          // Fase 3 estabiliza la primera mascota real. El flujo para añadir/cambiar
+          // múltiples mascotas se implementará de forma completa en una fase posterior.
+          setPets([myPet])
+          setCurrentPet(myPet)
 
           const hasSeenPitch = localStorage.getItem(`pitch_seen_${user.id}`)
           if (!hasSeenPitch) {
@@ -207,24 +215,8 @@ function PazoMain() {
             localStorage.setItem(`pitch_seen_${user.id}`, 'true')
           }
 
-          const realPet: Pet = {
-            id: myPet.id,
-            name: myPet.name,
-            species: myPet.species as any,
-            breed: 'Raza por definir',
-            age: myPet.age || 'Desconocida',
-            gender: 'hembra',
-            weight: myPet.weight || '-- kg',
-            dietPlan: myPet.dietPlan || 'Por definir',
-            bio: myPet.bio || `Perfil oficial de ${myPet.name} en Pazo.`,
-            photoUrl: myPet.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
-            qrId: `PAZO-QR-${myPet.name.toUpperCase()}`,
-            isLost: false,
-          }
-          setCurrentPet(realPet)
-
           let userInterests: string[] = ['Comunidades de gatos', 'Lugares aptos para mascotas']
-          if (myPet.interests && Array.isArray(myPet.interests)) {
+          if (myPet.interests && Array.isArray(myPet.interests) && myPet.interests.length > 0) {
             userInterests = myPet.interests
           }
 
@@ -704,7 +696,7 @@ function PazoMain() {
               }}
               onQuickDemo={() => setIsDemoUser(true)}
               onComplete={(newPet) => {
-                setPets((prev) => [newPet, ...prev])
+                setPets([newPet])
                 setCurrentPet(newPet)
                 setIsOnboardingActive(false)
               }}
