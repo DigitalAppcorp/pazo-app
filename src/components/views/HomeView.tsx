@@ -205,7 +205,9 @@ export const HomeView = ({
               onLikePost={onLikePost}
               onSavePost={onSavePost}
               onSelectPetProfile={onSelectPetProfile}
-              onToggleComments={(id) => setActiveCommentsPostId(activeCommentsPostId === id ? null : id)}
+              onToggleComments={handleToggleComments}
+              isCommentsLoading={loadingCommentsPostId === post.id}
+              isSubmittingComment={isSubmittingComment}
               onCommentTextChange={setNewCommentText}
               onSendComment={handleSendComment}
             />
@@ -226,11 +228,13 @@ interface PostCardProps {
   onSavePost: (postId: string) => void
   onSelectPetProfile: (petId: string) => void
   onToggleComments: (postId: string) => void
+  isCommentsLoading: boolean
+  isSubmittingComment: boolean
   onCommentTextChange: (text: string) => void
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, currentPetId, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const elementRef = usePostTracking(post.id, currentPetId)
 
