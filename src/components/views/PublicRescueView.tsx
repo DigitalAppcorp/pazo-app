@@ -7,12 +7,20 @@ import {
 
 interface PublicRescueViewProps {
   token: string
+  fromPreview?: boolean
+  onBack?: () => void
 }
 
-export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
+export const PublicRescueView = ({
+  token,
+  fromPreview = false,
+  onBack,
+}: PublicRescueViewProps) => {
   const [profile, setProfile] = useState<PublicRescueProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+  const [reporterName, setReporterName] = useState('')
+  const [reporterPhone, setReporterPhone] = useState('')
   const [message, setMessage] = useState('')
   const [location, setLocation] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -55,13 +63,26 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!message.trim() || isSubmitting) return
+    if (
+      !reporterName.trim()
+      || !reporterPhone.trim()
+      || !message.trim()
+      || isSubmitting
+    ) return
 
     setIsSubmitting(true)
 
     try {
-      await submitPublicSighting(token, message, location)
+      await submitPublicSighting(
+        token,
+        reporterName,
+        reporterPhone,
+        message,
+        location
+      )
       setSent(true)
+      setReporterName('')
+      setReporterPhone('')
       setMessage('')
       setLocation('')
     } catch (error: any) {
@@ -74,13 +95,24 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
   return (
     <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex justify-center p-0 sm:p-6">
       <main className="w-full sm:max-w-[430px] min-h-screen sm:min-h-[760px] bg-[#FAF8F5] sm:rounded-[2.8rem] shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden">
-        <header className="px-6 py-5 bg-white border-b border-[#204E4A]/8 flex items-center justify-between">
-          <div className="text-2xl font-black tracking-tight">
-            pazo<span className="text-[#E1E53F]">.</span>
+        <header className="px-5 py-4 bg-white border-b border-[#204E4A]/8 grid grid-cols-[40px_1fr_40px] items-center">
+          <div>
+            {fromPreview && onBack ? (
+              <button
+                onClick={onBack}
+                className="w-9 h-9 rounded-full bg-[#FAF8F5] text-[#204E4A] font-black cursor-pointer"
+                aria-label="Regresar"
+              >
+                ←
+              </button>
+            ) : null}
           </div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest bg-[#E1E53F] px-3 py-1 rounded-full">
+
+          <h1 className="text-base font-black text-center text-[#204E4A]">
             Pasaporte QR
-          </span>
+          </h1>
+
+          <div className="w-10" aria-hidden="true" />
         </header>
 
         <div className="p-6 space-y-5">
@@ -91,7 +123,7 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
           ) : loadError ? (
             <div className="py-16 text-center space-y-3">
               <div className="text-4xl">×</div>
-              <h1 className="text-xl font-black">Código no disponible</h1>
+              <h2 className="text-xl font-black">Código no disponible</h2>
               <p className="text-sm text-[#5C7470]">{loadError}</p>
             </div>
           ) : profile ? (
@@ -112,9 +144,9 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
                 </div>
 
                 <div>
-                  <h1 className="text-3xl font-black">
+                  <h2 className="text-3xl font-black">
                     Soy {profile.name}.
-                  </h1>
+                  </h2>
                   <p className="text-sm text-[#5C7470] mt-1">
                     {profile.species}
                     {profile.breed ? ` • ${profile.breed}` : ''}
@@ -135,7 +167,9 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
                   </span>
                   {profile.lastSeenLocation && (
                     <div>
-                      <span className="text-[10px] font-bold uppercase text-[#5C7470]">Última vez vista</span>
+                      <span className="text-[10px] font-bold uppercase text-[#5C7470]">
+                        Última vez vista
+                      </span>
                       <p className="font-extrabold text-sm">{profile.lastSeenLocation}</p>
                     </div>
                   )}
@@ -152,10 +186,7 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
 
               <section className="bg-white rounded-[2.2rem] p-5 shadow-xs space-y-4">
                 <div>
-                  <h2 className="text-lg font-black">¿La viste o está contigo?</h2>
-                  <p className="text-xs text-[#5C7470] mt-1 leading-relaxed">
-                    Envía un aviso privado. No verás el teléfono ni la dirección de su familia.
-                  </p>
+                  <h3 className="text-lg font-black">¿La viste o está contigo?</h3>
                 </div>
 
                 {sent ? (
@@ -167,6 +198,27 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-3">
+                    <input
+                      required
+                      minLength={2}
+                      maxLength={100}
+                      value={reporterName}
+                      onChange={(event) => setReporterName(event.target.value)}
+                      placeholder="Tu nombre"
+                      className="w-full bg-[#FAF8F5] rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                    />
+
+                    <input
+                      required
+                      type="tel"
+                      minLength={7}
+                      maxLength={40}
+                      value={reporterPhone}
+                      onChange={(event) => setReporterPhone(event.target.value)}
+                      placeholder="Tu teléfono"
+                      className="w-full bg-[#FAF8F5] rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                    />
+
                     <textarea
                       required
                       minLength={3}
@@ -188,7 +240,12 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting || !message.trim()}
+                      disabled={
+                        isSubmitting
+                        || !reporterName.trim()
+                        || !reporterPhone.trim()
+                        || !message.trim()
+                      }
                       className="w-full bg-[#204E4A] text-[#E1E53F] disabled:opacity-50 font-extrabold py-3.5 rounded-full"
                     >
                       {isSubmitting ? 'Enviando…' : 'Avisar a su familia'}
@@ -196,10 +253,6 @@ export const PublicRescueView = ({ token }: PublicRescueViewProps) => {
                   </form>
                 )}
               </section>
-
-              <p className="text-[10px] text-center text-[#5C7470] px-4">
-                Pazo no muestra datos privados de contacto en esta página.
-              </p>
             </>
           ) : null}
         </div>
