@@ -57,6 +57,7 @@ function PazoMain() {
   const [posts, setPosts] = useState<Post[]>([])
   const likingPostIdsRef = useRef<Set<string>>(new Set())
   const savingPostIdsRef = useRef<Set<string>>(new Set())
+  const commentingPostIdsRef = useRef<Set<string>>(new Set())
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
