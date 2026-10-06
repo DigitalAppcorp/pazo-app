@@ -220,23 +220,86 @@ Cuanto más alto el coste, más fuerte debe ser la evidencia antes de construir.
 
 ---
 
-## Gate 3 — Experimento mínimo
-Elegir la prueba más barata que responda la principal duda.
+## Gate 3 — Diseño de propuesta y experimento mínimo
+
+Antes de instrumentar clicks o preguntar “qué función quieres”, definir **qué producto estamos poniendo delante del usuario**.
+
+### 3A — Mapa de solución
+Para el área que se quiere validar, documentar:
+
+- job / resultado que busca el usuario;
+- problema o deseo;
+- capacidades candidatas;
+- módulos o submódulos que dependen entre sí;
+- funciones que son infraestructura y NO deben someterse a voto;
+- funciones que solo tienen sentido como parte de un bundle coherente;
+- riesgos de masa crítica, privacidad, moderación, APIs y operación;
+- qué capacidades podrían servir también para adquisición, retención o monetización;
+- alternativas que el Product Owner no había considerado.
+
+### 3B — Conceptos coherentes
+No validar listas arbitrarias de microfunciones.
+
+Agrupar capacidades en **experiencias o propuestas de valor coherentes**.
+
+Ejemplo:
+“vida local con tu mascota” puede incluir mapa, lugares, eventos y check-ins.
+No tiene sentido interpretar cada click aislado como autorización independiente si las piezas dependen unas de otras.
+
+Cada concepto debe definir:
+- promesa principal;
+- qué incluye;
+- qué NO incluye;
+- dependencia técnica/operativa;
+- primer hook visible;
+- por qué sería atractivo;
+- qué comportamiento demostraría valor real.
+
+### 3C — Arquitectura de elección
+Antes de mostrar opciones:
+
+- decidir qué se compara y qué no;
+- evitar opciones solapadas;
+- evitar sesgo por orden/posición;
+- incluir la posibilidad de no elegir;
+- no asumir que el usuario conoce la solución técnica;
+- preguntar primero por **resultado deseado**, no por nombres internos de módulos;
+- distinguir interés, intención y comportamiento real;
+- definir qué combinación de señales justifica construir.
+
+### 3D — Experimento mínimo
+Solo después elegir la prueba más barata que responda la principal duda.
 
 Ejemplos:
 - fake door;
-- botón “Me interesa”;
-- preview;
-- landing;
+- preview de una experiencia;
+- CTA “Me interesa”;
+- tarea concreta;
 - lista de espera;
 - encuesta de una pregunta;
 - prototipo visual;
-- enlace compartible;
-- prueba manual/concierge.
+- prueba manual/concierge;
+- landing externa.
 
 Regla:
 
+> **No instrumentar una opción hasta saber qué hipótesis representa y qué decisión permitirá tomar.**
+
 > **No construir backend completo para validar una hipótesis que puede medirse con una pantalla y un evento.**
+
+### Salida obligatoria de Gate 3
+
+Para módulos opcionales/network, Gate 3 debe producir un artefacto de producto que contenga:
+- mapa de capacidades;
+- bundles/conceptos;
+- dependencias;
+- hooks;
+- arquitectura de elección;
+- experimento;
+- métrica;
+- criterio de decisión.
+
+Sin este artefacto no se autoriza instrumentación ni Gate 4.
 
 ---
 
