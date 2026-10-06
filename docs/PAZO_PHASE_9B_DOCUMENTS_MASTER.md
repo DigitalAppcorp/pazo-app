@@ -1,6 +1,6 @@
 # PAZO — Sub-Ruta Maestra 9B: Documentos privados
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO CERRADA  
+**Estado:** COMPLETADA — GATES 6–8 CERRADOS  
 **Tipo:** U — utilidad individual  
 **Resultado Gate 5:** MVP REDUCIDO  
 **Documento padre:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
@@ -271,13 +271,18 @@ La documentación actual de Supabase confirma que buckets privados someten desca
 
 ---
 
-# 16. Próximo gate
+# 16. Estado final
 
-Gate 6 fue aprobado por el Product Owner.
+Gate 6 fue aprobado por el Product Owner y Gate 8 fue completado.
 
-Gate 7 está definido en:
-docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md
+Cierre:
+- backend privado aplicado;
+- build aprobado;
+- seguridad/RLS/Storage verificados;
+- prueba visual/end-to-end aprobada;
+- PR #14 fusionado a `main`;
+- merge commit: `6f833b779ef1a62d7321bc50dbab8c220f92a1d3`.
 
-Siguiente etapa: **Gate 8 — Implementación**.
+Compartir externamente sigue fuera del MVP y debe tratarse como una futura decisión separada.
 
-No aplicar nada a Supabase sin autorización explícita.
+**Fase 9B — COMPLETADA.**
