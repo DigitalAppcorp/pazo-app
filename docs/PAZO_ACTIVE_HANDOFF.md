@@ -21,8 +21,10 @@ For the current module also read:
 ## Working model
 
 - Product Owner: Brandon.
-- ChatGPT directly owns implementation work across GitHub + Supabase.
+- ChatGPT / AI Project Brain directly owns the technical process end-to-end across GitHub + Supabase: audit, architecture, implementation, migrations, security, tests, docs, PR and merge when authorized by the gate.
 - Product Owner makes product decisions and performs requested local/visual tests.
+- Antigravity is only the Product Owner's local execution/review environment. ChatGPT supplies exact commands when local execution is required; the Product Owner returns terminal output/screenshots and ChatGPT continues the implementation.
+- Do not delegate programming/debugging to Gemini or another AI unless the Product Owner explicitly requests that exception.
 - Never mutate Supabase without explicit Product Owner authorization.
 - Read-only Supabase inspection is allowed.
 - Prefer durable project decisions in repository docs over conversational memory.
@@ -121,7 +123,8 @@ Latest Product Owner visual feedback was incorporated in code:
 - the global Agenda banner was removed; the header-level alert area remains reserved for rescue/lost-pet/sighting flows;
 - the compact “Próximo cuidado” preview is now driven only by the selected care item's `Recordarme` window;
 - “Sin recordatorio” means the compact preview never appears;
-- after completing a reminder-qualified care item, the preview disappears unless the next occurrence already falls inside its reminder window.
+- after completing a reminder-qualified care item, the preview disappears unless the next occurrence already falls inside its reminder window;
+- the compact Complete action now shows `Completando…` while the backend request is in flight, blocks double-clicks, and only disappears after server confirmation; failures keep the reminder visible and show an error.
 
 Next:
 1. Product Owner pulls latest `feat/phase-9a-care`;
