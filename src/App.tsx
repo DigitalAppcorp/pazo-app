@@ -78,14 +78,39 @@ const dateKey = (date = new Date()) =>
     String(date.getDate()).padStart(2, '0'),
   ].join('-')
 
+const zonedDateKey = (timezone: string) => {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date())
+
+    const values = Object.fromEntries(
+      parts
+        .filter((part) => part.type !== 'literal')
+        .map((part) => [part.type, part.value])
+    )
+
+    return `${values.year}-${values.month}-${values.day}`
+  } catch {
+    return dateKey()
+  }
+}
+
 const calendarDayDiff = (fromDate: string, toDate: string) => {
-  const from = new Date(`${fromDate}T12:00:00`)
-  const to = new Date(`${toDate}T12:00:00`)
-  return Math.round((to.getTime() - from.getTime()) / 86400000)
+  const [fromYear, fromMonth, fromDay] = fromDate.split('-').map(Number)
+  const [toYear, toMonth, toDay] = toDate.split('-').map(Number)
+
+  const from = Date.UTC(fromYear, fromMonth - 1, fromDay)
+  const to = Date.UTC(toYear, toMonth - 1, toDay)
+
+  return Math.round((to - from) / 86400000)
 }
 
 const isCareReminderRelevant = (item: CareItem) => {
-  const today = dateKey()
+  const today = zonedDateKey(item.timezone)
   const daysUntilDue = calendarDayDiff(today, item.dueDate)
 
   if (daysUntilDue <= 0) return true
