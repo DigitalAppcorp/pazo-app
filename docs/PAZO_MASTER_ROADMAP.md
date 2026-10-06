@@ -839,12 +839,20 @@ Usar únicamente:
 - build, seguridad y prueba visual aprobados;
 - PR #14 fusionado a `main`.
 
-### Siguiente módulo
-- no hay un módulo nuevo autorizado todavía;
+### Siguiente habilitador: Instrumentación genérica de validación
+- tipo I — infraestructura;
+- Gates 0–5 cerrados;
+- resultado Gate 5: **BUILD NOW**;
+- Gate 6 propuesto en `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
+- consumidores iniciales: Comunidades + Mapa/Radar;
+- no reutilizar `interactions`;
+- siguiente acción: Product Owner aprueba o modifica Gate 6;
+- no escribir schema/código hasta cerrar Gate 6.
+
+### Otros módulos
 - Comunidades permanece en validación;
-- Mapa/Lugares requiere cerrar decisiones de alcance, proveedor y privacidad;
-- Mensajería permanece pospuesta/reevaluación;
-- cualquier nuevo módulo debe entrar por `docs/PAZO_MODULE_LIFECYCLE.md` y cerrar sus gates antes de código.
+- Mapa/Lugares completo sigue bloqueado por alcance/proveedor/privacidad;
+- Mensajería permanece pospuesta/reevaluación.
 
 ## Regla
 La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
