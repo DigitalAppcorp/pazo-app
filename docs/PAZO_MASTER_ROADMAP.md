@@ -822,6 +822,8 @@ Usar únicamente:
 - **EXPERIMENTO ACTIVO**;
 - no diseñar todavía roles/schema/feed/moderación;
 - su sub-ruta canónica es `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`;
+- 7.0A tiene propuesta de experimento lista y pendiente de aprobación del Product Owner;
+- no programar instrumentación hasta esa aprobación;
 - siguiente trabajo: cerrar el diseño del experimento 7.0A:
   - qué promesa/hook mostrará la preview;
   - qué elementos conceptuales hacen entendible/atractivo el módulo;
