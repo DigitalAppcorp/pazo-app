@@ -71,6 +71,38 @@ const getPublicRescueRoute = () => {
 const FEED_PAGE_SIZE = 10
 const NOTIFICATIONS_PAGE_SIZE = 10
 
+const dateKey = (date = new Date()) =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-')
+
+const calendarDayDiff = (fromDate: string, toDate: string) => {
+  const from = new Date(`${fromDate}T12:00:00`)
+  const to = new Date(`${toDate}T12:00:00`)
+  return Math.round((to.getTime() - from.getTime()) / 86400000)
+}
+
+const isCareReminderRelevant = (item: CareItem) => {
+  const today = dateKey()
+  const daysUntilDue = calendarDayDiff(today, item.dueDate)
+
+  if (daysUntilDue <= 0) return true
+  if (item.reminderDaysBefore === null) return false
+  return daysUntilDue <= item.reminderDaysBefore
+}
+
+const sortCareItems = (items: CareItem[]) =>
+  [...items].sort((a, b) => {
+    const dateCompare = a.dueDate.localeCompare(b.dueDate)
+    if (dateCompare !== 0) return dateCompare
+
+    const aTime = a.dueTime || '99:99'
+    const bTime = b.dueTime || '99:99'
+    return aTime.localeCompare(bTime)
+  })
+
 interface FeedPaginationState {
   petId: string
   socialPetIds: string[]
