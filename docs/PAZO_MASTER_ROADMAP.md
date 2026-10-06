@@ -443,7 +443,7 @@ Alcance funcional:
 - Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: SIGUIENTE — GATE 8 IMPLEMENTACIÓN**
+**Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
 
 **Sub-ruta de producto:** `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`  
 **Arquitectura técnica:** `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`
@@ -451,6 +451,33 @@ Alcance funcional:
 Gates 0–7 cerrados. Resultado Gate 5: **MVP REDUCIDO**.
 
 Núcleo aprobado: documentos privados owner-only. Compartir externamente queda fuera del MVP y se reevalúa después.
+
+### Estado técnico de implementación
+- rama: `feat/phase-9b-documents`;
+- tipos reales `PetDocument` preparados;
+- mocks `INITIAL_DOCS` y `PrivateDoc` retirados;
+- `documentService.ts` preparado;
+- `DocumentsModal.tsx` preparado;
+- entrada independiente de Documentos en PetView;
+- carga inicial, contador, F5, cambio de mascota y paginación preparados;
+- upload/preview/download/edit/delete preparados;
+- lifecycle recuperable `uploading/active/deleting`;
+- migración base `20261006090000_private_pet_documents.sql` aplicada a Supabase;
+- hardening `20261006092000_fix_private_document_storage_policies.sql` aplicado después de detectar y corregir resolución ambigua de `name` en policies;
+- migraciones registradas en Supabase como `20261006090551 private_pet_documents` y `20261006090654 fix_private_document_storage_policies`;
+- bucket privado `pet-documents` creado y verificado;
+- wrappers públicos SECURITY INVOKER + helpers privilegiados en `document_private`;
+- preflight real: no existen tabla/bucket/policies/RPCs 9B con nombres en conflicto;
+- `pets.id` y `pets.owner_id` UUID compatibles;
+- Storage metadata actual confirma `mimetype` y `size` disponibles para finalize;
+- Advisors baseline registrados antes de 9B;
+- pendiente: `npm run build` local;
+- build local PASS confirmado por Product Owner;
+- pruebas transaccionales DB/RLS pasaron con ROLLBACK: owner/non-owner, reserva, finalize, metadata edit, validaciones, cancel upload, begin/finalize delete metadata y Storage visibility;
+- upload arbitrario sin reserva bloqueado;
+- Security Advisor post-apply sin findings nuevos de 9B;
+- no quedaron filas/objetos de prueba;
+- pendiente: prueba visual/end-to-end con Storage API real (upload/preview/download/delete/F5/multi-pet).
 
 Se separa de Agenda por mayor superficie de seguridad.
 

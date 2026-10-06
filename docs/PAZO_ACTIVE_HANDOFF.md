@@ -99,7 +99,10 @@ Verified closure evidence:
 
 9A is closed. Do not reopen it unless a regression is reported.
 
-Active next module: **9B — Documentos privados**.
+Active implementation: **9B — Documentos privados**.
+
+**Gate:** 8 — Implementation  
+**Branch:** `feat/phase-9b-documents`
 
 Current state:
 - Gates 0–7 closed;
@@ -111,11 +114,26 @@ Current state:
 - real audit found no documents table, no document RPC and no private document bucket;
 - existing `pet-avatars` and `post-photos` buckets are public and must not be reused.
 
+Implementation state:
+- frontend/service/types prepared;
+- legacy document mocks removed;
+- private bucket + metadata + lifecycle RPC backend applied;
+- base migration registered as `20261006090551 private_pet_documents`;
+- follow-up policy hardening registered as `20261006090654 fix_private_document_storage_policies`;
+- `pet-documents` is private, 10 MB, PDF/JPEG/PNG/WEBP;
+- post-apply schema/policies/functions/grants verified;
+- DB/RLS transactional tests passed with ROLLBACK;
+- arbitrary Storage insert without reservation blocked;
+- owner/non-owner isolation passed;
+- no test rows or objects persisted;
+- existing Security Advisor warnings remain baseline rescue/Auth findings; no new 9B security warning was introduced;
+- local `npm run build` passed and was confirmed by the Product Owner.
+
 Immediate next action:
-1. enter Gate 8 on a dedicated branch;
-2. implement frontend/service/types and prepare one versioned migration;
-3. run diff/build/preflight;
-4. do not apply the migration until explicit Product Owner authorization.
+1. Product Owner pulls the current `feat/phase-9b-documents` branch;
+2. run the app locally and execute focused visual/end-to-end Storage validation;
+3. verify upload PDF/image, preview, download, edit, delete, F5 and multi-pet isolation;
+4. if all passes, take PR #14 out of draft, merge to main, verify main and close 9B.
 
 Communities remains in the Validation Lane and does not block this evaluation.
 
@@ -124,3 +142,24 @@ Communities remains in the Validation Lane and does not block this evaluation.
 A new ChatGPT conversation should NOT attempt to reconstruct PAZO from memory.
 
 It should read the repository docs above and continue from this handoff. Repository docs are the canonical source of truth.
+
+
+## Visual retest blocker found
+
+Product Owner found that deleting a document removed the file in Storage, but the UI showed an error and kept the document visible until reload.
+
+Root cause:
+- Storage API deletion succeeded;
+- metadata finalization could briefly lag behind Storage deletion;
+- frontend treated delayed finalize as a failed delete.
+
+Fix on branch:
+- retry delete finalization with short backoff;
+- once Storage confirms deletion, do not surface delayed metadata finalization as a user-facing failure;
+- remove the document from visible state/count immediately;
+- reconcile server truth in the background through the existing recovery flow.
+
+Pending:
+- local build after this fix;
+- focused delete retest without reload;
+- remaining 9B visual/end-to-end acceptance.

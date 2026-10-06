@@ -8,6 +8,7 @@ import {
   IconAlert,
   IconCheck,
   IconBowl,
+  IconDocument,
 } from '../icons/PazoIcons'
 
 interface PetViewProps {
@@ -21,6 +22,8 @@ interface PetViewProps {
   onCompleteCare: (careItem: CareItem) => void | Promise<void>
   onOpenQRPassport: () => void
   onOpenCareAgenda: () => void
+  documentCount: number
+  onOpenDocuments: () => void
   onOpenLostAlert: () => void
   lang: 'es' | 'en'
   userPosts?: Post[]
@@ -37,6 +40,8 @@ export const PetView = ({
   onCompleteCare,
   onOpenQRPassport,
   onOpenCareAgenda,
+  documentCount,
+  onOpenDocuments,
   onOpenLostAlert,
   lang,
   userPosts = [],
@@ -560,6 +565,30 @@ export const PetView = ({
                   {lang === 'es'
                     ? `${careItems.length} cuidados agendados`
                     : `${careItems.length} scheduled care items`}
+                </p>
+              </div>
+            </div>
+            <span className="text-lg text-[#5C7470] group-hover:translate-x-1 transition-transform font-bold">
+              ›
+            </span>
+          </div>
+
+          <div
+            onClick={onOpenDocuments}
+            className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center text-xl font-bold group-hover:scale-105 transition-transform shadow-xs">
+                <IconDocument size={22} />
+              </div>
+              <div>
+                <h4 className="font-extrabold text-sm text-[#204E4A]">
+                  {lang === 'es' ? 'Documentos privados' : 'Private documents'}
+                </h4>
+                <p className="text-xs text-[#5C7470]">
+                  {lang === 'es'
+                    ? `${documentCount} documentos guardados`
+                    : `${documentCount} saved documents`}
                 </p>
               </div>
             </div>

@@ -130,13 +130,25 @@ export interface CareItemInput {
   notes?: string | null
 }
 
-export interface PrivateDoc {
+export type DocumentCategory =
+  | 'vaccines'
+  | 'medical_history'
+  | 'identification'
+  | 'results'
+  | 'other'
+
+export interface PetDocument {
   id: string
+  petId: string
   title: string
-  fileName: string
-  fileSize: string
-  dateUploaded: string
-  category: 'vacunas' | 'historial' | 'identificacion'
+  category: DocumentCategory
+  originalFileName: string
+  storagePath: string
+  mimeType: string
+  sizeBytes: number
+  status: 'uploading' | 'active' | 'deleting'
+  createdAt: string
+  updatedAt: string
 }
 
 export interface MessageItem {
