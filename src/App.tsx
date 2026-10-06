@@ -1069,6 +1069,14 @@ function PazoMain() {
     }
   }, [isCareOpen, currentPet?.id])
 
+  useEffect(() => {
+    if (user?.id && !isOnboardingActive && pets.length > 0) {
+      void refreshCareReminders()
+    } else if (!user?.id) {
+      setCareReminderItems([])
+    }
+  }, [user?.id, isOnboardingActive, pets.length])
+
   const handleSendMessage = (convId: string, text: string) => {
     setConversations((prev) =>
       prev.map((c) => {
@@ -1227,6 +1235,21 @@ function PazoMain() {
     }
 
     setIsAlertOpen(true)
+  }
+
+  const careReminderItem = careReminderItems[0]
+  const careReminderPet = careReminderItem
+    ? pets.find((pet) => pet.id === careReminderItem.petId)
+    : undefined
+
+  const handleOpenCareReminder = () => {
+    if (!careReminderItem || !careReminderPet) return
+
+    if (careReminderPet.id !== currentPet.id) {
+      selectActivePet(careReminderPet)
+    }
+
+    setIsCareOpen(true)
   }
 
   if (publicRescueRoute.token) {
@@ -1526,6 +1549,34 @@ function PazoMain() {
               </button>
             )}
 
+            {careReminderItem && careReminderPet && (
+              <button
+                type="button"
+                onClick={handleOpenCareReminder}
+                className="mx-4 mt-3 rounded-2xl bg-[#F5F7E8] border border-[#204E4A]/10 px-4 py-3 flex items-center gap-3 text-left cursor-pointer shrink-0"
+              >
+                <span className="w-8 h-8 rounded-full bg-[#204E4A] text-[#E1E53F] flex items-center justify-center font-black shrink-0">
+                  ✓
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-xs font-black text-[#204E4A]">
+                    {lang === 'es'
+                      ? `Tienes un cuidado pendiente de ${careReminderPet.name}`
+                      : `You have care coming up for ${careReminderPet.name}`}
+                  </span>
+                  <span className="block text-[10px] text-[#5C7470] mt-0.5 leading-relaxed">
+                    {careReminderItem.title}
+                    {careReminderItems.length > 1
+                      ? (lang === 'es'
+                          ? ` · y ${careReminderItems.length - 1} más`
+                          : ` · and ${careReminderItems.length - 1} more`)
+                      : ''}
+                  </span>
+                </span>
+                <span className="font-black text-[#204E4A]">›</span>
+              </button>
+            )}
+
             <main
               ref={mainScrollRef}
               className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
@@ -1691,9 +1742,17 @@ function PazoMain() {
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
               careItems={careItems}
-              onToggleCare={handleToggleCompleteCare}
-              onAddCare={handleAddCare}
-              docs={docs}
+              careHistory={careHistory}
+              isLoading={isCareLoading}
+              error={careError}
+              isHistoryLoading={isCareHistoryLoading}
+              hasMoreHistory={hasMoreCareHistory}
+              onLoadMoreHistory={() => void loadMoreCareHistory()}
+              onCreateCare={handleCreateCare}
+              onUpdateCare={handleUpdateCare}
+              onArchiveCare={handleArchiveCare}
+              onCompleteCare={handleCompleteCare}
+              onUndoCompletion={handleUndoCareCompletion}
               lang={lang}
             />
 
