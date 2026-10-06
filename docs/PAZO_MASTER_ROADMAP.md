@@ -819,14 +819,23 @@ Usar únicamente:
 
 ## Carril de Validación
 ### Comunidades
-- mantener EXPERIMENTO ACTIVO;
-- no diseñar todavía roles/schema/feed;
-- instrumentación genérica se implementará en una fase pequeña separada cuando se autorice.
+- **EXPERIMENTO ACTIVO**;
+- no diseñar todavía roles/schema/feed/moderación;
+- su sub-ruta canónica es `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`;
+- siguiente trabajo: cerrar el diseño del experimento 7.0A:
+  - qué promesa/hook mostrará la preview;
+  - qué elementos conceptuales hacen entendible/atractivo el módulo;
+  - qué significa exactamente `Me interesa`;
+  - qué pregunta/opciones de intención necesitamos;
+  - qué cuenta como view/revisita;
+  - qué datos cambian la decisión BUILD NOW / MVP REDUCIDO / EXPERIMENTO ACTIVO / POSPUESTO;
+- después de cerrar ese experimento, implementar **una sola infraestructura genérica** de tracking por cuenta;
+- Comunidades será el primer consumidor.
 
 ### Mapa/Lugares
-- fake door existente no es confiable con el schema actual;
-- no arreglar tracking específico;
-- usar futura instrumentación genérica.
+- su fake door actual no produce datos confiables con el schema real;
+- no incluirlo todavía en el primer experimento de Comunidades;
+- debe pasar su propia ficha/experimento antes de conectarse a la infraestructura genérica.
 
 ## Carril de Implementación
 ### 9A Agenda/Cuidados
@@ -839,21 +848,10 @@ Usar únicamente:
 - build, seguridad y prueba visual aprobados;
 - PR #14 fusionado a `main`.
 
-### Siguiente habilitador: Instrumentación genérica de validación
-- tipo I — infraestructura;
-- Gates 0–7 cerrados;
-- resultado Gate 5: **BUILD NOW**;
-- producto: `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
-- arquitectura: `docs/PAZO_VALIDATION_INSTRUMENTATION_ARCHITECTURE.md`;
-- consumidores iniciales: Comunidades + Mapa/Radar;
-- no reutilizar `interactions`;
-- siguiente acción: Gate 8 en rama propia;
-- preparar código + migración sin aplicar Supabase.
-
-### Otros módulos
-- Comunidades permanece en validación;
-- Mapa/Lugares completo sigue bloqueado por alcance/proveedor/privacidad;
-- Mensajería permanece pospuesta/reevaluación.
+### Siguiente implementación
+- no hay un módulo grande autorizado automáticamente;
+- una vez cerrado el experimento 7.0A de Comunidades, la infraestructura genérica mínima de validación puede entrar como habilitador I;
+- no programar Comunidades completa mientras siga en EXPERIMENTO ACTIVO.
 
 ## Regla
 La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
