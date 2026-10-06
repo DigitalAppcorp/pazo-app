@@ -99,7 +99,10 @@ Verified closure evidence:
 
 9A is closed. Do not reopen it unless a regression is reported.
 
-Active next module: **9B — Documentos privados**.
+Active implementation: **9B — Documentos privados**.
+
+**Gate:** 8 — Implementation  
+**Branch:** `feat/phase-9b-documents`
 
 Current state:
 - Gates 0–7 closed;
@@ -111,11 +114,21 @@ Current state:
 - real audit found no documents table, no document RPC and no private document bucket;
 - existing `pet-avatars` and `post-photos` buckets are public and must not be reused.
 
+Implementation state:
+- frontend/service/types prepared;
+- legacy document mocks removed;
+- private bucket + metadata + lifecycle RPC migration prepared;
+- Supabase read-only preflight passed with no 9B collisions;
+- migration is NOT applied;
+- existing Security Advisor warnings are baseline rescue/Auth findings, not 9B;
+- build cannot be executed from ChatGPT container because github.com DNS is unavailable.
+
 Immediate next action:
-1. enter Gate 8 on a dedicated branch;
-2. implement frontend/service/types and prepare one versioned migration;
-3. run diff/build/preflight;
-4. do not apply the migration until explicit Product Owner authorization.
+1. Product Owner pulls `feat/phase-9b-documents`;
+2. run `npm run build`;
+3. if build passes, review final migration diff;
+4. then request explicit Product Owner authorization to apply 9B backend;
+5. after apply, run DB/Storage security tests and visual end-to-end.
 
 Communities remains in the Validation Lane and does not block this evaluation.
 
