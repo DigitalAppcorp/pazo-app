@@ -841,13 +841,14 @@ Usar únicamente:
 
 ### Siguiente habilitador: Instrumentación genérica de validación
 - tipo I — infraestructura;
-- Gates 0–5 cerrados;
+- Gates 0–7 cerrados;
 - resultado Gate 5: **BUILD NOW**;
-- Gate 6 propuesto en `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
+- producto: `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
+- arquitectura: `docs/PAZO_VALIDATION_INSTRUMENTATION_ARCHITECTURE.md`;
 - consumidores iniciales: Comunidades + Mapa/Radar;
 - no reutilizar `interactions`;
-- siguiente acción: Product Owner aprueba o modifica Gate 6;
-- no escribir schema/código hasta cerrar Gate 6.
+- siguiente acción: Gate 8 en rama propia;
+- preparar código + migración sin aplicar Supabase.
 
 ### Otros módulos
 - Comunidades permanece en validación;
