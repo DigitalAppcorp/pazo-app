@@ -828,9 +828,13 @@ Usar únicamente:
 - rama `feat/communities-validation-instrumentation` EN CURSO;
 - preview aprobada implementada sin Join/member counts ficticios;
 - servicio/panel genérico de validación preparados;
-- migración `20261006124500_communities_validation_instrumentation.sql` preparada, NO aplicada;
+- build local PASS confirmado por Product Owner;
+- migración base aplicada a Supabase con autorización explícita;
+- migraciones forward de performance aplicadas sin reescribir historial;
 - arquitectura usa RLS/grants normales, sin nuevos SECURITY DEFINER;
-- pendiente: build local, autorización Supabase, pruebas backend y validación visual;
+- pruebas backend/RLS/deduplicación/intención aprobadas;
+- Security Advisor sin findings nuevos atribuibles a instrumentación;
+- pendiente: validación visual/end-to-end del Product Owner;
 - siguiente trabajo: cerrar el diseño del experimento 7.0A:
   - qué promesa/hook mostrará la preview;
   - qué elementos conceptuales hacen entendible/atractivo el módulo;
