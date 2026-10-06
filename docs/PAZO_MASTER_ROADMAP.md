@@ -443,13 +443,14 @@ Alcance funcional:
 - Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: SIGUIENTE — GATE 6 ESPECIFICACIÓN DE PRODUCTO**
+**Estado: SIGUIENTE — GATE 8 IMPLEMENTACIÓN**
 
-**Sub-ruta:** `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`
+**Sub-ruta de producto:** `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`  
+**Arquitectura técnica:** `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`
 
-Gates 0–5 cerrados. Resultado Gate 5: **MVP REDUCIDO**.
+Gates 0–7 cerrados. Resultado Gate 5: **MVP REDUCIDO**.
 
-Núcleo aprobado para especificación: documentos privados owner-only. Compartir externamente queda fuera del MVP y se reevalúa después.
+Núcleo aprobado: documentos privados owner-only. Compartir externamente queda fuera del MVP y se reevalúa después.
 
 Se separa de Agenda por mayor superficie de seguridad.
 
@@ -810,11 +811,12 @@ Usar únicamente:
 - PR #12 fusionado a `main`.
 
 ### 9B Documentos privados
-1. Gates 0–5 cerrados;
+1. Gates 0–7 cerrados;
 2. resultado: **MVP REDUCIDO**;
-3. Gate 6 propuesto en `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`;
-4. siguiente acción: Product Owner aprueba o modifica la especificación de producto;
-5. no diseñar schema/bucket/RLS ni escribir código hasta cerrar Gate 6.
+3. producto y arquitectura cerrados;
+4. siguiente acción: Gate 8 en rama propia;
+5. preparar frontend + migración + pruebas sin aplicar Supabase;
+6. pedir autorización explícita antes de mutar Supabase.
 
 ## Regla
 La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
