@@ -469,9 +469,15 @@ export const CareModal = ({
         ) : error ? (
           <div className="py-10 text-center space-y-3">
             <p className="text-sm font-bold text-[#EC7357]">
-              {lang === 'es' ? 'No se pudo cargar la agenda.' : 'Could not load the agenda.'}
+              {lang === 'es'
+                ? 'No pudimos cargar la agenda en este momento.'
+                : 'We could not load the agenda right now.'}
             </p>
-            <p className="text-[11px] text-[#5C7470]">{error}</p>
+            <p className="text-[11px] text-[#5C7470]">
+              {lang === 'es'
+                ? 'Puedes volver a intentarlo sin perder nada.'
+                : 'You can try again without losing anything.'}
+            </p>
             <button
               onClick={onRetry}
               className="px-4 py-2 rounded-full bg-[#204E4A] text-[#E1E53F] text-xs font-bold cursor-pointer"
