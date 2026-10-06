@@ -139,24 +139,22 @@ export const archiveCareItem = async (careItemId: string): Promise<void> => {
   if (error) throw error
 }
 
-export const completeCareItem = async (item: CareItem): Promise<string> => {
-  const { data, error } = await supabase.rpc('complete_care_item', {
+export const completeCareItem = async (item: CareItem): Promise<void> => {
+  const { error } = await supabase.rpc('complete_care_item', {
     p_care_item_id: item.id,
     p_expected_due_date: item.dueDate,
     p_expected_due_time: item.dueTime || null,
   })
 
   if (error) throw error
-  return data as string
 }
 
-export const undoCareCompletion = async (completionId: string): Promise<string> => {
-  const { data, error } = await supabase.rpc('undo_care_completion', {
+export const undoCareCompletion = async (completionId: string): Promise<void> => {
+  const { error } = await supabase.rpc('undo_care_completion', {
     p_completion_id: completionId,
   })
 
   if (error) throw error
-  return data as string
 }
 
 export const fetchCareReminderCandidates = async (
@@ -166,7 +164,9 @@ export const fetchCareReminderCandidates = async (
 
   const now = new Date()
   const maxDate = new Date(now)
-  maxDate.setDate(maxDate.getDate() + 7)
+  // +8 creates a one-day safety margin for care items saved in another timezone.
+  // The final reminder decision is filtered client-side using the item's own IANA timezone.
+  maxDate.setDate(maxDate.getDate() + 8)
 
   const maxDateString = [
     maxDate.getFullYear(),
