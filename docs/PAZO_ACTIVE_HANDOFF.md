@@ -10,7 +10,8 @@ Before making any code, database, architecture or roadmap change, read:
 2. `docs/PAZO_MASTER_ROADMAP.md`
 3. `docs/PAZO_MODULE_LIFECYCLE.md`
 4. the active module sub-roadmap
-5. this file
+5. `docs/PAZO_PRODUCT_VISION.md` when making strategic/product-scope decisions
+6. this file
 
 ## Working model
 
@@ -25,6 +26,14 @@ Before making any code, database, architecture or roadmap change, read:
   - Validation lane for optional/network-effect modules.
   - Implementation lane for approved/core-utility modules.
 - Do not let a module in validation block an approved implementation module.
+
+## Long-term vision
+
+- PAZO is intended to become a broader pet ecosystem/platform if the MVP proves traction and economic viability.
+- The social/pet identity layer may later support vertical systems for groomers, vets, trainers, walkers/caregivers, adoption/rescue organizations, pet businesses and other pet-related services.
+- E-commerce and physical product selling are explicitly future work.
+- This vision is NON-EXECUTABLE and does not authorize current implementation.
+- Canonical document: `docs/PAZO_PRODUCT_VISION.md`.
 
 ## Current global product strategy
 
