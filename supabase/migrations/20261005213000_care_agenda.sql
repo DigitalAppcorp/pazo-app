@@ -175,23 +175,37 @@ USING (
   )
 );
 
-CREATE OR REPLACE FUNCTION private.touch_care_item_updated_at()
+CREATE OR REPLACE FUNCTION private.prepare_care_item()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = ''
 AS $function$
 BEGIN
-  NEW.updated_at := now();
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_catalog.pg_timezone_names
+    WHERE name = NEW.timezone
+  ) THEN
+    RAISE EXCEPTION 'Invalid IANA timezone.';
+  END IF;
+
+  NEW.title := btrim(NEW.title);
+  NEW.notes := NULLIF(btrim(COALESCE(NEW.notes, '')), '');
+
+  IF TG_OP = 'UPDATE' THEN
+    NEW.updated_at := now();
+  END IF;
+
   RETURN NEW;
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION private.touch_care_item_updated_at() FROM PUBLIC;
+REVOKE ALL ON FUNCTION private.prepare_care_item() FROM PUBLIC;
 
-CREATE TRIGGER trg_care_items_touch_updated_at
-BEFORE UPDATE ON public.care_items
+CREATE TRIGGER trg_care_items_prepare
+BEFORE INSERT OR UPDATE ON public.care_items
 FOR EACH ROW
-EXECUTE FUNCTION private.touch_care_item_updated_at();
+EXECUTE FUNCTION private.prepare_care_item();
 
 CREATE OR REPLACE FUNCTION public.complete_care_item(
   p_care_item_id uuid,
@@ -371,7 +385,8 @@ BEGIN
 
   IF v_item.status IS DISTINCT FROM v_completion.resulting_status
      OR v_item.due_date IS DISTINCT FROM v_completion.resulting_due_date
-     OR v_item.due_time IS DISTINCT FROM v_completion.resulting_due_time THEN
+     OR v_item.due_time IS DISTINCT FROM v_completion.resulting_due_time
+     OR v_item.recurrence IS DISTINCT FROM v_completion.recurrence_snapshot THEN
     RAISE EXCEPTION 'Care item changed after completion. Undo is no longer safe.';
   END IF;
 
