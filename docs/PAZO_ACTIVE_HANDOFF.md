@@ -143,6 +143,14 @@ Implementation state:
 - Supabase preflight confirms no conflicting validation tables;
 - Security Advisor baseline recorded before apply: 3 anon SD, 6 authenticated SD, 1 leaked-password warning.
 
+Visual correction after Product Owner review:
+- Explore is the umbrella discovery hub, not a Communities-only screen;
+- Communities now lives inside the Communities category of Explore;
+- entering Explore alone must not count as a Communities view;
+- Communities view is emitted only when its preview is intentionally opened;
+- the preview now explains what Communities is before asking for interest;
+- unified Explore search remains future Phase 12 and is not faked in 7.0A.
+
 Backend state:
 - local build PASS confirmed by Product Owner;
 - Supabase migration applied with explicit authorization;
