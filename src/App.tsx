@@ -8,14 +8,32 @@ import {
   fetchUnreadNotificationCount,
   markNotificationRead,
 } from './services/rescueService'
-import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
+import {
+  CARE_HISTORY_PAGE_SIZE,
+  archiveCareItem,
+  completeCareItem,
+  createCareItem,
+  fetchActiveCareItems,
+  fetchCareHistory,
+  fetchCareReminderCandidates,
+  undoCareCompletion,
+  updateCareItem,
+} from './services/careService'
+import type {
+  Pet,
+  Post,
+  Community,
+  CareItem,
+  CareCompletion,
+  CareItemInput,
+  Conversation,
+  PazoNotification,
+} from './types/pazo'
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
   INITIAL_COMMUNITIES,
   INITIAL_PLACES,
-  INITIAL_CARE_ITEMS,
-  INITIAL_DOCS,
   INITIAL_CONVERSATIONS,
 } from './data/mockData'
 
