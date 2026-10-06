@@ -443,9 +443,13 @@ Alcance funcional:
 - Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: PLANIFICADA**
+**Estado: SIGUIENTE — GATE 6 ESPECIFICACIÓN DE PRODUCTO**
 
-Siguiente candidato del carril de implementación; no está autorizado para código hasta pasar sus gates.
+**Sub-ruta:** `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`
+
+Gates 0–5 cerrados. Resultado Gate 5: **MVP REDUCIDO**.
+
+Núcleo aprobado para especificación: documentos privados owner-only. Compartir externamente queda fuera del MVP y se reevalúa después.
 
 Se separa de Agenda por mayor superficie de seguridad.
 
@@ -805,11 +809,12 @@ Usar únicamente:
 - build y prueba visual aprobados;
 - PR #12 fusionado a `main`.
 
-### Siguiente candidato: 9B Documentos privados
-1. retomar desde `docs/PAZO_MODULE_LIFECYCLE.md`;
-2. auditar valor, coste y superficie de seguridad/Storage;
-3. cerrar decisión de inversión antes de especificación;
-4. no escribir código ni crear Storage/schema hasta cerrar sus gates correspondientes.
+### 9B Documentos privados
+1. Gates 0–5 cerrados;
+2. resultado: **MVP REDUCIDO**;
+3. Gate 6 propuesto en `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`;
+4. siguiente acción: Product Owner aprueba o modifica la especificación de producto;
+5. no diseñar schema/bucket/RLS ni escribir código hasta cerrar Gate 6.
 
 ## Regla
 La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
