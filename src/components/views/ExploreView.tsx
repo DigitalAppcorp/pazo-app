@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Community } from '../../types/pazo'
+import { IconExplore } from '../icons/PazoIcons'
 import { ValidationInterestPanel } from '../validation/ValidationInterestPanel'
 
 interface ExploreViewProps {
@@ -16,6 +17,14 @@ export const ExploreView = ({
   lang,
 }: ExploreViewProps) => {
   const [activeCategory, setActiveCategory] = useState<ExploreCategory>('para_ti')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredCommunities = communities.filter(
+    (community) =>
+      community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      community.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      community.species.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const intentOptions = lang === 'es'
     ? [
@@ -37,65 +46,54 @@ export const ExploreView = ({
 
   const communityUses = lang === 'es'
     ? [
-        {
-          title: 'Conecta con gente como tú',
-          body: 'Encuentra grupos por zona, especie, raza, intereses o situaciones que compartes con tu mascota.',
-        },
-        {
-          title: 'Pregunta y comparte',
-          body: 'Resuelve dudas, comparte experiencias y encuentra consejos útiles de otros dueños.',
-        },
-        {
-          title: 'Haz planes juntos',
-          body: 'Organiza caminatas, encuentros, eventos o retos con personas de tu comunidad.',
-        },
-        {
-          title: 'Construye reconocimiento',
-          body: 'Roles, aportes e insignias podrían formar parte de la identidad de tu mascota en PAZO.',
-        },
-        {
-          title: 'Crea tu propio grupo',
-          body: 'Si no existe la comunidad que buscas, cualquier usuario podría crearla y administrar lo básico gratis.',
-        },
+        ['Conecta con gente como tú', 'Grupos por zona, especie, raza, intereses o experiencias compartidas.'],
+        ['Pregunta y comparte', 'Resuelve dudas y comparte consejos útiles con otros dueños.'],
+        ['Haz planes juntos', 'Caminatas, encuentros, eventos o retos con tu comunidad.'],
+        ['Construye reconocimiento', 'Roles, aportes e insignias que podrían mostrarse en el perfil de tu mascota.'],
+        ['Crea tu propio grupo', 'Si no existe, cualquier usuario podría crearlo y administrar lo básico gratis.'],
       ]
     : [
-        {
-          title: 'Connect with people like you',
-          body: 'Find groups by area, species, breed, interests, or situations you share with your pet.',
-        },
-        {
-          title: 'Ask and share',
-          body: 'Solve questions, share experiences, and find useful advice from other owners.',
-        },
-        {
-          title: 'Make plans together',
-          body: 'Organize walks, meetups, events, or challenges with people in your community.',
-        },
-        {
-          title: 'Build recognition',
-          body: 'Roles, contributions, and badges could become part of your pet identity in PAZO.',
-        },
-        {
-          title: 'Create your own group',
-          body: 'If the community you want does not exist, any user could create it and manage the basics for free.',
-        },
+        ['Connect with people like you', 'Groups by area, species, breed, interests, or shared experiences.'],
+        ['Ask and share', 'Solve questions and share useful advice with other owners.'],
+        ['Make plans together', 'Walks, meetups, events, or challenges with your community.'],
+        ['Build recognition', 'Roles, contributions, and badges that could appear on your pet profile.'],
+        ['Create your own group', 'If it does not exist, any user could create it and manage the basics for free.'],
       ]
 
   return (
     <div className="space-y-4 animate-slide-up pb-8">
-      <header className="space-y-1 px-1">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block shadow-xs">
-          {lang === 'es' ? 'Explorar' : 'Explore'}
+      <section className="space-y-2 px-1">
+        <span className="inline-flex rounded-full bg-[#E1E53F] px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#204E4A] shadow-xs">
+          {lang === 'es' ? 'Descubrimiento' : 'Discovery'}
         </span>
-        <h2 className="text-2xl font-black text-[#204E4A] tracking-tight">
-          {lang === 'es' ? 'Descubre más de PAZO' : 'Discover more of PAZO'}
+
+        <h2 className="text-[2rem] leading-none font-black tracking-tight text-[#204E4A]">
+          {lang === 'es' ? 'Encuentra a los tuyos.' : 'Find your crowd.'}
         </h2>
-        <p className="text-xs text-[#5C7470] leading-relaxed">
+
+        <p className="max-w-xl text-xs leading-relaxed text-[#5C7470]">
           {lang === 'es'
-            ? 'Busca mascotas, comunidades, eventos y otras experiencias dentro de PAZO.'
-            : 'Find pets, communities, events, and other experiences across PAZO.'}
+            ? 'Descubre mascotas, comunidades, eventos y nuevas experiencias dentro de PAZO.'
+            : 'Discover pets, communities, events and new experiences across PAZO.'}
         </p>
-      </header>
+      </section>
+
+      <div className="relative pt-1">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder={
+            lang === 'es'
+              ? 'Mascotas, comunidades, eventos...'
+              : 'Pets, communities, events...'
+          }
+          className="w-full rounded-full bg-white py-3.5 pl-11 pr-4 text-xs text-[#204E4A] shadow-sm outline-none placeholder:text-[#8FA09D] focus:ring-2 focus:ring-[#E1E53F]/70"
+        />
+        <div className="pointer-events-none absolute left-3.5 top-1/2 translate-y-[-35%] text-[#5C7470]">
+          <IconExplore size={17} />
+        </div>
+      </div>
 
       <nav className="flex gap-2 overflow-x-auto pb-1">
         {([
@@ -108,10 +106,10 @@ export const ExploreView = ({
             type="button"
             onClick={() => setActiveCategory(key)}
             className={
-              'text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer shrink-0 ' +
+              'shrink-0 rounded-full px-4 py-2.5 text-xs font-extrabold shadow-xs transition-all cursor-pointer ' +
               (activeCategory === key
-                ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-                : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs')
+                ? 'bg-[#204E4A] text-[#E1E53F]'
+                : 'bg-white text-[#5C7470] hover:bg-neutral-50')
             }
           >
             {label}
@@ -120,84 +118,171 @@ export const ExploreView = ({
       </nav>
 
       {activeCategory === 'para_ti' && (
-        <div className="space-y-4">
-          <section className="grid gap-3">
-            <button
-              type="button"
-              onClick={() => setActiveCategory('comunidades')}
-              className="w-full text-left bg-white rounded-[2rem] p-5 shadow-sm hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <span className="text-[9px] uppercase tracking-widest font-extrabold text-[#5C7470]">
-                    {lang === 'es' ? 'En evaluación' : 'Under evaluation'}
-                  </span>
-                  <h3 className="text-base font-black text-[#204E4A] mt-1">
-                    {lang === 'es' ? 'Comunidades' : 'Communities'}
-                  </h3>
-                  <p className="text-[11px] text-[#5C7470] leading-relaxed mt-1.5">
-                    {lang === 'es'
-                      ? 'Grupos creados alrededor de zonas, tipos de mascota, intereses y experiencias compartidas.'
-                      : 'Groups built around areas, pet types, interests, and shared experiences.'}
-                  </p>
-                </div>
-                <span className="w-9 h-9 rounded-full bg-[#E1E53F] text-[#204E4A] flex items-center justify-center font-black shrink-0">
-                  ›
-                </span>
+        <div className="space-y-5">
+          <section className="rounded-[2.2rem] bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[#FAF8F5]">
+                <img
+                  src="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=200&auto=format&fit=crop"
+                  alt="Nube"
+                  className="h-full w-full object-cover"
+                />
               </div>
-            </button>
 
-            <div className="bg-white rounded-[2rem] p-5 shadow-sm">
-              <span className="text-[9px] uppercase tracking-widest font-extrabold text-[#5C7470]">
-                {lang === 'es' ? 'Descubrimiento social' : 'Social discovery'}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-black text-[#204E4A]">Nube</span>
+                  <span className="shrink-0 rounded-full bg-[#FAF8F5] px-2.5 py-1 text-[9px] font-bold text-[#204E4A]">
+                    {lang === 'es' ? 'Conejo • LA' : 'Rabbit • LA'}
+                  </span>
+                </div>
+                <p className="mt-1 truncate text-[11px] text-[#5C7470]">
+                  {lang === 'es'
+                    ? 'Explora rincones tranquilos en compañía.'
+                    : 'Loves calm spots and friendly company.'}
+                </p>
+              </div>
+
+              <span className="shrink-0 rounded-full bg-[#FAF8F5] px-4 py-2 text-[10px] font-extrabold text-[#204E4A]">
+                {lang === 'es' ? 'Vista demo' : 'Demo view'}
               </span>
-              <h3 className="text-base font-black text-[#204E4A] mt-1">
-                {lang === 'es' ? 'Personas y mascotas' : 'People and pets'}
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-sm font-black text-[#204E4A]">
+                {lang === 'es' ? 'Comunidades sugeridas' : 'Suggested communities'}
               </h3>
-              <p className="text-[11px] text-[#5C7470] leading-relaxed mt-1.5">
-                {lang === 'es'
-                  ? 'Explorar también será el punto de entrada para descubrir perfiles y nuevas conexiones.'
-                  : 'Explore will also be the entry point for discovering profiles and new connections.'}
-              </p>
+              <button
+                type="button"
+                onClick={() => setActiveCategory('comunidades')}
+                className="text-[10px] font-extrabold text-[#204E4A] cursor-pointer"
+              >
+                {lang === 'es' ? 'Ver todas' : 'See all'}
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setActiveCategory('eventos')}
-              className="w-full text-left bg-white rounded-[2rem] p-5 shadow-sm hover:shadow-md transition-all cursor-pointer"
-            >
-              <span className="text-[9px] uppercase tracking-widest font-extrabold text-[#5C7470]">
-                {lang === 'es' ? 'Próximamente' : 'Coming later'}
-              </span>
-              <h3 className="text-base font-black text-[#204E4A] mt-1">
-                {lang === 'es' ? 'Eventos y actividades' : 'Events and activities'}
-              </h3>
-              <p className="text-[11px] text-[#5C7470] leading-relaxed mt-1.5">
-                {lang === 'es'
-                  ? 'Planes, encuentros y actividades podrán descubrirse desde este mismo hub cuando el módulo correspondiente esté listo.'
-                  : 'Plans, meetups, and activities can live in this same hub when that module is ready.'}
-              </p>
-            </button>
+            <div className="space-y-3">
+              {filteredCommunities.slice(0, 3).map((community) => (
+                <button
+                  key={community.id}
+                  type="button"
+                  onClick={() => setActiveCategory('comunidades')}
+                  className="w-full rounded-[2rem] bg-white p-4 text-left shadow-sm transition-all hover:shadow-md cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[#FAF8F5]">
+                      <img
+                        src={community.photoUrl}
+                        alt={community.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="truncate text-xs font-black text-[#204E4A]">
+                          {community.name}
+                        </h4>
+                        <span className="shrink-0 rounded-full bg-[#FAF8F5] px-2 py-0.5 text-[8px] font-extrabold uppercase tracking-wide text-[#5C7470]">
+                          {community.species}
+                        </span>
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-[#5C7470]">
+                        {community.tagline}
+                      </p>
+                      <span className="mt-1.5 block text-[9px] font-bold text-[#204E4A]/55">
+                        {lang === 'es' ? 'Vista previa conceptual' : 'Concept preview'}
+                      </span>
+                    </div>
+
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E1E53F] text-lg font-black text-[#204E4A]">
+                      ›
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[2rem] bg-white p-5 shadow-sm">
+            <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#5C7470]">
+              {lang === 'es' ? 'También en Explorar' : 'Also in Explore'}
+            </span>
+            <h3 className="mt-1 text-sm font-black text-[#204E4A]">
+              {lang === 'es' ? 'Personas, mascotas y eventos' : 'People, pets and events'}
+            </h3>
+            <p className="mt-1.5 text-[11px] leading-relaxed text-[#5C7470]">
+              {lang === 'es'
+                ? 'Explorar seguirá creciendo como el hub para descubrir nuevas conexiones y experiencias de PAZO.'
+                : 'Explore will keep growing as the hub for discovering new PAZO connections and experiences.'}
+            </p>
           </section>
         </div>
       )}
 
       {activeCategory === 'comunidades' && (
         <div className="space-y-5">
-          <section className="rounded-[2.3rem] bg-white p-5 shadow-sm overflow-hidden relative">
-            <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#E1E53F]/25 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10">
-              <span className="text-[9px] uppercase tracking-widest font-extrabold text-[#5C7470]">
+          <section className="rounded-[2.2rem] bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span className="rounded-full bg-[#FAF8F5] px-3 py-1 text-[9px] font-extrabold uppercase tracking-widest text-[#5C7470]">
                 {lang === 'es' ? 'Vista previa · aún no activa' : 'Preview · not live yet'}
               </span>
-              <h3 className="text-xl font-black text-[#204E4A] mt-1.5">
-                {lang === 'es' ? '¿Qué serían las Comunidades?' : 'What would Communities be?'}
+            </div>
+
+            <h3 className="mt-3 text-xl font-black text-[#204E4A]">
+              {lang === 'es' ? 'Comunidades en PAZO' : 'Communities in PAZO'}
+            </h3>
+            <p className="mt-2 text-xs leading-relaxed text-[#5C7470]">
+              {lang === 'es'
+                ? 'Espacios creados por usuarios para reunir personas y mascotas que comparten una zona, especie, raza, actividad, duda o interés.'
+                : 'Spaces created by users to bring together people and pets who share an area, species, breed, activity, question, or interest.'}
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <div className="px-1">
+              <h3 className="text-sm font-black text-[#204E4A]">
+                {lang === 'es' ? 'Ejemplos de comunidades' : 'Community examples'}
               </h3>
-              <p className="text-xs text-[#5C7470] leading-relaxed mt-2">
+              <p className="mt-1 text-[10px] text-[#5C7470]">
                 {lang === 'es'
-                  ? 'Espacios creados por usuarios de PAZO para reunir personas y mascotas que comparten una zona, una raza, una especie, una actividad, una duda o un interés.'
-                  : 'Spaces created by PAZO users to bring together people and pets who share an area, breed, species, activity, question, or interest.'}
+                  ? 'Son ejemplos para visualizar la idea. No son grupos activos ni tienen miembros reales.'
+                  : 'These examples only help visualize the idea. They are not live groups and have no real members.'}
               </p>
+            </div>
+
+            <div className="space-y-3">
+              {filteredCommunities.slice(0, 3).map((community) => (
+                <article
+                  key={community.id}
+                  className="rounded-[2rem] bg-white p-4 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[#FAF8F5]">
+                      <img
+                        src={community.photoUrl}
+                        alt={community.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="truncate text-xs font-black text-[#204E4A]">
+                          {community.name}
+                        </h4>
+                        <span className="rounded-full bg-[#FAF8F5] px-2 py-0.5 text-[8px] font-extrabold uppercase tracking-wide text-[#5C7470]">
+                          {community.species}
+                        </span>
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-[#5C7470]">
+                        {community.tagline}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
 
@@ -209,55 +294,21 @@ export const ExploreView = ({
             </div>
 
             <div className="grid gap-3">
-              {communityUses.map((item, index) => (
+              {communityUses.map(([title, body], index) => (
                 <div
-                  key={item.title}
-                  className="bg-white rounded-[1.8rem] p-4 shadow-sm flex gap-3 items-start"
+                  key={title}
+                  className="rounded-[1.8rem] bg-white p-4 shadow-sm"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-[#204E4A] text-[#E1E53F] flex items-center justify-center text-[10px] font-black shrink-0">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black text-[#204E4A]">{item.title}</h4>
-                    <p className="text-[11px] text-[#5C7470] leading-relaxed mt-1">{item.body}</p>
+                  <div className="flex gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#204E4A] text-[10px] font-black text-[#E1E53F]">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-[#204E4A]">{title}</h4>
+                      <p className="mt-1 text-[11px] leading-relaxed text-[#5C7470]">{body}</p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <div className="px-1">
-              <h3 className="text-sm font-black text-[#204E4A]">
-                {lang === 'es' ? 'Ejemplos de comunidades posibles' : 'Examples of possible communities'}
-              </h3>
-              <p className="text-[10px] text-[#5C7470] mt-1">
-                {lang === 'es'
-                  ? 'Son ejemplos para entender la idea. No son grupos activos ni tienen miembros reales.'
-                  : 'These are concept examples only. They are not live groups and do not have real members.'}
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              {communities.slice(0, 3).map((community) => (
-                <article
-                  key={community.id}
-                  className="bg-white rounded-[2rem] p-4 shadow-sm flex items-center gap-3"
-                >
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-[#FAF8F5] shrink-0">
-                    <img
-                      src={community.photoUrl}
-                      alt={community.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-black text-[#204E4A]">{community.name}</h4>
-                    <p className="text-[11px] text-[#5C7470] mt-1 leading-relaxed">
-                      {community.tagline}
-                    </p>
-                  </div>
-                </article>
               ))}
             </div>
           </section>
@@ -278,17 +329,17 @@ export const ExploreView = ({
       )}
 
       {activeCategory === 'eventos' && (
-        <section className="bg-white rounded-[2rem] p-5 shadow-sm">
-          <span className="text-[9px] uppercase tracking-widest font-extrabold text-[#5C7470]">
-            {lang === 'es' ? 'En preparación' : 'In preparation'}
+        <section className="rounded-[2.2rem] bg-white p-5 shadow-sm">
+          <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#5C7470]">
+            {lang === 'es' ? 'Próximamente' : 'Coming later'}
           </span>
-          <h3 className="text-base font-black text-[#204E4A] mt-1">
+          <h3 className="mt-1 text-base font-black text-[#204E4A]">
             {lang === 'es' ? 'Eventos y actividades' : 'Events and activities'}
           </h3>
-          <p className="text-[11px] text-[#5C7470] leading-relaxed mt-2">
+          <p className="mt-2 text-[11px] leading-relaxed text-[#5C7470]">
             {lang === 'es'
-              ? 'Explorar seguirá siendo el lugar donde aparecerán eventos cuando esa experiencia pase su propio proceso de validación e implementación.'
-              : 'Explore will remain the place where events appear after that experience passes its own validation and implementation process.'}
+              ? 'Explorar será también el lugar para encontrar planes, encuentros y actividades cuando ese módulo pase su propia validación.'
+              : 'Explore will also be the place to find plans, meetups, and activities once that module passes its own validation.'}
           </p>
         </section>
       )}
