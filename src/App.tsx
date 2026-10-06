@@ -918,19 +918,156 @@ function PazoMain() {
     )
   }
 
-  const handleToggleCompleteCare = (id: string) => {
-    setCareItems((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c))
-    )
+  const refreshCareReminders = async (petsToCheck: Pet[] = pets) => {
+    try {
+      const candidates = await fetchCareReminderCandidates(
+        petsToCheck.map((pet) => pet.id)
+      )
+      setCareReminderItems(candidates.filter(isCareReminderRelevant))
+    } catch (error) {
+      console.error('Error loading Agenda reminders:', error)
+    }
   }
 
-  const handleAddCare = (item: Omit<CareItem, 'id'>) => {
-    const newItem: CareItem = {
-      ...item,
-      id: `care-${Date.now()}`,
+  const loadCareForPet = async (petId: string) => {
+    const loadVersion = ++careLoadVersionRef.current
+    setIsCareLoading(true)
+    setCareError('')
+    careHistoryOffsetRef.current = 0
+    setHasMoreCareHistory(true)
+
+    try {
+      const [activeItems, history] = await Promise.all([
+        fetchActiveCareItems(petId),
+        fetchCareHistory(petId, 0, CARE_HISTORY_PAGE_SIZE),
+      ])
+
+      if (
+        loadVersion !== careLoadVersionRef.current
+        || activePetIdRef.current !== petId
+      ) {
+        return
+      }
+
+      setCareItems(sortCareItems(activeItems))
+      setCareHistory(history)
+      careHistoryOffsetRef.current = history.length
+      setHasMoreCareHistory(history.length === CARE_HISTORY_PAGE_SIZE)
+    } catch (error: any) {
+      console.error('Error loading Agenda:', error)
+
+      if (
+        loadVersion === careLoadVersionRef.current
+        && activePetIdRef.current === petId
+      ) {
+        setCareItems([])
+        setCareHistory([])
+        setCareError(error?.message || 'Agenda unavailable')
+      }
+    } finally {
+      if (loadVersion === careLoadVersionRef.current) {
+        setIsCareLoading(false)
+      }
     }
-    setCareItems((prev) => [newItem, ...prev])
   }
+
+  const loadMoreCareHistory = async () => {
+    if (
+      careHistoryLoadInFlightRef.current
+      || !hasMoreCareHistory
+      || !currentPet?.id
+    ) {
+      return
+    }
+
+    const petId = currentPet.id
+    careHistoryLoadInFlightRef.current = true
+    setIsCareHistoryLoading(true)
+
+    try {
+      const nextPage = await fetchCareHistory(
+        petId,
+        careHistoryOffsetRef.current,
+        CARE_HISTORY_PAGE_SIZE
+      )
+
+      if (activePetIdRef.current !== petId) return
+
+      careHistoryOffsetRef.current += nextPage.length
+      setHasMoreCareHistory(nextPage.length === CARE_HISTORY_PAGE_SIZE)
+      setCareHistory((previous) => {
+        const existing = new Set(previous.map((item) => item.id))
+        return [
+          ...previous,
+          ...nextPage.filter((item) => !existing.has(item.id)),
+        ]
+      })
+    } catch (error) {
+      console.error('Error loading more Agenda history:', error)
+    } finally {
+      careHistoryLoadInFlightRef.current = false
+      setIsCareHistoryLoading(false)
+    }
+  }
+
+  const reloadCurrentCare = async () => {
+    if (!currentPet?.id) return
+    await loadCareForPet(currentPet.id)
+    await refreshCareReminders()
+  }
+
+  const handleCreateCare = async (input: CareItemInput) => {
+    const petId = currentPet.id
+    const created = await createCareItem(petId, input)
+
+    if (activePetIdRef.current === petId) {
+      setCareItems((previous) => sortCareItems([...previous, created]))
+    }
+
+    await refreshCareReminders()
+  }
+
+  const handleUpdateCare = async (
+    careItemId: string,
+    input: CareItemInput
+  ) => {
+    const petId = currentPet.id
+    const updated = await updateCareItem(careItemId, input)
+
+    if (activePetIdRef.current === petId) {
+      setCareItems((previous) =>
+        sortCareItems(
+          previous.map((item) => item.id === updated.id ? updated : item)
+        )
+      )
+    }
+
+    await refreshCareReminders()
+  }
+
+  const handleArchiveCare = async (careItemId: string) => {
+    await archiveCareItem(careItemId)
+    setCareItems((previous) =>
+      previous.filter((item) => item.id !== careItemId)
+    )
+    await refreshCareReminders()
+  }
+
+  const handleCompleteCare = async (item: CareItem) => {
+    await completeCareItem(item)
+    await reloadCurrentCare()
+  }
+
+  const handleUndoCareCompletion = async (completion: CareCompletion) => {
+    await undoCareCompletion(completion.id)
+    await reloadCurrentCare()
+  }
+
+  useEffect(() => {
+    if (isCareOpen && currentPet?.id) {
+      void loadCareForPet(currentPet.id)
+    }
+  }, [isCareOpen, currentPet?.id])
 
   const handleSendMessage = (convId: string, text: string) => {
     setConversations((prev) =>
