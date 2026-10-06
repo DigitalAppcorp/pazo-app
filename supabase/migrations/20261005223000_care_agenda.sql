@@ -2,9 +2,14 @@ begin;
 
 -- =============================================================================
 -- PAZO — Fase 9A
--- Agenda/Cuidados: persistencia, historial, recurrencia y operaciones atómicas
+-- Agenda/Cuidados: persistencia, historial, recurrencia y operaciones atómicas.
 -- Preparada para revisión. NO aplicada a Supabase desde esta rama.
 -- =============================================================================
+
+create schema if not exists care_private;
+alter schema care_private owner to postgres;
+revoke all on schema care_private from public, anon, authenticated;
+grant usage on schema care_private to authenticated, service_role;
 
 create table public.care_items (
   id uuid primary key default gen_random_uuid(),
@@ -80,10 +85,10 @@ alter table public.care_items enable row level security;
 alter table public.care_completions enable row level security;
 
 -- -----------------------------------------------------------------------------
--- Normalización/validación interna
+-- Helpers internos
 -- -----------------------------------------------------------------------------
 
-create or replace function private.prepare_care_item()
+create or replace function care_private.prepare_care_item()
 returns trigger
 language plpgsql
 security definer
@@ -110,13 +115,15 @@ begin
 end;
 $function$;
 
-revoke all on function private.prepare_care_item() from public;
+alter function care_private.prepare_care_item() owner to postgres;
+revoke all on function care_private.prepare_care_item()
+from public, anon, authenticated;
 
 create trigger trg_prepare_care_item
 before insert or update on public.care_items
-for each row execute function private.prepare_care_item();
+for each row execute function care_private.prepare_care_item();
 
-create or replace function private.next_care_due_date(
+create or replace function care_private.next_care_due_date(
   p_base_date date,
   p_recurrence text
 )
@@ -170,7 +177,9 @@ begin
 end;
 $function$;
 
-revoke all on function private.next_care_due_date(date, text) from public;
+alter function care_private.next_care_due_date(date, text) owner to postgres;
+revoke all on function care_private.next_care_due_date(date, text)
+from public, anon, authenticated;
 
 -- -----------------------------------------------------------------------------
 -- RLS
@@ -270,10 +279,10 @@ grant all on table public.care_items to service_role;
 grant all on table public.care_completions to service_role;
 
 -- -----------------------------------------------------------------------------
--- Completar cuidado de forma atómica
+-- Core privilegiado: completar
 -- -----------------------------------------------------------------------------
 
-create or replace function public.complete_care_item(
+create or replace function care_private.complete_care_item_core(
   p_care_item_id uuid,
   p_expected_due_date date,
   p_expected_due_time time without time zone default null
@@ -357,7 +366,7 @@ begin
       (v_completed_at at time zone v_item.timezone)::date;
 
     v_next_due_date :=
-      private.next_care_due_date(v_local_completion_date, v_item.recurrence);
+      care_private.next_care_due_date(v_local_completion_date, v_item.recurrence);
 
     update public.care_items
     set due_date = v_next_due_date,
@@ -375,17 +384,49 @@ begin
 end;
 $function$;
 
+alter function care_private.complete_care_item_core(uuid, date, time without time zone)
+owner to postgres;
+revoke all on function care_private.complete_care_item_core(uuid, date, time without time zone)
+from public, anon, authenticated;
+grant execute on function care_private.complete_care_item_core(uuid, date, time without time zone)
+to authenticated, service_role;
+
+create or replace function public.complete_care_item(
+  p_care_item_id uuid,
+  p_expected_due_date date,
+  p_expected_due_time time without time zone default null
+)
+returns table (
+  completion_id uuid,
+  care_item_id uuid,
+  care_status text,
+  next_due_date date,
+  completed_at timestamptz
+)
+language sql
+security invoker
+set search_path = ''
+as $function$
+  select *
+  from care_private.complete_care_item_core(
+    p_care_item_id,
+    p_expected_due_date,
+    p_expected_due_time
+  );
+$function$;
+
+alter function public.complete_care_item(uuid, date, time without time zone)
+owner to postgres;
 revoke all on function public.complete_care_item(uuid, date, time without time zone)
 from public, anon;
-
 grant execute on function public.complete_care_item(uuid, date, time without time zone)
 to authenticated;
 
 -- -----------------------------------------------------------------------------
--- Deshacer únicamente la completion más reciente del cuidado
+-- Core privilegiado: deshacer latest completion
 -- -----------------------------------------------------------------------------
 
-create or replace function public.undo_care_completion(
+create or replace function care_private.undo_care_completion_core(
   p_completion_id uuid
 )
 returns table (
@@ -458,17 +499,41 @@ begin
 end;
 $function$;
 
+alter function care_private.undo_care_completion_core(uuid)
+owner to postgres;
+revoke all on function care_private.undo_care_completion_core(uuid)
+from public, anon, authenticated;
+grant execute on function care_private.undo_care_completion_core(uuid)
+to authenticated, service_role;
+
+create or replace function public.undo_care_completion(
+  p_completion_id uuid
+)
+returns table (
+  care_item_id uuid,
+  restored_due_date date,
+  restored_due_time time without time zone,
+  care_status text
+)
+language sql
+security invoker
+set search_path = ''
+as $function$
+  select *
+  from care_private.undo_care_completion_core(p_completion_id);
+$function$;
+
+alter function public.undo_care_completion(uuid) owner to postgres;
 revoke all on function public.undo_care_completion(uuid)
 from public, anon;
-
 grant execute on function public.undo_care_completion(uuid)
 to authenticated;
 
 -- -----------------------------------------------------------------------------
--- Archivar cuidado activo (producto: "Eliminar")
+-- Core privilegiado: archivar
 -- -----------------------------------------------------------------------------
 
-create or replace function public.archive_care_item(
+create or replace function care_private.archive_care_item_core(
   p_care_item_id uuid
 )
 returns boolean
@@ -505,9 +570,26 @@ begin
 end;
 $function$;
 
+alter function care_private.archive_care_item_core(uuid) owner to postgres;
+revoke all on function care_private.archive_care_item_core(uuid)
+from public, anon, authenticated;
+grant execute on function care_private.archive_care_item_core(uuid)
+to authenticated, service_role;
+
+create or replace function public.archive_care_item(
+  p_care_item_id uuid
+)
+returns boolean
+language sql
+security invoker
+set search_path = ''
+as $function$
+  select care_private.archive_care_item_core(p_care_item_id);
+$function$;
+
+alter function public.archive_care_item(uuid) owner to postgres;
 revoke all on function public.archive_care_item(uuid)
 from public, anon;
-
 grant execute on function public.archive_care_item(uuid)
 to authenticated;
 
