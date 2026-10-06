@@ -11,7 +11,7 @@ GRANT USAGE ON SCHEMA care_private TO authenticated, service_role;
 
 CREATE TABLE public.care_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  pet_id uuid NOT NULL REFERENCES public.pets(id) ON DELETE CASCADE,
+  pet_id uuid NOT NULL REFERENCES public.pets(id),
   title text NOT NULL,
   category text NOT NULL,
   due_date date NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE public.care_items (
 CREATE TABLE public.care_completions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   care_item_id uuid NOT NULL REFERENCES public.care_items(id),
-  pet_id uuid NOT NULL REFERENCES public.pets(id) ON DELETE CASCADE,
+  pet_id uuid NOT NULL REFERENCES public.pets(id),
   scheduled_date date NOT NULL,
   scheduled_time time without time zone,
   completed_at timestamptz NOT NULL DEFAULT now(),
