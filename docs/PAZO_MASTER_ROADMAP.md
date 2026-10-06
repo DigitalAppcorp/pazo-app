@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-06  
-**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades sigue en validación y Fase 9A Agenda/Cuidados está COMPLETADA en `main`. El siguiente candidato del carril de implementación es 9B Documentos privados, pendiente de pasar sus gates antes de programarse.
+**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades sigue en validación; Fase 9A Agenda/Cuidados y Fase 9B Documentos privados están COMPLETADAS en `main`. No hay un nuevo módulo autorizado en el Carril de Implementación hasta pasar sus gates.
 
 ---
 
@@ -147,6 +147,7 @@ Actualmente el núcleo persistente usa, entre otras:
 - `pet_places`
 - `care_items`
 - `care_completions`
+- `pet_documents`
 
 ## Módulos reales
 
@@ -170,6 +171,7 @@ Actualmente el núcleo persistente usa, entre otras:
 - Persistencia de scroll entre pestañas.
 - Protección contra follows entre mascotas del mismo dueño.
 - Agenda/Cuidados persistente por mascota.
+- Documentos privados persistentes por mascota.
 
 ## Módulos todavía mock, parciales o de demostración
 
@@ -177,7 +179,6 @@ Actualmente el núcleo persistente usa, entre otras:
 - Eventos.
 - Mapa real.
 - Check-ins.
-- Documentos privados.
 - Mensajería 1 a 1.
 - Centro general de notificaciones.
 - Crear lugar.
@@ -443,7 +444,7 @@ Alcance funcional:
 - Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
+**Estado: COMPLETADA**
 
 **Sub-ruta de producto:** `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`  
 **Arquitectura técnica:** `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`
@@ -452,32 +453,29 @@ Gates 0–7 cerrados. Resultado Gate 5: **MVP REDUCIDO**.
 
 Núcleo aprobado: documentos privados owner-only. Compartir externamente queda fuera del MVP y se reevalúa después.
 
-### Estado técnico de implementación
-- rama: `feat/phase-9b-documents`;
-- tipos reales `PetDocument` preparados;
-- mocks `INITIAL_DOCS` y `PrivateDoc` retirados;
-- `documentService.ts` preparado;
-- `DocumentsModal.tsx` preparado;
-- entrada independiente de Documentos en PetView;
-- carga inicial, contador, F5, cambio de mascota y paginación preparados;
-- upload/preview/download/edit/delete preparados;
-- lifecycle recuperable `uploading/active/deleting`;
-- migración base `20261006090000_private_pet_documents.sql` aplicada a Supabase;
-- hardening `20261006092000_fix_private_document_storage_policies.sql` aplicado después de detectar y corregir resolución ambigua de `name` en policies;
-- migraciones registradas en Supabase como `20261006090551 private_pet_documents` y `20261006090654 fix_private_document_storage_policies`;
-- bucket privado `pet-documents` creado y verificado;
-- wrappers públicos SECURITY INVOKER + helpers privilegiados en `document_private`;
-- preflight real: no existen tabla/bucket/policies/RPCs 9B con nombres en conflicto;
-- `pets.id` y `pets.owner_id` UUID compatibles;
-- Storage metadata actual confirma `mimetype` y `size` disponibles para finalize;
-- Advisors baseline registrados antes de 9B;
-- pendiente: `npm run build` local;
+### Estado técnico final
+- PR #14 fusionado a `main`;
+- commit de merge: `6f833b779ef1a62d7321bc50dbab8c220f92a1d3`;
 - build local PASS confirmado por Product Owner;
-- pruebas transaccionales DB/RLS pasaron con ROLLBACK: owner/non-owner, reserva, finalize, metadata edit, validaciones, cancel upload, begin/finalize delete metadata y Storage visibility;
+- prueba visual/end-to-end aprobada por Product Owner;
+- tipos reales `PetDocument`;
+- mocks `INITIAL_DOCS` y `PrivateDoc` retirados;
+- `documentService.ts` y `DocumentsModal.tsx` reales;
+- carga inicial, contador, F5, cambio de mascota y paginación reales;
+- upload/preview/download/edit/delete reales;
+- lifecycle recuperable `uploading/active/deleting`;
+- migración base aplicada y registrada como `20261006090551 private_pet_documents`;
+- hardening de políticas aplicado y registrado como `20261006090654 fix_private_document_storage_policies`;
+- bucket privado `pet-documents` verificado con límite 10 MB y MIME PDF/JPEG/PNG/WEBP;
+- wrappers públicos SECURITY INVOKER + helpers privilegiados en `document_private`;
+- RLS/grants owner-only verificados;
 - upload arbitrario sin reserva bloqueado;
-- Security Advisor post-apply sin findings nuevos de 9B;
-- no quedaron filas/objetos de prueba;
-- pendiente: prueba visual/end-to-end con Storage API real (upload/preview/download/delete/F5/multi-pet).
+- pruebas transaccionales DB/RLS aprobadas con `ROLLBACK`;
+- aislamiento owner/non-owner aprobado;
+- Security Advisor sin hallazgos nuevos atribuibles a 9B;
+- prueba real de Storage API aprobada: upload, preview, download, edit, delete, F5 y multi-pet;
+- bug visual de delete diferido corregido con reintentos de finalize + retiro inmediato de UI + reconciliación en background;
+- compartir externamente permanece fuera del MVP.
 
 Se separa de Agenda por mayor superficie de seguridad.
 
@@ -794,7 +792,7 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - `INITIAL_PETS` sigue sirviendo como fallback inicial en memoria; revisar cuando se termine la eliminación de mocks.
 - MapView es placeholder.
 - comunidades son mock.
-- Documentos privados siguen mock/local; Agenda/Cuidados es real desde 9A.
+- Agenda/Cuidados y Documentos privados son reales y persistentes.
 - Messages son mock/local.
 - algunos flujos del menú Crear anuncian “próximamente”.
 - bundle ya ha mostrado warning de chunk >500 kB; atender en Fase 15.
@@ -833,17 +831,20 @@ Usar únicamente:
 ## Carril de Implementación
 ### 9A Agenda/Cuidados
 - COMPLETADA;
-- backend aplicado;
-- build y prueba visual aprobados;
 - PR #12 fusionado a `main`.
 
 ### 9B Documentos privados
-1. Gates 0–7 cerrados;
-2. resultado: **MVP REDUCIDO**;
-3. producto y arquitectura cerrados;
-4. siguiente acción: Gate 8 en rama propia;
-5. preparar frontend + migración + pruebas sin aplicar Supabase;
-6. pedir autorización explícita antes de mutar Supabase.
+- COMPLETADA;
+- backend y Storage privado aplicados;
+- build, seguridad y prueba visual aprobados;
+- PR #14 fusionado a `main`.
+
+### Siguiente módulo
+- no hay un módulo nuevo autorizado todavía;
+- Comunidades permanece en validación;
+- Mapa/Lugares requiere cerrar decisiones de alcance, proveedor y privacidad;
+- Mensajería permanece pospuesta/reevaluación;
+- cualquier nuevo módulo debe entrar por `docs/PAZO_MODULE_LIFECYCLE.md` y cerrar sus gates antes de código.
 
 ## Regla
 La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
