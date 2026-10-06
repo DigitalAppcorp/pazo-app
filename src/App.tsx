@@ -8,14 +8,32 @@ import {
   fetchUnreadNotificationCount,
   markNotificationRead,
 } from './services/rescueService'
-import type { Pet, Post, Community, CareItem, Conversation, PazoNotification } from './types/pazo'
+import {
+  CARE_HISTORY_PAGE_SIZE,
+  archiveCareItem,
+  completeCareItem,
+  createCareItem,
+  fetchActiveCareItems,
+  fetchCareHistory,
+  fetchCareReminderCandidates,
+  undoCareCompletion,
+  updateCareItem,
+} from './services/careService'
+import type {
+  Pet,
+  Post,
+  Community,
+  CareItem,
+  CareCompletion,
+  CareItemInput,
+  Conversation,
+  PazoNotification,
+} from './types/pazo'
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
   INITIAL_COMMUNITIES,
   INITIAL_PLACES,
-  INITIAL_CARE_ITEMS,
-  INITIAL_DOCS,
   INITIAL_CONVERSATIONS,
 } from './data/mockData'
 
@@ -52,6 +70,63 @@ const getPublicRescueRoute = () => {
 
 const FEED_PAGE_SIZE = 10
 const NOTIFICATIONS_PAGE_SIZE = 10
+
+const dateKey = (date = new Date()) =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-')
+
+const zonedDateKey = (timezone: string) => {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date())
+
+    const values = Object.fromEntries(
+      parts
+        .filter((part) => part.type !== 'literal')
+        .map((part) => [part.type, part.value])
+    )
+
+    return `${values.year}-${values.month}-${values.day}`
+  } catch {
+    return dateKey()
+  }
+}
+
+const calendarDayDiff = (fromDate: string, toDate: string) => {
+  const [fromYear, fromMonth, fromDay] = fromDate.split('-').map(Number)
+  const [toYear, toMonth, toDay] = toDate.split('-').map(Number)
+
+  const from = Date.UTC(fromYear, fromMonth - 1, fromDay)
+  const to = Date.UTC(toYear, toMonth - 1, toDay)
+
+  return Math.round((to - from) / 86400000)
+}
+
+const isCareReminderRelevant = (item: CareItem) => {
+  const today = zonedDateKey(item.timezone)
+  const daysUntilDue = calendarDayDiff(today, item.dueDate)
+
+  if (item.reminderDaysBefore === null) return false
+  if (daysUntilDue <= 0) return true
+  return daysUntilDue <= item.reminderDaysBefore
+}
+
+const sortCareItems = (items: CareItem[]) =>
+  [...items].sort((a, b) => {
+    const dateCompare = a.dueDate.localeCompare(b.dueDate)
+    if (dateCompare !== 0) return dateCompare
+
+    const aTime = a.dueTime || '99:99'
+    const bTime = b.dueTime || '99:99'
+    return aTime.localeCompare(bTime)
+  })
 
 interface FeedPaginationState {
   petId: string
@@ -126,8 +201,16 @@ function PazoMain() {
   })
   const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
-  const [careItems, setCareItems] = useState<CareItem[]>(INITIAL_CARE_ITEMS)
-  const [docs] = useState(INITIAL_DOCS)
+  const [careItems, setCareItems] = useState<CareItem[]>([])
+  const [careHistory, setCareHistory] = useState<CareCompletion[]>([])
+  const [isCareLoading, setIsCareLoading] = useState(false)
+  const [careError, setCareError] = useState('')
+  const [isCareHistoryLoading, setIsCareHistoryLoading] = useState(false)
+  const [hasMoreCareHistory, setHasMoreCareHistory] = useState(true)
+  const [careReminderItems, setCareReminderItems] = useState<CareItem[]>([])
+  const careLoadVersionRef = useRef(0)
+  const careHistoryOffsetRef = useRef(0)
+  const careHistoryLoadInFlightRef = useRef(false)
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
   const [notifications, setNotifications] = useState<PazoNotification[]>([])
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
@@ -497,8 +580,14 @@ function PazoMain() {
     activePetIdRef.current = pet.id
     setCurrentPet(pet)
     setProfilePosts([])
+    setCareItems([])
+    setCareHistory([])
+    setCareError('')
+    careHistoryOffsetRef.current = 0
+    setHasMoreCareHistory(true)
     setSelectedPublicProfileId(null)
     void loadFeedForPet(pet)
+    void loadCareForPet(pet.id)
   }
 
   useEffect(() => {
@@ -537,7 +626,11 @@ function PazoMain() {
             localStorage.setItem(`pitch_seen_${user.id}`, 'true')
           }
 
-          await loadFeedForPet(activePet)
+          await Promise.all([
+            loadFeedForPet(activePet),
+            loadCareForPet(activePet.id),
+            refreshCareReminders(ownedPets),
+          ])
         } else {
           ownedPetIdsRef.current = []
           setPets([])
@@ -860,19 +953,149 @@ function PazoMain() {
     )
   }
 
-  const handleToggleCompleteCare = (id: string) => {
-    setCareItems((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c))
-    )
+  const refreshCareReminders = async (petsToCheck: Pet[] = pets) => {
+    try {
+      const candidates = await fetchCareReminderCandidates(
+        petsToCheck.map((pet) => pet.id)
+      )
+      setCareReminderItems(candidates.filter(isCareReminderRelevant))
+    } catch (error) {
+      console.error('Error loading Agenda reminders:', error)
+    }
   }
 
-  const handleAddCare = (item: Omit<CareItem, 'id'>) => {
-    const newItem: CareItem = {
-      ...item,
-      id: `care-${Date.now()}`,
+  const loadCareForPet = async (petId: string) => {
+    const loadVersion = ++careLoadVersionRef.current
+    setIsCareLoading(true)
+    setCareError('')
+    careHistoryOffsetRef.current = 0
+    setHasMoreCareHistory(true)
+
+    try {
+      const [activeItems, history] = await Promise.all([
+        fetchActiveCareItems(petId),
+        fetchCareHistory(petId, 0, CARE_HISTORY_PAGE_SIZE),
+      ])
+
+      if (
+        loadVersion !== careLoadVersionRef.current
+        || activePetIdRef.current !== petId
+      ) {
+        return
+      }
+
+      setCareItems(sortCareItems(activeItems))
+      setCareHistory(history)
+      careHistoryOffsetRef.current = history.length
+      setHasMoreCareHistory(history.length === CARE_HISTORY_PAGE_SIZE)
+    } catch (error: any) {
+      console.error('Error loading Agenda:', error)
+
+      if (
+        loadVersion === careLoadVersionRef.current
+        && activePetIdRef.current === petId
+      ) {
+        setCareItems([])
+        setCareHistory([])
+        setCareError(error?.message || 'Agenda unavailable')
+      }
+    } finally {
+      if (loadVersion === careLoadVersionRef.current) {
+        setIsCareLoading(false)
+      }
     }
-    setCareItems((prev) => [newItem, ...prev])
   }
+
+  const loadMoreCareHistory = async () => {
+    if (
+      careHistoryLoadInFlightRef.current
+      || !hasMoreCareHistory
+      || !currentPet?.id
+    ) {
+      return
+    }
+
+    const petId = currentPet.id
+    careHistoryLoadInFlightRef.current = true
+    setIsCareHistoryLoading(true)
+
+    try {
+      const nextPage = await fetchCareHistory(
+        petId,
+        careHistoryOffsetRef.current,
+        CARE_HISTORY_PAGE_SIZE
+      )
+
+      if (activePetIdRef.current !== petId) return
+
+      careHistoryOffsetRef.current += nextPage.length
+      setHasMoreCareHistory(nextPage.length === CARE_HISTORY_PAGE_SIZE)
+      setCareHistory((previous) => {
+        const existing = new Set(previous.map((item) => item.id))
+        return [
+          ...previous,
+          ...nextPage.filter((item) => !existing.has(item.id)),
+        ]
+      })
+    } catch (error) {
+      console.error('Error loading more Agenda history:', error)
+    } finally {
+      careHistoryLoadInFlightRef.current = false
+      setIsCareHistoryLoading(false)
+    }
+  }
+
+  const refreshCareAfterMutation = async (petId: string) => {
+    if (activePetIdRef.current === petId) {
+      await loadCareForPet(petId)
+    }
+    await refreshCareReminders()
+  }
+
+  const handleCreateCare = async (input: CareItemInput) => {
+    const petId = currentPet.id
+    await createCareItem(petId, input)
+    await refreshCareAfterMutation(petId)
+  }
+
+  const handleUpdateCare = async (
+    careItemId: string,
+    input: CareItemInput
+  ) => {
+    const petId = currentPet.id
+    await updateCareItem(careItemId, input)
+    await refreshCareAfterMutation(petId)
+  }
+
+  const handleArchiveCare = async (careItemId: string) => {
+    const petId = currentPet.id
+    await archiveCareItem(careItemId)
+    await refreshCareAfterMutation(petId)
+  }
+
+  const handleCompleteCare = async (item: CareItem) => {
+    await completeCareItem(item)
+    await refreshCareAfterMutation(item.petId)
+  }
+
+  const handleUndoCareCompletion = async (completion: CareCompletion) => {
+    await undoCareCompletion(completion.id)
+    await refreshCareAfterMutation(completion.petId)
+  }
+
+  useEffect(() => {
+    if (isCareOpen && currentPet?.id) {
+      void loadCareForPet(currentPet.id)
+    }
+  }, [isCareOpen, currentPet?.id])
+
+  useEffect(() => {
+    if (user?.id && !isOnboardingActive && pets.length > 0) {
+      void refreshCareReminders()
+    } else if (!user?.id) {
+      setCareReminderItems([])
+    }
+  }, [user?.id, isOnboardingActive, pets.length])
 
   const handleSendMessage = (convId: string, text: string) => {
     setConversations((prev) =>
@@ -1034,6 +1257,10 @@ function PazoMain() {
     setIsAlertOpen(true)
   }
 
+  const currentPetCareReminder = careReminderItems.find(
+    (item) => item.petId === currentPet.id
+  )
+
   if (publicRescueRoute.token) {
     return (
       <PublicRescueView
@@ -1112,7 +1339,11 @@ function PazoMain() {
                   localStorage.setItem(`active_pet_${user.id}`, newPet.id)
                 }
                 setIsOnboardingActive(false)
+                setCareItems([])
+                setCareHistory([])
                 void loadFeedForPet(newPet)
+                void loadCareForPet(newPet.id)
+                void refreshCareReminders([newPet])
               }}
             />
           ) : (
@@ -1407,8 +1638,8 @@ function PazoMain() {
                       }}
                       onAddPet={() => setIsAddPetOpen(true)}
                       careItems={careItems}
-                      onToggleCompleteCare={handleToggleCompleteCare}
-                      docs={docs}
+                      careReminderItem={currentPetCareReminder}
+                      onCompleteCare={handleCompleteCare}
                       onOpenQRPassport={() => setIsPassportOpen(true)}
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
@@ -1496,9 +1727,18 @@ function PazoMain() {
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
               careItems={careItems}
-              onToggleCare={handleToggleCompleteCare}
-              onAddCare={handleAddCare}
-              docs={docs}
+              careHistory={careHistory}
+              isLoading={isCareLoading}
+              error={careError}
+              isHistoryLoading={isCareHistoryLoading}
+              hasMoreHistory={hasMoreCareHistory}
+              onLoadMoreHistory={() => void loadMoreCareHistory()}
+              onRetry={() => void loadCareForPet(currentPet.id)}
+              onCreateCare={handleCreateCare}
+              onUpdateCare={handleUpdateCare}
+              onArchiveCare={handleArchiveCare}
+              onCompleteCare={handleCompleteCare}
+              onUndoCompletion={handleUndoCareCompletion}
               lang={lang}
             />
 

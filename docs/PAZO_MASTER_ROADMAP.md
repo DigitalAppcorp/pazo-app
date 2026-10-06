@@ -1,8 +1,8 @@
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
-**Última actualización:** 2026-10-05  
-**Estado general:** núcleo social y sistema de rescate estable hasta Fase 6. Fase 7 es la siguiente.
+**Última actualización:** 2026-10-06  
+**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades sigue en validación y Fase 9A Agenda/Cuidados está en Gate 8 con backend aplicado, pendiente de prueba visual y merge.
 
 ---
 
@@ -145,6 +145,8 @@ Actualmente el núcleo persistente usa, entre otras:
 - `interactions`
 - `follows`
 - `pet_places`
+- `care_items`
+- `care_completions`
 
 ## Módulos reales
 
@@ -174,7 +176,7 @@ Actualmente el núcleo persistente usa, entre otras:
 - Eventos.
 - Mapa real.
 - Check-ins.
-- Agenda de cuidados.
+- Agenda de cuidados en `main` todavía no está cerrada; backend 9A ya está aplicado y el frontend real vive en `feat/phase-9a-care` pendiente de prueba visual/merge.
 - Documentos privados.
 - Mensajería 1 a 1.
 - Centro general de notificaciones.
@@ -400,7 +402,7 @@ No activar ubicación precisa sin decisión explícita.
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
 
 ### 9A — Agenda/Cuidados
-**Estado: SIGUIENTE — GATES 6 Y 7 CERRADOS / IMPLEMENTACIÓN PENDIENTE**
+**Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
 
 **Sub-ruta de producto:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`  
 **Arquitectura técnica:** `docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`
@@ -421,6 +423,43 @@ Alcance funcional:
 - recurrencia simple;
 - reminder interno;
 - privacidad owner-only.
+
+### Estado técnico de implementación
+- rama: `feat/phase-9a-care`;
+- build local aprobado por Product Owner;
+- migración 9A aplicada a Supabase con autorización explícita;
+- migración registrada como `20261006054510 care_agenda`;
+- `care_items` + `care_completions` reales;
+- RLS/grants owner-only aplicados;
+- completar/deshacer/archivar atómicos aplicados;
+- frontend dejó de usar cuidados mock;
+- servicio real de Agenda preparado;
+- estados Próximo/Hoy/Vencido implementados;
+- historial paginado en bloques de 20;
+- recordatorio global por mascota preparado;
+- recordatorios respetan timezone guardado;
+- pruebas SQL/RLS con `ROLLBACK` aprobadas: owner/non-owner, one-off, recurrencia, double-complete, undo, archive e historial;
+- Advisors post-apply revisados: sin hallazgos nuevos de seguridad de 9A;
+- índices 9A aparecen como unused inmediatamente después de creación; reevaluar con tráfico real, no eliminarlos ahora;
+- pendiente: prueba visual/end-to-end real;
+- pendiente: PR #12 fuera de draft + merge a `main` tras aprobación visual.
+
+### Estado técnico de 9A
+- rama `feat/phase-9a-care` creada;
+- migración versionada aplicada;
+- `care_items` y `care_completions` activos en Supabase;
+- RLS/grants owner-only activos;
+- privileged writes en schema no expuesto `care_private`;
+- RPCs públicas SECURITY INVOKER activas;
+- frontend conectado a persistencia real;
+- mock de Agenda retirado;
+- Documentos retirado de CareModal y reservado para 9B;
+- historial paginado en bloques de 20;
+- indicador global de cuidados preparado;
+- build local aprobado;
+- pruebas SQL/RLS y Advisors post-apply aprobados;
+- pendiente: prueba visual/end-to-end;
+- pendiente: merge.
 
 ### 9B — Documentos privados
 **Estado: DESPUÉS DE 9A**
@@ -778,14 +817,14 @@ Usar únicamente:
 
 ## Carril de Implementación
 ### Agenda/Cuidados 9A
-1. producto: `docs/PAZO_PHASE_9A_CARE_MASTER.md`;
-2. arquitectura: `docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`;
-3. Gates 6 y 7 están cerrados;
-4. siguiente paso, solo tras revisión del Product Owner: **Gate 8 — Implementación**;
-5. crear rama específica de 9A;
-6. preparar migraciones sin aplicarlas;
-7. build/preflight;
-8. pedir autorización antes de cualquier mutación de Supabase.
+1. Gates 6 y 7 cerrados;
+2. Gate 8 en curso;
+3. rama `feat/phase-9a-care` y PR #12 activos;
+4. build aprobado;
+5. backend 9A aplicado y verificado;
+6. siguiente paso exacto: prueba visual/end-to-end real del Product Owner;
+7. si pasa: sacar PR #12 de draft, merge a `main`, verificar `main` y marcar 9A COMPLETADA;
+8. si falla: corregir únicamente la regresión observada y repetir prueba antes del merge.
 
 ### Después
 - 9B Documentos privados;

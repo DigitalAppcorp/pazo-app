@@ -123,7 +123,8 @@ Latest Product Owner visual feedback was incorporated in code:
 - the global Agenda banner was removed; the header-level alert area remains reserved for rescue/lost-pet/sighting flows;
 - the compact “Próximo cuidado” preview is now driven only by the selected care item's `Recordarme` window;
 - “Sin recordatorio” means the compact preview never appears;
-- after completing a reminder-qualified care item, the preview disappears unless the next occurrence already falls inside its reminder window.
+- after completing a reminder-qualified care item, the preview disappears unless the next occurrence already falls inside its reminder window;
+- the compact Complete action now shows `Completando…` while the backend request is in flight, blocks double-clicks, and only disappears after server confirmation; failures keep the reminder visible and show an error.
 
 Next:
 1. Product Owner pulls latest `feat/phase-9a-care`;

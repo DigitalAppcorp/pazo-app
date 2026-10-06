@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
-import type { Pet, CareItem, PrivateDoc, Post } from '../../types/pazo'
+import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
   IconPaw,
   IconCalendar,
@@ -17,8 +17,8 @@ interface PetViewProps {
   onPetUpdated: (pet: Pet) => void
   onAddPet: () => void
   careItems: CareItem[]
-  onToggleCompleteCare: (careId: string) => void
-  docs: PrivateDoc[]
+  careReminderItem?: CareItem
+  onCompleteCare: (careItem: CareItem) => void | Promise<void>
   onOpenQRPassport: () => void
   onOpenCareAgenda: () => void
   onOpenLostAlert: () => void
@@ -33,8 +33,8 @@ export const PetView = ({
   onPetUpdated,
   onAddPet,
   careItems,
-  onToggleCompleteCare,
-  docs,
+  careReminderItem,
+  onCompleteCare,
   onOpenQRPassport,
   onOpenCareAgenda,
   onOpenLostAlert,
@@ -46,6 +46,7 @@ export const PetView = ({
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
+  const [completingCareId, setCompletingCareId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const interestOptions = [
@@ -70,7 +71,7 @@ export const PetView = ({
 
   const [editForm, setEditForm] = useState(buildEditForm)
 
-  const nextPendingCare = careItems.find((c) => !c.completed)
+  const nextPendingCare = careReminderItem
 
   const handleEditClick = () => {
     setEditForm(buildEditForm())
@@ -84,6 +85,25 @@ export const PetView = ({
     }
     setEditPhotoFile(null)
     setIsEditing(false)
+  }
+
+  const handleCompleteReminderCare = async (careItem: CareItem) => {
+    if (completingCareId) return
+
+    setCompletingCareId(careItem.id)
+
+    try {
+      await onCompleteCare(careItem)
+    } catch (error) {
+      console.error('Error completing care reminder:', error)
+      alert(
+        lang === 'es'
+          ? 'No se pudo completar el cuidado. Inténtalo de nuevo.'
+          : 'Could not complete this care item. Please try again.'
+      )
+    } finally {
+      setCompletingCareId(null)
+    }
   }
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -534,12 +554,12 @@ export const PetView = ({
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-[#204E4A]">
-                  {lang === 'es' ? 'Cuidados y Agenda' : 'Care & Documents'}
+                  {lang === 'es' ? 'Cuidados y Agenda' : 'Care & Agenda'}
                 </h4>
                 <p className="text-xs text-[#5C7470]">
                   {lang === 'es'
-                    ? `${careItems.length} cuidados agendados • ${docs.length} documentos`
-                    : `${careItems.length} scheduled tasks • ${docs.length} docs`}
+                    ? `${careItems.length} cuidados agendados`
+                    : `${careItems.length} scheduled care items`}
                 </p>
               </div>
             </div>
@@ -558,16 +578,22 @@ export const PetView = ({
                   {nextPendingCare.title}
                 </span>
                 <span className="text-[11px] text-[#5C7470] block">
-                  {nextPendingCare.date} • {nextPendingCare.time}
+                  {nextPendingCare.dueDate}
+                  {nextPendingCare.dueTime ? ` • ${nextPendingCare.dueTime}` : ''}
                 </span>
               </div>
 
               <button
-                onClick={() => onToggleCompleteCare(nextPendingCare.id)}
-                className="text-xs font-bold text-[#204E4A] bg-white hover:bg-[#E1E53F] px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                onClick={() => void handleCompleteReminderCare(nextPendingCare)}
+                disabled={completingCareId === nextPendingCare.id}
+                className="text-xs font-bold text-[#204E4A] bg-white hover:bg-[#E1E53F] px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-wait"
               >
                 <IconCheck size={13} />
-                <span>{lang === 'es' ? 'Completar' : 'Done'}</span>
+                <span>
+                  {completingCareId === nextPendingCare.id
+                    ? (lang === 'es' ? 'Completando…' : 'Completing…')
+                    : (lang === 'es' ? 'Completar' : 'Done')}
+                </span>
               </button>
             </div>
           )}

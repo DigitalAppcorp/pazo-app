@@ -1,6 +1,6 @@
 # PAZO — Arquitectura Técnica 9A: Agenda y Cuidados
 
-**Estado:** GATE 7 — ARQUITECTURA TÉCNICA  
+**Estado:** GATE 7 CERRADO — BASE DE GATE 8 IMPLEMENTADA EN BACKEND  
 **Producto:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`  
 **Regla:** este documento describe contratos y arquitectura. No contiene migración ejecutable.
 
@@ -392,21 +392,24 @@ Anon:
 
 # 18. RPC Security
 
-`complete_care_item` y `undo_care_completion` necesitan mantener integridad entre dos tablas.
+`complete_care_item`, `undo_care_completion` y `archive_care_item` mantienen integridad que no debe quedar disponible como writes directos.
 
-Arquitectura recomendada:
-- SECURITY DEFINER únicamente si es necesario para impedir writes directos a completions;
+Patrón final preparado:
+- lógica privilegiada en schema no expuesto `care_private`;
+- helpers internos `SECURITY DEFINER`;
 - `SET search_path = ''`;
 - ownership explícito con `auth.uid()`;
-- revoke EXECUTE from PUBLIC/anon;
-- grant EXECUTE solo authenticated;
+- EXECUTE interno restringido;
+- RPCs públicas en `public` como `SECURITY INVOKER`;
+- PUBLIC/anon sin EXECUTE;
+- authenticated únicamente;
 - referencias schema-qualified;
-- tests owner/non-owner;
 - Advisors después de aplicar.
 
-Alternativa SECURITY INVOKER solo si podemos conservar integridad sin conceder writes arbitrarios al cliente.
-
-Durante implementación se elegirá la opción que mantenga menor superficie de privilegio.
+Además:
+- frontend no tiene UPDATE sobre `status` ni `pet_id`;
+- completar/deshacer/archivar no se pueden falsificar con un UPDATE directo;
+- `care_completions` es SELECT-only para authenticated.
 
 ---
 
@@ -494,7 +497,7 @@ Una sola fase puede dividir migración si mejora revisión:
 - RPC undo;
 - hardening.
 
-No aplicar nada sin autorización explícita.
+**Estado de aplicación:** migración 9A aplicada el 2026-10-06 con autorización explícita del Product Owner. Registrada en Supabase como `20261006054510 care_agenda`.
 
 ---
 
@@ -573,13 +576,15 @@ Fase 13 podrá rediseñar la presentación sin cambiar contratos.
 
 # 27. Estado del Gate 7
 
-Arquitectura propuesta completa.
+Gate 7 está cerrado y esta arquitectura es la base implementada de 9A.
 
-Antes de código:
-- Product Owner puede cambiar cualquier regla de producto;
-- si no hay cambios, esta arquitectura se considera base de implementación.
+Estado real:
+- Gate 8 en curso en `feat/phase-9a-care`;
+- migración SQL aplicada a Supabase;
+- RLS/grants/RPC verificados;
+- suite transaccional con `ROLLBACK` aprobada;
+- Advisors post-apply sin hallazgos nuevos de seguridad asociados a 9A;
+- build local aprobado por Product Owner;
+- pendiente prueba visual/end-to-end y merge a `main`.
 
-Siguiente etapa:
-**Gate 8 — Implementación 9A**, en rama propia.
-
-No se ha creado ni aplicado SQL todavía.
+9A no se considera COMPLETADA hasta cumplir esos dos últimos puntos.
