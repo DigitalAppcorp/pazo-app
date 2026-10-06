@@ -400,7 +400,7 @@ No activar ubicación precisa sin decisión explícita.
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
 
 ### 9A — Agenda/Cuidados
-**Estado: SIGUIENTE — GATES 6 Y 7 CERRADOS / IMPLEMENTACIÓN PENDIENTE**
+**Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
 
 **Sub-ruta de producto:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`  
 **Arquitectura técnica:** `docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`
@@ -421,6 +421,23 @@ Alcance funcional:
 - recurrencia simple;
 - reminder interno;
 - privacidad owner-only.
+
+### Estado técnico de 9A
+- rama `feat/phase-9a-care` creada;
+- migración versionada preparada, NO aplicada;
+- `care_items` y `care_completions` definidos;
+- RLS/grants owner-only preparados;
+- privileged writes movidos a schema no expuesto `care_private`;
+- RPCs públicas SECURITY INVOKER preparadas;
+- frontend conectado a persistencia real;
+- mock de Agenda retirado;
+- Documentos retirado de CareModal y reservado para 9B;
+- historial paginado en bloques de 20;
+- indicador global de cuidados preparado;
+- pendiente: build local;
+- pendiente: autorización para aplicar Supabase;
+- pendiente: pruebas SQL/RLS;
+- pendiente: prueba visual.
 
 ### 9B — Documentos privados
 **Estado: DESPUÉS DE 9A**
