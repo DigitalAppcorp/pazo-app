@@ -131,13 +131,26 @@ Current state:
 - no Supabase validation-instrumentation migration was applied;
 - Map/Radar is not automatically bundled into the first Communities experiment.
 
+Implementation state:
+- branch: `feat/communities-validation-instrumentation`;
+- generic `validationService.ts` prepared;
+- reusable `ValidationInterestPanel.tsx` prepared;
+- Communities preview now represents the five approved pillars;
+- simulated Join/Joined and fake member counts removed from Explore;
+- migration `20261006124500_communities_validation_instrumentation.sql` prepared but NOT applied;
+- private module/intent registry + three RLS-protected signal tables;
+- no SECURITY DEFINER added by this architecture;
+- Supabase preflight confirms no conflicting validation tables;
+- Security Advisor baseline recorded before apply: 3 anon SD, 6 authenticated SD, 1 leaked-password warning.
+
 Next action:
-1. implement the smallest generic validation infrastructure with Communities as first consumer;
-2. prepare versioned migration but do not apply Supabase yet;
-3. preflight build/security;
-4. request explicit Product Owner authorization before backend mutation;
-5. do not build Communities backend/roles/feed/moderation;
-6. after validation instrumentation is stable, let Communities collect data while the implementation lane remains free for another approved module.
+1. run local build on `feat/communities-validation-instrumentation`;
+2. if build passes, perform final SQL review;
+3. present exact Supabase mutation and request explicit Product Owner authorization;
+4. apply only after authorization;
+5. run ownership/dedup/intent/privacy tests and Advisors;
+6. Product Owner validates visual/end-to-end behavior;
+7. merge only after all checks pass.
 
 ## Important continuity note
 
