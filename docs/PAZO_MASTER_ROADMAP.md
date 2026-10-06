@@ -825,6 +825,12 @@ Usar únicamente:
 - 7.0A APROBADA por Product Owner;
 - autorizado preparar la infraestructura genérica mínima de validación con Comunidades como primer consumidor;
 - no construir backend/roles/feed/moderación de Comunidades;
+- rama `feat/communities-validation-instrumentation` EN CURSO;
+- preview aprobada implementada sin Join/member counts ficticios;
+- servicio/panel genérico de validación preparados;
+- migración `20261006124500_communities_validation_instrumentation.sql` preparada, NO aplicada;
+- arquitectura usa RLS/grants normales, sin nuevos SECURITY DEFINER;
+- pendiente: build local, autorización Supabase, pruebas backend y validación visual;
 - siguiente trabajo: cerrar el diseño del experimento 7.0A:
   - qué promesa/hook mostrará la preview;
   - qué elementos conceptuales hacen entendible/atractivo el módulo;
