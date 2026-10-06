@@ -397,7 +397,6 @@ No activar ubicación precisa sin decisión explícita.
 ---
 
 ## Fase 9 — Cuidados y documentos privados
-**Estado: CARRIL DE IMPLEMENTACIÓN — 9A COMPLETADA / 9B PENDIENTE DE GATES**
 
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
 
@@ -444,7 +443,9 @@ Alcance funcional:
 - Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: SIGUIENTE CANDIDATO — PENDIENTE DE GATES**
+**Estado: PLANIFICADA**
+
+Siguiente candidato del carril de implementación; no está autorizado para código hasta pasar sus gates.
 
 Se separa de Agenda por mayor superficie de seguridad.
 
@@ -761,7 +762,7 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - `INITIAL_PETS` sigue sirviendo como fallback inicial en memoria; revisar cuando se termine la eliminación de mocks.
 - MapView es placeholder.
 - comunidades son mock.
-- Care/Docs son mock/local.
+- Documentos privados siguen mock/local; Agenda/Cuidados es real desde 9A.
 - Messages son mock/local.
 - algunos flujos del menú Crear anuncian “próximamente”.
 - bundle ya ha mostrado warning de chunk >500 kB; atender en Fase 15.
@@ -811,4 +812,4 @@ Usar únicamente:
 4. no escribir código ni crear Storage/schema hasta cerrar sus gates correspondientes.
 
 ## Regla
-La numeración histórica de fases no bloquea los dos carriles. El próximo código real será 9A únicamente cuando Gate 7 esté cerrado.
+La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
