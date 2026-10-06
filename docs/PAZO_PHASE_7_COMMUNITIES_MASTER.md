@@ -130,6 +130,150 @@ Auditoría preliminar, NO decisión final:
 
 **Estado:** IDEA REGISTRADA — PENDIENTE DE AUDITORÍA DURANTE LA LLUVIA DE IDEAS.
 
+## Lluvia de ideas AI — engagement y monetización
+
+**Estado de todo este bloque:** HIPÓTESIS / BANCO DE IDEAS.  
+No constituye alcance aprobado, MVP ni especificación.
+
+### Identidad, status y pertenencia
+- insignias funcionales de Admin/Moderador/Organizador;
+- insignias ganadas por contribución, permanencia, eventos o hitos;
+- títulos visibles en el perfil de la mascota;
+- miembro fundador de una comunidad;
+- marcos/estilos cosméticos diferenciados de las insignias de autoridad;
+- vitrina de 2–4 insignias favoritas en el perfil;
+- hitos personales: primer evento, primera respuesta útil, primer año, etc.
+
+### Contribución y reputación
+- marcar respuestas como útiles;
+- respuesta aceptada en preguntas;
+- reconocimiento periódico a miembros útiles;
+- reputación basada en utilidad, no volumen de publicaciones;
+- insignias de ayuda/contribución;
+- sistema para destacar organizadores confiables sin vender autoridad;
+- evitar badges que puedan interpretarse como credenciales médicas/profesionales sin verificación real.
+
+### Rituales y recurrencia
+- retos semanales/mensuales;
+- misiones colectivas de comunidad;
+- metas grupales;
+- tema/prompt de la semana;
+- mascota o miembro destacado;
+- temporadas de comunidad;
+- recap semanal de actividad relevante;
+- recordatorios de eventos/retos;
+- rachas suaves de participación, evitando diseño compulsivo.
+
+### Eventos y actividad compartida
+- RSVP;
+- eventos recurrentes;
+- asistencia confirmada;
+- badge de participante/organizador;
+- clubes de caminata;
+- encuentros por especie/raza/interés;
+- calendario de comunidad;
+- herramientas de organizador;
+- después, integración con ubicación/mapa si el módulo correspondiente se valida.
+
+### Conocimiento y utilidad
+- preguntas y respuestas;
+- “pregunta a la comunidad”;
+- guías colaborativas;
+- recursos fijados;
+- listas de parques/veterinarios/lugares recomendados;
+- posts de consejos;
+- FAQs de comunidad;
+- contenido evergreen que haga que Comunidades sea útil aunque el Feed esté tranquilo.
+
+### Descubrimiento y conexión
+- recomendaciones de comunidades según especie, raza, intereses y zona;
+- comunidades locales;
+- comunidades por etapa de vida/problema/interés;
+- invitaciones;
+- compartir comunidad fuera de PAZO;
+- páginas públicas de comunidad como posible growth loop;
+- opción futura de “busco compañero para caminar/jugar” dentro de una comunidad antes de construir un módulo de matching completo.
+
+### Herramientas para admins
+- mensaje de bienvenida;
+- reglas;
+- posts fijados;
+- preguntas de ingreso;
+- roles básicos;
+- programación de posts;
+- encuestas;
+- eventos recurrentes;
+- analytics de comunidad;
+- member insights;
+- herramientas anti-spam;
+- moderación asistida;
+- roles personalizados;
+- insignias personalizadas;
+- personalización visual;
+- vanity URL;
+- automatizaciones.
+
+### Monetización candidata sin e-commerce
+- **Community Pro** para administradores: herramientas avanzadas sin quitar la creación/administración básica gratuita;
+- **Pazo Plus** para usuarios: cosmética/perfil/status no autoritativo y otras mejoras futuras;
+- boosts/promoción de comunidades en descubrimiento, solo cuando exista tráfico suficiente;
+- comunidades/posts/eventos patrocinados claramente etiquetados;
+- retos patrocinados;
+- herramientas pagas para negocios/profesionales que participen en comunidades;
+- analytics avanzados para admins;
+- personalización avanzada de comunidad;
+- automatización/moderación avanzada;
+- posibles herramientas premium para organizadores de eventos;
+- publicidad contextual por temática de comunidad, evitando depender de datos sensibles;
+- modelo futuro de cuentas profesionales/organizaciones con herramientas propias, sin vender “verificación” como simple badge.
+
+### Adquisición / growth loops
+- páginas públicas indexables de comunidades;
+- enlaces de invitación;
+- compartir badges/logros fuera de PAZO;
+- compartir eventos;
+- compartir guías útiles;
+- referral/invite rewards cosméticos o de status;
+- comunidades locales como páginas de entrada desde Google/redes;
+- AMAs o sesiones con profesionales como contenido compartible.
+
+### Ideas que NO deberían convertirse automáticamente en módulos separados
+- Chat: puede ser dependencia de una experiencia social ganadora;
+- Eventos: puede vivir dentro de Comunidades o Vida Local;
+- Check-ins: puede ser extensión de Lugares/Comunidades;
+- Notificaciones: infraestructura;
+- Search/Explore: infraestructura de descubrimiento;
+- ranking/leaderboards: mecánica de engagement, no producto principal.
+
+### Riesgos a auditar
+- convertir Comunidades en “otro Feed” sin valor diferencial;
+- gamificación que premie spam;
+- pay-to-status que confunda dinero con autoridad/confianza;
+- demasiadas comunidades vacías;
+- fragmentación de contenido;
+- leaderboards tóxicos/popularity contests;
+- badges que aparenten credenciales médicas o profesionales;
+- vender boosts antes de tener audiencia real;
+- monetización que bloquee participación básica;
+- exceso de notificaciones;
+- herramientas premium demasiado pronto.
+
+### Hipótesis estratégica inicial
+La monetización más prometedora para Comunidades probablemente no sea cobrar por entrar o crear, sino cobrar a:
+1. power users/admins por herramientas avanzadas;
+2. negocios/profesionales por herramientas/promoción contextual;
+3. usuarios por cosmética/status claramente separado de autoridad;
+4. anunciantes/patrocinadores cuando exista tráfico y engagement suficientes.
+
+La retención probablemente debe apoyarse más en:
+- pertenencia;
+- reconocimiento;
+- utilidad recurrente;
+- rituales/eventos;
+- relaciones;
+que en un segundo feed genérico.
+
+
 ---
 
 # 1. Pregunta principal
