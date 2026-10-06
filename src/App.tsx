@@ -1244,7 +1244,15 @@ function PazoMain() {
 
   const handleDeleteDocument = async (document: PetDocument) => {
     await deletePetDocument(document)
-    await refreshDocumentsAfterMutation(document.petId)
+
+    if (activePetIdRef.current === document.petId) {
+      setDocuments((previous) =>
+        previous.filter((item) => item.id !== document.id)
+      )
+      setDocumentCount((previous) => Math.max(0, previous - 1))
+    }
+
+    void refreshDocumentsAfterMutation(document.petId)
   }
 
   useEffect(() => {
