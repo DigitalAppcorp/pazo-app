@@ -153,7 +153,6 @@ export const uploadPetDocument = async (
   validateDocumentFile(file)
 
   const reservation = await beginUpload(petId, file, title, category)
-  let objectMayExist = false
 
   try {
     const { error: uploadError } = await supabase.storage
@@ -165,18 +164,15 @@ export const uploadPetDocument = async (
       })
 
     if (uploadError) throw uploadError
-    objectMayExist = true
 
     await finalizeUpload(reservation.id)
   } catch (error) {
-    if (objectMayExist) {
-      try {
-        await supabase.storage
-          .from(DOCUMENT_BUCKET)
-          .remove([reservation.storagePath])
-      } catch (cleanupError) {
-        console.error('Could not clean up failed document upload:', cleanupError)
-      }
+    try {
+      await supabase.storage
+        .from(DOCUMENT_BUCKET)
+        .remove([reservation.storagePath])
+    } catch (cleanupError) {
+      console.error('Could not clean up failed document upload:', cleanupError)
     }
 
     try {
