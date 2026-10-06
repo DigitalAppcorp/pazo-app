@@ -1748,6 +1748,7 @@ function PazoMain() {
               isHistoryLoading={isCareHistoryLoading}
               hasMoreHistory={hasMoreCareHistory}
               onLoadMoreHistory={() => void loadMoreCareHistory()}
+              onRetry={() => void loadCareForPet(currentPet.id)}
               onCreateCare={handleCreateCare}
               onUpdateCare={handleUpdateCare}
               onArchiveCare={handleArchiveCare}
