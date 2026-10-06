@@ -19,6 +19,15 @@ import {
   undoCareCompletion,
   updateCareItem,
 } from './services/careService'
+import {
+  DOCUMENTS_PAGE_SIZE,
+  deletePetDocument,
+  downloadPetDocumentBlob,
+  fetchPetDocumentsPage,
+  recoverPetDocumentOperations,
+  updatePetDocumentMetadata,
+  uploadPetDocument,
+} from './services/documentService'
 import type {
   Pet,
   Post,
@@ -26,6 +35,8 @@ import type {
   CareItem,
   CareCompletion,
   CareItemInput,
+  DocumentCategory,
+  PetDocument,
   Conversation,
   PazoNotification,
 } from './types/pazo'
@@ -52,6 +63,7 @@ import { CreatePostModal } from './components/modals/CreatePostModal'
 import { AddPetModal } from './components/modals/AddPetModal'
 import { PassportModal } from './components/modals/PassportModal'
 import { CareModal } from './components/modals/CareModal'
+import { DocumentsModal } from './components/modals/DocumentsModal'
 import { AlertModal } from './components/modals/AlertModal'
 import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
@@ -211,6 +223,15 @@ function PazoMain() {
   const careLoadVersionRef = useRef(0)
   const careHistoryOffsetRef = useRef(0)
   const careHistoryLoadInFlightRef = useRef(false)
+  const [documents, setDocuments] = useState<PetDocument[]>([])
+  const [documentCount, setDocumentCount] = useState(0)
+  const [isDocumentsLoading, setIsDocumentsLoading] = useState(false)
+  const [isDocumentsLoadingMore, setIsDocumentsLoadingMore] = useState(false)
+  const [hasMoreDocuments, setHasMoreDocuments] = useState(false)
+  const [documentsError, setDocumentsError] = useState('')
+  const documentLoadVersionRef = useRef(0)
+  const documentOffsetRef = useRef(0)
+  const documentLoadMoreInFlightRef = useRef(false)
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
   const [notifications, setNotifications] = useState<PazoNotification[]>([])
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
@@ -240,6 +261,7 @@ function PazoMain() {
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false)
   const [isAlertOpen, setIsAlertOpen] = useState(false)
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
@@ -585,9 +607,15 @@ function PazoMain() {
     setCareError('')
     careHistoryOffsetRef.current = 0
     setHasMoreCareHistory(true)
+    setDocuments([])
+    setDocumentCount(0)
+    setDocumentsError('')
+    documentOffsetRef.current = 0
+    setHasMoreDocuments(false)
     setSelectedPublicProfileId(null)
     void loadFeedForPet(pet)
     void loadCareForPet(pet.id)
+    void loadDocumentsForPet(pet.id)
   }
 
   useEffect(() => {
@@ -629,6 +657,7 @@ function PazoMain() {
           await Promise.all([
             loadFeedForPet(activePet),
             loadCareForPet(activePet.id),
+            loadDocumentsForPet(activePet.id),
             refreshCareReminders(ownedPets),
           ])
         } else {
@@ -1096,6 +1125,133 @@ function PazoMain() {
       setCareReminderItems([])
     }
   }, [user?.id, isOnboardingActive, pets.length])
+
+  const loadDocumentsForPet = async (petId: string) => {
+    const loadVersion = ++documentLoadVersionRef.current
+    setIsDocumentsLoading(true)
+    setDocumentsError('')
+    documentOffsetRef.current = 0
+    setHasMoreDocuments(false)
+
+    try {
+      await recoverPetDocumentOperations(petId)
+
+      const page = await fetchPetDocumentsPage(
+        petId,
+        0,
+        DOCUMENTS_PAGE_SIZE
+      )
+
+      if (
+        loadVersion !== documentLoadVersionRef.current
+        || activePetIdRef.current !== petId
+      ) {
+        return
+      }
+
+      setDocuments(page.items)
+      setDocumentCount(page.total)
+      documentOffsetRef.current = page.items.length
+      setHasMoreDocuments(page.items.length < page.total)
+    } catch (error: any) {
+      console.error('Error loading private documents:', error)
+
+      if (
+        loadVersion === documentLoadVersionRef.current
+        && activePetIdRef.current === petId
+      ) {
+        setDocuments([])
+        setDocumentCount(0)
+        setHasMoreDocuments(false)
+        setDocumentsError(
+          error?.message || (lang === 'es'
+            ? 'No se pudieron cargar los documentos.'
+            : 'Could not load documents.')
+        )
+      }
+    } finally {
+      if (loadVersion === documentLoadVersionRef.current) {
+        setIsDocumentsLoading(false)
+      }
+    }
+  }
+
+  const loadMoreDocuments = async () => {
+    if (
+      documentLoadMoreInFlightRef.current
+      || !hasMoreDocuments
+      || !currentPet?.id
+    ) {
+      return
+    }
+
+    const petId = currentPet.id
+    documentLoadMoreInFlightRef.current = true
+    setIsDocumentsLoadingMore(true)
+
+    try {
+      const page = await fetchPetDocumentsPage(
+        petId,
+        documentOffsetRef.current,
+        DOCUMENTS_PAGE_SIZE
+      )
+
+      if (activePetIdRef.current !== petId) return
+
+      setDocumentCount(page.total)
+      documentOffsetRef.current += page.items.length
+      setHasMoreDocuments(documentOffsetRef.current < page.total)
+      setDocuments((previous) => {
+        const existing = new Set(previous.map((item) => item.id))
+        return [
+          ...previous,
+          ...page.items.filter((item) => !existing.has(item.id)),
+        ]
+      })
+    } catch (error) {
+      console.error('Error loading more private documents:', error)
+    } finally {
+      documentLoadMoreInFlightRef.current = false
+      setIsDocumentsLoadingMore(false)
+    }
+  }
+
+  const refreshDocumentsAfterMutation = async (petId: string) => {
+    if (activePetIdRef.current === petId) {
+      await loadDocumentsForPet(petId)
+    }
+  }
+
+  const handleUploadDocument = async (
+    file: File,
+    title: string,
+    category: DocumentCategory
+  ) => {
+    const petId = currentPet.id
+    await uploadPetDocument(petId, file, title, category)
+    await refreshDocumentsAfterMutation(petId)
+  }
+
+  const handleUpdateDocument = async (
+    documentId: string,
+    title: string,
+    category: DocumentCategory
+  ) => {
+    const petId = currentPet.id
+    await updatePetDocumentMetadata(documentId, title, category)
+    await refreshDocumentsAfterMutation(petId)
+  }
+
+  const handleDeleteDocument = async (document: PetDocument) => {
+    await deletePetDocument(document)
+    await refreshDocumentsAfterMutation(document.petId)
+  }
+
+  useEffect(() => {
+    if (isDocumentsOpen && currentPet?.id) {
+      void loadDocumentsForPet(currentPet.id)
+    }
+  }, [isDocumentsOpen, currentPet?.id])
 
   const handleSendMessage = (convId: string, text: string) => {
     setConversations((prev) =>
@@ -1642,6 +1798,8 @@ function PazoMain() {
                       onCompleteCare={handleCompleteCare}
                       onOpenQRPassport={() => setIsPassportOpen(true)}
                       onOpenCareAgenda={() => setIsCareOpen(true)}
+                      documentCount={documentCount}
+                      onOpenDocuments={() => setIsDocumentsOpen(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
                       lang={lang}
                       userPosts={profilePosts}
@@ -1739,6 +1897,25 @@ function PazoMain() {
               onArchiveCare={handleArchiveCare}
               onCompleteCare={handleCompleteCare}
               onUndoCompletion={handleUndoCareCompletion}
+              lang={lang}
+            />
+
+            <DocumentsModal
+              isOpen={isDocumentsOpen}
+              onClose={() => setIsDocumentsOpen(false)}
+              petName={currentPet.name}
+              documents={documents}
+              total={documentCount}
+              isLoading={isDocumentsLoading}
+              error={documentsError}
+              isLoadingMore={isDocumentsLoadingMore}
+              hasMore={hasMoreDocuments}
+              onLoadMore={() => void loadMoreDocuments()}
+              onRetry={() => void loadDocumentsForPet(currentPet.id)}
+              onUpload={handleUploadDocument}
+              onUpdate={handleUpdateDocument}
+              onDelete={handleDeleteDocument}
+              onGetBlob={downloadPetDocumentBlob}
               lang={lang}
             />
 
