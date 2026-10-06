@@ -1,236 +1,193 @@
-# PAZO — Marco de Validación de Funcionalidades
+# PAZO — Protocolo de Experimentos de Validación
 
-**Objetivo:** evitar construir módulos costosos sin evidencia suficiente de utilidad, demanda o impacto para el MVP.
+**Documento operativo subordinado a:** `docs/PAZO_MODULE_LIFECYCLE.md`
 
-Este marco aplica especialmente a funciones opcionales, sociales, de entretenimiento o con efecto de red.
+Este archivo explica cómo medir hipótesis baratas antes de construir módulos opcionales.
 
----
-
-# 1. Clasificación antes de programar
-
-Toda función nueva debe clasificarse primero.
-
-## A. Utilidad directa
-Entrega valor aunque PAZO tenga pocos usuarios.
-
-Ejemplos:
-- QR de mascota;
-- alertas de mascota perdida;
-- agenda/cuidados;
-- documentos;
-- recordatorios.
-
-Estas funciones pueden justificarse por resolver un problema concreto del dueño.
-
-## B. Social / engagement
-Su valor aumenta con más usuarios y contenido.
-
-Ejemplos:
-- comunidades;
-- eventos;
-- matches;
-- ciertos módulos sociales.
-
-Estas funciones tienen riesgo de "cold start": si están vacías, su valor puede ser casi cero.
-
-## C. Adquisición
-Puede atraer usuarios nuevos desde fuera de PAZO.
-
-Ejemplos potenciales:
-- páginas públicas compartibles;
-- contenido indexable;
-- invitaciones;
-- comunidades con identidad local;
-- recursos públicos útiles.
-
-Una función no debe considerarse de adquisición solo porque guste a usuarios que ya están dentro de PAZO.
+No decide por sí solo qué construir.
 
 ---
 
-# 2. Regla de validación
+# 1. Cuándo usarlo
 
-Antes de construir por completo un módulo B o C, responder:
+Usarlo principalmente para módulos:
+- sociales;
+- opcionales;
+- con efecto de red;
+- caros;
+- con hipótesis de adquisición;
+- con hipótesis de monetización no demostrada.
 
-1. ¿Qué problema o deseo resuelve?
-2. ¿Para quién?
-3. ¿Qué beneficio concreto genera?
-4. ¿Depende de otros usuarios para funcionar?
-5. ¿Qué coste técnico y operativo tiene?
-6. ¿Qué riesgo de moderación/abuso introduce?
-7. ¿Qué métrica demostraría interés real?
-8. ¿Puede probarse esa hipótesis con una versión mucho más barata?
-
-Si no podemos responder estas preguntas, el módulo no entra todavía en desarrollo completo.
+No es obligatorio para seguridad, infraestructura o utilidades núcleo claramente justificadas.
 
 ---
 
-# 3. Fake door / "Me interesa"
+# 2. Fake door
 
-PAZO puede mostrar un módulo no construido como experimento transparente.
+Una preview puede explicar una función todavía no construida.
 
-El usuario puede:
-- entrar a una preview;
-- entender qué promete el módulo;
-- presionar "Me interesa";
-- opcionalmente indicar qué desea hacer allí.
+CTA recomendado:
 
-No se debe engañar al usuario haciéndole creer que la función ya existe.
+**Me interesa**
 
-## Eventos mínimos a medir
+Debe quedar claro que la función está en evaluación.
 
-- `feature_view`: usuario único que vio el módulo.
-- `feature_interest`: usuario único que presionó "Me interesa".
-- `feature_revisit`: volvió al módulo en otro día/sesión.
-- `feature_intent_reason`: opcional, respuesta a qué quiere hacer.
-- `feature_source`: desde dónde llegó.
-
-Las métricas deben calcularse sobre usuarios únicos además de eventos brutos.
+No simular una función inexistente como si estuviera disponible.
 
 ---
 
-# 4. Métricas principales
+# 3. Eventos conceptuales
+
+La instrumentación futura debe ser genérica.
+
+- `module_view`
+- `module_interest`
+- `module_intent`
+- revisita derivada de views en sesiones/días distintos
+- `module_external_visit`
+- `module_signup_attribution`
+
+No crear eventos/tablas específicos por módulo si el mismo sistema puede servir a todos.
+
+---
+
+# 4. Unidad de medición
+
+Principal:
+
+**cuenta/usuario único**
+
+No mascota.
+
+Motivo:
+una cuenta con varias mascotas no debe inflar la demanda.
+
+La mascota activa puede usarse como dimensión de segmentación.
+
+---
+
+# 5. Métricas
 
 ## Interest Rate
 
-`usuarios únicos que presionaron Me interesa / usuarios únicos que vieron el módulo`
-
-Mide demanda entre usuarios ya existentes.
+`usuarios únicos interesados / usuarios únicos que vieron el módulo`
 
 ## Revisit Rate
 
-Usuarios que vuelven al módulo posteriormente.
-
-Una segunda visita puede ser una señal más fuerte que un click de curiosidad.
+Usuarios que regresaron en otro día/sesión.
 
 ## Intent Distribution
 
-Si preguntamos "¿qué te gustaría hacer aquí?", permite descubrir qué funcionalidad concreta vale la pena construir.
+Respuesta a una pregunta corta sobre qué desea hacer allí.
 
 ## Acquisition Conversion
 
-Solo aplica si existe una entrada externa.
+Solo para tráfico externo:
 
-`usuarios nuevos registrados desde una landing/enlace del módulo / visitantes externos del módulo`
+`registros atribuidos / visitantes externos`
 
-**Importante:** el fake door dentro de la app NO mide adquisición.
+Un fake door interno no mide adquisición.
 
 ---
 
-# 5. Señales para tomar una decisión
+# 6. Pregunta de intención
 
-Los siguientes umbrales son una guía inicial, no una ley permanente.
+Para módulos grandes, después de “Me interesa” puede mostrarse una sola pregunta:
 
-No tomar decisiones con muestras demasiado pequeñas.
+> ¿Qué te gustaría hacer aquí?
+
+Máximo:
+- 4–6 opciones;
+- “Otro” opcional.
+
+No convertirlo en una encuesta larga.
+
+---
+
+# 7. Calidad de datos
+
+- deduplicar interés por cuenta + módulo;
+- no contar taps repetidos como demanda nueva;
+- conservar fecha;
+- conservar source;
+- evitar PII innecesaria;
+- distinguir tráfico interno de externo;
+- medir usuarios únicos además de eventos brutos.
+
+---
+
+# 8. Lectura orientativa
 
 ## Muestra
+- <30 viewers únicos: insuficiente;
+- 30–99: direccional;
+- 100+: base inicial razonable.
 
-- menos de 30 viewers únicos: señal insuficiente;
-- 30–99: señal direccional;
-- 100+: señal más confiable para la etapa inicial.
+## Interest Rate
+- <10%: débil;
+- 10–24%: seguir validando;
+- >=25%: prometedor.
 
-## Interest Rate orientativo
+Estos valores **no aprueban automáticamente** un módulo.
 
-- <10%: normalmente POSPONER;
-- 10–24%: mantener experimento y aprender por qué;
-- >=25%: candidato serio a MVP reducido, si también encaja con prioridades y coste.
-
-Además del porcentaje, observar:
-- número absoluto de interesados;
-- visitas repetidas;
-- intención concreta;
-- relación con retención;
-- comparación contra otros módulos no construidos.
-
-No construir únicamente porque un módulo tenga más clicks si existe otra función con más utilidad y menor coste.
+La decisión final usa también:
+- coste;
+- revisita;
+- intención;
+- masa crítica;
+- riesgo;
+- prioridad frente a otros módulos.
 
 ---
 
-# 6. Señal de adquisición
+# 9. Experimento externo
 
-Para saber si una función atrae gente a PAZO se necesita una prueba externa.
+Si queremos probar adquisición:
 
-Opciones baratas:
-- landing pública del concepto;
+- landing pública;
 - enlace compartible;
-- contenido orgánico en redes;
-- página pública indexable;
+- contenido orgánico;
 - lista de espera;
 - CTA de registro.
 
 Medir:
-- visitas externas;
+- visitantes externos;
 - registros;
-- porcentaje de conversión;
-- invitaciones/compartidos.
+- conversión;
+- fuente.
 
-No construir una red social interna completa solo para descubrir después si atrae usuarios.
-
----
-
-# 7. Resultado posible
-
-Cada módulo validado termina en uno de estos estados:
-
-## BUILD NOW
-Hay evidencia suficiente y es prioritario.
-
-Se define funcionalidad y se programa.
-
-## MVP REDUCIDO
-Hay interés, pero no justifica construir todo.
-
-Se implementa la versión mínima que prueba el valor central.
-
-## EXPERIMENTO ACTIVO
-Todavía no hay evidencia suficiente.
-
-Se conserva el fake door / "Me interesa".
-
-## POSPUESTO
-Demanda baja o coste demasiado alto.
-
-Se mantiene en backlog y se define un disparador para reevaluarlo.
+No construir un módulo social completo para descubrir si atrae usuarios.
 
 ---
 
-# 8. Disparadores de reevaluación
+# 10. Estado de la implementación
 
-Un módulo pospuesto puede reabrirse cuando ocurra alguno:
+El Product Owner reportó que existió una implementación de Gemini con entrada al módulo + “Me interesa”.
 
-- Interest Rate cruza el umbral acordado;
-- alcanza un número mínimo de usuarios interesados;
-- hay suficientes usuarios activos para evitar cold start;
-- usuarios piden repetidamente la función por otro canal;
-- aparece una oportunidad clara de adquisición;
-- una función posterior depende de ese módulo.
+Auditoría posterior:
+- no está confirmada en `main`;
+- no se encontró una señal persistente específica en Supabase;
+- probablemente se perdió durante reescrituras anteriores.
 
----
+Decisión:
 
-# 9. Auditoría del mecanismo actual de PAZO
+**No intentar recuperar lógica antigua a cualquier costo.**
 
-El Product Owner reporta que Gemini implementó un disparador de entrada al módulo + botón "Me interesa".
-
-En la auditoría actual de `main`, ramas visibles y Supabase:
-- sí existe tracking genérico de interacciones;
-- Supabase actualmente contiene eventos reales principalmente de posts;
-- no se confirmó todavía una señal persistente específica `feature_interest` ni una tabla específica de interés.
-
-Por lo tanto:
-
-**No duplicar el mecanismo.**
-
-Antes de depender de sus métricas:
-1. localizar/sincronizar la implementación exacta de Gemini;
-2. verificar dónde guarda los datos;
-3. comprobar que mide usuarios únicos y no solo clicks;
-4. normalizarla a este marco si hace falta.
+Cuando se autorice código de instrumentación:
+- se construirá una implementación genérica;
+- será pequeña;
+- servirá para Comunidades y módulos futuros;
+- tendrá tests/contratos claros;
+- no modificará módulos reales fuera del tracking necesario.
 
 ---
 
-# 10. Regla global
+# 11. Salida del experimento
 
-Para módulos opcionales/sociales de alto coste:
+El experimento alimenta el Gate 5 de `PAZO_MODULE_LIFECYCLE.md`.
 
-**Validar antes de construir.**
-
-La hoja maestra puede marcar una fase como "EN VALIDACIÓN" sin obligar a programarla inmediatamente.
+Resultados:
+- BUILD NOW;
+- MVP REDUCIDO;
+- EXPERIMENTO ACTIVO;
+- POSPUESTO.

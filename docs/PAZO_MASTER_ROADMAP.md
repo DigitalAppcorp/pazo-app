@@ -11,13 +11,23 @@
 Antes de modificar código, base de datos o arquitectura de PAZO:
 
 1. Leer este archivo completo.
-2. Identificar la fase marcada como **SIGUIENTE**.
-3. No saltar a otra fase salvo aprobación explícita del Product Owner.
-4. No implementar decisiones de producto marcadas como **DECISIÓN PENDIENTE**.
-5. Una fase debe terminar y quedar fusionada a `main` antes de comenzar la siguiente, salvo que se documente una excepción.
-6. Después de cada merge, actualizar este archivo.
+2. Leer `docs/PAZO_MODULE_LIFECYCLE.md`.
+3. Identificar el módulo/fase activo y su gate pendiente.
+4. Si existe sub-ruta específica, leerla.
+5. No implementar decisiones marcadas como **DECISIÓN PENDIENTE**.
+6. No convertir un módulo en implementación solo por su número de fase.
+7. Después de cada decisión/merge relevante, actualizar esta hoja.
 
-La finalidad es evitar reconstruir contexto en cada sesión, reducir tokens y evitar decisiones contradictorias.
+La finalidad es evitar reconstruir contexto, reducir tokens y evitar desarrollar funciones sin evidencia suficiente.
+
+### Modelo de dos carriles
+
+PAZO trabaja con dos carriles paralelos:
+
+- **Carril de Validación:** módulos opcionales pueden medir interés durante semanas/meses sin bloquear el proyecto.
+- **Carril de Implementación:** contiene únicamente utilidades núcleo, infraestructura necesaria o módulos que ya pasaron su gate.
+
+Por tanto, una fase en validación puede permanecer abierta mientras otra fase aprobada avanza en implementación.
 
 ---
 
@@ -317,10 +327,11 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 ---
 
 ## Fase 7 — Comunidades
-**Estado: SIGUIENTE — VALIDACIÓN DE PRODUCTO**
+**Estado: CARRIL DE VALIDACIÓN — EXPERIMENTO ACTIVO**
 
 **Sub-ruta canónica:** `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`  
-**Marco de validación:** `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`
+**Ciclo de vida:** `docs/PAZO_MODULE_LIFECYCLE.md`  
+**Protocolo de experimentos:** `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`
 
 Hoy `ExploreView` usa comunidades mock.
 
@@ -337,17 +348,20 @@ Antes de convertir Comunidades en un módulo persistente:
 - la administración básica no debe quedar bloqueada por pago.
 
 ### Estado actual
+Comunidades permanece en el **Carril de Validación**.
+
 No diseñar todavía roles, permisos, schema, Feed de comunidad o eventos.
 
-Primero completar el gate de producto:
-- auditar el fake door / botón "Me interesa";
+Siguiente trabajo del módulo:
+- crear/reconstruir instrumentación genérica de validación cuando se autorice código;
 - medir interés real;
-- distinguir engagement de adquisición;
+- medir intención concreta;
+- observar revisitas;
 - evaluar masa crítica;
-- comparar coste/valor con módulos de utilidad;
+- probar adquisición externamente solo si se busca usar Comunidades como growth loop;
 - decidir BUILD NOW / MVP REDUCIDO / EXPERIMENTO ACTIVO / POSPUESTO.
 
-Si Comunidades se pospone, Fase 7 no debe bloquear el resto del MVP: se registra el disparador de reevaluación y se continúa con la siguiente prioridad aprobada.
+Mientras Comunidades recopila datos, el Carril de Implementación puede avanzar con otro módulo.
 
 ---
 
@@ -726,16 +740,17 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-1. auditar y localizar la implementación existente del fake door / "Me interesa";
-2. confirmar qué eventos persiste y dónde;
-3. no duplicar tracking si la implementación de Gemini ya sirve;
-4. normalizar métricas según `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`;
-5. mantener Comunidades como **EXPERIMENTO ACTIVO** mientras no exista evidencia suficiente;
-6. evaluar por separado si Comunidades genera engagement interno y si puede generar adquisición externa;
-7. cuando haya datos suficientes, decidir:
-   - BUILD NOW;
-   - MVP REDUCIDO;
-   - EXPERIMENTO ACTIVO;
-   - POSPUESTO.
-8. solo si se aprueba construir, abrir diseño detallado de roles/permisos/schema;
-9. si se pospone, definir disparador de reevaluación y continuar con la siguiente prioridad del MVP.
+## Carril de Validación — Comunidades
+1. no programar todavía Comunidades;
+2. usar `docs/PAZO_MODULE_LIFECYCLE.md`;
+3. cuando se autorice instrumentación, reconstruir un sistema genérico de fake door para todos los módulos;
+4. dejar Comunidades acumulando evidencia sin bloquear el MVP.
+
+## Carril de Implementación
+1. hacer una evaluación rápida de los módulos pendientes con el sistema de ciclo de vida;
+2. seleccionar el módulo con mejor relación valor/coste para el MVP;
+3. candidato provisional actual: **Agenda/Cuidados + Documentos**, por ser utilidad individual y no depender de masa crítica;
+4. no comenzar código de ese módulo hasta cerrar su ficha de decisión y alcance mínimo.
+
+## Regla
+El siguiente desarrollo no se decide por numeración de fases sino por gates de producto + prioridad.
