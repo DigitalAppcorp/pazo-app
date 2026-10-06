@@ -37,7 +37,7 @@ For the current module also read:
 - Communities: EXPERIMENTO ACTIVO, validation lane.
 - Do not build Communities backend/roles/feed/moderation yet.
 - Future fake-door / "Me interesa" tracking must be one generic system reusable by Communities, Map, Matches and future modules.
-- Map has an old Gemini fake-door implementation, but its current write is incompatible with the real interactions schema and must not be treated as reliable data.
+- Map has a legacy fake-door implementation, but its current write is incompatible with the real interactions schema and must not be treated as reliable data.
 - Agenda/Care is the next implementation-lane module.
 - Documents are separated from Agenda as 9B because private Storage/signed URLs increase security scope.
 - Messaging is postponed/re-evaluate due network effect/moderation cost.
@@ -105,19 +105,30 @@ NPM install:
 
 Build status:
 - the five legacy CareItem/handler integration errors were fixed in subsequent commits;
-- Product Owner confirmed `npm run build` passes on the current 9A code;
+- Product Owner previously confirmed `npm run build` passed before the latest UX/state corrections;
+- a fresh local build is required after the newest fixes before merge;
 - Vercel deployment status is not usable as build evidence because deployment is rate-limited, not because of a code failure.
 
 ## Immediate next action
 
 Backend 9A is applied and the SQL/RLS post-apply suite passed.
 
+Latest Product Owner visual feedback was incorporated in code:
+- date and time fields open their native picker from the full field;
+- Agenda state is loaded on cold start, not only after opening the modal;
+- changing active pet clears stale Agenda state and immediately loads that pet's care data;
+- create/edit/archive/complete/undo refresh from server truth immediately;
+- the global Agenda banner was removed; the header-level alert area remains reserved for rescue/lost-pet/sighting flows;
+- the compact “Próximo cuidado” preview is now driven only by the selected care item's `Recordarme` window;
+- “Sin recordatorio” means the compact preview never appears;
+- after completing a reminder-qualified care item, the preview disappears unless the next occurrence already falls inside its reminder window.
+
 Next:
-1. run the real visual/end-to-end Agenda test from the 9A branch;
-2. verify create/edit/complete/undo/archive, recurrence, history pagination, F5 persistence and pet switching;
-3. verify the global care reminder opens the correct pet;
+1. Product Owner pulls latest `feat/phase-9a-care`;
+2. run `npm run build` again after these UX/state fixes;
+3. repeat the focused visual test: create/save → summary refresh, F5 persistence, pet switching, full-field date/time picker, reminder preview timing, complete → preview disappearance, history/undo;
 4. keep Documents isolated for 9B;
-5. if visual/end-to-end passes, move PR #12 out of draft, merge to `main`, verify `main`, and update the roadmap;
+5. if the focused visual/end-to-end test passes, move PR #12 out of draft, merge to `main`, verify `main`, and update the roadmap;
 6. do not mark 9A COMPLETADA before merge + Product Owner visual approval.
 
 ## Important continuity note
