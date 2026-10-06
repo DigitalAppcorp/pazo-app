@@ -1,6 +1,6 @@
 # PAZO — Sub-Ruta Maestra 9A: Agenda y Cuidados
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO  
+**Estado:** GATE 6 CERRADO — FASE 9A COMPLETADA  
 **Tipo:** U — utilidad individual  
 **Resultado Gate 5:** BUILD NOW  
 **Documento padre:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
@@ -419,7 +419,11 @@ Quedaron definidos:
 - plan de migración;
 - plan de pruebas.
 
-Siguiente etapa:
-**Gate 8 — Implementación**
+Estado final:
+- Gate 8 completado;
+- backend aplicado y verificado;
+- build aprobado;
+- prueba visual/end-to-end aprobada por Product Owner;
+- PR #12 fusionado a `main`.
 
-No iniciar implementación hasta revisión del Product Owner.
+**Fase 9A — COMPLETADA.**
