@@ -99,14 +99,21 @@ Verified closure evidence:
 
 9A is closed. Do not reopen it unless a regression is reported.
 
-Next implementation candidate: **9B — Documentos privados**.
+Active next module: **9B — Documentos privados**.
 
-Before any 9B code:
-1. read the module lifecycle;
-2. audit whether the module should BUILD NOW / MVP REDUCIDO / EXPERIMENTO ACTIVO / POSPUESTO;
-3. define product scope and privacy rules;
-4. define Storage/RLS/signed-URL architecture only after the product gate is closed;
-5. no Supabase mutation before explicit Product Owner authorization.
+Current state:
+- Gates 0–5 closed;
+- result: **MVP REDUCIDO**;
+- Gate 6 product specification proposed in `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`;
+- private upload/list/preview/download/edit/delete are in scope;
+- external sharing/signed links for third parties are out of MVP;
+- real audit found no documents table, no document RPC and no private document bucket;
+- existing `pet-avatars` and `post-photos` buckets are public and must not be reused.
+
+Immediate next action:
+1. Product Owner approves or modifies Gate 6 product behavior;
+2. only after approval, design Gate 7 architecture;
+3. no code or Supabase mutation before Gate 6 closes.
 
 Communities remains in the Validation Lane and does not block this evaluation.
 
