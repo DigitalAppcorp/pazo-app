@@ -1678,8 +1678,7 @@ function PazoMain() {
                       }}
                       onAddPet={() => setIsAddPetOpen(true)}
                       careItems={careItems}
-                      onToggleCompleteCare={handleToggleCompleteCare}
-                      docs={docs}
+                      onCompleteCare={handleCompleteCare}
                       onOpenQRPassport={() => setIsPassportOpen(true)}
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
