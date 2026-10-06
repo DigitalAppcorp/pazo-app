@@ -165,6 +165,7 @@ Si el navegador se cierra durante deletion, la fila deleting permanece oculta y 
 
 # 14. RPCs previstas
 
+Públicas:
 - begin_pet_document_upload;
 - finalize_pet_document_upload;
 - cancel_pet_document_upload;
@@ -172,7 +173,19 @@ Si el navegador se cierra durante deletion, la fila deleting permanece oculta y 
 - finalize_delete_pet_document;
 - cancel_delete_pet_document.
 
-SECURITY DEFINER solo donde sea necesario, con auth check explícito, SET search_path='', referencias calificadas, grants mínimos y sin EXECUTE para PUBLIC/anon.
+Patrón de seguridad:
+- wrappers públicos SECURITY INVOKER;
+- lógica privilegiada en schema no expuesto document_private;
+- helpers internos SECURITY DEFINER solo porque necesitan escribir columnas protegidas y verificar storage.objects;
+- auth check explícito dentro de cada helper;
+- SET search_path='';
+- referencias schema-qualified;
+- document_private con USAGE mínimo para authenticated;
+- EXECUTE interno solo para authenticated/service_role;
+- PUBLIC/anon sin EXECUTE;
+- wrappers públicos authenticated-only.
+
+Objetivo: evitar exponer SECURITY DEFINER directamente por Data API y no introducir nuevos warnings del Security Advisor.
 
 # 15. Frontend
 
