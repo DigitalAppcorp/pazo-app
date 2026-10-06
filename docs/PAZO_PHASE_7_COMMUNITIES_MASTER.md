@@ -29,6 +29,107 @@
 **Criterio para posponer:** interés débil, intención difusa, falta de masa crítica o coste superior a módulos de utilidad  
 **Disparador para reevaluar:** crecimiento suficiente de audiencia/interés o evidencia externa de adquisición
 
+
+---
+
+# 0.2 Banco de ideas y auditoría conceptual
+
+Antes de cerrar el experimento de Fase 7.0A, el Product Owner debe tener un espacio explícito para descargar ideas del módulo sin necesidad de estructurarlas.
+
+## Objetivo
+
+Capturar ideas antes de decidir qué mostrar en el fake door y antes de gastar tokens en especificación completa.
+
+Las ideas pueden ser:
+- funcionales;
+- sociales;
+- de identidad/status;
+- de engagement;
+- de adquisición;
+- de retención;
+- de monetización;
+- de seguridad/moderación;
+- de administración;
+- de infraestructura;
+- visuales/UX;
+- futuras o experimentales.
+
+## Flujo obligatorio
+
+### A. Descarga de ideas
+El Product Owner puede entregar ideas sin orden ni justificación completa.
+
+No pedirle que las convierta primero en especificaciones.
+
+### B. Auditoría conceptual
+El AI debe analizar cada idea en:
+- problema/deseo que resuelve;
+- beneficio real;
+- atractivo inicial;
+- utilidad recurrente;
+- riesgo de novedad sin retención;
+- dependencia con otras funciones;
+- coste técnico;
+- coste operativo;
+- moderación/privacidad/seguridad;
+- potencial de adquisición;
+- potencial de monetización inmediata o futura;
+- encaje con el MVP;
+- si necesita masa crítica;
+- si requiere validación o es una dependencia necesaria.
+
+### C. Clasificación
+Cada idea puede quedar como una o varias de:
+- CORE si Comunidades se construye;
+- MVP REDUCIDO candidato;
+- ENGAGEMENT;
+- IDENTIDAD / STATUS;
+- ADQUISICIÓN;
+- MONETIZACIÓN;
+- INFRAESTRUCTURA / dependencia;
+- FUTURO;
+- POSPONER;
+- DESCARTAR.
+
+Esta clasificación NO autoriza implementación.
+
+### D. Uso en el experimento
+Solo después de auditar el banco de ideas se decide:
+- qué visión mínima de Comunidades debe comunicar la preview;
+- qué beneficios deben verse para que el usuario entienda la propuesta;
+- qué ideas merecen aparecer como opciones de intención;
+- qué ideas son soporte y no deben convertirse en botones de votación;
+- qué ideas deben guardarse para después de BUILD NOW/MVP REDUCIDO.
+
+## Regla de ahorro de tokens
+
+No definir completamente permisos, tablas, roles, economía, niveles o catálogos de una idea todavía no aprobada.
+
+Definir únicamente lo suficiente para:
+1. entender su valor;
+2. detectar dependencias/riesgos;
+3. decidir si debe influir en el experimento;
+4. saber cuándo retomarla.
+
+## Primera idea registrada — Insignias de Comunidades
+
+**Origen:** Product Owner.
+
+Idea inicial:
+- administradores y otros roles podrían tener insignias visibles en vez de una simple etiqueta;
+- las insignias podrían mostrarse también en el perfil de la mascota;
+- podrían reforzar diferenciación, pertenencia e identidad;
+- podría existir una vía de monetización inmediata o futura alrededor de ciertas insignias/herramientas, todavía no definida.
+
+Auditoría preliminar, NO decisión final:
+- insignias de autoridad real como Admin/Moderador probablemente pertenecen a identidad funcional y confianza, no deberían comprarse;
+- insignias de logros/pertenencia pueden ser candidatas de engagement/status;
+- insignias cosméticas podrían evaluarse como monetización futura;
+- mostrar insignias fuera de la comunidad podría convertirlas en un sistema transversal de identidad/reconocimiento de PAZO;
+- no diseñar todavía catálogo, rarezas, niveles, economía ni venta hasta que Comunidades pase el gate correspondiente.
+
+**Estado:** IDEA REGISTRADA — PENDIENTE DE AUDITORÍA DURANTE LA LLUVIA DE IDEAS.
+
 ---
 
 # 1. Pregunta principal
