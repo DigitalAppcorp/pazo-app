@@ -1,6 +1,6 @@
 # PAZO — Arquitectura Técnica 9A: Agenda y Cuidados
 
-**Estado:** GATE 7 — ARQUITECTURA TÉCNICA  
+**Estado:** GATE 7 CERRADO — BASE DE GATE 8 IMPLEMENTADA EN BACKEND  
 **Producto:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`  
 **Regla:** este documento describe contratos y arquitectura. No contiene migración ejecutable.
 
@@ -497,7 +497,7 @@ Una sola fase puede dividir migración si mejora revisión:
 - RPC undo;
 - hardening.
 
-No aplicar nada sin autorización explícita.
+**Estado de aplicación:** migración 9A aplicada el 2026-10-06 con autorización explícita del Product Owner. Registrada en Supabase como `20261006054510 care_agenda`.
 
 ---
 
@@ -576,13 +576,15 @@ Fase 13 podrá rediseñar la presentación sin cambiar contratos.
 
 # 27. Estado del Gate 7
 
-Arquitectura propuesta completa.
+Gate 7 está cerrado y esta arquitectura es la base implementada de 9A.
 
-Antes de código:
-- Product Owner puede cambiar cualquier regla de producto;
-- si no hay cambios, esta arquitectura se considera base de implementación.
+Estado real:
+- Gate 8 en curso en `feat/phase-9a-care`;
+- migración SQL aplicada a Supabase;
+- RLS/grants/RPC verificados;
+- suite transaccional con `ROLLBACK` aprobada;
+- Advisors post-apply sin hallazgos nuevos de seguridad asociados a 9A;
+- build local aprobado por Product Owner;
+- pendiente prueba visual/end-to-end y merge a `main`.
 
-Siguiente etapa:
-**Gate 8 — Implementación 9A**, en rama propia.
-
-No se ha creado ni aplicado SQL todavía.
+9A no se considera COMPLETADA hasta cumplir esos dos últimos puntos.
