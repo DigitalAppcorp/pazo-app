@@ -395,22 +395,46 @@ No activar ubicación precisa sin decisión explícita.
 ---
 
 ## Fase 9 — Cuidados y documentos privados
-**Estado: PLANIFICADA**
+**Estado: CARRIL DE IMPLEMENTACIÓN — 9A SIGUIENTE**
 
-`CareModal` y documentos siguen siendo locales/mock.
+**Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
 
-### Objetivo
-Crear el espacio privado de salud/cuidados operativos de cada mascota.
+### 9A — Agenda/Cuidados
+**Estado: SIGUIENTE — GATE 6 CERRADO / GATE 7 PENDIENTE**
 
-### Alcance
-- care_items reales por mascota;
-- crear/editar/completar;
-- historial;
-- recordatorios;
-- documentos privados;
+**Sub-ruta:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`
+
+Decisión:
+- BUILD NOW;
+- utilidad individual;
+- no depende de masa crítica;
+- producto MVP ya especificado;
+- todavía NO programar hasta cerrar arquitectura técnica.
+
+Alcance funcional:
+- cuidados persistentes por mascota;
+- próximos/hoy/vencidos;
+- completar/deshacer;
+- historial real;
+- edición/eliminación;
+- recurrencia simple;
+- reminder interno;
+- privacidad owner-only.
+
+### 9B — Documentos privados
+**Estado: DESPUÉS DE 9A**
+
+Se separa de Agenda por mayor superficie de seguridad.
+
+Alcance futuro:
+- metadata persistente;
 - Storage privado;
-- vacunas, veterinaria, medicamentos, alimentación, higiene;
-- aislamiento total entre propietarios.
+- upload;
+- preview/descarga;
+- categorías;
+- URLs firmadas temporales;
+- eliminación;
+- aislamiento fuerte por propietario.
 
 ### No entra
 - diagnóstico médico;
@@ -740,17 +764,29 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Carril de Validación — Comunidades
-1. no programar todavía Comunidades;
-2. usar `docs/PAZO_MODULE_LIFECYCLE.md`;
-3. cuando se autorice instrumentación, reconstruir un sistema genérico de fake door para todos los módulos;
-4. dejar Comunidades acumulando evidencia sin bloquear el MVP.
+## Carril de Validación
+### Comunidades
+- mantener EXPERIMENTO ACTIVO;
+- no diseñar todavía roles/schema/feed;
+- instrumentación genérica se implementará en una fase pequeña separada cuando se autorice.
+
+### Mapa/Lugares
+- fake door existente no es confiable con el schema actual;
+- no arreglar tracking específico;
+- usar futura instrumentación genérica.
 
 ## Carril de Implementación
-1. hacer una evaluación rápida de los módulos pendientes con el sistema de ciclo de vida;
-2. seleccionar el módulo con mejor relación valor/coste para el MVP;
-3. candidato provisional actual: **Agenda/Cuidados + Documentos**, por ser utilidad individual y no depender de masa crítica;
-4. no comenzar código de ese módulo hasta cerrar su ficha de decisión y alcance mínimo.
+### Agenda/Cuidados 9A
+1. usar `docs/PAZO_PHASE_9A_CARE_MASTER.md`;
+2. Gate 6 de producto está cerrado;
+3. siguiente paso: **Gate 7 — Arquitectura Técnica**;
+4. definir schema/RLS/completions/recurrencia/timezone/paginación/notificaciones;
+5. no escribir código de producto ni aplicar Supabase hasta cerrar Gate 7;
+6. después crear rama de implementación específica.
+
+### Después
+- 9B Documentos privados;
+- otros módulos se reevalúan con `docs/PAZO_MODULE_LIFECYCLE.md`.
 
 ## Regla
-El siguiente desarrollo no se decide por numeración de fases sino por gates de producto + prioridad.
+La numeración histórica de fases no bloquea los dos carriles. El próximo código real será 9A únicamente cuando Gate 7 esté cerrado.
