@@ -1,6 +1,6 @@
 # PAZO — Arquitectura Técnica: Instrumentación Genérica de Validación
 
-**Estado:** GATE 7 — ARQUITECTURA TÉCNICA CERRADA  
+**Estado:** PROVISIONAL — NO CERRADA; ESPERA NUEVO GATE 6  
 **Producto:** `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`  
 **Resultado Gate 5:** BUILD NOW  
 **Regla:** prepara Gate 8; no autoriza mutaciones de Supabase.
@@ -496,9 +496,8 @@ Todas las pruebas DB posibles con BEGIN/ROLLBACK.
 
 # 24. Estado Gate 7
 
-Arquitectura cerrada.
+La arquitectura queda provisional.
 
-Siguiente:
-**Gate 8 — Implementación**.
+No continuar Gate 8 hasta cerrar nuevamente Gate 6 después del Product Capability Portfolio y del diseño de conceptos/experimentos.
 
-La migración se prepara primero y no se aplica sin autorización explícita.
+La migración existente en la rama es provisional y NO debe aplicarse.
