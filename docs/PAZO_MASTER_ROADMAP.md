@@ -116,6 +116,7 @@ Estas reglas no deben romperse sin una decisión explícita de arquitectura.
 - Las pruebas de seguridad no sustituyen las pruebas visuales, y viceversa.
 - Durante una fase de rediseño visual, la funcionalidad existente debe mantenerse intacta salvo aprobación explícita del Product Owner.
 - Cambios puramente estéticos no deben introducir nuevas dependencias de backend, alterar contratos de datos ni modificar reglas de negocio.
+- Módulos opcionales/sociales de alto coste deben pasar un gate de validación de producto antes de su implementación completa; usar `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`.
 
 ---
 
@@ -315,17 +316,20 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 
 ---
 
-## Fase 7 — Comunidades reales
-**Estado: SIGUIENTE — SUBFASE 7.0 EN DEFINICIÓN**
+## Fase 7 — Comunidades
+**Estado: SIGUIENTE — VALIDACIÓN DE PRODUCTO**
 
-**Sub-ruta canónica:** `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`
+**Sub-ruta canónica:** `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`  
+**Marco de validación:** `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`
 
 Hoy `ExploreView` usa comunidades mock.
 
-### Objetivo
-Convertir Comunidades en un módulo persistente.
+### Pregunta de Fase 7
+Antes de convertir Comunidades en un módulo persistente:
 
-### Decisiones ya confirmadas
+**¿Comunidades merece entrar al MVP ahora?**
+
+### Decisiones ya confirmadas si se construye
 - cualquier usuario puede crear comunidades;
 - no se requiere membresía paga para crear una comunidad;
 - el creador se convierte en propietario/administrador inicial;
@@ -333,24 +337,17 @@ Convertir Comunidades en un módulo persistente.
 - la administración básica no debe quedar bloqueada por pago.
 
 ### Estado actual
-Antes de programar se debe completar **Subfase 7.0 — Definición de producto**.
+No diseñar todavía roles, permisos, schema, Feed de comunidad o eventos.
 
-La sub-ruta de Fase 7 define y registra:
-- identidad de membresía;
-- tipos de comunidad;
-- roles;
-- permisos;
-- contenido;
-- Join/Leave;
-- moderación local;
-- eventos;
-- campos;
-- notificaciones;
-- descubrimiento;
-- ciclo de vida;
-- puntos de extensión premium.
+Primero completar el gate de producto:
+- auditar el fake door / botón "Me interesa";
+- medir interés real;
+- distinguir engagement de adquisición;
+- evaluar masa crítica;
+- comparar coste/valor con módulos de utilidad;
+- decidir BUILD NOW / MVP REDUCIDO / EXPERIMENTO ACTIVO / POSPUESTO.
 
-No crear esquema definitivo ni implementar comportamiento de Comunidades hasta cerrar las decisiones críticas de 7.0.
+Si Comunidades se pospone, Fase 7 no debe bloquear el resto del MVP: se registra el disparador de reevaluación y se continúa con la siguiente prioridad aprobada.
 
 ---
 
@@ -729,11 +726,16 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-1. usar `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md` como documento canónico de Fase 7;
-2. completar **Subfase 7.0 — Definición de producto** antes de programar;
-3. resolver primero la identidad de participación: cuenta, mascota o híbrido;
-4. continuar las decisiones en el orden definido por la sub-ruta;
-5. cuando 7.0 esté cerrada, auditar `ExploreView`, mocks y estructuras existentes;
-6. diseñar esquema/RLS/roles basados únicamente en decisiones aprobadas;
-7. crear rama de implementación de Fase 7;
-8. no comenzar Fase 8 antes de cerrar Fase 7.
+1. auditar y localizar la implementación existente del fake door / "Me interesa";
+2. confirmar qué eventos persiste y dónde;
+3. no duplicar tracking si la implementación de Gemini ya sirve;
+4. normalizar métricas según `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`;
+5. mantener Comunidades como **EXPERIMENTO ACTIVO** mientras no exista evidencia suficiente;
+6. evaluar por separado si Comunidades genera engagement interno y si puede generar adquisición externa;
+7. cuando haya datos suficientes, decidir:
+   - BUILD NOW;
+   - MVP REDUCIDO;
+   - EXPERIMENTO ACTIVO;
+   - POSPUESTO.
+8. solo si se aprueba construir, abrir diseño detallado de roles/permisos/schema;
+9. si se pospone, definir disparador de reevaluación y continuar con la siguiente prioridad del MVP.
