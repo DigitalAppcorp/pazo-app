@@ -152,6 +152,14 @@ Visual correction after Product Owner review:
 - the preview now explains what Communities is before asking for interest;
 - unified Explore search remains future Phase 12 and is not faked in 7.0A.
 
+Current UI iteration:
+- canonical Explore visual iteration implemented from Product Owner screenshot;
+- original hierarchy restored: discovery hero -> search -> Para ti / Comunidades / Eventos;
+- Para ti keeps featured discovery + suggested Communities cards;
+- fake Join/Joined and fake member counts remain removed;
+- Communities experiment lives only inside Communities tab;
+- pending Product Owner visual review of this iteration.
+
 Backend state:
 - local build PASS confirmed by Product Owner;
 - Supabase migration applied with explicit authorization;
