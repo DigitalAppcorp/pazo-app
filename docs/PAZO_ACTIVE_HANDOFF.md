@@ -123,7 +123,7 @@ Canonical source:
 
 Current state:
 - Communities remains **EXPERIMENTO ACTIVO**;
-- 7.0A experiment proposal is documented in `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md` and awaits Product Owner approval;
+- 7.0A experiment is APPROVED by Product Owner;
 - full Communities product/backend is blocked by data;
 - the original lost Gemini `Me interesa` implementation will not be recovered;
 - generic validation tracking is still the intended technical solution, but it must be implemented only after the Communities experiment itself is closed;
@@ -132,11 +132,12 @@ Current state:
 - Map/Radar is not automatically bundled into the first Communities experiment.
 
 Next action:
-1. Product Owner reviews/approves or modifies the 7.0A proposal;
-2. after approval, close product definition for the experiment;
-3. implement the smallest generic validation infrastructure with Communities as first consumer;
-4. do not build Communities backend/roles/feed/moderation;
-5. let Communities collect data while the implementation lane remains free for another approved module if one emerges.
+1. implement the smallest generic validation infrastructure with Communities as first consumer;
+2. prepare versioned migration but do not apply Supabase yet;
+3. preflight build/security;
+4. request explicit Product Owner authorization before backend mutation;
+5. do not build Communities backend/roles/feed/moderation;
+6. after validation instrumentation is stable, let Communities collect data while the implementation lane remains free for another approved module.
 
 ## Important continuity note
 
