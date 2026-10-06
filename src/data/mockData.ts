@@ -3,7 +3,6 @@ import type {
   Post,
   Community,
   PetPlace,
-  PrivateDoc,
   Conversation,
   PazoNotification,
 } from '../types/pazo'
@@ -189,25 +188,6 @@ export const INITIAL_PLACES: PetPlace[] = [
     description: 'Sendero sombreado con arroyos y helechos, ideal para días templados.',
     photoUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=600&auto=format&fit=crop',
     activeCheckIns: 7,
-  },
-]
-
-export const INITIAL_DOCS: PrivateDoc[] = [
-  {
-    id: 'doc-1',
-    title: 'Cartilla_Vacunacion_Oficial_Luna.pdf',
-    fileName: 'Cartilla_Vacunacion_Luna_2026.pdf',
-    fileSize: '1.2 MB',
-    dateUploaded: '15 Ago 2026',
-    category: 'vacunas',
-  },
-  {
-    id: 'doc-2',
-    title: 'Certificado_Microchip_Registro_CA.pdf',
-    fileName: 'Microchip_CA_Certificado.pdf',
-    fileSize: '650 KB',
-    dateUploaded: '10 Ene 2026',
-    category: 'identificacion',
   },
 ]
 
