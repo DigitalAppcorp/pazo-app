@@ -88,7 +88,8 @@ ON public.pet_documents
 FOR UPDATE
 TO authenticated
 USING (
-  EXISTS (
+  status = 'active'
+  AND EXISTS (
     SELECT 1
     FROM public.pets p
     WHERE p.id = pet_id
@@ -96,7 +97,8 @@ USING (
   )
 )
 WITH CHECK (
-  EXISTS (
+  status = 'active'
+  AND EXISTS (
     SELECT 1
     FROM public.pets p
     WHERE p.id = pet_id
