@@ -21,10 +21,8 @@ For the current module also read:
 ## Working model
 
 - Product Owner: Brandon.
-- ChatGPT / AI Project Brain directly owns the technical process end-to-end across GitHub + Supabase: audit, architecture, implementation, migrations, security, tests, docs, PR and merge when authorized by the gate.
+- ChatGPT directly owns implementation work across GitHub + Supabase.
 - Product Owner makes product decisions and performs requested local/visual tests.
-- Antigravity is only the Product Owner's local execution/review environment. ChatGPT supplies exact commands when local execution is required; the Product Owner returns terminal output/screenshots and ChatGPT continues the implementation.
-- Do not delegate programming/debugging to Gemini or another AI unless the Product Owner explicitly requests that exception.
 - Never mutate Supabase without explicit Product Owner authorization.
 - Read-only Supabase inspection is allowed.
 - Prefer durable project decisions in repository docs over conversational memory.
