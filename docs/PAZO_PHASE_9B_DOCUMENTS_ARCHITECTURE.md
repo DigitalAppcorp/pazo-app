@@ -1,6 +1,6 @@
 # PAZO — Arquitectura Técnica 9B: Documentos privados
 
-**Estado:** GATE 7 — ARQUITECTURA TÉCNICA CERRADA
+**Estado:** COMPLETADA — GATE 8 CERRADO
 **Producto:** docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md
 **Resultado Gate 5:** MVP REDUCIDO
 **Regla:** esta arquitectura prepara Gate 8. No autoriza mutaciones de Supabase.
@@ -313,11 +313,24 @@ Delete lifecycle:
 - prueba visual aprobada;
 - merged a main.
 
-# 24. Estado Gate 7
+# 24. Estado final
 
-Arquitectura cerrada.
-Siguiente etapa: Gate 8 — Implementación, en rama propia.
-La migración se prepara y revisa, pero no se aplica a Supabase sin autorización explícita del Product Owner.
+Gate 7 quedó cerrado y Gate 8 fue completado.
+
+Cierre real:
+- migración base aplicada;
+- hardening de policies aplicado;
+- bucket privado aplicado;
+- RLS/grants/RPCs verificados;
+- suite transaccional owner/non-owner aprobada;
+- Security Advisor sin hallazgos nuevos de 9B;
+- build local aprobado;
+- Storage API real validada visualmente;
+- bug de eliminación diferida corregido y retesteado;
+- PR #14 fusionado a `main`;
+- merge commit: `6f833b779ef1a62d7321bc50dbab8c220f92a1d3`.
+
+**Fase 9B — COMPLETADA.**
 
 ---
 
@@ -346,4 +359,4 @@ Backend verification passed:
 - delete metadata lifecycle;
 - Security Advisor has no new 9B finding.
 
-Full Storage API `remove()` remains part of visual/end-to-end testing because Supabase intentionally blocks direct SQL deletion from `storage.objects`.
+Storage API `remove()` was validated in the Product Owner visual/end-to-end test. A delayed metadata-finalization UX issue was found, fixed with retries/background reconciliation, and retested successfully.
