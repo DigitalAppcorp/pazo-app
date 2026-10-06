@@ -422,6 +422,24 @@ Alcance funcional:
 - reminder interno;
 - privacidad owner-only.
 
+### Estado técnico de implementación
+- rama: `feat/phase-9a-care`;
+- migración 9A preparada, NO aplicada a Supabase;
+- `care_items` + `care_completions` definidos;
+- RLS/grants owner-only preparados;
+- completar/deshacer/archivar atómicos preparados;
+- frontend dejó de usar cuidados mock;
+- servicio real de Agenda preparado;
+- estados Próximo/Hoy/Vencido implementados;
+- historial paginado en bloques de 20;
+- recordatorio global por mascota preparado;
+- recordatorios respetan timezone guardado;
+- colisiones de tablas/RPC verificadas: ninguna;
+- Advisors baseline registrados;
+- pendiente: build local;
+- pendiente: autorización explícita para aplicar backend 9A;
+- pendiente: pruebas SQL/RLS + prueba visual.
+
 ### Estado técnico de 9A
 - rama `feat/phase-9a-care` creada;
 - migración versionada preparada, NO aplicada;
