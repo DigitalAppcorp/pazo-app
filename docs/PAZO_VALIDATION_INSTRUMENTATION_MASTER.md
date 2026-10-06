@@ -1,6 +1,6 @@
 # PAZO — Instrumentación Genérica de Validación
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO PROPUESTA  
+**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO CERRADA  
 **Tipo:** I — infraestructura / habilitador  
 **Resultado Gate 5:** BUILD NOW  
 **Marco:** `docs/PAZO_MODULE_LIFECYCLE.md`  
@@ -351,12 +351,12 @@ La infraestructura está funcionalmente definida cuando:
 
 # 17. Próximo gate
 
-Esta es la propuesta de **Gate 6 — Especificación de producto**.
+Gate 6 fue aprobado por el Product Owner.
 
-Si el Product Owner la aprueba:
-- cerrar Gate 6;
-- diseñar Gate 7;
-- definir tabla/RLS/RPC/deduplicación/sesión;
-- crear una rama de implementación;
-- preparar migración sin aplicarla;
-- pedir autorización explícita antes de tocar Supabase.
+Gate 7 está cerrado en:
+`docs/PAZO_VALIDATION_INSTRUMENTATION_ARCHITECTURE.md`
+
+Siguiente etapa:
+**Gate 8 — Implementación**.
+
+No aplicar ninguna migración a Supabase sin autorización explícita.
