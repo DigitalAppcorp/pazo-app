@@ -17,6 +17,7 @@ interface PetViewProps {
   onPetUpdated: (pet: Pet) => void
   onAddPet: () => void
   careItems: CareItem[]
+  careReminderItem?: CareItem
   onCompleteCare: (careItem: CareItem) => void | Promise<void>
   onOpenQRPassport: () => void
   onOpenCareAgenda: () => void
@@ -32,6 +33,7 @@ export const PetView = ({
   onPetUpdated,
   onAddPet,
   careItems,
+  careReminderItem,
   onCompleteCare,
   onOpenQRPassport,
   onOpenCareAgenda,
@@ -68,7 +70,7 @@ export const PetView = ({
 
   const [editForm, setEditForm] = useState(buildEditForm)
 
-  const nextPendingCare = careItems.find((item) => item.status === 'active')
+  const nextPendingCare = careReminderItem
 
   const handleEditClick = () => {
     setEditForm(buildEditForm())
