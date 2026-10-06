@@ -279,7 +279,7 @@ que en un segundo feed genérico.
 
 # 0.3 Diseño propuesto del experimento 7.0A
 
-**Estado:** PROPUESTA DE PRODUCTO — PENDIENTE DE APROBACIÓN DEL PRODUCT OWNER.  
+**Estado:** APROBADA POR PRODUCT OWNER — LISTA PARA IMPLEMENTAR INSTRUMENTACIÓN MÍNIMA.  
 **No autoriza código ni backend.**
 
 ## Hipótesis principal
@@ -576,6 +576,8 @@ abrir 7.0B con una prueba externa separada:
 ---
 
 ## Definition of Done de 7.0A — Producto
+
+**CERRADA / APROBADA el 2026-10-06 por Product Owner.**
 
 Antes de programar instrumentación, deben quedar aprobados:
 
