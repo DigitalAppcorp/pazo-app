@@ -1,57 +1,101 @@
 import { useState } from 'react'
 import type { Community } from '../../types/pazo'
-import { IconExplore, IconCheck } from '../icons/PazoIcons'
+import { IconExplore } from '../icons/PazoIcons'
+import { ValidationInterestPanel } from '../validation/ValidationInterestPanel'
 
 interface ExploreViewProps {
   communities: Community[]
-  onToggleJoinCommunity: (commId: string) => void
-  onSelectPetProfile: (petName: string) => void
+  activePetId?: string | null
+  canTrackValidation: boolean
   lang: 'es' | 'en'
 }
 
+const COMMUNITY_INTENTS = [
+  {
+    value: 'local_people_pets',
+    es: 'Personas y mascotas de mi zona',
+    en: 'People and pets near me',
+  },
+  {
+    value: 'species_breed_groups',
+    es: 'Grupos por especie o raza',
+    en: 'Species or breed groups',
+  },
+  {
+    value: 'create_community',
+    es: 'Crear mi propia comunidad',
+    en: 'Create my own community',
+  },
+  {
+    value: 'meetups',
+    es: 'Organizar o encontrar encuentros',
+    en: 'Organize or find meetups',
+  },
+  {
+    value: 'advice',
+    es: 'Pedir o compartir consejos',
+    en: 'Ask for or share advice',
+  },
+  {
+    value: 'other',
+    es: 'Otro',
+    en: 'Other',
+  },
+]
+
 export const ExploreView = ({
   communities,
-  onToggleJoinCommunity,
-  onSelectPetProfile,
+  activePetId,
+  canTrackValidation,
   lang,
 }: ExploreViewProps) => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState<'para_ti' | 'comunidades' | 'eventos'>('para_ti')
 
   const filteredCommunities = communities.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.species.toLowerCase().includes(searchQuery.toLowerCase())
+    (community) =>
+      community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      community.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      community.species.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
     <div className="space-y-4 animate-slide-up pb-6">
-      {/* Título de la sección */}
       <div className="space-y-1 px-1">
         <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block shadow-xs">
-          {lang === 'es' ? 'Descubrimiento' : 'Discovery'}
+          {lang === 'es' ? 'Vista previa' : 'Preview'}
         </span>
         <h2 className="text-2xl font-black text-[#204E4A] tracking-tight">
-          {lang === 'es' ? 'Encuentra a los tuyos.' : 'Find your crowd.'}
+          {lang === 'es' ? 'Comunidades de Pazo' : 'Pazo Communities'}
         </h2>
         <p className="text-xs text-[#5C7470]">
           {lang === 'es'
-            ? 'Comunidades locales organizadas por especie e intereses'
-            : 'Local communities organized by species and interests'}
+            ? 'Estamos evaluando cómo debería funcionar este espacio antes de construirlo.'
+            : 'We are evaluating how this space should work before building it.'}
         </p>
       </div>
 
-      {/* Buscador con icono vectorial personalizado */}
+      <ValidationInterestPanel
+        moduleKey="communities"
+        source="explore"
+        activePetId={activePetId}
+        canTrack={canTrackValidation}
+        titleEs="¿Te gustaría usar Comunidades?"
+        titleEn="Would you use Communities?"
+        descriptionEs="Tu respuesta nos ayuda a decidir si este módulo merece entrar al MVP y qué parte debería construirse primero."
+        descriptionEn="Your response helps us decide whether this module belongs in the MVP and what should be built first."
+        intents={COMMUNITY_INTENTS}
+        lang={lang}
+      />
+
       <div className="relative">
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(event) => setSearchQuery(event.target.value)}
           placeholder={
             lang === 'es'
-              ? 'Mascotas, comunidades, eventos en LA...'
-              : 'Pets, communities, events in LA...'
+              ? 'Filtrar ejemplos de comunidades...'
+              : 'Filter community examples...'
           }
           className="w-full bg-white rounded-full pl-11 pr-4 py-3 text-xs text-[#204E4A] shadow-sm focus:bg-white"
         />
@@ -60,138 +104,66 @@ export const ExploreView = ({
         </div>
       </div>
 
-      {/* Selector de pestañas: Para ti / Comunidades / Eventos */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setActiveCategory('para_ti')}
-          className={`text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
-            activeCategory === 'para_ti'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs'
-          }`}
-        >
-          {lang === 'es' ? 'Para ti' : 'For you'}
-        </button>
-        <button
-          onClick={() => setActiveCategory('comunidades')}
-          className={`text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
-            activeCategory === 'comunidades'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs'
-          }`}
-        >
-          {lang === 'es' ? 'Comunidades' : 'Communities'}
-        </button>
-        <button
-          onClick={() => setActiveCategory('eventos')}
-          className={`text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
-            activeCategory === 'eventos'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs'
-          }`}
-        >
-          {lang === 'es' ? 'Eventos' : 'Events'}
-        </button>
-      </div>
-
-      {/* Perfil Destacado de Mascota (Nube el conejo) */}
-      <div className="p-4 bg-white rounded-[2.2rem] flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xs shrink-0">
-            <img
-              src="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=200&auto=format&fit=crop"
-              alt="Nube el conejo"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-sm text-[#204E4A]">Nube</span>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 bg-[#FAF8F5] text-[#204E4A] rounded-full shadow-xs">
-                {lang === 'es' ? 'Conejo • LA' : 'Rabbit • LA'}
-              </span>
-            </div>
-            <p className="text-[11px] text-[#5C7470] line-clamp-1">
-              {lang === 'es'
-                ? 'Explora rincones tranquilos en compañía.'
-                : 'Loves calm spots and friendly company.'}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={() => onSelectPetProfile('Nube')}
-          className="bg-[#FAF8F5] hover:bg-[#E1E53F] text-[#204E4A] text-[11px] font-bold px-3.5 py-2 rounded-full transition-all cursor-pointer shrink-0 shadow-xs"
-        >
-          {lang === 'es' ? 'Ver Ficha' : 'View Profile'}
-        </button>
-      </div>
-
-      {/* Lista de Comunidades */}
       <div className="space-y-3">
         <div className="flex justify-between items-center px-1">
-          <h3 className="font-extrabold text-sm text-[#204E4A]">
-            {lang === 'es' ? 'Comunidades sugeridas' : 'Suggested communities'}
-          </h3>
-          <span className="text-[11px] font-semibold text-[#5C7470]">
-            {filteredCommunities.length} {lang === 'es' ? 'disponibles' : 'available'}
+          <div>
+            <h3 className="font-extrabold text-sm text-[#204E4A]">
+              {lang === 'es'
+                ? 'Ejemplos conceptuales'
+                : 'Concept examples'}
+            </h3>
+            <p className="text-[10px] text-[#5C7470] mt-0.5">
+              {lang === 'es'
+                ? 'Estas comunidades todavía no están activas.'
+                : 'These communities are not active yet.'}
+            </p>
+          </div>
+          <span className="text-[10px] font-semibold text-[#5C7470]">
+            {filteredCommunities.length}{' '}
+            {lang === 'es' ? 'ejemplos' : 'examples'}
           </span>
         </div>
 
-        {filteredCommunities.map((comm) => (
+        {filteredCommunities.map((community) => (
           <div
-            key={comm.id}
-            className="p-4 bg-white rounded-[2rem] shadow-[0_3px_16px_rgba(32,78,74,0.04)] flex gap-3.5 items-center justify-between"
+            key={community.id}
+            className="p-4 bg-white rounded-[2rem] shadow-[0_3px_16px_rgba(32,78,74,0.04)] flex gap-3.5 items-center"
           >
-            <div className="flex gap-3 items-center min-w-0">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xs shrink-0">
-                <img
-                  src={comm.photoUrl}
-                  alt={comm.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h4 className="font-extrabold text-xs text-[#204E4A] truncate">
-                    {comm.name}
-                  </h4>
-                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-[#FAF8F5] text-[#5C7470] rounded-full shadow-xs shrink-0">
-                    {comm.species}
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#5C7470] truncate mt-0.5">
-                  {comm.tagline}
-                </p>
-                <span className="text-[10px] text-[#5C7470]/70 font-semibold block mt-0.5">
-                  {comm.membersCount.toLocaleString()}{' '}
-                  {lang === 'es' ? 'miembros' : 'members'}
-                </span>
-              </div>
+            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xs shrink-0">
+              <img
+                src={community.photoUrl}
+                alt={community.name}
+                className="w-full h-full object-cover"
+              />
             </div>
 
-            <button
-              onClick={() => onToggleJoinCommunity(comm.id)}
-              className={`text-xs font-bold px-4 py-2 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1 shadow-xs ${
-                comm.isJoined
-                  ? 'bg-[#FAF8F5] hover:bg-neutral-100 text-[#204E4A]'
-                  : 'bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A]'
-              }`}
-            >
-              {comm.isJoined && <IconCheck size={13} />}
-              <span>
-                {comm.isJoined
-                  ? lang === 'es'
-                    ? 'Unido'
-                    : 'Joined'
-                  : lang === 'es'
-                  ? 'Unirme'
-                  : 'Join'}
-              </span>
-            </button>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-extrabold text-xs text-[#204E4A] truncate">
+                  {community.name}
+                </h4>
+                <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-[#FAF8F5] text-[#5C7470] rounded-full shadow-xs shrink-0">
+                  {community.species}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#5C7470] line-clamp-2 mt-0.5">
+                {community.tagline}
+              </p>
+            </div>
+
+            <span className="text-[9px] font-black uppercase tracking-wide text-[#204E4A] bg-[#E1E53F]/35 px-2.5 py-1 rounded-full shrink-0">
+              {lang === 'es' ? 'Concepto' : 'Concept'}
+            </span>
           </div>
         ))}
+
+        {filteredCommunities.length === 0 && (
+          <div className="rounded-[1.5rem] bg-white p-5 text-center text-xs text-[#5C7470] border border-[#204E4A]/8">
+            {lang === 'es'
+              ? 'No hay ejemplos que coincidan con ese filtro.'
+              : 'No examples match that filter.'}
+          </div>
+        )}
       </div>
     </div>
   )
