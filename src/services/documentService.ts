@@ -235,6 +235,35 @@ const finalizeDelete = async (documentId: string) => {
   })
 }
 
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
+
+const finalizeDeleteWithRetry = async (documentId: string) => {
+  const delays = [0, 150, 350, 700]
+
+  for (let attempt = 0; attempt < delays.length; attempt += 1) {
+    if (delays[attempt] > 0) {
+      await wait(delays[attempt])
+    }
+
+    try {
+      await finalizeDelete(documentId)
+      return true
+    } catch (error) {
+      if (attempt === delays.length - 1) {
+        console.warn(
+          'Document file was removed but metadata finalization is still pending:',
+          error
+        )
+      }
+    }
+  }
+
+  return false
+}
+
 const cancelDelete = async (documentId: string) => {
   await rpcVoid('cancel_delete_pet_document', {
     p_document_id: documentId,
@@ -249,7 +278,7 @@ export const deletePetDocument = async (document: PetDocument) => {
     .remove([storagePath])
 
   if (!storageError) {
-    await finalizeDelete(document.id)
+    await finalizeDeleteWithRetry(document.id)
     return
   }
 
