@@ -593,6 +593,46 @@ Antes de programar instrumentación, deben quedar aprobados:
 - regla de que Comunidades sigue siendo EXPERIMENTO ACTIVO hasta obtener datos.
 
 
+
+---
+
+## Corrección de integración con Explorar
+
+**Detectada en validación visual del Product Owner.**
+
+\`Explorar\` NO es el módulo de Comunidades.
+
+Es el hub de descubrimiento de PAZO y, a largo plazo, debe reunir:
+- personas/mascotas;
+- comunidades;
+- eventos;
+- lugares/otras entidades cuando corresponda;
+- productos en una etapa futura si ese módulo se valida.
+
+Por tanto:
+
+- Comunidades vive como una categoría/superficie dentro de Explorar;
+- el experimento 7.0A no puede reemplazar toda la pantalla Explorar;
+- abrir Explorar NO cuenta como \`module_view = communities\`;
+- la view de Comunidades se registra solo cuando el usuario abre deliberadamente la superficie/pestaña de Comunidades;
+- el fake door debe explicar primero qué es una comunidad y qué podría hacer el usuario dentro;
+- solo después aparece el CTA de interés.
+
+La búsqueda unificada real de personas/comunidades/eventos pertenece a la fase futura \`Explore/Search\` y NO se simula como funcional dentro de este experimento.
+
+Esta corrección no modifica:
+- hipótesis principal;
+- cinco drivers;
+- pregunta de intención;
+- opciones;
+- thresholds;
+- backend de señales.
+
+Sí modifica:
+- jerarquía UX;
+- copy explicativo;
+- momento exacto en que se registra una view.
+
 ---
 
 # 1. Pregunta principal
