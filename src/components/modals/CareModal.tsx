@@ -356,10 +356,11 @@ export const CareModal = ({
                   required
                   type="date"
                   value={form.dueDate}
+                  onClick={(event) => event.currentTarget.showPicker?.()}
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, dueDate: event.target.value }))
                   }
-                  className="w-full bg-[#FAF8F5] border border-[#204E4A]/15 rounded-xl px-2 py-2.5 text-xs"
+                  className="w-full bg-[#FAF8F5] border border-[#204E4A]/15 rounded-xl px-2 py-2.5 text-xs cursor-pointer"
                 />
               </div>
             </div>
@@ -372,13 +373,14 @@ export const CareModal = ({
                 <input
                   type="time"
                   value={form.dueTime || ''}
+                  onClick={(event) => event.currentTarget.showPicker?.()}
                   onChange={(event) =>
                     setForm((prev) => ({
                       ...prev,
                       dueTime: event.target.value || null,
                     }))
                   }
-                  className="w-full bg-[#FAF8F5] border border-[#204E4A]/15 rounded-xl px-2 py-2.5 text-xs"
+                  className="w-full bg-[#FAF8F5] border border-[#204E4A]/15 rounded-xl px-2 py-2.5 text-xs cursor-pointer"
                 />
               </div>
 
