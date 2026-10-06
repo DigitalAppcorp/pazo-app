@@ -392,21 +392,24 @@ Anon:
 
 # 18. RPC Security
 
-`complete_care_item` y `undo_care_completion` necesitan mantener integridad entre dos tablas.
+`complete_care_item`, `undo_care_completion` y `archive_care_item` mantienen integridad que no debe quedar disponible como writes directos.
 
-Arquitectura recomendada:
-- SECURITY DEFINER únicamente si es necesario para impedir writes directos a completions;
+Patrón final preparado:
+- lógica privilegiada en schema no expuesto `care_private`;
+- helpers internos `SECURITY DEFINER`;
 - `SET search_path = ''`;
 - ownership explícito con `auth.uid()`;
-- revoke EXECUTE from PUBLIC/anon;
-- grant EXECUTE solo authenticated;
+- EXECUTE interno restringido;
+- RPCs públicas en `public` como `SECURITY INVOKER`;
+- PUBLIC/anon sin EXECUTE;
+- authenticated únicamente;
 - referencias schema-qualified;
-- tests owner/non-owner;
 - Advisors después de aplicar.
 
-Alternativa SECURITY INVOKER solo si podemos conservar integridad sin conceder writes arbitrarios al cliente.
-
-Durante implementación se elegirá la opción que mantenga menor superficie de privilegio.
+Además:
+- frontend no tiene UPDATE sobre `status` ni `pet_id`;
+- completar/deshacer/archivar no se pueden falsificar con un UPDATE directo;
+- `care_completions` es SELECT-only para authenticated.
 
 ---
 
