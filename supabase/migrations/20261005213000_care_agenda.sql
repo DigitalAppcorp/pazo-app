@@ -87,6 +87,13 @@ CREATE INDEX idx_care_completions_care_completed
 CREATE INDEX idx_care_completions_pet_completed
   ON public.care_completions (pet_id, completed_at DESC, id DESC);
 
+CREATE UNIQUE INDEX uq_care_completion_occurrence
+  ON public.care_completions (
+    care_item_id,
+    scheduled_date,
+    COALESCE(scheduled_time, '00:00:00'::time)
+  );
+
 ALTER TABLE public.care_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.care_completions ENABLE ROW LEVEL SECURITY;
 
