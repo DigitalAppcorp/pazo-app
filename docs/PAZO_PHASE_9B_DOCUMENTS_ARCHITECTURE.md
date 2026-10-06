@@ -318,3 +318,32 @@ Delete lifecycle:
 Arquitectura cerrada.
 Siguiente etapa: Gate 8 — Implementación, en rama propia.
 La migración se prepara y revisa, pero no se aplica a Supabase sin autorización explícita del Product Owner.
+
+---
+
+## Post-apply implementation note
+
+Backend 9B applied with Product Owner authorization.
+
+Applied migrations:
+- `20261006090551 private_pet_documents`;
+- `20261006090654 fix_private_document_storage_policies`.
+
+During post-apply verification an ambiguity in unqualified Storage policy path references was detected before visual testing. A separate hardening migration qualified references against `storage.objects.name`; policies were re-verified afterwards.
+
+Backend verification passed:
+- private bucket configuration;
+- metadata RLS;
+- column grants;
+- public wrappers SECURITY INVOKER;
+- internal helpers isolated in `document_private`;
+- owner/non-owner visibility;
+- direct protected status update blocked;
+- arbitrary bucket insert without reservation blocked;
+- upload reservation/finalize lifecycle;
+- MIME/size/ownership validation;
+- cancel reservation;
+- delete metadata lifecycle;
+- Security Advisor has no new 9B finding.
+
+Full Storage API `remove()` remains part of visual/end-to-end testing because Supabase intentionally blocks direct SQL deletion from `storage.objects`.
