@@ -3,7 +3,6 @@ import type {
   Post,
   Community,
   PetPlace,
-  CareItem,
   PrivateDoc,
   Conversation,
   PazoNotification,
@@ -190,42 +189,6 @@ export const INITIAL_PLACES: PetPlace[] = [
     description: 'Sendero sombreado con arroyos y helechos, ideal para días templados.',
     photoUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=600&auto=format&fit=crop',
     activeCheckIns: 7,
-  },
-]
-
-export const INITIAL_CARE_ITEMS: CareItem[] = [
-  {
-    id: 'care-1',
-    title: 'Cita veterinaria de control',
-    type: 'veterinaria',
-    date: '14 Octubre, 2026',
-    time: '10:30 AM',
-    completed: false,
-    repeat: 'Anual',
-    reminder: '1 día antes',
-    notes: 'Revisión dental y analítica sanguínea de rutina.',
-  },
-  {
-    id: 'care-2',
-    title: 'Refuerzo Vacuna Trivalente Felina',
-    type: 'vacuna',
-    date: '28 Octubre, 2026',
-    time: '11:00 AM',
-    completed: false,
-    repeat: 'Anual',
-    reminder: '2 días antes',
-    notes: 'Clínica VetCare Central.',
-  },
-  {
-    id: 'care-3',
-    title: 'Pipeta Antiparasitaria Externa',
-    type: 'medicamento',
-    date: '01 Octubre, 2026',
-    time: '09:00 AM',
-    completed: true,
-    repeat: 'Mensual',
-    reminder: 'Mismo día',
-    notes: 'Aplicado correctamente tras el cepillado.',
   },
 ]
 
