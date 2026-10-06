@@ -130,9 +130,9 @@ Escala:
 
 ## Carril de Implementación
 
-**Siguiente módulo: Agenda/Cuidados.**
+**Agenda/Cuidados (9A) y Documentos privados (9B) ya fueron completados.**
 
-Resultado del Gate 5:
+Resultado histórico del Gate 5 de Agenda:
 
 **BUILD NOW**
 
@@ -166,17 +166,17 @@ Objetivo:
 - aislamiento por mascota/owner.
 
 ## 9B — Documentos privados
-Después.
+COMPLETADA.
 
-Objetivo:
+Resultado entregado:
 - metadata persistente;
 - Storage privado;
 - upload;
-- descarga/preview;
+- descarga/preview autenticados;
 - categorías;
-- URLs firmadas temporales;
 - eliminación;
-- aislamiento fuerte por propietario.
+- aislamiento fuerte por propietario;
+- compartir externamente quedó fuera del MVP.
 
 Razón:
 no mezclar persistencia sencilla de Agenda con seguridad/Storage de Documentos en una sola implementación grande.
@@ -245,20 +245,17 @@ Usar su sub-ruta y datos de validación.
 
 ---
 
-# 8. Próximo gate
+# 8. Estado actual del Carril de Implementación
 
-Agenda/Cuidados pasa a:
+- 9A Agenda/Cuidados: COMPLETADA.
+- 9B Documentos privados: COMPLETADA.
+- No hay un siguiente módulo autorizado automáticamente.
 
-**Gate 6 — Especificación de Producto**
+Candidatos:
+- Mapa/Lugares: VALIDAR ALCANCE; requiere proveedor, privacidad y reglas geográficas.
+- Mensajería: POSPONER / REEVALUAR por masa crítica y moderación.
+- Comunidades: EXPERIMENTO ACTIVO en Carril de Validación.
+- Notificaciones generales: implementar solo por dependencia concreta.
+- Explore/Search: esperar más contenido real.
 
-Antes de cualquier código:
-1. crear sub-ruta maestra de Agenda;
-2. definir problema/beneficio;
-3. definir alcance MVP;
-4. definir flujos y estados;
-5. definir reglas de recurrencia/recordatorios;
-6. definir qué NO entra;
-7. cerrar Definition of Done;
-8. después diseñar arquitectura técnica.
-
-No programar todavía.
+El próximo módulo debe pasar nuevamente por `docs/PAZO_MODULE_LIFECYCLE.md`; no asumir prioridad por numeración histórica.
