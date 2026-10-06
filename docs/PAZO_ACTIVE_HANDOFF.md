@@ -107,15 +107,21 @@ Technical architecture:
 
 ## Immediate next action
 
-There is no new Implementation Lane module authorized yet.
+Active next candidate: **Generic Validation Instrumentation**.
 
-Before any new feature code:
-1. read `docs/PAZO_MASTER_ROADMAP.md`;
-2. select the next candidate through `docs/PAZO_MODULE_LIFECYCLE.md`;
-3. close its pending product gates before architecture/code;
-4. keep Communities in Validation Lane;
-5. do not start Map/Lugares until provider/location/privacy decisions are closed;
-6. keep Messaging postponed until its reevaluation triggers are met.
+Current state:
+- type: I — infrastructure;
+- Gates 0–5 closed;
+- Gate 5 result: **BUILD NOW**;
+- Gate 6 proposed in `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
+- dependency is real now because Communities lacks reliable signals and Map's current fake door writes an incompatible payload to `interactions`;
+- `interactions` remains reserved for social behavior and must not be reused;
+- only 2 real `pet_places` currently exist, so full Map implementation is not justified yet.
+
+Next action:
+1. Product Owner approves or modifies Gate 6;
+2. after approval, design Gate 7 architecture;
+3. no code or Supabase mutation before Gate 6 closes.
 
 ## Important continuity note
 
