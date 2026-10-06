@@ -75,12 +75,15 @@ Agenda MVP contracts already decided:
 
 Technical architecture:
 
-- planned tables: `care_items`, `care_completions`;
+- tables reales: `care_items`, `care_completions`;
 - completion history uses snapshots so future edits do not rewrite the past;
-- complete/undo must be atomic;
+- complete/undo are atomic;
 - owner/non-owner isolation enforced in backend;
 - no direct public/anon access;
-- no Supabase schema migration for 9A has been authorized/applied yet.
+- migración 9A aplicada a Supabase con autorización explícita del Product Owner;
+- migración registrada en Supabase como `20261006054510 care_agenda`;
+- pruebas SQL/RLS transaccionales con `ROLLBACK` aprobadas;
+- Advisors revisados: sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ## Current repository state
 
@@ -100,37 +103,22 @@ NPM install:
 - 196 packages installed;
 - 0 vulnerabilities.
 
-Current build fails with exactly 5 TypeScript errors:
-
-1. `src/App.tsx:1681`
-   - `handleToggleCompleteCare` no longer exists.
-   - `handleCompleteCare` exists at approximately line 1081.
-   - CareModal prop wiring still references the old handler name.
-
-2. `src/App.tsx:1682`
-   - `docs` is referenced but no longer defined in App state.
-
-3. `src/components/views/PetView.tsx:73`
-   - old field `CareItem.completed` is referenced, but the new CareItem type no longer has that field.
-
-4. `src/components/views/PetView.tsx:561`
-   - old field `CareItem.date` is referenced; new care model uses the new date contract.
-
-5. `src/components/views/PetView.tsx:561`
-   - old field `CareItem.time` is referenced; new care model uses the new optional time contract.
+Build status:
+- the five legacy CareItem/handler integration errors were fixed in subsequent commits;
+- Product Owner confirmed `npm run build` passes on the current 9A code;
+- Vercel deployment status is not usable as build evidence because deployment is rate-limited, not because of a code failure.
 
 ## Immediate next action
 
-Do NOT mutate Supabase yet.
+Backend 9A is applied and the SQL/RLS post-apply suite passed.
 
-First:
-1. fix the 5 TypeScript integration regressions;
-2. inspect all remaining references to the legacy CareItem shape;
-3. ensure Documents mock remains isolated from 9A and does not block build;
-4. run build/preflight locally;
-5. inspect branch diff;
-6. prepare/version 9A migration without applying it;
-7. only after clean build + reviewed migration, ask Product Owner for explicit Supabase authorization.
+Next:
+1. run the real visual/end-to-end Agenda test from the 9A branch;
+2. verify create/edit/complete/undo/archive, recurrence, history pagination, F5 persistence and pet switching;
+3. verify the global care reminder opens the correct pet;
+4. keep Documents isolated for 9B;
+5. if visual/end-to-end passes, move PR #12 out of draft, merge to `main`, verify `main`, and update the roadmap;
+6. do not mark 9A COMPLETADA before merge + Product Owner visual approval.
 
 ## Important continuity note
 
