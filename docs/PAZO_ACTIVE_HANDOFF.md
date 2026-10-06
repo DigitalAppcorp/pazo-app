@@ -117,18 +117,23 @@ Current state:
 Implementation state:
 - frontend/service/types prepared;
 - legacy document mocks removed;
-- private bucket + metadata + lifecycle RPC migration prepared;
-- Supabase read-only preflight passed with no 9B collisions;
-- migration is NOT applied;
-- existing Security Advisor warnings are baseline rescue/Auth findings, not 9B;
+- private bucket + metadata + lifecycle RPC backend applied;
+- base migration registered as `20261006090551 private_pet_documents`;
+- follow-up policy hardening registered as `20261006090654 fix_private_document_storage_policies`;
+- `pet-documents` is private, 10 MB, PDF/JPEG/PNG/WEBP;
+- post-apply schema/policies/functions/grants verified;
+- DB/RLS transactional tests passed with ROLLBACK;
+- arbitrary Storage insert without reservation blocked;
+- owner/non-owner isolation passed;
+- no test rows or objects persisted;
+- existing Security Advisor warnings remain baseline rescue/Auth findings; no new 9B security warning was introduced;
 - local `npm run build` passed and was confirmed by the Product Owner.
 
 Immediate next action:
-1. final migration review;
-2. request explicit Product Owner authorization to apply 9B backend;
-3. after apply, run DB/Storage security tests;
-4. then Product Owner runs focused visual/end-to-end validation;
-5. merge only after all checks pass.
+1. Product Owner pulls the current `feat/phase-9b-documents` branch;
+2. run the app locally and execute focused visual/end-to-end Storage validation;
+3. verify upload PDF/image, preview, download, edit, delete, F5 and multi-pet isolation;
+4. if all passes, take PR #14 out of draft, merge to main, verify main and close 9B.
 
 Communities remains in the Validation Lane and does not block this evaluation.
 
