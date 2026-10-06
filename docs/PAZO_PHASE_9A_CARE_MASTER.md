@@ -399,24 +399,27 @@ Este documento cumple Gate 6 salvo que Product Owner cambie alguna regla.
 
 ---
 
-# 20. Próximo gate
+# 20. Arquitectura y siguiente gate
 
-Después de aprobar esta especificación:
+**Gate 7 — Arquitectura Técnica: CERRADO**
 
-**Gate 7 — Arquitectura Técnica**
+Documento:
+`docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`
 
-Se definirá:
-- tablas;
-- relaciones;
-- RLS;
-- grants;
-- índice por mascota/fecha;
-- completion history;
-- estrategia de recurrencia;
+Quedaron definidos:
+- tablas conceptuales;
+- historial por completions;
+- RLS/grants;
+- completion/undo atómicos;
+- recurrencia;
 - timezone;
-- consultas/paginación;
-- integración incremental con notifications;
-- migración;
-- tests.
+- queries/paginación;
+- integración futura con notifications;
+- concurrencia;
+- plan de migración;
+- plan de pruebas.
 
-**No programar hasta cerrar Gate 7.**
+Siguiente etapa:
+**Gate 8 — Implementación**
+
+No iniciar implementación hasta revisión del Product Owner.
