@@ -142,3 +142,24 @@ Communities remains in the Validation Lane and does not block this evaluation.
 A new ChatGPT conversation should NOT attempt to reconstruct PAZO from memory.
 
 It should read the repository docs above and continue from this handoff. Repository docs are the canonical source of truth.
+
+
+## Visual retest blocker found
+
+Product Owner found that deleting a document removed the file in Storage, but the UI showed an error and kept the document visible until reload.
+
+Root cause:
+- Storage API deletion succeeded;
+- metadata finalization could briefly lag behind Storage deletion;
+- frontend treated delayed finalize as a failed delete.
+
+Fix on branch:
+- retry delete finalization with short backoff;
+- once Storage confirms deletion, do not surface delayed metadata finalization as a user-facing failure;
+- remove the document from visible state/count immediately;
+- reconcile server truth in the background through the existing recovery flow.
+
+Pending:
+- local build after this fix;
+- focused delete retest without reload;
+- remaining 9B visual/end-to-end acceptance.
