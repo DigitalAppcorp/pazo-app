@@ -141,12 +141,12 @@ export const ValidationInterestPanel = ({
           </div>
           <div>
             <p className="text-sm font-black">
-              {lang === 'es' ? 'Ayúdanos a decidir qué construir' : 'Help us decide what to build'}
+              {lang === 'es' ? '¿Usarías Comunidades en PAZO?' : 'Would you use Communities in PAZO?'}
             </p>
             <p className="text-[11px] text-white/75 leading-relaxed mt-1">
               {lang === 'es'
-                ? 'Comunidades todavía está en evaluación. Tu respuesta nos ayuda a saber si merece convertirse en una función real.'
-                : 'Communities is still being evaluated. Your response helps us decide whether it should become a real feature.'}
+                ? 'Esta función todavía está en evaluación. Si la idea que acabas de ver te sería útil, marca tu interés.'
+                : 'This feature is still being evaluated. If the idea you just saw would be useful to you, mark your interest.'}
             </p>
           </div>
         </div>
@@ -169,7 +169,7 @@ export const ValidationInterestPanel = ({
             ? (lang === 'es' ? 'Guardando...' : 'Saving...')
             : interested
             ? (lang === 'es' ? 'Interés registrado' : 'Interest registered')
-            : (lang === 'es' ? 'Me interesa' : "I'm interested")}
+            : (lang === 'es' ? 'Sí, me interesa' : "Yes, I'm interested")}
         </button>
 
         {interested && (
