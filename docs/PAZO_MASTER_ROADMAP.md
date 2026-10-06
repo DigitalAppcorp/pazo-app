@@ -443,7 +443,7 @@ Alcance funcional:
 - Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: SIGUIENTE — GATE 8 IMPLEMENTACIÓN**
+**Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
 
 **Sub-ruta de producto:** `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`  
 **Arquitectura técnica:** `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`
@@ -451,6 +451,27 @@ Alcance funcional:
 Gates 0–7 cerrados. Resultado Gate 5: **MVP REDUCIDO**.
 
 Núcleo aprobado: documentos privados owner-only. Compartir externamente queda fuera del MVP y se reevalúa después.
+
+### Estado técnico de implementación
+- rama: `feat/phase-9b-documents`;
+- tipos reales `PetDocument` preparados;
+- mocks `INITIAL_DOCS` y `PrivateDoc` retirados;
+- `documentService.ts` preparado;
+- `DocumentsModal.tsx` preparado;
+- entrada independiente de Documentos en PetView;
+- carga inicial, contador, F5, cambio de mascota y paginación preparados;
+- upload/preview/download/edit/delete preparados;
+- lifecycle recuperable `uploading/active/deleting`;
+- migración versionada `20261006090000_private_pet_documents.sql` preparada, NO aplicada;
+- bucket privado `pet-documents` preparado, NO creado todavía;
+- wrappers públicos SECURITY INVOKER + helpers privilegiados en `document_private`;
+- preflight real: no existen tabla/bucket/policies/RPCs 9B con nombres en conflicto;
+- `pets.id` y `pets.owner_id` UUID compatibles;
+- Storage metadata actual confirma `mimetype` y `size` disponibles para finalize;
+- Advisors baseline registrados antes de 9B;
+- pendiente: `npm run build` local;
+- pendiente: autorización explícita antes de aplicar Supabase;
+- pendiente después de aplicar: pruebas DB/Storage owner/non-owner/anon + visual end-to-end.
 
 Se separa de Agenda por mayor superficie de seguridad.
 
