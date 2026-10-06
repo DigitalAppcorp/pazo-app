@@ -1,8 +1,33 @@
 # PAZO — Sub-Ruta Maestra Fase 7: Comunidades
 
-**Estado:** VALIDACIÓN DE PRODUCTO — NO PROGRAMAR COMUNIDADES TODAVÍA  
+**Estado:** CARRIL DE VALIDACIÓN — EXPERIMENTO ACTIVO  
 **Fase padre:** Fase 7  
-**Marco obligatorio:** `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`
+**Ciclo de vida:** `docs/PAZO_MODULE_LIFECYCLE.md`  
+**Protocolo de experimentos:** `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`
+
+---
+
+# 0.1 Ficha de decisión actual
+
+**Nombre:** Comunidades  
+**Tipo:** N — efecto de red; posible A — adquisición; posible M — monetización futura  
+**Estado:** EXPERIMENTO ACTIVO  
+**Usuario objetivo:** dueños de mascotas que buscan pertenencia, información o actividad alrededor de intereses compartidos  
+**Problema/deseo:** conexión con personas/mascotas afines, grupos locales o especializados  
+**Resultado prometido:** pertenencia, descubrimiento, intercambio y posibles encuentros  
+**Valor con un solo usuario:** bajo  
+**Dependencia de masa crítica:** alta  
+**Coste estimado:** muy alto  
+**Riesgo operativo:** alto  
+**Riesgo de moderación:** alto  
+**Hipótesis de adquisición:** comunidades públicas/locales podrían generar invitaciones, contenido compartible o tráfico externo  
+**Hipótesis de retención:** pertenencia y contenido recurrente podrían aumentar revisitas  
+**Hipótesis de monetización:** herramientas avanzadas de administración podrían ser premium en el futuro  
+**Alternativa más barata para probarlo:** fake door + “Me interesa” + una pregunta de intención  
+**Métrica principal:** Interest Rate por cuenta única + revisita + concentración de intención  
+**Criterio para construir:** señal prometedora + uso concreto dominante + plan realista para evitar comunidades vacías  
+**Criterio para posponer:** interés débil, intención difusa, falta de masa crítica o coste superior a módulos de utilidad  
+**Disparador para reevaluar:** crecimiento suficiente de audiencia/interés o evidencia externa de adquisición
 
 ---
 
@@ -318,22 +343,18 @@ Las siguientes decisiones se conservan, pero NO deben consumirse ahora en diseñ
 
 # 14. Estado del disparador "Me interesa"
 
-El Product Owner indica que ya existe una implementación hecha con Gemini que:
-- registra entrada al módulo;
-- ofrece botón "Me interesa".
+El Product Owner indica que existió una implementación hecha con Gemini.
 
-La auditoría actual no pudo confirmar esa implementación específica en `main` ni una señal persistente específica en Supabase.
+Auditoría:
+- no está confirmada en `main`;
+- no existe una señal persistente específica visible en Supabase;
+- es probable que esa lógica se haya perdido durante reescrituras anteriores.
 
-Por lo tanto el próximo paso técnico NO es construir Comunidades.
-
-Es:
-
-1. localizar la implementación exacta de Gemini;
-2. sincronizarla si solo está local;
-3. auditar qué eventos guarda;
-4. comprobar que no cuente clicks repetidos como usuarios distintos;
-5. adaptar únicamente el tracking si fuese necesario;
-6. dejar el módulo funcionando como experimento.
+Decisión:
+- no invertir más tiempo intentando reconstruir esa implementación histórica;
+- cuando se autorice código, crear un sistema genérico de validación para todos los módulos;
+- Comunidades será el primer consumidor de ese sistema;
+- hasta entonces, no construir backend de Comunidades.
 
 ---
 
