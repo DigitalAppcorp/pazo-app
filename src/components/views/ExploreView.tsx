@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { Community } from '../../types/pazo'
-import { IconExplore } from '../icons/PazoIcons'
 import { ValidationInterestPanel } from '../validation/ValidationInterestPanel'
 
 interface ExploreViewProps {
@@ -16,15 +15,7 @@ export const ExploreView = ({
   canTrackValidation,
   lang,
 }: ExploreViewProps) => {
-  const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<ExploreCategory>('para_ti')
-
-  const filteredCommunities = communities.filter(
-    (community) =>
-      community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      community.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      community.species.toLowerCase().includes(searchQuery.toLowerCase())
-  )
 
   const intentOptions = lang === 'es'
     ? [
@@ -105,23 +96,6 @@ export const ExploreView = ({
             : 'Find pets, communities, events, and other experiences across PAZO.'}
         </p>
       </header>
-
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder={
-            lang === 'es'
-              ? 'Buscar mascotas, comunidades o eventos...'
-              : 'Search pets, communities, or events...'
-          }
-          className="w-full bg-white rounded-full pl-11 pr-4 py-3 text-xs text-[#204E4A] shadow-sm focus:bg-white"
-        />
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5C7470] pointer-events-none">
-          <IconExplore size={16} />
-        </div>
-      </div>
 
       <nav className="flex gap-2 overflow-x-auto pb-1">
         {([
@@ -265,7 +239,7 @@ export const ExploreView = ({
             </div>
 
             <div className="grid gap-3">
-              {filteredCommunities.slice(0, 3).map((community) => (
+              {communities.slice(0, 3).map((community) => (
                 <article
                   key={community.id}
                   className="bg-white rounded-[2rem] p-4 shadow-sm flex items-center gap-3"
@@ -306,7 +280,7 @@ export const ExploreView = ({
       {activeCategory === 'eventos' && (
         <section className="bg-white rounded-[2rem] p-5 shadow-sm">
           <span className="text-[9px] uppercase tracking-widest font-extrabold text-[#5C7470]">
-            {lang === 'es' ? 'Módulo todavía no implementado' : 'Module not implemented yet'}
+            {lang === 'es' ? 'En preparación' : 'In preparation'}
           </span>
           <h3 className="text-base font-black text-[#204E4A] mt-1">
             {lang === 'es' ? 'Eventos y actividades' : 'Events and activities'}
