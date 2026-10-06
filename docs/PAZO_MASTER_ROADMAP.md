@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-06  
-**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades sigue en validación y Fase 9A Agenda/Cuidados está en Gate 8 con backend aplicado, pendiente de prueba visual y merge.
+**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades sigue en validación y Fase 9A Agenda/Cuidados está COMPLETADA en `main`. El siguiente candidato del carril de implementación es 9B Documentos privados, pendiente de pasar sus gates antes de programarse.
 
 ---
 
@@ -169,6 +169,7 @@ Actualmente el núcleo persistente usa, entre otras:
 - Seguridad RLS/grants/RPC/Storage del núcleo.
 - Persistencia de scroll entre pestañas.
 - Protección contra follows entre mascotas del mismo dueño.
+- Agenda/Cuidados persistente por mascota.
 
 ## Módulos todavía mock, parciales o de demostración
 
@@ -176,7 +177,6 @@ Actualmente el núcleo persistente usa, entre otras:
 - Eventos.
 - Mapa real.
 - Check-ins.
-- Agenda de cuidados en `main` todavía no está cerrada; backend 9A ya está aplicado y el frontend real vive en `feat/phase-9a-care` pendiente de prueba visual/merge.
 - Documentos privados.
 - Mensajería 1 a 1.
 - Centro general de notificaciones.
@@ -397,12 +397,12 @@ No activar ubicación precisa sin decisión explícita.
 ---
 
 ## Fase 9 — Cuidados y documentos privados
-**Estado: CARRIL DE IMPLEMENTACIÓN — 9A SIGUIENTE**
+**Estado: CARRIL DE IMPLEMENTACIÓN — 9A COMPLETADA / 9B PENDIENTE DE GATES**
 
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
 
 ### 9A — Agenda/Cuidados
-**Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
+**Estado: COMPLETADA**
 
 **Sub-ruta de producto:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`  
 **Arquitectura técnica:** `docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`
@@ -411,8 +411,7 @@ Decisión:
 - BUILD NOW;
 - utilidad individual;
 - no depende de masa crítica;
-- producto MVP ya especificado;
-- todavía NO programar hasta cerrar arquitectura técnica.
+- producto MVP especificado, arquitectado, implementado y validado.
 
 Alcance funcional:
 - cuidados persistentes por mascota;
@@ -424,45 +423,28 @@ Alcance funcional:
 - reminder interno;
 - privacidad owner-only.
 
-### Estado técnico de implementación
-- rama: `feat/phase-9a-care`;
+### Estado técnico final
+- PR #12 fusionado a `main`;
+- commit de merge: `1876f7f02a452e58597a1c8151af77bc26c519f2`;
 - build local aprobado por Product Owner;
-- migración 9A aplicada a Supabase con autorización explícita;
-- migración registrada como `20261006054510 care_agenda`;
+- prueba visual/end-to-end aprobada por Product Owner;
+- migración 9A aplicada a Supabase y registrada como `20261006054510 care_agenda`;
 - `care_items` + `care_completions` reales;
-- RLS/grants owner-only aplicados;
-- completar/deshacer/archivar atómicos aplicados;
-- frontend dejó de usar cuidados mock;
-- servicio real de Agenda preparado;
-- estados Próximo/Hoy/Vencido implementados;
+- RLS/grants owner-only aplicados y auditados;
+- completar/deshacer/archivar atómicos;
+- frontend sin mock de Agenda;
+- crear, editar, archivar, completar y deshacer persistentes;
+- estados Próximo/Hoy/Vencido;
 - historial paginado en bloques de 20;
-- recordatorio global por mascota preparado;
-- recordatorios respetan timezone guardado;
+- reminders internos según `Recordarme` y timezone;
+- contador/resumen actualiza en carga, F5, mutaciones y cambio de mascota;
+- banner superior reservado a rescate/avistamientos;
+- feedback `Completando…` y bloqueo de doble clic en completion;
 - pruebas SQL/RLS con `ROLLBACK` aprobadas: owner/non-owner, one-off, recurrencia, double-complete, undo, archive e historial;
-- Advisors post-apply revisados: sin hallazgos nuevos de seguridad de 9A;
-- índices 9A aparecen como unused inmediatamente después de creación; reevaluar con tráfico real, no eliminarlos ahora;
-- pendiente: prueba visual/end-to-end real;
-- pendiente: PR #12 fuera de draft + merge a `main` tras aprobación visual.
-
-### Estado técnico de 9A
-- rama `feat/phase-9a-care` creada;
-- migración versionada aplicada;
-- `care_items` y `care_completions` activos en Supabase;
-- RLS/grants owner-only activos;
-- privileged writes en schema no expuesto `care_private`;
-- RPCs públicas SECURITY INVOKER activas;
-- frontend conectado a persistencia real;
-- mock de Agenda retirado;
-- Documentos retirado de CareModal y reservado para 9B;
-- historial paginado en bloques de 20;
-- indicador global de cuidados preparado;
-- build local aprobado;
-- pruebas SQL/RLS y Advisors post-apply aprobados;
-- pendiente: prueba visual/end-to-end;
-- pendiente: merge.
+- Advisors post-apply revisados sin hallazgos nuevos de seguridad atribuibles a 9A.
 
 ### 9B — Documentos privados
-**Estado: DESPUÉS DE 9A**
+**Estado: SIGUIENTE CANDIDATO — PENDIENTE DE GATES**
 
 Se separa de Agenda por mayor superficie de seguridad.
 
@@ -816,19 +798,17 @@ Usar únicamente:
 - usar futura instrumentación genérica.
 
 ## Carril de Implementación
-### Agenda/Cuidados 9A
-1. Gates 6 y 7 cerrados;
-2. Gate 8 en curso;
-3. rama `feat/phase-9a-care` y PR #12 activos;
-4. build aprobado;
-5. backend 9A aplicado y verificado;
-6. siguiente paso exacto: prueba visual/end-to-end real del Product Owner;
-7. si pasa: sacar PR #12 de draft, merge a `main`, verificar `main` y marcar 9A COMPLETADA;
-8. si falla: corregir únicamente la regresión observada y repetir prueba antes del merge.
+### 9A Agenda/Cuidados
+- COMPLETADA;
+- backend aplicado;
+- build y prueba visual aprobados;
+- PR #12 fusionado a `main`.
 
-### Después
-- 9B Documentos privados;
-- otros módulos se reevalúan con `docs/PAZO_MODULE_LIFECYCLE.md`.
+### Siguiente candidato: 9B Documentos privados
+1. retomar desde `docs/PAZO_MODULE_LIFECYCLE.md`;
+2. auditar valor, coste y superficie de seguridad/Storage;
+3. cerrar decisión de inversión antes de especificación;
+4. no escribir código ni crear Storage/schema hasta cerrar sus gates correspondientes.
 
 ## Regla
 La numeración histórica de fases no bloquea los dos carriles. El próximo código real será 9A únicamente cuando Gate 7 esté cerrado.
