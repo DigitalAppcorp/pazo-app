@@ -1,6 +1,6 @@
 # PAZO — Instrumentación Genérica de Validación
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO CERRADA  
+**Estado:** PAUSADA — GATE 6 REABIERTO POR DISEÑO DE VALIDACIÓN INCOMPLETO  
 **Tipo:** I — infraestructura / habilitador  
 **Resultado Gate 5:** BUILD NOW  
 **Marco:** `docs/PAZO_MODULE_LIFECYCLE.md`  
@@ -351,7 +351,20 @@ La infraestructura está funcionalmente definida cuando:
 
 # 17. Próximo gate
 
-Gate 6 fue aprobado por el Product Owner.
+La primera versión de Gate 6 fue aprobada, pero después se detectó una omisión de producto:
+
+la instrumentación estaba definiéndose antes de cerrar qué conceptos/bundles debían ponerse delante del usuario y qué decisiones debía habilitar cada señal.
+
+Por decisión del Product Owner, Gate 6 se reabre hasta completar:
+- mapa de capacidades;
+- bundles coherentes;
+- dependencias;
+- hooks;
+- arquitectura de elección;
+- variantes/concept versions;
+- señales conductuales y reglas de inversión.
+
+El código ya preparado queda como trabajo provisional, no autorizado para merge ni Supabase.
 
 Gate 7 está cerrado en:
 `docs/PAZO_VALIDATION_INSTRUMENTATION_ARCHITECTURE.md`
