@@ -11,5 +11,6 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 7. Después de cerrar una fase, actualizar `docs/PAZO_MASTER_ROADMAP.md`.
 8. En fases de rediseño visual, preservar la funcionalidad y los contratos de datos existentes; cualquier cambio de comportamiento requiere aprobación explícita del Product Owner.
 9. Si la fase activa tiene una sub-ruta maestra en `docs/`, leerla completa antes de modificar código, datos o arquitectura de esa fase. La sub-ruta gobierna las decisiones específicas y no puede contradecir la hoja maestra general.
+10. Para módulos opcionales/sociales de alto coste, leer `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md` y completar el gate de producto antes de diseñar o programar la implementación completa.
 
 La hoja maestra es la fuente canónica del estado y orden de desarrollo de PAZO.
