@@ -107,7 +107,10 @@ Technical architecture:
 
 ## Immediate next action
 
-Active next candidate: **Generic Validation Instrumentation**.
+Active implementation: **Generic Validation Instrumentation**.
+
+**Gate:** 8 — Implementation  
+**Branch:** `feat/generic-validation-instrumentation`
 
 Current state:
 - type: I — infrastructure;
@@ -119,13 +122,21 @@ Current state:
 - `interactions` remains reserved for social behavior and must not be reused;
 - only 2 real `pet_places` currently exist, so full Map implementation is not justified yet.
 
+Implementation state:
+- reusable validation service/panel prepared;
+- Communities now shows transparent concept examples instead of fake Join/Leave;
+- Radar no longer writes fake-door data to `interactions`;
+- generic migration prepared and NOT applied;
+- read-only Supabase preflight passed with no naming collisions;
+- direct client access to validation signals is intentionally not part of the design.
+
 Next action:
-1. enter Gate 8 on a dedicated branch;
-2. implement reusable validation service/panel;
-3. convert Communities and Radar fake doors to the generic system;
-4. prepare one versioned migration;
-5. build/preflight;
-6. request explicit Product Owner authorization before applying Supabase.
+1. Product Owner pulls `feat/generic-validation-instrumentation`;
+2. run `npm run build`;
+3. if build passes, final migration review;
+4. request explicit Product Owner authorization before applying Supabase;
+5. after apply, run auth/ownership/dedup/privacy tests;
+6. then Product Owner visual/end-to-end validation.
 
 ## Important continuity note
 
