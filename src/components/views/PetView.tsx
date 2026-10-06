@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
-import type { Pet, CareItem, PrivateDoc, Post } from '../../types/pazo'
+import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
   IconPaw,
   IconCalendar,
@@ -17,8 +17,7 @@ interface PetViewProps {
   onPetUpdated: (pet: Pet) => void
   onAddPet: () => void
   careItems: CareItem[]
-  onToggleCompleteCare: (careId: string) => void
-  docs: PrivateDoc[]
+  onCompleteCare: (careItem: CareItem) => void | Promise<void>
   onOpenQRPassport: () => void
   onOpenCareAgenda: () => void
   onOpenLostAlert: () => void
@@ -33,8 +32,7 @@ export const PetView = ({
   onPetUpdated,
   onAddPet,
   careItems,
-  onToggleCompleteCare,
-  docs,
+  onCompleteCare,
   onOpenQRPassport,
   onOpenCareAgenda,
   onOpenLostAlert,
@@ -70,7 +68,7 @@ export const PetView = ({
 
   const [editForm, setEditForm] = useState(buildEditForm)
 
-  const nextPendingCare = careItems.find((c) => !c.completed)
+  const nextPendingCare = careItems.find((item) => item.status === 'active')
 
   const handleEditClick = () => {
     setEditForm(buildEditForm())
@@ -534,12 +532,12 @@ export const PetView = ({
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-[#204E4A]">
-                  {lang === 'es' ? 'Cuidados y Agenda' : 'Care & Documents'}
+                  {lang === 'es' ? 'Cuidados y Agenda' : 'Care & Agenda'}
                 </h4>
                 <p className="text-xs text-[#5C7470]">
                   {lang === 'es'
-                    ? `${careItems.length} cuidados agendados • ${docs.length} documentos`
-                    : `${careItems.length} scheduled tasks • ${docs.length} docs`}
+                    ? `${careItems.length} cuidados agendados`
+                    : `${careItems.length} scheduled care items`}
                 </p>
               </div>
             </div>
@@ -558,12 +556,13 @@ export const PetView = ({
                   {nextPendingCare.title}
                 </span>
                 <span className="text-[11px] text-[#5C7470] block">
-                  {nextPendingCare.date} • {nextPendingCare.time}
+                  {nextPendingCare.dueDate}
+                  {nextPendingCare.dueTime ? ` • ${nextPendingCare.dueTime}` : ''}
                 </span>
               </div>
 
               <button
-                onClick={() => onToggleCompleteCare(nextPendingCare.id)}
+                onClick={() => void onCompleteCare(nextPendingCare)}
                 className="text-xs font-bold text-[#204E4A] bg-white hover:bg-[#E1E53F] px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
               >
                 <IconCheck size={13} />
