@@ -143,14 +143,22 @@ Implementation state:
 - Supabase preflight confirms no conflicting validation tables;
 - Security Advisor baseline recorded before apply: 3 anon SD, 6 authenticated SD, 1 leaked-password warning.
 
+Backend state:
+- local build PASS confirmed by Product Owner;
+- Supabase migration applied with explicit authorization;
+- RLS/dedup/ownership/intent tests PASS;
+- invalid intent, intent-without-interest, foreign user_id, anon access and private registry access correctly blocked;
+- test rows rolled back; signal tables remain empty before real use;
+- Security Advisor unchanged from baseline;
+- two validation indexes retained because they cover foreign keys; they may show as unused until real traffic exists.
+
 Next action:
-1. run local build on `feat/communities-validation-instrumentation`;
-2. if build passes, perform final SQL review;
-3. present exact Supabase mutation and request explicit Product Owner authorization;
-4. apply only after authorization;
-5. run ownership/dedup/intent/privacy tests and Advisors;
-6. Product Owner validates visual/end-to-end behavior;
-7. merge only after all checks pass.
+1. Product Owner runs the branch and visually validates Communities 7.0A;
+2. verify interest persists after F5;
+3. verify intent persists and can be changed;
+4. verify no Join/Joined or fake member counts remain;
+5. verify demo mode does not persist a fake vote;
+6. after Product Owner approval, finalize PR and merge to main.
 
 ## Important continuity note
 
