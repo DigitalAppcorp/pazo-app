@@ -102,18 +102,20 @@ Verified closure evidence:
 Active next module: **9B — Documentos privados**.
 
 Current state:
-- Gates 0–5 closed;
+- Gates 0–7 closed;
 - result: **MVP REDUCIDO**;
-- Gate 6 product specification proposed in `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`;
+- Gate 6 approved in `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`;
+- Gate 7 closed in `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`;
 - private upload/list/preview/download/edit/delete are in scope;
 - external sharing/signed links for third parties are out of MVP;
 - real audit found no documents table, no document RPC and no private document bucket;
 - existing `pet-avatars` and `post-photos` buckets are public and must not be reused.
 
 Immediate next action:
-1. Product Owner approves or modifies Gate 6 product behavior;
-2. only after approval, design Gate 7 architecture;
-3. no code or Supabase mutation before Gate 6 closes.
+1. enter Gate 8 on a dedicated branch;
+2. implement frontend/service/types and prepare one versioned migration;
+3. run diff/build/preflight;
+4. do not apply the migration until explicit Product Owner authorization.
 
 Communities remains in the Validation Lane and does not block this evaluation.
 
