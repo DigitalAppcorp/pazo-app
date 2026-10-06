@@ -5,6 +5,10 @@ BEGIN;
 -- Agenda y Cuidados
 -- =============================================================================
 
+CREATE SCHEMA IF NOT EXISTS care_private;
+REVOKE ALL ON SCHEMA care_private FROM PUBLIC, anon, authenticated;
+GRANT USAGE ON SCHEMA care_private TO authenticated, service_role;
+
 CREATE TABLE public.care_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   pet_id uuid NOT NULL REFERENCES public.pets(id) ON DELETE CASCADE,
@@ -207,7 +211,7 @@ BEFORE INSERT OR UPDATE ON public.care_items
 FOR EACH ROW
 EXECUTE FUNCTION private.prepare_care_item();
 
-CREATE OR REPLACE FUNCTION public.complete_care_item(
+CREATE OR REPLACE FUNCTION care_private.complete_care_item_internal(
   p_care_item_id uuid,
   p_expected_due_date date,
   p_expected_due_time time without time zone DEFAULT NULL
@@ -316,25 +320,25 @@ BEGIN
 END;
 $function$;
 
-ALTER FUNCTION public.complete_care_item(
+ALTER FUNCTION care_private.complete_care_item_internal(
   uuid,
   date,
   time without time zone
 ) OWNER TO postgres;
 
-REVOKE ALL ON FUNCTION public.complete_care_item(
+REVOKE ALL ON FUNCTION care_private.complete_care_item_internal(
   uuid,
   date,
   time without time zone
 ) FROM PUBLIC, anon;
 
-GRANT EXECUTE ON FUNCTION public.complete_care_item(
+GRANT EXECUTE ON FUNCTION care_private.complete_care_item_internal(
   uuid,
   date,
   time without time zone
-) TO authenticated;
+) TO authenticated, service_role;
 
-CREATE OR REPLACE FUNCTION public.undo_care_completion(
+CREATE OR REPLACE FUNCTION care_private.undo_care_completion_internal(
   p_completion_id uuid
 )
 RETURNS uuid
@@ -404,11 +408,13 @@ BEGIN
 END;
 $function$;
 
-ALTER FUNCTION public.undo_care_completion(uuid) OWNER TO postgres;
-REVOKE ALL ON FUNCTION public.undo_care_completion(uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.undo_care_completion(uuid) TO authenticated;
+ALTER FUNCTION care_private.undo_care_completion_internal(uuid) OWNER TO postgres;
+REVOKE ALL ON FUNCTION care_private.undo_care_completion_internal(uuid)
+FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION care_private.undo_care_completion_internal(uuid)
+TO authenticated, service_role;
 
-CREATE OR REPLACE FUNCTION public.archive_care_item(
+CREATE OR REPLACE FUNCTION care_private.archive_care_item_internal(
   p_care_item_id uuid
 )
 RETURNS void
@@ -436,7 +442,65 @@ BEGIN
 END;
 $function$;
 
-ALTER FUNCTION public.archive_care_item(uuid) OWNER TO postgres;
+ALTER FUNCTION care_private.archive_care_item_internal(uuid) OWNER TO postgres;
+REVOKE ALL ON FUNCTION care_private.archive_care_item_internal(uuid)
+FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION care_private.archive_care_item_internal(uuid)
+TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.complete_care_item(
+  p_care_item_id uuid,
+  p_expected_due_date date,
+  p_expected_due_time time without time zone DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT care_private.complete_care_item_internal(
+    p_care_item_id,
+    p_expected_due_date,
+    p_expected_due_time
+  );
+$function$;
+
+CREATE OR REPLACE FUNCTION public.undo_care_completion(
+  p_completion_id uuid
+)
+RETURNS uuid
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT care_private.undo_care_completion_internal(p_completion_id);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.archive_care_item(
+  p_care_item_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT care_private.archive_care_item_internal(p_care_item_id);
+$function$;
+
+REVOKE ALL ON FUNCTION public.complete_care_item(
+  uuid,
+  date,
+  time without time zone
+) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.complete_care_item(
+  uuid,
+  date,
+  time without time zone
+) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.undo_care_completion(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.undo_care_completion(uuid) TO authenticated;
+
 REVOKE ALL ON FUNCTION public.archive_care_item(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.archive_care_item(uuid) TO authenticated;
 
