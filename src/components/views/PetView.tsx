@@ -46,6 +46,7 @@ export const PetView = ({
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
+  const [completingCareId, setCompletingCareId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const interestOptions = [
@@ -84,6 +85,25 @@ export const PetView = ({
     }
     setEditPhotoFile(null)
     setIsEditing(false)
+  }
+
+  const handleCompleteReminderCare = async (careItem: CareItem) => {
+    if (completingCareId) return
+
+    setCompletingCareId(careItem.id)
+
+    try {
+      await onCompleteCare(careItem)
+    } catch (error) {
+      console.error('Error completing care reminder:', error)
+      alert(
+        lang === 'es'
+          ? 'No se pudo completar el cuidado. Inténtalo de nuevo.'
+          : 'Could not complete this care item. Please try again.'
+      )
+    } finally {
+      setCompletingCareId(null)
+    }
   }
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -564,11 +584,16 @@ export const PetView = ({
               </div>
 
               <button
-                onClick={() => void onCompleteCare(nextPendingCare)}
-                className="text-xs font-bold text-[#204E4A] bg-white hover:bg-[#E1E53F] px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                onClick={() => void handleCompleteReminderCare(nextPendingCare)}
+                disabled={completingCareId === nextPendingCare.id}
+                className="text-xs font-bold text-[#204E4A] bg-white hover:bg-[#E1E53F] px-4 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-wait"
               >
                 <IconCheck size={13} />
-                <span>{lang === 'es' ? 'Completar' : 'Done'}</span>
+                <span>
+                  {completingCareId === nextPendingCare.id
+                    ? (lang === 'es' ? 'Completando…' : 'Completing…')
+                    : (lang === 'es' ? 'Completar' : 'Done')}
+                </span>
               </button>
             </div>
           )}
