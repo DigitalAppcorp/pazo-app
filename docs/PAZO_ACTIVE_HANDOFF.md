@@ -144,6 +144,7 @@ Implementation state:
 - Security Advisor baseline recorded before apply: 3 anon SD, 6 authenticated SD, 1 leaked-password warning.
 
 Visual correction after Product Owner review:
+- canonical visual/structural reference: `docs/PAZO_EXPLORE_REFERENCE.md`;
 - Explore is the umbrella discovery hub, not a Communities-only screen;
 - Communities now lives inside the Communities category of Explore;
 - entering Explore alone must not count as a Communities view;
