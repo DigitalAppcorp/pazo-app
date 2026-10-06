@@ -73,16 +73,61 @@ export interface PetPlace {
   activeCheckIns: number
 }
 
+export type CareCategory =
+  | 'veterinarian'
+  | 'vaccine'
+  | 'medication'
+  | 'hygiene'
+  | 'feeding'
+  | 'other'
+
+export type CareRecurrence =
+  | 'none'
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'yearly'
+
+export type CareReminderDays = 0 | 1 | 2 | 7 | null
+
 export interface CareItem {
   id: string
+  petId: string
   title: string
-  type: 'veterinaria' | 'vacuna' | 'alimentacion' | 'medicamento' | 'higiene'
-  date: string
-  time: string
-  completed: boolean
-  repeat: string
-  reminder: string
-  notes?: string
+  category: CareCategory
+  dueDate: string
+  dueTime?: string | null
+  timezone: string
+  recurrence: CareRecurrence
+  reminderDaysBefore: CareReminderDays
+  notes?: string | null
+  status: 'active' | 'completed' | 'archived'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CareCompletion {
+  id: string
+  careItemId: string
+  petId: string
+  scheduledDate: string
+  scheduledTime?: string | null
+  completedAt: string
+  title: string
+  category: CareCategory
+  notes?: string | null
+  recurrence: CareRecurrence
+}
+
+export interface CareItemInput {
+  title: string
+  category: CareCategory
+  dueDate: string
+  dueTime?: string | null
+  timezone: string
+  recurrence: CareRecurrence
+  reminderDaysBefore: CareReminderDays
+  notes?: string | null
 }
 
 export interface PrivateDoc {
