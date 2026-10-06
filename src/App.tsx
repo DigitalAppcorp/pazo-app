@@ -31,7 +31,6 @@ import {
 import type {
   Pet,
   Post,
-  Community,
   CareItem,
   CareCompletion,
   CareItemInput,
@@ -211,7 +210,7 @@ function PazoMain() {
     mapa: 0,
     mascota: 0,
   })
-  const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
+  const communities = INITIAL_COMMUNITIES
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>([])
   const [careHistory, setCareHistory] = useState<CareCompletion[]>([])
@@ -961,25 +960,6 @@ function PazoMain() {
     )
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
-  }
-
-  const handleToggleJoinCommunity = (commId: string) => {
-    setCommunities((prev) =>
-      prev.map((c) => {
-        if (c.id === commId) {
-          const willJoin = !c.isJoined
-          if (willJoin) {
-            trackInteraction(commId, 'community', 'join')
-          }
-          return {
-            ...c,
-            isJoined: willJoin,
-            membersCount: c.isJoined ? c.membersCount - 1 : c.membersCount + 1,
-          }
-        }
-        return c
-      })
-    )
   }
 
   const refreshCareReminders = async (petsToCheck: Pet[] = pets) => {
@@ -1775,8 +1755,7 @@ function PazoMain() {
                   {activeTab === 'explorar' && (
                     <ExploreView
                       communities={communities}
-                      onToggleJoinCommunity={handleToggleJoinCommunity}
-                      onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                      canTrackValidation={Boolean(user?.id) && !isDemoUser}
                       lang={lang}
                     />
                   )}
