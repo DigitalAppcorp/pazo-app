@@ -107,25 +107,28 @@ Technical architecture:
 
 ## Immediate next action
 
-Active next candidate: **Generic Validation Instrumentation**.
+Active product work: **Fase 7.0A — Experimento de Comunidades**.
+
+Canonical source:
+`docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`
 
 Current state:
-- type: I — infrastructure;
-- Gates 0–7 closed;
-- Gate 5 result: **BUILD NOW**;
-- Gate 6 approved in `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
-- Gate 7 closed in `docs/PAZO_VALIDATION_INSTRUMENTATION_ARCHITECTURE.md`;
-- dependency is real now because Communities lacks reliable signals and Map's current fake door writes an incompatible payload to `interactions`;
-- `interactions` remains reserved for social behavior and must not be reused;
-- only 2 real `pet_places` currently exist, so full Map implementation is not justified yet.
+- Communities remains **EXPERIMENTO ACTIVO**;
+- full Communities product/backend is blocked by data;
+- the original lost Gemini `Me interesa` implementation will not be recovered;
+- generic validation tracking is still the intended technical solution, but it must be implemented only after the Communities experiment itself is closed;
+- PR #15 was closed without merge because it jumped to implementation too early;
+- no Supabase validation-instrumentation migration was applied;
+- Map/Radar is not automatically bundled into the first Communities experiment.
 
 Next action:
-1. enter Gate 8 on a dedicated branch;
-2. implement reusable validation service/panel;
-3. convert Communities and Radar fake doors to the generic system;
-4. prepare one versioned migration;
-5. build/preflight;
-6. request explicit Product Owner authorization before applying Supabase.
+1. finish the Communities 7.0A experiment definition;
+2. define the preview/hook and what conceptual functionality must be shown so users understand what they are expressing interest in;
+3. finalize the single post-interest intent question/options;
+4. define view/interest/revisit semantics and decision thresholds;
+5. challenge whether the proposed preview actually represents Communities or biases users toward one sub-use;
+6. after Product Owner approval, implement the smallest generic validation infrastructure with Communities as first consumer;
+7. let Communities collect data while the implementation lane remains free for another approved module if one emerges.
 
 ## Important continuity note
 
