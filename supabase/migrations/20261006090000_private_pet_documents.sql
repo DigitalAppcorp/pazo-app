@@ -4,6 +4,10 @@ BEGIN;
 -- Phase 9B — Private pet documents
 -- -----------------------------------------------------------------------------
 
+CREATE SCHEMA IF NOT EXISTS document_private;
+REVOKE ALL ON SCHEMA document_private FROM PUBLIC, anon, authenticated;
+GRANT USAGE ON SCHEMA document_private TO authenticated, service_role;
+
 CREATE TABLE public.pet_documents (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   pet_id uuid NOT NULL REFERENCES public.pets(id) ON DELETE RESTRICT,
@@ -48,7 +52,7 @@ CREATE INDEX idx_pet_documents_pet_status_created
 
 ALTER TABLE public.pet_documents ENABLE ROW LEVEL SECURITY;
 
-CREATE OR REPLACE FUNCTION private.prepare_pet_document()
+CREATE OR REPLACE FUNCTION document_private.prepare_pet_document()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = ''
@@ -62,13 +66,14 @@ BEGIN
 END;
 $function$;
 
-ALTER FUNCTION private.prepare_pet_document() OWNER TO postgres;
-REVOKE ALL ON FUNCTION private.prepare_pet_document() FROM PUBLIC, anon, authenticated;
+ALTER FUNCTION document_private.prepare_pet_document() OWNER TO postgres;
+REVOKE ALL ON FUNCTION document_private.prepare_pet_document()
+  FROM PUBLIC, anon, authenticated;
 
 CREATE TRIGGER trg_prepare_pet_document
 BEFORE INSERT OR UPDATE ON public.pet_documents
 FOR EACH ROW
-EXECUTE FUNCTION private.prepare_pet_document();
+EXECUTE FUNCTION document_private.prepare_pet_document();
 
 CREATE POLICY pet_documents_owner_select
 ON public.pet_documents
@@ -112,7 +117,7 @@ GRANT UPDATE (title, category) ON TABLE public.pet_documents TO authenticated;
 GRANT ALL ON TABLE public.pet_documents TO service_role;
 
 -- -----------------------------------------------------------------------------
--- Private Storage bucket
+-- Private Storage bucket and policies
 -- -----------------------------------------------------------------------------
 
 INSERT INTO storage.buckets (
@@ -199,10 +204,10 @@ USING (
 );
 
 -- -----------------------------------------------------------------------------
--- Upload lifecycle
+-- Internal privileged upload lifecycle
 -- -----------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.begin_pet_document_upload(
+CREATE OR REPLACE FUNCTION document_private.begin_pet_document_upload_internal(
   p_pet_id uuid,
   p_title text,
   p_category text,
@@ -320,7 +325,7 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION public.finalize_pet_document_upload(
+CREATE OR REPLACE FUNCTION document_private.finalize_pet_document_upload_internal(
   p_document_id uuid
 )
 RETURNS void
@@ -377,7 +382,7 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION public.cancel_pet_document_upload(
+CREATE OR REPLACE FUNCTION document_private.cancel_pet_document_upload_internal(
   p_document_id uuid
 )
 RETURNS void
@@ -421,10 +426,10 @@ END;
 $function$;
 
 -- -----------------------------------------------------------------------------
--- Delete lifecycle
+-- Internal privileged delete lifecycle
 -- -----------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.begin_delete_pet_document(
+CREATE OR REPLACE FUNCTION document_private.begin_delete_pet_document_internal(
   p_document_id uuid
 )
 RETURNS text
@@ -461,7 +466,7 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION public.finalize_delete_pet_document(
+CREATE OR REPLACE FUNCTION document_private.finalize_delete_pet_document_internal(
   p_document_id uuid
 )
 RETURNS void
@@ -504,7 +509,7 @@ BEGIN
 END;
 $function$;
 
-CREATE OR REPLACE FUNCTION public.cancel_delete_pet_document(
+CREATE OR REPLACE FUNCTION document_private.cancel_delete_pet_document_internal(
   p_document_id uuid
 )
 RETURNS void
@@ -548,6 +553,133 @@ BEGIN
 END;
 $function$;
 
+-- -----------------------------------------------------------------------------
+-- Public SECURITY INVOKER wrappers
+-- -----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION public.begin_pet_document_upload(
+  p_pet_id uuid,
+  p_title text,
+  p_category text,
+  p_original_file_name text,
+  p_mime_type text,
+  p_size_bytes bigint
+)
+RETURNS TABLE (
+  id uuid,
+  storage_path text
+)
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT *
+  FROM document_private.begin_pet_document_upload_internal(
+    p_pet_id,
+    p_title,
+    p_category,
+    p_original_file_name,
+    p_mime_type,
+    p_size_bytes
+  );
+$function$;
+
+CREATE OR REPLACE FUNCTION public.finalize_pet_document_upload(
+  p_document_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT document_private.finalize_pet_document_upload_internal(p_document_id);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.cancel_pet_document_upload(
+  p_document_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT document_private.cancel_pet_document_upload_internal(p_document_id);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.begin_delete_pet_document(
+  p_document_id uuid
+)
+RETURNS text
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT document_private.begin_delete_pet_document_internal(p_document_id);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.finalize_delete_pet_document(
+  p_document_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT document_private.finalize_delete_pet_document_internal(p_document_id);
+$function$;
+
+CREATE OR REPLACE FUNCTION public.cancel_delete_pet_document(
+  p_document_id uuid
+)
+RETURNS void
+LANGUAGE sql
+SECURITY INVOKER
+SET search_path = ''
+AS $function$
+  SELECT document_private.cancel_delete_pet_document_internal(p_document_id);
+$function$;
+
+-- Internal helper ownership/grants.
+ALTER FUNCTION document_private.begin_pet_document_upload_internal(uuid, text, text, text, text, bigint)
+  OWNER TO postgres;
+ALTER FUNCTION document_private.finalize_pet_document_upload_internal(uuid)
+  OWNER TO postgres;
+ALTER FUNCTION document_private.cancel_pet_document_upload_internal(uuid)
+  OWNER TO postgres;
+ALTER FUNCTION document_private.begin_delete_pet_document_internal(uuid)
+  OWNER TO postgres;
+ALTER FUNCTION document_private.finalize_delete_pet_document_internal(uuid)
+  OWNER TO postgres;
+ALTER FUNCTION document_private.cancel_delete_pet_document_internal(uuid)
+  OWNER TO postgres;
+
+REVOKE ALL ON FUNCTION document_private.begin_pet_document_upload_internal(uuid, text, text, text, text, bigint)
+  FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION document_private.finalize_pet_document_upload_internal(uuid)
+  FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION document_private.cancel_pet_document_upload_internal(uuid)
+  FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION document_private.begin_delete_pet_document_internal(uuid)
+  FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION document_private.finalize_delete_pet_document_internal(uuid)
+  FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION document_private.cancel_delete_pet_document_internal(uuid)
+  FROM PUBLIC, anon, authenticated;
+
+GRANT EXECUTE ON FUNCTION document_private.begin_pet_document_upload_internal(uuid, text, text, text, text, bigint)
+  TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION document_private.finalize_pet_document_upload_internal(uuid)
+  TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION document_private.cancel_pet_document_upload_internal(uuid)
+  TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION document_private.begin_delete_pet_document_internal(uuid)
+  TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION document_private.finalize_delete_pet_document_internal(uuid)
+  TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION document_private.cancel_delete_pet_document_internal(uuid)
+  TO authenticated, service_role;
+
+-- Public wrapper ownership/grants.
 ALTER FUNCTION public.begin_pet_document_upload(uuid, text, text, text, text, bigint)
   OWNER TO postgres;
 ALTER FUNCTION public.finalize_pet_document_upload(uuid)
