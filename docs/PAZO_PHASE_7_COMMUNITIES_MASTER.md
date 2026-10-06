@@ -274,6 +274,323 @@ La retención probablemente debe apoyarse más en:
 que en un segundo feed genérico.
 
 
+
+---
+
+# 0.3 Diseño propuesto del experimento 7.0A
+
+**Estado:** PROPUESTA DE PRODUCTO — PENDIENTE DE APROBACIÓN DEL PRODUCT OWNER.  
+**No autoriza código ni backend.**
+
+## Hipótesis principal
+
+La hipótesis a probar NO es:
+
+> “¿La gente quiere un botón llamado Comunidades?”
+
+La hipótesis es:
+
+> **¿Una experiencia donde dueños y mascotas pueden pertenecer a grupos afines, ayudarse, hacer actividades juntos y construir reconocimiento genera suficiente interés y potencial de recurrencia como para justificar inversión en Comunidades?**
+
+## Qué debe comunicar la preview
+
+La preview debe enseñar una visión mínima pero suficientemente rica para que el usuario entienda el valor.
+
+No debe simular actividad real inexistente ni mostrar números falsos de miembros.
+
+### Pilar 1 — Encuentra a los tuyos
+Ejemplos conceptuales:
+- comunidades por zona;
+- especie/raza;
+- intereses/estilo de vida;
+- problemas o etapas compartidas.
+
+Promesa:
+**“Encuentra personas y mascotas que viven cosas parecidas a ti.”**
+
+### Pilar 2 — Aprende y ayuda
+Ejemplos conceptuales:
+- preguntas;
+- respuestas útiles;
+- consejos;
+- guías/recursos de la comunidad.
+
+Promesa:
+**“Pregunta, aprende y aporta experiencia útil.”**
+
+### Pilar 3 — Haz cosas juntos
+Ejemplos conceptuales:
+- caminatas;
+- encuentros;
+- retos;
+- actividades/eventos.
+
+Promesa:
+**“Convierte una comunidad online en experiencias reales o recurrentes.”**
+
+### Pilar 4 — Construye identidad y reconocimiento
+Ejemplos conceptuales:
+- Admin/Moderador/Organizador;
+- miembro fundador;
+- contribución útil;
+- insignias/logros visibles en el perfil de la mascota.
+
+Promesa:
+**“Lo que aportas puede convertirse en parte de la identidad de tu mascota dentro de PAZO.”**
+
+### Pilar 5 — Crea y lidera
+Debe mostrarse que:
+- cualquier usuario puede crear una comunidad;
+- la administración básica sería gratuita;
+- crear no depende de membresía paga.
+
+Promesa:
+**“Si no existe tu grupo, puedes crearlo.”**
+
+## Qué NO mostrar todavía
+
+No presentar como parte del experimento inicial:
+- precios;
+- Community Pro;
+- Pazo Plus;
+- boosts;
+- publicidad;
+- patrocinios;
+- analytics avanzados;
+- automatización;
+- catálogo de insignias;
+- marketplace;
+- chat completo;
+- sistema de puntos/niveles;
+- ranking global.
+
+Motivo:
+mezclar monetización o demasiadas mecánicas antes de validar el valor base contaminaría la señal.
+
+Las hipótesis de monetización permanecen registradas para después.
+
+---
+
+## Hook principal propuesto
+
+La preview debe vender el resultado, no el nombre técnico del módulo.
+
+Hook ES:
+
+> **Tu mascota también puede encontrar su lugar.**
+
+Subhook:
+
+> **Comunidades para conectar con personas y mascotas afines, aprender, organizar planes y construir una identidad que crece con tu participación.**
+
+Versión alternativa a testear más adelante si hace falta:
+
+> **Encuentra a los tuyos. Aprende, participa y haz que tu mascota sea parte de algo.**
+
+No hacer A/B testing en el primer lanzamiento del experimento; primero obtener una línea base estable.
+
+---
+
+## CTA principal
+
+**Me interesa**
+
+Significado canónico:
+
+> **“Si Comunidades existiera de una forma útil como la que acabo de ver, quiero usarla.”**
+
+No significa:
+- Join;
+- membresía;
+- acceso anticipado;
+- pago;
+- suscripción.
+
+---
+
+## Pregunta posterior al interés
+
+Una sola pregunta obligatoria para el experimento inicial:
+
+> **¿Qué haría que volvieras más a Comunidades?**
+
+Una sola respuesta principal.
+
+Opciones:
+
+1. **Encontrar personas y mascotas como las mías**
+   - agrupa zona, especie, raza e intereses como mecanismos de descubrimiento.
+
+2. **Resolver dudas y compartir consejos**
+   - valida utilidad/conocimiento.
+
+3. **Encontrar planes, caminatas, eventos o retos**
+   - valida actividad compartida y recurrencia.
+
+4. **Crear y hacer crecer mi propia comunidad**
+   - valida creator/admin demand.
+
+5. **Ganar y mostrar reconocimiento o insignias**
+   - valida identidad/status como motor real, no solo como decoración.
+
+6. **Otro**
+   - código cerrado en la primera versión; sin texto libre para mantener análisis limpio.
+
+### Por qué una sola elección
+Queremos descubrir el **driver dominante de retorno**, no una lista de todo lo que “suena bien”.
+
+Más adelante, si la muestra lo justifica, una segunda ronda puede permitir prioridades múltiples.
+
+---
+
+## Señales a medir
+
+### View
+Cuenta autenticada única que realmente vio la preview.
+
+No contar:
+- rerenders;
+- cambios internos de tab;
+- múltiples mascotas como usuarios distintos.
+
+### Interest
+Una señal única por cuenta.
+
+Clicks repetidos no aumentan demanda.
+
+### Intent
+Una respuesta principal por cuenta.
+
+Puede cambiarse después; el análisis usa la selección actual y puede conservar histórico técnico solo si resulta necesario.
+
+### Revisit
+La misma cuenta vuelve a Comunidades en una sesión/día posterior.
+
+No crear un botón específico para “revisit”.
+
+### Source
+Superficie interna desde la que llegó, si existe más de una entrada.
+
+La cuenta es la unidad principal.
+
+---
+
+## Qué NO se interpreta automáticamente de los datos
+
+- muchos interesados NO autorizan todo el módulo;
+- muchos votos por eventos NO autorizan un sistema completo de eventos;
+- muchos votos por insignias NO autorizan gamificación compleja;
+- muchos creators NO autorizan Community Pro;
+- interés interno NO demuestra adquisición externa;
+- interés NO resuelve el problema de masa crítica.
+
+La intención sirve para descubrir qué **MVP reducido** tendría más sentido si el módulo pasa el gate.
+
+---
+
+## Criterio de decisión
+
+Mantener referencias actuales:
+
+### Muestra
+- <30 viewers únicos: insuficiente;
+- 30–99: direccional;
+- 100+: base inicial razonable.
+
+### Interest Rate
+- <10%: señal débil / considerar POSPONER;
+- 10–24%: EXPERIMENTO ACTIVO;
+- >=25%: señal prometedora para estudiar MVP REDUCIDO.
+
+Pero para avanzar a BUILD NOW/MVP REDUCIDO también se requiere:
+
+1. al menos un driver de intención interpretable;
+2. plan razonable contra cold start;
+3. suficiente densidad/audiencia para no lanzar comunidades vacías;
+4. coste comparativamente justificable frente a otros módulos;
+5. ausencia de riesgos de seguridad/moderación que hagan inviable el slice.
+
+---
+
+## Qué resultado puede producir el experimento
+
+### Caso A — Pertenencia domina
+Resultado posible:
+MVP centrado en grupos locales/afines + membership real.
+
+### Caso B — Consejos domina
+Resultado posible:
+MVP centrado en Q&A/recursos antes que un sistema social gigante.
+
+### Caso C — Planes domina
+Resultado posible:
+MVP reducido de grupos + actividades/encuentros.
+
+### Caso D — Creadores domina
+Resultado posible:
+explorar creación/admin básica como núcleo, pero solo si existe audiencia suficiente para poblar grupos.
+
+### Caso E — Reconocimiento domina
+Resultado posible:
+evaluar identidad/status transversal, pero NO construir Comunidades solo por badges si no existe razón social suficiente.
+
+### Caso F — Interés fuerte pero intención dispersa
+Resultado:
+seguir EXPERIMENTO ACTIVO; no diseñar backend completo todavía.
+
+---
+
+## Monetización en esta etapa
+
+NO preguntamos “¿pagarías?” en el primer fake door.
+
+Razón:
+primero hay que demostrar:
+- valor;
+- recurrencia;
+- rol real de usuarios/admins;
+- densidad.
+
+Hipótesis guardadas para etapas posteriores:
+- Community Pro;
+- Pazo Plus;
+- promoción/boosts;
+- herramientas profesionales;
+- patrocinio/publicidad contextual.
+
+El primer objetivo económico indirecto es comprobar si Comunidades puede crear suficiente engagement/retención como para aumentar el valor de la red.
+
+---
+
+## Adquisición
+
+El experimento interno 7.0A NO prueba adquisición.
+
+Si Comunidades obtiene señal interna fuerte:
+abrir 7.0B con una prueba externa separada:
+- landing/página pública conceptual;
+- ejemplos de comunidades;
+- invitación/CTA;
+- atribución de registro.
+
+---
+
+## Definition of Done de 7.0A — Producto
+
+Antes de programar instrumentación, deben quedar aprobados:
+
+- hipótesis principal;
+- cinco pilares que representa la preview;
+- hook/subhook;
+- significado de “Me interesa”;
+- pregunta posterior;
+- seis opciones de intención;
+- semántica de view/interest/intent/revisit;
+- criterios de decisión;
+- exclusión explícita de monetización del primer experimento;
+- regla de que Comunidades sigue siendo EXPERIMENTO ACTIVO hasta obtener datos.
+
+
 ---
 
 # 1. Pregunta principal
