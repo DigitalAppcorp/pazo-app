@@ -1,6 +1,6 @@
 # PAZO — Arquitectura: Instrumentación de Validación de Módulos
 
-**Estado:** GATE 7 CERRADO — GATE 8 EN PREPARACIÓN  
+**Estado:** GATE 8 — BACKEND APLICADO Y VERIFICADO; PENDIENTE VALIDACIÓN VISUAL  
 **Primer consumidor:** Comunidades 7.0A  
 **Regla:** esta arquitectura NO autoriza aplicar Supabase sin aprobación explícita del Product Owner.
 
@@ -272,3 +272,51 @@ Con transacción/rollback cuando sea posible:
 - datos por mascota;
 - Comunidades real;
 - roles/permisos/feed/eventos/moderación reales.
+
+
+---
+
+# 12. Estado aplicado
+
+Backend aplicado con autorización explícita del Product Owner.
+
+Migraciones registradas en Supabase:
+- `communities_validation_instrumentation`;
+- `trim_validation_indexes`;
+- `restore_validation_fk_indexes`.
+
+La segunda y tercera son migraciones forward de revisión de performance:
+- se probaron dos índices como prescindibles;
+- Performance Advisor mostró que cubrían foreign keys;
+- se restauraron;
+- no se reescribió historial.
+
+## Pruebas aprobadas
+
+- view por sesión deduplicada;
+- nueva sesión crea segunda view;
+- interest único por cuenta+módulo;
+- intent requiere interest;
+- intent inválido rechazado;
+- intent válido persistente;
+- cambio de intent permitido;
+- escritura con user_id ajeno rechazada;
+- anon bloqueado;
+- authenticated sin acceso al registry privado;
+- RLS limita interest/intent a la cuenta autenticada;
+- todas las pruebas destructivas/transitorias se ejecutaron con ROLLBACK;
+- tablas de señales quedaron en 0 filas después de pruebas.
+
+## Advisors post-apply
+
+Security:
+- sin findings nuevos atribuibles a instrumentación;
+- permanece baseline previo:
+  - 3 anon SECURITY DEFINER;
+  - 6 authenticated SECURITY DEFINER;
+  - Leaked Password Protection pendiente.
+
+Performance:
+- no hay foreign keys sin índice atribuibles a instrumentación;
+- los dos índices nuevos de validación aparecen como `unused_index` mientras las tablas están vacías;
+- se mantienen porque cubren foreign keys y serán útiles para consultas agregadas cuando exista volumen.
