@@ -33,7 +33,7 @@ Before making any code, database, architecture or roadmap change, read:
 - Future fake-door / "Me interesa" tracking must be one generic system reusable by Communities, Map, Matches and future modules.
 - Map has a legacy fake-door implementation, but its current write is incompatible with the real interactions schema and must not be treated as reliable data.
 - Agenda/Care 9A is complete in `main`.
-- Documents are separated from Agenda as 9B because private Storage/signed URLs increase security scope.
+- Documents 9B is complete in `main`; external sharing remains outside the MVP.
 - Messaging is postponed/re-evaluate due network effect/moderation cost.
 
 ## Current implementation status
@@ -82,84 +82,43 @@ Technical architecture:
 
 ## Current repository state
 
-`main` includes the complete 9A implementation via PR #12.
+`main` includes completed 9A and 9B implementations.
 
-Verified closure evidence:
+### Phase 9A — Agenda/Cuidados
+- PR #12 merged;
+- backend/build/security/visual validation passed.
+
+### Phase 9B — Documentos privados
+- COMPLETADA;
+- PR #14 merged to `main`;
+- merge commit: `6f833b779ef1a62d7321bc50dbab8c220f92a1d3`;
+- Product Owner approved final visual/end-to-end validation;
 - build local passed;
-- Product Owner visual/end-to-end test passed;
-- create/edit/archive/complete/undo persisted correctly;
-- F5 persistence passed;
-- multi-pet isolation/switching passed;
-- full-field date/time pickers passed;
-- reminder timing and disappearance after completion passed;
-- backend migration and SQL/RLS tests passed;
-- Advisors reviewed.
+- backend migrations applied:
+  - `20261006090551 private_pet_documents`
+  - `20261006090654 fix_private_document_storage_policies`
+- `pet-documents` is private, 10 MB, PDF/JPEG/PNG/WEBP;
+- metadata RLS/grants and Storage policies verified;
+- owner/non-owner isolation passed;
+- arbitrary Storage insert without reservation blocked;
+- upload/preview/download/edit/delete/F5/multi-pet validated;
+- delayed delete-finalization UX bug fixed and retested;
+- Security Advisor has no new 9B finding.
 
 ## Immediate next action
 
-9A is closed. Do not reopen it unless a regression is reported.
+There is no new Implementation Lane module authorized yet.
 
-Active implementation: **9B — Documentos privados**.
-
-**Gate:** 8 — Implementation  
-**Branch:** `feat/phase-9b-documents`
-
-Current state:
-- Gates 0–7 closed;
-- result: **MVP REDUCIDO**;
-- Gate 6 approved in `docs/PAZO_PHASE_9B_DOCUMENTS_MASTER.md`;
-- Gate 7 closed in `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`;
-- private upload/list/preview/download/edit/delete are in scope;
-- external sharing/signed links for third parties are out of MVP;
-- real audit found no documents table, no document RPC and no private document bucket;
-- existing `pet-avatars` and `post-photos` buckets are public and must not be reused.
-
-Implementation state:
-- frontend/service/types prepared;
-- legacy document mocks removed;
-- private bucket + metadata + lifecycle RPC backend applied;
-- base migration registered as `20261006090551 private_pet_documents`;
-- follow-up policy hardening registered as `20261006090654 fix_private_document_storage_policies`;
-- `pet-documents` is private, 10 MB, PDF/JPEG/PNG/WEBP;
-- post-apply schema/policies/functions/grants verified;
-- DB/RLS transactional tests passed with ROLLBACK;
-- arbitrary Storage insert without reservation blocked;
-- owner/non-owner isolation passed;
-- no test rows or objects persisted;
-- existing Security Advisor warnings remain baseline rescue/Auth findings; no new 9B security warning was introduced;
-- local `npm run build` passed and was confirmed by the Product Owner.
-
-Immediate next action:
-1. Product Owner pulls the current `feat/phase-9b-documents` branch;
-2. run the app locally and execute focused visual/end-to-end Storage validation;
-3. verify upload PDF/image, preview, download, edit, delete, F5 and multi-pet isolation;
-4. if all passes, take PR #14 out of draft, merge to main, verify main and close 9B.
-
-Communities remains in the Validation Lane and does not block this evaluation.
+Before any new feature code:
+1. read `docs/PAZO_MASTER_ROADMAP.md`;
+2. select the next candidate through `docs/PAZO_MODULE_LIFECYCLE.md`;
+3. close its pending product gates before architecture/code;
+4. keep Communities in Validation Lane;
+5. do not start Map/Lugares until provider/location/privacy decisions are closed;
+6. keep Messaging postponed until its reevaluation triggers are met.
 
 ## Important continuity note
 
 A new ChatGPT conversation should NOT attempt to reconstruct PAZO from memory.
 
 It should read the repository docs above and continue from this handoff. Repository docs are the canonical source of truth.
-
-
-## Visual retest blocker found
-
-Product Owner found that deleting a document removed the file in Storage, but the UI showed an error and kept the document visible until reload.
-
-Root cause:
-- Storage API deletion succeeded;
-- metadata finalization could briefly lag behind Storage deletion;
-- frontend treated delayed finalize as a failed delete.
-
-Fix on branch:
-- retry delete finalization with short backoff;
-- once Storage confirms deletion, do not surface delayed metadata finalization as a user-facing failure;
-- remove the document from visible state/count immediately;
-- reconcile server truth in the background through the existing recovery flow.
-
-Pending:
-- local build after this fix;
-- focused delete retest without reload;
-- remaining 9B visual/end-to-end acceptance.
