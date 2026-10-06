@@ -121,14 +121,14 @@ Implementation state:
 - Supabase read-only preflight passed with no 9B collisions;
 - migration is NOT applied;
 - existing Security Advisor warnings are baseline rescue/Auth findings, not 9B;
-- build cannot be executed from ChatGPT container because github.com DNS is unavailable.
+- local `npm run build` passed and was confirmed by the Product Owner.
 
 Immediate next action:
-1. Product Owner pulls `feat/phase-9b-documents`;
-2. run `npm run build`;
-3. if build passes, review final migration diff;
-4. then request explicit Product Owner authorization to apply 9B backend;
-5. after apply, run DB/Storage security tests and visual end-to-end.
+1. final migration review;
+2. request explicit Product Owner authorization to apply 9B backend;
+3. after apply, run DB/Storage security tests;
+4. then Product Owner runs focused visual/end-to-end validation;
+5. merge only after all checks pass.
 
 Communities remains in the Validation Lane and does not block this evaluation.
 
