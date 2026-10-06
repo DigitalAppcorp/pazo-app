@@ -1,198 +1,198 @@
-import { useState } from 'react'
 import type { Community } from '../../types/pazo'
-import { IconExplore, IconCheck } from '../icons/PazoIcons'
+import { ValidationInterestPanel } from '../validation/ValidationInterestPanel'
 
 interface ExploreViewProps {
   communities: Community[]
-  onToggleJoinCommunity: (commId: string) => void
-  onSelectPetProfile: (petName: string) => void
+  canTrackValidation: boolean
   lang: 'es' | 'en'
 }
 
 export const ExploreView = ({
   communities,
-  onToggleJoinCommunity,
-  onSelectPetProfile,
+  canTrackValidation,
   lang,
 }: ExploreViewProps) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState<'para_ti' | 'comunidades' | 'eventos'>('para_ti')
+  const pillars = lang === 'es'
+    ? [
+        {
+          title: 'Encuentra a los tuyos',
+          body: 'Grupos por zona, especie, raza, intereses o situaciones compartidas.',
+        },
+        {
+          title: 'Aprende y ayuda',
+          body: 'Pregunta, comparte consejos y encuentra respuestas útiles de otros dueños.',
+        },
+        {
+          title: 'Haz cosas juntos',
+          body: 'Caminatas, encuentros, actividades y retos que den motivos para volver.',
+        },
+        {
+          title: 'Construye identidad',
+          body: 'Reconocimiento, roles e insignias que puedan formar parte del perfil de tu mascota.',
+        },
+        {
+          title: 'Crea y lidera',
+          body: 'Si el grupo que buscas no existe, podrías crear el tuyo y administrarlo de forma básica gratis.',
+        },
+      ]
+    : [
+        {
+          title: 'Find your crowd',
+          body: 'Groups by area, species, breed, interests, or shared situations.',
+        },
+        {
+          title: 'Learn and help',
+          body: 'Ask questions, share advice, and find useful answers from other pet owners.',
+        },
+        {
+          title: 'Do things together',
+          body: 'Walks, meetups, activities, and challenges that create reasons to come back.',
+        },
+        {
+          title: 'Build identity',
+          body: 'Recognition, roles, and badges that can become part of your pet profile.',
+        },
+        {
+          title: 'Create and lead',
+          body: 'If the group you want does not exist, you could create it and manage the basics for free.',
+        },
+      ]
 
-  const filteredCommunities = communities.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.species.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const intentOptions = lang === 'es'
+    ? [
+        { key: 'similar_people_pets', label: 'Encontrar personas y mascotas como las mías' },
+        { key: 'advice', label: 'Resolver dudas y compartir consejos' },
+        { key: 'plans_events_challenges', label: 'Encontrar planes, caminatas, eventos o retos' },
+        { key: 'create_grow_community', label: 'Crear y hacer crecer mi propia comunidad' },
+        { key: 'recognition_badges', label: 'Ganar y mostrar reconocimiento o insignias' },
+        { key: 'other', label: 'Otro' },
+      ]
+    : [
+        { key: 'similar_people_pets', label: 'Find people and pets like mine' },
+        { key: 'advice', label: 'Solve questions and share advice' },
+        { key: 'plans_events_challenges', label: 'Find plans, walks, events, or challenges' },
+        { key: 'create_grow_community', label: 'Create and grow my own community' },
+        { key: 'recognition_badges', label: 'Earn and show recognition or badges' },
+        { key: 'other', label: 'Other' },
+      ]
+
+  const examples = communities.slice(0, 3)
 
   return (
-    <div className="space-y-4 animate-slide-up pb-6">
-      {/* Título de la sección */}
-      <div className="space-y-1 px-1">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block shadow-xs">
-          {lang === 'es' ? 'Descubrimiento' : 'Discovery'}
-        </span>
-        <h2 className="text-2xl font-black text-[#204E4A] tracking-tight">
-          {lang === 'es' ? 'Encuentra a los tuyos.' : 'Find your crowd.'}
-        </h2>
-        <p className="text-xs text-[#5C7470]">
-          {lang === 'es'
-            ? 'Comunidades locales organizadas por especie e intereses'
-            : 'Local communities organized by species and interests'}
-        </p>
-      </div>
+    <div className="space-y-5 animate-slide-up pb-8">
+      <section className="rounded-[2.4rem] bg-white p-5 shadow-sm overflow-hidden relative">
+        <div className="absolute -right-12 -top-12 w-36 h-36 bg-[#E1E53F]/25 rounded-full blur-2xl pointer-events-none" />
+        <div className="relative z-10 space-y-3">
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block">
+            {lang === 'es' ? 'Función en evaluación' : 'Feature under evaluation'}
+          </span>
 
-      {/* Buscador con icono vectorial personalizado */}
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={
-            lang === 'es'
-              ? 'Mascotas, comunidades, eventos en LA...'
-              : 'Pets, communities, events in LA...'
-          }
-          className="w-full bg-white rounded-full pl-11 pr-4 py-3 text-xs text-[#204E4A] shadow-sm focus:bg-white"
-        />
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5C7470] pointer-events-none">
-          <IconExplore size={16} />
-        </div>
-      </div>
-
-      {/* Selector de pestañas: Para ti / Comunidades / Eventos */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setActiveCategory('para_ti')}
-          className={`text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
-            activeCategory === 'para_ti'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs'
-          }`}
-        >
-          {lang === 'es' ? 'Para ti' : 'For you'}
-        </button>
-        <button
-          onClick={() => setActiveCategory('comunidades')}
-          className={`text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
-            activeCategory === 'comunidades'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs'
-          }`}
-        >
-          {lang === 'es' ? 'Comunidades' : 'Communities'}
-        </button>
-        <button
-          onClick={() => setActiveCategory('eventos')}
-          className={`text-xs font-bold px-4 py-2 rounded-full transition-all cursor-pointer ${
-            activeCategory === 'eventos'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : 'bg-white text-[#5C7470] hover:bg-neutral-50 shadow-xs'
-          }`}
-        >
-          {lang === 'es' ? 'Eventos' : 'Events'}
-        </button>
-      </div>
-
-      {/* Perfil Destacado de Mascota (Nube el conejo) */}
-      <div className="p-4 bg-white rounded-[2.2rem] flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xs shrink-0">
-            <img
-              src="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=200&auto=format&fit=crop"
-              alt="Nube el conejo"
-              className="w-full h-full object-cover"
-            />
-          </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-sm text-[#204E4A]">Nube</span>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 bg-[#FAF8F5] text-[#204E4A] rounded-full shadow-xs">
-                {lang === 'es' ? 'Conejo • LA' : 'Rabbit • LA'}
-              </span>
-            </div>
-            <p className="text-[11px] text-[#5C7470] line-clamp-1">
+            <h2 className="text-2xl font-black text-[#204E4A] tracking-tight leading-tight">
               {lang === 'es'
-                ? 'Explora rincones tranquilos en compañía.'
-                : 'Loves calm spots and friendly company.'}
+                ? 'Tu mascota también puede encontrar su lugar.'
+                : 'Your pet can find their place too.'}
+            </h2>
+            <p className="text-xs text-[#5C7470] leading-relaxed mt-2 max-w-lg">
+              {lang === 'es'
+                ? 'Comunidades para conectar con personas y mascotas afines, aprender, organizar planes y construir una identidad que crece con tu participación.'
+                : 'Communities to connect with like-minded people and pets, learn, organize plans, and build an identity that grows with participation.'}
             </p>
           </div>
         </div>
+      </section>
 
-        <button
-          onClick={() => onSelectPetProfile('Nube')}
-          className="bg-[#FAF8F5] hover:bg-[#E1E53F] text-[#204E4A] text-[11px] font-bold px-3.5 py-2 rounded-full transition-all cursor-pointer shrink-0 shadow-xs"
-        >
-          {lang === 'es' ? 'Ver Ficha' : 'View Profile'}
-        </button>
-      </div>
+      <section className="space-y-3">
+        <div className="px-1">
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#5C7470]">
+            {lang === 'es' ? 'Lo que podría ofrecer' : 'What it could offer'}
+          </p>
+        </div>
 
-      {/* Lista de Comunidades */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center px-1">
-          <h3 className="font-extrabold text-sm text-[#204E4A]">
-            {lang === 'es' ? 'Comunidades sugeridas' : 'Suggested communities'}
-          </h3>
-          <span className="text-[11px] font-semibold text-[#5C7470]">
-            {filteredCommunities.length} {lang === 'es' ? 'disponibles' : 'available'}
+        <div className="grid gap-3">
+          {pillars.map((pillar, index) => (
+            <div
+              key={pillar.title}
+              className="bg-white rounded-[1.9rem] p-4 shadow-sm flex gap-3.5 items-start"
+            >
+              <div className="w-9 h-9 rounded-2xl bg-[#204E4A] text-[#E1E53F] flex items-center justify-center text-[11px] font-black shrink-0">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-[#204E4A]">{pillar.title}</h3>
+                <p className="text-[11px] text-[#5C7470] leading-relaxed mt-1">
+                  {pillar.body}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <div className="px-1 flex items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#5C7470]">
+              {lang === 'es' ? 'Ejemplos conceptuales' : 'Concept examples'}
+            </p>
+            <h3 className="text-sm font-black text-[#204E4A] mt-1">
+              {lang === 'es' ? 'Así podrían sentirse algunos grupos' : 'How some groups could feel'}
+            </h3>
+          </div>
+          <span className="text-[9px] font-bold text-[#5C7470] bg-white px-2.5 py-1 rounded-full shadow-xs shrink-0">
+            {lang === 'es' ? 'Aún no activos' : 'Not active yet'}
           </span>
         </div>
 
-        {filteredCommunities.map((comm) => (
-          <div
-            key={comm.id}
-            className="p-4 bg-white rounded-[2rem] shadow-[0_3px_16px_rgba(32,78,74,0.04)] flex gap-3.5 items-center justify-between"
-          >
-            <div className="flex gap-3 items-center min-w-0">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-xs shrink-0">
+        <div className="grid gap-3">
+          {examples.map((community) => (
+            <article
+              key={community.id}
+              className="bg-white rounded-[2rem] p-4 shadow-sm flex items-center gap-3"
+            >
+              <div className="w-14 h-14 rounded-2xl overflow-hidden bg-[#FAF8F5] shrink-0">
                 <img
-                  src={comm.photoUrl}
-                  alt={comm.name}
+                  src={community.photoUrl}
+                  alt={community.name}
                   className="w-full h-full object-cover"
                 />
               </div>
 
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h4 className="font-extrabold text-xs text-[#204E4A] truncate">
-                    {comm.name}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-black text-[#204E4A] truncate">
+                    {community.name}
                   </h4>
-                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-[#FAF8F5] text-[#5C7470] rounded-full shadow-xs shrink-0">
-                    {comm.species}
+                  <span className="text-[8px] font-extrabold uppercase tracking-wide text-[#5C7470] bg-[#FAF8F5] px-2 py-0.5 rounded-full shrink-0">
+                    {community.species}
                   </span>
                 </div>
-                <p className="text-[11px] text-[#5C7470] truncate mt-0.5">
-                  {comm.tagline}
+                <p className="text-[11px] text-[#5C7470] mt-1 line-clamp-2">
+                  {community.tagline}
                 </p>
-                <span className="text-[10px] text-[#5C7470]/70 font-semibold block mt-0.5">
-                  {comm.membersCount.toLocaleString()}{' '}
-                  {lang === 'es' ? 'miembros' : 'members'}
-                </span>
+                <p className="text-[9px] font-semibold text-[#204E4A]/60 mt-1.5">
+                  {lang === 'es'
+                    ? 'Ejemplo para visualizar la idea, no una comunidad real.'
+                    : 'Concept example only, not a live community.'}
+                </p>
               </div>
-            </div>
+            </article>
+          ))}
+        </div>
+      </section>
 
-            <button
-              onClick={() => onToggleJoinCommunity(comm.id)}
-              className={`text-xs font-bold px-4 py-2 rounded-full transition-all shrink-0 cursor-pointer flex items-center gap-1 shadow-xs ${
-                comm.isJoined
-                  ? 'bg-[#FAF8F5] hover:bg-neutral-100 text-[#204E4A]'
-                  : 'bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A]'
-              }`}
-            >
-              {comm.isJoined && <IconCheck size={13} />}
-              <span>
-                {comm.isJoined
-                  ? lang === 'es'
-                    ? 'Unido'
-                    : 'Joined'
-                  : lang === 'es'
-                  ? 'Unirme'
-                  : 'Join'}
-              </span>
-            </button>
-          </div>
-        ))}
-      </div>
+      <ValidationInterestPanel
+        moduleKey="communities"
+        source="explore"
+        canTrack={canTrackValidation}
+        intentQuestion={
+          lang === 'es'
+            ? '¿Qué haría que volvieras más a Comunidades?'
+            : 'What would make you come back to Communities more often?'
+        }
+        intentOptions={intentOptions}
+        lang={lang}
+      />
     </div>
   )
 }
