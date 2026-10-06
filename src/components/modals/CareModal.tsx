@@ -19,6 +19,7 @@ interface CareModalProps {
   isHistoryLoading: boolean
   hasMoreHistory: boolean
   onLoadMoreHistory: () => void
+  onRetry: () => void
   onCreateCare: (input: CareItemInput) => Promise<void>
   onUpdateCare: (careItemId: string, input: CareItemInput) => Promise<void>
   onArchiveCare: (careItemId: string) => Promise<void>
@@ -134,6 +135,7 @@ export const CareModal = ({
   isHistoryLoading,
   hasMoreHistory,
   onLoadMoreHistory,
+  onRetry,
   onCreateCare,
   onUpdateCare,
   onArchiveCare,
@@ -465,11 +467,17 @@ export const CareModal = ({
             {lang === 'es' ? 'Cargando agenda…' : 'Loading agenda…'}
           </div>
         ) : error ? (
-          <div className="py-10 text-center space-y-2">
+          <div className="py-10 text-center space-y-3">
             <p className="text-sm font-bold text-[#EC7357]">
               {lang === 'es' ? 'No se pudo cargar la agenda.' : 'Could not load the agenda.'}
             </p>
             <p className="text-[11px] text-[#5C7470]">{error}</p>
+            <button
+              onClick={onRetry}
+              className="px-4 py-2 rounded-full bg-[#204E4A] text-[#E1E53F] text-xs font-bold cursor-pointer"
+            >
+              {lang === 'es' ? 'Reintentar' : 'Try again'}
+            </button>
           </div>
         ) : activeTab === 'proximos' ? (
           <div className="space-y-3">
