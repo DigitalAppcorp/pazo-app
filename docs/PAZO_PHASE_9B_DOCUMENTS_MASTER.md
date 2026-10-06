@@ -1,6 +1,6 @@
 # PAZO — Sub-Ruta Maestra 9B: Documentos privados
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO PROPUESTA  
+**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO CERRADA  
 **Tipo:** U — utilidad individual  
 **Resultado Gate 5:** MVP REDUCIDO  
 **Documento padre:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
@@ -273,12 +273,11 @@ La documentación actual de Supabase confirma que buckets privados someten desca
 
 # 16. Próximo gate
 
-Esta especificación es la propuesta de **Gate 6**.
+Gate 6 fue aprobado por el Product Owner.
 
-Antes de arquitectura técnica, el Product Owner debe aprobar o cambiar el comportamiento de producto.
+Gate 7 está definido en:
+docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md
 
-Si se aprueba:
-- cerrar Gate 6;
-- crear `docs/PAZO_PHASE_9B_DOCUMENTS_ARCHITECTURE.md`;
-- diseñar tabla, bucket privado, naming, RLS, grants, preview/download y borrado consistente;
-- no aplicar nada a Supabase sin autorización explícita.
+Siguiente etapa: **Gate 8 — Implementación**.
+
+No aplicar nada a Supabase sin autorización explícita.
