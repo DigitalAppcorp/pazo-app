@@ -839,7 +839,8 @@ Usar únicamente:
 - build, seguridad y prueba visual aprobados;
 - PR #14 fusionado a `main`.
 
-### Siguiente habilitador: Instrumentación genérica de validación
+### Instrumentación genérica de validación
+- **Estado: EN CURSO — GATE 8 IMPLEMENTACIÓN**
 - tipo I — infraestructura;
 - Gates 0–7 cerrados;
 - resultado Gate 5: **BUILD NOW**;
@@ -849,6 +850,21 @@ Usar únicamente:
 - no reutilizar `interactions`;
 - siguiente acción: Gate 8 en rama propia;
 - preparar código + migración sin aplicar Supabase.
+
+### Estado técnico — Instrumentación genérica
+- rama: `feat/generic-validation-instrumentation`;
+- `validationService.ts` preparado;
+- `ValidationInterestPanel.tsx` preparado;
+- Comunidades convertida a preview transparente;
+- Join/Leave y member counts ficticios retirados de la UI;
+- Radar convertido al sistema genérico;
+- tracking roto en `interactions` retirado;
+- migración `20261006103000_generic_validation_instrumentation.sql` preparada, NO aplicada;
+- preflight real de Supabase: sin colisiones de schema/tabla/RPC;
+- `auth.users.id` y `pets.id/owner_id` UUID compatibles;
+- pendiente: build local;
+- pendiente: autorización explícita antes de aplicar Supabase;
+- pendiente post-apply: deduplicación/ownership/privacy tests + visual end-to-end.
 
 ### Otros módulos
 - Comunidades permanece en validación;
