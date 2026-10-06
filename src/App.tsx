@@ -113,8 +113,8 @@ const isCareReminderRelevant = (item: CareItem) => {
   const today = zonedDateKey(item.timezone)
   const daysUntilDue = calendarDayDiff(today, item.dueDate)
 
-  if (daysUntilDue <= 0) return true
   if (item.reminderDaysBefore === null) return false
+  if (daysUntilDue <= 0) return true
   return daysUntilDue <= item.reminderDaysBefore
 }
 
@@ -580,8 +580,14 @@ function PazoMain() {
     activePetIdRef.current = pet.id
     setCurrentPet(pet)
     setProfilePosts([])
+    setCareItems([])
+    setCareHistory([])
+    setCareError('')
+    careHistoryOffsetRef.current = 0
+    setHasMoreCareHistory(true)
     setSelectedPublicProfileId(null)
     void loadFeedForPet(pet)
+    void loadCareForPet(pet.id)
   }
 
   useEffect(() => {
@@ -620,7 +626,11 @@ function PazoMain() {
             localStorage.setItem(`pitch_seen_${user.id}`, 'true')
           }
 
-          await loadFeedForPet(activePet)
+          await Promise.all([
+            loadFeedForPet(activePet),
+            loadCareForPet(activePet.id),
+            refreshCareReminders(ownedPets),
+          ])
         } else {
           ownedPetIdsRef.current = []
           setPets([])
@@ -1035,21 +1045,17 @@ function PazoMain() {
     }
   }
 
-  const reloadCurrentCare = async () => {
-    if (!currentPet?.id) return
-    await loadCareForPet(currentPet.id)
+  const refreshCareAfterMutation = async (petId: string) => {
+    if (activePetIdRef.current === petId) {
+      await loadCareForPet(petId)
+    }
     await refreshCareReminders()
   }
 
   const handleCreateCare = async (input: CareItemInput) => {
     const petId = currentPet.id
-    const created = await createCareItem(petId, input)
-
-    if (activePetIdRef.current === petId) {
-      setCareItems((previous) => sortCareItems([...previous, created]))
-    }
-
-    await refreshCareReminders()
+    await createCareItem(petId, input)
+    await refreshCareAfterMutation(petId)
   }
 
   const handleUpdateCare = async (
@@ -1057,35 +1063,24 @@ function PazoMain() {
     input: CareItemInput
   ) => {
     const petId = currentPet.id
-    const updated = await updateCareItem(careItemId, input)
-
-    if (activePetIdRef.current === petId) {
-      setCareItems((previous) =>
-        sortCareItems(
-          previous.map((item) => item.id === updated.id ? updated : item)
-        )
-      )
-    }
-
-    await refreshCareReminders()
+    await updateCareItem(careItemId, input)
+    await refreshCareAfterMutation(petId)
   }
 
   const handleArchiveCare = async (careItemId: string) => {
+    const petId = currentPet.id
     await archiveCareItem(careItemId)
-    setCareItems((previous) =>
-      previous.filter((item) => item.id !== careItemId)
-    )
-    await refreshCareReminders()
+    await refreshCareAfterMutation(petId)
   }
 
   const handleCompleteCare = async (item: CareItem) => {
     await completeCareItem(item)
-    await reloadCurrentCare()
+    await refreshCareAfterMutation(item.petId)
   }
 
   const handleUndoCareCompletion = async (completion: CareCompletion) => {
     await undoCareCompletion(completion.id)
-    await reloadCurrentCare()
+    await refreshCareAfterMutation(completion.petId)
   }
 
   useEffect(() => {
@@ -1262,20 +1257,9 @@ function PazoMain() {
     setIsAlertOpen(true)
   }
 
-  const careReminderItem = careReminderItems[0]
-  const careReminderPet = careReminderItem
-    ? pets.find((pet) => pet.id === careReminderItem.petId)
-    : undefined
-
-  const handleOpenCareReminder = () => {
-    if (!careReminderItem || !careReminderPet) return
-
-    if (careReminderPet.id !== currentPet.id) {
-      selectActivePet(careReminderPet)
-    }
-
-    setIsCareOpen(true)
-  }
+  const currentPetCareReminder = careReminderItems.find(
+    (item) => item.petId === currentPet.id
+  )
 
   if (publicRescueRoute.token) {
     return (
@@ -1355,7 +1339,11 @@ function PazoMain() {
                   localStorage.setItem(`active_pet_${user.id}`, newPet.id)
                 }
                 setIsOnboardingActive(false)
+                setCareItems([])
+                setCareHistory([])
                 void loadFeedForPet(newPet)
+                void loadCareForPet(newPet.id)
+                void refreshCareReminders([newPet])
               }}
             />
           ) : (
@@ -1574,34 +1562,6 @@ function PazoMain() {
               </button>
             )}
 
-            {careReminderItem && careReminderPet && (
-              <button
-                type="button"
-                onClick={handleOpenCareReminder}
-                className="mx-4 mt-3 rounded-2xl bg-[#F5F7E8] border border-[#204E4A]/10 px-4 py-3 flex items-center gap-3 text-left cursor-pointer shrink-0"
-              >
-                <span className="w-8 h-8 rounded-full bg-[#204E4A] text-[#E1E53F] flex items-center justify-center font-black shrink-0">
-                  ✓
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-xs font-black text-[#204E4A]">
-                    {lang === 'es'
-                      ? `Tienes un cuidado pendiente de ${careReminderPet.name}`
-                      : `You have care coming up for ${careReminderPet.name}`}
-                  </span>
-                  <span className="block text-[10px] text-[#5C7470] mt-0.5 leading-relaxed">
-                    {careReminderItem.title}
-                    {careReminderItems.length > 1
-                      ? (lang === 'es'
-                          ? ` · y ${careReminderItems.length - 1} más`
-                          : ` · and ${careReminderItems.length - 1} more`)
-                      : ''}
-                  </span>
-                </span>
-                <span className="font-black text-[#204E4A]">›</span>
-              </button>
-            )}
-
             <main
               ref={mainScrollRef}
               className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
@@ -1678,6 +1638,7 @@ function PazoMain() {
                       }}
                       onAddPet={() => setIsAddPetOpen(true)}
                       careItems={careItems}
+                      careReminderItem={currentPetCareReminder}
                       onCompleteCare={handleCompleteCare}
                       onOpenQRPassport={() => setIsPassportOpen(true)}
                       onOpenCareAgenda={() => setIsCareOpen(true)}
