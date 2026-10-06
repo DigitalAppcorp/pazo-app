@@ -400,9 +400,10 @@ No activar ubicación precisa sin decisión explícita.
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
 
 ### 9A — Agenda/Cuidados
-**Estado: SIGUIENTE — GATE 6 CERRADO / GATE 7 PENDIENTE**
+**Estado: SIGUIENTE — GATES 6 Y 7 CERRADOS / IMPLEMENTACIÓN PENDIENTE**
 
-**Sub-ruta:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`
+**Sub-ruta de producto:** `docs/PAZO_PHASE_9A_CARE_MASTER.md`  
+**Arquitectura técnica:** `docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`
 
 Decisión:
 - BUILD NOW;
@@ -777,12 +778,14 @@ Usar únicamente:
 
 ## Carril de Implementación
 ### Agenda/Cuidados 9A
-1. usar `docs/PAZO_PHASE_9A_CARE_MASTER.md`;
-2. Gate 6 de producto está cerrado;
-3. siguiente paso: **Gate 7 — Arquitectura Técnica**;
-4. definir schema/RLS/completions/recurrencia/timezone/paginación/notificaciones;
-5. no escribir código de producto ni aplicar Supabase hasta cerrar Gate 7;
-6. después crear rama de implementación específica.
+1. producto: `docs/PAZO_PHASE_9A_CARE_MASTER.md`;
+2. arquitectura: `docs/PAZO_PHASE_9A_CARE_ARCHITECTURE.md`;
+3. Gates 6 y 7 están cerrados;
+4. siguiente paso, solo tras revisión del Product Owner: **Gate 8 — Implementación**;
+5. crear rama específica de 9A;
+6. preparar migraciones sin aplicarlas;
+7. build/preflight;
+8. pedir autorización antes de cualquier mutación de Supabase.
 
 ### Después
 - 9B Documentos privados;
