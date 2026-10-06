@@ -111,17 +111,21 @@ Active next candidate: **Generic Validation Instrumentation**.
 
 Current state:
 - type: I — infrastructure;
-- Gates 0–5 closed;
+- Gates 0–7 closed;
 - Gate 5 result: **BUILD NOW**;
-- Gate 6 proposed in `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
+- Gate 6 approved in `docs/PAZO_VALIDATION_INSTRUMENTATION_MASTER.md`;
+- Gate 7 closed in `docs/PAZO_VALIDATION_INSTRUMENTATION_ARCHITECTURE.md`;
 - dependency is real now because Communities lacks reliable signals and Map's current fake door writes an incompatible payload to `interactions`;
 - `interactions` remains reserved for social behavior and must not be reused;
 - only 2 real `pet_places` currently exist, so full Map implementation is not justified yet.
 
 Next action:
-1. Product Owner approves or modifies Gate 6;
-2. after approval, design Gate 7 architecture;
-3. no code or Supabase mutation before Gate 6 closes.
+1. enter Gate 8 on a dedicated branch;
+2. implement reusable validation service/panel;
+3. convert Communities and Radar fake doors to the generic system;
+4. prepare one versioned migration;
+5. build/preflight;
+6. request explicit Product Owner authorization before applying Supabase.
 
 ## Important continuity note
 
