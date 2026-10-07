@@ -103,7 +103,7 @@ Current branch evidence:
 - Security Advisor: no new database findings attributable to this tranche;
 - existing Leaked Password Protection warning remains open.
 
-Runtime PayPal signature verification still requires real PayPal secrets + a real/simulator-compatible webhook delivery before membership may be re-enabled.
+Runtime PayPal signature verification still requires real PayPal secrets + a genuine Sandbox/Live subscription webhook delivery before membership may be re-enabled. PayPal's webhook simulator does not support postback verification through the verify-webhook-signature endpoint.
 
 ## 7. Tranches siguientes
 
