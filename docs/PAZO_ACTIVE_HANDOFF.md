@@ -22,6 +22,8 @@
 - Storage INSERT/RLS tests PASS;
 - Security Advisor: no new Communities findings;
 - real Storage API DELETE + visual/end-to-end test remain pending;
+- visual QA found unclear unlabeled fields in Community edit form;
+- Community edit form labels/placeholders/required-vs-optional states fixed in commit `9fdfb7f`; pending Product Owner local review;
 - generic validation backend remains for advanced extension experiments;
 - existing Communities validation test rows (2 views, 1 interest, 0 intents) remain untouched pending authorized cleanup.
 
