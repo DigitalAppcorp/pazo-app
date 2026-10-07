@@ -1,8 +1,8 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 8 REABIERTO — SCOPE CORRECTION: FAKE DOORS + 3D MARKERS
+**Estado:** COMPLETADA — GATE 8 CERRADO / GATE 9 MEDICIÓN
 **Fecha:** 2026-10-07
-**Implementación autorizada:** SÍ — corrección Gate 8 activa; no hay nueva mutación Supabase pendiente.
+**Implementación:** COMPLETADA. No hay mutaciones Supabase pendientes para el cierre.
 
 ## 1. Auditoría inicial histórica (antes del núcleo real)
 
@@ -299,13 +299,13 @@ Gate 2 — coste/dependencias: CERRADO.
 D1–D5: CERRADAS.  
 Gate 6 — CERRADO / aprobado por Product Owner.  
 Gate 7 — CERRADO.  
-Gate 8 — REABIERTO POR CORRECCIÓN DE CIERRE.
+Gate 8 — CERRADO — Scope Closure Reconciliation PASS.
 
 Fuentes:
 - producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
 - arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
 
-El núcleo de Fase 8 ya está aplicado y mergeado vía PR #20. Gate 8 está reabierto únicamente para completar fake doors y marcadores 3D ya aprobados.
+El núcleo de Fase 8 fue aplicado vía PR #20. La corrección de cierre de fake doors + marcadores 3D fue completada vía PR #22 y verificada en `main`.
 
 
 ## 12. Estado Gate 8
@@ -358,75 +358,42 @@ Preparado:
 - transactional view/interest QA PASS;
 - 0 test signals persisted.
 
-Gate 8 permanece ABIERTO únicamente hasta completar el cierre Git:
+Gate 8 — cierre final:
 - build local PASS: COMPLETADO;
 - autorización y apply de module keys: COMPLETADO;
 - prueba visual de modelos 3D: PASS;
 - prueba de fake doors + persistencia: PASS;
-- merge de la corrección: PENDIENTE;
-- verificación de `main`: PENDIENTE.
+- PR #22: MERGED;
+- merge commit: `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
+- `main`: VERIFIED;
+- Scope Closure Reconciliation: PASS.
 
 
-## 13. Checkpoint exacto para continuidad entre chats
+## 13. Cierre final y continuidad
 
-### Estado que NO debe reinterpretarse
-- el núcleo real de Lugares/Mapa/Check-ins funciona;
-- PR #20 ya está merged en `main`;
-- fake doors de Lugares fueron implementadas;
-- Product Owner autorizó la migración de experimentos;
-- Supabase registry: `20261007072355 place_extension_experiments`;
-- 6 module keys `places_*` existen;
-- QA transaccional de view/interest: PASS;
-- Security Advisor: sin findings nuevos por esta corrección.
+### Estado canónico
+- Fase 8 COMPLETADA;
+- núcleo real de Lugares/Mapa/Check-ins: PASS;
+- fake doors contextuales: PASS;
+- 3D markers por categoría: PASS;
+- PR #20: merged;
+- PR #22: merged;
+- merge final de corrección: `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
+- Supabase migrations de Fase 8: aplicadas;
+- Security Advisor: sin findings nuevos atribuibles a Fase 8;
+- Scope Closure Reconciliation: PASS.
 
-### Estado visual actual
-El Product Owner envió una captura de Los Feliz Small Animal Hospital.
+### Gate 9
+Medir:
+- aperturas de mapa;
+- uso de ubicación;
+- aperturas de lugares;
+- búsquedas/filtros;
+- check-ins;
+- sugerencias;
+- interés único por cada fake door y categoría de lugar.
 
-Resultado:
-- Mapbox: visible;
-- lugar: visible;
-- marcador fallback: círculo 2D azul visible;
-- **modelo 3D veterinaria: NO perceptible**.
+No construir extensiones solo porque estén instrumentadas.
 
-Ese resultado fue el fallo pre-fix.
-
-Después del ajuste de visibilidad, el Product Owner completó la ronda requerida:
-- build local: PASS;
-- veterinaria 3D: PASS;
-- parque/sendero: PASS;
-- fake door `Me interesa`: PASS;
-- persistencia tras F5: PASS.
-
-Por tanto:
-**3D marker validation = PASS** y **fake-door runtime validation = PASS**.
-
-### Fix preparado después de la captura
-En `src/features/places/map/MapboxMap.tsx`:
-- `model-scale: [12,12,12]`;
-- `model-type: location-indicator`;
-- `slot: top`;
-- `minzoom: 13.25`;
-- `model-translation: [0,0,1]`;
-- `model-emissive-strength: 0.12`;
-- círculo 2D se desvanece hasta opacidad 0 en zoom 16;
-- selección hace zoom >=16.2;
-- pitch seleccionado: 58°;
-- basemap `show3dObjects=false`;
-- `antialias=true`.
-
-### Siguiente verificación obligatoria
-La validación runtime/visual ya está completada.
-
-Siguiente secuencia:
-1. marcar PR #22 ready;
-2. mergear PR #22;
-3. verificar `main`;
-4. finalizar documentos canónicos de cierre.
-
-### Cierre
-Gate 8 vuelve a CERRADO cuando:
-- 3D markers visual PASS: COMPLETADO;
-- fake doors runtime/persistence PASS: COMPLETADO;
-- PR #22 merged: PENDIENTE;
-- `main` verified: PENDIENTE;
-- Scope Closure Reconciliation PASS final: pendiente únicamente de esos dos pasos Git.
+### Siguiente módulo
+Explore/Search es el siguiente candidato para **auditoría Gate 0–2**. Esto no autoriza implementación.
