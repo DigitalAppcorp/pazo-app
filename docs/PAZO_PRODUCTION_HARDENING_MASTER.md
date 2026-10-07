@@ -342,3 +342,33 @@ Before PR #30 can return to merge-ready:
 - TypeScript/build: PASS;
 - lint: PASS;
 - Product Owner visible onboarding validation: PENDING.
+
+
+## 12. Final Architecture / Privacy Reconciliation
+
+**Resultado:** PASS / MERGE PENDING.
+
+Product Owner validation on HEAD `595e7720fbea8bc0f81c7168bbe0a7d1e8143615`:
+- 18+ checkbox defaults unchecked: PASS;
+- signup is blocked until 18+ is actively confirmed: PASS;
+- onboarding copy no longer claims acceptance of unpublished Terms: PASS;
+- basic navigation smoke test after signup/login: PASS.
+
+Automated evidence:
+- hardening regression checks: PASS;
+- architecture contract check: PASS;
+- privacy/data-governance check: PASS;
+- TypeScript + production build: PASS;
+- lint: PASS;
+- PR remains mergeable.
+
+Final decision for this mini-tranche:
+- no mass folder refactor;
+- no session replay/autocapture;
+- no DOB/ID age collection;
+- no precise-location analytics;
+- architecture/privacy/data-governance controls are now permanent and enforced by CI.
+
+**Scope Closure Reconciliation: PASS.**
+
+PR #30 can return to Ready for Review and may be merged only after explicit Product Owner merge authorization.
