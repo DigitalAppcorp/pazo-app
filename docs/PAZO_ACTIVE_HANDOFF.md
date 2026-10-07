@@ -1,3 +1,16 @@
+## CURRENT ACTIVE WORK — COMMUNITIES MVP REAL
+
+- branch: `feat/communities-mvp`;
+- Gate 6 product: CLOSED / approved;
+- Gate 7 architecture: CLOSED;
+- Gate 8 implementation: IN PROGRESS;
+- canonical product spec: `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`;
+- canonical architecture: `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`;
+- operational state: `docs/PAZO_COMMUNITIES_CURRENT_STATE.md`;
+- no Communities backend migration applied yet;
+- do not mutate Supabase before build + explicit Product Owner authorization;
+- generic validation backend remains for advanced extension experiments.
+
 # PAZO — Active Handoff
 
 **Purpose:** durable context for resuming PAZO work in a new ChatGPT conversation without relying on the previous chat transcript.
@@ -37,8 +50,8 @@ Before making any code, database, architecture or roadmap change, read:
 
 ## Current global product strategy
 
-- Communities: EXPERIMENTO ACTIVO, validation lane.
-- Do not build Communities backend/roles/feed/moderation yet.
+- Communities: MVP REAL approved, Gate 8 implementation in progress.
+- Build the approved minimum useful core; validate only advanced extensions contextually.
 - Future fake-door / "Me interesa" tracking must be one generic system reusable by Communities, Map, Matches and future modules.
 - Map has a legacy fake-door implementation, but its current write is incompatible with the real interactions schema and must not be treated as reliable data.
 - Agenda/Care 9A is complete in `main`.
