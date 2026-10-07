@@ -75,6 +75,10 @@ if (!onboarding.includes('const [isOver18, setIsOver18] = useState(false)')) {
   fail('18+ attestation must not be preselected.')
 }
 
+if (onboarding.includes('acepto los términos y reglas')) {
+  fail('Onboarding must not claim acceptance of Terms that are not yet published.')
+}
+
 const observability = read('src/services/observability.ts')
 for (const required of [
   'SAFE_EVENT_PROPERTY_ALLOWLIST',
@@ -89,6 +93,10 @@ for (const required of [
 
 if (!fs.existsSync('docs/PAZO_PRIVACY_DATA_GOVERNANCE.md')) {
   fail('docs/PAZO_PRIVACY_DATA_GOVERNANCE.md is missing.')
+}
+
+if (!fs.existsSync('docs/PAZO_DATA_INVENTORY.md')) {
+  fail('docs/PAZO_DATA_INVENTORY.md is missing.')
 }
 
 if (!process.exitCode) {
