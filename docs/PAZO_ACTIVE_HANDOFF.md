@@ -7,13 +7,17 @@
 - legacy `module_key='communities'` experiment signals cleaned with Product Owner authorization.
 - current `communities_*` extension evidence preserved.
 - next module: Fase 8 — Lugares, mapa y Check-ins.
-- current step: audit real GitHub + Supabase state before product/architecture decisions.
-- pending Product Owner decisions for Fase 8:
-  - map/cartography provider;
-  - exact vs approximate location;
-  - who can add/suggest places;
-  - check-in visibility and lifetime.
-- do not implement precise GPS/location tracking until those decisions are explicitly closed.
+- audit real GitHub + Supabase state: COMPLETE.
+- current step: Gate 6 product specification review.
+- Product Owner decisions CLOSED:
+  - Mapbox GL JS;
+  - device location only by explicit action, ephemeral use, no exact GPS persistence;
+  - PAZO publishes places; users suggest pending approval;
+  - 2-hour check-ins + manual exit;
+  - public count, pet identity only by opt-in;
+  - reusable GLB/glTF category models prepared for future 3D/B2B layers.
+- Gate 6 source: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
+- do not implement until Gate 6 is explicitly approved.
 
 ## Read first
 
