@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE SCHEMA IF NOT EXISTS community_private;
 REVOKE ALL ON SCHEMA community_private FROM PUBLIC, anon, authenticated;
 
@@ -749,5 +747,3 @@ USING (
     )
   )
 );
-
-COMMIT;
