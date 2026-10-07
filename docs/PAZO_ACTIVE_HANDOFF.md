@@ -3,11 +3,11 @@
 **Project Brain OS:** v1.3.0  
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
-**Current state:** Fase 8 COMPLETADA  
-**Active product module:** Fase 12 — Global Search / Explore  
-**Gate:** Gate 8 — implementación + backend QA EN CURSO  
+**Current state:** Fase 12 COMPLETADA  
+**Active product module:** Ninguno — selección de siguiente módulo pendiente  
+**Gate:** Fase 12 Gate 8 CERRADO / Gate 9 MEDICIÓN  
 **Decision:** MVP REDUCIDO  
-**Supabase production mutation authorization:** APROBADA Y APLICADA
+**Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
 ## Startup protocol
 
@@ -78,86 +78,67 @@ Supabase:
 
 **Scope Closure Reconciliation: PASS.**
 
-## Active module — Fase 12 Global Search / Explore
+## Fase 12 — final closure
 
-Canonical docs:
-- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`;
-- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`;
-- `docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`.
+**Status:** COMPLETADA / Gate 9 measurement.
 
-Lifecycle:
-- Gate 0–7: CLOSED;
-- Gate 5 decision: MVP REDUCIDO;
-- Gate 8: IN PROGRESS.
+Product:
+- Explore was redefined as PAZO Global Search;
+- searchable identity = public pet profiles, never human accounts;
+- MVP providers = Pets + Communities + Places;
+- Search lives in Header;
+- Communities is a primary bottom-nav module;
+- Posts and Events are outside this MVP.
 
-Active Git:
-- branch: `feat/phase-12-global-search`;
-- PR: #28 — Draft;
-- current audited HEAD: pendiente de refrescar tras checkpoint de backend;
-- branch divergence: pendiente de refrescar tras checkpoint de backend;
-- Vercel statuses currently fail because of daily deployment/build quota, not a demonstrated code-build failure.
-
-Implemented on PR #28:
-- Search moved to Header;
-- Communities promoted to bottom navigation;
+Delivery:
+- federated Search with independent providers;
+- deterministic per-domain ranking;
+- minimal type filters;
+- debounce + stale-response protection;
+- partial-provider failure tolerance;
+- Search → public pet profile: PASS;
+- Search → Community: PASS;
+- Search → Map Place: PASS;
+- manual return/navigation does not reopen consumed targets: PASS;
 - old Explore container removed;
-- standalone `CommunitiesView`;
-- `GlobalSearchView`;
-- federated Pets / Communities / Places providers;
-- deterministic per-provider ranking;
-- 300ms debounce;
-- stale-response protection;
-- partial provider failure handling;
-- Search → public pet profile;
-- Search → Community;
-- Search → Map Place;
-- Map deep-link consumed once to avoid repeated reopening;
-- manual tab navigation clears consumed Search targets;
-- no human public profile search;
-- no Posts or fake Events;
-- privacy-safe Search telemetry wired in frontend.
+- Communities core reused rather than rebuilt.
 
-Security / privacy:
-- Pets Search selects only `id,name,species,breed,photo_url`;
-- existing column grants block client reads of private legacy columns such as `zone`, `interests`, and `weight`;
-- no raw Search query is persisted;
-- no new SECURITY DEFINER / service-role client path;
-- `search_usage_events` exposes no SELECT/UPDATE/DELETE to client roles;
-- authenticated client has column-level INSERT only;
-- RLS insert policy requires `user_id = auth.uid()`.
+Build/runtime evidence:
+- pre-telemetry local build: PASS;
+- final post-telemetry local build: PASS;
+- Product Owner runtime/visual QA: PASS;
+- Pet search: PASS;
+- Community search: PASS;
+- Place search: PASS;
+- empty state/filter behavior: PASS;
+- Feed / Communities / Map / My Pet smoke test: PASS;
+- F5 persistence/stability smoke test: PASS.
 
-Applied Supabase migrations:
+Supabase:
 - `20261007102632 phase_12_search_telemetry`;
-- `20261007102748 index_search_usage_events_user`.
+- `20261007102748 index_search_usage_events_user`;
+- RLS/grants/constraints: PASS;
+- anon telemetry access: blocked;
+- authenticated client: approved INSERT columns only;
+- no client SELECT/UPDATE/DELETE;
+- no raw query, entity id, owner id or GPS stored;
+- live runtime telemetry observed: 33 events / 1 session during Product Owner QA;
+- runtime telemetry included search opens, searches with/without results, all four filter states used, and result opens for pet/community/place;
+- Security Advisor: no new Fase 12 security findings;
+- FK index performance finding corrected forward.
 
-Current verification:
-- product spec: PASS;
-- architecture: PASS;
-- static diff/reference audit: PASS;
-- pre-telemetry TypeScript/Vite build: PASS — confirmed by Product Owner;
-- final post-telemetry TypeScript/Vite build: PENDING;
-- runtime Search QA: PENDING;
-- visual Product Owner acceptance: PENDING;
-- telemetry migration: APPLIED;
-- telemetry FK index correction: APPLIED;
-- backend grants/RLS/constraints QA: PASS;
-- Security Advisor: no new Phase 12 security findings;
-- Performance Advisor: unindexed-FK finding corrected; new index currently reports expected INFO "unused_index" immediately after creation.
+Git before merge:
+- PR #28;
+- branch `feat/phase-12-global-search`;
+- branch was 0 behind `main` at final reconciliation;
+- Vercel failures were quota/rate-limit only and not used as build evidence.
 
-Exact next action:
-1. refresh PR #28 HEAD after this checkpoint;
-2. Product Owner pulls `feat/phase-12-global-search`;
-3. run final `npm run build`;
-4. run Search runtime/visual QA for Pets + Communities + Places;
-5. verify telemetry events exist without raw query text;
-6. Scope Closure Reconciliation;
-7. PR #28 ready/merge only after all required evidence passes.
+**Scope Closure Reconciliation: PASS.**
 
-Do not:
-- merge PR #28 yet;
-- mark Fase 12 complete before final build/runtime/product acceptance;
-- store raw Search query text;
-- infer final build PASS from the earlier pre-telemetry build or Vercel quota failures.
+Next:
+- merge PR #28;
+- verify `main`;
+- no next implementation module is authorized automatically; choose the next module through the lifecycle.
 
 ## Other current product state
 
