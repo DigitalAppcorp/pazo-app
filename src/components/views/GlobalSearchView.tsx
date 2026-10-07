@@ -82,6 +82,7 @@ export const GlobalSearchView = ({
     }
 
     const version = ++requestVersionRef.current
+    setResponse(EMPTY_RESPONSE)
     setIsLoading(true)
     setUnexpectedError(false)
 
@@ -118,6 +119,18 @@ export const GlobalSearchView = ({
 
   const totalResults =
     response.pets.length + response.communities.length + response.places.length
+
+  const visibleResultCount =
+    filter === 'all'
+      ? totalResults
+      : filter === 'pet'
+        ? response.pets.length
+        : filter === 'community'
+          ? response.communities.length
+          : response.places.length
+
+  const activeFilterFailed =
+    filter !== 'all' && response.failedTypes.includes(filter)
 
   const groups = useMemo(
     () =>
@@ -282,8 +295,9 @@ export const GlobalSearchView = ({
 
             {!isLoading &&
               !unexpectedError &&
-              totalResults === 0 &&
-              response.failedTypes.length === 0 && (
+              visibleResultCount === 0 &&
+              !activeFilterFailed &&
+              (filter !== 'all' || response.failedTypes.length === 0) && (
                 <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
                   <p className="text-sm font-black text-[#204E4A]">
                     {lang === 'es'
