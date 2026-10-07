@@ -98,8 +98,18 @@ Si concede ubicación:
 
 Cada categoría tiene:
 - iconografía propia;
-- modelo 3D reutilizable futuro;
+- modelo 3D reutilizable;
 - color/estilo coherente con PAZO.
+
+Assets MVP:
+- `park.gltf`;
+- `trail.gltf`;
+- `restaurant.gltf`;
+- `veterinarian.gltf`;
+- `grooming.gltf`;
+- `pet-store.gltf`.
+
+Los modelos son low-poly/caricaturizados y representan la categoría, no el edificio real.
 
 No crear modelos 3D únicos por negocio en MVP.
 
@@ -263,19 +273,30 @@ Los 2 lugares seed existentes se consideran demo/no verificados hasta decidir si
 
 ## 9. Extensiones en validación
 
-Después de que el núcleo funcione, se pueden mostrar fake doors contextuales para:
-- reviews/calificaciones;
-- favoritos/listas;
-- fotos de usuarios;
-- rutas/caminatas;
-- eventos en lugares;
+El núcleo real queda acompañado por fake doors contextuales dentro del detalle de un lugar.
+
+Experimentos activos de esta fase:
+- `places_reviews` — reseñas y calificaciones;
+- `places_favorites` — guardar/favoritos/listas;
+- `places_user_photos` — fotos de la comunidad;
+- `places_events` — eventos ligados a un lugar;
+- `places_routes` — rutas y caminatas;
+- `places_business_offers` — ofertas/promociones de negocios verificados.
+
+Semántica:
+- claramente marcados **En desarrollo**;
+- visibles solo a usuarios autenticados reales;
+- una `view` cuenta cuando al menos 50% de la tarjeta entra al viewport;
+- un `interest` es único por cuenta + experimento;
+- source segmenta por categoría mediante `place_detail_<category>`;
+- no habilitan funcionalidad ficticia;
+- no inventan reviews, fotos, eventos, rutas ni promociones.
+
+Se dejan fuera de esta tanda:
 - historial personal de visitas;
-- publicar lugar directamente;
-- promociones/ofertas de negocios.
+- publicar lugares directamente.
 
-No activar todos automáticamente.
-
-Solo medir una extensión si su resultado cambiará una decisión de inversión.
+Se podrán medir después si aparece una decisión concreta que justifique hacerlo.
 
 ---
 
