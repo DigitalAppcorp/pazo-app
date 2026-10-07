@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-06  
-**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades sigue en validación; Fase 9A Agenda/Cuidados y Fase 9B Documentos privados están COMPLETADAS en `main`. No hay un nuevo módulo autorizado en el Carril de Implementación hasta pasar sus gates.
+**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades tiene MVP reducido real aprobado y entra a Gate 8 de implementación; Fase 9A Agenda/Cuidados y Fase 9B Documentos privados están COMPLETADAS en `main`.
 
 ---
 
@@ -330,41 +330,37 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 ---
 
 ## Fase 7 — Comunidades
-**Estado: CARRIL DE VALIDACIÓN — EXPERIMENTO ACTIVO**
+**Estado: EN CURSO — GATE 8**
 
-**Sub-ruta canónica:** `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`  
-**Ciclo de vida:** `docs/PAZO_MODULE_LIFECYCLE.md`  
-**Protocolo de experimentos:** `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`
+**Producto:** `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`  
+**Arquitectura:** `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`  
+**Estado operativo:** `docs/PAZO_COMMUNITIES_CURRENT_STATE.md`
 
-Hoy `ExploreView` usa comunidades mock.
+Decisión vigente:
+- MVP útil real aprobado;
+- membership por cuenta;
+- contenido por mascota activa;
+- comunidades públicas;
+- creación, Join/Leave, feed, comentarios/likes y administración básica reales;
+- extensiones avanzadas se validan dentro del módulo real;
+- posts de comunidad no contaminan Feed global por defecto.
 
-### Pregunta de Fase 7
-Antes de convertir Comunidades en un módulo persistente:
+Gate 6: CERRADO.  
+Gate 7: CERRADO.  
+Gate 8: EN CURSO — implementación, backend, E2E y fake doors aprobados; listo para merge.
 
-**¿Comunidades merece entrar al MVP ahora?**
+Backend:
+- `20261007014214 communities_mvp_core`;
+- `20261007014624 fix_community_storage_policies`;
+- build local PASS;
+- RLS/ownership/counters PASS;
+- Security Advisor sin findings nuevos atribuibles.
 
-### Decisiones ya confirmadas si se construye
-- cualquier usuario puede crear comunidades;
-- no se requiere membresía paga para crear una comunidad;
-- el creador se convierte en propietario/administrador inicial;
-- una futura membresía puede desbloquear herramientas adicionales aún no definidas;
-- la administración básica no debe quedar bloqueada por pago.
+Pendiente:
+- merge de PR #18;
+- verificación de `main`;
+- cierre documental de Gate 8.
 
-### Estado actual
-Comunidades permanece en el **Carril de Validación**.
-
-No diseñar todavía roles, permisos, schema, Feed de comunidad o eventos.
-
-Siguiente trabajo del módulo:
-- crear/reconstruir instrumentación genérica de validación cuando se autorice código;
-- medir interés real;
-- medir intención concreta;
-- observar revisitas;
-- evaluar masa crítica;
-- probar adquisición externamente solo si se busca usar Comunidades como growth loop;
-- decidir BUILD NOW / MVP REDUCIDO / EXPERIMENTO ACTIVO / POSPUESTO.
-
-Mientras Comunidades recopila datos, el Carril de Implementación puede avanzar con otro módulo.
 
 ---
 

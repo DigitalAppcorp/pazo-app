@@ -1,6 +1,44 @@
-# PAZO — Active Handoff
+## CURRENT ACTIVE WORK — COMMUNITIES MVP REAL
 
-**Purpose:** durable context for resuming PAZO work in a new ChatGPT conversation without relying on the previous chat transcript.
+- branch: `feat/communities-mvp`;
+- Gate 6 product: CLOSED / approved;
+- Gate 7 architecture: CLOSED;
+- Gate 8 implementation: IN PROGRESS;
+- product: `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`;
+- architecture: `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`;
+- migration prepared: `20261007013000_communities_mvp_core.sql`;
+- backend migrations are applied to Supabase;
+- real frontend/service layer is implemented on branch;
+- Explore preserves Product Owner's approved discovery hierarchy;
+- Community core implemented on branch: discovery, create, detail, Join/Leave, posts/photos, likes, comments, members, admin edit/moderation/archive;
+- global Feed persistence remains untouched;
+- demo mode does not call real Communities backend;
+- local `npm run build` PASS confirmed by Product Owner;
+- Product Owner explicitly authorized backend apply;
+- Supabase registry: `20261007014214 communities_mvp_core`;
+- Supabase registry: `20261007014624 fix_community_storage_policies`;
+- first Storage policy version had an ambiguous `name` reference; corrected forward-only by qualifying `objects.name`;
+- transactional RLS/ownership/counter tests PASS;
+- Storage INSERT/RLS tests PASS;
+- Security Advisor: no new Communities findings;
+- Communities visual/end-to-end validation: PASS;
+- Product Owner caught missing agreed fake-door layer before merge;
+- Community extension fake doors prepared for Events/Walks, Challenges, Badges/Recognition, Q&A, and Admin Tools;
+- fake doors are contextual: members only; Admin Tools owner-only; views tracked only on real viewport visibility;
+- Product Owner build PASS + explicit authorization received for Community extension experiments;
+- `20261007023800 community_extension_experiments` APPLIED;
+- `20261007023927 harden_community_extension_experiment_eligibility` APPLIED;
+- eligibility hardened server-side: member-only general experiments, Owner-only Admin Tools;
+- transactional experiment tests PASS; no test signals persisted;
+- Community fake-door visual review: PASS;
+- legacy validation cleanup: COMPLETE (2 views + 1 interest removed for module_key `communities`);
+- extension signals preserved: 5 views + 1 interest across `communities_*`;
+- PR #18 ready for final merge;
+- real Storage API DELETE validated through the app/UI: PASS;
+- visual QA found unclear unlabeled fields in Community edit form;
+- Community edit form labels/placeholders/required-vs-optional states fixed in commit `9fdfb7f`; Product Owner local review PASS;
+- generic validation backend remains for advanced extension experiments;
+- existing Communities validation test rows (2 views, 1 interest, 0 intents) remain untouched pending authorized cleanup.
 
 ## Read first
 
@@ -37,8 +75,8 @@ Before making any code, database, architecture or roadmap change, read:
 
 ## Current global product strategy
 
-- Communities: EXPERIMENTO ACTIVO, validation lane.
-- Do not build Communities backend/roles/feed/moderation yet.
+- Communities: MVP REAL approved, Gate 8 implementation in progress.
+- Build the approved minimum useful core; validate only advanced extensions contextually.
 - Future fake-door / "Me interesa" tracking must be one generic system reusable by Communities, Map, Matches and future modules.
 - Map has a legacy fake-door implementation, but its current write is incompatible with the real interactions schema and must not be treated as reliable data.
 - Agenda/Care 9A is complete in `main`.

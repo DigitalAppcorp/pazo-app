@@ -50,6 +50,94 @@ export interface Post {
   commentsLoaded?: boolean
 }
 
+export type CommunityRole = 'owner' | 'member'
+export type CommunityStatus = 'active' | 'archived'
+
+export interface CommunitySummary {
+  id: string
+  ownerUserId: string
+  name: string
+  description: string
+  category: string
+  species?: Species
+  zone?: string
+  imageUrl?: string
+  imageStoragePath?: string
+  rules?: string
+  status: CommunityStatus
+  membersCount: number
+  createdAt: string
+  updatedAt: string
+  isJoined: boolean
+  role?: CommunityRole
+}
+
+export interface CommunityMember {
+  userId: string
+  displayPetId?: string
+  role: CommunityRole
+  joinedAt: string
+  pet?: {
+    id: string
+    name: string
+    species: Species
+    photoUrl: string
+  }
+}
+
+export interface CommunityPostComment {
+  id: string
+  postId: string
+  authorPetId: string
+  authorName: string
+  authorSpecies: Species
+  authorAvatar: string
+  body: string
+  createdAt: string
+  canDelete: boolean
+}
+
+export interface CommunityPost {
+  id: string
+  communityId: string
+  authorUserId: string
+  authorPetId: string
+  authorName: string
+  authorSpecies: Species
+  authorAvatar: string
+  body: string
+  photoUrl?: string
+  photoStoragePath?: string
+  likesCount: number
+  commentsCount: number
+  createdAt: string
+  isLiked: boolean
+  canDelete: boolean
+}
+
+export interface CommunityCreateInput {
+  name: string
+  description: string
+  category: string
+  species?: Species
+  zone?: string
+  rules?: string
+  imageFile?: File | null
+}
+
+export interface CommunityUpdateInput {
+  name?: string
+  description?: string
+  category?: string
+  species?: Species | null
+  zone?: string | null
+  rules?: string | null
+  imageUrl?: string | null
+  imageStoragePath?: string | null
+  status?: CommunityStatus
+}
+
+// Legacy mock shape retained temporarily for non-real demo data only.
 export interface Community {
   id: string
   name: string
