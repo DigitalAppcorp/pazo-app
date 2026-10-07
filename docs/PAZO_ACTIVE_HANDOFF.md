@@ -160,9 +160,19 @@ Current truth:
   - `20261007052749 phase_8_places_initial_catalog`.
 - backend tests PASS so far: hidden/visible presence, foreign-user isolation, move between places, expiry, foreign-pet block, archived-place block, suggestions, telemetry.
 - checkout RLS bug discovered: ending an active row made it fail the active-only SELECT policy.
-- forward fix prepared: `20261007054500_fix_place_checkin_checkout_rls.sql`; NOT APPLIED.
-- frontend service updated to explicitly request only active/non-expired own check-in rows.
-- next required checks: local build after service fix + explicit Product Owner authorization for the forward RLS fix.
+- Product Owner confirmed local build PASS after checkout-service fix.
+- Product Owner explicitly authorized checkout RLS forward fix.
+- `20261007053859 fix_place_checkin_checkout_rls` APPLIED.
+- post-fix checkout/RLS/privacy tests: PASS.
+- owner active rows after checkout: 0.
+- public presence after checkout: 0.
+- foreign account private rows: 0.
+- hidden/visible presence behavior: PASS.
+- all transactional QA writes rolled back; production QA tables remain empty.
+- Security Advisor unchanged from baseline; no new Fase 8 warnings.
+- Performance Advisor reports 8 new unused-index INFO entries on brand-new Fase 8 tables; retain until real usage exists.
+- backend Gate 8 status: APPLIED + TRANSACTIONALLY VALIDATED.
+- next required checks: configure Mapbox public token locally, runtime visual/E2E validation, then PR final review/merge.
 
 After build PASS:
 1. final diff/SQL/security preflight;
