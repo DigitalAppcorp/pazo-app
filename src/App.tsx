@@ -1755,6 +1755,9 @@ function PazoMain() {
                     <ExploreView
                       currentPet={currentPet}
                       onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                      featuredPost={posts.find(
+                        (post) => !pets.some((pet) => pet.id === post.petId)
+                      )}
                       createCommunityRequestKey={communityCreateRequestKey}
                       lang={lang}
                     />
