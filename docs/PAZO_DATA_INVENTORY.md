@@ -1,0 +1,298 @@
+# PAZO — Data & Third-Party Inventory
+
+**Estado:** ACTIVO / baseline pre-Beta  
+**Regla:** este documento describe categorías y destinos conocidos. No sustituye una auditoría de schema ni una Privacy Policy pública.
+
+## 1. Cuenta / autenticación
+
+**Datos**
+- email;
+- identificadores internos de usuario/sesión;
+- credenciales gestionadas por Supabase Auth.
+
+**Clasificación**
+Privado de cuenta.
+
+**Proveedor**
+Supabase.
+
+**Reglas**
+- contraseña nunca se registra en analytics;
+- no exponer email a perfiles sociales;
+- no enviar email a PostHog;
+- mínimo de contraseña reforzado en UX/local baseline;
+- 18+ requiere declaración activa del usuario.
+
+## 2. Perfil social de mascota
+
+**Datos**
+- nombre;
+- especie/raza/edad descriptiva;
+- foto;
+- bio;
+- zona/intereses según feature;
+- estado social/público cuando aplique.
+
+**Clasificación**
+Mixto: campos públicos por intención + datos internos.
+
+**Proveedor**
+Supabase Database/Storage.
+
+**Regla**
+La identidad social es la mascota, no el humano.
+
+## 3. Feed / UGC social
+
+**Datos**
+- posts;
+- fotos;
+- comentarios;
+- likes/follows/saves o equivalentes cuando estén implementados.
+
+**Clasificación**
+Público/social por intención del usuario.
+
+**Riesgos**
+- moderación;
+- copyright/IP;
+- abuso;
+- contenido personal publicado voluntariamente.
+
+**Beta requirement**
+Reporting/blocking/removal policy en F14.
+
+## 4. Comunidades
+
+**Datos**
+- comunidad;
+- descripción/reglas;
+- membresía;
+- posts/comentarios;
+- imágenes.
+
+**Clasificación**
+Social/público o membership-scoped según el contrato del módulo.
+
+**Proveedor**
+Supabase Database/Storage.
+
+## 5. Lugares / mapa
+
+**Datos**
+- catálogo de lugares;
+- búsquedas/filtros;
+- check-ins;
+- sugerencias;
+- ubicación del dispositivo durante uso del mapa.
+
+**Clasificación**
+- catálogo: público;
+- presencia/check-in: sensible/contextual;
+- GPS exacto del dispositivo: sensible y efímero.
+
+**Regla**
+- no persistir GPS exacto por defecto;
+- no enviar coordenadas exactas a analytics;
+- visibilidad de presencia debe ser explícita.
+
+**Proveedor adicional**
+Mapbox recibe solicitudes necesarias para renderizar/usar el mapa según su integración.
+
+## 6. Rescue / QR / mascota perdida
+
+**Datos**
+- token público;
+- perfil público limitado;
+- estado de mascota perdida;
+- última ubicación textual;
+- reportes de avistamiento;
+- nombre/teléfono/mensaje del reportante cuando lo proporciona.
+
+**Clasificación**
+Mixto:
+- perfil público limitado;
+- reportes/contacto: sensible.
+
+**Regla**
+- acceso público solo mediante el contrato de Rescue;
+- no enviar contenido/contacto a analytics;
+- mantener rate limits;
+- ownership de acciones del dueño.
+
+## 7. Cuidados / Agenda
+
+**Datos**
+- tareas/recordatorios;
+- estado/fechas;
+- mascota relacionada.
+
+**Clasificación**
+Privado de cuenta/mascota salvo futura decisión contraria.
+
+**Proveedor**
+Supabase.
+
+## 8. Documentos privados
+
+**Datos**
+- archivo;
+- nombre original;
+- MIME/tamaño;
+- categoría/título;
+- metadata de Storage.
+
+**Clasificación**
+Privado sensible.
+
+**Proveedor**
+Supabase private Storage + Database.
+
+**Reglas**
+- owner-only;
+- URLs firmadas temporales;
+- no contenido/filename en analytics;
+- no session replay;
+- lifecycle recuperable.
+
+## 9. Search telemetry
+
+**Datos**
+- session id;
+- tipo de evento;
+- tipo de resultado/filtro;
+- had_results;
+- timestamps.
+
+**No almacenar**
+- query cruda;
+- entity id;
+- GPS;
+- PII.
+
+**Proveedor**
+Supabase.
+
+## 10. Product validation / Places telemetry
+
+**Datos**
+- module key/event type;
+- session;
+- contexto cerrado mínimo;
+- timestamps.
+
+**Reglas**
+- deduplicación;
+- sin contenido del usuario;
+- sin PII innecesaria.
+
+**Proveedor**
+Supabase.
+
+## 11. Error monitoring / product observability
+
+**Estado**
+Código preparado; live provider verification pendiente.
+
+**Proveedor previsto**
+PostHog.
+
+**Datos permitidos**
+- UUID interno;
+- session id aleatorio;
+- release/environment;
+- eventos allowlisted;
+- códigos de error;
+- excepciones sanitizadas.
+
+**Bloqueado por defecto**
+- session replay;
+- autocapture;
+- email;
+- teléfono;
+- mensajes/posts/documentos;
+- texto de búsqueda;
+- GPS;
+- tokens;
+- datos de pago.
+
+## 12. Pagos / Supporter
+
+**Estado**
+Checkout frontend desactivado. Webhook endurecido. Membresía no reactivada.
+
+**Proveedor**
+PayPal.
+
+**PAZO puede almacenar**
+- entitlement;
+- subscription id/provider reference necesaria;
+- estado derivado.
+
+**PAZO no almacena**
+- PAN/número de tarjeta;
+- CVV;
+- credenciales de PayPal.
+
+**Pendiente**
+- secretos reales;
+- webhook Sandbox/Live;
+- precio;
+- beneficios;
+- cancelación/UX;
+- Privacy Policy/Terms.
+
+## 13. Hosting / deployment
+
+**Proveedor previsto/actual a verificar**
+Vercel.
+
+**Pendiente**
+- proyecto exacto;
+- env;
+- logs;
+- usage/spend controls;
+- retención.
+
+No afirmar prácticas públicas hasta verificar.
+
+## 14. Client/local storage
+
+Usos conocidos:
+- sesión manejada por Supabase;
+- session ids técnicos/telemetría;
+- estado local no sensible cuando corresponda.
+
+Antes de Beta:
+- auditar localStorage/sessionStorage/cookies;
+- documentar claves;
+- eliminar datos legacy;
+- decidir qué debe sobrevivir logout.
+
+## 15. Retention matrix — pendiente F14
+
+No fijar períodos inventados.
+
+Debe cerrarse para:
+- auth/account;
+- UGC;
+- deleted UGC;
+- documents;
+- rescue sightings/contact;
+- care;
+- telemetry;
+- logs;
+- backups;
+- payment references.
+
+## 16. Provider register
+
+| Proveedor | Uso | Estado | Datos | Acción pre-Beta |
+|---|---|---|---|---|
+| Supabase | Auth/DB/Storage/Edge | Activo | múltiples categorías | retención/backups/Auth audit |
+| Mapbox | mapas | Activo | requests/location-context según uso | usage/privacy/spend review |
+| PayPal | Supporter | Parcial/desactivado en UX | subscription/payment metadata | secrets + real webhook + terms |
+| PostHog | observabilidad | Preparado, no verificado live | eventos allowlisted/exceptions | token + live ingestion + alerts |
+| Vercel | hosting/deploy | conexión pendiente de verificación operativa | deployment/log metadata | env/spend/log review |
+
+Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producción.
