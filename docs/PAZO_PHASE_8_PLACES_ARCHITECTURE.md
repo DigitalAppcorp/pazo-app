@@ -339,9 +339,21 @@ El DB guarda categoría, no path del asset.
 
 ### Render strategy
 - zoom lejano: marker/icon 2D;
-- zoom cercano: modelo 3D por categoría;
-- fallback automático a marker si GLB falla/no soporta;
+- desde zoom 13.5: capa `model` de Mapbox con glTF por categoría;
+- el marker 2D permanece debajo con menor opacidad como fallback;
+- click/hover funcionan tanto sobre marker como sobre modelo;
+- al seleccionar lugar, cámara sube a zoom >=14.5 y pitch 52°;
 - nombre/categoría textual siempre accesible.
+
+Assets:
+- `public/models/places/park.gltf`;
+- `public/models/places/trail.gltf`;
+- `public/models/places/restaurant.gltf`;
+- `public/models/places/veterinarian.gltf`;
+- `public/models/places/grooming.gltf`;
+- `public/models/places/pet-store.gltf`.
+
+Los modelos usan geometría low-poly y materiales embebidos sin texturas externas.
 
 Esto reduce GPU/bundle y mantiene accesibilidad.
 
@@ -638,3 +650,33 @@ La arquitectura evita:
 - almacenar Mapbox temporary search results;
 - acoplar datos a Mapbox;
 - reutilizar `interactions` fuera del Feed.
+
+
+## 21. Experimentos contextuales de Lugares
+
+Se reutiliza la infraestructura genérica `module_validation_*`.
+
+Module keys:
+- `places_reviews`;
+- `places_favorites`;
+- `places_user_photos`;
+- `places_events`;
+- `places_routes`;
+- `places_business_offers`.
+
+No se crean tablas de experimentos específicas de Fase 8.
+
+Source:
+- `place_detail_park`;
+- `place_detail_trail`;
+- `place_detail_food`;
+- `place_detail_veterinary`;
+- `place_detail_grooming`;
+- `place_detail_pet_store`.
+
+La métrica principal sigue siendo por cuenta, no por mascota ni por lugar.
+
+Migración preparada:
+`20261007073500_place_extension_experiments.sql`.
+
+No aplicar sin autorización explícita del Product Owner.
