@@ -1,5 +1,6 @@
-type ObservabilityValue = string | number | boolean | null
-type ObservabilityProperties = Record<string, ObservabilityValue | undefined>
+type JsonPrimitive = string | number | boolean | null
+type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue }
+type ObservabilityProperties = Record<string, JsonValue | undefined>
 
 const projectToken = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN?.trim() || ''
 const apiHost =
@@ -9,23 +10,59 @@ const releaseId = import.meta.env.VITE_APP_RELEASE?.trim() || 'development'
 
 let currentUserId: string | null = null
 let initialized = false
+let memorySessionId: string | null = null
+
+const redact = (value: string) =>
+  value
+    .replace(
+      /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
+      '[redacted-email]',
+    )
+    .replace(
+      /([?&](?:token|access_token|refresh_token|code|key|secret)=)[^&#\s]+/gi,
+      '$1[redacted]',
+    )
+    .replace(
+      /\b(?:eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\b/g,
+      '[redacted-jwt]',
+    )
+
+const createSessionId = () => {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+
+  return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
 
 const getSessionId = () => {
-  const key = 'pazo_observability_session_id'
-  const existing = sessionStorage.getItem(key)
-  if (existing) return existing
+  if (memorySessionId) return memorySessionId
 
-  const id = crypto.randomUUID()
-  sessionStorage.setItem(key, id)
-  return id
+  const key = 'pazo_observability_session_id'
+
+  try {
+    const existing = sessionStorage.getItem(key)
+    if (existing) {
+      memorySessionId = existing
+      return existing
+    }
+
+    const id = createSessionId()
+    sessionStorage.setItem(key, id)
+    memorySessionId = id
+    return id
+  } catch {
+    memorySessionId = createSessionId()
+    return memorySessionId
+  }
 }
 
 const sanitizeProperties = (
   properties: ObservabilityProperties,
-): Record<string, ObservabilityValue> =>
+): Record<string, JsonValue> =>
   Object.fromEntries(
     Object.entries(properties).filter(
-      (entry): entry is [string, ObservabilityValue] =>
+      (entry): entry is [string, JsonValue] =>
         entry[1] !== undefined,
     ),
   )
@@ -88,8 +125,11 @@ export const captureException = (
   } = {},
 ) => {
   const error = toError(value)
-  const type = error.name || 'Error'
-  const message = error.message || 'Unknown frontend error'
+  const type = redact(error.name || 'Error')
+  const message = redact(error.message || 'Unknown frontend error')
+  const stack = error.stack ? redact(error.stack).slice(0, 8000) : null
+  const mechanism = options.mechanism || 'unknown'
+  const handled = options.handled ?? false
   const fingerprint = `${type}:${message}`.slice(0, 255)
 
   captureEvent('$exception', {
@@ -97,12 +137,20 @@ export const captureException = (
     $exception_fingerprint: fingerprint,
     $issue_name: type.slice(0, 255),
     $issue_description: message.slice(0, 255),
-    error_type: type,
-    error_message: message.slice(0, 1000),
-    error_stack: error.stack?.slice(0, 8000),
-    error_handled: options.handled ?? false,
-    error_mechanism: options.mechanism || 'unknown',
-    component_stack: options.componentStack?.slice(0, 8000),
+    $exception_list: [
+      {
+        type,
+        value: message,
+        mechanism: {
+          handled,
+          type: mechanism,
+        },
+      },
+    ],
+    error_stack: stack,
+    component_stack: options.componentStack
+      ? redact(options.componentStack).slice(0, 8000)
+      : null,
   })
 }
 
