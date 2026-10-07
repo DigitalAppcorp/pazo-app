@@ -100,7 +100,6 @@ export const fetchPlacePresence = async (
     .from('pet_place_presence')
     .select(
       `
-        checkin_id,
         place_id,
         visible_pet_id,
         expires_at,
