@@ -50,20 +50,17 @@ Conclusión:
 
 ## Mapa/Lugares
 Estado real:
-- existe tabla `pet_places`;
-- actualmente contiene pocos registros;
-- `MapView` sigue siendo preview/fake door;
-- no existe mapa real;
-- no está decidido proveedor de mapas ni reglas de ubicación;
-- el fake door actual intenta escribir en `interactions`, pero no es compatible con el schema actual:
-  - omite `actor_pet_id` obligatorio;
-  - usa un `target_id` textual donde la columna requiere UUID.
+- Fase 8 COMPLETADA;
+- Mapbox real;
+- catálogo curado real;
+- check-ins reales con privacidad/expiración;
+- sugerencias reales;
+- ubicación del dispositivo efímera y no persistida;
+- backend/RLS/E2E aprobados.
 
 Conclusión:
-- el interés actual NO puede considerarse medido de forma fiable;
-- puede tener utilidad y adquisición local;
-- requiere proveedor, datos, privacidad y densidad;
-- debe permanecer en VALIDACIÓN DE ALCANCE hasta tener instrumentación genérica y decisiones geográficas.
+- ya no es candidato pendiente;
+- pasa a operación/medición post-lanzamiento.
 
 ---
 
@@ -97,12 +94,15 @@ Conclusión:
 
 ## Explore/Search
 Estado real:
-- hoy mezcla comunidades/eventos/mock y algunos accesos reales;
-- su valor aumenta cuando existan suficientes entidades reales que buscar.
+- ya existen mascotas reales;
+- Comunidades es real;
+- Lugares/Mapa es real;
+- Explore sigue siendo una superficie parcialmente mock/incompleta.
 
 Conclusión:
-- infraestructura dependiente del contenido;
-- no priorizar antes de que más módulos sean reales.
+- la condición histórica "implementar cuando haya contenido" ahora está sustancialmente cumplida;
+- es el mejor candidato actual para una nueva auditoría Gate 0–2;
+- esto no autoriza implementación todavía.
 
 ---
 
@@ -118,11 +118,11 @@ Escala:
 |---|---:|---:|---:|---:|---|
 | Agenda/Cuidados | 5 | 2 | 1 | 1 | BUILD NOW |
 | Documentos | 4 | 3 | 3 | 1 | SIGUIENTE DESPUÉS DE AGENDA |
-| Mapa/Lugares | 4 | 4 | 3 | 3 | VALIDAR ALCANCE |
+| Mapa/Lugares | 4 | 4 | 3 | 3 | COMPLETADO |
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
-| Explore/Search | 3 | 3 | 2 | 3 | IMPLEMENTAR CUANDO HAYA CONTENIDO |
+| Explore/Search | 4 | 3 | 2 | 2 | AUDITAR AHORA |
 
 ---
 
@@ -213,15 +213,9 @@ Continúa:
 No bloquea Agenda.
 
 ## Mapa/Lugares
-Continúa:
-**VALIDAR ALCANCE**
+**COMPLETADO.**
 
-El fake door actual no genera datos fiables.  
-No arreglarlo de forma específica.
-
-Cuando se autorice instrumentación:
-- crear sistema genérico;
-- usarlo para Comunidades, Mapa y módulos futuros.
+Pasa a Gate 9 / medición post-lanzamiento.
 
 ---
 
@@ -249,13 +243,13 @@ Usar su sub-ruta y datos de validación.
 
 - 9A Agenda/Cuidados: COMPLETADA.
 - 9B Documentos privados: COMPLETADA.
+- 8 Mapa/Lugares/Check-ins: COMPLETADA.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
-- Mapa/Lugares: VALIDAR ALCANCE; requiere proveedor, privacidad y reglas geográficas.
+- Explore/Search: **AUDITAR AHORA**; ya existen mascotas, Comunidades y Lugares reales.
 - Mensajería: POSPONER / REEVALUAR por masa crítica y moderación.
-- Comunidades: EXPERIMENTO ACTIVO en Carril de Validación.
 - Notificaciones generales: implementar solo por dependencia concreta.
-- Explore/Search: esperar más contenido real.
+- Rediseño UI: planificado, pero no debe desplazar una necesidad funcional más valiosa sin decisión explícita.
 
 El próximo módulo debe pasar nuevamente por `docs/PAZO_MODULE_LIFECYCLE.md`; no asumir prioridad por numeración histórica.
