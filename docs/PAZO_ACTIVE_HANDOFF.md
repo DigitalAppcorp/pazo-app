@@ -5,7 +5,7 @@
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
 **Active product module:** Production Hardening — infraestructura obligatoria  
-**Gate:** Production Hardening Gate 8 EN CURSO  
+**Gate:** Production Hardening Gate 8 — PR #30 MERGE PENDING  
 **Decision:** MVP REDUCIDO  
 **Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
@@ -238,3 +238,13 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 - Supabase plan is Free, so do not upgrade solely for that warning without explicit PO approval.
 - Cost rules canonical: `docs/PAZO_COST_GUARDRAILS.md`.
 - PostHog exception protocol verified against current docs; structured redacted stack frames implemented.
+
+
+### PR #30 final branch acceptance
+- Product Owner final runtime/product validation: PASS.
+- Final branch CI: PASS.
+- Scope Closure Reconciliation for PR #30: PASS.
+- PR #30 is mergeable and may be marked ready for review.
+- Do NOT call Production Hardening globally complete yet.
+- Exact next action: merge PR #30 only after explicit PO merge authorization, then verify `main`.
+- After merge/main verification, continue the remaining external hardening backlog separately: PayPal real secrets/webhook delivery, PostHog live ingestion/alerts, Vercel/Mapbox spend controls, hosted Auth verification, CAPTCHA timing, backup/restore drill.
