@@ -40,6 +40,8 @@ export const MapboxMap = ({
   const mapRef = useRef<any>(null)
   const userMarkerRef = useRef<any>(null)
   const placesRef = useRef(places)
+  const userLocationRef = useRef(userLocation)
+  const langRef = useRef(lang)
   const onSelectPlaceRef = useRef(onSelectPlace)
   const [error, setError] = useState('')
 
@@ -48,8 +50,57 @@ export const MapboxMap = ({
   }, [places])
 
   useEffect(() => {
+    userLocationRef.current = userLocation
+  }, [userLocation])
+
+  useEffect(() => {
+    langRef.current = lang
+  }, [lang])
+
+  useEffect(() => {
     onSelectPlaceRef.current = onSelectPlace
   }, [onSelectPlace])
+
+  const syncUserMarker = (
+    map: any,
+    mapboxgl: any,
+    location: EphemeralLocation | null | undefined,
+    currentLang: 'es' | 'en',
+    shouldFly = true
+  ) => {
+    userMarkerRef.current?.remove?.()
+    userMarkerRef.current = null
+
+    if (!location) return
+
+    const markerNode = document.createElement('div')
+    markerNode.setAttribute(
+      'aria-label',
+      currentLang === 'es'
+        ? 'Tu ubicación aproximada'
+        : 'Your approximate location'
+    )
+    markerNode.style.width = '18px'
+    markerNode.style.height = '18px'
+    markerNode.style.borderRadius = '999px'
+    markerNode.style.background = '#E1E53F'
+    markerNode.style.border = '3px solid #204E4A'
+    markerNode.style.boxShadow = '0 2px 10px rgba(32,78,74,.22)'
+
+    userMarkerRef.current = new mapboxgl.Marker({
+      element: markerNode,
+    })
+      .setLngLat([location.longitude, location.latitude])
+      .addTo(map)
+
+    if (shouldFly) {
+      map.flyTo({
+        center: [location.longitude, location.latitude],
+        zoom: 13.5,
+        duration: 700,
+      })
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -166,6 +217,14 @@ export const MapboxMap = ({
           map.on('mouseleave', 'pazo-place-pins', () => {
             map.getCanvas().style.cursor = ''
           })
+
+          syncUserMarker(
+            map,
+            mapboxgl,
+            userLocationRef.current,
+            langRef.current,
+            Boolean(userLocationRef.current)
+          )
         })
 
         map.on('error', (event: any) => {
@@ -220,33 +279,9 @@ export const MapboxMap = ({
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !userLocation || !window.mapboxgl) return
+    if (!map || !window.mapboxgl) return
 
-    userMarkerRef.current?.remove?.()
-
-    const markerNode = document.createElement('div')
-    markerNode.setAttribute(
-      'aria-label',
-      lang === 'es' ? 'Tu ubicación aproximada' : 'Your approximate location'
-    )
-    markerNode.style.width = '18px'
-    markerNode.style.height = '18px'
-    markerNode.style.borderRadius = '999px'
-    markerNode.style.background = '#E1E53F'
-    markerNode.style.border = '3px solid #204E4A'
-    markerNode.style.boxShadow = '0 2px 10px rgba(32,78,74,.22)'
-
-    userMarkerRef.current = new window.mapboxgl.Marker({
-      element: markerNode,
-    })
-      .setLngLat([userLocation.longitude, userLocation.latitude])
-      .addTo(map)
-
-    map.flyTo({
-      center: [userLocation.longitude, userLocation.latitude],
-      zoom: 13.5,
-      duration: 700,
-    })
+    syncUserMarker(map, window.mapboxgl, userLocation, lang)
   }, [lang, userLocation])
 
   if (error) {
