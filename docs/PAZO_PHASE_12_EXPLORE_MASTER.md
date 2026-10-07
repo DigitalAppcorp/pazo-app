@@ -1,8 +1,8 @@
 # PAZO — Fase 12 — Explore/Search unificado
 
-**Estado:** GATE 7 CERRADO — ARQUITECTURA LISTA / GATE 8 SIGUIENTE  
+**Estado:** GATE 8 EN CURSO — IMPLEMENTACIÓN + BACKEND QA  
 **Fecha:** 2026-10-07  
-**Implementación autorizada:** SIGUIENTE — no mutar Supabase sin autorización explícita  
+**Implementación autorizada:** SÍ — Product Owner autorizó backend y cierre de Gate 8  
 **Project Brain OS:** v1.3.0
 
 ## 1. Auditoría de estado real — Gate 0
@@ -372,8 +372,9 @@ Decisión:
 - no índice global;
 - no motor externo;
 - deep-links internos definidos;
-- una migración mínima solo para telemetría sin raw query;
-- Supabase apply requiere autorización explícita.
+- telemetría mínima sin raw query;
+- migración principal + corrección forward de índice FK tras Advisor;
+- Supabase apply autorizado y ejecutado.
 
 **Gate 7: CERRADO.**
 
@@ -387,7 +388,7 @@ Decisión:
 - Gate 5: MVP REDUCIDO;
 - Gate 6: CERRADO;
 - Gate 7: CERRADO;
-- Gate 8: EN CURSO — frontend/search/deep-links implementados en PR #28; build/runtime/telemetry pendientes.
+- Gate 8: EN CURSO — frontend/search/deep-links + telemetría/backend implementados; build final y runtime/product acceptance pendientes.
 
 No implementar hasta cerrar Gate 7 — arquitectura técnica.
 
@@ -415,12 +416,59 @@ Implemented:
 - obsolete Explore container removed.
 
 Pending:
-- local `npm run build`;
-- telemetry migration authorization/apply;
-- backend QA;
+- final post-telemetry `npm run build`;
+- backend QA: PASS;
 - runtime + visual Product Owner QA;
 - Scope Closure Reconciliation;
 - PR #28 ready/merge;
 - `main` verification.
 
 Vercel checks are currently blocked by the account's daily build/deployment quota and do not constitute compilation evidence.
+
+
+## 13. Gate 8 — backend telemetry aplicado
+
+Product Owner authorization:
+- explicit authorization granted after pre-telemetry build PASS.
+
+Supabase production:
+- `20261007102632 phase_12_search_telemetry` — APPLIED;
+- `20261007102748 index_search_usage_events_user` — APPLIED.
+
+Telemetry contract:
+- `search_open`;
+- `search_execute`;
+- `search_result_open`;
+- `search_filter_change`.
+
+Privacy:
+- no raw query;
+- no entity id;
+- no owner id;
+- no GPS;
+- authenticated has only column-level INSERT;
+- no client SELECT/UPDATE/DELETE;
+- RLS insert requires `user_id = auth.uid()`.
+
+Backend QA:
+- RLS enabled: PASS;
+- anon SELECT/INSERT: blocked;
+- authenticated table SELECT/UPDATE/DELETE: blocked;
+- authenticated INSERT only on approved columns: PASS;
+- insert policy: PASS;
+- payload shape constraints: present;
+- migration registry: PASS;
+- authenticated transactional insert simulation: PASS / rolled back;
+- Security Advisor: no new Phase 12 findings;
+- Performance Advisor initially found unindexed FK;
+- forward index migration applied;
+- unindexed-FK finding resolved;
+- newly created index currently appears as expected INFO `unused_index`.
+
+Remaining Gate 8 evidence:
+- final post-telemetry build;
+- Search runtime QA;
+- Product Owner visual acceptance;
+- telemetry runtime event verification;
+- Scope Closure Reconciliation;
+- PR #28 merge + main verification.
