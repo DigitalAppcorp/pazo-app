@@ -354,20 +354,6 @@ function PazoMain() {
     }
   }
 
-  const trackInteraction = async (targetId: string, targetType: 'post' | 'community' | 'place' | 'profile', actionType: 'like' | 'comment' | 'join' | 'view') => {
-    try {
-      if (!currentPet?.id) return
-      await supabase.from('interactions').insert({
-        actor_pet_id: currentPet.id,
-        target_id: targetId,
-        target_type: targetType,
-        action_type: actionType,
-      })
-    } catch (err) {
-      console.error('Error tracking interaction:', err)
-    }
-  }
-
   const formatPostRow = (post: any, isRecommended: boolean): Post => ({
     id: post.id,
     petId: post.pet_id,
