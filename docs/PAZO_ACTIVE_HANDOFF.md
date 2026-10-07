@@ -4,8 +4,8 @@
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
-**Active product module:** Ninguno — selección de siguiente módulo pendiente  
-**Gate:** Fase 12 Gate 8 CERRADO / Gate 9 MEDICIÓN  
+**Active product module:** Production Hardening — infraestructura obligatoria  
+**Gate:** Production Hardening Gate 8 EN CURSO  
 **Decision:** MVP REDUCIDO  
 **Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
@@ -139,8 +139,9 @@ Git final:
 **Scope Closure Reconciliation: PASS.**
 
 Next:
-- no next implementation module is authorized automatically;
-- choose the next module through the lifecycle.
+- Production Hardening ocupa temporalmente el Carril de Implementación;
+- Fase 12 permanece COMPLETADA / Gate 9 medición;
+- no iniciar Fase 13 hasta cerrar el tranche crítico de hardening.
 
 ## Other current product state
 
@@ -179,3 +180,21 @@ Known global debt:
 - `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
 
 Repository state is canonical. Conversation memory is secondary.
+
+
+## Active infrastructure — Production Hardening
+
+Canonical:
+- `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
+
+Branch:
+- `infra/production-hardening-1`
+
+Current scope:
+- PayPal webhook security;
+- supporter pitch safety;
+- React crash containment;
+- CI baseline;
+- observability/auth/key/cost hardening next.
+
+Monetization intent remains valid, but supporter membership is temporarily hidden until secure backend confirmation plus product eligibility/price/benefits are defined.
