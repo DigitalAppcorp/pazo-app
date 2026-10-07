@@ -581,10 +581,18 @@ Fase 6 introduce la primera notificación real de rescate. Esta fase generaliza 
 ---
 
 ## Fase 12 — Explore/Search unificado
-**Estado: PLANIFICADA**
+**Estado: EN CICLO DE PRODUCTO — GATE 2.5 IDEA BANK ABIERTO**
 
 ### Objetivo
-Que “Explorar” encuentre contenido real, no solo tarjetas mock.
+Que “Explorar” encuentre contenido real y navegue a entidades reales, sin prometer capacidades que todavía no existen.
+
+**Sub-ruta activa:** `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
+
+Gate 0 — auditoría real: CERRADO.  
+Gate 1 — valor: CERRADO.  
+Gate 2 — coste/dependencias: CERRADO.  
+Gate 2.5 — Idea Bank: ABIERTO.  
+Implementación: NO AUTORIZADA.
 
 ### Alcance
 - mascotas;
@@ -852,36 +860,29 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Carril de Implementación
+## Carril de producto — Fase 12 Explore/Search
 
-No hay un nuevo módulo autorizado para implementación.
+**Estado:** Gate 2.5 — Idea Bank ABIERTO.
 
-### Siguiente candidato — Explore/Search
-**Estado:** AUDITORÍA GATE 0–2 AUTORIZADA. IMPLEMENTACIÓN NO AUTORIZADA.
-
-Razón:
-- ya existen mascotas reales;
-- Comunidades tiene núcleo real;
-- Lugares/Mapa ya está completo;
-- Explore/Search sigue parcial/mock y ahora tiene suficiente contenido real alrededor para reevaluar su utilidad.
+La auditoría Gate 0–2 concluyó:
+- Explore actual es parcialmente real;
+- búsqueda actual solo filtra Comunidades;
+- no existe búsqueda pública de mascotas;
+- Lugares ya tiene search reutilizable;
+- Eventos sigue sin modelo real;
+- no se justifica infraestructura de búsqueda pesada con la densidad actual;
+- candidato provisional: MVP REDUCIDO REAL de mascotas + Comunidades + Lugares.
 
 ### Exact next action
-1. auditar el estado real de Explore/Search en `main`;
-2. identificar qué partes son mock, reales o inexistentes;
-3. evaluar Gate 1 (valor) y Gate 2 (coste/dependencias);
-4. abrir Idea Bank / Gate 2.5 antes de decidir alcance;
-5. recomendar una de las salidas de Gate 5;
-6. no crear branch de implementación ni código hasta que el Product Owner apruebe la decisión de inversión.
-
-## Estado de Fase 8
-- COMPLETADA;
-- PR #22 merged;
-- merge commit `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
-- Scope Closure Reconciliation PASS;
-- Gate 9: medir uso real y señales de fake doors.
+1. Product Owner descarga sus ideas para Explore/Search sin necesidad de estructurarlas.
+2. Project Brain audita cada idea con Gate 2.5.
+3. Se define el experimento o mínimo útil de Gate 3.
+4. Se toma decisión Gate 5.
+5. No crear código, rama de implementación ni migraciones hasta aprobación.
 
 ## Do not do
-- no reabrir Fase 8 salvo regresión o nueva decisión de producto;
-- no re-aplicar migraciones de Lugares;
-- no convertir interés de fake doors en features sin Gate 5;
-- no implementar Explore/Search antes de cerrar su auditoría/lifecycle.
+- no implementar Fase 12 todavía;
+- no añadir Eventos ficticios;
+- no usar datos privados de mascota para Search;
+- no construir motor de ranking/search externo antes de evidencia;
+- no mezclar Fase 13 de rediseño visual con esta decisión funcional.
