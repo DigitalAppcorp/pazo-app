@@ -227,7 +227,50 @@ P2:
 - frontend exception payload now includes redacted structured JavaScript stack frames in bottom-up order;
 - no session replay/autocapture SDK has been enabled.
 
-## 9. Definition of Done
+## 9. Scope Closure Reconciliation — PR #30
+
+**Resultado del tranche implementado:** PASS / MERGE PENDING.
+
+Product Owner final runtime validation on branch `infra/production-hardening-1`:
+- login/session + repeated reload: PASS;
+- premature PayPal pitch remains absent: PASS;
+- weak-password rejection and strengthened signup UX: PASS;
+- Google/Apple fake auth bypass removed: PASS;
+- Feed / Communities / Map / My Pet navigation: PASS;
+- private Documents upload/delete flow after idempotent-finalize change: PASS;
+- Rescue/public profile smoke path: PASS;
+- no product regression reported by PO.
+
+Engineering/backend evidence:
+- final GitHub Actions hardening smoke test: PASS;
+- final TypeScript + production build: PASS;
+- branch is mergeable;
+- social write rate limiter transactional test: PASS;
+- document finalize transactional test: PASS;
+- anonymous Rescue wrapper transactional test: PASS;
+- authenticated Rescue wrapper transactional test: PASS;
+- Security Advisor: only Leaked Password Protection remains, tied to current Supabase Free tier;
+- no paid-plan/resource change authorized or performed.
+
+Reconciliation against PR #30 approved scope:
+- PayPal premature pitch/browser entitlement: CLOSED;
+- webhook hardening code + production v3 deployment: CLOSED, but membership remains intentionally OFF pending real PayPal secrets/webhook verification;
+- React crash containment: CLOSED;
+- CI/build gate: CLOSED;
+- modern public Supabase key: CLOSED;
+- Auth/signup baseline cleanup: CLOSED for repo/local UX; hosted config verification remains external;
+- social anti-abuse baseline: CLOSED;
+- Documents/telemetry expected-error noise: CLOSED;
+- Rescue SECURITY DEFINER exposure: CLOSED;
+- cost-governance rule: CLOSED;
+- PostHog-compatible instrumentation code: CLOSED; external project/token/live ingestion remains explicitly pending;
+- Vercel/Mapbox spend-control verification, CAPTCHA and backup/restore drill remain outside this PR's completed deliverables and stay in Production Hardening backlog.
+
+**PR #30 may be merged after explicit Product Owner merge authorization.**
+
+Production Hardening as a whole remains **EN CURSO** after this tranche because external provider configuration/verification still remains.
+
+## 10. Definition of Done
 
 No cerrar hasta que:
 - webhook desplegado y rechace requests no verificadas;
