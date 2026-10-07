@@ -266,7 +266,7 @@ Reconciliation against PR #30 approved scope:
 - PostHog-compatible instrumentation code: CLOSED; external project/token/live ingestion remains explicitly pending;
 - Vercel/Mapbox spend-control verification, CAPTCHA and backup/restore drill remain outside this PR's completed deliverables and stay in Production Hardening backlog.
 
-**PR #30 may be merged after explicit Product Owner merge authorization.**
+**Historical note:** PR #30 was later merged after explicit Product Owner authorization.
 
 Production Hardening as a whole remains **EN CURSO** after this tranche because external provider configuration/verification still remains.
 
@@ -396,3 +396,55 @@ Remaining active backlog:
 - CAPTCHA/Turnstile timing before public Beta;
 - backup/restore drill;
 - final provider/privacy reconciliation before public Beta.
+
+
+## 14. External hardening tranche — 2026-10-07
+
+Branch: `infra/external-hardening-2`
+
+### PostHog
+- active project resolved successfully;
+- project had 0 ingested events at audit;
+- Product Owner explicitly authorized privacy-setting changes;
+- applied + verified:
+  - `anonymize_ips=true`;
+  - `autocapture_opt_out=true`;
+  - `capture_console_log_opt_in=false`;
+  - `capture_performance_opt_in=false`;
+  - `session_recording_opt_in=false`;
+  - `heatmaps_opt_in=false`;
+  - timezone `America/Los_Angeles`;
+- integrations: 0;
+- error-tracking alerts: 0;
+- live ingestion remains pending until PAZO runtime receives the public project token through environment config;
+- do not enable replay/autocapture to solve ingestion.
+
+### Vercel
+- connector/tools are reachable;
+- authenticated context currently returns 0 teams and 0 projects;
+- do not create or link a new production project without confirming the correct Vercel account/team;
+- production env/spend/log audit remains pending.
+
+### Supabase
+- plan: Free;
+- database baseline: ~17 MB;
+- Storage baseline: ~26 MB;
+- Security Advisor remains at Leaked Password Protection only;
+- PayPal webhook v3 ACTIVE and has 0 observed webhook calls at this checkpoint;
+- Free-tier backup strategy documented in `docs/PAZO_BACKUP_RESTORE_RUNBOOK.md`;
+- local Storage backup utility added at `scripts/backup-storage.mjs`.
+
+### Mapbox
+- frontend uses only `VITE_MAPBOX_ACCESS_TOKEN`;
+- no Mapbox token is hardcoded in source;
+- current vendor docs confirm URL restrictions for dedicated public web tokens;
+- Mapbox has usage notifications but no configurable hard spending cap;
+- account-level token restrictions/notifications remain pending because no Mapbox account connector is available in this session.
+
+### Still pending
+- first real PostHog event + controlled exception;
+- notification destination + low-noise error alert;
+- correct Vercel team/project connection;
+- Mapbox token restriction + usage notification confirmation;
+- PayPal Edge Function secrets + genuine Sandbox/Live webhook;
+- real DB + Storage off-site backup and non-destructive restore drill.
