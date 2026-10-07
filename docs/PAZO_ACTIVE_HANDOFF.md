@@ -23,6 +23,9 @@
   - pet-store.gltf.
 - Mapbox model layer prepared from zoom 13.5 with 2D marker fallback.
 - no new Supabase mutation has been authorized/applied for this correction.
+- Place experiment transactional preflight: PASS (view + interest); ROLLBACK left 0 registered place modules/signals.
+- glTF assets parse as 2.0 with embedded buffers; 6/6 valid structurally.
+- Mapbox model layer wired with category URL expression, close-zoom rendering, 2D fallback, click support, antialiasing, and basemap 3D objects disabled so PAZO models remain visually dominant.
 - next: local build, then request authorization for experiment module keys, then Product Owner runtime/visual validation.
 - do NOT advance to Explore/Search before this closes.
 
