@@ -7,14 +7,21 @@
 - product: `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`;
 - architecture: `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`;
 - migration prepared: `20261007013000_communities_mvp_core.sql`;
-- migration is NOT applied to Supabase;
+- backend migrations are applied to Supabase;
 - real frontend/service layer is implemented on branch;
 - Explore preserves Product Owner's approved discovery hierarchy;
 - Community core implemented on branch: discovery, create, detail, Join/Leave, posts/photos, likes, comments, members, admin edit/moderation/archive;
 - global Feed persistence remains untouched;
 - demo mode does not call real Communities backend;
-- static preflight completed; local `npm run build` is the next required check;
-- after build PASS: final SQL review -> explicit Product Owner authorization -> Supabase apply/tests;
+- local `npm run build` PASS confirmed by Product Owner;
+- Product Owner explicitly authorized backend apply;
+- Supabase registry: `20261007014214 communities_mvp_core`;
+- Supabase registry: `20261007014624 fix_community_storage_policies`;
+- first Storage policy version had an ambiguous `name` reference; corrected forward-only by qualifying `objects.name`;
+- transactional RLS/ownership/counter tests PASS;
+- Storage INSERT/RLS tests PASS;
+- Security Advisor: no new Communities findings;
+- real Storage API DELETE + visual/end-to-end test remain pending;
 - generic validation backend remains for advanced extension experiments;
 - existing Communities validation test rows (2 views, 1 interest, 0 intents) remain untouched pending authorized cleanup.
 
