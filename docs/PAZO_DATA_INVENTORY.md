@@ -192,7 +192,7 @@ Supabase.
 ## 11. Error monitoring / product observability
 
 **Estado**
-Código preparado; live provider verification pendiente.
+Proyecto PostHog conectado y privacy settings aplicados; live ingestion pendiente (0 eventos ingeridos al checkpoint).
 
 **Proveedor previsto**
 PostHog.
@@ -292,7 +292,7 @@ Debe cerrarse para:
 | Supabase | Auth/DB/Storage/Edge | Activo | múltiples categorías | retención/backups/Auth audit |
 | Mapbox | mapas | Activo | requests/location-context según uso | usage/privacy/spend review |
 | PayPal | Supporter | Parcial/desactivado en UX | subscription/payment metadata | secrets + real webhook + terms |
-| PostHog | observabilidad | Preparado, no verificado live | eventos allowlisted/exceptions | token + live ingestion + alerts |
-| Vercel | hosting/deploy | conexión pendiente de verificación operativa | deployment/log metadata | env/spend/log review |
+| PostHog | observabilidad | Conectado + privacy-hardened; 0 eventos live | eventos allowlisted/exceptions | env token + first event/error + destination/alert |
+| Vercel | hosting/deploy | conector visible pero 0 teams/proyectos | deployment/log metadata | conectar cuenta/proyecto correcto antes de auditar env/spend |
 
 Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producción.
