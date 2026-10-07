@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 8 — BACKEND APLICADO / VALIDACIÓN VISUAL PENDIENTE
+**Estado:** GATE 8 — VALIDACIÓN COMPLETA / LISTO PARA MERGE
 **Fecha:** 2026-10-06
 **Implementación autorizada:** NO
 
@@ -327,9 +327,20 @@ Backend QA:
 - telemetría mínima/dedupe: PASS;
 - Security Advisor sin findings nuevos de Fase 8.
 
+Validación runtime:
+- Mapbox real: PASS;
+- ubicación explícita efímera: PASS;
+- detalle de lugar: PASS;
+- check-in privado: PASS;
+- F5 persistence: PASS;
+- opt-in de visibilidad: PASS;
+- privacidad segunda cuenta: PASS;
+- cambio de lugar: PASS;
+- checkout manual: PASS;
+- búsqueda/filtros: PASS;
+- sugerencia de lugar: PASS.
+
 Pendiente para cerrar Gate 8:
-- configurar token público Mapbox;
-- validar mapa real en runtime;
-- prueba visual/end-to-end del Product Owner;
-- PR #20 final;
-- merge y verificación de `main`.
+- merge de PR #20;
+- verificación de `main`;
+- cierre documental final.
