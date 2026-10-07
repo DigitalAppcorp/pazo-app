@@ -99,7 +99,7 @@ Current branch evidence:
 - PayPal buttons in active App: absent;
 - client-side `is_founder: true` mutation: absent;
 - browser Supabase client migrated from legacy `anon` key to modern publishable key;
-- production `paypal-webhook` deployed as Edge Function version 2;
+- production `paypal-webhook` deployed as Edge Function version 3;
 - Security Advisor: no new database findings attributable to this tranche;
 - existing Leaked Password Protection warning remains open.
 
