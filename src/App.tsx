@@ -1825,10 +1825,17 @@ function PazoMain() {
                   tabScrollPositionsRef.current[activeTab] = scrollContainer.scrollTop
                 }
 
+                if (tab === 'comunidades') {
+                  setCommunityTargetId(null)
+                }
+
+                if (tab === 'mapa') {
+                  setPlaceTargetId(null)
+                }
+
                 if (tab !== activeTab) {
                   setActiveTab(tab)
                 }
-
               }}
               onOpenCreate={() => setIsCreateMenuOpen(true)}
               labels={{
@@ -1848,10 +1855,12 @@ function PazoMain() {
                 if (type === 'post') setIsCreatePostOpen(true)
                 if (type === 'alerta') setIsAlertOpen(true)
                 if (type === 'lugar') {
+                  setPlaceTargetId(null)
                   setActiveTab('mapa')
                   setPlaceSuggestionRequestKey((value) => value + 1)
                 }
                 if (type === 'comunidad') {
+                  setCommunityTargetId(null)
                   setActiveTab('comunidades')
                   setCommunityCreateRequestKey((value) => value + 1)
                 }
