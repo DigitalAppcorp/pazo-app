@@ -23,6 +23,7 @@ import {
   toggleCommunityPostLike,
   updateCommunity,
 } from '../../services/communityService'
+import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
 import {
   IconCamera,
   IconChat,
@@ -816,6 +817,111 @@ export const CommunityDetailView = ({
                       : 'This community has not posted additional rules yet.')}
                 </p>
               </div>
+
+              {community.isJoined && community.status === 'active' && (
+                <div className="space-y-3 border-t border-[#204E4A]/8 pt-4">
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                          {lang === 'es'
+                            ? 'Funciones en desarrollo'
+                            : 'Features in development'}
+                        </p>
+                        <h4 className="mt-1 text-sm font-black text-[#204E4A]">
+                          {lang === 'es'
+                            ? '¿Qué te gustaría usar aquí después?'
+                            : 'What would you like to use here next?'}
+                        </h4>
+                      </div>
+                      <span className="rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-[#204E4A]">
+                        {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[10px] leading-relaxed text-[#5C7470]">
+                      {lang === 'es'
+                        ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en esta comunidad.'
+                        : 'These features are not active yet. Mark only the ones you would actually use in this community.'}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    <CommunityFeatureExperimentCard
+                      moduleKey="communities_events"
+                      title={lang === 'es' ? 'Eventos y caminatas' : 'Events and walks'}
+                      description={
+                        lang === 'es'
+                          ? 'Crear y descubrir caminatas, encuentros y actividades organizadas por esta comunidad.'
+                          : 'Create and discover walks, meetups, and activities organized by this community.'
+                      }
+                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
+                      lang={lang}
+                    />
+
+                    <CommunityFeatureExperimentCard
+                      moduleKey="communities_challenges"
+                      title={lang === 'es' ? 'Retos colectivos' : 'Group challenges'}
+                      description={
+                        lang === 'es'
+                          ? 'Participar en metas y retos compartidos para mantener activa a la comunidad.'
+                          : 'Join shared goals and challenges that keep the community active.'
+                      }
+                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
+                      lang={lang}
+                    />
+
+                    <CommunityFeatureExperimentCard
+                      moduleKey="communities_badges"
+                      title={
+                        lang === 'es'
+                          ? 'Insignias y reconocimiento'
+                          : 'Badges and recognition'
+                      }
+                      description={
+                        lang === 'es'
+                          ? 'Reconocer aportes, hitos y participación útil dentro de la comunidad.'
+                          : 'Recognize contributions, milestones, and useful participation inside the community.'
+                      }
+                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
+                      lang={lang}
+                    />
+
+                    <CommunityFeatureExperimentCard
+                      moduleKey="communities_qa"
+                      title={
+                        lang === 'es'
+                          ? 'Preguntas y respuestas'
+                          : 'Questions and answers'
+                      }
+                      description={
+                        lang === 'es'
+                          ? 'Hacer preguntas, destacar respuestas útiles y construir conocimiento que no se pierda en el feed.'
+                          : 'Ask questions, highlight useful answers, and build knowledge that does not disappear in the feed.'
+                      }
+                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
+                      lang={lang}
+                    />
+
+                    {isOwner && (
+                      <CommunityFeatureExperimentCard
+                        moduleKey="communities_admin_tools"
+                        title={
+                          lang === 'es'
+                            ? 'Herramientas avanzadas de administración'
+                            : 'Advanced admin tools'
+                        }
+                        description={
+                          lang === 'es'
+                            ? 'Analytics, roles, automatizaciones y más control para hacer crecer y administrar la comunidad.'
+                            : 'Analytics, roles, automations, and more control to grow and manage the community.'
+                        }
+                        source="community_info_owner"
+                        lang={lang}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               {isOwner && (
                 <div className="flex flex-wrap gap-2 border-t border-[#204E4A]/8 pt-4">
