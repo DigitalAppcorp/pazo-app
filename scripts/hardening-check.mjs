@@ -69,6 +69,9 @@ for (const required of [
   '[redacted-email]',
   '[redacted-jwt]',
   'window.addEventListener(\'unhandledrejection\'',
+  '$exception_list',
+  'stacktrace',
+  '$exception_source',
 ]) {
   assertIncludes(observability, required, 'observability service')
 }
