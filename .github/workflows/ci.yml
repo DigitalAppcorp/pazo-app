@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Hardening regression checks
+        run: npm run test:hardening
+
       - name: Build
         env:
           VITE_APP_RELEASE: ${{ github.sha }}
