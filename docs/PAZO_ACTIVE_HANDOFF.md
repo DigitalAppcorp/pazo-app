@@ -9,7 +9,9 @@
 - next module: Fase 8 — Lugares, mapa y Check-ins.
 - audit real GitHub + Supabase state: COMPLETE.
 - Gate 6 product specification: CLOSED / approved by Product Owner.
-- current step: Gate 7 technical architecture + migration preparation.
+- Gate 7 technical architecture: CLOSED.
+- migration `20261007052000_phase_8_places_map_core.sql`: PREPARED / NOT APPLIED.
+- current step: Gate 8 frontend/service implementation + local build preflight.
 - Product Owner decisions CLOSED:
   - Mapbox GL JS;
   - device location only by explicit action, ephemeral use, no exact GPS persistence;
@@ -19,7 +21,7 @@
   - reusable GLB/glTF category models prepared for future 3D/B2B layers.
 - Gate 6 source: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
 - Gate 7 source: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
-- Supabase mutation is NOT authorized yet.
+- Supabase mutation is NOT authorized yet; request authorization only after frontend/build/diff/security preflight.
 
 ## Read first
 
