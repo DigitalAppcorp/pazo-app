@@ -394,7 +394,7 @@ Hacer funcional el descubrimiento local.
 
 Gate 6: CERRADO / aprobado.  
 Gate 7: CERRADO.  
-Gate 8: EN CURSO — implementación preparada, backend aún no aplicado.
+Gate 8: EN CURSO — backend aplicado y validado; runtime Mapbox + visual/E2E pendientes.
 
 Fuentes:
 - producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
@@ -836,8 +836,8 @@ Usar únicamente:
 - Gate 6 de producto: CERRADO / aprobado;
 - Gate 7 de arquitectura: CERRADO;
 - frontend/servicios/migraciones: en implementación sobre `feat/phase-8-places-map`;
-- migración core y seed inicial: PREPARADAS / NO APLICADAS;
-- no tocar Supabase hasta build local PASS + preflight + autorización explícita del Product Owner.
+- core + seed + checkout RLS fix: APLICADOS / backend QA PASS;
+- siguiente: configurar Mapbox, validar runtime/E2E y cerrar PR #20.
 
 Fuentes:
 - `docs/PAZO_PHASE_8_PLACES_MASTER.md`;
