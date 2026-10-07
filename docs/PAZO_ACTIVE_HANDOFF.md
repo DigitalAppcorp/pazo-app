@@ -1,25 +1,30 @@
-## CURRENT STATE — PHASE 8 COMPLETE / NEXT MODULE UNAUTHORIZED
+## CURRENT ACTIVE WORK — PHASE 8 CLOSURE CORRECTION
 
-- Fase 8 Lugares / Mapa / Check-ins: COMPLETADA.
-- PR #20 merged to `main`.
-- merge commit: `ca3fedd977e0720839a420f2e3673942871b7a61`.
-- Product Owner build PASS.
-- backend applied + transactional QA PASS.
-- Mapbox runtime PASS.
-- explicit ephemeral device location PASS; exact GPS is not persisted.
-- private/visible check-in, F5, move, expiry, checkout and second-account privacy PASS.
-- place suggestion flow PASS.
-- Security Advisor: no new Fase 8 findings.
-- Supabase migrations:
-  - `20261007052747 phase_8_places_map_core`;
-  - `20261007052749 phase_8_places_initial_catalog`;
-  - `20261007053859 fix_place_checkin_checkout_rls`.
-- post-E2E state: 0 active check-ins, 0 active presences.
-- one pending user suggestion remains: `south gate park`; preserved.
-- no next implementation module is automatically authorized.
-- recommended next candidate for Gate 0–2 audit: Fase 12 Explore/Search unificado.
-- Messaging remains postponed/re-evaluate.
-- do not implement Explore/Search until Product Owner explicitly authorizes its lifecycle/audit.
+- Product Owner correctly identified missing approved scope after the original Phase 8 merge.
+- Fase 8 is REOPENED until the missing pieces are validated and merged.
+- original implementation PR #20 remains valid for the real core.
+- correction branch: `fix/phase-8-fake-doors-3d-markers`.
+- missing piece 1: contextual fake doors.
+- missing piece 2: reusable caricature/low-poly 3D category markers.
+- prepared fake doors:
+  - `places_reviews`;
+  - `places_favorites`;
+  - `places_user_photos`;
+  - `places_events`;
+  - `places_routes`;
+  - `places_business_offers`.
+- fake-door migration prepared: `20261007073500_place_extension_experiments.sql` / NOT APPLIED.
+- 3D assets prepared:
+  - park.gltf;
+  - trail.gltf;
+  - restaurant.gltf;
+  - veterinarian.gltf;
+  - grooming.gltf;
+  - pet-store.gltf.
+- Mapbox model layer prepared from zoom 13.5 with 2D marker fallback.
+- no new Supabase mutation has been authorized/applied for this correction.
+- next: local build, then request authorization for experiment module keys, then Product Owner runtime/visual validation.
+- do NOT advance to Explore/Search before this closes.
 
 ## Read first
 
