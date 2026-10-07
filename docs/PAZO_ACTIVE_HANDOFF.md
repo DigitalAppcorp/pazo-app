@@ -137,28 +137,28 @@ Technical architecture:
 
 ## Immediate next action
 
-Active product work: **Fase 7.0A — Experimento de Comunidades**.
+Active work: **Fase 8 — Lugares, mapa y Check-ins — Gate 8**.
 
-Canonical source:
-`docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`
+Current truth:
+- product Gate 6 approved;
+- technical Gate 7 closed;
+- Mapbox renderer/service/UI implementation exists on branch;
+- legacy `INITIAL_PLACES` and broken `feature_map_*` interaction tracking removed;
+- core migration prepared: `20261007052000_phase_8_places_map_core.sql`;
+- curated initial catalog prepared: `20261007053000_phase_8_places_initial_catalog.sql`;
+- neither F8 migration has been applied to Supabase;
+- Mapbox public token is not stored in GitHub;
+- next required check is local production build.
 
-Current state:
-- Communities remains **EXPERIMENTO ACTIVO**;
-- 7.0A experiment is APPROVED by Product Owner;
-- full Communities product/backend is blocked by data;
-- the original lost Gemini `Me interesa` implementation will not be recovered;
-- generic validation tracking is still the intended technical solution, but it must be implemented only after the Communities experiment itself is closed;
-- PR #15 was closed without merge because it jumped to implementation too early;
-- no Supabase validation-instrumentation migration was applied;
-- Map/Radar is not automatically bundled into the first Communities experiment.
-
-Next action:
-1. implement the smallest generic validation infrastructure with Communities as first consumer;
-2. prepare versioned migration but do not apply Supabase yet;
-3. preflight build/security;
-4. request explicit Product Owner authorization before backend mutation;
-5. do not build Communities backend/roles/feed/moderation;
-6. after validation instrumentation is stable, let Communities collect data while the implementation lane remains free for another approved module.
+After build PASS:
+1. final diff/SQL/security preflight;
+2. explain exact Supabase mutations;
+3. request explicit Product Owner authorization;
+4. apply core + seed migrations;
+5. run RLS/concurrency/privacy tests;
+6. configure/test Mapbox token locally;
+7. Product Owner visual/end-to-end validation;
+8. PR + merge.
 
 ## Important continuity note
 
