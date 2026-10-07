@@ -284,7 +284,11 @@ export const OnboardingView = ({
                   onChange={(e) => setIsOver18(e.target.checked)}
                   className="rounded text-[#204E4A]"
                 />
-                <span className="text-[11px]">Tengo 18 años o más y acepto los términos y reglas.</span>
+                <span className="text-[11px]">
+                  {lang === 'es'
+                    ? 'Confirmo que tengo 18 años o más.'
+                    : 'I confirm that I am 18 or older.'}
+                </span>
               </label>
 
               <button
