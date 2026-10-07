@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-10-06
 **Rama:** `feat/communities-mvp`
-**Gate:** 8 — IMPLEMENTACIÓN EN PREPARACIÓN
+**Gate:** 8 — IMPLEMENTACIÓN / VALIDACIÓN END-TO-END
 **Decisión:** MVP reducido real
 
 ## Regla vigente
@@ -45,15 +45,21 @@ La validación se utilizará para extensiones avanzadas dentro del módulo real.
 - PR #17 sincronizó a main las migraciones de validación ya aplicadas.
 - instrumentación genérica disponible para extensiones futuras.
 - existen 2 views + 1 interest de Communities provenientes de pruebas; deben limpiarse antes de medición real con autorización.
-- backend real de Comunidades todavía no aplicado.
+- backend real de Comunidades APLICADO.
+- migración registrada en Supabase: `20261007014214 communities_mvp_core`.
+- fix forward-only de Storage registrado: `20261007014624 fix_community_storage_policies`.
+- RLS/ownership/counters probados con dos/tres cuentas reales dentro de transacciones con `ROLLBACK`.
+- Storage INSERT policies probadas: owner avatar, member post media, foreign path denied, removed-member denied.
+- Storage DELETE directo no puede probarse por SQL porque Supabase lo bloquea mediante `storage.protect_delete()`; debe validarse desde la Storage API/UI.
+- Security Advisor sin findings nuevos atribuibles a Comunidades.
+- señales antiguas de validación (2 views, 1 interest, 0 intents) siguen intactas; no se han borrado.
 
 ## Siguiente paso
 
-1. preparar migración Communities MVP;
-2. implementar frontend/servicio;
-3. build local;
-4. revisar SQL/diff;
-5. pedir autorización explícita antes de aplicar Supabase;
-6. pruebas RLS/ownership/storage;
-7. validación visual;
-8. PR + merge.
+1. validación visual/end-to-end real desde la app;
+2. comprobar upload y DELETE mediante Storage API;
+3. corregir cualquier regresión;
+4. decidir limpieza de señales antiguas de validación;
+5. pasar PR #18 de draft a ready;
+6. merge;
+7. actualizar roadmap/handoff y marcar COMPLETADA solo después del merge.
