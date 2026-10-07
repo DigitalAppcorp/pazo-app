@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 7 — ARQUITECTURA TÉCNICA
+**Estado:** GATE 8 — IMPLEMENTACIÓN EN PREPARACIÓN
 **Fecha:** 2026-10-06
 **Implementación autorizada:** NO
 
@@ -296,10 +296,11 @@ Gate 1 — valor: **MVP REDUCIDO REAL**.
 Gate 2 — coste/dependencias: CERRADO.  
 D1–D5: CERRADAS.  
 Gate 6 — CERRADO / aprobado por Product Owner.  
-Gate 7 — ARQUITECTURA TÉCNICA EN CURSO.
+Gate 7 — CERRADO.  
+Gate 8 — IMPLEMENTACIÓN EN PREPARACIÓN.
 
 Fuentes:
 - producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
 - arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
 
-No aplicar Supabase todavía.
+Migración core preparada, pero NO aplicada. Implementación frontend puede comenzar; Supabase requiere autorización explícita después de build/preflight.
