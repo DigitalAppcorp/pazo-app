@@ -368,7 +368,7 @@ Estado técnico final:
 ---
 
 ## Fase 8 — Lugares, mapa y Check-ins
-**Estado: PLANIFICADA**
+**Estado: SIGUIENTE — GATE 6**
 
 Existe `pet_places`, pero `MapView` todavía es placeholder.
 
@@ -386,13 +386,19 @@ Hacer funcional el descubrimiento local.
 - privacidad de ubicación;
 - creación/sugerencia de lugares según decisión de producto.
 
-### DECISIÓN PENDIENTE
-Elegir proveedor/cartografía y reglas de ubicación:
-- Mapbox / Google Maps / alternativa;
-- GPS exacto vs ubicación aproximada;
-- quién puede agregar lugares.
+### Decisiones de producto cerradas
+- Mapbox GL JS;
+- ubicación solo por acción explícita y uso efímero;
+- no persistir GPS exacto;
+- PAZO publica lugares y usuarios sugieren;
+- check-in 2 horas;
+- contador público + identidad de mascota solo con opt-in;
+- modelos 3D GLB/glTF por categoría preparados desde arquitectura.
 
-No activar ubicación precisa sin decisión explícita.
+**Gate actual:** Gate 6 — especificación de producto.
+Fuente: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
+
+No implementar todavía; Gate 7 depende de aprobación explícita del Product Owner.
 
 ---
 
