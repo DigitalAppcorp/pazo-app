@@ -112,11 +112,15 @@ CREATE INDEX communities_species_status_idx
 
 CREATE INDEX community_memberships_user_joined_idx
   ON public.community_memberships (user_id, joined_at DESC);
+CREATE INDEX community_memberships_display_pet_idx
+  ON public.community_memberships (display_pet_id);
 
 CREATE INDEX community_posts_community_created_idx
   ON public.community_posts (community_id, created_at DESC, id DESC);
 CREATE INDEX community_posts_author_created_idx
   ON public.community_posts (author_pet_id, created_at DESC);
+CREATE INDEX community_posts_author_user_idx
+  ON public.community_posts (author_user_id);
 
 CREATE INDEX community_comments_post_created_idx
   ON public.community_post_comments (post_id, created_at, id);
@@ -441,7 +445,7 @@ USING (
   )
 );
 
-CREATE OR REPLACE FUNCTION community_private.touch_community_updated_at()
+CREATE OR REPLACE FUNCTION community_private.normalize_community_row()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = ''
@@ -451,8 +455,30 @@ BEGIN
   NEW.name := btrim(NEW.name);
   NEW.description := btrim(NEW.description);
   NEW.category := btrim(NEW.category);
+  NEW.species := NULLIF(btrim(NEW.species), '');
   NEW.zone := NULLIF(btrim(NEW.zone), '');
   NEW.rules := NULLIF(btrim(NEW.rules), '');
+  RETURN NEW;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION community_private.ensure_owner_membership()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.community_memberships m
+    WHERE m.community_id = NEW.id
+      AND m.user_id = NEW.owner_user_id
+      AND m.role = 'owner'
+  ) THEN
+    RAISE EXCEPTION 'Community owner membership is required.';
+  END IF;
+
   RETURN NEW;
 END;
 $function$;
@@ -520,20 +546,28 @@ BEGIN
 END;
 $function$;
 
-ALTER FUNCTION community_private.touch_community_updated_at() OWNER TO postgres;
+ALTER FUNCTION community_private.normalize_community_row() OWNER TO postgres;
+ALTER FUNCTION community_private.ensure_owner_membership() OWNER TO postgres;
 ALTER FUNCTION community_private.adjust_member_count() OWNER TO postgres;
 ALTER FUNCTION community_private.adjust_community_like_count() OWNER TO postgres;
 ALTER FUNCTION community_private.adjust_community_comment_count() OWNER TO postgres;
 
-REVOKE ALL ON FUNCTION community_private.touch_community_updated_at() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION community_private.normalize_community_row() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION community_private.ensure_owner_membership() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION community_private.adjust_member_count() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION community_private.adjust_community_like_count() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION community_private.adjust_community_comment_count() FROM PUBLIC, anon, authenticated;
 
-CREATE TRIGGER trg_communities_touch_updated_at
-BEFORE UPDATE ON public.communities
+CREATE TRIGGER trg_communities_normalize
+BEFORE INSERT OR UPDATE ON public.communities
 FOR EACH ROW
-EXECUTE FUNCTION community_private.touch_community_updated_at();
+EXECUTE FUNCTION community_private.normalize_community_row();
+
+CREATE CONSTRAINT TRIGGER trg_communities_require_owner_membership
+AFTER INSERT OR UPDATE OF owner_user_id ON public.communities
+DEFERRABLE INITIALLY DEFERRED
+FOR EACH ROW
+EXECUTE FUNCTION community_private.ensure_owner_membership();
 
 CREATE TRIGGER trg_community_memberships_count
 AFTER INSERT OR DELETE ON public.community_memberships
