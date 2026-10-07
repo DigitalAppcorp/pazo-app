@@ -4,16 +4,19 @@
 - Gate 6 product: CLOSED / approved;
 - Gate 7 architecture: CLOSED;
 - Gate 8 implementation: IN PROGRESS;
-- canonical product spec: `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`;
-- canonical architecture: `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`;
-- operational state: `docs/PAZO_COMMUNITIES_CURRENT_STATE.md`;
-- no Communities backend migration applied yet;
-- do not mutate Supabase before build + explicit Product Owner authorization;
-- generic validation backend remains for advanced extension experiments.
-
-# PAZO — Active Handoff
-
-**Purpose:** durable context for resuming PAZO work in a new ChatGPT conversation without relying on the previous chat transcript.
+- product: `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`;
+- architecture: `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`;
+- migration prepared: `20261007013000_communities_mvp_core.sql`;
+- migration is NOT applied to Supabase;
+- real frontend/service layer is implemented on branch;
+- Explore preserves Product Owner's approved discovery hierarchy;
+- Community core implemented on branch: discovery, create, detail, Join/Leave, posts/photos, likes, comments, members, admin edit/moderation/archive;
+- global Feed persistence remains untouched;
+- demo mode does not call real Communities backend;
+- static preflight completed; local `npm run build` is the next required check;
+- after build PASS: final SQL review -> explicit Product Owner authorization -> Supabase apply/tests;
+- generic validation backend remains for advanced extension experiments;
+- existing Communities validation test rows (2 views, 1 interest, 0 intents) remain untouched pending authorized cleanup.
 
 ## Read first
 
