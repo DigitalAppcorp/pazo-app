@@ -3,7 +3,7 @@
 **Estado:** GATE 7 CERRADO — ARQUITECTURA TÉCNICA DEFINIDA  
 **Fecha:** 2026-10-06  
 **Gate 6:** CERRADO / aprobado por Product Owner  
-**Supabase apply:** NO AUTORIZADO TODAVÍA
+**Supabase apply:** core + checkout fix + Places experiments APPLIED with Product Owner authorization
 
 ## 1. Decisión arquitectónica principal
 
@@ -327,23 +327,34 @@ Mapbox GL JS soporta glTF/GLB mediante native `model` layer.
 
 ### Registry frontend
 ```text
-park         -> /models/places/park.glb
-trail        -> /models/places/trail.glb
-food         -> /models/places/restaurant.glb
-veterinary   -> /models/places/veterinarian.glb
-grooming     -> /models/places/grooming.glb
-pet_store    -> /models/places/pet-store.glb
+park         -> /models/places/park.gltf
+trail        -> /models/places/trail.gltf
+food         -> /models/places/restaurant.gltf
+veterinary   -> /models/places/veterinarian.gltf
+grooming     -> /models/places/grooming.gltf
+pet_store    -> /models/places/pet-store.gltf
 ```
 
 El DB guarda categoría, no path del asset.
 
-### Render strategy
+### Render strategy — estado actual de corrección
 - zoom lejano: marker/icon 2D;
-- desde zoom 13.5: capa `model` de Mapbox con glTF por categoría;
-- el marker 2D permanece debajo con menor opacidad como fallback;
+- capa `model` desde zoom 13.25;
+- `slot: top`;
+- `model-type: location-indicator`;
+- `model-scale: [12,12,12]`;
+- `model-translation: [0,0,1]`;
+- `model-emissive-strength: 0.12`;
+- marker 2D funciona como fallback y se desvanece hasta opacidad 0 en zoom 16;
 - click/hover funcionan tanto sobre marker como sobre modelo;
-- al seleccionar lugar, cámara sube a zoom >=14.5 y pitch 52°;
+- seleccionar lugar fuerza zoom >=16.2 y pitch 58°;
+- basemap de Mapbox usa `show3dObjects=false` para no competir visualmente con los modelos PAZO;
+- antialias activado;
 - nombre/categoría textual siempre accesible.
+
+Última evidencia visual:
+- antes de este ajuste el Product Owner solo veía el círculo 2D de veterinaria;
+- el fix anterior no cuenta como PASS hasta nueva prueba visual.
 
 Assets:
 - `public/models/places/park.gltf`;
@@ -676,7 +687,14 @@ Source:
 
 La métrica principal sigue siendo por cuenta, no por mascota ni por lugar.
 
-Migración preparada:
+Migración repo:
 `20261007073500_place_extension_experiments.sql`.
 
-No aplicar sin autorización explícita del Product Owner.
+Supabase registry:
+`20261007072355 place_extension_experiments`.
+
+Estado:
+- APPLIED con autorización explícita del Product Owner;
+- 6 `places_*` registrados;
+- transactional QA PASS;
+- no re-aplicar.
