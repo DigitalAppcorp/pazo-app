@@ -50,7 +50,7 @@ Conclusión:
 
 ## Mapa/Lugares
 Estado real:
-- Fase 8 COMPLETADA;
+- Fase 8 núcleo real merged; cierre REABIERTO por fake doors + 3D markers pendientes;
 - Mapbox real;
 - catálogo curado real;
 - check-ins reales con privacidad/expiración;
@@ -118,7 +118,7 @@ Escala:
 |---|---:|---:|---:|---:|---|
 | Agenda/Cuidados | 5 | 2 | 1 | 1 | BUILD NOW |
 | Documentos | 4 | 3 | 3 | 1 | SIGUIENTE DESPUÉS DE AGENDA |
-| Mapa/Lugares | 4 | 4 | 3 | 3 | COMPLETADO |
+| Mapa/Lugares | 4 | 4 | 3 | 3 | CIERRE EN CORRECCIÓN |
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
@@ -213,9 +213,9 @@ Continúa:
 No bloquea Agenda.
 
 ## Mapa/Lugares
-**COMPLETADO.**
+**GATE 8 REABIERTO PARA CORRECCIÓN DE SCOPE.**
 
-Pasa a Gate 9 / medición post-lanzamiento.
+No pasa a Gate 9 hasta validar fake doors + 3D markers.
 
 ---
 
