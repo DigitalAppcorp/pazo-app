@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 0–2 — AUDITORÍA / DEFINICIÓN DE PRODUCTO
+**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO
 **Fecha:** 2026-10-06
 **Implementación autorizada:** NO
 
@@ -143,13 +143,12 @@ Para MVP:
 - no mostrar historial completo de movimientos públicamente;
 - check-in expira automáticamente.
 
-### Decisión pendiente
-Qué ve otro usuario:
-A. solo contador de mascotas presentes;
-B. contador + mascotas presentes;
-C. contador + mascotas presentes solo si cada usuario opta explícitamente por hacerse visible.
+### Decisión aprobada
+Todos ven el contador de mascotas presentes.
 
-Recomendación: **C**.
+La identidad de cada mascota solo aparece mediante opt-in explícito del dueño.
+
+**Aprobado: opción C.**
 
 ---
 
@@ -224,7 +223,9 @@ Solo si Product Owner aprueba sugerencias:
 
 ## 7. Cartografía
 
-Decisión todavía pendiente.
+**Decisión aprobada: Mapbox GL JS.**
+
+PAZO conservará dominio y coordenadas propios, con adapter para evitar lock-in. El mapa se prepara para modelos 3D GLB/glTF por categoría.
 
 Separar:
 1. librería de render del mapa;
@@ -278,33 +279,25 @@ No construir todas ahora.
 
 ---
 
-## 10. Decisiones de Product Owner necesarias antes de Gate 6
+## 10. Decisiones de Product Owner — CERRADAS
 
-### D1 — Visibilidad del check-in
-Recomendado:
-**contador + mascota solo con opt-in explícito**.
-
-### D2 — Duración
-Recomendado:
-**2 horas por defecto**, con salir manualmente antes.
-
-### D3 — Alta de lugares
-Recomendado:
-**PAZO publica; usuarios sugieren; sugerencia requiere aprobación**.
-
-### D4 — Ubicación del dispositivo
-Recomendado:
-**solo bajo acción explícita, uso efímero, no persistir GPS exacto**.
-
-### D5 — Proveedor de mapa
-Pendiente de comparación técnica/económica actual.
+- D1 — visibilidad: contador público + identidad de mascota solo por opt-in. APROBADA.
+- D2 — duración: 2 horas + salida manual. APROBADA.
+- D3 — alta: PAZO publica; usuarios sugieren y requieren aprobación. APROBADA.
+- D4 — ubicación: solo acción explícita, uso efímero, sin persistir GPS exacto. APROBADA.
+- D5 — mapa: Mapbox GL JS + dominio PAZO desacoplado + modelos GLB/glTF reutilizables. APROBADA.
 
 ---
 
 ## 11. Gate actual
 
 Gate 0 — auditoría: CERRADO.  
-Gate 1 — valor: recomendación **MVP REDUCIDO REAL**.  
-Gate 2 — coste/dependencias: auditado.
+Gate 1 — valor: **MVP REDUCIDO REAL**.  
+Gate 2 — coste/dependencias: CERRADO.  
+D1–D5: CERRADAS.  
+Gate 6 — ESPECIFICACIÓN DE PRODUCTO EN CURSO.
 
-No abrir Gate 6/7 hasta que Product Owner cierre D1–D5.
+Fuente de Gate 6:
+`docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
+
+No abrir Gate 7 hasta aprobación explícita de Gate 6.
