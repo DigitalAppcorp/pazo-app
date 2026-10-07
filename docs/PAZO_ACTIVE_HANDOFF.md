@@ -154,7 +154,15 @@ Current truth:
 - Security baseline unchanged: 3 anon SECURITY DEFINER warnings, 6 authenticated SECURITY DEFINER warnings, 1 leaked-password warning.
 - core migration adds no public SECURITY DEFINER function; privileged trigger helpers live in private schema `place_private`.
 - branch is ahead of `main` with no behind commits.
-- next required action: explicit Product Owner authorization for core + initial catalog migrations.
+- Product Owner authorized and core + initial catalog migrations were applied.
+- Supabase registry:
+  - `20261007052747 phase_8_places_map_core`;
+  - `20261007052749 phase_8_places_initial_catalog`.
+- backend tests PASS so far: hidden/visible presence, foreign-user isolation, move between places, expiry, foreign-pet block, archived-place block, suggestions, telemetry.
+- checkout RLS bug discovered: ending an active row made it fail the active-only SELECT policy.
+- forward fix prepared: `20261007054500_fix_place_checkin_checkout_rls.sql`; NOT APPLIED.
+- frontend service updated to explicitly request only active/non-expired own check-in rows.
+- next required checks: local build after service fix + explicit Product Owner authorization for the forward RLS fix.
 
 After build PASS:
 1. final diff/SQL/security preflight;
