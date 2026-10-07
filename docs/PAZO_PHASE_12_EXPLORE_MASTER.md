@@ -1,8 +1,8 @@
 # PAZO — Fase 12 — Explore/Search unificado
 
-**Estado:** GATE 5 CERRADO — MVP REDUCIDO / GATE 6 ESPECIFICACIÓN DEFINIDA  
+**Estado:** GATE 7 CERRADO — ARQUITECTURA LISTA / GATE 8 SIGUIENTE  
 **Fecha:** 2026-10-07  
-**Implementación autorizada:** NO — arquitectura Gate 7 pendiente  
+**Implementación autorizada:** SIGUIENTE — no mutar Supabase sin autorización explícita  
 **Project Brain OS:** v1.3.0
 
 ## 1. Auditoría de estado real — Gate 0
@@ -361,7 +361,23 @@ El alcance funcional está definido allí.
 
 **Gate 6: CERRADO.**
 
-## 10. Estado
+## 10. Gate 7 — Arquitectura
+
+Sub-ruta:
+`docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`
+
+Decisión:
+- federated search;
+- providers separados para Pets / Communities / Places;
+- no índice global;
+- no motor externo;
+- deep-links internos definidos;
+- una migración mínima solo para telemetría sin raw query;
+- Supabase apply requiere autorización explícita.
+
+**Gate 7: CERRADO.**
+
+## 11. Estado
 
 - Gate 0: CERRADO;
 - Gate 1: CERRADO;
@@ -370,7 +386,7 @@ El alcance funcional está definido allí.
 - Gate 3: CERRADO;
 - Gate 5: MVP REDUCIDO;
 - Gate 6: CERRADO;
-- Gate 7: SIGUIENTE;
-- Gate 8: NO AUTORIZADO.
+- Gate 7: CERRADO;
+- Gate 8: SIGUIENTE — implementación en rama; Supabase apply no autorizado todavía.
 
 No implementar hasta cerrar Gate 7 — arquitectura técnica.
