@@ -86,7 +86,26 @@ No guardar secretos en Git ni en variables `VITE_*`.
 
 Mientras falte cualquiera, el webhook debe responder 503 y NO mutar membresías.
 
-## 6. Tranches siguientes
+## 6. Verification checkpoint
+
+Current branch evidence:
+- GitHub Actions CI: PASS;
+- `npm ci`: PASS;
+- production build: PASS;
+- lint step: visible/non-blocking because the pre-existing repository baseline contains 114 lint problems;
+- new PayPal webhook `any` lint debt corrected;
+- old Founder modal state: absent;
+- old `pitch_seen_*` bootstrap: absent;
+- PayPal buttons in active App: absent;
+- client-side `is_founder: true` mutation: absent;
+- browser Supabase client migrated from legacy `anon` key to modern publishable key;
+- production `paypal-webhook` deployed as Edge Function version 2;
+- Security Advisor: no new database findings attributable to this tranche;
+- existing Leaked Password Protection warning remains open.
+
+Runtime PayPal signature verification still requires real PayPal secrets + a real/simulator-compatible webhook delivery before membership may be re-enabled.
+
+## 7. Tranches siguientes
 
 P1:
 - Sentry/error monitoring y release tracking;
@@ -104,7 +123,7 @@ P2:
 - analytics mínimos de producto;
 - regla server-backed para elegibilidad del pitch.
 
-## 7. Definition of Done
+## 8. Definition of Done
 
 No cerrar hasta que:
 - webhook desplegado y rechace requests no verificadas;
