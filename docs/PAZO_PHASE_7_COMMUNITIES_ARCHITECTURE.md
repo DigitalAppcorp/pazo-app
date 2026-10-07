@@ -344,15 +344,23 @@ Antes de Beta pública, Fase 14 debe completar confianza/moderación global.
 
 La infraestructura genérica ya aplicada se conserva.
 
-Extensiones candidatas se registran como module keys separadas cuando se activen, por ejemplo:
-- `communities_events`
-- `communities_badges`
-- `communities_challenges`
-- `communities_admin_tools`
+Extensiones activadas como experimentos de MVP:
+- `communities_events`;
+- `communities_challenges`;
+- `communities_badges`;
+- `communities_qa`;
+- `communities_admin_tools`.
 
-No crear todas ahora.
+Implementación:
+- se reutilizan `module_validation_views` y `module_validation_interests`;
+- los module keys se registran en `validation_private.modules`;
+- no requieren `intent_options` en esta primera medición;
+- la view se emite con IntersectionObserver cuando al menos 50% de la tarjeta entra al viewport;
+- interest es único por cuenta + module key;
+- source distingue miembro vs Owner;
+- solo miembros reales ven experimentos; admin tools solo Owner.
 
-Solo registrar un experimento cuando su resultado cambie una decisión.
+No añadir más experimentos sin que su resultado cambie una decisión.
 
 ---
 
