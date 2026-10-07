@@ -5,6 +5,28 @@
 **Decisión de inversión:** MVP REDUCIDO REAL  
 **Implementación autorizada:** NO
 
+## 0. Estado de cierre actual
+
+Gate 6 continúa aprobado. El núcleo real de Fase 8 ya funciona.
+
+Gate 8 está reabierto únicamente porque dos entregables aprobados no habían sido validados al cerrar originalmente:
+- fake doors contextuales;
+- modelos 3D caricaturizados por categoría.
+
+Fake doors:
+- implementadas;
+- module keys aplicados en Supabase;
+- QA técnico PASS;
+- runtime/persistencia del Product Owner todavía pendiente.
+
+Modelos 3D:
+- assets glTF implementados;
+- primera captura del Product Owner mostró solo fallback 2D;
+- fix de escala/render preparado;
+- nueva validación visual todavía pendiente.
+
+No cerrar Fase 8 ni avanzar a otro módulo hasta completar estas verificaciones.
+
 ## 1. Objetivo
 
 Convertir el tab Mapa en una experiencia realmente útil para descubrir lugares pet-friendly y saber, de forma voluntaria y temporal, qué mascotas están presentes.
