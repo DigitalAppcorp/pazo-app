@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { searchGlobal } from '../../features/search/searchService'
+import { recordSearchUsageEvent } from '../../features/search/searchTelemetryService'
 import type {
   GlobalSearchResponse,
   GlobalSearchResult,
@@ -73,6 +74,16 @@ export const GlobalSearchView = ({
   const trimmedQuery = query.trim()
 
   useEffect(() => {
+    if (!canSearch) return
+
+    void recordSearchUsageEvent({
+      eventType: 'search_open',
+    }).catch((error) =>
+      console.error('Error recording Search open:', error)
+    )
+  }, [canSearch])
+
+  useEffect(() => {
     if (!canSearch || !trimmedQuery) {
       requestVersionRef.current += 1
       setResponse(EMPTY_RESPONSE)
@@ -91,6 +102,19 @@ export const GlobalSearchView = ({
         .then((nextResponse) => {
           if (requestVersionRef.current !== version) return
           setResponse(nextResponse)
+
+          const hadResults =
+            nextResponse.pets.length +
+              nextResponse.communities.length +
+              nextResponse.places.length >
+            0
+
+          void recordSearchUsageEvent({
+            eventType: 'search_execute',
+            hadResults,
+          }).catch((error) =>
+            console.error('Error recording Search execution:', error)
+          )
         })
         .catch((error) => {
           if (requestVersionRef.current !== version) return
@@ -143,9 +167,28 @@ export const GlobalSearchView = ({
   )
 
   const handleSelect = (result: GlobalSearchResult) => {
+    void recordSearchUsageEvent({
+      eventType: 'search_result_open',
+      resultType: result.type,
+      filterType: filter,
+    }).catch((error) =>
+      console.error('Error recording Search result open:', error)
+    )
+
     if (result.type === 'pet') onSelectPet(result.id)
     if (result.type === 'community') onSelectCommunity(result.id)
     if (result.type === 'place') onSelectPlace(result.id)
+  }
+
+  const handleFilterChange = (nextFilter: SearchFilter) => {
+    setFilter(nextFilter)
+
+    void recordSearchUsageEvent({
+      eventType: 'search_filter_change',
+      filterType: nextFilter,
+    }).catch((error) =>
+      console.error('Error recording Search filter:', error)
+    )
   }
 
   const renderResult = (result: GlobalSearchResult) => (
@@ -237,7 +280,7 @@ export const GlobalSearchView = ({
             <button
               key={key}
               type="button"
-              onClick={() => setFilter(key)}
+              onClick={() => handleFilterChange(key)}
               className={
                 'shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-all ' +
                 (filter === key
@@ -335,7 +378,7 @@ export const GlobalSearchView = ({
                     {filter === 'all' && results.length > 5 && (
                       <button
                         type="button"
-                        onClick={() => setFilter(type)}
+                        onClick={() => handleFilterChange(type)}
                         className="text-[10px] font-black text-[#204E4A]"
                       >
                         {lang === 'es' ? 'Ver todos' : 'See all'}
