@@ -116,6 +116,78 @@ const toError = (value: unknown) => {
   return new Error('Unknown frontend error')
 }
 
+interface ParsedStackFrame {
+  filename: string
+  function: string
+  lineno: number
+  colno: number
+  in_app: boolean
+  platform: 'javascript'
+  lang: 'javascript'
+}
+
+const sanitizeFrameLocation = (value: string) => {
+  const redacted = redact(value)
+
+  try {
+    const url = new URL(redacted, window.location.origin)
+    url.search = ''
+    url.hash = ''
+    return url.toString()
+  } catch {
+    return redacted.split('?')[0].split('#')[0]
+  }
+}
+
+const parseJavascriptStack = (stack: string | undefined): ParsedStackFrame[] => {
+  if (!stack) return []
+
+  const frames = stack
+    .split('\n')
+    .slice(1)
+    .map((line) => line.trim())
+    .map((line): ParsedStackFrame | null => {
+      const withFunction = line.match(
+        /^at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)$/,
+      )
+      const withoutFunction = line.match(
+        /^at\s+(.+?):(\d+):(\d+)$/,
+      )
+
+      if (withFunction) {
+        return {
+          function: redact(withFunction[1]).slice(0, 500),
+          filename: sanitizeFrameLocation(withFunction[2]).slice(0, 2000),
+          lineno: Number(withFunction[3]),
+          colno: Number(withFunction[4]),
+          in_app: true,
+          platform: 'javascript',
+          lang: 'javascript',
+        }
+      }
+
+      if (withoutFunction) {
+        return {
+          function: '<anonymous>',
+          filename: sanitizeFrameLocation(withoutFunction[1]).slice(0, 2000),
+          lineno: Number(withoutFunction[2]),
+          colno: Number(withoutFunction[3]),
+          in_app: true,
+          platform: 'javascript',
+          lang: 'javascript',
+        }
+      }
+
+      return null
+    })
+    .filter((frame): frame is ParsedStackFrame => frame !== null)
+    .slice(0, 50)
+
+  // Browser Error.stack is normally crash-site first. PostHog expects
+  // bottom-up wire order: entry point first, crash site last.
+  return frames.reverse()
+}
+
 export const captureException = (
   value: unknown,
   options: {
@@ -128,12 +200,16 @@ export const captureException = (
   const type = redact(error.name || 'Error')
   const message = redact(error.message || 'Unknown frontend error')
   const stack = error.stack ? redact(error.stack).slice(0, 8000) : null
+  const frames = parseJavascriptStack(error.stack)
   const mechanism = options.mechanism || 'unknown'
   const handled = options.handled ?? false
   const fingerprint = `${type}:${message}`.slice(0, 255)
 
   captureEvent('$exception', {
     $exception_level: 'error',
+    $exception_source: mechanism,
+    $exception_type: type,
+    $exception_message: message,
     $exception_fingerprint: fingerprint,
     $issue_name: type.slice(0, 255),
     $issue_description: message.slice(0, 255),
@@ -143,8 +219,15 @@ export const captureException = (
         value: message,
         mechanism: {
           handled,
+          synthetic: false,
           type: mechanism,
         },
+        stacktrace: frames.length > 0
+          ? {
+              type: 'raw',
+              frames,
+            }
+          : null,
       },
     ],
     error_stack: stack,
