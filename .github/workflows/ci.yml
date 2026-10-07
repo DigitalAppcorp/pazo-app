@@ -30,6 +30,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_APP_RELEASE: ${{ github.sha }}
         run: npm run build
 
       - name: Lint (legacy debt is currently non-blocking)
