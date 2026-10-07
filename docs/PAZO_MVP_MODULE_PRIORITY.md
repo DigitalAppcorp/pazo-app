@@ -64,8 +64,9 @@ Estado real:
 - backend/RLS/E2E aprobados.
 
 Conclusión:
-- ya no es candidato pendiente;
-- pasa a operación/medición post-lanzamiento.
+- ya no es un candidato nuevo: su núcleo real ya existe;
+- permanece en Gate 8 hasta cerrar fake doors + validación visual 3D + PR #22;
+- solo después del cierre y merge pasa a Gate 9 / medición post-lanzamiento.
 
 ---
 
@@ -258,7 +259,7 @@ Usar su sub-ruta y datos de validación.
 
 - 9A Agenda/Cuidados: COMPLETADA.
 - 9B Documentos privados: COMPLETADA.
-- 8 Mapa/Lugares/Check-ins: COMPLETADA.
+- 8 Mapa/Lugares/Check-ins: EN CURSO — GATE 8 REABIERTO; PR #22 pendiente de validación runtime/visual y merge.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
