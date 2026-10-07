@@ -64,9 +64,10 @@ Estado real:
 - backend/RLS/E2E aprobados.
 
 Conclusión:
-- ya no es un candidato nuevo: su núcleo real ya existe;
-- permanece en Gate 8 hasta cerrar fake doors + validación visual 3D + PR #22;
-- solo después del cierre y merge pasa a Gate 9 / medición post-lanzamiento.
+- Fase 8 está COMPLETADA;
+- PR #22 está merged y `main` verificado;
+- pasa a Gate 9 / medición post-lanzamiento;
+- las fake doors siguen como instrumentos de priorización, no como autorización automática de build.
 
 ---
 
@@ -219,19 +220,18 @@ Continúa:
 No bloquea Agenda.
 
 ## Mapa/Lugares
-**GATE 8 REABIERTO PARA CORRECCIÓN DE SCOPE.**
+**COMPLETADA — GATE 9 / MEDICIÓN.**
 
 Fake doors:
 - backend/registro: PASS;
 - runtime + F5 del Product Owner: PASS.
 
 3D markers:
-- assets/layer: implementados;
-- primera captura detectó modelo no perceptible;
-- fix de escala/cámara aplicado;
-- nueva prueba visual: PASS.
+- assets/layer: PASS;
+- fix de escala/cámara: PASS;
+- validación visual del Product Owner: PASS.
 
-No pasa a Gate 9 hasta mergear PR #22 y verificar `main`.
+PR #22 merged y `main` verificado.
 
 ---
 
@@ -259,7 +259,7 @@ Usar su sub-ruta y datos de validación.
 
 - 9A Agenda/Cuidados: COMPLETADA.
 - 9B Documentos privados: COMPLETADA.
-- 8 Mapa/Lugares/Check-ins: EN CURSO — QA DE CIERRE PASS; PR #22 pendiente de merge + verificación de `main`.
+- 8 Mapa/Lugares/Check-ins: COMPLETADA — Gate 9 / medición.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
