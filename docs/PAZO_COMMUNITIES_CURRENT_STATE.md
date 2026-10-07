@@ -44,7 +44,7 @@ La validación se utilizará para extensiones avanzadas dentro del módulo real.
 - PR #16 cerrado sin merge.
 - PR #17 sincronizó a main las migraciones de validación ya aplicadas.
 - instrumentación genérica disponible para extensiones futuras.
-- existen 2 views + 1 interest de Communities provenientes de pruebas; deben limpiarse antes de medición real con autorización.
+- legacy validation signals were cleaned with explicit Product Owner authorization.
 - backend real de Comunidades APLICADO.
 - migración registrada en Supabase: `20261007014214 communities_mvp_core`.
 - fix forward-only de Storage registrado: `20261007014624 fix_community_storage_policies`.
@@ -52,7 +52,7 @@ La validación se utilizará para extensiones avanzadas dentro del módulo real.
 - Storage INSERT policies probadas: owner avatar, member post media, foreign path denied, removed-member denied.
 - Storage DELETE directo no puede probarse por SQL porque Supabase lo bloquea mediante `storage.protect_delete()`; debe validarse desde la Storage API/UI.
 - Security Advisor sin findings nuevos atribuibles a Comunidades.
-- señales antiguas de validación (2 views, 1 interest, 0 intents) siguen intactas; no se han borrado.
+- legacy validation signals: 0 views / 0 interests / 0 intents.
 
 ## Validación end-to-end
 
@@ -65,7 +65,7 @@ La validación se utilizará para extensiones avanzadas dentro del módulo real.
 
 ## Community extension experiments
 
-**Status:** BACKEND APPLIED / pending Product Owner visual review.
+**Status:** APPLIED / VALIDATED / PRODUCT OWNER APPROVED.
 
 Active experiments:
 - `communities_events`;
@@ -85,7 +85,7 @@ Validation:
 - Owner general + admin-tools eligibility: PASS;
 - normal member admin-tools: BLOCKED;
 - outsider extension view/interest: BLOCKED;
-- tests rolled back; extension signal tables remain at 0 before Product Owner UI test;
+- transactional tests rolled back; real extension evidence begins only from Product Owner UI usage;
 - Security Advisor: no new findings attributable to experiment layer.
 
 ## Product Owner fake-door review
@@ -106,9 +106,9 @@ Validation:
   - 1 interest;
   - all under `communities_*`.
 
-## Siguiente paso
+## Cierre
 
-1. mark PR #18 ready;
-2. merge PR #18;
-3. verify main;
-4. close Gate 8 in canonical roadmap/handoff after merge.
+- PR #18 merged to `main`.
+- Merge commit: `169b9a47453de0653a3aba27338ea80cd046e0d6`.
+- Gate 8 closed.
+- Next active area: Fase 8 — Lugares, mapa y Check-ins.
