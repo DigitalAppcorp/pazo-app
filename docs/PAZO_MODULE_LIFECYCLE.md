@@ -294,6 +294,9 @@ Aquí sí definimos:
 - errores;
 - notificaciones;
 - privacidad;
+- datos públicos/privados/sensibles;
+- telemetría permitida/prohibida;
+- retención/borrado si aplica;
 - monetización futura;
 - Definition of Done.
 
@@ -305,6 +308,7 @@ Esta etapa produce la sub-ruta funcional del módulo.
 Solo después de cerrar producto.
 
 Definir:
+- ownership del código según `docs/PAZO_ARCHITECTURE_CONTRACT.md`;
 - tablas;
 - relaciones;
 - RLS;
@@ -312,9 +316,12 @@ Definir:
 - Storage;
 - paginación;
 - índices;
-- ownership;
+- ownership de datos;
+- clasificación de datos según `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`;
 - concurrencia;
-- APIs;
+- APIs/proveedores externos;
+- datos enviados a cada proveedor;
+- telemetría/logging;
 - migraciones;
 - tests.
 
