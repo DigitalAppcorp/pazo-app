@@ -25,7 +25,12 @@
 - Product Owner caught missing agreed fake-door layer before merge;
 - Community extension fake doors prepared for Events/Walks, Challenges, Badges/Recognition, Q&A, and Admin Tools;
 - fake doors are contextual: members only; Admin Tools owner-only; views tracked only on real viewport visibility;
-- migration `20261007021500_community_extension_experiments.sql` prepared but NOT applied; explicit authorization required after build;
+- Product Owner build PASS + explicit authorization received for Community extension experiments;
+- `20261007023800 community_extension_experiments` APPLIED;
+- `20261007023927 harden_community_extension_experiment_eligibility` APPLIED;
+- eligibility hardened server-side: member-only general experiments, Owner-only Admin Tools;
+- transactional experiment tests PASS; no test signals persisted;
+- pending Product Owner visual review of fake doors;
 - real Storage API DELETE validated through the app/UI: PASS;
 - visual QA found unclear unlabeled fields in Community edit form;
 - Community edit form labels/placeholders/required-vs-optional states fixed in commit `9fdfb7f`; Product Owner local review PASS;
