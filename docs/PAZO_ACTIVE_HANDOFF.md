@@ -5,7 +5,7 @@
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
 **Active product module:** Production Hardening — infraestructura obligatoria  
-**Gate:** Production Hardening Gate 8 — PR #30 GOVERNANCE RECONCILIATION  
+**Gate:** Production Hardening Gate 8 — PR #30 MERGE PENDING  
 **Decision:** MVP REDUCIDO  
 **Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
@@ -282,3 +282,13 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - TypeScript + production build: PASS.
 - Lint: PASS on this run.
 - PR #30 remains Draft until PO validates the visible 18+ onboarding change.
+
+
+### Architecture/privacy reconciliation final acceptance
+- PO visible onboarding validation: PASS.
+- 18+ explicit attestation behavior: PASS.
+- Navigation smoke test: PASS.
+- Governance CI suite: PASS.
+- Scope Closure Reconciliation: PASS.
+- PR #30 may return to Ready for Review.
+- Exact next action: merge PR #30 only after explicit PO authorization, then verify main.
