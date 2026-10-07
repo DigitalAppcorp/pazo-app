@@ -13,6 +13,7 @@ CREATE TABLE public.communities (
   species text,
   zone text,
   image_url text,
+  image_storage_path text,
   rules text,
   status text NOT NULL DEFAULT 'active',
   members_count integer NOT NULL DEFAULT 0,
@@ -30,6 +31,8 @@ CREATE TABLE public.communities (
     CHECK (zone IS NULL OR char_length(btrim(zone)) <= 100),
   CONSTRAINT communities_rules_length
     CHECK (rules IS NULL OR char_length(btrim(rules)) <= 2000),
+  CONSTRAINT communities_image_pair
+    CHECK ((image_url IS NULL) = (image_storage_path IS NULL)),
   CONSTRAINT communities_status_allowed
     CHECK (status IN ('active','archived')),
   CONSTRAINT communities_members_count_nonnegative
@@ -145,7 +148,7 @@ REVOKE ALL ON TABLE public.community_post_likes FROM PUBLIC, anon, authenticated
 GRANT SELECT ON TABLE public.communities TO authenticated;
 GRANT INSERT (name, description, category, species, zone, image_url, rules)
   ON TABLE public.communities TO authenticated;
-GRANT UPDATE (name, description, category, species, zone, image_url, rules, status)
+GRANT UPDATE (name, description, category, species, zone, image_url, image_storage_path, rules, status)
   ON TABLE public.communities TO authenticated;
 
 GRANT SELECT ON TABLE public.community_memberships TO authenticated;
