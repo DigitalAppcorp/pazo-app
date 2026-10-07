@@ -368,7 +368,7 @@ Estado técnico final:
 ---
 
 ## Fase 8 — Lugares, mapa y Check-ins
-**Estado: SIGUIENTE — GATE 6**
+**Estado: EN CURSO — GATE 8**
 
 Existe `pet_places`, pero `MapView` todavía es placeholder.
 
@@ -395,10 +395,16 @@ Hacer funcional el descubrimiento local.
 - contador público + identidad de mascota solo con opt-in;
 - modelos 3D GLB/glTF por categoría preparados desde arquitectura.
 
-**Gate actual:** Gate 6 — especificación de producto.
-Fuente: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
+Gate 6: CERRADO / aprobado.  
+Gate 7: CERRADO.  
+Gate 8: EN CURSO — implementación preparada, backend aún no aplicado.
 
-No implementar todavía; Gate 7 depende de aprobación explícita del Product Owner.
+Fuentes:
+- producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
+- arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`;
+- migración preparada: `20261007052000_phase_8_places_map_core.sql`.
+
+No aplicar Supabase hasta build + revisión + autorización explícita.
 
 ---
 
