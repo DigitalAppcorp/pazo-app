@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins — MVP de producto
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO EN CURSO  
+**Estado:** GATE 6 CERRADO — APROBADO POR PRODUCT OWNER  
 **Fecha:** 2026-10-06  
 **Decisión de inversión:** MVP REDUCIDO REAL  
 **Implementación autorizada:** NO
@@ -354,7 +354,9 @@ El mapa no debe quedar como pantalla en blanco.
 
 ## 14. Definition of Done — Gate 6
 
-Gate 6 queda cerrado cuando Product Owner apruebe:
+**APROBADO por Product Owner el 2026-10-06.**
+
+Quedó aprobado:
 
 - ciclo de valor;
 - categorías;
