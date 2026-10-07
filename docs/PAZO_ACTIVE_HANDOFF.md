@@ -107,9 +107,9 @@ Backend QA:
 - Community experiment modules remained intact;
 - Security Advisor unchanged from baseline.
 
-Still pending:
-- Product Owner runtime test of one `Me interesa`;
-- F5 must preserve `Interés registrado`.
+Product Owner runtime validation:
+- `Me interesa`: PASS;
+- F5 persistence of `Interés registrado`: PASS.
 
 Do NOT reapply the experiment migration.
 
@@ -137,10 +137,12 @@ Observed:
 - blue 2D fallback circle is visible;
 - **3D veterinary model is NOT perceptible**.
 
-Therefore:
-**3D VISUAL VALIDATION = FAIL/PENDING.**
+That screenshot was the pre-fix failure evidence.
 
-Do not call this PASS because the glTF files parse or because build succeeds.
+After the forward visibility fix, the Product Owner completed the requested runtime/visual QA and reported success.
+
+Therefore:
+**3D VISUAL VALIDATION = PASS.**
 
 ### Root cause / forward fix already prepared
 Current active-branch `MapboxMap.tsx` has a visibility correction:
@@ -158,38 +160,23 @@ Current active-branch `MapboxMap.tsx` has a visibility correction:
 
 This fix was prepared **after** the screenshot that showed only the blue circle.
 
-It has NOT yet received the Product Owner's new local build + visual PASS.
+Product Owner follow-up validation on the latest branch:
+- local build: PASS;
+- veterinary 3D marker: PASS;
+- park/trail visual check: PASS;
+- fake-door interest: PASS;
+- F5 persistence: PASS.
 
 ## Exact next action
 
-Do not design another module.
+All Product Owner runtime/visual checks for this correction are PASS.
 
-Ask Brandon to execute on the existing active branch:
-
-```powershell
-git fetch origin
-git switch fix/phase-8-fake-doors-3d-markers
-git pull --ff-only
-git rev-parse --short HEAD
-npm run build
-```
-
-If build PASS:
-1. `npm run dev`;
-2. open PAZO → Mapa;
-3. select **Los Feliz Small Animal Hospital**;
-4. verify the veterinary 3D figure is clearly visible, not just the blue circle;
-5. inspect Silver Lake Dog Park (park model) and Runyon Canyon Park (trail model);
-6. open a Place detail and scroll to **Funciones en desarrollo**;
-7. press **Me interesa** on one fake door only;
-8. F5;
-9. verify it still says **Interés registrado**.
-
-If 3D is still invisible:
-- stop closure;
-- inspect browser console / Mapbox layer errors and model-layer compatibility;
-- debug current active branch;
-- do not fall back to declaring the 2D circle sufficient, because 3D markers were approved scope.
+Remaining closure sequence:
+1. mark PR #22 ready;
+2. merge PR #22;
+3. verify `main`;
+4. finalize canonical docs on top of verified `main`;
+5. only then mark Fase 8 COMPLETADA and move it to Gate 9.
 
 ## Scope closure checklist
 
@@ -198,15 +185,15 @@ If 3D is still invisible:
 - real core E2E: PASS;
 - fake-door implementation: PASS;
 - fake-door backend registration: PASS;
-- fake-door runtime + F5: PENDING;
+- fake-door runtime + F5: PASS;
 - glTF assets: IMPLEMENTED;
 - 3D model layer: IMPLEMENTED;
-- 3D visual Product Owner acceptance: PENDING/previous screenshot FAIL;
+- 3D visual Product Owner acceptance: PASS;
 - PR #22 merge: PENDING;
 - main verification after PR #22: PENDING;
-- Scope Closure Reconciliation: NOT YET PASS.
+- Scope Closure Reconciliation: VALIDATION PASS / awaiting merge + main verification.
 
-Fase 8 remains **EN CURSO**.
+Fase 8 remains **EN CURSO** only until PR #22 is merged and `main` is verified.
 
 ## Do not do
 
