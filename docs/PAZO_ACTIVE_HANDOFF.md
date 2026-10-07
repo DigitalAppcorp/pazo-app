@@ -5,7 +5,7 @@
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
 **Active product module:** Production Hardening — infraestructura obligatoria  
-**Gate:** Production Hardening Gate 8 — PR #30 MERGE PENDING  
+**Gate:** Production Hardening Gate 8 — PR #30 MERGED / EXTERNAL HARDENING PENDING  
 **Decision:** MVP REDUCIDO  
 **Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
@@ -292,3 +292,21 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - Scope Closure Reconciliation: PASS.
 - PR #30 may return to Ready for Review.
 - Exact next action: merge PR #30 only after explicit PO authorization, then verify main.
+
+
+### PR #30 merge closure
+- PR #30: MERGED.
+- Merge commit: `c179182c79c587c7727277a966cc09704002ce10`.
+- Main verification:
+  - premature PayPal pitch absent;
+  - architecture contract present;
+  - privacy/data-governance contract present;
+  - data/provider inventory present;
+  - hardening code present.
+- Production Hardening remains EN CURSO.
+- Next exact work is external/provider hardening, not F13:
+  - PayPal real webhook verification;
+  - PostHog live ingestion/alerts;
+  - Vercel/Mapbox spend controls;
+  - hosted Auth verification;
+  - backup/restore drill.

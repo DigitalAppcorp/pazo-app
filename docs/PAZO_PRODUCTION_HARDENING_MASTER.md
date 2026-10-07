@@ -346,7 +346,7 @@ Before PR #30 can return to merge-ready:
 
 ## 12. Final Architecture / Privacy Reconciliation
 
-**Resultado:** PASS / MERGE PENDING.
+**Resultado:** PASS / MERGED.
 
 Product Owner validation on HEAD `595e7720fbea8bc0f81c7168bbe0a7d1e8143615`:
 - 18+ checkbox defaults unchecked: PASS;
@@ -371,4 +371,28 @@ Final decision for this mini-tranche:
 
 **Scope Closure Reconciliation: PASS.**
 
-PR #30 can return to Ready for Review and may be merged only after explicit Product Owner merge authorization.
+PR #30 was merged to `main` after explicit Product Owner authorization.
+
+
+## 13. PR #30 merge closure
+
+**Status:** MERGED / MAIN VERIFIED.
+
+- PR #30 merged after explicit Product Owner authorization.
+- merge commit: `c179182c79c587c7727277a966cc09704002ce10`;
+- `main` contains the hardening code and governance documents;
+- premature PayPal pitch remains absent on `main`;
+- architecture contract present on `main`;
+- privacy/data-governance contract present on `main`;
+- data/provider inventory present on `main`;
+- Production Hardening as a whole remains **EN CURSO** because external provider configuration/verification is still pending.
+
+Remaining active backlog:
+- PayPal real secrets + genuine Sandbox/Live webhook verification;
+- PostHog live project/token/event ingestion + alerts;
+- Vercel project/env/usage/spend controls;
+- Mapbox usage/budget alerts;
+- hosted Auth settings verification;
+- CAPTCHA/Turnstile timing before public Beta;
+- backup/restore drill;
+- final provider/privacy reconciliation before public Beta.
