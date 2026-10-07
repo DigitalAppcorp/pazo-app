@@ -113,9 +113,11 @@ const verifyPaypalWebhook = async (
   return data.verification_status === 'SUCCESS'
 }
 
-const getSubscriptionId = (event: Record<string, any>) => {
+const getSubscriptionId = (event: Record<string, unknown>) => {
   const type = String(event.event_type || '')
-  const resource = event.resource || {}
+  const resource = event.resource && typeof event.resource === 'object'
+    ? event.resource as Record<string, unknown>
+    : {}
 
   if (type.startsWith('BILLING.SUBSCRIPTION.')) {
     return typeof resource.id === 'string' ? resource.id : null
@@ -174,7 +176,7 @@ serve(async (req: Request): Promise<Response> => {
     return json({ error: 'Payload too large' }, 413)
   }
 
-  let event: Record<string, any>
+  let event: Record<string, unknown>
   try {
     event = JSON.parse(rawBody)
   } catch {
