@@ -5,7 +5,7 @@
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
 **Active product module:** Production Hardening — infraestructura obligatoria  
-**Gate:** Production Hardening Gate 8 — PR #30 MERGE PENDING  
+**Gate:** Production Hardening Gate 8 — PR #30 GOVERNANCE RECONCILIATION  
 **Decision:** MVP REDUCIDO  
 **Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
@@ -248,3 +248,27 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 - Do NOT call Production Hardening globally complete yet.
 - Exact next action: merge PR #30 only after explicit PO merge authorization, then verify `main`.
 - After merge/main verification, continue the remaining external hardening backlog separately: PayPal real secrets/webhook delivery, PostHog live ingestion/alerts, Vercel/Mapbox spend controls, hosted Auth verification, CAPTCHA timing, backup/restore drill.
+
+
+### Video-derived architecture/privacy reconciliation
+Status: EN CURSO / PR #30 returned to Draft.
+
+Implemented:
+- canonical architecture contract: `docs/PAZO_ARCHITECTURE_CONTRACT.md`;
+- canonical privacy/data governance: `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`;
+- data + third-party provider inventory: `docs/PAZO_DATA_INVENTORY.md`;
+- module lifecycle Gate 6/7 now requires data classification, telemetry/provider review and explicit code ownership;
+- F14 expanded with UGC reporting/blocking, copyright/IP, account deletion, minor-handling procedure, data inventory, retention matrix, Privacy Policy/Terms and tracking audit;
+- F15 expanded with restore drill, live observability verification, spend controls and client-storage audit;
+- architecture CI guard blocks new domain services/views/modals in legacy global folders without conscious baseline update;
+- privacy CI guard blocks session replay/autocapture/direct tracking patterns and reviewed tracking SDK additions by default;
+- PostHog product events/properties now use an explicit allowlist;
+- 18+ checkbox defaults false and requires active attestation;
+- onboarding no longer claims acceptance of Terms that are not yet published.
+
+Decision:
+- no mass folder refactor in this tranche;
+- no DOB/ID collection or invasive age verification introduced;
+- no session replay/autocapture enabled.
+
+Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche and must be rerun after CI + PO visual/runtime validation.
