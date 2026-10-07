@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-06  
-**Estado general:** núcleo social, rescate, Comunidades, Lugares/Mapa/Check-ins, Agenda/Cuidados y Documentos privados están COMPLETADOS en `main`. No hay un siguiente módulo de implementación autorizado automáticamente.
+**Estado general:** Fase 8 Lugares/Mapa/Check-ins fue reabierta por scope incompleto detectado por Product Owner: faltaban fake doors contextuales y marcadores 3D por categoría. No iniciar otro módulo hasta cerrar esta corrección.
 
 ---
 
@@ -340,7 +340,7 @@ Decisión vigente:
 
 Gate 6: CERRADO.  
 Gate 7: CERRADO.  
-Gate 8: CERRADO.
+Gate 8: REABIERTO — corrección de scope: fake doors + modelos 3D.
 
 Backend:
 - `20261007014214 communities_mvp_core`;
@@ -362,7 +362,7 @@ Estado técnico final:
 ---
 
 ## Fase 8 — Lugares, mapa y Check-ins
-**Estado: COMPLETADA**
+**Estado: EN CURSO — GATE 8 REABIERTO**
 
 ### Objetivo
 Hacer funcional el descubrimiento local.
@@ -834,32 +834,31 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Carril de Validación
-- Comunidades: núcleo real COMPLETADO; extensiones avanzadas siguen bajo validación contextual.
-- Futuros módulos sociales opcionales deben seguir `docs/PAZO_MODULE_LIFECYCLE.md`.
-
 ## Carril de Implementación
-No hay un módulo siguiente autorizado automáticamente.
 
-### Candidato recomendado para nueva auditoría: Fase 12 — Explore/Search unificado
+### Fase 8 — corrección de cierre
+**EN CURSO — Gate 8 reabierto.**
 
-Razón:
-- mascotas reales disponibles;
-- Comunidades reales disponibles;
-- Lugares reales disponibles;
-- Explore ya existe y puede convertirse en infraestructura útil sobre entidades reales;
-- la condición histórica "implementar cuando haya contenido" ya se cumple mejor que antes.
+Faltantes detectados por Product Owner:
+- fake doors contextuales para futuras funciones de Lugares;
+- marcadores/modelos 3D caricaturizados por categoría.
 
-Esto **no autoriza implementación**.
+Rama:
+`fix/phase-8-fake-doors-3d-markers`.
 
-Siguiente paso recomendado:
-1. Gate 0–2 de Explore/Search;
-2. auditar UI/repositorio/Supabase real;
-3. decidir alcance mínimo útil;
-4. comparar contra Mensajería, Notificaciones y Rediseño antes de autorizar código.
+Preparado:
+- 6 fake doors sobre infraestructura `module_validation_*`;
+- 6 assets glTF reutilizables;
+- Mapbox model layer desde zoom cercano con fallback 2D;
+- migración `20261007073500_place_extension_experiments.sql` NO aplicada.
 
-### Mensajería
-Permanece POSPUESTA / REEVALUAR por masa crítica, moderación y coste operativo.
+Cierre requerido:
+1. build local PASS;
+2. aplicar module keys con autorización explícita;
+3. validar fake doors + F5;
+4. validar visualmente los marcadores 3D;
+5. merge de corrección;
+6. volver a marcar Fase 8 COMPLETADA.
 
 ## Regla
-No iniciar otro módulo grande por numeración histórica. Primero pasar su lifecycle y obtener decisión explícita del Product Owner.
+No iniciar Explore/Search ni otro módulo grande antes de cerrar esta corrección.
