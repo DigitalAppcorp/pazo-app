@@ -1,3 +1,23 @@
+# CURRENT DECISION — MVP ÚTIL REAL
+
+**Fecha:** 2026-10-06
+**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO EN CURSO
+**Decisión:** MVP REDUCIDO REAL
+
+Comunidades deja de validarse como un fake door de módulo completo.
+
+La ruta actual es:
+- construir un núcleo real y usable;
+- preservar Explorar como hub general;
+- validar dentro de Comunidades solo extensiones avanzadas u opcionales;
+- conservar la instrumentación genérica para esas extensiones.
+
+**Especificación actual:** `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`
+
+El contenido de fake-door de módulo completo que sigue debajo queda como historial de decisión y no gobierna la ejecución actual.
+
+---
+
 # PAZO — Sub-Ruta Maestra Fase 7: Comunidades
 
 **Estado:** CARRIL DE VALIDACIÓN — EXPERIMENTO ACTIVO  
