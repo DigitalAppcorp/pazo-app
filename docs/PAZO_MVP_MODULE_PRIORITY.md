@@ -50,7 +50,12 @@ Conclusión:
 
 ## Mapa/Lugares
 Estado real:
-- Fase 8 núcleo real merged; cierre REABIERTO por fake doors + 3D markers pendientes;
+- núcleo real de Fase 8 merged y backend validado;
+- cierre REABIERTO por fake doors + 3D markers ya aprobados;
+- fake doors implementadas y module keys aplicados;
+- 3D assets implementados;
+- primera prueba visual 3D: FAIL/PENDING (solo se vio fallback 2D);
+- fix de visibilidad 3D preparado y pendiente de nuevo build/visual QA;
 - Mapbox real;
 - catálogo curado real;
 - check-ins reales con privacidad/expiración;
@@ -118,7 +123,7 @@ Escala:
 |---|---:|---:|---:|---:|---|
 | Agenda/Cuidados | 5 | 2 | 1 | 1 | BUILD NOW |
 | Documentos | 4 | 3 | 3 | 1 | SIGUIENTE DESPUÉS DE AGENDA |
-| Mapa/Lugares | 4 | 4 | 3 | 3 | CIERRE EN CORRECCIÓN |
+| Mapa/Lugares | 4 | 4 | 3 | 3 | CIERRE EN CORRECCIÓN — 3D QA PENDIENTE |
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
@@ -215,7 +220,17 @@ No bloquea Agenda.
 ## Mapa/Lugares
 **GATE 8 REABIERTO PARA CORRECCIÓN DE SCOPE.**
 
-No pasa a Gate 9 hasta validar fake doors + 3D markers.
+Fake doors:
+- backend/registro: PASS;
+- runtime + F5 del Product Owner: PENDIENTE.
+
+3D markers:
+- assets/layer: implementados;
+- primera captura: modelo no perceptible;
+- fix de escala/cámara preparado;
+- nueva prueba visual: PENDIENTE.
+
+No pasa a Gate 9 hasta validar fake doors + 3D markers y mergear PR #22.
 
 ---
 
