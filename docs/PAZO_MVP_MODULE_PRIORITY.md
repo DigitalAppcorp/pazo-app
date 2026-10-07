@@ -54,8 +54,8 @@ Estado real:
 - cierre REABIERTO por fake doors + 3D markers ya aprobados;
 - fake doors implementadas y module keys aplicados;
 - 3D assets implementados;
-- primera prueba visual 3D: FAIL/PENDING (solo se vio fallback 2D);
-- fix de visibilidad 3D preparado y pendiente de nuevo build/visual QA;
+- primera prueba visual 3D detectó fallback 2D;
+- fix de visibilidad 3D aplicado y nueva validación Product Owner: PASS;
 - Mapbox real;
 - catálogo curado real;
 - check-ins reales con privacidad/expiración;
@@ -124,7 +124,7 @@ Escala:
 |---|---:|---:|---:|---:|---|
 | Agenda/Cuidados | 5 | 2 | 1 | 1 | BUILD NOW |
 | Documentos | 4 | 3 | 3 | 1 | SIGUIENTE DESPUÉS DE AGENDA |
-| Mapa/Lugares | 4 | 4 | 3 | 3 | CIERRE EN CORRECCIÓN — 3D QA PENDIENTE |
+| Mapa/Lugares | 4 | 4 | 3 | 3 | CIERRE EN CORRECCIÓN — QA PASS / MERGE PENDIENTE |
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
@@ -223,15 +223,15 @@ No bloquea Agenda.
 
 Fake doors:
 - backend/registro: PASS;
-- runtime + F5 del Product Owner: PENDIENTE.
+- runtime + F5 del Product Owner: PASS.
 
 3D markers:
 - assets/layer: implementados;
-- primera captura: modelo no perceptible;
-- fix de escala/cámara preparado;
-- nueva prueba visual: PENDIENTE.
+- primera captura detectó modelo no perceptible;
+- fix de escala/cámara aplicado;
+- nueva prueba visual: PASS.
 
-No pasa a Gate 9 hasta validar fake doors + 3D markers y mergear PR #22.
+No pasa a Gate 9 hasta mergear PR #22 y verificar `main`.
 
 ---
 
@@ -259,7 +259,7 @@ Usar su sub-ruta y datos de validación.
 
 - 9A Agenda/Cuidados: COMPLETADA.
 - 9B Documentos privados: COMPLETADA.
-- 8 Mapa/Lugares/Check-ins: EN CURSO — GATE 8 REABIERTO; PR #22 pendiente de validación runtime/visual y merge.
+- 8 Mapa/Lugares/Check-ins: EN CURSO — QA DE CIERRE PASS; PR #22 pendiente de merge + verificación de `main`.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
