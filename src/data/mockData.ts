@@ -2,7 +2,6 @@ import type {
   Pet,
   Post,
   Community,
-  PetPlace,
   Conversation,
   PazoNotification,
 } from '../types/pazo'
@@ -149,45 +148,6 @@ export const INITIAL_COMMUNITIES: Community[] = [
     membersCount: 650,
     photoUrl: 'https://images.unsplash.com/photo-1591382696684-38c427c7547a?q=80&w=500&auto=format&fit=crop',
     isJoined: false,
-  },
-]
-
-export const INITIAL_PLACES: PetPlace[] = [
-  {
-    id: 'place-silverlake',
-    name: 'Silver Lake Meadow Park',
-    type: 'parque',
-    zone: 'Silver Lake',
-    address: '1850 W Silver Lake Dr, Los Angeles, CA',
-    hours: '06:00 - 20:00 todos los días',
-    speciesAllowed: 'Perros con correa, gatos en transportín/mochila segura',
-    description: 'Área verde amplia y tranquila con sombra de eucaliptos y bebederos limpios.',
-    photoUrl: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=600&auto=format&fit=crop',
-    activeCheckIns: 4,
-  },
-  {
-    id: 'place-muddy',
-    name: 'Muddy Paw Coffee & Patio',
-    type: 'cafeteria',
-    zone: 'Echo Park',
-    address: '3320 Sunset Blvd, Los Angeles, CA',
-    hours: '07:00 - 18:00',
-    speciesAllowed: 'Todas las especies con tutor responsable',
-    description: 'Terraza amplia pet-friendly, donan un porcentaje a rescates locales.',
-    photoUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=600&auto=format&fit=crop',
-    activeCheckIns: 2,
-  },
-  {
-    id: 'place-griffith',
-    name: 'Ferndell Trail en Griffith',
-    type: 'parque',
-    zone: 'Los Feliz',
-    address: 'Fern Dell Dr, Los Angeles, CA',
-    hours: '05:00 - 22:30',
-    speciesAllowed: 'Perros con correa reglamentaria',
-    description: 'Sendero sombreado con arroyos y helechos, ideal para días templados.',
-    photoUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=600&auto=format&fit=crop',
-    activeCheckIns: 7,
   },
 ]
 

@@ -181,9 +181,6 @@ Actualmente el núcleo persistente usa, entre otras:
 - Mensajería 1 a 1.
 - Centro general de notificaciones.
 - Crear lugar.
-- Crear comunidad.
-- QR/rescate real en `main`.
-- Alertas de mascota perdida reales en `main`.
 
 ---
 
@@ -368,7 +365,7 @@ Estado técnico final:
 ---
 
 ## Fase 8 — Lugares, mapa y Check-ins
-**Estado: PLANIFICADA**
+**Estado: EN CURSO — GATE 8**
 
 Existe `pet_places`, pero `MapView` todavía es placeholder.
 
@@ -386,13 +383,25 @@ Hacer funcional el descubrimiento local.
 - privacidad de ubicación;
 - creación/sugerencia de lugares según decisión de producto.
 
-### DECISIÓN PENDIENTE
-Elegir proveedor/cartografía y reglas de ubicación:
-- Mapbox / Google Maps / alternativa;
-- GPS exacto vs ubicación aproximada;
-- quién puede agregar lugares.
+### Decisiones de producto cerradas
+- Mapbox GL JS;
+- ubicación solo por acción explícita y uso efímero;
+- no persistir GPS exacto;
+- PAZO publica lugares y usuarios sugieren;
+- check-in 2 horas;
+- contador público + identidad de mascota solo con opt-in;
+- modelos 3D GLB/glTF por categoría preparados desde arquitectura.
 
-No activar ubicación precisa sin decisión explícita.
+Gate 6: CERRADO / aprobado.  
+Gate 7: CERRADO.  
+Gate 8: EN CURSO — backend + runtime + visual/E2E PASS; listo para merge.
+
+Fuentes:
+- producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
+- arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`;
+- migración preparada: `20261007052000_phase_8_places_map_core.sql`.
+
+No aplicar Supabase hasta build + revisión + autorización explícita.
 
 ---
 
@@ -790,7 +799,6 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - existe `CreateModal - copia.tsx`, probable archivo duplicado a retirar después de verificar uso.
 - `INITIAL_PETS` sigue sirviendo como fallback inicial en memoria; revisar cuando se termine la eliminación de mocks.
 - MapView es placeholder.
-- comunidades son mock.
 - Agenda/Cuidados y Documentos privados son reales y persistentes.
 - Messages son mock/local.
 - algunos flujos del menú Crear anuncian “próximamente”.
@@ -818,42 +826,23 @@ Usar únicamente:
 
 ## Carril de Validación
 ### Comunidades
-- **EXPERIMENTO ACTIVO**;
-- no diseñar todavía roles/schema/feed/moderación;
-- su sub-ruta canónica es `docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`;
-- 7.0A APROBADA por Product Owner;
-- autorizado preparar la infraestructura genérica mínima de validación con Comunidades como primer consumidor;
-- no construir backend/roles/feed/moderación de Comunidades;
-- siguiente trabajo: cerrar el diseño del experimento 7.0A:
-  - qué promesa/hook mostrará la preview;
-  - qué elementos conceptuales hacen entendible/atractivo el módulo;
-  - qué significa exactamente `Me interesa`;
-  - qué pregunta/opciones de intención necesitamos;
-  - qué cuenta como view/revisita;
-  - qué datos cambian la decisión BUILD NOW / MVP REDUCIDO / EXPERIMENTO ACTIVO / POSPUESTO;
-- después de cerrar ese experimento, implementar **una sola infraestructura genérica** de tracking por cuenta;
-- Comunidades será el primer consumidor.
-
-### Mapa/Lugares
-- su fake door actual no produce datos confiables con el schema real;
-- no incluirlo todavía en el primer experimento de Comunidades;
-- debe pasar su propia ficha/experimento antes de conectarse a la infraestructura genérica.
+- Fase 7 COMPLETADA;
+- el núcleo real ya está en `main`;
+- únicamente las extensiones avanzadas siguen bajo validación contextual mediante `communities_*`.
 
 ## Carril de Implementación
-### 9A Agenda/Cuidados
-- COMPLETADA;
-- PR #12 fusionado a `main`.
+### Fase 8 — Lugares, mapa y Check-ins
+- **EN CURSO — Gate 8**;
+- Gate 6 de producto: CERRADO / aprobado;
+- Gate 7 de arquitectura: CERRADO;
+- frontend/servicios/migraciones: en implementación sobre `feat/phase-8-places-map`;
+- core + seed + checkout RLS fix: APLICADOS / backend QA PASS;
+- siguiente: merge de PR #20, verificar `main` y cerrar documentalmente Gate 8.
 
-### 9B Documentos privados
-- COMPLETADA;
-- backend y Storage privado aplicados;
-- build, seguridad y prueba visual aprobados;
-- PR #14 fusionado a `main`.
-
-### Siguiente implementación
-- no hay un módulo grande autorizado automáticamente;
-- una vez cerrado el experimento 7.0A de Comunidades, la infraestructura genérica mínima de validación puede entrar como habilitador I;
-- no programar Comunidades completa mientras siga en EXPERIMENTO ACTIVO.
+Fuentes:
+- `docs/PAZO_PHASE_8_PLACES_MASTER.md`;
+- `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
+- `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
 
 ## Regla
-La numeración histórica de fases no bloquea los dos carriles. No iniciar el próximo módulo hasta cerrar sus gates correspondientes.
+No avanzar a otro módulo grande hasta cerrar Gate 8 de Fase 8 o pausarlo explícitamente.

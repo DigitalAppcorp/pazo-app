@@ -136,7 +136,7 @@ export const CreateModal = ({
                 </div>
               </button>
 
-              {/* 3. Check-in voluntario */}
+              {/* 3. Sugerir lugar para revisión */}
               <button
                 onClick={() => {
                   if (onSelectOption) onSelectOption('lugar')
@@ -152,12 +152,12 @@ export const CreateModal = ({
                 </div>
                 <div>
                   <h4 className="font-extrabold text-sm text-[#204E4A]">
-                    {lang === 'es' ? 'Hacer Check-in' : 'Make Check-in'}
+                    {lang === 'es' ? 'Sugerir un lugar' : 'Suggest a place'}
                   </h4>
                   <p className="text-xs text-[#5C7470]">
                     {lang === 'es'
-                      ? 'Avisar que estás en un parque o cafetería por un rato'
-                      : 'Signal presence at a park or cafe for a while'}
+                      ? 'Enviar un lugar pet-friendly para que PAZO lo revise'
+                      : 'Send a pet-friendly place for PAZO to review'}
                   </p>
                 </div>
               </button>

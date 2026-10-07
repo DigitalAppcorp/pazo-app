@@ -148,17 +148,79 @@ export interface Community {
   isJoined?: boolean
 }
 
+export type PlaceCategory =
+  | 'park'
+  | 'trail'
+  | 'food'
+  | 'veterinary'
+  | 'grooming'
+  | 'pet_store'
+
+export type PlaceStatus = 'active' | 'archived'
+
+export interface VisiblePlacePet {
+  id: string
+  name: string
+  species: Species
+  photoUrl: string
+}
+
 export interface PetPlace {
   id: string
   name: string
-  type: 'parque' | 'cafeteria' | 'playa' | 'veterinaria'
+  category: PlaceCategory
   zone: string
   address: string
-  hours: string
-  speciesAllowed: string
-  description: string
-  photoUrl: string
-  activeCheckIns: number
+  latitude: number
+  longitude: number
+  hours?: string
+  speciesAllowed?: string
+  petRules?: string
+  description?: string
+  photoUrl?: string
+  status: PlaceStatus
+  source: string
+  createdAt?: string
+  updatedAt?: string
+  distanceKm?: number
+  activePresenceCount?: number
+  visiblePets?: VisiblePlacePet[]
+}
+
+export interface ActivePlaceCheckin {
+  id: string
+  placeId: string
+  petId: string
+  visible: boolean
+  checkedInAt: string
+  expiresAt: string
+}
+
+export interface PlaceSuggestionInput {
+  name: string
+  category: PlaceCategory
+  address: string
+  zone?: string
+  note?: string
+}
+
+export type PlaceUsageEventType =
+  | 'map_open'
+  | 'use_location'
+  | 'place_open'
+  | 'search'
+  | 'filter'
+
+export interface PlaceBounds {
+  north: number
+  south: number
+  east: number
+  west: number
+}
+
+export interface EphemeralLocation {
+  latitude: number
+  longitude: number
 }
 
 export type CareCategory =

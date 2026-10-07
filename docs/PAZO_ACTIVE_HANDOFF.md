@@ -7,13 +7,21 @@
 - legacy `module_key='communities'` experiment signals cleaned with Product Owner authorization.
 - current `communities_*` extension evidence preserved.
 - next module: Fase 8 — Lugares, mapa y Check-ins.
-- current step: audit real GitHub + Supabase state before product/architecture decisions.
-- pending Product Owner decisions for Fase 8:
-  - map/cartography provider;
-  - exact vs approximate location;
-  - who can add/suggest places;
-  - check-in visibility and lifetime.
-- do not implement precise GPS/location tracking until those decisions are explicitly closed.
+- audit real GitHub + Supabase state: COMPLETE.
+- Gate 6 product specification: CLOSED / approved by Product Owner.
+- Gate 7 technical architecture: CLOSED.
+- migration `20261007052000_phase_8_places_map_core.sql`: PREPARED / NOT APPLIED.
+- current step: Gate 8 frontend/service implementation + local build preflight.
+- Product Owner decisions CLOSED:
+  - Mapbox GL JS;
+  - device location only by explicit action, ephemeral use, no exact GPS persistence;
+  - PAZO publishes places; users suggest pending approval;
+  - 2-hour check-ins + manual exit;
+  - public count, pet identity only by opt-in;
+  - reusable GLB/glTF category models prepared for future 3D/B2B layers.
+- Gate 6 source: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
+- Gate 7 source: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
+- Supabase mutation is NOT authorized yet; request authorization only after frontend/build/diff/security preflight.
 
 ## Read first
 
@@ -129,28 +137,72 @@ Technical architecture:
 
 ## Immediate next action
 
-Active product work: **Fase 7.0A — Experimento de Comunidades**.
+Active work: **Fase 8 — Lugares, mapa y Check-ins — Gate 8**.
 
-Canonical source:
-`docs/PAZO_PHASE_7_COMMUNITIES_MASTER.md`
+Current truth:
+- product Gate 6 approved;
+- technical Gate 7 closed;
+- Mapbox renderer/service/UI implementation exists on branch;
+- legacy `INITIAL_PLACES` and broken `feature_map_*` interaction tracking removed;
+- core migration prepared: `20261007052000_phase_8_places_map_core.sql`;
+- curated initial catalog prepared: `20261007053000_phase_8_places_initial_catalog.sql`;
+- neither F8 migration has been applied to Supabase;
+- Mapbox public token is not stored in GitHub;
+- Phase 8 local production build: PASS confirmed by Product Owner.
+- Phase 8 final backend preflight: PASS.
+- Supabase still has no Phase 8 objects/migrations applied.
+- Security baseline unchanged: 3 anon SECURITY DEFINER warnings, 6 authenticated SECURITY DEFINER warnings, 1 leaked-password warning.
+- core migration adds no public SECURITY DEFINER function; privileged trigger helpers live in private schema `place_private`.
+- branch is ahead of `main` with no behind commits.
+- Product Owner authorized and core + initial catalog migrations were applied.
+- Supabase registry:
+  - `20261007052747 phase_8_places_map_core`;
+  - `20261007052749 phase_8_places_initial_catalog`.
+- backend tests PASS so far: hidden/visible presence, foreign-user isolation, move between places, expiry, foreign-pet block, archived-place block, suggestions, telemetry.
+- checkout RLS bug discovered: ending an active row made it fail the active-only SELECT policy.
+- Product Owner confirmed local build PASS after checkout-service fix.
+- Product Owner explicitly authorized checkout RLS forward fix.
+- `20261007053859 fix_place_checkin_checkout_rls` APPLIED.
+- post-fix checkout/RLS/privacy tests: PASS.
+- owner active rows after checkout: 0.
+- public presence after checkout: 0.
+- foreign account private rows: 0.
+- hidden/visible presence behavior: PASS.
+- all transactional QA writes rolled back; production QA tables remain empty.
+- Security Advisor unchanged from baseline; no new Fase 8 warnings.
+- Performance Advisor reports 8 new unused-index INFO entries on brand-new Fase 8 tables; retain until real usage exists.
+- backend Gate 8 status: APPLIED + TRANSACTIONALLY VALIDATED.
+- Mapbox public token configured locally by Product Owner.
+- Mapbox runtime + explicit location action: PASS.
+- device geolocation works only after Product Owner taps "Usar mi ubicación".
+- exact device coordinates are not persisted in Supabase.
+- Phase 8 primary runtime E2E: PASS.
+- Product Owner confirmed:
+  - place detail;
+  - private check-in;
+  - F5 persistence;
+  - visibility opt-in;
+  - move between places closes previous presence;
+  - manual checkout;
+  - post-checkout F5;
+  - search/category filters.
+- Phase 8 full visual/end-to-end validation: PASS.
+- Product Owner confirmed second-account privacy/isolation: PASS.
+- Product Owner confirmed place suggestion flow: PASS.
+- runtime left 0 active check-ins and 0 active presences.
+- one real pending suggestion remains: "south gate park"; not deleted.
+- PR #20 ready for final merge.
+- after E2E PASS: final PR review/merge.
 
-Current state:
-- Communities remains **EXPERIMENTO ACTIVO**;
-- 7.0A experiment is APPROVED by Product Owner;
-- full Communities product/backend is blocked by data;
-- the original lost Gemini `Me interesa` implementation will not be recovered;
-- generic validation tracking is still the intended technical solution, but it must be implemented only after the Communities experiment itself is closed;
-- PR #15 was closed without merge because it jumped to implementation too early;
-- no Supabase validation-instrumentation migration was applied;
-- Map/Radar is not automatically bundled into the first Communities experiment.
-
-Next action:
-1. implement the smallest generic validation infrastructure with Communities as first consumer;
-2. prepare versioned migration but do not apply Supabase yet;
-3. preflight build/security;
-4. request explicit Product Owner authorization before backend mutation;
-5. do not build Communities backend/roles/feed/moderation;
-6. after validation instrumentation is stable, let Communities collect data while the implementation lane remains free for another approved module.
+After build PASS:
+1. final diff/SQL/security preflight;
+2. explain exact Supabase mutations;
+3. request explicit Product Owner authorization;
+4. apply core + seed migrations;
+5. run RLS/concurrency/privacy tests;
+6. configure/test Mapbox token locally;
+7. Product Owner visual/end-to-end validation;
+8. PR + merge.
 
 ## Important continuity note
 
