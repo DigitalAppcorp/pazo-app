@@ -88,6 +88,13 @@ Validation:
 - tests rolled back; extension signal tables remain at 0 before Product Owner UI test;
 - Security Advisor: no new findings attributable to experiment layer.
 
+## Product Owner fake-door review
+
+- Fake-door visual review: PASS.
+- Interest persistence behavior accepted.
+- Owner/Admin visibility rule accepted.
+- Community core + contextual extension layer are both approved for final closure.
+
 ## Siguiente paso
 
 1. Product Owner visually validates contextual fake doors;
