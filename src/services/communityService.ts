@@ -57,6 +57,7 @@ const mapCommunity = (
   species: row.species as Species | undefined,
   zone: row.zone || undefined,
   imageUrl: row.image_url || DEFAULT_COMMUNITY_IMAGE,
+  imageStoragePath: row.image_storage_path || undefined,
   rules: row.rules || undefined,
   status: row.status,
   membersCount: row.members_count || 0,
@@ -98,7 +99,7 @@ export const fetchCommunitySummaries = async ({
   let query = supabase
     .from('communities')
     .select(
-      'id,owner_user_id,name,description,category,species,zone,image_url,rules,status,members_count,created_at,updated_at'
+      'id,owner_user_id,name,description,category,species,zone,image_url,image_storage_path,rules,status,members_count,created_at,updated_at'
     )
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -127,7 +128,7 @@ export const fetchCommunityById = async (
   const { data, error } = await supabase
     .from('communities')
     .select(
-      'id,owner_user_id,name,description,category,species,zone,image_url,rules,status,members_count,created_at,updated_at'
+      'id,owner_user_id,name,description,category,species,zone,image_url,image_storage_path,rules,status,members_count,created_at,updated_at'
     )
     .eq('id', communityId)
     .single()
@@ -232,7 +233,7 @@ export const createCommunity = async (
 
       const { error: updateError } = await supabase
         .from('communities')
-        .update({ image_url: publicUrlData.publicUrl })
+        .update({ image_url: publicUrlData.publicUrl, image_storage_path: path })
         .eq('id', communityId)
 
       if (updateError) {
@@ -263,6 +264,7 @@ export const updateCommunity = async (
   if (input.zone !== undefined) payload.zone = input.zone?.trim() || null
   if (input.rules !== undefined) payload.rules = input.rules?.trim() || null
   if (input.imageUrl !== undefined) payload.image_url = input.imageUrl
+  if (input.imageStoragePath !== undefined) payload.image_storage_path = input.imageStoragePath
   if (input.status !== undefined) payload.status = input.status
 
   const { error } = await supabase
@@ -601,4 +603,48 @@ export const deleteCommunityPostComment = async (commentId: string) => {
     .eq('id', commentId)
 
   if (error) throw error
+}
+
+
+export const replaceCommunityImage = async (
+  community: CommunitySummary,
+  file: File
+) => {
+  validateImage(file)
+  const user = await getAuthUser()
+  const newPath = `${community.id}/${user.id}/${crypto.randomUUID()}.${imageExtension(file)}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(COMMUNITY_AVATAR_BUCKET)
+    .upload(newPath, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type,
+    })
+
+  if (uploadError) throw uploadError
+
+  const { data } = supabase.storage
+    .from(COMMUNITY_AVATAR_BUCKET)
+    .getPublicUrl(newPath)
+
+  try {
+    await updateCommunity(community.id, {
+      imageUrl: data.publicUrl,
+      imageStoragePath: newPath,
+    })
+  } catch (error) {
+    await supabase.storage.from(COMMUNITY_AVATAR_BUCKET).remove([newPath])
+    throw error
+  }
+
+  if (community.imageStoragePath) {
+    const { error: cleanupError } = await supabase.storage
+      .from(COMMUNITY_AVATAR_BUCKET)
+      .remove([community.imageStoragePath])
+
+    if (cleanupError) {
+      console.error('La portada se actualizó; limpieza anterior pendiente:', cleanupError)
+    }
+  }
 }
