@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins — Arquitectura técnica
 
-**Estado:** GATE 7 — ARQUITECTURA TÉCNICA  
+**Estado:** GATE 7 CERRADO — ARQUITECTURA TÉCNICA DEFINIDA  
 **Fecha:** 2026-10-06  
 **Gate 6:** CERRADO / aprobado por Product Owner  
 **Supabase apply:** NO AUTORIZADO TODAVÍA
@@ -615,7 +615,7 @@ Objetivo:
 
 ---
 
-# Gate 7 decision
+# Gate 7 — CERRADO
 
 Arquitectura recomendada:
 
