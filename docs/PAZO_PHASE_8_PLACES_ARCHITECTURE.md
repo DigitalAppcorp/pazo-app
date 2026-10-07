@@ -161,9 +161,16 @@ Trigger normaliza `ended_at` a `now()`; el cliente no decide la hora real de sal
 No DELETE cliente.
 
 ### Lectura cliente
-El dueño solo puede leer su propio check-in activo/no expirado.
+RLS permite al dueño leer únicamente sus propios registros de check-in; nunca los de otra cuenta.
 
-No se expone historial desde Data API.
+Motivo técnico:
+- PostgreSQL requiere que una fila siga siendo visible a la policy SELECT durante un UPDATE que la termina;
+- una policy SELECT limitada solo a "activo" bloquea el checkout válido al convertir la fila en terminada.
+
+Contrato de producto:
+- el frontend consulta explícitamente solo `ended_at IS NULL` y `expires_at > now()`;
+- PAZO no presenta historial de movimientos en la UI;
+- otros usuarios nunca pueden leer la tabla privada de check-ins.
 
 ---
 
