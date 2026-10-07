@@ -30,7 +30,7 @@
 - `20261007023927 harden_community_extension_experiment_eligibility` APPLIED;
 - eligibility hardened server-side: member-only general experiments, Owner-only Admin Tools;
 - transactional experiment tests PASS; no test signals persisted;
-- pending Product Owner visual review of fake doors;
+- Community fake-door visual review: PASS;
 - real Storage API DELETE validated through the app/UI: PASS;
 - visual QA found unclear unlabeled fields in Community edit form;
 - Community edit form labels/placeholders/required-vs-optional states fixed in commit `9fdfb7f`; Product Owner local review PASS;
