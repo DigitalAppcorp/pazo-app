@@ -2,8 +2,8 @@
 
 **Fecha:** 2026-10-06
 **Rama:** `feat/communities-mvp`
-**Gate:** 8 — IMPLEMENTACIÓN / VALIDACIÓN END-TO-END
-**Decisión:** MVP reducido real
+**Gate:** 8 CERRADO — COMPLETADA
+**Decisión:** MVP reducido real — MERGED TO MAIN
 
 ## Regla vigente
 
