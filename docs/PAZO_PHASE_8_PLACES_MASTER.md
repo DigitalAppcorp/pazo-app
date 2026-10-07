@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO
+**Estado:** GATE 7 — ARQUITECTURA TÉCNICA
 **Fecha:** 2026-10-06
 **Implementación autorizada:** NO
 
@@ -295,9 +295,11 @@ Gate 0 — auditoría: CERRADO.
 Gate 1 — valor: **MVP REDUCIDO REAL**.  
 Gate 2 — coste/dependencias: CERRADO.  
 D1–D5: CERRADAS.  
-Gate 6 — ESPECIFICACIÓN DE PRODUCTO EN CURSO.
+Gate 6 — CERRADO / aprobado por Product Owner.  
+Gate 7 — ARQUITECTURA TÉCNICA EN CURSO.
 
-Fuente de Gate 6:
-`docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
+Fuentes:
+- producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
+- arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
 
-No abrir Gate 7 hasta aprobación explícita de Gate 6.
+No aplicar Supabase todavía.
