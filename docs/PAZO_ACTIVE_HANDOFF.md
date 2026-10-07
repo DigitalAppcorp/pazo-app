@@ -31,6 +31,9 @@
 - eligibility hardened server-side: member-only general experiments, Owner-only Admin Tools;
 - transactional experiment tests PASS; no test signals persisted;
 - Community fake-door visual review: PASS;
+- legacy validation cleanup: COMPLETE (2 views + 1 interest removed for module_key `communities`);
+- extension signals preserved: 5 views + 1 interest across `communities_*`;
+- PR #18 ready for final merge;
 - real Storage API DELETE validated through the app/UI: PASS;
 - visual QA found unclear unlabeled fields in Community edit form;
 - Community edit form labels/placeholders/required-vs-optional states fixed in commit `9fdfb7f`; Product Owner local review PASS;
