@@ -50,7 +50,12 @@ Conclusión:
 
 ## Mapa/Lugares
 Estado real:
-- Fase 8 COMPLETADA;
+- núcleo real de Fase 8 merged y backend validado;
+- cierre REABIERTO por fake doors + 3D markers ya aprobados;
+- fake doors implementadas y module keys aplicados;
+- 3D assets implementados;
+- primera prueba visual 3D detectó fallback 2D;
+- fix de visibilidad 3D aplicado y nueva validación Product Owner: PASS;
 - Mapbox real;
 - catálogo curado real;
 - check-ins reales con privacidad/expiración;
@@ -59,8 +64,9 @@ Estado real:
 - backend/RLS/E2E aprobados.
 
 Conclusión:
-- ya no es candidato pendiente;
-- pasa a operación/medición post-lanzamiento.
+- ya no es un candidato nuevo: su núcleo real ya existe;
+- permanece en Gate 8 hasta cerrar fake doors + validación visual 3D + PR #22;
+- solo después del cierre y merge pasa a Gate 9 / medición post-lanzamiento.
 
 ---
 
@@ -118,7 +124,7 @@ Escala:
 |---|---:|---:|---:|---:|---|
 | Agenda/Cuidados | 5 | 2 | 1 | 1 | BUILD NOW |
 | Documentos | 4 | 3 | 3 | 1 | SIGUIENTE DESPUÉS DE AGENDA |
-| Mapa/Lugares | 4 | 4 | 3 | 3 | COMPLETADO |
+| Mapa/Lugares | 4 | 4 | 3 | 3 | CIERRE EN CORRECCIÓN — QA PASS / MERGE PENDIENTE |
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
@@ -213,9 +219,19 @@ Continúa:
 No bloquea Agenda.
 
 ## Mapa/Lugares
-**COMPLETADO.**
+**GATE 8 REABIERTO PARA CORRECCIÓN DE SCOPE.**
 
-Pasa a Gate 9 / medición post-lanzamiento.
+Fake doors:
+- backend/registro: PASS;
+- runtime + F5 del Product Owner: PASS.
+
+3D markers:
+- assets/layer: implementados;
+- primera captura detectó modelo no perceptible;
+- fix de escala/cámara aplicado;
+- nueva prueba visual: PASS.
+
+No pasa a Gate 9 hasta mergear PR #22 y verificar `main`.
 
 ---
 
@@ -243,7 +259,7 @@ Usar su sub-ruta y datos de validación.
 
 - 9A Agenda/Cuidados: COMPLETADA.
 - 9B Documentos privados: COMPLETADA.
-- 8 Mapa/Lugares/Check-ins: COMPLETADA.
+- 8 Mapa/Lugares/Check-ins: EN CURSO — QA DE CIERRE PASS; PR #22 pendiente de merge + verificación de `main`.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:

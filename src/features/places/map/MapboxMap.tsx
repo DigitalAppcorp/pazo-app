@@ -12,6 +12,29 @@ interface MapboxMapProps {
 
 const DEFAULT_CENTER: [number, number] = [-118.2437, 34.0522]
 
+const placeModelExpression = () => {
+  const modelUrl = (file: string) =>
+    new URL(`/models/places/${file}`, window.location.origin).toString()
+
+  return [
+    'match',
+    ['get', 'category'],
+    'park',
+    modelUrl('park.gltf'),
+    'trail',
+    modelUrl('trail.gltf'),
+    'food',
+    modelUrl('restaurant.gltf'),
+    'veterinary',
+    modelUrl('veterinarian.gltf'),
+    'grooming',
+    modelUrl('grooming.gltf'),
+    'pet_store',
+    modelUrl('pet-store.gltf'),
+    modelUrl('park.gltf'),
+  ]
+}
+
 const toGeoJson = (places: PetPlace[]) => ({
   type: 'FeatureCollection',
   features: places.map((place) => ({
@@ -125,10 +148,16 @@ export const MapboxMap = ({
         const map = new mapboxgl.Map({
           container: containerRef.current,
           style: 'mapbox://styles/mapbox/standard',
+          config: {
+            basemap: {
+              show3dObjects: false,
+            },
+          },
           center: DEFAULT_CENTER,
           zoom: 10.5,
           pitch: 32,
           bearing: 0,
+          antialias: true,
           attributionControl: true,
         })
 
@@ -182,7 +211,39 @@ export const MapboxMap = ({
               ],
               'circle-stroke-color': '#FAF8F5',
               'circle-stroke-width': 2,
-              'circle-opacity': 0.96,
+              'circle-opacity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                11,
+                0.96,
+                13.5,
+                0.52,
+                15,
+                0.12,
+                16,
+                0,
+              ],
+            },
+          })
+
+          map.addLayer({
+            id: 'pazo-place-models',
+            type: 'model',
+            source: 'pazo-places',
+            slot: 'top',
+            minzoom: 13.25,
+            layout: {
+              'model-id': placeModelExpression(),
+              'model-allow-density-reduction': false,
+            },
+            paint: {
+              'model-scale': [12, 12, 12],
+              'model-rotation': [0, 0, 0],
+              'model-translation': [0, 0, 1],
+              'model-opacity': 1,
+              'model-type': 'location-indicator',
+              'model-emissive-strength': 0.12,
             },
           })
 
@@ -205,18 +266,26 @@ export const MapboxMap = ({
             },
           })
 
-          map.on('click', 'pazo-place-pins', (event: any) => {
+          const handlePlaceClick = (event: any) => {
             const placeId = event.features?.[0]?.properties?.id
             if (placeId) onSelectPlaceRef.current(placeId)
-          })
+          }
 
-          map.on('mouseenter', 'pazo-place-pins', () => {
+          const showPointer = () => {
             map.getCanvas().style.cursor = 'pointer'
-          })
+          }
 
-          map.on('mouseleave', 'pazo-place-pins', () => {
+          const clearPointer = () => {
             map.getCanvas().style.cursor = ''
-          })
+          }
+
+          map.on('click', 'pazo-place-pins', handlePlaceClick)
+          map.on('mouseenter', 'pazo-place-pins', showPointer)
+          map.on('mouseleave', 'pazo-place-pins', clearPointer)
+
+          map.on('click', 'pazo-place-models', handlePlaceClick)
+          map.on('mouseenter', 'pazo-place-models', showPointer)
+          map.on('mouseleave', 'pazo-place-models', clearPointer)
 
           syncUserMarker(
             map,
@@ -271,8 +340,8 @@ export const MapboxMap = ({
 
     map.flyTo({
       center: [place.longitude, place.latitude],
-      zoom: Math.max(map.getZoom?.() || 0, 14.5),
-      pitch: 42,
+      zoom: Math.max(map.getZoom?.() || 0, 16.2),
+      pitch: 58,
       duration: 700,
     })
   }, [places, selectedPlaceId])

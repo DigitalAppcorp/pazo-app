@@ -5,6 +5,28 @@
 **Decisión de inversión:** MVP REDUCIDO REAL  
 **Implementación autorizada:** NO
 
+## 0. Estado de cierre actual
+
+Gate 6 continúa aprobado. El núcleo real de Fase 8 ya funciona.
+
+Gate 8 está reabierto únicamente porque dos entregables aprobados no habían sido validados al cerrar originalmente:
+- fake doors contextuales;
+- modelos 3D caricaturizados por categoría.
+
+Fake doors:
+- implementadas;
+- module keys aplicados en Supabase;
+- QA técnico PASS;
+- runtime/persistencia del Product Owner todavía pendiente.
+
+Modelos 3D:
+- assets glTF implementados;
+- primera captura del Product Owner mostró solo fallback 2D;
+- fix de escala/render preparado;
+- nueva validación visual todavía pendiente.
+
+No cerrar Fase 8 ni avanzar a otro módulo hasta completar estas verificaciones.
+
 ## 1. Objetivo
 
 Convertir el tab Mapa en una experiencia realmente útil para descubrir lugares pet-friendly y saber, de forma voluntaria y temporal, qué mascotas están presentes.
@@ -98,8 +120,18 @@ Si concede ubicación:
 
 Cada categoría tiene:
 - iconografía propia;
-- modelo 3D reutilizable futuro;
+- modelo 3D reutilizable;
 - color/estilo coherente con PAZO.
+
+Assets MVP:
+- `park.gltf`;
+- `trail.gltf`;
+- `restaurant.gltf`;
+- `veterinarian.gltf`;
+- `grooming.gltf`;
+- `pet-store.gltf`.
+
+Los modelos son low-poly/caricaturizados y representan la categoría, no el edificio real.
 
 No crear modelos 3D únicos por negocio en MVP.
 
@@ -263,19 +295,30 @@ Los 2 lugares seed existentes se consideran demo/no verificados hasta decidir si
 
 ## 9. Extensiones en validación
 
-Después de que el núcleo funcione, se pueden mostrar fake doors contextuales para:
-- reviews/calificaciones;
-- favoritos/listas;
-- fotos de usuarios;
-- rutas/caminatas;
-- eventos en lugares;
+El núcleo real queda acompañado por fake doors contextuales dentro del detalle de un lugar.
+
+Experimentos activos de esta fase:
+- `places_reviews` — reseñas y calificaciones;
+- `places_favorites` — guardar/favoritos/listas;
+- `places_user_photos` — fotos de la comunidad;
+- `places_events` — eventos ligados a un lugar;
+- `places_routes` — rutas y caminatas;
+- `places_business_offers` — ofertas/promociones de negocios verificados.
+
+Semántica:
+- claramente marcados **En desarrollo**;
+- visibles solo a usuarios autenticados reales;
+- una `view` cuenta cuando al menos 50% de la tarjeta entra al viewport;
+- un `interest` es único por cuenta + experimento;
+- source segmenta por categoría mediante `place_detail_<category>`;
+- no habilitan funcionalidad ficticia;
+- no inventan reviews, fotos, eventos, rutas ni promociones.
+
+Se dejan fuera de esta tanda:
 - historial personal de visitas;
-- publicar lugar directamente;
-- promociones/ofertas de negocios.
+- publicar lugares directamente.
 
-No activar todos automáticamente.
-
-Solo medir una extensión si su resultado cambiará una decisión de inversión.
+Se podrán medir después si aparece una decisión concreta que justifique hacerlo.
 
 ---
 

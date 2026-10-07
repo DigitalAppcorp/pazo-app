@@ -3,7 +3,7 @@
 **Estado:** GATE 7 CERRADO — ARQUITECTURA TÉCNICA DEFINIDA  
 **Fecha:** 2026-10-06  
 **Gate 6:** CERRADO / aprobado por Product Owner  
-**Supabase apply:** NO AUTORIZADO TODAVÍA
+**Supabase apply:** core + checkout fix + Places experiments APPLIED with Product Owner authorization
 
 ## 1. Decisión arquitectónica principal
 
@@ -327,21 +327,44 @@ Mapbox GL JS soporta glTF/GLB mediante native `model` layer.
 
 ### Registry frontend
 ```text
-park         -> /models/places/park.glb
-trail        -> /models/places/trail.glb
-food         -> /models/places/restaurant.glb
-veterinary   -> /models/places/veterinarian.glb
-grooming     -> /models/places/grooming.glb
-pet_store    -> /models/places/pet-store.glb
+park         -> /models/places/park.gltf
+trail        -> /models/places/trail.gltf
+food         -> /models/places/restaurant.gltf
+veterinary   -> /models/places/veterinarian.gltf
+grooming     -> /models/places/grooming.gltf
+pet_store    -> /models/places/pet-store.gltf
 ```
 
 El DB guarda categoría, no path del asset.
 
-### Render strategy
+### Render strategy — estado actual de corrección
 - zoom lejano: marker/icon 2D;
-- zoom cercano: modelo 3D por categoría;
-- fallback automático a marker si GLB falla/no soporta;
+- capa `model` desde zoom 13.25;
+- `slot: top`;
+- `model-type: location-indicator`;
+- `model-scale: [12,12,12]`;
+- `model-translation: [0,0,1]`;
+- `model-emissive-strength: 0.12`;
+- marker 2D funciona como fallback y se desvanece hasta opacidad 0 en zoom 16;
+- click/hover funcionan tanto sobre marker como sobre modelo;
+- seleccionar lugar fuerza zoom >=16.2 y pitch 58°;
+- basemap de Mapbox usa `show3dObjects=false` para no competir visualmente con los modelos PAZO;
+- antialias activado;
 - nombre/categoría textual siempre accesible.
+
+Última evidencia visual:
+- antes de este ajuste el Product Owner solo veía el círculo 2D de veterinaria;
+- el fix anterior no cuenta como PASS hasta nueva prueba visual.
+
+Assets:
+- `public/models/places/park.gltf`;
+- `public/models/places/trail.gltf`;
+- `public/models/places/restaurant.gltf`;
+- `public/models/places/veterinarian.gltf`;
+- `public/models/places/grooming.gltf`;
+- `public/models/places/pet-store.gltf`.
+
+Los modelos usan geometría low-poly y materiales embebidos sin texturas externas.
 
 Esto reduce GPU/bundle y mantiene accesibilidad.
 
@@ -638,3 +661,40 @@ La arquitectura evita:
 - almacenar Mapbox temporary search results;
 - acoplar datos a Mapbox;
 - reutilizar `interactions` fuera del Feed.
+
+
+## 21. Experimentos contextuales de Lugares
+
+Se reutiliza la infraestructura genérica `module_validation_*`.
+
+Module keys:
+- `places_reviews`;
+- `places_favorites`;
+- `places_user_photos`;
+- `places_events`;
+- `places_routes`;
+- `places_business_offers`.
+
+No se crean tablas de experimentos específicas de Fase 8.
+
+Source:
+- `place_detail_park`;
+- `place_detail_trail`;
+- `place_detail_food`;
+- `place_detail_veterinary`;
+- `place_detail_grooming`;
+- `place_detail_pet_store`.
+
+La métrica principal sigue siendo por cuenta, no por mascota ni por lugar.
+
+Migración repo:
+`20261007073500_place_extension_experiments.sql`.
+
+Supabase registry:
+`20261007072355 place_extension_experiments`.
+
+Estado:
+- APPLIED con autorización explícita del Product Owner;
+- 6 `places_*` registrados;
+- transactional QA PASS;
+- no re-aplicar.

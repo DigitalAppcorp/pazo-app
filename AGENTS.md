@@ -1,5 +1,8 @@
 # PAZO — Reglas permanentes para agentes
 
+**Project Brain OS version: 1.3.0**  
+Canonical OS: `DigitalAppcorp/project-brain-os`.
+
 Antes de cualquier modificación de código, base de datos, arquitectura o documentación de producto:
 
 1. Leer `docs/PAZO_ACTIVE_HANDOFF.md`.
@@ -8,10 +11,13 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 4. No inventar decisiones marcadas como **DECISIÓN PENDIENTE**.
 5. No saltar fases sin aprobación explícita del Product Owner.
 6. Para Supabase: auditar primero, versionar la migración, pedir autorización antes de aplicarla y verificar después.
-7. No declarar una fase COMPLETADA hasta que esté merged en `main`, el backend correspondiente esté aplicado y las pruebas hayan sido aprobadas.
+7. No declarar una fase COMPLETADA hasta que esté merged en `main`, el backend correspondiente esté aplicado, las pruebas hayan sido aprobadas y se haya ejecutado **Scope Closure Reconciliation** contra todo el scope/DoD aprobado.
 8. Después de cerrar una fase, actualizar `docs/PAZO_MASTER_ROADMAP.md` y `docs/PAZO_ACTIVE_HANDOFF.md`.
 9. En fases de rediseño visual, preservar la funcionalidad y los contratos de datos existentes; cualquier cambio de comportamiento requiere aprobación explícita del Product Owner.
 10. Si la fase activa tiene una sub-ruta maestra en `docs/`, leerla completa antes de modificar código, datos o arquitectura de esa fase. La sub-ruta gobierna las decisiones específicas y no puede contradecir la hoja maestra general.
 11. Antes de diseñar o programar un módulo nuevo/incompleto, leer `docs/PAZO_MODULE_LIFECYCLE.md` y continuar desde el gate pendiente. Para experimentos/fake doors, además leer `docs/PAZO_FEATURE_VALIDATION_FRAMEWORK.md`.
+12. Si existe un PR abierto para la fase activa, auditar ese PR y su branch antes de asumir que `main` contiene el estado más reciente.
+13. Build/backend PASS no implica aprobación visual. La aprobación del Product Owner cubre únicamente lo que realmente vio/probó.
+14. Fake doors, modelos 3D, assets visuales, instrumentación y estados UX cuentan como entregables reales cuando fueron incluidos en el scope aprobado; no convertirlos silenciosamente en trabajo futuro.
 
 `docs/PAZO_ACTIVE_HANDOFF.md` define el estado operativo actual. La hoja maestra define el estado global. `docs/PAZO_MODULE_LIFECYCLE.md` define cómo una idea llega a implementación. Las sub-rutas gobiernan el módulo específico.
