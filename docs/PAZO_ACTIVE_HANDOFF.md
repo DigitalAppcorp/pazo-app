@@ -148,7 +148,8 @@ Current truth:
 - curated initial catalog prepared: `20261007053000_phase_8_places_initial_catalog.sql`;
 - neither F8 migration has been applied to Supabase;
 - Mapbox public token is not stored in GitHub;
-- next required check is local production build.
+- Phase 8 local production build: PASS confirmed by Product Owner.
+- next required check: final SQL/security/diff preflight before authorization.
 
 After build PASS:
 1. final diff/SQL/security preflight;
