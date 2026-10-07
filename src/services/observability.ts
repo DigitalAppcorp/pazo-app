@@ -12,6 +12,18 @@ let currentUserId: string | null = null
 let initialized = false
 let memorySessionId: string | null = null
 
+const SAFE_EVENT_PROPERTY_ALLOWLIST = {
+  app_boot: new Set(['environment']),
+  auth_session_signed_in: new Set<string>(),
+  auth_session_signed_out: new Set<string>(),
+  auth_signup_succeeded: new Set<string>(),
+  auth_signup_failed: new Set(['error_code']),
+  auth_signin_succeeded: new Set<string>(),
+  auth_signin_failed: new Set(['error_code']),
+} as const
+
+type SafeProductEvent = keyof typeof SAFE_EVENT_PROPERTY_ALLOWLIST
+
 const redact = (value: string) =>
   value
     .replace(
@@ -76,7 +88,7 @@ export const setObservabilityUser = (userId: string | null) => {
   currentUserId = userId
 }
 
-export const captureEvent = (
+const sendEvent = (
   event: string,
   properties: ObservabilityProperties = {},
 ) => {
@@ -104,6 +116,18 @@ export const captureEvent = (
   }).catch(() => {
     // Observability must never break the product.
   })
+}
+
+export const captureEvent = (
+  event: SafeProductEvent,
+  properties: ObservabilityProperties = {},
+) => {
+  const allowedKeys = SAFE_EVENT_PROPERTY_ALLOWLIST[event]
+  const reviewedProperties = Object.fromEntries(
+    Object.entries(properties).filter(([key]) => allowedKeys.has(key)),
+  ) as ObservabilityProperties
+
+  sendEvent(event, reviewedProperties)
 }
 
 const toError = (value: unknown) => {
@@ -206,7 +230,7 @@ export const captureException = (
   const handled = options.handled ?? false
   const fingerprint = `${type}:${message}`.slice(0, 255)
 
-  captureEvent('$exception', {
+  sendEvent('$exception', {
     $exception_level: 'error',
     $exception_source: mechanism,
     $exception_type: type,
