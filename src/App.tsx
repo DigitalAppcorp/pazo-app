@@ -1754,6 +1754,7 @@ function PazoMain() {
                   {activeTab === 'explorar' && (
                     <ExploreView
                       currentPet={currentPet}
+                      canUseCommunities={Boolean(user?.id) && !isDemoUser}
                       onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                       featuredPost={posts.find(
                         (post) => !pets.some((pet) => pet.id === post.petId)
