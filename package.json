@@ -7,10 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:hardening": "node scripts/hardening-check.mjs",
+    "test:architecture": "node scripts/architecture-check.mjs",
+    "test:privacy": "node scripts/privacy-check.mjs",
+    "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy"
   },
   "dependencies": {
-    "@paypal/react-paypal-js": "^10.5.2",
     "@supabase/supabase-js": "^2.117.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

@@ -15,13 +15,21 @@ export const recordFeatureExperimentView = async (
   moduleKey: string,
   source: string
 ) => {
-  const { error } = await supabase.from('module_validation_views').insert({
-    module_key: moduleKey,
-    session_id: getSessionId(),
-    source,
-  })
+  const { error } = await supabase
+    .from('module_validation_views')
+    .upsert(
+      {
+        module_key: moduleKey,
+        session_id: getSessionId(),
+        source,
+      },
+      {
+        onConflict: 'user_id,module_key,session_id',
+        ignoreDuplicates: true,
+      }
+    )
 
-  if (error && error.code !== '23505') throw error
+  if (error) throw error
 }
 
 export const recordFeatureExperimentInterest = async (

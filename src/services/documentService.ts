@@ -229,10 +229,13 @@ const beginDelete = async (documentId: string): Promise<string> => {
   return data
 }
 
-const finalizeDelete = async (documentId: string) => {
-  await rpcVoid('finalize_delete_pet_document', {
+const tryFinalizeDelete = async (documentId: string): Promise<boolean> => {
+  const { data, error } = await supabase.rpc('try_finalize_delete_pet_document', {
     p_document_id: documentId,
   })
+
+  if (error) throw error
+  return data === true
 }
 
 const wait = (ms: number) =>
@@ -241,7 +244,7 @@ const wait = (ms: number) =>
   })
 
 const finalizeDeleteWithRetry = async (documentId: string) => {
-  const delays = [0, 150, 350, 700]
+  const delays = [0, 150, 300, 600, 1200, 2400]
 
   for (let attempt = 0; attempt < delays.length; attempt += 1) {
     if (delays[attempt] > 0) {
@@ -249,18 +252,21 @@ const finalizeDeleteWithRetry = async (documentId: string) => {
     }
 
     try {
-      await finalizeDelete(documentId)
-      return true
+      if (await tryFinalizeDelete(documentId)) {
+        return true
+      }
     } catch (error) {
       if (attempt === delays.length - 1) {
         console.warn(
-          'Document file was removed but metadata finalization is still pending:',
+          'Document metadata finalization failed unexpectedly:',
           error
         )
       }
+      continue
     }
   }
 
+  console.warn('Document metadata finalization remains pending and will recover later.')
   return false
 }
 
@@ -286,11 +292,13 @@ export const deletePetDocument = async (document: PetDocument) => {
     await cancelDelete(document.id)
   } catch (cancelError) {
     try {
-      await finalizeDelete(document.id)
-      return
+      if (await tryFinalizeDelete(document.id)) {
+        return
+      }
     } catch {
-      console.error('Could not reconcile failed document deletion:', cancelError)
+      // Fall through to the reconciliation error below.
     }
+    console.error('Could not reconcile failed document deletion:', cancelError)
   }
 
   throw storageError
@@ -307,7 +315,7 @@ export const recoverPetDocumentOperations = async (petId: string) => {
 
       if (!error) {
         try {
-          await finalizeDelete(document.id)
+          await finalizeDeleteWithRetry(document.id)
         } catch (finalizeError) {
           console.error('Could not finalize pending document deletion:', finalizeError)
         }
@@ -318,8 +326,8 @@ export const recoverPetDocumentOperations = async (petId: string) => {
 
     try {
       await finalizeUpload(document.id)
-    } catch (error: any) {
-      const message = String(error?.message || '')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : ''
 
       if (
         message.includes('Document file is missing')

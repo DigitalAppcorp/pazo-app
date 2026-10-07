@@ -33,7 +33,7 @@ export const OnboardingView = ({
   // Datos del flujo de onboarding
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isOver18, setIsOver18] = useState(true)
+  const [isOver18, setIsOver18] = useState(false)
 
   const { signUp } = useAuth()
 
@@ -84,11 +84,26 @@ export const OnboardingView = ({
       return
     }
     if (!isOver18) {
-      alert('Debes confirmar que eres mayor de edad.')
+      alert(lang === 'es' ? 'Debes confirmar que eres mayor de edad.' : 'You must confirm that you are 18 or older.')
       return
     }
 
-    const success = await signUp(email, password)
+    const hasStrongPassword =
+      password.length >= 8
+      && /[a-z]/.test(password)
+      && /[A-Z]/.test(password)
+      && /[0-9]/.test(password)
+
+    if (!hasStrongPassword) {
+      alert(
+        lang === 'es'
+          ? 'Usa al menos 8 caracteres, una mayúscula, una minúscula y un número.'
+          : 'Use at least 8 characters, one uppercase letter, one lowercase letter, and one number.'
+      )
+      return
+    }
+
+    const success = await signUp(email.trim(), password)
 
     if (success) {
       setStep('A03')
@@ -118,11 +133,12 @@ export const OnboardingView = ({
       })
 
       onComplete(createdPet)
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
       alert(
         lang === 'es'
-          ? `Hubo un problema al guardar tu mascota: ${error.message}`
-          : `There was a problem saving your pet: ${error.message}`
+          ? `Hubo un problema al guardar tu mascota: ${message}`
+          : `There was a problem saving your pet: ${message}`
       )
     } finally {
       setIsSubmittingPet(false)
@@ -250,8 +266,15 @@ export const OnboardingView = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
+                  minLength={8}
+                  autoComplete="new-password"
                   className="w-full bg-white rounded-2xl px-3.5 py-3 text-xs text-[#204E4A] focus:outline-none"
                 />
+                <span className="block text-[10px] text-[#5C7470] mt-1">
+                  {lang === 'es'
+                    ? 'Mínimo 8 caracteres, con mayúscula, minúscula y número.'
+                    : 'At least 8 characters with uppercase, lowercase, and a number.'}
+                </span>
               </div>
 
               <label className="flex items-center gap-2 pt-1 text-[#5C7470] cursor-pointer">
@@ -261,7 +284,11 @@ export const OnboardingView = ({
                   onChange={(e) => setIsOver18(e.target.checked)}
                   className="rounded text-[#204E4A]"
                 />
-                <span className="text-[11px]">Tengo 18 años o más y acepto los términos y reglas.</span>
+                <span className="text-[11px]">
+                  {lang === 'es'
+                    ? 'Confirmo que tengo 18 años o más.'
+                    : 'I confirm that I am 18 or older.'}
+                </span>
               </label>
 
               <button
@@ -274,17 +301,17 @@ export const OnboardingView = ({
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => setStep('A03')}
-                  className="flex-1 py-2 rounded-xl bg-white font-semibold text-[11px] text-[#204E4A] hover:bg-neutral-50 cursor-pointer soft-button"
+                  disabled
+                  className="flex-1 py-2 rounded-xl bg-white/70 font-semibold text-[11px] text-[#5C7470] cursor-not-allowed opacity-70"
                 >
-                  Continuar con Google
+                  Google · {lang === 'es' ? 'próximamente' : 'coming soon'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep('A03')}
-                  className="flex-1 py-2 rounded-xl bg-white font-semibold text-[11px] text-[#204E4A] hover:bg-neutral-50 cursor-pointer soft-button"
+                  disabled
+                  className="flex-1 py-2 rounded-xl bg-white/70 font-semibold text-[11px] text-[#5C7470] cursor-not-allowed opacity-70"
                 >
-                  Continuar con Apple
+                  Apple · {lang === 'es' ? 'próximamente' : 'coming soon'}
                 </button>
               </div>
             </div>

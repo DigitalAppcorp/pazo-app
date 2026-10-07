@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 12 Global Search COMPLETADA. Gate 8 cerrado con Scope Closure Reconciliation PASS; Gate 9 pasa a medición. No hay siguiente módulo de implementación autorizado automáticamente.
+**Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening ocupa temporalmente el Carril de Implementación por riesgo operativo pre-Beta.
 
 ---
 
@@ -705,6 +705,8 @@ Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de res
 ## Fase 14 — Confianza, moderación y privacidad
 **Estado: OBLIGATORIA ANTES DE BETA PÚBLICA**
 
+**Contrato canónico adicional:** `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`
+
 ### Alcance
 - reportar contenido;
 - reportar perfil;
@@ -714,10 +716,22 @@ Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de res
 - eliminación/cierre de cuenta;
 - borrado de mascota;
 - manejo de contenido eliminado;
+- procedimiento de contenido ilegal/abusivo;
+- proceso para copyright/IP/UGC;
 - límites básicos contra spam;
-- revisión final de datos públicos vs privados;
+- revisión final de datos públicos vs privados vs sensibles;
 - política de archivos;
+- data inventory;
+- retention/deletion matrix;
+- procedimiento si PAZO obtiene conocimiento de una cuenta menor de edad;
+- Privacy Policy real;
+- Terms of Use reales;
+- inventario de terceros/proveedores y datos enviados;
+- auditoría de tracking/analytics;
 - auditoría de RLS completa.
+
+### Regla
+No habilitar session replay/autocapture ni recolectar DOB/ID/GPS exacto para analytics por defecto. Cualquier excepción requiere una decisión explícita de privacidad/producto.
 
 ---
 
@@ -737,10 +751,14 @@ Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de res
 - errores y estados vacíos;
 - responsive;
 - performance;
-- activar Leaked Password Protection;
+- Leaked Password Protection cuando el plan/beneficio lo justifique;
 - revisión de env/secrets;
 - backups;
+- restore drill no destructivo;
 - logging/error monitoring;
+- verificación de PostHog live ingestion/alerts;
+- verificación de Vercel/Mapbox usage y spend controls;
+- auditoría final de cookies/storage/client identifiers;
 - pruebas de producción.
 
 ### Definition of Done
@@ -885,3 +903,24 @@ Seleccionar el siguiente módulo mediante `docs/PAZO_MODULE_LIFECYCLE.md` antes 
 - no reabrir Fase 12 salvo regresión o nueva decisión de producto;
 - no convertir datos de Gate 9 en features automáticamente;
 - no iniciar Fase 13/14/10/11 por numeración sin decisión de producto.
+
+
+---
+
+# Production Hardening — infraestructura pre-Beta
+**Estado: EN CURSO**
+
+**PR #30 / tranche implementado:** Architecture/Privacy Reconciliation PASS; Product Owner validation PASS; governance CI PASS; MERGE PENDING.
+
+Sub-ruta:
+`docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
+
+Prioridad:
+- P0 webhook PayPal + entitlement seguro;
+- P0 retirar pitch prematuro;
+- P1 Error Boundary + CI + observabilidad;
+- P1 modernizar claves/Auth;
+- P1 alertas de salud/costos;
+- P2 anti-abuse, ruido operacional, restore drill y analytics.
+
+Esta fase de infraestructura está autorizada por el Product Owner y no constituye autorización para decidir automáticamente precio o beneficios de la membresía.

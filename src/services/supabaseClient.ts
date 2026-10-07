@@ -1,9 +1,18 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-// Pega tu URL exacta manteniendo las comillas simples
-const supabaseUrl = 'https://mrybvqdebbgcayuvgkkr.supabase.co';
+const fallbackSupabaseUrl = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
+const fallbackPublishableKey = 'sb_publishable_eSU1LzulS94igbbS0oXdDw_OqeaiBeg'
 
-// Pega tu llave anon pública exacta manteniendo las comillas simples
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yeWJ2cWRlYmJnY2F5dXZna2tyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NDU3MzksImV4cCI6MjEwNjQyMTczOX0.MFB5MmQz4ywpHfEstmf49cNoab107DUWGsFNbA3ESXM';
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL?.trim()
+  || fallbackSupabaseUrl
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
+  || fallbackPublishableKey
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase public configuration is missing.')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey)

@@ -39,7 +39,6 @@ import type {
   Conversation,
   PazoNotification,
 } from './types/pazo'
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
   INITIAL_CONVERSATIONS,
@@ -185,7 +184,6 @@ function PazoMain() {
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
   const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>('A01')
 
-  const [showFounderModal, setShowFounderModal] = useState(false)
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
   const [hasMoreFeed, setHasMoreFeed] = useState(true)
@@ -636,12 +634,6 @@ function PazoMain() {
           activePetIdRef.current = activePet.id
           setCurrentPet(activePet)
           localStorage.setItem(`active_pet_${user.id}`, activePet.id)
-
-          const hasSeenPitch = localStorage.getItem(`pitch_seen_${user.id}`)
-          if (!hasSeenPitch) {
-            setShowFounderModal(true)
-            localStorage.setItem(`pitch_seen_${user.id}`, 'true')
-          }
 
           await Promise.all([
             loadFeedForPet(activePet),
@@ -1612,71 +1604,6 @@ function PazoMain() {
           )
         ) : (
           <div className="flex flex-col h-full bg-[#FAF8F5] relative overflow-hidden">
-
-            {showFounderModal && (
-              <div className="absolute inset-0 z-50 bg-[#204E4A]/80 backdrop-blur-sm flex items-center justify-center p-5 animate-fade-in">
-                <div className="bg-[#FAF8F5] rounded-[2.8rem] p-6 text-center shadow-2xl relative overflow-hidden w-full max-w-sm flex flex-col max-h-[90vh]">
-                  <div className="absolute -top-16 -right-16 w-32 h-32 bg-[#E1E53F]/40 rounded-full blur-2xl pointer-events-none"></div>
-
-                  <h3 className="text-2xl font-black text-[#204E4A] mb-2 leading-tight relative z-10 shrink-0">
-                    Haz que esta comunidad sea tuya 🐾
-                  </h3>
-                  <p className="text-[13px] text-[#5C7470] mb-5 leading-relaxed relative z-10 shrink-0">
-                    Nacimos para crear el espacio que tus mascotas merecen. Por solo <b>$2 al mes</b>, únete al Círculo de Fundadores. Tu respaldo mantiene Pazo vivo, rápido y sin publicidad.
-                  </p>
-
-                  <div className="relative z-10 w-full overflow-y-auto pb-2 custom-scrollbar">
-                    <PayPalScriptProvider
-                      options={{
-                        clientId: "BAAtHDXEJD99tZkvR7n4JsSIkYtVggw6MFKIa7M-CZ_VZDmYiVbGku66tIFT9AeDvRMsmAYNAszPzCHrfs",
-                        vault: true,
-                        intent: "subscription"
-                      }}
-                    >
-                      <PayPalButtons
-                        style={{ shape: "pill", color: "gold", layout: "vertical", label: "subscribe" }}
-                        createSubscription={(_data, actions) => {
-                          return actions.subscription.create({
-                            plan_id: "P-44J89528BL127951CMX2GSKA",
-                            custom_id: user?.id
-                          });
-                        }}
-                        onApprove={async (_data, _actions) => {
-                          alert(lang === 'es'
-                            ? '¡Gracias por unirte al Círculo de Fundadores! Tu insignia se activará en breve.'
-                            : 'Thank you for becoming a Founder! Your badge will activate shortly.'
-                          );
-
-                          setCurrentPet(prev => ({ ...prev, is_founder: true } as any));
-
-                          setShowFounderModal(false);
-                          localStorage.setItem(`pitch_seen_${user?.id}`, 'true');
-                        }}
-                        onError={(err) => {
-                          console.error("Error en PayPal:", err);
-                          alert(lang === 'es' ? 'Hubo un problema al procesar el pago. Intenta de nuevo.' : 'Payment error. Please try again.');
-                        }}
-                        onCancel={() => {
-                          console.log("El usuario canceló el flujo de pago");
-                        }}
-                      />
-                    </PayPalScriptProvider>
-                  </div>
-
-                  <div className="pt-2 shrink-0 relative z-10 border-t border-[#204E4A]/10 mt-2">
-                    <button
-                      onClick={() => {
-                        setShowFounderModal(false);
-                        localStorage.setItem(`pitch_seen_${user?.id}`, 'true');
-                      }}
-                      className="text-xs font-bold text-[#5C7470] hover:text-[#204E4A] py-2 cursor-pointer transition-colors w-full"
-                    >
-                      Quizás más tarde
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <HeaderBar
               lang={lang}

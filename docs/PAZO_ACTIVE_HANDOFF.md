@@ -4,8 +4,8 @@
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
-**Active product module:** Ninguno — selección de siguiente módulo pendiente  
-**Gate:** Fase 12 Gate 8 CERRADO / Gate 9 MEDICIÓN  
+**Active product module:** Production Hardening — infraestructura obligatoria  
+**Gate:** Production Hardening Gate 8 — PR #30 MERGE PENDING  
 **Decision:** MVP REDUCIDO  
 **Supabase production mutation authorization:** Fase 12 aplicada y verificada
 
@@ -139,8 +139,9 @@ Git final:
 **Scope Closure Reconciliation: PASS.**
 
 Next:
-- no next implementation module is authorized automatically;
-- choose the next module through the lifecycle.
+- Production Hardening ocupa temporalmente el Carril de Implementación;
+- Fase 12 permanece COMPLETADA / Gate 9 medición;
+- no iniciar Fase 13 hasta cerrar el tranche crítico de hardening.
 
 ## Other current product state
 
@@ -179,3 +180,115 @@ Known global debt:
 - `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
 
 Repository state is canonical. Conversation memory is secondary.
+
+
+## Active infrastructure — Production Hardening
+
+Canonical:
+- `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
+
+Branch:
+- `infra/production-hardening-1`
+
+Current scope:
+- PayPal webhook security;
+- supporter pitch safety;
+- React crash containment;
+- CI baseline;
+- observability/auth/key/cost hardening next.
+
+Monetization intent remains valid, but supporter membership is temporarily hidden until secure backend confirmation plus product eligibility/price/benefits are defined.
+
+
+### Production Hardening checkpoint
+- PR #30: Draft;
+- CI production build: PASS;
+- legacy lint debt: 114 problems discovered; currently informational/non-blocking;
+- supporter pitch removed from active frontend;
+- browser-side Founder activation removed;
+- Supabase browser key migrated to modern publishable key;
+- PayPal webhook v3 deployed to production with fail-closed + PayPal signature verification logic;
+- PayPal private secrets/runtime verified delivery: PENDING;
+- Error Boundary global: implemented;
+- Security Advisor: baseline only; Leaked Password Protection still pending.
+
+
+### Production Hardening checkpoint — expanded
+- PO runtime: PASS for removal of premature PayPal pitch/reload behavior.
+- Social write anti-abuse migration: `20261007123638`, deployed + transactional PASS.
+- Document finalize noise migration: `20261007124041`, deployed + transactional PASS.
+- Error Boundary + privacy-minimal observability: implemented.
+- PostHog env contract: implemented; external project ingestion verification PENDING.
+- PostHog ChatGPT app: installed, actions not exposed in this session.
+- Vercel ChatGPT app: installed, actions not exposed in this session.
+- Auth UX/local baseline: 8+ chars, upper/lower/digit; fake Google/Apple bypass removed.
+- Supabase hosted plan: Free; leaked-password protection therefore remains pending without forcing an upgrade.
+- Inactive PayPal frontend SDK: removed.
+- Expected 400/409 operational noise fixes: implemented.
+- CI hardening regression test: implemented.
+- Do NOT reactivate supporter membership until PayPal secrets + genuine webhook verification + product pricing/benefit/eligibility decisions are closed.
+
+
+### Rescue/security checkpoint
+- Migration `20261007124633_move_rescue_security_definers_private`: deployed.
+- Public Rescue/Founder RPCs are now SECURITY INVOKER wrappers; privileged logic lives in non-exposed `rescue_private`.
+- Anonymous wrapper test: PASS.
+- Authenticated wrapper test: PASS.
+- Security Advisor: 0 exposed SECURITY DEFINER warnings; only Leaked Password Protection remains.
+- Supabase plan is Free, so do not upgrade solely for that warning without explicit PO approval.
+- Cost rules canonical: `docs/PAZO_COST_GUARDRAILS.md`.
+- PostHog exception protocol verified against current docs; structured redacted stack frames implemented.
+
+
+### PR #30 final branch acceptance
+- Product Owner final runtime/product validation: PASS.
+- Final branch CI: PASS.
+- Scope Closure Reconciliation for PR #30: PASS.
+- PR #30 is mergeable and may be marked ready for review.
+- Do NOT call Production Hardening globally complete yet.
+- Exact next action: merge PR #30 only after explicit PO merge authorization, then verify `main`.
+- After merge/main verification, continue the remaining external hardening backlog separately: PayPal real secrets/webhook delivery, PostHog live ingestion/alerts, Vercel/Mapbox spend controls, hosted Auth verification, CAPTCHA timing, backup/restore drill.
+
+
+### Video-derived architecture/privacy reconciliation
+Status: EN CURSO / PR #30 returned to Draft.
+
+Implemented:
+- canonical architecture contract: `docs/PAZO_ARCHITECTURE_CONTRACT.md`;
+- canonical privacy/data governance: `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`;
+- data + third-party provider inventory: `docs/PAZO_DATA_INVENTORY.md`;
+- module lifecycle Gate 6/7 now requires data classification, telemetry/provider review and explicit code ownership;
+- F14 expanded with UGC reporting/blocking, copyright/IP, account deletion, minor-handling procedure, data inventory, retention matrix, Privacy Policy/Terms and tracking audit;
+- F15 expanded with restore drill, live observability verification, spend controls and client-storage audit;
+- architecture CI guard blocks new domain services/views/modals in legacy global folders without conscious baseline update;
+- privacy CI guard blocks session replay/autocapture/direct tracking patterns and reviewed tracking SDK additions by default;
+- PostHog product events/properties now use an explicit allowlist;
+- 18+ checkbox defaults false and requires active attestation;
+- onboarding no longer claims acceptance of Terms that are not yet published.
+
+Decision:
+- no mass folder refactor in this tranche;
+- no DOB/ID collection or invasive age verification introduced;
+- no session replay/autocapture enabled.
+
+Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche and must be rerun after CI + PO visual/runtime validation.
+
+
+### Architecture/privacy reconciliation CI checkpoint
+- HEAD: `889fbe432019b1f13c30610cffac40c08fa5ae38`.
+- Hardening regression checks: PASS.
+- Architecture contract check: PASS.
+- Privacy/data-governance check: PASS.
+- TypeScript + production build: PASS.
+- Lint: PASS on this run.
+- PR #30 remains Draft until PO validates the visible 18+ onboarding change.
+
+
+### Architecture/privacy reconciliation final acceptance
+- PO visible onboarding validation: PASS.
+- 18+ explicit attestation behavior: PASS.
+- Navigation smoke test: PASS.
+- Governance CI suite: PASS.
+- Scope Closure Reconciliation: PASS.
+- PR #30 may return to Ready for Review.
+- Exact next action: merge PR #30 only after explicit PO authorization, then verify main.
