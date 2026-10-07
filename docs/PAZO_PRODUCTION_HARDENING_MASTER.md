@@ -205,6 +205,28 @@ P2:
 - Full lint cleanup remains separate technical debt.
 - Backup/restore drill remains pending.
 
+### Rescue SECURITY DEFINER hardening
+- migration `20261007124633_move_rescue_security_definers_private` deployed;
+- privileged rescue/founder implementations moved to non-exposed `rescue_private`;
+- public RPC signatures preserved as `SECURITY INVOKER` wrappers;
+- anon/authenticated grants preserved according to original product behavior;
+- anonymous public-rescue wrapper transactional test: PASS;
+- authenticated rescue wrapper transactional test: PASS;
+- Security Advisor after migration: all exposed SECURITY DEFINER warnings removed;
+- remaining Security Advisor warning: Leaked Password Protection only.
+
+### Cost governance
+- canonical guardrails: `docs/PAZO_COST_GUARDRAILS.md`;
+- `AGENTS.md` now forbids paid-plan/resource/add-on/spend-cap changes without explicit PO approval;
+- current Supabase tier confirmed Free;
+- no plan upgrade authorized.
+
+### PostHog protocol verification
+- current PostHog docs confirm public event ingestion through `/i/v0/e` using the project token;
+- `$exception` / `$exception_list` structure confirmed;
+- frontend exception payload now includes redacted structured JavaScript stack frames in bottom-up order;
+- no session replay/autocapture SDK has been enabled.
+
 ## 9. Definition of Done
 
 No cerrar hasta que:
