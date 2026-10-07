@@ -347,7 +347,7 @@ Decisión vigente:
 
 Gate 6: CERRADO.  
 Gate 7: CERRADO.  
-Gate 8: EN CURSO — backend aplicado y validado; falta prueba visual/end-to-end + merge.
+Gate 8: EN CURSO — implementación, backend, E2E y fake doors aprobados; listo para merge.
 
 Backend:
 - `20261007014214 communities_mvp_core`;
@@ -357,10 +357,9 @@ Backend:
 - Security Advisor sin findings nuevos atribuibles.
 
 Pendiente:
-- Storage API DELETE real;
-- validación visual/end-to-end;
-- PR #18;
-- merge.
+- merge de PR #18;
+- verificación de `main`;
+- cierre documental de Gate 8.
 
 
 ---
