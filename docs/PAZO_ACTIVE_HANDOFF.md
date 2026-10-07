@@ -186,7 +186,12 @@ Current truth:
   - manual checkout;
   - post-checkout F5;
   - search/category filters.
-- remaining Gate 8 validation: second-account privacy/isolation + place suggestion flow.
+- Phase 8 full visual/end-to-end validation: PASS.
+- Product Owner confirmed second-account privacy/isolation: PASS.
+- Product Owner confirmed place suggestion flow: PASS.
+- runtime left 0 active check-ins and 0 active presences.
+- one real pending suggestion remains: "south gate park"; not deleted.
+- PR #20 ready for final merge.
 - after E2E PASS: final PR review/merge.
 
 After build PASS:
