@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 8 — VALIDACIÓN COMPLETA / LISTO PARA MERGE
+**Estado:** GATE 8 REABIERTO — SCOPE CORRECTION: FAKE DOORS + 3D MARKERS
 **Fecha:** 2026-10-06
 **Implementación autorizada:** NO
 
@@ -340,7 +340,22 @@ Validación runtime:
 - búsqueda/filtros: PASS;
 - sugerencia de lugar: PASS.
 
-Pendiente para cerrar Gate 8:
-- merge de PR #20;
-- verificación de `main`;
-- cierre documental final.
+PR #20 fue fusionado, pero el Product Owner detectó dos entregables aprobados que faltaban antes de considerar Fase 8 completa:
+- fake doors contextuales de extensiones;
+- marcadores/modelos 3D caricaturizados por categoría.
+
+Corrección en:
+`fix/phase-8-fake-doors-3d-markers`.
+
+Preparado:
+- 6 experimentos contextuales;
+- 6 modelos glTF low-poly por categoría;
+- Mapbox model layer desde zoom cercano con fallback 2D;
+- migración `20261007073500_place_extension_experiments.sql` preparada / NO aplicada.
+
+Gate 8 permanece ABIERTO hasta:
+- build local PASS;
+- autorización y apply de module keys;
+- prueba visual de modelos 3D;
+- prueba de fake doors + persistencia;
+- merge de la corrección.
