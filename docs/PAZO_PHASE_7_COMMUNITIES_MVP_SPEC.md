@@ -134,6 +134,28 @@ No forman parte del núcleo inicial:
 
 Estas funciones se validarán contextualmente con usuarios que realmente usan Comunidades.
 
+## Experimentos activos en el MVP
+
+Para que el MVP mida qué extensiones priorizar, el núcleo real incluye una sección contextual **Funciones en desarrollo** dentro de `Información`, visible solo para miembros reales.
+
+Experimentos activos iniciales:
+- `communities_events` — Eventos y caminatas;
+- `communities_challenges` — Retos colectivos;
+- `communities_badges` — Insignias y reconocimiento;
+- `communities_qa` — Preguntas y respuestas;
+- `communities_admin_tools` — Herramientas avanzadas de administración, visible solo al Owner/Admin.
+
+Semántica:
+- una `view` cuenta únicamente cuando la tarjeta entra realmente en viewport;
+- un `interest` es único por cuenta + experimento;
+- el interés persiste tras F5;
+- la fuente diferencia `community_info_member` y `community_info_owner`;
+- no se presentan como funciones activas;
+- no se muestran a visitantes no unidos, para aumentar el contexto de la señal;
+- no se usan cifras o actividad ficticia.
+
+Estos fake doors validan extensiones; no sustituyen funcionalidad del núcleo real.
+
 ## Monetización
 
 Núcleo gratuito:
