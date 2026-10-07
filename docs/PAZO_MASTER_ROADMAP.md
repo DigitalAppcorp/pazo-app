@@ -910,7 +910,7 @@ Seleccionar el siguiente módulo mediante `docs/PAZO_MODULE_LIFECYCLE.md` antes 
 # Production Hardening — infraestructura pre-Beta
 **Estado: EN CURSO**
 
-**PR #30 / tranche implementado:** Architecture/Privacy Reconciliation PASS; Product Owner validation PASS; governance CI PASS; MERGE PENDING.
+**PR #30 / tranche implementado:** MERGED to `main` at `c179182c79c587c7727277a966cc09704002ce10`; Architecture/Privacy Reconciliation PASS; Product Owner validation PASS; governance CI PASS.
 
 Sub-ruta:
 `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
