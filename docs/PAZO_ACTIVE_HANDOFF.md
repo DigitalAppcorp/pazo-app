@@ -4,7 +4,8 @@
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
 **Current state:** Fase 8 COMPLETADA  
-**Next authorized activity:** Explore/Search — auditoría Gate 0–2 only  
+**Active product module:** Fase 12 — Explore/Search  
+**Gate:** Gate 2.5 — Idea Bank ABIERTO  
 **Implementation authorization for Explore/Search:** NO
 
 ## Startup protocol
@@ -76,23 +77,33 @@ Supabase:
 
 **Scope Closure Reconciliation: PASS.**
 
-## Next candidate — Explore/Search
+## Active module — Fase 12 Explore/Search
 
-Explore/Search is now the next module to audit because PAZO has real pets, Communities and Places content.
+Canonical module document:
+`docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
 
-Current authorization:
-**Gate 0–2 audit only. No implementation yet.**
+Audit complete:
+- Gate 0: CERRADO;
+- Gate 1: CERRADO;
+- Gate 2: CERRADO;
+- Gate 2.5: ABIERTO.
+
+Key findings:
+- Explore is partially real, not a pure mock;
+- Communities are real;
+- the current search box effectively filters Communities only;
+- pet discovery is only an indirect Feed-derived card;
+- Places search exists but is not integrated into Explore;
+- Events has no real model yet;
+- current Supabase density does not justify a heavy search engine;
+- provisional technical direction is a small real unified search over pets + Communities + Places.
 
 Exact next action:
-1. inspect current Explore/Search frontend in `main`;
-2. identify mock vs real behavior and dependencies;
-3. define Gate 1 value;
-4. assess Gate 2 cost/dependencies/network effects;
-5. open Gate 2.5 Idea Bank with the Product Owner;
-6. recommend Gate 5 outcome;
-7. only after Product Owner approval proceed to Gate 6.
+**Product Owner Idea Bank.**
 
-Do not create an implementation branch for Explore/Search before its lifecycle decision.
+Brandon can provide ideas in any order or level of detail. Project Brain will classify and audit them before Gate 3/Gate 5.
+
+Do not create an implementation branch for Explore/Search until its lifecycle decision is approved.
 
 ## Other current product state
 
@@ -128,5 +139,6 @@ Known global debt:
 - `docs/PAZO_MODULE_LIFECYCLE.md`
 - `docs/PAZO_MVP_MODULE_PRIORITY.md`
 - `docs/PAZO_PHASE_8_PLACES_MASTER.md`
+- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
 
 Repository state is canonical. Conversation memory is secondary.
