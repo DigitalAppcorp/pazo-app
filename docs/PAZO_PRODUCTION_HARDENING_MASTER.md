@@ -229,7 +229,7 @@ P2:
 
 ## 9. Scope Closure Reconciliation — PR #30
 
-**Resultado del tranche implementado:** PASS / MERGE PENDING.
+**Resultado del tranche implementado:** PASS / MERGED (ver cierre en §13).
 
 Product Owner final runtime validation on branch `infra/production-hardening-1`:
 - login/session + repeated reload: PASS;
