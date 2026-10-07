@@ -218,7 +218,87 @@ Para cada idea, Project Brain evaluará:
 
 No convertir ideas automáticamente en features.
 
-## 6. Decisiones que NO están tomadas
+## 6. Gate 2.5 — Idea Bank entries
+
+### I1 — Explore como búsqueda global de PAZO
+**Origen:** Product Owner.  
+**Estado:** PROPUESTA / no aprobada todavía.
+
+Idea:
+- Explore no es un gran módulo de contenido;
+- su función principal es buscar cualquier entidad disponible dentro de PAZO;
+- ejemplos: mascotas/perfiles, Comunidades/grupos, Lugares y, cuando exista un módulo real, Eventos;
+- el peso técnico está en la lógica de búsqueda y navegación, no en una pantalla grande.
+
+Auditoría:
+- encaje estratégico: ALTO;
+- tipo: I + U;
+- valor con un solo usuario: medio-alto;
+- dependencia de masa crítica: baja para búsqueda, media para riqueza de resultados;
+- coste MVP: medio-bajo;
+- riesgo de moderación: bajo-medio;
+- riesgo de privacidad: bajo si solo usa proyecciones públicas;
+- recomendación: CANDIDATO FUERTE PARA MVP REDUCIDO.
+
+Arquitectura conceptual recomendada:
+- búsqueda federada por dominio, no índice global pesado inicialmente;
+- un orquestador de Search lanza consultas en paralelo a providers de Mascotas, Comunidades y Lugares;
+- cada provider controla sus campos públicos, filtros y ranking básico;
+- la UI agrupa resultados por tipo y permite “Ver todos”;
+- un provider de Eventos se añade solo cuando exista un modelo real de Eventos;
+- si el volumen futuro lo exige, migrar después a pg_trgm/full-text o un motor externo sin cambiar la UX principal.
+
+Nota de identidad:
+PAZO hoy define la identidad social como mascota. Por tanto, “buscar usuarios” debería significar buscar perfiles públicos de mascotas, no exponer cuentas humanas, salvo nueva decisión explícita del Product Owner.
+
+### I2 — Comunidades como módulo principal propio
+**Origen:** Product Owner.  
+**Estado:** PROPUESTA / no aprobada todavía.
+
+Idea:
+- sacar Comunidades de Explore;
+- darle un acceso principal equivalente a Feed, Mapa y Mi Mascota;
+- reutilizar el slot actual de Explore en la barra inferior.
+
+Navegación propuesta:
+- Inicio;
+- Comunidades;
+- Crear;
+- Mapa;
+- Mi Mascota.
+
+Auditoría:
+- encaje con estado real: ALTO, porque Comunidades ya tiene backend, membresías, detalle y contenido;
+- reduce acoplamiento conceptual entre Search y Comunidades;
+- mejora la claridad de IA/navigation;
+- coste frontend: bajo-medio;
+- no requiere nueva infraestructura backend por sí sola.
+
+### I3 — Mover Explore/Search al Header
+**Origen:** Product Owner.  
+**Estado:** PROPUESTA / no aprobada todavía.
+
+Idea:
+- Explore deja la barra inferior;
+- se convierte en botón de búsqueda global en el Header, junto a Mensajería y Notificaciones.
+
+Auditoría:
+- encaje conceptual: ALTO;
+- búsqueda global funciona mejor como utility/action que como destino principal persistente;
+- el Header actual ya contiene selector de idioma, Mensajes y Notificaciones;
+- añadir Search es técnicamente viable, aunque la densidad móvil debe revisarse visualmente en Fase 13;
+- alternativa futura: abrir Search como pantalla/modal full-screen conservando el botón en Header.
+
+### Relación entre las tres ideas
+Las tres propuestas son coherentes entre sí:
+
+**Comunidades ocupa navegación primaria; Explore se transforma en Search global transversal.**
+
+Esto resuelve la ambigüedad actual de Explore sin crear otro gran módulo.
+
+---
+
+## 7. Decisiones que NO están tomadas
 
 - si Search busca posts además de entidades;
 - si “Para ti” permanece dentro de Explore;
@@ -232,7 +312,7 @@ No convertir ideas automáticamente en features.
 - si eventos entrarán después como extensión;
 - qué métricas de búsqueda se guardarán.
 
-## 7. Estado
+## 8. Estado
 
 - Gate 0: CERRADO;
 - Gate 1: CERRADO;
