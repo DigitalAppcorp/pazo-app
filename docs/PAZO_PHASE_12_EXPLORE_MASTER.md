@@ -1,8 +1,8 @@
 # PAZO — Fase 12 — Explore/Search unificado
 
-**Estado:** GATE 0–2 CERRADOS / GATE 2.5 IDEA BANK ABIERTO  
+**Estado:** GATE 5 CERRADO — MVP REDUCIDO / GATE 6 ESPECIFICACIÓN DEFINIDA  
 **Fecha:** 2026-10-07  
-**Implementación autorizada:** NO  
+**Implementación autorizada:** NO — arquitectura Gate 7 pendiente  
 **Project Brain OS:** v1.3.0
 
 ## 1. Auditoría de estado real — Gate 0
@@ -222,7 +222,7 @@ No convertir ideas automáticamente en features.
 
 ### I1 — Explore como búsqueda global de PAZO
 **Origen:** Product Owner.  
-**Estado:** PROPUESTA / no aprobada todavía.
+**Estado:** APROBADA.
 
 Idea:
 - Explore no es un gran módulo de contenido;
@@ -248,12 +248,12 @@ Arquitectura conceptual recomendada:
 - un provider de Eventos se añade solo cuando exista un modelo real de Eventos;
 - si el volumen futuro lo exige, migrar después a pg_trgm/full-text o un motor externo sin cambiar la UX principal.
 
-Nota de identidad:
-PAZO hoy define la identidad social como mascota. Por tanto, “buscar usuarios” debería significar buscar perfiles públicos de mascotas, no exponer cuentas humanas, salvo nueva decisión explícita del Product Owner.
+Nota de identidad — CERRADA:
+El Product Owner aclaró que por “usuarios” se refería a **mascotas/perfiles públicos**. Search NO introduce perfiles humanos públicos ni búsqueda de cuentas humanas.
 
 ### I2 — Comunidades como módulo principal propio
 **Origen:** Product Owner.  
-**Estado:** PROPUESTA / no aprobada todavía.
+**Estado:** APROBADA.
 
 Idea:
 - sacar Comunidades de Explore;
@@ -276,7 +276,7 @@ Auditoría:
 
 ### I3 — Mover Explore/Search al Header
 **Origen:** Product Owner.  
-**Estado:** PROPUESTA / no aprobada todavía.
+**Estado:** APROBADA.
 
 Idea:
 - Explore deja la barra inferior;
@@ -298,30 +298,79 @@ Esto resuelve la ambigüedad actual de Explore sin crear otro gran módulo.
 
 ---
 
-## 7. Decisiones que NO están tomadas
+## 7. Gate 3 — Experimento mínimo
 
-- si Search busca posts además de entidades;
-- si “Para ti” permanece dentro de Explore;
-- si se muestran resultados mezclados o agrupados;
-- si existen filtros por especie/categoría/zona;
-- si se permite buscar por ubicación de mascotas — por defecto NO recomendado;
-- si lugares deben abrir un detail sheet dentro de Explore o saltar al Mapa;
-- si el buscador funciona para demo/anon;
-- si existirán tendencias/popularidad;
-- si habrá recomendaciones personalizadas;
-- si eventos entrarán después como extensión;
-- qué métricas de búsqueda se guardarán.
+Search es principalmente infraestructura/utilidad, por lo que no requiere fake door adicional.
 
-## 8. Estado
+La prueba mínima ya existía:
+- Explore visible en navegación;
+- input de búsqueda visible;
+- Comunidades reales dentro de la superficie;
+- navegación real a perfil público desde contenido recomendado.
+
+La principal incertidumbre no era “¿la gente quiere una pantalla llamada Explore?”, sino **qué debe significar esa superficie y dónde debe vivir**.
+
+Esa incertidumbre quedó resuelta por decisión del Product Owner:
+- Search = búsqueda global;
+- Comunidades = módulo principal propio;
+- Search = acción global en Header;
+- identidad buscable = mascotas/perfiles públicos, no humanos.
+
+**Gate 3: CERRADO sin código adicional.**
+
+## 8. Gate 5 — Decisión de inversión
+
+**Resultado: MVP REDUCIDO.**
+
+Razones:
+- Search es infraestructura habilitadora;
+- ya existen tres dominios reales que justifican su uso;
+- corrige una promesa engañosa del Explore actual;
+- el coste puede mantenerse bajo usando búsqueda federada;
+- no requiere nueva entidad de contenido;
+- no requiere motor externo;
+- no necesita masa crítica para funcionar;
+- la navegación de Comunidades queda conceptualmente más clara.
+
+MVP aprobado:
+- búsqueda global de mascotas;
+- Comunidades;
+- Lugares;
+- filtros por tipo;
+- navegación al módulo/entidad propietaria;
+- Search accesible desde Header;
+- Comunidades ocupa el slot inferior actual de Explore;
+- arquitectura extensible para futuros providers.
+
+Fuera del MVP:
+- Eventos hasta que exista módulo real;
+- posts;
+- perfiles humanos;
+- ranking ML;
+- búsqueda semántica/vectorial;
+- motor externo;
+- tendencias;
+- recomendaciones complejas.
+
+## 9. Gate 6 — Especificación
+
+Sub-ruta:
+`docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`
+
+El alcance funcional está definido allí.
+
+**Gate 6: CERRADO.**
+
+## 10. Estado
 
 - Gate 0: CERRADO;
 - Gate 1: CERRADO;
 - Gate 2: CERRADO;
-- Gate 2.5: ABIERTO;
-- Gate 3: NO INICIADO;
-- Gate 5: NO DECIDIDO;
-- Gate 6: NO AUTORIZADO;
-- Gate 7: NO AUTORIZADO;
+- Gate 2.5: CERRADO;
+- Gate 3: CERRADO;
+- Gate 5: MVP REDUCIDO;
+- Gate 6: CERRADO;
+- Gate 7: SIGUIENTE;
 - Gate 8: NO AUTORIZADO.
 
-No crear código ni migraciones de Fase 12 hasta cerrar el lifecycle correspondiente.
+No implementar hasta cerrar Gate 7 — arquitectura técnica.

@@ -4,9 +4,10 @@
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
 **Current state:** Fase 8 COMPLETADA  
-**Active product module:** Fase 12 — Explore/Search  
-**Gate:** Gate 2.5 — Idea Bank ABIERTO  
-**Implementation authorization for Explore/Search:** NO
+**Active product module:** Fase 12 — Global Search / Explore  
+**Gate:** Gate 7 — arquitectura técnica SIGUIENTE  
+**Decision:** MVP REDUCIDO  
+**Implementation authorization:** NO
 
 ## Startup protocol
 
@@ -77,33 +78,37 @@ Supabase:
 
 **Scope Closure Reconciliation: PASS.**
 
-## Active module — Fase 12 Explore/Search
+## Active module — Fase 12 Global Search / Explore
 
-Canonical module document:
-`docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
+Canonical docs:
+- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`;
+- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`.
 
-Audit complete:
-- Gate 0: CERRADO;
-- Gate 1: CERRADO;
-- Gate 2: CERRADO;
-- Gate 2.5: ABIERTO.
+Product decisions:
+- Search = búsqueda global transversal;
+- identity = mascotas/perfiles públicos, not human accounts;
+- MVP providers = Pets + Communities + Places;
+- Communities becomes a primary bottom-nav module;
+- Search moves to Header beside global actions;
+- Search routes to the owning module/entity;
+- Events only when a real Events module exists;
+- Posts excluded from MVP;
+- no heavy/external search engine;
+- no raw query analytics by default.
 
-Key findings:
-- Explore is partially real, not a pure mock;
-- Communities are real;
-- the current search box effectively filters Communities only;
-- pet discovery is only an indirect Feed-derived card;
-- Places search exists but is not integrated into Explore;
-- Events has no real model yet;
-- current Supabase density does not justify a heavy search engine;
-- provisional technical direction is a small real unified search over pets + Communities + Places.
+Lifecycle:
+- Gate 0: CLOSED;
+- Gate 1: CLOSED;
+- Gate 2: CLOSED;
+- Gate 2.5: CLOSED;
+- Gate 3: CLOSED without extra code;
+- Gate 5: MVP REDUCIDO;
+- Gate 6: CLOSED;
+- Gate 7: NEXT;
+- Gate 8: NOT AUTHORIZED.
 
 Exact next action:
-**Product Owner Idea Bank.**
-
-Brandon can provide ideas in any order or level of detail. Project Brain will classify and audit them before Gate 3/Gate 5.
-
-Do not create an implementation branch for Explore/Search until its lifecycle decision is approved.
+**Design and close Gate 7 architecture before implementation.**
 
 ## Other current product state
 

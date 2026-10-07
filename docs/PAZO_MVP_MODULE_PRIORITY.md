@@ -111,7 +111,10 @@ Estado real:
 Conclusión:
 - valor suficiente para continuar el lifecycle;
 - coste medio-bajo para un MVP reducido;
-- Gate 2.5 Idea Bank ABIERTO;
+- Product Owner aprobó Global Search + Comunidades como módulo principal;
+- Gate 5: MVP REDUCIDO;
+- Gate 6: CERRADO;
+- Gate 7: SIGUIENTE;
 - implementación todavía NO autorizada.
 
 ---
@@ -132,7 +135,7 @@ Escala:
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
-| Explore/Search | 4 | 3 | 2 | 2 | GATE 2.5 — IDEA BANK |
+| Global Search | 4 | 3 | 2 | 2 | MVP REDUCIDO — GATE 7 SIGUIENTE |
 
 ---
 
@@ -266,7 +269,7 @@ Usar su sub-ruta y datos de validación.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
-- Explore/Search: **GATE 2.5 IDEA BANK**; Gate 0–2 cerrados, implementación no autorizada.
+- Global Search: **MVP REDUCIDO — GATE 7 SIGUIENTE**; Gate 0–6 cerrados, implementación aún no autorizada.
 - Mensajería: POSPONER / REEVALUAR por masa crítica y moderación.
 - Notificaciones generales: implementar solo por dependencia concreta.
 - Rediseño UI: planificado, pero no debe desplazar una necesidad funcional más valiosa sin decisión explícita.

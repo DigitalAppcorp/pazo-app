@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 8 Lugares/Mapa/Check-ins COMPLETADA tras Scope Closure Reconciliation. PR #22 merged y `main` verificado. Siguiente acción autorizada: auditoría Gate 0–2 de Explore/Search; no implementar todavía.
+**Estado general:** Fase 12 Global Search es el módulo activo. Gate 0–6 cerrados con decisión MVP REDUCIDO; siguiente paso: Gate 7 arquitectura técnica. Implementación todavía no autorizada.
 
 ---
 
@@ -580,8 +580,8 @@ Fase 6 introduce la primera notificación real de rescate. Esta fase generaliza 
 
 ---
 
-## Fase 12 — Explore/Search unificado
-**Estado: EN CICLO DE PRODUCTO — GATE 2.5 IDEA BANK ABIERTO**
+## Fase 12 — Global Search / Explore
+**Estado: GATE 6 CERRADO — MVP REDUCIDO / GATE 7 SIGUIENTE**
 
 ### Objetivo
 Que “Explorar” encuentre contenido real y navegue a entidades reales, sin prometer capacidades que todavía no existen.
@@ -591,7 +591,11 @@ Que “Explorar” encuentre contenido real y navegue a entidades reales, sin pr
 Gate 0 — auditoría real: CERRADO.  
 Gate 1 — valor: CERRADO.  
 Gate 2 — coste/dependencias: CERRADO.  
-Gate 2.5 — Idea Bank: ABIERTO.  
+Gate 2.5 — Idea Bank: CERRADO.  
+Gate 3 — experimento mínimo: CERRADO sin código adicional.  
+Gate 5 — decisión: MVP REDUCIDO.  
+Gate 6 — especificación: CERRADO.  
+Gate 7 — SIGUIENTE.  
 Implementación: NO AUTORIZADA.
 
 ### Alcance
@@ -860,29 +864,36 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Carril de producto — Fase 12 Explore/Search
+## Fase 12 — Global Search / Explore
 
-**Estado:** Gate 2.5 — Idea Bank ABIERTO.
+**Estado:** Gate 6 CERRADO / Gate 7 SIGUIENTE.
 
-La auditoría Gate 0–2 concluyó:
-- Explore actual es parcialmente real;
-- búsqueda actual solo filtra Comunidades;
-- no existe búsqueda pública de mascotas;
-- Lugares ya tiene search reutilizable;
-- Eventos sigue sin modelo real;
-- no se justifica infraestructura de búsqueda pesada con la densidad actual;
-- candidato provisional: MVP REDUCIDO REAL de mascotas + Comunidades + Lugares.
+Decisión aprobada:
+- Explore se convierte en búsqueda global;
+- Search busca mascotas/perfiles públicos, Comunidades y Lugares;
+- no existen perfiles humanos públicos buscables;
+- Comunidades ocupa el slot inferior actual de Explore;
+- Search pasa al Header;
+- futuros módulos se integran como providers cuando sean reales;
+- Eventos y Posts quedan fuera del MVP.
+
+Producto:
+- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
+- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`
 
 ### Exact next action
-1. Product Owner descarga sus ideas para Explore/Search sin necesidad de estructurarlas.
-2. Project Brain audita cada idea con Gate 2.5.
-3. Se define el experimento o mínimo útil de Gate 3.
-4. Se toma decisión Gate 5.
-5. No crear código, rama de implementación ni migraciones hasta aprobación.
+1. diseñar arquitectura federada de Search;
+2. definir contratos de resultado/provider;
+3. definir navegación Search → mascota/Comunidad/Lugar;
+4. auditar consultas Supabase y RLS exactas;
+5. decidir si hace falta migración/índices ahora;
+6. preparar Definition of Done técnica;
+7. no implementar hasta cerrar Gate 7.
 
 ## Do not do
-- no implementar Fase 12 todavía;
-- no añadir Eventos ficticios;
-- no usar datos privados de mascota para Search;
-- no construir motor de ranking/search externo antes de evidencia;
-- no mezclar Fase 13 de rediseño visual con esta decisión funcional.
+- no crear perfiles humanos;
+- no incluir Eventos falsos;
+- no buscar campos privados de mascota;
+- no guardar raw query en analytics;
+- no introducir motor externo de búsqueda;
+- no reconstruir Comunidades; reutilizar su módulo real.
