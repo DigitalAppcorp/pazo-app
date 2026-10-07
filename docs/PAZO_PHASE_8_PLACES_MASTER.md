@@ -1,6 +1,6 @@
 # PAZO — Fase 8 — Lugares, mapa y Check-ins
 
-**Estado:** GATE 8 — IMPLEMENTACIÓN EN PREPARACIÓN
+**Estado:** GATE 8 — BACKEND APLICADO / VALIDACIÓN VISUAL PENDIENTE
 **Fecha:** 2026-10-06
 **Implementación autorizada:** NO
 
@@ -304,3 +304,32 @@ Fuentes:
 - arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
 
 Migración core preparada, pero NO aplicada. Implementación frontend puede comenzar; Supabase requiere autorización explícita después de build/preflight.
+
+
+## 12. Estado Gate 8
+
+Backend aplicado:
+- `20261007052747 phase_8_places_map_core`;
+- `20261007052749 phase_8_places_initial_catalog`;
+- `20261007053859 fix_place_checkin_checkout_rls`.
+
+Backend QA:
+- lugares demo archivados y catálogo inicial activo: PASS;
+- check-in privado: PASS;
+- visibilidad opt-in: PASS;
+- aislamiento entre cuentas: PASS;
+- cambio de lugar cierra presencia anterior: PASS;
+- expiración temporal: PASS;
+- checkout manual: PASS;
+- mascota ajena bloqueada: PASS;
+- lugar archivado bloqueado: PASS;
+- sugerencias pending/server-owned: PASS;
+- telemetría mínima/dedupe: PASS;
+- Security Advisor sin findings nuevos de Fase 8.
+
+Pendiente para cerrar Gate 8:
+- configurar token público Mapbox;
+- validar mapa real en runtime;
+- prueba visual/end-to-end del Product Owner;
+- PR #20 final;
+- merge y verificación de `main`.
