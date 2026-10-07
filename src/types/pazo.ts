@@ -62,6 +62,7 @@ export interface CommunitySummary {
   species?: Species
   zone?: string
   imageUrl?: string
+  imageStoragePath?: string
   rules?: string
   status: CommunityStatus
   membersCount: number
@@ -132,6 +133,7 @@ export interface CommunityUpdateInput {
   zone?: string | null
   rules?: string | null
   imageUrl?: string | null
+  imageStoragePath?: string | null
   status?: CommunityStatus
 }
 
