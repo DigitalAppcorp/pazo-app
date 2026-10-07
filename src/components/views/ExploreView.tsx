@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { CommunitySummary, Pet } from '../../types/pazo'
+import type { CommunitySummary, Pet, Post } from '../../types/pazo'
 import {
   fetchCommunitySummaries,
   joinCommunity,
@@ -12,6 +12,7 @@ import { CommunityDetailView } from './CommunityDetailView'
 interface ExploreViewProps {
   currentPet: Pet | null
   onSelectPetProfile: (petId: string) => void
+  featuredPost?: Post
   createCommunityRequestKey?: number
   lang: 'es' | 'en'
 }
@@ -21,6 +22,7 @@ type ExploreCategory = 'para_ti' | 'comunidades' | 'eventos'
 export const ExploreView = ({
   currentPet,
   onSelectPetProfile,
+  featuredPost,
   createCommunityRequestKey = 0,
   lang,
 }: ExploreViewProps) => {
@@ -136,14 +138,21 @@ export const ExploreView = ({
   const suggestedCommunities = filteredCommunities.slice(0, 3)
 
   const renderCommunityCard = (community: CommunitySummary) => (
-    <button
+    <div
       key={community.id}
-      type="button"
+      role="button"
+      tabIndex={0}
       onClick={() => {
         setSelectedCommunityId(community.id)
         setActiveCategory('comunidades')
       }}
-      className="w-full rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-all hover:shadow-md"
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          setSelectedCommunityId(community.id)
+          setActiveCategory('comunidades')
+        }
+      }}
+      className="w-full cursor-pointer rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-all hover:shadow-md"
     >
       <div className="flex items-center justify-between gap-3.5">
         <div className="flex min-w-0 items-center gap-3">
@@ -205,7 +214,7 @@ export const ExploreView = ({
           </span>
         </button>
       </div>
-    </button>
+    </div>
   )
 
   return (
@@ -266,40 +275,48 @@ export const ExploreView = ({
 
         {activeCategory === 'para_ti' && (
           <>
-            <div className="flex items-center justify-between rounded-[2.2rem] bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl shadow-xs">
-                  <img
-                    src="https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=200&auto=format&fit=crop"
-                    alt="Nube"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-extrabold text-[#204E4A]">
-                      Nube
-                    </span>
-                    <span className="rounded-full bg-[#FAF8F5] px-2.5 py-0.5 text-[10px] font-bold text-[#204E4A] shadow-xs">
-                      {lang === 'es' ? 'Conejo • LA' : 'Rabbit • LA'}
-                    </span>
+            {featuredPost ? (
+              <div className="flex items-center justify-between rounded-[2.2rem] bg-white p-4 shadow-sm">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl shadow-xs">
+                    <img
+                      src={featuredPost.petAvatar}
+                      alt={featuredPost.petName}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                  <p className="line-clamp-1 text-[11px] text-[#5C7470]">
-                    {lang === 'es'
-                      ? 'Explora rincones tranquilos en compañía.'
-                      : 'Loves calm spots and friendly company.'}
-                  </p>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-extrabold text-[#204E4A]">
+                        {featuredPost.petName}
+                      </span>
+                      <span className="shrink-0 rounded-full bg-[#FAF8F5] px-2.5 py-0.5 text-[10px] font-bold text-[#204E4A] shadow-xs">
+                        {featuredPost.petSpecies}
+                      </span>
+                    </div>
+                    <p className="line-clamp-1 text-[11px] text-[#5C7470]">
+                      {featuredPost.text}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => onSelectPetProfile('Nube')}
-                className="shrink-0 rounded-full bg-[#FAF8F5] px-3.5 py-2 text-[11px] font-bold text-[#204E4A] shadow-xs transition-all hover:bg-[#E1E53F]"
-              >
-                {lang === 'es' ? 'Ver Ficha' : 'View Profile'}
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => onSelectPetProfile(featuredPost.petId)}
+                  className="shrink-0 rounded-full bg-[#FAF8F5] px-3.5 py-2 text-[11px] font-bold text-[#204E4A] shadow-xs transition-all hover:bg-[#E1E53F]"
+                >
+                  {lang === 'es' ? 'Ver Ficha' : 'View Profile'}
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-[2.2rem] bg-white p-4 shadow-sm">
+                <p className="text-xs font-bold text-[#204E4A]">
+                  {lang === 'es'
+                    ? 'Cuando haya nuevas mascotas para descubrir, aparecerán aquí.'
+                    : 'New pets to discover will appear here.'}
+                </p>
+              </div>
+            )}
 
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
