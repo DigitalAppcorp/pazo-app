@@ -1,8 +1,8 @@
 # PAZO — Fase 12 — Explore/Search unificado
 
-**Estado:** GATE 8 EN CURSO — IMPLEMENTACIÓN + BACKEND QA  
+**Estado:** COMPLETADA — GATE 8 CERRADO / GATE 9 MEDICIÓN  
 **Fecha:** 2026-10-07  
-**Implementación autorizada:** SÍ — Product Owner autorizó backend y cierre de Gate 8  
+**Implementación:** COMPLETADA  
 **Project Brain OS:** v1.3.0
 
 ## 1. Auditoría de estado real — Gate 0
@@ -388,7 +388,8 @@ Decisión:
 - Gate 5: MVP REDUCIDO;
 - Gate 6: CERRADO;
 - Gate 7: CERRADO;
-- Gate 8: EN CURSO — frontend/search/deep-links + telemetría/backend implementados; build final y runtime/product acceptance pendientes.
+- Gate 8: CERRADO;
+- Gate 9: MEDICIÓN.
 
 No implementar hasta cerrar Gate 7 — arquitectura técnica.
 
@@ -472,3 +473,52 @@ Remaining Gate 8 evidence:
 - telemetry runtime event verification;
 - Scope Closure Reconciliation;
 - PR #28 merge + main verification.
+
+
+## 14. Scope Closure Reconciliation — FINAL
+
+Comparación de alcance aprobado vs entrega:
+
+- Search global transversal: PASS;
+- Header Search action: PASS;
+- Communities como módulo principal en bottom nav: PASS;
+- Pets provider: PASS;
+- Communities provider: PASS;
+- Places provider: PASS;
+- filtros mínimos por tipo: PASS;
+- navegación a entidades reales: PASS;
+- ranking simple por dominio: PASS;
+- debounce + stale-response guard: PASS;
+- partial provider failure contract: PASS;
+- perfiles humanos fuera: PASS;
+- Posts fuera: PASS;
+- Eventos falsos fuera: PASS;
+- sin motor externo / índice global: PASS;
+- privacidad de mascota: PASS;
+- raw query no persistida: PASS;
+- telemetría mínima: PASS;
+- backend RLS/grants/constraints: PASS;
+- build final: PASS;
+- runtime/visual Product Owner QA: PASS;
+- smoke test de módulos existentes + F5: PASS.
+
+Runtime telemetry evidence:
+- 33 eventos durante QA;
+- search_open registrado;
+- search_execute con resultados y sin resultados registrado;
+- filtros all/pet/community/place registrados;
+- result opens de pet/community/place registrados;
+- schema sin columna de raw query.
+
+Supabase:
+- `20261007102632 phase_12_search_telemetry`;
+- `20261007102748 index_search_usage_events_user`.
+
+Security Advisor:
+- sin findings nuevos atribuibles a Fase 12;
+- warnings globales previos de SECURITY DEFINER y Leaked Password Protection permanecen como deuda conocida.
+
+**Scope Closure Reconciliation: PASS.**
+**Gate 8: CERRADO.**
+**Fase 12: COMPLETADA.**
+**Gate 9: medición de uso de Search.**
