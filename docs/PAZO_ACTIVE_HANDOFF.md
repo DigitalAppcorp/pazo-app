@@ -176,7 +176,17 @@ Current truth:
 - Mapbox runtime + explicit location action: PASS.
 - device geolocation works only after Product Owner taps "Usar mi ubicación".
 - exact device coordinates are not persisted in Supabase.
-- remaining Gate 8 validation: place detail + check-in privacy/visibility + move + checkout + F5 + suggestion + second-account isolation.
+- Phase 8 primary runtime E2E: PASS.
+- Product Owner confirmed:
+  - place detail;
+  - private check-in;
+  - F5 persistence;
+  - visibility opt-in;
+  - move between places closes previous presence;
+  - manual checkout;
+  - post-checkout F5;
+  - search/category filters.
+- remaining Gate 8 validation: second-account privacy/isolation + place suggestion flow.
 - after E2E PASS: final PR review/merge.
 
 After build PASS:
