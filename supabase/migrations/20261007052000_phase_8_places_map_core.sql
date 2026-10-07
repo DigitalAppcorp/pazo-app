@@ -379,13 +379,24 @@ REVOKE ALL ON TABLE public.pet_place_checkins
 REVOKE ALL ON TABLE public.pet_place_presence
   FROM PUBLIC, anon, authenticated;
 
-GRANT SELECT ON TABLE public.pet_place_checkins TO authenticated;
+GRANT SELECT (
+  id,
+  place_id,
+  pet_id,
+  visible,
+  checked_in_at,
+  expires_at
+) ON TABLE public.pet_place_checkins TO authenticated;
 GRANT INSERT (place_id, pet_id, visible)
   ON TABLE public.pet_place_checkins TO authenticated;
 GRANT UPDATE (visible, ended_at)
   ON TABLE public.pet_place_checkins TO authenticated;
 
-GRANT SELECT ON TABLE public.pet_place_presence TO authenticated;
+GRANT SELECT (
+  place_id,
+  visible_pet_id,
+  expires_at
+) ON TABLE public.pet_place_presence TO authenticated;
 
 GRANT ALL ON TABLE public.pet_place_checkins TO service_role;
 GRANT ALL ON TABLE public.pet_place_presence TO service_role;
