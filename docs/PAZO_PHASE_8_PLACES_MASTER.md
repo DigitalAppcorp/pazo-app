@@ -358,12 +358,13 @@ Preparado:
 - transactional view/interest QA PASS;
 - 0 test signals persisted.
 
-Gate 8 permanece ABIERTO hasta:
+Gate 8 permanece ABIERTO únicamente hasta completar el cierre Git:
 - build local PASS: COMPLETADO;
 - autorización y apply de module keys: COMPLETADO;
-- prueba visual de modelos 3D: PENDIENTE;
-- prueba de fake doors + persistencia: PENDIENTE;
-- merge de la corrección: PENDIENTE.
+- prueba visual de modelos 3D: PASS;
+- prueba de fake doors + persistencia: PASS;
+- merge de la corrección: PENDIENTE;
+- verificación de `main`: PENDIENTE.
 
 
 ## 13. Checkpoint exacto para continuidad entre chats
@@ -387,8 +388,17 @@ Resultado:
 - marcador fallback: círculo 2D azul visible;
 - **modelo 3D veterinaria: NO perceptible**.
 
+Ese resultado fue el fallo pre-fix.
+
+Después del ajuste de visibilidad, el Product Owner completó la ronda requerida:
+- build local: PASS;
+- veterinaria 3D: PASS;
+- parque/sendero: PASS;
+- fake door `Me interesa`: PASS;
+- persistencia tras F5: PASS.
+
 Por tanto:
-**3D marker validation = FAIL/PENDING**, no PASS.
+**3D marker validation = PASS** y **fake-door runtime validation = PASS**.
 
 ### Fix preparado después de la captura
 En `src/features/places/map/MapboxMap.tsx`:
@@ -405,18 +415,18 @@ En `src/features/places/map/MapboxMap.tsx`:
 - `antialias=true`.
 
 ### Siguiente verificación obligatoria
-1. pull latest branch;
-2. `npm run build`;
-3. abrir app local;
-4. seleccionar veterinaria;
-5. confirmar visualmente que la figura 3D es claramente visible;
-6. revisar parque/sendero;
-7. validar fake door `Me interesa` + F5.
+La validación runtime/visual ya está completada.
+
+Siguiente secuencia:
+1. marcar PR #22 ready;
+2. mergear PR #22;
+3. verificar `main`;
+4. finalizar documentos canónicos de cierre.
 
 ### Cierre
-Gate 8 solo vuelve a CERRADO cuando:
-- 3D markers visual PASS;
-- fake doors runtime/persistence PASS;
-- PR #22 merged;
-- `main` verified;
-- Scope Closure Reconciliation PASS.
+Gate 8 vuelve a CERRADO cuando:
+- 3D markers visual PASS: COMPLETADO;
+- fake doors runtime/persistence PASS: COMPLETADO;
+- PR #22 merged: PENDIENTE;
+- `main` verified: PENDIENTE;
+- Scope Closure Reconciliation PASS final: pendiente únicamente de esos dos pasos Git.
