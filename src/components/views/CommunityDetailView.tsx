@@ -839,78 +839,200 @@ export const CommunityDetailView = ({
               )}
             </>
           ) : (
-            <form onSubmit={handleSaveEdit} className="space-y-3">
-              <input
-                value={editName}
-                onChange={(event) => setEditName(event.target.value)}
-                minLength={3}
-                maxLength={80}
-                required
-                className="w-full rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-xs text-[#204E4A]"
-              />
-              <textarea
-                value={editDescription}
-                onChange={(event) => setEditDescription(event.target.value)}
-                rows={4}
-                maxLength={1000}
-                required
-                className="w-full rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-xs text-[#204E4A]"
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  value={editCategory}
-                  onChange={(event) => setEditCategory(event.target.value)}
-                  maxLength={40}
-                  required
-                  className="rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-xs text-[#204E4A]"
-                />
-                <select
-                  value={editSpecies}
-                  onChange={(event) =>
-                    setEditSpecies(event.target.value as Species | '')
-                  }
-                  className="rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-xs text-[#204E4A]"
-                >
-                  <option value="">{lang === 'es' ? 'Todas' : 'All'}</option>
-                  <option value="perro">{lang === 'es' ? 'Perro' : 'Dog'}</option>
-                  <option value="gato">{lang === 'es' ? 'Gato' : 'Cat'}</option>
-                  <option value="conejo">{lang === 'es' ? 'Conejo' : 'Rabbit'}</option>
-                  <option value="ave">{lang === 'es' ? 'Ave' : 'Bird'}</option>
-                  <option value="otro">{lang === 'es' ? 'Otro' : 'Other'}</option>
-                </select>
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div className="mb-1">
+                <h4 className="text-sm font-black text-[#204E4A]">
+                  {lang === 'es' ? 'Editar comunidad' : 'Edit community'}
+                </h4>
+                <p className="mt-1 text-[10px] leading-relaxed text-[#5C7470]">
+                  {lang === 'es'
+                    ? 'Actualiza la información que las personas verán antes de unirse.'
+                    : 'Update the information people will see before joining.'}
+                </p>
               </div>
-              <input
-                value={editZone}
-                onChange={(event) => setEditZone(event.target.value)}
-                maxLength={100}
-                className="w-full rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-xs text-[#204E4A]"
-                placeholder={lang === 'es' ? 'Zona' : 'Area'}
-              />
-              <textarea
-                value={editRules}
-                onChange={(event) => setEditRules(event.target.value)}
-                rows={4}
-                maxLength={2000}
-                className="w-full rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-xs text-[#204E4A]"
-                placeholder={lang === 'es' ? 'Reglas' : 'Rules'}
-              />
 
-              <label className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#FAF8F5] px-3 py-2.5 text-[10px] font-bold text-[#204E4A]">
-                <IconCamera size={15} />
-                {editImage
-                  ? editImage.name
-                  : lang === 'es'
-                    ? 'Cambiar portada'
-                    : 'Change cover'}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="community-edit-name"
+                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                >
+                  {lang === 'es' ? 'Nombre de la comunidad' : 'Community name'}{' '}
+                  <span className="text-[#5C7470]">*</span>
+                </label>
                 <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={(event) => setEditImage(event.target.files?.[0] || null)}
-                  className="hidden"
+                  id="community-edit-name"
+                  value={editName}
+                  onChange={(event) => setEditName(event.target.value)}
+                  minLength={3}
+                  maxLength={80}
+                  required
+                  placeholder={
+                    lang === 'es'
+                      ? 'Ej. Perros Senderistas LA'
+                      : 'E.g. LA Hiking Dogs'
+                  }
+                  className="w-full rounded-2xl bg-[#FAF8F5] px-4 py-3 text-xs text-[#204E4A] outline-none ring-1 ring-transparent placeholder:text-[#8FA09D] focus:ring-[#204E4A]/20"
                 />
-              </label>
+              </div>
 
-              <div className="flex gap-2">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="community-edit-description"
+                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                >
+                  {lang === 'es' ? 'Descripción' : 'Description'}{' '}
+                  <span className="text-[#5C7470]">*</span>
+                </label>
+                <textarea
+                  id="community-edit-description"
+                  value={editDescription}
+                  onChange={(event) => setEditDescription(event.target.value)}
+                  rows={4}
+                  maxLength={1000}
+                  required
+                  placeholder={
+                    lang === 'es'
+                      ? 'Explica de qué trata la comunidad y qué une a sus miembros.'
+                      : 'Explain what the community is about and what brings its members together.'
+                  }
+                  className="w-full rounded-2xl bg-[#FAF8F5] px-4 py-3 text-xs text-[#204E4A] outline-none ring-1 ring-transparent placeholder:text-[#8FA09D] focus:ring-[#204E4A]/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="community-edit-category"
+                    className="block text-[11px] font-extrabold text-[#204E4A]"
+                  >
+                    {lang === 'es' ? 'Categoría' : 'Category'}{' '}
+                    <span className="text-[#5C7470]">*</span>
+                  </label>
+                  <input
+                    id="community-edit-category"
+                    value={editCategory}
+                    onChange={(event) => setEditCategory(event.target.value)}
+                    maxLength={40}
+                    required
+                    placeholder={
+                      lang === 'es'
+                        ? 'Ej. Paseos, ayuda, consejos'
+                        : 'E.g. Walks, support, advice'
+                    }
+                    className="w-full rounded-2xl bg-[#FAF8F5] px-4 py-3 text-xs text-[#204E4A] outline-none ring-1 ring-transparent placeholder:text-[#8FA09D] focus:ring-[#204E4A]/20"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="community-edit-species"
+                    className="block text-[11px] font-extrabold text-[#204E4A]"
+                  >
+                    {lang === 'es' ? 'Especie principal' : 'Main species'}{' '}
+                    <span className="font-medium text-[#5C7470]">
+                      {lang === 'es' ? '(opcional)' : '(optional)'}
+                    </span>
+                  </label>
+                  <select
+                    id="community-edit-species"
+                    value={editSpecies}
+                    onChange={(event) =>
+                      setEditSpecies(event.target.value as Species | '')
+                    }
+                    className="w-full rounded-2xl bg-[#FAF8F5] px-4 py-3 text-xs text-[#204E4A] outline-none ring-1 ring-transparent focus:ring-[#204E4A]/20"
+                  >
+                    <option value="">
+                      {lang === 'es' ? 'Todas las especies' : 'All species'}
+                    </option>
+                    <option value="perro">{lang === 'es' ? 'Perro' : 'Dog'}</option>
+                    <option value="gato">{lang === 'es' ? 'Gato' : 'Cat'}</option>
+                    <option value="conejo">{lang === 'es' ? 'Conejo' : 'Rabbit'}</option>
+                    <option value="ave">{lang === 'es' ? 'Ave' : 'Bird'}</option>
+                    <option value="otro">{lang === 'es' ? 'Otro' : 'Other'}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="community-edit-zone"
+                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                >
+                  {lang === 'es' ? 'Zona o ubicación' : 'Area or location'}{' '}
+                  <span className="font-medium text-[#5C7470]">
+                    {lang === 'es' ? '(opcional)' : '(optional)'}
+                  </span>
+                </label>
+                <input
+                  id="community-edit-zone"
+                  value={editZone}
+                  onChange={(event) => setEditZone(event.target.value)}
+                  maxLength={100}
+                  className="w-full rounded-2xl bg-[#FAF8F5] px-4 py-3 text-xs text-[#204E4A] outline-none ring-1 ring-transparent placeholder:text-[#8FA09D] focus:ring-[#204E4A]/20"
+                  placeholder={
+                    lang === 'es'
+                      ? 'Ej. Los Ángeles, CA'
+                      : 'E.g. Los Angeles, CA'
+                  }
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="community-edit-rules"
+                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                >
+                  {lang === 'es' ? 'Reglas de la comunidad' : 'Community rules'}{' '}
+                  <span className="font-medium text-[#5C7470]">
+                    {lang === 'es' ? '(opcional)' : '(optional)'}
+                  </span>
+                </label>
+                <textarea
+                  id="community-edit-rules"
+                  value={editRules}
+                  onChange={(event) => setEditRules(event.target.value)}
+                  rows={4}
+                  maxLength={2000}
+                  className="w-full rounded-2xl bg-[#FAF8F5] px-4 py-3 text-xs text-[#204E4A] outline-none ring-1 ring-transparent placeholder:text-[#8FA09D] focus:ring-[#204E4A]/20"
+                  placeholder={
+                    lang === 'es'
+                      ? 'Describe las normas básicas de convivencia y publicaciones.'
+                      : 'Describe the basic rules for behavior and posts.'
+                  }
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="block text-[11px] font-extrabold text-[#204E4A]">
+                  {lang === 'es' ? 'Portada de la comunidad' : 'Community cover'}{' '}
+                  <span className="font-medium text-[#5C7470]">
+                    {lang === 'es' ? '(opcional)' : '(optional)'}
+                  </span>
+                </span>
+                <label className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#FAF8F5] px-4 py-3 text-[10px] font-bold text-[#204E4A] ring-1 ring-transparent transition-all hover:ring-[#204E4A]/15">
+                  <IconCamera size={15} />
+                  {editImage
+                    ? editImage.name
+                    : lang === 'es'
+                      ? 'Seleccionar una nueva portada'
+                      : 'Choose a new cover'}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) =>
+                      setEditImage(event.target.files?.[0] || null)
+                    }
+                    className="hidden"
+                  />
+                </label>
+                <p className="text-[9px] text-[#5C7470]">
+                  {lang === 'es'
+                    ? 'JPG, PNG o WEBP · máximo 5 MB.'
+                    : 'JPG, PNG or WEBP · maximum 5 MB.'}
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-1">
                 <button
                   type="submit"
                   disabled={isSavingEdit}
