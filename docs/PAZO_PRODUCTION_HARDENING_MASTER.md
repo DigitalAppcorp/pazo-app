@@ -90,6 +90,7 @@ Mientras falte cualquiera, el webhook debe responder 503 y NO mutar membresías.
 
 Current branch evidence:
 - GitHub Actions CI: PASS;
+- Product Owner runtime validation: PASS — login, Feed/Communities navigation and repeated reloads no longer show the premature PayPal pitch;
 - `npm ci`: PASS;
 - production build: PASS;
 - lint step: visible/non-blocking because the pre-existing repository baseline contains 114 lint problems;
