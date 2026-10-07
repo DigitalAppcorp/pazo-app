@@ -670,3 +670,36 @@ El siguiente trabajo es documental/producto:
 5. decidir qué módulo entra al Carril de Implementación mientras Comunidades recopila datos.
 
 Solo después se autoriza código de instrumentación.
+
+
+---
+
+# Scope Closure Reconciliation — obligatorio antes de COMPLETADA
+
+PAZO adopta Project Brain OS v1.3.0.
+
+Antes de marcar una fase/módulo **COMPLETADA**:
+1. releer scope aprobado, arquitectura y Definition of Done;
+2. enumerar cada entregable aprobado;
+3. comprobar por separado:
+   - código implementado;
+   - backend aplicado;
+   - pruebas técnicas;
+   - runtime real;
+   - aceptación visual/producto;
+   - fake doors/instrumentación/assets prometidos;
+   - merge a `main`;
+   - verificación de `main`;
+4. mantener Gate 8 abierto si cualquier item aprobado está ausente o no validado.
+
+No inferir:
+- build PASS ⇒ visual PASS;
+- backend PASS ⇒ UX PASS;
+- código presente ⇒ runtime PASS;
+- aprobación de un flujo ⇒ aprobación de entregables que el Product Owner no vio.
+
+Si una fase se cerró prematuramente:
+- reabrirla explícitamente;
+- corregir forward;
+- no reescribir historial/migraciones;
+- cerrar de nuevo solo tras validar el scope faltante.
