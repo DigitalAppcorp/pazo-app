@@ -172,7 +172,12 @@ Current truth:
 - Security Advisor unchanged from baseline; no new Fase 8 warnings.
 - Performance Advisor reports 8 new unused-index INFO entries on brand-new Fase 8 tables; retain until real usage exists.
 - backend Gate 8 status: APPLIED + TRANSACTIONALLY VALIDATED.
-- next required checks: configure Mapbox public token locally, runtime visual/E2E validation, then PR final review/merge.
+- Mapbox public token configured locally by Product Owner.
+- Mapbox runtime + explicit location action: PASS.
+- device geolocation works only after Product Owner taps "Usar mi ubicación".
+- exact device coordinates are not persisted in Supabase.
+- remaining Gate 8 validation: place detail + check-in privacy/visibility + move + checkout + F5 + suggestion + second-account isolation.
+- after E2E PASS: final PR review/merge.
 
 After build PASS:
 1. final diff/SQL/security preflight;
