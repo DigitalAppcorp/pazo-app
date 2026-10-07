@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 12 Global Search es el módulo activo. Gate 0–6 cerrados con decisión MVP REDUCIDO; siguiente paso: Gate 7 arquitectura técnica. Implementación todavía no autorizada.
+**Estado general:** Fase 12 Global Search es el módulo activo. Gate 0–7 cerrados con decisión MVP REDUCIDO. Gate 8 es el siguiente paso; Supabase production apply requiere autorización explícita.
 
 ---
 
@@ -581,7 +581,7 @@ Fase 6 introduce la primera notificación real de rescate. Esta fase generaliza 
 ---
 
 ## Fase 12 — Global Search / Explore
-**Estado: GATE 6 CERRADO — MVP REDUCIDO / GATE 7 SIGUIENTE**
+**Estado: GATE 7 CERRADO — MVP REDUCIDO / GATE 8 SIGUIENTE**
 
 ### Objetivo
 Que “Explorar” encuentre contenido real y navegue a entidades reales, sin prometer capacidades que todavía no existen.
@@ -595,8 +595,9 @@ Gate 2.5 — Idea Bank: CERRADO.
 Gate 3 — experimento mínimo: CERRADO sin código adicional.  
 Gate 5 — decisión: MVP REDUCIDO.  
 Gate 6 — especificación: CERRADO.  
-Gate 7 — SIGUIENTE.  
-Implementación: NO AUTORIZADA.
+Gate 7 — CERRADO.  
+Gate 8 — SIGUIENTE.  
+Supabase apply: requiere autorización explícita.
 
 ### Alcance
 - mascotas;
@@ -866,34 +867,38 @@ Usar únicamente:
 
 ## Fase 12 — Global Search / Explore
 
-**Estado:** Gate 6 CERRADO / Gate 7 SIGUIENTE.
+**Estado:** Gate 7 CERRADO / Gate 8 SIGUIENTE.
 
-Decisión aprobada:
-- Explore se convierte en búsqueda global;
-- Search busca mascotas/perfiles públicos, Comunidades y Lugares;
-- no existen perfiles humanos públicos buscables;
-- Comunidades ocupa el slot inferior actual de Explore;
-- Search pasa al Header;
-- futuros módulos se integran como providers cuando sean reales;
-- Eventos y Posts quedan fuera del MVP.
+Arquitectura:
+- federated search;
+- Pets + Communities + Places providers;
+- Search Header;
+- Communities bottom nav;
+- deep-link interno;
+- `Promise.allSettled` + stale-response guard;
+- sin motor externo ni índice central;
+- migración prevista solo para `search_usage_events` sin raw query.
 
-Producto:
+Documentos:
 - `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
 - `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`
+- `docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`
 
 ### Exact next action
-1. diseñar arquitectura federada de Search;
-2. definir contratos de resultado/provider;
-3. definir navegación Search → mascota/Comunidad/Lugar;
-4. auditar consultas Supabase y RLS exactas;
-5. decidir si hace falta migración/índices ahora;
-6. preparar Definition of Done técnica;
-7. no implementar hasta cerrar Gate 7.
+1. crear rama de implementación Fase 12;
+2. implementar refactor Communities + navegación;
+3. implementar Global Search y providers;
+4. implementar deep-link a Pet/Community/Place;
+5. preparar migración de telemetría, no aplicarla;
+6. build + diff + preflight;
+7. pedir autorización explícita antes de aplicar migración;
+8. QA backend + runtime + visual;
+9. Scope Closure Reconciliation.
 
 ## Do not do
-- no crear perfiles humanos;
-- no incluir Eventos falsos;
-- no buscar campos privados de mascota;
-- no guardar raw query en analytics;
-- no introducir motor externo de búsqueda;
-- no reconstruir Comunidades; reutilizar su módulo real.
+- no exponer perfiles humanos;
+- no buscar datos privados;
+- no guardar raw query;
+- no reescribir Comunidades;
+- no introducir motor externo;
+- no aplicar migración sin autorización.

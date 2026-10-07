@@ -5,9 +5,9 @@
 **Product Owner:** Brandon  
 **Current state:** Fase 8 COMPLETADA  
 **Active product module:** Fase 12 — Global Search / Explore  
-**Gate:** Gate 7 — arquitectura técnica SIGUIENTE  
+**Gate:** Gate 8 — implementación SIGUIENTE  
 **Decision:** MVP REDUCIDO  
-**Implementation authorization:** NO
+**Supabase production mutation authorization:** NO — solicitar antes de apply
 
 ## Startup protocol
 
@@ -82,7 +82,8 @@ Supabase:
 
 Canonical docs:
 - `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`;
-- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`.
+- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`
+- `docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`.
 
 Product decisions:
 - Search = búsqueda global transversal;
@@ -104,11 +105,14 @@ Lifecycle:
 - Gate 3: CLOSED without extra code;
 - Gate 5: MVP REDUCIDO;
 - Gate 6: CLOSED;
-- Gate 7: NEXT;
-- Gate 8: NOT AUTHORIZED.
+- Gate 7: CLOSED;
+- Gate 8: NEXT.
+
+Architecture:
+`docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`
 
 Exact next action:
-**Design and close Gate 7 architecture before implementation.**
+**Implement Gate 8 in a feature branch. Prepare telemetry migration but do not apply it until Brandon explicitly authorizes the Supabase mutation.**
 
 ## Other current product state
 
