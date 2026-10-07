@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 12 Global Search es el módulo activo. Gate 0–7 cerrados con decisión MVP REDUCIDO. Gate 8 es el siguiente paso; Supabase production apply requiere autorización explícita.
+**Estado general:** Fase 12 Global Search es el módulo activo. Gate 0–7 cerrados con decisión MVP REDUCIDO. Gate 8 está en curso; frontend y backend están implementados, falta build final + runtime/product acceptance + cierre.
 
 ---
 
@@ -581,7 +581,7 @@ Fase 6 introduce la primera notificación real de rescate. Esta fase generaliza 
 ---
 
 ## Fase 12 — Global Search / Explore
-**Estado: GATE 7 CERRADO — MVP REDUCIDO / GATE 8 SIGUIENTE**
+**Estado: GATE 8 EN CURSO — IMPLEMENTACIÓN + BACKEND QA PASS**
 
 ### Objetivo
 Que “Explorar” encuentre contenido real y navegue a entidades reales, sin prometer capacidades que todavía no existen.
@@ -596,8 +596,9 @@ Gate 3 — experimento mínimo: CERRADO sin código adicional.
 Gate 5 — decisión: MVP REDUCIDO.  
 Gate 6 — especificación: CERRADO.  
 Gate 7 — CERRADO.  
-Gate 8 — SIGUIENTE.  
-Supabase apply: requiere autorización explícita.
+Gate 8 — EN CURSO.  
+Supabase apply: AUTORIZADO Y APLICADO.  
+Build final/runtime/product acceptance: PENDIENTE.
 
 ### Alcance
 - mascotas;
@@ -877,7 +878,8 @@ Arquitectura:
 - deep-link interno;
 - `Promise.allSettled` + stale-response guard;
 - sin motor externo ni índice central;
-- migración prevista solo para `search_usage_events` sin raw query.
+- telemetría `search_usage_events` aplicada sin raw query;
+- índice FK correctivo aplicado tras Performance Advisor.
 
 Documentos:
 - `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
@@ -885,15 +887,12 @@ Documentos:
 - `docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`
 
 ### Exact next action
-1. crear rama de implementación Fase 12;
-2. implementar refactor Communities + navegación;
-3. implementar Global Search y providers;
-4. implementar deep-link a Pet/Community/Place;
-5. preparar migración de telemetría, no aplicarla;
-6. build + diff + preflight;
-7. pedir autorización explícita antes de aplicar migración;
-8. QA backend + runtime + visual;
-9. Scope Closure Reconciliation.
+1. final local build on latest `feat/phase-12-global-search`;
+2. runtime Search QA for pet/community/place;
+3. verify telemetry events without raw query;
+4. Product Owner visual acceptance;
+5. Scope Closure Reconciliation;
+6. mark PR #28 ready, merge and verify `main`.
 
 ## Do not do
 - no exponer perfiles humanos;
