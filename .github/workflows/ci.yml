@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Hardening regression checks
-        run: npm run test:hardening
+      - name: Hardening + architecture + privacy governance checks
+        run: npm run test:governance
 
       - name: Build
         env:
