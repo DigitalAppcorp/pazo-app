@@ -1,27 +1,25 @@
-## CURRENT ACTIVE WORK — PHASE 8 PLACES / MAP / CHECK-INS
+## CURRENT STATE — PHASE 8 COMPLETE / NEXT MODULE UNAUTHORIZED
 
-- Fase 7 Communities: COMPLETADA.
-- PR #18 merged to `main`.
-- merge commit: `169b9a47453de0653a3aba27338ea80cd046e0d6`.
-- Communities core, Storage, RLS, E2E and contextual fake doors: PASS.
-- legacy `module_key='communities'` experiment signals cleaned with Product Owner authorization.
-- current `communities_*` extension evidence preserved.
-- next module: Fase 8 — Lugares, mapa y Check-ins.
-- audit real GitHub + Supabase state: COMPLETE.
-- Gate 6 product specification: CLOSED / approved by Product Owner.
-- Gate 7 technical architecture: CLOSED.
-- migration `20261007052000_phase_8_places_map_core.sql`: PREPARED / NOT APPLIED.
-- current step: Gate 8 frontend/service implementation + local build preflight.
-- Product Owner decisions CLOSED:
-  - Mapbox GL JS;
-  - device location only by explicit action, ephemeral use, no exact GPS persistence;
-  - PAZO publishes places; users suggest pending approval;
-  - 2-hour check-ins + manual exit;
-  - public count, pet identity only by opt-in;
-  - reusable GLB/glTF category models prepared for future 3D/B2B layers.
-- Gate 6 source: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
-- Gate 7 source: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
-- Supabase mutation is NOT authorized yet; request authorization only after frontend/build/diff/security preflight.
+- Fase 8 Lugares / Mapa / Check-ins: COMPLETADA.
+- PR #20 merged to `main`.
+- merge commit: `ca3fedd977e0720839a420f2e3673942871b7a61`.
+- Product Owner build PASS.
+- backend applied + transactional QA PASS.
+- Mapbox runtime PASS.
+- explicit ephemeral device location PASS; exact GPS is not persisted.
+- private/visible check-in, F5, move, expiry, checkout and second-account privacy PASS.
+- place suggestion flow PASS.
+- Security Advisor: no new Fase 8 findings.
+- Supabase migrations:
+  - `20261007052747 phase_8_places_map_core`;
+  - `20261007052749 phase_8_places_initial_catalog`;
+  - `20261007053859 fix_place_checkin_checkout_rls`.
+- post-E2E state: 0 active check-ins, 0 active presences.
+- one pending user suggestion remains: `south gate park`; preserved.
+- no next implementation module is automatically authorized.
+- recommended next candidate for Gate 0–2 audit: Fase 12 Explore/Search unificado.
+- Messaging remains postponed/re-evaluate.
+- do not implement Explore/Search until Product Owner explicitly authorizes its lifecycle/audit.
 
 ## Read first
 
@@ -137,72 +135,20 @@ Technical architecture:
 
 ## Immediate next action
 
-Active work: **Fase 8 — Lugares, mapa y Check-ins — Gate 8**.
+No implementation lane is currently authorized.
 
-Current truth:
-- product Gate 6 approved;
-- technical Gate 7 closed;
-- Mapbox renderer/service/UI implementation exists on branch;
-- legacy `INITIAL_PLACES` and broken `feature_map_*` interaction tracking removed;
-- core migration prepared: `20261007052000_phase_8_places_map_core.sql`;
-- curated initial catalog prepared: `20261007053000_phase_8_places_initial_catalog.sql`;
-- neither F8 migration has been applied to Supabase;
-- Mapbox public token is not stored in GitHub;
-- Phase 8 local production build: PASS confirmed by Product Owner.
-- Phase 8 final backend preflight: PASS.
-- Supabase still has no Phase 8 objects/migrations applied.
-- Security baseline unchanged: 3 anon SECURITY DEFINER warnings, 6 authenticated SECURITY DEFINER warnings, 1 leaked-password warning.
-- core migration adds no public SECURITY DEFINER function; privileged trigger helpers live in private schema `place_private`.
-- branch is ahead of `main` with no behind commits.
-- Product Owner authorized and core + initial catalog migrations were applied.
-- Supabase registry:
-  - `20261007052747 phase_8_places_map_core`;
-  - `20261007052749 phase_8_places_initial_catalog`.
-- backend tests PASS so far: hidden/visible presence, foreign-user isolation, move between places, expiry, foreign-pet block, archived-place block, suggestions, telemetry.
-- checkout RLS bug discovered: ending an active row made it fail the active-only SELECT policy.
-- Product Owner confirmed local build PASS after checkout-service fix.
-- Product Owner explicitly authorized checkout RLS forward fix.
-- `20261007053859 fix_place_checkin_checkout_rls` APPLIED.
-- post-fix checkout/RLS/privacy tests: PASS.
-- owner active rows after checkout: 0.
-- public presence after checkout: 0.
-- foreign account private rows: 0.
-- hidden/visible presence behavior: PASS.
-- all transactional QA writes rolled back; production QA tables remain empty.
-- Security Advisor unchanged from baseline; no new Fase 8 warnings.
-- Performance Advisor reports 8 new unused-index INFO entries on brand-new Fase 8 tables; retain until real usage exists.
-- backend Gate 8 status: APPLIED + TRANSACTIONALLY VALIDATED.
-- Mapbox public token configured locally by Product Owner.
-- Mapbox runtime + explicit location action: PASS.
-- device geolocation works only after Product Owner taps "Usar mi ubicación".
-- exact device coordinates are not persisted in Supabase.
-- Phase 8 primary runtime E2E: PASS.
-- Product Owner confirmed:
-  - place detail;
-  - private check-in;
-  - F5 persistence;
-  - visibility opt-in;
-  - move between places closes previous presence;
-  - manual checkout;
-  - post-checkout F5;
-  - search/category filters.
-- Phase 8 full visual/end-to-end validation: PASS.
-- Product Owner confirmed second-account privacy/isolation: PASS.
-- Product Owner confirmed place suggestion flow: PASS.
-- runtime left 0 active check-ins and 0 active presences.
-- one real pending suggestion remains: "south gate park"; not deleted.
-- PR #20 ready for final merge.
-- after E2E PASS: final PR review/merge.
+Recommended next decision:
+- audit **Fase 12 — Explore/Search unificado** through Gate 0–2;
+- compare its value/cost against remaining candidates;
+- do not start code until Product Owner approves the resulting investment decision.
 
-After build PASS:
-1. final diff/SQL/security preflight;
-2. explain exact Supabase mutations;
-3. request explicit Product Owner authorization;
-4. apply core + seed migrations;
-5. run RLS/concurrency/privacy tests;
-6. configure/test Mapbox token locally;
-7. Product Owner visual/end-to-end validation;
-8. PR + merge.
+Why Explore/Search is now a strong candidate:
+- real pets exist;
+- Communities is real;
+- Places/Map is real;
+- discovery can now connect multiple real entity types instead of mostly mocks.
+
+Messaging remains postponed/re-evaluate due network effect, moderation and operating cost.
 
 ## Important continuity note
 
