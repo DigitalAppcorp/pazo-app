@@ -11,6 +11,7 @@ import { CommunityDetailView } from './CommunityDetailView'
 
 interface ExploreViewProps {
   currentPet: Pet | null
+  canUseCommunities: boolean
   onSelectPetProfile: (petId: string) => void
   featuredPost?: Post
   createCommunityRequestKey?: number
@@ -21,6 +22,7 @@ type ExploreCategory = 'para_ti' | 'comunidades' | 'eventos'
 
 export const ExploreView = ({
   currentPet,
+  canUseCommunities,
   onSelectPetProfile,
   featuredPost,
   createCommunityRequestKey = 0,
@@ -38,6 +40,12 @@ export const ExploreView = ({
   const [membershipBusyId, setMembershipBusyId] = useState<string | null>(null)
 
   const loadCommunities = useCallback(async () => {
+    if (!canUseCommunities) {
+      setCommunities([])
+      setIsLoadingCommunities(false)
+      return
+    }
+
     setIsLoadingCommunities(true)
     try {
       const rows = await fetchCommunitySummaries({ limit: 20 })
@@ -47,19 +55,19 @@ export const ExploreView = ({
     } finally {
       setIsLoadingCommunities(false)
     }
-  }, [])
+  }, [canUseCommunities])
 
   useEffect(() => {
     void loadCommunities()
   }, [loadCommunities])
 
   useEffect(() => {
-    if (createCommunityRequestKey > 0) {
+    if (createCommunityRequestKey > 0 && canUseCommunities) {
       setActiveCategory('comunidades')
       setSelectedCommunityId(null)
       setIsCreateCommunityOpen(true)
     }
-  }, [createCommunityRequestKey])
+  }, [canUseCommunities, createCommunityRequestKey])
 
   const filteredCommunities = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -81,7 +89,7 @@ export const ExploreView = ({
     community: CommunitySummary
   ) => {
     event.stopPropagation()
-    if (!currentPet?.id || membershipBusyId) return
+    if (!canUseCommunities || !currentPet?.id || membershipBusyId) return
     if (community.role === 'owner') {
       setSelectedCommunityId(community.id)
       setActiveCategory('comunidades')
@@ -345,13 +353,18 @@ export const ExploreView = ({
               ) : (
                 <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm">
                   <p className="text-xs font-black text-[#204E4A]">
-                    {lang === 'es'
-                      ? 'Todavía no hay comunidades reales'
-                      : 'No real communities yet'}
+                    {!canUseCommunities
+                      ? lang === 'es'
+                        ? 'Inicia sesión para usar Comunidades'
+                        : 'Sign in to use Communities'
+                      : lang === 'es'
+                        ? 'Todavía no hay comunidades reales'
+                        : 'No real communities yet'}
                   </p>
                   <button
                     type="button"
                     onClick={() => setIsCreateCommunityOpen(true)}
+                    disabled={!canUseCommunities}
                     className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2 text-[10px] font-black text-[#204E4A]"
                   >
                     <IconPlus size={14} />
@@ -379,7 +392,7 @@ export const ExploreView = ({
               <button
                 type="button"
                 onClick={() => setIsCreateCommunityOpen(true)}
-                disabled={!currentPet}
+                disabled={!currentPet || !canUseCommunities}
                 className="inline-flex items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2 text-[10px] font-black text-[#204E4A] shadow-xs disabled:opacity-50"
               >
                 <IconPlus size={14} />
@@ -398,15 +411,19 @@ export const ExploreView = ({
             ) : (
               <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
                 <p className="text-xs font-black text-[#204E4A]">
-                  {searchQuery
+                  {!canUseCommunities
                     ? lang === 'es'
-                      ? 'No encontramos comunidades con esa búsqueda.'
-                      : 'No communities match that search.'
-                    : lang === 'es'
-                      ? 'Todavía no hay comunidades.'
-                      : 'No communities yet.'}
+                      ? 'Inicia sesión con una cuenta real para usar Comunidades.'
+                      : 'Sign in with a real account to use Communities.'
+                    : searchQuery
+                      ? lang === 'es'
+                        ? 'No encontramos comunidades con esa búsqueda.'
+                        : 'No communities match that search.'
+                      : lang === 'es'
+                        ? 'Todavía no hay comunidades.'
+                        : 'No communities yet.'}
                 </p>
-                {!searchQuery && (
+                {!searchQuery && canUseCommunities && (
                   <p className="mt-1 text-[10px] text-[#5C7470]">
                     {lang === 'es'
                       ? 'Puedes crear una comunidad real desde aquí.'
