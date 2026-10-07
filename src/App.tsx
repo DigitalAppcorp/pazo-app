@@ -42,7 +42,6 @@ import type {
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
-  INITIAL_PLACES,
   INITIAL_CONVERSATIONS,
 } from './data/mockData'
 
@@ -209,7 +208,6 @@ function PazoMain() {
     mapa: 0,
     mascota: 0,
   })
-  const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>([])
   const [careHistory, setCareHistory] = useState<CareCompletion[]>([])
   const [isCareLoading, setIsCareLoading] = useState(false)
@@ -256,6 +254,7 @@ function PazoMain() {
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const [communityCreateRequestKey, setCommunityCreateRequestKey] = useState(0)
+  const [placeSuggestionRequestKey, setPlaceSuggestionRequestKey] = useState(0)
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
@@ -1766,8 +1765,9 @@ function PazoMain() {
 
                   {activeTab === 'mapa' && (
                     <MapView
-                      places={places}
-                      activePetName={currentPet.name}
+                      currentPet={currentPet}
+                      canUsePlaces={Boolean(user?.id) && !isDemoUser}
+                      suggestPlaceRequestKey={placeSuggestionRequestKey}
                       lang={lang}
                     />
                   )}
@@ -1812,9 +1812,6 @@ function PazoMain() {
                   setActiveTab(tab)
                 }
 
-                if (tab === 'mapa') {
-                  trackInteraction('feature_map_tab', 'place', 'view')
-                }
               }}
               onOpenCreate={() => setIsCreateMenuOpen(true)}
               labels={{
@@ -1833,7 +1830,10 @@ function PazoMain() {
                 setIsCreateMenuOpen(false)
                 if (type === 'post') setIsCreatePostOpen(true)
                 if (type === 'alerta') setIsAlertOpen(true)
-                if (type === 'lugar') alert(lang === 'es' ? 'Módulo de creación de lugares próximamente' : 'Place creation coming soon')
+                if (type === 'lugar') {
+                  setActiveTab('mapa')
+                  setPlaceSuggestionRequestKey((value) => value + 1)
+                }
                 if (type === 'comunidad') {
                   setActiveTab('explorar')
                   setCommunityCreateRequestKey((value) => value + 1)
