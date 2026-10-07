@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 12 Global Search COMPLETADA. Gate 8 cerrado con Scope Closure Reconciliation PASS; Gate 9 pasa a medición. No hay siguiente módulo de implementación autorizado automáticamente.
+**Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening ocupa temporalmente el Carril de Implementación por riesgo operativo pre-Beta.
 
 ---
 
@@ -885,3 +885,22 @@ Seleccionar el siguiente módulo mediante `docs/PAZO_MODULE_LIFECYCLE.md` antes 
 - no reabrir Fase 12 salvo regresión o nueva decisión de producto;
 - no convertir datos de Gate 9 en features automáticamente;
 - no iniciar Fase 13/14/10/11 por numeración sin decisión de producto.
+
+
+---
+
+# Production Hardening — infraestructura pre-Beta
+**Estado: EN CURSO**
+
+Sub-ruta:
+`docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
+
+Prioridad:
+- P0 webhook PayPal + entitlement seguro;
+- P0 retirar pitch prematuro;
+- P1 Error Boundary + CI + observabilidad;
+- P1 modernizar claves/Auth;
+- P1 alertas de salud/costos;
+- P2 anti-abuse, ruido operacional, restore drill y analytics.
+
+Esta fase de infraestructura está autorizada por el Product Owner y no constituye autorización para decidir automáticamente precio o beneficios de la membresía.
