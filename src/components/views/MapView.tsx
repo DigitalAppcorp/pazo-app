@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   ActivePlaceCheckin,
   EphemeralLocation,
@@ -98,6 +98,7 @@ export const MapView = ({
   const [locationMessage, setLocationMessage] = useState('')
   const [isLocating, setIsLocating] = useState(false)
   const [isSuggestOpen, setIsSuggestOpen] = useState(false)
+  const handledRequestedPlaceKeyRef = useRef(0)
 
   const loadPlaces = useCallback(async () => {
     setIsLoading(true)
@@ -207,11 +208,19 @@ export const MapView = ({
   }
 
   useEffect(() => {
-    if (!requestedPlaceId || requestedPlaceKey <= 0 || isLoading) return
+    if (
+      !requestedPlaceId ||
+      requestedPlaceKey <= 0 ||
+      requestedPlaceKey === handledRequestedPlaceKeyRef.current ||
+      isLoading
+    ) {
+      return
+    }
 
     const requestedPlace = places.find((place) => place.id === requestedPlaceId)
     if (!requestedPlace) return
 
+    handledRequestedPlaceKeyRef.current = requestedPlaceKey
     setSearchQuery('')
     setCategory('all')
     setSelectedPlaceId(requestedPlaceId)
