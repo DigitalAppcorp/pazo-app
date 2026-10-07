@@ -1,183 +1,252 @@
-## CURRENT ACTIVE WORK — PHASE 8 CLOSURE CORRECTION
+# PAZO — ACTIVE HANDOFF
 
-- Product Owner correctly identified missing approved scope after the original Phase 8 merge.
-- Fase 8 is REOPENED until the missing pieces are validated and merged.
-- original implementation PR #20 remains valid for the real core.
-- correction branch: `fix/phase-8-fake-doors-3d-markers`.
-- missing piece 1: contextual fake doors.
-- missing piece 2: reusable caricature/low-poly 3D category markers.
-- prepared fake doors:
-  - `places_reviews`;
-  - `places_favorites`;
-  - `places_user_photos`;
-  - `places_events`;
-  - `places_routes`;
-  - `places_business_offers`.
-- fake-door migration prepared: `20261007073500_place_extension_experiments.sql` / NOT APPLIED.
-- 3D assets prepared:
-  - park.gltf;
-  - trail.gltf;
-  - restaurant.gltf;
-  - veterinarian.gltf;
-  - grooming.gltf;
-  - pet-store.gltf.
-- Mapbox model layer prepared from zoom 13.5 with 2D marker fallback.
-- no new Supabase mutation has been authorized/applied for this correction.
-- Place experiment transactional preflight: PASS (view + interest); ROLLBACK left 0 registered place modules/signals.
-- glTF assets parse as 2.0 with embedded buffers; 6/6 valid structurally.
-- Mapbox model layer wired with category URL expression, close-zoom rendering, 2D fallback, click support, antialiasing, and basemap 3D objects disabled so PAZO models remain visually dominant.
-- Product Owner local build for Phase 8 correction: PASS.
-- Product Owner explicitly authorized Place experiment registration.
-- Supabase migration applied: `20261007072355 place_extension_experiments`.
-- all 6 `places_*` module keys registered.
-- transactional experiment QA: PASS.
-- duplicate view/interest behavior: PASS.
-- QA rollback left 0 place views and 0 place interests.
-- Communities experiment modules remain intact.
-- Security Advisor unchanged from baseline; no new correction findings.
-- Product Owner screenshot showed only the 2D veterinary fallback; 3D model was not perceptible.
-- root cause identified: low-poly model dimensions were rendered at `model-scale [1,1,1]`, effectively too small at map zoom.
-- forward UI fix prepared:
-  - model scale increased to `[12,12,12]`;
-  - `model-type: location-indicator`;
-  - model layer placed in `top` slot;
-  - selected-place camera now zooms to >=16.2 and pitch 58°;
-  - 2D circle fades to 0 by zoom 16;
-  - 3D layer begins at zoom 13.25.
-- next: local build after visibility fix, then Product Owner runtime/visual validation of 3D markers + fake doors + interest persistence.
-- do NOT advance to Explore/Search before this closes.
+**Project Brain OS:** v1.3.0  
+**Canonical OS:** `DigitalAppcorp/project-brain-os`  
+**Product Owner:** Brandon  
+**Active module:** Fase 8 — Lugares / Mapa / Check-ins  
+**Gate:** Gate 8 REABIERTO — closure correction  
+**Active branch:** `fix/phase-8-fake-doors-3d-markers`  
+**Active PR:** #22 — Draft / currently mergeable  
+**Main baseline before correction:** `0ce5c20bc6d075012e119c7f117d5e43ad26ffd2`
 
-## Read first
+## Startup protocol for a new ChatGPT chat
 
-Before making any code, database, architecture or roadmap change, read:
+Do NOT reconstruct PAZO from conversational memory.
 
-1. `AGENTS.md`
-2. `docs/PAZO_MASTER_ROADMAP.md`
-3. `docs/PAZO_MODULE_LIFECYCLE.md`
-4. the active module sub-roadmap
-5. `docs/PAZO_PRODUCT_VISION.md` when making strategic/product-scope decisions
-6. this file
+Before acting:
+1. activate/read Project Brain OS v1.3.0 from `DigitalAppcorp/project-brain-os`;
+2. read `AGENTS.md`;
+3. read this file;
+4. read `docs/PAZO_MASTER_ROADMAP.md`;
+5. read `docs/PAZO_PHASE_8_PLACES_MASTER.md`;
+6. inspect PR #22 and its current HEAD;
+7. inspect the active branch files before changing code;
+8. continue from the exact unresolved verification below.
+
+Do not use `main` alone as current truth while PR #22 is open.
 
 ## Working model
 
-- Product Owner: Brandon.
-- ChatGPT directly owns implementation work across GitHub + Supabase.
-- Product Owner makes product decisions and performs requested local/visual tests.
+- Brandon is Product Owner.
+- ChatGPT is the technical executor/brain: product reasoning, architecture, code, Supabase, security, migrations, tests, docs, Git/PR and regression prevention.
+- Do not delegate implementation/debugging to Gemini or another AI unless Brandon explicitly asks.
+- Antigravity/local machine is execution + visualization only.
+- Ask Brandon only for real product decisions, required production authorization, local build/runtime output, and visual acceptance.
 - Never mutate Supabase without explicit Product Owner authorization.
-- Read-only Supabase inspection is allowed.
-- Prefer durable project decisions in repository docs over conversational memory.
-- Do not invent decisions marked pending.
-- Use the two-lane roadmap:
-  - Validation lane for optional/network-effect modules.
-  - Implementation lane for approved/core-utility modules.
-- Do not let a module in validation block an approved implementation module.
+- Use forward migrations; never rewrite applied migration history.
+- Preserve behavior already approved.
 
-## Long-term vision
+## Current truth
 
-- PAZO is intended to become a broader pet ecosystem/platform if the MVP proves traction and economic viability.
-- The social/pet identity layer may later support vertical systems for groomers, vets, trainers, walkers/caregivers, adoption/rescue organizations, pet businesses and other pet-related services.
-- E-commerce and physical product selling are explicitly future work.
-- This vision is NON-EXECUTABLE and does not authorize current implementation.
-- Canonical document: `docs/PAZO_PRODUCT_VISION.md`.
+### Fase 8 real core
+The real Places/Map/Check-ins core is already implemented and merged through PR #20.
 
-## Current global product strategy
+Merge commit:
+`ca3fedd977e0720839a420f2e3673942871b7a61`
 
-- Communities: COMPLETADA in `main`; advanced extensions continue under contextual validation.
-- Fase 8 Places/Map/Check-ins is now the next active product area.
-- Future fake-door / "Me interesa" tracking must be one generic system reusable by Communities, Map, Matches and future modules.
-- Map/Lugares must be audited from current repo + Supabase reality before any implementation; legacy fake-door behavior is not trusted as evidence.
-- Agenda/Care 9A is complete in `main`.
-- Documents 9B is complete in `main`; external sharing remains outside the MVP.
-- Messaging is postponed/re-evaluate due network effect/moderation cost.
+Validated real core:
+- Mapbox runtime: PASS;
+- explicit `Usar mi ubicación`: PASS;
+- exact device GPS is not persisted;
+- curated real Places catalog: PASS;
+- search/filter/detail: PASS;
+- private check-in: PASS;
+- optional visible pet identity: PASS;
+- 2-hour expiration: PASS;
+- move between places closes previous presence: PASS;
+- manual checkout: PASS;
+- F5 persistence: PASS;
+- second-account privacy/isolation: PASS;
+- place suggestion flow: PASS.
 
-## Current implementation status
+Applied Supabase migrations:
+- `20261007052747 phase_8_places_map_core`;
+- `20261007052749 phase_8_places_initial_catalog`;
+- `20261007053859 fix_place_checkin_checkout_rls`.
 
-**Phase 9A — Agenda/Cuidados: COMPLETADA**
+### Why Gate 8 was reopened
+Fase 8 was closed prematurely even though two already-approved deliverables were still missing/unvalidated:
+1. contextual fake doors for future Place capabilities;
+2. reusable caricature/low-poly 3D category markers.
 
-- PR #12 merged to `main`;
-- merge commit: `1876f7f02a452e58597a1c8151af77bc26c519f2`;
-- Product Owner approved the focused visual/end-to-end test;
-- backend, build, RLS/security and persistence checks passed.
+Under Project Brain OS v1.3.0 Scope Closure Reconciliation, Fase 8 must remain open until both are validated and PR #22 is merged.
 
-Agenda MVP contracts already decided:
+## Fake doors — current state
 
-- utility works for a single user; no network dependency;
-- care belongs to one pet;
-- private owner-only;
-- categories: veterinarian, vaccine, medication, hygiene, feeding, other;
-- due date required;
-- due time optional;
-- notes optional;
-- recurrence: none/daily/weekly/monthly/yearly;
-- reminder offsets: none/same day/1 day/2 days/7 days;
-- visual states derived: upcoming/today/overdue/completed-history;
-- overdue never auto-completes;
-- completion is explicit;
-- recurrent completion records history and advances next due date;
-- next recurrence is based on actual completion date, not the stale overdue date;
-- active deletion uses archive behavior rather than destructive history deletion;
-- history is paginated;
-- timezone stored as IANA timezone;
-- push notifications are NOT required for 9A;
-- reminders work in-app first;
-- Documents/Storage are NOT part of 9A.
+Implemented inside a real Place detail:
+- `places_reviews` — Reseñas y calificaciones;
+- `places_favorites` — Guardar/Listas;
+- `places_user_photos` — Fotos de la comunidad;
+- `places_events` — Eventos en el lugar;
+- `places_routes` — Rutas y caminatas;
+- `places_business_offers` — Ofertas del negocio.
 
-Technical architecture:
+Behavior:
+- clearly labeled **En desarrollo**;
+- view records only after >=50% viewport visibility;
+- interest is unique per account + experiment;
+- source segmented as `place_detail_<category>`;
+- no fake reviews/photos/events/routes/offers.
 
-- tables reales: `care_items`, `care_completions`;
-- completion history uses snapshots so future edits do not rewrite the past;
-- complete/undo are atomic;
-- owner/non-owner isolation enforced in backend;
-- no direct public/anon access;
-- migración 9A aplicada a Supabase con autorización explícita del Product Owner;
-- migración registrada en Supabase como `20261006054510 care_agenda`;
-- pruebas SQL/RLS transaccionales con `ROLLBACK` aprobadas;
-- Advisors revisados: sin hallazgos nuevos de seguridad atribuibles a 9A.
+Product Owner:
+- local build before experiment apply: PASS;
+- explicit authorization to apply experiments: RECEIVED.
 
-## Current repository state
+Repo migration:
+`20261007073500_place_extension_experiments.sql`
 
-`main` includes completed 9A and 9B implementations.
+Supabase registry:
+`20261007072355 place_extension_experiments`
 
-### Phase 9A — Agenda/Cuidados
-- PR #12 merged;
-- backend/build/security/visual validation passed.
+Backend QA:
+- all 6 module keys registered;
+- view + interest transactional test: PASS;
+- duplicate protection: PASS;
+- QA used ROLLBACK;
+- 0 QA Place views/interests persisted immediately after backend QA;
+- Community experiment modules remained intact;
+- Security Advisor unchanged from baseline.
 
-### Phase 9B — Documentos privados
-- COMPLETADA;
-- PR #14 merged to `main`;
-- merge commit: `6f833b779ef1a62d7321bc50dbab8c220f92a1d3`;
-- Product Owner approved final visual/end-to-end validation;
-- build local passed;
-- backend migrations applied:
-  - `20261006090551 private_pet_documents`
-  - `20261006090654 fix_private_document_storage_policies`
-- `pet-documents` is private, 10 MB, PDF/JPEG/PNG/WEBP;
-- metadata RLS/grants and Storage policies verified;
-- owner/non-owner isolation passed;
-- arbitrary Storage insert without reservation blocked;
-- upload/preview/download/edit/delete/F5/multi-pet validated;
-- delayed delete-finalization UX bug fixed and retested;
-- Security Advisor has no new 9B finding.
+Still pending:
+- Product Owner runtime test of one `Me interesa`;
+- F5 must preserve `Interés registrado`.
 
-## Immediate next action
+Do NOT reapply the experiment migration.
 
-No implementation lane is currently authorized.
+## 3D category markers — current state
 
-Recommended next decision:
-- audit **Fase 12 — Explore/Search unificado** through Gate 0–2;
-- compare its value/cost against remaining candidates;
-- do not start code until Product Owner approves the resulting investment decision.
+Assets exist:
+- `public/models/places/park.gltf`;
+- `trail.gltf`;
+- `restaurant.gltf`;
+- `veterinarian.gltf`;
+- `grooming.gltf`;
+- `pet-store.gltf`.
 
-Why Explore/Search is now a strong candidate:
-- real pets exist;
-- Communities is real;
-- Places/Map is real;
-- discovery can now connect multiple real entity types instead of mostly mocks.
+Structural preflight:
+- 6/6 parse as glTF 2.0;
+- embedded buffers;
+- reusable by Place category.
 
-Messaging remains postponed/re-evaluate due network effect, moderation and operating cost.
+### Latest Product Owner visual evidence
+Brandon sent a screenshot of **Los Feliz Small Animal Hospital**.
 
-## Important continuity note
+Observed:
+- Mapbox loads correctly;
+- selected veterinary Place is on the map;
+- blue 2D fallback circle is visible;
+- **3D veterinary model is NOT perceptible**.
 
-A new ChatGPT conversation should NOT attempt to reconstruct PAZO from memory.
+Therefore:
+**3D VISUAL VALIDATION = FAIL/PENDING.**
 
-It should read the repository docs above and continue from this handoff. Repository docs are the canonical source of truth.
+Do not call this PASS because the glTF files parse or because build succeeds.
+
+### Root cause / forward fix already prepared
+Current active-branch `MapboxMap.tsx` has a visibility correction:
+- `model-scale: [12,12,12]`;
+- `model-type: location-indicator`;
+- `slot: top`;
+- `minzoom: 13.25`;
+- `model-translation: [0,0,1]`;
+- `model-emissive-strength: 0.12`;
+- selected Place flyTo zoom >=16.2;
+- selected pitch 58°;
+- 2D circle fades to opacity 0 by zoom 16;
+- Mapbox basemap `show3dObjects=false`;
+- `antialias=true`.
+
+This fix was prepared **after** the screenshot that showed only the blue circle.
+
+It has NOT yet received the Product Owner's new local build + visual PASS.
+
+## Exact next action
+
+Do not design another module.
+
+Ask Brandon to execute on the existing active branch:
+
+```powershell
+git fetch origin
+git switch fix/phase-8-fake-doors-3d-markers
+git pull --ff-only
+git rev-parse --short HEAD
+npm run build
+```
+
+If build PASS:
+1. `npm run dev`;
+2. open PAZO → Mapa;
+3. select **Los Feliz Small Animal Hospital**;
+4. verify the veterinary 3D figure is clearly visible, not just the blue circle;
+5. inspect Silver Lake Dog Park (park model) and Runyon Canyon Park (trail model);
+6. open a Place detail and scroll to **Funciones en desarrollo**;
+7. press **Me interesa** on one fake door only;
+8. F5;
+9. verify it still says **Interés registrado**.
+
+If 3D is still invisible:
+- stop closure;
+- inspect browser console / Mapbox layer errors and model-layer compatibility;
+- debug current active branch;
+- do not fall back to declaring the 2D circle sufficient, because 3D markers were approved scope.
+
+## Scope closure checklist
+
+- real core implementation: PASS / merged;
+- real core backend: PASS / applied;
+- real core E2E: PASS;
+- fake-door implementation: PASS;
+- fake-door backend registration: PASS;
+- fake-door runtime + F5: PENDING;
+- glTF assets: IMPLEMENTED;
+- 3D model layer: IMPLEMENTED;
+- 3D visual Product Owner acceptance: PENDING/previous screenshot FAIL;
+- PR #22 merge: PENDING;
+- main verification after PR #22: PENDING;
+- Scope Closure Reconciliation: NOT YET PASS.
+
+Fase 8 remains **EN CURSO**.
+
+## Do not do
+
+- Do not advance to Explore/Search.
+- Do not mark Fase 8 COMPLETADA.
+- Do not reapply already-applied Supabase migrations.
+- Do not infer visual success from technical preflight.
+- Do not remove the 2D fallback until the 3D behavior is proven stable.
+- Do not add Three.js or another renderer unless current Mapbox native model-layer path is proven insufficient.
+- Do not change check-in/privacy/location contracts while debugging 3D.
+- Do not invent new Product Owner decisions.
+
+## Global PAZO state summary
+
+Completed and merged:
+- F0 Foundation;
+- F1 Public profile + Follow;
+- F2 Feed interactions;
+- F3 Pet registration/edit/privacy;
+- F4 Security/stabilization;
+- F5 Multi-pet;
+- F6 QR passport/lost/sightings;
+- F7 Communities real core + contextual extension experiments;
+- F9A Agenda/Care;
+- F9B Private Documents;
+- F8 real core is merged, but F8 phase closure is REOPENED until PR #22 passes remaining scope validation.
+
+Known global debt:
+- Supabase Auth Leaked Password Protection remains disabled.
+- Messaging remains postponed/re-evaluate because of network/moderation cost.
+- Events/general notifications remain incomplete/planned.
+
+## Canonical references
+
+- `AGENTS.md`
+- `docs/PAZO_MASTER_ROADMAP.md`
+- `docs/PAZO_MODULE_LIFECYCLE.md`
+- `docs/PAZO_PHASE_8_PLACES_MASTER.md`
+- `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`
+- `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`
+- PR #22
+
+Repository docs + current open PR are the source of truth. Conversation memory is secondary.
