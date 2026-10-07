@@ -17,6 +17,8 @@ export const fetchActivePlaceCheckin = async (
     .from('pet_place_checkins')
     .select('id,place_id,pet_id,visible,checked_in_at,expires_at')
     .eq('pet_id', petId)
+    .is('ended_at', null)
+    .gt('expires_at', new Date().toISOString())
     .maybeSingle()
 
   if (error) throw error
