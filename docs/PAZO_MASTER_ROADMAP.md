@@ -1,7 +1,7 @@
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
-**Última actualización:** 2026-10-06  
+**Última actualización:** 2026-10-07  
 **Estado general:** Fase 8 Lugares/Mapa/Check-ins fue reabierta por scope incompleto detectado por Product Owner: faltaban fake doors contextuales y marcadores 3D por categoría. No iniciar otro módulo hasta cerrar esta corrección.
 
 ---
@@ -340,7 +340,7 @@ Decisión vigente:
 
 Gate 6: CERRADO.  
 Gate 7: CERRADO.  
-Gate 8: REABIERTO — corrección de scope: fake doors + modelos 3D.
+Gate 8: CERRADO.
 
 Backend:
 - `20261007014214 communities_mvp_core`;
@@ -389,7 +389,7 @@ Hacer funcional el descubrimiento local.
 
 Gate 6: CERRADO / aprobado.  
 Gate 7: CERRADO.  
-Gate 8: CERRADO.
+Gate 8: REABIERTO — corrección de cierre por fake doors + marcadores 3D.
 
 Estado técnico final:
 - PR #20 fusionado a `main`;
@@ -415,6 +415,27 @@ Fuentes:
 - estado: `docs/PAZO_PHASE_8_PLACES_MASTER.md`.
 
 ---
+
+
+### Corrección de cierre actual
+- PR #22 abierto como Draft.
+- branch: `fix/phase-8-fake-doors-3d-markers`.
+- fake doors de Lugares: implementadas y registradas en Supabase;
+- Supabase registry: `20261007072355 place_extension_experiments`;
+- 6 module keys `places_*`: registrados;
+- build de la primera corrección: PASS;
+- screenshot del Product Owner: el mapa funcionó pero solo se percibió el círculo 2D azul en la veterinaria; el modelo 3D no fue perceptible;
+- causa técnica identificada: escala/render insuficiente del modelo;
+- fix de visibilidad preparado en branch:
+  - `model-scale [12,12,12]`;
+  - `model-type: location-indicator`;
+  - layer en slot `top`;
+  - min zoom 13.25;
+  - 2D fallback se desvanece hasta 0 en zoom 16;
+  - selección hace flyTo a zoom >=16.2 y pitch 58°;
+- ESTE FIX AÚN REQUIERE build local + validación visual del Product Owner;
+- fake doors requieren prueba runtime + `Me interesa` + F5;
+- Fase 8 NO puede volver a COMPLETADA hasta esas validaciones + merge de PR #22.
 
 ## Fase 9 — Cuidados y documentos privados
 
@@ -839,26 +860,41 @@ Usar únicamente:
 ### Fase 8 — corrección de cierre
 **EN CURSO — Gate 8 reabierto.**
 
-Faltantes detectados por Product Owner:
-- fake doors contextuales para futuras funciones de Lugares;
-- marcadores/modelos 3D caricaturizados por categoría.
+Active branch:
+`fix/phase-8-fake-doors-3d-markers`
 
-Rama:
-`fix/phase-8-fake-doors-3d-markers`.
+Active PR:
+**#22 — `fix: complete Phase 8 fake doors and 3D place markers` — Draft**
 
-Preparado:
-- 6 fake doors sobre infraestructura `module_validation_*`;
-- 6 assets glTF reutilizables;
-- Mapbox model layer desde zoom cercano con fallback 2D;
-- migración `20261007073500_place_extension_experiments.sql` NO aplicada.
+Backend correction:
+- experiment migration repo: `20261007073500_place_extension_experiments.sql`;
+- Supabase registry: `20261007072355 place_extension_experiments`;
+- 6 `places_*` module keys registered;
+- transactional view/interest QA PASS;
+- Security Advisor unchanged from baseline.
 
-Cierre requerido:
-1. build local PASS;
-2. aplicar module keys con autorización explícita;
-3. validar fake doors + F5;
-4. validar visualmente los marcadores 3D;
-5. merge de corrección;
-6. volver a marcar Fase 8 COMPLETADA.
+Latest runtime evidence:
+- Product Owner screenshot showed the selected veterinary place as a **blue 2D circle only**;
+- the 3D veterinary model was not visually perceptible.
 
-## Regla
-No iniciar Explore/Search ni otro módulo grande antes de cerrar esta corrección.
+Forward UI fix already exists on the active branch:
+- model scale `[12,12,12]`;
+- `model-type: location-indicator`;
+- model slot `top`;
+- minzoom 13.25;
+- 2D circle opacity reaches 0 by zoom 16;
+- selected place zoom >=16.2, pitch 58°.
+
+### Exact next action
+1. Product Owner pulls latest active branch and runs `npm run build`.
+2. If build PASS, run local app with existing Mapbox token.
+3. Open Los Feliz Small Animal Hospital and verify the veterinary 3D model is clearly visible.
+4. Verify park + trail models as available.
+5. Open a real place detail, scroll to fake doors, press **Me interesa** on one option and F5; interest must persist.
+6. Only after visual/runtime PASS: mark PR #22 ready, merge, verify `main`, then close Fase 8 again.
+
+## Do not do
+- Do not start Explore/Search or another module.
+- Do not mark Fase 8 COMPLETADA because the real core already works.
+- Do not infer 3D success from glTF parsing or build PASS; Product Owner must see it.
+- Do not reapply the Places experiment migration; it is already applied.
