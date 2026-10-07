@@ -272,3 +272,13 @@ Decision:
 - no session replay/autocapture enabled.
 
 Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche and must be rerun after CI + PO visual/runtime validation.
+
+
+### Architecture/privacy reconciliation CI checkpoint
+- HEAD: `889fbe432019b1f13c30610cffac40c08fa5ae38`.
+- Hardening regression checks: PASS.
+- Architecture contract check: PASS.
+- Privacy/data-governance check: PASS.
+- TypeScript + production build: PASS.
+- Lint: PASS on this run.
+- PR #30 remains Draft until PO validates the visible 18+ onboarding change.
