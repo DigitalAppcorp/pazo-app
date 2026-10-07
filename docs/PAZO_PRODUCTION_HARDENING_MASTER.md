@@ -282,3 +282,53 @@ No cerrar hasta que:
 - observabilidad/error monitoring P1 resuelta o explícitamente separada con gate activo;
 - Scope Closure Reconciliation PASS;
 - merge a main y main verificado.
+
+
+## 11. Architecture / Privacy Reconciliation — video audit
+
+**Estado:** EN CURSO.
+
+A second audit triggered by two external engineering/privacy videos re-opened PR #30 after its previous reconciliation.
+
+### Changes introduced
+
+Architecture:
+- added `docs/PAZO_ARCHITECTURE_CONTRACT.md`;
+- new feature/domain code defaults to `src/features/<domain>/`;
+- current `src/services`, `src/components/views`, `src/components/modals` are treated as legacy baseline, not as templates for future growth;
+- no mass refactor authorized;
+- CI architecture check rejects new domain files in those global legacy folders unless the architecture baseline is consciously updated.
+
+Privacy/data governance:
+- added `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`;
+- added `docs/PAZO_DATA_INVENTORY.md`;
+- PostHog product events/properties are now allowlisted;
+- session replay/autocapture/direct third-party tracking are blocked by policy + CI unless explicitly reviewed;
+- age attestation is not preselected;
+- onboarding no longer claims acceptance of unpublished Terms;
+- no DOB/ID collection added;
+- no precise-location analytics added.
+
+Pre-Beta impact:
+- F14 now explicitly owns UGC reporting/blocking, copyright/IP process, account deletion, underage-known-account handling, provider/data inventory, retention matrix, Privacy Policy/Terms and tracking audit;
+- F15 now explicitly owns restore drill, live observability verification, spend controls and client-storage/cookie audit.
+
+### Rationale
+
+The goal is not to turn Production Hardening into a legal-document or folder-migration project.
+
+The goal is:
+- prevent new implicit architecture debt;
+- ensure public policies later reflect real implementation;
+- minimize data collection;
+- make risky tracking/provider changes fail CI until consciously reviewed.
+
+### Closure rule
+
+The previous PR #30 Scope Closure Reconciliation is superseded.
+
+Before PR #30 can return to merge-ready:
+- governance CI PASS;
+- TypeScript/build PASS;
+- Product Owner verifies the visible 18+ onboarding behavior and a basic navigation smoke test;
+- final reconciliation is recorded again.
