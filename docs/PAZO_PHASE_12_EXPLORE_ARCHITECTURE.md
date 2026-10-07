@@ -414,7 +414,7 @@ Restricciones:
 - no client SELECT;
 - service_role conserva lectura para analytics.
 
-Esta es la única mutación de schema prevista para el MVP.
+Esta era la mutación funcional prevista. Tras el apply, Performance Advisor exigió una corrección forward para indexar el FK `user_id`.
 
 Requiere autorización explícita del Product Owner antes de apply.
 
@@ -457,12 +457,9 @@ Telemetría:
 
 ## 20. Migración prevista
 
-Gate 8 puede crear una migración forward para:
-- `search_usage_events`;
-- constraints;
-- índices mínimos;
-- grants;
-- RLS/policy.
+Gate 8 aplicó:
+- `20261007102632 phase_12_search_telemetry` para `search_usage_events`, constraints, grants y RLS/policy;
+- `20261007102748 index_search_usage_events_user` como corrección forward del FK detectado por Performance Advisor.
 
 No tocar:
 - `pets`;
