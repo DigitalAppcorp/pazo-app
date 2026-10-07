@@ -149,7 +149,12 @@ Current truth:
 - neither F8 migration has been applied to Supabase;
 - Mapbox public token is not stored in GitHub;
 - Phase 8 local production build: PASS confirmed by Product Owner.
-- next required check: final SQL/security/diff preflight before authorization.
+- Phase 8 final backend preflight: PASS.
+- Supabase still has no Phase 8 objects/migrations applied.
+- Security baseline unchanged: 3 anon SECURITY DEFINER warnings, 6 authenticated SECURITY DEFINER warnings, 1 leaked-password warning.
+- core migration adds no public SECURITY DEFINER function; privileged trigger helpers live in private schema `place_private`.
+- branch is ahead of `main` with no behind commits.
+- next required action: explicit Product Owner authorization for core + initial catalog migrations.
 
 After build PASS:
 1. final diff/SQL/security preflight;
