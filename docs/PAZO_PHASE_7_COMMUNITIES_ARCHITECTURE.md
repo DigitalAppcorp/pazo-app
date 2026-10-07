@@ -455,3 +455,35 @@ Arquitectura recomendada:
 **tablas sociales aisladas + membership por cuenta + identidad visible por mascota + contenido solo dentro de Comunidad.**
 
 Tras cerrar este Gate se entra a Gate 8 y se prepara código/migración, sin tocar Supabase hasta autorización.
+
+
+## 17. Estado de aplicación
+
+**Aplicado con autorización explícita del Product Owner.**
+
+Registry Supabase:
+- `20261007014214 communities_mvp_core`;
+- `20261007014624 fix_community_storage_policies`.
+
+La segunda migración corrige de forma forward-only una ambigüedad SQL en las políticas Storage: dentro de subqueries, `name` podía resolverse como `communities.name`; ahora se usa explícitamente `objects.name`.
+
+Validación backend:
+- creación atómica + owner membership: PASS;
+- owner no puede hacer Leave: PASS;
+- non-owner update: bloqueado;
+- foreign pet join/post: bloqueado;
+- Join + deduplicación: PASS;
+- posts/comments/likes solo member: PASS;
+- counters like/comment insert/delete: PASS;
+- owner moderation: PASS;
+- member removal: PASS;
+- removed member activity: bloqueada;
+- archived Join: bloqueado;
+- Storage valid owner/member INSERT: PASS;
+- Storage foreign path / removed-member INSERT: bloqueado;
+- Security Advisor: sin findings nuevos atribuibles a Comunidades.
+
+Pendiente:
+- DELETE de media vía Storage API real/UI;
+- validación visual/end-to-end;
+- merge de PR.
