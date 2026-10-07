@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 8 Lugares/Mapa/Check-ins fue reabierta por scope incompleto detectado por Product Owner: faltaban fake doors contextuales y marcadores 3D por categoría. No iniciar otro módulo hasta cerrar esta corrección.
+**Estado general:** Fase 8 Lugares/Mapa/Check-ins COMPLETADA tras Scope Closure Reconciliation. PR #22 merged y `main` verificado. Siguiente acción autorizada: auditoría Gate 0–2 de Explore/Search; no implementar todavía.
 
 ---
 
@@ -362,7 +362,7 @@ Estado técnico final:
 ---
 
 ## Fase 8 — Lugares, mapa y Check-ins
-**Estado: EN CURSO — GATE 8 REABIERTO**
+**Estado: COMPLETADA — GATE 8 CERRADO / GATE 9 MEDICIÓN**
 
 ### Objetivo
 Hacer funcional el descubrimiento local.
@@ -389,7 +389,7 @@ Hacer funcional el descubrimiento local.
 
 Gate 6: CERRADO / aprobado.  
 Gate 7: CERRADO.  
-Gate 8: REABIERTO — corrección de cierre por fake doors + marcadores 3D.
+Gate 8: CERRADO — Scope Closure Reconciliation PASS.
 
 Estado técnico final:
 - PR #20 fusionado a `main`;
@@ -417,25 +417,22 @@ Fuentes:
 ---
 
 
-### Corrección de cierre actual
-- PR #22 abierto como Draft.
-- branch: `fix/phase-8-fake-doors-3d-markers`.
-- fake doors de Lugares: implementadas y registradas en Supabase;
-- Supabase registry: `20261007072355 place_extension_experiments`;
-- 6 module keys `places_*`: registrados;
-- build de la primera corrección: PASS;
-- screenshot del Product Owner: el mapa funcionó pero solo se percibió el círculo 2D azul en la veterinaria; el modelo 3D no fue perceptible;
-- causa técnica identificada: escala/render insuficiente del modelo;
-- fix de visibilidad preparado en branch:
-  - `model-scale [12,12,12]`;
-  - `model-type: location-indicator`;
-  - layer en slot `top`;
-  - min zoom 13.25;
-  - 2D fallback se desvanece hasta 0 en zoom 16;
-  - selección hace flyTo a zoom >=16.2 y pitch 58°;
-- ESTE FIX AÚN REQUIERE build local + validación visual del Product Owner;
-- fake doors requieren prueba runtime + `Me interesa` + F5;
-- Fase 8 NO puede volver a COMPLETADA hasta esas validaciones + merge de PR #22.
+### Corrección de cierre — FINALIZADA
+- PR #22 fusionado a `main`;
+- merge commit: `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
+- 6 fake doors contextuales implementadas;
+- Supabase registry `20261007072355 place_extension_experiments`: APPLIED;
+- runtime `Me interesa` + F5: PASS;
+- 6 modelos glTF low-poly por categoría: implementados;
+- veterinaria 3D: PASS después del fix de visibilidad;
+- parque/sendero: PASS;
+- build local Product Owner: PASS;
+- backend QA: PASS;
+- Security Advisor: sin findings nuevos atribuibles a Fase 8;
+- `main` verificado después del merge;
+- Scope Closure Reconciliation: PASS.
+
+Fase 8 queda cerrada. Sus extensiones experimentales pasan a medición post-lanzamiento; no se construyen automáticamente por existir interés.
 
 ## Fase 9 — Cuidados y documentos privados
 
@@ -857,44 +854,34 @@ Usar únicamente:
 
 ## Carril de Implementación
 
-### Fase 8 — corrección de cierre
-**EN CURSO — Gate 8 reabierto.**
+No hay un nuevo módulo autorizado para implementación.
 
-Active branch:
-`fix/phase-8-fake-doors-3d-markers`
+### Siguiente candidato — Explore/Search
+**Estado:** AUDITORÍA GATE 0–2 AUTORIZADA. IMPLEMENTACIÓN NO AUTORIZADA.
 
-Active PR:
-**#22 — `fix: complete Phase 8 fake doors and 3D place markers` — Draft**
-
-Backend correction:
-- experiment migration repo: `20261007073500_place_extension_experiments.sql`;
-- Supabase registry: `20261007072355 place_extension_experiments`;
-- 6 `places_*` module keys registered;
-- transactional view/interest QA PASS;
-- Security Advisor unchanged from baseline.
-
-Latest runtime evidence:
-- Product Owner screenshot showed the selected veterinary place as a **blue 2D circle only**;
-- the 3D veterinary model was not visually perceptible.
-
-Forward UI fix already exists on the active branch:
-- model scale `[12,12,12]`;
-- `model-type: location-indicator`;
-- model slot `top`;
-- minzoom 13.25;
-- 2D circle opacity reaches 0 by zoom 16;
-- selected place zoom >=16.2, pitch 58°.
+Razón:
+- ya existen mascotas reales;
+- Comunidades tiene núcleo real;
+- Lugares/Mapa ya está completo;
+- Explore/Search sigue parcial/mock y ahora tiene suficiente contenido real alrededor para reevaluar su utilidad.
 
 ### Exact next action
-1. Product Owner pulls latest active branch and runs `npm run build`.
-2. If build PASS, run local app with existing Mapbox token.
-3. Open Los Feliz Small Animal Hospital and verify the veterinary 3D model is clearly visible.
-4. Verify park + trail models as available.
-5. Open a real place detail, scroll to fake doors, press **Me interesa** on one option and F5; interest must persist.
-6. Only after visual/runtime PASS: mark PR #22 ready, merge, verify `main`, then close Fase 8 again.
+1. auditar el estado real de Explore/Search en `main`;
+2. identificar qué partes son mock, reales o inexistentes;
+3. evaluar Gate 1 (valor) y Gate 2 (coste/dependencias);
+4. abrir Idea Bank / Gate 2.5 antes de decidir alcance;
+5. recomendar una de las salidas de Gate 5;
+6. no crear branch de implementación ni código hasta que el Product Owner apruebe la decisión de inversión.
+
+## Estado de Fase 8
+- COMPLETADA;
+- PR #22 merged;
+- merge commit `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
+- Scope Closure Reconciliation PASS;
+- Gate 9: medir uso real y señales de fake doors.
 
 ## Do not do
-- Do not start Explore/Search or another module.
-- Do not mark Fase 8 COMPLETADA because the real core already works.
-- Do not infer 3D success from glTF parsing or build PASS; Product Owner must see it.
-- Do not reapply the Places experiment migration; it is already applied.
+- no reabrir Fase 8 salvo regresión o nueva decisión de producto;
+- no re-aplicar migraciones de Lugares;
+- no convertir interés de fake doors en features sin Gate 5;
+- no implementar Explore/Search antes de cerrar su auditoría/lifecycle.
