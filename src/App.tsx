@@ -31,7 +31,6 @@ import {
 import type {
   Pet,
   Post,
-  Community,
   CareItem,
   CareCompletion,
   CareItemInput,
@@ -43,7 +42,6 @@ import type {
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 import {
   INITIAL_PETS,
-  INITIAL_COMMUNITIES,
   INITIAL_PLACES,
   INITIAL_CONVERSATIONS,
 } from './data/mockData'
@@ -211,7 +209,6 @@ function PazoMain() {
     mapa: 0,
     mascota: 0,
   })
-  const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES)
   const [places] = useState(INITIAL_PLACES)
   const [careItems, setCareItems] = useState<CareItem[]>([])
   const [careHistory, setCareHistory] = useState<CareCompletion[]>([])
@@ -258,6 +255,7 @@ function PazoMain() {
 
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
+  const [communityCreateRequestKey, setCommunityCreateRequestKey] = useState(0)
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
@@ -961,25 +959,6 @@ function PazoMain() {
     )
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
-  }
-
-  const handleToggleJoinCommunity = (commId: string) => {
-    setCommunities((prev) =>
-      prev.map((c) => {
-        if (c.id === commId) {
-          const willJoin = !c.isJoined
-          if (willJoin) {
-            trackInteraction(commId, 'community', 'join')
-          }
-          return {
-            ...c,
-            isJoined: willJoin,
-            membersCount: c.isJoined ? c.membersCount - 1 : c.membersCount + 1,
-          }
-        }
-        return c
-      })
-    )
   }
 
   const refreshCareReminders = async (petsToCheck: Pet[] = pets) => {
@@ -1774,9 +1753,9 @@ function PazoMain() {
 
                   {activeTab === 'explorar' && (
                     <ExploreView
-                      communities={communities}
-                      onToggleJoinCommunity={handleToggleJoinCommunity}
+                      currentPet={currentPet}
                       onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                      createCommunityRequestKey={communityCreateRequestKey}
                       lang={lang}
                     />
                   )}
@@ -1851,7 +1830,10 @@ function PazoMain() {
                 if (type === 'post') setIsCreatePostOpen(true)
                 if (type === 'alerta') setIsAlertOpen(true)
                 if (type === 'lugar') alert(lang === 'es' ? 'Módulo de creación de lugares próximamente' : 'Place creation coming soon')
-                if (type === 'comunidad') alert(lang === 'es' ? 'Módulo de creación de comunidades próximamente' : 'Community creation coming soon')
+                if (type === 'comunidad') {
+                  setActiveTab('explorar')
+                  setCommunityCreateRequestKey((value) => value + 1)
+                }
               }}
               lang={lang}
             />
