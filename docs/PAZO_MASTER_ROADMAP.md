@@ -347,9 +347,20 @@ Decisión vigente:
 
 Gate 6: CERRADO.  
 Gate 7: CERRADO.  
-Gate 8: EN CURSO.
+Gate 8: EN CURSO — backend aplicado y validado; falta prueba visual/end-to-end + merge.
 
-No aplicar Supabase hasta build PASS + revisión + autorización explícita.
+Backend:
+- `20261007014214 communities_mvp_core`;
+- `20261007014624 fix_community_storage_policies`;
+- build local PASS;
+- RLS/ownership/counters PASS;
+- Security Advisor sin findings nuevos atribuibles.
+
+Pendiente:
+- Storage API DELETE real;
+- validación visual/end-to-end;
+- PR #18;
+- merge.
 
 
 ---
