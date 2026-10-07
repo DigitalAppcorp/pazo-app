@@ -95,12 +95,20 @@ Validation:
 - Owner/Admin visibility rule accepted.
 - Community core + contextual extension layer are both approved for final closure.
 
+## Final cleanup
+
+- Legacy validation cleanup: COMPLETE.
+- Removed only:
+  - 2 `module_validation_views` rows for `module_key='communities'`;
+  - 1 `module_validation_interests` row for `module_key='communities'`.
+- Preserved current extension evidence:
+  - 5 views;
+  - 1 interest;
+  - all under `communities_*`.
+
 ## Siguiente paso
 
-1. Product Owner visually validates contextual fake doors;
-2. verify real interest persists after F5;
-3. verify Owner sees Admin Tools and normal member does not;
-4. decide cleanup of old validation test signals;
-5. final review of PR #18;
-6. merge;
-7. verify main and close Gate 8.
+1. mark PR #18 ready;
+2. merge PR #18;
+3. verify main;
+4. close Gate 8 in canonical roadmap/handoff after merge.
