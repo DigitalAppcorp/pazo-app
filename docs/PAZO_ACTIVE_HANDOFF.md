@@ -227,3 +227,14 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 - Expected 400/409 operational noise fixes: implemented.
 - CI hardening regression test: implemented.
 - Do NOT reactivate supporter membership until PayPal secrets + genuine webhook verification + product pricing/benefit/eligibility decisions are closed.
+
+
+### Rescue/security checkpoint
+- Migration `20261007124633_move_rescue_security_definers_private`: deployed.
+- Public Rescue/Founder RPCs are now SECURITY INVOKER wrappers; privileged logic lives in non-exposed `rescue_private`.
+- Anonymous wrapper test: PASS.
+- Authenticated wrapper test: PASS.
+- Security Advisor: 0 exposed SECURITY DEFINER warnings; only Leaked Password Protection remains.
+- Supabase plan is Free, so do not upgrade solely for that warning without explicit PO approval.
+- Cost rules canonical: `docs/PAZO_COST_GUARDRAILS.md`.
+- PostHog exception protocol verified against current docs; structured redacted stack frames implemented.
