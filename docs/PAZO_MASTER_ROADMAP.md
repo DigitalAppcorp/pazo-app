@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-06  
-**Estado general:** núcleo social, rescate y Comunidades estables hasta Fase 7; Fase 9A Agenda/Cuidados y Fase 9B Documentos privados están COMPLETADAS en `main`. Siguiente módulo: Fase 8 — Lugares, mapa y Check-ins.
+**Estado general:** núcleo social, rescate, Comunidades, Lugares/Mapa/Check-ins, Agenda/Cuidados y Documentos privados están COMPLETADOS en `main`. No hay un siguiente módulo de implementación autorizado automáticamente.
 
 ---
 
@@ -176,11 +176,8 @@ Actualmente el núcleo persistente usa, entre otras:
 ## Módulos todavía mock, parciales o de demostración
 
 - Eventos.
-- Mapa real.
-- Check-ins.
 - Mensajería 1 a 1.
 - Centro general de notificaciones.
-- Crear lugar.
 
 ---
 
@@ -365,9 +362,7 @@ Estado técnico final:
 ---
 
 ## Fase 8 — Lugares, mapa y Check-ins
-**Estado: EN CURSO — GATE 8**
-
-Existe `pet_places`, pero `MapView` todavía es placeholder.
+**Estado: COMPLETADA**
 
 ### Objetivo
 Hacer funcional el descubrimiento local.
@@ -394,14 +389,30 @@ Hacer funcional el descubrimiento local.
 
 Gate 6: CERRADO / aprobado.  
 Gate 7: CERRADO.  
-Gate 8: EN CURSO — backend + runtime + visual/E2E PASS; listo para merge.
+Gate 8: CERRADO.
+
+Estado técnico final:
+- PR #20 fusionado a `main`;
+- merge commit: `ca3fedd977e0720839a420f2e3673942871b7a61`;
+- build local PASS;
+- Mapbox runtime PASS;
+- ubicación del dispositivo solo bajo acción explícita y uso efímero;
+- 0 GPS exacto persistido;
+- catálogo real inicial + lugares demo archivados;
+- check-in privado/visible, expiración, cambio de lugar y checkout manual: PASS;
+- aislamiento entre cuentas: PASS;
+- sugerencias de lugares: PASS;
+- búsqueda/filtros/detalle: PASS;
+- Security Advisor sin findings nuevos atribuibles a Fase 8;
+- migraciones aplicadas:
+  - `20261007052747 phase_8_places_map_core`;
+  - `20261007052749 phase_8_places_initial_catalog`;
+  - `20261007053859 fix_place_checkin_checkout_rls`.
 
 Fuentes:
 - producto: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
 - arquitectura: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`;
-- migración preparada: `20261007052000_phase_8_places_map_core.sql`.
-
-No aplicar Supabase hasta build + revisión + autorización explícita.
+- estado: `docs/PAZO_PHASE_8_PLACES_MASTER.md`.
 
 ---
 
@@ -798,7 +809,6 @@ No convertir esta lista en una fase automáticamente; resolver cuando correspond
 - `src/data/mockData.ts` todavía alimenta módulos incompletos.
 - existe `CreateModal - copia.tsx`, probable archivo duplicado a retirar después de verificar uso.
 - `INITIAL_PETS` sigue sirviendo como fallback inicial en memoria; revisar cuando se termine la eliminación de mocks.
-- MapView es placeholder.
 - Agenda/Cuidados y Documentos privados son reales y persistentes.
 - Messages son mock/local.
 - algunos flujos del menú Crear anuncian “próximamente”.
@@ -825,24 +835,31 @@ Usar únicamente:
 # 11. Próximo paso exacto
 
 ## Carril de Validación
-### Comunidades
-- Fase 7 COMPLETADA;
-- el núcleo real ya está en `main`;
-- únicamente las extensiones avanzadas siguen bajo validación contextual mediante `communities_*`.
+- Comunidades: núcleo real COMPLETADO; extensiones avanzadas siguen bajo validación contextual.
+- Futuros módulos sociales opcionales deben seguir `docs/PAZO_MODULE_LIFECYCLE.md`.
 
 ## Carril de Implementación
-### Fase 8 — Lugares, mapa y Check-ins
-- **EN CURSO — Gate 8**;
-- Gate 6 de producto: CERRADO / aprobado;
-- Gate 7 de arquitectura: CERRADO;
-- frontend/servicios/migraciones: en implementación sobre `feat/phase-8-places-map`;
-- core + seed + checkout RLS fix: APLICADOS / backend QA PASS;
-- siguiente: merge de PR #20, verificar `main` y cerrar documentalmente Gate 8.
+No hay un módulo siguiente autorizado automáticamente.
 
-Fuentes:
-- `docs/PAZO_PHASE_8_PLACES_MASTER.md`;
-- `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`;
-- `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
+### Candidato recomendado para nueva auditoría: Fase 12 — Explore/Search unificado
+
+Razón:
+- mascotas reales disponibles;
+- Comunidades reales disponibles;
+- Lugares reales disponibles;
+- Explore ya existe y puede convertirse en infraestructura útil sobre entidades reales;
+- la condición histórica "implementar cuando haya contenido" ya se cumple mejor que antes.
+
+Esto **no autoriza implementación**.
+
+Siguiente paso recomendado:
+1. Gate 0–2 de Explore/Search;
+2. auditar UI/repositorio/Supabase real;
+3. decidir alcance mínimo útil;
+4. comparar contra Mensajería, Notificaciones y Rediseño antes de autorizar código.
+
+### Mensajería
+Permanece POSPUESTA / REEVALUAR por masa crítica, moderación y coste operativo.
 
 ## Regla
-No avanzar a otro módulo grande hasta cerrar Gate 8 de Fase 8 o pausarlo explícitamente.
+No iniciar otro módulo grande por numeración histórica. Primero pasar su lifecycle y obtener decisión explícita del Product Owner.
