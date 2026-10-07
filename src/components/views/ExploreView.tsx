@@ -12,6 +12,7 @@ import { CommunityDetailView } from './CommunityDetailView'
 interface ExploreViewProps {
   currentPet: Pet | null
   onSelectPetProfile: (petId: string) => void
+  createCommunityRequestKey?: number
   lang: 'es' | 'en'
 }
 
@@ -20,6 +21,7 @@ type ExploreCategory = 'para_ti' | 'comunidades' | 'eventos'
 export const ExploreView = ({
   currentPet,
   onSelectPetProfile,
+  createCommunityRequestKey = 0,
   lang,
 }: ExploreViewProps) => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -48,6 +50,14 @@ export const ExploreView = ({
   useEffect(() => {
     void loadCommunities()
   }, [loadCommunities])
+
+  useEffect(() => {
+    if (createCommunityRequestKey > 0) {
+      setActiveCategory('comunidades')
+      setSelectedCommunityId(null)
+      setIsCreateCommunityOpen(true)
+    }
+  }, [createCommunityRequestKey])
 
   const filteredCommunities = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
