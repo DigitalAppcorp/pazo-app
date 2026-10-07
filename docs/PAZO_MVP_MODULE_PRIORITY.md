@@ -99,23 +99,21 @@ Conclusión:
 
 ---
 
-## Explore/Search
+## Global Search
 Estado real:
-- ya existen mascotas, Comunidades y Lugares reales;
-- Explore actual reutiliza Comunidades reales y una mascota derivada del Feed;
-- el buscador actual solo filtra Comunidades;
-- mascotas y Lugares todavía no participan de una búsqueda unificada;
-- Eventos continúa como placeholder;
-- Gate 0–2 auditados y cerrados.
+- Fase 12 COMPLETADA;
+- Search global real sobre Mascotas + Comunidades + Lugares;
+- Comunidades es módulo principal en bottom nav;
+- Search vive en Header;
+- deep-links reales a perfil, Comunidad y Mapa;
+- telemetría privacy-safe activa;
+- build/runtime/Product Owner QA: PASS;
+- Scope Closure Reconciliation: PASS.
 
 Conclusión:
-- valor suficiente para continuar el lifecycle;
-- coste medio-bajo para un MVP reducido;
-- Product Owner aprobó Global Search + Comunidades como módulo principal;
-- Gate 5: MVP REDUCIDO;
-- Gate 6: CERRADO;
-- Gate 7: SIGUIENTE;
-- implementación todavía NO autorizada.
+- Gate 8 CERRADO;
+- Gate 9 / medición;
+- no requiere más implementación hasta que los datos o una nueva decisión de producto lo justifiquen.
 
 ---
 
@@ -135,7 +133,7 @@ Escala:
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
-| Global Search | 4 | 3 | 2 | 2 | MVP REDUCIDO — GATE 7 SIGUIENTE |
+| Global Search | 4 | 3 | 2 | 2 | COMPLETADA — GATE 9 MEDICIÓN |
 
 ---
 
@@ -266,10 +264,10 @@ Usar su sub-ruta y datos de validación.
 - 9A Agenda/Cuidados: COMPLETADA.
 - 9B Documentos privados: COMPLETADA.
 - 8 Mapa/Lugares/Check-ins: COMPLETADA — Gate 9 / medición.
+- Global Search: COMPLETADA — Gate 9 / medición.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
-- Global Search: **MVP REDUCIDO — GATE 7 SIGUIENTE**; Gate 0–6 cerrados, implementación aún no autorizada.
 - Mensajería: POSPONER / REEVALUAR por masa crítica y moderación.
 - Notificaciones generales: implementar solo por dependencia concreta.
 - Rediseño UI: planificado, pero no debe desplazar una necesidad funcional más valiosa sin decisión explícita.

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   ActivePlaceCheckin,
   EphemeralLocation,
@@ -34,6 +34,8 @@ interface MapViewProps {
   currentPet: Pet | null
   canUsePlaces: boolean
   suggestPlaceRequestKey?: number
+  requestedPlaceId?: string | null
+  requestedPlaceKey?: number
   lang: 'es' | 'en'
 }
 
@@ -77,6 +79,8 @@ export const MapView = ({
   currentPet,
   canUsePlaces,
   suggestPlaceRequestKey = 0,
+  requestedPlaceId = null,
+  requestedPlaceKey = 0,
   lang,
 }: MapViewProps) => {
   const [places, setPlaces] = useState<PetPlace[]>([])
@@ -94,6 +98,7 @@ export const MapView = ({
   const [locationMessage, setLocationMessage] = useState('')
   const [isLocating, setIsLocating] = useState(false)
   const [isSuggestOpen, setIsSuggestOpen] = useState(false)
+  const handledRequestedPlaceKeyRef = useRef(0)
 
   const loadPlaces = useCallback(async () => {
     setIsLoading(true)
@@ -201,6 +206,41 @@ export const MapView = ({
       )
     }
   }
+
+  useEffect(() => {
+    if (
+      !requestedPlaceId ||
+      requestedPlaceKey <= 0 ||
+      requestedPlaceKey === handledRequestedPlaceKeyRef.current ||
+      isLoading
+    ) {
+      return
+    }
+
+    const requestedPlace = places.find((place) => place.id === requestedPlaceId)
+    if (!requestedPlace) return
+
+    handledRequestedPlaceKeyRef.current = requestedPlaceKey
+    setSearchQuery('')
+    setCategory('all')
+    setSelectedPlaceId(requestedPlaceId)
+
+    if (canUsePlaces) {
+      void recordPlaceUsageEvent({
+        eventType: 'place_open',
+        placeId: requestedPlace.id,
+        category: requestedPlace.category,
+      }).catch((error) =>
+        console.error('Error recording requested Place open:', error)
+      )
+    }
+  }, [
+    canUsePlaces,
+    isLoading,
+    places,
+    requestedPlaceId,
+    requestedPlaceKey,
+  ])
 
   const handleCategory = (next: CategoryFilter) => {
     setCategory(next)

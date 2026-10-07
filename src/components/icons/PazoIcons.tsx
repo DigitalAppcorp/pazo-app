@@ -461,3 +461,23 @@ export const IconPill = ({ className = 'w-5 h-5', size }: IconProps) => (
   </svg>
 )
 
+
+
+// 27. Grupo / Comunidad
+export const IconCommunity = ({ className = 'w-5 h-5', size }: IconProps) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    style={size ? { width: size, height: size } : undefined}
+  >
+    <circle cx="9" cy="8" r="3" />
+    <circle cx="17" cy="9" r="2.5" />
+    <path d="M3.5 19c.5-3.5 2.6-5.5 5.5-5.5s5 2 5.5 5.5" />
+    <path d="M14 14c2.8-.8 5.5.8 6.5 4" />
+  </svg>
+)

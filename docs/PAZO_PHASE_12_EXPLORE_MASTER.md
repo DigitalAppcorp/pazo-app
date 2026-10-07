@@ -1,8 +1,8 @@
 # PAZO — Fase 12 — Explore/Search unificado
 
-**Estado:** GATE 7 CERRADO — ARQUITECTURA LISTA / GATE 8 SIGUIENTE  
+**Estado:** COMPLETADA — GATE 8 CERRADO / GATE 9 MEDICIÓN  
 **Fecha:** 2026-10-07  
-**Implementación autorizada:** SIGUIENTE — no mutar Supabase sin autorización explícita  
+**Implementación:** COMPLETADA  
 **Project Brain OS:** v1.3.0
 
 ## 1. Auditoría de estado real — Gate 0
@@ -372,8 +372,9 @@ Decisión:
 - no índice global;
 - no motor externo;
 - deep-links internos definidos;
-- una migración mínima solo para telemetría sin raw query;
-- Supabase apply requiere autorización explícita.
+- telemetría mínima sin raw query;
+- migración principal + corrección forward de índice FK tras Advisor;
+- Supabase apply autorizado y ejecutado.
 
 **Gate 7: CERRADO.**
 
@@ -387,6 +388,137 @@ Decisión:
 - Gate 5: MVP REDUCIDO;
 - Gate 6: CERRADO;
 - Gate 7: CERRADO;
-- Gate 8: SIGUIENTE — implementación en rama; Supabase apply no autorizado todavía.
+- Gate 8: CERRADO;
+- Gate 9: MEDICIÓN.
 
 No implementar hasta cerrar Gate 7 — arquitectura técnica.
+
+
+## 12. Gate 8 — checkpoint de implementación
+
+Branch:
+`feat/phase-12-global-search`
+
+PR:
+#28 — Draft.
+
+Audited HEAD before local build:
+`66c24b54d514ab8a9074c5b2a1c629707f929104`
+
+Implemented:
+- Global Search Header action;
+- Communities bottom-nav module;
+- federated Pets / Communities / Places Search;
+- safe public pet projection;
+- grouped filters/results;
+- partial-failure tolerance;
+- stale-response protection;
+- deep-links to Pet / Community / Place;
+- obsolete Explore container removed.
+
+Pending:
+- final post-telemetry `npm run build`;
+- backend QA: PASS;
+- runtime + visual Product Owner QA;
+- Scope Closure Reconciliation;
+- PR #28 ready/merge;
+- `main` verification.
+
+Vercel checks are currently blocked by the account's daily build/deployment quota and do not constitute compilation evidence.
+
+
+## 13. Gate 8 — backend telemetry aplicado
+
+Product Owner authorization:
+- explicit authorization granted after pre-telemetry build PASS.
+
+Supabase production:
+- `20261007102632 phase_12_search_telemetry` — APPLIED;
+- `20261007102748 index_search_usage_events_user` — APPLIED.
+
+Telemetry contract:
+- `search_open`;
+- `search_execute`;
+- `search_result_open`;
+- `search_filter_change`.
+
+Privacy:
+- no raw query;
+- no entity id;
+- no owner id;
+- no GPS;
+- authenticated has only column-level INSERT;
+- no client SELECT/UPDATE/DELETE;
+- RLS insert requires `user_id = auth.uid()`.
+
+Backend QA:
+- RLS enabled: PASS;
+- anon SELECT/INSERT: blocked;
+- authenticated table SELECT/UPDATE/DELETE: blocked;
+- authenticated INSERT only on approved columns: PASS;
+- insert policy: PASS;
+- payload shape constraints: present;
+- migration registry: PASS;
+- authenticated transactional insert simulation: PASS / rolled back;
+- Security Advisor: no new Phase 12 findings;
+- Performance Advisor initially found unindexed FK;
+- forward index migration applied;
+- unindexed-FK finding resolved;
+- newly created index currently appears as expected INFO `unused_index`.
+
+Remaining Gate 8 evidence:
+- final post-telemetry build;
+- Search runtime QA;
+- Product Owner visual acceptance;
+- telemetry runtime event verification;
+- Scope Closure Reconciliation;
+- PR #28 merge + main verification.
+
+
+## 14. Scope Closure Reconciliation — FINAL
+
+Comparación de alcance aprobado vs entrega:
+
+- Search global transversal: PASS;
+- Header Search action: PASS;
+- Communities como módulo principal en bottom nav: PASS;
+- Pets provider: PASS;
+- Communities provider: PASS;
+- Places provider: PASS;
+- filtros mínimos por tipo: PASS;
+- navegación a entidades reales: PASS;
+- ranking simple por dominio: PASS;
+- debounce + stale-response guard: PASS;
+- partial provider failure contract: PASS;
+- perfiles humanos fuera: PASS;
+- Posts fuera: PASS;
+- Eventos falsos fuera: PASS;
+- sin motor externo / índice global: PASS;
+- privacidad de mascota: PASS;
+- raw query no persistida: PASS;
+- telemetría mínima: PASS;
+- backend RLS/grants/constraints: PASS;
+- build final: PASS;
+- runtime/visual Product Owner QA: PASS;
+- smoke test de módulos existentes + F5: PASS.
+
+Runtime telemetry evidence:
+- 33 eventos durante QA;
+- search_open registrado;
+- search_execute con resultados y sin resultados registrado;
+- filtros all/pet/community/place registrados;
+- result opens de pet/community/place registrados;
+- schema sin columna de raw query.
+
+Supabase:
+- `20261007102632 phase_12_search_telemetry`;
+- `20261007102748 index_search_usage_events_user`.
+
+Security Advisor:
+- sin findings nuevos atribuibles a Fase 12;
+- warnings globales previos de SECURITY DEFINER y Leaked Password Protection permanecen como deuda conocida.
+
+**Scope Closure Reconciliation: PASS.**
+**Gate 8: CERRADO.**
+**Fase 12: COMPLETADA.**
+**Gate 9: medición de uso de Search.**

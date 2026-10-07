@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-07  
-**Estado general:** Fase 12 Global Search es el módulo activo. Gate 0–7 cerrados con decisión MVP REDUCIDO. Gate 8 es el siguiente paso; Supabase production apply requiere autorización explícita.
+**Estado general:** Fase 12 Global Search COMPLETADA. Gate 8 cerrado con Scope Closure Reconciliation PASS; Gate 9 pasa a medición. No hay siguiente módulo de implementación autorizado automáticamente.
 
 ---
 
@@ -581,7 +581,7 @@ Fase 6 introduce la primera notificación real de rescate. Esta fase generaliza 
 ---
 
 ## Fase 12 — Global Search / Explore
-**Estado: GATE 7 CERRADO — MVP REDUCIDO / GATE 8 SIGUIENTE**
+**Estado: COMPLETADA — GATE 8 CERRADO / GATE 9 MEDICIÓN**
 
 ### Objetivo
 Que “Explorar” encuentre contenido real y navegue a entidades reales, sin prometer capacidades que todavía no existen.
@@ -596,8 +596,9 @@ Gate 3 — experimento mínimo: CERRADO sin código adicional.
 Gate 5 — decisión: MVP REDUCIDO.  
 Gate 6 — especificación: CERRADO.  
 Gate 7 — CERRADO.  
-Gate 8 — SIGUIENTE.  
-Supabase apply: requiere autorización explícita.
+Gate 8 — CERRADO.  
+Gate 9 — MEDICIÓN.  
+Supabase / build / runtime / Product Owner acceptance: PASS.
 
 ### Alcance
 - mascotas;
@@ -865,40 +866,22 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Fase 12 — Global Search / Explore
+## Selección del siguiente módulo
 
-**Estado:** Gate 7 CERRADO / Gate 8 SIGUIENTE.
+Fase 12 está COMPLETADA y pasa a Gate 9 / medición.
 
-Arquitectura:
-- federated search;
-- Pets + Communities + Places providers;
-- Search Header;
-- Communities bottom nav;
-- deep-link interno;
-- `Promise.allSettled` + stale-response guard;
-- sin motor externo ni índice central;
-- migración prevista solo para `search_usage_events` sin raw query.
+No existe un siguiente módulo autorizado automáticamente.
 
-Documentos:
-- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
-- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`
-- `docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`
+Candidatos conocidos:
+- Fase 13 — Rediseño visual y sistema de interfaz: PLANIFICADA;
+- Fase 14 — Confianza, moderación y privacidad: OBLIGATORIA antes de Beta pública;
+- Fase 10 — Mensajería: POSPONER / REEVALUAR;
+- Fase 11 — Notificaciones generales: implementar por dependencia concreta.
 
 ### Exact next action
-1. crear rama de implementación Fase 12;
-2. implementar refactor Communities + navegación;
-3. implementar Global Search y providers;
-4. implementar deep-link a Pet/Community/Place;
-5. preparar migración de telemetría, no aplicarla;
-6. build + diff + preflight;
-7. pedir autorización explícita antes de aplicar migración;
-8. QA backend + runtime + visual;
-9. Scope Closure Reconciliation.
+Seleccionar el siguiente módulo mediante `docs/PAZO_MODULE_LIFECYCLE.md` antes de implementar.
 
 ## Do not do
-- no exponer perfiles humanos;
-- no buscar datos privados;
-- no guardar raw query;
-- no reescribir Comunidades;
-- no introducir motor externo;
-- no aplicar migración sin autorización.
+- no reabrir Fase 12 salvo regresión o nueva decisión de producto;
+- no convertir datos de Gate 9 en features automáticamente;
+- no iniciar Fase 13/14/10/11 por numeración sin decisión de producto.

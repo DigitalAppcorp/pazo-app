@@ -48,7 +48,8 @@ import {
 import { BottomNav, type NavTab } from './components/BottomNav'
 import { HeaderBar } from './components/HeaderBar'
 import { HomeView } from './components/views/HomeView'
-import { ExploreView } from './components/views/ExploreView'
+import { CommunitiesView } from './components/views/CommunitiesView'
+import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
 import { OnboardingView } from './components/views/OnboardingView'
@@ -204,7 +205,7 @@ function PazoMain() {
   const mainScrollRef = useRef<HTMLElement | null>(null)
   const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
     inicio: 0,
-    explorar: 0,
+    comunidades: 0,
     mapa: 0,
     mascota: 0,
   })
@@ -248,13 +249,18 @@ function PazoMain() {
     return () => cancelAnimationFrame(frame)
   }, [activeTab])
 
-  // Estado global para la pantalla exclusiva de perfil público
+  // Estados globales para superficies y deep-links internos.
   const [selectedPublicProfileId, setSelectedPublicProfileId] = useState<string | null>(null)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const [communityCreateRequestKey, setCommunityCreateRequestKey] = useState(0)
+  const [communityTargetId, setCommunityTargetId] = useState<string | null>(null)
+  const [communityTargetKey, setCommunityTargetKey] = useState(0)
   const [placeSuggestionRequestKey, setPlaceSuggestionRequestKey] = useState(0)
+  const [placeTargetId, setPlaceTargetId] = useState<string | null>(null)
+  const [placeTargetKey, setPlaceTargetKey] = useState(0)
   const [isAddPetOpen, setIsAddPetOpen] = useState(false)
   const [isPassportOpen, setIsPassportOpen] = useState(false)
   const [isCareOpen, setIsCareOpen] = useState(false)
@@ -1447,6 +1453,30 @@ function PazoMain() {
           />
         )}
 
+        {isSearchOpen && (
+          <GlobalSearchView
+            canSearch={Boolean(user?.id) && !isDemoUser}
+            onClose={() => setIsSearchOpen(false)}
+            onSelectPet={(petId) => {
+              setIsSearchOpen(false)
+              setSelectedPublicProfileId(petId)
+            }}
+            onSelectCommunity={(communityId) => {
+              setIsSearchOpen(false)
+              setCommunityTargetId(communityId)
+              setCommunityTargetKey((value) => value + 1)
+              setActiveTab('comunidades')
+            }}
+            onSelectPlace={(placeId) => {
+              setIsSearchOpen(false)
+              setPlaceTargetId(placeId)
+              setPlaceTargetKey((value) => value + 1)
+              setActiveTab('mapa')
+            }}
+            lang={lang}
+          />
+        )}
+
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (
             <OnboardingView
@@ -1651,6 +1681,7 @@ function PazoMain() {
             <HeaderBar
               lang={lang}
               onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+              onOpenSearch={() => setIsSearchOpen(true)}
               onOpenMessages={() => setIsMessagesOpen(true)}
               onOpenNotifications={handleOpenNotifications}
               unreadMessagesCount={unreadMessages}
@@ -1736,15 +1767,13 @@ function PazoMain() {
                     </>
                   )}
 
-                  {activeTab === 'explorar' && (
-                    <ExploreView
+                  {activeTab === 'comunidades' && (
+                    <CommunitiesView
                       currentPet={currentPet}
                       canUseCommunities={Boolean(user?.id) && !isDemoUser}
-                      onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
-                      featuredPost={posts.find(
-                        (post) => !pets.some((pet) => pet.id === post.petId)
-                      )}
                       createCommunityRequestKey={communityCreateRequestKey}
+                      requestedCommunityId={communityTargetId}
+                      requestedCommunityKey={communityTargetKey}
                       lang={lang}
                     />
                   )}
@@ -1754,6 +1783,8 @@ function PazoMain() {
                       currentPet={currentPet}
                       canUsePlaces={Boolean(user?.id) && !isDemoUser}
                       suggestPlaceRequestKey={placeSuggestionRequestKey}
+                      requestedPlaceId={placeTargetId}
+                      requestedPlaceKey={placeTargetKey}
                       lang={lang}
                     />
                   )}
@@ -1794,15 +1825,22 @@ function PazoMain() {
                   tabScrollPositionsRef.current[activeTab] = scrollContainer.scrollTop
                 }
 
+                if (tab === 'comunidades') {
+                  setCommunityTargetId(null)
+                }
+
+                if (tab === 'mapa') {
+                  setPlaceTargetId(null)
+                }
+
                 if (tab !== activeTab) {
                   setActiveTab(tab)
                 }
-
               }}
               onOpenCreate={() => setIsCreateMenuOpen(true)}
               labels={{
                 inicio: lang === 'es' ? 'Inicio' : 'Home',
-                explorar: lang === 'es' ? 'Explorar' : 'Explore',
+                comunidades: lang === 'es' ? 'Comunidades' : 'Communities',
                 crear: lang === 'es' ? 'Crear' : 'Create',
                 mapa: lang === 'es' ? 'Mapa' : 'Map',
                 mascota: lang === 'es' ? 'Mi mascota' : 'My Pet',
@@ -1817,11 +1855,13 @@ function PazoMain() {
                 if (type === 'post') setIsCreatePostOpen(true)
                 if (type === 'alerta') setIsAlertOpen(true)
                 if (type === 'lugar') {
+                  setPlaceTargetId(null)
                   setActiveTab('mapa')
                   setPlaceSuggestionRequestKey((value) => value + 1)
                 }
                 if (type === 'comunidad') {
-                  setActiveTab('explorar')
+                  setCommunityTargetId(null)
+                  setActiveTab('comunidades')
                   setCommunityCreateRequestKey((value) => value + 1)
                 }
               }}
