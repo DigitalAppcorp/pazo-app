@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-06  
-**Estado general:** núcleo social y rescate estables hasta Fase 6; Comunidades tiene MVP reducido real aprobado y entra a Gate 8 de implementación; Fase 9A Agenda/Cuidados y Fase 9B Documentos privados están COMPLETADAS en `main`.
+**Estado general:** núcleo social, rescate y Comunidades estables hasta Fase 7; Fase 9A Agenda/Cuidados y Fase 9B Documentos privados están COMPLETADAS en `main`. Siguiente módulo: Fase 8 — Lugares, mapa y Check-ins.
 
 ---
 
@@ -175,7 +175,6 @@ Actualmente el núcleo persistente usa, entre otras:
 
 ## Módulos todavía mock, parciales o de demostración
 
-- Comunidades.
 - Eventos.
 - Mapa real.
 - Check-ins.
@@ -330,7 +329,7 @@ Convertir el sistema de rescate que hoy es visual en una utilidad real.
 ---
 
 ## Fase 7 — Comunidades
-**Estado: EN CURSO — GATE 8**
+**Estado: COMPLETADA**
 
 **Producto:** `docs/PAZO_PHASE_7_COMMUNITIES_MVP_SPEC.md`  
 **Arquitectura:** `docs/PAZO_PHASE_7_COMMUNITIES_ARCHITECTURE.md`  
@@ -347,7 +346,7 @@ Decisión vigente:
 
 Gate 6: CERRADO.  
 Gate 7: CERRADO.  
-Gate 8: EN CURSO — implementación, backend, E2E y fake doors aprobados; listo para merge.
+Gate 8: CERRADO.
 
 Backend:
 - `20261007014214 communities_mvp_core`;
@@ -356,10 +355,14 @@ Backend:
 - RLS/ownership/counters PASS;
 - Security Advisor sin findings nuevos atribuibles.
 
-Pendiente:
-- merge de PR #18;
-- verificación de `main`;
-- cierre documental de Gate 8.
+Estado técnico final:
+- PR #18 fusionado a `main`;
+- merge commit: `169b9a47453de0653a3aba27338ea80cd046e0d6`;
+- build local PASS confirmado por Product Owner;
+- prueba visual/end-to-end PASS;
+- núcleo real y fake doors contextuales validados;
+- señales legacy limpiadas;
+- Security Advisor sin findings nuevos atribuibles a Comunidades.
 
 
 ---
