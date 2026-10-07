@@ -74,10 +74,8 @@ export const CommunitiesView = ({
   }, [canUseCommunities, requestedCommunityId, requestedCommunityKey])
 
   const handleQuickMembership = async (
-    event: React.MouseEvent,
     community: CommunitySummary
   ) => {
-    event.stopPropagation()
     if (!canUseCommunities || !currentPet?.id || membershipBusyId) return
 
     if (community.role === 'owner') {
@@ -191,11 +189,18 @@ export const CommunitiesView = ({
         ) : (
           <div className="space-y-3">
             {communities.map((community) => (
-              <button
+              <div
                 key={community.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedCommunityId(community.id)}
-                className="w-full rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-all hover:shadow-md"
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    setSelectedCommunityId(community.id)
+                  }
+                }}
+                className="w-full cursor-pointer rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-all hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-3.5">
                   <div className="flex min-w-0 items-center gap-3">
@@ -228,27 +233,15 @@ export const CommunitiesView = ({
                     </div>
                   </div>
 
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    onClick={(event) =>
-                      void handleQuickMembership(
-                        event as unknown as React.MouseEvent,
-                        community
-                      )
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        void handleQuickMembership(
-                          event as unknown as React.MouseEvent,
-                          community
-                        )
-                      }
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      void handleQuickMembership(community)
                     }}
+                    disabled={membershipBusyId === community.id || !currentPet}
                     className={
-                      'flex shrink-0 items-center gap-1 rounded-full px-4 py-2 text-xs font-bold shadow-xs transition-all ' +
+                      'flex shrink-0 items-center gap-1 rounded-full px-4 py-2 text-xs font-bold shadow-xs transition-all disabled:opacity-50 ' +
                       (community.isJoined
                         ? 'bg-[#FAF8F5] text-[#204E4A]'
                         : 'bg-[#E1E53F] text-[#204E4A]')
@@ -266,9 +259,9 @@ export const CommunitiesView = ({
                           : lang === 'es'
                             ? 'Unirme'
                             : 'Join'}
-                  </span>
+                  </button>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
