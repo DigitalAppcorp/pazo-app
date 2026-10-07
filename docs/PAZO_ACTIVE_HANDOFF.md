@@ -211,3 +211,19 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 - PayPal private secrets/runtime verified delivery: PENDING;
 - Error Boundary global: implemented;
 - Security Advisor: baseline only; Leaked Password Protection still pending.
+
+
+### Production Hardening checkpoint — expanded
+- PO runtime: PASS for removal of premature PayPal pitch/reload behavior.
+- Social write anti-abuse migration: `20261007123638`, deployed + transactional PASS.
+- Document finalize noise migration: `20261007124041`, deployed + transactional PASS.
+- Error Boundary + privacy-minimal observability: implemented.
+- PostHog env contract: implemented; external project ingestion verification PENDING.
+- PostHog ChatGPT app: installed, actions not exposed in this session.
+- Vercel ChatGPT app: installed, actions not exposed in this session.
+- Auth UX/local baseline: 8+ chars, upper/lower/digit; fake Google/Apple bypass removed.
+- Supabase hosted plan: Free; leaked-password protection therefore remains pending without forcing an upgrade.
+- Inactive PayPal frontend SDK: removed.
+- Expected 400/409 operational noise fixes: implemented.
+- CI hardening regression test: implemented.
+- Do NOT reactivate supporter membership until PayPal secrets + genuine webhook verification + product pricing/benefit/eligibility decisions are closed.
