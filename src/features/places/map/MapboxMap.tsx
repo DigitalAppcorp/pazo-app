@@ -217,10 +217,12 @@ export const MapboxMap = ({
                 ['zoom'],
                 11,
                 0.96,
-                14,
-                0.58,
+                13.5,
+                0.52,
+                15,
+                0.12,
                 16,
-                0.22,
+                0,
               ],
             },
           })
@@ -229,16 +231,19 @@ export const MapboxMap = ({
             id: 'pazo-place-models',
             type: 'model',
             source: 'pazo-places',
-            minzoom: 13.5,
+            slot: 'top',
+            minzoom: 13.25,
             layout: {
               'model-id': placeModelExpression(),
               'model-allow-density-reduction': false,
             },
             paint: {
-              'model-scale': [1, 1, 1],
+              'model-scale': [12, 12, 12],
               'model-rotation': [0, 0, 0],
-              'model-translation': [0, 0, 0],
+              'model-translation': [0, 0, 1],
               'model-opacity': 1,
+              'model-type': 'location-indicator',
+              'model-emissive-strength': 0.12,
             },
           })
 
@@ -335,8 +340,8 @@ export const MapboxMap = ({
 
     map.flyTo({
       center: [place.longitude, place.latitude],
-      zoom: Math.max(map.getZoom?.() || 0, 14.5),
-      pitch: 52,
+      zoom: Math.max(map.getZoom?.() || 0, 16.2),
+      pitch: 58,
       duration: 700,
     })
   }, [places, selectedPlaceId])
