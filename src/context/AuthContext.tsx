@@ -38,16 +38,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       const nextUser = session?.user ?? null
+
+      if (event === 'SIGNED_OUT') {
+        captureEvent('auth_session_signed_out')
+      }
+
       setUser(nextUser)
       setObservabilityUser(nextUser?.id ?? null)
       setLoading(false)
 
       if (event === 'SIGNED_IN') {
         captureEvent('auth_session_signed_in')
-      }
-
-      if (event === 'SIGNED_OUT') {
-        captureEvent('auth_session_signed_out')
       }
     })
 
