@@ -35,7 +35,16 @@
 - QA rollback left 0 place views and 0 place interests.
 - Communities experiment modules remain intact.
 - Security Advisor unchanged from baseline; no new correction findings.
-- next: Product Owner runtime/visual validation of 3D markers + fake doors + interest persistence.
+- Product Owner screenshot showed only the 2D veterinary fallback; 3D model was not perceptible.
+- root cause identified: low-poly model dimensions were rendered at `model-scale [1,1,1]`, effectively too small at map zoom.
+- forward UI fix prepared:
+  - model scale increased to `[12,12,12]`;
+  - `model-type: location-indicator`;
+  - model layer placed in `top` slot;
+  - selected-place camera now zooms to >=16.2 and pitch 58°;
+  - 2D circle fades to 0 by zoom 16;
+  - 3D layer begins at zoom 13.25.
+- next: local build after visibility fix, then Product Owner runtime/visual validation of 3D markers + fake doors + interest persistence.
 - do NOT advance to Explore/Search before this closes.
 
 ## Read first
