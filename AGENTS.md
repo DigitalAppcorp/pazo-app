@@ -19,5 +19,6 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 12. Si existe un PR abierto para la fase activa, auditar ese PR y su branch antes de asumir que `main` contiene el estado más reciente.
 13. Build/backend PASS no implica aprobación visual. La aprobación del Product Owner cubre únicamente lo que realmente vio/probó.
 14. Fake doors, modelos 3D, assets visuales, instrumentación y estados UX cuentan como entregables reales cuando fueron incluidos en el scope aprobado; no convertirlos silenciosamente en trabajo futuro.
+15. Ningún agente puede crear recursos pagados, subir de plan, habilitar add-ons facturables, aumentar límites de gasto o activar infraestructura con costo recurrente/por uso sin autorización explícita del Product Owner. Antes debe indicar proveedor, motivo, costo conocido o variable y alternativa gratuita/actual.
 
 `docs/PAZO_ACTIVE_HANDOFF.md` define el estado operativo actual. La hoja maestra define el estado global. `docs/PAZO_MODULE_LIFECYCLE.md` define cómo una idea llega a implementación. Las sub-rutas gobiernan el módulo específico.
