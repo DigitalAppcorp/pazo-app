@@ -63,11 +63,37 @@ La validación se utilizará para extensiones avanzadas dentro del módulo real.
 - Join/participation/member removal flow: PASS.
 - Product Owner confirmed expected behavior.
 
+## Community extension experiments
+
+**Status:** BACKEND APPLIED / pending Product Owner visual review.
+
+Active experiments:
+- `communities_events`;
+- `communities_challenges`;
+- `communities_badges`;
+- `communities_qa`;
+- `communities_admin_tools` (Owner/Admin only).
+
+Registry:
+- `20261007023800 community_extension_experiments`;
+- `20261007023927 harden_community_extension_experiment_eligibility`.
+
+Validation:
+- view dedupe per session: PASS;
+- interest unique per account+experiment: PASS;
+- member general-extension eligibility: PASS;
+- Owner general + admin-tools eligibility: PASS;
+- normal member admin-tools: BLOCKED;
+- outsider extension view/interest: BLOCKED;
+- tests rolled back; extension signal tables remain at 0 before Product Owner UI test;
+- Security Advisor: no new findings attributable to experiment layer.
+
 ## Siguiente paso
 
-1. final local production build after latest UI fix;
-2. decide cleanup of old validation test signals;
-3. pass PR #18 from draft to ready;
-4. merge;
-5. verify main;
-6. update roadmap/handoff and mark COMPLETADA only after merge.
+1. Product Owner visually validates contextual fake doors;
+2. verify real interest persists after F5;
+3. verify Owner sees Admin Tools and normal member does not;
+4. decide cleanup of old validation test signals;
+5. final review of PR #18;
+6. merge;
+7. verify main and close Gate 8.
