@@ -387,6 +387,40 @@ Decisión:
 - Gate 5: MVP REDUCIDO;
 - Gate 6: CERRADO;
 - Gate 7: CERRADO;
-- Gate 8: SIGUIENTE — implementación en rama; Supabase apply no autorizado todavía.
+- Gate 8: EN CURSO — frontend/search/deep-links implementados en PR #28; build/runtime/telemetry pendientes.
 
 No implementar hasta cerrar Gate 7 — arquitectura técnica.
+
+
+## 12. Gate 8 — checkpoint de implementación
+
+Branch:
+`feat/phase-12-global-search`
+
+PR:
+#28 — Draft.
+
+Audited HEAD before local build:
+`66c24b54d514ab8a9074c5b2a1c629707f929104`
+
+Implemented:
+- Global Search Header action;
+- Communities bottom-nav module;
+- federated Pets / Communities / Places Search;
+- safe public pet projection;
+- grouped filters/results;
+- partial-failure tolerance;
+- stale-response protection;
+- deep-links to Pet / Community / Place;
+- obsolete Explore container removed.
+
+Pending:
+- local `npm run build`;
+- telemetry migration authorization/apply;
+- backend QA;
+- runtime + visual Product Owner QA;
+- Scope Closure Reconciliation;
+- PR #28 ready/merge;
+- `main` verification.
+
+Vercel checks are currently blocked by the account's daily build/deployment quota and do not constitute compilation evidence.
