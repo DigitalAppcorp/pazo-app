@@ -101,15 +101,18 @@ Conclusión:
 
 ## Explore/Search
 Estado real:
-- ya existen mascotas reales;
-- Comunidades es real;
-- Lugares/Mapa es real;
-- Explore sigue siendo una superficie parcialmente mock/incompleta.
+- ya existen mascotas, Comunidades y Lugares reales;
+- Explore actual reutiliza Comunidades reales y una mascota derivada del Feed;
+- el buscador actual solo filtra Comunidades;
+- mascotas y Lugares todavía no participan de una búsqueda unificada;
+- Eventos continúa como placeholder;
+- Gate 0–2 auditados y cerrados.
 
 Conclusión:
-- la condición histórica "implementar cuando haya contenido" ahora está sustancialmente cumplida;
-- es el mejor candidato actual para una nueva auditoría Gate 0–2;
-- esto no autoriza implementación todavía.
+- valor suficiente para continuar el lifecycle;
+- coste medio-bajo para un MVP reducido;
+- Gate 2.5 Idea Bank ABIERTO;
+- implementación todavía NO autorizada.
 
 ---
 
@@ -129,7 +132,7 @@ Escala:
 | Mensajería | 3 | 4 | 4 | 4 | POSPONER / REEVALUAR |
 | Comunidades | 3 | 5 | 5 | 5 | EXPERIMENTO ACTIVO |
 | Notificaciones generales | 4 | 3 | 2 | 1 | IMPLEMENTAR POR DEPENDENCIA |
-| Explore/Search | 4 | 3 | 2 | 2 | AUDITAR AHORA |
+| Explore/Search | 4 | 3 | 2 | 2 | GATE 2.5 — IDEA BANK |
 
 ---
 
@@ -263,7 +266,7 @@ Usar su sub-ruta y datos de validación.
 - No hay un siguiente módulo autorizado automáticamente.
 
 Candidatos:
-- Explore/Search: **AUDITAR AHORA**; ya existen mascotas, Comunidades y Lugares reales.
+- Explore/Search: **GATE 2.5 IDEA BANK**; Gate 0–2 cerrados, implementación no autorizada.
 - Mensajería: POSPONER / REEVALUAR por masa crítica y moderación.
 - Notificaciones generales: implementar solo por dependencia concreta.
 - Rediseño UI: planificado, pero no debe desplazar una necesidad funcional más valiosa sin decisión explícita.
