@@ -117,6 +117,7 @@ const toError = (value: unknown) => {
 }
 
 interface ParsedStackFrame {
+  [key: string]: JsonValue
   filename: string
   function: string
   lineno: number
