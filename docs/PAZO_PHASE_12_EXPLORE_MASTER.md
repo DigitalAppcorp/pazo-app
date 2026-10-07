@@ -522,3 +522,21 @@ Security Advisor:
 **Gate 8: CERRADO.**
 **Fase 12: COMPLETADA.**
 **Gate 9: medición de uso de Search.**
+
+
+## 15. Git closure
+
+PR:
+- #28 — `feat: add PAZO global search`.
+
+Merge:
+- merged into `main`;
+- merge commit: `6ebc2e5d70b2cee37e7444916a03479b9b9d1d90`.
+
+Post-merge verification:
+- `GlobalSearchView.tsx` present on `main`: PASS;
+- telemetry migration file present on `main`: PASS;
+- canonical handoff shows Fase 12 COMPLETADA: PASS;
+- canonical Phase 12 master shows Gate 8 CERRADO: PASS.
+
+**Final state: FASE 12 COMPLETADA / GATE 9 MEDICIÓN.**
