@@ -207,7 +207,7 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 - supporter pitch removed from active frontend;
 - browser-side Founder activation removed;
 - Supabase browser key migrated to modern publishable key;
-- PayPal webhook v2 deployed to production with fail-closed + PayPal signature verification logic;
+- PayPal webhook v3 deployed to production with fail-closed + PayPal signature verification logic;
 - PayPal private secrets/runtime verified delivery: PENDING;
 - Error Boundary global: implemented;
 - Security Advisor: baseline only; Leaked Password Protection still pending.
