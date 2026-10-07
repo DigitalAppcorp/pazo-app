@@ -148,10 +148,16 @@ export const MapboxMap = ({
         const map = new mapboxgl.Map({
           container: containerRef.current,
           style: 'mapbox://styles/mapbox/standard',
+          config: {
+            basemap: {
+              show3dObjects: false,
+            },
+          },
           center: DEFAULT_CENTER,
           zoom: 10.5,
           pitch: 32,
           bearing: 0,
+          antialias: true,
           attributionControl: true,
         })
 
