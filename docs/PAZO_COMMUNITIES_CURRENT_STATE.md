@@ -54,12 +54,20 @@ La validación se utilizará para extensiones avanzadas dentro del módulo real.
 - Security Advisor sin findings nuevos atribuibles a Comunidades.
 - señales antiguas de validación (2 views, 1 interest, 0 intents) siguen intactas; no se han borrado.
 
+## Validación end-to-end
+
+- Visual/end-to-end real desde la app: PASS.
+- Community image upload/change via Storage API: PASS.
+- Community post image upload/delete via Storage API: PASS.
+- persistence after F5: PASS.
+- Join/participation/member removal flow: PASS.
+- Product Owner confirmed expected behavior.
+
 ## Siguiente paso
 
-1. validación visual/end-to-end real desde la app;
-2. comprobar upload y DELETE mediante Storage API;
-3. corregir cualquier regresión;
-4. decidir limpieza de señales antiguas de validación;
-5. pasar PR #18 de draft a ready;
-6. merge;
-7. actualizar roadmap/handoff y marcar COMPLETADA solo después del merge.
+1. final local production build after latest UI fix;
+2. decide cleanup of old validation test signals;
+3. pass PR #18 from draft to ready;
+4. merge;
+5. verify main;
+6. update roadmap/handoff and mark COMPLETADA only after merge.
