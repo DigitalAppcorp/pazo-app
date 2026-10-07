@@ -332,3 +332,13 @@ Before PR #30 can return to merge-ready:
 - TypeScript/build PASS;
 - Product Owner verifies the visible 18+ onboarding behavior and a basic navigation smoke test;
 - final reconciliation is recorded again.
+
+
+### Architecture/privacy CI evidence
+- governance suite: PASS;
+- architecture guard: PASS;
+- privacy guard: PASS;
+- hardening smoke: PASS;
+- TypeScript/build: PASS;
+- lint: PASS;
+- Product Owner visible onboarding validation: PENDING.
