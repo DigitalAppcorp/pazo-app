@@ -124,7 +124,88 @@ P2:
 - analytics mínimos de producto;
 - regla server-backed para elegibilidad del pitch.
 
-## 8. Definition of Done
+
+## 8. Hardening checkpoint — 2026-10-07
+
+### Implemented + verified
+- Product Owner runtime validation of the supporter-pitch removal: PASS.
+- GitHub Actions CI exists and production build passes.
+- Critical hardening regression smoke test added to CI:
+  - premature PayPal pitch must remain absent;
+  - browser-side Founder grant must remain absent;
+  - legacy Supabase JWT anon key must remain absent from browser client;
+  - service-role key must remain absent from browser client;
+  - global Error Boundary + observability bootstrap must remain wired;
+  - PayPal webhook signature/plan verification must remain present;
+  - inactive PayPal frontend SDK must remain absent.
+- Browser Supabase client uses modern publishable key.
+- Inactive `@paypal/react-paypal-js` SDK removed from bundle/lockfile.
+- Global Error Boundary implemented.
+- Privacy-minimal frontend observability service implemented:
+  - app boot;
+  - auth success/failure/session events;
+  - global browser errors;
+  - unhandled promise rejections;
+  - React Error Boundary exceptions;
+  - email/JWT/query-secret redaction;
+  - no email/password/pet content/GPS/search text sent intentionally.
+- PostHog integration contract added through:
+  - `VITE_POSTHOG_PROJECT_TOKEN`;
+  - `VITE_POSTHOG_HOST`;
+  - `VITE_APP_RELEASE`.
+- PostHog app is installed in ChatGPT, but its actions are not exposed in this session; project/token/event ingestion are therefore NOT yet externally verified.
+- Signup baseline hardened:
+  - minimum 8 characters;
+  - uppercase + lowercase + digit required by UI/local config;
+  - secure password change enabled in local Supabase config;
+  - fake Google/Apple buttons no longer bypass authentication and are disabled as "coming soon".
+- Hosted Supabase organization confirmed on Free tier.
+- Leaked Password Protection remains unavailable on current tier and is intentionally not used as a reason to force an upgrade.
+- Social-write rate limiting deployed:
+  - migration `20261007123638_production_hardening_social_write_rate_limits`;
+  - communities: 3 / 24h / user;
+  - posts: 30 / hour / user;
+  - comments: 60 / hour / user;
+  - community posts: 30 / hour / user;
+  - community comments: 60 / hour / user;
+  - place suggestions: 10 / 24h / user;
+  - internal SECURITY DEFINER trigger function is outside the exposed schema;
+  - `anon` and `authenticated` cannot execute it directly;
+  - transactional rollback verification: PASS;
+  - Security Advisor produced no new warning from this limiter.
+- Documents operational-noise fix deployed:
+  - migration `20261007124041_idempotent_pet_document_delete_finalize`;
+  - expected Storage propagation delay now returns `false` rather than HTTP 400;
+  - client retries without generating expected-error noise;
+  - finalization is idempotent;
+  - transactional rollback verification: PASS.
+- Expected telemetry conflict noise reduced:
+  - repeated map-open write skipped within the same session;
+  - module validation views use duplicate-ignore upsert;
+  - DB uniqueness constraints remain intact.
+
+### Still pending / external
+- PayPal:
+  - private Edge Function secrets still need secure configuration;
+  - real Sandbox/Live webhook delivery must be verified before supporter membership returns;
+  - price/benefits/eligibility are still product decisions.
+- PostHog:
+  - actual project token/host configuration;
+  - first live event + first controlled exception ingestion verification;
+  - alert/dashboard setup.
+- Vercel:
+  - app is installed in ChatGPT, but connector actions are not exposed in this session;
+  - production project/env/usage/spend settings remain unverified.
+- Mapbox:
+  - usage/budget alert configuration remains unverified.
+- CAPTCHA/Turnstile:
+  - not enabled; defer until production signup domain/configuration is ready.
+- Remote hosted Auth minimum-password/secure-change settings still require dashboard/Management API verification; repo/local baseline alone is not proof of hosted state.
+- Leaked Password Protection remains an Advisor warning while PAZO stays on Supabase Free.
+- Full lint cleanup remains separate technical debt.
+- Backup/restore drill remains pending.
+
+## 9. Definition of Done
 
 No cerrar hasta que:
 - webhook desplegado y rechace requests no verificadas;
