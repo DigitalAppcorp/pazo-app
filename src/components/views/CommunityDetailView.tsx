@@ -26,7 +26,6 @@ import {
 import {
   IconCamera,
   IconChat,
-  IconCheck,
   IconClose,
   IconHeart,
   IconPaw,
