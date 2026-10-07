@@ -82,37 +82,74 @@ Supabase:
 
 Canonical docs:
 - `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`;
-- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`
+- `docs/PAZO_PHASE_12_EXPLORE_MVP_SPEC.md`;
 - `docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`.
 
-Product decisions:
-- Search = búsqueda global transversal;
-- identity = mascotas/perfiles públicos, not human accounts;
-- MVP providers = Pets + Communities + Places;
-- Communities becomes a primary bottom-nav module;
-- Search moves to Header beside global actions;
-- Search routes to the owning module/entity;
-- Events only when a real Events module exists;
-- Posts excluded from MVP;
-- no heavy/external search engine;
-- no raw query analytics by default.
-
 Lifecycle:
-- Gate 0: CLOSED;
-- Gate 1: CLOSED;
-- Gate 2: CLOSED;
-- Gate 2.5: CLOSED;
-- Gate 3: CLOSED without extra code;
-- Gate 5: MVP REDUCIDO;
-- Gate 6: CLOSED;
-- Gate 7: CLOSED;
-- Gate 8: NEXT.
+- Gate 0–7: CLOSED;
+- Gate 5 decision: MVP REDUCIDO;
+- Gate 8: IN PROGRESS.
 
-Architecture:
-`docs/PAZO_PHASE_12_EXPLORE_ARCHITECTURE.md`
+Active Git:
+- branch: `feat/phase-12-global-search`;
+- PR: #28 — Draft;
+- current audited HEAD: `66c24b54d514ab8a9074c5b2a1c629707f929104`;
+- branch is 14 commits ahead / 0 behind `main`;
+- Vercel statuses currently fail because of daily deployment/build quota, not a demonstrated code-build failure.
+
+Implemented on PR #28:
+- Search moved to Header;
+- Communities promoted to bottom navigation;
+- old Explore container removed;
+- standalone `CommunitiesView`;
+- `GlobalSearchView`;
+- federated Pets / Communities / Places providers;
+- deterministic per-provider ranking;
+- 300ms debounce;
+- stale-response protection;
+- partial provider failure handling;
+- Search → public pet profile;
+- Search → Community;
+- Search → Map Place;
+- Map deep-link consumed once to avoid repeated reopening;
+- manual tab navigation clears consumed Search targets;
+- no human public profile search;
+- no Posts or fake Events.
+
+Security / privacy:
+- Pets Search selects only `id,name,species,breed,photo_url`;
+- existing column grants block client reads of private legacy columns such as `zone`, `interests`, and `weight`;
+- no raw Search query is persisted;
+- no new SECURITY DEFINER / service-role client path.
+
+Current verification:
+- product spec: PASS;
+- architecture: PASS;
+- static diff/reference audit: PASS;
+- real TypeScript/Vite build: PENDING;
+- runtime Search QA: PENDING;
+- visual Product Owner acceptance: PENDING;
+- telemetry migration: NOT APPLIED;
+- Supabase mutation authorization: NOT YET REQUESTED/APPLIED.
 
 Exact next action:
-**Implement Gate 8 in a feature branch. Prepare telemetry migration but do not apply it until Brandon explicitly authorizes the Supabase mutation.**
+1. Product Owner pulls `feat/phase-12-global-search`;
+2. verify HEAD `66c24b`;
+3. run `npm run build`;
+4. report only build PASS or exact terminal errors.
+
+If build PASS:
+- continue with telemetry migration authorization/apply;
+- backend QA;
+- runtime/visual QA;
+- Scope Closure Reconciliation;
+- PR #28 ready/merge only after all required evidence passes.
+
+Do not:
+- merge PR #28 yet;
+- mark Fase 12 complete;
+- apply Supabase telemetry without explicit Product Owner authorization;
+- infer build PASS from static audit or Vercel quota failures.
 
 ## Other current product state
 
