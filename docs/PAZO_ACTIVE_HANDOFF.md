@@ -201,7 +201,7 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 
 
 ### Production Hardening checkpoint
-- PR #30: Draft;
+- Historical checkpoint: PR #30 was Draft at this stage; it was later merged.
 - CI production build: PASS;
 - legacy lint debt: 114 problems discovered; currently informational/non-blocking;
 - supporter pitch removed from active frontend;
@@ -244,9 +244,9 @@ Monetization intent remains valid, but supporter membership is temporarily hidde
 - Product Owner final runtime/product validation: PASS.
 - Final branch CI: PASS.
 - Scope Closure Reconciliation for PR #30: PASS.
-- PR #30 is mergeable and may be marked ready for review.
+- Historical checkpoint: PR #30 was mergeable; final merged state is recorded below.
 - Do NOT call Production Hardening globally complete yet.
-- Exact next action: merge PR #30 only after explicit PO merge authorization, then verify `main`.
+- Historical next action completed: PR #30 merged and `main` was verified.
 - After merge/main verification, continue the remaining external hardening backlog separately: PayPal real secrets/webhook delivery, PostHog live ingestion/alerts, Vercel/Mapbox spend controls, hosted Auth verification, CAPTCHA timing, backup/restore drill.
 
 
@@ -290,8 +290,8 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - Navigation smoke test: PASS.
 - Governance CI suite: PASS.
 - Scope Closure Reconciliation: PASS.
-- PR #30 may return to Ready for Review.
-- Exact next action: merge PR #30 only after explicit PO authorization, then verify main.
+- Historical checkpoint completed: PR #30 later returned to Ready for Review and was merged.
+- Historical next action completed: PR #30 merged and main was verified.
 
 
 ### PR #30 merge closure
