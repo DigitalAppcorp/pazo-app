@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { captureException } from '../services/observability'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -22,6 +23,11 @@ export class ErrorBoundary extends Component<
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('Unhandled React error:', error, info)
+    captureException(error, {
+      handled: true,
+      mechanism: 'react.error_boundary',
+      componentStack: info.componentStack,
+    })
   }
 
   private handleReload = () => {
