@@ -1,6 +1,6 @@
 # PAZO — Fase 7 Comunidades — MVP útil real
 
-**Estado:** GATE 6 — ESPECIFICACIÓN DE PRODUCTO EN CURSO
+**Estado:** GATE 6 CERRADO — APROBADO POR PRODUCT OWNER
 **Decisión:** MVP REDUCIDO REAL
 **Fecha:** 2026-10-06
 
@@ -188,7 +188,9 @@ Se evaluará:
 
 ## Definition of Done Gate 6
 
-El Product Owner debe aprobar:
+**APROBADO por Product Owner el 2026-10-06.**
+
+Queda aprobado:
 - membership por cuenta + autoría por mascota activa;
 - públicas en MVP;
 - detalle de comunidad;
@@ -201,4 +203,4 @@ El Product Owner debe aprobar:
 - fuera de alcance;
 - métricas.
 
-Después: Gate 7 — arquitectura técnica.
+Siguiente: Gate 7 — arquitectura técnica.
