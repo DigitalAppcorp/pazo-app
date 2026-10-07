@@ -351,11 +351,14 @@ Preparado:
 - 6 experimentos contextuales;
 - 6 modelos glTF low-poly por categoría;
 - Mapbox model layer desde zoom cercano con fallback 2D;
-- migración `20261007073500_place_extension_experiments.sql` preparada / NO aplicada.
+- migración repo `20261007073500_place_extension_experiments.sql`;
+- Supabase registry `20261007072355 place_extension_experiments` APPLIED;
+- transactional view/interest QA PASS;
+- 0 test signals persisted.
 
 Gate 8 permanece ABIERTO hasta:
-- build local PASS;
-- autorización y apply de module keys;
-- prueba visual de modelos 3D;
-- prueba de fake doors + persistencia;
-- merge de la corrección.
+- build local PASS: COMPLETADO;
+- autorización y apply de module keys: COMPLETADO;
+- prueba visual de modelos 3D: PENDIENTE;
+- prueba de fake doors + persistencia: PENDIENTE;
+- merge de la corrección: PENDIENTE.
