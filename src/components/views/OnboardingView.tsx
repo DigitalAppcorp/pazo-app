@@ -33,7 +33,7 @@ export const OnboardingView = ({
   // Datos del flujo de onboarding
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isOver18, setIsOver18] = useState(true)
+  const [isOver18, setIsOver18] = useState(false)
 
   const { signUp } = useAuth()
 
