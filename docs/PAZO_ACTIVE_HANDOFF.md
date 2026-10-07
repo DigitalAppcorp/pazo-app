@@ -5,9 +5,9 @@
 **Product Owner:** Brandon  
 **Current state:** Fase 8 COMPLETADA  
 **Active product module:** Fase 12 — Global Search / Explore  
-**Gate:** Gate 8 — implementación SIGUIENTE  
+**Gate:** Gate 8 — implementación + backend QA EN CURSO  
 **Decision:** MVP REDUCIDO  
-**Supabase production mutation authorization:** NO — solicitar antes de apply
+**Supabase production mutation authorization:** APROBADA Y APLICADA
 
 ## Startup protocol
 
@@ -93,8 +93,8 @@ Lifecycle:
 Active Git:
 - branch: `feat/phase-12-global-search`;
 - PR: #28 — Draft;
-- current audited HEAD: `66c24b54d514ab8a9074c5b2a1c629707f929104`;
-- branch is 14 commits ahead / 0 behind `main`;
+- current audited HEAD: pendiente de refrescar tras checkpoint de backend;
+- branch divergence: pendiente de refrescar tras checkpoint de backend;
 - Vercel statuses currently fail because of daily deployment/build quota, not a demonstrated code-build failure.
 
 Implemented on PR #28:
@@ -114,42 +114,50 @@ Implemented on PR #28:
 - Map deep-link consumed once to avoid repeated reopening;
 - manual tab navigation clears consumed Search targets;
 - no human public profile search;
-- no Posts or fake Events.
+- no Posts or fake Events;
+- privacy-safe Search telemetry wired in frontend.
 
 Security / privacy:
 - Pets Search selects only `id,name,species,breed,photo_url`;
 - existing column grants block client reads of private legacy columns such as `zone`, `interests`, and `weight`;
 - no raw Search query is persisted;
-- no new SECURITY DEFINER / service-role client path.
+- no new SECURITY DEFINER / service-role client path;
+- `search_usage_events` exposes no SELECT/UPDATE/DELETE to client roles;
+- authenticated client has column-level INSERT only;
+- RLS insert policy requires `user_id = auth.uid()`.
+
+Applied Supabase migrations:
+- `20261007102632 phase_12_search_telemetry`;
+- `20261007102748 index_search_usage_events_user`.
 
 Current verification:
 - product spec: PASS;
 - architecture: PASS;
 - static diff/reference audit: PASS;
-- real TypeScript/Vite build: PENDING;
+- pre-telemetry TypeScript/Vite build: PASS — confirmed by Product Owner;
+- final post-telemetry TypeScript/Vite build: PENDING;
 - runtime Search QA: PENDING;
 - visual Product Owner acceptance: PENDING;
-- telemetry migration: NOT APPLIED;
-- Supabase mutation authorization: NOT YET REQUESTED/APPLIED.
+- telemetry migration: APPLIED;
+- telemetry FK index correction: APPLIED;
+- backend grants/RLS/constraints QA: PASS;
+- Security Advisor: no new Phase 12 security findings;
+- Performance Advisor: unindexed-FK finding corrected; new index currently reports expected INFO "unused_index" immediately after creation.
 
 Exact next action:
-1. Product Owner pulls `feat/phase-12-global-search`;
-2. verify HEAD `66c24b`;
-3. run `npm run build`;
-4. report only build PASS or exact terminal errors.
-
-If build PASS:
-- continue with telemetry migration authorization/apply;
-- backend QA;
-- runtime/visual QA;
-- Scope Closure Reconciliation;
-- PR #28 ready/merge only after all required evidence passes.
+1. refresh PR #28 HEAD after this checkpoint;
+2. Product Owner pulls `feat/phase-12-global-search`;
+3. run final `npm run build`;
+4. run Search runtime/visual QA for Pets + Communities + Places;
+5. verify telemetry events exist without raw query text;
+6. Scope Closure Reconciliation;
+7. PR #28 ready/merge only after all required evidence passes.
 
 Do not:
 - merge PR #28 yet;
-- mark Fase 12 complete;
-- apply Supabase telemetry without explicit Product Owner authorization;
-- infer build PASS from static audit or Vercel quota failures.
+- mark Fase 12 complete before final build/runtime/product acceptance;
+- store raw Search query text;
+- infer final build PASS from the earlier pre-telemetry build or Vercel quota failures.
 
 ## Other current product state
 
