@@ -20,6 +20,7 @@ import {
 import { recordPlaceUsageEvent } from '../../services/placeTelemetryService'
 import { MapboxMap } from '../../features/places/map/MapboxMap'
 import { SuggestPlaceModal } from '../modals/SuggestPlaceModal'
+import { PlaceFeatureExperimentCard } from '../validation/PlaceFeatureExperimentCard'
 import {
   IconCheck,
   IconClose,
@@ -807,6 +808,117 @@ export const MapView = ({
                 </div>
               )}
             </div>
+
+            {canUsePlaces && (
+              <div className="mt-5 border-t border-[#204E4A]/8 pt-4">
+                <div className="mb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                        {lang === 'es'
+                          ? 'Funciones en desarrollo'
+                          : 'Features in development'}
+                      </p>
+                      <h4 className="mt-1 text-sm font-black text-[#204E4A]">
+                        {lang === 'es'
+                          ? '¿Qué te gustaría hacer aquí después?'
+                          : 'What would you like to do here next?'}
+                      </h4>
+                    </div>
+                    <span className="rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-[#204E4A]">
+                      {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[9px] leading-relaxed text-[#5C7470]">
+                    {lang === 'es'
+                      ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en este tipo de lugar.'
+                      : 'These features are not active yet. Mark only the ones you would actually use for this type of place.'}
+                  </p>
+                </div>
+
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <PlaceFeatureExperimentCard
+                    moduleKey="places_reviews"
+                    title={
+                      lang === 'es'
+                        ? 'Reseñas y calificaciones'
+                        : 'Reviews and ratings'
+                    }
+                    description={
+                      lang === 'es'
+                        ? 'Leer experiencias de otros dueños y valorar qué tan pet-friendly es este lugar.'
+                        : 'Read other owners’ experiences and rate how pet-friendly this place is.'
+                    }
+                    source={`place_detail_${selectedPlace.category}`}
+                    lang={lang}
+                  />
+
+                  <PlaceFeatureExperimentCard
+                    moduleKey="places_favorites"
+                    title={lang === 'es' ? 'Guardar y crear listas' : 'Save and create lists'}
+                    description={
+                      lang === 'es'
+                        ? 'Guardar lugares favoritos y organizarlos para volver después.'
+                        : 'Save favorite places and organize them for later.'
+                    }
+                    source={`place_detail_${selectedPlace.category}`}
+                    lang={lang}
+                  />
+
+                  <PlaceFeatureExperimentCard
+                    moduleKey="places_user_photos"
+                    title={lang === 'es' ? 'Fotos de la comunidad' : 'Community photos'}
+                    description={
+                      lang === 'es'
+                        ? 'Ver y compartir fotos reales de mascotas y espacios dentro del lugar.'
+                        : 'See and share real photos of pets and spaces at this place.'
+                    }
+                    source={`place_detail_${selectedPlace.category}`}
+                    lang={lang}
+                  />
+
+                  <PlaceFeatureExperimentCard
+                    moduleKey="places_events"
+                    title={lang === 'es' ? 'Eventos en este lugar' : 'Events at this place'}
+                    description={
+                      lang === 'es'
+                        ? 'Descubrir encuentros, actividades y eventos pet-friendly organizados aquí.'
+                        : 'Discover meetups, activities, and pet-friendly events organized here.'
+                    }
+                    source={`place_detail_${selectedPlace.category}`}
+                    lang={lang}
+                  />
+
+                  <PlaceFeatureExperimentCard
+                    moduleKey="places_routes"
+                    title={lang === 'es' ? 'Rutas y caminatas' : 'Routes and walks'}
+                    description={
+                      lang === 'es'
+                        ? 'Encontrar o seguir rutas para caminar con tu mascota alrededor de este lugar.'
+                        : 'Find or follow routes for walking with your pet around this place.'
+                    }
+                    source={`place_detail_${selectedPlace.category}`}
+                    lang={lang}
+                  />
+
+                  <PlaceFeatureExperimentCard
+                    moduleKey="places_business_offers"
+                    title={
+                      lang === 'es'
+                        ? 'Ofertas del negocio'
+                        : 'Business offers'
+                    }
+                    description={
+                      lang === 'es'
+                        ? 'Recibir promociones o beneficios pet-friendly publicados por negocios verificados.'
+                        : 'Receive pet-friendly offers or benefits from verified businesses.'
+                    }
+                    source={`place_detail_${selectedPlace.category}`}
+                    lang={lang}
+                  />
+                </div>
+              </div>
+            )}
           </section>
         )}
       </div>
