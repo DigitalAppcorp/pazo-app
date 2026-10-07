@@ -242,7 +242,10 @@ Revisión manual inicial mediante backend/dashboard/service role.
 ## 7. Mapbox y geocoding
 
 ### Renderer
-- dependencia: `mapbox-gl`;
+- MVP: Mapbox GL JS v3.30.0 desde CDN oficial, fijado por versión;
+- wrapper propio `mapboxLoader.ts` para aislar el proveedor;
+- evita alterar el lockfile solo para el renderer durante esta fase;
+- una migración futura a paquete npm no cambia dominio, schema ni contratos;
 - token público: `VITE_MAPBOX_ACCESS_TOKEN`;
 - nunca usar token secreto en cliente;
 - restringir token por URL/dominio en Mapbox.
