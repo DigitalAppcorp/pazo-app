@@ -127,18 +127,20 @@ Supabase:
 - Security Advisor: no new Fase 12 security findings;
 - FK index performance finding corrected forward.
 
-Git before merge:
-- PR #28;
-- branch `feat/phase-12-global-search`;
-- branch was 0 behind `main` at final reconciliation;
-- Vercel failures were quota/rate-limit only and not used as build evidence.
+Git final:
+- PR #28 merged;
+- merge commit `6ebc2e5d70b2cee37e7444916a03479b9b9d1d90`;
+- `main` verified after merge;
+- Global Search code present on `main`;
+- both Phase 12 migration files present on `main`;
+- canonical Phase 12 docs on `main` show Gate 8 CLOSED / Phase 12 COMPLETE;
+- Vercel failures were quota/rate-limit only and were not used as build evidence.
 
 **Scope Closure Reconciliation: PASS.**
 
 Next:
-- merge PR #28;
-- verify `main`;
-- no next implementation module is authorized automatically; choose the next module through the lifecycle.
+- no next implementation module is authorized automatically;
+- choose the next module through the lifecycle.
 
 ## Other current product state
 
