@@ -8,7 +8,8 @@
 - current `communities_*` extension evidence preserved.
 - next module: Fase 8 — Lugares, mapa y Check-ins.
 - audit real GitHub + Supabase state: COMPLETE.
-- current step: Gate 6 product specification review.
+- Gate 6 product specification: CLOSED / approved by Product Owner.
+- current step: Gate 7 technical architecture + migration preparation.
 - Product Owner decisions CLOSED:
   - Mapbox GL JS;
   - device location only by explicit action, ephemeral use, no exact GPS persistence;
@@ -17,7 +18,8 @@
   - public count, pet identity only by opt-in;
   - reusable GLB/glTF category models prepared for future 3D/B2B layers.
 - Gate 6 source: `docs/PAZO_PHASE_8_PLACES_MVP_SPEC.md`.
-- do not implement until Gate 6 is explicitly approved.
+- Gate 7 source: `docs/PAZO_PHASE_8_PLACES_ARCHITECTURE.md`.
+- Supabase mutation is NOT authorized yet.
 
 ## Read first
 
