@@ -1,4 +1,4 @@
-const MAPBOX_VERSION = '3.32.0'
+const MAPBOX_VERSION = '3.30.0'
 const MAPBOX_SCRIPT_ID = 'pazo-mapbox-gl-script'
 const MAPBOX_STYLE_ID = 'pazo-mapbox-gl-style'
 
