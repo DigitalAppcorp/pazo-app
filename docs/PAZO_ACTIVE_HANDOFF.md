@@ -26,7 +26,16 @@
 - Place experiment transactional preflight: PASS (view + interest); ROLLBACK left 0 registered place modules/signals.
 - glTF assets parse as 2.0 with embedded buffers; 6/6 valid structurally.
 - Mapbox model layer wired with category URL expression, close-zoom rendering, 2D fallback, click support, antialiasing, and basemap 3D objects disabled so PAZO models remain visually dominant.
-- next: local build, then request authorization for experiment module keys, then Product Owner runtime/visual validation.
+- Product Owner local build for Phase 8 correction: PASS.
+- Product Owner explicitly authorized Place experiment registration.
+- Supabase migration applied: `20261007072355 place_extension_experiments`.
+- all 6 `places_*` module keys registered.
+- transactional experiment QA: PASS.
+- duplicate view/interest behavior: PASS.
+- QA rollback left 0 place views and 0 place interests.
+- Communities experiment modules remain intact.
+- Security Advisor unchanged from baseline; no new correction findings.
+- next: Product Owner runtime/visual validation of 3D markers + fake doors + interest persistence.
 - do NOT advance to Explore/Search before this closes.
 
 ## Read first
