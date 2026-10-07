@@ -21,7 +21,8 @@
 - transactional RLS/ownership/counter tests PASS;
 - Storage INSERT/RLS tests PASS;
 - Security Advisor: no new Communities findings;
-- real Storage API DELETE + visual/end-to-end test remain pending;
+- Communities visual/end-to-end validation: PASS;
+- real Storage API DELETE validated through the app/UI: PASS;
 - visual QA found unclear unlabeled fields in Community edit form;
 - Community edit form labels/placeholders/required-vs-optional states fixed in commit `9fdfb7f`; Product Owner local review PASS;
 - generic validation backend remains for advanced extension experiments;
