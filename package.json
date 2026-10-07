@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:hardening": "node scripts/hardening-check.mjs"
+    "test:hardening": "node scripts/hardening-check.mjs",
+    "test:architecture": "node scripts/architecture-check.mjs",
+    "test:privacy": "node scripts/privacy-check.mjs",
+    "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
