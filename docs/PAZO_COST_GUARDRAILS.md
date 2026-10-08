@@ -62,20 +62,28 @@ El agente debe indicar:
   - automatic console capture OFF;
   - automatic performance capture OFF;
   - timezone America/Los_Angeles.
-- Live ingestion todavía pendiente: el proyecto reporta 0 eventos ingeridos.
+- Live ingestion local: PASS.
+- Error tracking + grouping: PASS.
+- Vercel Preview ingestion: PASS.
+- Eventos PAZO usan `$geoip_disable=true`; sin ciudad/lat/long en eventos verificados.
+- Production env ya preparado, pendiente únicamente de un deployment nuevo de Production.
 - No crear alertas hasta existir un destino explícito aprobado (Slack/webhook/etc.).
 
 ### Vercel
-- Conector responde, pero actualmente devuelve 0 teams y 0 proyectos.
-- No crear un proyecto Vercel nuevo a ciegas.
-- Proyecto/plan/env/spend controls siguen pendientes hasta conectar la cuenta/proyecto correcto.
+- Proyecto de PAZO identificado: `pazo-app-t83r`.
+- Production alias: `pazo-app-t83r.vercel.app`.
+- PR #33 fue mergeado; variables públicas de PostHog + Supabase publishable key quedaron creadas para Production.
+- Cuenta Free alcanzó el límite diario de deployments vía API (>100/24h), por lo que el nuevo deployment de Production quedó temporalmente bloqueado por Vercel.
+- No subir a Pro para resolver ese límite.
+- Team/billing scope del conector devuelve 403; spend/billing audit sigue pendiente.
 
 ### Mapbox
-- Token público ya forma parte del producto.
-- Código usa VITE_MAPBOX_ACCESS_TOKEN; no hay token hardcoded.
-- Mapbox no ofrece hard spending cap.
-- Pendiente: token dedicado para PAZO, URL restrictions y usage notifications por email.
-- No aumentar límites o contratar un plan sin aprobación.
+- Rollout público PAUSADO por decisión del Product Owner.
+- Mapa real se mantiene únicamente en desarrollo local mientras se valida demanda.
+- Builds publicados no montan Mapbox y no requieren VITE_MAPBOX_ACCESS_TOKEN.
+- Producción usa el fake door genérico `places_map` para medir interés.
+- No comprar Vercel Pro, Mapbox add-ons ni aumentar límites para habilitar el mapa durante el experimento.
+- Si la demanda justifica reactivarlo, revisar nuevamente token dedicado, URL restrictions, usage notifications y costo antes del rollout.
 
 ### PayPal
 - No genera costo de infraestructura mientras la membresía esté desactivada.
