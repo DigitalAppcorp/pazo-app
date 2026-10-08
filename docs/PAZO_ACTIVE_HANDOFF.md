@@ -472,8 +472,9 @@ PR:
 - PR #34: OPEN
 - Draft: false / Ready for Review
 - Mergeable: true
-- Remote HEAD: `bb00bfba505ff4ad676b76d81227a3d192487747`
-- Base main en apertura actual: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`
+- El HEAD remoto cambió al añadir este handoff; NO confiar en un SHA congelado aquí.
+- El siguiente chat debe consultar PR #34 en vivo y usar su `head_sha` actual.
+- Base histórica conocida antes de este handoff: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`
 - NO MERGEAR hasta nueva autorización explícita del PO dentro del release workflow.
 
 ## Estado del experimento Places / Map
