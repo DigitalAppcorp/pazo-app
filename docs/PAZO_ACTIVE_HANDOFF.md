@@ -383,3 +383,20 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
   - no GPS/location/Mapbox requests.
 - Do not add `VITE_MAPBOX_ACCESS_TOKEN` to Vercel or buy a paid plan while this experiment is active.
 - Re-evaluate after sufficient unique viewers / interest rate according to `PAZO_FEATURE_VALIDATION_FRAMEWORK.md`.
+
+
+### PR #33 / Vercel Production current state
+- PR #33: MERGED.
+- Merge commit: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`.
+- Production PostHog + Supabase publishable env: CONFIGURED in Vercel.
+- New Production deployment: BLOCKED TEMPORARILY by Vercel Free daily deployment limit (>100/24h).
+- Public alias is still serving the previous Production deployment until the limit resets.
+- Do not upgrade Vercel solely to bypass this limit.
+
+### Current exact product rollout
+- Places/Map public rollout: PAUSED by PO.
+- Real Mapbox view: local Vite development only.
+- Published build target: `places_map` demand fake door.
+- Canonical experiment: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`.
+- Tracking: generic unique views + deduped account interest.
+- Next deployment, once Vercel allows it, must contain this fake door rather than require a production Mapbox token.
