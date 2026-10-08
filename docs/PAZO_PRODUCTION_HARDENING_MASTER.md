@@ -520,3 +520,34 @@ Branch: `infra/external-hardening-2`
   - no GeoIP city/latitude/longitude.
 - Vercel Preview observability integration: PASS.
 - Production PostHog env must remain disabled until PR #33 is merged, because current production build predates the event-level GeoIP opt-out.
+
+
+## 15. PR #33 merge + Vercel deployment constraint
+
+- PR #33 merged to `main` after explicit Product Owner authorization.
+- merge commit: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`.
+- Vercel Production env prepared:
+  - PostHog public project token;
+  - PostHog host;
+  - release label `vercel-production`;
+  - Supabase publishable key.
+- automatic Git deployment did not appear after merge.
+- explicit production deployment attempt was rejected by Vercel Free limit:
+  - `api-deployments-free-per-day`;
+  - more than 100 API deployments in 24 hours;
+  - retry window reported by Vercel: 24 hours.
+- no plan upgrade authorized or performed.
+- current public Production deployment remains on older commit `5163c187...` until Vercel permits a new deployment.
+
+### Places / Map cost decision
+
+Product Owner chose not to upgrade to Pro for Mapbox/public map enablement before demand is proven.
+
+New policy:
+- real Mapbox Places stays in local development;
+- published builds render the `places_map` demand fake door;
+- production does not need a Mapbox token while the experiment is active;
+- no geolocation/Mapbox/check-in calls from the fake door;
+- canonical experiment: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`.
+
+This decision avoids treating infrastructure cost as evidence that the module deserves rollout.
