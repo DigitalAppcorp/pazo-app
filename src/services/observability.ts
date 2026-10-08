@@ -99,6 +99,7 @@ const sendEvent = (
     event,
     properties: {
       distinct_id: getDistinctId(),
+      $geoip_disable: true,
       pazo_session_id: getSessionId(),
       pazo_release: releaseId,
       app: 'pazo',
