@@ -324,3 +324,11 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - PayPal webhook v3: ACTIVE; 0 observed real webhook calls.
 - Mapbox: env-token based, no hardcoded token; account restriction/usage alert verification pending.
 - Next runtime gate: wire PostHog public token into a real PAZO runtime, verify first event + controlled exception.
+
+
+### PostHog live ingestion checkpoint
+- First real PAZO event: PASS (`app_boot`).
+- Event contract observed: app/environment/release/session only from PAZO's reviewed payload.
+- New privacy fix committed: all PAZO PostHog events send `$geoip_disable=true`.
+- Privacy CI guard updated to require the GeoIP opt-out.
+- Next exact runtime step: pull branch, restart Vite with temporary PostHog env vars, then trigger one controlled exception and verify `$exception` ingestion.
