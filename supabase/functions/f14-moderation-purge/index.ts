@@ -14,6 +14,11 @@ const respond = (status: number, message: string) =>
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
   if (request.method !== 'POST') return respond(405, 'Method not allowed')
+  // Fail closed: this flag is intentionally NOT configured in PAZO hosted.
+  // A later explicit PO security approval is required before any Storage DELETE can occur.
+  // Hard-disabled at source: enabling media deletion requires a new reviewed commit and deployment.
+  const MEDIA_DELETION_ENABLED = false
+  if (!MEDIA_DELETION_ENABLED) return respond(503, 'Media deletion disabled pending security verification')
   const bearer = request.headers.get('authorization') ?? ''
   if (!bearer.startsWith('Bearer ')) return respond(401, 'Authentication required')
 

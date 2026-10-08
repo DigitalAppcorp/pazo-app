@@ -186,7 +186,7 @@ GRANT EXECUTE ON FUNCTION public.f14_moderation_queue(integer,integer) TO authen
 CREATE FUNCTION public.f14_review_report(p_report uuid,p_action text,p_note text DEFAULT '')
 RETURNS text LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_record moderation_private.reports%ROWTYPE;
-DECLARE v_media text;
+v_media text;
 BEGIN
   IF NOT public.f14_is_moderator() THEN RAISE EXCEPTION 'Moderator access required' USING ERRCODE='42501'; END IF;
   IF p_action NOT IN ('dismiss','remove') OR char_length(coalesce(p_note,''))>500 THEN
@@ -249,7 +249,7 @@ COMMENT ON TABLE moderation_private.reports IS 'Reporter identity restricted; D3
 COMMENT ON TABLE moderation_private.content_restrictions IS 'Denies reads at RLS. Public Storage/CDN media requires an independently verified purge.';
 -- Moderator-only media status; frontend cannot designate a purge as completed.
 CREATE FUNCTION public.f14_pending_media(p_limit integer DEFAULT 20)
-RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_items jsonb;
 BEGIN
  IF NOT public.f14_is_moderator() THEN RAISE EXCEPTION 'Moderator access required' USING ERRCODE='42501'; END IF;
@@ -266,7 +266,7 @@ REVOKE ALL ON FUNCTION public.f14_pending_media(integer) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.f14_pending_media(integer) TO authenticated;
 
 CREATE FUNCTION public.f14_media_task(p_kind text,p_id uuid)
-RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_url text; v_bucket text; v_path text;
 DECLARE v_owner uuid; v_pet uuid; v_community uuid;
 BEGIN
@@ -297,7 +297,7 @@ GRANT EXECUTE ON FUNCTION public.f14_media_task(text,uuid) TO authenticated;
 
 -- Only a trusted backend with service_role can mark the cleanup finished.
 CREATE FUNCTION public.f14_confirm_media_cleanup(p_kind text,p_id uuid)
-RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $
+RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $$
 BEGIN
  IF auth.role() IS DISTINCT FROM 'service_role' THEN
    RAISE EXCEPTION 'Service role required' USING ERRCODE='42501';
