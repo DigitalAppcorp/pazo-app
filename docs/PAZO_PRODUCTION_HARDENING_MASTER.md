@@ -494,3 +494,29 @@ Branch: `infra/external-hardening-2`
   - current test user deleting Storage objects: 0;
   - one stale deleting row/object remains for a different account and should self-recover when that account next runs the recovery flow;
 - Documents recovery fix: PASS for current test user.
+
+
+### Vercel preview observability verification
+- production project identified: `prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH` / `pazo-app-t83r`;
+- framework: Vite;
+- Git source: `DigitalAppcorp/pazo-app`;
+- production alias: `pazo-app-t83r.vercel.app`;
+- Vercel connector has project-level access but team/billing scope returns 403;
+- Preview env configured with:
+  - `VITE_POSTHOG_PROJECT_TOKEN`;
+  - `VITE_POSTHOG_HOST`;
+  - `VITE_APP_RELEASE=vercel-preview`;
+  - `VITE_SUPABASE_PUBLISHABLE_KEY`;
+- Preview deployment rebuilt from PR #33 HEAD and reached READY;
+- Product Owner entered the Preview successfully;
+- PostHog verified live Preview events:
+  - `app_boot`;
+  - `auth_signin_succeeded`;
+  - `auth_session_signed_in`;
+- verified Preview properties:
+  - release `vercel-preview`;
+  - app boot environment `production`;
+  - `$geoip_disable=true`;
+  - no GeoIP city/latitude/longitude.
+- Vercel Preview observability integration: PASS.
+- Production PostHog env must remain disabled until PR #33 is merged, because current production build predates the event-level GeoIP opt-out.
