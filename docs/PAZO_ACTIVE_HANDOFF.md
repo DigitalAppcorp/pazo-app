@@ -426,3 +426,16 @@ This checkpoint supersedes the earlier pending backend-gate note.
   - rollback residue: 0.
 - Backend tracking contract: OPERATIONAL.
 - Frontend fake door is still development/PR #34 until merge + deployment.
+
+
+### Places demand fake-door runtime validation
+- Local production-build preview validated by Product Owner: PASS.
+- Fake door visible instead of Mapbox: PASS.
+- Real persisted telemetry after PO interaction:
+  - total views: 1;
+  - unique viewers: 1;
+  - total interests: 1;
+  - unique interested accounts: 1.
+- No duplicate signals observed.
+- Backend + frontend validation contract: PASS.
+- Public Vercel rollout remains pending a new Production deployment after the Free deployment-rate limit resets.
