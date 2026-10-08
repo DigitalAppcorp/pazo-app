@@ -261,14 +261,14 @@ BEGIN
  ) t;
  RETURN v_items;
 END;
-$;
+$$;
 REVOKE ALL ON FUNCTION public.f14_pending_media(integer) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.f14_pending_media(integer) TO authenticated;
 
 CREATE FUNCTION public.f14_media_task(p_kind text,p_id uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_url text; v_bucket text; v_path text;
-DECLARE v_owner uuid; v_pet uuid; v_community uuid;
+v_owner uuid; v_pet uuid; v_community uuid;
 BEGIN
  IF NOT public.f14_is_moderator() THEN RAISE EXCEPTION 'Moderator access required' USING ERRCODE='42501'; END IF;
  IF NOT EXISTS (SELECT 1 FROM moderation_private.content_restrictions
@@ -291,7 +291,7 @@ BEGIN
  RETURN jsonb_build_object('bucket',v_bucket,'url',v_url,'path',v_path,
   'owner',v_owner,'pet',v_pet,'community',v_community);
 END;
-$;
+$$;
 REVOKE ALL ON FUNCTION public.f14_media_task(text,uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.f14_media_task(text,uuid) TO authenticated;
 
@@ -307,7 +307,7 @@ BEGIN
  WHERE target_kind=p_kind AND target_id=p_id AND media_status='pending_review';
  RETURN FOUND;
 END;
-$;
+$$;
 REVOKE ALL ON FUNCTION public.f14_confirm_media_cleanup(text,uuid) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.f14_confirm_media_cleanup(text,uuid) TO service_role;
 
