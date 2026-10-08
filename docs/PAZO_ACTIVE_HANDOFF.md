@@ -400,3 +400,11 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - Canonical experiment: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`.
 - Tracking: generic unique views + deduped account interest.
 - Next deployment, once Vercel allows it, must contain this fake door rather than require a production Mapbox token.
+
+
+### Places demand experiment backend gate
+- `places_map` is not yet present in `validation_private.modules`.
+- Migration prepared but NOT applied:
+  - `20261008013000_register_places_map_validation.sql`.
+- No new table/RLS/provider is introduced; migration only registers the generic module key.
+- Do not mark tracking operational until PO authorizes apply and runtime view + interest persistence are verified.
