@@ -208,6 +208,7 @@ PostHog.
 **Bloqueado por defecto**
 - session replay;
 - autocapture;
+- PostHog GeoIP enrichment (`$geoip_disable=true` on PAZO events);
 - email;
 - teléfono;
 - mensajes/posts/documentos;
