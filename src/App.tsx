@@ -1693,7 +1693,6 @@ function PazoMain() {
                       <HomeView
                         posts={posts.filter(post => !safety.blockedIds.has(post.ownerUserId || '') && !safety.hiddenIds.has(post.id))}
                         onHidePost={async (id) => { try { await safety.hide(id) } catch { window.alert('No se pudo ocultar la publicación.') } }}
-                        onOpenSafetySettings={() => setShowSafetySettings(true)}
                         onLikePost={handleLikePost}
                         onSavePost={handleSavePost}
                         onAddComment={handleAddComment}
@@ -1760,6 +1759,7 @@ function PazoMain() {
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       documentCount={documentCount}
                       onOpenDocuments={() => setIsDocumentsOpen(true)}
+                      onOpenSafetySettings={() => setShowSafetySettings(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
                       lang={lang}
                       userPosts={profilePosts}

@@ -24,6 +24,7 @@ interface PetViewProps {
   onOpenCareAgenda: () => void
   documentCount: number
   onOpenDocuments: () => void
+  onOpenSafetySettings: () => void
   onOpenLostAlert: () => void
   lang: 'es' | 'en'
   userPosts?: Post[]
@@ -42,6 +43,7 @@ export const PetView = ({
   onOpenCareAgenda,
   documentCount,
   onOpenDocuments,
+  onOpenSafetySettings,
   onOpenLostAlert,
   lang,
   userPosts = [],
@@ -219,6 +221,18 @@ export const PetView = ({
             >
               <span>{lang === 'es' ? 'Cambiar' : 'Switch'}</span>
               <span className="text-[10px]">▾</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenSafetySettings}
+              aria-label={lang === 'es' ? 'Seguridad y privacidad de la cuenta' : 'Account safety and privacy'}
+              title={lang === 'es' ? 'Seguridad y privacidad' : 'Safety and privacy'}
+              className="w-10 h-10 shrink-0 rounded-full bg-white hover:bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center transition-colors cursor-pointer shadow-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204E4A]"
+            >
+              <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3 4 6v5c0 5.1 3.5 8.6 8 10 4.5-1.4 8-4.9 8-10V6l-8-3Z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
             </button>
             <button
               onClick={handleLogout}
@@ -524,6 +538,26 @@ export const PetView = ({
           <h3 className="font-extrabold text-sm text-[#204E4A] px-1">
             {lang === 'es' ? `Todo sobre ${currentPet.name}` : `All about ${currentPet.name}`}
           </h3>
+
+          <button
+            type="button"
+            onClick={onOpenSafetySettings}
+            className="w-full p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between text-left cursor-pointer transition-all active:scale-[0.99] group focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#204E4A]"
+          >
+            <span className="flex items-center gap-3.5">
+              <span aria-hidden="true" className="w-12 h-12 shrink-0 rounded-2xl bg-[#204E4A]/10 text-[#204E4A] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3 4 6v5c0 5.1 3.5 8.6 8 10 4.5-1.4 8-4.9 8-10V6l-8-3Z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </span>
+              <span>
+                <span className="block font-extrabold text-sm text-[#204E4A]">{lang === 'es' ? 'Seguridad y privacidad' : 'Safety and privacy'}</span>
+                <span className="block text-xs text-[#5C7470]">{lang === 'es' ? 'Bloqueos, publicaciones ocultas y denuncias' : 'Blocks, hidden posts and reports'}</span>
+              </span>
+            </span>
+            <span aria-hidden="true" className="ml-2 text-lg font-bold text-[#5C7470] group-hover:translate-x-1 transition-transform">›</span>
+          </button>
 
           <div
             onClick={onOpenQRPassport}

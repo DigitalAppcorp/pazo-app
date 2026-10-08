@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { submitReport, type ReportReason, type ReportTarget } from './reportingService'
 
 interface Props {
-  target: { kind: ReportTarget; id: string }
+  target: { kind: ReportTarget; id: string; label?: string }
   onClose: () => void
   lang: 'es' | 'en'
 }
@@ -21,6 +21,14 @@ export function ReportDialog({ target, onClose, lang }: Props) {
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
   const es = lang === 'es'
+  const typeLabel: Record<ReportTarget, [string, string]> = {
+    feed_post: ['Publicación', 'Feed post'],
+    feed_comment: ['Comentario', 'Feed comment'],
+    pet_profile: ['Perfil de mascota', 'Pet profile'],
+    community_post: ['Publicación de comunidad', 'Community post'],
+    community_comment: ['Comentario de comunidad', 'Community comment'],
+  }
+  const subjectLabel = target.label?.trim() || typeLabel[target.kind][es ? 0 : 1]
 
   const send = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -46,9 +54,12 @@ export function ReportDialog({ target, onClose, lang }: Props) {
     className="fixed inset-0 z-[190] flex items-center justify-center bg-black/55 p-4">
     <div className="w-full max-w-sm rounded-[1.8rem] bg-[#FAF8F5] p-5 shadow-xl text-[#204E4A]">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-black">{es ? 'Enviar denuncia' : 'Submit report'}</h2>
+        <h2 className="text-lg font-black">{sent ? (es ? 'Denuncia recibida' : 'Report received') : (es ? 'Enviar denuncia' : 'Submit report')}</h2>
         <button type="button" onClick={onClose} className="font-bold text-sm">{es ? 'Cerrar' : 'Close'}</button>
       </div>
+      <p className="mt-3 rounded-xl bg-[#204E4A]/[0.06] px-3 py-2 text-xs font-semibold leading-relaxed" aria-label={es ? 'Contenido seleccionado' : 'Selected content'}>
+        {es ? 'Contenido: ' : 'Content: '}{subjectLabel}
+      </p>
       {sent ? <div role="status" className="mt-5 space-y-3">
         <p className="text-sm">{es ? 'Denuncia recibida. Un moderador podrá revisarla.' : 'Report received for moderation review.'}</p>
         <button type="button" onClick={onClose} className="rounded-full bg-[#204E4A] px-4 py-2 font-bold text-white">{es ? 'Aceptar' : 'OK'}</button>
