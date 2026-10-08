@@ -949,3 +949,12 @@ Este checkpoint más reciente sustituye las referencias anteriores a A2 como no 
 - Sigue pendiente designar mediante aprobación específica un moderador inicial (no derivarlo de `profiles.is_founder`), pruebas reales REST/RPC entre roles/perfiles/cuentas de prueba, validar eliminación segura de imagen/Storage y propagación CDN, análisis de retención D3-B, y aceptación visual de A2 en frontend desplegado. No afirmar que A2 está cerrado.
 - Vercel producción sigue pospuesto por decisión de PO y por permisos 403 del equipo digitalapp; previews GitHub no equivalen a release. No iniciar A3/A4 sin autorización.
 - **Integridad de migraciones:** A1 en repo `20261008090000` frente a versión aplicada `20261008112333`; A2 nombre/version en repo coincide con versión aplicada. Reconciliar A1 antes de replays/remotos; no ejecutar migraciones antiguas a ciegas.
+
+
+---
+
+# F14 A2 — PRIMER MODERADOR ASIGNADO — 2026-10-08
+
+Por aprobación explícita del Product Owner se otorgó el rol de moderador inicial de PAZO a la cuenta Auth verificada `appdigital.corp@gmail.com` exclusivamente mediante `moderation_private.moderator_grants` en Supabase hosted `mrybvqdebbgcayuvgkkr`. La concesión se realizó con DML transaccional e identidad comprobada por correo activo/verificado. **Auditoría posterior:** target_granted=true, moderator_count=1, other_grants=0, moderation_reports=0, content_restrictions=0. No se asignó acceso administrativo general a proveedores, ni se cambió `profiles.is_founder`.
+
+**Próximo gate:** validar con sesiones autorizadas/negadas los RPC y los cinco reportes, deduplicación/rate limit, cola de moderación, RLS y retiros sin afectar otros datos. La limpieza Storage continúa inerte (endpoint devuelve 503), UI solo en preview, A1 pendiente de API hospedada y Vercel producción pospuesto. No declarar A2 cerrado ni iniciar A3/A4 sin autorización.

@@ -954,3 +954,7 @@ Por aprobación explícita del Product Owner, se inició la preparación de **re
 
 ### F14 A2 — activación de backend hospedado (2026-10-08)
 La migración `f14_reports_moderation` se aplicó a Supabase PAZO, versión real `20261008120333`. Cinco políticas restrictivas implementan retirada a nivel API; `moderation_private` contiene registro privado de denuncias, concesiones de moderador, decisiones y restricciones. **No hay moderadores asignados ni contenido retirado**. La Edge Function de limpieza existe con JWT y código inerte que devuelve 503, sin borrar archivos. La versión de purga propuesta reside solo en `supabase/drafts/`, no en la ruta de funciones desplegables. A2 continúa abierto hasta pruebas API, primer moderador autorizado, validación de almacenamiento/CDN y aceptación UI; publicación Vercel diferida. A3/A4 sin permiso.
+
+
+### F14 A2 — rol inicial asignado
+La cuenta verificada `appdigital.corp@gmail.com` recibió por autorización explícita del PO la única concesión de moderador PAZO en `moderation_private.moderator_grants` del proyecto hospedado. Verificación: 1 moderador, 0 otros, 0 denuncias y 0 restricciones de contenido. No añade permisos de administrador a GitHub, Vercel ni Supabase; limpieza Storage desactivada. Restan pruebas de seguridad API, UI preview y retiro de medios antes de cierre de A2. El PO mantiene aplazada la publicación oficial de Vercel.
