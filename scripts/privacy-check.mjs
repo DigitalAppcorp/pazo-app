@@ -83,6 +83,7 @@ const observability = read('src/services/observability.ts')
 for (const required of [
   'SAFE_EVENT_PROPERTY_ALLOWLIST',
   "sendEvent('$exception'",
+  '$geoip_disable: true',
   '[redacted-email]',
   '[redacted-jwt]',
 ]) {
