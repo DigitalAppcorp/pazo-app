@@ -188,7 +188,7 @@ Canonical:
 - `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
 
 Branch:
-- `infra/production-hardening-1`
+- `infra/external-hardening-2`
 
 Current scope:
 - PayPal webhook security;
@@ -310,3 +310,61 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
   - Vercel/Mapbox spend controls;
   - hosted Auth verification;
   - backup/restore drill.
+
+
+### External hardening active checkpoint
+- PostHog project connected.
+- PostHog privacy settings applied + verified: anonymize IP ON; autocapture/replay/heatmaps/console/performance automatic capture OFF; timezone America/Los_Angeles.
+- PostHog live ingestion: PENDING; project still has 0 events.
+- PostHog integrations/alerts: 0; need an explicit destination before authoring alerts.
+- Vercel connector: reachable but 0 teams / 0 projects; do not create a new project blindly.
+- Supabase: Free; DB ~17 MB; Storage ~26 MB.
+- Backup runbook: `docs/PAZO_BACKUP_RESTORE_RUNBOOK.md`.
+- Storage backup utility: `scripts/backup-storage.mjs`.
+- PayPal webhook v3: ACTIVE; 0 observed real webhook calls.
+- Mapbox: env-token based, no hardcoded token; account restriction/usage alert verification pending.
+- Next runtime gate: wire PostHog public token into a real PAZO runtime, verify first event + controlled exception.
+
+
+### PostHog live ingestion checkpoint
+- First real PAZO event: PASS (`app_boot`).
+- Event contract observed: app/environment/release/session only from PAZO's reviewed payload.
+- New privacy fix committed: all PAZO PostHog events send `$geoip_disable=true`.
+- Privacy CI guard updated to require the GeoIP opt-out.
+- Next exact runtime step: pull branch, restart Vite with temporary PostHog env vars, then trigger one controlled exception and verify `$exception` ingestion.
+
+
+### PostHog error tracking + Documents checkpoint
+- PostHog controlled exception ingestion: PASS.
+- Two controlled `$exception` events grouped into one issue: PASS.
+- Verified exception GeoIP enrichment absent.
+- Documents repeated warning root cause found:
+  - deleting document objects are hidden by Storage SELECT RLS because policy only allows `active`;
+  - 4 stale deleting rows currently still have Storage objects;
+  - 3 are for the current test user.
+- Migration prepared in PR #33:
+  - `20261008010500_fix_pet_document_delete_storage_visibility.sql`.
+- DO NOT mark Documents cleanup fixed in production until PO authorizes migration, migration is applied, current user reloads, stale files disappear, and warnings stop.
+
+
+### Documents recovery production verification
+- Migration applied in production after explicit PO authorization:
+  - `20261008010424_fix_pet_document_delete_storage_visibility.sql`.
+- Owner-only Storage visibility for `deleting` objects verified.
+- Current test account recovery after reload: PASS.
+- Current test account pending deleting rows: 0.
+- Current test account pending deleting Storage objects: 0.
+- One stale deleting row/object remains for another account and should self-recover on that account's next recovery run.
+- Documents repeated-warning issue is resolved for the current test account.
+
+
+### Vercel Preview integration checkpoint
+- Vercel project resolved: `pazo-app-t83r` (`prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`).
+- Production alias confirmed: `pazo-app-t83r.vercel.app`.
+- Preview observability variables configured without paid resources.
+- Preview deployment from PR #33: READY.
+- PO Preview runtime validation: PASS.
+- PostHog Preview ingestion: PASS.
+- Preview events have `$geoip_disable=true` and no city/lat/long enrichment.
+- Do NOT enable PostHog in production before PR #33 merge.
+- Next gate: final CI -> PO merge authorization -> merge PR #33 -> add production PostHog/Supabase publishable env -> verify production deployment + PostHog.

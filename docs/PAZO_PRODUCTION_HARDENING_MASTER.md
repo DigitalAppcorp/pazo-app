@@ -266,7 +266,7 @@ Reconciliation against PR #30 approved scope:
 - PostHog-compatible instrumentation code: CLOSED; external project/token/live ingestion remains explicitly pending;
 - Vercel/Mapbox spend-control verification, CAPTCHA and backup/restore drill remain outside this PR's completed deliverables and stay in Production Hardening backlog.
 
-**PR #30 may be merged after explicit Product Owner merge authorization.**
+**Historical note:** PR #30 was later merged after explicit Product Owner authorization.
 
 Production Hardening as a whole remains **EN CURSO** after this tranche because external provider configuration/verification still remains.
 
@@ -396,3 +396,127 @@ Remaining active backlog:
 - CAPTCHA/Turnstile timing before public Beta;
 - backup/restore drill;
 - final provider/privacy reconciliation before public Beta.
+
+
+## 14. External hardening tranche — 2026-10-07
+
+Branch: `infra/external-hardening-2`
+
+### PostHog
+- active project resolved successfully;
+- project had 0 ingested events at audit;
+- Product Owner explicitly authorized privacy-setting changes;
+- applied + verified:
+  - `anonymize_ips=true`;
+  - `autocapture_opt_out=true`;
+  - `capture_console_log_opt_in=false`;
+  - `capture_performance_opt_in=false`;
+  - `session_recording_opt_in=false`;
+  - `heatmaps_opt_in=false`;
+  - timezone `America/Los_Angeles`;
+- integrations: 0;
+- error-tracking alerts: 0;
+- live ingestion remains pending until PAZO runtime receives the public project token through environment config;
+- do not enable replay/autocapture to solve ingestion.
+
+### Vercel
+- connector/tools are reachable;
+- authenticated context currently returns 0 teams and 0 projects;
+- do not create or link a new production project without confirming the correct Vercel account/team;
+- production env/spend/log audit remains pending.
+
+### Supabase
+- plan: Free;
+- database baseline: ~17 MB;
+- Storage baseline: ~26 MB;
+- Security Advisor remains at Leaked Password Protection only;
+- PayPal webhook v3 ACTIVE and has 0 observed webhook calls at this checkpoint;
+- Free-tier backup strategy documented in `docs/PAZO_BACKUP_RESTORE_RUNBOOK.md`;
+- local Storage backup utility added at `scripts/backup-storage.mjs`.
+
+### Mapbox
+- frontend uses only `VITE_MAPBOX_ACCESS_TOKEN`;
+- no Mapbox token is hardcoded in source;
+- current vendor docs confirm URL restrictions for dedicated public web tokens;
+- Mapbox has usage notifications but no configurable hard spending cap;
+- account-level token restrictions/notifications remain pending because no Mapbox account connector is available in this session.
+
+### Still pending
+- first real PostHog event + controlled exception;
+- notification destination + low-noise error alert;
+- correct Vercel team/project connection;
+- Mapbox token restriction + usage notification confirmation;
+- PayPal Edge Function secrets + genuine Sandbox/Live webhook;
+- real DB + Storage off-site backup and non-destructive restore drill.
+
+
+### PostHog live ingestion checkpoint
+- Product Owner started PAZO locally with temporary environment variables; no token was committed to Git.
+- PostHog switched from `ingested_event=false` to `true`.
+- `app_boot` is confirmed as a real recently ingested event.
+- verified fields:
+  - `app=pazo`;
+  - `environment=development`;
+  - `pazo_release=local-hardening-test`;
+  - random PAZO session id.
+- PostHog still exposed GeoIP-derived property names even with IP anonymization enabled.
+- PAZO now sends `$geoip_disable=true` on every event to disable GeoIP enrichment at ingestion.
+- CI privacy guard enforces that opt-out.
+- controlled `$exception` runtime verification: PENDING.
+
+
+### PostHog controlled exception verification
+- controlled browser ErrorEvent executed by Product Owner;
+- PostHog received two `$exception` events;
+- exception type: `Error`;
+- message: `PAZO_OBSERVABILITY_TEST`;
+- source: `window.error`;
+- release: `local-hardening-test`;
+- `$geoip_disable=true`;
+- no GeoIP city attached to verified exception events;
+- Error Tracking grouped both occurrences into one active issue;
+- error-tracking ingestion/grouping: PASS.
+
+### Documents recovery bug found during observability validation
+- repeated console warning was not random noise;
+- 4 rows remain in `pet_documents.status='deleting'` while their Storage objects still exist;
+- 3 belong to the current test user; 1 belongs to another account;
+- Storage SELECT RLS currently exposes only `active` document objects;
+- authenticated transactional visibility test for the current owner's deleting objects returned 0 visible rows;
+- this conflicts with reliable client-side Storage cleanup during the `deleting` lifecycle;
+- migration applied in production after explicit PO authorization:
+  - `20261008010424_fix_pet_document_delete_storage_visibility.sql`;
+  - owner-only Storage SELECT expands from `active` to `active|deleting`;
+  - DELETE ownership policy remains unchanged;
+- authenticated visibility verification: current test user changed from 0 to 3 visible deleting objects;
+- after Product Owner reload/recovery:
+  - current test user deleting rows: 0;
+  - current test user deleting Storage objects: 0;
+  - one stale deleting row/object remains for a different account and should self-recover when that account next runs the recovery flow;
+- Documents recovery fix: PASS for current test user.
+
+
+### Vercel preview observability verification
+- production project identified: `prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH` / `pazo-app-t83r`;
+- framework: Vite;
+- Git source: `DigitalAppcorp/pazo-app`;
+- production alias: `pazo-app-t83r.vercel.app`;
+- Vercel connector has project-level access but team/billing scope returns 403;
+- Preview env configured with:
+  - `VITE_POSTHOG_PROJECT_TOKEN`;
+  - `VITE_POSTHOG_HOST`;
+  - `VITE_APP_RELEASE=vercel-preview`;
+  - `VITE_SUPABASE_PUBLISHABLE_KEY`;
+- Preview deployment rebuilt from PR #33 HEAD and reached READY;
+- Product Owner entered the Preview successfully;
+- PostHog verified live Preview events:
+  - `app_boot`;
+  - `auth_signin_succeeded`;
+  - `auth_session_signed_in`;
+- verified Preview properties:
+  - release `vercel-preview`;
+  - app boot environment `production`;
+  - `$geoip_disable=true`;
+  - no GeoIP city/latitude/longitude.
+- Vercel Preview observability integration: PASS.
+- Production PostHog env must remain disabled until PR #33 is merged, because current production build predates the event-level GeoIP opt-out.

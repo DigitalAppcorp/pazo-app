@@ -48,19 +48,33 @@ El agente debe indicar:
 - Proyecto PAZO: Free.
 - Leaked Password Protection requiere un tier superior; se mantiene pendiente y no justifica por sí sola un upgrade.
 - RLS, Auth rate limits y hardening de DB cubren parte del riesgo sin gasto adicional.
+- Database baseline observado: ~17 MB.
+- Storage baseline observado: ~26 MB.
+- Free tier: mantener dumps/off-site manuales; runbook en docs/PAZO_BACKUP_RESTORE_RUNBOOK.md.
 
 ### PostHog
-- Integración de frontend preparada con captura mínima.
-- Token/proyecto/live ingestion todavía no verificados en esta sesión.
-- Mantener autocapture/session replay desactivados inicialmente salvo decisión posterior.
+- Proyecto conectado y verificado.
+- Ajustes de privacidad aplicados 2026-10-07:
+  - IP anonymization ON;
+  - autocapture OFF;
+  - session replay OFF;
+  - heatmaps OFF;
+  - automatic console capture OFF;
+  - automatic performance capture OFF;
+  - timezone America/Los_Angeles.
+- Live ingestion todavía pendiente: el proyecto reporta 0 eventos ingeridos.
+- No crear alertas hasta existir un destino explícito aprobado (Slack/webhook/etc.).
 
 ### Vercel
-- App de ChatGPT instalada.
-- Proyecto, plan, spend controls y alertas todavía no verificados porque sus acciones no están expuestas en esta sesión.
+- Conector responde, pero actualmente devuelve 0 teams y 0 proyectos.
+- No crear un proyecto Vercel nuevo a ciegas.
+- Proyecto/plan/env/spend controls siguen pendientes hasta conectar la cuenta/proyecto correcto.
 
 ### Mapbox
 - Token público ya forma parte del producto.
-- Presupuesto/usage alerts aún no verificados.
+- Código usa VITE_MAPBOX_ACCESS_TOKEN; no hay token hardcoded.
+- Mapbox no ofrece hard spending cap.
+- Pendiente: token dedicado para PAZO, URL restrictions y usage notifications por email.
 - No aumentar límites o contratar un plan sin aprobación.
 
 ### PayPal
