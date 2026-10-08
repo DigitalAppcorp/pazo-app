@@ -781,15 +781,18 @@ This checkpoint supersedes the earlier exact-next-step notes in this file.
 - Accepted recovery commit before reconciliation: `36aa9aa` (`chore: restore reproducible local development`).
 - Recoverable local branch: `codex/pre-pr34-local-recovery-20261008` at `36aa9aa`.
 - Remote PR #34 HEAD audited live before reconciliation: `21ceab643564830b4fc5a2d278c5c0c9354ca05a`.
+- Local reconciliation merge commit: `605ea4c` (`merge: reconcile PR34 local-first governance`).
+- After that merge the working tree was clean and the active branch was 3 commits ahead of the remote branch; this handoff update is the next local checkpoint.
 - Integration is local only; PR #34 has not been merged, and nothing has been pushed or deployed.
 
 ## Local runtime acceptance
 - `npm run local:setup`: PASS.
 - `npm run verify:local`: PASS.
+- Post-reconciliation `npm run verify:local`: PASS — pgTAP 15/15, disposable signup-to-Feed flow, schema lint, governance suite and build.
 - Product Owner manual acceptance: signup + explicit 18+ attestation + pet registration + Feed + reload persistence PASS.
 - Local Supabase remains isolated from production; no remote migration or production mutation occurred.
 
 ## Exact next step
-- Complete the local merge verification and keep the resulting commits unpushed.
+- Keep the reconciled local commits unpushed until the Product Owner authorizes a meaningful GitHub checkpoint.
 - Do not start Fase 13, 14, 10 or 11 automatically; module selection still requires the Product Owner lifecycle decision recorded in `docs/PAZO_MASTER_ROADMAP.md`.
 - Continue remaining Production Hardening only when it can be done locally; hosted-provider work stays deferred to Release Candidate unless separately authorized.
