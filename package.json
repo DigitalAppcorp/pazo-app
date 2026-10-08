@@ -16,13 +16,16 @@
     "test:ops": "node --check scripts/backup-storage.mjs",
     "test:product-rollout": "node scripts/product-rollout-check.mjs",
     "verify": "npm run test:governance && npm run build",
+    "local:prepare": "node scripts/prepare-local-supabase.mjs",
     "local:env": "node scripts/configure-local-env.mjs",
-    "local:migrate": "npx supabase migration up --local",
-    "local:test:db": "npx supabase test db --local supabase/tests/database/local_dev_contract.test.sql",
+    "local:migrate": "npx supabase --workdir .local-supabase migration up --local",
+    "local:migration:list": "npx supabase --workdir .local-supabase migration list --local",
+    "local:test:db": "npx supabase --workdir .local-supabase test db --local .local-supabase/supabase/tests/database/local_dev_contract.test.sql",
     "local:test:flow": "node scripts/verify-local-flow.mjs",
-    "local:setup": "npx supabase start && npm run local:env && npm run local:migrate",
+    "local:test:cold": "node scripts/verify-local-cold-start.mjs",
+    "local:setup": "npm run local:prepare && npx supabase --workdir .local-supabase start && npm run local:env && npm run local:migrate",
     "dev:local": "vite --host 127.0.0.1 --port 5173",
-    "verify:local": "npm run local:test:db && npm run local:test:flow && npx supabase db lint --local --schema public --level error --fail-on error && npm run verify"
+    "verify:local": "npm run local:test:db && npm run local:test:flow && npx supabase --workdir .local-supabase db lint --local --schema public --level error --fail-on error && npm run verify"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

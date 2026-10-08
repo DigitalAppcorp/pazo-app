@@ -2,10 +2,24 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
+const localWorkdir = process.env.PAZO_LOCAL_SUPABASE_WORKDIR || '.local-supabase'
+const expectedPort = process.env.PAZO_LOCAL_SUPABASE_PORT || '54321'
+const cliArgs = [
+  '--no-install',
+  'supabase',
+  '--workdir',
+  localWorkdir,
+  'status',
+  '-o',
+  'env',
+]
 const command = process.platform === 'win32' ? 'cmd.exe' : 'npx'
+if (process.platform === 'win32' && /[\s"&|<>^%]/u.test(localWorkdir)) {
+  throw new Error('El workdir local contiene caracteres no compatibles con cmd.exe.')
+}
 const args = process.platform === 'win32'
-  ? ['/d', '/s', '/c', 'npx --no-install supabase status -o env']
-  : ['--no-install', 'supabase', 'status', '-o', 'env']
+  ? ['/d', '/s', '/c', `npx ${cliArgs.join(' ')}`]
+  : cliArgs
 const result = spawnSync(command, args, {
   encoding: 'utf8',
   shell: false,
@@ -39,7 +53,7 @@ if (!apiUrl || !publishableKey) {
 }
 
 const parsedUrl = new URL(apiUrl)
-if (!['127.0.0.1', 'localhost'].includes(parsedUrl.hostname) || parsedUrl.port !== '54321') {
+if (!['127.0.0.1', 'localhost'].includes(parsedUrl.hostname) || parsedUrl.port !== expectedPort) {
   throw new Error('La configuración detectada no corresponde al Supabase local de PAZO.')
 }
 
@@ -59,6 +73,12 @@ const setVariable = (name, value) => {
 
 setVariable('VITE_SUPABASE_URL', apiUrl)
 setVariable('VITE_SUPABASE_PUBLISHABLE_KEY', publishableKey)
+setVariable(
+  'VITE_ENABLE_LOCAL_POSTHOG',
+  process.env.PAZO_ENABLE_LOCAL_POSTHOG === '1' ? 'true' : 'false',
+)
 writeFileSync(envPath, content.replace(/^\uFEFF/, ''), 'utf8')
 
-console.log('PAZO local: .env.local apunta a Supabase local; valores no mostrados.')
+console.log(
+  'PAZO local: .env.local apunta a Supabase local; PostHog localhost está desactivado; valores no mostrados.',
+)

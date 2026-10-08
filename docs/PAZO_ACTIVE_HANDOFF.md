@@ -9,6 +9,8 @@
 **Decision:** MVP REDUCIDO  
 **Current remote mutation authorization:** NINGUNA; las aplicaciones históricas registradas permanecen verificadas
 
+**Operational precedence:** the last checkpoint in this file supersedes earlier historical "exact next step" notes.
+
 ## Startup protocol
 
 Before acting:
@@ -465,7 +467,7 @@ This checkpoint supersedes the earlier pending backend-gate note.
   - untracked local backup and Supabase branch marker.
 
 ### External/shared governance availability
-- PAZO continues to declare Project Brain OS v1.3.0 as canonical.
+- PAZO declares Project Brain OS v1.4.0 as canonical.
 - No local checkout or installed skill for `DigitalAppcorp/project-brain-os` was available in this Codex environment.
 - No Brain OS file was modified; this operating decision is PAZO-specific and is fully represented in PAZO governance.
 
@@ -796,3 +798,56 @@ This checkpoint supersedes the earlier exact-next-step notes in this file.
 - Keep the reconciled local commits unpushed until the Product Owner authorizes a meaningful GitHub checkpoint.
 - Do not start Fase 13, 14, 10 or 11 automatically; module selection still requires the Product Owner lifecycle decision recorded in `docs/PAZO_MASTER_ROADMAP.md`.
 - Continue remaining Production Hardening only when it can be done locally; hosted-provider work stays deferred to Release Candidate unless separately authorized.
+
+
+---
+
+# LOCAL ENVIRONMENT GATE — 2026-10-08
+
+This checkpoint supersedes the earlier local-environment setup instructions in this file.
+
+## Git and scope
+- Active branch: `product/places-demand-validation`.
+- Pre-checkpoint local HEAD: `cea8a33` (`docs: record local PR34 reconciliation`), 4 commits ahead of the remote branch.
+- All work in this gate is local only. Production, the remote branch, PR #34 and Vercel were not changed.
+- The generated Supabase workdir `.local-supabase/` is ignored by Git.
+
+## Reproducible Supabase contract
+- The 30 historical migrations are restored to the canonical production-safe path `supabase/migrations/`.
+- The local reconstructed baseline and local development contract are isolated under `supabase/local_migrations/`; they are not part of the canonical remote migration chain.
+- `scripts/prepare-local-supabase.mjs` generates `.local-supabase/supabase/` from the two local migrations plus any future canonical migration newer than the local baseline.
+- Daily commands use an explicit local workdir. `npm run local:setup` prepares, starts, configures and migrates the local stack.
+- `npm run local:test:cold` pauses the daily stack while preserving its volumes, rebuilds an empty isolated stack, verifies it and restores the daily stack. This serialized design is required by the current Docker memory budget on this machine.
+
+## Verification evidence
+- Empty cold rebuild: PASS.
+- `npm run verify:local`: PASS.
+- pgTAP database contract: 17/17 PASS.
+- Database lint at error level: PASS.
+- Disposable API flow: signup → pet → direct Feed read → recommended Feed RPC → representative module reads → cleanup: PASS.
+- Runtime Storage upload/delete coverage: all five buckets PASS (`pet-avatars`, `post-photos`, `pet-documents`, `community-avatars`, `community-post-photos`).
+- Governance, hardening, architecture, privacy and product-rollout checks: PASS.
+- TypeScript/Vite build and targeted ESLint for changed files: PASS.
+- Local Auth health and Vite app: HTTP 200.
+- Test residue after cleanup: 0 users, 0 pets, 0 communities and 0 documents matching the disposable test markers.
+- `git diff --check`: PASS; only Windows LF→CRLF notices were reported.
+
+## Local safety behavior
+- `.env.local` is generated from the running local stack without printing credentials.
+- Development rejects non-local Supabase endpoints.
+- PostHog is disabled by default on `localhost`/`127.0.0.1`; explicit local opt-in requires `PAZO_ENABLE_LOCAL_POSTHOG=1` when regenerating `.env.local`.
+- No secrets are committed or intentionally printed by the workflow.
+
+## Files in this local checkpoint
+- Workflow/config: `.env.example`, `.gitignore`, `package.json`.
+- Scripts: `scripts/prepare-local-supabase.mjs`, `scripts/verify-local-cold-start.mjs`, `scripts/configure-local-env.mjs`, `scripts/verify-local-flow.mjs`.
+- Runtime: `src/services/observability.ts`.
+- Database tests: `supabase/tests/database/local_dev_contract.test.sql`.
+- Migration-path reconciliation: `supabase/migrations/` and `supabase/local_migrations/`.
+- Documentation: `docs/PAZO_LOCAL_DEVELOPMENT.md`, `docs/PAZO_ACTIVE_HANDOFF.md`.
+
+## Remaining gates
+- Product Owner browser smoke test at `http://127.0.0.1:5173`: register a disposable local account/pet and enter Feed.
+- Storage backup/restore drill remains explicitly deferred to the Release Candidate gate; the earlier failed manifest was not treated as complete.
+- Full legacy ESLint debt remains nonblocking; changed files pass targeted lint.
+- Do not start Fase 14 until the Product Owner accepts this local environment gate. After acceptance, audit the phase/sub-route before implementation.

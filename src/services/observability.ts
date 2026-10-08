@@ -7,6 +7,8 @@ const apiHost =
   import.meta.env.VITE_POSTHOG_HOST?.trim()
   || 'https://us.i.posthog.com'
 const releaseId = import.meta.env.VITE_APP_RELEASE?.trim() || 'development'
+const allowLocalObservability =
+  import.meta.env.VITE_ENABLE_LOCAL_POSTHOG?.trim().toLowerCase() === 'true'
 
 let currentUserId: string | null = null
 let initialized = false
@@ -82,7 +84,13 @@ const sanitizeProperties = (
 const getDistinctId = () =>
   currentUserId || `anonymous:${getSessionId()}`
 
-export const isObservabilityEnabled = () => Boolean(projectToken)
+const isLocalRuntime = () => {
+  if (typeof window === 'undefined') return false
+  return ['127.0.0.1', 'localhost'].includes(window.location.hostname)
+}
+
+export const isObservabilityEnabled = () =>
+  Boolean(projectToken) && (!isLocalRuntime() || allowLocalObservability)
 
 export const setObservabilityUser = (userId: string | null) => {
   currentUserId = userId

@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT extensions.plan(15);
+SELECT extensions.plan(17);
 
 SELECT extensions.ok(
   (SELECT count(*) = 5 FROM storage.buckets WHERE id IN (
@@ -22,6 +22,18 @@ SELECT extensions.ok(
       OR (id IN ('pet-avatars','post-photos','community-avatars','community-post-photos')
           AND public = true AND file_size_limit = 5242880)),
   'bucket visibility and file-size limits match the PAZO contract'
+);
+
+SELECT extensions.ok(
+  (SELECT count(*) = 5
+   FROM storage.buckets
+   WHERE (id = 'pet-documents'
+          AND allowed_mime_types @> ARRAY['application/pdf','image/jpeg','image/png','image/webp']::text[]
+          AND cardinality(allowed_mime_types) = 4)
+      OR (id IN ('pet-avatars','post-photos','community-avatars','community-post-photos')
+          AND allowed_mime_types @> ARRAY['image/jpeg','image/png','image/webp']::text[]
+          AND cardinality(allowed_mime_types) = 3)),
+  'bucket MIME allowlists match the PAZO contract'
 );
 
 SELECT extensions.ok(
@@ -106,6 +118,45 @@ SELECT extensions.ok(
     'EXECUTE'
   ),
   'authenticated can execute create_pet_profile'
+);
+
+SELECT extensions.ok(
+  NOT EXISTS (
+    SELECT 1
+    FROM (VALUES
+      ('authenticated', 'public.activate_lost_pet_alert(uuid,text,timestamptz,text)'),
+      ('authenticated', 'public.archive_care_item(uuid)'),
+      ('authenticated', 'public.begin_delete_pet_document(uuid)'),
+      ('authenticated', 'public.begin_pet_document_upload(uuid,text,text,text,text,bigint)'),
+      ('authenticated', 'public.cancel_delete_pet_document(uuid)'),
+      ('authenticated', 'public.cancel_pet_document_upload(uuid)'),
+      ('authenticated', 'public.complete_care_item(uuid,date,time without time zone)'),
+      ('authenticated', 'public.create_community(text,text,text,text,text,text,uuid)'),
+      ('authenticated', 'public.create_pet_profile(text,text,text,text,text,text[],text,text,text)'),
+      ('authenticated', 'public.finalize_delete_pet_document(uuid)'),
+      ('authenticated', 'public.finalize_pet_document_upload(uuid)'),
+      ('authenticated', 'public.get_pet_founder_status(uuid)'),
+      ('authenticated', 'public.get_public_pet_rescue_profile(uuid)'),
+      ('authenticated', 'public.get_recommended_posts(uuid,integer)'),
+      ('authenticated', 'public.get_recommended_posts_page(uuid,integer,integer)'),
+      ('authenticated', 'public.register_interaction_signal(uuid,uuid,text)'),
+      ('authenticated', 'public.resolve_lost_pet_alert(uuid)'),
+      ('authenticated', 'public.rotate_pet_public_link(uuid)'),
+      ('authenticated', 'public.submit_pet_sighting(uuid,text,text,text,text)'),
+      ('authenticated', 'public.try_finalize_delete_pet_document(uuid)'),
+      ('authenticated', 'public.undo_care_completion(uuid)'),
+      ('authenticated', 'public.update_pet_profile(uuid,text,text,text,text,text,text,text,text,text[],text,text)'),
+      ('anon', 'public.get_pet_founder_status(uuid)'),
+      ('anon', 'public.get_public_pet_rescue_profile(uuid)'),
+      ('anon', 'public.submit_pet_sighting(uuid,text,text,text,text)')
+    ) AS required(role_name, signature)
+    CROSS JOIN LATERAL (
+      SELECT to_regprocedure(required.signature) AS procedure_oid
+    ) resolved
+    WHERE resolved.procedure_oid IS NULL
+       OR NOT has_function_privilege(required.role_name, resolved.procedure_oid, 'EXECUTE')
+  ),
+  'all frontend RPCs retain their intended execution grants'
 );
 
 SELECT extensions.ok(

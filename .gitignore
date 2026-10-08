@@ -28,5 +28,6 @@ dist-ssr
 .env.*
 !.env.example
 .local-backups/
+.local-supabase/
 supabase/.temp/
 supabase/.branches/
