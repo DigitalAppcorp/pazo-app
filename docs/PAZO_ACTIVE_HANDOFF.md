@@ -934,3 +934,6 @@ Se preparó código de Edge Function `f14-moderation-purge` (solo GitHub, sin de
 
 ## A2 adicional — copias históricas de comentarios
 Se detectaron 5 duplicados legacy de comentarios en `public.posts.comments`, todos mapeados a `public.post_comments.legacy_id` y ninguno huérfano según auditoría agregada. El SQL A2 borrador fue corregido para retirar copias JSONB públicas de comentarios moderados o asociados a un perfil retirado, conservando las filas fuente normalizadas y otros comentarios. No aplicado; probar lecturas directas REST y las consultas de Feed antes de ejecución hosted.
+
+
+**Guardia anti-borrado cruzado (A2):** borrador Edge `f14-moderation-purge` valida prefijos `owner/pet` para `post-photos`, `owner` para `pet-avatars` y `community/owner` para `community-post-photos`; los datos se obtienen por RPC verificada desde SQL, no de parámetros del cliente. En caso de ruta inválida se requiere revisión manual. No se probó ni desplegó a Supabase hosted.

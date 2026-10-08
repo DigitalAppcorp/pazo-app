@@ -34,4 +34,5 @@ for (const f of [
   'src/features/moderation/ModerationMediaQueue.tsx',
   'supabase/functions/f14-moderation-purge/index.ts'
 ]) assert.ok(existsSync(f), 'Missing UI/service '+f)
+assert.ok(read('supabase/functions/f14-moderation-purge/index.ts').includes('parts.length !== expected.length + 1'), 'Storage purge must verify owner and object path')
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')

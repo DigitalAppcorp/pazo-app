@@ -268,6 +268,7 @@ GRANT EXECUTE ON FUNCTION public.f14_pending_media(integer) TO authenticated;
 CREATE FUNCTION public.f14_media_task(p_kind text,p_id uuid)
 RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
 DECLARE v_url text; v_bucket text; v_path text;
+DECLARE v_owner uuid; v_pet uuid; v_community uuid;
 BEGIN
  IF NOT public.f14_is_moderator() THEN RAISE EXCEPTION 'Moderator access required' USING ERRCODE='42501'; END IF;
  IF NOT EXISTS (SELECT 1 FROM moderation_private.content_restrictions
@@ -276,17 +277,19 @@ BEGIN
  END IF;
  CASE p_kind
   WHEN 'feed_post' THEN
-    SELECT photo_url INTO v_url FROM public.posts WHERE id=p_id;
+    SELECT photo_url,user_id,pet_id INTO v_url,v_owner,v_pet FROM public.posts WHERE id=p_id;
     v_bucket:='post-photos';
   WHEN 'pet_profile' THEN
-    SELECT photo_url INTO v_url FROM public.pets WHERE id=p_id;
+    SELECT photo_url,owner_id INTO v_url,v_owner FROM public.pets WHERE id=p_id;
     v_bucket:='pet-avatars';
   WHEN 'community_post' THEN
-    SELECT photo_storage_path INTO v_path FROM public.community_posts WHERE id=p_id;
+    SELECT photo_storage_path,photo_url,author_user_id,community_id
+    INTO v_path,v_url,v_owner,v_community FROM public.community_posts WHERE id=p_id;
     v_bucket:='community-post-photos';
   ELSE RAISE EXCEPTION 'No removable media for this target' USING ERRCODE='22023';
  END CASE;
- RETURN jsonb_build_object('bucket',v_bucket,'url',v_url,'path',v_path);
+ RETURN jsonb_build_object('bucket',v_bucket,'url',v_url,'path',v_path,
+  'owner',v_owner,'pet',v_pet,'community',v_community);
 END;
 $;
 REVOKE ALL ON FUNCTION public.f14_media_task(text,uuid) FROM PUBLIC,anon;

@@ -65,6 +65,21 @@ Deno.serve(async request => {
   }
   if (path && (path.startsWith('/') || path.includes('..') || path.includes('\\') || path.length > 700))
     return respond(400, 'Invalid media path')
+  if (path) {
+    // Reject foreign or unrelated objects even if a row contains an arbitrary public URL.
+    const parts = path.split('/')
+    const owner = typeof task.owner === 'string' ? task.owner : ''
+    const expected = bucket === 'post-photos'
+      ? [owner, task.pet]
+      : bucket === 'pet-avatars'
+        ? [owner]
+        : [task.community, owner]
+    if (expected.some(x => typeof x !== 'string' || !x) ||
+      parts.length !== expected.length + 1 ||
+      expected.some((v, i) => parts[i] !== v) ||
+      !parts.at(-1) || !/^[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(parts.at(-1)!))
+      return respond(409, 'Media ownership/path mismatch; manual review required')
+  }
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
   if (path) {
