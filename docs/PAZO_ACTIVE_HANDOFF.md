@@ -7,7 +7,7 @@
 **Active product module:** Production Hardening — infraestructura obligatoria  
 **Gate:** Production Hardening Gate 8 — PR #30 MERGED / EXTERNAL HARDENING PENDING  
 **Decision:** MVP REDUCIDO  
-**Supabase production mutation authorization:** Fase 12 aplicada y verificada
+**Current remote mutation authorization:** NINGUNA; las aplicaciones históricas registradas permanecen verificadas
 
 ## Startup protocol
 
@@ -24,9 +24,10 @@ Do not reconstruct project state from chat memory when repository evidence exist
 ## Working model
 
 - Brandon is Product Owner.
-- ChatGPT owns product reasoning, architecture, implementation, backend, security, tests, Git/PR and durable docs.
-- Antigravity/local is execution + visual validation only.
-- Never mutate Supabase without explicit Product Owner authorization.
+- Codex/local is the primary technical owner for day-to-day implementation, architecture, tests and durable documentation.
+- ChatGPT normal + GitHub is the fallback path and must resume from repository evidence, not conversation memory.
+- Product reasoning, code, backend, security, tests and Git/PR state must remain transferable through the canonical docs and Git state.
+- Never mutate Supabase/production or push, merge or deploy without explicit current Product Owner authorization.
 - Preserve already-approved behavior and avoid silent regressions.
 
 ## Fase 8 — final closure
@@ -426,3 +427,122 @@ This checkpoint supersedes the earlier pending backend-gate note.
   - rollback residue: 0.
 - Backend tracking contract: OPERATIONAL.
 - Frontend fake door is still development/PR #34 until merge + deployment.
+
+
+## Codex-first continuity checkpoint — 2026-10-08
+
+### Approved operating model
+- Codex/local is the primary technical execution environment for PAZO.
+- ChatGPT normal is the fallback agent; GitHub plus PAZO's canonical documents are the transfer medium.
+- Every incoming instruction is classified before execution as Implementation, permanent PAZO rule, reusable Brain OS improvement or Handoff.
+- Temporary requests do not become permanent governance automatically.
+- PAZO-specific rules stay in this repository; reusable cross-project improvements belong in the separate `DigitalAppcorp/project-brain-os` repository only after review and explicit authorization.
+
+### Resume protocol for either agent
+1. Read `AGENTS.md`, this handoff, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MODULE_LIFECYCLE.md` and the active sub-route.
+2. Verify the real branch, HEAD, upstream, dirty working tree and open PR before assuming `main` is current.
+3. Preserve uncommitted work until its origin and intended scope are confirmed.
+4. Use `npm run verify` as the grouped local governance + build gate; record separately any runtime, backend, visual or provider validation.
+5. Update this handoff after a meaningful milestone and before changing agents.
+6. Never mutate production or perform migration, push, merge or deploy without current explicit Product Owner authorization.
+
+### Current local Git state
+- checkout: `product/places-demand-validation`;
+- upstream: `origin/product/places-demand-validation`;
+- local branch is 1 commit ahead;
+- HEAD: `d2e0c09f066d245b37f44757ecb2d6a6c3e29490` — `chore: establish local-first verification workflow`;
+- that commit adds the grouped `npm run verify` command and is not yet published to the upstream branch;
+- staged changes: none at this checkpoint;
+- governance files changed by this continuity update:
+  - `AGENTS.md`;
+  - `docs/PAZO_MASTER_ROADMAP.md`;
+  - `docs/PAZO_ACTIVE_HANDOFF.md`;
+- pre-existing local work that must not be overwritten or silently bundled with this governance change:
+  - modified `src/services/supabaseClient.ts`;
+  - 30 tracked historical migration files removed from `supabase/migrations/`;
+  - corresponding untracked copies under `supabase/migrations_legacy/`;
+  - untracked `supabase/migrations/20261008030000_pazo_local_baseline.sql`;
+  - untracked local backup and Supabase branch marker.
+
+### External/shared governance availability
+- PAZO continues to declare Project Brain OS v1.3.0 as canonical.
+- No local checkout or installed skill for `DigitalAppcorp/project-brain-os` was available in this Codex environment.
+- No Brain OS file was modified; this operating decision is PAZO-specific and is fully represented in PAZO governance.
+
+### Exact next step
+- review this governance-only diff and keep it separate from the pre-existing Supabase local-baseline reorganization;
+- before resuming implementation, audit the real PR #34/current branch and confirm ownership and intent of every pending migration move;
+- do not stage, commit, push, merge, deploy or mutate production as part of that audit without the applicable Product Owner authorization.
+
+
+## Local development recovery checkpoint — 2026-10-08
+
+This checkpoint supersedes the previous local-Supabase audit as the current local implementation state. It does not change the Production Hardening phase or authorize remote mutations.
+
+### Result
+- Local Supabase setup is reproducible through `npm run local:setup`; it starts the stack, refreshes only the local public client variables, and applies pending local migrations.
+- Full local gate is `npm run verify:local`; it validates the database contract, exercises signup → profile → avatar → pet → Feed query, lints the public schema, runs governance checks and builds the app.
+- Local Vite starts with `npm run dev:local` at `http://127.0.0.1:5173`.
+- Canonical procedure: `docs/PAZO_LOCAL_DEVELOPMENT.md`.
+
+### Local Supabase contract restored
+- local migration history contains the baseline `20261008030000` plus `20261008061800_pazo_local_dev_contract`;
+- `auth.users` once again triggers `public.handle_new_user()` so signup creates the required profile;
+- direct client execution of `handle_new_user` is revoked;
+- broad auto-exposed table/function privileges are disabled and replaced with the production-derived least-privilege allowlist;
+- authenticated clients cannot update `profiles.is_founder`, while approved profile fields remain editable;
+- buckets present: `pet-avatars`, `post-photos`, `pet-documents`, `community-avatars`, `community-post-photos`;
+- 11 owner/path-aware Storage policies cover the five bucket contracts;
+- all 29 public tables retain RLS;
+- optional local analytics/vector services are disabled because the application does not require them;
+- `.env.local` BOM was removed and local Supabase public values can be refreshed without printing them;
+- no reset, remote migration, production change, push, merge or deployment was performed.
+
+### Reproducibility files
+- `supabase/migrations/20261008030000_pazo_local_baseline.sql`;
+- `supabase/migrations/20261008061800_pazo_local_dev_contract.sql`;
+- `supabase/tests/database/local_dev_contract.test.sql`;
+- `supabase/seed.sql`;
+- `scripts/configure-local-env.mjs`;
+- `scripts/verify-local-flow.mjs`;
+- `docs/PAZO_LOCAL_DEVELOPMENT.md`;
+- `supabase/config.toml`, `package.json`, `.gitignore` and `src/services/supabaseClient.ts` updated for the local-only workflow.
+
+The previous 30 incremental migration files remain preserved under `supabase/migrations_legacy/`; no migration history was deleted remotely. A pre-change local database dump exists under ignored `.local-backups/`.
+
+### Verification evidence
+- `npm run local:setup`: PASS on a running stack;
+- pgTAP local database contract: 15/15 PASS;
+- disposable API flow: PASS, with no residual test user/pet/object;
+- Supabase public-schema lint: PASS, no schema errors;
+- hardening, architecture, privacy, operations and product-rollout checks: PASS;
+- targeted ESLint for the repaired/new runtime files: PASS;
+- TypeScript + Vite production build: PASS;
+- app root and local Auth health endpoint: HTTP 200;
+- full repository lint remains known legacy debt: 110 findings (104 errors, 6 warnings); this local tranche introduced none in its checked files;
+- Vite reports the existing >500 kB bundle-size warning; non-blocking for this recovery.
+
+### Current Git/worktree state
+- checkout: `product/places-demand-validation`, tracking `origin/product/places-demand-validation`, ahead by 1 commit;
+- staged changes: none;
+- all recovery work remains uncommitted and local alongside the already-documented governance changes;
+- production configuration remains intact and untouched.
+
+### Exact next step
+1. Product Owner opens `http://127.0.0.1:5173`, creates a disposable account and personally completes the required 18+ attestation.
+2. Register a pet with an avatar and confirm automatic entry into Feed.
+3. Record visual/runtime approval or the exact failing step here before any commit, push, merge, deployment or production migration.
+
+### Product Owner local runtime acceptance
+- Date: 2026-10-08.
+- Local account creation + explicit 18+ attestation: PASS.
+- Pet registration with the restored local backend: PASS.
+- Automatic entry into Feed: PASS.
+- Session/pet persistence after reload: PASS.
+- Local development recovery milestone: ACCEPTED.
+- No production mutation, push, merge or deployment was performed.
+
+### Next gate after local recovery
+- Preserve the accepted recovery as local uncommitted work until its diff/commit boundary is reconciled.
+- Resume only the remaining Production Hardening scope documented in `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`.
+- Any hosted-provider mutation, production verification, push, merge or deployment still requires explicit Product Owner authorization.

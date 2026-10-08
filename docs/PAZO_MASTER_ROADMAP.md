@@ -1,7 +1,7 @@
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
-**Última actualización:** 2026-10-07  
+**Última actualización:** 2026-10-08
 **Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening ocupa temporalmente el Carril de Implementación por riesgo operativo pre-Beta.
 
 ---
@@ -40,7 +40,7 @@ Por tanto, una fase en validación puede permanecer abierta mientras otra fase a
 - Autoriza explícitamente cualquier mutación importante en Supabase.
 
 ## Implementación
-ChatGPT trabaja directamente sobre GitHub y Supabase:
+Codex/local es el responsable técnico principal por defecto. ChatGPT normal puede retomar el trabajo como respaldo usando el mismo estado durable del repositorio:
 - frontend React/TypeScript;
 - arquitectura;
 - Supabase/PostgreSQL;
@@ -51,6 +51,10 @@ ChatGPT trabaja directamente sobre GitHub y Supabase:
 - seguridad;
 - pruebas;
 - PRs y merge.
+
+Ambos agentes deben comenzar por `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, esta hoja y la sub-ruta activa. `npm run verify` es el gate local agrupado de gobernanza + build; no sustituye pruebas runtime, visuales, de backend ni Scope Closure Reconciliation.
+
+Las migraciones remotas, mutaciones de producción, push, merge y deploy requieren autorización explícita y vigente del Product Owner. El handoff debe dejar rama/HEAD/upstream, working tree, decisiones, verificaciones y siguiente paso suficiente para cambiar de agente sin depender del chat anterior.
 
 No pedir al Product Owner que copie código entre herramientas salvo que sea estrictamente necesario para una prueba local.
 
