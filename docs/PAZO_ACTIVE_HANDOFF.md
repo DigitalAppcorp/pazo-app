@@ -345,3 +345,14 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - Migration prepared in PR #33:
   - `20261008010500_fix_pet_document_delete_storage_visibility.sql`.
 - DO NOT mark Documents cleanup fixed in production until PO authorizes migration, migration is applied, current user reloads, stale files disappear, and warnings stop.
+
+
+### Documents recovery production verification
+- Migration applied in production after explicit PO authorization:
+  - `20261008010424_fix_pet_document_delete_storage_visibility.sql`.
+- Owner-only Storage visibility for `deleting` objects verified.
+- Current test account recovery after reload: PASS.
+- Current test account pending deleting rows: 0.
+- Current test account pending deleting Storage objects: 0.
+- One stale deleting row/object remains for another account and should self-recover on that account's next recovery run.
+- Documents repeated-warning issue is resolved for the current test account.
