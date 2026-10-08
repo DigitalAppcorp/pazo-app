@@ -173,3 +173,9 @@ Una consulta agregada al esquema hospedado detectó **5 comentarios históricos 
 El PO confirmó que `appdigital.corp@gmail.com` es su cuenta PAZO y autorizó expresamente asignarle el rol inicial de moderador. Se comprobó que Auth contiene una única cuenta con correo confirmado y no eliminada. `moderation_private.moderator_grants` ahora contiene **una concesión y ninguna otra**. Comprobación posterior: no hay reportes ni contenido moderado. Esta concesión únicamente habilita las RPC de revisión; **no** implica permisos de administrador de GitHub/Vercel/Supabase y no activa Storage DELETE.
 
 Pendiente: prueba de acceso con token real del moderador y denegación a cuentas estándar; matriz de cinco tipos, RLS y legados, seguridad API, revisión visual vía preview, media/CDN y reconciliación de cierre. A3/A4 no autorizados.
+
+
+### 12. Verificación parcial A2 de roles y hallazgo de RLS (2026-10-08)
+Se simularon roles SQL con `SET LOCAL ROLE` y `request.jwt.claim.sub`, con `ROLLBACK`. PASS: único moderador reconocido, cola accesible, usuario estándar y `anon` rechazados, lectura social anónima legítima conservada, tablas privadas inaccesibles, cinco clases de reportes con IDs inexistentes rechazadas y motivo no admitido rechazado. No se usaron JWT reales ni se generaron reportes persistentes: faltan pruebas REST con tokens firmados, deduplicación, rate-limit, flujos de retirada y validación UI.
+
+Se observó que `f14_moderated_comments_select` no verificaba SELECT del post padre; `f14_moderated_community_comments_select` tampoco lo exige explícitamente. El nuevo SQL propuesto `supabase/drafts/20261008_f14_comment_parent_guard.sql` modifica las dos políticas para requerir lectura RLS del post padre, incluidas restricciones de retirada de perfiles. La sintaxis superó prueba DDL reversible con `ROLLBACK`; producción sigue sin esta corrección. **Exigir aprobación específica antes de aplicar**. A2 sigue ABIERTO.

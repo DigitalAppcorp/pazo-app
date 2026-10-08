@@ -958,3 +958,7 @@ La migración `f14_reports_moderation` se aplicó a Supabase PAZO, versión real
 
 ### F14 A2 — rol inicial asignado
 La cuenta verificada `appdigital.corp@gmail.com` recibió por autorización explícita del PO la única concesión de moderador PAZO en `moderation_private.moderator_grants` del proyecto hospedado. Verificación: 1 moderador, 0 otros, 0 denuncias y 0 restricciones de contenido. No añade permisos de administrador a GitHub, Vercel ni Supabase; limpieza Storage desactivada. Restan pruebas de seguridad API, UI preview y retiro de medios antes de cierre de A2. El PO mantiene aplazada la publicación oficial de Vercel.
+
+
+### Gate F14 A2 — Seguridad de reportes/roles parcialmente validada
+Pruebas hospedadas de contexto SQL (revertidas): PASS para permisos de moderador único, denegación a cuenta estándar y anon, lectura social pública legítima y validación de los cinco tipos de reporte con objetivos inexistentes. **No probaron JWT reales ni reportes efectivos**. Auditoría RLS halló falta de verificación explícita de visibilidad del post padre al consultar comentarios: borrador de corrección en `supabase/drafts/20261008_f14_comment_parent_guard.sql`, dry-run SQL PASS, **no aplicado**. Requiere aprobación del PO y nuevas pruebas antes de cerrar A2. Storage DELETE sigue deshabilitado.
