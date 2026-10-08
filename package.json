@@ -14,14 +14,15 @@
     "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops && npm run test:product-rollout",
     "backup:storage": "node scripts/backup-storage.mjs",
     "test:ops": "node --check scripts/backup-storage.mjs",
-    "test:product-rollout": "node scripts/product-rollout-check.mjs"
+    "test:product-rollout": "node scripts/product-rollout-check.mjs",
+    "verify": "npm run test:governance && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
+    "qrcode-generator": "2.0.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4",
-    "qrcode-generator": "2.0.4"
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
