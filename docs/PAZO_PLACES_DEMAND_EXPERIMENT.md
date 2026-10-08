@@ -109,3 +109,16 @@ Resultados posibles:
 No comprar Vercel Pro, Mapbox add-ons ni otro plan únicamente para habilitar este módulo durante validación.
 
 Cualquier reactivación de proveedor pagado requiere autorización explícita del Product Owner.
+
+
+## 9. Backend gate
+
+The generic validation tables already exist.
+
+Required registry entry:
+- `validation_private.modules.module_key = 'places_map'`.
+
+Prepared migration:
+- `20261008013000_register_places_map_validation.sql`.
+
+Status: **PENDING explicit Product Owner authorization + production apply + runtime persistence verification.**
