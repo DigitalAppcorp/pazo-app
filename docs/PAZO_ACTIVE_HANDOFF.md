@@ -408,3 +408,21 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
   - `20261008013000_register_places_map_validation.sql`.
 - No new table/RLS/provider is introduced; migration only registers the generic module key.
 - Do not mark tracking operational until PO authorizes apply and runtime view + interest persistence are verified.
+
+
+### Places demand backend — FINAL CHECKPOINT
+This checkpoint supersedes the earlier pending backend-gate note.
+
+- `places_map` registry: APPLIED in Supabase production.
+- Applied migrations:
+  - `20261008015255_register_places_map_validation.sql`;
+  - `20261008015603_grant_module_validation_inserts.sql`.
+- `module_validation_views`: authenticated INSERT only.
+- `module_validation_interests`: authenticated INSERT + own-row SELECT through existing RLS.
+- Generic view tracking now uses INSERT and ignores duplicate-session conflict code `23505`; it no longer needs client SELECT on the views table.
+- Transactional QA:
+  - view write: PASS;
+  - interest write + own-row read: PASS;
+  - rollback residue: 0.
+- Backend tracking contract: OPERATIONAL.
+- Frontend fake door is still development/PR #34 until merge + deployment.
