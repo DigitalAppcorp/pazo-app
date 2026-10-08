@@ -1,6 +1,7 @@
 export type SearchEntityType = 'pet' | 'community' | 'place'
 
 export interface GlobalSearchResult {
+  ownerUserId?: string
   type: SearchEntityType
   id: string
   title: string

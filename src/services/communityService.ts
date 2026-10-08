@@ -568,6 +568,7 @@ export const fetchCommunityPostComments = async (
       id: row.id,
       postId: row.post_id,
       authorPetId: row.author_pet_id,
+      authorUserId: author?.owner_id,
       authorName: author?.name || 'Mascota',
       authorSpecies: (author?.species || 'otro') as Species,
       authorAvatar: author?.photo_url || DEFAULT_PET_AVATAR,

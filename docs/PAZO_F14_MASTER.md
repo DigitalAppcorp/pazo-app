@@ -1,0 +1,122 @@
+# PAZO — Fase 14: confianza, moderación y privacidad
+
+**Ruta maestra de producto y arquitectura — 2026-10-08**
+**Categoría:** infraestructura obligatoria para Beta; no requiere fake door.
+**Estado:** F14 EN CURSO documental; Gate 5 CERRADO (MVP REDUCIDO); Gate 6 CERRADO (scope); Gate 7 CERRADO (arquitectura); Gate 8 PLANIFICADO, **sin autorización para implementación**.
+**Base auditada:** respaldo `backup/pazo-codex-local-20261008` (`c4f466f`).
+**Precedencia:** `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MODULE_LIFECYCLE.md`, `docs/PAZO_ARCHITECTURE_CONTRACT.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` y `docs/PAZO_DATA_INVENTORY.md` siguen obligatorios. Este documento detalla la sub-ruta F14.
+
+> IMPORTANTE: la aprobación de arquitectura NO significa que la función exista, ni permite crear SQL/código, alterar producción o presentar cumplimiento legal como confirmado. Este documento registra decisiones aprobadas y especificaciones para futuras autorizaciones separadas.
+
+## 1. Gates y decisiones aprobadas
+
+- **Gate 5 — CERRADO / MVP REDUCIDO.** Moderación humana mínima; no IA de moderación, reconocimiento facial, verificación documental de edad, gran consola administrativa ni proveedor nuevo.
+- **Gate 6 — CERRADO.** Reportar cinco tipos: publicación del Feed, comentario del Feed, perfil público de mascota, publicación de Comunidad y comentario de Comunidad. No incluye reportar una comunidad entera como recurso, salvo nueva decisión.
+- **Gate 7 — CERRADO por autorización expresa del Product Owner.** Se aprueba el contrato de arquitectura resumido en este documento, incluidas las condiciones y pruebas obligatorias abajo.
+- **D1 — CERRADA.** Perfiles y publicaciones públicas seguirán accesibles a visitantes anónimos. Bloquear se ejecuta a nivel de cuenta Auth, en ambos sentidos y para todas las mascotas de ambas cuentas; se filtra la experiencia autenticada y se rechazan operaciones sociales entre cuentas. No prometer que el bloqueado perderá acceso anónimo a contenido público. Conservar el rescate/QR público según su contrato limitado.
+- **D2 — CERRADA.** Si el único propietario de una comunidad elimina su cuenta: archivar y despublicar sin borrar automáticamente contribuciones ajenas; no transferir dirección sin aceptación. Archivo privado de contribuciones conservadas conforme a D3-B.
+- **D3-A — CERRADA.** Despublicación, eliminación verificable en origen activo y Storage, conservación mínima justificada y distinción entre datos activos, terceros, backups, logs y CDN.
+- **D3-B — CERRADA.** Metas operativas propuestas por PAZO aprobadas por PO; **no están implementadas**, no constituyen obligaciones legales universales ni garantizan retención de proveedores. Matriz siguiente.
+- **D4 — Alcance delimitado** por Gate 6: solamente cinco clases de denuncias antes indicadas.
+
+## 2. Retención D3-B aprobada como meta de diseño
+
+| Categoría | Disparador y meta operativa | Responsable provisional | Cautelas |
+|---|---|---|---|
+| Cuenta, mascotas, posts, comentarios, fotos y documentos propios | Despublicar tras solicitud de eliminación confirmada; completar limpieza de datos activos y Storage **dentro de 30 días** | PO / ejecutor técnico autorizado | Reintentos, FK, CDN, copias de seguridad y posibles excepciones legales |
+| Cuidados y registros asociados | Al eliminar mascota/cuenta: limpieza coordinada dentro de **30 días** | Ejecutor técnico | Dependencias `care_items`/`care_completions` sin borrado cascada automático |
+| Contactos y avistamientos cerrados | Eliminar información sensible **dentro de 30 días** desde el cierre o fin de finalidad | PO / responsable de rescate | Considerar aportes de terceros y obligaciones concretas |
+| Reportes cerrados sin infracción | Eliminar o anonimizar irreversiblemente a los **90 días** tras resolución | Moderador / PO | Conservar mínimo durante revisión y proteger identidad del reportante |
+| Reportes con infracción confirmada | Evidencia mínima segregada hasta **180 días** desde resolución | Moderador / PO | Excepciones justificadas con fecha y revisor; nunca republicar evidencia |
+| Comunidades archivadas sin dueño y aportes de terceros | Despublicar al confirmar; revisión a **90 días**; resolución humana documentada antes de **180 días** | PO / moderador | No eliminar aportaciones ajenas por cascada ni transferir dueño sin aceptación |
+| Telemetría propia identificable | Hasta **90 días**; agregados realmente anónimos hasta **12 meses** | PO / técnico | Un UUID persistente no es anónimo; PostHog requiere verificación propia |
+| Logs bajo control de PAZO | Meta de **hasta 30 días**, o menor si proveedor limita | PO / técnico | Sin PII, secretos ni payload de formularios |
+| Backups propios DB + Storage | Rotación/caducidad **30 días** desde creación | PO / técnico | Backups externos aún por verificar; restaurar no debe resucitar datos borrados |
+| Bloqueos y ocultación | Vigentes mientras la cuenta exista o el usuario retire el bloqueo; limpieza vinculada al cierre **dentro de 30 días** | Sistema / PO | No reactivar follows tras desbloquear |
+| Pago/PayPal | **Sin plazo asignado** hasta revisar obligaciones jurídicas y contractuales | PO / asesor competente | Supporter desactivado; no inferir plazo de PayPal |
+| Cuenta de menor conocida | Restricción prioritaria al comprobar el caso; ruta de cierre/borrado con meta general **hasta 30 días** desde decisión | PO | No exigir DOB ni documento de edad por defecto; atender requisitos aplicables |
+
+**Responsabilidades:** Product Owner = responsable provisional de privacidad, moderación y excepciones; ejecutor técnico = diseño/pruebas/operación solo bajo autorización específica. No hay un DPO formal designado por este documento. Antes de Beta: contacto público de privacidad, procedimiento de solicitudes, tratamientos excepcionales, política jurídica revisada cuando corresponda y matriz contrastada contra configuración real de Supabase, PostHog, Vercel, Mapbox y PayPal. Los textos públicos no prometerán plazos no implementados.
+
+## 3. Arquitectura funcional de Gate 7 (aprobada; aún no implementada)
+
+### 3.1 Propiedad del código
+
+- Nuevo `src/features/moderation/` para reportes, bloqueos, ocultación, permisos de moderadores, cola y vistas mínimas.
+- Nuevo `src/features/account/` para solicitud confirmada y eliminación de cuenta/mascota, progreso y reintentos.
+- UI de dominios legacy (`App.tsx`, Feed, Perfil, Comunidades, búsqueda, rescate) integrada incrementalmente, sin trasladar grandes carpetas ni copiar reglas de negocio en `App.tsx`.
+- Sin incorporación de servicios externos, SDK de replay/autocapture ni planes pagados por defecto.
+
+### 3.2 Objetos de datos propuestos
+
+Los nombres finales y DDL deberán comprobarse contra el esquema en el bloque local correspondiente, no antes.
+
+| Objeto | Diseño/seguridad mínima |
+|---|---|
+| `account_blocks` | Pareja de cuentas Auth, actor/objetivo, sin autobloqueo, relación bidireccional de control, índices ambos sentidos, RLS mínima |
+| `hidden_posts` | Relación usuario-publicación, sin afectar visibilidad del autor o de terceros, borrado al cerrar cuenta |
+| `moderation_private.reports` | Cinco tipos cerrados, propietario resuelto en servidor, motivo permitido, deduplicación y rate limit; acceso solo vía endpoint verificado |
+| `moderation_private.actions`, `moderator_grants` | Decisión, actor, destino, motivo/caducidad mínima; autoridad privada (jamás `profiles.is_founder`) y bitácora no editable por usuario |
+| `content_restrictions` | Retirada/restricción efectiva en API, lectura anónima y autenticada cuando se retire por moderación |
+| `account_private.deletion_jobs` | Trabajos idempotentes, solicitud confirmada, estado y reintentos, inventario de archivos/FK, resultados por fase |
+| Archivo de comunidades y medios privados | Contribuciones de terceros sin publicación pública, revisión 90d y resolución 180d; control de acceso independiente |
+
+**Regla de RLS:** usar `auth.uid()` y propiedad realmente derivada del servidor; grants explícitos; RLS para cualquier objeto expuesto; funciones privilegiadas en esquemas no expuestos con `search_path` fijo, validación propia y sin service-role en navegador. No creer que una política `PERMISSIVE` adicional restringe una política preexistente `USING(true)`. No filtrar únicamente en React: verificar SQL, RPC, rutas directas, Feed, perfiles, búsqueda y comunidades.
+
+### 3.3 Bloqueo, denuncia y moderación
+
+- Bloqueo por cuenta, no por mascota; cancelar follows de ambos lados, bloquear nuevas acciones sociales relacionadas (follow, likes, saves, comentarios y operaciones directamente involucradas en Comunidad); cambiar mascota activa no evade bloqueo; desbloquear no restaura follows.
+- Ocultar publicación es preferencia privada independiente de bloquear, con persistencia y limpieza al eliminar cuenta.
+- Reportar: actor autenticado, objetivo existente y denunciable, sin permitir que cliente asigne `reporter`, `owner` o rol; reportes no enumerables por denunciado ni terceros.
+- Moderador: autoridad server-side segregada, cola paginada, registro auditable, retirada efectiva de contenido y medios; el usuario no puede darse privilegios desde metadatos de perfil.
+- Lectura anónima de contenido social legítimamente público permanece autorizada conforme D1; contenido retirado por moderación o archivado NO debe permanecer accesible por API, URL pública ni Storage si se requiere despublicación.
+
+### 3.4 Eliminación de cuenta y protección de terceros
+
+**Riesgo verificado:** `communities.owner_user_id` es NOT NULL y FK `ON DELETE CASCADE` a Auth. `community_posts.author_user_id` y `author_pet_id` también están en cascada. `pet_documents.pet_id` es RESTRICT; cuidados y algunos contenidos tienen FKs no cascada. Borrar Auth o mascotas sin preparar dependencias puede destruir contenido ajeno o fallar parcialmente.
+
+**Contrato:** reautenticación reciente; estado de cuenta protegido; inventario completo; preparar archivo privado sin datos del titular; despublicar comunidad y contenido propio; revisar referencias; eliminar archivos mediante Storage API y comprobar resultados; eliminar datos propios en orden dependiente; Auth **al final**. Trabajo idempotente con estados de error/reintentos, sin confirmación engañosa. Seguridad de sesión/JWT y enlaces CDN debe probarse.
+
+**D2 / comunidad sin dueño:** evolución posterior autorizable de `communities.owner_user_id` a nullable en archived, FK a Auth sin cascada peligrosa y CHECK para requerir dueño en active; cambiar RLS según estado. Aportes de terceros preservados solo en archivo privado; sus medias dejan de estar en bucket público. Si un post del titular tiene comentarios de terceros, conservar un *tombstone* desidentificado (sin autor/texto/foto originales) para vincular aportes privados, y adaptar `NOT NULL`, FKs y constraints sin cascada. Si no hay aportes ajenos, eliminar post propio. Ninguna transferencia automática de propiedad. Revisión humana 90d/180d.
+
+**Borrado parcial:** si Storage o una relación falla, mantener job recuperable y no declarar eliminación completada. Backups restaurados deben reaplicar solicitudes de supresión desde registro separado antes de reexponer servicio. Las fotos almacenadas públicamente no se vuelven privadas por ocultar una tarjeta.
+
+## 4. Pruebas y Definition of Done (Gate 8 futuro)
+
+- Matriz A/B/C con dos mascotas por cuenta; bloqueo unilateral y cruzado, desbloqueo, cambio de mascota, F5, tries directos API/RPC, persistencia y compatibilidad con lectura anónima D1.
+- Cinco tipos de denuncia; validación de objetivo, duplicado, rate limit, rechazo self-report no autorizado si aplica, actor falso, escalamiento por falsificación de moderator ID y cola privada paginada.
+- Retirada efectiva en Feed, perfil, búsqueda, Comunidades, RPC, APIs, archivos Storage; ningún reporte ni archivo privado filtrado a público/analítica.
+- Borrado de cuenta desechable con múltiples mascotas, posts propios con comentarios ajenos, comunidad con autores distintos, documentos privados, cuidados, rescate QR, presencia, follows y los cinco buckets. Fallas simuladas con reintentos; conservación de aportes ajenos, sin pérdida silenciosa.
+- Retención D3-B con reloj controlado; vencimientos y excepciones auditables; backups sin resurrección de datos borrados; sin transferencias a PostHog/analítica de datos sensibles.
+- Pruebas pgTAP/SQL, API, Storage, `npm run verify:local`, cold-start cuando corresponda, targeted lint, revisión visual PO y Scope Closure Reconciliation. PASS de una suite antigua no equivale a verificación de F14.
+- Fase 14 solo podrá declararse COMPLETADA tras merge a `main` autorizado, backend aplicado, pruebas aprobadas, verificación y DoD reconciliada, más políticas de privacidad y procedimientos Beta adecuados.
+
+## 5. Plan Gate 8 y permisos separados
+
+| Bloque | Alcance | Autorización actual |
+|---|---|---|
+| **A0 — Documentación local** | Incorporar esta sub-ruta, actualizar roadmap/handoff y comprobar diff / `npm run verify` | **AUTORIZADO únicamente para documentos** |
+| A1 — Bloqueos y ocultación | Backend/UI local, matrices RLS/RPC, filtro transversal | NO AUTORIZADO |
+| A2 — Reportes y moderación | Cinco objetivos, moderador, cola y retirada efectiva | NO AUTORIZADO |
+| A3 — Eliminación y archivo | Integridad FK/Storage/Auth, aportes terceros, jobs resilientes | NO AUTORIZADO |
+| A4 — Retención y privacidad | Procesos D3-B, matriz/inventario, procedimientos y textos | NO AUTORIZADO |
+
+Cada bloque futuro requiere permiso del Product Owner para el alcance concreto, migraciones locales si corresponden y pruebas. Ningún bloque autoriza automáticamente al siguiente. Cualquier migración remota, push, merge o despliegue necesita **nueva autorización explícita**. `supabase/local_migrations/` es entorno aislado; jamás representa por sí mismo una migración para producción. Antes de release reconciliar historia de 30 archivos canónicos y Supabase remoto.
+
+**Punto de parada A0:** verificar `git status`, `git diff --check` y `npm run verify` local, registrar resultado y DETENERSE. No ejecutar comandos Supabase destructivos ni iniciar A1.
+
+## 6. Trabajo pendiente para Beta (no equivale a permiso actual)
+
+- Correo/contacto de privacidad, proceso de solicitudes y política pública consistente con implementación efectiva.
+- Revisión jurídica específica de políticas, derechos del usuario, casos de menores y reclamaciones de copyright/IP cuando corresponda; ningún plazo de PayPal inferido.
+- Validación de retención real de proveedores y alertas; Vercel permisos de acceso a proyecto, PostHog eliminación; respaldo externo DB+Storage y restauración verificable (Release Candidate).
+- Production Hardening continúa EN CURSO en su sub-ruta independiente; PR #34 permanece sin merge ni despliegue en virtud de A0.
+
+## 7. F14 A1 — candidato aislado pendiente de autorización de aplicación
+
+- Fuente: ZIP del PO posterior a `F14 A0 VERIFIED PASS`, sin carpeta `.git`; HEAD local exacto debe confirmarse en Windows.
+- SQL versionado **solo como propuesta**: `supabase/migrations/20261008090000_f14_account_blocks_hidden_posts.sql`; NO aplicado a ninguna base. NO autoriza Supabase prod, push o deploy.
+- UI/servicio bajo `src/features/moderation/`, conectada a Feed, perfil, búsqueda, Comunidades; D1 mantiene lectura anónima social y rescate.
+- Pruebas estáticas `npm run test:f14`; pgTAP dedicado `npm run local:test:f14` solo después de autorizar migración local.
+- **Pendiente antes de cerrar A1:** aplicar parche a la copia local exacta, autorización explícita para migración local, `npm run verify:local`, build, pruebas A/B/C de bloqueo entre varias mascotas, calls directas de API/RPC y revisión visual.
+- No declarar este bloque completado hasta verificar y recibir aceptación del PO. A2-A4 permanecen sin autorización.

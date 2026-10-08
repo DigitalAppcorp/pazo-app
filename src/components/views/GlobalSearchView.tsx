@@ -17,6 +17,7 @@ import {
 
 interface GlobalSearchViewProps {
   canSearch: boolean
+  blockedIds: ReadonlySet<string>
   onClose: () => void
   onSelectPet: (petId: string) => void
   onSelectCommunity: (communityId: string) => void
@@ -58,6 +59,7 @@ const groupConfig = {
 
 export const GlobalSearchView = ({
   canSearch,
+  blockedIds,
   onClose,
   onSelectPet,
   onSelectCommunity,
@@ -101,7 +103,7 @@ export const GlobalSearchView = ({
       void searchGlobal(trimmedQuery)
         .then((nextResponse) => {
           if (requestVersionRef.current !== version) return
-          setResponse(nextResponse)
+          setResponse({ ...nextResponse, pets: nextResponse.pets.filter(r => !blockedIds.has(r.ownerUserId || '')), communities: nextResponse.communities.filter(r => !blockedIds.has(r.ownerUserId || '')) })
 
           const hadResults =
             nextResponse.pets.length +
@@ -130,7 +132,7 @@ export const GlobalSearchView = ({
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [canSearch, trimmedQuery])
+  }, [canSearch, trimmedQuery, blockedIds])
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {

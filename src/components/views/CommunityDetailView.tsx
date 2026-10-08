@@ -35,6 +35,7 @@ import {
 
 interface CommunityDetailViewProps {
   communityId: string
+  blockedIds: ReadonlySet<string>
   currentPet: Pet | null
   onBack: () => void
   onCommunityChanged?: () => void
@@ -51,6 +52,7 @@ const formatDate = (value: string, lang: 'es' | 'en') =>
 
 export const CommunityDetailView = ({
   communityId,
+  blockedIds,
   currentPet,
   onBack,
   onCommunityChanged,
@@ -95,14 +97,14 @@ export const CommunityDetailView = ({
       ])
 
       setCommunity(nextCommunity)
-      setMembers(nextMembers)
-      setPosts(nextPosts)
+      setMembers(nextMembers.filter(m => !blockedIds.has(m.userId)))
+      setPosts(nextPosts.filter(p => !blockedIds.has(p.authorUserId)))
     } catch (error) {
       console.error('Error loading community:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [communityId, currentPet?.id])
+  }, [communityId, currentPet?.id, blockedIds])
 
   useEffect(() => {
     void loadCommunity()
@@ -116,7 +118,7 @@ export const CommunityDetailView = ({
 
   const refreshPosts = async () => {
     const nextPosts = await fetchCommunityPosts(communityId, currentPet?.id)
-    setPosts(nextPosts)
+    setPosts(nextPosts.filter(p => !blockedIds.has(p.authorUserId)))
   }
 
   const handleMembership = async () => {
@@ -218,7 +220,7 @@ export const CommunityDetailView = ({
   const loadComments = async (postId: string) => {
     try {
       const comments = await fetchCommunityPostComments(postId)
-      setCommentsByPost((current) => ({ ...current, [postId]: comments }))
+      setCommentsByPost((current) => ({ ...current, [postId]: comments.filter(c => !blockedIds.has(c.authorUserId || '')) }))
     } catch (error) {
       console.error('Error loading Community comments:', error)
     }

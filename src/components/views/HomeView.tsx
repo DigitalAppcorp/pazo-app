@@ -6,6 +6,8 @@ import { FollowButton } from '../shared/FollowButton'
 
 interface HomeViewProps {
   posts: Post[]
+  onHidePost: (id: string) => Promise<void>
+  onOpenSafetySettings: () => void
   onLikePost: (postId: string) => void
   onSavePost: (postId: string) => void
   onAddComment: (postId: string, text: string) => Promise<boolean>
@@ -93,7 +95,7 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
 }
 
 export const HomeView = ({
-  posts, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
+  posts, onHidePost, onOpenSafetySettings, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
@@ -171,6 +173,7 @@ export const HomeView = ({
           </button>
         </div>
       </div>
+      <button type="button" onClick={onOpenSafetySettings} className="px-1 text-xs font-bold underline">{lang === 'es' ? 'Bloqueos y contenido oculto' : 'Blocked and hidden content'}</button>
       {feedFilter === 'nearby' ? (
         <div className="bg-white rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
           <div className="w-16 h-16 rounded-2xl bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center mx-auto mb-2">
@@ -199,6 +202,7 @@ export const HomeView = ({
             <PostCard
               key={post.id}
               post={post}
+              onHidePost={onHidePost}
               currentPetId={currentPetId}
               ownedPetIds={ownedPetIds}
               lang={lang}
@@ -222,6 +226,7 @@ export const HomeView = ({
 
 interface PostCardProps {
   post: Post
+  onHidePost: (id: string) => Promise<void>
   currentPetId: string
   ownedPetIds: string[]
   lang: 'es' | 'en'
@@ -237,7 +242,7 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, onHidePost, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, currentPetId)
@@ -271,7 +276,7 @@ const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCo
             canFollow={!ownedPetIds.includes(post.petId)}
             lang={lang}
           />
-          <button className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold" title="Opciones">&bull;&bull;&bull;</button>
+          <button type="button" onClick={() => void onHidePost(post.id)} className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold">{lang === 'es' ? 'Ocultar' : 'Hide'}</button>
         </div>
       </div>
       {post.photoUrl && (

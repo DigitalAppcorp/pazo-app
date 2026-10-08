@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-08
-**Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening ocupa temporalmente el Carril de Implementación por riesgo operativo pre-Beta.
+**Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening permanece EN CURSO como carril de infraestructura pre-Beta. Fase 14 fue seleccionada explícitamente: Gates 5, 6 y 7 CERRADOS; Gate 8 planificado, solo Bloque 00 documental autorizado.
 
 ---
 
@@ -718,9 +718,11 @@ Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de res
 ---
 
 ## Fase 14 — Confianza, moderación y privacidad
-**Estado: OBLIGATORIA ANTES DE BETA PÚBLICA**
+**Estado: EN CURSO (planificación/documentación) — Gate 5 CERRADO / Gate 6 CERRADO / Gate 7 CERRADO / Gate 8 NO AUTORIZADO PARA IMPLEMENTAR.** Sigue siendo obligatoria antes de Beta pública.
 
+**Sub-ruta maestra:** `docs/PAZO_F14_MASTER.md` — decisiones D1, D2, D3-A, D3-B, contrato arquitectónico y plan por bloques A0–A4.
 **Contrato canónico adicional:** `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`
+**Única autorización vigente en Gate 8:** Bloque 00 documental LOCAL (actualizar y verificar documentación); NO código funcional, migraciones, push, merge, deploy ni producción.
 
 ### Alcance
 - reportar contenido;
@@ -899,25 +901,21 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Selección del siguiente módulo
+## Fase seleccionada explícitamente
 
-Fase 12 está COMPLETADA y pasa a Gate 9 / medición.
+Fase 12 está COMPLETADA y permanece en Gate 9 / medición.
+La Fase 14 fue seleccionada por el Product Owner; Gate 5 (MVP REDUCIDO), Gate 6 (scope) y Gate 7 (arquitectura) están CERRADOS. Su alcance y A0–A4 se documentan en `docs/PAZO_F14_MASTER.md`.
+Production Hardening continúa EN CURSO de forma separada; no atribuirle cierre.
 
-No existe un siguiente módulo autorizado automáticamente.
-
-Candidatos conocidos:
-- Fase 13 — Rediseño visual y sistema de interfaz: PLANIFICADA;
-- Fase 14 — Confianza, moderación y privacidad: OBLIGATORIA antes de Beta pública;
-- Fase 10 — Mensajería: POSPONER / REEVALUAR;
-- Fase 11 — Notificaciones generales: implementar por dependencia concreta.
+Otras fases: Fase 13 PLANIFICADA; Fase 10 POSPONER/REEVALUAR; Fase 11 por dependencia concreta. Ninguna obtiene autorización automática.
 
 ### Exact next action
-Seleccionar el siguiente módulo mediante `docs/PAZO_MODULE_LIFECYCLE.md` antes de implementar.
+Ejecutar y verificar EXCLUSIVAMENTE la consolidación documental local de Gate 8 / Bloque 00, tras comprobar el HEAD y working tree reales. Solicitar autorización independiente antes del Bloque 01. No iniciar implementación por el hecho de haber aprobado el diseño.
 
 ## Do not do
 - no reabrir Fase 12 salvo regresión o nueva decisión de producto;
 - no convertir datos de Gate 9 en features automáticamente;
-- no iniciar Fase 13/14/10/11 por numeración sin decisión de producto.
+- no iniciar Fase 13/10/11 automáticamente; Fase 14 no tiene permiso para código, migraciones ni despliegue bajo la autorización A0.
 
 
 ---

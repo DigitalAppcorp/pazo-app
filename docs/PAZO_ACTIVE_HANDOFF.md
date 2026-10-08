@@ -851,3 +851,39 @@ This checkpoint supersedes the earlier local-environment setup instructions in t
 - Storage backup/restore drill remains explicitly deferred to the Release Candidate gate; the earlier failed manifest was not treated as complete.
 - Full legacy ESLint debt remains nonblocking; changed files pass targeted lint.
 - Do not start Fase 14 until the Product Owner accepts this local environment gate. After acceptance, audit the phase/sub-route before implementation.
+
+---
+
+# F14 GATE 7 CLOSURE / GATE 8 BLOCK 00 — 2026-10-08
+
+This checkpoint supersedes the older F14 next-step instructions above. This is a DOCUMENTATION-ONLY approval, not implementation acceptance.
+
+## Canonical source of truth
+- `docs/PAZO_F14_MASTER.md` records F14 Gate 5 CLOSED (`MVP REDUCIDO`), Gate 6 CLOSED (scope), Gate 7 CLOSED (technical architecture), and decisions D1/D2/D3-A/D3-B approved by Product Owner.
+- D1: pet profiles/posts remain public to anonymous visitors; mutual authenticated-account social blocking covers all pets on each account, but cannot promise anonymous invisibility.
+- D2: archive/unpublish community on deletion of its sole owner; preserve other members' contributions in private custody as appropriate; do not assign a successor without consent.
+- D3-A: data category deletion destinations and minimal justified retention.
+- D3-B: approved *PAZO operational targets*, not implemented or guaranteed vendor/legal retention; see matrix in the F14 sub-route. Product Owner is provisional privacy lead and moderator; technical executor acts only under specific authorization.
+- Reporting MVP is limited to five targets: Feed post, Feed comment, pet profile, Community post, Community comment.
+
+## Architecture risks and gates
+- Existing FK `communities.owner_user_id -> auth.users ON DELETE CASCADE` violates D2 unless migrated safely. Cascades from community post authors/pets and non-cascading document/care FKs also require controlled account deletion.
+- Public SELECT policies and public Storage objects cannot be treated as hidden solely by React filters. RLS/RPC/write blocking and private archives must be verified under separate Gate 8 block approvals.
+- Gate 8 execution plan: A0 docs only (THIS authorization); A1 blocking/hiding; A2 reports/moderation; A3 account deletion/community preservation; A4 retention/privacy. A1-A4 NOT authorized.
+- No F14 database objects, UI, jobs or provider changes have been implemented or tested by this documentation checkpoint.
+
+## Git/recovery and verification boundary
+- Source reference for this documentation reconciliation: backup tag `backup/pazo-codex-local-20261008` -> `c4f466f9b537be2f7b7ef10737659780b7a2987f` (five commits ahead of remote feature branch when audited).
+- Remote `product/places-demand-validation` was `21ceab643564830b4fc5a2d278c5c0c9354ca05a`; `main` was `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90` at last read-only audit. Verify live refs at any later release.
+- Local machine working tree/HEAD cannot be assumed from this file: verify `git status --short` and `git log -1 --oneline` on the Product Owner machine before/after applying docs.
+- A0 PASS is pending the local `git apply --check`/`git diff --check`/`npm run verify` report from the Product Owner. Do NOT report it as verified beforehand.
+- No permission for F14 code, new/applied migrations, push, merge, deploy or production changes. PR #34 remains unmerged. Production Hardening remains open; Storage restore drill remains deferred to Release Candidate.
+
+## Exact next step
+- Finish/verify A0 docs locally and STOP. Require distinct Product Owner authorization for A1 and any later gate or hosted-provider action.
+
+---
+
+# F14/A1 — candidato de código/SQL PREPARADO, NO APLICADO — 2026-10-08
+
+El Product Owner proporcionó `PAZO_F14_B01_SOURCE.zip` con la documentación A0 aceptada. Se preparó un parche para Bloque 01 en entorno aislado. El PO todavía NO autorizó aplicar migraciones SQL locales; la migración `20261008090000_f14_account_blocks_hidden_posts.sql` debe permanecer como archivo sin ejecutar. Ninguna operación remota, push, merge o deployment está autorizada. El entorno de preparación no pudo instalar todas las dependencias de npm, así que build completo, pgTAP y runtime están pendientes en Windows/Supabase LOCAL. Siguiente paso exacto: revisión/aplicación del parche local separada de autorización para aplicar migración local; después verificar con cuentas desechables, `npm run verify:local` y aceptar A1 solo con Scope Closure Reconciliation.
