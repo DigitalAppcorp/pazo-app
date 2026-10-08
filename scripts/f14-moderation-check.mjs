@@ -21,6 +21,7 @@ for (const s of [
   'CREATE FUNCTION public.f14_pending_media',
   'CREATE FUNCTION public.f14_media_task',
   'CREATE FUNCTION public.f14_confirm_media_cleanup',
+  'legacy.legacy_id = item.elem',
   "'pending_review'",
   'REVOKE ALL ON ALL TABLES IN SCHEMA moderation_private',
 ]) assert.ok(sql.includes(s), 'Missing moderation contract: '+s)

@@ -203,6 +203,33 @@ BEGIN
       (target_kind,target_id,report_id,applied_by,media_status)
     VALUES (v_record.target_kind,v_record.target_id,p_report,auth.uid(),v_media)
     ON CONFLICT(target_kind,target_id) DO NOTHING;
+
+    -- Historical PAZO comments are duplicated in posts.comments JSONB.
+    -- Their canonical rows remain in post_comments for moderation evidence;
+    -- remove ONLY the public JSON copy when a comment or its pet profile is withdrawn.
+    IF v_record.target_kind IN ('feed_comment','pet_profile') THEN
+      UPDATE public.posts p
+      SET comments = (
+        SELECT coalesce(jsonb_agg(item.elem ORDER BY item.ordinal),'[]'::jsonb)
+        FROM jsonb_array_elements(
+          CASE WHEN jsonb_typeof(p.comments)='array' THEN p.comments ELSE '[]'::jsonb END
+        ) WITH ORDINALITY AS item(elem,ordinal)
+        LEFT JOIN public.post_comments legacy
+          ON legacy.legacy_id = item.elem ->> 'id'
+        WHERE legacy.id IS NULL
+          OR NOT (
+            (v_record.target_kind='feed_comment' AND legacy.id=v_record.target_id)
+            OR (v_record.target_kind='pet_profile' AND legacy.author_pet_id=v_record.target_id)
+          )
+      )
+      WHERE jsonb_typeof(p.comments)='array'
+        AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements(p.comments) item
+          JOIN public.post_comments legacy ON legacy.legacy_id = item ->> 'id'
+          WHERE (v_record.target_kind='feed_comment' AND legacy.id=v_record.target_id)
+             OR (v_record.target_kind='pet_profile' AND legacy.author_pet_id=v_record.target_id)
+        );
+    END IF;
   END IF;
   UPDATE moderation_private.reports
     SET status=CASE WHEN p_action='remove' THEN 'removed' ELSE 'dismissed' END,

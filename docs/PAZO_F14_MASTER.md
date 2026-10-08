@@ -154,3 +154,7 @@ El Product Owner autorizó iniciar A2 **sin exigir antes la publicación del fro
 
 ### Contrato de revisión de medios preparado en A2
 El borrador SQL incorpora `f14_pending_media`, `f14_media_task` y `f14_confirm_media_cleanup` (esta última requiere `service_role`). Se agrega una Edge Function propuesta en `supabase/functions/f14-moderation-purge/`: exige JWT validado, `f14_is_moderator` desde servidor, limita a buckets controlados por PAZO, rechaza URLs externas y marca la limpieza solo tras éxito de Storage API. **No está desplegada ni probada contra Storage hospedado**. El CDN puede retener enlaces temporalmente; sigue siendo necesario verificar URL directa y propagación. No conceder permiso de moderador, desplegar Edge Function ni aplicar SQL sin aprobación distinta y verificación de riesgos. La UI indica pendiente si el backend no está operativo.
+
+
+### Corrección de privacidad: comentarios legacy duplicados
+Una consulta agregada al esquema hospedado detectó **5 comentarios históricos duplicados en `posts.comments` JSONB**, todos vinculados mediante `post_comments.legacy_id` a un comentario normalizado (0 huérfanos). La retirada de un `feed_comment` o de un `pet_profile` debe retirar también su copia legacy JSON, sin borrar la fila canónica de evidencia. El SQL A2 borrador incluye esa depuración específica y mantiene las demás copias intactas. Este comportamiento requiere prueba de API `posts.select(*)` y control de regresión antes de aplicar a datos hospedados. Ningún dato histórico se modificó durante esta auditoría.

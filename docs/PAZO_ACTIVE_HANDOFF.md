@@ -930,3 +930,7 @@ Este checkpoint **sustituye instrucciones anteriores de local-first y prohibicio
 
 ## Adenda A2 — retiro de medios
 Se preparó código de Edge Function `f14-moderation-purge` (solo GitHub, sin deploy) y pantalla de revisión de fotografías. El endpoint requiere un JWT de moderador y servicio de Storage, rechaza medios externos y jamás debería marcar `purged` si la operación falla. **No ejecutado ni probado en Supabase hosted**; se necesita autorización y revisión posterior. La prueba de contenido retirado por URL pública/CDN sigue siendo gate obligatorio para cerrar A2.
+
+
+## A2 adicional — copias históricas de comentarios
+Se detectaron 5 duplicados legacy de comentarios en `public.posts.comments`, todos mapeados a `public.post_comments.legacy_id` y ninguno huérfano según auditoría agregada. El SQL A2 borrador fue corregido para retirar copias JSONB públicas de comentarios moderados o asociados a un perfil retirado, conservando las filas fuente normalizadas y otros comentarios. No aplicado; probar lecturas directas REST y las consultas de Feed antes de ejecución hosted.
