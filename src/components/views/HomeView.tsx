@@ -3,6 +3,8 @@ import type { Post } from '../../types/pazo'
 import { IconBookmark, IconPaw } from '../icons/PazoIcons'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
 
 interface HomeViewProps {
   posts: Post[]
@@ -98,6 +100,7 @@ export const HomeView = ({
   posts, onHidePost, onOpenSafetySettings, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
+  const [reportTarget, setReportTarget] = useState<{ kind: ReportTarget; id: string } | null>(null)
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
   const [loadingCommentsPostId, setLoadingCommentsPostId] = useState<string | null>(null)
   const [newCommentText, setNewCommentText] = useState('')
@@ -203,6 +206,7 @@ export const HomeView = ({
               key={post.id}
               post={post}
               onHidePost={onHidePost}
+              onReport={(kind,id) => setReportTarget({ kind, id })}
               currentPetId={currentPetId}
               ownedPetIds={ownedPetIds}
               lang={lang}
@@ -220,6 +224,7 @@ export const HomeView = ({
           ))}
         </div>
       )}
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
     </div>
   )
 }
@@ -227,6 +232,7 @@ export const HomeView = ({
 interface PostCardProps {
   post: Post
   onHidePost: (id: string) => Promise<void>
+  onReport: (kind: 'feed_post' | 'feed_comment', id: string) => void
   currentPetId: string
   ownedPetIds: string[]
   lang: 'es' | 'en'
@@ -242,7 +248,7 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, onHidePost, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, onHidePost, onReport, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, currentPetId)
@@ -277,6 +283,7 @@ const PostCard = ({ post, onHidePost, currentPetId, ownedPetIds, lang, isComment
             lang={lang}
           />
           <button type="button" onClick={() => void onHidePost(post.id)} className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold">{lang === 'es' ? 'Ocultar' : 'Hide'}</button>
+          <button type="button" onClick={() => onReport('feed_post', post.id)} className="text-[#5C7470] p-1 text-xs font-bold underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
         </div>
       </div>
       {post.photoUrl && (
@@ -328,6 +335,7 @@ const PostCard = ({ post, onHidePost, currentPetId, ownedPetIds, lang, isComment
                     <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
                     <span className="text-[#5C7470]">{comment.text}</span>
                     <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
+                    <button type="button" onClick={() => onReport('feed_comment',comment.id)} className="text-[10px] font-bold underline text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
                   </div>
                 </div>
               ))}

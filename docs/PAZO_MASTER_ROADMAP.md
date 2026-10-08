@@ -946,3 +946,7 @@ Esta fase de infraestructura está autorizada por el Product Owner y no constitu
 - F14 A1: código en rama GitHub `f14/block01-hosted-mvp-20261008` desde respaldo `c4f466f`, sin merge en `main` ni PR #34; Supabase PAZO aplicó migración `f14_account_blocks_hidden_posts` versión remota `20261008112333`; archivo repo `20261008090000_f14_account_blocks_hidden_posts.sql` (versiones distintas, reconciliar).
 - Vercel `pazo-app-t83r`: preview Git SHA `62c3f88` READY; despliegue/proción a producción rechazados 403 (scope `digitalapp`). `pazo-app` también generó preview automático por integración, NO se publicó como producción.
 - A1 pendiente: desbloquear permisos Vercel del equipo `digitalapp`, desplegar/prometer únicamente `pazo-app-t83r`, comprobar funcionamiento en línea y API directa entre cuentas. No cerrar A1 ni avanzar a A2 mientras falten estas pruebas.
+
+
+### F14 A2 iniciada — 2026-10-08
+Por aprobación explícita del Product Owner, se inició la preparación de **reportes y moderación** en la rama independiente `f14/block02-moderation-mvp-20261008`, sin esperar la publicación bloqueada de Vercel B01. La implementación hospedada de A1 aún no está completamente aceptada. A2 no está implementada en Supabase hosted: SQL propuesto permanece en `supabase/drafts/`, **no aplicado**. El alcance completo exige cinco tipos de denuncia, autoridad y cola privadas, retirada real de API y medios públicos de Storage; su evidencia de seguridad, permisos iniciales y aprobación visual siguen pendientes. No iniciar A3/A4 automáticamente.

@@ -129,3 +129,24 @@ Cada bloque futuro requiere permiso del Product Owner para el alcance concreto, 
 Por decisión expresa del PO, desarrollo del MVP temporalmente **hosted-first** en lugar de descargas/parches y entorno local; ver `AGENTS.md` y `docs/PAZO_ACTIVE_HANDOFF.md`. La implementación de bloqueos/ocultación ya está en la rama `f14/block01-hosted-mvp-20261008` desde `c4f466f`, sin merge a `main`. Supabase PAZO aplicó SQL A1 (`f14_account_blocks_hidden_posts`, versión remota `20261008112333`) y pasó revisión estructural posterior. El archivo local versionado usa prefijo `20261008090000`: reconciliar migraciones. Se preserva D1 de lectura `anon`.
 
 El frontend de `pazo-app-t83r` compiló en **preview** pero NO está en producción: operaciones API directas de deployment y promote fallaron 403 por autorización del equipo Vercel `digitalapp`. La prueba visual y el paquete local habían pasado; prueba hosted de API real entre cuentas A/B/C aún pendiente. A1 sigue ABIERTO. **A2–A4 no autorizados**, producción no debe publicitarse como Beta final de F14.
+
+
+## 9. F14 A2 — Implementación preparada, autorización de despliegue pendiente (2026-10-08)
+
+El Product Owner autorizó iniciar A2 **sin exigir antes la publicación del frontend A1**, la cual continúa bloqueada por permisos Vercel 403. El código A2 se prepara exclusivamente en rama GitHub `f14/block02-moderation-mvp-20261008`. La migración está en `supabase/drafts/20261008150000_f14_reports_moderation.sql`: **no debe incluirse en el replay automático ni aplicarse a Supabase hasta autorización posterior específica**.
+
+### Contrato de A2
+- Denuncias autenticadas de **cinco tipos** aprobados; tipo, owner, reporter real y existencia se verifican del lado servidor. El usuario no puede designar autor ni moderador.
+- Taxonomía de motivos de implementación **provisional**, pendiente de aceptación de producto: `spam`, `harassment`, `unsafe`, `other`. Detalles opcionales hasta 500 caracteres, máximo cinco denuncias por cuenta en 24 h; índice único sobre denuncias pendientes para impedir duplicados.
+- Esquema privado `moderation_private` contiene `reports`, `moderator_grants`, `moderation_actions` y `content_restrictions`. Ningún usuario obtiene rol automáticamente; `profiles.is_founder` no concede privilegios. Requiere selección/autorización explícita del primer moderador antes de operación real.
+- RPC `f14_submit_report`, `f14_is_moderator`, `f14_moderation_queue`, `f14_review_report`. Accesos verifican `auth.uid()` dentro de funciones de servidor. Cola paginada en lotes de 20, orden por fecha/ID y auditoría de decisiones.
+- Contenido retirado se bloquea en lecturas por API REST/RLS **restrictiva**, incluidas lectura anónima de posts/perfiles/comentarios y lectura autenticada de comunidades. D1 se preserva para contenido público NO retirado. La UI no debe fingir que un botón por sí solo hace la retirada.
+- **Limitación crítica pendiente:** fotos en buckets públicos y CDN pueden seguir accesibles por URL directa aunque RLS o tarjetas oculten el contenido. `content_restrictions.media_status='pending_review'` obliga a auditoría y posterior borrado verificado mediante Storage API. No declarar retirada total, privacidad garantizada ni A2 cerrado hasta implementar y probar ese flujo. Archivos fuera de Supabase requieren procedimiento separado.
+- La retención D3-B de denuncias sigue siendo meta no implementada; revisar periódicamente 90/180 días en A4. No enviar reporter, razones ni textos a PostHog/logs cliente.
+
+### Pendiente para aceptación y autorización siguiente
+1. Verificar compilación/CI de rama en GitHub/Vercel Preview.
+2. Revisión SQL por seguridad, tests directos A/B/C, RLS select anon/auth, RPC falsa autoridad, concurrencia/rate limit/deduplicación.
+3. Aprobar y ejecutar la migración con versión remota reconciliada; elegir primer moderador con autorización separada.
+4. Implementar purga de medios Storage segura e idempotente, comprobar URL directa y propagación/CDN; validar visual y Scope Closure Reconciliation.
+5. B01 continúa pendiente de prueba API hospedada y publicación oficial. A3/A4 siguen sin autorización.

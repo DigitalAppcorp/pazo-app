@@ -24,6 +24,8 @@ import {
   updateCommunity,
 } from '../../services/communityService'
 import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
 import {
   IconCamera,
   IconChat,
@@ -76,6 +78,7 @@ export const CommunityDetailView = ({
   >({})
   const [commentDraft, setCommentDraft] = useState('')
   const [isCommentBusy, setIsCommentBusy] = useState(false)
+  const [reportTarget, setReportTarget] = useState<{ kind: ReportTarget; id: string } | null>(null)
 
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
@@ -408,6 +411,7 @@ export const CommunityDetailView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-8">
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
       <button
         type="button"
         onClick={onBack}
@@ -674,6 +678,7 @@ export const CommunityDetailView = ({
                     </div>
                   </div>
 
+                  <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id})} className="text-[10px] font-bold underline text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
                   {post.canDelete && (
                     <button
                       type="button"
@@ -737,6 +742,7 @@ export const CommunityDetailView = ({
                             <p className="text-[10px] font-black text-[#204E4A]">
                               {comment.authorName}
                             </p>
+                            <button type="button" onClick={() => setReportTarget({kind:'community_comment',id:comment.id})} className="text-[9px] font-bold underline text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
                             {comment.canDelete && (
                               <button
                                 type="button"

@@ -3,6 +3,7 @@ import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { IconPaw } from '../icons/PazoIcons'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
 
 interface PublicProfileViewProps {
   targetPetId: string
@@ -29,6 +30,7 @@ export const PublicProfileView = ({
   const [ownerUserId, setOwnerUserId] = useState<string | null>(null)
   const [blockBusy, setBlockBusy] = useState(false)
   const [blockError, setBlockError] = useState('')
+  const [reportOpen, setReportOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'posts' | 'info'>('posts')
 
@@ -174,6 +176,7 @@ export const PublicProfileView = ({
   return (
     <div className="absolute inset-0 z-[100] bg-[#FDFBF7] overflow-y-auto animate-slide-up flex flex-col font-['Quicksand','Nunito',sans-serif] antialiased text-[#204E4A]">
 
+      {reportOpen && <ReportDialog lang={lang} target={{ kind: 'pet_profile', id: targetPetId }} onClose={() => setReportOpen(false)} />}
       {/* Paso 3: Orbes de Luz Ambiental para Glassmorphism Avanzado */}
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
         <div className="bg-[#E1E53F]/40 blur-[100px] w-96 h-96 rounded-full absolute -top-10 -left-10 animate-pulse"></div>
@@ -197,6 +200,7 @@ export const PublicProfileView = ({
       </div>
       {ownerUserId && !ownedPetIds.includes(targetPetId) && <div className="relative z-30 p-4">
         <button type="button" disabled={blockBusy || (isBlocked && !blockedByMe)} onClick={() => void changeBlock()} className="rounded-xl bg-[#204E4A] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{blockedByMe ? (lang === 'es' ? 'Desbloquear cuenta' : 'Unblock') : (lang === 'es' ? 'Bloquear cuenta' : 'Block')}</button>
+        <button type="button" onClick={() => setReportOpen(true)} className="ml-2 rounded-xl bg-white px-4 py-2 text-xs font-bold underline">{lang === 'es' ? 'Denunciar perfil' : 'Report profile'}</button>
         {blockError && <p role="alert" className="text-red-700 text-xs">{blockError}</p>}
         {isBlocked && <p className="text-xs mt-2">{lang === 'es' ? 'Contenido oculto en tu sesión. El contenido público sigue disponible sin iniciar sesión.' : 'Hidden while signed in. Public content remains accessible when signed out.'}</p>}
       </div>}

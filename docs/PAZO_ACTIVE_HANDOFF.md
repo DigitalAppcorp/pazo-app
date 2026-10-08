@@ -913,3 +913,16 @@ Este checkpoint **sustituye instrucciones anteriores de local-first y prohibicio
 1. Resolver autorización Vercel de escritura del scope `digitalapp` para `pazo-app-t83r` (sin pasos manuales locales).
 2. Tras éxito de conexión: deploy target=production de rama/commit aprobados (con producción Supabase ya migrada); comprobar target/URL y build.
 3. Validar flujo A/B/C por API directa y smoke hosted; Scope Closure Reconciliation antes de cerrar A1. A2–A4 NO están autorizados.
+
+
+---
+
+# F14 A2 / MODERATION IMPLEMENTATION CHECKPOINT — 2026-10-08
+
+- Autorización PO vigente: iniciar **Bloque 02 reportes/moderación** directamente en GitHub; decisión aparte permite **postergar Vercel producción**. Esto sustituye el anterior bloqueo por B01 incompleto solo para el inicio de A2, **no** significa que B01 esté aprobado ni completo.
+- Rama A2: `f14/block02-moderation-mvp-20261008` creada desde `e75efcbd8c30744c6795a435ef8eae27a75dca43` (rama B01 con handoff hosted-first). Base independiente de `main` y PR #34. Backend A1 sigue aplicado y estructuralmente revisado; API A1 hospedada pendiente.
+- A2 frontend propuesto: `ReportDialog`, `reportingService`, `ModeratorQueue`; entradas de denuncia en Feed (post/comentario), perfil, Comunidades (post/comentario); cola accesible solo al verificarse `f14_is_moderator`.
+- A2 backend **solo en borrador**: `supabase/drafts/20261008150000_f14_reports_moderation.sql`. No se aplicó SQL A2 a PAZO hosted y no se crearon permisos de moderador. Nunca mover al directorio de migraciones canónicas y aplicar sin autorización independiente.
+- Seguridad: reportes privados y 5 tipos validados en servidor, RLS restrictiva con `f14_content_visible`, decisiones auditadas. **Storage público/CDN NO se elimina con el SQL**; queda media_status pending_review. No declarar A2 completo ni que contenido multimedia se retiró totalmente hasta purge efectivo y pruebas.
+- Vercel producción: sigue bloqueada por 403 al intentar create/promote en equipo `digitalapp`; sus previews no son producción. No repetir esos intentos sin cambio real de permisos.
+- Siguiente paso: validar build preview A2, revisar schema/draft y definir procedimiento de Storage purge y primera concesión de moderator; solicitar autorización específica antes de cualquier DDL hosted A2 o nuevo servicio remoto. A3/A4 no autorizados.
