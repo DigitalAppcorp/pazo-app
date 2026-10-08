@@ -962,3 +962,7 @@ La cuenta verificada `appdigital.corp@gmail.com` recibió por autorización expl
 
 ### Gate F14 A2 — Seguridad de reportes/roles parcialmente validada
 Pruebas hospedadas de contexto SQL (revertidas): PASS para permisos de moderador único, denegación a cuenta estándar y anon, lectura social pública legítima y validación de los cinco tipos de reporte con objetivos inexistentes. **No probaron JWT reales ni reportes efectivos**. Auditoría RLS halló falta de verificación explícita de visibilidad del post padre al consultar comentarios: borrador de corrección en `supabase/drafts/20261008_f14_comment_parent_guard.sql`, dry-run SQL PASS, **no aplicado**. Requiere aprobación del PO y nuevas pruebas antes de cerrar A2. Storage DELETE sigue deshabilitado.
+
+
+### F14 A2 — RLS comment parent fix applied / verified
+PO approved and hosted Supabase applied `f14_comment_parent_guard` (version `20261008122907`). Both policies are restrictive and require a SELECT-visible parent post. SQL role simulations, anonymous/authenticated read smoke, transactional Feed post withdrawal and pet profile withdrawal (including a third-party comment) PASS. Transient restrictions rolled back; no reports or real withdrawals created. No Community comments existed to run a data-driven scenario; keep that test open. Media purge still in disabled stub, Vercel production deferred, A2 open until signed JWT API and complete moderation functionality are checked. A3/A4 not authorized.
