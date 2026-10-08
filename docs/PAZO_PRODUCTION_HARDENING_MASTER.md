@@ -463,3 +463,29 @@ Branch: `infra/external-hardening-2`
 - PAZO now sends `$geoip_disable=true` on every event to disable GeoIP enrichment at ingestion.
 - CI privacy guard enforces that opt-out.
 - controlled `$exception` runtime verification: PENDING.
+
+
+### PostHog controlled exception verification
+- controlled browser ErrorEvent executed by Product Owner;
+- PostHog received two `$exception` events;
+- exception type: `Error`;
+- message: `PAZO_OBSERVABILITY_TEST`;
+- source: `window.error`;
+- release: `local-hardening-test`;
+- `$geoip_disable=true`;
+- no GeoIP city attached to verified exception events;
+- Error Tracking grouped both occurrences into one active issue;
+- error-tracking ingestion/grouping: PASS.
+
+### Documents recovery bug found during observability validation
+- repeated console warning was not random noise;
+- 4 rows remain in `pet_documents.status='deleting'` while their Storage objects still exist;
+- 3 belong to the current test user; 1 belongs to another account;
+- Storage SELECT RLS currently exposes only `active` document objects;
+- authenticated transactional visibility test for the current owner's deleting objects returned 0 visible rows;
+- this conflicts with reliable client-side Storage cleanup during the `deleting` lifecycle;
+- migration prepared but NOT applied:
+  - `20261008010500_fix_pet_document_delete_storage_visibility.sql`;
+  - owner-only Storage SELECT expands from `active` to `active|deleting`;
+  - DELETE ownership policy remains unchanged;
+- production application of this migration requires explicit PO authorization.
