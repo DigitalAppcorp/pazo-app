@@ -926,3 +926,7 @@ Este checkpoint **sustituye instrucciones anteriores de local-first y prohibicio
 - Seguridad: reportes privados y 5 tipos validados en servidor, RLS restrictiva con `f14_content_visible`, decisiones auditadas. **Storage público/CDN NO se elimina con el SQL**; queda media_status pending_review. No declarar A2 completo ni que contenido multimedia se retiró totalmente hasta purge efectivo y pruebas.
 - Vercel producción: sigue bloqueada por 403 al intentar create/promote en equipo `digitalapp`; sus previews no son producción. No repetir esos intentos sin cambio real de permisos.
 - Siguiente paso: validar build preview A2, revisar schema/draft y definir procedimiento de Storage purge y primera concesión de moderator; solicitar autorización específica antes de cualquier DDL hosted A2 o nuevo servicio remoto. A3/A4 no autorizados.
+
+
+## Adenda A2 — retiro de medios
+Se preparó código de Edge Function `f14-moderation-purge` (solo GitHub, sin deploy) y pantalla de revisión de fotografías. El endpoint requiere un JWT de moderador y servicio de Storage, rechaza medios externos y jamás debería marcar `purged` si la operación falla. **No ejecutado ni probado en Supabase hosted**; se necesita autorización y revisión posterior. La prueba de contenido retirado por URL pública/CDN sigue siendo gate obligatorio para cerrar A2.

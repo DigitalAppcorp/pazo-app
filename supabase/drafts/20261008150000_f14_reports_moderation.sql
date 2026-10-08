@@ -220,4 +220,65 @@ GRANT EXECUTE ON FUNCTION public.f14_review_report(uuid,text,text) TO authentica
 -- Preserve audit trail. No users are provisioned as moderators in this migration.
 COMMENT ON TABLE moderation_private.reports IS 'Reporter identity restricted; D3-B requires eventual retention cleanup and review.';
 COMMENT ON TABLE moderation_private.content_restrictions IS 'Denies reads at RLS. Public Storage/CDN media requires an independently verified purge.';
+-- Moderator-only media status; frontend cannot designate a purge as completed.
+CREATE FUNCTION public.f14_pending_media(p_limit integer DEFAULT 20)
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
+DECLARE v_items jsonb;
+BEGIN
+ IF NOT public.f14_is_moderator() THEN RAISE EXCEPTION 'Moderator access required' USING ERRCODE='42501'; END IF;
+ SELECT coalesce(jsonb_agg(to_jsonb(t)),'[]'::jsonb) INTO v_items FROM (
+   SELECT target_kind,target_id,applied_at FROM moderation_private.content_restrictions
+   WHERE media_status='pending_review'
+   ORDER BY applied_at ASC,target_id ASC
+   LIMIT least(greatest(coalesce(p_limit,20),1),30)
+ ) t;
+ RETURN v_items;
+END;
+$;
+REVOKE ALL ON FUNCTION public.f14_pending_media(integer) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.f14_pending_media(integer) TO authenticated;
+
+CREATE FUNCTION public.f14_media_task(p_kind text,p_id uuid)
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $
+DECLARE v_url text; v_bucket text; v_path text;
+BEGIN
+ IF NOT public.f14_is_moderator() THEN RAISE EXCEPTION 'Moderator access required' USING ERRCODE='42501'; END IF;
+ IF NOT EXISTS (SELECT 1 FROM moderation_private.content_restrictions
+   WHERE target_kind=p_kind AND target_id=p_id AND media_status='pending_review') THEN
+   RAISE EXCEPTION 'No pending media task' USING ERRCODE='22023';
+ END IF;
+ CASE p_kind
+  WHEN 'feed_post' THEN
+    SELECT photo_url INTO v_url FROM public.posts WHERE id=p_id;
+    v_bucket:='post-photos';
+  WHEN 'pet_profile' THEN
+    SELECT photo_url INTO v_url FROM public.pets WHERE id=p_id;
+    v_bucket:='pet-avatars';
+  WHEN 'community_post' THEN
+    SELECT photo_storage_path INTO v_path FROM public.community_posts WHERE id=p_id;
+    v_bucket:='community-post-photos';
+  ELSE RAISE EXCEPTION 'No removable media for this target' USING ERRCODE='22023';
+ END CASE;
+ RETURN jsonb_build_object('bucket',v_bucket,'url',v_url,'path',v_path);
+END;
+$;
+REVOKE ALL ON FUNCTION public.f14_media_task(text,uuid) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.f14_media_task(text,uuid) TO authenticated;
+
+-- Only a trusted backend with service_role can mark the cleanup finished.
+CREATE FUNCTION public.f14_confirm_media_cleanup(p_kind text,p_id uuid)
+RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path='' AS $
+BEGIN
+ IF auth.role() IS DISTINCT FROM 'service_role' THEN
+   RAISE EXCEPTION 'Service role required' USING ERRCODE='42501';
+ END IF;
+ UPDATE moderation_private.content_restrictions
+ SET media_status='purged'
+ WHERE target_kind=p_kind AND target_id=p_id AND media_status='pending_review';
+ RETURN FOUND;
+END;
+$;
+REVOKE ALL ON FUNCTION public.f14_confirm_media_cleanup(text,uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_confirm_media_cleanup(text,uuid) TO service_role;
+
 COMMIT;

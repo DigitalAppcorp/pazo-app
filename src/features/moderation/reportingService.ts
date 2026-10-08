@@ -38,3 +38,24 @@ export async function reviewReport(reportId: string, action: 'dismiss' | 'remove
   if (error) throw error
   return String(data)
 }
+
+export interface PendingMedia {
+  target_kind: 'feed_post' | 'pet_profile' | 'community_post'
+  target_id: string
+  applied_at: string
+}
+
+export async function getPendingModerationMedia(): Promise<PendingMedia[]> {
+  const { data, error } = await supabase.rpc('f14_pending_media', { p_limit: 20 })
+  if (error) throw error
+  if (!Array.isArray(data)) throw new Error('Respuesta inválida del backend.')
+  return data as PendingMedia[]
+}
+
+export async function purgeModerationMedia(kind: PendingMedia['target_kind'], id: string): Promise<void> {
+  const { data, error } = await supabase.functions.invoke('f14-moderation-purge', {
+    body: { targetKind: kind, targetId: id },
+  })
+  if (error) throw error
+  if (!data || typeof data.message !== 'string') throw new Error('No se pudo confirmar la limpieza.')
+}

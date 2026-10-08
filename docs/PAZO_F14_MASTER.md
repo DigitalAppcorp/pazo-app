@@ -150,3 +150,7 @@ El Product Owner autorizó iniciar A2 **sin exigir antes la publicación del fro
 3. Aprobar y ejecutar la migración con versión remota reconciliada; elegir primer moderador con autorización separada.
 4. Implementar purga de medios Storage segura e idempotente, comprobar URL directa y propagación/CDN; validar visual y Scope Closure Reconciliation.
 5. B01 continúa pendiente de prueba API hospedada y publicación oficial. A3/A4 siguen sin autorización.
+
+
+### Contrato de revisión de medios preparado en A2
+El borrador SQL incorpora `f14_pending_media`, `f14_media_task` y `f14_confirm_media_cleanup` (esta última requiere `service_role`). Se agrega una Edge Function propuesta en `supabase/functions/f14-moderation-purge/`: exige JWT validado, `f14_is_moderator` desde servidor, limita a buckets controlados por PAZO, rechaza URLs externas y marca la limpieza solo tras éxito de Storage API. **No está desplegada ni probada contra Storage hospedado**. El CDN puede retener enlaces temporalmente; sigue siendo necesario verificar URL directa y propagación. No conceder permiso de moderador, desplegar Edge Function ni aplicar SQL sin aprobación distinta y verificación de riesgos. La UI indica pendiente si el backend no está operativo.

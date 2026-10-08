@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { isModerator } from './reportingService'
 import { ModeratorQueue } from './ModeratorQueue'
+import { ModerationMediaQueue } from './ModerationMediaQueue'
 type Props = {
   lang: 'es' | 'en'; ownBlocks: ReadonlySet<string>; hidden: ReadonlySet<string>;
   onUnblock: (id: string) => Promise<void>; onUnhide: (id: string) => Promise<void>; onClose: () => void
@@ -11,6 +12,7 @@ export function SafetySettings({ lang, ownBlocks, hidden, onUnblock, onUnhide, o
   const [busy, setBusy] = useState(false)
   const [moderator, setModerator] = useState(false)
   const [showQueue, setShowQueue] = useState(false)
+  const [showMedia, setShowMedia] = useState(false)
   const [error, setError] = useState('')
   const blockIds = [...ownBlocks], postIds = [...hidden]
   useEffect(() => { let live = true; void isModerator().then(ok => { if (live) setModerator(ok) }).catch(() => {}); return () => { live = false } }, [])
@@ -40,6 +42,8 @@ export function SafetySettings({ lang, ownBlocks, hidden, onUnblock, onUnhide, o
     <div className="flex justify-between gap-3 mb-6"><h2 className="font-black text-lg">{lang === 'es' ? 'Bloqueos y publicaciones ocultas' : 'Blocked accounts and hidden posts'}</h2><button onClick={onClose} className="font-bold">{lang === 'es' ? 'Cerrar' : 'Close'}</button></div>
     {moderator && <button type="button" onClick={() => setShowQueue(true)} className="mb-4 rounded-full bg-[#204E4A] px-4 py-2 text-xs font-bold text-white">{lang === 'es' ? 'Cola de moderación' : 'Moderation queue'}</button>}
     {showQueue && <ModeratorQueue lang={lang} onClose={() => setShowQueue(false)} />}
+    {moderator && <button type="button" onClick={() => setShowMedia(true)} className="ml-2 mb-4 rounded-full bg-white px-4 py-2 text-xs font-bold underline">{lang === 'es' ? 'Archivos pendientes' : 'Pending media'}</button>}
+    {showMedia && <ModerationMediaQueue lang={lang} onClose={() => setShowMedia(false)} />}
     {error && <p role="alert" className="text-red-700 mb-4">{error}</p>}
     <h3 className="font-extrabold mb-2">{lang === 'es' ? 'Cuentas bloqueadas por ti' : 'Accounts you blocked'}</h3>
     {!blockIds.length && <p className="text-sm mb-4">{lang === 'es' ? 'Ninguna' : 'None'}</p>}

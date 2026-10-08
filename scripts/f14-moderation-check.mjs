@@ -18,6 +18,9 @@ for (const s of [
   'CREATE FUNCTION public.f14_is_moderator',
   'CREATE FUNCTION public.f14_moderation_queue',
   'CREATE FUNCTION public.f14_review_report',
+  'CREATE FUNCTION public.f14_pending_media',
+  'CREATE FUNCTION public.f14_media_task',
+  'CREATE FUNCTION public.f14_confirm_media_cleanup',
   "'pending_review'",
   'REVOKE ALL ON ALL TABLES IN SCHEMA moderation_private',
 ]) assert.ok(sql.includes(s), 'Missing moderation contract: '+s)
@@ -26,6 +29,8 @@ for (const s of ['feed_post','feed_comment','pet_profile','community_post','comm
 for (const f of [
   'src/features/moderation/reportingService.ts',
   'src/features/moderation/ReportDialog.tsx',
-  'src/features/moderation/ModeratorQueue.tsx'
+  'src/features/moderation/ModeratorQueue.tsx',
+  'src/features/moderation/ModerationMediaQueue.tsx',
+  'supabase/functions/f14-moderation-purge/index.ts'
 ]) assert.ok(existsSync(f), 'Missing UI/service '+f)
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
