@@ -356,3 +356,15 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - Current test account pending deleting Storage objects: 0.
 - One stale deleting row/object remains for another account and should self-recover on that account's next recovery run.
 - Documents repeated-warning issue is resolved for the current test account.
+
+
+### Vercel Preview integration checkpoint
+- Vercel project resolved: `pazo-app-t83r` (`prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`).
+- Production alias confirmed: `pazo-app-t83r.vercel.app`.
+- Preview observability variables configured without paid resources.
+- Preview deployment from PR #33: READY.
+- PO Preview runtime validation: PASS.
+- PostHog Preview ingestion: PASS.
+- Preview events have `$geoip_disable=true` and no city/lat/long enrichment.
+- Do NOT enable PostHog in production before PR #33 merge.
+- Next gate: final CI -> PO merge authorization -> merge PR #33 -> add production PostHog/Supabase publishable env -> verify production deployment + PostHog.
