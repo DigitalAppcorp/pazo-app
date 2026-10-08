@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-08
-**Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening permanece EN CURSO como carril de infraestructura pre-Beta. Fase 14 fue seleccionada explícitamente: Gates 5, 6 y 7 CERRADOS; Gate 8 planificado, solo Bloque 00 documental autorizado.
+**Estado general:** Fase 12 COMPLETADA / Gate 9 medición; Production Hardening EN CURSO. Fase 14: Gates 5–7 CERRADOS, Gate 8 A0 terminado y A1 en despliegue hosted-first (GitHub y backend Supabase PAZO aplicados; Vercel producción BLOQUEADO por permisos 403). A1 NO cerrado; A2–A4 sin autorización.
 
 ---
 
@@ -937,3 +937,12 @@ Prioridad:
 - P2 anti-abuse, ruido operacional, restore drill y analytics.
 
 Esta fase de infraestructura está autorizada por el Product Owner y no constituye autorización para decidir automáticamente precio o beneficios de la membresía.
+
+
+---
+
+## Actualización operativa 2026-10-08 — MVP hosted-first
+- Decisión expresa del Product Owner: suspender temporalmente local-first hasta el lanzamiento oficial; eliminar pasos manuales de descargas/parches en favor de conectores GitHub/Supabase/Vercel, conservando gates, seguridad y autorizaciones de alcance.
+- F14 A1: código en rama GitHub `f14/block01-hosted-mvp-20261008` desde respaldo `c4f466f`, sin merge en `main` ni PR #34; Supabase PAZO aplicó migración `f14_account_blocks_hidden_posts` versión remota `20261008112333`; archivo repo `20261008090000_f14_account_blocks_hidden_posts.sql` (versiones distintas, reconciliar).
+- Vercel `pazo-app-t83r`: preview Git SHA `62c3f88` READY; despliegue/proción a producción rechazados 403 (scope `digitalapp`). `pazo-app` también generó preview automático por integración, NO se publicó como producción.
+- A1 pendiente: desbloquear permisos Vercel del equipo `digitalapp`, desplegar/prometer únicamente `pazo-app-t83r`, comprobar funcionamiento en línea y API directa entre cuentas. No cerrar A1 ni avanzar a A2 mientras falten estas pruebas.

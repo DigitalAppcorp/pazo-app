@@ -120,3 +120,12 @@ Cada bloque futuro requiere permiso del Product Owner para el alcance concreto, 
 - Pruebas estáticas `npm run test:f14`; pgTAP dedicado `npm run local:test:f14` solo después de autorizar migración local.
 - **Pendiente antes de cerrar A1:** aplicar parche a la copia local exacta, autorización explícita para migración local, `npm run verify:local`, build, pruebas A/B/C de bloqueo entre varias mascotas, calls directas de API/RPC y revisión visual.
 - No declarar este bloque completado hasta verificar y recibir aceptación del PO. A2-A4 permanecen sin autorización.
+
+
+---
+
+## 8. Estado operativo F14 A1 hosted-first — 2026-10-08
+
+Por decisión expresa del PO, desarrollo del MVP temporalmente **hosted-first** en lugar de descargas/parches y entorno local; ver `AGENTS.md` y `docs/PAZO_ACTIVE_HANDOFF.md`. La implementación de bloqueos/ocultación ya está en la rama `f14/block01-hosted-mvp-20261008` desde `c4f466f`, sin merge a `main`. Supabase PAZO aplicó SQL A1 (`f14_account_blocks_hidden_posts`, versión remota `20261008112333`) y pasó revisión estructural posterior. El archivo local versionado usa prefijo `20261008090000`: reconciliar migraciones. Se preserva D1 de lectura `anon`.
+
+El frontend de `pazo-app-t83r` compiló en **preview** pero NO está en producción: operaciones API directas de deployment y promote fallaron 403 por autorización del equipo Vercel `digitalapp`. La prueba visual y el paquete local habían pasado; prueba hosted de API real entre cuentas A/B/C aún pendiente. A1 sigue ABIERTO. **A2–A4 no autorizados**, producción no debe publicitarse como Beta final de F14.

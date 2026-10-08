@@ -887,3 +887,29 @@ This checkpoint supersedes the older F14 next-step instructions above. This is a
 # F14/A1 — candidato de código/SQL PREPARADO, NO APLICADO — 2026-10-08
 
 El Product Owner proporcionó `PAZO_F14_B01_SOURCE.zip` con la documentación A0 aceptada. Se preparó un parche para Bloque 01 en entorno aislado. El PO todavía NO autorizó aplicar migraciones SQL locales; la migración `20261008090000_f14_account_blocks_hidden_posts.sql` debe permanecer como archivo sin ejecutar. Ninguna operación remota, push, merge o deployment está autorizada. El entorno de preparación no pudo instalar todas las dependencias de npm, así que build completo, pgTAP y runtime están pendientes en Windows/Supabase LOCAL. Siguiente paso exacto: revisión/aplicación del parche local separada de autorización para aplicar migración local; después verificar con cuentas desechables, `npm run verify:local` y aceptar A1 solo con Scope Closure Reconciliation.
+
+
+---
+
+# HOSTED-FIRST MVP / F14 A1 TRANSFER CHECKPOINT — 2026-10-08
+
+Este checkpoint **sustituye instrucciones anteriores de local-first y prohibiciones remotas que eran válidas ANTES de la autorización vigente**. Product Owner decidió trabajar directamente en producción durante el desarrollo temporal del MVP para eliminar parches descargables y comandos locales, manteniendo autorizaciones concretas, controles de seguridad, privacidad y cero gastos nuevos sin permiso.
+
+## Git / Frontend
+- Respaldo original de GitHub: `backup/pazo-codex-local-20261008` → `c4f466f9b537be2f7b7ef10737659780b7a2987f`.
+- Rama dedicada del Bloque 01: `f14/block01-hosted-mvp-20261008`; commit de implementación `62c3f88b942cf2342e822f62582b1352fffea705`. Los 20 blobs de A0+A1 coincidieron con las versiones exactas verificadas de ZIP/parches locales. Este checkpoint documental añade un commit posterior.
+- `main` y PR #34 siguen sin merge. La rama original `product/places-demand-validation` conserva un remote HEAD distinto: no sobrescribirla ni asumir que el working tree Windows está sincronizado.
+- Integración GitHub generó **previews automáticos** READY para Vercel `pazo-app` y `pazo-app-t83r` (`target=null`), sin lanzamiento a producción. Vercel `pazo-app-t83r` preview deployment: `dpl_6UZBfRtNLdoeXoGXBPmTYJ5kpeU3`.
+- Intentos autorizados de despliegue target=production y promoción del preview a producción **AMBOS 403 FORBIDDEN** bajo el scope `digitalapp`. La conexión Vercel permite consultar y crear previews desde GitHub, pero no ejecutar esos cambios directos. Detener aquí; requiere reconectar/autenticar el equipo `digitalapp` con permisos de escritura. No desplegar `pazo-app` como alternativa.
+
+## Supabase PAZO (hosted)
+- Proyecto: `mrybvqdebbgcayuvgkkr` ACTIVE_HEALTHY.
+- Migración F14 A1 aplicada con autorización del PO: `f14_account_blocks_hidden_posts`, versión aplicada Supabase `20261008112333`. SQL corresponde al blob GitHub `ccc5787b071d89889506de50e90baccaf2e73d47` (`supabase/migrations/20261008090000_f14_account_blocks_hidden_posts.sql`); versionado remoto distinto del archivo: **reconciliar antes de futuro release/migration replay**.
+- Verificación remota posterior: `public.account_blocks`, `public.hidden_posts`, RLS ambas true, seis políticas de propietario, cuatro políticas restrictivas para Comunidades, nueve triggers y RPC privada de bloques disponible solo a `authenticated`; `anon` sin SELECT privado. No borrar cuentas reales ni realizar resets.
+- Backend SQL completo aplicado; UI de código local anterior recibió `npm run verify` PASS, `npm run local:test:f14` PASS y `B01 VISUAL PASS` del PO; GitHub/Vercel previews compilados READY. **Prueba directa API multiusuario A/B/C en entorno hospedado pendiente**, no declarar A1 cerrada.
+- Inventario de usuarios reales y datos de prueba en PAZO debe revisarse y eliminarse selectivamente antes de lanzamiento oficial, con atención a backups/logs/CDN/retenciones; no prometer borrado instantáneo.
+
+## Próximo paso exacto
+1. Resolver autorización Vercel de escritura del scope `digitalapp` para `pazo-app-t83r` (sin pasos manuales locales).
+2. Tras éxito de conexión: deploy target=production de rama/commit aprobados (con producción Supabase ya migrada); comprobar target/URL y build.
+3. Validar flujo A/B/C por API directa y smoke hosted; Scope Closure Reconciliation antes de cerrar A1. A2–A4 NO están autorizados.

@@ -49,3 +49,14 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 30. El baseline local actual NO equivale automáticamente a una migración de producción. Antes del lanzamiento debe hacerse reconciliación formal de migraciones local/remoto/producción.
 31. Vercel y demás providers se reactivan en lote en Release Candidate, salvo integración que no pueda verificarse localmente.
 32. Si existe trabajo local no empujado, el handoff debe decirlo explícitamente y el siguiente chat debe empezar auditando `git status --short` + `git log -1 --oneline` antes de asumir el estado.
+
+## Modo temporal MVP: hosted-first — decisión PO 2026-10-08
+
+Esta decisión temporal del Product Owner **sustituye los puntos 25–31 que imponen local-first**, solamente para el ciclo de construcción y prueba del MVP anterior al lanzamiento oficial. El Product Owner prefiere que el ejecutor haga el trabajo directamente mediante los conectores GitHub/Supabase/Vercel, sin descargas, PowerShell ni copia manual por hito.
+
+- El carril de implementación es **hosted-first** y de acceso controlado: cambios versionados en rama GitHub, verificación de build/seguridad, migraciones aprobadas en Supabase PAZO y deploy al proyecto autorizado de Vercel. No declarar una funcionalidad implementada hasta comprobar UI y backend. Usar previews solo para pruebas; NO equivalen a publicación oficial.
+- Toda modificación remota, push/merge/deploy, SQL de producción, costos o eliminación de datos exige autorización explícita del Product Owner para el alcance vigente; esta decisión de proceso no constituye permiso ilimitado para fases posteriores.
+- Cualquier prueba con datos de producción deberá identificar sus registros y plan de eliminación antes del lanzamiento oficial. No borrar a ciegas datos de otros usuarios; considerar retención de copias/logs y terceros. Las reglas de privacidad y F14 siguen vigentes.
+- Priorizar acciones directas de los conectores. Si una conexión impide un paso con 403, DETENER; no cambiar de proyecto, reescribir `main` ni omitir controles. Pedir reconexión del equipo correcto en lugar de volver al ciclo manual.
+- La historia de migraciones del repo y la aplicada en Supabase no coincide por completo: registrar el vínculo de cada migración aplicada y reconciliar antes del lanzamiento. No usar migraciones locales retrospectivas para sobrescribir producción.
+- Después del lanzamiento oficial, reevaluar y restaurar el modo local de desarrollo conforme al Product Owner; no asumir que los datos de prueba de backups/proveedores desaparecen en el acto.
