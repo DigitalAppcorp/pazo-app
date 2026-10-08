@@ -161,3 +161,9 @@ Una consulta agregada al esquema hospedado detectó **5 comentarios históricos 
 
 
 **Guardia de Storage añadida al borrador:** `f14_media_task` obtiene `owner`, `pet` y `community` directamente de la fila base. La Edge Function valida que las rutas del objeto correspondan al titular y al contexto del contenido original antes de eliminar. Si la URL es externa, malformada o corresponde a otra identidad, queda en revisión manual. **Todavía faltan pruebas funcionales y confirmación real de propagación CDN**.
+
+
+### 10. Activación autorizada A2 — supabase PAZO, 2026-10-08
+`moderation_private` y los RPC de denuncias/revisión fueron creados mediante migración `f14_reports_moderation`, versión Supabase `20261008120333` (SQL blob `b853f00ad222079021d49dece92e42282e135864`). Se verificó sintaxis con DDL transaccional revertido antes del apply real. Post-auditoría: 5 políticas RLS restrictivas, anon excluido, sin concesiones de rol moderador ni contenidos retirados. Edge `f14-moderation-purge` versión 1 JWT activo pero **solo stub inerte que devuelve 503**: ningún borrado de Storage. El diseño de purga completo fue movido a `supabase/drafts/` para impedir despliegues accidentales.
+
+**Pruebas pendientes:** integración de formularios vía preview con credenciales de prueba; deduplicación y limitación por reportero, 5 objetivos, validación de rol y RLS/REST anónimo/autenticado, contenidos retirados y copias legacy, borrado de medios y propagación CDN. Cierre A2 y promoción a producción Vercel NO autorizados automáticamente. El siguiente gate requiere autorización explícita para designar moderador e intervenir registros de prueba. A3/A4 no autorizados.

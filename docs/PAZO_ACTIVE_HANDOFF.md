@@ -937,3 +937,15 @@ Se detectaron 5 duplicados legacy de comentarios en `public.posts.comments`, tod
 
 
 **Guardia anti-borrado cruzado (A2):** borrador Edge `f14-moderation-purge` valida prefijos `owner/pet` para `post-photos`, `owner` para `pet-avatars` y `community/owner` para `community-post-photos`; los datos se obtienen por RPC verificada desde SQL, no de parámetros del cliente. En caso de ruta inválida se requiere revisión manual. No se probó ni desplegó a Supabase hosted.
+
+
+---
+
+# F14 A2 — SUPABASE ACTIVADO / MEDIA PURGE BLOQUEADO — 2026-10-08
+Este checkpoint más reciente sustituye las referencias anteriores a A2 como no aplicado. El PO **autorizó aplicar A2 a Supabase PAZO y desplegar la función de Storage sin permitir borrados**. Se corrigió el SQL y pasó prueba reversible (transacción ROLLBACK) antes de aplicarse.
+- Supabase PAZO `mrybvqdebbgcayuvgkkr`: migración `f14_reports_moderation` versión **`20261008120333`** aplicada exitosamente. SQL aplicado con blob SHA Git `b853f00ad222079021d49dece92e42282e135864`; registrar canónico `supabase/migrations/20261008120333_f14_reports_moderation.sql` (no conservar en drafts).
+- Comprobación posterior: cinco políticas RLS restrictivas para lectura de contenido retirado; esquema y tablas `moderation_private` accesibles únicamente a funciones privilegiadas; `anon` sin ejecución de reportes/cola, `authenticated` puede enviar reportes; ningún `authenticated` puede confirmar limpieza media; `service_role` sí; 0 reportes, 0 concesiones de moderador y 0 restricciones de contenido al verificar.
+- Edge `f14-moderation-purge`, versión **1**, ACTIVE, **`verify_jwt=true`**. Se publicó deliberadamente una **implementación inerte** que devuelve 503 para cualquier petición, sin credencial elevada, sin borrar ni leer Storage. Código operativo en `supabase/functions/f14-moderation-purge/index.ts`; código amplio futuro solo en `supabase/drafts/f14_moderation_purge_full_proposal.ts`, NO DESPLEGADO.
+- Sigue pendiente designar mediante aprobación específica un moderador inicial (no derivarlo de `profiles.is_founder`), pruebas reales REST/RPC entre roles/perfiles/cuentas de prueba, validar eliminación segura de imagen/Storage y propagación CDN, análisis de retención D3-B, y aceptación visual de A2 en frontend desplegado. No afirmar que A2 está cerrado.
+- Vercel producción sigue pospuesto por decisión de PO y por permisos 403 del equipo digitalapp; previews GitHub no equivalen a release. No iniciar A3/A4 sin autorización.
+- **Integridad de migraciones:** A1 en repo `20261008090000` frente a versión aplicada `20261008112333`; A2 nombre/version en repo coincide con versión aplicada. Reconciliar A1 antes de replays/remotos; no ejecutar migraciones antiguas a ciegas.

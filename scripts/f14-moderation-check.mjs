@@ -2,10 +2,10 @@ import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 
 const read = p => readFileSync(p,'utf8')
-const draft = 'supabase/drafts/20261008150000_f14_reports_moderation.sql'
-assert.ok(existsSync(draft), 'A2 SQL draft must remain outside canonical production migrations')
-assert.ok(!existsSync('supabase/migrations/20261008150000_f14_reports_moderation_DRAFT.sql'), 'Draft must not be picked up by migrations')
-const sql = read(draft)
+const canonical = 'supabase/migrations/20261008120333_f14_reports_moderation.sql'
+assert.ok(existsSync(canonical), 'A2 applied SQL version must be tracked with hosted version')
+assert.ok(!existsSync('supabase/drafts/20261008150000_f14_reports_moderation.sql'), 'Applied SQL must not stay in drafts')
+const sql = read(canonical)
 for (const s of [
   'CREATE SCHEMA IF NOT EXISTS moderation_private',
   'CREATE TABLE moderation_private.reports',
@@ -34,5 +34,9 @@ for (const f of [
   'src/features/moderation/ModerationMediaQueue.tsx',
   'supabase/functions/f14-moderation-purge/index.ts'
 ]) assert.ok(existsSync(f), 'Missing UI/service '+f)
-assert.ok(read('supabase/functions/f14-moderation-purge/index.ts').includes('parts.length !== expected.length + 1'), 'Storage purge must verify owner and object path')
+const parked = read('supabase/functions/f14-moderation-purge/index.ts')
+assert.ok(parked.includes('Media cleanup disabled pending security verification'), 'Deployed function must remain parked')
+assert.ok(!parked.includes('.storage.from('), 'Deployed function must not contain Storage DELETE logic')
+const future = read('supabase/drafts/f14_moderation_purge_full_proposal.ts')
+assert.ok(future.includes('parts.length !== expected.length + 1'), 'Future purge must validate owner and path')
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')

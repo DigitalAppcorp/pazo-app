@@ -950,3 +950,7 @@ Esta fase de infraestructura está autorizada por el Product Owner y no constitu
 
 ### F14 A2 iniciada — 2026-10-08
 Por aprobación explícita del Product Owner, se inició la preparación de **reportes y moderación** en la rama independiente `f14/block02-moderation-mvp-20261008`, sin esperar la publicación bloqueada de Vercel B01. La implementación hospedada de A1 aún no está completamente aceptada. A2 no está implementada en Supabase hosted: SQL propuesto permanece en `supabase/drafts/`, **no aplicado**. El alcance completo exige cinco tipos de denuncia, autoridad y cola privadas, retirada real de API y medios públicos de Storage; su evidencia de seguridad, permisos iniciales y aprobación visual siguen pendientes. No iniciar A3/A4 automáticamente.
+
+
+### F14 A2 — activación de backend hospedado (2026-10-08)
+La migración `f14_reports_moderation` se aplicó a Supabase PAZO, versión real `20261008120333`. Cinco políticas restrictivas implementan retirada a nivel API; `moderation_private` contiene registro privado de denuncias, concesiones de moderador, decisiones y restricciones. **No hay moderadores asignados ni contenido retirado**. La Edge Function de limpieza existe con JWT y código inerte que devuelve 503, sin borrar archivos. La versión de purga propuesta reside solo en `supabase/drafts/`, no en la ruta de funciones desplegables. A2 continúa abierto hasta pruebas API, primer moderador autorizado, validación de almacenamiento/CDN y aceptación UI; publicación Vercel diferida. A3/A4 sin permiso.
