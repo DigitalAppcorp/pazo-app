@@ -484,8 +484,13 @@ Branch: `infra/external-hardening-2`
 - Storage SELECT RLS currently exposes only `active` document objects;
 - authenticated transactional visibility test for the current owner's deleting objects returned 0 visible rows;
 - this conflicts with reliable client-side Storage cleanup during the `deleting` lifecycle;
-- migration prepared but NOT applied:
-  - `20261008010500_fix_pet_document_delete_storage_visibility.sql`;
+- migration applied in production after explicit PO authorization:
+  - `20261008010424_fix_pet_document_delete_storage_visibility.sql`;
   - owner-only Storage SELECT expands from `active` to `active|deleting`;
   - DELETE ownership policy remains unchanged;
-- production application of this migration requires explicit PO authorization.
+- authenticated visibility verification: current test user changed from 0 to 3 visible deleting objects;
+- after Product Owner reload/recovery:
+  - current test user deleting rows: 0;
+  - current test user deleting Storage objects: 0;
+  - one stale deleting row/object remains for a different account and should self-recover when that account next runs the recovery flow;
+- Documents recovery fix: PASS for current test user.
