@@ -332,3 +332,16 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - New privacy fix committed: all PAZO PostHog events send `$geoip_disable=true`.
 - Privacy CI guard updated to require the GeoIP opt-out.
 - Next exact runtime step: pull branch, restart Vite with temporary PostHog env vars, then trigger one controlled exception and verify `$exception` ingestion.
+
+
+### PostHog error tracking + Documents checkpoint
+- PostHog controlled exception ingestion: PASS.
+- Two controlled `$exception` events grouped into one issue: PASS.
+- Verified exception GeoIP enrichment absent.
+- Documents repeated warning root cause found:
+  - deleting document objects are hidden by Storage SELECT RLS because policy only allows `active`;
+  - 4 stale deleting rows currently still have Storage objects;
+  - 3 are for the current test user.
+- Migration prepared in PR #33:
+  - `20261008010500_fix_pet_document_delete_storage_visibility.sql`.
+- DO NOT mark Documents cleanup fixed in production until PO authorizes migration, migration is applied, current user reloads, stale files disappear, and warnings stop.
