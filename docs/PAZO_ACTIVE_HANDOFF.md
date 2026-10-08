@@ -1,6 +1,6 @@
 # PAZO — ACTIVE HANDOFF
 
-**Project Brain OS:** v1.3.0  
+**Project Brain OS:** v1.4.0
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
 **Current state:** Fase 12 COMPLETADA  
@@ -12,7 +12,7 @@
 ## Startup protocol
 
 Before acting:
-1. activate/read Project Brain OS v1.3.0 from `DigitalAppcorp/project-brain-os`;
+1. activate/read Project Brain OS v1.4.0 from `DigitalAppcorp/project-brain-os`;
 2. read `AGENTS.md`;
 3. read this file;
 4. read `docs/PAZO_MASTER_ROADMAP.md`;
@@ -546,3 +546,250 @@ The previous 30 incremental migration files remain preserved under `supabase/mig
 - Preserve the accepted recovery as local uncommitted work until its diff/commit boundary is reconciled.
 - Resume only the remaining Production Hardening scope documented in `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`.
 - Any hosted-provider mutation, production verification, push, merge or deployment still requires explicit Product Owner authorization.
+---
+
+## PR #34 remote handoff imported during local reconciliation — 2026-10-08
+
+### Places demand fake-door runtime validation
+- Local production-build preview validated by Product Owner: PASS.
+- Fake door visible instead of Mapbox: PASS.
+- Real persisted telemetry after PO interaction:
+  - total views: 1;
+  - unique viewers: 1;
+  - total interests: 1;
+  - unique interested accounts: 1.
+- No duplicate signals observed.
+- Backend + frontend validation contract: PASS.
+- Public Vercel rollout remains pending a new Production deployment after the Free deployment-rate limit resets.
+
+
+---
+
+# HANDOFF CRÍTICO — 2026-10-08 — CAMBIO A LOCAL-FIRST
+
+## Regla operativa vigente
+
+El Product Owner decidió trabajar PAZO **localmente durante desarrollo** para reducir tiempo, tokens e infraestructura.
+
+Desde este checkpoint:
+- NO nuevos deployments de Vercel durante desarrollo normal.
+- NO Preview deployments.
+- NO mergear PR #34 todavía.
+- NO push/PR por microcambio.
+- Git local = puntos de recuperación frecuentes.
+- GitHub remoto = checkpoints significativos.
+- Producción = solo por excepción o durante Release Candidate.
+- Antes del lanzamiento final: reconciliación completa local ↔ remote branch ↔ main ↔ Supabase prod ↔ Vercel prod.
+
+Brain OS canónico actualizado a **v1.4.0** con Local-First Efficiency Mode.
+
+## Estado remoto exacto
+
+Repositorio: `DigitalAppcorp/pazo-app`.
+
+Remote branch activa:
+`product/places-demand-validation`
+
+PR:
+- PR #34: OPEN
+- Draft: false / Ready for Review
+- Mergeable: true
+- El HEAD remoto cambió al añadir este handoff; NO confiar en un SHA congelado aquí.
+- El siguiente chat debe consultar PR #34 en vivo y usar su `head_sha` actual.
+- Base histórica conocida antes de este handoff: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`
+- NO MERGEAR hasta nueva autorización explícita del PO dentro del release workflow.
+
+## Estado del experimento Places / Map
+
+- Fase 8 engineering: COMPLETE históricamente.
+- Public rollout: PAUSADO.
+- Real Mapbox: desarrollo local.
+- Build publicado objetivo: fake door `places_map`.
+- Fake door runtime local production-preview: PASS.
+- Tracking real contra Supabase prod durante la validación:
+  - views: 1
+  - unique viewers: 1
+  - interests: 1
+  - unique interested: 1
+- Backend tracking prod: OPERATIONAL.
+- Migraciones prod ya aplicadas:
+  - `20261008015255_register_places_map_validation`
+  - `20261008015603_grant_module_validation_inserts`
+- No comprar Vercel Pro / Mapbox add-on para este módulo mientras la demanda no lo justifique.
+
+## Estado producción que YA existe
+
+PR #33 ya fue mergeado históricamente:
+- merge commit `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`.
+
+Supabase producción ya contiene hardening autorizado, incluyendo:
+- social write rate limits;
+- idempotent document finalize;
+- rescue SECURITY DEFINER moved behind private schema;
+- document Storage visibility fix;
+- `places_map` validation registry + INSERT grants.
+
+PostHog:
+- local ingestion: PASS;
+- controlled exception + grouping: PASS;
+- Vercel Preview ingestion: PASS;
+- `$geoip_disable=true` verified;
+- session replay/autocapture remain OFF.
+
+Vercel:
+- project `pazo-app-t83r`;
+- production env for PostHog + Supabase publishable key was configured;
+- public deployment remained older because Free plan API deployment limit was hit;
+- do NOT spend/upgrade to bypass this during development.
+
+## Estado LOCAL del Product Owner — NO asumir que GitHub lo contiene
+
+Ruta local:
+`C:\Users\osori\Downloads\pazo-app`
+
+El PO creó/confirmó un flujo local de verificación:
+- `npm run verify` = `npm run test:governance && npm run build`
+- lint legacy NO bloquea el ciclo diario;
+- razón: ESLint tiene deuda histórica aproximada de 104 errores / 6 warnings.
+- último resultado reportado: **verify PASS**.
+
+El PO hizo un commit local de `package.json` para este workflow.
+El SHA local NO fue capturado en este chat; el siguiente chat debe leerlo con:
+`git log -1 --oneline`
+
+## Supabase local — estado crítico
+
+Docker Desktop + WSL fueron instalados y funcionan.
+
+Supabase CLI:
+- versión observada: 2.120.0.
+
+Problema descubierto:
+- la historia legacy de migraciones del repo no puede reconstruir una DB vacía;
+- la primera migración intentaba alterar `public.interactions` antes de que existiera;
+- causa real: falta el baseline original del proyecto, no un único migration bug.
+
+Decisión local tomada:
+- preservar las migraciones históricas separadas;
+- crear un baseline local a partir del schema backup actual.
+
+Operaciones ejecutadas LOCALMENTE por el PO:
+1. `supabase/migrations` fue renombrado a:
+   `supabase/migrations_legacy`
+2. se creó un nuevo:
+   `supabase/migrations`
+3. se copió el backup de schema a:
+   `supabase/migrations/20261008030000_pazo_local_baseline.sql`
+
+Resultado:
+- `npx supabase start` después del baseline: **PASS**.
+
+IMPORTANTE:
+- estos cambios de migrations/baseline son LOCAL-ONLY al momento de este handoff;
+- no asumir que están committeados ni pushed;
+- baseline local NO debe empujarse a producción como una migration normal;
+- release gate deberá reconciliar cuidadosamente history/baseline/prod.
+
+## Backup local
+
+Backup DB creado exitosamente en una carpeta bajo:
+`C:\Users\osori\pazo-backups\...`
+
+Tamaños observados:
+- `roles.sql`: 370 bytes
+- `schema.sql`: 176576 bytes
+- `data.sql`: 2007873 bytes
+
+Storage backup:
+- NO completado;
+- script falló con `Invalid Compact JWS` al usar nueva `sb_secret_...` en Storage;
+- no se generó `storage-manifest.json`;
+- decisión posterior: PAUSAR el backup/restore drill de Storage hasta release gate para no gastar tiempo ahora.
+
+Si una shell antigua sigue abierta, limpiar cualquier credencial temporal:
+`Remove-Item Env:PAZO_SUPABASE_SECRET_KEY -ErrorAction SilentlyContinue`
+
+Nunca pedir al usuario que pegue secrets en chat.
+
+## Siguiente paso EXACTO para el nuevo chat
+
+NO empezar una nueva fase todavía.
+
+Primero reconstruir verdad local, porque hay cambios que GitHub no conoce.
+
+Pedir al PO ejecutar SOLO:
+```powershell
+git status --short
+git log -1 --oneline
+npx supabase status -o env
+```
+
+Objetivo:
+1. conocer working tree local exacto;
+2. conocer local HEAD exacto;
+3. confirmar que Supabase local está vivo y obtener URL/key locales sin exponer secret.
+
+Después:
+- crear/verificar `.env.local` apuntando PAZO a Supabase LOCAL;
+- NO usar fallback de Supabase producción durante desarrollo;
+- ejecutar `npm run dev`;
+- registrar una cuenta de prueba LOCAL;
+- verificar que puede entrar al Feed;
+- si PASS, añadir guardrail para que DEV falle si intenta usar Supabase producción accidentalmente.
+
+Resultado esperado del próximo gate:
+**PAZO local frontend + Supabase local completamente desacoplados de producción.**
+
+## Prohibiciones temporales
+
+Mientras Local-First Mode esté activo:
+- NO `npx supabase db reset --linked`
+- NO `npx supabase db push`
+- NO `supabase migration repair` contra prod
+- NO merge PR #34
+- NO nuevo Vercel deployment
+- NO upgrade Vercel/Mapbox
+- NO reactivar PayPal supporter flow
+- NO publicar nuevos módulos
+
+Usar `--local` explícitamente para operaciones destructivas de DB cuando exista ambigüedad.
+
+## Forma de responder al Product Owner
+
+- español;
+- directo;
+- no abrumar;
+- ChatGPT toma decisiones técnicas y ejecuta lo que pueda;
+- no pedir al PO decidir arquitectura;
+- dar un solo bloque de comandos cuando realmente deba tocar su PC;
+- explicar qué resultado esperar;
+- para ahorro de tokens, pedir únicamente `PASS` o el primer error;
+- no repetir historia si está en este handoff;
+- distinguir siempre LOCAL / REMOTE BRANCH / MAIN / PRODUCCIÓN;
+- no declarar algo probado si solo está implementado.
+
+
+---
+
+# LOCAL RECONCILIATION CHECKPOINT — 2026-10-08
+
+This checkpoint supersedes the earlier exact-next-step notes in this file.
+
+## Governance and Git
+- Product Owner explicitly authorized local reconciliation with the four newer PR #34 commits.
+- Project Brain OS v1.4.0 local-first rules and PAZO's Codex-first continuity rules are both preserved in `AGENTS.md`.
+- Accepted recovery commit before reconciliation: `36aa9aa` (`chore: restore reproducible local development`).
+- Recoverable local branch: `codex/pre-pr34-local-recovery-20261008` at `36aa9aa`.
+- Remote PR #34 HEAD audited live before reconciliation: `21ceab643564830b4fc5a2d278c5c0c9354ca05a`.
+- Integration is local only; PR #34 has not been merged, and nothing has been pushed or deployed.
+
+## Local runtime acceptance
+- `npm run local:setup`: PASS.
+- `npm run verify:local`: PASS.
+- Product Owner manual acceptance: signup + explicit 18+ attestation + pet registration + Feed + reload persistence PASS.
+- Local Supabase remains isolated from production; no remote migration or production mutation occurred.
+
+## Exact next step
+- Complete the local merge verification and keep the resulting commits unpushed.
+- Do not start Fase 13, 14, 10 or 11 automatically; module selection still requires the Product Owner lifecycle decision recorded in `docs/PAZO_MASTER_ROADMAP.md`.
+- Continue remaining Production Hardening only when it can be done locally; hosted-provider work stays deferred to Release Candidate unless separately authorized.

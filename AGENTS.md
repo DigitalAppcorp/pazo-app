@@ -1,6 +1,6 @@
 # PAZO — Reglas permanentes para agentes
 
-**Project Brain OS version: 1.3.0**  
+**Project Brain OS version: 1.4.0**
 Canonical OS: `DigitalAppcorp/project-brain-os`.
 
 Antes de cualquier modificación de código, base de datos, arquitectura o documentación de producto:
@@ -31,3 +31,21 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 24. Ningún agente puede ejecutar migraciones remotas, mutar producción, hacer push, merge o deploy sin autorización explícita y vigente del Product Owner para esa acción concreta.
 
 `docs/PAZO_ACTIVE_HANDOFF.md` define el estado operativo actual. La hoja maestra define el estado global. `docs/PAZO_MODULE_LIFECYCLE.md` define cómo una idea llega a implementación. `docs/PAZO_ARCHITECTURE_CONTRACT.md` gobierna ownership/ubicación del código. `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` gobierna datos/tracking/privacidad. `docs/PAZO_DATA_INVENTORY.md` registra categorías y terceros conocidos. Las sub-rutas gobiernan el módulo específico.
+
+
+## Local-first operating mode — active
+
+25. Durante el desarrollo activo de PAZO, trabajar **local-first**:
+   - implementación, runtime, build y backend local por defecto;
+   - no usar Vercel Preview/Production por cada cambio;
+   - no hacer merges/pushes por microcambios;
+   - producción solo por excepción o en release gate.
+26. Distinguir siempre cinco estados: working tree local, local HEAD, remote feature branch, `main` y producción. Nunca asumir que son iguales.
+27. Usar un único gate local de verificación para el ciclo diario:
+   - `npm run verify` = governance + build;
+   - lint legacy queda fuera del bloqueo diario hasta su limpieza específica.
+28. Para ahorrar tokens, pedir al Product Owner solo `verify PASS` o el primer error útil; no solicitar logs completos salvo necesidad.
+29. Supabase diario debe correr localmente. En comandos destructivos usar `--local` explícitamente cuando aplique. No ejecutar `db reset --linked`, `db push` ni `migration repair` contra producción durante desarrollo normal.
+30. El baseline local actual NO equivale automáticamente a una migración de producción. Antes del lanzamiento debe hacerse reconciliación formal de migraciones local/remoto/producción.
+31. Vercel y demás providers se reactivan en lote en Release Candidate, salvo integración que no pueda verificarse localmente.
+32. Si existe trabajo local no empujado, el handoff debe decirlo explícitamente y el siguiente chat debe empezar auditando `git status --short` + `git log -1 --oneline` antes de asumir el estado.
