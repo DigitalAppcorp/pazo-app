@@ -434,6 +434,17 @@ Fuentes:
 
 Fase 8 queda cerrada. Sus extensiones experimentales pasan a medición post-lanzamiento; no se construyen automáticamente por existir interés.
 
+### Ajuste de rollout — 2026-10-07
+- Fase 8 sigue técnicamente COMPLETADA.
+- Rollout público de Mapa/Lugares: PAUSADO.
+- Mapa real: desarrollo local únicamente.
+- App publicada: fake door de demanda `places_map`.
+- Tracking: views + interés único por cuenta usando el framework genérico.
+- No solicitar ubicación ni cargar Mapbox en builds publicados durante el experimento.
+- Contrato: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`.
+- Resultado operativo actual: **EXPERIMENTO ACTIVO / Gate 9**.
+
+
 ## Fase 9 — Cuidados y documentos privados
 
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`

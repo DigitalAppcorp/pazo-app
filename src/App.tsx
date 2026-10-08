@@ -50,6 +50,7 @@ import { HomeView } from './components/views/HomeView'
 import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
+import { PlacesDemandExperiment } from './features/places/validation/PlacesDemandExperiment'
 import { PetView } from './components/views/PetView'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
@@ -79,6 +80,7 @@ const getPublicRescueRoute = () => {
 
 const FEED_PAGE_SIZE = 10
 const NOTIFICATIONS_PAGE_SIZE = 10
+const PLACES_MAP_DEVELOPMENT_ONLY = import.meta.env.DEV
 
 const dateKey = (date = new Date()) =>
   [
@@ -1706,14 +1708,21 @@ function PazoMain() {
                   )}
 
                   {activeTab === 'mapa' && (
-                    <MapView
-                      currentPet={currentPet}
-                      canUsePlaces={Boolean(user?.id) && !isDemoUser}
-                      suggestPlaceRequestKey={placeSuggestionRequestKey}
-                      requestedPlaceId={placeTargetId}
-                      requestedPlaceKey={placeTargetKey}
-                      lang={lang}
-                    />
+                    PLACES_MAP_DEVELOPMENT_ONLY ? (
+                      <MapView
+                        currentPet={currentPet}
+                        canUsePlaces={Boolean(user?.id) && !isDemoUser}
+                        suggestPlaceRequestKey={placeSuggestionRequestKey}
+                        requestedPlaceId={placeTargetId}
+                        requestedPlaceKey={placeTargetKey}
+                        lang={lang}
+                      />
+                    ) : (
+                      <PlacesDemandExperiment
+                        canTrack={Boolean(user?.id) && !isDemoUser}
+                        lang={lang}
+                      />
+                    )
                   )}
 
                   {activeTab === 'mascota' && (
