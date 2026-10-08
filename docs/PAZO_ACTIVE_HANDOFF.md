@@ -368,3 +368,18 @@ Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche 
 - Preview events have `$geoip_disable=true` and no city/lat/long enrichment.
 - Do NOT enable PostHog in production before PR #33 merge.
 - Next gate: final CI -> PO merge authorization -> merge PR #33 -> add production PostHog/Supabase publishable env -> verify production deployment + PostHog.
+
+
+### Places / Map rollout decision
+- Product Owner declined upgrading to Pro to enable Mapbox in the published app before demand validation.
+- Fase 8 engineering remains COMPLETE; public rollout is PAUSED.
+- New active experiment: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`.
+- Published builds must render the `places_map` fake door instead of mounting `MapView`.
+- Local `npm run dev` keeps the real map for development.
+- Fake door telemetry:
+  - module key: `places_map`;
+  - source: `bottom_nav_map`;
+  - generic unique view + deduped interest;
+  - no GPS/location/Mapbox requests.
+- Do not add `VITE_MAPBOX_ACCESS_TOKEN` to Vercel or buy a paid plan while this experiment is active.
+- Re-evaluate after sufficient unique viewers / interest rate according to `PAZO_FEATURE_VALIDATION_FRAMEWORK.md`.
