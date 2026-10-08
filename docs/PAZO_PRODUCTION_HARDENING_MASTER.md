@@ -448,3 +448,18 @@ Branch: `infra/external-hardening-2`
 - Mapbox token restriction + usage notification confirmation;
 - PayPal Edge Function secrets + genuine Sandbox/Live webhook;
 - real DB + Storage off-site backup and non-destructive restore drill.
+
+
+### PostHog live ingestion checkpoint
+- Product Owner started PAZO locally with temporary environment variables; no token was committed to Git.
+- PostHog switched from `ingested_event=false` to `true`.
+- `app_boot` is confirmed as a real recently ingested event.
+- verified fields:
+  - `app=pazo`;
+  - `environment=development`;
+  - `pazo_release=local-hardening-test`;
+  - random PAZO session id.
+- PostHog still exposed GeoIP-derived property names even with IP anonymization enabled.
+- PAZO now sends `$geoip_disable=true` on every event to disable GeoIP enrichment at ingestion.
+- CI privacy guard enforces that opt-out.
+- controlled `$exception` runtime verification: PENDING.
