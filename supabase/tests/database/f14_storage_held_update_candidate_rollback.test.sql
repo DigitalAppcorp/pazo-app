@@ -33,6 +33,30 @@ $$;
 -- Existing narrow EXECUTE grants remain unchanged by CREATE OR REPLACE.
 -- Do not broaden role grants or leak claim identifiers.
 
+CREATE OR REPLACE FUNCTION public.f14_recheck_media_claim(p_claim uuid)
+RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $f14_recheck$
+DECLARE v_claim moderation_private.media_claims%ROWTYPE; v_now jsonb;
+BEGIN
+  IF auth.role() IS DISTINCT FROM 'service_role' THEN
+    RAISE EXCEPTION 'service role required' USING ERRCODE='42501';
+  END IF;
+  SELECT * INTO v_claim FROM moderation_private.media_claims
+    WHERE claim_id=p_claim FOR UPDATE;
+  IF NOT FOUND OR v_claim.status<>'held' THEN RETURN false; END IF;
+  IF v_claim.expires_at<=clock_timestamp() THEN
+    RETURN false;
+  END IF;
+  v_now:=moderation_private.f14_media_probe(v_claim.target_kind,v_claim.target_id);
+  IF v_now IS NULL OR v_now IS DISTINCT FROM v_claim.snapshot THEN
+    RETURN false;
+  END IF;
+  UPDATE moderation_private.media_claims SET checked_at=now() WHERE claim_id=p_claim;
+  INSERT INTO moderation_private.media_claim_events(claim_id,event) VALUES(p_claim,'rechecked');
+  RETURN true;
+END;
+$f14_recheck$;
+
 CREATE POLICY f14_media_claim_restrict_update ON storage.objects AS RESTRICTIVE
 FOR UPDATE TO authenticated
 USING (public.f14_storage_media_path_unclaimed(bucket_id,name))
@@ -102,6 +126,47 @@ BEGIN
  IF n<>0 THEN RAISE EXCEPTION 'Candidate: held claim must still protect after TTL expiry: %',n; END IF;
 END $expiry$;
 RESET ROLE;
+
+-- Service-role recheck must fail closed without invalidating an expired hold.
+SELECT set_config('pazo.f14.qa.claim',(
+ SELECT claim_id::text FROM moderation_private.media_claims
+ WHERE snapshot->>'path'=current_setting('pazo.f14.qa.held')),true);
+SELECT set_config('request.jwt.claim.role','service_role',true);
+SET LOCAL ROLE service_role;
+DO $expired_recheck$
+BEGIN
+ IF public.f14_recheck_media_claim(current_setting('pazo.f14.qa.claim')::uuid) THEN
+   RAISE EXCEPTION 'Expired claim recheck must return false';
+ END IF;
+END $expired_recheck$;
+RESET ROLE;
+DO $held_after_expiry_recheck$
+BEGIN
+ IF (SELECT status FROM moderation_private.media_claims
+     WHERE claim_id=current_setting('pazo.f14.qa.claim')::uuid)<>'held' THEN
+   RAISE EXCEPTION 'Expiry recheck must NOT automatically invalidate the hold';
+ END IF;
+END $held_after_expiry_recheck$;
+
+-- A valid-time claim whose source disappeared is also fail-closed.
+UPDATE moderation_private.media_claims
+SET created_at=now(), expires_at=now()+interval '5 minutes'
+WHERE claim_id=current_setting('pazo.f14.qa.claim')::uuid;
+SET LOCAL ROLE service_role;
+DO $drift_recheck$
+BEGIN
+ IF public.f14_recheck_media_claim(current_setting('pazo.f14.qa.claim')::uuid) THEN
+   RAISE EXCEPTION 'Missing source must not be accepted as valid';
+ END IF;
+END $drift_recheck$;
+RESET ROLE;
+DO $held_after_drift_recheck$
+BEGIN
+ IF (SELECT status FROM moderation_private.media_claims
+     WHERE claim_id=current_setting('pazo.f14.qa.claim')::uuid)<>'held' THEN
+   RAISE EXCEPTION 'Source drift recheck must NOT automatically invalidate hold';
+ END IF;
+END $held_after_drift_recheck$;
 
 -- The guard deliberately releases a path only after explicit invalidation.
 -- Real future workers still need serialization against in-flight HTTP deletes.
