@@ -54,6 +54,12 @@
 - **Siguiente paso operativo:** auditoría puntual de brechas funcionales de los módulos ya existentes contra roadmap/scope y código de la rama, sin repetir QA aprobadas ni diseñar nuevas features; ordenar impedimentos para flujo registro → mascota → publicar/interactuar → comunidades/lugares/cuidados → notificaciones, y distinguir mocks/errores reales. Avanzar después solo por el gate funcional aprobado correspondiente; no iniciar automáticamente F14 A3/A4 o una nueva fase sin respetar sus autorizaciones.
 - No afirmar beta pública lista mientras falten requisitos mínimos de privacidad, gestión de reportes/contenido público, eliminación de cuenta y pruebas reales; la prioridad funcional **no** es una exención de responsabilidades con el primer usuario.
 
+## Avance funcional siguiente — 2026-10-09 | último checkpoint
+
+- **PR #36 DRAFT independiente de F14:** corregida la carga inicial `fetchOwnedPets` de sesiones autenticadas para no confundir fallas de red con cuentas sin mascota: spinner, pantalla de error con Reintentar y descarte de consultas atrasadas cuando cambia la sesión. **Código** `446b2c5b7403a423d9a9e570dd9ad53514043399`, GitHub Actions run `37931428416` **SUCCESS** (governance, build, lint). **Docs** de auditoría actualizados en `mvp/functional-readiness-20261009` commit `49237fac95a1c01895d72d5619360d22204c1d83`.
+- **Vercel comprobado en GitHub status:** integración `Vercel – pazo-app` y `Vercel – pazo-app-t83r` fallan con destino `https://vercel.com/digitalapp?upgradeToPro=build-rate-limit`; además el conector devuelve 403 en scope `digitalapp`. Por lo tanto **no hay Preview certificada** de PR #36. Conservar plan actual, no lanzar builds extra ni pagar upgrade. La única evaluación pendiente de ese flujo es QA de navegador cuando se habilite un Preview autorizado.
+- **Prioridad intacta:** MVP funcional, reducción de fallos reales; F14 A2 PR #35 DRAFT/PAUSADA, D3-A incompleto. No fusionar main/Production ni SQL ni reabrir ledger; primero QA de registro + recovery, Feed, demo-mensajería, bootstrap de mascotas y móvil.
+
 ## Hito MVP funcional independiente — 2026-10-09 (no fusionado)
 
 - Trabajo de producto ejecutado en rama **`mvp/functional-readiness-20261009`** nacida de `main` (no de F14), PR **#36 DRAFT**: https://github.com/DigitalAppcorp/pazo-app/pull/36 ; HEAD auditado `f0b638263857b8ef47b651e33be5c53016860c90`.
