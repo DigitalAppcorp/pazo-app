@@ -23,6 +23,8 @@ test('rollback regression verifies consistent, expired and drift states, with no
   assert.ok(regression.includes('held_snapshot_consistent_not_delete_authorized<>1'))
   assert.ok(regression.includes('held_expired<>1'))
   assert.ok(regression.includes('held_source_drift<>1'))
+  assert.ok(regression.includes('held_without_storage_metadata<>1'))
+  assert.ok(regression.includes('held_moderation_state_drift<>1'))
   assert.ok(regression.includes("UPDATE public.posts SET photo_url=NULL"))
   assert.doesNotMatch(regression,/\bCOMMIT\s*;/i)
   assert.doesNotMatch(regression,/DELETE\s+FROM\s+storage\.objects/i)
