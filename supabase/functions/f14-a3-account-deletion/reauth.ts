@@ -29,7 +29,7 @@ export interface A3PasswordReauthResult {
   status: 'recorded_for_review' | 'rejected' | 'retryable'
   accountDeletionAllowed: false
 }
-const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const outcome=(status:A3PasswordReauthResult['status']):A3PasswordReauthResult =>
   ({status,accountDeletionAllowed:false})
 
