@@ -1061,3 +1061,10 @@ Después de migraciones `20261009054411`, `20261009055801` y `20261009055955`, S
 UI moderadora A2 corregida: retiró el botón que invocaba la purga HTTP 503 y sus falsas señales de éxito; ahora expresa `revisión manual pendiente`, no confirmación de eliminación, con recarga de cola de solo lectura. Regla estática nueva prohíbe regresión a la invocación de la Edge destructiva. TSX transpila sin errores de sintaxis en comprobación aislada, sin afirmar `npm run verify` o prueba visual.
 
 **Gate siguiente:** recuperar capacidad de compilación/Preview gratuito, `npm run verify` y prueba visual PO de la cola de revisión; auditoría restante de carreras reales service-role/Storage, recuperación de claims y CDN/D3-B. No habilitar purga que no puede certificar el objeto/version; conservar revisión manual como comportamiento seguro. A2 **ABIERTO**, A3/A4 y main no alterados.
+
+
+### F14 A2 — PR draft y CI PASS
+
+GitHub PR #35 DRAFT creado, no merge. Workflow CI `37892668372` sobre `da619f9`: SUCCESS (governance + build + lint legacy no bloqueante). Vercel todavía limita nuevas compilaciones.
+
+Supabase `20261009061213_f14_reject_unverified_purged_status` aplicada: bloquea confirmación `purged` no sustentada; pruebas SQL reversibles antes/después PASS. Nueva UI de medios en revisión manual, retirando botón de eliminación no operativo. A2 sigue abierto hasta aprobación visual de nuevo panel y decisión sobre limitación de eliminación física/CDN. No A3/A4 ni merge.
