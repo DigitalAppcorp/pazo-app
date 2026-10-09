@@ -11,7 +11,7 @@ const testFile = () => {
   const binary = atob(PNG_1PX)
   const bytes = new Uint8Array(binary.length)
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return new Blob([bytes], { type: 'image/png' })
+  return new Blob([bytes.buffer as ArrayBuffer], { type: 'image/png' })
 }
 
 /** Preview-only: user-initiated synthetic Storage API smoke, no real user content. */
@@ -66,8 +66,7 @@ export function F14StorageProbe({ lang }: Props) {
       if (removed.error) throw new Error('remove')
       // Rely on absence observed by the Storage origin API, not success text alone.
       const checked = await storage.info(path)
-      const notFound = checked.error &&
-        (String(checked.error.statusCode) === '404' || String(checked.error.status) === '404')
+      const notFound = !!checked.error && String(checked.error.statusCode) === '404'
       if (!notFound) throw new Error('not_verified_absent')
       add(es ? 'Ausencia del archivo confirmada en Storage' : 'Storage object absence confirmed')
       window.sessionStorage.removeItem(savedKey)
