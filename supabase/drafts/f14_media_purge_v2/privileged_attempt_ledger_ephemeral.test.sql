@@ -59,13 +59,26 @@ BEGIN
  END;
  IF NOT rejected THEN RAISE EXCEPTION 'Duplicate Storage path accepted'; END IF;
 
+ -- Insert a second valid claim/attempt so the wrong-path fence fails
+ -- on the COMPOSITE FK, rather than the unique active_operation_id check.
+ INSERT INTO moderation_private.media_purge_attempts(
+  operation_id,claim_id,storage_object_id,bucket,object_path,object_version,
+  fence_generation,fence_token
+ ) VALUES(
+  '77777777-7777-4777-8777-777777777777',
+  '22222222-2222-4222-8222-222222222222',
+  '88888888-8888-4888-8888-888888888888',
+  'post-photos','owner/pet/legitimate.webp',
+  '99999999-9999-4999-8999-999999999999',2,
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+ );
  -- Fence cannot claim an operation belonging to a different path.
  rejected:=false;
  BEGIN
   INSERT INTO moderation_private.media_writer_fences(
    bucket,object_path,generation,active_operation_id
-  ) VALUES('post-photos','owner/pet/other.webp',1,
-           '33333333-3333-4333-8333-333333333333');
+  ) VALUES('post-photos','owner/pet/other.webp',2,
+           '77777777-7777-4777-8777-777777777777');
  EXCEPTION WHEN foreign_key_violation THEN rejected:=true;
  END;
  IF NOT rejected THEN RAISE EXCEPTION 'Cross-object fence was accepted'; END IF;
