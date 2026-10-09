@@ -24,6 +24,8 @@ import {
   updateCommunity,
 } from '../../services/communityService'
 import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
 import {
   IconCamera,
   IconChat,
@@ -35,6 +37,7 @@ import {
 
 interface CommunityDetailViewProps {
   communityId: string
+  canReport: boolean
   currentPet: Pet | null
   onBack: () => void
   onCommunityChanged?: () => void
@@ -51,11 +54,13 @@ const formatDate = (value: string, lang: 'es' | 'en') =>
 
 export const CommunityDetailView = ({
   communityId,
+  canReport,
   currentPet,
   onBack,
   onCommunityChanged,
   lang,
 }: CommunityDetailViewProps) => {
+  const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string} | null>(null)
   const [community, setCommunity] = useState<CommunitySummary | null>(null)
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [posts, setPosts] = useState<CommunityPost[]>([])
@@ -406,6 +411,7 @@ export const CommunityDetailView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-8">
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
       <button
         type="button"
         onClick={onBack}
@@ -672,6 +678,9 @@ export const CommunityDetailView = ({
                     </div>
                   </div>
 
+                  <div className="flex items-center gap-2">
+                  {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id})}
+                    className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   {post.canDelete && (
                     <button
                       type="button"
@@ -681,6 +690,7 @@ export const CommunityDetailView = ({
                       {lang === 'es' ? 'Eliminar' : 'Delete'}
                     </button>
                   )}
+                  </div>
                 </div>
 
                 {post.body && (
@@ -747,6 +757,8 @@ export const CommunityDetailView = ({
                               </button>
                             )}
                           </div>
+                          {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_comment',id:comment.id})}
+                            className="text-[10px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                           <p className="mt-0.5 text-[10px] leading-relaxed text-[#5C7470]">
                             {comment.body}
                           </p>

@@ -1504,6 +1504,7 @@ function PazoMain() {
         {selectedPublicProfileId && (
           <PublicProfileView
             targetPetId={selectedPublicProfileId}
+            canReport={Boolean(user?.id) && !isDemoUser}
             currentPetId={currentPet?.id}
             ownedPetIds={pets.map((pet) => pet.id)}
             onClose={() => setSelectedPublicProfileId(null)}
@@ -1801,6 +1802,7 @@ function PazoMain() {
                       ) : (
                       <HomeView
                         posts={posts}
+                        canReport={Boolean(user?.id) && !isDemoUser}
                         onLikePost={handleLikePost}
                         onSavePost={handleSavePost}
                         onAddComment={handleAddComment}
@@ -1855,6 +1857,7 @@ function PazoMain() {
                   {activeTab === 'mascota' && (
                     <PetView
                       currentPet={currentPet}
+                      canModerate={Boolean(user?.id) && !isDemoUser}
                       availablePets={pets}
                       onSelectPet={selectActivePet}
                       onPetUpdated={(updatedPet) => {
