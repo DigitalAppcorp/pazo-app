@@ -176,3 +176,12 @@ test('checkpoint uses service-only CAS, validated lease and revision',()=>{
  assert.match(reviewSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_worker_review_checkpoint\(uuid,uuid,bigint,bigint,text,text,text\) TO service_role/)
  assert.match(reviewSql,/REVOKE ALL ON FUNCTION public\.f14_a3_worker_review_checkpoint\(uuid,uuid,bigint,bigint,text,text,text\) FROM PUBLIC,anon,authenticated/)
 })
+
+const a3Config=readFileSync(new URL('../supabase/config.toml',import.meta.url),'utf8')
+test('A3 Edge handler requires config disabled and JWT verification',()=>{
+  assert.match(a3Config,/\[functions\.f14-a3-account-deletion\]\s+enabled = false\s+verify_jwt = true/)
+  const fn=readFileSync(new URL('../supabase/functions/f14-a3-account-deletion/index.ts',import.meta.url),'utf8')
+  assert.match(fn,/PAZO_A3_REVIEW_WORKER_ENABLED/)
+  assert.match(fn,/PAZO_A3_REVIEW_INVOKE_SECRET/)
+  assert.doesNotMatch(fn,/\bauth\.admin\.deleteUser\b|storage\.from\(/)
+})

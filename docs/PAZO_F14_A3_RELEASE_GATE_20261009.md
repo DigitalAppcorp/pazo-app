@@ -74,3 +74,9 @@ E. Finalmente Scope Closure Reconciliation de F14 Gate 8 con pruebas observables
 - Nueva sexta migración bloqueada `supabase/drafts/20261009_f14_a3_worker_checkpoint_NOT_APPLIED.sql`: RPC service_role y journal privado CAS/versiones y eventos mínimos; no content DELETE.
 - SQL real **TEMP + ROLLBACK**: 2 eventos de journal en revisión 2, rechazo de tokens viejos y revision 0 repetida; sin objetos permanentes. CI motor #38003551960, checkpoint #38003843415 y adaptador #38003932473 SUCCESS. Un primer CI falló por ruta de test inválida y fue corregido antes del checkpoint final.
 - Evidencia/alcance: `docs/PAZO_F14_A3_WORKER_REVIEW_20261009.md`. **Worker destructivo NO construido**, aun sin sesión reciente JWT real, all-writes freeze, paths exactos Storage/CDN, Auth final ni E2E. A3 permanece abierta y UI OFF. PO no autorizó migraciones ni despliegue.
+
+## A3.4d — Internal HTTP review runner disabled (2026-10-09)
+
+- PR #38 agrega `http.ts`, `index.ts` y pruebas para invocación interna de revisión. HTTP requiere token de servicio secreto, body JSON limitado, no CORS y no expone operaciones físicas. `supabase/config.toml` mantiene la función `enabled=false`, `verify_jwt=true`; además runtime exige PAZO_A3_REVIEW_WORKER_ENABLED=true, ausente por defecto. Ningún Edge desplegado.
+- Backend de revisión no dispone aún de verificadores externos aprobados; el adaptador retorna missing_evidence por defecto y no existe eliminación física. Las nuevas variables de entorno y coste de despliegue NO se han configurado ni solicitado.
+- Cambios bajo Gate A3 DRAFT; F14 sigue ABIERTA. Evidencia ampliada en docs/PAZO_F14_A3_WORKER_REVIEW_20261009.md.
