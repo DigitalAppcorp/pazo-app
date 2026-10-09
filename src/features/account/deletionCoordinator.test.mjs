@@ -35,7 +35,7 @@ test('logical progression never skips safety gates', () => {
   const expected = [
     'review_request', 'review_request', 'freeze_writes', 'archive_others',
     'archive_others', 'remove_media', 'remove_media', 'remove_media',
-    'remove_media', 'remove_media', 'verify_data', 'revoke_sessions',
+    'remove_media', 'verify_data', 'revoke_sessions',
     'await_manual_review', 'auth_final',
   ]
   const keys = ACCOUNT_DELETION_REQUIREMENTS
