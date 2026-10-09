@@ -12,7 +12,7 @@ BEGIN
  WHERE operation_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
    AND event_type='dispatch_recorded';
  IF n<>1 THEN RAISE EXCEPTION 'Journal recorded more than one dispatch'; END IF;
- SELECT phase INTO phase FROM moderation_private.media_purge_attempts
+ SELECT a.phase INTO phase FROM moderation_private.media_purge_attempts a
  WHERE operation_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
  IF phase<>'possibly_in_flight' THEN RAISE EXCEPTION 'Journal lost uncertain state'; END IF;
 END $f14$;
