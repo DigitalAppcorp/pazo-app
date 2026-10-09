@@ -289,3 +289,7 @@ Matriz detallada y evidencia: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md`.
 ### 2026-10-09 — corrección P0 de Onboarding/Auth
 
 El PR #36 incorporó manejo de alta sin sesión (email pendiente de verificación) y eliminó los valores de ejemplo `Luna / 3 años` del registro de mascota. Tests Node de resultados Auth y build con CI `37928358071` SUCCESS (commit `504f422`). Aún falta QA del correo real en entorno autorizado; recuperación de contraseña permanece un gap para Beta. Este trabajo no transforma la etapa en completada ni autoriza publicación.
+
+### 2026-10-09 — Recuperación de acceso: implementación inicial, QA alojada pendiente
+
+El PR #36 incluye `resetPasswordForEmail`, estado de `PASSWORD_RECOVERY`, formulario de contraseña nueva, protección contra errores y salida a login; utiliza el estándar de contraseña de signup. CI run `37930372739` PASS en commit `815cbda`. **No afirmar flujo completo hasta prueba de enlace de email real** y revisión de Redirect URLs en Auth; acceso Vercel al equipo `digitalapp` sigue 403. No se requiere migración ni nuevo proveedor para el MVP.
