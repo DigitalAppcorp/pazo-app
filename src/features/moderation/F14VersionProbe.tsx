@@ -9,7 +9,7 @@ const ownedFixture = (path: string, uid: string) =>
   new RegExp('^' + uid + '/f14-version-probe-[0-9a-f-]{36}\\.png$', 'i').test(path)
 const imageBlob = () => {
   const bytes = atob(PIXEL)
-  return new Blob([Uint8Array.from(bytes, c => c.charCodeAt(0))], { type: 'image/png' })
+  return new Blob([Uint8Array.from(bytes, c => c.charCodeAt(0)).buffer as ArrayBuffer], { type: 'image/png' })
 }
 
 /**
