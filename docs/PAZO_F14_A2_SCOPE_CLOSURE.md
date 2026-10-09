@@ -43,3 +43,8 @@ La referencia vigente del cliente Storage documenta `remove([{path,versionId}])`
 
 
 **Gate operativo 2026-10-09:** GitHub Actions sobre `2e8a32c` pasó (run `37895742885`); Vercel respondió `402 api-deployments-free-per-day` (más de 100 deploys diarios, esperar ~24 h) a la petición de Preview actualizado. Se verificó que no existe deployment para ese SHA. La QA HTTP con versión real queda **NO EJECUTADA** hasta poder publicar Preview, y no implica aprobación para borrar medios reales. Los buckets Storage PAZO tienen `versioning_status=DISABLED`; los 20 objetos retienen una versión de 36 caracteres. No configurar versionado ni subir de plan para esta prueba.
+
+
+### Evidencia de CDN/cacheControl y ensayo sintético ampliado
+
+Auditoría Supabase únicamente agregada: 4 buckets públicos, 1 privado y 20 objetos actuales con `cacheControl=max-age=3600`. La caché del navegador puede mantener copias aproximadamente una hora o según gestión cliente; despublicación/Storage origin/CDN son estados distintos. Supabase documenta invalidación automática Smart CDN para Pro+ y API de purga manual Pro+ (requiere credencial privilegiada); el plan actual no debe modificarse ni crear cargos. La prueba opt-in de versión exacta agrega una sola observación HTTP del CDN sobre su píxel sintético recién eliminado, SIN certificar invalidación global. No confundirla con cachés de fotos moderadas. La eliminación física D3-A sigue abierta y la QA HTTP requiere un Preview nuevo con el último SHA.
