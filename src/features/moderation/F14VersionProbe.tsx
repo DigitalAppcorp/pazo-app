@@ -22,12 +22,14 @@ export function F14VersionProbe({ lang }: Props) {
   const [busy, setBusy] = useState(false)
   const [steps, setSteps] = useState<Step[]>([])
   const [error, setError] = useState('')
+  const [cdnObservation, setCdnObservation] = useState('')
   const [done, setDone] = useState(false)
   async function run() {
     if (busy || done) return
     setBusy(true)
     setError('')
     setSteps([])
+    setCdnObservation('')
     const success = (esLabel: string, enLabel: string) =>
       setSteps(prev => [...prev, { label: es ? esLabel : enLabel }])
     let key = '', path = ''
@@ -97,6 +99,13 @@ export function F14VersionProbe({ lang }: Props) {
       window.sessionStorage.setItem(key, JSON.stringify({ path, objectId: firstId, versionId: version }))
       success('Identidad y versión obtenidas desde Storage', 'Storage identity and version read')
 
+      // Only the caller-owned 1px synthetic file is used to observe public CDN.
+      // CDN checks are informational and never authorize media cleanup.
+      const publicUrl = storage.getPublicUrl(path).data.publicUrl
+      let cdnWarm = false
+      try { cdnWarm = (await fetch(publicUrl, { cache: 'reload' })).ok }
+      catch { /* network/CORS differences do not affect the version safety result */ }
+
       // Wrong version must NEVER remove the current version. This affects ONLY
       // the synthetic path generated above. A 404 rejection is acceptable.
       const wrongVersion = crypto.randomUUID()
@@ -121,6 +130,20 @@ export function F14VersionProbe({ lang }: Props) {
       if (listed.error || listed.data?.some(x => x.name === path.slice(uid.length + 1)))
         throw new Error('ORIGIN_ABSENCE_UNCONFIRMED')
       success('Versión exacta eliminada; ausencia verificada en origen', 'Exact version removed and origin absence verified')
+      if (cdnWarm) {
+        try {
+          const url = new URL(publicUrl)
+          url.searchParams.set('cacheNonce', crypto.randomUUID())
+          const edge = await fetch(url.toString(), { cache: 'no-store' })
+          setCdnObservation(es
+            ? `CDN consultado desde este dispositivo: HTTP ${edge.status}. No demuestra invalidación mundial ni borra la caché de otros navegadores.`
+            : `CDN observed from this device: HTTP ${edge.status}. This does not certify global invalidation or clear other browsers' caches.`)
+        } catch {
+          setCdnObservation(es ? 'CDN no verificable desde este dispositivo.' : 'CDN could not be checked from this device.')
+        }
+      } else {
+        setCdnObservation(es ? 'CDN no precargado: observación no disponible.' : 'CDN was not primed: observation unavailable.')
+      }
       window.sessionStorage.removeItem(key)
       setDone(true)
     } catch {
@@ -147,6 +170,7 @@ export function F14VersionProbe({ lang }: Props) {
     </div>
     {done && <p className="mt-2 text-xs font-bold text-emerald-700">
       {es ? 'PASS de la prueba aislada; NO equivale a una purga de medios moderados.' : 'Synthetic test PASS; moderated-media purge is still not certified.'}</p>}
+    {cdnObservation && <p className="mt-2 text-xs text-[#5C7470]" role="status">{cdnObservation}</p>}
     {error && <p role="alert" className="mt-2 text-xs font-semibold text-red-700">{error}</p>}
   </section>
 }
