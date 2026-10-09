@@ -58,8 +58,6 @@ CREATE TABLE moderation_private.media_purge_attempts (
 -- This intentionally prefers a stuck path to deleting the wrong object.
 CREATE UNIQUE INDEX media_purge_attempts_path_once
   ON moderation_private.media_purge_attempts(bucket,object_path);
-CREATE UNIQUE INDEX media_purge_attempts_path_generation
-  ON moderation_private.media_purge_attempts(bucket,object_path,fence_generation);
 CREATE UNIQUE INDEX media_purge_attempts_fence_token
   ON moderation_private.media_purge_attempts(fence_token);
 
