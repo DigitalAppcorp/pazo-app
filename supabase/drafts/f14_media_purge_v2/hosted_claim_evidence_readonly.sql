@@ -35,11 +35,11 @@ SELECT jsonb_build_object(
         UNION ALL SELECT photo_url FROM public.community_posts
         UNION ALL SELECT image_url FROM public.communities
       ) urls
-      WHERE urls.url LIKE ('%/storage/v1/object/public/' || c.bucket || '/' || c.snapshot->>'path' || '%')
+      WHERE urls.url LIKE ('%/storage/v1/object/public/' || c.bucket || '/' || (c.snapshot->>'path') || '%')
     ),
     'community_path_count', (
       SELECT count(*) FROM public.community_posts cp
-      WHERE cp.photo_storage_path=c.snapshot->>'path'
+      WHERE cp.photo_storage_path=(c.snapshot->>'path')
     )
   ),
   'databaseNow', clock_timestamp()
