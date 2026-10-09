@@ -362,3 +362,10 @@ Se desmontó y eliminó del código el componente `F14StorageProbe` aprobado pre
 Captura PO del Preview `ac167b4` confirma 4 pasos PASS del test sintético `F14VersionProbe`: archivo creado, ID/versión leídos, intento de borrar versión equivocada sin afectar la actual, borrado de versión exacta y ausencia del origen. Backend se verificó en lectura posterior: 20 objetos, cero `f14-version-probe-*` remanentes. **No repetir.**
 
 La observación CDN del mismo test reportó HTTP 400 desde teléfono con URL `cacheNonce`: **resultado no concluyente**, no demuestra purga CDN y tampoco que haya servido imagen eliminada. Marcar `versionId exacto HTTP` **PASS solo para fixture de prueba**, sin cambiar el estado fail-closed de la purga real. Persisten coordinación escrituras privilegiadas, acceso seguro a evidencia, retención/CDN/navegadores/backups. Edge HTTP 503, `purged` protegido, A2 Gate 8 y D3-A siguen ABIERTOS.
+
+
+### 41. A2 — RPC privada service-only implementada, gate D3-A aún abierto
+
+El PO aprobó específicamente la migración de lectura `f14_get_media_claim_evidence(uuid)`. Supabase confirmó apply y registró versión `20261009095635_f14_service_only_media_evidence_reader`; GitHub contiene el mismo SQL versionado. `anon` y `authenticated` carecen de EXECUTE; únicamente `service_role` tiene acceso a la función, sin `USAGE` del esquema `moderation_private`. Comprobaciones alojadas de roles, JWT falsificado, claims ausentes y expedientes sintéticos de Feed/Comunidad bajo ROLLBACK: PASS. La RPC retorna solo evidencia `candidate_only` con `mayDelete:false`, y devuelve NULL por deriva de versión/fuente. Test SQL de permisos versionado; prueba estática Node creada pero no integrada en npm test:f14 por bloqueo del conector (no afirmar CI para ella).
+
+El gate de **lectura privada** está completado en backend; A2/D3-A no: faltan exclusión interservicios Storage/operaciones in-flight, recuperación/reintentos, gestión de caché CDN/browser y alcance de retención antes de realizar DELETE moderado. Edge sigue 503, prohibido marcar `purged`, PR #35 DRAFT, sin merge a main/A3/A4.
