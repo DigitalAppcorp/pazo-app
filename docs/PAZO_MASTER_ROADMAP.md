@@ -1052,3 +1052,12 @@ Por autorización técnica PO, dos migraciones adicionales **aplicadas a Supabas
 - `20261009055955_f14_disable_unverified_media_purge_confirmation`: función antigua `f14_confirm_media_cleanup` deshabilitada para todos, incluyendo `service_role`, para que no marque `purged` sin evidencia objeto/versión. Rollback e instalado PASS.
 
 Backend post-apply: 20 objetos intactos, claims/reportes/restricciones cero, Edge desactivada HTTP 503. F14 A2 **Gate 8 ABIERTO** hasta serialización de escritores privilegiados, recuperación segura de holds, CDN/D3-B, HTTP QA aislada y confirmación de eliminación exacta. A3/A4, `main` y publicación oficial intactos. CI último HEAD no certificado, Vercel rate-limit histórico.
+
+
+### F14 A2 — seguridad efectiva, revisión manual operativa (2026-10-09 UTC)
+
+Después de migraciones `20261009054411`, `20261009055801` y `20261009055955`, Supabase aplicó **`20261009061213_f14_reject_unverified_purged_status`**: trigger de restricciones prohíbe `media_status='purged'` sin protocolo seguro. Ensayos DDL reversibles y sobre trigger instalado PASS. Storage 20 intactos, claims y restricciones 0. Código y test canónicos en repositorio.
+
+UI moderadora A2 corregida: retiró el botón que invocaba la purga HTTP 503 y sus falsas señales de éxito; ahora expresa `revisión manual pendiente`, no confirmación de eliminación, con recarga de cola de solo lectura. Regla estática nueva prohíbe regresión a la invocación de la Edge destructiva. TSX transpila sin errores de sintaxis en comprobación aislada, sin afirmar `npm run verify` o prueba visual.
+
+**Gate siguiente:** recuperar capacidad de compilación/Preview gratuito, `npm run verify` y prueba visual PO de la cola de revisión; auditoría restante de carreras reales service-role/Storage, recuperación de claims y CDN/D3-B. No habilitar purga que no puede certificar el objeto/version; conservar revisión manual como comportamiento seguro. A2 **ABIERTO**, A3/A4 y main no alterados.
