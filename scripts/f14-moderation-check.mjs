@@ -137,4 +137,37 @@ assert.ok(storageSmoke.includes('storage.list(uid,'), 'Storage smoke must verify
 assert.ok(!storageSmoke.includes('storage.info(path)'), 'Storage smoke must not depend on unavailable SDK info method')
 assert.ok(storageSmoke.includes('sessionStorage.setItem'), 'Storage smoke must support interrupted cleanup')
 assert.ok(qaHost.includes('<F14StorageProbe lang={lang} />'), 'Storage smoke must live in QA-only Preview')
+const updateDraft = 'supabase/drafts/20261009_f14_storage_held_media_update_guard.sql'
+const updateSmoke = 'supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql'
+const updateBehavior = 'supabase/tests/database/f14_storage_held_update_behavior_rollback.test.sql'
+const casGate = 'supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md'
+for (const f of [updateDraft, updateSmoke, updateBehavior, casGate])
+  assert.ok(existsSync(f), 'F14 staged fail-closed UPDATE artifact missing: '+f)
+const updateSql = read(updateDraft)
+assert.ok(updateSql.includes('AS RESTRICTIVE FOR UPDATE') &&
+  updateSql.includes('USING (public.f14_storage_media_path_unclaimed(bucket_id,name))') &&
+  updateSql.includes('WITH CHECK (public.f14_storage_media_path_unclaimed(bucket_id,name))'),
+  'Staged UPDATE guard must protect BOTH existing and new object paths')
+assert.ok(!updateSql.includes('DELETE FROM storage.objects'), 'Guard draft must never delete Storage metadata')
+for (const f of [updateSmoke, updateBehavior]) {
+  const testSql = read(f)
+  assert.ok(testSql.includes('BEGIN;') && testSql.trimEnd().endsWith('ROLLBACK;'),
+    'Staged RLS tests must be transactionally reversible: '+f)
+  assert.ok(!testSql.includes('\nCOMMIT;'), 'Staged RLS tests must never commit: '+f)
+}
+const behaviorSql = read(updateBehavior)
+assert.ok(behaviorSql.includes('f14_test_update_permission') &&
+  behaviorSql.includes('SET LOCAL ROLE authenticated') &&
+  behaviorSql.includes('Unheld UPDATE should be permitted') &&
+  behaviorSql.includes('Held UPDATE must affect zero rows'),
+  'Behavior-level SQL must simulate a future UPDATE grant while blocking held media')
+const casContract = read(casGate)
+assert.ok(casContract.includes('service_role') &&
+  casContract.includes('claim_id') &&
+  casContract.includes('manual_review'),
+  'CAS design must fail closed on service bypass, identity drift and uncertainty')
+assert.ok(parked.includes('status: 503') &&
+  !parked.includes('.remove(') && !parked.includes('fetch('),
+  'F14 moderation purge Edge must remain strictly parked; no Storage HTTP operations')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
