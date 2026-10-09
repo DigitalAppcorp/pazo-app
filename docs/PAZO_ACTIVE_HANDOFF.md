@@ -107,3 +107,10 @@ Preparar **release-readiness check** acotado de PR #36, sin reabrir módulos; ve
 - Checkpoints de CLI/CI: GitHub Actions `37953010063` **SUCCESS** en commit `cf333380d7de63a0dc8dd13ccd11c8eaed7cbd96`. Más adelante comprobar el SHA documental nuevo. 5 tests de estados/errores + pruebas estáticas de migraciones, además de tests del MVP.
 - **A3 sigue ABIERTA:** falta worker que congele escrituras concurrentes, adapte FK/RLS de comunidades, garantice comprobación de archivo/medios y recuperación, reautenticación de backend, borrado físico Storage/CDN y Auth al final; no ejecutar scripts en Supabase sin gate explícito. El usuario autorizó código DRAFT, no apply/merge/deploy.
 - La experiencia del usuario normal no cambia: `VITE_F14_A3_REQUESTS_ENABLED` OFF por defecto. No pedir prueba de borrar cuenta ni activar el flag hasta disponer de backend y aprobación.
+
+## F14 A3.4a — coordinator/worker lease DRAFT y QA de concurrencia (2026-10-09)
+
+- PR #38 contiene `src/features/account/deletionCoordinator.ts` (inspector puro de 12 condiciones, **destructiveExecutionAllowed=false en todas las situaciones**, secuencia propuesta sin llamadas a Storage/Auth/SQL) y pruebas de cada omisión, string truthy y lease expirado/versionado. No se usa para autorizar operaciones en navegador.
+- Tercero SQL DRAFT `supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql`: lease exclusivo/versionado para servicio, `SELECT ... FOR UPDATE`, CAS, duración 5–60s, validación y liberación; **sin borrado, sin alterar status, sin activar worker**. Una cuenta normal no recibe tokens ni grants; requiere status `reviewing` que todavía no se establece por ningún worker.
+- CI del código `991fb7b9` GitHub Actions `37953868080` SUCCESS (después de reparar expectativa de test). CI del SQL `bf1610f3` run `37954129413` SUCCESS. Se añadió clasificación del archivo privado y tokens de lease en `docs/PAZO_DATA_INVENTORY.md`.
+- Próximo gate técnico: integración de reautenticación desde servidor, bloqueo efectivo de writes y protección de FK; D3-A Storage/CDN permanece blocker. Ningún SQL aplicado, ninguna cuenta/pet/archivo borrado, ni merge o despliegue, ni gasto.

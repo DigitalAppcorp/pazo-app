@@ -297,3 +297,23 @@ Debe cerrarse para:
 | Vercel | hosting/deploy | conector visible pero 0 teams/proyectos | deployment/log metadata | conectar cuenta/proyecto correcto antes de auditar env/spend |
 
 Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producción.
+
+## 17. Eliminación de cuenta y conservación privada de aportaciones ajenas — F14 A3 DRAFT
+
+**Estado de tratamiento:** **PROPUESTA NO ACTIVADA**. Las tablas/RPC y el coordinador del PR #38 son únicamente código en GitHub y SQL `supabase/drafts/` con aborto explícito. Ninguna solicitud ni archivo privado de eliminación está operando en Supabase hospedado.
+
+**Categorías previstas en el backend si el PO autoriza activar A3:**
+- `account_private.deletion_jobs`: id interno del job, referencia al usuario que lo solicitó, estado, fecha de recepción, fecha de actualización; clasificación **privada de cuenta y operativa sensible**;
+- `account_private.deletion_events`: bitácora mínima por job/acción/fecha y razones sanitizadas, sin email/textos originales;
+- `account_private.deletion_post_tombstones`: identificador de relación + fecha de post desidentificado, sin texto/fotografía/nombre del titular;
+- `account_private.deletion_preserved_posts` y `deletion_preserved_comments`: **contenido UGC de otras cuentas**, autores internos, fechas y relaciones con posts/comunidades; se trata como **contenido privado de archivo sensible** después del cierre del propietario. No exponer como Feed público, resultados de búsqueda, analytics, ni a expropietarios;
+- `account_private.deletion_worker_leases`: identificador job, token/version/expiración de exclusión; **secreto operacional** exclusivo de servicio, nunca en cliente/telemetría;
+- inventario de archivos por bucket/ruta/versión requerirá categoría privada de metadata, sin almacenar bytes en logs.
+
+**Finalidad:** atender solicitudes verificadas sin borrar aportaciones ajenas y permitir recuperación idempotente; no analítica, monetización ni reutilización de UGC. **Proveedor propuesto:** Supabase DB/Auth/Storage ya conectado; no se añade tercero.
+
+**Acceso/seguridad pretendido:** `account_private` no expuesto en Data API; RLS habilitada y grants revocados a `anon`/`authenticated`, RPC de solicitante limitado a estado/cantidades propias, operación de archivo y lease solamente `service_role`. Auditoría de claims/ACL y prueba real con JWT todavía pendientes. Nunca service-role en navegador.
+
+**Retención:** las metas D3-B del PO para aportaciones archivadas (revisión a 90 días y resolución humana antes de 180 días) NO están implementadas ni contrastadas con proveedores. Políticas públicas NO deben prometer esos plazos. El cierre masivo de los datos actuales de prueba pre-lanzamiento es una operación distinta y requerirá inventario/autorización propia.
+
+**Bloqueos:** congelación real de escrituras, verificación de D3-A Storage/CDN, archive de comentarios/likes legacy y referencias, sesión antigua, Auth al final, control de backups y pruebas de borrado. Ningún worker destructivo se ha desplegado.
