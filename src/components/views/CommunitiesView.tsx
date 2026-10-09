@@ -11,6 +11,7 @@ import { CommunityDetailView } from './CommunityDetailView'
 
 interface CommunitiesViewProps {
   currentPet: Pet | null
+  blockedIds: ReadonlySet<string>
   canUseCommunities: boolean
   createCommunityRequestKey?: number
   requestedCommunityId?: string | null
@@ -20,6 +21,7 @@ interface CommunitiesViewProps {
 
 export const CommunitiesView = ({
   currentPet,
+  blockedIds,
   canUseCommunities,
   createCommunityRequestKey = 0,
   requestedCommunityId = null,
@@ -108,6 +110,7 @@ export const CommunitiesView = ({
     return (
       <>
         <CommunityDetailView
+          blockedIds={blockedIds}
           communityId={selectedCommunityId}
           currentPet={currentPet}
           onBack={() => setSelectedCommunityId(null)}
@@ -188,7 +191,7 @@ export const CommunitiesView = ({
           </div>
         ) : (
           <div className="space-y-3">
-            {communities.map((community) => (
+            {communities.filter(c => !blockedIds.has(c.ownerUserId)).map((community) => (
               <div
                 key={community.id}
                 role="button"

@@ -3,9 +3,14 @@ import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { IconPaw } from '../icons/PazoIcons'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
 
 interface PublicProfileViewProps {
   targetPetId: string
+  blockedIds: ReadonlySet<string>
+  ownBlockIds: ReadonlySet<string>
+  onBlock: (id: string) => Promise<void>
+  onUnblock: (id: string) => Promise<void>
   currentPetId?: string
   ownedPetIds: string[]
   onClose: () => void
@@ -14,6 +19,7 @@ interface PublicProfileViewProps {
 
 export const PublicProfileView = ({
   targetPetId,
+  blockedIds, ownBlockIds, onBlock, onUnblock,
   currentPetId,
   ownedPetIds,
   onClose,
@@ -21,6 +27,10 @@ export const PublicProfileView = ({
 }: PublicProfileViewProps) => {
   const [petProfile, setPetProfile] = useState<Pet | null>(null)
   const [petPosts, setPetPosts] = useState<Post[]>([])
+  const [ownerUserId, setOwnerUserId] = useState<string | null>(null)
+  const [blockBusy, setBlockBusy] = useState(false)
+  const [blockError, setBlockError] = useState('')
+  const [reportOpen, setReportOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'posts' | 'info'>('posts')
 
@@ -39,10 +49,12 @@ export const PublicProfileView = ({
       }
 
       setIsLoading(true)
+      setPetProfile(null)
+      setOwnerUserId(null)
       try {
         const { data: petData, error: petError } = await supabase
           .from('pets')
-          .select('id,name,species,age,photo_url,created_at,bio,breed,gender,is_lost')
+          .select('id,owner_id,name,species,age,photo_url,created_at,bio,breed,gender,is_lost')
           .eq('id', targetPetId)
           .maybeSingle()
 
@@ -55,6 +67,7 @@ export const PublicProfileView = ({
           return
         }
 
+        if (isMounted) setOwnerUserId(petData.owner_id)
         // Paso 2: Conexión de Datos Reales (Seguidores, Siguiendo, Fundador)
         const { count: followers } = await supabase
           .from('follows')
@@ -149,9 +162,21 @@ export const PublicProfileView = ({
     }
   }, [targetPetId])
 
+  const isBlocked = ownerUserId ? blockedIds.has(ownerUserId) : false
+  const blockedByMe = ownerUserId ? ownBlockIds.has(ownerUserId) : false
+  const changeBlock = async () => {
+    if (!ownerUserId || blockBusy) return
+    setBlockBusy(true); setBlockError('')
+    try {
+      if (blockedByMe) await onUnblock(ownerUserId)
+      else if (window.confirm(lang === 'es' ? '¿Bloquear esta cuenta y todas sus mascotas?' : 'Block this account and all its pets?')) await onBlock(ownerUserId)
+    } catch { setBlockError(lang === 'es' ? 'No se pudo actualizar el bloqueo' : 'Could not update block') }
+    finally { setBlockBusy(false) }
+  }
   return (
     <div className="absolute inset-0 z-[100] bg-[#FDFBF7] overflow-y-auto animate-slide-up flex flex-col font-['Quicksand','Nunito',sans-serif] antialiased text-[#204E4A]">
 
+      {reportOpen && <ReportDialog lang={lang} target={{ kind: 'pet_profile', id: targetPetId }} onClose={() => setReportOpen(false)} />}
       {/* Paso 3: Orbes de Luz Ambiental para Glassmorphism Avanzado */}
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
         <div className="bg-[#E1E53F]/40 blur-[100px] w-96 h-96 rounded-full absolute -top-10 -left-10 animate-pulse"></div>
@@ -173,6 +198,12 @@ export const PublicProfileView = ({
         </span>
         <div className="w-24"></div>
       </div>
+      {ownerUserId && !ownedPetIds.includes(targetPetId) && <div className="relative z-30 p-4">
+        <button type="button" disabled={blockBusy || (isBlocked && !blockedByMe)} onClick={() => void changeBlock()} className="rounded-xl bg-[#204E4A] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">{blockedByMe ? (lang === 'es' ? 'Desbloquear cuenta' : 'Unblock') : (lang === 'es' ? 'Bloquear cuenta' : 'Block')}</button>
+        <button type="button" onClick={() => setReportOpen(true)} className="ml-2 rounded-xl bg-white px-4 py-2 text-xs font-bold underline">{lang === 'es' ? 'Denunciar perfil' : 'Report profile'}</button>
+        {blockError && <p role="alert" className="text-red-700 text-xs">{blockError}</p>}
+        {isBlocked && <p className="text-xs mt-2">{lang === 'es' ? 'Contenido oculto en tu sesión. El contenido público sigue disponible sin iniciar sesión.' : 'Hidden while signed in. Public content remains accessible when signed out.'}</p>}
+      </div>}
 
       {/* Contenedor Principal */}
       <div className="p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto space-y-8 flex-1 relative z-10">
@@ -183,7 +214,7 @@ export const PublicProfileView = ({
               {lang === 'es' ? 'Cargando perfil...' : 'Loading profile...'}
             </p>
           </div>
-        ) : !petProfile ? (
+        ) : isBlocked ? (<p className="relative z-20 text-center p-8">{lang === 'es' ? 'Perfil oculto por bloqueo' : 'Profile hidden by block'}</p>) : !petProfile ? (
           <div className="text-center py-16 space-y-4 bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/60">
             <p className="text-lg font-bold text-[#204E4A]">
               {lang === 'es'

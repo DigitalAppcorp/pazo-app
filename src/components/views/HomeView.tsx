@@ -3,9 +3,12 @@ import type { Post } from '../../types/pazo'
 import { IconBookmark, IconPaw } from '../icons/PazoIcons'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
 
 interface HomeViewProps {
   posts: Post[]
+  onHidePost: (id: string) => Promise<void>
   onLikePost: (postId: string) => void
   onSavePost: (postId: string) => void
   onAddComment: (postId: string, text: string) => Promise<boolean>
@@ -93,9 +96,10 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
 }
 
 export const HomeView = ({
-  posts, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
+  posts, onHidePost, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
+  const [reportTarget, setReportTarget] = useState<{ kind: ReportTarget; id: string; label?: string } | null>(null)
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
   const [loadingCommentsPostId, setLoadingCommentsPostId] = useState<string | null>(null)
   const [newCommentText, setNewCommentText] = useState('')
@@ -199,6 +203,8 @@ export const HomeView = ({
             <PostCard
               key={post.id}
               post={post}
+              onHidePost={onHidePost}
+              onReport={(kind,id,label) => setReportTarget({ kind, id, label })}
               currentPetId={currentPetId}
               ownedPetIds={ownedPetIds}
               lang={lang}
@@ -216,12 +222,15 @@ export const HomeView = ({
           ))}
         </div>
       )}
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
     </div>
   )
 }
 
 interface PostCardProps {
   post: Post
+  onHidePost: (id: string) => Promise<void>
+  onReport: (kind: 'feed_post' | 'feed_comment', id: string, label?: string) => void
   currentPetId: string
   ownedPetIds: string[]
   lang: 'es' | 'en'
@@ -237,19 +246,21 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, onHidePost, onReport, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+  const [avatarFailed, setAvatarFailed] = useState(!post.petAvatar)
+  const actionsMenuRef = useRef<HTMLDetailsElement>(null)
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, currentPetId)
 
   return (
     <article ref={elementRef as React.RefObject<HTMLElement>} className="bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden transition-all">
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div onClick={() => onSelectPetProfile(post.petId)} className={`w-10 h-10 rounded-full overflow-hidden shadow-xs shrink-0 cursor-pointer ${post.isRecommended ? 'p-0.5 bg-gradient-to-tr from-[#E1E53F] to-[#204E4A]' : ''}`}>
-            <img src={post.petAvatar} alt={post.petName} className="w-full h-full object-cover" />
-          </div>
-          <div>
+      <div className="p-4 flex items-start justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <button type="button" onClick={() => onSelectPetProfile(post.petId)} aria-label={(lang === 'es' ? 'Ver perfil de ' : 'View profile of ') + post.petName} className={`w-10 h-10 rounded-full overflow-hidden shadow-xs shrink-0 cursor-pointer flex items-center justify-center text-[#204E4A] bg-[#E1E53F]/20 ${post.isRecommended ? 'ring-2 ring-[#E1E53F]' : ''}`}>
+            {avatarFailed ? <IconPaw size={20} /> : <img src={post.petAvatar} alt="" onError={() => setAvatarFailed(true)} className="w-full h-full object-cover" />}
+          </button>
+          <div className="min-w-0 flex-1">
             <h3 onClick={() => onSelectPetProfile(post.petId)} className="font-extrabold text-sm text-[#204E4A] leading-tight flex items-center gap-1.5 cursor-pointer hover:underline">
               <span>{post.petName}</span>
               {post.isRecommended ? (
@@ -264,14 +275,38 @@ const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCo
             <p className="text-[11px] text-[#5C7470]">{post.location} &bull; {displayTime}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1">
           <FollowButton
             currentPetId={currentPetId}
             targetPetId={post.petId}
             canFollow={!ownedPetIds.includes(post.petId)}
             lang={lang}
           />
-          <button className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold" title="Opciones">&bull;&bull;&bull;</button>
+          <details ref={actionsMenuRef} className="relative z-10" onKeyDown={(event) => {
+            if (event.key === 'Escape') { actionsMenuRef.current?.removeAttribute('open'); event.preventDefault() }
+          }} onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) actionsMenuRef.current?.removeAttribute('open')
+          }}>
+            <summary aria-label={lang === 'es' ? 'Opciones de la publicación' : 'Post options'} title={lang === 'es' ? 'Opciones' : 'Options'} className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-full text-[#204E4A] hover:bg-[#FAF8F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#204E4A] [&::-webkit-details-marker]:hidden">
+              <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" />
+              </svg>
+            </summary>
+            <div className="absolute right-0 top-full z-30 mt-1 min-w-36 rounded-2xl border border-[#204E4A]/10 bg-white p-1.5 shadow-lg">
+              <button type="button" onClick={() => {
+                actionsMenuRef.current?.removeAttribute('open')
+                void onHidePost(post.id)
+              }} className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-xs font-bold text-[#204E4A] hover:bg-[#FAF8F5]">
+                {lang === 'es' ? 'Ocultar publicación' : 'Hide post'}
+              </button>
+              <button type="button" onClick={() => {
+                actionsMenuRef.current?.removeAttribute('open')
+                onReport('feed_post', post.id, (lang === 'es' ? 'Publicación de ' : 'Post by ') + post.petName)
+              }} className="flex min-h-11 w-full items-center rounded-xl px-4 text-left text-xs font-bold text-[#204E4A] hover:bg-[#FAF8F5]">
+                {lang === 'es' ? 'Denunciar publicación' : 'Report post'}
+              </button>
+            </div>
+          </details>
         </div>
       </div>
       {post.photoUrl && (
@@ -323,6 +358,7 @@ const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCo
                     <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
                     <span className="text-[#5C7470]">{comment.text}</span>
                     <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
+                    <button type="button" onClick={() => onReport('feed_comment',comment.id, (lang === 'es' ? 'Comentario de ' : 'Comment by ') + comment.authorName)} className="text-[10px] font-bold underline text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
                   </div>
                 </div>
               ))}

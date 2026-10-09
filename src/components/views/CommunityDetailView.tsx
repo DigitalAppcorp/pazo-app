@@ -24,6 +24,8 @@ import {
   updateCommunity,
 } from '../../services/communityService'
 import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
 import {
   IconCamera,
   IconChat,
@@ -35,6 +37,7 @@ import {
 
 interface CommunityDetailViewProps {
   communityId: string
+  blockedIds: ReadonlySet<string>
   currentPet: Pet | null
   onBack: () => void
   onCommunityChanged?: () => void
@@ -51,6 +54,7 @@ const formatDate = (value: string, lang: 'es' | 'en') =>
 
 export const CommunityDetailView = ({
   communityId,
+  blockedIds,
   currentPet,
   onBack,
   onCommunityChanged,
@@ -74,6 +78,7 @@ export const CommunityDetailView = ({
   >({})
   const [commentDraft, setCommentDraft] = useState('')
   const [isCommentBusy, setIsCommentBusy] = useState(false)
+  const [reportTarget, setReportTarget] = useState<{ kind: ReportTarget; id: string } | null>(null)
 
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
@@ -95,14 +100,14 @@ export const CommunityDetailView = ({
       ])
 
       setCommunity(nextCommunity)
-      setMembers(nextMembers)
-      setPosts(nextPosts)
+      setMembers(nextMembers.filter(m => !blockedIds.has(m.userId)))
+      setPosts(nextPosts.filter(p => !blockedIds.has(p.authorUserId)))
     } catch (error) {
       console.error('Error loading community:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [communityId, currentPet?.id])
+  }, [communityId, currentPet?.id, blockedIds])
 
   useEffect(() => {
     void loadCommunity()
@@ -116,7 +121,7 @@ export const CommunityDetailView = ({
 
   const refreshPosts = async () => {
     const nextPosts = await fetchCommunityPosts(communityId, currentPet?.id)
-    setPosts(nextPosts)
+    setPosts(nextPosts.filter(p => !blockedIds.has(p.authorUserId)))
   }
 
   const handleMembership = async () => {
@@ -218,7 +223,7 @@ export const CommunityDetailView = ({
   const loadComments = async (postId: string) => {
     try {
       const comments = await fetchCommunityPostComments(postId)
-      setCommentsByPost((current) => ({ ...current, [postId]: comments }))
+      setCommentsByPost((current) => ({ ...current, [postId]: comments.filter(c => !blockedIds.has(c.authorUserId || '')) }))
     } catch (error) {
       console.error('Error loading Community comments:', error)
     }
@@ -406,6 +411,7 @@ export const CommunityDetailView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-8">
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
       <button
         type="button"
         onClick={onBack}
@@ -672,6 +678,7 @@ export const CommunityDetailView = ({
                     </div>
                   </div>
 
+                  <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id})} className="text-[10px] font-bold underline text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
                   {post.canDelete && (
                     <button
                       type="button"
@@ -735,6 +742,7 @@ export const CommunityDetailView = ({
                             <p className="text-[10px] font-black text-[#204E4A]">
                               {comment.authorName}
                             </p>
+                            <button type="button" onClick={() => setReportTarget({kind:'community_comment',id:comment.id})} className="text-[9px] font-bold underline text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>
                             {comment.canDelete && (
                               <button
                                 type="button"

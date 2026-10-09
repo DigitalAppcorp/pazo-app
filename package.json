@@ -11,16 +11,31 @@
     "test:hardening": "node scripts/hardening-check.mjs",
     "test:architecture": "node scripts/architecture-check.mjs",
     "test:privacy": "node scripts/privacy-check.mjs",
-    "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops",
+    "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops && npm run test:product-rollout && npm run test:f14",
+    "test:f14": "node scripts/f14-social-check.mjs && node scripts/f14-moderation-check.mjs && node --test supabase/drafts/f14_media_purge_v2/mediaGuard.test.mjs supabase/drafts/f14_media_purge_v2/exactVersionPreflight.test.mjs supabase/drafts/f14_media_purge_v2/hostedClaimEvidence.test.mjs supabase/drafts/f14_media_purge_v2/hosted_claim_evidence_readonly.test.mjs supabase/drafts/f14_media_purge_v2/held_claim_reconciliation_readonly.test.mjs supabase/drafts/f14_media_purge_v2/exactVersionOutcome.test.mjs supabase/drafts/f14_media_purge_v2/serviceEvidenceRpc.test.mjs supabase/drafts/f14_media_purge_v2/serviceReaderDryRun.test.mjs supabase/drafts/f14_media_purge_v2/privilegedAttemptProtocol.test.mjs supabase/drafts/f14_media_purge_v2/privilegedAttemptLedgerDraft.test.mjs",
+    "local:test:f14": "npx supabase --workdir .local-supabase test db --local .local-supabase/supabase/tests/database/f14_social.test.sql",
     "backup:storage": "node scripts/backup-storage.mjs",
-    "test:ops": "node --check scripts/backup-storage.mjs"
+    "test:ops": "node --check scripts/backup-storage.mjs",
+    "test:product-rollout": "node scripts/product-rollout-check.mjs",
+    "verify": "npm run test:governance && npm run build",
+    "local:prepare": "node scripts/prepare-local-supabase.mjs",
+    "local:env": "node scripts/configure-local-env.mjs",
+    "local:migrate": "npx supabase --workdir .local-supabase migration up --local",
+    "local:migration:list": "npx supabase --workdir .local-supabase migration list --local",
+    "local:test:db": "npx supabase --workdir .local-supabase test db --local .local-supabase/supabase/tests/database/local_dev_contract.test.sql",
+    "local:test:flow": "node scripts/verify-local-flow.mjs",
+    "local:test:cold": "node scripts/verify-local-cold-start.mjs",
+    "local:setup": "npm run local:prepare && npx supabase --workdir .local-supabase start && npm run local:env && npm run local:migrate",
+    "dev:local": "vite --host 127.0.0.1 --port 5173",
+    "verify:local": "npm run local:test:db && npm run local:test:flow && npx supabase --workdir .local-supabase db lint --local --schema public --level error --fail-on error && npm run verify",
+    "test:f14:jwt": "node scripts/f14-signed-jwt-authorization.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
+    "qrcode-generator": "2.0.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4",
-    "qrcode-generator": "2.0.4"
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

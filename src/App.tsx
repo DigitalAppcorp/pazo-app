@@ -50,6 +50,9 @@ import { HomeView } from './components/views/HomeView'
 import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
+import { PlacesDemandExperiment } from './features/places/validation/PlacesDemandExperiment'
+import { useSocialSafety } from './features/moderation/useSocialSafety'
+import { SafetySettings } from './features/moderation/SafetySettings'
 import { PetView } from './components/views/PetView'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
@@ -79,6 +82,7 @@ const getPublicRescueRoute = () => {
 
 const FEED_PAGE_SIZE = 10
 const NOTIFICATIONS_PAGE_SIZE = 10
+const PLACES_MAP_DEVELOPMENT_ONLY = import.meta.env.DEV
 
 const dateKey = (date = new Date()) =>
   [
@@ -157,6 +161,8 @@ const EMPTY_FEED_PAGINATION: FeedPaginationState = {
 
 function PazoMain() {
   const { user, loading, signIn } = useAuth()
+  const safety = useSocialSafety(user?.id)
+  const [showSafetySettings, setShowSafetySettings] = useState(false)
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
 
@@ -361,6 +367,7 @@ function PazoMain() {
   const formatPostRow = (post: any, isRecommended: boolean): Post => ({
     id: post.id,
     petId: post.pet_id,
+    ownerUserId: post.user_id,
     petName: post.pet_name,
     petSpecies: post.pet_species,
     petAvatar: post.pet_avatar,
@@ -429,16 +436,11 @@ function PazoMain() {
 
       let socialRows: any[] = []
       if (!pagination.socialExhausted && pagination.socialPetIds.length > 0) {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .in('pet_id', pagination.socialPetIds)
-          .order('created_at', { ascending: false })
-          .order('id', { ascending: false })
-          .range(
-            pagination.socialOffset,
-            pagination.socialOffset + FEED_PAGE_SIZE - 1
-          )
+        let query = supabase.from('posts').select('*').in('pet_id', pagination.socialPetIds)
+        if (safety.blockedIds.size) query = query.not('user_id', 'in', `(${[...safety.blockedIds].join(',')})`)
+        if (safety.hiddenIds.size) query = query.not('id', 'in', `(${[...safety.hiddenIds].join(',')})`)
+        const { data, error } = await query.order('created_at', { ascending: false })
+          .order('id', { ascending: false }).range(pagination.socialOffset, pagination.socialOffset + FEED_PAGE_SIZE - 1)
 
         if (error) {
           throw error
@@ -465,16 +467,14 @@ function PazoMain() {
         recommendationRows = data || []
       }
 
-      const socialPosts = socialRows.map((post) => formatPostRow(post, false))
-      const recommendedPosts = recommendationRows.map((post) =>
-        formatPostRow(post, true)
-      )
+      const socialPosts = socialRows.filter((post) => !safety.blockedIds.has(post.user_id) && !safety.hiddenIds.has(post.id)).map((post) => formatPostRow(post, false))
+      const recommendedPosts = recommendationRows.filter((post) => !safety.blockedIds.has(post.user_id) && !safety.hiddenIds.has(post.id)).map((post) => formatPostRow(post, true))
 
       const page = blendFeeds(socialPosts, recommendedPosts)
         .slice(0, FEED_PAGE_SIZE)
 
-      const consumedSocial = page.filter((post) => !post.isRecommended).length
-      const consumedRecommendations = page.filter((post) => post.isRecommended).length
+      const consumedSocial = socialRows.length
+      const consumedRecommendations = recommendationRows.length
 
       pagination.socialOffset += consumedSocial
       pagination.recommendationOffset += consumedRecommendations
@@ -787,7 +787,8 @@ function PazoMain() {
           author:pets!post_comments_author_pet_id_fkey (
             name,
             species,
-            photo_url
+            photo_url,
+            owner_id
           )
         `)
         .eq('post_id', postId)
@@ -795,12 +796,16 @@ function PazoMain() {
 
       if (error) throw error
 
-      const loadedComments = (data || []).map((row: any) => {
+      const loadedComments = (data || []).filter((row: any) => {
+        const author = Array.isArray(row.author) ? row.author[0] : row.author
+        return !safety.blockedIds.has(author?.owner_id)
+      }).map((row: any) => {
         const author = Array.isArray(row.author) ? row.author[0] : row.author
 
         return {
           id: row.id,
           authorPetId: row.author_pet_id,
+          authorUserId: author?.owner_id,
           authorName: author?.name || (lang === 'es' ? 'Mascota' : 'Pet'),
           authorPet: author?.species || 'otro',
           authorAvatar: author?.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
@@ -1435,18 +1440,27 @@ function PazoMain() {
       <div className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
-        {selectedPublicProfileId && (
+        {selectedPublicProfileId && safety.ready && (
           <PublicProfileView
             targetPetId={selectedPublicProfileId}
             currentPetId={currentPet?.id}
             ownedPetIds={pets.map((pet) => pet.id)}
             onClose={() => setSelectedPublicProfileId(null)}
             lang={lang}
+            blockedIds={safety.blockedIds}
+            ownBlockIds={safety.ownBlockIds}
+            onBlock={safety.block}
+            onUnblock={safety.unblock}
           />
         )}
 
-        {isSearchOpen && (
+        {showSafetySettings && safety.ready && (
+          <SafetySettings lang={lang} ownBlocks={safety.ownBlockIds} hidden={safety.hiddenIds} onUnblock={safety.unblock} onUnhide={safety.unhide} onClose={() => setShowSafetySettings(false)} />
+        )}
+
+        {isSearchOpen && safety.ready && (
           <GlobalSearchView
+            blockedIds={safety.blockedIds}
             canSearch={Boolean(user?.id) && !isDemoUser}
             onClose={() => setIsSearchOpen(false)}
             onSelectPet={(petId) => {
@@ -1666,17 +1680,19 @@ function PazoMain() {
                 }
               }}
             >
-              {isFeedLoading ? (
+              {isFeedLoading || (Boolean(user?.id) && !safety.ready) ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
-                  <p className="text-xs font-bold text-[#5C7470] tracking-wider uppercase">Sincronizando feed...</p>
+                  <p className="text-xs font-bold text-[#5C7470] tracking-wider uppercase">{safety.error ? 'Protección social no disponible' : 'Sincronizando feed...'}</p>
+                  {safety.error && <button type="button" className="font-bold underline" onClick={() => void safety.refresh()}>Reintentar</button>}
                 </div>
               ) : (
                 <>
                   {activeTab === 'inicio' && (
                     <>
                       <HomeView
-                        posts={posts}
+                        posts={posts.filter(post => !safety.blockedIds.has(post.ownerUserId || '') && !safety.hiddenIds.has(post.id))}
+                        onHidePost={async (id) => { try { await safety.hide(id) } catch { window.alert('No se pudo ocultar la publicación.') } }}
                         onLikePost={handleLikePost}
                         onSavePost={handleSavePost}
                         onAddComment={handleAddComment}
@@ -1696,6 +1712,7 @@ function PazoMain() {
 
                   {activeTab === 'comunidades' && (
                     <CommunitiesView
+                      blockedIds={safety.blockedIds}
                       currentPet={currentPet}
                       canUseCommunities={Boolean(user?.id) && !isDemoUser}
                       createCommunityRequestKey={communityCreateRequestKey}
@@ -1706,14 +1723,21 @@ function PazoMain() {
                   )}
 
                   {activeTab === 'mapa' && (
-                    <MapView
-                      currentPet={currentPet}
-                      canUsePlaces={Boolean(user?.id) && !isDemoUser}
-                      suggestPlaceRequestKey={placeSuggestionRequestKey}
-                      requestedPlaceId={placeTargetId}
-                      requestedPlaceKey={placeTargetKey}
-                      lang={lang}
-                    />
+                    PLACES_MAP_DEVELOPMENT_ONLY ? (
+                      <MapView
+                        currentPet={currentPet}
+                        canUsePlaces={Boolean(user?.id) && !isDemoUser}
+                        suggestPlaceRequestKey={placeSuggestionRequestKey}
+                        requestedPlaceId={placeTargetId}
+                        requestedPlaceKey={placeTargetKey}
+                        lang={lang}
+                      />
+                    ) : (
+                      <PlacesDemandExperiment
+                        canTrack={Boolean(user?.id) && !isDemoUser}
+                        lang={lang}
+                      />
+                    )
                   )}
 
                   {activeTab === 'mascota' && (
@@ -1735,6 +1759,7 @@ function PazoMain() {
                       onOpenCareAgenda={() => setIsCareOpen(true)}
                       documentCount={documentCount}
                       onOpenDocuments={() => setIsDocumentsOpen(true)}
+                      onOpenSafetySettings={() => setShowSafetySettings(true)}
                       onOpenLostAlert={() => setIsAlertOpen(true)}
                       lang={lang}
                       userPosts={profilePosts}

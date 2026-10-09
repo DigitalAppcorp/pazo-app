@@ -21,6 +21,7 @@ export interface Pet {
 export interface PostComment {
   id: string
   authorPetId?: string
+  authorUserId?: string
   authorName: string
   authorPet: string
   authorAvatar: string
@@ -32,6 +33,7 @@ export interface PostComment {
 export interface Post {
   id: string
   petId: string
+  ownerUserId?: string
   petName: string
   petSpecies: Species
   petAvatar: string
@@ -89,6 +91,7 @@ export interface CommunityPostComment {
   id: string
   postId: string
   authorPetId: string
+  authorUserId?: string
   authorName: string
   authorSpecies: Species
   authorAvatar: string

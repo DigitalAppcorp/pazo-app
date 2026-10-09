@@ -397,3 +397,29 @@ No construir extensiones solo porque estén instrumentadas.
 
 ### Siguiente módulo
 Explore/Search es el siguiente candidato para **auditoría Gate 0–2**. Esto no autoriza implementación.
+
+
+## 14. Gate 9 rollout adjustment — demand validation
+
+**Product Owner decision: 2026-10-07**
+
+Fase 8 remains technically COMPLETADA. The public rollout is now deliberately PAUSED.
+
+Reason:
+- enabling the map in the published app introduces provider/deployment cost before user demand is validated;
+- the Product Owner declined upgrading to a paid Vercel plan for this purpose.
+
+Runtime policy:
+- `npm run dev`: real Mapbox Places module remains available for engineering/product development;
+- Vite builds / published app: real Mapbox module is not mounted;
+- published Map tab renders `PlacesDemandExperiment`;
+- no geolocation request, Mapbox request, place query or check-in is initiated by the fake door.
+
+Validation contract:
+- canonical doc: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`;
+- module key: `places_map`;
+- source: `bottom_nav_map`;
+- measurement: unique account views + deduped account interest via existing generic module validation tables.
+
+This rollout decision does not erase Fase 8 engineering work and does not reopen Gate 8.
+It moves the module itself into an **EXPERIMENTO ACTIVO** at Gate 9 until demand/cost are re-evaluated.

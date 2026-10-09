@@ -1,370 +1,96 @@
-# PAZO — ACTIVE HANDOFF
-
-**Project Brain OS:** v1.3.0  
-**Canonical OS:** `DigitalAppcorp/project-brain-os`  
-**Product Owner:** Brandon  
-**Current state:** Fase 12 COMPLETADA  
-**Active product module:** Production Hardening — infraestructura obligatoria  
-**Gate:** Production Hardening Gate 8 — PR #30 MERGED / EXTERNAL HARDENING PENDING  
-**Decision:** MVP REDUCIDO  
-**Supabase production mutation authorization:** Fase 12 aplicada y verificada
-
-## Startup protocol
-
-Before acting:
-1. activate/read Project Brain OS v1.3.0 from `DigitalAppcorp/project-brain-os`;
-2. read `AGENTS.md`;
-3. read this file;
-4. read `docs/PAZO_MASTER_ROADMAP.md`;
-5. read `docs/PAZO_MODULE_LIFECYCLE.md`;
-6. audit the real current `main` and open PRs before changing code.
-
-Do not reconstruct project state from chat memory when repository evidence exists.
-
-## Working model
-
-- Brandon is Product Owner.
-- ChatGPT owns product reasoning, architecture, implementation, backend, security, tests, Git/PR and durable docs.
-- Antigravity/local is execution + visual validation only.
-- Never mutate Supabase without explicit Product Owner authorization.
-- Preserve already-approved behavior and avoid silent regressions.
-
-## Fase 8 — final closure
-
-**Status:** COMPLETADA / Gate 9 measurement.
-
-Core merge:
-- PR #20;
-- merge commit `ca3fedd977e0720839a420f2e3673942871b7a61`.
-
-Closure correction:
-- PR #22;
-- merge commit `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
-- `main` verified after merge.
-
-Validated core:
-- real Mapbox map: PASS;
-- explicit ephemeral device location: PASS;
-- exact GPS not persisted;
-- curated Places catalog: PASS;
-- search/filter/detail: PASS;
-- private/visible check-in: PASS;
-- 2-hour expiry: PASS;
-- moving between places closes previous presence: PASS;
-- manual checkout: PASS;
-- F5 persistence: PASS;
-- second-account privacy/isolation: PASS;
-- place suggestion flow: PASS.
-
-Closure deliverables:
-- 6 contextual Place fake doors: PASS;
-- fake-door backend registry: PASS;
-- `Me interesa`: PASS;
-- fake-door F5 persistence: PASS;
-- 6 reusable glTF category models: PASS;
-- veterinarian 3D visual validation: PASS;
-- park/trail visual validation: PASS;
-- 2D fallback retained;
-- Product Owner build/runtime validation: PASS.
-
-Supabase:
-- `20261007052747 phase_8_places_map_core`;
-- `20261007052749 phase_8_places_initial_catalog`;
-- `20261007053859 fix_place_checkin_checkout_rls`;
-- `20261007072355 place_extension_experiments` registry applied;
-- 6 `places_*` module keys present;
-- Security Advisor baseline unchanged;
-- Leaked Password Protection remains global known debt.
-
-**Scope Closure Reconciliation: PASS.**
-
-## Fase 12 — final closure
-
-**Status:** COMPLETADA / Gate 9 measurement.
-
-Product:
-- Explore was redefined as PAZO Global Search;
-- searchable identity = public pet profiles, never human accounts;
-- MVP providers = Pets + Communities + Places;
-- Search lives in Header;
-- Communities is a primary bottom-nav module;
-- Posts and Events are outside this MVP.
-
-Delivery:
-- federated Search with independent providers;
-- deterministic per-domain ranking;
-- minimal type filters;
-- debounce + stale-response protection;
-- partial-provider failure tolerance;
-- Search → public pet profile: PASS;
-- Search → Community: PASS;
-- Search → Map Place: PASS;
-- manual return/navigation does not reopen consumed targets: PASS;
-- old Explore container removed;
-- Communities core reused rather than rebuilt.
-
-Build/runtime evidence:
-- pre-telemetry local build: PASS;
-- final post-telemetry local build: PASS;
-- Product Owner runtime/visual QA: PASS;
-- Pet search: PASS;
-- Community search: PASS;
-- Place search: PASS;
-- empty state/filter behavior: PASS;
-- Feed / Communities / Map / My Pet smoke test: PASS;
-- F5 persistence/stability smoke test: PASS.
-
-Supabase:
-- `20261007102632 phase_12_search_telemetry`;
-- `20261007102748 index_search_usage_events_user`;
-- RLS/grants/constraints: PASS;
-- anon telemetry access: blocked;
-- authenticated client: approved INSERT columns only;
-- no client SELECT/UPDATE/DELETE;
-- no raw query, entity id, owner id or GPS stored;
-- live runtime telemetry observed: 33 events / 1 session during Product Owner QA;
-- runtime telemetry included search opens, searches with/without results, all four filter states used, and result opens for pet/community/place;
-- Security Advisor: no new Fase 12 security findings;
-- FK index performance finding corrected forward.
-
-Git final:
-- PR #28 merged;
-- merge commit `6ebc2e5d70b2cee37e7444916a03479b9b9d1d90`;
-- `main` verified after merge;
-- Global Search code present on `main`;
-- both Phase 12 migration files present on `main`;
-- canonical Phase 12 docs on `main` show Gate 8 CLOSED / Phase 12 COMPLETE;
-- Vercel failures were quota/rate-limit only and were not used as build evidence.
-
-**Scope Closure Reconciliation: PASS.**
-
-Next:
-- Production Hardening ocupa temporalmente el Carril de Implementación;
-- Fase 12 permanece COMPLETADA / Gate 9 medición;
-- no iniciar Fase 13 hasta cerrar el tranche crítico de hardening.
-
-## Other current product state
-
-Completed:
-- F0 Foundation;
-- F1 Public profile + Follow;
-- F2 Feed interactions;
-- F3 Pet registration/edit/privacy;
-- F4 Security/stabilization;
-- F5 Multi-pet;
-- F6 QR passport/lost/sightings;
-- F7 Communities real core;
-- F8 Places/Map/Check-ins;
-- F9A Agenda/Care;
-- F9B Private Documents.
-
-Validation/measurement:
-- Communities advanced extensions;
-- Places advanced extensions.
-
-Postponed/re-evaluate:
-- Messaging, due network effect/moderation cost.
-
-Known global debt:
-- Supabase Auth Leaked Password Protection disabled;
-- general notification center incomplete/planned;
-- events remain incomplete/planned.
-
-## Canonical references
-
-- `AGENTS.md`
-- `docs/PAZO_MASTER_ROADMAP.md`
-- `docs/PAZO_MODULE_LIFECYCLE.md`
-- `docs/PAZO_MVP_MODULE_PRIORITY.md`
-- `docs/PAZO_PHASE_8_PLACES_MASTER.md`
-- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
-
-Repository state is canonical. Conversation memory is secondary.
-
-
-## Active infrastructure — Production Hardening
-
-Canonical:
-- `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
-
-Branch:
-- `infra/external-hardening-2`
-
-Current scope:
-- PayPal webhook security;
-- supporter pitch safety;
-- React crash containment;
-- CI baseline;
-- observability/auth/key/cost hardening next.
-
-Monetization intent remains valid, but supporter membership is temporarily hidden until secure backend confirmation plus product eligibility/price/benefits are defined.
-
-
-### Production Hardening checkpoint
-- Historical checkpoint: PR #30 was Draft at this stage; it was later merged.
-- CI production build: PASS;
-- legacy lint debt: 114 problems discovered; currently informational/non-blocking;
-- supporter pitch removed from active frontend;
-- browser-side Founder activation removed;
-- Supabase browser key migrated to modern publishable key;
-- PayPal webhook v3 deployed to production with fail-closed + PayPal signature verification logic;
-- PayPal private secrets/runtime verified delivery: PENDING;
-- Error Boundary global: implemented;
-- Security Advisor: baseline only; Leaked Password Protection still pending.
-
-
-### Production Hardening checkpoint — expanded
-- PO runtime: PASS for removal of premature PayPal pitch/reload behavior.
-- Social write anti-abuse migration: `20261007123638`, deployed + transactional PASS.
-- Document finalize noise migration: `20261007124041`, deployed + transactional PASS.
-- Error Boundary + privacy-minimal observability: implemented.
-- PostHog env contract: implemented; external project ingestion verification PENDING.
-- PostHog ChatGPT app: installed, actions not exposed in this session.
-- Vercel ChatGPT app: installed, actions not exposed in this session.
-- Auth UX/local baseline: 8+ chars, upper/lower/digit; fake Google/Apple bypass removed.
-- Supabase hosted plan: Free; leaked-password protection therefore remains pending without forcing an upgrade.
-- Inactive PayPal frontend SDK: removed.
-- Expected 400/409 operational noise fixes: implemented.
-- CI hardening regression test: implemented.
-- Do NOT reactivate supporter membership until PayPal secrets + genuine webhook verification + product pricing/benefit/eligibility decisions are closed.
-
-
-### Rescue/security checkpoint
-- Migration `20261007124633_move_rescue_security_definers_private`: deployed.
-- Public Rescue/Founder RPCs are now SECURITY INVOKER wrappers; privileged logic lives in non-exposed `rescue_private`.
-- Anonymous wrapper test: PASS.
-- Authenticated wrapper test: PASS.
-- Security Advisor: 0 exposed SECURITY DEFINER warnings; only Leaked Password Protection remains.
-- Supabase plan is Free, so do not upgrade solely for that warning without explicit PO approval.
-- Cost rules canonical: `docs/PAZO_COST_GUARDRAILS.md`.
-- PostHog exception protocol verified against current docs; structured redacted stack frames implemented.
-
-
-### PR #30 final branch acceptance
-- Product Owner final runtime/product validation: PASS.
-- Final branch CI: PASS.
-- Scope Closure Reconciliation for PR #30: PASS.
-- Historical checkpoint: PR #30 was mergeable; final merged state is recorded below.
-- Do NOT call Production Hardening globally complete yet.
-- Historical next action completed: PR #30 merged and `main` was verified.
-- After merge/main verification, continue the remaining external hardening backlog separately: PayPal real secrets/webhook delivery, PostHog live ingestion/alerts, Vercel/Mapbox spend controls, hosted Auth verification, CAPTCHA timing, backup/restore drill.
-
-
-### Video-derived architecture/privacy reconciliation
-Status: EN CURSO / PR #30 returned to Draft.
-
-Implemented:
-- canonical architecture contract: `docs/PAZO_ARCHITECTURE_CONTRACT.md`;
-- canonical privacy/data governance: `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`;
-- data + third-party provider inventory: `docs/PAZO_DATA_INVENTORY.md`;
-- module lifecycle Gate 6/7 now requires data classification, telemetry/provider review and explicit code ownership;
-- F14 expanded with UGC reporting/blocking, copyright/IP, account deletion, minor-handling procedure, data inventory, retention matrix, Privacy Policy/Terms and tracking audit;
-- F15 expanded with restore drill, live observability verification, spend controls and client-storage audit;
-- architecture CI guard blocks new domain services/views/modals in legacy global folders without conscious baseline update;
-- privacy CI guard blocks session replay/autocapture/direct tracking patterns and reviewed tracking SDK additions by default;
-- PostHog product events/properties now use an explicit allowlist;
-- 18+ checkbox defaults false and requires active attestation;
-- onboarding no longer claims acceptance of Terms that are not yet published.
-
-Decision:
-- no mass folder refactor in this tranche;
-- no DOB/ID collection or invasive age verification introduced;
-- no session replay/autocapture enabled.
-
-Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche and must be rerun after CI + PO visual/runtime validation.
-
-
-### Architecture/privacy reconciliation CI checkpoint
-- HEAD: `889fbe432019b1f13c30610cffac40c08fa5ae38`.
-- Hardening regression checks: PASS.
-- Architecture contract check: PASS.
-- Privacy/data-governance check: PASS.
-- TypeScript + production build: PASS.
-- Lint: PASS on this run.
-- PR #30 remains Draft until PO validates the visible 18+ onboarding change.
-
-
-### Architecture/privacy reconciliation final acceptance
-- PO visible onboarding validation: PASS.
-- 18+ explicit attestation behavior: PASS.
-- Navigation smoke test: PASS.
-- Governance CI suite: PASS.
-- Scope Closure Reconciliation: PASS.
-- Historical checkpoint completed: PR #30 later returned to Ready for Review and was merged.
-- Historical next action completed: PR #30 merged and main was verified.
-
-
-### PR #30 merge closure
-- PR #30: MERGED.
-- Merge commit: `c179182c79c587c7727277a966cc09704002ce10`.
-- Main verification:
-  - premature PayPal pitch absent;
-  - architecture contract present;
-  - privacy/data-governance contract present;
-  - data/provider inventory present;
-  - hardening code present.
-- Production Hardening remains EN CURSO.
-- Next exact work is external/provider hardening, not F13:
-  - PayPal real webhook verification;
-  - PostHog live ingestion/alerts;
-  - Vercel/Mapbox spend controls;
-  - hosted Auth verification;
-  - backup/restore drill.
-
-
-### External hardening active checkpoint
-- PostHog project connected.
-- PostHog privacy settings applied + verified: anonymize IP ON; autocapture/replay/heatmaps/console/performance automatic capture OFF; timezone America/Los_Angeles.
-- PostHog live ingestion: PENDING; project still has 0 events.
-- PostHog integrations/alerts: 0; need an explicit destination before authoring alerts.
-- Vercel connector: reachable but 0 teams / 0 projects; do not create a new project blindly.
-- Supabase: Free; DB ~17 MB; Storage ~26 MB.
-- Backup runbook: `docs/PAZO_BACKUP_RESTORE_RUNBOOK.md`.
-- Storage backup utility: `scripts/backup-storage.mjs`.
-- PayPal webhook v3: ACTIVE; 0 observed real webhook calls.
-- Mapbox: env-token based, no hardcoded token; account restriction/usage alert verification pending.
-- Next runtime gate: wire PostHog public token into a real PAZO runtime, verify first event + controlled exception.
-
-
-### PostHog live ingestion checkpoint
-- First real PAZO event: PASS (`app_boot`).
-- Event contract observed: app/environment/release/session only from PAZO's reviewed payload.
-- New privacy fix committed: all PAZO PostHog events send `$geoip_disable=true`.
-- Privacy CI guard updated to require the GeoIP opt-out.
-- Next exact runtime step: pull branch, restart Vite with temporary PostHog env vars, then trigger one controlled exception and verify `$exception` ingestion.
-
-
-### PostHog error tracking + Documents checkpoint
-- PostHog controlled exception ingestion: PASS.
-- Two controlled `$exception` events grouped into one issue: PASS.
-- Verified exception GeoIP enrichment absent.
-- Documents repeated warning root cause found:
-  - deleting document objects are hidden by Storage SELECT RLS because policy only allows `active`;
-  - 4 stale deleting rows currently still have Storage objects;
-  - 3 are for the current test user.
-- Migration prepared in PR #33:
-  - `20261008010500_fix_pet_document_delete_storage_visibility.sql`.
-- DO NOT mark Documents cleanup fixed in production until PO authorizes migration, migration is applied, current user reloads, stale files disappear, and warnings stop.
-
-
-### Documents recovery production verification
-- Migration applied in production after explicit PO authorization:
-  - `20261008010424_fix_pet_document_delete_storage_visibility.sql`.
-- Owner-only Storage visibility for `deleting` objects verified.
-- Current test account recovery after reload: PASS.
-- Current test account pending deleting rows: 0.
-- Current test account pending deleting Storage objects: 0.
-- One stale deleting row/object remains for another account and should self-recover on that account's next recovery run.
-- Documents repeated-warning issue is resolved for the current test account.
-
-
-### Vercel Preview integration checkpoint
-- Vercel project resolved: `pazo-app-t83r` (`prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`).
-- Production alias confirmed: `pazo-app-t83r.vercel.app`.
-- Preview observability variables configured without paid resources.
-- Preview deployment from PR #33: READY.
-- PO Preview runtime validation: PASS.
-- PostHog Preview ingestion: PASS.
-- Preview events have `$geoip_disable=true` and no city/lat/long enrichment.
-- Do NOT enable PostHog in production before PR #33 merge.
-- Next gate: final CI -> PO merge authorization -> merge PR #33 -> add production PostHog/Supabase publishable env -> verify production deployment + PostHog.
+# PAZO — ACTIVE HANDOFF | ESTADO OPERATIVO VIGENTE
+
+**Corte comprobado:** 2026-10-09, auditoría read-only nueva realizada sobre GitHub, Supabase y metadatos limitados de Vercel; los SHA citados son anteriores al commit de este checkpoint documental. **Project Brain OS:** v1.4.1, repositorio canónico `DigitalAppcorp/project-brain-os`. **Este archivo prevalece sobre las notas cronológicas antiguas; verificar en vivo Git, Supabase y CI antes de actuar.**
+
+## Cómo trabajar con el Product Owner
+
+- El usuario es **Product Owner**; ChatGPT/Codex es el **responsable técnico principal de extremo a extremo**: arquitectura, código, SQL, GitHub, seguridad, CI, documentación y gates. **No delegar normalmente la programación a Gemini ni convertir al PO en operador de terminal.**
+- Hablar **español**, directo, técnico y con explicaciones claras. Trabajar de manera autónoma dentro del alcance vigente; pedir solo decisiones de producto o autorizaciones sensibles realmente pendientes. Evitar ciclos interminables de informes sin cambios ni progreso verificable.
+- Prioridades: producto útil para personas con mascotas, MVP funcional para validar adopción (no un conjunto de pantallas vacías), privacidad, coste mínimo, no inventar decisiones ni adelantar módulos futuros. No forzar monetización prematura. Preservar UX/funciones/experimentos/3D aprobados como entregables reales cuando sean scope.
+- **Modo temporal hosted-first aprobado 2026-10-08:** usar conectores disponibles para GitHub/Supabase/Vercel, commits por hitos y pruebas agrupadas para ahorrar tiempo/tokens. No hacer deploy Preview por cada cambio. La regla local-first general sigue documentada en AGENTS, pero esta excepción temporal tiene precedencia para el MVP.
+- La orden «continúa/sigue» autoriza avanzar **trabajo técnico reversible dentro de F14 A2**, no concede permiso universal para nuevas migraciones remotas, borrar medios reales, `main` merge, release, cambiar scopes A3/A4 ni contratar servicios. Según `AGENTS.md` #24, pedir autorización **específica para cada mutación remota sensible**. Una migración de lector fue autorizada, aplicada y auditada; **esa aprobación no cubre el ledger futuro**.
+
+## Fuentes de verdad al activar otro chat
+
+1. Leer `AGENTS.md` y Brain OS `SKILL.md` + `patterns/VERIFIABLE_HANDOFF.md`.
+2. Leer **este snapshot**; luego `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_F14_MASTER.md`, `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`, y los contratos F14 referidos abajo.
+3. Inspeccionar **rama remota activa** `f14/block02-moderation-mvp-20261008`, PR **#35 DRAFT**, último HEAD y jobs CI. `main` y Vercel no se equiparan con la rama.
+4. Verificar solo-lectura Supabase y despliegues/Edge relevantes antes de confiar en cifras históricas. No asumir árbol local limpio o pushes pendientes: **estado local Antigravity/PC desconocido**; solo existe evidencia GitHub remota.
+5. Si documentos antiguos contradicen este corte, resolver contra implementación actual, proveedor y scope. Archivo de esta conversación: `docs/archive/PAZO_ACTIVE_HANDOFF_F14_A2_THROUGH_20261009.md`; archivo de prompt anterior: `docs/archive/PAZO_NEXT_CHAT_START_F14_A2_THROUGH_20261009.md`. Historial aún más antiguo y Git siguen disponibles.
+
+## Estado real verificado — F14 A2, Gate 8 ABIERTO
+
+- **Repositorio:** `DigitalAppcorp/pazo-app`. Rama `f14/block02-moderation-mvp-20261008`; **HEAD remoto auditado antes de este checkpoint documental:** `defce91f7405b36a07a83d000a9322024ed16e38`. **PR #35 DRAFT, sin merge**. Base `main` verificada: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`. El HEAD cambia si se publica este checkpoint: consultar el commit real del PR y su CI; el SHA previo es evidencia histórica, no el estado posterior.
+- **CI para HEAD auditado `defce91`:** run `37923451550` **SUCCESS** (governance, borrador ledger en PostgreSQL efímero y build). Suite F14 de **128 tests Node PASS**, PostgreSQL 16 efímero: esquema/roles/constraints del ledger DRAFT, transiciones privadas y **carrera con dos conexiones SQL** (lock/timeout y rechazo duplicado), build Vite PASS. Lint legacy sigue fuera del bloqueo cotidiano. **Esto NO prueba concurrencia Storage HTTP.**
+- **Supabase PAZO** proyecto `mrybvqdebbgcayuvgkkr`, consulta read-only en este corte: **20 objetos Storage, 0 media_claims, 0 media_claim_events, 0 reports, 0 content_restrictions**. Las tablas propuestas `moderation_private.media_purge_attempts`, `media_writer_fences`, `media_purge_attempt_events` **NO existen** (`to_regclass=NULL`).
+- **Migraciones aplicadas relevantes:** F14 hardening/holds previas y lector `20261009095635_f14_service_only_media_evidence_reader`. `public.f14_get_media_claim_evidence(uuid)` **ACTIVA**, `EXECUTE` solo `service_role`; `authenticated` no tiene acceso; el esquema privado sigue cerrado a roles API. Lectura candidato retorna `mayDelete:false`. `public.f14_confirm_media_cleanup` tiene EXECUTE de `service_role` **revocado**. Trigger `f14_no_unverified_media_purge` **activo**, impide afirmar `purged` sin prueba.
+- **Edge:** `f14-moderation-purge` desplegada versión 1 es **stub HTTP 503**, sin operaciones Storage ni borrado real. No activarla. **Vercel:** hay Previews anteriores, pero ninguno verifica automáticamente el último código; no deployar ni afirmar que producción cambió. `main` y Vercel Production no recibieron el PR #35.
+- **Decisión de producto D3-A CERRADA** = obligación aprobada de tratar media retenida/moderada; **implementación y DoD D3-A ABIERTOS**. Algunas notas antiguas escriben «D3-A (CERRADA)» refiriéndose a la decisión, NO al Gate 8.
+
+## Evidencias completadas — no repetir al PO
+
+- Pruebas visuales autenticadas anteriores: dos cuentas normal/moderador, denuncia/moderación y panel `Revisión de archivos`, aceptadas por el PO.
+- `F14VersionProbe` en Preview: captura PO **PASS 4/4** (píxel sintético creado, ID/version leídos, wrong-version no borra objeto actual, exact-version borra y origen `info/list` ausente). **No volver a pedir esta prueba.** CDN respondió **HTTP 400**, **inconcluso** para invalidación de cachés, no certificar purge global.
+- SQL real con `BEGIN/ROLLBACK` PASS para Feed/Comunidad, cinco tipos de denuncia, ACL de moderación, RLS que oculta contenido, lectura RPC service-only, URL compartida/expiración/reporte descartado/versión cambiante. No persisten fixtures.
+- Código puro `hostedClaimEvidence`, `exactVersionPreflight`, `serviceReaderDryRun`, `exactVersionOutcome`, `privilegedAttemptProtocol` **NUNCA da autorización DELETE**; falla a revisión manual. El modelo ensayó **1,331 secuencias de tres eventos**, no una operación Storage real.
+- **Borradores NO APLICADOS** en `supabase/drafts/f14_media_purge_v2/`: `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` (3 tablas privadas, FK compuesta e idempotencia, RLS/REVOKE) y `20261009_attempt_transitions_SIMULATION_ONLY.sql` (lock SQL con dos sesiones, `shouldSendHttp:false`). CI efímero PASS no convierte estas piezas en backend desplegado.
+- Seguridad de medios: bucket post-photos y community-post-photos; otras rutas de avatar/documentos no son parte del purge D3-A. Inventario de writers Auth en `WRITER_INVENTORY_AND_BOUNDARIES.md`; escritores externos con `service_role` **NO auditados exhaustivamente**.
+
+## Auditoría adicional en vivo — 2026-10-09, sin cambios de backend
+
+- **GitHub:** PR #35 sigue **DRAFT**, abierto, no fusionado y base `main` `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`. HEAD auditado `defce91f7405b36a07a83d000a9322024ed16e38`; GitHub Actions run `37923451550` / job `verify` SUCCESS. Los checks Vercel figuran FAILURE por `build-rate-limit`, no por evidencia de error Vite; ningún Preview nuevo de este HEAD se ha certificado.
+- **Supabase PAZO real:** Postgres 17; **20** objetos Storage y **0** claims/eventos/reportes/restricciones. Los tres objetos del ledger propuesto siguen **AUSENTES**. RPC `f14_get_media_claim_evidence(uuid)` presente: EXECUTE `service_role` únicamente; `f14_confirm_media_cleanup(text,uuid)` revocada para anon/auth/service. Trigger `f14_no_unverified_media_purge` habilitado; los buckets `post-photos` y `community-post-photos` son **públicos**. La Edge alojada sigue siendo el stub 503 sin DELETE.
+- **Escritores:** se contrastaron los flujos Auth existentes de Feed/Comunidad (`upsert:false`, limpiezas por ruta), el cliente público y el F14VersionProbe sintético; no se detectó un nuevo ejecutor HTTP privilegiado en esos archivos. El inventario de clientes externos con `service_role` NO se puede certificar con esas lecturas. La consulta de metadatos de variables Vercel `pazo-app` respondió **403 por scope digitalapp**; se detuvo sin cambiar de cuenta, equipo o proveedor.
+- **Observación de logs (solo agregados, últimas 24h disponibles):** 39 eventos de `storage_logs` a escala de proyecto, sin listar paths ni datos de usuario: 11 eventos etiquetados `authenticated` (3 list, 3 uploads, 3 info y 2 DELETE), 28 sin campo de rol utilizable (incluidas lecturas públicas y eventos sin metadatos). **No se observó etiqueta explícita `service_role` en esa muestra; esto NO certifica su ausencia ni cubre otros periodos/servicios.**
+- **Gate:** D3-A **decisión aprobada**, pero D3-A **implementación y F14 A2 Gate 8 abiertos**. No instalar el ledger, enviar HTTP DELETE ni liberar `held` por timeout/TTL. El siguiente paso técnico sigue siendo inventario completo de escritores privilegiados y ensayo HTTP concurrente exclusivamente sintético bajo una frontera autorizada. Un PostgreSQL temporal (16) no demuestra compatibilidad operativa ni fencing HTTP en el Supabase hospedado (17).
+
+## Nueva decisión de prioridad del Product Owner — 2026-10-09
+
+**Clasificación:** cambio de prioridad del MVP / handoff operativo de PAZO; NO es una regla genérica de Brain OS ni una autorización de release o borrado.
+
+- El PO ordena **dejar en pausa el blindaje avanzado antes de validar demanda** y priorizar **terminar los módulos ya definidos, corregir fallos funcionales, probar recorridos completos y preparar validación de adopción**. No invertir más ciclos en el ledger privado de purga, carreras HTTP entre writers privilegiados, exhaustividad de claves externas o automatización CDN/retención mientras no haya un nuevo gate expreso o un riesgo urgente observado.
+- **F14 A2 Gate 8 pasa a PAUSADA (avance parcial), NO COMPLETADA.** PR #35 sigue **DRAFT / sin merge**. D3-A conserva su decisión y deuda de implementación: no se sustituye silenciosamente su Definition of Done; el alcance de una futura beta pública requerirá reconciliación explícita y un procedimiento real de retirada/borrado cuando corresponda.
+- Mantener protección básica existente: Auth/RLS, validación server-side, denuncia/ocultación, cola/moderación, medidas antiabuso, privacidad mínima y no-falso-éxito. **Sin habilitar purga Edge 503 ni marcar 'purged', liberar 'held' automáticamente, borrar medios reales, abrir permisos ni contratar servicios.** Una URL pública de foto puede conservarse accesible aunque se oculte un post en SQL; documentar el riesgo y contar con una vía de respuesta humana antes de pruebas con contenido real.
+- **Siguiente paso operativo:** auditoría puntual de brechas funcionales de los módulos ya existentes contra roadmap/scope y código de la rama, sin repetir QA aprobadas ni diseñar nuevas features; ordenar impedimentos para flujo registro → mascota → publicar/interactuar → comunidades/lugares/cuidados → notificaciones, y distinguir mocks/errores reales. Avanzar después solo por el gate funcional aprobado correspondiente; no iniciar automáticamente F14 A3/A4 o una nueva fase sin respetar sus autorizaciones.
+- No afirmar beta pública lista mientras falten requisitos mínimos de privacidad, gestión de reportes/contenido público, eliminación de cuenta y pruebas reales; la prioridad funcional **no** es una exención de responsabilidades con el primer usuario.
+
+## Avance funcional siguiente — 2026-10-09 | último checkpoint
+
+- **PR #36 DRAFT independiente de F14:** corregida la carga inicial `fetchOwnedPets` de sesiones autenticadas para no confundir fallas de red con cuentas sin mascota: spinner, pantalla de error con Reintentar y descarte de consultas atrasadas cuando cambia la sesión. **Código** `446b2c5b7403a423d9a9e570dd9ad53514043399`, GitHub Actions run `37931428416` **SUCCESS** (governance, build, lint). **Docs** de auditoría actualizados en `mvp/functional-readiness-20261009` commit `49237fac95a1c01895d72d5619360d22204c1d83`.
+- **Vercel comprobado en GitHub status:** integración `Vercel – pazo-app` y `Vercel – pazo-app-t83r` fallan con destino `https://vercel.com/digitalapp?upgradeToPro=build-rate-limit`; además el conector devuelve 403 en scope `digitalapp`. Por lo tanto **no hay Preview certificada** de PR #36. Conservar plan actual, no lanzar builds extra ni pagar upgrade. La única evaluación pendiente de ese flujo es QA de navegador cuando se habilite un Preview autorizado.
+- **Prioridad intacta:** MVP funcional, reducción de fallos reales; F14 A2 PR #35 DRAFT/PAUSADA, D3-A incompleto. No fusionar main/Production ni SQL ni reabrir ledger; primero QA de registro + recovery, Feed, demo-mensajería, bootstrap de mascotas y móvil.
+
+## Hito MVP funcional independiente — 2026-10-09 (no fusionado)
+
+- Trabajo de producto ejecutado en rama **`mvp/functional-readiness-20261009`** nacida de `main` (no de F14), PR **#36 DRAFT**: https://github.com/DigitalAppcorp/pazo-app/pull/36 ; HEAD auditado `f0b638263857b8ef47b651e33be5c53016860c90`.
+- Corrección funcional del Feed: selección de páginas sin perder publicaciones social/recomendado por cursores, deduplicación y protección contra respuestas obsoletas al cambiar mascota. Seis tests Node; GitHub Actions run `37927412741` **SUCCESS** en ese HEAD (governance + build), además de prueba local del helper PASS 6/6. **No se ha hecho QA visual de scroll**.
+- Cuenta real ya no muestra conversaciones y badges **ficticios**; mensajería 1 a 1 sigue POSPUESTA y el demo interactivo se conserva en el modo explícito de demostración. No hay backend de mensajes.
+- Auditoría integral (evidencia/déficits, no reinicio de fases): `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` en PR #36. Núcleo histórico real: alta mascota, Feed, Comunidades, Mapa/Lugares, Agenda, Documentos, Rescate y Buscar. Aclaración crítica: en `main` el tab Mapa monta `MapView`, pero **esta rama F14** introduce un guard `DEV` que en builds no-dev sustituye el mapa real por fake door. No fusionar F14 sin reconciliar intencionalmente el rollout y coste de Mapbox.
+- **Siguiente gate:** verificar PR #36 en Preview para scroll + cambio de mascota + aviso de mensajes de cuenta normal; solicitar solo esa aceptación visual nueva. No repetir QA anteriores. Después organizar regresiones reales de onboarding/publicación/Comunidades/Lugares/Cuidados con ejecución mínima, antes de cualquier beta.
+- Independencia estricta: PR #35 sigue DRAFT/PAUSADO, sin merge de código F14 a `main`; PR #36 también DRAFT, sin merge o deploy. No inferir que el fix del Feed está ya en la rama F14 hasta reconciliación explícita. La auditoría Supabase observó tablas reales con RLS; no se mutaron registros.
+
+## Progreso posterior del carril funcional — 2026-10-09
+
+- Rama separada `mvp/functional-readiness-20261009`, PR #36 **DRAFT**, HEAD verificado `c513543499e9cc485c615d38eb72f626e9fcf72a` (base main anterior, NO incluye el PR #35). GitHub Actions run `37928545787` **SUCCESS** para HEAD final: governance, nuevos tests Node + build.
+- **Nuevo fix P0 onboarding**: se detectó que `AuthContext.signUp` devolvía `true` sin verificar `data.session`; cuando Supabase exige email confirmado, saltaba a A03 y luego fallaba `create_pet_profile` por falta de sesión. Ahora clasifica `authenticated / verify_email / failed`, muestra el paso de confirmación y evita crear mascota antes de login. Los nuevos perfiles ya no prellenan nombre/edad `Luna / 3 años`; la foto real se elige voluntariamente (el servicio todavía usa imagen genérica si no se sube).
+- Tests `src/features/auth/signupFlow.test.mjs` y `src/features/feed/selectFeedPage.test.mjs`; CI PASS no implica prueba de email real, mobile, Preview ni beta pública. **Vercel list_deployments sigue 403 por equipo `digitalapp`; no se intentó otro scope ni deploy.**
+- **Siguiente gate funcional**: validación limitada de Feed scroll/switch mascotas + registro con y sin confirmación (según entorno configurado) + pantalla de mensajes no mock en sesión real. Hasta autorización de acceso Vercel, seguir solo análisis/correcciones reversibles con CI; no exigir repetición del QA F14 aceptado. No fusionar PR #35/36 ni publicar. En beta revisar recuperación de contraseña, eliminación de cuenta y actuación humana de reportes.
+- Fuente detallada: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` en PR #36. **F14 A2 SIGUE PAUSADA**, D3-A no completada, purga Edge 503 y ledger remoto no instalado.
+
+## MVP funcional — recuperación de contraseña (2026-10-09)
+
+- **Rama independiente:** `mvp/functional-readiness-20261009`, PR #36 **DRAFT** desde `main`; HEAD `3500a48373d4e84743c9813c0b8df9e9e55d4cb0` al registrar este checkpoint. F14 PR #35 DRAFT/PAUSADA, sin integrar o redeplegar.
+- **Entrega:** el acceso ahora dispone de «¿Olvidaste tu contraseña?» que usa `resetPasswordForEmail`, un redirect `/?auth=recovery`, el evento `PASSWORD_RECOVERY`, formulario de contraseña nueva con la política vigente y regreso a login tras cerrar la sesión temporal; instrucciones para enlace caducado. Se añadieron tests puros de URLs y contraseña al CI. Login y registro restauran el estado de los botones si falla la red.
+- **Checks:** última compilación íntegra **SUCCESS** observada en run `37930559035` (HEAD documental `01b11cf`); run `37930631241` para el fix de error de red `3500a48` terminó **SUCCESS** (governance y build). Los fallos CI intermedios de builds incompletos quedaron corregidos incorporando los eventos Auth al allowlist de telemetría de privacidad; no hay captura de emails/tokens/passwords.
+- **Gate funcional pendiente:** correo real + callback Supabase, allowlist de Redirect URLs del entorno autorizado, confirmación del email de alta, expiración y móvil, scroll Feed/mascota, aviso de mensajes no mock. El conector Vercel devuelve **403 en equipo `digitalapp`**, por lo que **no existe QA Preview certificada** de este HEAD y no se cambia team/scope para evitar controles.
+- **No iniciar:** ledger/carreras Storage de F14, merge de PR #35/36, despliegue Production, migraciones SQL, costes, mensajes reales sin gate. Los trabajos de F7/F8/F9/F12 previamente validados no requieren reconstrucción. Fuente: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` (PR #36).
+
+## Próximo paso EXACTO y bloqueadores — registro histórico sustituido por la decisión anterior
+
+**SUSTITUIDO por decisión PO anterior (histórico):** El anterior siguiente gate proponía continuar con fencing/ledger/HTTP concurrente. Ahora queda diferido; NO ejecutarlo como acción siguiente sin reapertura expresa.
+
+**No hacer**: mover borrador a migración aplicada sin permiso puntual del PO; borrar medios reales, ejecutar `remove([path])` de contenido moderado, marcar `purged`, soltar `held` vencidos, activar Edge destructiva, modificar permisos privados para “resolver” accesos, merge a main, A3/A4, producción, upgrade de Vercel ni add-ons pagados. Los locks PostgreSQL terminan antes del HTTP y `service_role` evita Storage RLS: las pruebas SQL de 2 conexiones no resuelven ese problema.
+
+## Checklist mínimo por nuevo hito
+
+Auditar branch/HEAD/PR → verificar estado base/backend → implementar solo lo autorizado → pruebas Node + SQL aislado/rollback + CI y build → comprobar en vivo si se aplicó alguna mutación → actualizar **este snapshot**, roadmap y Scope Closure solo con nuevos hechos → registrar PR. Mantener este archivo compacto; transferir históricos al archivo, no seguir apilando cronología. Cuando algo requiera PO, pedir **una sola autorización concreta** y explicar riesgos y alternativas sin reabrir decisiones anteriores.

@@ -64,7 +64,7 @@ export const searchPublicPets = async (
 
   const { data, error } = await supabase
     .from('pets')
-    .select('id,name,species,breed,photo_url')
+    .select('id,owner_id,name,species,breed,photo_url')
     .or(
       `name.ilike.%${query}%,species.ilike.%${query}%,breed.ilike.%${query}%`
     )
@@ -82,6 +82,7 @@ export const searchPublicPets = async (
   return rows.map((row: any) => ({
     type: 'pet' as const,
     id: row.id,
+    ownerUserId: row.owner_id,
     title: row.name,
     subtitle: [row.species, row.breed].filter(Boolean).join(' · '),
     imageUrl: row.photo_url || undefined,
@@ -97,7 +98,7 @@ export const searchCommunities = async (
   const { data, error } = await supabase
     .from('communities')
     .select(
-      'id,name,description,category,species,zone,image_url,members_count'
+      'id,owner_user_id,name,description,category,species,zone,image_url,members_count'
     )
     .eq('status', 'active')
     .or(
@@ -117,6 +118,7 @@ export const searchCommunities = async (
   return rows.map((row: any) => ({
     type: 'community' as const,
     id: row.id,
+    ownerUserId: row.owner_user_id,
     title: row.name,
     subtitle: row.description || undefined,
     imageUrl: row.image_url || undefined,

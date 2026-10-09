@@ -97,7 +97,13 @@ Supabase Database/Storage.
 - visibilidad de presencia debe ser explícita.
 
 **Proveedor adicional**
-Mapbox recibe solicitudes necesarias para renderizar/usar el mapa según su integración.
+Mapbox queda limitado a desarrollo local mientras `places_map` está en validación de demanda.
+
+En builds publicados durante el experimento:
+- no se monta Mapbox;
+- no se solicita ubicación;
+- no se envían coordenadas al proveedor;
+- la pestaña Mapa registra únicamente view/interest mediante el sistema genérico de validación.
 
 ## 6. Rescue / QR / mascota perdida
 
@@ -291,7 +297,7 @@ Debe cerrarse para:
 | Proveedor | Uso | Estado | Datos | Acción pre-Beta |
 |---|---|---|---|---|
 | Supabase | Auth/DB/Storage/Edge | Activo | múltiples categorías | retención/backups/Auth audit |
-| Mapbox | mapas | Activo | requests/location-context según uso | usage/privacy/spend review |
+| Mapbox | mapas | Desarrollo local / rollout público pausado | requests/location-context solo durante desarrollo | reevaluar costo/privacy si places_map valida demanda |
 | PayPal | Supporter | Parcial/desactivado en UX | subscription/payment metadata | secrets + real webhook + terms |
 | PostHog | observabilidad | Conectado + privacy-hardened; 0 eventos live | eventos allowlisted/exceptions | env token + first event/error + destination/alert |
 | Vercel | hosting/deploy | conector visible pero 0 teams/proyectos | deployment/log metadata | conectar cuenta/proyecto correcto antes de auditar env/spend |

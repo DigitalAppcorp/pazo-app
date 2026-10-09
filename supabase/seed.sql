@@ -1,0 +1,5 @@
+-- PAZO local development seed.
+--
+-- Keep this file free of production data, credentials and personal information.
+-- The current schema and Storage contract are recreated by versioned migrations;
+-- browser/API verification creates isolated disposable data and removes it afterward.

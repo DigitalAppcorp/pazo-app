@@ -1,8 +1,8 @@
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
-**Última actualización:** 2026-10-07  
-**Estado general:** Fase 12 Global Search COMPLETADA / Gate 9 medición. Production Hardening ocupa temporalmente el Carril de Implementación por riesgo operativo pre-Beta.
+**Última actualización:** 2026-10-09
+**Estado general:** Fase 12 COMPLETADA / Gate 9 medición; **prioridad MVP funcional y pruebas de adopción** por decisión PO 2026-10-09. **F14 A2 PAUSADA** con Gate 8 abierto (PR #35 DRAFT y protección básica fail-closed), D3-A aprobado como alcance pero implementación pendiente. F14 A3/A4 no iniciadas; main y Production sin merge/release F14. **SIGUIENTE:** auditar brechas funcionales de módulos existentes, conservar mínimos de seguridad y proponer orden de finalización.
 
 ---
 
@@ -40,7 +40,7 @@ Por tanto, una fase en validación puede permanecer abierta mientras otra fase a
 - Autoriza explícitamente cualquier mutación importante en Supabase.
 
 ## Implementación
-ChatGPT trabaja directamente sobre GitHub y Supabase:
+Codex/local es el responsable técnico principal por defecto. ChatGPT normal puede retomar el trabajo como respaldo usando el mismo estado durable del repositorio:
 - frontend React/TypeScript;
 - arquitectura;
 - Supabase/PostgreSQL;
@@ -51,6 +51,10 @@ ChatGPT trabaja directamente sobre GitHub y Supabase:
 - seguridad;
 - pruebas;
 - PRs y merge.
+
+Ambos agentes deben comenzar por `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, esta hoja y la sub-ruta activa. `npm run verify` es el gate local agrupado de gobernanza + build; no sustituye pruebas runtime, visuales, de backend ni Scope Closure Reconciliation.
+
+Las migraciones remotas, mutaciones de producción, push, merge y deploy requieren autorización explícita y vigente del Product Owner. El handoff debe dejar rama/HEAD/upstream, working tree, decisiones, verificaciones y siguiente paso suficiente para cambiar de agente sin depender del chat anterior.
 
 No pedir al Product Owner que copie código entre herramientas salvo que sea estrictamente necesario para una prueba local.
 
@@ -434,6 +438,17 @@ Fuentes:
 
 Fase 8 queda cerrada. Sus extensiones experimentales pasan a medición post-lanzamiento; no se construyen automáticamente por existir interés.
 
+### Ajuste de rollout — 2026-10-07
+- Fase 8 sigue técnicamente COMPLETADA.
+- Rollout público de Mapa/Lugares: PAUSADO.
+- Mapa real: desarrollo local únicamente.
+- App publicada: fake door de demanda `places_map`.
+- Tracking: views + interés único por cuenta usando el framework genérico.
+- No solicitar ubicación ni cargar Mapbox en builds publicados durante el experimento.
+- Contrato: `docs/PAZO_PLACES_DEMAND_EXPERIMENT.md`.
+- Resultado operativo actual: **EXPERIMENTO ACTIVO / Gate 9**.
+
+
 ## Fase 9 — Cuidados y documentos privados
 
 **Priorización:** `docs/PAZO_MVP_MODULE_PRIORITY.md`
@@ -703,9 +718,11 @@ Estos puntos son exclusivamente estéticos y no bloquean la funcionalidad de res
 ---
 
 ## Fase 14 — Confianza, moderación y privacidad
-**Estado: OBLIGATORIA ANTES DE BETA PÚBLICA**
+**Estado: EN CURSO (planificación/documentación) — Gate 5 CERRADO / Gate 6 CERRADO / Gate 7 CERRADO / Gate 8 NO AUTORIZADO PARA IMPLEMENTAR.** Sigue siendo obligatoria antes de Beta pública.
 
+**Sub-ruta maestra:** `docs/PAZO_F14_MASTER.md` — decisiones D1, D2, D3-A, D3-B, contrato arquitectónico y plan por bloques A0–A4.
 **Contrato canónico adicional:** `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`
+**Única autorización vigente en Gate 8:** Bloque 00 documental LOCAL (actualizar y verificar documentación); NO código funcional, migraciones, push, merge, deploy ni producción.
 
 ### Alcance
 - reportar contenido;
@@ -884,25 +901,21 @@ Usar únicamente:
 
 # 11. Próximo paso exacto
 
-## Selección del siguiente módulo
+## Fase seleccionada explícitamente
 
-Fase 12 está COMPLETADA y pasa a Gate 9 / medición.
+Fase 12 está COMPLETADA y permanece en Gate 9 / medición.
+La Fase 14 fue seleccionada por el Product Owner; Gate 5 (MVP REDUCIDO), Gate 6 (scope) y Gate 7 (arquitectura) están CERRADOS. Su alcance y A0–A4 se documentan en `docs/PAZO_F14_MASTER.md`.
+Production Hardening continúa EN CURSO de forma separada; no atribuirle cierre.
 
-No existe un siguiente módulo autorizado automáticamente.
-
-Candidatos conocidos:
-- Fase 13 — Rediseño visual y sistema de interfaz: PLANIFICADA;
-- Fase 14 — Confianza, moderación y privacidad: OBLIGATORIA antes de Beta pública;
-- Fase 10 — Mensajería: POSPONER / REEVALUAR;
-- Fase 11 — Notificaciones generales: implementar por dependencia concreta.
+Otras fases: Fase 13 PLANIFICADA; Fase 10 POSPONER/REEVALUAR; Fase 11 por dependencia concreta. Ninguna obtiene autorización automática.
 
 ### Exact next action
-Seleccionar el siguiente módulo mediante `docs/PAZO_MODULE_LIFECYCLE.md` antes de implementar.
+Ejecutar y verificar EXCLUSIVAMENTE la consolidación documental local de Gate 8 / Bloque 00, tras comprobar el HEAD y working tree reales. Solicitar autorización independiente antes del Bloque 01. No iniciar implementación por el hecho de haber aprobado el diseño.
 
 ## Do not do
 - no reabrir Fase 12 salvo regresión o nueva decisión de producto;
 - no convertir datos de Gate 9 en features automáticamente;
-- no iniciar Fase 13/14/10/11 por numeración sin decisión de producto.
+- no iniciar Fase 13/10/11 automáticamente; Fase 14 no tiene permiso para código, migraciones ni despliegue bajo la autorización A0.
 
 
 ---
@@ -924,3 +937,225 @@ Prioridad:
 - P2 anti-abuse, ruido operacional, restore drill y analytics.
 
 Esta fase de infraestructura está autorizada por el Product Owner y no constituye autorización para decidir automáticamente precio o beneficios de la membresía.
+
+
+---
+
+## Actualización operativa 2026-10-08 — MVP hosted-first
+- Decisión expresa del Product Owner: suspender temporalmente local-first hasta el lanzamiento oficial; eliminar pasos manuales de descargas/parches en favor de conectores GitHub/Supabase/Vercel, conservando gates, seguridad y autorizaciones de alcance.
+- F14 A1: código en rama GitHub `f14/block01-hosted-mvp-20261008` desde respaldo `c4f466f`, sin merge en `main` ni PR #34; Supabase PAZO aplicó migración `f14_account_blocks_hidden_posts` versión remota `20261008112333`; archivo repo `20261008090000_f14_account_blocks_hidden_posts.sql` (versiones distintas, reconciliar).
+- Vercel `pazo-app-t83r`: preview Git SHA `62c3f88` READY; despliegue/proción a producción rechazados 403 (scope `digitalapp`). `pazo-app` también generó preview automático por integración, NO se publicó como producción.
+- A1 pendiente: desbloquear permisos Vercel del equipo `digitalapp`, desplegar/prometer únicamente `pazo-app-t83r`, comprobar funcionamiento en línea y API directa entre cuentas. No cerrar A1 ni avanzar a A2 mientras falten estas pruebas.
+
+
+### F14 A2 iniciada — 2026-10-08
+Por aprobación explícita del Product Owner, se inició la preparación de **reportes y moderación** en la rama independiente `f14/block02-moderation-mvp-20261008`, sin esperar la publicación bloqueada de Vercel B01. La implementación hospedada de A1 aún no está completamente aceptada. A2 no está implementada en Supabase hosted: SQL propuesto permanece en `supabase/drafts/`, **no aplicado**. El alcance completo exige cinco tipos de denuncia, autoridad y cola privadas, retirada real de API y medios públicos de Storage; su evidencia de seguridad, permisos iniciales y aprobación visual siguen pendientes. No iniciar A3/A4 automáticamente.
+
+
+### F14 A2 — activación de backend hospedado (2026-10-08)
+La migración `f14_reports_moderation` se aplicó a Supabase PAZO, versión real `20261008120333`. Cinco políticas restrictivas implementan retirada a nivel API; `moderation_private` contiene registro privado de denuncias, concesiones de moderador, decisiones y restricciones. **No hay moderadores asignados ni contenido retirado**. La Edge Function de limpieza existe con JWT y código inerte que devuelve 503, sin borrar archivos. La versión de purga propuesta reside solo en `supabase/drafts/`, no en la ruta de funciones desplegables. A2 continúa abierto hasta pruebas API, primer moderador autorizado, validación de almacenamiento/CDN y aceptación UI; publicación Vercel diferida. A3/A4 sin permiso.
+
+
+### F14 A2 — rol inicial asignado
+La cuenta verificada `appdigital.corp@gmail.com` recibió por autorización explícita del PO la única concesión de moderador PAZO en `moderation_private.moderator_grants` del proyecto hospedado. Verificación: 1 moderador, 0 otros, 0 denuncias y 0 restricciones de contenido. No añade permisos de administrador a GitHub, Vercel ni Supabase; limpieza Storage desactivada. Restan pruebas de seguridad API, UI preview y retiro de medios antes de cierre de A2. El PO mantiene aplazada la publicación oficial de Vercel.
+
+
+### Gate F14 A2 — Seguridad de reportes/roles parcialmente validada
+Pruebas hospedadas de contexto SQL (revertidas): PASS para permisos de moderador único, denegación a cuenta estándar y anon, lectura social pública legítima y validación de los cinco tipos de reporte con objetivos inexistentes. **No probaron JWT reales ni reportes efectivos**. Auditoría RLS halló falta de verificación explícita de visibilidad del post padre al consultar comentarios: borrador de corrección en `supabase/drafts/20261008_f14_comment_parent_guard.sql`, dry-run SQL PASS, **no aplicado**. Requiere aprobación del PO y nuevas pruebas antes de cerrar A2. Storage DELETE sigue deshabilitado.
+
+
+### F14 A2 — RLS comment parent fix applied / verified
+PO approved and hosted Supabase applied `f14_comment_parent_guard` (version `20261008122907`). Both policies are restrictive and require a SELECT-visible parent post. SQL role simulations, anonymous/authenticated read smoke, transactional Feed post withdrawal and pet profile withdrawal (including a third-party comment) PASS. Transient restrictions rolled back; no reports or real withdrawals created. No Community comments existed to run a data-driven scenario; keep that test open. Media purge still in disabled stub, Vercel production deferred, A2 open until signed JWT API and complete moderation functionality are checked. A3/A4 not authorized.
+
+
+### F14 A2 — Audit of existing column permissions (2026-10-08)
+A proposed rescue grant migration was **cancelled as unnecessary** after discovering intentional column-specific grants to `authenticated` despite `has_table_privilege=FALSE`. Verified via reversible SQL as `authenticated`: own pet, RPC `create_community`, membership, Feed and Community posts/comments succeed; cross-owner pet updates and private columns are denied. Zero synthetic records remain. **No production permission changes were made.** HTTP/JWT and UI tests still pending, Storage disabled, A2 open. No A3/A4 approval.
+
+
+### F14 A2 — approved live report test closed and cleaned (2026-10-08)
+A real-user-session Preview report was successfully dismissed through the moderator queue, hosted Supabase status and action audit verified. All explicitly identified trial pet, post, report, action and same-owner impression records removed after dependency audit and reversible dry-run; exact post-delete counts zero. No production Vercel deployment, no other user records changed. Backend moderator permission still active. A2 remains open for independent JWT denial, real depublishing tests and protected media/CDN purging procedure (currently intentionally disabled). A3/A4 not yet authorized.
+
+
+### F14 A2 — Live depublish validation completed (2026-10-08/09 UTC)
+Real Preview moderator action `Despublicar` -> SQL `status=removed` + action audit + RLS restriction PASS. Anonymous and authenticated SQL role tests confirm removed post invisible; other posts visible. PO-authorized exact trial pet/post/report/action/restriction/impression cleanup succeeded after guarded ROLLBACK dry-run; zero trial records, zero total reports/restrictions, 1 moderator, 14 posts and 5 pets persist. No images, no Storage mutations. **Backlog: no-media content currently receives spurious `pending_review` media status**; correct with separate approved migration before broader rollout. Independent non-moderator real signed JWT tests and media Storage/CDN remain open; A3/A4 not authorized.
+
+
+### F14 A2 — phantom media queue fix staged (2026-10-08)
+Prepared and SQL rollback-tested presence-aware media classification on `f14_review_report`; text-only Feed/Community posts would not become false media-review tasks, but profile media review remains conservative. Versioned draft and five-case reversible suite, along with matching moderator UI messaging, are on A2 branch. **Await separate PO authorization before Supabase apply**; no Storage purge or Vercel production. A2 open.
+
+
+### F14 A2 — no-photo media classification applied (2026-10-09)
+After explicit PO approval, migration `f14_media_status_presence_guard`, server `20261009010551`, updated `f14_review_report` so text-only Feed/Community posts do not become pending media deletion tasks; photo-bearing content remains queued, pet profiles stay conservatively queued. Five-case hosted-function rollback validation PASS. SQL is now canonical at `supabase/migrations/20261009010551_f14_media_status_presence_guard.sql`, no longer a draft. No Storage deletion or production deployment. A2 pending independent JWT validation, Storage/CDN safety and retention policy.
+
+
+### F14 A2 — Media deletion secure-draft gate (2026-10-08)
+Audit + V2 draft only: proof-driven path inspection for current and verified legacy Feed photos, Community media, and conservative pet avatars; 30+ local synthetic Node cases and a genuine JWT read-only test script staged. Actual signed JWT test needs securely injected independent user session and has NOT PASSED. No delete/claim/confirmation RPC implemented, no production deploy; Edge stays 503. Request new PO gate before metadata/claim migration and separate gate before irreversible Storage removal. Full plan: supabase/drafts/f14_media_purge_v2/README.md. A2 open, A3/A4 unauthorized.
+
+
+### F14 A2 — preflight/claim reversible Gate (2026-10-08)
+Draft private claims table + object fingerprint/id/lease, service-only prepare/recheck and audit, current/legacy Feed and Community path proofs, SQL transactional revalidation. Multiple BEGIN/ROLLBACK tests PASS, no objects or schema persisted. Claim is a candidate, NOT permission to delete; user/JWT HTTP, cross-service race-safe CAS confirmation, real Storage API verification/CDN and D3-B remain future gates. SQL draft `supabase/drafts/20261009_f14_media_claim_preflight.sql`, separate PO approval before hosted apply. Edge 503 unchanged; A2 open, A3/A4 not authorized.
+
+
+### F14 A2 — preflight media claims applied (2026-10-09 UTC)
+Hosted PAZO migration `f14_media_claim_preflight` version `20261009014616` applied under PO authorization; canonicized in git. Private claim/event tables, service-only preflight and recheck, five-minute expiring candidate lease, no deletion or purged status. Live backend trials with BEGIN/ROLLBACK PASS; four existing confirmed nonmoderator accounts make independent role testing possible without new Auth users, but genuine signed JWT test STILL PENDING user session access. Blocks: Storage object CAS / deletion confirmation, CDN, D3-B. 503 Edge remains blocked. A2 not closed.
+
+
+### F14 A2 — two browser role screenshots, strict QA retest required (2026-10-08 local)
+
+PO provided two authentic-session UI PASS screenshots (normal / moderator), with moderator actions visible. Original test flaw found: any RPC failure wrongly counted as permission denied. Preview-only diagnostic patched to require specific SQLSTATE `42501` for denied queue/media/preflight claims; account type is displayed. Updated tests needed on both sessions before declaring complete signed-JWT HTTP authorization. No production deployment, Storage DELETE or other backend mutations.
+
+
+### F14 A2 — strict browser permission tests passed (2026-10-08 local)
+PO submitted normal-account and moderator-account Preview screenshots, both **6/6 PASS** after UI verifier was hardened to require PostgREST SQLSTATE `42501` for forbidden actions; role correctly displayed in both. Mark **real-session browser permissions PASS**, while independent raw signed JWT runner and Storage deletion audits remain separate and unexecuted. DB check 0 claims/events/reports/restrictions, 1 moderator, 20 Storage objects; deployed Edge still 503. Next gate: prove exact-object lifecycle/Storage concurrency with isolated bytes, strong claim-bound confirmation and CDN/retention plan. A2 open. Do not delete media, merge main or deploy production.
+
+
+### F14 A2 — Held media Storage RLS protection applied (2026-10-09 UTC)
+Supabase migration `20261009040957_f14_storage_held_media_guard` adds two RESTRICTIVE authenticated INSERT/DELETE policies covering only active claimed paths in `post-photos` or `community-post-photos`, preserving existing grants and permissions. Held/unheld/expired synthetic cases PASS with ROLLBACK. 20 existing objects untouched; 0 claims. Adds defense in depth but DOES NOT solve service_role or HTTP race, so no automatic deletion. A2 open, Storage/CDN and D3-B still pending.
+
+
+### F14 A2 — next real-user Storage test staged (2026-10-09)
+Preview-only opt-in F14StorageProbe creates one unique synthetic 1px image in the signed-in user's post-photos folder, checks its metadata via Storage API, removes only that synthetic fixture, then confirms absence; interrupted cleanup can be retried without uploading a second test file. Requires PO visual action; must not be called a completed live test until screenshot. Does not enable moderated image purge or certify CDN/cache CAS. A2 open.
+
+
+### Checkpoint handoff compacto F14 A2 — 2026-10-08
+Snapshot actual: `docs/PAZO_ACTIVE_HANDOFF.md` (historial completo movido a `docs/archive/PAZO_ACTIVE_HANDOFF_THROUGH_20261009.md`). Rama `f14/block02-moderation-mvp-20261008`, HEAD observado antes del handoff `2e6dd13`, CI ambos PASS. Migración de hold sobre rutas `20261009040957` aplicada, zero claims/reports/restrictions, 1 moderador y 20 Storage objects al auditar. Dos cuentas Auth real 6/6 PASS en permissions. Prueba visual **pendiente**: botón `Crear, verificar y limpiar archivo de prueba` en Preview-only F14StorageProbe. No suponer que build PASS equivale a ejecución del botón; no activar purga real 503, no merge a main y no cerrar A2. Leer handoff para el siguiente paso y autorización.
+
+
+### F14 A2 — Gate RLS UPDATE/TTL/recheck fail-closed, 2026-10-08
+
+- Prueba aislada `F14StorageProbe` con imagen artificial de 1 píxel: **PO visual PASS**; post-verificación Storage: 0 archivos `f14-storage-probe-*`, 20 objetos restantes. No repetir.
+- Tres pruebas RLS en Supabase hospedado con `BEGIN/ROLLBACK`: estructura del `UPDATE` restrictivo PASS; reproducción de fallo real de protección que caduca a los 5 minutos PASS; candidato que mantiene `held` tras vencimiento y no auto-invalida en recheck de expiry/drift PASS. Sólo objetos/metadatos sintéticos, sin bytes ni borrado.
+- Límite comprobado: `service_role` bypass RLS incluso con `held`. **No se ha demostrado CAS entre PostgreSQL y Storage API**; no autorizar purga automática o invocar `f14_confirm_media_cleanup`.
+- Único borrador para próxima autorización expresa: `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql` — helper de bloqueo `held` sin liberación por TTL, regla `RESTRICTIVE UPDATE` y `f14_recheck_media_claim` fail-closed. **NO APLICADO** en producción. No cambia planes, archivos, retention D3-B, CDN, ni función Edge 503.
+- Estado DB después de pruebas: Storage 20, claims 0, reports 0, restrictions 0, política UPDATE nueva ausente, helper/recheck productivos siguen originales. F14 A2 **Gate 8 ABIERTO**. PR #34/main y F14 A3/A4 sin cambios.
+- Vercel marcó `failure` por **build-rate-limit** tras commits; no inferir compilación. Sin aprobación de upgrade. `npm run verify` del HEAD actual pendiente.
+- **Next exact gate:** permiso expreso PO antes de apply de la migración acotada, después pruebas RLS/rol/grants y auditoría del bypass service-role / API MOVE-COPY-UPSERT y operaciones en vuelo. Purga seguirá 503 hasta prueba independiente y gate de eliminación específico.
+
+
+
+### F14 A2 — checkpoint alojado después de aprobación de hardening
+
+La migración exclusivamente defensiva **`20261009054411_f14_held_media_fail_closed_recheck_update_guard`** fue aprobada y aplicada en Supabase PAZO. Conserva rutas reservadas `held` bloqueadas pasada la expiración, añade política `RESTRICTIVE UPDATE` y evita invalidaciones automáticas de `f14_recheck_media_claim`. Migración Git canónica versionada. Sin Storage DELETE, sin activar Edge, sin cambio de plan, sin merge ni lanzamiento.
+
+SQL/RLS transaccional post-apply PASS para UPDATE held/free/expirado, recheck/drift, grants, INSERT held/free y lectura `anon`/auth de medios públicos. El SQL DELETE directo fue rechazado por protección del proveedor; prueba de DELETE real por Storage API aún no realizada. Recuento: 20 objetos Storage y 0 claims/reportes/restricciones. Edge `f14-moderation-purge` sigue stub HTTP 503.
+
+El test de precondiciones `COPY` detectó que una ruta held pública continúa SELECT-visible y la copia a ruta libre podría estar permitida según permisos SQL; **COPY HTTP no probado**, no confundir la defensa RLS con revocación de URLs públicas. Riesgo service-role/carreras entre API y DB sigue abierto. Recuperación de claims requiere protocolo explícito, no liberación automática por TTL. Documento: `supabase/drafts/f14_media_purge_v2/HELD_CLAIM_RECOVERY_AND_COPY_AUDIT.md`.
+
+**Siguiente:** auditoría de escritores privilegiados y MOVE/COPY/UPSERT con fixtures aisladas, diseño fail-closed de recuperación/confirmación+CDN; detenerse ante eliminación irreversible o nuevo gate de producto/visual. F14 A2 Gate 8 sigue ABIERTO; F14 A3/A4 sin autorización, `main` y PR de Lugares no alterados.
+
+
+### F14 A2 — seguridad COPY + confirmación exacta pendiente (checkpoint 2026-10-09 UTC)
+
+Por autorización técnica PO, dos migraciones adicionales **aplicadas a Supabase PAZO** con sus SQL canónicos:
+
+- `20261009055801_f14_held_media_copy_source_operation_guard`: deniega `SELECT` de origen `held` a `authenticated` solo para COPY REST/S3, preservando lecturas ordinarias. Pruebas reversible e instalada PASS para varios nombres de operación y lectura de control. No simula tráfico HTTP real ni evita descargar la URL pública.
+- `20261009055955_f14_disable_unverified_media_purge_confirmation`: función antigua `f14_confirm_media_cleanup` deshabilitada para todos, incluyendo `service_role`, para que no marque `purged` sin evidencia objeto/versión. Rollback e instalado PASS.
+
+Backend post-apply: 20 objetos intactos, claims/reportes/restricciones cero, Edge desactivada HTTP 503. F14 A2 **Gate 8 ABIERTO** hasta serialización de escritores privilegiados, recuperación segura de holds, CDN/D3-B, HTTP QA aislada y confirmación de eliminación exacta. A3/A4, `main` y publicación oficial intactos. CI último HEAD no certificado, Vercel rate-limit histórico.
+
+
+### F14 A2 — seguridad efectiva, revisión manual operativa (2026-10-09 UTC)
+
+Después de migraciones `20261009054411`, `20261009055801` y `20261009055955`, Supabase aplicó **`20261009061213_f14_reject_unverified_purged_status`**: trigger de restricciones prohíbe `media_status='purged'` sin protocolo seguro. Ensayos DDL reversibles y sobre trigger instalado PASS. Storage 20 intactos, claims y restricciones 0. Código y test canónicos en repositorio.
+
+UI moderadora A2 corregida: retiró el botón que invocaba la purga HTTP 503 y sus falsas señales de éxito; ahora expresa `revisión manual pendiente`, no confirmación de eliminación, con recarga de cola de solo lectura. Regla estática nueva prohíbe regresión a la invocación de la Edge destructiva. TSX transpila sin errores de sintaxis en comprobación aislada, sin afirmar `npm run verify` o prueba visual.
+
+**Gate siguiente:** recuperar capacidad de compilación/Preview gratuito, `npm run verify` y prueba visual PO de la cola de revisión; auditoría restante de carreras reales service-role/Storage, recuperación de claims y CDN/D3-B. No habilitar purga que no puede certificar el objeto/version; conservar revisión manual como comportamiento seguro. A2 **ABIERTO**, A3/A4 y main no alterados.
+
+
+### F14 A2 — PR draft y CI PASS
+
+GitHub PR #35 DRAFT creado, no merge. Workflow CI `37892668372` sobre `da619f9`: SUCCESS (governance + build + lint legacy no bloqueante). Vercel todavía limita nuevas compilaciones.
+
+Supabase `20261009061213_f14_reject_unverified_purged_status` aplicada: bloquea confirmación `purged` no sustentada; pruebas SQL reversibles antes/después PASS. Nueva UI de medios en revisión manual, retirando botón de eliminación no operativo. A2 sigue abierto hasta aprobación visual de nuevo panel y decisión sobre limitación de eliminación física/CDN. No A3/A4 ni merge.
+
+
+### F14 A2 — validación visual de revisión de medios aceptada (2026-10-09)
+
+El PO compartió captura real de `Revisión de archivos` en Vercel Preview `a650dd8`, validación visual PASS: mensajes correctos, cola vacía, botón de actualizar y ausencia de acción destructiva. No implica prueba de refresco ni de una cola con registros. No repetir esta pantalla ni Auth/Storage sintético ya validados.
+
+Reconciliación Gate 8 documentada en `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. D3-A continúa requiriendo borrado verificable en origen/Storage cuando procede: esta UI de revisión manual no cierra A2 sin resolver las garantías de concurrencia, identidad objeto/version y CDN, o sin modificación explícita del alcance por PO. PR #35 sigue DRAFT, no merge, A3/A4 no autorizados.
+
+
+### F14 A2 — prueba de eliminación por versión exacta preparada
+
+Nueva pista verificada en documentación Supabase: selector `versionId` para versión actual o archivada. Inspector de preflight puro y suite en CI; nuevo panel de QA Preview solo de píxel sintético y acción explícita (prueba de versión equivocada + exacta). **La prueba Auth/HTTP nueva aún requiere PO**, distinta de la prueba Storage ya aprobada. Ninguna imagen de usuarios ha sido modificada. F14 A2 continúa abierto por concurrencia `service_role`/HTTP, CDN y DoD D3-A; PR #35 DRAFT, sin fusionar `main` ni iniciar A3/A4.
+
+
+### F14 A2 — Pruebas de expediente positivo con rollback, gate de integración pendiente
+
+El usuario autorizó continuar autónomamente el trabajo técnico para completar F14, **sin suponer pruebas ni garantías no demostradas**. Se ejecutaron en Supabase PAZO fixtures transaccionales sintéticos para Feed y Comunidad, con `BEGIN/ROLLBACK`: consulta de evidencia `hosted_claim_evidence_readonly.sql` PASS con post/report/claim/objeto metadata y re-probe coincidentes; al quitar las referencias a imagen de la publicación la revalidación devolvió JSONB null y el contador de ruta de Comunidad descendió a 0. No quedaron datos persistentes ni bytes de prueba. Regresiones Node adicionales para fuente ausente y transacción compatible con `FOR SHARE`; CI run `37902465901` SUCCESS en `ce5c0b2`. El fixture SQL largo no pudo guardarse en GitHub por un control de seguridad del conector, así que la evidencia alojada no equivale a CI SQL reproducible.
+
+**Bloqueo de arquitectura confirmado:** el backend habitual `service_role` no tiene `USAGE` en `moderation_private`, correctamente. Requeriría una interfaz de lectura limitada a servicio, con autorización y pruebas de permisos, no abrir el esquema. Intentar preparar una RPC de lectura en GitHub fue bloqueado por controles de seguridad del sistema; no se eludió ni instaló. Se mantuvieron 20 objetos Storage, cero reservas/reportes/restricciones, purge Edge 503, estado `purged` protegido. El Preview nuevo de `F14VersionProbe` aún no está disponible por cuota de Vercel. **Gate 8 y D3-A siguen ABIERTOS**; no declarar F14 completada, no pasar a implementación A3/A4 sin cerrar A2, no main/Production/upgrade/borrado real.
+
+
+### F14 A2 — Test independiente completo de reportes con límite/deduplicación (2026-10-09)
+
+`supabase/tests/database/f14_five_report_kinds_hosted_rollback.test.sql` probado en Supabase alojado: denuncias de los cinco tipos bajo `authenticated` sin grant de moderador, límite de cinco por 24h, duplicado rechazado, acceso a cola/decisión de moderación denegado para normal, cinco `dismiss` por moderador y auditoría total. PASS con `BEGIN/ROLLBACK`, sin datos remanentes. No equivale a aceptación visual de los cinco formularios. `scripts/f14-moderation-check.mjs` exige la prueba versionada.
+
+Preview `ac167b4` READY con `F14VersionProbe`: la cuota de Vercel dejó de ser el impedimento absoluto del test; **ahora se espera la ejecución y captura PO** de versión exacta sobre archivo sintético. F14 A2/D3-A siguen abiertos por resultado HTTP no recibido, exclusión service_role/Storage y CDN. No habilitar `purged`, Edge destructiva, main ni A3/A4.
+
+
+### F14 A2 — validación HTTP real de selección de versión exacta (PO PASS)
+
+PO probó nuevo `F14VersionProbe` en Vercel Preview `ac167b4`: subida sintética, lectura ID+versión, rechazo efectivo de versión equivocada, eliminación de versión actual exacta y ausencia de origen: **PASS 4/4 en captura**. SQL posterior: 20 objetos sin residuos del fixture. No solicitar repetir test. Observación CDN HTTP 400 con `cacheNonce` es **inconclusa** y no equivale a invalidación/retención certificada. Quitar `prueba HTTP de versionId no ejecutada` de los bloqueadores restantes; quedan concurrencia y coordinación de escritores privilegiados, autorización de lectura privada, limpieza segura/reintentos, CDN/browser/backups y validación global D3-A. F14 A2/ Gate 8 abiertos, PR #35 DRAFT y Edge destructiva 503.
+
+
+### F14 A2 — Diagnóstico de holds y no-falso-éxito (2026-10-09)
+
+Operator diagnostic SELECT agregado + fixture 5 casos en transacción `ROLLBACK` PASS; auditoría de permisos privados / RPC y trigger anti-`purged` PASS; clasificador puro `exactVersionOutcome` con tests rechaza timeout, path-only y falso CDN PASS en GitHub CI tras verificación. Se mantiene Edge 503, 20 objetos Storage intactos, cero claims/eventos/reportes/restricciones y PR #35 DRAFT. No se aplicó DDL. Próximo gate real A2: interfaz privada solo `service_role`, exclusión HTTP/Storage y aceptación de limites de CDN; `versionId` sintético ya PASS 4/4. No habilitar DELETE reales, no merge, A3/A4 sin gate.
+
+
+### F14 A2 — Lector service-only aplicado y verificado (2026-10-09)
+
+Nueva RPC `public.f14_get_media_claim_evidence(uuid)` desplegada en Supabase PAZO por autorización puntual del PO. Versión remota `20261009095635` y migración del repositorio reconciliadas. EXECUTE únicamente `service_role`; JWT equivocado y roles anon/auth denegados; sin USAGE directo del esquema privado. Pruebas positivas SQL Feed/Comunidades y negativas de deriva de versión/referencia dentro de ROLLBACK PASS; sin fotos borradas, Storage conserva 20 objetos, claims/reportes/restricciones 0. PR #35 DRAFT. F14 A2/D3-A permanece ABIERTO por coordinación HTTP/Storage concurrente, respuesta a timeout, caché/retención. Edge purga permanece desactivada; no pasar a main/A3/A4 sin reconciliación del resto del DoD.
+
+
+### F14 A2 — Dry-run de la evidencia de servicio y nuevos casos de deriva
+
+RPC `f14_get_media_claim_evidence` activa bajo `service_role`; sus tests `serviceEvidenceRpc.test.mjs` y `serviceReaderDryRun.test.mjs` se ejecutan ya en CI. Adaptador puro `serviceReaderDryRun.mjs` jamás emite permiso DELETE, aun con versión exacta coincidente. SQL alojado `f14_service_evidence_reader_drift_rollback.test.sql` pasó pruebas positivas y negativas de referencia compartida, hold vencido, reporte descartado, restricción retirada y objeto versionado distinto con rollback. GitHub run `37916517423` SUCCESS, 112/112 pruebas y build. RLS de Storage conserva los holds y purge Edge sigue HTTP 503, 20 objetos originales intactos. F14 A2/D3-A ABIERTOS: falta fence interservicios confiable y duradero, reintentos ante timeout y política CDN/browser/backup; PR #35 DRAFT, main sin merge, A3/A4 sin iniciarse.
+
+
+### F14 A2 — Simulación de fencing y registro HTTP previo: PASS solo como modelo
+
+Se agregó `privilegedAttemptProtocol.mjs` más suite a `npm run test:f14` y control de gobernanza. Verifica 1,331 secuencias de solicitudes, rechaza tokens/generaciones obsoletos, doble dispatch, timeout/replay, origen equivocado y falso éxito CDN, **sin producir autorización DELETE o RELEASE**. CI `37917583521` SUCCESS: 122/122 pruebas Node y build PASS tras corregir TypeError `null` detectado en un run inicial. El protocolo de ledger y exclusión real pendiente se define en `PRIVILEGED_ATTEMPT_FENCE_GATE.md`, **solo diseño: no desplegado**. Storage sin nuevos DELETE, reader service-only permanece y Edge de purga 503. D3-A/A2 pendientes de durable fence entre todas las escrituras service_role y HTTP, timeouts y retención/caché. PR #35 DRAFT; no main/Production/A3/A4.
+
+
+### F14 A2 — diseño privado de ledger y auditoría de escrituras, SIN despliegue
+
+Preparado un borrador de migración `supabase/drafts/f14_media_purge_v2/20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` para intentos, fences y eventos privados con RLS/REVOKE, unicidad/identidad de archivo y no `purged`. Inventario repositorio `WRITER_INVENTORY_AND_BOUNDARIES.md` separa escritores Auth de Feed/Comunidad y otros buckets; no acredita ausencia de service_role externo. Tests estáticos y governance en CI, 128 PASS `37918721107` antes de ajuste del índice redundante; consultar HEAD final. No se aplicó DDL: las tablas no existen en Supabase, los 20 objetos siguen intactos. Próximo gate: compilar/probar propuesta en DB reversible con autorización apropiada, demostrar exclusión de TODOS los escritores privilegiados en Storage HTTP con 2 procesos sintéticos y acordar CDN/browser/retención. F14 A2 D3-A abiertos, Edge 503, PR #35 DRAFT, main/Production/A3/A4 intactos.
+
+
+### F14 A2 — Verificación SQL real del ledger, únicamente Postgres 16 desechable
+
+Sin coste de infraestructura nueva ni tocar Supabase: GitHub Actions CI ahora compila `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` en contenedor Postgres efímero y prueba FK de bucket/path/operación, unicidad de intentos/eventos, rechazos de ruta/estado, RLS/REVOKE. `37919563316` SUCCESS: 128/128 pruebas Node, SQL smoke PASS y build PASS. Las 3 tablas todavía no existen en PAZO (confirmado read-only), Storage 20 objetos intactos. No se considera ledger aplicado ni exclusión HTTP/service_role comprobada. A2 D3-A abiertos hasta revisión/permiso de cualquier migración remota, fencing de escritores privilegiados, prueba HTTP cross-process y política CDN/browser/backups. PR #35 DRAFT; Edge 503, main/producción sin merge.
+
+
+### F14 A2 — Carrera de dos sesiones SQL y journal sin DELETE: PASS en Postgres aislado
+
+Nuevo DDL draft de funciones privadas SECURITY INVOKER para transición de intentos, recuperación timeout y bloqueo `FOR UPDATE` del claim, fence y operación, con `mayDelete:false`. Ledger draft vincula generation exacta por FK. GitHub `37921483402` SUCCESS: 128 Node tests, SQL con ROLLBACK, **2 conexiones PostgreSQL simultáneas** prueban que despacho duplicado bloquea y se rechaza tras COMMIT; build PASS. Solo contenedor efímero, sin instalación Supabase y sin servicio HTTP real. F14 D3-A sigue bloqueada por exclusión de writers privilegiados Storage, ACK/timeout y CDN/retención. PR #35 DRAFT; no main/Production/A3/A4.
+
+### 44. F14 A2 — auditoría de continuidad en vivo (2026-10-09, solo lectura)
+
+HEAD de PR #35 anterior a este checkpoint: `defce91f7405b36a07a83d000a9322024ed16e38`; GitHub Actions `37923451550` **SUCCESS** (governance, Postgres efímero ledger DRAFT y build), mientras Vercel registra error de cuota `build-rate-limit`, no fallo comprobado de Vite. Supabase PAZO Postgres 17: 20 objetos Storage, 0 claims/eventos/reportes/restricciones y 0 tablas de ledger; RPC de evidencia solo `service_role`, confirmación antigua revocada, trigger anti-`purged` activo y Edge 503. Ambos buckets D3-A permanecen públicos. Inventario de escritores Auth en la rama verificado; escritores externos con `service_role` no certificables. La consulta de variables del proyecto Vercel recibió 403 por alcance del equipo; no se modificó configuración. **A2 Gate 8 abierto, no DDL/DELETE/merge/deploy/costos.** Fuente operativa: `docs/PAZO_ACTIVE_HANDOFF.md` y contrato `PRIVILEGED_ATTEMPT_FENCE_GATE.md`.
+
+### 45. Cambio de prioridad del PO: terminar MVP antes del hardening avanzado (2026-10-09)
+
+El PO decidió que la próxima inversión de ingeniería sea completar **módulos funcionales existentes y pruebas reales de valor**, no perfeccionar el coordinador distribuido de Storage antes de validar demanda. Se declara **PAUSADA** F14 A2 (Gate 8 sigue ABIERTO; PR #35 DRAFT), sin borrar trabajo ni convertir D3-A en COMPLETADA. No se implementan ledger remoto, SQL de purga, borrado automático ni CDN avanzado. **SIGUIENTE:** auditoría acotada de faltantes reales y mocks en módulos ya desarrollados, con foco en onboarding, mascota, Feed/interacciones, Explorar/Comunidades/Lugares, Cuidados, notificaciones y recorridos móvil; aplicar a cada módulo su gate/alcance aprobado y no adelantar funcionalidades no decididas. Mantener Auth/RLS/denuncia/moderación, limitar exposición de medios públicos y reservar gate mínimo de privacidad/retirada de contenido y pruebas antes de incorporar usuarios externos. F14 A3/A4 y cambios de Production/main requieren sus propias autorizaciones. No confundir prioridad comercial con aprobación para lanzar sin capacidad efectiva de atender contenido abusivo o solicitudes de eliminación.
+
+
+### 46. Ejecución del carril funcional, sin reabrir F14 (2026-10-09)
+
+Se creó PR #36 DRAFT desde `main` en rama `mvp/functional-readiness-20261009`, separada de PR #35 F14 pausado. Arregla cursores Feed para no omitir posts mezclados (pruebas Node 6/6) y evita representar mensajes fake a usuarios autenticados; demo explícita conservada. GitHub Actions `37927412741` SUCCESS en HEAD `f0b638`; falta QA de la funcionalidad en Preview. Auditoría de módulos en `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` de esa rama. Existe diferencia deliberada a reconciliar de Lugares: `main` muestra mapa real, F14 no-dev sustituye por experimento para controlar rollout/costo. No publicar silenciosamente sin decisión/QA. **Ni PR #35 ni #36 mergeados; ninguna SQL/deploy de producción.**
+
+### 47. Fix de signup antes de validar adquisición de usuarios (2026-10-09)
+
+PR #36, rama independiente de F14, HEAD `c513543`, CI `37928545787` SUCCESS. Se corrigió el flujo Supabase signUp cuando `data.session=null`: en lugar de intentar crear una mascota sin sesión, instruye confirmar correo y volver a iniciar sesión. Quitados nombre/edad `Luna / 3 años` predeterminados y placeholder de foto visible hasta elegir archivo. Pruebas de resultado signup + paginación incluidas en governance. **Sin QA de correo real o Preview** (Vercel bloqueado 403 scope digitalapp); PR sigue DRAFT sin merge ni Production. F14 A2 permanece PAUSADA y no debe recibir desarrollo de ledger hasta un gate nuevo. Prioridad: corregir onboarding, probar Feed/Comunidades/Lugares/Cuidados/Documentos y beta limitada con privacidad básica verificable.
+
+### 48. Recuperación de contraseña en carril MVP, F14 pausada (2026-10-09)
+
+Rama `mvp/functional-readiness-20261009`, PR #36 DRAFT HEAD `3500a48`: recuperación de acceso por correo con Supabase Auth, evento `PASSWORD_RECOVERY`, nuevo password, regreso a login, URL marcador `/?auth=recovery`, pruebas unitarias y manejo de errores de red login/registro. Build anterior `37930559035` SUCCESS; última compilación `37930631241` terminó **SUCCESS** en HEAD `3500a48`. Queda **sin validar** el email/callback real y las Redirect URLs de Supabase del entorno habilitado; Vercel responde 403 para equipo `digitalapp` y no se hizo deploy. No habilitar beta pública por CI únicamente. PR #35 / F14 A2 sigue PAUSADO, Gate 8 ABIERTO y purga protegida 503. Ningún merge/SQL/Production/costo.
+
+### 49. Carga inicial de mascotas protegida y motivo confirmado de Preview faltante (2026-10-09)
+
+PR #36 DRAFT de MVP funcional, código `446b2c5`, Actions `37931428416` SUCCESS: la carga real de mascotas de una cuenta autenticada muestra estado pendiente, error recuperable y reintento, sin enviarla erróneamente al registro; pantalla A03 solo si `fetchOwnedPets` respondió sin mascotas. Auditoría detallada en `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` en PR #36. GitHub commit-status de Vercel reporta `build-rate-limit` en los dos contextos y el conector al scope `digitalapp` sigue 403. No crear builds extra ni actualizar plan para este gate; QA visual y email real pendientes. PR #35 F14 continúa PAUSADO; ambos sin merge, sin producción ni cambios Supabase.
