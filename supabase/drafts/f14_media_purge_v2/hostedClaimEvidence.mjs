@@ -4,7 +4,7 @@
 // No network, no credentials, no Storage mutation, NO delete authorization.
 import { inspectExactVersionPreflight } from './exactVersionPreflight.mjs'
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const validRow = x => x !== null && typeof x === 'object' && !Array.isArray(x)
 const fail = reason => Object.freeze({ status: 'manual_review', reason })
 
