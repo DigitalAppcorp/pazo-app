@@ -1129,3 +1129,8 @@ Preparado un borrador de migración `supabase/drafts/f14_media_purge_v2/20261009
 ### F14 A2 — Verificación SQL real del ledger, únicamente Postgres 16 desechable
 
 Sin coste de infraestructura nueva ni tocar Supabase: GitHub Actions CI ahora compila `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` en contenedor Postgres efímero y prueba FK de bucket/path/operación, unicidad de intentos/eventos, rechazos de ruta/estado, RLS/REVOKE. `37919563316` SUCCESS: 128/128 pruebas Node, SQL smoke PASS y build PASS. Las 3 tablas todavía no existen en PAZO (confirmado read-only), Storage 20 objetos intactos. No se considera ledger aplicado ni exclusión HTTP/service_role comprobada. A2 D3-A abiertos hasta revisión/permiso de cualquier migración remota, fencing de escritores privilegiados, prueba HTTP cross-process y política CDN/browser/backups. PR #35 DRAFT; Edge 503, main/producción sin merge.
+
+
+### F14 A2 — Carrera de dos sesiones SQL y journal sin DELETE: PASS en Postgres aislado
+
+Nuevo DDL draft de funciones privadas SECURITY INVOKER para transición de intentos, recuperación timeout y bloqueo `FOR UPDATE` del claim, fence y operación, con `mayDelete:false`. Ledger draft vincula generation exacta por FK. GitHub `37921483402` SUCCESS: 128 Node tests, SQL con ROLLBACK, **2 conexiones PostgreSQL simultáneas** prueban que despacho duplicado bloquea y se rechaza tras COMMIT; build PASS. Solo contenedor efímero, sin instalación Supabase y sin servicio HTTP real. F14 D3-A sigue bloqueada por exclusión de writers privilegiados Storage, ACK/timeout y CDN/retención. PR #35 DRAFT; no main/Production/A3/A4.
