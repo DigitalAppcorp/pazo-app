@@ -45,11 +45,15 @@ BEGIN
 END $initial$;
 RESET ROLE;
 -- Another synthetic post reuses the URL: deny the now-shared resource.
-INSERT INTO public.posts(id,pet_id,user_id,pet_name,pet_species,text,photo_url)
-VALUES(gen_random_uuid(),current_setting('f14.qa.pet')::uuid,
- current_setting('f14.qa.owner')::uuid,'F14 reference','perro',
- 'duplicate synthetic reference',current_setting('f14.qa.url'))
-RETURNING id;
+DO $duplicate$
+DECLARE v_duplicate uuid:=gen_random_uuid();
+BEGIN
+ INSERT INTO public.posts(id,pet_id,user_id,pet_name,pet_species,text,photo_url)
+ VALUES(v_duplicate,current_setting('f14.qa.pet')::uuid,
+  current_setting('f14.qa.owner')::uuid,'F14 reference','perro',
+  'duplicate synthetic reference',current_setting('f14.qa.url'));
+ PERFORM set_config('f14.qa.duplicate',v_duplicate::text,true);
+END $duplicate$;
 SET LOCAL ROLE service_role;
 DO $shared$
 BEGIN
@@ -59,8 +63,7 @@ END $shared$;
 RESET ROLE;
 -- Remove only the second synthetic URL reference. No user content touched.
 UPDATE public.posts SET photo_url=NULL
- WHERE text='duplicate synthetic reference' AND user_id=current_setting('f14.qa.owner')::uuid
- AND photo_url=current_setting('f14.qa.url');
+ WHERE id=current_setting('f14.qa.duplicate')::uuid;
 UPDATE moderation_private.media_claims
  SET created_at=now()-interval '12 minutes',expires_at=now()-interval '5 minutes'
  WHERE claim_id=current_setting('f14.qa.claim')::uuid;
