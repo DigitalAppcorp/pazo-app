@@ -34,3 +34,12 @@ El cierre seguro exige **enumerar y coordinar todos** los clientes privilegiados
 - Aprobación específica para cualquier nueva migración remota o para activar una Edge destructiva. Mantener PR #35 DRAFT y no fusionar `main`.
 
 **Gate actual:** solo modelo + test. Ninguna tabla, trigger, tarea, endpoint, función Edge o comando de borrado se instaló por este documento.
+
+
+## Evidencia de SQL aislado en CI — PASS, SIN Supabase live DDL
+
+Propuesta de tres tablas privadas en `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql`, no aplicada a PAZO. Se creó `privileged_attempt_ledger_ephemeral.test.sql` con IDs únicamente sintéticos y `scripts/test-f14-ledger-ephemeral.sh`: **solo bajo `GITHUB_ACTIONS=true`**, inicia un PostgreSQL 16 desechable por Docker en el runner, crea roles `anon/authenticated/service_role` falsos y la tabla stub `media_claims`, compila y ejecuta la propuesta en el contenedor, prueba RLS FORCE + grants cerrados, ruta exclusiva, FK compuesta de operación/bucket/path, idempotencia de evento, ruta malformada y estado `purged` rechazado. El SQL de fixture termina en `ROLLBACK`; el contenedor se elimina al finalizar. **No utiliza el proyecto Supabase, llaves, fotos ni cuentas reales.**
+
+Resultados transparentes: primer CI con Postgres `37919265959` falló por un fixture que esperaba `foreign_key_violation` pero chocaba primero con `unique_violation` para el mismo `active_operation_id`; ajustado para insertar una segunda operación sintética y aislar la FK compuesta. Otro run `37919380212` falló al iniciar el contenedor sin mensajes de diagnóstico; se mejoró registro/cleanup y se repitió. **CI `37919563316` SUCCESS** con salida `F14 private ledger DRAFT: disposable PostgreSQL smoke PASS`, **128/128 pruebas Node PASS** y compilación Vite PASS.
+
+**Resultado del gate:** validez de esquema y restricciones principales **PASS EN POSTGRES TEMPORAL**, no se ha probado ni instalado ledger en Supabase PAZO, no se ha desarrollado/instalado RPC de coordinación, no se han auditado todos los actores externos `service_role` y el ensayo de dos procesos con operaciones Storage HTTP sigue pendiente. La tabla por sí sola no constituye exclusión. Para migración real se exige autorización concreta nueva según AGENTS, revisión de privacidad/retención, SQL canonizado, rollback y permisos posteriores. No confundirlo con aprobación para borrar medios.
