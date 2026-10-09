@@ -127,6 +127,7 @@ test('SQL draft dollar quotes are paired and no malformed AS $ single marker exi
     '../supabase/drafts/20261009_f14_a3_write_fence_NOT_APPLIED.sql',
     '../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql',
     '../supabase/drafts/20261009_f14_a3_worker_legacy_clear_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_recent_auth_NOT_APPLIED.sql',
   ]
   for (const path of paths) {
     const source = readFileSync(new URL(path,import.meta.url),'utf8')
@@ -188,4 +189,17 @@ test('A3 Edge endpoint stays disabled, uses named-secret middleware and dual gat
   assert.match(fn,/PAZO_A3_REVIEW_INVOKE_SECRET/)
   assert.match(fn,/makeA3InternalReviewHandler/)
   assert.doesNotMatch(fn,/\bauth\.admin\.deleteUser\b|storage\.from\(|\bauth: 'none'\b/)
+})
+
+const a3RecentSql=readFileSync(new URL('../supabase/drafts/20261009_f14_a3_recent_auth_NOT_APPLIED.sql',import.meta.url),'utf8')
+test('A3 recent auth draft is fail-closed with five-minute server receipt',()=>{
+ const a=a3RecentSql.indexOf("RAISE EXCEPTION 'A3 RECENT AUTH DRAFT ONLY")
+ assert.ok(a3RecentSql.indexOf('BEGIN;')<a && a<a3RecentSql.indexOf('CREATE TABLE'))
+ assert.match(a3RecentSql,/ALTER TABLE account_private\.deletion_recent_auth ENABLE ROW LEVEL SECURITY/)
+ assert.match(a3RecentSql,/INTERVAL '5 minutes'/)
+ assert.match(a3RecentSql,/auth\.sessions s WHERE s\.id=p_session_id/)
+ assert.match(a3RecentSql,/r\.consumed_at IS NOT NULL/)
+ assert.match(a3RecentSql,/j\.status='reviewing'/)
+ assert.match(a3RecentSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_record_reauth\(uuid,uuid,uuid\) TO service_role/)
+ assert.doesNotMatch(a3RecentSql,/\bDELETE\s+FROM\b|\bTRUNCATE\b|\bauth\.admin\.deleteUser\b/i)
 })
