@@ -76,8 +76,9 @@ BEGIN
   -- Their eventual preservation requires a separate legacy migration.
   IF EXISTS (
     SELECT 1 FROM public.posts p WHERE p.user_id=v_uid
-      AND jsonb_typeof(p.comments)='array'
-      AND jsonb_array_length(p.comments)>0
+      AND CASE WHEN jsonb_typeof(p.comments)='array'
+        THEN jsonb_array_length(p.comments)>0
+        ELSE false END
   ) THEN
     RAISE EXCEPTION 'Legacy embedded comments require manual author reconciliation'
       USING ERRCODE='P0001';

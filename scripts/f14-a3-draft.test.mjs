@@ -144,6 +144,8 @@ test('A3 preflight identifies embedded comments and media as manual review block
   }
   assert.match(sql,/jsonb_typeof\(p\.comments\)='array'/)
   assert.match(sql,/jsonb_array_length\(p\.comments\)/)
+  assert.match(sql,/CASE[\s\S]*?WHEN jsonb_typeof\(p\.comments\)='array' THEN jsonb_array_length/)
+  assert.match(archiveSql,/CASE WHEN jsonb_typeof\(p\.comments\)='array'/)
   assert.match(archiveSql,/Legacy embedded comments require manual author reconciliation/)
   assert.match(archiveSql,/jsonb_array_length\(p\.comments\)>0/)
 })

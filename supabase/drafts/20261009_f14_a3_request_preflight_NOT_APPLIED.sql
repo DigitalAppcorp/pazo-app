@@ -98,9 +98,10 @@ BEGIN
 
   -- Embedded legacy JSON comments may not have verified account authorship.
   -- Never assume they are duplicates of post_comments or safe to discard.
-  SELECT coalesce(sum(jsonb_array_length(p.comments)),0)::int INTO v_legacy_comments
-  FROM public.posts p WHERE p.user_id=v_uid
-    AND jsonb_typeof(p.comments)='array';
+  SELECT coalesce(sum(CASE
+    WHEN jsonb_typeof(p.comments)='array' THEN jsonb_array_length(p.comments)
+    ELSE 0 END),0)::int INTO v_legacy_comments
+  FROM public.posts p WHERE p.user_id=v_uid;
 
   SELECT count(*)::int INTO v_feed_photos
   FROM public.posts p WHERE p.user_id=v_uid
