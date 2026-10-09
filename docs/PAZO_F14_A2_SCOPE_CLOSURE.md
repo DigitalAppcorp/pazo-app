@@ -35,3 +35,8 @@
 5. No iniciar A3/A4, `main` merge, Vercel Production, nuevos proveedores/pagos, ni borrar contenido real hasta sus gates.
 
 **Principio:** preferir un gate abierto verificable a un PASS engañoso que pueda destruir contenido o exponer datos.
+
+
+### Actualización: selector de versión exacta por API, QA pendiente
+
+La referencia vigente del cliente Storage documenta `remove([{path,versionId}])` para versión exacta tanto actual como archivada. Esto abre una alternativa a borrado por ruta, **pero no prueba por sí solo atomicidad, operaciones HTTP en vuelo ni CDN**. La suite pura `exactVersionPreflight.test.mjs` está incorporada a CI; un test de UI Preview con archivo artificial `F14VersionProbe` está versionado, todavía sin evidencia visual ni ejecución autenticada del PO. El elemento de eliminación física/CDN sigue bloqueante hasta validar versión real y exclusión de escritores privilegiados.
