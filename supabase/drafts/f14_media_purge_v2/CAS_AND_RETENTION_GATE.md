@@ -38,3 +38,14 @@
 ## Estado de seguridad posterior al Gate visual (2026-10-09)
 
 Se añadieron controles remotos: `20261009054411` (hold persistente/UPDATE/recheck), `20261009055801` (origen COPY), `20261009055955` (RPC antigua `f14_confirm_media_cleanup` deshabilitada y EXECUTE revocado) y `20261009061213` (trigger prohíbe `media_status='purged'` sin protocolo). **La referencia anterior a que la vieja RPC 'marca purged' es histórica: ya no puede ejecutarse.** El estado efectivo es no-borrado (Edge 503), revisión administrativa solo lectura. El PO confirmó por captura el panel del nuevo Preview SHA `a650dd8`: visual PASS para ese estado vacío y mensajes; no demuestra eliminación física, caché o caso con medio real. La prueba automatizada de build/governance fue PASS en ese SHA. La reconciliación DoD actual es `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. Ni la mitigación COPY ni el trigger resuelven CAS/serialización entre Storage y escritores privilegiados. No habilitar purga automática hasta probar esa propiedad con fuente/versión exacta.
+
+
+## 2026-10-09 — Revisión de API: selector exacto por `versionId` documentado
+
+La referencia **actual** `https://supabase.com/docs/reference/javascript/file-buckets-remove` aclara que `remove([{path,versionId}])` apunta a una versión **exacta**, vigente o archivada. Esto reemplaza la antigua suposición de que solo servía para versiones no actuales. **No se ha probado su semántica HTTP real frente a carreras en PAZO**, ni la coincidencia con identidad de objectId en el Storage alojado, ni la conservación de otra versión tras sustituir una ruta. La protección de URL pública y CDN también sigue pendiente.
+
+Se añadió el inspector puro `exactVersionPreflight.mjs` y suite de casos en `exactVersionPreflight.test.mjs`, integrados a `npm run test:f14`. Verifica coherencia `claim + source + objectId + versionId + updatedAt + fingerprint`, rechazo de expiración, versión sustituida, compartición incierta, fuente archivada o marcador de eliminación. **Siempre devuelve `candidate_only` o `manual_review` con `mayDelete:false` y no ejecuta Storage API.** El backend no se modificó.
+
+Para verificar el comportamiento real se añadió `F14VersionProbe` exclusivamente a Preview, con consentimiento por botón. Sólo opera sobre un píxel artificial `uid/f14-version-probe-UUID.png` y prueba versión equivocada, versión correcta y ausencia de origen. El Product Owner todavía **no** ha pulsado esta prueba nueva; no inferir PASS del anterior `F14StorageProbe` que eliminaba solo por ruta. El texto de la UI advierte que no prueba CDN, claims de medios reales ni escritores privilegiados.
+
+**Gate posterior aunque pase:** exigir confirmación de que una sustitución concurrente no se borra por error, serialización de writers privilegiados y prueba de origen/CDN independiente. Mantener Edge 503, bloqueo `purged` y PR DRAFT hasta todas las pruebas exigidas.
