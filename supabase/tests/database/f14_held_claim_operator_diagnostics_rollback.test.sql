@@ -24,6 +24,7 @@ BEGIN
  RETURNING claim_id INTO v_claim;
  PERFORM set_config('f14.diag.claim',v_claim::text,true);
  PERFORM set_config('f14.diag.post',post_id::text,true);
+ PERFORM set_config('f14.diag.source_url',v_url,true);
 END $fixture$;
 PREPARE f14_diag AS
 -- F14 A2 / D3-A: SAFE, AGGREGATED, ADMIN-ONLY stalled-claim diagnostic.
@@ -97,5 +98,30 @@ BEGIN
  IF r.held_source_drift<>1 OR r.held_snapshot_consistent_not_delete_authorized<>0
  THEN RAISE EXCEPTION 'Source drift classification failed: %',row_to_json(r); END IF;
 END $drift$;
+-- Restore the source, then simulate metadata-reference drift on the fixture.
+UPDATE public.posts SET photo_url=current_setting('f14.diag.source_url')
+WHERE id=current_setting('f14.diag.post')::uuid;
+UPDATE moderation_private.media_claims SET storage_object_id=gen_random_uuid()
+WHERE claim_id=current_setting('f14.diag.claim')::uuid;
+DO $missing_storage$
+DECLARE r record;
+BEGIN
+ EXECUTE 'EXECUTE f14_diag' INTO r;
+ IF r.held_without_storage_metadata<>1
+ THEN RAISE EXCEPTION 'Missing Storage metadata classification failed: %',row_to_json(r); END IF;
+END $missing_storage$;
+-- Repair the synthetic pointer before simulating changed moderation state.
+UPDATE moderation_private.media_claims
+SET storage_object_id=(snapshot->>'storage_object_id')::uuid
+WHERE claim_id=current_setting('f14.diag.claim')::uuid;
+UPDATE moderation_private.content_restrictions SET media_status='none'
+WHERE target_kind='feed_post' AND target_id=current_setting('f14.diag.post')::uuid;
+DO $state_drift$
+DECLARE r record;
+BEGIN
+ EXECUTE 'EXECUTE f14_diag' INTO r;
+ IF r.held_moderation_state_drift<>1
+ THEN RAISE EXCEPTION 'Moderation-state drift classification failed: %',row_to_json(r); END IF;
+END $state_drift$;
 DEALLOCATE f14_diag;
 ROLLBACK;
