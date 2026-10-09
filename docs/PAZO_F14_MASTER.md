@@ -280,3 +280,12 @@ La suite estática `scripts/f14-moderation-check.mjs` ahora exige los borradores
 
 **Pendientes imprescindibles A2:** evaluar llamadas `MOVE/COPY/UPSERT` vía API con pruebas auténticas bajo autorización, controles de `service_role`, prohibir liberación de claim mientras haya un delete in-flight, protocolo de confirmación objeto/version por backend, CDN/retención D3-B y tests finales de UI. Ningún DELETE de medios reales, Edge activation, nueva migración alojada o merge `main` fue autorizado por este gate.
 
+
+
+### 32. A2 — recheck fail-closed auditado, borrador completado, sin apply
+
+Se inspeccionó `public.f14_recheck_media_claim(uuid)` realmente desplegada: actualmente cambia `status='invalidated'` en el recheck si el claim está vencido o la fuente difiere, liberando la protección. El borrador `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql` ahora contiene **tres cambios propuestos no aplicados**: (1) no caducar automáticamente la protección RLS de un `held`; (2) añadir `AS RESTRICTIVE FOR UPDATE` con `USING` y `WITH CHECK`; (3) modificar `f14_recheck_media_claim` para devolver `false` en expiry/drift **sin invalidar automáticamente**. Requiere reconciliación manual auditable para liberar reservas abandonadas.
+
+`f14_storage_held_update_candidate_rollback.test.sql` pasó sobre Supabase hospedado en transacción `BEGIN/ROLLBACK` probando objeto libre, retenido, vencido, recheck con rol `service_role` sin liberación, drift sin liberación y desbloqueo explícito. También demostró, **como límite esperado**, que `service_role` SÍ puede actualizar objetos `held` pese a RLS; esto no está solucionado por el borrador. No son pruebas de Storage HTTP, MOVE/COPY, ni CAS real. Ni versión activa de `remove` ni CDN fueron certificados.
+
+Recuento post-ROLLBACK: 20 objetos, 0 claims/eventos/reportes/restricciones, 0 política UPDATE instalada y función `recheck` productiva original sin cambios. Vercel CI del HEAD reciente bloqueado por **build-rate-limit**; `npm run verify` para último HEAD no observado. **Gate actual:** proponer autorización de migración alojada estrecha solo para guardas fail-closed, sin permitir DELETE, sin habilitar Edge y sin cerrar F14 A2; después auditar coordinación de escritores privilegiados/operaciones en vuelo y mantener purga en revisión manual mientras no haya prueba de exclusión trans-servicio.
