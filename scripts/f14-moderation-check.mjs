@@ -128,15 +128,12 @@ assert.ok(holdSql.includes('AS RESTRICTIVE FOR INSERT') && holdSql.includes('AS 
 assert.ok(holdSql.includes('f14_media_claims_held_bucket_path_idx'), 'Storage hold lookup index required')
 assert.ok(!holdSql.includes('DELETE FROM storage.objects') && !holdSql.includes('.remove('), 'Storage hold migration must not delete files')
 assert.ok(read(holdRegression).trimEnd().endsWith('ROLLBACK;'), 'Storage hold test must be reversible')
-const storageSmoke = read('src/features/moderation/F14StorageProbe.tsx')
-assert.ok(storageSmoke.includes('f14-storage-probe-'), 'Storage smoke must isolate its fixture by unique path')
-assert.ok(storageSmoke.includes('upsert: false'), 'Storage smoke must never overwrite existing files')
-assert.ok(storageSmoke.includes('.remove([path])'), 'Storage smoke must clean ONLY its self-generated file')
-assert.ok(storageSmoke.includes('isTrialPath(path, uid)'), 'Storage smoke must validate exact fixture ownership before removal')
-assert.ok(storageSmoke.includes('storage.list(uid,'), 'Storage smoke must verify object presence and absence via supported list API')
-assert.ok(!storageSmoke.includes('storage.info(path)'), 'Storage smoke must not depend on unavailable SDK info method')
-assert.ok(storageSmoke.includes('sessionStorage.setItem'), 'Storage smoke must support interrupted cleanup')
-assert.ok(!qaHost.includes('<F14StorageProbe lang={lang} />'), 'Already completed path-only Storage smoke must not reappear in Preview')
+// The previous path-only synthetic test was visually approved and retired.
+// Keep Git history as evidence; do not ship an executable path-only cleaner.
+assert.ok(!existsSync('src/features/moderation/F14StorageProbe.tsx'),
+  'Deprecated path-only Storage test must not return to the app')
+assert.ok(!qaHost.includes('F14StorageProbe'),
+  'Previously approved path-only test must stay unmounted from Preview')
 const updateMigration = 'supabase/migrations/20261009054411_f14_held_media_fail_closed_recheck_update_guard.sql'
 const updateSmoke = 'supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql'
 const updateBehavior = 'supabase/tests/database/f14_storage_held_update_behavior_rollback.test.sql'
