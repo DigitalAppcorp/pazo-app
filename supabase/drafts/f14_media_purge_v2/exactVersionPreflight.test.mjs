@@ -49,6 +49,15 @@ blocked('missing claim fails closed', {...sample(), claim:null},'missing_server_
 blocked('client or reused candidate rejected',patch(sample(),'candidate',{status:'approved'}),'unverified_candidate')
 blocked('wrong bucket rejected',patch(sample(),'candidate',{bucket:'pet-documents'}),'unverified_candidate')
 blocked('legacy manual avatar task cannot become delete eligible',patch(sample(),'claim',{kind:'pet_profile'}),'claim_not_exact_or_unconfirmed')
+blocked('community claim cannot reference Feed bucket',
+ patch(sample(),'claim',{kind:'community_post'}),'claim_not_exact_or_unconfirmed')
+blocked('Feed claim cannot reference Community bucket',
+ (() => { const x=sample(); return {
+   ...x, candidate:{...x.candidate,bucket:'community-post-photos'},
+   claim:{...x.claim,bucket:'community-post-photos'},
+   live:{...x.live,bucket:'community-post-photos'},
+ } })(),'claim_not_exact_or_unconfirmed')
+
 blocked('report must be withdrawn',patch(sample(),'claim',{reportStatus:'pending'}),'claim_not_exact_or_unconfirmed')
 blocked('media must still be awaiting review',patch(sample(),'claim',{mediaStatus:'purged'}),'claim_not_exact_or_unconfirmed')
 blocked('shared-reference uncertainty blocks deletion',patch(sample(),'claim',{exclusiveReferenceProof:false}),'claim_not_exact_or_unconfirmed')
