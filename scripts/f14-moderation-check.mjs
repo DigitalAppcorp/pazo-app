@@ -142,10 +142,11 @@ const updateSmoke = 'supabase/tests/database/f14_storage_held_media_update_draft
 const updateBehavior = 'supabase/tests/database/f14_storage_held_update_behavior_rollback.test.sql'
 const updateCandidate = 'supabase/tests/database/f14_storage_held_update_candidate_rollback.test.sql'
 const updateInstalled = 'supabase/tests/database/f14_storage_held_update_installed_rollback.test.sql'
+const insertInstalled = 'supabase/tests/database/f14_storage_held_insert_guard_installed_rollback.test.sql'
 const casGate = 'supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md'
 assert.ok(!existsSync('supabase/drafts/20261009_f14_storage_held_media_update_guard.sql'),
   'Applied migration must no longer remain in drafts')
-for (const f of [updateMigration, updateSmoke, updateBehavior, updateCandidate, updateInstalled, casGate])
+for (const f of [updateMigration, updateSmoke, updateBehavior, updateCandidate, updateInstalled, insertInstalled, casGate])
   assert.ok(existsSync(f), 'F14 staged fail-closed UPDATE artifact missing: '+f)
 const updateSql = read(updateMigration)
 assert.ok(updateSql.includes('APPLIED to hosted PAZO Supabase version 20261009054411'),
@@ -163,7 +164,7 @@ assert.ok(updateSql.includes('CREATE OR REPLACE FUNCTION public.f14_recheck_medi
 assert.ok(!updateSql.includes("SET status='invalidated'"),
   'Candidate recheck must not automatically release media holds')
 assert.ok(!updateSql.includes('DELETE FROM storage.objects'), 'Guard draft must never delete Storage metadata')
-for (const f of [updateSmoke, updateBehavior, updateCandidate, updateInstalled]) {
+for (const f of [updateSmoke, updateBehavior, updateCandidate, updateInstalled, insertInstalled]) {
   const testSql = read(f)
   assert.ok(testSql.includes('BEGIN;') && testSql.trimEnd().endsWith('ROLLBACK;'),
     'Staged RLS tests must be transactionally reversible: '+f)
@@ -188,6 +189,12 @@ assert.ok(installedSql.includes('Installed UPDATE guard is missing') &&
   !installedSql.includes('CREATE OR REPLACE FUNCTION public.f14_recheck_media_claim') &&
   !installedSql.includes('CREATE POLICY f14_media_claim_restrict_update'),
   'Installed SQL regression must test live backend without replacing production functions')
+const insertSql = read(insertInstalled)
+assert.ok(insertSql.includes('INSERT to held path must raise 42501') &&
+  insertSql.includes('INSERT free path failed') &&
+  insertSql.includes('ROLLBACK;') &&
+  !insertSql.includes('DELETE FROM storage.objects'),
+  'Installed Storage RLS test must cover held/free INSERT without SQL metadata deletion')
 const casContract = read(casGate)
 assert.ok(casContract.includes('service_role') &&
   casContract.includes('claim_id') &&
