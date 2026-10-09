@@ -42,7 +42,7 @@ test('tampered JWT claim or missing session cannot be used for account closure',
  const r=await verifyA3PasswordForJob(job,jwt,pwd,a.port)
  assert.equal(r.status,'rejected')
  assert.ok(!a.events.includes('Auth.signInWithPassword'))
- const b=setup({session:null})
+ const b=setup({session:''})
  assert.equal((await verifyA3PasswordForJob(job,jwt,pwd,b.port)).status,'rejected')
 })
 test('wrong password, different login identity or unsafe signout block receipt',async()=>{
