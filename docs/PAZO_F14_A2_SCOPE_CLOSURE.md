@@ -91,3 +91,8 @@ Se añadió diagnóstico operativo **sin DML y sin PII** `held_claim_reconciliat
 `exactVersionOutcome.mjs` + tests clasifican intento con versionId exacto y ausencia posterior `info/list`. Nunca emite `purged` ni `mayFinalizePurge:true`, y trata timeout, reintento, versión distinta y HTTP CDN como **no concluyentes** para el cumplimiento D3-A. Auditaron los permisos de las RPC y el esquema privado en `f14_private_claim_permissions_readonly.test.sql` alojado PASS: rol service_role autorizado solo a las RPC necesarias, no al esquema privado ni a la antigua confirmación purged. No hay nuevo lector de evidencia implementado por bloqueo previo del conector; la protección fail-closed sigue vigente.
 
 **Estado:** diagnóstico/prevención de falso éxito PASS; eliminación real moderada, serialización `service_role`/HTTP, lectura privada del backend y política CDN/retención siguen BLOQUEANTES. El PO ya aprobó la prueba aislada por `versionId` (4/4), no repetirla. A2 no cerrado, PR #35 DRAFT.
+
+
+### Gate de autorización concreta: RPC service-only de evidencia
+
+Hay diseño verificable en `supabase/drafts/f14_media_purge_v2/PRIVATE_SERVICE_READ_GATE.md` para crear `public.f14_get_media_claim_evidence(uuid)` con lectura transaccional, EXECUTE únicamente `service_role`, sin acceso directo al esquema privado desde rol API. **No existe en backend**. Necesita DDL versionado, pruebas negativas anon/auth, pruebas de source/version/ref mismatch, aprobación remota específica del PO y reconciliación de migraciones. El intento anterior de crear el archivo RPC fue detenido por seguridad del conector; no eludirlo. Aunque se apruebe e instale, no autoriza habilitar purga mientras sigan concurrencia HTTP y CDN pendientes.
