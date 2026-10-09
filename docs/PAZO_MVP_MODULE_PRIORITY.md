@@ -301,3 +301,9 @@ PR #36 ahora protege la carga inicial de mascotas para usuarios autenticados: sp
 ### 2026-10-09 — Feed con estado de error visible y cursores recuperables
 
 Fix P0 del carril MVP en PR #36: diferenciar Feed vacío de error de conexión; retry inicial y de página posterior, no disparar carga automática en bucle después de error, preservar cursores hasta éxito de enriquecimiento y no ignorar fallos de follows. Tests de cursor y gating de prueba; sin despliegue, no implica QA visual ni merge de `main`.
+
+### Checkpoint — aceptación funcional local por Product Owner (2026-10-09)
+
+El PO confirmó PASS de recorridos sociales/auth/feed y del funcionamiento general de los demás módulos en la worktree de PR #36, usando frontend en localhost y Supabase alojado. **No se repite smoke** salvo regresión o RC. Evidencia detallada y límites: `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md`.
+
+**Siguiente prioridad real** = gates de integración, correo Auth y operación mínima de seguridad/privacidad para beta; no implementar más módulos. F14 A2 sigue pausada/no completada; PR #35 y #34 requieren reconciliación de Mapa. Cambios estéticos de espacio field/botón pospuestos a F13.
