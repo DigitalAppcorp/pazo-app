@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
@@ -157,7 +158,10 @@ const EMPTY_FEED_PAGINATION: FeedPaginationState = {
 }
 
 function PazoMain() {
-  const { user, loading, signIn } = useAuth()
+  const {
+    user, loading, signIn, isPasswordRecovery,
+    requestPasswordReset, changePassword, finishPasswordRecovery,
+  } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
 
@@ -620,6 +624,11 @@ function PazoMain() {
   const [showPassword, setShowPassword] = useState(false)
   const [loginMessage, setLoginMessage] = useState('')
   const [submittingLogin, setSubmittingLogin] = useState(false)
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [requestingPasswordReset, setRequestingPasswordReset] = useState(false)
+  const [resetRequestMessage, setResetRequestMessage] = useState('')
+  const [resetRequestError, setResetRequestError] = useState(false)
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -632,6 +641,41 @@ function PazoMain() {
       setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
     }
     setSubmittingLogin(false)
+  }
+
+  const handleRequestPasswordReset = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!resetEmail.trim() || requestingPasswordReset) return
+    setRequestingPasswordReset(true)
+    setResetRequestMessage('')
+    setResetRequestError(false)
+    try {
+      const ok = await requestPasswordReset(resetEmail.trim())
+      setResetRequestError(!ok)
+      setResetRequestMessage(ok
+        ? (lang === 'es'
+          ? 'Si existe una cuenta con ese correo, recibirás un enlace de recuperación. Revisa también el spam.'
+          : 'If an account exists for that email, you will receive a recovery link. Check spam too.')
+        : (lang === 'es'
+          ? 'No pudimos enviar el correo. Inténtalo más tarde.'
+          : 'We could not send the email. Please try again later.'))
+    } catch {
+      setResetRequestError(true)
+      setResetRequestMessage(lang === 'es'
+        ? 'Error de conexión. Inténtalo nuevamente.'
+        : 'Connection error. Please try again.')
+    } finally {
+      setRequestingPasswordReset(false)
+    }
+  }
+
+  const handleExitPasswordRecovery = async () => {
+    await finishPasswordRecovery()
+    setIsDemoUser(false)
+    setIsOnboardingActive(false)
+    setAuthMode('login')
+    setForgotPasswordMode(false)
+    setLoginMessage('')
   }
 
   const handleLikePost = async (postId: string) => {
@@ -1390,6 +1434,17 @@ function PazoMain() {
     )
   }
 
+  if (isPasswordRecovery) {
+    return (
+      <PasswordRecoveryView
+        lang={lang}
+        sessionReady={Boolean(user)}
+        onUpdatePassword={changePassword}
+        onExit={handleExitPasswordRecovery}
+      />
+    )
+  }
+
   const isAuthenticated = (!!user && !isOnboardingActive) || isDemoUser
 
   return (
@@ -1484,15 +1539,48 @@ function PazoMain() {
                     Pazo Acceso
                   </span>
                   <h2 className="text-3xl font-black text-[#204E4A]">
-                    {lang === 'es' ? 'Iniciar Sesión' : 'Log in to Pazo'}
+                    {forgotPasswordMode
+                      ? (lang === 'es' ? 'Recuperar contraseña' : 'Reset your password')
+                      : (lang === 'es' ? 'Iniciar Sesión' : 'Log in to Pazo')}
                   </h2>
                   <p className="text-xs text-[#5C7470]">
-                    {lang === 'es'
-                      ? 'Ingresa tus datos para entrar directamente a tu cuenta.'
-                      : 'Enter your credentials to access your account.'}
+                    {forgotPasswordMode
+                      ? (lang === 'es'
+                        ? 'Te enviaremos un enlace para crear una contraseña nueva.'
+                        : 'We will send a link so you can set a new password.')
+                      : (lang === 'es'
+                        ? 'Ingresa tus datos para entrar directamente a tu cuenta.'
+                        : 'Enter your credentials to access your account.')}
                   </p>
                 </div>
 
+                {forgotPasswordMode ? (
+                  <form onSubmit={handleRequestPasswordReset} className="space-y-3.5">
+                    <label className="block text-[11px] font-bold text-[#204E4A]">
+                      {lang === 'es' ? 'Correo electrónico' : 'Email address'}
+                      <input type="email" required autoComplete="email"
+                        value={resetEmail} onChange={(event) => setResetEmail(event.target.value)}
+                        placeholder="tu@correo.com"
+                        className="mt-1 w-full bg-white border-2 border-[#204E4A]/15 rounded-2xl px-4 py-3 text-xs text-[#204E4A]" />
+                    </label>
+                    <button type="submit" disabled={requestingPasswordReset}
+                      className="w-full bg-[#204E4A] text-white font-extrabold py-3.5 rounded-full text-xs disabled:opacity-50">
+                      {requestingPasswordReset
+                        ? (lang === 'es' ? 'Enviando...' : 'Sending...')
+                        : (lang === 'es' ? 'Enviar enlace' : 'Send link')}
+                    </button>
+                    {resetRequestMessage && (
+                      <p role={resetRequestError ? 'alert' : 'status'}
+                        className="text-xs text-[#204E4A] leading-relaxed">{resetRequestMessage}</p>
+                    )}
+                    <button type="button" onClick={() => {
+                      setForgotPasswordMode(false)
+                      setResetRequestMessage('')
+                    }} className="w-full text-xs font-bold text-[#5C7470] underline">
+                      {lang === 'es' ? 'Volver a iniciar sesión' : 'Back to log in'}
+                    </button>
+                  </form>
+                ) : (
                 <form onSubmit={handlePasswordLogin} className="space-y-3.5">
                   <div>
                     <label className="block text-[11px] font-bold text-[#204E4A] mb-1">
@@ -1540,9 +1628,17 @@ function PazoMain() {
                       ? (lang === 'es' ? 'Iniciando sesión...' : 'Logging in...')
                       : (lang === 'es' ? 'Iniciar Sesión' : 'Log in')}
                   </button>
+                  <button type="button" onClick={() => {
+                    setResetEmail(emailInput)
+                    setResetRequestMessage('')
+                    setForgotPasswordMode(true)
+                  }} className="w-full text-xs font-bold text-[#204E4A] underline cursor-pointer">
+                    {lang === 'es' ? '¿Olvidaste tu contraseña?' : 'Forgot your password?'}
+                  </button>
                 </form>
+                )}
 
-                {loginMessage && (
+                {!forgotPasswordMode && loginMessage && (
                   <div className="p-3 bg-[#E1E53F]/30 border border-[#204E4A]/20 text-[#204E4A] rounded-2xl text-xs text-center font-semibold">
                     {loginMessage}
                   </div>
