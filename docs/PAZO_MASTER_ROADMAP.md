@@ -1104,3 +1104,8 @@ PO probó nuevo `F14VersionProbe` en Vercel Preview `ac167b4`: subida sintética
 ### F14 A2 — Diagnóstico de holds y no-falso-éxito (2026-10-09)
 
 Operator diagnostic SELECT agregado + fixture 5 casos en transacción `ROLLBACK` PASS; auditoría de permisos privados / RPC y trigger anti-`purged` PASS; clasificador puro `exactVersionOutcome` con tests rechaza timeout, path-only y falso CDN PASS en GitHub CI tras verificación. Se mantiene Edge 503, 20 objetos Storage intactos, cero claims/eventos/reportes/restricciones y PR #35 DRAFT. No se aplicó DDL. Próximo gate real A2: interfaz privada solo `service_role`, exclusión HTTP/Storage y aceptación de limites de CDN; `versionId` sintético ya PASS 4/4. No habilitar DELETE reales, no merge, A3/A4 sin gate.
+
+
+### F14 A2 — Lector service-only aplicado y verificado (2026-10-09)
+
+Nueva RPC `public.f14_get_media_claim_evidence(uuid)` desplegada en Supabase PAZO por autorización puntual del PO. Versión remota `20261009095635` y migración del repositorio reconciliadas. EXECUTE únicamente `service_role`; JWT equivocado y roles anon/auth denegados; sin USAGE directo del esquema privado. Pruebas positivas SQL Feed/Comunidades y negativas de deriva de versión/referencia dentro de ROLLBACK PASS; sin fotos borradas, Storage conserva 20 objetos, claims/reportes/restricciones 0. PR #35 DRAFT. F14 A2/D3-A permanece ABIERTO por coordinación HTTP/Storage concurrente, respuesta a timeout, caché/retención. Edge purga permanece desactivada; no pasar a main/A3/A4 sin reconciliación del resto del DoD.
