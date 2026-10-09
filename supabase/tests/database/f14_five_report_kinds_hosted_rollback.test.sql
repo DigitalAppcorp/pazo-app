@@ -4,7 +4,7 @@
 -- Must never be used as a migration or run with COMMIT.
 BEGIN;
 DO $f14$
-DECLARE owner_id uuid;community_post_id uuid;v_pet_id uuid;comment_id uuid;moderator_id uuid;
+DECLARE owner_id uuid;community_post_id uuid;v_pet_id uuid;comment_id uuid;moderator_id uuid;reporter_id uuid;
         feed_post_id uuid;feed_comment_id uuid;
 BEGIN
  SELECT cp.author_user_id,cp.id,pet.id INTO owner_id,community_post_id,v_pet_id
@@ -18,11 +18,16 @@ BEGIN
  THEN RAISE EXCEPTION 'Missing existing FK prerequisites for rollback smoke'; END IF;
  SELECT user_id INTO moderator_id FROM moderation_private.moderator_grants LIMIT 1;
  IF moderator_id IS NULL THEN RAISE EXCEPTION 'No designated moderator for rollback smoke'; END IF;
+ SELECT a.id INTO reporter_id FROM auth.users a WHERE NOT EXISTS
+ (SELECT 1 FROM moderation_private.moderator_grants g WHERE g.user_id=a.id) LIMIT 1;
+ IF reporter_id IS NULL THEN RAISE EXCEPTION 'No normal user for report intake smoke'; END IF;
  PERFORM set_config('f14.qa.moderator',moderator_id::text,true);
  PERFORM set_config('request.jwt.claim.sub',owner_id::text,true);
  PERFORM set_config('request.jwt.claim.role','authenticated',true);
  INSERT INTO public.community_post_comments(post_id,author_pet_id,body)
  VALUES(community_post_id,v_pet_id,'F14 rollback-only moderation test') RETURNING id INTO comment_id;
+ -- The reporter differs from the moderator: validate real ordinary account rights.
+ PERFORM set_config('request.jwt.claim.sub',reporter_id::text,true);
  PERFORM set_config('f14.qa.feedpost',feed_post_id::text,true);
  PERFORM set_config('f14.qa.feedcomment',feed_comment_id::text,true);
  PERFORM set_config('f14.qa.pet',v_pet_id::text,true);
