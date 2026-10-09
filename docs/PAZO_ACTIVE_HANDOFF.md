@@ -1,6 +1,6 @@
 # PAZO — ACTIVE HANDOFF / SNAPSHOT OPERATIVO
 
-**Verificado:** 2026-10-08 (última verificación remota; migraciones fechadas en UTC 2026-10-09). Actualizar branch/CI/db antes de escribir código.
+**Verificado:** 2026-10-08 local / 2026-10-09 UTC. Último apply F14 A2 20261009054411; verificar HEAD, CI y DB nuevamente antes de nuevas operaciones.
 **Sistema de trabajo:** [Project Brain OS v1.4.1](https://github.com/DigitalAppcorp/project-brain-os), `SKILL.md` + `patterns/VERIFIABLE_HANDOFF.md`.
 **Product Owner:** define visión, prioridades y aceptación visual; IA/ChatGPT realiza análisis, arquitectura, código, GitHub, Supabase, QA técnico y handoffs.
 **MODO TEMPORAL:** `hosted-first` para MVP en Preview controlado, sin pedir terminal/descargas ni delegar a otra IA; al lanzar reevaluar local-first.
@@ -8,10 +8,10 @@
 ## 1. Fuente de verdad, Git y alcance
 
 - Repositorio: `DigitalAppcorp/pazo-app`.
-- **Rama activa F14 A2:** `f14/block02-moderation-mvp-20261008`. Último HEAD auditado ANTES de commits documentales de este ciclo: **`594e1c916d4aa4d26e7fd9c2513800803347e5ca`**. Consultar HEAD/CI de nuevo en el siguiente chat.
+- **Rama activa F14 A2:** `f14/block02-moderation-mvp-20261008`. La rama ha recibido commits técnicos/documentales posteriores a `6073e270`; consultar HEAD/CI actual, no asumir SHA del snapshot.
 - `main` observado: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90` (distinto de la rama F14).
 - Único PR abierto observado: **#34** `product/places-demand-validation`, sobre Lugares y **no relacionado** con F14. No se encontró PR F14 abierto en esta consulta; verificar de nuevo.
-- Dos checks sobre HEAD `594e1c9`: **SUCCESS** (`Vercel – pazo-app` y `Vercel – pazo-app-t83r`). Preview F14: https://vercel.com/digitalapp/pazo-app-t83r/55Qz33nsAyzbBBkgrFraRAAyr8qc . El resultado CI no prueba que el usuario haya ejecutado el botón de QA.
+- Históricamente hubo dos checks **SUCCESS** sobre `594e1c9`, pero los últimos commits quedaron sin CI PASS por límite de builds. Preview F14: https://vercel.com/digitalapp/pazo-app-t83r/55Qz33nsAyzbBBkgrFraRAAyr8qc . El resultado CI no prueba que el usuario haya ejecutado el botón de QA.
 - **No merge a main ni publicación oficial de PAZO**. Los deploys automáticos de rama/Preview no equivalen a lanzamiento.
 - Working tree local de Antigravity, commits locales no empujados: **desconocidos** en este punto; no inferir que GitHub contiene trabajo local no observado. Pedir solo si el trabajo siguiente depende de ello.
 - Reglas: `AGENTS.md`, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_F14_MASTER.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`, `docs/PAZO_DATA_INVENTORY.md`, `docs/PAZO_ARCHITECTURE_CONTRACT.md`.
@@ -57,17 +57,27 @@ PAZO es una red social de mascotas orientada inicialmente a Los Ángeles, 18+, c
 
 **Gate visual aislado CERRADO.** No volver a pedir al PO que pulse el botón. **A2 global permanece ABIERTO**: esto no prueba `service_role`, claim real, carrera entre DB/Storage, objeto de contenido retirado ni CDN.
 
-### Auditoría técnica posterior, sin mutaciones de Supabase
+### Checkpoint de migración alojada autorizada — F14 A2
 
-- El Storage RLS actual tiene `RESTRICTIVE` para `INSERT` y `DELETE` sobre rutas reservadas de Feed/Comunidad. **No existe actualmente una política permisiva UPDATE**; sobrescribir vía upsert autenticado ya carece de esa autorización. Falta garantizar de forma explícita `UPDATE` si en el futuro se conceden permisos, y estudiar operaciones de servicio/MOVE/COPY.
-- `service_role` bypass RLS; el claim de cinco minutos y locks transaccionales NO constituyen CAS entre Supabase DB y Storage HTTP.
-- Supabase documenta purge manual de CDN en plan Pro o superior; no se autoriza upgrade. Caché CDN y caché navegador requieren tratamiento separado.
-- Diseño fail-closed de A2: `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md`. SQL **solo borrador NO aplicado** `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql`: `RESTRICTIVE UPDATE` y retener protección de claims `held` más allá del TTL.
-- **Pruebas Supabase SQL `BEGIN/ROLLBACK` PASS**: `f14_storage_held_media_update_draft_rollback.test.sql` (estructura), `f14_storage_held_update_behavior_rollback.test.sql` (con UPDATE permitido temporalmente: objeto libre modificable, held bloqueado, claim vencido bajo helper actual **desbloquea** el objeto) y `f14_storage_held_update_candidate_rollback.test.sql` (candidato conserva `held` más allá del TTL; `f14_recheck_media_claim` service_role simulado devuelve false ante expiración y drift **sin invalidar**, invalidación manual explícita desbloquea). Test negativo confirma que `service_role` **sí omite RLS y modifica un objeto held sintético**: quedan pendientes controles de escritor privilegiado y HTTP concurrente. Todo revertido, sin bytes de Storage.
-- **Borrador alojado NO aplicado**: `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql` ahora incluye helper sin vencimiento automático de bloqueo `held`, política UPDATE restrictiva y recheck que falla cerrado sin invalidación automática. **No habilita purga**; sin rutina de reconciliación manual auditada, el claim podría permanecer bloqueado. Un nuevo gate de aprobación es imprescindible para aplicar.
-- **Post-ROLLBACK confirmado:** Storage 20, claims/eventos/reportes/restricciones 0, guard UPDATE instalado 0; helper y recheck alojados continúan en versiones originales, incluyendo liberación automática de caducados. `f14_confirm_media_cleanup` continúa prohibida para certificar purga.
-- La suite `scripts/f14-moderation-check.mjs` ahora exige borrador, pruebas reversibles, seguridad de TTL y Edge 503. CI del último HEAD **sin PASS**: Vercel rechazó compilaciones por límite de builds, no por un error del compilador reportado. Intento de git externo desde contenedor no disponible por DNS; `npm run verify` de último HEAD queda pendiente. No comprar upgrade.
-- El asesor de Supabase informa advertencias `SECURITY DEFINER` en RPCs F14, incluida función auxiliar RLS expuesta; se requiere análisis de permisos/alcance antes de migrar, sin asumir explotación ni eliminar grants precipitadamente.
+**Autorización explícita del PO en el chat actual:** aplicar el endurecimiento SQL de `held` + `RESTRICTIVE UPDATE` + `recheck` fail-closed; avanzar autónomamente en pasos técnicos no visuales. Esta aprobación NO habilita borrado de medios reales, activación de Edge, plan pagado, merge/main ni lanzamiento oficial.
+
+**Supabase PAZO: APLICADA y VERIFICADA** versión remota `20261009054411_f14_held_media_fail_closed_recheck_update_guard`. Archivo canónico `supabase/migrations/20261009054411_f14_held_media_fail_closed_recheck_update_guard.sql`; borrador SQL anterior retirado de `supabase/drafts/`.
+
+Garantías efectivas:
+- `public.f14_storage_media_path_unclaimed` bloquea `INSERT/DELETE` existentes y la nueva política `UPDATE` para rutas con `claim.status='held'`, aunque haya caducado `expires_at`; otros buckets/rutas mantienen su política vigente.
+- `public.f14_recheck_media_claim` devuelve `false` para expiración/drift sin invalidar automáticamente la reserva. Dejará reservas `held` bloqueadas hasta resolución explícita y auditada; esa recuperación operativa **aún no existe**.
+- Privilegios conservados: `recheck` ejecutable solo por `service_role`; helper de RLS solo `authenticated`, nunca `anon`. Ningún cambio a `f14_confirm_media_cleanup`.
+
+**Pruebas después del apply**:
+- `supabase/tests/database/f14_storage_held_update_installed_rollback.test.sql`: PASS, `BEGIN/ROLLBACK`, con roles SQL simulados: `UPDATE` de ruta libre permitido bajo grant sintético temporal, `held` denegado, expiración/drift de recheck no liberan, invalidación explícita libera.
+- `supabase/tests/database/f14_storage_held_insert_guard_installed_rollback.test.sql`: PASS; `INSERT` a ruta `held` falla con `42501`, ruta libre permitida; helper reporta denegación de ruta `held` para política DELETE. **Intento SQL DELETE directo** fue rechazado por `storage.protect_delete()` (comportamiento correcto de Supabase); no eludirlo ni tomarlo como validación HTTP DELETE.
+- Smoke SQL `anon` y `authenticated` lectura pública de `post-photos`: PASS.
+- Storage `20` objetos, `0` claims/eventos/reportes/restricciones; dos políticas restrictivas anteriores y nueva UPDATE intactas; Security Advisor sin hallazgos nuevos atribuibles a este cambio.
+- Edge `f14-moderation-purge` verificada directamente versión 1 HTTP **503**, sin métodos para eliminar Storage. `service_role` **bypassa RLS** en la prueba sintética: riesgo restante, no superado.
+
+**CI/frontend:** los checks Vercel recientes están fallando por `build-rate-limit`; NO implican fallo de TypeScript ni demuestran build PASS. No comprar recursos. `npm run verify` del último HEAD no ejecutado en sesión. Git: solo rama F14 A2, sin merge ni release. El Product Owner ya validó el ciclo sintético de Storage visualmente; NO repetir.
+
+**Riesgos que bloquean cierre A2:** no existe CAS confirmado para borrar el objeto activo por versión; `service_role` elude RLS; operaciones HTTP in-flight y MOVE/COPY/UPSERT requieren gate de seguridad; caché CDN y D3-B todavía sin evidencia; reserva `held` necesita recuperación explícita controlada; la función antigua `f14_confirm_media_cleanup(kind,id)` **NO** puede marcar `purged` de forma segura.
 
 ## 6. Autorizaciones, límites y forma de colaborar
 
@@ -77,12 +87,10 @@ La última indicación del PO: **«tienes toda la autorización en todos los pas
 
 Trabajo con conectores GitHub/Supabase/Vercel; no exigir PowerShell/descarga/Antigravity cuando se pueda hacer directamente. Español claro, directo, enfoque producto+seguridad, pocas listas, sin emojis decorativos. Conservar un historial verificable y ahorrar tokens. No inventar decisiones. Al reportar: separar CI, SQL role simulations, sesión Auth real, QA visual, deploy y release.
 
-## 7. SIGUIENTE GATE F14 A2 — confirmar seguridad de medios ANTES de purga
+## 7. SIGUIENTE GATE F14 A2 — exclusión cross-service y recuperación segura
 
-**Gate actual:** las simulaciones de política UPDATE, expiración, recheck fail-closed y bypass de `service_role` están probadas en SQL sintético con ROLLBACK. **Siguiente acción:** solicitar al PO autorización concreta antes de aplicar exclusivamente el borrador de endurecimiento RLS/recheck de A2; la aplicación NO permite DELETE. Después: verificar políticas live y serialización de escrituras privilegiadas, COPY/MOVE/UPSERT, y establecer prueba real de exclusión entre servicios; sin garantías demostradas no activar purga automática y conservar revisión manual. No repetir visual Storage ya aprobado.
+**Responsable: AI Project Brain, autónomo en investigación, SQL transaccional reversible, tests sin eliminación, diseño de contrato y docs.** Auditar MOVE/COPY/UPSERT y escrituras `service_role`, documentar las garantías disponibles en la API y especificar un procedimiento para recuperar reservas `held` sin liberar un delete in-flight. Preparar código/tareas no destructivas solo cuando sean verificables. El plan `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md` continúa siendo marco preliminar, no autorización de borrar.
 
-**No hacer todavía:** activar Edge 503, invocar `f14_confirm_media_cleanup(kind,id)`, borrar media real, alterar CDN/retención de proveedores, aplicar migraciones remotas sin gate expreso, publicar Vercel Production, mergear `main`, iniciar A3/A4 o crear recursos pagos.
+**Puntos de detención:** no realizar Storage DELETE de contenido ajeno, ni activar Edge, ni marcar `purged`, ni autorizar una nueva migración sensible fuera del alcance recién aprobado, ni publicar oficialmente Vercel, ni fusionar main, ni pasar a F14 A3/A4. Mantener la revisión manual como salida fail-closed si la API no ofrece exclusión demostrable. La siguiente aceptación visual del PO se pedirá solo si una prueba funcional visible nueva la necesita.
 
-**Evidencia ya suficiente:** el ciclo de imagen sintética autenticada y su limpieza. **Pendiente antes de cierre A2:** protocolo de concurrencia y evidencia de no reaparición, URL pública/cache, matriz D3-B aplicable y pruebas finales de seguridad/aceptación sin retestar lo aprobado.
-
-**Git/CI:** rama `f14/block02-moderation-mvp-20261008`; consultar HEAD después de este commit (no congelar SHA autorreferente). Vercel checks para los últimos commits fueron `failure` con motivo **build-rate-limit**, no es evidencia de compilación fallida ni PASS. Vercel API para el equipo `digitalapp` previamente devolvió 403; NO cambiar de proyecto, subir plan, ni forzar despliegue. `main` y PR #34 permanecen sin acción.
+**Estado git:** consultar el HEAD remoto real de `f14/block02-moderation-mvp-20261008` tras estos commits de documentación; rama local del Product Owner no observada. `main` y PR #34 (Lugares) no fueron alterados.
