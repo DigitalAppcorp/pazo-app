@@ -273,4 +273,22 @@ assert.ok(!pendingMediaView.includes('purgeModerationMedia') &&
   !reportApi.includes('purgeModerationMedia'),
   'User-facing moderator tools must not invoke parked destructive Storage Edge')
 
+const noFalsePurge = 'supabase/migrations/20261009061213_f14_reject_unverified_purged_status.sql'
+const noFalsePurgeDraftTest = 'supabase/tests/database/f14_reject_unverified_purged_draft_rollback.test.sql'
+const noFalsePurgeInstalledTest = 'supabase/tests/database/f14_reject_unverified_purged_installed_rollback.test.sql'
+for (const file of [noFalsePurge,noFalsePurgeDraftTest,noFalsePurgeInstalledTest])
+  assert.ok(existsSync(file),'F14 false-purge safety regression missing: '+file)
+const purgeLockSql=read(noFalsePurge)
+assert.ok(purgeLockSql.includes('CREATE TRIGGER f14_no_unverified_media_purge') &&
+  purgeLockSql.includes("IF NEW.media_status='purged'") &&
+  purgeLockSql.includes("ERRCODE='23514'") &&
+  !purgeLockSql.includes('DELETE FROM storage.objects'),
+  'Installed false-purge guard must prevent recording success without object proof')
+for (const file of [noFalsePurgeDraftTest,noFalsePurgeInstalledTest]) {
+  const sql=read(file)
+  assert.ok(sql.includes('BEGIN;') && sql.trimEnd().endsWith('ROLLBACK;') &&
+    !sql.includes('DELETE FROM storage.objects'),
+    'False-purge tests must be reversible and never delete Storage metadata')
+}
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
