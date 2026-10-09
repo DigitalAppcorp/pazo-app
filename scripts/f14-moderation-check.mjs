@@ -420,4 +420,19 @@ assert.ok(privateAcl.trimEnd().endsWith('ROLLBACK;') &&
  !privateAcl.includes('GRANT '),
  'F14 permission smoke must remain read-only and deny legacy purge')
 
+// A deployed SECURITY DEFINER reader must stay service-only and its SQL
+// contract must be exercised by the same CI as the rest of F14.
+const serviceReaderMigration = 'supabase/migrations/20261009095635_f14_service_only_media_evidence_reader.sql'
+const serviceReaderTest = 'supabase/drafts/f14_media_purge_v2/serviceEvidenceRpc.test.mjs'
+const serviceReaderRoles = 'supabase/tests/database/f14_service_only_evidence_reader_permissions_rollback.test.sql'
+assert.ok([serviceReaderMigration,serviceReaderTest,serviceReaderRoles].every(existsSync),
+  'Installed F14 reader SQL, contract test and hosted permission regression required')
+const serviceReaderSql = read(serviceReaderMigration)
+assert.ok(serviceReaderSql.includes("auth.role() IS DISTINCT FROM 'service_role'") &&
+  serviceReaderSql.includes('mayDelete\',false') &&
+  serviceReaderSql.includes('FOR SHARE OF c,cr,r,o') &&
+  !/\\b(?:INSERT INTO|UPDATE |DELETE FROM|TRUNCATE)\\b/i.test(serviceReaderSql.replace(/--[^\\n]*/g, '')) &&
+  read('package.json').includes(serviceReaderTest),
+  'Service-only claim reader must remain read-only and regression-covered')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
