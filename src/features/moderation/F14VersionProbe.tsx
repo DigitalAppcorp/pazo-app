@@ -39,13 +39,17 @@ export function F14VersionProbe({ lang }: Props) {
       // The recovery record contains identity/version when verification completed.
       // A path alone is NEVER enough to authorize cleanup after an interruption.
       const saved = window.sessionStorage.getItem(key)
-      let previous: { path: string; objectId?: string; versionId?: string } | null = null
+      type StoredFixture = { path: string; objectId?: string; versionId?: string }
+      let previous: StoredFixture | null = null
       if (saved) {
-        try { previous = JSON.parse(saved) as typeof previous }
+        let decoded: unknown
+        try { decoded = JSON.parse(saved) }
         catch { throw new Error('INVALID_SAVED_PROOF') }
-        if (!previous || typeof previous.path !== 'string' ||
-            !ownedFixture(previous.path, uid))
+        if (!decoded || typeof decoded !== 'object' ||
+            !('path' in decoded) || typeof decoded.path !== 'string' ||
+            !ownedFixture(decoded.path, uid))
           throw new Error('INVALID_SAVED_PROOF')
+        previous = decoded as StoredFixture
       }
       path = previous?.path || uid + '/f14-version-probe-' + crypto.randomUUID() + '.png'
       if (!ownedFixture(path, uid)) throw new Error('UNSAFE_PATH')
