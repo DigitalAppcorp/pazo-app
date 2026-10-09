@@ -1,5 +1,5 @@
--- F14 A2 proposed patch: no-media depublishing classification. NOT APPLIED.
--- Preview/rehearsal only until PO confirms production migration gate.
+-- F14 A2 applied media classification fix, hosted Supabase migration version 20261009010551.
+-- Applied with explicit PO authorization. Five regression cases passed against installed function.
 -- Does NOT enable Storage deletion, alter security grants or change moderation privacy.
 -- Keep pet_profile pending_review until its associated posts/media are audited.
 BEGIN;

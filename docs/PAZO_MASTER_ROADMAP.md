@@ -982,3 +982,7 @@ Real Preview moderator action `Despublicar` -> SQL `status=removed` + action aud
 
 ### F14 A2 — phantom media queue fix staged (2026-10-08)
 Prepared and SQL rollback-tested presence-aware media classification on `f14_review_report`; text-only Feed/Community posts would not become false media-review tasks, but profile media review remains conservative. Versioned draft and five-case reversible suite, along with matching moderator UI messaging, are on A2 branch. **Await separate PO authorization before Supabase apply**; no Storage purge or Vercel production. A2 open.
+
+
+### F14 A2 — no-photo media classification applied (2026-10-09)
+After explicit PO approval, migration `f14_media_status_presence_guard`, server `20261009010551`, updated `f14_review_report` so text-only Feed/Community posts do not become pending media deletion tasks; photo-bearing content remains queued, pet profiles stay conservatively queued. Five-case hosted-function rollback validation PASS. SQL is now canonical at `supabase/migrations/20261009010551_f14_media_status_presence_guard.sql`, no longer a draft. No Storage deletion or production deployment. A2 pending independent JWT validation, Storage/CDN safety and retention policy.

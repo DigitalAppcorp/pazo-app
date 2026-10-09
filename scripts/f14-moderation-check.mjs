@@ -60,9 +60,10 @@ assert.ok(dialog.includes('setAlreadyReported(true)') && dialog.includes('Denunc
 assert.ok(dialog.includes("typeof dbError?.message === 'string'"), 'PostgREST plain-object errors must be supported')
 assert.ok(home.includes('avatarFailed'), 'Social avatars should not render broken image placeholders')
 assert.ok(home.includes('Opciones de la publicación'), 'Feed actions must use compact accessible menu')
-const mediaDraft = 'supabase/drafts/20261009_f14_media_status_presence_guard.sql'
+const mediaDraft = 'supabase/migrations/20261009010551_f14_media_status_presence_guard.sql'
 const mediaTest = 'supabase/tests/database/f14_media_presence_rollback.test.sql'
-assert.ok(existsSync(mediaDraft), 'Media classification draft must be versioned outside canonical migrations')
+assert.ok(existsSync(mediaDraft), 'Applied media classification must be in canonical migrations')
+assert.ok(!existsSync('supabase/drafts/20261009_f14_media_status_presence_guard.sql'), 'Applied SQL must no longer remain in drafts')
 assert.ok(existsSync(mediaTest), 'Media classification rollback test must be included')
 assert.ok(read(mediaDraft).includes('depublished_no_media_review'), 'No-photo content must return no-media result')
 assert.ok(read(mediaDraft).includes('photo_storage_path'), 'Community photo path must be checked')
