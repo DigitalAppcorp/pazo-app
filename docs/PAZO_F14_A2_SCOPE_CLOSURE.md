@@ -5,7 +5,7 @@
 ## Contrato de producto aprobado que gobierna A2
 
 - F14 Gate 5/6/7: moderación humana mínima para denuncias de Feed post/comentario, perfil de mascota y Comunidad post/comentario. Privacidad D1: contenido público legítimo permanece visible anónimamente; moderado/retirado debe restringirse en API.
-- D3-A (CERRADA): además de despublicar, verificar eliminación en origen activo y Storage cuando proceda; distinguir origen, URL pública/CDN/navegador, backups y proveedores. **No reducir silenciosamente a moderación manual.**
+- D3-A (DECISIÓN DE PRODUCTO CERRADA; IMPLEMENTACIÓN/DoD ABIERTOS): además de despublicar, verificar eliminación en origen activo y Storage cuando proceda; distinguir origen, URL pública/CDN/navegador, backups y proveedores. **No reducir silenciosamente a moderación manual.**
 - D3-B: matriz operativa aprobada de diseño (30 días para determinadas eliminaciones activas; 90/180 días para reportes según resolución, etc.), pero implementación pertenece A4 y requiere prueba; no se permite prometer cumplimiento en producción ni iniciar A4 aquí.
 
 ## Matriz Gate 8: evidencia real, sin extrapolaciones
