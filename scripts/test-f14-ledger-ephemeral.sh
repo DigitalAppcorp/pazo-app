@@ -25,12 +25,23 @@ echo "Starting private disposable PostgreSQL only in GitHub CI"
 docker run -d --rm --name "$name" \
   -e POSTGRES_PASSWORD="f14-throwaway-only" \
   -e POSTGRES_DB="postgres" postgres:16-alpine >/dev/null
-for iteration in $(seq 1 40); do
-  if docker exec "$name" pg_isready -U postgres -d postgres >/dev/null 2>&1; then break; fi
+# The official Postgres image briefly starts a temporary server during
+# initdb, then shuts it down and starts the final server. pg_isready alone
+# can incorrectly pass during that transient first server.
+ready=false
+for iteration in $(seq 1 45); do
+  if docker logs "$name" 2>&1 | grep -q "PostgreSQL init process complete; ready for start up." &&
+     docker exec "$name" psql -X -U postgres -d postgres -Atqc 'SELECT 1' >/dev/null 2>&1; then
+    ready=true
+    break
+  fi
   sleep 1
 done
-docker exec "$name" pg_isready -U postgres -d postgres >/dev/null
-echo "Disposable PostgreSQL is accepting connections"
+if [[ "$ready" != "true" ]]; then
+  echo "Final disposable PostgreSQL did not become ready"
+  exit 2
+fi
+echo "Final disposable PostgreSQL is accepting connections"
 
 # Minimum structural stubs, no application/user tables or live credentials.
 docker exec -i "$name" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres <<'SQL'
