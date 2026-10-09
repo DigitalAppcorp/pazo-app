@@ -36,26 +36,48 @@ export function F14VersionProbe({ lang }: Props) {
       if (authError || !data.user) throw new Error('AUTH')
       const uid = data.user.id
       key = 'pazo:f14:version-probe:' + uid
-      const stored = window.sessionStorage.getItem(key)
-      if (stored && !ownedFixture(stored, uid)) throw new Error('UNSAFE_SAVED_PATH')
-      path = stored || uid + '/f14-version-probe-' + crypto.randomUUID() + '.png'
+      // The recovery record contains identity/version when verification completed.
+      // A path alone is NEVER enough to authorize cleanup after an interruption.
+      const saved = window.sessionStorage.getItem(key)
+      let previous: { path: string; objectId?: string; versionId?: string } | null = null
+      if (saved) {
+        try { previous = JSON.parse(saved) as typeof previous }
+        catch { throw new Error('INVALID_SAVED_PROOF') }
+        if (!previous || typeof previous.path !== 'string' ||
+            !ownedFixture(previous.path, uid))
+          throw new Error('INVALID_SAVED_PROOF')
+      }
+      path = previous?.path || uid + '/f14-version-probe-' + crypto.randomUUID() + '.png'
       if (!ownedFixture(path, uid)) throw new Error('UNSAFE_PATH')
       const storage = supabase.storage.from(BUCKET)
-      if (stored) {
-        // A previous interrupted attempt may have left one synthetic file.
-        // Only cleanup is permitted on retry; do not mark version QA as PASS.
-        const cleanup = await storage.remove([path])
+      if (previous) {
+        // Only the very same synthetic object version may be recovered.
+        // A missing object is already safe; never downgrade to remove([path]).
+        const current = await storage.info(path)
+        if (current.error && String(current.error.statusCode) === '404') {
+          window.sessionStorage.removeItem(key)
+          setError(es ? 'No queda archivo artificial pendiente. Puedes iniciar una prueba nueva.'
+            : 'No synthetic fixture remains. You may start a new test.')
+          return
+        }
+        if (current.error || !previous.objectId || !previous.versionId ||
+            current.data?.id !== previous.objectId ||
+            current.data?.version !== previous.versionId)
+          throw new Error('RECOVERY_IDENTITY_UNVERIFIED')
+        const cleanup = await storage.remove([{ path, versionId: previous.versionId }])
         if (cleanup.error) throw new Error('RECOVERY_FAILED')
         const gone = await storage.info(path)
-        if (!gone.error) throw new Error('RECOVERY_UNCONFIRMED')
+        if (!gone.error || String(gone.error.statusCode) !== '404')
+          throw new Error('RECOVERY_UNCONFIRMED')
         window.sessionStorage.removeItem(key)
         setError(es
-          ? 'Archivo de prueba anterior limpiado. Puedes iniciar una prueba nueva.'
-          : 'Previous test fixture cleaned up. You may start a new test.')
+          ? 'Archivo artificial anterior limpiado por versión exacta. Puedes iniciar una prueba nueva.'
+          : 'Previous synthetic fixture removed by its exact version. You may start a new test.')
         return
       }
-      // Persist path BEFORE upload; interrupted runs never spawn new or orphan files.
-      window.sessionStorage.setItem(key, path)
+      // Remember the path before upload so an interrupted test cannot upload a
+      // second fixture. The verified object version is stored below.
+      window.sessionStorage.setItem(key, JSON.stringify({ path }))
       const uploaded = await storage.upload(path, imageBlob(), {
         upsert: false, contentType: 'image/png', cacheControl: '60',
       })
@@ -68,6 +90,7 @@ export function F14VersionProbe({ lang }: Props) {
       if (first.error || typeof version !== 'string' || !version ||
         typeof firstId !== 'string' || !firstId)
         throw new Error('VERSION_NOT_AVAILABLE')
+      window.sessionStorage.setItem(key, JSON.stringify({ path, objectId: firstId, versionId: version }))
       success('Identidad y versión obtenidas desde Storage', 'Storage identity and version read')
 
       // Wrong version must NEVER remove the current version. This affects ONLY
@@ -99,8 +122,8 @@ export function F14VersionProbe({ lang }: Props) {
     } catch {
       // Keep only the specific generated fixture path for bounded retry cleanup.
       setError(es
-        ? 'La prueba de versiones NO pasó o quedó incompleta. No la repitas con otra cuenta. Vuelve a pulsar para limpiar exclusivamente el archivo artificial de esta prueba.'
-        : 'Version test did NOT pass or was interrupted. Retry with this same account only to clean up its synthetic fixture.')
+        ? 'La prueba de versiones NO pasó o quedó incompleta. Reintenta solo con esta cuenta: no se eliminará nada si la identidad y la versión no pueden verificarse.'
+        : 'Version test did NOT pass or was interrupted. Retry only with this account: no file will be removed without exact identity and version proof.')
     } finally {
       setBusy(false)
     }
