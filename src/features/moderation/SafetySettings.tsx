@@ -40,7 +40,7 @@ export function SafetySettings({ lang, ownBlocks, hidden, onUnblock, onUnhide, o
   }
   return <div role="dialog" aria-modal="true" aria-label="Seguridad social" className="absolute inset-0 z-[160] bg-[#FDFBF7] overflow-y-auto p-5 text-[#204E4A]">
     <div className="flex justify-between gap-3 mb-6"><h2 className="font-black text-lg">{lang === 'es' ? 'Bloqueos y publicaciones ocultas' : 'Blocked accounts and hidden posts'}</h2><button onClick={onClose} className="font-bold">{lang === 'es' ? 'Cerrar' : 'Close'}</button></div>
-    {moderator && <button type="button" onClick={() => setShowQueue(true)} className="mb-4 rounded-full bg-[#204E4A] px-4 py-2 text-xs font-bold text-white">{lang === 'es' ? 'Cola de moderación' : 'Moderation queue'}</button>}
+    {moderator && <button type="button" onClick={() => setShowQueue(true)} className="mb-4 rounded-full bg-[#204E4A] px-4 py-2 text-xs font-bold text-white">{lang === 'es' ? 'Ver denuncias pendientes' : 'View pending reports'}</button>}
     {showQueue && <ModeratorQueue lang={lang} onClose={() => setShowQueue(false)} />}
     {moderator && <button type="button" onClick={() => setShowMedia(true)} className="ml-2 mb-4 rounded-full bg-white px-4 py-2 text-xs font-bold underline">{lang === 'es' ? 'Archivos pendientes' : 'Pending media'}</button>}
     {showMedia && <ModerationMediaQueue lang={lang} onClose={() => setShowMedia(false)} />}
