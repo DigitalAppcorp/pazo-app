@@ -99,3 +99,11 @@ Preparar **release-readiness check** acotado de PR #36, sin reabrir módulos; ve
 - Arquitectura definitiva, protección de aportes de terceros, reautenticación backend, borrado real Storage/CDN, retención y account cleanup **NO ESTÁN IMPLEMENTADOS**: documento `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md`. Gate A3 permanece ABIERTO. Las próximas aprobaciones para aplicar SQL/desplegar/eliminar siguen siendo obligatorias.
 - Todos los datos actuales de Supabase hospedado son pre-lanzamiento (decisión PO), pero no se han limpiado, ni se puede reemplazar el flujo de eliminación de usuarios por una limpieza masiva.
 - CI GitHub de primer código/SQL DRAFT `37951819473` SUCCESS. Verificar CI del último SHA antes de handoff/release.
+
+## F14 A3.2 — snapshot privado de aportaciones ajenas DRAFT 2026-10-09
+
+- PR #38 contiene **dos migraciones en `supabase/drafts/`**, NO aplicadas, ambas con `BEGIN` + `DO RAISE EXCEPTION` antes de cualquier DDL para impedir aplicación accidental.
+- Segundo borrador `20261009_f14_a3_preserve_contributions_NOT_APPLIED.sql` crea tablas privadas para tombstone de Feed, posts ajenos de comunidad y comentarios de otras cuentas; snapshot idempotente, solo server-role, devuelve explícitamente `ready_to_delete_auth=false` y `ready_to_delete_media=false`; corta si detecta medios de comunidad sin migración verificada. **No elimina registros ni realiza Storage delete**.
+- Checkpoints de CLI/CI: GitHub Actions `37953010063` **SUCCESS** en commit `cf333380d7de63a0dc8dd13ccd11c8eaed7cbd96`. Más adelante comprobar el SHA documental nuevo. 5 tests de estados/errores + pruebas estáticas de migraciones, además de tests del MVP.
+- **A3 sigue ABIERTA:** falta worker que congele escrituras concurrentes, adapte FK/RLS de comunidades, garantice comprobación de archivo/medios y recuperación, reautenticación de backend, borrado físico Storage/CDN y Auth al final; no ejecutar scripts en Supabase sin gate explícito. El usuario autorizó código DRAFT, no apply/merge/deploy.
+- La experiencia del usuario normal no cambia: `VITE_F14_A3_REQUESTS_ENABLED` OFF por defecto. No pedir prueba de borrar cuenta ni activar el flag hasta disponer de backend y aprobación.

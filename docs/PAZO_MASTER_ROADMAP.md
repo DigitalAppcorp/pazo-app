@@ -948,3 +948,12 @@ PR #37 (DRAFT) **no cierra Gate 8**. PR #36 fue aceptado funcionalmente en local
 El PO autorizó creación de código y migraciones como borradores. PR #38 DRAFT prepara el **intake** de solicitud de cierre de cuenta, resumen de dependencias, consulta de estado y cancelación si no ha empezado procesado; protegido por un flag frontend OFF por defecto. SQL privado con RLS, grants, auditoría, 4 RPC y excepción `DO ... RAISE` explícita para impedir aplicación accidental. Tests + CI inicial PASS. **No hay worker de eliminación, ni integración de Storage/CDN/archivo de terceros/Auth; Gate 8 A3 permanece abierto**.
 
 Leer `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md` y `docs/PAZO_F14_A3_DELETION_PREFLIGHT_20261009.md`. D3-A y A4 siguen siendo dependencias de beta. No confundir documentación PR o UI desactivada con entrega pública ni autorizar merge / SQL sin gate.
+
+
+## F14 A3.2 — snapshot privado de aportaciones ajenas DRAFT 2026-10-09
+
+- PR #38 contiene **dos migraciones en `supabase/drafts/`**, NO aplicadas, ambas con `BEGIN` + `DO RAISE EXCEPTION` antes de cualquier DDL para impedir aplicación accidental.
+- Segundo borrador `20261009_f14_a3_preserve_contributions_NOT_APPLIED.sql` crea tablas privadas para tombstone de Feed, posts ajenos de comunidad y comentarios de otras cuentas; snapshot idempotente, solo server-role, devuelve explícitamente `ready_to_delete_auth=false` y `ready_to_delete_media=false`; corta si detecta medios de comunidad sin migración verificada. **No elimina registros ni realiza Storage delete**.
+- Checkpoints de CLI/CI: GitHub Actions `37953010063` **SUCCESS** en commit `cf333380d7de63a0dc8dd13ccd11c8eaed7cbd96`. Más adelante comprobar el SHA documental nuevo. 5 tests de estados/errores + pruebas estáticas de migraciones, además de tests del MVP.
+- **A3 sigue ABIERTA:** falta worker que congele escrituras concurrentes, adapte FK/RLS de comunidades, garantice comprobación de archivo/medios y recuperación, reautenticación de backend, borrado físico Storage/CDN y Auth al final; no ejecutar scripts en Supabase sin gate explícito. El usuario autorizó código DRAFT, no apply/merge/deploy.
+- La experiencia del usuario normal no cambia: `VITE_F14_A3_REQUESTS_ENABLED` OFF por defecto. No pedir prueba de borrar cuenta ni activar el flag hasta disponer de backend y aprobación.
