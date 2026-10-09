@@ -348,4 +348,20 @@ assert.ok(hostedCode.includes('inspectExactVersionPreflight({') &&
   read('package.json').includes('hostedClaimEvidence.test.mjs'),
   'Hosted claim snapshot preflight must validate independent evidence and not delete')
 
+// Five-type hosted SQL smoke: positive Auth intake, duplicate, 5/day limit,
+// moderator dismissals and audit are reversible. NOT equivalent to browser QA.
+const fiveKindsSmoke = 'supabase/tests/database/f14_five_report_kinds_hosted_rollback.test.sql'
+assert.ok(existsSync(fiveKindsSmoke), 'Five report-kind hosted rollback suite must exist')
+const fiveKindsSql = read(fiveKindsSmoke)
+assert.ok(fiveKindsSql.trimEnd().endsWith('ROLLBACK;') &&
+  fiveKindsSql.includes('SET LOCAL ROLE authenticated;') &&
+  fiveKindsSql.includes("WHEN unique_violation THEN") &&
+  fiveKindsSql.includes("WHEN invalid_parameter_value THEN") &&
+  fiveKindsSql.includes("public.f14_review_report(") &&
+  fiveKindsSql.includes("moderation_private.moderation_actions") &&
+  !/\bCOMMIT\s*;/i.test(fiveKindsSql),
+  'Hosted report QA must cover authentication, rate limits, audit and rollback')
+for(const kind of ['feed_post','feed_comment','pet_profile','community_post','community_comment'])
+  assert.ok(fiveKindsSql.includes(kind), 'Missing report target smoke case: '+kind)
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
