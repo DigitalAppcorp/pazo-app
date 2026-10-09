@@ -11,3 +11,6 @@ Backend F14: Edge `f14-moderation-purge` HTTP 503 sin delete; trigger impide `pu
 
 
 **Checkpoint adicional 2026-10-09:** Supabase agregado: 4 buckets públicos y 1 privado; 20 objetos cacheados con `max-age=3600` en metadata; Smart CDN y purga manual Pro+ NO autorizados, navegador puede retener copia. `F14VersionProbe` ahora observa CDN solo sobre su píxel sintético tras confirmar ausencia en origen, no certifica invalidación global; consultas CDN expiran en 5 s y está protegido contra doble clic. Código en rama F14, no Preview reciente por cuota Vercel. Gate de prueba sigue pendiente; no ejecutar ni confundir con la vieja prueba de 1 píxel ya aprobada. No duplicar automatización existente de reintento ni llamar a create_deployment reiteradamente.
+
+
+**Actualización del gate:** el componente antiguo `F14StorageProbe` aprobado fue desmontado y eliminado del código para evitar repetir el borrado sintético por ruta. Ahora el único ensayo Storage de Preview es `F14VersionProbe`, pendiente de desplegar al restablecer la cuota Vercel y ejecutar con una cuenta autenticada; no usar un Preview viejo. El checkout Git local del PO no ha sido auditado ni asumido; solo rama remota F14/PR #35 se está modificando. Mantener Edge 503 y todos los guards de Supabase. Documentar HEAD + CI real tras commits.
