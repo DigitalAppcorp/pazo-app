@@ -103,7 +103,7 @@ CREATE TABLE moderation_private.media_purge_attempt_events (
     )),
   event_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   fence_generation bigint NOT NULL CHECK (fence_generation > 0),
-  UNIQUE(operation_id,event_type,fence_generation,event_at)
+  UNIQUE(operation_id,event_type,fence_generation)
 );
 CREATE INDEX media_purge_attempt_events_op_at
   ON moderation_private.media_purge_attempt_events(operation_id,event_at);
