@@ -51,11 +51,3 @@ export async function getPendingModerationMedia(): Promise<PendingMedia[]> {
   if (!Array.isArray(data)) throw new Error('Respuesta inválida del backend.')
   return data as PendingMedia[]
 }
-
-export async function purgeModerationMedia(kind: PendingMedia['target_kind'], id: string): Promise<void> {
-  const { data, error } = await supabase.functions.invoke('f14-moderation-purge', {
-    body: { targetKind: kind, targetId: id },
-  })
-  if (error) throw error
-  if (!data || typeof data.message !== 'string') throw new Error('No se pudo confirmar la limpieza.')
-}
