@@ -435,4 +435,19 @@ assert.ok(serviceReaderSql.includes("auth.role() IS DISTINCT FROM 'service_role'
   read('package.json').includes(serviceReaderTest),
   'Service-only claim reader must remain read-only and regression-covered')
 
+// The live service-reader regression covers the adversarial cases missing
+// from the initial positive fixture; SQL runs against PAZO only under ROLLBACK.
+const serviceReaderDrift = 'supabase/tests/database/f14_service_evidence_reader_drift_rollback.test.sql'
+assert.ok(existsSync(serviceReaderDrift), 'Service-only reader drift regression missing')
+const readerDriftSql = read(serviceReaderDrift)
+assert.ok(readerDriftSql.trimEnd().endsWith('ROLLBACK;') &&
+  readerDriftSql.includes('Shared photo URL unexpectedly passed') &&
+  readerDriftSql.includes('Expired media hold unexpectedly returned') &&
+  readerDriftSql.includes('Dismissed report unexpectedly returned') &&
+  readerDriftSql.includes('No longer pending_review unexpectedly returned') &&
+  readerDriftSql.includes('Changed Storage version unexpectedly returned') &&
+  !readerDriftSql.includes('COMMIT;') &&
+  !readerDriftSql.includes('DELETE FROM storage.objects'),
+  'Adversarial service-reader test must remain complete and rollback-only')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
