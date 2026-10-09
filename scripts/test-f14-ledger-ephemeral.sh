@@ -49,7 +49,7 @@ CREATE ROLE anon NOLOGIN;
 CREATE ROLE authenticated NOLOGIN;
 CREATE ROLE service_role NOLOGIN;
 CREATE SCHEMA moderation_private;
-CREATE TABLE moderation_private.media_claims (claim_id uuid PRIMARY KEY);
+CREATE TABLE moderation_private.media_claims (claim_id uuid PRIMARY KEY, status text NOT NULL DEFAULT 'held');
 SQL
 
 # Apply ONLY to this disposable container and exercise adversarial SQL cases.
@@ -57,5 +57,12 @@ docker exec -i "$name" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
   < supabase/drafts/f14_media_purge_v2/20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql
 docker exec -i "$name" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
   < supabase/drafts/f14_media_purge_v2/privileged_attempt_ledger_ephemeral.test.sql
+
+# Private state transitions deliberately return no permission to send HTTP.
+docker exec -i "$name" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+  < supabase/drafts/f14_media_purge_v2/20261009_attempt_transitions_SIMULATION_ONLY.sql
+docker exec -i "$name" psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+  < supabase/drafts/f14_media_purge_v2/attempt_transitions_ephemeral.test.sql
+echo "F14 private journal transitions: PostgreSQL rollback QA PASS (no HTTP)"
 
 echo "F14 private ledger DRAFT: disposable PostgreSQL smoke PASS (no live DB writes)"
