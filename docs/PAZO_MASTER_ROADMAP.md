@@ -1042,3 +1042,13 @@ SQL/RLS transaccional post-apply PASS para UPDATE held/free/expirado, recheck/dr
 El test de precondiciones `COPY` detectó que una ruta held pública continúa SELECT-visible y la copia a ruta libre podría estar permitida según permisos SQL; **COPY HTTP no probado**, no confundir la defensa RLS con revocación de URLs públicas. Riesgo service-role/carreras entre API y DB sigue abierto. Recuperación de claims requiere protocolo explícito, no liberación automática por TTL. Documento: `supabase/drafts/f14_media_purge_v2/HELD_CLAIM_RECOVERY_AND_COPY_AUDIT.md`.
 
 **Siguiente:** auditoría de escritores privilegiados y MOVE/COPY/UPSERT con fixtures aisladas, diseño fail-closed de recuperación/confirmación+CDN; detenerse ante eliminación irreversible o nuevo gate de producto/visual. F14 A2 Gate 8 sigue ABIERTO; F14 A3/A4 sin autorización, `main` y PR de Lugares no alterados.
+
+
+### F14 A2 — seguridad COPY + confirmación exacta pendiente (checkpoint 2026-10-09 UTC)
+
+Por autorización técnica PO, dos migraciones adicionales **aplicadas a Supabase PAZO** con sus SQL canónicos:
+
+- `20261009055801_f14_held_media_copy_source_operation_guard`: deniega `SELECT` de origen `held` a `authenticated` solo para COPY REST/S3, preservando lecturas ordinarias. Pruebas reversible e instalada PASS para varios nombres de operación y lectura de control. No simula tráfico HTTP real ni evita descargar la URL pública.
+- `20261009055955_f14_disable_unverified_media_purge_confirmation`: función antigua `f14_confirm_media_cleanup` deshabilitada para todos, incluyendo `service_role`, para que no marque `purged` sin evidencia objeto/versión. Rollback e instalado PASS.
+
+Backend post-apply: 20 objetos intactos, claims/reportes/restricciones cero, Edge desactivada HTTP 503. F14 A2 **Gate 8 ABIERTO** hasta serialización de escritores privilegiados, recuperación segura de holds, CDN/D3-B, HTTP QA aislada y confirmación de eliminación exacta. A3/A4, `main` y publicación oficial intactos. CI último HEAD no certificado, Vercel rate-limit histórico.
