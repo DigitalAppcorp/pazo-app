@@ -41,7 +41,23 @@ BEGIN
    target:=current_setting('f14.qa.'||entry)::uuid;
    new_id:=public.f14_submit_report(kind,target,'spam','F14 rollback-only report');
    IF new_id IS NULL THEN RAISE EXCEPTION 'Report not created for %',kind; END IF;
+   IF kind='feed_post' THEN
+     BEGIN
+       PERFORM public.f14_submit_report(kind,target,'spam','duplicate rollback-only');
+       RAISE EXCEPTION 'Duplicate report unexpectedly accepted';
+     EXCEPTION WHEN unique_violation THEN
+       NULL; -- Expected SQLSTATE 23505 on pending duplicate.
+     END;
+   END IF;
  END LOOP;
+ BEGIN
+   PERFORM public.f14_submit_report('feed_post',
+     current_setting('f14.qa.feedpost')::uuid,'spam','sixth rollback-only');
+   RAISE EXCEPTION 'Sixth report unexpectedly accepted';
+ EXCEPTION WHEN invalid_parameter_value THEN
+   -- Existing five-per-24-hours protection is SQLSTATE 22023.
+   NULL;
+ END;
 END $reports$;
 RESET ROLE;
 DO $verify$
