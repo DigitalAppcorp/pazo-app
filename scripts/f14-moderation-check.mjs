@@ -429,9 +429,9 @@ assert.ok([serviceReaderMigration,serviceReaderTest,serviceReaderRoles].every(ex
   'Installed F14 reader SQL, contract test and hosted permission regression required')
 const serviceReaderSql = read(serviceReaderMigration)
 assert.ok(serviceReaderSql.includes("auth.role() IS DISTINCT FROM 'service_role'") &&
-  serviceReaderSql.includes('mayDelete\',false') &&
+  serviceReaderSql.includes("'mayDelete',false") &&
   serviceReaderSql.includes('FOR SHARE OF c,cr,r,o') &&
-  !/\\b(?:INSERT INTO|UPDATE |DELETE FROM|TRUNCATE)\\b/i.test(serviceReaderSql.replace(/--[^\\n]*/g, '')) &&
+  !/\b(?:INSERT INTO|UPDATE |DELETE FROM|TRUNCATE)\b/i.test(serviceReaderSql.replace(/--[^\n]*/g, '')) &&
   read('package.json').includes(serviceReaderTest),
   'Service-only claim reader must remain read-only and regression-covered')
 
