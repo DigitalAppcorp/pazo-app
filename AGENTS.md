@@ -1,6 +1,6 @@
 # PAZO — Reglas permanentes para agentes
 
-**Project Brain OS version: 1.4.0**
+**Project Brain OS version: 1.4.1**
 Canonical OS: `DigitalAppcorp/project-brain-os`.
 
 Antes de cualquier modificación de código, base de datos, arquitectura o documentación de producto:
@@ -60,3 +60,10 @@ Esta decisión temporal del Product Owner **sustituye los puntos 25–31 que imp
 - Priorizar acciones directas de los conectores. Si una conexión impide un paso con 403, DETENER; no cambiar de proyecto, reescribir `main` ni omitir controles. Pedir reconexión del equipo correcto en lugar de volver al ciclo manual.
 - La historia de migraciones del repo y la aplicada en Supabase no coincide por completo: registrar el vínculo de cada migración aplicada y reconciliar antes del lanzamiento. No usar migraciones locales retrospectivas para sobrescribir producción.
 - Después del lanzamiento oficial, reevaluar y restaurar el modo local de desarrollo conforme al Product Owner; no asumir que los datos de prueba de backups/proveedores desaparecen en el acto.
+
+
+## Continuidad entre chats — snapshot compacto
+
+33. Leer primero `docs/PAZO_ACTIVE_HANDOFF.md` como snapshot vigente de F14; el historial íntegro está archivado en `docs/archive/PAZO_ACTIVE_HANDOFF_THROUGH_20261009.md`, no releerlo por defecto. Reconciliar cualquier SHA del snapshot con rama remota, main, PR, CI y proveedor antes de actuar.
+34. El mensaje de inicio rápido del próximo chat está en `docs/PAZO_NEXT_CHAT_START.md`. Brain OS v1.4.1 define el patrón reusable `patterns/VERIFIABLE_HANDOFF.md`. Brain OS permanece separado de decisiones exclusivas de PAZO.
+35. Autorización técnica amplia del PO para continuar F14 A2 sin microaprobaciones visuales no anula gates de seguridad: no inferir permiso para borrar contenido real, publicar oficialmente, fusionar main, introducir costos, ni activar purga de Storage. Evidencia visual solo cuando el PO pruebe el flujo.

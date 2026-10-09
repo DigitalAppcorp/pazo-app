@@ -246,3 +246,7 @@ With PO blanket technical authorization, applied Supabase migration `20261009040
 
 ### 28. Live isolated synthetic Storage API QA staged (2026-10-09)
 The browser Preview (pazo-app-t83r only) now contains a separately labeled, opt-in Storage lifecycle test for one unique generated 1-pixel file. It authenticates via existing PAZO session, uploads with upsert false, validates `.info()`, deletes only that file via Storage API, confirms origin metadata 404, and retains an account-specific retry path for interrupted cleanup. No real user content or moderation report touched. **Await PO click and screenshot; not marked PASS yet.** Does not test service-role purge, concurrent held claim or CDN invalidation. 503 Edge stays parked, A2 open.
+
+
+### 29. Transferencia de chat y gate visual pendiente (2026-10-08)
+Brain OS v1.4.1 + snapshot corto `docs/PAZO_ACTIVE_HANDOFF.md`; historial archivado. La rama F14 A2 en commit auditado `2e6dd13` contiene `F14StorageProbe` de Preview y build Vercel en ambos proyectos PASS. El PO **todavía NO validó visualmente pulsando** el botón que crea/verifica/limpia la imagen sintética; esa es la siguiente aceptación real. No inventar PASS ni confundir una imagen artificial generada por QA con purga de fotos de clientes. SQL hold `20261009040957` aplicada, Edge `f14-moderation-purge` 503, Storage 20 objetos en última lectura (un objeto adicional sin provenance conocida). A2 sigue abierto por cross-service CAS, confirmación de ausencia exacta y CDN/retención D3-B; no F14 A3/A4 ni merge a main.

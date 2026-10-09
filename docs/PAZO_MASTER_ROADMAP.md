@@ -1015,3 +1015,7 @@ Supabase migration `20261009040957_f14_storage_held_media_guard` adds two RESTRI
 
 ### F14 A2 — next real-user Storage test staged (2026-10-09)
 Preview-only opt-in F14StorageProbe creates one unique synthetic 1px image in the signed-in user's post-photos folder, checks its metadata via Storage API, removes only that synthetic fixture, then confirms absence; interrupted cleanup can be retried without uploading a second test file. Requires PO visual action; must not be called a completed live test until screenshot. Does not enable moderated image purge or certify CDN/cache CAS. A2 open.
+
+
+### Checkpoint handoff compacto F14 A2 — 2026-10-08
+Snapshot actual: `docs/PAZO_ACTIVE_HANDOFF.md` (historial completo movido a `docs/archive/PAZO_ACTIVE_HANDOFF_THROUGH_20261009.md`). Rama `f14/block02-moderation-mvp-20261008`, HEAD observado antes del handoff `2e6dd13`, CI ambos PASS. Migración de hold sobre rutas `20261009040957` aplicada, zero claims/reports/restrictions, 1 moderador y 20 Storage objects al auditar. Dos cuentas Auth real 6/6 PASS en permissions. Prueba visual **pendiente**: botón `Crear, verificar y limpiar archivo de prueba` en Preview-only F14StorageProbe. No suponer que build PASS equivale a ejecución del botón; no activar purga real 503, no merge a main y no cerrar A2. Leer handoff para el siguiente paso y autorización.
