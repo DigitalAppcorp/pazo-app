@@ -1109,3 +1109,8 @@ Operator diagnostic SELECT agregado + fixture 5 casos en transacción `ROLLBACK`
 ### F14 A2 — Lector service-only aplicado y verificado (2026-10-09)
 
 Nueva RPC `public.f14_get_media_claim_evidence(uuid)` desplegada en Supabase PAZO por autorización puntual del PO. Versión remota `20261009095635` y migración del repositorio reconciliadas. EXECUTE únicamente `service_role`; JWT equivocado y roles anon/auth denegados; sin USAGE directo del esquema privado. Pruebas positivas SQL Feed/Comunidades y negativas de deriva de versión/referencia dentro de ROLLBACK PASS; sin fotos borradas, Storage conserva 20 objetos, claims/reportes/restricciones 0. PR #35 DRAFT. F14 A2/D3-A permanece ABIERTO por coordinación HTTP/Storage concurrente, respuesta a timeout, caché/retención. Edge purga permanece desactivada; no pasar a main/A3/A4 sin reconciliación del resto del DoD.
+
+
+### F14 A2 — Dry-run de la evidencia de servicio y nuevos casos de deriva
+
+RPC `f14_get_media_claim_evidence` activa bajo `service_role`; sus tests `serviceEvidenceRpc.test.mjs` y `serviceReaderDryRun.test.mjs` se ejecutan ya en CI. Adaptador puro `serviceReaderDryRun.mjs` jamás emite permiso DELETE, aun con versión exacta coincidente. SQL alojado `f14_service_evidence_reader_drift_rollback.test.sql` pasó pruebas positivas y negativas de referencia compartida, hold vencido, reporte descartado, restricción retirada y objeto versionado distinto con rollback. GitHub run `37916517423` SUCCESS, 112/112 pruebas y build. RLS de Storage conserva los holds y purge Edge sigue HTTP 503, 20 objetos originales intactos. F14 A2/D3-A ABIERTOS: falta fence interservicios confiable y duradero, reintentos ante timeout y política CDN/browser/backup; PR #35 DRAFT, main sin merge, A3/A4 sin iniciarse.
