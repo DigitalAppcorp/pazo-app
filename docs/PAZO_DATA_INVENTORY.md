@@ -321,3 +321,9 @@ Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producc
 ## 18. Protección de escrituras y FK en eliminación — A3 DRAFT, NO ACTIVA
 
 Se propusieron guardias DB de escritura por propietario/contraparte en 11 tablas y una ruta de archivo `archived` para comunidades, bajo SQL **no aplicado** del PR #38. No existe nueva recolección ni tercer proveedor. Los guards harán consulta privada de trabajos de borrado y utilizarán locks transaccionales asociados a UUID de cuenta; nunca deben exponer estado de terceros a un cliente. Las migraciones todavía NO gobiernan el Supabase alojado. No afirmar al público que se congelan escrituras ni que comunidades sin dueño se archivan automáticamente. Los bloqueos legales/operacionales D3-A, sesión y retención continúan.
+
+## 19. Inventario de medios del cierre — propuesta NO ACTIVADA
+
+`src/features/account/mediaManifest.ts` (PR #38) propone comprobar bucket, ruta exacta, versión/id del objeto, titular validado por servidor, total de referencias propias/ajenas, freeze de escritura y lease válido. Cinco buckets existentes: `pet-avatars`, `post-photos`, `community-avatars`, `community-post-photos`, `pet-documents`. No captura ni envía esa información a proveedores nuevos; el validador no registra rutas ni borra Storage. Es una propuesta para operar desde servidor bajo autorización.
+
+El borrado físico aún **NO está implementado**. Supabase Storage API es requerida para eliminar bytes; nunca `DELETE FROM storage.objects`. La purga manual de CDN está documentada por Supabase como Pro+, **no se ha contratado ni aprobado**; no prometer revocación instantánea de URL pública sin medición. Ver `docs/PAZO_F14_A3_MEDIA_ORIGIN_GATE_20261009.md` y gate A3.

@@ -106,3 +106,9 @@ Based on a read-only inspection of hosted Postgres `public.communities` and its 
 PR #38 remains DRAFT; release is not allowed until SQL/E2E tests, a distinct migration authorization and remaining F14 gates.
 ## Corrección de SQL del archivo (2026-10-09)
 Se detectó en auditoría posterior al CI que el wrapper `f14_a3_worker_snapshot_contributions` tenía `AS $` y `$;` (delimitador PL/pgSQL inválido) aunque las pruebas estáticas originales pasaban. Corregido a delimitador `$a3_worker_wrapper$` pareado y añadido test de todos los delimitadores SQL de los cinco borradores. **Esto no equivale a ejecución real en PostgreSQL**; QA SQL sobre DB aislada permanece imprescindible antes del gate remoto.
+
+## A3 — checkpoint de cierre técnico sin activación, 2026-10-09
+
+PO pidió terminar desarrollo. Se reparó un SQL inválido de `f14_a3_worker_snapshot_contributions` y se añadió validador de delimitadores en todos los SQL DRAFT; CI #37956473862 SUCCESS. `src/features/account/mediaManifest.ts` + pruebas negativas verifican rutas de Storage, propiedad, objetos compartidos, concurrencia y evidencia de CDN; devuelve `deletionAuthorized=false` en todos los casos; CI #37956829331 SUCCESS.
+
+**No confundir esto con un trabajador físico de eliminación**. Sigue SIN implementar lo señalado en `docs/PAZO_F14_A3_RELEASE_GATE_20261009.md`: SQL aislado, transición worker, reauth backend, freeze total, archivo/retención E2E, D3-A Storage/CDN, Auth final, políticas y release. La UI A3 permanece OFF; PR #38 DRAFT y branch `main` intacta. No pedir al PO borrar ninguna cuenta con esta versión.

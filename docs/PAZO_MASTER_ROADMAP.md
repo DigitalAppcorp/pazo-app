@@ -973,3 +973,9 @@ Leer `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md` y `docs/PAZO_F14_A3_DEL
 - Migración DRAFT `supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql` prepara `communities.owner_user_id` nullable únicamente para `archived`, `ON DELETE SET NULL` a Auth, ajuste de constraint trigger de membresía, y `RESTRICT` para FKs de autor de `community_posts`. **NO aplicar:** puede cambiar reglas de borrado de mascotas/usuarios; requiere pruebas en DB aislada y revisión de views, RPC y medios. No borrado de contribuciones ajenas.
 - Contratos detallados `docs/PAZO_F14_A3_WRITE_FENCE_20261009.md` y `docs/PAZO_F14_A3_COMMUNITY_FK_PROPOSAL_20261009.md`. Tests estáticos/versionado en `scripts/f14-a3-draft.test.mjs`; código de cambios no ejecuta ninguna eliminación ni SQL en remoto.
 - Próximo trabajo: ampliar matriz de cobertura, diseñar transición server-only al estado de congelación usando locks compatibles, pruebas aisladas de FK/RLS e integrar D3-A/Storage. **A3 sigue abierta**, no prometer eliminación real de cuentas.
+
+## A3 — checkpoint de cierre técnico sin activación, 2026-10-09
+
+PO pidió terminar desarrollo. Se reparó un SQL inválido de `f14_a3_worker_snapshot_contributions` y se añadió validador de delimitadores en todos los SQL DRAFT; CI #37956473862 SUCCESS. `src/features/account/mediaManifest.ts` + pruebas negativas verifican rutas de Storage, propiedad, objetos compartidos, concurrencia y evidencia de CDN; devuelve `deletionAuthorized=false` en todos los casos; CI #37956829331 SUCCESS.
+
+**No confundir esto con un trabajador físico de eliminación**. Sigue SIN implementar lo señalado en `docs/PAZO_F14_A3_RELEASE_GATE_20261009.md`: SQL aislado, transición worker, reauth backend, freeze total, archivo/retención E2E, D3-A Storage/CDN, Auth final, políticas y release. La UI A3 permanece OFF; PR #38 DRAFT y branch `main` intacta. No pedir al PO borrar ninguna cuenta con esta versión.
