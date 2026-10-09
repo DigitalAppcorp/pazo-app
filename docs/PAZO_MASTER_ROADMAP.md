@@ -1019,3 +1019,15 @@ Preview-only opt-in F14StorageProbe creates one unique synthetic 1px image in th
 
 ### Checkpoint handoff compacto F14 A2 — 2026-10-08
 Snapshot actual: `docs/PAZO_ACTIVE_HANDOFF.md` (historial completo movido a `docs/archive/PAZO_ACTIVE_HANDOFF_THROUGH_20261009.md`). Rama `f14/block02-moderation-mvp-20261008`, HEAD observado antes del handoff `2e6dd13`, CI ambos PASS. Migración de hold sobre rutas `20261009040957` aplicada, zero claims/reports/restrictions, 1 moderador y 20 Storage objects al auditar. Dos cuentas Auth real 6/6 PASS en permissions. Prueba visual **pendiente**: botón `Crear, verificar y limpiar archivo de prueba` en Preview-only F14StorageProbe. No suponer que build PASS equivale a ejecución del botón; no activar purga real 503, no merge a main y no cerrar A2. Leer handoff para el siguiente paso y autorización.
+
+
+### F14 A2 — Gate RLS UPDATE/TTL/recheck fail-closed, 2026-10-08
+
+- Prueba aislada `F14StorageProbe` con imagen artificial de 1 píxel: **PO visual PASS**; post-verificación Storage: 0 archivos `f14-storage-probe-*`, 20 objetos restantes. No repetir.
+- Tres pruebas RLS en Supabase hospedado con `BEGIN/ROLLBACK`: estructura del `UPDATE` restrictivo PASS; reproducción de fallo real de protección que caduca a los 5 minutos PASS; candidato que mantiene `held` tras vencimiento y no auto-invalida en recheck de expiry/drift PASS. Sólo objetos/metadatos sintéticos, sin bytes ni borrado.
+- Límite comprobado: `service_role` bypass RLS incluso con `held`. **No se ha demostrado CAS entre PostgreSQL y Storage API**; no autorizar purga automática o invocar `f14_confirm_media_cleanup`.
+- Único borrador para próxima autorización expresa: `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql` — helper de bloqueo `held` sin liberación por TTL, regla `RESTRICTIVE UPDATE` y `f14_recheck_media_claim` fail-closed. **NO APLICADO** en producción. No cambia planes, archivos, retention D3-B, CDN, ni función Edge 503.
+- Estado DB después de pruebas: Storage 20, claims 0, reports 0, restrictions 0, política UPDATE nueva ausente, helper/recheck productivos siguen originales. F14 A2 **Gate 8 ABIERTO**. PR #34/main y F14 A3/A4 sin cambios.
+- Vercel marcó `failure` por **build-rate-limit** tras commits; no inferir compilación. Sin aprobación de upgrade. `npm run verify` del HEAD actual pendiente.
+- **Next exact gate:** permiso expreso PO antes de apply de la migración acotada, después pruebas RLS/rol/grants y auditoría del bypass service-role / API MOVE-COPY-UPSERT y operaciones en vuelo. Purga seguirá 503 hasta prueba independiente y gate de eliminación específico.
+
