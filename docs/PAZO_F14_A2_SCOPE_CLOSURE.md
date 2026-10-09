@@ -57,3 +57,10 @@ El preflight offline ahora exige un `f14_media_probe(kind,id)` **actual**, compa
 ### Gate de integración — consulta real PostgreSQL para evidencia, sin borrado
 
 Preparado `supabase/drafts/f14_media_purge_v2/hosted_claim_evidence_readonly.sql` y contrato Node `hosted_claim_evidence_readonly.test.mjs`. Selección privada de reserva/restricción/reporte, objeto vigente, `f14_media_probe` fresco, referencia única y reloj servidor, sin acceso a bytes ni información de denuncia libre. SQL preparado y ejecutado en Supabase con un ID sintético inexistente: `[]` sin errores; no existen reservas actuales. CI `37901053491` PASS. **No concluir que el caso positivo, aislamiento de transacciones o un DELETE de versión hospedado hayan sido validados**; este query no sostiene locks durante HTTP. Mantener purga Edge 503 y estado `purged` bloqueado. D3-A y F14 A2 abiertos, Preview nuevo pendiente.
+
+
+### Evidencia positiva de Postgres (Feed y Comunidad) — 2026-10-09
+
+Dos escenarios alojados de solo fixture transaccional `BEGIN/ROLLBACK` pasaron. Feed: una reserva `held` sintética produjo `snapshot` igual a `f14_media_probe` fresco, único uso de URL e identidad Storage/version; al cambiar `posts.photo_url`, el probe invalidó la fuente. Comunidad: `snapshot`, bucket y referencias de URL/path coherentes; al borrar **ambos** campos emparejados de foto en `community_posts`, `currentSourceSnapshot` pasó a JSONB `null` y el contador path a 0. Sin archivos físicos ni expedientes persistentes. El SQL de prueba no está versionado porque una escritura al repositorio fue bloqueada por controles de seguridad; no inferir cobertura CI de estos fixtures alojados.
+
+**Nuevo bloqueador de integración:** `service_role` no dispone de `USAGE` del esquema privado `moderation_private`; el SELECT probado con el rol administrativo no es una RPC accesible desde Edge. Una interfaz de lectura estrictamente limitada a servidor requiere otro gate de seguridad; no ampliar grants del esquema ni instalar funciones no verificadas. `F14VersionProbe` aún sin Preview actualizado/QA HTTP; carreras entre API/DB, retención/CDN y D3-A físico continúan pendientes. **A2 no completado**.
