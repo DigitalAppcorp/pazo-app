@@ -109,6 +109,10 @@ export const OnboardingView = ({
         setPassword('')
         setAwaitingEmailConfirmation(true)
       }
+    } catch {
+      alert(lang === 'es'
+        ? 'No hay conexión. Inténtalo nuevamente.'
+        : 'Connection error. Please try again.')
     } finally {
       setIsSigningUp(false)
     }

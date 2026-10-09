@@ -635,12 +635,18 @@ function PazoMain() {
     setSubmittingLogin(true)
     setLoginMessage('')
 
-    const success = await signIn(emailInput, passwordInput)
-
-    if (!success) {
-      setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
+    try {
+      const success = await signIn(emailInput, passwordInput)
+      if (success) {
+        setPasswordInput('')
+      } else {
+        setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
+      }
+    } catch {
+      setLoginMessage(lang === 'es' ? 'No hay conexión. Inténtalo nuevamente.' : 'Connection error. Please try again.')
+    } finally {
+      setSubmittingLogin(false)
     }
-    setSubmittingLogin(false)
   }
 
   const handleRequestPasswordReset = async (event: React.FormEvent) => {
