@@ -970,3 +970,7 @@ PO approved and hosted Supabase applied `f14_comment_parent_guard` (version `202
 
 ### F14 A2 — Audit of existing column permissions (2026-10-08)
 A proposed rescue grant migration was **cancelled as unnecessary** after discovering intentional column-specific grants to `authenticated` despite `has_table_privilege=FALSE`. Verified via reversible SQL as `authenticated`: own pet, RPC `create_community`, membership, Feed and Community posts/comments succeed; cross-owner pet updates and private columns are denied. Zero synthetic records remain. **No production permission changes were made.** HTTP/JWT and UI tests still pending, Storage disabled, A2 open. No A3/A4 approval.
+
+
+### F14 A2 — approved live report test closed and cleaned (2026-10-08)
+A real-user-session Preview report was successfully dismissed through the moderator queue, hosted Supabase status and action audit verified. All explicitly identified trial pet, post, report, action and same-owner impression records removed after dependency audit and reversible dry-run; exact post-delete counts zero. No production Vercel deployment, no other user records changed. Backend moderator permission still active. A2 remains open for independent JWT denial, real depublishing tests and protected media/CDN purging procedure (currently intentionally disabled). A3/A4 not yet authorized.

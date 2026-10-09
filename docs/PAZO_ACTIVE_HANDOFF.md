@@ -1041,3 +1041,22 @@ PO screenshot in mobile Preview shows `No se pudo enviar. Intenta más tarde.` a
 
 # F14 A2 — MOBILE MODERATION QUEUE VISIBILITY (2026-10-08)
 PO screenshot of the Safety page again showed the **button** `Cola de moderación` and no actual report cards, while hosted Supabase still held exactly one `feed_post/spam/pending` report. The Safety screen is NOT the queue. The queue component rendered `absolute inset-0` within another `absolute` Safety panel and an animated/scrolling application root, potentially clipping or moving the queue away from the visible mobile viewport. A frontend-only fix renders the moderator queue as `createPortal(...,document.body)` in a viewport-anchored fixed modal with visible close control, focus management and bounded internal scrolling. Safety access button renamed to `Ver denuncias pendientes` to distinguish a navigation action from an active state. Report cards display readable target/reason labels instead of only raw type codes. No backend modifications or resolution of the pending report. **Require Vercel Preview SUCCESS + PO visual confirmation; then dismiss only the known test report by UI and clean exact test data.** Do not ask user to re-report. Scope: A2 branch only, no Vercel production, no Storage purge.
+
+
+---
+
+# F14 A2 — REAL MODERATION DECISION + LIVE TEST CLEANUP COMPLETE (2026-10-08 US Pacific)
+
+**LATEST STATE: earlier notes saying that temporary test post, pet and report remain pending have been superseded.** The PO used actual signed Auth session in Vercel Preview, opened the repaired portal-based moderation queue, and confirmed the action **Descartar**. Hosted Supabase verification confirmed the specific approved trial report `c2b059ae-4d5d-4546-9975-5111837e2a6a` was **`dismissed`**, with `resolved_at` set and **one `moderation_actions.action='dismiss'` audit**. This validates the functional user-facing submit -> queue -> dismiss path with PO's real Auth session. The Feed post was NOT withdrawn.
+
+The PO had explicitly authorized creating and deleting only trial records. Pre-deletion audit found no third-party comments, follows, community content, photos, documents, care records, notifications, hidden posts, alternative reports or content restrictions. One `impression` interaction referenced the disposable post and was produced by a pet owned by the same account. A full transactionally reversible deletion dry-run **PASS**. The same guarded transaction then COMMITTED removal of only:
+- disposable pet `3353cfcd-4737-4f07-a0d4-f0a8021d792a` (and its generated `pet_public_links` child),
+- disposable post `eef68345-f2c0-4ab7-91fe-66337f0f3b9b`,
+- dismissed trial report `c2b059ae-4d5d-4546-9975-5111837e2a6a` and its sole `moderation_actions` audit record,
+- single same-owner test `impression` `cd4f0861-6e43-4861-8f49-313d19544d0d`.
+
+Post-commit SQL confirmed **0 remaining** for all five explicit trial IDs. The deletion was purpose-limited to trial data; it does not authorize removing unrelated audit trails or actual customer data. PO's real Auth account and existing pets remain intact; no images were attached and no Storage operations occurred. The unique moderator role remains. The app may need a refresh after trial post disappearance.
+
+Latest UI fix `09317171e4b1c7f4284644fff45645068c7a325c` shows the moderator queue in a document-body portal and renames its entry to `Ver denuncias pendientes`; Vercel `pazo-app-t83r` Preview build succeeded, PO confirmed finish of the moderation action. Keep `main`, Vercel production and non-A2 roadmap blocks unchanged.
+
+**A2 remains OPEN:** real signed HTTP tests with an independent non-moderator login (not just simulated SQL claims); actual `remove` (depublish) decision via real API/UI with disposable data; secure, complete handling of public media/Storage/CDN remains NOT implemented because the Edge endpoint is an intentionally disabled 503 stub; review data retention D3-B; comprehensive UI moderation queue context and accessibility. A1 hosted API closure still outstanding. Do NOT start A3/A4 nor enable Storage purge or production deploy without new scoped authorization.
