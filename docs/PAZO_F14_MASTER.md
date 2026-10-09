@@ -250,3 +250,15 @@ The browser Preview (pazo-app-t83r only) now contains a separately labeled, opt-
 
 ### 29. Transferencia de chat y gate visual pendiente (2026-10-08)
 Brain OS v1.4.1 + snapshot corto `docs/PAZO_ACTIVE_HANDOFF.md`; historial archivado. La rama F14 A2 en commit auditado `2e6dd13` contiene `F14StorageProbe` de Preview y build Vercel en ambos proyectos PASS. El PO **todavía NO validó visualmente pulsando** el botón que crea/verifica/limpia la imagen sintética; esa es la siguiente aceptación real. No inventar PASS ni confundir una imagen artificial generada por QA con purga de fotos de clientes. SQL hold `20261009040957` aplicada, Edge `f14-moderation-purge` 503, Storage 20 objetos en última lectura (un objeto adicional sin provenance conocida). A2 sigue abierto por cross-service CAS, confirmación de ausencia exacta y CDN/retención D3-B; no F14 A3/A4 ni merge a main.
+
+
+### 30. A2 Storage sintético PASS y siguiente gate seguro (2026-10-08 local)
+
+**Aceptación visual PO: PASS.** Captura real de `F14StorageProbe` en Preview: autenticación, imagen artificial de 1 píxel creada, objeto localizado con Storage API, eliminación del fixture y ausencia confirmada mediante Storage API. Se trata solo de un fixture generado por esa prueba, NO de contenido de usuarios moderado ni de prueba `service_role`.
+
+**Verificación alojada solo lectura posterior:** 20 objetos Storage, 0 rutas `f14-storage-probe-*`, 0 media claims, 0 eventos, 0 reportes, 0 restricciones. No hubo limpieza manual. Auditoría `storage.objects`: reglas F14 RESTRICTIVE INSERT/DELETE aplicadas; **0 políticas UPDATE permisivas** actualmente, así que `upsert` autenticado no está concedido por RLS. Una futura concesión UPDATE requiere endurecimiento explícito; el helper público `SECURITY DEFINER` también requiere revisión de exposición. Supabase documenta borrado `remove([{path,versionId}])` para versiones no actuales, pero NO se ha confirmado que sea CAS seguro sobre la versión activa; S3 bucket versioning no está disponible como sustituto.
+
+**Trabajo versionado en rama, SIN aplicar backend:** `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md` (invariantes, carrera DB/Storage, confirmación objeto/version, CDN y límites D3-B), `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql` (política UPDATE restrictiva propuesta), `supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql` (DDL de prueba reversible, aún NO ejecutado). No habilitar Edge 503, no ejecutar `f14_confirm_media_cleanup`, no afirmar `purged`.
+
+**Estado:** gate de imagen sintética PASS, F14 A2 Gate 8 **ABIERTO** por garantías entre servicios, revisión de políticas y permisos, medio retirado/CDN, retención D3-B y aceptación de alcance. A3/A4 no autorizados. Se requiere gate específico para cualquier migración alojada o Storage DELETE. No merge/main ni publicación oficial.
+
