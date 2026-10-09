@@ -104,3 +104,5 @@ Based on a read-only inspection of hosted Postgres `public.communities` and its 
 **Subsequent correctness matrix:** archiving owner while preserving third-party post/comment, author deleting own profile with/without pet, direct Auth DELETE of active vs archived community, references to signed public URLs, restoring backups, RLS anonymous/authenticated, cascade blockers for Feed posts and comments, session expiration and normal deletes not impacted.
 
 PR #38 remains DRAFT; release is not allowed until SQL/E2E tests, a distinct migration authorization and remaining F14 gates.
+## Corrección de SQL del archivo (2026-10-09)
+Se detectó en auditoría posterior al CI que el wrapper `f14_a3_worker_snapshot_contributions` tenía `AS $` y `$;` (delimitador PL/pgSQL inválido) aunque las pruebas estáticas originales pasaban. Corregido a delimitador `$a3_worker_wrapper$` pareado y añadido test de todos los delimitadores SQL de los cinco borradores. **Esto no equivale a ejecución real en PostgreSQL**; QA SQL sobre DB aislada permanece imprescindible antes del gate remoto.

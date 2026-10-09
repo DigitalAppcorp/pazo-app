@@ -117,3 +117,22 @@ test('community authored posts cannot disappear through Auth/pet cascading FK', 
   assert.match(fkSql,/community_posts_author_pet_id_fkey[\s\S]*?REFERENCES public\.pets\(id\) ON DELETE RESTRICT/)
   assert.match(fkSql,/INCOMPLETE: legacy\/community views/)
 })
+
+test('SQL draft dollar quotes are paired and no malformed AS $ single marker exists', () => {
+  const paths = [
+    '../supabase/drafts/20261009_f14_a3_request_preflight_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_preserve_contributions_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_write_fence_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql',
+  ]
+  for (const path of paths) {
+    const source = readFileSync(new URL(path,import.meta.url),'utf8')
+    assert.doesNotMatch(source,/\bAS\s+\$(?!\$|[A-Za-z_])/m,path+' contains invalid dollar quote')
+    const markers = source.match(/\$[A-Za-z_][A-Za-z_0-9]*\$|\$\$/g)||[]
+    for (const name of new Set(markers)) {
+      assert.equal(markers.filter(x=>x===name).length % 2,0,path+' unpaired '+name)
+    }
+    assert.ok(source.indexOf('BEGIN;') >= 0 && source.indexOf('RAISE EXCEPTION') > source.indexOf('BEGIN;'),path+' must fail closed in transaction')
+  }
+})

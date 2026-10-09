@@ -153,7 +153,7 @@ GRANT EXECUTE ON FUNCTION account_private.f14_a3_snapshot_contributions(uuid)
 -- stays OUT of the PostgREST exposed schema list; no browser receives the key.
 CREATE OR REPLACE FUNCTION public.f14_a3_worker_snapshot_contributions(p_job_id uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
-AS $
+AS $a3_worker_wrapper$
 BEGIN
   -- Callable only with a signed service_role JWT, never with user metadata.
   IF COALESCE(current_setting('request.jwt.claim.role', true), '') <> 'service_role' THEN
@@ -161,7 +161,7 @@ BEGIN
   END IF;
   RETURN account_private.f14_a3_snapshot_contributions(p_job_id);
 END;
-$;
+$a3_worker_wrapper$;
 REVOKE ALL ON FUNCTION public.f14_a3_worker_snapshot_contributions(uuid)
   FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.f14_a3_worker_snapshot_contributions(uuid)
