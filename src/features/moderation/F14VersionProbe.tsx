@@ -106,7 +106,7 @@ export function F14VersionProbe({ lang }: Props) {
       // CDN checks are informational and never authorize media cleanup.
       const publicUrl = storage.getPublicUrl(path).data.publicUrl
       let cdnWarm = false
-      try { cdnWarm = (await fetch(publicUrl, { cache: 'reload' })).ok }
+      try { cdnWarm = (await fetch(publicUrl, { cache: 'reload', signal: AbortSignal.timeout(5000) })).ok }
       catch { /* network/CORS differences do not affect the version safety result */ }
 
       // Wrong version must NEVER remove the current version. This affects ONLY
@@ -137,7 +137,7 @@ export function F14VersionProbe({ lang }: Props) {
         try {
           const url = new URL(publicUrl)
           url.searchParams.set('cacheNonce', crypto.randomUUID())
-          const edge = await fetch(url.toString(), { cache: 'no-store' })
+          const edge = await fetch(url.toString(), { cache: 'no-store', signal: AbortSignal.timeout(5000) })
           setCdnObservation(es
             ? `CDN consultado desde este dispositivo: HTTP ${edge.status}. No demuestra invalidación mundial ni borra la caché de otros navegadores.`
             : `CDN observed from this device: HTTP ${edge.status}. This does not certify global invalidation or clear other browsers' caches.`)
