@@ -55,6 +55,11 @@ bad('metadata changed',patch('storageObject',{metadata_fingerprint:'000000000000
 bad('archived object',patch('storageObject',{archived_at:'2026-10-09T06:00:01Z'}),'object_metadata_or_state_drift')
 bad('expired claim',patch('reservation',{expires_at:updated}),'claim_expired_or_clock_untrusted')
 bad('clock absent',{...sample(),databaseNow:undefined},'claim_expired_or_clock_untrusted')
+bad('source removed between reservation and current query',
+  {...sample(),currentSourceSnapshot:null},'missing_database_evidence')
+bad('revalidated photo is no longer the held media',
+  patch('currentSourceSnapshot',{path:'owner/changed.png'}),'current_source_snapshot_drift')
+
 test('snapshot identity and canonical source must agree',()=>{
  const x=sample();x.reservation.snapshot.report_id=ids.target
  assert.equal(inspectHostedClaimEvidence(x).reason,'database_identity_drift')
