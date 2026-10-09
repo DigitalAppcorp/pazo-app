@@ -450,4 +450,18 @@ assert.ok(readerDriftSql.trimEnd().endsWith('ROLLBACK;') &&
   !readerDriftSql.includes('DELETE FROM storage.objects'),
   'Adversarial service-reader test must remain complete and rollback-only')
 
+// Service-only evidence can be assessed offline, never sent to Storage for deletion.
+const dryRunAdapterPath = 'supabase/drafts/f14_media_purge_v2/serviceReaderDryRun.mjs'
+const dryRunAdapterTest = 'supabase/drafts/f14_media_purge_v2/serviceReaderDryRun.test.mjs'
+assert.ok(existsSync(dryRunAdapterPath) && existsSync(dryRunAdapterTest),
+  'Service-only reader dry-run adapter/tests must be checked in')
+const dryRunAdapter = read(dryRunAdapterPath)
+assert.ok(dryRunAdapter.includes('inspectHostedClaimEvidence(result)') &&
+  dryRunAdapter.includes('mayDelete: false') &&
+  dryRunAdapter.includes('requires_privileged_writer_fence_and_attempt_ledger') &&
+  !dryRunAdapter.includes('.remove(') &&
+  !dryRunAdapter.includes('supabase.storage') &&
+  read('package.json').includes(dryRunAdapterTest),
+  'Service-only evidence must never turn directly into permission to purge')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
