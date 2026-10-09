@@ -2,7 +2,7 @@
 
 **Ruta maestra de producto y arquitectura — 2026-10-08**
 **Categoría:** infraestructura obligatoria para Beta; no requiere fake door.
-**Estado:** F14 EN CURSO documental; Gate 5 CERRADO (MVP REDUCIDO); Gate 6 CERRADO (scope); Gate 7 CERRADO (arquitectura); Gate 8 PLANIFICADO, **sin autorización para implementación**.
+**Estado vigente (2026-10-09):** F14 A2 Gate 8 **EN CURSO**; Gate 5/6/7 CERRADOS. Implementación y migraciones A2 autorizadas y verificadas, PR #35 DRAFT; A3/A4 NO autorizados. Ver `docs/PAZO_ACTIVE_HANDOFF.md` y `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. La especificación de A0–A4 que sigue abajo conserva el contexto histórico previo a las autorizaciones posteriores.
 **Base auditada:** respaldo `backup/pazo-codex-local-20261008` (`c4f466f`).
 **Precedencia:** `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MODULE_LIFECYCLE.md`, `docs/PAZO_ARCHITECTURE_CONTRACT.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` y `docs/PAZO_DATA_INVENTORY.md` siguen obligatorios. Este documento detalla la sub-ruta F14.
 
@@ -329,3 +329,10 @@ Supabase versión `20261009061213_f14_reject_unverified_purged_status` aplicada:
 Validación parcial del componente React mediante TypeScript: cero diagnósticos de sintaxis al transpilar JSX aisladamente, **no** equivale a build completo o prueba visual. La cuota de builds Vercel aún puede bloquear el Preview. Siguiente: verificación integrada `npm run verify` y validación visual del nuevo estado de revisión de medios. La prueba visual del archivo sintético de 1 píxel ya fue aprobada y no se repetirá.
 
 Riesgos que impiden habilitar eliminación automática: coordinación con escrituras privilegiadas, ausencia de borrado condicionado por versión activa demostrable, carreras HTTP, caché/CDN y retención D3-B. La salida segura es revisión manual y nunca confirmar `purged` prematuramente. F14 A2 sigue abierto, A3/A4 y `main` sin alteraciones.
+
+
+### 36. F14 A2 — evidencia visual PO y alcance reconciliado
+
+Captura del Product Owner de `Revisión de archivos` sobre Preview Vercel READY `a650dd8`: **PASS visual** para contenido, estado vacío y ausencia de operación destructiva. No se ha demostrado funcionamiento del refresco ni de un caso no vacío. GitHub Actions CI del mismo SHA SUCCESS. No pedir nuevamente esta aceptación ni repetir QA Auth/Storage sintético previamente aprobadas.
+
+Matriz actual de cierre: `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. Sigue pendiente el requisito D3-A de eliminar medios retirados del origen activo y Storage de manera verificable; el modo revisión manual no sustituye D3-A sin decisión PO explícita. CDN/cachés, exclusión entre operaciones privilegiadas y borrado condicional por versión activa no han sido certificados. Edge HTTP 503; estado `purged` protegido por SQL. PR #35 DRAFT, `main` sin merge, A3/A4 no iniciadas.
