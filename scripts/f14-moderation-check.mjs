@@ -500,4 +500,34 @@ assert.ok(ledgerSqlText.includes('ARCHITECTURAL DRAFT ONLY. DO NOT APPLY') &&
   read('package.json').includes(ledgerTest),
   'F14 ledger proposal must remain private, fenced by identity, tested and unapplied')
 
+// F14 A2: private journal transitions are draft-only; exercises never
+// authorize an HTTP send or a release. The two-connection SQL fixture must
+// remain in the isolated Docker CI (not in Supabase production migrations).
+const transitionDraft = 'supabase/drafts/f14_media_purge_v2/20261009_attempt_transitions_SIMULATION_ONLY.sql'
+const transitionTest = 'supabase/drafts/f14_media_purge_v2/attempt_transitions_ephemeral.test.sql'
+const raceFiles = [
+  'supabase/drafts/f14_media_purge_v2/attempt_concurrency_ephemeral.setup.sql',
+  'supabase/drafts/f14_media_purge_v2/attempt_concurrency_worker_a.sql',
+  'supabase/drafts/f14_media_purge_v2/attempt_concurrency_worker_b.sql',
+  'supabase/drafts/f14_media_purge_v2/attempt_concurrency_after.sql',
+]
+assert.ok([transitionDraft,transitionTest,...raceFiles].every(existsSync),
+  'F14 private journal transition and two-session SQL proof required')
+const transitionSql = read(transitionDraft)
+const transitionSmoke = read('scripts/test-f14-ledger-ephemeral.sh')
+assert.ok(transitionSql.includes('SECURITY INVOKER') &&
+  transitionSql.includes('FOR UPDATE OF a,f') &&
+  transitionSql.includes("'shouldSendHttp',false") &&
+  transitionSql.includes("'mayDelete',false") &&
+  transitionSql.includes('REVOKE ALL ON FUNCTION') &&
+  !transitionSql.includes('GRANT EXECUTE') &&
+  !transitionSql.includes('DELETE FROM storage.objects') &&
+  read(transitionTest).trimEnd().endsWith('ROLLBACK;') &&
+  read(raceFiles[1]).includes('pg_sleep(6)') &&
+  read(raceFiles[2]).includes("lock_timeout = '450ms'") &&
+  read(raceFiles[3]).trimEnd().endsWith('ROLLBACK;') &&
+  transitionSmoke.includes(transitionDraft) &&
+  raceFiles.every(file => transitionSmoke.includes(file)),
+  'Private draft journal must remain locked, unprivileged and SQL-tested')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
