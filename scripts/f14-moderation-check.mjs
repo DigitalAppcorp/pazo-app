@@ -136,7 +136,7 @@ assert.ok(storageSmoke.includes('isTrialPath(path, uid)'), 'Storage smoke must v
 assert.ok(storageSmoke.includes('storage.list(uid,'), 'Storage smoke must verify object presence and absence via supported list API')
 assert.ok(!storageSmoke.includes('storage.info(path)'), 'Storage smoke must not depend on unavailable SDK info method')
 assert.ok(storageSmoke.includes('sessionStorage.setItem'), 'Storage smoke must support interrupted cleanup')
-assert.ok(qaHost.includes('<F14StorageProbe lang={lang} />'), 'Storage smoke must live in QA-only Preview')
+assert.ok(!qaHost.includes('<F14StorageProbe lang={lang} />'), 'Already completed path-only Storage smoke must not reappear in Preview')
 const updateMigration = 'supabase/migrations/20261009054411_f14_held_media_fail_closed_recheck_update_guard.sql'
 const updateSmoke = 'supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql'
 const updateBehavior = 'supabase/tests/database/f14_storage_held_update_behavior_rollback.test.sql'
