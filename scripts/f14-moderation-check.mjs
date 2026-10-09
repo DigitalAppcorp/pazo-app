@@ -406,4 +406,18 @@ assert.ok(exactOutcome.includes("status: 'origin_absent_observed'") &&
 for(const testName of ['held_claim_reconciliation_readonly.test.mjs','exactVersionOutcome.test.mjs'])
  assert.ok(read('package.json').includes(testName),'Safety suites must run in F14 CI: '+testName)
 
+// Permission regression proves that backend service access stays narrow and
+// nobody gets direct SELECT access to private F14 moderation tables.
+const privatePrivilegesTest = 'supabase/tests/database/f14_private_claim_permissions_readonly.test.sql'
+assert.ok(existsSync(privatePrivilegesTest),'F14 private grants regression missing')
+const privateAcl = read(privatePrivilegesTest)
+assert.ok(privateAcl.trimEnd().endsWith('ROLLBACK;') &&
+ privateAcl.includes("has_schema_privilege('authenticated',v_schema,'USAGE')") &&
+ privateAcl.includes("has_schema_privilege('service_role',v_schema,'USAGE')") &&
+ privateAcl.includes("has_function_privilege('service_role','public.f14_confirm_media_cleanup(text,uuid)','EXECUTE')") &&
+ privateAcl.includes('f14_no_unverified_media_purge') &&
+ !privateAcl.includes('COMMIT;') &&
+ !privateAcl.includes('GRANT '),
+ 'F14 permission smoke must remain read-only and deny legacy purge')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
