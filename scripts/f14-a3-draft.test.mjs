@@ -128,6 +128,7 @@ test('SQL draft dollar quotes are paired and no malformed AS $ single marker exi
     '../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql',
     '../supabase/drafts/20261009_f14_a3_worker_legacy_clear_NOT_APPLIED.sql',
     '../supabase/drafts/20261009_f14_a3_recent_auth_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_freeze_transition_NOT_APPLIED.sql',
   ]
   for (const path of paths) {
     const source = readFileSync(new URL(path,import.meta.url),'utf8')
@@ -202,4 +203,26 @@ test('A3 recent auth draft is fail-closed with five-minute server receipt',()=>{
  assert.match(a3RecentSql,/j\.status='reviewing'/)
  assert.match(a3RecentSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_record_reauth\(uuid,uuid,uuid\) TO service_role/)
  assert.doesNotMatch(a3RecentSql,/\bDELETE\s+FROM\b|\bTRUNCATE\b|\bauth\.admin\.deleteUser\b/i)
+})
+
+const transitionSql=readFileSync(new URL('../supabase/drafts/20261009_f14_a3_freeze_transition_NOT_APPLIED.sql',import.meta.url),'utf8')
+test('A3 transition draft aborts before DDL and its freeze-readiness gate is always false',()=>{
+ const guard=transitionSql.indexOf("RAISE EXCEPTION 'A3 TRANSITION DRAFT ONLY")
+ assert.ok(transitionSql.indexOf('BEGIN;')<guard && guard<transitionSql.indexOf('CREATE OR REPLACE FUNCTION'))
+ assert.match(transitionSql,/f14_a3_full_write_fence_ready\(\)[\s\S]*?SELECT false/)
+ assert.match(transitionSql,/IF NOT account_private\.f14_a3_full_write_fence_ready\(\) THEN RETURN false/)
+ assert.doesNotMatch(transitionSql,/\bDELETE\s+FROM\b|\bTRUNCATE\b|\bauth\.admin\.deleteUser\b/i)
+})
+test('A3 state transition shares owner advisory lock with all write-fence triggers',()=>{
+ assert.match(transitionSql,/SELECT user_id INTO v_owner FROM account_private\.deletion_jobs/)
+ assert.match(transitionSql,/pg_advisory_xact_lock\(\s*pg_catalog\.hashtextextended\(p_user_id::text,901426\)/)
+ assert.match(transitionSql,/WHERE id=p_job_id FOR UPDATE/)
+ assert.match(transitionSql,/v_status <> 'requested'/)
+ assert.match(transitionSql,/FROM account_private\.deletion_recent_auth r[\s\S]*?FOR UPDATE/)
+ assert.match(transitionSql,/v_expires <= v_now/)
+ assert.match(transitionSql,/auth\.sessions s[\s\S]*?s\.user_id=p_user_id/)
+ assert.match(transitionSql,/SET consumed_at=v_now/)
+ assert.match(transitionSql,/SET status='reviewing',updated_at=v_now/)
+ assert.match(transitionSql,/INSERT INTO account_private\.deletion_events\(job_id,action\)/)
+ assert.match(transitionSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_begin_review\(uuid,uuid,uuid\)[\s\S]*?TO service_role/)
 })
