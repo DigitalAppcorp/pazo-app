@@ -41,3 +41,8 @@ Referencia oficial: [Copy / Move Objects](https://supabase.com/docs/guides/stora
 - Rutina de recuperación que no libera un claim mientras exista una eliminación en vuelo. D3-B pendiente, sin activar A3/A4.
 
 **Regla de fallo seguro:** cuando haya incertidumbre de ruta, objeto, versión, exclusividad, operación concurrente, CDN o permisos, conservar estado pendiente/revisión manual. No marcar `purged` ni activar Edge hasta cierre de todos los gates.
+
+
+## Actualización verificada 2026-10-09 — defensa COPY aplicada
+
+Las observaciones anteriores sobre SELECT de origen reservado describían **el estado anterior a la migración**. Supabase PAZO aplicó `20261009055801_f14_held_media_copy_source_operation_guard`: política `RESTRICTIVE SELECT TO authenticated`, con comprobación `storage.allow_any_operation` para `object.copy`, `s3.object.copy` y `s3.upload.part_copy`. Las pruebas SQL reversibles e instaladas verificaron origen `held` bloqueado en esas operaciones, origen libre permitido, y lectura ordinaria intacta. **No se probó una petición COPY real por HTTP ni se revocan descargas de URLs públicas.** Por tanto, no describir la brecha SQL previa como abierta sin mencionar esta corrección; permanecen service-role bypass/HTTP in-flight y copias externas. El PO validó visualmente el panel de revisión manual, pero esa evidencia no cierra D3-A.
