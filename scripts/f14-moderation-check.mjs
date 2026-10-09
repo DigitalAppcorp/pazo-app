@@ -108,4 +108,11 @@ for (const f of claimTests) {
   assert.ok(testSql.trimEnd().endsWith('ROLLBACK;'), 'Claim SQL test must end with ROLLBACK: '+f)
   assert.ok(!testSql.includes('\nCOMMIT;'), 'Claim SQL test must never COMMIT: '+f)
 }
+const uiQa = read('src/features/moderation/F14RoleCheck.tsx')
+const qaHost = read('src/features/moderation/SafetySettings.tsx')
+assert.ok(uiQa.includes("supabase.auth.getUser()"), 'F14 QA must check current real authenticated session')
+assert.ok(uiQa.includes("f14_prepare_media_claim") && uiQa.includes("f14_recheck_media_claim"), 'F14 QA must test service-only RPC denial')
+assert.ok(!uiQa.includes('access_token') && !uiQa.includes('getSession()'), 'F14 QA must not read/copy bearer tokens')
+assert.ok(qaHost.includes("window.location.hostname.includes('pazo-app-t83r')"), 'QA must only appear in isolated Preview project')
+assert.ok(!uiQa.includes('remove(['), 'F14 QA must never delete Storage content')
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')

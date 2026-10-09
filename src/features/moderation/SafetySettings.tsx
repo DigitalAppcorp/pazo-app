@@ -3,6 +3,7 @@ import { supabase } from '../../services/supabaseClient'
 import { isModerator } from './reportingService'
 import { ModeratorQueue } from './ModeratorQueue'
 import { ModerationMediaQueue } from './ModerationMediaQueue'
+import { F14RoleCheck } from './F14RoleCheck'
 type Props = {
   lang: 'es' | 'en'; ownBlocks: ReadonlySet<string>; hidden: ReadonlySet<string>;
   onUnblock: (id: string) => Promise<void>; onUnhide: (id: string) => Promise<void>; onClose: () => void
@@ -14,6 +15,10 @@ export function SafetySettings({ lang, ownBlocks, hidden, onUnblock, onUnhide, o
   const [showQueue, setShowQueue] = useState(false)
   const [showMedia, setShowMedia] = useState(false)
   const [error, setError] = useState('')
+  // Visible only in PAZO's isolated Preview project, never on production domain.
+  const f14QaPreview = typeof window !== 'undefined'
+    && window.location.hostname.endsWith('.vercel.app')
+    && window.location.hostname.includes('pazo-app-t83r')
   const blockIds = [...ownBlocks], postIds = [...hidden]
   useEffect(() => { let live = true; void isModerator().then(ok => { if (live) setModerator(ok) }).catch(() => {}); return () => { live = false } }, [])
   useEffect(() => {
@@ -44,6 +49,7 @@ export function SafetySettings({ lang, ownBlocks, hidden, onUnblock, onUnhide, o
     {showQueue && <ModeratorQueue lang={lang} onClose={() => setShowQueue(false)} />}
     {moderator && <button type="button" onClick={() => setShowMedia(true)} className="ml-2 mb-4 rounded-full bg-white px-4 py-2 text-xs font-bold underline">{lang === 'es' ? 'Archivos pendientes' : 'Pending media'}</button>}
     {showMedia && <ModerationMediaQueue lang={lang} onClose={() => setShowMedia(false)} />}
+    {f14QaPreview && <F14RoleCheck lang={lang} />}
     {error && <p role="alert" className="text-red-700 mb-4">{error}</p>}
     <h3 className="font-extrabold mb-2">{lang === 'es' ? 'Cuentas bloqueadas por ti' : 'Accounts you blocked'}</h3>
     {!blockIds.length && <p className="text-sm mb-4">{lang === 'es' ? 'Ninguna' : 'None'}</p>}

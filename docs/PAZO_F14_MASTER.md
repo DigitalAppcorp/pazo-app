@@ -225,3 +225,7 @@ PO authorized preparing and reversibly testing claim gate. Draft `supabase/draft
 
 ### 23. F14 A2 preflight claims installed (2026-10-09 UTC)
 PO approved hosted migration; Supabase version `20261009014616` installed. Private leases/events plus service_role-only prepare/recheck RPC, no Storage DELETE or confirmation. Tested after migration via reversible SQL: Feed current/legacy, Community, idempotent recheck, source+version drift, expiry, anonymous/authenticated role rejection, shared file, cross-project URL and delete marker. All checks PASS. 0 claims/reports/restrictions and 19 Storage objects remain. Genuine two-account signed JWT and cross-service CAS confirmation pending; Edge remains 503, A2 open, no A3/A4.
+
+
+### 24. Preview live-session JWT testing UI staged (2026-10-09 UTC)
+Scoped moderation diagnostic panel in `pazo-app-t83r` Preview only, with no token copying and no writes. The actual signed-in user can test moderator or normal-account RPC access, including guaranteed denial of service-only claim APIs. UI test is NOT PASS until PO uses two independent sessions and shares redacted results/screenshot. Does not enable Storage deletion, D3-B unresolved, A2 remains open.
