@@ -20,6 +20,10 @@ const SAFE_EVENT_PROPERTY_ALLOWLIST = {
   auth_signup_failed: new Set(['error_code']),
   auth_signin_succeeded: new Set<string>(),
   auth_signin_failed: new Set(['error_code']),
+  auth_password_reset_request_failed: new Set(['error_code']),
+  auth_password_reset_requested: new Set<string>(),
+  auth_password_reset_update_failed: new Set(['error_code']),
+  auth_password_reset_completed: new Set<string>(),
 } as const
 
 type SafeProductEvent = keyof typeof SAFE_EVENT_PROPERTY_ALLOWLIST
