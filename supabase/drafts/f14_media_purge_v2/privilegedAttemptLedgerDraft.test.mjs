@@ -31,7 +31,7 @@ test('claims and exact Storage identity cannot be silently swapped',()=>{
   'ON moderation_private.media_purge_attempts(bucket,object_path)',
   'FOREIGN KEY (active_operation_id,bucket,object_path)',
   'REFERENCES moderation_private.media_purge_attempts(operation_id,bucket,object_path)',
-  'UNIQUE(operation_id,event_type,fence_generation,event_at)',
+  'UNIQUE(operation_id,event_type,fence_generation)',
  ])
   assert.ok(body.includes(token),'Missing private ledger integrity contract: '+token)
  for(const bucket of ['post-photos','community-post-photos'])
