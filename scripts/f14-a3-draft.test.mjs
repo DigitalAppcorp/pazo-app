@@ -97,3 +97,23 @@ test('write-fence never claims to cover Storage, JWT, Auth or all tables', () =>
   assert.match(fenceSql,/direct Auth/)
   assert.doesNotMatch(fenceSql,/\bauth\.admin\.deleteUser/)
 })
+
+
+const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql', import.meta.url), 'utf8')
+test('community FK draft aborts transaction before altering any table', () => {
+  assert.ok(fkSql.indexOf('BEGIN;') < fkSql.indexOf("RAISE EXCEPTION 'F14 A3 COMMUNITY FK DRAFT ONLY"))
+  assert.ok(fkSql.indexOf("RAISE EXCEPTION 'F14 A3 COMMUNITY FK DRAFT ONLY") < fkSql.indexOf('ALTER TABLE'))
+  assert.match(fkSql,/DO \$a3_fk_not_applied\$/)
+  assert.doesNotMatch(fkSql,/\bDELETE\s+FROM\b|\bTRUNCATE\s+/i)
+})
+test('active communities need owner and archived orphan has guarded trigger', () => {
+  assert.match(fkSql,/CHECK \(status <> 'active' OR owner_user_id IS NOT NULL\)/)
+  assert.match(fkSql,/NEW.status='archived' AND NEW.owner_user_id IS NULL/)
+  assert.match(fkSql,/NEW.owner_user_id IS NULL OR NOT EXISTS/)
+  assert.match(fkSql,/owner_user_id\) REFERENCES auth\.users\(id\) ON DELETE SET NULL/)
+})
+test('community authored posts cannot disappear through Auth/pet cascading FK', () => {
+  assert.match(fkSql,/community_posts_author_user_id_fkey[\s\S]*?REFERENCES auth\.users\(id\) ON DELETE RESTRICT/)
+  assert.match(fkSql,/community_posts_author_pet_id_fkey[\s\S]*?REFERENCES public\.pets\(id\) ON DELETE RESTRICT/)
+  assert.match(fkSql,/INCOMPLETE: legacy\/community views/)
+})
