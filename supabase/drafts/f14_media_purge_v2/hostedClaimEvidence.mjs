@@ -15,14 +15,16 @@ const fail = reason => Object.freeze({ status: 'manual_review', reason })
  * @param {object} evidence.report - moderation_private.reports row
  * @param {object} evidence.storageObject - storage.objects row + independently
  *                  computed `metadata_fingerprint` from PostgreSQL SQL
+ * @param {object} evidence.currentSourceSnapshot - fresh trusted output of
+ *                  moderation_private.f14_media_probe(kind,id) in SAME transaction
  * @param {object} evidence.references - trusted, freshly counted source URLs
  *                  and (for community_post) photo_storage_path references
  * @param {string} evidence.databaseNow - trusted server UTC clock, ISO string
  */
 export function inspectHostedClaimEvidence({
-  reservation, restriction, report, storageObject, references, databaseNow,
+  reservation, restriction, report, storageObject, currentSourceSnapshot, references, databaseNow,
 } = {}) {
-  if (![reservation, restriction, report, storageObject, references]
+  if (![reservation, restriction, report, storageObject, currentSourceSnapshot, references]
     .every(validRow)) return fail('missing_database_evidence')
   const snap = reservation.snapshot
   if (!validRow(snap)) return fail('missing_claim_snapshot')
@@ -62,6 +64,18 @@ export function inspectHostedClaimEvidence({
   const url = `https://mrybvqdebbgcayuvgkkr.supabase.co/storage/v1/object/public/${bucket}/${path}`
   if (snap.source_url !== url)
     return fail('canonical_source_url_mismatch')
+  // A lease alone does not prove the original post/community still has this
+  // media reference, owner, pet, community or version. Demand a live source
+  // re-probe from the same trusted SQL snapshot immediately before selection.
+  const keys = [
+    'kind', 'target_id', 'report_id', 'bucket', 'path', 'source_url',
+    'owner_id', 'pet_id', 'community_id', 'storage_object_id',
+    'object_version', 'object_updated_at', 'metadata_fingerprint',
+  ]
+  if (keys.some(k =>
+    !Object.hasOwn(snap,k) || !Object.hasOwn(currentSourceSnapshot,k) ||
+    snap[k] !== currentSourceSnapshot[k]))
+    return fail('current_source_snapshot_drift')
   // This is an independently recomputed count, NOT a boolean supplied by
   // f14_prepare_media_claim or a previous point-in-time snapshot.
   if (references.url_reference_count !== 1 ||
