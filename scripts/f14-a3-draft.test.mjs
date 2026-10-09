@@ -67,3 +67,33 @@ test('leases serialize claims and reject stale workers', () => {
     assert.ok(leaseSql.includes('GRANT EXECUTE ON FUNCTION public.f14_a3_worker_'+f+' TO service_role'))
   }
 })
+
+
+const fenceSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_write_fence_NOT_APPLIED.sql', import.meta.url),'utf8')
+test('write-fence migration aborts inside transaction BEFORE all SQL changes', () => {
+  const abort=fenceSql.indexOf("RAISE EXCEPTION 'F14 A3 WRITE FENCE DRAFT ONLY")
+  const ddl=fenceSql.indexOf('CREATE OR REPLACE FUNCTION')
+  assert.ok(fenceSql.indexOf('BEGIN;')<abort && abort<ddl)
+  assert.match(fenceSql,/DO \$a3_fence_not_applied\$/)
+  assert.doesNotMatch(fenceSql,/\b(?:DELETE\s+FROM|TRUNCATE\s+|DROP\s+TABLE)\b/i)
+})
+test('write-fence covers all mapped row tables on insert/update/delete', () => {
+  const list=['pets','posts','communities','community_posts','post_comments',
+    'community_post_comments','community_memberships','follows',
+    'care_items','care_completions','pet_documents']
+  for (const table of list) {
+    assert.ok(fenceSql.includes("WHEN '"+table+"' THEN"),'owner resolver for '+table)
+    assert.ok(fenceSql.includes('BEFORE INSERT OR UPDATE OR DELETE ON public.'+table),'trigger for '+table)
+  }
+  assert.match(fenceSql,/IF TG_OP <> 'INSERT' THEN/)
+  assert.match(fenceSql,/IF TG_OP <> 'DELETE' THEN/)
+  assert.match(fenceSql,/ARRAY_CAT\(v_owners,account_private\.f14_a3_row_owners/)
+  assert.match(fenceSql,/SELECT DISTINCT x FROM UNNEST\(v_owners\).*ORDER BY x/)
+  assert.match(fenceSql,/pg_advisory_xact_lock/)
+  assert.match(fenceSql,/status NOT IN \('requested','cancelled'\)/)
+})
+test('write-fence never claims to cover Storage, JWT, Auth or all tables', () => {
+  assert.match(fenceSql,/NOT COVERED: Storage API/)
+  assert.match(fenceSql,/direct Auth/)
+  assert.doesNotMatch(fenceSql,/\bauth\.admin\.deleteUser/)
+})

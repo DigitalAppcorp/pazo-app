@@ -63,3 +63,21 @@ Archivo `supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql`:
 - aún NO existe una operación de backend que ponga jobs en `reviewing` ni freeze real de writers. **Ninguna lease autoriza eliminación**: debe sumarse comprobación de sesión y evidencia de los otros gates, además de un worker real protegido por un gate independiente.
 
 **Riesgos sin resolver:** lock SQL no cubre toda la duración de llamadas HTTP a Storage; los permisos privilegiados pueden omitir RLS; tokens de acceso pueden sobrevivir el borrado Auth. El worker real deberá utilizar versionado de objetos, reglas de suspensión de escrituras, bitácora de pasos, reautenticación verificada y reintentos idempotentes, y no sustituir esto por un lease temporal.
+
+
+## A3.4b — borrador de write fence
+
+## Diseño contenido en el borrador
+- Archivo `supabase/drafts/20261009_f14_a3_write_fence_NOT_APPLIED.sql`: aborto transaccional explícito ANTES de crear objetos.
+- Función `account_private.f14_a3_row_owners(table,row)` consulta propietarios reales de filas y relaciones asociadas dentro de permisos privados; no acepta IDs autoritativos del cliente.
+- Trigger `account_private.f14_a3_guard_social_write` para INSERT/UPDATE/DELETE, comparando propietario antiguo/nuevo y relaciones de terceros. Enlaza a `deletion_jobs` y rechaza estado diferente de `requested` o `cancelled`. Por tanto, una simple solicitud no bloquea el Feed hasta que se revise.
+- Locks `pg_advisory_xact_lock(hashtextextended(uuid,901426))` adquiridos en UUID ordenado. Se exige que el futuro RPC del worker **tome el mismo lock antes de activar la fase congelada**; sin esa transición atómica, el gatillo por sí solo no evita carreras.
+- Los triggers **también bloquearían SQL privilegiado** que intente modificar filas congeladas hasta que exista una ruta de worker autorizada y demostrada. No colocar un bypass basado en valores arbitrarios de sesión o metadata de usuario.
+
+## Vacíos reales que impiden activar
+1. Todos los writes de `interactions`, likes/saves, publicaciones de avistamientos, `pet_place_checkins`, presencia, QR/rescue, `notifications` y sus RPC/Edge, **Storage API** y acciones privilegiadas. Este draft protege 11 tablas importantes, **no todas las rutas**.
+2. Worker aún no puede hacer transición atómica segura con el lock; la función de lease anterior solo reserva y no modifica `deletion_jobs.status`. Reautenticación reciente y bloqueo integral de JWT no implementados.
+3. FK de comunidades, posts y comentarios con CASCADE siguen peligrosos; no modificar hasta diseñar archive/tombstone consistente para todas las referencias. Retención privada 90/180 días es objetivo, no política técnica instalada.
+4. No se ejecutaron triggers ni tests SQL en Supabase (solo revisión de catálogo, pruebas de invariantes de borrador y CI). No se han ejecutado operaciones reales sobre usuarios o Storage.
+
+**Siguiente:** completar matriz de cobertura de escrituras, analizar FK/RLS y pruebas aisladas antes de solicitar cualquier permiso de aplicación. La fase A3 y Gate 8 permanecen ABIERTOS. No habilitar `VITE_F14_A3_REQUESTS_ENABLED`.
