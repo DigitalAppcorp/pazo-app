@@ -1068,3 +1068,10 @@ UI moderadora A2 corregida: retiró el botón que invocaba la purga HTTP 503 y s
 GitHub PR #35 DRAFT creado, no merge. Workflow CI `37892668372` sobre `da619f9`: SUCCESS (governance + build + lint legacy no bloqueante). Vercel todavía limita nuevas compilaciones.
 
 Supabase `20261009061213_f14_reject_unverified_purged_status` aplicada: bloquea confirmación `purged` no sustentada; pruebas SQL reversibles antes/después PASS. Nueva UI de medios en revisión manual, retirando botón de eliminación no operativo. A2 sigue abierto hasta aprobación visual de nuevo panel y decisión sobre limitación de eliminación física/CDN. No A3/A4 ni merge.
+
+
+### F14 A2 — validación visual de revisión de medios aceptada (2026-10-09)
+
+El PO compartió captura real de `Revisión de archivos` en Vercel Preview `a650dd8`, validación visual PASS: mensajes correctos, cola vacía, botón de actualizar y ausencia de acción destructiva. No implica prueba de refresco ni de una cola con registros. No repetir esta pantalla ni Auth/Storage sintético ya validados.
+
+Reconciliación Gate 8 documentada en `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. D3-A continúa requiriendo borrado verificable en origen/Storage cuando procede: esta UI de revisión manual no cierra A2 sin resolver las garantías de concurrencia, identidad objeto/version y CDN, o sin modificación explícita del alcance por PO. PR #35 sigue DRAFT, no merge, A3/A4 no autorizados.
