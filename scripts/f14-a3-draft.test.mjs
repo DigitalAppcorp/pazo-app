@@ -100,7 +100,8 @@ test('write-fence never claims to cover Storage, JWT, Auth or all tables', () =>
 })
 
 
-const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql', import.meta.url), 'utf8')
+const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_worker_checkpoint_NOT_APPLIED.sql', import.meta.url), 'utf8')
 test('community FK draft aborts transaction before altering any table', () => {
   assert.ok(fkSql.indexOf('BEGIN;') < fkSql.indexOf("RAISE EXCEPTION 'F14 A3 COMMUNITY FK DRAFT ONLY"))
   assert.ok(fkSql.indexOf("RAISE EXCEPTION 'F14 A3 COMMUNITY FK DRAFT ONLY") < fkSql.indexOf('ALTER TABLE'))
@@ -158,4 +159,21 @@ test('A3 interaction, community-like and check-in guards verify both owner and t
   assert.match(fenceSql,/WHEN 'community_post_likes' THEN[\s\S]*?p\.author_user_id,c\.owner_user_id/)
   assert.match(fenceSql,/WHEN 'pet_place_checkins' THEN[\s\S]*?v_owner := \(p_row->>'user_id'\)::uuid/)
   assert.match(fenceSql,/Unknown check-in owner during A3 freeze/)
+})
+
+
+const reviewSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_worker_checkpoint_NOT_APPLIED.sql',import.meta.url),'utf8')
+test('review SQL draft fail-closed, with no content deletion or credentials',()=>{
+ assert.ok(reviewSql.indexOf('BEGIN;') < reviewSql.indexOf("RAISE EXCEPTION 'A3 CHECKPOINT DRAFT ONLY"))
+ assert.ok(reviewSql.indexOf("RAISE EXCEPTION 'A3 CHECKPOINT DRAFT ONLY") < reviewSql.indexOf('CREATE TABLE'))
+ assert.doesNotMatch(reviewSql,/\bDELETE\s+FROM\b|\bTRUNCATE\s+|\bDROP\s+TABLE\b|\bauth\.admin\.deleteUser\b/i)
+ assert.match(reviewSql,/ALTER TABLE account_private\.deletion_review_events ENABLE ROW LEVEL SECURITY/)
+})
+test('checkpoint uses service-only CAS, validated lease and revision',()=>{
+ assert.match(reviewSql,/WHERE job_id=p_job_id AND revision=p_expected_revision/)
+ assert.match(reviewSql,/lease_token=p_token AND lease_version=p_version/)
+ assert.match(reviewSql,/expires_at>pg_catalog\.clock_timestamp\(\) FOR UPDATE/)
+ assert.match(reviewSql,/status='reviewing' FOR UPDATE/)
+ assert.match(reviewSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_worker_review_checkpoint\(uuid,uuid,bigint,bigint,text,text,text\) TO service_role/)
+ assert.match(reviewSql,/REVOKE ALL ON FUNCTION public\.f14_a3_worker_review_checkpoint\(uuid,uuid,bigint,bigint,text,text,text\) FROM PUBLIC,anon,authenticated/)
 })
