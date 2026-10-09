@@ -107,3 +107,14 @@ Los borradores originales se retiraron tras canonizarlos. El control está docum
 **Puntos de detención:** no realizar Storage DELETE de contenido ajeno, ni activar Edge, ni marcar `purged`, ni autorizar una nueva migración sensible fuera del alcance recién aprobado, ni publicar oficialmente Vercel, ni fusionar main, ni pasar a F14 A3/A4. Mantener la revisión manual como salida fail-closed si la API no ofrece exclusión demostrable. La siguiente aceptación visual del PO se pedirá solo si una prueba funcional visible nueva la necesita.
 
 **Estado git:** consultar el HEAD remoto real de `f14/block02-moderation-mvp-20261008` tras estos commits de documentación; rama local del Product Owner no observada. `main` y PR #34 (Lugares) no fueron alterados.
+
+
+## 8. Checkpoint CI + moderación segura
+
+PR #35 DRAFT en GitHub (sin merge). GitHub Actions CI sobre SHA `da619f905fc77f934158e8eb4f9656c93110ea5b`: SUCCESS, verificaciones governance, build y lint no bloqueante; run `37892668372`. Vercel sigue bloqueado por límite de builds; no hay evidencia de Preview nuevo.
+
+Supabase migración `20261009061213_f14_reject_unverified_purged_status` aplicada y en Git: trigger que impide `media_status='purged'` no certificado. Las pruebas SQL reversibles previas y posteriores pasaron. 20 objetos Storage conservados, 0 claims y 0 restricciones. Edge de purga sigue HTTP 503.
+
+Se retiró el botón inoperante de eliminación del panel `ModerationMediaQueue`; ahora solo muestra revisión administrativa pendiente y permite recargar. Se retiró la invocación desde `reportingService`. La nueva vista transpila JSX y compiló en el workflow de GitHub; falta aceptación visual del PO cuando Vercel publique un Preview actualizado. No repetir pruebas Auth ni Storage sintético, previamente aprobadas.
+
+Siguiente gate: evaluar si el MVP usa revisión manual con contenido despublicado o requiere eliminar físicamente medios. La exclusión entre Storage y escritores privilegiados, la comprobación exacta de versión y la caché CDN aún no están demostradas. F14 A2 abierto. `main` y A3/A4 pendientes.
