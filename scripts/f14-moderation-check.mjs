@@ -152,6 +152,11 @@ assert.ok(updateSql.includes('AS RESTRICTIVE FOR UPDATE') &&
 assert.ok(updateSql.includes("AND c.status='held'") &&
   !updateSql.includes('c.expires_at>statement_timestamp()'),
   'Candidate must block held media even after claim TTL expires')
+assert.ok(updateSql.includes('CREATE OR REPLACE FUNCTION public.f14_recheck_media_claim') &&
+  updateSql.includes('RETURN false;'),
+  'Service-role recheck candidate must fail closed on expired/drifted claims')
+assert.ok(!updateSql.includes("SET status='invalidated'"),
+  'Candidate recheck must not automatically release media holds')
 assert.ok(!updateSql.includes('DELETE FROM storage.objects'), 'Guard draft must never delete Storage metadata')
 for (const f of [updateSmoke, updateBehavior, updateCandidate]) {
   const testSql = read(f)
@@ -168,7 +173,9 @@ assert.ok(behaviorSql.includes('f14_test_update_permission') &&
 const candidateSql = read(updateCandidate)
 assert.ok(candidateSql.includes('Candidate: held claim must still protect after TTL expiry') &&
   candidateSql.includes('Invalidated claim must release path') &&
-  candidateSql.includes('CREATE OR REPLACE FUNCTION public.f14_storage_media_path_unclaimed'),
+  candidateSql.includes('CREATE OR REPLACE FUNCTION public.f14_storage_media_path_unclaimed') &&
+  candidateSql.includes('Expiry recheck must NOT automatically invalidate the hold') &&
+  candidateSql.includes('Source drift recheck must NOT automatically invalidate hold'),
   'Candidate rollback test must prove fail-closed expiry and explicit release')
 const casContract = read(casGate)
 assert.ok(casContract.includes('service_role') &&
