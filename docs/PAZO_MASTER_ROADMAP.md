@@ -1094,3 +1094,8 @@ El usuario autorizó continuar autónomamente el trabajo técnico para completar
 `supabase/tests/database/f14_five_report_kinds_hosted_rollback.test.sql` probado en Supabase alojado: denuncias de los cinco tipos bajo `authenticated` sin grant de moderador, límite de cinco por 24h, duplicado rechazado, acceso a cola/decisión de moderación denegado para normal, cinco `dismiss` por moderador y auditoría total. PASS con `BEGIN/ROLLBACK`, sin datos remanentes. No equivale a aceptación visual de los cinco formularios. `scripts/f14-moderation-check.mjs` exige la prueba versionada.
 
 Preview `ac167b4` READY con `F14VersionProbe`: la cuota de Vercel dejó de ser el impedimento absoluto del test; **ahora se espera la ejecución y captura PO** de versión exacta sobre archivo sintético. F14 A2/D3-A siguen abiertos por resultado HTTP no recibido, exclusión service_role/Storage y CDN. No habilitar `purged`, Edge destructiva, main ni A3/A4.
+
+
+### F14 A2 — validación HTTP real de selección de versión exacta (PO PASS)
+
+PO probó nuevo `F14VersionProbe` en Vercel Preview `ac167b4`: subida sintética, lectura ID+versión, rechazo efectivo de versión equivocada, eliminación de versión actual exacta y ausencia de origen: **PASS 4/4 en captura**. SQL posterior: 20 objetos sin residuos del fixture. No solicitar repetir test. Observación CDN HTTP 400 con `cacheNonce` es **inconclusa** y no equivale a invalidación/retención certificada. Quitar `prueba HTTP de versionId no ejecutada` de los bloqueadores restantes; quedan concurrencia y coordinación de escritores privilegiados, autorización de lectura privada, limpieza segura/reintentos, CDN/browser/backups y validación global D3-A. F14 A2/ Gate 8 abiertos, PR #35 DRAFT y Edge destructiva 503.
