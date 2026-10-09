@@ -304,3 +304,17 @@ Cambios: RLS retiene bloqueo sobre ruta `held` aunque venza el TTL; política `R
 **Riesgo COPY identificado mediante prueba de permisos SQL con ROLLBACK:** `f14_storage_copy_prerequisites_rollback.test.sql` PASS demuestra que el SELECT de origen held público y un INSERT de destino libre autorizado coexisten; esto **NO confirma COPY HTTP**, pero impide afirmar que todas las copias de medios retenidos son imposibles. MOVE requiere UPDATE; los usuarios normales carecen actualmente de UPDATE permisivo. `service_role` sigue eludiendo RLS, sin CAS cross-service. CDNs/retención D3-B pendientes.
 
 **Próximo gate técnico A2:** auditoría/prueba API de operación de copia/movimiento/sobrescritura con archivos sintéticos, coordinación de escritores privilegiados, recuperación segura de claims, confirmación de objeto+versión y CDN. No fotos reales, no Edge activa, no gastos, no Vercel Production, no main ni F14 A3/A4. Los últimos checks CI Vercel están sujetos a build-rate-limit; `npm run verify` final no confirmado.
+
+
+### 34. A2 — COPY interno bloqueado para ruta held; confirmación vieja deshabilitada (2026-10-09 UTC)
+
+PO autorizó los cambios técnicos necesarios dentro de F14 A2. Tras inspeccionar las operaciones de Storage documentadas por Supabase (`object.copy`, `s3.object.copy`, `s3.upload.part_copy`) se versionaron y aplicaron dos migraciones defensivas:
+
+1. **`20261009055801_f14_held_media_copy_source_operation_guard`**: nueva política `RESTRICTIVE FOR SELECT TO authenticated` en `storage.objects`, activada exclusivamente durante operaciones COPY conocidas. Excluye del origen objetos en `claim.status='held'`; no altera la lectura ordinaria/Feed ni los permisos de rutas no reservadas. Suite `f14_held_copy_source_select_rollback.test.sql` PASS en transacción; `f14_held_copy_source_installed_rollback.test.sql` PASS contra política instalada. Comprobaron SELECT cerrado ante `object.copy`, `s3.object.copy` y `s3.upload.part_copy`, preservación de `object.list`, `object.get_public`, `object.get_authenticated`, `object.sign`, permisos de `anon` y orígenes no reservados. **No es prueba HTTP auténtica ni prohíbe copiar una URL pública fuera de Supabase.**
+2. **`20261009055955_f14_disable_unverified_media_purge_confirmation`**: función obsoleta `public.f14_confirm_media_cleanup` ahora solo genera `42501`, con `REVOKE EXECUTE` para `PUBLIC`, `anon`, `authenticated` y `service_role`. Así se impide marcar `media_status='purged'` sin verificación de objeto. Prueba rollback y `f14_legacy_media_confirmation_installed_rollback.test.sql` PASS después del apply.
+
+Los dos archivos canónicos existen en `supabase/migrations/` con sus versiones remotas exactas; borradores de `supabase/drafts/` retirados. `scripts/f14-moderation-check.mjs` exige su presencia, operaciones restringidas y que la función antigua no actualice `purged`.
+
+**Estado alojado:** 20 Storage objects, 0 claims, 0 reportes, 0 restricciones; políticas originales INSERT/DELETE, UPDATE y COPY presentes. Edge `f14-moderation-purge` sigue v1 stub HTTP 503, sin bytes eliminados. No hay nueva rutina de purga habilitada.
+
+**Bloqueadores restantes A2:** `service_role` omite RLS, falta exclusión serializable entre servicios/operaciones HTTP y borrado condicional de versión activa, recuperación auditada de `held`, comprobación de origen/versión/CDN con fixture aislado y D3-B. Si no existe prueba de exclusión, mantener salida manual y NO declarar `purged`. No merge/main, A3/A4 ni despliegue oficial. CI Vercel sigue limitado por cuota y `npm run verify` final no observado.
