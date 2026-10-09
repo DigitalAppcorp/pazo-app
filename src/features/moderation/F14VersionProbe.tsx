@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { supabase } from '../../services/supabaseClient'
 
 type Props = { lang: 'es' | 'en' }
@@ -19,13 +19,16 @@ const imageBlob = () => {
  */
 export function F14VersionProbe({ lang }: Props) {
   const es = lang === 'es'
+  // Synchronous guard against double taps before React applies a busy render.
+  const runningRef = useRef(false)
   const [busy, setBusy] = useState(false)
   const [steps, setSteps] = useState<Step[]>([])
   const [error, setError] = useState('')
   const [cdnObservation, setCdnObservation] = useState('')
   const [done, setDone] = useState(false)
   async function run() {
-    if (busy || done) return
+    if (runningRef.current || done) return
+    runningRef.current = true
     setBusy(true)
     setError('')
     setSteps([])
@@ -152,14 +155,15 @@ export function F14VersionProbe({ lang }: Props) {
         ? 'La prueba de versiones NO pasó o quedó incompleta. Reintenta solo con esta cuenta: no se eliminará nada si la identidad y la versión no pueden verificarse.'
         : 'Version test did NOT pass or was interrupted. Retry only with this account: no file will be removed without exact identity and version proof.')
     } finally {
+      runningRef.current = false
       setBusy(false)
     }
   }
   return <section aria-label="F14 exact-version Storage QA" className="mb-5 rounded-2xl border border-[#204E4A]/20 bg-white p-4 text-[#204E4A]">
     <h3 className="text-sm font-extrabold">{es ? 'Prueba de versión exacta F14' : 'F14 exact-version check'}</h3>
     <p className="mt-1 text-xs leading-relaxed">{es
-      ? 'Prueba nueva y aislada: crea una imagen artificial de 1 píxel, comprueba que una versión incorrecta no elimine la actual y después elimina la versión correcta. No modifica publicaciones ni fotos personales. No valida concurrencia ni CDN.'
-      : 'Separate synthetic 1px test: checks that a wrong version cannot delete the current file, then removes the exact version. No personal content, concurrency or CDN testing.'}</p>
+      ? 'Prueba nueva y aislada: crea una imagen artificial de 1 píxel, comprueba que una versión incorrecta no elimine la actual y después elimina la versión correcta. No modifica publicaciones ni fotos personales. Solo observa CDN desde tu dispositivo; no certifica propagación ni concurrencia.'
+      : 'Separate synthetic 1px test: checks that a wrong version cannot delete the current file, then removes the exact version. No personal content. CDN is observed on this device only; global cache invalidation and concurrency remain unverified.'}</p>
     <button type="button" disabled={busy || done} onClick={() => void run()}
       className="mt-3 min-h-11 rounded-xl bg-[#204E4A] px-4 text-xs font-bold text-white disabled:opacity-60">
       {busy ? (es ? 'Verificando…' : 'Checking…') : done ? (es ? 'Prueba completada' : 'Test complete')
