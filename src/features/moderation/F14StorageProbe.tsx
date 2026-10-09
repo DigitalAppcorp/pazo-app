@@ -53,10 +53,11 @@ export function F14StorageProbe({ lang }: Props) {
         })
         if (upload.error) throw new Error('upload')
         add(es ? 'Imagen sintética creada' : 'Synthetic image uploaded')
-        const info = await storage.info(path)
-        if (info.error || !info.data || !Number.isFinite(info.data.size) || info.data.size <= 0)
-          throw new Error('info')
-        add(es ? 'Archivo comprobado mediante Storage API' : 'File verified by Storage API')
+        const listing = await storage.list(uid, { limit: 20, search: path.slice(uid.length + 1) })
+        if (listing.error || !Array.isArray(listing.data) ||
+          !listing.data.some(item => item.name === path.slice(uid.length + 1)))
+          throw new Error('list_before')
+        add(es ? 'Archivo localizado mediante Storage API' : 'File located through Storage API')
       } else {
         add(es ? 'Reanudando limpieza del archivo sintético anterior' : 'Resuming previous synthetic fixture cleanup')
       }
@@ -64,10 +65,11 @@ export function F14StorageProbe({ lang }: Props) {
       if (!isTrialPath(path, uid)) throw new Error('invalid_path')
       const removed = await storage.remove([path])
       if (removed.error) throw new Error('remove')
-      // Rely on absence observed by the Storage origin API, not success text alone.
-      const checked = await storage.info(path)
-      const notFound = !!checked.error && String(checked.error.statusCode) === '404'
-      if (!notFound) throw new Error('not_verified_absent')
+      // List the exact owning folder; an API error never counts as deletion.
+      const checked = await storage.list(uid, { limit: 20, search: path.slice(uid.length + 1) })
+      if (checked.error || !Array.isArray(checked.data) ||
+        checked.data.some(item => item.name === path.slice(uid.length + 1)))
+        throw new Error('not_verified_absent')
       add(es ? 'Ausencia del archivo confirmada en Storage' : 'Storage object absence confirmed')
       window.sessionStorage.removeItem(savedKey)
       setCompleted(true)
