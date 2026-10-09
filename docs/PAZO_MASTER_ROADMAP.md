@@ -995,3 +995,10 @@ PO pidió terminar desarrollo. Se reparó un SQL inválido de `f14_a3_worker_sna
 - SQL DRAFT `f14_a3_write_fence` extendido de **11 a 14 tablas** añadiendo `interactions`, `community_post_likes`, `pet_place_checkins`. Pruebas TEMP verificaron 3 rechazos y 1 acción no relacionada permitida. Código CI `38002952300` PASS.
 - Verificación post-QA: Supabase alojado mantiene 6 cuentas, 6 mascotas, 1 comunidad, 20 objetos; jobs/leases/RPC A3 ausentes. **No hay migraciones A3 aplicadas, ni borrado Storage/Auth ni cambios a contenido real.**
 - **Pendiente crítico**: DDL completo en sandbox aislado, concurrencia entre 2 conexiones, rutas residuales de escritura, worker operativo/reautenticación/Storage/CDN/retención/Auth final. No activar A3 ni fusionar PR. Estas pruebas no certifican seguridad JWT/RLS de nuevos objetos.
+
+## 2026-10-09 — F14 A3 review worker + durable CAS journal DRAFT
+
+- Nuevo motor `supabase/functions/f14-a3-account-deletion/worker.ts` + adaptador RPC `adapter.ts`, sin Edge entrypoint/deploy: revisión con evidencias server-only, lease revalidada antes/después de gates, check de estado reviewing, reintentos seguros, sanear errores y nunca autorización irreversible. Cuando faltan verificadores, retorna blocked.
+- Nueva sexta migración bloqueada `supabase/drafts/20261009_f14_a3_worker_checkpoint_NOT_APPLIED.sql`: RPC service_role y journal privado CAS/versiones y eventos mínimos; no content DELETE.
+- SQL real **TEMP + ROLLBACK**: 2 eventos de journal en revisión 2, rechazo de tokens viejos y revision 0 repetida; sin objetos permanentes. CI motor #38003551960, checkpoint #38003843415 y adaptador #38003932473 SUCCESS. Un primer CI falló por ruta de test inválida y fue corregido antes del checkpoint final.
+- Evidencia/alcance: `docs/PAZO_F14_A3_WORKER_REVIEW_20261009.md`. **Worker destructivo NO construido**, aun sin sesión reciente JWT real, all-writes freeze, paths exactos Storage/CDN, Auth final ni E2E. A3 permanece abierta y UI OFF. PO no autorizó migraciones ni despliegue.

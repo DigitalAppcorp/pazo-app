@@ -327,3 +327,7 @@ Se propusieron guardias DB de escritura por propietario/contraparte en 11 tablas
 `src/features/account/mediaManifest.ts` (PR #38) propone comprobar bucket, ruta exacta, versión/id del objeto, titular validado por servidor, total de referencias propias/ajenas, freeze de escritura y lease válido. Cinco buckets existentes: `pet-avatars`, `post-photos`, `community-avatars`, `community-post-photos`, `pet-documents`. No captura ni envía esa información a proveedores nuevos; el validador no registra rutas ni borra Storage. Es una propuesta para operar desde servidor bajo autorización.
 
 El borrado físico aún **NO está implementado**. Supabase Storage API es requerida para eliminar bytes; nunca `DELETE FROM storage.objects`. La purga manual de CDN está documentada por Supabase como Pro+, **no se ha contratado ni aprobado**; no prometer revocación instantánea de URL pública sin medición. Ver `docs/PAZO_F14_A3_MEDIA_ORIGIN_GATE_20261009.md` y gate A3.
+
+## 20. Journal de revisión de eliminación (propuesta DRAFT, sin instalar)
+
+El sexto archivo SQL propuesto de F14 A3 agrega en `account_private` checkpoints de trabajo (ID de job, revisión, etapa, estado técnico, código de incidencia, fecha) y eventos de revisión, **sin emails, fotos, URLs, rutas de archivos ni UGC**. Datos operativos privados. Solo adaptador de servicio autorizado, con chequeo actual de lease y versión; anon y authenticated sin grants. No existe aún en el Supabase alojado, no hay proveedor nuevo ni ejecución real.
