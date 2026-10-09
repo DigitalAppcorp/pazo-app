@@ -148,3 +148,14 @@ El último código `F14VersionProbe` se compiló y las pruebas automatizadas de 
 **Next gate:** cuando se restablezca la cuota, crear **un único** Preview desde el último SHA con CI verde y comprobar READY; pedir al PO que pulse `Prueba de versión exacta F14` una vez y comparta captura. Si falla, sólo reintentar desde la misma cuenta para limpiar su fixture; no marcar PASS. La ejecución anterior del botón `Prueba aislada de Storage F14` ya pasó y no debe repetirse.
 
 Estado seguro: sin migraciones en esta iteración, Storage 20/claims 0/reportes 0/restricciones 0, Edge purga 503, trigger de estado `purged` activo, PR #35 DRAFT. A2 continúa ABIERTO. No automatizar borrado de medios ajenos basado solo en este nuevo test.
+
+
+### F14 A2 — Corrección de recuperación exacta, sin Preview nuevo
+
+En continuidad técnica se auditó el último código de `F14VersionProbe` y se eliminó una regresión potencial: la recuperación después de interrupción usaba `storage.remove([path])`, operación no vinculada a la versión previamente observada. **Ahora nunca hay borrado por ruta sola**: `sessionStorage` guarda `path + objectId + versionId` después de comprobarlos; una recuperación compara los tres con `storage.info` y solo solicita `remove([{path,versionId}])` si coinciden. Si se interrumpe entre upload y lectura de identidad, la recuperación falla cerrada y puede dejar únicamente la imagen sintética pendiente; no se elimina nada sin evidencia suficiente. El mensaje de UI ya no promete recuperación automática en ese caso.
+
+Se corrigió error TypeScript TS2339 causado por un `as typeof previous` que infería `null`: ahora se analiza JSON como `unknown` y se valida antes de usarlo. GitHub Actions de la revisión intermedia `37896620408` falló **por compilación**; se corrigió el problema. Run siguiente `37896731396`: **SUCCESS**. También se vinculó en `exactVersionPreflight.mjs` cada `claim.kind` al bucket respectivo para evitar mezclar Feed y Comunidad, con dos casos regresivos nuevos; CI `37896853637`: **SUCCESS**.
+
+**Entorno:** `pazo-app-t83r` último Preview verificado para la rama sigue con SHA `df833ab`, anterior a la incorporación de `F14VersionProbe`. La petición de Preview del nuevo código sigue bloqueada por límite gratuito `api-deployments-free-per-day`; NO marcar QA por versión real ni decir al PO que ya está la prueba en ese Preview. Existe automatización previa de reintento controlado de Preview al restablecer la cuota: no duplicar ni evadir el límite. Supabase sin migraciones ni operaciones de Storage en esta continuación; recuento consultado: 20 objetos, 0 claims/reportes/restricciones.
+
+**Próximo gate sin repetir aprobaciones:** tras recuperar cuota, verificar CI del SHA actual y desplegar UN Preview de rama, verificar SHA/READY y entonces pedir prueba sintética específica de versión exacta al PO. Luego analizar exclusión concurrente y CDN; no activar Edge real ni declarar `purged`, no merge a main/A3/A4.
