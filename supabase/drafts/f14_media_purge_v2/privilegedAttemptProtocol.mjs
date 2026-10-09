@@ -28,7 +28,10 @@ const deny = reason => safe({ phase: 'manual_review', reason })
  * A UI, client-provided boolean, or this return value NEVER establishes a
  * real durable writer fence. It must not be used to invoke Storage HTTP.
  */
-export function beginSimulatedAttempt({ claimId, objectId, fenceToken, generation, selector } = {}) {
+export function beginSimulatedAttempt(input = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input))
+    return deny(reasons.INVALID)
+  const { claimId, objectId, fenceToken, generation, selector } = input
   if (!UUID.test(claimId || '') || !UUID.test(objectId || '') ||
       !UUID.test(fenceToken || '') || !Number.isSafeInteger(generation) ||
       generation < 1 || !selector ||
