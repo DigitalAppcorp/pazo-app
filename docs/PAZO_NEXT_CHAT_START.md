@@ -8,3 +8,6 @@ Backend F14: Edge `f14-moderation-purge` HTTP 503 sin delete; trigger impide `pu
 
 
 **Bloqueo más reciente:** intento de generar Preview para `2e8a32c` fue rechazado HTTP 402 por límite `api-deployments-free-per-day` de Vercel Free (más de 100 despliegues/24 h). No existe Preview listo de esa versión; no pedir al PO probar pantalla todavía. Esperar recuperación de cuota, crear solo un despliegue Preview y verificar SHA/READY. CI GitHub de `2e8a32c` SUCCESS en run `37895742885`; `F14VersionProbe` quedó disponible solo en código. Supabase: cinco buckets con `versioning_status=DISABLED`, 20 objetos/0 claims. Sin cambios al backend.
+
+
+**Checkpoint adicional 2026-10-09:** Supabase agregado: 4 buckets públicos y 1 privado; 20 objetos cacheados con `max-age=3600` en metadata; Smart CDN y purga manual Pro+ NO autorizados, navegador puede retener copia. `F14VersionProbe` ahora observa CDN solo sobre su píxel sintético tras confirmar ausencia en origen, no certifica invalidación global; consultas CDN expiran en 5 s y está protegido contra doble clic. Código en rama F14, no Preview reciente por cuota Vercel. Gate de prueba sigue pendiente; no ejecutar ni confundir con la vieja prueba de 1 píxel ya aprobada. No duplicar automatización existente de reintento ni llamar a create_deployment reiteradamente.
