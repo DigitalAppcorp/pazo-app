@@ -67,6 +67,18 @@ BEGIN
    -- Existing five-per-24-hours protection is SQLSTATE 22023.
    NULL;
  END;
+ -- A non-moderator who can submit reports must still be denied the queue.
+ BEGIN
+   PERFORM public.f14_moderation_queue(20,0);
+   RAISE EXCEPTION 'Normal user could read moderator queue';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; -- 42501
+ END;
+ BEGIN
+   PERFORM public.f14_review_report(
+     current_setting('f14.qa.report.feedpost')::uuid,'dismiss','unauthorized test');
+   RAISE EXCEPTION 'Normal user could moderate reports';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; -- 42501
+ END;
 END $reports$;
 RESET ROLE;
 SELECT set_config('request.jwt.claim.sub',current_setting('f14.qa.moderator'),true);
