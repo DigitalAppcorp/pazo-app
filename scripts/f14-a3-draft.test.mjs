@@ -25,3 +25,19 @@ test('Auth FK remains restrictive until the final verified phase', () => {
   assert.match(sql,/user_id uuid REFERENCES auth\.users\(id\) ON DELETE RESTRICT/)
   assert.match(sql,/CHECK \(user_id IS NOT NULL OR status = 'completed'\)/)
 })
+
+const archiveSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_preserve_contributions_NOT_APPLIED.sql', import.meta.url),'utf8')
+test('archive migration aborts before all DDL and cannot delete public content', () => {
+  assert.ok(archiveSql.indexOf('RAISE EXCEPTION \'A3 ARCHIVE DRAFT ONLY') < archiveSql.indexOf('CREATE TABLE'))
+  assert.doesNotMatch(archiveSql,/\\bDELETE\\s+FROM\\s+(?:public|storage|auth)\\./i)
+  assert.doesNotMatch(archiveSql,/\\bauth\\.admin\\.deleteUser/i)
+  assert.match(archiveSql,/ready_to_delete_auth',false/)
+  assert.match(archiveSql,/ready_to_delete_media',false/)
+})
+test('archive snapshots require service role, preserve third parties only', () => {
+  assert.match(archiveSql,/GRANT EXECUTE ON FUNCTION public\\.f14_a3_worker_snapshot_contributions\\(uuid\\)\\s+TO service_role/)
+  assert.match(archiveSql,/REVOKE ALL ON FUNCTION public\\.f14_a3_worker_snapshot_contributions\\(uuid\\)\\s+FROM PUBLIC,anon,authenticated/)
+  assert.match(archiveSql,/p\\.author_user_id<>v_uid/)
+  assert.match(archiveSql,/pet\\.owner_id<>v_uid/)
+  assert.match(archiveSql,/Manual Storage\\/media archival required before snapshot/)
+})

@@ -147,6 +147,24 @@ REVOKE ALL ON FUNCTION account_private.f14_a3_snapshot_contributions(uuid)
 GRANT EXECUTE ON FUNCTION account_private.f14_a3_snapshot_contributions(uuid)
   TO service_role;
 
+-- Public RPC wrapper for a server-only service-role client. The private schema
+-- stays OUT of the PostgREST exposed schema list; no browser receives the key.
+CREATE OR REPLACE FUNCTION public.f14_a3_worker_snapshot_contributions(p_job_id uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $
+BEGIN
+  -- Callable only with a signed service_role JWT, never with user metadata.
+  IF COALESCE(current_setting('request.jwt.claim.role', true), '') <> 'service_role' THEN
+    RAISE EXCEPTION 'Service authorization required' USING ERRCODE='42501';
+  END IF;
+  RETURN account_private.f14_a3_snapshot_contributions(p_job_id);
+END;
+$;
+REVOKE ALL ON FUNCTION public.f14_a3_worker_snapshot_contributions(uuid)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_worker_snapshot_contributions(uuid)
+  TO service_role;
+
 COMMIT;
 
 -- No deletion, transfer of community ownership, PUBLIC read,
