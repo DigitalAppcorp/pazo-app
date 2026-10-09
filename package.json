@@ -12,7 +12,7 @@
     "test:architecture": "node scripts/architecture-check.mjs",
     "test:privacy": "node scripts/privacy-check.mjs",
     "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops && npm run test:mvp",
-    "test:mvp": "node --experimental-strip-types --test src/features/feed/selectFeedPage.test.mjs src/features/feed/advanceFeedCursors.test.mjs src/features/auth/signupFlow.test.mjs src/features/auth/recoveryFlow.test.mjs",
+    "test:mvp": "node --experimental-strip-types --test src/features/feed/selectFeedPage.test.mjs src/features/feed/advanceFeedCursors.test.mjs src/features/auth/signupFlow.test.mjs src/features/auth/recoveryFlow.test.mjs src/features/account/deletionFlow.test.mjs",
     "backup:storage": "node scripts/backup-storage.mjs",
     "test:ops": "node --check scripts/backup-storage.mjs"
   },

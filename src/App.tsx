@@ -1858,6 +1858,7 @@ function PazoMain() {
                     <PetView
                       currentPet={currentPet}
                       canModerate={Boolean(user?.id) && !isDemoUser}
+                      accountUserId={isDemoUser ? null : user?.id || null}
                       availablePets={pets}
                       onSelectPet={selectActivePet}
                       onPetUpdated={(updatedPet) => {
