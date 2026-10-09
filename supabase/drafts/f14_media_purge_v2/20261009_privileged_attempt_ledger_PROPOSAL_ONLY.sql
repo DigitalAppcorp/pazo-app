@@ -47,9 +47,10 @@ CREATE TABLE moderation_private.media_purge_attempts (
   CHECK (dispatch_recorded_at IS NULL OR dispatch_recorded_at >= created_at),
   CHECK (
     (phase='prepared_unverified' AND dispatch_count=0 AND dispatch_recorded_at IS NULL)
+    OR (phase='manual_review' AND dispatch_count=0 AND dispatch_recorded_at IS NULL)
     OR (phase IN ('possibly_in_flight','unknown_after_dispatch','awaiting_origin_check',
                  'origin_absent_observed','manual_review')
-        AND dispatch_count IN (0,1))
+        AND dispatch_count=1 AND dispatch_recorded_at IS NOT NULL)
   ),
   CHECK (NOT origin_absent_observed OR phase IN ('origin_absent_observed','manual_review'))
 );
