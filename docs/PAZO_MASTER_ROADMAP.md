@@ -2,7 +2,7 @@
 
 **Documento canónico del proyecto.**  
 **Última actualización:** 2026-10-09
-**Estado general:** Fase 12 COMPLETADA / Gate 9 medición; Production Hardening EN CURSO. **Fase 14 A2 EN CURSO — Gate 8 ABIERTO**, PR #35 DRAFT, lector de evidencia aplicado y purga fail-closed. D3-A tiene decisión de producto aprobada pero implementación/DoD ABIERTOS. A3/A4 no iniciadas; main y Production sin merge/release F14.
+**Estado general:** Fase 12 COMPLETADA / Gate 9 medición; **prioridad MVP funcional y pruebas de adopción** por decisión PO 2026-10-09. **F14 A2 PAUSADA** con Gate 8 abierto (PR #35 DRAFT y protección básica fail-closed), D3-A aprobado como alcance pero implementación pendiente. F14 A3/A4 no iniciadas; main y Production sin merge/release F14. **SIGUIENTE:** auditar brechas funcionales de módulos existentes, conservar mínimos de seguridad y proponer orden de finalización.
 
 ---
 
@@ -1138,3 +1138,8 @@ Nuevo DDL draft de funciones privadas SECURITY INVOKER para transición de inten
 ### 44. F14 A2 — auditoría de continuidad en vivo (2026-10-09, solo lectura)
 
 HEAD de PR #35 anterior a este checkpoint: `defce91f7405b36a07a83d000a9322024ed16e38`; GitHub Actions `37923451550` **SUCCESS** (governance, Postgres efímero ledger DRAFT y build), mientras Vercel registra error de cuota `build-rate-limit`, no fallo comprobado de Vite. Supabase PAZO Postgres 17: 20 objetos Storage, 0 claims/eventos/reportes/restricciones y 0 tablas de ledger; RPC de evidencia solo `service_role`, confirmación antigua revocada, trigger anti-`purged` activo y Edge 503. Ambos buckets D3-A permanecen públicos. Inventario de escritores Auth en la rama verificado; escritores externos con `service_role` no certificables. La consulta de variables del proyecto Vercel recibió 403 por alcance del equipo; no se modificó configuración. **A2 Gate 8 abierto, no DDL/DELETE/merge/deploy/costos.** Fuente operativa: `docs/PAZO_ACTIVE_HANDOFF.md` y contrato `PRIVILEGED_ATTEMPT_FENCE_GATE.md`.
+
+### 45. Cambio de prioridad del PO: terminar MVP antes del hardening avanzado (2026-10-09)
+
+El PO decidió que la próxima inversión de ingeniería sea completar **módulos funcionales existentes y pruebas reales de valor**, no perfeccionar el coordinador distribuido de Storage antes de validar demanda. Se declara **PAUSADA** F14 A2 (Gate 8 sigue ABIERTO; PR #35 DRAFT), sin borrar trabajo ni convertir D3-A en COMPLETADA. No se implementan ledger remoto, SQL de purga, borrado automático ni CDN avanzado. **SIGUIENTE:** auditoría acotada de faltantes reales y mocks en módulos ya desarrollados, con foco en onboarding, mascota, Feed/interacciones, Explorar/Comunidades/Lugares, Cuidados, notificaciones y recorridos móvil; aplicar a cada módulo su gate/alcance aprobado y no adelantar funcionalidades no decididas. Mantener Auth/RLS/denuncia/moderación, limitar exposición de medios públicos y reservar gate mínimo de privacidad/retirada de contenido y pruebas antes de incorporar usuarios externos. F14 A3/A4 y cambios de Production/main requieren sus propias autorizaciones. No confundir prioridad comercial con aprobación para lanzar sin capacidad efectiva de atender contenido abusivo o solicitudes de eliminación.
+

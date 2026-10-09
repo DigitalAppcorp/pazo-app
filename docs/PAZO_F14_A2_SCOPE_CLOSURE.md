@@ -1,6 +1,6 @@
 # PAZO — F14 A2: reconciliación de alcance y cierre
 
-**Checkpoint:** 2026-10-09 UTC. **Estado general:** `EN CURSO`; PR #35 `DRAFT`, ninguna fusión con `main`. Este documento solo registra evidencia, no sustituye una aprobación pendiente ni autoriza A3/A4.
+**Checkpoint:** 2026-10-09 UTC. **Estado general:** `PAUSADA` por nueva prioridad del Product Owner (Gate 8 ABIERTO); PR #35 `DRAFT`, ninguna fusión con `main`. Este documento solo registra evidencia, no sustituye una aprobación pendiente ni autoriza A3/A4.
 
 ## Contrato de producto aprobado que gobierna A2
 
@@ -134,3 +134,7 @@ El SQL `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` ya fue **ejecutado
 ### Journal de intentos + carrera SQL real — PASS temporal, no cierre de A2
 
 Funciones privadas draft `f14_draft_record_possible_dispatch`/`f14_draft_note_transport` hacen transition CAS transaccional y bloquean intento/fence/claim con `FOR UPDATE`, sin grants ni permiso HTTP; se reforzó FK de generation y se probó rechazo de generación obsoleta. PostgreSQL efímero (run `37921483402`) PASS: 128/128 tests Node, SQL transitions con rollback, dos sesiones enfrentadas con lock timeout, sin doble dispatch y build. No toca Supabase ni objetos reales. Falta control de **todos** los escritores service_role externos, capacidad de coordinar HTTP real, reintentos/ACK, CDN/browser/retención. F14 A2/D3-A **abiertos**, Edge real desactivada.
+
+### Decisión de planificación — 2026-10-09 (no es Scope Closure PASS)
+
+El PO prioriza finalizar los módulos MVP y comprobar adopción antes de seguir con un coordinador de eliminación distribuida. A2 queda **PAUSADA / incompleta**, conservando todos los ítems de la matriz de alcance como evidencias parciales o bloqueantes: ni D3-A, ni purga CDN, ni garantías de escritores privilegiados se declararán PASS. No reejecutar la QA de píxel ya aceptada ni los fixtures SQL ya probados por defecto. El sistema permanece en revisión manual fail-closed y Edge 503. Para una beta con contenido de personas reales, definir un procedimiento mínimo de respuesta a reportes, enlaces públicos y solicitudes de eliminación antes de habilitarla. El siguiente carril de trabajo es auditar y cerrar brechas funcionales de módulos ya definidos, no instalar el ledger propuesto ni fusionar este PR silenciosamente.

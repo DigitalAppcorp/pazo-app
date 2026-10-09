@@ -2,7 +2,7 @@
 
 **Ruta maestra de producto y arquitectura — 2026-10-08**
 **Categoría:** infraestructura obligatoria para Beta; no requiere fake door.
-**Estado vigente (2026-10-09):** F14 A2 Gate 8 **EN CURSO**; Gate 5/6/7 CERRADOS. Implementación y migraciones A2 autorizadas y verificadas, PR #35 DRAFT; A3/A4 NO autorizados. Ver `docs/PAZO_ACTIVE_HANDOFF.md` y `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. La especificación de A0–A4 que sigue abajo conserva el contexto histórico previo a las autorizaciones posteriores.
+**Estado vigente (2026-10-09):** por nueva prioridad del PO, **F14 A2 PAUSADA con Gate 8 ABIERTO**; PR #35 DRAFT, implementación parcial y protecciones básicas conservadas. D3-A sigue aprobada como decisión y no completada como implementación. A3/A4 NO autorizados; el siguiente esfuerzo es terminar y probar módulos MVP existentes (ver roadmap y handoff). La especificación histórica permanece para retomar los gates pendientes.
 **Base auditada:** respaldo `backup/pazo-codex-local-20261008` (`c4f466f`).
 **Precedencia:** `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MODULE_LIFECYCLE.md`, `docs/PAZO_ARCHITECTURE_CONTRACT.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` y `docs/PAZO_DATA_INVENTORY.md` siguen obligatorios. Este documento detalla la sub-ruta F14.
 
@@ -383,3 +383,7 @@ GitHub CI ahora ejecuta la propuesta únicamente en contenedor PostgreSQL 16 des
 ### 43. F14 A2 — Transiciones y carrera de dos procesos PostgreSQL, solo DRAFT (2026-10-09)
 
 Ledger borrador incorpora FK exacta de generación, además de bucket/ruta/operación. Funciones draft `f14_draft_record_possible_dispatch` y `f14_draft_note_transport` realizan transiciones dentro de PostgreSQL sin EXECUTE para roles API, bloqueando intento/fence/claim; no conceden permisos de DELETE HTTP. Pruebas reales contra Postgres Docker aislado: duplicado y token stale rechazados, timeout mantiene el hold, reporte de éxito HTTP sin confirmar origen no libera ruta, dos conexiones simultáneas con lock timeout verifican exclusión mutua y no-replay posterior. GitHub CI `37921483402` PASS, 128/128 pruebas y build. **No instalado en Supabase**; no excluye service_role HTTP externo ni demuestra CAS global. Gate 8/D3-A **ABIERTO**, Edge 503, PR #35 DRAFT y sin cambio a main/Production/A3/A4.
+
+### 44. Decisión PO: pausar hardening avanzado para validar MVP — 2026-10-09
+
+Se pospone el trabajo nuevo en ledger privado, exclusión trans-servicios service-role/Storage HTTP, reintentos complejos y CDN/retención avanzada **hasta una nueva priorización explícita o incidente/riesgo que lo justifique**. No se revocan requisitos ni resultados aprobados; D3-A continúa como DoD pendiente y A2 como trabajo parcial. El sistema seguirá fail-closed (purga Edge 503, confirmación 'purged' impedida, revisión moderadora manual). La nueva prioridad es completar el uso real de los módulos ya contemplados, su QA y el gate de preparación de una beta limitada. Antes de usuarios reales, evaluar específicamente si moderación, retiro de contenido y eliminación de datos pueden responderse de forma operativa sin falsas promesas; la URL pública de una imagen no desaparece solo por retirar el post de la API. Esta decisión de calendario no autoriza producción, borrado de fotos, migraciones ni A3/A4.
