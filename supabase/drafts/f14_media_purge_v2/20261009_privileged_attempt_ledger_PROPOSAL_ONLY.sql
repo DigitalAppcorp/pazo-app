@@ -28,7 +28,7 @@ CREATE TABLE moderation_private.media_purge_attempts (
     CHECK (object_version ~ '^[A-Za-z0-9_-]{8,128}$'),
   fence_generation bigint NOT NULL CHECK (fence_generation > 0),
   fence_token uuid NOT NULL,
-  UNIQUE(operation_id,bucket,object_path),
+  UNIQUE(operation_id,bucket,object_path,fence_generation),
   phase text NOT NULL DEFAULT 'prepared_unverified'
     CHECK (phase IN (
       'prepared_unverified',
@@ -80,8 +80,8 @@ CREATE TABLE moderation_private.media_writer_fences (
     CHECK (state IN ('quarantined','possibly_in_flight','manual_review')),
   active_operation_id uuid UNIQUE,
   CONSTRAINT media_writer_fences_attempt_identity_fkey
-    FOREIGN KEY (active_operation_id,bucket,object_path)
-    REFERENCES moderation_private.media_purge_attempts(operation_id,bucket,object_path)
+    FOREIGN KEY (active_operation_id,bucket,object_path,generation)
+    REFERENCES moderation_private.media_purge_attempts(operation_id,bucket,object_path,fence_generation)
     ON DELETE RESTRICT,
   changed_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   PRIMARY KEY(bucket,object_path),
