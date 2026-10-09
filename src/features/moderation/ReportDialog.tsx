@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { submitReport, type ReportReason, type ReportTarget } from './reportingService'
 
 interface Props {
@@ -20,6 +21,43 @@ export function ReportDialog({ target, onClose, lang }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogPanelRef = useRef<HTMLDivElement>(null)
+  const busyRef = useRef(busy)
+  busyRef.current = busy
+
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    closeButtonRef.current?.focus()
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !busyRef.current) {
+        event.preventDefault()
+        onClose()
+      }
+      if (event.key !== 'Tab') return
+      const focusable = dialogPanelRef.current?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+      )
+      if (!focusable?.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      previousFocus?.focus()
+    }
+  }, [onClose])
+
   const es = lang === 'es'
   const typeLabel: Record<ReportTarget, [string, string]> = {
     feed_post: ['Publicación', 'Feed post'],
@@ -50,12 +88,15 @@ export function ReportDialog({ target, onClose, lang }: Props) {
     }
   }
 
-  return <div role="dialog" aria-modal="true" aria-label={es ? 'Denunciar contenido' : 'Report content'}
-    className="fixed inset-0 z-[190] flex items-center justify-center bg-black/55 p-4">
-    <div className="w-full max-w-sm rounded-[1.8rem] bg-[#FAF8F5] p-5 shadow-xl text-[#204E4A]">
+  // Portal escapes the animated, scrollable Feed/Community ancestors. A CSS transform
+  // on any ancestor otherwise changes the containing block of position: fixed.
+  return createPortal(
+    <div role="dialog" aria-modal="true" aria-label={es ? 'Denunciar contenido' : 'Report content'}
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/55 p-4">
+      <div ref={dialogPanelRef} className="w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-[1.8rem] bg-[#FAF8F5] p-5 shadow-xl text-[#204E4A]">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-lg font-black">{sent ? (es ? 'Denuncia recibida' : 'Report received') : (es ? 'Enviar denuncia' : 'Submit report')}</h2>
-        <button type="button" onClick={onClose} className="font-bold text-sm">{es ? 'Cerrar' : 'Close'}</button>
+        <button ref={closeButtonRef} type="button" disabled={busy} onClick={onClose} className="min-h-11 rounded-xl px-3 font-bold text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#204E4A] disabled:opacity-50">{es ? 'Cerrar' : 'Close'}</button>
       </div>
       <p className="mt-3 rounded-xl bg-[#204E4A]/[0.06] px-3 py-2 text-xs font-semibold leading-relaxed" aria-label={es ? 'Contenido seleccionado' : 'Selected content'}>
         {es ? 'Contenido: ' : 'Content: '}{subjectLabel}
@@ -80,6 +121,8 @@ export function ReportDialog({ target, onClose, lang }: Props) {
           {busy ? (es ? 'Enviando...' : 'Sending...') : (es ? 'Enviar denuncia' : 'Send report')}
         </button>
       </form>}
-    </div>
-  </div>
+      </div>
+    </div>,
+    document.body
+  )
 }
