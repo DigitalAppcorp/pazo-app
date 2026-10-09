@@ -516,7 +516,7 @@ assert.ok([transitionDraft,transitionTest,...raceFiles].every(existsSync),
 const transitionSql = read(transitionDraft)
 const transitionSmoke = read('scripts/test-f14-ledger-ephemeral.sh')
 assert.ok(transitionSql.includes('SECURITY INVOKER') &&
-  transitionSql.includes('FOR UPDATE OF a,f') &&
+  transitionSql.includes('FOR UPDATE OF a,f,c') &&
   transitionSql.includes("'shouldSendHttp',false") &&
   transitionSql.includes("'mayDelete',false") &&
   transitionSql.includes('REVOKE ALL ON FUNCTION') &&
