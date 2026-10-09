@@ -308,6 +308,11 @@ assert.ok(safetyRoot.includes('f14QaPreview && <F14VersionProbe') &&
   versionProbe.includes('upsert: false') &&
   versionProbe.includes('storage.remove([{ path, versionId: wrongVersion }])') &&
   versionProbe.includes('storage.remove([{ path, versionId: version }])') &&
+  versionProbe.includes('storage.remove([{ path, versionId: previous.versionId }])') &&
+  versionProbe.includes('current.data?.id !== previous.objectId') &&
+  versionProbe.includes('current.data?.version !== previous.versionId') &&
+  versionProbe.includes('JSON.stringify({ path, objectId: firstId, versionId: version })') &&
+  !versionProbe.includes('storage.remove([path])') &&
   versionProbe.includes("String(absent.error.statusCode) !== '404'") &&
   versionProbe.includes('setDone(true)') &&
   !versionProbe.includes('SUPABASE_SERVICE_ROLE_KEY') &&
