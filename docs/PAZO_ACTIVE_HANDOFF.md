@@ -87,9 +87,22 @@ La última indicación del PO: **«tienes toda la autorización en todos los pas
 
 Trabajo con conectores GitHub/Supabase/Vercel; no exigir PowerShell/descarga/Antigravity cuando se pueda hacer directamente. Español claro, directo, enfoque producto+seguridad, pocas listas, sin emojis decorativos. Conservar un historial verificable y ahorrar tokens. No inventar decisiones. Al reportar: separar CI, SQL role simulations, sesión Auth real, QA visual, deploy y release.
 
+### Checkpoint de seguridad posterior — operaciones COPY y confirmación antigua
+
+**Nueva autorización PO:** ejecución técnica autónoma dentro de F14 A2. Se aplicaron dos migraciones alojadas **sin operaciones sobre bytes de Storage**:
+
+- `20261009055801_f14_held_media_copy_source_operation_guard`: política `SELECT RESTRICTIVE` solo para `authenticated` en las operaciones Storage `object.copy`, `s3.object.copy` y `s3.upload.part_copy`; deniega origen de copia `held` y conserva lectura/listado normal (buckets públicos incluidos). Prueba rollback + prueba contra migración instalada PASS con objeto/metadatos sintéticos. Código canónico `supabase/migrations/20261009055801_f14_held_media_copy_source_operation_guard.sql`.
+- `20261009055955_f14_disable_unverified_media_purge_confirmation`: desactiva la función antigua `public.f14_confirm_media_cleanup(text,uuid)` con error `42501` y revoca EXECUTE incluso a `service_role`. Impide declarar `purged` sin prueba de objeto/versión. Prueba rollback + prueba contra función instalada PASS. Código canónico `supabase/migrations/20261009055955_f14_disable_unverified_media_purge_confirmation.sql`.
+
+Los borradores originales se retiraron tras canonizarlos. El control está documentado en `scripts/f14-moderation-check.mjs`. **Última auditoría alojada:** 20 objetos Storage, 0 claims, 0 denuncias, 0 restricciones; 1 política COPY, 1 política UPDATE y 2 guardas anteriores presentes. Edge `f14-moderation-purge` sigue versión 1, HTTP 503, sin eliminación. `service_role` aún evade las políticas RLS y no existe CAS interservicio.
+
+**Límites reales:** estas son simulaciones SQL de contexto `storage.operation`; NO se ejecutó COPY/MOVE/DELETE HTTP con cuenta auténtica bajo claim real. La política COPY impide un flujo interno autenticado contemplado por las operaciones oficiales, pero NO revoca URLs públicas ni copias obtenidas fuera de Storage. No reintentar QA visual de un píxel; ya PASS.
+
+**CI:** Vercel ha marcado builds de rama por `build-rate-limit`; no comprar upgrade ni presentar esos checks como PASS. `npm run verify` de HEAD final continúa sin evidencia.
+
 ## 7. SIGUIENTE GATE F14 A2 — exclusión cross-service y recuperación segura
 
-**Responsable: AI Project Brain, autónomo en investigación, SQL transaccional reversible, tests sin eliminación, diseño de contrato y docs.** Auditar MOVE/COPY/UPSERT y escrituras `service_role`, documentar las garantías disponibles en la API y especificar un procedimiento para recuperar reservas `held` sin liberar un delete in-flight. Preparar código/tareas no destructivas solo cuando sean verificables. El plan `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md` continúa siendo marco preliminar, no autorización de borrar.
+**Responsable: AI Project Brain.** Protección COPY y bloqueo de confirmación sin pruebas ya aplicados; continuar con revisión de escritores `service_role`, exclusión real de operaciones HTTP en vuelo y protocolo de recuperación de reservas `held` sin liberar un delete in-flight. Toda prueba adicional con imágenes debe ser aislada y no debe involucrar medios de usuarios. Preparar código/tareas no destructivas solo cuando sean verificables. El plan `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md` continúa siendo marco preliminar, no autorización de borrar.
 
 **Puntos de detención:** no realizar Storage DELETE de contenido ajeno, ni activar Edge, ni marcar `purged`, ni autorizar una nueva migración sensible fuera del alcance recién aprobado, ni publicar oficialmente Vercel, ni fusionar main, ni pasar a F14 A3/A4. Mantener la revisión manual como salida fail-closed si la API no ofrece exclusión demostrable. La siguiente aceptación visual del PO se pedirá solo si una prueba funcional visible nueva la necesita.
 
