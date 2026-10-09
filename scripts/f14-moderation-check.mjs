@@ -331,4 +331,19 @@ const pkg=read('package.json')
 assert.ok(pkg.includes('exactVersionPreflight.test.mjs'),
   'New preflight regression suite must be executed during CI governance')
 
+// Hosted schema adapter remains PURE and must never authorize deletion.
+const hostedAdapter = 'supabase/drafts/f14_media_purge_v2/hostedClaimEvidence.mjs'
+const hostedTests = 'supabase/drafts/f14_media_purge_v2/hostedClaimEvidence.test.mjs'
+assert.ok(existsSync(hostedAdapter) && existsSync(hostedTests), 'F14 hosted snapshot reconciliation needs tests')
+const hostedCode = read(hostedAdapter)
+assert.ok(hostedCode.includes('inspectExactVersionPreflight({') &&
+  hostedCode.includes('snap.storage_object_id !== reservation.storage_object_id') &&
+  hostedCode.includes("references.url_reference_count !== 1") &&
+  hostedCode.includes('references.community_path_count !== 1') &&
+  hostedCode.includes("snap.source_url !== url") &&
+  !hostedCode.includes('.remove(') &&
+  !hostedCode.includes('supabase.storage') &&
+  read('package.json').includes('hostedClaimEvidence.test.mjs'),
+  'Hosted claim snapshot preflight must validate independent evidence and not delete')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
