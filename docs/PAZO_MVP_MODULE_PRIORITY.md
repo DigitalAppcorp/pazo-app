@@ -278,10 +278,10 @@ El próximo módulo debe pasar nuevamente por `docs/PAZO_MODULE_LIFECYCLE.md`; n
 
 **Este checkpoint posterior prevalece sobre los inventarios históricos de mocks de Agenda/Documentos en las primeras secciones.** El PO priorizó terminar la experiencia real por encima del hardening avanzado de Storage. F14 A2 está pausada con Gate 8 abierto; no se considera terminada ni autoriza un release.
 
-- **Corregir primero:** defecto verificable de paginación del Feed y presentación ficticia de mensajes en sesiones reales — rama \`mvp/functional-readiness-20261009\`, PR #36 DRAFT, CI \`37927084599\` SUCCESS para el primer commit de código.
+- **Corregir primero:** defecto verificable de paginación del Feed y presentación ficticia de mensajes en sesiones reales — rama `mvp/functional-readiness-20261009`, PR #36 DRAFT, CI `37927084599` SUCCESS para el primer commit de código.
 - **Cerrados históricamente y no rehacer:** Comunidades F7, Mapa/Lugares F8, Agenda 9A, Documentos 9B, Buscar F12. Aplicar solo QA de integración/release cuando corresponda.
-- **Incongruencia de rollout que NO se debe ocultar:** \`main\` incluye \`MapView\` real pero F14 PR #35 lo limita a \`import.meta.env.DEV\`; requiere gate de entorno/coste antes de lanzar una versión combinada.
+- **Incongruencia de rollout que NO se debe ocultar:** `main` incluye `MapView` real pero F14 PR #35 lo limita a `import.meta.env.DEV`; requiere gate de entorno/coste antes de lanzar una versión combinada.
 - **Pospuestos:** backend de mensajería y notificaciones genéricas sin dependencia; no dejarlos aparentar funcionalidades reales dentro de la cuenta.
 - **Antes de beta externa:** resolución operativa acotada de reportes, contenido público y derechos de eliminación, más smoke del recorrido central en móvil. No activar purge automática ni mentir sobre CDN.
 
-Matriz detallada y evidencia: \`docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md\`.
+Matriz detallada y evidencia: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md`.
