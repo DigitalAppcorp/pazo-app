@@ -1,6 +1,8 @@
 -- F14 A3: ACCOUNT DELETION REQUEST INTAKE -- DRAFT, NOT APPLIED.
 -- Prohibited until separate PO approval, reviewed SQL/RLS/pgTAP and beta gates.
 -- Hard fail closed: MUST deliberately remove the following guard after approval.
+BEGIN;
+
 DO $a3_do_not_apply$
 BEGIN
   RAISE EXCEPTION 'A3 DRAFT ONLY: explicit Product Owner approval and preflight required';
@@ -8,7 +10,7 @@ END
 $a3_do_not_apply$;
 
 -- BEGIN approved migration only below this point.
-BEGIN;
+
 
 CREATE SCHEMA IF NOT EXISTS account_private;
 REVOKE ALL ON SCHEMA account_private FROM PUBLIC, anon, authenticated;

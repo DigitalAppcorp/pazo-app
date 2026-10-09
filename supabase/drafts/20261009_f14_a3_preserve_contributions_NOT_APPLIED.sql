@@ -1,13 +1,15 @@
 -- F14 A3: PRESERVE THIRD-PARTY CONTRIBUTIONS -- DRAFT, NOT APPLIED.
 -- Requires intake migration, approved write-freeze/worker + media relocation.
 -- Hard abort before DDL to prevent accidental production execution.
+BEGIN;
+
 DO $a3_archive_not_applied$
 BEGIN
   RAISE EXCEPTION 'A3 ARCHIVE DRAFT ONLY: approval and worker write-freeze required';
 END
 $a3_archive_not_applied$;
 
-BEGIN;
+
 
 -- Private tombstone: NEVER copy removed account's names, posts, avatar or text.
 CREATE TABLE account_private.deletion_post_tombstones (
