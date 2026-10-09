@@ -38,3 +38,11 @@
 ## Aceptación visual PO de denuncias — 2026-10-09
 
 Con código `b184a66` del PR #37, el PO confirmó la opción «Denunciar perfil» en mascota de otra cuenta, y a continuación «listo» tras verificar apertura de formulario y opciones para publicaciones/comentarios de Feed/Comunidades. **PASS visual reportado** únicamente: no se envió reporte real ni se ejecutó cola o decisión moderadora. El backend existe pero sigue necesitando prueba controlada de Auth, persistencia, deduplicación, rate-limit y permisos. Ningún dato de otro usuario debe denunciarse por comodidad.
+
+## F14 QA hosted: resolución Descartar verificada (2026-10-09)
+
+- PO, usando sesión moderadora en localhost/PR #37, confirmó haber pulsado **Descartar** sobre la denuncia de prueba previamente enviada.
+- Consulta Supabase **solo lectura**: moderación privada contiene una fila feed_post/spam ahora status `dismissed`, resolved_at=2026-10-09 15:02:52.31554+00.
+- Consulta JOIN `moderation_private.moderation_actions` + `moderation_private.reports`: existe una acción `dismiss` con fecha coincidente y reporte `dismissed`. **PASS de transición y bitácora de moderador para ese caso**. No se eliminó ninguna publicación, foto ni archivo; el asistente no ejecutó SQL de escritura.
+- Esto amplía evidencia del flujo «enviar -> pendiente -> moderador descarta»; todavía no valida `remove`, otros cuatro tipos con envío, rechazo directo de API a no moderador, Storage/CDN, eliminación de cuenta o release.
+- Siguiente ensayo: publicación SOLO TEXTO de prueba de la otra cuenta controlada, denuncia desde cuenta normal y **Despublicar** con la moderadora. Verificar estado/bitácora y exclusión de API. Sin imágenes para evitar confundir despublicación con purga física.

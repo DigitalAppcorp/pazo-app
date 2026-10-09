@@ -46,3 +46,11 @@ El PR está dirigido temporalmente a `main` solo para activar el CI existente, q
 - Supabase (SELECT de solo lectura de `moderation_private.reports`) devolvió **exactamente una fila**: `target_kind=feed_post`, `reason=spam`, `status=pending`, `details=Prueba controlada F14`, `created_at=2026-10-09 14:57:06+00`. Línea base antes del envío: 0 filas. **PASS: UI -> persistencia hosted de una denuncia; sin duplicado observado**.
 - NO probado todavía: intento duplicado, 4 tipos restantes con envío, acceso de moderador y autorización negativa, cola de revisión, acción dismiss/remove, borrado físico Storage/CDN.
 - Siguiente prueba: salir de cuenta normal, entrar con **cuenta moderadora controlada**, abrir Mi mascota -> Menú y utilidades -> Moderación -> Denuncias; verificar que se muestre esa denuncia pendiente. No pulsar Descartar/Despublicar hasta confirmar cola correcta. No requiere comandos ni migraciones.
+
+## F14 QA hosted: resolución Descartar verificada (2026-10-09)
+
+- PO, usando sesión moderadora en localhost/PR #37, confirmó haber pulsado **Descartar** sobre la denuncia de prueba previamente enviada.
+- Consulta Supabase **solo lectura**: moderación privada contiene una fila feed_post/spam ahora status `dismissed`, resolved_at=2026-10-09 15:02:52.31554+00.
+- Consulta JOIN `moderation_private.moderation_actions` + `moderation_private.reports`: existe una acción `dismiss` con fecha coincidente y reporte `dismissed`. **PASS de transición y bitácora de moderador para ese caso**. No se eliminó ninguna publicación, foto ni archivo; el asistente no ejecutó SQL de escritura.
+- Esto amplía evidencia del flujo «enviar -> pendiente -> moderador descarta»; todavía no valida `remove`, otros cuatro tipos con envío, rechazo directo de API a no moderador, Storage/CDN, eliminación de cuenta o release.
+- Siguiente ensayo: publicación SOLO TEXTO de prueba de la otra cuenta controlada, denuncia desde cuenta normal y **Despublicar** con la moderadora. Verificar estado/bitácora y exclusión de API. Sin imágenes para evitar confundir despublicación con purga física.
