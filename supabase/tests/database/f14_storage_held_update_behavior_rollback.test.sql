@@ -66,6 +66,23 @@ END $assertions$;
 
 RESET ROLE;
 
+-- An expired hold no longer protects bytes. This is an INTENTIONAL risk
+-- demonstration, not an endorsement of expiring claims mid-deletion.
+UPDATE moderation_private.media_claims
+SET created_at=now()-interval '10 minutes',
+    expires_at=now()-interval '1 minute'
+WHERE snapshot->>'path'=current_setting('pazo.f14.qa.held');
+SET LOCAL ROLE authenticated;
+DO $expiry$
+DECLARE n int;
+BEGIN
+ UPDATE storage.objects SET metadata='{"qa":"expired_claim_allows_write"}'::jsonb
+ WHERE bucket_id='post-photos' AND name=current_setting('pazo.f14.qa.held');
+ GET DIAGNOSTICS n = ROW_COUNT;
+ IF n<>1 THEN RAISE EXCEPTION 'Expired claim should not protect the object: %',n; END IF;
+END $expiry$;
+RESET ROLE;
+
 DO $invariants$
 DECLARE n int;
 BEGIN
