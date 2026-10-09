@@ -242,3 +242,7 @@ PO sent new screenshots from fixed strict diagnostic `38a2bcc`: one labeled `Nor
 
 ### 27. Authenticated Storage hold guards installed (2026-10-09 UTC)
 With PO blanket technical authorization, applied Supabase migration `20261009040957_f14_storage_held_media_guard.sql` (service remains non-deleting). Two restrictive storage.objects INSERT/DELETE policies block only currently claimed post-photos/community-post-photos paths for authenticated accounts, with definer helper/index; four existing permissive owner policies unchanged. Reversible synthetic test and post-apply tests PASS for held/unheld/different bucket/expiry. Anon lacks helper EXECUTE. 20 objects preserved, 0 claims. **Not a complete cross-service CAS**; storage service role bypass, in-flight requests and TTL remain risks. Edge disabled 503; exact-object deletion confirmation, CDN/cache and D3-B unresolved.
+
+
+### 28. Live isolated synthetic Storage API QA staged (2026-10-09)
+The browser Preview (pazo-app-t83r only) now contains a separately labeled, opt-in Storage lifecycle test for one unique generated 1-pixel file. It authenticates via existing PAZO session, uploads with upsert false, validates `.info()`, deletes only that file via Storage API, confirms origin metadata 404, and retains an account-specific retry path for interrupted cleanup. No real user content or moderation report touched. **Await PO click and screenshot; not marked PASS yet.** Does not test service-role purge, concurrent held claim or CDN invalidation. 503 Edge stays parked, A2 open.

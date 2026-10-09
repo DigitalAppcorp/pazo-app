@@ -1011,3 +1011,7 @@ PO submitted normal-account and moderator-account Preview screenshots, both **6/
 
 ### F14 A2 — Held media Storage RLS protection applied (2026-10-09 UTC)
 Supabase migration `20261009040957_f14_storage_held_media_guard` adds two RESTRICTIVE authenticated INSERT/DELETE policies covering only active claimed paths in `post-photos` or `community-post-photos`, preserving existing grants and permissions. Held/unheld/expired synthetic cases PASS with ROLLBACK. 20 existing objects untouched; 0 claims. Adds defense in depth but DOES NOT solve service_role or HTTP race, so no automatic deletion. A2 open, Storage/CDN and D3-B still pending.
+
+
+### F14 A2 — next real-user Storage test staged (2026-10-09)
+Preview-only opt-in F14StorageProbe creates one unique synthetic 1px image in the signed-in user's post-photos folder, checks its metadata via Storage API, removes only that synthetic fixture, then confirms absence; interrupted cleanup can be retried without uploading a second test file. Requires PO visual action; must not be called a completed live test until screenshot. Does not enable moderated image purge or certify CDN/cache CAS. A2 open.
