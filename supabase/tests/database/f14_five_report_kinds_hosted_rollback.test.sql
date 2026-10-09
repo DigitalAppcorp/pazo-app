@@ -4,25 +4,25 @@
 -- Must never be used as a migration or run with COMMIT.
 BEGIN;
 DO $f14$
-DECLARE owner_id uuid;community_post_id uuid;pet_id uuid;comment_id uuid;
+DECLARE owner_id uuid;community_post_id uuid;v_pet_id uuid;comment_id uuid;
         feed_post_id uuid;feed_comment_id uuid;
 BEGIN
- SELECT cp.author_user_id,cp.id,pet.id INTO owner_id,community_post_id,pet_id
+ SELECT cp.author_user_id,cp.id,pet.id INTO owner_id,community_post_id,v_pet_id
  FROM public.community_posts cp
  JOIN public.communities c ON c.id=cp.community_id AND c.status='active'
  JOIN public.pets pet ON pet.owner_id=cp.author_user_id
  LIMIT 1;
- SELECT id INTO feed_post_id FROM public.posts WHERE pet_id IS NOT NULL LIMIT 1;
- SELECT id INTO feed_comment_id FROM public.post_comments LIMIT 1;
+ SELECT fp.id INTO feed_post_id FROM public.posts fp WHERE fp.pet_id IS NOT NULL LIMIT 1;
+ SELECT fc.id INTO feed_comment_id FROM public.post_comments fc LIMIT 1;
  IF owner_id IS NULL OR feed_post_id IS NULL OR feed_comment_id IS NULL
  THEN RAISE EXCEPTION 'Missing existing FK prerequisites for rollback smoke'; END IF;
  PERFORM set_config('request.jwt.claim.sub',owner_id::text,true);
  PERFORM set_config('request.jwt.claim.role','authenticated',true);
  INSERT INTO public.community_post_comments(post_id,author_pet_id,body)
- VALUES(community_post_id,pet_id,'F14 rollback-only moderation test') RETURNING id INTO comment_id;
+ VALUES(community_post_id,v_pet_id,'F14 rollback-only moderation test') RETURNING id INTO comment_id;
  PERFORM set_config('f14.qa.feedpost',feed_post_id::text,true);
  PERFORM set_config('f14.qa.feedcomment',feed_comment_id::text,true);
- PERFORM set_config('f14.qa.pet',pet_id::text,true);
+ PERFORM set_config('f14.qa.pet',v_pet_id::text,true);
  PERFORM set_config('f14.qa.communitypost',community_post_id::text,true);
  PERFORM set_config('f14.qa.communitycomment',comment_id::text,true);
 END $f14$;
