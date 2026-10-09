@@ -12,7 +12,7 @@
     "test:architecture": "node scripts/architecture-check.mjs",
     "test:privacy": "node scripts/privacy-check.mjs",
     "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops && npm run test:product-rollout && npm run test:f14",
-    "test:f14": "node scripts/f14-social-check.mjs && node scripts/f14-moderation-check.mjs && node --test supabase/drafts/f14_media_purge_v2/mediaGuard.test.mjs supabase/drafts/f14_media_purge_v2/exactVersionPreflight.test.mjs supabase/drafts/f14_media_purge_v2/hostedClaimEvidence.test.mjs supabase/drafts/f14_media_purge_v2/hosted_claim_evidence_readonly.test.mjs supabase/drafts/f14_media_purge_v2/held_claim_reconciliation_readonly.test.mjs",
+    "test:f14": "node scripts/f14-social-check.mjs && node scripts/f14-moderation-check.mjs && node --test supabase/drafts/f14_media_purge_v2/mediaGuard.test.mjs supabase/drafts/f14_media_purge_v2/exactVersionPreflight.test.mjs supabase/drafts/f14_media_purge_v2/hostedClaimEvidence.test.mjs supabase/drafts/f14_media_purge_v2/hosted_claim_evidence_readonly.test.mjs supabase/drafts/f14_media_purge_v2/held_claim_reconciliation_readonly.test.mjs supabase/drafts/f14_media_purge_v2/exactVersionOutcome.test.mjs",
     "local:test:f14": "npx supabase --workdir .local-supabase test db --local .local-supabase/supabase/tests/database/f14_social.test.sql",
     "backup:storage": "node scripts/backup-storage.mjs",
     "test:ops": "node --check scripts/backup-storage.mjs",
