@@ -338,6 +338,8 @@ assert.ok(existsSync(hostedAdapter) && existsSync(hostedTests), 'F14 hosted snap
 const hostedCode = read(hostedAdapter)
 assert.ok(hostedCode.includes('inspectExactVersionPreflight({') &&
   hostedCode.includes('snap.storage_object_id !== reservation.storage_object_id') &&
+  hostedCode.includes('currentSourceSnapshot') &&
+  hostedCode.includes('current_source_snapshot_drift') &&
   hostedCode.includes("references.url_reference_count !== 1") &&
   hostedCode.includes('references.community_path_count !== 1') &&
   hostedCode.includes("snap.source_url !== url") &&
