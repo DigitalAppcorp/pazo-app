@@ -484,4 +484,20 @@ assert.ok(attemptText.includes('mayDelete: false') &&
   read('package.json').includes(attemptTest),
   'Concurrent writer protocol must remain simulation-only and fail-closed')
 
+// The ledger is ONLY A DRAFT: the active project has no ledger RPC/table,
+// no privileged writer fence, and no media delete endpoint. CI must prevent
+// this prototype from silently becoming a deployed purge.
+const ledgerDraft = 'supabase/drafts/f14_media_purge_v2/20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql'
+const ledgerTest = 'supabase/drafts/f14_media_purge_v2/privilegedAttemptLedgerDraft.test.mjs'
+const writerInventory = 'supabase/drafts/f14_media_purge_v2/WRITER_INVENTORY_AND_BOUNDARIES.md'
+assert.ok([ledgerDraft,ledgerTest,writerInventory].every(existsSync),
+  'F14 privileged writer inventory, private ledger draft and contract tests required')
+const ledgerSqlText = read(ledgerDraft)
+assert.ok(ledgerSqlText.includes('ARCHITECTURAL DRAFT ONLY. DO NOT APPLY') &&
+  ledgerSqlText.includes('REVOKE ALL ON TABLE moderation_private.media_purge_attempts') &&
+  ledgerSqlText.includes('FOREIGN KEY (active_operation_id,bucket,object_path)') &&
+  !ledgerSqlText.includes('GRANT EXECUTE ON FUNCTION') &&
+  read('package.json').includes(ledgerTest),
+  'F14 ledger proposal must remain private, fenced by identity, tested and unapplied')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
