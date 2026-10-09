@@ -33,3 +33,8 @@
 - Actualizar plan de ejecución y pedir **aprobación específica** para migración de control de escritura y, por separado, cualquier eliminación de bytes. No activar la Edge ni usar documentos privados.
 
 **Gate de aceptación pendiente:** demostrar exclusión segura de operaciones concurrentes + evidencia de origen/CDN o decidir retener purga como revisión manual. F14 A2 sigue abierto; no A3/A4, merge a main ni publicación oficial.
+
+
+## Estado de seguridad posterior al Gate visual (2026-10-09)
+
+Se añadieron controles remotos: `20261009054411` (hold persistente/UPDATE/recheck), `20261009055801` (origen COPY), `20261009055955` (RPC antigua `f14_confirm_media_cleanup` deshabilitada y EXECUTE revocado) y `20261009061213` (trigger prohíbe `media_status='purged'` sin protocolo). **La referencia anterior a que la vieja RPC 'marca purged' es histórica: ya no puede ejecutarse.** El estado efectivo es no-borrado (Edge 503), revisión administrativa solo lectura. El PO confirmó por captura el panel del nuevo Preview SHA `a650dd8`: visual PASS para ese estado vacío y mensajes; no demuestra eliminación física, caché o caso con medio real. La prueba automatizada de build/governance fue PASS en ese SHA. La reconciliación DoD actual es `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. Ni la mitigación COPY ni el trigger resuelven CAS/serialización entre Storage y escritores privilegiados. No habilitar purga automática hasta probar esa propiedad con fuente/versión exacta.
