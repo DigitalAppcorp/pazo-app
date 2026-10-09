@@ -942,3 +942,9 @@ Esta fase de infraestructura está autorizada por el Product Owner y no constitu
 PR #37 (DRAFT) **no cierra Gate 8**. PR #36 fue aceptado funcionalmente en local y es base de integración. PR #37 reutiliza las RPC de reportes y colas moderadoras ya aplicadas a Supabase alojado para conectar cinco clases de denuncia a UI, sin fusionar PR #35 (F14 A2 avanzada) ni reintroducir su guard `import.meta.env.DEV` que altera el Mapa real. CI `37944094738` SUCCESS en commit `eda27bc`; QA real de reportes pendiente.
 
 **Bloqueadores de release siguen**: retirada de medio físico/Storage/CDN D3-A; ruta íntegra de eliminación cuenta/mascota A3; matriz D3-B y textos públicos A4; confirmación/recovery email real; reconciliación de PR #34 de Lugares y PR #35 sin desactivar funciones históricamente aprobadas. No cambiar scope aprobado por llamarlo «mínimo» ni equiparar botones visibles con seguridad verificada. Ningún gasto, merge, migración ni despliegue autorizado por este checkpoint. Ver `docs/PAZO_F14_BETA_REPORTING_PILOT_20261009.md`.
+
+## Checkpoint F14 A3 (2026-10-09) — preparación autorizada, no aplicación
+
+El PO autorizó creación de código y migraciones como borradores. PR #38 DRAFT prepara el **intake** de solicitud de cierre de cuenta, resumen de dependencias, consulta de estado y cancelación si no ha empezado procesado; protegido por un flag frontend OFF por defecto. SQL privado con RLS, grants, auditoría, 4 RPC y excepción `DO ... RAISE` explícita para impedir aplicación accidental. Tests + CI inicial PASS. **No hay worker de eliminación, ni integración de Storage/CDN/archivo de terceros/Auth; Gate 8 A3 permanece abierto**.
+
+Leer `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md` y `docs/PAZO_F14_A3_DELETION_PREFLIGHT_20261009.md`. D3-A y A4 siguen siendo dependencias de beta. No confundir documentación PR o UI desactivada con entrega pública ni autorizar merge / SQL sin gate.

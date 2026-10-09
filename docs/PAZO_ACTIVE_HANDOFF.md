@@ -90,3 +90,12 @@ Preparar **release-readiness check** acotado de PR #36, sin reabrir módulos; ve
 - A3 auditado sin mutaciones: esquema hosted presenta 6 cuentas/mascotas, 1 comunidad con 1 aportación de no propietario, 6 comentarios Feed cruzados, 1 documento privado, 5 cuidados/2 completados y 20 objetos Storage (19 públicos, 1 privado) en 5 buckets.
 - **Bloqueo de seguridad:** `communities.owner_user_id` y `community_posts.author_user_id` tienen CASCADE a Auth; una eliminación ingenua puede borrar aportes de terceros. `pet_documents` RESTRICT y cuidados con NO ACTION impiden orden improvisado. No hay jobs A3 implantados.
 - Decisión PO pre-lanzamiento de datos actuales de prueba sigue vigente. **No se borró nada**. Plan auditado: `docs/PAZO_F14_A3_DELETION_PREFLIGHT_20261009.md`. A3 necesita permiso de implementación *separado*, y luego autorización independiente para ejecutar migraciones/operaciones de borrado. Mantener PR #37 DRAFT, sin merge/deploy.
+
+## F14 A3 — avance técnico de implementación DRAFT 2026-10-09
+
+- PO autorizó **solo preparar código/migraciones en borrador**, no apply de SQL ni borrado, merge, deploy o gastos. Se abrió **PR #38** `f14/a3-account-deletion-draft-20261009` dependiente lógicamente de PR #37 y #36; GitHub base `main` solo para CI.
+- A3 primer incremento: `src/features/account/` con `deletionFlow.ts`, `deletionService.ts`, `AccountDeletionPanel.tsx`, 5 pruebas unitarias y orquestación en `PetView`/App. Feature gate `VITE_F14_A3_REQUESTS_ENABLED` **false por defecto**; UI y RPC **NO están activos** para usuarios.
+- SQL en `supabase/drafts/20261009_f14_a3_request_preflight_NOT_APPLIED.sql` contiene excepción DRAFT fail-closed para evitar apply casual. Tras ella hay propuesta de esquema privado/jobs/auditoría y cuatro RPC (preflight/status/request/cancel). No crea worker, no borra datos, no toca Storage/Auth/relaciones de terceros.
+- Arquitectura definitiva, protección de aportes de terceros, reautenticación backend, borrado real Storage/CDN, retención y account cleanup **NO ESTÁN IMPLEMENTADOS**: documento `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md`. Gate A3 permanece ABIERTO. Las próximas aprobaciones para aplicar SQL/desplegar/eliminar siguen siendo obligatorias.
+- Todos los datos actuales de Supabase hospedado son pre-lanzamiento (decisión PO), pero no se han limpiado, ni se puede reemplazar el flujo de eliminación de usuarios por una limpieza masiva.
+- CI GitHub de primer código/SQL DRAFT `37951819473` SUCCESS. Verificar CI del último SHA antes de handoff/release.
