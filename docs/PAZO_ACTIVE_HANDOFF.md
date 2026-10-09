@@ -1,5 +1,7 @@
 # PAZO — ACTIVE HANDOFF
 
+> **Decisión UX inamovible confirmada 2026-10-09:** cero contornos (borders, outlines, anillos de foco, sombras tipo borde) para botones, tarjetas, contenedores y similares; la única excepción es un campo de texto que realmente necesite un contorno localizado. Para foco accesible utilizar cambio de fondo/contraste o subrayado **sin dibujar contorno**. Ver AGENTS.md regla 21 y docs/PAZO_UI_QUALITY_GATE.md del PR #36; la regla anterior de focus-ring fue revertida en la rama y no está en main.
+
 **Project Brain OS:** v1.3.0  
 **Canonical OS:** `DigitalAppcorp/project-brain-os`  
 **Product Owner:** Brandon  
