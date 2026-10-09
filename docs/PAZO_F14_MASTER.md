@@ -336,3 +336,10 @@ Riesgos que impiden habilitar eliminación automática: coordinación con escrit
 Captura del Product Owner de `Revisión de archivos` sobre Preview Vercel READY `a650dd8`: **PASS visual** para contenido, estado vacío y ausencia de operación destructiva. No se ha demostrado funcionamiento del refresco ni de un caso no vacío. GitHub Actions CI del mismo SHA SUCCESS. No pedir nuevamente esta aceptación ni repetir QA Auth/Storage sintético previamente aprobadas.
 
 Matriz actual de cierre: `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. Sigue pendiente el requisito D3-A de eliminar medios retirados del origen activo y Storage de manera verificable; el modo revisión manual no sustituye D3-A sin decisión PO explícita. CDN/cachés, exclusión entre operaciones privilegiadas y borrado condicional por versión activa no han sido certificados. Edge HTTP 503; estado `purged` protegido por SQL. PR #35 DRAFT, `main` sin merge, A3/A4 no iniciadas.
+
+
+### 37. F14 A2 — evidencia nueva de versión exacta y prueba sintética opt-in
+
+Documentación actual de Supabase JS aclara que `remove([{path,versionId}])` selecciona la versión exacta **vigente o archivada**. Se diseñó `exactVersionPreflight.mjs`, un validador puro que siempre responde `candidate_only` / `manual_review` con `mayDelete:false`. Sus tests se agregaron a la verificación F14. Se agregó `F14VersionProbe` al Preview exclusivo: sólo crea y elimina un píxel sintético, prueba una versión incorrecta contra una vigente y después la versión correcta, comprobando ausencia de origen. No reutiliza el QA visual anterior ni toca medios moderados reales. Esta nueva prueba requiere ejecución auténtica y captura del PO; no marcar PASS hasta recibirla.
+
+Permanece riesgo de escrituras privilegiadas, solicitud HTTP en vuelo, validación del objeto exacto, CDN y backup. No habilitar purga real ni declarar D3-A completada por documentación de SDK. Ver `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`.
