@@ -318,3 +318,14 @@ Los dos archivos canónicos existen en `supabase/migrations/` con sus versiones 
 **Estado alojado:** 20 Storage objects, 0 claims, 0 reportes, 0 restricciones; políticas originales INSERT/DELETE, UPDATE y COPY presentes. Edge `f14-moderation-purge` sigue v1 stub HTTP 503, sin bytes eliminados. No hay nueva rutina de purga habilitada.
 
 **Bloqueadores restantes A2:** `service_role` omite RLS, falta exclusión serializable entre servicios/operaciones HTTP y borrado condicional de versión activa, recuperación auditada de `held`, comprobación de origen/versión/CDN con fixture aislado y D3-B. Si no existe prueba de exclusión, mantener salida manual y NO declarar `purged`. No merge/main, A3/A4 ni despliegue oficial. CI Vercel sigue limitado por cuota y `npm run verify` final no observado.
+
+
+### 35. A2 — UI de revisión manual y resguardo del estado final (2026-10-09)
+
+Cambio frontend en rama: `ModerationMediaQueue` ya no ofrece una acción que invocaba la Edge 503. Ahora muestra la cola pendiente y explica que no hay eliminación de Storage confirmada. `reportingService` retiró `purgeModerationMedia`. Se reforzó `scripts/f14-moderation-check.mjs` para impedir que vuelva una llamada de eliminación no verificada.
+
+Supabase versión `20261009061213_f14_reject_unverified_purged_status` aplicada: el trigger `f14_no_unverified_media_purge` impide cambiar el estado a `purged` sin protocolo de prueba. Las dos pruebas SQL reversibles del nuevo control pasaron; todos los datos sintéticos se revirtieron. El backend tenía 20 objetos Storage, 0 reservas y 0 restricciones. El trigger conserva las transiciones normales hacia `pending_review`.
+
+Validación parcial del componente React mediante TypeScript: cero diagnósticos de sintaxis al transpilar JSX aisladamente, **no** equivale a build completo o prueba visual. La cuota de builds Vercel aún puede bloquear el Preview. Siguiente: verificación integrada `npm run verify` y validación visual del nuevo estado de revisión de medios. La prueba visual del archivo sintético de 1 píxel ya fue aprobada y no se repetirá.
+
+Riesgos que impiden habilitar eliminación automática: coordinación con escrituras privilegiadas, ausencia de borrado condicionado por versión activa demostrable, carreras HTTP, caché/CDN y retención D3-B. La salida segura es revisión manual y nunca confirmar `purged` prematuramente. F14 A2 sigue abierto, A3/A4 y `main` sin alteraciones.
