@@ -220,4 +220,44 @@ assert.ok(parked.includes('status: 503') &&
   !parked.includes('.remove(') && !parked.includes('fetch('),
   'F14 moderation purge Edge must remain strictly parked; no Storage HTTP operations')
 
+// F14 A2 hosted hardening 20261009055801 + 20261009055955.
+const copyMigration = 'supabase/migrations/20261009055801_f14_held_media_copy_source_operation_guard.sql'
+const copyDraft = 'supabase/drafts/20261009_f14_held_copy_source_select_guard.sql'
+const copyDraftTest = 'supabase/tests/database/f14_held_copy_source_select_rollback.test.sql'
+const copyInstalledTest = 'supabase/tests/database/f14_held_copy_source_installed_rollback.test.sql'
+const disabledMigration = 'supabase/migrations/20261009055955_f14_disable_unverified_media_purge_confirmation.sql'
+const disabledDraft = 'supabase/drafts/20261009_f14_disable_legacy_media_purge_confirmation.sql'
+const disabledDraftTest = 'supabase/tests/database/f14_legacy_media_confirmation_disabled_rollback.test.sql'
+const disabledInstalledTest = 'supabase/tests/database/f14_legacy_media_confirmation_installed_rollback.test.sql'
+for (const path of [copyMigration,copyDraftTest,copyInstalledTest,
+  disabledMigration,disabledDraftTest,disabledInstalledTest])
+  assert.ok(existsSync(path), 'Applied F14 security gate artifact missing: ' + path)
+for (const path of [copyDraft,disabledDraft])
+  assert.ok(!existsSync(path), 'Applied migration must not remain in drafts: ' + path)
+const copyGuardSql = read(copyMigration)
+assert.ok(copyGuardSql.includes('AS RESTRICTIVE FOR SELECT') &&
+  copyGuardSql.includes('storage.allow_any_operation') &&
+  copyGuardSql.includes('storage.object.copy') &&
+  copyGuardSql.includes('storage.s3.object.copy') &&
+  copyGuardSql.includes('storage.s3.upload.part_copy') &&
+  copyGuardSql.includes('OR public.f14_storage_media_path_unclaimed(bucket_id,name)'),
+  'Copy guard must only deny held-source COPY operations, not ordinary reads')
+const disabledSql = read(disabledMigration)
+assert.ok(disabledSql.includes('CREATE OR REPLACE FUNCTION public.f14_confirm_media_cleanup') &&
+  disabledSql.includes('Legacy media cleanup confirmation disabled') &&
+  disabledSql.includes("ERRCODE='42501'") &&
+  disabledSql.includes('REVOKE ALL ON FUNCTION public.f14_confirm_media_cleanup') &&
+  !disabledSql.includes("SET media_status='purged'"),
+  'Legacy media confirmation must reject all callers without purged mutation')
+for (const path of [copyDraftTest,copyInstalledTest,disabledDraftTest,disabledInstalledTest]) {
+  const sql = read(path)
+  assert.ok(sql.includes('BEGIN;') && sql.trimEnd().endsWith('ROLLBACK;') &&
+    !sql.includes('DELETE FROM storage.objects'),
+    'Security SQL tests must be reversible and not delete Storage metadata: ' + path)
+}
+assert.ok(read(copyInstalledTest).includes('Installed COPY source guard missing'),
+  'COPY validation must check hosted installed policy rather than install it')
+assert.ok(read(disabledInstalledTest).includes('Service role must not invoke legacy purged confirmation'),
+  'Legacy RPC validation must reject service_role on hosted backend')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
