@@ -317,3 +317,7 @@ Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producc
 **Retención:** las metas D3-B del PO para aportaciones archivadas (revisión a 90 días y resolución humana antes de 180 días) NO están implementadas ni contrastadas con proveedores. Políticas públicas NO deben prometer esos plazos. El cierre masivo de los datos actuales de prueba pre-lanzamiento es una operación distinta y requerirá inventario/autorización propia.
 
 **Bloqueos:** congelación real de escrituras, verificación de D3-A Storage/CDN, archive de comentarios/likes legacy y referencias, sesión antigua, Auth al final, control de backups y pruebas de borrado. Ningún worker destructivo se ha desplegado.
+
+## 18. Protección de escrituras y FK en eliminación — A3 DRAFT, NO ACTIVA
+
+Se propusieron guardias DB de escritura por propietario/contraparte en 11 tablas y una ruta de archivo `archived` para comunidades, bajo SQL **no aplicado** del PR #38. No existe nueva recolección ni tercer proveedor. Los guards harán consulta privada de trabajos de borrado y utilizarán locks transaccionales asociados a UUID de cuenta; nunca deben exponer estado de terceros a un cliente. Las migraciones todavía NO gobiernan el Supabase alojado. No afirmar al público que se congelan escrituras ni que comunidades sin dueño se archivan automáticamente. Los bloqueos legales/operacionales D3-A, sesión y retención continúan.
