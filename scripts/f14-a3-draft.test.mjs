@@ -80,7 +80,8 @@ test('write-fence migration aborts inside transaction BEFORE all SQL changes', (
 test('write-fence covers all mapped row tables on insert/update/delete', () => {
   const list=['pets','posts','communities','community_posts','post_comments',
     'community_post_comments','community_memberships','follows',
-    'care_items','care_completions','pet_documents']
+    'care_items','care_completions','pet_documents',
+    'interactions','community_post_likes','pet_place_checkins']
   for (const table of list) {
     assert.ok(fenceSql.includes("WHEN '"+table+"' THEN"),'owner resolver for '+table)
     assert.ok(fenceSql.includes('BEFORE INSERT OR UPDATE OR DELETE ON public.'+table),'trigger for '+table)
@@ -148,4 +149,13 @@ test('A3 preflight identifies embedded comments and media as manual review block
   assert.match(archiveSql,/CASE WHEN jsonb_typeof\(p\.comments\)='array'/)
   assert.match(archiveSql,/Legacy embedded comments require manual author reconciliation/)
   assert.match(archiveSql,/jsonb_array_length\(p\.comments\)>0/)
+})
+
+test('A3 interaction, community-like and check-in guards verify both owner and target', () => {
+  assert.match(fenceSql,/WHEN 'interactions' THEN[\s\S]*?target_type'\)='post'/)
+  assert.match(fenceSql,/Unknown interaction owner during A3 freeze/)
+  assert.match(fenceSql,/Unsupported interaction target for A3 freeze/)
+  assert.match(fenceSql,/WHEN 'community_post_likes' THEN[\s\S]*?p\.author_user_id,c\.owner_user_id/)
+  assert.match(fenceSql,/WHEN 'pet_place_checkins' THEN[\s\S]*?v_owner := \(p_row->>'user_id'\)::uuid/)
+  assert.match(fenceSql,/Unknown check-in owner during A3 freeze/)
 })

@@ -22,3 +22,10 @@
 4. No se ejecutaron triggers ni tests SQL en Supabase (solo revisión de catálogo, pruebas de invariantes de borrador y CI). No se han ejecutado operaciones reales sobre usuarios o Storage.
 
 **Siguiente:** completar matriz de cobertura de escrituras, analizar FK/RLS y pruebas aisladas antes de solicitar cualquier permiso de aplicación. La fase A3 y Gate 8 permanecen ABIERTOS. No habilitar `VITE_F14_A3_REQUESTS_ENABLED`.
+## Extensión del borrador tras PostgreSQL TEMP QA (2026-10-09)
+
+- Se probaron las funciones originales adaptadas **solo a tablas temporales**, dentro de transacciones ROLLBACK: una cuenta congelada rechazó modificar su post, rechazar un comentario escrito por un tercero sobre ese post y reparentar contenido hacia ella; otra cuenta conservó escritura normal. Es **PASS del comportamiento sintético de triggers**, no prueba de carrera entre dos conexiones ni cobertura de Storage/Edge.
+- Inventario real de Supabase verificado por SELECT READ ONLY: `interactions` contiene 143 señales `target_type='post'`, `community_post_likes` 2 filas y `pet_place_checkins` 6. Se comprobó el nombre real de las columnas en las tres tablas.
+- Se añadieron ramas de `f14_a3_row_owners` y triggers para esas tres tablas: comprobación de dueño actor/autor afectado de `posts`, `community_posts` y mascotas; la operación aborta ante destino inexistente o un tipo de interacción desconocido. Total **14 tablas cubiertas como SQL DRAFT**.
+- Esta cobertura adicional todavía NO valida todos los caminos de backend ni todas las operaciones privilegiadas. En particular, `target_type` futuros fuera de `post` se rechazan deliberadamente hasta nuevo contrato; puede requerir reconciliación antes de aplicar.
+- **Sin apply remoto, sin merge/deploy, flag A3 OFF.**

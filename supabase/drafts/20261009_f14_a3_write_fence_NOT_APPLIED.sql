@@ -52,6 +52,30 @@ BEGIN
     WHEN 'follows' THEN
       SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'follower_id')::uuid;
       SELECT owner_id INTO v_secondary FROM public.pets WHERE id=(p_row->>'following_id')::uuid;
+    WHEN 'interactions' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'actor_pet_id')::uuid;
+      IF (p_row->>'target_type')='post' THEN
+        SELECT user_id INTO v_secondary FROM public.posts WHERE id=(p_row->>'target_id')::uuid;
+      ELSE
+        RAISE EXCEPTION 'Unsupported interaction target for A3 freeze' USING ERRCODE='42501';
+      END IF;
+      IF v_owner IS NULL OR v_secondary IS NULL THEN
+        RAISE EXCEPTION 'Unknown interaction owner during A3 freeze' USING ERRCODE='42501';
+      END IF;
+    WHEN 'community_post_likes' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'actor_pet_id')::uuid;
+      SELECT p.author_user_id,c.owner_user_id INTO v_secondary,v_third
+        FROM public.community_posts p JOIN public.communities c ON c.id=p.community_id
+        WHERE p.id=(p_row->>'post_id')::uuid;
+      IF v_owner IS NULL OR v_secondary IS NULL THEN
+        RAISE EXCEPTION 'Unknown community like owner during A3 freeze' USING ERRCODE='42501';
+      END IF;
+    WHEN 'pet_place_checkins' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+      SELECT owner_id INTO v_secondary FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+      IF v_owner IS NULL OR v_secondary IS NULL THEN
+        RAISE EXCEPTION 'Unknown check-in owner during A3 freeze' USING ERRCODE='42501';
+      END IF;
     WHEN 'care_items' THEN
       SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
     WHEN 'care_completions' THEN
@@ -126,6 +150,12 @@ CREATE TRIGGER a3_write_fence_community_memberships BEFORE INSERT OR UPDATE OR D
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_follows BEFORE INSERT OR UPDATE OR DELETE ON public.follows
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_interactions BEFORE INSERT OR UPDATE OR DELETE ON public.interactions
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_community_post_likes BEFORE INSERT OR UPDATE OR DELETE ON public.community_post_likes
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_pet_place_checkins BEFORE INSERT OR UPDATE OR DELETE ON public.pet_place_checkins
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_care_items BEFORE INSERT OR UPDATE OR DELETE ON public.care_items
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_care_completions BEFORE INSERT OR UPDATE OR DELETE ON public.care_completions
@@ -135,7 +165,7 @@ CREATE TRIGGER a3_write_fence_pet_documents BEFORE INSERT OR UPDATE OR DELETE ON
 
 COMMIT;
 
--- NOT COVERED: Storage API, interactions/likes/saves, check-ins, QR/rescue,
+-- NOT COVERED: Storage API, unknown future interaction targets, QR/rescue,
 -- notifications, private account settings, privileged operations, direct Auth
 -- deletes or service-side functions on unmapped tables.
 -- Do not consider write freeze complete; no worker may delete data using this alone.
