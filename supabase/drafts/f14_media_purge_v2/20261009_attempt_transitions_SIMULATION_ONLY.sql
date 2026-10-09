@@ -31,7 +31,7 @@ BEGIN
   WHERE a.operation_id=p_operation AND a.fence_token=p_token
     AND a.fence_generation=p_generation AND f.generation=p_generation
     AND c.status='held'
-  FOR UPDATE OF a,f;
+  FOR UPDATE OF a,f,c;
 
   IF NOT FOUND OR v_phase<>'prepared_unverified' OR
      v_state<>'quarantined' OR v_count<>0 THEN
