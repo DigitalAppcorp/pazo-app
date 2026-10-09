@@ -125,3 +125,15 @@ Siguiente gate: evaluar si el MVP usa revisión manual con contenido despublicad
 PO envió captura real del Preview `dpl_6iFoQUQ9QVYi8JBzR2FDWKtmmnRE` (READY; SHA `a650dd8`). **Visual PASS** para título `Revisión de archivos`, mensajes precisos de revisión administrativa y URLs públicas, estado vacío coherente con backend, botón `Actualizar estado` y ausencia de acción de purga. **No repetir esta QA**; no implica que el botón se haya pulsado ni prueba de reportes no vacíos, Storage bytes, CDN o concurrencia.
 
 GitHub CI para SHA `a650dd8`: SUCCESS. PR #35 sigue DRAFT, sin merge. Supabase 20 objetos, 0 claims/reportes/restricciones, Edge HTTP 503. **A2 continúa abierto:** D3-A exige verificación de eliminación en Storage además de despublicación; la vista manual no sustituye ese requisito. Falta contrato seguro entre DB y Storage, comprobación de origen/CDN y reconciliación de alcance. No iniciar A3/A4 ni publicar producción.
+
+
+## 10. Gate técnico A2 — comprobación de versionId exacto (pendiente de sesión real)
+
+La referencia actual de Supabase para `remove` confirma que `{path,versionId}` selecciona versión exacta **actual o archivada**, a diferencia del borrado sólo por ruta. No equivale a certificación en el proyecto PAZO. Se incorporaron:
+
+- `supabase/drafts/f14_media_purge_v2/exactVersionPreflight.mjs`: inspector **puro, sin I/O**, coherencia de identidad y versión entre claim/objeto actual/medio; siempre `candidate_only` con `mayDelete:false` o `manual_review`, nunca autorización de borrado.
+- `exactVersionPreflight.test.mjs` incorporado a `npm run test:f14`, con fallos ante expiración, versiones divergentes, referencia no exclusiva y metadata cambiada.
+- `src/features/moderation/F14VersionProbe.tsx`: ensayo **opt-in en Preview** con archivo artificial `uid/f14-version-probe-UUID.png`, elimina primero versión deliberadamente errónea (que debe dejar intacta la actual) y luego versión exacta, comprobando ausencia en origen por Storage API. En caso de interrupción sólo se permite intentar limpiar ese archivo sintético bajo la misma sesión. No usa servicio privilegiado, fotos de usuarios ni modifica moderación.
+- `SafetySettings.tsx` expone el botón nuevo únicamente en `pazo-app-t83r` Preview, separado del anterior `F14StorageProbe` ya aprobado. Las pruebas estáticas de regresión impiden un borrado por ruta de medios personales.
+
+**Estado:** suite Node/CI deberá comprobarse en último HEAD; Preview nuevo y **QA de versión exacta aún no ejecutada por PO**, no inventar PASS. Supabase no recibió migraciones ni operaciones de Storage durante este checkpoint. 20 objetos previos se mantienen como inventario esperado, confirmar lectura al finalizar. El avance de A2 depende de confirmar comportamiento `versionId` y luego examinar concurrencia/service_role + CDN; Edge 503 y bloqueo `purged` permanecen. No solicitar repetir la prueba anterior del píxel ni el panel manual aprobados.
