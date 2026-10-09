@@ -34,3 +34,7 @@
 - No continuar agregando features opcionales, mensajería backend, arquitectura de moderación avanzada o retoques estéticos indiscriminados.
 
 **Siguiente trabajo del agente:** cerrar checklist de release y presentar un gate específico de PR #36. Esta evidencia se actualiza solo ante una nueva prueba real.
+
+## Aceptación visual PO de denuncias — 2026-10-09
+
+Con código `b184a66` del PR #37, el PO confirmó la opción «Denunciar perfil» en mascota de otra cuenta, y a continuación «listo» tras verificar apertura de formulario y opciones para publicaciones/comentarios de Feed/Comunidades. **PASS visual reportado** únicamente: no se envió reporte real ni se ejecutó cola o decisión moderadora. El backend existe pero sigue necesitando prueba controlada de Auth, persistencia, deduplicación, rate-limit y permisos. Ningún dato de otro usuario debe denunciarse por comodidad.

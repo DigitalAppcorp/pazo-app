@@ -24,3 +24,10 @@
 La cola de medios utiliza ahora un diálogo Portal responsivo con cierre Escape y control de foco; antes era `absolute` y podía quedar recortada dentro del perfil. La cola continúa **solo lectura**: no es un camino oculto para borrar Storage/CDN.
 
 El PR está dirigido temporalmente a `main` solo para activar el CI existente, que no se ejecuta en PRs cuyo base sea otra rama. **No está autorizado el merge**; la dependencia PR #36 debe integrarse primero, luego volver a conciliar el diff.
+
+## Aceptación visual PO de denuncias — 2026-10-09
+
+- **Entorno:** Antigravity, frontend local de PR #37 en commit `b184a66`; Supabase hospedado de PAZO. El PO confirmó el SHA, encontró «Denunciar perfil» de mascota ajena y después respondió «listo» a una única ronda de revisión de las **cinco opciones**: Feed post, Feed comment, pet profile, Community post y Community comment, verificando apertura de formulario.
+- **Resultado:** UI/visibilidad del formulario por usuario real **PASS reportado por PO**; no se recibieron capturas detalladas de cada variante y NO consta pulsación de «Enviar denuncia», persistencia de denuncia ni recepción/decisión de moderador. No marcar Gate 8 completo.
+- **Siguiente gate:** prueba real de creación, deduplicación y cola de moderación con contenido **descartable de otra cuenta de prueba controlada** y cuenta moderadora con grant legítimo, sin enviar reportes sobre usuarios ajenos. Completar negativo: usuario normal no ve/puede invocar cola moderadora. Registrar resultados, sin editar DB, nunca borrar medios reales.
+- **Bloqueadores de beta:** D3-A Storage/CDN; A3 cierre/eliminación de cuenta con terceros; A4 retención/privacidad; correo real Auth; integración PR #36/37/34 sin regresión de Mapa y entrega de release.

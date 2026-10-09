@@ -42,5 +42,11 @@
 3. **Release:** reconciliar PR #36 y branches #34/#35, CI de HEAD, Mapa real vs cost/rollout, entorno de despliegue/variables, pruebas móviles y smoke en artefacto de release. Vercel está bloqueado por rate-limit.
 4. **Diseño fino:** feedback PO sobre espacio field/botón en login/recuperación queda para F13; foco de teclado/reduced-motion no explícitamente probado. **No bloquear avance por esto** salvo regresión de usabilidad real.
 
+## Aceptación visual PO de denuncias — 2026-10-09
+
+- PO confirmó `git log -1 --oneline` = `b184a66` en `pazo-visual-qa`, confirmó botón `Denunciar perfil` en otra mascota y después validó con «listo» la ronda visual de cinco superficies/formularios del PR #37. **Aprobación visual local; no envío de denuncias ni prueba de cola real.**
+- Se dejó el checkout de frontend con Supabase alojado; nunca pedir Docker/Supabase local para ver cambios. Carpeta original `pazo-app` contiene cambios no confirmados de F14, preservarlos.
+- El siguiente gate requiere 2 cuentas descartables controladas (usuario denunciante/autor y cuenta moderadora ya autorizada), sin usar contenido ajeno ni activar eliminación; no confundir review visual con seguridad de API.
+
 ## Próxima acción única
 Preparar **release-readiness check** acotado de PR #36, sin reabrir módulos; verificar CI actual y separar qué puede integrarse ahora de los bloqueos reales de beta pública. Antes de merge/deploy, detenerse en gate de autorización PO. Retomar F14 mínimo solo con decisión/gate aprobado, sin asumir que su rama es apta para producción.
