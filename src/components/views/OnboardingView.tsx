@@ -3,6 +3,7 @@ import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
+import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04' | 'A05'
@@ -89,13 +90,7 @@ export const OnboardingView = ({
       return
     }
 
-    const hasStrongPassword =
-      password.length >= 8
-      && /[a-z]/.test(password)
-      && /[A-Z]/.test(password)
-      && /[0-9]/.test(password)
-
-    if (!hasStrongPassword) {
+    if (!isValidPazoPassword(password)) {
       alert(
         lang === 'es'
           ? 'Usa al menos 8 caracteres, una mayúscula, una minúscula y un número.'
