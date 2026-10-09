@@ -21,6 +21,7 @@ export function ReportDialog({ target, onClose, lang }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
+  const [alreadyReported, setAlreadyReported] = useState(false)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const dialogPanelRef = useRef<HTMLDivElement>(null)
   const busyRef = useRef(busy)
@@ -77,12 +78,22 @@ export function ReportDialog({ target, onClose, lang }: Props) {
       await submitReport(target.kind, target.id, reason, details)
       setSent(true)
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : ''
-      setError(message.includes('already pending')
-        ? (es ? 'Ya existe una denuncia pendiente sobre este contenido.' : 'You already reported this content.')
-        : message.includes('limit')
-          ? (es ? 'Has alcanzado el límite temporal de denuncias.' : 'Report limit reached.')
-          : (es ? 'No se pudo enviar. Intenta más tarde.' : 'Could not submit your report.'))
+      // PostgREST errors may be plain objects, not Error instances.
+      // Backend f14_submit_report uses SQLSTATE 23505 for duplicate pending reports.
+      const dbError = cause && typeof cause === 'object'
+        ? cause as { code?: unknown; message?: unknown }
+        : null
+      const code = typeof dbError?.code === 'string' ? dbError.code : ''
+      const message = typeof dbError?.message === 'string'
+        ? dbError.message.toLowerCase()
+        : cause instanceof Error ? cause.message.toLowerCase() : ''
+      if (code === '23505' || message.includes('already pending') || message.includes('already reported')) {
+        setAlreadyReported(true)
+      } else {
+        setError(message.includes('report limit reached')
+          ? (es ? 'Has alcanzado el límite de cinco denuncias en 24 horas.' : 'You have reached the limit of five reports in 24 hours.')
+          : (es ? 'No se pudo enviar la denuncia. Intenta más tarde.' : 'The report could not be submitted. Please try later.'))
+      }
     } finally {
       setBusy(false)
     }
@@ -95,14 +106,16 @@ export function ReportDialog({ target, onClose, lang }: Props) {
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/55 p-4">
       <div ref={dialogPanelRef} className="w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-[1.8rem] bg-[#FAF8F5] p-5 shadow-xl text-[#204E4A]">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-black">{sent ? (es ? 'Denuncia recibida' : 'Report received') : (es ? 'Enviar denuncia' : 'Submit report')}</h2>
+        <h2 className="text-lg font-black">{alreadyReported ? (es ? 'Denuncia pendiente' : 'Report pending') : sent ? (es ? 'Denuncia recibida' : 'Report received') : (es ? 'Enviar denuncia' : 'Submit report')}</h2>
         <button ref={closeButtonRef} type="button" disabled={busy} onClick={onClose} className="min-h-11 rounded-xl px-3 font-bold text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#204E4A] disabled:opacity-50">{es ? 'Cerrar' : 'Close'}</button>
       </div>
       <p className="mt-3 rounded-xl bg-[#204E4A]/[0.06] px-3 py-2 text-xs font-semibold leading-relaxed" aria-label={es ? 'Contenido seleccionado' : 'Selected content'}>
         {es ? 'Contenido: ' : 'Content: '}{subjectLabel}
       </p>
-      {sent ? <div role="status" className="mt-5 space-y-3">
-        <p className="text-sm">{es ? 'Denuncia recibida. Un moderador podrá revisarla.' : 'Report received for moderation review.'}</p>
+      {sent || alreadyReported ? <div role="status" className="mt-5 space-y-3">
+        <p className="text-sm">{alreadyReported
+          ? (es ? 'Ya denunciaste este contenido. La denuncia está pendiente de revisión; no necesitas enviarla otra vez.' : 'You have already reported this content. It is pending review; you do not need to submit it again.')
+          : (es ? 'Denuncia recibida. Un moderador podrá revisarla.' : 'Report received for moderation review.')}</p>
         <button type="button" onClick={onClose} className="rounded-full bg-[#204E4A] px-4 py-2 font-bold text-white">{es ? 'Aceptar' : 'OK'}</button>
       </div> : <form className="mt-4 space-y-4" onSubmit={send}>
         <label className="block text-xs font-bold">{es ? 'Motivo' : 'Reason'}
