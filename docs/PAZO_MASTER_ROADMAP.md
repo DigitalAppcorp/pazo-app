@@ -990,3 +990,7 @@ After explicit PO approval, migration `f14_media_status_presence_guard`, server 
 
 ### F14 A2 — Media deletion secure-draft gate (2026-10-08)
 Audit + V2 draft only: proof-driven path inspection for current and verified legacy Feed photos, Community media, and conservative pet avatars; 30+ local synthetic Node cases and a genuine JWT read-only test script staged. Actual signed JWT test needs securely injected independent user session and has NOT PASSED. No delete/claim/confirmation RPC implemented, no production deploy; Edge stays 503. Request new PO gate before metadata/claim migration and separate gate before irreversible Storage removal. Full plan: supabase/drafts/f14_media_purge_v2/README.md. A2 open, A3/A4 unauthorized.
+
+
+### F14 A2 — preflight/claim reversible Gate (2026-10-08)
+Draft private claims table + object fingerprint/id/lease, service-only prepare/recheck and audit, current/legacy Feed and Community path proofs, SQL transactional revalidation. Multiple BEGIN/ROLLBACK tests PASS, no objects or schema persisted. Claim is a candidate, NOT permission to delete; user/JWT HTTP, cross-service race-safe CAS confirmation, real Storage API verification/CDN and D3-B remain future gates. SQL draft `supabase/drafts/20261009_f14_media_claim_preflight.sql`, separate PO approval before hosted apply. Edge 503 unchanged; A2 open, A3/A4 not authorized.
