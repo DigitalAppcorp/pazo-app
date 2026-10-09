@@ -55,3 +55,6 @@ No incluir UUIDs, emails ni rutas privadas en telemetría, UI pública o este do
 
 ## Estado / decisión requerida
 **PREPARADO PARA SOLICITAR GATE A3 de implementación en rama DRAFT, sin aplicar migraciones.** A3 implica rediseñar FKs de comunidades/contribuciones y desarrollar un worker seguro: no es un delete rápido. Solicitar permiso específico del PO para preparar **código y migraciones como borradores sin aplicar**. Requerir **otra autorización** para SQL en Supabase alojado, borrar cuentas/storage, merge, despliegue o cambio de planes. No marcar Beta lista por aprobar este preflight.
+
+## Gate A3 autorizado para preparación — 2026-10-09
+El PO respondió «sí» a preparar **código y migraciones como borradores**, prohibida ejecución remota/SQL destructivo/merge/deploy. Rama `f14/a3-account-deletion-draft-20261009` con estados de solicitud y SQL privado protegido por guard de fallo explícito. Documento rector de implementación: `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md`. No está habilitado para usuarios finales ni cumple A3.2–A3.4.
