@@ -140,16 +140,20 @@ assert.ok(qaHost.includes('<F14StorageProbe lang={lang} />'), 'Storage smoke mus
 const updateDraft = 'supabase/drafts/20261009_f14_storage_held_media_update_guard.sql'
 const updateSmoke = 'supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql'
 const updateBehavior = 'supabase/tests/database/f14_storage_held_update_behavior_rollback.test.sql'
+const updateCandidate = 'supabase/tests/database/f14_storage_held_update_candidate_rollback.test.sql'
 const casGate = 'supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md'
-for (const f of [updateDraft, updateSmoke, updateBehavior, casGate])
+for (const f of [updateDraft, updateSmoke, updateBehavior, updateCandidate, casGate])
   assert.ok(existsSync(f), 'F14 staged fail-closed UPDATE artifact missing: '+f)
 const updateSql = read(updateDraft)
 assert.ok(updateSql.includes('AS RESTRICTIVE FOR UPDATE') &&
   updateSql.includes('USING (public.f14_storage_media_path_unclaimed(bucket_id,name))') &&
   updateSql.includes('WITH CHECK (public.f14_storage_media_path_unclaimed(bucket_id,name))'),
   'Staged UPDATE guard must protect BOTH existing and new object paths')
+assert.ok(updateSql.includes("AND c.status='held'") &&
+  !updateSql.includes('c.expires_at>statement_timestamp()'),
+  'Candidate must block held media even after claim TTL expires')
 assert.ok(!updateSql.includes('DELETE FROM storage.objects'), 'Guard draft must never delete Storage metadata')
-for (const f of [updateSmoke, updateBehavior]) {
+for (const f of [updateSmoke, updateBehavior, updateCandidate]) {
   const testSql = read(f)
   assert.ok(testSql.includes('BEGIN;') && testSql.trimEnd().endsWith('ROLLBACK;'),
     'Staged RLS tests must be transactionally reversible: '+f)
@@ -161,6 +165,11 @@ assert.ok(behaviorSql.includes('f14_test_update_permission') &&
   behaviorSql.includes('Unheld UPDATE should be permitted') &&
   behaviorSql.includes('Held UPDATE must affect zero rows'),
   'Behavior-level SQL must simulate a future UPDATE grant while blocking held media')
+const candidateSql = read(updateCandidate)
+assert.ok(candidateSql.includes('Candidate: held claim must still protect after TTL expiry') &&
+  candidateSql.includes('Invalidated claim must release path') &&
+  candidateSql.includes('CREATE OR REPLACE FUNCTION public.f14_storage_media_path_unclaimed'),
+  'Candidate rollback test must prove fail-closed expiry and explicit release')
 const casContract = read(casGate)
 assert.ok(casContract.includes('service_role') &&
   casContract.includes('claim_id') &&
