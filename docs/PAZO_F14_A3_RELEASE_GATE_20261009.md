@@ -51,3 +51,11 @@ E. Finalmente Scope Closure Reconciliation de F14 Gate 8 con pruebas observables
 - Cero contornos y reglas de privacidad de PAZO intactas.
 
 **Estado al checkpoint:** F14 A3 está **desarrollada parcialmente y bloqueada por los gates técnicos enumerados**. No se debe marcar COMPLETE ni sugerir al usuario probar eliminación todavía.
+
+## 2026-10-09 — Hosted SQL QA read-only A3
+
+- PO autorizó pruebas SQL controladas/reversibles, NO ejecución de migraciones ni eliminación.
+- Se probaron en Supabase transacciones READ ONLY con ROLLBACK: 6 cuentas, 1 post ajeno en comunidad, 6 comentarios Feed ajenos y 1 documento privado. La única comunidad bloqueada por media; 5 comentarios JSON legacy en 3 posts; 13 posts Feed con foto, 2 posts de Comunidad con foto, 6 perfiles de mascota con foto.
+- Preflight mejorado detecta media/legacy y bloquea 5 de 6 cuentas hasta revisión. SQL de snapshot falla cerrado ante comentarios JSON de autoría no reconciliada. Conteo CASE sobre JSON no-array probado por SELECT real. PR #38 código + tests CI #38002029845 PASS.
+- FKs reales peligrosas 5/5 coinciden; anon carece de SELECT de communities; authenticated sin JWT no ve comunidades; no existen tablas ni RPC A3. Ningún DDL/DML ni Storage/Auth write remoto.
+- Evidencia completa: docs/PAZO_F14_A3_HOSTED_READONLY_QA_20261009.md. Queda pendiente DDL/pgTAP en sandbox y todo el worker; Gate A3 abierto, sin merge/deploy y feature flag OFF.
