@@ -26,11 +26,11 @@ test('claims and exact Storage identity cannot be silently swapped',()=>{
   'object_version text NOT NULL',
   'fence_generation bigint NOT NULL CHECK (fence_generation > 0)',
   'fence_token uuid NOT NULL',
-  'UNIQUE(operation_id,bucket,object_path)',
+  'UNIQUE(operation_id,bucket,object_path,fence_generation)',
   'CREATE UNIQUE INDEX media_purge_attempts_path_once',
   'ON moderation_private.media_purge_attempts(bucket,object_path)',
-  'FOREIGN KEY (active_operation_id,bucket,object_path)',
-  'REFERENCES moderation_private.media_purge_attempts(operation_id,bucket,object_path)',
+  'FOREIGN KEY (active_operation_id,bucket,object_path,generation)',
+  'REFERENCES moderation_private.media_purge_attempts(operation_id,bucket,object_path,fence_generation)',
   'UNIQUE(operation_id,event_type,fence_generation)',
  ])
   assert.ok(body.includes(token),'Missing private ledger integrity contract: '+token)
