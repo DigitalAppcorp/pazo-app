@@ -92,7 +92,8 @@ BEGIN
   -- IMPORTANT: the future worker must acquire the exact same advisory
   -- transaction lock before changing job status to a frozen state. Otherwise
   -- this row guard alone does NOT close a concurrent transition race.
-  FOR v_uid IN SELECT DISTINCT x FROM UNNEST(v_owners) AS x WHERE x IS NOT NULL ORDER BY x LOOP
+  FOR v_uid IN SELECT DISTINCT uid FROM UNNEST(v_owners) AS owner(uid)
+    WHERE uid IS NOT NULL ORDER BY uid LOOP
     PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_uid::text,901426));
     IF EXISTS (
       SELECT 1 FROM account_private.deletion_jobs

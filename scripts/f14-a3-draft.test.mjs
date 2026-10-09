@@ -88,7 +88,7 @@ test('write-fence covers all mapped row tables on insert/update/delete', () => {
   assert.match(fenceSql,/IF TG_OP <> 'INSERT' THEN/)
   assert.match(fenceSql,/IF TG_OP <> 'DELETE' THEN/)
   assert.match(fenceSql,/ARRAY_CAT\(v_owners,account_private\.f14_a3_row_owners/)
-  assert.match(fenceSql,/SELECT DISTINCT x FROM UNNEST\(v_owners\).*ORDER BY x/)
+  assert.match(fenceSql,/SELECT DISTINCT uid FROM UNNEST\(v_owners\) AS owner\(uid\)/)
   assert.match(fenceSql,/pg_advisory_xact_lock/)
   assert.match(fenceSql,/status NOT IN \('requested','cancelled'\)/)
 })
