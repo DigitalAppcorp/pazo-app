@@ -343,3 +343,10 @@ Matriz actual de cierre: `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. Sigue pendiente el
 Documentación actual de Supabase JS aclara que `remove([{path,versionId}])` selecciona la versión exacta **vigente o archivada**. Se diseñó `exactVersionPreflight.mjs`, un validador puro que siempre responde `candidate_only` / `manual_review` con `mayDelete:false`. Sus tests se agregaron a la verificación F14. Se agregó `F14VersionProbe` al Preview exclusivo: sólo crea y elimina un píxel sintético, prueba una versión incorrecta contra una vigente y después la versión correcta, comprobando ausencia de origen. No reutiliza el QA visual anterior ni toca medios moderados reales. Esta nueva prueba requiere ejecución auténtica y captura del PO; no marcar PASS hasta recibirla.
 
 Permanece riesgo de escrituras privilegiadas, solicitud HTTP en vuelo, validación del objeto exacto, CDN y backup. No habilitar purga real ni declarar D3-A completada por documentación de SDK. Ver `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`.
+
+
+### 38. F14 A2 — CDN/cache observada; sin falsas garantías de eliminación
+
+Lectura agregada de Supabase: 4 buckets públicos, 1 privado y 20 objetos con `cacheControl=max-age=3600`. En Free no afirmar invalidación Smart CDN Pro+ ni soporte de purge manual Pro+. La caché del navegador puede conservar bytes previamente descargados incluso tras retiro lógico y de origen. No se cambió el plan ni la política de cacheControl por efecto de egress/costos no estimados.
+
+La prueba Preview `F14VersionProbe` fue reforzada: bloqueo síncrono contra dobles clics, recuperación solo con ID/versión exactos, consultas CDN de su archivo sintético acotadas a 5 s y observación HTTP sin asignar certificación CDN. Gate HTTP real aún pendiente, Vercel cuota; CI y backend deben auditarse por último SHA. D3-A y Gate 8 abiertos.
