@@ -350,3 +350,8 @@ Permanece riesgo de escrituras privilegiadas, solicitud HTTP en vuelo, validaci�
 Lectura agregada de Supabase: 4 buckets públicos, 1 privado y 20 objetos con `cacheControl=max-age=3600`. En Free no afirmar invalidación Smart CDN Pro+ ni soporte de purge manual Pro+. La caché del navegador puede conservar bytes previamente descargados incluso tras retiro lógico y de origen. No se cambió el plan ni la política de cacheControl por efecto de egress/costos no estimados.
 
 La prueba Preview `F14VersionProbe` fue reforzada: bloqueo síncrono contra dobles clics, recuperación solo con ID/versión exactos, consultas CDN de su archivo sintético acotadas a 5 s y observación HTTP sin asignar certificación CDN. Gate HTTP real aún pendiente, Vercel cuota; CI y backend deben auditarse por último SHA. D3-A y Gate 8 abiertos.
+
+
+### 39. F14 A2 — retiro del QA anterior para evitar ejecuciones duplicadas
+
+Se desmontó y eliminó del código el componente `F14StorageProbe` aprobado previamente, que utilizaba borrado sintético por ruta. Se conserva su resultado histórico, pero no estará disponible en nuevos Previews. La única prueba visible de Storage pendiente será `F14VersionProbe`, que usa la versión exacta del objeto y solo el archivo artificial que creó. Governance prohíbe reinstalar el componente anterior. Vercel Preview con la versión nueva aún pendiente por cuota y CI del último SHA debe consultarse. D3-A y Gate 8 siguen abiertos.
