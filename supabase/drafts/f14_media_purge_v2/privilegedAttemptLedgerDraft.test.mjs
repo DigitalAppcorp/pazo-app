@@ -90,6 +90,6 @@ test('actual front-end operations and special synthetic probe are inventoried',(
   'petService.ts','documentService.ts','NO comprobado'])
   assert.ok(inventory.includes(phrase),'Inventory missing: '+phrase)
  assert.ok(inventory.includes('inventario') && inventory.includes('no exhaustivo'))
- assert.ok(protocol.includes('todos los escritores') ||
-  protocol.includes('TODOS los escritores') || protocol.includes('absolutamente todos'))
+ assert.ok(protocol.includes('escritores privilegiados') &&
+  protocol.includes('fencing') && protocol.includes('HTTP'))
 })
