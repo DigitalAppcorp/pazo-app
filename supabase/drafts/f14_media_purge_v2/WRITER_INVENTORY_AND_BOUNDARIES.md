@@ -36,3 +36,10 @@
 5. Probar posteriormente cambios Auth RLS, escritor service_role concurrente, reintento, timeout, versión exacta y caché, **solo con objetos sintéticos** y con gate/permiso de backend aplicable.
 
 El inventario es evidencia parcial de código; no sustituye auditoría de llaves, despliegues y accesos externos.
+
+## Contraste en vivo 2026-10-09 — inventario parcial, no autorización DELETE
+
+- Archivos de rama inspeccionados: `CreatePostModal.tsx` (`upload`, `upsert:false`, cleanup `remove([path])`), `communityService.ts` (flujos Auth y limpieza por ruta), `supabaseClient.ts` (SDK con llave publicable), `F14VersionProbe.tsx` (solo selector `versionId` sintético) y stub Edge fuente/alojado (503). No se encontró una operación elevada nueva en **estos archivos**, sin afirmar ausencia global.
+- Supabase PAZO confirmó dos buckets de publicaciones **públicos** y solo dos Edge desplegadas conocidas: `paypal-webhook` y `f14-moderation-purge` (stub sin borrar). 20 objetos actuales; tres tablas de ledger sin instalar; no modificar bytes ni permisos.
+- Intento de inventariar variables Vercel `pazo-app` por metadatos (sin descifrar valores) devolvió **403** en el scope `digitalapp`. Detenido conforme AGENTS, sin utilizar otra cuenta/team. Este resultado no indica presencia ni ausencia de credenciales externas.
+- El universo de claves service-role, accesos de consola, scripts externos y peticiones HTTP privilegiadas **sigue sin prueba exhaustiva**. Una simulación SQL de dos conexiones no puede controlar un escritor HTTP ajeno. La salida segura continúa siendo revisar manualmente y conservar `held`; antes de instalar el ledger o ejecutar prueba HTTP privilegiada debe definirse frontera autorizada, ensayo sintético y permiso remoto concreto.

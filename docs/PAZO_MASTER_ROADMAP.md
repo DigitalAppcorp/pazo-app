@@ -1,8 +1,8 @@
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
-**Última actualización:** 2026-10-08
-**Estado general:** Fase 12 COMPLETADA / Gate 9 medición; Production Hardening EN CURSO. Fase 14: Gates 5–7 CERRADOS, Gate 8 A0 terminado y A1 en despliegue hosted-first (GitHub y backend Supabase PAZO aplicados; Vercel producción BLOQUEADO por permisos 403). A1 NO cerrado; A2–A4 sin autorización.
+**Última actualización:** 2026-10-09
+**Estado general:** Fase 12 COMPLETADA / Gate 9 medición; Production Hardening EN CURSO. **Fase 14 A2 EN CURSO — Gate 8 ABIERTO**, PR #35 DRAFT, lector de evidencia aplicado y purga fail-closed. D3-A tiene decisión de producto aprobada pero implementación/DoD ABIERTOS. A3/A4 no iniciadas; main y Production sin merge/release F14.
 
 ---
 
@@ -1134,3 +1134,7 @@ Sin coste de infraestructura nueva ni tocar Supabase: GitHub Actions CI ahora co
 ### F14 A2 — Carrera de dos sesiones SQL y journal sin DELETE: PASS en Postgres aislado
 
 Nuevo DDL draft de funciones privadas SECURITY INVOKER para transición de intentos, recuperación timeout y bloqueo `FOR UPDATE` del claim, fence y operación, con `mayDelete:false`. Ledger draft vincula generation exacta por FK. GitHub `37921483402` SUCCESS: 128 Node tests, SQL con ROLLBACK, **2 conexiones PostgreSQL simultáneas** prueban que despacho duplicado bloquea y se rechaza tras COMMIT; build PASS. Solo contenedor efímero, sin instalación Supabase y sin servicio HTTP real. F14 D3-A sigue bloqueada por exclusión de writers privilegiados Storage, ACK/timeout y CDN/retención. PR #35 DRAFT; no main/Production/A3/A4.
+
+### 44. F14 A2 — auditoría de continuidad en vivo (2026-10-09, solo lectura)
+
+HEAD de PR #35 anterior a este checkpoint: `defce91f7405b36a07a83d000a9322024ed16e38`; GitHub Actions `37923451550` **SUCCESS** (governance, Postgres efímero ledger DRAFT y build), mientras Vercel registra error de cuota `build-rate-limit`, no fallo comprobado de Vite. Supabase PAZO Postgres 17: 20 objetos Storage, 0 claims/eventos/reportes/restricciones y 0 tablas de ledger; RPC de evidencia solo `service_role`, confirmación antigua revocada, trigger anti-`purged` activo y Edge 503. Ambos buckets D3-A permanecen públicos. Inventario de escritores Auth en la rama verificado; escritores externos con `service_role` no certificables. La consulta de variables del proyecto Vercel recibió 403 por alcance del equipo; no se modificó configuración. **A2 Gate 8 abierto, no DDL/DELETE/merge/deploy/costos.** Fuente operativa: `docs/PAZO_ACTIVE_HANDOFF.md` y contrato `PRIVILEGED_ATTEMPT_FENCE_GATE.md`.
