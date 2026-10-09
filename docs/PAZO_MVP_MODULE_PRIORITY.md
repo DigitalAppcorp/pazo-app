@@ -285,3 +285,7 @@ El próximo módulo debe pasar nuevamente por `docs/PAZO_MODULE_LIFECYCLE.md`; n
 - **Antes de beta externa:** resolución operativa acotada de reportes, contenido público y derechos de eliminación, más smoke del recorrido central en móvil. No activar purge automática ni mentir sobre CDN.
 
 Matriz detallada y evidencia: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md`.
+
+### 2026-10-09 — corrección P0 de Onboarding/Auth
+
+El PR #36 incorporó manejo de alta sin sesión (email pendiente de verificación) y eliminó los valores de ejemplo `Luna / 3 años` del registro de mascota. Tests Node de resultados Auth y build con CI `37928358071` SUCCESS (commit `504f422`). Aún falta QA del correo real en entorno autorizado; recuperación de contraseña permanece un gap para Beta. Este trabajo no transforma la etapa en completada ni autoriza publicación.
