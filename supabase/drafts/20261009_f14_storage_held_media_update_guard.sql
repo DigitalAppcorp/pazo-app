@@ -1,18 +1,40 @@
--- PAZO F14 A2 — DRAFT ONLY / NOT APPLIED / NOT APPROVED FOR PRODUCTION.
--- Intended companion for existing 20261009040957 held-media INSERT/DELETE guards.
--- Prevent an authenticated principal from changing the old OR new path of a
--- held media object if UPDATE/UPSERT/MOVE support is ever granted.
+-- PAZO F14 A2 — NOT APPLIED. Product Owner migration gate required.
+-- Candidate fail-closed media-lock hardening; does NOT enable moderated deletion.
+-- Authoritative update of existing 20261009040957 held INSERT/DELETE guards.
 --
--- Current live storage.objects RLS audit (2026-10-08): NO PERMISSIVE UPDATE
--- policies, so owner UPDATE is already denied by default. This is defense in
--- depth and must never be represented as proof of a currently exploitable bypass.
+-- Existing issue: old helper releases the write block automatically after
+-- five minutes, even when a cleanup request may still be in flight.
+-- Proposed: preserve the authenticated write block while claim.status='held',
+-- regardless of expires_at; only explicit invalidation releases it.
+-- Caveat: f14_recheck_media_claim() can invalidate expired claims, so a
+-- future worker MUST serialize claims/rechecks/deletion. This patch alone
+-- is NOT a cross-service lock/CAS and must not activate the purge Edge.
 --
--- Caveats: does not protect service_role, in-flight HTTP operations, five-minute
--- hold expiry, or prove CAS/object-version conditional deletion. Does not give
--- UPDATE capability by itself; a restrictive policy cannot grant access.
--- Requires Product Owner migration gate before execution against hosted PAZO.
-
+-- Also enforce UPDATE USING+WITH CHECK on held paths as defense-in-depth.
+-- There is currently NO permissive UPDATE policy for authenticated roles.
+--
+-- service_role bypasses RLS. Never claim this protects privileged writes,
+-- in-flight Storage API calls, COPY/MOVE paths, or browser/CDN caches.
 BEGIN;
+
+CREATE OR REPLACE FUNCTION public.f14_storage_media_path_unclaimed(p_bucket text,p_path text)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+ SELECT CASE
+ WHEN p_bucket NOT IN ('post-photos','community-post-photos') THEN true
+ WHEN p_path IS NULL OR p_path='' THEN false
+ ELSE NOT EXISTS (
+   SELECT 1
+   FROM moderation_private.media_claims c
+   WHERE c.bucket=p_bucket AND c.snapshot->>'path'=p_path
+     AND c.status='held'
+ )
+ END;
+$$;
+-- Existing narrow EXECUTE grants remain unchanged by CREATE OR REPLACE.
+-- Do not broaden role grants or leak claim identifiers.
 
 CREATE POLICY f14_media_claim_restrict_update
 ON storage.objects
