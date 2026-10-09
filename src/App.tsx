@@ -205,6 +205,12 @@ function PazoMain() {
   const feedLoadMoreInFlightRef = useRef(false)
   const feedPaginationRef = useRef<FeedPaginationState>({ ...EMPTY_FEED_PAGINATION })
   const ownedPetIdsRef = useRef<string[]>([])
+  // A transient network failure must not send an existing account to signup.
+  const [petBootstrap, setPetBootstrap] = useState<{
+    userId: string
+    status: 'loading' | 'error' | 'ready'
+  } | null>(null)
+  const [petBootstrapRetry, setPetBootstrapRetry] = useState(0)
   const mainScrollRef = useRef<HTMLElement | null>(null)
   const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
     inicio: 0,
@@ -570,41 +576,54 @@ function PazoMain() {
   }
 
   useEffect(() => {
+    let cancelled = false
+
     if (!loading && user) {
+      const userId = user.id
       const initApp = async () => {
-        if (!user.id) return
+        setPetBootstrap({ userId, status: 'loading' })
         setIsFeedLoading(true)
 
         let ownedPets: Pet[] = []
-
         try {
-          ownedPets = await fetchOwnedPets(user.id)
+          ownedPets = await fetchOwnedPets(userId)
         } catch (petError) {
           console.error('Error fetching pet profiles:', petError)
-          setIsFeedLoading(false)
+          if (!cancelled) {
+            setPetBootstrap({ userId, status: 'error' })
+            setIsFeedLoading(false)
+          }
           return
         }
+
+        if (cancelled) return
 
         if (ownedPets.length > 0) {
           setIsOnboardingActive(false)
           ownedPetIdsRef.current = ownedPets.map((pet) => pet.id)
           setPets(ownedPets)
 
-          const storedActivePetId = localStorage.getItem(`active_pet_${user.id}`)
+          const storedActivePetId = localStorage.getItem(`active_pet_${userId}`)
           const activePet =
             ownedPets.find((pet) => pet.id === storedActivePetId)
             || ownedPets[0]
 
           activePetIdRef.current = activePet.id
           setCurrentPet(activePet)
-          localStorage.setItem(`active_pet_${user.id}`, activePet.id)
+          localStorage.setItem(`active_pet_${userId}`, activePet.id)
 
-          await Promise.all([
-            loadFeedForPet(activePet),
-            loadCareForPet(activePet.id),
-            loadDocumentsForPet(activePet.id),
-            refreshCareReminders(ownedPets),
-          ])
+          try {
+            await Promise.all([
+              loadFeedForPet(activePet),
+              loadCareForPet(activePet.id),
+              loadDocumentsForPet(activePet.id),
+              refreshCareReminders(ownedPets),
+            ])
+          } catch (initialDataError) {
+            // Pet identity is already confirmed. Secondary data failures
+            // should not send the user back to account creation.
+            console.error('Error loading initial pet data:', initialDataError)
+          }
         } else {
           ownedPetIdsRef.current = []
           setPets([])
@@ -613,11 +632,15 @@ function PazoMain() {
           setIsOnboardingActive(true)
           setIsFeedLoading(false)
         }
+
+        if (!cancelled) setPetBootstrap({ userId, status: 'ready' })
       }
 
       void initApp()
     }
-  }, [user, loading])
+
+    return () => { cancelled = true }
+  }, [user, loading, petBootstrapRetry])
 
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
@@ -1448,6 +1471,38 @@ function PazoMain() {
         onUpdatePassword={changePassword}
         onExit={handleExitPasswordRecovery}
       />
+    )
+  }
+
+  if (user && (petBootstrap?.userId !== user.id || petBootstrap.status === 'loading')) {
+    return (
+      <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
+        <div aria-hidden="true" className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
+        <p className="text-sm font-bold">
+          {lang === 'es' ? 'Cargando tus mascotas...' : 'Loading your pets...'}
+        </p>
+      </div>
+    )
+  }
+
+  if (user && petBootstrap?.status === 'error') {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-5">
+        <main className="max-w-sm w-full bg-white p-6 rounded-[2rem] shadow-sm space-y-4">
+          <h1 className="text-xl font-black">
+            {lang === 'es' ? 'No pudimos cargar tus mascotas' : 'We could not load your pets'}
+          </h1>
+          <p role="alert" className="text-sm text-[#5C7470]">
+            {lang === 'es'
+              ? 'Tu sesión sigue activa. Comprueba tu conexión e inténtalo de nuevo; no necesitas crear otra cuenta.'
+              : 'You are still signed in. Check your connection and try again; you do not need another account.'}
+          </p>
+          <button type="button" onClick={() => setPetBootstrapRetry((value) => value + 1)}
+            className="w-full rounded-full bg-[#204E4A] text-white py-3 font-extrabold cursor-pointer">
+            {lang === 'es' ? 'Reintentar' : 'Try again'}
+          </button>
+        </main>
+      </div>
     )
   }
 
