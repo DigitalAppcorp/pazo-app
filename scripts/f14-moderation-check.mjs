@@ -260,4 +260,17 @@ assert.ok(read(copyInstalledTest).includes('Installed COPY source guard missing'
 assert.ok(read(disabledInstalledTest).includes('Service role must not invoke legacy purged confirmation'),
   'Legacy RPC validation must reject service_role on hosted backend')
 
+const pendingMediaView = read('src/features/moderation/ModerationMediaQueue.tsx')
+const reportApi = read('src/features/moderation/reportingService.ts')
+assert.ok(pendingMediaView.includes('Revisión manual pendiente') &&
+  pendingMediaView.includes('no se ha confirmado eliminación') &&
+  pendingMediaView.includes('getPendingModerationMedia'),
+  'Pending media UI must state manual-only review, not fake Storage success')
+assert.ok(!pendingMediaView.includes('purgeModerationMedia') &&
+  !pendingMediaView.includes('Storage aceptó la operación') &&
+  !pendingMediaView.includes('Revisar y eliminar medio') &&
+  !reportApi.includes("functions.invoke('f14-moderation-purge'") &&
+  !reportApi.includes('purgeModerationMedia'),
+  'User-facing moderator tools must not invoke parked destructive Storage Edge')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
