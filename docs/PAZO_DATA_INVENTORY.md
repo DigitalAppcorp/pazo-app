@@ -331,3 +331,7 @@ El borrado físico aún **NO está implementado**. Supabase Storage API es reque
 ## 20. Journal de revisión de eliminación (propuesta DRAFT, sin instalar)
 
 El sexto archivo SQL propuesto de F14 A3 agrega en `account_private` checkpoints de trabajo (ID de job, revisión, etapa, estado técnico, código de incidencia, fecha) y eventos de revisión, **sin emails, fotos, URLs, rutas de archivos ni UGC**. Datos operativos privados. Solo adaptador de servicio autorizado, con chequeo actual de lease y versión; anon y authenticated sin grants. No existe aún en el Supabase alojado, no hay proveedor nuevo ni ejecución real.
+
+## 21. Evidencia de reautenticación para cierre — PROPUESTA NO ACTIVADA
+
+Octavo borrador A3 de `account_private.deletion_recent_auth`: almacenaría IDs internos de solicitud, cuenta y sesión, fecha de verificación, caducidad a **cinco minutos** y fecha de consumo. **Nunca contraseñas, JWT, OTP, hashes de contraseña ni correos de reautenticación**. Exclusiva de servicio, con RLS y grants revocados a anon/authenticated. Permanece sin instalar, no hay evento de usuario ni nuevo proveedor; usa Supabase Auth actual. El token/contraseña se procesarían efímeramente por un backend autorizado, con cliente Auth aislado. No afirmar autoservicio de eliminación pública antes de verificar protección completa de cuentas, terceros y medios.
