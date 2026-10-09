@@ -118,3 +118,10 @@ Supabase migración `20261009061213_f14_reject_unverified_purged_status` aplicad
 Se retiró el botón inoperante de eliminación del panel `ModerationMediaQueue`; ahora solo muestra revisión administrativa pendiente y permite recargar. Se retiró la invocación desde `reportingService`. La nueva vista transpila JSX y compiló en el workflow de GitHub; falta aceptación visual del PO cuando Vercel publique un Preview actualizado. No repetir pruebas Auth ni Storage sintético, previamente aprobadas.
 
 Siguiente gate: evaluar si el MVP usa revisión manual con contenido despublicado o requiere eliminar físicamente medios. La exclusión entre Storage y escritores privilegiados, la comprobación exacta de versión y la caché CDN aún no están demostradas. F14 A2 abierto. `main` y A3/A4 pendientes.
+
+
+## 9. Aceptación visual de panel F14 A2 — 2026-10-09
+
+PO envió captura real del Preview `dpl_6iFoQUQ9QVYi8JBzR2FDWKtmmnRE` (READY; SHA `a650dd8`). **Visual PASS** para título `Revisión de archivos`, mensajes precisos de revisión administrativa y URLs públicas, estado vacío coherente con backend, botón `Actualizar estado` y ausencia de acción de purga. **No repetir esta QA**; no implica que el botón se haya pulsado ni prueba de reportes no vacíos, Storage bytes, CDN o concurrencia.
+
+GitHub CI para SHA `a650dd8`: SUCCESS. PR #35 sigue DRAFT, sin merge. Supabase 20 objetos, 0 claims/reportes/restricciones, Edge HTTP 503. **A2 continúa abierto:** D3-A exige verificación de eliminación en Storage además de despublicación; la vista manual no sustituye ese requisito. Falta contrato seguro entre DB y Storage, comprobación de origen/CDN y reconciliación de alcance. No iniciar A3/A4 ni publicar producción.
