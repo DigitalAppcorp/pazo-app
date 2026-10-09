@@ -310,7 +310,8 @@ assert.ok(safetyRoot.includes('f14QaPreview && <F14VersionProbe') &&
   versionProbe.includes('storage.remove([{ path, versionId: version }])') &&
   versionProbe.includes("String(absent.error.statusCode) !== '404'") &&
   versionProbe.includes('setDone(true)') &&
-  !versionProbe.includes('service_role') &&
+  !versionProbe.includes('SUPABASE_SERVICE_ROLE_KEY') &&
+  !versionProbe.includes('createClient(') &&
   !versionProbe.includes('pet-documents'),
   'Exact-version HTTP probe must be opt-in, synthetic, version-specific and never use service secrets')
 const pkg=read('package.json')
