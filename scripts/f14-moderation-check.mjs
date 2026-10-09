@@ -464,4 +464,24 @@ assert.ok(dryRunAdapter.includes('inspectHostedClaimEvidence(result)') &&
   read('package.json').includes(dryRunAdapterTest),
   'Service-only evidence must never turn directly into permission to purge')
 
+// A hypothetical HTTP journal cannot become an implicit DELETE permission.
+// Proof model enumerates event interleavings but is NOT a live service fence.
+const attemptModel = 'supabase/drafts/f14_media_purge_v2/privilegedAttemptProtocol.mjs'
+const attemptTest = 'supabase/drafts/f14_media_purge_v2/privilegedAttemptProtocol.test.mjs'
+assert.ok(existsSync(attemptModel) && existsSync(attemptTest),
+  'Privileged attempt model and concurrency regression required')
+const attemptText = read(attemptModel)
+const attemptSuite = read(attemptTest)
+assert.ok(attemptText.includes('mayDelete: false') &&
+  attemptText.includes('shouldSendHttp: false') &&
+  attemptText.includes('mayFinalizePurge: false') &&
+  attemptText.includes('canReleaseHold: false') &&
+  !attemptText.includes('.remove(') &&
+  !attemptText.includes('supabase.storage') &&
+  attemptSuite.includes('interleavings up to 3 events') &&
+  attemptSuite.includes('HTTP_TIMEOUT') &&
+  attemptSuite.includes('RETRY_DELETE') &&
+  read('package.json').includes(attemptTest),
+  'Concurrent writer protocol must remain simulation-only and fail-closed')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
