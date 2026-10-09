@@ -293,3 +293,7 @@ El PR #36 incorporó manejo de alta sin sesión (email pendiente de verificació
 ### 2026-10-09 — Recuperación de acceso: implementación inicial, QA alojada pendiente
 
 El PR #36 incluye `resetPasswordForEmail`, estado de `PASSWORD_RECOVERY`, formulario de contraseña nueva, protección contra errores y salida a login; utiliza el estándar de contraseña de signup. CI run `37930372739` PASS en commit `815cbda`. **No afirmar flujo completo hasta prueba de enlace de email real** y revisión de Redirect URLs en Auth; acceso Vercel al equipo `digitalapp` sigue 403. No se requiere migración ni nuevo proveedor para el MVP.
+
+### 2026-10-09 — No confundir error de carga con cuenta nueva
+
+PR #36 ahora protege la carga inicial de mascotas para usuarios autenticados: spinner, error recuperable y Reintentar ante fallos de `fetchOwnedPets`; A03 solo tras respuesta real con lista vacía. CI run `37931428416` SUCCESS commit `446b2c5`. GitHub confirma **build-rate-limit Vercel** además del 403 del scope `digitalapp`; sin QA en Preview, no habilitar plan pago. No reabrir F14 hardening ni mezclar las ramas por inercia.
