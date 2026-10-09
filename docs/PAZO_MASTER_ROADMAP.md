@@ -1003,3 +1003,7 @@ Hosted PAZO migration `f14_media_claim_preflight` version `20261009014616` appli
 ### F14 A2 — two browser role screenshots, strict QA retest required (2026-10-08 local)
 
 PO provided two authentic-session UI PASS screenshots (normal / moderator), with moderator actions visible. Original test flaw found: any RPC failure wrongly counted as permission denied. Preview-only diagnostic patched to require specific SQLSTATE `42501` for denied queue/media/preflight claims; account type is displayed. Updated tests needed on both sessions before declaring complete signed-JWT HTTP authorization. No production deployment, Storage DELETE or other backend mutations.
+
+
+### F14 A2 — strict browser permission tests passed (2026-10-08 local)
+PO submitted normal-account and moderator-account Preview screenshots, both **6/6 PASS** after UI verifier was hardened to require PostgREST SQLSTATE `42501` for forbidden actions; role correctly displayed in both. Mark **real-session browser permissions PASS**, while independent raw signed JWT runner and Storage deletion audits remain separate and unexecuted. DB check 0 claims/events/reports/restrictions, 1 moderator, 20 Storage objects; deployed Edge still 503. Next gate: prove exact-object lifecycle/Storage concurrency with isolated bytes, strong claim-bound confirmation and CDN/retention plan. A2 open. Do not delete media, merge main or deploy production.

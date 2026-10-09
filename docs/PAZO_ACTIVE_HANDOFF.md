@@ -1182,3 +1182,22 @@ PO uploaded two screen captures of `Mi mascota > Seguridad y privacidad > Prueba
 **Remediation staged on the same F14 A2 branch**: `F14RoleCheck` now requires PostgREST error code **SQLSTATE 42501** for every expected denial, instead of a truthy error. It shows actual `Tipo de cuenta comprobado: Normal/Moderadora`, and explains connection errors do not count as PASS. Static regression checker asserts the strict condition. No data changes; Preview-only UI. The PO **must rerun this stricter version in both real sessions** to close signed-JWT UI gate. A non-42501 error must be investigated (function cache vs authorization vs network), not silently treated as denial.
 
 No Edge Storage purge, Storage DELETE, main merge, production deployment or A3/A4. Other F14 A2 blockers still outstanding: exact-object Storage CAS/confirm, CDN and D3-B retention. Continue from latest branch HEAD and wait for updated Preview CI.
+
+
+---
+
+# F14 A2 — REAL BROWSER PERMISSIONS GATE: STRICT SQLSTATE 42501 PASS (2026-10-08 local)
+
+**LATEST CHECKPOINT — supersedes previous "strict retest pending".** Product Owner provided TWO new screenshots of PAZO Preview's corrected `Prueba de permisos F14`. Image 1 explicitly marked **cuenta Normal**, image 2 explicitly marked **cuenta Moderadora**. BOTH screens show `PASS — Todos los permisos correctos` with **six individual PASS results each**, and the correct account type label:
+1. Current session validated via `supabase.auth.getUser()`.
+2. User's actual moderator status via `f14_is_moderator`.
+3. `f14_moderation_queue` access matching the role.
+4. `f14_pending_media` access matching the role.
+5. `f14_prepare_media_claim` service-only denial.
+6. `f14_recheck_media_claim` service-only denial.
+
+These screenshots are from strict QA commit `38a2bcc88e158f8ce2ece704a88ec292d7d33b7a`. That verifier requires **PostgREST SQLSTATE `42501`**, rather than any failure, for expected denial. Therefore **SIGNED-IN BROWSER PERMISSION GATE PASS** for one normal account and the existing moderator, with actual Auth sessions. This is not a general penetration test, does not independently verify raw network response logs or CDN behavior, and does not replace the pending separately executed `scripts/f14-signed-jwt-authorization.mjs` CLI test. No passwords or JWT secrets were shared.
+
+Read-only DB check after screenshots: 0 claims/events/reports/restrictions, 1 moderator and **20 Storage objects currently** (earlier audit had 19; one extra object appeared before this check; identity/provenance not established, DO NOT delete/alter it). Deployed `f14-moderation-purge` still version 1, disabled HTTP 503 and no `.remove(` call. Preview-only QA panel may remain while F14 A2 open; MUST remove or explicitly gate it prior to broad public beta. No DB changes or external user actions taken by assistant in this checkpoint.
+
+**Next engineering gate** is safe media deletion across DB and Storage: verify exact object/version via Storage API against an isolated real test object, design hard fail-closed handling of concurrent replacement/upsert and an exact-object claim-bound completion ledger, then CDN/cache and D3-B retention policy. Do not enable Storage DELETE or promote to Vercel production/main without separate PO permission. F14 A2 remains OPEN, A3/A4 not authorized.
