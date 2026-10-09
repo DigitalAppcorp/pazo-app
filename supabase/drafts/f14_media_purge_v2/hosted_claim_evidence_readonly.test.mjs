@@ -12,6 +12,14 @@ test('Hosted claim reader is one parameterized SELECT with no application DML', 
   assert.doesNotMatch(body, /storage\.from\(/i)
   assert.doesNotMatch(body, /service_role\s*key/i)
 })
+test('Live probes require lock-capable transaction; SQL remains SELECT-only', () => {
+  assert.ok(sql.includes('REPEATABLE READ'))
+  assert.ok(sql.includes('f14_media_probe'))
+  assert.ok(sql.includes('FOR SHARE'))
+  assert.ok(sql.includes('MUST NOT use PostgreSQL READ ONLY'))
+  const body = sql.replace(/--[^\n]*/g, '')
+  assert.doesNotMatch(body, /\bBEGIN\b|\bSET\s+TRANSACTION\b/i)
+})
 test('Hosted evidence includes independently computed live source and version', () => {
   assert.ok(sql.includes('moderation_private.f14_media_probe(c.target_kind, c.target_id)'))
   assert.ok(sql.includes('md5(coalesce(o.metadata::text,\'\'))'))
