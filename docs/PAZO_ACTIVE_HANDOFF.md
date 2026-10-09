@@ -48,5 +48,14 @@
 - Se dejó el checkout de frontend con Supabase alojado; nunca pedir Docker/Supabase local para ver cambios. Carpeta original `pazo-app` contiene cambios no confirmados de F14, preservarlos.
 - El siguiente gate requiere 2 cuentas descartables controladas (usuario denunciante/autor y cuenta moderadora ya autorizada), sin usar contenido ajeno ni activar eliminación; no confundir review visual con seguridad de API.
 
+
+## Decisión PO — Supabase alojado durante desarrollo = datos de prueba (2026-10-09)
+
+- El Product Owner aclara que **todos los datos actuales de la base hospedada de PAZO, aunque el proyecto se denomine «producción», son datos de prueba pre-lanzamiento**. Incluye publicaciones, perfiles, mascotas, comentarios y cuentas utilizadas para QA; no hay datos de una beta pública que deban tratarse como registros finales de usuarios.
+- **Autorizado en principio:** ejecutar validaciones funcionales controladas con esas cuentas/datos (p. ej. denuncia real, cola del moderador, acción de despublicar un post de prueba). No etiquetar estos registros como contenido de clientes externos. Documentar antes/después y resultados.
+- **Limpieza pre-lanzamiento:** el PO quiere eliminar los datos de prueba antes de abrir PAZO oficialmente. Preparar inventario y plan de limpieza; **no ejecutar un borrado masivo ahora**, ni eliminar esquema, funciones, buckets, permisos, rol de moderador, migraciones o configuración por confundir infraestructura con datos. Solicitar gate específico del PO justo antes de ejecutarlo y verificar integridad.
+- Los riesgos técnicos siguen siendo reales aunque el contenido sea de prueba: D3-A Storage/CDN, eliminación de cuentas/medios, permisos SQL, reportes y retención se deben validar. No publicar el producto afirmando limpieza que aún no se ha ejecutado.
+- QA frontend continúa en Antigravity localhost con **Supabase hosted**, sin requerir infraestructura Supabase local, sin Vercel.
+
 ## Próxima acción única
 Preparar **release-readiness check** acotado de PR #36, sin reabrir módulos; verificar CI actual y separar qué puede integrarse ahora de los bloqueos reales de beta pública. Antes de merge/deploy, detenerse en gate de autorización PO. Retomar F14 mínimo solo con decisión/gate aprobado, sin asumir que su rama es apta para producción.
