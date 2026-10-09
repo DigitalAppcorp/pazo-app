@@ -195,6 +195,22 @@ assert.ok(insertSql.includes('INSERT to held path must raise 42501') &&
   insertSql.includes('ROLLBACK;') &&
   !insertSql.includes('DELETE FROM storage.objects'),
   'Installed Storage RLS test must cover held/free INSERT without SQL metadata deletion')
+const copyRisk = 'supabase/tests/database/f14_storage_copy_prerequisites_rollback.test.sql'
+const copyRecovery = 'supabase/drafts/f14_media_purge_v2/HELD_CLAIM_RECOVERY_AND_COPY_AUDIT.md'
+for (const f of [copyRisk, copyRecovery])
+  assert.ok(existsSync(f), 'F14 cross-service remaining-risk artifact missing: '+f)
+const copySql = read(copyRisk)
+assert.ok(copySql.includes('A public SELECT source + unheld owned INSERT destination') &&
+  copySql.includes('SET LOCAL ROLE authenticated') &&
+  copySql.trimEnd().endsWith('ROLLBACK;') &&
+  !copySql.includes('DELETE FROM storage.objects'),
+  'COPY limitations must be backed by reversible SQL without Storage deletion')
+const recoveryContract = read(copyRecovery)
+assert.ok(recoveryContract.includes('service_role') &&
+  recoveryContract.includes('manual_review') &&
+  recoveryContract.includes('MOVE') && recoveryContract.includes('COPY') &&
+  recoveryContract.includes('UPSERT') && recoveryContract.includes('HTTP 503'),
+  'Recovery/COPY limitations must remain documented and fail-closed')
 const casContract = read(casGate)
 assert.ok(casContract.includes('service_role') &&
   casContract.includes('claim_id') &&
