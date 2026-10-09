@@ -395,7 +395,7 @@ assert.ok(claimDiagnose.includes('held_expired') &&
  claimDiagnose.includes('held_source_drift') &&
  claimDiagnose.includes('held_without_storage_metadata') &&
  claimDiagnose.includes('held_moderation_state_drift') &&
- !/\\b(?:DELETE|TRUNCATE|INSERT|UPDATE|GRANT|REVOKE)\\b/i.test(claimDiagnose.replace(/--[^\\n]*/g,'')),
+ !/\b(?:DELETE|TRUNCATE|INSERT|UPDATE|GRANT|REVOKE)\b/i.test(claimDiagnose.replace(/--[^\n]*/g,'')),
  'Operator diagnostic must be aggregate SELECT only')
 assert.ok(exactOutcome.includes("status: 'origin_absent_observed'") &&
  exactOutcome.includes('mayFinalizePurge: false') &&
