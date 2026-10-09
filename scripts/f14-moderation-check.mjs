@@ -137,14 +137,19 @@ assert.ok(storageSmoke.includes('storage.list(uid,'), 'Storage smoke must verify
 assert.ok(!storageSmoke.includes('storage.info(path)'), 'Storage smoke must not depend on unavailable SDK info method')
 assert.ok(storageSmoke.includes('sessionStorage.setItem'), 'Storage smoke must support interrupted cleanup')
 assert.ok(qaHost.includes('<F14StorageProbe lang={lang} />'), 'Storage smoke must live in QA-only Preview')
-const updateDraft = 'supabase/drafts/20261009_f14_storage_held_media_update_guard.sql'
+const updateMigration = 'supabase/migrations/20261009054411_f14_held_media_fail_closed_recheck_update_guard.sql'
 const updateSmoke = 'supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql'
 const updateBehavior = 'supabase/tests/database/f14_storage_held_update_behavior_rollback.test.sql'
 const updateCandidate = 'supabase/tests/database/f14_storage_held_update_candidate_rollback.test.sql'
+const updateInstalled = 'supabase/tests/database/f14_storage_held_update_installed_rollback.test.sql'
 const casGate = 'supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md'
-for (const f of [updateDraft, updateSmoke, updateBehavior, updateCandidate, casGate])
+assert.ok(!existsSync('supabase/drafts/20261009_f14_storage_held_media_update_guard.sql'),
+  'Applied migration must no longer remain in drafts')
+for (const f of [updateMigration, updateSmoke, updateBehavior, updateCandidate, updateInstalled, casGate])
   assert.ok(existsSync(f), 'F14 staged fail-closed UPDATE artifact missing: '+f)
-const updateSql = read(updateDraft)
+const updateSql = read(updateMigration)
+assert.ok(updateSql.includes('APPLIED to hosted PAZO Supabase version 20261009054411'),
+  'Canonical applied migration must record hosted version')
 assert.ok(updateSql.includes('AS RESTRICTIVE FOR UPDATE') &&
   updateSql.includes('USING (public.f14_storage_media_path_unclaimed(bucket_id,name))') &&
   updateSql.includes('WITH CHECK (public.f14_storage_media_path_unclaimed(bucket_id,name))'),
@@ -158,7 +163,7 @@ assert.ok(updateSql.includes('CREATE OR REPLACE FUNCTION public.f14_recheck_medi
 assert.ok(!updateSql.includes("SET status='invalidated'"),
   'Candidate recheck must not automatically release media holds')
 assert.ok(!updateSql.includes('DELETE FROM storage.objects'), 'Guard draft must never delete Storage metadata')
-for (const f of [updateSmoke, updateBehavior, updateCandidate]) {
+for (const f of [updateSmoke, updateBehavior, updateCandidate, updateInstalled]) {
   const testSql = read(f)
   assert.ok(testSql.includes('BEGIN;') && testSql.trimEnd().endsWith('ROLLBACK;'),
     'Staged RLS tests must be transactionally reversible: '+f)
@@ -177,6 +182,12 @@ assert.ok(candidateSql.includes('Candidate: held claim must still protect after 
   candidateSql.includes('Expiry recheck must NOT automatically invalidate the hold') &&
   candidateSql.includes('Source drift recheck must NOT automatically invalidate hold'),
   'Candidate rollback test must prove fail-closed expiry and explicit release')
+const installedSql = read(updateInstalled)
+assert.ok(installedSql.includes('Installed UPDATE guard is missing') &&
+  installedSql.includes('Installed guard: held claim must still protect after TTL expiry') &&
+  !installedSql.includes('CREATE OR REPLACE FUNCTION public.f14_recheck_media_claim') &&
+  !installedSql.includes('CREATE POLICY f14_media_claim_restrict_update'),
+  'Installed SQL regression must test live backend without replacing production functions')
 const casContract = read(casGate)
 assert.ok(casContract.includes('service_role') &&
   casContract.includes('claim_id') &&
