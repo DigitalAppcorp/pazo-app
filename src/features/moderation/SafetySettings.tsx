@@ -4,7 +4,6 @@ import { isModerator } from './reportingService'
 import { ModeratorQueue } from './ModeratorQueue'
 import { ModerationMediaQueue } from './ModerationMediaQueue'
 import { F14RoleCheck } from './F14RoleCheck'
-import { F14StorageProbe } from './F14StorageProbe'
 import { F14VersionProbe } from './F14VersionProbe'
 type Props = {
   lang: 'es' | 'en'; ownBlocks: ReadonlySet<string>; hidden: ReadonlySet<string>;
@@ -52,7 +51,6 @@ export function SafetySettings({ lang, ownBlocks, hidden, onUnblock, onUnhide, o
     {moderator && <button type="button" onClick={() => setShowMedia(true)} className="ml-2 mb-4 rounded-full bg-white px-4 py-2 text-xs font-bold underline">{lang === 'es' ? 'Archivos pendientes' : 'Pending media'}</button>}
     {showMedia && <ModerationMediaQueue lang={lang} onClose={() => setShowMedia(false)} />}
     {f14QaPreview && <F14RoleCheck lang={lang} />}
-    {f14QaPreview && <F14StorageProbe lang={lang} />}
     {f14QaPreview && <F14VersionProbe lang={lang} />}
     {error && <p role="alert" className="text-red-700 mb-4">{error}</p>}
     <h3 className="font-extrabold mb-2">{lang === 'es' ? 'Cuentas bloqueadas por ti' : 'Accounts you blocked'}</h3>
