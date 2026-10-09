@@ -54,6 +54,15 @@
 - **Siguiente paso operativo:** auditoría puntual de brechas funcionales de los módulos ya existentes contra roadmap/scope y código de la rama, sin repetir QA aprobadas ni diseñar nuevas features; ordenar impedimentos para flujo registro → mascota → publicar/interactuar → comunidades/lugares/cuidados → notificaciones, y distinguir mocks/errores reales. Avanzar después solo por el gate funcional aprobado correspondiente; no iniciar automáticamente F14 A3/A4 o una nueva fase sin respetar sus autorizaciones.
 - No afirmar beta pública lista mientras falten requisitos mínimos de privacidad, gestión de reportes/contenido público, eliminación de cuenta y pruebas reales; la prioridad funcional **no** es una exención de responsabilidades con el primer usuario.
 
+## Hito MVP funcional independiente — 2026-10-09 (no fusionado)
+
+- Trabajo de producto ejecutado en rama **`mvp/functional-readiness-20261009`** nacida de `main` (no de F14), PR **#36 DRAFT**: https://github.com/DigitalAppcorp/pazo-app/pull/36 ; HEAD auditado `f0b638263857b8ef47b651e33be5c53016860c90`.
+- Corrección funcional del Feed: selección de páginas sin perder publicaciones social/recomendado por cursores, deduplicación y protección contra respuestas obsoletas al cambiar mascota. Seis tests Node; GitHub Actions run `37927412741` **SUCCESS** en ese HEAD (governance + build), además de prueba local del helper PASS 6/6. **No se ha hecho QA visual de scroll**.
+- Cuenta real ya no muestra conversaciones y badges **ficticios**; mensajería 1 a 1 sigue POSPUESTA y el demo interactivo se conserva en el modo explícito de demostración. No hay backend de mensajes.
+- Auditoría integral (evidencia/déficits, no reinicio de fases): `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` en PR #36. Núcleo histórico real: alta mascota, Feed, Comunidades, Mapa/Lugares, Agenda, Documentos, Rescate y Buscar. Aclaración crítica: en `main` el tab Mapa monta `MapView`, pero **esta rama F14** introduce un guard `DEV` que en builds no-dev sustituye el mapa real por fake door. No fusionar F14 sin reconciliar intencionalmente el rollout y coste de Mapbox.
+- **Siguiente gate:** verificar PR #36 en Preview para scroll + cambio de mascota + aviso de mensajes de cuenta normal; solicitar solo esa aceptación visual nueva. No repetir QA anteriores. Después organizar regresiones reales de onboarding/publicación/Comunidades/Lugares/Cuidados con ejecución mínima, antes de cualquier beta.
+- Independencia estricta: PR #35 sigue DRAFT/PAUSADO, sin merge de código F14 a `main`; PR #36 también DRAFT, sin merge o deploy. No inferir que el fix del Feed está ya en la rama F14 hasta reconciliación explícita. La auditoría Supabase observó tablas reales con RLS; no se mutaron registros.
+
 ## Próximo paso EXACTO y bloqueadores — registro histórico sustituido por la decisión anterior
 
 **SUSTITUIDO por decisión PO anterior (histórico):** El anterior siguiente gate proponía continuar con fencing/ledger/HTTP concurrente. Ahora queda diferido; NO ejecutarlo como acción siguiente sin reapertura expresa.
