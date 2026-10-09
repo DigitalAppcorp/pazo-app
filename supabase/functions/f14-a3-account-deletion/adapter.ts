@@ -7,7 +7,7 @@ interface RpcResponse { data: unknown; error: unknown }
 export interface A3ServerRpc {
   rpc(name: string, params: Record<string, unknown>): Promise<RpcResponse>
 }
-export type VerifiedGateCheck = (jobId: string) => Promise<A3ReviewProof>
+export type VerifiedGateCheck = (jobId: string, claim: A3LeaseClaim) => Promise<A3ReviewProof>
 export type A3ServerGateChecks = Partial<Record<A3ReviewGate,VerifiedGateCheck>>
 
 function unwrap(result: RpcResponse): unknown {
@@ -42,10 +42,10 @@ export function createA3ReviewPort(
     async readRevision(jobId) {
       return asRevision(unwrap(await db.rpc('f14_a3_worker_review_revision',{p_job_id:jobId})))
     },
-    async inspectGate(jobId,gate) {
+    async inspectGate(jobId,gate,claim) {
       const check=checks[gate]
       if(!check) return {passed:false,issue:'missing_evidence'}
-      const p=await check(jobId)
+      const p=await check(jobId,claim)
       if(p?.passed===true) return {passed:true}
       return {
         passed:false,

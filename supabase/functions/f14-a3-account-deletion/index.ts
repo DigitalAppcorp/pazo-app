@@ -3,6 +3,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2'
 import { makeA3InternalReviewHandler } from './http.ts'
 import { createA3ReviewPort, type A3ServerRpc } from './adapter.ts'
+import { createA3ReadOnlyChecks } from './checks.ts'
 
 const url=Deno.env.get('SUPABASE_URL')??''
 const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??''
@@ -18,7 +19,8 @@ const handler=makeA3InternalReviewHandler({
     const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}})
     // No gate providers registered: any review call fails closed until each
     // real backend verifier is developed and independently approved.
-    return createA3ReviewPort(db as unknown as A3ServerRpc)
+    const serviceDb=db as unknown as A3ServerRpc
+    return createA3ReviewPort(serviceDb,createA3ReadOnlyChecks(serviceDb))
   },
 })
 

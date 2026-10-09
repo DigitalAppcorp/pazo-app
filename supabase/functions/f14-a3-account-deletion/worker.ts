@@ -41,7 +41,7 @@ export interface A3ReviewPort {
   readJob(jobId: string): Promise<A3ReviewJob | null>
   leaseIsCurrent(jobId: string, claim: A3LeaseClaim): Promise<boolean>
   readRevision(jobId: string): Promise<number>
-  inspectGate(jobId: string, gate: A3ReviewGate): Promise<A3ReviewProof>
+  inspectGate(jobId: string, gate: A3ReviewGate, claim: A3LeaseClaim): Promise<A3ReviewProof>
   /** Durable DB CAS; throws or returns null on conflict/failure. */
   saveCheckpoint(checkpoint: A3Checkpoint): Promise<number | null>
 }
@@ -93,7 +93,7 @@ export async function runA3DeletionReview(
       }
       let proof: A3ReviewProof
       try {
-        proof = await port.inspectGate(jobId,gate)
+        proof = await port.inspectGate(jobId,gate,claim)
       } catch {
         // No exception messages, UGC, emails, object paths or tokens in logs.
         try {
