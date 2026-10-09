@@ -18,3 +18,9 @@
 - **A3/A4 no terminadas:** cuenta/mascota, archivos, retención y políticas públicas. No prometer eliminación completa ni dar beta pública aún.
 - CI solo demuestra build/tests. Se requiere QA real de cinco objetivos, moderador/no moderador y prueba de borrado físico separada con autorización específica. No usar datos de usuarios reales para ensayo.
 - PR #35 permanece pausado; PR #34 regula alternativa pública de Lugares y exige reconciliación explícita. No fusionar por inercia.
+
+### Refinamiento QA de interfaz
+
+La cola de medios utiliza ahora un diálogo Portal responsivo con cierre Escape y control de foco; antes era `absolute` y podía quedar recortada dentro del perfil. La cola continúa **solo lectura**: no es un camino oculto para borrar Storage/CDN.
+
+El PR está dirigido temporalmente a `main` solo para activar el CI existente, que no se ejecuta en PRs cuyo base sea otra rama. **No está autorizado el merge**; la dependencia PR #36 debe integrarse primero, luego volver a conciliar el diff.
