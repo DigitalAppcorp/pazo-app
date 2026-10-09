@@ -355,3 +355,10 @@ La prueba Preview `F14VersionProbe` fue reforzada: bloqueo síncrono contra dobl
 ### 39. F14 A2 — retiro del QA anterior para evitar ejecuciones duplicadas
 
 Se desmontó y eliminó del código el componente `F14StorageProbe` aprobado previamente, que utilizaba borrado sintético por ruta. Se conserva su resultado histórico, pero no estará disponible en nuevos Previews. La única prueba visible de Storage pendiente será `F14VersionProbe`, que usa la versión exacta del objeto y solo el archivo artificial que creó. Governance prohíbe reinstalar el componente anterior. Vercel Preview con la versión nueva aún pendiente por cuota y CI del último SHA debe consultarse. D3-A y Gate 8 siguen abiertos.
+
+
+### 40. A2 — QA autenticado de eliminación exacta versionId aprobado
+
+Captura PO del Preview `ac167b4` confirma 4 pasos PASS del test sintético `F14VersionProbe`: archivo creado, ID/versión leídos, intento de borrar versión equivocada sin afectar la actual, borrado de versión exacta y ausencia del origen. Backend se verificó en lectura posterior: 20 objetos, cero `f14-version-probe-*` remanentes. **No repetir.**
+
+La observación CDN del mismo test reportó HTTP 400 desde teléfono con URL `cacheNonce`: **resultado no concluyente**, no demuestra purga CDN y tampoco que haya servido imagen eliminada. Marcar `versionId exacto HTTP` **PASS solo para fixture de prueba**, sin cambiar el estado fail-closed de la purga real. Persisten coordinación escrituras privilegiadas, acceso seguro a evidencia, retención/CDN/navegadores/backups. Edge HTTP 503, `purged` protegido, A2 Gate 8 y D3-A siguen ABIERTOS.
