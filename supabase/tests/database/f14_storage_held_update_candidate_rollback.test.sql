@@ -168,6 +168,20 @@ BEGIN
  END IF;
 END $held_after_drift_recheck$;
 
+-- Verify the expected service_role RLS bypass on synthetic metadata only.
+-- This is a negative security boundary: the migration CANNOT protect trusted
+-- privileged clients. Future workers need a shared writer-exclusion protocol.
+SET LOCAL ROLE service_role;
+DO $service_bypass$
+DECLARE n int;
+BEGIN
+ UPDATE storage.objects SET metadata='{"qa":"service_role_bypasses_rls"}'::jsonb
+ WHERE bucket_id='post-photos' AND name=current_setting('pazo.f14.qa.held');
+ GET DIAGNOSTICS n = ROW_COUNT;
+ IF n<>1 THEN RAISE EXCEPTION 'Expected privileged write bypass, got %',n; END IF;
+END $service_bypass$;
+RESET ROLE;
+
 -- The guard deliberately releases a path only after explicit invalidation.
 -- Real future workers still need serialization against in-flight HTTP deletes.
 UPDATE moderation_private.media_claims SET status='invalidated'
