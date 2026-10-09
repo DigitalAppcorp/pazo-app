@@ -112,3 +112,10 @@ El test Node de `serviceEvidenceRpc.test.mjs` ahora forma parte real de `npm run
 `f14_service_evidence_reader_drift_rollback.test.sql` se ejecutó directamente en PAZO con `BEGIN/ROLLBACK`: reserva válida -> candidato; al compartir URL, vencer hold, descartar reporte, retirar restricción o modificar versión -> NULL. No quedaron residuos. Este fixture está versionado y protegido por `scripts/f14-moderation-check.mjs`, pero no se ejecuta automáticamente como SQL desde CI. Supabase conserva 20 objetos, 0 claims/reportes/restricciones.
 
 **Pendiente bloqueante para D3-A:** exclusión/registro durable de operaciones HTTP entre escritores privilegiados y moderación, recuperación segura de timeouts y reintentos; CDN/browser/backups y retención siguen sin prueba de invalidación global. La prueba HTTP exact-version de píxel del PO sigue PASS y no se repite. La Edge de borrado permanece HTTP 503, PR #35 DRAFT y A2 ABIERTO.
+
+
+### Modelo de exclusión de escritores — simulación PASS; servidor real pendiente
+
+`privilegedAttemptProtocol.mjs` y suite Node versionadas y ejecutadas en CI: HTTP timeout/error -> estado desconocido sin retry automático; envío duplicado/token o generación caducada -> rechazo; solo origen ausente -> **nunca** certificar CDN o `purged`; bloqueo persistente con revisión humana si falta prueba. Se comprobaron **1,331 interleavings** de 3 eventos y el contrato `mayDelete=false`, `shouldSendHttp=false`, `canReleaseHold=false`. Primer CI detectó TypeError ante `null`; corregido. GitHub Actions `37917583521` SUCCESS sobre `46423d0`, **122 pruebas PASS** y build PASS. Gobierno estático impide perder el test de CI.
+
+**No confundir:** la simulación no proporciona una barrera real con `service_role` ni un ledger durable. El contrato de activación y pruebas pendientes está en `PRIVILEGED_ATTEMPT_FENCE_GATE.md`; requiere inventario completo de writers externos, migración separada aprobada, pruebas de dos procesos en Storage real sobre archivos sintéticos, reconciliación de timeouts y alcance CDN/browser/backup. A2 y D3-A siguen abiertos, Edge destructiva 503.
