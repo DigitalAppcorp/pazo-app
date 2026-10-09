@@ -9,7 +9,7 @@ const version='88888888-8888-4888-8888-888888888888'
 const fingerprint='abcdefabcdefabcdefabcdefabcdefab'
 const url=`https://mrybvqdebbgcayuvgkkr.supabase.co/storage/v1/object/public/post-photos/${path}`
 function sample(){
- return {
+ const value = {
   reservation:{claim_id:ids.claim,target_kind:'feed_post',target_id:ids.target,report_id:ids.report,bucket:'post-photos',storage_object_id:ids.object,status:'held',expires_at:'2026-10-09T07:00:00.000Z',
    snapshot:{kind:'feed_post',target_id:ids.target,report_id:ids.report,bucket:'post-photos',path,source_url:url,owner_id:ids.owner,storage_object_id:ids.object,object_version:version,object_updated_at:updated,metadata_fingerprint:fingerprint}},
   restriction:{target_kind:'feed_post',target_id:ids.target,report_id:ids.report,media_status:'pending_review'},
@@ -18,6 +18,11 @@ function sample(){
   references:{url_reference_count:1,community_path_count:0},
   databaseNow:'2026-10-09T06:01:00.000Z'
  }
+ // The live f14_media_probe always contains both nullable relationship keys.
+ value.reservation.snapshot.pet_id='66666666-6666-4666-8666-666666666666'
+ value.reservation.snapshot.community_id=null
+ value.currentSourceSnapshot={...value.reservation.snapshot}
+ return value
 }
 function patch(section, changes){const x=sample();x[section]={...x[section],...changes};return x}
 function bad(name,x,reason){test(name,()=>{const r=inspectHostedClaimEvidence(x);assert.equal(r.status,'manual_review');assert.equal(r.reason,reason);assert.equal(Object.hasOwn(r,'selector'),false)})}
@@ -31,6 +36,12 @@ test('hosted row field names produce exact selector but NEVER authorization',()=
 })
 bad('snapshot absent',patch('reservation',{snapshot:null}),'missing_claim_snapshot')
 bad('report absent',{...sample(),report:undefined},'missing_database_evidence')
+bad('fresh source re-probe required',{...sample(),currentSourceSnapshot:null},'missing_database_evidence')
+bad('changed source URL after held claim',patch('currentSourceSnapshot',{source_url:'https://elsewhere.invalid/x'}),'current_source_snapshot_drift')
+bad('changed source owner after claim',patch('currentSourceSnapshot',{owner_id:ids.report}),'current_source_snapshot_drift')
+bad('changed pet association after claim',patch('currentSourceSnapshot',{pet_id:ids.object}),'current_source_snapshot_drift')
+bad('changed current source version after claim',patch('currentSourceSnapshot',{object_version:ids.report}),'current_source_snapshot_drift')
+
 bad('report source mismatch',patch('report',{target_id:ids.object}),'database_identity_drift')
 bad('restriction source mismatch',patch('restriction',{report_id:ids.object}),'database_identity_drift')
 bad('pending report not removable',patch('report',{status:'pending'}),'not_pending_verified_moderation')
@@ -63,6 +74,7 @@ test('community requires matching bucket, kind, and unique path reference',()=>{
  x.report.target_kind='community_post'
  x.storageObject.bucket_id=bucket
  x.references.community_path_count=1
+ x.currentSourceSnapshot={...x.reservation.snapshot}
  assert.equal(inspectHostedClaimEvidence(x).status,'candidate_only')
  x.references.community_path_count=0
  assert.equal(inspectHostedClaimEvidence(x).reason,'nonexclusive_or_unverified_references')
