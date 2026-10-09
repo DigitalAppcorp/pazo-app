@@ -52,3 +52,8 @@ Auditoría Supabase únicamente agregada: 4 buckets públicos, 1 privado y 20 ob
 ### Reconciliación backend de claim/source — CI PASS, eliminación aún NO validada
 
 El preflight offline ahora exige un `f14_media_probe(kind,id)` **actual**, comparado con `media_claims.snapshot`, referencias URL/path recomputadas, `storage.objects` actual, reporte y restricción vigentes. No autoriza borrar; si cambia el autor, mascota, URL, versión, metadata o estado, exige revisión manual. Tests ejecutados en GitHub CI `37900262964` SUCCESS. La capacidad real de `remove([{path,versionId}])` en PAZO, CDN, carreras HTTP, `service_role`, recuperación y retención siguen pendientes. Preview actualizado bloqueado por cuota Vercel; no solicitar clic en Preview anterior ni revalidar QA visual aprobadas.
+
+
+### Gate de integración — consulta real PostgreSQL para evidencia, sin borrado
+
+Preparado `supabase/drafts/f14_media_purge_v2/hosted_claim_evidence_readonly.sql` y contrato Node `hosted_claim_evidence_readonly.test.mjs`. Selección privada de reserva/restricción/reporte, objeto vigente, `f14_media_probe` fresco, referencia única y reloj servidor, sin acceso a bytes ni información de denuncia libre. SQL preparado y ejecutado en Supabase con un ID sintético inexistente: `[]` sin errores; no existen reservas actuales. CI `37901053491` PASS. **No concluir que el caso positivo, aislamiento de transacciones o un DELETE de versión hospedado hayan sido validados**; este query no sostiene locks durante HTTP. Mantener purga Edge 503 y estado `purged` bloqueado. D3-A y F14 A2 abiertos, Preview nuevo pendiente.
