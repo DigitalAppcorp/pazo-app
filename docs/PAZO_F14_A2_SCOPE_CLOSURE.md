@@ -129,3 +129,8 @@ Hay esquema draft `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` bajo `s
 ### Propuesta ledger: PostgreSQL 16 efímero PASS, Supabase real no modificado
 
 El SQL `20261009_privileged_attempt_ledger_PROPOSAL_ONLY.sql` ya fue **ejecutado en PostgreSQL 16 temporal de CI**, sin aplicación a PAZO. Fixture `privileged_attempt_ledger_ephemeral.test.sql` y script `test-f14-ledger-ephemeral.sh` prueban que CREATE TABLE, constraint de ruta exclusiva, FK compuesta, event idempotency, RLS FORCE y REVOKE compilan y rechazan entradas ilegales, incluyendo estado `purged`. Run `37919563316` SUCCESS, **128 tests Node**, smoke SQL PASS y build PASS; primeros dos runs CI fueron corregidos tras problemas de fixture y arranque. **No prueba CAS, RPC, fencing real ni HTTP concurrente.** Las tablas siguen ausentes en Supabase PAZO. Siguiente gate: coordinación aplicable a todos los escritores privilegiados, pruebas de dos procesos con medios sintéticos, autorización DDL remota concreta y CDN/retención. A2 ABIERTO.
+
+
+### Journal de intentos + carrera SQL real — PASS temporal, no cierre de A2
+
+Funciones privadas draft `f14_draft_record_possible_dispatch`/`f14_draft_note_transport` hacen transition CAS transaccional y bloquean intento/fence/claim con `FOR UPDATE`, sin grants ni permiso HTTP; se reforzó FK de generation y se probó rechazo de generación obsoleta. PostgreSQL efímero (run `37921483402`) PASS: 128/128 tests Node, SQL transitions con rollback, dos sesiones enfrentadas con lock timeout, sin doble dispatch y build. No toca Supabase ni objetos reales. Falta control de **todos** los escritores service_role externos, capacidad de coordinar HTTP real, reintentos/ACK, CDN/browser/retención. F14 A2/D3-A **abiertos**, Edge real desactivada.
