@@ -4,6 +4,7 @@ import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
+import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
 import {
   fetchLatestUnreadSightingNotification,
   fetchNotifications,
@@ -192,6 +193,7 @@ function PazoMain() {
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
   const [hasMoreFeed, setHasMoreFeed] = useState(true)
+  const [feedError, setFeedError] = useState<'initial' | 'more' | null>(null)
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
@@ -357,6 +359,8 @@ function PazoMain() {
     if (reset) {
       setIsFeedLoading(true)
       setHasMoreFeed(true)
+      setFeedError(null)
+      setPosts([])
       feedPaginationRef.current = {
         ...EMPTY_FEED_PAGINATION,
         petId: pet.id,
@@ -364,7 +368,7 @@ function PazoMain() {
     }
 
     try {
-      let pagination = feedPaginationRef.current
+      let pagination = { ...feedPaginationRef.current }
 
       if (reset || pagination.petId !== pet.id) {
         const ownedPetIds =
@@ -377,9 +381,7 @@ function PazoMain() {
           .select('following_id')
           .eq('follower_id', pet.id)
 
-        if (followsError) {
-          console.error('Error fetching follows for feed pagination:', followsError)
-        }
+        if (followsError) throw followsError
 
         const followingIds = follows?.map((follow) => follow.following_id) || []
 
@@ -395,7 +397,6 @@ function PazoMain() {
         }
 
         if (feedLoadVersionRef.current !== loadVersion) return
-        feedPaginationRef.current = pagination
       }
 
       let socialRows: any[] = []
@@ -450,31 +451,17 @@ function PazoMain() {
         formatPostRow(item, recommended)
       )
 
-      pagination.socialOffset += selection.consumedSocial
-      pagination.recommendationOffset += selection.consumedRecommendations
-
-      if (
-        socialRows.length === 0
-        || (socialRows.length < FEED_PAGE_SIZE
-          && selection.consumedSocial >= socialRows.length)
-      ) {
-        pagination.socialExhausted = true
-      }
-
-      if (
-        recommendationRows.length === 0
-        || (recommendationRows.length < FEED_PAGE_SIZE
-          && selection.consumedRecommendations >= recommendationRows.length)
-      ) {
-        pagination.recommendationExhausted = true
-      }
-
-      feedPaginationRef.current = pagination
+      const nextPagination = advanceFeedCursors(
+        pagination, selection, socialRows.length, recommendationRows.length, FEED_PAGE_SIZE
+      )
 
       const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
 
       if (feedLoadVersionRef.current !== loadVersion) return
 
+      // Commit fetched data and corresponding cursors as one successful page.
+      feedPaginationRef.current = nextPagination
+      setFeedError(null)
       if (reset) {
         setPosts(enrichedPage)
       } else {
@@ -486,14 +473,15 @@ function PazoMain() {
       }
 
       setHasMoreFeed(
-        !(pagination.socialExhausted && pagination.recommendationExhausted)
+        !(nextPagination.socialExhausted && nextPagination.recommendationExhausted)
       )
     } catch (error) {
       console.error(`Error loading feed page for pet ${pet.id}:`, error)
 
-      if (reset && feedLoadVersionRef.current === loadVersion) {
-        setPosts([])
-        setHasMoreFeed(false)
+      if (feedLoadVersionRef.current === loadVersion) {
+        // Report transient failure instead of claiming the feed is empty.
+        // Preserve the last committed page cursor so retry cannot skip posts.
+        setFeedError(reset ? 'initial' : 'more')
       }
     } finally {
       if (reset && feedLoadVersionRef.current === loadVersion) {
@@ -1779,6 +1767,7 @@ function PazoMain() {
                   && hasMoreFeed
                   && !isFeedLoading
                   && !isFeedLoadingMore
+                  && feedError !== 'more'
                   && element.scrollHeight - element.scrollTop - element.clientHeight < 700
                 ) {
                   void loadMoreFeed()
@@ -1794,6 +1783,22 @@ function PazoMain() {
                 <>
                   {activeTab === 'inicio' && (
                     <>
+                      {feedError === 'initial' ? (
+                        <section role="alert" className="rounded-[2rem] bg-white border border-[#204E4A]/10 p-6 text-center space-y-3">
+                          <h2 className="text-lg font-black text-[#204E4A]">
+                            {lang === 'es' ? 'No pudimos cargar las publicaciones' : 'Could not load posts'}
+                          </h2>
+                          <p className="text-xs text-[#5C7470]">
+                            {lang === 'es'
+                              ? 'Puede ser un problema de conexión. Inténtalo de nuevo; tus publicaciones no se han borrado.'
+                              : 'It might be a connection issue. Try again; your posts were not deleted.'}
+                          </p>
+                          <button type="button" onClick={() => void loadFeedForPet(currentPet)}
+                            className="rounded-full px-5 py-3 bg-[#204E4A] text-white font-extrabold text-xs cursor-pointer">
+                            {lang === 'es' ? 'Reintentar' : 'Try again'}
+                          </button>
+                        </section>
+                      ) : (
                       <HomeView
                         posts={posts}
                         onLikePost={handleLikePost}
@@ -1805,6 +1810,18 @@ function PazoMain() {
                         ownedPetIds={pets.map((pet) => pet.id)}
                         onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                       />
+                      )}
+                      {feedError === 'more' && (
+                        <div role="alert" className="mt-4 rounded-2xl bg-white p-4 text-center space-y-3">
+                          <p className="text-xs text-[#5C7470]">
+                            {lang === 'es' ? 'No pudimos cargar más publicaciones.' : 'Could not load more posts.'}
+                          </p>
+                          <button type="button" onClick={() => void loadMoreFeed()}
+                            className="rounded-full bg-[#204E4A] px-5 py-2.5 text-white font-bold text-xs cursor-pointer">
+                            {lang === 'es' ? 'Reintentar' : 'Try again'}
+                          </button>
+                        </div>
+                      )}
                       {isFeedLoadingMore && (
                         <div className="py-5 flex justify-center">
                           <div className="w-6 h-6 border-2 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />

@@ -297,3 +297,7 @@ El PR #36 incluye `resetPasswordForEmail`, estado de `PASSWORD_RECOVERY`, formul
 ### 2026-10-09 — No confundir error de carga con cuenta nueva
 
 PR #36 ahora protege la carga inicial de mascotas para usuarios autenticados: spinner, error recuperable y Reintentar ante fallos de `fetchOwnedPets`; A03 solo tras respuesta real con lista vacía. CI run `37931428416` SUCCESS commit `446b2c5`. GitHub confirma **build-rate-limit Vercel** además del 403 del scope `digitalapp`; sin QA en Preview, no habilitar plan pago. No reabrir F14 hardening ni mezclar las ramas por inercia.
+
+### 2026-10-09 — Feed con estado de error visible y cursores recuperables
+
+Fix P0 del carril MVP en PR #36: diferenciar Feed vacío de error de conexión; retry inicial y de página posterior, no disparar carga automática en bucle después de error, preservar cursores hasta éxito de enriquecimiento y no ignorar fallos de follows. Tests de cursor y gating de prueba; sin despliegue, no implica QA visual ni merge de `main`.
