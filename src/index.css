@@ -107,3 +107,18 @@
   background: rgba(32, 78, 74, 0.15);
   border-radius: 9999px;
 }
+
+/* Visible only for keyboard-style focus; keeps pointer UI borderless. */
+:where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible {
+  box-shadow: 0 0 0 3px #E1E53F, 0 0 0 5px #204E4A !important;
+}
+
+/* Respect reduced-motion preference without removing content or functionality. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -25,4 +25,6 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 18. Privacy Policy/Terms públicos no pueden afirmar prácticas que el producto todavía no cumple. Antes de Beta pública deben reconciliarse contra implementación real, proveedores, retención y flujos de eliminación.
 19. No recolectar fecha de nacimiento, ID u otra prueba de edad solo por comodidad. PAZO es 18+; cualquier age-assurance adicional requiere decisión de producto/privacidad y minimización de datos.
 
+20. Antes de modificar una pantalla, aplicar de forma proporcional `docs/PAZO_UI_QUALITY_GATE.md`: estados completos, foco/teclado, móvil, identidad actual y comparación de regresiones. Build PASS no equivale a aprobación visual; rediseños y nuevas dependencias requieren su gate.
+
 `docs/PAZO_ACTIVE_HANDOFF.md` define el estado operativo actual. La hoja maestra define el estado global. `docs/PAZO_MODULE_LIFECYCLE.md` define cómo una idea llega a implementación. `docs/PAZO_ARCHITECTURE_CONTRACT.md` gobierna ownership/ubicación del código. `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` gobierna datos/tracking/privacidad. `docs/PAZO_DATA_INVENTORY.md` registra categorías y terceros conocidos. Las sub-rutas gobiernan el módulo específico.
