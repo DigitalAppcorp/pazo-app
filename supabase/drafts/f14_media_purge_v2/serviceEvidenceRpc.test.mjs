@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 
-const sql=readFileSync('supabase/migrations/20261009153000_f14_service_only_media_evidence_reader.sql','utf8')
+const sql=readFileSync('supabase/migrations/20261009095635_f14_service_only_media_evidence_reader.sql','utf8')
 const body=sql.replace(/--[^\n]*/g,'').trim()
 test('RPC is strict service-only security definer, no grants on private schema',()=>{
  assert.ok(sql.includes('CREATE FUNCTION public.f14_get_media_claim_evidence(p_claim uuid)'))
