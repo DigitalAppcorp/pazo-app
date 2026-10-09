@@ -40,3 +40,12 @@
 ### Revisión de consistencia del SQL borrador
 
 La FK de `deletion_jobs.user_id` se diseñó nullable **solamente** si `status='completed'`, manteniendo `ON DELETE RESTRICT`. Así un trabajador final, no implementado, podrá registrar cierre tras validar todas las fases y desvincular el identificador antes de `auth.admin.deleteUser` en su transacción final. Si el proceso Auth falla después de desvincular, el job debe reanudar desde un registro segregado; esto es **otro bloqueo A3.4** y no se presume resuelto. La tabla no admite nulificar `user_id` para evitar su FK mientras una solicitud esté pendiente. Este archivo sigue protegido por excepción hard-fail.
+
+## Incremento A3.2 — snapshot privado con medios bloqueados (borrador)
+
+`supabase/drafts/20261009_f14_a3_preserve_contributions_NOT_APPLIED.sql` prepara tres tablas privadas con RLS: `deletion_post_tombstones`, `deletion_preserved_posts` y `deletion_preserved_comments`. Función `account_private.f14_a3_snapshot_contributions(job_uuid)` concede EXECUTE solo al rol service_role y no expone endpoints públicos. Requiere job en estado `archiving`, **no borra filas** y devuelve explícitamente `ready_to_delete_auth=false` / `ready_to_delete_media=false`.
+
+- Captura posts de autores ajenos dentro de comunidades del titular; comentarios de otras cuentas en publicaciones Feed propias; comentarios ajenos dentro de comunidades propias. Conserva tombstone mínima (ID y fecha, nunca texto/foto/nombre propios).
+- Aborta transaccionalmente si la comunidad o cualquier post de ella contiene `image_url`, `photo_url` o rutas Storage: **no mover contenido audiovisual público por SQL**. Se debe agregar un preflight de referencias a medias compartidos y confirmar D3-A con API antes de seguir.
+- **No prueba aún escritura congelada**, archivo exacto de likes o mensajes, medios de comentarios legacy ni verificación de concurrencia. El worker futuro tiene que impedir escrituras mientras se toma el snapshot, comparar conteos y decidir archivo de aportes externos con propiedad verificada. Si eso falla, no puede continuar a Auth.
+- El script tiene `RAISE EXCEPTION` inicial deliberada, por lo que no debe aplicarse ni habilitarse la función sin remover guard bajo gate aprobado. Sin cambios de cascade FK ni políticas de lectura en hospedado.
