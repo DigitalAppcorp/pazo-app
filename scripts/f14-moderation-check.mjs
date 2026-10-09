@@ -380,4 +380,30 @@ assert.ok(visibilitySql.trimEnd().endsWith('ROLLBACK;') &&
 for(const kind of ['feed_post','feed_comment','pet_profile','community_post','community_comment'])
   assert.ok(visibilitySql.includes(kind), 'Missing visibility target: '+kind)
 
+// Fail-closed recovery and exact-version HTTP classification are product gates,
+// never automatically declare moderation media "purged" after a timeout or CDN hit.
+for(const file of [
+ 'supabase/drafts/f14_media_purge_v2/held_claim_reconciliation_readonly.sql',
+ 'supabase/tests/database/f14_held_claim_operator_diagnostics_rollback.test.sql',
+ 'supabase/drafts/f14_media_purge_v2/HELD_CLAIM_OPERATOR_RUNBOOK.md',
+ 'supabase/drafts/f14_media_purge_v2/exactVersionOutcome.mjs',
+ 'supabase/drafts/f14_media_purge_v2/exactVersionOutcome.test.mjs',
+]) assert.ok(existsSync(file),'F14 held-claim safety gate missing: '+file)
+const claimDiagnose = read('supabase/drafts/f14_media_purge_v2/held_claim_reconciliation_readonly.sql')
+const exactOutcome = read('supabase/drafts/f14_media_purge_v2/exactVersionOutcome.mjs')
+assert.ok(claimDiagnose.includes('held_expired') &&
+ claimDiagnose.includes('held_source_drift') &&
+ claimDiagnose.includes('held_without_storage_metadata') &&
+ claimDiagnose.includes('held_moderation_state_drift') &&
+ !/\\b(?:DELETE|TRUNCATE|INSERT|UPDATE|GRANT|REVOKE)\\b/i.test(claimDiagnose.replace(/--[^\\n]*/g,'')),
+ 'Operator diagnostic must be aggregate SELECT only')
+assert.ok(exactOutcome.includes("status: 'origin_absent_observed'") &&
+ exactOutcome.includes('mayFinalizePurge: false') &&
+ exactOutcome.includes('cdnAbsentVerified: false') &&
+ !exactOutcome.includes('.remove(') &&
+ !exactOutcome.includes('supabase.storage'),
+ 'Exact-version outcome may observe origin absence but must never trigger deletion or final purge')
+for(const testName of ['held_claim_reconciliation_readonly.test.mjs','exactVersionOutcome.test.mjs'])
+ assert.ok(read('package.json').includes(testName),'Safety suites must run in F14 CI: '+testName)
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
