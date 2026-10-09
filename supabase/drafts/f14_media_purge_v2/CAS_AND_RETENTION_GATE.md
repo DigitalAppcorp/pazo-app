@@ -60,3 +60,15 @@ Se leyó el fuente público actual `supabase/storage`:
 - **Postgres PAZO (read-only):** índice único `objects_bucket_id_name_version_key` sobre `(bucket_id,name,version)`, índice único de versión actual por `(bucket_id,name)` cuando `archived_at IS NULL`; recuentos actuales 20 objetos, 20 versiones únicas, y ningún path duplicado por bucket. Los cinco buckets tienen `versioning_status=DISABLED` pese a que cada objeto tiene un identificador interno de versión. Esta comprobación no tocó bytes.
 
 **Conclusión acotada:** el código upstream respalda una eliminación condicional por versión, pero necesitamos comprobar el comportamiento alojado de una versión correcta y otra incorrecta usando exclusivamente una imagen artificial, y probar operaciones in-flight con sus casos límite. El test Preview `F14VersionProbe` está preparado pero no desplegado por la cuota de Vercel; revisión manual sigue obligatoria.
+
+
+## Auditoría de caché real de PAZO — 2026-10-09
+
+Consulta **solo agregada** a `storage.buckets` y `storage.objects.metadata`, sin extraer URLs privadas ni nombres: 4 buckets públicos (`community-avatars`, `community-post-photos`, `pet-avatars`, `post-photos`) y 1 privado (`pet-documents`); 20 objetos existentes con `cacheControl: "max-age=3600"`. Esto implica hasta una hora de retención de navegador conforme al encabezado cacheable, con posibles variaciones según cliente y caché. No confundir retiro de Feed ni ausencia del origen con revocación de bytes ya descargados.
+
+Documentación de Supabase consultada:
+- [Smart CDN](https://supabase.com/docs/guides/storage/cdn/smart-cdn): sincroniza invalidaciones de cambios/borrados en Pro o superior, con hasta 60 segundos de propagación descrita, pero **no elimina la caché del navegador**.
+- [Purge CDN Cache](https://supabase.com/docs/guides/storage/cdn/purge-cdn-cache): purga manual por objeto solo Pro+ y key secreta de servidor. **PAZO no debe activar Pro, pagar ni exponer secretos** sin autorización.
+- [Storage CDN fundamentals](https://supabase.com/docs/guides/storage/cdn/fundamentals): CDN puede servir copias del origen. No extrapolar garantías Pro a Free.
+
+**Prueba actualizada solo en Preview:** `F14VersionProbe` calienta la URL pública **exclusivamente del píxel sintético propio** (cacheControl 60), verifica primero eliminación exacta y ausencia por Storage API, luego observa UNA solicitud HTTP al URL de prueba con `cacheNonce` y `cache:'no-store'`. Presenta código HTTP u observación no disponible sin confundirlo con un PASS global de CDN. No registra contenido de usuarios ni hace `purgeCache`. No prueba el comportamiento de `max-age=3600` de medios reales, ni otros nodos ni navegadores; no autoriza purga. El test no se ha ejecutado en Preview autenticado y sigue pendiente de cuota Vercel.
