@@ -15,18 +15,20 @@ REVOKE ALL ON SCHEMA account_private FROM PUBLIC, anon, authenticated;
 
 CREATE TABLE IF NOT EXISTS account_private.deletion_jobs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
+  user_id uuid REFERENCES auth.users(id) ON DELETE RESTRICT,
   status text NOT NULL DEFAULT 'requested'
     CHECK (status IN ('requested', 'reviewing', 'blocked', 'archiving',
       'media_pending', 'deleting_data', 'deleting_auth', 'completed', 'failed', 'cancelled')),
   requested_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CHECK (updated_at >= requested_at)
+  CHECK (updated_at >= requested_at),
+  -- Audit row survives only after the final verified Auth step unlinks the ID.
+  CHECK (user_id IS NOT NULL OR status = 'completed')
 );
 
 -- An active request is unique per user. Cancelled/completed history is preserved
--- while the account exists; finalization must explicitly anonymize + unlink the
--- private job before deleting Auth (this FK blocks accidental direct deletes).
+-- while the account exists; finalization must explicitly unlink the user only
+-- at status completed. FK RESTRICT blocks direct Auth deletion before unlinking.
 CREATE UNIQUE INDEX IF NOT EXISTS deletion_jobs_one_active_per_user
 ON account_private.deletion_jobs (user_id)
 WHERE status NOT IN ('cancelled', 'completed');

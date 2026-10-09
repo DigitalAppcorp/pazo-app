@@ -36,3 +36,7 @@
 - SQL reversible/pgTAP primero; pruebas reales de usuario/Storage solo después de aprobar y aplicar paso a paso, sin activar Vercel ni alterar datos de prueba hoy.
 
 **Siguiente gate después de validar build/CI de esta rama:** diseño seguro de A3.2 y backend de archivo/worker, con test reversible. No aplicar SQL, no activar flag, no merge. Una propuesta adicional de PR de borrado no significa que la función ya elimine cuentas.
+
+### Revisión de consistencia del SQL borrador
+
+La FK de `deletion_jobs.user_id` se diseñó nullable **solamente** si `status='completed'`, manteniendo `ON DELETE RESTRICT`. Así un trabajador final, no implementado, podrá registrar cierre tras validar todas las fases y desvincular el identificador antes de `auth.admin.deleteUser` en su transacción final. Si el proceso Auth falla después de desvincular, el job debe reanudar desde un registro segregado; esto es **otro bloqueo A3.4** y no se presume resuelto. La tabla no admite nulificar `user_id` para evitar su FK mientras una solicitud esté pendiente. Este archivo sigue protegido por excepción hard-fail.
