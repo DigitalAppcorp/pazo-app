@@ -25,7 +25,9 @@ export function inspectExactVersionPreflight({ candidate, claim, live, now } = {
     claim.objectId !== candidate.objectId ||
     claim.targetId !== candidate.targetId ||
     !['feed_post','community_post'].includes(claim.kind) ||
-    !claim.exclusiveReferenceProof)
+    (claim.kind === 'feed_post' && claim.bucket !== 'post-photos') ||
+    (claim.kind === 'community_post' && claim.bucket !== 'community-post-photos') ||
+    claim.exclusiveReferenceProof !== true)
     return fail('claim_not_exact_or_unconfirmed')
 
   const checkTime = normTime(now)
