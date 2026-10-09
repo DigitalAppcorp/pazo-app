@@ -63,6 +63,14 @@
 - **Siguiente gate:** verificar PR #36 en Preview para scroll + cambio de mascota + aviso de mensajes de cuenta normal; solicitar solo esa aceptación visual nueva. No repetir QA anteriores. Después organizar regresiones reales de onboarding/publicación/Comunidades/Lugares/Cuidados con ejecución mínima, antes de cualquier beta.
 - Independencia estricta: PR #35 sigue DRAFT/PAUSADO, sin merge de código F14 a `main`; PR #36 también DRAFT, sin merge o deploy. No inferir que el fix del Feed está ya en la rama F14 hasta reconciliación explícita. La auditoría Supabase observó tablas reales con RLS; no se mutaron registros.
 
+## Progreso posterior del carril funcional — 2026-10-09
+
+- Rama separada `mvp/functional-readiness-20261009`, PR #36 **DRAFT**, HEAD verificado `c513543499e9cc485c615d38eb72f626e9fcf72a` (base main anterior, NO incluye el PR #35). GitHub Actions run `37928545787` **SUCCESS** para HEAD final: governance, nuevos tests Node + build.
+- **Nuevo fix P0 onboarding**: se detectó que `AuthContext.signUp` devolvía `true` sin verificar `data.session`; cuando Supabase exige email confirmado, saltaba a A03 y luego fallaba `create_pet_profile` por falta de sesión. Ahora clasifica `authenticated / verify_email / failed`, muestra el paso de confirmación y evita crear mascota antes de login. Los nuevos perfiles ya no prellenan nombre/edad `Luna / 3 años`; la foto real se elige voluntariamente (el servicio todavía usa imagen genérica si no se sube).
+- Tests `src/features/auth/signupFlow.test.mjs` y `src/features/feed/selectFeedPage.test.mjs`; CI PASS no implica prueba de email real, mobile, Preview ni beta pública. **Vercel list_deployments sigue 403 por equipo `digitalapp`; no se intentó otro scope ni deploy.**
+- **Siguiente gate funcional**: validación limitada de Feed scroll/switch mascotas + registro con y sin confirmación (según entorno configurado) + pantalla de mensajes no mock en sesión real. Hasta autorización de acceso Vercel, seguir solo análisis/correcciones reversibles con CI; no exigir repetición del QA F14 aceptado. No fusionar PR #35/36 ni publicar. En beta revisar recuperación de contraseña, eliminación de cuenta y actuación humana de reportes.
+- Fuente detallada: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md` en PR #36. **F14 A2 SIGUE PAUSADA**, D3-A no completada, purga Edge 503 y ledger remoto no instalado.
+
 ## Próximo paso EXACTO y bloqueadores — registro histórico sustituido por la decisión anterior
 
 **SUSTITUIDO por decisión PO anterior (histórico):** El anterior siguiente gate proponía continuar con fencing/ledger/HTTP concurrente. Ahora queda diferido; NO ejecutarlo como acción siguiente sin reapertura expresa.
