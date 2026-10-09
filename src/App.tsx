@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
+import { selectFeedPage } from './features/feed/selectFeedPage'
+import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
 import {
   fetchLatestUnreadSightingNotification,
   fetchNotifications,
@@ -156,7 +159,10 @@ const EMPTY_FEED_PAGINATION: FeedPaginationState = {
 }
 
 function PazoMain() {
-  const { user, loading, signIn } = useAuth()
+  const {
+    user, loading, signIn, isPasswordRecovery,
+    requestPasswordReset, changePassword, finishPasswordRecovery,
+  } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
 
@@ -187,6 +193,7 @@ function PazoMain() {
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
   const [hasMoreFeed, setHasMoreFeed] = useState(true)
+  const [feedError, setFeedError] = useState<'initial' | 'more' | null>(null)
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
@@ -200,6 +207,12 @@ function PazoMain() {
   const feedLoadMoreInFlightRef = useRef(false)
   const feedPaginationRef = useRef<FeedPaginationState>({ ...EMPTY_FEED_PAGINATION })
   const ownedPetIdsRef = useRef<string[]>([])
+  // A transient network failure must not send an existing account to signup.
+  const [petBootstrap, setPetBootstrap] = useState<{
+    userId: string
+    status: 'loading' | 'error' | 'ready'
+  } | null>(null)
+  const [petBootstrapRetry, setPetBootstrapRetry] = useState(0)
   const mainScrollRef = useRef<HTMLElement | null>(null)
   const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
     inicio: 0,
@@ -267,47 +280,6 @@ function PazoMain() {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
-
-  const blendFeeds = (followed: Post[], recommended: Post[]): Post[] => {
-    if (!followed || followed.length === 0) return recommended
-    if (!recommended || recommended.length === 0) return followed
-
-    // Crear un Set con los IDs de las publicaciones seguidas para evitar duplicados
-    const followedIds = new Set(followed.map(p => p.id))
-
-    // Filtrar recomendaciones que ya existan en el feed de seguidos
-    const filteredRecommended = recommended.filter(p => !followedIds.has(p.id))
-
-    const blended: Post[] = []
-    let recIndex = 0
-
-    // Calcular frecuencia dinámica de inyección basada en el tamaño del feed de seguidos
-    const frequency = followed.length <= 3 ? 2 : 4
-
-    for (let i = 0; i < followed.length; i++) {
-      blended.push(followed[i])
-
-      // Inyectar un post recomendado cada 'frequency' posts de seguidos
-      if ((i + 1) % frequency === 0 && recIndex < filteredRecommended.length) {
-        blended.push({
-          ...filteredRecommended[recIndex],
-          isRecommended: true
-        } as Post)
-        recIndex++
-      }
-    }
-
-    // Si sobraron recomendaciones filtradas y el feed es corto, añadirlas al final
-    while (recIndex < filteredRecommended.length) {
-      blended.push({
-        ...filteredRecommended[recIndex],
-        isRecommended: true
-      } as Post)
-      recIndex++
-    }
-
-    return blended
-  }
 
   const enrichPostsWithInteractions = async (postsList: Post[], petId?: string): Promise<Post[]> => {
     if (postsList.length === 0) return postsList
@@ -387,6 +359,8 @@ function PazoMain() {
     if (reset) {
       setIsFeedLoading(true)
       setHasMoreFeed(true)
+      setFeedError(null)
+      setPosts([])
       feedPaginationRef.current = {
         ...EMPTY_FEED_PAGINATION,
         petId: pet.id,
@@ -394,7 +368,7 @@ function PazoMain() {
     }
 
     try {
-      let pagination = feedPaginationRef.current
+      let pagination = { ...feedPaginationRef.current }
 
       if (reset || pagination.petId !== pet.id) {
         const ownedPetIds =
@@ -407,9 +381,7 @@ function PazoMain() {
           .select('following_id')
           .eq('follower_id', pet.id)
 
-        if (followsError) {
-          console.error('Error fetching follows for feed pagination:', followsError)
-        }
+        if (followsError) throw followsError
 
         const followingIds = follows?.map((follow) => follow.following_id) || []
 
@@ -424,7 +396,7 @@ function PazoMain() {
           recommendationExhausted: false,
         }
 
-        feedPaginationRef.current = pagination
+        if (feedLoadVersionRef.current !== loadVersion) return
       }
 
       let socialRows: any[] = []
@@ -465,46 +437,31 @@ function PazoMain() {
         recommendationRows = data || []
       }
 
-      const socialPosts = socialRows.map((post) => formatPostRow(post, false))
-      const recommendedPosts = recommendationRows.map((post) =>
-        formatPostRow(post, true)
+      // Each query returns up to one page; only the items rendered should
+      // advance that source's cursor. Other candidates stay on later pages.
+      if (feedLoadVersionRef.current !== loadVersion) return
+      const selection = selectFeedPage(
+        socialRows,
+        recommendationRows,
+        FEED_PAGE_SIZE,
+        reset ? new Set<string>() : new Set(posts.map((post) => post.id)),
+        () => true
+      )
+      const page = selection.entries.map(({ item, recommended }) =>
+        formatPostRow(item, recommended)
       )
 
-      const page = blendFeeds(socialPosts, recommendedPosts)
-        .slice(0, FEED_PAGE_SIZE)
-
-      const consumedSocial = page.filter((post) => !post.isRecommended).length
-      const consumedRecommendations = page.filter((post) => post.isRecommended).length
-
-      pagination.socialOffset += consumedSocial
-      pagination.recommendationOffset += consumedRecommendations
-
-      if (
-        socialRows.length === 0
-        || (
-          socialRows.length < FEED_PAGE_SIZE
-          && consumedSocial >= socialRows.length
-        )
-      ) {
-        pagination.socialExhausted = true
-      }
-
-      if (
-        recommendationRows.length === 0
-        || (
-          recommendationRows.length < FEED_PAGE_SIZE
-          && consumedRecommendations >= recommendationRows.length
-        )
-      ) {
-        pagination.recommendationExhausted = true
-      }
-
-      feedPaginationRef.current = pagination
+      const nextPagination = advanceFeedCursors(
+        pagination, selection, socialRows.length, recommendationRows.length, FEED_PAGE_SIZE
+      )
 
       const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
 
       if (feedLoadVersionRef.current !== loadVersion) return
 
+      // Commit fetched data and corresponding cursors as one successful page.
+      feedPaginationRef.current = nextPagination
+      setFeedError(null)
       if (reset) {
         setPosts(enrichedPage)
       } else {
@@ -516,14 +473,15 @@ function PazoMain() {
       }
 
       setHasMoreFeed(
-        !(pagination.socialExhausted && pagination.recommendationExhausted)
+        !(nextPagination.socialExhausted && nextPagination.recommendationExhausted)
       )
     } catch (error) {
       console.error(`Error loading feed page for pet ${pet.id}:`, error)
 
-      if (reset && feedLoadVersionRef.current === loadVersion) {
-        setPosts([])
-        setHasMoreFeed(false)
+      if (feedLoadVersionRef.current === loadVersion) {
+        // Report transient failure instead of claiming the feed is empty.
+        // Preserve the last committed page cursor so retry cannot skip posts.
+        setFeedError(reset ? 'initial' : 'more')
       }
     } finally {
       if (reset && feedLoadVersionRef.current === loadVersion) {
@@ -606,41 +564,54 @@ function PazoMain() {
   }
 
   useEffect(() => {
+    let cancelled = false
+
     if (!loading && user) {
+      const userId = user.id
       const initApp = async () => {
-        if (!user.id) return
+        setPetBootstrap({ userId, status: 'loading' })
         setIsFeedLoading(true)
 
         let ownedPets: Pet[] = []
-
         try {
-          ownedPets = await fetchOwnedPets(user.id)
+          ownedPets = await fetchOwnedPets(userId)
         } catch (petError) {
           console.error('Error fetching pet profiles:', petError)
-          setIsFeedLoading(false)
+          if (!cancelled) {
+            setPetBootstrap({ userId, status: 'error' })
+            setIsFeedLoading(false)
+          }
           return
         }
+
+        if (cancelled) return
 
         if (ownedPets.length > 0) {
           setIsOnboardingActive(false)
           ownedPetIdsRef.current = ownedPets.map((pet) => pet.id)
           setPets(ownedPets)
 
-          const storedActivePetId = localStorage.getItem(`active_pet_${user.id}`)
+          const storedActivePetId = localStorage.getItem(`active_pet_${userId}`)
           const activePet =
             ownedPets.find((pet) => pet.id === storedActivePetId)
             || ownedPets[0]
 
           activePetIdRef.current = activePet.id
           setCurrentPet(activePet)
-          localStorage.setItem(`active_pet_${user.id}`, activePet.id)
+          localStorage.setItem(`active_pet_${userId}`, activePet.id)
 
-          await Promise.all([
-            loadFeedForPet(activePet),
-            loadCareForPet(activePet.id),
-            loadDocumentsForPet(activePet.id),
-            refreshCareReminders(ownedPets),
-          ])
+          try {
+            await Promise.all([
+              loadFeedForPet(activePet),
+              loadCareForPet(activePet.id),
+              loadDocumentsForPet(activePet.id),
+              refreshCareReminders(ownedPets),
+            ])
+          } catch (initialDataError) {
+            // Pet identity is already confirmed. Secondary data failures
+            // should not send the user back to account creation.
+            console.error('Error loading initial pet data:', initialDataError)
+          }
         } else {
           ownedPetIdsRef.current = []
           setPets([])
@@ -649,29 +620,79 @@ function PazoMain() {
           setIsOnboardingActive(true)
           setIsFeedLoading(false)
         }
+
+        if (!cancelled) setPetBootstrap({ userId, status: 'ready' })
       }
 
       void initApp()
     }
-  }, [user, loading])
+
+    return () => { cancelled = true }
+  }, [user, loading, petBootstrapRetry])
 
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loginMessage, setLoginMessage] = useState('')
   const [submittingLogin, setSubmittingLogin] = useState(false)
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [requestingPasswordReset, setRequestingPasswordReset] = useState(false)
+  const [resetRequestMessage, setResetRequestMessage] = useState('')
+  const [resetRequestError, setResetRequestError] = useState(false)
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmittingLogin(true)
     setLoginMessage('')
 
-    const success = await signIn(emailInput, passwordInput)
-
-    if (!success) {
-      setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
+    try {
+      const success = await signIn(emailInput, passwordInput)
+      if (success) {
+        setPasswordInput('')
+      } else {
+        setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
+      }
+    } catch {
+      setLoginMessage(lang === 'es' ? 'No hay conexión. Inténtalo nuevamente.' : 'Connection error. Please try again.')
+    } finally {
+      setSubmittingLogin(false)
     }
-    setSubmittingLogin(false)
+  }
+
+  const handleRequestPasswordReset = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!resetEmail.trim() || requestingPasswordReset) return
+    setRequestingPasswordReset(true)
+    setResetRequestMessage('')
+    setResetRequestError(false)
+    try {
+      const ok = await requestPasswordReset(resetEmail.trim())
+      setResetRequestError(!ok)
+      setResetRequestMessage(ok
+        ? (lang === 'es'
+          ? 'Si existe una cuenta con ese correo, recibirás un enlace de recuperación. Revisa también el spam.'
+          : 'If an account exists for that email, you will receive a recovery link. Check spam too.')
+        : (lang === 'es'
+          ? 'No pudimos enviar el correo. Inténtalo más tarde.'
+          : 'We could not send the email. Please try again later.'))
+    } catch {
+      setResetRequestError(true)
+      setResetRequestMessage(lang === 'es'
+        ? 'Error de conexión. Inténtalo nuevamente.'
+        : 'Connection error. Please try again.')
+    } finally {
+      setRequestingPasswordReset(false)
+    }
+  }
+
+  const handleExitPasswordRecovery = async () => {
+    await finishPasswordRecovery()
+    setIsDemoUser(false)
+    setIsOnboardingActive(false)
+    setAuthMode('login')
+    setForgotPasswordMode(false)
+    setLoginMessage('')
   }
 
   const handleLikePost = async (postId: string) => {
@@ -1358,7 +1379,9 @@ function PazoMain() {
     }
   }, [user?.id, isOnboardingActive, pets.length])
 
-  const unreadMessages = conversations.filter((c) => c.isRequest).length
+  const unreadMessages = isDemoUser && !user
+    ? conversations.filter((c) => c.isRequest).length
+    : 0
   const unreadNotifications = unreadNotificationCount
   const lostPets = pets.filter((pet) => pet.isLost)
 
@@ -1424,6 +1447,49 @@ function PazoMain() {
           <span className="letter-epic text-[#E1E53F]" style={{ '--tx': '95px', '--ty': '-20px' } as React.CSSProperties}>.</span>
         </div>
         <p className="mt-8 text-xs font-extrabold text-[#5C7470] tracking-[0.3em] uppercase animate-pulse relative z-10">Su mundo, más cerca.</p>
+      </div>
+    )
+  }
+
+  if (isPasswordRecovery) {
+    return (
+      <PasswordRecoveryView
+        lang={lang}
+        sessionReady={Boolean(user)}
+        onUpdatePassword={changePassword}
+        onExit={handleExitPasswordRecovery}
+      />
+    )
+  }
+
+  if (user && (petBootstrap?.userId !== user.id || petBootstrap.status === 'loading')) {
+    return (
+      <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
+        <div aria-hidden="true" className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
+        <p className="text-sm font-bold">
+          {lang === 'es' ? 'Cargando tus mascotas...' : 'Loading your pets...'}
+        </p>
+      </div>
+    )
+  }
+
+  if (user && petBootstrap?.status === 'error') {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-5">
+        <main className="max-w-sm w-full bg-white p-6 rounded-[2rem] shadow-sm space-y-4">
+          <h1 className="text-xl font-black">
+            {lang === 'es' ? 'No pudimos cargar tus mascotas' : 'We could not load your pets'}
+          </h1>
+          <p role="alert" className="text-sm text-[#5C7470]">
+            {lang === 'es'
+              ? 'Tu sesión sigue activa. Comprueba tu conexión e inténtalo de nuevo; no necesitas crear otra cuenta.'
+              : 'You are still signed in. Check your connection and try again; you do not need another account.'}
+          </p>
+          <button type="button" onClick={() => setPetBootstrapRetry((value) => value + 1)}
+            className="w-full rounded-full bg-[#204E4A] text-white py-3 font-extrabold cursor-pointer">
+            {lang === 'es' ? 'Reintentar' : 'Try again'}
+          </button>
+        </main>
       </div>
     )
   }
@@ -1522,15 +1588,48 @@ function PazoMain() {
                     Pazo Acceso
                   </span>
                   <h2 className="text-3xl font-black text-[#204E4A]">
-                    {lang === 'es' ? 'Iniciar Sesión' : 'Log in to Pazo'}
+                    {forgotPasswordMode
+                      ? (lang === 'es' ? 'Recuperar contraseña' : 'Reset your password')
+                      : (lang === 'es' ? 'Iniciar Sesión' : 'Log in to Pazo')}
                   </h2>
                   <p className="text-xs text-[#5C7470]">
-                    {lang === 'es'
-                      ? 'Ingresa tus datos para entrar directamente a tu cuenta.'
-                      : 'Enter your credentials to access your account.'}
+                    {forgotPasswordMode
+                      ? (lang === 'es'
+                        ? 'Te enviaremos un enlace para crear una contraseña nueva.'
+                        : 'We will send a link so you can set a new password.')
+                      : (lang === 'es'
+                        ? 'Ingresa tus datos para entrar directamente a tu cuenta.'
+                        : 'Enter your credentials to access your account.')}
                   </p>
                 </div>
 
+                {forgotPasswordMode ? (
+                  <form onSubmit={handleRequestPasswordReset} className="space-y-3.5">
+                    <label className="block text-[11px] font-bold text-[#204E4A]">
+                      {lang === 'es' ? 'Correo electrónico' : 'Email address'}
+                      <input type="email" required autoComplete="email"
+                        value={resetEmail} onChange={(event) => setResetEmail(event.target.value)}
+                        placeholder="tu@correo.com"
+                        className="mt-1 w-full bg-white border-2 border-[#204E4A]/15 rounded-2xl px-4 py-3 text-xs text-[#204E4A]" />
+                    </label>
+                    <button type="submit" disabled={requestingPasswordReset}
+                      className="w-full bg-[#204E4A] text-white font-extrabold py-3.5 rounded-full text-xs disabled:opacity-50">
+                      {requestingPasswordReset
+                        ? (lang === 'es' ? 'Enviando...' : 'Sending...')
+                        : (lang === 'es' ? 'Enviar enlace' : 'Send link')}
+                    </button>
+                    {resetRequestMessage && (
+                      <p role={resetRequestError ? 'alert' : 'status'}
+                        className="text-xs text-[#204E4A] leading-relaxed">{resetRequestMessage}</p>
+                    )}
+                    <button type="button" onClick={() => {
+                      setForgotPasswordMode(false)
+                      setResetRequestMessage('')
+                    }} className="w-full text-xs font-bold text-[#5C7470] underline">
+                      {lang === 'es' ? 'Volver a iniciar sesión' : 'Back to log in'}
+                    </button>
+                  </form>
+                ) : (
                 <form onSubmit={handlePasswordLogin} className="space-y-3.5">
                   <div>
                     <label className="block text-[11px] font-bold text-[#204E4A] mb-1">
@@ -1578,9 +1677,17 @@ function PazoMain() {
                       ? (lang === 'es' ? 'Iniciando sesión...' : 'Logging in...')
                       : (lang === 'es' ? 'Iniciar Sesión' : 'Log in')}
                   </button>
+                  <button type="button" onClick={() => {
+                    setResetEmail(emailInput)
+                    setResetRequestMessage('')
+                    setForgotPasswordMode(true)
+                  }} className="w-full text-xs font-bold text-[#204E4A] underline cursor-pointer">
+                    {lang === 'es' ? '¿Olvidaste tu contraseña?' : 'Forgot your password?'}
+                  </button>
                 </form>
+                )}
 
-                {loginMessage && (
+                {!forgotPasswordMode && loginMessage && (
                   <div className="p-3 bg-[#E1E53F]/30 border border-[#204E4A]/20 text-[#204E4A] rounded-2xl text-xs text-center font-semibold">
                     {loginMessage}
                   </div>
@@ -1660,6 +1767,7 @@ function PazoMain() {
                   && hasMoreFeed
                   && !isFeedLoading
                   && !isFeedLoadingMore
+                  && feedError !== 'more'
                   && element.scrollHeight - element.scrollTop - element.clientHeight < 700
                 ) {
                   void loadMoreFeed()
@@ -1675,6 +1783,22 @@ function PazoMain() {
                 <>
                   {activeTab === 'inicio' && (
                     <>
+                      {feedError === 'initial' ? (
+                        <section role="alert" className="rounded-[2rem] bg-white border border-[#204E4A]/10 p-6 text-center space-y-3">
+                          <h2 className="text-lg font-black text-[#204E4A]">
+                            {lang === 'es' ? 'No pudimos cargar las publicaciones' : 'Could not load posts'}
+                          </h2>
+                          <p className="text-xs text-[#5C7470]">
+                            {lang === 'es'
+                              ? 'Puede ser un problema de conexión. Inténtalo de nuevo; tus publicaciones no se han borrado.'
+                              : 'It might be a connection issue. Try again; your posts were not deleted.'}
+                          </p>
+                          <button type="button" onClick={() => void loadFeedForPet(currentPet)}
+                            className="rounded-full px-5 py-3 bg-[#204E4A] text-white font-extrabold text-xs cursor-pointer">
+                            {lang === 'es' ? 'Reintentar' : 'Try again'}
+                          </button>
+                        </section>
+                      ) : (
                       <HomeView
                         posts={posts}
                         onLikePost={handleLikePost}
@@ -1686,6 +1810,18 @@ function PazoMain() {
                         ownedPetIds={pets.map((pet) => pet.id)}
                         onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                       />
+                      )}
+                      {feedError === 'more' && (
+                        <div role="alert" className="mt-4 rounded-2xl bg-white p-4 text-center space-y-3">
+                          <p className="text-xs text-[#5C7470]">
+                            {lang === 'es' ? 'No pudimos cargar más publicaciones.' : 'Could not load more posts.'}
+                          </p>
+                          <button type="button" onClick={() => void loadMoreFeed()}
+                            className="rounded-full bg-[#204E4A] px-5 py-2.5 text-white font-bold text-xs cursor-pointer">
+                            {lang === 'es' ? 'Reintentar' : 'Try again'}
+                          </button>
+                        </div>
+                      )}
                       {isFeedLoadingMore && (
                         <div className="py-5 flex justify-center">
                           <div className="w-6 h-6 border-2 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
@@ -1883,7 +2019,8 @@ function PazoMain() {
             <MessagesModal
               isOpen={isMessagesOpen}
               onClose={() => setIsMessagesOpen(false)}
-              conversations={conversations}
+              conversations={isDemoUser && !user ? conversations : []}
+              isDemo={isDemoUser && !user}
               onSendMessage={handleSendMessage}
               lang={lang}
             />

@@ -84,8 +84,8 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
   if (diffInMinutes < 5) return lang === 'es' ? 'Hace un momento' : 'Just now'
   if (diffInHours < 24) {
-    if (diffInHours < 1) return lang === 'es' ? `Hace ${diffInMinutes} min` : ` mins ago`
-    return lang === 'es' ? `Hace ${diffInHours} h` : ` h ago`
+    if (diffInHours < 1) return lang === 'es' ? `Hace ${diffInMinutes} min` : `${diffInMinutes} mins ago`
+    return lang === 'es' ? `Hace ${diffInHours} h` : `${diffInHours} h ago`
   }
   const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
   if (postDate.getFullYear() !== now.getFullYear()) options.year = 'numeric'
@@ -195,6 +195,18 @@ export const HomeView = ({
         </div>
       ) : (
         <div className="space-y-4">
+          {displayedPosts.length === 0 && (
+            <div className="rounded-[2rem] bg-white p-7 text-center space-y-2 border border-[#204E4A]/10">
+              <h3 className="text-base font-black text-[#204E4A]">
+                {lang === 'es' ? 'Todavía no hay publicaciones' : 'No posts yet'}
+              </h3>
+              <p className="text-xs text-[#5C7470]">
+                {lang === 'es'
+                  ? 'Comparte un momento de tu mascota o explora las comunidades.'
+                  : 'Share a moment with your pet or explore communities.'}
+              </p>
+            </div>
+          )}
           {displayedPosts.map((post) => (
             <PostCard
               key={post.id}

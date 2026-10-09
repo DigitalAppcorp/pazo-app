@@ -24,7 +24,7 @@
     color: #5C7470 !important;
   }
 
-  /* Cero contornos en toda la app: botones, contenedores, inputs y tarjetas */
+  /* Regla inamovible PO: cero contornos, excepto campos de texto cuando sea estrictamente necesario. */
   button, input, textarea, select, div, article, nav, header, main, section {
     border-width: 0px !important;
     border-style: none !important;
@@ -106,4 +106,35 @@
 ::-webkit-scrollbar-thumb {
   background: rgba(32, 78, 74, 0.15);
   border-radius: 9999px;
+}
+
+/* PAZO immutable visual rule: no outlines, borders or focus rings on controls.
+   Keyboard focus is indicated using surface/text changes, never a contour. */
+:where(a, button, [role="button"], [tabindex]):focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: #E1E53F !important;
+  color: #204E4A !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+/* Text-entry surfaces may use a softer fill; an actual contour is opt-in
+   only if a particular text field genuinely needs it and PO approves. */
+:where(input, textarea, select):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #FFF5CE !important;
+  caret-color: #204E4A;
+}
+
+/* Respect reduced-motion preference without removing content or functionality. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
