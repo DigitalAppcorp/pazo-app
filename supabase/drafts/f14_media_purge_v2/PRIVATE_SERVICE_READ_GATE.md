@@ -22,3 +22,14 @@ Fuente validada para este diseño: `hosted_claim_evidence_readonly.sql`, y clasi
 ## Decisión requerida
 
 El Product Owner debe autorizar **específicamente** la migración remota que crea esta RPC de **solo lectura** después de ver su DDL/test y confirmar que no amplía las operaciones de borrado. La autorización general para continuar F14 no sustituye los gates de migración/producción del `AGENTS.md`. Un intento previo de preparar el RPC fue bloqueado por seguridad del conector; no sortear esa barrera, ni pedir secretos/JWT al usuario. Si persiste, documentar la limitación y no inventar un lector activo.
+
+
+## Resultado del gate — APLICADO / acceso restringido verificado (2026-10-09)
+
+El Product Owner autorizó específicamente esta única migración de lectura. Supabase confirmó `apply_migration: success=true` y la registró como `20261009095635_f14_service_only_media_evidence_reader`. El repositorio contiene exactamente el SQL aplicado en `supabase/migrations/20261009095635_f14_service_only_media_evidence_reader.sql`; se retiró el nombre preliminar posterior para evitar duplicados de historial.
+
+**Auditoría alojada PASS:** `SECURITY DEFINER`, `search_path=''`, retorno `jsonb`, `anon EXECUTE=false`, `authenticated EXECUTE=false`, `service_role EXECUTE=true`, `service_role USAGE moderation_private=false`. Prueba SQL reproducible `supabase/tests/database/f14_service_only_evidence_reader_permissions_rollback.test.sql` PASS: ambos roles públicos denegados, `service_role` con JWT no privilegiado denegado, JWT de servicio autorizado pero claims nulos/inexistentes sin evidencia. Con fixtures sintéticos en `BEGIN/ROLLBACK`, prueba **positiva** PASS para Feed y Comunidad, comprobando `status=candidate_only`, `mayDelete=false`, snapshots/referencias; al cambiar la versión o retirar la fotografía original, devuelve NULL. No se persistieron fixtures ni se eliminaron bytes.
+
+**Limitación importante:** la prueba estática `serviceEvidenceRpc.test.mjs` se creó y se revisó, pero su inclusión en el comando `npm run test:f14` fue bloqueada por el control de seguridad de la herramienta. No afirmar que esa prueba Node se ejecutó por CI. La validación real de permisos/filas sí se ejecutó directamente en Supabase y el SQL del test de permisos quedó versionado. No intentar eludir un bloqueo del conector.
+
+**Lo que NO autoriza este PASS:** purga real, `purged`, exclusión de escrituras service_role concurrentes ni invalidación CDN/navegador/backup. La Edge de eliminación permanece desactivada. El gate de lector privado pasa a **PASS BACKEND**; F14 A2/D3-A permanece ABIERTO por los otros requisitos.
