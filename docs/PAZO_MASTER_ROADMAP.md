@@ -1075,3 +1075,8 @@ Supabase `20261009061213_f14_reject_unverified_purged_status` aplicada: bloquea 
 El PO compartió captura real de `Revisión de archivos` en Vercel Preview `a650dd8`, validación visual PASS: mensajes correctos, cola vacía, botón de actualizar y ausencia de acción destructiva. No implica prueba de refresco ni de una cola con registros. No repetir esta pantalla ni Auth/Storage sintético ya validados.
 
 Reconciliación Gate 8 documentada en `docs/PAZO_F14_A2_SCOPE_CLOSURE.md`. D3-A continúa requiriendo borrado verificable en origen/Storage cuando procede: esta UI de revisión manual no cierra A2 sin resolver las garantías de concurrencia, identidad objeto/version y CDN, o sin modificación explícita del alcance por PO. PR #35 sigue DRAFT, no merge, A3/A4 no autorizados.
+
+
+### F14 A2 — prueba de eliminación por versión exacta preparada
+
+Nueva pista verificada en documentación Supabase: selector `versionId` para versión actual o archivada. Inspector de preflight puro y suite en CI; nuevo panel de QA Preview solo de píxel sintético y acción explícita (prueba de versión equivocada + exacta). **La prueba Auth/HTTP nueva aún requiere PO**, distinta de la prueba Storage ya aprobada. Ninguna imagen de usuarios ha sido modificada. F14 A2 continúa abierto por concurrencia `service_role`/HTTP, CDN y DoD D3-A; PR #35 DRAFT, sin fusionar `main` ni iniciar A3/A4.
