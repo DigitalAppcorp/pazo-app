@@ -1099,3 +1099,8 @@ Preview `ac167b4` READY con `F14VersionProbe`: la cuota de Vercel dejó de ser e
 ### F14 A2 — validación HTTP real de selección de versión exacta (PO PASS)
 
 PO probó nuevo `F14VersionProbe` en Vercel Preview `ac167b4`: subida sintética, lectura ID+versión, rechazo efectivo de versión equivocada, eliminación de versión actual exacta y ausencia de origen: **PASS 4/4 en captura**. SQL posterior: 20 objetos sin residuos del fixture. No solicitar repetir test. Observación CDN HTTP 400 con `cacheNonce` es **inconclusa** y no equivale a invalidación/retención certificada. Quitar `prueba HTTP de versionId no ejecutada` de los bloqueadores restantes; quedan concurrencia y coordinación de escritores privilegiados, autorización de lectura privada, limpieza segura/reintentos, CDN/browser/backups y validación global D3-A. F14 A2/ Gate 8 abiertos, PR #35 DRAFT y Edge destructiva 503.
+
+
+### F14 A2 — Diagnóstico de holds y no-falso-éxito (2026-10-09)
+
+Operator diagnostic SELECT agregado + fixture 5 casos en transacción `ROLLBACK` PASS; auditoría de permisos privados / RPC y trigger anti-`purged` PASS; clasificador puro `exactVersionOutcome` con tests rechaza timeout, path-only y falso CDN PASS en GitHub CI tras verificación. Se mantiene Edge 503, 20 objetos Storage intactos, cero claims/eventos/reportes/restricciones y PR #35 DRAFT. No se aplicó DDL. Próximo gate real A2: interfaz privada solo `service_role`, exclusión HTTP/Storage y aceptación de limites de CDN; `versionId` sintético ya PASS 4/4. No habilitar DELETE reales, no merge, A3/A4 sin gate.
