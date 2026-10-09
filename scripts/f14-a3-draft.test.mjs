@@ -136,3 +136,14 @@ test('SQL draft dollar quotes are paired and no malformed AS $ single marker exi
     assert.ok(source.indexOf('BEGIN;') >= 0 && source.indexOf('RAISE EXCEPTION') > source.indexOf('BEGIN;'),path+' must fail closed in transaction')
   }
 })
+
+test('A3 preflight identifies embedded comments and media as manual review blockers', () => {
+  for (const key of ['legacy_embedded_comments','feed_posts_with_photos',
+    'community_posts_with_photos','pet_profiles_with_photos']) {
+    assert.match(sql,new RegExp("'"+key+"'"))
+  }
+  assert.match(sql,/jsonb_typeof\(p\.comments\)='array'/)
+  assert.match(sql,/jsonb_array_length\(p\.comments\)/)
+  assert.match(archiveSql,/Legacy embedded comments require manual author reconciliation/)
+  assert.match(archiveSql,/jsonb_array_length\(p\.comments\)>0/)
+})

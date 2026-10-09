@@ -68,6 +68,10 @@ DECLARE
   v_foreign_feed_comments int;
   v_docs int;
   v_care int;
+  v_legacy_comments int;
+  v_feed_photos int;
+  v_community_photos int;
+  v_pet_avatars int;
 BEGIN
   IF v_uid IS NULL THEN RAISE EXCEPTION 'Authentication required' USING ERRCODE='28000'; END IF;
 
@@ -91,12 +95,39 @@ BEGIN
   SELECT count(*)::int INTO v_care FROM public.care_items c
   JOIN public.pets pt ON pt.id=c.pet_id WHERE pt.owner_id=v_uid;
 
+
+  -- Embedded legacy JSON comments may not have verified account authorship.
+  -- Never assume they are duplicates of post_comments or safe to discard.
+  SELECT coalesce(sum(jsonb_array_length(p.comments)),0)::int INTO v_legacy_comments
+  FROM public.posts p WHERE p.user_id=v_uid
+    AND jsonb_typeof(p.comments)='array';
+
+  SELECT count(*)::int INTO v_feed_photos
+  FROM public.posts p WHERE p.user_id=v_uid
+    AND nullif(btrim(coalesce(p.photo_url,'')),'') IS NOT NULL;
+
+  SELECT count(*)::int INTO v_community_photos
+  FROM public.community_posts p JOIN public.communities c ON c.id=p.community_id
+  WHERE (c.owner_user_id=v_uid OR p.author_user_id=v_uid)
+    AND (nullif(btrim(coalesce(p.photo_url,'')),'') IS NOT NULL
+      OR nullif(btrim(coalesce(p.photo_storage_path,'')),'') IS NOT NULL);
+
+  SELECT count(*)::int INTO v_pet_avatars
+  FROM public.pets p WHERE p.owner_id=v_uid
+    AND nullif(btrim(coalesce(p.photo_url,'')),'') IS NOT NULL;
+
   RETURN pg_catalog.jsonb_build_object(
     'pets',v_pets, 'posts',v_posts, 'communities_owned',v_owned,
     'foreign_community_posts',v_foreign_comm_posts,
     'foreign_feed_comments',v_foreign_feed_comments,
     'documents',v_docs,'care_items',v_care,
-    'requires_manual_review',(v_owned>0 OR v_foreign_comm_posts>0 OR v_foreign_feed_comments>0 OR v_docs>0)
+    'legacy_embedded_comments',v_legacy_comments,
+    'feed_posts_with_photos',v_feed_photos,
+    'community_posts_with_photos',v_community_photos,
+    'pet_profiles_with_photos',v_pet_avatars,
+    'requires_manual_review',(v_owned>0 OR v_foreign_comm_posts>0 OR v_foreign_feed_comments>0
+       OR v_docs>0 OR v_legacy_comments>0 OR v_feed_photos>0
+       OR v_community_photos>0 OR v_pet_avatars>0)
   );
 END;
 $$;

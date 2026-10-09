@@ -17,6 +17,10 @@ export interface AccountDeletionPreflight {
   foreignFeedComments: number
   documents: number
   careItems: number
+  legacyEmbeddedComments: number
+  feedPostsWithPhotos: number
+  communityPostsWithPhotos: number
+  petProfilesWithPhotos: number
   requiresManualReview: boolean
 }
 
@@ -59,6 +63,10 @@ export function parseDeletionPreflight(value: unknown): AccountDeletionPreflight
     foreignFeedComments: count('foreign_feed_comments'),
     documents: count('documents'),
     careItems: count('care_items'),
+    legacyEmbeddedComments: count('legacy_embedded_comments'),
+    feedPostsWithPhotos: count('feed_posts_with_photos'),
+    communityPostsWithPhotos: count('community_posts_with_photos'),
+    petProfilesWithPhotos: count('pet_profiles_with_photos'),
     requiresManualReview: r.requires_manual_review,
   }
 }

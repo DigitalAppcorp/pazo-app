@@ -81,6 +81,10 @@ export function AccountDeletionPanel({ lang, userId }: Props) {
         {es ? 'Dependencias detectadas:' : 'Dependencies found:'} {preflight.pets} {es ? 'mascotas' : 'pets'},
         {' '}{preflight.posts} {es ? 'publicaciones' : 'posts'},
         {' '}{preflight.documents} {es ? 'documentos' : 'documents'}.
+        {(preflight.legacyEmbeddedComments > 0 || preflight.feedPostsWithPhotos > 0 ||
+          preflight.communityPostsWithPhotos > 0 || preflight.petProfilesWithPhotos > 0) &&
+          (es ? ' Hay comentarios antiguos o fotografías pendientes de revisión.' :
+            ' Legacy comments or photographs require review.')}
         {preflight.requiresManualReview && (es
           ? ' Se requiere revisión para proteger aportaciones de otras cuentas.'
           : ' Review is needed to protect contributions from other accounts.')}

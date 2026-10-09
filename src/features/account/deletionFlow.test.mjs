@@ -29,12 +29,18 @@ test('preflight fails closed for invalid counts or missing review flag', () => {
   const valid = {
     pets: 2, posts: 3, communities_owned: 1,
     foreign_community_posts: 5, foreign_feed_comments: 2,
-    documents: 1, care_items: 4, requires_manual_review: true,
+    documents: 1, care_items: 4, legacy_embedded_comments: 3,
+    feed_posts_with_photos: 2, community_posts_with_photos: 1,
+    pet_profiles_with_photos: 1, requires_manual_review: true,
   }
   assert.equal(parseDeletionPreflight(valid).foreignCommunityPosts, 5)
+  assert.equal(parseDeletionPreflight(valid).legacyEmbeddedComments, 3)
+  assert.equal(parseDeletionPreflight(valid).feedPostsWithPhotos, 2)
   assert.throws(() => parseDeletionPreflight({ ...valid, pets: -1 }))
   assert.throws(() => parseDeletionPreflight({ ...valid, documents: '2' }))
   assert.throws(() => parseDeletionPreflight({ ...valid, requires_manual_review: undefined }))
+  assert.throws(() => parseDeletionPreflight({ ...valid, legacy_embedded_comments: undefined }))
+  assert.throws(() => parseDeletionPreflight({ ...valid, community_posts_with_photos: -1 }))
 })
 test('all lifecycle steps have honest status labels in both languages', () => {
   for (const status of deletionStatuses) {

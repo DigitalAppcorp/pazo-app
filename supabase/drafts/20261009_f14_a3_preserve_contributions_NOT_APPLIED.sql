@@ -71,6 +71,18 @@ BEGIN
       USING ERRCODE='42501';
   END IF;
 
+
+  -- Embedded legacy comments lack verified author identity; fail closed.
+  -- Their eventual preservation requires a separate legacy migration.
+  IF EXISTS (
+    SELECT 1 FROM public.posts p WHERE p.user_id=v_uid
+      AND jsonb_typeof(p.comments)='array'
+      AND jsonb_array_length(p.comments)>0
+  ) THEN
+    RAISE EXCEPTION 'Legacy embedded comments require manual author reconciliation'
+      USING ERRCODE='P0001';
+  END IF;
+
   -- Refuse unverified public media and every unknown shared path.
   -- Archive is not a substitute for Storage migration, CDN or D3-A.
   IF EXISTS (
