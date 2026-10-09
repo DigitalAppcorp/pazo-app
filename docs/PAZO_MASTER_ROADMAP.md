@@ -1031,3 +1031,14 @@ Snapshot actual: `docs/PAZO_ACTIVE_HANDOFF.md` (historial completo movido a `doc
 - Vercel marcó `failure` por **build-rate-limit** tras commits; no inferir compilación. Sin aprobación de upgrade. `npm run verify` del HEAD actual pendiente.
 - **Next exact gate:** permiso expreso PO antes de apply de la migración acotada, después pruebas RLS/rol/grants y auditoría del bypass service-role / API MOVE-COPY-UPSERT y operaciones en vuelo. Purga seguirá 503 hasta prueba independiente y gate de eliminación específico.
 
+
+
+### F14 A2 — checkpoint alojado después de aprobación de hardening
+
+La migración exclusivamente defensiva **`20261009054411_f14_held_media_fail_closed_recheck_update_guard`** fue aprobada y aplicada en Supabase PAZO. Conserva rutas reservadas `held` bloqueadas pasada la expiración, añade política `RESTRICTIVE UPDATE` y evita invalidaciones automáticas de `f14_recheck_media_claim`. Migración Git canónica versionada. Sin Storage DELETE, sin activar Edge, sin cambio de plan, sin merge ni lanzamiento.
+
+SQL/RLS transaccional post-apply PASS para UPDATE held/free/expirado, recheck/drift, grants, INSERT held/free y lectura `anon`/auth de medios públicos. El SQL DELETE directo fue rechazado por protección del proveedor; prueba de DELETE real por Storage API aún no realizada. Recuento: 20 objetos Storage y 0 claims/reportes/restricciones. Edge `f14-moderation-purge` sigue stub HTTP 503.
+
+El test de precondiciones `COPY` detectó que una ruta held pública continúa SELECT-visible y la copia a ruta libre podría estar permitida según permisos SQL; **COPY HTTP no probado**, no confundir la defensa RLS con revocación de URLs públicas. Riesgo service-role/carreras entre API y DB sigue abierto. Recuperación de claims requiere protocolo explícito, no liberación automática por TTL. Documento: `supabase/drafts/f14_media_purge_v2/HELD_CLAIM_RECOVERY_AND_COPY_AUDIT.md`.
+
+**Siguiente:** auditoría de escritores privilegiados y MOVE/COPY/UPSERT con fixtures aisladas, diseño fail-closed de recuperación/confirmación+CDN; detenerse ante eliminación irreversible o nuevo gate de producto/visual. F14 A2 Gate 8 sigue ABIERTO; F14 A3/A4 sin autorización, `main` y PR de Lugares no alterados.
