@@ -100,8 +100,7 @@ test('write-fence never claims to cover Storage, JWT, Auth or all tables', () =>
 })
 
 
-const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql',
-    '../supabase/drafts/20261009_f14_a3_worker_checkpoint_NOT_APPLIED.sql', import.meta.url), 'utf8')
+const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql', import.meta.url), 'utf8')
 test('community FK draft aborts transaction before altering any table', () => {
   assert.ok(fkSql.indexOf('BEGIN;') < fkSql.indexOf("RAISE EXCEPTION 'F14 A3 COMMUNITY FK DRAFT ONLY"))
   assert.ok(fkSql.indexOf("RAISE EXCEPTION 'F14 A3 COMMUNITY FK DRAFT ONLY") < fkSql.indexOf('ALTER TABLE'))
