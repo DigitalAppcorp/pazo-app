@@ -998,3 +998,8 @@ Draft private claims table + object fingerprint/id/lease, service-only prepare/r
 
 ### F14 A2 — preflight media claims applied (2026-10-09 UTC)
 Hosted PAZO migration `f14_media_claim_preflight` version `20261009014616` applied under PO authorization; canonicized in git. Private claim/event tables, service-only preflight and recheck, five-minute expiring candidate lease, no deletion or purged status. Live backend trials with BEGIN/ROLLBACK PASS; four existing confirmed nonmoderator accounts make independent role testing possible without new Auth users, but genuine signed JWT test STILL PENDING user session access. Blocks: Storage object CAS / deletion confirmation, CDN, D3-B. 503 Edge remains blocked. A2 not closed.
+
+
+### F14 A2 — two browser role screenshots, strict QA retest required (2026-10-08 local)
+
+PO provided two authentic-session UI PASS screenshots (normal / moderator), with moderator actions visible. Original test flaw found: any RPC failure wrongly counted as permission denied. Preview-only diagnostic patched to require specific SQLSTATE `42501` for denied queue/media/preflight claims; account type is displayed. Updated tests needed on both sessions before declaring complete signed-JWT HTTP authorization. No production deployment, Storage DELETE or other backend mutations.

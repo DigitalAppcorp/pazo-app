@@ -6,11 +6,18 @@ type Check = { label: string; passed: boolean }
 
 const EMPTY_ID = '00000000-0000-4000-8000-000000000000'
 
+// PostgREST returns PostgreSQL SQLSTATE 42501 for authorization failures.
+// A timeout, missing RPC or connectivity error must never count as permission denial.
+type RpcError = { code?: string } | null | undefined
+const permissionDenied = (error: RpcError) => error?.code === '42501'
+
+
 /** Preview-only, non-mutating live-JWT regression for signed-in PAZO users. */
 export function F14RoleCheck({ lang }: Props) {
   const [running, setRunning] = useState(false)
   const [checks, setChecks] = useState<Check[]>([])
   const [error, setError] = useState('')
+  const [accountRole, setAccountRole] = useState<'moderator' | 'normal' | ''>('')
   const es = lang === 'es'
   const tested = checks.length > 0
   const allPass = tested && checks.every(c => c.passed)
@@ -19,6 +26,7 @@ export function F14RoleCheck({ lang }: Props) {
     setRunning(true)
     setChecks([])
     setError('')
+    setAccountRole('')
     try {
       // The user's *real existing* Supabase session signs all rpc requests.
       // Never read, display or transmit the access token to a new destination.
@@ -33,6 +41,7 @@ export function F14RoleCheck({ lang }: Props) {
         return
       }
       const moderator = role.data
+      setAccountRole(moderator ? 'moderator' : 'normal')
       const [queue, media, prepare, recheck] = await Promise.all([
         supabase.rpc('f14_moderation_queue', { p_limit: 1, p_offset: 0 }),
         supabase.rpc('f14_pending_media', { p_limit: 1 }),
@@ -43,13 +52,13 @@ export function F14RoleCheck({ lang }: Props) {
         { label: es ? 'Sesión real validada por Auth' : 'Actual session validated by Auth', passed: true },
         { label: es ? 'Rol del usuario identificado' : 'Account role verified', passed: true },
         { label: es ? 'Acceso a la cola según el rol' : 'Report queue permission matches role',
-          passed: moderator ? (!queue.error && Array.isArray(queue.data)) : !!queue.error },
+          passed: moderator ? (!queue.error && Array.isArray(queue.data)) : permissionDenied(queue.error) },
         { label: es ? 'Acceso a archivos pendientes según el rol' : 'Media queue permission matches role',
-          passed: moderator ? (!media.error && Array.isArray(media.data)) : !!media.error },
+          passed: moderator ? (!media.error && Array.isArray(media.data)) : permissionDenied(media.error) },
         { label: es ? 'Reserva privada bloqueada para cuentas' : 'Service-only media claim denied',
-          passed: !!prepare.error },
+          passed: permissionDenied(prepare.error) },
         { label: es ? 'Revisión privada bloqueada para cuentas' : 'Service-only recheck denied',
-          passed: !!recheck.error },
+          passed: permissionDenied(recheck.error) },
       ])
     } catch {
       setError(es ? 'La comprobación no pudo finalizar.' : 'The security check could not finish.')
@@ -58,8 +67,9 @@ export function F14RoleCheck({ lang }: Props) {
     }
   }
   const heading = es ? 'Prueba de permisos F14' : 'F14 permissions check'
-  const roleCheck = tested
-    ? (es ? 'El tipo de cuenta se comprobó dentro de la sesión iniciada.' : 'Account role was verified in the signed-in session.')
+  const roleCheck = accountRole
+    ? (es ? 'Tipo de cuenta comprobado: ' : 'Verified account type: ') +
+      (accountRole === 'moderator' ? (es ? 'Moderadora' : 'Moderator') : (es ? 'Normal' : 'Normal'))
     : (es ? 'Usa una cuenta a la vez. No se muestran contraseñas ni tokens.' : 'Test one account at a time. Passwords and tokens are never displayed.')
   return <section aria-label={heading} className="mb-5 rounded-2xl border border-[#204E4A]/20 bg-white p-4">
     <h3 className="text-sm font-extrabold">{heading}</h3>
@@ -76,7 +86,7 @@ export function F14RoleCheck({ lang }: Props) {
         {' · '}{item.label}
       </p>)}
       <p className="text-[11px] text-[#204E4A]/80">
-        {es ? 'Toma una captura con el resultado. La prueba no envía denuncias ni borra contenido.' : 'Take a screenshot of the result. No reports or content are deleted.'}
+        {es ? 'Solo se acepta SQLSTATE 42501 como rechazo de permisos. Un error de conexión no pasa esta prueba. La comprobación no modifica datos.' : 'Only SQLSTATE 42501 counts as permission denial. Connectivity errors do not pass. This check does not modify data.'}
       </p>
     </div>}
   </section>

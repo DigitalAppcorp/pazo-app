@@ -229,3 +229,8 @@ PO approved hosted migration; Supabase version `20261009014616` installed. Priva
 
 ### 24. Preview live-session JWT testing UI staged (2026-10-09 UTC)
 Scoped moderation diagnostic panel in `pazo-app-t83r` Preview only, with no token copying and no writes. The actual signed-in user can test moderator or normal-account RPC access, including guaranteed denial of service-only claim APIs. UI test is NOT PASS until PO uses two independent sessions and shares redacted results/screenshot. Does not enable Storage deletion, D3-B unresolved, A2 remains open.
+
+
+### 25. Signed-browser screenshot smoke vs strict HTTP authorization evidence (2026-10-08 local)
+
+PO supplied real browser screenshots: normal and moderator accounts each showed six PASS items; moderator screenshot includes its two management entry buttons. **QA audit found that original verifier treated any RPC error as denied**, allowing false positives from outages/missing RPC. Applied a code-only fix requiring `42501` SQLSTATE for all expected denies and labeling verified account type. Original visual test is recorded but strict signed-browser security gate **awaits PO's two retests after Preview CI**. No DB or Edge changes, and A2 remains open.
