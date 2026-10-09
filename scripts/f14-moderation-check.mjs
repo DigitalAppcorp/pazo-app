@@ -70,4 +70,14 @@ assert.ok(read(mediaDraft).includes('photo_storage_path'), 'Community photo path
 assert.ok(read(mediaDraft).includes("WHEN 'pet_profile' THEN 'pending_review'"), 'Pet profile media status remains conservative')
 assert.ok(read(mediaTest).includes('ROLLBACK;'), 'Migration test must end with rollback')
 assert.ok(moderationQueue.includes('depublished_no_media_review'), 'Moderator UI must display correct no-media result')
+const v2Guard = 'supabase/drafts/f14_media_purge_v2/mediaGuard.mjs'
+const v2Cases = 'supabase/drafts/f14_media_purge_v2/mediaGuard.test.mjs'
+const v2Readme = 'supabase/drafts/f14_media_purge_v2/README.md'
+const realJwt = 'scripts/f14-signed-jwt-authorization.mjs'
+for (const f of [v2Guard,v2Cases,v2Readme,realJwt]) assert.ok(existsSync(f), 'F14 A2 safe Storage audit artifact missing: ' + f)
+assert.ok(read(v2Guard).includes("status: 'candidate_only'"), 'V2 must never claim deletion success')
+assert.ok(!read(v2Guard).includes('.remove(['), 'Pure V2 must never delete files')
+assert.ok(read(v2Cases).includes('legacy feed pet-only path'), 'Legacy paths must be regression-tested')
+assert.ok(read(v2Readme).includes('NEVER DEPLOY'), 'Unapproved purge must remain gated')
+assert.ok(read(realJwt).includes('PAZO_NORMAL_USER_ACCESS_TOKEN'), 'Security tests need a separate genuine user JWT')
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')

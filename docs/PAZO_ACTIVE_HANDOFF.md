@@ -1113,3 +1113,20 @@ Proposed logic uses `NULLIF(BTRIM(photo_url),'') IS NOT NULL` for Feed posts, an
 **Actual hosted five-case regression PASS after DDL commit:** executed the existing five-case synthetic moderation fixture against the *already deployed function*, not a temporary function replacement, in a BEGIN/ROLLBACK. Feed no photo/no task; Feed photo/pending; Community no photo/no task; Community URL+path/pending; pet profile/pending. Auth role simulated by SQL claims, NOT an independent real signed JWT login. ROLLBACK restored all generated rows. Pre- and post-apply audit: 1 moderator; 0 reports and restrictions. **No Storage files removed or uploaded**, Edge `f14-moderation-purge` remains deliberately inoperative (503); Vercel production untouched, `main` untouched.
 
 **A2 not closed**: signed-JWT HTTP security tests with an independent normal account remain pending; safe media Storage/CDN purge and D3-B audit retention unresolved; comprehensive moderator review UX still pending. A3/A4 not authorized. Do not enable Storage delete or deploy production without separate PO gate.
+
+
+---
+
+# F14 A2 — STORAGE SECURITY V2 DRAFT + NO-DELETE AUDIT (2026-10-08 US local)
+
+**Latest checkpoint**: PO asked to prepare safer media deletion, after earlier read-only Storage audit. Scope is to prepare and test, **NOT** authorize Storage DELETE, SQL moderation migrations, Edge deployment or production release. Audit validated five existing buckets: post-photos public 10, pet-avatars public 3, community-post-photos public 3, community-avatars public 2, pet-documents PRIVATE 1. Existing deployed f14-moderation-purge remains HTTP 503 with no Storage mutation implementation.
+
+Live data classification (read-only, no raw URLs exposed): 13 Feed photo_url records, 7 correspond to existing post-photos objects, 6 are external/other not identifiable in that bucket. Of 7, 3 follow owner_user/pet/UUID.ext and 4 are older pet/safe_file.ext; author owns pet in all seven. Four pet profiles have photo-bearing posts; do NOT mark a profile fully purged by deleting one avatar. 5 pet photo URLs, 3 internal matched, 2 external/other. Community post image URL/path pairs: 2 matching objects. 3 post-photos objects currently unmatched to a post: NEVER orphan sweep or bulk deletion.
+
+**Prepared files** (not deployed):
+- supabase/drafts/f14_media_purge_v2/mediaGuard.mjs: pure, strict, fail-closed candidate inspector, returns only candidate_only or manual_review. Requires provenance and object ID/timestamp, exact row references, correct URL origin/bucket, ownership, current moderation state; understands verified legacy path.
+- supabase/drafts/f14_media_purge_v2/mediaGuard.test.mjs: 30+ synthetic tests for current/legacy URL/path, ownership, shared and external media, traversal, reference mismatch, profile-related photo cases.
+- scripts/f14-signed-jwt-authorization.mjs: nonmutating real HTTP tests, requires separate genuine moderator and normal-account access tokens securely injected. **NOT EXECUTED** because authentic independent normal JWT credentials are not available in the connector. Never use manufactured JWT claims as evidence of this gate.
+- supabase/drafts/f14_media_purge_v2/README.md: threat model and gates. Prior supabase/drafts/f14_moderation_purge_full_proposal.ts is explicitly SUPERSEDED as unsafe for rollout.
+
+**Critical blockers:** No privileged authoritative media-claim RPC and zero-other-reference uniqueness CAS guard exists yet; old f14_confirm_media_cleanup(kind,id) is insufficient to confirm EXACT object+version. CDN/browser caches may retain bytes after Storage API deletion. Service-role deletion must use Supabase Storage API only, never DELETE on storage.objects. Until signed-JWT, idempotent claim and private isolated asset tests pass, no active deletion. External URL cases and uncertain object provenance -> manual review. Frontend/production unchanged. F14 A2 OPEN, A3/A4 unauthorized.

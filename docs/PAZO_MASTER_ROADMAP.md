@@ -986,3 +986,7 @@ Prepared and SQL rollback-tested presence-aware media classification on `f14_rev
 
 ### F14 A2 — no-photo media classification applied (2026-10-09)
 After explicit PO approval, migration `f14_media_status_presence_guard`, server `20261009010551`, updated `f14_review_report` so text-only Feed/Community posts do not become pending media deletion tasks; photo-bearing content remains queued, pet profiles stay conservatively queued. Five-case hosted-function rollback validation PASS. SQL is now canonical at `supabase/migrations/20261009010551_f14_media_status_presence_guard.sql`, no longer a draft. No Storage deletion or production deployment. A2 pending independent JWT validation, Storage/CDN safety and retention policy.
+
+
+### F14 A2 — Media deletion secure-draft gate (2026-10-08)
+Audit + V2 draft only: proof-driven path inspection for current and verified legacy Feed photos, Community media, and conservative pet avatars; 30+ local synthetic Node cases and a genuine JWT read-only test script staged. Actual signed JWT test needs securely injected independent user session and has NOT PASSED. No delete/claim/confirmation RPC implemented, no production deploy; Edge stays 503. Request new PO gate before metadata/claim migration and separate gate before irreversible Storage removal. Full plan: supabase/drafts/f14_media_purge_v2/README.md. A2 open, A3/A4 unauthorized.

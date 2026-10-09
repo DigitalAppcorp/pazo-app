@@ -1,3 +1,5 @@
+// RETIRED SECURITY DRAFT: DO NOT DEPLOY. Superseded by f14_media_purge_v2/README.md.
+// Current Storage deletion proposal does not cover historical paths, cross-reference ownership or atomic claims.
 // F14 A2 - gated draft Edge Function. Deploy only with PO authorization.
 // This endpoint requires a verified user JWT AND a server-side moderator grant.
 // Service key stays inside the Edge runtime and is never returned to browser.
