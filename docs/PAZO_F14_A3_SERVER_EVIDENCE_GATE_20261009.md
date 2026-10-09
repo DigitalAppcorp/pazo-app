@@ -21,3 +21,9 @@ Documentación oficial de Supabase: https://supabase.com/docs/guides/functions/a
 ## Gates restantes
 
 Reautenticación reciente probada por servidor (no JWT `iat`), freeze real para todas las escrituras, archivo de aportes ajenos/legacy, Storage API/CDN verificado, sesión antigua invalidada, backup/retención, FK real y worker físico con Auth al final; pruebas reales con dos sesiones y migration apply aislado antes de desplegar. Los gates de autorización PO para SQL alojado, despliegues, borrados y merge siguen separados.
+
+## Reconciliación de autenticación de Edge — borrador actualizado (2026-10-09)
+
+Se eligió el protocolo moderno de Supabase para llamadas *servicio a servicio*: `@supabase/server@1.8.1` (pin) con `withSupabase({auth:'secret:pazo-a3-review'})`. El middleware validaría exclusivamente una **clave secreta nombrada** del proveedor en el header `apikey`; `verify_jwt=false` en `supabase/config.toml` es necesario para aceptar `sb_secret_...` no JWT, **no es una apertura pública**, porque la validación de clave se hace en `@supabase/server`. Además, el handler existente exige un segundo secreto independiente `x-a3-worker-key` y la variable de habilitación `PAZO_A3_REVIEW_WORKER_ENABLED=true`. La función continúa `enabled=false` en config, la variable no está configurada y la clave nombrada NO se ha creado. Ninguna llamada API se ha desplegado.
+
+**Gate pendiente:** probar en runtime Edge/Deno que solicitudes sin `apikey`, con `apikey` público/usuario, con clave equivocada y sin segundo secreto reciben denegación; que una clave nombrada válida solo llega al motor de revisión (no al de eliminación); y validar en GitHub/Deno el SDK pinneado. No se puede afirmar E2E del middleware basándose solo en tests Node/estáticos. Una autorización futura de deploy/clave deberá ser específica y no incluye borrado de cuentas.

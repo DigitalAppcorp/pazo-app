@@ -428,5 +428,7 @@ entrypoint = "./functions/paypal-webhook/index.ts"
 # F14 A3: review-only preview entrypoint. Explicitly disabled until PO gate.
 [functions.f14-a3-account-deletion]
 enabled = false
-verify_jwt = true
+# The named-secret middleware authenticates apikey internally.
+# Supabase legacy JWT gateway must be disabled for sb_secret_* API keys.
+verify_jwt = false
 entrypoint = "./functions/f14-a3-account-deletion/index.ts"

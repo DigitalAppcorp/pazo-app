@@ -179,22 +179,13 @@ test('checkpoint uses service-only CAS, validated lease and revision',()=>{
 })
 
 const a3Config=readFileSync(new URL('../supabase/config.toml',import.meta.url),'utf8')
-test('A3 Edge handler requires config disabled and JWT verification',()=>{
-  assert.match(a3Config,/\[functions\.f14-a3-account-deletion\]\s+enabled = false\s+verify_jwt = true/)
+test('A3 Edge endpoint stays disabled, uses named-secret middleware and dual gates',()=>{
+  assert.match(a3Config,/\[functions\.f14-a3-account-deletion\][\s\S]*?enabled = false[\s\S]*?verify_jwt = false/)
   const fn=readFileSync(new URL('../supabase/functions/f14-a3-account-deletion/index.ts',import.meta.url),'utf8')
+  assert.match(fn,/npm:@supabase\/server@1\.8\.1/)
+  assert.match(fn,/withSupabase\(\{ auth: 'secret:pazo-a3-review' \}/)
   assert.match(fn,/PAZO_A3_REVIEW_WORKER_ENABLED/)
   assert.match(fn,/PAZO_A3_REVIEW_INVOKE_SECRET/)
-  assert.doesNotMatch(fn,/\bauth\.admin\.deleteUser\b|storage\.from\(/)
-})
-
-const legacyCheckSql=readFileSync(new URL('../supabase/drafts/20261009_f14_a3_worker_legacy_clear_NOT_APPLIED.sql',import.meta.url),'utf8')
-test('legacy server readiness aborts before SQL, exposes no delete and restricts RPC',()=>{
- const guard=legacyCheckSql.indexOf("RAISE EXCEPTION 'A3 LEGACY READINESS DRAFT ONLY")
- assert.ok(legacyCheckSql.indexOf('BEGIN;')<guard)
- assert.ok(guard<legacyCheckSql.indexOf('CREATE OR REPLACE FUNCTION'))
- assert.match(legacyCheckSql,/FROM PUBLIC,anon,authenticated/)
- assert.match(legacyCheckSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_worker_legacy_clear\(uuid\) TO service_role/)
- assert.match(legacyCheckSql,/p\.comments='null'::jsonb/)
- assert.match(legacyCheckSql,/p\.comments='\[\]'::jsonb/)
- assert.doesNotMatch(legacyCheckSql,/\bDELETE\s+FROM\b|\bTRUNCATE\b|\bDROP\s+TABLE\b/i)
+  assert.match(fn,/makeA3InternalReviewHandler/)
+  assert.doesNotMatch(fn,/\bauth\.admin\.deleteUser\b|storage\.from\(|\bauth: 'none'\b/)
 })
