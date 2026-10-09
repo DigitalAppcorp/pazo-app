@@ -137,3 +137,14 @@ La referencia actual de Supabase para `remove` confirma que `{path,versionId}` s
 - `SafetySettings.tsx` expone el botón nuevo únicamente en `pazo-app-t83r` Preview, separado del anterior `F14StorageProbe` ya aprobado. Las pruebas estáticas de regresión impiden un borrado por ruta de medios personales.
 
 **Estado:** suite Node/CI deberá comprobarse en último HEAD; Preview nuevo y **QA de versión exacta aún no ejecutada por PO**, no inventar PASS. Supabase no recibió migraciones ni operaciones de Storage durante este checkpoint. 20 objetos previos se mantienen como inventario esperado, confirmar lectura al finalizar. El avance de A2 depende de confirmar comportamiento `versionId` y luego examinar concurrencia/service_role + CDN; Edge 503 y bloqueo `purged` permanecen. No solicitar repetir la prueba anterior del píxel ni el panel manual aprobados.
+
+
+### A2 Version-id QA: CI aprobado, Preview pendiente por límite de Vercel
+
+Supabase Storage en PAZO (lectura real): los cinco buckets declaran `versioning_status=DISABLED`, pero los 20 objetos existentes tienen identificador de versión de 36 caracteres; **NO cambiar versionado de buckets**. Referencia SDK actual documenta `remove([{path,versionId}])` como selección de versión exacta vigente/archivada, **aún no probado en este proyecto con HTTP real**.
+
+El último código `F14VersionProbe` se compiló y las pruebas automatizadas de `exactVersionPreflight` pasaron mediante GitHub Actions `37895742885` sobre `2e8a32c` (**CI SUCCESS**). Una solicitud de despliegue Preview del mismo SHA a `pazo-app-t83r` fue rechazada por Vercel: HTTP **402**, `api-deployments-free-per-day`, más de 100 deploys, `retryAfter=86400` segundos. La posterior búsqueda por SHA encontró **0 Previews** de esa versión. No repetir llamadas ni contratar plan para eludir la cuota. Vercel no ha desplegado la nueva UI.
+
+**Next gate:** cuando se restablezca la cuota, crear **un único** Preview desde el último SHA con CI verde y comprobar READY; pedir al PO que pulse `Prueba de versión exacta F14` una vez y comparta captura. Si falla, sólo reintentar desde la misma cuenta para limpiar su fixture; no marcar PASS. La ejecución anterior del botón `Prueba aislada de Storage F14` ya pasó y no debe repetirse.
+
+Estado seguro: sin migraciones en esta iteración, Storage 20/claims 0/reportes 0/restricciones 0, Edge purga 503, trigger de estado `purged` activo, PR #35 DRAFT. A2 continúa ABIERTO. No automatizar borrado de medios ajenos basado solo en este nuevo test.
