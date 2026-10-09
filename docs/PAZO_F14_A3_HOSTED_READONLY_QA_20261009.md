@@ -30,3 +30,5 @@
 - Falta backend worker real: reautenticación, freeze integral, archivo de contribuciones con pruebas, objetos Storage por API, visibilidad CDN, JWT y Auth final.
 - Para probar realmente DDL se necesita un sandbox aislado y autorización de entorno; NO usar apply_migration para probar contra el Supabase hospedado, porque escribiría estado persistente y registros de migraciones.
 - Autorizar por separado cambios en base alojada, borrados, merges, despliegues y costos. Gate F14 A3 sigue ABIERTO.
+
+> Actualización: después de las pruebas exclusivamente READ ONLY se realizaron funciones y DDL sobre objetos TEMP con ROLLBACK, sin apply; ver docs/PAZO_F14_A3_TEMP_PG_QA_20261009.md.
