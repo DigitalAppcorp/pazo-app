@@ -8,10 +8,10 @@
 ## 1. Fuente de verdad, Git y alcance
 
 - Repositorio: `DigitalAppcorp/pazo-app`.
-- **Rama activa F14 A2:** `f14/block02-moderation-mvp-20261008`. HEAD confirmado antes de este handoff **`2e6dd134ddee4bc981310dd58eb1ee5eafc98123`**. Este documento se actualizará con un nuevo commit: el siguiente chat DEBE volver a leer HEAD.
+- **Rama activa F14 A2:** `f14/block02-moderation-mvp-20261008`. Último HEAD auditado ANTES de commits documentales de este ciclo: **`594e1c916d4aa4d26e7fd9c2513800803347e5ca`**. Consultar HEAD/CI de nuevo en el siguiente chat.
 - `main` observado: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90` (distinto de la rama F14).
 - Único PR abierto observado: **#34** `product/places-demand-validation`, sobre Lugares y **no relacionado** con F14. No se encontró PR F14 abierto en esta consulta; verificar de nuevo.
-- Dos builds del HEAD `2e6dd13`: **SUCCESS** (`Vercel – pazo-app` y `Vercel – pazo-app-t83r`). Preview F14: https://vercel.com/digitalapp/pazo-app-t83r/55Qz33nsAyzbBBkgrFraRAAyr8qc . El resultado CI no prueba que el usuario haya ejecutado el botón de QA.
+- Dos checks sobre HEAD `594e1c9`: **SUCCESS** (`Vercel – pazo-app` y `Vercel – pazo-app-t83r`). Preview F14: https://vercel.com/digitalapp/pazo-app-t83r/55Qz33nsAyzbBBkgrFraRAAyr8qc . El resultado CI no prueba que el usuario haya ejecutado el botón de QA.
 - **No merge a main ni publicación oficial de PAZO**. Los deploys automáticos de rama/Preview no equivalen a lanzamiento.
 - Working tree local de Antigravity, commits locales no empujados: **desconocidos** en este punto; no inferir que GitHub contiene trabajo local no observado. Pedir solo si el trabajo siguiente depende de ello.
 - Reglas: `AGENTS.md`, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_F14_MASTER.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`, `docs/PAZO_DATA_INVENTORY.md`, `docs/PAZO_ARCHITECTURE_CONTRACT.md`.
@@ -45,20 +45,25 @@ PAZO es una red social de mascotas orientada inicialmente a Los Ángeles, 18+, c
 - Restricciones SQL sobre post no invalidan URLs públicas ya conocidas. La documentación oficial de Supabase indica que eliminación de bytes se hace mediante Storage API, nunca SQL DELETE en `storage.objects`; la propagación Smart CDN puede tardar ~60 s y cachés del navegador pueden persistir.
 - No existe aún confirmación segura de eliminación por objeto+versión/claim, ni un CAS transaccional efectivo que abarque DB + Storage API, ni verificación de borrado CDN. **NO declarar media `purged` usando `f14_confirm_media_cleanup(kind,id)`**: es insuficiente.
 
-## 5. LO ÚLTIMO IMPLEMENTADO, NO VALIDADO VISUALMENTE — PRIORIDAD ABSOLUTA
+## 5. ÚLTIMA ACEPTACIÓN VISUAL — STORAGE SINTÉTICO: PASS
 
-Tres commits posteriores al último control de roles:
-- `0e17386`: nueva protección RLS de rutas retenidas y migración alojada `20261009040957`.
-- `37dec4f`: añade componente Preview-only `src/features/moderation/F14StorageProbe.tsx` en Seguridad y privacidad.
-- `de54766`, `2e6dd13`: correcciones de tipado y uso de `storage.list(...)` en vez de `.info()`; **último HEAD build PASS** en ambos proyectos.
+**2026-10-08 local, confirmación del Product Owner con captura real del Preview F14.** El panel `Prueba aislada de Storage F14` mostró:
+- PASS cuenta autenticada;
+- PASS imagen artificial de 1 píxel creada;
+- PASS archivo localizado por Storage API;
+- PASS eliminación del archivo sintético y ausencia confirmada por Storage API.
 
-**PRUEBA VISUAL PENDIENTE DEL PRODUCT OWNER (primera acción):**
-1. Abrir el Preview exacto `pazo-app-t83r` enlazado arriba, clic en **Visit**.
-2. Sesión normal ya existente de PAZO; ir a **Mi mascota → Seguridad y privacidad → Prueba aislada de Storage F14**.
-3. Leer descripción; cuando decida participar, pulsar **«Crear, verificar y limpiar archivo de prueba»** UNA sola vez y mandar captura de resultado.
-4. El test genera UNA imagen artificial de 1 píxel bajo `post-photos/{auth_user_id}/f14-storage-probe-{uuid}.png`, con `upsert:false`, comprueba existencia mediante Storage.list, llama Storage API `.remove([solo-ruta-generada])` y comprueba ausencia mediante Storage.list. NO altera mascota/post/reporte ni fotografía de cliente. Este **único borrado de fixture sintética generado por la propia prueba** es una prueba controlada diferente de habilitar purga de contenido moderado real.
-5. Si FAIL/error, no repetir con otra cuenta ni borrar manualmente a ciegas; el código guarda en `sessionStorage` la ruta sintética de esa cuenta y el siguiente intento desde la misma sesión solo trata de limpiar esa misma ruta. Primero leer captura e inspeccionar estado real del objeto.
-6. **Esto NO valida** borrado con `service_role`, reserva `held` concurrente ni caché CDN ni seguridad absoluta contra upsert/race. No confundir PASS del ciclo de fixture con cierre de A2.
+**Verificación adicional directamente en Supabase (solo lectura):** `storage.objects` mantiene 20 objetos, `post-photos/%/f14-storage-probe-%` tiene **0**, `moderation_private.media_claims` 0, eventos 0, reportes 0 y restricciones 0. No se generó un nuevo borrado ni se modificó contenido de usuarios. Una sexta mascota aparece en recuento agregado de `pets` (anteriormente cinco); procedencia desconocida, NO tratarla como fixture ni limpiarla.
+
+**Gate visual aislado CERRADO.** No volver a pedir al PO que pulse el botón. **A2 global permanece ABIERTO**: esto no prueba `service_role`, claim real, carrera entre DB/Storage, objeto de contenido retirado ni CDN.
+
+### Auditoría técnica posterior, sin mutaciones de Supabase
+
+- El Storage RLS actual tiene `RESTRICTIVE` para `INSERT` y `DELETE` sobre rutas reservadas de Feed/Comunidad. **No existe actualmente una política permisiva UPDATE**; sobrescribir vía upsert autenticado ya carece de esa autorización. Falta garantizar de forma explícita `UPDATE` si en el futuro se conceden permisos, y estudiar operaciones de servicio/MOVE/COPY.
+- `service_role` bypass RLS; el claim de cinco minutos y locks transaccionales NO constituyen CAS entre Supabase DB y Storage HTTP.
+- Supabase documenta purge manual de CDN en plan Pro o superior; no se autoriza upgrade. Caché CDN y caché navegador requieren tratamiento separado.
+- Diseño fail-closed y retención preliminar versionados en `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md`. Solo diseño; **no hay endpoint destructor ni nueva migración aplicada**.
+- El asesor de Supabase informa advertencias `SECURITY DEFINER` en RPCs F14, incluida función auxiliar RLS expuesta; se requiere análisis de permisos/alcance antes de migrar, sin asumir explotación ni eliminar grants precipitadamente.
 
 ## 6. Autorizaciones, límites y forma de colaborar
 
@@ -68,11 +73,12 @@ La última indicación del PO: **«tienes toda la autorización en todos los pas
 
 Trabajo con conectores GitHub/Supabase/Vercel; no exigir PowerShell/descarga/Antigravity cuando se pueda hacer directamente. Español claro, directo, enfoque producto+seguridad, pocas listas, sin emojis decorativos. Conservar un historial verificable y ahorrar tokens. No inventar decisiones. Al reportar: separar CI, SQL role simulations, sesión Auth real, QA visual, deploy y release.
 
-## 7. Próximo gate después de la prueba visual
+## 7. SIGUIENTE GATE F14 A2 — confirmar seguridad de medios ANTES de purga
 
-Según resultado de la imagen sintética:
-- PASS: registrar evidencia y limpieza en Supabase, y avanzar solo en rama al diseño de confirmación por ID/versión + claim, concurrencia/tombstones, backend de limpieza de objetos aislados y retención D3-B según `docs/PAZO_F14_MASTER.md`. Cualquier eliminación de archivos de clientes o activación de la Edge exige gate propio.
-- FAIL: diagnosticar error exacto / SDK list y metadata, estabilizar la prueba sin crear nuevos objetos.
-- Antes de cerrar A2: verificar multi-rol, medios reales aislados, flujos de privacidad, CDN y Retención D3-B **aprobada como meta pero no implementada**; Scope Closure Reconciliation, PR/merge y release controlado.
+**AI Project Brain ejecuta sin más validación visual por ahora:** auditar firma/versionado de Storage, operaciones UPDATE/UPSERT/MOVE/COPY y restricciones `service_role`; desarrollar contrato y tests **no destructivos** de confirmación vinculada a `claim_id + objeto + versión`. El diseño actual está en `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md`. No inventar CAS nativo en `.remove([path])`: si no existe exclusión demostrable, el borrado automático queda deshabilitado y se propone revisión manual.
 
-**Primera operación del SIGUIENTE CHAT:** activar Brain OS 1.4.1, leer AGENTS + este snapshot + roadmap + F14 master, comprobar el nuevo HEAD/CI y **retomar la prueba visual de Storage pendiente**. NO iniciar otra fase ni rediseñar producto. Si hay evidencia nueva en repo/DB, actualizar snapshot según realidad.
+**No hacer todavía:** activar Edge 503, invocar `f14_confirm_media_cleanup(kind,id)`, borrar media real, alterar CDN/retención de proveedores, aplicar migraciones remotas sin gate expreso, publicar Vercel Production, mergear `main`, iniciar A3/A4 o crear recursos pagos.
+
+**Evidencia ya suficiente:** el ciclo de imagen sintética autenticada y su limpieza. **Pendiente antes de cierre A2:** protocolo de concurrencia y evidencia de no reaparición, URL pública/cache, matriz D3-B aplicable y pruebas finales de seguridad/aceptación sin retestar lo aprobado.
+
+**Git/CI:** la rama sigue `f14/block02-moderation-mvp-20261008`; HEAD previo al inicio de esta verificación `594e1c916d4aa4d26e7fd9c2513800803347e5ca` con dos checks Vercel success; posteriores commits documentales pueden mover HEAD, consultar de nuevo. Vercel API al leer despliegues bajo `digitalapp` devolvió 403; NO cambiar de proyecto ni hacer deploy para rodearlo.
