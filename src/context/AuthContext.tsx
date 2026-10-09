@@ -7,6 +7,7 @@ import {
 } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
+import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
 import {
   captureEvent,
   setObservabilityUser,
@@ -15,7 +16,7 @@ import {
 interface AuthContextValue {
   user: User | null
   loading: boolean
-  signUp: (email: string, password: string) => Promise<boolean>
+  signUp: (email: string, password: string) => Promise<SignUpOutcome>
   signIn: (email: string, password: string) => Promise<boolean>
   signOut: () => Promise<void>
 }
@@ -55,19 +56,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password })
+  const signUp = async (email: string, password: string): Promise<SignUpOutcome> => {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    const outcome = classifySignUpResult(error, data?.session)
 
     if (error) {
       captureEvent('auth_signup_failed', {
         error_code: error.code || null,
       })
       alert(`Error: ${error.message}`)
-      return false
+      return 'failed'
     }
 
     captureEvent('auth_signup_succeeded')
-    return true
+    return outcome
   }
 
   const signIn = async (email: string, password: string) => {
