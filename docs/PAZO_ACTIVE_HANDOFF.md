@@ -7,6 +7,16 @@
 - Leer primero `AGENTS.md`, este handoff, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md` y el scope de cualquier módulo específico antes de actuar.
 - **No crear nuevas fases ni rediseñar todo PAZO**. Prioridad del PO: cierre MVP y lanzamiento con mínima demora, tokens y costes.
 
+## F14 beta reporting pilot — scope limitado 2026-10-09
+
+- El Product Owner autorizó seguir el **cierre mínimo previo a Beta** después de aprobar QA funcional local de PR #36. No autorizó desclasificar D3-A ni declarar F14 completada.
+- PR [#37](https://github.com/DigitalAppcorp/pazo-app/pull/37) DRAFT, branch `f14/beta-reporting-integration-20261009`. Basado en PR #36 `beef7a6`, no en #35. Código integrado `eda27bc00d4641b0766c85582f75d7ab9a525f19`; CI GitHub Actions `37944094738` SUCCESS; documentación posterior cambia HEAD y exige recheck.
+- Frontend conectado a RPC existentes en Supabase para **cinco targets de denuncia** (Feed post/comentario, perfil mascota, Comunidad post/comentario). Acciones solo Auth real; cola de moderador solo tras `f14_is_moderator`. Sin botonera destructiva de Storage, no simular purge.
+- F14 migraciones de reportes, guardrails y media ya figuran APLICADAS en Supabase alojado; se consultaron estado de DB, lista de migraciones, Edge y permisos **solo lectura**. `f14-moderation-purge` Edge permanece stub 503. **No cambios de schema, DB, grants, archivos o backend efectuados en este checkpoint**.
+- Alerta list_tables «RLS Disabled» cuatro tablas privadas: inspección SQL de ACL confirma `anon` y `authenticated` sin USAGE esquema `moderation_private` ni SELECT/INSERT sobre las cuatro tablas. No demuestra acceso directo, pero tampoco equivale a auditoría completa; revisar RPC SECURITY DEFINER y rutas API. Referencia: `docs/PAZO_F14_BETA_REPORTING_PILOT_20261009.md`.
+- PR #37 se apuntó provisionalmente a **main solo para activar CI** (el workflow existente corre solo PR a main); apilado lógicamente sobre PR #36. **No fusionar PR #37 antes de PR #36**, ni asumir base de producción, ni probar medios reales. PR #35/PR #34 separados para reconciliar rollout de Lugares.
+- **Next:** QA de reportes en `pazo-visual-qa` usando rama PR #37 (en worktree independiente), solo datos descartables propios, incluyendo 5 targets y moderador; validar también acceso denegado a no-moderador. Después resolver requisitos beta pendientes: D3-A medios/CDN, A3 cuenta, A4 retención/políticas, email real y release env. No limpiar datos ni pagar por automatización.
+
 ## Código / estado verificable
 - `main`: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90` al inicio del checkpoint; **no contiene todavía PR #36**.
 - **PR #36 DRAFT**, `mvp/functional-readiness-20261009`. Último código + reglas QA confirmadas en commit `b49ecd33b8d451056d3a5f2e26baf216a9662967`. Este handoff documental quedará en un commit posterior de la misma rama: comprobar GitHub HEAD en vivo. GitHub Actions `37935882305` **SUCCESS** sobre `b49ecd3`; volver a comprobar CI del HEAD documental.
