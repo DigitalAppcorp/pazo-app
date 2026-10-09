@@ -76,6 +76,55 @@ BEGIN
       IF v_owner IS NULL OR v_secondary IS NULL THEN
         RAISE EXCEPTION 'Unknown check-in owner during A3 freeze' USING ERRCODE='42501';
       END IF;
+
+    WHEN 'hidden_posts' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+      SELECT user_id INTO v_secondary FROM public.posts WHERE id=(p_row->>'post_id')::uuid;
+      IF v_owner IS NULL OR v_secondary IS NULL THEN
+        RAISE EXCEPTION 'Unresolvable hidden-post relationship' USING ERRCODE='42501';
+      END IF;
+    WHEN 'lost_pet_alerts' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+      IF v_owner IS NULL THEN
+        RAISE EXCEPTION 'Unresolvable lost-pet alert owner' USING ERRCODE='42501';
+      END IF;
+    WHEN 'module_validation_intents' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+    WHEN 'module_validation_interests' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+    WHEN 'module_validation_views' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+    WHEN 'notifications' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+      IF (p_row->>'pet_id') IS NOT NULL THEN
+        SELECT owner_id INTO v_secondary FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+        IF v_secondary IS NULL THEN
+          RAISE EXCEPTION 'Unresolvable notification pet owner' USING ERRCODE='42501';
+        END IF;
+      END IF;
+    WHEN 'pet_private_details' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+    WHEN 'pet_private_metrics' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+    WHEN 'pet_public_links' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+    WHEN 'pet_sightings' THEN
+      SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+      IF (p_row->>'alert_id') IS NOT NULL THEN
+        SELECT owner_id INTO v_secondary
+          FROM public.lost_pet_alerts a JOIN public.pets p ON p.id=a.pet_id
+          WHERE a.id=(p_row->>'alert_id')::uuid;
+        IF v_secondary IS NULL THEN
+          RAISE EXCEPTION 'Unresolvable sighting alert owner' USING ERRCODE='42501';
+        END IF;
+      END IF;
+      IF v_owner IS NULL THEN
+        RAISE EXCEPTION 'Unresolvable sighted pet owner' USING ERRCODE='42501';
+      END IF;
+    WHEN 'place_usage_events' THEN
+      v_owner := (p_row->>'user_id')::uuid;
+    WHEN 'search_usage_events' THEN
+      v_owner := (p_row->>'user_id')::uuid;
     WHEN 'care_items' THEN
       SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
     WHEN 'care_completions' THEN
@@ -156,6 +205,30 @@ CREATE TRIGGER a3_write_fence_community_post_likes BEFORE INSERT OR UPDATE OR DE
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_pet_place_checkins BEFORE INSERT OR UPDATE OR DELETE ON public.pet_place_checkins
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_hidden_posts BEFORE INSERT OR UPDATE OR DELETE ON public.hidden_posts
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_lost_pet_alerts BEFORE INSERT OR UPDATE OR DELETE ON public.lost_pet_alerts
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_module_validation_intents BEFORE INSERT OR UPDATE OR DELETE ON public.module_validation_intents
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_module_validation_interests BEFORE INSERT OR UPDATE OR DELETE ON public.module_validation_interests
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_module_validation_views BEFORE INSERT OR UPDATE OR DELETE ON public.module_validation_views
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_notifications BEFORE INSERT OR UPDATE OR DELETE ON public.notifications
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_pet_private_details BEFORE INSERT OR UPDATE OR DELETE ON public.pet_private_details
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_pet_private_metrics BEFORE INSERT OR UPDATE OR DELETE ON public.pet_private_metrics
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_pet_public_links BEFORE INSERT OR UPDATE OR DELETE ON public.pet_public_links
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_pet_sightings BEFORE INSERT OR UPDATE OR DELETE ON public.pet_sightings
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_place_usage_events BEFORE INSERT OR UPDATE OR DELETE ON public.place_usage_events
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_search_usage_events BEFORE INSERT OR UPDATE OR DELETE ON public.search_usage_events
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_care_items BEFORE INSERT OR UPDATE OR DELETE ON public.care_items
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_care_completions BEFORE INSERT OR UPDATE OR DELETE ON public.care_completions
@@ -165,7 +238,7 @@ CREATE TRIGGER a3_write_fence_pet_documents BEFORE INSERT OR UPDATE OR DELETE ON
 
 COMMIT;
 
--- NOT COVERED: Storage API, unknown future interaction targets, QR/rescue,
--- notifications, private account settings, privileged operations, direct Auth
+-- NOT COVERED: Storage API, unknown future interaction targets, unmapped
+-- private/legacy tables, privileged Edge/RPC operations, direct Auth
 -- deletes or service-side functions on unmapped tables.
 -- Do not consider write freeze complete; no worker may delete data using this alone.
