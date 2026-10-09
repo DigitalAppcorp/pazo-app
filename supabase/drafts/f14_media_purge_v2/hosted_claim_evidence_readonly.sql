@@ -1,6 +1,9 @@
 -- PAZO F14 A2 — READ-ONLY PRIVATE EVIDENCE QUERY TEMPLATE.
 -- Do not expose to browser, authenticated or anon. Run ONLY from a trusted
--- backend in a single repeatable-read transaction with required permissions.
+-- backend in a single REPEATABLE READ transaction with required permissions.
+-- IMPORTANT: transaction MUST NOT use PostgreSQL READ ONLY mode: f14_media_probe
+-- acquires SELECT ... FOR SHARE locks for real rows. The statement below is
+-- SELECT-only, but READ ONLY mode may reject row locks. Never expose to clients.
 -- $1: media_claims.claim_id UUID. No deletions, changes or authorization.
 -- f14_media_probe obtains source evidence but SQL locks do not span Storage HTTP.
 -- Returns a single JSON object for inspectHostedClaimEvidence, or zero rows.
