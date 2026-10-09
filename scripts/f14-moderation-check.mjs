@@ -119,4 +119,13 @@ assert.ok(uiQa.includes("Tipo de cuenta comprobado:"), 'Preview QA must identify
 assert.ok(!uiQa.includes('access_token') && !uiQa.includes('getSession()'), 'F14 QA must not read/copy bearer tokens')
 assert.ok(qaHost.includes("window.location.hostname.includes('pazo-app-t83r')"), 'QA must only appear in isolated Preview project')
 assert.ok(!uiQa.includes('remove(['), 'F14 QA must never delete Storage content')
+const holdMigration = 'supabase/migrations/20261009040957_f14_storage_held_media_guard.sql'
+const holdRegression = 'supabase/tests/database/f14_storage_held_media_guard_rollback.test.sql'
+assert.ok(existsSync(holdMigration) && existsSync(holdRegression), 'Installed Storage hold guard must be versioned')
+assert.ok(!existsSync('supabase/drafts/20261009_f14_storage_held_media_policy.sql'), 'Applied hold guard must not remain a draft')
+const holdSql = read(holdMigration)
+assert.ok(holdSql.includes('AS RESTRICTIVE FOR INSERT') && holdSql.includes('AS RESTRICTIVE FOR DELETE'), 'Storage hold must restrict both insert and delete')
+assert.ok(holdSql.includes('f14_media_claims_held_bucket_path_idx'), 'Storage hold lookup index required')
+assert.ok(!holdSql.includes('DELETE FROM storage.objects') && !holdSql.includes('.remove('), 'Storage hold migration must not delete files')
+assert.ok(read(holdRegression).trimEnd().endsWith('ROLLBACK;'), 'Storage hold test must be reversible')
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')

@@ -1007,3 +1007,7 @@ PO provided two authentic-session UI PASS screenshots (normal / moderator), with
 
 ### F14 A2 — strict browser permission tests passed (2026-10-08 local)
 PO submitted normal-account and moderator-account Preview screenshots, both **6/6 PASS** after UI verifier was hardened to require PostgREST SQLSTATE `42501` for forbidden actions; role correctly displayed in both. Mark **real-session browser permissions PASS**, while independent raw signed JWT runner and Storage deletion audits remain separate and unexecuted. DB check 0 claims/events/reports/restrictions, 1 moderator, 20 Storage objects; deployed Edge still 503. Next gate: prove exact-object lifecycle/Storage concurrency with isolated bytes, strong claim-bound confirmation and CDN/retention plan. A2 open. Do not delete media, merge main or deploy production.
+
+
+### F14 A2 — Held media Storage RLS protection applied (2026-10-09 UTC)
+Supabase migration `20261009040957_f14_storage_held_media_guard` adds two RESTRICTIVE authenticated INSERT/DELETE policies covering only active claimed paths in `post-photos` or `community-post-photos`, preserving existing grants and permissions. Held/unheld/expired synthetic cases PASS with ROLLBACK. 20 existing objects untouched; 0 claims. Adds defense in depth but DOES NOT solve service_role or HTTP race, so no automatic deletion. A2 open, Storage/CDN and D3-B still pending.

@@ -47,3 +47,8 @@ No cerrar F14 A2, no tocar main, Production Vercel, ni iniciar A3/A4.
 Supabase registra `f14_media_claim_preflight` versión `20261009014616`. Dos tablas privadas y dos RPC service-only instaladas. Grants: anon/authenticated denegados, service_role autorizado. Cero reservas/reports/restrictions actuales, 1 moderador, 19 objetos de Storage intactos. Pruebas funcionales sobre la función realmente instalada: Feed actual/idempotencia/URL cambiada, rechazo de permisos, Comunidad, versión del objeto modificada, Feed legacy, vencimiento y 3 escenarios de rechazo (foto compartida, host distinto, marcador de borrado), todos con ROLLBACK. Esto NO es prueba JWT firmada real ni de bytes/CDN.
 
 **La reserva solo devuelve candidato.** La confirmación de ausencia en Storage y el control de carrera entre servicios siguen sin implementar. No invocar ni conectar `f14_confirm_media_cleanup(kind,id)` a un nuevo worker.
+
+
+## Applied authenticated-object hold policy (2026-10-09)
+
+Migration `20261009040957_f14_storage_held_media_guard.sql` is active. While a claim is held and unexpired, **authenticated** users cannot INSERT or DELETE that exact path in `post-photos` / `community-post-photos` through Storage's row-level policies. Untouched paths/buckets continue under existing allow policies. It does not block operations performed using `service_role`, and no SQL policy is a cross-service compare-and-swap. A different path or a mutation that began before the claim may still require recheck. The Storage purge Edge remains 503.
