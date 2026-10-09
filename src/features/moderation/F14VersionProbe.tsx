@@ -79,14 +79,14 @@ export function F14VersionProbe({ lang }: Props) {
       if (afterWrong.error || afterWrong.data?.id !== firstId ||
         afterWrong.data?.version !== version)
         throw new Error('WRONG_VERSION_REMOVED_CURRENT')
-      if (wrong.error && !['404', '409'].includes(String(wrong.error.statusCode)))
+      if (wrong.error && !['400', '404', '409'].includes(String(wrong.error.statusCode)))
         throw new Error('VERSION_REQUEST_FAILED')
       success('La versión incorrecta no eliminó el archivo actual', 'Wrong version did not remove current object')
 
       const exact = await storage.remove([{ path, versionId: version }])
       if (exact.error) throw new Error('EXACT_DELETE_FAILED')
       const absent = await storage.info(path)
-      if (!absent.error || !['404', '400'].includes(String(absent.error.statusCode)))
+      if (!absent.error || String(absent.error.statusCode) !== '404')
         throw new Error('CURRENT_VERSION_STILL_PRESENT')
       const listed = await storage.list(uid, {
         search: path.slice(uid.length + 1), limit: 25,
