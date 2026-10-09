@@ -83,6 +83,15 @@ BEGIN
  END;
  IF NOT rejected THEN RAISE EXCEPTION 'Cross-object fence was accepted'; END IF;
 
+ -- A fence with a different generation must also be rejected at FK layer.
+ rejected:=false;
+ BEGIN
+  UPDATE moderation_private.media_writer_fences SET generation=99
+  WHERE active_operation_id='33333333-3333-4333-8333-333333333333';
+ EXCEPTION WHEN foreign_key_violation THEN rejected:=true;
+ END;
+ IF NOT rejected THEN RAISE EXCEPTION 'Cross-generation fence was accepted'; END IF;
+
  -- Replay must not create duplicate event for same operation/generation.
  rejected:=false;
  BEGIN
