@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
+import { selectFeedPage } from './features/feed/selectFeedPage'
 import {
   fetchLatestUnreadSightingNotification,
   fetchNotifications,
@@ -268,47 +269,6 @@ function PazoMain() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
-  const blendFeeds = (followed: Post[], recommended: Post[]): Post[] => {
-    if (!followed || followed.length === 0) return recommended
-    if (!recommended || recommended.length === 0) return followed
-
-    // Crear un Set con los IDs de las publicaciones seguidas para evitar duplicados
-    const followedIds = new Set(followed.map(p => p.id))
-
-    // Filtrar recomendaciones que ya existan en el feed de seguidos
-    const filteredRecommended = recommended.filter(p => !followedIds.has(p.id))
-
-    const blended: Post[] = []
-    let recIndex = 0
-
-    // Calcular frecuencia dinámica de inyección basada en el tamaño del feed de seguidos
-    const frequency = followed.length <= 3 ? 2 : 4
-
-    for (let i = 0; i < followed.length; i++) {
-      blended.push(followed[i])
-
-      // Inyectar un post recomendado cada 'frequency' posts de seguidos
-      if ((i + 1) % frequency === 0 && recIndex < filteredRecommended.length) {
-        blended.push({
-          ...filteredRecommended[recIndex],
-          isRecommended: true
-        } as Post)
-        recIndex++
-      }
-    }
-
-    // Si sobraron recomendaciones filtradas y el feed es corto, añadirlas al final
-    while (recIndex < filteredRecommended.length) {
-      blended.push({
-        ...filteredRecommended[recIndex],
-        isRecommended: true
-      } as Post)
-      recIndex++
-    }
-
-    return blended
-  }
-
   const enrichPostsWithInteractions = async (postsList: Post[], petId?: string): Promise<Post[]> => {
     if (postsList.length === 0) return postsList
 
@@ -424,6 +384,7 @@ function PazoMain() {
           recommendationExhausted: false,
         }
 
+        if (feedLoadVersionRef.current !== loadVersion) return
         feedPaginationRef.current = pagination
       }
 
@@ -465,36 +426,35 @@ function PazoMain() {
         recommendationRows = data || []
       }
 
-      const socialPosts = socialRows.map((post) => formatPostRow(post, false))
-      const recommendedPosts = recommendationRows.map((post) =>
-        formatPostRow(post, true)
+      // Each query returns up to one page; only the items rendered should
+      // advance that source's cursor. Other candidates stay on later pages.
+      if (feedLoadVersionRef.current !== loadVersion) return
+      const selection = selectFeedPage(
+        socialRows,
+        recommendationRows,
+        FEED_PAGE_SIZE,
+        reset ? new Set<string>() : new Set(posts.map((post) => post.id)),
+        () => true
+      )
+      const page = selection.entries.map(({ item, recommended }) =>
+        formatPostRow(item, recommended)
       )
 
-      const page = blendFeeds(socialPosts, recommendedPosts)
-        .slice(0, FEED_PAGE_SIZE)
-
-      const consumedSocial = page.filter((post) => !post.isRecommended).length
-      const consumedRecommendations = page.filter((post) => post.isRecommended).length
-
-      pagination.socialOffset += consumedSocial
-      pagination.recommendationOffset += consumedRecommendations
+      pagination.socialOffset += selection.consumedSocial
+      pagination.recommendationOffset += selection.consumedRecommendations
 
       if (
         socialRows.length === 0
-        || (
-          socialRows.length < FEED_PAGE_SIZE
-          && consumedSocial >= socialRows.length
-        )
+        || (socialRows.length < FEED_PAGE_SIZE
+          && selection.consumedSocial >= socialRows.length)
       ) {
         pagination.socialExhausted = true
       }
 
       if (
         recommendationRows.length === 0
-        || (
-          recommendationRows.length < FEED_PAGE_SIZE
-          && consumedRecommendations >= recommendationRows.length
-        )
+        || (recommendationRows.length < FEED_PAGE_SIZE
+          && selection.consumedRecommendations >= recommendationRows.length)
       ) {
         pagination.recommendationExhausted = true
       }
@@ -1358,7 +1318,9 @@ function PazoMain() {
     }
   }, [user?.id, isOnboardingActive, pets.length])
 
-  const unreadMessages = conversations.filter((c) => c.isRequest).length
+  const unreadMessages = isDemoUser && !user
+    ? conversations.filter((c) => c.isRequest).length
+    : 0
   const unreadNotifications = unreadNotificationCount
   const lostPets = pets.filter((pet) => pet.isLost)
 
@@ -1883,7 +1845,8 @@ function PazoMain() {
             <MessagesModal
               isOpen={isMessagesOpen}
               onClose={() => setIsMessagesOpen(false)}
-              conversations={conversations}
+              conversations={isDemoUser && !user ? conversations : []}
+              isDemo={isDemoUser && !user}
               onSendMessage={handleSendMessage}
               lang={lang}
             />
