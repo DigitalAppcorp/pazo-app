@@ -321,7 +321,8 @@ assert.ok(safetyRoot.includes('f14QaPreview && <F14VersionProbe') &&
   versionProbe.includes('runningRef.current = false') &&
   versionProbe.includes('storage.getPublicUrl(path).data.publicUrl') &&
   versionProbe.includes("url.searchParams.set('cacheNonce', crypto.randomUUID())") &&
-  versionProbe.includes("fetch(url.toString(), { cache: 'no-store' })") &&
+  versionProbe.includes("fetch(url.toString(), { cache: 'no-store', signal: AbortSignal.timeout(5000) })") &&
+  versionProbe.includes("fetch(publicUrl, { cache: 'reload', signal: AbortSignal.timeout(5000) })") &&
   versionProbe.includes('No demuestra invalidación mundial') &&
   versionProbe.indexOf('const edge = await fetch(') > versionProbe.indexOf("success('Versión exacta eliminada") &&
   !versionProbe.includes('purgeCache(') &&
