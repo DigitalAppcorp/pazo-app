@@ -364,4 +364,20 @@ assert.ok(fiveKindsSql.trimEnd().endsWith('ROLLBACK;') &&
 for(const kind of ['feed_post','feed_comment','pet_profile','community_post','community_comment'])
   assert.ok(fiveKindsSql.includes(kind), 'Missing report target smoke case: '+kind)
 
+// Moderated-content RLS must hide the 5 approved target kinds before beta.
+// These hosted tests require seeded content but commit no reports or restrictions.
+const fiveKindsVisibility = 'supabase/tests/database/f14_five_target_visibility_hosted_rollback.test.sql'
+assert.ok(existsSync(fiveKindsVisibility), 'F14 hosted five-target visibility regression missing')
+const visibilitySql = read(fiveKindsVisibility)
+assert.ok(visibilitySql.trimEnd().endsWith('ROLLBACK;') &&
+  visibilitySql.includes('SET LOCAL ROLE authenticated;') &&
+  visibilitySql.includes('SET LOCAL ROLE anon;') &&
+  visibilitySql.includes('moderation_private.content_restrictions') &&
+  visibilitySql.includes('Moderated resource still visible to authenticated role') &&
+  visibilitySql.includes('Moderated public Feed or pet visible to anon') &&
+  !visibilitySql.includes('COMMIT;'),
+  'F14 five-target RLS coverage must be reversible and verify anonymous visibility')
+for(const kind of ['feed_post','feed_comment','pet_profile','community_post','community_comment'])
+  assert.ok(visibilitySql.includes(kind), 'Missing visibility target: '+kind)
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
