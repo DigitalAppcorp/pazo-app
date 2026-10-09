@@ -315,6 +315,10 @@ assert.ok(safetyRoot.includes('f14QaPreview && <F14VersionProbe') &&
   !versionProbe.includes('storage.remove([path])') &&
   versionProbe.includes("String(absent.error.statusCode) !== '404'") &&
   versionProbe.includes('setDone(true)') &&
+  versionProbe.includes('const runningRef = useRef(false)') &&
+  versionProbe.includes('if (runningRef.current || done) return') &&
+  versionProbe.includes('runningRef.current = true') &&
+  versionProbe.includes('runningRef.current = false') &&
   versionProbe.includes('storage.getPublicUrl(path).data.publicUrl') &&
   versionProbe.includes("url.searchParams.set('cacheNonce', crypto.randomUUID())") &&
   versionProbe.includes("fetch(url.toString(), { cache: 'no-store' })") &&
