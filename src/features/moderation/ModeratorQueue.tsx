@@ -64,7 +64,11 @@ export function ModeratorQueue({ lang, onClose }: Props) {
       const result = await reviewReport(report.id, action)
       setMessage(result === 'depublished_pending_media_review'
         ? (es ? 'Contenido despublicado. Revisión de archivos pendiente.' : 'Content depublished; media review pending.')
-        : (es ? 'Denuncia descartada.' : 'Report dismissed.'))
+        : result === 'depublished_no_media_review'
+          ? (es ? 'Contenido despublicado. No hay archivos adjuntos que revisar.' : 'Content depublished. No attached media to review.')
+          : result === 'dismissed'
+            ? (es ? 'Denuncia descartada.' : 'Report dismissed.')
+            : (es ? 'Decisión registrada. Comprueba el estado de la cola.' : 'Decision recorded. Check the queue status.'))
       await load(0)
     } catch { setError(es ? 'No se pudo registrar la decisión.' : 'Failed to save moderation decision.') }
     finally { setBusy(false) }

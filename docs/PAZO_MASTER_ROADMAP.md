@@ -978,3 +978,7 @@ A real-user-session Preview report was successfully dismissed through the modera
 
 ### F14 A2 — Live depublish validation completed (2026-10-08/09 UTC)
 Real Preview moderator action `Despublicar` -> SQL `status=removed` + action audit + RLS restriction PASS. Anonymous and authenticated SQL role tests confirm removed post invisible; other posts visible. PO-authorized exact trial pet/post/report/action/restriction/impression cleanup succeeded after guarded ROLLBACK dry-run; zero trial records, zero total reports/restrictions, 1 moderator, 14 posts and 5 pets persist. No images, no Storage mutations. **Backlog: no-media content currently receives spurious `pending_review` media status**; correct with separate approved migration before broader rollout. Independent non-moderator real signed JWT tests and media Storage/CDN remain open; A3/A4 not authorized.
+
+
+### F14 A2 — phantom media queue fix staged (2026-10-08)
+Prepared and SQL rollback-tested presence-aware media classification on `f14_review_report`; text-only Feed/Community posts would not become false media-review tasks, but profile media review remains conservative. Versioned draft and five-case reversible suite, along with matching moderator UI messaging, are on A2 branch. **Await separate PO authorization before Supabase apply**; no Storage purge or Vercel production. A2 open.
