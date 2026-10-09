@@ -291,4 +291,30 @@ for (const file of [noFalsePurgeDraftTest,noFalsePurgeInstalledTest]) {
     'False-purge tests must be reversible and never delete Storage metadata')
 }
 
+// Exact-version behavior remains a Preview-only synthetic test, NOT production purge.
+const versionInspector=read('supabase/drafts/f14_media_purge_v2/exactVersionPreflight.mjs')
+const versionProbe=read('src/features/moderation/F14VersionProbe.tsx')
+const safetyRoot=read('src/features/moderation/SafetySettings.tsx')
+assert.ok(versionInspector.includes("status: 'manual_review'") &&
+  versionInspector.includes("status: 'candidate_only'") &&
+  versionInspector.includes('mayDelete: false') &&
+  versionInspector.includes('versionId: live.version') &&
+  !versionInspector.includes('.remove('),
+  'Exact-version inspector must never become an executable deletion function')
+assert.ok(existsSync('supabase/drafts/f14_media_purge_v2/exactVersionPreflight.test.mjs'),
+  'Exact-version recheck must have hermetic unit tests')
+assert.ok(safetyRoot.includes('f14QaPreview && <F14VersionProbe') &&
+  versionProbe.includes('f14-version-probe-') &&
+  versionProbe.includes('upsert: false') &&
+  versionProbe.includes('storage.remove([{ path, versionId: wrongVersion }])') &&
+  versionProbe.includes('storage.remove([{ path, versionId: version }])') &&
+  versionProbe.includes("String(absent.error.statusCode) !== '404'") &&
+  versionProbe.includes('setDone(true)') &&
+  !versionProbe.includes('service_role') &&
+  !versionProbe.includes('pet-documents'),
+  'Exact-version HTTP probe must be opt-in, synthetic, version-specific and never use service secrets')
+const pkg=read('package.json')
+assert.ok(pkg.includes('exactVersionPreflight.test.mjs'),
+  'New preflight regression suite must be executed during CI governance')
+
 console.log('F14 moderation static contract: PASS (not a database or Storage purge test)')
