@@ -18,7 +18,7 @@ CREATE OR REPLACE FUNCTION public.f14_storage_media_path_unclaimed(p_bucket text
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = ''
-AS $
+AS $$
  SELECT CASE
  WHEN p_bucket NOT IN ('post-photos','community-post-photos') THEN true
  WHEN p_path IS NULL OR p_path='' THEN false
@@ -29,7 +29,7 @@ AS $
      AND c.status='held'
  )
  END;
-$;
+$$;
 -- Existing narrow EXECUTE grants remain unchanged by CREATE OR REPLACE.
 -- Do not broaden role grants or leak claim identifiers.
 
