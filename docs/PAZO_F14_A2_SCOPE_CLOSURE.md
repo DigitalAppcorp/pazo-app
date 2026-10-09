@@ -40,3 +40,6 @@
 ### Actualización: selector de versión exacta por API, QA pendiente
 
 La referencia vigente del cliente Storage documenta `remove([{path,versionId}])` para versión exacta tanto actual como archivada. Esto abre una alternativa a borrado por ruta, **pero no prueba por sí solo atomicidad, operaciones HTTP en vuelo ni CDN**. La suite pura `exactVersionPreflight.test.mjs` está incorporada a CI; un test de UI Preview con archivo artificial `F14VersionProbe` está versionado, todavía sin evidencia visual ni ejecución autenticada del PO. El elemento de eliminación física/CDN sigue bloqueante hasta validar versión real y exclusión de escritores privilegiados.
+
+
+**Gate operativo 2026-10-09:** GitHub Actions sobre `2e8a32c` pasó (run `37895742885`); Vercel respondió `402 api-deployments-free-per-day` (más de 100 deploys diarios, esperar ~24 h) a la petición de Preview actualizado. Se verificó que no existe deployment para ese SHA. La QA HTTP con versión real queda **NO EJECUTADA** hasta poder publicar Preview, y no implica aprobación para borrar medios reales. Los buckets Storage PAZO tienen `versioning_status=DISABLED`; los 20 objetos retienen una versión de 36 caracteres. No configurar versionado ni subir de plan para esta prueba.
