@@ -315,6 +315,12 @@ assert.ok(safetyRoot.includes('f14QaPreview && <F14VersionProbe') &&
   !versionProbe.includes('storage.remove([path])') &&
   versionProbe.includes("String(absent.error.statusCode) !== '404'") &&
   versionProbe.includes('setDone(true)') &&
+  versionProbe.includes('storage.getPublicUrl(path).data.publicUrl') &&
+  versionProbe.includes("url.searchParams.set('cacheNonce', crypto.randomUUID())") &&
+  versionProbe.includes("fetch(url.toString(), { cache: 'no-store' })") &&
+  versionProbe.includes('No demuestra invalidación mundial') &&
+  versionProbe.indexOf('const edge = await fetch(') > versionProbe.indexOf("success('Versión exacta eliminada") &&
+  !versionProbe.includes('purgeCache(') &&
   !versionProbe.includes('SUPABASE_SERVICE_ROLE_KEY') &&
   !versionProbe.includes('createClient(') &&
   !versionProbe.includes('pet-documents'),
