@@ -262,3 +262,21 @@ Brain OS v1.4.1 + snapshot corto `docs/PAZO_ACTIVE_HANDOFF.md`; historial archiv
 
 **Estado:** gate de imagen sintética PASS, F14 A2 Gate 8 **ABIERTO** por garantías entre servicios, revisión de políticas y permisos, medio retirado/CDN, retención D3-B y aceptación de alcance. A3/A4 no autorizados. Se requiere gate específico para cualquier migración alojada o Storage DELETE. No merge/main ni publicación oficial.
 
+
+
+### 31. A2 — Pruebas RLS UPDATE, expiración y candidato fail-closed (2026-10-08)
+
+El PO autorizó avanzar con el **gate técnico no destructivo** posterior al Storage synthetic PASS. Ejecutadas mediante Supabase hospedado y sentencias completas con `BEGIN` + `ROLLBACK`:
+
+- `f14_storage_held_media_update_draft_rollback.test.sql`: estructura `RESTRICTIVE UPDATE` con `USING` y `WITH CHECK`, PASS.
+- `f14_storage_held_update_behavior_rollback.test.sql`: objetos/claim sintéticos creados y revertidos; con una política UPDATE permisiva **temporal** el objeto libre acepta la modificación y el `held` la rechaza. **Hallazgo:** la reserva vencida a los 5 minutos libera la protección bajo el helper **actual**. PASS como prueba del riesgo actual, **no como seguridad suficiente**.
+- `f14_storage_held_update_candidate_rollback.test.sql`: prueba reversible de la versión propuesta del helper, que mantiene una ruta `held` bloqueada aun pasado el TTL y la libera solo tras cambiar explícitamente su estado a `invalidated`. PASS como simulación de política RLS; no certifica bloqueos de peticiones HTTP ya iniciadas.
+
+Se actualizó, **solo en `supabase/drafts/`**, `20261009_f14_storage_held_media_update_guard.sql`: añade política UPDATE y elimina expiración automática del predicado RLS sobre `held`. **No aplicado en Supabase.** La RPC de `recheck` sigue pudiendo invalidar reservas expiradas: debe diseñarse coordinación/sincronización antes de activar cualquier worker real. El proyecto todavía carece de borrado CAS confirmado para la versión actual de Storage y `service_role` bypass RLS.
+
+La suite estática `scripts/f14-moderation-check.mjs` ahora exige los borradores de seguridad, los dos sentidos del control UPDATE y la Edge 503. Verificación post-prueba de producción: **20** objetos Storage, **0** claims/reportes/restricciones, **0** políticas UPDATE F14 permanentes; helper actual conserva el predicado de caducidad (prueba de ROLLBACK correcto). No se modificaron archivos reales.
+
+**Git/CI:** los checks Vercel posteriores a estos commits de rama fallaron por **build-rate-limit**, no proporcionan evidencia de compilación. Intento independiente de acceder a GitHub desde contenedor sin salida de red; no se ejecutó `npm run verify` para el último HEAD. No comprar plan ni inferir PASS.
+
+**Pendientes imprescindibles A2:** evaluar llamadas `MOVE/COPY/UPSERT` vía API con pruebas auténticas bajo autorización, controles de `service_role`, prohibir liberación de claim mientras haya un delete in-flight, protocolo de confirmación objeto/version por backend, CDN/retención D3-B y tests finales de UI. Ningún DELETE de medios reales, Edge activation, nueva migración alojada o merge `main` fue autorizado por este gate.
+
