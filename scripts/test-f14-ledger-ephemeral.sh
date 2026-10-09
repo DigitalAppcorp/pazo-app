@@ -11,9 +11,6 @@ if [[ ! -f supabase/drafts/f14_media_purge_v2/20261009_privileged_attempt_ledger
   exit 2
 fi
 name="pazo-f14-ledger-ephemeral-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-docker run -d --rm --name "$name" \
-  -e POSTGRES_PASSWORD="f14-throwaway-only" \
-  -e POSTGRES_DB="postgres" postgres:16-alpine >/dev/null
 cleanup(){
   status=$?
   if [[ $status -ne 0 ]]; then
@@ -24,6 +21,10 @@ cleanup(){
 }
 
 trap cleanup EXIT
+echo "Starting private disposable PostgreSQL only in GitHub CI"
+docker run -d --rm --name "$name" \
+  -e POSTGRES_PASSWORD="f14-throwaway-only" \
+  -e POSTGRES_DB="postgres" postgres:16-alpine >/dev/null
 for iteration in $(seq 1 40); do
   if docker exec "$name" pg_isready -U postgres -d postgres >/dev/null 2>&1; then break; fi
   sleep 1
