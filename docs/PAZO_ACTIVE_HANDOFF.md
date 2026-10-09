@@ -62,7 +62,7 @@ PAZO es una red social de mascotas orientada inicialmente a Los Ángeles, 18+, c
 - El Storage RLS actual tiene `RESTRICTIVE` para `INSERT` y `DELETE` sobre rutas reservadas de Feed/Comunidad. **No existe actualmente una política permisiva UPDATE**; sobrescribir vía upsert autenticado ya carece de esa autorización. Falta garantizar de forma explícita `UPDATE` si en el futuro se conceden permisos, y estudiar operaciones de servicio/MOVE/COPY.
 - `service_role` bypass RLS; el claim de cinco minutos y locks transaccionales NO constituyen CAS entre Supabase DB y Storage HTTP.
 - Supabase documenta purge manual de CDN en plan Pro o superior; no se autoriza upgrade. Caché CDN y caché navegador requieren tratamiento separado.
-- Diseño fail-closed y retención preliminar versionados en `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md`. Solo diseño; **no hay endpoint destructor ni nueva migración aplicada**.
+- Diseño fail-closed y retención preliminar versionados en `supabase/drafts/f14_media_purge_v2/CAS_AND_RETENTION_GATE.md`. Solo diseño; **no hay endpoint destructor ni nueva migración aplicada**. Nuevo SQL **solo borrador NO aplicado**: `supabase/drafts/20261009_f14_storage_held_media_update_guard.sql` y test transaccional **aún no ejecutado** `supabase/tests/database/f14_storage_held_media_update_draft_rollback.test.sql`.
 - El asesor de Supabase informa advertencias `SECURITY DEFINER` en RPCs F14, incluida función auxiliar RLS expuesta; se requiere análisis de permisos/alcance antes de migrar, sin asumir explotación ni eliminar grants precipitadamente.
 
 ## 6. Autorizaciones, límites y forma de colaborar
