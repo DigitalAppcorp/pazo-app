@@ -1,0 +1,36 @@
+# PAZO F14 A2 — Gate para fencing durable de operaciones Storage privilegiadas
+
+**Estado:** contrato de diseño y simulador Node; **NO es un servicio desplegado, una migración ni autorización para borrar medios**. El PO permitió avanzar con ingeniería no destructiva; nueva DDL remota, edición real de fotos y release requieren un gate concreto según `AGENTS.md`.
+
+## Riesgo que debe resolver
+
+`public.f14_get_media_claim_evidence(uuid)` puede comprobar una reserva, identidad de media, referencia exclusiva y versión exacta dentro de una transacción SQL. **Los bloqueos PostgreSQL terminan antes de la petición HTTP a Storage.** Un cliente con `service_role` omite las políticas RLS, incluso cuando la ruta está retenida mediante `held`. Un borrado con `versionId` exacto ya pasó una prueba sintética en Supabase (PO QA 4/4); no equivale a un compare-and-swap distribuido con escritores privilegiados, fuente social, CDN o backup.
+
+El cierre seguro exige **enumerar y coordinar todos** los clientes privilegiados que puedan escribir, copiar, mover o eliminar objetos en `post-photos` y `community-post-photos`. No basta enumerar este repositorio si existen scripts, accesos de consola o integraciones con la clave de servicio. El inventario de `src/services/communityService.ts` muestra cargas autenticadas con `upsert:false`; eso **no** prueba ausencia de otros writers.
+
+## Contrato del futuro servicio — no implementado
+
+1. **Registro duradero privado.** Tabla de intentos autorizada solo al ejecutor servidor, nunca a `anon/authenticated`: identificador aleatorio `operation_id`, `claim_id`, `storage_object_id`, bucket, ruta exacta protegida, `versionId`, generación monotónica, sello temporal y estado. No registrar imagen, contenido de posts, identidad de denunciantes, headers de autorización ni JWT en logs. Definir retención en F14 D3-B.
+2. **Barrera de escritores.** El servicio debe disponer de un punto único de entrada y una generación/fencing token monotónica para **todos** los escritores privilegiados de esos buckets, con estado confirmado antes de despachar un DELETE. Un token almacenado únicamente en Postgres **NO** detiene a un writer externo que llame Storage directamente; si existe cualquiera, abortar.
+3. **Intento antes del HTTP.** Registrar en la misma base, con exclusión de ruta y `operation_id` único, que la petición **podría estar en vuelo**. Confirmar su persistencia antes del primer byte de DELETE. La lease `expires_at` del media claim no debe liberar la ruta durante un intento iniciado, vencido o desconocido.
+4. **Envío restringido.** Únicamente `remove([{path,versionId}])` después de comprobaciones con servidor, nunca `remove([path])` ni regenerar `versionId` con la ruta original. No inferir autorización del resultado `candidate_only` ni de `mayDelete:false`.
+5. **Confirmación independiente.** Tratar `timeout`, desconexión, 500, reintento y respuesta vacía como **estado desconocido**, no como fracaso seguro. Con respuesta HTTP exitosa, comprobar origen con `storage.info` + `storage.list` y la identidad del objeto/version, además de la fuente vigente en DB. Un HTTP 400/404 CDN no prueba invalidación mundial.
+6. **Recuperación.** No reintentar DELETE ni invalidar `held` automáticamente tras timeout o vencimiento. Reconciliar estado del origen, operaciones en vuelo y writers registrados. Si falta un testigo confiable, conservar reserva y escalar a revisión manual. La pérdida de disponibilidad es preferible a eliminar un archivo nuevo o republicar uno moderado.
+7. **Terminación honesta.** `origin_absent_observed` no equivale a `purged`. No marcar `purged` hasta alinear implementación, CDN/TTL, retención/backups y doctrina D3-A/D3-B aprobada. La Edge `f14-moderation-purge` permanece con HTTP 503.
+
+## Contrato de simulación versionado
+
+- `privilegedAttemptProtocol.mjs`: estado inmutable con `claimId`, `objectId`, `fenceToken`, `generation`, `selector` exacto; eventos hipotéticos `JOURNAL_DISPATCH`, `HTTP_SUCCESS`, `HTTP_TIMEOUT`, `HTTP_ERROR`, `OBSERVE_ORIGIN`, `REQUEST_MANUAL_REVIEW`.
+- `privilegedAttemptProtocol.test.mjs`: exige persistencia/registro y fence simulado antes de registrar despacho, niega token viejo y despacho duplicado, no reenvía un HTTP ambiguo, niega liberar hold o marcar purged. Enumera **1,331 secuencias** de tres eventos (11³). Cada estado tiene `mayDelete:false`, `shouldSendHttp:false`, `mayFinalizePurge:false`, `canReleaseHold:false`.
+- **Límite metodológico:** los booleanos de los tests son testigos sintéticos. **No** significan que exista un ledger duradero, fencing aplicado a Storage o cooperación real de writers. No importar este simulador en una Edge productiva para decidir envíos.
+- `serviceReaderDryRun.mjs`, `hostedClaimEvidence.mjs`, `exactVersionOutcome.mjs` siguen siendo solo detectores/candidatos; no autorizan acciones destructivas.
+
+## Evidencia requerida para un siguiente gate técnico
+
+- Inventario completo y revisión de accesos privilegiados de PAZO, incluidos jobs, backoffice, Edge, consola, scripts y proveedores externos. Listado de operaciones `upload/upsert/move/copy/remove` y políticas de credenciales.
+- Revisión de migración **borrador** para ledger/RPC de intento; suite de roles `anon/authenticated/service_role` y reversión `BEGIN/ROLLBACK` en SQL.
+- Prueba real con **dos procesos backend concurrentes** sobre archivos **sintéticos**: solicitud HTTP lenta/in-flight vs escritura o sustitución privilegiada, generación obsoleta, restart, crash antes/después del envío, pérdida de ACK, replay y reconciliación; demostrar invariante bajo operación Storage real antes de activar purga.
+- Documentar alcance de CDN/browser/cache/backups y ventanas realistas en plan Free; evitar prometer eliminación inmediata de copias previas.
+- Aprobación específica para cualquier nueva migración remota o para activar una Edge destructiva. Mantener PR #35 DRAFT y no fusionar `main`.
+
+**Gate actual:** solo modelo + test. Ninguna tabla, trigger, tarea, endpoint, función Edge o comando de borrado se instaló por este documento.
