@@ -1,5 +1,4 @@
--- F14 A2 installed claim RPC regression. Requires canonical migration 20261009014616.
--- Synthetic fixture and changes are rolled back; no Storage byte deletion.
+-- F14 A2 lease expiry against installed version 20261009014616.
 BEGIN;
 DO $seed$
 DECLARE v_owner uuid; v_pet uuid; v_post uuid; v_filename text; v_path text; v_object uuid;
@@ -41,8 +40,9 @@ BEGIN
  PERFORM set_config('pazo.f14.lease.claim',v_claim::text,true);
 END $verify$;
 RESET ROLE;
-UPDATE public.posts SET photo_url='https://example.invalid/changed.jpg'
-WHERE id=current_setting('pazo.f14.lease.post')::uuid;
+UPDATE moderation_private.media_claims
+SET created_at=now()-interval '10 minutes', expires_at=now()-interval '5 minutes'
+WHERE claim_id=current_setting('pazo.f14.lease.claim')::uuid;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role','service_role',true);
 DO $drift$

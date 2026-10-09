@@ -27,7 +27,8 @@
     "local:test:cold": "node scripts/verify-local-cold-start.mjs",
     "local:setup": "npm run local:prepare && npx supabase --workdir .local-supabase start && npm run local:env && npm run local:migrate",
     "dev:local": "vite --host 127.0.0.1 --port 5173",
-    "verify:local": "npm run local:test:db && npm run local:test:flow && npx supabase --workdir .local-supabase db lint --local --schema public --level error --fail-on error && npm run verify"
+    "verify:local": "npm run local:test:db && npm run local:test:flow && npx supabase --workdir .local-supabase db lint --local --schema public --level error --fail-on error && npm run verify",
+    "test:f14:jwt": "node scripts/f14-signed-jwt-authorization.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

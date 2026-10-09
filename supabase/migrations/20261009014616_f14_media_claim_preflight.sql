@@ -1,5 +1,5 @@
--- PAZO F14 A2: DRAFT ONLY. Preflight/lease WITHOUT STORAGE DELETION.
--- Not approved for Supabase deployment. Run tests under BEGIN/ROLLBACK only.
+-- PAZO F14 A2: APPLIED preflight/lease migration version 20261009014616.
+-- Authorised by Product Owner; NO STORAGE DELETION OR PURGE CONFIRMATION.
 -- Service-role RPC only; Edge purge remains hard-disabled HTTP 503.
 -- Project-bound to PAZO Supabase ref mrybvqdebbgcayuvgkkr (no cross-project URLs).
 BEGIN;

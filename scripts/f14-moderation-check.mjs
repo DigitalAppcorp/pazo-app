@@ -80,7 +80,7 @@ assert.ok(!read(v2Guard).includes('.remove(['), 'Pure V2 must never delete files
 assert.ok(read(v2Cases).includes('legacy feed pet-only path'), 'Legacy paths must be regression-tested')
 assert.ok(read(v2Readme).includes('NEVER DEPLOY'), 'Unapproved purge must remain gated')
 assert.ok(read(realJwt).includes('PAZO_NORMAL_USER_ACCESS_TOKEN'), 'Security tests need a separate genuine user JWT')
-const claimDraft = 'supabase/drafts/20261009_f14_media_claim_preflight.sql'
+const claimDraft = 'supabase/migrations/20261009014616_f14_media_claim_preflight.sql'
 const claimPlan = 'supabase/drafts/f14_media_purge_v2/CLAIM_GATE.md'
 const claimTests = [
   'supabase/tests/database/f14_media_claim_lease_rollback.test.sql',
@@ -88,6 +88,8 @@ const claimTests = [
   'supabase/tests/database/f14_media_claim_community_rollback.test.sql',
   'supabase/tests/database/f14_media_claim_version_rollback.test.sql',
   'supabase/tests/database/f14_media_claim_legacy_rollback.test.sql',
+  'supabase/tests/database/f14_media_claim_expiry_rollback.test.sql',
+  'supabase/tests/database/f14_media_claim_refusals_rollback.test.sql',
 ]
 for (const f of [claimDraft, claimPlan, ...claimTests])
   assert.ok(existsSync(f), 'F14 A2 claim gate artifact missing: ' + f)
@@ -99,7 +101,8 @@ assert.ok(claimSql.includes("IF auth.role() IS DISTINCT FROM 'service_role'"), '
 assert.ok(claimSql.includes('CREATE FUNCTION public.f14_recheck_media_claim'), 'Claim recheck missing')
 assert.ok(!claimSql.includes('DELETE FROM storage.objects'), 'Never delete Storage metadata via SQL')
 assert.ok(!claimSql.includes('storage.from('), 'Draft claim SQL must not mutate Storage API')
-assert.ok(read(claimPlan).includes('BORRADOR') && read(claimPlan).includes('503'), 'Claim gate must not be represented as deployed')
+assert.ok(read(claimPlan).includes('APLICADA') && read(claimPlan).includes('503'), 'Claim migration is applied but purge must stay parked')
+assert.ok(!existsSync('supabase/drafts/20261009_f14_media_claim_preflight.sql'), 'Applied migration draft must not remain as a second source')
 for (const f of claimTests) {
   const testSql = read(f)
   assert.ok(testSql.trimEnd().endsWith('ROLLBACK;'), 'Claim SQL test must end with ROLLBACK: '+f)

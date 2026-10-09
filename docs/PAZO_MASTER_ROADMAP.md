@@ -994,3 +994,7 @@ Audit + V2 draft only: proof-driven path inspection for current and verified leg
 
 ### F14 A2 — preflight/claim reversible Gate (2026-10-08)
 Draft private claims table + object fingerprint/id/lease, service-only prepare/recheck and audit, current/legacy Feed and Community path proofs, SQL transactional revalidation. Multiple BEGIN/ROLLBACK tests PASS, no objects or schema persisted. Claim is a candidate, NOT permission to delete; user/JWT HTTP, cross-service race-safe CAS confirmation, real Storage API verification/CDN and D3-B remain future gates. SQL draft `supabase/drafts/20261009_f14_media_claim_preflight.sql`, separate PO approval before hosted apply. Edge 503 unchanged; A2 open, A3/A4 not authorized.
+
+
+### F14 A2 — preflight media claims applied (2026-10-09 UTC)
+Hosted PAZO migration `f14_media_claim_preflight` version `20261009014616` applied under PO authorization; canonicized in git. Private claim/event tables, service-only preflight and recheck, five-minute expiring candidate lease, no deletion or purged status. Live backend trials with BEGIN/ROLLBACK PASS; four existing confirmed nonmoderator accounts make independent role testing possible without new Auth users, but genuine signed JWT test STILL PENDING user session access. Blocks: Storage object CAS / deletion confirmation, CDN, D3-B. 503 Edge remains blocked. A2 not closed.

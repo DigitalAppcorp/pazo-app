@@ -1,10 +1,10 @@
 # PAZO F14 A2 — Preflight y reserva transaccional para medios (Gate preparado)
 
-**Estado: BORRADOR. NO APLICADO A SUPABASE. SIN BORRADO DE ARCHIVOS.**
+**Estado: MIGRACIÓN DE RESERVAS APLICADA (`20261009014616`). SIN BORRADO DE ARCHIVOS NI PURGA ACTIVA.**
 
 ## Alcance y garantías reales
 
-- Archivo propuesto: `supabase/drafts/20261009_f14_media_claim_preflight.sql`.
+- Migración canónica aplicada: `supabase/migrations/20261009014616_f14_media_claim_preflight.sql`.
 - Crear, si se aprueba expresamente la migración, una tabla privada de reservas y un registro de eventos. La reserva es única por contenido y por objeto de Storage y vence en cinco minutos. Reintentos con exactamente la misma prueba devuelven el mismo ID mientras la reserva es válida.
 - Funciones RPC `public.f14_prepare_media_claim(kind,id)` y `public.f14_recheck_media_claim(claimId)` exclusivamente para `service_role`, con validación también dentro de la función. `anon` y `authenticated` no tienen EXECUTE ni acceso directo a las tablas privadas.
 - La prueba se calcula en el servidor desde reportes retirados, restricción `pending_review`, relaciones de autor/mascota/comunidad, URL canónica de ESTE proyecto Supabase, ruta exacta, referencia única, registro del objeto, version, updated_at y huella de metadata. No se acepta evidencia de identidad suministrada por clientes.
@@ -32,7 +32,7 @@ Los casos de prueba usan metadata **sintética** de Storage en una transacción 
 
 ## Gates pendientes
 
-1. **Autorización específica para aplicar este SQL** en Supabase, después de revisión. No asumir que aprobación para preparar implica aprobación para aplicar.
+1. **Superado:** aplicación autorizada y registrada en Supabase como versión `20261009014616`, con cinco pruebas positivas y dos pruebas adicionales de vencimiento/rechazo contra la función instalada.
 2. Reconciliar versión remota con migración canónica y retención D3-B; estudiar triggers/locks y garantía de CAS entre servicio de DB y Storage, incluyendo subidas/upserts concurrentes.
 3. Ejecutar smoke HTTP con JWT reales de cuentas separadas moderador/no moderador; el test en `scripts/f14-signed-jwt-authorization.mjs` permanece sin ejecutar.
 4. Probar con un archivo REAL, aislado, sin contenido de clientes, pero **sin borrarlo**, para verificar getInfo y comportamiento versionado.
@@ -40,3 +40,10 @@ Los casos de prueba usan metadata **sintética** de Storage en una transacción 
 6. **Una aprobación posterior e independiente** para habilitar cualquier Storage DELETE. Por ahora `f14-moderation-purge` debe seguir respondiendo 503 sin código de borrado.
 
 No cerrar F14 A2, no tocar main, Production Vercel, ni iniciar A3/A4.
+
+
+## Validación posterior a aplicación (2026-10-09 UTC)
+
+Supabase registra `f14_media_claim_preflight` versión `20261009014616`. Dos tablas privadas y dos RPC service-only instaladas. Grants: anon/authenticated denegados, service_role autorizado. Cero reservas/reports/restrictions actuales, 1 moderador, 19 objetos de Storage intactos. Pruebas funcionales sobre la función realmente instalada: Feed actual/idempotencia/URL cambiada, rechazo de permisos, Comunidad, versión del objeto modificada, Feed legacy, vencimiento y 3 escenarios de rechazo (foto compartida, host distinto, marcador de borrado), todos con ROLLBACK. Esto NO es prueba JWT firmada real ni de bytes/CDN.
+
+**La reserva solo devuelve candidato.** La confirmación de ausencia en Storage y el control de carrera entre servicios siguen sin implementar. No invocar ni conectar `f14_confirm_media_cleanup(kind,id)` a un nuevo worker.

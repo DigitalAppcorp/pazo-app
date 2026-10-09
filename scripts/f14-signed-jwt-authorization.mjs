@@ -52,9 +52,20 @@ for (const [name,jwt] of [['moderator',PAZO_MODERATOR_ACCESS_TOKEN],
   const media=await rpc('f14_pending_media',jwt,{p_limit:1})
   if(name==='moderator') { ok(media,'moderator media queue'); assert.ok(Array.isArray(JSON.parse(media.body))) }
   else denied(media,'nonmoderator media queue')
+
+  // Even moderators are not service_role. These APIs MUST be inaccessible to browsers.
+  const invalidTarget='00000000-0000-4000-8000-000000000000'
+  const prepare=await rpc('f14_prepare_media_claim',jwt,{p_kind:'feed_post',p_id:invalidTarget})
+  denied(prepare,name+' forbidden preflight claim')
+  const recheck=await rpc('f14_recheck_media_claim',jwt,{p_claim:invalidTarget})
+  denied(recheck,name+' forbidden claim recheck')
   results.push(name+' moderation permissions validated')
 }
 const anon=await rpc('f14_moderation_queue',null,{p_limit:1,p_offset:0})
 denied(anon,'anonymous moderation queue')
-results.push('anonymous queue rejected')
+const anonymousClaim=await rpc('f14_prepare_media_claim',null,{
+  p_kind:'feed_post',p_id:'00000000-0000-4000-8000-000000000000'
+})
+denied(anonymousClaim,'anonymous claim')
+results.push('anonymous queue and claim rejected')
 console.log('PASS: '+results.join('; ')+'; no mutation attempted.')
