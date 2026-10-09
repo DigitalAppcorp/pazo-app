@@ -1130,3 +1130,7 @@ Live data classification (read-only, no raw URLs exposed): 13 Feed photo_url rec
 - supabase/drafts/f14_media_purge_v2/README.md: threat model and gates. Prior supabase/drafts/f14_moderation_purge_full_proposal.ts is explicitly SUPERSEDED as unsafe for rollout.
 
 **Critical blockers:** No privileged authoritative media-claim RPC and zero-other-reference uniqueness CAS guard exists yet; old f14_confirm_media_cleanup(kind,id) is insufficient to confirm EXACT object+version. CDN/browser caches may retain bytes after Storage API deletion. Service-role deletion must use Supabase Storage API only, never DELETE on storage.objects. Until signed-JWT, idempotent claim and private isolated asset tests pass, no active deletion. External URL cases and uncertain object provenance -> manual review. Frontend/production unchanged. F14 A2 OPEN, A3/A4 unauthorized.
+
+
+### Storage V2 test harness consistency (2026-10-08)
+The hermetic inspector's 29 synthetic cases were executed with 29 passing / 0 failing in an isolated V8 evaluator equipped with a URL-parser shim; this is **not** a native Node test run, nor HTTP/JWT evidence. The tests are now included in `npm run test:f14` and therefore `npm run verify` for future genuine Node CI execution. Real-JWT harness was corrected to omit Authorization header for anonymous requests. Both Vercel checks on security draft commit `31b2aacd` succeeded, and the deployed Storage Edge 503 stub remained unchanged. No Storage deletion, user-data mutation, SQL DDL or production release.

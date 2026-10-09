@@ -24,9 +24,10 @@ const mod=payload(PAZO_MODERATOR_ACCESS_TOKEN)
 const normal=payload(PAZO_NORMAL_USER_ACCESS_TOKEN)
 assert.notEqual(mod.sub,normal.sub,'Moderator and normal user must be separate accounts')
 async function rpc(functionName, token, body) {
+  const headers={apikey:PAZO_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'}
+  if (token) headers.Authorization='Bearer '+token
   const res=await fetch(new URL('/rest/v1/rpc/'+functionName,base),{
-    method:'POST',headers:{apikey:PAZO_SUPABASE_PUBLISHABLE_KEY,
-      Authorization:token?'Bearer '+token:undefined,'Content-Type':'application/json'},
+    method:'POST',headers,
     body:JSON.stringify(body),
     signal:AbortSignal.timeout(10000),
   })

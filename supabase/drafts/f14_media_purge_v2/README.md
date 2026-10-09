@@ -41,3 +41,7 @@ For all kinds, require a canonical https URL on the expected Supabase project an
 - Published Edge: HARD-DISABLED HTTP 503, no deletion code.
 
 After draft review, request separate PO authorization for the preflight/claim migration and test with isolated photo fixture before even considering actual Storage deletion. Main, Vercel production, and F14 Block 03 remain untouched.
+
+## Repository verification
+
+The hermetic suite is wired into npm run test:f14 and therefore npm run verify. Its 29 cases were separately evaluated in the orchestration V8 environment using a URL parser shim; an actual Node test-runner result must be recorded when verify is executed in a Node environment. This does NOT fulfill the signed-JWT test gate.
