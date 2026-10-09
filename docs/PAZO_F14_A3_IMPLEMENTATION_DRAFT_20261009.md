@@ -52,3 +52,14 @@ La FK de `deletion_jobs.user_id` se diseñó nullable **solamente** si `status='
 
 ### Wrapper de servicio y permisos
 La función de archivo permanece en `account_private`; el worker futuro usaría `public.f14_a3_worker_snapshot_contributions(uuid)`, wrapper SEC-DEF cuyo EXECUTE se concede **solo** a `service_role` y cuya implementación comprueba el claim firmado `request.jwt.claim.role='service_role'`. Las ACL revocan `PUBLIC`, `anon` y `authenticated`. No se exponen datos al navegador, ni se añade `account_private` a esquemas REST de Supabase. Estos controles requieren pruebas negativas reales con JWT por separado antes de desplegar.
+
+## Incremento A3.4a — lease de exclusión de worker (solo DRAFT)
+
+Archivo `supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql`:
+- tabla `account_private.deletion_worker_leases`, RLS activa y sin grants de tablas a roles de app;
+- tres RPC públicas cuyo EXECUTE solo recibe `service_role` (adicionalmente verifican claim JWT de rol firmado);
+- adquisición serializada con `FOR UPDATE` en fila job, clave única por trabajo y bloqueo de adquisición concurrente; versión/token de lease, expiración acotada 5–60 s, rechazo si job no está en `reviewing`; validación solo-lectura y liberación compare-and-set, sin borrar nada;
+- excepción transaccional al principio del SQL para impedir apply accidental;
+- aún NO existe una operación de backend que ponga jobs en `reviewing` ni freeze real de writers. **Ninguna lease autoriza eliminación**: debe sumarse comprobación de sesión y evidencia de los otros gates, además de un worker real protegido por un gate independiente.
+
+**Riesgos sin resolver:** lock SQL no cubre toda la duración de llamadas HTTP a Storage; los permisos privilegiados pueden omitir RLS; tokens de acceso pueden sobrevivir el borrado Auth. El worker real deberá utilizar versionado de objetos, reglas de suspensión de escrituras, bitácora de pasos, reautenticación verificada y reintentos idempotentes, y no sustituir esto por un lease temporal.

@@ -45,3 +45,25 @@ test('archive only snapshots other accounts, accessed by server role', () => {
   assert.match(archiveSql, /pet\.owner_id<>v_uid/)
   assert.match(archiveSql, /Manual Storage\/media archival required before snapshot/)
 })
+
+
+const leaseSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql', import.meta.url),'utf8')
+test('worker lease SQL is inert and cannot physically delete records or assets', () => {
+  assert.ok(leaseSql.indexOf('BEGIN;') < leaseSql.indexOf("RAISE EXCEPTION 'A3 LEASE DRAFT ONLY"))
+  assert.ok(leaseSql.indexOf("RAISE EXCEPTION 'A3 LEASE DRAFT ONLY") < leaseSql.indexOf('CREATE TABLE'))
+  assert.match(leaseSql, /ALTER TABLE account_private\.deletion_worker_leases ENABLE ROW LEVEL SECURITY/)
+  assert.doesNotMatch(leaseSql, /\b(?:DELETE\s+FROM|TRUNCATE|DROP\s+TABLE)\b/i)
+  assert.doesNotMatch(leaseSql, /\bauth\.admin\.deleteUser\s*\(/i)
+})
+test('leases serialize claims and reject stale workers', () => {
+  assert.match(leaseSql, /WHERE id=p_job_id FOR UPDATE/)
+  assert.match(leaseSql, /ON CONFLICT \(job_id\) DO UPDATE/)
+  assert.match(leaseSql, /lease_version = account_private\.deletion_worker_leases\.lease_version\+1/)
+  assert.match(leaseSql, /WHERE account_private\.deletion_worker_leases\.expires_at <= v_now/)
+  assert.match(leaseSql, /AND lease_version=p_version AND expires_at>clock_timestamp\(\)/)
+  assert.match(leaseSql, /p_seconds < 5 OR p_seconds > 60/)
+  for (const f of ['acquire_lease(uuid,integer)', 'validate_lease(uuid,uuid,bigint)', 'release_lease(uuid,uuid,bigint)']) {
+    assert.ok(leaseSql.includes('FROM PUBLIC,anon,authenticated'))
+    assert.ok(leaseSql.includes('GRANT EXECUTE ON FUNCTION public.f14_a3_worker_'+f+' TO service_role'))
+  }
+})
