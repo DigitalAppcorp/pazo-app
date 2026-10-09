@@ -495,7 +495,7 @@ assert.ok([ledgerDraft,ledgerTest,writerInventory].every(existsSync),
 const ledgerSqlText = read(ledgerDraft)
 assert.ok(ledgerSqlText.includes('ARCHITECTURAL DRAFT ONLY. DO NOT APPLY') &&
   ledgerSqlText.includes('REVOKE ALL ON TABLE moderation_private.media_purge_attempts') &&
-  ledgerSqlText.includes('FOREIGN KEY (active_operation_id,bucket,object_path)') &&
+  ledgerSqlText.includes('FOREIGN KEY (active_operation_id,bucket,object_path,generation)') &&
   !ledgerSqlText.includes('GRANT EXECUTE ON FUNCTION') &&
   read('package.json').includes(ledgerTest),
   'F14 ledger proposal must remain private, fenced by identity, tested and unapplied')
