@@ -974,3 +974,7 @@ A proposed rescue grant migration was **cancelled as unnecessary** after discove
 
 ### F14 A2 — approved live report test closed and cleaned (2026-10-08)
 A real-user-session Preview report was successfully dismissed through the moderator queue, hosted Supabase status and action audit verified. All explicitly identified trial pet, post, report, action and same-owner impression records removed after dependency audit and reversible dry-run; exact post-delete counts zero. No production Vercel deployment, no other user records changed. Backend moderator permission still active. A2 remains open for independent JWT denial, real depublishing tests and protected media/CDN purging procedure (currently intentionally disabled). A3/A4 not yet authorized.
+
+
+### F14 A2 — Live depublish validation completed (2026-10-08/09 UTC)
+Real Preview moderator action `Despublicar` -> SQL `status=removed` + action audit + RLS restriction PASS. Anonymous and authenticated SQL role tests confirm removed post invisible; other posts visible. PO-authorized exact trial pet/post/report/action/restriction/impression cleanup succeeded after guarded ROLLBACK dry-run; zero trial records, zero total reports/restrictions, 1 moderator, 14 posts and 5 pets persist. No images, no Storage mutations. **Backlog: no-media content currently receives spurious `pending_review` media status**; correct with separate approved migration before broader rollout. Independent non-moderator real signed JWT tests and media Storage/CDN remain open; A3/A4 not authorized.
