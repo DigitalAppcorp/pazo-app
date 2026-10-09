@@ -32,6 +32,9 @@ jobs:
       - name: Hardening + architecture + privacy + ops governance checks
         run: npm run test:governance
 
+      - name: F14 ledger draft — disposable PostgreSQL only
+        run: bash scripts/test-f14-ledger-ephemeral.sh
+
       - name: Build
         env:
           VITE_APP_RELEASE: ${{ github.sha }}
