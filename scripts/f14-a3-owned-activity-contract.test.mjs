@@ -53,3 +53,13 @@ test('post and community counters are recalculated from surviving rows',()=>{
  assert.match(sql,/i\.action_type='like' AND i\.target_id=p\.id/)
  assert.match(sql,/'account_deleted',false,'destructive_execution_allowed',false/)
 })
+
+test('no owned activity cleanup until every exact media snapshot has durable 404 proof',()=>{
+ assert.match(sql,/deletion_frozen_targets t/)
+ assert.match(sql,/t\.target_type='storage'/)
+ assert.match(sql,/t\.target_id=o\.bucket_id\|\|':'\|\|o\.name/)
+ assert.match(sql,/deletion_media_grants g/)
+ assert.match(sql,/g\.removed_at IS NOT NULL/)
+ assert.match(sql,/Frozen Storage origin or durable removal receipt missing/)
+ assert.match(sql,/set_config\('pazo\.a3_cleanup_lease'/)
+})
