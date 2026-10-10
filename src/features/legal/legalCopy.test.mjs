@@ -33,8 +33,8 @@ test('public privacy inbox is real, bilingual, and never promises automated dele
   assert.equal(LEGAL_RELEASE_READY, false)
   const es = legalPreview.privacy.es.sections.map(s => s.text).join(' ')
   const en = legalPreview.privacy.en.sections.map(s => s.text).join(' ')
-  assert.match(es,/solicitud no borra datos automáticamente/i)
-  assert.match(en,/does not automatically erase data/i)
+  assert.match(es,/solicitarla no elimina automáticamente tus datos/i)
+  assert.match(en,/does not automatically erase your data/i)
   const previews = readFileSync(new URL('./LegalPreviewDialog.tsx', import.meta.url), 'utf8')
   const request = readFileSync(new URL('../account/DeletionRequestDialog.tsx', import.meta.url), 'utf8')
   for (const ui of [previews, request]) {
@@ -59,4 +59,19 @@ test('PO-designated legal operator is consistent in both languages and drafts', 
   assert.match(legalPreview.privacy.es.alert,/conservación/)
   assert.match(legalPreview.privacy.en.alert,/retention/)
   assert.doesNotMatch(legalPreview.privacy.es.alert,/Falta verificar responsable legal/)
+})
+
+test('draft retention text describes real limits, without invented numeric purge guarantees', () => {
+  const es=legalPreview.privacy.es.sections.find(x=>x.heading==='Conservación y solicitudes')?.text
+  const en=legalPreview.privacy.en.sections.find(x=>x.heading==='Retention and requests')?.text
+  assert.ok(es && en)
+  assert.match(es,/No existe una purga automática general/i)
+  assert.match(en,/no general automatic age-based purge/i)
+  assert.match(es,/respaldo y cachés/i)
+  assert.match(en,/backups and caches/i)
+  assert.match(es,/solicitarla no elimina automáticamente/i)
+  assert.match(en,/does not automatically erase/i)
+  assert.doesNotMatch(es,/\b\d+\s+(días|semanas|meses|años)\b/i)
+  assert.doesNotMatch(en,/\b\d+\s+(days|weeks|months|years)\b/i)
+  assert.equal(LEGAL_RELEASE_READY,false)
 })
