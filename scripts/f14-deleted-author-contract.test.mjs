@@ -88,3 +88,9 @@ test('UI renders only existing third-party replies with no new author actions',(
  assert.match(service,/canDelete: !deleted/)
  assert.match(app,/photoUrl: wasAuthorDeleted\(post\) \? null : post\.photo_url/)
 })
+
+test('uninstalled tombstone SQL fails before any ALTER or write',()=>{
+  assert.match(sql,/^BEGIN;\s*--[^\n]*\n--[^\n]*\nDO \$f14_never_apply\$/m)
+  assert.match(sql,/RAISE EXCEPTION 'F14 AUTHOR THREAD DRAFT NOT APPLIED/)
+  assert.ok(sql.indexOf('RAISE EXCEPTION')<sql.indexOf('ALTER TABLE public.posts'))
+})
