@@ -26,3 +26,9 @@ Fecha 2026-10-09. PR #38 DRAFT. Auditoría de catálogo Supabase READ ONLY y del
 - No crear sandbox pagado, aplicar DDL alojado, habilitar flags, desplegar ni fusionar por esta auditoría. Pedir gate específico cuando sea necesario.
 
 Resultado: CI y fixtures pg_temp previos son evidencia parcial, nunca sustituyen concurrencia real. F14 A3 Gate 8 permanece ABIERTO.
+
+## Interbloqueo concreto auditado: RPC de señales vs comentario
+
+La definición existente de `public.register_interaction_signal` (fuente `supabase/migrations/20261005101300_feed_like_save_integrity.sql`, verificada contra `pg_get_functiondef` alojado) en acciones `impression/view/comment/not_interested` toma `pet_private_metrics FOR UPDATE` **antes** de intentar INSERT a `interactions` y por tanto antes del A3 BEFORE guard propuesto. En cambio, `post_comments INSERT` pasa primero por A3 BEFORE y luego su AFTER llama a `private.adjust_pet_learning_tags`, que toma `pet_private_metrics FOR UPDATE`. Con el mismo actor/target y dos transacciones es posible un ciclo **metrics row → A3 advisory** frente a **A3 advisory → metrics row**; no se afirma que un deadlock ya haya ocurrido en producción.
+
+**Mitigación preparada, no aplicada:** `supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql`. Conserva `SECURITY INVOKER`, firma, permisos y acciones existentes; añade locks A3 de actor y dueño de post en orden UUID antes de cualquier escritura/métricas; relee propietarios tras la espera y aborta con SQLSTATE 40001 si cambian. La propuesta evita esta inversión específica pero **no certifica el grafo global**, otras RPC ni seguridad E2E. Pruebas estáticas en CI; todavía falta carrera de dos conexiones en DB aislada.

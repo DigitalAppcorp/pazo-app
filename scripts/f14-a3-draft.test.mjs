@@ -157,6 +157,7 @@ test('SQL draft dollar quotes are paired and no malformed AS $ single marker exi
     '../supabase/drafts/20261009_f14_a3_worker_legacy_clear_NOT_APPLIED.sql',
     '../supabase/drafts/20261009_f14_a3_recent_auth_NOT_APPLIED.sql',
     '../supabase/drafts/20261009_f14_a3_freeze_transition_NOT_APPLIED.sql',
+    '../supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql',
   ]
   for (const path of paths) {
     const source = readFileSync(new URL(path,import.meta.url),'utf8')
@@ -253,4 +254,32 @@ test('A3 state transition shares owner advisory lock with all write-fence trigge
  assert.match(transitionSql,/SET status='reviewing',updated_at=v_now/)
  assert.match(transitionSql,/INSERT INTO account_private\.deletion_events\(job_id,action\)/)
  assert.match(transitionSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_begin_review\(uuid,uuid,uuid\)[\s\S]*?TO service_role/)
+})
+
+const interactionLockSql=readFileSync(
+  new URL('../supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql',import.meta.url),'utf8')
+test('A3 interaction RPC lock-order draft aborts before DDL; invoker privilege preserved',()=>{
+  const abort=interactionLockSql.indexOf("RAISE EXCEPTION 'A3 INTERACTION LOCK ORDER DRAFT ONLY")
+  const ddl=interactionLockSql.indexOf('CREATE OR REPLACE FUNCTION')
+  assert.ok(interactionLockSql.indexOf('BEGIN;')<abort && abort<ddl)
+  assert.match(interactionLockSql,/DO \$a3_interaction_not_applied\$/)
+  assert.match(interactionLockSql,/SECURITY INVOKER/)
+  assert.doesNotMatch(interactionLockSql,/SECURITY DEFINER|\bauth\.admin\.deleteUser\s*\(|\bDELETE\s+FROM\s+(?:storage|auth)\./i)
+  assert.match(interactionLockSql,/GRANT EXECUTE ON FUNCTION public\.register_interaction_signal\(uuid, uuid, text\) TO authenticated/)
+})
+test('A3 Feed RPC acquires ordered owner locks before locking metric rows or writing interactions',()=>{
+  const start=interactionLockSql.indexOf('CREATE OR REPLACE FUNCTION public.register_interaction_signal(')
+  const fragment=interactionLockSql.slice(start)
+  const lock=fragment.indexOf('pg_catalog.pg_advisory_xact_lock')
+  const metric=fragment.indexOf('INSERT INTO public.pet_private_metrics')
+  const interactions=fragment.indexOf('INSERT INTO public.interactions')
+  assert.ok(lock>0 && metric>lock && interactions>lock)
+  assert.match(fragment,/SELECT DISTINCT uid[\s\S]*?WHERE uid IS NOT NULL ORDER BY uid/)
+  assert.match(fragment,/hashtextextended\(v_a3_lock_owner::text,901426\)/)
+  assert.match(fragment,/SELECT p\.tags, p\.user_id[\s\S]*?INTO v_tags, v_target_owner_id/)
+  assert.match(fragment,/v_checked_actor_owner IS DISTINCT FROM v_owner_id/)
+  assert.match(fragment,/v_checked_target_owner IS DISTINCT FROM v_target_owner_id/)
+  assert.match(fragment,/ERRCODE='40001'/)
+  assert.match(fragment,/p_action_type IN \('unlike', 'unsave'\)/)
+  assert.match(fragment,/WHERE pet_id = p_actor_pet_id[\s\S]*?FOR UPDATE/)
 })

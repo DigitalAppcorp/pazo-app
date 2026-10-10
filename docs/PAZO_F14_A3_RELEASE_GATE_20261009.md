@@ -97,3 +97,7 @@ E. Finalmente Scope Closure Reconciliation de F14 Gate 8 con pruebas observables
 - Octava migración protegida por aborto transaccional `supabase/drafts/20261009_f14_a3_recent_auth_NOT_APPLIED.sql`: prueba de sesión y propietario, TTL 5 minutos; la puerta worker necesita prueba consumida de una futura transición segura que NO está implementada, por lo que no libera eliminaciones.
 - SQL alojado PG_TEMP con rollback: pertenencia y sesión externa, recibo idempotente, prueba sin consumir/rechazada, consumida/fresca permitida, caducada/rechazada, rol normal/rechazado. Ningún dato real alterado. Detalles: `docs/PAZO_F14_A3_REAUTH_GATE_20261009.md`.
 - **A3/Scope Gate continúan ABIERTOS**: falta transición atómica para freeze real, cobertura de todas las escrituras, pruebas Edge/Deno con credenciales válidas, Storage/CDN/retención, Auth final. No merge ni despliegue.
+
+## A3 lock-order mitigation DRAFT — 2026-10-09
+
+Décimo archivo SQL propuesto: `supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql`, con guardia de aborto previa al DDL. Corrige una inversión de locks identificada entre la RPC de interacciones (métrica antes de A3) y el AFTER de comentarios (A3 antes de métrica). Conserva SECURITY INVOKER y permisos. El CI estático NO sustituye la prueba de dos conexiones. **No aplicado**, no modifica flags, Edge, Auth, Storage ni borrado; bloqueo del release gate permanece.

@@ -58,3 +58,7 @@
 **PostgreSQL TEMP + ROLLBACK ejecutado en PAZO alojado, solo fixtures sintéticos:** bloquear desde B a cuenta A congelada y limpiar ambos sentidos de follows PASS; intentar bloqueo saliente de A congelada y nuevo follow B→A bloqueado PASS; presencia NULL de A congelada rechazada PASS; upsert/UPDATE de B activo permitido PASS; reparent a A y pet de otro dueño rechazados PASS; checkout B con limpieza de presencia PASS. Se ejecutó código PL/pgSQL del guard adaptado a `pg_temp`, no el DDL de nueve drafts ni RLS real/2 sesiones.
 
 **Gate no cerrado:** autorización remota NO concedida; faltan race tests A3/seed0 combinados contra bloqueos, consistencia de locks bajo RPC/Edge/Storage, grants/RLS reales en sandbox aislado, backups/retención y políticas públicas. `full_write_fence_ready()` continúa **SELECT false**. No merge/deploy ni activación.
+
+### Writer indirecto de Feed: orden de locks (propuesta sin aplicar)
+
+Se detectó que `register_interaction_signal` bloquea `pet_private_metrics FOR UPDATE` antes del INSERT de `interactions`, mientras el AFTER de `post_comments` adquiere A3 primero y después `pet_private_metrics`. Se documentó la inversión en `docs/PAZO_F14_A3_LOCK_GRAPH_GATE_20261009.md` y se preparó un décimo SQL DRAFT `supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql`, con abort por defecto, locks ordenados sobre actor/target y revalidación antes de escritura. No es un fix desplegado ni prueba de concurrencia de dos sesiones. Gate 8 abierto.
