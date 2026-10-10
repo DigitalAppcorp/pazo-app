@@ -334,6 +334,48 @@ REVOKE ALL ON FUNCTION public.f14_a3_allow_exact_media_remove(uuid,uuid,uuid,big
 GRANT EXECUTE ON FUNCTION public.f14_a3_allow_exact_media_remove(uuid,uuid,uuid,bigint,text,text,text)
   TO service_role;
 
+-- Durable exact-object checkpoint AFTER Storage API reports success and
+-- the origin record is absent. Idempotent on a repeated service-side call
+-- for the same generation while the current lease is still valid.
+CREATE OR REPLACE FUNCTION public.f14_a3_checkpoint_media_removed(
+  p_subject_user_id uuid,p_reviewer_user_id uuid,p_lease_token uuid,
+  p_revision bigint,p_bucket text,p_path text,p_object_version text
+) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $checkpoint_media$
+DECLARE v_count integer;
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'')<>'service_role'
+    OR p_subject_user_id IS NULL OR p_reviewer_user_id IS NULL
+    OR p_lease_token IS NULL OR p_revision IS NULL
+    OR p_bucket IS NULL OR p_path IS NULL OR p_object_version IS NULL THEN
+    RAISE EXCEPTION 'Media checkpoint unauthorized' USING ERRCODE='42501';
+  END IF;
+  UPDATE account_requests_private.deletion_media_grants g
+  SET removed_at=COALESCE(g.removed_at,pg_catalog.clock_timestamp())
+  FROM account_requests_private.deletion_review_jobs j,
+       account_requests_private.deletion_requests r
+  WHERE g.subject_user_id=p_subject_user_id
+    AND g.bucket_id=p_bucket AND g.object_path=p_path
+    AND g.object_version=p_object_version
+    AND g.reviewer_user_id=p_reviewer_user_id
+    AND g.lease_token=p_lease_token AND g.review_revision=p_revision
+    AND j.subject_user_id=g.subject_user_id
+    AND j.phase='remove_media' AND j.lease_token=p_lease_token
+    AND j.revision=p_revision AND j.lease_expires_at>pg_catalog.clock_timestamp()
+    AND r.subject_user_id=p_subject_user_id AND r.status='processing'
+    AND NOT EXISTS (SELECT 1 FROM storage.objects o
+      WHERE o.bucket_id=p_bucket AND o.name=p_path)
+    AND g.expires_at>pg_catalog.clock_timestamp();
+  GET DIAGNOSTICS v_count=ROW_COUNT;
+  RETURN v_count=1;
+END
+$checkpoint_media$;
+
+REVOKE ALL ON FUNCTION public.f14_a3_checkpoint_media_removed(uuid,uuid,uuid,bigint,text,text,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_checkpoint_media_removed(uuid,uuid,uuid,bigint,text,text,text)
+  TO service_role;
+
 -- Storage write fence covers both owner's storage.objects.owner_id and exact
 -- bucket:path snapshots. Even service_role bypass requires a reviewed cleanup
 -- lease. Never DELETE directly from storage.objects; executor uses Storage API.
