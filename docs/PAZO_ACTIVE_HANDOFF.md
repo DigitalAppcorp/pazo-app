@@ -36,3 +36,7 @@ Revisar **cierre legal/operativo del RC**, trabajando en código y docs ES/EN so
 - Auditoría documental legal/operativa publicada en `docs/PAZO_MVP_LEGAL_CLOSURE_AUDIT_20261010.md` (commit `8471a504`). Contiene evidencias, brechas y orden de cierre; no modifica código ni datos. `LEGAL_RELEASE_READY=false`.
 - HEAD de partida auditado `e497c794`; CI #626 solo se certifica para SHA previo; no se ha confirmado CI del HEAD posterior a este cambio documental. Los estados de Vercel indican límite de builds; NO intervenir. 
 - Próximo paso permitido: reconciliación comprobable de términos, retención y proveedores; esperar resultado de Codex únicamente para gate de baja. Todas las exclusiones y decisiones previas siguen vigentes.
+
+## Avance de reconciliación independiente (2026-10-10)
+- Creado `docs/PAZO_MVP_PRIVACY_OPERATIONS_RECONCILIATION_20261010.md` (`c2475bc`): SOP mínimo de solicitudes/soporte, proveedor de imagen externo `images.unsplash.com` no contemplado antes en inventario y riesgo concreto en `captureException` de PostHog (filtrado de patrones limitado). No se ha demostrado ingestión efectiva ni fuga; es un riesgo de diseño, no incidente confirmado.
+- Próximo gate independiente P0: cierre de tratamiento de errores y proveedor de imagen en Privacy ES/EN e inventario, seguido de verificación de configuración y retención sin modificar datos reservados a Codex. `LEGAL_RELEASE_READY=false`; CI del SHA documental más reciente no certificada. Ningún cambio funcional, DB, Vercel, main ni A3.
