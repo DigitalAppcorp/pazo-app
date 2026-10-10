@@ -1,4 +1,14 @@
-# PAZO — ACTIVE HANDOFF | 2026-10-10, post-reset y recuperación de perfil
+# PAZO — HANDOFF ACTIVO: RELEASE FAST-TRACK (10 OCT 2026)
+
+**PRODUCT OWNER decidió parar A3 avanzado y priorizar el MVP.** Este encabezado sustituye los próximos pasos A3 históricos debajo. El único carril actual es `docs/PAZO_MVP_RELEASE_GATES_20261010.md`. Trabajar sobre la rama `release/mvp-beta-fast-track-20261010`, creada desde `781069d6`, **antes** de 132 commits posteriores de A3; preservar PR #37/#38 DRAFT como historia, NO mezclarlos completos ni continuar su complejidad. Contiene Auth/Feed/Comunidades/Lugares/denuncias/legales/intake ya construido. Mapa real preservado; no guard `PLACES_MAP_DEVELOPMENT_ONLY`. Sin A3 Edge, sin ejecución de eliminación, sin Vercel, sin merge/main, sin borrar las seis cuentas existentes.
+
+**Provisional de baja (NO equivalente a borrado efectivo):** UI + tres RPC instaladas de solicitud/estado/cancelación; cola privada `supabase/queries/f14_beta_deletion_request_queue_READ_ONLY.sql` y `docs/PAZO_MVP_MANUAL_DELETION_SOP_20261010.md`; lectura SQL alojada 2026-10-10 confirmó 0 solicitudes. Responsable operador designado/confirmado por PO pero correo/UUID no se guarda en repo. No se ha probado eliminación manual completa ni se ha habilitado auto-borrado; beta pública permanece bloqueada hasta el ensayo de una cuenta nueva descartable y políticas reales. `LEGAL_RELEASE_READY=false`.
+
+**SIGUIENTE con prioridad y sin más A3:** (1) comparar RC/main y validar CI sin Vercel, (2) QA **link real** de confirmación y cambio de contraseña desde recovery en localhost, (3) prueba de moderación/media sobre un solo objeto descartable, (4) SOP manual de baja en cuenta desechable y contacto/política legal, (5) QA RC acotada/merge autorizado/Vercel solo entonces. No rehacer QA de módulos ya probados. Pedir intervención PO solo para acciones que exigen su sesión/correo, responsable legal o prueba destructiva explícita.
+
+---
+
+# PAZO — HISTORIAL OPERATIVO ANTERIOR (NO GOBIERNA PRIORIDAD ACTUAL)
 
 **Reglas:** `AGENTS.md` y `docs/PAZO_MASTER_ROADMAP.md`. **Brain OS:** `DigitalAppcorp/project-brain-os` v1.4.1 (`SKILL.md` + `patterns/VERIFIABLE_HANDOFF.md`). **Historial:** `docs/archive/PAZO_ACTIVE_HANDOFF_BEFORE_RESET_20261010.md` y `docs/archive/PAZO_ACTIVE_HANDOFF_BEFORE_PROFILE_RECOVERY_20261010.md` (conservan evidencia, estados previos y decisiones).
 
