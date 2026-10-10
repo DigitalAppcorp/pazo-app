@@ -87,3 +87,7 @@ Autorización PO aplicada: migración `20261010033538_f14_moderation_media_prefl
 ## D3-A: consolidación de claims y finalización protegida
 
 Nueva migración `supabase/sql/f14_moderation_media_finalize.sql` integra la prevalidación, la reserva de objeto específica y el trigger de estado seguro existente, no reemplaza el sistema de claims ni relaja RLS de Storage. `public.f14_moderation_media_gate` sólo concede permiso con `service_role` y la foto exactamente comprobada; etapa `complete` requiere Storage metadata ausente y revalida relación, claim y reporte antes de `purged`. Despliegue Edge continúa bloqueado por constante fija; no ejecutar pruebas destructivas sobre fotos anteriores.
+
+### Reconciliación D3-A de backend APLICADA (2026-10-10 UTC)
+
+Migration hosted `20261010034610_f14_finalize_media_after_verified_claim`: se integró la validación exacta de claims y la fase `complete` con el trigger de protección, sin desactivar trigger/RLS. Edge `f14-moderation-purge` v3 mantiene latch fija `F14_MEDIA_PURGE_RELEASE_APPROVED=false`. CI PASS `38021681379`. Auditoría 13 objetos originarios, cero medios `purged` y cero claims; grant solo service_role en función SQL. Próxima aceptación D3-A: ensayo de un post nuevo con foto descartable identificada, no los archivos existentes. Solo después habilitar una capacidad estrictamente limitada al ID probado. No se requiere Vercel.

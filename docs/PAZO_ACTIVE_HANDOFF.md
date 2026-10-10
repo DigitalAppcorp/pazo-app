@@ -8,7 +8,7 @@
 ## Fuente de verdad y rol
 - Product Owner: usuario; ChatGPT Project Brain es ejecutor técnico. Canonical Brain OS: `DigitalAppcorp/project-brain-os` (versión estable vigente 1.4.1; el `AGENTS.md` histórico refiere 1.3.0 y el patrón de diseño nuevo de Brain OS PR #3 **sigue DRAFT**).
 - Leer primero `AGENTS.md`, este handoff, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md` y el scope de cualquier módulo específico antes de actuar.
-- **Lote activo 2 (MVP):** Supabase F14 preflight de medios INSTALADO con autorización PO: migración `20261010033538_f14_moderation_media_preflight_locked`, Edge `f14-moderation-purge` v2, JWT requerido, latch de código `F14_MEDIA_PURGE_RELEASE_APPROVED=false`. **Sin borrado**, backend `complete=false`, trigger de rechazo original activo, botón local OFF. D3-A sigue abierta. Sin Vercel ni merge.
+- **Lote activo 2 / D3-A:** SQL de finalización real backend aplicada a Supabase, migración `20261010034610_f14_finalize_media_after_verified_claim`; Edge `f14-moderation-purge` **v3** desplegada `verify_jwt=true`, lógica de claim existente integrada. CI #38021681379 PASS. **F14_MEDIA_PURGE_RELEASE_APPROVED=false** en código y flag UI OFF, por lo que NADIE puede ejecutar borrado vía Edge; 13 archivos originales conservados, purged=0, claims=0. Falta UNA foto NUEVA descartable expresamente identificada, con post reportado/removed por moderador, para habilitar ensayo limitado y verificar URL. NO Vercel, NO merge, NO borrar otros registros.
 
 ## F14 beta reporting pilot — scope limitado 2026-10-09
 
