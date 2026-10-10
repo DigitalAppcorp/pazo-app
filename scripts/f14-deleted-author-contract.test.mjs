@@ -32,3 +32,21 @@ test('only server processing can redact after verifying Storage, legacy comments
  ])assert.ok(sql.includes(fragment),fragment)
  assert.match(sql,/REVOKE ALL ON FUNCTION public\.pazo_redact_social_threads\(uuid\)\s+FROM PUBLIC,anon,authenticated/)
 })
+
+test('redacted author references are mandatory if FK owner or pet becomes null',()=>{
+ for(const v of [
+  'author_deleted_at IS NULL AND user_id IS NOT NULL',
+  'author_deleted_at IS NOT NULL AND user_id IS NULL',
+  'author_deleted_at IS NULL AND author_user_id IS NOT NULL AND author_pet_id IS NOT NULL',
+  'author_deleted_at IS NOT NULL AND author_user_id IS NULL AND author_pet_id IS NULL'
+ ])assert.ok(sql.includes(v),v)
+})
+test('feed recommendation retains anonymous reply threads, not moderated removals',()=>{
+ for(const v of [
+  'CREATE OR REPLACE FUNCTION public.get_recommended_posts_page',
+  'LEFT JOIN public.pets candidate_pet',
+  'candidate.author_deleted_at IS NOT NULL',
+  'EXISTS(\n        SELECT 1 FROM public.post_comments pc WHERE pc.post_id=candidate.id',
+  "public.f14_content_visible('feed_post',candidate.id)"
+ ])assert.ok(sql.includes(v.replace('\\n','\n')),v)
+})
