@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { getModerationQueue, reviewReport, type PendingReport } from './reportingService'
+import { reportTargetShortId } from './reportSubject'
 
 interface Props { lang: 'es' | 'en'; onClose: () => void }
 const PAGE = 20
@@ -58,7 +59,8 @@ export function ModeratorQueue({ lang, onClose }: Props) {
     const explanation = action === 'remove'
       ? (es ? 'Retirar de la lectura pública. La limpieza de medios públicos se revisa por separado. ¿Continuar?' : 'Hide content from public reads. Public media requires separate cleanup. Continue?')
       : (es ? '¿Descartar esta denuncia?' : 'Dismiss this report?')
-    if (!window.confirm(explanation)) return
+    const targetLabel = `${report.target_kind} · ${reportTargetShortId(report.target_id)}`
+    if (!window.confirm(`${explanation}\n\n${es ? 'Objetivo' : 'Target'}: ${targetLabel}`)) return
     setBusy(true); setError(''); setMessage('')
     try {
       const result = await reviewReport(report.id, action)

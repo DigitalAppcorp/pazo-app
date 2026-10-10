@@ -26,6 +26,7 @@ import {
 import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
+import { describeReportSubject } from '../../features/moderation/reportSubject'
 import {
   IconCamera,
   IconChat,
@@ -60,7 +61,7 @@ export const CommunityDetailView = ({
   onCommunityChanged,
   lang,
 }: CommunityDetailViewProps) => {
-  const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string} | null>(null)
+  const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
   const [community, setCommunity] = useState<CommunitySummary | null>(null)
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [posts, setPosts] = useState<CommunityPost[]>([])
@@ -679,7 +680,7 @@ export const CommunityDetailView = ({
                   </div>
 
                   <div className="flex items-center gap-2">
-                  {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id})}
+                  {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id,label:describeReportSubject('community_post',post.authorName,post.body,lang)})}
                     className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   {post.canDelete && (
                     <button
@@ -757,7 +758,7 @@ export const CommunityDetailView = ({
                               </button>
                             )}
                           </div>
-                          {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_comment',id:comment.id})}
+                          {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_comment',id:comment.id,label:describeReportSubject('community_comment',comment.authorName,comment.body,lang)})}
                             className="text-[10px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                           <p className="mt-0.5 text-[10px] leading-relaxed text-[#5C7470]">
                             {comment.body}

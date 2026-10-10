@@ -4,6 +4,7 @@ import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { IconPaw } from '../icons/PazoIcons'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
+import { describeReportSubject } from '../../features/moderation/reportSubject'
 
 interface PublicProfileViewProps {
   targetPetId: string
@@ -178,7 +179,7 @@ export const PublicProfileView = ({
         <div className="w-24"></div>
       </div>
 
-      {reportOpen && <ReportDialog target={{kind:'pet_profile',id:targetPetId}} lang={lang} onClose={() => setReportOpen(false)} />}
+      {reportOpen && <ReportDialog target={{kind:'pet_profile',id:targetPetId,label:describeReportSubject('pet_profile',petProfile?.name,null,lang)}} lang={lang} onClose={() => setReportOpen(false)} />}
       {/* Contenedor Principal */}
       <div className="p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto space-y-8 flex-1 relative z-10">
         {isLoading ? (

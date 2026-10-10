@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { submitReport, type ReportReason, type ReportTarget } from './reportingService'
+import { reportTargetShortId } from './reportSubject'
 
 interface Props {
   target: { kind: ReportTarget; id: string; label?: string }
@@ -109,9 +110,10 @@ export function ReportDialog({ target, onClose, lang }: Props) {
         <h2 className="text-lg font-black">{alreadyReported ? (es ? 'Denuncia pendiente' : 'Report pending') : sent ? (es ? 'Denuncia recibida' : 'Report received') : (es ? 'Enviar denuncia' : 'Submit report')}</h2>
         <button ref={closeButtonRef} type="button" disabled={busy} onClick={onClose} className="min-h-11 rounded-xl px-3 font-bold text-sm disabled:opacity-50">{es ? 'Cerrar' : 'Close'}</button>
       </div>
-      <p className="mt-3 rounded-xl bg-[#204E4A]/[0.06] px-3 py-2 text-xs font-semibold leading-relaxed" aria-label={es ? 'Contenido seleccionado' : 'Selected content'}>
-        {es ? 'Contenido: ' : 'Content: '}{subjectLabel}
-      </p>
+      <div className="mt-3 rounded-xl bg-[#204E4A]/[0.06] px-3 py-2 text-xs leading-relaxed" aria-label={es ? 'Contenido seleccionado' : 'Selected content'}>
+        <p className="font-semibold break-words">{es ? 'Contenido: ' : 'Content: '}{subjectLabel}</p>
+        <p className="mt-1 text-[10px] text-[#5C7470]">{es ? 'ID de referencia: ' : 'Reference ID: '}{reportTargetShortId(target.id)}</p>
+      </div>
       {sent || alreadyReported ? <div role="status" className="mt-5 space-y-3">
         <p className="text-sm">{alreadyReported
           ? (es ? 'Ya denunciaste este contenido. La denuncia está pendiente de revisión; no necesitas enviarla otra vez.' : 'You have already reported this content. It is pending review; you do not need to submit it again.')

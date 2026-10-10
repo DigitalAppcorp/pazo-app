@@ -35,3 +35,11 @@
 - Hallazgo en PR #37: `?auth=recovery` era suficiente para abrir la pantalla y `sessionReady=Boolean(user)` permitía llegar a la acción de cambio de contraseña desde una sesión normal existente, sin constancia de un enlace de recuperación validado. **Corrección propuesta:** exigir evento `PASSWORD_RECOVERY` con usuario de sesión, y validar el mismo gate al llamar a `updateUser`; al completar/salir/signout se revoca ese estado. El URL sigue siendo solo marcador de UI; un enlace caducado muestra aviso y no habilita el formulario.
 - La prueba Node verifica la matriz (evento válido × usuario); falta **QA real de clic de correo** y comprobar si el evento llega en todos los flujos/reload del navegador. Seguridad fail-closed: ante ausencia de evento se pide solicitar un enlace nuevo. No asumir que `supabase/config.toml` local refleja URLs Auth permitidas en el proyecto alojado.
 - Pendiente gate de integración: autorización específica de merge y confirmación de que no disparará deploy automático a Vercel; por ahora branch DRAFT y ejecución local.
+
+## Moderación: mejorar precisión de objetivo en las cinco superficies
+
+La QA anterior despublicó el post antiguo cuando se pretendía comprobar uno nuevo. El formulario mostraba principalmente autor o tipo, no el contenido preciso. Se añadió una etiqueta de contexto con extracto acotado para posts/comentarios de Feed y Comunidad, nombre de mascota para perfiles y sufijo de UUID idéntico al del target backend. La confirmación de moderación usa exclusivamente el tipo y UUID de la denuncia devuelta por RPC, nunca un texto libre del denunciante. No se guarda ni transmite el extracto extra ni se agrega analytics.
+
+Supabase confirma que `f14-moderation-purge` está desplegado únicamente como **stub 503** y `f14_pending_media` devuelve un target, no un objeto Storage validado; la purga/URL/CDN sigue P0 abierta. El cambio de identificación ayuda a evitar reportar el elemento incorrecto, **no** certifica purga física ni una vista previa fiable del contenido para el moderador.
+
+Auth: el PO confirmó correo de recuperación y presentación del formulario en localhost. No repetir QA salvo nueva regresión.

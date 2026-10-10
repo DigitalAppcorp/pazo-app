@@ -5,6 +5,7 @@ import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
+import { describeReportSubject } from '../../features/moderation/reportSubject'
 
 interface HomeViewProps {
   posts: Post[]
@@ -292,7 +293,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
             canFollow={!ownedPetIds.includes(post.petId)}
             lang={lang}
           />
-          {canReport && !ownedPetIds.includes(post.petId) && <button type="button" onClick={() => onReport('feed_post', post.id, (lang === 'es' ? 'Publicación de ' : 'Post by ') + post.petName)}
+          {canReport && !ownedPetIds.includes(post.petId) && <button type="button" onClick={() => onReport('feed_post', post.id, describeReportSubject('feed_post', post.petName, post.text, lang))}
             className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
         </div>
       </div>
@@ -346,7 +347,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
                     <span className="text-[#5C7470]">{comment.text}</span>
                     <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
                     {canReport && (!comment.authorPetId || !ownedPetIds.includes(comment.authorPetId)) && <button type="button"
-                      onClick={() => onReport('feed_comment', comment.id, (lang === 'es' ? 'Comentario de ' : 'Comment by ') + comment.authorName)}
+                      onClick={() => onReport('feed_comment', comment.id, describeReportSubject('feed_comment', comment.authorName, comment.text, lang))}
                       className="mt-1 text-[10px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   </div>
                 </div>

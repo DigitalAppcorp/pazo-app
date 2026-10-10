@@ -8,7 +8,7 @@
 ## Fuente de verdad y rol
 - Product Owner: usuario; ChatGPT Project Brain es ejecutor técnico. Canonical Brain OS: `DigitalAppcorp/project-brain-os` (versión estable vigente 1.4.1; el `AGENTS.md` histórico refiere 1.3.0 y el patrón de diseño nuevo de Brain OS PR #3 **sigue DRAFT**).
 - Leer primero `AGENTS.md`, este handoff, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md` y el scope de cualquier módulo específico antes de actuar.
-- **Lote activo 1 (MVP):** auditoría de integración #36/#37 y cierre Auth con guard de evento de recuperación; NO Vercel y NO merge hasta autorización propia. Ver `docs/PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md`. **No crear nuevas fases ni rediseñar todo PAZO**. Prioridad del PO: cierre MVP y lanzamiento con mínima demora, tokens y costes.
+- **Lote activo 2 (MVP):** correo de recuperación vía localhost PASS reportado por PO; mejorar identidad de 5 targets de denuncia para evitar confundir posts, purga Storage/CDN sigue P0 pendiente. NO Vercel ni merge sin gate. Ver `docs/PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md`. **No crear nuevas fases ni rediseñar todo PAZO**. Prioridad del PO: cierre MVP y lanzamiento con mínima demora, tokens y costes.
 
 ## F14 beta reporting pilot — scope limitado 2026-10-09
 

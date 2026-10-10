@@ -55,3 +55,7 @@ Con código `b184a66` del PR #37, el PO confirmó la opción «Denunciar perfil�
 - `public.f14_content_visible('feed_post',id)` devuelve `false` para la publicación anterior restringida y `true` para la nueva. `moderation_private.content_restrictions` tiene registro de la anterior con `media_status=none`; la nueva no tiene restricción.
 - Prueba real de consulta DB con `BEGIN READ ONLY; SET LOCAL ROLE anon; SELECT ... FROM public.posts ...; ROLLBACK`: **solo aparece la publicación nueva**, NO la anterior. Esto demuestra RLS efectiva del rol público simulado contra estas dos filas en PostgreSQL. No equivale a comprobar caché de navegador, CDN, URL Storage ni endpoint HTTP independiente.
 - **Resultado:** PASS para `remove` + bitácora + exclusión SELECT `anon` **del ID realmente denunciado**, pero la prueba específica de despublicar el post NUEVO queda **pendiente** hasta que PO denuncie ese post exacto desde la otra cuenta y lo resuelva la moderadora. No hacer SQL destructivo ni crear restricciones de prueba directamente para simular UI. No bloquear el proceso por datos de prueba.
+
+## Aceptación PO de correo de recuperación en localhost (2026-10-09)
+
+Con PR #37 commit `298458dc`, el PO indicó «listo, funciono» tras recibir y abrir el enlace de recuperación solicitado. **PASS reportado** del enlace y llegada al formulario con el guard `PASSWORD_RECOVERY`. No consta una prueba diferenciada de actualización definitiva + nuevo login; no inventar esa evidencia ni repetir todo el recorrido sin regresión.
