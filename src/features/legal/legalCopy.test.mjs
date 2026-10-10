@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LEGAL_RELEASE_READY, PAZO_LEGAL_OPERATOR_NAME, legalPreview } from './legalCopy.ts'
+import { LEGAL_RELEASE_READY, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, legalPreview } from './legalCopy.ts'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact.ts'
 import { readFileSync } from 'node:fs'
 
@@ -47,11 +47,13 @@ test('public privacy inbox is real, bilingual, and never promises automated dele
 
 test('PO-designated legal operator is consistent in both languages and drafts', () => {
   assert.equal(PAZO_LEGAL_OPERATOR_NAME, 'Alvarado Solutions LLC')
+  assert.equal(PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, 'California')
   assert.equal(LEGAL_RELEASE_READY, false)
   for(const kind of ['privacy','terms']) {
     for(const lang of ['es','en']) {
       const copy=legalPreview[kind][lang]
       assert.ok(copy.sections.some(s=>s.text.includes(PAZO_LEGAL_OPERATOR_NAME)),kind+' '+lang)
+      assert.ok(copy.sections.some(s=>s.text.includes(PAZO_LEGAL_OPERATOR_NAME) && s.text.includes(PAZO_LEGAL_OPERATOR_REGISTRATION_STATE)),kind+' '+lang+' registration')
     }
   }
   assert.match(legalPreview.privacy.es.alert,/conservación/)
