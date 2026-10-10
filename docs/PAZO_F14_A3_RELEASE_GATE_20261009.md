@@ -108,3 +108,7 @@ READ ONLY confirmó `profiles.id` FK Auth ON DELETE CASCADE, `pets.owner_id` y `
 
 ## A3 contrato de planificación terminal, CI (2026-10-09, DRAFT)
 Se incorporó un módulo puro de planificación con once etapas ordenadas y bloqueos estructurales inmutables por incompatibilidad entre perfil CASCADE/trigger A3 y job FK RESTRICT. Aunque todos los flags alegados sean true, el modelo no concede permiso de borrado ni accede a Auth/Storage. Se ejecuta con `npm run test:mvp` en CI. El bloqueo exige una implementación posterior de capacidad estrecha servicio+lease, DDL y tests aislados, todos bajo aprobación. `full_write_fence_ready()` sigue false.
+
+## 22. Scope interno transaccional para futura limpieza de perfil (DRAFT, NO INSTALADO)
+
+El undécimo borrador SQL propone `account_private.deletion_terminal_scopes`: `job_id`, UUID del dueño, scope restringido `profile_delete`, identificador efímero de backend y transacción, token/versión del lease y timestamp, sin email, contraseña, ruta de objeto ni contenido. Tabla privada con RLS y grants revocados; está diseñado solo para operaciones service-only verificadas, sin salida a cliente, y se borra al terminar la transacción. **No instalado**, no hay datos nuevos ni nuevo proveedor; no habilita eliminación real ni telemetría adicional.

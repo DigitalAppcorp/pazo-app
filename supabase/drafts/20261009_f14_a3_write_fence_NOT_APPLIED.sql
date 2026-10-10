@@ -224,6 +224,13 @@ BEGIN
            OR (v_followed_owner=v_actor AND v_follow_owner=b.blocked_user_id))
        LIMIT 1;
     END IF;
+  -- Narrow terminal cleanup: ONLY profiles DELETE with private proof
+  -- created inside the same DB transaction by a service-only procedure.
+  -- No blanket service_role or caller-controlled GUC exception.
+  ELSIF TG_TABLE_NAME='profiles' AND TG_OP='DELETE'
+      AND account_private.f14_a3_terminal_profile_scope_valid(
+        (v_old->>'id')::uuid) THEN
+    v_exception_target := (v_old->>'id')::uuid;
   END IF;
 
   -- IMPORTANT: the future worker must acquire the exact same advisory
@@ -247,6 +254,8 @@ $$;
 REVOKE ALL ON FUNCTION account_private.f14_a3_guard_social_write()
   FROM PUBLIC,anon,authenticated;
 
+-- Terminal scoped function must be present before this fence is installed.
+-- Readiness gates still return false, so no deletion can run.
 CREATE TRIGGER a3_write_fence_account_blocks BEFORE INSERT OR UPDATE OR DELETE ON public.account_blocks
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_pets BEFORE INSERT OR UPDATE OR DELETE ON public.pets

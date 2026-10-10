@@ -306,3 +306,40 @@ test('A3 Auth-last gate cannot be declared ready with a frozen-profile delete fe
  assert.doesNotMatch(fenceSql,/current_setting\('request\.jwt\.claim\.role'[\s\S]*?service_role[\s\S]*?THEN RETURN OLD/i)
  assert.match(transitionSql,/f14_a3_full_write_fence_ready\(\)[\s\S]*?SELECT false/)
 })
+
+
+const terminalScopeSql=readFileSync(
+ new URL('../supabase/drafts/20261009_f14_a3_terminal_profile_scope_NOT_APPLIED.sql',import.meta.url),'utf8')
+test('A3 terminal scoped profile DRAFT is guarded and has two permanently false readiness gates',()=>{
+ const gate=terminalScopeSql.indexOf("RAISE EXCEPTION 'A3 TERMINAL PROFILE SCOPE DRAFT ONLY")
+ const ddl=terminalScopeSql.indexOf('CREATE TABLE')
+ assert.ok(terminalScopeSql.indexOf('BEGIN;')<gate && gate<ddl)
+ assert.match(terminalScopeSql,/f14_a3_terminal_profile_cleanup_ready\(\)[\s\S]*?SELECT false/)
+ assert.match(terminalScopeSql,/IF NOT account_private\.f14_a3_full_write_fence_ready\(\)[\s\S]*?OR NOT account_private\.f14_a3_terminal_profile_cleanup_ready\(\) THEN/)
+ assert.doesNotMatch(terminalScopeSql,/auth\.admin\.deleteUser|DELETE FROM (?:auth|storage)\.|TRUNCATE|DROP TABLE/i)
+})
+test('A3 terminal capability is bound to owner, job, backend, transaction and live lease',()=>{
+ for(const token of [
+  "s.user_id=p_user_id","s.scope='profile_delete'",
+  "s.backend_pid=pg_catalog.pg_backend_pid()",
+  "s.transaction_id=pg_catalog.pg_current_xact_id_if_assigned()",
+  "j.status='deleting_auth'",
+  "l.lease_token=s.lease_token AND l.lease_version=s.lease_version",
+  "l.expires_at > pg_catalog.clock_timestamp()"
+ ]) assert.ok(terminalScopeSql.includes(token),token)
+ assert.match(terminalScopeSql,/CHECK \(scope='profile_delete'\)/)
+ assert.match(terminalScopeSql,/ALTER TABLE account_private\.deletion_terminal_scopes ENABLE ROW LEVEL SECURITY/)
+ assert.match(terminalScopeSql,/REVOKE ALL ON account_private\.deletion_terminal_scopes[\s\S]*?FROM PUBLIC,anon,authenticated,service_role/)
+ assert.match(terminalScopeSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_terminal_delete_profile\(uuid,uuid,uuid,bigint\)[\s\S]*?TO service_role/)
+})
+test('A3 narrow guard exception only applies to scoped profiles DELETE, never blanket service role',()=>{
+ assert.match(fenceSql,/ELSIF TG_TABLE_NAME='profiles' AND TG_OP='DELETE'[\s\S]*?f14_a3_terminal_profile_scope_valid\([\s\S]*?v_exception_target := \(v_old->>'id'\)::uuid/)
+ assert.match(fenceSql,/CREATE TRIGGER a3_write_fence_profiles BEFORE INSERT OR UPDATE OR DELETE/)
+ assert.doesNotMatch(fenceSql,/IF\s+(?:current_role|current_user)\s*=\s*'service_role'\s+THEN\s+RETURN/i)
+ assert.doesNotMatch(fenceSql,/set_config\(|current_setting\('a3\.bypass'/i)
+ const functionPart=terminalScopeSql.slice(terminalScopeSql.indexOf('CREATE OR REPLACE FUNCTION public.f14_a3_service_terminal_delete_profile('))
+ const del=functionPart.match(/\bDELETE FROM public\.[a-z_]+/g)??[]
+ assert.deepEqual(del,['DELETE FROM public.profiles'])
+ assert.ok(functionPart.indexOf('pg_advisory_xact_lock')<functionPart.indexOf('FROM account_private.deletion_jobs j'))
+ assert.ok(functionPart.indexOf('FROM account_private.deletion_jobs j')<functionPart.indexOf('FROM account_private.deletion_worker_leases l'))
+})
