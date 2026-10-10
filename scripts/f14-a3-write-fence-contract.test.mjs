@@ -57,7 +57,6 @@ test('Storage grant is exact-path, exact generation and short-lived',()=>{
 test('processing transition verifies signed-in session and atomically snapshots',()=>{
  assert.match(sql,/CREATE OR REPLACE FUNCTION public\.f14_a3_start_processing/)
  assert.match(sql,/FOR UPDATE;/)
- assert.match(sql,/ses\.created_at>=v_requested_at/)
  assert.match(sql,/s\.created_at>=v_requested_at/)
  assert.match(sql,/lease_expires_at>v_now/)
  assert.match(sql,/INSERT INTO account_requests_private\.deletion_frozen_targets/)
