@@ -86,7 +86,9 @@ const sanitizeProperties = (
 const getDistinctId = () =>
   currentUserId || `anonymous:${getSessionId()}`
 
-export const isObservabilityEnabled = () => Boolean(projectToken)
+// PO decision (2026-10-10): PostHog is disabled throughout the MVP beta.
+// Preserve the integration for a separately approved post-launch reactivation.
+export const isObservabilityEnabled = () => false
 
 export const setObservabilityUser = (userId: string | null) => {
   currentUserId = userId
