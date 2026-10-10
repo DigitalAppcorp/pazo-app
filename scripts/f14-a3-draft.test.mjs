@@ -343,3 +343,44 @@ test('A3 narrow guard exception only applies to scoped profiles DELETE, never bl
  assert.ok(functionPart.indexOf('pg_advisory_xact_lock')<functionPart.indexOf('FROM account_private.deletion_jobs j'))
  assert.ok(functionPart.indexOf('FROM account_private.deletion_jobs j')<functionPart.indexOf('FROM account_private.deletion_worker_leases l'))
 })
+
+
+const handoffSql=readFileSync(new URL('../supabase/drafts/20261009_f14_a3_terminal_lease_handoff_NOT_APPLIED.sql',import.meta.url),'utf8')
+test('A3 terminal lease handoff DRAFT aborts before DDL; independent gates stay false',()=>{
+ const guard=handoffSql.indexOf("RAISE EXCEPTION 'A3 TERMINAL LEASE HANDOFF DRAFT ONLY")
+ const def=handoffSql.indexOf('CREATE OR REPLACE FUNCTION')
+ assert.ok(handoffSql.indexOf('BEGIN;')<guard && guard<def)
+ assert.match(handoffSql,/f14_a3_terminal_handoff_ready\(\)[\s\S]*?SELECT false/)
+ assert.match(handoffSql,/IF NOT account_private\.f14_a3_full_write_fence_ready\(\)[\s\S]*?OR NOT account_private\.f14_a3_terminal_handoff_ready\(\) THEN/)
+ assert.doesNotMatch(handoffSql,/auth\.admin\.deleteUser|DELETE FROM public\.|DELETE FROM storage\.|DELETE FROM auth\./i)
+})
+test('A3 handoff verifies service, owner and exact old lease before atomic rotation',()=>{
+ const service=handoffSql.indexOf("current_setting('request.jwt.claim.role',true)")
+ const lock=handoffSql.indexOf('pg_catalog.pg_advisory_xact_lock')
+ const job=handoffSql.indexOf('FROM account_private.deletion_jobs WHERE id=p_job_id FOR UPDATE')
+ const lease=handoffSql.indexOf('FROM account_private.deletion_worker_leases l')
+ const update=handoffSql.indexOf('UPDATE account_private.deletion_worker_leases')
+ const status=handoffSql.indexOf('UPDATE account_private.deletion_jobs')
+ assert.ok(service>0 && lock>service && job>lock && lease>job && update>lease && status>update)
+ for(const v of [
+  "v_owner IS DISTINCT FROM p_user_id OR v_status <> 'deleting_data'",
+  "l.lease_token=p_old_token","l.lease_version=p_old_version",
+  "l.expires_at>v_now FOR UPDATE",
+  "lease_token=v_new_token","lease_version=lease_version+1",
+  "acquired_at=v_now","expires_at=v_now+pg_catalog.make_interval(secs=>p_seconds)",
+  "WHERE id=p_job_id AND user_id=p_user_id AND status='deleting_data'",
+  "SET status='deleting_auth',updated_at=v_now",
+  "VALUES (p_job_id,'data_verified')"
+ ]) assert.ok(handoffSql.includes(v),v)
+ assert.match(handoffSql,/p_seconds < 5 OR p_seconds > 60/)
+ assert.match(handoffSql,/p_old_version = 9223372036854775807/)
+ assert.match(handoffSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_handoff_terminal_lease\(uuid,uuid,uuid,bigint,integer\)[\s\S]*?TO service_role/)
+})
+test('A3 terminal handoff never broadens reviewing-only worker lease',()=>{
+ const reviewLeaseSql=readFileSync(new URL('../supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql',import.meta.url),'utf8')
+ assert.match(reviewLeaseSql,/j\.status = 'reviewing'/)
+ assert.match(reviewLeaseSql,/v_status <> 'reviewing'/)
+ assert.match(terminalScopeSql,/j\.status='deleting_auth'/)
+ assert.match(terminalScopeSql,/l\.lease_token=s\.lease_token AND l\.lease_version=s\.lease_version/)
+ assert.doesNotMatch(handoffSql,/\bSET\s+(?:LOCAL\s+)?(?:role|session)|set_config\s*\(/i)
+})

@@ -112,3 +112,7 @@ Se incorporó un módulo puro de planificación con once etapas ordenadas y bloq
 ## 22. Scope interno transaccional para futura limpieza de perfil (DRAFT, NO INSTALADO)
 
 El undécimo borrador SQL propone `account_private.deletion_terminal_scopes`: `job_id`, UUID del dueño, scope restringido `profile_delete`, identificador efímero de backend y transacción, token/versión del lease y timestamp, sin email, contraseña, ruta de objeto ni contenido. Tabla privada con RLS y grants revocados; está diseñado solo para operaciones service-only verificadas, sin salida a cliente, y se borra al terminar la transacción. **No instalado**, no hay datos nuevos ni nuevo proveedor; no habilita eliminación real ni telemetría adicional.
+
+
+## A3.6 — Handoff de lease propuesta (2026-10-09, NOT APPLIED)
+`supabase/drafts/20261009_f14_a3_terminal_lease_handoff_NOT_APPLIED.sql` define rotación transaccional de token/versión e impedimento de replays al pasar del estado `deleting_data` a `deleting_auth`, sin permitir que un lease solo de revisión sea usado para borrar. Un guard DDL y dos readiness gates false lo hacen inerte. QA sintética `pg_temp` con ROLLBACK PASS para el contrato de handoff; no equivale a prueba de instalación ni a Auth/Storage delete. Falta un protocolo seguro de renovación de lease terminal expirado y la secuencia anterior de limpieza.

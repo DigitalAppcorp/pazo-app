@@ -41,3 +41,10 @@ El trigger A3 `a3_write_fence_profiles BEFORE INSERT OR UPDATE OR DELETE` propue
 ### A3.5 — Scoped profile transaction draft, still disabled
 
 Se agregó `supabase/drafts/20261009_f14_a3_terminal_profile_scope_NOT_APPLIED.sql` (11º SQL DRAFT) y la extensión acotada del `f14_a3_guard_social_write`: `profiles DELETE` puede exceptuar un propietario **solo** si existe autorización privada de la **misma transacción/backend**, mismo `job_id` y lease vigente y estado `deleting_auth`. Ninguna excepción global del rol `service_role` ni GUC de bypass. El nuevo `f14_a3_terminal_profile_cleanup_ready()` y el antiguo `f14_a3_full_write_fence_ready()` permanecen siempre `false`; todos los SQL abortan antes del DDL. QA `pg_temp` ROLLBACK del predicado aislado PASS; integración real NO probada. Conflicto del lease `reviewing` y FK Auth siguen abiertos.
+
+## A3.6 — Traspaso CAS del lease terminal (12.º DRAFT, 2026-10-09)
+
+- `supabase/drafts/20261009_f14_a3_terminal_lease_handoff_NOT_APPLIED.sql` propone una RPC privada del servicio que pasa exclusivamente de `deleting_data` a `deleting_auth` con locks ordenados A3→job→lease y comprobación de propietario, token, versión y fecha de caducidad; rota token+versión antes de devolver un nuevo lease y registra `data_verified` en el mismo commit. Los intentos repetidos con token antiguo fallan.
+- `f14_a3_terminal_handoff_ready()` es **SELECT false** y `f14_a3_full_write_fence_ready()` también permanece false; el propio archivo aborta antes de DDL. No instala nada ni abre una transición real.
+- QA sintética en PostgreSQL alojado, `pg_temp` bajo BEGIN/ROLLBACK: PASS para rechazo de gate cerrado, propietario distinto, versión vieja, `reviewing`, lease expirado y repetición del token; caso sintético de éxito rota versión 3→4 y nuevo token con status `deleting_auth`. **No se probó la RPC original, triggers completos, rol service real ni dos conexiones.**
+- Aún faltan transiciones de `reviewing` a `deleting_data`, renew/recovery de lease terminal tras expiración, verificación de evidencias server-only, reconciliación UGC/FK/Storage/Auth y las pruebas E2E. El worker actual no cambia. Gate 8 sigue abierto.
