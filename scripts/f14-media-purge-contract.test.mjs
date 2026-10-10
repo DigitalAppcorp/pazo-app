@@ -16,6 +16,8 @@ test('SQL only authorizes exact server-only removed content and matches Storage 
   "v_refs <> 1",
   "o.owner_id IS DISTINCT FROM v_owner::text",
   "p_stage='preflight'",
+  "p_stage IS NULL",
+  "photo_storage_path=p_path",
   "IF EXISTS(SELECT 1 FROM storage.objects o",
   "SET media_status='purged'",
   "AND media_status='pending_review'",
@@ -32,6 +34,8 @@ test('Edge is off unless explicitly enabled, verifies user and role, and never l
  assert.match(edge,/admin\.storage\.from\(target\.bucket\)\.exists\(target\.path\)/)
  assert.match(edge,/p_stage:stage/)
  assert.match(edge,/method:'HEAD'/)
+ assert.match(edge,/method:'GET'/)
+ assert.match(edge,/Range':'bytes=0-0'/)
  assert.match(edge,/Cache-Control':'no-cache'/)
  assert.doesNotMatch(edge,/console\.(?:log|error|warn)\(/)
  assert.match(core,/await deps\.publicUrlInaccessible\(target\)/)

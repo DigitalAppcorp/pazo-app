@@ -18,7 +18,7 @@ BEGIN
  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'service_role'
  OR p_kind NOT IN ('feed_post','community_post')
  OR p_target IS NULL OR p_url IS NULL OR p_path IS NULL
- OR p_stage NOT IN ('preflight','complete')
+ OR p_stage IS NULL OR p_stage NOT IN ('preflight','complete')
  OR p_path !~ '^[A-Za-z0-9_-]+(/[A-Za-z0-9._-]+)+$'
  OR pg_catalog.strpos(p_path,'..') > 0 OR pg_catalog.length(p_path)>400
  THEN RETURN false; END IF;
@@ -55,6 +55,9 @@ BEGIN
   UNION ALL SELECT COUNT(*) FROM public.profiles WHERE avatar_url=p_url
  ) refs;
  IF v_refs <> 1 THEN RETURN false; END IF;
+ IF p_kind='community_post' AND
+   (SELECT COUNT(*) FROM public.community_posts WHERE photo_storage_path=p_path)<>1
+ THEN RETURN false; END IF;
 
  -- If object exists, the immutable Storage owner must match the actual
  -- published content owner. Missing object can be reconciled after retry.

@@ -16,6 +16,13 @@ async function publicUrlInaccessible(url:string):Promise<boolean> {
   const response=await fetch(candidate,{method:'HEAD',cache:'no-store',redirect:'error',
     headers:{'Cache-Control':'no-cache'}})
   if(![403,404,410].includes(response.status)) return false
+  // HEAD is not sufficient: some gateways can return 404 for HEAD but
+  // still serve GET bytes. A Range request tests actual download access.
+  const download=await fetch(candidate,{method:'GET',cache:'no-store',redirect:'error',
+    headers:{'Cache-Control':'no-cache','Range':'bytes=0-0'}})
+  const unavailable=[403,404,410].includes(download.status)
+  await download.body?.cancel()
+  if(!unavailable) return false
  }
  return true
 }

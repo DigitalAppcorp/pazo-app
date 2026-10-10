@@ -10,7 +10,8 @@ export interface PurgeDeps {
   publicUrlInaccessible(object: PurgeObject): Promise<boolean>
 }
 export class PurgeRejected extends Error {
-  constructor(public readonly code: 'unauthorized' | 'invalid_target' | 'manual_review' | 'not_approved' | 'not_verified') { super(code) }
+  readonly code: 'unauthorized' | 'invalid_target' | 'manual_review' | 'not_approved' | 'not_verified'
+  constructor(code: PurgeRejected['code']) { super(code); this.code = code }
 }
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const safePath = /^[A-Za-z0-9_-]+(?:\/[A-Za-z0-9._-]+)+$/
@@ -27,7 +28,8 @@ export function resolvePurgeObject(projectUrl: string, kind: string, id: string,
   let path: string
   try { path = decodeURIComponent(url.pathname.slice(prefix.length)) }
   catch { throw new PurgeRejected('manual_review') }
-  if (!safePath.test(path) || path.includes('..') || path.includes('\\') || path.length > 400
+  if (row.photo_url !== origin.origin + prefix + path || !safePath.test(path)
+    || path.includes('..') || path.includes('\\') || path.length > 400
     || (kind === 'community_post' && row.photo_storage_path !== path)) throw new PurgeRejected('manual_review')
   return {kind,id,bucket,path,url:row.photo_url}
 }
