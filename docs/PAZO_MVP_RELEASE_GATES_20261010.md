@@ -17,7 +17,7 @@
 | Orden | Gate mínimo | Estado y prueba decisiva |
 |---|---|---|
 | 1 | **Integración MVP limpia** | Rama RC desde commit pre-A3 creada. Comparar #36/#37/main y comprobar código+Mapa+Auth. **Falta:** CI de la rama RC y revisión del diff antes del merge; no tocar main todavía |
-| 2 | **Auth end-to-end** | Alta/confirmación por correo real, sesión, recuperación por enlace real y cambio de clave en localhost; reusar QA ya pasada, probar **solo el enlace y cambio completo pendientes** |
+| 2 | **Auth — QA previamente aceptada** | **PASS del PO:** registro + sesión + mascota + Feed (2026-10-08); recuperación por enlace y formulario de nueva contraseña (2026-10-10). No repetir ni reabrir como bloqueo sin regresión demostrada. Código Auth devuelto al baseline aprobado `781069d6`. |
 | 3 | **Moderación mínima real** | Denuncia y decisión ya probadas; falta verificar retirada real de medios de **un único objeto nuevo descartable** con seguridad del operador y comprobar URL/origen. Si purga automática está apagada, documentar y usar un flujo supervisado verdadero, sin prometer purga CDN |
 | 4 | **Privacidad y salida segura** | Atención manual comprobada con cuenta de test separada; políticas/Terms definitivos (operador legal y retención aún pendientes); **contacto público de privacidad ya confirmado y enlazado en ES/EN**. `LEGAL_RELEASE_READY=false` hasta que sean reales |
 | 5 | **RC y lanzamiento** | QA móvil mínima de cambios nuevos, inventario/limpieza **autorizada** de datos de prueba, gate de merge revisado por PO; **solo después** decidir Vercel y exposición a público externo |
@@ -26,13 +26,13 @@
 No nuevas insignias premium, mensajería real, diseños cosméticos, cambios de Mapa ya aprobado, más tests de splash/feed/cuidados ya aceptados, A3 de 30 tablas/leases/CDN ni cron/servicios pagados. Los controles de datos y privacidad que sí bloquean beta pública no se omiten: se resuelven de forma focalizada.
 
 ## Aceptación y colaboración del PO
-Solo pedir al PO **una acción cuando sea indispensable**: probar el correo real de confirmación/recuperación y dar el resultado; confirmar identidad del responsable legal y criterios reales de retención (el correo de privacidad ya está aprobado); y aprobar por separado una prueba destructiva estrictamente de cuenta/archivo descartables o el merge/producción. No pedir otra aprobación general para continuar auditoría/código seguro. No mezclar un «CI PASS» con «beta lanzada».
+Solo pedir al PO **una acción cuando sea indispensable**: confirmar identidad del responsable legal y criterios reales de retención (correo de privacidad ya aprobado); y aprobar por separado una prueba destructiva estrictamente de cuenta/archivo descartables o el merge/producción. No pedir otra aprobación general para continuar auditoría/código seguro. No mezclar un «CI PASS» con «beta lanzada».
 
 **Estado actual:** carril de integración y operación manual preparado; lanzamiento aún **NO aprobado** y eliminación definitiva **NO probada**. La versión avanzada A3 permanece en pausa, preservada en GitHub.
 
-## Checkpoint Auth — enlaces de confirmación y recuperación (2026-10-10)
+## Corrección de QA Auth — evidencia aceptada, NO RETEST (2026-10-10)
 
-- `src/context/AuthContext.tsx` ahora envía `options.emailRedirectTo=signUpConfirmationRedirectUrl(window.location.origin)` en `supabase.auth.signUp`; antes dependía del Site URL alojado por defecto. El helper usa el origen actual, sin tokens ni correos en la URL, y añade casos `127.0.0.1:5173` / HTTPS a `signupFlow.test.mjs`.
-- Password reset existente usa `redirectTo: recoveryRedirectUrl(window.location.origin)`, destino `/?auth=recovery`, y exige evento Auth `PASSWORD_RECOVERY` antes de habilitar cambio de contraseña; no confundir marcador en URL con sesión verificada.
-- **Pendiente de aceptación**: configuración alojada de Supabase Auth debe permitir los destinos exactos del entorno local, típicamente `http://127.0.0.1:5173` y `http://127.0.0.1:5173/?auth=recovery` (si se usa ese host/puerto). El archivo `supabase/config.toml` es configuración de CLI local, NO certifica la allowlist del proyecto alojado. Comprobar entrega del email real, clic, sesión, recuperación y cambio de clave; CI estático no los sustituye.
-- No se modificó Supabase alojado ni se generaron correos de prueba. No hay ningún cambio en Vercel, `main` o las seis cuentas actuales. La rama RC no tiene aún PR, de modo que la suite Actions para PR puede no haberse ejecutado.
+- **Evidencia anterior documentada del PO:** `LOCAL AUTH PASS` (2026-10-08) para registro, creación de mascota, Feed y persistencia tras recarga; **«listo, funcionó»** (2026-10-10) para enlace de recuperación y formulario de nueva contraseña. El PO reiteró que ya había hecho la prueba. Se reconoce como **QA aceptada**; no solicitarla de nuevo.
+- El cambio reciente que añadía `emailRedirectTo` y un helper nuevo a `signUp` no estaba motivado por una regresión observada y reabría QA sin necesidad. **Revertido** en esta rama: `AuthContext.tsx`, `signupFlow.ts` y `signupFlow.test.mjs` restaurados desde el baseline de código `781069d6`. La recuperación conserva su lógica que ya fue aprobada. No volver a introducir un cambio en Auth por especulación.
+- **Siguiente P0 efectivo:** revisar integración/RC y bloqueos de salida de privacidad (responsable legal, política/retención) y procedimiento manual de baja; usar evidencias de moderación existentes y verificar solo lagunas concretas, no repetir módulos probados.
+- Contacto público `appdigital.corp@gmail.com` confirmado; `LEGAL_RELEASE_READY=false` por asuntos legales restantes, no por un email de recuperación. Sin Vercel, `main`, Supabase write ni eliminación de cuentas.
