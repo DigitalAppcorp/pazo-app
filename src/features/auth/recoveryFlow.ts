@@ -11,3 +11,10 @@ export const isValidPazoPassword = (password: string): boolean =>
   && /[a-z]/.test(password)
   && /[A-Z]/.test(password)
   && /[0-9]/.test(password)
+
+// Only the Supabase PASSWORD_RECOVERY event confirms this special flow.
+// Merely visiting ?auth=recovery with a normal logged-in session is not proof.
+export const isVerifiedRecoverySession = (
+  recoveryEventObserved: boolean,
+  hasSessionUser: boolean,
+): boolean => recoveryEventObserved === true && hasSessionUser === true

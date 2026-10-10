@@ -160,7 +160,7 @@ const EMPTY_FEED_PAGINATION: FeedPaginationState = {
 
 function PazoMain() {
   const {
-    user, loading, signIn, isPasswordRecovery,
+    user, loading, signIn, isPasswordRecovery, recoverySessionVerified,
     requestPasswordReset, changePassword, finishPasswordRecovery,
   } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
@@ -1455,7 +1455,7 @@ function PazoMain() {
     return (
       <PasswordRecoveryView
         lang={lang}
-        sessionReady={Boolean(user)}
+        sessionReady={Boolean(user) && recoverySessionVerified}
         onUpdatePassword={changePassword}
         onExit={handleExitPasswordRecovery}
       />

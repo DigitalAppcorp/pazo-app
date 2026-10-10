@@ -28,3 +28,10 @@
 6. PRs #36/#37 están pendientes de merge **por autorización explícita del PO**; A3 #38 no va al merge del MVP tal como está. Conservar ramas y no reescribir historial. GitHub Actions CI reemplaza pruebas repetitivas, pero no cubre E2E ni revisión de seguridad externa.
 
 **Próximo trabajo concreto:** auditar integración #36/#37 como candidato MVP y presentar un único gate de merge + QA Auth sobre localhost. Evitar nuevas subfases de A3. Este documento prevalece sobre los próximos pasos cronológicos antiguos en los handoffs mientras rija la decisión PO.
+
+## Lote 1 — integración MVP y Auth fail-closed
+
+- Auditoría GitHub: `main` sigue `ae7e63f`; PR #37 conserva descendencia directa de #36 y usa `MapView` real en tab mapa, sin `PLACES_MAP_DEVELOPMENT_ONLY`. No integrar PR #35 que contiene el guard dev-only; no se reescribe ninguna rama ni se aplica backend.
+- Hallazgo en PR #37: `?auth=recovery` era suficiente para abrir la pantalla y `sessionReady=Boolean(user)` permitía llegar a la acción de cambio de contraseña desde una sesión normal existente, sin constancia de un enlace de recuperación validado. **Corrección propuesta:** exigir evento `PASSWORD_RECOVERY` con usuario de sesión, y validar el mismo gate al llamar a `updateUser`; al completar/salir/signout se revoca ese estado. El URL sigue siendo solo marcador de UI; un enlace caducado muestra aviso y no habilita el formulario.
+- La prueba Node verifica la matriz (evento válido × usuario); falta **QA real de clic de correo** y comprobar si el evento llega en todos los flujos/reload del navegador. Seguridad fail-closed: ante ausencia de evento se pide solicitar un enlace nuevo. No asumir que `supabase/config.toml` local refleja URLs Auth permitidas en el proyecto alojado.
+- Pendiente gate de integración: autorización específica de merge y confirmación de que no disparará deploy automático a Vercel; por ahora branch DRAFT y ejecución local.

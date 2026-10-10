@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { isRecoveryReturn, recoveryRedirectUrl, isValidPazoPassword } from './recoveryFlow.ts'
+import { isRecoveryReturn, recoveryRedirectUrl, isValidPazoPassword, isVerifiedRecoverySession } from './recoveryFlow.ts'
 
 test('recovery marker is distinct from ordinary routes and links', () => {
   assert.equal(isRecoveryReturn('?auth=recovery'), true)
@@ -19,4 +19,11 @@ test('password policy matches signup requirements', () => {
   for (const password of ['', 'abcD123', 'abcdefgh1', 'ABCDEFGH1', 'Abcdefgh', 'Abcdefgh1']) {
     assert.equal(isValidPazoPassword(password), password === 'Abcdefgh1')
   }
+})
+
+test('URL marker or ordinary login cannot authorize password reset; recovery event and user required', () => {
+  assert.equal(isVerifiedRecoverySession(false, false), false)
+  assert.equal(isVerifiedRecoverySession(false, true), false)
+  assert.equal(isVerifiedRecoverySession(true, false), false)
+  assert.equal(isVerifiedRecoverySession(true, true), true)
 })

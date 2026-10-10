@@ -8,7 +8,7 @@ import {
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
-import { isRecoveryReturn, recoveryRedirectUrl } from '../features/auth/recoveryFlow'
+import { isRecoveryReturn, isVerifiedRecoverySession, recoveryRedirectUrl } from '../features/auth/recoveryFlow'
 import {
   captureEvent,
   setObservabilityUser,
@@ -21,6 +21,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<boolean>
   signOut: () => Promise<void>
   isPasswordRecovery: boolean
+  recoverySessionVerified: boolean
   requestPasswordReset: (email: string) => Promise<boolean>
   changePassword: (password: string) => Promise<boolean>
   finishPasswordRecovery: () => Promise<void>
@@ -34,6 +35,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(
     () => isRecoveryReturn(window.location.search)
   )
+  // A query string is only a UI marker, NOT proof that the recovery link
+  // created a session. Supabase must emit PASSWORD_RECOVERY first.
+  const [recoverySessionVerified, setRecoverySessionVerified] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -48,11 +52,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } = supabase.auth.onAuthStateChange((event, session) => {
       const nextUser = session?.user ?? null
 
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' && session?.user) {
         setIsPasswordRecovery(true)
+        setRecoverySessionVerified(true)
       }
 
       if (event === 'SIGNED_OUT') {
+        setRecoverySessionVerified(false)
         captureEvent('auth_session_signed_out')
       }
 
@@ -117,6 +123,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const changePassword = async (password: string): Promise<boolean> => {
+    // Neither a URL marker nor an ordinary pre-existing login grants a
+    // password-reset flow. Require the verified Auth event and live user.
+    if (!isVerifiedRecoverySession(recoverySessionVerified, Boolean(user))) {
+      return false
+    }
     const { error } = await supabase.auth.updateUser({ password })
     if (error) {
       captureEvent('auth_password_reset_update_failed', {
@@ -124,6 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       })
       return false
     }
+    setRecoverySessionVerified(false)
     captureEvent('auth_password_reset_completed')
     return true
   }
@@ -135,6 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     url.searchParams.delete('auth')
     window.history.replaceState(window.history.state, '', url.pathname + url.search)
     setIsPasswordRecovery(false)
+    setRecoverySessionVerified(false)
     setObservabilityUser(null)
   }
 
@@ -152,6 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signIn,
         signOut,
         isPasswordRecovery,
+        recoverySessionVerified,
         requestPasswordReset,
         changePassword,
         finishPasswordRecovery,
