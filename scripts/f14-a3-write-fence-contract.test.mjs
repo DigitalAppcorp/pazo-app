@@ -68,3 +68,13 @@ test('no production entry point or UI modified',()=>{
  assert.match(app,/Versión \{pazoBuildVersion\}/)
  assert.doesNotMatch(disabled,/auth\.admin\.deleteUser\(/)
 })
+
+test('Storage deletion is journaled and may only be retried after exact checkpoint',()=>{
+ assert.match(sql,/CREATE OR REPLACE FUNCTION public\.f14_a3_checkpoint_media_removed\(/)
+ assert.match(sql,/CREATE OR REPLACE FUNCTION public\.f14_a3_media_checkpoint_valid\(/)
+ assert.match(sql,/g\.removed_at IS NOT NULL/)
+ assert.match(sql,/g\.removed_at IS NULL/)
+ assert.match(sql,/NOT EXISTS \(SELECT 1 FROM storage\.objects o/)
+ assert.match(sql,/g\.object_version=p_object_version/)
+ assert.match(sql,/j\.phase='remove_media'/)
+})
