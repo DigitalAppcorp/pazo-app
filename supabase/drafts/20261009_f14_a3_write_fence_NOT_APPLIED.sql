@@ -255,7 +255,7 @@ COMMIT;
 
 -- NOT COVERED: account_blocks (user safety and follow-cleanup semantics),
 -- pet_place_presence (derived writes through checkin triggers / nullable pet),
--- Storage API, unknown future interaction targets, unmapped
+-- NOT COVERED: Storage API, unknown future interaction targets, unmapped
 -- private/legacy tables, privileged Edge/RPC operations, direct Auth
 -- deletes or service-side functions on unmapped tables.
 -- Do not consider write freeze complete; no worker may delete data using this alone.

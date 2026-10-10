@@ -38,3 +38,10 @@
 - pet_place_presence es tabla derivada mediante place_private.sync_place_presence() tras cambios en pet_place_checkins. visible_pet_id puede ser NULL y el FK checkin_id tiene CASCADE. Resolver propietario desde el padre durante una cascada podría impedir checkout normal. Requiere auditoría de todos los escritores privilegiados y prueba aislada de cascadas antes de añadir un fence directo.
 - RLS, grants, FK y funciones de las cuatro tablas se inspeccionaron. La falta de permisos INSERT para authenticated no demuestra que no existan funciones privilegiadas; verificar RPC/Edge e indirectos.
 - Tests de contrato añadidos para paridad, cardinalidad 28 y nuevas rutas. Esto prueba texto/CI, NO ejecución PostgreSQL de los 28 triggers. Pendientes: pruebas SQL temporales de nuevas rutas, dos sesiones, DDL/RLS en DB aislada y Storage/Auth/terceros. Gate 8 continúa ABIERTO, transición full_write_fence_ready() sigue en false.
+
+### PostgreSQL sintético reversible: nuevas ramas profiles y place_suggestions
+
+- Ejecutada prueba alojada con BEGIN, tablas y funciones pg_temp, y ROLLBACK. Se aisló el resolver de las dos nuevas rutas copiando sus ramas exactas del borrador, y se ejecutó la función guard de la rama reescrita exclusivamente para pg_temp.deletion_jobs. Ninguna tabla real consultada por las dos ramas ni alterada.
+- PASS: INSERT/UPDATE/DELETE bloqueados para la cuenta en reviewing (ambas tablas), INSERT con propietario nulo rechazado, y UPDATE permitidos para la cuenta no congelada. Resultado SQL devuelto: PASS synthetic pg_temp fence on profiles and place_suggestions; rolled back.
+- Limitación expresa: no es instalación de los triggers originales ni verificación de otras 26 ramas, roles/RLS, transiciones reales ni carreras de dos sesiones.
+- CI del primer commit 2fba36d3 falló únicamente por conservar la aserción documental literal /NOT COVERED: Storage API/ tras reordenar los comentarios. Se restauró esa etiqueta sin cambiar el SQL ejecutable; se verifica en CI del siguiente commit.
