@@ -60,3 +60,11 @@
 - Riesgo específico tras reset: `profiles` carece de política INSERT para `authenticated`; el trigger `on_auth_user_created` solo se activa al crear una cuenta Auth nueva. No usar un INSERT cliente no autorizado ni re-crear cuentas; evaluar necesidad real de restaurar perfil en el gate posterior, sin DDL sin autorización.
 - Corrección reversible en la rama: `OnboardingView` detecta sesión autenticada y sustituye el botón «Volver» desde A03 hacia formulario de alta A02 por «Sesión recuperada»; evita invitar accidentalmente a crear una segunda cuenta cuando una retenida no tiene mascotas. Commit `a6d5a412873778d7903eaa43ebb8351f6fbbf4bb`. CI de este commit y aceptación visual no se presuponen.
 - Próxima acción única: revisar CI del HEAD final y validar en local con **una** cuenta Auth retenida el login → A03 → creación de mascota → recarga F5, sin repetir suites previas ni crear cuenta nueva. Corroborar si `profiles` realmente se requiere para el flujo y remediar con gate separado si exige migración. No marcar MVP listo aún.
+
+## Gate post-reset — verificación incremental (2026-10-10)
+
+- PO respondió «listo» al flujo solicitado login → mascota → F5; se registra confirmación del PO, sin afirmar observación directa de navegación o captura de F5.
+- Supabase alojado comprobado por SELECT read-only: 6 `auth.users`, 1 `public.pets`, 1 `storage.objects`, 0 `public.profiles`. No se repitió la limpieza y se conservaron las cuentas Auth. Se comprueba persistencia de mascota y objeto a nivel DB, no el render tras F5.
+- CI del commit previo de handoff `6096c0bba32530c985f128ed41c1eb3161bc6d50`: GitHub Actions #38033791277 **SUCCESS**. El PR #37 sigue abierto DRAFT, no merged.
+- **Riesgo abierto:** perfil `profiles` ausente tras recuperación de Auth. Trigger de alta de Auth no se ejecuta al iniciar sesión; no existe INSERT permitido para cliente autenticado. Próximo gate técnico: identificar referencias runtime a `profiles`, confirmar qué funcionalidades requieren la fila y preparar propuesta de restauración segura/idempotente. Cualquier migración o escritura SQL alojada requiere autorización nueva del PO.
+- No Vercel, no merge, no migración, no Auth delete. Gate de **creación inicial de mascota** validado; **reconstrucción de perfil y cierre total de onboarding** aún pendientes.
