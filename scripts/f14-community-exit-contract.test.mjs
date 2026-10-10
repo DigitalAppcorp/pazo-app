@@ -1,0 +1,38 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+const sql=readFileSync(new URL('../supabase/drafts/20261010_f14_community_ownership_continuity_NOT_APPLIED.sql',import.meta.url),'utf8')
+const dbTest = (fragment) => assert.ok(sql.includes(fragment),fragment)
+test('archival preserves third-party community posts even after Auth deletion',()=>{
+ for(const v of ["ON DELETE SET NULL","owner_user_id IS NOT NULL OR status='archived'",
+   "status='archived',owner_user_id=NULL","community_private.ensure_owner_membership()",
+   "v_archived:=v_archived+1"])dbTest(v)
+ assert.doesNotMatch(sql,/\\b(?:DELETE FROM|TRUNCATE|DROP TABLE|DELETE USER)\\b/i)
+ assert.doesNotMatch(sql,/ON DELETE CASCADE;\\s*--.*communities owner/i)
+})
+test('accepted transfer is authenticated, consent-only and atomically matches membership and owner',()=>{
+ for(const v of [
+  "candidate_user_id=v_uid","m.role='admin'","role='owner'","role='member'",
+  "o.status='pending'","o.expires_at>pg_catalog.clock_timestamp()",
+  "r.subject_user_id=v_owner AND r.status='requested' FOR UPDATE",
+  "status='accepted',accepted_at=pg_catalog.clock_timestamp()",
+  "owner_user_id=v_uid WHERE id=p_community_id AND owner_user_id=v_owner",
+  "FOREIGN KEY(owner_user_id) REFERENCES auth.users(id) ON DELETE SET NULL",
+ ])dbTest(v)
+})
+test('archive can only be invoked by service role for processing request',()=>{
+ for(const v of [
+  "auth.role() IS DISTINCT FROM 'service_role'",
+  "r.subject_user_id=p_subject_user_id AND r.status='processing' FOR UPDATE",
+  "RAISE EXCEPTION 'Community has pending transfer acceptance'",
+  "GRANT EXECUTE ON FUNCTION public.pazo_archive_owned_communities_for_deletion(uuid) TO service_role",
+  "REVOKE ALL ON FUNCTION public.pazo_archive_owned_communities_for_deletion(uuid) FROM PUBLIC,anon,authenticated",
+ ])dbTest(v)
+})
+test('owner and candidate RPCs have explicit grants and no direct public table grants',()=>{
+ for(const v of ['pazo_community_set_admin(uuid,uuid)','pazo_community_offer_transfer(uuid,uuid)','pazo_community_accept_transfer(uuid)','pazo_community_transfer_offer(uuid)']){
+   assert.match(sql,new RegExp('GRANT EXECUTE ON FUNCTION public\\.'+v.replace(/[()]/g,'\\$&')+' TO authenticated'))
+ }
+ dbTest('ALTER TABLE community_private.ownership_transfer_offers ENABLE ROW LEVEL SECURITY')
+ dbTest('REVOKE ALL ON community_private.ownership_transfer_offers FROM PUBLIC,anon,authenticated')
+})
