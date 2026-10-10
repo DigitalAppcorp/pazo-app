@@ -39,6 +39,6 @@ Solo pedir al PO **una acción cuando sea indispensable**: confirmar jurisdicci�
 
 ## Identificación del operador del servicio — decisión PO (2026-10-10)
 
-**Operador declarado por el Product Owner:** **Alvarado Solutions LLC**, empresa que el PO indica está registrada. Se incorporó una única constante en `src/features/legal/legalCopy.ts` y la atribución en Privacidad/Términos ES y EN; se añadió prueba anti-regresión. **No se ha verificado por registro público su jurisdicción, domicilio ni agente registrado**; no inventar esos datos ni confundir la cuenta de soporte con la entidad responsable. El correo público autorizado sigue siendo `appdigital.corp@gmail.com`.
+**Operador declarado por el Product Owner:** **Alvarado Solutions LLC**, empresa que el PO indica está registrada. Se incorporó una única constante en `src/features/legal/legalCopy.ts` y la atribución en Privacidad/Términos ES y EN; se añadió prueba anti-regresión. **El PO confirmó California como estado de registro**, sin comprobación independiente en el registro oficial. No inventar domicilio, agente registrado ni datos no aportados; no confundir la cuenta de soporte con la entidad responsable. El correo público autorizado sigue siendo `appdigital.corp@gmail.com`.
 
 **Gate legal restante:** confirmar información legal de contacto exigible, fecha efectiva, retención real y operación de solicitudes de baja; revisión final del texto. `LEGAL_RELEASE_READY=false` hasta entonces. Auth y módulos funcionales ya aprobados NO se reensayan. No tocar Vercel, Supabase ni `main`.
