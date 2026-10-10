@@ -63,7 +63,7 @@ BEGIN
   'status',r.status,'requested_at',r.requested_at
  ) INTO v_result FROM account_requests_private.deletion_requests r
  WHERE r.subject_user_id=v_uid;
- RETURN COALESCE(v_result,'null'::jsonb);
+ RETURN v_result; -- SQL NULL for absent request; never expose another owner's row
 END;
 $status$;
 
