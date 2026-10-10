@@ -73,3 +73,19 @@ Solo pedir al PO **una acción cuando sea indispensable**: confirmar jurisdicci�
 - **Protección de último moderador:** `supabase/queries/f14_account_deletion_preflight_READ_ONLY.sql` ahora devuelve `blocked_last_moderator` si el solicitante es el único moderador. Verificado con ejecución READ-ONLY del preflight contra la cuenta operadora (sin exponer ID): resultado **blocked_last_moderator**. CI contrato PASS. No existe SQL que borre cuentas ni nueva Edge.
 - El intake de baja existe; **en builds públicos el botón está apagado** por `VITE_F14_DELETION_REQUESTS_ENABLED` hasta completar la operación manual verificable. No publicitar opción inaccesible ni activarla sin operador de soporte.
 - **Siguiente gate único:** ensayo limitado con cuenta nueva descartable, previa aprobación específica para borrar esa identidad y sus medios; nunca usar las seis existentes. Después confirmar las políticas públicas ES/EN y la release candidate. No repetir Auth, Feed, Comunidades, Mapa ni Moderación ya aprobados sin defecto concreto.
+
+
+## Desbloqueo del cierre administrativo: ensayo único QA, autorizado, aún NO ejecutado
+
+Work se detuvo correctamente antes de crear la cuenta por no existir un procedimiento aprobado para marcar `completed`. Se auditaron la tabla real de solicitudes (estados `requested / cancelled / processing / completed`, `processed_at` obligatorio al completar) y sus FKs: **no hay FK de la solicitud hacia Auth**, de modo que el registro puede finalizarse **después** de borrar Auth.
+
+Se aprobaron **DOS plantillas restringidas a la cuenta QA identificada por el alias exacto** y al entorno inicial de seis usuarios / un moderador / una mascota / un objeto:
+
+- `supabase/queries/f14_qa_begin_processing_ADMIN_ONLY.sql`: **solo después** de enviar desde la cuenta QA su propia solicitud `requested`, validar preflight y asegurar ausencia de hilos ajenos. Ejecutar en SQL Editor de administrador; cambia **únicamente esa fila** de `requested` a `processing`. Falla cerrado si no hay exactamente siete cuentas, si el moderador no coincide, si el alias no está confirmado o hay otras solicitudes en curso.
+- `supabase/queries/f14_qa_complete_verified_ADMIN_ONLY.sql`: **después** de retirar solo el avatar propio mediante Storage, borrar los datos propios con verificación de titularidad, cerrar Auth mediante **Auth Admin oficial** y confirmar que continúan las **seis cuentas originales** y la línea base de mascotas/Storage. Reemplazar el UUID de ceros por el UUID exacto de la QA capturado antes del cierre. Marca **una sola fila `processing`** como `completed` con `processed_at` y bloquea si queda Auth, mascota, avatar, publicación, comunidad, moderador alterado o petición ajena.
+
+**No ejecutar ambos scripts seguidos:** entre fase 1 y 2 debe realizarse y verificarse el borrado real. Cada bloque es una transacción acotada que falla cerrado; no son funciones públicas, DDL, Edge, migraciones ni borradores de A3. La fase 2 no garantiza automáticamente borrado de caché/CDN ni de copias de seguridad: registrar sus límites honestamente. El operador de Work debe revisar preflight y confirmar los seis **UUID anteriores**, sin divulgarlos en el repositorio, antes de cualquier borrado irreversible.
+
+El PO ya aprobó crear/borrar **una cuenta nueva**; no volver a pedir autorización genérica, pero detenerse ante bloqueos concretos (por ejemplo, falta de sesión de PAZO o Auth Admin). Si la QA no usa el alias exacto `appdigital.corp+pazo-baja-qa@gmail.com`, **no modificar el script para abrir el alcance**. Volver a planificar el ensayo seguro. No ejecutar nada sobre las seis cuentas.
+
+**Estado actual:** ninguna cuenta QA creada, cero solicitudes; **procedimiento preparado, NO ensayado**, lanzamiento beta pública todavía bloqueado.
