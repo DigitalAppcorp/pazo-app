@@ -39,7 +39,7 @@ export const OnboardingView = ({
   const [password, setPassword] = useState('')
   const [isOver18, setIsOver18] = useState(false)
 
-  const { signUp } = useAuth()
+  const { signUp, user } = useAuth()
   const [isSigningUp, setIsSigningUp] = useState(false)
   const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] = useState(false)
 
@@ -377,12 +377,18 @@ export const OnboardingView = ({
         /* ================= A03 / CREAR MASCOTA ================= */
         <div className="flex flex-col h-full justify-between relative z-10 animate-slide-up">
           <div className="flex items-center justify-between pt-2">
-            <button
-              onClick={() => setStep('A02')}
-              className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
-            >
-              ← Volver
-            </button>
+            {user ? (
+              <span role="status" className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full">
+                {lang === 'es' ? 'Sesión recuperada' : 'Session restored'}
+              </span>
+            ) : (
+              <button
+                onClick={() => setStep('A02')}
+                className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
+              >
+                ← Volver
+              </button>
+            )}
             <span className="text-[10px] font-bold text-[#5C7470]">Paso 2 de 4</span>
           </div>
 
