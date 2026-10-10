@@ -26,10 +26,13 @@ async function publicUrlInaccessible(url:string):Promise<boolean> {
  }
  return true
 }
+// Immutable rollout safety latch, independent of hosted environment values.
+// Activation needs a separate reviewed code commit and explicit PO authorization.
+const F14_MEDIA_PURGE_RELEASE_APPROVED = false
 Deno.serve(async(req:Request)=>{
  if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors})
  if(req.method!=='POST') return reply(405,{error:'method_not_allowed'})
- if(Deno.env.get('F14_MEDIA_PURGE_ENABLED')!=='true') return reply(503,{error:'cleanup_disabled'})
+ if(!F14_MEDIA_PURGE_RELEASE_APPROVED || Deno.env.get('F14_MEDIA_PURGE_ENABLED')!=='true') return reply(503,{error:'cleanup_disabled'})
  const url=Deno.env.get('SUPABASE_URL'),anon=Deno.env.get('SUPABASE_ANON_KEY'),secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
  if(!url||!anon||!secret) return reply(503,{error:'cleanup_not_configured'})
  const auth=req.headers.get('Authorization')||''

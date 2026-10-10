@@ -53,3 +53,7 @@ Flujo: JWT validado por Auth + RPC `f14_is_moderator`; fila actual obtenida con 
 **Alcance intencional:** posts Feed/Comunidad. `pet_profile` involucra imágenes múltiples y aportes cruzados: permanece manual; contenido sin Storage propio, referencias legacy o URLs externas también requieren revisión. `purged` significa ausencia del objeto de origen y verificaciones HTTP puntuales, **NO** garantía de invalidación instantánea en todos los nodos CDN; un enlace guardado podría mantenerse en caché. Políticas públicas y gate de Beta deben reflejarlo.
 
 **Nada aplicado todavía**: hosted `f14-moderation-purge` sigue stub 503. `supabase/sql/f14_moderation_media_gate.sql` es SQL concreto de backend revisable, no una migración aplicada. Requiere gate explícito para instalar SQL, reemplazar Edge y habilitar flags para pruebas con **una fotografía desechable propia**; comprobar URL antes/después, BOLA/no-moderador, contadores/bitácora y CDN. No tocar Vercel ni realizar borrado remoto hasta entonces.
+
+### Gate de implementación aprobado por PO (2026-10-09)
+
+PO autorizó instalar **únicamente** `f14_moderation_media_gate` (función SQL) y publicar la nueva versión de `f14-moderation-purge` **inactiva**, sin activar frontend ni ejecutar borrado de objetos. Se agregó lock de despliegue de código `F14_MEDIA_PURGE_RELEASE_APPROVED=false` además del flag de entorno `F14_MEDIA_PURGE_ENABLED` y el flag visual `VITE_F14_MEDIA_PURGE_ENABLED`, para impedir cambios accidentales por secreto preconfigurado. No asumir autorización de ensayo destructivo, Vercel o merge.

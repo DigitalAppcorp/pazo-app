@@ -45,3 +45,8 @@ test('moderation UI stays disabled until local flag and operator gate',()=>{
  assert.match(ui,/purgeModerationMedia\(/)
  assert.match(ui,/window\.confirm/)
 })
+
+test('server deployment is disabled independently of hosted secret values',()=>{
+ assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
+ assert.match(edge,/if\(!F14_MEDIA_PURGE_RELEASE_APPROVED \|\| Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)!=='true'\)/)
+})
