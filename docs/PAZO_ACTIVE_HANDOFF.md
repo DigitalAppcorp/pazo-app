@@ -46,3 +46,6 @@ Revisar **cierre legal/operativo del RC**, trabajando en código y docs ES/EN so
 
 ## Avance legal acotado (2026-10-10)
 - `src/features/legal/legalCopy.ts` actualizado ES/EN (`5a9135e`): PostHog explícitamente excluido de beta y Unsplash declarado como anfitrión de imagen externa. Prueba contractual ES/EN actualizada (`69e6097`). No se cambió telemetría, imágenes, Auth ni datos; `LEGAL_RELEASE_READY=false` y no hay políticas definitivas. Antes de publicar, comprobar que no exista token PostHog activo en el entorno de lanzamiento; no tocar Vercel ahora. Falta CI del HEAD actual y resultado Codex de eliminación. No repetir QA aprobada, no tocar main/A3/Supabase.
+
+## PostHog desactivado en código RC (2026-10-10)
+- Commit `7f8f75ff`: `isObservabilityEnabled()` devuelve `false` para todo el MVP, incluso si existe `VITE_POSTHOG_PROJECT_TOKEN`; `sendEvent` retorna sin hacer POST. Integración conservada para futura reactivación bajo autorización PO. No se alteraron cuentas/Storage ni otros módulos; no se tocó Vercel/main/A3. La prueba de baja sigue reservada a Codex. CI del nuevo HEAD por confirmar. `LEGAL_RELEASE_READY=false`.
