@@ -1450,8 +1450,8 @@ function PazoMain() {
           <span className="letter-epic text-[#E1E53F]" style={{ '--tx': '95px', '--ty': '-20px' } as React.CSSProperties}>.</span>
         </div>
         <p className="mt-8 text-xs font-extrabold text-[#5C7470] tracking-[0.3em] uppercase animate-pulse relative z-10">Su mundo, más cerca.</p>
-        <p aria-label="Versión de PAZO" className="absolute bottom-6 left-0 right-0 text-center text-[10px] font-semibold tracking-[0.12em] text-[#5C7470] z-10">
-          Versión {pazoBuildVersion}{import.meta.env.DEV ? ' · local' : ''}
+        <p aria-label="Versión de PAZO" className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65 z-10">
+          {pazoBuildVersion}
         </p>
       </div>
     )
