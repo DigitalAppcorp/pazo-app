@@ -36,3 +36,7 @@ Proyecto `mrybvqdebbgcayuvgkkr`. Después de la limpieza autorizada del 10-oct-2
 **Límites inalterables:** NO repetir el borrado; no tocar Auth/identidades ni restaurar fixtures, no merge a main, no Vercel, no migraciones adicionales, no purgas de media, no borrar cuentas, no crear recursos de pago sin autorización específica. El futuro borrado final pre-lanzamiento es otro gate con inventario, alcance y aprobación; decidir expresamente si conserva o no Auth.
 
 **Activación nuevo chat:** «Activa Brain OS v1.4.1 y PAZO PR #37, lee AGENTS/handoff/roadmap; audita HEAD/CI/Supabase y continúa solo desde el gate de aceptación post-reset. Conserva las 6 Auth, no hagas merge/Vercel ni más migraciones sin permiso».
+
+## QA visual reportada; discrepancia de persistencia — 2026-10-10
+
+El Product Owner confirmó que sus pruebas locales pasaron. Se registra PASS visual reportado, sin evidencia del SHA del directorio ejecutado. Consulta read-only posterior: 6 cuentas Auth, 0 perfiles, 1 mascota y 1 objeto Storage. Por tanto, la restauración real de perfil aún NO está demostrada en Supabase alojado. Las pruebas de backend reversibles y CI del cambio pasaron anteriormente. No repetir la suite visual ni la purga. Próxima comprobación: identificar rama y commit de la carpeta ejecutada en Antigravity; después contrastar el entorno Supabase antes de declarar el gate cerrado.
