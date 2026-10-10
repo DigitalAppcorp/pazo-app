@@ -71,3 +71,9 @@ El PR está dirigido temporalmente a `main` solo para activar el CI existente, q
 - A3 auditado sin mutaciones: esquema hosted presenta 6 cuentas/mascotas, 1 comunidad con 1 aportación de no propietario, 6 comentarios Feed cruzados, 1 documento privado, 5 cuidados/2 completados y 20 objetos Storage (19 públicos, 1 privado) en 5 buckets.
 - **Bloqueo de seguridad:** `communities.owner_user_id` y `community_posts.author_user_id` tienen CASCADE a Auth; una eliminación ingenua puede borrar aportes de terceros. `pet_documents` RESTRICT y cuidados con NO ACTION impiden orden improvisado. No hay jobs A3 implantados.
 - Decisión PO pre-lanzamiento de datos actuales de prueba sigue vigente. **No se borró nada**. Plan auditado: `docs/PAZO_F14_A3_DELETION_PREFLIGHT_20261009.md`. A3 necesita permiso de implementación *separado*, y luego autorización independiente para ejecutar migraciones/operaciones de borrado. Mantener PR #37 DRAFT, sin merge/deploy.
+
+## D3-A — Implementación lista para revisión, sin activar (2026-10-09)
+
+Se versionaron Edge con validación Auth/moderador y feature flag OFF, función PostgreSQL `f14_moderation_media_gate` restringida a service_role, verificación de propietario/unicidad de referencia, borrado exclusivo Storage API, `exists=false`, HTTP HEAD sobre URL original y variante cache-bust y finalización transaccional de `media_status='purged'` solo tras éxito. Interfaz de cola tiene botón detrás de flag local OFF. Ver `docs/PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md`.
+
+**Sin cambio en Supabase remoto.** No afirmar cobertura de perfil con múltiples medios, origen externo ni limpieza CDN global; no abrir Beta hasta QA controlada y cierre del contrato de medios.
