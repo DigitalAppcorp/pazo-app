@@ -88,7 +88,8 @@ DECLARE
   v_care bigint;
   v_storage bigint;
 BEGIN
-  IF CURRENT_USER <> 'service_role' OR p_subject_user_id IS NULL THEN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role', true),'') <> 'service_role'
+      OR p_subject_user_id IS NULL THEN
     RAISE EXCEPTION 'Service reviewer required' USING ERRCODE='42501';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM account_requests_private.deletion_requests
