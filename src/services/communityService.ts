@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { wasAuthorDeleted } from '../features/account/deletedAuthorThread'
 import type {
   CommunityCreateInput,
   CommunityMember,
@@ -47,7 +48,7 @@ const validateImage = (file: File) => {
 
 const mapCommunity = (
   row: any,
-  membership?: { role?: 'owner' | 'member' } | null
+  membership?: { role?: 'owner' | 'admin' | 'member' } | null
 ): CommunitySummary => ({
   id: row.id,
   ownerUserId: row.owner_user_id,
@@ -68,7 +69,7 @@ const mapCommunity = (
 })
 
 const fetchMembershipMap = async (communityIds: string[]) => {
-  if (communityIds.length === 0) return new Map<string, { role: 'owner' | 'member' }>()
+  if (communityIds.length === 0) return new Map<string, { role: 'owner' | 'admin' | 'member' }>()
 
   const user = await getAuthUser()
   const { data, error } = await supabase
@@ -82,7 +83,7 @@ const fetchMembershipMap = async (communityIds: string[]) => {
   return new Map(
     (data || []).map((row: any) => [
       row.community_id,
-      { role: row.role as 'owner' | 'member' },
+      { role: row.role as 'owner' | 'admin' | 'member' },
     ])
   )
 }
@@ -345,6 +346,7 @@ export const fetchCommunityPosts = async (
         likes_count,
         comments_count,
         created_at,
+        ${import.meta.env.VITE_F14_DELETED_AUTHOR_THREADS_ENABLED === 'true' ? 'author_deleted_at,' : ''}
         author:pets!community_posts_author_pet_id_fkey (
           id,
           name,
@@ -379,23 +381,25 @@ export const fetchCommunityPosts = async (
 
   return rows.map((row: any) => {
     const author = Array.isArray(row.author) ? row.author[0] : row.author
+    const deleted = wasAuthorDeleted(row)
 
     return {
       id: row.id,
       communityId: row.community_id,
-      authorUserId: row.author_user_id,
-      authorPetId: row.author_pet_id,
-      authorName: author?.name || 'Mascota',
-      authorSpecies: (author?.species || 'otro') as Species,
-      authorAvatar: author?.photo_url || DEFAULT_PET_AVATAR,
-      body: row.body,
-      photoUrl: row.photo_url || undefined,
-      photoStoragePath: row.photo_storage_path || undefined,
+      authorUserId: deleted ? '' : (row.author_user_id || ''),
+      authorPetId: deleted ? '' : (row.author_pet_id || ''),
+      isAuthorDeleted: deleted,
+      authorName: deleted ? 'Autor eliminado' : (author?.name || 'Mascota'),
+      authorSpecies: deleted ? 'otro' : ((author?.species || 'otro') as Species),
+      authorAvatar: deleted ? '' : (author?.photo_url || DEFAULT_PET_AVATAR),
+      body: deleted ? '' : row.body,
+      photoUrl: deleted ? undefined : (row.photo_url || undefined),
+      photoStoragePath: deleted ? undefined : (row.photo_storage_path || undefined),
       likesCount: row.likes_count || 0,
       commentsCount: row.comments_count || 0,
       createdAt: row.created_at,
       isLiked: likedPostIds.has(row.id),
-      canDelete: row.author_user_id === user.id || ownerUserId === user.id,
+      canDelete: !deleted && (row.author_user_id === user.id || ownerUserId === user.id),
     }
   })
 }

@@ -32,6 +32,7 @@ export interface PostComment {
 export interface Post {
   id: string
   petId: string
+  isAuthorDeleted?: boolean
   petName: string
   petSpecies: Species
   petAvatar: string
@@ -50,12 +51,12 @@ export interface Post {
   commentsLoaded?: boolean
 }
 
-export type CommunityRole = 'owner' | 'member'
+export type CommunityRole = 'owner' | 'admin' | 'member'
 export type CommunityStatus = 'active' | 'archived'
 
 export interface CommunitySummary {
   id: string
-  ownerUserId: string
+  ownerUserId: string | null
   name: string
   description: string
   category: string
@@ -102,6 +103,7 @@ export interface CommunityPost {
   communityId: string
   authorUserId: string
   authorPetId: string
+  isAuthorDeleted?: boolean
   authorName: string
   authorSpecies: Species
   authorAvatar: string

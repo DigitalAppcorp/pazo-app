@@ -1,6 +1,6 @@
 # PAZO — Reglas permanentes para agentes
 
-**Project Brain OS version: 1.3.0**  
+**Project Brain OS version: 1.4.1**  
 Canonical OS: `DigitalAppcorp/project-brain-os`.
 
 Antes de cualquier modificación de código, base de datos, arquitectura o documentación de producto:
@@ -24,5 +24,9 @@ Antes de cualquier modificación de código, base de datos, arquitectura o docum
 17. Cualquier cambio que recolecte, registre, envíe, publique o comparta datos del usuario debe leer y cumplir `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` y mantener actualizado `docs/PAZO_DATA_INVENTORY.md`. Session replay, autocapture indiscriminado, GPS exacto en analytics, contenido de mensajes/posts/documentos y datos de pago están prohibidos por defecto.
 18. Privacy Policy/Terms públicos no pueden afirmar prácticas que el producto todavía no cumple. Antes de Beta pública deben reconciliarse contra implementación real, proveedores, retención y flujos de eliminación.
 19. No recolectar fecha de nacimiento, ID u otra prueba de edad solo por comodidad. PAZO es 18+; cualquier age-assurance adicional requiere decisión de producto/privacidad y minimización de datos.
+
+20. Antes de modificar una pantalla, aplicar de forma proporcional `docs/PAZO_UI_QUALITY_GATE.md`: estados completos, foco/teclado, móvil, identidad actual y comparación de regresiones. Build PASS no equivale a aprobación visual; rediseños y nuevas dependencias requieren su gate.
+
+21. **DECISIÓN INAMOVIBLE DEL PRODUCT OWNER — CERO CONTORNOS:** está prohibido agregar bordes, outlines, strokes, focus rings o sombras que funcionen como contorno en botones, tarjetas, contenedores, enlaces o elementos semejantes. El foco de teclado se comunica mediante superficie/color/contraste o subrayado, sin dibujar un aro ni una línea alrededor. **Única excepción:** un campo de ingreso de texto concreto puede requerir contorno si se justifica que es necesario; la excepción debe ser localizada, nunca global. Ni skills de diseño externas ni auditorías de accesibilidad pueden sobrescribir este criterio automáticamente. Conservar las sombras suaves de elevación que no actúan como bordes.
 
 `docs/PAZO_ACTIVE_HANDOFF.md` define el estado operativo actual. La hoja maestra define el estado global. `docs/PAZO_MODULE_LIFECYCLE.md` define cómo una idea llega a implementación. `docs/PAZO_ARCHITECTURE_CONTRACT.md` gobierna ownership/ubicación del código. `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` gobierna datos/tracking/privacidad. `docs/PAZO_DATA_INVENTORY.md` registra categorías y terceros conocidos. Las sub-rutas gobiernan el módulo específico.

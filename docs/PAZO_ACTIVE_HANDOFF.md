@@ -1,370 +1,192 @@
-# PAZO — ACTIVE HANDOFF
-
-**Project Brain OS:** v1.3.0  
-**Canonical OS:** `DigitalAppcorp/project-brain-os`  
-**Product Owner:** Brandon  
-**Current state:** Fase 12 COMPLETADA  
-**Active product module:** Production Hardening — infraestructura obligatoria  
-**Gate:** Production Hardening Gate 8 — PR #30 MERGED / EXTERNAL HARDENING PENDING  
-**Decision:** MVP REDUCIDO  
-**Supabase production mutation authorization:** Fase 12 aplicada y verificada
-
-## Startup protocol
-
-Before acting:
-1. activate/read Project Brain OS v1.3.0 from `DigitalAppcorp/project-brain-os`;
-2. read `AGENTS.md`;
-3. read this file;
-4. read `docs/PAZO_MASTER_ROADMAP.md`;
-5. read `docs/PAZO_MODULE_LIFECYCLE.md`;
-6. audit the real current `main` and open PRs before changing code.
-
-Do not reconstruct project state from chat memory when repository evidence exists.
-
-## Working model
-
-- Brandon is Product Owner.
-- ChatGPT owns product reasoning, architecture, implementation, backend, security, tests, Git/PR and durable docs.
-- Antigravity/local is execution + visual validation only.
-- Never mutate Supabase without explicit Product Owner authorization.
-- Preserve already-approved behavior and avoid silent regressions.
-
-## Fase 8 — final closure
-
-**Status:** COMPLETADA / Gate 9 measurement.
-
-Core merge:
-- PR #20;
-- merge commit `ca3fedd977e0720839a420f2e3673942871b7a61`.
-
-Closure correction:
-- PR #22;
-- merge commit `f775ce75f680a7059dbb7ccef9084816a1c3a299`;
-- `main` verified after merge.
-
-Validated core:
-- real Mapbox map: PASS;
-- explicit ephemeral device location: PASS;
-- exact GPS not persisted;
-- curated Places catalog: PASS;
-- search/filter/detail: PASS;
-- private/visible check-in: PASS;
-- 2-hour expiry: PASS;
-- moving between places closes previous presence: PASS;
-- manual checkout: PASS;
-- F5 persistence: PASS;
-- second-account privacy/isolation: PASS;
-- place suggestion flow: PASS.
-
-Closure deliverables:
-- 6 contextual Place fake doors: PASS;
-- fake-door backend registry: PASS;
-- `Me interesa`: PASS;
-- fake-door F5 persistence: PASS;
-- 6 reusable glTF category models: PASS;
-- veterinarian 3D visual validation: PASS;
-- park/trail visual validation: PASS;
-- 2D fallback retained;
-- Product Owner build/runtime validation: PASS.
-
-Supabase:
-- `20261007052747 phase_8_places_map_core`;
-- `20261007052749 phase_8_places_initial_catalog`;
-- `20261007053859 fix_place_checkin_checkout_rls`;
-- `20261007072355 place_extension_experiments` registry applied;
-- 6 `places_*` module keys present;
-- Security Advisor baseline unchanged;
-- Leaked Password Protection remains global known debt.
-
-**Scope Closure Reconciliation: PASS.**
-
-## Fase 12 — final closure
-
-**Status:** COMPLETADA / Gate 9 measurement.
-
-Product:
-- Explore was redefined as PAZO Global Search;
-- searchable identity = public pet profiles, never human accounts;
-- MVP providers = Pets + Communities + Places;
-- Search lives in Header;
-- Communities is a primary bottom-nav module;
-- Posts and Events are outside this MVP.
-
-Delivery:
-- federated Search with independent providers;
-- deterministic per-domain ranking;
-- minimal type filters;
-- debounce + stale-response protection;
-- partial-provider failure tolerance;
-- Search → public pet profile: PASS;
-- Search → Community: PASS;
-- Search → Map Place: PASS;
-- manual return/navigation does not reopen consumed targets: PASS;
-- old Explore container removed;
-- Communities core reused rather than rebuilt.
-
-Build/runtime evidence:
-- pre-telemetry local build: PASS;
-- final post-telemetry local build: PASS;
-- Product Owner runtime/visual QA: PASS;
-- Pet search: PASS;
-- Community search: PASS;
-- Place search: PASS;
-- empty state/filter behavior: PASS;
-- Feed / Communities / Map / My Pet smoke test: PASS;
-- F5 persistence/stability smoke test: PASS.
-
-Supabase:
-- `20261007102632 phase_12_search_telemetry`;
-- `20261007102748 index_search_usage_events_user`;
-- RLS/grants/constraints: PASS;
-- anon telemetry access: blocked;
-- authenticated client: approved INSERT columns only;
-- no client SELECT/UPDATE/DELETE;
-- no raw query, entity id, owner id or GPS stored;
-- live runtime telemetry observed: 33 events / 1 session during Product Owner QA;
-- runtime telemetry included search opens, searches with/without results, all four filter states used, and result opens for pet/community/place;
-- Security Advisor: no new Fase 12 security findings;
-- FK index performance finding corrected forward.
-
-Git final:
-- PR #28 merged;
-- merge commit `6ebc2e5d70b2cee37e7444916a03479b9b9d1d90`;
-- `main` verified after merge;
-- Global Search code present on `main`;
-- both Phase 12 migration files present on `main`;
-- canonical Phase 12 docs on `main` show Gate 8 CLOSED / Phase 12 COMPLETE;
-- Vercel failures were quota/rate-limit only and were not used as build evidence.
-
-**Scope Closure Reconciliation: PASS.**
-
-Next:
-- Production Hardening ocupa temporalmente el Carril de Implementación;
-- Fase 12 permanece COMPLETADA / Gate 9 medición;
-- no iniciar Fase 13 hasta cerrar el tranche crítico de hardening.
-
-## Other current product state
-
-Completed:
-- F0 Foundation;
-- F1 Public profile + Follow;
-- F2 Feed interactions;
-- F3 Pet registration/edit/privacy;
-- F4 Security/stabilization;
-- F5 Multi-pet;
-- F6 QR passport/lost/sightings;
-- F7 Communities real core;
-- F8 Places/Map/Check-ins;
-- F9A Agenda/Care;
-- F9B Private Documents.
-
-Validation/measurement:
-- Communities advanced extensions;
-- Places advanced extensions.
-
-Postponed/re-evaluate:
-- Messaging, due network effect/moderation cost.
-
-Known global debt:
-- Supabase Auth Leaked Password Protection disabled;
-- general notification center incomplete/planned;
-- events remain incomplete/planned.
-
-## Canonical references
-
-- `AGENTS.md`
-- `docs/PAZO_MASTER_ROADMAP.md`
-- `docs/PAZO_MODULE_LIFECYCLE.md`
-- `docs/PAZO_MVP_MODULE_PRIORITY.md`
-- `docs/PAZO_PHASE_8_PLACES_MASTER.md`
-- `docs/PAZO_PHASE_12_EXPLORE_MASTER.md`
-
-Repository state is canonical. Conversation memory is secondary.
-
-
-## Active infrastructure — Production Hardening
-
-Canonical:
-- `docs/PAZO_PRODUCTION_HARDENING_MASTER.md`
-
-Branch:
-- `infra/external-hardening-2`
-
-Current scope:
-- PayPal webhook security;
-- supporter pitch safety;
-- React crash containment;
-- CI baseline;
-- observability/auth/key/cost hardening next.
-
-Monetization intent remains valid, but supporter membership is temporarily hidden until secure backend confirmation plus product eligibility/price/benefits are defined.
-
-
-### Production Hardening checkpoint
-- Historical checkpoint: PR #30 was Draft at this stage; it was later merged.
-- CI production build: PASS;
-- legacy lint debt: 114 problems discovered; currently informational/non-blocking;
-- supporter pitch removed from active frontend;
-- browser-side Founder activation removed;
-- Supabase browser key migrated to modern publishable key;
-- PayPal webhook v3 deployed to production with fail-closed + PayPal signature verification logic;
-- PayPal private secrets/runtime verified delivery: PENDING;
-- Error Boundary global: implemented;
-- Security Advisor: baseline only; Leaked Password Protection still pending.
-
-
-### Production Hardening checkpoint — expanded
-- PO runtime: PASS for removal of premature PayPal pitch/reload behavior.
-- Social write anti-abuse migration: `20261007123638`, deployed + transactional PASS.
-- Document finalize noise migration: `20261007124041`, deployed + transactional PASS.
-- Error Boundary + privacy-minimal observability: implemented.
-- PostHog env contract: implemented; external project ingestion verification PENDING.
-- PostHog ChatGPT app: installed, actions not exposed in this session.
-- Vercel ChatGPT app: installed, actions not exposed in this session.
-- Auth UX/local baseline: 8+ chars, upper/lower/digit; fake Google/Apple bypass removed.
-- Supabase hosted plan: Free; leaked-password protection therefore remains pending without forcing an upgrade.
-- Inactive PayPal frontend SDK: removed.
-- Expected 400/409 operational noise fixes: implemented.
-- CI hardening regression test: implemented.
-- Do NOT reactivate supporter membership until PayPal secrets + genuine webhook verification + product pricing/benefit/eligibility decisions are closed.
-
-
-### Rescue/security checkpoint
-- Migration `20261007124633_move_rescue_security_definers_private`: deployed.
-- Public Rescue/Founder RPCs are now SECURITY INVOKER wrappers; privileged logic lives in non-exposed `rescue_private`.
-- Anonymous wrapper test: PASS.
-- Authenticated wrapper test: PASS.
-- Security Advisor: 0 exposed SECURITY DEFINER warnings; only Leaked Password Protection remains.
-- Supabase plan is Free, so do not upgrade solely for that warning without explicit PO approval.
-- Cost rules canonical: `docs/PAZO_COST_GUARDRAILS.md`.
-- PostHog exception protocol verified against current docs; structured redacted stack frames implemented.
-
-
-### PR #30 final branch acceptance
-- Product Owner final runtime/product validation: PASS.
-- Final branch CI: PASS.
-- Scope Closure Reconciliation for PR #30: PASS.
-- Historical checkpoint: PR #30 was mergeable; final merged state is recorded below.
-- Do NOT call Production Hardening globally complete yet.
-- Historical next action completed: PR #30 merged and `main` was verified.
-- After merge/main verification, continue the remaining external hardening backlog separately: PayPal real secrets/webhook delivery, PostHog live ingestion/alerts, Vercel/Mapbox spend controls, hosted Auth verification, CAPTCHA timing, backup/restore drill.
-
-
-### Video-derived architecture/privacy reconciliation
-Status: EN CURSO / PR #30 returned to Draft.
-
-Implemented:
-- canonical architecture contract: `docs/PAZO_ARCHITECTURE_CONTRACT.md`;
-- canonical privacy/data governance: `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`;
-- data + third-party provider inventory: `docs/PAZO_DATA_INVENTORY.md`;
-- module lifecycle Gate 6/7 now requires data classification, telemetry/provider review and explicit code ownership;
-- F14 expanded with UGC reporting/blocking, copyright/IP, account deletion, minor-handling procedure, data inventory, retention matrix, Privacy Policy/Terms and tracking audit;
-- F15 expanded with restore drill, live observability verification, spend controls and client-storage audit;
-- architecture CI guard blocks new domain services/views/modals in legacy global folders without conscious baseline update;
-- privacy CI guard blocks session replay/autocapture/direct tracking patterns and reviewed tracking SDK additions by default;
-- PostHog product events/properties now use an explicit allowlist;
-- 18+ checkbox defaults false and requires active attestation;
-- onboarding no longer claims acceptance of Terms that are not yet published.
-
-Decision:
-- no mass folder refactor in this tranche;
-- no DOB/ID collection or invasive age verification introduced;
-- no session replay/autocapture enabled.
-
-Previous PR #30 Scope Closure Reconciliation is superseded by this mini-tranche and must be rerun after CI + PO visual/runtime validation.
-
-
-### Architecture/privacy reconciliation CI checkpoint
-- HEAD: `889fbe432019b1f13c30610cffac40c08fa5ae38`.
-- Hardening regression checks: PASS.
-- Architecture contract check: PASS.
-- Privacy/data-governance check: PASS.
-- TypeScript + production build: PASS.
-- Lint: PASS on this run.
-- PR #30 remains Draft until PO validates the visible 18+ onboarding change.
-
-
-### Architecture/privacy reconciliation final acceptance
-- PO visible onboarding validation: PASS.
-- 18+ explicit attestation behavior: PASS.
-- Navigation smoke test: PASS.
-- Governance CI suite: PASS.
-- Scope Closure Reconciliation: PASS.
-- Historical checkpoint completed: PR #30 later returned to Ready for Review and was merged.
-- Historical next action completed: PR #30 merged and main was verified.
-
-
-### PR #30 merge closure
-- PR #30: MERGED.
-- Merge commit: `c179182c79c587c7727277a966cc09704002ce10`.
-- Main verification:
-  - premature PayPal pitch absent;
-  - architecture contract present;
-  - privacy/data-governance contract present;
-  - data/provider inventory present;
-  - hardening code present.
-- Production Hardening remains EN CURSO.
-- Next exact work is external/provider hardening, not F13:
-  - PayPal real webhook verification;
-  - PostHog live ingestion/alerts;
-  - Vercel/Mapbox spend controls;
-  - hosted Auth verification;
-  - backup/restore drill.
-
-
-### External hardening active checkpoint
-- PostHog project connected.
-- PostHog privacy settings applied + verified: anonymize IP ON; autocapture/replay/heatmaps/console/performance automatic capture OFF; timezone America/Los_Angeles.
-- PostHog live ingestion: PENDING; project still has 0 events.
-- PostHog integrations/alerts: 0; need an explicit destination before authoring alerts.
-- Vercel connector: reachable but 0 teams / 0 projects; do not create a new project blindly.
-- Supabase: Free; DB ~17 MB; Storage ~26 MB.
-- Backup runbook: `docs/PAZO_BACKUP_RESTORE_RUNBOOK.md`.
-- Storage backup utility: `scripts/backup-storage.mjs`.
-- PayPal webhook v3: ACTIVE; 0 observed real webhook calls.
-- Mapbox: env-token based, no hardcoded token; account restriction/usage alert verification pending.
-- Next runtime gate: wire PostHog public token into a real PAZO runtime, verify first event + controlled exception.
-
-
-### PostHog live ingestion checkpoint
-- First real PAZO event: PASS (`app_boot`).
-- Event contract observed: app/environment/release/session only from PAZO's reviewed payload.
-- New privacy fix committed: all PAZO PostHog events send `$geoip_disable=true`.
-- Privacy CI guard updated to require the GeoIP opt-out.
-- Next exact runtime step: pull branch, restart Vite with temporary PostHog env vars, then trigger one controlled exception and verify `$exception` ingestion.
-
-
-### PostHog error tracking + Documents checkpoint
-- PostHog controlled exception ingestion: PASS.
-- Two controlled `$exception` events grouped into one issue: PASS.
-- Verified exception GeoIP enrichment absent.
-- Documents repeated warning root cause found:
-  - deleting document objects are hidden by Storage SELECT RLS because policy only allows `active`;
-  - 4 stale deleting rows currently still have Storage objects;
-  - 3 are for the current test user.
-- Migration prepared in PR #33:
-  - `20261008010500_fix_pet_document_delete_storage_visibility.sql`.
-- DO NOT mark Documents cleanup fixed in production until PO authorizes migration, migration is applied, current user reloads, stale files disappear, and warnings stop.
-
-
-### Documents recovery production verification
-- Migration applied in production after explicit PO authorization:
-  - `20261008010424_fix_pet_document_delete_storage_visibility.sql`.
-- Owner-only Storage visibility for `deleting` objects verified.
-- Current test account recovery after reload: PASS.
-- Current test account pending deleting rows: 0.
-- Current test account pending deleting Storage objects: 0.
-- One stale deleting row/object remains for another account and should self-recover on that account's next recovery run.
-- Documents repeated-warning issue is resolved for the current test account.
-
-
-### Vercel Preview integration checkpoint
-- Vercel project resolved: `pazo-app-t83r` (`prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`).
-- Production alias confirmed: `pazo-app-t83r.vercel.app`.
-- Preview observability variables configured without paid resources.
-- Preview deployment from PR #33: READY.
-- PO Preview runtime validation: PASS.
-- PostHog Preview ingestion: PASS.
-- Preview events have `$geoip_disable=true` and no city/lat/long enrichment.
-- Do NOT enable PostHog in production before PR #33 merge.
-- Next gate: final CI -> PO merge authorization -> merge PR #33 -> add production PostHog/Supabase publishable env -> verify production deployment + PostHog.
+# PAZO — ACTIVE HANDOFF | 2026-10-10, post-reset y recuperación de perfil
+
+**Reglas:** `AGENTS.md` y `docs/PAZO_MASTER_ROADMAP.md`. **Brain OS:** `DigitalAppcorp/project-brain-os` v1.4.1 (`SKILL.md` + `patterns/VERIFIABLE_HANDOFF.md`). **Historial:** `docs/archive/PAZO_ACTIVE_HANDOFF_BEFORE_RESET_20261010.md` y `docs/archive/PAZO_ACTIVE_HANDOFF_BEFORE_PROFILE_RECOVERY_20261010.md` (conservan evidencia, estados previos y decisiones).
+
+## Fuente de verdad y estado Git
+
+- Repositorio `DigitalAppcorp/pazo-app`, rama `f14/beta-reporting-integration-20261009`, [PR #37](https://github.com/DigitalAppcorp/pazo-app/pull/37) **DRAFT, NO MERGED**, base `main`. PR #36 sigue siendo dependencia lógica de integración; no fusionar ni rebasear sin gate PO.
+- **Último código verificado:** commit `a9f7f85a1b31a5126add26ed69cec8ff29b91856`; GitHub Actions CI **PASS** #38034600644 (hardening, arquitectura, privacidad, tests MVP, build; lint legacy no bloqueante). Un commit documental posterior requiere comprobación de su propio CI. El HEAD puede avanzar por la documentación; leer PR vivo.
+- Estado de worktree local Windows/Antigravity: **DESCONOCIDO**. QA de navegador actualizado post-integración: **PENDIENTE**. Ni el CI ni el test SQL simulado demuestran funcionamiento real con credenciales.
+- No se ha hecho merge a main, deploy de Vercel, creación de infraestructura de pago ni purga de datos en este gate.
+
+## Supabase alojado — verificado
+
+Proyecto `mrybvqdebbgcayuvgkkr`. Después de la limpieza autorizada del 10-oct-2026, **NO REPETIR NINGÚN BORRADO**. SELECT posterior a nueva migración: **6 `auth.users`, 6 identidades, 0 `public.profiles`, 1 `public.pets`, 1 `storage.objects`**; la mascota y el avatar son de la prueba post-reset validada por PO mediante su «listo». La ausencia de perfil se debe a que `handle_new_user()` solo corre cuando se registra una cuenta Auth nueva. No crear cuentas nuevas ni restaurar fixtures viejos.
+
+**Nueva migración APLICADA, autorizada en este chat por el PO al aceptar el gate solicitado:** `20261010072555_f14_recover_missing_profile`. SQL versionado `supabase/migrations/20261010072555_f14_recover_missing_profile.sql` (se mantiene el borrador anterior en `supabase/drafts/` solo como historia, NO volver a ejecutarlo). Crea la RPC `public.pazo_ensure_my_profile()` con verificación de `auth.uid()`, acceso exclusivo de `authenticated`, inserción solo de `id` y flags falsos, `ON CONFLICT DO NOTHING`. No permite insertar o modificar arbitrariamente `profiles`; `anon` no tiene EXECUTE y `authenticated` no tiene INSERT directo. No crea perfiles en masa.
+
+**QA de backend:** dos invocaciones de la RPC bajo rol autenticado con identity JWT simulada dentro de **BEGIN/ROLLBACK** resultaron en exactamente un perfil temporal, ambos flags false; después de rollback `profiles` permanece en cero y Auth/pets/Storage no cambiaron. Prueba de permisos `anon=false`, `authenticated=true`. No se probaron credenciales reales después de conectar el cliente; no reportar ese caso como E2E PASS. Supabase Security Advisor enumera la RPC como `authenticated_security_definer_function_executable` WARN (acceso intencional y restringido); otras advertencias históricas permanecen y no se corrigieron por este gate.
+
+**Migraciones F14 antes aplicadas:** `20261010043307_f14_media_jwt_claim_compat_single_test`, `20261010045708_f14_account_request_intake`, `20261010053708_f14_community_ownership_continuity`. **SIN APLICAR:** `supabase/drafts/20261010_f14_deleted_author_threads_NOT_APPLIED.sql`; requiere aprobación separada y no implica worker de eliminación Auth/Storage. Edge `f14-moderation-purge` v5, verify_jwt=true, purge global OFF; no encenderla.
+
+## Código de recuperación y alcance probado
+
+- `src/features/auth/ensureOwnAccountProfile.ts`: única llamada cliente `supabase.rpc('pazo_ensure_my_profile')`, sin user ID suministrado por browser.
+- `src/context/AuthContext.tsx`: tras reconocer una sesión válida, recupera perfil **antes de permitir montar la app**; cubre login nuevo y sesiones almacenadas, acepta reintento/Sign Out ante fallo y no bloquea pantalla de recuperación de contraseña. No reconfigura login ni onboarding de mascota.
+- `src/App.tsx`: estado previo conserva la distinción entre pets vacías y error y encamina mascota nueva a A03. `OnboardingView` evita volver a registro cuando ya hay sesión. Creación de mascota post-reset previa **PASS PO**, DB `pets=1`, sin prueba nueva tras cambio de AuthContext.
+- Revisión estática de estados vacíos: Feed muestra «Todavía no hay publicaciones», Comunidades «Todavía no hay comunidades», Lugares «No encontramos lugares…» y carga/error con reintento; **runtime aún no verificado**.
+- No crear datos de moderador ni catálogo de Lugares a escondidas. `moderator_grants` y `pet_places` fueron vaciados por reset y sus accesos/estados deben tratarse explícitamente; autorizaciones antiguas de usuario moderador no se recrean por perfil.
+
+## ÚNICA SIGUIENTE ACCIÓN — Gate de aceptación post-reset
+
+**PO:** actualizar worktree visual a último SHA del PR #37 **sin sobrescribir trabajo local no guardado**, iniciar sesión con una de las 6 cuentas Auth retenidas y confirmar una sola vez: no queda atrapado en «Preparando tu cuenta», entra a PAZO, ve su mascota después de F5, y la navegación de Feed/Comunidades/Lugares con datos vacíos no da errores. No crear cuenta Auth nueva ni repetir suites anteriores. Una vez confirmado, **AI:** verificar con SELECT que `profiles=1` para su cuenta (agregado, sin IDs), `auth.users=6`, ausencia de flags privilegiados, y comprobar HEAD/CI del checkpoint. Corregir cualquier fallo reversible en la rama antes de pasar a los bloqueadores siguientes de MVP/F14.
+
+**Después del gate:** revisar cierre de beta (retirada segura Storage/CDN D3-A, A3 eliminación real de cuenta, D3-B retención, A4 documentos legales, email de Auth real y PR apilados). Decisiones de producto de transferencia de Comunidades y «Autor eliminado» permanecen cerradas; implementación y release no lo están.
+
+**Límites inalterables:** NO repetir el borrado; no tocar Auth/identidades ni restaurar fixtures, no merge a main, no Vercel, no migraciones adicionales, no purgas de media, no borrar cuentas, no crear recursos de pago sin autorización específica. El futuro borrado final pre-lanzamiento es otro gate con inventario, alcance y aprobación; decidir expresamente si conserva o no Auth.
+
+**Activación nuevo chat:** «Activa Brain OS v1.4.1 y PAZO PR #37, lee AGENTS/handoff/roadmap; audita HEAD/CI/Supabase y continúa solo desde el gate de aceptación post-reset. Conserva las 6 Auth, no hagas merge/Vercel ni más migraciones sin permiso».
+
+## QA visual reportada; discrepancia de persistencia — 2026-10-10
+
+El Product Owner confirmó que sus pruebas locales pasaron. Se registra PASS visual reportado, sin evidencia del SHA del directorio ejecutado. Consulta read-only posterior: 6 cuentas Auth, 0 perfiles, 1 mascota y 1 objeto Storage. Por tanto, la restauración real de perfil aún NO está demostrada en Supabase alojado. Las pruebas de backend reversibles y CI del cambio pasaron anteriormente. No repetir la suite visual ni la purga. Próxima comprobación: identificar rama y commit de la carpeta ejecutada en Antigravity; después contrastar el entorno Supabase antes de declarar el gate cerrado.
+
+## Identificación visual de versión en splash — 2026-10-10
+
+- Decisión PO: mostrar una versión corta para no confundir builds de Antigravity con HEAD GitHub.
+- Código: `vite.config.ts` genera `__PAZO_BUILD_VERSION__` con `VITE_APP_RELEASE` (CI) o `git rev-parse --short=8 HEAD` (local); marca `· modificado` si el checkout contiene cambios rastreados no confirmados. `src/features/release/buildVersion.ts` lo expone; `src/App.tsx` lo muestra como texto discreto bajo «Su mundo, más cerca» en el splash. En desarrollo agrega `· local`; sin Git/env: `desconocida`. No agrega dependencias, bordes, migraciones ni tracking. Código en `9f0caed7ed6fdc12cb76a4845c653312a605b8b1`.
+- La versión local se calcula **al arrancar/reiniciar Vite**; si se hace checkout mientras el servidor sigue abierto, reiniciar dev server antes de comparar. Los cambios no rastreados `untracked` no están incluidos en el marcador. El número mostrado es la revisión de fuente, NO un test de Supabase conectado ni aprobación de E2E.
+- **Gate todavía abierto:** el PO reportó flujo visual PASS pero SELECT alojado resultó 6 Auth, 0 profiles y 1 mascota. Con la nueva versión visible en splash, pedir solo la cadena exacta de versión local y comparar con el commit fuente, más el origen de Supabase si persiste la discrepancia. No repetir QA anterior ni afirmar auto-restauración E2E hasta ver fila en `profiles`.
+- PR #37 sigue DRAFT, no merge/main/Vercel; CI de este nuevo cambio se debe verificar separadamente.
+
+## Ajuste aprobado del indicador de versión en splash — 2026-10-10
+
+- PO rechazó letras/etiquetas visibles porque llamaban la atención; solicitó **solo números** en el **centro inferior**, con presencia discreta. Esta decisión sustituye la presentación anterior `Versión <SHA> · local/modificado`, aunque se conserva automáticamente la identificación del checkout.
+- `vite.config.ts` convierte los primeros 6 dígitos hexadecimales del SHA del commit a un número decimal de 8 posiciones y define una etiqueta visual `0.1.NNNNNNNN` (solo dígitos y puntos). Si hay cambios rastreados sin commit, agrega el indicador numérico `.1`; si no hay Git válido muestra `0.0.0` como valor de desconocido. Es identificador de QA, **no** SemVer oficial ni garantía matemática de unicidad absoluta (24 bits pueden colisionar).
+- `src/App.tsx` muestra **únicamente** `{pazoBuildVersion}`, centrado en `bottom-4`, fuente `10px`, color secundario atenuado, sin rótulos «Versión»/«local» ni letras visibles, sin contornos. El `aria-label` accesible no forma parte del texto visible.
+- Para comparar compilación local y GitHub se debe calcular la misma transformación sobre el SHA deseado, y **reiniciar Vite** después de checkout/cambios. El valor puede diferir si hay modificaciones sin confirmar. Commits de código: `4fcc9fdd` y `bbf82eea` en PR #37. CI del SHA de código y QA visual específicos deben verificarse; no confundirlos con aceptación del gate de perfil.
+- Otros gates sin cambios: `profiles=0` a última inspección pese a PASS visual reportado; reconciliar instalación/entorno, no repetir borrados. No Vercel, migraciones, ni merge.
+
+## Corrección de texto del splash — 2026-10-10
+
+- El PO precisó que el indicador inferior central SÍ debe decir `Versión` seguido del identificador numérico, por ejemplo `Versión 0.1.08229221`. La petición de usar solo números se refería al **identificador**, no a quitar la palabra «Versión».
+- `src/App.tsx` restablece `Versión {pazoBuildVersion}`, conserva ubicación inferior central, tipografía pequeña y discreta, sin contornos ni texto adicional (`local`, `modificado`). Commit de código `d52e0d38` en PR #37; comprobar CI de ese SHA por separado.
+- El resto de la funcionalidad y las restricciones de base de datos, Vercel, Auth y merge no cambian. La aceptación visual específica de este ajuste aún es independiente del CI.
+
+## Gate integrado de MVP — reconciliación no destructiva (2026-10-10)
+
+**Evidencia GitHub y CI:**
+- PR #37 HEAD auditado antes de este commit documental `25268442c53d5d2f4bfa5ad051de26c664a8764a` y CI #38037587661 **SUCCESS**; DRAFT, abierto, **no merged**. `main` continúa en `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`.
+- Comparación exacta #36 `beef7a68` → #37: `ahead_by=78`, `behind_by=0`; #37 contiene la base de código MVP #36, además de F14 y recovery/splash. Esto NO implica que el merge sea seguro ni autorizado. No duplicar #36.
+- PR #38 de baja A3 está **divergido** de #37 (`ahead_by=60`, `behind_by=69` al comparar #37 → #38). Incluye `AccountDeletionPanel`, coordinator y numerosos SQL `NOT_APPLIED`. **No cherry-pick/merge masivo**, ni reanudar 13 drafts; la decisión fast-track anterior lo mantiene pausado. Reutilizar ideas puntuales solo tras revisión de compatibilidad.
+- PR #35 DRAFT contiene trabajo avanzado F14 pero no se fusiona porque puede introducir guard de Mapa solo desarrollo. PR #34 es carril de validación de Lugares; no sustituye el `MapView` real ya conectado en #37.
+
+**Chequeo estático de P0:**
+- `src/App.tsx` mantiene `MapView` real en la navegación (no hay bandera `PLACES_MAP_DEVELOPMENT_ONLY` en ese archivo).
+- `src/features/legal/legalCopy.ts`: `LEGAL_RELEASE_READY=false`; aviso de borrador, **política pública aún no lista**.
+- `src/features/account/deletionPreflight.ts`: `ACCOUNT_DELETION_EXECUTION_ENABLED=false`; `deletionRequestState.ts`: `DELETION_EXECUTOR_ENABLED=false`; solicitud intake existe pero no permite prometer eliminación definitiva.
+- `supabase/functions/f14-moderation-purge/index.ts`: `F14_MEDIA_PURGE_RELEASE_APPROVED=false`; función bloqueada con respuesta 503. No habilitar por un simple cambio de bandera: verificar Storage/CDN y worker antes de Beta.
+- SELECT alojado tras último PASS visual: **6 Auth, 0 profiles, 1 pets, 0 posts, 1 Storage**. Ninguna purga/DDL/escritura aplicada durante esta auditoría. La migración de autor eliminado sigue NOT_APPLIED.
+
+**Decisión ejecutiva:** la integración de código #36 → #37 es consistente por ascendencia; **no está habilitada para merge o release** mientras F14 P0 esté pendiente. No repetir suites aprobadas ni desbloquear banderas artificialmente. Próximo paso de coste casi cero para el gate Auth: el PO comparte **el número exacto que ve junto a «Versión» en el splash del proyecto abierto en Antigravity**; se compara con el algoritmo vigente en `vite.config.ts`, teniendo en cuenta checkout modificado y reinicio Vite. Si el número coincide con un commit que contiene `ensureOwnAccountProfile`, confirmar Supabase `profiles` por SELECT y diagnosticar origen; si no, actualizar local con `git status` antes de cualquier pull. Este dato no reemplaza la evidencia de Auth real y no debe forzar pruebas reiteradas. En paralelo, trabajo siguiente de F14 exige un **único gate PO** para solución mínima de baja/media, nunca operaciones irreversibles por omisión.
+
+## Incidencia nueva: splash no termina en Antigravity — 2026-10-10
+
+- El PO informó **«Ahora ya no pasa del splash»** después de actualizar el indicador de versión. No tenemos captura de consola ni SHA local confirmado: la causa exacta del entorno todavía NO está probada.
+- Auditoría directa de `src/App.tsx`: `if (showSplash || loading)` mantenía el splash animado después de los 2,5 s si `AuthContext.loading` permanecía `true`. Auditoría de `AuthContext.tsx`: `supabase.auth.getSession().then(...)` no tenía `catch`, timeout ni recuperación visible. La recuperación `pazo_ensure_my_profile` también carecía de timeout, por lo que podía bloquear la pantalla «Preparando tu cuenta».
+- **Corrección de frontend solamente** en `AuthContext.tsx` y `App.tsx`, commits `7d3b5d05`, `eba7bc74`: el splash dura lo que establece su temporizador, separa «Verificando tu sesión» del splash; la sesión se comprueba con `INITIAL_SESSION` o `getSession` y error/timeout de 10 s; en fallo aparece «Reintentar» sin considerar autenticada una sesión desconocida. La RPC de perfil conserva permiso solo authenticated, timeout 10 s y reintento fail-closed. El indicador inferior `Versión 0.1.NNNNNNNN` no se modificó.
+- **No asegurar todavía que sea el único origen de la avería**: el usuario debe ejecutar la rama/commit nuevo en Antigravity; GitHub CI de código y QA local requieren evidencia separada. Si aparece un error tras reintentar, diagnosticarlo por etapa y consola sanitizada, sin credenciales/tokens.
+- **No** se ejecutaron SQL de escritura, borrados, migraciones, deploy, merges ni cambios a cuentas por esta incidencia. Sigue pendiente reconciliación de `profiles=0` en DB hospedada. No repetir QA de Feed/Comunidades/Lugares anteriores: comprobar solo que termina splash → sesión/onboarding, F5 y perfil de DB.
+
+## Versión duplicada en pantalla de bienvenida — 2026-10-10
+
+- PO confirmó QA local PASS con instalación limpia `C:\\Users\\osori\\Downloads\\pazo-app-versionado`, rama `f14/beta-reporting-integration-20261009`, checkout `0541521` sin cambios locales. Se conserva carpeta antigua `pazo-visual-qa` como respaldo. No confundir este PASS general de la compilación anterior con QA visual del cambio nuevo.
+- A solicitud del PO se reutiliza `pazoBuildVersion` también en **A01 Bienvenida** (`src/components/views/OnboardingView.tsx`), bajo los botones «Comenzar», «Ya tengo una cuenta» y «Demo»: texto visible `Versión 0.1.NNNNNNNN`, pequeño, gris suave, centrado y sin bordes. El número es exactamente la misma fuente dinámica del splash; no se cambia Git, backend, Auth, otros pasos de onboarding ni diseño de botones. Commit de código `ac74ecc6`.
+- QA requerido solo del cambio afectado: actualizar con `git fetch` + `git pull --ff-only` desde la nueva carpeta limpia, reiniciar Vite, comprobar splash y **A01** con mismo número, y que sus botones siguen accesibles. No repetir suites de Feed/Comunidades/Lugares ya aprobadas. Se requiere CI de código antes de reportar build PASS.
+- Mantener PR #37 DRAFT, no merge, Vercel ni operaciones Supabase. El anterior estado alojado `profiles=0` no fue revisado en esta tarea visual y no se declara resuelto por inferencia.
+
+## Gate post-reset: login local + persistencia hosted confirmados — 2026-10-10
+
+- **Confirmación explícita PO:** desde la instalación nueva y actualizada `pazo-app-versionado`, el splash ya no queda bloqueado; inició con su cuenta Auth existente, accedió sin errores reportados a PAZO y observó los apartados «Privacidad y reglas» / «Cuenta y datos». La captura muestra los accesos «Privacidad», «Reglas de uso» y «Solicitar eliminación de cuenta»; no demuestra envío de solicitud ni eliminación de cuenta.
+- **Supabase alojado, SELECT read-only posterior al login:** `auth.users=6`, `public.profiles=1` (antes `0`), `public.pets=1`, `public.posts=0`, `storage.objects=1`, `profiles.is_founder=true=0`. Además, JOIN agregado `pets` → `profiles`: `pets_without_profile=0`, `pets_with_owner_profile=1`. La discrepancia previa **sí quedó resuelta para esta cuenta/mascota**, coherente con la RPC `pazo_ensure_my_profile()`; no extrapolar a las otras cinco cuentas no reconectadas.
+- **Gate de splash/auth/perfil asociado a cuenta probada: PASS de PO + persistencia en base real.** CI de la rama y QA del footer A01 son pruebas separadas: el usuario confirmó navegación general pero no describió expresamente la versión A01 ni equivalencia de ambos números, por lo que no afirmar ese detalle visual comprobado.
+- La UI A3 («Solicitar eliminación de cuenta») sigue siendo **intake/revisión**, NO ejecutor de borrado. Privacidad/reglas siguen en borrador pre-beta. NO se ha probado cierre de solicitud, eliminación real de datos o purga Storage/CDN; flags de F14 continúan OFF.
+- **Acción siguiente:** no repetir login, splash, creación de mascota, Feed/Comunidades/Lugares históricamente aprobados. Continuar con un único lote P0 de lanzamiento: plan mínimo y gate explícito para eliminación segura de cuenta/medios y conciliación de políticas públicas, sin reactivar PR #38 completo ni ejecutar drafts/migraciones por inercia. Mantener PR #37 DRAFT, sin Vercel, main/merge, SQL de escritura ni costos.
+
+## F14 A3 — Auditoría alojada y gate mínimo consolidado (2026-10-10)
+
+- Se auditó esquema real **solo lectura** y PR #38, contrastando la planificación antigua. Estado: 6 Auth, 1 perfil, 1 mascota, 0 posts/comunidades/comentarios/documentos, un `pet-avatars` Storage, **0 solicitudes** en `account_requests_private.deletion_requests`. Código actual de frontend permite solicitar/consultar/cancelar vía las RPC alojadas que validan `auth.uid()`; no hay ejecutor real de eliminación.
+- Hallazgo importante post-migraciones: `communities.owner_user_id` a `auth.users` es hoy `ON DELETE SET NULL`, no `CASCADE` como indicaba el preflight histórico. Esto reduce un riesgo, NO implementa archivado ni resuelve cascadas de `community_posts`; `pet_documents` sigue RESTRICT, `care_*` y `pets.owner_id` exigen orden específico. Supabase docs corroboran que `auth.admin.deleteUser` necesita servidor con service-role y no es operación del browser.
+- **Entregable documental verificable:** `docs/PAZO_F14_A3_MINIMUM_RELEASE_GATE_20261010.md`: especificación de un lote de código A3 coherente, sin fragmentar en 13 SQL ni asumir simulaciones completas. Ejecutor supervisado reintentable, freeze, aportes de terceros, medios Storage+origen/cache, dependencias y Auth al final. Aprovechar PR #38 de forma selectiva, **no fusionar**; el plan contempla prueba controlada futura con datos *descartables nuevos autorizados*, nunca con las 6 cuentas actuales.
+- El PO dijo «vamos» para continuar cierre del MVP. **No interpretar como permiso para aplicar migraciones, ejecutar baja ni alterar Auth/Storage**. El gate operativo que sigue es autorización explícita para **preparar código y SQL NO APLICADO**, sin ejecución remota. Después pedir otra autorización independiente para migraciones/test destructivo y otra para release.
+- No se modificó el frontend aprobado, la UI de versión, DB ni Vercel. PR #37 DRAFT. El gate post-reset de login/perfil cerrado para cuenta probada permanece vigente.
+
+## F14 A3 — preparación de código aprobada, sin ejecución (2026-10-10)
+
+- **Gate PO de código**: a la pregunta de autorización limitada a preparar A3 (código + SQL sin aplicar) contestó «muy bien». Solo autoriza trabajar en PR #37. No habilita DDL alojado, Auth delete, borrado Storage, despliegue Edge, Vercel, main o merge.
+- Artefactos agregados: `src/features/account/deletionExecutionPlan.ts` y test; `src/features/account/mediaManifest.ts` y test selectivamente reutilizados de PR #38; `supabase/drafts/20261010_f14_a3_supervised_review_NOT_APPLIED.sql` (guard incondicional; esquema privado de revisión y lectura de inventario, NO transición ni borrado); `supabase/functions/f14-account-deletion/index.ts` (endpoint bloqueado inmutable 503 y **no desplegado**); prueba de contrato `scripts/f14-a3-review-contract.test.mjs`, integrada a `npm run test:mvp`. Inventario privacidad actualizado.
+- **CI código**: GitHub Actions #463 del SHA `12b18d9a` SUCCESS. No demuestra ejecutar DDL ni la operación de cuenta.
+- La ejecución final de A3 **sigue sin implementar**: no hay write-fence completo, flujo de reautenticación vinculado al job, archivado/tombstone de terceros listo, Storage API + CDN efectivo, cleanup de DB/dep, sesión/Auth al final. Mantener el botón existente con promesa de solicitud, no de borrado inmediato.
+- Plan canónico con evidencia real, lista de entregables y faltantes: `docs/PAZO_F14_A3_MINIMUM_RELEASE_GATE_20261010.md` §7. No convertir el scaffold en release con un cambio de bandera. Gate de aplicación separado cuando exista código completo y pruebas no destructivas. No repetir QA anterior.
+
+### A3 — coordinador interno y QA simulada de secuencia (2026-10-10)
+- Nuevo `supabase/functions/f14-account-deletion/core.ts` candidate: `runSupervisedA3Candidate(ports,releaseApproved)`, mantiene Auth **estrictamente al final**; valida aprobación de operador, reauth, lease, freeze, aportes ajenos, manifiesto seguro, verificación origen + URL/CDN, limpieza datos, revocación sesiones y política backups; `markCompleted` solo tras `verifyAuthUserAbsent`. El servidor debe aportar implementaciones autorizadas de cada puerto; NO existe adaptador real. Endpoint `index.ts` 503 inmutable.
+- Test `supabase/functions/f14-account-deletion/core.test.mjs` cubre happy-path exclusivamente con mocks y fail-closed de todos los pasos; incluido en `npm run test:mvp`. No se ha probado ninguna operación de borrado con identidades reales ni credenciales.
+- **No cerrado:** permisos de reviewer/enrolamiento, evidencia de reauth, RPC transaccional con lease CAS, write-fence de usuarios/service_role, archivo/tombstones de terceros, Storage API y CDN de URLs reales, cleanup completo de FK y Auth admin. El SQL es solo contrato de revisión, guardado y NO APLICADO. Mantener código preparado para completar adaptadores dentro del gate de implementación aprobado, sin afirmar MVP listo.
+
+## A3 — gate de operador para revisión segura y lease CAS preparado (2026-10-10)
+
+- PO: «ok sigue», continuidad de autorización para **preparar código** dentro de F14 A3; NO autoriza escribir en Supabase alojado, activar Edge, borrar cuentas/Storage, Vercel ni merge.
+- Implementado en PR #37: `reviewAdapter.ts` autentica el JWT del operador en servidor mediante `auth.getUser(jwt)`; exige grant privado del operador y solicitud abierta para el sujeto antes de leer inventario agregado. Mensajes de error genéricos, números íntegros y `destructive_execution_allowed=false`; no cliente browser ni secrets en frontend. `claimA3ReviewLease()` prepara token y revisión de solicitud **solo para revisión**.
+- SQL `supabase/drafts/20261010_f14_a3_supervised_review_NOT_APPLIED.sql` (**NO APLICADO**) ampliado con RPC service-only `f14_a3_review_operator_authorized`, `f14_a3_review_claim` (bloqueo del registro de solicitud `FOR UPDATE OF r`, versión CAS, vencimiento 5 min y rotación de token), `f14_a3_review_lease_valid`. Tabla de operadores futura sin filas ni grants de escritura directa. La cuenta sigue activa, request no pasa a processing, no hay revocación de sesiones ni purga. Revisor debe verificarse fuera de PostgreSQL con Auth.getUser JWT real; rol del cliente no se toma de user_metadata ni JSON.
+- `reviewAdapter.test.mjs` y el contrato SQL prueban permiso, error y respuestas; CI #482 `4155039c` SUCCESS, con posterior corrección de args RPC para enviar revisión como número (requiere CI del HEAD siguiente).
+- **Riesgo abierto:** la exclusividad del lease se comprobó por modelo/contrato, no por dos conexiones PostgreSQL; no hay reautenticación fresca del sujeto, write-fence transacciones/Storage, persistencia de recuperación de fallos, archivo de terceros y limpieza definitiva. El endpoint A3 continúa 503 inmutable; `core.ts` es un coordinador inyectable NO conectado ni desplegado. No afirmar finalización A3.
+- Contrato consolidado y estado: `docs/PAZO_F14_A3_MINIMUM_RELEASE_GATE_20261010.md` §8. Siguiente trabajo de código A3: completar las piezas de backend privilegiado y luego solicitar **un solo gate PO independiente** de aplicación/test destructivo, sin repetir validaciones previas de la app.
+
+## F14 A3 — login posterior a solicitud exigido y writers auditados (2026-10-10)
+
+- PO «ok sigue»: continuidad del gate de **preparar código/borradores solamente**. No SQL ejecutado, Auth/Storage borrado, Edge desplegado, cambios en main/Vercel/merge ni nuevas dependencias.
+- PR #37 incorpora prueba estricta de **sesión nueva del titular después de solicitar baja**: RPCs propuestas y **NO APLICADAS** `f14_a3_subject_record_recent_signin()` y `f14_a3_reauth_evidence_valid(uuid,uuid,uuid,bigint)`. Validan JWT/session_id del propietario, `auth.sessions.created_at` posterior al request, TTL 5min, lease y operador actuales; renovar lease borra prueba vieja. No datos de contraseña ni token almacenados. **No existe UX de re-login aún**, ni se declara reautenticación en vivo.
+- `reviewAdapter.ts` incluye `verifyA3RecentSignin`; el coordinador `core.ts` ahora exige `verifyRecentSignin()` autónomamente antes de freeze, no confía solo en `authorize()`. Tests y contrato SQL añadidos; CI #491 tuvo un fallo exclusivo del checker por comentario SQL, corregido en `00bfdec0` CI #492 PASS; código posterior en `7e61d49c` CI #494 PASS.
+- Se auditó Supabase alojado **solo lectura**: `auth.sessions` cuenta con `id,user_id,created_at,not_after`; `deletion_requests` con `subject_user_id,status,requested_at`; pg_policies tiene escrituras en UGC/mascotas/cuidados/comunidades/rescate/telemetría y `storage.objects` **6 INSERT / 6 DELETE / 1 UPDATE** authenticated (no concluye que sean rutas efectivas todas). Volátiles `create_pet_profile`, `update_pet_profile`, `create_community`, `complete_care_item`, `begin_pet_document_upload`, `submit_pet_sighting`, etc. **No hay write-fence real**, y el lease de revisión no lo reemplaza.
+- Documento de riesgo obligatorio antes de habilitar: `docs/PAZO_F14_A3_WRITE_FENCE_COVERAGE_20261010.md`, con cobertura para todos los escritores, incluidos RPC SECURITY DEFINER, service_role y Storage. La solución debe probar carreras/concurrencia en DB **aislada** tras una autorización separada. Los tests Node son mocks/estáticos; nunca han probado este nuevo SQL con el motor Postgres.
+- Estado: A3 **BLOQUEADA** para eliminación real; Edge `f14-account-deletion/index.ts` sigue 503 e inactivo. Siguen pendientes freeze global, evidencia de operadores reales autorizados, preservación de terceros/tombstones, medios, limpieza FK/Auth y política pública. No volver a pedir al PO autorización para continuar el código DRAFT; pedir gate explícito cuando exista migración operativa y un plan de prueba destructiva concreto. No repetir el QA ya aprobado del splash/login/feed/mapa.
+
+## F14 A3 — mandato general PO y avance de freeze/Storage (2026-10-10)
+
+**Mandato explícito PO:** «Autorizado, automatiza ya todo, llega hasta el final, tienes carta abierta a implementar todo lo que se requiere para cerrar todo ese modulo». Se trabajó autónomamente en el código de A3 y auditorías en PR #37. Sin nueva identidad de operador verificable ni cuentas descartables designadas, no se intentó ejecutar SQL/desplegar Edge/borrar ninguna de las **6 cuentas conservadas** ni 1 mascota y 1 avatar de QA. La autorización de producto no sustituye validación destructiva real. No Vercel, `main` ni merge.
+
+**Nuevos artefactos reales:**
+- Draft `supabase/drafts/20261010_f14_a3_write_fence_NOT_APPLIED.sql`: guard **incondicional al inicio**, 30 triggers de tablas de aplicación + Storage, comprobación de OLD/NEW, bloqueo transaccional solicitud `FOR SHARE`, registro de objetivos congelados, autorización de limpieza exclusivamente con lease verificada. Incluye `f14_a3_start_processing`: verifica reautenticación Auth posterior al request y claim actual, captura mascota/post/comunidad/cpost/Storage y pasa la solicitud a `processing` en una transacción. El código NO está instalado y requiere pruebas con dos conexiones reales.
+- Para Storage API separado: `f14_a3_allow_exact_media_remove` crea permiso de **2 minutos** por bucket/ruta/versión, comprueba ownership de `storage.objects` y rechaza referencias de otras cuentas; `f14_a3_checkpoint_media_removed` y `f14_a3_media_checkpoint_valid` llevan journal de borrado/recuperación. No se concede un permiso general por bucket. SQL NO APLICADO.
+- `supabase/functions/f14-account-deletion/processingAdapter.ts` autentica revisor + reauth y solicita transición SQL indivisible. `storageRemoval.ts` usa `.storage.from(bucket).exists/remove([path])` solo tras permisos de lease/versión/fence, verifica inexistencia origen, URL/CDN, e integra checkpoint reintentable. `mediaGrant.ts` une la API con RPC de autorización, checkpoint y validación de reintento. Todos son **adaptadores candidatos, no conectados al endpoint distribuible**, que conserva hard-off 503.
+- Tests de casos felices y negativos `processingAdapter.test.mjs`, `storageRemoval.test.mjs`, `mediaGrant.test.mjs`, `scripts/f14-a3-write-fence-contract.test.mjs` en `npm run test:mvp`. Hubo fallo #519 por test fixture `null` que se corrigió `ccdff543`, CI **#520 PASS**. Journal posterior CI **#525 PASS**. Protección cruzada y documentación posteriores requieren CI del HEAD final.
+- Alcance exacto, permanentes limitaciones y evidencia en `docs/PAZO_F14_A3_MINIMUM_RELEASE_GATE_20261010.md` §10. `docs/PAZO_DATA_INVENTORY.md` registra sólo **metadatos futuros**, no una recolección activa.
+
+**No cerrar A3 todavía**: falta integrar `deleted_author_threads_NOT_APPLIED.sql` con conservación real de terceros, cleanup FK de documentos/cuidados/follows/rescue/QR/moderación, revocación de sesiones y Auth final (servicio server-side), sistema durable de reanudación de fases, validación del SQL real y concurrencia con dos cuentas nuevas de prueba, responsable/operador identificado y retenciones legales. No habilitar con un cambio de `false` a `true` por sí solo. Próximo ingeniero continúa con fase de cleanup/archivo e implementación de etapa Auth, nunca repite splash/login/Feed/Mapa aprobados. Sin prueba real no hay merge, despliegue ni DoD. Si se requiere acción PO, pedir sólo lo imprescindible para prueba (cuenta autorizada como operador y cuentas desechables), no nuevas aprobaciones genéricas.
+
+## F14 A3 — Operador propuesto y verificado en Auth (2026-10-10)
+
+- PO identificó explícitamente **una dirección de correo existente** para la función de revisor de solicitudes A3. La dirección exacta está en la conversación del PO; **no copiar correo ni UUID Auth a GitHub** ni datos públicos para minimizar información personal. Consulta alojada **SELECT de agregados** confirmó **1 coincidencia exacta y 1 email confirmado**. `auth.users` tiene `id,email,email_confirmed_at,deleted_at`. La cuenta del operador no se utilizará para tests destructivos ni se borrará.
+- Código nuevo `supabase/drafts/20261010_f14_a3_operator_enrollment_NOT_APPLIED.sql` (**guard incondicional RAISE EXCEPTION; jamás ejecutado**): el DBA autorizado debe suministrar el correo out-of-band como parámetro de sesión en transacción segura, exige rol `postgres`, 1 identidad activa y confirmada, instala solo su UUID en `account_requests_private.deletion_review_operators` **tras** la migración base de A3; no concede `service_role`, privilegios Auth/Storage ni accesos `anon/authenticated`. Registrar acceso o revocación con auditoría.
+- Prueba agregada `scripts/f14-a3-review-contract.test.mjs`: no identidad literal en el repo, la instalación no es una operación client-side y el SQL inactivo bloquea su aplicación por accidente.
+- **Estado real:** cuenta **designada y verificada**, permiso de operador **todavía NO asignado**: la tabla privada está solo en un draft `NOT_APPLIED`. PR #37 sigue DRAFT; no Supabase DDL, Storage, Auth delete, Vercel ni merge. No volver a preguntar qué cuenta será operadora salvo cambio explícito del PO.
+- Sigue pendiente comprobar worker, DB/Storage concurrencia, preservación ajena, cleanup FK, sesiones/Auth y cuentas nuevas descartables de prueba antes de habilitar A3. El correo designado no es consentimiento para borrar cuentas retenidas.
+
+## F14 A3 — Corrección API Storage y guard Auth FINAL sin despliegue (2026-10-10)
+
+- PO siguió con «ok sigue» bajo autorización general A3; no se repitieron tests de UI ya aprobada. Continúa PR #37 DRAFT, sin merge/main, Vercel, Supabase DDL/Edge deploy, sin borrar las 6 identidades Auth, perfil/mascota/avatar que permanecen en entorno alojado.
+- **Bug real corregido:** `supabase/functions/f14-account-deletion/storageRemoval.ts` usaba `.storage.from(bucket).exists(path)`, método no documentado en Supabase JS. Ahora usa `.info(path)` oficial; objeto presente solo con `data` estructurado, objeto ausente solo si `data=null` **y error explícito HTTP 404**. Null sin error, 403/401/5xx, fallos de red y respuesta ambigua deniegan avance. Test `storageRemoval.test.mjs` adaptado con casos negativos. **CI #537 PASS**, SHA `d98c65e2`. Docs: Supabase Storage JS `file-buckets-info`.
+- **Paso final Auth candidato agregado:** `supabase/functions/f14-account-deletion/authFinal.ts` con interfaz `A3AuthFinalPorts` para gate de reviewer/lease vigente, Storage+URLs vacío, FK/PII limpio, contenido ajeno intacto, sesiones y retención revisadas; persiste intención final durable **antes** de usar `auth.admin.deleteUser(subjectId,false)`. Exige ausencia Auth probada con `getUserById(subjectId)` y **404 explícito** (null ambiguo/no 404 no basta); no marca `completed` sin volver a comprobar los gates. Recuperación tras caída requiere intención persistida; no reintenta borrado de Auth sin ella. Tests negativos `authFinal.test.mjs`; primer CI #540 FALLÓ por fixture de null (corregido), **CI #541 PASS** SHA `fc97781e`.
+- `scripts/f14-a3-live-api-contract.test.mjs` impide volver a `.exists()`/borrado de buckets y garantiza que la Edge `index.ts` continúa **503 inmutable**, sin importar adaptadores destructivos. Añadido a `npm run test:mvp`; CI #543 lanzado con SHA `a29aad89`.
+- **Límite crucial:** no hay implementación de los puertos de datos/retención/journal `A3AuthFinalPorts` en Supabase, no se aplicó `write_fence_NOT_APPLIED.sql` ni `supervised_review_NOT_APPLIED.sql`. `authFinal.ts` es **código candidato inalcanzable desde el endpoint**, NO elimina usuarios. Tampoco existe E2E real con dos cuentas recién creadas descartables. No declarar A3 operativo/completado ni conceder acceso de operador todavía. La cuenta del PO designada para revisar está verificada, sin permiso activo.
+- **Siguiente trabajo:** integrar preservación social y limpieza FK en servidor+SQL seguro, definir control durable de etapas/intent, verificar con PostgreSQL/Storage reales aislados y comprobar que Auth ADMIN no falla por objetos Storage remanentes. Mantener flags OFF; no introducir planes/servicios pagados por CDN.
+
+## F14 A3 — pruebas de integridad social y snapshot exacto de terceros (2026-10-10)
+
+- PO «ok sigue» bajo autorización general de implementación. Se revisó PostgreSQL alojado READ-ONLY: `post_comments→posts` y `community_post_comments→community_posts` ON DELETE CASCADE; `community_posts.author_pet_id` y `author_user_id` CASCADE; `communities.owner_user_id` SET NULL. Documentos RESTRICT, cuidados NO ACTION. Estado pruebas: 0 posts, 0 comentarios, 0 community_posts, 0 community_post_comments, 0 cares/documentos. **Los ceros NO prueban preservación multicuenta**.
+- El draft `supabase/drafts/20261010_f14_deleted_author_threads_NOT_APPLIED.sql` **antes carecía de guard**; se añadió `RAISE EXCEPTION` al comienzo antes de cualquier ALTER (commit `b9443018`). Sigue NO APLICADO.
+- Nuevo `supabase/drafts/20261010_f14_a3_social_dependency_review_NOT_APPLIED.sql`, read-only y service-only, con guard incondicional, inventario agregados (posts/replies ajenos, comunidades, documentos, cuidados, Storage y moderación). Nuevo `socialDependencyReview.ts` convierte recuentos + pruebas servidor en gate fail-closed, siempre `destructiveExecutionAllowed=false`, y `socialDependencyAdapter.ts` requiere operador JWT y grant verificado antes de invocar RPC. Tests de contratos y negativos.
+- Extendimos `supabase/drafts/20261010_f14_a3_write_fence_NOT_APPLIED.sql` (**no ejecutado**) con `deletion_third_party_evidence`: identifica con ID+autor las contribuciones ajenas justo en la transacción de `f14_a3_start_processing`; `f14_a3_verify_other_users_survived` revisa cada ID y autor bajo lease válida. `thirdPartySurvival.ts` exige esa evidencia de SQL. Nada de cuerpo de comentario o URL se guarda en el snapshot.
+- Existe RPC alojada `public.pazo_archive_owned_communities_for_deletion(uuid)`, inspeccionada: exige solicitud processing; archiva owner→NULL, rechaza transferencias pendientes y comentarios ajenos en posts del dueño. **Reutilizarla, pero tras redacción compatible**, no recrearla ni invocarla ahora.
+- El primer CI de la revisión social #552 FAIL por test que exigía recibos incluso con recuento de comentarios 0; se corrigió el fixture para recuentos positivos en `532eb7b7`, **CI #556 PASS**. El lote de snapshot + comprobación individual `b4de5d26` **CI #561 PASS**. No son pruebas de PostgreSQL/concurrencia real; no declarar A3 completo.
+- Documento detallado para continuación y pendientes: `docs/PAZO_F14_A3_SOCIAL_PRESERVATION_GATE_20261010.md`. Pendiente: FKs tombstone + migración probada, limpieza otras categorías, worker real y Auth final, retención legal, QA destructiva aislada. PR #37 permanece DRAFT, endpoint 503, sin Supabase DDL/deploy, Vercel, merge/main, ni bajas reales. La cuenta de revisor designada por PO continúa **sin permisos activos**, se conservan las seis identidades actuales.
+
+## F14 A3 — Contrato de limpieza de actividad propia (2026-10-10)
+
+- PO «ok sigue»: implementación autónoma en PR #37 DRAFT. La DB alojada fue inspeccionada solo con `SELECT` para relaciones; no se cambió Auth, Storage, backend alojado, Edge, main, Vercel, ni cuentas actuales. Se confirmó `deletion_requests` privado sin FK que fuerce borrar el journal al borrar Auth; comentarios de terceros presentan ON DELETE CASCADE, pet_documents RESTRICT y care NO ACTION.
+- NUEVO `supabase/functions/f14-account-deletion/privateCleanupPlan.ts`: orden estricto de 9 etapas, contra evidencia técnica de procesamiento, lease, write fence, medio/CDN, terceros/moderación; ninguna etapa autoriza ejecución solo por booleans. Checks de redacción, archivo y rescate deben acreditarse **tras** su etapa, no antes. Tests `privateCleanupPlan.test.mjs`.
+- NUEVO SQL candidate `supabase/drafts/20261010_f14_a3_owned_activity_cleanup_NOT_APPLIED.sql`, con **RAISE EXCEPTION incondicional**, fase `clean_private_data`, reviewer/lease y bloqueo de solicitud, sin medios sin retirar ni snapshot/journal sin recibo. Usa `SET LOCAL` lógico (`set_config(...,true)`) para el bypass transaccional del write-fence **solo tras validar lease**. Borra únicamente comentarios/reacciones/interacciones de mascotas del solicitante y recalcula `comments_count/likes_count/likes` de padres afectados, con comprobación anterior y posterior por ID+autor ajeno. No borra posts, mascotas, comunidades, Auth ni Storage. Requiere testing real y consolidación.
+- Nuevo `ownedActivityAdapter.ts` + `ownedActivityAdapter.test.mjs` y contrato estático `scripts/f14-a3-owned-activity-contract.test.mjs` en `npm run test:mvp`. CI #572 FAIL por regex UUID de 4 grupos (en adapter) → corregido `227f8049`, CI **#574 PASS**; media journal CI **#576 PASS**.
+- El borrador de tombstones `supabase/drafts/20261010_f14_deleted_author_threads_NOT_APPLIED.sql` fue reforzado: nueva firma `pazo_redact_social_threads(uuid,uuid,uuid,bigint)`, exige operador/lease válida en `preserve_others` o `clean_private_data`, usa `set_config('pazo.a3_cleanup_lease',...,true)`; contrato actualizado `scripts/f14-deleted-author-contract.test.mjs`; CI **#578 PASS**. Nada instalado.
+- Fuente completa: `docs/PAZO_F14_A3_SOCIAL_PRESERVATION_GATE_20261010.md` §12. Siguiente trabajo concreto: RPC protegida para **borrar posts sin respuestas ajenas** y archivar comunidades existentes, después limpiar documentos/cuidados/QR/rescate/mascotas; journal y Auth final. Preparar integración/PostgreSQL aislado, no repetir pruebas splash/login/feed/mapa ya aprobadas. PR #37 sigue DRAFT, Endpoint 503, operador designado **sin privilegios activos**, 6 cuentas retenidas.

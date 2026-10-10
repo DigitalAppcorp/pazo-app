@@ -108,6 +108,7 @@ export const CommunitiesView = ({
     return (
       <>
         <CommunityDetailView
+          canReport={canUseCommunities}
           communityId={selectedCommunityId}
           currentPet={currentPet}
           onBack={() => setSelectedCommunityId(null)}

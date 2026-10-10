@@ -273,3 +273,37 @@ Candidatos:
 - Rediseño UI: planificado, pero no debe desplazar una necesidad funcional más valiosa sin decisión explícita.
 
 El próximo módulo debe pasar nuevamente por `docs/PAZO_MODULE_LIFECYCLE.md`; no asumir prioridad por numeración histórica.
+
+## Checkpoint funcional 2026-10-09 — prioridad MVP (estado vigente)
+
+**Este checkpoint posterior prevalece sobre los inventarios históricos de mocks de Agenda/Documentos en las primeras secciones.** El PO priorizó terminar la experiencia real por encima del hardening avanzado de Storage. F14 A2 está pausada con Gate 8 abierto; no se considera terminada ni autoriza un release.
+
+- **Corregir primero:** defecto verificable de paginación del Feed y presentación ficticia de mensajes en sesiones reales — rama `mvp/functional-readiness-20261009`, PR #36 DRAFT, CI `37927084599` SUCCESS para el primer commit de código.
+- **Cerrados históricamente y no rehacer:** Comunidades F7, Mapa/Lugares F8, Agenda 9A, Documentos 9B, Buscar F12. Aplicar solo QA de integración/release cuando corresponda.
+- **Incongruencia de rollout que NO se debe ocultar:** `main` incluye `MapView` real pero F14 PR #35 lo limita a `import.meta.env.DEV`; requiere gate de entorno/coste antes de lanzar una versión combinada.
+- **Pospuestos:** backend de mensajería y notificaciones genéricas sin dependencia; no dejarlos aparentar funcionalidades reales dentro de la cuenta.
+- **Antes de beta externa:** resolución operativa acotada de reportes, contenido público y derechos de eliminación, más smoke del recorrido central en móvil. No activar purge automática ni mentir sobre CDN.
+
+Matriz detallada y evidencia: `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md`.
+
+### 2026-10-09 — corrección P0 de Onboarding/Auth
+
+El PR #36 incorporó manejo de alta sin sesión (email pendiente de verificación) y eliminó los valores de ejemplo `Luna / 3 años` del registro de mascota. Tests Node de resultados Auth y build con CI `37928358071` SUCCESS (commit `504f422`). Aún falta QA del correo real en entorno autorizado; recuperación de contraseña permanece un gap para Beta. Este trabajo no transforma la etapa en completada ni autoriza publicación.
+
+### 2026-10-09 — Recuperación de acceso: implementación inicial, QA alojada pendiente
+
+El PR #36 incluye `resetPasswordForEmail`, estado de `PASSWORD_RECOVERY`, formulario de contraseña nueva, protección contra errores y salida a login; utiliza el estándar de contraseña de signup. CI run `37930372739` PASS en commit `815cbda`. **No afirmar flujo completo hasta prueba de enlace de email real** y revisión de Redirect URLs en Auth; acceso Vercel al equipo `digitalapp` sigue 403. No se requiere migración ni nuevo proveedor para el MVP.
+
+### 2026-10-09 — No confundir error de carga con cuenta nueva
+
+PR #36 ahora protege la carga inicial de mascotas para usuarios autenticados: spinner, error recuperable y Reintentar ante fallos de `fetchOwnedPets`; A03 solo tras respuesta real con lista vacía. CI run `37931428416` SUCCESS commit `446b2c5`. GitHub confirma **build-rate-limit Vercel** además del 403 del scope `digitalapp`; sin QA en Preview, no habilitar plan pago. No reabrir F14 hardening ni mezclar las ramas por inercia.
+
+### 2026-10-09 — Feed con estado de error visible y cursores recuperables
+
+Fix P0 del carril MVP en PR #36: diferenciar Feed vacío de error de conexión; retry inicial y de página posterior, no disparar carga automática en bucle después de error, preservar cursores hasta éxito de enriquecimiento y no ignorar fallos de follows. Tests de cursor y gating de prueba; sin despliegue, no implica QA visual ni merge de `main`.
+
+### Checkpoint — aceptación funcional local por Product Owner (2026-10-09)
+
+El PO confirmó PASS de recorridos sociales/auth/feed y del funcionamiento general de los demás módulos en la worktree de PR #36, usando frontend en localhost y Supabase alojado. **No se repite smoke** salvo regresión o RC. Evidencia detallada y límites: `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md`.
+
+**Siguiente prioridad real** = gates de integración, correo Auth y operación mínima de seguridad/privacidad para beta; no implementar más módulos. F14 A2 sigue pausada/no completada; PR #35 y #34 requieren reconciliación de Mapa. Cambios estéticos de espacio field/botón pospuestos a F13.
