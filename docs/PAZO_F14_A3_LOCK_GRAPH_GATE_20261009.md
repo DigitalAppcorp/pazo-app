@@ -21,7 +21,7 @@ Fecha 2026-10-09. PR #38 DRAFT. Auditoría de catálogo Supabase READ ONLY y del
 
 - Dos conexiones simultáneas: transición A3 versus bloqueo A/B y B/A; follow INSERT/DELETE y unblock. Registrar éxito, rechazo 42501, timeouts y SQLSTATE 40P01, sin ignorar deadlocks.
 - Repetir con checkin INSERT/UPDATE/DELETE, expiración, UPSERT presence y cascada del checkin; comprobar limpieza y ausencia de resurrección de presencia.
-- Validar grants/RLS y permisos reales de authenticated, anon y service_role para los nueve borradores; probar cadenas completas de triggers y FKs.
+- Validar grants/RLS y permisos reales de authenticated, anon y service_role para los diez borradores; probar cadenas completas de triggers y FKs.
 - Auditar todos los writers RPC, Edge, Auth y Storage API antes de cambiar readiness a true.
 - No crear sandbox pagado, aplicar DDL alojado, habilitar flags, desplegar ni fusionar por esta auditoría. Pedir gate específico cuando sea necesario.
 
@@ -32,3 +32,9 @@ Resultado: CI y fixtures pg_temp previos son evidencia parcial, nunca sustituyen
 La definición existente de `public.register_interaction_signal` (fuente `supabase/migrations/20261005101300_feed_like_save_integrity.sql`, verificada contra `pg_get_functiondef` alojado) en acciones `impression/view/comment/not_interested` toma `pet_private_metrics FOR UPDATE` **antes** de intentar INSERT a `interactions` y por tanto antes del A3 BEFORE guard propuesto. En cambio, `post_comments INSERT` pasa primero por A3 BEFORE y luego su AFTER llama a `private.adjust_pet_learning_tags`, que toma `pet_private_metrics FOR UPDATE`. Con el mismo actor/target y dos transacciones es posible un ciclo **metrics row → A3 advisory** frente a **A3 advisory → metrics row**; no se afirma que un deadlock ya haya ocurrido en producción.
 
 **Mitigación preparada, no aplicada:** `supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql`. Conserva `SECURITY INVOKER`, firma, permisos y acciones existentes; añade locks A3 de actor y dueño de post en orden UUID antes de cualquier escritura/métricas; relee propietarios tras la espera y aborta con SQLSTATE 40001 si cambian. La propuesta evita esta inversión específica pero **no certifica el grafo global**, otras RPC ni seguridad E2E. Pruebas estáticas en CI; todavía falta carrera de dos conexiones en DB aislada.
+
+## Modelo determinista CI y auditoría del catálogo (2026-10-09)
+
+- `scripts/f14-a3-lock-model.test.mjs` modela dos transacciones con un lock manager cooperativo, reproduciendo el ciclo posible `metrics→A3` vs `A3→metrics`. Verifica que el camino DRAFT `A3→metrics` elimina **ese ciclo específico** y prueba el efecto de ordenar locks A3 de actor/target. Lee además el SQL y la migración de comentarios para evitar divergencia trivial entre modelo y código.
+- **No es prueba de concurrencia PostgreSQL, ni prueba de RLS/triggers, ni demuestra ausencia de otros deadlocks.** No hay binario servidor PostgreSQL local en el contenedor, y no se ejecutan cargas entre sesiones sobre la DB PAZO alojada. Gate de DB aislada sigue ABIERTO.
+- Supabase `pg_class` consultado sin mutaciones: **31 tablas public ordinarias**; las 30 tablas con escrituras asociadas a cuentas están incluidas como nombres en el DRAFT. Única sin fence: `public.pet_places`, catálogo global de lugares sin user_id/owner_id de cuenta. La inspección de `has_table_privilege` y `pg_get_functiondef` confirma writers privilegiados en `private`, `place_private`, `document_private` y `rescue_private`; cada cadena deberá verificarse con triggers instalados en una DB aislada. No confundir este inventario con cobertura integral de Storage API.
