@@ -27,7 +27,7 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
         { heading: 'Información privada', text: 'Cuidados, documentos de mascotas y ciertos reportes de rescate requieren controles de acceso. No publiques contraseñas ni información privada dentro de comentarios o publicaciones públicas.' },
         { heading: 'Servicios utilizados', text: 'Supabase proporciona autenticación, base de datos y almacenamiento. El mapa utiliza Mapbox. La observabilidad y las herramientas de pruebas se revisan por separado antes de activarse al público.' },
         { heading: 'Moderación y archivos', text: 'Puedes denunciar contenido; las publicaciones retiradas se ocultan de las vistas sociales. El proceso de retirada de archivos y cachés, así como las solicitudes de eliminación de cuenta, todavía se están validando.' },
-        { heading: 'Retención y derechos', text: 'Puedes contactar a PAZO sobre privacidad y soporte mediante el correo indicado a continuación. Ya puedes enviar una solicitud de eliminación desde tu cuenta; la solicitud no borra datos automáticamente. El procedimiento real y los criterios de conservación siguen pendientes de validación para el lanzamiento.' },
+        { heading: 'Conservación y solicitudes', text: 'Los datos de cuenta, mascotas y publicaciones siguen almacenados mientras la cuenta está activa o hasta que se modifiquen o retiren mediante un proceso confirmado. No existe una purga automática general por antigüedad. Las denuncias y comunicaciones de soporte requieren revisión particular; las copias de respaldo y cachés pueden permanecer según cada proveedor. Puedes solicitar la baja desde tu cuenta o escribir al contacto indicado; solicitarla no elimina automáticamente tus datos. Los criterios finales están sujetos a verificación antes de publicar esta política.' },
       ],
     },
     en: {
@@ -40,7 +40,7 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
         { heading: 'Private information', text: 'Care schedules, pet documents and some rescue reports require access controls. Do not place passwords or private information in public posts or comments.' },
         { heading: 'Service providers', text: 'Supabase supports authentication, database and storage. The map uses Mapbox. Monitoring and testing tools are reviewed separately before public activation.' },
         { heading: 'Moderation and files', text: 'You can report content; removed posts are hidden from social views. Storage/cache removal and account-deletion requests are still undergoing verification.' },
-        { heading: 'Retention and requests', text: 'You can contact PAZO for privacy and support using the email below. You can already submit an account-deletion request from your account; submitting it does not automatically erase data. The actual process and retention criteria still require verification before launch.' },
+        { heading: 'Retention and requests', text: 'Account, pet and post data currently remain stored while the account is active or until modified or removed through a verified process. There is no general automatic age-based purge. Moderation reports and support correspondence require individual review; provider backups and caches may persist. You can request account deletion from your account or write to the contact below; submitting a request does not automatically erase your data. Final retention criteria require verification before publishing this policy.' },
       ],
     },
   },
