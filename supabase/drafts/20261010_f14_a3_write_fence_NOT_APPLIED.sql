@@ -25,6 +25,25 @@ REVOKE ALL ON account_requests_private.deletion_frozen_targets FROM PUBLIC,anon,
 -- No direct writes from client or service_role. Only audited definer RPC
 -- may populate snapshots and freeze while holding request/target row locks.
 
+-- Technical-only snapshot of third-party contributions. It stores no
+-- message text, media URLs, coordinates, emails or telephone numbers.
+-- Capture under the SAME request lock/transaction as the freeze, so a
+-- follow-up verification can detect a lost reply after a CASCADE.
+CREATE TABLE account_requests_private.deletion_third_party_evidence (
+  subject_user_id uuid NOT NULL
+    REFERENCES account_requests_private.deletion_requests(subject_user_id),
+  contribution_kind text NOT NULL
+    CHECK (contribution_kind IN ('feed_reply','community_reply','community_post')),
+  contribution_id uuid NOT NULL,
+  author_id uuid NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+  PRIMARY KEY (subject_user_id,contribution_kind,contribution_id)
+);
+ALTER TABLE account_requests_private.deletion_third_party_evidence
+  ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON account_requests_private.deletion_third_party_evidence
+  FROM PUBLIC,anon,authenticated,service_role;
+
 -- Per-path, short-lived media grant. No Storage API can pass a SQL
 -- transaction-local GUC across HTTP requests, so DELETE must be authorized
 -- by an exact, server-issued generation+lease grant. An UPDATE or INSERT
@@ -586,6 +605,36 @@ BEGIN
       FROM storage.objects o WHERE o.owner_id=p_subject_user_id::text
     ON CONFLICT DO NOTHING;
 
+  -- Save exact third-party comment/post row identity before either
+  -- author ownership or FK relationships are detached. Avoid copying body.
+  INSERT INTO account_requests_private.deletion_third_party_evidence
+    (subject_user_id,contribution_kind,contribution_id,author_id)
+  SELECT p_subject_user_id,'feed_reply',c.id,c.author_pet_id
+  FROM public.post_comments c
+  JOIN public.posts p ON p.id=c.post_id
+  JOIN public.pets authorpet ON authorpet.id=c.author_pet_id
+  WHERE (p.user_id=p_subject_user_id OR EXISTS(
+    SELECT 1 FROM public.pets ownpet
+    WHERE ownpet.id=p.pet_id AND ownpet.owner_id=p_subject_user_id))
+    AND authorpet.owner_id<>p_subject_user_id
+  UNION ALL
+  SELECT p_subject_user_id,'community_reply',c.id,c.author_pet_id
+  FROM public.community_post_comments c
+  JOIN public.community_posts cp ON cp.id=c.post_id
+  JOIN public.pets authorpet ON authorpet.id=c.author_pet_id
+  WHERE (cp.author_user_id=p_subject_user_id OR EXISTS(
+    SELECT 1 FROM public.pets ownpet
+    WHERE ownpet.id=cp.author_pet_id
+      AND ownpet.owner_id=p_subject_user_id))
+    AND authorpet.owner_id<>p_subject_user_id
+  UNION ALL
+  SELECT p_subject_user_id,'community_post',cp.id,cp.author_user_id
+  FROM public.community_posts cp
+  JOIN public.communities community ON community.id=cp.community_id
+  WHERE community.owner_user_id=p_subject_user_id
+    AND cp.author_user_id<>p_subject_user_id
+  ON CONFLICT DO NOTHING;
+
   UPDATE account_requests_private.deletion_requests
   SET status='processing',updated_at=v_now
   WHERE subject_user_id=p_subject_user_id AND status='requested';
@@ -610,6 +659,77 @@ $a3_start$;
 REVOKE ALL ON FUNCTION public.f14_a3_start_processing(uuid,uuid,uuid,bigint)
   FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.f14_a3_start_processing(uuid,uuid,uuid,bigint)
+  TO service_role;
+
+-- Read-only strict survival proof for the exact frozen contribution IDs.
+-- Count equality alone is insufficient: another row could replace the
+-- deleted contribution. Verify identity and original author's pet/account.
+-- This does NOT assert whether media, text, retentions or Auth were removed.
+CREATE OR REPLACE FUNCTION public.f14_a3_verify_other_users_survived(
+  p_subject_user_id uuid,p_reviewer_user_id uuid,
+  p_lease_token uuid,p_revision bigint
+)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_survival$
+DECLARE
+  v_expected bigint;
+  v_missing bigint;
+  v_now timestamptz:=pg_catalog.clock_timestamp();
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'service_role'
+    OR p_subject_user_id IS NULL OR p_reviewer_user_id IS NULL
+    OR p_lease_token IS NULL OR p_revision IS NULL
+    OR NOT EXISTS(
+      SELECT 1 FROM account_requests_private.deletion_review_jobs j
+      JOIN account_requests_private.deletion_requests req
+        ON req.subject_user_id=j.subject_user_id
+      JOIN account_requests_private.deletion_review_operators op
+        ON op.operator_user_id=j.reviewer_user_id
+      WHERE req.status='processing'
+        AND j.subject_user_id=p_subject_user_id
+        AND j.reviewer_user_id=p_reviewer_user_id
+        AND j.lease_token=p_lease_token AND j.revision=p_revision
+        AND j.lease_expires_at>v_now
+        AND j.phase NOT IN ('review_request','freeze_writes')
+    ) THEN
+    RAISE EXCEPTION 'A3 preservation verification unavailable' USING ERRCODE='42501';
+  END IF;
+
+  SELECT count(*) INTO v_expected
+  FROM account_requests_private.deletion_third_party_evidence e
+  WHERE e.subject_user_id=p_subject_user_id;
+
+  SELECT count(*) INTO v_missing
+  FROM account_requests_private.deletion_third_party_evidence e
+  WHERE e.subject_user_id=p_subject_user_id
+    AND (
+      (e.contribution_kind='feed_reply' AND NOT EXISTS(
+        SELECT 1 FROM public.post_comments c
+        WHERE c.id=e.contribution_id AND c.author_pet_id=e.author_id
+      ))
+      OR
+      (e.contribution_kind='community_reply' AND NOT EXISTS(
+        SELECT 1 FROM public.community_post_comments c
+        WHERE c.id=e.contribution_id AND c.author_pet_id=e.author_id
+      ))
+      OR
+      (e.contribution_kind='community_post' AND NOT EXISTS(
+        SELECT 1 FROM public.community_posts p
+        WHERE p.id=e.contribution_id AND p.author_user_id=e.author_id
+      ))
+    );
+
+  RETURN pg_catalog.jsonb_build_object(
+    'expected_contributions',v_expected,
+    'missing_contributions',v_missing,
+    'survival_verified',v_missing=0,
+    'destructive_execution_allowed',false
+  );
+END
+$a3_survival$;
+REVOKE ALL ON FUNCTION public.f14_a3_verify_other_users_survived(uuid,uuid,uuid,bigint)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_verify_other_users_survived(uuid,uuid,uuid,bigint)
   TO service_role;
 
 -- Blockers requiring integration testing before removing top RAISE:
