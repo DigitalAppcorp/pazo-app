@@ -1,8 +1,8 @@
 # PAZO — Auditoría técnica pre-lanzamiento | 2026-10-10
 
-**Rama auditada:** `release/mvp-beta-fast-track-20261010`  
-**HEAD inicial:** `beefa73e17b7e35b5a25a39b541185af1d9ce57a`  
-**Supabase:** proyecto autorizado `mrybvqdebbgcayuvgkkr`  
+**Rama auditada:** `release/mvp-beta-fast-track-20261010`
+**HEAD inicial:** `beefa73e17b7e35b5a25a39b541185af1d9ce57a`
+**Supabase:** proyecto autorizado `mrybvqdebbgcayuvgkkr`
 **Alcance:** F14 moderación/media, permisos hosted, PWA local y configuración del RC. Lecturas Supabase de solo lectura; ninguna migración, función, bandera, Storage, usuario, Vercel o `main` fue modificada.
 
 ## A — Ensayo E2E de baja
@@ -58,6 +58,8 @@ La selección de mascota se guarda bajo `active_pet_<user.id>`; otros datos del 
 - `ErrorBoundary`, watchdogs de sesión/perfil, mensajes de recuperación y fallback offline cubren errores básicos de carga. No se rehizo QA aprobada de módulos.
 
 ## Gates restantes
+
+Validación local: `npm run test:governance` (91 pruebas) y `npm run build` PASS; PWA runtime local PASS. ESLint dirigido a los archivos cambiados PASS. El lint completo del repositorio conserva 107 errores y 6 advertencias preexistentes. GitHub Actions CI #672 PASS para el primer commit publicado de esta auditoría; el push documental final dispara su propio run.
 
 - F14 integral no está cerrada: medio de moderación aún no retirado físicamente; operación futura requiere autorización separada y una sola prueba de objeto descartable, sin terceras personas.
 - F15 es parcial: faltan Preview HTTPS, prueba instalada/standalone Android e iOS, prueba de logout/cambio de cuenta con identidades de test autorizadas, y configuración Mapbox en el entorno Preview.
