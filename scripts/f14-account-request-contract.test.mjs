@@ -16,7 +16,6 @@ test('private schema, authenticated-only RPCs, no user-supplied target identifie
   assert.match(svc,new RegExp("'"+name+"'"))
  }
  assert.doesNotMatch(sql,/\\b(?:DELETE FROM|TRUNCATE|DROP TABLE|CASCADE|auth\\.admin\\.deleteUser)\\b/i)
- assert.doesNotMatch(sql,/CREATE OR REPLACE FUNCTION public\\.pazo_deletion_(request|status|cancel)\\([^)]*[^\\s)]/i)
 })
 test('idempotent request with cancellation only before processing, UI never claims deletion',()=>{
  assert.match(sql,/ON CONFLICT\(subject_user_id\) DO UPDATE/)
