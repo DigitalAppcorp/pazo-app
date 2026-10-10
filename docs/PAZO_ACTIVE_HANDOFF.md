@@ -43,3 +43,6 @@ Revisar **cierre legal/operativo del RC**, trabajando en código y docs ES/EN so
 
 ## Decisión PO — PostHog fuera del MVP (2026-10-10)
 - El Product Owner descarta usar PostHog hasta nuevo aviso porque aún no existen usuarios externos que analizar. No dedicar tiempo a dashboards ni ingestión. Conservar integración en código, sin activar token en beta; validar ausencia de `VITE_POSTHOG_PROJECT_TOKEN` en configuración de publicación cuando se autorice el gate de despliegue. No modificar Vercel por ahora. Las métricas básicas existentes de Supabase no se alteran. La revisión legal de servicios debe diferenciar proveedor opcional inactivo de servicio activo. No tocar Codex, main ni A3.
+
+## Avance legal acotado (2026-10-10)
+- `src/features/legal/legalCopy.ts` actualizado ES/EN (`5a9135e`): PostHog explícitamente excluido de beta y Unsplash declarado como anfitrión de imagen externa. Prueba contractual ES/EN actualizada (`69e6097`). No se cambió telemetría, imágenes, Auth ni datos; `LEGAL_RELEASE_READY=false` y no hay políticas definitivas. Antes de publicar, comprobar que no exista token PostHog activo en el entorno de lanzamiento; no tocar Vercel ahora. Falta CI del HEAD actual y resultado Codex de eliminación. No repetir QA aprobada, no tocar main/A3/Supabase.
