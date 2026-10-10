@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { legalPreview, type LegalKind, type LegalLanguage } from './legalCopy'
+import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact'
 
 interface Props { kind: LegalKind; lang: LegalLanguage; onClose: () => void }
 
@@ -41,6 +42,18 @@ export function LegalPreviewDialog({ kind, lang, onClose }: Props) {
               <p className="mt-1 text-xs leading-relaxed text-[#5C7470]">{section.text}</p>
             </section>
           ))}
+        </div>
+        <div className="mt-5 rounded-2xl bg-white px-4 py-4">
+          <p className="text-xs font-bold">{lang === 'es' ? 'Privacidad y soporte' : 'Privacy and support'}</p>
+          <a href={PAZO_PRIVACY_SUPPORT_MAILTO}
+            className="mt-2 inline-block break-all text-sm font-semibold text-[#204E4A] underline underline-offset-4 focus-visible:bg-[#E1E53F]">
+            {PAZO_PRIVACY_SUPPORT_EMAIL}
+          </a>
+          <p className="mt-2 text-xs leading-relaxed text-[#5C7470]">
+            {lang === 'es'
+              ? 'Este correo recibe consultas de privacidad y soporte. Escribirnos no elimina tu cuenta automáticamente.'
+              : 'This inbox accepts privacy and support questions. Emailing us does not automatically delete your account.'}
+          </p>
         </div>
         <button type="button" onClick={onClose}
           className="mt-6 w-full rounded-full bg-[#204E4A] py-3 text-xs font-extrabold text-white focus-visible:bg-[#356D67]">
