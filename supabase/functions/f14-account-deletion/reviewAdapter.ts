@@ -178,3 +178,35 @@ export async function claimA3ReviewLease(
   if (error) throw new A3ReviewDenied()
   return parseA3ReviewLease(data)
 }
+
+/**
+ * Confirmation only: an Auth session created AFTER the account request was
+ * opened is still present, fresh and tied to the EXACT lease + reviewer.
+ * The service-side RPC rechecks all dates and authorization on every call.
+ * It neither freezes writes nor authorizes erasure.
+ */
+export async function verifyA3RecentSignin(
+  admin: A3PrivilegedClient,
+  operatorJwt: string,
+  subjectUserId: string,
+  lease: Readonly<A3LeaseReceipt>,
+): Promise<{recentSigninVerified: true; destructiveExecutionAllowed: false}> {
+  if (!lease || typeof lease !== 'object'
+      || !Number.isSafeInteger(lease.revision) || lease.revision < 2
+      || typeof lease.leaseToken !== 'string' || !UUID.test(lease.leaseToken)
+      || typeof lease.expiresAt !== 'string'
+      || !Number.isFinite(Date.parse(lease.expiresAt))
+      || lease.stage !== 'review_request'
+      || lease.destructiveExecutionAllowed !== false) {
+    throw new A3ReviewDenied()
+  }
+  const operatorId = await authorizeOperator(admin, operatorJwt, subjectUserId)
+  const checked = await admin.rpc('f14_a3_reauth_evidence_valid', {
+    p_operator_user_id: operatorId,
+    p_subject_user_id: subjectUserId,
+    p_lease_token: lease.leaseToken,
+    p_revision: lease.revision,
+  }).catch(() => { throw new A3ReviewDenied() })
+  if (checked.error || checked.data !== true) throw new A3ReviewDenied()
+  return {recentSigninVerified: true, destructiveExecutionAllowed: false}
+}
