@@ -335,3 +335,20 @@ El preflight analiza interacciones Feed originadas por terceros (explícitas e i
 ### 24.8 Hilos con autor eliminado: política aprobada, draft NO aplicado
 
 La estructura propuesta `author_deleted_at` conserva únicamente el identificador de hilo, estado de anonimización, fecha y referencias a comentarios ajenos; reemplaza texto, imágenes, nombres, ubicación, etiquetas y metadatos de autor por valores neutrales. La baja de Auth/mascota no debe destruir esas respuestas por cascada. Los nuevos triggers impiden interacciones posteriores, incluyendo escrituras directas sin interfaz. La redacción sólo podrá usarse como parte de una solicitud de eliminación `processing` con Storage y archivos externos verificados fuera de SQL. No se ha instalado la migración ni borrado usuarios, comentarios ni medios. Seguridad de datos de terceras personas y procedimiento final de solicitudes siguen pendientes antes de beta pública.
+
+## F14 A3 — revisión de baja supervisada (código y SQL NO APLICADO, 2026-10-10)
+
+La preparación A3 en `src/features/account/deletionExecutionPlan.ts`,
+`src/features/account/mediaManifest.ts` y
+`supabase/drafts/20261010_f14_a3_supervised_review_NOT_APPLIED.sql`
+modela **sin almacenar nuevos datos reales** una revisión privada del cierre de cuenta.
+
+**Campos previstos del contrato de revisión (no instalados):**
+- `subject_user_id` (UUID del solicitante, recuperado de una solicitud existente), `reviewer_user_id` (UUID interno del operador), hora de reautenticación reciente y revisión;
+- fase, revisión monotónica, token/expiración de arrendamiento de operación y código sanitizado de incidencia;
+- eventos mínimos `requested/blocked/reviewed/failed`, sin contraseña, correo, nombres de mascotas, nombres o rutas de archivos, URLs, ubicación, textos de posts ni contenido de documentos;
+- agregados de preflight para contribuciones cruzadas, mascotas, cuidado, documentos y objetos Storage; los totales no autorizan borrados.
+
+**Acceso previsto:** esquema `account_requests_private`, sin grants para `anon`/`authenticated` ni exposición al frontend. API de revisión solo para `service_role`, y gate humano exacto que requiere todavía verificación y aprobación. No se habilita telemetry ni sesión grabada.
+
+**Pendiente legal:** duración y borrado de journal/lease de operador, políticas efectivas de retención de terceros, backups/logs y CDN. No publicar una garantía temporal ni conservar UUID eternamente por omisión. Ningún dato se ha borrado o recolectado por este cambio documental y de código.
