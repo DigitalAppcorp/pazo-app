@@ -22,7 +22,7 @@ export interface A3PrivilegedClient {
       error: unknown
     }>
   }
-  rpc(name: string, args: Record<string, string>): Promise<{
+  rpc(name: string, args: Record<string, unknown>): Promise<{
     data: unknown
     error: unknown
   }>
@@ -173,7 +173,7 @@ export async function claimA3ReviewLease(
   const {data, error} = await admin.rpc('f14_a3_review_claim', {
     p_operator_user_id: operatorId,
     p_subject_user_id: subjectUserId,
-    ...(expectedRevision === null ? {} : {p_expected_revision: String(expectedRevision)}),
+    ...(expectedRevision === null ? {} : {p_expected_revision: expectedRevision}),
   }).catch(() => { throw new A3ReviewDenied() })
   if (error) throw new A3ReviewDenied()
   return parseA3ReviewLease(data)
