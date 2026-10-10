@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { getA3ReviewInventory, parseA3ReviewInventory, A3ReviewDenied } from './reviewAdapter.ts'
+import { getA3ReviewInventory, claimA3ReviewLease, parseA3ReviewInventory, A3ReviewDenied } from './reviewAdapter.ts'
 
 const OPERATOR = '11111111-1111-4111-8111-111111111111'
 const SUBJECT = '22222222-2222-4222-8222-222222222222'
@@ -105,5 +105,77 @@ test('malformed count, unexpected permission and incomplete report fail closed',
     {...inventory,owned_pets:undefined},
   ]) {
     assert.throws(()=>parseA3ReviewInventory(report),A3ReviewDenied)
+  }
+})
+
+test('server-only lease claim returns a review-only receipt and exact CAS revision', async () => {
+  const calls = []
+  const response = {
+    revision: 2,
+    lease_token: '33333333-3333-4333-8333-333333333333',
+    expires_at: '2026-10-10T12:00:00Z',
+    stage: 'review_request',
+    destructive_execution_allowed: false,
+  }
+  const admin = {
+    auth:{ getUser: async () => ({data:{user:{id:OPERATOR}},error:null}) },
+    rpc: async (name, args) => {
+      calls.push({name,args})
+      return name === 'f14_a3_review_operator_authorized'
+        ? {data:true,error:null} : {data:response,error:null}
+    },
+  }
+  const receipt = await claimA3ReviewLease(admin,'valid-auth-token-for-operator-123',SUBJECT,null)
+  assert.deepEqual(receipt,{
+    revision:2,leaseToken:response.lease_token,expiresAt:response.expires_at,
+    stage:'review_request',destructiveExecutionAllowed:false,
+  })
+  assert.equal(calls.at(-1).name,'f14_a3_review_claim')
+  assert.deepEqual(calls.at(-1).args,{
+    p_operator_user_id:OPERATOR,p_subject_user_id:SUBJECT,
+  })
+  await claimA3ReviewLease(admin,'valid-auth-token-for-operator-123',SUBJECT,2)
+  assert.equal(calls.at(-1).args.p_expected_revision,'2')
+  assert.equal(calls.some(c=>/delete|freeze|processing|storage/i.test(c.name)),false)
+})
+
+test('denies malformed lease CAS and any lease granting deletion authority', async () => {
+  const verified = {
+    revision:2,lease_token:'33333333-3333-4333-8333-333333333333',
+    expires_at:'2026-10-10T12:00:00Z',stage:'review_request',
+    destructive_execution_allowed:false,
+  }
+  for (const invalid of [
+    {...verified,revision:0},
+    {...verified,lease_token:'forged'},
+    {...verified,stage:'processing'},
+    {...verified,destructive_execution_allowed:true},
+    {...verified,expires_at:'not-a-date'},
+    null,
+  ]) {
+    const admin = {
+      auth:{getUser:async()=>({data:{user:{id:OPERATOR}},error:null})},
+      rpc:async(name)=>({data:name==='f14_a3_review_operator_authorized'?true:invalid,error:null}),
+    }
+    await assert.rejects(
+      claimA3ReviewLease(admin,'valid-auth-token-for-operator-123',SUBJECT,1),A3ReviewDenied,
+    )
+  }
+  for (const revision of [-1,1.5,NaN,Infinity]) {
+    const {client,calls}=adapter()
+    await assert.rejects(
+      claimA3ReviewLease(client,'valid-auth-token-for-operator-123',SUBJECT,revision),A3ReviewDenied,
+    )
+    assert.equal(calls.length,0)
+  }
+})
+
+test('a lease cannot be obtained without a valid operator membership', async () => {
+  for (const config of [{grant:false},{authError:new Error('revoked')},{user:{id:SUBJECT}}]) {
+    const {client,calls}=adapter(config)
+    await assert.rejects(
+      claimA3ReviewLease(client,'valid-auth-token-for-operator-123',SUBJECT,null),A3ReviewDenied,
+    )
+    assert.ok(!calls.some(([name])=>name==='f14_a3_review_claim'))
   }
 })
