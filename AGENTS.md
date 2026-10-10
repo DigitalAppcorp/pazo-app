@@ -1,6 +1,6 @@
 # PAZO — Reglas permanentes para agentes
 
-**Project Brain OS version: 1.3.0**  
+**Project Brain OS version: 1.4.1**  
 Canonical OS: `DigitalAppcorp/project-brain-os`.
 
 Antes de cualquier modificación de código, base de datos, arquitectura o documentación de producto:
