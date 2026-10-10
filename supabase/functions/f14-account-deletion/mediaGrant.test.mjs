@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {authorizeA3MediaGrant,A3MediaGrantDenied} from './mediaGrant.ts'
+import {authorizeA3MediaGrant,checkpointA3MediaRemoval,verifyA3MediaCheckpoint,A3MediaGrantDenied} from './mediaGrant.ts'
 
 const operator='11111111-1111-4111-8111-111111111111'
 const subject='22222222-2222-4222-8222-222222222222'
@@ -62,5 +62,26 @@ test('cannot get grant with subject JWT, expired operator or DB deny',async()=>{
    x.client,'valid-jwt-token-for-operator',subject,lease,object),A3MediaGrantDenied)
   if(opts.user===null||opts.user?.id===subject||opts.authError)
     assert.ok(!x.calls.some(c=>c[0]==='f14_a3_allow_exact_media_remove'))
+ }
+})
+
+test('origin-delete receipt and retry use exact same verified operator and path',async()=>{
+ for(const [method,rpc] of [
+   [checkpointA3MediaRemoval,'f14_a3_checkpoint_media_removed'],
+   [verifyA3MediaCheckpoint,'f14_a3_media_checkpoint_valid'],
+ ]) {
+   const x=port()
+   assert.equal(await method(x.client,'valid-jwt-token-for-operator',subject,lease,object),true)
+   assert.equal(x.calls[1][0],rpc)
+   assert.equal(x.calls[1][1].p_object_version,object.objectVersion)
+   assert.equal(x.calls[1][1].p_path,object.path)
+ }
+})
+test('failed checkpoint or origin retry proof is not treated as success',async()=>{
+ for(const method of [checkpointA3MediaRemoval,verifyA3MediaCheckpoint]){
+  for(const value of [false,null,'true']) {
+    const x=port({grant:value})
+    await assert.rejects(method(x.client,'valid-jwt-token-for-operator',subject,lease,object),A3MediaGrantDenied)
+  }
  }
 })
