@@ -72,6 +72,12 @@ GRANT SELECT ON account_requests_private.deletion_review_operators TO service_ro
 GRANT SELECT ON account_requests_private.deletion_review_jobs TO service_role;
 GRANT SELECT ON account_requests_private.deletion_review_events TO service_role;
 
+-- The receipt stores no password, email, raw JWT or OTP.
+-- A successful post-request sign-in gets its own auth.sessions.id; a refresh
+-- of an older access token cannot satisfy a freshly created session.
+ALTER TABLE account_requests_private.deletion_review_jobs
+  ADD COLUMN reauth_session_id uuid;
+
 -- Privileged, purely READ-ONLY inventory. Non-zero values block blind cascade
 -- until a future server executor proves third-party archival and media cleanup.
 -- This is deliberately NOT a full deletion-ready determination.
@@ -233,6 +239,8 @@ BEGIN
       lease_token=v_token,
       lease_expires_at=v_until,
       revision=j.revision+1,
+      reauthenticated_at=NULL,
+      reauth_session_id=NULL,
       updated_at=v_now
   WHERE j.subject_user_id=p_subject_user_id AND j.revision=v_previous
   RETURNING j.revision INTO v_revision;
@@ -289,6 +297,127 @@ REVOKE ALL ON FUNCTION public.f14_a3_review_lease_valid(uuid,uuid,uuid,bigint)
 GRANT EXECUTE ON FUNCTION public.f14_a3_review_claim(uuid,uuid,bigint)
   TO service_role;
 GRANT EXECUTE ON FUNCTION public.f14_a3_review_lease_valid(uuid,uuid,uuid,bigint)
+  TO service_role;
+
+-- Records a new authenticated session created AFTER the owner's request.
+-- Called by the OWNER's own freshly signed-in JWT; NEVER accepts a user ID,
+-- password, OTP, email or session ID supplied as a function parameter.
+-- A session refresh of an older login is intentionally insufficient.
+CREATE OR REPLACE FUNCTION public.f14_a3_subject_record_recent_signin()
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_recent_owner$
+DECLARE
+  v_owner uuid := auth.uid();
+  v_session uuid;
+  v_request timestamptz;
+  v_started timestamptz;
+  v_job_revision bigint;
+  v_now timestamptz := pg_catalog.clock_timestamp();
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'authenticated'
+    OR v_owner IS NULL THEN
+    RAISE EXCEPTION 'Authenticated account required' USING ERRCODE='42501';
+  END IF;
+
+  -- auth.jwt() reflects a verified Supabase JWT, not user_metadata or JSON
+  -- from the HTTP request. Malformed/missing claim fails before any mutation.
+  IF COALESCE(auth.jwt()->>'session_id','') !~
+      '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
+-- the freeze of all writes and per-account reauthentication proof have NOT
+-- been independently verified. A proposed stage cannot grant delete access.
+-- Required next: private leased/CAS transition, operator enrollment,
+-- real Auth reauthentication binding, FK/third-party tombstone reconciliation,
+-- media manifest + Storage/CDN origin verification, Auth-session revocation,
+-- then a separately authorized executor and its end-to-end tests.
+COMMIT;
+ THEN
+    RAISE EXCEPTION 'Fresh session required' USING ERRCODE='42501';
+  END IF;
+  v_session := (auth.jwt()->>'session_id')::uuid;
+
+  SELECT r.requested_at INTO v_request
+  FROM account_requests_private.deletion_requests r
+  WHERE r.subject_user_id=v_owner AND r.status='requested';
+  IF v_request IS NULL THEN
+    RAISE EXCEPTION 'Active request required' USING ERRCODE='42501';
+  END IF;
+
+  SELECT s.created_at INTO v_started
+  FROM auth.sessions s
+  WHERE s.id=v_session AND s.user_id=v_owner
+    AND (s.not_after IS NULL OR s.not_after>v_now);
+  IF v_started IS NULL OR v_started < v_request
+    OR v_started > v_now OR v_started < v_now-INTERVAL '5 minutes' THEN
+    RAISE EXCEPTION 'New sign-in after request required' USING ERRCODE='42501';
+  END IF;
+
+  -- This row lock guards against operator lease rotation while recording
+  -- proof. The owner's password/token is never persisted.
+  SELECT j.revision INTO v_job_revision
+  FROM account_requests_private.deletion_review_jobs j
+  WHERE j.subject_user_id=v_owner AND j.phase='review_request'
+    AND j.lease_token IS NOT NULL AND j.lease_expires_at>v_now
+  FOR UPDATE;
+  IF v_job_revision IS NULL THEN
+    RAISE EXCEPTION 'Active review required' USING ERRCODE='42501';
+  END IF;
+
+  UPDATE account_requests_private.deletion_review_jobs
+  SET reauthenticated_at=v_now,reauth_session_id=v_session,updated_at=v_now
+  WHERE subject_user_id=v_owner AND revision=v_job_revision
+    AND lease_expires_at>v_now;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Review changed during sign-in' USING ERRCODE='40001';
+  END IF;
+  RETURN true; -- Reauthentication RECORDED, NOT a deletion authorization.
+END
+$a3_recent_owner$;
+
+-- Service read-back is bound to the SAME current reviewer, lease token,
+-- revision, pending request, and non-expired Auth session.
+CREATE OR REPLACE FUNCTION public.f14_a3_reauth_evidence_valid(
+  p_operator_user_id uuid,p_subject_user_id uuid,
+  p_lease_token uuid,p_revision bigint
+)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_recent_check$
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'service_role'
+    OR p_operator_user_id IS NULL OR p_subject_user_id IS NULL
+    OR p_lease_token IS NULL OR p_revision IS NULL THEN
+    RAISE EXCEPTION 'Service reviewer required' USING ERRCODE='42501';
+  END IF;
+  RETURN EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_review_jobs j
+    JOIN account_requests_private.deletion_review_operators op
+      ON op.operator_user_id=j.reviewer_user_id
+    JOIN account_requests_private.deletion_requests req
+      ON req.subject_user_id=j.subject_user_id AND req.status='requested'
+    JOIN auth.sessions ses
+      ON ses.id=j.reauth_session_id AND ses.user_id=j.subject_user_id
+    WHERE j.subject_user_id=p_subject_user_id
+      AND j.reviewer_user_id=p_operator_user_id
+      AND j.lease_token=p_lease_token
+      AND j.revision=p_revision
+      AND j.phase='review_request'
+      AND j.lease_expires_at>pg_catalog.clock_timestamp()
+      AND j.reauthenticated_at IS NOT NULL
+      AND j.reauthenticated_at>pg_catalog.clock_timestamp()-INTERVAL '5 minutes'
+      AND ses.created_at>=req.requested_at
+      AND ses.created_at<=j.reauthenticated_at
+      AND ses.created_at>=pg_catalog.clock_timestamp()-INTERVAL '5 minutes'
+      AND (ses.not_after IS NULL OR ses.not_after>pg_catalog.clock_timestamp())
+  );
+END
+$a3_recent_check$;
+
+REVOKE ALL ON FUNCTION public.f14_a3_subject_record_recent_signin()
+  FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.f14_a3_reauth_evidence_valid(uuid,uuid,uuid,bigint)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_subject_record_recent_signin()
+  TO authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_reauth_evidence_valid(uuid,uuid,uuid,bigint)
   TO service_role;
 
 -- No destructive stage-transition RPC, DELETE or UPDATE of intake is included:
