@@ -44,3 +44,20 @@ Proyecto `mrybvqdebbgcayuvgkkr`, verificado 2026-10-10 tras la sesión real del 
 > **Gate A3 mínimo — implementación en borrador:** Autorizar preparar en la rama del PR #37 el ejecutor supervisado seguro y su migración **sin aplicar**, reutilizando los componentes y tests útiles del PR #38. Está prohibido efectuar borrados o escrituras remotas, desplegar Edge, activar banderas, modificar Vercel o fusionar PRs hasta autorizaciones posteriores separadas.
 
 **Criterio de éxito inmediato:** CI PASS de la implementación propuesta + revisión de diff/contratos y lista de cambios SQL que requerirán una aprobación única específica posterior. Mientras se espera ese gate, solo la solicitud y cancelación existentes están operativas.
+
+## 7. Checkpoint de implementación autorizada en borrador — 2026-10-10
+
+**Autorización PO:** a la pregunta de si autorizaba preparar código y migración A3 **sin aplicarla ni borrar datos**, respondió «muy bien». Interpretación limitada al desarrollo en el PR #37. No permiso para aplicar DDL, crear operadores reales, registrar bajas, probar con las 6 cuentas guardadas, publicar Edge, activar flags, merge o Vercel.
+
+**Artefactos realmente implementados en PR #37 bajo esta aprobación:**
+- `src/features/account/deletionExecutionPlan.ts`: contrato de 13 evidencias servidor, fases de revisión, evaluación estricta fail-closed y validación de lease/operador; indicador `A3_EXECUTION_RELEASE_APPROVED=false`. `deletionExecutionPlan.test.mjs` comprueba todas las puertas y denegaciones.
+- `src/features/account/mediaManifest.ts`: copia revisada del validador independiente del PR #38, acepta solo buckets/rutas exactas, origen y titular verificados, no compartidos ni duplicados, fence+lease. `mediaManifest.test.mjs` comprueba denegaciones y pruebas de origen/CDN.
+- `supabase/drafts/20261010_f14_a3_supervised_review_NOT_APPLIED.sql`: **NO ejecutado**; guard incondicional `RAISE EXCEPTION` al comienzo de la transacción; esquema propuesto privado para operadores (VACÍO), etapas, lease y eventos. Incluye consulta agregada de preflight service-only; nunca mueve el estado del intake ni elimina Auth, tablas o Storage. **No es migración aplicable tal cual.**
+- `supabase/functions/f14-account-deletion/index.ts`: endpoint candidato **NO desplegado**, responde 503 porque su switch inmutable es falso. No trae service_role al navegador ni ejecuta operaciones reales.
+- `scripts/f14-a3-review-contract.test.mjs` + test suite MVP del `package.json`: protege la no activación y ausencia de deletes. Inventario `docs/PAZO_DATA_INVENTORY.md` actualizado para metadatos previstos (aún no recolectados).
+
+**Alcance pendiente y no simulado como completo:** aún NO hay una implementación de executor que realice paso a paso preservación de terceros, limpieza de dependencias, retiro real Storage y verificación de URL, invalidación de sesiones y `auth.admin.deleteUser` al final. El SQL no tiene transiciones ni write-fence activo. No confundir «código de revisión preparado» con «baja final programada», ni habilitar cambiando un flag. El próximo trabajo de desarrollo dentro del gate A3 debe suministrar ese servidor de ejecución y las dependencias de escritura/concurrencia con pruebas antes de pedir aplicación de migración.
+
+**Evidencia:** CI para el commit de código/contratos `12b18d9a`: GitHub Actions #463 SUCCESS. Los commits de documentación posteriores necesitan verificar su propio CI. SQL no fue ejecutado ni validado contra Supabase mediante BEGIN/ROLLBACK: el PO no aprobó operaciones DB bajo este gate.
+
+**Regla rápida:** no fragmentar esto en múltiples autorizaciones de borrador; el PO ya aprobó preparar el código. Las autorizaciones siguientes se solicitarán solo cuando exista código de ejecución completo y un diff/migración concretos para instalar o realizar pruebas destructivas, o si hay una decisión de privacidad/operador indispensable que el PO deba tomar.
