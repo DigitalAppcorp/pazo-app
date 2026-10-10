@@ -4,7 +4,7 @@ import { LEGAL_RELEASE_READY, PAZO_LEGAL_EFFECTIVE_DATE, PAZO_LEGAL_OPERATOR_NAM
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact.ts'
 import { readFileSync } from 'node:fs'
 
-test('beta privacy and terms are dated, bilingual and ready as release text', () => {
+test('beta privacy and terms are bilingual and have no premature effective date', () => {
   assert.equal(LEGAL_RELEASE_READY, true)
   for (const kind of ['privacy','terms']) for (const lang of ['es','en']) {
     const copy=legalPreview[kind][lang]
@@ -13,9 +13,14 @@ test('beta privacy and terms are dated, bilingual and ready as release text', ()
     assert.ok(copy.sections.length>=5)
     assert.ok(copy.sections.every(s=>s.heading && s.text))
   }
-  assert.equal(PAZO_LEGAL_EFFECTIVE_DATE, '2026-10-10')
-  assert.match(legalPreview.privacy.es.alert,/10 de octubre de 2026/)
-  assert.match(legalPreview.terms.en.alert,/October 10, 2026/)
+  assert.equal(PAZO_LEGAL_EFFECTIVE_DATE, null)
+  assert.match(legalPreview.privacy.es.alert,/fecha de vigencia se fijará al publicar/i)
+  assert.match(legalPreview.privacy.en.alert,/effective date will be set when the beta is published/i)
+  assert.match(legalPreview.terms.es.alert,/fecha de vigencia se fijará al publicar/i)
+  assert.match(legalPreview.terms.en.alert,/effective date will be set when the beta is published/i)
+  for (const kind of ['privacy','terms']) for (const lang of ['es','en']) {
+    assert.doesNotMatch(legalPreview[kind][lang].alert,/October 10, 2026|10 de octubre de 2026/)
+  }
 })
 test('truthful disclosure: no false claims of deletion or public purchases', () => {
   const privacy=legalPreview.privacy.es.sections.map(x=>x.text).join(' ')

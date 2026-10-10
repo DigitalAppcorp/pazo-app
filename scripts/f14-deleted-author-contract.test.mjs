@@ -46,9 +46,9 @@ test('feed recommendation retains anonymous reply threads, not moderated removal
   'CREATE OR REPLACE FUNCTION public.get_recommended_posts_page',
   'LEFT JOIN public.pets candidate_pet',
   'candidate.author_deleted_at IS NOT NULL',
-  'EXISTS(\n        SELECT 1 FROM public.post_comments pc WHERE pc.post_id=candidate.id',
   "public.f14_content_visible('feed_post',candidate.id)"
  ])assert.ok(sql.includes(v.replace('\\n','\n')),v)
+ assert.match(sql,/EXISTS\(\s*SELECT 1 FROM public\.post_comments pc WHERE pc\.post_id=candidate\.id\s*\)/)
 })
 
 test('legacy and externally hosted media cannot be treated as verified deleted objects',()=>{

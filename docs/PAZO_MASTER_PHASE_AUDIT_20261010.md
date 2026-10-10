@@ -61,3 +61,8 @@
 - Subrutas F7, F8, F9B, F12; `docs/PAZO_MVP_MODULE_PRIORITY.md`, `docs/PAZO_UI_QUALITY_GATE.md`, `docs/PAZO_MVP_FUNCTIONAL_AUDIT_20261009.md`.
 - `src/components/modals/MessagesModal.tsx`, `src/features/moderation/ModerationMediaQueue.tsx`, `src/features/legal/legalCopy.ts`, `index.html`, `vite.config.ts`, repositorio `tree?recursive=1` para ausencia de manifest.
 - No se consultó el contenido privado de Auth/Storage ni se ejecutaron nuevas pruebas E2E. Hallazgos de código no equivalen a QA en navegador.
+# **ACTUALIZACIÓN POSTERIOR — AUDITORÍA PRELANZAMIENTO 2026-10-10**
+
+Leer [`PAZO_PRELAUNCH_TECH_AUDIT_20261010.md`](PAZO_PRELAUNCH_TECH_AUDIT_20261010.md) para la comprobación F14/F15 vigente. El ensayo de baja Codex descrito como pendiente más abajo terminó PASS en esta fecha; no repetirlo. La rama ya contiene manifest, PNG generados y SW network-only (ver banner F15 que sigue); instalación HTTPS Android/iOS no comprobada. F14 integral no está cerrada: el endpoint de retirada de medios permanece bloqueado.
+
+Read-only Supabase confirma que las cuatro tablas `moderation_private` con RLS desactivada no tienen USAGE/SELECT/INSERT para `anon` ni `authenticated`. El Security Advisor también advierte `public.f14_content_visible` ejecutable por `anon`; la función retorna únicamente booleano y es dependencia de cinco políticas RLS de lectura pública. No es evidencia de lectura directa de reportes y no se cambió RLS.

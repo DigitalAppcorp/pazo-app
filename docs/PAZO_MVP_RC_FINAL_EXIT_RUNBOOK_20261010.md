@@ -40,3 +40,6 @@ Codex debe informar PASS/FAIL documentado sobre **su única cuenta QA** según `
 
 **PREPARACIÓN INDEPENDIENTE CERRADA EN DOCUMENTOS, NO RELEASE READY.**
 No quedan cambios técnicos independientes identificados. **Única validación funcional pendiente: PASS de Codex en baja manual.** CI y textos legales quedan cerrados para el RC. Publicación/merge siguen necesitando autorización expresa del Product Owner; eso no es una prueba ni una nueva fase de desarrollo.
+# **ESTADO MÁS RECIENTE — AUDITORÍA PRELANZAMIENTO 2026-10-10**
+
+Consultar [`PAZO_PRELAUNCH_TECH_AUDIT_20261010.md`](PAZO_PRELAUNCH_TECH_AUDIT_20261010.md): Codex E2E de baja PASS; CI local/Actions del commit de auditoría se debe comprobar al publicar el cambio. El flag de solicitud pública de baja continúa sujeto a disponer del operador. `f14-moderation-purge` v5 sigue bloqueada y no se ensayó una retirada física; F14 queda parcial. F15 PWA estática/local queda parcial hasta Preview HTTPS e instalación Android/iOS. El aviso legal se fecha al publicar. Mapbox falta configurar en el entorno de Preview. Antes del GO/NO-GO, recordar F13 PLANIFICADA para decisión expresa del PO. No se alteró Vercel, hosted SQL ni `main`.
