@@ -205,6 +205,15 @@ BEGIN
    WHERE o.community_id=v_community.id AND o.owner_user_id=p_subject_user_id
    AND o.status='pending' AND o.expires_at>pg_catalog.clock_timestamp())
   THEN RAISE EXCEPTION 'Community has pending transfer acceptance'; END IF;
+  -- No community continuity path may conceal a later cascade of replies
+  -- owned by another account on posts written by the departing account.
+  IF EXISTS(SELECT 1 FROM public.community_post_comments cc
+     JOIN public.community_posts cp ON cp.id=cc.post_id
+     JOIN public.pets pet ON pet.id=cc.author_pet_id
+     WHERE cp.community_id=v_community.id
+       AND cp.author_user_id=p_subject_user_id
+       AND pet.owner_id<>p_subject_user_id)
+  THEN RAISE EXCEPTION 'Other users comments on departing owner posts require preservation'; END IF;
   UPDATE public.communities SET status='archived',owner_user_id=NULL
    WHERE id=v_community.id AND owner_user_id=p_subject_user_id;
   UPDATE public.community_memberships SET role='member'

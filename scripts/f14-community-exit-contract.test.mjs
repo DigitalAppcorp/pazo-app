@@ -57,3 +57,14 @@ test('UI and Supabase client remain gated until reviewed migration is installed'
  assert.match(types,/export type CommunityRole = 'owner' \| 'admin' \| 'member'/)
  assert.match(types,/ownerUserId: string \| null/)
 })
+
+test('archive refuses to hide third-party reply loss on departing owner posts',()=>{
+ for(const fragment of ['JOIN public.community_post_comments', 'cp.author_user_id=p_subject_user_id',
+ 'pet.owner_id<>p_subject_user_id',
+ 'Other users comments on departing owner posts require preservation']) {
+   // Name of JOIN in SQL is community_post_comments cc, not an ALTER or DELETE.
+   if(fragment==='JOIN public.community_post_comments')
+      assert.match(sql,/FROM public\.community_post_comments cc/)
+   else dbTest(fragment)
+ }
+})

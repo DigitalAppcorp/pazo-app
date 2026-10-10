@@ -7,6 +7,7 @@ export type AccountDeletionCounts = {
   owned_community_posts: number
   external_community_posts: number
   external_community_comments: number
+  external_comments_on_own_community_posts: number
   external_community_memberships: number
   external_feed_comments: number
   pet_documents: number
@@ -20,12 +21,12 @@ export type ReadinessResult = {
 export const ACCOUNT_DELETION_EXECUTION_ENABLED = false as const
 const countKeys: Array<keyof AccountDeletionCounts> = [
   'owned_pets','owned_feed_posts','owned_communities','owned_community_posts',
-  'external_community_posts','external_community_comments','external_community_memberships',
+  'external_community_posts','external_community_comments','external_comments_on_own_community_posts','external_community_memberships',
   'external_feed_comments','pet_documents','storage_objects','moderation_records'
 ]
 const thirdParty: ReadonlyArray<keyof AccountDeletionCounts> = [
   'external_community_posts','external_community_comments',
-  'external_community_memberships','external_feed_comments'
+  'external_comments_on_own_community_posts','external_community_memberships','external_feed_comments'
 ]
 export function evaluateAccountDeletionReadiness(
   counts: AccountDeletionCounts,

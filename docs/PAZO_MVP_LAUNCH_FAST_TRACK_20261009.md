@@ -159,3 +159,7 @@ La UI mínima `CommunityDetailView → Miembros` aparece solo con `VITE_F14_COMM
 ### Verificación del lote de continuidad — CI + pg_temp (2026-10-10)
 
 Código `4881ab7b` CI #38026921677 PASS. Se probó la **lógica de escenarios** en PostgreSQL creando cuatro tablas únicamente `TEMP ON COMMIT DROP` dentro de transacción `BEGIN/ROLLBACK`; ejemplo A: titularidad cambia al admin que acepta y se conservan los dos posts; B: oferta rechazada permite `archived+owner=NULL` y conserva el post del tercero; C: oferta vigente impide archivar. PASS, sin tocar relaciones reales. Estas pruebas validan invariantes de negocio simuladas, **no** garantizan compilación de toda la migración SQL ni el comportamiento final con triggers, RLS, JWT y dos sesiones. Para aprobar instalación se necesita gate PO de migración y después QA real aislada/rollback. No fusionar ni desplegar.
+
+### Protección adicional frente a pérdida de comentarios ajenos
+
+Incluso tras transferir una comunidad, el usuario saliente puede conservar posts propios allí. Un posterior DELETE de su Auth dispararía CASCADE sobre esos posts y comentarios ajenos. Se agregó el campo agregado `external_comments_on_own_community_posts` al preflight (autor del post, independiente del owner del grupo), con clasificación `blocked_third_party`; la función de archivo server-only falla si detecta esos comentarios en la comunidad. Ningún borrado, transferencia o archivo real se ejecutó. No confundir continuidad del grupo con seguridad del borrado de todos los posts.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {evaluateAccountDeletionReadiness,ACCOUNT_DELETION_EXECUTION_ENABLED} from './deletionPreflight.ts'
 function empty(){return {
  owned_pets:0,owned_feed_posts:0,owned_communities:0,owned_community_posts:0,
- external_community_posts:0,external_community_comments:0,external_community_memberships:0,
+ external_community_posts:0,external_community_comments:0,external_comments_on_own_community_posts:0,external_community_memberships:0,
  external_feed_comments:0,pet_documents:0,storage_objects:0,moderation_records:0,
 }}
 test('third-party content and memberships block a community-owner deletion',()=>{
@@ -32,4 +32,11 @@ test('malformed counts cannot drive deletion readiness',()=>{
  for (const n of [-1,NaN,Infinity,2.3,'2',null]){
   assert.throws(()=>evaluateAccountDeletionReadiness({...empty(),storage_objects:n}))
  }
+})
+
+test('after a community transfers, other users comments on departing owner posts are STILL blockers',()=>{
+ const result=evaluateAccountDeletionReadiness({...empty(),
+   owned_communities:0,owned_community_posts:1,external_comments_on_own_community_posts:2})
+ assert.equal(result.status,'blocked_third_party')
+ assert.ok(result.blockers.includes('external_comments_on_own_community_posts'))
 })

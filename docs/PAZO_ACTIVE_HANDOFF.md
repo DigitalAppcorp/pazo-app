@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | estado verificado 2026-10-09
 
+> **F14 ADICIÓN DE SEGURIDAD A PREVALIDACIÓN:** una transferencia de comunidad NO libera las dependencias de los posts del usuario saliente. Se añadió `external_comments_on_own_community_posts` al preflight por autor del post (no solo owner del grupo), para bloquear pérdida de respuestas de terceros incluso después del traspaso. La RPC service-only de archivo también rechaza el caso cuando existan tales comentarios. Código y SQL de continuidad en DRAFT, nunca aplicados; no cambia Auth, Storage ni RLS. Tests de regresión incluidos.
+
+
 > **F14 / CONTINUIDAD COMUNIDADES IMPLEMENTADA EN CÓDIGO — 2026-10-10:** PR #37 commit `4881ab7b`, CI #38026921677 PASS. Decisión PO: ofrecer traspaso solo a administrador designado con aceptación explícita; sin aceptación vigente archivar preservando publicaciones de otros usuarios. Migración `supabase/drafts/20261010_f14_community_ownership_continuity_NOT_APPLIED.sql` **NO APLICADA**: introduce rol `admin`, oferta de 7 días con aceptación/rechazo por receptor, RPC de archivo restringida a `service_role` y solicitudes `processing`, FK propietario `ON DELETE SET NULL` con CHECK para impedir comunidad activa sin propietario, y guard de membresía. UI propietario/candidato ES/EN oculta con `VITE_F14_COMMUNITY_OWNERSHIP_ENABLED` OFF. PG sintético en `pg_temp` con `BEGIN/ROLLBACK` PASS: transferencia consentida sin perder publicaciones, archivo sin perder contenido ajeno, oferta vigente bloquea archivo; **no es E2E de la migración real**, todavía requiere gate PO y QA aislada. Datos existentes sin cambios, Auth/Storage no borrados, Vercel/main intactos.
 
 

@@ -20,6 +20,10 @@ counts AS (
   JOIN public.communities c ON c.id=cp.community_id
   JOIN public.pets pet ON pet.id=cm.author_pet_id
   WHERE c.owner_user_id=q.user_id AND pet.owner_id<>q.user_id)::int AS external_community_comments,
+ (SELECT count(*) FROM public.community_post_comments cm
+  JOIN public.community_posts cp ON cp.id=cm.post_id
+  JOIN public.pets pet ON pet.id=cm.author_pet_id
+  WHERE cp.author_user_id=q.user_id AND pet.owner_id<>q.user_id)::int AS external_comments_on_own_community_posts,
  (SELECT count(*) FROM public.community_memberships member
   JOIN public.communities c ON c.id=member.community_id
   WHERE c.owner_user_id=q.user_id AND member.user_id<>q.user_id)::int AS external_community_memberships,
@@ -37,6 +41,7 @@ counts AS (
 SELECT user_id,
  CASE
   WHEN (external_community_posts+external_community_comments+
+        external_comments_on_own_community_posts+
         external_community_memberships+external_feed_comments)>0 THEN 'blocked_third_party'
   WHEN (owned_pets+owned_feed_posts+owned_communities+owned_community_posts+
         pet_documents+storage_objects+moderation_records)>0 THEN 'cleanup_required'
@@ -49,6 +54,7 @@ SELECT user_id,
   'owned_community_posts',owned_community_posts,
   'external_community_posts',external_community_posts,
   'external_community_comments',external_community_comments,
+  'external_comments_on_own_community_posts',external_comments_on_own_community_posts,
   'external_community_memberships',external_community_memberships,
   'external_feed_comments',external_feed_comments,
   'pet_documents',pet_documents,

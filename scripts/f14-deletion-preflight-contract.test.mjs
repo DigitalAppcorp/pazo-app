@@ -19,3 +19,11 @@ test('preflight is scoped to requested accounts only and never mutates data',()=
 test('deletion request entry is enabled in localhost only, never in production by default',()=>{
  assert.match(pet,/import\.meta\.env\.DEV\s*\|\|\s*import\.meta\.env\.VITE_F14_DELETION_REQUESTS_ENABLED\s*===\s*'true'/)
 })
+
+test('preflight includes third-party comments on owner posts EVEN AFTER ownership transfer',()=>{
+ for(const v of [
+  'AS external_comments_on_own_community_posts',
+  'cp.author_user_id=q.user_id AND pet.owner_id<>q.user_id',
+  "'external_comments_on_own_community_posts',external_comments_on_own_community_posts"
+ ])assert.ok(sql.includes(v),v)
+})
