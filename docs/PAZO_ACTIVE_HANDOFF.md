@@ -62,3 +62,20 @@ El Product Owner confirmó que sus pruebas locales pasaron. Se registra PASS vis
 - El PO precisó que el indicador inferior central SÍ debe decir `Versión` seguido del identificador numérico, por ejemplo `Versión 0.1.08229221`. La petición de usar solo números se refería al **identificador**, no a quitar la palabra «Versión».
 - `src/App.tsx` restablece `Versión {pazoBuildVersion}`, conserva ubicación inferior central, tipografía pequeña y discreta, sin contornos ni texto adicional (`local`, `modificado`). Commit de código `d52e0d38` en PR #37; comprobar CI de ese SHA por separado.
 - El resto de la funcionalidad y las restricciones de base de datos, Vercel, Auth y merge no cambian. La aceptación visual específica de este ajuste aún es independiente del CI.
+
+## Gate integrado de MVP — reconciliación no destructiva (2026-10-10)
+
+**Evidencia GitHub y CI:**
+- PR #37 HEAD auditado antes de este commit documental `25268442c53d5d2f4bfa5ad051de26c664a8764a` y CI #38037587661 **SUCCESS**; DRAFT, abierto, **no merged**. `main` continúa en `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`.
+- Comparación exacta #36 `beef7a68` → #37: `ahead_by=78`, `behind_by=0`; #37 contiene la base de código MVP #36, además de F14 y recovery/splash. Esto NO implica que el merge sea seguro ni autorizado. No duplicar #36.
+- PR #38 de baja A3 está **divergido** de #37 (`ahead_by=60`, `behind_by=69` al comparar #37 → #38). Incluye `AccountDeletionPanel`, coordinator y numerosos SQL `NOT_APPLIED`. **No cherry-pick/merge masivo**, ni reanudar 13 drafts; la decisión fast-track anterior lo mantiene pausado. Reutilizar ideas puntuales solo tras revisión de compatibilidad.
+- PR #35 DRAFT contiene trabajo avanzado F14 pero no se fusiona porque puede introducir guard de Mapa solo desarrollo. PR #34 es carril de validación de Lugares; no sustituye el `MapView` real ya conectado en #37.
+
+**Chequeo estático de P0:**
+- `src/App.tsx` mantiene `MapView` real en la navegación (no hay bandera `PLACES_MAP_DEVELOPMENT_ONLY` en ese archivo).
+- `src/features/legal/legalCopy.ts`: `LEGAL_RELEASE_READY=false`; aviso de borrador, **política pública aún no lista**.
+- `src/features/account/deletionPreflight.ts`: `ACCOUNT_DELETION_EXECUTION_ENABLED=false`; `deletionRequestState.ts`: `DELETION_EXECUTOR_ENABLED=false`; solicitud intake existe pero no permite prometer eliminación definitiva.
+- `supabase/functions/f14-moderation-purge/index.ts`: `F14_MEDIA_PURGE_RELEASE_APPROVED=false`; función bloqueada con respuesta 503. No habilitar por un simple cambio de bandera: verificar Storage/CDN y worker antes de Beta.
+- SELECT alojado tras último PASS visual: **6 Auth, 0 profiles, 1 pets, 0 posts, 1 Storage**. Ninguna purga/DDL/escritura aplicada durante esta auditoría. La migración de autor eliminado sigue NOT_APPLIED.
+
+**Decisión ejecutiva:** la integración de código #36 → #37 es consistente por ascendencia; **no está habilitada para merge o release** mientras F14 P0 esté pendiente. No repetir suites aprobadas ni desbloquear banderas artificialmente. Próximo paso de coste casi cero para el gate Auth: el PO comparte **el número exacto que ve junto a «Versión» en el splash del proyecto abierto en Antigravity**; se compara con el algoritmo vigente en `vite.config.ts`, teniendo en cuenta checkout modificado y reinicio Vite. Si el número coincide con un commit que contiene `ensureOwnAccountProfile`, confirmar Supabase `profiles` por SELECT y diagnosticar origen; si no, actualizar local con `git status` antes de cualquier pull. Este dato no reemplaza la evidencia de Auth real y no debe forzar pruebas reiteradas. En paralelo, trabajo siguiente de F14 exige un **único gate PO** para solución mínima de baja/media, nunca operaciones irreversibles por omisión.
