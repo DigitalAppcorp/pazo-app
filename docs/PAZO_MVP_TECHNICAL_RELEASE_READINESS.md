@@ -1,5 +1,13 @@
 # PAZO MVP — Technical Release Readiness
 
+## Recuperación SQL F14 y validación PostgreSQL (2026-10-10)
+
+Se recuperaron por consultas individuales READ ONLY las 17 entradas F14 aplicadas y se compararon con la rama RC. Quince SQL ausentes se archivaron sin cambios en `supabase/history/f14_applied/`; la entrada de ensayo `20261010043307` se archivó como extracto estructural con su operación puntual y UUID omitidos explícitamente. Su original ya estaba en `supabase/sql/f14_media_auth_role_compat_single_trial.sql`. La versión `20261010072555` ya estaba en migraciones y solo difiere en comentarios. El manifiesto del archivo incluye los MD5 de las fuentes originales.
+
+El esquema inicial PAZO no está versionado: la primera migración del repositorio requiere `public.interactions`, `public.posts` y `public.pet_private_metrics` preexistentes. Las migraciones F14 recuperadas tampoco son un sustituto de un dump estructural. La conexión Supabase disponible solo permite consultas SQL de lectura y no entrega credenciales PostgreSQL para `pg_dump --schema-only`; no se obtuvo un snapshot oficial de `public`, `moderation_private`, Auth y Storage. **Resultado PostgreSQL: BLOQUEADO**, sin prueba aislada ni PASS de sintaxis, ACL, claims, idempotencia o transición `purged`. El CI habitual de frontend no cubre este gate.
+
+Próximo requisito específico: obtener por canal seguro una conexión PostgreSQL de solo lectura apta para `pg_dump --schema-only`, revisar y desidentificar el dump, preparar una base estructural aislada, y recién entonces ejecutar allí la migración pendiente y las pruebas sintéticas. No usar `supabase db push`, no aplicar el SQL pendiente a hosted, no activar Edge ni borrar Storage. La autorización de aplicación y del único medio descartable es un gate posterior independiente.
+
 **Corte:** 2026-10-10
 **Rama:** `release/mvp-beta-fast-track-20261010`
 **SHA del cierre F14 publicado:** `c11087a6d0e2d860cc3f76c8ce5999dfda4f990b`
