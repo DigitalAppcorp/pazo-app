@@ -50,3 +50,15 @@ test('feed recommendation retains anonymous reply threads, not moderated removal
   "public.f14_content_visible('feed_post',candidate.id)"
  ])assert.ok(sql.includes(v.replace('\\n','\n')),v)
 })
+
+test('legacy and externally hosted media cannot be treated as verified deleted objects',()=>{
+ for(const v of [
+  'External or legacy media requires verified provider cleanup',
+  "'/storage/v1/object/public/post-photos/'",
+  "'/storage/v1/object/public/community-post-photos/'",
+  "'/storage/v1/object/public/pet-avatars/'",
+  'cp.photo_storage_path=obj.name',
+  'comments_count=(SELECT count(*) FROM public.post_comments remaining',
+  'comments_count=(SELECT count(*) FROM public.community_post_comments remaining'
+ ])assert.ok(sql.includes(v),v)
+})

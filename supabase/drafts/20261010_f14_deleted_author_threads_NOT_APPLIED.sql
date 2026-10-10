@@ -78,13 +78,30 @@ BEGIN
    AND pg_catalog.right(cp.photo_url,pg_catalog.length('/storage/v1/object/public/'||obj.bucket_id||'/'||obj.name))
       =('/storage/v1/object/public/'||obj.bucket_id||'/'||obj.name)
    WHERE cp.author_user_id=p_subject)
+ OR EXISTS(SELECT 1 FROM public.community_posts cp JOIN storage.objects obj
+   ON obj.bucket_id='community-post-photos'
+   AND cp.photo_storage_path=obj.name
+   WHERE cp.author_user_id=p_subject)
  THEN RAISE EXCEPTION 'Post photo still present in Storage';END IF;
+ -- Existing external/legacy URLs are not evidence of deletion from that
+ -- provider. Also check the pet avatar source independently.
+ IF EXISTS(SELECT 1 FROM public.posts p WHERE p.user_id=p_subject AND p.photo_url IS NOT NULL
+    AND pg_catalog.position('/storage/v1/object/public/post-photos/' IN p.photo_url)=0)
+ OR EXISTS(SELECT 1 FROM public.community_posts cp WHERE cp.author_user_id=p_subject
+    AND cp.photo_url IS NOT NULL
+    AND pg_catalog.position('/storage/v1/object/public/community-post-photos/' IN cp.photo_url)=0)
+ OR EXISTS(SELECT 1 FROM public.pets pet WHERE pet.owner_id=p_subject AND pet.photo_url IS NOT NULL
+    AND pg_catalog.position('/storage/v1/object/public/pet-avatars/' IN pet.photo_url)=0)
+ THEN RAISE EXCEPTION 'External or legacy media requires verified provider cleanup';END IF;
+
  -- Preserve only discussions that have an actual third-party author.
  UPDATE public.posts p
  SET author_deleted_at=pg_catalog.clock_timestamp(),
      user_id=NULL,pet_id=NULL,pet_name='Autor eliminado',pet_species='otro',
      pet_avatar=NULL,location=NULL,text='',photo_url=NULL,
-     tags='{}'::text[],comments='[]'::jsonb,likes=0
+     tags='{}'::text[],comments='[]'::jsonb,likes=0,
+     comments_count=(SELECT count(*) FROM public.post_comments remaining
+       WHERE remaining.post_id=p.id)
  WHERE p.user_id=p_subject AND p.author_deleted_at IS NULL
  AND EXISTS(SELECT 1 FROM public.post_comments c
    JOIN public.pets pet ON pet.id=c.author_pet_id
@@ -93,7 +110,9 @@ BEGIN
  UPDATE public.community_posts cp
  SET author_deleted_at=pg_catalog.clock_timestamp(),
      author_user_id=NULL,author_pet_id=NULL,body='',photo_url=NULL,
-     photo_storage_path=NULL,likes_count=0
+     photo_storage_path=NULL,likes_count=0,
+     comments_count=(SELECT count(*) FROM public.community_post_comments remaining
+       WHERE remaining.post_id=cp.id)
  WHERE cp.author_user_id=p_subject AND cp.author_deleted_at IS NULL
  AND EXISTS(SELECT 1 FROM public.community_post_comments c
    JOIN public.pets pet ON pet.id=c.author_pet_id
