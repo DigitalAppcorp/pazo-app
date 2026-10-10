@@ -22,9 +22,9 @@ function port(opts={}){
        calls.push(name)
        if(name==='f14_a3_review_operator_authorized') return {data:opts.operator??true,error:null}
        if(name==='f14_a3_reauth_evidence_valid') return {data:opts.reauth??true,error:null}
-       return {data:opts.processing??{
+       return {data:opts.processing===undefined?{
          status:'processing',frozen:true,revision:2,destructive_execution_allowed:false,
-       },error:opts.error??null}
+       }:opts.processing,error:opts.error??null}
      },
    },
  }
