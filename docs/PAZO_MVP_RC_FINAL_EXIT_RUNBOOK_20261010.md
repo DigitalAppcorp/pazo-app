@@ -22,6 +22,7 @@ Codex debe informar PASS/FAIL documentado sobre **su única cuenta QA** según `
 2. El código y los avisos legales del commit `956693135` ya tienen CI #650 PASS; si hay cambios de código posteriores, certificar solo ese SHA nuevo. La actualización puramente documental de este runbook no reabre QA del producto.
 3. Los textos están preparados ES/EN, con fecha de vigencia 10 oct 2026 y límites reales de baja manual, backups, medios y terceros. Tras PASS de Codex no elaborar una nueva política por rutina; solo reabrirla si la prueba revela que su contenido es falso.
 4. Revisar que los enlaces legales sean visibles antes de registro y en la app pública. Para evitar rehacer QA, verificar únicamente diferencias introducidas por la publicación, no recorrer todos los módulos aprobados.
+4A. **Configuración de apertura (no es desarrollo):** el intake de eliminación está deshabilitado por defecto en compilaciones públicas; al desplegar tras PASS de Codex y con operador disponible, activar deliberadamente `VITE_F14_DELETION_REQUESTS_ENABLED=true` en el entorno de publicación y comprobar la entrada a la cola. No activar antes del PASS ni abrir beta sin ese flujo funcional.
 5. Solicitar aprobación específica del PO para merge y despliegue. **Hasta esa aprobación: no tocar `main`, Vercel ni abrir beta pública**. La limpieza de datos de prueba fuera de la cuenta QA requiere otra autorización explícita.
 
 ## Evidencia y límites de esta sesión
