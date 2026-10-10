@@ -99,3 +99,7 @@ Edge v4 publicada con JWT obligatorio y allowlist temporal de una sola publicaci
 ### F14 D3-A — causa de POST 409 resuelta (2026-10-10 04:33 UTC)
 
 Al primer click del moderador, autorización y creación/recheck claim PASS; `f14_moderation_media_gate` preflight false. Se corrigió la comprobación legada de rol en gate + trigger por `auth.role()` (migración aplicada `20261010043307_f14_media_jwt_claim_compat_single_test`), extendiendo solo el claim exacto ya validado. SQL preflight probada true con formato PostgREST, CI PASS #38024417241, datos de Storage sin cambios. Aún falta el segundo click del usuario y verificar que solo la foto descartable cambie a purged. Restablecer Edge a modo global disabled después de la prueba.
+
+### Nota de rollback (2026-10-10 UTC)
+
+Después del 409 de preflight se aplicó la corrección JWT `auth.role()` sin borrar objetos. La Edge v4 con allowlist temporal del ensayo fue sustituida por **v5 bloqueada**; no hubo eliminación real ni `purged`. Se revierte el allowlist del frontend y los tests en PR #37. Mantener D3-A abierta y sin reintentos que no respeten un JWT real de moderación.

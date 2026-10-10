@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 const sql=readFileSync(new URL('../supabase/sql/f14_moderation_media_gate.sql',import.meta.url),'utf8')
 const liveSql=readFileSync(new URL('../supabase/sql/f14_moderation_media_finalize.sql',import.meta.url),'utf8')
-const roleCompatSql=readFileSync(new URL('../supabase/sql/f14_media_auth_role_compat_single_trial.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../supabase/functions/f14-moderation-purge/index.ts',import.meta.url),'utf8')
 const core=readFileSync(new URL('../supabase/functions/f14-moderation-purge/core.ts',import.meta.url),'utf8')
 const ui=readFileSync(new URL('../src/features/moderation/ModerationMediaQueue.tsx',import.meta.url),'utf8')
@@ -33,7 +32,7 @@ test('SQL only authorizes exact server-only removed content and matches Storage 
  assert.doesNotMatch(sql,/\bUPDATE\s+moderation_private\.content_restrictions\b/i)
 })
 test('Edge is off unless explicitly enabled, verifies user and role, and never logs key or raw URL',()=>{
- assert.match(edge,/Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)==='true'/)
+ assert.match(edge,/F14_MEDIA_PURGE_ENABLED'\)!=='true'/)
  assert.match(edge,/userClient\.auth\.getUser\(token\)/)
  assert.match(edge,/userClient\.rpc\('f14_is_moderator'\)/)
  assert.match(edge,/admin\.storage\.from\(target\.bucket\)\.remove\(\[target\.path\]\)/)
@@ -54,9 +53,7 @@ test('moderation UI stays disabled until local flag and operator gate',()=>{
 
 test('server deployment is disabled independently of hosted secret values',()=>{
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
- assert.match(edge,/if\(!isApprovedSingleTrial && !globalRelease\)/)
- assert.match(edge,/input.id===F14_D3A_SINGLE_TEST_TARGET_ID/)
- assert.match(edge,/Date.now\(\)<Date.parse\(F14_D3A_SINGLE_TEST_EXPIRY\)/)
+ assert.match(edge,/if\(!F14_MEDIA_PURGE_RELEASE_APPROVED \|\| Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)!=='true'\)/)
 })
 
 test('D3A finalization preserves claim/version and requires server proof and absent Storage object',()=>{
@@ -79,30 +76,4 @@ test('D3A finalization preserves claim/version and requires server proof and abs
  assert.ok(edge.indexOf("f14_prepare_media_claim")<edge.indexOf("f14_recheck_media_claim"))
  assert.ok(edge.indexOf("f14_recheck_media_claim")<edge.indexOf("f14_moderation_media_gate"))
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
-})
-
-test('single disposable-photo trial cannot enable any other target or production UI',()=>{
- const edgeTarget=edge.match(/const F14_D3A_SINGLE_TEST_TARGET_ID = '([^']+)'/)?.[1]
- const uiTarget=ui.match(/const singleTestId = '([^']+)'/)?.[1]
- assert.equal(edgeTarget,'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e')
- assert.equal(uiTarget,edgeTarget)
- assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
- assert.match(edge,/input.kind==='feed_post'/)
- assert.match(ui,/import.meta.env.DEV && item.target_kind === 'feed_post'/)
-})
-
-test('PostgREST role compatibility keeps the exact service_role guard, claims and trigger',()=>{
- const expected="auth.role() IS DISTINCT FROM 'service_role'"
- assert.equal(roleCompatSql.split(expected).length-1,2)
- assert.doesNotMatch(roleCompatSql,/current_setting\('request\.jwt\.claim\.role'/)
- assert.match(roleCompatSql,/CREATE OR REPLACE FUNCTION public\.f14_moderation_media_gate/)
- assert.match(roleCompatSql,/CREATE OR REPLACE FUNCTION moderation_private\.f14_reject_unverified_purged/)
- assert.match(roleCompatSql,/REVOKE ALL ON FUNCTION public\.f14_moderation_media_gate[\s\S]*FROM PUBLIC,anon,authenticated/)
- assert.match(roleCompatSql,/v_live IS DISTINCT FROM v_claim\.snapshot/)
- assert.match(roleCompatSql,/NOT EXISTS \(SELECT 1 FROM storage\.objects/)
- assert.match(roleCompatSql,/SET media_status='purged'/)
- assert.match(roleCompatSql,/v_claim\.snapshot = moderation_private\.f14_media_probe\('feed_post',v_id\)/)
- assert.match(roleCompatSql,/WHERE c\.target_kind='feed_post' AND c\.target_id=v_id/)
- assert.match(roleCompatSql,/v_id uuid := 'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e'::uuid/)
- assert.doesNotMatch(roleCompatSql,/DROP TRIGGER|DISABLE TRIGGER|TRUNCATE|DELETE FROM storage\./i)
 })

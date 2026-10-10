@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | estado verificado 2026-10-09
 
+> **D3-A ROLLBACK SEGURO — 2026-10-10 04:37 UTC:** ante petición del PO de automatizar y seguir rápido, se restauró Edge `f14-moderation-purge` **v5**, `verify_jwt=true`, release latch `F14_MEDIA_PURGE_RELEASE_APPROVED=false`, sin excepción temporal para ningún UUID; UI también vuelve a apagada (sin botón dev). Foto descartable verificada sigue **sin borrar**, 14 objetos Storage (13 anteriores + 1 ensayo), purged=0. Se corrigió y verificó preflight JWT `auth.role()` (migración `20261010043307_f14_media_jwt_claim_compat_single_test`; PASS SQL), pero **no es una prueba de purga real**. D3-A NO cerrada. Requiere ejecución futura con JWT de moderador vía flujo explícito; no manipular Storage SQL. Continuar en paralelo con gates MVP sin tocar Vercel ni merge.
+
+
 > **D3-A JWT HOTFIX APLICADO (2026-10-10 04:33 UTC):** migración remota `20261010043307_f14_media_jwt_claim_compat_single_test`, CI #38024417241 PASS. Reemplaza la lectura legacy `request.jwt.claim.role` por `auth.role()` en el gate y trigger (ambos aceptan formato PostgREST `request.jwt.claims`). Preflight SQL para el único `feed_post` nuevo con JWT claims service_role PASS bajo BEGIN/ROLLBACK; grants anon/authenticated aún DENY. Claim exacto extendido hasta **05:33 UTC** y comprobado `held`/checked. Storage 14, media purged 0, test object 1 y pending_review 1. **Foto NO BORRADA todavía**; PO debe hacer solo un segundo clic en su UI local del objeto `...7bf4076e`; después verificar y desactivar la excepción temporal de Edge v4. No Vercel ni merge.
 
 
