@@ -164,7 +164,134 @@ REVOKE ALL ON FUNCTION public.f14_a3_review_operator_authorized(uuid,uuid)
 GRANT EXECUTE ON FUNCTION public.f14_a3_review_operator_authorized(uuid,uuid)
   TO service_role;
 
--- No stage-transition RPC, DELETE or UPDATE of existing intake is included:
+-- Durable, leased reviewer claim (NOT a deletion approval). The request row
+-- serializes competing reviewers. Existing users stay active; no write fence,
+-- reauthentication receipt, or account deletion follows from this function.
+CREATE OR REPLACE FUNCTION public.f14_a3_review_claim(
+  p_operator_user_id uuid,
+  p_subject_user_id uuid,
+  p_expected_revision bigint DEFAULT NULL
+)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_claim$
+DECLARE
+  v_request_status text;
+  v_previous bigint;
+  v_token uuid;
+  v_until timestamptz;
+  v_revision bigint;
+  v_now timestamptz := pg_catalog.clock_timestamp();
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role', true),'') <> 'service_role'
+    OR p_operator_user_id IS NULL OR p_subject_user_id IS NULL
+    OR p_operator_user_id = p_subject_user_id
+    OR (p_expected_revision IS NOT NULL AND p_expected_revision < 1) THEN
+    RAISE EXCEPTION 'Reviewer access denied' USING ERRCODE='42501';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_review_operators o
+    JOIN auth.users op ON op.id=o.operator_user_id
+    WHERE o.operator_user_id=p_operator_user_id
+  ) THEN
+    RAISE EXCEPTION 'Reviewer access denied' USING ERRCODE='42501';
+  END IF;
+
+  SELECT r.status INTO v_request_status
+  FROM account_requests_private.deletion_requests r
+  JOIN auth.users subject ON subject.id=r.subject_user_id
+  WHERE r.subject_user_id=p_subject_user_id FOR UPDATE;
+  IF v_request_status IS DISTINCT FROM 'requested' THEN
+    RAISE EXCEPTION 'Request not reviewable' USING ERRCODE='42501';
+  END IF;
+
+  INSERT INTO account_requests_private.deletion_review_jobs(subject_user_id)
+  VALUES (p_subject_user_id) ON CONFLICT (subject_user_id) DO NOTHING;
+
+  -- This row lock plus revision compare-and-set prevents two claims owning
+  -- the same revision and makes re-entry explicit after an expired lease.
+  SELECT revision INTO v_previous
+  FROM account_requests_private.deletion_review_jobs
+  WHERE subject_user_id=p_subject_user_id FOR UPDATE;
+  IF p_expected_revision IS NULL AND v_previous <> 1 THEN
+    RAISE EXCEPTION 'Revision required to reclaim' USING ERRCODE='40001';
+  END IF;
+  IF p_expected_revision IS NOT NULL AND p_expected_revision <> v_previous THEN
+    RAISE EXCEPTION 'Stale reviewer revision' USING ERRCODE='40001';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_review_jobs j
+    WHERE j.subject_user_id=p_subject_user_id
+      AND j.lease_expires_at>v_now
+  ) THEN
+    RAISE EXCEPTION 'Review lease still active' USING ERRCODE='42501';
+  END IF;
+
+  v_token := pg_catalog.gen_random_uuid();
+  v_until := v_now + INTERVAL '5 minutes';
+  UPDATE account_requests_private.deletion_review_jobs j
+  SET reviewer_user_id=p_operator_user_id,
+      lease_token=v_token,
+      lease_expires_at=v_until,
+      revision=j.revision+1,
+      updated_at=v_now
+  WHERE j.subject_user_id=p_subject_user_id AND j.revision=v_previous
+  RETURNING j.revision INTO v_revision;
+  IF v_revision IS NULL THEN
+    RAISE EXCEPTION 'Reviewer revision changed' USING ERRCODE='40001';
+  END IF;
+
+  INSERT INTO account_requests_private.deletion_review_events
+    (subject_user_id,revision,phase,result)
+  VALUES (p_subject_user_id,v_revision,'review_request','reviewed');
+  RETURN pg_catalog.jsonb_build_object(
+    'revision',v_revision,'lease_token',v_token,
+    'expires_at',v_until,'stage','review_request',
+    'destructive_execution_allowed',false
+  );
+END
+$a3_claim$;
+
+CREATE OR REPLACE FUNCTION public.f14_a3_review_lease_valid(
+  p_operator_user_id uuid,
+  p_subject_user_id uuid,
+  p_lease_token uuid,
+  p_revision bigint
+)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_lease$
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'service_role'
+    OR p_operator_user_id IS NULL OR p_subject_user_id IS NULL
+    OR p_lease_token IS NULL OR p_revision IS NULL THEN
+    RAISE EXCEPTION 'Service reviewer required' USING ERRCODE='42501';
+  END IF;
+  RETURN EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_review_jobs j
+    JOIN account_requests_private.deletion_review_operators op
+      ON op.operator_user_id=j.reviewer_user_id
+    JOIN account_requests_private.deletion_requests req
+      ON req.subject_user_id=j.subject_user_id
+    WHERE j.subject_user_id=p_subject_user_id
+      AND j.reviewer_user_id=p_operator_user_id
+      AND j.lease_token=p_lease_token
+      AND j.revision=p_revision
+      AND j.lease_expires_at>pg_catalog.clock_timestamp()
+      AND j.phase='review_request'
+      AND req.status='requested'
+  );
+END
+$a3_lease$;
+
+REVOKE ALL ON FUNCTION public.f14_a3_review_claim(uuid,uuid,bigint)
+  FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.f14_a3_review_lease_valid(uuid,uuid,uuid,bigint)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_review_claim(uuid,uuid,bigint)
+  TO service_role;
+GRANT EXECUTE ON FUNCTION public.f14_a3_review_lease_valid(uuid,uuid,uuid,bigint)
+  TO service_role;
+
+-- No destructive stage-transition RPC, DELETE or UPDATE of intake is included:
 -- the freeze of all writes and per-account reauthentication proof have NOT
 -- been independently verified. A proposed stage cannot grant delete access.
 -- Required next: private leased/CAS transition, operator enrollment,
