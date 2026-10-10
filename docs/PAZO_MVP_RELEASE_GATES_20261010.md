@@ -103,3 +103,20 @@ La pantalla de registro `src/components/views/OnboardingView.tsx` ya contiene en
 - https://oag.ca.gov/sites/all/files/agweb/pdfs/privacy/COPP_bus_reportinfo_sharing1.pdf
 
 **No asumir que la CCPA/CPRA se aplica o no** sin evaluar sus umbrales y condiciones reales de empresa. CPPA FAQ: https://cppa.ca.gov/faq y umbrales actualizados: https://cppa.ca.gov/regulations/cpi_adjustment.html. El domicilio registral no se inventa ni se declara por defecto requisito universal de CalOPPA si no se ha verificado. El operador y correo público ya están confirmados por el PO. **El ensayo de baja de una cuenta QA sigue delegado exclusivamente a Codex:** `docs/PAZO_CODEX_PENDING_QA_20261010.md`. No tocar sus siete cuentas/archivo ni cambiar baselines.
+
+## Gate operativo vigente — recorte explícito (2026-10-10)
+
+El PO confirma: **lanzar un MVP pequeño y seguro sin prolongar mejoras no indispensables**.
+
+| Condición de salida | Evidencia actual | Acción restante |
+|---|---|---|
+| Funcionalidad básica | QA del PO ya aceptada (Auth, Feed, Comunidades, Cuidados, Lugares) | No repetir salvo regresión observada |
+| Telemetría opcional | PostHog apagado en código mediante `isObservabilityEnabled() => false` (commit `7f8f75ff`) | Cerrado para RC, no invertir más tiempo |
+| Política/Reglas ES/EN | Borradores actualizados con operador, contacto, retención cualitativa, exclusión de PostHog y recurso Unsplash | Revisión mínima de precisión y aprobación de textos **finales**, fecha efectiva solo al publicar; `LEGAL_RELEASE_READY=false` |
+| Baja manual | Intake y SOP disponibles, cuenta de ensayo reservada | Solo Codex certificará E2E de cuenta descartable; no intervenir |
+| Moderación/media | Moderador DB asignado, flujo de denuncia documentado; media purge OFF | No afirmar retirada física de origen/CDN sin evidencia; dejar protocolo manual seguro |
+| RC final | GitHub Actions #626 PASS en SHA anterior; HEAD actual no certificado | Comprobar CI en SHA definitivo y pedir gate PO antes de merge/deploy |
+
+**Posbeta:** A3 avanzado, métricas PostHog, nuevas funcionalidades, mejora cosmética, auditorías ampliadas y automatización de medios. **No posponer:** falsedad material del aviso de privacidad, filtración activa, falta de atención real de solicitudes o seguridad básica. Sin nuevos proveedores pagados, cambios en Supabase, Vercel o main.
+
+**Interpretación de avances anteriores:** cualquier instrucción histórica que pida reactivar PostHog o expandir la auditoría por rutina queda subordinada a este gate y al handoff vigente.
