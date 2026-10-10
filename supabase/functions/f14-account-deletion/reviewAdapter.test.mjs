@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { getA3ReviewInventory, claimA3ReviewLease, parseA3ReviewInventory, A3ReviewDenied } from './reviewAdapter.ts'
+import { getA3ReviewInventory, claimA3ReviewLease, verifyA3RecentSignin, parseA3ReviewInventory, A3ReviewDenied } from './reviewAdapter.ts'
 
 const OPERATOR = '11111111-1111-4111-8111-111111111111'
 const SUBJECT = '22222222-2222-4222-8222-222222222222'
@@ -177,5 +177,76 @@ test('a lease cannot be obtained without a valid operator membership', async () 
       claimA3ReviewLease(client,'valid-auth-token-for-operator-123',SUBJECT,null),A3ReviewDenied,
     )
     assert.ok(!calls.some(([name])=>name==='f14_a3_review_claim'))
+  }
+})
+
+const receipt = {
+  revision: 2,
+  leaseToken: '33333333-3333-4333-8333-333333333333',
+  expiresAt: '2026-10-10T12:00:00Z',
+  stage: 'review_request',
+  destructiveExecutionAllowed: false,
+}
+
+test('server confirms recent login only when operator and same lease are verified', async () => {
+  const calls=[]
+  const client={
+    auth:{getUser:async()=>({data:{user:{id:OPERATOR}},error:null})},
+    rpc:async(name,args)=>{
+      calls.push({name,args})
+      return {data:true,error:null}
+    },
+  }
+  const result=await verifyA3RecentSignin(
+    client,'valid-operator-jwt-for-testing',SUBJECT,receipt,
+  )
+  assert.deepEqual(result,{recentSigninVerified:true,destructiveExecutionAllowed:false})
+  assert.equal(calls[0].name,'f14_a3_review_operator_authorized')
+  assert.deepEqual(calls[1],{
+    name:'f14_a3_reauth_evidence_valid',
+    args:{
+      p_operator_user_id:OPERATOR,p_subject_user_id:SUBJECT,
+      p_lease_token:receipt.leaseToken,p_revision:receipt.revision,
+    },
+  })
+})
+
+test('stale, malformed or deletion-authorizing lease is refused BEFORE any RPC', async () => {
+  for (const lease of [
+    null,{}, {...receipt,revision:0},{...receipt,revision:1.5},
+    {...receipt,leaseToken:'attacker'}, {...receipt,expiresAt:'never'},
+    {...receipt,stage:'deleting_auth'}, {...receipt,destructiveExecutionAllowed:true},
+  ]) {
+    const {client,calls}=adapter()
+    await assert.rejects(
+      verifyA3RecentSignin(client,'valid-operator-jwt-for-testing',SUBJECT,lease),
+      A3ReviewDenied,
+    )
+    assert.deepEqual(calls,[])
+  }
+})
+
+test('missing fresh sign-in, revoked lease or unauthorized reviewer fails closed', async () => {
+  for (const config of [
+    {grant:false},
+    {authError:new Error('revoked')},
+    {user:{id:SUBJECT}},
+  ]) {
+    const {client,calls}=adapter(config)
+    await assert.rejects(
+      verifyA3RecentSignin(client,'valid-operator-jwt-for-testing',SUBJECT,receipt),
+      A3ReviewDenied,
+    )
+    assert.ok(!calls.some(([name])=>name==='f14_a3_reauth_evidence_valid'))
+  }
+  for (const signal of [false,null,'true']) {
+    const client={
+      auth:{getUser:async()=>({data:{user:{id:OPERATOR}},error:null})},
+      rpc:async(name)=>({data:name==='f14_a3_review_operator_authorized'?true:signal,error:null}),
+    }
+    await assert.rejects(
+      verifyA3RecentSignin(client,'valid-operator-jwt-for-testing',SUBJECT,receipt),
+      A3ReviewDenied,
+    )
   }
 })
