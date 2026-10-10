@@ -4,17 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node scripts/generate-pwa-icons.mjs && vite",
+    "build": "node scripts/generate-pwa-icons.mjs && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:hardening": "node scripts/hardening-check.mjs",
     "test:architecture": "node scripts/architecture-check.mjs",
     "test:privacy": "node scripts/privacy-check.mjs",
-    "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops && npm run test:mvp",
+    "test:governance": "npm run test:hardening && npm run test:architecture && npm run test:privacy && npm run test:ops && npm run test:mvp && npm run test:pwa",
     "test:mvp": "node --experimental-strip-types --test src/features/feed/selectFeedPage.test.mjs src/features/feed/advanceFeedCursors.test.mjs src/features/auth/signupFlow.test.mjs src/features/auth/recoveryFlow.test.mjs src/features/moderation/reportSubject.test.mjs supabase/functions/f14-moderation-purge/core.test.mjs supabase/functions/f14-moderation-purge/storageInfo.test.mjs scripts/f14-media-purge-contract.test.mjs src/features/legal/legalCopy.test.mjs src/features/account/deletionRequestState.test.mjs scripts/f14-qa-account-status-contract.test.mjs scripts/f14-account-request-contract.test.mjs src/features/account/deletionPreflight.test.mjs scripts/f14-deletion-preflight-contract.test.mjs src/features/account/communityExitPolicy.test.mjs src/features/account/communityOwnershipState.test.mjs scripts/f14-community-exit-contract.test.mjs scripts/f14-account-cleanup-integrity-contract.test.mjs src/features/account/deletedAuthorThread.test.mjs scripts/f14-deleted-author-contract.test.mjs",
     "backup:storage": "node scripts/backup-storage.mjs",
-    "test:ops": "node --check scripts/backup-storage.mjs"
+    "test:ops": "node --check scripts/backup-storage.mjs",
+    "test:pwa": "node scripts/pwa-check.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
