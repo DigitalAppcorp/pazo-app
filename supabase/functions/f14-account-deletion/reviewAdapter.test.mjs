@@ -135,7 +135,7 @@ test('server-only lease claim returns a review-only receipt and exact CAS revisi
     p_operator_user_id:OPERATOR,p_subject_user_id:SUBJECT,
   })
   await claimA3ReviewLease(admin,'valid-auth-token-for-operator-123',SUBJECT,2)
-  assert.equal(calls.at(-1).args.p_expected_revision,'2')
+  assert.equal(calls.at(-1).args.p_expected_revision,2)
   assert.equal(calls.some(c=>/delete|freeze|processing|storage/i.test(c.name)),false)
 })
 
