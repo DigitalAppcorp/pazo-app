@@ -17,7 +17,13 @@ export interface A3ProcessingLease {
  * An authenticated, privately enrolled operator and live processing lease
  * must be rechecked within the SQL RPC. No destructive call is made here.
  */
-export async function authorizeA3MediaGrant(
+type MediaRpcName =
+  | 'f14_a3_allow_exact_media_remove'
+  | 'f14_a3_checkpoint_media_removed'
+  | 'f14_a3_media_checkpoint_valid'
+
+async function exactMediaRpc(
+  rpcName:MediaRpcName,
   admin:A3PrivilegedClient,
   operatorJwt:string,
   subjectUserId:string,
@@ -31,12 +37,13 @@ export async function authorizeA3MediaGrant(
     ||inspectMediaManifest([object]).blocked.length>0) {
     throw new A3MediaGrantDenied()
   }
-  const result=await admin.auth.getUser(operatorJwt).catch(()=>{throw new A3MediaGrantDenied()})
+  const result=await admin.auth.getUser(operatorJwt)
+    .catch(()=>{throw new A3MediaGrantDenied()})
   const reviewer=result.data?.user?.id
   if(result.error||typeof reviewer!=='string'||!UUID.test(reviewer)
     ||reviewer===subjectUserId) throw new A3MediaGrantDenied()
 
-  const grant=await admin.rpc('f14_a3_allow_exact_media_remove',{
+  const grant=await admin.rpc(rpcName,{
     p_subject_user_id:subjectUserId,
     p_reviewer_user_id:reviewer,
     p_lease_token:lease.token,
@@ -48,3 +55,20 @@ export async function authorizeA3MediaGrant(
   if(grant.error||grant.data!==true) throw new A3MediaGrantDenied()
   return true
 }
+
+export const authorizeA3MediaGrant=(
+  admin:A3PrivilegedClient,jwt:string,subjectId:string,
+  lease:Readonly<A3ProcessingLease>,object:Readonly<MediaInventoryEntry>,
+)=>exactMediaRpc('f14_a3_allow_exact_media_remove',admin,jwt,subjectId,lease,object)
+
+/** Persist a completed Storage API removal, AFTER the origin record is absent. */
+export const checkpointA3MediaRemoval=(
+  admin:A3PrivilegedClient,jwt:string,subjectId:string,
+  lease:Readonly<A3ProcessingLease>,object:Readonly<MediaInventoryEntry>,
+)=>exactMediaRpc('f14_a3_checkpoint_media_removed',admin,jwt,subjectId,lease,object)
+
+/** Retry requires this exact existing durable journal entry. */
+export const verifyA3MediaCheckpoint=(
+  admin:A3PrivilegedClient,jwt:string,subjectId:string,
+  lease:Readonly<A3ProcessingLease>,object:Readonly<MediaInventoryEntry>,
+)=>exactMediaRpc('f14_a3_media_checkpoint_valid',admin,jwt,subjectId,lease,object)
