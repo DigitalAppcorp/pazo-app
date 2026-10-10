@@ -18,7 +18,7 @@ test('SQL only authorizes exact server-only removed content and matches Storage 
   "p_stage='preflight'",
   "p_stage IS NULL",
   "photo_storage_path=p_path",
-  "IF EXISTS(SELECT 1 FROM storage.objects o",
+  "IF p_stage='preflight' THEN RETURN true; END IF;",
   "RETURN false;",
   "c.status='held'",
   "c.checked_at IS NOT NULL",
