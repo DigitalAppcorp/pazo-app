@@ -384,3 +384,46 @@ test('A3 terminal handoff never broadens reviewing-only worker lease',()=>{
  assert.match(terminalScopeSql,/l\.lease_token=s\.lease_token AND l\.lease_version=s\.lease_version/)
  assert.doesNotMatch(handoffSql,/\bSET\s+(?:LOCAL\s+)?(?:role|session)|set_config\s*\(/i)
 })
+
+
+const quarantineSql=readFileSync(new URL('../supabase/drafts/20261009_f14_a3_expired_terminal_lease_quarantine_NOT_APPLIED.sql',import.meta.url),'utf8')
+const quarantineQa=readFileSync(new URL('./f14-a3-terminal-quarantine-temp-qa.sql',import.meta.url),'utf8')
+test('A3 terminal quarantine DRAFT aborts before any DDL and both readiness gates stay closed',()=>{
+ const guard=quarantineSql.indexOf("RAISE EXCEPTION 'A3 TERMINAL QUARANTINE DRAFT ONLY")
+ const ddl=quarantineSql.indexOf('CREATE OR REPLACE FUNCTION')
+ assert.ok(quarantineSql.indexOf('BEGIN;')<guard && guard<ddl)
+ assert.match(quarantineSql,/f14_a3_terminal_quarantine_ready\(\)[\s\S]*?SELECT false/)
+ assert.match(quarantineSql,/IF NOT account_private\.f14_a3_full_write_fence_ready\(\)[\s\S]*?OR NOT account_private\.f14_a3_terminal_quarantine_ready\(\) THEN/)
+ assert.match(quarantineSql,/REVOKE ALL ON FUNCTION public\.f14_a3_service_quarantine_expired_terminal_lease\(uuid,uuid,uuid,bigint\)[\s\S]*?FROM PUBLIC,anon,authenticated/)
+ assert.match(quarantineSql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_service_quarantine_expired_terminal_lease\(uuid,uuid,uuid,bigint\)[\s\S]*?TO service_role/)
+ assert.doesNotMatch(quarantineSql,/\bDELETE\s+FROM\s+(?:public|auth|storage)\.|auth\.admin\.deleteUser|SET\s+status='completed'/i)
+})
+test('A3 quarantine only invalidates an exact expired terminal lease and blocks, never auto-retries',()=>{
+ const ownerLock=quarantineSql.indexOf('pg_catalog.pg_advisory_xact_lock')
+ const jobLock=quarantineSql.indexOf('FROM account_private.deletion_jobs WHERE id=p_job_id FOR UPDATE')
+ const leaseLock=quarantineSql.indexOf('FROM account_private.deletion_worker_leases l')
+ const cas=quarantineSql.indexOf('UPDATE account_private.deletion_worker_leases')
+ const status=quarantineSql.indexOf('UPDATE account_private.deletion_jobs')
+ assert.ok(ownerLock>0 && ownerLock<jobLock && jobLock<leaseLock && leaseLock<cas && cas<status)
+ for(const v of [
+  "v_owner IS DISTINCT FROM p_user_id OR v_status <> 'deleting_auth'",
+  'lease_token=pg_catalog.gen_random_uuid()',
+  'lease_version=lease_version+1',
+  'lease_token=p_old_token',
+  'lease_version=p_old_version',
+  'lease_version<9223372036854775807',
+  'expires_at<=v_now',
+  "SET status='blocked',updated_at=v_now",
+  "VALUES (p_job_id,'blocked')",
+ ]) assert.ok(quarantineSql.includes(v),v)
+ assert.doesNotMatch(quarantineSql,/SET\s+status='reviewing'|SET\s+status='deleting_auth'|SET\s+status='completed'/)
+})
+test('A3 pg_temp quarantine fixture never writes real tables or persists a lease',()=>{
+ assert.match(quarantineQa,/^BEGIN;/m)
+ assert.match(quarantineQa,/^ROLLBACK;/m)
+ assert.match(quarantineQa,/CREATE TEMP TABLE a3_quarantine_jobs/)
+ assert.match(quarantineQa,/CREATE OR REPLACE FUNCTION pg_temp\.a3_quarantine/)
+ assert.match(quarantineQa,/replayed|stale lease replay accepted/)
+ assert.match(quarantineQa,/expires_at<=v_now/)
+ assert.doesNotMatch(quarantineQa,/\b(?:INSERT\s+INTO|DELETE\s+FROM|UPDATE|ALTER\s+TABLE|TRUNCATE)\s+(?:public|auth|storage)\./i)
+})

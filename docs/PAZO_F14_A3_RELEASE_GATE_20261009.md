@@ -116,3 +116,7 @@ El undécimo borrador SQL propone `account_private.deletion_terminal_scopes`: `j
 
 ## A3.6 — Handoff de lease propuesta (2026-10-09, NOT APPLIED)
 `supabase/drafts/20261009_f14_a3_terminal_lease_handoff_NOT_APPLIED.sql` define rotación transaccional de token/versión e impedimento de replays al pasar del estado `deleting_data` a `deleting_auth`, sin permitir que un lease solo de revisión sea usado para borrar. Un guard DDL y dos readiness gates false lo hacen inerte. QA sintética `pg_temp` con ROLLBACK PASS para el contrato de handoff; no equivale a prueba de instalación ni a Auth/Storage delete. Falta un protocolo seguro de renovación de lease terminal expirado y la secuencia anterior de limpieza.
+
+## A3.7 — Cuarentena sin retry automático (2026-10-09)
+
+Decimotercer SQL DRAFT `supabase/drafts/20261009_f14_a3_expired_terminal_lease_quarantine_NOT_APPLIED.sql`, inerte por `BEGIN/DO RAISE EXCEPTION` y readiness fija `false`. Invalidaría token+versión de un lease caducado en `deleting_auth` y pasaría a `blocked`, sin emitir credencial nueva ni intentar Auth/Storage. La prueba `pg_temp` QA `scripts/f14-a3-terminal-quarantine-temp-qa.sql` PASS bajo ROLLBACK; CI estático verifica gates, exclusividad y ausencia de deletes. No confundir cuarentena con recuperación completada o resultado externo verificado. Gate 8 permanece abierto.
