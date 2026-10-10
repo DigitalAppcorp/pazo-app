@@ -1,5 +1,7 @@
 # PAZO — Data & Third-Party Inventory
 
+> **Estado post-limpieza 2026-10-10:** inventario de categorías conserva validez como diseño, **no como evidencia de filas actuales**. Se observan 0 filas en las tablas de aplicación y 0 objetos en Storage; permanecen 6 cuentas Auth/identidades. Antes del reset los datos eran fixtures. Consultar `docs/PAZO_F14_TEST_DATA_RESET_20261010.md`.
+
 **Estado:** ACTIVO / baseline pre-Beta  
 **Regla:** este documento describe categorías y destinos conocidos. No sustituye una auditoría de schema ni una Privacy Policy pública.
 

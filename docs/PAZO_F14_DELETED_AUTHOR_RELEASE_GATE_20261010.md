@@ -1,3 +1,5 @@
+> **CAMBIO DE CONTEXTO POST-LIMPIEZA (2026-10-10):** Los **3 posts con comentarios JSON legacy, las 8 referencias de medios no conciliadas y la claim `held` eran fixtures PRE-RESET**. El estado alojado actual muestra 0 posts, 0 claims y 0 Storage. La migración de tombstones **sigue NO APLICADA**; nunca se ejecutó un E2E real de eliminación. No reconstruir el contenido eliminado para reproducir el caso. Ver `docs/PAZO_ACTIVE_HANDOFF.md`.
+
 # F14 — Gate de hilos de «Autor eliminado» (2026-10-10)
 
 **Estado:** código implementado y CI PASS; migración NO aplicada. El PO aprobó la política funcional, no la ejecución irreversible.
