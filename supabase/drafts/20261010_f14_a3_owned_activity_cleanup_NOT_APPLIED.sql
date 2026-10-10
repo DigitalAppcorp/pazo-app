@@ -79,6 +79,30 @@ BEGIN
      USING ERRCODE='42501';
  END IF;
 
+ -- Every exact frozen media target must have both an absent Storage
+ -- origin object and a trusted, persisted removal receipt. An object with
+ -- no matching journal entry cannot silently disappear and still pass.
+ IF EXISTS(
+   SELECT 1 FROM account_requests_private.deletion_frozen_targets t
+   WHERE t.subject_user_id=p_subject_user_id
+     AND t.target_type='storage'
+     AND (
+       EXISTS(
+         SELECT 1 FROM storage.objects o
+         WHERE t.target_id=o.bucket_id||':'||o.name
+       )
+       OR NOT EXISTS(
+         SELECT 1 FROM account_requests_private.deletion_media_grants g
+         WHERE g.subject_user_id=t.subject_user_id
+           AND t.target_id=g.bucket_id||':'||g.object_path
+           AND g.removed_at IS NOT NULL
+       )
+     )
+ ) THEN
+   RAISE EXCEPTION 'Frozen Storage origin or durable removal receipt missing'
+     USING ERRCODE='42501';
+ END IF;
+
  -- There must be no departing-author post that is still live while
  -- containing other people's replies. Such posts require redaction and
  -- ON DELETE SET NULL FK conversion before any dependent cleanup.
