@@ -128,3 +128,10 @@ El PO confirma: **lanzar un MVP pequeño y seguro sin prolongar mejoras no indis
 - PostHog ya tiene guard de código OFF en `src/services/observability.ts`; no es dependencia de salida.
 - **Gate del candidato final:** certificar `npm ci`, `npm run test:governance`, `npm run build` en el HEAD que vaya a publicarse; el conector GitHub disponible no devuelve CI push del HEAD. Verificación no reemplazada por checks de cuota Vercel.
 - **Fuera de este carril:** la única cuenta QA, solicitudes, Storage/Auth y prueba E2E Codex. Cuando Codex entregue PASS verificable y se certifique build, revisar fecha efectiva, publicación visible ES/EN, moderación/retirada supervisada y pedir autorización expresa al PO antes de tocar main o Vercel.
+
+## Cierre final de pendientes independientes a Codex — 2026-10-10
+**SUPERSEDE los estados históricos anteriores de esta página.** El CI del RC código/legal `956693135` es **#650 SUCCESS**: `npm ci`, `npm run test:governance` (91 test MVP), `npm run build`, lint. La consulta se hizo en el endpoint REST de GitHub Actions para push (https://github.com/DigitalAppcorp/pazo-app/actions/runs/38076159686). No hay deuda de CI pendiente para ese SHA.
+
+Privacidad/Términos ES/EN se finalizaron para beta con fecha de vigencia **10 oct 2026**, correo aprobado, controles de ubicación, proveedores, retención cualitativa y tratamiento manual de solicitudes. `LEGAL_RELEASE_READY=true` indica **texto legal preparado**, no que el flujo E2E de baja esté probado ni que se autorice acceso público. Los enlaces del onboarding ya no dicen «borrador». PostHog permanece OFF.
+
+**ÚNICO PENDIENTE FUNCIONAL TÉCNICO:** Codex debe terminar la prueba descartable de eliminación por SOP y entregar resultado PASS/FAIL verificable. Después de un PASS, el PO autoriza o rechaza merge/despliegue; esa autorización no es una fase técnica sorpresa. Si Codex encuentra FALLA real, corregir exclusivamente la falla probada. No intervenir con datos Codex, main, Vercel, A3 ni otras QA.
