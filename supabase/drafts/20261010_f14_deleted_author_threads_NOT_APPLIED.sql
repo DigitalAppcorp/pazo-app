@@ -29,7 +29,7 @@ ALTER TABLE public.posts ADD CONSTRAINT f14_posts_deleted_author_sanitized CHECK
  (author_deleted_at IS NOT NULL AND user_id IS NULL AND pet_id IS NULL AND pet_name='Autor eliminado'
   AND pet_species='otro' AND pet_avatar IS NULL AND location IS NULL
   AND text='' AND photo_url IS NULL AND tags='{}'::text[]
-  AND comments='[]'::jsonb))
+  AND comments='[]'::jsonb)
 );
 ALTER TABLE public.community_posts DROP CONSTRAINT community_posts_content_required;
 ALTER TABLE public.community_posts ADD CONSTRAINT community_posts_content_required CHECK(
@@ -38,7 +38,7 @@ ALTER TABLE public.community_posts ADD CONSTRAINT community_posts_content_requir
 ALTER TABLE public.community_posts ADD CONSTRAINT f14_community_deleted_author_sanitized CHECK (
  (author_deleted_at IS NULL AND author_user_id IS NOT NULL AND author_pet_id IS NOT NULL) OR
  (author_deleted_at IS NOT NULL AND author_user_id IS NULL AND author_pet_id IS NULL
-  AND body='' AND photo_url IS NULL AND photo_storage_path IS NULL))
+  AND body='' AND photo_url IS NULL AND photo_storage_path IS NULL)
 );
 -- This server-only step is prepared, not installed or executed. A separate
 -- worker must first freeze access, clear physical media through Storage API,
