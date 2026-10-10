@@ -75,3 +75,29 @@ test('draft retention text describes real limits, without invented numeric purge
   assert.doesNotMatch(en,/\b\d+\s+(days|weeks|months|years)\b/i)
   assert.equal(LEGAL_RELEASE_READY,false)
 })
+
+test('draft statements distinguish ephemeral map location, persisted check-ins and rescue contacts', () => {
+  for (const lang of ['es','en']) {
+    const sections=legalPreview.privacy[lang].sections
+    const location=sections.find(s=>s.heading===(lang==='es'?'Ubicación y lugares':'Location and places'))?.text
+    const rescue=sections.find(s=>s.heading===(lang==='es'?'Rescate y avistamientos':'Rescue and sightings'))?.text
+    const providers=sections.find(s=>s.heading===(lang==='es'?'Servicios utilizados':'Service providers'))?.text
+    const changes=sections.find(s=>s.heading===(lang==='es'?'Cambios y señales del navegador':'Updates and browser signals'))?.text
+    const retention=sections.find(s=>s.heading===(lang==='es'?'Conservación y solicitudes':'Retention and requests'))?.text
+    assert.ok(location && rescue && providers && changes && retention)
+    assert.match(location,/Mapbox/)
+    assert.match(location,/check-in/i)
+    assert.match(rescue,lang==='es'?/teléfono/:/phone number/)
+    assert.match(providers,/PostHog/)
+    assert.match(changes,/Do Not Track/)
+    assert.match(retention,lang==='es'?/Si la opción está habilitada/:/If the option is enabled/)
+  }
+  const map=readFileSync(new URL('../../components/views/MapView.tsx',import.meta.url),'utf8')
+  const places=readFileSync(new URL('../../services/placeCheckinService.ts',import.meta.url),'utf8')
+  const rescue=readFileSync(new URL('../../services/rescueService.ts',import.meta.url),'utf8')
+  assert.match(map,/navigator\.geolocation\.getCurrentPosition/)
+  assert.match(map,/onClick=\{handleUseLocation\}/)
+  for (const col of ['place_id','pet_id','visible']) assert.ok(places.includes(col))
+  for (const field of ['p_reporter_name','p_reporter_phone','p_message','p_location']) assert.ok(rescue.includes(field))
+  assert.equal(LEGAL_RELEASE_READY,false)
+})

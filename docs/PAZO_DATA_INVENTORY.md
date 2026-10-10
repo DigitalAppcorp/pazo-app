@@ -1,6 +1,6 @@
 # PAZO — Data & Third-Party Inventory
 
-> **Estado post-limpieza 2026-10-10:** inventario de categorías conserva validez como diseño, **no como evidencia de filas actuales**. Se observan 0 filas en las tablas de aplicación y 0 objetos en Storage; permanecen 6 cuentas Auth/identidades. Antes del reset los datos eran fixtures. Consultar `docs/PAZO_F14_TEST_DATA_RESET_20261010.md`.
+> **Estado de referencia pre-beta (verificado el 2026-10-10, sujeto a cambios de QA):** la descripción antigua de cero datos correspondía al reset anterior, no al estado actual. Había **7 cuentas Auth** (6 originales que deben preservarse y 1 QA descartable ya confirmada), **1 mascota y 1 archivo Storage anteriores**, **1 moderador** y **0 solicitudes de eliminación**. Esta cuenta QA no tenía mascotas ni archivos; su ensayo está reservado a Codex en `docs/PAZO_CODEX_PENDING_QA_20261010.md`. El inventario registra categorías y no sustituye una consulta actual de la base de datos.
 
 **Estado:** ACTIVO / baseline pre-Beta  
 **Regla:** este documento describe categorías y destinos conocidos. No sustituye una auditoría de schema ni una Privacy Policy pública.
@@ -99,7 +99,7 @@ Supabase Database/Storage.
 - visibilidad de presencia debe ser explícita.
 
 **Proveedor adicional**
-Mapbox recibe solicitudes necesarias para renderizar/usar el mapa según su integración.
+Mapbox recibe solicitudes necesarias para renderizar/usar el mapa según su integración. El cliente obtiene GPS solo tras pulsar el botón de ubicación y lo usa en estado de sesión para centrar el mapa y calcular distancias; los check-ins persistentes sí registran la identidad de mascota/lugar, fecha y visibilidad, sin el GPS exacto del dispositivo. El proveedor del mapa puede recibir metadatos técnicos de las zonas visualizadas.
 
 ## 6. Rescue / QR / mascota perdida
 
@@ -121,6 +121,8 @@ Mixto:
 - no enviar contenido/contacto a analytics;
 - mantener rate limits;
 - ownership de acciones del dueño.
+
+**Aviso legal en preparación:** los avistamientos pueden incluir nombre y teléfono del reportante, mensaje y ubicación escrita; el enlace público de rescate solo debe divulgar los campos limitados acordados, no esos datos privados. La política ES/EN deberá comunicarlo antes del lanzamiento.
 
 ## 7. Cuidados / Agenda
 
