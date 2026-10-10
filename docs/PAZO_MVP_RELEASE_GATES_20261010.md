@@ -16,7 +16,7 @@
 
 | Orden | Gate mínimo | Estado y prueba decisiva |
 |---|---|---|
-| 1 | **Integración MVP limpia** | Rama RC desde commit pre-A3 creada. Comparar #36/#37/main y comprobar código+Mapa+Auth. **Falta:** CI de la rama RC y revisión del diff antes del merge; no tocar main todavía |
+| 1 | **Integración MVP limpia** | Rama RC desde commit pre-A3 creada. Comparar #36/#37/main y comprobar código+Mapa+Auth. **CI #608 SUCCESS** (2026-10-10, commit `4744d6f3`): `npm ci`, `test:governance`, build y lint concluido sin error. Comparación GitHub contra `main`: **ahead 167 / behind 0**, 98 archivos; no sustituye gate de merge/QA de RC. No tocar main todavía |
 | 2 | **Auth — QA previamente aceptada** | **PASS del PO:** registro + sesión + mascota + Feed (2026-10-08); recuperación por enlace y formulario de nueva contraseña (2026-10-10). No repetir ni reabrir como bloqueo sin regresión demostrada. Código Auth devuelto al baseline aprobado `781069d6`. |
 | 3 | **Moderación mínima real** | Denuncia y decisión ya probadas; falta verificar retirada real de medios de **un único objeto nuevo descartable** con seguridad del operador y comprobar URL/origen. Si purga automática está apagada, documentar y usar un flujo supervisado verdadero, sin prometer purga CDN |
 | 4 | **Privacidad y salida segura** | Atención manual comprobada con cuenta de test separada; políticas/Terms definitivos (**operador identificado por PO: Alvarado Solutions LLC**; jurisdicción/domicilio legal de contacto, criterios de conservación y proceso real de baja aún pendientes); **contacto público de privacidad confirmado en ES/EN**. `LEGAL_RELEASE_READY=false` hasta que sean reales |
@@ -42,6 +42,14 @@ Solo pedir al PO **una acción cuando sea indispensable**: confirmar jurisdicci�
 **Operador declarado por el Product Owner:** **Alvarado Solutions LLC**, empresa que el PO indica está registrada. Se incorporó una única constante en `src/features/legal/legalCopy.ts` y la atribución en Privacidad/Términos ES y EN; se añadió prueba anti-regresión. **El PO confirmó California como estado de registro**, sin comprobación independiente en el registro oficial. No inventar domicilio, agente registrado ni datos no aportados; no confundir la cuenta de soporte con la entidad responsable. El correo público autorizado sigue siendo `appdigital.corp@gmail.com`.
 
 **Gate legal restante:** confirmar información legal de contacto exigible, fecha efectiva, retención real y operación de solicitudes de baja; revisión final del texto. `LEGAL_RELEASE_READY=false` hasta entonces. Auth y módulos funcionales ya aprobados NO se reensayan. No tocar Vercel, Supabase ni `main`.
+
+## 2026-10-10 — CI RC y operación moderadora real
+
+- **CI RC oficialmente confirmado:** GitHub Actions #608 `SUCCESS`, commit `4744d6f3`, job `verify`: Checkout, Node 22, npm ci, pruebas de gobernanza/privacidad/MVP, build y lint, todas las etapas marcadas `success`. Evidencia: https://github.com/DigitalAppcorp/pazo-app/actions/runs/38056411791. No repetir suites de Auth, Feed, Comunidades, Cuidados, Lugares ya aprobadas.
+- **Comparación contra main:** `ahead=167`, `behind=0`, 98 rutas modificadas/añadidas. PR #36 continúa DRAFT; #37/#38 se conservan pausados. **No hacer merge automático** ni usar los PRs A3 completos como lanzamiento.
+- **Bloqueo operativo hallado en DB (solo SELECT):** `moderation_private.moderator_grants` **0 filas**. `public.f14_is_moderator()` exige `auth.uid()` presente en esa tabla, así que **nadie puede administrar denuncias desde la interfaz** tras el reset. La cuenta previamente designada para tareas internas existe **una sola vez y está confirmada** en Auth, pero **NO tiene permiso de moderador**. Una autorización de atención de soporte/privacidad no equivale automáticamente a esta concesión. **Gate pendiente de PO:** aprobación explícita para otorgar el rol mínimo de moderador a esa cuenta, con SQL auditado y verificación posterior. No activar `service_role` en frontend ni almacenar UUID Auth en documentación.
+- Estado hosted agregado: 6 cuentas Auth, 1 perfil, 1 mascota y 1 avatar `pet-avatars`; 0 posts, comentarios, comunidades, denuncias pendientes, solicitudes de baja y claims retenidos. Estos son datos de prueba. La tabla histórica de reset con cero productos ya **no es el estado actual**. No borrar ni modificar estas cuentas/archivos.
+- **Permanece pendiente**: operación supervisada real de eliminación de una cuenta **nueva descartable** y, en su caso, retirada física de **un medio nuevo descartable** bajo un gate específico; cierre final del texto legal y política de conservación verificable. `LEGAL_RELEASE_READY=false`, automatización A3 en pausa, Edge de purge apagado, sin Vercel.
 
 ## 2026-10-10 — reconciliación de retención sin expandir alcance
 
