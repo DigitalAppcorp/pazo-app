@@ -81,7 +81,7 @@ test('write-fence covers all mapped row tables on insert/update/delete', () => {
   const list=['pets','posts','communities','community_posts','post_comments',
     'community_post_comments','community_memberships','follows',
     'care_items','care_completions','pet_documents',
-    'interactions','community_post_likes','pet_place_checkins']
+    'interactions','community_post_likes','pet_place_checkins','profiles','place_suggestions']
   for (const table of list) {
     assert.ok(fenceSql.includes("WHEN '"+table+"' THEN"),'owner resolver for '+table)
     assert.ok(fenceSql.includes('BEFORE INSERT OR UPDATE OR DELETE ON public.'+table),'trigger for '+table)
@@ -99,6 +99,24 @@ test('write-fence never claims to cover Storage, JWT, Auth or all tables', () =>
   assert.doesNotMatch(fenceSql,/\bauth\.admin\.deleteUser/)
 })
 
+
+test('A3 expanded write fence maps 28 distinct existing public tables (never claimed as complete)', () => {
+  const mapped=[...fenceSql.matchAll(/WHEN '([a-z_]+)' THEN/g)].map(m=>m[1])
+  const triggers=[...fenceSql.matchAll(/CREATE TRIGGER a3_write_fence_([a-z_]+) BEFORE INSERT OR UPDATE OR DELETE ON public\.([a-z_]+)/g)]
+  assert.equal(mapped.length,28)
+  assert.equal(triggers.length,28)
+  assert.equal(new Set(mapped).size,28)
+  assert.equal(new Set(triggers.map(m=>m[2])).size,28)
+  assert.deepEqual(triggers.map(m=>m[2]).sort(),mapped.sort())
+  assert.match(fenceSql,/WHEN 'profiles' THEN[\s\S]*?p_row->>'id'/)
+  assert.match(fenceSql,/WHEN 'place_suggestions' THEN[\s\S]*?p_row->>'submitter_user_id'/)
+  assert.match(fenceSql,/Unknown profile owner during A3 freeze/)
+  assert.match(fenceSql,/Unknown place suggestion owner during A3 freeze/)
+  assert.match(fenceSql,/NOT COVERED: account_blocks/)
+  assert.match(fenceSql,/pet_place_presence \(derived writes/)
+  assert.doesNotMatch(fenceSql,/CREATE TRIGGER a3_write_fence_account_blocks/)
+  assert.doesNotMatch(fenceSql,/CREATE TRIGGER a3_write_fence_pet_place_presence/)
+})
 
 const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql', import.meta.url), 'utf8')
 test('community FK draft aborts transaction before altering any table', () => {

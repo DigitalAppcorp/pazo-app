@@ -108,6 +108,17 @@ BEGIN
       SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
     WHEN 'pet_public_links' THEN
       SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
+    WHEN 'profiles' THEN
+      -- profiles.id is the account owner (FK to auth.users).
+      v_owner := (p_row->>'id')::uuid;
+      IF v_owner IS NULL THEN
+        RAISE EXCEPTION 'Unknown profile owner during A3 freeze' USING ERRCODE='42501';
+      END IF;
+    WHEN 'place_suggestions' THEN
+      v_owner := (p_row->>'submitter_user_id')::uuid;
+      IF v_owner IS NULL THEN
+        RAISE EXCEPTION 'Unknown place suggestion owner during A3 freeze' USING ERRCODE='42501';
+      END IF;
     WHEN 'pet_sightings' THEN
       SELECT owner_id INTO v_owner FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
       IF (p_row->>'alert_id') IS NOT NULL THEN
@@ -185,6 +196,8 @@ REVOKE ALL ON FUNCTION account_private.f14_a3_guard_social_write()
 
 CREATE TRIGGER a3_write_fence_pets BEFORE INSERT OR UPDATE OR DELETE ON public.pets
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_profiles BEFORE INSERT OR UPDATE OR DELETE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_posts BEFORE INSERT OR UPDATE OR DELETE ON public.posts
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_communities BEFORE INSERT OR UPDATE OR DELETE ON public.communities
@@ -225,6 +238,8 @@ CREATE TRIGGER a3_write_fence_pet_public_links BEFORE INSERT OR UPDATE OR DELETE
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_pet_sightings BEFORE INSERT OR UPDATE OR DELETE ON public.pet_sightings
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_place_suggestions BEFORE INSERT OR UPDATE OR DELETE ON public.place_suggestions
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_place_usage_events BEFORE INSERT OR UPDATE OR DELETE ON public.place_usage_events
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_search_usage_events BEFORE INSERT OR UPDATE OR DELETE ON public.search_usage_events
@@ -238,7 +253,9 @@ CREATE TRIGGER a3_write_fence_pet_documents BEFORE INSERT OR UPDATE OR DELETE ON
 
 COMMIT;
 
--- NOT COVERED: Storage API, unknown future interaction targets, unmapped
+-- NOT COVERED: account_blocks (user safety and follow-cleanup semantics),
+-- pet_place_presence (derived writes through checkin triggers / nullable pet),
+-- Storage API, unknown future interaction targets, unmapped
 -- private/legacy tables, privileged Edge/RPC operations, direct Auth
 -- deletes or service-side functions on unmapped tables.
 -- Do not consider write freeze complete; no worker may delete data using this alone.
