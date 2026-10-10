@@ -376,6 +376,43 @@ REVOKE ALL ON FUNCTION public.f14_a3_checkpoint_media_removed(uuid,uuid,uuid,big
 GRANT EXECUTE ON FUNCTION public.f14_a3_checkpoint_media_removed(uuid,uuid,uuid,bigint,text,text,text)
   TO service_role;
 
+-- Strict read-back for retries: a missing origin object alone cannot
+-- substitute for a server-generated checkpoint of an exact generation.
+CREATE OR REPLACE FUNCTION public.f14_a3_media_checkpoint_valid(
+  p_subject_user_id uuid,p_reviewer_user_id uuid,p_lease_token uuid,
+  p_revision bigint,p_bucket text,p_path text,p_object_version text
+) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $verify_media$
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'')<>'service_role'
+    OR p_subject_user_id IS NULL OR p_reviewer_user_id IS NULL
+    OR p_lease_token IS NULL OR p_revision IS NULL THEN
+    RAISE EXCEPTION 'Media checkpoint unavailable' USING ERRCODE='42501';
+  END IF;
+  RETURN EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_media_grants g
+    JOIN account_requests_private.deletion_review_jobs j
+      ON j.subject_user_id=g.subject_user_id
+    JOIN account_requests_private.deletion_requests req
+      ON req.subject_user_id=g.subject_user_id
+    WHERE req.status='processing' AND j.phase='remove_media'
+      AND g.subject_user_id=p_subject_user_id
+      AND g.reviewer_user_id=p_reviewer_user_id
+      AND g.bucket_id=p_bucket AND g.object_path=p_path
+      AND g.object_version=p_object_version
+      AND g.removed_at IS NOT NULL
+      AND j.lease_token=p_lease_token AND j.revision=p_revision
+      AND j.lease_expires_at>pg_catalog.clock_timestamp()
+      AND NOT EXISTS (SELECT 1 FROM storage.objects o
+        WHERE o.bucket_id=p_bucket AND o.name=p_path)
+  );
+END
+$verify_media$;
+REVOKE ALL ON FUNCTION public.f14_a3_media_checkpoint_valid(uuid,uuid,uuid,bigint,text,text,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_media_checkpoint_valid(uuid,uuid,uuid,bigint,text,text,text)
+  TO service_role;
+
 -- Storage write fence covers both owner's storage.objects.owner_id and exact
 -- bucket:path snapshots. Even service_role bypass requires a reviewed cleanup
 -- lease. Never DELETE directly from storage.objects; executor uses Storage API.
