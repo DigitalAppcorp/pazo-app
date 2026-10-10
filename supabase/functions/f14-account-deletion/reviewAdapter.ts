@@ -84,22 +84,18 @@ export function parseA3ReviewInventory(value: unknown): A3ReadOnlyInventory {
  * The subject UUID is supplied by a trusted reviewer workflow (not a public
  * user action); DB also checks the request exists and the operator is enrolled.
  */
-export async function getA3ReviewInventory(
+async function authorizeOperator(
   admin: A3PrivilegedClient,
   operatorJwt: string,
   subjectUserId: string,
-): Promise<A3ReadOnlyInventory> {
+): Promise<string> {
   if (typeof operatorJwt !== 'string' || operatorJwt.length < 20
       || operatorJwt.length > 8192 || !UUID.test(subjectUserId)) {
     throw new A3ReviewDenied()
   }
-
-  // Do not forward caller JWT into the privileged client's global headers.
-  // Auth verifies validity, expiry and issuer; identity is never taken from
-  // the request JSON, its email address or user_metadata.
-  const identity = await admin.auth.getUser(operatorJwt).catch(() => {
-    throw new A3ReviewDenied()
-  })
+  // JWT must originate from Authorization header on a trusted service.
+  const identity = await admin.auth.getUser(operatorJwt)
+    .catch(() => { throw new A3ReviewDenied() })
   const operatorId = identity.data?.user?.id
   if (identity.error || typeof operatorId !== 'string'
       || !UUID.test(operatorId) || operatorId === subjectUserId) {
@@ -110,15 +106,75 @@ export async function getA3ReviewInventory(
     p_operator_user_id: operatorId,
     p_subject_user_id: subjectUserId,
   }).catch(() => { throw new A3ReviewDenied() })
+  if (membership.error || membership.data !== true) throw new A3ReviewDenied()
+  return operatorId
+}
 
-  if (membership.error || membership.data !== true) {
-    throw new A3ReviewDenied()
-  }
-
+/** An operator can inspect only a verified pending-request aggregate. */
+export async function getA3ReviewInventory(
+  admin: A3PrivilegedClient,
+  operatorJwt: string,
+  subjectUserId: string,
+): Promise<A3ReadOnlyInventory> {
+  await authorizeOperator(admin, operatorJwt, subjectUserId)
   const inventory = await admin.rpc('f14_a3_review_inventory', {
     p_subject_user_id: subjectUserId,
   }).catch(() => { throw new A3ReviewDenied() })
   if (inventory.error) throw new A3ReviewDenied()
-
   return parseA3ReviewInventory(inventory.data)
+}
+
+export interface A3LeaseReceipt {
+  revision: number
+  leaseToken: string
+  expiresAt: string
+  stage: 'review_request'
+  destructiveExecutionAllowed: false
+}
+
+function parseA3ReviewLease(data: unknown): A3LeaseReceipt {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new A3ReviewDenied()
+  }
+  const row = data as Record<string, unknown>
+  if (!Number.isSafeInteger(row.revision) || (row.revision as number) < 2
+      || typeof row.lease_token !== 'string' || !UUID.test(row.lease_token)
+      || typeof row.expires_at !== 'string'
+      || !Number.isFinite(Date.parse(row.expires_at))
+      || row.stage !== 'review_request'
+      || row.destructive_execution_allowed !== false) {
+    throw new A3ReviewDenied()
+  }
+  return {
+    revision: row.revision as number,
+    leaseToken: row.lease_token,
+    expiresAt: row.expires_at,
+    stage: 'review_request',
+    destructiveExecutionAllowed: false,
+  }
+}
+
+/**
+ * Creates/reclaims an EXCLUSIVE REVIEW lease only. It neither freezes writes
+ * nor transitions the deletion request to processing. The expected revision
+ * is obtained from server-side state; browser payloads cannot control it.
+ */
+export async function claimA3ReviewLease(
+  admin: A3PrivilegedClient,
+  operatorJwt: string,
+  subjectUserId: string,
+  expectedRevision: number | null,
+): Promise<A3LeaseReceipt> {
+  if (expectedRevision !== null
+      && (!Number.isSafeInteger(expectedRevision) || expectedRevision < 1)) {
+    throw new A3ReviewDenied()
+  }
+  const operatorId = await authorizeOperator(admin, operatorJwt, subjectUserId)
+  const {data, error} = await admin.rpc('f14_a3_review_claim', {
+    p_operator_user_id: operatorId,
+    p_subject_user_id: subjectUserId,
+    ...(expectedRevision === null ? {} : {p_expected_revision: String(expectedRevision)}),
+  }).catch(() => { throw new A3ReviewDenied() })
+  if (error) throw new A3ReviewDenied()
+  return parseA3ReviewLease(data)
 }
