@@ -1,0 +1,28 @@
+# PAZO MVP — matriz mínima de conservación (BORRADOR OPERATIVO, 2026-10-10)
+
+**Estado: PROPUESTA, NO POLÍTICA PUBLICADA.** Producto 18+. Entidad operadora declarada por el PO: **Alvarado Solutions LLC, registrada en California**. Contacto de privacidad/soporte autorizado: **appdigital.corp@gmail.com**. Esta matriz sirve para completar el aviso antes de Beta; **no sustituye** el ensayo de eliminación manual ni acredita que se hayan borrado datos.
+
+**Evidencia:** revisión READ-ONLY de tablas PostgreSQL del proyecto y `src/services/observability.ts` / `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`. No se consultaron datos personales. `LEGAL_RELEASE_READY=false`, y no se instala ningún worker/cron o purga automática.
+
+| Categoría actual | Finalidad y criterio propuesto de conservación | Estado real / excepción por comprobar |
+|---|---|---|
+| Autenticación, perfil y mascotas | Mientras exista la cuenta y sean necesarios para prestar el servicio. Al solicitar baja, revisión de identidad, relaciones y excepciones antes de cerrar Auth. | La solicitud se registra, pero el borrado manual completo NO está ensayado. No prometer cierre inmediato ni acceso revocado antes de verificarlo. |
+| Posts, comentarios, comunidad, imágenes públicas, likes | Mientras sean compartidos o necesarios para interacciones de la comunidad; eliminar/moderar conforme a acciones verificadas y distinguir contribuciones de otras personas. | Retirada de medios del origen/CDN no automatizada; URLs públicas pueden seguir accesibles. Las FK CASCADE pueden afectar terceros; detener baja si no se resuelve. |
+| Cuidados, documentos y datos privados de mascotas | Mientras se use la función y se mantenga la titularidad; retirada de documentos privados y referencias tras una baja verificada. | Debe usarse Storage API, no SQL directo de `storage.objects`. Revisión manual por tipo y por propietario; no se ha demostrado limpieza total. |
+| Alertas y reportes de mascotas perdidas/avistamientos | Mientras la alerta o la atención de rescate lo requiera; al cerrarse, evaluar reducción de visibilidad y necesidad de conservación de registros. | Datos de ubicación/contacto pueden ser especialmente delicados; no establecer expiración automática inexistente. Reconciliar enlaces de terceros. |
+| Denuncias, moderación, reclamaciones y decisiones | Mientras sean necesarios para resolver una denuncia, proteger a la comunidad, atender reclamaciones o cumplir obligaciones aplicables. | Registro `moderation_private` separado; no prometer anonimización o borrado indiscriminado ante una baja. Acceso mínimo y revisión por operador. |
+| Solicitudes de baja y correspondencia de soporte | Mientras se procese la solicitud y durante el periodo estrictamente necesario para documentar respuesta, reclamaciones u obligaciones aplicables. | Tabla privada `account_requests_private.deletion_requests`; no hay borrado automático ni retención máxima implementada. Correo de soporte se gestiona fuera de la app; no duplicar mensajes en analytics/issues. |
+| Eventos de validación, búsquedas y uso, analítica | Solo eventos mínimos de producto necesarios para diagnóstico/validación; minimizar identificadores y desactivar medición no necesaria. | Tablas de eventos existen; `PostHog` solo se envía si hay token configurado. **No se conoce** plazo de conservación del proveedor ni hay purge por antigüedad verificada. |
+| Logs, errores, seguridad | Lo necesario para estabilidad, investigación de incidentes y seguridad; nunca registrar contenido sensible o tokens. | Retención efectiva de logs dependiente de proveedores/configuración; verificar ajustes antes de comprometer días exactos. |
+| Backups y caches de Supabase/proveedores | Conforme a políticas de backup y ciclo de vida verificables del proveedor; explicar que las copias y cachés pueden seguir existiendo tras retirar datos activos. | No se ha verificado ventana contractual/técnica de backups ni expiración CDN. No prometer borrado inmediato de todas las copias. |
+
+## Reglas mínimas antes de activar beta pública
+
+1. **Sin cifras inventadas:** publicar criterios concretos verificables o límites de tiempo solo si hay configuración/operación que los cumpla. Revisar compromisos de Supabase, PostHog si está activado, proveedor de correo y almacenamiento.
+2. **Sin ambigüedad de baja:** el usuario ya puede enviar y cancelar solicitudes. La operación final será **manual y supervisada durante el MVP** y NO es todavía un flujo completo validado; no anunciar "baja realizada" hasta comprobar el estado del usuario, medias, datos, FKs y terceros.
+3. **Privacidad de terceros:** moderación y contribuciones ajenas requieren tratamiento separado; una petición individual no autoriza borrarlas por CASCADE.
+4. **Prueba única necesaria:** ensayo de solicitud, revisión y borrado efectivo con **cuenta(s) nuevas descartables**, sin tocar cuentas de prueba existentes, antes del público. Si no es viable, no abrir beta pública con promesa de eliminación efectiva.
+5. **Texto visible:** revisión ES/EN de Privacy Policy y Terms con operador/medio de contacto, destinatarios/proveedores, categorías, finalidades, derechos y criterios de retención; asignar fecha efectiva **al publicarla**, nunca anticipada.
+6. **P0 de RC:** mantener Auth, Feed, Comunidades, Lugares y otras funciones aprobadas sin retesting genérico. No reactivar A3 avanzado ni Vercel/merge sin gate.
+
+**Decisión pendiente:** el PO debe validar las reglas de tratamiento y el proceso real, y debe comprobarse el funcionamiento de la eliminación manual. No se requiere inventar un domicilio empresarial ni levantar infraestructura adicional solo para elaborar este borrador.
