@@ -40,6 +40,43 @@ ALTER TABLE public.community_posts ADD CONSTRAINT f14_community_deleted_author_s
  (author_deleted_at IS NOT NULL AND author_user_id IS NULL AND author_pet_id IS NULL
   AND body='' AND photo_url IS NULL AND photo_storage_path IS NULL)
 );
+-- A retained reply thread is read-only. Client code cannot be the security
+-- boundary: direct REST/RPC writes to tombstones must fail at the database.
+CREATE OR REPLACE FUNCTION private.f14_guard_deleted_thread_write()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $guard$
+DECLARE v_deleted timestamptz;
+BEGIN
+ IF TG_TABLE_NAME='post_comments' THEN
+   SELECT p.author_deleted_at INTO v_deleted FROM public.posts p WHERE p.id=NEW.post_id;
+ ELSIF TG_TABLE_NAME='community_post_comments'
+    OR TG_TABLE_NAME='community_post_likes' THEN
+   SELECT cp.author_deleted_at INTO v_deleted FROM public.community_posts cp WHERE cp.id=NEW.post_id;
+ ELSIF TG_TABLE_NAME='interactions' AND NEW.target_type='post' THEN
+   SELECT p.author_deleted_at INTO v_deleted FROM public.posts p WHERE p.id=NEW.target_id;
+ END IF;
+ IF v_deleted IS NOT NULL THEN
+   RAISE EXCEPTION 'Archived deleted-author discussion is read only'
+     USING ERRCODE='42501';
+ END IF;
+ RETURN NEW;
+END;
+$guard$;
+REVOKE ALL ON FUNCTION private.f14_guard_deleted_thread_write()
+ FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER f14_block_deleted_feed_replies
+ BEFORE INSERT OR UPDATE ON public.post_comments
+ FOR EACH ROW EXECUTE FUNCTION private.f14_guard_deleted_thread_write();
+CREATE TRIGGER f14_block_deleted_community_replies
+ BEFORE INSERT OR UPDATE ON public.community_post_comments
+ FOR EACH ROW EXECUTE FUNCTION private.f14_guard_deleted_thread_write();
+CREATE TRIGGER f14_block_deleted_community_likes
+ BEFORE INSERT OR UPDATE ON public.community_post_likes
+ FOR EACH ROW EXECUTE FUNCTION private.f14_guard_deleted_thread_write();
+CREATE TRIGGER f14_block_deleted_feed_interactions
+ BEFORE INSERT OR UPDATE ON public.interactions
+ FOR EACH ROW EXECUTE FUNCTION private.f14_guard_deleted_thread_write();
+
 -- This server-only step is prepared, not installed or executed. A separate
 -- worker must first freeze access, clear physical media through Storage API,
 -- verify URL references and handle every other personal data category.

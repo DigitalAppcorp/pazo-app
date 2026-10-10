@@ -62,3 +62,29 @@ test('legacy and externally hosted media cannot be treated as verified deleted o
   'comments_count=(SELECT count(*) FROM public.community_post_comments remaining'
  ])assert.ok(sql.includes(v),v)
 })
+
+test('RLS bypass and direct API calls cannot create comments or interactions in retained threads',()=>{
+ for(const v of [
+  'private.f14_guard_deleted_thread_write()',
+  'Archived deleted-author discussion is read only',
+  'CREATE TRIGGER f14_block_deleted_feed_replies',
+  'CREATE TRIGGER f14_block_deleted_community_replies',
+  'CREATE TRIGGER f14_block_deleted_community_likes',
+  'CREATE TRIGGER f14_block_deleted_feed_interactions',
+  'BEFORE INSERT OR UPDATE ON public.post_comments',
+  'BEFORE INSERT OR UPDATE ON public.community_post_comments',
+  'BEFORE INSERT OR UPDATE ON public.community_post_likes',
+  'BEFORE INSERT OR UPDATE ON public.interactions'
+ ]) assert.ok(sql.includes(v),v)
+})
+test('UI renders only existing third-party replies with no new author actions',()=>{
+ const feed=readFileSync(new URL('../src/components/views/HomeView.tsx',import.meta.url),'utf8')
+ const community=readFileSync(new URL('../src/components/views/CommunityDetailView.tsx',import.meta.url),'utf8')
+ const service=readFileSync(new URL('../src/services/communityService.ts',import.meta.url),'utf8')
+ const app=readFileSync(new URL('../src/App.tsx',import.meta.url),'utf8')
+ assert.match(feed,/if \(post\.isAuthorDeleted\) return/)
+ assert.match(community,/post\.isAuthorDeleted \? \(/)
+ assert.match(service,/VITE_F14_DELETED_AUTHOR_THREADS_ENABLED/)
+ assert.match(service,/canDelete: !deleted/)
+ assert.match(app,/photoUrl: wasAuthorDeleted\(post\) \? null : post\.photo_url/)
+})
