@@ -19,12 +19,16 @@ test('SQL only authorizes exact server-only removed content and matches Storage 
   "p_stage IS NULL",
   "photo_storage_path=p_path",
   "IF EXISTS(SELECT 1 FROM storage.objects o",
-  "SET media_status='purged'",
-  "AND media_status='pending_review'",
+  "RETURN false;",
+  "c.status='held'",
+  "c.checked_at IS NOT NULL",
+  "c.snapshot->>'source_url'=p_url",
+  "report.status='removed'",
  ]) assert.ok(sql.includes(item),item)
  assert.match(sql,/REVOKE ALL ON FUNCTION public\.f14_moderation_media_gate[\s\S]*FROM PUBLIC,anon,authenticated/)
  assert.match(sql,/GRANT EXECUTE ON FUNCTION public\.f14_moderation_media_gate[\s\S]*TO service_role/)
  assert.doesNotMatch(sql,/\b(?:DELETE FROM|TRUNCATE)\s+(?:storage|auth|public)\./i)
+ assert.doesNotMatch(sql,/\bUPDATE\s+moderation_private\.content_restrictions\b/i)
 })
 test('Edge is off unless explicitly enabled, verifies user and role, and never logs key or raw URL',()=>{
  assert.match(edge,/F14_MEDIA_PURGE_ENABLED'\)!=='true'/)

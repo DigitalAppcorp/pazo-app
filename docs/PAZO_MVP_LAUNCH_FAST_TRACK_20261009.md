@@ -57,3 +57,7 @@ Flujo: JWT validado por Auth + RPC `f14_is_moderator`; fila actual obtenida con 
 ### Gate de implementación aprobado por PO (2026-10-09)
 
 PO autorizó instalar **únicamente** `f14_moderation_media_gate` (función SQL) y publicar la nueva versión de `f14-moderation-purge` **inactiva**, sin activar frontend ni ejecutar borrado de objetos. Se agregó lock de despliegue de código `F14_MEDIA_PURGE_RELEASE_APPROVED=false` además del flag de entorno `F14_MEDIA_PURGE_ENABLED` y el flag visual `VITE_F14_MEDIA_PURGE_ENABLED`, para impedir cambios accidentales por secreto preconfigurado. No asumir autorización de ensayo destructivo, Vercel o merge.
+
+### Descubrimiento en auditoría de preinstalación — protección histórica prioritaria
+
+En Supabase alojado están **activos** un trigger `f14_no_unverified_media_purge` (deniega `media_status='purged'`) y los leases `moderation_private.media_claims`, cuyo guard de Storage prohíbe operaciones con claim `held`. El SQL nuevo original no reconciliaba esos controles anteriores; instalarlo como ejecutor completo implicaría contradicciones y posible pérdida de garantías. Se refactorizó el SQL autorizado como **preflight de servicio**: precisa claim `held` válido, verificado y coincidente con el objeto; etapa `complete` devuelve `false` sin `UPDATE`. Se conserva el trigger histórico. El nuevo Edge conserva latch fijo `F14_MEDIA_PURGE_RELEASE_APPROVED=false`; ninguna eliminación real está autorizada en esta instalación. Para activar y probar purga física se requiere reconciliar guards y autorización específica del PO.

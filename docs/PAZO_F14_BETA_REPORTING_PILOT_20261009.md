@@ -77,3 +77,5 @@ El PR está dirigido temporalmente a `main` solo para activar el CI existente, q
 Se versionaron Edge con validación Auth/moderador y feature flag OFF, función PostgreSQL `f14_moderation_media_gate` restringida a service_role, verificación de propietario/unicidad de referencia, borrado exclusivo Storage API, `exists=false`, HTTP HEAD sobre URL original y variante cache-bust y finalización transaccional de `media_status='purged'` solo tras éxito. Interfaz de cola tiene botón detrás de flag local OFF. Ver `docs/PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md`.
 
 **Sin cambio en Supabase remoto.** No afirmar cobertura de perfil con múltiples medios, origen externo ni limpieza CDN global; no abrir Beta hasta QA controlada y cierre del contrato de medios.
+
+**Nota de preinstalación:** el backend existente incluye `f14_no_unverified_media_purge` y reservas `moderation_private.media_claims`. La función nueva se instala solo como prueba previa sin escritura; `complete` devolverá false, sin sustituir ni desactivar los guards históricos. El Edge está bloqueado en código independientemente de flags de entorno.

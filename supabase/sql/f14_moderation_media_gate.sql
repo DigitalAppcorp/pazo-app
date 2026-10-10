@@ -1,4 +1,4 @@
--- F14 D3-A: single-object Storage removal gate. READY FOR REVIEW, NOT APPLIED.
+-- F14 D3-A: server-only media preflight. Authorized to install, permanently fail-closed for completion.
 -- Run only after explicit PO authorization. Edge F14_MEDIA_PURGE_ENABLED remains OFF.
 -- Storage deletion itself MUST occur through Storage API, never by SQL.
 BEGIN;
@@ -67,17 +67,27 @@ BEGIN
     AND o.owner_id IS DISTINCT FROM v_owner::text
  ) THEN RETURN false; END IF;
 
- IF p_stage='preflight' THEN RETURN true; END IF;
- -- Caller must first remove object via Storage API and verify direct URL.
- -- This last server-side check is authoritative for origin metadata.
- IF EXISTS(SELECT 1 FROM storage.objects o
-  WHERE o.bucket_id=p_bucket AND o.name=p_path) THEN RETURN false; END IF;
+ -- Existing F14 media claims protect the Storage object against
+ -- deletion while held. Require exact, rechecked server-side evidence even
+ -- for preflight; all historical unclaimed media will be refused.
+ IF NOT EXISTS(
+  SELECT 1 FROM moderation_private.media_claims c
+  JOIN moderation_private.reports report ON report.id=c.report_id
+  WHERE c.target_kind=p_kind AND c.target_id=p_target
+    AND c.bucket=p_bucket AND c.status='held'
+    AND c.checked_at IS NOT NULL AND c.expires_at>pg_catalog.clock_timestamp()
+    AND c.snapshot->>'path'=p_path
+    AND c.snapshot->>'source_url'=p_url
+    AND c.snapshot->>'owner_id'=v_owner::text
+    AND report.status='removed'
+    AND report.target_kind=p_kind AND report.target_id=p_target
+ ) THEN RETURN false; END IF;
 
- UPDATE moderation_private.content_restrictions
- SET media_status='purged'
- WHERE target_kind=p_kind AND target_id=p_target
-   AND media_status='pending_review';
- RETURN FOUND;
+ -- DEPLOY-ONLY CONTRACT: no destructive capability or state transitions.
+ -- Existing media claim Storage safeguards and the 'purged' trigger must
+ -- be reconciled through a separately reviewed migration before execution.
+ IF p_stage='preflight' THEN RETURN true; END IF;
+ RETURN false;
 END;
 $f14_purge$;
 REVOKE ALL ON FUNCTION public.f14_moderation_media_gate(text,uuid,text,text,text,text)
@@ -86,6 +96,5 @@ GRANT EXECUTE ON FUNCTION public.f14_moderation_media_gate(text,uuid,text,text,t
  TO service_role;
 COMMIT;
 
--- Semantic contract: purged = Storage origin absent AND two direct HEAD probes
--- succeeded in server caller; it cannot guarantee all CDN regions evicted.
--- Other media (pet_profile, external URL, shared, legacy) remain pending_review.
+-- This installation never marks a file purged; existing F14 trigger still rejects that status.
+-- Post-install QA must verify that no image or moderation status changed.
