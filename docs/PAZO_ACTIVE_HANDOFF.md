@@ -40,3 +40,11 @@ Proyecto `mrybvqdebbgcayuvgkkr`. Después de la limpieza autorizada del 10-oct-2
 ## QA visual reportada; discrepancia de persistencia — 2026-10-10
 
 El Product Owner confirmó que sus pruebas locales pasaron. Se registra PASS visual reportado, sin evidencia del SHA del directorio ejecutado. Consulta read-only posterior: 6 cuentas Auth, 0 perfiles, 1 mascota y 1 objeto Storage. Por tanto, la restauración real de perfil aún NO está demostrada en Supabase alojado. Las pruebas de backend reversibles y CI del cambio pasaron anteriormente. No repetir la suite visual ni la purga. Próxima comprobación: identificar rama y commit de la carpeta ejecutada en Antigravity; después contrastar el entorno Supabase antes de declarar el gate cerrado.
+
+## Identificación visual de versión en splash — 2026-10-10
+
+- Decisión PO: mostrar una versión corta para no confundir builds de Antigravity con HEAD GitHub.
+- Código: `vite.config.ts` genera `__PAZO_BUILD_VERSION__` con `VITE_APP_RELEASE` (CI) o `git rev-parse --short=8 HEAD` (local); marca `· modificado` si el checkout contiene cambios rastreados no confirmados. `src/features/release/buildVersion.ts` lo expone; `src/App.tsx` lo muestra como texto discreto bajo «Su mundo, más cerca» en el splash. En desarrollo agrega `· local`; sin Git/env: `desconocida`. No agrega dependencias, bordes, migraciones ni tracking. Código en `9f0caed7ed6fdc12cb76a4845c653312a605b8b1`.
+- La versión local se calcula **al arrancar/reiniciar Vite**; si se hace checkout mientras el servidor sigue abierto, reiniciar dev server antes de comparar. Los cambios no rastreados `untracked` no están incluidos en el marcador. El número mostrado es la revisión de fuente, NO un test de Supabase conectado ni aprobación de E2E.
+- **Gate todavía abierto:** el PO reportó flujo visual PASS pero SELECT alojado resultó 6 Auth, 0 profiles y 1 mascota. Con la nueva versión visible en splash, pedir solo la cadena exacta de versión local y comparar con el commit fuente, más el origen de Supabase si persiste la discrepancia. No repetir QA anterior ni afirmar auto-restauración E2E hasta ver fila en `profiles`.
+- PR #37 sigue DRAFT, no merge/main/Vercel; CI de este nuevo cambio se debe verificar separadamente.
