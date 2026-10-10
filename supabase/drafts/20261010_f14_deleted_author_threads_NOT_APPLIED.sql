@@ -210,7 +210,7 @@ BEGIN
   LIMIT v_limit
   OFFSET v_offset;
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION public.pazo_redact_social_threads(uuid)
  FROM PUBLIC,anon,authenticated;
