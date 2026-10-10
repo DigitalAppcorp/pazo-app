@@ -14,13 +14,17 @@ import {
  * preservation, exact Storage generations and retries.
  * This TS interface is not a security boundary. Never expose it to the browser.
  */
+export type A3RejectCode =
+  | 'not_approved' | 'not_authorized' | 'lease_invalid' | 'writes_not_frozen'
+  | 'third_party_unverified' | 'media_unverified'
+  | 'data_unverified' | 'sessions_unverified'
+  | 'retention_unverified' | 'auth_unverified'
+
 export class A3Rejected extends Error {
-  constructor(public readonly code:
-    | 'not_approved' | 'not_authorized' | 'lease_invalid' | 'writes_not_frozen'
-    | 'third_party_unverified' | 'media_unverified'
-    | 'data_unverified' | 'sessions_unverified'
-    | 'retention_unverified' | 'auth_unverified') {
+  readonly code: A3RejectCode
+  constructor(code: A3RejectCode) {
     super(code)
+    this.code = code
   }
 }
 
