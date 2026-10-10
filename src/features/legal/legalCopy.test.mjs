@@ -1,11 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LEGAL_RELEASE_READY, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, legalPreview } from './legalCopy.ts'
+import { LEGAL_RELEASE_READY, PAZO_LEGAL_EFFECTIVE_DATE, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, legalPreview } from './legalCopy.ts'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact.ts'
 import { readFileSync } from 'node:fs'
 
-test('no draft is treated as the final published privacy policy or terms', () => {
-  assert.equal(LEGAL_RELEASE_READY, false)
+test('beta privacy and terms are dated, bilingual and ready as release text', () => {
+  assert.equal(LEGAL_RELEASE_READY, true)
   for (const kind of ['privacy','terms']) for (const lang of ['es','en']) {
     const copy=legalPreview[kind][lang]
     assert.ok(copy.heading.length>8)
@@ -13,8 +13,9 @@ test('no draft is treated as the final published privacy policy or terms', () =>
     assert.ok(copy.sections.length>=5)
     assert.ok(copy.sections.every(s=>s.heading && s.text))
   }
-  assert.match(legalPreview.privacy.es.alert,/Borrador/)
-  assert.match(legalPreview.terms.en.alert,/not final contractual terms/)
+  assert.equal(PAZO_LEGAL_EFFECTIVE_DATE, '2026-10-10')
+  assert.match(legalPreview.privacy.es.alert,/10 de octubre de 2026/)
+  assert.match(legalPreview.terms.en.alert,/October 10, 2026/)
 })
 test('truthful disclosure: no false claims of deletion or public purchases', () => {
   const privacy=legalPreview.privacy.es.sections.map(x=>x.text).join(' ')
@@ -30,7 +31,7 @@ test('truthful disclosure: no false claims of deletion or public purchases', () 
 test('public privacy inbox is real, bilingual, and never promises automated deletion', () => {
   assert.equal(PAZO_PRIVACY_SUPPORT_EMAIL, 'appdigital.corp@gmail.com')
   assert.equal(PAZO_PRIVACY_SUPPORT_MAILTO, 'mailto:appdigital.corp@gmail.com')
-  assert.equal(LEGAL_RELEASE_READY, false)
+  assert.equal(LEGAL_RELEASE_READY, true)
   const es = legalPreview.privacy.es.sections.map(s => s.text).join(' ')
   const en = legalPreview.privacy.en.sections.map(s => s.text).join(' ')
   assert.match(es,/solicitarla no elimina automáticamente tus datos/i)
@@ -48,7 +49,7 @@ test('public privacy inbox is real, bilingual, and never promises automated dele
 test('PO-designated legal operator is consistent in both languages and drafts', () => {
   assert.equal(PAZO_LEGAL_OPERATOR_NAME, 'Alvarado Solutions LLC')
   assert.equal(PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, 'California')
-  assert.equal(LEGAL_RELEASE_READY, false)
+  assert.equal(LEGAL_RELEASE_READY, true)
   for(const kind of ['privacy','terms']) {
     for(const lang of ['es','en']) {
       const copy=legalPreview[kind][lang]
@@ -56,8 +57,8 @@ test('PO-designated legal operator is consistent in both languages and drafts', 
       assert.ok(copy.sections.some(s=>s.text.includes(PAZO_LEGAL_OPERATOR_NAME) && s.text.includes(PAZO_LEGAL_OPERATOR_REGISTRATION_STATE)),kind+' '+lang+' registration')
     }
   }
-  assert.match(legalPreview.privacy.es.alert,/conservación/)
-  assert.match(legalPreview.privacy.en.alert,/retention/)
+  assert.match(legalPreview.privacy.es.alert,/baja/)
+  assert.match(legalPreview.privacy.en.alert,/deletion/)
   assert.doesNotMatch(legalPreview.privacy.es.alert,/Falta verificar responsable legal/)
 })
 
@@ -73,7 +74,7 @@ test('draft retention text describes real limits, without invented numeric purge
   assert.match(en,/does not automatically erase/i)
   assert.doesNotMatch(es,/\b\d+\s+(días|semanas|meses|años)\b/i)
   assert.doesNotMatch(en,/\b\d+\s+(days|weeks|months|years)\b/i)
-  assert.equal(LEGAL_RELEASE_READY,false)
+  assert.equal(LEGAL_RELEASE_READY,true)
 })
 
 test('draft statements distinguish ephemeral map location, persisted check-ins and rescue contacts', () => {
@@ -103,5 +104,5 @@ test('draft statements distinguish ephemeral map location, persisted check-ins a
   assert.match(map,/onClick=\{handleUseLocation\}/)
   for (const col of ['place_id','pet_id','visible']) assert.ok(places.includes(col))
   for (const field of ['p_reporter_name','p_reporter_phone','p_message','p_location']) assert.ok(rescue.includes(field))
-  assert.equal(LEGAL_RELEASE_READY,false)
+  assert.equal(LEGAL_RELEASE_READY,true)
 })
