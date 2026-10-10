@@ -4,6 +4,13 @@
 -- DO NOT APPLY without separate migration gate. This is not the Auth/Storage
 -- deletion executor. Existing media remains untouched by this SQL.
 BEGIN;
+-- Fail closed even if this draft is accidentally submitted to a SQL runner.
+-- A future approved migration must be rebuilt and integration-tested separately.
+DO $a3_uninstalled$
+BEGIN
+  RAISE EXCEPTION 'F14 DELETED AUTHOR DRAFT NOT APPLIED: Requires isolated FK and third-party QA';
+END
+$a3_uninstalled$;
 ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS author_deleted_at timestamptz;
 ALTER TABLE public.community_posts ADD COLUMN IF NOT EXISTS author_deleted_at timestamptz;
 -- A retained thread must survive later deletion of the author and their pet.
