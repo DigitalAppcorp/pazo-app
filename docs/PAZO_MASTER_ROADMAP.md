@@ -1,3 +1,7 @@
+> **DECISIÓN PO 2026-10-09 / CAMBIO DE PRIORIDAD:** A3 de PR #38 queda **PAUSADA**, no liberada ni terminada; detener nuevas migraciones/drafts. El carril activo es el cierre del MVP en PR #36/#37: [fast-track](PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md), versión reciente en PR #37. **No tocar Vercel hasta tener MVP listo para lanzamiento.** No activar A3, no merge, DDL, deletes, gastos o deployments. Los «SIGUIENTE» cronológicos anteriores de este archivo quedan subordinados a esta decisión.
+
+> **PUNTO DE REANUDACIÓN ACTUAL (2026-10-09):** leer primero [`docs/PAZO_ACTIVE_HANDOFF.md`](PAZO_ACTIVE_HANDOFF.md). El snapshot sustituye en materia de estado vigente los checkpoints cronológicos antiguos de esta hoja. Rama activa PR #38 DRAFT, HEAD del checkpoint anterior `d512cbce8a5a9946132ce6811aaff905cdc37757`; HEAD revalidado antes de ampliar `0e4b6734ceefbea1ce859e224dbaa350ad2130fd` con CI #38007913612 SUCCESS; trece SQL drafts **NO_APLICADOS** y contrato puro DRAFT de planificación terminal (sin borrados) (incluye corrección DRAFT de orden de locks en Feed) y modelo determinista Node para visualizar el ciclo de locks y prueba PG TEMP CASCADE/42501 con ROLLBACK (bloqueo Auth-last documentado); CI y PG concurrente real son gates distintos; nuevo write fence propuesto **30 tablas mapeadas** (29 full DML + 1 presencia I/U con DELETE de limpieza permitido; bloqueos de terceros preservados en draft), A3/Scope Gate abierto. GitHub main/producción sin merge/deploy. Revalidar HEAD antes de implementar.
+
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
@@ -924,3 +928,104 @@ Prioridad:
 - P2 anti-abuse, ruido operacional, restore drill y analytics.
 
 Esta fase de infraestructura está autorizada por el Product Owner y no constituye autorización para decidir automáticamente precio o beneficios de la membresía.
+
+---
+
+## Checkpoint vigente — QA local del MVP 2026-10-09
+
+**Evidencia posterior a los párrafos históricos de roadmap.** El PO abrió PR #36 commit `b49ecd3` en Antigravity/localhost (frontend local, Supabase alojado) y declaró PASS en login/pantalla de recuperación, Feed/paginación, mensajes honestos, publicación, interacciones y comentarios con F5, perfiles/follows; además confirmó funcionamiento general de todos los módulos. Ver `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md` para alcance y límites. Esto **cierra el smoke funcional local, no Gate 8 de F14 ni el Release Gate público**.
+
+**Ruta crítica ahora:** no repetir módulos; verificar PR #36/CI actual, gestionar merge solo con autorización PO, validar email real de Auth, resolver mínimo operacional F14 de reportes/eliminación y textos legales, evitar regresión de Mapa dev-only en PR #35 y obtener artefacto de release cuando sea viable sin upgrade Vercel. No abrir fases 10/11/13 por defecto.
+
+**Regla visual firme:** cero contornos en componentes (única excepción justificada en fields de texto), incluso en estados de foco; espaciado login queda para revisión visual futura, no blocker funcional. El PO conserva modificaciones F14 sin commit en su carpeta local original; conservarlas.
+
+**Situación GitHub al checkpoint:** `main` `ae7e63f`, PR #36 DRAFT (sin merge), PR #35 DRAFT (F14 pausada), PR #34 OPEN (rollout Lugares). La comprobación de funcionamiento local no implica que esos PRs estén listos para integrar ni que la beta pública esté autorizada.
+
+## Actualización F14 — integración acotada hacia Beta, 2026-10-09
+
+PR #37 (DRAFT) **no cierra Gate 8**. PR #36 fue aceptado funcionalmente en local y es base de integración. PR #37 reutiliza las RPC de reportes y colas moderadoras ya aplicadas a Supabase alojado para conectar cinco clases de denuncia a UI, sin fusionar PR #35 (F14 A2 avanzada) ni reintroducir su guard `import.meta.env.DEV` que altera el Mapa real. CI `37944094738` SUCCESS en commit `eda27bc`; QA real de reportes pendiente.
+
+**Bloqueadores de release siguen**: retirada de medio físico/Storage/CDN D3-A; ruta íntegra de eliminación cuenta/mascota A3; matriz D3-B y textos públicos A4; confirmación/recovery email real; reconciliación de PR #34 de Lugares y PR #35 sin desactivar funciones históricamente aprobadas. No cambiar scope aprobado por llamarlo «mínimo» ni equiparar botones visibles con seguridad verificada. Ningún gasto, merge, migración ni despliegue autorizado por este checkpoint. Ver `docs/PAZO_F14_BETA_REPORTING_PILOT_20261009.md`.
+
+## Checkpoint F14 A3 (2026-10-09) — preparación autorizada, no aplicación
+
+El PO autorizó creación de código y migraciones como borradores. PR #38 DRAFT prepara el **intake** de solicitud de cierre de cuenta, resumen de dependencias, consulta de estado y cancelación si no ha empezado procesado; protegido por un flag frontend OFF por defecto. SQL privado con RLS, grants, auditoría, 4 RPC y excepción `DO ... RAISE` explícita para impedir aplicación accidental. Tests + CI inicial PASS. **No hay worker de eliminación, ni integración de Storage/CDN/archivo de terceros/Auth; Gate 8 A3 permanece abierto**.
+
+Leer `docs/PAZO_F14_A3_IMPLEMENTATION_DRAFT_20261009.md` y `docs/PAZO_F14_A3_DELETION_PREFLIGHT_20261009.md`. D3-A y A4 siguen siendo dependencias de beta. No confundir documentación PR o UI desactivada con entrega pública ni autorizar merge / SQL sin gate.
+
+
+## F14 A3.2 — snapshot privado de aportaciones ajenas DRAFT 2026-10-09
+
+- PR #38 contiene **dos migraciones en `supabase/drafts/`**, NO aplicadas, ambas con `BEGIN` + `DO RAISE EXCEPTION` antes de cualquier DDL para impedir aplicación accidental.
+- Segundo borrador `20261009_f14_a3_preserve_contributions_NOT_APPLIED.sql` crea tablas privadas para tombstone de Feed, posts ajenos de comunidad y comentarios de otras cuentas; snapshot idempotente, solo server-role, devuelve explícitamente `ready_to_delete_auth=false` y `ready_to_delete_media=false`; corta si detecta medios de comunidad sin migración verificada. **No elimina registros ni realiza Storage delete**.
+- Checkpoints de CLI/CI: GitHub Actions `37953010063` **SUCCESS** en commit `cf333380d7de63a0dc8dd13ccd11c8eaed7cbd96`. Más adelante comprobar el SHA documental nuevo. 5 tests de estados/errores + pruebas estáticas de migraciones, además de tests del MVP.
+- **A3 sigue ABIERTA:** falta worker que congele escrituras concurrentes, adapte FK/RLS de comunidades, garantice comprobación de archivo/medios y recuperación, reautenticación de backend, borrado físico Storage/CDN y Auth al final; no ejecutar scripts en Supabase sin gate explícito. El usuario autorizó código DRAFT, no apply/merge/deploy.
+- La experiencia del usuario normal no cambia: `VITE_F14_A3_REQUESTS_ENABLED` OFF por defecto. No pedir prueba de borrar cuenta ni activar el flag hasta disponer de backend y aprobación.
+
+## F14 A3.4a — coordinator/worker lease DRAFT y QA de concurrencia (2026-10-09)
+
+- PR #38 contiene `src/features/account/deletionCoordinator.ts` (inspector puro de 12 condiciones, **destructiveExecutionAllowed=false en todas las situaciones**, secuencia propuesta sin llamadas a Storage/Auth/SQL) y pruebas de cada omisión, string truthy y lease expirado/versionado. No se usa para autorizar operaciones en navegador.
+- Tercero SQL DRAFT `supabase/drafts/20261009_f14_a3_worker_lease_NOT_APPLIED.sql`: lease exclusivo/versionado para servicio, `SELECT ... FOR UPDATE`, CAS, duración 5–60s, validación y liberación; **sin borrado, sin alterar status, sin activar worker**. Una cuenta normal no recibe tokens ni grants; requiere status `reviewing` que todavía no se establece por ningún worker.
+- CI del código `991fb7b9` GitHub Actions `37953868080` SUCCESS (después de reparar expectativa de test). CI del SQL `bf1610f3` run `37954129413` SUCCESS. Se añadió clasificación del archivo privado y tokens de lease en `docs/PAZO_DATA_INVENTORY.md`.
+- Próximo gate técnico: integración de reautenticación desde servidor, bloqueo efectivo de writes y protección de FK; D3-A Storage/CDN permanece blocker. Ningún SQL aplicado, ninguna cuenta/pet/archivo borrado, ni merge o despliegue, ni gasto.
+
+## F14 A3.4b — write fence / FK D2 proposal, 2026-10-09
+
+- PO continúa autorizando **solo código y migraciones DRAFT**, no DB apply, merge, deploy, eliminación ni gastos. PR #38 sigue DRAFT / feature flag `VITE_F14_A3_REQUESTS_ENABLED` OFF.
+- Inventario Supabase **READ ONLY** de propietarios/FKs/triggers/RLS: las tablas públicas de comunidades, posts, seguidores, cuidados y documentos tienen relaciones con Auth y mascotas, algunas `ON DELETE CASCADE`. `community_private.ensure_owner_membership()` actualmente rechaza comunidad sin dueño incluso archivada; esta dependencia fue inspeccionada directamente.
+- Migración DRAFT `supabase/drafts/20261009_f14_a3_write_fence_NOT_APPLIED.sql` con aborto SQL transaccional, guard de BEFORE INSERT/UPDATE/DELETE sobre **11 tablas** (post/comment/mascota/comunidad/membresía/follows/cuidados/documentos) y chequeo owner de fila vieja/nueva/relaciones; locks transaccionales ordenados. **Cobertura incompleta**: aún faltan interacciones, rescatistas, check-ins, QR, Storage API, RLS/RPC especiales, Auth y un cambio de estado atómico que use los mismos locks. Ningún trigger aplicado.
+- Migración DRAFT `supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql` prepara `communities.owner_user_id` nullable únicamente para `archived`, `ON DELETE SET NULL` a Auth, ajuste de constraint trigger de membresía, y `RESTRICT` para FKs de autor de `community_posts`. **NO aplicar:** puede cambiar reglas de borrado de mascotas/usuarios; requiere pruebas en DB aislada y revisión de views, RPC y medios. No borrado de contribuciones ajenas.
+- Contratos detallados `docs/PAZO_F14_A3_WRITE_FENCE_20261009.md` y `docs/PAZO_F14_A3_COMMUNITY_FK_PROPOSAL_20261009.md`. Tests estáticos/versionado en `scripts/f14-a3-draft.test.mjs`; código de cambios no ejecuta ninguna eliminación ni SQL en remoto.
+- Próximo trabajo: ampliar matriz de cobertura, diseñar transición server-only al estado de congelación usando locks compatibles, pruebas aisladas de FK/RLS e integrar D3-A/Storage. **A3 sigue abierta**, no prometer eliminación real de cuentas.
+
+## A3 — checkpoint de cierre técnico sin activación, 2026-10-09
+
+PO pidió terminar desarrollo. Se reparó un SQL inválido de `f14_a3_worker_snapshot_contributions` y se añadió validador de delimitadores en todos los SQL DRAFT; CI #37956473862 SUCCESS. `src/features/account/mediaManifest.ts` + pruebas negativas verifican rutas de Storage, propiedad, objetos compartidos, concurrencia y evidencia de CDN; devuelve `deletionAuthorized=false` en todos los casos; CI #37956829331 SUCCESS.
+
+**No confundir esto con un trabajador físico de eliminación**. Sigue SIN implementar lo señalado en `docs/PAZO_F14_A3_RELEASE_GATE_20261009.md`: SQL aislado, transición worker, reauth backend, freeze total, archivo/retención E2E, D3-A Storage/CDN, Auth final, políticas y release. La UI A3 permanece OFF; PR #38 DRAFT y branch `main` intacta. No pedir al PO borrar ninguna cuenta con esta versión.
+
+## 2026-10-09 — Hosted SQL QA read-only A3
+
+- PO autorizó pruebas SQL controladas/reversibles, NO ejecución de migraciones ni eliminación.
+- Se probaron en Supabase transacciones READ ONLY con ROLLBACK: 6 cuentas, 1 post ajeno en comunidad, 6 comentarios Feed ajenos y 1 documento privado. La única comunidad bloqueada por media; 5 comentarios JSON legacy en 3 posts; 13 posts Feed con foto, 2 posts de Comunidad con foto, 6 perfiles de mascota con foto.
+- Preflight mejorado detecta media/legacy y bloquea 5 de 6 cuentas hasta revisión. SQL de snapshot falla cerrado ante comentarios JSON de autoría no reconciliada. Conteo CASE sobre JSON no-array probado por SELECT real. PR #38 código + tests CI #38002029845 PASS.
+- FKs reales peligrosas 5/5 coinciden; anon carece de SELECT de communities; authenticated sin JWT no ve comunidades; no existen tablas ni RPC A3. Ningún DDL/DML ni Storage/Auth write remoto.
+- Evidencia completa: docs/PAZO_F14_A3_HOSTED_READONLY_QA_20261009.md. Queda pendiente DDL/pgTAP en sandbox y todo el worker; Gate A3 abierto, sin merge/deploy y feature flag OFF.
+
+## 2026-10-09 — F14 A3 PostgreSQL TEMP QA (reversible y sin apply)
+
+- PO autorizó pruebas SQL reversibles en Supabase hospedado. Se probaron funciones de intake/estado/cancelación, worker lease/CAS, snapshot de aportes de terceros, write fence y FK de comunidad **adaptadas a pg_temp**, con datos exclusivamente sintéticos y `BEGIN ... ROLLBACK`. Ver `docs/PAZO_F14_A3_TEMP_PG_QA_20261009.md`.
+- PASS: idempotencia de solicitudes (2 jobs históricos/1 activo), lease versión 3/rechazo de claim simultáneo, archivo privado 1 post/2 comentarios/1 tombstone, bloqueos al detectar media/legacy, write fence de posts y comentarios ajenos, transición de comunidad archivada sin perder post ajeno.
+- SQL DRAFT `f14_a3_write_fence` extendido de **11 a 14 tablas** añadiendo `interactions`, `community_post_likes`, `pet_place_checkins`. Pruebas TEMP verificaron 3 rechazos y 1 acción no relacionada permitida. Código CI `38002952300` PASS.
+- Verificación post-QA: Supabase alojado mantiene 6 cuentas, 6 mascotas, 1 comunidad, 20 objetos; jobs/leases/RPC A3 ausentes. **No hay migraciones A3 aplicadas, ni borrado Storage/Auth ni cambios a contenido real.**
+- **Pendiente crítico**: DDL completo en sandbox aislado, concurrencia entre 2 conexiones, rutas residuales de escritura, worker operativo/reautenticación/Storage/CDN/retención/Auth final. No activar A3 ni fusionar PR. Estas pruebas no certifican seguridad JWT/RLS de nuevos objetos.
+
+## 2026-10-09 — F14 A3 review worker + durable CAS journal DRAFT
+
+- Nuevo motor `supabase/functions/f14-a3-account-deletion/worker.ts` + adaptador RPC `adapter.ts`, sin Edge entrypoint/deploy: revisión con evidencias server-only, lease revalidada antes/después de gates, check de estado reviewing, reintentos seguros, sanear errores y nunca autorización irreversible. Cuando faltan verificadores, retorna blocked.
+- Nueva sexta migración bloqueada `supabase/drafts/20261009_f14_a3_worker_checkpoint_NOT_APPLIED.sql`: RPC service_role y journal privado CAS/versiones y eventos mínimos; no content DELETE.
+- SQL real **TEMP + ROLLBACK**: 2 eventos de journal en revisión 2, rechazo de tokens viejos y revision 0 repetida; sin objetos permanentes. CI motor #38003551960, checkpoint #38003843415 y adaptador #38003932473 SUCCESS. Un primer CI falló por ruta de test inválida y fue corregido antes del checkpoint final.
+- Evidencia/alcance: `docs/PAZO_F14_A3_WORKER_REVIEW_20261009.md`. **Worker destructivo NO construido**, aun sin sesión reciente JWT real, all-writes freeze, paths exactos Storage/CDN, Auth final ni E2E. A3 permanece abierta y UI OFF. PO no autorizó migraciones ni despliegue.
+
+## A3.4d — Internal HTTP review runner disabled (2026-10-09)
+
+- PR #38 agrega `http.ts`, `index.ts` y pruebas para invocación interna de revisión. HTTP requiere token de servicio secreto, body JSON limitado, no CORS y no expone operaciones físicas. `supabase/config.toml` mantiene la función `enabled=false`, `verify_jwt=true`; además runtime exige PAZO_A3_REVIEW_WORKER_ENABLED=true, ausente por defecto. Ningún Edge desplegado.
+- Backend de revisión no dispone aún de verificadores externos aprobados; el adaptador retorna missing_evidence por defecto y no existe eliminación física. Las nuevas variables de entorno y coste de despliegue NO se han configurado ni solicitado.
+- Cambios bajo Gate A3 DRAFT; F14 sigue ABIERTA. Evidencia ampliada en docs/PAZO_F14_A3_WORKER_REVIEW_20261009.md.
+
+## A3.4e — verificadores de servicio limitados, 2026-10-09
+
+- El worker servidor de PR #38 ahora inyecta `createA3ReadOnlyChecks()` mediante `adapter.ts` e `index.ts`. Se verifican exclusivamente **(1)** `worker_lease_valid` consultando `public.f14_a3_worker_validate_lease` con el token/versión exactos, y **(2)** `legacy_authorship_reconciled` consultando una RPC SQL borrador que solo devuelve true cuando la cuenta NO tiene ningún JSON de comentarios legacy sin reconciliar. No se acepta un valor `'true'`, `1`, error RPC ni evidencia de navegador.
+- Séptima migración **NO_APLICADA** `supabase/drafts/20261009_f14_a3_worker_legacy_clear_NOT_APPLIED.sql`, con `BEGIN/DO RAISE EXCEPTION` intencional antes de DDL, `SECURITY DEFINER`, grants solo `service_role` y sin DML. Se probó la función **adaptada a pg_temp** con fixtures sintéticos y `ROLLBACK`: array vacío/SQL NULL/JSON null permitido; comentario JSON no vacío y objeto desconocido bloqueados; estado no reviewing y rol authenticated rechazados. Esto NO prueba permisos RPC aplicados de verdad.
+- Las otras ocho verificaciones no tienen provider: el primer gate `recent_reauthentication` **se bloquea siempre**. No se puede completar una revisión ni borrar cuenta por este código. No activar `PAZO_A3_REVIEW_WORKER_ENABLED` ni `VITE_F14_A3_REQUESTS_ENABLED`.
+- Supabase actual recomienda para llamadas servicio-a-servicio secret key con validación server `auth: 'secret'` y `verify_jwt=false` (https://supabase.com/docs/guides/functions/auth), mientras el borrador A3 conserva por defensa en profundidad `verify_jwt=true` y header interno `x-a3-worker-key`. **No desplegar sin reconciliar esta incompatibilidad de formatos y hacer pruebas reales de gateway con credenciales de servicio**. No degradar simplemente a `verify_jwt=false` sin configurar primero el autenticador oficial y probar denegaciones.
+- CI código `151d48bb` [#38004703115](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38004703115) SUCCESS; SQL draft `01042a3d` [#38004748138](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38004748138) SUCCESS.
+- Verificación posterior READ ONLY: 6 cuentas Auth, 6 mascotas, 20 objetos Storage; `f14_a3_request_deletion()` y `f14_a3_worker_legacy_clear(uuid)` siguen ausentes. Sin apply, merge, deploy, borrados ni gastos. A3 / Gate 8 ABIERTOS.
+
+## A3.4f — Auth service-to-service y contraseña server-side DRAFT (2026-10-09)
+
+- PR #38 cambió `index.ts` a `@supabase/server@1.8.1` middleware `auth:'secret:pazo-a3-review'` con credencial nombrada de servidor por `apikey`. Por diseño `verify_jwt=false` (solo gateway) y `enabled=false` (función desactivada); segundo secreto privado y flag de runtime siguen necesarios. **No se crearon claves, secrets, recursos ni deploy**. No publicar sin pruebas reales del gateway.
+- Nuevos módulos server-only `reauth.ts`/`reauthAdapter.ts` + tests: exigir sesión JWT consultada con Auth.getUser y claims válidos; job pertenece al usuario; `signInWithPassword` vuelve a validar contraseña en sesión aislada y signOut local; solo entonces registrar prueba privada, sin exponer contraseña, token ni email. **Sin endpoint HTTP de reauth**, UI A3 OFF.
+- Octava migración protegida por aborto transaccional `supabase/drafts/20261009_f14_a3_recent_auth_NOT_APPLIED.sql`: prueba de sesión y propietario, TTL 5 minutos; la puerta worker necesita prueba consumida de una futura transición segura que NO está implementada, por lo que no libera eliminaciones.
+- SQL alojado PG_TEMP con rollback: pertenencia y sesión externa, recibo idempotente, prueba sin consumir/rechazada, consumida/fresca permitida, caducada/rechazada, rol normal/rechazado. Ningún dato real alterado. Detalles: `docs/PAZO_F14_A3_REAUTH_GATE_20261009.md`.
+- **A3/Scope Gate continúan ABIERTOS**: falta transición atómica para freeze real, cobertura de todas las escrituras, pruebas Edge/Deno con credenciales válidas, Storage/CDN/retención, Auth final. No merge ni despliegue.

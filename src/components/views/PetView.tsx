@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
+import { ModerationAccess } from '../../features/moderation/ModerationAccess'
+import { AccountDeletionPanel } from '../../features/account/AccountDeletionPanel'
 import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
   IconPaw,
@@ -13,6 +15,8 @@ import {
 
 interface PetViewProps {
   currentPet: Pet
+  canModerate: boolean
+  accountUserId: string | null
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
   onPetUpdated: (pet: Pet) => void
@@ -31,6 +35,8 @@ interface PetViewProps {
 
 export const PetView = ({
   currentPet,
+  canModerate,
+  accountUserId,
   availablePets,
   onSelectPet,
   onPetUpdated,
@@ -524,6 +530,8 @@ export const PetView = ({
           <h3 className="font-extrabold text-sm text-[#204E4A] px-1">
             {lang === 'es' ? `Todo sobre ${currentPet.name}` : `All about ${currentPet.name}`}
           </h3>
+          <ModerationAccess enabled={canModerate} lang={lang} />
+          {accountUserId && <AccountDeletionPanel key={accountUserId} userId={accountUserId} lang={lang} />}
 
           <div
             onClick={onOpenQRPassport}

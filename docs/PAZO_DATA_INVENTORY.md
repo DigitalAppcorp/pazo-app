@@ -297,3 +297,41 @@ Debe cerrarse para:
 | Vercel | hosting/deploy | conector visible pero 0 teams/proyectos | deployment/log metadata | conectar cuenta/proyecto correcto antes de auditar env/spend |
 
 Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producción.
+
+## 17. Eliminación de cuenta y conservación privada de aportaciones ajenas — F14 A3 DRAFT
+
+**Estado de tratamiento:** **PROPUESTA NO ACTIVADA**. Las tablas/RPC y el coordinador del PR #38 son únicamente código en GitHub y SQL `supabase/drafts/` con aborto explícito. Ninguna solicitud ni archivo privado de eliminación está operando en Supabase hospedado.
+
+**Categorías previstas en el backend si el PO autoriza activar A3:**
+- `account_private.deletion_jobs`: id interno del job, referencia al usuario que lo solicitó, estado, fecha de recepción, fecha de actualización; clasificación **privada de cuenta y operativa sensible**;
+- `account_private.deletion_events`: bitácora mínima por job/acción/fecha y razones sanitizadas, sin email/textos originales;
+- `account_private.deletion_post_tombstones`: identificador de relación + fecha de post desidentificado, sin texto/fotografía/nombre del titular;
+- `account_private.deletion_preserved_posts` y `deletion_preserved_comments`: **contenido UGC de otras cuentas**, autores internos, fechas y relaciones con posts/comunidades; se trata como **contenido privado de archivo sensible** después del cierre del propietario. No exponer como Feed público, resultados de búsqueda, analytics, ni a expropietarios;
+- `account_private.deletion_worker_leases`: identificador job, token/version/expiración de exclusión; **secreto operacional** exclusivo de servicio, nunca en cliente/telemetría;
+- inventario de archivos por bucket/ruta/versión requerirá categoría privada de metadata, sin almacenar bytes en logs.
+
+**Finalidad:** atender solicitudes verificadas sin borrar aportaciones ajenas y permitir recuperación idempotente; no analítica, monetización ni reutilización de UGC. **Proveedor propuesto:** Supabase DB/Auth/Storage ya conectado; no se añade tercero.
+
+**Acceso/seguridad pretendido:** `account_private` no expuesto en Data API; RLS habilitada y grants revocados a `anon`/`authenticated`, RPC de solicitante limitado a estado/cantidades propias, operación de archivo y lease solamente `service_role`. Auditoría de claims/ACL y prueba real con JWT todavía pendientes. Nunca service-role en navegador.
+
+**Retención:** las metas D3-B del PO para aportaciones archivadas (revisión a 90 días y resolución humana antes de 180 días) NO están implementadas ni contrastadas con proveedores. Políticas públicas NO deben prometer esos plazos. El cierre masivo de los datos actuales de prueba pre-lanzamiento es una operación distinta y requerirá inventario/autorización propia.
+
+**Bloqueos:** congelación real de escrituras, verificación de D3-A Storage/CDN, archive de comentarios/likes legacy y referencias, sesión antigua, Auth al final, control de backups y pruebas de borrado. Ningún worker destructivo se ha desplegado.
+
+## 18. Protección de escrituras y FK en eliminación — A3 DRAFT, NO ACTIVA
+
+Se propusieron guardias DB de escritura por propietario/contraparte en 11 tablas y una ruta de archivo `archived` para comunidades, bajo SQL **no aplicado** del PR #38. No existe nueva recolección ni tercer proveedor. Los guards harán consulta privada de trabajos de borrado y utilizarán locks transaccionales asociados a UUID de cuenta; nunca deben exponer estado de terceros a un cliente. Las migraciones todavía NO gobiernan el Supabase alojado. No afirmar al público que se congelan escrituras ni que comunidades sin dueño se archivan automáticamente. Los bloqueos legales/operacionales D3-A, sesión y retención continúan.
+
+## 19. Inventario de medios del cierre — propuesta NO ACTIVADA
+
+`src/features/account/mediaManifest.ts` (PR #38) propone comprobar bucket, ruta exacta, versión/id del objeto, titular validado por servidor, total de referencias propias/ajenas, freeze de escritura y lease válido. Cinco buckets existentes: `pet-avatars`, `post-photos`, `community-avatars`, `community-post-photos`, `pet-documents`. No captura ni envía esa información a proveedores nuevos; el validador no registra rutas ni borra Storage. Es una propuesta para operar desde servidor bajo autorización.
+
+El borrado físico aún **NO está implementado**. Supabase Storage API es requerida para eliminar bytes; nunca `DELETE FROM storage.objects`. La purga manual de CDN está documentada por Supabase como Pro+, **no se ha contratado ni aprobado**; no prometer revocación instantánea de URL pública sin medición. Ver `docs/PAZO_F14_A3_MEDIA_ORIGIN_GATE_20261009.md` y gate A3.
+
+## 20. Journal de revisión de eliminación (propuesta DRAFT, sin instalar)
+
+El sexto archivo SQL propuesto de F14 A3 agrega en `account_private` checkpoints de trabajo (ID de job, revisión, etapa, estado técnico, código de incidencia, fecha) y eventos de revisión, **sin emails, fotos, URLs, rutas de archivos ni UGC**. Datos operativos privados. Solo adaptador de servicio autorizado, con chequeo actual de lease y versión; anon y authenticated sin grants. No existe aún en el Supabase alojado, no hay proveedor nuevo ni ejecución real.
+
+## 21. Evidencia de reautenticación para cierre — PROPUESTA NO ACTIVADA
+
+Octavo borrador A3 de `account_private.deletion_recent_auth`: almacenaría IDs internos de solicitud, cuenta y sesión, fecha de verificación, caducidad a **cinco minutos** y fecha de consumo. **Nunca contraseñas, JWT, OTP, hashes de contraseña ni correos de reautenticación**. Exclusiva de servicio, con RLS y grants revocados a anon/authenticated. Permanece sin instalar, no hay evento de usuario ni nuevo proveedor; usa Supabase Auth actual. El token/contraseña se procesarían efímeramente por un backend autorizado, con cliente Auth aislado. No afirmar autoservicio de eliminación pública antes de verificar protección completa de cuentas, terceros y medios.

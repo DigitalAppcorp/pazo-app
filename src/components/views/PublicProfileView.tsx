@@ -3,9 +3,11 @@ import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { IconPaw } from '../icons/PazoIcons'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
 
 interface PublicProfileViewProps {
   targetPetId: string
+  canReport: boolean
   currentPetId?: string
   ownedPetIds: string[]
   onClose: () => void
@@ -14,11 +16,13 @@ interface PublicProfileViewProps {
 
 export const PublicProfileView = ({
   targetPetId,
+  canReport,
   currentPetId,
   ownedPetIds,
   onClose,
   lang,
 }: PublicProfileViewProps) => {
+  const [reportOpen, setReportOpen] = useState(false)
   const [petProfile, setPetProfile] = useState<Pet | null>(null)
   const [petPosts, setPetPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -174,6 +178,7 @@ export const PublicProfileView = ({
         <div className="w-24"></div>
       </div>
 
+      {reportOpen && <ReportDialog target={{kind:'pet_profile',id:targetPetId}} lang={lang} onClose={() => setReportOpen(false)} />}
       {/* Contenedor Principal */}
       <div className="p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto space-y-8 flex-1 relative z-10">
         {isLoading ? (
@@ -266,6 +271,8 @@ export const PublicProfileView = ({
                 </div>
               </div>
 
+              {canReport && !ownedPetIds.includes(targetPetId) && <button type="button" onClick={() => setReportOpen(true)}
+                className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar perfil' : 'Report profile'}</button>}
               {/* Métricas Reales */}
               <div className="flex items-center justify-around gap-2 pt-6 border-t border-[#204E4A]/10">
                 <div className="flex flex-col items-center flex-1">

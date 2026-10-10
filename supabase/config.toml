@@ -424,3 +424,11 @@ entrypoint = "./functions/paypal-webhook/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/paypal-webhook/*.html" ]
+
+# F14 A3: review-only preview entrypoint. Explicitly disabled until PO gate.
+[functions.f14-a3-account-deletion]
+enabled = false
+# The named-secret middleware authenticates apikey internally.
+# Supabase legacy JWT gateway must be disabled for sb_secret_* API keys.
+verify_jwt = false
+entrypoint = "./functions/f14-a3-account-deletion/index.ts"

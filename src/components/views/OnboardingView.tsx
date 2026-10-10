@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import type { Species, Pet } from '../../types/pazo'
-import { IconCat, IconDog, IconRabbit, IconBird } from '../icons/PazoIcons'
+import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
+import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04' | 'A05'
@@ -36,13 +37,13 @@ export const OnboardingView = ({
   const [isOver18, setIsOver18] = useState(false)
 
   const { signUp } = useAuth()
+  const [isSigningUp, setIsSigningUp] = useState(false)
+  const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] = useState(false)
 
-  const [petName, setPetName] = useState('Luna')
+  const [petName, setPetName] = useState('')
   const [petSpecies, setPetSpecies] = useState<Species>('gato')
-  const [petAge, setPetAge] = useState('3 años')
-  const [petPhoto, setPetPhoto] = useState(
-    'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=600&auto=format&fit=crop'
-  )
+  const [petAge, setPetAge] = useState('')
+  const [petPhoto, setPetPhoto] = useState('')
   const [petPhotoFile, setPetPhotoFile] = useState<File | null>(null)
   const [isSubmittingPet, setIsSubmittingPet] = useState(false)
 
@@ -79,6 +80,7 @@ export const OnboardingView = ({
   }
 
   const handleSignUp = async () => {
+    if (isSigningUp || awaitingEmailConfirmation) return
     if (!email || !password) {
       alert('Por favor ingresa un correo y contraseña.')
       return
@@ -88,13 +90,7 @@ export const OnboardingView = ({
       return
     }
 
-    const hasStrongPassword =
-      password.length >= 8
-      && /[a-z]/.test(password)
-      && /[A-Z]/.test(password)
-      && /[0-9]/.test(password)
-
-    if (!hasStrongPassword) {
+    if (!isValidPazoPassword(password)) {
       alert(
         lang === 'es'
           ? 'Usa al menos 8 caracteres, una mayúscula, una minúscula y un número.'
@@ -103,10 +99,22 @@ export const OnboardingView = ({
       return
     }
 
-    const success = await signUp(email.trim(), password)
-
-    if (success) {
-      setStep('A03')
+    setIsSigningUp(true)
+    try {
+      const outcome = await signUp(email.trim(), password)
+      if (outcome === 'authenticated') {
+        setPassword('')
+        setStep('A03')
+      } else if (outcome === 'verify_email') {
+        setPassword('')
+        setAwaitingEmailConfirmation(true)
+      }
+    } catch {
+      alert(lang === 'es'
+        ? 'No hay conexión. Inténtalo nuevamente.'
+        : 'Connection error. Please try again.')
+    } finally {
+      setIsSigningUp(false)
     }
   }
 
@@ -126,7 +134,7 @@ export const OnboardingView = ({
         name: normalizedName,
         species: petSpecies,
         age: petAge,
-        photoUrl: petPhoto,
+        photoUrl: petPhotoFile ? petPhoto : undefined,
         photoFile: petPhotoFile,
         zone,
         interests,
@@ -247,6 +255,26 @@ export const OnboardingView = ({
               </p>
             </div>
 
+            {awaitingEmailConfirmation ? (
+              <div role="status" className="p-4 bg-white border border-[#204E4A]/15 rounded-2xl text-[#204E4A] space-y-3">
+                <h3 className="font-extrabold text-base">
+                  {lang === 'es' ? 'Revisa tu correo' : 'Check your email'}
+                </h3>
+                <p className="text-xs text-[#5C7470] leading-relaxed">
+                  {lang === 'es'
+                    ? 'Si tu dirección puede registrarse, recibirás un enlace de confirmación. Confirma tu correo y después inicia sesión para agregar tu mascota.'
+                    : 'If your address can be registered, you will receive a confirmation link. Confirm your email, then sign in to add your pet.'}
+                </p>
+                <button type="button" onClick={onSkipToLogin}
+                  className="w-full bg-[#204E4A] text-white rounded-full py-3 text-xs font-extrabold cursor-pointer">
+                  {lang === 'es' ? 'Ya confirmé: iniciar sesión' : 'Confirmed: sign in'}
+                </button>
+                <button type="button" onClick={() => setAwaitingEmailConfirmation(false)}
+                  className="w-full text-xs font-bold text-[#5C7470] underline cursor-pointer">
+                  {lang === 'es' ? 'Usar otro correo' : 'Use another email'}
+                </button>
+              </div>
+            ) : (
             <div className="space-y-3 pt-1 text-xs">
               <div>
                 <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Correo electrónico</label>
@@ -293,9 +321,12 @@ export const OnboardingView = ({
 
               <button
                 onClick={handleSignUp}
-                className="w-full bg-[#204E4A] hover:bg-[#183d3a] text-white font-extrabold py-3.5 rounded-full text-xs shadow-md transition-all cursor-pointer mt-2"
+                disabled={isSigningUp}
+                className="w-full disabled:opacity-60 bg-[#204E4A] hover:bg-[#183d3a] text-white font-extrabold py-3.5 rounded-full text-xs shadow-md transition-all cursor-pointer mt-2"
               >
-                Crear cuenta
+                {isSigningUp
+                  ? (lang === 'es' ? 'Creando cuenta...' : 'Creating account...')
+                  : (lang === 'es' ? 'Crear cuenta' : 'Create account')}
               </button>
 
               <div className="flex gap-2 pt-1">
@@ -315,6 +346,7 @@ export const OnboardingView = ({
                 </button>
               </div>
             </div>
+            )}
           </div>
 
           <div className="text-center pb-2">
@@ -354,11 +386,13 @@ export const OnboardingView = ({
 
             {/* Avatar selector conectado a la galería */}
             <div className="flex items-center gap-3 p-3 bg-white rounded-2xl soft-card">
-              <img
-                src={petPhoto}
-                alt="Foto"
-                className="w-14 h-14 rounded-2xl object-cover shrink-0"
-              />
+              {petPhoto ? (
+                <img src={petPhoto} alt="Foto elegida para tu mascota" className="w-14 h-14 rounded-2xl object-cover shrink-0" />
+              ) : (
+                <div aria-hidden="true" className="w-14 h-14 rounded-2xl bg-[#FAF8F5] flex items-center justify-center shrink-0 text-[#204E4A]">
+                  <IconPaw size={24} />
+                </div>
+              )}
               <div className="flex-1">
                 <label className="inline-flex items-center gap-1.5 text-xs font-bold text-[#204E4A] bg-[#FAF8F5] px-3.5 py-2 rounded-full cursor-pointer soft-button hover:bg-[#204E4A]/5 transition-colors">
                   <span>📷 Cambiar fotografía</span>

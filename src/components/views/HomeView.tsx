@@ -3,9 +3,12 @@ import type { Post } from '../../types/pazo'
 import { IconBookmark, IconPaw } from '../icons/PazoIcons'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
 
 interface HomeViewProps {
   posts: Post[]
+  canReport: boolean
   onLikePost: (postId: string) => void
   onSavePost: (postId: string) => void
   onAddComment: (postId: string, text: string) => Promise<boolean>
@@ -84,8 +87,8 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
   if (diffInMinutes < 5) return lang === 'es' ? 'Hace un momento' : 'Just now'
   if (diffInHours < 24) {
-    if (diffInHours < 1) return lang === 'es' ? `Hace ${diffInMinutes} min` : ` mins ago`
-    return lang === 'es' ? `Hace ${diffInHours} h` : ` h ago`
+    if (diffInHours < 1) return lang === 'es' ? `Hace ${diffInMinutes} min` : `${diffInMinutes} mins ago`
+    return lang === 'es' ? `Hace ${diffInHours} h` : `${diffInHours} h ago`
   }
   const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
   if (postDate.getFullYear() !== now.getFullYear()) options.year = 'numeric'
@@ -93,8 +96,9 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
 }
 
 export const HomeView = ({
-  posts, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
+  posts, canReport, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
+  const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
   const [loadingCommentsPostId, setLoadingCommentsPostId] = useState<string | null>(null)
@@ -195,10 +199,24 @@ export const HomeView = ({
         </div>
       ) : (
         <div className="space-y-4">
+          {displayedPosts.length === 0 && (
+            <div className="rounded-[2rem] bg-white p-7 text-center space-y-2 border border-[#204E4A]/10">
+              <h3 className="text-base font-black text-[#204E4A]">
+                {lang === 'es' ? 'Todavía no hay publicaciones' : 'No posts yet'}
+              </h3>
+              <p className="text-xs text-[#5C7470]">
+                {lang === 'es'
+                  ? 'Comparte un momento de tu mascota o explora las comunidades.'
+                  : 'Share a moment with your pet or explore communities.'}
+              </p>
+            </div>
+          )}
           {displayedPosts.map((post) => (
             <PostCard
               key={post.id}
               post={post}
+              canReport={canReport}
+              onReport={(kind,id,label) => setReportTarget({kind,id,label})}
               currentPetId={currentPetId}
               ownedPetIds={ownedPetIds}
               lang={lang}
@@ -216,12 +234,15 @@ export const HomeView = ({
           ))}
         </div>
       )}
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} target={reportTarget} lang={lang} onClose={() => setReportTarget(null)} />}
     </div>
   )
 }
 
 interface PostCardProps {
   post: Post
+  canReport: boolean
+  onReport: (kind: 'feed_post' | 'feed_comment', id: string, label?: string) => void
   currentPetId: string
   ownedPetIds: string[]
   lang: 'es' | 'en'
@@ -237,7 +258,7 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, currentPetId)
@@ -271,7 +292,8 @@ const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCo
             canFollow={!ownedPetIds.includes(post.petId)}
             lang={lang}
           />
-          <button className="text-[#5C7470] hover:text-[#204E4A] p-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer text-xs font-bold" title="Opciones">&bull;&bull;&bull;</button>
+          {canReport && !ownedPetIds.includes(post.petId) && <button type="button" onClick={() => onReport('feed_post', post.id, (lang === 'es' ? 'Publicación de ' : 'Post by ') + post.petName)}
+            className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
         </div>
       </div>
       {post.photoUrl && (
@@ -323,6 +345,9 @@ const PostCard = ({ post, currentPetId, ownedPetIds, lang, isCommentsOpen, newCo
                     <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
                     <span className="text-[#5C7470]">{comment.text}</span>
                     <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
+                    {canReport && (!comment.authorPetId || !ownedPetIds.includes(comment.authorPetId)) && <button type="button"
+                      onClick={() => onReport('feed_comment', comment.id, (lang === 'es' ? 'Comentario de ' : 'Comment by ') + comment.authorName)}
+                      className="mt-1 text-[10px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   </div>
                 </div>
               ))}

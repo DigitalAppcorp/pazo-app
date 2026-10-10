@@ -5,6 +5,7 @@ interface MessagesModalProps {
   isOpen: boolean
   onClose: () => void
   conversations: Conversation[]
+  isDemo: boolean
   onSendMessage: (convId: string, text: string) => void
   lang: 'es' | 'en'
 }
@@ -13,6 +14,7 @@ export const MessagesModal = ({
   isOpen,
   onClose,
   conversations,
+  isDemo,
   onSendMessage,
   lang,
 }: MessagesModalProps) => {
@@ -21,6 +23,32 @@ export const MessagesModal = ({
   const [inputText, setInputText] = useState('')
 
   if (!isOpen) return null
+
+  // Real accounts must not be shown sample conversations or fake unread mail.
+  if (!isDemo) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div role="dialog" aria-modal="true" aria-labelledby="messages-not-ready-title"
+          className="w-full max-w-sm bg-white rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 id="messages-not-ready-title" className="text-lg font-black text-[#204E4A]">
+              {lang === 'es' ? 'Mensajería en desarrollo' : 'Messaging in development'}
+            </h3>
+            <button type="button" onClick={onClose}
+              aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
+              className="w-8 h-8 rounded-full bg-[#FAF8F5] text-[#204E4A] font-bold cursor-pointer">
+              ✕
+            </button>
+          </div>
+          <p className="text-xs leading-relaxed text-[#5C7470]">
+            {lang === 'es'
+              ? 'Los mensajes privados aún no están disponibles. No se enviarán mensajes ni aparecerán conversaciones de ejemplo en tu cuenta.'
+              : 'Private messages are not available yet. No messages can be sent, and sample conversations will not appear in your account.'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const activeConv = conversations.find((c) => c.id === activeConvId)
   const filteredList = conversations.filter((c) =>
