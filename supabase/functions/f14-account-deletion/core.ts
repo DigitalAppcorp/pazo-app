@@ -15,7 +15,7 @@ import {
  * This TS interface is not a security boundary. Never expose it to the browser.
  */
 export type A3RejectCode =
-  | 'not_approved' | 'not_authorized' | 'lease_invalid' | 'writes_not_frozen'
+  | 'not_approved' | 'not_authorized' | 'lease_invalid' | 'fresh_signin_missing' | 'writes_not_frozen'
   | 'third_party_unverified' | 'media_unverified'
   | 'data_unverified' | 'sessions_unverified'
   | 'retention_unverified' | 'auth_unverified'
@@ -29,8 +29,10 @@ export class A3Rejected extends Error {
 }
 
 export interface A3ReviewPorts {
-  /** Verified request, approved human operator AND recent subject reauth. */
+  /** Verify the pending request and separately enrolled human reviewer. */
   authorize(): Promise<boolean>
+  /** Verify the owner's NEW signed-in Auth session since requesting closure. */
+  verifyRecentSignin(): Promise<boolean>
   /** Atomic server-side CAS lease check. Called before every irreversible step. */
   verifyLease(): Promise<boolean>
   /** Freeze ALL app and privileged writers before any owned data is removed. */
@@ -75,6 +77,8 @@ export async function runSupervisedA3Candidate(
 ): Promise<{ completed: true }> {
   if (releaseApproved !== true) throw new A3Rejected('not_approved')
   if (await ports.authorize() !== true) throw new A3Rejected('not_authorized')
+  await requireLease(ports)
+  if (await ports.verifyRecentSignin() !== true) throw new A3Rejected('fresh_signin_missing')
   await requireLease(ports)
 
   if (await ports.freezeAccountWrites() !== true
