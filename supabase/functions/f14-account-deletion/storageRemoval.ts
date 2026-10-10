@@ -14,7 +14,8 @@ import {
  * Storage.remove(path) is not itself a conditional versioned DELETE.
  */
 export interface A3StorageBucket {
-  exists(path: string): Promise<{data: boolean | null; error: unknown}>
+  // Supabase StorageFileApi exposes info(), NOT exists().
+  info(path: string): Promise<{data: Record<string, unknown> | null; error: unknown}>
   remove(paths: string[]): Promise<{error: unknown}>
 }
 export interface A3StorageService {
@@ -47,6 +48,28 @@ const ensure = (ok: unknown) => {
   if (ok !== true) throw new A3StorageBlocked()
 }
 
+/** Strictly distinguish a missing origin object from 401/403/5xx/network.
+ * A missing data property, null with no 404, or a string error is NOT proof.
+ * Storage info() is the documented Supabase Storage JS method.
+ */
+async function existsAtOrigin(bucket: A3StorageBucket, path: string): Promise<boolean> {
+  const result = await bucket.info(path).catch(() => {
+    throw new A3StorageBlocked()
+  })
+  if (result.error !== null && result.error !== undefined) {
+    const error = result.error
+    if (result.data === null && error && typeof error === 'object'
+        && 'status' in error && error.status === 404) {
+      return false
+    }
+    throw new A3StorageBlocked()
+  }
+  if (result.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
+    return true
+  }
+  throw new A3StorageBlocked()
+}
+
 /**
  * Returns proof of one exact path's removal; NEVER a blanket approval for
  * account deletion or arbitrary paths. If any check fails, throws to stop
@@ -65,13 +88,12 @@ export async function removeVerifiedA3Object(
   await ensure(await proofs.verifyWriteFence())
 
   const bucket = admin.storage.from(row.bucket)
-  const pre = await bucket.exists(row.path)
-  if (pre.error) throw new A3StorageBlocked()
-  if (pre.data === false) {
+  const pre = await existsAtOrigin(bucket, row.path)
+  if (pre === false) {
     // A previous attempt may have already removed the object. A persisted
     // server-side checkpoint is required; absence alone isn't enough.
     await ensure(await proofs.verifyPreviouslyRemoved(row))
-  } else if (pre.data === true) {
+  } else if (pre === true) {
     // Explicit exact path only. NEVER bulk-delete bucket or SQL DELETE
     // storage.objects. Concurrent uploads must be frozen beforehand.
     await ensure(await proofs.verifyLease())
@@ -82,15 +104,13 @@ export async function removeVerifiedA3Object(
     // storage.objects.version; its grant expires in two minutes.
     const result = await bucket.remove([row.path])
     if (result.error) throw new A3StorageBlocked()
-    const after = await bucket.exists(row.path)
-    if (after.error || after.data !== false) throw new A3StorageBlocked()
+    if (await existsAtOrigin(bucket, row.path) !== false) throw new A3StorageBlocked()
     // Journal persists evidence BEFORE returning. If checkpointing fails,
     // the retry must be manually reconciled instead of blindly deleting.
     await ensure(await proofs.checkpointRemoved(row))
   } else throw new A3StorageBlocked()
 
-  const after = await bucket.exists(row.path)
-  if (after.error || after.data !== false) throw new A3StorageBlocked()
+  if (await existsAtOrigin(bucket, row.path) !== false) throw new A3StorageBlocked()
   await ensure(await proofs.verifyLease())
   await ensure(await proofs.verifyWriteFence())
 
