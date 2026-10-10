@@ -78,7 +78,7 @@ test('write-fence migration aborts inside transaction BEFORE all SQL changes', (
   assert.doesNotMatch(fenceSql,/\b(?:DELETE\s+FROM|TRUNCATE\s+|DROP\s+TABLE)\b/i)
 })
 test('write-fence covers all mapped row tables on insert/update/delete', () => {
-  const list=['pets','posts','communities','community_posts','post_comments',
+  const list=['account_blocks','pets','posts','communities','community_posts','post_comments',
     'community_post_comments','community_memberships','follows',
     'care_items','care_completions','pet_documents',
     'interactions','community_post_likes','pet_place_checkins','profiles','place_suggestions']
@@ -100,22 +100,32 @@ test('write-fence never claims to cover Storage, JWT, Auth or all tables', () =>
 })
 
 
-test('A3 expanded write fence maps 28 distinct existing public tables (never claimed as complete)', () => {
+test('A3 expanded write fence covers 29 full-table triggers and one derived presence trigger', () => {
   const mapped=[...fenceSql.matchAll(/WHEN '([a-z_]+)' THEN/g)].map(m=>m[1])
   const triggers=[...fenceSql.matchAll(/CREATE TRIGGER a3_write_fence_([a-z_]+) BEFORE INSERT OR UPDATE OR DELETE ON public\.([a-z_]+)/g)]
-  assert.equal(mapped.length,28)
-  assert.equal(triggers.length,28)
-  assert.equal(new Set(mapped).size,28)
-  assert.equal(new Set(triggers.map(m=>m[2])).size,28)
-  assert.deepEqual(triggers.map(m=>m[2]).sort(),mapped.sort())
+  assert.equal(mapped.length,30)
+  assert.equal(triggers.length,29)
+  assert.equal(new Set(mapped).size,30)
+  assert.equal(new Set(triggers.map(m=>m[2])).size,29)
+  const partial='pet_place_presence'
+  assert.deepEqual(triggers.map(m=>m[2]).sort(),mapped.filter(t=>t!==partial).sort())
+  assert.match(fenceSql,/CREATE TRIGGER a3_write_fence_pet_place_presence BEFORE INSERT OR UPDATE ON public\.pet_place_presence/)
+  assert.doesNotMatch(fenceSql,/CREATE TRIGGER a3_write_fence_pet_place_presence BEFORE INSERT OR UPDATE OR DELETE/)
+  assert.match(fenceSql,/WHEN 'account_blocks' THEN[\s\S]*?blocker_user_id[\s\S]*?blocked_user_id/)
+  assert.match(fenceSql,/WHEN 'pet_place_presence' THEN[\s\S]*?FROM public\.pet_place_checkins/)
+  assert.match(fenceSql,/IF TG_TABLE_NAME='account_blocks' AND TG_OP IN \('INSERT','DELETE'\)/)
+  assert.match(fenceSql,/ELSIF TG_TABLE_NAME='follows' AND TG_OP='DELETE'/)
+  assert.match(fenceSql,/v_uid IS DISTINCT FROM v_exception_target/)
+  assert.match(fenceSql,/auth\.uid\(\)/)
+  assert.match(fenceSql,/FROM public\.account_blocks b/)
   assert.match(fenceSql,/WHEN 'profiles' THEN[\s\S]*?p_row->>'id'/)
   assert.match(fenceSql,/WHEN 'place_suggestions' THEN[\s\S]*?p_row->>'submitter_user_id'/)
   assert.match(fenceSql,/Unknown profile owner during A3 freeze/)
   assert.match(fenceSql,/Unknown place suggestion owner during A3 freeze/)
-  assert.match(fenceSql,/NOT COVERED: account_blocks/)
-  assert.match(fenceSql,/pet_place_presence \(derived writes/)
-  assert.doesNotMatch(fenceSql,/CREATE TRIGGER a3_write_fence_account_blocks/)
-  assert.doesNotMatch(fenceSql,/CREATE TRIGGER a3_write_fence_pet_place_presence/)
+  assert.match(fenceSql,/Intentional exception: place-presence DELETE/)
+  assert.match(fenceSql,/authenticated blocker/)
+  assert.match(fenceSql,/CREATE TRIGGER a3_write_fence_account_blocks/)
+  assert.match(fenceSql,/CREATE TRIGGER a3_write_fence_pet_place_presence/)
 })
 
 const fkSql = readFileSync(new URL('../supabase/drafts/20261009_f14_a3_community_fk_NOT_APPLIED.sql', import.meta.url), 'utf8')

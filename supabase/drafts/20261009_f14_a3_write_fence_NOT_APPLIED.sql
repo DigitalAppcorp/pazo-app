@@ -70,6 +70,29 @@ BEGIN
       IF v_owner IS NULL OR v_secondary IS NULL THEN
         RAISE EXCEPTION 'Unknown community like owner during A3 freeze' USING ERRCODE='42501';
       END IF;
+    WHEN 'account_blocks' THEN
+      -- Ownership is asymmetric: blocker controls the safety action; the
+      -- blocked account must still be lock-ordered but may be frozen.
+      v_owner := (p_row->>'blocker_user_id')::uuid;
+      v_secondary := (p_row->>'blocked_user_id')::uuid;
+      IF v_owner IS NULL OR v_secondary IS NULL THEN
+        RAISE EXCEPTION 'Unresolvable account block relationship' USING ERRCODE='42501';
+      END IF;
+    WHEN 'pet_place_presence' THEN
+      -- Derived by place_private.sync_place_presence. INSERT/UPDATE only:
+      -- source checkin is still present; DELETE cleanup may run after FK
+      -- cascade removes that source, so direct DELETE is intentionally
+      -- excluded from this trigger (not a complete Storage/DB freeze).
+      SELECT c.user_id,c.pet_id,p.owner_id INTO v_owner,v_pet,v_secondary
+        FROM public.pet_place_checkins c
+        JOIN public.pets p ON p.id=c.pet_id
+       WHERE c.id=(p_row->>'checkin_id')::uuid;
+      IF v_owner IS NULL OR v_secondary IS NULL
+        OR v_owner IS DISTINCT FROM v_secondary
+        OR ((p_row->>'visible_pet_id') IS NOT NULL
+          AND v_pet IS DISTINCT FROM (p_row->>'visible_pet_id')::uuid) THEN
+        RAISE EXCEPTION 'Unresolvable place presence ownership' USING ERRCODE='42501';
+      END IF;
     WHEN 'pet_place_checkins' THEN
       v_owner := (p_row->>'user_id')::uuid;
       SELECT owner_id INTO v_secondary FROM public.pets WHERE id=(p_row->>'pet_id')::uuid;
@@ -163,6 +186,10 @@ DECLARE
   v_new jsonb;
   v_owners uuid[] := '{}'::uuid[];
   v_uid uuid;
+  v_exception_target uuid;
+  v_actor uuid;
+  v_follow_owner uuid;
+  v_followed_owner uuid;
 BEGIN
   IF TG_OP <> 'INSERT' THEN v_old := TO_JSONB(OLD); END IF;
   IF TG_OP <> 'DELETE' THEN v_new := TO_JSONB(NEW); END IF;
@@ -171,6 +198,32 @@ BEGIN
   END IF;
   IF TG_OP <> 'DELETE' THEN
     v_owners := ARRAY_CAT(v_owners,account_private.f14_a3_row_owners(TG_TABLE_NAME,v_new));
+  END IF;
+
+  -- Safety policy: a third-party may block/unblock a frozen account.
+  -- Account-block target is lock-ordered but exempt from frozen-row denial
+  -- on INSERT/DELETE. UPDATE is never exempt (service-only drift guard).
+  IF TG_TABLE_NAME='account_blocks' AND TG_OP IN ('INSERT','DELETE') THEN
+    v_exception_target := (CASE WHEN TG_OP='DELETE' THEN v_old ELSE v_new END
+      ->>'blocked_user_id')::uuid;
+  ELSIF TG_TABLE_NAME='follows' AND TG_OP='DELETE' THEN
+    -- A valid signed-in blocker with an existing block may remove only a
+    -- mutual follow with the blocked account. No caller-controlled bypass
+    -- flag, and a frozen blocker is still denied in the loop below.
+    SELECT owner_id INTO v_follow_owner FROM public.pets
+      WHERE id=(v_old->>'follower_id')::uuid;
+    SELECT owner_id INTO v_followed_owner FROM public.pets
+      WHERE id=(v_old->>'following_id')::uuid;
+    v_actor := auth.uid();
+    IF v_actor IS NOT NULL AND v_follow_owner IS NOT NULL
+      AND v_followed_owner IS NOT NULL THEN
+      SELECT blocked_user_id INTO v_exception_target
+        FROM public.account_blocks b
+       WHERE b.blocker_user_id=v_actor
+         AND ((v_follow_owner=v_actor AND v_followed_owner=b.blocked_user_id)
+           OR (v_followed_owner=v_actor AND v_follow_owner=b.blocked_user_id))
+       LIMIT 1;
+    END IF;
   END IF;
 
   -- IMPORTANT: the future worker must acquire the exact same advisory
@@ -183,7 +236,7 @@ BEGIN
       SELECT 1 FROM account_private.deletion_jobs
       WHERE user_id=v_uid
         AND status NOT IN ('requested','cancelled')
-    ) THEN
+    ) AND v_uid IS DISTINCT FROM v_exception_target THEN
       RAISE EXCEPTION 'Account write paused for deletion review' USING ERRCODE='42501';
     END IF;
   END LOOP;
@@ -194,6 +247,8 @@ $$;
 REVOKE ALL ON FUNCTION account_private.f14_a3_guard_social_write()
   FROM PUBLIC,anon,authenticated;
 
+CREATE TRIGGER a3_write_fence_account_blocks BEFORE INSERT OR UPDATE OR DELETE ON public.account_blocks
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_pets BEFORE INSERT OR UPDATE OR DELETE ON public.pets
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_profiles BEFORE INSERT OR UPDATE OR DELETE ON public.profiles
@@ -215,6 +270,8 @@ CREATE TRIGGER a3_write_fence_follows BEFORE INSERT OR UPDATE OR DELETE ON publi
 CREATE TRIGGER a3_write_fence_interactions BEFORE INSERT OR UPDATE OR DELETE ON public.interactions
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_community_post_likes BEFORE INSERT OR UPDATE OR DELETE ON public.community_post_likes
+  FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
+CREATE TRIGGER a3_write_fence_pet_place_presence BEFORE INSERT OR UPDATE ON public.pet_place_presence
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
 CREATE TRIGGER a3_write_fence_pet_place_checkins BEFORE INSERT OR UPDATE OR DELETE ON public.pet_place_checkins
   FOR EACH ROW EXECUTE FUNCTION account_private.f14_a3_guard_social_write();
@@ -253,8 +310,9 @@ CREATE TRIGGER a3_write_fence_pet_documents BEFORE INSERT OR UPDATE OR DELETE ON
 
 COMMIT;
 
--- NOT COVERED: account_blocks (user safety and follow-cleanup semantics),
--- pet_place_presence (derived writes through checkin triggers / nullable pet),
+-- Intentional exception: place-presence DELETE is derived cleanup, not fenced;
+-- account-block INSERT/DELETE and reciprocal follow cleanup are safety exceptions
+-- for the authenticated blocker. They are NOT verified against a 2-session race.
 -- NOT COVERED: Storage API, unknown future interaction targets, unmapped
 -- private/legacy tables, privileged Edge/RPC operations, direct Auth
 -- deletes or service-side functions on unmapped tables.
