@@ -325,3 +325,7 @@ La migración de continuidad añade a `community_private` únicamente metadatos 
 ### 24.5 Estado real de continuidad — 2026-10-10
 
 Instalada migración `20261010053708_f14_community_ownership_continuity` y tabla privada `community_private.ownership_transfer_offers`; 0 ofertas persistentes tras QA reversible. La tabla contiene IDs de comunidad, antiguo propietario y admin candidato, marcas de tiempo y estado; sin emails ni contenido. La interfaz de candidatura/aceptación solo se expone en QA local DEV y la aplicación productiva permanece con gate desactivado. Sin cambios ni borrado de contenido social o Storage en la instalación.
+
+### 24.6 Integridad del borrado de cuenta — 2026-10-10
+
+El preflight analiza interacciones Feed originadas por terceros (explícitas e impresiones), likes de comunidad, inconsistencias de autor de mascotas, media claims y URLs de medios sin equivalencia exacta en Storage. No se instrumentan nuevos eventos ni se exportan URLs/cuerpos/identidades. Los reportes agregados se reservan al operador. La revisión de seis cuentas detecta 8 referencias no verificadas y exige conciliación antes de cualquier borrado. No hay cambios permanentes al backend en este lote.
