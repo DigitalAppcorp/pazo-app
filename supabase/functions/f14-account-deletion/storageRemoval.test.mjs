@@ -33,6 +33,9 @@ function harness(options={}){
    verifyExactGenerationAndReferences:async()=>{
      calls.push('version');return options.version??true
    },
+   authorizeExactRemoval:async()=>{
+     calls.push('grant');return options.grant??true
+   },
    verifyPreviouslyRemoved:async()=>{
      calls.push('oldCheckpoint');return options.oldCheckpoint??false
    },
@@ -61,6 +64,7 @@ test('only an exact owned object is removed and independently verified',async()=
  const removal=x.calls.findIndex(v=>v.startsWith('remove:'))
  assert.ok(removal>0)
  assert.ok(x.calls.lastIndexOf('version')<removal)
+ assert.ok(x.calls.lastIndexOf('grant')<removal)
  assert.ok(x.calls.includes('checkpoint'))
  assert.ok(x.calls.lastIndexOf('exists:'+row().path)>removal)
  assert.ok(x.calls.lastIndexOf('url')>removal)
@@ -83,7 +87,7 @@ test('shared, foreign, unsafe and duplicate candidates are never removed',async(
 
 test('missing lease, fence, authoritative generation or origin blocks physical remove',async()=>{
  for(const options of [
-  {lease:false},{fence:false},{version:false},
+  {lease:false},{fence:false},{version:false},{grant:false},
   {existsError:new Error('unavailable')},{exists:null},
  ]){
    const calls=await blocked(options)
