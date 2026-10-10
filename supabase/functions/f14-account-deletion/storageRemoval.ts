@@ -25,6 +25,10 @@ export interface A3StorageProofs {
   verifyLease(): Promise<boolean>
   verifyWriteFence(): Promise<boolean>
   verifyExactGenerationAndReferences(object: Readonly<MediaInventoryEntry>): Promise<boolean>
+  /** Durable server-side checkpoint of a prior successful remove call; no client values. */
+  verifyPreviouslyRemoved(object: Readonly<MediaInventoryEntry>): Promise<boolean>
+  /** Persist exact-object deletion checkpoint; independent job journal on server. */
+  checkpointRemoved(object: Readonly<MediaInventoryEntry>): Promise<boolean>
   /**
    * HEAD + ranged GET of OLD public URL, plus cache-busting fetch, must yield
    * 403/404/410. False for unknown/failed checks, never treat 5xx as missing.
@@ -61,25 +65,30 @@ export async function removeVerifiedA3Object(
 
   const bucket = admin.storage.from(row.bucket)
   const pre = await bucket.exists(row.path)
-  if (pre.error || pre.data !== true) throw new A3StorageBlocked()
-
-  // Explicit exact path only. NEVER bulk-delete a bucket or SQL DELETE
-  // storage.objects. Uploads/upserts to this path must already be frozen.
-  await ensure(await proofs.verifyLease())
-  await ensure(await proofs.verifyWriteFence())
-  await ensure(await proofs.verifyExactGenerationAndReferences(row))
-  const result = await bucket.remove([row.path])
-  if (result.error) throw new A3StorageBlocked()
+  if (pre.error) throw new A3StorageBlocked()
+  if (pre.data === false) {
+    // A previous attempt may have already removed the object. A persisted
+    // server-side checkpoint is required; absence alone isn't enough.
+    await ensure(await proofs.verifyPreviouslyRemoved(row))
+  } else if (pre.data === true) {
+    // Explicit exact path only. NEVER bulk-delete bucket or SQL DELETE
+    // storage.objects. Concurrent uploads must be frozen beforehand.
+    await ensure(await proofs.verifyLease())
+    await ensure(await proofs.verifyWriteFence())
+    await ensure(await proofs.verifyExactGenerationAndReferences(row))
+    const result = await bucket.remove([row.path])
+    if (result.error) throw new A3StorageBlocked()
+    const after = await bucket.exists(row.path)
+    if (after.error || after.data !== false) throw new A3StorageBlocked()
+    // Journal persists evidence BEFORE returning. If checkpointing fails,
+    // the retry must be manually reconciled instead of blindly deleting.
+    await ensure(await proofs.checkpointRemoved(row))
+  } else throw new A3StorageBlocked()
 
   const after = await bucket.exists(row.path)
   if (after.error || after.data !== false) throw new A3StorageBlocked()
   await ensure(await proofs.verifyLease())
   await ensure(await proofs.verifyWriteFence())
-  const noReference = await proofs.verifyExactGenerationAndReferences(row)
-  // A successful deletion changes the generation existence, so the expected
-  // snapshot should no longer verify. Whether references remain must be
-  // resolved in the later DB cleanup stage and checked separately.
-  if (noReference === true) throw new A3StorageBlocked()
 
   const urlChecked = await proofs.verifyOldUrlAndCdn(row)
   const verification: MediaRemovalVerification = {
