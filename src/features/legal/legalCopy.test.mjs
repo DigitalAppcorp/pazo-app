@@ -92,6 +92,8 @@ test('draft statements distinguish ephemeral map location, persisted check-ins a
     assert.match(providers,/Unsplash/)
     assert.match(providers,lang==='es'?/excluido de esta versión/:/excluded from this release/)
     assert.match(changes,/Do Not Track/)
+    assert.match(changes,lang==='es'?/no cambia su funcionamiento/:/does not change its behavior/)
+    assert.match(retention,lang==='es'?/solicitar corrección/:/request corrections/)
     assert.match(retention,lang==='es'?/Si la opción está habilitada/:/If the option is enabled/)
   }
   const map=readFileSync(new URL('../../components/views/MapView.tsx',import.meta.url),'utf8')
