@@ -23,14 +23,14 @@ test('author text, locations, avatars, photos and duplicated JSON are erased on 
  assert.doesNotMatch(sql,/\b(?:DELETE FROM|TRUNCATE|DROP TABLE|auth\.admin\.deleteUser)\b/i)
 })
 test('only server processing can redact after verifying Storage, legacy comments and claims',()=>{
- for(const fragment of ["auth.role() IS DISTINCT FROM 'service_role'",
+ for(const fragment of ["current_setting('request.jwt.claim.role',true)",
   "req.status='processing' FOR UPDATE",
   'Storage media not physically reconciled','Legacy embedded comments require reconciliation',
   'Held moderation claim requires reconciliation','Post photo still present in Storage',
-  'GRANT EXECUTE ON FUNCTION public.pazo_redact_social_threads(uuid) TO service_role',
+  'GRANT EXECUTE ON FUNCTION public.pazo_redact_social_threads(uuid,uuid,uuid,bigint) TO service_role',
   "'account_deleted',false","'storage_deleted',false"
  ])assert.ok(sql.includes(fragment),fragment)
- assert.match(sql,/REVOKE ALL ON FUNCTION public\.pazo_redact_social_threads\(uuid\)\s+FROM PUBLIC,anon,authenticated/)
+ assert.match(sql,/REVOKE ALL ON FUNCTION public\.pazo_redact_social_threads\(uuid,uuid,uuid,bigint\)\s+FROM PUBLIC,anon,authenticated/)
 })
 
 test('redacted author references are mandatory if FK owner or pet becomes null',()=>{
@@ -87,4 +87,16 @@ test('UI renders only existing third-party replies with no new author actions',(
  assert.match(service,/VITE_F14_DELETED_AUTHOR_THREADS_ENABLED/)
  assert.match(service,/canDelete: !deleted/)
  assert.match(app,/photoUrl: wasAuthorDeleted\(post\) \? null : post\.photo_url/)
+})
+
+test('deleted-author redaction requires a real processing lease and transaction-local fence',()=>{
+ for(const fragment of [
+   'p_reviewer_user_id uuid,p_lease_token uuid,p_revision bigint',
+   'j.reviewer_user_id=p_reviewer_user_id',
+   'j.lease_token=p_lease_token AND j.revision=p_revision',
+   "j.phase IN ('preserve_others','clean_private_data')",
+   'j.lease_expires_at>pg_catalog.clock_timestamp()',
+   "set_config('pazo.a3_cleanup_lease',p_lease_token::text,true)",
+ ]) assert.ok(sql.includes(fragment),fragment)
+ assert.match(sql,/RAISE EXCEPTION 'F14 DELETED AUTHOR DRAFT NOT APPLIED/)
 })
