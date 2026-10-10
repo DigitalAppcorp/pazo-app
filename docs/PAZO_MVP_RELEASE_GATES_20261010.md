@@ -89,3 +89,17 @@ Se aprobaron **DOS plantillas restringidas a la cuenta QA identificada por el al
 El PO ya aprobó crear/borrar **una cuenta nueva**; no volver a pedir autorización genérica, pero detenerse ante bloqueos concretos (por ejemplo, falta de sesión de PAZO o Auth Admin). Si la QA no usa el alias exacto `appdigital.corp+pazo-baja-qa@gmail.com`, **no modificar el script para abrir el alcance**. Volver a planificar el ensayo seguro. No ejecutar nada sobre las seis cuentas.
 
 **Estado actual:** ninguna cuenta QA creada, cero solicitudes; **procedimiento preparado, NO ensayado**, lanzamiento beta pública todavía bloqueado.
+
+
+## Revisión legal acotada — CalOPPA / salida pública (2026-10-10)
+
+**Auditoría solo lectura; no se publica la política ni se habilita `LEGAL_RELEASE_READY`.**
+La pantalla de registro `src/components/views/OnboardingView.tsx` ya contiene enlaces a los borradores ES/EN de Privacidad y Reglas **antes** de crear la cuenta; no rediseñar Auth ni repetir QA aprobada. Verificar visibilidad suficientemente prominente también en la ruta inicial al publicar.
+
+**Solo faltan estas comprobaciones de texto y operación:** (1) enumerar tipos de datos y terceros/proveedores reales, diferenciando Supabase, Mapbox y PostHog si se habilita; (2) explicar contacto/corrección/baja auténticos, incluido que el botón de baja está apagado en builds públicos hasta aprobar su procedimiento; (3) explicar cómo se notificarán cambios materiales de la política; (4) fijar **fecha efectiva al publicar**, nunca anticiparla; (5) documentar cómo responde el servicio a `Do Not Track` y si terceros pueden recopilar información identificable; (6) describir ubicación voluntaria frente a check-ins guardados y contacto de avistamientos. Estas declaraciones requieren reconciliación con el producto y configuración de proveedores, no nuevas funcionalidades.
+
+**CalOPPA** exige una política visible para servicios comerciales que recopilan información identificable de consumidores en California, y declaraciones de categorías, terceros, cambios, fecha efectiva y Do Not Track. Fuentes oficiales:
+- https://oag.ca.gov/news/press-releases/attorney-general-kamala-d-harris-launches-new-tool-help-consumers-report
+- https://oag.ca.gov/sites/all/files/agweb/pdfs/privacy/COPP_bus_reportinfo_sharing1.pdf
+
+**No asumir que la CCPA/CPRA se aplica o no** sin evaluar sus umbrales y condiciones reales de empresa. CPPA FAQ: https://cppa.ca.gov/faq y umbrales actualizados: https://cppa.ca.gov/regulations/cpi_adjustment.html. El domicilio registral no se inventa ni se declara por defecto requisito universal de CalOPPA si no se ha verificado. El operador y correo público ya están confirmados por el PO. **El ensayo de baja de una cuenta QA sigue delegado exclusivamente a Codex:** `docs/PAZO_CODEX_PENDING_QA_20261010.md`. No tocar sus siete cuentas/archivo ni cambiar baselines.
