@@ -51,3 +51,12 @@
 
 **Nuevo chat — activación sugerida:**
 > Activa Project Brain OS v1.4.1 desde `DigitalAppcorp/project-brain-os`. Continúa PAZO en `DigitalAppcorp/pazo-app` PR #37 DRAFT, rama `f14/beta-reporting-integration-20261009`. Lee `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, `docs/PAZO_MASTER_ROADMAP.md` y la ruta F14 correspondiente. Audita HEAD, CI y Supabase de solo lectura. Ya se verificaron 6 Auth y 0 filas de app / Storage después de reset aprobado: **no repitas el borrado**. Empieza por login/onboarding tras limpieza; continúa autónomamente dentro de los gates sin Vercel ni merge.
+
+## Auditoría incremental del gate login/onboarding — 2026-10-10
+
+- PR #37 seguía DRAFT, HEAD de entrada `eeb2283931edf2c07934e79d1d84a6db146b1e74`, CI #38033515133 SUCCESS. Brain OS v1.4.1 recuperado de `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`.
+- SELECT remoto de solo lectura: `auth.users=6`, `auth.identities=6`, `public.profiles=0`, `public.pets=0`, `storage.objects=0`. Sin borrados, nuevas cuentas, migraciones ni cambios en Vercel/main.
+- `src/App.tsx`: `fetchOwnedPets` distingue lista vacía de error de red; la lista vacía redirige a A03 de creación de mascota y un error muestra reintento sin perder sesión. `create_pet_profile` actual usa `auth.uid()` y crea mascota vinculada directamente a `auth.users` (FK `pets_owner_id_fkey`). Este examen de código/SQL NO equivale a QA autenticada E2E.
+- Riesgo específico tras reset: `profiles` carece de política INSERT para `authenticated`; el trigger `on_auth_user_created` solo se activa al crear una cuenta Auth nueva. No usar un INSERT cliente no autorizado ni re-crear cuentas; evaluar necesidad real de restaurar perfil en el gate posterior, sin DDL sin autorización.
+- Corrección reversible en la rama: `OnboardingView` detecta sesión autenticada y sustituye el botón «Volver» desde A03 hacia formulario de alta A02 por «Sesión recuperada»; evita invitar accidentalmente a crear una segunda cuenta cuando una retenida no tiene mascotas. Commit `a6d5a412873778d7903eaa43ebb8351f6fbbf4bb`. CI de este commit y aceptación visual no se presuponen.
+- Próxima acción única: revisar CI del HEAD final y validar en local con **una** cuenta Auth retenida el login → A03 → creación de mascota → recarga F5, sin repetir suites previas ni crear cuenta nueva. Corroborar si `profiles` realmente se requiere para el flujo y remediar con gate separado si exige migración. No marcar MVP listo aún.
