@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { supabase } from './services/supabaseClient'
@@ -332,17 +333,18 @@ function PazoMain() {
 
   const formatPostRow = (post: any, isRecommended: boolean): Post => ({
     id: post.id,
-    petId: post.pet_id,
-    petName: post.pet_name,
-    petSpecies: post.pet_species,
-    petAvatar: post.pet_avatar,
-    location: post.location,
+    petId: wasAuthorDeleted(post) ? '' : (post.pet_id || ''),
+    isAuthorDeleted: wasAuthorDeleted(post),
+    petName: wasAuthorDeleted(post) ? 'Autor eliminado' : post.pet_name,
+    petSpecies: wasAuthorDeleted(post) ? 'otro' : post.pet_species,
+    petAvatar: wasAuthorDeleted(post) ? '' : post.pet_avatar,
+    location: wasAuthorDeleted(post) ? '' : post.location,
     timeAgo: 'Hace un momento',
     createdAt: post.created_at,
     isRecommended,
-    tags: post.tags || [],
-    text: post.text,
-    photoUrl: post.photo_url,
+    tags: wasAuthorDeleted(post) ? [] : (post.tags || []),
+    text: wasAuthorDeleted(post) ? '' : post.text,
+    photoUrl: wasAuthorDeleted(post) ? null : post.photo_url,
     likes: post.likes || 0,
     isLiked: false,
     isSaved: false,

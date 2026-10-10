@@ -704,7 +704,29 @@ export const CommunityDetailView = ({
               </p>
             </div>
           ) : (
-            posts.map((post) => (
+            posts.map((post) => post.isAuthorDeleted ? (
+              <article key={post.id} className="space-y-3 rounded-[2rem] bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-3 text-[#204E4A]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FAF8F5]"><IconPaw size={18}/></div>
+                  <p className="text-xs font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
+                </div>
+                <p className="text-xs text-[#5C7470]">
+                  {lang === 'es'
+                    ? 'Se retiró el contenido personal del autor. Los comentarios de otras personas permanecen.'
+                    : 'The author’s personal content was removed. Other people’s comments remain.'}
+                </p>
+                <button type="button" onClick={() => void toggleComments(post.id)}
+                  className="rounded-full bg-[#FAF8F5] px-4 py-2 text-xs font-bold text-[#204E4A]">
+                  {lang === 'es' ? 'Ver comentarios' : 'View comments'} ({post.commentsCount})
+                </button>
+                {openCommentsFor === post.id && <div className="space-y-2">
+                  {(commentsByPost[post.id] || []).map(comment => <div key={comment.id} className="rounded-2xl bg-[#FAF8F5] p-3 text-xs">
+                    <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
+                    <p className="mt-1 text-[#5C7470]">{comment.body}</p>
+                  </div>)}
+                </div>}
+              </article>
+            ) : (
               <article
                 key={post.id}
                 className="space-y-3 rounded-[2rem] bg-white p-4 shadow-sm"

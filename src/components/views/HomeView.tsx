@@ -262,7 +262,32 @@ interface PostCardProps {
 const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
-  const elementRef = usePostTracking(post.id, currentPetId)
+  const elementRef = usePostTracking(post.id, post.isAuthorDeleted ? '' : currentPetId)
+
+
+  if (post.isAuthorDeleted) return (
+    <article ref={elementRef as React.RefObject<HTMLElement>} className="rounded-[2.2rem] bg-white p-5 shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
+      <div className="flex items-center gap-3 text-[#204E4A]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF8F5]"><IconPaw size={18}/></div>
+        <p className="text-sm font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
+      </div>
+      <p className="mt-3 text-xs leading-relaxed text-[#5C7470]">
+        {lang === 'es'
+          ? 'El autor eliminó su cuenta. Su contenido personal se retiró, pero se conservaron los comentarios de otras personas.'
+          : 'The author deleted their account. Their personal content was removed, but other people’s comments were preserved.'}
+      </p>
+      <button type="button" onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading}
+        className="mt-3 rounded-full bg-[#FAF8F5] px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40">
+        {lang === 'es' ? 'Ver comentarios' : 'View comments'} ({displayCommentsCount})
+      </button>
+      {isCommentsOpen && <div className="mt-3 space-y-2">
+        {post.comments.map(comment => <div key={comment.id} className="rounded-2xl bg-[#FAF8F5] p-3 text-xs">
+          <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
+          <p className="mt-1 text-[#5C7470]">{comment.text}</p>
+        </div>)}
+      </div>}
+    </article>
+  )
 
   return (
     <article ref={elementRef as React.RefObject<HTMLElement>} className="bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden transition-all">

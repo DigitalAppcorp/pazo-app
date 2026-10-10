@@ -32,6 +32,7 @@ export interface PostComment {
 export interface Post {
   id: string
   petId: string
+  isAuthorDeleted?: boolean
   petName: string
   petSpecies: Species
   petAvatar: string
@@ -102,6 +103,7 @@ export interface CommunityPost {
   communityId: string
   authorUserId: string
   authorPetId: string
+  isAuthorDeleted?: boolean
   authorName: string
   authorSpecies: Species
   authorAvatar: string

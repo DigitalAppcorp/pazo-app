@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import type { Post } from '../types/pazo'
+import { wasAuthorDeleted } from '../features/account/deletedAuthorThread'
 
 export const fetchSmartFeed = async (userId: string, userInterests: string[]): Promise<Post[]> => {
     // 1. Obtener los IDs de las mascotas que el usuario sigue
@@ -30,17 +31,18 @@ export const fetchSmartFeed = async (userId: string, userInterests: string[]): P
     // 4. Mapear y etiquetar los posts seguidos
     const formattedFollowed: Post[] = (followedPosts || []).map((p: any) => ({
         id: p.id,
-        petId: p.pet_id,
-        petName: p.pet_name,
-        petSpecies: p.pet_species,
-        petAvatar: p.pet_avatar,
-        location: p.location,
+        petId: wasAuthorDeleted(p) ? '' : (p.pet_id || ''),
+        isAuthorDeleted: wasAuthorDeleted(p),
+        petName: wasAuthorDeleted(p) ? 'Autor eliminado' : p.pet_name,
+        petSpecies: wasAuthorDeleted(p) ? 'otro' : p.pet_species,
+        petAvatar: wasAuthorDeleted(p) ? '' : p.pet_avatar,
+        location: wasAuthorDeleted(p) ? '' : p.location,
         timeAgo: 'Hace un momento',
         createdAt: p.created_at,
         isRecommended: false,
-        tags: p.tags || [],
-        text: p.text,
-        photoUrl: p.photo_url,
+        tags: wasAuthorDeleted(p) ? [] : (p.tags || []),
+        text: wasAuthorDeleted(p) ? '' : p.text,
+        photoUrl: wasAuthorDeleted(p) ? null : p.photo_url,
         likes: p.likes,
         isLiked: false,
         isSaved: false,
@@ -50,17 +52,18 @@ export const fetchSmartFeed = async (userId: string, userInterests: string[]): P
     // 5. Mapear y etiquetar los posts recomendados con la insignia algorítmica
     const formattedRecommended: Post[] = (recommendedPosts || []).map((p: any) => ({
         id: p.id,
-        petId: p.pet_id,
-        petName: p.pet_name,
-        petSpecies: p.pet_species,
-        petAvatar: p.pet_avatar,
-        location: p.location,
+        petId: wasAuthorDeleted(p) ? '' : (p.pet_id || ''),
+        isAuthorDeleted: wasAuthorDeleted(p),
+        petName: wasAuthorDeleted(p) ? 'Autor eliminado' : p.pet_name,
+        petSpecies: wasAuthorDeleted(p) ? 'otro' : p.pet_species,
+        petAvatar: wasAuthorDeleted(p) ? '' : p.pet_avatar,
+        location: wasAuthorDeleted(p) ? '' : p.location,
         timeAgo: 'Hace un momento',
         createdAt: p.created_at,
         isRecommended: true, // <--- Esto activa la etiqueta "Sugerencia" en la interfaz
-        tags: p.tags || [],
-        text: p.text,
-        photoUrl: p.photo_url,
+        tags: wasAuthorDeleted(p) ? [] : (p.tags || []),
+        text: wasAuthorDeleted(p) ? '' : p.text,
+        photoUrl: wasAuthorDeleted(p) ? null : p.photo_url,
         likes: p.likes,
         isLiked: false,
         isSaved: false,
