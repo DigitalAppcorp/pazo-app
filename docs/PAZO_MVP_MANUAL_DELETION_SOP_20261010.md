@@ -35,3 +35,7 @@ Crear **una cuenta descartable nueva y claramente autorizada** (distinta de las 
 5. QA RC acotada en móvil y evidencia PASS/FAIL; después revisar con el PO merge, limpieza de test y Vercel. No rehacer módulos ya aceptados.
 
 **Regla antiestancamiento:** cualquier problema de baja complejo fuera de este flujo vuelve al backlog de A3 avanzado con caso real y consentimiento verificable; no detiene las tareas de integración, Auth y QA interna del MVP. **A3 pausada ≠ obligación legal suspendida.**
+
+## Identidad del operador — PO 2026-10-10
+
+El Product Owner declaró que **PAZO opera bajo Alvarado Solutions LLC (empresa registrada)**. Distinguir la **entidad responsable** del **buzón público de soporte y privacidad** `appdigital.corp@gmail.com`, aunque ambas responsabilidades las gestione la misma persona. La denominación se refleja en los borradores legales ES/EN; la jurisdicción y domicilio legal no se han comprobado ni se asumirán. Esto no asigna a ninguna cuenta permisos de servicio sobre Supabase y no valida por sí solo una eliminación manual completa. Se conserva la cola de solo lectura y la exigencia de probar una baja sobre una cuenta nueva descartable antes de beta pública.
