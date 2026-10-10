@@ -58,6 +58,12 @@ BEGIN
    RAISE EXCEPTION 'Stale reviewer lease or phase' USING ERRCODE='42501';
  END IF;
 
+ -- The write-fence trigger verifies this SAME live lease and processing
+ -- phase for every write in this transaction. This value is transaction-local
+ -- and cannot be authorized solely by a browser or unverified service call.
+ PERFORM pg_catalog.set_config('pazo.a3_cleanup_lease',
+   p_lease_token::text,true);
+
  -- Fails closed if the media and social archive prerequisites remain.
  IF EXISTS(SELECT 1 FROM storage.objects o
    WHERE o.owner_id=p_subject_user_id::text)
