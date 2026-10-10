@@ -356,3 +356,7 @@ modela **sin almacenar nuevos datos reales** una revisión privada del cierre de
 ### A3: prueba temporal de reautenticación (propuesta NO instalada, 2026-10-10)
 
 El contrato SQL `20261010_f14_a3_supervised_review_NOT_APPLIED.sql` contempla conservar en tabla privada `reauth_session_id` (UUID interno de sesión de Auth) y `reauthenticated_at` por un periodo de validez de **cinco minutos como prueba activa**. El revisor solo puede consultar un booleano ligado a su lease. Reasignar la reserva borra la evidencia; al terminar/cancelar la baja se deberá definir y verificar borrado/retención del journal. No guardar contraseñas, OTP, acceso JWT, correos o nombres de archivos. La reautenticación todavía no está desplegada ni conectada al cliente.
+
+### F14 A3 — inventario de congelación y medios (SOLO DRAFT, 2026-10-10)
+
+Los contratos `supabase/drafts/20261010_f14_a3_write_fence_NOT_APPLIED.sql` proponen metadatos **no instalados**: `deletion_frozen_targets` (UUID de solicitante, tipo e ID técnico del objeto afectado), y `deletion_media_grants` (bucket, ruta privada exacta, versión de Storage, revisión/operador, token de lease, expiración de dos minutos y fecha de eliminación verificada). Estos datos serían operacionales sensibles, no públicos ni enviados a analítica. Al preparar la política final se necesita definir retención mínima, eliminación del journal y tratamiento de copia de seguridad; no reutilizar las rutas privadas ni tokens en logs. Ninguno de estos registros se ha creado en el Supabase hospedado.
