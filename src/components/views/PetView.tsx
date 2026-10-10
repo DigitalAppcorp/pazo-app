@@ -3,6 +3,7 @@ import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
+import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
@@ -56,6 +57,8 @@ export const PetView = ({
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
+  const [showDeletionRequest, setShowDeletionRequest] = useState(false)
+  const requestEnabled = import.meta.env.VITE_F14_DELETION_REQUESTS_ENABLED === 'true'
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
   const [completingCareId, setCompletingCareId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -623,6 +626,22 @@ export const PetView = ({
             </div>
           </div>
 
+          <div className="rounded-[2rem] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+            <h4 className="text-sm font-extrabold text-[#204E4A]">
+              {lang==='es'?'Cuenta y datos':'Account and data'}
+            </h4>
+            <p className="mt-1 text-xs text-[#5C7470]">
+              {requestEnabled
+                ?(lang==='es'?'Puedes solicitar revisión para eliminar tu cuenta. El envío no provoca eliminación inmediata.':'You can request account deletion review. Submitting does not immediately delete your account.')
+                :(lang==='es'?'Las solicitudes de eliminación se habilitarán cuando termine la verificación del servicio.':'Deletion requests will be available after service verification.')}
+            </p>
+            <button type="button" disabled={!requestEnabled}
+              onClick={()=>setShowDeletionRequest(true)}
+              className="mt-3 rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40 focus-visible:bg-[#E1E53F]">
+              {lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'}
+            </button>
+          </div>
+
           {nextPendingCare && (
             <div className="p-4 bg-[#FAF8F5] rounded-[2rem] flex justify-between items-center shadow-xs">
               <div className="space-y-0.5">
@@ -674,6 +693,7 @@ export const PetView = ({
         </div>
       )}
       {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
+      {showDeletionRequest && <DeletionRequestDialog lang={lang} onClose={() => setShowDeletionRequest(false)} />}
     </div>
   )
 }

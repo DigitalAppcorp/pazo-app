@@ -301,3 +301,7 @@ Cualquier proveedor nuevo debe añadirse aquí antes de recibir datos de producc
 ## 23. F14 D3-A — Limpieza de medios moderados, código preparado/no desplegado
 
 El futuro servicio Edge `f14-moderation-purge` usará JWT de moderador validado por Auth, service_role solo en el servidor, kind/UUID del contenido retirado y ruta exacta de objeto recuperada desde DB interna; no se envían URLs, paths o datos personales a analytics ni logs de consola. Se verificará eliminación del origen con API Storage y dos probes HTTP, pero la invalidación global de CDN debe validarse y explicarse por separado. La interfaz permanece desactivada por defecto, SQL aún no aplicado y no se borraron objetos durante este lote. Sólo publicaciones Feed/Comunidad con propietario y referencia únicos; `pet_profile` y datos legacy requieren revisión manual. No añade proveedor.
+
+## 24. Solicitud de eliminación de cuenta (código preparado, no aplicado)
+
+Se planificó tabla privada con `subject_user_id` y estado/tiempos operativos, sin email ni descripción libre; RLS enabled y 3 RPC propias sin argumentos de user ID. Proveedor Supabase ya existente. No se ha activado ni recogido ninguna solicitud a través de esta interfaz. Conservación y procedimiento definitivo requieren acuerdo de política antes de Beta.

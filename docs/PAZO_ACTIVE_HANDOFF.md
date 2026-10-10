@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | estado verificado 2026-10-09
 
+> **F14 / LOTe CUENTA (2026-10-10):** entrega de solicitud autenticada de eliminación (NO ejecución): `supabase/drafts/20261010_f14_account_request_intake_NOT_APPLIED.sql`, tres RPC idempotentes request/status/cancel, esquema privado/tabla mínima, UI ES/EN en Mi mascota detrás de `VITE_F14_DELETION_REQUESTS_ENABLED` (OFF), tests de ownership y no borrado. **NO se aplicó la migración**: `AGENTS.md` requiere gate PO independiente para SQL, y eliminar datos/Auth/Storage sigue totalmente fuera de alcance. Solicitud registrada != cuenta eliminada, no abrir Beta hasta manejo real seguro. D3-A Edge v5 desactivada; 14 objetos intactos.
+
+
 > **LOTE MVP / PRIVACIDAD INFORMATIVA (2026-10-10 UTC):** PR #37 incluye centro preliminar ES/EN accesible desde registro y Mi Mascota; no requiere base de datos, servicios ni navegación extra. Texto consistente con inventario Supabase/Mapbox/moderación y explícitamente marcado **borrador**: `LEGAL_RELEASE_READY=false`, sin fingir contacto legal, retención ni eliminación de cuenta completas. Requiere verificación de responsable/contacto, retención y políticas definitivas antes de Beta externa; solo CI todavía no aprueba legalmente el texto. D3-A sigue pendiente del E2E real, Edge v5 protegida, 14 objetos intactos.
 
 
