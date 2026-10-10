@@ -29,3 +29,10 @@ No nuevas insignias premium, mensajería real, diseños cosméticos, cambios de 
 Solo pedir al PO **una acción cuando sea indispensable**: probar el correo real de confirmación/recuperación y dar el resultado; confirmar identidad del responsable legal y criterios reales de retención (el correo de privacidad ya está aprobado); y aprobar por separado una prueba destructiva estrictamente de cuenta/archivo descartables o el merge/producción. No pedir otra aprobación general para continuar auditoría/código seguro. No mezclar un «CI PASS» con «beta lanzada».
 
 **Estado actual:** carril de integración y operación manual preparado; lanzamiento aún **NO aprobado** y eliminación definitiva **NO probada**. La versión avanzada A3 permanece en pausa, preservada en GitHub.
+
+## Checkpoint Auth — enlaces de confirmación y recuperación (2026-10-10)
+
+- `src/context/AuthContext.tsx` ahora envía `options.emailRedirectTo=signUpConfirmationRedirectUrl(window.location.origin)` en `supabase.auth.signUp`; antes dependía del Site URL alojado por defecto. El helper usa el origen actual, sin tokens ni correos en la URL, y añade casos `127.0.0.1:5173` / HTTPS a `signupFlow.test.mjs`.
+- Password reset existente usa `redirectTo: recoveryRedirectUrl(window.location.origin)`, destino `/?auth=recovery`, y exige evento Auth `PASSWORD_RECOVERY` antes de habilitar cambio de contraseña; no confundir marcador en URL con sesión verificada.
+- **Pendiente de aceptación**: configuración alojada de Supabase Auth debe permitir los destinos exactos del entorno local, típicamente `http://127.0.0.1:5173` y `http://127.0.0.1:5173/?auth=recovery` (si se usa ese host/puerto). El archivo `supabase/config.toml` es configuración de CLI local, NO certifica la allowlist del proyecto alojado. Comprobar entrega del email real, clic, sesión, recuperación y cambio de clave; CI estático no los sustituye.
+- No se modificó Supabase alojado ni se generaron correos de prueba. No hay ningún cambio en Vercel, `main` o las seis cuentas actuales. La rama RC no tiene aún PR, de modo que la suite Actions para PR puede no haberse ejecutado.
