@@ -79,3 +79,21 @@ test('reviewer rechecks same subject, operator, lease, revision and reauth sessi
   assert.match(sql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_reauth_evidence_valid\(uuid,uuid,uuid,bigint\)\s+TO service_role/)
   assert.match(sql,/RAISE EXCEPTION 'F14 A3 REVIEW DRAFT ONLY/)
 })
+
+test('A3 operator enrollment is installer-only, private and identity-safe', () => {
+  const enrollment = readFileSync(
+    new URL('../supabase/drafts/20261010_f14_a3_operator_enrollment_NOT_APPLIED.sql',import.meta.url),
+    'utf8',
+  )
+  assert.match(enrollment,/RAISE EXCEPTION 'A3 OPERATOR ENROLLMENT DRAFT:/)
+  assert.match(enrollment,/current_user NOT IN \('postgres'\)/)
+  assert.match(enrollment,/current_setting\('pazo\.a3_operator_email',true\)/)
+  assert.match(enrollment,/email_confirmed_at IS NOT NULL/)
+  assert.match(enrollment,/deleted_at IS NULL/)
+  assert.match(enrollment,/v_match_count<>1/)
+  assert.match(enrollment,/INSERT INTO account_requests_private\.deletion_review_operators/)
+  assert.match(enrollment,/ON CONFLICT \(operator_user_id\) DO NOTHING/)
+  assert.doesNotMatch(enrollment,/auth\.admin\.deleteUser|\bDELETE\s+FROM\s+auth\.users/i)
+  assert.doesNotMatch(enrollment,/[\w.+-]+@gmail\.com/i)
+  assert.doesNotMatch(enrollment,/GRANT (?:ALL|INSERT|UPDATE|DELETE).*\b(?:anon|authenticated|service_role)\b/i)
+})
