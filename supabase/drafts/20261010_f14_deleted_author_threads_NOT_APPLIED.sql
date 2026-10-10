@@ -4,6 +4,13 @@
 -- DO NOT APPLY without separate migration gate. This is not the Auth/Storage
 -- deletion executor. Existing media remains untouched by this SQL.
 BEGIN;
+-- This author-deletion schema draft is intentionally uninstalled.  Do NOT
+-- remove this fail-closed sentinel without a new migration gate.
+DO $f14_never_apply$
+BEGIN
+  RAISE EXCEPTION 'F14 AUTHOR THREAD DRAFT NOT APPLIED; use separately reviewed migration';
+END
+$f14_never_apply$;
 ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS author_deleted_at timestamptz;
 ALTER TABLE public.community_posts ADD COLUMN IF NOT EXISTS author_deleted_at timestamptz;
 -- A retained thread must survive later deletion of the author and their pet.
