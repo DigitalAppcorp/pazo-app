@@ -9,7 +9,7 @@ const valid = ()=>({
  unresolvedThirdPartyReports:0,legacyEmbeddedComments:0,
  outsideProviderMedia:0,thirdPartySnapshotVerified:true,
  feedThreadsRedacted:true,communityThreadsRedacted:true,
- rescueSightingsReconciled:true,thirdPartyIntegrityVerified:true,
+ rescueSightingsReconciled:true,ownedCommunitiesArchived:true,thirdPartyIntegrityVerified:true,
 })
 
 test('cleanup order refuses to delete pets before their children and threads',()=>{
@@ -39,9 +39,12 @@ test('each completed step advances one ordered stage without granting execution'
  assert.equal(finished.destructiveExecutionAllowed,false)
 })
 
-test('every missing safety proof blocks cleanup',()=>{
+test('each common safety proof fails closed before redaction',()=>{
  const template=valid()
+ const deferred=new Set(['feedThreadsRedacted','communityThreadsRedacted',
+   'ownedCommunitiesArchived','rescueSightingsReconciled'])
  for(const key of Object.keys(template)){
+   if(deferred.has(key))continue
    const value=template[key]===true?false:1
    const result=reviewA3Cleanup({...template,[key]:value})
    assert.ok(result.missing.includes(key),key)
@@ -51,6 +54,23 @@ test('every missing safety proof blocks cleanup',()=>{
    const result=reviewA3Cleanup(input)
    assert.equal(result.readyForReview,false)
    assert.equal(result.destructiveExecutionAllowed,false)
+ }
+})
+
+test('deferred stage proofs are required immediately after the affected stage',()=>{
+ const checks=[
+   ['feedThreadsRedacted',1],
+   ['communityThreadsRedacted',1],
+   ['ownedCommunitiesArchived',4],
+   ['rescueSightingsReconciled',5],
+ ]
+ for(const [key,complete] of checks){
+   const evidence={...valid(),[key]:false}
+   assert.ok(!reviewA3Cleanup(evidence,A3_CLEANUP_ORDER.slice(0,complete-1)).missing.includes(key),
+    key+' cannot be required before its own stage')
+   const later=reviewA3Cleanup(evidence,A3_CLEANUP_ORDER.slice(0,complete))
+   assert.ok(later.missing.includes(key),key)
+   assert.equal(later.nextStage,null,key)
  }
 })
 
