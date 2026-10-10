@@ -86,12 +86,12 @@ BEGIN
  -- Existing external/legacy URLs are not evidence of deletion from that
  -- provider. Also check the pet avatar source independently.
  IF EXISTS(SELECT 1 FROM public.posts p WHERE p.user_id=p_subject AND p.photo_url IS NOT NULL
-    AND pg_catalog.position('/storage/v1/object/public/post-photos/' IN p.photo_url)=0)
+    AND pg_catalog.strpos(p.photo_url,'/storage/v1/object/public/post-photos/')=0)
  OR EXISTS(SELECT 1 FROM public.community_posts cp WHERE cp.author_user_id=p_subject
     AND cp.photo_url IS NOT NULL
-    AND pg_catalog.position('/storage/v1/object/public/community-post-photos/' IN cp.photo_url)=0)
+    AND pg_catalog.strpos(cp.photo_url,'/storage/v1/object/public/community-post-photos/')=0)
  OR EXISTS(SELECT 1 FROM public.pets pet WHERE pet.owner_id=p_subject AND pet.photo_url IS NOT NULL
-    AND pg_catalog.position('/storage/v1/object/public/pet-avatars/' IN pet.photo_url)=0)
+    AND pg_catalog.strpos(pet.photo_url,'/storage/v1/object/public/pet-avatars/')=0)
  THEN RAISE EXCEPTION 'External or legacy media requires verified provider cleanup';END IF;
 
  -- Preserve only discussions that have an actual third-party author.
