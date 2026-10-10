@@ -2,7 +2,7 @@
 
 **Corte:** 2026-10-10
 **Rama:** `release/mvp-beta-fast-track-20261010`
-**SHA inicial auditado:** `654f5e2fb51f11f5175990bd75aaa4f44dd8a312`
+**SHA del cierre F14 publicado:** `c11087a6d0e2d860cc3f76c8ce5999dfda4f990b`
 **Resultado:** **NO-GO para beta pública**; RC listo para revisión técnica condicionada.
 **No se declara lanzamiento público.** F13, GO/NO-GO final, limpieza final de datos, merge y publicación corresponden al Product Owner.
 
@@ -13,7 +13,7 @@
 - `npm run build`: PASS (TypeScript + Vite). Vite informa que el bundle JS principal (~813 kB sin comprimir) rebasa el umbral de 500 kB; no bloqueó el build y queda como optimización POSBETA mientras no se observen fallos de carga.
 - `npm run lint`: FAIL heredado, 106 errores y 6 advertencias en la base amplia (principalmente `any` y reglas React Hooks). El aviso del efecto de carga en `ModerationMediaQueue.tsx` se corrigió con una carga diferida y el lint dirigido de archivos cambiados pasa. CI trata lint como no bloqueante (`continue-on-error: true`).
 - `git diff --check`: PASS antes de documentar.
-- SHA remoto conocido al inicio: `654f5e2fb51f11f5175990bd75aaa4f44dd8a312`; CI #673 PASS. Se verificará de nuevo el SHA y CI tras el push final.
+- CI GitHub Actions **#674 SUCCESS** en el SHA de cierre `c11087a6d0e2d860cc3f76c8ce5999dfda4f990b`: instalación, gobernanza, build y lint (lint en CI no bloqueante). [Run #674](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38091563531). El ref remoto fue confirmado con `git ls-remote` en el mismo SHA.
 
 ## Cambios de este cierre
 
@@ -32,7 +32,7 @@ Migración preparada: `supabase/migrations/20261010222006_f14_media_purge_retry_
 | Auth / contraseña | GATE de configuración | LPP no está disponible en el plan Free; documentar y decidir mejora de contraseña/preparación de plan antes de una beta pública. No se cambió plan ni configuración. Redirect URL de recovery necesita allowlist exacta para Preview/host y no se verificó aquí. |
 | Privacidad/Terms | Texto preparado, no aprobado para publicación | ES/EN reflejan operador declarado, proveedores, GPS voluntario y límites de eliminación; `LEGAL_RELEASE_READY=true` significa texto elaborado. `PAZO_LEGAL_EFFECTIVE_DATE=null`; se fija al publicar. No inventar plazos ni declarar eliminación inmediata CDN/backups. Confirmar precisión operativa y atención de solicitudes antes del release. |
 | PWA | PASS estático/local; HTTPS GATE REQUIRED | Manifest, iconos 192/512/maskable/Apple y SW network-only; test PWA PASS. Preview HTTPS e instalación real en Android/Chrome e iOS/Safari no comprobados. Revalidar navegación/logout/cambio de cuenta en Preview. |
-| Vercel Preview | BLOCKED por acceso | Preferido `pazo-app-t83r`. Conector devuelve 403 por alcance digitalapp y no hay CLI `vercel` en PATH ni local. No se verificó URL, protección, variables ni Preview para este SHA. GitHub no expuso check de Vercel asociado al SHA; no se hizo deployment adicional. Reautorizar/reconectar integración y reutilizar Preview automático existente antes de crear uno. |
+| Vercel Preview | PREVIEW CANDIDATO, sin verificación runtime | El check `Vercel Preview Comments` para el SHA devuelve cero comentarios pendientes y enlaza [este Preview candidato](https://pazo-app-t83r-git-release-mvp-beta-fast-track-f4f99c-digitalapp.vercel.app). El check solo certifica estado de comentarios, no disponibilidad, commit desplegado ni protección. El `web` fetch no pudo acceder a la URL; el conector Vercel devolvió 403 por alcance `digitalapp`, y no hay CLI `vercel`. No se verificaron variables ni protección de esta URL específica, ni se creó otro deployment. Reconectar Vercel para inspeccionar el deployment y reutilizarlo si corresponde al SHA exacto. |
 | Mapbox / entorno | GATE REQUIRED | Nombres esperados: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_MAPBOX_ACCESS_TOKEN`; solo se inspeccionó `.env.example`, no los valores del hosting. Confirmar presencia y proyecto destino en Preview por canal seguro; ningún secreto en `VITE_*`. |
 | F13 | POSBETA/decisión PO | Continúa pendiente. Recordarla justo antes del gate final. |
 
