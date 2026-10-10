@@ -328,11 +328,11 @@ export const OnboardingView = ({
               <div className="flex flex-wrap items-center justify-center gap-3 pt-1 text-[11px]">
                 <button type="button" onClick={() => setLegalKind('privacy')}
                   className="font-semibold text-[#204E4A] underline underline-offset-2 focus-visible:bg-[#E1E53F]">
-                  {lang === 'es' ? 'Privacidad (borrador)' : 'Privacy (draft)'}
+                  {lang === 'es' ? 'Política de privacidad' : 'Privacy policy'}
                 </button>
                 <button type="button" onClick={() => setLegalKind('terms')}
                   className="font-semibold text-[#204E4A] underline underline-offset-2 focus-visible:bg-[#E1E53F]">
-                  {lang === 'es' ? 'Reglas de uso (borrador)' : 'Community rules (draft)'}
+                  {lang === 'es' ? 'Términos de uso' : 'Terms of use'}
                 </button>
               </div>
 
