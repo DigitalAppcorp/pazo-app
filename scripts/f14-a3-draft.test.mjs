@@ -283,3 +283,26 @@ test('A3 Feed RPC acquires ordered owner locks before locking metric rows or wri
   assert.match(fragment,/p_action_type IN \('unlike', 'unsave'\)/)
   assert.match(fragment,/WHERE ppm\.pet_id = p_actor_pet_id[\s\S]*?FOR UPDATE/)
 })
+
+
+const cascadeQaSql=readFileSync(new URL('./f14-a3-cascade-temp-qa.sql',import.meta.url),'utf8')
+test('A3 synthetic cascade QA stays pg_temp-only and rollback-protected',()=>{
+ assert.match(cascadeQaSql,/^BEGIN;/m)
+ assert.match(cascadeQaSql,/^ROLLBACK;/m)
+ assert.match(cascadeQaSql,/CREATE TEMP TABLE a3_cascade_users/)
+ assert.match(cascadeQaSql,/REFERENCES pg_temp\.a3_cascade_users\(id\) ON DELETE CASCADE/)
+ assert.match(cascadeQaSql,/CREATE OR REPLACE FUNCTION pg_temp\.a3_cascade_profile_guard/)
+ assert.match(cascadeQaSql,/WHERE j\.user_id=v_owner AND j\.status NOT IN \('requested','cancelled'\)/)
+ assert.match(cascadeQaSql,/EXCEPTION WHEN SQLSTATE '42501'/)
+ assert.match(cascadeQaSql,/SELECT 'PASS: synthetic frozen DELETE blocked/)
+ assert.doesNotMatch(cascadeQaSql,/\b(?:INSERT\s+INTO|DELETE\s+FROM|UPDATE|TRUNCATE|ALTER\s+TABLE)\s+(?:public|auth|storage)\./i)
+})
+test('A3 Auth-last gate cannot be declared ready with a frozen-profile delete fence',()=>{
+ assert.match(fenceSql,/WHEN 'profiles' THEN[\s\S]*?v_owner := \(p_row->>'id'\)::uuid/)
+ assert.match(fenceSql,/CREATE TRIGGER a3_write_fence_profiles BEFORE INSERT OR UPDATE OR DELETE/)
+ assert.match(fenceSql,/IF EXISTS \([\s\S]*?FROM account_private\.deletion_jobs[\s\S]*?status NOT IN \('requested','cancelled'\)/)
+ assert.match(fenceSql,/v_uid IS DISTINCT FROM v_exception_target/)
+ // No blanket service_role exception may disable A3 data protection.
+ assert.doesNotMatch(fenceSql,/current_setting\('request\.jwt\.claim\.role'[\s\S]*?service_role[\s\S]*?THEN RETURN OLD/i)
+ assert.match(transitionSql,/f14_a3_full_write_fence_ready\(\)[\s\S]*?SELECT false/)
+})

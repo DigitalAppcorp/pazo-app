@@ -101,3 +101,7 @@ E. Finalmente Scope Closure Reconciliation de F14 Gate 8 con pruebas observables
 ## A3 lock-order mitigation DRAFT — 2026-10-09
 
 Décimo archivo SQL propuesto: `supabase/drafts/20261009_f14_a3_interaction_lock_order_NOT_APPLIED.sql`, con guardia de aborto previa al DDL. Corrige una inversión de locks identificada entre la RPC de interacciones (métrica antes de A3) y el AFTER de comentarios (A3 antes de métrica). Conserva SECURITY INVOKER y permisos. El CI estático NO sustituye la prueba de dos conexiones. **No aplicado**, no modifica flags, Edge, Auth, Storage ni borrado; bloqueo del release gate permanece.
+
+## Gate 8 — Auth-last/CASCADE vs write-fence (2026-10-09)
+
+READ ONLY confirmó `profiles.id` FK Auth ON DELETE CASCADE, `pets.owner_id` y `posts.user_id` FK NO ACTION, y `pet_documents.pet_id` FK RESTRICT. En estado A3 `reviewing` el trigger propuesto `a3_write_fence_profiles BEFORE DELETE` rechazaría la cascada del Auth DELETE. Fixture `pg_temp` en Supabase alojado con BEGIN/ROLLBACK **PASS**, comprobó el bloqueo 42501 sin tocar cuentas reales. Ver `docs/PAZO_F14_A3_CASCADE_DELETE_GATE_20261009.md`. **NO habilitar un bypass global de service_role** ni permitir Auth DELETE hasta diseñar cleanup terminal autenticada/lease+evidencia, preservar UGC de terceros, Storage/CDN y probar en DB aislada. Bloqueo de release A3 permanece.
