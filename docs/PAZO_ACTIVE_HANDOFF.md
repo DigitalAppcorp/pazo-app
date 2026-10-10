@@ -49,3 +49,7 @@ Revisar **cierre legal/operativo del RC**, trabajando en código y docs ES/EN so
 
 ## PostHog desactivado en código RC (2026-10-10)
 - Commit `7f8f75ff`: `isObservabilityEnabled()` devuelve `false` para todo el MVP, incluso si existe `VITE_POSTHOG_PROJECT_TOKEN`; `sendEvent` retorna sin hacer POST. Integración conservada para futura reactivación bajo autorización PO. No se alteraron cuentas/Storage ni otros módulos; no se tocó Vercel/main/A3. La prueba de baja sigue reservada a Codex. CI del nuevo HEAD por confirmar. `LEGAL_RELEASE_READY=false`.
+
+## Gate de salida MVP consolidado (2026-10-10)
+- `docs/PAZO_MVP_RELEASE_GATES_20261010.md` actualizado (commit `04ed7054`) con las únicas condiciones de beta y posbeta explícita; prevalece sobre prioridades históricas. PostHog OFF en código, sin más trabajo de analítica. No repetir QA ya aprobada.
+- Trabajo independiente siguiente: reconciliación legal mínima para avisos definitivos y CI del SHA final; eliminación QA reservada a Codex. Antes de publicar verificar mecanismo operativo de solicitudes y no afirmar borrado de medios/CDN no comprobado. `LEGAL_RELEASE_READY=false`. Vercel, main, Supabase y A3 sin cambios.
