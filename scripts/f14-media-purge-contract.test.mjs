@@ -32,7 +32,7 @@ test('SQL only authorizes exact server-only removed content and matches Storage 
  assert.doesNotMatch(sql,/\bUPDATE\s+moderation_private\.content_restrictions\b/i)
 })
 test('Edge is off unless explicitly enabled, verifies user and role, and never logs key or raw URL',()=>{
- assert.match(edge,/F14_MEDIA_PURGE_ENABLED'\)!=='true'/)
+ assert.match(edge,/Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)==='true'/)
  assert.match(edge,/userClient\.auth\.getUser\(token\)/)
  assert.match(edge,/userClient\.rpc\('f14_is_moderator'\)/)
  assert.match(edge,/admin\.storage\.from\(target\.bucket\)\.remove\(\[target\.path\]\)/)
