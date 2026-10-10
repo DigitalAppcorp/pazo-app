@@ -15,9 +15,12 @@ function harness(options={}){
  const admin={storage:{from(bucket){
    calls.push('bucket:'+bucket)
    return {
-     exists:async(path)=>{
-       calls.push('exists:'+path)
-       return {data:exists,error:options.existsError??null}
+     info:async(path)=>{
+       calls.push('info:'+path)
+       if(options.existsError) return {data:null,error:options.existsError}
+       if(exists===true) return {data:{size:125,contentType:'image/webp'},error:null}
+       if(exists===false) return {data:null,error:{status:404,message:'Object not found'}}
+       return {data:null,error:null} // malformed/ambiguous response; must fail closed
      },
      remove:async(paths)=>{
        calls.push('remove:'+paths.join(','))
@@ -66,7 +69,7 @@ test('only an exact owned object is removed and independently verified',async()=
  assert.ok(x.calls.lastIndexOf('version')<removal)
  assert.ok(x.calls.lastIndexOf('grant')<removal)
  assert.ok(x.calls.includes('checkpoint'))
- assert.ok(x.calls.lastIndexOf('exists:'+row().path)>removal)
+ assert.ok(x.calls.lastIndexOf('info:'+row().path)>removal)
  assert.ok(x.calls.lastIndexOf('url')>removal)
 })
 
@@ -88,7 +91,9 @@ test('shared, foreign, unsafe and duplicate candidates are never removed',async(
 test('missing lease, fence, authoritative generation or origin blocks physical remove',async()=>{
  for(const options of [
   {lease:false},{fence:false},{version:false},{grant:false},
-  {existsError:new Error('unavailable')},{exists:null},
+  {existsError:new Error('unavailable')},{existsError:{status:403}},
+  {existsError:{status:500}},{existsError:{status:404}}, // mock must be distinct from a real explicit 404 below
+  {exists:null},
  ]){
    const calls=await blocked(options)
    assert.ok(!calls.some(v=>v.startsWith('remove:')),JSON.stringify(options))
@@ -113,4 +118,14 @@ test('failed removal or failed checkpoint cannot return success',async()=>{
    if(options.removeError) assert.ok(!calls.includes('checkpoint'))
    assert.ok(!calls.includes('auth.admin.deleteUser'))
  }
+})
+
+test('only explicit 404 proves missing: 403/500, null, and thrown network fail closed',async()=>{
+ for(const err of [{status:401},{status:403},{status:500},'404',{statusCode:'404'},{message:'Object not found'}]){
+   const calls=await blocked({existsError:err})
+   assert.ok(!calls.includes('oldCheckpoint'),JSON.stringify(err))
+   assert.ok(!calls.some(v=>v.startsWith('remove:')))
+ }
+ const calls=await blocked({exists:null})
+ assert.ok(!calls.includes('oldCheckpoint'))
 })
