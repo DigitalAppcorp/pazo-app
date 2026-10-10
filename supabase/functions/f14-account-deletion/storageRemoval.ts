@@ -25,6 +25,8 @@ export interface A3StorageProofs {
   verifyLease(): Promise<boolean>
   verifyWriteFence(): Promise<boolean>
   verifyExactGenerationAndReferences(object: Readonly<MediaInventoryEntry>): Promise<boolean>
+  /** Mint a short-lived, exact-object/version SQL grant for Storage DELETE. */
+  authorizeExactRemoval(object: Readonly<MediaInventoryEntry>): Promise<boolean>
   /** Durable server-side checkpoint of a prior successful remove call; no client values. */
   verifyPreviouslyRemoved(object: Readonly<MediaInventoryEntry>): Promise<boolean>
   /** Persist exact-object deletion checkpoint; independent job journal on server. */
@@ -75,6 +77,9 @@ export async function removeVerifiedA3Object(
     await ensure(await proofs.verifyLease())
     await ensure(await proofs.verifyWriteFence())
     await ensure(await proofs.verifyExactGenerationAndReferences(row))
+    await ensure(await proofs.authorizeExactRemoval(row))
+    // The authorization RPC checks lease + request status and the current
+    // storage.objects.version; its grant expires in two minutes.
     const result = await bucket.remove([row.path])
     if (result.error) throw new A3StorageBlocked()
     const after = await bucket.exists(row.path)
