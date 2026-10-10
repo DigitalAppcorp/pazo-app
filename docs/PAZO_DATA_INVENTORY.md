@@ -317,3 +317,7 @@ La consulta admin `supabase/queries/f14_account_deletion_preflight_READ_ONLY.sql
 ### 24.3 Continuidad de comunidad en eliminación de cuenta
 
 La migración propuesta NO APLICADA añade una tabla privada con IDs internos del grupo/propietario/admin candidato y plazos de transferencia (7 días), sin contenido ni email. Solo admin destinatario y owner pueden consultar una oferta; aceptación requiere JWT propio; nadie fuera del servidor puede archivar. Las comunidades archivadas conservan contenido de terceros en la base, pero no son públicas bajo la RLS vigente. No se habilita recolección nueva ni migración en este lote.
+
+### 24.4 Transferencia consentida y archivo (propuesta aún inactiva)
+
+La migración de continuidad añade a `community_private` únicamente metadatos de oferta (IDs internos del grupo/propietario/admin destinatario y fecha de vencimiento) y propuesta de relación de propietario nullable solo para archivo. El administrador designado no recibe poderes amplios de moderación ni acceso a archivos: solo puede aceptar/rechazar una transferencia destinada a su UUID bajo sesión autenticada. Comunidad archivada permanece en DB, con el contenido ajeno intacto, pero oculta bajo las RLS de lectura actuales. El ciclo de vida definitivo y la migración no han sido activados. Sin retención nueva de email, documentos ni analytics.

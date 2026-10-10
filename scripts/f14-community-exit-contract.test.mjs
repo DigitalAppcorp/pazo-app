@@ -44,3 +44,16 @@ test('refusing a transfer belongs only to the exact logged-in candidate',()=>{
  "GRANT EXECUTE ON FUNCTION public.pazo_community_decline_transfer(uuid) TO authenticated"
  ])dbTest(fragment)
 })
+
+test('UI and Supabase client remain gated until reviewed migration is installed',()=>{
+ const ui=readFileSync(new URL('../src/components/views/CommunityDetailView.tsx',import.meta.url),'utf8')
+ const svc=readFileSync(new URL('../src/features/account/communityOwnershipService.ts',import.meta.url),'utf8')
+ const types=readFileSync(new URL('../src/types/pazo.ts',import.meta.url),'utf8')
+ assert.match(svc,/VITE_F14_COMMUNITY_OWNERSHIP_ENABLED === 'true'/)
+ assert.match(svc,/COMMUNITY_OWNERSHIP_RELEASE_READY = false/)
+ assert.match(ui,/exitUiEnabled && member\.role === 'member'/)
+ assert.match(ui,/ownershipOffer\.isCandidate/)
+ assert.match(ui,/declineCommunityTransfer\(communityId\)/)
+ assert.match(types,/export type CommunityRole = 'owner' \| 'admin' \| 'member'/)
+ assert.match(types,/ownerUserId: string \| null/)
+})
