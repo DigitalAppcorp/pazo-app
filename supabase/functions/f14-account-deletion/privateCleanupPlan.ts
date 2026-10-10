@@ -36,6 +36,7 @@ export interface A3CleanupEvidence {
   feedThreadsRedacted: boolean
   communityThreadsRedacted: boolean
   rescueSightingsReconciled: boolean
+  ownedCommunitiesArchived: boolean
   thirdPartyIntegrityVerified: boolean
 }
 
@@ -50,9 +51,7 @@ export interface A3CleanupReview {
 const BOOLEAN_REQUIREMENTS = [
   'requestProcessing','exactReviewerLeaseValid','writesFrozen',
   'mediaRemovedAtOrigin','mediaUrlsNoLongerAvailable',
-  'thirdPartySnapshotVerified','feedThreadsRedacted',
-  'communityThreadsRedacted','rescueSightingsReconciled',
-  'thirdPartyIntegrityVerified',
+  'thirdPartySnapshotVerified','thirdPartyIntegrityVerified',
 ] as const
 
 const ZERO_REQUIREMENTS = [
@@ -94,6 +93,20 @@ export function reviewA3Cleanup(
   for (const stage of A3_CLEANUP_ORDER) {
     if (!done.has(stage)) encounteredGap = true
     else if (encounteredGap) missing.push('noncontiguous_checkpoint')
+  }
+  // Readiness is stage-relative: don't demand completion of the action
+  // we're about to perform. Subsequent stages require refreshed evidence.
+  if (done.has('redact_preserved_threads')) {
+    if (data.feedThreadsRedacted !== true) missing.push('feedThreadsRedacted')
+    if (data.communityThreadsRedacted !== true) missing.push('communityThreadsRedacted')
+  }
+  if (done.has('archive_owned_communities')
+      && data.ownedCommunitiesArchived !== true) {
+    missing.push('ownedCommunitiesArchived')
+  }
+  if (done.has('remove_private_documents_and_care')
+      && data.rescueSightingsReconciled !== true) {
+    missing.push('rescueSightingsReconciled')
   }
   const nextStage = missing.length === 0
     ? A3_CLEANUP_ORDER.find(stage => !done.has(stage)) ?? null
