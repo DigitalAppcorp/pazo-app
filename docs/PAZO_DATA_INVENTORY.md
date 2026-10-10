@@ -329,3 +329,7 @@ Instalada migración `20261010053708_f14_community_ownership_continuity` y tabla
 ### 24.6 Integridad del borrado de cuenta — 2026-10-10
 
 El preflight analiza interacciones Feed originadas por terceros (explícitas e impresiones), likes de comunidad, inconsistencias de autor de mascotas, media claims y URLs de medios sin equivalencia exacta en Storage. No se instrumentan nuevos eventos ni se exportan URLs/cuerpos/identidades. Los reportes agregados se reservan al operador. La revisión de seis cuentas detecta 8 referencias no verificadas y exige conciliación antes de cualquier borrado. No hay cambios permanentes al backend en este lote.
+
+### 24.8 Hilos con autor eliminado: política aprobada, draft NO aplicado
+
+La estructura propuesta `author_deleted_at` conserva únicamente el identificador de hilo, estado de anonimización, fecha y referencias a comentarios ajenos; reemplaza texto, imágenes, nombres, ubicación, etiquetas y metadatos de autor por valores neutrales. La baja de Auth/mascota no debe destruir esas respuestas por cascada. Los nuevos triggers impiden interacciones posteriores, incluyendo escrituras directas sin interfaz. La redacción sólo podrá usarse como parte de una solicitud de eliminación `processing` con Storage y archivos externos verificados fuera de SQL. No se ha instalado la migración ni borrado usuarios, comentarios ni medios. Seguridad de datos de terceras personas y procedimiento final de solicitudes siguen pendientes antes de beta pública.
