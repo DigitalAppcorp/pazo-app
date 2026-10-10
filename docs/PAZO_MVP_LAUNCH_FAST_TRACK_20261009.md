@@ -1,3 +1,5 @@
+> **ACTUALIZACIÓN DE PRIORIDAD — 2026-10-10:** el PO congeló la automatización A3 para priorizar la beta. Rama de lanzamiento **`release/mvp-beta-fast-track-20261010`** creada desde `781069d6` pre-A3 avanzado; PR #37/#38 preservados sin merge. La baja provisional usa el intake existente más cola privada y SOP; aún falta una prueba manual real con cuenta descartable, contacto público/políticas y verificación Auth/medios. **Orden operativo** y bloqueo de Vercel en `docs/PAZO_MVP_RELEASE_GATES_20261010.md`. Este checkpoint sustituye cualquier instrucción inferior de continuar borradores A3 o ejecutar bajas sin comprobarlas.
+
 # PAZO — Fast-track al MVP lanzable | decisión PO 2026-10-09
 
 **Decisión vigente:** avanzar más rápido, sin intervenir Vercel hasta que el MVP esté listo para lanzamiento. Prioridad: cerrar funcionamiento e integración, no incrementar experimentos, scripts sueltos ni borradores A3. **No autoriza merge, deploy, SQL permanente, eliminación de datos ni gasto.**
