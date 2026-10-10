@@ -78,3 +78,14 @@ test('Storage deletion is journaled and may only be retried after exact checkpoi
  assert.match(sql,/g\.object_version=p_object_version/)
  assert.match(sql,/j\.phase='remove_media'/)
 })
+
+test('exact media grants reject cross-owner records and shared references',()=>{
+ assert.match(sql,/o\.owner_id=p_subject_user_id::text/)
+ for(const table of ['public.pet_documents','public.community_posts','public.communities','public.posts','public.pets']){
+  assert.ok(sql.includes(table),table)
+ }
+ assert.match(sql,/cp\.author_user_id<>p_subject_user_id/)
+ assert.match(sql,/pet\.owner_id<>p_subject_user_id/)
+ assert.match(sql,/c\.owner_user_id<>p_subject_user_id/)
+ assert.match(sql,/RETURN false; END IF;/)
+})
