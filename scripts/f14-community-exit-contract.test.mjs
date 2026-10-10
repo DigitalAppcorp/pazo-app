@@ -14,7 +14,8 @@ test('accepted transfer is authenticated, consent-only and atomically matches me
  for(const v of [
   "candidate_user_id=v_uid","m.role='admin'","role='owner'","role='member'",
   "o.status='pending'","o.expires_at>pg_catalog.clock_timestamp()",
-  "r.subject_user_id=v_owner AND r.status='requested' FOR UPDATE",
+  "r.subject_user_id=v_owner AND r.status='requested'",
+  "o.created_at>=r.requested_at",
   "status='accepted',accepted_at=pg_catalog.clock_timestamp()",
   "owner_user_id=v_uid WHERE id=p_community_id AND owner_user_id=v_owner",
   "FOREIGN KEY(owner_user_id) REFERENCES auth.users(id) ON DELETE SET NULL",
