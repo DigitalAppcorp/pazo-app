@@ -306,11 +306,47 @@ BEGIN
     JOIN storage.objects o
       ON o.bucket_id=p_bucket AND o.name=p_path
       AND o.version=p_object_version
+      AND o.owner_id=p_subject_user_id::text
     WHERE req.status='processing' AND j.phase='remove_media'
       AND j.subject_user_id=p_subject_user_id
       AND j.reviewer_user_id=p_reviewer_user_id
       AND j.lease_token=p_lease_token AND j.revision=p_revision
       AND j.lease_expires_at>v_now
+  ) THEN RETURN false; END IF;
+
+  -- No shared or cross-owned references may lose bytes. If a reference
+  -- cannot be attributed safely, stop the job for manual reconciliation.
+  IF EXISTS (
+    SELECT 1 FROM public.pet_documents doc
+      JOIN public.pets pet ON pet.id=doc.pet_id
+      WHERE p_bucket='pet-documents'
+        AND doc.storage_path=p_path AND pet.owner_id<>p_subject_user_id
+  ) OR EXISTS (
+    SELECT 1 FROM public.community_posts cp
+      WHERE p_bucket='community-post-photos'
+        AND cp.photo_storage_path=p_path
+        AND (cp.author_user_id IS NULL OR cp.author_user_id<>p_subject_user_id)
+  ) OR EXISTS (
+    SELECT 1 FROM public.communities c
+      WHERE p_bucket='community-avatars'
+        AND c.image_storage_path=p_path
+        AND (c.owner_user_id IS NULL OR c.owner_user_id<>p_subject_user_id)
+  ) OR EXISTS (
+    SELECT 1 FROM public.posts p
+      WHERE p_bucket='post-photos'
+        AND p.photo_url IS NOT NULL
+        AND pg_catalog.right(p.photo_url,
+          pg_catalog.length('/storage/v1/object/public/post-photos/'||p_path))
+          ='/storage/v1/object/public/post-photos/'||p_path
+        AND (p.user_id IS NULL OR p.user_id<>p_subject_user_id)
+  ) OR EXISTS (
+    SELECT 1 FROM public.pets pet
+      WHERE p_bucket='pet-avatars'
+        AND pet.photo_url IS NOT NULL
+        AND pg_catalog.right(pet.photo_url,
+          pg_catalog.length('/storage/v1/object/public/pet-avatars/'||p_path))
+          ='/storage/v1/object/public/pet-avatars/'||p_path
+        AND pet.owner_id<>p_subject_user_id
   ) THEN RETURN false; END IF;
 
   INSERT INTO account_requests_private.deletion_media_grants
