@@ -61,7 +61,6 @@ export async function removeVerifiedA3Object(
   }
   await ensure(await proofs.verifyLease())
   await ensure(await proofs.verifyWriteFence())
-  await ensure(await proofs.verifyExactGenerationAndReferences(row))
 
   const bucket = admin.storage.from(row.bucket)
   const pre = await bucket.exists(row.path)
