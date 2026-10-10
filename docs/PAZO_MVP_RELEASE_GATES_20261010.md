@@ -120,3 +120,11 @@ El PO confirma: **lanzar un MVP pequeño y seguro sin prolongar mejoras no indis
 **Posbeta:** A3 avanzado, métricas PostHog, nuevas funcionalidades, mejora cosmética, auditorías ampliadas y automatización de medios. **No posponer:** falsedad material del aviso de privacidad, filtración activa, falta de atención real de solicitudes o seguridad básica. Sin nuevos proveedores pagados, cambios en Supabase, Vercel o main.
 
 **Interpretación de avances anteriores:** cualquier instrucción histórica que pida reactivar PostHog o expandir la auditoría por rutina queda subordinada a este gate y al handoff vigente.
+
+## Cierre independiente a Codex — 2026-10-10
+
+- Los borradores de Privacy ES/EN incorporan operador, contacto público, categorías principales, Supabase/Mapbox/Unsplash, PostHog expresamente desactivado, Do Not Track, solicitudes de consulta/corrección, retención cualitativa y límites de eliminación de medios/backups; última revisión de texto `eac2a278`, cobertura contractual `8a95de5d`. **No son aún política definitiva**, y `LEGAL_RELEASE_READY=false` por la prueba de baja y publicación/fecha pendiente.
+- Protocolo mínimo de atención humana documentado en `docs/PAZO_MVP_PRIVACY_OPERATIONS_RECONCILIATION_20261010.md`. No se afirma que el operador haya atendido una solicitud real.
+- PostHog ya tiene guard de código OFF en `src/services/observability.ts`; no es dependencia de salida.
+- **Gate del candidato final:** certificar `npm ci`, `npm run test:governance`, `npm run build` en el HEAD que vaya a publicarse; el conector GitHub disponible no devuelve CI push del HEAD. Verificación no reemplazada por checks de cuota Vercel.
+- **Fuera de este carril:** la única cuenta QA, solicitudes, Storage/Auth y prueba E2E Codex. Cuando Codex entregue PASS verificable y se certifique build, revisar fecha efectiva, publicación visible ES/EN, moderación/retirada supervisada y pedir autorización expresa al PO antes de tocar main o Vercel.
