@@ -8,7 +8,7 @@
 ## Fuente de verdad y rol
 - Product Owner: usuario; ChatGPT Project Brain es ejecutor técnico. Canonical Brain OS: `DigitalAppcorp/project-brain-os` (versión estable vigente 1.4.1; el `AGENTS.md` histórico refiere 1.3.0 y el patrón de diseño nuevo de Brain OS PR #3 **sigue DRAFT**).
 - Leer primero `AGENTS.md`, este handoff, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_MVP_LOCAL_ACCEPTANCE_20261009.md` y el scope de cualquier módulo específico antes de actuar.
-- **Lote activo 2 (MVP):** Auth correo PASS PO; identidad de denuncias mejorada; código Edge+SQL+UI de retirada de objetos Feed/Comunidad preparado en PR #37, desactivado por latch de código + dos flags; despliegue autorizado exclusivamente apagado. Pruebas/E2E de Storage/CDN y perfil multi-imagen P0 pendientes. NO Vercel ni merge sin gate. Ver `docs/PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md`. **No crear nuevas fases ni rediseñar todo PAZO**. Prioridad del PO: cierre MVP y lanzamiento con mínima demora, tokens y costes.
+- **Lote activo 2 (MVP):** Supabase F14 preflight de medios INSTALADO con autorización PO: migración `20261010033538_f14_moderation_media_preflight_locked`, Edge `f14-moderation-purge` v2, JWT requerido, latch de código `F14_MEDIA_PURGE_RELEASE_APPROVED=false`. **Sin borrado**, backend `complete=false`, trigger de rechazo original activo, botón local OFF. D3-A sigue abierta. Sin Vercel ni merge.
 
 ## F14 beta reporting pilot — scope limitado 2026-10-09
 

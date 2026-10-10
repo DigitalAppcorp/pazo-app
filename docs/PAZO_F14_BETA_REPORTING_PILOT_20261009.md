@@ -79,3 +79,7 @@ Se versionaron Edge con validación Auth/moderador y feature flag OFF, función 
 **Sin cambio en Supabase remoto.** No afirmar cobertura de perfil con múltiples medios, origen externo ni limpieza CDN global; no abrir Beta hasta QA controlada y cierre del contrato de medios.
 
 **Nota de preinstalación:** el backend existente incluye `f14_no_unverified_media_purge` y reservas `moderation_private.media_claims`. La función nueva se instala solo como prueba previa sin escritura; `complete` devolverá false, sin sustituir ni desactivar los guards históricos. El Edge está bloqueado en código independientemente de flags de entorno.
+
+### Aplicación segura de contrato inerte (2026-10-10 UTC)
+
+Autorización PO aplicada: migración `20261010033538_f14_moderation_media_preflight_locked` y Edge v2 JWT obligatorio con bloqueo fijo. El nuevo SQL solo permite validación preliminar por servicio y nunca pone media_status=purged; control previo de claims y trigger de rechazo se mantienen. ACL service-only verificada, sin cambios al número de objetos de publicaciones (13) ni archivos eliminados. Bloqueado hasta nuevo gate de prueba específica.
