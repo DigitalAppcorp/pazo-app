@@ -95,3 +95,7 @@ Migration hosted `20261010034610_f14_finalize_media_after_verified_claim`: se in
 ### Ensayo acotado en curso, sin borrado aún
 
 Edge v4 publicada con JWT obligatorio y allowlist temporal de una sola publicación recién creada y retirada, UUID `aa00d5b6-9626-4e16-90a1-3b6e7bf4076e`; permiso global de purga sigue desactivado. Baseline 14 objetos (incluye 1 prueba nueva), `purged=0`. Próximo: pulsación desde localhost por moderador, verificar y después desactivar excepción en código/desplegar; no ejecutar sobre los otros medios ni usar Vercel.
+
+### F14 D3-A — causa de POST 409 resuelta (2026-10-10 04:33 UTC)
+
+Al primer click del moderador, autorización y creación/recheck claim PASS; `f14_moderation_media_gate` preflight false. Se corrigió la comprobación legada de rol en gate + trigger por `auth.role()` (migración aplicada `20261010043307_f14_media_jwt_claim_compat_single_test`), extendiendo solo el claim exacto ya validado. SQL preflight probada true con formato PostgREST, CI PASS #38024417241, datos de Storage sin cambios. Aún falta el segundo click del usuario y verificar que solo la foto descartable cambie a purged. Restablecer Edge a modo global disabled después de la prueba.

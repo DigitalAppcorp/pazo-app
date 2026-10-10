@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | estado verificado 2026-10-09
 
+> **D3-A JWT HOTFIX APLICADO (2026-10-10 04:33 UTC):** migración remota `20261010043307_f14_media_jwt_claim_compat_single_test`, CI #38024417241 PASS. Reemplaza la lectura legacy `request.jwt.claim.role` por `auth.role()` en el gate y trigger (ambos aceptan formato PostgREST `request.jwt.claims`). Preflight SQL para el único `feed_post` nuevo con JWT claims service_role PASS bajo BEGIN/ROLLBACK; grants anon/authenticated aún DENY. Claim exacto extendido hasta **05:33 UTC** y comprobado `held`/checked. Storage 14, media purged 0, test object 1 y pending_review 1. **Foto NO BORRADA todavía**; PO debe hacer solo un segundo clic en su UI local del objeto `...7bf4076e`; después verificar y desactivar la excepción temporal de Edge v4. No Vercel ni merge.
+
+
 > **DECISIÓN PO / FAST-TRACK 2026-10-09:** NO usar Vercel hasta MVP listo para lanzar. Carril activo: integración del MVP #36→#37 y cierres Auth/moderación/privacidad con criterios E2E; **PR #38 A3 PAUSADA**, sin más drafts hipotéticos. Detalle y gates: [PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md](PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md). Los checkpoints cronológicos antiguos de esta rama no reactivan A3 ni autorizan merge/deploy/SQL.
 
 
