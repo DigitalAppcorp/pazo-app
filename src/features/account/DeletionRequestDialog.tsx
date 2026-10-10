@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react'
 import {createPortal} from 'react-dom'
 import {getDeletionRequest,submitDeletionRequest,cancelDeletionRequest} from './deletionRequestService'
 import {mayCancelDeletion,type DeletionReceipt} from './deletionRequestState'
+import {PAZO_PRIVACY_SUPPORT_EMAIL,PAZO_PRIVACY_SUPPORT_MAILTO} from '../legal/supportContact'
 
 type Props={lang:'es'|'en';onClose:()=>void}
 export function DeletionRequestDialog({lang,onClose}:Props) {
@@ -73,6 +74,20 @@ export function DeletionRequestDialog({lang,onClose}:Props) {
           {es?'Cancelar solicitud pendiente':'Cancel pending request'}
         </button>}
        </>}
+      <div className="mt-5 rounded-2xl bg-white px-4 py-4">
+        <p className="text-xs font-semibold">
+          {es?'¿No puedes acceder a tu cuenta o necesitas ayuda?':'Can’t access your account or need help?'}
+        </p>
+        <a href={PAZO_PRIVACY_SUPPORT_MAILTO}
+          className="mt-2 inline-block break-all text-sm font-bold underline underline-offset-4 focus-visible:bg-[#E1E53F]">
+          {PAZO_PRIVACY_SUPPORT_EMAIL}
+        </a>
+        <p className="mt-2 text-xs leading-relaxed text-[#5C7470]">
+          {es
+            ?'Este correo recibe consultas de privacidad y soporte. Escribirnos no cancela ni completa tu solicitud automáticamente.'
+            :'This inbox handles privacy and support questions. Emailing us does not automatically cancel or complete your request.'}
+        </p>
+      </div>
       {error&&<p role="alert" className="mt-3 text-xs font-bold text-[#AF3029]">
         {es?'No se pudo confirmar el cambio. La cuenta no ha sido eliminada; inténtalo después.':'Could not confirm this change. The account has not been deleted; please try later.'}
       </p>}
