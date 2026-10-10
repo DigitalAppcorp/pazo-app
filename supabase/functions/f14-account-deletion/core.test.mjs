@@ -18,7 +18,7 @@ function factory(overrides = {}) {
   const calls = []
   const yes = async () => true
   const methods = {
-    authorize: yes, verifyLease: yes,
+    authorize: yes, verifyLease: yes, verifyRecentSignin: yes,
     freezeAccountWrites: yes, verifyWritesFrozen: yes,
     preserveOthers: yes, verifyOthersPreserved: yes,
     manifest: async () => [],
@@ -59,6 +59,7 @@ test('immutable deployment gate prevents even reads when OFF', async () => {
 test('verified empty-account path orders Auth last and completion after proof', async () => {
   const { calls, ports } = factory()
   assert.deepEqual(await runSupervisedA3Candidate(ports, true), { completed: true })
+  assert.ok(calls.indexOf('verifyRecentSignin') < calls.indexOf('freezeAccountWrites'))
   assert.ok(calls.indexOf('verifyWritesFrozen') < calls.indexOf('preserveOthers'))
   assert.ok(calls.indexOf('preserveOthers') < calls.indexOf('cleanAccountData'))
   assert.ok(calls.indexOf('cleanAccountData') < calls.indexOf('revokeSessions'))
@@ -71,6 +72,7 @@ test('rejects missing operator, lease, frozen writers and third-party archive', 
   const cases = [
     ['authorize', 'not_authorized'],
     ['verifyLease', 'lease_invalid'],
+    ['verifyRecentSignin', 'fresh_signin_missing'],
     ['freezeAccountWrites', 'writes_not_frozen'],
     ['verifyWritesFrozen', 'writes_not_frozen'],
     ['preserveOthers', 'third_party_unverified'],
