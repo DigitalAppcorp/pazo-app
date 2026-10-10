@@ -37,3 +37,17 @@ test('preflight accounts for polymorphic feed references, reactions, Storage cla
  assert.match(sql,/false AS may_delete_auth/)
  assert.match(sql,/false AS may_delete_storage/)
 })
+
+test('a sole moderator is never treated as eligible for manual account removal',()=>{
+ const guard=sql.indexOf("WHEN last_moderator_at_risk=1 THEN 'blocked_last_moderator'")
+ const thirdParty=sql.indexOf("THEN 'blocked_third_party'")
+ assert.ok(guard>0 && thirdParty>guard,'sole moderator must block first')
+ assert.match(sql,/moderation_private\.moderator_grants g\s+WHERE g\.user_id=q\.user_id/)
+ assert.match(sql,/SELECT count\(\*\) FROM moderation_private\.moderator_grants\)=1/)
+ assert.match(sql,/AS moderator_grants/)
+ assert.match(sql,/AS last_moderator_at_risk/)
+ assert.match(sql,/moderator_grants\+\s*external_feed_impressions/)
+ assert.match(sql,/'last_moderator_at_risk',last_moderator_at_risk/)
+ assert.match(sql,/false AS may_delete_auth/)
+ assert.match(sql,/false AS may_delete_storage/)
+})
