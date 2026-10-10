@@ -13,6 +13,6 @@ export function parseDeletionReceipt(value: unknown): DeletionReceipt | null {
 export function mayCancelDeletion(status: DeletionStatus|null): boolean {
   return status==='requested'
 }
-// A deletion REQUEST does not delete an account. Release remains unavailable
-// until the backing intake RPC is installed AND explicitly enabled in local env.
+// Intake RPCs are installed and tested, but final deletion remains unavailable.
+// Dev UI can request/cancel only; production entry stays gated by environment.
 export const DELETION_EXECUTOR_ENABLED = false as const

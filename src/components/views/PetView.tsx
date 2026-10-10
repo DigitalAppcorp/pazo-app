@@ -58,7 +58,9 @@ export const PetView = ({
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
   const [showDeletionRequest, setShowDeletionRequest] = useState(false)
-  const requestEnabled = import.meta.env.VITE_F14_DELETION_REQUESTS_ENABLED === 'true'
+  // The intake RPCs are installed and QA-tested. Keep production disabled
+  // until launch gates close; allow request/status/cancel QA in localhost.
+  const requestEnabled = import.meta.env.DEV || import.meta.env.VITE_F14_DELETION_REQUESTS_ENABLED === 'true'
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
   const [completingCareId, setCompletingCareId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
