@@ -87,18 +87,36 @@ CREATE TRIGGER f14_block_deleted_feed_interactions
 -- This server-only step is prepared, not installed or executed. A separate
 -- worker must first freeze access, clear physical media through Storage API,
 -- verify URL references and handle every other personal data category.
-CREATE OR REPLACE FUNCTION public.pazo_redact_social_threads(p_subject uuid)
+CREATE OR REPLACE FUNCTION public.pazo_redact_social_threads(
+ p_subject uuid,p_reviewer_user_id uuid,p_lease_token uuid,p_revision bigint
+)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $redact$
 DECLARE v_feed int;v_community int;
 BEGIN
- IF auth.role() IS DISTINCT FROM 'service_role' THEN
+ IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'service_role' THEN
    RAISE EXCEPTION 'Server authorization required' USING ERRCODE='42501';
  END IF;
- IF p_subject IS NULL THEN RAISE EXCEPTION 'Missing subject';END IF;
+ IF p_subject IS NULL OR p_reviewer_user_id IS NULL OR p_subject=p_reviewer_user_id
+   OR p_lease_token IS NULL OR p_revision IS NULL THEN
+   RAISE EXCEPTION 'Missing or invalid supervised cleanup identifiers' USING ERRCODE='42501';
+ END IF;
  PERFORM 1 FROM account_requests_private.deletion_requests req
  WHERE req.subject_user_id=p_subject AND req.status='processing' FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Account request is not processing';END IF;
+ PERFORM 1 FROM account_requests_private.deletion_review_jobs j
+ JOIN account_requests_private.deletion_review_operators op
+   ON op.operator_user_id=j.reviewer_user_id
+ WHERE j.subject_user_id=p_subject
+   AND j.reviewer_user_id=p_reviewer_user_id
+   AND j.lease_token=p_lease_token AND j.revision=p_revision
+   AND j.lease_expires_at>pg_catalog.clock_timestamp()
+   AND j.phase IN ('preserve_others','clean_private_data')
+ FOR UPDATE OF j;
+ IF NOT FOUND THEN
+   RAISE EXCEPTION 'Redaction lease or phase is not valid' USING ERRCODE='42501';
+ END IF;
+ PERFORM pg_catalog.set_config('pazo.a3_cleanup_lease',p_lease_token::text,true);
  -- A held moderation claim is a legal/security dependency, not cleanup.
  IF EXISTS(SELECT 1 FROM moderation_private.media_claims claim
    WHERE claim.status='held' AND claim.snapshot->>'owner_id'=p_subject::text)
@@ -275,7 +293,7 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.pazo_redact_social_threads(uuid)
+REVOKE ALL ON FUNCTION public.pazo_redact_social_threads(uuid,uuid,uuid,bigint)
  FROM PUBLIC,anon,authenticated;
-GRANT EXECUTE ON FUNCTION public.pazo_redact_social_threads(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_redact_social_threads(uuid,uuid,uuid,bigint) TO service_role;
 COMMIT;
