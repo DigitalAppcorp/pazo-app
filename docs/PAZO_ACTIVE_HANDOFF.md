@@ -56,3 +56,9 @@ El Product Owner confirmó que sus pruebas locales pasaron. Se registra PASS vis
 - `src/App.tsx` muestra **únicamente** `{pazoBuildVersion}`, centrado en `bottom-4`, fuente `10px`, color secundario atenuado, sin rótulos «Versión»/«local» ni letras visibles, sin contornos. El `aria-label` accesible no forma parte del texto visible.
 - Para comparar compilación local y GitHub se debe calcular la misma transformación sobre el SHA deseado, y **reiniciar Vite** después de checkout/cambios. El valor puede diferir si hay modificaciones sin confirmar. Commits de código: `4fcc9fdd` y `bbf82eea` en PR #37. CI del SHA de código y QA visual específicos deben verificarse; no confundirlos con aceptación del gate de perfil.
 - Otros gates sin cambios: `profiles=0` a última inspección pese a PASS visual reportado; reconciliar instalación/entorno, no repetir borrados. No Vercel, migraciones, ni merge.
+
+## Corrección de texto del splash — 2026-10-10
+
+- El PO precisó que el indicador inferior central SÍ debe decir `Versión` seguido del identificador numérico, por ejemplo `Versión 0.1.08229221`. La petición de usar solo números se refería al **identificador**, no a quitar la palabra «Versión».
+- `src/App.tsx` restablece `Versión {pazoBuildVersion}`, conserva ubicación inferior central, tipografía pequeña y discreta, sin contornos ni texto adicional (`local`, `modificado`). Commit de código `d52e0d38` en PR #37; comprobar CI de ese SHA por separado.
+- El resto de la funcionalidad y las restricciones de base de datos, Vercel, Auth y merge no cambian. La aceptación visual específica de este ajuste aún es independiente del CI.
