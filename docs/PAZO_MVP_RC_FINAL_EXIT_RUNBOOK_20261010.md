@@ -1,3 +1,5 @@
+> **ACTUALIZACIÓN PWA OBLIGATORIA Y F13 (2026-10-10):** El PO confirmó que una beta web no instalable NO cumple el MVP. Manifest, SW network-only, iconos y PWA wiring tienen CI #667 PASS (commit `fe1a5fc4`); **queda la prueba real de instalación en el dominio HTTPS** una vez autorizada la publicación, en Android/Chrome e iOS/Safari con Añadir a pantalla de inicio, apertura standalone y reinicio de sesión seguro si aplica. No es un módulo nuevo: es smoke de despliegue. La F13 NO está completada; **recordar al PO justo antes de GO/NO-GO** para que decida realizarla o diferirla. No interpretar frases históricas de esta página como permiso para lanzar web-only.
+
 # PAZO — RC de beta listo para decisión condicionada (2026-10-10)
 
 **Propietario del producto:** Product Owner. **Ejecutor técnico:** ChatGPT. **Ensayo exclusivo de baja descartable:** Codex.  
