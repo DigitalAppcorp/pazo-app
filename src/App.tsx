@@ -1451,7 +1451,7 @@ function PazoMain() {
         </div>
         <p className="mt-8 text-xs font-extrabold text-[#5C7470] tracking-[0.3em] uppercase animate-pulse relative z-10">Su mundo, más cerca.</p>
         <p aria-label="Versión de PAZO" className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65 z-10">
-          {pazoBuildVersion}
+          Versión {pazoBuildVersion}
         </p>
       </div>
     )
