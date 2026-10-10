@@ -394,6 +394,109 @@ REVOKE ALL ON FUNCTION account_requests_private.a3_guard_application_write()
 REVOKE ALL ON FUNCTION account_requests_private.a3_guard_storage_object()
   FROM PUBLIC,anon,authenticated;
 
+-- The only transition from REQUESTED into PROCESSING. The same request
+-- row acts as the linearization point for application write triggers:
+-- a write that commits first is captured in the snapshot; a write racing
+-- after this transaction starts must wait and is rejected after commit.
+CREATE OR REPLACE FUNCTION public.f14_a3_start_processing(
+  p_subject_user_id uuid,p_operator_user_id uuid,
+  p_lease_token uuid,p_revision bigint
+) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_start$
+DECLARE
+  v_now timestamptz:=pg_catalog.clock_timestamp();
+  v_status text;
+  v_session uuid;
+  v_authenticated_at timestamptz;
+  v_requested_at timestamptz;
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'')<>'service_role'
+    OR p_subject_user_id IS NULL OR p_operator_user_id IS NULL
+    OR p_subject_user_id=p_operator_user_id OR p_lease_token IS NULL
+    OR p_revision IS NULL THEN
+    RAISE EXCEPTION 'A3 processing unauthorized' USING ERRCODE='42501';
+  END IF;
+
+  SELECT status,requested_at INTO v_status,v_requested_at
+    FROM account_requests_private.deletion_requests
+    WHERE subject_user_id=p_subject_user_id FOR UPDATE;
+  IF v_status IS DISTINCT FROM 'requested' THEN
+    RAISE EXCEPTION 'Not a pending deletion request' USING ERRCODE='42501';
+  END IF;
+
+  SELECT j.reauth_session_id,j.reauthenticated_at
+  INTO v_session,v_authenticated_at
+    FROM account_requests_private.deletion_review_jobs j
+    JOIN account_requests_private.deletion_review_operators op
+      ON op.operator_user_id=j.reviewer_user_id
+    WHERE j.subject_user_id=p_subject_user_id
+      AND j.reviewer_user_id=p_operator_user_id
+      AND j.lease_token=p_lease_token
+      AND j.revision=p_revision
+      AND j.phase='review_request'
+      AND j.lease_expires_at>v_now FOR UPDATE OF j;
+  IF v_session IS NULL OR v_authenticated_at IS NULL
+    OR v_authenticated_at<v_now-INTERVAL '5 minutes'
+    OR NOT EXISTS (
+      SELECT 1 FROM auth.sessions s
+      WHERE s.id=v_session AND s.user_id=p_subject_user_id
+        AND s.created_at>=v_requested_at
+        AND s.created_at<=v_authenticated_at
+        AND s.created_at>=v_now-INTERVAL '5 minutes'
+        AND (s.not_after IS NULL OR s.not_after>v_now)
+    ) THEN
+    RAISE EXCEPTION 'Fresh owner session and lease required'
+      USING ERRCODE='42501';
+  END IF;
+
+  -- Conservatively capture third-party references before any owner is
+  -- detached. These INSERTs and the status transition commit atomically.
+  INSERT INTO account_requests_private.deletion_frozen_targets
+    (subject_user_id,target_type,target_id)
+    SELECT p_subject_user_id,'pet',p.id::text FROM public.pets p
+      WHERE p.owner_id=p_subject_user_id
+    UNION ALL
+    SELECT p_subject_user_id,'post',p.id::text FROM public.posts p
+      WHERE p.user_id=p_subject_user_id OR p.pet_id IN (
+        SELECT id FROM public.pets WHERE owner_id=p_subject_user_id)
+    UNION ALL
+    SELECT p_subject_user_id,'community',c.id::text FROM public.communities c
+      WHERE c.owner_user_id=p_subject_user_id
+    UNION ALL
+    SELECT p_subject_user_id,'cpost',cp.id::text FROM public.community_posts cp
+      WHERE cp.author_user_id=p_subject_user_id OR cp.author_pet_id IN (
+        SELECT id FROM public.pets WHERE owner_id=p_subject_user_id)
+    UNION ALL
+    SELECT p_subject_user_id,'storage',o.bucket_id||':'||o.name
+      FROM storage.objects o WHERE o.owner_id=p_subject_user_id::text
+    ON CONFLICT DO NOTHING;
+
+  UPDATE account_requests_private.deletion_requests
+  SET status='processing',updated_at=v_now
+  WHERE subject_user_id=p_subject_user_id AND status='requested';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Processing transition lost' USING ERRCODE='40001';
+  END IF;
+  UPDATE account_requests_private.deletion_review_jobs
+  SET phase='freeze_writes',updated_at=v_now
+  WHERE subject_user_id=p_subject_user_id
+    AND lease_token=p_lease_token AND revision=p_revision
+    AND lease_expires_at>v_now;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Review lease expired' USING ERRCODE='40001';
+  END IF;
+  RETURN pg_catalog.jsonb_build_object(
+    'status','processing','frozen',true,
+    'revision',p_revision,'destructive_execution_allowed',false
+  );
+END
+$a3_start$;
+
+REVOKE ALL ON FUNCTION public.f14_a3_start_processing(uuid,uuid,uuid,bigint)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_start_processing(uuid,uuid,uuid,bigint)
+  TO service_role;
+
 -- Blockers requiring integration testing before removing top RAISE:
 -- 1) Bypass proof/lease must be established only by reviewed privileged RPC.
 -- 2) Atomic freeze must snapshot ALL targets (pet/post/community/cpost/storage)
