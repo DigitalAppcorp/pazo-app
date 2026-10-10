@@ -305,3 +305,7 @@ El futuro servicio Edge `f14-moderation-purge` usará JWT de moderador validado 
 ## 24. Solicitud de eliminación de cuenta (código preparado, no aplicado)
 
 Se planificó tabla privada con `subject_user_id` y estado/tiempos operativos, sin email ni descripción libre; RLS enabled y 3 RPC propias sin argumentos de user ID. Proveedor Supabase ya existente. No se ha activado ni recogido ninguna solicitud a través de esta interfaz. Conservación y procedimiento definitivo requieren acuerdo de política antes de Beta.
+
+### 24.1 Estado real de solicitudes (2026-10-10 UTC)
+
+Supabase tiene instalada la tabla privada `account_requests_private.deletion_requests` con `subject_user_id` y marcas temporales/estado. Tres RPCs de consulta/solicitud/cancelación validan `auth.uid()`; no exponen la tabla a clientes. Tras instalación y pruebas con `ROLLBACK` hay **0 solicitudes persistentes**. Todavía no se habilitó UI en la Beta ni existe worker autorizado para ejecutar eliminación. Retención, auditoría y borrado real permanecen decisiones pendientes.
