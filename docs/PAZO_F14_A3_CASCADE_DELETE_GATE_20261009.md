@@ -23,3 +23,10 @@ El trigger A3 `a3_write_fence_profiles BEFORE INSERT OR UPDATE OR DELETE` propue
 4. Probar el flujo en una DB **aislada** con 2 conexiones, roles reales, RLS, reintentos, fallos parciales y preservación de terceros. Requiere aprobación específica para cualquier apply/ejecución real.
 
 **DoD de A3 bloqueado:** `full_write_fence_ready()` permanece `SELECT false`. El worker actual no tiene permiso para borrar Auth/Storage; ningún resultado de `pg_temp` o CI equivale a aprobación del servicio.
+
+## Contrato puro de secuencia terminal añadido al PR #38 (DRAFT)
+
+- `supabase/functions/f14-a3-account-deletion/terminalPlan.ts`: verificador sin I/O que enumera pasos y evidencia exacta para freeze, archivo privado de terceros, despublicación, Storage, filas con FK, retención, revocación, Auth al final y verificación/auditoría posterior.
+- Los dos bloqueos estructurales `frozen_profile_cascade_rejected` y `deletion_job_auth_fk_restrict` son constantes **no controladas por input**, incluso si todos los flags de evidencia son `true`. `authDeleteAllowed` y `destructiveExecutionAllowed` son `false` incondicionalmente. No importa ni modifica el worker actual.
+- `terminalPlan.test.mjs`: verifica orden y cobertura sin saltarse etapas, rechazo de evidencias `'true'` y claves extras, bloqueos estructurales persistentes, y ausencia de APIs de delete. Añadido a CI.
+- **No es implementación de un executor, ni certificación de reauth/Storage/Auth/PG concurrente.** Próximo gate: acordar y verificar cómo el esquema y el lease autorizan únicamente la limpieza terminal de un job; adaptar transiciones/FKs/triggers en SQL DRAFT protegido por aborto, con pruebas en DB aislada. Ninguna acción de backend real autorizada.
