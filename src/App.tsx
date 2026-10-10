@@ -1423,7 +1423,7 @@ function PazoMain() {
     )
   }
 
-  if (showSplash || loading) {
+  if (showSplash) {
     return (
       <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center relative overflow-hidden p-5">
         <style>{`
@@ -1452,6 +1452,19 @@ function PazoMain() {
         <p className="mt-8 text-xs font-extrabold text-[#5C7470] tracking-[0.3em] uppercase animate-pulse relative z-10">Su mundo, más cerca.</p>
         <p aria-label="Versión de PAZO" className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65 z-10">
           Versión {pazoBuildVersion}
+        </p>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-3 px-6">
+        <p className="text-sm font-bold animate-pulse">
+          {lang === 'es' ? 'Verificando tu sesión…' : 'Checking your session…'}
+        </p>
+        <p className="text-xs text-[#5C7470]">
+          {lang === 'es' ? 'Tus datos están protegidos.' : 'Your data is protected.'}
         </p>
       </div>
     )
