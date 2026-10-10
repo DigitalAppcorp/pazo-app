@@ -199,7 +199,7 @@ BEGIN
   SELECT r.status INTO v_request_status
   FROM account_requests_private.deletion_requests r
   JOIN auth.users subject ON subject.id=r.subject_user_id
-  WHERE r.subject_user_id=p_subject_user_id FOR UPDATE;
+  WHERE r.subject_user_id=p_subject_user_id FOR UPDATE OF r;
   IF v_request_status IS DISTINCT FROM 'requested' THEN
     RAISE EXCEPTION 'Request not reviewable' USING ERRCODE='42501';
   END IF;
