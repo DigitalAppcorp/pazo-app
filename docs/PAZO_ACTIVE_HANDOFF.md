@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | estado verificado 2026-10-09
 
+> **LOTE MVP / PRIVACIDAD INFORMATIVA (2026-10-10 UTC):** PR #37 incluye centro preliminar ES/EN accesible desde registro y Mi Mascota; no requiere base de datos, servicios ni navegación extra. Texto consistente con inventario Supabase/Mapbox/moderación y explícitamente marcado **borrador**: `LEGAL_RELEASE_READY=false`, sin fingir contacto legal, retención ni eliminación de cuenta completas. Requiere verificación de responsable/contacto, retención y políticas definitivas antes de Beta externa; solo CI todavía no aprueba legalmente el texto. D3-A sigue pendiente del E2E real, Edge v5 protegida, 14 objetos intactos.
+
+
 > **D3-A ROLLBACK SEGURO — 2026-10-10 04:37 UTC:** ante petición del PO de automatizar y seguir rápido, se restauró Edge `f14-moderation-purge` **v5**, `verify_jwt=true`, release latch `F14_MEDIA_PURGE_RELEASE_APPROVED=false`, sin excepción temporal para ningún UUID; UI también vuelve a apagada (sin botón dev). Foto descartable verificada sigue **sin borrar**, 14 objetos Storage (13 anteriores + 1 ensayo), purged=0. Se corrigió y verificó preflight JWT `auth.role()` (migración `20261010043307_f14_media_jwt_claim_compat_single_test`; PASS SQL), pero **no es una prueba de purga real**. D3-A NO cerrada. Requiere ejecución futura con JWT de moderador vía flujo explícito; no manipular Storage SQL. Continuar en paralelo con gates MVP sin tocar Vercel ni merge.
 
 

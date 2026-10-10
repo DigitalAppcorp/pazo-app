@@ -2,6 +2,8 @@ import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
+import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
+import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
   IconPaw,
@@ -53,6 +55,7 @@ export const PetView = ({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
+  const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
   const [completingCareId, setCompletingCareId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -601,6 +604,25 @@ export const PetView = ({
             </span>
           </div>
 
+          <div className="rounded-[2rem] bg-white px-4 py-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+            <h4 className="text-sm font-extrabold text-[#204E4A]">
+              {lang === 'es' ? 'Privacidad y reglas' : 'Privacy & community rules'}
+            </h4>
+            <p className="mt-1 text-xs text-[#5C7470]">
+              {lang === 'es' ? 'Información preliminar para la etapa de pruebas.' : 'Preliminary information for the testing stage.'}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" onClick={() => setLegalKind('privacy')}
+                className="rounded-full bg-[#E1E53F]/40 px-4 py-2 text-xs font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
+                {lang === 'es' ? 'Privacidad' : 'Privacy'}
+              </button>
+              <button type="button" onClick={() => setLegalKind('terms')}
+                className="rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
+                {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
+              </button>
+            </div>
+          </div>
+
           {nextPendingCare && (
             <div className="p-4 bg-[#FAF8F5] rounded-[2rem] flex justify-between items-center shadow-xs">
               <div className="space-y-0.5">
@@ -651,6 +673,7 @@ export const PetView = ({
           </div>
         </div>
       )}
+      {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
     </div>
   )
 }

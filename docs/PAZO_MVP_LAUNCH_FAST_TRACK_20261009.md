@@ -109,3 +109,7 @@ Para evitar recrear medios y el vencimiento de cinco minutos, se extendió UNA s
 ### D3-A: excepcion temporal revertida (2026-10-10 04:37 UTC)
 
 Para no dejar permisos destructivos activos, se publicó Edge **v5** desde el código seguro anterior, `verify_jwt=true`, constante `F14_MEDIA_PURGE_RELEASE_APPROVED=false` y sin allowlist de UUID. Los 14 objetos siguen en Storage y `purged=0`. No se ejecutó la eliminación física; el usuario pidió automatizar todo y evitar más rondas manuales. El ensayo E2E queda P0 pendiente de una sesión real de moderador o prueba equivalente autenticada; no sustituirla por DELETE de metadata SQL. Se retiró también el botón DEV de único post de la rama PR #37. El hotfix de `auth.role()` del backend permanece aplicado y se verificó con transacción ROLLBACK. Priorizar el siguiente lote MVP mientras esta prueba espera.
+
+### Lote MVP — información preliminar de privacidad y reglas
+
+Se añadió `src/features/legal/` con copias ES/EN sin promesas de retención, contacto o borrado instantáneo. Acceso en A02 registro (sin casilla premarcada ni consentimiento falso) y menú de Mi Mascota (sin tocar módulos existentes). Dialog con Escape/teclado, foco devuelto y sin contornos. **No es la Privacy Policy/Terms pública final**, flag de código `LEGAL_RELEASE_READY=false` y tests de exactitud básica. Contrato de operadores, datos de contacto, políticas, plazos y derechos efectivos pendiente de verificación/PO antes de beta. No Vercel, no despliegue.

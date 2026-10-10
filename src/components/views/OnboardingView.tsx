@@ -4,6 +4,8 @@ import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIc
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
+import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
+import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
   initialStep?: 'A01' | 'A02' | 'A03' | 'A04' | 'A05'
@@ -23,6 +25,7 @@ export const OnboardingView = ({
   onToggleLang,
 }: OnboardingViewProps) => {
   const [step, setStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>(initialStep)
+  const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
 
   // Sincroniza el paso si cambia desde App.tsx (Vital para el redireccionamiento)
   useEffect(() => {
@@ -318,6 +321,16 @@ export const OnboardingView = ({
                     : 'I confirm that I am 18 or older.'}
                 </span>
               </label>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-1 text-[11px]">
+                <button type="button" onClick={() => setLegalKind('privacy')}
+                  className="font-semibold text-[#204E4A] underline underline-offset-2 focus-visible:bg-[#E1E53F]">
+                  {lang === 'es' ? 'Privacidad (borrador)' : 'Privacy (draft)'}
+                </button>
+                <button type="button" onClick={() => setLegalKind('terms')}
+                  className="font-semibold text-[#204E4A] underline underline-offset-2 focus-visible:bg-[#E1E53F]">
+                  {lang === 'es' ? 'Reglas de uso (borrador)' : 'Community rules (draft)'}
+                </button>
+              </div>
 
               <button
                 onClick={handleSignUp}
@@ -619,6 +632,7 @@ export const OnboardingView = ({
           </div>
         </div>
       )}
+      {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
     </div>
   )
 }
