@@ -8,7 +8,7 @@ import {
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
-import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
+import { classifySignUpResult, signUpConfirmationRedirectUrl, type SignUpOutcome } from '../features/auth/signupFlow'
 import { isRecoveryReturn, isVerifiedRecoverySession, recoveryRedirectUrl } from '../features/auth/recoveryFlow'
 import {
   captureEvent,
@@ -144,7 +144,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user?.id, profileRetry])
 
   const signUp = async (email: string, password: string): Promise<SignUpOutcome> => {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email, password,
+      options: { emailRedirectTo: signUpConfirmationRedirectUrl(window.location.origin) },
+    })
     const outcome = classifySignUpResult(error, data?.session)
 
     if (error) {
