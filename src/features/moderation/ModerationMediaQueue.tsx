@@ -20,7 +20,10 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
     catch { setError(es ? 'No se pudo consultar la cola de revisión.' : 'Could not load the review queue.') }
     finally { setBusy(false) }
   }, [es])
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void load() }, 0)
+    return () => window.clearTimeout(timer)
+  }, [load])
   const purge = async(item: PendingMedia) => {
     if (!enablePurge || busy || !['feed_post','community_post'].includes(item.target_kind)) return
     const label = item.target_kind + ' · ' + item.target_id.slice(-8)
@@ -30,10 +33,14 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
     if (!window.confirm(confirmText)) return
     setBusy(true); setError(''); setMessage('')
     try {
-      await purgeModerationMedia(item)
-      setMessage(es
-        ? 'Archivo eliminado del origen. La disponibilidad en cachés CDN externas requiere validación final.'
-        : 'File removed from origin. CDN cache visibility still needs final verification.')
+      const outcome = await purgeModerationMedia(item)
+      setMessage(outcome === 'verification_pending'
+        ? (es
+          ? 'Storage ya no confirma el objeto, pero la URL pública aún responde. Se mantiene pendiente; vuelve a verificar más tarde.'
+          : 'Storage no longer confirms the object, but the public URL still responds. It remains pending; verify again later.')
+        : (es
+          ? 'Archivo eliminado del origen. La disponibilidad en cachés CDN externas requiere validación final.'
+          : 'File removed from origin. CDN cache visibility still needs final verification.'))
       await load()
     } catch {
       setError(es

@@ -1,3 +1,5 @@
+> **ESTADO DE RELEASE VIGENTE — 2026-10-10:** `LEGAL_RELEASE_READY=true` en código significa que el texto bilingüe está preparado para revisión, no aprobación legal ni salida pública. La fecha efectiva permanece `null` hasta publicación. El readiness técnico actual está en `docs/PAZO_MVP_TECHNICAL_RELEASE_READINESS.md`; beta pública NO-GO hasta sus gates de privacidad, Preview/PWA y operación.
+
 # PAZO — Privacy & Data Governance
 
 **Estado:** ACTIVO / BETA GATE  

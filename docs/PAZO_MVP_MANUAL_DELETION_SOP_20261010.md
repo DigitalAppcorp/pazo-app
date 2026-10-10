@@ -1,3 +1,4 @@
+> **RECTIFICACIÓN VIGENTE — 2026-10-10:** la prueba E2E de baja de una identidad QA descartable se completó PASS, según `docs/PAZO_CODEX_PENDING_QA_20261010.md`; no repetir ni crear otra cuenta. Se preservaron las seis identidades originales, moderador, mascota y objeto mediante evidencia privada autorizada. No se certificaron CDN/backups. Este PASS no cambia la operación cotidiana: intake público continúa apagado por defecto y el operador sigue obligado a verificar y atender solicitudes reales antes de habilitarlo.
 # PAZO MVP — solicitud y baja manual supervisada (procedimiento provisional)
 
 **Decisión PO, 2026-10-10:** parar el ejecutor automático A3 y priorizar el primer MVP. Este procedimiento **no** introduce servicio, cron, dependencia ni permisos elevados. El código avanzado A3 permanece en PR #37/#38, **desactivado**; no instalar sus SQL `NOT_APPLIED` ni Edge `f14-account-deletion`.

@@ -6,6 +6,8 @@ const liveSql=readFileSync(new URL('../supabase/sql/f14_moderation_media_finaliz
 const edge=readFileSync(new URL('../supabase/functions/f14-moderation-purge/index.ts',import.meta.url),'utf8')
 const core=readFileSync(new URL('../supabase/functions/f14-moderation-purge/core.ts',import.meta.url),'utf8')
 const ui=readFileSync(new URL('../src/features/moderation/ModerationMediaQueue.tsx',import.meta.url),'utf8')
+const retryMigration=readFileSync(new URL('../supabase/migrations/20261010222006_f14_media_purge_retry_reconciliation.sql',import.meta.url),'utf8')
+const reporting=readFileSync(new URL('../src/features/moderation/reportingService.ts',import.meta.url),'utf8')
 test('SQL only authorizes exact server-only removed content and matches Storage owner',()=>{
  for(const item of [
   "current_setting('request.jwt.claim.role',true)","'service_role'",
@@ -78,4 +80,26 @@ test('D3A finalization preserves claim/version and requires server proof and abs
  assert.ok(edge.indexOf("f14_prepare_media_claim")<edge.indexOf("f14_recheck_media_claim"))
  assert.ok(edge.indexOf("f14_recheck_media_claim")<edge.indexOf("f14_moderation_media_gate"))
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
+})
+
+test('retry reconciliation is moderator-only, exact-claim, origin-absent and idempotent',()=>{
+ for(const v of [
+  "auth.role() IS DISTINCT FROM 'service_role'",
+  "p_stage IS NULL",
+  "r.media_status IN ('pending_review', 'purged')",
+  "v_claim.snapshot->>'storage_object_id' IS DISTINCT FROM v_claim.storage_object_id::text",
+  "v_claim.snapshot->>'report_id' IS DISTINCT FROM v_report::text",
+  "report.status = 'removed'",
+  "o.bucket_id = p_bucket AND o.name = p_path",
+  "IF v_media_status = 'purged' THEN RETURN true; END IF;",
+  "SET media_status = 'purged'",
+  'TO service_role'
+ ]) assert.ok(retryMigration.includes(v),v)
+ assert.doesNotMatch(retryMigration,/\b(?:DELETE FROM|TRUNCATE|DROP TRIGGER|DISABLE TRIGGER)\b/i)
+ assert.match(core,/if \(!await deps\.objectExists\(target\)\) return finalizeVerifiedRemoval\(\)/)
+ assert.match(core,/new PurgeRejected\('verification_pending'\)/)
+ assert.match(edge,/error\.code==='verification_pending'\) return reply\(202,\{status:'verification_pending'\}\)/)
+ assert.match(reporting,/data\?\.status === 'verification_pending'/)
+ assert.match(ui,/Storage ya no confirma el objeto, pero la URL pública aún responde/)
+ assert.match(ui,/It remains pending; verify again later/)
 })

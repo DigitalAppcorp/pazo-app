@@ -55,7 +55,7 @@ export async function getPendingModerationMedia(): Promise<PendingMedia[]> {
 /** Only after the server-side purge gate is deployed and verified.
  * The client sends the immutable moderation target, NEVER a bucket or path.
  */
-export async function purgeModerationMedia(item: PendingMedia): Promise<void> {
+export async function purgeModerationMedia(item: PendingMedia): Promise<'removed' | 'verification_pending'> {
   if (item.target_kind !== 'feed_post' && item.target_kind !== 'community_post') {
     throw new Error('Este tipo necesita revisión manual.')
   }
@@ -63,7 +63,9 @@ export async function purgeModerationMedia(item: PendingMedia): Promise<void> {
     body: { kind: item.target_kind, id: item.target_id },
   })
   if (error) throw error
+  if (data?.status === 'verification_pending') return 'verification_pending'
   if (data?.status !== 'origin_removed_cdn_uncertain') {
     throw new Error('Storage no confirmó la retirada del origen.')
   }
+  return 'removed'
 }

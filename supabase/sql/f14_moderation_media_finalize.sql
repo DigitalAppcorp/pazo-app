@@ -1,3 +1,4 @@
+-- HISTORICAL SNAPSHOT ONLY. Superseded by the forward migration; do not reapply or use to replace the current hosted function.
 -- F14 D3-A: consolidate existing media claims, Storage API removal and audited finalization.
 -- Install with deletion disabled in Edge (code latch remains FALSE). Does not
 -- delete any row or file. Only service_role may finalize post/media state.

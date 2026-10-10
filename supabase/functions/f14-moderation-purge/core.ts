@@ -10,7 +10,7 @@ export interface PurgeDeps {
   publicUrlInaccessible(object: PurgeObject): Promise<boolean>
 }
 export class PurgeRejected extends Error {
-  readonly code: 'unauthorized' | 'invalid_target' | 'manual_review' | 'not_approved' | 'not_verified'
+  readonly code: 'unauthorized' | 'invalid_target' | 'manual_review' | 'not_approved' | 'not_verified' | 'verification_pending'
   constructor(code: PurgeRejected['code']) { super(code); this.code = code }
 }
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
@@ -40,10 +40,43 @@ export async function runMediaPurge(projectUrl: string, kind: string, id: string
   if ((kind !== 'feed_post' && kind !== 'community_post') || !uuid.test(id)) throw new PurgeRejected('invalid_target')
   const row = await deps.fetchRow(kind,id)
   const target = resolvePurgeObject(projectUrl,kind,id,row)
-  if (!await deps.gate(target,'preflight')) throw new PurgeRejected('not_approved')
-  if (await deps.objectExists(target)) await deps.removeObject(target)
+  const finalizeVerifiedRemoval = async () => {
+    // Public Storage can continue serving a cached copy briefly after origin
+    // removal. Keep the moderation row pending so an administrator can retry
+    // this exact target once the public URLs stop responding.
+    if (!await deps.publicUrlInaccessible(target)) throw new PurgeRejected('verification_pending')
+    if (!await deps.gate(target,'complete')) throw new PurgeRejected('not_verified')
+    return {status:'origin_removed_cdn_uncertain' as const}
+  }
+
+  // A retry after a timeout may find that Storage removal already succeeded.
+  // Reconcile only through the completion gate, which requires the existing
+  // held, rechecked claim and proves the exact object is absent.
+  if (!await deps.objectExists(target)) return finalizeVerifiedRemoval()
+
+  let approved: boolean
+  try {
+    approved = await deps.gate(target,'preflight')
+  } catch (error) {
+    // Another identical moderator request may have removed the same object
+    // while this request was checking its claim. Errors remain errors while
+    // the origin object still exists; only an absent object can enter the
+    // independently guarded reconciliation path.
+    if (await deps.objectExists(target)) throw error
+    return finalizeVerifiedRemoval()
+  }
+  if (!approved) {
+    if (await deps.objectExists(target)) throw new PurgeRejected('not_approved')
+    return finalizeVerifiedRemoval()
+  }
+
+  try {
+    await deps.removeObject(target)
+  } catch (error) {
+    // Storage may complete the delete even if the response is lost. Confirm
+    // absence before attempting reconciliation; otherwise preserve the error.
+    if (await deps.objectExists(target)) throw error
+  }
   if (await deps.objectExists(target)) throw new PurgeRejected('not_verified')
-  if (!await deps.publicUrlInaccessible(target)) throw new PurgeRejected('not_verified')
-  if (!await deps.gate(target,'complete')) throw new PurgeRejected('not_verified')
-  return {status:'origin_removed_cdn_uncertain'}
+  return finalizeVerifiedRemoval()
 }

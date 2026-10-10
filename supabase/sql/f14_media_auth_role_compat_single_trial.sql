@@ -1,3 +1,4 @@
+-- HISTORICAL ONE-OFF TRIAL ONLY. Contains a single prior test target; do not reuse or apply.
 -- F14 D3-A hotfix: Supabase PostgREST may provide claims as the
 -- 'request.jwt.claims' JSON rather than legacy 'request.jwt.claim.role'.
 -- auth.role() resolves both formats; EXECUTE remains service_role-only.

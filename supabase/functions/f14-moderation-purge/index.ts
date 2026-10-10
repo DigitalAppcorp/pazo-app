@@ -100,6 +100,7 @@ Deno.serve(async(req:Request)=>{
   return reply(200,result)
  }catch(error){
   if(error instanceof PurgeRejected){
+   if(error.code==='verification_pending') return reply(202,{status:'verification_pending'})
    return reply(error.code==='unauthorized'?403:error.code==='invalid_target'?400:409,{error:error.code})
   }
   // Never expose secret credentials, raw SQL, URLs or paths.

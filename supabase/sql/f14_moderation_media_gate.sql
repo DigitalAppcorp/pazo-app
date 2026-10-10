@@ -1,3 +1,4 @@
+-- HISTORICAL PREVIEW ONLY. Superseded by the forward migration; do not reapply or use to replace the current hosted function.
 -- F14 D3-A: server-only media preflight. Authorized to install, permanently fail-closed for completion.
 -- Run only after explicit PO authorization. Edge F14_MEDIA_PURGE_ENABLED remains OFF.
 -- Storage deletion itself MUST occur through Storage API, never by SQL.

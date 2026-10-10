@@ -20,12 +20,30 @@ function stub(overrides={}) {
 test('success validates auth, current row, backend, object and public URL before finalizing',async()=>{
  const {calls,deps}=stub()
  assert.deepEqual(await runMediaPurge(origin,'feed_post',id,deps),{status:'origin_removed_cdn_uncertain'})
- assert.deepEqual(calls,['auth','row','preflight','exists','remove','exists','head','complete'])
+ assert.deepEqual(calls,['auth','row','exists','preflight','remove','exists','head','complete'])
 })
 test('missing origin reconciles prior attempt without additional delete',async()=>{
  const {calls,deps}=stub({objectExists:async()=>{calls.push('exists');return false}})
  await runMediaPurge(origin,'feed_post',id,deps)
- assert.ok(!calls.includes('remove'));assert.ok(calls.includes('complete'))
+ assert.deepEqual(calls,['auth','row','exists','head','complete'])
+ assert.ok(!calls.includes('preflight'));assert.ok(!calls.includes('remove'))
+})
+test('missing origin with a still-accessible public URL remains pending and cannot finalize',async()=>{
+ const {calls,deps}=stub({objectExists:async()=>{calls.push('exists');return false},
+  publicUrlInaccessible:async()=>{calls.push('head');return false}})
+ await assert.rejects(runMediaPurge(origin,'feed_post',id,deps),
+  e=>e instanceof PurgeRejected&&e.code==='verification_pending')
+ assert.deepEqual(calls,['auth','row','exists','head'])
+})
+test('retry after an uncertain removal reconciles the existing claim without requiring a live Storage snapshot',async()=>{
+ const {calls,deps}=stub({
+  objectExists:async()=>{calls.push('exists');return false},
+  gate:async(_target,stage)=>{calls.push(stage);return stage==='complete'},
+ })
+ const result=await runMediaPurge(origin,'feed_post',id,deps)
+ assert.deepEqual(result,{status:'origin_removed_cdn_uncertain'})
+ assert.equal(calls.filter(x=>x==='complete').length,1)
+ assert.ok(!calls.includes('preflight'));assert.ok(!calls.includes('remove'))
 })
 test('non moderator cannot read row or delete',async()=>{
  const {calls,deps}=stub({authorizeModerator:async()=>{calls.push('auth');return false}})
@@ -33,9 +51,10 @@ test('non moderator cannot read row or delete',async()=>{
  assert.deepEqual(calls,['auth'])
 })
 test('preflight failure stops before any storage call',async()=>{
- const {calls,deps}=stub({gate:async()=>{calls.push('preflight');return false}})
+ const {calls,deps}=stub({gate:async()=>{calls.push('preflight');return false},
+  objectExists:async()=>{calls.push('exists');return true}})
  await assert.rejects(runMediaPurge(origin,'feed_post',id,deps))
- assert.deepEqual(calls,['auth','row','preflight'])
+ assert.deepEqual(calls,['auth','row','exists','preflight','exists'])
 })
 test('remaining object or public cache never marks purged',async()=>{
  for (const stage of ['exists','head']) {
@@ -49,6 +68,21 @@ test('fail-closed if backend refuses to finalize',async()=>{
  const {calls,deps}=stub({gate:async(_o,s)=>{calls.push(s);return s==='preflight'}})
  await assert.rejects(runMediaPurge(origin,'feed_post',id,deps))
  assert.ok(calls.includes('complete'))
+})
+test('lost Storage delete response can reconcile only after an explicit absent-origin check',async()=>{
+ let present=true
+ const {calls,deps}=stub({
+  objectExists:async()=>{calls.push('exists');return present},
+  removeObject:async()=>{calls.push('remove');present=false;throw new Error('response lost')},
+ })
+ assert.deepEqual(await runMediaPurge(origin,'feed_post',id,deps),{status:'origin_removed_cdn_uncertain'})
+ assert.ok(calls.includes('complete'))
+})
+test('failed Storage delete with origin still present never checks cache or finalizes',async()=>{
+ const {calls,deps}=stub({removeObject:async()=>{calls.push('remove');throw new Error('denied')},
+  objectExists:async()=>{calls.push('exists');return true}})
+ await assert.rejects(runMediaPurge(origin,'feed_post',id,deps),/denied/)
+ assert.ok(!calls.includes('head'));assert.ok(!calls.includes('complete'))
 })
 test('rejects external links, wrong bucket/project, traversal and ambiguous objects',()=>{
  const bad=[
