@@ -91,3 +91,7 @@ Nueva migración `supabase/sql/f14_moderation_media_finalize.sql` integra la pre
 ### Reconciliación D3-A de backend APLICADA (2026-10-10 UTC)
 
 Migration hosted `20261010034610_f14_finalize_media_after_verified_claim`: se integró la validación exacta de claims y la fase `complete` con el trigger de protección, sin desactivar trigger/RLS. Edge `f14-moderation-purge` v3 mantiene latch fija `F14_MEDIA_PURGE_RELEASE_APPROVED=false`. CI PASS `38021681379`. Auditoría 13 objetos originarios, cero medios `purged` y cero claims; grant solo service_role en función SQL. Próxima aceptación D3-A: ensayo de un post nuevo con foto descartable identificada, no los archivos existentes. Solo después habilitar una capacidad estrictamente limitada al ID probado. No se requiere Vercel.
+
+### Ensayo acotado en curso, sin borrado aún
+
+Edge v4 publicada con JWT obligatorio y allowlist temporal de una sola publicación recién creada y retirada, UUID `aa00d5b6-9626-4e16-90a1-3b6e7bf4076e`; permiso global de purga sigue desactivado. Baseline 14 objetos (incluye 1 prueba nueva), `purged=0`. Próximo: pulsación desde localhost por moderador, verificar y después desactivar excepción en código/desplegar; no ejecutar sobre los otros medios ni usar Vercel.
