@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 const sql=readFileSync(new URL('../supabase/sql/f14_moderation_media_gate.sql',import.meta.url),'utf8')
 const liveSql=readFileSync(new URL('../supabase/sql/f14_moderation_media_finalize.sql',import.meta.url),'utf8')
+const roleCompatSql=readFileSync(new URL('../supabase/sql/f14_media_auth_role_compat_single_trial.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../supabase/functions/f14-moderation-purge/index.ts',import.meta.url),'utf8')
 const core=readFileSync(new URL('../supabase/functions/f14-moderation-purge/core.ts',import.meta.url),'utf8')
 const ui=readFileSync(new URL('../src/features/moderation/ModerationMediaQueue.tsx',import.meta.url),'utf8')
@@ -88,4 +89,20 @@ test('single disposable-photo trial cannot enable any other target or production
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
  assert.match(edge,/input.kind==='feed_post'/)
  assert.match(ui,/import.meta.env.DEV && item.target_kind === 'feed_post'/)
+})
+
+test('PostgREST role compatibility keeps the exact service_role guard, claims and trigger',()=>{
+ const expected="auth.role() IS DISTINCT FROM 'service_role'"
+ assert.equal(roleCompatSql.split(expected).length-1,2)
+ assert.doesNotMatch(roleCompatSql,/current_setting\('request\.jwt\.claim\.role'/)
+ assert.match(roleCompatSql,/CREATE OR REPLACE FUNCTION public\.f14_moderation_media_gate/)
+ assert.match(roleCompatSql,/CREATE OR REPLACE FUNCTION moderation_private\.f14_reject_unverified_purged/)
+ assert.match(roleCompatSql,/REVOKE ALL ON FUNCTION public\.f14_moderation_media_gate[\s\S]*FROM PUBLIC,anon,authenticated/)
+ assert.match(roleCompatSql,/v_live IS DISTINCT FROM v_claim\.snapshot/)
+ assert.match(roleCompatSql,/NOT EXISTS \(SELECT 1 FROM storage\.objects/)
+ assert.match(roleCompatSql,/SET media_status='purged'/)
+ assert.match(roleCompatSql,/v_claim\.snapshot = moderation_private\.f14_media_probe\('feed_post',v_id\)/)
+ assert.match(roleCompatSql,/WHERE c\.target_kind='feed_post' AND c\.target_id=v_id/)
+ assert.match(roleCompatSql,/v_id uuid := 'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e'::uuid/)
+ assert.doesNotMatch(roleCompatSql,/DROP TRIGGER|DISABLE TRIGGER|TRUNCATE|DELETE FROM storage\./i)
 })
