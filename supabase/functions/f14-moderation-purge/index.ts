@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2'
 import { runMediaPurge, PurgeRejected, type PurgeObject, type PurgeKind } from './core.ts'
+import { storageObjectExists } from './storageInfo.ts'
 
 // Two independent activation gates: published Edge env switch and database RPC.
 // Do not deploy enabled before P0 media gate and authorized E2E verification.
@@ -87,9 +88,8 @@ Deno.serve(async(req:Request)=>{
     return data===true
    },
    objectExists:async(target:PurgeObject)=>{
-    const {data,error}=await admin.storage.from(target.bucket).exists(target.path)
-    if(error) throw error
-    return data===true
+    const result=await admin.storage.from(target.bucket).info(target.path)
+    return storageObjectExists(result)
    },
    removeObject:async(target:PurgeObject)=>{
     const {error}=await admin.storage.from(target.bucket).remove([target.path])
