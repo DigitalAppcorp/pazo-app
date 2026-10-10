@@ -1,6 +1,8 @@
 -- PAZO F14: READ-ONLY operator preflight for deletion requests.
 -- Does not execute DELETE, UPDATE, INSERT or DDL. Run as trusted SQL operator.
 -- No authenticated/public RPC is created. User IDs remain internal to the operator.
+-- Additionally fails closed for the sole moderator account: do not remove
+-- the only person able to review reports. This query never performs deletion.
 -- For a scoped audit of all test accounts, temporarily replace the
 -- candidate_users CTE with SELECT id AS user_id FROM auth.users.
 WITH candidate_users AS (
@@ -65,18 +67,25 @@ counts AS (
   WHERE pet.owner_id=q.user_id)::int AS pet_documents,
  (SELECT count(*) FROM storage.objects o WHERE o.owner_id=q.user_id::text)::int AS storage_objects,
  (SELECT count(*) FROM moderation_private.reports report WHERE
-   report.target_owner_user_id=q.user_id OR report.reporter_user_id=q.user_id)::int AS moderation_records
+   report.target_owner_user_id=q.user_id OR report.reporter_user_id=q.user_id)::int AS moderation_records,
+ (SELECT count(*) FROM moderation_private.moderator_grants g
+   WHERE g.user_id=q.user_id)::int AS moderator_grants,
+ CASE WHEN EXISTS(SELECT 1 FROM moderation_private.moderator_grants g
+     WHERE g.user_id=q.user_id)
+   AND (SELECT count(*) FROM moderation_private.moderator_grants)=1
+  THEN 1 ELSE 0 END::int AS last_moderator_at_risk
  FROM candidate_users q
 )
 SELECT user_id,
  CASE
+  WHEN last_moderator_at_risk=1 THEN 'blocked_last_moderator'
   WHEN (external_community_posts+external_community_comments+
         external_comments_on_own_community_posts+
         external_community_memberships+external_feed_comments+
         external_explicit_feed_interactions+external_community_reactions+
         cross_owner_feed_posts_via_pet+cross_owner_community_posts_via_pet)>0 THEN 'blocked_third_party'
   WHEN (owned_pets+owned_feed_posts+owned_communities+owned_community_posts+
-        pet_documents+storage_objects+moderation_records+
+        pet_documents+storage_objects+moderation_records+moderator_grants+
         external_feed_impressions+held_moderation_claims+
         unresolved_owned_photo_references)>0 THEN 'cleanup_required'
   ELSE 'awaiting_executor'
@@ -100,7 +109,9 @@ SELECT user_id,
   'unresolved_owned_photo_references',unresolved_owned_photo_references,
   'pet_documents',pet_documents,
   'storage_objects',storage_objects,
-  'moderation_records',moderation_records) AS dependency_counts,
+  'moderation_records',moderation_records,
+  'moderator_grants',moderator_grants,
+  'last_moderator_at_risk',last_moderator_at_risk) AS dependency_counts,
  false AS may_delete_auth,
  false AS may_delete_storage
 FROM counts ORDER BY readiness,user_id;
