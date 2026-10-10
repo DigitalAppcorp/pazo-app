@@ -53,3 +53,7 @@ Revisar **cierre legal/operativo del RC**, trabajando en código y docs ES/EN so
 ## Gate de salida MVP consolidado (2026-10-10)
 - `docs/PAZO_MVP_RELEASE_GATES_20261010.md` actualizado (commit `04ed7054`) con las únicas condiciones de beta y posbeta explícita; prevalece sobre prioridades históricas. PostHog OFF en código, sin más trabajo de analítica. No repetir QA ya aprobada.
 - Trabajo independiente siguiente: reconciliación legal mínima para avisos definitivos y CI del SHA final; eliminación QA reservada a Codex. Antes de publicar verificar mecanismo operativo de solicitudes y no afirmar borrado de medios/CDN no comprobado. `LEGAL_RELEASE_READY=false`. Vercel, main, Supabase y A3 sin cambios.
+
+## RC preparado para gate condicionado — 2026-10-10
+- Creado `docs/PAZO_MVP_RC_FINAL_EXIT_RUNBOOK_20261010.md` (`574993f5`) con checklist exacto posterior a Codex. Sin cambios funcionales pendientes identificados y autorizados en este carril; el trabajo independiente documental está cerrado, **no** equivale a salida pública aprobada.
+- Bloqueos: Codex E2E de la cuenta descartable, CI/build del SHA final aún no certificado (conector no muestra runs push; no se pudo clonar desde este runtime), conversión veraz de textos legales y aprobación expresa del PO para merge/despliegue. `LEGAL_RELEASE_READY=false`. No tocar Vercel/main/Supabase/A3 ni datos QA.
