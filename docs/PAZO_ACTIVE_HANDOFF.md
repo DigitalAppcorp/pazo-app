@@ -1,3 +1,5 @@
+> **AUDITORÍA TRANSVERSAL DE FASES 0–20 (2026-10-10):** leer primero `docs/PAZO_MASTER_PHASE_AUDIT_20261010.md` (commit `b03785fc`). Rectificación: la F13 sigue PLANIFICADA, no completada; la F15 no está acreditada como PWA instalable (falta manifest) y F14 en alcance original no está cerrada (Codex E2E + purga de medios OFF). CI #652 PASS no cierra esos gates. Cualquier nota histórica que afirme «solo falta Codex» debe interpretarse como «única prueba E2E reservada a Codex», no como certificación de todas las fases. No inventar decisiones de PO ni tocar Supabase/Vercel/main por esta auditoría.
+
 # PAZO — HANDOFF VIGENTE | 2026-10-10
 
 **Usar este snapshot como fuente principal.** Las notas históricas anteriores se conservan en Git (versión previa de este archivo, commit `083515358f5577a88cb069b254d11217b217323d`). No confundir evidencia histórica con estado actual.
