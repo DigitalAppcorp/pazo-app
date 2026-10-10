@@ -238,3 +238,9 @@ No abrir Beta pública hasta que:
 - CCPA/CPRA y regulaciones de California vigentes.
 
 Revisar fuentes oficiales en la fecha de lanzamiento; no congelar requisitos legales en documentación antigua.
+
+## Contacto público de privacidad y soporte — decisión PO 2026-10-10
+
+El PO autorizó **appdigital.corp@gmail.com** para recibir consultas de privacidad y soporte de PAZO. Es una dirección **deliberadamente pública**, enlazada mediante `mailto:` en la vista de privacidad/Terms y en la solicitud de baja (ES/EN). Esta autorización **no** convierte el email en identidad legal del responsable, **no** concede permisos de Supabase, y no permite publicar su UUID Auth, credenciales ni metadatos de solicitudes. Los mensajes que envíen usuarios a ese buzón pueden contener información personal: tratarlos como datos privados de soporte, acceso mínimo, sin analítica ni copias en issues públicos, con política de retención pendiente de fijar antes de Beta externa.
+
+La recepción de un email o una solicitud en la app **no equivale a eliminación completada**. Mantener `LEGAL_RELEASE_READY=false` hasta validar responsable legal, retención, tratamiento de terceros y operación manual de baja con cuenta descartable. No enviar email desde el navegador automáticamente: el enlace abre el cliente de correo del usuario.
