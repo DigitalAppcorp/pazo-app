@@ -27,3 +27,13 @@ test('preflight includes third-party comments on owner posts EVEN AFTER ownershi
   "'external_comments_on_own_community_posts',external_comments_on_own_community_posts"
  ])assert.ok(sql.includes(v),v)
 })
+
+test('preflight accounts for polymorphic feed references, reactions, Storage claims and photos',()=>{
+ for(const field of ["external_explicit_feed_interactions","external_feed_impressions","external_community_reactions","cross_owner_feed_posts_via_pet","cross_owner_community_posts_via_pet","held_moderation_claims","unresolved_owned_photo_references"]){
+  assert.ok(sql.includes('AS '+field),field)
+  assert.ok(sql.includes("'"+field+"',"+field),field)
+ }
+ for(const name of ['public.interactions i','public.community_post_likes l','moderation_private.media_claims c','storage.objects o'])assert.ok(sql.includes(name),name)
+ assert.match(sql,/false AS may_delete_auth/)
+ assert.match(sql,/false AS may_delete_storage/)
+})
