@@ -68,3 +68,11 @@ test('archive refuses to hide third-party reply loss on departing owner posts',(
    else dbTest(fragment)
  }
 })
+
+test('cancel-and-reissue invalidates any stale ownership offer',()=>{
+ for(const marker of [
+  'r.requested_at<=v_old.created_at',
+  'o.created_at>=r.requested_at',
+  'r.requested_at<=o.created_at'
+ ]) dbTest(marker)
+})

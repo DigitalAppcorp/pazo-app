@@ -1,5 +1,5 @@
--- F14 community continuity on account deletion. REVIEW ONLY / NOT APPLIED.
--- PO approved: transfer ONLY to an admin who explicitly accepts; otherwise archive.
+-- F14 community continuity on account deletion. APPROVED FOR DEPLOYMENT AFTER QA.
+-- PO authorized the non-deleting migration. Transfer ONLY to an admin who explicitly accepts; otherwise archive.
 -- This migration DOES NOT delete users, posts, memberships, or Storage objects.
 BEGIN;
 
@@ -97,6 +97,9 @@ BEGIN
  SELECT * INTO v_old FROM community_private.ownership_transfer_offers
  WHERE community_id=p_community_id FOR UPDATE;
  IF FOUND AND v_old.status='pending' AND v_old.expires_at>pg_catalog.clock_timestamp()
+ AND EXISTS(SELECT 1 FROM account_requests_private.deletion_requests r
+  WHERE r.subject_user_id=v_uid AND r.status='requested'
+  AND r.requested_at<=v_old.created_at)
  THEN RETURN false; END IF;
  INSERT INTO community_private.ownership_transfer_offers(
  community_id,owner_user_id,candidate_user_id,status,created_at,expires_at,accepted_at)
@@ -123,7 +126,11 @@ BEGIN
  AND o.status='pending' AND o.expires_at>pg_catalog.clock_timestamp();
  IF v_owner IS NULL THEN RETURN false; END IF;
  PERFORM 1 FROM account_requests_private.deletion_requests r
- WHERE r.subject_user_id=v_owner AND r.status='requested' FOR UPDATE;
+ WHERE r.subject_user_id=v_owner AND r.status='requested'
+ AND EXISTS(SELECT 1 FROM community_private.ownership_transfer_offers o
+  WHERE o.community_id=p_community_id AND o.owner_user_id=v_owner
+  AND o.status='pending' AND o.created_at>=r.requested_at)
+ FOR UPDATE;
  IF NOT FOUND THEN RETURN false; END IF;
  PERFORM 1 FROM public.communities c
  WHERE c.id=p_community_id AND c.owner_user_id=v_owner AND c.status='active' FOR UPDATE;
@@ -178,7 +185,10 @@ BEGIN
  INTO v_result FROM community_private.ownership_transfer_offers o
  WHERE o.community_id=p_community_id AND o.status='pending'
  AND o.expires_at>pg_catalog.clock_timestamp()
- AND (o.owner_user_id=v_uid OR o.candidate_user_id=v_uid);
+ AND (o.owner_user_id=v_uid OR o.candidate_user_id=v_uid)
+ AND EXISTS(SELECT 1 FROM account_requests_private.deletion_requests r
+  WHERE r.subject_user_id=o.owner_user_id AND r.status='requested'
+    AND r.requested_at<=o.created_at);
  RETURN v_result;
 END;
 $read_offer$;
