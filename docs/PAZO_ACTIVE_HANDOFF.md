@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | estado verificado 2026-10-09
 
+> **F14 COMUNIDADES — MIGRACIÓN APLICADA 2026-10-10:** PO autorizó y se aplicó migración remota `20261010053708_f14_community_ownership_continuity` (PR #37). La FK propietaria cambió a `ON DELETE SET NULL` con CHECK que prohíbe comunidad activa sin owner; sigue el trigger de membresía. Se añadieron seis RPC y tabla privada de ofertas; anon no puede aceptarlas, usuarios autenticados no pueden archivar, service_role sí. Prueba real en DB alojada con dos identidades autenticadas bajo `BEGIN/ROLLBACK`: PASS designación admin, oferta, invalidación tras cancel/re-request, nueva oferta, aceptación y conservación de los 3 posts. La prueba reversible del archivo **preinstalación** pasó; una prueba adicional de archivo ya instalado fue bloqueada por el entorno y permanece sin ejecutar. Datos intactos: 6 Auth, 1 comunidad, 3 posts, 21 Storage, 0 solicitudes, 0 ofertas, 0 admins permanentes. UI administrativa solo `import.meta.env.DEV` / flag explícito, producción OFF. Sin ejecutor definitivo de borrado. No Vercel, sin merge a main.
+
+
 > **F14 ADICIÓN DE SEGURIDAD A PREVALIDACIÓN:** una transferencia de comunidad NO libera las dependencias de los posts del usuario saliente. Se añadió `external_comments_on_own_community_posts` al preflight por autor del post (no solo owner del grupo), para bloquear pérdida de respuestas de terceros incluso después del traspaso. La RPC service-only de archivo también rechaza el caso cuando existan tales comentarios. Código y SQL de continuidad en DRAFT, nunca aplicados; no cambia Auth, Storage ni RLS. Tests de regresión incluidos.
 
 

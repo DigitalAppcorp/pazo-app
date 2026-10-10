@@ -1,4 +1,4 @@
--- F14 community continuity on account deletion. APPROVED FOR DEPLOYMENT AFTER QA.
+-- F14 community continuity on account deletion. APPLIED REMOTELY 20261010053708_f14_community_ownership_continuity.
 -- PO authorized the non-deleting migration. Transfer ONLY to an admin who explicitly accepts; otherwise archive.
 -- This migration DOES NOT delete users, posts, memberships, or Storage objects.
 BEGIN;

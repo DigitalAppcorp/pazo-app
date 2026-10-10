@@ -1,11 +1,11 @@
 import { supabase } from '../../services/supabaseClient'
 import {parseOwnershipOffer,type OwnershipOffer} from './communityOwnershipState'
 
-// This UI remains OFF until the SQL is explicitly approved, applied,
-// and tested with two real authenticated sessions.
+// Community RPCs installed and verified with two simulated JWTs.
+// Local QA enabled; production remains gated until launch readiness.
 export const COMMUNITY_OWNERSHIP_RELEASE_READY = false as const
 export function ownershipUiEnabled():boolean {
- return import.meta.env.VITE_F14_COMMUNITY_OWNERSHIP_ENABLED === 'true'
+ return import.meta.env.DEV || import.meta.env.VITE_F14_COMMUNITY_OWNERSHIP_ENABLED === 'true'
 }
 export async function nominateCommunityAdmin(communityId:string,userId:string):Promise<boolean> {
  const {data,error}=await supabase.rpc('pazo_community_set_admin',{

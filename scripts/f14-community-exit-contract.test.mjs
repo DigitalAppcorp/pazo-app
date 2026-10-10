@@ -51,6 +51,7 @@ test('UI and Supabase client remain gated until reviewed migration is installed'
  const svc=readFileSync(new URL('../src/features/account/communityOwnershipService.ts',import.meta.url),'utf8')
  const types=readFileSync(new URL('../src/types/pazo.ts',import.meta.url),'utf8')
  assert.match(svc,/VITE_F14_COMMUNITY_OWNERSHIP_ENABLED === 'true'/)
+ assert.match(svc,/import\.meta\.env\.DEV \|\| import\.meta\.env\.VITE_F14_COMMUNITY_OWNERSHIP_ENABLED/)
  assert.match(svc,/COMMUNITY_OWNERSHIP_RELEASE_READY = false/)
  assert.match(ui,/exitUiEnabled && member\.role === 'member'/)
  assert.match(ui,/ownershipOffer\.isCandidate/)
