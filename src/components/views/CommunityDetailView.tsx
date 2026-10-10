@@ -28,6 +28,11 @@ import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 import {
+ ownershipUiEnabled,nominateCommunityAdmin,proposeCommunityTransfer,
+ fetchCommunityOwnershipOffer,acceptCommunityTransfer,declineCommunityTransfer,
+} from '../../features/account/communityOwnershipService'
+import type {OwnershipOffer} from '../../features/account/communityOwnershipState'
+import {
   IconCamera,
   IconChat,
   IconClose,
@@ -64,6 +69,11 @@ export const CommunityDetailView = ({
   const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
   const [community, setCommunity] = useState<CommunitySummary | null>(null)
   const [members, setMembers] = useState<CommunityMember[]>([])
+  const [ownershipOffer,setOwnershipOffer]=useState<{offer:OwnershipOffer;isCandidate:boolean}|null>(null)
+  const [ownershipBusy,setOwnershipBusy]=useState(false)
+  const [ownershipError,setOwnershipError]=useState('')
+  const [ownershipInfo,setOwnershipInfo]=useState('')
+  const exitUiEnabled=ownershipUiEnabled()
   const [posts, setPosts] = useState<CommunityPost[]>([])
   const [activeTab, setActiveTab] = useState<DetailTab>('posts')
   const [isLoading, setIsLoading] = useState(true)
@@ -103,12 +113,16 @@ export const CommunityDetailView = ({
       setCommunity(nextCommunity)
       setMembers(nextMembers)
       setPosts(nextPosts)
+      if (exitUiEnabled) {
+        try { setOwnershipOffer(await fetchCommunityOwnershipOffer(communityId)) }
+        catch { setOwnershipOffer(null) }
+      }
     } catch (error) {
       console.error('Error loading community:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [communityId, currentPet?.id])
+  }, [communityId, currentPet?.id, exitUiEnabled])
 
   useEffect(() => {
     void loadCommunity()
@@ -317,6 +331,47 @@ export const CommunityDetailView = ({
     } catch (error) {
       console.error('Error removing Community member:', error)
     }
+  }
+
+  const changeOwnership = async (task: () => Promise<boolean>,message:string)=>{
+    if(ownershipBusy || !exitUiEnabled)return
+    setOwnershipBusy(true);setOwnershipError('');setOwnershipInfo('')
+    try {
+      const success=await task()
+      if(!success)throw new Error('ownership_check_failed')
+      setOwnershipInfo(message)
+      await loadCommunity()
+      onCommunityChanged?.()
+    } catch {
+      setOwnershipError(lang==='es'
+        ? 'No se pudo confirmar el cambio. Verifica que exista una solicitud de eliminación pendiente y que la persona sea administradora.'
+        : 'Could not verify the change. Check for a pending deletion request and an eligible administrator.')
+    } finally {setOwnershipBusy(false)}
+  }
+
+  const setAdminFor=(member:CommunityMember)=>{
+    if(!window.confirm(lang==='es'
+      ? '¿Designar a esta persona como administradora candidata? No se transfiere la propiedad todavía.'
+      : 'Nominate this person as an administrator? Ownership is not transferred yet.'))return
+    void changeOwnership(
+      ()=>nominateCommunityAdmin(communityId,member.userId),
+      lang==='es'?'Administrador designado.':'Administrator nominated.')
+  }
+  const offerTo=(member:CommunityMember)=>{
+    if(!window.confirm(lang==='es'
+      ? '¿Ofrecer la propiedad de la comunidad a esta persona? Solo cambiará si acepta.'
+      : 'Offer community ownership? It will only change if this person accepts.'))return
+    void changeOwnership(
+      ()=>proposeCommunityTransfer(communityId,member.userId),
+      lang==='es'?'Oferta enviada; esperando aceptación.':'Offer sent; awaiting acceptance.')
+  }
+  const answerOffer=(accept:boolean)=>{
+    if(accept&&!window.confirm(lang==='es'
+      ? '¿Aceptar la propiedad y responsabilidad de esta comunidad?'
+      : 'Accept ownership and responsibility for this community?'))return
+    void changeOwnership(
+      ()=>accept?acceptCommunityTransfer(communityId):declineCommunityTransfer(communityId),
+      lang==='es'?(accept?'Transferencia aceptada.':'Oferta rechazada.'):(accept?'Transfer accepted.':'Offer declined.'))
   }
 
   const beginEdit = () => {
@@ -1180,6 +1235,27 @@ export const CommunityDetailView = ({
 
       {activeTab === 'members' && (
         <section className="space-y-3">
+          {exitUiEnabled && ownershipOffer && (
+            <div className="rounded-[1.8rem] bg-[#E1E53F]/20 p-4">
+              <p className="text-xs font-bold text-[#204E4A]">
+                {lang==='es'?'Transferencia pendiente de aceptación':'Ownership transfer awaiting acceptance'}
+              </p>
+              {ownershipOffer.isCandidate && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" disabled={ownershipBusy} onClick={()=>answerOffer(true)}
+                    className="rounded-full bg-[#204E4A] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">
+                    {lang==='es'?'Aceptar propiedad':'Accept ownership'}
+                  </button>
+                  <button type="button" disabled={ownershipBusy} onClick={()=>answerOffer(false)}
+                    className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40">
+                    {lang==='es'?'Rechazar':'Decline'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {exitUiEnabled && ownershipError && <p role="alert" className="rounded-2xl bg-white p-3 text-xs text-[#AF3029]">{ownershipError}</p>}
+          {exitUiEnabled && ownershipInfo && <p role="status" className="rounded-2xl bg-white p-3 text-xs text-[#204E4A]">{ownershipInfo}</p>}
           {members.map((member) => (
             <div
               key={member.userId}
@@ -1197,10 +1273,10 @@ export const CommunityDetailView = ({
                       {member.pet?.name ||
                         (lang === 'es' ? 'Mascota no disponible' : 'Pet unavailable')}
                     </p>
-                    {member.role === 'owner' && (
+                    {(member.role === 'owner' || member.role === 'admin') && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F] px-2 py-0.5 text-[8px] font-extrabold uppercase text-[#204E4A]">
                         <IconShield size={10} />
-                        Admin
+                        {member.role === 'owner' ? 'Propietario' : 'Admin'}
                       </span>
                     )}
                   </div>
@@ -1214,13 +1290,26 @@ export const CommunityDetailView = ({
               </div>
 
               {isOwner && member.role !== 'owner' && (
-                <button
-                  type="button"
-                  onClick={() => void handleRemoveMember(member)}
-                  className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[9px] font-bold text-[#5C7470]"
-                >
-                  {lang === 'es' ? 'Retirar' : 'Remove'}
-                </button>
+                <div className="flex flex-wrap justify-end gap-1">
+                  {exitUiEnabled && member.role === 'member' && (
+                    <button type="button" disabled={ownershipBusy}
+                      onClick={()=>setAdminFor(member)}
+                      className="rounded-full bg-[#E1E53F]/50 px-3 py-2 text-[9px] font-bold text-[#204E4A] disabled:opacity-40">
+                      {lang==='es'?'Designar admin':'Nominate admin'}
+                    </button>
+                  )}
+                  {exitUiEnabled && member.role === 'admin' && !ownershipOffer && (
+                    <button type="button" disabled={ownershipBusy}
+                      onClick={()=>offerTo(member)}
+                      className="rounded-full bg-[#204E4A] px-3 py-2 text-[9px] font-bold text-white disabled:opacity-40">
+                      {lang==='es'?'Ofrecer titularidad':'Offer ownership'}
+                    </button>
+                  )}
+                  <button type="button" onClick={() => void handleRemoveMember(member)}
+                    className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[9px] font-bold text-[#5C7470]">
+                    {lang === 'es' ? 'Retirar' : 'Remove'}
+                  </button>
+                </div>
               )}
             </div>
           ))}

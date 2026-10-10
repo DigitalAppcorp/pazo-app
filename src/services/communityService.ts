@@ -47,7 +47,7 @@ const validateImage = (file: File) => {
 
 const mapCommunity = (
   row: any,
-  membership?: { role?: 'owner' | 'member' } | null
+  membership?: { role?: 'owner' | 'admin' | 'member' } | null
 ): CommunitySummary => ({
   id: row.id,
   ownerUserId: row.owner_user_id,
@@ -68,7 +68,7 @@ const mapCommunity = (
 })
 
 const fetchMembershipMap = async (communityIds: string[]) => {
-  if (communityIds.length === 0) return new Map<string, { role: 'owner' | 'member' }>()
+  if (communityIds.length === 0) return new Map<string, { role: 'owner' | 'admin' | 'member' }>()
 
   const user = await getAuthUser()
   const { data, error } = await supabase
@@ -82,7 +82,7 @@ const fetchMembershipMap = async (communityIds: string[]) => {
   return new Map(
     (data || []).map((row: any) => [
       row.community_id,
-      { role: row.role as 'owner' | 'member' },
+      { role: row.role as 'owner' | 'admin' | 'member' },
     ])
   )
 }

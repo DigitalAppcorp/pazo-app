@@ -50,12 +50,12 @@ export interface Post {
   commentsLoaded?: boolean
 }
 
-export type CommunityRole = 'owner' | 'member'
+export type CommunityRole = 'owner' | 'admin' | 'member'
 export type CommunityStatus = 'active' | 'archived'
 
 export interface CommunitySummary {
   id: string
-  ownerUserId: string
+  ownerUserId: string | null
   name: string
   description: string
   category: string

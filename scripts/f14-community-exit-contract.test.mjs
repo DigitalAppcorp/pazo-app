@@ -36,3 +36,11 @@ test('owner and candidate RPCs have explicit grants and no direct public table g
  dbTest('ALTER TABLE community_private.ownership_transfer_offers ENABLE ROW LEVEL SECURITY')
  dbTest('REVOKE ALL ON community_private.ownership_transfer_offers FROM PUBLIC,anon,authenticated')
 })
+
+test('refusing a transfer belongs only to the exact logged-in candidate',()=>{
+ for(const fragment of [
+ "CREATE OR REPLACE FUNCTION public.pazo_community_decline_transfer",
+ "o.candidate_user_id=v_uid","o.status='pending' AND o.expires_at>pg_catalog.clock_timestamp()",
+ "GRANT EXECUTE ON FUNCTION public.pazo_community_decline_transfer(uuid) TO authenticated"
+ ])dbTest(fragment)
+})

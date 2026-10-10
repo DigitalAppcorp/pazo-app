@@ -151,6 +151,21 @@ BEGIN
 END;
 $accept$;
 
+-- A candidate may refuse without waiting for the 7-day expiry.
+CREATE OR REPLACE FUNCTION public.pazo_community_decline_transfer(p_community_id uuid)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $decline$
+DECLARE v_uid uuid:=auth.uid();v_count integer;
+BEGIN
+ IF v_uid IS NULL THEN RETURN false; END IF;
+ UPDATE community_private.ownership_transfer_offers o SET status='declined'
+ WHERE o.community_id=p_community_id AND o.candidate_user_id=v_uid
+ AND o.status='pending' AND o.expires_at>pg_catalog.clock_timestamp();
+ GET DIAGNOSTICS v_count=ROW_COUNT;
+ RETURN v_count=1;
+END;
+$decline$;
+
 -- Users can only see a targeted offer: owner or candidate, never another member.
 CREATE OR REPLACE FUNCTION public.pazo_community_transfer_offer(p_community_id uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
@@ -205,10 +220,12 @@ REVOKE ALL ON FUNCTION public.pazo_community_set_admin(uuid,uuid) FROM PUBLIC,an
 REVOKE ALL ON FUNCTION public.pazo_community_offer_transfer(uuid,uuid) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.pazo_community_accept_transfer(uuid) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.pazo_community_transfer_offer(uuid) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.pazo_community_decline_transfer(uuid) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.pazo_archive_owned_communities_for_deletion(uuid) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_community_set_admin(uuid,uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_community_offer_transfer(uuid,uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_community_accept_transfer(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_community_transfer_offer(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.pazo_community_decline_transfer(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_archive_owned_communities_for_deletion(uuid) TO service_role;
 COMMIT;

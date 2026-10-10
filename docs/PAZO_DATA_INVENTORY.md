@@ -313,3 +313,7 @@ Supabase tiene instalada la tabla privada `account_requests_private.deletion_req
 ### 24.2 Preflight de eliminación sin mutación
 
 La consulta admin `supabase/queries/f14_account_deletion_preflight_READ_ONLY.sql` cuenta dependencias por UUID interno solo para solicitudes propias registradas como `requested`. No registra emails, nombres de personas, documentos ni URLs en analytics, logs o salida pública. Cuenta relaciones externas de comunidades/Feed, documentos, moderación y objetos de Storage. No se publicó RPC de consulta a usuarios; el reporte es interno y no ejecuta eliminación. El frontend de solicitud/cancelación se habilita solo en entorno local `DEV`; producción sigue apagada. Los datos de prueba se mantienen.
+
+### 24.3 Continuidad de comunidad en eliminación de cuenta
+
+La migración propuesta NO APLICADA añade una tabla privada con IDs internos del grupo/propietario/admin candidato y plazos de transferencia (7 días), sin contenido ni email. Solo admin destinatario y owner pueden consultar una oferta; aceptación requiere JWT propio; nadie fuera del servidor puede archivar. Las comunidades archivadas conservan contenido de terceros en la base, pero no son públicas bajo la RLS vigente. No se habilita recolección nueva ni migración en este lote.
