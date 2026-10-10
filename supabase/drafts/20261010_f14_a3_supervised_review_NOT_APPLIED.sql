@@ -131,6 +131,39 @@ REVOKE ALL ON FUNCTION public.f14_a3_review_inventory(uuid)
   FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.f14_a3_review_inventory(uuid) TO service_role;
 
+-- Private reviewer membership check. Called ONLY after a trusted Edge server
+-- independently verifies operator JWT via auth.getUser(jwt). The operator id
+-- must NOT be taken directly from browser JSON or unverified user metadata.
+CREATE OR REPLACE FUNCTION public.f14_a3_review_operator_authorized(
+  p_operator_user_id uuid,
+  p_subject_user_id uuid
+)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $a3_operator$
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role', true),'') <> 'service_role'
+    OR p_operator_user_id IS NULL OR p_subject_user_id IS NULL THEN
+    RAISE EXCEPTION 'Service reviewer required' USING ERRCODE='42501';
+  END IF;
+  RETURN EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_review_operators o
+    JOIN auth.users u ON u.id = o.operator_user_id
+    WHERE o.operator_user_id = p_operator_user_id
+      AND o.operator_user_id <> p_subject_user_id
+  ) AND EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_requests req
+    JOIN auth.users subject ON subject.id = req.subject_user_id
+    WHERE req.subject_user_id = p_subject_user_id
+      AND req.status IN ('requested','processing')
+  );
+END
+$a3_operator$;
+
+REVOKE ALL ON FUNCTION public.f14_a3_review_operator_authorized(uuid,uuid)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_review_operator_authorized(uuid,uuid)
+  TO service_role;
+
 -- No stage-transition RPC, DELETE or UPDATE of existing intake is included:
 -- the freeze of all writes and per-account reauthentication proof have NOT
 -- been independently verified. A proposed stage cannot grant delete access.
