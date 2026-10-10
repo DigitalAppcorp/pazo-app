@@ -7,6 +7,7 @@ import {
 } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
+import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
 import { isRecoveryReturn, isVerifiedRecoverySession, recoveryRedirectUrl } from '../features/auth/recoveryFlow'
 import {
@@ -32,6 +33,8 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileStatus, setProfileStatus] = useState<{ userId: string; status: 'loading' | 'ready' | 'error' } | null>(null)
+  const [profileRetry, setProfileRetry] = useState(0)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(
     () => isRecoveryReturn(window.location.search)
   )
@@ -73,6 +76,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Auth identities can survive a prelaunch fixture reset even if profiles do not.
+  // Keep the application behind a reversible bootstrap gate until the server restores
+  // the minimal profile owned by the signed-in account.
+  useEffect(() => {
+    if (!user?.id) {
+      setProfileStatus(null)
+      return
+    }
+
+    let cancelled = false
+    const userId = user.id
+    setProfileStatus({ userId, status: 'loading' })
+
+    void ensureOwnAccountProfile()
+      .then(() => {
+        if (!cancelled) setProfileStatus({ userId, status: 'ready' })
+      })
+      .catch((error) => {
+        console.error('Could not initialize account profile:', error)
+        if (!cancelled) setProfileStatus({ userId, status: 'error' })
+      })
+
+    return () => { cancelled = true }
+  }, [user?.id, profileRetry])
 
   const signUp = async (email: string, password: string): Promise<SignUpOutcome> => {
     const { data, error } = await supabase.auth.signUp({ email, password })
@@ -171,7 +199,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         finishPasswordRecovery,
       }}
     >
-      {children}
+      {user && !isPasswordRecovery && (profileStatus?.userId !== user.id || profileStatus.status === 'loading') ? (
+        <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-6">
+          <p className="font-bold text-sm">Preparando tu cuenta…</p>
+        </div>
+      ) : user && !isPasswordRecovery && profileStatus?.status === 'error' ? (
+        <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-3 px-6">
+          <p role="alert" className="font-bold text-sm text-center">No pudimos preparar tu cuenta. Tu sesión sigue guardada.</p>
+          <button type="button" onClick={() => setProfileRetry((value) => value + 1)}
+            className="rounded-full bg-[#204E4A] text-white px-6 py-3 font-bold cursor-pointer">Reintentar</button>
+          <button type="button" onClick={() => void signOut()}
+            className="rounded-full bg-[#E1E53F] text-[#204E4A] px-6 py-3 font-bold cursor-pointer">Cerrar sesión</button>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   )
 }
