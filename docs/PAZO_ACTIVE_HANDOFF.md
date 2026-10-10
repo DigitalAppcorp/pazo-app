@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF | snapshot canónico para nuevo chat
 
+> **DECISIÓN PO 2026-10-09 / CAMBIO DE PRIORIDAD:** A3 de PR #38 queda **PAUSADA**, no liberada ni terminada; detener nuevas migraciones/drafts. El carril activo es el cierre del MVP en PR #36/#37: [fast-track](PAZO_MVP_LAUNCH_FAST_TRACK_20261009.md), versión reciente en PR #37. **No tocar Vercel hasta tener MVP listo para lanzamiento.** No activar A3, no merge, DDL, deletes, gastos o deployments. Los «SIGUIENTE» cronológicos anteriores de este archivo quedan subordinados a esta decisión.
+
+
 **Verificado:** 2026-10-09, GitHub remoto + Supabase READ ONLY.  
 **Orden de autoridad:** `AGENTS.md` → este snapshot → `docs/PAZO_MASTER_ROADMAP.md` → contratos/sub-rutas de módulo → código y estado real GitHub/Supabase. Los apéndices antiguos y PR body extensos son historia; no sustituyen este snapshot. Antes de implementar, **volver a consultar refs, CI, ramas y DB**.
 
