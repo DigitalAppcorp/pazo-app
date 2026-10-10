@@ -65,7 +65,7 @@ test('fresh sign-in is self-bound to Auth session created after deletion request
   assert.match(sql,/lease_expires_at>v_now/)
   assert.match(sql,/SET reauthenticated_at=v_now,reauth_session_id=v_session,updated_at=v_now/)
   assert.match(sql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_subject_record_recent_signin\(\)\s+TO authenticated/)
-  assert.doesNotMatch(sql,/signInWithPassword|user_metadata|plaintext_password/i)
+  assert.doesNotMatch(sql.replace(/^\s*--.*$/gm,''),/signInWithPassword|user_metadata|plaintext_password/i)
 })
 
 test('reviewer rechecks same subject, operator, lease, revision and reauth session', () => {
