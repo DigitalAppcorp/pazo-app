@@ -31,3 +31,8 @@ SELECT-only verificada 2026-10-10 en proyecto `mrybvqdebbgcayuvgkkr`: **7 Auth**
 Revisar **cierre legal/operativo del RC**, trabajando en código y docs ES/EN solo si hay diferencia concreta frente al producto: retención real y proveedores, política/terms, fecha efectiva al publicar, procedimiento de respuesta, etc. Mantener `LEGAL_RELEASE_READY=false` hasta comprobar requisitos. Auditar CI después de cambios; no nuevos módulos, re-test repetitivo, A3, Vercel, merge ni costes. Cuando Codex entregue PASS/FAIL, integrar solo ese resultado y preparar gate de salida/decisión PO.
 
 **Regla de lectura:** este snapshot > banners históricos del roadmap. Fuentes: `docs/PAZO_MVP_RELEASE_GATES_20261010.md`, `docs/PAZO_MVP_MANUAL_DELETION_SOP_20261010.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`, `docs/PAZO_CODEX_PENDING_QA_20261010.md`. El texto anterior completo se recupera mediante el historial Git de este archivo.
+
+## Avance independiente posterior (2026-10-10)
+- Auditoría documental legal/operativa publicada en `docs/PAZO_MVP_LEGAL_CLOSURE_AUDIT_20261010.md` (commit `8471a504`). Contiene evidencias, brechas y orden de cierre; no modifica código ni datos. `LEGAL_RELEASE_READY=false`.
+- HEAD de partida auditado `e497c794`; CI #626 solo se certifica para SHA previo; no se ha confirmado CI del HEAD posterior a este cambio documental. Los estados de Vercel indican límite de builds; NO intervenir. 
+- Próximo paso permitido: reconciliación comprobable de términos, retención y proveedores; esperar resultado de Codex únicamente para gate de baja. Todas las exclusiones y decisiones previas siguen vigentes.
