@@ -24,7 +24,7 @@ function fixture(overrides = {}) {
       assert.equal(id,SUBJECT)
       return exists
         ? {data:{user:{id:SUBJECT}},error:null}
-        : {data:{user:null},error:overrides.authReadError ?? {status:404}}
+        : {data:{user:null},error:overrides.authReadError === undefined ? {status:404} : overrides.authReadError}
     },
     deleteUser:async(id,soft)=>{
       calls.push('auth.deleteUser')
