@@ -11,7 +11,7 @@ const row=()=>({
 
 function harness(options={}){
  const calls=[]
- let exists=options.exists??true
+ let exists=options.exists===undefined?true:options.exists
  const admin={storage:{from(bucket){
    calls.push('bucket:'+bucket)
    return {
