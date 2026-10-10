@@ -83,3 +83,7 @@ Se versionaron Edge con validación Auth/moderador y feature flag OFF, función 
 ### Aplicación segura de contrato inerte (2026-10-10 UTC)
 
 Autorización PO aplicada: migración `20261010033538_f14_moderation_media_preflight_locked` y Edge v2 JWT obligatorio con bloqueo fijo. El nuevo SQL solo permite validación preliminar por servicio y nunca pone media_status=purged; control previo de claims y trigger de rechazo se mantienen. ACL service-only verificada, sin cambios al número de objetos de publicaciones (13) ni archivos eliminados. Bloqueado hasta nuevo gate de prueba específica.
+
+## D3-A: consolidación de claims y finalización protegida
+
+Nueva migración `supabase/sql/f14_moderation_media_finalize.sql` integra la prevalidación, la reserva de objeto específica y el trigger de estado seguro existente, no reemplaza el sistema de claims ni relaja RLS de Storage. `public.f14_moderation_media_gate` sólo concede permiso con `service_role` y la foto exactamente comprobada; etapa `complete` requiere Storage metadata ausente y revalida relación, claim y reporte antes de `purged`. Despliegue Edge continúa bloqueado por constante fija; no ejecutar pruebas destructivas sobre fotos anteriores.

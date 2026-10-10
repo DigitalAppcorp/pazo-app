@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 const sql=readFileSync(new URL('../supabase/sql/f14_moderation_media_gate.sql',import.meta.url),'utf8')
+const liveSql=readFileSync(new URL('../supabase/sql/f14_moderation_media_finalize.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../supabase/functions/f14-moderation-purge/index.ts',import.meta.url),'utf8')
 const core=readFileSync(new URL('../supabase/functions/f14-moderation-purge/core.ts',import.meta.url),'utf8')
 const ui=readFileSync(new URL('../src/features/moderation/ModerationMediaQueue.tsx',import.meta.url),'utf8')
@@ -53,4 +54,26 @@ test('moderation UI stays disabled until local flag and operator gate',()=>{
 test('server deployment is disabled independently of hosted secret values',()=>{
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
  assert.match(edge,/if\(!F14_MEDIA_PURGE_RELEASE_APPROVED \|\| Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)!=='true'\)/)
+})
+
+test('D3A finalization preserves claim/version and requires server proof and absent Storage object',()=>{
+ for(const v of [
+  "moderation_private.f14_media_probe(p_kind,p_target)",
+  "v_live IS DISTINCT FROM v_claim.snapshot",
+  "v_claim.expires_at<=pg_catalog.clock_timestamp()",
+  "v_claim.checked_at IS NULL",
+  "v_claim.snapshot->>'source_url' IS DISTINCT FROM p_url",
+  "o.bucket_id=p_bucket AND o.name=p_path",
+  "SET media_status='purged'",
+  "pg_catalog.current_setting('request.jwt.claim.role',true) IS DISTINCT FROM 'service_role'",
+  "NOT EXISTS (SELECT 1 FROM storage.objects o",
+  "c.status='held' AND c.checked_at IS NOT NULL"
+ ]) assert.ok(liveSql.includes(v),v)
+ assert.doesNotMatch(liveSql,/DROP TRIGGER|DISABLE TRIGGER|TRUNCATE|DELETE FROM storage\./i)
+ assert.match(liveSql,/CREATE OR REPLACE FUNCTION moderation_private\.f14_reject_unverified_purged/)
+ assert.match(edge,/admin\.rpc\('f14_prepare_media_claim'/)
+ assert.match(edge,/admin\.rpc\('f14_recheck_media_claim'/)
+ assert.ok(edge.indexOf("f14_prepare_media_claim")<edge.indexOf("f14_recheck_media_claim"))
+ assert.ok(edge.indexOf("f14_recheck_media_claim")<edge.indexOf("f14_moderation_media_gate"))
+ assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
 })

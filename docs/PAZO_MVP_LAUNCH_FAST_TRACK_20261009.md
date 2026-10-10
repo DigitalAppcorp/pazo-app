@@ -69,3 +69,9 @@ La autorización PO alcanzó **instalar SQL y Edge con eliminación desactivada*
 Verificación SQL alojada: grant EXECUTE anon/authenticated **false** y service_role **true**, una función gate presente, 13 objetos post-photos + community-post-photos antes y después, cero restricciones `purged` y cero `pending_review`. CI del código #38021054637 PASS. Hubo aviso del asesor de seguridad sobre otra función preexistente, `f14_content_visible` ejecutable desde rol anon; auditar el contrato público antes de tocarlo.
 
 **Gate abierto:** integrar de forma segura el sistema de claims/locks y el trigger existente para permitir eventual eliminación física con prueba específica autorizada. La presente autorización NO cubrió habilitar flags, ejecutar purga, cambiar triggers anteriores, merge ni Vercel. CDN no se declara purgada.
+
+### Lote consolidado D3-A: claims existentes y confirmación exacta
+
+Se integró el workflow histórico `f14_prepare_media_claim` → `f14_recheck_media_claim` → `f14_moderation_media_gate(preflight)` antes de llamar Storage. Se preserva la reserva `held` mientras la Edge realiza la eliminación para impedir cambios de usuarios normales al archivo. La etapa de confirmación en `supabase/sql/f14_moderation_media_finalize.sql` exige objeto ausente y claim original verificado; el trigger `f14_reject_unverified_purged` se conserva y SOLO permite `purged` a `service_role` con claim exacto/checked y Storage ausente. No se introducen bypasses mediante GUC ni roles públicos. La Edge aún mantiene `F14_MEDIA_PURGE_RELEASE_APPROVED=false`, y la interfaz `VITE_F14_MEDIA_PURGE_ENABLED` está apagada.
+
+**Gate controlado único restante**: ejecutar E2E con una fotografía nueva descartable identificada inequívocamente, y verificar GET directo/actualización en Storage, sin utilizar fotos preexistentes; nunca declarar CDN global purgada. Sin Vercel y sin merge a main.

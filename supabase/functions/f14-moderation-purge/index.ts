@@ -65,6 +65,20 @@ Deno.serve(async(req:Request)=>{
     return data as {photo_url:string|null;photo_storage_path?:string|null}|null
    },
    gate:async(target:PurgeObject,stage:'preflight'|'complete')=>{
+    if(stage==='preflight'){
+      // A held claim stops ordinary-user Storage mutation while the
+      // exact version and owner are revalidated by the existing RPCs.
+      const {data:claim,error:prepareError}=await admin.rpc('f14_prepare_media_claim',{
+        p_kind:target.kind,p_id:target.id
+      })
+      if(prepareError) throw prepareError
+      if(claim?.status!=='candidate_only'||typeof claim.claim_id!=='string') return false
+      const {data:checked,error:checkError}=await admin.rpc('f14_recheck_media_claim',{
+        p_claim:claim.claim_id
+      })
+      if(checkError) throw checkError
+      if(checked!==true) return false
+    }
     const {data,error}=await admin.rpc('f14_moderation_media_gate',{
       p_kind:target.kind,p_target:target.id,p_bucket:target.bucket,p_path:target.path,
       p_url:target.url,p_stage:stage
