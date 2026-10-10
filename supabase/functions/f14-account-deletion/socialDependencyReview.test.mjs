@@ -21,9 +21,17 @@ test('all verified conditions permit REVIEW but never erasure',()=>{
   assert.deepEqual(result,{reviewable:true,blockers:[],destructiveExecutionAllowed:false})
 })
 
-test('each independently required server proof fails closed',()=>{
+test('every applicable server proof fails closed',()=>{
+  // A preservation receipt is only required when its associated content
+  // exists; exercise all such gates with real positive aggregate counts.
+  const involved={...inventory(),
+    third_party_feed_replies_to_preserve:1,
+    third_party_community_replies_to_preserve:1,
+    third_party_community_posts_to_preserve:1,
+    owned_communities:1,
+  }
   for(const key of Object.keys(evidence())){
-    const result=assessA3SocialPreservation(inventory(),{...evidence(),[key]:false})
+    const result=assessA3SocialPreservation(involved,{...evidence(),[key]:false})
     assert.equal(result.reviewable,false,key)
     assert.equal(result.destructiveExecutionAllowed,false,key)
     assert.ok(result.blockers.length>0,key)
