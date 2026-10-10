@@ -4,6 +4,7 @@ import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIc
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
+import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
@@ -230,6 +231,9 @@ export const OnboardingView = ({
                 Demo
               </button>
             </div>
+            <p aria-label="Versión de PAZO" className="pt-1 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65">
+              Versión {pazoBuildVersion}
+            </p>
           </div>
         </div>
       )}
