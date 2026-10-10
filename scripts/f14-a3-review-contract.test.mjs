@@ -13,7 +13,7 @@ test('A3 review draft has a fail-closed SQL transaction guard', () => {
   assert.match(sql,/REVOKE ALL ON account_requests_private\.deletion_review_jobs FROM PUBLIC,anon,authenticated/)
   assert.match(sql,/REVOKE ALL ON FUNCTION public\.f14_a3_review_inventory\(uuid\)/)
   assert.match(sql,/GRANT EXECUTE ON FUNCTION public\.f14_a3_review_inventory\(uuid\) TO service_role/)
-  assert.match(sql,/CURRENT_USER <> 'service_role'/)
+  assert.match(sql,/current_setting\('request.jwt.claim.role', true\)/)
   assert.match(sql,/destructive_execution_allowed',false/)
 })
 
