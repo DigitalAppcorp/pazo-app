@@ -352,3 +352,7 @@ modela **sin almacenar nuevos datos reales** una revisión privada del cierre de
 **Acceso previsto:** esquema `account_requests_private`, sin grants para `anon`/`authenticated` ni exposición al frontend. API de revisión solo para `service_role`, y gate humano exacto que requiere todavía verificación y aprobación. No se habilita telemetry ni sesión grabada.
 
 **Pendiente legal:** duración y borrado de journal/lease de operador, políticas efectivas de retención de terceros, backups/logs y CDN. No publicar una garantía temporal ni conservar UUID eternamente por omisión. Ningún dato se ha borrado o recolectado por este cambio documental y de código.
+
+### A3: prueba temporal de reautenticación (propuesta NO instalada, 2026-10-10)
+
+El contrato SQL `20261010_f14_a3_supervised_review_NOT_APPLIED.sql` contempla conservar en tabla privada `reauth_session_id` (UUID interno de sesión de Auth) y `reauthenticated_at` por un periodo de validez de **cinco minutos como prueba activa**. El revisor solo puede consultar un booleano ligado a su lease. Reasignar la reserva borra la evidencia; al terminar/cancelar la baja se deberá definir y verificar borrado/retención del journal. No guardar contraseñas, OTP, acceso JWT, correos o nombres de archivos. La reautenticación todavía no está desplegada ni conectada al cliente.
