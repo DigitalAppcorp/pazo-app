@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { User } from '@supabase/supabase-js'
+import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
 import { ensureOwnAccountProfile } from '../features/auth/ensureOwnAccountProfile'
 import { classifySignUpResult, type SignUpOutcome } from '../features/auth/signupFlow'
@@ -33,6 +33,8 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [authBootstrapError, setAuthBootstrapError] = useState(false)
+  const [authBootstrapRetry, setAuthBootstrapRetry] = useState(0)
   const [profileStatus, setProfileStatus] = useState<{ userId: string; status: 'loading' | 'ready' | 'error' } | null>(null)
   const [profileRetry, setProfileRetry] = useState(0)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(
@@ -42,18 +44,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // created a session. Supabase must emit PASSWORD_RECOVERY first.
   const [recoverySessionVerified, setRecoverySessionVerified] = useState(false)
 
+  // Session bootstrap is independent from the splash animation.
+  // A hung getSession must not trap the user behind the splash forever.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let cancelled = false
+    let resolved = false
+
+    setLoading(true)
+    setAuthBootstrapError(false)
+
+    const watchdog = window.setTimeout(() => {
+      if (!cancelled && !resolved) setAuthBootstrapError(true)
+    }, 10000)
+
+    const acceptSession = (session: Session | null) => {
+      if (cancelled) return
+      resolved = true
+      window.clearTimeout(watchdog)
       const nextUser = session?.user ?? null
       setUser(nextUser)
       setObservabilityUser(nextUser?.id ?? null)
+      setAuthBootstrapError(false)
       setLoading(false)
-    })
+    }
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      const nextUser = session?.user ?? null
+      if (cancelled) return
+      acceptSession(session)
 
       if (event === 'PASSWORD_RECOVERY' && session?.user) {
         setIsPasswordRecovery(true)
@@ -64,18 +83,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setRecoverySessionVerified(false)
         captureEvent('auth_session_signed_out')
       }
-
-      setUser(nextUser)
-      setObservabilityUser(nextUser?.id ?? null)
-      setLoading(false)
-
-      if (event === 'SIGNED_IN') {
-        captureEvent('auth_session_signed_in')
-      }
+      if (event === 'SIGNED_IN') captureEvent('auth_session_signed_in')
     })
 
-    return () => subscription.unsubscribe()
-  }, [])
+    // INITIAL_SESSION usually arrives through onAuthStateChange; getSession
+    // is a fallback. A delayed response must not overwrite a newer event.
+    void supabase.auth.getSession()
+      .then(({ data, error }) => {
+        if (error) {
+          if (!cancelled && !resolved) setAuthBootstrapError(true)
+          return
+        }
+        if (!resolved) acceptSession(data.session)
+      })
+      .catch(() => {
+        if (!cancelled && !resolved) setAuthBootstrapError(true)
+      })
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(watchdog)
+      subscription.unsubscribe()
+    }
+  }, [authBootstrapRetry])
 
   // Auth identities can survive a prelaunch fixture reset even if profiles do not.
   // Keep the application behind a reversible bootstrap gate until the server restores
@@ -90,16 +120,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userId = user.id
     setProfileStatus({ userId, status: 'loading' })
 
+    const watchdog = window.setTimeout(() => {
+      if (!cancelled) setProfileStatus({ userId, status: 'error' })
+    }, 10000)
+
     void ensureOwnAccountProfile()
       .then(() => {
+        window.clearTimeout(watchdog)
         if (!cancelled) setProfileStatus({ userId, status: 'ready' })
       })
-      .catch((error) => {
-        console.error('Could not initialize account profile:', error)
-        if (!cancelled) setProfileStatus({ userId, status: 'error' })
+      .catch(() => {
+        window.clearTimeout(watchdog)
+        if (!cancelled) {
+          console.error('Could not initialize account profile')
+          setProfileStatus({ userId, status: 'error' })
+        }
       })
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+      window.clearTimeout(watchdog)
+    }
   }, [user?.id, profileRetry])
 
   const signUp = async (email: string, password: string): Promise<SignUpOutcome> => {
@@ -199,7 +240,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         finishPasswordRecovery,
       }}
     >
-      {user && !isPasswordRecovery && (profileStatus?.userId !== user.id || profileStatus.status === 'loading') ? (
+      {authBootstrapError && loading ? (
+        <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
+          <p role="alert" className="text-sm font-bold text-center">
+            No pudimos comprobar tu sesión. Tu cuenta no se ha modificado.
+          </p>
+          <button type="button" onClick={() => setAuthBootstrapRetry((attempt) => attempt + 1)}
+            className="rounded-full bg-[#204E4A] px-6 py-3 font-bold text-white cursor-pointer focus-visible:bg-[#356D67]">
+            Reintentar
+          </button>
+        </div>
+      ) : user && !isPasswordRecovery && (profileStatus?.userId !== user.id || profileStatus.status === 'loading') ? (
         <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-6">
           <p className="font-bold text-sm">Preparando tu cuenta…</p>
         </div>
