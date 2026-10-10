@@ -25,6 +25,27 @@ REVOKE ALL ON account_requests_private.deletion_frozen_targets FROM PUBLIC,anon,
 -- No direct writes from client or service_role. Only audited definer RPC
 -- may populate snapshots and freeze while holding request/target row locks.
 
+-- Per-path, short-lived media grant. No Storage API can pass a SQL
+-- transaction-local GUC across HTTP requests, so DELETE must be authorized
+-- by an exact, server-issued generation+lease grant. An UPDATE or INSERT
+-- never uses this bypass. No grants exist by default.
+CREATE TABLE account_requests_private.deletion_media_grants (
+  subject_user_id uuid NOT NULL
+    REFERENCES account_requests_private.deletion_requests(subject_user_id),
+  bucket_id text NOT NULL,
+  object_path text NOT NULL,
+  object_version text NOT NULL,
+  review_revision bigint NOT NULL CHECK (review_revision>0),
+  reviewer_user_id uuid NOT NULL,
+  lease_token uuid NOT NULL,
+  expires_at timestamptz NOT NULL,
+  removed_at timestamptz,
+  PRIMARY KEY(subject_user_id,bucket_id,object_path)
+);
+ALTER TABLE account_requests_private.deletion_media_grants ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON account_requests_private.deletion_media_grants
+  FROM PUBLIC,anon,authenticated;
+
 -- Guards any account with a PROCESSING deletion request. SELECT FOR SHARE
 -- serializes competing writes with the atomic REQUESTED->PROCESSING transition.
 -- For a service-only cleanup bypass, the authorized RPC must set a LOCAL
@@ -253,6 +274,66 @@ DROP TRIGGER IF EXISTS a3_account_write_fence ON public.search_usage_events;
 CREATE TRIGGER a3_account_write_fence BEFORE INSERT OR UPDATE OR DELETE ON public.search_usage_events
 FOR EACH ROW EXECUTE FUNCTION account_requests_private.a3_guard_application_write('user','user_id');
 
+-- Service-only authorization of ONE exact Storage generation. It is
+-- only available during the independent processing/remove_media stage,
+-- with an approved lease and frozen target. No wildcard or bucket delete.
+CREATE OR REPLACE FUNCTION public.f14_a3_allow_exact_media_remove(
+  p_subject_user_id uuid,p_reviewer_user_id uuid,p_lease_token uuid,
+  p_revision bigint,p_bucket text,p_path text,p_object_version text
+) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $authorize_media$
+DECLARE v_now timestamptz := pg_catalog.clock_timestamp();
+BEGIN
+  IF COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'') <> 'service_role'
+    OR p_subject_user_id IS NULL OR p_reviewer_user_id IS NULL
+    OR p_lease_token IS NULL OR p_revision IS NULL
+    OR p_bucket NOT IN ('pet-avatars','post-photos','community-avatars',
+       'community-post-photos','pet-documents')
+    OR p_path IS NULL OR pg_catalog.length(p_path)=0
+    OR p_object_version IS NULL OR pg_catalog.length(p_object_version)=0
+    THEN RAISE EXCEPTION 'Exact media authorization denied' USING ERRCODE='42501';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM account_requests_private.deletion_review_jobs j
+    JOIN account_requests_private.deletion_review_operators op
+      ON op.operator_user_id=j.reviewer_user_id
+    JOIN account_requests_private.deletion_requests req
+      ON req.subject_user_id=j.subject_user_id
+    JOIN account_requests_private.deletion_frozen_targets t
+      ON t.subject_user_id=j.subject_user_id
+      AND t.target_type='storage'
+      AND t.target_id=p_bucket||':'||p_path
+    JOIN storage.objects o
+      ON o.bucket_id=p_bucket AND o.name=p_path
+      AND o.version=p_object_version
+    WHERE req.status='processing' AND j.phase='remove_media'
+      AND j.subject_user_id=p_subject_user_id
+      AND j.reviewer_user_id=p_reviewer_user_id
+      AND j.lease_token=p_lease_token AND j.revision=p_revision
+      AND j.lease_expires_at>v_now
+  ) THEN RETURN false; END IF;
+
+  INSERT INTO account_requests_private.deletion_media_grants
+    (subject_user_id,bucket_id,object_path,object_version,
+     reviewer_user_id,review_revision,lease_token,expires_at)
+  VALUES(p_subject_user_id,p_bucket,p_path,p_object_version,
+     p_reviewer_user_id,p_revision,p_lease_token,v_now+INTERVAL '2 minutes')
+  ON CONFLICT(subject_user_id,bucket_id,object_path) DO UPDATE
+  SET object_version=excluded.object_version,
+      reviewer_user_id=excluded.reviewer_user_id,
+      review_revision=excluded.review_revision,
+      lease_token=excluded.lease_token,
+      expires_at=excluded.expires_at
+  WHERE account_requests_private.deletion_media_grants.removed_at IS NULL;
+  RETURN FOUND;
+END
+$authorize_media$;
+
+REVOKE ALL ON FUNCTION public.f14_a3_allow_exact_media_remove(uuid,uuid,uuid,bigint,text,text,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f14_a3_allow_exact_media_remove(uuid,uuid,uuid,bigint,text,text,text)
+  TO service_role;
+
 -- Storage write fence covers both owner's storage.objects.owner_id and exact
 -- bucket:path snapshots. Even service_role bypass requires a reviewed cleanup
 -- lease. Never DELETE directly from storage.objects; executor uses Storage API.
@@ -265,6 +346,30 @@ BEGIN
     IF (i=1 AND TG_OP='DELETE') OR (i=2 AND TG_OP='INSERT') THEN CONTINUE; END IF;
     IF i=1 THEN v_row:=pg_catalog.to_jsonb(NEW);
     ELSE v_row:=pg_catalog.to_jsonb(OLD); END IF;
+    -- Storage API uses a distinct HTTP transaction. A precise, expiring
+    -- generation grant replaces the transaction-local cleanup GUC for DELETE
+    -- ONLY; uploads/upserts remain frozen.
+    IF TG_OP='DELETE'
+       AND COALESCE(pg_catalog.current_setting('request.jwt.claim.role',true),'')='service_role'
+       AND EXISTS (
+         SELECT 1 FROM account_requests_private.deletion_media_grants g
+         JOIN account_requests_private.deletion_review_jobs j
+           ON j.subject_user_id=g.subject_user_id
+         JOIN account_requests_private.deletion_requests req
+           ON req.subject_user_id=g.subject_user_id
+         WHERE g.bucket_id=(v_row->>'bucket_id')
+           AND g.object_path=(v_row->>'name')
+           AND g.object_version=(v_row->>'version')
+           AND g.expires_at>pg_catalog.clock_timestamp()
+           AND g.removed_at IS NULL
+           AND j.phase='remove_media'
+           AND req.status='processing'
+           AND j.lease_token=g.lease_token
+           AND j.revision=g.review_revision
+           AND j.reviewer_user_id=g.reviewer_user_id
+           AND j.lease_expires_at>pg_catalog.clock_timestamp()
+       ) THEN CONTINUE;
+    END IF;
     PERFORM account_requests_private.a3_assert_row_not_frozen(v_row,'owner_text','owner_id');
     PERFORM account_requests_private.a3_assert_user_not_frozen(t.subject_user_id)
       FROM account_requests_private.deletion_frozen_targets t
