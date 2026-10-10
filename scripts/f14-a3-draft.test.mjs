@@ -281,5 +281,5 @@ test('A3 Feed RPC acquires ordered owner locks before locking metric rows or wri
   assert.match(fragment,/v_checked_target_owner IS DISTINCT FROM v_target_owner_id/)
   assert.match(fragment,/ERRCODE='40001'/)
   assert.match(fragment,/p_action_type IN \('unlike', 'unsave'\)/)
-  assert.match(fragment,/WHERE pet_id = p_actor_pet_id[\s\S]*?FOR UPDATE/)
+  assert.match(fragment,/WHERE ppm\.pet_id = p_actor_pet_id[\s\S]*?FOR UPDATE/)
 })
