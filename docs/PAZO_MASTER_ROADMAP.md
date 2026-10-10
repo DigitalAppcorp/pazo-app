@@ -1,3 +1,5 @@
+> **PUNTO DE REANUDACIÓN ACTUAL (2026-10-09):** leer primero [`docs/PAZO_ACTIVE_HANDOFF.md`](PAZO_ACTIVE_HANDOFF.md). El snapshot sustituye en materia de estado vigente los checkpoints cronológicos antiguos de esta hoja. Rama activa PR #38 DRAFT, HEAD auditado `d512cbce8a5a9946132ce6811aaff905cdc37757`, CI #38007005749 SUCCESS; nueve SQL drafts **NO_APLICADOS**; nuevo write fence propuesto 26 tablas, A3/Scope Gate abierto. GitHub main/producción sin merge/deploy. Revalidar HEAD antes de implementar.
+
 # PAZO — Hoja Maestra de Desarrollo
 
 **Documento canónico del proyecto.**  
