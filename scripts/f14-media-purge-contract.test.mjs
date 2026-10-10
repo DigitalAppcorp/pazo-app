@@ -53,7 +53,9 @@ test('moderation UI stays disabled until local flag and operator gate',()=>{
 
 test('server deployment is disabled independently of hosted secret values',()=>{
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
- assert.match(edge,/if\(!F14_MEDIA_PURGE_RELEASE_APPROVED \|\| Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)!=='true'\)/)
+ assert.match(edge,/if\(!isApprovedSingleTrial && !globalRelease\)/)
+ assert.match(edge,/input.id===F14_D3A_SINGLE_TEST_TARGET_ID/)
+ assert.match(edge,/Date.now\(\)<Date.parse\(F14_D3A_SINGLE_TEST_EXPIRY\)/)
 })
 
 test('D3A finalization preserves claim/version and requires server proof and absent Storage object',()=>{
@@ -76,4 +78,14 @@ test('D3A finalization preserves claim/version and requires server proof and abs
  assert.ok(edge.indexOf("f14_prepare_media_claim")<edge.indexOf("f14_recheck_media_claim"))
  assert.ok(edge.indexOf("f14_recheck_media_claim")<edge.indexOf("f14_moderation_media_gate"))
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
+})
+
+test('single disposable-photo trial cannot enable any other target or production UI',()=>{
+ const edgeTarget=edge.match(/const F14_D3A_SINGLE_TEST_TARGET_ID = '([^']+)'/)?.[1]
+ const uiTarget=ui.match(/const singleTestId = '([^']+)'/)?.[1]
+ assert.equal(edgeTarget,'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e')
+ assert.equal(uiTarget,edgeTarget)
+ assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
+ assert.match(edge,/input.kind==='feed_post'/)
+ assert.match(ui,/import.meta.env.DEV && item.target_kind === 'feed_post'/)
 })

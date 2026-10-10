@@ -29,10 +29,13 @@ async function publicUrlInaccessible(url:string):Promise<boolean> {
 // Immutable rollout safety latch, independent of hosted environment values.
 // Activation needs a separate reviewed code commit and explicit PO authorization.
 const F14_MEDIA_PURGE_RELEASE_APPROVED = false
+// Temporary one-post QA release. Remove before PR merge; no other object allowed.
+const F14_D3A_SINGLE_TEST_TARGET_ID = 'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e'
+const F14_D3A_SINGLE_TEST_EXPIRY = '2026-10-11T07:00:00Z'
 Deno.serve(async(req:Request)=>{
  if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors})
  if(req.method!=='POST') return reply(405,{error:'method_not_allowed'})
- if(!F14_MEDIA_PURGE_RELEASE_APPROVED || Deno.env.get('F14_MEDIA_PURGE_ENABLED')!=='true') return reply(503,{error:'cleanup_disabled'})
+ // Defer the release gate until the exact kind and UUID have been parsed.
  const url=Deno.env.get('SUPABASE_URL'),anon=Deno.env.get('SUPABASE_ANON_KEY'),secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
  if(!url||!anon||!secret) return reply(503,{error:'cleanup_not_configured'})
  const auth=req.headers.get('Authorization')||''
@@ -43,6 +46,15 @@ Deno.serve(async(req:Request)=>{
  try {input=JSON.parse(body)} catch {return reply(400,{error:'invalid_json'})}
  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['kind','id'].includes(k))
   ||typeof input.kind!=='string'||typeof input.id!=='string') return reply(400,{error:'invalid_request'})
+ // The globally disabled release cannot be enabled by a request parameter.
+ // One verified disposable feed image is temporarily allowed until expiry.
+ const isApprovedSingleTrial=input.kind==='feed_post'
+   && input.id===F14_D3A_SINGLE_TEST_TARGET_ID
+   && Date.now()<Date.parse(F14_D3A_SINGLE_TEST_EXPIRY)
+ const globalRelease=F14_MEDIA_PURGE_RELEASE_APPROVED
+   && Deno.env.get('F14_MEDIA_PURGE_ENABLED')==='true'
+ if(!isApprovedSingleTrial && !globalRelease) return reply(503,{error:'cleanup_disabled'})
+
  try{
   const token=auth.slice(7)
   const userClient=createClient(url,anon,{global:{headers:{Authorization:auth}},

@@ -12,6 +12,10 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const enablePurge = import.meta.env.VITE_F14_MEDIA_PURGE_ENABLED === 'true'
+  const singleTestId = 'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e'
+  const canPurge = (item: PendingMedia) =>
+    (import.meta.env.DEV && item.target_kind === 'feed_post' && item.target_id === singleTestId)
+    || (enablePurge && (item.target_kind === 'feed_post' || item.target_kind === 'community_post'))
   const closeRef = useRef<HTMLButtonElement>(null)
   const load = useCallback(async () => {
     setBusy(true)
@@ -22,7 +26,7 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
   }, [es])
   useEffect(() => { void load() }, [load])
   const purge = async(item: PendingMedia) => {
-    if (!enablePurge || busy || !['feed_post','community_post'].includes(item.target_kind)) return
+    if (!canPurge(item) || busy) return
     const label = item.target_kind + ' · ' + item.target_id.slice(-8)
     const confirmText = es
       ? 'Eliminar DEFINITIVAMENTE del origen Storage la imagen del contenido retirado ' + label + '? Esta acción no se puede deshacer.'
@@ -62,8 +66,8 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
         </div>
         <p className="my-4 text-xs text-[#5C7470]">
           {es
-            ? 'El contenido retirado no aparece en las lecturas públicas de PAZO. Las fotos pueden seguir accesibles mediante enlaces públicos guardados. La eliminación de Storage continúa desactivada.'
-            : 'Removed content is hidden from PAZO public reads. Photos may remain accessible by known public URLs. Storage deletion remains disabled.'}
+            ? 'Las fotos retiradas pueden seguir accesibles mediante enlaces guardados. Solo la nueva foto descartable está habilitada para esta prueba; el borrado general continúa desactivado.'
+            : 'Removed content stays hidden, but photos can remain accessible via saved URLs. Only one disposable image is enabled for local QA; general deletion remains disabled.'}
         </p>
         {message && <p role="status" className="my-2 text-xs text-[#204E4A]">{message}</p>}
         {error && <p role="alert" className="my-2 text-xs text-red-700">{error}</p>}
@@ -75,10 +79,10 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
             <p className="text-xs text-[#5C7470]">
               {es ? 'Revisión manual pendiente: no se ha confirmado eliminación de Storage ni CDN.' : 'Manual review pending: Storage or CDN deletion not confirmed.'}
             </p>
-            {enablePurge && (item.target_kind === 'feed_post' || item.target_kind === 'community_post') && (
+            {canPurge(item) && (
               <button type="button" disabled={busy} onClick={() => void purge(item)}
                 className="mt-2 rounded-full bg-[#204E4A] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">
-                {es ? 'Retirar archivo verificado' : 'Remove verified file'}
+                {item.target_id === singleTestId && import.meta.env.DEV ? (es ? 'Retirar foto de prueba' : 'Remove test photo') : (es ? 'Retirar archivo verificado' : 'Remove verified file')}
               </button>
             )}
             {enablePurge && item.target_kind === 'pet_profile' && (
