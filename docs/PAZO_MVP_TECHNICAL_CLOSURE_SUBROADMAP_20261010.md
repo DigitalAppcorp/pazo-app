@@ -2,6 +2,8 @@
 
 ## Delta de ejecución autorizado — 2026-10-10
 
+**Evidencia remota comprobada:** publicación RC `908bb58b9658328d2c3ca0868fcc5a6b23cef2e4`, [GitHub Actions #680 SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38100010682), jobs gobernanza/build SUCCESS. [Preview exacto](https://pazo-app-t83r-n4rs7jr2l-digitalapp.vercel.app) READY, protegido, mismo SHA; lectura del contenido protegido falla con **403 / read_protection_bypass**. Vercel CLI no disponible; no se usó navegador ni se desactivó protección. Este comprobante documental no cambia el frontend; verificar también el CI del nuevo HEAD documental antes de continuar. El lint local completo permanece FAIL heredado (105/6), aunque el job remoto sea no bloqueante.
+
 Orden maestra PO posterior a esta subhoja: ejecutar P0/P1, **excluir T18–T20/P2, F13 y producción**. Supersede instrucciones antiguas de resolver P2 conjuntamente. HEAD inicial remoto verificado: `39c0238c55901e2f242f4e3fc990ffaf5f7ef97f`; copia aislada limpia, checkout original preservado. Sin Computer Use. Implementación: [`962029ff46e01a89dccbc3eebc670f05375575c0`](https://github.com/DigitalAppcorp/pazo-app/commit/962029ff46e01a89dccbc3eebc670f05375575c0). El siguiente commit solo fija esta evidencia. Ambos se publican en un único push RC para evitar Previews redundantes; el CI debe verificarse sobre el HEAD final, no solo sobre el commit de código.
 
 | Tarea | Estado vigente | Cambio/archivo y prueba | Intervención pendiente |
