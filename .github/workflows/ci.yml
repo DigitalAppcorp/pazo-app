@@ -38,6 +38,56 @@ jobs:
           VITE_APP_RELEASE: ${{ github.sha }}
         run: npm run build
 
+      - name: F14 media purge regressions
+        run: npm run test:f14
+
       - name: Lint (legacy debt is currently non-blocking)
         continue-on-error: true
         run: npm run lint
+
+  f14-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          # Disposable local service password; never a hosted credential.
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+          POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US --locale=en_US.UTF-8
+        ports:
+          - 55441:5432
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Restore audited catalog structure without hosted connections
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          node scripts/f14-postgres-catalog.mjs
+      - name: Apply both pending migrations in order and repeat idempotently
+        run: |
+          for attempt in 1 2; do
+            psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+              -c 'SET ROLE postgres;' \
+              -f supabase/migrations/20261010222006_f14_media_purge_retry_reconciliation.sql \
+              -f supabase/migrations/20261011022000_f14_media_url_alias_guard.sql
+          done
+          node scripts/f14-postgres-catalog.mjs
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/metadata.sql -f supabase/tests/f14/synthetic-cases.sql
+      - name: Pre-existing aliases and real two-session concurrency
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c "SET pazo.test.prepare_claims='false';" \
+            -f supabase/tests/f14/concurrency-fixture.sql \
+            -f supabase/tests/f14/alias-before-claim.sql \
+            -f supabase/tests/f14/cleanup.sql
+          node scripts/f14-postgres-concurrency.mjs

@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.117.2'
 import { runMediaPurge, PurgeRejected, type PurgeObject, type PurgeKind } from './core.ts'
 import { storageObjectExists } from './storageInfo.ts'
+import { publicUrlInaccessible } from './publicUrl.ts'
 
 // Two independent activation gates: published Edge env switch and database RPC.
 // Do not deploy enabled before P0 media gate and authorized E2E verification.
@@ -10,23 +11,6 @@ const cors = {'Access-Control-Allow-Origin':'*',
 const reply=(status:number, body:unknown)=>new Response(JSON.stringify(body),{
   status,headers:{...cors,'Content-Type':'application/json; charset=utf-8'}
 })
-async function publicUrlInaccessible(url:string):Promise<boolean> {
- const fresh=new URL(url)
- fresh.searchParams.set('pazo_verify',crypto.randomUUID())
- for(const candidate of [url,fresh.toString()]){
-  const response=await fetch(candidate,{method:'HEAD',cache:'no-store',redirect:'error',
-    headers:{'Cache-Control':'no-cache'}})
-  if(![403,404,410].includes(response.status)) return false
-  // HEAD is not sufficient: some gateways can return 404 for HEAD but
-  // still serve GET bytes. A Range request tests actual download access.
-  const download=await fetch(candidate,{method:'GET',cache:'no-store',redirect:'error',
-    headers:{'Cache-Control':'no-cache','Range':'bytes=0-0'}})
-  const unavailable=[403,404,410].includes(download.status)
-  await download.body?.cancel()
-  if(!unavailable) return false
- }
- return true
-}
 // Immutable rollout safety latch, independent of hosted environment values.
 // Activation needs a separate reviewed code commit and explicit PO authorization.
 const F14_MEDIA_PURGE_RELEASE_APPROVED = false

@@ -2,10 +2,11 @@
 -- NOT APPLIED to hosted Supabase. Requires a separate PO-hosted migration gate.
 -- Depends on 20261010222006_f14_media_purge_retry_reconciliation.sql.
 -- From the local PostgreSQL 17 single-session candidate PASS, 2026-10-11.
--- The helper name retains 'local' to preserve the SQL tested in that lab.
--- WARNING: this detects the project's canonical public Storage URL (including
--- query/fragment/percent-encoded path variants). Other hosts, signed URL forms
--- and concurrent references require an additional review before rollout.
+-- The helper name retains 'local' for historical continuity with the lab.
+-- Covers known project public/signed/authenticated/render routes and browser
+-- aliases. External hosts/proxies remain outside this identity contract.
+-- Held claims now prevent new references
+-- across RPC transactions; this does not authorize a Storage API deletion.
 -- No Storage API deletion, policy relaxation, feature flag or data mutation.
 BEGIN;
 
@@ -25,26 +26,38 @@ DECLARE
   v_hex text;
   v_value integer;
   v_character text;
+  v_host text; v_segment text; v_segments text[] := ARRAY[]::text[]; v_input text;
 BEGIN
   IF pg_catalog.length(p_url) > 2048 OR pg_catalog.length(p_path) > 400
      OR p_bucket NOT IN ('post-photos', 'community-post-photos')
   THEN RETURN false; END IF;
 
-  -- Only the canonical Supabase Storage public endpoint for this project.
+  -- Conservative normalization of browser URL spellings. This never chooses
+  -- the deletion target: the target itself must remain canonical and exact.
+  v_input:=pg_catalog.regexp_replace(p_url,'[[:space:]]','','g');
+  v_input:=pg_catalog.replace(v_input,pg_catalog.chr(92),'/');
+  IF pg_catalog.left(v_input,2)='//' THEN v_input:='https:'||v_input; END IF;
+  v_input:=pg_catalog.regexp_replace(v_input,'^([A-Za-z]+):/*','\1://');
+  -- Only this project's Storage endpoints; uncertain matching aliases block.
   -- The URL hostname and scheme are case insensitive; the Storage path is not.
   v_parts := pg_catalog.regexp_match(
-    p_url, '^([A-Za-z]+)://([^/?#]+)(/[^?#]*)([?#].*)?$'
+    v_input, '^([A-Za-z]+)://([^/?#]+)(/[^?#]*)([?#].*)?$'
   );
-  IF v_parts IS NULL OR pg_catalog.lower(v_parts[1]) <> 'https'
-     OR pg_catalog.lower(v_parts[2]) <> 'mrybvqdebbgcayuvgkkr.supabase.co'
+  v_host:=pg_catalog.regexp_replace(pg_catalog.lower(v_parts[2]),'^.*@','');
+  WHILE pg_catalog.strpos(v_host,'%')>0 LOOP
+   v_hex:=pg_catalog.substring(v_host,'%([0-9a-f]{2})');
+   IF v_hex IS NULL THEN RETURN false; END IF;
+   v_value:=pg_catalog.get_byte(pg_catalog.decode(v_hex,'hex'),0);
+   IF v_value<33 OR v_value>126 THEN RETURN false; END IF;
+   v_host:=pg_catalog.replace(v_host,'%'||v_hex,pg_catalog.lower(pg_catalog.chr(v_value)));
+  END LOOP;
+  IF pg_catalog.lower(v_parts[1])='https' THEN v_host:=pg_catalog.regexp_replace(v_host,':443$','');
+  ELSIF pg_catalog.lower(v_parts[1])='http' THEN v_host:=pg_catalog.regexp_replace(v_host,':80$',''); END IF;
+  v_host:=pg_catalog.regexp_replace(v_host,'[.]$','');
+  IF v_parts IS NULL OR pg_catalog.lower(v_parts[1]) NOT IN ('http','https')
+     OR v_host <> 'mrybvqdebbgcayuvgkkr.supabase.co'
   THEN RETURN false; END IF;
-  IF pg_catalog.left(v_parts[3], pg_catalog.length('/storage/v1/object/public/'))
-     <> '/storage/v1/object/public/'
-  THEN RETURN false; END IF;
-
-  v_suffix := pg_catalog.substr(
-    v_parts[3], pg_catalog.length('/storage/v1/object/public/') + 1
-  );
+  v_suffix := v_parts[3];
   WHILE v_pos <= pg_catalog.length(v_suffix) LOOP
     v_character := pg_catalog.substr(v_suffix, v_pos, 1);
     IF v_character = '%' THEN
@@ -61,11 +74,117 @@ BEGIN
     IF v_character !~ '^[A-Za-z0-9._/-]$' THEN RETURN false; END IF;
     v_decoded := v_decoded || v_character;
   END LOOP;
+  -- Browser dot-segment normalization, including percent-encoded dots. Counting
+  -- an uncertain but matching alias is conservative: it can only block a purge.
+  FOREACH v_segment IN ARRAY pg_catalog.string_to_array(v_decoded,'/') LOOP
+   IF v_segment='.' THEN CONTINUE;
+   ELSIF v_segment='..' THEN v_segments:=v_segments[1:CASE WHEN pg_catalog.cardinality(v_segments)>0 THEN pg_catalog.cardinality(v_segments)-1 ELSE 0 END];
+   ELSE v_segments:=pg_catalog.array_append(v_segments,v_segment); END IF;
+  END LOOP;
+  v_decoded:=pg_catalog.array_to_string(v_segments,'/');
+  v_decoded:=pg_catalog.regexp_replace(v_decoded,
+    '^/storage/v1/(object|render/image)/(public|sign|authenticated)/','');
   RETURN v_decoded = (p_bucket || '/' || p_path);
 END;
 $f14_url_identity$;
 REVOKE ALL ON FUNCTION moderation_private.f14_local_url_points_to_object(text, text, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION moderation_private.f14_local_url_points_to_object(text, text, text) TO "postgres";
+ALTER FUNCTION moderation_private.f14_local_url_points_to_object(text,text,text) OWNER TO postgres;
+
+-- A claim survives the HTTP gap between preflight and Storage removal. Ordinary
+-- reference writers must not attach another row to that quarantined object.
+-- Triggers run even for service_role/BYPASSRLS; no new public RPC or grants.
+CREATE OR REPLACE FUNCTION moderation_private.f14_guard_held_media_reference()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $f14_reference_guard$
+DECLARE v_new jsonb := pg_catalog.to_jsonb(NEW); v_old jsonb;
+ v_column text; v_value text; v_changed boolean := false;
+BEGIN
+ IF TG_OP='UPDATE' THEN v_old:=pg_catalog.to_jsonb(OLD); END IF;
+ FOREACH v_column IN ARRAY TG_ARGV LOOP
+  IF (v_new->>v_column) IS NOT NULL
+     AND (TG_OP='INSERT' OR (v_new->>v_column) IS DISTINCT FROM (v_old->>v_column))
+  THEN v_changed:=true; END IF;
+ END LOOP;
+ IF NOT v_changed THEN RETURN NEW; END IF;
+ -- A stale transaction snapshot cannot safely observe a newly committed claim.
+ IF pg_catalog.current_setting('transaction_isolation') NOT IN ('read committed','read uncommitted')
+ THEN RAISE EXCEPTION 'F14 reference writes require a fresh transaction snapshot'
+   USING ERRCODE='40001'; END IF;
+ FOREACH v_column IN ARRAY TG_ARGV LOOP
+  v_value:=v_new->>v_column;
+  IF v_value IS NULL OR (TG_OP='UPDATE' AND v_value IS NOT DISTINCT FROM (v_old->>v_column))
+  THEN CONTINUE; END IF;
+  IF EXISTS (
+   SELECT 1 FROM moderation_private.media_claims c
+   WHERE c.status='held' AND (
+    (v_column='photo_storage_path' AND c.bucket='community-post-photos'
+      AND c.snapshot->>'path'=v_value)
+    OR (v_column<>'photo_storage_path'
+      AND moderation_private.f14_local_url_points_to_object(v_value,c.bucket,c.snapshot->>'path'))
+   )
+  ) THEN RAISE EXCEPTION 'F14 held media cannot receive a new reference'
+    USING ERRCODE='23514'; END IF;
+ END LOOP;
+ RETURN NEW;
+END;
+$f14_reference_guard$;
+ALTER FUNCTION moderation_private.f14_guard_held_media_reference() OWNER TO postgres;
+REVOKE ALL ON FUNCTION moderation_private.f14_guard_held_media_reference() FROM PUBLIC,anon,authenticated,service_role;
+
+CREATE OR REPLACE TRIGGER f14_guard_held_media_reference
+BEFORE INSERT OR UPDATE OF photo_url,pet_avatar ON public.posts
+FOR EACH ROW EXECUTE FUNCTION moderation_private.f14_guard_held_media_reference('photo_url','pet_avatar');
+CREATE OR REPLACE TRIGGER f14_guard_held_media_reference
+BEFORE INSERT OR UPDATE OF photo_url,photo_storage_path ON public.community_posts
+FOR EACH ROW EXECUTE FUNCTION moderation_private.f14_guard_held_media_reference('photo_url','photo_storage_path');
+CREATE OR REPLACE TRIGGER f14_guard_held_media_reference
+BEFORE INSERT OR UPDATE OF photo_url ON public.pets
+FOR EACH ROW EXECUTE FUNCTION moderation_private.f14_guard_held_media_reference('photo_url');
+CREATE OR REPLACE TRIGGER f14_guard_held_media_reference
+BEFORE INSERT OR UPDATE OF image_url ON public.communities
+FOR EACH ROW EXECUTE FUNCTION moderation_private.f14_guard_held_media_reference('image_url');
+CREATE OR REPLACE TRIGGER f14_guard_held_media_reference
+BEFORE INSERT OR UPDATE OF avatar_url ON public.profiles
+FOR EACH ROW EXECUTE FUNCTION moderation_private.f14_guard_held_media_reference('avatar_url');
+
+-- RLS STABLE predicates can predate a lock wait. A volatile BEFORE trigger
+-- reads the claim after acquiring the object row lock, closing that MVCC gap.
+-- No deletion is initiated here; only the existing verified server API path
+-- may remove the exact claimed version. INSERT/UPDATE cannot replace it.
+CREATE OR REPLACE FUNCTION moderation_private.f14_guard_held_storage_mutation()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $f14_storage_guard$
+DECLARE c moderation_private.media_claims%ROWTYPE; v_bucket text; v_path text;
+BEGIN
+ IF TG_OP='INSERT' THEN v_bucket:=NEW.bucket_id;v_path:=NEW.name;
+ ELSE v_bucket:=OLD.bucket_id;v_path:=OLD.name; END IF;
+ IF v_bucket NOT IN ('post-photos','community-post-photos')
+    AND (TG_OP<>'UPDATE' OR NEW.bucket_id NOT IN ('post-photos','community-post-photos'))
+ THEN IF TG_OP='DELETE' THEN RETURN OLD; ELSE RETURN NEW; END IF; END IF;
+ IF pg_catalog.current_setting('transaction_isolation') NOT IN ('read committed','read uncommitted')
+ THEN RAISE EXCEPTION 'F14 Storage writes require a fresh transaction snapshot' USING ERRCODE='40001'; END IF;
+ SELECT * INTO c FROM moderation_private.media_claims mc
+ WHERE mc.status='held' AND ((mc.bucket=v_bucket AND mc.snapshot->>'path'=v_path)
+   OR (TG_OP='UPDATE' AND mc.bucket=NEW.bucket_id AND mc.snapshot->>'path'=NEW.name))
+ ORDER BY mc.claim_id LIMIT 1;
+ IF NOT FOUND THEN IF TG_OP='DELETE' THEN RETURN OLD; ELSE RETURN NEW; END IF; END IF;
+ IF TG_OP='DELETE' AND pg_catalog.current_setting('role',true)='service_role'
+    AND auth.role()='service_role' AND c.checked_at IS NOT NULL
+    AND c.expires_at>pg_catalog.clock_timestamp()
+    AND c.storage_object_id=OLD.id AND c.snapshot->>'storage_object_id'=OLD.id::text
+    AND c.snapshot->>'object_version' IS NOT DISTINCT FROM OLD.version
+    AND c.snapshot->>'owner_id' IS NOT DISTINCT FROM OLD.owner_id
+    AND (c.snapshot->>'object_updated_at')::timestamptz IS NOT DISTINCT FROM OLD.updated_at
+    AND c.snapshot->>'metadata_fingerprint'=pg_catalog.md5(coalesce(OLD.metadata::text,''))
+    AND public.f14_moderation_media_gate(c.target_kind,c.target_id,OLD.bucket_id,OLD.name,c.snapshot->>'source_url','preflight')
+ THEN RETURN OLD; END IF;
+ RAISE EXCEPTION 'F14 held Storage mutation requires exact verified server removal' USING ERRCODE='23514';
+END;
+$f14_storage_guard$;
+ALTER FUNCTION moderation_private.f14_guard_held_storage_mutation() OWNER TO postgres;
+REVOKE ALL ON FUNCTION moderation_private.f14_guard_held_storage_mutation() FROM PUBLIC,anon,authenticated,service_role;
+CREATE OR REPLACE TRIGGER f14_guard_held_storage_mutation
+BEFORE INSERT OR UPDATE OR DELETE ON storage.objects
+FOR EACH ROW EXECUTE FUNCTION moderation_private.f14_guard_held_storage_mutation();
 
 CREATE OR REPLACE FUNCTION moderation_private.f14_media_probe(p_kind text,p_id uuid)
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
@@ -75,6 +194,12 @@ DECLARE
   v_count integer; v_owner_ok boolean;
 BEGIN
   IF p_kind NOT IN ('feed_post','community_post') OR p_id IS NULL THEN RETURN NULL; END IF;
+  IF pg_catalog.current_setting('transaction_isolation') NOT IN ('read committed','read uncommitted')
+  THEN RETURN NULL; END IF;
+  -- Writers obtain ROW EXCLUSIVE before their BEFORE trigger. SHARE blocks them
+  -- until the prepare RPC commits its held claim, or sees their committed alias
+  -- before granting a claim. Locks end at transaction completion, never HTTP.
+  LOCK TABLE public.posts,public.community_posts,public.pets,public.communities,public.profiles IN SHARE MODE;
   SELECT r.report_id INTO v_report
   FROM moderation_private.content_restrictions r
   JOIN moderation_private.reports rep ON rep.id=r.report_id
@@ -329,5 +454,8 @@ BEGIN
   RETURN v_count = 1;
 END;
 $f14_media_gate$;
+
+ALTER FUNCTION moderation_private.f14_media_probe(text,uuid) OWNER TO postgres;
+ALTER FUNCTION public.f14_moderation_media_gate(text,uuid,text,text,text,text) OWNER TO postgres;
 
 COMMIT;
