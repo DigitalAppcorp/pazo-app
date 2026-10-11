@@ -28,13 +28,16 @@ DECLARE
   v_character text;
   v_host text; v_segment text; v_segments text[] := ARRAY[]::text[]; v_input text;
 BEGIN
-  IF pg_catalog.length(p_url) > 2048 OR pg_catalog.length(p_path) > 400
+  IF pg_catalog.length(p_path) > 400
      OR p_bucket NOT IN ('post-photos', 'community-post-photos')
   THEN RETURN false; END IF;
 
   -- Conservative normalization of browser URL spellings. This never chooses
   -- the deletion target: the target itself must remain canonical and exact.
-  v_input:=pg_catalog.regexp_replace(p_url,'[[:space:]]','','g');
+  -- A long query/fragment must not hide a shared object. Strip them before
+  -- parsing identity rather than silently ignoring URLs longer than 2048.
+  v_input:=pg_catalog.split_part(pg_catalog.split_part(p_url,'?',1),'#',1);
+  v_input:=pg_catalog.regexp_replace(v_input,'[[:space:]]','','g');
   v_input:=pg_catalog.replace(v_input,pg_catalog.chr(92),'/');
   IF pg_catalog.left(v_input,2)='//' THEN v_input:='https:'||v_input; END IF;
   v_input:=pg_catalog.regexp_replace(v_input,'^([A-Za-z]+):/*','\1://');

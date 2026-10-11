@@ -27,6 +27,8 @@ No Computer Use, cambios hosted, Edge deploy, Vercel manual, main, F13 ni T11.
    Se cuenta conservadoramente su identidad, además de query/fragment/path
    codificado y variantes de navegador HTTP, esquema relativo, backslash y
    hostname codificado/trailing-dot cuando corresponden al mismo proyecto.
+   Queries/fragmentos/userinfo largos tampoco pueden eludir la identidad por
+   superar el anterior corte de 2048 caracteres; se eliminó ese falso negativo.
    El objeto que se puede retirar **sigue siendo una URL canónica exacta**.
 4. HEAD/GET 403 se aceptaba como prueba de desaparición pública. Se extrae el
    verificador HTTP y se exige 404/410 en las cuatro comprobaciones; 403,
@@ -45,7 +47,7 @@ No se relaja una política, se otorga una RPC pública o se libera un claim.
 |---|---|
 | SQL versionado, ambas migraciones en orden, repetición del par | PASS, con SET ROLE postgres **NOSUPERUSER** y privilegios fuente |
 | Suite histórica adaptada a rechazos más tempranos | **42 resultados PASS**, ROLLBACK; claims/roles/argumentos, snapshots, ACL, RLS/Storage/COPY, versiones, expiración, idempotencia y sentinelas ajenos |
-| Referencias existentes antes del claim | **264 comprobaciones PASS**: seis columnas x 22 aliases x feed/community; updates reales sujetos a constraints y probe=NULL |
+| Referencias existentes antes del claim | **300 comprobaciones PASS**: seis columnas x 25 aliases x feed/community; updates reales sujetos a constraints y probe=NULL |
 | Concurrencia | **12 escenarios PASS**, participantes psql separados y esperas reales observadas en pg_stat_activity |
 | Edge/core/Storage.info/HTTP | **38 tests PASS**; Storage y HTTP simulados, sin peticiones reales |
 | Build | PASS; warning heredado del chunk App >500 kB |

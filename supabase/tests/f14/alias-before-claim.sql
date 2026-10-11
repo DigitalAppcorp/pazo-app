@@ -34,7 +34,9 @@ BEGIN
     replace(c.url,'https:',''),
     replace(c.url,'/',chr(92)),
     replace(c.url,'.supabase.co/','.supabase.co./'),
-    chr(9)||c.url||chr(10),replace(c.url,'://mry','://%6dry')
+    chr(9)||c.url||chr(10),replace(c.url,'://mry','://%6dry'),
+    c.url||'?v='||repeat('synthetic',400),c.url||'#'||repeat('synthetic',400),
+    replace(c.url,'https://','https://'||repeat('synthetic',400)||'@')
    ] LOOP
     IF NOT moderation_private.f14_local_url_points_to_object(alias,c.bucket,c.path)
     THEN RAISE EXCEPTION 'Identity alias not covered'; END IF;
@@ -55,7 +57,7 @@ BEGIN
    END LOOP;
   END LOOP;
  END LOOP;
- IF attempts<>264 THEN RAISE EXCEPTION 'Incomplete alias matrix: %',attempts; END IF;
- RAISE NOTICE 'PASS 264 pre-existing alias checks, 6 surfaces x 22 aliases x 2 kinds';
+ IF attempts<>300 THEN RAISE EXCEPTION 'Incomplete alias matrix: %',attempts; END IF;
+ RAISE NOTICE 'PASS 300 pre-existing alias checks, 6 surfaces x 25 aliases x 2 kinds';
 END $$;
 ROLLBACK;

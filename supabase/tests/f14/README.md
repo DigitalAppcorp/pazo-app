@@ -55,7 +55,7 @@ f14_admin -d f14_synthetic -v ON_ERROR_STOP=1`:
    repeat the pair; `RESET ROLE`. The restored postgres role is **not superuser**.
 3. Run `metadata.sql` and `synthetic-cases.sql` (42 results, ROLLBACK).
 4. Set `pazo.test.prepare_claims='false'`; run `concurrency-fixture.sql`,
-   `alias-before-claim.sql` (264 checks, ROLLBACK), then `cleanup.sql`.
+   `alias-before-claim.sql` (300 checks, ROLLBACK), then `cleanup.sql`.
 5. Run `node scripts/f14-postgres-concurrency.mjs` (12 real scenarios; lock waits
    observed via pg_stat_activity rather than inferred from elapsed sleeps).
 6. `npm run test:f14`, then build.
