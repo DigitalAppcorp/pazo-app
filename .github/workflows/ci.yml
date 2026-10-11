@@ -41,6 +41,15 @@ jobs:
       - name: F14 media purge regressions
         run: npm run test:f14
 
+      - name: Operator PowerShell syntax without credentials or provider calls
+        shell: pwsh
+        run: |
+          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1')) {
+            $tokens=$null; $parseErrors=$null
+            [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $file),[ref]$tokens,[ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count) { throw "PowerShell syntax error in $file" }
+          }
+
       - name: Lint (legacy debt is currently non-blocking)
         continue-on-error: true
         run: npm run lint
