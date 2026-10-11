@@ -1,3 +1,4 @@
+import { prepareCommunityPostCleanup, retainUnconfirmedUpload } from '../features/communities/communityMediaCleanup'
 import { supabase } from './supabaseClient'
 import { wasAuthorDeleted } from '../features/account/deletedAuthorThread'
 import type {
@@ -453,36 +454,21 @@ export const createCommunityPost = async ({
 
     if (error) throw error
   } catch (error) {
-    if (storagePath) {
-      const { error: cleanupError } = await supabase.storage
-        .from(COMMUNITY_POST_BUCKET)
-        .remove([storagePath])
-      if (cleanupError) {
-        console.error('No se pudo limpiar la foto del post fallido:', cleanupError)
-      }
-    }
-
-    throw error
+    retainUnconfirmedUpload(storagePath, error)
   }
 }
 
 export const deleteCommunityPost = async (post: CommunityPost) => {
-  const { error } = await supabase
-    .from('community_posts')
-    .delete()
-    .eq('id', post.id)
-
-  if (error) throw error
-
-  if (post.photoStoragePath) {
-    const { error: storageError } = await supabase.storage
-      .from(COMMUNITY_POST_BUCKET)
-      .remove([post.photoStoragePath])
-
-    if (storageError) {
-      console.error('Post eliminado; limpieza de imagen pendiente:', storageError)
-    }
-  }
+  await getAuthUser()
+  return prepareCommunityPostCleanup(post.id, async () => {
+    const { data, error } = await supabase
+      .from('community_posts')
+      .delete()
+      .eq('id', post.id)
+      .select('id,community_id,photo_storage_path')
+    if (error) throw error
+    return data || []
+  })
 }
 
 export const toggleCommunityPostLike = async ({

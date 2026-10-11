@@ -140,12 +140,14 @@ export const HomeView = ({
 
   const handleSelectNearby = async () => {
     setFeedFilter('nearby')
+    if (!canReport) return
     try {
       await supabase.from('interactions').insert({ target_id: 'feature_nearby_tab', target_type: 'place', action_type: 'view' })
     } catch (err) { console.error('Error tracking nearby view:', err) }
   }
 
   const handleNearbyInterest = async () => {
+    if (!canReport) return
     setIsSubmittingNearby(true)
     try {
       await supabase.from('interactions').insert({ target_id: 'feature_nearby_interested', target_type: 'place', action_type: 'join' })
@@ -169,10 +171,10 @@ export const HomeView = ({
         </div>
         <div className="bg-[#FAF8F5] p-1 rounded-full flex gap-1 shadow-xs">
           <button onClick={() => setFeedFilter('following')} className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-sm' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
-            {lang === 'es' ? 'Siguiendo' : 'Following'}
+            {lang === 'es' ? 'Para ti' : 'For you'}
           </button>
           <button onClick={handleSelectNearby} className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-sm' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
-            {lang === 'es' ? 'Cerca de mi' : 'Nearby'}
+            {lang === 'es' ? 'Cerca · Próximamente' : 'Nearby · Coming soon'}
           </button>
         </div>
       </div>
@@ -186,15 +188,15 @@ export const HomeView = ({
           </div>
           <h3 className="text-lg font-black text-[#204E4A]">{lang === 'es' ? 'Comunidad en tu vecindario' : 'Neighborhood community'}</h3>
           <p className="text-xs text-[#5C7470] leading-relaxed max-w-[260px] mx-auto font-medium">
-            {lang === 'es' ? 'Estamos trabajando fuertemente para construir el feed basado en geolocalizacion que te conecte al instante con mascotas y duenos cercanos.' : 'Estamos trabajando fuertemente para construir el feed basado en geolocalizacion que te conecte al instante con mascotas y duenos cercanos.'}
+            {lang === 'es' ? 'Estamos trabajando fuertemente para construir el feed basado en geolocalizacion que te conecte al instante con mascotas y duenos cercanos.' : 'We are working on a location-based feed to connect you with nearby pets and their people.'}
           </p>
           {hasVotedNearby ? (
             <div className="bg-[#204E4A] text-[#E1E53F] p-3.5 rounded-2xl text-xs font-bold inline-flex items-center gap-2">
               <span>&#x2713; {lang === 'es' ? 'Gracias por ayudarnos a priorizar!' : 'Thanks for your support!'}</span>
             </div>
           ) : (
-            <button onClick={handleNearbyInterest} disabled={isSubmittingNearby} className="bg-[#204E4A] hover:bg-[#183d3a] text-[#E1E53F] font-black px-6 py-3 rounded-full text-xs shadow-md transition-all cursor-pointer active:scale-95">
-              {isSubmittingNearby ? 'Registrando...' : (lang === 'es' ? 'Me interesa esta funcion' : 'I am interested')}
+            <button onClick={handleNearbyInterest} disabled={isSubmittingNearby || !canReport} className="bg-[#204E4A] hover:bg-[#183d3a] text-[#E1E53F] font-black px-6 py-3 rounded-full text-xs shadow-md transition-all cursor-pointer active:scale-95">
+              {!canReport ? (lang === 'es' ? 'Inicia sesión para expresar interés' : 'Sign in to express interest') : isSubmittingNearby ? (lang === 'es' ? 'Registrando...' : 'Saving...') : (lang === 'es' ? 'Me interesa esta funcion' : 'I am interested')}
             </button>
           )}
         </div>
@@ -218,7 +220,7 @@ export const HomeView = ({
               post={post}
               canReport={canReport}
               onReport={(kind,id,label) => setReportTarget({kind,id,label})}
-              currentPetId={currentPetId}
+              currentPetId={canReport ? currentPetId : ''}
               ownedPetIds={ownedPetIds}
               lang={lang}
               isCommentsOpen={activeCommentsPostId === post.id}

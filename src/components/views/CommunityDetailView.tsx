@@ -1,3 +1,5 @@
+import { CommunityMediaPendingError, COMMUNITY_MEDIA_BUCKET } from '../../features/communities/communityMediaCleanup'
+import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { useCallback, useEffect, useState } from 'react'
 import type {
   CommunityMember,
@@ -83,6 +85,8 @@ export const CommunityDetailView = ({
   const [postImage, setPostImage] = useState<File | null>(null)
   const [postPreview, setPostPreview] = useState('')
   const [isPosting, setIsPosting] = useState(false)
+  const [postMediaReviewPending, setPostMediaReviewPending] = useState(false)
+  const [postMediaReviewPath, setPostMediaReviewPath] = useState<string | null>(null)
 
   const [openCommentsFor, setOpenCommentsFor] = useState<string | null>(null)
   const [commentsByPost, setCommentsByPost] = useState<
@@ -174,7 +178,7 @@ export const CommunityDetailView = ({
 
   const handleCreatePost = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!community?.isJoined || !currentPet?.id || isPosting) return
+    if (!community?.isJoined || !currentPet?.id || isPosting || postMediaReviewPending) return
     if (!postText.trim() && !postImage) return
 
     setIsPosting(true)
@@ -193,6 +197,14 @@ export const CommunityDetailView = ({
       await refreshPosts()
       onCommunityChanged?.()
     } catch (error: any) {
+      if (error instanceof CommunityMediaPendingError) {
+        setPostMediaReviewPending(true)
+        setPostMediaReviewPath(error.storagePath)
+        alert(lang === 'es'
+          ? `No se pudo confirmar la publicación. No reintentes todavía. La foto requiere revisión: ${COMMUNITY_MEDIA_BUCKET}/${error.storagePath}. Contacta con ${PAZO_PRIVACY_SUPPORT_EMAIL}.`
+          : `Publication could not be confirmed. Do not retry yet. The photo needs review: ${COMMUNITY_MEDIA_BUCKET}/${error.storagePath}. Contact ${PAZO_PRIVACY_SUPPORT_EMAIL}.`)
+        return
+      }
       console.error('Error creating Community post:', error)
       alert(
         lang === 'es'
@@ -299,7 +311,12 @@ export const CommunityDetailView = ({
     }
 
     try {
-      await deleteCommunityPost(post)
+      const result = await deleteCommunityPost(post)
+      if (result.mediaCleanupPending) {
+        alert(lang === 'es'
+          ? `Publicación eliminada. La retirada de la foto no está confirmada: ${COMMUNITY_MEDIA_BUCKET}/${result.storagePath}. Contacta con ${PAZO_PRIVACY_SUPPORT_EMAIL}.`
+          : `Post deleted. Photo removal is not confirmed: ${COMMUNITY_MEDIA_BUCKET}/${result.storagePath}. Contact ${PAZO_PRIVACY_SUPPORT_EMAIL}.`)
+      }
       await refreshPosts()
       onCommunityChanged?.()
     } catch (error: any) {
@@ -653,9 +670,15 @@ export const CommunityDetailView = ({
                   />
                 </label>
 
+                {postMediaReviewPath && <p role="status" className="text-xs text-[#5C7470] break-all">
+                  {lang === 'es' ? 'Publicación sin confirmar. Contacta con soporte antes de reenviar. Referencia: '
+                    : 'Publication unconfirmed. Contact support before retrying. Reference: '}
+                  {COMMUNITY_MEDIA_BUCKET}/{postMediaReviewPath}{' '}
+                  <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="font-bold underline">{PAZO_PRIVACY_SUPPORT_EMAIL}</a>
+                </p>}
                 <button
                   type="submit"
-                  disabled={isPosting || (!postText.trim() && !postImage)}
+                  disabled={postMediaReviewPending || isPosting || (!postText.trim() && !postImage)}
                   className="rounded-full bg-[#E1E53F] px-5 py-2.5 text-[11px] font-black text-[#204E4A] disabled:opacity-50"
                 >
                   {isPosting

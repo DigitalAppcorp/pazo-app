@@ -4,6 +4,7 @@ import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
+import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
@@ -18,6 +19,8 @@ import {
 interface PetViewProps {
   currentPet: Pet
   canModerate: boolean
+  canManagePet: boolean
+  onRequireAccount: () => void
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
   onPetUpdated: (pet: Pet) => void
@@ -37,6 +40,8 @@ interface PetViewProps {
 export const PetView = ({
   currentPet,
   canModerate,
+  canManagePet,
+  onRequireAccount,
   availablePets,
   onSelectPet,
   onPetUpdated,
@@ -90,6 +95,7 @@ export const PetView = ({
   const nextPendingCare = careReminderItem
 
   const handleEditClick = () => {
+    if (!canManagePet) { onRequireAccount(); return }
     setEditForm(buildEditForm())
     setEditPhotoFile(null)
     setIsEditing(true)
@@ -104,6 +110,7 @@ export const PetView = ({
   }
 
   const handleCompleteReminderCare = async (careItem: CareItem) => {
+    if (!canManagePet) { onRequireAccount(); return }
     if (completingCareId) return
 
     setCompletingCareId(careItem.id)
@@ -123,6 +130,7 @@ export const PetView = ({
   }
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canManagePet) { onRequireAccount(); return }
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -156,6 +164,7 @@ export const PetView = ({
   }
 
   const handleSaveProfile = async () => {
+    if (!canManagePet) { onRequireAccount(); return }
     if (isSaving) return
     if (!editForm.name.trim()) {
       alert(lang === 'es' ? 'El nombre de la mascota es obligatorio.' : 'Pet name is required.')
@@ -638,10 +647,13 @@ export const PetView = ({
                 :(lang==='es'?'Las solicitudes de eliminación se habilitarán cuando termine la verificación del servicio.':'Deletion requests will be available after service verification.')}
             </p>
             <button type="button" disabled={!requestEnabled}
-              onClick={()=>setShowDeletionRequest(true)}
+              onClick={() => canManagePet ? setShowDeletionRequest(true) : onRequireAccount()}
               className="mt-3 rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40 focus-visible:bg-[#E1E53F]">
               {lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'}
             </button>
+            <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="mt-3 block text-xs font-bold text-[#204E4A] underline">
+              {lang === 'es' ? 'Soporte y privacidad: ' : 'Support and privacy: '}{PAZO_PRIVACY_SUPPORT_EMAIL}
+            </a>
           </div>
 
           {nextPendingCare && (

@@ -1,3 +1,5 @@
+> **CIERRE P0/P1 EN EJECUCIÓN — 2026-10-10:** T01–T04/T13–T16 corregidas y pruebas dirigidas PASS; T17 fail-closed implementado, pendiente login Preview. Estados/evidencia vigentes en [subhoja maestra](PAZO_MVP_TECHNICAL_CLOSURE_SUBROADMAP_20261010.md), procedimientos/gates en [operaciones de cierre](PAZO_MVP_CLOSURE_OPERATIONS_20261010.md). T05–T12 mantienen gates explícitos de acceso Preview/Mapbox, Auth, operador, medios físicos, dispositivos y release. No Computer Use, P2/F13, main, producción, SQL hosted ni borrados; los estados históricos anteriores no superseden este delta. CI del HEAD publicado debe comprobarse por SHA; build/QA local no acreditan runtime.
+
 # PAZO MVP — Technical Release Readiness
 
 ## Recuperación SQL F14 y validación PostgreSQL (2026-10-10)

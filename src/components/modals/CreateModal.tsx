@@ -18,6 +18,8 @@ interface CreateModalProps {
   onOpenCheckIn?: () => void
   onOpenAlert?: () => void
   onSelectOption?: (type: 'post' | 'lugar' | 'comunidad' | 'alerta') => void
+  canCreate?: boolean
+  onRequireAccount?: () => void
   lang: 'es' | 'en'
 }
 
@@ -30,6 +32,8 @@ export const CreateModal = ({
   onOpenCheckIn,
   onOpenAlert,
   onSelectOption,
+  canCreate = true,
+  onRequireAccount,
   lang,
 }: CreateModalProps) => {
   const [mode, setMode] = useState<'menu' | 'post' | 'event'>('menu')
@@ -52,6 +56,7 @@ export const CreateModal = ({
   }
 
   const handlePublish = () => {
+    if (!canCreate) { onRequireAccount?.(); return }
     if (!postText.trim() && !selectedFile) return
     if (onCreatePost) {
       onCreatePost(
@@ -88,11 +93,16 @@ export const CreateModal = ({
               </button>
             </div>
 
+            {!canCreate && <p role="status" className="text-xs text-[#5C7470]">
+              {lang === 'es' ? 'Demo: inicia sesión para publicar o gestionar una mascota real.'
+                : 'Demo: sign in to post or manage a real pet.'}
+            </p>}
             {/* Las 4 acciones principales de la especificación de Pazo */}
             <div className="space-y-2.5 pt-1">
               {/* 1. Publicación */}
               <button
                 onClick={() => {
+                  if (!canCreate) { onRequireAccount?.(); return }
                   if (onSelectOption) onSelectOption('post')
                   else setMode('post')
                 }}
@@ -113,11 +123,10 @@ export const CreateModal = ({
                 </div>
               </button>
 
-              {/* 2. Evento / Encuentro */}
-              <button
+              {/* 2. Evento / Encuentro: aún no disponible */}
+              <button disabled
                 onClick={() => {
-                  if (onSelectOption) onSelectOption('comunidad')
-                  else setMode('event')
+                  // Meetups are a future feature, with no publishing route.
                 }}
                 className="w-full p-4 bg-[#FAF8F5] hover:bg-[#FAF8F5]/80 rounded-[1.8rem] flex items-center gap-3.5 transition-all cursor-pointer text-left group shadow-xs"
               >
@@ -126,12 +135,12 @@ export const CreateModal = ({
                 </div>
                 <div>
                   <h4 className="font-extrabold text-sm text-[#204E4A]">
-                    {lang === 'es' ? 'Crear Encuentro' : 'Create Meetup'}
+                    {lang === 'es' ? 'Encuentros · Próximamente' : 'Meetups · Coming soon'}
                   </h4>
                   <p className="text-xs text-[#5C7470]">
                     {lang === 'es'
-                      ? 'Paseo grupal o actividad en un lugar público'
-                      : 'Group walk or meetup at a local spot'}
+                      ? 'Esta función aún no está disponible'
+                      : 'This feature is not available yet'}
                   </p>
                 </div>
               </button>
@@ -139,6 +148,7 @@ export const CreateModal = ({
               {/* 3. Sugerir lugar para revisión */}
               <button
                 onClick={() => {
+                  if (!canCreate) { onRequireAccount?.(); return }
                   if (onSelectOption) onSelectOption('lugar')
                   else if (onOpenCheckIn) {
                     onClose()
@@ -165,6 +175,7 @@ export const CreateModal = ({
               {/* 4. Alerta de Mascota */}
               <button
                 onClick={() => {
+                  if (!canCreate) { onRequireAccount?.(); return }
                   if (onSelectOption) onSelectOption('alerta')
                   else if (onOpenAlert) {
                     onClose()
@@ -178,12 +189,12 @@ export const CreateModal = ({
                 </div>
                 <div>
                   <h4 className="font-extrabold text-sm text-[#EC7357]">
-                    {lang === 'es' ? 'Alerta de Pérdida o Hallazgo' : 'Lost or Found Alert'}
+                    {lang === 'es' ? 'Mi mascota está perdida' : 'My pet is lost'}
                   </h4>
                   <p className="text-xs text-[#5C7470]">
                     {lang === 'es'
-                      ? 'Activar red de búsqueda comunitaria protegida'
-                      : 'Broadcast a protected community search alert'}
+                      ? `Marcar a ${activePetName} como perdida y recibir avistamientos`
+                      : `Mark ${activePetName} as lost and receive sightings`}
                   </p>
                 </div>
               </button>
@@ -339,13 +350,10 @@ export const CreateModal = ({
               </div>
 
               <button
-                onClick={() => {
-                  alert(lang === 'es' ? '¡Encuentro publicado en tu comunidad!' : 'Meetup published!')
-                  onClose()
-                }}
+                disabled
                 className="w-full bg-[#204E4A] hover:bg-[#183d3a] text-[#E1E53F] font-extrabold py-3.5 rounded-full text-sm shadow-md transition-all cursor-pointer"
               >
-                {lang === 'es' ? 'Guardar y Publicar Encuentro' : 'Publish Meetup'}
+                {lang === 'es' ? 'Próximamente' : 'Coming soon'}
               </button>
             </div>
           </div>

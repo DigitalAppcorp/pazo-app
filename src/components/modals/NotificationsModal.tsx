@@ -1,3 +1,4 @@
+import { getNotificationSightingId } from '../../features/notifications/notificationSource'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
 import { IconCalendar, IconChat } from '../icons/PazoIcons'
@@ -23,7 +24,7 @@ export const NotificationsModal = ({
   isLoadingMore,
   lang,
 }: NotificationsModalProps) => {
-  const [filter, setFilter] = useState<'todas' | 'cuidados' | 'comunidad'>('todas')
+  const [filter, setFilter] = useState<'todas' | 'comunidad'>('todas')
 
   if (!isOpen) return null
 
@@ -74,16 +75,6 @@ export const NotificationsModal = ({
             {lang === 'es' ? 'Todas' : 'All'}
           </button>
           <button
-            onClick={() => setFilter('cuidados')}
-            className={`flex-1 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
-              filter === 'cuidados'
-                ? 'bg-[#204E4A] text-[#E1E53F]'
-                : 'text-[#5C7470] hover:text-[#204E4A]'
-            }`}
-          >
-            {lang === 'es' ? 'Cuidados' : 'Care'}
-          </button>
-          <button
             onClick={() => setFilter('comunidad')}
             className={`flex-1 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
               filter === 'comunidad'
@@ -91,7 +82,7 @@ export const NotificationsModal = ({
                 : 'text-[#5C7470] hover:text-[#204E4A]'
             }`}
           >
-            {lang === 'es' ? 'Comunidad' : 'Community'}
+            {lang === 'es' ? 'Avistamientos' : 'Sightings'}
           </button>
         </div>
 
@@ -102,7 +93,7 @@ export const NotificationsModal = ({
             </p>
           ) : (
             filtered.map((item) => {
-              const canOpen = item.category === 'comunidad' && Boolean(item.sourceId)
+              const canOpen = Boolean(getNotificationSightingId(item))
 
               return (
                 <button

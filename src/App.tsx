@@ -1,3 +1,5 @@
+import { canUseAccountFeatures } from './features/auth/accountAccess'
+import { getNotificationSightingId } from './features/notifications/notificationSource'
 import { useState, useEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -282,6 +284,18 @@ function PazoMain() {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
+
+  const canUseAccount = canUseAccountFeatures(user?.id, isDemoUser)
+  const requireAccount = () => {
+    setIsCreateMenuOpen(false)
+    setIsDemoUser(false)
+    setIsOnboardingActive(false)
+    setAuthMode('login')
+  }
+  const openAccountAction = (action: () => void) => {
+    if (!canUseAccount) { requireAccount(); return }
+    action()
+  }
 
   const enrichPostsWithInteractions = async (postsList: Post[], petId?: string): Promise<Post[]> => {
     if (postsList.length === 0) return postsList
@@ -699,6 +713,7 @@ function PazoMain() {
   }
 
   const handleLikePost = async (postId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
     const operationKey = `${actorPetId}:${postId}`
@@ -748,6 +763,7 @@ function PazoMain() {
   }
 
   const handleSavePost = async (postId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
     const operationKey = `${actorPetId}:${postId}`
@@ -855,6 +871,7 @@ function PazoMain() {
   }
 
   const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    if (!canUseAccount) { requireAccount(); return false }
     const trimmedText = text.trim()
     if (!currentPet?.id || !postId || !trimmedText) return false
     const actorPet = currentPet
@@ -1068,6 +1085,7 @@ function PazoMain() {
   }
 
   const handleCreateCare = async (input: CareItemInput) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await createCareItem(petId, input)
     await refreshCareAfterMutation(petId)
@@ -1077,23 +1095,27 @@ function PazoMain() {
     careItemId: string,
     input: CareItemInput
   ) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await updateCareItem(careItemId, input)
     await refreshCareAfterMutation(petId)
   }
 
   const handleArchiveCare = async (careItemId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await archiveCareItem(careItemId)
     await refreshCareAfterMutation(petId)
   }
 
   const handleCompleteCare = async (item: CareItem) => {
+    if (!canUseAccount) { requireAccount(); return }
     await completeCareItem(item)
     await refreshCareAfterMutation(item.petId)
   }
 
   const handleUndoCareCompletion = async (completion: CareCompletion) => {
+    if (!canUseAccount) { requireAccount(); return }
     await undoCareCompletion(completion.id)
     await refreshCareAfterMutation(completion.petId)
   }
@@ -1213,6 +1235,7 @@ function PazoMain() {
     title: string,
     category: DocumentCategory
   ) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await uploadPetDocument(petId, file, title, category)
     await refreshDocumentsAfterMutation(petId)
@@ -1223,12 +1246,14 @@ function PazoMain() {
     title: string,
     category: DocumentCategory
   ) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await updatePetDocumentMetadata(documentId, title, category)
     await refreshDocumentsAfterMutation(petId)
   }
 
   const handleDeleteDocument = async (document: PetDocument) => {
+    if (!canUseAccount) { requireAccount(); return }
     await deletePetDocument(document)
 
     if (activePetIdRef.current === document.petId) {
@@ -1345,10 +1370,11 @@ function PazoMain() {
   }
 
   const handleOpenNotification = async (notification: PazoNotification) => {
-    if (!notification.sourceId) return
+    const sightingId = getNotificationSightingId(notification)
+    if (!canUseAccount || !sightingId) return
 
     setIsNotificationsOpen(false)
-    setSelectedSightingId(notification.sourceId)
+    setSelectedSightingId(sightingId)
 
     if (!notification.read) {
       try {
@@ -1876,6 +1902,8 @@ function PazoMain() {
                   {activeTab === 'mascota' && (
                     <PetView
                       currentPet={currentPet}
+                      canManagePet={canUseAccount}
+                      onRequireAccount={requireAccount}
                       canModerate={Boolean(user?.id) && !isDemoUser}
                       availablePets={pets}
                       onSelectPet={selectActivePet}
@@ -1885,15 +1913,15 @@ function PazoMain() {
                           prevPets.map((pet) => pet.id === updatedPet.id ? updatedPet : pet)
                         )
                       }}
-                      onAddPet={() => setIsAddPetOpen(true)}
+                      onAddPet={() => openAccountAction(() => setIsAddPetOpen(true))}
                       careItems={careItems}
                       careReminderItem={currentPetCareReminder}
                       onCompleteCare={handleCompleteCare}
-                      onOpenQRPassport={() => setIsPassportOpen(true)}
-                      onOpenCareAgenda={() => setIsCareOpen(true)}
+                      onOpenQRPassport={() => openAccountAction(() => setIsPassportOpen(true))}
+                      onOpenCareAgenda={() => openAccountAction(() => setIsCareOpen(true))}
                       documentCount={documentCount}
-                      onOpenDocuments={() => setIsDocumentsOpen(true)}
-                      onOpenLostAlert={() => setIsAlertOpen(true)}
+                      onOpenDocuments={() => openAccountAction(() => setIsDocumentsOpen(true))}
+                      onOpenLostAlert={() => openAccountAction(() => setIsAlertOpen(true))}
                       lang={lang}
                       userPosts={profilePosts}
                     />
@@ -1935,7 +1963,12 @@ function PazoMain() {
             <CreateModal
               isOpen={isCreateMenuOpen}
               onClose={() => setIsCreateMenuOpen(false)}
+              activePetName={canUseAccount ? currentPet.name : (lang === 'es' ? 'una mascota de ejemplo' : 'a sample pet')}
+              activePetSpecies={currentPet.species}
+              canCreate={canUseAccount}
+              onRequireAccount={requireAccount}
               onSelectOption={(type) => {
+                if (!canUseAccount) { requireAccount(); return }
                 setIsCreateMenuOpen(false)
                 if (type === 'post') setIsCreatePostOpen(true)
                 if (type === 'alerta') setIsAlertOpen(true)
@@ -1954,7 +1987,7 @@ function PazoMain() {
             />
 
             <CreatePostModal
-              isOpen={isCreatePostOpen}
+              isOpen={canUseAccount && isCreatePostOpen}
               onClose={() => setIsCreatePostOpen(false)}
               currentPet={currentPet}
               onPostCreated={handlePostCreated}
@@ -1962,7 +1995,7 @@ function PazoMain() {
             />
 
             <AddPetModal
-              isOpen={isAddPetOpen}
+              isOpen={canUseAccount && isAddPetOpen}
               onClose={() => setIsAddPetOpen(false)}
               onPetCreated={(newPet) => {
                 ownedPetIdsRef.current = Array.from(
@@ -1986,7 +2019,7 @@ function PazoMain() {
             />
 
             <CareModal
-              isOpen={isCareOpen}
+              isOpen={canUseAccount && isCareOpen}
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
               careItems={careItems}
@@ -2006,7 +2039,7 @@ function PazoMain() {
             />
 
             <DocumentsModal
-              isOpen={isDocumentsOpen}
+              isOpen={canUseAccount && isDocumentsOpen}
               onClose={() => setIsDocumentsOpen(false)}
               petName={currentPet.name}
               documents={documents}
@@ -2025,7 +2058,7 @@ function PazoMain() {
             />
 
             <AlertModal
-              isOpen={isAlertOpen}
+              isOpen={canUseAccount && isAlertOpen}
               onClose={() => setIsAlertOpen(false)}
               pet={currentPet}
               onPetUpdated={(updatedPet) => {

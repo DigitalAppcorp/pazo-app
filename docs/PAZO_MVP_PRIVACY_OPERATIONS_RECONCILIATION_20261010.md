@@ -1,3 +1,5 @@
+> **RECONCILIACIÓN VIGENTE — 2026-10-10:** texto legal ES/EN preparado (`LEGAL_RELEASE_READY=true` solo en código), fecha efectiva null; PostHog hardcoded OFF aunque Vercel conserve variables antiguas; Unsplash inventariado/texto público; E2E manual de baja anterior PASS no repetido. La operación exige operador designado y método real de medios aún no probado. El análisis inicial de este documento se conserva como histórico. Fallos parciales de fotos, contacto y gates actuales: [operaciones de cierre](PAZO_MVP_CLOSURE_OPERATIONS_20261010.md). No afirmar un canal atendido, plazo o purga hasta verificarlo.
+
 # PAZO MVP — reconciliación de proveedores y operación de privacidad (2026-10-10)
 
 **Estado:** preparación interna, NO política pública y NO certificación legal. Complementa `PAZO_MVP_LEGAL_CLOSURE_AUDIT_20261010.md`. `LEGAL_RELEASE_READY=false`.

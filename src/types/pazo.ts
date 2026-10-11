@@ -331,5 +331,6 @@ export interface PazoNotification {
   read: boolean
   createdAt?: string
   petId?: string | null
+  sourceType?: string
   sourceId?: string | null
 }

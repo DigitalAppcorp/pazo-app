@@ -86,7 +86,7 @@ export const OnboardingView = ({
   const handleSignUp = async () => {
     if (isSigningUp || awaitingEmailConfirmation) return
     if (!email || !password) {
-      alert('Por favor ingresa un correo y contraseña.')
+      alert(lang === 'es' ? 'Por favor ingresa un correo y contraseña.' : 'Please enter an email and password.')
       return
     }
     if (!isOver18) {
@@ -184,27 +184,27 @@ export const OnboardingView = ({
               <div className="w-full h-64 rounded-[2.2rem] overflow-hidden shadow-[0_12px_32px_rgba(32,78,74,0.12)] soft-card">
                 <img
                   src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=900&auto=format&fit=crop"
-                  alt="Mascotas felices"
+                  alt={lang === 'es' ? "Mascotas felices" : "Happy pets"}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#204E4A]/45 via-transparent to-transparent"></div>
                 <div className="absolute bottom-3.5 left-3.5 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-[11px] font-bold text-[#204E4A]">Los Ángeles • Comunidad Abierta</span>
+                  <span className="text-[11px] font-bold text-[#204E4A]">{lang === 'es' ? "Los Ángeles • Comunidad Abierta" : "Los Angeles • Open community"}</span>
                 </div>
               </div>
 
               <div className="absolute -top-3 right-4 bg-[#E1E53F] text-[#204E4A] text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(225,229,63,0.55)] soft-card animate-float">
-                ★ Identidad, Comunidad y Cuidado
+                {lang === 'es' ? "★ Identidad, Comunidad y Cuidado" : "★ Identity, community and care"}
               </div>
             </div>
 
             <div className="space-y-1.5 text-left">
               <h1 className="text-[34px] sm:text-[38px] font-black leading-[1.08] tracking-tight text-[#204E4A]">
-                Su mundo, más cerca.
+                {lang === 'es' ? "Su mundo, más cerca." : "Their world, closer."}
               </h1>
               <p className="text-[13px] leading-relaxed text-[#5C7470]">
-                Comparte su vida. Encuentra tu comunidad. Cuida lo que más quieres.
+                {lang === 'es' ? "Comparte su vida. Encuentra tu comunidad. Cuida lo que más quieres." : "Share their life. Find your community. Care for those you love."}
               </p>
             </div>
           </div>
@@ -214,7 +214,7 @@ export const OnboardingView = ({
               onClick={() => setStep('A02')}
               className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold text-[15px] py-4 rounded-full shadow-[0_8px_25px_rgba(225,229,63,0.38)] transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>Comenzar</span>
+              <span>{lang === 'es' ? "Comenzar" : "Get started"}</span>
             </button>
 
             <div className="flex gap-2">
@@ -222,7 +222,7 @@ export const OnboardingView = ({
                 onClick={onSkipToLogin}
                 className="flex-1 bg-white hover:bg-neutral-50 text-[#204E4A] font-bold text-[15px] py-4 rounded-full shadow-sm transition-all cursor-pointer soft-button"
               >
-                Ya tengo una cuenta
+                {lang === 'es' ? "Ya tengo una cuenta" : "I already have an account"}
               </button>
               <button
                 onClick={onQuickDemo}
@@ -231,8 +231,8 @@ export const OnboardingView = ({
                 Demo
               </button>
             </div>
-            <p aria-label="Versión de PAZO" className="pt-1 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65">
-              Versión {pazoBuildVersion}
+            <p aria-label={lang === 'es' ? "Versión de PAZO" : "PAZO version"} className="pt-1 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65">
+              {lang === 'es' ? 'Versión' : 'Version'} {pazoBuildVersion}
             </p>
           </div>
         </div>
@@ -246,19 +246,19 @@ export const OnboardingView = ({
               onClick={() => setStep('A01')}
               className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
             >
-              ← Volver
+              {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[10px] font-bold text-[#5C7470]">Paso 1 de 4</span>
+            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 1 de 4" : "Step 1 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                Tu cuenta
+                {lang === 'es' ? "Tu cuenta" : "Your account"}
               </span>
-              <h2 className="text-3xl font-black text-[#204E4A]">Comencemos.</h2>
+              <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Comencemos." : "Let’s get started."}</h2>
               <p className="text-xs text-[#5C7470]">
-                Una persona responsable, todas sus mascotas.
+                {lang === 'es' ? "Una persona responsable, todas sus mascotas." : "One responsible person, all their pets."}
               </p>
             </div>
 
@@ -284,18 +284,18 @@ export const OnboardingView = ({
             ) : (
             <div className="space-y-3 pt-1 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Correo electrónico</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Correo electrónico" : "Email"}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@correo.com"
+                  placeholder={lang === 'es' ? "tu@correo.com" : "you@example.com"}
                   className="w-full bg-white rounded-2xl px-3.5 py-3 text-xs text-[#204E4A] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Contraseña</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Contraseña" : "Password"}</label>
                 <input
                   type="password"
                   value={password}
@@ -371,7 +371,7 @@ export const OnboardingView = ({
               onClick={onSkipToLogin}
               className="text-xs font-semibold text-[#5C7470] hover:text-[#204E4A] cursor-pointer"
             >
-              ¿Ya tienes cuenta? Iniciar sesión
+              {lang === 'es' ? "¿Ya tienes cuenta? Iniciar sesión" : "Already have an account? Sign in"}
             </button>
           </div>
         </div>
@@ -390,27 +390,27 @@ export const OnboardingView = ({
                 onClick={() => setStep('A02')}
                 className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
               >
-                ← Volver
+                {lang === 'es' ? "← Volver" : "← Back"}
               </button>
             )}
-            <span className="text-[10px] font-bold text-[#5C7470]">Paso 2 de 4</span>
+            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 2 de 4" : "Step 2 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                Agregar mascota
+                {lang === 'es' ? "Agregar mascota" : "Add a pet"}
               </span>
-              <h2 className="text-3xl font-black text-[#204E4A]">¿Quién te acompaña?</h2>
+              <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "¿Quién te acompaña?" : "Who is by your side?"}</h2>
               <p className="text-xs text-[#5C7470]">
-                Añade cualquier especie. La app se adapta con cariño.
+                {lang === 'es' ? "Añade cualquier especie. La app se adapta con cariño." : "Add your pet. Choose their species below."}
               </p>
             </div>
 
             {/* Avatar selector conectado a la galería */}
             <div className="flex items-center gap-3 p-3 bg-white rounded-2xl soft-card">
               {petPhoto ? (
-                <img src={petPhoto} alt="Foto elegida para tu mascota" className="w-14 h-14 rounded-2xl object-cover shrink-0" />
+                <img src={petPhoto} alt={lang === 'es' ? "Foto elegida para tu mascota" : "Selected pet photo"} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
               ) : (
                 <div aria-hidden="true" className="w-14 h-14 rounded-2xl bg-[#FAF8F5] flex items-center justify-center shrink-0 text-[#204E4A]">
                   <IconPaw size={24} />
@@ -418,7 +418,7 @@ export const OnboardingView = ({
               )}
               <div className="flex-1">
                 <label className="inline-flex items-center gap-1.5 text-xs font-bold text-[#204E4A] bg-[#FAF8F5] px-3.5 py-2 rounded-full cursor-pointer soft-button hover:bg-[#204E4A]/5 transition-colors">
-                  <span>📷 Cambiar fotografía</span>
+                  <span>{lang === 'es' ? "📷 Cambiar fotografía" : "📷 Change photo"}</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -426,24 +426,24 @@ export const OnboardingView = ({
                     className="hidden"
                   />
                 </label>
-                <span className="block text-[10px] text-[#5C7470] mt-1">Sube una foto desde tu galería</span>
+                <span className="block text-[10px] text-[#5C7470] mt-1">{lang === 'es' ? "Sube una foto desde tu galería" : "Upload a photo from your gallery"}</span>
               </div>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Nombre</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Nombre" : "Name"}</label>
                 <input
                   type="text"
                   value={petName}
                   onChange={(e) => setPetName(e.target.value)}
-                  placeholder="Ej: Luna, Bruno, Nube..."
+                  placeholder={lang === 'es' ? "Ej: Luna, Bruno, Nube..." : "E.g. Luna, Bruno, Cloud..."}
                   className="w-full bg-white rounded-2xl px-3.5 py-2.5 text-xs text-[#204E4A]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Especie</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Especie" : "Species"}</label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {(['gato', 'perro', 'conejo', 'ave'] as Species[]).map((sp) => (
                     <button
@@ -452,24 +452,24 @@ export const OnboardingView = ({
                       onClick={() => setPetSpecies(sp)}
                       className={`py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer soft-button ${petSpecies === sp ? 'bg-[#204E4A] text-[#E1E53F]' : 'bg-white text-[#5C7470]'} `}
                     >
-                      {sp === 'gato' ? <><IconCat className="w-4 h-4 mr-1" /> Gato</> : sp === 'perro' ? <><IconDog className="w-4 h-4 mr-1" /> Perro</> : sp === 'conejo' ? <><IconRabbit className="w-4 h-4 mr-1" /> Conejo</> : <><IconBird className="w-4 h-4 mr-1" /> Ave</>}
+                      {sp === 'gato' ? <><IconCat className="w-4 h-4 mr-1" /> {lang === 'es' ? "Gato" : "Cat"}</> : sp === 'perro' ? <><IconDog className="w-4 h-4 mr-1" /> {lang === 'es' ? "Perro" : "Dog"}</> : sp === 'conejo' ? <><IconRabbit className="w-4 h-4 mr-1" /> {lang === 'es' ? "Conejo" : "Rabbit"}</> : <><IconBird className="w-4 h-4 mr-1" /> {lang === 'es' ? "Ave" : "Bird"}</>}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Edad aproximada</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Edad aproximada" : "Approximate age"}</label>
                 <input
                   type="text"
                   value={petAge}
                   onChange={(e) => setPetAge(e.target.value)}
-                  placeholder="Ej: 3 años o fecha estimada"
+                  placeholder={lang === 'es' ? "Ej: 3 años o fecha estimada" : "E.g. 3 years or estimated date"}
                   className="w-full bg-white rounded-2xl px-3.5 py-2.5 text-xs text-[#204E4A]"
                 />
               </div>
 
-              <p className="text-[10px] text-[#5C7470]">Raza y datos médicos se pueden añadir después.</p>
+              <p className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Raza y datos médicos se pueden añadir después." : "Breed and medical details can be added later."}</p>
             </div>
           </div>
 
@@ -478,7 +478,7 @@ export const OnboardingView = ({
               onClick={() => setStep('A04')}
               className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold py-3.5 rounded-full text-xs shadow-md cursor-pointer transition-all"
             >
-              Continuar
+              {lang === 'es' ? "Continuar" : "Continue"}
             </button>
           </div>
         </div>
@@ -492,37 +492,37 @@ export const OnboardingView = ({
               onClick={() => setStep('A03')}
               className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
             >
-              ← Volver
+              {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[10px] font-bold text-[#5C7470]">Paso 3 de 4</span>
+            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 3 de 4" : "Step 3 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                Privacidad
+                {lang === 'es' ? "Privacidad" : "Privacy"}
               </span>
-              <h2 className="text-3xl font-black text-[#204E4A]">Tú decides.</h2>
+              <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Tú decides." : "You decide."}</h2>
               <p className="text-xs text-[#5C7470]">
-                Revisa qué se podrá ver antes de compartir su perfil público.
+                {lang === 'es' ? "Revisa qué se podrá ver antes de compartir su perfil público." : "Review what will be visible before sharing their public profile."}
               </p>
             </div>
 
             <div className="space-y-2.5 text-xs">
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
-                  <span className="font-extrabold text-[#204E4A] block">Nombre y fotografía</span>
-                  <span className="text-[10px] text-[#5C7470]">Visible para la comunidad</span>
+                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Nombre y fotografía" : "Name and photo"}</span>
+                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Visible para la comunidad" : "Visible to the community"}</span>
                 </div>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  Públicos
+                  {lang === 'es' ? "Públicos" : "Public"}
                 </span>
               </div>
 
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
-                  <span className="font-extrabold text-[#204E4A] block">Zona aproximada</span>
-                  <span className="text-[10px] text-[#5C7470]">Sin dirección exacta</span>
+                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</span>
+                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Sin dirección exacta" : "No exact address"}</span>
                 </div>
                 <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full">
                   {zone}
@@ -531,21 +531,21 @@ export const OnboardingView = ({
 
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
-                  <span className="font-extrabold text-[#204E4A] block">Datos de contacto</span>
-                  <span className="text-[10px] text-[#5C7470]">Teléfono y correo protegidos</span>
+                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Datos de contacto" : "Contact details"}</span>
+                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Teléfono y correo protegidos" : "Phone and email protected"}</span>
                 </div>
                 <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  Privados 🔒
+                  {lang === 'es' ? "Privados 🔒" : "Private 🔒"}
                 </span>
               </div>
 
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
-                  <span className="font-extrabold text-[#204E4A] block">Cuidados y documentos</span>
-                  <span className="text-[10px] text-[#5C7470]">Solo visibles por el tutor</span>
+                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Cuidados y documentos" : "Care and documents"}</span>
+                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Solo visibles por el tutor" : "Visible only to the guardian"}</span>
                 </div>
                 <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  Privados 🔒
+                  {lang === 'es' ? "Privados 🔒" : "Private 🔒"}
                 </span>
               </div>
             </div>
@@ -556,7 +556,7 @@ export const OnboardingView = ({
               onClick={() => setStep('A05')}
               className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold py-3.5 rounded-full text-xs shadow-md cursor-pointer transition-all"
             >
-              Guardar y continuar
+              {lang === 'es' ? "Guardar y continuar" : "Save and continue"}
             </button>
           </div>
         </div>
@@ -570,37 +570,37 @@ export const OnboardingView = ({
               onClick={() => setStep('A04')}
               className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
             >
-              ← Volver
+              {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[10px] font-bold text-[#5C7470]">Paso 4 de 4</span>
+            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 4 de 4" : "Step 4 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                Tu comunidad
+                {lang === 'es' ? "Tu comunidad" : "Your community"}
               </span>
-              <h2 className="text-3xl font-black text-[#204E4A]">Cerca de ustedes.</h2>
+              <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Cerca de ustedes." : "Close to you."}</h2>
               <p className="text-xs text-[#5C7470]">
-                Elige tu zona e intereses para empezar a explorar.
+                {lang === 'es' ? "Elige tu zona e intereses para empezar a explorar." : "Choose your area and interests to start exploring."}
               </p>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">Zona aproximada</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</label>
                 <input
                   type="text"
                   value={zone}
                   onChange={(e) => setZone(e.target.value)}
-                  placeholder="Los Ángeles"
+                  placeholder={lang === 'es' ? "Los Ángeles" : "Los Angeles"}
                   className="w-full bg-white rounded-2xl px-3.5 py-2.5 text-xs text-[#204E4A]"
                 />
-                <span className="text-[10px] text-[#5C7470] mt-0.5 block">También puedes buscar sin GPS.</span>
+                <span className="text-[10px] text-[#5C7470] mt-0.5 block">{lang === 'es' ? "También puedes buscar sin GPS." : "You can also search without GPS."}</span>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1.5">¿Qué les interesa?</label>
+                <label className="block text-[11px] font-bold text-[#204E4A] mb-1.5">{lang === 'es' ? "¿Qué les interesa?" : "What interests you?"}</label>
                 <div className="space-y-2">
                   {[
                     'Comunidades de gatos',
@@ -616,7 +616,12 @@ export const OnboardingView = ({
                         onClick={() => toggleInterest(topic)}
                         className={`w-full p-3 rounded-2xl text-xs font-bold flex justify-between items-center transition-all cursor-pointer soft-button ${selected ? 'bg-[#204E4A] text-[#E1E53F]' : 'bg-white text-[#5C7470]'} `}
                       >
-                        <span>{topic}</span>
+                        <span>{lang === 'es' ? topic : ({
+                          'Comunidades de gatos': 'Cat communities',
+                          'Lugares aptos para mascotas': 'Pet-friendly places',
+                          'Actividades y encuentros': 'Activities and meetups',
+                          'Nutrición y alimentación natural': 'Nutrition and natural food',
+                        } as Record<string, string>)[topic]}</span>
                         <span>{selected ? '✓' : '+'}</span>
                       </button>
                     )
@@ -637,7 +642,7 @@ export const OnboardingView = ({
                 : (lang === 'es' ? 'Descubrir Pazo →' : 'Discover Pazo →')}
             </button>
             <p className="text-[10px] text-center text-[#5C7470]">
-              Podrás cambiar estos ajustes en cualquier momento desde tu perfil.
+              {lang === 'es' ? "Podrás cambiar estos ajustes en cualquier momento desde tu perfil." : "You can change these settings anytime from your profile."}
             </p>
           </div>
         </div>
