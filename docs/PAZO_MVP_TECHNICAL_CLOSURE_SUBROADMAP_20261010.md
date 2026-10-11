@@ -12,7 +12,7 @@
 
 1. Leer `AGENTS.md`, **esta subhoja** y únicamente los archivos enumerados en la tarea que vaya a ejecutarse; consultar `docs/PAZO_ACTIVE_HANDOFF.md` por cambios posteriores.
 2. Comprobar SHA remoto y `git status` antes de escribir. Si algún archivo cambió después del baseline, revisar **solo su diff** y reconciliar el estado de su tarea; no aplicar estas líneas como órdenes ciegas.
-3. Ejecutar tareas en orden **T01 → T12**, sin repetir QA de módulos aprobados salvo que el cambio introduzca una regresión.
+3. Ejecutar **T01–T04 y micropendientes P1 T13–T17** primero, después **T05–T11** y al final **T12**. Registrar T18–T20 (P2) y resolverlos solo si son de bajo riesgo y no amplían alcance. Sin repetir QA de módulos aprobados salvo regresión.
 4. Para cada tarea: verificar causa, producir cambio mínimo si hace falta, ejecutar pruebas dirigidas, registrar evidencia, actualizar su fila de estado, commit y push **solo a RC**. Los gates humanos no se sortean.
 5. Mantener **F13 para después del cierre técnico**: es exclusivamente una colaboración del Product Owner y ChatGPT; nadie debe tomar decisiones estéticas por él.
 6. Esta subhoja es un **índice operativo de pendientes**. El roadmap maestro mantiene el scope y las reglas de fase; los SOP privados y contratos SQL conservan su autoridad técnica. Ante contradicción, no inferir permisos de un documento más reciente: pedir el gate correcto.
@@ -104,8 +104,60 @@
 
 ### T12 — Smoke final de integración (una sola pasada, no repetir pruebas viejas)
 - **Prioridad/estado:** **P0 / POR VERIFICAR TRAS CAMBIOS**.
-- **Acción:** verificar HEAD RC + GitHub Actions SUCCESS sobre el mismo SHA; desde HTTPS probar solo rutas tocadas T01–T11, login/recovery/carga, mapa, alta/baja visible, denuncia y navegación de PWA; comparar con módulos aprobados para detectar regresión de alto impacto. Registrar PASS/FAIL con evidencias mínimas, redacciones privadas y rollback.
+- **Acción:** verificar HEAD RC + GitHub Actions SUCCESS sobre el mismo SHA; desde HTTPS probar solo rutas tocadas T01–T11 y micropendientes T13–T20 efectivamente modificados, login/recovery/carga, mapa, alta/baja visible, denuncia y navegación de PWA; comparar con módulos aprobados para detectar regresión de alto impacto. Registrar PASS/FAIL con evidencias mínimas, redacciones privadas y rollback.
 - **DoD:** ninguna regresión crítica atribuible a cambios recientes; lista real de bloqueos remanentes; RC aprobable por PO para pasar a F13. `npm run lint` completo presenta deuda heredada (~106 errores/6 avisos), y bundle de build ~813 kB: no declarar ambos PASS ni bloquear solo por warnings sin impacto demostrado; exigir lint dirigido en archivos modificados y métricas de carga razonables.
+
+## 3A. Micropendientes de comportamiento, datos y texto (registrados para NO releer código)
+
+Estas tareas provienen de inspección puntual del RC y se separan de F13. **P1** exige arreglo funcional o decisión de alcance antes del smoke final; **P2** queda en el inventario, se resuelve si es trivial y seguro, pero no se convierte automáticamente en bloqueador de beta. Trabajar T13–T20 junto con T01–T04 **antes** de T12, sin repetir QA completo de módulos no tocados.
+
+### T13 — Menú Crear muestra nombre genérico en lugar de mascota activa
+- **Prioridad/estado:** **P1 / POR HACER**.
+- **Evidencia:** `src/components/modals/CreateModal.tsx:24-30,105-112` usa `activePetName='Mascota'` como valor por defecto y presenta «Compartir una foto o momento de {activePetName}». El montaje real `src/App.tsx:1935-1954` pasa `onSelectOption` y `lang`, **no** `activePetName` ni especie: con una mascota real sigue diciendo «Mascota».
+- **Acción mínima:** pasar la identidad de `currentPet` al modal o mostrar copy neutro sin simulación de identidad. Conservar selectores, posts y navegación. No rediseñar.
+- **DoD:** abrir Crear con dos mascotas diferentes refleja la mascota seleccionada; estado demo no muestra una identidad real inexistente; ES/EN coherentes; prueba dirigida.
+
+### T14 — Idioma EN incompleto en registro y onboarding
+- **Prioridad/estado:** **P1 / POR HACER**.
+- **Evidencia:** `src/components/views/OnboardingView.tsx:175-237` permite alternar `lang`, pero cabecera, promesa de bienvenida y CTA («Su mundo, más cerca», «Comenzar», «Ya tengo una cuenta») están escritos directamente en español. `OnboardingView.tsx:243-264,285-301,365-640` conserva en español etiquetas, progreso, especies, privacidad, zona e intereses en pasos A02–A05. `src/components/views/HomeView.tsx:185-205` tiene texto español incluso en la rama inglesa de «Cerca de mí».
+- **Acción mínima:** completar textos ES/EN de los flujos de alta/primer uso y fake door cercana; conservar valores internos de especies/intereses y su persistencia, sin modificar identificadores/semántica por traducir solo etiquetas.
+- **DoD:** alternar ES/EN desde bienvenida hasta completar alta no deja CTA/instrucciones críticas en idioma incorrecto; no cambia payload ni dato guardado; prueba dirigida. No requiere rediseño F13.
+
+### T15 — Modo demo permite iniciar acciones que requieren cuenta real
+- **Prioridad/estado:** **P1 / POR VERIFICAR Y CORREGIR SI SE REPRODUCE**.
+- **Evidencia:** `src/App.tsx:1516-1517` considera `isDemoUser` una superficie autenticada a efectos de render; `App.tsx:1935-1960` ofrece el menú Crear y abre `CreatePostModal` sin condicionar `user`. `src/components/modals/CreatePostModal.tsx:85-116` intenta `supabase.auth.getUser()` y rechaza si no hay sesión real. En cambio Comunidades y Lugares sí se protegen con `Boolean(user?.id) && !isDemoUser`.
+- **Acción mínima:** inspeccionar interacciones de demo (crear post, pérdida, subir archivo, sugerir lugar, abrir cuidados/documentos), impedir operaciones reales sin sesión y presentar «inicia sesión» o modo demostración no persistente, **sin** registros ficticios en la cuenta real.
+- **DoD:** ninguna CTA de demo promete publicar datos que terminarán en error `No active session`; no existe escritura anónima no autorizada; usuarios reales conservan acciones; una prueba dirigida recorre el menú Crear en modo demo.
+
+### T16 — Eliminación de post de Comunidad puede dejar foto pública huérfana
+- **Prioridad/estado:** **P1 / POR VERIFICAR** (riesgo de integridad ante fallo parcial, no incidente confirmado).
+- **Evidencia:** `src/services/communityService.ts:467-488` elimina primero el registro `community_posts`; luego intenta `storage.from(COMMUNITY_POST_BUCKET).remove([post.photoStoragePath])`. Si Storage falla, solo registra `console.error('Post eliminado; limpieza de imagen pendiente')`: no hay reintento persistente identificado en esa ruta. También `communityService.ts:418-464` intenta limpiar upload fallido y solo registra fallo si la limpieza falla. La foto podría seguir accesible por su URL mientras el post ya no existe.
+- **Acción mínima:** auditar restricciones de Storage y flujo de usuario/propietario; definir reconciliación/cola administrativa verificable para errores parciales sin quitar permisos ni relajar RLS. Evitar false positives de `purged` o borrados de contenido de terceros. La retirada moderadora F14 T08 es un contrato separado.
+- **DoD:** si falla la limpieza, el operador conserva referencia inequívoca y estado accionable; no se afirma eliminación física antes de comprobar ausencia; pruebas simuladas de fallo sin borrar medios actuales; cualquier operación destructiva requiere gate.
+
+### T17 — Fallback silencioso de Supabase en el frontend
+- **Prioridad/estado:** **P1 / VERIFICACIÓN DE RELEASE**.
+- **Evidencia:** `src/services/supabaseClient.ts:3-12` usa URL y **publishable key pública** del proyecto alojado como fallback cuando faltan `VITE_SUPABASE_URL` o `VITE_SUPABASE_PUBLISHABLE_KEY`; el error de configuración posterior queda efectivamente inalcanzable. Es una clave pública, **no** `service_role`, pero un build mal configurado puede conectarse al proyecto incorrecto sin advertirlo.
+- **Acción mínima:** revisar compatibilidad con entornos, y exigir que Preview/producción seleccionen explícitamente el proyecto esperado por variable de build; considerar fail-closed en builds de lanzamiento. Nunca sustituir la clave pública por un secreto ni cambiar el backend sin gate.
+- **DoD:** faltan variables esenciales → build o pantalla indica configuración inválida en lugar de conectarse silenciosamente a otro proyecto; Preview sigue pudiendo iniciar sesión con publishable key correcta; prueba de configuración ausente y correcta.
+
+### T18 — Tiempo relativo de notificaciones no calculado
+- **Prioridad/estado:** **P2 / POR HACER CUANDO SE TOQUE T03**.
+- **Evidencia:** `src/services/rescueService.ts:190-200` asigna `timeAgo: 'Reciente'` a **todas** las notificaciones aunque cada fila tiene `created_at`; `src/components/modals/NotificationsModal.tsx:139-143` lo muestra tal cual incluso con idioma EN. Una alerta antigua seguiría diciendo «Reciente».
+- **Acción mínima:** derivar fecha legible real con localización ES/EN en componente o formatter; evitar depender de strings de UI fijos en DTO si son multilingües.
+- **DoD:** notificación antigua muestra antigüedad/fecha honesta, EN no conserva «Reciente», y orden/paginación/sighting no cambian. Cerrar junto con T03 si es de bajo riesgo.
+
+### T19 — Código duplicado e interfaces prototipo no utilizadas
+- **Prioridad/estado:** **P2 / INVENTARIO, NO BLOQUEADOR AUTOMÁTICO**.
+- **Evidencia:** existe `src/components/modals/CreateModal - copia.tsx`, definición histórica duplicada de `CreatePostModal`; `src/components/modals/CreateModal.tsx:35-67,190-349` contiene ramas internas `post` y `event` no usadas por el montaje actual que siempre pasa `onSelectOption` desde `App.tsx:1935-1954`. La rama `event` muestra éxito mediante `alert` sin guardar nada; `handlePublish` de la rama `post` usa una imagen Unsplash de fallback aunque no exista archivo.
+- **Acción mínima:** tras verificar importaciones, retirar o neutralizar rutas muertas potencialmente engañosas, preservando `CreatePostModal.tsx` real y sin refactor extenso. T01 gobierna la promesa visible «Crear Encuentro».
+- **DoD:** ningún fallback/prototipo puede anunciar publicación inexistente si se reutiliza; no se rompe menú actual; el duplicate solo se elimina después de comprobar no importación; lint dirigido y build PASS.
+
+### T20 — Ubicación hardcodeada al crear publicaciones
+- **Prioridad/estado:** **P2 / DECISIÓN DE ALCANCE, SIN CAMBIO AUTOMÁTICO**.
+- **Evidencia:** `src/components/modals/CreatePostModal.tsx:140-150` fija `location: 'Los Ángeles, CA'` en el payload de cada publicación. La audiencia inicial de PAZO es Los Ángeles; **no implica por sí solo defecto en el MVP local**. Diferenciar de coordenadas privadas GPS: no añadir captura de ubicación involuntaria.
+- **Acción mínima:** confirmar si esa etiqueta debe representar el área de lanzamiento o la zona general opcional de la mascota. No derivar ubicación exacta ni añadir tracking sin decisión PO y gobierno de privacidad.
+- **DoD:** texto visible y dato persistido no afirman una ubicación individual falsa; tratamiento explícito conforme al scope LA; si se mantiene como localidad de comunidad, documentarlo.
 
 ## 4. ÚLTIMA fase de implementación antes de decidir beta
 
@@ -134,6 +186,8 @@
 | 2 | T02 CTA rescate | Codex/ChatGPT | Etiqueta/ruta coherentes; sin modificar rescate |
 | 3 | T03 notificaciones | Codex/ChatGPT | Filtros reales y apertura tipada |
 | 4 | T04 Feed mixto | Codex/ChatGPT, decisión copy PO si afecta producto | Etiqueta honesta + paginación intacta |
+| 4a | **T13–T17 micropendientes P1** | Codex/ChatGPT; PO en decisiones | copy funcional, demo, archivos y entorno verificables |
+| 4b | **T18–T20 registro P2** | Codex/ChatGPT | incluir en cambios dirigidos solo si es seguro; no expandir beta |
 | 5 | T05 Preview/Mapbox | ChatGPT + PO para credenciales, Codex si habilitado | HTTPS/mapa/modelos operativos en SHA |
 | 6 | T06 Auth entorno | ChatGPT + PO | recovery/callback real sin localhost |
 | 7 | T07 intake baja | ChatGPT + operador + PO | solicitud pública solo cuando atendible |
