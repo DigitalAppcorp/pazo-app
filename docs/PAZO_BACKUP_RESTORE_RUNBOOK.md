@@ -1,4 +1,4 @@
-> **ESTADO ACTUAL — 2026-10-11:** herramientas nativas y paquete cifrado sintético PASS; backup real, Drive personal, descarga y restore real BLOQUEADOS por accesos humanos aún pendientes. Autorización de respaldo y ensayo F14 existente, no pedirla otra vez. [Evidencia](PAZO_AUTONOMOUS_PRE_F13_GATES_20261011.md).
+> **ESTADO ACTUAL — 2026-10-11:** backup DB/roles/Storage real, cifrado/roundtrip y restore completo offline PASS LOCAL. T11 PARCIAL: PO difiere reconexión/subida a Drive para hacerla después; descarga externa, custodia independiente de clave y prueba de servicio Auth/Storage aún no certificadas. Acceso administrativo CLI resuelto sin reset; autorización de respaldo y ensayo F14 existente. [Evidencia real](PAZO_REAL_BACKUP_LOCAL_RECOVERY_20261011.md).
 
 # PAZO — Backup & Restore Runbook
 
@@ -46,10 +46,13 @@ Usar variables de entorno locales o un secret manager.
 
 ## 4. Backup lógico de Database — método nativo actual
 
-PostgreSQL 17.11 oficial instalado en el laboratorio local; Docker Desktop no
-es necesario. Antes de ejecutar, el PO prepara personalmente la conexión
-administrativa y clave SDK en entradas ocultas del ayudante local
-'Preparar-acceso-privado-PAZO.ps1': DPAPI fuera de Git/Drive, sin conexión.
+PostgreSQL 17.11 oficial instalado; Docker no es necesario para exportar.
+El método actual reutiliza la CLI Supabase administrativa ya autenticada con
+`-SupabaseCli <bin-oficial>`: parsea exclusivamente exports literales del
+dry-run oficial, nunca ejecuta su shell ni muestra la conexión. Clave SDK
+existente recuperada por API oficial y protegida con DPAPI fuera de Git/Drive.
+Alternativa manual: entradas ocultas del ayudante local
+'Preparar-acceso-privado-PAZO.ps1', sin conectar ni publicar credenciales.
 No usar claves frontend, secretos en argv, URLs con contraseña, transcript ni
 Actions alojados para exportar datos privados. Consultar Dashboard > Connect;
 directa o Session Pooler puerto 5432, no Transaction Pooler 6543.
@@ -57,18 +60,32 @@ directa o Session Pooler puerto 5432, no Transaction Pooler 6543.
 'scripts/backup-database.ps1 -PostgresBin <bin-oficial> -OutputDirectory <directorio-nuevo-privado>'
 lee esa credencial solo en memoria, establece conexiones READ ONLY y exporta
 'database.dump' custom completo, 'roles.sql' sin passwords de roles,
-'storage-inventory.json', TOC y hashes. No excluir silenciosamente Auth,
+'storage-inventory.json', TOC con `--create`, 'extension-owners.json' y hashes.
+Cinco piezas distintas obligatorias, más manifest. No excluir silenciosamente Auth,
 Storage, políticas, grants, ownership o extensiones que causen un error.
 Un fallo conserva los diagnósticos privados y NO certifica backup. La carpeta
 debe estar fuera de repo/sync, con ACL de operador/SYSTEM; no sobrescribir
 exportaciones anteriores. El inventario y dump son lecturas independientes:
 verificar deriva antes/después; no prometer snapshot atómico DB+Storage.
 
-Prueba ejecutada: dump/restore de catálogo sintético con owners/ACL conservados
-y comparación de funciones/tablas/políticas/triggers. Esto valida herramientas,
-no recuperación de datos Auth/Storage alojados. Restaurar roles/extensiones en
-clúster aislado compatible antes de restaurar el dump real; no omitir errores
-de roles propietarios o funciones de extensión para producir un PASS falso.
+Prueba ejecutada: dump/restore REAL en imagen oficial Supabase Postgres
+17.11.0.004 ya instalada, contenedor nuevo offline/red none/cero puertos,
+datos en tmpfs. 81 tablas + 3 secuencias, 197 funciones, 96 políticas,
+353 constraints y 47 triggers: datos, owners/ACL/RLS y extensiones coinciden.
+No equivale a levantar servicios Auth/Storage ni login/reupload HTTP.
+
+Orden fiel de recuperación: bootstrap supabase_admin como en la fuente;
+roles originales adaptando solo su CREATE ROLE ya satisfecho por initdb;
+no eliminar GRANTED BY. Listar TOC con `pg_restore --list --create` para
+restaurar creación/ACL/propiedades DB, luego schemas. Precrear extensiones
+con owner/schema/version de extension-owners.json, después restaurar el
+resto con --single-transaction --exit-on-error. La preparación puede exigir
+SUPERUSER transitorio exclusivamente en el aislado; debe terminar con
+postgres NOSUPERUSER y los grants originales. No cambiar catálogos internos,
+omitir vault ni ignorar errores. Comparar el resultado con la fuente READ
+ONLY usando scripts/backup-catalog-verification.sql en archivos privados.
+Guardar logs/huellas solo privados, no CI alojado. Los contenedores propios
+se detuvieron y sus tmpfs liberaron; archivos y clave siguen preservados.
 
 ## 5. Storage
 
@@ -113,7 +130,13 @@ No incluir secretos en el manifest.
 5. Extraer y comprobar el archivo cifrado con autorización del PO en una carpeta local aislada, sin sincronización, y ejecutar restore drill no destructivo en destino aislado compatible. La validez del cifrado, los hashes o un SQL no vacío **no demuestran por sí solos** recuperación funcional de DB, Auth, políticas RLS ni Storage. Limpiar los temporales sin borrar datos de Supabase y seguir política local de privacidad.
 6. Registrar únicamente fecha UTC, rama/commit, tamaño, hashes del paquete cifrado, conteos, destino privado descrito genéricamente, resultado de descifrado/restore PASS/FAIL y límites encontrados; nunca guardar nombres, emails, claves, URLs firmadas ni bucket paths privados en documentación pública.
 
-**Gate de T11:** Google Drive **ELEGIDO**, no un backup aprobado. Queda PENDIENTE exportación real, cifrado local, Drive upload privado verificado, descarga y prueba de restauración. Los scripts `PAZO_BACKUP_RESTORE_RUNBOOK.md` anteriores son una guía que se debe validar con herramientas realmente instaladas y credenciales proporcionadas localmente por el PO. Codex puede auditar/preparar el procedimiento en Windows cuando vuelva su acceso; no asumir control remoto del ordenador ni copiar secretos al chat. No hacer merge, borrar datos, publicar beta ni crear proyectos/servicios facturables por esta elección.
+**Gate de T11:** exportación real, cifrado/descifrado y restore DB/roles/ACL
+PASS LOCAL; binarios Storage descargados/verificados. Drive upload privado,
+descarga y custodia independiente de clave PENDIENTES DEL PO, quien dejó
+expresamente la reconexión/subida para después. No volver a solicitarla ni
+subir a la cuenta de soporte. No declarar recuperación completa del servicio
+Auth/Storage por conservar sus tablas. No merge, borrados alojados, beta ni
+servicios facturables por esta elección.
 
 ## 7. Off-site
 
@@ -179,13 +202,14 @@ sin imprimir rutas. Nombres locales SHA256; bucket/path quedan en manifest
 privado para restaurar por SDK. Nunca hacer público un bucket para respaldarlo.
 No confundir hash local con garantía de snapshot atómico o restauración física.
 
-'scripts/pack-backup-age.ps1' requiere las cuatro entradas distintas del
+'scripts/pack-backup-age.ps1' requiere las cinco entradas distintas del
 manifest DB, hashes válidos y verificación Storage; crea ZIP claro solo dentro
 de la carpeta privada y cifra a un destinatario público age del PO. Mantener
 la identidad privada fuera de repo, Drive y chat. Ni el empaquetador ni CI
 suben datos, modifican Supabase, eliminan originales o certifican recuperación.
-Prueba local real: paquete sintético → age → descifrar → extraer → hashes PASS;
-manifest incompleto rechazado. No convertir ese resultado en T11 real PASS.
+Prueba local real: DB/roles/Storage reales → age → descifrar → extraer →
+hashes PASS; manifest antiguo sin extension owners rechazado antes de cifrar.
+No convertir ese resultado local en T11 off-site PASS.
 
 La restauración real debe comprobar estructuras, filas, ownership/ACL/RLS,
 funciones F14 y todos los binarios con hashes en aislado, sin redes/servicios

@@ -100,3 +100,8 @@ jobs:
             -f supabase/tests/f14/alias-before-claim.sql \
             -f supabase/tests/f14/cleanup.sql
           node scripts/f14-postgres-concurrency.mjs
+      - name: Backup verification SQL on synthetic tables and sequences only
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -Atq -v ON_ERROR_STOP=1 \
+            -o "$RUNNER_TEMP/backup-catalog.json" -f scripts/backup-catalog-verification.sql
+          node --input-type=module -e 'import fs from "node:fs"; JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/backup-catalog.json", "utf8")); console.log("Backup catalog query PASS on synthetic PostgreSQL; no hosted backup certification.");'
