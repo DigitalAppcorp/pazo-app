@@ -2,6 +2,8 @@
 
 ## Delta de cierre confirmado por PO — 2026-10-11
 
+**Decisión T11 adicional (2026-10-11):** Google Drive privado seleccionado por el PO como destino de respaldo off-site, cifrado local obligatorio antes de subida. Sin exportación, subida, prueba de descarga ni restore comprobados; T11 **NO PASS**. Procedimiento: `PAZO_BACKUP_RESTORE_RUNBOOK.md`.
+
 **Evidencia nueva, posterior a la tabla histórica más abajo:**
 - **T05:** Preview con Mapbox visible: PASS visual del PO. No se han acreditado modelos 3D sobre lugares reales; las seis mallas glTF y su ensayo local no sustituyen ese gate.
 - **T06:** recuperación de contraseña por email, vuelta al Preview, cambio de contraseña e inicio de sesión nuevo: **PASS E2E del PO**. Redirect exacto autorizado por el PO en Supabase Auth.

@@ -112,6 +112,21 @@ Cada backup debe guardar un pequeño manifest con:
 
 No incluir secretos en el manifest.
 
+## T11 — Google Drive aprobado como destino off-site (decisión PO 2026-10-11)
+
+**Destino elegido:** Google Drive privado bajo el control del Product Owner. Carpeta sugerida `PAZO/Backups`; la ubicación concreta/ID y la capacidad disponible deben verificarse en su propia cuenta antes de cualquier subida. No se ha comprobado que Drive esté conectado a los agentes, no se ha creado una carpeta ni se ha subido respaldo alguno. No se autoriza contratar almacenamiento de pago.
+
+**Confidencialidad obligatoria:**
+
+1. Exportar datos DB y objetos Storage **a una carpeta temporal local FUERA de cualquier carpeta sincronizada con Drive**; no conectar un `pg_dump` o exportación de fotos privadas directamente con la carpeta de Drive.
+2. Verificar resultados y rutas, y empaquetar DB, objetos binarios de Storage preservando bucket/path, metadatos mínimos del respaldo e inventario de configuración *sin credenciales*. Cifrar el paquete **antes** de subirlo con un método probado de cifrado local fuerte (por ejemplo, archivo `.7z` AES-256 con cifrado de nombres, si el ejecutor dispone de 7-Zip). El ZIP nativo de Windows sin cifrado no cumple.
+3. El PO conserva **fuera de GitHub, Drive y este chat** una contraseña de cifrado única, robusta y recuperable; no introducirla en código, registro de terminal, Git, prompts ni capturas. Codex nunca debe imprimirla ni leerla de documentos del repositorio. No subir una copia cuya contraseña pueda perderse.
+4. Subir **solo el archivo ya cifrado** a una carpeta privada de Drive. No crear enlaces públicos, carpetas compartidas ni usar cuentas ajenas; verificar que Drive registra el archivo completo, que coincide el tamaño y el SHA-256 del archivo cifrado, y que puede descargarse.
+5. Extraer y comprobar el archivo cifrado con autorización del PO en una carpeta local aislada, sin sincronización, y ejecutar restore drill no destructivo en destino aislado compatible. La validez del cifrado, los hashes o un SQL no vacío **no demuestran por sí solos** recuperación funcional de DB, Auth, políticas RLS ni Storage. Limpiar los temporales sin borrar datos de Supabase y seguir política local de privacidad.
+6. Registrar únicamente fecha UTC, rama/commit, tamaño, hashes del paquete cifrado, conteos, destino privado descrito genéricamente, resultado de descifrado/restore PASS/FAIL y límites encontrados; nunca guardar nombres, emails, claves, URLs firmadas ni bucket paths privados en documentación pública.
+
+**Gate de T11:** Google Drive **ELEGIDO**, no un backup aprobado. Queda PENDIENTE exportación real, cifrado local, Drive upload privado verificado, descarga y prueba de restauración. Los scripts `PAZO_BACKUP_RESTORE_RUNBOOK.md` anteriores son una guía que se debe validar con herramientas realmente instaladas y credenciales proporcionadas localmente por el PO. Codex puede auditar/preparar el procedimiento en Windows cuando vuelva su acceso; no asumir control remoto del ordenador ni copiar secretos al chat. No hacer merge, borrar datos, publicar beta ni crear proyectos/servicios facturables por esta elección.
+
 ## 7. Off-site
 
 Una copia en la misma computadora no es suficiente.

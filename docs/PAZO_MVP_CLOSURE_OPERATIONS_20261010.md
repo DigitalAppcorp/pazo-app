@@ -83,6 +83,8 @@ Guardar solo versión de build, dispositivo/navegador, fecha y booleanos; no cap
 
 ## T11 — inventario, conservación y release futuro
 
+**Decisión del PO, 2026-10-11:** Google Drive será el repositorio privado off-site de respaldos. **Solo cargar archivos cifrados localmente**, nunca dumps o archivos privados sueltos en carpetas sincronizadas. Ver contrato detallado en `PAZO_BACKUP_RESTORE_RUNBOOK.md`; DB+Storage, subida, descarga y restore siguen **PENDIENTES**. No se conectó Drive ni se trasladaron datos.
+
 Inventario agregado READ ONLY de esta ejecución: **6 Auth, 1 profile, 1 pet, 0 posts, 0 communities, 0 community posts, 1 objeto `pet-avatars`, 1 grant moderador, 0 claims held, 1 baja completed; 55 FK hacia Auth/pets**. No incluir IDs ni inferir que estas filas son basura de QA. Preservar las seis cuentas originales, el último moderador, mascota y archivo existente. No se ejecutó limpieza.
 
 Preflight de salida:
