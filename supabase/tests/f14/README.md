@@ -13,6 +13,9 @@ SHA256: `2fbac99e885458998cba7611362121849cb0532a32f6bfe147a3eafe03f3f45e`.
 Definitions were reviewed before publication: no user rows, private UUIDs, role
 passwords, tokens or private connection strings. The only project hostname is
 the public Storage endpoint already versioned in F14.
+Five historical end-of-line spaces inside source function bodies are preserved
+for exact fingerprints; .gitattributes scopes that whitespace exception to this
+fixture only. Application code and pending migrations have no such exception.
 
 ## Fidelity
 
