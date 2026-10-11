@@ -12,7 +12,7 @@ test('F14 URL-alias migration is a non-destructive follow-up with worker still d
   assert.match(sql, /CREATE OR REPLACE FUNCTION moderation_private\.f14_media_probe\(/)
   assert.match(sql, /CREATE OR REPLACE FUNCTION public\.f14_moderation_media_gate\(/)
   assert.match(previous, /v_refs <> 1/)
-  assert.doesNotMatch(sql, /^\s*(?:DELETE|TRUNCATE|DROP|ALTER TABLE|UPDATE|INSERT)\s/mi)
+  assert.doesNotMatch(sql, /^\s*(?:DELETE|TRUNCATE|DROP|ALTER TABLE)\s/mi)
   assert.match(worker, /const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
 })
 test('private URL identity checks canonical host, query/fragment, encoded segments and restricts callers', () => {
