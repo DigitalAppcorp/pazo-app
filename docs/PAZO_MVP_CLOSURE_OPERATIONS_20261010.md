@@ -49,6 +49,27 @@ Los tres RPC de baja están presentes y admiten authenticated/service_role, sin 
 
 Textos ES/EN coherentes con retirada social y revisión manual de archivos; fecha efectiva `null`, PostHog hardcoded OFF aunque existan variables antiguas. No se prometen tiempos, purga total ni verificación documental 18+. Confirmar operador, canal atendido, frecuencia real de revisión y tratamiento de incidentes/menores antes de activar `VITE_F14_DELETION_REQUESTS_ENABLED` en el entorno autorizado. Leaked Password Protection sigue como gate previo del plan Free; no se contrató plan ni se certificó su configuración con esta ejecución. Se conserva mitigación de contraseña de UX, que no sustituye detección de filtraciones.
 
+
+## T10 — Protocolo mínimo de moderación aprobado por Product Owner (2026-10-11)
+
+**Decisión expresa del PO:** el PO operará personalmente el buzón público `appdigital.corp@gmail.com` y la cola privada de solicitudes/denuncias **cada día durante la beta**. Esta decisión designa al responsable y la cadencia; no constituye prueba de que ya se estén atendiendo peticiones externas ni de que existan avisos automáticos. Nunca afirmar que el correo recibe automáticamente cada denuncia o baja: la cola privada se revisa por separado.
+
+Procedimiento mínimo aprobado para la beta:
+
+1. Revisar diariamente el correo de soporte/privacidad y las colas autorizadas de moderación y baja en Supabase; usar las consultas READ ONLY ya versionadas y las funciones operadoras permitidas. No exportar UUID, correos personales, teléfonos, enlaces de recuperación ni otros datos sensibles a Git/capturas.
+2. Priorizar amenazas, acoso grave, divulgación de datos privados y sospechas razonables de que una cuenta pertenece a un menor de 18 años. Evaluar el contexto sin presumir automáticamente la infracción; si corresponde, ocultar o restringir contenido mediante los mecanismos moderadores existentes y registrar evidencia mínima en bitácora administrativa privada. Escalar incidentes que excedan las herramientas actuales, sin borrar datos ajenos ni prometer resultados inmediatos.
+3. No solicitar documentos de identidad innecesarios. Para peticiones de eliminación, verificar titularidad y alcance conforme a `docs/PAZO_MVP_MANUAL_DELETION_SOP_20261010.md`; **solicitar baja no equivale a borrado**. La cuenta del único moderador sigue protegida. No ejecutar SQL de borrado de Auth ni Storage directamente.
+4. Mantener un registro privado de revisiones, decisión, fecha y resultado mínimo, sin copiar contenido personal en Git, analítica ni documentos públicos. Solicitudes bloqueadas permanecen pendientes; informar al titular por canal autorizado sin prometer borrado inmediato ni purga universal de caché/backups.
+5. Si el operador no puede realizar la revisión o responder incidentes, detener intake/publicación y reevaluar capacidad operativa. La revisión diaria no certifica SLA, asesoramiento jurídico ni un sistema de alertas automático.
+
+**Alcance del gate:** protocolo y responsable APROBADOS por PO; operación bajo carga, canal efectivo, textos finales, botón `VITE_F14_DELETION_REQUESTS_ENABLED` y respuesta real al público aún requieren verificación separada. Flag público sigue OFF. F14 purga OFF. No lanzar beta ni habilitar flags como consecuencia de esta aprobación.
+
+**Seguridad, solo lectura, 2026-10-11:** el asesor de Supabase reportó protección de contraseñas filtradas desactivada; según su documentación oficial requiere plan Pro o superior. La UX exige min. 8 caracteres y mezcla de tipos, pero no verifica fugas. **No activar plan pago**. También reportó advertencias de RPC SECURITY DEFINER ejecutables, incluidas `f14_content_visible` en rol `anon`; un aviso exige revisar intención/privilegios y código, **no** revocar grants automáticamente ni tratar todos los avisos como vulnerabilidades demostradas. `f14_content_visible` fue inspeccionada en modo READ ONLY: solo devuelve booleano para `p_id` y `moderation_private.is_removed`. Continuar revisión de exposición antes de beta.
+
+## T11 — Respaldo y preparación para salida (gate NO completado al 2026-10-11)
+
+Fuente operativa: `docs/PAZO_BACKUP_RESTORE_RUNBOOK.md`. Preparación documentada, **sin evidencia de backup+restore PASS**. Antes de publicar: exportación lógica DB real; copia binaria de Storage respetando privacidad; copia off-site segura; restore drill en destino aislado y verificación de Auth/RLS/Storage; inventario de datos prebeta y aprobación individual para eliminar los estrictamente descartables; rollback frontend y gates separados de cambios de DB/Storage y de merge/main/dominio. Nunca subir secretos/backups al repositorio, crear proyecto pagado sin gate ni restaurar sobre hosted para "probar". El PO aún no autorizó una eliminación masiva, merge ni beta pública.
+
 ## T09 — protocolo físico mínimo
 
 Prerrequisito: último Preview HTTPS protegido que cargue realmente, con cuenta de prueba controlada. La instalación puede quedar limitada por protección Vercel: no desactivarla sin decisión PO.

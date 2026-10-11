@@ -1,5 +1,19 @@
 # PAZO — Subhoja maestra: pendientes reales de cierre del MVP
 
+## Delta de cierre confirmado por PO — 2026-10-11
+
+**Evidencia nueva, posterior a la tabla histórica más abajo:**
+- **T05:** Preview con Mapbox visible: PASS visual del PO. No se han acreditado modelos 3D sobre lugares reales; las seis mallas glTF y su ensayo local no sustituyen ese gate.
+- **T06:** recuperación de contraseña por email, vuelta al Preview, cambio de contraseña e inicio de sesión nuevo: **PASS E2E del PO**. Redirect exacto autorizado por el PO en Supabase Auth.
+- **T07:** PO se compromete a revisar diariamente el correo de soporte y la cola privada. Operador designado; intake público sigue OFF hasta capacidad efectiva y gate aparte.
+- **T09:** instalación real de PAZO desde Chrome Android y apertura independiente sin barra de URL: PASS Android del PO; iOS sigue sin verificación.
+- **T10:** protocolo diario de moderación/incidentes (amenazas, datos privados, posible menor de 18 años) y bitácora privada **APROBADO POR PO**. Responsable y textos ES/EN preparados, sin certificación integral legal/operativa ni email automático. Seguridad Supabase: aviso leaked password protection OFF (documentación indica plan Pro+), no contratar; revisión de RPC SECURITY DEFINER pendiente, sin cambios de grants.
+- **T08:** se compararon vía A automatizada y B manual; decisión pospuesta hasta auditoría local aislada con Codex. Ninguna autorización para desplegar A, aplicar SQL hosted ni borrar un medio real. Edge purga OFF.
+- **T11:** `PAZO_BACKUP_RESTORE_RUNBOOK.md` documenta respaldos DB, Storage, off-site y restore drill aislado, pero NINGUNO se ha acreditado como PASS; no eliminar datos de prueba ni hacer merge.
+- **T12:** smoke final acotado y CI del SHA final aún pendientes. **F13** último paso visual aprobado con el PO antes del GO/NO-GO.
+
+Esta sección actualiza los estados de la tabla histórica a continuación sin alterar su evidencia previa. El detalle operativo y límites están en `PAZO_MVP_CLOSURE_OPERATIONS_20261010.md`; no confundir protocolo aprobado con beta pública lista.
+
 ## Delta de ejecución autorizado — 2026-10-10
 
 **Evidencia remota comprobada:** publicación RC `908bb58b9658328d2c3ca0868fcc5a6b23cef2e4`, [GitHub Actions #680 SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38100010682), jobs gobernanza/build SUCCESS. [Preview exacto](https://pazo-app-t83r-n4rs7jr2l-digitalapp.vercel.app) READY, protegido, mismo SHA; lectura del contenido protegido falla con **403 / read_protection_bypass**. Vercel CLI no disponible; no se usó navegador ni se desactivó protección. Este comprobante documental no cambia el frontend; verificar también el CI del nuevo HEAD documental antes de continuar. El lint local completo permanece FAIL heredado (105/6), aunque el job remoto sea no bloqueante.
