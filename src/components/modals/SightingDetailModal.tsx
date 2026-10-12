@@ -99,7 +99,7 @@ export const SightingDetailModal = ({
                 )}
               </div>
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#5C7470] font-bold">
+                <span className="text-[13px] uppercase tracking-wider text-[#5C7470] font-bold">
                   {lang === 'es' ? 'Aviso sobre' : 'Sighting for'}
                 </span>
                 <p className="text-lg font-black text-[#204E4A]">{detail.petName}</p>
@@ -113,7 +113,7 @@ export const SightingDetailModal = ({
 
               <div className="bg-[#FAF8F5] rounded-2xl p-4 space-y-3">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#5C7470]">
+                  <span className="text-[13px] uppercase font-bold text-[#5C7470]">
                     {lang === 'es' ? 'Nombre' : 'Name'}
                   </span>
                   <p className="text-sm font-extrabold text-[#204E4A]">
@@ -122,7 +122,7 @@ export const SightingDetailModal = ({
                 </div>
 
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#5C7470]">
+                  <span className="text-[13px] uppercase font-bold text-[#5C7470]">
                     {lang === 'es' ? 'Teléfono' : 'Phone'}
                   </span>
                   {detail.reporterPhone ? (
@@ -151,7 +151,7 @@ export const SightingDetailModal = ({
 
                 {detail.locationText && (
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-[#5C7470]">
+                    <span className="text-[13px] uppercase font-bold text-[#5C7470]">
                       {lang === 'es' ? 'Ubicación aproximada' : 'Approximate location'}
                     </span>
                     <p className="text-sm font-extrabold text-[#204E4A]">
@@ -160,7 +160,7 @@ export const SightingDetailModal = ({
                   </div>
                 )}
 
-                <p className="text-[10px] text-[#5C7470]">
+                <p className="text-[13px] text-[#5C7470]">
                   {new Date(detail.createdAt).toLocaleString()}
                 </p>
               </div>
