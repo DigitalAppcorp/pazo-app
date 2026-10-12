@@ -1,3 +1,4 @@
+import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { useState } from 'react'
 import type { Pet, Post } from '../../types/pazo'
 import { IconClose, IconPaw } from '../icons/PazoIcons'
@@ -250,7 +251,7 @@ export const CreatePostModal = ({
                             </div>
                         ) : (
                             <label className="w-full h-36 flex flex-col items-center justify-center border-2 border-dashed border-[#204E4A]/20 rounded-2xl bg-white hover:bg-[#204E4A]/5 cursor-pointer transition-colors text-[#5C7470]">
-                                <span className="text-2xl mb-1">📷</span>
+                                <PazoMotifIcon kind="camera" size={30} className="mb-1" />
                                 <span className="font-bold text-[#204E4A]">
                                     {lang === 'es' ? 'Seleccionar imagen de galería' : 'Choose image from gallery'}
                                 </span>

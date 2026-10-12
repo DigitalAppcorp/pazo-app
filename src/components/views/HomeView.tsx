@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Post } from '../../types/pazo'
 import { IconBookmark, IconPaw } from '../icons/PazoIcons'
+import { PazoMotifIcon } from '../icons/PazoMotifIcons'
+import { DEMO_POST_MOTIFS, DEMO_COMMENT_MOTIFS } from '../../data/mockData'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
@@ -357,6 +359,13 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
         <p className="text-xs text-[#204E4A] leading-relaxed font-normal">
           <span onClick={() => onSelectPetProfile(post.petId)} className="font-extrabold mr-1.5 cursor-pointer hover:underline">{post.petName}:</span>
           {post.text}
+          {DEMO_POST_MOTIFS[post.id] && (
+            <span className="ml-1 inline-flex items-center gap-0.5 align-middle" aria-hidden="true">
+              {DEMO_POST_MOTIFS[post.id].map((kind, index) => (
+                <PazoMotifIcon key={`${kind}-${index}`} kind={kind} size={15} />
+              ))}
+            </span>
+          )}
         </p>
         {displayCommentsCount > 0 && !isCommentsOpen && (
           <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="text-[11px] font-semibold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer block pt-1">
@@ -371,7 +380,15 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
                   <img src={comment.authorAvatar} alt={comment.authorPet} className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" />
                   <div className="flex-1 bg-[#FAF8F5] p-2.5 rounded-2xl shadow-xs">
                     <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
-                    <span className="text-[#5C7470]">{comment.text}</span>
+                    <span className="text-[#5C7470]">{comment.text}
+                      {DEMO_COMMENT_MOTIFS[comment.id] && (
+                        <span className="ml-1 inline-flex items-center align-middle" aria-hidden="true">
+                          {DEMO_COMMENT_MOTIFS[comment.id].map((kind, index) => (
+                            <PazoMotifIcon key={`${kind}-${index}`} kind={kind} size={14} />
+                          ))}
+                        </span>
+                      )}
+                    </span>
                     <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
                     {canReport && (!comment.authorPetId || !ownedPetIds.includes(comment.authorPetId)) && <button type="button"
                       onClick={() => onReport('feed_comment', comment.id, describeReportSubject('feed_comment', comment.authorName, comment.text, lang))}
