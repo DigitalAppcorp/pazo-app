@@ -5,6 +5,7 @@ import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
+import { PazoSplash } from './features/splash/PazoSplash'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
@@ -182,9 +183,12 @@ function PazoMain() {
   const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
+    // Keep the previously approved 2.5-second splash lifetime.
+    // Reduced-motion users see the static identity without an unnecessary wait.
+    const duration = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ? 150 : 2500
     const splashTimer = setTimeout(() => {
       setShowSplash(false)
-    }, 2500)
+    }, duration)
 
     return () => clearTimeout(splashTimer)
   }, [])
@@ -1450,37 +1454,7 @@ function PazoMain() {
   }
 
   if (showSplash) {
-    return (
-      <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center relative overflow-hidden p-5">
-        <style>{`
-          @keyframes flyOutSpin {
-            0%, 15% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-            45% { transform: translate(var(--tx), var(--ty)) rotate(180deg) scale(1.4); opacity: 0.85; }
-            65% { transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(1.4); opacity: 0.85; }
-            90%, 100% { transform: translate(0, 0) rotate(1080deg) scale(1); opacity: 1; }
-          }
-          .letter-epic {
-            display: inline-block;
-            animation: flyOutSpin 4s cubic-bezier(0.68, -0.55, 0.26, 1.55) infinite;
-            transform-origin: center;
-          }
-        `}</style>
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-[#E1E53F]/35 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[#204E4A]/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="text-6xl sm:text-7xl font-black text-[#204E4A] tracking-tighter flex items-center relative z-10">
-          <span className="letter-epic" style={{ '--tx': '-70px', '--ty': '-50px' } as React.CSSProperties}>p</span>
-          <span className="letter-epic" style={{ '--tx': '-35px', '--ty': '60px' } as React.CSSProperties}>a</span>
-          <span className="letter-epic" style={{ '--tx': '35px', '--ty': '-60px' } as React.CSSProperties}>z</span>
-          <span className="letter-epic" style={{ '--tx': '70px', '--ty': '50px' } as React.CSSProperties}>o</span>
-          <span className="letter-epic text-[#E1E53F]" style={{ '--tx': '95px', '--ty': '-20px' } as React.CSSProperties}>.</span>
-        </div>
-        <p className="mt-8 text-xs font-extrabold text-[#5C7470] tracking-[0.3em] uppercase animate-pulse relative z-10">Su mundo, más cerca.</p>
-        <p aria-label="Versión de PAZO" className="absolute bottom-4 left-0 right-0 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65 z-10">
-          Versión {pazoBuildVersion}
-        </p>
-      </div>
-    )
+    return <PazoSplash buildVersion={pazoBuildVersion} lang={lang} />
   }
 
   if (loading) {
