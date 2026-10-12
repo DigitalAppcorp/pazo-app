@@ -25,7 +25,7 @@
 
 ## F13 — Ambient Feed + exhaustive yellow heading pills audit (2026-10-12)
 
-- PO expressly requested Home/Feed ambient animated blurred orbs as in the public profile: implemented **within HomeView.tsx only** (three green/lime/sage diffuse orbs, decorative and pointer-events-none beneath feed cards, existing profile-style `animate-pulse`, respects `prefers-reduced-motion`).
+- **SUPERSEDED BY PO VISUAL REJECTION (2026-10-12):** The previous three animated orbs in Home/Feed were rejected as visually unattractive. Commit `a1e3ad47` restores `src/components/views/HomeView.tsx` byte-for-byte to pre-orbs state `a7ad3d84` (blob `5e9dcca2357f5f8207854ccacac4696f4daaee84`). **DO NOT restore/add Feed orbs without renewed explicit PO approval**. Public profile orbs remain unchanged.
 - Audited **all 43 `src/**/*.tsx` files** and all three `src/**/*.css` files for hard-coded yellow/coral pills, uppercase eyebrows and title-like badges. The eight remaining decorative yellow title pills removed in commit `63090d44`:
   - `src/App.tsx`: Pazo Acceso / login eyebrow.
   - `src/components/modals/MessagesModal.tsx`: Mensajería 1 a 1 eyebrow.
@@ -34,6 +34,11 @@
 - Kept real page headings (e.g. `Iniciar Sesión`, `Hablemos.`, `Comencemos.`), instructional steps, event handlers, badges with **functional semantics** (Admin/Founder/Perro, new/unread, recommended, active check-in, archived, privacy status) and yellow primary action buttons; removing these would misrepresent product state.
 - **PO freeze exception:** `src/components/views/MapView.tsx` contains an `Ayúdanos a priorizar` yellow/transparent mini-label in future-place-feature area; deliberately **not edited** because **ALL changes to Lugares/Mapa remain unauthorized**. MapboxMap/PlaceFeatureExperiment unchanged.
 - This is a code audit and branch implementation only. CI/build and Product Owner's visual comparison are separate gates; do not assert no yellow pixels anywhere.
+
+## F13 — Onboarding species selector refinement (2026-10-12)
+
+- PO screenshot of `Especie` selector rejected old four buttons as disproportionate. Commit `a1e3ad47` updates **only the selector in `src/components/views/OnboardingView.tsx`**: four equal-width 74px-high mini-cards, responsive grid, centered 23px PAZO animal glyphs, 12px labels, 18px corner radius, translucent idle surface, dark green/lime selected state, soft shadow and `aria-pressed` selection. Preserve `setPetSpecies` behavior and existing species IDs; no backend/data changes.
+- Validation: CI pending or verified separately; actual PO visual acceptance pending. **Map remains frozen.**
 
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
