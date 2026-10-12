@@ -1,4 +1,5 @@
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
+import { DEMO_POST_MOTIFS } from '../../data/mockData'
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
@@ -530,7 +531,16 @@ export const PetView = ({
                   <span className="text-[10px] text-[#5C7470] font-bold">{post.timeAgo}</span>
                   <span className="inline-flex items-center gap-1 text-[10px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
                 </div>
-                <p className="text-xs text-[#204E4A] font-medium">{post.text}</p>
+                <p className="text-xs text-[#204E4A] font-medium">
+                  {post.text}
+                  {DEMO_POST_MOTIFS[post.id] && (
+                    <span className="ml-1 inline-flex items-center gap-0.5 align-middle" aria-hidden="true">
+                      {DEMO_POST_MOTIFS[post.id].map((kind, index) => (
+                        <PazoMotifIcon key={`${kind}-${index}`} kind={kind} size={15} />
+                      ))}
+                    </span>
+                  )}
+                </p>
                 {post.photoUrl && (
                   <div className="w-full h-44 rounded-2xl overflow-hidden shadow-xs">
                     <img src={post.photoUrl} alt="User post" className="w-full h-full object-cover" />
