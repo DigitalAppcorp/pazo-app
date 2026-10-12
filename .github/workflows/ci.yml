@@ -4,10 +4,12 @@ on:
   pull_request:
     branches:
       - main
+      - release/mvp-beta-fast-track-20261010
   push:
     branches:
       - main
       - release/mvp-beta-fast-track-20261010
+      - fix/f14-nosuchkey-verification-20261012
 
 permissions:
   contents: read
