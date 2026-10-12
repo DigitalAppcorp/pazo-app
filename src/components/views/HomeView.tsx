@@ -162,15 +162,14 @@ export const HomeView = ({
 
   return (
     <div className="space-y-3 animate-slide-up pb-6">
-      {/* F13: título y filtros en una sola composición, sin franja flotante.
-          Se adaptan mediante flex-wrap según el ancho real del contenido. */}
+      {/* F13: título y filtros en la misma fila; en pantallas estrechas se apilan juntos sin espacio muerto. */}
       <div className="space-y-1 px-1">
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <h2 className="shrink-0 text-[20px] font-black leading-tight tracking-tight text-[#204E4A]">
+        <div className="grid grid-cols-[minmax(0,1fr)_178px] items-center gap-x-2 gap-y-2 max-[360px]:grid-cols-1">
+          <h2 className="min-w-0 text-[clamp(16px,4vw,20px)] font-black leading-tight tracking-tight text-[#204E4A]">
             {lang === 'es' ? 'Su pequeño mundo.' : 'Their little world.'}
           </h2>
           <div
-            className="ml-auto flex h-11 w-[206px] max-w-full shrink-0 items-stretch gap-0.5 rounded-full bg-white/30 p-0.5 backdrop-blur-sm"
+            className="flex h-11 w-[178px] max-w-full items-stretch gap-0.5 rounded-full bg-white/30 p-0.5 backdrop-blur-sm max-[360px]:ml-auto"
             role="group"
             aria-label={lang === 'es' ? 'Filtrar publicaciones' : 'Filter posts'}
           >
@@ -178,7 +177,7 @@ export const HomeView = ({
               type="button"
               aria-pressed={feedFilter === 'following'}
               onClick={() => setFeedFilter('following')}
-              className={`min-w-0 flex-[1_1_40%] rounded-full px-2 text-[13px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+              className={`min-w-0 flex-[1_1_40%] rounded-full px-1 text-[10px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
             >
               {lang === 'es' ? 'Para ti' : 'For you'}
             </button>
@@ -186,7 +185,7 @@ export const HomeView = ({
               type="button"
               aria-pressed={feedFilter === 'nearby'}
               onClick={handleSelectNearby}
-              className={`min-w-0 flex-[1_1_60%] rounded-full px-1 text-center text-[12px] font-bold leading-[1.2] transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+              className={`min-w-0 flex-[1_1_60%] rounded-full px-0.5 text-center text-[9px] font-bold leading-[1.2] transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
             >
               {lang === 'es' ? <>Cerca ·<span className="block">Próximamente</span></> : <>Nearby ·<span className="block">Coming soon</span></>}
             </button>
