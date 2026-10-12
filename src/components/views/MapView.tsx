@@ -541,12 +541,11 @@ export const MapView = ({
                 </p>
               </div>
             ) : (
-              <div className="pointer-events-auto -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2" role="list" aria-label={lang === 'es' ? 'Lugares cercanos' : 'Nearby places'}>
+              <div className="pointer-events-auto -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2" role="region" aria-label={lang === 'es' ? 'Lugares cercanos' : 'Nearby places'}>
                 {displayPlaces.map((place) => (
                   <button
                     key={place.id}
                     type="button"
-                    role="listitem"
                     onClick={() => handleSelectPlace(place.id)}
                     aria-pressed={selectedPlaceId === place.id}
                     className={
