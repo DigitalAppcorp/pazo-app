@@ -1,15 +1,25 @@
 @import "tailwindcss";
 
+/* F13: una sola familia tipográfica para PAZO, basada en el perfil público. */
+@theme {
+  --font-sans: 'Quicksand', 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 @layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
   body {
-    font-family: 'Palo Seco', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: inherit;
     letter-spacing: -0.015em;
     background-color: #EFECE4;
   }
 
-  /* Toda fuente que sea en negrita con la fuente Sans-serif (Palo Seco) */
-  b, strong, .font-bold, .font-extrabold, .font-black, [class*="font-semibold"], [class*="font-bold"], [class*="font-extrabold"] {
-    font-family: 'Palo Seco', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  /* Controles y textos con peso alto comparten la misma familia.
+     No forzar una fuente distinta en .font-bold / .font-black. */
+  button, input, textarea, select {
+    font-family: inherit;
   }
 
   /* Todos los textos de la app tengan un Outer margin de 2 pixeles */
