@@ -35,6 +35,9 @@ BEGIN
     VALUES(v_owner,'authenticated','authenticated','f14-reconcile@example.invalid','{}','{}');
   INSERT INTO public.pets(id,owner_id,name,species)
     VALUES(v_pet,v_owner,'Synthetic','gato');
+  PERFORM set_config('request.jwt.claim.sub',v_owner::text,true);
+  PERFORM set_config('request.jwt.claim.role','authenticated',true);
+  PERFORM set_config('request.jwt.claims',jsonb_build_object('role','authenticated','sub',v_owner)::text,true);
   INSERT INTO public.posts(id,user_id,pet_id,pet_name,pet_species,text,photo_url)
     VALUES(v_post,v_owner,v_pet,'Synthetic','gato','F14 synthetic reconciliation',v_url);
   INSERT INTO storage.buckets(id,name,public) VALUES(v_bucket,v_bucket,true);
