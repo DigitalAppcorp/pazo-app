@@ -436,17 +436,34 @@ export const OnboardingView = ({
 
               <div>
                 <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Especie" : "Species"}</label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {(['gato', 'perro', 'conejo', 'ave'] as Species[]).map((sp) => (
-                    <button
-                      key={sp}
-                      type="button"
-                      onClick={() => setPetSpecies(sp)}
-                      className={`py-2 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer soft-button ${petSpecies === sp ? 'bg-[#204E4A] text-[#E1E53F]' : 'bg-white text-[#5C7470]'} `}
-                    >
-                      {sp === 'gato' ? <><IconCat className="w-4 h-4 mr-1" /> {lang === 'es' ? "Gato" : "Cat"}</> : sp === 'perro' ? <><IconDog className="w-4 h-4 mr-1" /> {lang === 'es' ? "Perro" : "Dog"}</> : sp === 'conejo' ? <><IconRabbit className="w-4 h-4 mr-1" /> {lang === 'es' ? "Conejo" : "Rabbit"}</> : <><IconBird className="w-4 h-4 mr-1" /> {lang === 'es' ? "Ave" : "Bird"}</>}
-                    </button>
-                  ))}
+                <div role="group" aria-label={lang === 'es' ? 'Seleccionar especie' : 'Select species'} className="grid grid-cols-4 gap-2">
+                  {(['gato', 'perro', 'conejo', 'ave'] as Species[]).map((sp) => {
+                    const isSelected = petSpecies === sp
+                    const name = sp === 'gato'
+                      ? (lang === 'es' ? 'Gato' : 'Cat')
+                      : sp === 'perro'
+                        ? (lang === 'es' ? 'Perro' : 'Dog')
+                        : sp === 'conejo'
+                          ? (lang === 'es' ? 'Conejo' : 'Rabbit')
+                          : (lang === 'es' ? 'Ave' : 'Bird')
+                    return (
+                      <button
+                        key={sp}
+                        type="button"
+                        aria-pressed={isSelected}
+                        aria-label={name}
+                        onClick={() => setPetSpecies(sp)}
+                        className={`flex h-[74px] min-w-0 flex-col items-center justify-center gap-1.5 rounded-[18px] px-1.5 py-2 text-center transition-colors duration-200 ${isSelected
+                          ? 'bg-[#204E4A] text-[#E1E53F] shadow-[0_5px_15px_rgba(32,78,74,0.15)]'
+                          : 'bg-white/80 text-[#5C7470] shadow-[0_3px_12px_rgba(32,78,74,0.05)] backdrop-blur-md hover:bg-white'}`}
+                      >
+                        <span aria-hidden="true" className="flex h-[24px] items-center justify-center">
+                          {sp === 'gato' ? <IconCat size={23} /> : sp === 'perro' ? <IconDog size={23} /> : sp === 'conejo' ? <IconRabbit size={23} /> : <IconBird size={23} />}
+                        </span>
+                        <span className="block w-full truncate text-[12px] font-extrabold leading-tight">{name}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
