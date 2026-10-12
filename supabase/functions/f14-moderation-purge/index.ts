@@ -2,6 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.117.2'
 import { runMediaPurge, PurgeRejected, type PurgeObject, type PurgeKind } from './core.ts'
 import { storageObjectExists } from './storageInfo.ts'
 import { publicUrlInaccessible } from './publicUrl.ts'
+import { trialRequestAllowed, trialTargetAllowed, assertTrialStorageIdentity } from './trialScope.ts'
 
 // Two independent activation gates: published Edge env switch and database RPC.
 // Do not deploy enabled before P0 media gate and authorized E2E verification.
@@ -14,10 +15,16 @@ const reply=(status:number, body:unknown)=>new Response(JSON.stringify(body),{
 // Immutable rollout safety latch, independent of hosted environment values.
 // Activation needs a separate reviewed code commit and explicit PO authorization.
 const F14_MEDIA_PURGE_RELEASE_APPROVED = false
+// Separate, single-object test authorization. Keep FALSE until the Product Owner
+// separately approves the executable trial, then revert immediately afterward.
+const F14_TRIAL_PURGE_APPROVED = false
 Deno.serve(async(req:Request)=>{
  if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors})
  if(req.method!=='POST') return reply(405,{error:'method_not_allowed'})
- if(!F14_MEDIA_PURGE_RELEASE_APPROVED || Deno.env.get('F14_MEDIA_PURGE_ENABLED')!=='true') return reply(503,{error:'cleanup_disabled'})
+ const releaseEnabled = F14_MEDIA_PURGE_RELEASE_APPROVED && Deno.env.get('F14_MEDIA_PURGE_ENABLED')==='true'
+ const trialEnabled = F14_TRIAL_PURGE_APPROVED && Deno.env.get('F14_TRIAL_PURGE_ENABLED')==='true'
+ if(!releaseEnabled && !trialEnabled) return reply(503,{error:'cleanup_disabled'})
+ const singleTargetTrial = trialEnabled && !releaseEnabled
  const url=Deno.env.get('SUPABASE_URL'),anon=Deno.env.get('SUPABASE_ANON_KEY'),secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
  if(!url||!anon||!secret) return reply(503,{error:'cleanup_not_configured'})
  const auth=req.headers.get('Authorization')||''
@@ -28,6 +35,8 @@ Deno.serve(async(req:Request)=>{
  try {input=JSON.parse(body)} catch {return reply(400,{error:'invalid_json'})}
  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['kind','id'].includes(k))
   ||typeof input.kind!=='string'||typeof input.id!=='string') return reply(400,{error:'invalid_request'})
+ // The test route refuses all other targets *before* any privileged lookup.
+ if(singleTargetTrial && !trialRequestAllowed(input.kind,input.id)) return reply(409,{error:'trial_target_refused'})
  try{
   const token=auth.slice(7)
   const userClient=createClient(url,anon,{global:{headers:{Authorization:auth}},
@@ -72,10 +81,22 @@ Deno.serve(async(req:Request)=>{
     return data===true
    },
    objectExists:async(target:PurgeObject)=>{
+    if(singleTargetTrial && !trialTargetAllowed(target)) throw new Error('trial_target_refused')
     const result=await admin.storage.from(target.bucket).info(target.path)
-    return storageObjectExists(result)
+    const exists=storageObjectExists(result)
+    if(exists && singleTargetTrial) assertTrialStorageIdentity(result)
+    return exists
    },
    removeObject:async(target:PurgeObject)=>{
+    if(singleTargetTrial){
+      if(!trialTargetAllowed(target)) throw new Error('trial_target_refused')
+      // Re-read immediately before the irreversible call. Missing/ambiguous ID
+      // fails closed, even when an earlier preflight had already passed.
+      const beforeRemove=await admin.storage.from(target.bucket).info(target.path)
+      if(!storageObjectExists(beforeRemove)) throw new Error('trial_storage_absent_before_remove')
+      assertTrialStorageIdentity(beforeRemove)
+    }
+    // The existing held-claim trigger and service-role gate remain mandatory.
     const {error}=await admin.storage.from(target.bucket).remove([target.path])
     if(error) throw error
    },
