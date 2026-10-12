@@ -162,21 +162,14 @@ export const HomeView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-6">
-      <div className="space-y-3 px-1">
-        <div>
-          <h2 className="text-xl font-black tracking-tight text-[#204E4A]">
-            {lang === 'es' ? 'Su pequeno mundo.' : 'Their little world.'}
-          </h2>
-          <p className="text-[17px] leading-snug text-[#5C7470]">
-            {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
-          </p>
-        </div>
-        <div className="mx-auto flex w-full max-w-sm gap-1 rounded-full bg-white/75 p-1 shadow-sm backdrop-blur-xl">
+      {/* F13: franja de pestañas bajo la cabecera, alineada a la derecha según referencia PO. */}
+      <div className="flex w-full justify-end px-1 pt-1">
+        <div className="flex h-[49px] w-[235px] max-w-full items-stretch gap-0.5 rounded-full bg-transparent p-0.5" role="group" aria-label={lang === 'es' ? 'Filtrar publicaciones' : 'Filter posts'}>
           <button
             type="button"
             aria-pressed={feedFilter === 'following'}
             onClick={() => setFeedFilter('following')}
-            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[16px] font-extrabold transition-colors sm:text-[17px] ${feedFilter === 'following' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
+            className={`min-w-0 flex-[1.05] rounded-full px-2 text-[14px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.15)]' : 'text-[#5C7470] hover:bg-white/60'}`}
           >
             {lang === 'es' ? 'Para ti' : 'For you'}
           </button>
@@ -184,11 +177,19 @@ export const HomeView = ({
             type="button"
             aria-pressed={feedFilter === 'nearby'}
             onClick={handleSelectNearby}
-            className={`min-w-0 flex-[1.6] rounded-full px-2 py-2 text-[15px] font-extrabold transition-colors sm:text-[17px] ${feedFilter === 'nearby' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
+            className={`min-w-0 flex-[1.35] rounded-full px-1 text-center text-[13px] font-bold leading-tight transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.15)]' : 'text-[#5C7470] hover:bg-white/60'}`}
           >
-            {lang === 'es' ? 'Cerca · Próximamente' : 'Nearby · Coming soon'}
+            {lang === 'es' ? <>Cerca ·<span className="block">Próximamente</span></> : <>Nearby ·<span className="block">Coming soon</span></>}
           </button>
         </div>
+      </div>
+      <div className="px-1">
+        <h2 className="text-xl font-black tracking-tight text-[#204E4A]">
+          {lang === 'es' ? 'Su pequeno mundo.' : 'Their little world.'}
+        </h2>
+        <p className="text-[17px] leading-snug text-[#5C7470]">
+          {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
+        </p>
       </div>
       {feedFilter === 'nearby' ? (
         <div className="pazo-glass-card rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">

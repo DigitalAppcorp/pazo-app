@@ -275,22 +275,23 @@ export const PublicProfileView = ({
                 </button>
               )}
 
-              <div className="mt-4 grid grid-cols-3 gap-1 rounded-[1.4rem] bg-[#F3F5EF]/90 px-1 py-3 text-center sm:gap-3">
-                <div className="flex min-w-0 flex-col items-center">
-                  <span className="text-[28px] font-black leading-tight text-[#204E4A]">{petPosts.length}</span>
-                  <span className="mt-0.5 break-words text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[15px]">
+              {/* Métricas deliberadamente compactas: etiquetas legibles en tres columnas móviles. */}
+              <div className="mt-3 grid grid-cols-3 items-center gap-1 rounded-[1.3rem] bg-[#F3F5EF]/75 px-2 py-2.5 text-center sm:gap-3">
+                <div className="flex min-w-0 flex-col items-center gap-1">
+                  <span className="text-[23px] font-extrabold leading-none text-[#204E4A]">{petPosts.length}</span>
+                  <span className="block w-full whitespace-nowrap text-[10px] font-bold uppercase leading-tight tracking-[-0.025em] text-[#5C7470] sm:text-[11px]">
                     {lang === 'es' ? 'Publicaciones' : 'Posts'}
                   </span>
                 </div>
-                <div className="flex min-w-0 flex-col items-center">
-                  <span className="text-[28px] font-black leading-tight text-[#204E4A]">{followersCount}</span>
-                  <span className="mt-0.5 break-words text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[15px]">
+                <div className="flex min-w-0 flex-col items-center gap-1">
+                  <span className="text-[23px] font-extrabold leading-none text-[#204E4A]">{followersCount}</span>
+                  <span className="block w-full whitespace-nowrap text-[10px] font-bold uppercase leading-tight tracking-[-0.025em] text-[#5C7470] sm:text-[11px]">
                     {lang === 'es' ? 'Seguidores' : 'Followers'}
                   </span>
                 </div>
-                <div className="flex min-w-0 flex-col items-center">
-                  <span className="text-[28px] font-black leading-tight text-[#204E4A]">{followingCount}</span>
-                  <span className="mt-0.5 break-words text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[15px]">
+                <div className="flex min-w-0 flex-col items-center gap-1">
+                  <span className="text-[23px] font-extrabold leading-none text-[#204E4A]">{followingCount}</span>
+                  <span className="block w-full whitespace-nowrap text-[10px] font-bold uppercase leading-tight tracking-[-0.025em] text-[#5C7470] sm:text-[11px]">
                     {lang === 'es' ? 'Siguiendo' : 'Following'}
                   </span>
                 </div>
