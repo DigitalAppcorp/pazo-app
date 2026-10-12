@@ -1,3 +1,4 @@
+import type { PazoMotif } from '../components/icons/PazoMotifIcons'
 import type {
   Pet,
   Post,
@@ -47,7 +48,7 @@ export const INITIAL_POSTS: Post[] = [
     petAvatar: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=200&auto=format&fit=crop',
     location: 'Los Ángeles • Silver Lake',
     timeAgo: 'hace 25 min',
-    text: 'Luna encontró su nuevo rincón soleado favorito para ver caer la tarde. 🌿✨',
+    text: 'Luna encontró su nuevo rincón soleado favorito para ver caer la tarde.',
     photoUrl: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?q=80&w=800&auto=format&fit=crop',
     likes: 42,
     isLiked: true,
@@ -66,7 +67,7 @@ export const INITIAL_POSTS: Post[] = [
         authorName: 'Alex',
         authorPet: 'Bruno',
         authorAvatar: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=150&auto=format&fit=crop',
-        text: 'Esa calma no tiene precio 💛',
+        text: 'Esa calma no tiene precio',
         timeAgo: 'hace 5 min',
       },
     ],
@@ -79,7 +80,7 @@ export const INITIAL_POSTS: Post[] = [
     petAvatar: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=200&auto=format&fit=crop',
     location: 'Los Ángeles • Pasadena',
     timeAgo: 'hace 2 horas',
-    text: 'Tarde de tréboles frescos y exploración por el patio con supervisión. 🌾🐇',
+    text: 'Tarde de tréboles frescos y exploración por el patio con supervisión.',
     photoUrl: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?q=80&w=800&auto=format&fit=crop',
     likes: 89,
     isLiked: false,
@@ -103,7 +104,7 @@ export const INITIAL_POSTS: Post[] = [
     petAvatar: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=200&auto=format&fit=crop',
     location: 'Los Ángeles • Griffith Park',
     timeAgo: 'hace 4 horas',
-    text: 'Caminata de 5km completada antes de que el sol subiera. ¡Listo para su comida fresca! 🐕🐾',
+    text: 'Caminata de 5km completada antes de que el sol subiera. ¡Listo para su comida fresca!',
     photoUrl: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=800&auto=format&fit=crop',
     likes: 124,
     isLiked: false,
@@ -246,3 +247,15 @@ export const INITIAL_NOTIFICATIONS: PazoNotification[] = [
     read: true,
   },
 ]
+
+// Demo only: symbolic flourishes are presentation metadata, never persisted
+// in captions or user-authored comments and never sent to the database.
+export const DEMO_POST_MOTIFS: Record<string, readonly PazoMotif[]> = {
+  'post-1': ['leaf', 'sparkle'],
+  'post-2': ['meadow', 'rabbit'],
+  'post-3': ['dog', 'paw'],
+}
+
+export const DEMO_COMMENT_MOTIFS: Record<string, readonly PazoMotif[]> = {
+  'c-2': ['warm-heart'],
+}
