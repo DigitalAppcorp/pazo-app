@@ -1,3 +1,4 @@
+import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { useState } from 'react'
 import type { Conversation } from '../../types/pazo'
 
@@ -145,7 +146,7 @@ export const MessagesModal = ({
             </div>
 
             <p className="text-[10px] text-center text-[#5C7470] pt-1">
-              🛡️ {lang === 'es'
+              <PazoMotifIcon kind="shield" size={14} className="inline-block align-[-2px] mr-1" /> {lang === 'es'
                 ? 'Los contactos nuevos llegan a Solicitudes para que decidas con permiso.'
                 : 'New contacts arrive in Requests so you decide who can message you.'}
             </p>
