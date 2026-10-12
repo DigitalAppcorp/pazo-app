@@ -161,33 +161,38 @@ export const HomeView = ({
   const displayedPosts = posts.filter((post) => feedFilter === 'following' ? true : !post.isRecommended)
 
   return (
-    <div className="space-y-4 animate-slide-up pb-6">
-      {/* F13: franja de pestañas bajo la cabecera, alineada a la derecha según referencia PO. */}
-      <div className="flex w-full justify-end px-1 pt-1">
-        <div className="flex h-[49px] w-[235px] max-w-full items-stretch gap-0.5 rounded-full bg-transparent p-0.5" role="group" aria-label={lang === 'es' ? 'Filtrar publicaciones' : 'Filter posts'}>
-          <button
-            type="button"
-            aria-pressed={feedFilter === 'following'}
-            onClick={() => setFeedFilter('following')}
-            className={`min-w-0 flex-[1.05] rounded-full px-2 text-[14px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.15)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+    <div className="space-y-3 animate-slide-up pb-6">
+      {/* F13: título y filtros en una sola composición, sin franja flotante.
+          Se adaptan mediante flex-wrap según el ancho real del contenido. */}
+      <div className="space-y-1 px-1">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <h2 className="shrink-0 text-[20px] font-black leading-tight tracking-tight text-[#204E4A]">
+            {lang === 'es' ? 'Su pequeño mundo.' : 'Their little world.'}
+          </h2>
+          <div
+            className="ml-auto flex h-11 w-[206px] max-w-full shrink-0 items-stretch gap-0.5 rounded-full bg-white/30 p-0.5 backdrop-blur-sm"
+            role="group"
+            aria-label={lang === 'es' ? 'Filtrar publicaciones' : 'Filter posts'}
           >
-            {lang === 'es' ? 'Para ti' : 'For you'}
-          </button>
-          <button
-            type="button"
-            aria-pressed={feedFilter === 'nearby'}
-            onClick={handleSelectNearby}
-            className={`min-w-0 flex-[1.35] rounded-full px-1 text-center text-[13px] font-bold leading-tight transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.15)]' : 'text-[#5C7470] hover:bg-white/60'}`}
-          >
-            {lang === 'es' ? <>Cerca ·<span className="block">Próximamente</span></> : <>Nearby ·<span className="block">Coming soon</span></>}
-          </button>
+            <button
+              type="button"
+              aria-pressed={feedFilter === 'following'}
+              onClick={() => setFeedFilter('following')}
+              className={`min-w-0 flex-[1_1_40%] rounded-full px-2 text-[13px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+            >
+              {lang === 'es' ? 'Para ti' : 'For you'}
+            </button>
+            <button
+              type="button"
+              aria-pressed={feedFilter === 'nearby'}
+              onClick={handleSelectNearby}
+              className={`min-w-0 flex-[1_1_60%] rounded-full px-1 text-center text-[12px] font-bold leading-[1.2] transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+            >
+              {lang === 'es' ? <>Cerca ·<span className="block">Próximamente</span></> : <>Nearby ·<span className="block">Coming soon</span></>}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="px-1">
-        <h2 className="text-xl font-black tracking-tight text-[#204E4A]">
-          {lang === 'es' ? 'Su pequeno mundo.' : 'Their little world.'}
-        </h2>
-        <p className="text-[17px] leading-snug text-[#5C7470]">
+        <p className="text-[14px] leading-snug text-[#5C7470]">
           {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
         </p>
       </div>
