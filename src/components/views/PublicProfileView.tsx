@@ -155,7 +155,7 @@ export const PublicProfileView = ({
   }, [targetPetId])
 
   return (
-    <div className="absolute inset-0 z-[100] bg-[#FDFBF7] overflow-y-auto animate-slide-up flex flex-col font-['Quicksand','Nunito',sans-serif] antialiased text-[#204E4A]">
+    <div className="absolute inset-0 z-[100] bg-[#FDFBF7] overflow-y-auto animate-slide-up flex flex-col font-sans antialiased text-[#204E4A]">
 
       {/* Paso 3: Orbes de Luz Ambiental para Glassmorphism Avanzado */}
       <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
