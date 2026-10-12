@@ -1,3 +1,4 @@
+import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { useState, useEffect } from 'react'
 import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
@@ -195,7 +196,7 @@ export const OnboardingView = ({
               </div>
 
               <div className="absolute -top-3 right-4 bg-[#E1E53F] text-[#204E4A] text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(225,229,63,0.55)] soft-card animate-float">
-                {lang === 'es' ? "★ Identidad, Comunidad y Cuidado" : "★ Identity, community and care"}
+                <span className="inline-flex items-center gap-1"><PazoMotifIcon kind="star" size={13} />{lang === 'es' ? 'Identidad, Comunidad y Cuidado' : 'Identity, community and care'}</span>
               </div>
             </div>
 
@@ -418,7 +419,7 @@ export const OnboardingView = ({
               )}
               <div className="flex-1">
                 <label className="inline-flex items-center gap-1.5 text-xs font-bold text-[#204E4A] bg-[#FAF8F5] px-3.5 py-2 rounded-full cursor-pointer soft-button hover:bg-[#204E4A]/5 transition-colors">
-                  <span>{lang === 'es' ? "📷 Cambiar fotografía" : "📷 Change photo"}</span>
+                  <span className="inline-flex items-center gap-1.5"><PazoMotifIcon kind="camera" size={17} />{lang === 'es' ? 'Cambiar fotografía' : 'Change photo'}</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -535,7 +536,7 @@ export const OnboardingView = ({
                   <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Teléfono y correo protegidos" : "Phone and email protected"}</span>
                 </div>
                 <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  {lang === 'es' ? "Privados 🔒" : "Private 🔒"}
+                  <span className="inline-flex items-center gap-1">{lang === 'es' ? 'Privados' : 'Private'}<PazoMotifIcon kind="lock" size={12} /></span>
                 </span>
               </div>
 
@@ -545,7 +546,7 @@ export const OnboardingView = ({
                   <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Solo visibles por el tutor" : "Visible only to the guardian"}</span>
                 </div>
                 <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  {lang === 'es' ? "Privados 🔒" : "Private 🔒"}
+                  <span className="inline-flex items-center gap-1">{lang === 'es' ? 'Privados' : 'Private'}<PazoMotifIcon kind="lock" size={12} /></span>
                 </span>
               </div>
             </div>
