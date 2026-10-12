@@ -23,6 +23,18 @@
 10. **Social profile card:** avatar+identity row, metrics nearby, translucent card, post feed full width for singleton posts. Implemented; visual acceptance pending.
 11. **Glass surfaces:** `pazo-glass-card` y `pazo-glass-modal` en `src/index.css` (sin contornos, con preferencia de transparencia reducida), aplicados a 30 tarjetas de 6 vistas y 13 paneles de 11 modales. CI PASS, aprobación visual pendiente.
 
+## F13 — Ambient Feed + exhaustive yellow heading pills audit (2026-10-12)
+
+- PO expressly requested Home/Feed ambient animated blurred orbs as in the public profile: implemented **within HomeView.tsx only** (three green/lime/sage diffuse orbs, decorative and pointer-events-none beneath feed cards, existing profile-style `animate-pulse`, respects `prefers-reduced-motion`).
+- Audited **all 43 `src/**/*.tsx` files** and all three `src/**/*.css` files for hard-coded yellow/coral pills, uppercase eyebrows and title-like badges. The eight remaining decorative yellow title pills removed in commit `63090d44`:
+  - `src/App.tsx`: Pazo Acceso / login eyebrow.
+  - `src/components/modals/MessagesModal.tsx`: Mensajería 1 a 1 eyebrow.
+  - `src/components/views/OnboardingView.tsx`: promo hero badge Identidad/Comunidad/Cuidado; Tu cuenta; Agregar mascota; Privacidad; Tu comunidad (5).
+  - `src/components/views/CommunityDetailView.tsx`: Ayúdanos a priorizar promotional title pill.
+- Kept real page headings (e.g. `Iniciar Sesión`, `Hablemos.`, `Comencemos.`), instructional steps, event handlers, badges with **functional semantics** (Admin/Founder/Perro, new/unread, recommended, active check-in, archived, privacy status) and yellow primary action buttons; removing these would misrepresent product state.
+- **PO freeze exception:** `src/components/views/MapView.tsx` contains an `Ayúdanos a priorizar` yellow/transparent mini-label in future-place-feature area; deliberately **not edited** because **ALL changes to Lugares/Mapa remain unauthorized**. MapboxMap/PlaceFeatureExperiment unchanged.
+- This is a code audit and branch implementation only. CI/build and Product Owner's visual comparison are separate gates; do not assert no yellow pixels anywhere.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
