@@ -1,3 +1,4 @@
+import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
@@ -527,7 +528,7 @@ export const PetView = ({
               <div key={post.id} className="bg-white rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-[#5C7470] font-bold">{post.timeAgo}</span>
-                  <span className="text-[10px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold">♥ {post.likes}</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
                 </div>
                 <p className="text-xs text-[#204E4A] font-medium">{post.text}</p>
                 {post.photoUrl && (
