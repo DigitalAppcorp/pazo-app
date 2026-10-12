@@ -36,3 +36,11 @@
 ## Notas de seguridad
 - Documentación Supabase: desplegar explícitamente la función por nombre, comprobar `verify_jwt`, no subir todas. Los secretos de Supabase se administran sólo en entorno operador; no mostrarlos en respuestas.
 - Tiempos del CDN, backup offsite y fecha legal de lanzamiento no se dan por certificados mediante una respuesta `NoSuchKey`.
+
+## Resultado efectivo del Gate A (2026-10-12 UTC) — PASS ALOJADO
+
+- Product Owner aprobó explícitamente **sólo** la instalación de `supabase/migrations/20261012063205_f14_one_object_admin_reconcile.sql`, sin ejecución de cierre.
+- La herramienta de migraciones oficiales aplicó los **4328 bytes exactos del SQL de RC** (`success:true`) y registró `20261012071140_f14_one_object_admin_reconcile`. **ATENCIÓN:** el archivo del repo tiene prefijo `20261012063205`. No ejecutar `supabase db push` sobre todas las migraciones ni repetir esta migración desde su nombre de archivo: el versionado del ledger alojado es distinto. Corregir mapeo de historial en gate futuro, sin reaplicar DDL; referencia canónica en `docs/PAZO_ACTIVE_HANDOFF.md`.
+- Postflight de catálogo: RPC existe con firma exacta, `owner=postgres`, `security_definer=true`, `search_path=''`, `EXECUTE` exclusivamente para `service_role` (`anon=false`, `authenticated=false`, `PUBLIC=0`). Contiene target UUID y Storage UUID exactos, la puerta `f14_moderation_media_gate`, reintento idempotente y evento.
+- Postflight datos: **cero cambios en datos**. `post-photos=0`, `pet-avatars=2`, objeto UUID ausente, claim `held=1`, claim `invalidated=0`, evento invalidado `0`, restricción `pending_review=1`, `purged=0`, reporte `removed=1`.
+- Edge nueva `f14-moderation-reconcile` todavía **NO instalada**, Edge de purga original **v27 `verify_jwt=true`, ambos latches false**; ningún flag activado ni POST enviado. **STOP aquí:** ejecutar Gate B necesita orden separada del PO.
