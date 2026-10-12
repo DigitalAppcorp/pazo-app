@@ -113,6 +113,28 @@
   animation: pulseSoft 3s ease-in-out infinite;
 }
 
+/* F13: superficie cristal uniforme; elevación suave, sin borde ni aro. */
+@layer components {
+  .pazo-glass-card {
+    background-color: rgba(255, 255, 255, 0.76);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 8px 26px rgba(32, 78, 74, 0.07);
+  }
+  .pazo-glass-modal {
+    background-color: rgba(250, 248, 245, 0.94);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    backdrop-filter: blur(24px) saturate(1.2);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .pazo-glass-card, .pazo-glass-modal {
+    background-color: #FAF8F5;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 /* Sombra sutil Pazo para reemplazar contornos */
 .soft-card {
   box-shadow: 0 4px 20px -2px rgba(32, 78, 74, 0.06), 0 2px 6px -1px rgba(32, 78, 74, 0.04);

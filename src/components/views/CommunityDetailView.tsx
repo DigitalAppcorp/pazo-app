@@ -472,7 +472,7 @@ export const CommunityDetailView = ({
         <button onClick={onBack} className="text-xs font-bold text-[#204E4A]">
           {lang === 'es' ? 'Volver' : 'Back'}
         </button>
-        <div className="rounded-[2rem] bg-white p-5 text-xs text-[#5C7470] shadow-sm">
+        <div className="rounded-[2rem] pazo-glass-card p-5 text-xs text-[#5C7470] shadow-sm">
           {lang === 'es' ? 'No se pudo cargar la comunidad.' : 'Could not load the community.'}
         </div>
       </div>
@@ -493,7 +493,7 @@ export const CommunityDetailView = ({
         {lang === 'es' ? 'Volver a Explorar' : 'Back to Explore'}
       </button>
 
-      <section className="overflow-hidden rounded-[2.4rem] bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[2.4rem] pazo-glass-card shadow-sm">
         <div className="relative h-44 bg-[#DDE7E4]">
           <img
             src={community.imageUrl}
@@ -694,7 +694,7 @@ export const CommunityDetailView = ({
           )}
 
           {!community.isJoined && community.status === 'active' && (
-            <div className="rounded-[2rem] bg-white p-4 text-center shadow-sm">
+            <div className="rounded-[2rem] pazo-glass-card p-4 text-center shadow-sm">
               <p className="text-xs font-bold text-[#204E4A]">
                 {lang === 'es'
                   ? 'Puedes leer la comunidad sin unirte.'
@@ -709,7 +709,7 @@ export const CommunityDetailView = ({
           )}
 
           {posts.length === 0 ? (
-            <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+            <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
               <IconPaw size={24} className="mx-auto text-[#204E4A]/50" />
               <p className="mt-2 text-xs font-black text-[#204E4A]">
                 {lang === 'es'
@@ -728,7 +728,7 @@ export const CommunityDetailView = ({
             </div>
           ) : (
             posts.map((post) => post.isAuthorDeleted ? (
-              <article key={post.id} className="space-y-3 rounded-[2rem] bg-white p-4 shadow-sm">
+              <article key={post.id} className="space-y-3 rounded-[2rem] pazo-glass-card p-4 shadow-sm">
                 <div className="flex items-center gap-3 text-[#204E4A]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FAF8F5]"><IconPaw size={18}/></div>
                   <p className="text-xs font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
@@ -907,7 +907,7 @@ export const CommunityDetailView = ({
       )}
 
       {activeTab === 'info' && (
-        <section className="space-y-4 rounded-[2rem] bg-white p-5 shadow-sm">
+        <section className="space-y-4 rounded-[2rem] pazo-glass-card p-5 shadow-sm">
           {!isEditing ? (
             <>
               <div>
@@ -1360,7 +1360,7 @@ export const CommunityDetailView = ({
           ))}
 
           {members.length === 0 && (
-            <div className="rounded-[2rem] bg-white p-5 text-xs text-[#5C7470] shadow-sm">
+            <div className="rounded-[2rem] pazo-glass-card p-5 text-xs text-[#5C7470] shadow-sm">
               {lang === 'es' ? 'No hay miembros para mostrar.' : 'No members to show.'}
             </div>
           )}

@@ -264,7 +264,7 @@ export const OnboardingView = ({
             </div>
 
             {awaitingEmailConfirmation ? (
-              <div role="status" className="p-4 bg-white border border-[#204E4A]/15 rounded-2xl text-[#204E4A] space-y-3">
+              <div role="status" className="p-4 pazo-glass-card border border-[#204E4A]/15 rounded-2xl text-[#204E4A] space-y-3">
                 <h3 className="font-extrabold text-base">
                   {lang === 'es' ? 'Revisa tu correo' : 'Check your email'}
                 </h3>
@@ -409,7 +409,7 @@ export const OnboardingView = ({
             </div>
 
             {/* Avatar selector conectado a la galería */}
-            <div className="flex items-center gap-3 p-3 bg-white rounded-2xl soft-card">
+            <div className="flex items-center gap-3 p-3 pazo-glass-card rounded-2xl soft-card">
               {petPhoto ? (
                 <img src={petPhoto} alt={lang === 'es' ? "Foto elegida para tu mascota" : "Selected pet photo"} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
               ) : (
@@ -510,7 +510,7 @@ export const OnboardingView = ({
             </div>
 
             <div className="space-y-2.5 text-xs">
-              <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
+              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Nombre y fotografía" : "Name and photo"}</span>
                   <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Visible para la comunidad" : "Visible to the community"}</span>
@@ -520,7 +520,7 @@ export const OnboardingView = ({
                 </span>
               </div>
 
-              <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
+              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</span>
                   <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Sin dirección exacta" : "No exact address"}</span>
@@ -530,7 +530,7 @@ export const OnboardingView = ({
                 </span>
               </div>
 
-              <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
+              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Datos de contacto" : "Contact details"}</span>
                   <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Teléfono y correo protegidos" : "Phone and email protected"}</span>
@@ -540,7 +540,7 @@ export const OnboardingView = ({
                 </span>
               </div>
 
-              <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
+              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Cuidados y documentos" : "Care and documents"}</span>
                   <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Solo visibles por el tutor" : "Visible only to the guardian"}</span>

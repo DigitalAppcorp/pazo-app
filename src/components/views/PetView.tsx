@@ -260,7 +260,7 @@ export const PetView = ({
       </div>
 
       {showPetPicker && !isEditing && (
-        <div className="p-3 bg-white rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
+        <div className="p-3 pazo-glass-card rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
           <div className="flex justify-between items-center px-2">
             <span className="text-[13px] font-extrabold uppercase text-[#5C7470] tracking-wider">
               {lang === 'es' ? 'Tus mascotas registradas' : 'Your registered pets'}
@@ -311,7 +311,7 @@ export const PetView = ({
         </div>
       )}
 
-      <div className="p-5 bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
+      <div className="p-5 pazo-glass-card rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
         {!isEditing && (
           <button
             onClick={handleEditClick}
@@ -502,7 +502,7 @@ export const PetView = ({
       </div>
 
       {!isEditing && (
-        <div className="flex bg-white p-1 rounded-2xl border border-[#204E4A]/10 shadow-xs">
+        <div className="flex pazo-glass-card p-1 rounded-2xl border border-[#204E4A]/10 shadow-xs">
           <button
             onClick={() => setActiveTab('menu')}
             className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'menu' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
@@ -521,7 +521,7 @@ export const PetView = ({
       {!isEditing && activeTab === 'myposts' ? (
         <div className="space-y-3 animate-fade-in">
           {userPosts.length === 0 ? (
-            <div className="bg-white rounded-[2rem] p-8 text-center border border-[#204E4A]/10 shadow-xs">
+            <div className="pazo-glass-card rounded-[2rem] p-8 text-center border border-[#204E4A]/10 shadow-xs">
               <p className="text-xs text-[#5C7470] font-medium">
                 {lang === 'es'
                   ? `Aún no has compartido historias de ${currentPet.name}.`
@@ -530,7 +530,7 @@ export const PetView = ({
             </div>
           ) : (
             userPosts.map((post) => (
-              <div key={post.id} className="bg-white rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
+              <div key={post.id} className="pazo-glass-card rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] text-[#5C7470] font-bold">{post.timeAgo}</span>
                   <span className="inline-flex items-center gap-1 text-[13px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
@@ -633,7 +633,7 @@ export const PetView = ({
             </span>
           </div>
 
-          <div className="rounded-[2rem] bg-white px-4 py-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+          <div className="rounded-[2rem] pazo-glass-card px-4 py-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
             <h4 className="text-sm font-extrabold text-[#204E4A]">
               {lang === 'es' ? 'Privacidad y reglas' : 'Privacy & community rules'}
             </h4>
@@ -652,7 +652,7 @@ export const PetView = ({
             </div>
           </div>
 
-          <div className="rounded-[2rem] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+          <div className="rounded-[2rem] pazo-glass-card p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
             <h4 className="text-sm font-extrabold text-[#204E4A]">
               {lang==='es'?'Cuenta y datos':'Account and data'}
             </h4>

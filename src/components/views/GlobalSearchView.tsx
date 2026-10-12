@@ -296,7 +296,7 @@ export const GlobalSearchView = ({
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">
         {!canSearch ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+          <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
             <p className="text-sm font-black text-[#204E4A]">
               {lang === 'es'
                 ? 'Inicia sesión con una cuenta real para buscar en PAZO.'
@@ -327,7 +327,7 @@ export const GlobalSearchView = ({
             )}
 
             {!isLoading && unexpectedError && (
-              <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
+              <div className="rounded-2xl pazo-glass-card p-5 text-center shadow-sm">
                 <p className="text-xs font-black text-[#204E4A]">
                   {lang === 'es'
                     ? 'No pudimos completar la búsqueda.'
@@ -341,7 +341,7 @@ export const GlobalSearchView = ({
               visibleResultCount === 0 &&
               !activeFilterFailed &&
               (filter !== 'all' || response.failedTypes.length === 0) && (
-                <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+                <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
                   <p className="text-sm font-black text-[#204E4A]">
                     {lang === 'es'
                       ? `No encontramos resultados para “${trimmedQuery}”.`
@@ -387,7 +387,7 @@ export const GlobalSearchView = ({
                   </div>
 
                   {failed ? (
-                    <div className="rounded-2xl bg-white p-4 text-[14px] font-semibold text-[#5C7470] shadow-sm">
+                    <div className="rounded-2xl pazo-glass-card p-4 text-[14px] font-semibold text-[#5C7470] shadow-sm">
                       {lang === 'es'
                         ? 'Esta categoría no pudo cargarse. Los demás resultados siguen disponibles.'
                         : 'This category could not load. Other results are still available.'}

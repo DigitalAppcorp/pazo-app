@@ -159,7 +159,7 @@ export const CommunitiesView = ({
         </div>
 
         {!canUseCommunities ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+          <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
             <p className="text-xs font-black text-[#204E4A]">
               {lang === 'es'
                 ? 'Inicia sesión con una cuenta real para usar Comunidades.'
@@ -171,7 +171,7 @@ export const CommunitiesView = ({
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#204E4A]/20 border-t-[#204E4A]" />
           </div>
         ) : communities.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+          <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
             <p className="text-xs font-black text-[#204E4A]">
               {lang === 'es'
                 ? 'Todavía no hay comunidades.'

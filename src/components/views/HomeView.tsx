@@ -191,7 +191,7 @@ export const HomeView = ({
         </div>
       </div>
       {feedFilter === 'nearby' ? (
-        <div className="bg-white rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
+        <div className="pazo-glass-card rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
           <div className="w-16 h-16 rounded-2xl bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center mx-auto mb-2">
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -215,7 +215,7 @@ export const HomeView = ({
       ) : (
         <div className="space-y-4">
           {displayedPosts.length === 0 && (
-            <div className="rounded-[2rem] bg-white p-7 text-center space-y-2 border border-[#204E4A]/10">
+            <div className="rounded-[2rem] pazo-glass-card p-7 text-center space-y-2 border border-[#204E4A]/10">
               <h3 className="text-base font-black text-[#204E4A]">
                 {lang === 'es' ? 'Todavía no hay publicaciones' : 'No posts yet'}
               </h3>
@@ -280,7 +280,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
 
 
   if (post.isAuthorDeleted) return (
-    <article ref={elementRef as React.RefObject<HTMLElement>} className="rounded-[2.2rem] bg-white p-5 shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
+    <article ref={elementRef as React.RefObject<HTMLElement>} className="rounded-[2.2rem] pazo-glass-card p-5 shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
       <div className="flex items-center gap-3 text-[#204E4A]">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF8F5]"><IconPaw size={18}/></div>
         <p className="text-sm font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
@@ -304,7 +304,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
   )
 
   return (
-    <article ref={elementRef as React.RefObject<HTMLElement>} className="bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden transition-all">
+    <article ref={elementRef as React.RefObject<HTMLElement>} className="pazo-glass-card rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden transition-all">
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div onClick={() => onSelectPetProfile(post.petId)} className={`w-10 h-10 rounded-full overflow-hidden shadow-xs shrink-0 cursor-pointer ${post.isRecommended ? 'p-0.5 bg-gradient-to-tr from-[#E1E53F] to-[#204E4A]' : ''}`}>
