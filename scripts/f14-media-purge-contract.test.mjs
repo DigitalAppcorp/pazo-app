@@ -35,7 +35,8 @@ test('SQL only authorizes exact server-only removed content and matches Storage 
  assert.doesNotMatch(sql,/\bUPDATE\s+moderation_private\.content_restrictions\b/i)
 })
 test('Edge is off unless explicitly enabled, verifies user and role, and never logs key or raw URL',()=>{
- assert.match(edge,/F14_MEDIA_PURGE_ENABLED'\)!=='true'/)
+ assert.match(edge,/F14_MEDIA_PURGE_ENABLED'\)==='true'/)
+ assert.match(edge,/F14_TRIAL_PURGE_ENABLED'\)==='true'/)
  assert.match(edge,/userClient\.auth\.getUser\(token\)/)
  assert.match(edge,/userClient\.rpc\('f14_is_moderator'\)/)
  assert.match(edge,/admin\.storage\.from\(target\.bucket\)\.remove\(\[target\.path\]\)/)
@@ -58,7 +59,13 @@ test('moderation UI stays disabled until local flag and operator gate',()=>{
 
 test('server deployment is disabled independently of hosted secret values',()=>{
  assert.match(edge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
- assert.match(edge,/if\(!F14_MEDIA_PURGE_RELEASE_APPROVED \|\| Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)!=='true'\)/)
+ assert.match(edge,/const releaseEnabled = F14_MEDIA_PURGE_RELEASE_APPROVED && Deno\.env\.get\('F14_MEDIA_PURGE_ENABLED'\)==='true'/)
+ assert.match(edge,/const F14_TRIAL_PURGE_APPROVED = false/)
+ assert.match(edge,/const trialEnabled = F14_TRIAL_PURGE_APPROVED && Deno\.env\.get\('F14_TRIAL_PURGE_ENABLED'\)==='true'/)
+ assert.match(edge,/if\(!releaseEnabled && !trialEnabled\) return reply\(503,\{error:'cleanup_disabled'\}\)/)
+ assert.match(edge,/singleTargetTrial && !trialRequestAllowed\(input.kind,input.id\)/)
+ assert.match(edge,/assertTrialStorageIdentity\(result\)/)
+ assert.match(edge,/assertTrialStorageIdentity\(beforeRemove\)/)
 })
 
 test('D3A finalization preserves claim/version and requires server proof and absent Storage object',()=>{
