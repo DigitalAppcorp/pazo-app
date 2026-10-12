@@ -1,3 +1,5 @@
+> **F13 AUTORIZADA — 2026-10-12:** El Product Owner aceptó iniciar una revisión visual **enfocada**, no un rediseño masivo. Gate inicial: comparación de capturas reales de PAZO con hallazgos de CSS/componentes; corregir solo inconsistencias aprobadas bloque por bloque, preservando funcionalidad y regla permanente **cero contornos**. Diagnóstico de código pendiente de confirmación visual: márgenes 2px `!important` de todos los h1–h6/p/label en `src/index.css`; microtextos 10–11px en `BottomNav`, `HeaderBar`, `HomeView` y otras vistas; `PublicProfileView` fuerza Quicksand/Nunito en lugar de Palo Seco. No eliminar reglas globales ni modificar componentes antes del comparativo visual y aceptación PO. La smoke final T12 HTTPS+CI debe ser una sola pasada después de cambios F13 aprobados, no duplicarse. `main`, Vercel y Supabase sin autorización de mutación adicional.
+
 > **T09 PWA física PASS por PO — 2026-10-12:** El PO confirmó prueba satisfactoria de instalación/uso de PAZO en iPhone; Android Chrome instalado sin barra de URL ya estaba aprobado previamente. No repetir pruebas físicas de ambos dispositivos. El cierre por SHA de release/HTTPS queda en T12, antes de F13 y GO/NO-GO; no equivale a autorizar publicación. **Siguiente gate T11**: respaldo DB/Storage, cifrado age y restore aislado ya PASS LOCAL, falta verificar off-site personal Drive/upload-download/custodia recuperable. Ver handoff vigente.
 
 > **ACTUALIZACIÓN PRIORITARIA — 2026-10-12, F14/T08 Gate B PASS específico:** reconciliación administrativa de **un único objeto de prueba** finalizada con POST autenticado HTTP 200 y postflight SQL alojado: claim invalidated=1/held=0; un evento invalidated; restricción purged=1/pending=0; reporte removed=1; foto original ausente y dos avatares intactos. Rollback CLI secreto OFF + código OFF y funciones alojadas bloqueadas (reconciler v27, purge v41, JWT true) confirmado. **NO repetir purga, POST, migración ni ensayos históricos; F14 integral y GO beta NO se declaran completos.** Fuente de detalle: `docs/PAZO_ACTIVE_HANDOFF.md`. Prioridad siguiente: gates T05/T07/T09/T10/T11/T12 y F13 visual al final, sin tocar main/Vercel hasta gate del PO.
@@ -693,7 +695,7 @@ Supabase / build / runtime / Product Owner acceptance: PASS.
 ---
 
 ## Fase 13 — Rediseño visual y sistema de interfaz
-**Estado: PLANIFICADA**
+**Estado: EN CURSO — auditoría visual enfocada autorizada por Product Owner (2026-10-12), sin cambios de UI aún**
 
 ### Objetivo
 Elevar la calidad visual de PAZO sin alterar las funcionalidades ya aprobadas.
