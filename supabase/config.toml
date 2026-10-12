@@ -429,3 +429,10 @@ entrypoint = "./functions/paypal-webhook/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/f14-moderation-purge/index.ts"
+
+# F14 verified-only administrative reconciliation: deliberately not deployed.
+# Separate PO gate must explicitly review and enable it after PG/HTTP tests.
+[functions.f14-moderation-reconcile]
+enabled = false
+verify_jwt = true
+entrypoint = "./functions/f14-moderation-reconcile/index.ts"
