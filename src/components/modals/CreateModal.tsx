@@ -77,11 +77,11 @@ export const CreateModal = ({
         {mode === 'menu' ? (
           <>
             {/* Header del menú de acciones */}
+            <SectionTitle>
+            Pazo Action
+            </SectionTitle>
             <div className="flex justify-between items-center pb-2">
               <div>
-                <SectionTitle>
-              Pazo Action
-            </SectionTitle>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
                   {lang === 'es' ? 'Crear y Compartir' : 'Create & Share'}
                 </h3>

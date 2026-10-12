@@ -133,11 +133,11 @@ export const AddPetModal = ({ isOpen, onClose, onPetCreated, lang }: AddPetModal
   return (
     <div className="absolute inset-0 z-[160] bg-[#204E4A]/35 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-5">
       <div className="w-full max-w-md max-h-[92%] overflow-y-auto bg-[#FDFBF7] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-6 space-y-5">
+        <SectionTitle>
+        {lang === 'es' ? 'Nueva mascota' : 'New pet'}
+        </SectionTitle>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <SectionTitle>
-              {lang === 'es' ? 'Nueva mascota' : 'New pet'}
-            </SectionTitle>
             <h2 className="text-2xl font-black text-[#204E4A] mt-2">
               {lang === 'es' ? 'Añadir a tu familia' : 'Add to your family'}
             </h2>

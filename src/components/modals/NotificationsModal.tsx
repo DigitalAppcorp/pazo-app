@@ -47,11 +47,11 @@ export const NotificationsModal = ({
           }
         }}
       >
+        <SectionTitle>
+        {lang === 'es' ? 'Avisos y Alertas' : 'Alerts & Activity'}
+        </SectionTitle>
         <div className="flex justify-between items-center pb-2">
           <div>
-            <SectionTitle>
-              {lang === 'es' ? 'Avisos y Alertas' : 'Alerts & Activity'}
-            </SectionTitle>
             <h3 className="text-xl font-black text-[#204E4A] mt-1">
               {lang === 'es' ? 'Al día.' : 'Notifications.'}
             </h3>

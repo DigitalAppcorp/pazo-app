@@ -401,11 +401,11 @@ export const MapView = ({
   return (
     <>
       <div className="space-y-4 animate-slide-up pb-8">
+        <SectionTitle>
+        {lang === 'es' ? 'Lugares' : 'Places'}
+        </SectionTitle>
         <div className="flex items-start justify-between gap-3 px-1">
           <div>
-            <SectionTitle>
-              {lang === 'es' ? 'Lugares' : 'Places'}
-            </SectionTitle>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-[#204E4A]">
               {lang === 'es'
                 ? 'Explora con tu mascota.'

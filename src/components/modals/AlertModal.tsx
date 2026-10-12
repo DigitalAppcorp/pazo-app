@@ -130,11 +130,11 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
           </div>
         ) : step === 'create' ? (
           <div className="space-y-4">
+            <SectionTitle tone="alert">
+            {lang === 'es' ? 'Emergencia Comunitaria' : 'Community Alert'}
+            </SectionTitle>
             <div className="flex justify-between items-center pb-2 border-b border-[#204E4A]/10">
               <div>
-                <SectionTitle tone="alert">
-              {lang === 'es' ? 'Emergencia Comunitaria' : 'Community Alert'}
-            </SectionTitle>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
                   {lang === 'es' ? `Busquemos a ${pet.name}.` : `Let's find ${pet.name}.`}
                 </h3>

@@ -219,11 +219,11 @@ export const PetView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-6">
+        <SectionTitle>
+        {isEditing ? (lang === 'es' ? 'Editando Perfil' : 'Editing Profile') : (lang === 'es' ? 'Ficha Oficial' : 'Official Record')}
+        </SectionTitle>
       <div className="flex justify-between items-center px-1">
         <div>
-          <SectionTitle>
-              {isEditing ? (lang === 'es' ? 'Editando Perfil' : 'Editing Profile') : (lang === 'es' ? 'Ficha Oficial' : 'Official Record')}
-            </SectionTitle>
           <h2 className="text-2xl font-black text-[#204E4A] tracking-tight mt-1">
             {currentPet.name}
           </h2>
