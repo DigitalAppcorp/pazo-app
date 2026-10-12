@@ -70,7 +70,7 @@ export const MessagesModal = ({
           <>
             <div className="flex justify-between items-center pb-2">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
+                <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
                   {lang === 'es' ? 'Mensajería 1 a 1' : 'Direct Messages'}
                 </span>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
@@ -134,9 +134,9 @@ export const MessagesModal = ({
                         <span className="font-extrabold text-xs text-[#204E4A]">
                           {conv.personName} • {conv.petName}
                         </span>
-                        <span className="text-[10px] text-[#5C7470]">{conv.timeAgo}</span>
+                        <span className="text-[13px] text-[#5C7470]">{conv.timeAgo}</span>
                       </div>
-                      <p className="text-[11px] text-[#5C7470] truncate mt-0.5">
+                      <p className="text-[14px] text-[#5C7470] truncate mt-0.5">
                         {conv.lastMessage}
                       </p>
                     </div>
@@ -145,7 +145,7 @@ export const MessagesModal = ({
               )}
             </div>
 
-            <p className="text-[10px] text-center text-[#5C7470] pt-1">
+            <p className="text-[13px] text-center text-[#5C7470] pt-1">
               <PazoMotifIcon kind="shield" size={14} className="inline-block align-[-2px] mr-1" /> {lang === 'es'
                 ? 'Los contactos nuevos llegan a Solicitudes para que decidas con permiso.'
                 : 'New contacts arrive in Requests so you decide who can message you.'}
@@ -165,7 +165,7 @@ export const MessagesModal = ({
                 <span className="font-extrabold text-xs text-[#204E4A] block">
                   {activeConv.personName} • {activeConv.petName}
                 </span>
-                <span className="text-[10px] text-[#5C7470]">{activeConv.petSpecies}</span>
+                <span className="text-[13px] text-[#5C7470]">{activeConv.petSpecies}</span>
               </div>
               <button onClick={onClose} className="text-sm font-bold text-[#5C7470] cursor-pointer">
                 ✕
@@ -190,7 +190,7 @@ export const MessagesModal = ({
                   >
                     {m.text}
                   </div>
-                  <span className="text-[9px] text-[#5C7470]/70 mt-0.5 px-1">{m.timestamp}</span>
+                  <span className="text-[12px] text-[#5C7470]/70 mt-0.5 px-1">{m.timestamp}</span>
                 </div>
               ))}
             </div>

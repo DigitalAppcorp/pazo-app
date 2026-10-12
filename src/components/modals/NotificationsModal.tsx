@@ -123,10 +123,10 @@ export const NotificationsModal = ({
                         />
                       )}
                     </div>
-                    <span className="text-[11px] text-[#5C7470] block mt-0.5">
+                    <span className="text-[14px] text-[#5C7470] block mt-0.5">
                       {item.subtitle}
                     </span>
-                    <span className="text-[9px] text-[#5C7470]/60 block mt-1">
+                    <span className="text-[12px] text-[#5C7470]/60 block mt-1">
                       {item.timeAgo}
                     </span>
                   </div>

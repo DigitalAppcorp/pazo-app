@@ -205,7 +205,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
             <span className="font-extrabold text-sm text-[#204E4A] block">
               {pet.name}
             </span>
-            <span className="text-[10px] text-[#5C7470] block mt-1">
+            <span className="text-[13px] text-[#5C7470] block mt-1">
               {lang === 'es'
                 ? 'Pon este QR en su placa o collar.'
                 : 'Place this QR on their tag or collar.'}
@@ -213,7 +213,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
           </div>
         </div>
 
-        <div className="p-3 bg-[#FAF8F5] rounded-2xl text-[#5C7470] text-[11px] leading-relaxed shadow-xs flex items-start gap-2">
+        <div className="p-3 bg-[#FAF8F5] rounded-2xl text-[#5C7470] text-[14px] leading-relaxed shadow-xs flex items-start gap-2">
           <IconShield size={16} className="text-[#204E4A] shrink-0 mt-0.5" />
           <span>
             {lang === 'es'
@@ -252,7 +252,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
           <button
             onClick={handleRotateQr}
             disabled={!publicUrl || isRotating}
-            className="col-span-2 w-full mt-1 text-[10px] font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 cursor-pointer"
+            className="col-span-2 w-full mt-1 text-[13px] font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 cursor-pointer"
           >
             {isRotating
               ? (lang === 'es' ? 'Regenerando…' : 'Regenerating…')

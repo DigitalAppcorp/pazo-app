@@ -143,14 +143,14 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
                 <img src={pet.photoUrl} alt={pet.name} className="w-10 h-10 rounded-xl object-cover" />
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{pet.name}</span>
-                  <span className="text-[11px] text-[#5C7470]">
+                  <span className="text-[14px] text-[#5C7470]">
                     {pet.species}{pet.breed ? ` • ${pet.breed}` : ''}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Última vez vista' : 'Last seen location'}
                 </label>
                 <input
@@ -164,7 +164,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Fecha y hora aproximada' : 'Approximate date & time'}
                 </label>
                 <input
@@ -176,7 +176,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Descripción' : 'Description'}
                 </label>
                 <textarea
@@ -189,7 +189,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
                 />
               </div>
 
-              <div className="p-3 bg-white border border-[#204E4A]/10 rounded-2xl text-[11px] text-[#5C7470]">
+              <div className="p-3 bg-white border border-[#204E4A]/10 rounded-2xl text-[14px] text-[#5C7470]">
                 {lang === 'es'
                   ? 'Tu teléfono y domicilio no se mostrarán. El QR permitirá enviar avisos privados.'
                   : 'Your phone and home address stay hidden. The QR allows private notices.'}

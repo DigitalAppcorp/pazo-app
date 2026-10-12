@@ -224,7 +224,7 @@ export const CreateModal = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#5C7470] mb-1">
+                <label className="block text-[14px] font-bold text-[#5C7470] mb-1">
                   {lang === 'es' ? '¿Qué compartieron hoy?' : 'What did you share today?'}
                 </label>
                 <textarea
@@ -276,7 +276,7 @@ export const CreateModal = ({
                   <button
                     type="button"
                     onClick={() => setAudience('public')}
-                    className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'public'
+                    className={`px-3 py-1 rounded-full text-[14px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'public'
                       ? 'bg-[#204E4A] text-[#E1E53F]'
                       : 'bg-white text-[#5C7470]'
                       }`}
@@ -286,7 +286,7 @@ export const CreateModal = ({
                   <button
                     type="button"
                     onClick={() => setAudience('community')}
-                    className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'community'
+                    className={`px-3 py-1 rounded-full text-[14px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'community'
                       ? 'bg-[#204E4A] text-[#E1E53F]'
                       : 'bg-white text-[#5C7470]'
                       }`}
@@ -325,7 +325,7 @@ export const CreateModal = ({
 
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-[#FAF8F5] rounded-2xl shadow-xs">
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Nombre de la actividad' : 'Activity Name'}
                 </label>
                 <input
@@ -336,7 +336,7 @@ export const CreateModal = ({
               </div>
 
               <div className="p-3 bg-[#FAF8F5] rounded-2xl shadow-xs">
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Lugar público & Hora' : 'Public Place & Time'}
                 </label>
                 <input
