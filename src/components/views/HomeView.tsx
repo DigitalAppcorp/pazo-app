@@ -163,7 +163,7 @@ export const HomeView = ({
   return (
     <div className="space-y-3 animate-slide-up pb-6">
       {/* F13: título y filtros en la misma fila; en pantallas estrechas se apilan juntos sin espacio muerto. */}
-      <div className="space-y-1 px-1">
+      <div className="px-1">
         <div className="grid grid-cols-[minmax(0,1fr)_170px] items-center gap-x-2 gap-y-2 max-[360px]:grid-cols-1">
           <h2 className="min-w-0 text-[clamp(16px,4vw,20px)] font-black leading-tight tracking-tight text-[#204E4A]">
             {lang === 'es' ? 'Su pequeño mundo.' : 'Their little world.'}
@@ -191,9 +191,6 @@ export const HomeView = ({
             </button>
           </div>
         </div>
-        <p className="text-[14px] leading-snug text-[#5C7470]">
-          {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
-        </p>
       </div>
       {feedFilter === 'nearby' ? (
         <div className="pazo-glass-card rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
