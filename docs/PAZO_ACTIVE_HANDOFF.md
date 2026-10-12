@@ -1,6 +1,9 @@
-# PAZO — ACTIVE HANDOFF (snapshot canónico corto)
+# PAZO — ACTIVE HANDOFF
 
-**Corte: 2026-10-12. Próxima tarea única: reconstrucción Figma fiel de las pantallas REALES de PAZO.**
+> **F13 — NUEVA INSTRUCCIÓN DEL PRODUCT OWNER (2026-10-12; PREVALECE SOBRE §3 Y §5 HISTÓRICOS):** El PO ya no desea replicación en Figma ni delegar a Codex. La misión activa es editar directamente la interfaz React/TSX de PAZO, subir cada bloque a una rama de GitHub y validar en **Vite local, sin usar Vercel para revisión visual**. Se aprobaron referencias visuales (21 capturas en conversación) para: convertir etiquetas/pills de pantallas en títulos superiores como «PERFIL», reubicar controles de header, iconografía propietaria integral, mapa full-bleed con buscador superior y lugares en carrusel inferior horizontal SIN nuevas acciones, valor no indicado de mascota sin inventar datos, aumentar texto +3 px con responsive/overflow controlado, intereses elegibles respaldados por datos existentes y especie, eliminar espacio vacío en métricas, suavizar espacio de tabs, rediseñar tarjeta de perfil como red social, mantener superficies tipo cristal. **NO** realizar Supabase SQL ni Vercel/deploy ni merge a main; no repetir QA aprobada. El primer bloque (solo etiquetas superiores) se está implementando en rama `f13/section-titles-20261012`; CI y aceptación visual PO siguen pendientes. El inventario y gates están en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. Los 25 frames rechazados de Figma siguen históricos, NO son entregable.
+
+
+**Corte: 2026-10-12. Tarea vigente: refinamiento F13 en código real React/TSX con visual QA local.**
 **Product Owner:** usuario. **Agente:** ChatGPT Project Brain OS v1.4.1, ejecutor técnico principal. **Fase:** F13 identidad y revisión visual EN CURSO. **Lanzamiento público:** NO-GO; requiere decisión PO explícita.
 **Este snapshot prevalece sobre fechas y banners históricos del roadmap.** Handoff anterior completo (94 KB) preservado íntegramente en historial Git de `docs/PAZO_ACTIVE_HANDOFF.md` antes del commit actual, concretamente en la rama RC en commit `9385f339242f013e7d35b0c98d10b8051b07222d`. Para evidencia detallada F14/T08, abrir ese estado y los runbooks, sin replicar su contenido.
 
