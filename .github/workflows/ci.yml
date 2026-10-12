@@ -10,6 +10,7 @@ on:
       - main
       - release/mvp-beta-fast-track-20261010
       - fix/f14-nosuchkey-verification-20261012
+      - fix/f14-verified-reconciliation-20261012
 
 permissions:
   contents: read
@@ -90,10 +91,12 @@ jobs:
             psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
               -c 'SET ROLE postgres;' \
               -f supabase/migrations/20261010222006_f14_media_purge_retry_reconciliation.sql \
-              -f supabase/migrations/20261011022000_f14_media_url_alias_guard.sql
+              -f supabase/migrations/20261011022000_f14_media_url_alias_guard.sql \
+              -f supabase/migrations/20261012063205_f14_one_object_admin_reconcile.sql
           done
           node scripts/f14-postgres-catalog.mjs
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/metadata.sql -f supabase/tests/f14/synthetic-cases.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/one-object-reconcile-cases.sql
       - name: Pre-existing aliases and real two-session concurrency
         run: |
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
@@ -107,3 +110,5 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -Atq -v ON_ERROR_STOP=1 \
             -o "$RUNNER_TEMP/backup-catalog.json" -f scripts/backup-catalog-verification.sql
           node --input-type=module -e 'import fs from "node:fs"; JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/backup-catalog.json", "utf8")); console.log("Backup catalog query PASS on synthetic PostgreSQL; no hosted backup certification.");'
+      - name: Reconciliation-only two-session lock and idempotency
+        run: node scripts/f14-one-object-reconciliation-concurrency.mjs

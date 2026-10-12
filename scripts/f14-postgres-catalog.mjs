@@ -12,7 +12,7 @@ function norm(x,k=''){
  if(x&&typeof x==='object')return Object.fromEntries(Object.keys(x).sort().map(k=>[k,norm(x[k],k)]))
  return typeof x==='string'?x.replaceAll('\r\n','\n'):x
 }
-const changed=new Set(['f14_media_probe','f14_moderation_media_gate','f14_local_url_points_to_object','f14_guard_held_media_reference','f14_guard_held_storage_mutation'])
+const changed=new Set(['f14_media_probe','f14_moderation_media_gate','f14_local_url_points_to_object','f14_guard_held_media_reference','f14_guard_held_storage_mutation','f14_finalize_one_object_reconciliation'])
 for(const [kind,q] of Object.entries(queries)){
  const query=kind==='sequences'?q.replace('s.seqmax,','s.seqmax::text AS seqmax,'):q
  const rows=JSON.parse(execFileSync(psql,['-X','-h','127.0.0.1','-p','55441','-U','f14_admin','-d','f14_synthetic','-Atq','-v','ON_ERROR_STOP=1','-c',`SELECT coalesce(json_agg(t),'[]') FROM (${query}) t`],{encoding:'utf8',maxBuffer:4e6,timeout:15000}))
