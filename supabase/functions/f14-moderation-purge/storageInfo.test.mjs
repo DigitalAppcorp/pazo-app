@@ -21,3 +21,28 @@ test('ambiguous data or errors never confirm origin removal',()=>{
     {data:'picture.webp',error:null}, {data:[],error:null},
   ]) assert.throws(()=>storageObjectExists(response),/storage_info_unverified/)
 })
+
+test('Supabase HTTP 400 NoSuchKey with internal 404 confirms missing origin',()=>{
+  for (const statusCode of ['404',404]) {
+    assert.equal(storageObjectExists({data:null,error:{
+      status:400,statusCode,code:'NoSuchKey',message:'Object not found'
+    }}),false)
+  }
+})
+
+test('wrapped absence rejects generic 400, forged codes and misleading messages',()=>{
+  const valid={status:400,statusCode:'404',code:'NoSuchKey',message:'Object not found'}
+  for(const error of [
+    {status:400}, {status:400,message:'Object not found'},
+    {...valid,code:'Unknown'}, {...valid,code:null},
+    {...valid,statusCode:'400'}, {...valid,statusCode:' 404'},
+    {...valid,message:'Bad request'}, {...valid,message:null},
+    {...valid,status:401}, {...valid,status:403}, {...valid,status:429},
+    {...valid,status:500}, {...valid,status:'400'},
+    null, [], 'NoSuchKey',
+  ]) {
+    assert.throws(()=>storageObjectExists({data:null,error}),/storage_info_unverified/)
+  }
+  assert.throws(()=>storageObjectExists({data:{name:'exists'},error:valid}),/storage_info_unverified/)
+  assert.throws(()=>storageObjectExists({data:undefined,error:valid}),/storage_info_unverified/)
+})
