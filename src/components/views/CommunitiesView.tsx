@@ -1,3 +1,4 @@
+import { SectionTitle } from '../shared/SectionTitle'
 import { useCallback, useEffect, useState } from 'react'
 import type { CommunitySummary, Pet } from '../../types/pazo'
 import {
@@ -5,7 +6,7 @@ import {
   joinCommunity,
   leaveCommunity,
 } from '../../services/communityService'
-import { IconCheck, IconCommunity, IconPlus } from '../icons/PazoIcons'
+import { IconCheck, IconPlus } from '../icons/PazoIcons'
 import { CreateCommunityModal } from '../modals/CreateCommunityModal'
 import { CommunityDetailView } from './CommunityDetailView'
 
@@ -135,10 +136,9 @@ export const CommunitiesView = ({
       <div className="space-y-4 animate-slide-up pb-6">
         <div className="flex items-start justify-between gap-3 px-1">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E1E53F] px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] shadow-xs">
-              <IconCommunity size={13} />
+            <SectionTitle>
               {lang === 'es' ? 'Comunidades' : 'Communities'}
-            </span>
+            </SectionTitle>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-[#204E4A]">
               {lang === 'es'
                 ? 'Encuentra tu comunidad.'

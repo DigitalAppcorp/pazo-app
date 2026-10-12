@@ -1,3 +1,4 @@
+import { SectionTitle } from '../shared/SectionTitle'
 import { useEffect, useState } from 'react'
 import type { Pet } from '../../types/pazo'
 import {
@@ -131,9 +132,9 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-2 border-b border-[#204E4A]/10">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-white bg-[#EC7357] px-2.5 py-0.5 rounded-full inline-block">
-                  {lang === 'es' ? 'Emergencia Comunitaria' : 'Community Alert'}
-                </span>
+                <SectionTitle tone="alert">
+              {lang === 'es' ? 'Emergencia Comunitaria' : 'Community Alert'}
+            </SectionTitle>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
                   {lang === 'es' ? `Busquemos a ${pet.name}.` : `Let's find ${pet.name}.`}
                 </h3>

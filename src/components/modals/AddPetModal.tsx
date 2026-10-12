@@ -1,3 +1,4 @@
+import { SectionTitle } from '../shared/SectionTitle'
 import { useState } from 'react'
 import { createPetProfile } from '../../services/petService'
 import type { Pet, Species } from '../../types/pazo'
@@ -134,9 +135,9 @@ export const AddPetModal = ({ isOpen, onClose, onPetCreated, lang }: AddPetModal
       <div className="w-full max-w-md max-h-[92%] overflow-y-auto bg-[#FDFBF7] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-6 space-y-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full">
+            <SectionTitle>
               {lang === 'es' ? 'Nueva mascota' : 'New pet'}
-            </span>
+            </SectionTitle>
             <h2 className="text-2xl font-black text-[#204E4A] mt-2">
               {lang === 'es' ? 'Añadir a tu familia' : 'Add to your family'}
             </h2>

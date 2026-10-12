@@ -1,3 +1,4 @@
+import { SectionTitle } from '../shared/SectionTitle'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
 import { useState, useRef } from 'react'
@@ -220,9 +221,9 @@ export const PetView = ({
     <div className="space-y-4 animate-slide-up pb-6">
       <div className="flex justify-between items-center px-1">
         <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block shadow-xs">
-            {isEditing ? (lang === 'es' ? 'Editando Perfil' : 'Editing Profile') : (lang === 'es' ? 'Ficha Oficial' : 'Official Record')}
-          </span>
+          <SectionTitle>
+              {isEditing ? (lang === 'es' ? 'Editando Perfil' : 'Editing Profile') : (lang === 'es' ? 'Ficha Oficial' : 'Official Record')}
+            </SectionTitle>
           <h2 className="text-2xl font-black text-[#204E4A] tracking-tight mt-1">
             {currentPet.name}
           </h2>

@@ -1,3 +1,4 @@
+import { SectionTitle } from '../shared/SectionTitle'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   ActivePlaceCheckin,
@@ -402,9 +403,9 @@ export const MapView = ({
       <div className="space-y-4 animate-slide-up pb-8">
         <div className="flex items-start justify-between gap-3 px-1">
           <div>
-            <span className="inline-block rounded-full bg-[#E1E53F] px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] shadow-xs">
+            <SectionTitle>
               {lang === 'es' ? 'Lugares' : 'Places'}
-            </span>
+            </SectionTitle>
             <h2 className="mt-1 text-2xl font-black tracking-tight text-[#204E4A]">
               {lang === 'es'
                 ? 'Explora con tu mascota.'
