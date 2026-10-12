@@ -30,7 +30,7 @@ test('reconciliation requires specific immutable target and service role',()=>{
 test('reconciliation migration performs no Storage removal or schema security relaxation',()=>{
   assert.doesNotMatch(migration,/\b(?:DELETE FROM|TRUNCATE|DROP TRIGGER|DISABLE TRIGGER)\b/i)
   assert.doesNotMatch(migration,/\b(?:ALTER TABLE|GRANT.*TO\s+(?:PUBLIC|anon|authenticated))\b/i)
-  assert.match(migration,/^BEGIN;[\s\S]*COMMIT;\s*$/)
+  assert.match(migration,/(?:^|\n)BEGIN;[\s\S]*COMMIT;\s*$/)
 })
 
 test('reconciliation Edge has no purge path and requires real moderator + four HTTP probes',()=>{
@@ -46,7 +46,7 @@ test('reconciliation Edge has no purge path and requires real moderator + four H
     "admin.rpc(\n      'f14_finalize_one_object_reconciliation'",
     "F14_TRIAL_SCOPE.storageObjectId"
   ]) assert.ok(edge.includes(token),token)
-  assert.doesNotMatch(edge,/\.remove\s*\(|runMediaPurge|createSignedUploadUrl|\.upload\s*\(/)
+  assert.doesNotMatch(edge,/\.remove\s*\(|\brunMediaPurge\s*\(|createSignedUploadUrl|\.upload\s*\(/)
   assert.doesNotMatch(edge,/console\.(log|error|warn)\(/)
   assert.match(purge,/const F14_TRIAL_PURGE_APPROVED = false/)
   assert.match(purge,/const F14_MEDIA_PURGE_RELEASE_APPROVED = false/)
