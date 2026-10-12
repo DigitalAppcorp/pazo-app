@@ -479,14 +479,21 @@ export const PetView = ({
                   </span>
                 </div>
                 <p className="text-xs text-[#5C7470] mt-0.5">{currentPet.bio}</p>
-                <div className="flex flex-wrap gap-2 text-[11px] font-bold text-[#204E4A] mt-2">
-                  <span className="bg-[#FAF8F5] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
-                    <span>{currentPet.weight}</span>
-                  </span>
-                  <span className="bg-[#FAF8F5] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
-                    <IconBowl size={13} />
-                    <span className="truncate max-w-[140px]">{currentPet.dietPlan}</span>
-                  </span>
+                <div className="mt-2 flex flex-wrap gap-2 text-[14px] font-bold text-[#204E4A]">
+                  {currentPet.weight && (
+                    <span className="flex items-center gap-1 rounded-full bg-white/65 px-3 py-1.5 shadow-xs">{currentPet.weight}</span>
+                  )}
+                  {currentPet.dietPlan && (
+                    <span className="flex items-center gap-1 rounded-full bg-white/65 px-3 py-1.5 shadow-xs">
+                      <IconBowl size={16} />
+                      <span className="max-w-[180px] break-words">{currentPet.dietPlan}</span>
+                    </span>
+                  )}
+                  {!currentPet.weight && !currentPet.dietPlan && (
+                    <p className="text-[13px] font-medium text-[#5C7470]">
+                      {lang === 'es' ? 'Datos adicionales sin registrar' : 'Additional details not provided'}
+                    </p>
+                  )}
                 </div>
               </>
             )}

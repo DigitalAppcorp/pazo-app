@@ -11,11 +11,11 @@
 
 ## Ordered delivery (independent gates)
 1. **Section title labels:** PO rejected even plain replacement titles. Remove ALL category title labels (including plain replacements) entirely; retain meaningful page headings. Implemented on F13 branch.
-2. **Top controls:** align language/search/messages/notifications and tab group according to screenshots 14–15, without introducing actions.
+2. **Top controls:** compact 40px translucent actions for ES/search/chat/bell, home feed tabs centered below header, small-screen containment. Implemented; visual acceptance pending.
 3. **Pazo native icon family:** own SVG/vector designs covering active screens; include states, semantics, sizing. Preserve the 3D map models; avoid emojis added by app UI.
 4. **Map presentation:** existing Mapbox canvas full visual background, existing search at top, existing Places list horizontally scrollable at bottom; keep check-in/detail/search/privacy controls/actions, permission rules and mobile/desktop responsive.
-5. **My Pet missing value:** investigate actual blank source, distinguish not-provided from loading error, do not invent data or modify DB.
-6. **Typography:** +3 px to text across PAZO with per-component containment/wrapping, mobile bottom nav, tabs, fields and modal overflow; avoid destructive blanket CSS transforms.
+5. **My Pet missing value:** weight and diet are optional; hide blank chips and show neutral missing-value message when both absent. Implemented; visual acceptance pending.
+6. **Typography:** standard Tailwind named text sizes increased +3px with line-heights; mobile nav/header + home tabs adjusted. Arbitrary pixel utilities still require view-by-view audit; NOT fully complete.
 7. **Interests:** inspect existing data source and species mapping for selectable interests; read-only schema inspection before any proposed backend changes. Do not create fabricated catalog or change data contracts.
 8. **Profile metrics whitespace:** remove ghost FollowButton area for own pet and tighten metric layout. Implemented; visual acceptance pending.
 9. **Profile tab gap:** compact accessible active tabs without fake borders. Implemented; visual acceptance pending.

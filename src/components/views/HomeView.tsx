@@ -162,20 +162,30 @@ export const HomeView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-6">
-      <div className="flex justify-between items-center px-1">
+      <div className="space-y-3 px-1">
         <div>
-          <h2 className="text-xl font-black text-[#204E4A] tracking-tight">
+          <h2 className="text-xl font-black tracking-tight text-[#204E4A]">
             {lang === 'es' ? 'Su pequeno mundo.' : 'Their little world.'}
           </h2>
-          <p className="text-[11px] text-[#5C7470]">
+          <p className="text-[14px] leading-snug text-[#5C7470]">
             {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
           </p>
         </div>
-        <div className="bg-[#FAF8F5] p-1 rounded-full flex gap-1 shadow-xs">
-          <button onClick={() => setFeedFilter('following')} className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-sm' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
+        <div className="mx-auto flex w-full max-w-sm gap-1 rounded-full bg-white/75 p-1 shadow-sm backdrop-blur-xl">
+          <button
+            type="button"
+            aria-pressed={feedFilter === 'following'}
+            onClick={() => setFeedFilter('following')}
+            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[13px] font-extrabold transition-colors sm:text-[14px] ${feedFilter === 'following' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
+          >
             {lang === 'es' ? 'Para ti' : 'For you'}
           </button>
-          <button onClick={handleSelectNearby} className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-sm' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
+          <button
+            type="button"
+            aria-pressed={feedFilter === 'nearby'}
+            onClick={handleSelectNearby}
+            className={`min-w-0 flex-[1.6] rounded-full px-2 py-2 text-[12px] font-extrabold transition-colors sm:text-[14px] ${feedFilter === 'nearby' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
+          >
             {lang === 'es' ? 'Cerca · Próximamente' : 'Nearby · Coming soon'}
           </button>
         </div>
