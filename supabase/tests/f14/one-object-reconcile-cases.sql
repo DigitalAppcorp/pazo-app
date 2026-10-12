@@ -29,7 +29,7 @@ DECLARE
   v_report uuid;
   v_claim jsonb;
 BEGIN
-  v_path:=v_owner::text||'/'||v_pet::text||'/synthetic-e2e.png';
+  v_path:=v_owner::text||'/'||v_pet::text||'/'||gen_random_uuid()::text||'.png';
   v_url:='https://mrybvqdebbgcayuvgkkr.supabase.co/storage/v1/object/public/'||v_bucket||'/'||v_path;
   INSERT INTO auth.users(id,aud,role,email,raw_app_meta_data,raw_user_meta_data)
     VALUES(v_owner,'authenticated','authenticated','f14-reconcile@example.invalid','{}','{}');
