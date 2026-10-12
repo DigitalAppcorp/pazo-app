@@ -102,7 +102,7 @@ export const CreateCommunityModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#204E4A]/80 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="max-h-[92vh] w-full overflow-y-auto rounded-t-[2.8rem] bg-[#FAF8F5] p-6 shadow-2xl sm:max-w-lg sm:rounded-[2.8rem]">
+      <div className="max-h-[92vh] w-full overflow-y-auto rounded-t-[2.8rem] pazo-glass-modal p-6 shadow-2xl sm:max-w-lg sm:rounded-[2.8rem]">
         <div className="mb-5 flex items-center justify-between border-b border-[#204E4A]/10 pb-3">
           <div>
             <p className="text-[13px] font-extrabold uppercase tracking-widest text-[#5C7470]">

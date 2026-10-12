@@ -72,7 +72,7 @@ export const CreateModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-slide-up">
-      <div className="w-full sm:max-w-sm bg-white rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full sm:max-w-sm pazo-glass-modal rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         {mode === 'menu' ? (
           <>
             {/* Header del menú de acciones */}

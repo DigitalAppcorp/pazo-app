@@ -279,7 +279,7 @@ export const DocumentsModal = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#204E4A]/45 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="w-full sm:max-w-xl max-h-[94vh] bg-[#FAF8F5] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden">
+      <div className="w-full sm:max-w-xl max-h-[94vh] pazo-glass-modal rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden">
         <div className="px-5 pt-5 pb-4 bg-white border-b border-[#204E4A]/10 flex items-start justify-between gap-4">
           <div>
             <p className="text-[13px] uppercase tracking-[0.18em] font-black text-[#5C7470]">
@@ -569,7 +569,7 @@ export const DocumentsModal = ({
 
       {preview && (
         <div className="fixed inset-0 z-[60] bg-[#102C29]/80 backdrop-blur-sm p-4 flex items-center justify-center">
-          <div className="w-full max-w-3xl max-h-[92vh] bg-white rounded-[1.75rem] overflow-hidden flex flex-col shadow-2xl">
+          <div className="w-full max-w-3xl max-h-[92vh] pazo-glass-modal rounded-[1.75rem] overflow-hidden flex flex-col shadow-2xl">
             <div className="px-4 py-3 flex items-center justify-between border-b border-[#204E4A]/10">
               <div className="min-w-0">
                 <p className="text-sm font-black text-[#204E4A] truncate">

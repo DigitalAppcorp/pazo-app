@@ -30,7 +30,7 @@ export const MessagesModal = ({
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
         <div role="dialog" aria-modal="true" aria-labelledby="messages-not-ready-title"
-          className="w-full max-w-sm bg-white rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4">
+          className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4">
           <div className="flex items-center justify-between gap-3">
             <h3 id="messages-not-ready-title" className="text-lg font-black text-[#204E4A]">
               {lang === 'es' ? 'Mensajería en desarrollo' : 'Messaging in development'}
@@ -64,7 +64,7 @@ export const MessagesModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm bg-white rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto flex flex-col">
+      <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto flex flex-col">
         {!activeConv ? (
           /* ================= M01: BANDEJA DE MENSAJES ================= */
           <>

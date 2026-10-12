@@ -59,7 +59,7 @@ export const SightingDetailModal = ({
 
   return (
     <div className="fixed inset-0 z-[170] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-slide-up">
-      <div className="w-full max-w-sm bg-white rounded-[2.8rem] p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <button
             onClick={onClose}

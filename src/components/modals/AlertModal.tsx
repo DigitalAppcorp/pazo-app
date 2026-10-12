@@ -122,7 +122,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm bg-white rounded-[2.8rem] border border-[#EC7357]/30 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] border border-[#EC7357]/30 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         {isLoading ? (
           <div className="py-16 text-center text-xs font-bold text-[#5C7470]">
             {lang === 'es' ? 'Cargando alerta…' : 'Loading alert…'}

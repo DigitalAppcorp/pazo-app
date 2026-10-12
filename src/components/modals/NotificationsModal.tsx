@@ -35,7 +35,7 @@ export const NotificationsModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
       <div
-        className="w-full max-w-sm bg-white rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto soft-card"
+        className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto soft-card"
         onScroll={(event) => {
           const element = event.currentTarget
           const distanceToBottom =
