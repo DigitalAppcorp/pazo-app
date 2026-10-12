@@ -7,13 +7,14 @@
 - Visual validation in local Vite; Vercel not used for visual review or deliberate deployment.
 - No Supabase schema/data/RLS mutations without separate authorization; no repeated approved F14/T08, T05, T06, T07/T10, T09, T11 QA.
 - Match PO colors/Quicksand, zero borders/outline rings (except justified text input), and preserve functional behavior and glass-like surfaces.
+- **Restricción PO prioritaria:** NO CAMBIAR LA PANTALLA DEL MAPA / LUGARES hasta que el PO lo autorice. La autorización anterior del diseño del mapa quedó expresamente suspendida.
 - PO local working tree contains existing changes: avoid overwriting it; use a clean independent clone/branch after permission issue is resolved.
 
 ## Ordered delivery (independent gates)
 1. **Section title labels:** PO rejected even plain replacement titles. Remove ALL category title labels (including plain replacements) entirely; retain meaningful page headings. Implemented on F13 branch.
 2. **Top controls:** compact 40px translucent actions for ES/search/chat/bell, home feed tabs centered below header, small-screen containment. Implemented; visual acceptance pending.
 3. **Pazo native icon family:** new cohesive PAZO vector mark treatment applied to core 8 high-visibility actions (Inicio, Explorar, Crear, Mapa, Mensajes, Notificaciones, Comunidades and pin). Remaining secondary icons not yet redrawn; visual acceptance pending.
-4. **Map presentation:** Mapbox now fills the Places canvas with floating top search/filters and bottom horizontal cards; existing check-in/detail/privacy actions preserved. Implemented; visual acceptance pending.
+4. **MAPA/LUGARES CONGELADO POR PO (2026-10-12):** prohibido modificar pantalla Lugares, MapView, MapboxMap, superposiciones, tarjetas, controles, iconos específicos y comportamiento del mapa hasta nueva autorización explícita del Product Owner. Se revierte el rediseño de MapView introducido en `ee14658e` y se restaura desde `5016395e`: se conserva únicamente la eliminación de etiqueta superior que el PO ya solicitó. No incluir MapView en bloques de F13.
 5. **My Pet missing value:** weight and diet are optional; hide blank chips and show neutral missing-value message when both absent. Implemented; visual acceptance pending.
 6. **Typography:** standard Tailwind named text sizes increased +3px with line-heights; mobile nav/header + home tabs adjusted. Arbitrary pixel utilities still require view-by-view audit; NOT fully complete.
 7. **Interests:** READ-ONLY audit: production public schema contains pets.interests but no interests catalog table; onboarding currently hard-codes four options (one cat-specific). Species-based DB-sourced catalog requires explicit schema/data authorization, not implemented.
@@ -25,4 +26,4 @@
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
-- Next action: CI + local visual review of block 1; if accepted continue block 2.
+- Next action: revisar CI del rollback de mapa; completar mejoras F13 fuera de Lugares, después solicitar revisión visual PO de las pantallas modificadas. No atribuir aprobación visual por CI.
