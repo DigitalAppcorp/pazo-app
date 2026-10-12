@@ -6,7 +6,7 @@ import {
   joinCommunity,
   leaveCommunity,
 } from '../../services/communityService'
-import { IconCheck, IconPlus } from '../icons/PazoIcons'
+import { IconCheck, IconCommunity, IconPlus } from '../icons/PazoIcons'
 import { CreateCommunityModal } from '../modals/CreateCommunityModal'
 import { CommunityDetailView } from './CommunityDetailView'
 
