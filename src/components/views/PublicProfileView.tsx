@@ -216,35 +216,35 @@ export const PublicProfileView = ({
                     className="h-24 w-24 rounded-[1.75rem] bg-[#FAF8F5] object-cover shadow-sm sm:h-28 sm:w-28"
                   />
                   {petProfile.isLost && (
-                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#EC7357] px-2.5 py-1 text-[11px] font-black text-white shadow-sm">
+                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#EC7357] px-2.5 py-1 text-[14px] font-black text-white shadow-sm">
                       {lang === 'es' ? 'Perdido' : 'Lost'}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1 pt-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <h2 className="min-w-0 break-words text-[25px] font-black leading-tight tracking-tight text-[#204E4A] sm:text-[30px]">
+                    <h2 className="min-w-0 break-words text-[28px] font-black leading-tight tracking-tight text-[#204E4A] sm:text-[33px]">
                       {petProfile.name}
                     </h2>
                     <IconPaw size={19} className="shrink-0 text-[#204E4A]/35" />
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#E1E53F]/50 px-3 py-1 text-[12px] font-extrabold uppercase tracking-wide text-[#204E4A]">
+                    <span className="rounded-full bg-[#E1E53F]/50 px-3 py-1 text-[15px] font-extrabold uppercase tracking-wide text-[#204E4A]">
                       {petProfile.species}
                     </span>
                     {isFounder && (
-                      <span className="rounded-full bg-[#204E4A] px-3 py-1 text-[11px] font-black uppercase tracking-wide text-white">
+                      <span className="rounded-full bg-[#204E4A] px-3 py-1 text-[14px] font-black uppercase tracking-wide text-white">
                         {lang === 'es' ? 'Fundador' : 'Founder'}
                       </span>
                     )}
                   </div>
                   {petProfile.breed && (
-                    <p className="mt-2 break-words text-[14px] font-semibold text-[#5C7470]">{petProfile.breed}</p>
+                    <p className="mt-2 break-words text-[17px] font-semibold text-[#5C7470]">{petProfile.breed}</p>
                   )}
                 </div>
               </div>
               {petProfile.bio && (
-                <p className="mt-4 rounded-2xl bg-white/55 px-4 py-3 text-[15px] font-medium leading-relaxed text-[#204E4A] break-words">
+                <p className="mt-4 rounded-2xl bg-white/55 px-4 py-3 text-[18px] font-medium leading-relaxed text-[#204E4A] break-words">
                   {petProfile.bio}
                 </p>
               )}
@@ -269,7 +269,7 @@ export const PublicProfileView = ({
                 <button
                   type="button"
                   onClick={() => setReportOpen(true)}
-                  className="mt-3 rounded-full bg-white/75 px-3 py-1.5 text-[12px] font-bold text-[#5C7470] underline"
+                  className="mt-3 rounded-full bg-white/75 px-3 py-1.5 text-[15px] font-bold text-[#5C7470] underline"
                 >
                   {lang === 'es' ? 'Denunciar perfil' : 'Report profile'}
                 </button>
@@ -277,20 +277,20 @@ export const PublicProfileView = ({
 
               <div className="mt-4 grid grid-cols-3 gap-1 rounded-[1.4rem] bg-[#F3F5EF]/90 px-1 py-3 text-center sm:gap-3">
                 <div className="flex min-w-0 flex-col items-center">
-                  <span className="text-[25px] font-black leading-tight text-[#204E4A]">{petPosts.length}</span>
-                  <span className="mt-0.5 break-words text-[10px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[12px]">
+                  <span className="text-[28px] font-black leading-tight text-[#204E4A]">{petPosts.length}</span>
+                  <span className="mt-0.5 break-words text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[15px]">
                     {lang === 'es' ? 'Publicaciones' : 'Posts'}
                   </span>
                 </div>
                 <div className="flex min-w-0 flex-col items-center">
-                  <span className="text-[25px] font-black leading-tight text-[#204E4A]">{followersCount}</span>
-                  <span className="mt-0.5 break-words text-[10px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[12px]">
+                  <span className="text-[28px] font-black leading-tight text-[#204E4A]">{followersCount}</span>
+                  <span className="mt-0.5 break-words text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[15px]">
                     {lang === 'es' ? 'Seguidores' : 'Followers'}
                   </span>
                 </div>
                 <div className="flex min-w-0 flex-col items-center">
-                  <span className="text-[25px] font-black leading-tight text-[#204E4A]">{followingCount}</span>
-                  <span className="mt-0.5 break-words text-[10px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[12px]">
+                  <span className="text-[28px] font-black leading-tight text-[#204E4A]">{followingCount}</span>
+                  <span className="mt-0.5 break-words text-[13px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[15px]">
                     {lang === 'es' ? 'Siguiendo' : 'Following'}
                   </span>
                 </div>
@@ -303,7 +303,7 @@ export const PublicProfileView = ({
                 type="button"
                 aria-pressed={activeTab === 'posts'}
                 onClick={() => setActiveTab('posts')}
-                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[15px] font-extrabold transition-colors ${activeTab === 'posts' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
+                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[18px] font-extrabold transition-colors ${activeTab === 'posts' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
               >
                 {lang === 'es' ? 'Publicaciones' : 'Posts'}
               </button>
@@ -311,7 +311,7 @@ export const PublicProfileView = ({
                 type="button"
                 aria-pressed={activeTab === 'info'}
                 onClick={() => setActiveTab('info')}
-                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[15px] font-extrabold transition-colors ${activeTab === 'info' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
+                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[18px] font-extrabold transition-colors ${activeTab === 'info' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
               >
                 {lang === 'es' ? 'Información' : 'Info'}
               </button>
@@ -337,8 +337,8 @@ export const PublicProfileView = ({
                           <div className="flex items-center gap-3 px-4 py-3">
                             <img src={petProfile.photoUrl} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[16px] font-black text-[#204E4A]">{petProfile.name}</p>
-                              <p className="text-[12px] text-[#5C7470]">{post.timeAgo}</p>
+                              <p className="truncate text-[19px] font-black text-[#204E4A]">{petProfile.name}</p>
+                              <p className="text-[15px] text-[#5C7470]">{post.timeAgo}</p>
                             </div>
                           </div>
                           {post.photoUrl && (
@@ -347,11 +347,11 @@ export const PublicProfileView = ({
                             </div>
                           )}
                           <div className="space-y-2 px-4 py-3">
-                            <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#5C7470]">
+                            <div className="flex items-center gap-1.5 text-[16px] font-extrabold text-[#5C7470]">
                               <IconPaw size={17} className="text-[#204E4A]" />
                               <span>{post.likes} {lang === 'es' ? 'me gusta' : 'likes'}</span>
                             </div>
-                            {post.text && <p className="break-words text-[16px] font-medium leading-relaxed text-[#204E4A]">{post.text}</p>}
+                            {post.text && <p className="break-words text-[19px] font-medium leading-relaxed text-[#204E4A]">{post.text}</p>}
                           </div>
                         </article>
                       ))}

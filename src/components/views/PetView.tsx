@@ -237,7 +237,7 @@ export const PetView = ({
               className="text-xs font-bold text-[#204E4A] bg-white hover:bg-neutral-50 px-3.5 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
             >
               <span>{lang === 'es' ? 'Cambiar' : 'Switch'}</span>
-              <span className="text-[10px]">▾</span>
+              <span className="text-[13px]">▾</span>
             </button>
             <button
               onClick={handleLogout}
@@ -262,12 +262,12 @@ export const PetView = ({
       {showPetPicker && !isEditing && (
         <div className="p-3 bg-white rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
           <div className="flex justify-between items-center px-2">
-            <span className="text-[10px] font-extrabold uppercase text-[#5C7470] tracking-wider">
+            <span className="text-[13px] font-extrabold uppercase text-[#5C7470] tracking-wider">
               {lang === 'es' ? 'Tus mascotas registradas' : 'Your registered pets'}
             </span>
             <button
               onClick={onAddPet}
-              className="text-[11px] font-extrabold text-[#204E4A] hover:underline cursor-pointer"
+              className="text-[14px] font-extrabold text-[#204E4A] hover:underline cursor-pointer"
             >
               + {lang === 'es' ? 'Añadir otra' : 'Add another'}
             </button>
@@ -294,7 +294,7 @@ export const PetView = ({
                 <div className="text-left">
                   <span className="font-extrabold text-xs block leading-tight">{p.name}</span>
                   <span
-                    className={`text-[10px] ${currentPet.id === p.id ? 'text-white/70' : 'text-[#5C7470]'
+                    className={`text-[13px] ${currentPet.id === p.id ? 'text-white/70' : 'text-[#5C7470]'
                       }`}
                   >
                     {p.species} • {p.age}
@@ -315,7 +315,7 @@ export const PetView = ({
         {!isEditing && (
           <button
             onClick={handleEditClick}
-            className="absolute top-4 right-4 text-[10px] font-bold text-[#204E4A] bg-[#FAF8F5] hover:bg-[#E1E53F] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-[13px] font-bold text-[#204E4A] bg-[#FAF8F5] hover:bg-[#E1E53F] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
           >
             {lang === 'es' ? 'Editar' : 'Edit'}
           </button>
@@ -336,7 +336,7 @@ export const PetView = ({
 
             {isEditing && (
               <label className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-[1.8rem] cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-[10px] font-bold text-center leading-tight">
+                <span className="text-white text-[13px] font-bold text-center leading-tight">
                   {lang === 'es' ? 'Cambiar\nFoto' : 'Change\nPhoto'}
                 </span>
                 <input
@@ -354,7 +354,7 @@ export const PetView = ({
             {isEditing ? (
               <div className="space-y-2.5 w-full mt-1">
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Nombre de la mascota</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Nombre de la mascota</label>
                   <input
                     type="text"
                     value={editForm.name}
@@ -364,7 +364,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Biografía corta</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Biografía corta</label>
                   <input
                     type="text"
                     value={editForm.bio}
@@ -375,7 +375,7 @@ export const PetView = ({
 
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Raza</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Raza</label>
                     <input
                       type="text"
                       value={editForm.breed}
@@ -385,7 +385,7 @@ export const PetView = ({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Género</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Género</label>
                     <select
                       value={editForm.gender}
                       onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
@@ -400,7 +400,7 @@ export const PetView = ({
 
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Peso · privado</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Peso · privado</label>
                     <input
                       type="text"
                       value={editForm.weight}
@@ -409,7 +409,7 @@ export const PetView = ({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Edad</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Edad</label>
                     <input
                       type="text"
                       value={editForm.age}
@@ -420,7 +420,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Dieta / Plan · privado</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Dieta / Plan · privado</label>
                   <input
                     type="text"
                     value={editForm.dietPlan}
@@ -430,7 +430,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Zona aproximada · privada</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Zona aproximada · privada</label>
                   <input
                     type="text"
                     value={editForm.zone}
@@ -441,7 +441,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-1">Intereses · privados</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-1">Intereses · privados</label>
                   <div className="flex flex-wrap gap-1.5">
                     {interestOptions.map((interest) => {
                       const selected = editForm.interests.includes(interest)
@@ -450,7 +450,7 @@ export const PetView = ({
                           key={interest}
                           type="button"
                           onClick={() => toggleEditInterest(interest)}
-                          className={`text-[9px] font-bold px-2.5 py-1.5 rounded-full transition-colors cursor-pointer ${selected
+                          className={`text-[12px] font-bold px-2.5 py-1.5 rounded-full transition-colors cursor-pointer ${selected
                             ? 'bg-[#204E4A] text-[#E1E53F]'
                             : 'bg-[#FAF8F5] text-[#5C7470]'
                             }`}
@@ -474,12 +474,12 @@ export const PetView = ({
               <>
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-lg font-black text-[#204E4A] truncate">{currentPet.name}</h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
+                  <span className="text-[13px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
                     {currentPet.species}
                   </span>
                 </div>
                 <p className="text-xs text-[#5C7470] mt-0.5">{currentPet.bio}</p>
-                <div className="mt-2 flex flex-wrap gap-2 text-[14px] font-bold text-[#204E4A]">
+                <div className="mt-2 flex flex-wrap gap-2 text-[17px] font-bold text-[#204E4A]">
                   {currentPet.weight && (
                     <span className="flex items-center gap-1 rounded-full bg-white/65 px-3 py-1.5 shadow-xs">{currentPet.weight}</span>
                   )}
@@ -490,7 +490,7 @@ export const PetView = ({
                     </span>
                   )}
                   {!currentPet.weight && !currentPet.dietPlan && (
-                    <p className="text-[13px] font-medium text-[#5C7470]">
+                    <p className="text-[16px] font-medium text-[#5C7470]">
                       {lang === 'es' ? 'Datos adicionales sin registrar' : 'Additional details not provided'}
                     </p>
                   )}
@@ -532,8 +532,8 @@ export const PetView = ({
             userPosts.map((post) => (
               <div key={post.id} className="bg-white rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[#5C7470] font-bold">{post.timeAgo}</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
+                  <span className="text-[13px] text-[#5C7470] font-bold">{post.timeAgo}</span>
+                  <span className="inline-flex items-center gap-1 text-[13px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
                 </div>
                 <p className="text-xs text-[#204E4A] font-medium">
                   {post.text}
@@ -674,13 +674,13 @@ export const PetView = ({
           {nextPendingCare && (
             <div className="p-4 bg-[#FAF8F5] rounded-[2rem] flex justify-between items-center shadow-xs">
               <div className="space-y-0.5">
-                <span className="text-[10px] font-extrabold uppercase text-[#EC7357] tracking-wider block">
+                <span className="text-[13px] font-extrabold uppercase text-[#EC7357] tracking-wider block">
                   {lang === 'es' ? 'Próximo cuidado' : 'Next upcoming task'}
                 </span>
                 <span className="font-bold text-xs text-[#204E4A] block">
                   {nextPendingCare.title}
                 </span>
-                <span className="text-[11px] text-[#5C7470] block">
+                <span className="text-[14px] text-[#5C7470] block">
                   {nextPendingCare.dueDate}
                   {nextPendingCare.dueTime ? ` • ${nextPendingCare.dueTime}` : ''}
                 </span>
@@ -713,7 +713,7 @@ export const PetView = ({
                   : `Is ${currentPet.name} lost? Trigger Alert`}
               </span>
             </button>
-            <p className="text-[11px] text-center text-[#5C7470] mt-1.5">
+            <p className="text-[14px] text-center text-[#5C7470] mt-1.5">
               {lang === 'es'
                 ? 'Emite una búsqueda comunitaria protegida'
                 : 'Broadcasts a protected community alert'}

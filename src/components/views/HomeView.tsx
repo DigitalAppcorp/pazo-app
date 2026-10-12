@@ -167,7 +167,7 @@ export const HomeView = ({
           <h2 className="text-xl font-black tracking-tight text-[#204E4A]">
             {lang === 'es' ? 'Su pequeno mundo.' : 'Their little world.'}
           </h2>
-          <p className="text-[14px] leading-snug text-[#5C7470]">
+          <p className="text-[17px] leading-snug text-[#5C7470]">
             {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
           </p>
         </div>
@@ -176,7 +176,7 @@ export const HomeView = ({
             type="button"
             aria-pressed={feedFilter === 'following'}
             onClick={() => setFeedFilter('following')}
-            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[13px] font-extrabold transition-colors sm:text-[14px] ${feedFilter === 'following' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
+            className={`min-w-0 flex-1 rounded-full px-2 py-2 text-[16px] font-extrabold transition-colors sm:text-[17px] ${feedFilter === 'following' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
           >
             {lang === 'es' ? 'Para ti' : 'For you'}
           </button>
@@ -184,7 +184,7 @@ export const HomeView = ({
             type="button"
             aria-pressed={feedFilter === 'nearby'}
             onClick={handleSelectNearby}
-            className={`min-w-0 flex-[1.6] rounded-full px-2 py-2 text-[12px] font-extrabold transition-colors sm:text-[14px] ${feedFilter === 'nearby' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
+            className={`min-w-0 flex-[1.6] rounded-full px-2 py-2 text-[15px] font-extrabold transition-colors sm:text-[17px] ${feedFilter === 'nearby' ? 'bg-[#204E4A] text-white' : 'text-[#5C7470] hover:bg-white'}`}
           >
             {lang === 'es' ? 'Cerca · Próximamente' : 'Nearby · Coming soon'}
           </button>
@@ -314,15 +314,15 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
             <h3 onClick={() => onSelectPetProfile(post.petId)} className="font-extrabold text-sm text-[#204E4A] leading-tight flex items-center gap-1.5 cursor-pointer hover:underline">
               <span>{post.petName}</span>
               {post.isRecommended ? (
-                <span className="text-[9px] uppercase font-black px-2 py-0.5 bg-[#E1E53F]/40 text-[#204E4A] rounded-md flex items-center gap-1 shadow-xs">
+                <span className="text-[12px] uppercase font-black px-2 py-0.5 bg-[#E1E53F]/40 text-[#204E4A] rounded-md flex items-center gap-1 shadow-xs">
                   <span className="w-2.5 h-2.5 flex items-center justify-center"><IconPaw size={10} /></span>
                   <span>{lang === 'es' ? 'Sugerencia' : 'Suggested'}</span>
                 </span>
               ) : (
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-[#FAF8F5] text-[#5C7470] rounded-full shadow-xs">{post.petSpecies}</span>
+                <span className="text-[13px] uppercase font-bold px-2 py-0.5 bg-[#FAF8F5] text-[#5C7470] rounded-full shadow-xs">{post.petSpecies}</span>
               )}
             </h3>
-            <p className="text-[11px] text-[#5C7470]">{post.location} &bull; {displayTime}</p>
+            <p className="text-[14px] text-[#5C7470]">{post.location} &bull; {displayTime}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -333,7 +333,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
             lang={lang}
           />
           {canReport && !ownedPetIds.includes(post.petId) && <button type="button" onClick={() => onReport('feed_post', post.id, describeReportSubject('feed_post', post.petName, post.text, lang))}
-            className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
+            className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
         </div>
       </div>
       {post.photoUrl && (
@@ -378,7 +378,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
           )}
         </p>
         {displayCommentsCount > 0 && !isCommentsOpen && (
-          <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="text-[11px] font-semibold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer block pt-1">
+          <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="text-[14px] font-semibold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer block pt-1">
             {lang === 'es' ? `Ver ${displayCommentsCount} comentario${displayCommentsCount > 1 ? 's' : ''}...` : `View all ${displayCommentsCount} comment${displayCommentsCount > 1 ? 's' : ''}...`}
           </button>
         )}
@@ -399,10 +399,10 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
                         </span>
                       )}
                     </span>
-                    <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
+                    <span className="block text-[12px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
                     {canReport && (!comment.authorPetId || !ownedPetIds.includes(comment.authorPetId)) && <button type="button"
                       onClick={() => onReport('feed_comment', comment.id, describeReportSubject('feed_comment', comment.authorName, comment.text, lang))}
-                      className="mt-1 text-[10px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
+                      className="mt-1 text-[13px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   </div>
                 </div>
               ))}

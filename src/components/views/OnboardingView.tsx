@@ -174,7 +174,7 @@ export const OnboardingView = ({
             </div>
             <button
               onClick={onToggleLang}
-              className="text-[11px] font-extrabold tracking-widest px-3 py-1.5 rounded-full bg-white text-[#204E4A] cursor-pointer soft-button"
+              className="text-[14px] font-extrabold tracking-widest px-3 py-1.5 rounded-full bg-white text-[#204E4A] cursor-pointer soft-button"
             >
               {lang === 'es' ? 'ES ▾' : 'EN ▾'}
             </button>
@@ -191,20 +191,20 @@ export const OnboardingView = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-[#204E4A]/45 via-transparent to-transparent"></div>
                 <div className="absolute bottom-3.5 left-3.5 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-[11px] font-bold text-[#204E4A]">{lang === 'es' ? "Los Ángeles • Comunidad Abierta" : "Los Angeles • Open community"}</span>
+                  <span className="text-[14px] font-bold text-[#204E4A]">{lang === 'es' ? "Los Ángeles • Comunidad Abierta" : "Los Angeles • Open community"}</span>
                 </div>
               </div>
 
-              <div className="absolute -top-3 right-4 bg-[#E1E53F] text-[#204E4A] text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(225,229,63,0.55)] soft-card animate-float">
+              <div className="absolute -top-3 right-4 bg-[#E1E53F] text-[#204E4A] text-[13px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(225,229,63,0.55)] soft-card animate-float">
                 <span className="inline-flex items-center gap-1"><PazoMotifIcon kind="star" size={13} />{lang === 'es' ? 'Identidad, Comunidad y Cuidado' : 'Identity, community and care'}</span>
               </div>
             </div>
 
             <div className="space-y-1.5 text-left">
-              <h1 className="text-[34px] sm:text-[38px] font-black leading-[1.08] tracking-tight text-[#204E4A]">
+              <h1 className="text-[37px] sm:text-[41px] font-black leading-[1.08] tracking-tight text-[#204E4A]">
                 {lang === 'es' ? "Su mundo, más cerca." : "Their world, closer."}
               </h1>
-              <p className="text-[13px] leading-relaxed text-[#5C7470]">
+              <p className="text-[16px] leading-relaxed text-[#5C7470]">
                 {lang === 'es' ? "Comparte su vida. Encuentra tu comunidad. Cuida lo que más quieres." : "Share their life. Find your community. Care for those you love."}
               </p>
             </div>
@@ -213,7 +213,7 @@ export const OnboardingView = ({
           <div className="space-y-2.5 pb-2">
             <button
               onClick={() => setStep('A02')}
-              className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold text-[15px] py-4 rounded-full shadow-[0_8px_25px_rgba(225,229,63,0.38)] transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold text-[18px] py-4 rounded-full shadow-[0_8px_25px_rgba(225,229,63,0.38)] transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
             >
               <span>{lang === 'es' ? "Comenzar" : "Get started"}</span>
             </button>
@@ -221,7 +221,7 @@ export const OnboardingView = ({
             <div className="flex gap-2">
               <button
                 onClick={onSkipToLogin}
-                className="flex-1 bg-white hover:bg-neutral-50 text-[#204E4A] font-bold text-[15px] py-4 rounded-full shadow-sm transition-all cursor-pointer soft-button"
+                className="flex-1 bg-white hover:bg-neutral-50 text-[#204E4A] font-bold text-[18px] py-4 rounded-full shadow-sm transition-all cursor-pointer soft-button"
               >
                 {lang === 'es' ? "Ya tengo una cuenta" : "I already have an account"}
               </button>
@@ -232,7 +232,7 @@ export const OnboardingView = ({
                 Demo
               </button>
             </div>
-            <p aria-label={lang === 'es' ? "Versión de PAZO" : "PAZO version"} className="pt-1 text-center text-[10px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65">
+            <p aria-label={lang === 'es' ? "Versión de PAZO" : "PAZO version"} className="pt-1 text-center text-[13px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65">
               {lang === 'es' ? 'Versión' : 'Version'} {pazoBuildVersion}
             </p>
           </div>
@@ -249,12 +249,12 @@ export const OnboardingView = ({
             >
               {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 1 de 4" : "Step 1 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 1 de 4" : "Step 1 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
+              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
                 {lang === 'es' ? "Tu cuenta" : "Your account"}
               </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Comencemos." : "Let’s get started."}</h2>
@@ -285,7 +285,7 @@ export const OnboardingView = ({
             ) : (
             <div className="space-y-3 pt-1 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Correo electrónico" : "Email"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Correo electrónico" : "Email"}</label>
                 <input
                   type="email"
                   value={email}
@@ -296,7 +296,7 @@ export const OnboardingView = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Contraseña" : "Password"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Contraseña" : "Password"}</label>
                 <input
                   type="password"
                   value={password}
@@ -306,7 +306,7 @@ export const OnboardingView = ({
                   autoComplete="new-password"
                   className="w-full bg-white rounded-2xl px-3.5 py-3 text-xs text-[#204E4A] focus:outline-none"
                 />
-                <span className="block text-[10px] text-[#5C7470] mt-1">
+                <span className="block text-[13px] text-[#5C7470] mt-1">
                   {lang === 'es'
                     ? 'Mínimo 8 caracteres, con mayúscula, minúscula y número.'
                     : 'At least 8 characters with uppercase, lowercase, and a number.'}
@@ -320,13 +320,13 @@ export const OnboardingView = ({
                   onChange={(e) => setIsOver18(e.target.checked)}
                   className="rounded text-[#204E4A]"
                 />
-                <span className="text-[11px]">
+                <span className="text-[14px]">
                   {lang === 'es'
                     ? 'Confirmo que tengo 18 años o más.'
                     : 'I confirm that I am 18 or older.'}
                 </span>
               </label>
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-1 text-[11px]">
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-1 text-[14px]">
                 <button type="button" onClick={() => setLegalKind('privacy')}
                   className="font-semibold text-[#204E4A] underline underline-offset-2 focus-visible:bg-[#E1E53F]">
                   {lang === 'es' ? 'Política de privacidad' : 'Privacy policy'}
@@ -351,14 +351,14 @@ export const OnboardingView = ({
                 <button
                   type="button"
                   disabled
-                  className="flex-1 py-2 rounded-xl bg-white/70 font-semibold text-[11px] text-[#5C7470] cursor-not-allowed opacity-70"
+                  className="flex-1 py-2 rounded-xl bg-white/70 font-semibold text-[14px] text-[#5C7470] cursor-not-allowed opacity-70"
                 >
                   Google · {lang === 'es' ? 'próximamente' : 'coming soon'}
                 </button>
                 <button
                   type="button"
                   disabled
-                  className="flex-1 py-2 rounded-xl bg-white/70 font-semibold text-[11px] text-[#5C7470] cursor-not-allowed opacity-70"
+                  className="flex-1 py-2 rounded-xl bg-white/70 font-semibold text-[14px] text-[#5C7470] cursor-not-allowed opacity-70"
                 >
                   Apple · {lang === 'es' ? 'próximamente' : 'coming soon'}
                 </button>
@@ -394,12 +394,12 @@ export const OnboardingView = ({
                 {lang === 'es' ? "← Volver" : "← Back"}
               </button>
             )}
-            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 2 de 4" : "Step 2 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 2 de 4" : "Step 2 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
+              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
                 {lang === 'es' ? "Agregar mascota" : "Add a pet"}
               </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "¿Quién te acompaña?" : "Who is by your side?"}</h2>
@@ -427,13 +427,13 @@ export const OnboardingView = ({
                     className="hidden"
                   />
                 </label>
-                <span className="block text-[10px] text-[#5C7470] mt-1">{lang === 'es' ? "Sube una foto desde tu galería" : "Upload a photo from your gallery"}</span>
+                <span className="block text-[13px] text-[#5C7470] mt-1">{lang === 'es' ? "Sube una foto desde tu galería" : "Upload a photo from your gallery"}</span>
               </div>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Nombre" : "Name"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Nombre" : "Name"}</label>
                 <input
                   type="text"
                   value={petName}
@@ -444,7 +444,7 @@ export const OnboardingView = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Especie" : "Species"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Especie" : "Species"}</label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {(['gato', 'perro', 'conejo', 'ave'] as Species[]).map((sp) => (
                     <button
@@ -460,7 +460,7 @@ export const OnboardingView = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Edad aproximada" : "Approximate age"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Edad aproximada" : "Approximate age"}</label>
                 <input
                   type="text"
                   value={petAge}
@@ -470,7 +470,7 @@ export const OnboardingView = ({
                 />
               </div>
 
-              <p className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Raza y datos médicos se pueden añadir después." : "Breed and medical details can be added later."}</p>
+              <p className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Raza y datos médicos se pueden añadir después." : "Breed and medical details can be added later."}</p>
             </div>
           </div>
 
@@ -495,12 +495,12 @@ export const OnboardingView = ({
             >
               {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 3 de 4" : "Step 3 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 3 de 4" : "Step 3 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
+              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
                 {lang === 'es' ? "Privacidad" : "Privacy"}
               </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Tú decides." : "You decide."}</h2>
@@ -513,9 +513,9 @@ export const OnboardingView = ({
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Nombre y fotografía" : "Name and photo"}</span>
-                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Visible para la comunidad" : "Visible to the community"}</span>
+                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Visible para la comunidad" : "Visible to the community"}</span>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span className="text-[13px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
                   {lang === 'es' ? "Públicos" : "Public"}
                 </span>
               </div>
@@ -523,9 +523,9 @@ export const OnboardingView = ({
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</span>
-                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Sin dirección exacta" : "No exact address"}</span>
+                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Sin dirección exacta" : "No exact address"}</span>
                 </div>
-                <span className="text-[10px] font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full">
+                <span className="text-[13px] font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full">
                   {zone}
                 </span>
               </div>
@@ -533,9 +533,9 @@ export const OnboardingView = ({
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Datos de contacto" : "Contact details"}</span>
-                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Teléfono y correo protegidos" : "Phone and email protected"}</span>
+                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Teléfono y correo protegidos" : "Phone and email protected"}</span>
                 </div>
-                <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+                <span className="text-[13px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
                   <span className="inline-flex items-center gap-1">{lang === 'es' ? 'Privados' : 'Private'}<PazoMotifIcon kind="lock" size={12} /></span>
                 </span>
               </div>
@@ -543,9 +543,9 @@ export const OnboardingView = ({
               <div className="p-3.5 bg-white rounded-2xl flex justify-between items-center soft-card">
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Cuidados y documentos" : "Care and documents"}</span>
-                  <span className="text-[10px] text-[#5C7470]">{lang === 'es' ? "Solo visibles por el tutor" : "Visible only to the guardian"}</span>
+                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Solo visibles por el tutor" : "Visible only to the guardian"}</span>
                 </div>
-                <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+                <span className="text-[13px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
                   <span className="inline-flex items-center gap-1">{lang === 'es' ? 'Privados' : 'Private'}<PazoMotifIcon kind="lock" size={12} /></span>
                 </span>
               </div>
@@ -573,12 +573,12 @@ export const OnboardingView = ({
             >
               {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 4 de 4" : "Step 4 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 4 de 4" : "Step 4 of 4"}</span>
           </div>
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
+              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
                 {lang === 'es' ? "Tu comunidad" : "Your community"}
               </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Cerca de ustedes." : "Close to you."}</h2>
@@ -589,7 +589,7 @@ export const OnboardingView = ({
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</label>
                 <input
                   type="text"
                   value={zone}
@@ -597,11 +597,11 @@ export const OnboardingView = ({
                   placeholder={lang === 'es' ? "Los Ángeles" : "Los Angeles"}
                   className="w-full bg-white rounded-2xl px-3.5 py-2.5 text-xs text-[#204E4A]"
                 />
-                <span className="text-[10px] text-[#5C7470] mt-0.5 block">{lang === 'es' ? "También puedes buscar sin GPS." : "You can also search without GPS."}</span>
+                <span className="text-[13px] text-[#5C7470] mt-0.5 block">{lang === 'es' ? "También puedes buscar sin GPS." : "You can also search without GPS."}</span>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#204E4A] mb-1.5">{lang === 'es' ? "¿Qué les interesa?" : "What interests you?"}</label>
+                <label className="block text-[14px] font-bold text-[#204E4A] mb-1.5">{lang === 'es' ? "¿Qué les interesa?" : "What interests you?"}</label>
                 <div className="space-y-2">
                   {[
                     'Comunidades de gatos',
@@ -642,7 +642,7 @@ export const OnboardingView = ({
                 ? (lang === 'es' ? 'Guardando mascota...' : 'Saving pet...')
                 : (lang === 'es' ? 'Descubrir Pazo →' : 'Discover Pazo →')}
             </button>
-            <p className="text-[10px] text-center text-[#5C7470]">
+            <p className="text-[13px] text-center text-[#5C7470]">
               {lang === 'es' ? "Podrás cambiar estos ajustes en cualquier momento desde tu perfil." : "You can change these settings anytime from your profile."}
             </p>
           </div>

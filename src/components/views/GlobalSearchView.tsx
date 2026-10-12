@@ -219,12 +219,12 @@ export const GlobalSearchView = ({
           {result.title}
         </p>
         {result.subtitle && (
-          <p className="mt-0.5 line-clamp-1 text-[11px] text-[#5C7470]">
+          <p className="mt-0.5 line-clamp-1 text-[14px] text-[#5C7470]">
             {result.subtitle}
           </p>
         )}
         {result.meta && result.meta.length > 0 && (
-          <p className="mt-1 truncate text-[10px] font-semibold text-[#5C7470]/70">
+          <p className="mt-1 truncate text-[13px] font-semibold text-[#5C7470]/70">
             {result.meta.join(' · ')}
           </p>
         )}
@@ -347,7 +347,7 @@ export const GlobalSearchView = ({
                       ? `No encontramos resultados para “${trimmedQuery}”.`
                       : `No results found for “${trimmedQuery}”.`}
                   </p>
-                  <p className="mt-1 text-[11px] text-[#5C7470]">
+                  <p className="mt-1 text-[14px] text-[#5C7470]">
                     {lang === 'es'
                       ? 'Prueba otra palabra o cambia el tipo de resultado.'
                       : 'Try another word or change the result type.'}
@@ -379,7 +379,7 @@ export const GlobalSearchView = ({
                       <button
                         type="button"
                         onClick={() => handleFilterChange(type)}
-                        className="text-[10px] font-black text-[#204E4A]"
+                        className="text-[13px] font-black text-[#204E4A]"
                       >
                         {lang === 'es' ? 'Ver todos' : 'See all'}
                       </button>
@@ -387,7 +387,7 @@ export const GlobalSearchView = ({
                   </div>
 
                   {failed ? (
-                    <div className="rounded-2xl bg-white p-4 text-[11px] font-semibold text-[#5C7470] shadow-sm">
+                    <div className="rounded-2xl bg-white p-4 text-[14px] font-semibold text-[#5C7470] shadow-sm">
                       {lang === 'es'
                         ? 'Esta categoría no pudo cargarse. Los demás resultados siguen disponibles.'
                         : 'This category could not load. Other results are still available.'}

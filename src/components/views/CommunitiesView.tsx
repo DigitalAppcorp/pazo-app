@@ -151,7 +151,7 @@ export const CommunitiesView = ({
             type="button"
             onClick={() => setIsCreateCommunityOpen(true)}
             disabled={!currentPet || !canUseCommunities}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2 text-[10px] font-black text-[#204E4A] shadow-xs disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2 text-[13px] font-black text-[#204E4A] shadow-xs disabled:opacity-50"
           >
             <IconPlus size={14} />
             {lang === 'es' ? 'Crear' : 'Create'}
@@ -177,7 +177,7 @@ export const CommunitiesView = ({
                 ? 'Todavía no hay comunidades.'
                 : 'No communities yet.'}
             </p>
-            <p className="mt-1 text-[10px] text-[#5C7470]">
+            <p className="mt-1 text-[13px] text-[#5C7470]">
               {lang === 'es'
                 ? 'Puedes crear la primera desde aquí.'
                 : 'You can create the first one here.'}
@@ -219,10 +219,10 @@ export const CommunitiesView = ({
                       <h3 className="truncate text-xs font-extrabold text-[#204E4A]">
                         {community.name}
                       </h3>
-                      <p className="mt-0.5 line-clamp-1 text-[11px] text-[#5C7470]">
+                      <p className="mt-0.5 line-clamp-1 text-[14px] text-[#5C7470]">
                         {community.description}
                       </p>
-                      <span className="mt-0.5 block text-[10px] font-semibold text-[#5C7470]/70">
+                      <span className="mt-0.5 block text-[13px] font-semibold text-[#5C7470]/70">
                         {community.membersCount.toLocaleString()}{' '}
                         {lang === 'es' ? 'miembros' : 'members'}
                         {community.zone ? ` · ${community.zone}` : ''}

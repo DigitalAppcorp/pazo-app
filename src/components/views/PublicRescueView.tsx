@@ -162,12 +162,12 @@ export const PublicRescueView = ({
 
               {profile.isLost && (
                 <section className="bg-[#FFF2EE] border border-[#EC7357]/30 rounded-[2rem] p-4 space-y-2">
-                  <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-white bg-[#EC7357] px-3 py-1 rounded-full">
+                  <span className="inline-block text-[13px] font-extrabold uppercase tracking-widest text-white bg-[#EC7357] px-3 py-1 rounded-full">
                     Mascota reportada como perdida
                   </span>
                   {profile.lastSeenLocation && (
                     <div>
-                      <span className="text-[10px] font-bold uppercase text-[#5C7470]">
+                      <span className="text-[13px] font-bold uppercase text-[#5C7470]">
                         Última vez vista
                       </span>
                       <p className="font-extrabold text-sm">{profile.lastSeenLocation}</p>
