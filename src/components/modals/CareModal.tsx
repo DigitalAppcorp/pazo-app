@@ -1,4 +1,3 @@
-import { SectionTitle } from '../shared/SectionTitle'
 import { useMemo, useState } from 'react'
 import type {
   CareCategory,
@@ -251,9 +250,6 @@ export const CareModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
       <div className="w-full max-w-sm bg-white rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-        <SectionTitle>
-        {lang === 'es' ? 'Agenda privada' : 'Private agenda'}
-        </SectionTitle>
         <div className="flex justify-between items-center pb-2">
           <div>
             <h3 className="text-xl font-black text-[#204E4A] mt-1">

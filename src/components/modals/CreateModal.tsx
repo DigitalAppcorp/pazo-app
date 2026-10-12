@@ -1,4 +1,3 @@
-import { SectionTitle } from '../shared/SectionTitle'
 import { useState } from 'react'
 import type { Species } from '../../types/pazo'
 import {
@@ -77,9 +76,6 @@ export const CreateModal = ({
         {mode === 'menu' ? (
           <>
             {/* Header del menú de acciones */}
-            <SectionTitle>
-            Pazo Action
-            </SectionTitle>
             <div className="flex justify-between items-center pb-2">
               <div>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">

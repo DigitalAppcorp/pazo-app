@@ -1,4 +1,3 @@
-import { SectionTitle } from '../shared/SectionTitle'
 import { useEffect, useState } from 'react'
 import type { Pet } from '../../types/pazo'
 import {
@@ -130,9 +129,6 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
           </div>
         ) : step === 'create' ? (
           <div className="space-y-4">
-            <SectionTitle tone="alert">
-            {lang === 'es' ? 'Emergencia Comunitaria' : 'Community Alert'}
-            </SectionTitle>
             <div className="flex justify-between items-center pb-2 border-b border-[#204E4A]/10">
               <div>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">

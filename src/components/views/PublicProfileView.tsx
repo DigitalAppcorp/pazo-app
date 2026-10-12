@@ -181,7 +181,7 @@ export const PublicProfileView = ({
 
       {reportOpen && <ReportDialog target={{kind:'pet_profile',id:targetPetId,label:describeReportSubject('pet_profile',petProfile?.name,null,lang)}} lang={lang} onClose={() => setReportOpen(false)} />}
       {/* Contenedor Principal */}
-      <div className="p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto space-y-8 flex-1 relative z-10">
+      <div className="w-full max-w-2xl flex-1 mx-auto space-y-4 px-4 py-4 sm:px-6 sm:py-6 relative z-10">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-10 h-10 border-4 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
@@ -204,122 +204,121 @@ export const PublicProfileView = ({
             </button>
           </div>
         ) : (
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-3 animate-fade-in">
 
-            {/* Paso 3: Tarjeta Principal (Verdadero Glassmorphism Avanzado) */}
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(32,78,74,0.08)] rounded-[2.5rem] p-6 sm:p-8 text-center space-y-6">
-
-              {/* Avatar */}
-              <div className="relative inline-block">
-                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-[#E1E53F] shadow-sm overflow-hidden bg-white mx-auto relative z-10">
+            {/* F13: Perfil social compacto. Sin contenedores vacíos cuando no se puede seguir. */}
+            <section className="overflow-hidden rounded-[2rem] bg-white/65 px-4 py-5 shadow-[0_14px_34px_rgba(32,78,74,0.09)] backdrop-blur-2xl sm:px-6 sm:py-6">
+              <div className="flex items-start gap-4 sm:gap-5">
+                <div className="relative shrink-0">
                   <img
                     src={petProfile.photoUrl}
                     alt={petProfile.name}
-                    className="w-full h-full object-cover"
+                    className="h-24 w-24 rounded-[1.75rem] bg-[#FAF8F5] object-cover shadow-sm sm:h-28 sm:w-28"
                   />
+                  {petProfile.isLost && (
+                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#EC7357] px-2.5 py-1 text-[11px] font-black text-white shadow-sm">
+                      {lang === 'es' ? 'Perdido' : 'Lost'}
+                    </span>
+                  )}
                 </div>
-                {petProfile.isLost && (
-                  <span className="absolute bottom-1 right-0 bg-[#EC7357] text-white text-xs font-black uppercase px-3 py-1 rounded-full shadow-md border-2 border-white z-20">
-                    {lang === 'es' ? 'Perdido' : 'Lost'}
-                  </span>
-                )}
-              </div>
-
-              {/* Info Central */}
-              <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <h2 className="text-3xl sm:text-4xl text-[#204E4A] font-black tracking-tight flex items-center flex-wrap justify-center gap-2">
-                    {petProfile.name}
-                    <IconPaw size={24} className="text-[#204E4A]/30" />
+                <div className="min-w-0 flex-1 pt-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <h2 className="min-w-0 break-words text-[25px] font-black leading-tight tracking-tight text-[#204E4A] sm:text-[30px]">
+                      {petProfile.name}
+                    </h2>
+                    <IconPaw size={19} className="shrink-0 text-[#204E4A]/35" />
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-[#E1E53F]/50 px-3 py-1 text-[12px] font-extrabold uppercase tracking-wide text-[#204E4A]">
+                      {petProfile.species}
+                    </span>
                     {isFounder && (
-                      <span className="bg-gradient-to-r from-[#E1E53F] to-[#d4d82e] text-[#204E4A] font-black text-[10px] px-2.5 py-1 rounded-full shadow-sm border border-[#204E4A]/10 ml-1 tracking-wider uppercase">
-                        Fundador
+                      <span className="rounded-full bg-[#204E4A] px-3 py-1 text-[11px] font-black uppercase tracking-wide text-white">
+                        {lang === 'es' ? 'Fundador' : 'Founder'}
                       </span>
                     )}
-                  </h2>
-                  <span className="bg-white/60 backdrop-blur-sm text-[#204E4A] font-extrabold text-sm px-4 py-1.5 rounded-full uppercase tracking-wide border border-white">
-                    {petProfile.species}
+                  </div>
+                  {petProfile.breed && (
+                    <p className="mt-2 break-words text-[14px] font-semibold text-[#5C7470]">{petProfile.breed}</p>
+                  )}
+                </div>
+              </div>
+              {petProfile.bio && (
+                <p className="mt-4 rounded-2xl bg-white/55 px-4 py-3 text-[15px] font-medium leading-relaxed text-[#204E4A] break-words">
+                  {petProfile.bio}
+                </p>
+              )}
+
+              {Boolean(currentPetId) && !ownedPetIds.includes(petProfile.id) && (
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="w-full max-w-[260px]">
+                    <FollowButton
+                      currentPetId={currentPetId || ''}
+                      targetPetId={petProfile.id}
+                      canFollow={true}
+                      lang={lang}
+                      variant="profile"
+                      onFollowChange={(isFollowing) => {
+                        setFollowersCount((prev) => isFollowing ? prev + 1 : Math.max(0, prev - 1))
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {canReport && !ownedPetIds.includes(targetPetId) && (
+                <button
+                  type="button"
+                  onClick={() => setReportOpen(true)}
+                  className="mt-3 rounded-full bg-white/75 px-3 py-1.5 text-[12px] font-bold text-[#5C7470] underline"
+                >
+                  {lang === 'es' ? 'Denunciar perfil' : 'Report profile'}
+                </button>
+              )}
+
+              <div className="mt-4 grid grid-cols-3 gap-1 rounded-[1.4rem] bg-[#F3F5EF]/90 px-1 py-3 text-center sm:gap-3">
+                <div className="flex min-w-0 flex-col items-center">
+                  <span className="text-[25px] font-black leading-tight text-[#204E4A]">{petPosts.length}</span>
+                  <span className="mt-0.5 break-words text-[10px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[12px]">
+                    {lang === 'es' ? 'Publicaciones' : 'Posts'}
                   </span>
                 </div>
-
-                {petProfile.breed && (
-                  <p className="text-base text-[#5C7470] font-bold">
-                    {petProfile.breed}
-                  </p>
-                )}
-
-                {petProfile.bio && (
-                  <p className="text-base text-[#204E4A]/90 font-medium bg-white/50 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/60 max-w-xl mx-auto leading-relaxed break-words shadow-sm">
-                    "{petProfile.bio}"
-                  </p>
-                )}
-              </div>
-
-              {/* Paso 1: Reparación y Conexión del FollowButton */}
-              <div className="flex justify-center w-full mt-2 relative z-20">
-                <div className="w-full max-w-[260px]">
-                  <FollowButton
-                    currentPetId={currentPetId || ''}
-                    targetPetId={petProfile.id}
-                    canFollow={!ownedPetIds.includes(petProfile.id)}
-                    lang={lang}
-                    variant="profile" // Obliga al estilo de perfil sin que se oculte
-                    onFollowChange={(isFollowing) => {
-                      // Actualización instantánea en tiempo real del contador
-                      setFollowersCount((prev) => isFollowing ? prev + 1 : Math.max(0, prev - 1))
-                    }}
-                  />
+                <div className="flex min-w-0 flex-col items-center">
+                  <span className="text-[25px] font-black leading-tight text-[#204E4A]">{followersCount}</span>
+                  <span className="mt-0.5 break-words text-[10px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[12px]">
+                    {lang === 'es' ? 'Seguidores' : 'Followers'}
+                  </span>
+                </div>
+                <div className="flex min-w-0 flex-col items-center">
+                  <span className="text-[25px] font-black leading-tight text-[#204E4A]">{followingCount}</span>
+                  <span className="mt-0.5 break-words text-[10px] font-extrabold uppercase tracking-[0.03em] text-[#5C7470] sm:text-[12px]">
+                    {lang === 'es' ? 'Siguiendo' : 'Following'}
+                  </span>
                 </div>
               </div>
+            </section>
 
-              {canReport && !ownedPetIds.includes(targetPetId) && <button type="button" onClick={() => setReportOpen(true)}
-                className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar perfil' : 'Report profile'}</button>}
-              {/* Métricas Reales */}
-              <div className="flex items-center justify-around gap-2 pt-6 border-t border-[#204E4A]/10">
-                <div className="flex flex-col items-center flex-1">
-                  <span className="font-black text-2xl text-[#204E4A]">{petPosts.length}</span>
-                  <span className="text-xs font-bold text-[#5C7470] uppercase tracking-wider mt-1">{lang === 'es' ? 'Publicaciones' : 'Posts'}</span>
-                </div>
-                <div className="w-px h-12 bg-[#204E4A]/10"></div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="font-black text-2xl text-[#204E4A] transition-all duration-300">{followersCount}</span>
-                  <span className="text-xs font-bold text-[#5C7470] uppercase tracking-wider mt-1">{lang === 'es' ? 'Seguidores' : 'Followers'}</span>
-                </div>
-                <div className="w-px h-12 bg-[#204E4A]/10"></div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="font-black text-2xl text-[#204E4A]">{followingCount}</span>
-                  <span className="text-xs font-bold text-[#5C7470] uppercase tracking-wider mt-1">{lang === 'es' ? 'Siguiendo' : 'Following'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Paso 4: Refinamiento de Pestañas (Totalmente Transparentes) */}
-            <div className="relative flex bg-transparent p-1.5 rounded-full border border-[#204E4A]/10 w-full max-w-md mx-auto">
-              {/* Indicador de fondo oscuro que se desliza */}
-              <div
-                className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-[#204E4A] rounded-full transition-transform duration-300 ease-out shadow-[0_4px_12px_rgba(32,78,74,0.3)]"
-                style={{
-                  transform: activeTab === 'posts' ? 'translateX(0)' : 'translateX(100%)',
-                }}
-              />
+            {/* Pestañas sociales compactas, accesibles y translúcidas. */}
+            <div className="mx-auto flex w-full max-w-md gap-1 rounded-[1.4rem] bg-white/60 p-1 backdrop-blur-xl">
               <button
+                type="button"
+                aria-pressed={activeTab === 'posts'}
                 onClick={() => setActiveTab('posts')}
-                className={`flex-1 relative z-10 py-3.5 text-sm sm:text-base font-bold rounded-full transition-colors duration-300 ${activeTab === 'posts' ? 'text-white' : 'text-[#5C7470] hover:text-[#204E4A]'
-                  }`}
+                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[15px] font-extrabold transition-colors ${activeTab === 'posts' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
               >
                 {lang === 'es' ? 'Publicaciones' : 'Posts'}
               </button>
               <button
+                type="button"
+                aria-pressed={activeTab === 'info'}
                 onClick={() => setActiveTab('info')}
-                className={`flex-1 relative z-10 py-3.5 text-sm sm:text-base font-bold rounded-full transition-colors duration-300 ${activeTab === 'info' ? 'text-white' : 'text-[#5C7470] hover:text-[#204E4A]'
-                  }`}
+                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[15px] font-extrabold transition-colors ${activeTab === 'info' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
               >
                 {lang === 'es' ? 'Información' : 'Info'}
               </button>
             </div>
 
             {/* Contenido (Galería / Información) */}
-            <div className="pt-2">
+            <div className="pt-0">
               {activeTab === 'posts' ? (
                 <div>
                   {petPosts.length === 0 ? (
@@ -331,34 +330,30 @@ export const PublicProfileView = ({
                       </p>
                     </div>
                   ) : (
-                    /* Galería Inmersiva */
-                    <div className="grid grid-cols-2 gap-4 sm:gap-5">
+                    /* Publicaciones en formato social: una publicación ocupa todo el ancho. */
+                    <div className="flex flex-col gap-4">
                       {petPosts.map((post) => (
-                        <div
-                          key={post.id}
-                          className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-[0_4px_20px_rgba(32,78,74,0.08)] relative group bg-[#204E4A] cursor-pointer"
-                        >
-                          {post.photoUrl ? (
-                            <>
-                              <img
-                                src={post.photoUrl}
-                                alt={post.text}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                              />
-                              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-4 sm:p-5">
-                                <p className="text-white text-sm sm:text-base font-medium z-10 relative line-clamp-3 leading-snug drop-shadow-md">
-                                  {post.text}
-                                </p>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="w-full h-full p-5 sm:p-6 flex items-end bg-gradient-to-br from-[#204E4A] to-[#163B38]">
-                              <p className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-6">
-                                {post.text}
-                              </p>
+                        <article key={post.id} className="overflow-hidden rounded-[1.8rem] bg-white/75 shadow-[0_6px_24px_rgba(32,78,74,0.07)] backdrop-blur-xl">
+                          <div className="flex items-center gap-3 px-4 py-3">
+                            <img src={petProfile.photoUrl} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[16px] font-black text-[#204E4A]">{petProfile.name}</p>
+                              <p className="text-[12px] text-[#5C7470]">{post.timeAgo}</p>
+                            </div>
+                          </div>
+                          {post.photoUrl && (
+                            <div className="max-h-[420px] w-full overflow-hidden bg-[#E9EFEB]">
+                              <img src={post.photoUrl} alt={post.text || petProfile.name} className="max-h-[420px] w-full object-cover" />
                             </div>
                           )}
-                        </div>
+                          <div className="space-y-2 px-4 py-3">
+                            <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#5C7470]">
+                              <IconPaw size={17} className="text-[#204E4A]" />
+                              <span>{post.likes} {lang === 'es' ? 'me gusta' : 'likes'}</span>
+                            </div>
+                            {post.text && <p className="break-words text-[16px] font-medium leading-relaxed text-[#204E4A]">{post.text}</p>}
+                          </div>
+                        </article>
                       ))}
                     </div>
                   )}

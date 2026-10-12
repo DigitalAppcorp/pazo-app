@@ -1,4 +1,3 @@
-import { SectionTitle } from '../shared/SectionTitle'
 import { useCallback, useEffect, useState } from 'react'
 import type { CommunitySummary, Pet } from '../../types/pazo'
 import {
@@ -134,9 +133,6 @@ export const CommunitiesView = ({
   return (
     <>
       <div className="space-y-4 animate-slide-up pb-6">
-        <SectionTitle>
-        {lang === 'es' ? 'Comunidades' : 'Communities'}
-        </SectionTitle>
         <div className="flex items-start justify-between gap-3 px-1">
           <div>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-[#204E4A]">

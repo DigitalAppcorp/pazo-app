@@ -1,4 +1,3 @@
-import { SectionTitle } from '../shared/SectionTitle'
 import { getNotificationSightingId } from '../../features/notifications/notificationSource'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
@@ -47,9 +46,6 @@ export const NotificationsModal = ({
           }
         }}
       >
-        <SectionTitle>
-        {lang === 'es' ? 'Avisos y Alertas' : 'Alerts & Activity'}
-        </SectionTitle>
         <div className="flex justify-between items-center pb-2">
           <div>
             <h3 className="text-xl font-black text-[#204E4A] mt-1">
