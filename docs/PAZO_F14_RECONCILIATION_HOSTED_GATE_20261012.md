@@ -44,3 +44,9 @@
 - Postflight de catálogo: RPC existe con firma exacta, `owner=postgres`, `security_definer=true`, `search_path=''`, `EXECUTE` exclusivamente para `service_role` (`anon=false`, `authenticated=false`, `PUBLIC=0`). Contiene target UUID y Storage UUID exactos, la puerta `f14_moderation_media_gate`, reintento idempotente y evento.
 - Postflight datos: **cero cambios en datos**. `post-photos=0`, `pet-avatars=2`, objeto UUID ausente, claim `held=1`, claim `invalidated=0`, evento invalidado `0`, restricción `pending_review=1`, `purged=0`, reporte `removed=1`.
 - Edge nueva `f14-moderation-reconcile` todavía **NO instalada**, Edge de purga original **v27 `verify_jwt=true`, ambos latches false**; ningún flag activado ni POST enviado. **STOP aquí:** ejecutar Gate B necesita orden separada del PO.
+
+## Gate B — Instalación de la función en estado INERTE (2026-10-12 UTC)
+
+- El PO autorizó Gate B limitado a un único cierre del UUID sintético; se desplegó SOLO `f14-moderation-reconcile` v1 con cinco archivos exactos y `verify_jwt=true`. Fuente remota contiene `F14_ONE_OBJECT_RECONCILE_APPROVED=false`; hash proveedor `89bbf3cf73fa44735c310ebb4fd49b2682ec6c614cdd1f029d040b2e470d3ba0`. Estado `ACTIVE` en inventario de Edge significa que está desplegada, NO que pueda finalizar: falla cerrado por latch. No hubo `POST`, flag `true` ni llamada a la RPC.
+- Postflight: `f14-moderation-purge` v27 original con latches false; `post-photos=0`, `pet-avatars=2`, target UUID ausente, claim `held=1`, restricción `pending_review=1`, ninguna transición. **Gate B sigue PARCIAL.**
+- El conector de este chat NO puede manejar secretos ni invocar Edge como moderador PAZO genuino. Continuar **solo mediante** el entorno operador del PO, con CLI/watchdog/rollback verificados primero. Orden ejecutable y criterios STOP: `docs/PAZO_F14_GATE_B_OPERATOR_HANDOFF_20261012.md`. NO ejecutar SQL manualmente ni activar Edge desde aquí sin capacidad de rollback.
