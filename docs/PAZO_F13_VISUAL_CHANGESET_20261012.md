@@ -12,11 +12,11 @@
 ## Ordered delivery (independent gates)
 1. **Section title labels:** PO rejected even plain replacement titles. Remove ALL category title labels (including plain replacements) entirely; retain meaningful page headings. Implemented on F13 branch.
 2. **Top controls:** compact 40px translucent actions for ES/search/chat/bell, home feed tabs centered below header, small-screen containment. Implemented; visual acceptance pending.
-3. **Pazo native icon family:** own SVG/vector designs covering active screens; include states, semantics, sizing. Preserve the 3D map models; avoid emojis added by app UI.
-4. **Map presentation:** existing Mapbox canvas full visual background, existing search at top, existing Places list horizontally scrollable at bottom; keep check-in/detail/search/privacy controls/actions, permission rules and mobile/desktop responsive.
+3. **Pazo native icon family:** new cohesive PAZO vector mark treatment applied to core 8 high-visibility actions (Inicio, Explorar, Crear, Mapa, Mensajes, Notificaciones, Comunidades and pin). Remaining secondary icons not yet redrawn; visual acceptance pending.
+4. **Map presentation:** Mapbox now fills the Places canvas with floating top search/filters and bottom horizontal cards; existing check-in/detail/privacy actions preserved. Implemented; visual acceptance pending.
 5. **My Pet missing value:** weight and diet are optional; hide blank chips and show neutral missing-value message when both absent. Implemented; visual acceptance pending.
 6. **Typography:** standard Tailwind named text sizes increased +3px with line-heights; mobile nav/header + home tabs adjusted. Arbitrary pixel utilities still require view-by-view audit; NOT fully complete.
-7. **Interests:** inspect existing data source and species mapping for selectable interests; read-only schema inspection before any proposed backend changes. Do not create fabricated catalog or change data contracts.
+7. **Interests:** READ-ONLY audit: production public schema contains pets.interests but no interests catalog table; onboarding currently hard-codes four options (one cat-specific). Species-based DB-sourced catalog requires explicit schema/data authorization, not implemented.
 8. **Profile metrics whitespace:** remove ghost FollowButton area for own pet and tighten metric layout. Implemented; visual acceptance pending.
 9. **Profile tab gap:** compact accessible active tabs without fake borders. Implemented; visual acceptance pending.
 10. **Social profile card:** avatar+identity row, metrics nearby, translucent card, post feed full width for singleton posts. Implemented; visual acceptance pending.

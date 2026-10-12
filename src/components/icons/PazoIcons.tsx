@@ -15,8 +15,10 @@ export const IconHome = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <path d="M3 10.5L12 3l9 7.5v9a2 2 0 0 1-2 2h-4.5a1.5 1.5 0 0 1-1.5-1.5V15a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v5a1.5 1.5 0 0 1-1.5 1.5H5a2 2 0 0 1-2-2v-9z" />
-    <path d="M9 3v2" />
+
+    <path d="M3.4 10.4 10.9 3.9a1.8 1.8 0 0 1 2.3 0l7.4 6.5v8.1c0 1.6-1.2 2.8-2.8 2.8H6.2c-1.6 0-2.8-1.2-2.8-2.8z" />
+    <path d="M9.1 21v-4.6a2.9 2.9 0 0 1 5.8 0V21" />
+    <path d="m16.4 6.6 1.4-1.2" />
   </svg>
 )
 
@@ -32,9 +34,13 @@ export const IconExplore = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <circle cx="10.5" cy="10.5" r="7" />
-    <path d="M16 16l5 5" />
-    <circle cx="10.5" cy="10.5" r="2.5" />
+
+    <circle cx="10.2" cy="10.2" r="7.2" />
+    <path d="m15.8 15.8 5.1 5.1" />
+    <ellipse cx="7.4" cy="8.6" rx=".85" ry="1.3" fill="currentColor" stroke="none" />
+    <ellipse cx="10" cy="6.9" rx=".85" ry="1.3" fill="currentColor" stroke="none" />
+    <ellipse cx="12.9" cy="8.2" rx=".85" ry="1.3" fill="currentColor" stroke="none" />
+    <path d="M8 12.6c.3-1.4 1.6-2 2.9-2 1.5 0 2.8 1 2.6 2.3-.1 1.1-1.3 1.8-2.6 1.8-1.5 0-3.2-.8-2.9-2.1z" fill="currentColor" stroke="none" />
   </svg>
 )
 
@@ -50,8 +56,9 @@ export const IconPlus = ({ className = 'w-6 h-6', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <line x1="12" y1="5" x2="12" y2="19" />
-    <line x1="5" y1="12" x2="19" y2="12" />
+
+    <path d="M12 3.8v16.4M3.8 12h16.4" />
+    <path d="M9.1 4.7c.6-.2 1.1-.3 1.7-.3m4.1 15c-.6.2-1.2.3-1.8.3" strokeWidth="1.6" opacity=".5" />
   </svg>
 )
 
@@ -67,9 +74,11 @@ export const IconMap = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <path d="M2 6.5L8 3.5l8 3.5 6-3v14l-6 3-8-3.5-6 3v-14z" />
-    <path d="M8 3.5v14" />
-    <path d="M16 7v14" />
+
+    <path d="m2.5 6.8 5.3-2.9 8.4 3.2 5.3-2.8v13.6l-5.3 2.8-8.4-3.2-5.3 2.8z" />
+    <path d="M7.8 4v13.5M16.2 7.1v13.6" />
+    <path d="M11.9 14.8s-2.3-2.8-2.3-4.5a2.3 2.3 0 0 1 4.6 0c0 1.7-2.3 4.5-2.3 4.5z" fill="currentColor" stroke="none" />
+    <circle cx="11.9" cy="10.1" r=".75" fill="#FAF8F5" stroke="none" />
   </svg>
 )
 
@@ -160,8 +169,10 @@ export const IconPin = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <path d="M12 21s-6.5-6.5-6.5-11.5a6.5 6.5 0 0 1 13 0C18.5 14.5 12 21 12 21z" />
-    <circle cx="12" cy="9.5" r="2.5" />
+
+    <path d="M12 21.2s-6.7-6.5-6.7-11.6a6.7 6.7 0 0 1 13.4 0c0 5.1-6.7 11.6-6.7 11.6z" />
+    <circle cx="12" cy="9.2" r="2.2" />
+    <circle cx="12" cy="9.2" r=".5" fill="currentColor" stroke="none" />
   </svg>
 )
 
@@ -195,10 +206,12 @@ export const IconChat = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <path d="M20 12c0 4.4-3.8 8-8.5 8-1.4 0-2.8-.3-4-.9L3 20.5l1.6-4.1C3.6 15 3 13.5 3 12c0-4.4 3.8-8 8.5-8S20 7.6 20 12z" />
-    <circle cx="8" cy="12" r="1" fill="currentColor" />
-    <circle cx="12" cy="12" r="1" fill="currentColor" />
-    <circle cx="16" cy="12" r="1" fill="currentColor" />
+
+    <path d="M20.5 11.2c0 4.8-4.1 8.4-9 8.4-1.3 0-2.5-.2-3.6-.7L3 20.6l1.5-4.6a7.9 7.9 0 0 1-2-4.8c0-4.5 4-8.1 9-8.1s9 3.6 9 8.1z" />
+    <path d="M7.2 11.8c.9-1.3 2-1.9 3.8-1.9 1.8 0 3 .6 3.9 1.9" />
+    <circle cx="8" cy="8.1" r=".9" fill="currentColor" stroke="none" />
+    <circle cx="11.8" cy="7.4" r=".9" fill="currentColor" stroke="none" />
+    <circle cx="15.5" cy="8.1" r=".9" fill="currentColor" stroke="none" />
   </svg>
 )
 
@@ -214,8 +227,10 @@ export const IconBell = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+
+    <path d="M18.4 9.1c0-4-2.5-6.4-6.4-6.4S5.6 5.1 5.6 9.1c0 5.7-2.6 7.5-2.6 7.5h18s-2.6-1.8-2.6-7.5z" />
+    <path d="M9.6 20.2c.5 1.2 1.3 1.7 2.4 1.7s1.9-.5 2.4-1.7" />
+    <path d="M8.2 17.2h7.6" strokeWidth="1.5" opacity=".45" />
   </svg>
 )
 
@@ -475,9 +490,10 @@ export const IconCommunity = ({ className = 'w-5 h-5', size }: IconProps) => (
     className={className}
     style={size ? { width: size, height: size } : undefined}
   >
-    <circle cx="9" cy="8" r="3" />
-    <circle cx="17" cy="9" r="2.5" />
-    <path d="M3.5 19c.5-3.5 2.6-5.5 5.5-5.5s5 2 5.5 5.5" />
-    <path d="M14 14c2.8-.8 5.5.8 6.5 4" />
+
+    <circle cx="8" cy="8.5" r="2.8" />
+    <circle cx="16.5" cy="9.5" r="2.3" />
+    <path d="M2.8 19.6c.5-3.7 2.5-5.6 5.2-5.6 2.9 0 4.8 2 5.2 5.6M14 14.5c3-.9 5.9 1.1 7.1 4.4" />
+    <path d="M12 4.1c.8-.8 1.8-.8 2.6 0" strokeWidth="1.3" />
   </svg>
 )
