@@ -1604,9 +1604,6 @@ function PazoMain() {
 
               <div className="my-auto space-y-5">
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-                    Pazo Acceso
-                  </span>
                   <h2 className="text-3xl font-black text-[#204E4A]">
                     {forgotPasswordMode
                       ? (lang === 'es' ? 'Recuperar contraseña' : 'Reset your password')

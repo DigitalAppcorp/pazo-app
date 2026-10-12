@@ -161,9 +161,15 @@ export const HomeView = ({
   const displayedPosts = posts.filter((post) => feedFilter === 'following' ? true : !post.isRecommended)
 
   return (
-    <div className="space-y-3 animate-slide-up pb-6">
+    <div className="relative space-y-3 pb-6 animate-slide-up">
+      {/* Orbes ambientales del perfil replicados detrás del Feed. Solo presentación. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -left-20 -top-16 h-72 w-72 rounded-full bg-[#E1E53F]/35 blur-[90px] motion-reduce:animate-none animate-pulse sm:h-96 sm:w-96" />
+        <div className="absolute -right-24 top-[30%] h-72 w-72 rounded-full bg-[#204E4A]/12 blur-[100px] sm:h-[28rem] sm:w-[28rem]" />
+        <div className="absolute -left-12 bottom-[5%] h-80 w-80 rounded-full bg-[#E8F3EE]/80 blur-[90px] motion-reduce:animate-none animate-pulse sm:h-[32rem] sm:w-[32rem]" style={{ animationDuration: '7s' }} />
+      </div>
       {/* F13: título y filtros en la misma fila; en pantallas estrechas se apilan juntos sin espacio muerto. */}
-      <div className="px-1">
+      <div className="relative z-10 px-1">
         <div className="grid grid-cols-[minmax(0,1fr)_170px] items-center gap-x-2 gap-y-2 max-[360px]:grid-cols-1">
           <h2 className="min-w-0 text-[clamp(16px,4vw,20px)] font-black leading-tight tracking-tight text-[#204E4A]">
             {lang === 'es' ? 'Su pequeño mundo.' : 'Their little world.'}
@@ -193,7 +199,7 @@ export const HomeView = ({
         </div>
       </div>
       {feedFilter === 'nearby' ? (
-        <div className="pazo-glass-card rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
+        <div className="relative z-10 pazo-glass-card rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
           <div className="w-16 h-16 rounded-2xl bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center mx-auto mb-2">
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -215,7 +221,7 @@ export const HomeView = ({
           )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="relative z-10 space-y-4">
           {displayedPosts.length === 0 && (
             <div className="rounded-[2rem] pazo-glass-card p-7 text-center space-y-2 border border-[#204E4A]/10">
               <h3 className="text-base font-black text-[#204E4A]">

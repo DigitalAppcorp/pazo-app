@@ -70,9 +70,6 @@ export const MessagesModal = ({
           <>
             <div className="flex justify-between items-center pb-2">
               <div>
-                <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-                  {lang === 'es' ? 'Mensajería 1 a 1' : 'Direct Messages'}
-                </span>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
                   {lang === 'es' ? 'Hablemos.' : 'Conversations.'}
                 </h3>

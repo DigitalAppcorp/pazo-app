@@ -947,9 +947,6 @@ export const CommunityDetailView = ({
                             : 'What would you like to use here next?'}
                         </h4>
                       </div>
-                      <span className="rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#204E4A]">
-                        {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
-                      </span>
                     </div>
                     <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
                       {lang === 'es'

@@ -195,9 +195,6 @@ export const OnboardingView = ({
                 </div>
               </div>
 
-              <div className="absolute -top-3 right-4 bg-[#E1E53F] text-[#204E4A] text-[13px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(225,229,63,0.55)] soft-card animate-float">
-                <span className="inline-flex items-center gap-1"><PazoMotifIcon kind="star" size={13} />{lang === 'es' ? 'Identidad, Comunidad y Cuidado' : 'Identity, community and care'}</span>
-              </div>
             </div>
 
             <div className="space-y-1.5 text-left">
@@ -254,9 +251,6 @@ export const OnboardingView = ({
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                {lang === 'es' ? "Tu cuenta" : "Your account"}
-              </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Comencemos." : "Let’s get started."}</h2>
               <p className="text-xs text-[#5C7470]">
                 {lang === 'es' ? "Una persona responsable, todas sus mascotas." : "One responsible person, all their pets."}
@@ -399,9 +393,6 @@ export const OnboardingView = ({
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                {lang === 'es' ? "Agregar mascota" : "Add a pet"}
-              </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "¿Quién te acompaña?" : "Who is by your side?"}</h2>
               <p className="text-xs text-[#5C7470]">
                 {lang === 'es' ? "Añade cualquier especie. La app se adapta con cariño." : "Add your pet. Choose their species below."}
@@ -500,9 +491,6 @@ export const OnboardingView = ({
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                {lang === 'es' ? "Privacidad" : "Privacy"}
-              </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Tú decides." : "You decide."}</h2>
               <p className="text-xs text-[#5C7470]">
                 {lang === 'es' ? "Revisa qué se podrá ver antes de compartir su perfil público." : "Review what will be visible before sharing their public profile."}
@@ -578,9 +566,6 @@ export const OnboardingView = ({
 
           <div className="my-auto space-y-4">
             <div className="space-y-1">
-              <span className="text-[13px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full">
-                {lang === 'es' ? "Tu comunidad" : "Your community"}
-              </span>
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Cerca de ustedes." : "Close to you."}</h2>
               <p className="text-xs text-[#5C7470]">
                 {lang === 'es' ? "Elige tu zona e intereses para empezar a explorar." : "Choose your area and interests to start exploring."}
