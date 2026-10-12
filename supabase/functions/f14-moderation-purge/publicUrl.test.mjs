@@ -36,3 +36,84 @@ test('HTTP 410 is accepted only for all four probes',async()=>{
 test('network and redirect errors remain errors',async()=>{
  await assert.rejects(publicUrlInaccessible(url,async()=>{throw Error('synthetic network failure')}),/synthetic network failure/)
 })
+
+const noSuchKey=()=>new Response(JSON.stringify({
+  statusCode:'404',code:'NoSuchKey',error:'not_found',message:'Object not found'
+}),{status:400,headers:{'Content-Type':'application/json; charset=utf-8'}})
+
+test('Supabase wrapped HTTP 400 NoSuchKey proves all four missing responses',async()=>{
+  const calls=[]
+  assert.equal(await publicUrlInaccessible(url,async(u,o)=>{
+    calls.push({url:u,method:o.method,range:o.headers.Range})
+    return o.method==='HEAD'?new Response(null,{status:400}):noSuchKey()
+  }),true)
+  assert.equal(calls.length,4)
+  assert.deepEqual(calls.map(c=>c.method),['HEAD','GET','HEAD','GET'])
+  assert.deepEqual(calls.map(c=>c.range),[undefined,'bytes=0-0',undefined,'bytes=0-0'])
+  assert.equal(calls[0].url,url)
+  assert.equal(calls[2].url,calls[3].url)
+  assert.ok(new URL(calls[2].url).searchParams.has('pazo_verify'))
+})
+
+test('HEAD 404 and GET with exact wrapped 400 is accepted',async()=>{
+  assert.equal(await publicUrlInaccessible(url,async(_u,o)=>
+    o.method==='HEAD'?new Response(null,{status:404}):noSuchKey()
+  ),true)
+})
+
+test('ambiguous HEAD 400 cannot be confirmed solely by GET 404',async()=>{
+  assert.equal(await publicUrlInaccessible(url,async(_u,o)=>
+    new Response(null,{status:o.method==='HEAD'?400:404})
+  ),false)
+})
+
+test('a generic or forged HTTP 400 can never prove public absence',async()=>{
+  const valid={statusCode:'404',code:'NoSuchKey',error:'not_found',message:'Object not found'}
+  const variants=[
+    {code:'NoSuchKey'}, {message:'Object not found'},
+    {...valid,statusCode:'400'}, {...valid,statusCode:' 404'},
+    {...valid,code:'Unknown'}, {...valid,error:'access_denied'},
+    {...valid,message:'unknown'}, {}, [], null
+  ]
+  for(const body of variants){
+    let calls=0
+    assert.equal(await publicUrlInaccessible(url,async(_u,o)=>{
+      calls++
+      return o.method==='HEAD' ? new Response(null,{status:400}) :
+        new Response(JSON.stringify(body),{status:400,headers:{'Content-Type':'application/json'}})
+    }),false)
+    assert.equal(calls,2)
+  }
+})
+
+test('HTTP 400 without canonical JSON is refused',async()=>{
+  for(const response of [
+    new Response('Object not found',{status:400,headers:{'Content-Type':'text/plain'}}),
+    new Response('{malformed json',{status:400,headers:{'Content-Type':'application/json'}}),
+    new Response(null,{status:400,headers:{'Content-Type':'application/json'}})
+  ]) {
+    assert.equal(await publicUrlInaccessible(url,async(_u,o)=>
+      o.method==='HEAD'?new Response(null,{status:400}):response
+    ),false)
+  }
+})
+
+test('a public cache hit or denied download invalidates even exact NoSuchKey evidence',async()=>{
+  for(const status of [200,206,401,403,429,500]){
+    let calls=0
+    assert.equal(await publicUrlInaccessible(url,async(_u,o)=>{
+      calls++
+      if(calls===4) return new Response(null,{status})
+      return o.method==='HEAD' ? new Response(null,{status:400}) : noSuchKey()
+    }),false)
+    assert.equal(calls,4)
+  }
+})
+
+test('HTTP 400 JSON NoSuchKey on a 200 download is not accepted',async()=>{
+  const body=JSON.stringify({statusCode:'404',code:'NoSuchKey',error:'not_found',message:'Object not found'})
+  assert.equal(await publicUrlInaccessible(url,async(_u,o)=>
+    o.method==='HEAD'?new Response(null,{status:404}):
+      new Response(body,{status:200,headers:{'Content-Type':'application/json'}})
+  ),false)
+})
