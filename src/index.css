@@ -146,18 +146,18 @@
 
 .pazo-liquid-surface {
   position: absolute;
-  top: 15px;
+  top: 14px;
   right: 0;
-  bottom: calc(-1 * max(0.5rem, env(safe-area-inset-bottom)));
+  bottom: -3px;
   left: 0;
   border-radius: 12px 12px 14px 14px;
   background: #FFF8EB;
   box-shadow: 0 4px 16px rgba(32, 78, 74, 0.06);
-  /* The solid green orb has radius 23px, while this 30px cut leaves 7px
-     of exposed beige around it; center aligns at track y=12px. */
-  -webkit-mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -3px,
+  /* Circle: orb center is track y=12px; mask center is surface y=-2px.
+     The 30px cut around its 23px radius exposes 7px of the real app background. */
+  -webkit-mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -2px,
     transparent 0 29px, #000 30px);
-  mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -3px,
+  mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -2px,
     transparent 0 29px, #000 30px);
   transition: --pazo-liquid-center 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
 }
@@ -170,7 +170,7 @@
   height: 46px;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: #55A58B;
+  background: #204E4A;
   box-shadow: 0 8px 17px rgba(32, 78, 74, 0.20);
   transition: left 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
 }

@@ -52,7 +52,7 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
         <span
           aria-hidden="true"
           className={'pazo-liquid-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full ' +
-            (isActive ? 'pazo-liquid-icon--active text-[#143D35]' : '')}
+            (isActive ? 'pazo-liquid-icon--active text-[#E1E53F]' : '')}
         >
           <Icon size={21}/>
         </span>
@@ -67,10 +67,10 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
   return (
     <nav
       aria-label="Navegación de PAZO"
-      className="relative z-30 shrink-0 bg-[#EFECE4] px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      className="relative z-30 shrink-0 bg-[#FAF8F5] px-4 pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
     >
-      <div className="relative grid h-[64px] grid-cols-5 items-center">
-        {/* Compact cream bar with one small, moving top recess; Create remains separate. */}
+      <div className="relative grid h-[76px] grid-cols-5 items-center">
+        {/* Cream surface cut out against the actual PAZO app background; center Create remains independent. */}
         <div
           aria-hidden="true"
           className="pazo-liquid-surface pointer-events-none"
