@@ -8,6 +8,7 @@ import {
 import { IconCheck, IconCommunity, IconPlus } from '../icons/PazoIcons'
 import { CreateCommunityModal } from '../modals/CreateCommunityModal'
 import { CommunityDetailView } from './CommunityDetailView'
+import { CommunitiesEmptyState } from '../../features/communities/components/CommunitiesEmptyState'
 
 interface CommunitiesViewProps {
   currentPet: Pet | null
@@ -171,18 +172,11 @@ export const CommunitiesView = ({
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#204E4A]/20 border-t-[#204E4A]" />
           </div>
         ) : communities.length === 0 ? (
-          <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
-            <p className="text-xs font-black text-[#204E4A]">
-              {lang === 'es'
-                ? 'Todavía no hay comunidades.'
-                : 'No communities yet.'}
-            </p>
-            <p className="mt-1 text-[13px] text-[#5C7470]">
-              {lang === 'es'
-                ? 'Puedes crear la primera desde aquí.'
-                : 'You can create the first one here.'}
-            </p>
-          </div>
+          <CommunitiesEmptyState
+            lang={lang}
+            canCreate={Boolean(currentPet) && canUseCommunities}
+            onCreate={() => setIsCreateCommunityOpen(true)}
+          />
         ) : (
           <div className="space-y-3">
             {communities.map((community) => (
