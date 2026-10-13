@@ -1,11 +1,11 @@
-# PAZO — Plan técnico PRE-AUTORIZACIÓN: muro Amigo de PAZO
+# PAZO — Plan técnico y estado alojado: muro Amigo de PAZO
 
-**Estado:** BORRADOR SQL Y TESTS CREADOS POR AUTORIZACIÓN PO (2026-10-13); **NO APLICADOS A SUPABASE ALOJADO**. Solo probados en CI PostgreSQL sintético.  
+**Estado:** BASE DE CONSENTIMIENTOS PRIVADOS APLICADA POR AUTORIZACIÓN PO (2026-10-13), versión Supabase `20261013215221`. Pago, vista pública de mascotas y consentimiento positivo siguen BLOQUEADOS.  
 **Fecha:** 2026-10-13.  
 **Repositorio:** `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, PR #44 DRAFT.  
 **Proyecto Supabase:** `mrybvqdebbgcayuvgkkr`.  
 **Base de requisitos aprobada:** [política de consentimiento](PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md).  
-**Límites:** no activar proveedor, no cambiar DB alojada, no aplicar el SQL `NOT_APPLIED`, no fusionar PR ni desplegar.
+**Límites:** solo se aplicó la migración privada descrita; no activar proveedor, no añadir nuevos cambios alojados sin gate nuevo, no fusionar PR ni desplegar.
 
 ## 1. Preflight alojado READ ONLY (2026-10-13)
 
@@ -48,15 +48,15 @@ Herramientas empleadas: Supabase `list_tables` (public, verbose), `list_migratio
 | E. UI real | sustituir solo simulación de participación por estados del servidor; preservar A01 aceptado, cuadrícula y ES/EN | D, nueva validación PO y pruebas móviles |
 | F. Baja/migraciones | actualizar preflight y SOP manual, retención, inventario, SQL tests/rollback; verificar extremo a extremo | Procedimiento F14 aprobado; no borrados ad hoc |
 
-**Secuencia eficiente:** evitar construir un muro que muestra supuesto apoyo hasta que haya estado server-side verificable; pueden diseñarse/validarse contratos y QA offline antes de cualquier migración. El PO **autorizó y se preparó** un paquete de migración en GitHub **SIN APLICAR A SUPABASE**. El siguiente paso requiere nueva aprobación técnica y de privacidad antes de promoverlo a `supabase/migrations/`, aplicarlo, o habilitar pagos.
+**Secuencia eficiente:** evitar construir un muro que muestra supuesto apoyo hasta que haya estado server-side verificable; pueden diseñarse/validarse contratos y QA offline antes de cualquier migración. El PO primero autorizó preparar el borrador sin aplicar, y después **autorizó expresamente el gate de la migración privada**. Se aplicó la versión `20261013215221` con verificación alojada de privacidad PASADA. Un gate separado es obligatorio para cualquier cambio posterior, especialmente habilitar permisos positivos o pagos.
 
-### Borrador SQL preparado (no aplicado alojado)
+### Migración de base privada aplicada alojada (F16 todavía no activo)
 
-- [`supabase/drafts/20261013_f16_supporter_wall_consents_NOT_APPLIED.sql`](../supabase/drafts/20261013_f16_supporter_wall_consents_NOT_APPLIED.sql): tabla privada de consentimientos, roles/RLS sin grants directos, RPC propias autenticadas, sin lista pública. Función interna de entitlement **retorna FALSE intencionadamente** hasta gate de pagos, impidiendo aprobar consentimientos reales anticipados.
+- [`supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql`](../supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql): tabla privada de consentimientos, roles/RLS sin grants directos, RPC propias autenticadas, sin lista pública. Función interna de entitlement **retorna FALSE intencionadamente** hasta gate de pagos, impidiendo aprobar consentimientos reales anticipados.
 - [`supabase/tests/supporter/consent-metadata.sql`](../supabase/tests/supporter/consent-metadata.sql): aserciones del catálogo (RLS/ACL/search_path/ownership de funciones).
 - [`supabase/tests/supporter/consent-synthetic.sql`](../supabase/tests/supporter/consent-synthetic.sql): actores/pets ficticios, cambio temporal de gate solo dentro de transacción `BEGIN..ROLLBACK`, autorización/revocación, propiedad, transferencia, versiones inválidas y vencimiento. Guardias de `f14_synthetic`/PG17.
-- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml): job existente `f14-postgres` prueba el **borrador** contra DB efímera tras operaciones F14; run `38472636836` PostgreSQL SUCCESS. **No es prueba en Supabase alojado ni verificación de cobertura PayPal**.
-- Criterio posterior: auditar RLS combinadas `pets_public_read`/`f14_moderated_pets_select`, exposición `profiles.paypal_subscription_id`, efectos de deletion SOP, retención/consentimiento, textos legales y flujo con proveedor real. **El borrador es insuficiente para publicar mascotas aunque sus pruebas pasen.**
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml): job existente `f14-postgres` prueba el **borrador** contra DB efímera tras operaciones F14; run `38473628996` (verify + PostgreSQL SUCCESS). **Además se auditó el esquema alojado después de aplicarlo**: RLS forzada, 0 consentimientos, roles y funciones correctos. Esto NO es verificación de cobertura PayPal.
+- Criterio posterior: auditar RLS combinadas `pets_public_read`/`f14_moderated_pets_select`, exposición `profiles.paypal_subscription_id`, efectos de deletion SOP, retención/consentimiento, textos legales y flujo con proveedor real. **La base de consentimientos es insuficiente para publicar mascotas aunque sus pruebas pasen.**
 
 ## 4. Pruebas obligatorias para el futuro gate de implementación
 
@@ -76,4 +76,4 @@ Herramientas empleadas: Supabase `list_tables` (public, verbose), `list_migratio
 4. Permisos/grants/funciones del schema `private` actual y revisión del perfil público legado `profiles.paypal_subscription_id` — *auditar antes de dar privilegios o crear wrappers*.
 5. Fijar gate de autorización para crear/aplicar migración; no confundir la aprobación de **reglas del producto** con aprobación de **cambios técnicos**.
 
-No se ha modificado la base de datos, ni su política RLS, ni se han activado cobros. Este documento es un análisis y plan sujeto a revisión; **no SQL ejecutable aprobado**.
+**Actualización posterior:** se aplicó únicamente la migración privada F16 versión `20261013215221` con el consentimiento positivo bloqueado y sin alterar otros esquemas existentes. No se activaron cobros ni vista pública ni publicación de mascotas. Para nuevas fases del muro y pagos se requiere autorización separada.

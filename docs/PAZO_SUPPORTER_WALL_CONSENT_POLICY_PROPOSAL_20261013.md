@@ -1,11 +1,13 @@
 # PAZO — Política aprobada de producto para «Gracias, Amigos de PAZO»
 
-**Estado:** APROBADA POR PRODUCT OWNER (2026-10-13) EN REGLAS DE PRODUCTO; NO IMPLEMENTADA Y SIN AUTORIZACIÓN PARA CAMBIOS DE SUPABASE/PAGOS.  
+**Estado:** POLÍTICA DE PRODUCTO APROBADA (2026-10-13). **La base privada de consentimientos fue aplicada a Supabase con autorización PO posterior**, pero todavía NO existen consentimientos reales habilitados, pagos ni muro público con mascotas. Sin autorización para etapas adicionales.  
 **Fecha:** 2026-10-13.  
 **Categoría:** F16, monetización voluntaria y privacidad.  
 **Fuente:** identidad PET-ONLY, diseño de cuadrícula (opción 2), acceso público desde Bienvenida A01 y selección simulada desde Mi mascota, previamente aprobados.
 
 **Gate del Product Owner (2026-10-13):** el PO respondió explícitamente **«si aprobado»** a las reglas de participación y retirada presentadas, incluidas visibilidad sin registro, opt-in individual, revocación, mantenimiento hasta el fin del período pagado, expiración, nueva autorización tras reactivar y eliminación. **ESTAS REGLAS QUEDAN APROBADAS COMO PRODUCTO; NO HABILITAN MIGRACIONES, PAYPAL NI DESPLIEGUE.** Documento técnico siguiente: [plan READ ONLY](PAZO_SUPPORTER_WALL_BACKEND_DESIGN_PREFLIGHT_20261013.md).
+
+**Gate técnico posterior de solo esquema (2026-10-13):** instalada migración `20261013215221_f16_supporter_wall_consents_foundation` tras autorización PO. Verificación alojada READ ONLY: tabla con RLS forzada, cero registros de consentimiento y helper de entitlement con resultado false; no permite publicación de mascotas ni acceso anónimo a la tabla. No incluye textos legales definitivos ni procesador de pagos.
 
 ## 1. Regla de oro
 

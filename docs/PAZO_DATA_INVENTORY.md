@@ -50,6 +50,14 @@ Supabase Database/Storage.
 **Regla**
 La identidad social es la mascota, no el humano.
 
+## 2A. Amigo de PAZO — consentimiento para muro (solo esquema, inactivo)
+
+**Estado verificado 2026-10-13:** esquema `supporter_private` instalado por autorización PO con migración Supabase `20261013215221`. Tabla `wall_consents` **sin filas**, al carecer aún de membresías verificables y de interfaz de consentimiento real. **No se publica ningún participante.** `RLS` habilitada y forzada, sin acceso directo `anon`/`authenticated`.
+
+**Datos que podría almacenar tras habilitación futura autorizada:** `pet_id`, `owner_id_at_grant` (UUID de cuenta interno), `notice_version`, `granted_at`, `revoked_at`, `updated_at`. Categoría **privada de cuenta y consentimiento**; proveedor Supabase Database. Se asocian a datos públicos de mascota solo cuando un contrato futuro valide membresía, titularidad y autorización sin revelar identidad humana.
+
+**Protecciones activas:** RPC de revocación y lectura privada solo para autenticados y propiedad comprobada; RPC de nueva autorización bloqueada por `wall_has_verified_entitlement() = false`; ninguna lista pública ni identificación de suscriptores; no PayPal ni historial de pagos. Eliminación de mascotas/usuarios debe auditarse conforme SOP F14 y FK; la política de conservación/retención requiere revisión antes de habilitar opt-in real. No usar analytics para consentimiento ni pago.
+
 ## 3. Feed / UGC social
 
 **Datos**

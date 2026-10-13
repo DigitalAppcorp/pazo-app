@@ -115,11 +115,11 @@ jobs:
 
       # F16 consent foundation. Verify ONLY in this disposable
       # PostgreSQL service to verify RLS/roles and synthetic-owner behaviour.
-      - name: F16 draft consent security SQL in disposable PostgreSQL only
+      - name: F16 consent foundation security SQL in disposable PostgreSQL only
         run: |
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -c 'SET ROLE postgres;' \
-            -f supabase/migrations/20261013190000_f16_supporter_wall_consents_foundation.sql
+            -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/consent-metadata.sql \
             -f supabase/tests/supporter/consent-synthetic.sql
