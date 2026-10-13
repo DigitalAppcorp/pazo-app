@@ -259,10 +259,42 @@ test('T04 mixed feed label is For you and demo nearby interest cannot write', as
   await act(async()=>button(renderer.root,'Nearby').props.onClick())
   assert.equal(button(renderer.root,'Sign in to express interest').props.disabled,true)
   await act(async()=>button(renderer.root,'Sign in to express interest').props.onClick())
-  assert.match(JSON.stringify(renderer.toJSON()),/location-based feed/)
+  assert.match(JSON.stringify(renderer.toJSON()),/A world of pets around you/)
+  assert.match(JSON.stringify(renderer.toJSON()),/Coming soon to PAZO/)
+  assert.ok(renderer.root.findAllByType('svg').some(el=>el.props.viewBox==='0 0 340 178'))
+  assert.ok(button(renderer.root,'For you').props['aria-pressed']===false)
+  assert.ok(button(renderer.root,'Nearby').props['aria-pressed']===true)
   assert.deepEqual(calls,[])
   await act(async()=>renderer.unmount())
 })
+test('F13 nearby-only preview changes copy and artwork without rerouting feed, map or the interest callback', async () => {
+  const source=fs.readFileSync('src/components/views/HomeView.tsx','utf8')
+  assert.ok(source.includes('const NearbyNeighborhoodArtwork = () => ('))
+  assert.ok(source.includes('Comunidad cercana')===false)
+  assert.ok(source.includes('Un mundo de mascotas a tu alrededor'))
+  assert.ok(source.includes('Próximamente en PAZO'))
+  assert.ok(source.includes('onClick={handleNearbyInterest}'))
+  assert.ok(source.includes("target_id: 'feature_nearby_interested'"))
+  assert.ok(source.includes("target_id: 'feature_nearby_tab'"))
+  assert.ok(source.includes("setFeedFilter('following')"))
+  assert.ok(!source.includes('Estamos trabajando fuertemente'))
+  const props={
+    posts:[],canReport:false,onLikePost(){},onSavePost(){},
+    onAddComment:async()=>false,onLoadComments:async()=>true,lang:'es',
+    ownedPetIds:[],onSelectPetProfile(){}
+  }
+  let renderer
+  await act(async()=>{renderer=create(React.createElement(HomeView,props))})
+  assert.ok(button(renderer.root,'Para ti'))
+  await act(async()=>button(renderer.root,'Cerca').props.onClick())
+  assert.ok(JSON.stringify(renderer.toJSON()).includes('Un mundo de mascotas a tu alrededor'))
+  assert.equal(button(renderer.root,'Inicia sesión para expresar interés').props.disabled,true)
+  await act(async()=>button(renderer.root,'Para ti').props.onClick())
+  assert.ok(JSON.stringify(renderer.toJSON()).includes('Todavía no hay publicaciones'))
+  assert.ok(!JSON.stringify(renderer.toJSON()).includes('Un mundo de mascotas a tu alrededor'))
+  await act(async()=>renderer.unmount())
+})
+
 test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {
   const base={
     targetPetId:'someone-elses-pet',
