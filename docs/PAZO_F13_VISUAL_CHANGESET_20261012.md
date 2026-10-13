@@ -81,6 +81,17 @@
 - **Aprobación visual del PO pendiente**: probar perfil de mascota ajena/propia, perfiles con y sin bio, Fundador/Perdido, ES/EN, menú y Seguir/Siguiendo, tabs en móvil 320/375px.
 - **Restricciones:** `MapView.tsx`/Mapbox/Lugares congelados. No se mutó Supabase, no Vercel para visual, no se fusiona RC/main sin aprobación PO.
 
+## F13 — Opción 4: discrepancia visual detectada por PO y segunda implementación (2026-10-13)
+
+- **EVIDENCIA:** PO comparó screenshot real de primer intento con el mockup «OPCIÓN 4 · COMUNIDAD/LIFESTYLE» y rechazó ese intento por falta de semejanza, pese a CI PASS. **No declarar como aprobado** el commit `2fb0f0d6` ni todo F13.
+- **Referencia visual autorizada:** composición social cálida con retrato circular protagonista, nombre grande **debajo**, chip de especie, bio únicamente si está guardada; CTA verde sólido con icono de persona+; métricas en cápsula horizontal con iconos, tabs redondeadas con iconos, publicaciones cálidas y menú de tres puntos para acciones reales.
+- **EXCEPCIÓN deliberada:** el mockup generado incluía una foto de perro de portada, pero el PO eligió expresamente **SIN PORTADA (1C)** posteriormente. No usar fotos ficticias, no añadir portada, no rellenar bio (2C), no inventar insignias ni espacio fijo. Conservar la insignia Fundador real y futura extensión vacía.
+- **Implementación corregida** `78a339a6`: `PublicProfileView.tsx` sustituye layout «avatar cuadrado + nombre al lado» por **avatar circular de 132–156px**, nombre principal 34–48px debajo, fondo cálido claro y estatísticas tipo pill, tabs totalmente redondas con iconos estilo mockup, post cards con menú `···` (solo si reportable: real `ReportDialog feed_post`). Datos, privacidad, eventos y permisos conservados.
+- **CTA** `8d592e03`: `FollowButton variant="profile"` usa botón verde sólido con icono de usuario+ y más altura; `Siguiendo` tiene superficie atenuada sin contorno; la variante `feed` TRANSPARENTE aprobada sigue intacta.
+- **Prueba** `ce2e0965` añade comprobaciones de estructura de la opción 4 y del cableado del menú/post, sin crear datos ni dependencias. CI y revisión visual PO separados; no afirmar comparación de navegador contra mockup sin screenshot posterior.
+- Bio editable del propio perfil ya implementada/persistida en `PetView` con `updatePetProfile`; la captura del PO mostró que `bretman` no tiene bio visible, por lo que no se inventó texto.
+- **Restricción inamovible:** mapa/Lugares congelado, Supabase sin escrituras/migraciones, no main ni Vercel para QA.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
