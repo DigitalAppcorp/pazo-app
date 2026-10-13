@@ -10,15 +10,21 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
-## 2. ÚNICO paso inmediato pendiente: aceptación visual del nuevo consentimiento por mascota
+## Gate visual F16 — APROBADO por Product Owner (2026-10-13)
 
-**La aprobación del TEXTO YA EXISTE; lo que falta es la aceptación VISUAL del código del preview.**
+El PO inspeccionó el preview local de consentimiento individual por mascota en PAZO y respondió «Sí, está excelente». Se registra aceptación visual de ese flujo únicamente. El copy ES/EN ya estaba aprobado y **no se pide otra aprobación**. La validación no equivale a prueba legal, consentimiento persistido, entitlement ni autorización de pagos. La UI permanece simulada y sin guardar, PR #44 DRAFT, sin merge. La revisión técnica CI del HEAD anterior f5bf5a661fc50fa68b4a2723f7b1ddeac88dd79f fue SUCCESS (run 38478119445); cualquier commit documental posterior requiere CI propia.
+
+**Siguiente gate F16:** documentar/definir el acceso de lectura al muro para usuarios autenticados sin invadir Explorar ni rediseñar A01; después atender retención/legal y procesador con autorización específica. No implementar pagos, API pública, activación de wall consent, ni SQL sin gate separado. La aceptación visual actual no amplía esos permisos.
+
+## 2. Gate histórico ya cerrado: aceptación visual del consentimiento por mascota
+
+**Texto y apariencia del preview: APROBADOS por el PO el 2026-10-13.**
 
 - PO aprobó el copy ES/EN de `docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md` con «aprobado». No volver a pedir aprobación del contenido ni confundirla con validación visual o aprobación legal/Terms.
 - Implementado en `src/features/supporter/components/GratitudeParticipationPreview.tsx` en commit `32551f5e` y documentado en `61eb2fd2`. Ruta en Vite autenticado: **Mi mascota → Menú y Utilidades → Amigo de PAZO → Participar en el muro**.
 - Cada mascota real del usuario muestra foto/nombre. Se abre un panel individual con aviso ES/EN ANTES de la acción, que explica: nombre/foto pública/insignia, lectura del muro incluso SIN cuenta, ausencia de nombre personal/email/datos de pago, retirada revocable y límites de copias/capturas de terceros. Acciones **«Autorizar a [mascota] · Simulación»**, **«Ahora no»** y **«Quitar del muro · Simulación»**. Múltiples mascotas independientes, opción inicial desactivada, cerrar/reabrir borra selección.
 - **Estado solo React en memoria**: NO hay `supabase`, fetch ni localStorage en el componente, NO se guarda consentimiento, NO hay participantes reales ni permisos de publicación. UI debe seguir etiquetada «Vista previa / Sin guardar cambios». Tests ES/EN, independencia por mascota, rechazo y retirada, remount y vacío: PASS en CI citado.
-- **Acción siguiente**: PO revisa el flujo en Vite (ancho móvil y escritorio, ambos idiomas si puede); si indica ajustes visuales, implementarlos en este preview y pasar CI. Si responde que quedó perfecto, registrar gate visual aprobado sin activar backend. **No pedir otra vez el permiso de programar este prototipo.**
+- **Gate cerrado**: PO confirmó «Sí, está excelente» tras probar el preview local. No reabrir este gate ni habilitar backend a partir de esa aprobación.
 
 ## 3. Decisiones F16 ya cerradas (NO reinterpretar)
 
