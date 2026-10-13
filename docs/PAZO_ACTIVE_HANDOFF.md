@@ -177,6 +177,12 @@
 - La UI privada permanece **simulación no persistente**, el muro público continúa vacío y las membresías siguen NO ACTIVAS. La función positiva de autorización **permanece bloqueada hasta integrar verificación real server-side y consentimiento revisado**. F16 sigue BACKLOG; PR #44 sigue DRAFT.
 - Próximo gate: revisión con el PO del texto ES/EN, retención de consentimiento, definición del acceso al muro para quien ya inició sesión y de proveedor de pago. **No sustituir el stub que retorna false, no activar pagos, ni exponer lista pública sin otra aprobación expresa y pruebas de seguridad.**
 
+## 1W. A01 Bienvenida — rediseño integral anotado en BACKLOG, sin interrumpir F16 (PO 2026-10-13)
+
+- El PO indicó que **también desea rediseñar en el futuro la pantalla inicial A01** (mensaje «Su mundo, más cerca», botones Comenzar/Ya tengo una cuenta), pero eligió **dejarlo pendiente** para no romper el trabajo en curso del sistema «Amigo de PAZO». **No ha aprobado ni elegido ninguna propuesta nueva ni autorizado programar ese rediseño.**
+- **A01 actual se mantiene exactamente como fue aprobada visualmente:** el pequeño acceso «Conoce a los Amigos de PAZO» bajo el mensaje introductorio permite llegar al muro sin registrarse. No cambiarlo durante el gate de entitlements/consentimiento.
+- Antes de iniciar el futuro rediseño: pedir referencias y aprobación visual PO; planificar cómo conservar/regresar el enlace público al muro y no alterar autenticación, onboarding, registro, login, uso móvil o beneficios en desarrollo. Tratarlo como proyecto visual separado sujeto a gate propio. La membresía F16 mantiene prioridad actual.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
