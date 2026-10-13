@@ -187,6 +187,18 @@ test('F13 approved lifestyle profile exposes only permitted actions and real bio
   assert.ok(editor.includes('id="pazo-pet-bio"'))
   assert.ok(editor.includes('value={editForm.bio}'))
   assert.ok(editor.includes('bio: editForm.bio'))
+  assert.ok(profile.includes('h-[132px] w-[132px] rounded-full'))
+  assert.ok(profile.includes('text-[clamp(34px,9vw,48px)]'))
+  assert.ok(profile.includes('bg-[#FFFCF5]/90'))
+  assert.ok(profile.includes('rounded-full bg-white/80'))
+  assert.ok(profile.includes("setPostReportId(post.id)"))
+  assert.ok(profile.includes("kind: 'feed_post'"))
+  assert.ok(profile.includes("postMenuId === post.id"))
+  const follow=fs.readFileSync('src/components/shared/FollowButton.tsx','utf8')
+  assert.ok(follow.includes("variant === 'profile' && isFollowing"))
+  assert.ok(follow.includes("variant === 'profile' && ("))
+  assert.ok(follow.includes('min-h-14'))
+
 })
 
 test('F13 feed post actions stay inside an accessible overflow menu; hide can be undone', async () => {
