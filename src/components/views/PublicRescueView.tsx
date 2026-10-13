@@ -4,6 +4,8 @@ import {
   submitPublicSighting,
   type PublicRescueProfile,
 } from '../../services/rescueService'
+import { RescuePassportHero } from '../../features/rescue/components/RescuePassportHero'
+import { IconAlert, IconPaw } from '../icons/PazoIcons'
 
 interface PublicRescueViewProps {
   token: string
@@ -93,163 +95,83 @@ export const PublicRescueView = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex justify-center p-0 sm:p-6">
-      <main className="w-full sm:max-w-[430px] min-h-screen sm:min-h-[760px] bg-[#FAF8F5] sm:rounded-[2.8rem] shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden">
-        <header className="px-5 py-4 bg-white border-b border-[#204E4A]/8 grid grid-cols-[40px_1fr_40px] items-center">
+    <div className="flex min-h-dvh justify-center bg-[#EFECE4] p-0 text-[#204E4A] sm:p-6">
+      <main className="min-h-dvh w-full overflow-hidden bg-[#FAF8F5] shadow-[0_18px_48px_rgba(32,78,74,0.10)] sm:min-h-[760px] sm:max-w-[430px] sm:rounded-[2.7rem]">
+        <header className="grid grid-cols-[44px_1fr_44px] items-center bg-[#FFFCF6] px-4 py-3">
           <div>
             {fromPreview && onBack ? (
-              <button
-                onClick={onBack}
-                className="w-9 h-9 rounded-full bg-[#FAF8F5] text-[#204E4A] font-black cursor-pointer"
-                aria-label="Regresar"
-              >
+              <button type="button" onClick={onBack} aria-label="Regresar"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF8F5] text-[#204E4A] transition-colors hover:bg-[#E1E53F]/40 focus-visible:bg-[#E1E53F]/40">
                 ←
               </button>
             ) : null}
           </div>
-
-          <h1 className="text-base font-black text-center text-[#204E4A]">
-            Pasaporte QR
-          </h1>
-
-          <div className="w-10" aria-hidden="true" />
+          <h1 className="text-center text-sm font-black text-[#204E4A]">Pasaporte QR</h1>
+          <div aria-hidden="true" />
         </header>
 
-        <div className="p-6 space-y-5">
+        <div className="space-y-4 px-4 pb-9 pt-4">
           {isLoading ? (
-            <div className="py-20 text-center text-sm font-bold text-[#5C7470]">
-              Cargando pasaporte…
-            </div>
+            <div role="status" className="py-20 text-center text-sm font-bold text-[#5C7470]">Cargando pasaporte…</div>
           ) : loadError ? (
-            <div className="py-16 text-center space-y-3">
-              <div className="text-4xl">×</div>
+            <div role="alert" className="space-y-3 rounded-[2rem] bg-[#FFFCF6] px-5 py-12 text-center">
               <h2 className="text-xl font-black">Código no disponible</h2>
               <p className="text-sm text-[#5C7470]">{loadError}</p>
             </div>
           ) : profile ? (
             <>
-              <section className="text-center space-y-3">
-                <div className="w-28 h-28 mx-auto rounded-[2.2rem] overflow-hidden bg-white shadow-md">
-                  {profile.photoUrl ? (
-                    <img
-                      src={profile.photoUrl}
-                      alt={profile.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl font-black">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+              <RescuePassportHero profile={profile}/>
+              <section aria-labelledby="pazo-report-heading" className="rounded-[2rem] bg-[#FFFCF6] p-4 shadow-[0_5px_24px_rgba(32,78,74,0.055)]">
+                <div className="mb-4 text-center">
+                  <div aria-hidden="true" className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-[#E1E53F]/35 text-[#204E4A]">
+                    <IconPaw size={20}/>
+                  </div>
+                  <h3 id="pazo-report-heading" className="text-base font-black">¿La viste o está contigo?</h3>
+                  <p className="mt-1 text-xs text-[#5C7470]">Cualquier información puede ayudar a encontrarla.</p>
                 </div>
-
-                <div>
-                  <h2 className="text-3xl font-black">
-                    Soy {profile.name}.
-                  </h2>
-                  <p className="text-sm text-[#5C7470] mt-1">
-                    {profile.species}
-                    {profile.breed ? ` • ${profile.breed}` : ''}
-                  </p>
-                </div>
-
-                {profile.bio && (
-                  <p className="text-sm text-[#5C7470] leading-relaxed max-w-xs mx-auto">
-                    {profile.bio}
-                  </p>
-                )}
-              </section>
-
-              {profile.isLost && (
-                <section className="bg-[#FFF2EE] border border-[#EC7357]/30 rounded-[2rem] p-4 space-y-2">
-                  <span className="inline-block text-[13px] font-extrabold uppercase tracking-widest text-white bg-[#EC7357] px-3 py-1 rounded-full">
-                    Mascota reportada como perdida
-                  </span>
-                  {profile.lastSeenLocation && (
-                    <div>
-                      <span className="text-[13px] font-bold uppercase text-[#5C7470]">
-                        Última vez vista
-                      </span>
-                      <p className="font-extrabold text-sm">{profile.lastSeenLocation}</p>
-                    </div>
-                  )}
-                  {profile.alertLastSeenAt && (
-                    <p className="text-xs text-[#5C7470]">
-                      {new Date(profile.alertLastSeenAt).toLocaleString()}
-                    </p>
-                  )}
-                  {profile.alertDetails && (
-                    <p className="text-sm leading-relaxed">{profile.alertDetails}</p>
-                  )}
-                </section>
-              )}
-
-              <section className="bg-white rounded-[2.2rem] p-5 shadow-xs space-y-4">
-                <div>
-                  <h3 className="text-lg font-black">¿La viste o está contigo?</h3>
-                </div>
-
                 {sent ? (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
-                    <p className="font-extrabold text-emerald-800">Aviso enviado.</p>
-                    <p className="text-xs text-emerald-700 mt-1">
-                      La familia de {profile.name} recibirá una notificación privada.
-                    </p>
+                  <div role="status" className="rounded-2xl bg-[#E9F4E9] p-4 text-center">
+                    <p className="font-extrabold text-[#204E4A]">Aviso enviado.</p>
+                    <p className="mt-1 text-xs text-[#5C7470]">La familia de {profile.name} recibirá una notificación privada.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-3">
-                    <input
-                      required
-                      minLength={2}
-                      maxLength={100}
-                      value={reporterName}
+                    <label htmlFor="pazo-rescue-name" className="sr-only">Tu nombre</label>
+                    <input id="pazo-rescue-name" required minLength={2} maxLength={100}
+                      autoComplete="name" value={reporterName}
                       onChange={(event) => setReporterName(event.target.value)}
                       placeholder="Tu nombre"
-                      className="w-full bg-[#FAF8F5] rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                    />
+                      className="min-h-11 w-full rounded-2xl bg-[#F4F4F0] px-4 py-3 text-sm text-[#204E4A] placeholder:text-[#829591] focus-visible:bg-[#EAF0E5]"/>
 
-                    <input
-                      required
-                      type="tel"
-                      minLength={7}
-                      maxLength={40}
-                      value={reporterPhone}
+                    <label htmlFor="pazo-rescue-phone" className="sr-only">Tu teléfono</label>
+                    <input id="pazo-rescue-phone" required type="tel" minLength={7} maxLength={40}
+                      autoComplete="tel" value={reporterPhone}
                       onChange={(event) => setReporterPhone(event.target.value)}
                       placeholder="Tu teléfono"
-                      className="w-full bg-[#FAF8F5] rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                    />
+                      className="min-h-11 w-full rounded-2xl bg-[#F4F4F0] px-4 py-3 text-sm text-[#204E4A] placeholder:text-[#829591] focus-visible:bg-[#EAF0E5]"/>
 
-                    <textarea
-                      required
-                      minLength={3}
-                      maxLength={1000}
-                      rows={4}
-                      value={message}
+                    <label htmlFor="pazo-rescue-message" className="sr-only">Información sobre el avistamiento</label>
+                    <textarea id="pazo-rescue-message" required minLength={3} maxLength={1000}
+                      rows={4} value={message}
                       onChange={(event) => setMessage(event.target.value)}
-                      placeholder="Ej: Lo vi cerca del parque, lleva collar verde…"
-                      className="w-full bg-[#FAF8F5] rounded-2xl p-3 text-sm focus:outline-none"
-                    />
+                      placeholder="Cuéntanos algo (por ejemplo, dónde la viste)"
+                      className="w-full resize-y rounded-2xl bg-[#F4F4F0] p-4 text-sm text-[#204E4A] placeholder:text-[#829591] focus-visible:bg-[#EAF0E5]"/>
 
-                    <input
-                      maxLength={250}
-                      value={location}
+                    <label htmlFor="pazo-rescue-location" className="sr-only">Ubicación aproximada, opcional</label>
+                    <input id="pazo-rescue-location" maxLength={250} value={location}
                       onChange={(event) => setLocation(event.target.value)}
                       placeholder="Ubicación aproximada · opcional"
-                      className="w-full bg-[#FAF8F5] rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                    />
+                      className="min-h-11 w-full rounded-2xl bg-[#F4F4F0] px-4 py-3 text-sm text-[#204E4A] placeholder:text-[#829591] focus-visible:bg-[#EAF0E5]"/>
 
-                    <button
-                      type="submit"
-                      disabled={
-                        isSubmitting
-                        || !reporterName.trim()
-                        || !reporterPhone.trim()
-                        || !message.trim()
-                      }
-                      className="w-full bg-[#204E4A] text-[#E1E53F] disabled:opacity-50 font-extrabold py-3.5 rounded-full"
-                    >
+                    <button type="submit"
+                      disabled={isSubmitting || !reporterName.trim() || !reporterPhone.trim() || !message.trim()}
+                      className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#204E4A] px-4 py-3 text-sm font-extrabold text-[#E1E53F] transition-colors hover:bg-[#32645E] focus-visible:bg-[#32645E] disabled:opacity-50">
+                      <IconAlert size={17}/>
                       {isSubmitting ? 'Enviando…' : 'Avisar a su familia'}
                     </button>
+                    <p className="text-center text-[11px] leading-relaxed text-[#5C7470]">
+                      Tu aviso se envía de forma privada a la familia de {profile.name}.
+                    </p>
                   </form>
                 )}
               </section>

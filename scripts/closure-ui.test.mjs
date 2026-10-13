@@ -66,6 +66,7 @@ const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
 const {ImmersivePlacesStage}=await load('features/places/components/ImmersivePlacesStage.js')
+const {RescuePassportHero}=await load('features/rescue/components/RescuePassportHero.js')
 const {LostAlertReview}=await load('features/rescue/components/LostAlertReview.js')
 const {ActiveLostAlertPanel}=await load('features/rescue/components/ActiveLostAlertPanel.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
@@ -122,6 +123,35 @@ test('F13 active alert option 2 retains resolve and exposes existing public pass
   assert.equal(tree.root.findAllByType('button')[1].props.disabled,false)
   assert.ok(tree.root.findAllByType('button').slice(2,5).every(x=>x.props.disabled===true))
   await act(async()=>{tree.unmount()})
+})
+
+test('F13 public QR passport Option 3 displays only fetched rescue data, decorative neighborhood and no invented map/photo uploads', () => {
+  const profile={name:'emilio',species:'gato',breed:'Real breed',photoUrl:'https://test.invalid/real-pet.jpg',bio:'Real bio',
+    isLost:true,lastSeenLocation:'Real last seen zone',alertLastSeenAt:'2026-10-13T08:00:00Z',alertDetails:'Real alert details'}
+  const html=renderToStaticMarkup(React.createElement(RescuePassportHero,{profile}))
+  assert.match(html,/Soy /)
+  for(const value of ['emilio','gato','Real breed','Real bio','Real last seen zone','Real alert details','Mascota reportada como perdida','Última ubicación','Última vez vista']) {
+    assert.ok(html.includes(value),value)
+  }
+  assert.ok(html.includes('viewBox="0 0 400 150"'),'Neighborhood is purely a static drawing')
+  assert.ok(!html.includes('mapboxgl')&&!html.includes('geolocation'))
+  assert.ok(!html.includes('type="file"'))
+  assert.ok(!html.includes('border-'))
+  const noAlert=renderToStaticMarkup(React.createElement(RescuePassportHero,{profile:{...profile,isLost:false}}))
+  assert.ok(noAlert.includes('emilio'))
+  assert.ok(!noAlert.includes('Mascota reportada como perdida'))
+  assert.ok(!noAlert.includes('Real last seen zone'))
+  const fallback=renderToStaticMarkup(React.createElement(RescuePassportHero,{profile:{...profile,isLost:true,photoUrl:null,lastSeenLocation:null,alertLastSeenAt:null,alertDetails:null}}))
+  assert.ok(!fallback.includes('<img'))
+  assert.ok(!fallback.includes('undefined'))
+  const view=fs.readFileSync('src/components/views/PublicRescueView.tsx','utf8')
+  assert.ok(view.includes('<RescuePassportHero profile={profile}/>'))
+  assert.ok(view.includes('await submitPublicSighting('),'Original private sighting RPC still runs')
+  for(const field of ['reporterName','reporterPhone','message','location'])assert.ok(view.includes(field),field)
+  for(const gate of ['isSubmitting || !reporterName.trim() || !reporterPhone.trim() || !message.trim()','setSent(true)','setReporterPhone','setReporterName','setMessage','setLocation','fromPreview && onBack','loadError','isLoading'])assert.ok(view.includes(gate),gate)
+  assert.ok(view.includes('type="tel"'))
+  assert.ok(!view.includes('type="file"'))
+  assert.ok(!view.includes('navigator.geolocation'))
 })
 test('F13 Places Option 3 renders an edge-to-edge map, real carousel, filters and voluntary controls', () => {
   const chosen={
