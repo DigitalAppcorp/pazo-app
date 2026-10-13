@@ -85,6 +85,12 @@ Social/público o membership-scoped según el contrato del módulo.
 **Proveedor**
 Supabase Database/Storage.
 
+**Notificaciones por membresía (F13, nueva función pendiente de activación):**
+- Destinatario: UUID del dueño de comunidad en `notifications.user_id`; `source_id` UUID de comunidad, tipo `community_join`, título y cuerpo limitados que identifican la comunidad, creación/lectura.
+- Señal: inserción confirmada de `community_memberships`, no contenido de conversación; no se persiste identidad de la mascota/unidor en el aviso.
+- Clasificación: social/contextual; acceso solo destinatario por RLS ya existente, sin INSERT del frontend.
+- Proveedor: Supabase Database actual. Sin GPS, email, analítica, proveedor nuevo o push externo. Migración versionada y NO APLICADA a la espera del PO. No se establecen reglas de retención nuevas al margen del ciclo de vida vigente de notifications.
+
 ## 5. Lugares / mapa
 
 **Datos**

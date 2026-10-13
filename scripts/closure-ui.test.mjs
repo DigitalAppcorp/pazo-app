@@ -245,7 +245,7 @@ test('Community join notification: strict source types, modal navigation, recipi
   assert.equal(getNotificationCommunityId({...join,sourceType:'system'}),null)
   assert.equal(getNotificationCommunityId({...join,sourceType:'sighting'}),null)
   assert.equal(getNotificationCommunityId({...join,sourceId:null}),null)
-  const sighting={...join,id:'sighting-id',sourceType:'sighting',sourceId:'sighting-source',category:'comunidad'}
+  const sighting={...join,id:'sighting-id',title:'Sighting detected',sourceType:'sighting',sourceId:'sighting-source',category:'comunidad'}
   assert.equal(getNotificationSightingId(sighting),'sighting-source')
   assert.equal(getNotificationCommunityId(sighting),null)
   let activated=[]
@@ -266,7 +266,7 @@ test('Community join notification: strict source types, modal navigation, recipi
   assert.deepEqual(activated,['notification-real'])
   await act(async()=>button(renderer.root,'Avistamientos').props.onClick())
   assert.equal(button(renderer.root,'Nuevo miembro en tu comunidad'),undefined)
-  assert.ok(button(renderer.root,'Sighting title')===undefined)
+  assert.ok(button(renderer.root,'Sighting detected'))
   await act(async()=>renderer.unmount())
 
   const app=fs.readFileSync('src/App.tsx','utf8')
