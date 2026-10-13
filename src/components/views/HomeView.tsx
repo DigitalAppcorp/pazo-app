@@ -98,6 +98,68 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
   return postDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', options)
 }
 
+/**
+ * PAZO's decorative preview for the unreleased nearby feed.
+ * Buildings, pets and pins are illustrations only; no location or nearby-user data.
+ */
+const NearbyNeighborhoodArtwork = () => (
+  <svg
+    viewBox="0 0 340 178"
+    aria-hidden="true"
+    focusable="false"
+    className="mx-auto block h-auto w-full max-w-[340px]"
+    fill="none"
+  >
+    <path d="M10 147c17-12 50-11 72-5 23-17 60-19 87-8 25-17 63-15 85-1 32-7 56 1 76 16v17H10z" fill="#DDEBD9" />
+    <ellipse cx="171" cy="165" rx="142" ry="8" fill="#B8D6CA" opacity=".45"/>
+    {/* A small neighborhood, not a live location map. */}
+    <rect x="55" y="63" width="68" height="74" rx="6" fill="#FFFCF6"/>
+    <path d="m46 67 42-36 44 36c4 4 1 9-4 9H50c-6 0-8-5-4-9Z" fill="#E7AA88"/>
+    <rect x="78" y="91" width="21" height="46" rx="10.5" fill="#90BCAF"/>
+    <rect x="62" y="85" width="13" height="17" rx="4" fill="#D4EAE4"/>
+    <rect x="101" y="85" width="13" height="17" rx="4" fill="#D4EAE4"/>
+    <rect x="155" y="51" width="78" height="87" rx="7" fill="#F8F1DD"/>
+    <path d="m146 55 47-38 47 38c4 4 2 9-4 9h-86c-6 0-8-5-4-9Z" fill="#204E4A"/>
+    <rect x="188" y="94" width="23" height="44" rx="11" fill="#DCA981"/>
+    <rect x="163" y="79" width="17" height="18" rx="5" fill="#BBDAD0"/>
+    <rect x="213" y="79" width="14" height="18" rx="5" fill="#BBDAD0"/>
+    <path d="M265 120V81" stroke="#6D9E83" strokeWidth="8" strokeLinecap="round"/>
+    <circle cx="253" cy="76" r="22" fill="#B8D4A2"/>
+    <circle cx="274" cy="65" r="23" fill="#C8DFB1"/>
+    <circle cx="289" cy="83" r="18" fill="#ACCCA0"/>
+    <path d="M30 137V106" stroke="#82A487" strokeWidth="6" strokeLinecap="round"/>
+    <circle cx="26" cy="99" r="17" fill="#C5DDAE"/>
+    <circle cx="41" cy="97" r="15" fill="#B0CE9C"/>
+    {/* Dog peeking in front of the house. */}
+    <path d="M102 131c-11-11-22-6-21 7 0 8 7 13 14 10Z" fill="#A56E57"/>
+    <ellipse cx="117" cy="135" rx="29" ry="25" fill="#DFB18B"/>
+    <path d="M98 115c-9-4-17 2-17 14 0 9 6 15 13 12l10-14Z" fill="#9C6853"/>
+    <path d="M134 116c9-4 16 4 16 15 0 9-6 14-13 11l-7-15Z" fill="#A57355"/>
+    <ellipse cx="107" cy="131" rx="3.5" ry="4.3" fill="#204E4A"/>
+    <ellipse cx="128" cy="131" rx="3.5" ry="4.3" fill="#204E4A"/>
+    <ellipse cx="118" cy="144" rx="12" ry="9" fill="#F7DEBF"/>
+    <path d="M114 140c2-3 7-3 9 0 1 2-2 5-5 5s-6-3-4-5Z" fill="#204E4A"/>
+    <path d="M118 145c-2 4-6 4-8 2m8-2c2 4 6 4 8 2" stroke="#204E4A" strokeWidth="1.7" strokeLinecap="round"/>
+    {/* Cat with little paws. */}
+    <path d="m226 132 3-25 17 12 14-1 17-12 3 26Z" fill="#8FB6A6"/>
+    <ellipse cx="253" cy="139" rx="29" ry="25" fill="#A6CDBA"/>
+    <path d="m231 118 3-14 13 13m15 0 13-13 3 14" fill="#8FB6A6"/>
+    <ellipse cx="242" cy="134" rx="3" ry="4" fill="#204E4A"/>
+    <ellipse cx="265" cy="134" rx="3" ry="4" fill="#204E4A"/>
+    <path d="M250 145c2-2 5-2 7 0-1 3-2 4-4 4-2 0-3-1-3-4Z" fill="#EC7357"/>
+    <path d="M253 150c-2 3-5 3-7 2m7-2c2 3 5 3 7 2" stroke="#204E4A" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="m230 145 16 3m-17 4 16-1m35-6-16 3m17 4-16-1" stroke="#204E4A" strokeWidth="1.4" strokeLinecap="round" opacity=".6"/>
+    {/* Future nearby markers: aesthetic, not actual GPS pins. */}
+    <path d="M82 5c-13 0-23 10-23 22 0 17 23 34 23 34s23-17 23-34C105 15 95 5 82 5Z" fill="#204E4A"/>
+    <circle cx="82" cy="27" r="8.5" fill="#E1E53F"/>
+    <path d="M285 12c-12 0-21 9-21 21 0 15 21 30 21 30s21-15 21-30c0-12-9-21-21-21Z" fill="#E1E53F"/>
+    <circle cx="285" cy="33" r="7.5" fill="#204E4A"/>
+    <circle cx="312" cy="111" r="4" fill="#EC7357" opacity=".65"/>
+    <circle cx="28" cy="67" r="4" fill="#E1E53F"/>
+    <path d="M305 128c4-5 7-5 11 0m-6-8c3-3 5-3 7 0" stroke="#204E4A" strokeWidth="2.5" strokeLinecap="round" opacity=".45"/>
+  </svg>
+)
+
 export const HomeView = ({
   posts, canReport, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
@@ -210,27 +272,47 @@ export const HomeView = ({
         </div>
       </div>
       {feedFilter === 'nearby' ? (
-        <div className="pazo-glass-card rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
-          <div className="w-16 h-16 rounded-2xl bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center mx-auto mb-2">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+        <section
+          aria-label={lang === 'es' ? 'Vista previa de comunidad cercana' : 'Nearby community preview'}
+          className="my-5 overflow-hidden rounded-[2.25rem] bg-white/80 px-5 pb-6 pt-4 text-center shadow-[0_8px_30px_rgba(32,78,74,0.06)] backdrop-blur-xl animate-fade-in sm:px-7"
+        >
+          <div className="mx-auto max-w-[340px] rounded-[1.6rem] bg-gradient-to-b from-[#F4F5E9] via-[#F6F7EF] to-[#E8F1E8] px-1 pt-1">
+            <NearbyNeighborhoodArtwork />
           </div>
-          <h3 className="text-lg font-black text-[#204E4A]">{lang === 'es' ? 'Comunidad en tu vecindario' : 'Neighborhood community'}</h3>
-          <p className="text-xs text-[#5C7470] leading-relaxed max-w-[260px] mx-auto font-medium">
-            {lang === 'es' ? 'Estamos trabajando fuertemente para construir el feed basado en geolocalizacion que te conecte al instante con mascotas y duenos cercanos.' : 'We are working on a location-based feed to connect you with nearby pets and their people.'}
+
+          <p className="mt-4 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#628079]">
+            {lang === 'es' ? 'Próximamente en PAZO' : 'Coming soon to PAZO'}
           </p>
-          {hasVotedNearby ? (
-            <div className="bg-[#204E4A] text-[#E1E53F] p-3.5 rounded-2xl text-xs font-bold inline-flex items-center gap-2">
-              <span>&#x2713; {lang === 'es' ? 'Gracias por ayudarnos a priorizar!' : 'Thanks for your support!'}</span>
-            </div>
-          ) : (
-            <button onClick={handleNearbyInterest} disabled={isSubmittingNearby || !canReport} className="bg-[#204E4A] hover:bg-[#183d3a] text-[#E1E53F] font-black px-6 py-3 rounded-full text-xs shadow-md transition-all cursor-pointer active:scale-95">
-              {!canReport ? (lang === 'es' ? 'Inicia sesión para expresar interés' : 'Sign in to express interest') : isSubmittingNearby ? (lang === 'es' ? 'Registrando...' : 'Saving...') : (lang === 'es' ? 'Me interesa esta funcion' : 'I am interested')}
-            </button>
-          )}
-        </div>
+          <h3 className="mx-auto mt-1.5 max-w-[285px] text-[clamp(19px,5.3vw,23px)] font-black leading-tight text-[#204E4A]">
+            {lang === 'es' ? 'Un mundo de mascotas a tu alrededor' : 'A world of pets around you'}
+          </h3>
+          <p className="mx-auto mt-2 max-w-[280px] text-[13px] font-medium leading-relaxed text-[#5C7470]">
+            {lang === 'es'
+              ? 'Imagina descubrir publicaciones de mascotas y personas de tu comunidad cercana.'
+              : 'Imagine discovering posts from pets and people in your nearby community.'}
+          </p>
+          <div className="mt-5">
+            {hasVotedNearby ? (
+              <div role="status" className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#E5EFE6] px-4 py-3 text-[13px] font-extrabold text-[#204E4A]">
+                <span aria-hidden="true">✓</span>
+                <span>{lang === 'es' ? '¡Gracias por ayudarnos a priorizar!' : 'Thanks for helping us prioritize!'}</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleNearbyInterest}
+                disabled={isSubmittingNearby || !canReport}
+                className="inline-flex min-h-[46px] max-w-full items-center justify-center rounded-full bg-[#204E4A] px-5 py-3 text-center text-[13px] font-extrabold leading-snug text-[#E1E53F] shadow-[0_5px_15px_rgba(32,78,74,0.14)] transition-colors hover:bg-[#183d3a] focus-visible:bg-[#346C62] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {!canReport
+                  ? (lang === 'es' ? 'Inicia sesión para expresar interés' : 'Sign in to express interest')
+                  : isSubmittingNearby
+                    ? (lang === 'es' ? 'Registrando...' : 'Saving...')
+                    : (lang === 'es' ? 'Me interesa esta función' : 'I am interested')}
+              </button>
+            )}
+          </div>
+        </section>
       ) : (
         <div className="space-y-4">
           {lastHiddenPostId && (
