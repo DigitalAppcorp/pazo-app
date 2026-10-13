@@ -67,7 +67,8 @@
 ## 1H. Decisión de producto PayPal (PO 2026-10-13)
 
 - El PO eligió y **APROBÓ USD 2.99/mes** como precio mensual de la membresía voluntaria para apoyar PAZO. Reemplaza la propuesta histórica de USD 2/mes; no implica que se permita cobrar por funciones núcleo, ni crea un paywall.
-- `docs/PAZO_SUPPORTER_MEMBERSHIP_DISCOVERY.md`, `docs/PAZO_PRODUCTION_HARDENING_MASTER.md` y roadmap registran la decisión. Pendientes: plan anual sí/no, nombre, beneficios, criterios de elegibilidad, frecuencia/cooldown, cancelación/gracia, ubicación manual del apoyo; además, credenciales seguras y webhooks auténticos Sandbox antes de activar ningún checkout/entitlement.
+- El PO confirmó posteriormente que **por ahora habrá UN ÚNICO PLAN MENSUAL de USD 2.99, sin alternativa anual**. No implementar ni anunciar plan anual; cualquier incorporación futura requiere autorización adicional.
+- `docs/PAZO_SUPPORTER_MEMBERSHIP_DISCOVERY.md`, `docs/PAZO_PRODUCTION_HARDENING_MASTER.md` y roadmap registran ambas decisiones. Pendientes: nombre, beneficios, criterios de elegibilidad, frecuencia/cooldown, cancelación/gracia, ubicación manual del apoyo; además, credenciales seguras y webhooks auténticos Sandbox antes de activar ningún checkout/entitlement.
 - **Alcance de este commit:** solo documentación de una decisión explícita; no se cambian `src/`, `supabase/`, servicios, precios alojados en PayPal, secretos, bases de datos ni despliegues. El pitch sigue OFF. La F13 y su validación visual permanecen abiertas; F16 sigue BACKLOG.
 
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada

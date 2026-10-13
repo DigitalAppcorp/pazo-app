@@ -61,7 +61,7 @@ No usar solo "abrir la app" como prueba suficiente de valor.
 Cooldown recomendado después de "Quizás más tarde":
 - 30 días.
 
-## 5. Precio — mensual aprobado; plan anual pendiente
+## 5. Precio — solo plan mensual aprobado
 
 La versión anterior usaba **USD 2/mes**.
 
@@ -74,7 +74,7 @@ Aproximación antes de impuestos/otros cargos:
 
 **Decisión definitiva del Product Owner (2026-10-13): USD 2.99 al mes** para la membresía voluntaria de apoyo a PAZO. Precio mensual aprobado; no supone autorización para activar cobros, crear planes PayPal, modificar backend, ni fijar otros términos.
 
-**Todavía pendiente:** decidir si existirá una opción anual y, en su caso, su precio. USD 24/año fue únicamente una propuesta, NO aprobada.
+**Decisión adicional del Product Owner (2026-10-13): por ahora SOLO se ofrecerá el plan mensual de USD 2.99.** No crear, mostrar ni configurar una opción anual en el lanzamiento inicial. La eventual incorporación de un plan anual requerirá una decisión explícita posterior del PO; USD 24/año queda como propuesta histórica no aprobada.
 
 Las cifras netas anteriores son estimaciones históricas, no tarifas PayPal verificadas al momento de cobrar; antes de activar pagos, revisar costos y condiciones vigentes.
 
@@ -125,7 +125,7 @@ No almacenar PII de pago en analytics de PAZO.
 
 Product Owner debe cerrar antes de reactivar:
 - precio mensual: **APROBADO USD 2.99/mes (PO 2026-10-13)**;
-- anual sí/no y precio si se aprueba;
+- periodicidad: **APROBADO solo mensual, sin plan anual por ahora (PO 2026-10-13)**;
 - nombre: Supporter / Fundador / Círculo de Fundadores / otro;
 - beneficios incluidos;
 - regla exacta de elegibilidad;
