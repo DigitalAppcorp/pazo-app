@@ -78,7 +78,7 @@ Aproximación antes de impuestos/otros cargos:
 
 Las cifras netas anteriores son estimaciones históricas, no tarifas PayPal verificadas al momento de cobrar; antes de activar pagos, revisar costos y condiciones vigentes.
 
-## 6. Beneficios — primera recompensa aprobada, adicionales pendientes
+## 6. Beneficios — cuatro recompensas aprobadas; pendiente implementación
 
 **Nombre comercial APROBADO por Product Owner (2026-10-13): Amigo de PAZO.** Se usará para identificar la membresía de apoyo voluntario de USD 2.99/mes (sin opción anual por ahora). El nombre no aprueba automáticamente ninguna insignia, categoría de fundador, ventaja premium o cambio de `profiles.is_founder`; la implementación visual/entitlement se definirá y validará separadamente.
 
@@ -90,14 +90,18 @@ Las cifras netas anteriores son estimaciones históricas, no tarifas PayPal veri
 - **Dependencia técnica real:** `PublicProfileView.tsx` ya tiene indicador legado `Fundador` basado en `get_pet_founder_status`; la experiencia de pago se llamará «Amigo de PAZO». `HomeView.tsx` usa `PostCard` con `post.petAvatar` y actualmente `Post` no incluye entitlement del autor: hará falta lectura/autorización backend segura y contrato de datos apropiado, no una señal inventada en el frontend. Separar semántica comercial de `profiles.is_founder` hasta decidir una transición segura.
 - **Estado:** requisito de producto autorizado y documentado, **todavía NO implementado** ni conectado a pagos. No activar PayPal ni modificar esquema/servicio sin su gate de seguridad y autorización técnica. El aspecto definitivo de ambas insignias requiere revisión visual del PO.
 
+**Paquete inicial de CUATRO recompensas APROBADO por el Product Owner (2026-10-13)**. Su intención es agradecer a quienes sostienen PAZO sin crear rangos de superioridad, privilegios funcionales ni paywall.
+
+1. **Insignia «Amigo de PAZO»:** visible en el perfil social de la mascota y, en versión pequeña, superpuesta al avatar/foto del autor de publicaciones. Solo si existe entitlement activo y verificado por backend; ver detalles anteriores.
+2. **Personalización especial del perfil:** un conjunto pequeño de estilos puramente cosméticos (fondos suaves, huellas o acentos de color); sin alteración del Feed, alcance, seguridad ni funcionalidades gratuitas. Las variantes específicas se someterán a aprobación visual.
+3. **Muro «Gracias, Amigos de PAZO»:** reconocimiento de mascotas de quienes apoyan, exclusivamente con consentimiento explícito de inclusión (opt-in), retiro voluntario y sin publicar la condición de pagador por defecto. Pendiente definir ubicación y UX de consentimiento, así como su política de visibilidad al finalizar suscripción.
+4. **Insignia que evoluciona con la constancia:** adornos conmemorativos al alcanzar **3, 6 y 12 meses de apoyo acumulado**; su objetivo es expresar agradecimiento, no jerarquía. Los meses deberán derivarse de historial verificado server-side, no de antigüedad de cuenta, un checkout ni una fecha inferida. Antes de implementarlo quedan pendientes reglas para pagos parciales, reembolsos, pausas, restauración y conservación de hitos tras baja.
+
+**Estado:** estas cuatro recompensas están aprobadas como requisitos de producto, pero no implementadas aún. Su diseño, privacidad, esquema y lectura segura de entitlement necesitan gate técnico/visual independiente y autorización antes de modificar Supabase. No activar cobros. Las ideas de votaciones y acceso anticipado quedan fuera del paquete inicial.
+
 La propuesta debe recompensar apoyo sin romper el producto gratuito.
 
-Candidatos de bajo riesgo:
-- **insignia «Amigo de PAZO» en perfil social + miniinsignia sobre avatar de autor en publicaciones: APROBADA**;
-- reconocimiento de miembro temprano adicional (no aprobado);
-- acceso anticipado a experimentos opcionales;
-- capacidad de votar/priorizar ideas;
-- cosméticos de perfil no funcionales.
+Otras ideas consideradas para el futuro (NO aprobadas para el paquete inicial): votaciones sobre funciones y acceso anticipado a experimentos.
 
 Evitar por ahora:
 - esconder funciones núcleo detrás de pago;
@@ -137,7 +141,7 @@ Product Owner debe cerrar antes de reactivar:
 - precio mensual: **APROBADO USD 2.99/mes (PO 2026-10-13)**;
 - periodicidad: **APROBADO solo mensual, sin plan anual por ahora (PO 2026-10-13)**;
 - nombre comercial: **APROBADO — Amigo de PAZO (PO 2026-10-13)**;
-- primera recompensa visual: **APROBADA (perfil social + avatar en publicaciones)**; beneficios adicionales (si los hay), pendientes;
+- beneficios: **CUATRO APROBADOS** (doble insignia, personalización cosmética, muro opt-in e insignia conmemorativa a 3/6/12 meses acumulados); detalles de diseño, historial verificable y consentimiento pendientes;
 - regla exacta de elegibilidad;
 - cooldown del pitch;
 - dónde puede abrirse manualmente la opción de apoyar.
