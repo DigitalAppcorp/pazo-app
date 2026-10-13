@@ -174,7 +174,7 @@ export const NotificationsModal = ({
                     className={
                       'flex w-full min-w-0 items-start gap-3 rounded-[23px] px-3.5 py-3.5 text-left transition-colors ' +
                       (item.read
-                        ? 'bg-white/70'
+                        ? 'bg-white/70 '
                         : 'bg-[#E7F0DA]/90 shadow-[0_5px_16px_rgba(32,78,74,0.06)] ') +
                       (canOpen ? 'cursor-pointer hover:bg-[#E1E53F]/20 focus-visible:bg-[#E1E53F]/25' : 'cursor-default')
                     }

@@ -135,6 +135,67 @@ test('T15 demo Create traversal requests login and never dispatches a real actio
   assert.match(JSON.stringify(renderer.toJSON()),/Demo: sign in/)
   await act(async()=>renderer.unmount())
 })
+test('F13 Community Cares empty-state is branded, filtered, bilingual and closes without fake alerts', async () => {
+  for(const [lang,heading,empty,closeLabel] of [
+    ['es','Siempre cerca de tu comunidad.','¡Todo en calma!','Cerrar avisos'],
+    ['en','Always close to your community.','All is calm!','Close notifications'],
+  ]) {
+    let closed=0
+    const props={
+      isOpen:true,lang,notifications:[],onClose(){closed++},
+      onOpenNotification(){throw Error('No synthetic notifications are openable')},
+      onLoadMore(){throw Error('No pagination expected')},hasMore:false,isLoadingMore:false,
+    }
+    const html=renderToStaticMarkup(React.createElement(NotificationsModal,props))
+    assert.ok(html.includes('role="dialog"'))
+    assert.ok(html.includes('aria-modal="true"'))
+    assert.ok(html.includes('pazo-notifications-description'))
+    assert.ok(html.includes('viewBox="0 0 340 188"'))
+    assert.ok(html.includes(heading))
+    assert.ok(html.includes(empty))
+    assert.ok(!html.includes('Synthetic notification'))
+    let renderer
+    await act(async()=>{renderer=create(React.createElement(NotificationsModal,props))})
+    assert.ok(button(renderer.root,lang==='es'?'Todas':'All'))
+    await act(async()=>button(renderer.root,lang==='es'?'Avistamientos':'Sightings').props.onClick())
+    assert.ok(JSON.stringify(renderer.toJSON()).includes(lang==='es'?'Sin avistamientos por ahora':'No sightings for now'))
+    const dismiss=renderer.root.findAllByType('button').find(el=>el.props['aria-label']===closeLabel)
+    assert.ok(dismiss)
+    await act(async()=>dismiss.props.onClick())
+    assert.equal(closed,1)
+    await act(async()=>renderer.unmount())
+    assert.equal(renderToStaticMarkup(React.createElement(NotificationsModal,{...props,isOpen:false})),'')
+  }
+})
+
+test('F13 Community Cares preserves real notification interaction, filter and existing pagination', async () => {
+  const activated=[],paging=[]
+  const sighting={id:'s1',title:'Valid sighting',subtitle:'Description',category:'comunidad',sourceType:'sighting',sourceId:'real-sighting-1',read:false,timeAgo:'2 h'}
+  const system={id:'sys',title:'Informational alert',subtitle:'No destination',category:'todas',sourceType:'system',sourceId:'unused',read:true,timeAgo:'3 h'}
+  const props={
+    isOpen:true,lang:'en',notifications:[sighting,system],onClose(){},
+    onOpenNotification:n=>activated.push(n.id),onLoadMore:()=>paging.push('load'),
+    hasMore:true,isLoadingMore:false
+  }
+  let renderer
+  await act(async()=>{renderer=create(React.createElement(NotificationsModal,props))})
+  assert.ok(button(renderer.root,'Valid sighting'))
+  assert.ok(button(renderer.root,'Informational alert'))
+  assert.equal(button(renderer.root,'Informational alert').props.disabled,true)
+  const scrollable=renderer.root.findAllByType('section').find(n=>n.props['aria-modal']==='true')
+  await act(async()=>scrollable.props.onScroll({currentTarget:{scrollHeight:700,scrollTop:570,clientHeight:100}}))
+  assert.deepEqual(paging,['load'])
+  await act(async()=>button(renderer.root,'Valid sighting').props.onClick())
+  assert.deepEqual(activated,['s1'])
+  await act(async()=>button(renderer.root,'Sightings').props.onClick())
+  assert.equal(button(renderer.root,'Informational alert'),undefined)
+  await act(async()=>renderer.update(React.createElement(NotificationsModal,{...props,notifications:[]})))
+  assert.ok(button(renderer.root,'View earlier notifications'))
+  await act(async()=>button(renderer.root,'View earlier notifications').props.onClick())
+  assert.deepEqual(paging,['load','load'])
+  await act(async()=>renderer.unmount())
+})
+
 test('T03 only sighting opens its destination; unsupported Care filter is absent', async () => {
   const opened=[];let renderer
   const base={id:'n1',title:'Sighting title',subtitle:'Synthetic',category:'comunidad',sourceType:'sighting',sourceId:'s1',read:false,timeAgo:'Reciente'}
