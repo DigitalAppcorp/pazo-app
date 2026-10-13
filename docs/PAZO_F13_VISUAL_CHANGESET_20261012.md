@@ -40,6 +40,16 @@
 - PO screenshot of `Especie` selector rejected old four buttons as disproportionate. Commit `a1e3ad47` updates **only the selector in `src/components/views/OnboardingView.tsx`**: four equal-width 74px-high mini-cards, responsive grid, centered 23px PAZO animal glyphs, 12px labels, 18px corner radius, translucent idle surface, dark green/lime selected state, soft shadow and `aria-pressed` selection. Preserve `setPetSpecies` behavior and existing species IDs; no backend/data changes.
 - Validation: CI pending or verified separately; actual PO visual acceptance pending. **Map remains frozen.**
 
+## F13 — Consolidación del registro y aviso de privacidad (PO aprobado, 2026-10-12)
+
+- **Decisión PO:** eliminar la pantalla A04 «Tú decides» como paso independiente: era meramente informativa y el botón «Guardar y continuar» no guardaba ajustes.
+- **Implementado:** A02 registro cuenta (paso 1/3) → A03 agregar mascota (paso 2/3, con resumen bilingüe de privacidad y acción real `Consultar privacidad` que abre la política existente) → A04 zona/intereses (paso 3/3, antes A05). Back: A04 → A03. Bienvenida A01 sin numerar; al iniciar sesión una cuenta sin mascota entra en A03 como antes.
+- El nuevo resumen advierte que nombre/especie/foto de mascota pueden ser visibles y que no se incluyan datos privados. Wording conservador según `PublicProfileView`, `petService` y `legalCopy`; sin prometer privacidad configurable que no existe.
+- Se conserva la persistencia real **solo al pulsar el botón final** `Crear perfil y entrar`: llama al `handleFinishOnboarding`/RPC existente, con datos previos de mascota/zona/intereses intactos; ningún contrato de DB/Storage cambia.
+- El formulario A03 admite scroll vertical y el resumen puede abrir el modal de privacidad preexistente; verificar teclado/móvil/ES+EN y validación visual PO.
+- **Impacto de datos:** ninguna nueva captura, colección, evento, tabla o política; `docs/PAZO_DATA_INVENTORY.md` sin cambio de categorías.
+- **Map/Lugares congelado**; no modificar `MapView`/Mapbox. CI de código y aceptación visual constituyen gates independientes.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
