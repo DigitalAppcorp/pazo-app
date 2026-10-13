@@ -14,7 +14,7 @@
 
 El PO inspeccionó el preview local de consentimiento individual por mascota en PAZO y respondió «Sí, está excelente». Se registra aceptación visual de ese flujo únicamente. El copy ES/EN ya estaba aprobado y **no se pide otra aprobación**. La validación no equivale a prueba legal, consentimiento persistido, entitlement ni autorización de pagos. La UI permanece simulada y sin guardar, PR #44 DRAFT, sin merge. La revisión técnica CI del HEAD anterior f5bf5a661fc50fa68b4a2723f7b1ddeac88dd79f fue SUCCESS (run 38478119445); cualquier commit documental posterior requiere CI propia.
 
-**Siguiente gate F16:** documentar/definir el acceso de lectura al muro para usuarios autenticados sin invadir Explorar ni rediseñar A01; después atender retención/legal y procesador con autorización específica. No implementar pagos, API pública, activación de wall consent, ni SQL sin gate separado. La aceptación visual actual no amplía esos permisos.
+**Siguiente gate F16:** revisar la integración PayPal inicial como contrato técnico sin cobros activos, junto con retención/legal y controles de seguridad. El acceso público A01 y consentimiento visual ya están aprobados; no reabrirlos. No implementar pagos, API pública, activación de wall consent, ni SQL sin gate separado. La aceptación visual actual no amplía esos permisos.
 
 ## 2. Gate histórico ya cerrado: aceptación visual del consentimiento por mascota
 
@@ -27,6 +27,8 @@ El PO inspeccionó el preview local de consentimiento individual por mascota en 
 - **Gate cerrado**: PO confirmó «Sí, está excelente» tras probar el preview local. No reabrir este gate ni habilitar backend a partir de esa aprobación.
 
 ## 3. Decisiones F16 ya cerradas (NO reinterpretar)
+
+- **Procesador elegido por PO (2026-10-13): PayPal para los cobros iniciales.** La limitación para usar Stripe es operativa del PO. Cuando se cumplan sus requisitos, integrar **Stripe como opción de pago adicional** junto a PayPal, no migrar/reemplazar automáticamente. Arquitectura preparada para múltiples proveedores; ninguna integración de cobro está autorizada aún.
 
 - **Membresía voluntaria** llamada «Amigo de PAZO», **USD 2.99 mensuales**, NO anual por ahora. El núcleo de seguridad, rescate y social de PAZO sigue gratuito; pitch y checkout aún OFF.
 - Cuatro beneficios aprobados: (1) insignia Amigo de PAZO en perfil y miniinsignia en posts, únicamente con entitlement real; (2) cinco estilos cosméticos de perfil (**Clásico PAZO, Naturaleza, Corazones, Cielo estrellado, Aventura**), con preview funcional, adornos suaves y contraste revisado, PO dijo que le encantan; (3) muro público «Gracias, Amigos de PAZO», opt-in por mascota revocable; (4) insignias conmemorativas de **3, 6, 12 meses pagados acumulados** sin jerarquía.
@@ -41,7 +43,7 @@ El PO inspeccionó el preview local de consentimiento individual por mascota en 
 - No existe lista pública de mascotas pagadoras; no se aprobó plan/checkout, webhook de PayPal, ledger real, ni badges reales. Jamás usar `profiles.paypal_subscription_id`, `is_founder` o callback navegador para acreditar pago. Solo cobros verificados server-side y permisos por mascota podrán dar elegibilidad, después de **autorización técnica nueva**. Riesgo conocido de lectura pública de algunos campos legacy de perfiles: revisar antes de cualquier API público.
 - Migración comunidades **YA APLICADA**: `20261013025451_community_join_owner_notifications.sql`; no repetir. Notifica al propietario por una nueva adhesión real, excluyendo autoalta del dueño; validación transaccional/RLS pasada; QA visual de segundo actor pendiente cuando corresponda.
 - F14 moderación/borrado de cuentas mantiene SOP supervisado y gates separados. No ejecutar pruebas destructivas con cuentas existentes ni marcar baja completada sin operador y verificación.
-- Texto de consentimiento ES/EN aprobado **para producto/preview**, todavía faltan revisión legal de términos, **retención de datos**, arquitectura server-side y selección del procesador. PayPal es solo **candidato**; API de suscripciones y eventos verificados no equivalen a cobro confirmado. Comparar tarifas reales para USD 2.99 antes de alta de plan; no crear recursos pagados. Ver `docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md` y `docs/PAZO_DATA_INVENTORY.md`.
+- Texto de consentimiento ES/EN aprobado **para producto/preview**, todavía faltan revisión legal de términos, **retención de datos**, arquitectura server-side y selección del procesador. **PayPal fue elegido por el Product Owner como procesador inicial**, debido a limitaciones actuales para cobrar con Stripe. Stripe es **integración adicional futura**, no reemplazo obligatorio, cuando cumpla los requisitos necesarios. La elección de PayPal NO autoriza crear planes ni activar cobros; verificar tarifas reales para USD 2.99 y requisitos de cuenta antes de implementar. Ver `docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md` y `docs/PAZO_DATA_INVENTORY.md`.
 
 ## 5. Otros gates F13 abiertos, sin interferir con F16
 
@@ -56,4 +58,4 @@ El Product Owner dirige UX/negocio, autoriza gates; ChatGPT audita, programa, ve
 
 ## Activación exacta para el próximo chat
 
-«Activa Project Brain OS v1.4.1 desde `DigitalAppcorp/project-brain-os`. Soy Product Owner de PAZO. Abre el repo `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, PR #44 DRAFT. Lee `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, roadmap, consentimiento F16 y documentación visual. Audita **HEAD remoto, CI y Supabase en solo lectura**. Continúa **desde el gate visual pendiente del consentimiento individual ES/EN de Amigo de PAZO** en Vite; no repitas lo ya aprobado, no actives cobros ni apliques nuevas migraciones ni toques el rediseño diferido de Bienvenida A01. Implementa tú los ajustes autorizados y mantiene el handoff verificable».
+«Activa Project Brain OS v1.4.1 desde `DigitalAppcorp/project-brain-os`. Soy Product Owner de PAZO. Abre el repo `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, PR #44 DRAFT. Lee `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, roadmap, consentimiento F16 y documentación visual. Audita **HEAD remoto, CI y Supabase en solo lectura**. Continúa **desde el cierre técnico/legal y arquitectura PayPal inicial de F16**, con gate visual de consentimiento ES/EN ya aprobado; no repitas lo ya aprobado, no actives cobros ni apliques nuevas migraciones ni toques el rediseño diferido de Bienvenida A01. Implementa tú los ajustes autorizados y mantiene el handoff verificable».
