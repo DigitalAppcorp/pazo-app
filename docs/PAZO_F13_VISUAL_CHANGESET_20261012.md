@@ -92,6 +92,15 @@
 - Bio editable del propio perfil ya implementada/persistida en `PetView` con `updatePetProfile`; la captura del PO mostró que `bretman` no tiene bio visible, por lo que no se inventó texto.
 - **Restricción inamovible:** mapa/Lugares congelado, Supabase sin escrituras/migraciones, no main ni Vercel para QA.
 
+## F13 — Tercera implementación: reconstrucción completa según mockup 4 (PO 2026-10-13)
+
+- **Instrucción correctiva inequívoca:** «No quiero que adaptes la pantalla a la que ya tenía. Quiero que la rediseñes, deja la página tal cual la opción 4, con datos reales y sin portada». Los dos enfoques anteriores `2fb0f0d6` / `78a339a6` fueron rechazados visualmente. No deben tratarse como versiones aprobadas.
+- **Cambio estructural real** `ef90d7f5`: se eliminó TODO el render anterior de `PublicProfileView.tsx` y se reconstruyó el cuerpo visual. No queda la tarjeta contenedora única que agrupaba avatar+nombre+follow+estadísticas. El layout usa lienzo crema continuo, cabecera de tres puntos, detalles decorativos puntuales cálidos (sin portada ni fotos falsas), avatar circular 148–168px sobre el lienzo, nombre grande debajo, especie, bio real opcional, CTA perfil Seguir verde con persona+, estadísticas COMO CÁPSULA INDEPENDIENTE, tabs segmentadas, publicaciones sociales en cards independientes de radio amplio y menú real de denunciar; pestaña Información con dos bloques suaves. Se mantiene fetch original, ReportDialog, permiso de reporte, post-data, follow y badges existentes.
+- Se retiró el fallback visual de foto de perro de Unsplash en ausencia de `photo_url`: el componente representa un icono PAZO en su lugar, sin inventar datos/fotografías. `bio` continúa apareciendo solo con valor; el campo de edición real ya usa RPC existente.
+- **No portada, por elección PO 1C**: el mockup referencia tiene una fotografía decorativa grande de perro pero la decisión posterior de PO es no incluir portada. Esta es la única diferencia estructural de contenido respecto al mockup.
+- Código y test sujeto a CI / visual PO separados. QA requerido: 320/375/430 px, avatar con/sin fotografía, fundador / perdido / bio vacío, active Follow, 3 dot menu, report correcto, propias/no propias y tabs reales.
+- `MapView` y Lugares congelados; no Supabase ni main ni Vercel visual.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
