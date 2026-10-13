@@ -1,13 +1,13 @@
 # PAZO F16 — Consentimiento ES/EN y contrato de verificación de membresía
 
-**Estado:** PROPUESTA PARA REVISIÓN PO, NO IMPLEMENTADA. 13 de octubre de 2026.  
+**Estado:** COPY DE CONSENTIMIENTO ES/EN APROBADO por Product Owner (2026-10-13). Solo está integrado en preview UI sin persistencia; pendientes términos legales definitivos, retención y autorización de pagos.  
 **Ámbito:** `Amigo de PAZO` voluntario, USD 2.99/mes (sin plan anual); muro «Gracias, Amigos de PAZO».  
 **Precondición verificada:** la base privada `supporter_private.wall_consents` está instalada en Supabase bajo migración `20261013215221`, con RLS forzada, sin registros y con `wall_has_verified_entitlement() = false`.  
 **Fuera de alcance:** pago real, PayPal/Stripe configurado, prueba con personas existentes, aplicación de SQL, UI persistente, publicación en el muro, insignias activas, rediseño de bienvenida A01, merge, Vercel.
 
 ## A. Texto propuesto para permiso individual por mascota
 
-Los textos aún **no están aprobados para uso público ni representan términos legales finales**. La versión `wall_consent_v1` del esquema NO equivale a que el texto aquí propuesto esté aprobado/servido al usuario; el backend seguirá bloqueando autorización positiva hasta cerrar ambas piezas.
+Los textos fueron **aprobados por el Product Owner como copy de producto**. Su uso como aviso legal final y en consentimientos persistidos **todavía requiere revisión de privacidad/retención y autorización separada**. La versión `wall_consent_v1` del esquema NO equivale a que el texto aquí propuesto esté aprobado/servido al usuario; el backend seguirá bloqueando autorización positiva hasta cerrar ambas piezas.
 
 ### Español — pantalla «Participar en el muro»
 
@@ -101,4 +101,4 @@ Los textos aún **no están aprobados para uso público ni representan términos
 - **G4 Implementación:** autorización separada antes de crear plan/producto en PayPal, claves, Edge Functions/webhooks, SQL de entitlements o activar cobros.
 - **G5 Navegación:** fijar acceso público al muro para usuarios que ya iniciaron sesión sin reintroducir el enlace intrusivo en Explorar ni alterar la bienvenida aprobada.
 
-**Estado final de este documento:** solo propuesta de copy y arquitectura. PR #44 DRAFT; F16 no publicada.
+**Estado final de este documento:** copy bilingüe aprobado e integrado en vista previa no persistente, commit `32551f5e`, CI `38476612061` SUCCESS. El PO todavía no validó visualmente la nueva interacción en Vite y no autorizó pagos ni consentimiento real. Contrato de billing permanece propuesta. PR #44 DRAFT; F16 no publicada.

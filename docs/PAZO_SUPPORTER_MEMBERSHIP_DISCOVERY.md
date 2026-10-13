@@ -163,6 +163,10 @@ El PO autorizó primero preparar SQL y pruebas, y después autorizó avanzar con
 
 Documento [`docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md`](PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md) creado por continuación del PO. **PROPUESTA, NO APROBACIÓN FINAL DE COPY NI PAGOS.** Resuelve redacción por mascota, lectura pública sin cuenta, ausencia de datos humanos, retirada, errores, reautorización tras expiración y estados bilingües. Contrato de billing propuesto: webhook auténtico, cobro completo verificado, ledger `paid_through`, refund/reversal, idempotencia y exclusión pública si no está cubierto. PayPal es candidato a evaluar con condiciones comerciales vigentes y la tarifa fija es sustancial con USD 2.99. No crear plan/checkout, no cambiar Supabase, no modificar UI aprobada ni sustituir stub false. Esperar gate específico PO.
 
+### Copy de consentimiento ES/EN APROBADO e implementado visualmente (2026-10-13)
+
+El PO respondió **«aprobado»** al texto propuesto de permiso individual. `GratitudeParticipationPreview.tsx` muestra antes de simular la autorización el aviso completo con nombre real de cada mascota, público incluso sin sesión, sin datos humanos ni de pago, límites de copias externas y revocación. Los botones de confirmación/retirada llevan «Simulación / Preview» y no cambian base de datos ni entitlement. Se conservaron A01, Explorar y módulos de mascotas; CI `38476612061` SUCCESS. **Pendiente:** aprobación visual del nuevo flujo en Vite, retención/Privacy/Terms, elección del proveedor de pagos y habilitación independiente del backend.
+
 ## 7. Entitlement
 
 Fuente de verdad:
