@@ -136,8 +136,8 @@
 }
 
 
-/* F13: calibrated curved cutout. The mask exposes the navigation's beige
-   background between the cream surface and the translucent glass indicator. */
+/* F13: compact cream navigation with a small moving top recess.
+   One mask cuts the curve; nothing is drawn on top of the bar to fake the gap. */
 @property --pazo-liquid-center {
   syntax: '<percentage>';
   inherits: false;
@@ -146,53 +146,33 @@
 
 .pazo-liquid-surface {
   position: absolute;
-  top: 12px;
+  top: 15px;
   right: 0;
   bottom: calc(-1 * max(0.5rem, env(safe-area-inset-bottom)));
   left: 0;
-  border-radius: 18px 18px 24px 24px;
-  background: #F7F2E8;
-  /* Orb center = -5px + 23px = 18px from the track top.
-     Recess center = 12px + 6px = 18px. A 31px cut around a 23px
-     orb leaves an 8px gap, instead of the old oversized 14px gap. */
-  -webkit-mask-image: radial-gradient(circle 31px at var(--pazo-liquid-center) 6px,
-    transparent 0 30px, #000 31px);
-  mask-image: radial-gradient(circle 31px at var(--pazo-liquid-center) 6px,
-    transparent 0 30px, #000 31px);
+  border-radius: 12px 12px 14px 14px;
+  background: #FFF8EB;
+  box-shadow: 0 4px 16px rgba(32, 78, 74, 0.06);
+  /* The solid green orb has radius 23px, while this 30px cut leaves 7px
+     of exposed beige around it; center aligns at track y=12px. */
+  -webkit-mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -3px,
+    transparent 0 29px, #000 30px);
+  mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -3px,
+    transparent 0 29px, #000 30px);
   transition: --pazo-liquid-center 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
-  will-change: -webkit-mask-image, mask-image;
 }
 
 .pazo-liquid-indicator {
   position: absolute;
-  top: -5px;
+  top: -11px;
   z-index: 1;
   width: 46px;
   height: 46px;
   transform: translateX(-50%);
   border-radius: 50%;
-  /* Frosted green glass: underlying cream/beige remains perceptible. */
-  background: rgba(40, 124, 99, 0.30);
-  -webkit-backdrop-filter: blur(16px) saturate(1.08);
-  backdrop-filter: blur(16px) saturate(1.08);
-  box-shadow: 0 12px 22px -10px rgba(26, 71, 60, 0.37),
-    0 5px 10px -7px rgba(26, 71, 60, 0.22);
+  background: #55A58B;
+  box-shadow: 0 8px 17px rgba(32, 78, 74, 0.20);
   transition: left 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
-  will-change: left;
-}
-
-/* A blurred glint, not a plastic shell, edge ring, or spherical gradient. */
-.pazo-liquid-indicator::before {
-  content: '';
-  position: absolute;
-  top: 5px;
-  left: 8px;
-  width: 24px;
-  height: 9px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  filter: blur(5px);
-  pointer-events: none;
 }
 
 .pazo-liquid-icon {
@@ -211,17 +191,8 @@
   100% { transform: translateY(-15px) scale(1); }
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .pazo-liquid-indicator {
-    background: #9FCDBC;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  .pazo-liquid-indicator::before { display: none; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .pazo-liquid-surface, .pazo-liquid-indicator { transition: none; will-change: auto; }
+  .pazo-liquid-surface, .pazo-liquid-indicator { transition: none; }
   .pazo-liquid-icon--active { animation: none; transform: translateY(-15px); }
 }
 

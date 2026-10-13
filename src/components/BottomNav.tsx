@@ -67,10 +67,10 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
   return (
     <nav
       aria-label="Navegación de PAZO"
-      className="relative z-30 shrink-0 bg-[#EFECE4] pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      className="relative z-30 shrink-0 bg-[#EFECE4] px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
     >
-      <div className="relative grid h-[70px] grid-cols-5 items-center">
-        {/* The cream bar itself is masked to carve a moving, transparent concavity. */}
+      <div className="relative grid h-[64px] grid-cols-5 items-center">
+        {/* Compact cream bar with one small, moving top recess; Create remains separate. */}
         <div
           aria-hidden="true"
           className="pazo-liquid-surface pointer-events-none"
