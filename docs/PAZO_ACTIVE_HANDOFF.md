@@ -13,9 +13,9 @@
 
 ## 1A. Nuevo feedback de UI de Mi mascota — configuración legal (PO 2026-10-13)
 
-- PO pidió sacar los dos botones **Privacidad** y **Reglas de uso** del bloque inferior y colocarlos en un menú de **engranaje junto a Cerrar sesión**. Se mantiene **Cuenta y datos** con solicitud de eliminación de cuenta y correo de privacidad en su posición original; ninguna mutación legal, datos, RPC, backend o permisos.
-- `src/components/views/PetView.tsx`: botón de configuración accesible ES/EN, dos accesos a los `LegalPreviewDialog` existentes, cerrar con Escape/tap fuera, foco perceptible sin contornos, targets táctiles adecuados y animación respetando reduced-motion. Se elimina la tarjeta de acceso legal duplicada del cuerpo del perfil; los documentos legales mismos NO cambian.
-- `scripts/closure-ui.test.mjs`: prueba aislada de menú y cierre, textos ES/EN, logout cercano y eliminación de cuenta conservada. **Nuevo gate:** CI del commit y revisión visual en Vite local por PO. No declarar aprobación visual ni cerrar F13.
+- **Corrección posterior del PO, 2026-10-13:** el engranaje junto a Cerrar sesión también debe contener **Cuenta y datos** (texto informativo, acción «Solicitar eliminación de cuenta», correo real de Soporte y privacidad). Las **dos tarjetas** inferiores «Privacidad y reglas» y «Cuenta y datos» desaparecen del cuerpo del perfil. La interpretación anterior que dejaba Cuenta y datos debajo fue rechazada por omisión.
+- `src/components/views/PetView.tsx`: menú de configuración ES/EN incluye Privacidad, Reglas de uso y Cuenta y datos; conserva `LegalPreviewDialog`, `DeletionRequestDialog`, `requestEnabled`, `canManagePet/onRequireAccount` y el enlace `PAZO_PRIVACY_SUPPORT_MAILTO` sin activar eliminaciones ni alterar reglas de backend. Menú con scroll en móvil, teclado/Escape/click fuera, cero contornos y animación respetando movimiento reducido.
+- `scripts/closure-ui.test.mjs`: prueba enfocada comprueba que sección y CTA solo aparecen dentro del engranaje, que permanece la restricción de eliminación y que soporte sigue accesible; adapta test de edición demo al menú nuevo. **Nuevo gate:** CI del HEAD más reciente, seguida de revisión visual en Vite local del PO. Sin autorizar merge, Supabase ni Vercel.
 
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 

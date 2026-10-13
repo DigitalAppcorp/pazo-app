@@ -498,7 +498,7 @@ test('T14 English onboarding submits the unchanged Spanish species/interest iden
   await act(async()=>renderer.unmount())
 })
 
-test('F13 settings gear by logout contains both legal links and leaves account deletion in place', async () => {
+test('F13 profile settings groups privacy, terms, deletion and support by logout', async () => {
   const pet={id:'synthetic-pet',name:'Synthetic Cat',species:'gato',photoUrl:'',age:'1'}
   const makeProps=lang=>({currentPet:pet,canManagePet:false,onRequireAccount(){},
     canModerate:false,availablePets:[pet],onSelectPet(){},onPetUpdated(){},onAddPet(){},
@@ -515,16 +515,21 @@ test('F13 settings gear by logout contains both legal links and leaves account d
     assert.equal(gearButton().props['aria-expanded'],false)
     assert.equal(ui.root.findAllByProps({id:'pazo-profile-settings'}).length,0)
     assert.equal(button(ui.root,terms),undefined,'Legal options must not remain in main body')
+    assert.ok(!JSON.stringify(ui.toJSON()).includes(section),'Account section must not remain in main body')
     await act(async()=>{gearButton().props.onClick()})
     assert.equal(gearButton().props['aria-expanded'],true)
     const menu=ui.root.findByProps({id:'pazo-profile-settings'})
     const menuButtons=menu.findAllByType('button')
-    assert.equal(menuButtons.length,2)
-    assert.deepEqual(menuButtons.map(buttonText),[privacy,terms])
+    assert.equal(menuButtons.length,3)
+    assert.deepEqual(menuButtons.map(buttonText),[privacy,terms,lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'])
+    assert.ok(JSON.stringify(menu.toJSON()).includes(section),'Account section must live inside settings')
+    assert.equal(menuButtons[2].props.disabled,true,'Existing production request gate must remain disabled')
+    assert.ok(menu.findAllByType('a').some(a=>a.props.href==='mailto:appdigital.corp@gmail.com'),'Support mailto must live inside settings')
     assert.ok(ui.root.findAllByType('button').some(b=>b.props.title===(lang==='es'?'Cerrar sesión':'Log out')))
-    assert.ok(JSON.stringify(ui.toJSON()).includes(section),'Deletion/request contact section remains visible')
+    assert.ok(JSON.stringify(ui.toJSON()).includes(section),'Deletion section visible only while settings is expanded')
     await act(async()=>{gearButton().props.onClick()})
     assert.equal(gearButton().props['aria-expanded'],false)
+    assert.ok(!JSON.stringify(ui.toJSON()).includes(section),'Account section must disappear when settings closes')
     await act(async()=>{ui.unmount()})
   }
   const source=fs.readFileSync('src/components/views/PetView.tsx','utf8')
@@ -538,11 +543,14 @@ test('T15 demo profile Edit requests a real account without exposing an upload f
   let renderer;let requests=0;petInputs.length=0
   const pet={id:'synthetic-pet',name:'Synthetic Cat',species:'gato',photoUrl:'',age:'1'}
   await act(async()=>{renderer=create(React.createElement(PetView,{currentPet:pet,canManagePet:false,onRequireAccount:()=>requests++,canModerate:false,availablePets:[pet],onSelectPet(){},onPetUpdated(){},onAddPet(){},careItems:[],onCompleteCare(){},onOpenQRPassport(){},onOpenCareAgenda(){},documentCount:0,onOpenDocuments(){},onOpenLostAlert(){},lang:'en'}))})
+  const gear=renderer.root.findAllByType('button').find(b=>b.props['aria-label']==='Settings')
+  await act(async()=>gear.props.onClick())
+  assert.ok(renderer.root.findAllByType('a').some(a=>a.props.href==='mailto:appdigital.corp@gmail.com'))
   await act(async()=>button(renderer.root,'Edit').props.onClick())
   assert.equal(requests,1)
   assert.equal(renderer.root.findAllByType('input').filter(i=>i.props.type==='file').length,0)
   assert.deepEqual(petInputs,[])
-  assert.ok(renderer.root.findAllByType('a').some(a=>a.props.href==='mailto:appdigital.corp@gmail.com'))
+  assert.ok(renderer.root.findAllByProps({id:'pazo-profile-settings'}).length===0)
   await act(async()=>renderer.unmount())
 })
 test('T04 mixed feed label is For you and demo nearby interest cannot write', async () => {

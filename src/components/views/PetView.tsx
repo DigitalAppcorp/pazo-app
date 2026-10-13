@@ -285,8 +285,8 @@ export const PetView = ({
                 <div
                   id="pazo-profile-settings"
                   role="group"
-                  aria-label={lang === 'es' ? 'Privacidad y reglas' : 'Privacy and community rules'}
-                  className="absolute right-0 top-full z-50 mt-2 w-[min(16rem,calc(100vw-2rem))] rounded-[1.5rem] bg-[#FFFCF6] p-2 shadow-[0_12px_35px_rgba(32,78,74,0.17)] motion-safe:animate-[slideUpFade_220ms_ease-out_both]"
+                  aria-label={lang === 'es' ? 'Configuración de cuenta' : 'Account settings'}
+                  className="absolute right-0 top-full z-50 mt-2 max-h-[70dvh] w-[min(19rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-[1.5rem] bg-[#FFFCF6] p-2 shadow-[0_12px_35px_rgba(32,78,74,0.17)] motion-safe:animate-[slideUpFade_220ms_ease-out_both]"
                 >
                   <p className="px-3 pb-1 pt-2 text-[11px] font-extrabold text-[#5C7470]">
                     {lang === 'es' ? 'Privacidad y reglas' : 'Privacy and community rules'}
@@ -305,6 +305,24 @@ export const PetView = ({
                   >
                     {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
                   </button>
+              <div className="mt-2 rounded-2xl bg-[#F0F3ED]/85 p-3">
+                <h4 className="text-sm font-extrabold text-[#204E4A]">
+                  {lang==='es'?'Cuenta y datos':'Account and data'}
+                </h4>
+                <p className="mt-1 text-xs text-[#5C7470]">
+                  {requestEnabled
+                    ?(lang==='es'?'Puedes solicitar revisión para eliminar tu cuenta. El envío no provoca eliminación inmediata.':'You can request account deletion review. Submitting does not immediately delete your account.')
+                    :(lang==='es'?'Las solicitudes de eliminación se habilitarán cuando termine la verificación del servicio.':'Deletion requests will be available after service verification.')}
+                </p>
+                <button type="button" disabled={!requestEnabled}
+                  onClick={() => { setShowSettings(false); canManagePet ? setShowDeletionRequest(true) : onRequireAccount() }}
+                  className="mt-3 w-full rounded-2xl bg-[#204E4A]/10 px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors disabled:opacity-40 focus-visible:bg-[#E1E53F]">
+                  {lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'}
+                </button>
+                <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="mt-3 block break-all rounded-xl py-2 text-xs font-bold text-[#204E4A] underline focus-visible:bg-[#E1E53F]/35">
+                  {lang === 'es' ? 'Soporte y privacidad: ' : 'Support and privacy: '}{PAZO_PRIVACY_SUPPORT_EMAIL}
+                </a>
+              </div>
                 </div>
               )}
             </div>
@@ -705,24 +723,7 @@ export const PetView = ({
             </span>
           </div>
 
-          <div className="rounded-[2rem] pazo-glass-card p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
-            <h4 className="text-sm font-extrabold text-[#204E4A]">
-              {lang==='es'?'Cuenta y datos':'Account and data'}
-            </h4>
-            <p className="mt-1 text-xs text-[#5C7470]">
-              {requestEnabled
-                ?(lang==='es'?'Puedes solicitar revisión para eliminar tu cuenta. El envío no provoca eliminación inmediata.':'You can request account deletion review. Submitting does not immediately delete your account.')
-                :(lang==='es'?'Las solicitudes de eliminación se habilitarán cuando termine la verificación del servicio.':'Deletion requests will be available after service verification.')}
-            </p>
-            <button type="button" disabled={!requestEnabled}
-              onClick={() => canManagePet ? setShowDeletionRequest(true) : onRequireAccount()}
-              className="mt-3 rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40 focus-visible:bg-[#E1E53F]">
-              {lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'}
-            </button>
-            <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="mt-3 block text-xs font-bold text-[#204E4A] underline">
-              {lang === 'es' ? 'Soporte y privacidad: ' : 'Support and privacy: '}{PAZO_PRIVACY_SUPPORT_EMAIL}
-            </a>
-          </div>
+
 
           {nextPendingCare && (
             <div className="p-4 bg-[#FAF8F5] rounded-[2rem] flex justify-between items-center shadow-xs">
