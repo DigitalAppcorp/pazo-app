@@ -101,6 +101,15 @@
 - Código y test sujeto a CI / visual PO separados. QA requerido: 320/375/430 px, avatar con/sin fotografía, fundador / perdido / bio vacío, active Follow, 3 dot menu, report correcto, propias/no propias y tabs reales.
 - `MapView` y Lugares congelados; no Supabase ni main ni Vercel visual.
 
+## F13 — Mensajería en desarrollo, diseño opción 4 «Comunidad que conecta» (PO autorizado, 2026-10-13)
+
+- **Decisión PO:** conservar mensajes fuera del MVP, pero reemplazar modal informativo genérico con presentación editorial de comunidad/lifestyle; este cambio solo rediseña la pantalla de «En desarrollo», no reactiva mensajería.
+- **Código `681bc2be`** en `src/components/modals/MessagesModal.tsx`: sección de aviso de cuentas reales `!isDemo` con SVG original de perro/gato, burbujas de conversación y huella, tarjeta crema de esquinas suaves, título bilingüe «Cada amistad comienza con un hola» / «Every friendship starts with hello», estado explícito «En desarrollo», descripción honesta y única acción de cerrar/volver a PAZO. El botón X conserva su acción.
+- **Restricciones de integridad:** `isDemo` y su interfaz anterior permanecen separados; usuarios reales no ven fake inbox ni mensajes de prueba; no habilitar `onSendMessage`, redes, chats, citas de lanzamiento ni instrumentación silenciosa. Cero escrituras de DB, ninguna dependencia nueva.
+- **Accesibilidad/responsive:** `role=dialog`, `aria-modal`, `aria-describedby`, controles con 44px o más, colores legibles, `max-height` con scroll vertical para pantallas pequeñas, ilustración `aria-hidden`. Sin bordes, contornos ni anillos.
+- **Pruebas `ae901df8`:** ES/EN, contenido real de desarrollo, no revelar conversaciones sintéticas, `onClose` en X y CTA, no llamar `onSendMessage`. Código CI PASS; prueba y aceptación visual PO se verifican por separado.
+- Mapa/Lugares congelado; F13 y PR #44 continúan abiertos hasta aprobación PO, sin merge.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
