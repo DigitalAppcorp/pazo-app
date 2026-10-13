@@ -77,3 +77,37 @@ Ejecutar primero con fixtures sintéticos aislados, sin cuentas existentes, sin 
 **A — Diseño:** este documento, auditado y versionado. **B — Revisión técnica:** retención/legal, tarifas y elegibilidad de PayPal Business, definición de fecha de período, API y política de devolución, RLS/roles/Storage. **C — Autorización separada PO:** crear migración y/o recursos PayPal (producto, plan, claves, webhook, Edge, cualquier consumo). **D — Pruebas:** entorno aislado y sandbox autorizado, escenarios anteriores, callbacks, permisos y rollback. **E — Activación:** gate adicional antes de habilitar cobros reales y publicación del muro.
 
 **Referencias:** `docs/PAZO_SUPPORTER_WALL_BACKEND_DESIGN_PREFLIGHT_20261013.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`, `docs/PAZO_DATA_INVENTORY.md`, `docs/PAZO_MVP_MANUAL_DELETION_SOP_20261010.md`, y migración aplicada `20261013215221_f16_supporter_wall_consents_foundation.sql`. Documentación PayPal: https://developer.paypal.com/subscriptions/integrate, https://developer.paypal.com/api/rest/webhooks/rest/ .
+
+## 7. Contrato de integración PayPal Subscriptions — próximo gate (2026-10-13)
+
+**Estado:** definido para implementación futura, NO implementado. El CI 38481610859 del modelo sintético PASS; esos tests no comprueban una firma real, persistencia transaccional, PayPal sandbox ni permisos reales. PayPal inicial; Stripe adicional futuro. Ningún pago ni proyecto PayPal creado.
+
+### Entradas autorizadas y separación de responsabilidades
+
+- `POST /supporter/subscriptions/start` (nombre **ilustrativo**, sujeto a routing final): requiere sesión de PAZO validada por servidor; crea intento privado ligado a `auth.uid()`, producto/precio interno fijo USD 2.99 mensual; respuesta solo contiene lo necesario para continuar en PayPal. No acepta `owner_id`, merchant ID ni importe del navegador.
+- `POST /supporter/webhooks/paypal` (nombre ilustrativo): endpoint HTTPS sin sesión PAZO, autenticado **mediante verificación de firma PayPal**, no mediante JWT del usuario. Recibir cuerpo bruto original y headers de transmisión, validar tamaño/método/content-type y limitación de tasa. Nunca colocar `service_role` ni secretos en React.
+- `GET /supporter/membership` (nombre ilustrativo): autenticado, devuelve solamente entitlement propio y vencimiento permitido; no devuelve registro de otros usuarios ni payloads PayPal.
+- `POST /supporter/subscriptions/cancel` (nombre ilustrativo): dueño autenticado, resuelve suscripción vinculada en backend, pide cancelar futuras renovaciones a PayPal, reconcilia resultado, sin revocar automáticamente cobertura pagada válida. Retries idempotentes y respuesta de error comprobable.
+- `public.pazo_wall_consent_enable/disable` ya existe con autorización positiva intencionalmente bloqueada por `wall_has_verified_entitlement()=false`. NO conectar checkout a estas funciones.
+
+### Verificación de webhook: requisitos oficiales confirmados
+
+1. Guardar `webhook_id` asociado a la **app y entorno** que suscribió la URL (sandbox/live distintos).
+2. Verificar firma siguiendo la documentación de PayPal usando ID, fecha, firma, algoritmo y certificado correspondiente, sobre **el cuerpo exacto** recibido. Para verificación criptográfica local, PayPal documenta la cadena `transmissionId|timeStamp|webhookId|crc32(rawBody)` (sin cambiar bytes del cuerpo). Alternativa: API `verify-webhook-signature` con `webhook_event` original. No admitir un simple booleano `signatureValid` del cliente; ese campo solo existe en fixtures sintéticos.
+3. Bloquear SSRF, redirecciones a destinos arbitrarios y uso de certificados no confiables: restringir URLs/host oficial PayPal y validarlas; no descargar certificados de ubicaciones sin allowlist. Limitar cabeceras y payload.
+4. Firma válida autoriza **recepción de un evento**, no beneficios. Persistir identificador de evento y estado de trabajo en inbox privado, con respuesta HTTP 2xx solamente después de aceptación durable o duplicado idempotente. PayPal puede reintentar entregas fallidas (la documentación indica hasta 25 intentos en tres días).
+5. Confirmar transacción/suscripción mediante API PayPal del entorno correcto y verificar merchant, usuario vinculado, plan, precio, moneda, cobro y reembolsos antes de acreditar.
+6. Event IDs no garantizan deduplicar la misma venta descrita en eventos distintos: mantener índice único también para ID de transacción verificada. Eventos fuera de orden y reembolso previo a la conciliación requieren tombstone/pending-reversal, o reconsulta de estado PayPal antes de acreditar.
+7. PayPal distingue webhooks simulados (no pertenecen a app) y sandbox reales; la **verificación por postback no funciona con eventos simulados**. Separar pruebas del listener y pruebas reales en sandbox.
+
+### Preflight pendiente antes de escribir código real
+
+- Confirmar merchant PayPal Business y disponibilidad de Subscriptions/cargos para USD 2.99.
+- Elegir la infraestructura privada donde residirá el endpoint, sin exponer secretos y bajo el contrato de arquitectura PAZO.
+- Acordar semántica verificable de período de cobertura frente a fechas de pago y refunds: NO sumar un mes calendario a cada notificación sin documentación del billing cycle.
+- Definir tratamiento de reversión recibida antes del pago, auditoría de webhook, política de expiración de inbox y retención de comprobantes.
+- Integrar tests adversariales de firma/cuerpo bruto, replay, firma mock vs sandbox, event reversal antes de completed, concurrencia y duplicados persistidos.
+- Obtener autorización del PO para crear recursos PayPal, SQL, endpoints, secretos y probar sandbox. Gate distinto para pagos en vivo y publicación en muro.
+- Los tests `syntheticLedger` prueban **solo el modelo en memoria**, no el receptor real. No registrar `integration PASS` hasta completar sandbox y seguridad.
+
+Fuentes oficiales: https://developer.paypal.com/api/rest/webhooks/rest/ (última revisión 2026-06-18) y https://developer.paypal.com/subscriptions/integrate/ .
