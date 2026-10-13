@@ -620,7 +620,7 @@ export const CommunityDetailView = ({
           )}
 
           {posts.length === 0 ? (
-            <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
+            <div className="rounded-[2rem] bg-white/80 px-5 py-9 text-center shadow-[0_6px_20px_rgba(32,78,74,0.045)] backdrop-blur-xl">
               <IconPaw size={24} className="mx-auto text-[#204E4A]/50" />
               <p className="mt-2 text-xs font-black text-[#204E4A]">
                 {lang === 'es'
@@ -639,7 +639,7 @@ export const CommunityDetailView = ({
             </div>
           ) : (
             posts.map((post) => post.isAuthorDeleted ? (
-              <article key={post.id} className="space-y-3 rounded-[2rem] pazo-glass-card p-4 shadow-sm">
+              <article key={post.id} className="space-y-3 rounded-[2rem] bg-white/85 p-4 shadow-[0_6px_24px_rgba(32,78,74,0.05)] backdrop-blur-xl">
                 <div className="flex items-center gap-3 text-[#204E4A]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FAF8F5]"><IconPaw size={18}/></div>
                   <p className="text-xs font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
@@ -663,18 +663,18 @@ export const CommunityDetailView = ({
             ) : (
               <article
                 key={post.id}
-                className="space-y-3 rounded-[2rem] bg-white p-4 shadow-sm"
+                className="overflow-hidden rounded-[2rem] bg-white/90 shadow-[0_9px_28px_rgba(32,78,74,0.06)] backdrop-blur-xl"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start justify-between gap-2 px-4 pb-3 pt-4">
                   <div className="flex items-center gap-3">
                     <img
                       src={post.authorAvatar}
                       alt={post.authorName}
-                      className="h-10 w-10 rounded-2xl object-cover"
+                      className="h-11 w-11 shrink-0 rounded-full bg-[#F0F3E9] object-cover shadow-sm"
                     />
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-black text-[#204E4A]">
+                        <p className="text-[16px] font-black leading-snug text-[#204E4A]">
                           {post.authorName}
                         </p>
                         {post.authorUserId === community.ownerUserId && (
@@ -692,12 +692,12 @@ export const CommunityDetailView = ({
 
                   <div className="flex items-center gap-2">
                   {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id,label:describeReportSubject('community_post',post.authorName,post.body,lang)})}
-                    className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
+                    className="rounded-full bg-[#F1F4EA] px-2.5 py-2 text-[12px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   {post.canDelete && (
                     <button
                       type="button"
                       onClick={() => void handleDeletePost(post)}
-                      className="rounded-full bg-[#FAF8F5] px-3 py-1.5 text-[12px] font-bold text-[#5C7470]"
+                      className="rounded-full bg-[#F1F4EA] px-2.5 py-2 text-[12px] font-bold text-[#5C7470]"
                     >
                       {lang === 'es' ? 'Eliminar' : 'Delete'}
                     </button>
@@ -705,21 +705,18 @@ export const CommunityDetailView = ({
                   </div>
                 </div>
 
+                {post.photoUrl && (
+                  <div className="max-h-[32rem] w-full overflow-hidden bg-[#ECF0E9]">
+                    <img src={post.photoUrl} alt="" className="max-h-[32rem] w-full object-cover" />
+                  </div>
+                )}
                 {post.body && (
-                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-[#204E4A]">
+                  <p className="whitespace-pre-wrap break-words px-4 pb-2 pt-3 text-[14px] font-medium leading-relaxed text-[#204E4A]">
                     {post.body}
                   </p>
                 )}
 
-                {post.photoUrl && (
-                  <img
-                    src={post.photoUrl}
-                    alt=""
-                    className="max-h-[28rem] w-full rounded-[1.6rem] object-cover"
-                  />
-                )}
-
-                <div className="flex items-center gap-3 border-t border-[#204E4A]/8 pt-3">
+                <div className="flex items-center gap-5 px-4 pb-4 pt-3">
                   <button
                     type="button"
                     onClick={() => void handleLike(post)}
@@ -744,13 +741,13 @@ export const CommunityDetailView = ({
                 </div>
 
                 {openCommentsFor === post.id && (
-                  <div className="space-y-3 rounded-2xl bg-[#FAF8F5] p-3">
+                  <div className="mx-3 mb-3 space-y-3 rounded-[1.4rem] bg-[#F4F5ED] p-4">
                     {(commentsByPost[post.id] || []).map((comment) => (
                       <div key={comment.id} className="flex items-start gap-2.5">
                         <img
                           src={comment.authorAvatar}
                           alt={comment.authorName}
-                          className="h-8 w-8 rounded-xl object-cover"
+                          className="h-9 w-9 shrink-0 rounded-full object-cover"
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
@@ -818,14 +815,14 @@ export const CommunityDetailView = ({
       )}
 
       {activeTab === 'info' && (
-        <section className="space-y-4 rounded-[2rem] pazo-glass-card p-5 shadow-sm">
+        <section className="space-y-5 rounded-[2rem] bg-white/80 p-5 shadow-[0_8px_28px_rgba(32,78,74,0.055)] backdrop-blur-xl sm:p-6">
           {!isEditing ? (
             <>
               <div>
                 <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
                   {lang === 'es' ? 'Descripción' : 'Description'}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-[#204E4A]">
+                <p className="mt-2 whitespace-pre-wrap break-words text-[14px] font-medium leading-relaxed text-[#204E4A]">
                   {community.description}
                 </p>
               </div>
@@ -834,7 +831,7 @@ export const CommunityDetailView = ({
                 <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
                   {lang === 'es' ? 'Reglas' : 'Rules'}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-[#204E4A]">
+                <p className="mt-2 whitespace-pre-wrap break-words text-[14px] leading-relaxed text-[#204E4A]">
                   {community.rules ||
                     (lang === 'es'
                       ? 'Esta comunidad todavía no ha publicado reglas adicionales.'
@@ -843,7 +840,7 @@ export const CommunityDetailView = ({
               </div>
 
               {community.isJoined && community.status === 'active' && (
-                <div className="space-y-3 border-t border-[#204E4A]/8 pt-4">
+                <div className="space-y-3 rounded-[1.6rem] bg-[#F4F5ED] p-4">
                   <div>
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -945,7 +942,7 @@ export const CommunityDetailView = ({
               )}
 
               {isOwner && (
-                <div className="flex flex-wrap gap-2 border-t border-[#204E4A]/8 pt-4">
+                <div className="flex flex-wrap gap-2 rounded-[1.6rem] bg-[#F4F5ED] p-4">
                   <button
                     type="button"
                     onClick={beginEdit}
@@ -1212,13 +1209,13 @@ export const CommunityDetailView = ({
           {members.map((member) => (
             <div
               key={member.userId}
-              className="flex items-center justify-between gap-3 rounded-[1.8rem] bg-white p-4 shadow-sm"
+              className="flex items-center justify-between gap-3 rounded-[1.8rem] bg-white/85 p-4 shadow-[0_7px_20px_rgba(32,78,74,0.05)] backdrop-blur-xl"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <img
                   src={member.pet?.photoUrl}
                   alt={member.pet?.name || ''}
-                  className="h-11 w-11 rounded-2xl bg-[#FAF8F5] object-cover"
+                  className="h-12 w-12 shrink-0 rounded-full bg-[#EAF0E8] object-cover"
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
