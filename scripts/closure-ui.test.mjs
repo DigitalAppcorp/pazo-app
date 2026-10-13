@@ -93,11 +93,11 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
   assert.equal(buttons()[0].props['aria-current'],'page')
   assert.ok(buttons().slice(1).every(b=>b.props['aria-current']===undefined))
   const indicator=()=>ui.root.findAll(n=>n.props.className==='pazo-liquid-indicator pointer-events-none')[0]
-  const notch=()=>ui.root.findAll(n=>n.props.className==='pazo-liquid-notch pointer-events-none')[0]
+  const surface=()=>ui.root.findAll(n=>n.props.className==='pazo-liquid-surface pointer-events-none')[0]
   assert.equal(indicator().props.style.left,'10%')
-  assert.equal(notch().props.style.left,'10%')
+  assert.equal(surface().props.style['--pazo-liquid-center'],'10%')
   assert.equal(indicator().props['aria-hidden'],'true')
-  assert.equal(notch().props['aria-hidden'],'true')
+  assert.equal(surface().props['aria-hidden'],'true')
   await act(async()=>{buttons()[2].props.onClick()})
   assert.deepEqual(created,['create'])
   assert.deepEqual(selected,[],'Create must not select a navigation tab')
@@ -106,7 +106,7 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
     assert.equal(selected.at(-1),tab)
     await act(async()=>{ui.update(React.createElement(BottomNav,{...props,activeTab:tab}))})
     assert.equal(indicator().props.style.left,left)
-    assert.equal(notch().props.style.left,left,'Moving recess must remain aligned to orb on every tab')
+    assert.equal(surface().props.style['--pazo-liquid-center'],left,'True carved recess must track orb on every tab')
     assert.equal(buttons()[i].props['aria-current'],'page')
     assert.equal(buttons().filter(b=>b.props['aria-current']==='page').length,1)
   }
@@ -116,9 +116,12 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
   assert.deepEqual(buttons().map(b=>b.props['aria-label']),['Home','Communities','Create','Map','My Pet'])
   await act(async()=>{ui.unmount()})
   const css=fs.readFileSync('src/index.css','utf8')
-  for(const part of ['.pazo-liquid-indicator','.pazo-liquid-notch','transition: left 460ms','background: #FAF8F5','-webkit-mask-image: linear-gradient','background: radial-gradient','backdrop-filter: blur(11px)','box-shadow: 0 12px 24px','@keyframes pazoLiquidSettle','prefers-reduced-transparency: reduce','prefers-reduced-motion: reduce', '.pazo-liquid-notch, .pazo-liquid-indicator { transition: none','animation: none; transform: translateY(-15px)'])assert.ok(css.includes(part),part)
-  const notchCss=css.split('.pazo-liquid-notch {')[1].split('}')[0]
-  assert.ok(!/border\s*:|outline\s*:|ring\s*:/.test(notchCss),'Recess must not introduce outlines or borders')
+  for(const part of ['.pazo-liquid-indicator','.pazo-liquid-surface','@property --pazo-liquid-center','background: #FAF8F5','-webkit-mask-image: radial-gradient(circle 37px','mask-image: radial-gradient(circle 37px','transparent 0 36px, #000 37px','transition: --pazo-liquid-center 460ms','background: rgba(48, 132, 105, 0.51)','backdrop-filter: blur(14px)','box-shadow: 0 15px 25px','@keyframes pazoLiquidSettle','prefers-reduced-transparency: reduce','prefers-reduced-motion: reduce', '.pazo-liquid-surface, .pazo-liquid-indicator { transition: none','animation: none; transform: translateY(-15px)'])assert.ok(css.includes(part),part)
+  const surfaceCss=css.split('.pazo-liquid-surface {')[1].split('}')[0]
+  assert.ok(!/border\s*:|outline\s*:|ring\s*:/.test(surfaceCss),'Carved bar must not introduce outlines or borders')
+  assert.ok(!css.includes('pazo-liquid-notch'),'Old painted cream notch must not remain')
+  assert.ok(!css.includes('background: radial-gradient(circle at 30% 20%'),'Plastic gradient must be removed')
+  assert.ok(fs.readFileSync('src/components/BottomNav.tsx','utf8').includes('bg-[#EFECE4]'),'Outer gap must expose darker cream')
   const app=fs.readFileSync('src/App.tsx','utf8')
   assert.ok(app.includes('onOpenCreate={() => setIsCreateMenuOpen(true)}'))
   assert.ok(app.includes('if (tab !== activeTab)'))

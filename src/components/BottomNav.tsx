@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import {
   IconHome,
   IconCommunity,
@@ -46,17 +47,17 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
         aria-label={labels[tab]}
         aria-current={isActive ? 'page' : undefined}
         onClick={() => onSelectTab(tab)}
-        className="group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 text-[#D0DEDA] transition-colors duration-200 hover:text-white focus-visible:bg-[#E1E53F]"
+        className="group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 text-[#5C7470] transition-colors duration-200 hover:text-[#204E4A] focus-visible:bg-[#E1E53F]"
       >
         <span
           aria-hidden="true"
           className={'pazo-liquid-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full ' +
-            (isActive ? 'pazo-liquid-icon--active text-[#204E4A]' : '')}
+            (isActive ? 'pazo-liquid-icon--active text-[#143D35]' : '')}
         >
           <Icon size={21}/>
         </span>
         <span className={'max-w-full truncate text-[10px] font-extrabold tracking-tight transition-[opacity,color] duration-200 sm:text-xs ' +
-          (isActive ? 'text-[#E1E53F] opacity-100' : 'opacity-0 group-focus-visible:opacity-100')}>
+          (isActive ? 'text-[#204E4A] opacity-100' : 'opacity-0 group-focus-visible:opacity-100')}>
           {labels[tab]}
         </span>
       </button>
@@ -66,14 +67,14 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
   return (
     <nav
       aria-label="Navegación de PAZO"
-      className="relative z-30 shrink-0 bg-[#204E4A] px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-7px_26px_rgba(32,78,74,0.13)] sm:px-3"
+      className="relative z-30 shrink-0 bg-[#EFECE4] pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
     >
       <div className="relative grid h-[70px] grid-cols-5 items-center">
-        {/* Moving cream-colored recess creates a real visual gap around the glass orb. */}
+        {/* The cream bar itself is masked to carve a moving, transparent concavity. */}
         <div
           aria-hidden="true"
-          className="pazo-liquid-notch pointer-events-none"
-          style={{ left: indicatorLeft + '%' }}
+          className="pazo-liquid-surface pointer-events-none"
+          style={{ '--pazo-liquid-center': indicatorLeft + '%' } as CSSProperties}
         />
         <div
           aria-hidden="true"
@@ -97,7 +98,7 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
           >
             <IconPlus size={26}/>
           </span>
-          <span className="-mt-1 max-w-full truncate text-[10px] font-extrabold tracking-tight text-[#E1E53F] sm:text-xs">
+          <span className="-mt-1 max-w-full truncate text-[10px] font-extrabold tracking-tight text-[#204E4A] sm:text-xs">
             {labels.crear}
           </span>
         </button>
