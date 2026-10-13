@@ -62,6 +62,7 @@ const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
+const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
 test.after(()=>{
   const target=fs.realpathSync(compiled)
@@ -70,6 +71,43 @@ test.after(()=>{
 })
 const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.children.filter(c=>typeof c==='string')).join(' ')
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
+
+test('F13 Community Option 6 empty state matches map concept, preserves real create callback, and does not invent communities', async () => {
+  for(const [lang,heading,cta] of [
+    ['es','Todavía no hay comunidades.','Crear la primera comunidad'],
+    ['en','No communities yet.','Create the first community'],
+  ]) {
+    let created=0
+    const props={lang,canCreate:true,onCreate(){created++}}
+    const markup=renderToStaticMarkup(React.createElement(CommunitiesEmptyState,props))
+    assert.ok(markup.includes('viewBox="0 0 360 207"'))
+    assert.ok(markup.includes('community-map-ground'))
+    assert.ok(markup.includes('community-map-pin-shadow'))
+    assert.ok(markup.includes(heading))
+    assert.ok(markup.includes(cta))
+    assert.ok(!markup.includes('Community #1'))
+    assert.ok(!markup.includes('href='))
+    let renderer
+    await act(async()=>{renderer=create(React.createElement(CommunitiesEmptyState,props))})
+    const action=button(renderer.root,cta)
+    assert.ok(action)
+    assert.equal(action.props.disabled,false)
+    await act(async()=>action.props.onClick())
+    assert.equal(created,1)
+    await act(async()=>renderer.update(React.createElement(CommunitiesEmptyState,{...props,canCreate:false})))
+    const disabled=button(renderer.root,cta)
+    assert.ok(disabled?.props.disabled)
+    await act(async()=>renderer.unmount())
+  }
+  const view=fs.readFileSync('src/components/views/CommunitiesView.tsx','utf8')
+  assert.ok(view.includes('communities.length === 0'))
+  assert.ok(view.includes('<CommunitiesEmptyState'))
+  assert.ok(view.includes('onCreate={() => setIsCreateCommunityOpen(true)}'))
+  assert.ok(view.includes('canCreate={Boolean(currentPet) && canUseCommunities}'))
+  assert.ok(view.includes('community.isJoined'))
+  assert.ok(view.includes('handleQuickMembership'))
+  assert.ok(view.includes('setSelectedCommunityId(community.id)'))
+})
 
 test('F13 messaging coming-soon is branded, bilingual, closeable and never shows synthetic chats for real accounts', async () => {
   for(const [lang,title,cta,status] of [
