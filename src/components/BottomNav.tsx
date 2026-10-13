@@ -52,7 +52,7 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
         <span
           aria-hidden="true"
           className={'pazo-liquid-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full ' +
-            (isActive ? 'pazo-liquid-icon--active text-[#E1E53F]' : '')}
+            (isActive ? 'pazo-liquid-icon--active text-[#E1E53F]' : 'pazo-liquid-icon--idle')}
         >
           <Icon size={21}/>
         </span>
