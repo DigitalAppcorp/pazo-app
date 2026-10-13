@@ -59,6 +59,13 @@
 - Prueba `scripts/closure-ui.test.mjs` `50a0a1f1` ejercita aparición del menú, Report condicional, ocultamiento local y deshacer.
 - No se modificó ningún servicio, SQL, esquema Supabase, mapa/Lugares o rama `main`. **CI de HEAD y aceptación visual PO son gates independientes.**
 
+## F13 — Feed «Seguir» transparente (PO 2026-10-13)
+
+- PO screenshot validated three-dot action menu but rejected dark-green solid **Seguir** in feed header.
+- Add an explicit `variant="feed"` to the existing `FollowButton` component, used **only in HomeView PostCard**. This variant renders a fully transparent resting background and dark-green text (`#204E4A`), no shadow or border, with a subtle translucent hover. Keep current click handling, visibility, text, dimensions, follow API and loading state unchanged.
+- **Do not modify** the styling of follow buttons in the public profile or other UI, or the three-dot menu.
+- Map/Places frozen; no data/database changes. CI does not constitute PO visual approval.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.

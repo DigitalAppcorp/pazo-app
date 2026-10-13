@@ -385,6 +385,7 @@ const PostCard = ({ post, canReport, onReport, onHidePost, currentPetId, ownedPe
                 targetPetId={post.petId}
                 canFollow={true}
                 lang={lang}
+                variant="feed"
               />
             </div>
           )}

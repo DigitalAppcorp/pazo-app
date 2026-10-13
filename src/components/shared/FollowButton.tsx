@@ -5,7 +5,7 @@ interface FollowButtonProps {
     currentPetId: string
     targetPetId: string
     lang?: 'es' | 'en'
-    variant?: 'default' | 'profile'
+    variant?: 'default' | 'profile' | 'feed'
     canFollow?: boolean
     onFollowChange?: (newIsFollowing: boolean) => void
 }
@@ -94,9 +94,11 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
         <button
             onClick={handleToggleFollow}
             disabled={isPending}
-            className={`w-full py-2.5 px-4 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${isFollowing && variant === 'profile'
-                    ? 'bg-transparent border-2 border-[#204E4A]/20 text-[#204E4A] hover:bg-[#204E4A]/5'
-                    : 'bg-[#204E4A] text-white shadow-md hover:bg-[#183d3a]'
+            className={`w-full py-2.5 px-4 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${variant === 'feed'
+                    ? 'bg-transparent text-[#204E4A] shadow-none hover:bg-[#204E4A]/5'
+                    : isFollowing && variant === 'profile'
+                      ? 'bg-transparent border-2 border-[#204E4A]/20 text-[#204E4A] hover:bg-[#204E4A]/5'
+                      : 'bg-[#204E4A] text-white shadow-md hover:bg-[#183d3a]'
                 }`}
         >
             {isPending ? (
