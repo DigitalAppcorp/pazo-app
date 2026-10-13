@@ -57,6 +57,7 @@ compileDirectory('src')
 const load=relative=>import(pathToFileURL(path.join(compiled,relative)).href)
 const {CreateModal}=await load('components/modals/CreateModal.js')
 const {NotificationsModal}=await load('components/modals/NotificationsModal.js')
+const {mapNotificationRow,getNotificationCommunityId,getNotificationSightingId}=await load('features/notifications/notificationSource.js')
 const {OnboardingView}=await load('components/views/OnboardingView.js')
 const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
@@ -229,6 +230,70 @@ test('T15 demo Create traversal requests login and never dispatches a real actio
   assert.match(JSON.stringify(renderer.toJSON()),/Demo: sign in/)
   await act(async()=>renderer.unmount())
 })
+test('Community join notification: strict source types, modal navigation, recipient contract and migration safety', async () => {
+  const sourceRow={
+    id:'notification-real',type:'community_join',
+    title:'Nuevo miembro en tu comunidad',body:'Alguien se unió a tu comunidad «Test».',
+    read_at:null,created_at:'2026-10-12T12:00:00Z',pet_id:null,source_id:'real-community-id',
+  }
+  const join=mapNotificationRow(sourceRow)
+  assert.equal(join.category,'todas')
+  assert.equal(join.sourceType,'community_join')
+  assert.equal(join.read,false)
+  assert.equal(getNotificationCommunityId(join),'real-community-id')
+  assert.equal(getNotificationSightingId(join),null)
+  assert.equal(getNotificationCommunityId({...join,sourceType:'system'}),null)
+  assert.equal(getNotificationCommunityId({...join,sourceType:'sighting'}),null)
+  assert.equal(getNotificationCommunityId({...join,sourceId:null}),null)
+  const sighting={...join,id:'sighting-id',sourceType:'sighting',sourceId:'sighting-source',category:'comunidad'}
+  assert.equal(getNotificationSightingId(sighting),'sighting-source')
+  assert.equal(getNotificationCommunityId(sighting),null)
+  let activated=[]
+  const props={
+    isOpen:true,lang:'es',
+    notifications:[join,sighting,{...join,id:'system',title:'System notice',sourceType:'system',sourceId:'not-a-community'}],
+    onClose(){},
+    onOpenNotification(notification){activated.push(notification.id)},
+    onLoadMore(){},hasMore:false,isLoadingMore:false,
+  }
+  let renderer
+  await act(async()=>{renderer=create(React.createElement(NotificationsModal,props))})
+  const joinButton=button(renderer.root,'Nuevo miembro en tu comunidad')
+  assert.ok(joinButton)
+  assert.equal(joinButton.props.disabled,false)
+  assert.equal(button(renderer.root,'System notice').props.disabled,true)
+  await act(async()=>joinButton.props.onClick())
+  assert.deepEqual(activated,['notification-real'])
+  await act(async()=>button(renderer.root,'Avistamientos').props.onClick())
+  assert.equal(button(renderer.root,'Nuevo miembro en tu comunidad'),undefined)
+  assert.ok(button(renderer.root,'Sighting title')===undefined)
+  await act(async()=>renderer.unmount())
+
+  const app=fs.readFileSync('src/App.tsx','utf8')
+  assert.ok(app.includes('getNotificationCommunityId(notification)'))
+  assert.ok(app.includes('setCommunityTargetId(joinedCommunityId)'))
+  assert.ok(app.includes('setCommunityTargetKey((value) => value + 1)'))
+  assert.ok(app.includes("setActiveTab('comunidades')"))
+  assert.ok(app.includes('await markNotificationRead(notification.id)'))
+
+  const sql=fs.readFileSync('supabase/migrations/20261012235800_community_join_owner_notifications.sql','utf8')
+  for(const line of [
+    "CHECK (type IN ('sighting', 'system', 'community_join'))",
+    "SECURITY DEFINER",
+    "SET search_path = ''",
+    "IF NEW.role <> 'member' THEN",
+    "v_owner_id = NEW.user_id",
+    "c.status = 'active'",
+    "v_owner_id,",
+    "'community_join'",
+    "NEW.community_id",
+    "AFTER INSERT ON public.community_memberships",
+    "REVOKE ALL ON FUNCTION community_private.notify_owner_on_member_join()",
+  ]) assert.ok(sql.includes(line),line)
+  assert.ok(!/GRANT INSERT\\s+ON\\s+(TABLE\\s+)?public\\.notifications\\s+TO\\s+authenticated/i.test(sql))
+  assert.ok(!/INSERT INTO public\\.community_memberships/i.test(sql))
+})
+
 test('F13 Community Cares empty-state is branded, filtered, bilingual and closes without fake alerts', async () => {
   for(const [lang,heading,empty,closeLabel] of [
     ['es','Siempre cerca de tu comunidad.','¡Todo en calma!','Cerrar avisos'],
