@@ -65,6 +65,7 @@ const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
+const {ImmersivePlacesStage}=await load('features/places/components/ImmersivePlacesStage.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
 test.after(()=>{
   const target=fs.realpathSync(compiled)
@@ -73,6 +74,68 @@ test.after(()=>{
 })
 const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.children.filter(c=>typeof c==='string')).join(' ')
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
+
+test('F13 Places Option 3 renders an edge-to-edge map, real carousel, filters and voluntary controls', () => {
+  const chosen={
+    id:'test-real-source-id',name:'Silver Lake Dog Park',category:'park',
+    zone:'Silver Lake',description:'Real description',photoUrl:'https://source.invalid/real-photo.jpg',
+    activePresenceCount:2,distanceKm:1.7,
+    latitude:34.0,longitude:-118.2,address:'LA'
+  }
+  const categories=[
+    {value:'all',es:'Todos',en:'All'},
+    {value:'park',es:'Parques',en:'Parks'},
+    {value:'food',es:'Comida / café',en:'Food / cafe'}
+  ]
+  const props={
+    lang:'es',places:[chosen],categoryOptions:categories,category:'all',
+    onCategory(){},searchQuery:'',onSearchChange(){},onSearchCommit(){},
+    selectedPlaceId:null,onSelectPlace(){},userLocation:null,
+    locationMessage:'',isLocating:false,onUseLocation(){},
+    canSuggest:true,onSuggest(){},activeCheckin:false,
+    isLoading:false,loadError:'',onRetry(){}
+  }
+  const markup=renderToStaticMarkup(React.createElement(ImmersivePlacesStage,props))
+  assert.match(markup,/Explorar lugares en el mapa/)
+  assert.match(markup,/Buscar lugar, zona o dirección/)
+  assert.match(markup,/Carrusel horizontal de lugares/)
+  assert.match(markup,/Silver Lake Dog Park/)
+  assert.match(markup,/1.7 km/)
+  assert.match(markup,/2 mascotas presentes/)
+  assert.match(markup,/src="https:\/\/source.invalid\/real-photo.jpg"/)
+  assert.match(markup,/aria-pressed="true"/)
+  assert.match(markup,/Ubicación opcional/)
+  assert.match(markup,/Tu ubicación se usa solo si la activas; no se guarda/)
+  assert.doesNotMatch(markup,/Reseñas verificadas|Favoritos activados/)
+  const empty=renderToStaticMarkup(React.createElement(ImmersivePlacesStage,{...props,places:[]}))
+  assert.match(empty,/No encontramos lugares con esos filtros/)
+  assert.doesNotMatch(empty,/Silver Lake Dog Park/)
+  const error=renderToStaticMarkup(React.createElement(ImmersivePlacesStage,{...props,loadError:'Network error'}))
+  assert.match(error,/Network error/)
+  assert.match(error,/Reintentar/)
+  const code=fs.readFileSync('src/components/views/MapView.tsx','utf8')
+  const app=fs.readFileSync('src/App.tsx','utf8')
+  const mapbox=fs.readFileSync('src/features/places/map/MapboxMap.tsx','utf8')
+  const stage=fs.readFileSync('src/features/places/components/ImmersivePlacesStage.tsx','utf8')
+  assert.ok(code.includes('<ImmersivePlacesStage'))
+  assert.ok(code.includes('onSelectPlace={handleSelectPlace}'))
+  assert.ok(code.includes('onUseLocation={handleUseLocation}'))
+  assert.ok(code.includes('onSearchCommit={handleSearchCommit}'))
+  assert.ok(code.includes('onCategory={handleCategory}'))
+  assert.ok(code.includes("onSuggest={() => setIsSuggestOpen(true)}"))
+  for(const key of ['handleStartCheckin','handleEndCheckin','handleVisibility','PlaceFeatureExperimentCard','SuggestPlaceModal','onClose={() => setIsSuggestOpen(false)}']) assert.ok(code.includes(key),key)
+  assert.ok(app.includes("activeTab === 'mapa'"))
+  assert.ok(app.includes("'relative min-h-0 flex-1 overflow-hidden p-0'"))
+  assert.ok(stage.includes('<MapboxMap'))
+  assert.ok(stage.includes('snap-x snap-mandatory'))
+  assert.ok(stage.includes('overflow-x-auto'))
+  assert.ok(stage.includes('pointer-events-none'))
+  assert.ok(mapbox.includes('drawPazoCategoryPin'))
+  assert.ok(mapbox.includes("'pazo-place-models'"))
+  assert.ok(mapbox.includes("map.on('click', 'pazo-place-pins', handlePlaceClick)"))
+  assert.ok(!stage.includes('navigator.geolocation.getCurrentPosition'))
+  assert.ok(!code.includes('pazo-glass-card p-6')) // Old stand-alone list layout must not return.
+})
 
 test('F13 Community Lifestyle Option 4 uses real cover, open identity, owner/membership states and existing callbacks', async () => {
   const original={
