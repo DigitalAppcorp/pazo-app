@@ -276,28 +276,24 @@ export const GlobalSearchView = ({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+        {/* Secondary discovery: a quiet text link, not a promotional banner competing with search. */}
         {!trimmedQuery && (
-          <button
-            ref={gratitudeEntryRef}
-            type="button"
-            onClick={() => setShowGratitudeWall(true)}
-            className="mb-5 flex w-full items-center justify-between gap-4 rounded-[27px] bg-[#FBE8D9] p-4 text-left shadow-[0_5px_18px_rgba(32,78,74,0.05)] transition-colors hover:bg-[#F8DBC7] focus-visible:bg-[#E1E53F]/45"
-          >
-            <span className="flex min-w-0 items-center gap-3">
-              <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-[#D96D7A]">
-                <IconPaw size={26} />
+          <div className="-mt-1 mb-2 flex justify-end">
+            <button
+              ref={gratitudeEntryRef}
+              type="button"
+              onClick={() => setShowGratitudeWall(true)}
+              aria-label={lang === 'es' ? 'Ver muro Gracias, Amigos de PAZO (en desarrollo)' : 'Open Thank you, PAZO Friends wall (in development)'}
+              className="inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-full px-2.5 py-2 text-[12px] font-semibold text-[#5C7470] transition-colors hover:bg-[#EFF2EA] hover:text-[#204E4A] focus-visible:bg-[#E1E53F]/40 focus-visible:text-[#204E4A]"
+            >
+              <IconPaw size={13} className="shrink-0 text-[#73918A]" />
+              <span>{lang === 'es' ? 'Amigos de PAZO' : 'PAZO Friends'}</span>
+              <span className="text-[11px] font-normal text-[#7B9089]">
+                {lang === 'es' ? '· En desarrollo' : '· In development'}
               </span>
-              <span className="min-w-0">
-                <span className="block text-[16px] font-black text-[#204E4A]">
-                  {lang === 'es' ? 'Gracias, Amigos de PAZO' : 'Thank you, PAZO Friends'}
-                </span>
-                <span className="block text-[12px] font-medium leading-snug text-[#5C7470]">
-                  {lang === 'es' ? 'Conoce el muro de agradecimiento · En desarrollo' : 'Visit our gratitude wall · In development'}
-                </span>
-              </span>
-            </span>
-            <span aria-hidden="true" className="text-2xl font-bold text-[#204E4A]">›</span>
-          </button>
+              <span aria-hidden="true" className="text-[17px] leading-none">›</span>
+            </button>
+          </div>
         )}
         {!canSearch ? (
           <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">

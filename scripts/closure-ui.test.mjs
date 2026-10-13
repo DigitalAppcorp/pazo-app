@@ -67,6 +67,7 @@ const {SupporterThemePreviewPicker,SupporterProfileBackdrop,SUPPORTER_PROFILE_TH
 const {SupporterThemePreviewPanel}=await load('features/supporter/components/SupporterThemePreviewPanel.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
 const {GratitudeWallPreview}=await load('features/supporter/components/GratitudeWallPreview.js')
+const {GlobalSearchView}=await load('components/views/GlobalSearchView.js')
 const {GratitudeParticipationPreview}=await load('features/supporter/components/GratitudeParticipationPreview.js')
 const {LiquidChoiceTabs}=await load('components/ui/LiquidChoiceTabs.js')
 const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchFilters.js')
@@ -987,6 +988,24 @@ test('F16 discoverable customization opens from Mi mascota with own pet, no link
   assert.ok(css.includes('translate3d(3px, -6px, 0) rotate(2deg)'),'Float movement stays within a subtle range')
   assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion disables ornamental animation')
   assert.ok(!preview.includes('animate-float'),'Text and portrait must never float')
+})
+
+test('F16 gratitude wall discoverability is subtle, bilingual and does not dominate Explore', () => {
+  const props={canSearch:true,onClose(){},onSelectPet(){},onSelectCommunity(){},onSelectPlace(){}}
+  const source=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
+  assert.ok(source.includes('setShowGratitudeWall(true)'),'Subtle access remains functional')
+  assert.ok(source.includes('ref={gratitudeEntryRef}'),'Return focus remains available')
+  assert.ok(source.includes('!trimmedQuery'),'Only appears before active searching')
+  assert.ok(source.includes('inline-flex min-h-10')&&source.includes('justify-end'),'Small right-aligned secondary link')
+  assert.ok(!source.includes('bg-[#FBE8D9]'),'Do not restore intrusive full-width salmon promotion')
+  assert.ok(!source.includes('Conoce el muro de agradecimiento'),'Remove long promotional subtitle')
+  for(const [lang,visibleLabel] of [['es','Amigos de PAZO'],['en','PAZO Friends']]){
+    const markup=renderToStaticMarkup(React.createElement(GlobalSearchView,{...props,lang}))
+    assert.ok(markup.includes(visibleLabel),'Localized discreet link must be shown')
+    assert.ok(markup.includes(lang==='es'?'En desarrollo':'In development'),'Status disclosed in compact link')
+    assert.ok(markup.includes(lang==='es'?'Busca en todo PAZO':'Search all of PAZO'),'Search remains the primary content')
+    assert.ok(!markup.includes('bg-[#FBE8D9]'),'Large visual promotion must not render')
+  }
 })
 
 test('F16 gratitude wall preview has consent-safe two-column placeholders and working category tabs ES/EN', async () => {

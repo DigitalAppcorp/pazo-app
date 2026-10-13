@@ -139,6 +139,10 @@ La presencia en el muro exige **opt-in explícito y revocable, por mascota**; si
 
 **Entrada pública**: desde pantalla de Explorar/búsqueda global, con un enlace visible «Gracias, Amigos de PAZO» a vista dedicada en cuadrícula; filtros Todos / Recientes / Más tiempo apoyando, inicialmente sin participantes. **Entrada privada**: desde Mi mascota → Menú y Utilidades → Amigo de PAZO, con un panel de selección por mascota, sin pedir nombres humanos ni aliases. El PO autorizó ambos recorridos. El prototipo usa únicamente elementos de diseño vacíos en el muro público y las mascotas ya cargadas de la propia cuenta en gestión privada; **selecciones exclusivamente visuales, sin escritura**. La UI anuncia explícitamente que **ni hay consentimiento real ni publicaciones**. Aún se requieren backend de entitlement/opt-in por mascota y autorización separada antes de activar guardar/publicar. Probar visualmente con PO.
 
+### Ajuste de acceso discreto en Explorar (feedback PO 2026-10-13)
+
+El primer acceso visual al muro en Explorar se consideró «muy invasivo»: tarjeta promocional salmón de ancho completo con icono grande y dos líneas. Se reemplaza por **enlace secundario compacto a la derecha** «Amigos de PAZO · En desarrollo», pequeño y sin relleno llamativo; solo cuando la búsqueda está vacía. Abre exactamente la misma pantalla y no cambia su cuadrícula aprobada. El PO debe validar el nuevo acceso en Vite. No reintroducir una tarjeta grande ni confundir este ajuste de discoverability con la aprobación del muro.
+
 ## 7. Entitlement
 
 Fuente de verdad:
