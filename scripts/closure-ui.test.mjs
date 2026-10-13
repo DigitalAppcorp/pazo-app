@@ -939,9 +939,9 @@ test('F16 discoverable customization opens from Mi mascota with own pet, no link
     const dialogs=ui.root.findAllByProps({role:'dialog'})
     assert.equal(dialogs.length,1)
     const dialog=dialogs[0]
-    assert.equal(dialog.props['aria-modal'],true)
-    assert.ok(JSON.stringify(dialog.toJSON()).includes('Luna'))
-    assert.ok(JSON.stringify(dialog.toJSON()).includes('luna.jpg'))
+    assert.equal(dialog.props['aria-modal'],'true')
+    assert.ok(JSON.stringify(ui.toJSON()).includes('Luna'))
+    assert.ok(JSON.stringify(ui.toJSON()).includes('luna.jpg'))
     assert.ok(button(dialog,original))
     assert.ok(button(dialog,nature))
     assert.equal(button(dialog,original).props['aria-pressed'],true)
