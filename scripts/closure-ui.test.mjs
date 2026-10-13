@@ -153,7 +153,7 @@ test('F13 liquid search filter preserves horizontal scrolling, four results type
   assert.ok(view.includes('<LiquidSearchFilters filter={filter} lang={lang} onChange={handleFilterChange} />'))
   assert.ok(view.includes("eventType: 'search_filter_change'"))
   assert.ok(view.includes("setFilter(nextFilter)"))
-  for(const value of ['overflow-x-auto','relative flex w-max min-w-full gap-2','selected.offsetLeft','selected.offsetWidth','ResizeObserver','observer.observe(track)','addEventListener(\\'resize\\', update)'])assert.ok(filter.includes(value),value)
+  for(const value of ['overflow-x-auto','relative flex w-max min-w-full gap-2','selected.offsetLeft','selected.offsetWidth','ResizeObserver','observer.observe(track)',"addEventListener('resize', update)"])assert.ok(filter.includes(value),value)
   for(const key of ['.pazo-choice-indicator--community[data-active="members"]','.pazo-choice-indicator--pet[data-active="myposts"]','.pazo-search-filter-indicator','width 460ms','prefers-reduced-motion: reduce'])assert.ok(css.includes(key),key)
 })
 test('F13 social pet profile liquid tabs glide between posts and information, preserving callbacks and accessibility', async () => {
