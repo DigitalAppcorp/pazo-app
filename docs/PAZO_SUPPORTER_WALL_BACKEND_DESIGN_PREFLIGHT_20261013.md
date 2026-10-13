@@ -81,3 +81,26 @@ La revisión PO del copy contextual por mascota y el contrato de pagos está en 
 5. Fijar gate de autorización para crear/aplicar migración; no confundir la aprobación de **reglas del producto** con aprobación de **cambios técnicos**.
 
 **Actualización posterior:** se aplicó únicamente la migración privada F16 versión `20261013215221` con el consentimiento positivo bloqueado y sin alterar otros esquemas existentes. No se activaron cobros ni vista pública ni publicación de mascotas. Para nuevas fases del muro y pagos se requiere autorización separada.
+
+
+## 6. Auditoría incremental de seguridad y privacidad — 2026-10-13 (SOLO LECTURA)
+
+**Alcance y evidencia:** consultas SELECT a `pg_class`, `pg_policies` y `has_column_privilege` sobre el proyecto alojado `mrybvqdebbgcayuvgkkr`. No se leyeron filas de usuarios, no se ejecutó SQL de escritura, no se modificaron RLS ni funciones. CI del commit documental anterior `4284e9b`: SUCCESS, run `38478928123`. La aprobación visual del consentimiento individual por mascota fue confirmada por el PO; no repetirla.
+
+| Objeto | Estado confirmado | Consecuencia para F16 |
+| --- | --- | --- |
+| `supporter_private.wall_consents` | RLS ON y FORCE RLS ON | Protección estructural verificada; no implica entitlement ni muro real |
+| `public.pets` | RLS ON; `pets_public_read` PERMISSIVE `true` (anon/authenticated) y `f14_moderated_pets_select` RESTRICTIVE con `f14_content_visible('pet_profile',id)` | La política restrictiva se combina con la permisiva en SELECT; conservar moderación y verificar que proyección pública futura no evada esta condición |
+| `public.profiles` | RLS ON; `profiles_public_read` PERMISSIVE `true` (anon/authenticated) | La fila es públicamente legible para columnas concedidas; NO usar `profiles` como roster ni entitlement |
+| `public.profiles.paypal_subscription_id` | `has_column_privilege(...,'SELECT')` = false para anon y authenticated | Riesgo de exposición directa de esa columna **no confirmado**; los grants de columna la protegen en los roles verificados. No inferir protección de otros roles, RPC, vistas o endpoints sin auditar |
+| `public.profiles.id`, `is_founder`, `username` | SELECT = true para anon y authenticated | Son datos legibles públicamente bajo las reglas actuales; el muro F16 futuro debe proyectar solo identidad PET-ONLY sin estos campos |
+
+**Decisiones de cierre del bloque:**
+1. Mantener todos los permisos y políticas actuales sin cambios. Una auditoría no autoriza endurecimiento incidental que pueda romper perfil y Feed.
+2. El muro futuro deberá usar una proyección server-side mínima y verificada por titularidad, consentimiento vigente, entitlement pagado y moderación; nunca SELECT directo de `profiles`, `wall_consents` o ledger.
+3. Antes de cualquier escritura/activación: auditar wrappers/RPC, roles con privilegios, Storage de fotos, comportamiento de sesión anónima y autenticada, baja/retirada y revocación con caché.
+4. **Retención NO CERRADA:** documentar períodos/criterios y obligaciones legales de conservación frente a borrado antes de guardar autorizaciones reales; no inventar plazos ni afirmar cumplimiento legal.
+5. **Pagos NO AUTORIZADOS:** ninguna creación de plan, webhook, ledger, claves o entitlement. `wall_has_verified_entitlement()` permanece bloqueado según último preflight alojado documentado.
+6. El acceso aprobado desde Bienvenida A01 y el preview de consentimiento individual quedan **GATES VISUALES CERRADOS**. La ubicación adicional dentro de sesión iniciada no debe presentarse como trabajo de rediseño obligatorio para este gate de seguridad.
+
+**Resultado:** auditoría de políticas/grants acotada PASS (lectura), implementación/activación de F16 sigue BLOQUEADA por gates separados. No declarar revisión legal ni seguridad integral completadas.
