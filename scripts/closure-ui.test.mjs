@@ -64,6 +64,8 @@ const {PetView}=await load('components/views/PetView.js')
 const {BottomNav}=await load('components/BottomNav.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
+const {LiquidChoiceTabs}=await load('components/ui/LiquidChoiceTabs.js')
+const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchFilters.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
@@ -83,6 +85,77 @@ const button = (root, needle) => root.findAllByType('button').find(b=>buttonText
 
 
 
+
+test('F13 liquid selector keeps both pet utility and three community tabs, in Spanish and English', async () => {
+  for(const [variant,lang,options] of [
+    ['community','es',[['posts','Publicaciones'],['info','Información'],['members','Miembros']]],
+    ['community','en',[['posts','Posts'],['info','Info'],['members','Members']]],
+    ['pet','es',[['menu','Menú y Utilidades'],['myposts','Mis Publicaciones (0)']]],
+    ['pet','en',[['menu','Menu & Utilities'],['myposts','My Posts (0)']]],
+  ]) {
+    const calls=[]
+    const choices=options.map(([id,label])=>({id,label}))
+    const rootProps={variant,active:choices[0].id,choices,onChange:id=>calls.push(id),accessibleLabel:lang==='es'?'Secciones':'Sections'}
+    let ui
+    await act(async()=>{ui=create(React.createElement(LiquidChoiceTabs,rootProps))})
+    const tabs=()=>ui.root.findAllByType('button')
+    const indicator=()=>ui.root.findAll(n=>typeof n.props.className==='string'&&n.props.className.includes('pazo-choice-indicator pointer-events-none'))[0]
+    assert.deepEqual(tabs().map(buttonText),choices.map(c=>c.label))
+    assert.equal(tabs().length,choices.length)
+    assert.equal(tabs()[0].props['aria-pressed'],true)
+    assert.equal(indicator().props['data-active'],choices[0].id)
+    assert.equal(indicator().props['aria-hidden'],'true')
+    for(const [index,option] of choices.entries()) {
+      await act(async()=>{tabs()[index].props.onClick()})
+      assert.equal(calls.at(-1),option.id)
+      await act(async()=>{ui.update(React.createElement(LiquidChoiceTabs,{...rootProps,active:option.id}))})
+      assert.equal(indicator().props['data-active'],option.id)
+      assert.equal(tabs().filter(b=>b.props['aria-pressed']).length,1)
+      assert.equal(tabs()[index].props['aria-current'],'page')
+    }
+    await act(async()=>{ui.unmount()})
+  }
+  const community=fs.readFileSync('src/components/views/CommunityDetailView.tsx','utf8')
+  const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
+  assert.ok(community.includes('variant="community"')&&community.includes('onChange={setActiveTab}'))
+  assert.ok(pet.includes('variant="pet"')&&pet.includes('onChange={setActiveTab}'))
+  for(const tab of ["activeTab === 'posts'","activeTab === 'info'","activeTab === 'members'"])assert.ok(community.includes(tab))
+  assert.ok(pet.includes("activeTab === 'myposts'"))
+  assert.ok(pet.includes('!isEditing && ('),'Edit mode still hides selector')
+})
+
+test('F13 liquid search filter preserves horizontal scrolling, four results types and original telemetry handler', async () => {
+  for(const [lang,names] of [
+    ['es',['Todos','Mascotas','Comunidades','Lugares']],
+    ['en',['All','Pets','Communities','Places']]
+  ]) {
+    const seen=[],all=['all','pet','community','place']
+    const props={filter:'all',lang,onChange:filter=>seen.push(filter)}
+    let ui
+    await act(async()=>{ui=create(React.createElement(LiquidSearchFilters,props))})
+    const buttons=()=>ui.root.findAllByType('button')
+    assert.deepEqual(buttons().map(buttonText),names)
+    assert.deepEqual(buttons().map(b=>b.props['aria-pressed']),[true,false,false,false])
+    // React-test-renderer has no DOM offset measurements; fallback active pill stays visible.
+    assert.ok(buttons()[0].props.className.includes('bg-[#204E4A]'))
+    for(const [index,id] of all.entries()) {
+      await act(async()=>{buttons()[index].props.onClick()})
+      assert.equal(seen.at(-1),id)
+      await act(async()=>{ui.update(React.createElement(LiquidSearchFilters,{...props,filter:id}))})
+      assert.equal(buttons()[index].props['aria-pressed'],true)
+      assert.equal(buttons().filter(b=>b.props['aria-pressed']).length,1)
+    }
+    await act(async()=>{ui.unmount()})
+  }
+  const view=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
+  const filter=fs.readFileSync('src/features/search/components/LiquidSearchFilters.tsx','utf8')
+  const css=fs.readFileSync('src/index.css','utf8')
+  assert.ok(view.includes('<LiquidSearchFilters filter={filter} lang={lang} onChange={handleFilterChange} />'))
+  assert.ok(view.includes("eventType: 'search_filter_change'"))
+  assert.ok(view.includes("setFilter(nextFilter)"))
+  for(const value of ['overflow-x-auto','relative flex w-max min-w-full gap-2','selected.offsetLeft','selected.offsetWidth','ResizeObserver','observer.observe(track)','addEventListener(\\'resize\\', update)'])assert.ok(filter.includes(value),value)
+  for(const key of ['.pazo-choice-indicator--community[data-active="members"]','.pazo-choice-indicator--pet[data-active="myposts"]','.pazo-search-filter-indicator','width 460ms','prefers-reduced-motion: reduce'])assert.ok(css.includes(key),key)
+})
 test('F13 social pet profile liquid tabs glide between posts and information, preserving callbacks and accessibility', async () => {
   for(const [lang,first,second] of [['es','Publicaciones','Información'],['en','Posts','Info']]) {
     const selections=[]

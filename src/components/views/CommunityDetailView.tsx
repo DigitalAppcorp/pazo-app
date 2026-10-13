@@ -27,6 +27,7 @@ import {
 } from '../../services/communityService'
 import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
 import { CommunityLifestyleHero } from '../../features/communities/components/CommunityLifestyleHero'
+import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
@@ -490,21 +491,17 @@ export const CommunityDetailView = ({
         postsCount={posts.length} canJoin={Boolean(currentPet)} isMembershipBusy={isMembershipBusy}
         onMembership={() => void handleMembership()} onBack={onBack} lang={lang} />
 
-      <nav aria-label={lang === 'es' ? 'Secciones de comunidad' : 'Community sections'}
-        className="grid grid-cols-3 gap-1 rounded-full bg-white/80 p-1.5 shadow-[0_4px_19px_rgba(32,78,74,0.05)] backdrop-blur-xl">
-        {([
-          ['posts', lang === 'es' ? 'Publicaciones' : 'Posts'],
-          ['info', lang === 'es' ? 'Información' : 'Info'],
-          ['members', lang === 'es' ? 'Miembros' : 'Members'],
-        ] as Array<[DetailTab, string]>).map(([key, label]) => (
-          <button key={key} type="button" aria-pressed={activeTab === key} onClick={() => setActiveTab(key)}
-            className={`min-w-0 rounded-full px-1.5 py-3 text-[clamp(11px,3.1vw,14px)] font-extrabold transition-colors ${activeTab === key
-              ? 'bg-[#204E4A] text-white shadow-[0_3px_10px_rgba(32,78,74,0.12)]'
-              : 'text-[#5C7470] hover:bg-[#E1E53F]/20 focus-visible:bg-[#E1E53F]/25'}`}>
-            {label}
-          </button>
-        ))}
-      </nav>
+      <LiquidChoiceTabs
+        variant="community"
+        active={activeTab}
+        onChange={setActiveTab}
+        accessibleLabel={lang === 'es' ? 'Secciones de comunidad' : 'Community sections'}
+        choices={[
+          {id: 'posts', label: lang === 'es' ? 'Publicaciones' : 'Posts'},
+          {id: 'info', label: lang === 'es' ? 'Información' : 'Info'},
+          {id: 'members', label: lang === 'es' ? 'Miembros' : 'Members'},
+        ]}
+      />
 
       {activeTab === 'posts' && (
         <div className="space-y-4">

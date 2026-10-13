@@ -50,6 +50,13 @@
 - `src/features/profile/components/PublicProfileTabs.tsx` encapsula el control visual y callbacks existentes con etiquetas ES/EN, `aria-current` / `aria-pressed`; `src/components/views/PublicProfileView.tsx` continúa siendo dueño de `activeTab` y de los paneles/datos reales de posts/info. CSS en `src/index.css` con reduced-motion; iconos, colores, focus surfaces sin contornos y responsive preservados. Sin dependencias, datos, telemetría ni Supabase.
 - **Único gate siguiente:** verificar CI nuevo HEAD y revisión visual del PO en su Vite local. Sin declarar pixel perfect ni cerrar F13, merge o Vercel.
 
+## 1F. F13 — Tres selectores adicionales con animación Liquid (PO 2026-10-13)
+
+- El PO aprobó visualmente Liquid Navigation y solicitó explícitamente **la misma animación** en tres capturas: (1) comunidad **Publicaciones / Información / Miembros**, (2) Mi mascota **Menú y Utilidades / Mis Publicaciones (contador real)**, y (3) búsqueda global **Todos / Mascotas / Comunidades / Lugares**.
+- Implementación bajo gate de solo presentación: `src/components/ui/LiquidChoiceTabs.tsx` reutiliza cápsula verde única y traslado elástico 460 ms en pestañas regulares de 3 y 2 columnas; no duplica ni sustituye el estado `activeTab` de `CommunityDetailView` y `PetView`, preservando handlers y paneles. Ícono/texto activo recibe micro-asentamiento 380 ms. Blanco + verde oficial, texto lime exclusivo de pet donde ya existía. Sin cambiar `PublicProfileTabs` previamente aprobado.
+- `src/features/search/components/LiquidSearchFilters.tsx` mantiene chips con anchura ES/EN variable en carrusel lateral, `overflow-x-auto` original; comparte indicador que mide `offsetLeft/offsetWidth` de cada chip y se anima horizontalmente y en ancho. El indicador viaja DENTRO del track scrollable; no se superpone a la pantalla ni bloquea swipe. Sin acceso DOM hay fallback sólido; ResizeObserver/window resize y cambios de idioma actualizan medidas. El handler `handleFilterChange`, telemetría existente, carga/errores y navegación intactos.
+- Pruebas enfocadas en `scripts/closure-ui.test.mjs`: 2/3/4 tabs, callbacks, ES/EN, pressed/aria, estados y contratos de scroll/medición y reduced motion. Sin dependencias nuevas, Supabase, datos o Vercel. **Siguiente gate:** CI del HEAD + revisión real por PO en Vite local de los tres selectores; F13 y PR #44 DRAFT, sin merge.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**

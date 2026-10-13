@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
+import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
@@ -592,20 +593,16 @@ export const PetView = ({
       </div>
 
       {!isEditing && (
-        <div className="flex pazo-glass-card p-1 rounded-2xl border border-[#204E4A]/10 shadow-xs">
-          <button
-            onClick={() => setActiveTab('menu')}
-            className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'menu' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
-          >
-            {lang === 'es' ? 'Menú y Utilidades' : 'Menu & Utilities'}
-          </button>
-          <button
-            onClick={() => setActiveTab('myposts')}
-            className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'myposts' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
-          >
-            {lang === 'es' ? `Mis Publicaciones (${userPosts.length})` : `My Posts (${userPosts.length})`}
-          </button>
-        </div>
+        <LiquidChoiceTabs
+          variant="pet"
+          active={activeTab}
+          onChange={setActiveTab}
+          accessibleLabel={lang === 'es' ? 'Secciones de mi mascota' : 'My pet sections'}
+          choices={[
+            {id: 'menu', label: lang === 'es' ? 'Menú y Utilidades' : 'Menu & Utilities'},
+            {id: 'myposts', label: lang === 'es' ? `Mis Publicaciones (${userPosts.length})` : `My Posts (${userPosts.length})`},
+          ]}
+        />
       )}
 
       {!isEditing && activeTab === 'myposts' ? (

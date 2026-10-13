@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { searchGlobal } from '../../features/search/searchService'
 import { recordSearchUsageEvent } from '../../features/search/searchTelemetryService'
+import { LiquidSearchFilters } from '../../features/search/components/LiquidSearchFilters'
 import type {
   GlobalSearchResponse,
   GlobalSearchResult,
@@ -268,30 +269,7 @@ export const GlobalSearchView = ({
           </div>
         </div>
 
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-          {(
-            [
-              ['all', lang === 'es' ? 'Todos' : 'All'],
-              ['pet', lang === 'es' ? 'Mascotas' : 'Pets'],
-              ['community', lang === 'es' ? 'Comunidades' : 'Communities'],
-              ['place', lang === 'es' ? 'Lugares' : 'Places'],
-            ] as Array<[SearchFilter, string]>
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleFilterChange(key)}
-              className={
-                'shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-all ' +
-                (filter === key
-                  ? 'bg-[#204E4A] text-[#E1E53F]'
-                  : 'bg-[#FAF8F5] text-[#5C7470]')
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <LiquidSearchFilters filter={filter} lang={lang} onChange={handleFilterChange} />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">

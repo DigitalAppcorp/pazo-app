@@ -234,6 +234,57 @@
   .pazo-profile-tab-icon--active { animation: none; }
 }
 
+
+/* F13 liquid segmented tabs: one moving solid-green surface shared by all choices. */
+.pazo-choice-indicator {
+  position: absolute;
+  background: #204E4A;
+  box-shadow: 0 3px 10px rgba(32, 78, 74, 0.12);
+  transform: translateX(0);
+  transition: transform 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+  border-radius: 9999px;
+}
+.pazo-choice-indicator--community {
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 20px) / 3);
+}
+.pazo-choice-indicator--community[data-active="info"] {
+  transform: translateX(calc(100% + 4px));
+}
+.pazo-choice-indicator--community[data-active="members"] {
+  transform: translateX(calc(200% + 8px));
+}
+.pazo-choice-indicator--pet {
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 2);
+  border-radius: 12px;
+}
+.pazo-choice-indicator--pet[data-active="myposts"] {
+  transform: translateX(100%);
+}
+.pazo-choice-label--active {
+  display: inline-block;
+  animation: pazoProfileTabSettle 380ms cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+.pazo-search-filter-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: #204E4A;
+  border-radius: 9999px;
+  transition: transform 460ms cubic-bezier(0.22, 1.26, 0.36, 1),
+    width 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pazo-choice-indicator, .pazo-search-filter-indicator { transition: none; }
+  .pazo-choice-label--active { animation: none; }
+}
+
 /* Sombra sutil Pazo para reemplazar contornos */
 .soft-card {
   box-shadow: 0 4px 20px -2px rgba(32, 78, 74, 0.06), 0 2px 6px -1px rgba(32, 78, 74, 0.04);
