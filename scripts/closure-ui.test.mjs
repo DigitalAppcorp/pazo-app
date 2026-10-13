@@ -61,6 +61,7 @@ const {OnboardingView}=await load('components/views/OnboardingView.js')
 const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
+const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
 test.after(()=>{
   const target=fs.realpathSync(compiled)
@@ -69,6 +70,45 @@ test.after(()=>{
 })
 const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.children.filter(c=>typeof c==='string')).join(' ')
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
+
+test('F13 messaging coming-soon is branded, bilingual, closeable and never shows synthetic chats for real accounts', async () => {
+  for(const [lang,title,cta,status] of [
+    ['es','Cada amistad comienza con un hola.','Volver a PAZO','En desarrollo'],
+    ['en','Every friendship starts with hello.','Back to PAZO','In development'],
+  ]) {
+    let closes=0, sends=0
+    const props={
+      isOpen:true,
+      isDemo:false,
+      lang,
+      conversations:[{id:'SYNTHETIC-NOT-TO-BE-SHOWN',petName:'Fake pet',personName:'Fake person',lastMessage:'Synthetic message'}],
+      onClose(){closes++},
+      onSendMessage(){sends++}
+    }
+    const markup=renderToStaticMarkup(React.createElement(MessagesModal,props))
+    assert.ok(markup.includes('role="dialog"'))
+    assert.ok(markup.includes('aria-modal="true"'))
+    assert.ok(markup.includes('messages-not-ready-description'))
+    assert.ok(markup.includes(title))
+    assert.ok(markup.includes(status))
+    assert.ok(markup.includes('PAZO'))
+    assert.ok(markup.includes('viewBox="0 0 360 225"')) // Unique PAZO pets/chat artwork.
+    assert.ok(!markup.includes('SYNTHETIC-NOT-TO-BE-SHOWN'))
+    assert.ok(!markup.includes('Fake pet'))
+    assert.ok(!markup.includes('Synthetic message'))
+    assert.ok(!markup.includes('<input'))
+    let renderer
+    await act(async()=>{renderer=create(React.createElement(MessagesModal,props))})
+    await act(async()=>button(renderer.root,cta).props.onClick())
+    const closeButton=renderer.root.findAllByType('button').find(node=>node.props['aria-label']===(lang==='es'?'Cerrar':'Close'))
+    assert.ok(closeButton)
+    await act(async()=>closeButton.props.onClick())
+    assert.equal(closes,2)
+    assert.equal(sends,0)
+    await act(async()=>renderer.unmount())
+    assert.equal(renderToStaticMarkup(React.createElement(MessagesModal,{...props,isOpen:false})),'')
+  }
+})
 
 test('T01/T02/T13 real Create menu preserves post/place/lost routes and active pet identity', async () => {
   for (const [name,lang] of [['Synthetic Cat','es'],['Synthetic Dog','en']]) {
