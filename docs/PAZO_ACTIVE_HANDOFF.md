@@ -60,7 +60,7 @@
 ## 1G. F13 — Aparición suave de tarjetas de Comunidades (PO 2026-10-13)
 
 - El PO aprobó los tres controles Liquid y solicitó **exclusivamente** que las tarjetas de comunidades aparezcan con una animación pequeña al renderizar la lista. Captura: tarjeta con imagen/nombre/descripción/conteo y «Unido».
-- Implementado en `src/components/views/CommunitiesView.tsx` para cada tarjeta real con key estable `community.id`, `pazo-community-card-enter` (fade-in + traslado 9px/escala 0.99 durante 340ms) y escalonado discreto de 50ms limitado al sexto índice. Solo anima al montar las tarjetas después de la carga; no toca datos ni crea elementos ficticios.
+- Implementado en `src/components/views/CommunitiesView.tsx` para cada tarjeta real con key estable `community.id`, `pazo-community-card-enter` (fade-in + traslado leve de 5px durante 160ms) y escalonado de 12ms limitado al tercer índice (duración acumulada máxima ~196ms). El PO rechazó la animación anterior por demasiado lenta; queda reemplazada. Solo anima al montar las tarjetas después de la carga; no toca datos ni crea elementos ficticios.
 - CSS en `src/index.css`, `prefers-reduced-motion: reduce` desactiva la entrada. Se conservan loading/empty, imágenes y botones, click/Enter/Espacio, stopPropagation para unirse/salirse, backend, cero contornos y enfoque existente. Prueba de contrato acotada en `scripts/closure-ui.test.mjs`.
 - **Gate siguiente:** CI nuevo HEAD y revisión visual PO de una lista de comunidades en Vite local. F13 sigue abierta y PR #44 DRAFT; sin merge/Supabase/Vercel.
 

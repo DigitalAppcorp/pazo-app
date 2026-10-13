@@ -184,7 +184,7 @@ export const CommunitiesView = ({
                 key={community.id}
                 role="button"
                 tabIndex={0}
-                style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
+                style={{ animationDelay: `${Math.min(index, 3) * 12}ms` }}
                 onClick={() => setSelectedCommunityId(community.id)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
