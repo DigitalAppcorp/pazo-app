@@ -104,3 +104,36 @@ La revisión PO del copy contextual por mascota y el contrato de pagos está en 
 6. El acceso aprobado desde Bienvenida A01 y el preview de consentimiento individual quedan **GATES VISUALES CERRADOS**. La ubicación adicional dentro de sesión iniciada no debe presentarse como trabajo de rediseño obligatorio para este gate de seguridad.
 
 **Resultado:** auditoría de políticas/grants acotada PASS (lectura), implementación/activación de F16 sigue BLOQUEADA por gates separados. No declarar revisión legal ni seguridad integral completadas.
+
+## 7. Reconciliación de retención y baja F16 — análisis documental (2026-10-13)
+
+**Estado: análisis técnico cerrado; decisión de retención/legal NO cerrada.** Contraste de `docs/PAZO_MVP_MANUAL_DELETION_SOP_20261010.md`, `docs/PAZO_MVP_RETENTION_MATRIX_DRAFT_20261010.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md` y la migración versionada `20261013215221_f16_supporter_wall_consents_foundation.sql`. No se ejecutó SQL ni se modificaron datos alojados.
+
+### Ciclo de vida comprobado en el SQL versionado
+
+| Evento | Efecto estructural o previsto | Validación pendiente |
+| --- | --- | --- |
+| Mascota sin permiso | No se crea una fila por defecto; el gate positivo permanece desactivado | Mantener exclusión del muro |
+| Retirada por titular | `pazo_wall_consent_disable` establece `revoked_at`, sin exigir membresía y sin borrar la fila | Definir conservación mínima del registro revocado; no presentar retiro exitoso antes de confirmación del servidor |
+| Eliminación física de mascota | FK `wall_consents.pet_id → pets.id ON DELETE CASCADE` elimina la fila ligada a esa mascota | Confirmar que el SOP de baja procesa relaciones y Storage antes de borrar la mascota; no borrar directamente |
+| Eliminación física de usuario Auth | FK `owner_id_at_grant → auth.users.id ON DELETE CASCADE` elimina consentimiento si el borrado realmente se completa | No significa que toda la baja sea automática; preservar F14 y excepciones de retención |
+| Cambio de titularidad | `pazo_wall_my_consents` filtra dueño actual y dueño al otorgar; `enable` exige dueño actual | La exclusión del muro público futuro debe aplicar ambas verificaciones y consentimiento nuevo tras cambio |
+| Cancelación, vencimiento, reembolso | Sin ledger/entitlement real, el gate de autorización positiva retorna falso | Establecer reglas vinculadas a cobertura verificada antes de activar; no deducir estado por navegador |
+
+### Criterio de conservación propuesto, NO aprobado como política legal
+
+- **Consentimiento vigente:** conservar exclusivamente identificadores internos mínimos y versión/fechas mientras exista la mascota/cuenta y la finalidad de exhibición esté activa; nunca usar email, tarjeta, identidad humana pública o analytics.
+- **Consentimiento retirado:** mantener solo el registro mínimo imprescindible para demostrar retirada o resolver reclamaciones justificadas; **no se ha fijado duración ni mecanismo de expiración**. La fila revocada ya no deberá habilitar publicación.
+- **Solicitud de eliminación:** el SOP manual F14 gobierna verificación de identidad, relaciones y datos de terceros; la cascada de F16 no demuestra la finalización de eliminación de Auth, Storage, cachés ni respaldos. La evidencia administrativa debe limitarse al mínimo permitido por obligaciones aplicables.
+- **Backups/copias externas:** no garantizar destrucción inmediata; documentar comportamiento real de proveedor y ventanas verificadas antes de prometer plazos.
+- **Nuevos consentimientos:** están bloqueados hasta que exista cobertura pagada server-side, aviso vigente y nuevas autorizaciones expresas. La validación visual previa no autoriza persistencia.
+
+### Condiciones de salida para el gate legal/retención
+
+1. Definir con revisión jurídica/aplicable **criterio o duración operacional verificable** de conservación de autorizaciones y retiros, incluidos casos de reclamación.
+2. Confirmar si la retención elegida requiere migración de purga de registros revocados o cambios de respaldo; diseñar y probar por separado, nunca ejecutar automáticamente sin gate PO.
+3. Incorporar categoría y criterio final en la Privacy Policy/Terms ES/EN y `docs/PAZO_DATA_INVENTORY.md` antes de activar almacenamiento de consentimiento positivo.
+4. Reconciliar con el SOP de cuenta/mascota y los escenarios de revocación, cambio de titularidad, pérdida de elegibilidad, remoción pública y caché.
+5. Mantener `wall_has_verified_entitlement()` cerrado, la UI en simulación y PR #44 DRAFT mientras faltan verificación de pago, permisos de muro y cierre legal.
+
+**Resultado:** no se encontró un motivo para aplicar una nueva migración ahora. La estructura actual contempla retirada y cascada por borrado físico, pero **no implementa caducidad de registros revocados por tiempo**; no declarar cumplimiento legal ni eliminación integral por ese hecho.
