@@ -160,3 +160,44 @@ Cifras matemáticas sin redondeo individual de la tasa intermedia; los proveedor
 **DECISIÓN POSTERIOR DEL PRODUCT OWNER (2026-10-13), prevalece sobre la recomendación económica:** **PayPal es el proveedor inicial elegido** debido a las limitaciones actuales del PO para cobrar mediante Stripe. **Stripe será una integración adicional futura** cuando el PO cumpla los requisitos necesarios; no se plantea sustituir necesariamente a PayPal. La comparación económica anterior es solo referencia, no una decisión de proveedor. Para PayPal, verificar condiciones reales de suscripciones, tarifas, cuenta receptora y requisitos antes de cualquier activación. No usar Checkout/URL de retorno como acreditación: planificar verificación webhook autenticada, consulta server-side de factura/cobro, ledger idempotente y cobertura temporal confirmada. El cambio a proveedor no altera consentimiento PET-ONLY.
 
 **Gate previo a cualquier integración pagada:** el procesador inicial **ya está seleccionado: PayPal**; siguen pendientes comprobación de la cuenta receptora y tarifas aplicables, Privacy/Terms, cancelación/reembolsos y autorización técnica específica de entitlements, webhooks y plan. Diseñar abstracción de proveedor para futura coexistencia PayPal + Stripe, sin construir Stripe ahora. **NO crear producto, plan, claves, endpoint, migración, ni activar entitlement.**
+
+## 9. Contrato técnico PayPal-first — diseño sin activación (2026-10-13)
+
+**Decisión del PO:** PayPal es el procesador inicial por las limitaciones actuales para cobrar por Stripe; Stripe será una integración adicional futura, no un reemplazo forzoso. Solo hay plan mensual USD 2.99. **Diseño únicamente**: sin crear productos/planes, webhooks, secretos, migraciones, Edge Functions o entitlement real.
+
+### Componentes y límites de autoridad
+
+1. **Cliente PAZO (React):** solicitar inicio de suscripción autenticado y mostrar estado `pendiente de verificación`; ningún `onApprove`, retorno de checkout, identificador PayPal recibido del navegador ni `profiles.paypal_subscription_id` concede insignias, temas o muro.
+2. **Adaptador de proveedor PayPal (servidor):** vincular la operación iniciada por `auth.uid()` con una referencia interna opaca de intento. Los identificadores externos de suscripción/producto/plan se mantienen privados; no aceptar un `user_id` arbitrario del cliente para atribución.
+3. **Receptor HTTPS de webhooks (futuro):** verificar criptográficamente la firma PayPal con el Webhook ID correcto, parámetros de transmisión, cuerpo bruto y certificado validado; utilizar las garantías oficiales de PayPal, con protección frente a certificados/URLs no confiables. No aceptar eventos sin firma válida. No registrar cuerpo con PII ni secretos.
+4. **Ingestión idempotente:** asociar por `(provider,event_id)` y transacción real por `(provider,capture_or_sale_id)`, preservar auditoría mínima; los reintentos o eventos desordenados no duplican ni extienden cobertura. Procesar en transacción o cola duradera con reintento seguro; responder éxito solo tras recepción durable, no tras una promesa de procesamiento.
+5. **Conciliación server-side:** consultar PayPal y verificar importe, moneda, plan, cuenta merchant, transacción completada, ausencia de reversión, titular atribuible y vigencia. `BILLING.SUBSCRIPTION.ACTIVATED` por sí solo no significa cobro acreditado; `PAYMENT.SALE.COMPLETED` es señal para conciliar, no para confiar ciegamente en el payload.
+6. **Ledger privado y entitlement:** registrar mínimos de pago/cobertura `paid_through` confirmados, eventos de reversión y estado de renovación por separado; determinar entitlement desde cobertura vigente no reembolsada. Ante error, inconsistencia o ausencia de confirmación, **fail closed**. No revelar importes/historial mediante API social.
+7. **Beneficios:** servicio común consulta entitlement verificado; insignia, tema y muro dependen de este servicio. El muro añade consentimiento por mascota, titularidad actual y moderación; no publica miembros por defecto.
+8. **Portabilidad futura:** modelo interno con `provider` / `external_reference` / transacción y cobertura normalizados. Se podrá agregar Stripe como otro adaptador y método de checkout, sin trasladar suscripciones PayPal automáticamente ni duplicar cobertura si un usuario paga en ambos canales. Decidir reglas de deduplicación antes de introducir el segundo proveedor.
+
+### Matriz mínima de escenarios de prueba, NO ejecutada
+
+| Situación | Resultado requerido |
+| --- | --- |
+| Checkout aprobado sin cargo confirmado | Sin beneficios |
+| Suscripción ACTIVATED sin cobro acreditado | Sin beneficios |
+| Cobro completado, verificado, vinculado a titular y plan correcto | Cobertura hasta fecha verificada |
+| Webhook repetido / fuera de orden | Sin doble crédito |
+| Webhook con firma incorrecta o referencia de otra cuenta | Rechazo; sin crédito |
+| Pago fallido o pendiente | No extender cobertura |
+| Cancelación de renovación | Mantener solo cobertura pagada y confirmada, sin renovación ficticia |
+| Reembolso/contracargo que invalida cobertura | Revocar elegibilidad según pagos conciliados |
+| Expiración | No mostrar insignias ni mascota en muro |
+| Pérdida de elegibilidad y posterior reactivación | Nuevo consentimiento expreso para regresar al muro |
+| Retirada de mascota aun sin membresía vigente | Permitir revocación, sin exigir checkout |
+| Futuro pago por dos proveedores | No duplicar meses ni acceso; política por decidir |
+
+### Gates pendientes
+
+- **Comerciales/legales:** validar titular de cuenta PayPal Business, elegibilidad de PayPal Subscriptions, comisiones específicas de ese producto, impuestos cuando correspondan, términos de renovación/cancelación/reembolso, Privacy/Terms y retención.
+- **Arquitectura:** aprobar contrato de eventos, esquema mínimo privado, ciclo de vida de intentos, tratamiento de duplicados/reembolsos y política `paid_through`. Auditar permisos, RLS, funciones y datos de lectura pública antes de cualquier wrapper.
+- **Implementación:** autorización técnica explícita para crear recursos PayPal, claves, endpoints, SQL/Edge y ejecución alojada; primero pruebas aisladas/sandbox, luego gate de producción distinto.
+- **Producto:** respetar las UI aprobadas; ninguna membresía/insignia/muro real hasta consentimiento y pago verificables.
+
+**Documentación oficial consultada 2026-10-13:** https://developer.paypal.com/subscriptions/integrate (actualizada 2026-09-14), https://developer.paypal.com/api/rest/webhooks/rest/ (actualizada 2026-06-18), https://developer.paypal.com/api/subscriptions/v1 . La guía de webhook contempla reintentos de entrega y verificación de firma; no asumir orden, unicidad ni pago confirmado.
