@@ -119,6 +119,15 @@
 - **Pruebas def85882:** estado vacío en dos idiomas, filtro, cierre, apertura de avistamiento, bloqueo de notificación sin destino, scroll y paginación manual: CI SUCCESS (#38333808283). El código también CI SUCCESS (#38333718441). La validación visual de PO en Vite permanece PENDIENTE.
 - **Restricciones:** Mapa/Lugares congelado; no Supabase, Vercel deliberado, main, migraciones ni merge. PR #44 DRAFT.
 
+## F13 — Solo aviso «Cerca · Próximamente»: opción 4 «Explora tu mundo» (PO aprobado, 2026-10-13)
+
+- **Alcance PO explícito:** modificar ÚNICAMENTE el aviso/tarjeta visible al elegir «Cerca · Próximamente» en Inicio. No rediseñar encabezado «Su pequeño mundo», pestañas Para ti/Cerca, publicaciones, navegación inferior ni Lugares/Mapa.
+- **Código f87d29cc:** único archivo de UI modificado `src/components/views/HomeView.tsx`. Se sustituyó solo el JSX de la rama `feedFilter === 'nearby'` y se añadió `NearbyNeighborhoodArtwork`, SVG decorativo original de casas, árboles, perro, gato y dos pines no georreferenciados. Tarjeta cálida con superficie glass ligera, sin bordes.
+- Copy aprobado: etiqueta textual simple «Próximamente en PAZO» (no pill amarilla), título «Un mundo de mascotas a tu alrededor», descripción corta que plantea una posibilidad futura sin prometer que está activa; versión inglesa incluida.
+- **Contrato de validación preservado:** mismos callbacks `handleSelectNearby` y `handleNearbyInterest`, mismo insert existente `feature_nearby_interested`, mismos estados `hasVotedNearby`, `isSubmittingNearby`, `canReport`, sin nuevas llamadas de ubicación, trackers, tablas ni alteración de Supabase. CTA «Me interesa esta función» o bloqueo de cuenta, feedback de voto e inglés.
+- **Pruebas 400db79a:** se actualiza prueba T04 para el texto real, y se verifica comportamiento ES/EN de avatar/artwork, interés deshabilitado para demo, que el aviso desaparezca al volver «Para ti» y que los identificadores de experimento existentes sigan intactos. GitHub CI SUCCESS #38334840145.
+- **Gate pendiente:** screenshot local del PO en Vite. NO confundir CI/build PASS con aceptación visual. PR #44 DRAFT, RC/main sin merge, Lugares/Mapa congelado.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
