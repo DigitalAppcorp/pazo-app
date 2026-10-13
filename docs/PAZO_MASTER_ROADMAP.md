@@ -879,7 +879,7 @@ Estas funciones pertenecen al concepto original de PAZO, pero no deben entrar au
 ## Fase 16 — Monetización base
 **Estado: BACKLOG**
 
-**Decisiones de producto registradas (PO 2026-10-13):** membresía voluntaria de apoyo de **USD 2.99 al mes, con una sola periodicidad mensual y SIN plan anual por ahora**, manteniendo el núcleo de PAZO gratuito. Una opción anual futura requiere otra aprobación del PO. Nombre, beneficios, reglas de elegibilidad y cancelación/gracia continúan pendientes. Esto no cambia el estado BACKLOG ni autoriza checkout, gastos, suscripciones activas o cambios de Supabase.
+**Decisiones de producto registradas (PO 2026-10-13):** membresía voluntaria **«Amigo de PAZO» de USD 2.99 al mes, con una sola periodicidad mensual y SIN plan anual por ahora**, manteniendo el núcleo de PAZO gratuito. Una opción anual futura requiere otra aprobación del PO. Los beneficios, insignias, reglas de elegibilidad y cancelación/gracia continúan pendientes. Esto no cambia el estado BACKLOG ni autoriza checkout, gastos, suscripciones activas o cambios de Supabase.
 
 - membresías;
 - beneficios;

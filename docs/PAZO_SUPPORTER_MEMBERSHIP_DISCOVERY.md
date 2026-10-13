@@ -80,6 +80,9 @@ Las cifras netas anteriores son estimaciones históricas, no tarifas PayPal veri
 
 ## 6. Beneficios — recomendación provisional
 
+**Nombre comercial APROBADO por Product Owner (2026-10-13): Amigo de PAZO.** Se usará para identificar la membresía de apoyo voluntario de USD 2.99/mes (sin opción anual por ahora). El nombre no aprueba automáticamente ninguna insignia, categoría de fundador, ventaja premium o cambio de `profiles.is_founder`; la implementación visual/entitlement se definirá y validará separadamente.
+
+
 La propuesta debe recompensar apoyo sin romper el producto gratuito.
 
 Candidatos de bajo riesgo:
@@ -126,7 +129,7 @@ No almacenar PII de pago en analytics de PAZO.
 Product Owner debe cerrar antes de reactivar:
 - precio mensual: **APROBADO USD 2.99/mes (PO 2026-10-13)**;
 - periodicidad: **APROBADO solo mensual, sin plan anual por ahora (PO 2026-10-13)**;
-- nombre: Supporter / Fundador / Círculo de Fundadores / otro;
+- nombre comercial: **APROBADO — Amigo de PAZO (PO 2026-10-13)**;
 - beneficios incluidos;
 - regla exacta de elegibilidad;
 - cooldown del pitch;

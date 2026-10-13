@@ -43,13 +43,12 @@ Intención aprobada:
 - mensaje principal: ayudar a mantener PAZO activo y sostenible;
 - evitar una experiencia tipo paywall o “llegaste, págame”.
 
-**Precio y periodicidad aprobados por el PO el 2026-10-13: únicamente USD 2.99/mes.** Sin plan anual por ahora; una opción anual futura requeriría nueva aprobación. No es autorización para crear planes, configurar secretos o activar pagos.
+**Precio, periodicidad y nombre aprobados por el PO el 2026-10-13: «Amigo de PAZO», USD 2.99/mes, únicamente mensual.** Sin plan anual por ahora; una opción anual futura requeriría nueva aprobación. Esto no concede automáticamente insignias ni modifica el campo técnico legado `is_founder`. No es autorización para crear planes, configurar secretos o activar pagos.
 
 Aún NO decidido:
 - beneficios definitivos;
 - umbral exacto de elegibilidad para mostrar el pitch;
 - frecuencia de reaparición;
-- nombre definitivo del programa;
 - política de cancelación/gracia desde UX.
 
 Regla:
