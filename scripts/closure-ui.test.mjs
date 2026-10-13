@@ -989,20 +989,36 @@ test('F16 discoverable customization opens from Mi mascota with own pet, no link
   assert.ok(!preview.includes('animate-float'),'Text and portrait must never float')
 })
 
-test('F16 gratitude wall discoverability is subtle, bilingual and does not dominate Explore', () => {
-  const source=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
-  assert.ok(source.includes('setShowGratitudeWall(true)'),'Subtle access remains functional')
-  assert.ok(source.includes('ref={gratitudeEntryRef}'),'Return focus remains available')
-  assert.ok(source.includes('!trimmedQuery'),'Only appears before active searching')
-  assert.ok(source.includes('inline-flex min-h-10')&&source.includes('justify-end'),'Small right-aligned secondary link')
-  assert.ok(!source.includes('bg-[#FBE8D9]'),'Do not restore intrusive full-width salmon promotion')
-  assert.ok(!source.includes('Conoce el muro de agradecimiento'),'Remove long promotional subtitle')
-  assert.ok(source.includes("'Amigos de PAZO'")&&source.includes("'PAZO Friends'"),'Bilingual compact label is present')
-  assert.ok(source.includes("'· En desarrollo'")&&source.includes("'· In development'"),'Bilingual pending-state label is present')
-  assert.ok(source.includes("'Busca en todo PAZO'")&&source.includes("'Search all of PAZO'"),'Primary search guidance is intact')
-  const compact=source.slice(source.indexOf('ref={gratitudeEntryRef}'),source.indexOf('</button>',source.indexOf('ref={gratitudeEntryRef}')))
-  const compactClasses=compact.match(/className="([^"]+)"/)[1].split(/\s+/)
-  assert.ok(!compactClasses.includes('w-full')&&!compactClasses.includes('p-4')&&!compactClasses.some(token=>token.startsWith('shadow-')),'Secondary entry is neither full-width nor a prominent card')
+test('F16 gratitude wall is accessible from welcome A01 without login, not in Explore', async () => {
+  const search=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
+  assert.ok(!search.includes('showGratitudeWall')&&!search.includes('GratitudeWallPreview'),'Explore must remain a search-only experience')
+  const welcome=fs.readFileSync('src/components/views/OnboardingView.tsx','utf8')
+  assert.ok(welcome.includes("step === 'A01' && showGratitudeWall"),'Public wall only exposed on the welcome step')
+  assert.ok(welcome.includes('gratitudeWelcomeLinkRef.current?.focus()'),'Close returns focus to the welcome link')
+  assert.ok(welcome.includes('min-h-0 flex-1 flex-col overflow-y-auto'),'Center content scrolls if phone is short')
+  assert.ok(welcome.includes('shrink-0 space-y-2.5 pb-2'),'Main account actions stay visible in anchored footer')
+  for(const [lang,entry,primary,login,back] of [
+    ['es','Conoce a los Amigos de PAZO','Comenzar','Ya tengo una cuenta','Volver a bienvenida'],
+    ['en','Meet the PAZO Friends','Get started','I already have an account','Back to welcome'],
+  ]) {
+    let ui
+    await act(async()=>{ui=create(React.createElement(OnboardingView,{initialStep:'A01',lang,onComplete(){},onSkipToLogin(){},onQuickDemo(){},onToggleLang(){}}))})
+    assert.ok(button(ui.root,entry),'Welcome link works before sign-up')
+    assert.ok(button(ui.root,primary),'Signup preserved')
+    assert.ok(button(ui.root,login),'Login preserved')
+    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
+    await act(async()=>button(ui.root,entry).props.onClick())
+    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,1,'Opening wall does not require a session')
+    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Aún no hay mascotas participantes':'No participating pets yet'))
+    const dialog=ui.root.findAllByProps({role:'dialog'})[0]
+    const close=dialog.findAllByType('button').find(b=>b.props['aria-label']===back)
+    assert.ok(close,'Return button names welcome correctly')
+    await act(async()=>close.props.onClick())
+    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
+    assert.ok(button(ui.root,entry),'Welcome accessible again')
+    assert.ok(button(ui.root,primary))
+    await act(async()=>ui.unmount())
+  }
 })
 
 test('F16 gratitude wall preview has consent-safe two-column placeholders and working category tabs ES/EN', async () => {
@@ -1027,9 +1043,9 @@ test('F16 gratitude wall preview has consent-safe two-column placeholders and wo
     await act(async()=>ui.unmount())
   }
   const content=fs.readFileSync('src/features/supporter/components/GratitudeWallPreview.tsx','utf8')
-  const explore=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
-  assert.ok(explore.includes('setShowGratitudeWall(true)'),'Explore entry must work without typed URL')
-  assert.ok(explore.includes('<GratitudeWallPreview'),'Dedicated wall screen must be reachable from Explore')
+  const welcome=fs.readFileSync('src/components/views/OnboardingView.tsx','utf8')
+  assert.ok(welcome.includes('setShowGratitudeWall(true)'),'Public wall entry works without authentication')
+  assert.ok(welcome.includes('<GratitudeWallPreview'),'Wall is accessible from welcome A01')
   assert.ok(!content.includes('supabase')&&!content.includes('localStorage'),'No paying pets or consent inferred from browser')
   assert.ok(!content.includes('border-')&&!content.includes('ring-'),'No new outlined surfaces')
 })

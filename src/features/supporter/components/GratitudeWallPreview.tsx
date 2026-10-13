@@ -36,7 +36,7 @@ export const GratitudeWallPreview = ({ lang, onClose }: GratitudeWallPreviewProp
       <header className="shrink-0 bg-[#FAF8F5]/95 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-xl items-center gap-3">
           <button ref={closeRef} type="button" onClick={onClose}
-            aria-label={lang === 'es' ? 'Volver a Explorar' : 'Back to Explore'}
+            aria-label={lang === 'es' ? 'Volver a bienvenida' : 'Back to welcome'}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-[0_4px_14px_rgba(32,78,74,0.08)] transition-colors hover:bg-[#E1E53F]/40 focus-visible:bg-[#E1E53F]/40">
             <span aria-hidden="true" className="text-2xl font-bold">‹</span>
           </button>

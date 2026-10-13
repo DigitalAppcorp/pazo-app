@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { searchGlobal } from '../../features/search/searchService'
 import { recordSearchUsageEvent } from '../../features/search/searchTelemetryService'
 import { LiquidSearchFilters } from '../../features/search/components/LiquidSearchFilters'
-import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
 import type {
   GlobalSearchResponse,
   GlobalSearchResult,
@@ -67,8 +66,6 @@ export const GlobalSearchView = ({
   lang,
 }: GlobalSearchViewProps) => {
   const [query, setQuery] = useState('')
-  const [showGratitudeWall, setShowGratitudeWall] = useState(false)
-  const gratitudeEntryRef = useRef<HTMLButtonElement>(null)
   const [filter, setFilter] = useState<SearchFilter>('all')
   const [response, setResponse] = useState<GlobalSearchResponse>(EMPTY_RESPONSE)
   const [isLoading, setIsLoading] = useState(false)
@@ -138,12 +135,12 @@ export const GlobalSearchView = ({
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !showGratitudeWall) onClose()
+      if (event.key === 'Escape') onClose()
     }
 
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [onClose, showGratitudeWall])
+  }, [onClose])
 
   const totalResults =
     response.pets.length + response.communities.length + response.places.length
@@ -276,25 +273,6 @@ export const GlobalSearchView = ({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">
-        {/* Secondary discovery: a quiet text link, not a promotional banner competing with search. */}
-        {!trimmedQuery && (
-          <div className="-mt-1 mb-2 flex justify-end">
-            <button
-              ref={gratitudeEntryRef}
-              type="button"
-              onClick={() => setShowGratitudeWall(true)}
-              aria-label={lang === 'es' ? 'Ver muro Gracias, Amigos de PAZO (en desarrollo)' : 'Open Thank you, PAZO Friends wall (in development)'}
-              className="inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-full px-2.5 py-2 text-[12px] font-semibold text-[#5C7470] transition-colors hover:bg-[#EFF2EA] hover:text-[#204E4A] focus-visible:bg-[#E1E53F]/40 focus-visible:text-[#204E4A]"
-            >
-              <IconPaw size={13} className="shrink-0 text-[#73918A]" />
-              <span>{lang === 'es' ? 'Amigos de PAZO' : 'PAZO Friends'}</span>
-              <span className="text-[11px] font-normal text-[#7B9089]">
-                {lang === 'es' ? '· En desarrollo' : '· In development'}
-              </span>
-              <span aria-hidden="true" className="text-[17px] leading-none">›</span>
-            </button>
-          </div>
-        )}
         {!canSearch ? (
           <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
             <p className="text-sm font-black text-[#204E4A]">
@@ -401,15 +379,6 @@ export const GlobalSearchView = ({
           </div>
         )}
       </div>
-      {showGratitudeWall && (
-        <GratitudeWallPreview
-          lang={lang}
-          onClose={() => {
-            setShowGratitudeWall(false)
-            gratitudeEntryRef.current?.focus()
-          }}
-        />
-      )}
     </div>
   )
 }

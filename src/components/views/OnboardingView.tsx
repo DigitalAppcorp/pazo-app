@@ -1,5 +1,5 @@
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
@@ -7,6 +7,7 @@ import { createPetProfile } from '../../services/petService'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
+import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
@@ -28,6 +29,9 @@ export const OnboardingView = ({
 }: OnboardingViewProps) => {
   const [step, setStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>(initialStep)
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
+  // Discoverable before account creation; this preview has no entitlement or consent.
+  const [showGratitudeWall, setShowGratitudeWall] = useState(false)
+  const gratitudeWelcomeLinkRef = useRef<HTMLButtonElement>(null)
 
   // Sincroniza el paso si cambia desde App.tsx (Vital para el redireccionamiento)
   useEffect(() => {
@@ -166,8 +170,8 @@ export const OnboardingView = ({
 
       {step === 'A01' && (
         /* ================= A01 / BIENVENIDA ================= */
-        <div className="flex flex-col h-full justify-between relative z-10 animate-slide-up">
-          <header className="flex justify-between items-center pt-2">
+        <div className="flex min-h-0 h-full flex-col justify-between relative z-10 animate-slide-up">
+          <header className="flex shrink-0 justify-between items-center pt-2">
             <div className="flex items-center gap-2">
               <span className="font-black text-2xl tracking-tighter text-[#204E4A]">pazo.</span>
               <span className="w-2.5 h-2.5 rounded-full bg-[#E1E53F] animate-pulse-soft"></span>
@@ -180,7 +184,9 @@ export const OnboardingView = ({
             </button>
           </header>
 
-          <div className="my-auto py-3 space-y-4">
+          {/* Allow center content to scroll on short phones; keep main actions visible. */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+            <div className="my-auto space-y-4 py-3">
             <div className="relative">
               <div className="w-full h-64 rounded-[2.2rem] overflow-hidden shadow-[0_12px_32px_rgba(32,78,74,0.12)] soft-card">
                 <img
@@ -204,10 +210,21 @@ export const OnboardingView = ({
               <p className="text-[16px] leading-relaxed text-[#5C7470]">
                 {lang === 'es' ? "Comparte su vida. Encuentra tu comunidad. Cuida lo que más quieres." : "Share their life. Find your community. Care for those you love."}
               </p>
+              <button
+                ref={gratitudeWelcomeLinkRef}
+                type="button"
+                onClick={() => setShowGratitudeWall(true)}
+                className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl px-1.5 py-2 text-left text-[13px] font-semibold text-[#57776F] transition-colors hover:text-[#204E4A] focus-visible:bg-[#E1E53F]/35 focus-visible:text-[#204E4A]"
+              >
+                <IconPaw size={16} className="shrink-0 text-[#7A9B8E]" />
+                <span>{lang === 'es' ? 'Conoce a los Amigos de PAZO' : 'Meet the PAZO Friends'}</span>
+                <span aria-hidden="true" className="text-[18px] leading-none">›</span>
+              </button>
+            </div>
             </div>
           </div>
 
-          <div className="space-y-2.5 pb-2">
+          <div className="shrink-0 space-y-2.5 pb-2">
             <button
               onClick={() => setStep('A02')}
               className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold text-[18px] py-4 rounded-full shadow-[0_8px_25px_rgba(225,229,63,0.38)] transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
@@ -584,6 +601,15 @@ export const OnboardingView = ({
             </p>
           </div>
         </div>
+      )}
+      {step === 'A01' && showGratitudeWall && (
+        <GratitudeWallPreview
+          lang={lang}
+          onClose={() => {
+            setShowGratitudeWall(false)
+            gratitudeWelcomeLinkRef.current?.focus()
+          }}
+        />
       )}
       {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
     </div>
