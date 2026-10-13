@@ -879,6 +879,8 @@ Estas funciones pertenecen al concepto original de PAZO, pero no deben entrar au
 ## Fase 16 — Monetización base
 **Estado: BACKLOG**
 
+**Decisión de producto registrada (PO 2026-10-13):** membresía voluntaria de apoyo a **USD 2.99 al mes**, con el núcleo de PAZO gratuito. El plan anual, nombre, beneficios, reglas de elegibilidad y cancelación/gracia continúan pendientes. Esto no cambia el estado BACKLOG ni autoriza checkout, gastos, suscripciones activas o cambios de Supabase.
+
 - membresías;
 - beneficios;
 - PayPal o pasarela definitiva;
@@ -888,7 +890,7 @@ Estas funciones pertenecen al concepto original de PAZO, pero no deben entrar au
 - cancelación;
 - fundador/premium.
 
-Antes de implementar, decidir producto y precios.
+Antes de implementar, cerrar los demás detalles de producto y confirmar las condiciones de suscripción y tarifas vigentes de PayPal. El precio mensual USD 2.99 ya está decidido.
 
 ## Fase 17 — Parejas / Matches de mascotas
 **Estado: BACKLOG**

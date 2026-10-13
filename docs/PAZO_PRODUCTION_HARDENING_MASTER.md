@@ -43,8 +43,9 @@ Intención aprobada:
 - mensaje principal: ayudar a mantener PAZO activo y sostenible;
 - evitar una experiencia tipo paywall o “llegaste, págame”.
 
+**Precio mensual aprobado por el PO el 2026-10-13: USD 2.99/mes.** No es autorización para crear planes, configurar secretos o activar pagos.
+
 Aún NO decidido:
-- precio definitivo;
 - beneficios definitivos;
 - umbral exacto de elegibilidad para mostrar el pitch;
 - frecuencia de reaparición;
