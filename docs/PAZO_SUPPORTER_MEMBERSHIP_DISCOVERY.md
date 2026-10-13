@@ -143,6 +143,10 @@ La presencia en el muro exige **opt-in explícito y revocable, por mascota**; si
 
 El primer acceso visual al muro en Explorar se consideró «muy invasivo»: tarjeta promocional salmón de ancho completo con icono grande y dos líneas. Se reemplaza por **enlace secundario compacto a la derecha** «Amigos de PAZO · En desarrollo», pequeño y sin relleno llamativo; solo cuando la búsqueda está vacía. Abre exactamente la misma pantalla y no cambia su cuadrícula aprobada. El PO debe validar el nuevo acceso en Vite. No reintroducir una tarjeta grande ni confundir este ajuste de discoverability con la aprobación del muro.
 
+### Acceso público desde bienvenida — concepto visual aprobado (PO 2026-10-13)
+
+El PO rechazó el elemento promocional en Explorar y propuso **Bienvenida A01**, la primera vista de PAZO para quienes todavía no tienen cuenta. Aprobó el concepto de un **enlace pequeño bajo «Su mundo, más cerca»**, sin tarjeta, banner ni CTA competidor de «Comenzar» o «Ya tengo una cuenta». El enlace «Conoce a los Amigos de PAZO» (EN «Meet the PAZO Friends») abre el muro de cuadrícula en modo vista previa sin iniciar sesión. El regreso vuelve a A01; en pantallas bajas solo el contenido central puede hacer scroll para conservar acciones al pie. Se eliminó por completo el acceso al muro desde Explorar. La selección privada simulada permanece bajo Mi mascota. **Pendiente:** revisión visual en Vite y decisión futura del punto de lectura pública para sesiones ya autenticadas. Sin consentimientos almacenados, entitlement real, Supabase ni PayPal.
+
 ## 7. Entitlement
 
 Fuente de verdad:
