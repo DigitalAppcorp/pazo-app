@@ -135,6 +135,10 @@ El PO eligió **flotación vertical suave + deriva lateral/rotación mínima (op
 
 La presencia en el muro exige **opt-in explícito y revocable, por mascota**; sin publicación automática por apoyar o adquirir una suscripción. Requiere verificar entitlement de la cuenta en backend, seleccionar mascota(s) autorizada(s), consulta pública minimizada, retiro y un estado vacío verídico, no usuarios simulados en producción. «Más tiempo apoyando» significa solo un ordenamiento informativo futuro con historial verificado; **no es un ranking de valor**, ni autorización para mostrar historiales de pago. **Pendientes de definición funcional y aprobación:** entrada exacta a pantalla, detalle de consentimiento y cancelación, período/tiempo acumulado y desempate, ordenamiento real, política de pérdida de elegibilidad, interacción de tarjetas, y regla de retirada/privacidad. Esta aprobación **no autoriza programar backend, activar PayPal ni instalar membresías**; F16 sigue BACKLOG.
 
+### Pantallas de preview aprobadas para desarrollar (PO 2026-10-13)
+
+**Entrada pública**: desde pantalla de Explorar/búsqueda global, con un enlace visible «Gracias, Amigos de PAZO» a vista dedicada en cuadrícula; filtros Todos / Recientes / Más tiempo apoyando, inicialmente sin participantes. **Entrada privada**: desde Mi mascota → Menú y Utilidades → Amigo de PAZO, con un panel de selección por mascota, sin pedir nombres humanos ni aliases. El PO autorizó ambos recorridos. El prototipo usa únicamente elementos de diseño vacíos en el muro público y las mascotas ya cargadas de la propia cuenta en gestión privada; **selecciones exclusivamente visuales, sin escritura**. La UI anuncia explícitamente que **ni hay consentimiento real ni publicaciones**. Aún se requieren backend de entitlement/opt-in por mascota y autorización separada antes de activar guardar/publicar. Probar visualmente con PO.
+
 ## 7. Entitlement
 
 Fuente de verdad:

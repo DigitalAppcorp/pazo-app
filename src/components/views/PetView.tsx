@@ -6,6 +6,7 @@ import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
 import { SupporterThemePreviewPanel } from '../../features/supporter/components/SupporterThemePreviewPanel'
+import { GratitudeParticipationPreview } from '../../features/supporter/components/GratitudeParticipationPreview'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
@@ -66,6 +67,8 @@ export const PetView = ({
   const [isSaving, setIsSaving] = useState(false)
   const [showSupporterThemePreview, setShowSupporterThemePreview] = useState(false)
   const supporterPreviewEntryRef = useRef<HTMLButtonElement>(null)
+  const [showGratitudeParticipation, setShowGratitudeParticipation] = useState(false)
+  const gratitudeParticipationEntryRef = useRef<HTMLButtonElement>(null)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
   const [showSettings, setShowSettings] = useState(false)
@@ -674,6 +677,28 @@ export const PetView = ({
             <span aria-hidden="true" className="ml-2 text-xl font-extrabold text-[#5C7470]">›</span>
           </button>
 
+          <button
+            ref={gratitudeParticipationEntryRef}
+            type="button"
+            onClick={() => setShowGratitudeParticipation(true)}
+            className="flex w-full items-center justify-between gap-3 rounded-[2rem] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F8EDF0] focus-visible:bg-[#E1E53F]/30"
+          >
+            <span className="flex min-w-0 items-center gap-3.5">
+              <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FBE0E4] text-[#D96D7A]">
+                <IconPaw size={22} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[16px] font-extrabold text-[#204E4A]">
+                  {lang === 'es' ? 'Amigo de PAZO' : 'PAZO Friend'}
+                </span>
+                <span className="block text-[12px] font-medium text-[#5C7470]">
+                  {lang === 'es' ? 'Participar en el muro · En desarrollo' : 'Join the gratitude wall · In development'}
+                </span>
+              </span>
+            </span>
+            <span aria-hidden="true" className="ml-2 text-xl font-bold text-[#5C7470]">›</span>
+          </button>
+
           <div
             onClick={onOpenQRPassport}
             className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
@@ -805,6 +830,16 @@ export const PetView = ({
           onClose={() => {
             setShowSupporterThemePreview(false)
             supporterPreviewEntryRef.current?.focus()
+          }}
+        />
+      )}
+      {showGratitudeParticipation && (
+        <GratitudeParticipationPreview
+          pets={availablePets}
+          lang={lang}
+          onClose={() => {
+            setShowGratitudeParticipation(false)
+            gratitudeParticipationEntryRef.current?.focus()
           }}
         />
       )}

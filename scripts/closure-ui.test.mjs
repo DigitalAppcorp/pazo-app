@@ -66,6 +66,8 @@ const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {SupporterThemePreviewPicker,SupporterProfileBackdrop,SUPPORTER_PROFILE_THEMES}=await load('features/supporter/components/SupporterProfileThemes.js')
 const {SupporterThemePreviewPanel}=await load('features/supporter/components/SupporterThemePreviewPanel.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
+const {GratitudeWallPreview}=await load('features/supporter/components/GratitudeWallPreview.js')
+const {GratitudeParticipationPreview}=await load('features/supporter/components/GratitudeParticipationPreview.js')
 const {LiquidChoiceTabs}=await load('components/ui/LiquidChoiceTabs.js')
 const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchFilters.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
@@ -985,6 +987,64 @@ test('F16 discoverable customization opens from Mi mascota with own pet, no link
   assert.ok(css.includes('translate3d(3px, -6px, 0) rotate(2deg)'),'Float movement stays within a subtle range')
   assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion disables ornamental animation')
   assert.ok(!preview.includes('animate-float'),'Text and portrait must never float')
+})
+
+test('F16 gratitude wall preview has consent-safe two-column placeholders and working category tabs ES/EN', async () => {
+  for(const [lang,all,recent,longtime] of [
+    ['es','Todos','Recientes','Más tiempo apoyando'],
+    ['en','All','Recent','Longtime supporters'],
+  ]) {
+    let ui
+    await act(async()=>{ui=create(React.createElement(GratitudeWallPreview,{lang,onClose(){}}))})
+    const root=ui.root
+    assert.equal(root.findAllByProps({role:'dialog'}).length,1)
+    assert.equal(root.findAllByProps({'aria-label':lang==='es'?'Cuadrícula de mascotas':'Pet grid'}).length,1)
+    assert.equal(root.findAllByProps({'aria-hidden':'true'}).filter(x=>typeof x.props.className==='string'&&x.props.className.includes('grid grid-cols-2')).length,1)
+    assert.ok(button(root,all))
+    assert.equal(button(root,all).props['aria-pressed'],true)
+    await act(async()=>button(root,recent).props.onClick())
+    assert.equal(button(root,recent).props['aria-pressed'],true)
+    await act(async()=>button(root,longtime).props.onClick())
+    assert.equal(button(root,longtime).props['aria-pressed'],true)
+    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Aún no hay mascotas participantes':'No participating pets yet'))
+    assert.ok(!JSON.stringify(ui.toJSON()).includes('@luna')&&!JSON.stringify(ui.toJSON()).includes('12 MESES'))
+    await act(async()=>ui.unmount())
+  }
+  const content=fs.readFileSync('src/features/supporter/components/GratitudeWallPreview.tsx','utf8')
+  const explore=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
+  assert.ok(explore.includes('setShowGratitudeWall(true)'),'Explore entry must work without typed URL')
+  assert.ok(explore.includes('<GratitudeWallPreview'),'Dedicated wall screen must be reachable from Explore')
+  assert.ok(!content.includes('supabase')&&!content.includes('localStorage'),'No paying pets or consent inferred from browser')
+  assert.ok(!content.includes('border-')&&!content.includes('ring-'),'No new outlined surfaces')
+})
+
+test('F16 pet-specific gratitude participation simulates reversible selection without recording consent', async () => {
+  const pets=[
+    {id:'p1',name:'Luna',species:'perro',photoUrl:'https://synthetic.invalid/luna.png'},
+    {id:'p2',name:'Kira',species:'gato',photoUrl:'https://synthetic.invalid/kira.png'}
+  ]
+  for(const lang of ['es','en']) {
+    let ui
+    await act(async()=>{ui=create(React.createElement(GratitudeParticipationPreview,{pets,lang,onClose(){}}))})
+    const root=ui.root
+    const options=()=>root.findAllByType('button').filter(b=>b.props['aria-pressed']!==undefined)
+    assert.equal(options().length,2)
+    assert.equal(options().filter(b=>b.props['aria-pressed']).length,0)
+    await act(async()=>options()[0].props.onClick())
+    assert.equal(options()[0].props['aria-pressed'],true)
+    assert.equal(options()[1].props['aria-pressed'],false)
+    await act(async()=>options()[0].props.onClick())
+    assert.equal(options()[0].props['aria-pressed'],false)
+    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Sin guardar cambios':'Changes are not saved'))
+    await act(async()=>ui.unmount())
+  }
+  const content=fs.readFileSync('src/features/supporter/components/GratitudeParticipationPreview.tsx','utf8')
+  const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
+  assert.ok(pet.includes('setShowGratitudeParticipation(true)'))
+  assert.ok(pet.includes('pets={availablePets}'))
+  assert.ok(pet.includes('<GratitudeParticipationPreview'))
+  assert.ok(!content.includes('supabase')&&!content.includes('localStorage')&&!content.includes('fetch('))
+  assert.ok(!content.includes('border-')&&!content.includes('ring-'),'No new outlined surfaces')
 })
 
 test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {
