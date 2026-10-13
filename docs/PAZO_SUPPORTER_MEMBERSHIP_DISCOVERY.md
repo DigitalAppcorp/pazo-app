@@ -147,6 +147,10 @@ El primer acceso visual al muro en Explorar se consideró «muy invasivo»: tarj
 
 El PO rechazó el elemento promocional en Explorar y propuso **Bienvenida A01**, la primera vista de PAZO para quienes todavía no tienen cuenta. Aprobó el concepto de un **enlace pequeño bajo «Su mundo, más cerca»**, sin tarjeta, banner ni CTA competidor de «Comenzar» o «Ya tengo una cuenta». El enlace «Conoce a los Amigos de PAZO» (EN «Meet the PAZO Friends») abre el muro de cuadrícula en modo vista previa sin iniciar sesión. El regreso vuelve a A01; en pantallas bajas solo el contenido central puede hacer scroll para conservar acciones al pie. Se eliminó por completo el acceso al muro desde Explorar. La selección privada simulada permanece bajo Mi mascota. **Validación visual Vite APROBADA (PO 2026-10-13):** «listo, quedo perfecto». No volver a modificar el enlace secundario ni su ubicación A01 sin petición del PO. **Pendiente:** punto de lectura pública para sesiones ya autenticadas, participación/consentimiento real por mascota, reglas backend de elegibilidad y retirada. No equivale a membresía lanzada. Sin consentimientos almacenados, entitlement real, Supabase ni PayPal.
 
+### Contrato funcional de consentimiento — PROPUESTA, NO APROBADA (2026-10-13)
+
+Se preparó el documento [`docs/PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md`](PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md) tras aprobación del PO para continuar definiendo reglas. **No es autorización para modificar backend ni aceptación de términos**. Propone: opt-in individual seguro por mascota, lectura pública mínima incluso para visitantes sin sesión, elegibilidad derivada de pago server-side vigente, revocación efectiva, despublicación ante pérdida de cobertura o borrado, sin reaparición automática al reactivar, orden neutral Todos/Recientes/antigüedad y tratamiento explícito de reembolsos/errores. Requiere revisión PO y más adelante gate técnico/privacidad/retención. El estado actual de previews no cambia.
+
 ## 7. Entitlement
 
 Fuente de verdad:

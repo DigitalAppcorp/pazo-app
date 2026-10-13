@@ -145,6 +145,12 @@
 - Esta aceptación **no** aprueba ni activa automáticamente el muro con mascotas reales, su orden backend, opt-in persistido, creación de suscripciones ni totalidad de F16. La cuadrícula vacía y administración privada siguen como previews. El acceso para sesiones autenticadas a ver el muro sigue **sin decisión**, aunque se puede gestionar una selección visual desde Mi mascota.
 - **Siguiente gate:** especificar consentimiento informado por mascota, retiro de permiso, elegibilidad/salida por cancelación y estados de datos; obtener aprobación explícita del PO antes de cualquier Supabase/PayPal. No duplicar entrada en Explorar ni alterar la bienvenida aprobada. PR #44 DRAFT; no merge/deploy.
 
+## 1S. F16 — propuesta de consentimiento, elegibilidad y retiro preparada para PO (2026-10-13)
+
+- El PO aceptó continuar al **gate de reglas del muro** tras aprobar la ubicación A01: «muy bien, estoy deacuerdo». Se auditó el modelo de mascotas, los dos previews `GratitudeParticipationPreview` / `GratitudeWallPreview`, documentos de privacidad/inventario y requisitos F16. No existe backend/pagos/consentimiento persistido.
+- **Documento NUEVO de propuesta, no decisión cerrada:** [`docs/PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md`](PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md). Define opt-in por mascota explícito y visible a visitantes, propiedad/autenticación, minimización de tarjeta PET-ONLY, elegibilidad por membresía validada, retirada, cancelación hasta fin de período pagado, no republicación automática al reactivar, borrado/moderación, filtros estables, estados UX y pruebas/seguridad necesarias.
+- **Pendiente de aprobación explícita PO:** reglas de reautorización, expiración/retirada y exposición a invitados, experiencia para sesiones autenticadas y texto final. No programar backend, migraciones ni PayPal con solo este borrador. Seguir el gate visual aprobado A01. PR #44 permanece DRAFT; F16 BACKLOG.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
