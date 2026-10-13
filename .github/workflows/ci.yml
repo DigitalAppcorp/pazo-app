@@ -36,6 +36,9 @@ jobs:
       - name: Hardening + architecture + privacy + ops governance checks
         run: npm run test:governance
 
+      - name: F16 synthetic reconciliation tests (offline, no PayPal or hosted DB)
+        run: npm run test:f16:synthetic
+
       - name: Build
         env:
           VITE_APP_RELEASE: ${{ github.sha }}
