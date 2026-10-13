@@ -66,6 +66,21 @@
 - **Do not modify** the styling of follow buttons in the public profile or other UI, or the three-dot menu.
 - Map/Places frozen; no data/database changes. CI does not constitute PO visual approval.
 
+## F13 — Perfil público PAZO opción 4, Comunidad / Lifestyle (PO aprobado, 2026-10-13)
+
+**Decisión UX:** el PO seleccionó la opción visual 4 pero expresamente **SIN FOTO DE PORTADA**; área superior limpia para futuras insignias sin crear espacios vacíos ni simular insignias, **bio solo cuando existe**, Seguir **verde sólido** (el feed conserva Seguir transparente), contadores con iconos y pestañas como mockup. Acciones secundarias en menú de tres puntos.
+
+**Implementación del código, commit `2fb0f0d6`:**
+- `src/components/views/PublicProfileView.tsx`: cabecera sticky en 3 columnas con Regresar, título Perfil centrado y menú `···` únicamente cuando se permite denunciar mascota ajena; Denunciar perfil ya no flota bajo Seguir. Menú accesible (`role=menu`, `aria-expanded`, Escape, click fuera) que invoca el `ReportDialog` preexistente; ninguna opción «Compartir»/«Copiar» sin contrato real.
+- Identidad mascota: avatar real, nombre, especie, raza opcional y estado Perdido preexistente. Sin portada; `get_pet_founder_status` conserva badge Fundador solo cuando el dato exista, dejando un punto de extensión para insignias futuras **sin reserva vertical vacía ni fake-door**.
+- `bio` obtenida del campo `pets.bio` existente y mostrada solo si contiene texto; no introducir bio de ejemplo, textos inventados ni rellenar perfiles viejos.
+- Botón `FollowButton variant="profile"` permanece verde sólido para «Seguir», permanece visible para «Siguiendo»; contadores siguen los recuentos reales de la tabla `follows`, y publicaciones reales. Estadísticas 3 columnas con IconDocument/IconCommunity/IconHeart y tipografía responsive.
+- Tabs Publicaciones / Información con iconografía e idénticos callbacks/datos originales. Lista de publicaciones reales y empty state existentes, información Edad/Género, superficies suaves sin bordes.
+- `src/components/views/PetView.tsx` ya tenía edición y guardado real de `bio` por `updatePetProfile` RPC; se mejoró a `textarea` bilingüe de dos líneas, máximo 240 caracteres, texto opcional y advertencia de visibilidad pública, sin nuevos datos, SQL ni migración.
+- `scripts/closure-ui.test.mjs` incluye test de la cabecera/menú según titular/permisos y conexión del campo de biografía con el formulario; commit `162f28a0`. La compilación en GitHub del commit de implementación fue SUCCESS; el test adicional está sujeto al CI del HEAD actual.
+- **Aprobación visual del PO pendiente**: probar perfil de mascota ajena/propia, perfiles con y sin bio, Fundador/Perdido, ES/EN, menú y Seguir/Siguiendo, tabs en móvil 320/375px.
+- **Restricciones:** `MapView.tsx`/Mapbox/Lugares congelados. No se mutó Supabase, no Vercel para visual, no se fusiona RC/main sin aprobación PO.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.

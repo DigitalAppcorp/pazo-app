@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF
 
+> **F13 PERFIL SOCIAL — OPCIÓN 4 APROBADA/IMPLEMENTADA (2026-10-13):** PO eligió opción visual «Comunidad / Lifestyle» con **SIN PORTADA** (espacio limpio para insignias futuras, no inventar ni mostrar placeholders vacíos), bio SOLO SI EXISTE, Seguir VERDE SÓLIDO en perfil (la variante transparente corresponde exclusivamente al Feed), contadores con iconos, pestañas estilo mockup y menú `···` para Denunciar perfil existente. Código `2fb0f0d6401948f18cc0c8703fd70f0b5989471a`: `PublicProfileView.tsx` rediseñado con avatar/nombre/especie, badge Fundador real condicional, bio condicional desde `pets.bio`, FollowButton `variant=profile`, tres métricas reales con IconDocument/IconCommunity/IconHeart, tabs Publicaciones/Información y menú report con Escape/click fuera. `PetView.tsx`: «Editar mi perfil» ya guardaba bio vía `updatePetProfile`; campo ahora textarea corta bilingüe (max 240) con aviso de visibilidad pública. Nuevo test `scripts/closure-ui.test.mjs` en `162f28a0` para menú y edición. CI del código PASS; test HEAD verificar por SHA. **PO debe hacer revisión visual local, NO marcar fase completa.** Mapa congelado, PR #44 DRAFT hacia RC, sin Supabase writes/DB migrations, Vercel ni main merge.
+
+
 > **ÚLTIMA DECISIÓN PO — F13 SEGUIR EN FEED (2026-10-13):** Tras confirmar la disposición compacta y menú `···`, PO pidió que `Seguir` **no sea verde sólido sino transparente**. Nuevo `variant="feed"` específico de `FollowButton` aplicado en `HomeView/PostCard`: sin fondo/borde/sombra al reposo, texto verde `#204E4A`, hover verde muy tenue. Dimensiones y funcionalidad de follow sin cambios; variantes perfil/default sin cambios. Mapa congelado, PR #44 DRAFT sin merge/DB/Vercel y revisión visual PO pendiente.
 
 
