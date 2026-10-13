@@ -63,6 +63,7 @@ const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
 const {BottomNav}=await load('components/BottomNav.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
+const {SupporterThemePreviewPicker,SupporterProfileBackdrop,SUPPORTER_PROFILE_THEMES,isLocalSupporterThemePreviewEnabled}=await load('features/supporter/components/SupporterProfileThemes.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
 const {LiquidChoiceTabs}=await load('components/ui/LiquidChoiceTabs.js')
 const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchFilters.js')
@@ -877,6 +878,46 @@ test('F13 nearby-only preview changes copy and artwork without rerouting feed, m
   assert.ok(JSON.stringify(renderer.toJSON()).includes('Todavía no hay publicaciones'))
   assert.ok(!JSON.stringify(renderer.toJSON()).includes('Un mundo de mascotas a tu alrededor'))
   await act(async()=>renderer.unmount())
+})
+
+test('F16 approved supporter themes have five distinct non-persistent visual previews and preserve the original profile', async () => {
+  const expected=['classic','nature','hearts','stars','adventure']
+  assert.deepEqual(SUPPORTER_PROFILE_THEMES.map(theme=>theme.id),expected)
+  assert.equal(isLocalSupporterThemePreviewEnabled(),false,'Preview must be disabled outside DEV runtime')
+  for (const option of SUPPORTER_PROFILE_THEMES) {
+    const rendered=renderToStaticMarkup(React.createElement(SupporterProfileBackdrop,{theme:option.id}))
+    assert.ok(rendered.includes('data-supporter-theme="'+option.id+'"'),'Distinct decorative layer exists: '+option.id)
+    assert.ok(rendered.includes('aria-hidden="true"'),'All decorations are ignored by screenreaders')
+    assert.ok(!rendered.includes('Amigo de PAZO'),'No false supporter status in the background layer')
+  }
+  const selected=[]
+  let view
+  await act(async()=>{
+    view=create(React.createElement(SupporterThemePreviewPicker,{value:null,onChange:value=>selected.push(value),lang:'es'}))
+  })
+  const choices=()=>view.root.findAllByType('button')
+  assert.equal(choices().length,6,'Original option plus five approved themes')
+  assert.ok(buttonText(choices()[0]).includes('Original'))
+  assert.equal(choices()[0].props['aria-pressed'],true)
+  assert.ok(JSON.stringify(view.toJSON()).includes('SOLO DESARROLLO'))
+  for(const [index,id] of expected.entries()){
+    await act(async()=>choices()[index+1].props.onClick())
+    assert.equal(selected.at(-1),id)
+  }
+  await act(async()=>choices()[0].props.onClick())
+  assert.equal(selected.at(-1),null,'Original background stays recoverable')
+  await act(async()=>view.update(React.createElement(SupporterThemePreviewPicker,{value:'stars',onChange:value=>selected.push(value),lang:'en'})))
+  assert.equal(choices()[4].props['aria-pressed'],true,'Selected theme exposed to assistive technology')
+  assert.ok(JSON.stringify(view.toJSON()).includes('Development only')===false || JSON.stringify(view.toJSON()).includes('DEVELOPMENT ONLY'))
+  await act(async()=>view.unmount())
+  const profile=fs.readFileSync('src/components/views/PublicProfileView.tsx','utf8')
+  const source=fs.readFileSync('src/features/supporter/components/SupporterProfileThemes.tsx','utf8')
+  assert.ok(source.includes('import.meta.env.DEV')&&source.includes("new URLSearchParams(window.location.search).get('pazo_theme_preview') === '1'"))
+  assert.ok(profile.includes('canPreviewSupporterThemes && previewTheme'))
+  assert.ok(profile.includes('canPreviewSupporterThemes && ('))
+  assert.ok(profile.includes('get_pet_founder_status'),'Legacy verified status flow remains unchanged')
+  assert.ok(!source.includes('localStorage')&&!source.includes('supabase'),'Theme preview never writes user preferences or payment status')
+  assert.ok(!source.includes('border-')&&!source.includes('ring-')&&!source.includes('outline-'),'Theme preview has zero UI borders')
 })
 
 test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {

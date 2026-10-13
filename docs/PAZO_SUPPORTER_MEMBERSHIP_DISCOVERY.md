@@ -119,6 +119,10 @@ Se eligió el **concepto original** del tablero visual inicial (medallas de huel
 
 El PO confirmó «listo, ya quedó». **Los PNG NO están aún en el repositorio**, ni la UI conectada a membresías. No sustituir los assets elegidos por recreaciones aproximadas; confirmar que los archivos exactos se han incorporado antes de programar. Accesibilidad y legibilidad de miniinsignia pendiente en Vite. Siguiente trabajo de producto: decidir temas cosméticos de perfil, a partir de las cinco opciones del primer tablero (Clásico PAZO, Naturaleza, Corazones, Cielo estrellado, Aventura); todavía NO aprobadas como conjunto.
 
+### Fondos cosméticos — gate de vista previa (PO 2026-10-13)
+
+El Product Owner aprobó los **cinco estilos del concepto visual original**: Clásico PAZO, Naturaleza, Corazones, Cielo estrellado y Aventura. Se implementaron únicamente como **simulación visual activable en Vite local** (`import.meta.env.DEV` + query `pazo_theme_preview=1`) dentro de `PublicProfileView`; selector con opción de volver al diseño Original. Los fondos se generan como ornamentos vectoriales locales; no son fotos ni contenido social inventado. No hay almacenamiento, consulta de pago, insignia falsificada, asignación de tema a perfiles ajenos ni cambios de Supabase. **Todavía NO equivale a una personalización funcional para suscriptores.** Requiere prueba y aprobación visual antes de integrarse con entitlement y preferencias seguras.
+
 ## 7. Entitlement
 
 Fuente de verdad:
