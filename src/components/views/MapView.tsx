@@ -76,6 +76,8 @@ export const MapView = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
+  // A new request also re-centers repeated taps on the same carousel card.
+  const [mapFocusRequest, setMapFocusRequest] = useState<{ placeId: string } | null>(null)
   const [activeCheckin, setActiveCheckin] =
     useState<ActivePlaceCheckin | null>(null)
   const [isCheckinBusy, setIsCheckinBusy] = useState(false)
@@ -179,8 +181,16 @@ export const MapView = ({
     [places, selectedPlaceId]
   )
 
+  // Carousel taps pan/zoom the map without opening the check-in detail.
+  const handleFocusPlace = (placeId: string) => {
+    setSelectedPlaceId(null)
+    setMapFocusRequest({ placeId })
+  }
+
+  // Map pins (2D/3D) still open the complete details and check-in actions.
   const handleSelectPlace = (placeId: string) => {
     setSelectedPlaceId(placeId)
+    setMapFocusRequest({ placeId })
     const place = places.find((item) => item.id === placeId)
 
     if (canUsePlaces && place) {
@@ -211,6 +221,7 @@ export const MapView = ({
     setSearchQuery('')
     setCategory('all')
     setSelectedPlaceId(requestedPlaceId)
+    setMapFocusRequest({ placeId: requestedPlaceId })
 
     if (canUsePlaces) {
       void recordPlaceUsageEvent({
@@ -396,7 +407,9 @@ export const MapView = ({
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearchCommit={handleSearchCommit}
-          selectedPlaceId={selectedPlaceId}
+          selectedPlaceId={mapFocusRequest?.placeId ?? selectedPlaceId}
+          focusPlaceRequest={mapFocusRequest}
+          onFocusPlace={handleFocusPlace}
           onSelectPlace={handleSelectPlace}
           userLocation={userLocation}
           locationMessage={locationMessage}
@@ -411,10 +424,11 @@ export const MapView = ({
         >
         {selectedPlace && (
           <section
+            key={selectedPlace.id}
             role="dialog"
             aria-modal="false"
             aria-label={lang === 'es' ? 'Detalle del lugar' : 'Place details'}
-            className="absolute inset-x-3 bottom-3 top-[102px] z-40 overflow-y-auto overscroll-contain rounded-[2.15rem] bg-[#FFFCF6]/98 p-5 shadow-[0_12px_44px_rgba(32,78,74,0.2)] backdrop-blur-xl"
+            className="absolute inset-x-3 bottom-3 top-[102px] z-40 overflow-y-auto overscroll-contain rounded-[2.15rem] bg-[#FFFCF6]/98 p-5 shadow-[0_12px_44px_rgba(32,78,74,0.2)] backdrop-blur-xl motion-safe:animate-[slideUpFade_320ms_ease-out_both]"
           >
             <div className="flex items-start justify-between gap-3">
               <div>

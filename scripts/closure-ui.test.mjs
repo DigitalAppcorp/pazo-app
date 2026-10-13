@@ -90,7 +90,7 @@ test('F13 Places Option 3 renders an edge-to-edge map, real carousel, filters an
   const props={
     lang:'es',places:[chosen],categoryOptions:categories,category:'all',
     onCategory(){},searchQuery:'',onSearchChange(){},onSearchCommit(){},
-    selectedPlaceId:null,onSelectPlace(){},userLocation:null,
+    selectedPlaceId:null,focusPlaceRequest:null,onFocusPlace(){},onSelectPlace(){},userLocation:null,
     locationMessage:'',isLocating:false,onUseLocation(){},
     canSuggest:true,onSuggest(){},activeCheckin:false,
     isLoading:false,loadError:'',onRetry(){}
@@ -119,6 +119,7 @@ test('F13 Places Option 3 renders an edge-to-edge map, real carousel, filters an
   const stage=fs.readFileSync('src/features/places/components/ImmersivePlacesStage.tsx','utf8')
   assert.ok(code.includes('<ImmersivePlacesStage'))
   assert.ok(code.includes('onSelectPlace={handleSelectPlace}'))
+  assert.ok(code.includes('onFocusPlace={handleFocusPlace}'))
   assert.ok(code.includes('onUseLocation={handleUseLocation}'))
   assert.ok(code.includes('onSearchCommit={handleSearchCommit}'))
   assert.ok(code.includes('onCategory={handleCategory}'))
@@ -133,8 +134,42 @@ test('F13 Places Option 3 renders an edge-to-edge map, real carousel, filters an
   assert.ok(mapbox.includes('drawPazoCategoryPin'))
   assert.ok(mapbox.includes("'pazo-place-models'"))
   assert.ok(mapbox.includes("map.on('click', 'pazo-place-pins', handlePlaceClick)"))
+  assert.ok(mapbox.includes("map.on('click', 'pazo-place-models', handlePlaceClick)"))
   assert.ok(!stage.includes('navigator.geolocation.getCurrentPosition'))
   assert.ok(!code.includes('pazo-glass-card p-6')) // Old stand-alone list layout must not return.
+})
+
+test('F13 Places carousel only centers map; pins retain details with brief entrance motion', async () => {
+  const focused=[],opened=[]
+  const chosen={id:'test-focus-id',name:'Real Place',category:'park',latitude:34,
+    longitude:-118,address:'LA',zone:'LA',activePresenceCount:0}
+  const props={lang:'es',places:[chosen],categoryOptions:[{value:'all',es:'Todos',en:'All'}],
+    category:'all',onCategory(){},searchQuery:'',onSearchChange(){},onSearchCommit(){},
+    selectedPlaceId:null,focusPlaceRequest:null,
+    onFocusPlace:id=>focused.push(id),onSelectPlace:id=>opened.push(id),
+    userLocation:null,locationMessage:'',isLocating:false,onUseLocation(){},
+    canSuggest:false,onSuggest(){},activeCheckin:false,isLoading:false,
+    loadError:'',onRetry(){}}
+  let tree
+  await act(async()=>{tree=create(React.createElement(ImmersivePlacesStage,props))})
+  const card=tree.root.findAllByType('button').find(b=>b.props['aria-label']==='Centrar mapa en Real Place')
+  assert.ok(card,'Carousel card must describe map focusing, not details')
+  await act(async()=>{card.props.onClick();card.props.onClick()})
+  assert.deepEqual(focused,['test-focus-id','test-focus-id'])
+  assert.deepEqual(opened,[],'Carousel must not open the detail')
+  await act(async()=>{tree.unmount()})
+  const mapView=fs.readFileSync('src/components/views/MapView.tsx','utf8')
+  const stage=fs.readFileSync('src/features/places/components/ImmersivePlacesStage.tsx','utf8')
+  const mapbox=fs.readFileSync('src/features/places/map/MapboxMap.tsx','utf8')
+  assert.match(mapView,/const handleFocusPlace = \(placeId: string\) => \{\s*setSelectedPlaceId\(null\)\s*setMapFocusRequest\(\{ placeId \}\)/)
+  assert.ok(mapView.includes('setSelectedPlaceId(requestedPlaceId)'),'Deep link still opens detail')
+  assert.ok(mapView.includes('setMapFocusRequest({ placeId: requestedPlaceId })'))
+  assert.ok(stage.includes('onClick={() => onFocusPlace(place.id)}'))
+  assert.ok(stage.includes('onSelectPlace={onSelectPlace}'),'Pins still use the detail handler')
+  assert.ok(mapbox.includes("map.on('click', 'pazo-place-models', handlePlaceClick)"))
+  assert.ok(mapbox.includes('focusPlaceRequest.placeId'))
+  assert.ok(mapView.includes('motion-safe:animate-[slideUpFade_320ms_ease-out_both]'))
+  assert.ok(fs.readFileSync('src/index.css','utf8').includes('@keyframes slideUpFade'))
 })
 
 test('F13 Community Lifestyle Option 4 uses real cover, open identity, owner/membership states and existing callbacks', async () => {

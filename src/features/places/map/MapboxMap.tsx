@@ -4,7 +4,7 @@ import { loadMapboxGl } from './mapboxLoader'
 
 interface MapboxMapProps {
   places: PetPlace[]
-  selectedPlaceId?: string | null
+  focusPlaceRequest?: { placeId: string } | null
   userLocation?: EphemeralLocation | null
   onSelectPlace: (placeId: string) => void
   lang: 'es' | 'en'
@@ -120,7 +120,7 @@ const toGeoJson = (places: PetPlace[]) => ({
 
 export const MapboxMap = ({
   places,
-  selectedPlaceId,
+  focusPlaceRequest,
   userLocation,
   onSelectPlace,
   lang,
@@ -371,9 +371,9 @@ export const MapboxMap = ({
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !selectedPlaceId) return
+    if (!map || !focusPlaceRequest) return
 
-    const place = places.find((item) => item.id === selectedPlaceId)
+    const place = places.find((item) => item.id === focusPlaceRequest.placeId)
     if (!place) return
 
     map.flyTo({
@@ -382,7 +382,7 @@ export const MapboxMap = ({
       pitch: 58,
       duration: 700,
     })
-  }, [places, selectedPlaceId])
+  }, [places, focusPlaceRequest])
 
   useEffect(() => {
     const map = mapRef.current

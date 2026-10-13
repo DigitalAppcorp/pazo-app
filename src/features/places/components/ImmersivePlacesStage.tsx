@@ -16,6 +16,8 @@ interface ImmersivePlacesStageProps {
   onSearchChange: (value: string) => void
   onSearchCommit: () => void
   selectedPlaceId: string | null
+  focusPlaceRequest: { placeId: string } | null
+  onFocusPlace: (placeId: string) => void
   onSelectPlace: (placeId: string) => void
   userLocation: EphemeralLocation | null
   locationMessage: string
@@ -45,7 +47,7 @@ const showDistance = (distanceKm?: number) =>
 export const ImmersivePlacesStage = ({
   lang, places, categoryOptions, category, onCategory,
   searchQuery, onSearchChange, onSearchCommit,
-  selectedPlaceId, onSelectPlace, userLocation, locationMessage,
+  selectedPlaceId, focusPlaceRequest, onFocusPlace, onSelectPlace, userLocation, locationMessage,
   isLocating, onUseLocation, canSuggest, onSuggest, activeCheckin,
   isLoading, loadError, onRetry, children,
 }: ImmersivePlacesStageProps) => (
@@ -57,7 +59,7 @@ export const ImmersivePlacesStage = ({
     <div className="absolute inset-0 z-0 [&_.mapboxgl-ctrl-top-right]:!right-2 [&_.mapboxgl-ctrl-top-right]:!top-[132px]">
       <MapboxMap
         places={places}
-        selectedPlaceId={selectedPlaceId}
+        focusPlaceRequest={focusPlaceRequest}
         userLocation={userLocation}
         onSelectPlace={onSelectPlace}
         lang={lang}
@@ -200,8 +202,8 @@ export const ImmersivePlacesStage = ({
               <button
                 type="button"
                 key={place.id}
-                onClick={() => onSelectPlace(place.id)}
-                aria-label={lang === 'es' ? `Ver detalles de ${place.name}` : `View details of ${place.name}`}
+                onClick={() => onFocusPlace(place.id)}
+                aria-label={lang === 'es' ? `Centrar mapa en ${place.name}` : `Center map on ${place.name}`}
                 className={`group flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] p-2 text-left shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
                   ? 'bg-[#EAF2E4] '
                   : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-visible:bg-[#F1F5EC]'}`}
