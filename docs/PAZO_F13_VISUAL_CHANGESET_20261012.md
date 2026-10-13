@@ -128,6 +128,14 @@
 - **Pruebas 400db79a:** se actualiza prueba T04 para el texto real, y se verifica comportamiento ES/EN de avatar/artwork, interés deshabilitado para demo, que el aviso desaparezca al volver «Para ti» y que los identificadores de experimento existentes sigan intactos. GitHub CI SUCCESS #38334840145.
 - **Gate pendiente:** screenshot local del PO en Vite. NO confundir CI/build PASS con aceptación visual. PR #44 DRAFT, RC/main sin merge, Lugares/Mapa congelado.
 
+## F13 — Comunidades Opción 6 «Mapa con pines» (2026-10-13, PO autorizado)
+
+- **Selección visual PO:** de seis mockups generados el PO eligió exactamente **Opción 6 — Estilo mapa con pines** y autorizó implementación fiel de referencia, con estado vacío «Todavía no hay comunidades.», mapa ILUSTRADO de calles blancas/zonas verdes, casitas, árboles, pin central verde oscuro con huella blanca, pequeños motivos de comunidad, y CTA sólido «Crear la primera comunidad». El header PAZO y navegación global NO se rehacen.
+- **Código `9e45ae18`:** el estado `communities.length === 0` en `src/components/views/CommunitiesView.tsx` se sustituyó por `src/features/communities/components/CommunitiesEmptyState.tsx`, componente puramente visual con SVG original (no Mapbox, ni mapas reales ni ubicaciones de usuarios), superficie glass crema/blanca, proporción y radios inspirados en el mockup. Texto bilingüe de ausencia de comunidades + CTA verde. Se conserva el botón amarillo «Crear» en la parte superior y su apertura del mismo `CreateCommunityModal`.
+- **Funcionalidad:** CTA de tarjeta usa `onCreate={() => setIsCreateCommunityOpen(true)}`; permiso `canCreate={Boolean(currentPet) && canUseCommunities}`. Modal de creación, load communities, navegación a detalle, join/leave, miembros y listados existentes quedan sin modificar; solo rama del estado vacío cambia.
+- **Pruebas `b41bbc28`:** arte/mapa representativo sin datos falsos, textos ES/EN, habilitar/deshabilitar botón según permisos, callback, preservación de acciones de comunidades ya existentes. CI/build y aprobación visual local PO son gates diferentes; QA de reproducción exacta se hará en Vite con screenshot real y sin afirmar que la referencia y runtime son idénticos todavía.
+- **Restricción PO vigente:** Mapa/Lugares **congelado**; la ilustración de comunidad no llama proveedores Maps. Cero mutación de Supabase, migraciones, Vercel deliberado o merges de RC/main. PR #44 continúa DRAFT.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
