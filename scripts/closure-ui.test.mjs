@@ -107,7 +107,7 @@ test('T03 only sighting opens its destination; unsupported Care filter is absent
   await act(async()=>renderer.unmount())
 })
 test('T14 each onboarding step renders localized critical text without changing stored identifiers', () => {
-  const needles={A01:['Comenzar','Get started'],A02:['Correo electrónico','Email'],A03:['Antes de crear su perfil','Before creating their profile'],A04:['Comunidades de gatos','Cat communities']}
+  const needles={A01:['Comenzar','Get started'],A02:['Correo electrónico','Email'],A03:['El nombre, especie y foto de tu mascota','Your pet\'s name, species and photo'],A04:['Comunidades de gatos','Cat communities']}
   for(const [initialStep,[es,en]] of Object.entries(needles)) {
     const render=lang=>renderToStaticMarkup(React.createElement(OnboardingView,{initialStep,lang,onComplete(){},onSkipToLogin(){},onQuickDemo(){},onToggleLang(){}}))
     assert.ok(render('es').includes(es),initialStep)
