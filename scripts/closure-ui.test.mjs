@@ -1001,7 +1001,8 @@ test('F16 gratitude wall discoverability is subtle, bilingual and does not domin
   assert.ok(source.includes("'· En desarrollo'")&&source.includes("'· In development'"),'Bilingual pending-state label is present')
   assert.ok(source.includes("'Busca en todo PAZO'")&&source.includes("'Search all of PAZO'"),'Primary search guidance is intact')
   const compact=source.slice(source.indexOf('ref={gratitudeEntryRef}'),source.indexOf('</button>',source.indexOf('ref={gratitudeEntryRef}')))
-  assert.ok(!compact.includes('w-full')&&!compact.includes('p-4')&&!compact.includes('shadow-'),'Secondary entry is neither full-width nor a prominent card')
+  const compactClasses=compact.match(/className="([^"]+)"/)[1].split(/\s+/)
+  assert.ok(!compactClasses.includes('w-full')&&!compactClasses.includes('p-4')&&!compactClasses.some(token=>token.startsWith('shadow-')),'Secondary entry is neither full-width nor a prominent card')
 })
 
 test('F16 gratitude wall preview has consent-safe two-column placeholders and working category tabs ES/EN', async () => {
