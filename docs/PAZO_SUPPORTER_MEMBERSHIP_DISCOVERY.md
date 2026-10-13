@@ -125,7 +125,9 @@ El Product Owner aprobó los **cinco estilos del concepto visual original**: Cl�
 
 ### Refinamiento visual aprobado: flotación y contraste (PO 2026-10-13)
 
-El PO eligió **flotación vertical suave + deriva lateral/rotación mínima (opción B)** sobre los cinco fondos, sin mover imagen, nombre, controles ni bio. Se añade movimiento decorativo asincrónico ligero y se respeta `prefers-reduced-motion`. El tema «Cielo estrellado» usa tipografía marfil y una superficie azul oscuro continua para garantizar legibilidad donde antes se mezclaban textos verde oscuro sobre azul; temas luminosos conservan los colores actuales. El preview sigue sin posibilidad de guardar ni entitlement, y requiere validación visual del PO en Vite.
+El PO eligió **flotación vertical suave + deriva lateral/rotación mínima (opción B)** sobre los cinco fondos, sin mover imagen, nombre, controles ni bio. Se añade movimiento decorativo asincrónico ligero y se respeta `prefers-reduced-motion`. El tema «Cielo estrellado» usa tipografía marfil y una superficie azul oscuro continua para garantizar legibilidad donde antes se mezclaban textos verde oscuro sobre azul; temas luminosos conservan los colores actuales. El preview sigue sin posibilidad de guardar ni entitlement.
+
+**Gate de aceptación visual cerrado (PO 2026-10-13):** tras probar los fondos, el usuario declaró «Diseño aceptado, me encanta». Quedan aceptados el conjunto de cinco temas, la navegación normal de `Mi mascota`, la flotación opción B y los ajustes de contraste del commit `2bd00920`. No reabrir el aspecto de este preview sin solicitud expresa; no implica que existan preferencias persistidas ni que el programa de apoyo esté activo. **Siguiente diseño**: muro público voluntario «Gracias, Amigos de PAZO», sujeto a consentimiento explícito revocable, privacidad y aprobación visual independiente.
 
 ## 7. Entitlement
 

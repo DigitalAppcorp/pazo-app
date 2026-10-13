@@ -103,6 +103,12 @@
 - `SupporterThemePreviewPanel.tsx`: el tema «Cielo estrellado» usa base azul nocturna persistente aun bajo el fade de las ilustraciones, veladura tonal suave sin tarjeta nueva, y nombre marfil/bio/raza claros. Al cambiar a temas luminosos o «Original», recupera fondo crema y textos verde PAZO. Sin outlines, bordes, focus rings, backend, datos, cobros ni cambios al perfil público.
 - Validación: pruebas de contrato/React sobre 5 themes, animación/reduced-motion, selector EN/ES, modo nocturno y restauración de contrastes. Próximo gate: CI del commit y revisión visual real del PO en Vite; **no presumir aceptación visual por CI**. F16 sigue BACKLOG, PR #44 Draft, no merge/deploy/PayPal/Supabase.
 
+## 1M. Aceptación visual definitiva — fondos Amigo de PAZO (PO 2026-10-13)
+
+- **PO aprobó el diseño visual observado en Vite:** «Diseño aceptado, me encanta». Esto cubre la **vista previa de los cinco temas** (Clásico PAZO, Naturaleza, Corazones, Cielo estrellado, Aventura), su selector en `Mi mascota → Personalizar perfil`, flotación orgánica opción B y mejora de contraste nocturno del HEAD `2bd00920` con CI SUCCESS (run `38453600103`).
+- **Cerrar únicamente el gate visual de la vista previa** de personalización cosmética, sin abrir rediseños de oficio. Congelar la dirección estética aceptada salvo instrucciones expresas nuevas del PO. Este reconocimiento **NO** equivale a función de membresía lista para producción, publicación del tema, aprobación del efecto sobre perfiles ajenos, verificación de accesibilidad real completa o cierre F16/F13.
+- **Siguiente gate de diseño del programa de apoyo:** preparar propuestas visuales para el muro público opcional **«Gracias, Amigos de PAZO»** con consentimiento explícito revocable. Antes de cualquier código/backend, validar ubicación, qué se muestra de las mascotas, entrada/salida del muro, y el estado sin miembros; usar contenido claramente conceptual para mockups, nunca inventar personas pagadoras reales. No recopilar identidades de pagadores ni publicar datos por defecto. `F16 BACKLOG`, pitch OFF y PR #44 DRAFT sin merge/Supabase/PayPal.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
