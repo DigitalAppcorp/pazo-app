@@ -196,7 +196,7 @@ function PazoMain() {
   const [isDemoUser, setIsDemoUser] = useState(false)
   const [authMode, setAuthMode] = useState<'onboarding' | 'login'>('onboarding')
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
-  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>('A01')
+  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>('A01')
 
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)

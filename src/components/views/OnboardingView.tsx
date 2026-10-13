@@ -10,7 +10,7 @@ import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
-  initialStep?: 'A01' | 'A02' | 'A03' | 'A04' | 'A05'
+  initialStep?: 'A01' | 'A02' | 'A03' | 'A04'
   onComplete: (createdPet: Pet) => void
   onSkipToLogin: () => void
   onQuickDemo: () => void
@@ -26,7 +26,7 @@ export const OnboardingView = ({
   lang,
   onToggleLang,
 }: OnboardingViewProps) => {
-  const [step, setStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>(initialStep)
+  const [step, setStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>(initialStep)
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
 
   // Sincroniza el paso si cambia desde App.tsx (Vital para el redireccionamiento)
@@ -246,7 +246,7 @@ export const OnboardingView = ({
             >
               {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 1 de 4" : "Step 1 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 1 de 3" : "Step 1 of 3"}</span>
           </div>
 
           <div className="my-auto space-y-4">
@@ -388,10 +388,10 @@ export const OnboardingView = ({
                 {lang === 'es' ? "← Volver" : "← Back"}
               </button>
             )}
-            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 2 de 4" : "Step 2 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 2 de 3" : "Step 2 of 3"}</span>
           </div>
 
-          <div className="my-auto space-y-4">
+          <div className="my-auto min-h-0 space-y-4 overflow-y-auto py-2">
             <div className="space-y-1">
               <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "¿Quién te acompaña?" : "Who is by your side?"}</h2>
               <p className="text-xs text-[#5C7470]">
@@ -479,6 +479,17 @@ export const OnboardingView = ({
               </div>
 
               <p className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Raza y datos médicos se pueden añadir después." : "Breed and medical details can be added later."}</p>
+              <aside aria-label={lang === 'es' ? 'Resumen de privacidad' : 'Privacy summary'} className="rounded-2xl bg-white/75 px-3.5 py-3 shadow-[0_4px_16px_rgba(32,78,74,0.05)] backdrop-blur-sm">
+                <p className="text-[13px] font-extrabold leading-snug text-[#204E4A]">{lang === 'es' ? 'Antes de crear su perfil' : 'Before creating their profile'}</p>
+                <p className="mt-1 text-[12px] leading-relaxed text-[#5C7470]">
+                  {lang === 'es'
+                    ? 'El nombre, especie y foto que elijas podrán verse en PAZO. Evita incluir teléfonos, direcciones u otros datos personales.'
+                    : 'The name, species and photo you choose may be visible on PAZO. Avoid including phone numbers, addresses or other personal information.'}
+                </p>
+                <button type="button" onClick={() => setLegalKind('privacy')} className="mt-1.5 text-[12px] font-extrabold text-[#204E4A] underline underline-offset-2">
+                  {lang === 'es' ? 'Consultar privacidad' : 'Read privacy details'}
+                </button>
+              </aside>
             </div>
           </div>
 
@@ -494,7 +505,7 @@ export const OnboardingView = ({
       )}
 
       {step === 'A04' && (
-        /* ================= A04 / PRIVACIDAD INICIAL ================= */
+        /* ================= A04 / ZONA E INTERESES ================= */
         <div className="flex flex-col h-full justify-between relative z-10 animate-slide-up">
           <div className="flex items-center justify-between pt-2">
             <button
@@ -503,82 +514,7 @@ export const OnboardingView = ({
             >
               {lang === 'es' ? "← Volver" : "← Back"}
             </button>
-            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 3 de 4" : "Step 3 of 4"}</span>
-          </div>
-
-          <div className="my-auto space-y-4">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-black text-[#204E4A]">{lang === 'es' ? "Tú decides." : "You decide."}</h2>
-              <p className="text-xs text-[#5C7470]">
-                {lang === 'es' ? "Revisa qué se podrá ver antes de compartir su perfil público." : "Review what will be visible before sharing their public profile."}
-              </p>
-            </div>
-
-            <div className="space-y-2.5 text-xs">
-              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
-                <div>
-                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Nombre y fotografía" : "Name and photo"}</span>
-                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Visible para la comunidad" : "Visible to the community"}</span>
-                </div>
-                <span className="text-[13px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  {lang === 'es' ? "Públicos" : "Public"}
-                </span>
-              </div>
-
-              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
-                <div>
-                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Zona aproximada" : "Approximate area"}</span>
-                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Sin dirección exacta" : "No exact address"}</span>
-                </div>
-                <span className="text-[13px] font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-full">
-                  {zone}
-                </span>
-              </div>
-
-              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
-                <div>
-                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Datos de contacto" : "Contact details"}</span>
-                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Teléfono y correo protegidos" : "Phone and email protected"}</span>
-                </div>
-                <span className="text-[13px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  <span className="inline-flex items-center gap-1">{lang === 'es' ? 'Privados' : 'Private'}<PazoMotifIcon kind="lock" size={12} /></span>
-                </span>
-              </div>
-
-              <div className="p-3.5 pazo-glass-card rounded-2xl flex justify-between items-center soft-card">
-                <div>
-                  <span className="font-extrabold text-[#204E4A] block">{lang === 'es' ? "Cuidados y documentos" : "Care and documents"}</span>
-                  <span className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Solo visibles por el tutor" : "Visible only to the guardian"}</span>
-                </div>
-                <span className="text-[13px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                  <span className="inline-flex items-center gap-1">{lang === 'es' ? 'Privados' : 'Private'}<PazoMotifIcon kind="lock" size={12} /></span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pb-2">
-            <button
-              onClick={() => setStep('A05')}
-              className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold py-3.5 rounded-full text-xs shadow-md cursor-pointer transition-all"
-            >
-              {lang === 'es' ? "Guardar y continuar" : "Save and continue"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step === 'A05' && (
-        /* ================= A05 / ZONA E INTERESES ================= */
-        <div className="flex flex-col h-full justify-between relative z-10 animate-slide-up">
-          <div className="flex items-center justify-between pt-2">
-            <button
-              onClick={() => setStep('A04')}
-              className="text-xs font-bold text-[#204E4A] bg-white px-3 py-1.5 rounded-full cursor-pointer soft-button"
-            >
-              {lang === 'es' ? "← Volver" : "← Back"}
-            </button>
-            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 4 de 4" : "Step 4 of 4"}</span>
+            <span className="text-[13px] font-bold text-[#5C7470]">{lang === 'es' ? "Paso 3 de 3" : "Step 3 of 3"}</span>
           </div>
 
           <div className="my-auto space-y-4">
@@ -642,7 +578,7 @@ export const OnboardingView = ({
             >
               {isSubmittingPet
                 ? (lang === 'es' ? 'Guardando mascota...' : 'Saving pet...')
-                : (lang === 'es' ? 'Descubrir Pazo →' : 'Discover Pazo →')}
+                : (lang === 'es' ? 'Crear perfil y entrar' : 'Create profile and enter')}
             </button>
             <p className="text-[13px] text-center text-[#5C7470]">
               {lang === 'es' ? "Podrás cambiar estos ajustes en cualquier momento desde tu perfil." : "You can change these settings anytime from your profile."}
