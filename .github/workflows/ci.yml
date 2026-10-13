@@ -112,3 +112,14 @@ jobs:
           node --input-type=module -e 'import fs from "node:fs"; JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/backup-catalog.json", "utf8")); console.log("Backup catalog query PASS on synthetic PostgreSQL; no hosted backup certification.");'
       - name: Reconciliation-only two-session lock and idempotency
         run: node scripts/f14-one-object-reconciliation-concurrency.mjs
+
+      # F16 SQL is a NOT_APPLIED draft. Apply ONLY in this disposable
+      # PostgreSQL service to verify RLS/roles and synthetic-owner behaviour.
+      - name: F16 draft consent security SQL in disposable PostgreSQL only
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/20261013_f16_supporter_wall_consents_NOT_APPLIED.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/consent-metadata.sql \
+            -f supabase/tests/supporter/consent-synthetic.sql
