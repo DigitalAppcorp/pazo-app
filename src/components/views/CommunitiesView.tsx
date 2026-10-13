@@ -179,11 +179,12 @@ export const CommunitiesView = ({
           />
         ) : (
           <div className="space-y-3">
-            {communities.map((community) => (
+            {communities.map((community, index) => (
               <div
                 key={community.id}
                 role="button"
                 tabIndex={0}
+                style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
                 onClick={() => setSelectedCommunityId(community.id)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
@@ -191,7 +192,7 @@ export const CommunitiesView = ({
                     setSelectedCommunityId(community.id)
                   }
                 }}
-                className="w-full cursor-pointer rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-all hover:shadow-md"
+                className="pazo-community-card-enter w-full cursor-pointer rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-3.5">
                   <div className="flex min-w-0 items-center gap-3">

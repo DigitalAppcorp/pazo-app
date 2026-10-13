@@ -491,6 +491,24 @@ test('F13 Community Lifestyle Option 4 uses real cover, open identity, owner/mem
   assert.ok(!view.includes('rounded-[2.4rem] pazo-glass-card'))
 })
 
+
+test('F13 Communities list entrance animates only real result cards with capped stagger and reduced-motion support', () => {
+  const view=fs.readFileSync('src/components/views/CommunitiesView.tsx','utf8')
+  const css=fs.readFileSync('src/index.css','utf8')
+  assert.ok(view.includes('communities.map((community, index) => ('),'Existing results list should remain data-driven')
+  assert.ok(view.includes('key={community.id}'),'Community cards retain stable keys')
+  assert.ok(view.includes('style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}'),'Entrance staggering is bounded and index based')
+  assert.ok(view.includes('className="pazo-community-card-enter'),'Only the real community card has its own entrance animation')
+  assert.ok(view.includes("setSelectedCommunityId(community.id)"),'Card still navigates to detail')
+  assert.ok(view.includes('void handleQuickMembership(community)'),'Quick join/leave callback stays unchanged')
+  assert.ok(view.includes('event.stopPropagation()'),'Quick membership does not open detail')
+  assert.ok(view.includes('communities.length === 0')&&view.includes('<CommunitiesEmptyState'),'Empty state stays unchanged')
+  assert.ok(view.includes('isLoading ? ('),'Loading state stays unchanged')
+  assert.ok(css.includes('@keyframes pazoCommunityCardEnter'))
+  assert.ok(css.includes('translateY(9px) scale(0.99)'))
+  assert.ok(css.includes('pazoCommunityCardEnter 340ms cubic-bezier'))
+  assert.ok(css.includes('.pazo-community-card-enter {\n    animation: none;'),'Reduced motion disables entrance entirely')
+})
 test('F13 Community Option 6 empty state matches map concept, preserves real create callback, and does not invent communities', async () => {
   for(const [lang,heading,cta] of [
     ['es','Todavía no hay comunidades.','Crear la primera comunidad'],

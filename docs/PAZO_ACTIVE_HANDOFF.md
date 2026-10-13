@@ -57,6 +57,13 @@
 - `src/features/search/components/LiquidSearchFilters.tsx` mantiene chips con anchura ES/EN variable en carrusel lateral, `overflow-x-auto` original; comparte indicador que mide `offsetLeft/offsetWidth` de cada chip y se anima horizontalmente y en ancho. El indicador viaja DENTRO del track scrollable; no se superpone a la pantalla ni bloquea swipe. Sin acceso DOM hay fallback sólido; ResizeObserver/window resize y cambios de idioma actualizan medidas. El handler `handleFilterChange`, telemetría existente, carga/errores y navegación intactos.
 - Pruebas enfocadas en `scripts/closure-ui.test.mjs`: 2/3/4 tabs, callbacks, ES/EN, pressed/aria, estados y contratos de scroll/medición y reduced motion. Sin dependencias nuevas, Supabase, datos o Vercel. **Siguiente gate:** CI del HEAD + revisión real por PO en Vite local de los tres selectores; F13 y PR #44 DRAFT, sin merge.
 
+## 1G. F13 — Aparición suave de tarjetas de Comunidades (PO 2026-10-13)
+
+- El PO aprobó los tres controles Liquid y solicitó **exclusivamente** que las tarjetas de comunidades aparezcan con una animación pequeña al renderizar la lista. Captura: tarjeta con imagen/nombre/descripción/conteo y «Unido».
+- Implementado en `src/components/views/CommunitiesView.tsx` para cada tarjeta real con key estable `community.id`, `pazo-community-card-enter` (fade-in + traslado 9px/escala 0.99 durante 340ms) y escalonado discreto de 50ms limitado al sexto índice. Solo anima al montar las tarjetas después de la carga; no toca datos ni crea elementos ficticios.
+- CSS en `src/index.css`, `prefers-reduced-motion: reduce` desactiva la entrada. Se conservan loading/empty, imágenes y botones, click/Enter/Espacio, stopPropagation para unirse/salirse, backend, cero contornos y enfoque existente. Prueba de contrato acotada en `scripts/closure-ui.test.mjs`.
+- **Gate siguiente:** CI nuevo HEAD y revisión visual PO de una lista de comunidades en Vite local. F13 sigue abierta y PR #44 DRAFT; sin merge/Supabase/Vercel.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
