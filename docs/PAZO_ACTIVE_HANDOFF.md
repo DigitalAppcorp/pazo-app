@@ -10,6 +10,13 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate operativo F16 — Plan PayPal Sandbox identificado (2026-10-13)
+
+- **Plan ID Sandbox entregado por el PO:** `P-14V25407JP6850922NLHMDKI`. ID no secreto; **aún NO verificado contra PayPal**. El PO declara que ya existen app/API Sandbox, plan de suscripción y medios de pago configurados; NO crear recursos duplicados.
+- **Verificación de solo lectura preparada:** `npm run verify:f16:paypal:sandbox:plan`, obtiene OAuth vía variables de entorno locales seguras y consulta `GET /v1/billing/plans/{id}` en Sandbox. Valida estado, USD 2.99 mensual, ciclo recurrente y comisiones iniciales; no muestra tokens. Pruebas sintéticas puras con `npm run test:f16:synthetic`.
+- **Único dato operativo pendiente:** resultado sanitizado de la consulta autenticada del plan. Nunca pedir Client Secret o token en chat. Ni el usuario ni el agente deben habilitar Live, crear nuevos planes, modificar Supabase, activar entitlement o desplegar endpoints por el solo hecho de tener el Plan ID.
+- Contrato exacto: `docs/PAZO_F16_PAYPAL_RECONCILIATION_MODEL_20261013.md`. Mantener PR #44 DRAFT, sin merge. El preflight no autoriza pagos reales.
+
 ## Gate visual F16 — APROBADO por Product Owner (2026-10-13)
 
 El PO inspeccionó el preview local de consentimiento individual por mascota en PAZO y respondió «Sí, está excelente». Se registra aceptación visual de ese flujo únicamente. El copy ES/EN ya estaba aprobado y **no se pide otra aprobación**. La validación no equivale a prueba legal, consentimiento persistido, entitlement ni autorización de pagos. La UI permanece simulada y sin guardar, PR #44 DRAFT, sin merge. La revisión técnica CI del HEAD anterior f5bf5a661fc50fa68b4a2723f7b1ddeac88dd79f fue SUCCESS (run 38478119445); cualquier commit documental posterior requiere CI propia.
