@@ -136,6 +136,16 @@
 - **Pruebas `b41bbc28`:** arte/mapa representativo sin datos falsos, textos ES/EN, habilitar/deshabilitar botón según permisos, callback, preservación de acciones de comunidades ya existentes. CI/build y aprobación visual local PO son gates diferentes; QA de reproducción exacta se hará en Vite con screenshot real y sin afirmar que la referencia y runtime son idénticos todavía.
 - **Restricción PO vigente:** Mapa/Lugares **congelado**; la ilustración de comunidad no llama proveedores Maps. Cero mutación de Supabase, migraciones, Vercel deliberado o merges de RC/main. PR #44 continúa DRAFT.
 
+## F13 — Detalle de comunidad: rediseño integral Opción 4 «Comunidad Lifestyle PAZO» (PO aprobado, 2026-10-13)
+
+- **Orden PO:** no crear un mockup ni un parche visual: programar la propuesta **Opción 4 — Comunidad Lifestyle PAZO** en la vista real de detalle de una comunidad; preservar portada, datos, acciones y permisos existentes.
+- **Código `490b04b3`:** `src/features/communities/components/CommunityLifestyleHero.tsx` nuevo, exclusivamente visual/de dominio: portada con imagen REAL de `community.imageUrl` (si falta, espacio verde con icono PAZO, sin foto falsa), superficie crema que se funde con el hero mediante SVG orgánico, botón de regreso en portada, estado archivado real, nombre grande en área abierta **sin tarjeta rígida de identidad**, categoría/especie/zona de datos, descripción real, badge Admin SOLO si rol owner, contadores de `community.membersCount` y `posts.length` con iconos. Unirse/Salir usa `handleMembership` existente para no-owner; propietario no recibe un botón «Administrador» sin acción que duplique badge.
+- `CommunityDetailView.tsx` ahora compone hero de dominio, nav unificado 3 tabs (`posts/info/members`) con `aria-pressed`, composer social con avatar circular, texto editable, subida de foto y botón Publicar, todo conectado a los handlers existentes.
+- **Código `43025c3d`:** composición de publicaciones ya reales más editorial/social (avatar circular, imagen de publicación más protagonista, reacciones y comentarios en secciones suaves); Información glass cálido y miembros con avatar redondo. Se conservan los fake doors `CommunityFeatureExperimentCard` actuales dentro de Información, edición/archivado/transferencias, reportes, eliminar y avisos de limpieza multimedia.
+- **Reglas:** NO inventar posts/miembros/eventos/insignias ni incorporar URLs externas decorativas; no cambiar servicios, esquemas ni Supabase. No tocar `MapView.tsx` ni Lugares/Mapa. Respetar cero contornos en componentes nuevos; Quicksand/colores establecidos.
+- **Test `0c3f52bc`:** arte/portada/metadata reales, admin, join/leave/archivado, CTA Back, tabs y presencia de handlers críticos; gate CI separado de QA visual. El primer render está pendiente de captura local del PO; **NO declarar coincidencia pixel-perfect con la Opción 4 ni cierre de F13 sin aceptación visual**.
+- **PR #44** sigue DRAFT hacia RC `release/mvp-beta-fast-track-20261010`; sin merge a `main`, Vercel, migraciones o DB writes.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
