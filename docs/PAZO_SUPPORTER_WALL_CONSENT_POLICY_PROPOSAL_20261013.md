@@ -1,9 +1,11 @@
-# PAZO — Política propuesta para «Gracias, Amigos de PAZO»
+# PAZO — Política aprobada de producto para «Gracias, Amigos de PAZO»
 
-**Estado:** PROPUESTA PARA APROBACIÓN DEL PRODUCT OWNER; NO IMPLEMENTADA.  
+**Estado:** APROBADA POR PRODUCT OWNER (2026-10-13) EN REGLAS DE PRODUCTO; NO IMPLEMENTADA Y SIN AUTORIZACIÓN PARA CAMBIOS DE SUPABASE/PAGOS.  
 **Fecha:** 2026-10-13.  
 **Categoría:** F16, monetización voluntaria y privacidad.  
 **Fuente:** identidad PET-ONLY, diseño de cuadrícula (opción 2), acceso público desde Bienvenida A01 y selección simulada desde Mi mascota, previamente aprobados.
+
+**Gate del Product Owner (2026-10-13):** el PO respondió explícitamente **«si aprobado»** a las reglas de participación y retirada presentadas, incluidas visibilidad sin registro, opt-in individual, revocación, mantenimiento hasta el fin del período pagado, expiración, nueva autorización tras reactivar y eliminación. **ESTAS REGLAS QUEDAN APROBADAS COMO PRODUCTO; NO HABILITAN MIGRACIONES, PAYPAL NI DESPLIEGUE.** Documento técnico siguiente: [plan READ ONLY](PAZO_SUPPORTER_WALL_BACKEND_DESIGN_PREFLIGHT_20261013.md).
 
 ## 1. Regla de oro
 
@@ -50,7 +52,7 @@ Toda baja debe intentar dejar la consulta pública sin mascota desde la confirma
 - Paginación y conteos solo sobre mascotas autorizadas y elegibles. Un usuario con varias mascotas puede aparecer con cada una de las que autorizó; nunca duplicar una mascota por pagos históricos.
 - Estado vacío real si ninguna cumple criterios; errores de consulta deben mostrar un estado de error separado, no «0 participantes».
 
-Los meses acumulados, su efecto de reembolso/contracargo y la presentación final del orden se verificarán en el contrato de entitlement antes de programar.
+Los meses acumulados, su efecto de reembolso/contracargo y la presentación final del orden se verificarán en el contrato de entitlement antes de programar. **No activar «Más tiempo apoyando» con un orden falso; si faltan datos verificados, mantenerlo en modo informativo sin participantes fabricados.**
 
 ## 7. Estados UX ES/EN a diseñar
 
@@ -71,10 +73,10 @@ EN equivalente y estados requieren gate UX final del PO. No recoger casillas glo
 
 ## 9. Gates no superados
 
-1. **Product Owner:** aceptar/corregir esta política, en especial reautorización tras caducidad, exposición pública a visitantes y filtros.
+1. **Product Owner:** **APROBADO (2026-10-13)**: reautorización por mascota tras pérdida de elegibilidad, exposición pública a visitantes sin registro y reglas de filtros. La aceptación no es autorización de implementación de backend.
 2. **UX:** aprobar los textos/estados EN/ES y el acceso al muro desde sesión iniciada; no cambiar el A01 aprobado.
 3. **Arquitectura/privacidad:** auditar Supabase RLS + SOP de baja, fijar retención y consentimiento server-side.
 4. **Implementación autorizada por separado:** migraciones versionadas, API/función pública minimizada, pruebas automatizadas de seguridad, validación visual en Vite.
 5. **Membresía/pagos:** aprobación adicional específica antes de configurar PayPal, webhook, cobros o servicios pagados.
 
-Hasta entonces, F16 sigue BACKLOG y las pantallas existentes son **previews no persistentes**. No usar esto como términos legales vigentes ni afirmar que la membresía existe en producción.
+Hasta entonces, F16 sigue BACKLOG y las pantallas existentes son **previews no persistentes**. **La política de producto está aprobada, pero no se ha concedido permiso para aplicar SQL/migraciones, desplegar, hacer cobros o activar consentimiento real.** No usar esto como términos legales vigentes ni afirmar que la membresía existe en producción.

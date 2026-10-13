@@ -151,6 +151,10 @@ El PO rechazó el elemento promocional en Explorar y propuso **Bienvenida A01**,
 
 Se preparó el documento [`docs/PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md`](PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md) tras aprobación del PO para continuar definiendo reglas. **No es autorización para modificar backend ni aceptación de términos**. Propone: opt-in individual seguro por mascota, lectura pública mínima incluso para visitantes sin sesión, elegibilidad derivada de pago server-side vigente, revocación efectiva, despublicación ante pérdida de cobertura o borrado, sin reaparición automática al reactivar, orden neutral Todos/Recientes/antigüedad y tratamiento explícito de reembolsos/errores. Requiere revisión PO y más adelante gate técnico/privacidad/retención. El estado actual de previews no cambia.
 
+### Política de participación APROBADA; diseño técnico en revisión (PO 2026-10-13)
+
+El PO confirmó «si aprobado» a las reglas expuestas en `docs/PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md`: consentimiento individual y revocable, exclusión tras cancelar y finalizar período válido, reautorización después de reactivar, tratamiento de bajas y filtros verificables. **Gate de producto superado, gate técnico/billing aún NO autorizado.** Preflight alojado sin mutaciones corroboró propiedad por `pets.owner_id` y la existencia de `profiles.paypal_subscription_id` legado con lectura pública amplia — no es fuente de entitlement; requerirá revisión de privacidad. Preparado [plan técnico READ ONLY](PAZO_SUPPORTER_WALL_BACKEND_DESIGN_PREFLIGHT_20261013.md), sin crear/aplicar SQL. Entrada A01 del muro continúa aprobada y no debe rediseñarse.
+
 ## 7. Entitlement
 
 Fuente de verdad:
