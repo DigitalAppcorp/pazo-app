@@ -161,6 +161,34 @@ test('T04 mixed feed label is For you and demo nearby interest cannot write', as
   assert.deepEqual(calls,[])
   await act(async()=>renderer.unmount())
 })
+test('F13 feed post actions stay inside an accessible overflow menu; hide can be undone', async () => {
+  const post={
+    id:'synthetic-feed-post',petId:'another-pet',petName:'Second pet',petSpecies:'perro',
+    petAvatar:'',location:'Los Angeles',timeAgo:'1 h',text:'Synthetic card content',
+    photoUrl:null,likes:0,comments:[]
+  }
+  let renderer
+  await act(async()=>{renderer=create(React.createElement(HomeView,{
+    posts:[post],canReport:true,currentPetId:'',ownedPetIds:[],lang:'en',
+    onLikePost(){},onSavePost(){},onAddComment:async()=>true,onLoadComments:async()=>true,onSelectPetProfile(){}
+  }))})
+  const menuButton=()=>renderer.root.findAllByType('button').find(b=>b.props['aria-haspopup']==='menu')
+  assert.ok(menuButton())
+  assert.equal(menuButton().props['aria-expanded'],false)
+  assert.equal(button(renderer.root,'Report'),undefined)
+  await act(async()=>menuButton().props.onClick())
+  assert.equal(menuButton().props['aria-expanded'],true)
+  assert.ok(button(renderer.root,'Hide post'))
+  assert.ok(button(renderer.root,'Report'))
+  await act(async()=>button(renderer.root,'Hide post').props.onClick())
+  assert.equal(button(renderer.root,'Hide post'),undefined)
+  assert.ok(button(renderer.root,'Undo'))
+  assert.ok(!JSON.stringify(renderer.toJSON()).includes('Synthetic card content'))
+  await act(async()=>button(renderer.root,'Undo').props.onClick())
+  assert.ok(JSON.stringify(renderer.toJSON()).includes('Synthetic card content'))
+  assert.equal(menuButton().props['aria-expanded'],false)
+  await act(async()=>renderer.unmount())
+})
 test('T16 actual service rejects unconfirmed DELETE and uses only the database-returned path', async () => {
   calls.length=0;hasUser=true
   const post={id:'synthetic-post',photoStoragePath:'forged-client-path'}
