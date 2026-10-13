@@ -63,6 +63,7 @@ const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
 const {BottomNav}=await load('components/BottomNav.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
+const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
@@ -80,6 +81,44 @@ const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.chil
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
 
 
+
+
+test('F13 social pet profile liquid tabs glide between posts and information, preserving callbacks and accessibility', async () => {
+  for(const [lang,first,second] of [['es','Publicaciones','Información'],['en','Posts','Info']]) {
+    const selections=[]
+    const props={lang,activeTab:'posts',onChange:tab=>selections.push(tab)}
+    let ui
+    await act(async()=>{ui=create(React.createElement(PublicProfileTabs,props))})
+    const tabs=()=>ui.root.findAllByType('button')
+    const indicator=()=>ui.root.findAll(n=>n.props.className==='pazo-profile-tab-indicator pointer-events-none')[0]
+    assert.deepEqual(tabs().map(buttonText),[first,second])
+    assert.equal(tabs().length,2)
+    assert.equal(tabs()[0].props['aria-current'],'page')
+    assert.equal(tabs()[0].props['aria-pressed'],true)
+    assert.equal(tabs()[1].props['aria-pressed'],false)
+    assert.equal(indicator().props['data-active'],'posts')
+    assert.equal(indicator().props['aria-hidden'],'true')
+    await act(async()=>{tabs()[1].props.onClick()})
+    assert.deepEqual(selections,['info'])
+    await act(async()=>{ui.update(React.createElement(PublicProfileTabs,{...props,activeTab:'info'}))})
+    assert.equal(indicator().props['data-active'],'info')
+    assert.equal(tabs()[1].props['aria-current'],'page')
+    assert.equal(tabs()[1].props['aria-pressed'],true)
+    assert.equal(tabs()[0].props['aria-pressed'],false)
+    await act(async()=>{tabs()[0].props.onClick()})
+    assert.deepEqual(selections,['info','posts'])
+    await act(async()=>{ui.unmount()})
+  }
+  const css=fs.readFileSync('src/index.css','utf8')
+  for(const part of ['.pazo-profile-tab-indicator','width: calc((100% - 18px) / 2)','transform: translateX(calc(100% + 6px))','transition: transform 460ms cubic-bezier','background: #204E4A','@keyframes pazoProfileTabSettle','prefers-reduced-motion: reduce','.pazo-profile-tab-indicator { transition: none'])assert.ok(css.includes(part),part)
+  const segment=fs.readFileSync('src/features/profile/components/PublicProfileTabs.tsx','utf8')
+  const profile=fs.readFileSync('src/components/views/PublicProfileView.tsx','utf8')
+  assert.ok(segment.includes("onClick={() => onChange('posts')}"))
+  assert.ok(segment.includes("onClick={() => onChange('info')}"))
+  assert.ok(profile.includes('<PublicProfileTabs activeTab={activeTab} onChange={setActiveTab} lang={lang} />'))
+  assert.ok(profile.includes("activeTab === 'posts' ? ("))
+  assert.ok(profile.includes("activeTab === 'info' ?"))
+})
 
 test('F13 Liquid Navigation animates actual tabs without changing the center Create action', async () => {
   const labels={inicio:'Inicio',comunidades:'Comunidades',crear:'Crear',mapa:'Mapa',mascota:'Mi mascota'}

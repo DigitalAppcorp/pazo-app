@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
+import { PublicProfileTabs } from '../../features/profile/components/PublicProfileTabs'
 import { IconPaw, IconDocument, IconCommunity, IconHeart } from '../icons/PazoIcons'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
@@ -370,39 +371,8 @@ export const PublicProfileView = ({
               </div>
             </section>
 
-            {/* Wide unified segmented tabs (not two disconnected blocks). */}
-            <nav className="mt-5 grid grid-cols-2 gap-1.5 rounded-full bg-white/85 p-1.5 shadow-[0_5px_20px_rgba(32,78,74,0.05)] backdrop-blur-md"
-              aria-label={lang === 'es' ? 'Secciones del perfil' : 'Profile sections'}>
-              <button
-                type="button"
-                aria-current={activeTab === 'posts' ? 'page' : undefined}
-                aria-pressed={activeTab === 'posts'}
-                onClick={() => setActiveTab('posts')}
-                className={activeTab === 'posts'
-                  ? 'flex min-w-0 items-center justify-center gap-2 rounded-full bg-[#204E4A] px-2 py-3.5 text-[clamp(13px,3.7vw,16px)] font-extrabold text-white shadow-sm'
-                  : 'flex min-w-0 items-center justify-center gap-2 rounded-full px-2 py-3.5 text-[clamp(13px,3.7vw,16px)] font-extrabold text-[#607B73] hover:bg-[#204E4A]/5'}
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="currentColor">
-                  <rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/>
-                </svg>
-                <span>{lang === 'es' ? 'Publicaciones' : 'Posts'}</span>
-              </button>
-              <button
-                type="button"
-                aria-current={activeTab === 'info' ? 'page' : undefined}
-                aria-pressed={activeTab === 'info'}
-                onClick={() => setActiveTab('info')}
-                className={activeTab === 'info'
-                  ? 'flex min-w-0 items-center justify-center gap-2 rounded-full bg-[#204E4A] px-2 py-3.5 text-[clamp(13px,3.7vw,16px)] font-extrabold text-white shadow-sm'
-                  : 'flex min-w-0 items-center justify-center gap-2 rounded-full px-2 py-3.5 text-[clamp(13px,3.7vw,16px)] font-extrabold text-[#607B73] hover:bg-[#204E4A]/5'}
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7v.2" strokeLinecap="round"/>
-                </svg>
-                <span>{lang === 'es' ? 'Información' : 'Info'}</span>
-              </button>
-            </nav>
+            {/* Approved Liquid Navigation motion applied to existing social profile tabs. */}
+            <PublicProfileTabs activeTab={activeTab} onChange={setActiveTab} lang={lang} />
 
             <section className="mt-4" aria-label={activeTab === 'posts'
               ? (lang === 'es' ? 'Publicaciones de la mascota' : 'Pet posts')

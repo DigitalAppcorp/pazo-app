@@ -44,6 +44,12 @@
 - **Nuevo feedback PO en captura de 2026-10-13:** aprobó el blanco de la barra, pero observó los **iconos inactivos demasiado altos** respecto al centro de la franja blanca. Diagnóstico: `BottomNav` sigue reservando espacio para el label inactivo con `opacity-0`, dejando el glifo visual en y~31 frente al centro de la barra blanca y~46. Solución focal: clase `pazo-liquid-icon--idle` con `transform: translateY(15px)`; clase activa mantiene `pazo-liquid-icon--active` y subida de -15px en el indicador, y `Crear` central se mantiene independiente. No cambiar color, notch, altura, safe area, funciones ni animación.
 - **Siguiente gate:** verificar GitHub CI del nuevo HEAD y revisión visual PO exclusivamente del centrado de iconos inactivos. F13 sigue abierta; sin merge, Supabase ni Vercel.
 
+## 1E. F13 — Liquid segmented tabs del perfil social de mascota (PO 2026-10-13)
+
+- El PO confirmó aprobación visual de la barra inferior de PAZO tras correcciones, y pidió **el mismo efecto** para el selector **Publicaciones / Información** del perfil social de mascota (captura adjunta). Interpretación contextual: conservar exactamente la cápsula verde oscuro, superficie blanca, posiciones y opciones, animando **la misma cápsula compartida** horizontalmente con easing elástico 460ms y micro-asentamiento del icono activo 380ms. No aplicar el hueco de barra inferior ni una nueva bolita redonda a una pestaña de texto: mantener su forma existente de píldora.
+- `src/features/profile/components/PublicProfileTabs.tsx` encapsula el control visual y callbacks existentes con etiquetas ES/EN, `aria-current` / `aria-pressed`; `src/components/views/PublicProfileView.tsx` continúa siendo dueño de `activeTab` y de los paneles/datos reales de posts/info. CSS en `src/index.css` con reduced-motion; iconos, colores, focus surfaces sin contornos y responsive preservados. Sin dependencias, datos, telemetría ni Supabase.
+- **Único gate siguiente:** verificar CI nuevo HEAD y revisión visual del PO en su Vite local. Sin declarar pixel perfect ni cerrar F13, merge o Vercel.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
