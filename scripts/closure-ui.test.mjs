@@ -117,7 +117,7 @@ test('F13 social pet profile liquid tabs glide between posts and information, pr
   assert.ok(segment.includes("onClick={() => onChange('info')}"))
   assert.ok(profile.includes('<PublicProfileTabs activeTab={activeTab} onChange={setActiveTab} lang={lang} />'))
   assert.ok(profile.includes("activeTab === 'posts' ? ("))
-  assert.ok(profile.includes("activeTab === 'info' ?"))
+  assert.ok(profile.includes("aria-label={activeTab === 'posts'"),'Posts/info keep their original accessible panel heading')
 })
 
 test('F13 Liquid Navigation animates actual tabs without changing the center Create action', async () => {
