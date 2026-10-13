@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
-import { IconPaw } from '../icons/PazoIcons'
+import { IconPaw, IconDocument, IconCommunity, IconHeart } from '../icons/PazoIcons'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 
@@ -24,6 +24,8 @@ export const PublicProfileView = ({
   lang,
 }: PublicProfileViewProps) => {
   const [reportOpen, setReportOpen] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement | null>(null)
   const [petProfile, setPetProfile] = useState<Pet | null>(null)
   const [petPosts, setPetPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -154,6 +156,26 @@ export const PublicProfileView = ({
     }
   }, [targetPetId])
 
+  useEffect(() => {
+    setProfileMenuOpen(false)
+  }, [targetPetId])
+
+  useEffect(() => {
+    if (!profileMenuOpen || typeof document === 'undefined') return
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !profileMenuRef.current?.contains(event.target)) setProfileMenuOpen(false)
+    }
+    const dismissEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setProfileMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('keydown', dismissEscape)
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('keydown', dismissEscape)
+    }
+  }, [profileMenuOpen])
+
   return (
     <div className="absolute inset-0 z-[100] bg-[#FDFBF7] overflow-y-auto animate-slide-up flex flex-col font-sans antialiased text-[#204E4A]">
 
@@ -164,20 +186,38 @@ export const PublicProfileView = ({
         <div className="bg-[#E8F3EE]/80 blur-[100px] w-[32rem] h-[32rem] rounded-full absolute bottom-10 left-1/4 animate-pulse" style={{ animationDuration: '7s' }}></div>
       </div>
 
-      {/* Cabecera Fija */}
-      <div className="sticky top-0 z-30 bg-[#FDFBF7]/80 backdrop-blur-xl px-4 sm:px-8 py-4 flex items-center justify-between border-b border-[#204E4A]/5">
-        <button
-          onClick={onClose}
-          className="bg-white/80 backdrop-blur-md border border-[#204E4A]/10 text-[#204E4A] font-bold rounded-full px-5 py-2.5 cursor-pointer shadow-sm hover:bg-white transition-all active:scale-95 text-sm flex items-center gap-2"
-        >
-          <span className="text-lg leading-none mb-0.5">←</span>
-          <span>{lang === 'es' ? 'Regresar' : 'Back'}</span>
+      <header className="sticky top-0 z-30 grid grid-cols-[1fr_auto_1fr] items-center gap-2 bg-[#FAF8F5]/90 px-4 py-3 backdrop-blur-xl sm:px-6">
+        <button type="button" onClick={onClose} aria-label={lang === 'es' ? 'Regresar' : 'Back'}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-white/85 text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.08)] transition-colors hover:bg-[#E1E53F]/25">
+          <span aria-hidden="true" className="text-[24px] leading-none">←</span>
         </button>
-        <span className="text-sm font-black tracking-widest uppercase opacity-40 text-[#204E4A]">
+        <h1 className="text-[14px] font-extrabold uppercase tracking-[0.18em] text-[#204E4A]">
           {lang === 'es' ? 'Perfil' : 'Profile'}
-        </span>
-        <div className="w-24"></div>
-      </div>
+        </h1>
+        <div className="flex min-w-0 items-center justify-end">
+          {canReport && !ownedPetIds.includes(targetPetId) && (
+            <div ref={profileMenuRef} className="relative">
+              <button type="button" onClick={() => setProfileMenuOpen((previous) => !previous)}
+                aria-label={lang === 'es' ? 'Opciones del perfil' : 'Profile options'}
+                aria-haspopup="menu" aria-expanded={profileMenuOpen}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/85 text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.08)] transition-colors hover:bg-[#E1E53F]/25">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                  <circle cx="5" cy="12" r="1.65" /><circle cx="12" cy="12" r="1.65" /><circle cx="19" cy="12" r="1.65" />
+                </svg>
+              </button>
+              {profileMenuOpen && (
+                <div role="menu" aria-label={lang === 'es' ? 'Acciones del perfil' : 'Profile actions'}
+                  className="absolute right-0 top-full z-50 mt-2 min-w-[175px] rounded-2xl bg-white/95 p-1.5 shadow-[0_12px_30px_rgba(32,78,74,0.14)] backdrop-blur-xl">
+                  <button type="button" role="menuitem" onClick={() => { setProfileMenuOpen(false); setReportOpen(true) }}
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-[13px] font-bold text-[#204E4A] hover:bg-[#FAF8F5]">
+                    {lang === 'es' ? 'Denunciar perfil' : 'Report profile'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
 
       {reportOpen && <ReportDialog target={{kind:'pet_profile',id:targetPetId,label:describeReportSubject('pet_profile',petProfile?.name,null,lang)}} lang={lang} onClose={() => setReportOpen(false)} />}
       {/* Contenedor Principal */}
@@ -190,7 +230,7 @@ export const PublicProfileView = ({
             </p>
           </div>
         ) : !petProfile ? (
-          <div className="text-center py-16 space-y-4 bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/60">
+          <div className="space-y-4 rounded-[2.5rem] bg-white/60 p-8 py-16 text-center shadow-sm backdrop-blur-xl">
             <p className="text-lg font-bold text-[#204E4A]">
               {lang === 'es'
                 ? 'No se encontró la información de esta mascota.'
@@ -206,115 +246,79 @@ export const PublicProfileView = ({
         ) : (
           <div className="space-y-3 animate-fade-in">
 
-            {/* F13: Perfil social compacto. Sin contenedores vacíos cuando no se puede seguir. */}
-            <section className="overflow-hidden rounded-[2rem] bg-white/65 px-4 py-5 shadow-[0_14px_34px_rgba(32,78,74,0.09)] backdrop-blur-2xl sm:px-6 sm:py-6">
-              <div className="flex items-start gap-4 sm:gap-5">
+            {/* Comunidad/Lifestyle: sin portada. Las insignias futuras se añadirán
+                junto a la identidad; sin espacio vacío ni insignias inventadas. */}
+            <section className="rounded-[2rem] bg-white/75 px-4 py-5 shadow-[0_12px_32px_rgba(32,78,74,0.08)] backdrop-blur-xl sm:px-6 sm:py-6">
+              <div className="flex items-start gap-3.5 sm:gap-5">
                 <div className="relative shrink-0">
-                  <img
-                    src={petProfile.photoUrl}
-                    alt={petProfile.name}
-                    className="h-24 w-24 rounded-[1.75rem] bg-[#FAF8F5] object-cover shadow-sm sm:h-28 sm:w-28"
-                  />
+                  <img src={petProfile.photoUrl} alt={petProfile.name}
+                    className="h-[94px] w-[94px] rounded-[1.75rem] bg-[#FAF8F5] object-cover shadow-sm sm:h-28 sm:w-28" />
                   {petProfile.isLost && (
-                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#EC7357] px-2.5 py-1 text-[14px] font-black text-white shadow-sm">
+                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#EC7357] px-2.5 py-1 text-[11px] font-extrabold text-white shadow-sm">
                       {lang === 'es' ? 'Perdido' : 'Lost'}
                     </span>
                   )}
                 </div>
-                <div className="min-w-0 flex-1 pt-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <h2 className="min-w-0 break-words text-[28px] font-black leading-tight tracking-tight text-[#204E4A] sm:text-[33px]">
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                    <h2 className="min-w-0 break-words text-[clamp(23px,6vw,31px)] font-black leading-tight tracking-tight text-[#204E4A]">
                       {petProfile.name}
                     </h2>
-                    <IconPaw size={19} className="shrink-0 text-[#204E4A]/35" />
+                    <IconPaw size={18} className="shrink-0 text-[#204E4A]/45" />
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#E1E53F]/50 px-3 py-1 text-[15px] font-extrabold uppercase tracking-wide text-[#204E4A]">
-                      {petProfile.species}
-                    </span>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="rounded-full bg-[#E1E53F]/65 px-3 py-1 text-[12px] font-extrabold uppercase text-[#204E4A]">{petProfile.species}</span>
+                    {/* Punto de extensión para insignias; solo las existentes y verificadas. */}
                     {isFounder && (
-                      <span className="rounded-full bg-[#204E4A] px-3 py-1 text-[14px] font-black uppercase tracking-wide text-white">
-                        {lang === 'es' ? 'Fundador' : 'Founder'}
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#204E4A]/10 px-2.5 py-1 text-[11px] font-extrabold text-[#204E4A]">
+                        <IconPaw size={13} />{lang === 'es' ? 'Fundador' : 'Founder'}
                       </span>
                     )}
                   </div>
-                  {petProfile.breed && (
-                    <p className="mt-2 break-words text-[17px] font-semibold text-[#5C7470]">{petProfile.breed}</p>
-                  )}
+                  {petProfile.breed && <p className="mt-2 break-words text-[13px] font-semibold text-[#5C7470]">{petProfile.breed}</p>}
                 </div>
               </div>
-              {petProfile.bio && (
-                <p className="mt-4 rounded-2xl bg-white/55 px-4 py-3 text-[18px] font-medium leading-relaxed text-[#204E4A] break-words">
-                  {petProfile.bio}
-                </p>
+
+              {Boolean(petProfile.bio?.trim()) && (
+                <p className="mt-4 break-words text-[14px] font-semibold leading-relaxed text-[#204E4A]">{petProfile.bio}</p>
               )}
 
               {Boolean(currentPetId) && !ownedPetIds.includes(petProfile.id) && (
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="w-full max-w-[260px]">
-                    <FollowButton
-                      currentPetId={currentPetId || ''}
-                      targetPetId={petProfile.id}
-                      canFollow={true}
-                      lang={lang}
-                      variant="profile"
-                      onFollowChange={(isFollowing) => {
-                        setFollowersCount((prev) => isFollowing ? prev + 1 : Math.max(0, prev - 1))
-                      }}
-                    />
-                  </div>
+                <div className="mt-4">
+                  <FollowButton currentPetId={currentPetId || ''} targetPetId={petProfile.id}
+                    canFollow={true} lang={lang} variant="profile"
+                    onFollowChange={(following) => setFollowersCount((previous) => following ? previous + 1 : Math.max(0, previous - 1))} />
                 </div>
-              )}
-              {canReport && !ownedPetIds.includes(targetPetId) && (
-                <button
-                  type="button"
-                  onClick={() => setReportOpen(true)}
-                  className="mt-3 rounded-full bg-white/75 px-3 py-1.5 text-[15px] font-bold text-[#5C7470] underline"
-                >
-                  {lang === 'es' ? 'Denunciar perfil' : 'Report profile'}
-                </button>
               )}
 
-              {/* Métricas deliberadamente compactas: etiquetas legibles en tres columnas móviles. */}
-              <div className="mt-3 grid grid-cols-3 items-center gap-1 rounded-[1.3rem] bg-[#F3F5EF]/75 px-2 py-2.5 text-center sm:gap-3">
-                <div className="flex min-w-0 flex-col items-center gap-1">
-                  <span className="text-[23px] font-extrabold leading-none text-[#204E4A]">{petPosts.length}</span>
-                  <span className="block w-full whitespace-nowrap text-[10px] font-bold uppercase leading-tight tracking-[-0.025em] text-[#5C7470] sm:text-[11px]">
-                    {lang === 'es' ? 'Publicaciones' : 'Posts'}
-                  </span>
-                </div>
-                <div className="flex min-w-0 flex-col items-center gap-1">
-                  <span className="text-[23px] font-extrabold leading-none text-[#204E4A]">{followersCount}</span>
-                  <span className="block w-full whitespace-nowrap text-[10px] font-bold uppercase leading-tight tracking-[-0.025em] text-[#5C7470] sm:text-[11px]">
-                    {lang === 'es' ? 'Seguidores' : 'Followers'}
-                  </span>
-                </div>
-                <div className="flex min-w-0 flex-col items-center gap-1">
-                  <span className="text-[23px] font-extrabold leading-none text-[#204E4A]">{followingCount}</span>
-                  <span className="block w-full whitespace-nowrap text-[10px] font-bold uppercase leading-tight tracking-[-0.025em] text-[#5C7470] sm:text-[11px]">
-                    {lang === 'es' ? 'Siguiendo' : 'Following'}
-                  </span>
-                </div>
+              <div className="mt-4 grid grid-cols-3 gap-1 rounded-[1.5rem] bg-[#F6F7EE]/90 px-1.5 py-3 sm:gap-2">
+                {([
+                  { key: 'posts', count: petPosts.length, label: lang === 'es' ? 'Publicaciones' : 'Posts', Icon: IconDocument },
+                  { key: 'followers', count: followersCount, label: lang === 'es' ? 'Seguidores' : 'Followers', Icon: IconCommunity },
+                  { key: 'following', count: followingCount, label: lang === 'es' ? 'Siguiendo' : 'Following', Icon: IconHeart },
+                ] as const).map(({ key, count, label, Icon }) => (
+                  <div key={key} className="flex min-w-0 flex-col items-center justify-center gap-1 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E1E53F]/35 text-[#204E4A]">
+                        <Icon size={16} />
+                      </span>
+                      <span className="text-[23px] font-black leading-none text-[#204E4A]">{count}</span>
+                    </div>
+                    <span className="w-full text-[clamp(9px,2.5vw,11px)] font-extrabold uppercase leading-tight tracking-[-0.025em] text-[#5C7470]">{label}</span>
+                  </div>
+                ))}
               </div>
             </section>
 
-            {/* Pestañas sociales compactas, accesibles y translúcidas. */}
-            <div className="mx-auto flex w-full max-w-md gap-1 rounded-[1.4rem] bg-white/60 p-1 backdrop-blur-xl">
-              <button
-                type="button"
-                aria-pressed={activeTab === 'posts'}
-                onClick={() => setActiveTab('posts')}
-                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[18px] font-extrabold transition-colors ${activeTab === 'posts' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
-              >
-                {lang === 'es' ? 'Publicaciones' : 'Posts'}
+            <div className="grid grid-cols-2 gap-1 rounded-[1.65rem] bg-white/75 p-1.5 shadow-[0_4px_18px_rgba(32,78,74,0.05)] backdrop-blur-xl">
+              <button type="button" aria-pressed={activeTab === 'posts'} onClick={() => setActiveTab('posts')}
+                className={`flex min-w-0 items-center justify-center gap-2 rounded-[1.35rem] px-2 py-3 text-[clamp(13px,3.7vw,16px)] font-extrabold transition-colors ${activeTab === 'posts' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-[#204E4A]/5'}`}>
+                <IconDocument size={17} /><span>{lang === 'es' ? 'Publicaciones' : 'Posts'}</span>
               </button>
-              <button
-                type="button"
-                aria-pressed={activeTab === 'info'}
-                onClick={() => setActiveTab('info')}
-                className={`min-w-0 flex-1 rounded-[1.15rem] px-2 py-2.5 text-[18px] font-extrabold transition-colors ${activeTab === 'info' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-white/60'}`}
-              >
-                {lang === 'es' ? 'Información' : 'Info'}
+              <button type="button" aria-pressed={activeTab === 'info'} onClick={() => setActiveTab('info')}
+                className={`flex min-w-0 items-center justify-center gap-2 rounded-[1.35rem] px-2 py-3 text-[clamp(13px,3.7vw,16px)] font-extrabold transition-colors ${activeTab === 'info' ? 'bg-[#204E4A] text-white shadow-sm' : 'text-[#5C7470] hover:bg-[#204E4A]/5'}`}>
+                <span aria-hidden="true" className="text-[17px] font-black leading-none">ⓘ</span>
+                <span>{lang === 'es' ? 'Información' : 'Info'}</span>
               </button>
             </div>
 
@@ -323,7 +327,7 @@ export const PublicProfileView = ({
               {activeTab === 'posts' ? (
                 <div>
                   {petPosts.length === 0 ? (
-                    <div className="text-center py-16 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-6 shadow-sm border border-white/50">
+                    <div className="rounded-[2rem] bg-white/65 px-6 py-12 text-center shadow-sm backdrop-blur-xl">
                       <p className="text-base font-bold text-[#5C7470]">
                         {lang === 'es'
                           ? 'Esta mascota aún no tiene publicaciones.'
@@ -361,15 +365,15 @@ export const PublicProfileView = ({
                 </div>
               ) : (
                 /* Paso 4: Cajas de Información con Restricciones de Desbordamiento */
-                <div className="bg-white/40 backdrop-blur-xl p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_8px_32px_rgba(32,78,74,0.05)]">
+                <div className="rounded-[2rem] bg-white/70 p-4 shadow-[0_8px_26px_rgba(32,78,74,0.06)] backdrop-blur-xl sm:p-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm sm:text-base">
-                    <div className="flex flex-col p-5 bg-white/60 backdrop-blur-sm rounded-[1.5rem] border border-white/80 space-y-1 shadow-sm overflow-hidden">
+                    <div className="flex flex-col space-y-1 overflow-hidden rounded-[1.4rem] bg-white/65 p-4 shadow-sm backdrop-blur-sm">
                       <span className="font-bold text-[#5C7470]">
                         {lang === 'es' ? 'Edad' : 'Age'}
                       </span>
                       <span className="font-black text-sm sm:text-base text-[#204E4A] break-words">{petProfile.age}</span>
                     </div>
-                    <div className="flex flex-col p-5 bg-white/60 backdrop-blur-sm rounded-[1.5rem] border border-white/80 space-y-1 shadow-sm overflow-hidden">
+                    <div className="flex flex-col space-y-1 overflow-hidden rounded-[1.4rem] bg-white/65 p-4 shadow-sm backdrop-blur-sm">
                       <span className="font-bold text-[#5C7470]">
                         {lang === 'es' ? 'Género' : 'Gender'}
                       </span>

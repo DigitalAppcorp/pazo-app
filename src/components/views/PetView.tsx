@@ -364,13 +364,16 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Biografía corta</label>
-                  <input
-                    type="text"
-                    value={editForm.bio}
-                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
-                  />
+                  <label htmlFor="pazo-pet-bio" className="mb-1 block text-[13px] font-bold text-[#5C7470]">
+                    {lang === 'es' ? 'Biografía corta (opcional)' : 'Short bio (optional)'}
+                  </label>
+                  <textarea id="pazo-pet-bio" rows={2} maxLength={240} value={editForm.bio}
+                    onChange={(event) => setEditForm({ ...editForm, bio: event.target.value })}
+                    placeholder={lang === 'es' ? '¿Qué hace especial a tu mascota?' : 'What makes your pet special?'}
+                    className="w-full resize-y rounded-xl bg-[#FAF8F5] px-3 py-2 text-[13px] leading-relaxed text-[#204E4A]" />
+                  <p className="text-[11px] leading-snug text-[#5C7470]">
+                    {lang === 'es' ? 'Aparecerá en el perfil público solo si la completas.' : 'Shown on the public profile only if you fill it in.'}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
