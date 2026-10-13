@@ -1,11 +1,11 @@
 # PAZO — Plan técnico PRE-AUTORIZACIÓN: muro Amigo de PAZO
 
-**Estado:** DISEÑO TÉCNICO PARA REVISIÓN DEL PRODUCT OWNER; SIN MIGRACIONES CREADAS/APLICADAS.  
+**Estado:** BORRADOR SQL Y TESTS CREADOS POR AUTORIZACIÓN PO (2026-10-13); **NO APLICADOS A SUPABASE ALOJADO**. Solo probados en CI PostgreSQL sintético.  
 **Fecha:** 2026-10-13.  
 **Repositorio:** `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, PR #44 DRAFT.  
 **Proyecto Supabase:** `mrybvqdebbgcayuvgkkr`.  
 **Base de requisitos aprobada:** [política de consentimiento](PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md).  
-**Límites:** no activar proveedor, no cambiar DB, no crear tablas/RPC todavía, no fusionar PR ni desplegar.
+**Límites:** no activar proveedor, no cambiar DB alojada, no aplicar el SQL `NOT_APPLIED`, no fusionar PR ni desplegar.
 
 ## 1. Preflight alojado READ ONLY (2026-10-13)
 
@@ -48,7 +48,15 @@ Herramientas empleadas: Supabase `list_tables` (public, verbose), `list_migratio
 | E. UI real | sustituir solo simulación de participación por estados del servidor; preservar A01 aceptado, cuadrícula y ES/EN | D, nueva validación PO y pruebas móviles |
 | F. Baja/migraciones | actualizar preflight y SOP manual, retención, inventario, SQL tests/rollback; verificar extremo a extremo | Procedimiento F14 aprobado; no borrados ad hoc |
 
-**Secuencia eficiente:** evitar construir un muro que muestra supuesto apoyo hasta que haya estado server-side verificable; pueden diseñarse/validarse contratos y QA offline antes de cualquier migración. El siguiente paso permitido es preparar un paquete de migración en GitHub **sin aplicarlo**, únicamente si el PO solicita y autoriza explícitamente esa tarea.
+**Secuencia eficiente:** evitar construir un muro que muestra supuesto apoyo hasta que haya estado server-side verificable; pueden diseñarse/validarse contratos y QA offline antes de cualquier migración. El PO **autorizó y se preparó** un paquete de migración en GitHub **SIN APLICAR A SUPABASE**. El siguiente paso requiere nueva aprobación técnica y de privacidad antes de promoverlo a `supabase/migrations/`, aplicarlo, o habilitar pagos.
+
+### Borrador SQL preparado (no aplicado alojado)
+
+- [`supabase/drafts/20261013_f16_supporter_wall_consents_NOT_APPLIED.sql`](../supabase/drafts/20261013_f16_supporter_wall_consents_NOT_APPLIED.sql): tabla privada de consentimientos, roles/RLS sin grants directos, RPC propias autenticadas, sin lista pública. Función interna de entitlement **retorna FALSE intencionadamente** hasta gate de pagos, impidiendo aprobar consentimientos reales anticipados.
+- [`supabase/tests/supporter/consent-metadata.sql`](../supabase/tests/supporter/consent-metadata.sql): aserciones del catálogo (RLS/ACL/search_path/ownership de funciones).
+- [`supabase/tests/supporter/consent-synthetic.sql`](../supabase/tests/supporter/consent-synthetic.sql): actores/pets ficticios, cambio temporal de gate solo dentro de transacción `BEGIN..ROLLBACK`, autorización/revocación, propiedad, transferencia, versiones inválidas y vencimiento. Guardias de `f14_synthetic`/PG17.
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml): job existente `f14-postgres` prueba el **borrador** contra DB efímera tras operaciones F14; run `38472636836` PostgreSQL SUCCESS. **No es prueba en Supabase alojado ni verificación de cobertura PayPal**.
+- Criterio posterior: auditar RLS combinadas `pets_public_read`/`f14_moderated_pets_select`, exposición `profiles.paypal_subscription_id`, efectos de deletion SOP, retención/consentimiento, textos legales y flujo con proveedor real. **El borrador es insuficiente para publicar mascotas aunque sus pruebas pasen.**
 
 ## 4. Pruebas obligatorias para el futuro gate de implementación
 

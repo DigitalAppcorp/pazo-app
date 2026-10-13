@@ -155,6 +155,10 @@ Se preparó el documento [`docs/PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_2026
 
 El PO confirmó «si aprobado» a las reglas expuestas en `docs/PAZO_SUPPORTER_WALL_CONSENT_POLICY_PROPOSAL_20261013.md`: consentimiento individual y revocable, exclusión tras cancelar y finalizar período válido, reautorización después de reactivar, tratamiento de bajas y filtros verificables. **Gate de producto superado, gate técnico/billing aún NO autorizado.** Preflight alojado sin mutaciones corroboró propiedad por `pets.owner_id` y la existencia de `profiles.paypal_subscription_id` legado con lectura pública amplia — no es fuente de entitlement; requerirá revisión de privacidad. Preparado [plan técnico READ ONLY](PAZO_SUPPORTER_WALL_BACKEND_DESIGN_PREFLIGHT_20261013.md), sin crear/aplicar SQL. Entrada A01 del muro continúa aprobada y no debe rediseñarse.
 
+### Borrador de SQL de consentimiento autorizado para CREACIÓN, NO aplicación (2026-10-13)
+
+El PO autorizó preparar archivos SQL sin aplicar Supabase. Se creó `supabase/drafts/20261013_f16_supporter_wall_consents_NOT_APPLIED.sql` con almacenamiento privado por mascota, revocación segura y RPC restringidas al dueño; las autorizaciones positivas están **bloqueadas por un helper de entitlement siempre falso**, hasta autorizar e integrar pagos reales verificables. Las pruebas en `supabase/tests/supporter/` se ejecutaron sobre PostgreSQL sintético de CI, sin tocar ninguna cuenta/mascota real. La arquitectura sigue separando opt-in (permiso privado) de los datos públicos de mascota (aún inexistentes en el muro) y no usa `is_founder`/`paypal_subscription_id` para inferir pago. No desplegar ni promover este draft sin autorización nueva.
+
 ## 7. Entitlement
 
 Fuente de verdad:
