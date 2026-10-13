@@ -66,6 +66,8 @@ const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
 const {ImmersivePlacesStage}=await load('features/places/components/ImmersivePlacesStage.js')
+const {LostAlertReview}=await load('features/rescue/components/LostAlertReview.js')
+const {ActiveLostAlertPanel}=await load('features/rescue/components/ActiveLostAlertPanel.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
 test.after(()=>{
   const target=fs.realpathSync(compiled)
@@ -75,6 +77,52 @@ test.after(()=>{
 const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.children.filter(c=>typeof c==='string')).join(' ')
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
 
+
+test('F13 lost-pet alert option 6 review has only real preview information and original publish/edit callbacks', async () => {
+  const pet={id:'test-pet',name:'emilio',photoUrl:'https://source.invalid/pet.jpg',species:'perro',age:'4',qrId:'test'}
+  for(const lang of ['es','en']) {
+    let edit=0,publish=0,tree
+    await act(async()=>{tree=create(React.createElement(LostAlertReview,{
+      pet,lang,lastSeen:'Zona aprobada',dateTime:'2026-10-13T12:00',details:'Detalle real',
+      isSaving:false,onEdit(){edit++},onPublish(){publish++}
+    }))})
+    const json=JSON.stringify(tree.toJSON())
+    assert.ok(json.includes('Zona aprobada')&&json.includes('Detalle real')&&json.includes('emilio'))
+    assert.equal(tree.root.findAllByType('input').length,0)
+    assert.equal(tree.root.findAllByType('textarea').length,0)
+    const all=tree.root.findAllByType('button')
+    assert.equal(all.length,2)
+    await act(async()=>{all[0].props.onClick();all[1].props.onClick()})
+    assert.equal(edit,1);assert.equal(publish,1)
+    await act(async()=>{tree.unmount()})
+  }
+})
+
+test('F13 active alert option 2 retains resolve and exposes existing public passport sharing options', async () => {
+  const pet={id:'test-pet',name:'emilio',photoUrl:'https://source.invalid/pet.jpg',species:'perro',age:'4',qrId:'test'}
+  const calls=[]
+  const base={
+    pet,lastSeen:'Zona real',details:'Descripción real',lang:'es',isSaving:false,
+    publicUrl:'https://pazo.invalid/#/rescue/12345678-1234-1234-1234-123456789abc',
+    isLinkLoading:false,linkError:'',shareFeedback:'',isLocalLink:false,
+    onCopy(){calls.push('copy')},onWhatsApp(){calls.push('whatsapp')},
+    onInstagram(){calls.push('instagram')},onMore(){calls.push('more')},
+    onRetryLink(){calls.push('retry')},onResolve(){calls.push('resolve')},onClose(){calls.push('close')}
+  }
+  let tree
+  await act(async()=>{tree=create(React.createElement(ActiveLostAlertPanel,base))})
+  const b=tree.root.findAllByType('button')
+  assert.equal(b.length,7)
+  for(const choice of b.slice(1,5))assert.equal(choice.props.disabled,false)
+  await act(async()=>{for(const choice of b)choice.props.onClick()})
+  assert.deepEqual(calls,['close','copy','whatsapp','instagram','more','resolve','close'])
+  assert.ok(JSON.stringify(tree.toJSON()).includes('Zona real'))
+  assert.ok(JSON.stringify(tree.toJSON()).includes('Descripción real'))
+  await act(async()=>{tree.update(React.createElement(ActiveLostAlertPanel,{...base,isLocalLink:true}))})
+  assert.equal(tree.root.findAllByType('button')[1].props.disabled,false)
+  assert.ok(tree.root.findAllByType('button').slice(2,5).every(x=>x.props.disabled===true))
+  await act(async()=>{tree.unmount()})
+})
 test('F13 Places Option 3 renders an edge-to-edge map, real carousel, filters and voluntary controls', () => {
   const chosen={
     id:'test-real-source-id',name:'Silver Lake Dog Park',category:'park',

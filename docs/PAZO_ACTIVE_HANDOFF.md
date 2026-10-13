@@ -17,6 +17,14 @@
 - `src/components/views/PetView.tsx`: menú de configuración ES/EN incluye Privacidad, Reglas de uso y Cuenta y datos; conserva `LegalPreviewDialog`, `DeletionRequestDialog`, `requestEnabled`, `canManagePet/onRequireAccount` y el enlace `PAZO_PRIVACY_SUPPORT_MAILTO` sin activar eliminaciones ni alterar reglas de backend. Menú con scroll en móvil, teclado/Escape/click fuera, cero contornos y animación respetando movimiento reducido.
 - `scripts/closure-ui.test.mjs`: prueba enfocada comprueba que sección y CTA solo aparecen dentro del engranaje, que permanece la restricción de eliminación y que soporte sigue accesible; adapta test de edición demo al menú nuevo. **Nuevo gate:** CI del HEAD más reciente, seguida de revisión visual en Vite local del PO. Sin autorizar merge, Supabase ni Vercel.
 
+
+## 1B. F13 — Alertas de mascota perdida: decisiones PO del 2026-10-13
+
+- **Revisión previa (paso 2) — Opción 6** «vista previa de publicación», con datos ya capturados en el formulario anterior y sin introducir otros campos. Volver a «Modificar datos» o «Publicar alerta» conserva el servicio de activación actual. Diseño en `src/features/rescue/components/LostAlertReview.tsx`.
+- **Alerta activa — Opción 2**: fotografía real de la mascota, ubicación y descripción existentes, bloque «Compartir búsqueda», cuatro accesos (Copiar link, WhatsApp, Instagram mediante copia para pegar manualmente, y Más por Web Share API con fallback de copia), mantener botones «¡Ya está en casa! Finalizar alerta» y «Cerrar ventana». Diseño en `src/features/rescue/components/ActiveLostAlertPanel.tsx` conectado por `src/components/modals/AlertModal.tsx`.
+- **Contrato de enlace:** `getPetPublicToken` + `buildPublicRescueUrl` existentes en `rescueService`, mismo `#/rescue/{public_token}` que `PassportModal` y `PublicRescueView` con alerta visible. Token existente de lectura, sin nuevas tablas, tokens, URLs fijas, SQL o escrituras adicionales. En localhost solo Copiar enlace (para QA local); apps externas se deshabilitan, pues el enlace localhost no es accesible desde contactos. No prometer post directo en Instagram: se copia y usuario pega.
+- Privacidad: el link es público por intención PO y expone solo los datos que ya muestra el pasaporte; no transportar correo, teléfono privado ni GPS, y no usar proveedor de share propio. Publicar/finalizar usan RPCs previas. Probar CI y después revisión visual PO en Vite; **NO declarar aceptado** solo por test. F13 y PR #44 DRAFT. No merge/DB/Vercel.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
