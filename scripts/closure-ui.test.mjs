@@ -107,12 +107,14 @@ test('T03 only sighting opens its destination; unsupported Care filter is absent
   await act(async()=>renderer.unmount())
 })
 test('T14 each onboarding step renders localized critical text without changing stored identifiers', () => {
-  const needles={A01:['Comenzar','Get started'],A02:['Correo electrónico','Email'],A03:['Edad aproximada','Approximate age'],A04:['Solo visibles por el tutor','Visible only to the guardian'],A05:['Comunidades de gatos','Cat communities']}
+  const needles={A01:['Comenzar','Get started'],A02:['Correo electrónico','Email'],A03:['Antes de crear su perfil','Before creating their profile'],A04:['Comunidades de gatos','Cat communities']}
   for(const [initialStep,[es,en]] of Object.entries(needles)) {
     const render=lang=>renderToStaticMarkup(React.createElement(OnboardingView,{initialStep,lang,onComplete(){},onSkipToLogin(){},onQuickDemo(){},onToggleLang(){}}))
     assert.ok(render('es').includes(es),initialStep)
     const english=render('en');assert.ok(english.includes(en),initialStep);assert.ok(!english.includes(es),initialStep)
-    if(initialStep==='A05') assert.ok(english.includes('value="Los Ángeles"')) // User/state value is not translated.
+    if(initialStep==='A04') assert.ok(english.includes('value="Los Ángeles"')) // User/state value is not translated.
+    assert.ok(!english.includes('You decide.')) // Removed nonfunctional privacy page.
+    if(initialStep==='A03') assert.ok(english.includes('Read privacy details'))
   }
 })
 test('T14 English onboarding submits the unchanged Spanish species/interest identifiers', async () => {
@@ -122,10 +124,14 @@ test('T14 English onboarding submits the unchanged Spanish species/interest iden
   await act(async()=>name.props.onChange({target:{value:'Synthetic Dog'}}))
   await act(async()=>button(renderer.root,'Dog').props.onClick())
   await act(async()=>button(renderer.root,'Continue').props.onClick())
-  await act(async()=>button(renderer.root,'Save and continue').props.onClick())
+  assert.equal(button(renderer.root,'Save and continue'),undefined)
+  assert.ok(button(renderer.root,'Cat communities'))
+  await act(async()=>button(renderer.root,'Back').props.onClick())
+  assert.ok(button(renderer.root,'Read privacy details'))
+  await act(async()=>button(renderer.root,'Continue').props.onClick())
   await act(async()=>button(renderer.root,'Cat communities').props.onClick())
   await act(async()=>button(renderer.root,'Nutrition and natural food').props.onClick())
-  await act(async()=>button(renderer.root,'Discover Pazo').props.onClick())
+  await act(async()=>button(renderer.root,'Create profile and enter').props.onClick())
   assert.equal(completed,true);assert.equal(petInputs.length,1)
   assert.equal(petInputs[0].species,'perro')
   assert.equal(petInputs[0].name,'Synthetic Dog')
