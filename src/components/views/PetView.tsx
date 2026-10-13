@@ -5,6 +5,7 @@ import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
+import { SupporterThemePreviewPanel } from '../../features/supporter/components/SupporterThemePreviewPanel'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
@@ -63,6 +64,8 @@ export const PetView = ({
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showSupporterThemePreview, setShowSupporterThemePreview] = useState(false)
+  const supporterPreviewEntryRef = useRef<HTMLButtonElement>(null)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
   const [showSettings, setShowSettings] = useState(false)
@@ -648,6 +651,29 @@ export const PetView = ({
           </h3>
           <ModerationAccess enabled={canModerate} lang={lang} />
 
+          {/* Discoverable under Mi mascota, not a secret link, fake entitlement or Settings item. */}
+          <button
+            ref={supporterPreviewEntryRef}
+            type="button"
+            onClick={() => setShowSupporterThemePreview(true)}
+            className="flex w-full items-center justify-between rounded-[2rem] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F5F7EE] focus-visible:bg-[#E1E53F]/30"
+          >
+            <span className="flex min-w-0 items-center gap-3.5">
+              <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/35 text-[#204E4A]">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="13" cy="8" r="3"/><path d="M7 20c0-4 2.2-6 6-6s6 2 6 6M3 8l2 2m-2 0 2-2"/>
+                </svg>
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[16px] font-extrabold text-[#204E4A]">{lang === 'es' ? 'Personalizar perfil' : 'Customize profile'}</span>
+                <span className="block text-[12px] font-medium text-[#5C7470]">
+                  {lang === 'es' ? 'Explorar estilos de Amigo de PAZO · En desarrollo' : 'Explore Amigo de PAZO themes · In development'}
+                </span>
+              </span>
+            </span>
+            <span aria-hidden="true" className="ml-2 text-xl font-extrabold text-[#5C7470]">›</span>
+          </button>
+
           <div
             onClick={onOpenQRPassport}
             className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
@@ -771,6 +797,16 @@ export const PetView = ({
             </p>
           </div>
         </div>
+      )}
+      {showSupporterThemePreview && (
+        <SupporterThemePreviewPanel
+          pet={currentPet}
+          lang={lang}
+          onClose={() => {
+            setShowSupporterThemePreview(false)
+            supporterPreviewEntryRef.current?.focus()
+          }}
+        />
       )}
       {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
       {showDeletionRequest && <DeletionRequestDialog lang={lang} onClose={() => setShowDeletionRequest(false)} />}

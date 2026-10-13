@@ -3,12 +3,6 @@ import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
 import { PublicProfileTabs } from '../../features/profile/components/PublicProfileTabs'
-import {
-  isLocalSupporterThemePreviewEnabled,
-  SupporterProfileBackdrop,
-  SupporterThemePreviewPicker,
-  type SupporterProfileThemeSelection,
-} from '../../features/supporter/components/SupporterProfileThemes'
 import { IconPaw, IconDocument, IconCommunity, IconHeart } from '../icons/PazoIcons'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
@@ -40,9 +34,6 @@ export const PublicProfileView = ({
   const [petPosts, setPetPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'posts' | 'info'>('posts')
-  // F16: visual-only local preview, never interpreted as verified membership.
-  const [previewTheme, setPreviewTheme] = useState<SupporterProfileThemeSelection>(null)
-  const canPreviewSupporterThemes = isLocalSupporterThemePreviewEnabled()
 
   // Paso 2: Estados Reales
   const [followersCount, setFollowersCount] = useState<number>(0)
@@ -210,10 +201,7 @@ export const PublicProfileView = ({
   return (
     <div className="absolute inset-0 z-[100] flex flex-col overflow-x-hidden overflow-y-auto bg-[#F8F5EC] font-sans text-[#204E4A] antialiased animate-slide-up">
       {/* Warm open canvas, not a card and never a synthetic cover photograph. */}
-      {canPreviewSupporterThemes && previewTheme && (
-        <SupporterProfileBackdrop theme={previewTheme} />
-      )}
-      <div aria-hidden="true" className={'pointer-events-none absolute inset-x-0 top-0 h-[540px] overflow-hidden ' + (canPreviewSupporterThemes && previewTheme ? 'hidden' : '')}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[540px] overflow-hidden">
         <div className="absolute -left-36 -top-32 h-80 w-80 rounded-full bg-[#EFE9D6]/55 blur-[75px]" />
         <svg className="absolute right-[-14px] top-[132px] h-28 w-24 text-[#D9D6A8]/65" viewBox="0 0 100 120" fill="currentColor">
           <ellipse cx="29" cy="32" rx="8" ry="16" transform="rotate(-20 29 32)" />
@@ -301,9 +289,6 @@ export const PublicProfileView = ({
           </div>
         ) : (
           <div className="animate-fade-in">
-            {canPreviewSupporterThemes && (
-              <SupporterThemePreviewPicker value={previewTheme} onChange={setPreviewTheme} lang={lang} />
-            )}
             {/* A genuine redesign: the identity is ON the canvas, not inside a profile card. */}
             <section aria-label={lang === 'es' ? 'Identidad de la mascota' : 'Pet identity'} className="relative px-2 pt-4">
               <div className="relative inline-flex">

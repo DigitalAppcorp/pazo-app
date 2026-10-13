@@ -63,7 +63,8 @@ const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
 const {BottomNav}=await load('components/BottomNav.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
-const {SupporterThemePreviewPicker,SupporterProfileBackdrop,SUPPORTER_PROFILE_THEMES,isLocalSupporterThemePreviewEnabled}=await load('features/supporter/components/SupporterProfileThemes.js')
+const {SupporterThemePreviewPicker,SupporterProfileBackdrop,SUPPORTER_PROFILE_THEMES}=await load('features/supporter/components/SupporterProfileThemes.js')
+const {SupporterThemePreviewPanel}=await load('features/supporter/components/SupporterThemePreviewPanel.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
 const {LiquidChoiceTabs}=await load('components/ui/LiquidChoiceTabs.js')
 const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchFilters.js')
@@ -883,7 +884,6 @@ test('F13 nearby-only preview changes copy and artwork without rerouting feed, m
 test('F16 approved supporter themes have five distinct non-persistent visual previews and preserve the original profile', async () => {
   const expected=['classic','nature','hearts','stars','adventure']
   assert.deepEqual(SUPPORTER_PROFILE_THEMES.map(theme=>theme.id),expected)
-  assert.equal(isLocalSupporterThemePreviewEnabled(),false,'Preview must be disabled outside DEV runtime')
   for (const option of SUPPORTER_PROFILE_THEMES) {
     const rendered=renderToStaticMarkup(React.createElement(SupporterProfileBackdrop,{theme:option.id}))
     assert.ok(rendered.includes('data-supporter-theme="'+option.id+'"'),'Distinct decorative layer exists: '+option.id)
@@ -899,7 +899,7 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
   assert.equal(choices().length,6,'Original option plus five approved themes')
   assert.ok(buttonText(choices()[0]).includes('Original'))
   assert.equal(choices()[0].props['aria-pressed'],true)
-  assert.ok(JSON.stringify(view.toJSON()).includes('SOLO DESARROLLO'))
+  assert.ok(JSON.stringify(view.toJSON()).includes('EN DESARROLLO'))
   for(const [index,id] of expected.entries()){
     await act(async()=>choices()[index+1].props.onClick())
     assert.equal(selected.at(-1),id)
@@ -908,16 +908,62 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
   assert.equal(selected.at(-1),null,'Original background stays recoverable')
   await act(async()=>view.update(React.createElement(SupporterThemePreviewPicker,{value:'stars',onChange:value=>selected.push(value),lang:'en'})))
   assert.equal(choices()[4].props['aria-pressed'],true,'Selected theme exposed to assistive technology')
-  assert.ok(JSON.stringify(view.toJSON()).includes('Development only')===false || JSON.stringify(view.toJSON()).includes('DEVELOPMENT ONLY'))
+  assert.ok(JSON.stringify(view.toJSON()).includes('IN DEVELOPMENT'))
   await act(async()=>view.unmount())
   const profile=fs.readFileSync('src/components/views/PublicProfileView.tsx','utf8')
   const source=fs.readFileSync('src/features/supporter/components/SupporterProfileThemes.tsx','utf8')
-  assert.ok(source.includes('import.meta.env.DEV')&&source.includes("new URLSearchParams(window.location.search).get('pazo_theme_preview') === '1'"))
-  assert.ok(profile.includes('canPreviewSupporterThemes && previewTheme'))
-  assert.ok(profile.includes('canPreviewSupporterThemes && ('))
+  assert.ok(!source.includes('pazo_theme_preview')&&!source.includes('import.meta.env.DEV'),'No secret URL or development-only gate')
+  assert.ok(!profile.includes('SupporterThemePreviewPicker')&&!profile.includes('SupporterProfileBackdrop'),'Public profiles cannot be customized without verified entitlement')
   assert.ok(profile.includes('get_pet_founder_status'),'Legacy verified status flow remains unchanged')
   assert.ok(!source.includes('localStorage')&&!source.includes('supabase'),'Theme preview never writes user preferences or payment status')
   assert.ok(!source.includes('border-')&&!source.includes('ring-')&&!source.includes('outline-'),'Theme preview has zero UI borders')
+})
+
+test('F16 discoverable customization opens from Mi mascota with own pet, no link, payment or persistence', async () => {
+  const pet={id:'owned-cat',name:'Luna',species:'gato',photoUrl:'https://synthetic.invalid/luna.jpg',age:'2',bio:'Amiga de todos'}
+  const makeProps=lang=>({
+    currentPet:pet,canManagePet:true,canModerate:false,onRequireAccount(){},
+    availablePets:[pet],onSelectPet(){},onPetUpdated(){},onAddPet(){},
+    careItems:[],onCompleteCare(){},onOpenQRPassport(){},onOpenCareAgenda(){},
+    documentCount:0,onOpenDocuments(){},onOpenLostAlert(){},lang
+  })
+  for (const [lang,entry,original,nature,close] of [
+    ['es','Personalizar perfil','Original','Naturaleza','Cerrar vista previa'],
+    ['en','Customize profile','Original','Nature','Close preview'],
+  ]) {
+    let ui
+    await act(async()=>{ui=create(React.createElement(PetView,makeProps(lang)))})
+    assert.ok(button(ui.root,entry),'Discoverable from ordinary My Pet utilities')
+    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
+    await act(async()=>button(ui.root,entry).props.onClick())
+    const dialogs=ui.root.findAllByProps({role:'dialog'})
+    assert.equal(dialogs.length,1)
+    const dialog=dialogs[0]
+    assert.equal(dialog.props['aria-modal'],true)
+    assert.ok(JSON.stringify(dialog.toJSON()).includes('Luna'))
+    assert.ok(JSON.stringify(dialog.toJSON()).includes('luna.jpg'))
+    assert.ok(button(dialog,original))
+    assert.ok(button(dialog,nature))
+    assert.equal(button(dialog,original).props['aria-pressed'],true)
+    await act(async()=>button(dialog,nature).props.onClick())
+    assert.ok(ui.root.findAllByProps({'data-supporter-theme':'nature'}).length===1)
+    assert.equal(button(dialog,nature).props['aria-pressed'],true)
+    await act(async()=>button(dialog,original).props.onClick())
+    assert.equal(ui.root.findAllByProps({'data-supporter-theme':'nature'}).length,0)
+    assert.ok(button(dialog,close))
+    await act(async()=>button(dialog,close).props.onClick())
+    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
+    await act(async()=>button(ui.root,entry).props.onClick())
+    assert.equal(button(ui.root,original).props['aria-pressed'],true,'Reopen starts from unchanged original; nothing was saved')
+    await act(async()=>ui.unmount())
+  }
+  const petCode=fs.readFileSync('src/components/views/PetView.tsx','utf8')
+  const preview=fs.readFileSync('src/features/supporter/components/SupporterThemePreviewPanel.tsx','utf8')
+  assert.ok(petCode.includes('setShowSupporterThemePreview(true)'))
+  assert.ok(petCode.includes('showSupporterThemePreview && ('))
+  assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'No payment or preferences are written')
+  assert.ok(!preview.includes('Guardar')&&!preview.includes('Save Changes'),'Do not promise saving before entitlement backend is installed')
+  assert.ok(!preview.includes('border-')&&!preview.includes('ring-')&&!preview.includes('outline-'),'No outlined UI')
 })
 
 test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {

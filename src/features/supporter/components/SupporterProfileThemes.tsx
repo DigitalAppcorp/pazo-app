@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-// F16 discovery-only visuals. Never infer paid membership from the URL or this state.
+// F16 discovery-only visuals. Never infer paid membership from this local selector state.
 export const SUPPORTER_PROFILE_THEMES = [
   {
     id: 'classic', labelEs: 'Clásico PAZO', labelEn: 'Classic PAZO',
@@ -31,12 +31,6 @@ export const SUPPORTER_PROFILE_THEMES = [
 
 export type SupporterProfileThemeId = typeof SUPPORTER_PROFILE_THEMES[number]['id']
 export type SupporterProfileThemeSelection = SupporterProfileThemeId | null
-
-// Both checks are essential: not present in production builds, even with the query string.
-export const isLocalSupporterThemePreviewEnabled = () =>
-  Boolean(import.meta.env.DEV) &&
-  typeof window !== 'undefined' &&
-  new URLSearchParams(window.location.search).get('pazo_theme_preview') === '1'
 
 const decorativePositions = [
   { left: '73%', top: '12%', width: 66, rotation: -18, opacity: 0.75 },
@@ -143,7 +137,7 @@ interface SupporterThemePreviewPickerProps {
 
 export const SupporterThemePreviewPicker = ({ value, onChange, lang }: SupporterThemePreviewPickerProps) => (
   <section
-    aria-label={lang === 'es' ? 'Vista previa local de fondos' : 'Local background preview'}
+    aria-label={lang === 'es' ? 'Vista previa de fondos' : 'Background preview'}
     className="relative z-20 mb-5 rounded-[26px] bg-white/95 p-3.5 shadow-[0_10px_30px_rgba(32,78,74,0.10)]"
   >
     <div className="mb-2 flex items-center justify-between gap-2 px-1">
@@ -151,7 +145,7 @@ export const SupporterThemePreviewPicker = ({ value, onChange, lang }: Supporter
         {lang === 'es' ? 'Vista previa de temas' : 'Theme preview'}
       </p>
       <span className="rounded-full bg-[#F4EDD8] px-2 py-1 text-[10px] font-extrabold text-[#6A6557]">
-        {lang === 'es' ? 'SOLO DESARROLLO' : 'DEVELOPMENT ONLY'}
+        {lang === 'es' ? 'EN DESARROLLO' : 'IN DEVELOPMENT'}
       </span>
     </div>
     <div role="group" aria-label={lang === 'es' ? 'Elegir decoración' : 'Choose decoration'} className="flex gap-2 overflow-x-auto pb-1">
@@ -178,8 +172,8 @@ export const SupporterThemePreviewPicker = ({ value, onChange, lang }: Supporter
     </div>
     <p className="mt-1.5 px-1 text-[11px] font-medium text-[#617670]" aria-live="polite">
       {lang === 'es'
-        ? 'Simulación visual sin guardar cambios ni conceder membresía.'
-        : 'Visual preview only. No changes saved or membership granted.'}
+        ? 'Prueba los diseños; no se guardan cambios ni se activa ninguna membresía.'
+        : 'Explore the designs; no changes are saved or membership activated.'}
     </p>
   </section>
 )
