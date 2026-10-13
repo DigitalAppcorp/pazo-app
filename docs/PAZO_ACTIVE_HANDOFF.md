@@ -11,6 +11,12 @@
 - Local del PO: Windows PowerShell; clon separado `$env:USERPROFILE\PAZO-F13-preview`, Vite `http://localhost:5173/`. Ha logrado configuración local de Supabase/Mapbox para pruebas anteriormente; NUNCA copiar valores de llaves a Git o handoff. **Estado actual del árbol local, sesión Auth y preview real: NO OBSERVADOS**. No asumir que está limpio, funcionando, o actualizado al HEAD.
 - **No usar Vercel para QA visual**; no desplegar deliberadamente ni gastar/incrementar planes/costos. Push puede activar integraciones automáticas: no prometer que nunca hay despliegue automático.
 
+## 1A. Nuevo feedback de UI de Mi mascota — configuración legal (PO 2026-10-13)
+
+- PO pidió sacar los dos botones **Privacidad** y **Reglas de uso** del bloque inferior y colocarlos en un menú de **engranaje junto a Cerrar sesión**. Se mantiene **Cuenta y datos** con solicitud de eliminación de cuenta y correo de privacidad en su posición original; ninguna mutación legal, datos, RPC, backend o permisos.
+- `src/components/views/PetView.tsx`: botón de configuración accesible ES/EN, dos accesos a los `LegalPreviewDialog` existentes, cerrar con Escape/tap fuera, foco perceptible sin contornos, targets táctiles adecuados y animación respetando reduced-motion. Se elimina la tarjeta de acceso legal duplicada del cuerpo del perfil; los documentos legales mismos NO cambian.
+- `scripts/closure-ui.test.mjs`: prueba aislada de menú y cierre, textos ES/EN, logout cercano y eliminación de cuenta conservada. **Nuevo gate:** CI del commit y revisión visual en Vite local por PO. No declarar aprobación visual ni cerrar F13.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**

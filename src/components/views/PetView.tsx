@@ -1,6 +1,6 @@
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
@@ -64,6 +64,9 @@ export const PetView = ({
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const settingsMenuRef = useRef<HTMLDivElement>(null)
+  const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const [showDeletionRequest, setShowDeletionRequest] = useState(false)
   // The intake RPCs are installed and QA-tested. Keep production disabled
   // until launch gates close; allow request/status/cancel QA in localhost.
@@ -96,8 +99,30 @@ export const PetView = ({
 
   const nextPendingCare = careReminderItem
 
+  useEffect(() => {
+    if (!showSettings || typeof document === 'undefined') return
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !settingsMenuRef.current?.contains(event.target)) {
+        setShowSettings(false)
+      }
+    }
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowSettings(false)
+        settingsButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('keydown', dismissOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('keydown', dismissOnEscape)
+    }
+  }, [showSettings])
+
   const handleEditClick = () => {
     if (!canManagePet) { onRequireAccount(); return }
+    setShowSettings(false)
     setEditForm(buildEditForm())
     setEditPhotoFile(null)
     setIsEditing(true)
@@ -239,9 +264,53 @@ export const PetView = ({
               <span>{lang === 'es' ? 'Cambiar' : 'Switch'}</span>
               <span className="text-[13px]">▾</span>
             </button>
+
+            <div className="relative z-30" ref={settingsMenuRef}>
+              <button
+                ref={settingsButtonRef}
+                type="button"
+                onClick={() => setShowSettings((open) => !open)}
+                aria-label={lang === 'es' ? 'Configuración' : 'Settings'}
+                title={lang === 'es' ? 'Configuración' : 'Settings'}
+                aria-expanded={showSettings}
+                aria-controls="pazo-profile-settings"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-xs transition-colors hover:bg-[#E1E53F]/40 focus-visible:bg-[#E1E53F]"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.3 2.8h3.4l.55 2.12c.48.19.94.46 1.36.78l2.07-.63 1.7 2.94-1.54 1.5a7.5 7.5 0 0 1 0 1.98l1.54 1.5-1.7 2.94-2.07-.63c-.42.32-.88.59-1.36.78l-.55 2.12h-3.4l-.55-2.12a6.8 6.8 0 0 1-1.36-.78l-2.07.63-1.7-2.94 1.54-1.5a7.5 7.5 0 0 1 0-1.98l-1.54-1.5 1.7-2.94 2.07.63c.42-.32.88-.59 1.36-.78z" transform="translate(0 1.5)" />
+                  <circle cx="12" cy="12" r="2.65" />
+                </svg>
+              </button>
+              {showSettings && (
+                <div
+                  id="pazo-profile-settings"
+                  role="group"
+                  aria-label={lang === 'es' ? 'Privacidad y reglas' : 'Privacy and community rules'}
+                  className="absolute right-0 top-full z-50 mt-2 w-[min(16rem,calc(100vw-2rem))] rounded-[1.5rem] bg-[#FFFCF6] p-2 shadow-[0_12px_35px_rgba(32,78,74,0.17)] motion-safe:animate-[slideUpFade_220ms_ease-out_both]"
+                >
+                  <p className="px-3 pb-1 pt-2 text-[11px] font-extrabold text-[#5C7470]">
+                    {lang === 'es' ? 'Privacidad y reglas' : 'Privacy and community rules'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setShowSettings(false); setLegalKind('privacy') }}
+                    className="w-full rounded-2xl px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/35"
+                  >
+                    {lang === 'es' ? 'Privacidad' : 'Privacy'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowSettings(false); setLegalKind('terms') }}
+                    className="w-full rounded-2xl px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/35"
+                  >
+                    {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               onClick={handleLogout}
-              className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+              className="w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 focus-visible:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
               title={lang === 'es' ? 'Cerrar sesión' : 'Log out'}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -634,25 +703,6 @@ export const PetView = ({
             <span className="text-lg text-[#5C7470] group-hover:translate-x-1 transition-transform font-bold">
               ›
             </span>
-          </div>
-
-          <div className="rounded-[2rem] pazo-glass-card px-4 py-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
-            <h4 className="text-sm font-extrabold text-[#204E4A]">
-              {lang === 'es' ? 'Privacidad y reglas' : 'Privacy & community rules'}
-            </h4>
-            <p className="mt-1 text-xs text-[#5C7470]">
-              {lang === 'es' ? 'Información preliminar para la etapa de pruebas.' : 'Preliminary information for the testing stage.'}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setLegalKind('privacy')}
-                className="rounded-full bg-[#E1E53F]/40 px-4 py-2 text-xs font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
-                {lang === 'es' ? 'Privacidad' : 'Privacy'}
-              </button>
-              <button type="button" onClick={() => setLegalKind('terms')}
-                className="rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
-                {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
-              </button>
-            </div>
           </div>
 
           <div className="rounded-[2rem] pazo-glass-card p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">

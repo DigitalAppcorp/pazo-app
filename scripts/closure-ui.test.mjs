@@ -497,6 +497,43 @@ test('T14 English onboarding submits the unchanged Spanish species/interest iden
   assert.deepEqual(petInputs[0].interests,['Lugares aptos para mascotas','Nutrición y alimentación natural'])
   await act(async()=>renderer.unmount())
 })
+
+test('F13 settings gear by logout contains both legal links and leaves account deletion in place', async () => {
+  const pet={id:'synthetic-pet',name:'Synthetic Cat',species:'gato',photoUrl:'',age:'1'}
+  const makeProps=lang=>({currentPet:pet,canManagePet:false,onRequireAccount(){},
+    canModerate:false,availablePets:[pet],onSelectPet(){},onPetUpdated(){},onAddPet(){},
+    careItems:[],onCompleteCare(){},onOpenQRPassport(){},onOpenCareAgenda(){},
+    documentCount:0,onOpenDocuments(){},onOpenLostAlert(){},lang})
+  for(const [lang,gear,privacy,terms,section] of [
+    ['es','Configuración','Privacidad','Reglas de uso','Cuenta y datos'],
+    ['en','Settings','Privacy','Community rules','Account and data']
+  ]) {
+    let ui
+    await act(async()=>{ui=create(React.createElement(PetView,makeProps(lang)))})
+    const gearButton=()=>ui.root.findAllByType('button').find(b=>b.props['aria-label']===gear)
+    assert.ok(gearButton(),lang+' gear accessible')
+    assert.equal(gearButton().props['aria-expanded'],false)
+    assert.equal(ui.root.findAllByProps({id:'pazo-profile-settings'}).length,0)
+    assert.equal(button(ui.root,terms),undefined,'Legal options must not remain in main body')
+    await act(async()=>{gearButton().props.onClick()})
+    assert.equal(gearButton().props['aria-expanded'],true)
+    const menu=ui.root.findByProps({id:'pazo-profile-settings'})
+    const menuButtons=menu.findAllByType('button')
+    assert.equal(menuButtons.length,2)
+    assert.deepEqual(menuButtons.map(buttonText),[privacy,terms])
+    assert.ok(ui.root.findAllByType('button').some(b=>b.props.title===(lang==='es'?'Cerrar sesión':'Log out')))
+    assert.ok(JSON.stringify(ui.toJSON()).includes(section),'Deletion/request contact section remains visible')
+    await act(async()=>{gearButton().props.onClick()})
+    assert.equal(gearButton().props['aria-expanded'],false)
+    await act(async()=>{ui.unmount()})
+  }
+  const source=fs.readFileSync('src/components/views/PetView.tsx','utf8')
+  assert.ok(source.includes("setLegalKind('privacy')")&&source.includes("setLegalKind('terms')"))
+  assert.ok(source.includes('showDeletionRequest && <DeletionRequestDialog'))
+  assert.ok(source.includes('disabled={!requestEnabled}'))
+  assert.ok(source.includes('PAZO_PRIVACY_SUPPORT_MAILTO'))
+})
+
 test('T15 demo profile Edit requests a real account without exposing an upload form', async () => {
   let renderer;let requests=0;petInputs.length=0
   const pet={id:'synthetic-pet',name:'Synthetic Cat',species:'gato',photoUrl:'',age:'1'}
