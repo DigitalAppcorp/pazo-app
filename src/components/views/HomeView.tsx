@@ -307,7 +307,7 @@ const PostCard = ({ post, canReport, onReport, onHidePost, currentPetId, ownedPe
   const menuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    if (!menuOpen) return
+    if (!menuOpen || typeof document === 'undefined') return
     const handlePointerDown = (event: PointerEvent) => {
       if (event.target instanceof Node && !menuRef.current?.contains(event.target)) setMenuOpen(false)
     }
