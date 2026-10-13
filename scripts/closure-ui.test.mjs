@@ -276,7 +276,7 @@ test('Community join notification: strict source types, modal navigation, recipi
   assert.ok(app.includes("setActiveTab('comunidades')"))
   assert.ok(app.includes('await markNotificationRead(notification.id)'))
 
-  const sql=fs.readFileSync('supabase/migrations/20261012235800_community_join_owner_notifications.sql','utf8')
+  const sql=fs.readFileSync('supabase/migrations/20261013025451_community_join_owner_notifications.sql','utf8')
   for(const line of [
     "CHECK (type IN ('sighting', 'system', 'community_join'))",
     "SECURITY DEFINER",
