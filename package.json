@@ -19,7 +19,7 @@
     "test:f14": "node --experimental-strip-types --test supabase/functions/f14-moderation-purge/core.test.mjs supabase/functions/f14-moderation-purge/storageInfo.test.mjs supabase/functions/f14-moderation-purge/publicUrl.test.mjs supabase/functions/f14-moderation-purge/trialScope.test.mjs scripts/f14-media-purge-contract.test.mjs scripts/f14-media-url-alias-contract.test.mjs scripts/f14-admin-reconciliation-contract.test.mjs",
     "test:pwa": "node scripts/pwa-check.mjs",
     "test:closure": "node --experimental-strip-types --test scripts/closure-core.test.mjs scripts/closure-ui.test.mjs",
-    "test:f16:synthetic": "node --test src/features/supporter/testing/syntheticLedger.test.mjs src/features/supporter/testing/offlineWebhookIntake.test.mjs"
+    "test:f16:synthetic": "node --test src/features/supporter/testing/syntheticLedger.test.mjs src/features/supporter/testing/offlineWebhookIntake.test.mjs src/features/supporter/testing/paypalOfflineSignature.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
