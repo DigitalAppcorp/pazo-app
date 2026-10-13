@@ -477,8 +477,13 @@ test('F13 Community Lifestyle Option 4 uses real cover, open identity, owner/mem
   assert.ok(view.includes('<CommunityLifestyleHero'))
   assert.ok(view.includes("postsCount={posts.length}"))
   assert.ok(view.includes('onMembership={() => void handleMembership()}'))
-  assert.ok(view.includes("aria-pressed={activeTab === key}"))
-  assert.ok(view.includes("setActiveTab(key)"))
+  assert.ok(view.includes('<LiquidChoiceTabs'),'Community uses shared accessible slider')
+  assert.ok(view.includes('variant="community"'),'Community preserves three choices')
+  assert.ok(view.includes('active={activeTab}'),'The selected community section remains controlled by the view')
+  assert.ok(view.includes('onChange={setActiveTab}'),'The same community section handler remains connected')
+  const choice=fs.readFileSync('src/components/ui/LiquidChoiceTabs.tsx','utf8')
+  assert.ok(choice.includes('aria-pressed={selected}'),'Moved selector keeps pressed semantics')
+  assert.ok(choice.includes('onClick={() => onChange(id)}'),'Moved selector keeps original interactions')
   for(const identifier of ['handleCreatePost','toggleComments','handleDeleteComment','handleLike','handleRemoveMember','handleSaveEdit','handleArchive','CommunityFeatureExperimentCard']){
     assert.ok(view.includes(identifier),identifier)
   }
