@@ -133,7 +133,7 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
   assert.ok(navSource.includes('h-[76px]'),'Nav track must allow readable labels on mobile')
   assert.ok(navSource.includes('pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))]'),'Bar must clear mobile safe area and have comfortable bottom spacing')
   assert.ok(navSource.includes("pazo-liquid-icon--active text-[#E1E53F]"),'Active icon must contrast with official dark green orb')
-  assert.ok(fs.readFileSync('src/components/BottomNav.tsx','utf8').includes('bg-[#EFECE4]'),'Outer gap must expose darker cream')
+  assert.ok(fs.readFileSync('src/components/BottomNav.tsx','utf8').includes('bg-[#FAF8F5]'),'Notch must reveal the same background as PAZO, not a darker cream')
   const app=fs.readFileSync('src/App.tsx','utf8')
   assert.ok(app.includes('onOpenCreate={() => setIsCreateMenuOpen(true)}'))
   assert.ok(app.includes('if (tab !== activeTab)'))
