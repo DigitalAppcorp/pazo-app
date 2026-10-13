@@ -110,6 +110,15 @@
 - **Pruebas `ae901df8`:** ES/EN, contenido real de desarrollo, no revelar conversaciones sintéticas, `onClose` en X y CTA, no llamar `onSendMessage`. Código CI PASS; prueba y aceptación visual PO se verifican por separado.
 - Mapa/Lugares congelado; F13 y PR #44 continúan abiertos hasta aprobación PO, sin merge.
 
+## F13 — Avisos/Notificaciones opción 4 «Comunidad que cuida» (PO aprobado, 2026-10-13)
+
+- **Decisión PO:** Avisos ya está desarrollado y funcional; se aprueba rediseño visual completo, Opción 4 cálida/PAZO lifestyle, sin inventar alertas ni alterar funcionamiento.
+- **Código f03fcb03:** nueva presentación de src/components/modals/NotificationsModal.tsx: lienzo crema, cabecera «Siempre cerca de tu comunidad», filtros reales Todas/Avistamientos, ilustración vectorial original perro descansando junto a una campana únicamente cuando la sección no tiene avisos cargados, título «¡Todo en calma!», tarjetas suaves con categoría, título, contenido, fecha/tiempo, indicador de no leído y acceso contextual existente.
+- **Contratos preservados:** getNotificationSightingId decide apertura; onOpenNotification se ejecuta exclusivamente para avistamientos navegables, notificaciones informativas continúan disabled. onClose, onScroll + onLoadMore, hasMore y isLoadingMore siguen. Si la sección está vacía pero hay más páginas, «Ver avisos anteriores» invoca el mismo callback onLoadMore; ningún endpoint nuevo.
+- **ES/EN y accesibilidad:** role=dialog, aria-modal, aria-describedby, aria-pressed para filtros, targets de 44px, estado de carga, scrolling móvil y SVG aria-hidden. Sin nuevas librerías, datos falsos, tracking ni contornos visuales de botones/tarjetas.
+- **Pruebas def85882:** estado vacío en dos idiomas, filtro, cierre, apertura de avistamiento, bloqueo de notificación sin destino, scroll y paginación manual: CI SUCCESS (#38333808283). El código también CI SUCCESS (#38333718441). La validación visual de PO en Vite permanece PENDIENTE.
+- **Restricciones:** Mapa/Lugares congelado; no Supabase, Vercel deliberado, main, migraciones ni merge. PR #44 DRAFT.
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
