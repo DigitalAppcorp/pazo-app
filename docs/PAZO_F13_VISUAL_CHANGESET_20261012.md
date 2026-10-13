@@ -159,6 +159,20 @@
 - **Gate:** GH CI/test de frontend y contrato SQL no valida ejecución alojada. Requiere autorización PO separada para aplicar DDL a Supabase. Luego validar una única unión descartable con dueño distinto, notificación a solo ese dueño, contador al reabrir, click deep-link, marca leído, no alerta al self/owner, sin reabrir pruebas de fases ya PASS. No ejecutar SQL hosted hasta aprobación explícita.
 - **Congelados:** Lugares/Mapa, `main`, RC, Vercel. PR #44 permanece DRAFT.
 
+## F13 — Mapa/Lugares, Opción 3 «Mapa inmersivo con carrusel» (autorizado 2026-10-13)
+
+**Decisión y referencia:** PO enseñó el módulo MapView antiguo (mapa dentro de caja, lista vertical de 6 lugares) y pidió el mapa como toda la pantalla del MÓDULO (no toda la PWA), buscador superpuesto arriba, filtros flotantes, lugares abajo desplazables lateralmente y efecto difuminado en todo contorno del mapa. Se mostraron cuatro referencias visuales; PO eligió **Opción 3** y autorizó codificarla. Esta instrucción reemplaza solo la congelación visual anterior de Lugares.
+
+**Alcance ejecutado (código `b0124d57`, `9bfb5f86`, `5087b5a8`, test `c853088d`, fix `81cfe14a`):**
+- `src/features/places/components/ImmersivePlacesStage.tsx` nuevo, bajo dominio Places; Mapbox a 100% width/height del módulo, sin card, sin borde, degradados crema de cuatro lados `pointer-events-none` para NO bloquear gestos. Floating search real (text input, commit telemetry existente), botón real Sugerir (modal ya existente), carrusel de filtros todos los originales, ubicación voluntaria con permiso y aviso discreto, estado de check-in.
+- Carrusel inferior horizontal `overflow-x-auto` + `snap-x snap-mandatory`, tarjeta de ubicación a ancho móvil con adelanto del siguiente elemento, fotografía SOLO si `place.photoUrl` real en datos, nombre/categoría/zona, contador de presencia REAL y distancia SOLO cuando `place.distanceKm` calculado por servicio con coordenadas voluntarias. Tarjetas reales al pulsar ejecutan `handleSelectPlace`, telemetría existente y map flyTo; error, loading, empty y reintento conservados.
+- `src/components/views/MapView.tsx`: toda la lógica original (`fetchPlaces` con presencia, búsqueda/filtros, geolocalización manual sin persistir coordenadas, check-in/checkout/visibilidad, detalle y seis tarjetas de fake doors) preservada y pasada a stage con callbacks. El detalle seleccionado ahora es panel scrollable sobre mapa, no debajo de lista vertical. Sin nuevo endpoint/Supabase/modelo de datos.
+- `src/features/places/map/MapboxMap.tsx`: bandera `immersive` y resize del canvas, clase sin esquinas forzadas en modo inmersivo; marcadores 2D PAZO de categoría a zoom bajo dibujados en canvas y añadidos a mapa simbólico (parques/senderos/comida/veterinaria/grooming/tiendas). Sigue capa de modelos 3D existente al zoom cercano y mismos event handlers de pins y modelos. Mapbox NavigationControl sigue utilizable.
+- `src/App.tsx`: elimina únicamente el padding y scroll outer de tab `mapa` para poder cubrir el espacio entre header y bottom nav; las otras tabs conservan la estructura previa.
+- Pruebas: `scripts/closure-ui.test.mjs` cubre stage real, lugar existente, filtro, loading/empty/error, privacy, source IDs, botones sin nuevas fake functions y lugar interactivo; `src/features/legal/legalCopy.test.mjs` conserva el gate de uso voluntario de GPS ahora cableado a `onUseLocation`. **CI SUCCESS #38341868940**, pero no inspección del mapa desde navegador (preview PO pendiente).
+- Política de coste: mismos Mapbox ya activos, no compras, nuevos recursos ni upgrades. Ninguna foto o rating ficticios. Regla cero contornos, Quicksand, paleta PAZO.
+- **Visual pendiente:** capturas Vite 375px y 430px; revisar safe-areas, controles superpuestos/map interaction y swipe horizontal con dedo. Ajustar tras feedback antes de cerrar F13 o merge. PR #44 DRAFT RC, `main` y Vercel no tocados. **Supabase no modificado para el mapa.**
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
