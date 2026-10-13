@@ -8,6 +8,7 @@ interface MapboxMapProps {
   userLocation?: EphemeralLocation | null
   onSelectPlace: (placeId: string) => void
   lang: 'es' | 'en'
+  immersive?: boolean
 }
 
 const DEFAULT_CENTER: [number, number] = [-118.2437, 34.0522]
@@ -58,6 +59,7 @@ export const MapboxMap = ({
   userLocation,
   onSelectPlace,
   lang,
+  immersive = false,
 }: MapboxMapProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<any>(null)
@@ -353,9 +355,19 @@ export const MapboxMap = ({
     syncUserMarker(map, window.mapboxgl, userLocation, lang)
   }, [lang, userLocation])
 
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined' || !containerRef.current) return
+    const observer = new ResizeObserver(() => mapRef.current?.resize?.())
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
+
   if (error) {
     return (
-      <div className="flex h-full min-h-64 items-center justify-center rounded-[2rem] bg-[#E7ECEA] p-5 text-center">
+      <div className={immersive
+        ? "flex h-full w-full items-center justify-center bg-[#E7ECEA] p-5 text-center"
+        : "flex h-full min-h-64 items-center justify-center rounded-[2rem] bg-[#E7ECEA] p-5 text-center"
+      }>
         <div>
           <p className="text-xs font-black text-[#204E4A]">
             {lang === 'es' ? 'Mapa no disponible' : 'Map unavailable'}
@@ -371,7 +383,10 @@ export const MapboxMap = ({
   return (
     <div
       ref={containerRef}
-      className="h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]"
+      className={immersive
+        ? "h-full w-full bg-[#E7ECEA]"
+        : "h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]"
+      }
       aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'}
     />
   )
