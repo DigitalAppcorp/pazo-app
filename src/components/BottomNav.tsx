@@ -69,6 +69,12 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
       className="relative z-30 shrink-0 bg-[#204E4A] px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-7px_26px_rgba(32,78,74,0.13)] sm:px-3"
     >
       <div className="relative grid h-[70px] grid-cols-5 items-center">
+        {/* Moving cream-colored recess creates a real visual gap around the glass orb. */}
+        <div
+          aria-hidden="true"
+          className="pazo-liquid-notch pointer-events-none"
+          style={{ left: indicatorLeft + '%' }}
+        />
         <div
           aria-hidden="true"
           className="pazo-liquid-indicator pointer-events-none"
