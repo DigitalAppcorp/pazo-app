@@ -114,7 +114,7 @@ test('T14 each onboarding step renders localized critical text without changing 
     const english=render('en');assert.ok(english.includes(en),initialStep);assert.ok(!english.includes(es),initialStep)
     if(initialStep==='A04') assert.ok(english.includes('value="Los Ángeles"')) // User/state value is not translated.
     assert.ok(!english.includes('You decide.')) // Removed nonfunctional privacy page.
-    if(initialStep==='A03') assert.ok(english.includes('Read privacy details'))
+    if(initialStep==='A03') assert.ok(english.includes('Privacy details'))
   }
 })
 test('T14 English onboarding submits the unchanged Spanish species/interest identifiers', async () => {
@@ -127,7 +127,7 @@ test('T14 English onboarding submits the unchanged Spanish species/interest iden
   assert.equal(button(renderer.root,'Save and continue'),undefined)
   assert.ok(button(renderer.root,'Cat communities'))
   await act(async()=>button(renderer.root,'Back').props.onClick())
-  assert.ok(button(renderer.root,'Read privacy details'))
+  assert.ok(button(renderer.root,'Privacy details'))
   await act(async()=>button(renderer.root,'Continue').props.onClick())
   await act(async()=>button(renderer.root,'Cat communities').props.onClick())
   await act(async()=>button(renderer.root,'Nutrition and natural food').props.onClick())
