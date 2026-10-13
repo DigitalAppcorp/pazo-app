@@ -109,6 +109,16 @@ Evitar por ahora:
 - beneficios que generen soporte operacional costoso;
 - promesa "sin publicidad" hasta definir una política real de ads.
 
+### Dirección visual de insignias aprobada (PO 2026-10-13)
+
+Se eligió el **concepto original** del tablero visual inicial (medallas de huella con banda azul «Amigo de PAZO»), descartando las alternativas posteriores. Se revisaron cuatro niveles y se entregaron PNG en la conversación:
+- Inicio: oro con corazón rojo y banda azul;
+- 3 meses: bronce con detalle verde, banda azul;
+- 6 meses: plata con estrella, banda azul;
+- 12 meses: oro, corona y laureles con detalle verde y banda azul.
+
+El PO confirmó «listo, ya quedó». **Los PNG NO están aún en el repositorio**, ni la UI conectada a membresías. No sustituir los assets elegidos por recreaciones aproximadas; confirmar que los archivos exactos se han incorporado antes de programar. Accesibilidad y legibilidad de miniinsignia pendiente en Vite. Siguiente trabajo de producto: decidir temas cosméticos de perfil, a partir de las cinco opciones del primer tablero (Clásico PAZO, Naturaleza, Corazones, Cielo estrellado, Aventura); todavía NO aprobadas como conjunto.
+
 ## 7. Entitlement
 
 Fuente de verdad:
