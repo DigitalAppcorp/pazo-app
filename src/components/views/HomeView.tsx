@@ -241,7 +241,7 @@ export const HomeView = ({
               </button>
             </div>
           )}
-          {displayedPosts.length === 0 && (
+          {displayedPosts.length === 0 && !lastHiddenPostId && (
             <div className="rounded-[2rem] pazo-glass-card p-7 text-center space-y-2 border border-[#204E4A]/10">
               <h3 className="text-base font-black text-[#204E4A]">
                 {lang === 'es' ? 'Todavía no hay publicaciones' : 'No posts yet'}
