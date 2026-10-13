@@ -34,7 +34,7 @@ export type SupporterProfileThemeSelection = SupporterProfileThemeId | null
 
 // Both checks are essential: not present in production builds, even with the query string.
 export const isLocalSupporterThemePreviewEnabled = () =>
-  import.meta.env.DEV &&
+  Boolean(import.meta.env.DEV) &&
   typeof window !== 'undefined' &&
   new URLSearchParams(window.location.search).get('pazo_theme_preview') === '1'
 
