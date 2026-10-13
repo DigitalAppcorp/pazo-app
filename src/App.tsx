@@ -1,5 +1,5 @@
 import { canUseAccountFeatures } from './features/auth/accountAccess'
-import { getNotificationSightingId } from './features/notifications/notificationSource'
+import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { useState, useEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -1375,10 +1375,17 @@ function PazoMain() {
 
   const handleOpenNotification = async (notification: PazoNotification) => {
     const sightingId = getNotificationSightingId(notification)
-    if (!canUseAccount || !sightingId) return
+    const joinedCommunityId = getNotificationCommunityId(notification)
+    if (!canUseAccount || (!sightingId && !joinedCommunityId)) return
 
     setIsNotificationsOpen(false)
-    setSelectedSightingId(sightingId)
+    if (joinedCommunityId) {
+      setCommunityTargetId(joinedCommunityId)
+      setCommunityTargetKey((value) => value + 1)
+      setActiveTab('comunidades')
+    } else if (sightingId) {
+      setSelectedSightingId(sightingId)
+    }
 
     if (!notification.read) {
       try {

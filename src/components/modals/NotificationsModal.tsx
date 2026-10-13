@@ -1,7 +1,7 @@
-import { getNotificationSightingId } from '../../features/notifications/notificationSource'
+import { getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
-import { IconCalendar, IconChat } from '../icons/PazoIcons'
+import { IconCalendar, IconChat, IconCommunity } from '../icons/PazoIcons'
 
 interface NotificationsModalProps {
   isOpen: boolean
@@ -161,8 +161,9 @@ export const NotificationsModal = ({
           ) : (
             <div className="space-y-2.5" aria-live="polite">
               {filtered.map((item) => {
-                const canOpen = Boolean(getNotificationSightingId(item))
-                const isSighting = item.category === 'comunidad'
+                const isSighting = Boolean(getNotificationSightingId(item))
+                const isCommunityJoin = Boolean(getNotificationCommunityId(item))
+                const canOpen = isSighting || isCommunityJoin
                 const isCare = item.category === 'cuidados'
 
                 return (
@@ -180,8 +181,8 @@ export const NotificationsModal = ({
                     }
                   >
                     <span aria-hidden="true" className={'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ' +
-                      (isSighting ? 'bg-[#E1E53F]/50 text-[#204E4A]' : isCare ? 'bg-[#E7F0DA] text-[#204E4A]' : 'bg-[#F1F3EB] text-[#204E4A]')}>
-                      {isCare ? <IconCalendar size={21} /> : isSighting ? <IconChat size={21} /> : <NotificationBell />}
+                      (isSighting || isCommunityJoin ? 'bg-[#E1E53F]/50 text-[#204E4A]' : isCare ? 'bg-[#E7F0DA] text-[#204E4A]' : 'bg-[#F1F3EB] text-[#204E4A]')}>
+                      {isCare ? <IconCalendar size={21} /> : isSighting ? <IconChat size={21} /> : isCommunityJoin ? <IconCommunity size={21} /> : <NotificationBell />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start gap-2">
