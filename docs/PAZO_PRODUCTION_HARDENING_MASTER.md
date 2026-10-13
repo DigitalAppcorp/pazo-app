@@ -43,10 +43,10 @@ Intención aprobada:
 - mensaje principal: ayudar a mantener PAZO activo y sostenible;
 - evitar una experiencia tipo paywall o “llegaste, págame”.
 
-**Precio, periodicidad y nombre aprobados por el PO el 2026-10-13: «Amigo de PAZO», USD 2.99/mes, únicamente mensual.** Sin plan anual por ahora; una opción anual futura requeriría nueva aprobación. Esto no concede automáticamente insignias ni modifica el campo técnico legado `is_founder`. No es autorización para crear planes, configurar secretos o activar pagos.
+**Precio, periodicidad y nombre aprobados por el PO el 2026-10-13: «Amigo de PAZO», USD 2.99/mes, únicamente mensual.** Sin plan anual por ahora; una opción anual futura requeriría nueva aprobación. El PO aprobó posteriormente una insignia visible «Amigo de PAZO» en el perfil social y miniinsignia sobre el avatar del autor en sus publicaciones, ambas condicionadas a entitlement backend activo y verificado; no es autorización para concederlas desde el navegador ni redefinir automáticamente el campo técnico legado `is_founder`. No es autorización para crear planes, configurar secretos o activar pagos.
 
 Aún NO decidido:
-- beneficios definitivos;
+- recompensas adicionales y detalles visuales de la insignia aprobada;
 - umbral exacto de elegibilidad para mostrar el pitch;
 - frecuencia de reaparición;
 - política de cancelación/gracia desde UX.

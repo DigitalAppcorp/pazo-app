@@ -78,16 +78,23 @@ Aproximación antes de impuestos/otros cargos:
 
 Las cifras netas anteriores son estimaciones históricas, no tarifas PayPal verificadas al momento de cobrar; antes de activar pagos, revisar costos y condiciones vigentes.
 
-## 6. Beneficios — recomendación provisional
+## 6. Beneficios — primera recompensa aprobada, adicionales pendientes
 
 **Nombre comercial APROBADO por Product Owner (2026-10-13): Amigo de PAZO.** Se usará para identificar la membresía de apoyo voluntario de USD 2.99/mes (sin opción anual por ahora). El nombre no aprueba automáticamente ninguna insignia, categoría de fundador, ventaja premium o cambio de `profiles.is_founder`; la implementación visual/entitlement se definirá y validará separadamente.
 
 
+**Primera recompensa APROBADA por Product Owner (2026-10-13): reconocimiento visual «Amigo de PAZO» en dos ubicaciones.**
+- **Perfil social de la mascota:** insignia visible junto a la identidad/fotografía, identificable como «Amigo de PAZO»; no confundirla con un nuevo rango «Fundador».
+- **Publicaciones de quien tiene una membresía activa verificada:** una insignia pequeña superpuesta a la **fotografía/avatar del autor** de la publicación. Debe ser legible pero discreta y no tapar la cara/foto, el botón del avatar ni otras señales esenciales. Alcance mínimo: tarjetas de publicaciones del Feed; al implementar, revisar también superficies que presentan publicaciones con avatar de autor (perfil social/comunidades) para mantener consistencia, sin asumir que los comentarios quedan autorizados.
+- **Quién la obtiene:** el titular de una membresía mensual activa verificada por el backend. PAZO identifica al autor mediante su identidad de cuenta/mascota, sin equiparar pulsar checkout o respuesta del navegador con suscripción pagada. Si la membresía deja de estar activa, ambos distintivos deben desaparecer tras reflejarse el estado verificado. No asignarlos manualmente ni a cuentas de prueba por defecto.
+- **Dependencia técnica real:** `PublicProfileView.tsx` ya tiene indicador legado `Fundador` basado en `get_pet_founder_status`; la experiencia de pago se llamará «Amigo de PAZO». `HomeView.tsx` usa `PostCard` con `post.petAvatar` y actualmente `Post` no incluye entitlement del autor: hará falta lectura/autorización backend segura y contrato de datos apropiado, no una señal inventada en el frontend. Separar semántica comercial de `profiles.is_founder` hasta decidir una transición segura.
+- **Estado:** requisito de producto autorizado y documentado, **todavía NO implementado** ni conectado a pagos. No activar PayPal ni modificar esquema/servicio sin su gate de seguridad y autorización técnica. El aspecto definitivo de ambas insignias requiere revisión visual del PO.
+
 La propuesta debe recompensar apoyo sin romper el producto gratuito.
 
 Candidatos de bajo riesgo:
-- insignia visual de Supporter/Fundador;
-- reconocimiento de miembro temprano;
+- **insignia «Amigo de PAZO» en perfil social + miniinsignia sobre avatar de autor en publicaciones: APROBADA**;
+- reconocimiento de miembro temprano adicional (no aprobado);
 - acceso anticipado a experimentos opcionales;
 - capacidad de votar/priorizar ideas;
 - cosméticos de perfil no funcionales.
@@ -130,7 +137,7 @@ Product Owner debe cerrar antes de reactivar:
 - precio mensual: **APROBADO USD 2.99/mes (PO 2026-10-13)**;
 - periodicidad: **APROBADO solo mensual, sin plan anual por ahora (PO 2026-10-13)**;
 - nombre comercial: **APROBADO — Amigo de PAZO (PO 2026-10-13)**;
-- beneficios incluidos;
+- primera recompensa visual: **APROBADA (perfil social + avatar en publicaciones)**; beneficios adicionales (si los hay), pendientes;
 - regla exacta de elegibilidad;
 - cooldown del pitch;
 - dónde puede abrirse manualmente la opción de apoyar.
