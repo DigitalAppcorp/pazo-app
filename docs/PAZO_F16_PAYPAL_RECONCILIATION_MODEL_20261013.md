@@ -111,3 +111,11 @@ Ejecutar primero con fixtures sintéticos aislados, sin cuentas existentes, sin 
 - Los tests `syntheticLedger` prueban **solo el modelo en memoria**, no el receptor real. No registrar `integration PASS` hasta completar sandbox y seguridad.
 
 Fuentes oficiales: https://developer.paypal.com/api/rest/webhooks/rest/ (última revisión 2026-06-18) y https://developer.paypal.com/subscriptions/integrate/ .
+
+## 8. PayPal Sandbox — recursos existentes comunicados por PO (2026-10-13)
+
+**Estado: REPORTADO POR EL PRODUCT OWNER, NO VERIFICADO VIA API.** El PO confirmó que su cuenta empresarial ya dispone de credenciales/API Sandbox, que **ya creó la suscripción** y **configuró los métodos de pago admitidos** en PayPal. No tratar esos recursos como pendientes de creación y **no duplicarlos**. Esto no confirma aún que exista una suscripción de prueba aprobada/cobrada, que el plan coincida con USD 2.99 por mes, que haya webhook configurado ni que el acceso del agente esté conectado.
+
+**Preflight no sensible para reutilizar lo que existe:** identificar el **Plan ID Sandbox** (habitualmente prefijo `P-`), el entorno exacto, la frecuencia e importe/moneda del plan y si existe **Webhook ID** de una app Sandbox; verificar IDs y configuraciones por API solo cuando haya una conexión segura autorizada. No solicitar Client Secret, access token, contraseña ni capturas con esas credenciales; el Client ID tampoco debe incrustarse en el repositorio. La configuración de métodos de pago no equivale a comprobación de un cobro recurrente exitoso.
+
+**Próximo gate real:** asociar la implementación a recursos Sandbox existentes, preparar credenciales únicamente mediante gestor de secretos en infraestructura autorizada, validar factura/cobro en Sandbox, y comprobar webhook real/verificación firma e idempotencia. **No modificar Supabase alojado, crear nuevos recursos PayPal ni activar Live sin autorización separada.** CI offline hasta commit `24b061c`: SUCCESS, run `38483616902`.
