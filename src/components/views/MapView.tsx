@@ -56,12 +56,6 @@ const categoryLabel = (
     lang === 'es' ? 'es' : 'en'
   ] || category
 
-const formatDistance = (distanceKm?: number) => {
-  if (distanceKm === undefined) return ''
-  if (distanceKm < 1) return `${Math.max(1, Math.round(distanceKm * 1000))} m`
-  return `${distanceKm.toFixed(distanceKm < 10 ? 1 : 0)} km`
-}
-
 const formatExpiry = (value: string, lang: 'es' | 'en') =>
   new Intl.DateTimeFormat(lang === 'es' ? 'es-US' : 'en-US', {
     hour: 'numeric',
