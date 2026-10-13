@@ -21,100 +21,84 @@ interface BottomNavProps {
   }
 }
 
-export const BottomNav = ({
-  activeTab,
-  onSelectTab,
-  onOpenCreate,
-  labels,
-}: BottomNavProps) => {
+// Create is an independent modal action, not an actual tab.
+// Five equal-width centers: 10%, 30%, 50% (Create), 70%, 90%.
+const NAV_ITEMS = [
+  { tab: 'inicio', Icon: IconHome, center: 10 },
+  { tab: 'comunidades', Icon: IconCommunity, center: 30 },
+  { tab: 'mapa', Icon: IconMap, center: 70 },
+  { tab: 'mascota', Icon: IconPaw, center: 90 },
+] as const
+
+export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: BottomNavProps) => {
+  const selected = NAV_ITEMS.find((item) => item.tab === activeTab)
+  const indicatorLeft = selected?.center ?? 10
+
+  const renderTab = (tab: NavTab) => {
+    const item = NAV_ITEMS.find((entry) => entry.tab === tab)
+    if (!item) return null
+    const { Icon } = item
+    const isActive = activeTab === tab
+    return (
+      <button
+        key={tab}
+        type="button"
+        aria-label={labels[tab]}
+        aria-current={isActive ? 'page' : undefined}
+        onClick={() => onSelectTab(tab)}
+        className="group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 text-[#D0DEDA] transition-colors duration-200 hover:text-white focus-visible:bg-[#E1E53F]"
+      >
+        <span
+          aria-hidden="true"
+          className={'pazo-liquid-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-full ' +
+            (isActive ? 'pazo-liquid-icon--active text-[#204E4A]' : '')}
+        >
+          <Icon size={21}/>
+        </span>
+        <span className={'max-w-full truncate text-[10px] font-extrabold tracking-tight transition-[opacity,color] duration-200 sm:text-xs ' +
+          (isActive ? 'text-[#E1E53F] opacity-100' : 'opacity-0 group-focus-visible:opacity-100')}>
+          {labels[tab]}
+        </span>
+      </button>
+    )
+  }
+
   return (
-    <nav className="relative z-30 grid shrink-0 grid-cols-5 items-center gap-0.5 bg-white/85 px-1 py-2 shadow-[0_-4px_20px_rgba(32,78,74,0.06)] backdrop-blur-xl sm:px-3">
-      <button
-        onClick={() => onSelectTab('inicio')}
-        className={`flex min-w-0 flex-col items-center gap-0.5 rounded-2xl px-0.5 py-1 transition-colors ${
-          activeTab === 'inicio'
-            ? 'text-[#204E4A] font-extrabold'
-            : 'text-[#5C7470]/70 hover:text-[#204E4A]'
-        }`}
-      >
-        <span
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'inicio' ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm' : ''
-          }`}
-        >
-          <IconHome size={18} />
-        </span>
-        <span className="max-w-full truncate text-[11px] font-semibold tracking-tight sm:text-[13px]">{labels.inicio}</span>
-      </button>
+    <nav
+      aria-label="Navegación de PAZO"
+      className="relative z-30 shrink-0 bg-[#204E4A] px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-7px_26px_rgba(32,78,74,0.13)] sm:px-3"
+    >
+      <div className="relative grid h-[70px] grid-cols-5 items-center">
+        <div
+          aria-hidden="true"
+          className="pazo-liquid-indicator pointer-events-none"
+          style={{ left: indicatorLeft + '%' }}
+        />
 
-      <button
-        onClick={() => onSelectTab('comunidades')}
-        className={`flex min-w-0 flex-col items-center gap-0.5 rounded-2xl px-0.5 py-1 transition-colors ${
-          activeTab === 'comunidades'
-            ? 'text-[#204E4A] font-extrabold'
-            : 'text-[#5C7470]/70 hover:text-[#204E4A]'
-        }`}
-      >
-        <span
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'comunidades'
-              ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm'
-              : ''
-          }`}
-        >
-          <IconCommunity size={18} />
-        </span>
-        <span className="max-w-full truncate text-[11px] font-semibold tracking-tight sm:text-[13px]">{labels.comunidades}</span>
-      </button>
+        {renderTab('inicio')}
+        {renderTab('comunidades')}
 
-      <button
-        onClick={onOpenCreate}
-        className="group flex min-w-0 flex-col items-center -mt-5"
-        title="Crear publicación, evento o alerta"
-      >
-        <div className="w-13 h-13 rounded-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] flex items-center justify-center shadow-[0_8px_25px_rgba(225,229,63,0.55)] transition-all transform group-hover:scale-105 active:scale-95">
-          <IconPlus size={26} />
-        </div>
-        <span className="mt-1 max-w-full truncate text-[11px] font-extrabold tracking-tight text-[#204E4A] sm:text-[13px]">
-          {labels.crear}
-        </span>
-      </button>
-
-      <button
-        onClick={() => onSelectTab('mapa')}
-        className={`flex min-w-0 flex-col items-center gap-0.5 rounded-2xl px-0.5 py-1 transition-colors ${
-          activeTab === 'mapa'
-            ? 'text-[#204E4A] font-extrabold'
-            : 'text-[#5C7470]/70 hover:text-[#204E4A]'
-        }`}
-      >
-        <span
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'mapa' ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm' : ''
-          }`}
+        <button
+          type="button"
+          onClick={onOpenCreate}
+          title={labels.crear}
+          aria-label={labels.crear}
+          className="group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 focus-visible:bg-[#E1E53F]"
         >
-          <IconMap size={18} />
-        </span>
-        <span className="max-w-full truncate text-[11px] font-semibold tracking-tight sm:text-[13px]">{labels.mapa}</span>
-      </button>
+          <span
+            aria-hidden="true"
+            className="flex h-[52px] w-[52px] -translate-y-[8px] items-center justify-center rounded-full bg-[#E1E53F] text-[#204E4A] shadow-[0_6px_22px_rgba(225,229,63,0.32)] transition-transform duration-200 group-hover:-translate-y-[11px] group-active:scale-95"
+          >
+            <IconPlus size={26}/>
+          </span>
+          <span className="-mt-1 max-w-full truncate text-[10px] font-extrabold tracking-tight text-[#E1E53F] sm:text-xs">
+            {labels.crear}
+          </span>
+        </button>
 
-      <button
-        onClick={() => onSelectTab('mascota')}
-        className={`flex min-w-0 flex-col items-center gap-0.5 rounded-2xl px-0.5 py-1 transition-colors ${
-          activeTab === 'mascota'
-            ? 'text-[#204E4A] font-extrabold'
-            : 'text-[#5C7470]/70 hover:text-[#204E4A]'
-        }`}
-      >
-        <span
-          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            activeTab === 'mascota' ? 'bg-[#204E4A] text-[#E1E53F] shadow-sm' : ''
-          }`}
-        >
-          <IconPaw size={18} />
-        </span>
-        <span className="max-w-full truncate text-[11px] font-semibold tracking-tight sm:text-[13px]">{labels.mascota}</span>
-      </button>
+        {renderTab('mapa')}
+        {renderTab('mascota')}
+      </div>
     </nav>
   )
 }

@@ -61,6 +61,7 @@ const {mapNotificationRow,getNotificationCommunityId,getNotificationSightingId}=
 const {OnboardingView}=await load('components/views/OnboardingView.js')
 const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
+const {BottomNav}=await load('components/BottomNav.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
@@ -79,6 +80,44 @@ const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.chil
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
 
 
+
+test('F13 Liquid Navigation animates actual tabs without changing the center Create action', async () => {
+  const labels={inicio:'Inicio',comunidades:'Comunidades',crear:'Crear',mapa:'Mapa',mascota:'Mi mascota'}
+  const selected=[],created=[]
+  const props={activeTab:'inicio',labels,onSelectTab:tab=>selected.push(tab),onOpenCreate:()=>created.push('create')}
+  let ui
+  await act(async()=>{ui=create(React.createElement(BottomNav,props))})
+  const buttons=()=>ui.root.findAllByType('button')
+  assert.equal(buttons().length,5)
+  assert.deepEqual(buttons().map(b=>b.props['aria-label']),Object.values(labels))
+  assert.equal(buttons()[0].props['aria-current'],'page')
+  assert.ok(buttons().slice(1).every(b=>b.props['aria-current']===undefined))
+  const indicator=()=>ui.root.findAll(n=>n.props.className==='pazo-liquid-indicator pointer-events-none')[0]
+  assert.equal(indicator().props.style.left,'10%')
+  assert.equal(indicator().props['aria-hidden'],'true')
+  await act(async()=>{buttons()[2].props.onClick()})
+  assert.deepEqual(created,['create'])
+  assert.deepEqual(selected,[],'Create must not select a navigation tab')
+  for(const [i,tab,left] of [[1,'comunidades','30%'],[3,'mapa','70%'],[4,'mascota','90%'],[0,'inicio','10%']]) {
+    await act(async()=>{buttons()[i].props.onClick()})
+    assert.equal(selected.at(-1),tab)
+    await act(async()=>{ui.update(React.createElement(BottomNav,{...props,activeTab:tab}))})
+    assert.equal(indicator().props.style.left,left)
+    assert.equal(buttons()[i].props['aria-current'],'page')
+    assert.equal(buttons().filter(b=>b.props['aria-current']==='page').length,1)
+  }
+  await act(async()=>{ui.update(React.createElement(BottomNav,{...props,labels:{
+    inicio:'Home',comunidades:'Communities',crear:'Create',mapa:'Map',mascota:'My Pet'
+  }}))})
+  assert.deepEqual(buttons().map(b=>b.props['aria-label']),['Home','Communities','Create','Map','My Pet'])
+  await act(async()=>{ui.unmount()})
+  const css=fs.readFileSync('src/index.css','utf8')
+  for(const part of ['.pazo-liquid-indicator','transition: left 460ms','@keyframes pazoLiquidSettle','prefers-reduced-motion: reduce', 'animation: none; transform: translateY(-15px)'])assert.ok(css.includes(part),part)
+  const app=fs.readFileSync('src/App.tsx','utf8')
+  assert.ok(app.includes('onOpenCreate={() => setIsCreateMenuOpen(true)}'))
+  assert.ok(app.includes('if (tab !== activeTab)'))
+  assert.ok(app.includes('setActiveTab(tab)'))
+})
 test('F13 lost-pet alert option 6 review has only real preview information and original publish/edit callbacks', async () => {
   const pet={id:'test-pet',name:'emilio',photoUrl:'https://source.invalid/pet.jpg',species:'perro',age:'4',qrId:'test'}
   for(const lang of ['es','en']) {

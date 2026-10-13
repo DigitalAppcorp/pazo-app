@@ -31,6 +31,13 @@
 - `src/components/views/PublicRescueView.tsx` adapta presentación del encabezado, tarjetas y formulario a la Opción 3; conserva la carga del pasaporte por token, errores, navegación de Vista previa, `submitPublicSighting`, campos originales nombre/teléfono/mensaje/ubicación opcional, validaciones, estado enviando y éxito sin nueva captura/almacenamiento. **NO agregar la subida de fotos** que aparecía decorativamente en las propuestas, no aprobada funcionalmente. Sin cambios en DB/Supabase, RLS, proveedores ni rutas.
 - Estética Quicksand/PAZO, verde/coral/crema, cero contornos, foco por superficie, móvil. `scripts/closure-ui.test.mjs` incluye prueba focal de sólo datos reales, estados perdidos/no perdidos, formulario y servicio conservados. **Gate siguiente:** CI del commit y revisión visual PO de pasaporte vía QR/link en Vite local. No confundir CI con aprobación visual, no cerrar F13 ni fusionar o publicar.
 
+## 1D. F13 — Barra inferior Liquid Navigation (PO aprobado 2026-10-13)
+
+- PO compartió un video de Liquid Navigation y autorizó expresamente implementarlo según propuesta: superficie verde oscuro #204E4A, indicador flotante lima #E1E53F que se desliza con easing elástico (460 ms) entre 4 tabs reales, icono activo elevado y asentamiento 420 ms, etiqueta activa visible y elementos no activos discretos.
+- Contrato funcional preservado: inicio/comunidades/mapa/mascota mantienen exactamente sus callbacks de App.tsx; Crear ocupa el centro y conserva onOpenCreate (NO es NavTab ni desplaza el indicador). Cambios en src/components/BottomNav.tsx y src/index.css, sin dependencias, SDK, routes, backend o datos.
+- Cero contornos, foco por superficie, soporte de teclado, aria-current=page, etiquetas ES/EN, safe-area-inset-bottom; prefers-reduced-motion elimina animación sin ocultar selección. Prueba sintética enfocada en scripts/closure-ui.test.mjs verifica callbacks, indicador y accesibilidad.
+- Único siguiente gate: verificar CI del nuevo HEAD y revisión visual real del PO en Vite local a ancho móvil, especialmente cuatro movimientos e independencia del botón Crear. NO afirmar aceptación visual, no merge ni despliegue.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**
