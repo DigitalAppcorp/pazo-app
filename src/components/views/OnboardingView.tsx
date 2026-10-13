@@ -479,15 +479,14 @@ export const OnboardingView = ({
               </div>
 
               <p className="text-[13px] text-[#5C7470]">{lang === 'es' ? "Raza y datos médicos se pueden añadir después." : "Breed and medical details can be added later."}</p>
-              <aside aria-label={lang === 'es' ? 'Resumen de privacidad' : 'Privacy summary'} className="rounded-2xl bg-white/75 px-3.5 py-3 shadow-[0_4px_16px_rgba(32,78,74,0.05)] backdrop-blur-sm">
-                <p className="text-[13px] font-extrabold leading-snug text-[#204E4A]">{lang === 'es' ? 'Antes de crear su perfil' : 'Before creating their profile'}</p>
-                <p className="mt-1 text-[12px] leading-relaxed text-[#5C7470]">
+              <aside aria-label={lang === 'es' ? 'Aviso de privacidad' : 'Privacy notice'} className="px-1 text-[12px] leading-relaxed text-[#71847F]">
+                <span>
                   {lang === 'es'
-                    ? 'El nombre, especie y foto que elijas podrán verse en PAZO. Evita incluir teléfonos, direcciones u otros datos personales.'
-                    : 'The name, species and photo you choose may be visible on PAZO. Avoid including phone numbers, addresses or other personal information.'}
-                </p>
-                <button type="button" onClick={() => setLegalKind('privacy')} className="mt-1.5 text-[12px] font-extrabold text-[#204E4A] underline underline-offset-2">
-                  {lang === 'es' ? 'Consultar privacidad' : 'Read privacy details'}
+                    ? 'El nombre, especie y foto de tu mascota pueden ser públicos. Evita incluir datos personales. '
+                    : "Your pet's name, species and photo may be public. Avoid including personal information. "}
+                </span>
+                <button type="button" onClick={() => setLegalKind('privacy')} className="inline text-[12px] font-semibold text-[#204E4A] underline underline-offset-2">
+                  {lang === 'es' ? 'Ver privacidad' : 'Privacy details'}
                 </button>
               </aside>
             </div>
