@@ -94,11 +94,13 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
         <button
             onClick={handleToggleFollow}
             disabled={isPending}
-            className={`w-full py-2.5 px-4 rounded-full font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${variant === 'feed'
+            className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-4 font-bold transition-all duration-300 ${variant === 'profile' ? 'min-h-14 py-3 text-[17px]' : 'py-2.5 text-sm'} ${variant === 'feed'
                     ? 'bg-transparent text-[#204E4A] shadow-none hover:bg-[#204E4A]/5'
-                    : isFollowing && variant === 'profile'
-                      ? 'bg-transparent border-2 border-[#204E4A]/20 text-[#204E4A] hover:bg-[#204E4A]/5'
-                      : 'bg-[#204E4A] text-white shadow-md hover:bg-[#183d3a]'
+                    : variant === 'profile' && isFollowing
+                      ? 'bg-[#204E4A]/10 text-[#204E4A] shadow-none hover:bg-[#204E4A]/15'
+                      : variant === 'profile'
+                        ? 'bg-[#204E4A] text-white shadow-[0_5px_15px_rgba(32,78,74,0.16)] hover:bg-[#183d3a]'
+                        : 'bg-[#204E4A] text-white shadow-md hover:bg-[#183d3a]'
                 }`}
         >
             {isPending ? (
@@ -106,7 +108,15 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
             ) : isFollowing ? (
                 lang === 'es' ? 'Siguiendo' : 'Following'
             ) : (
-                lang === 'es' ? 'Seguir' : 'Follow'
+                <>
+                    {variant === 'profile' && (
+                        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="9" cy="7" r="3.5" />
+                            <path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20M19.5 9v7M16 12.5h7" />
+                        </svg>
+                    )}
+                    <span>{lang === 'es' ? 'Seguir' : 'Follow'}</span>
+                </>
             )}
         </button>
     )
