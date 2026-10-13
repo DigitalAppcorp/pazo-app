@@ -137,3 +137,26 @@ La revisión PO del copy contextual por mascota y el contrato de pagos está en 
 5. Mantener `wall_has_verified_entitlement()` cerrado, la UI en simulación y PR #44 DRAFT mientras faltan verificación de pago, permisos de muro y cierre legal.
 
 **Resultado:** no se encontró un motivo para aplicar una nueva migración ahora. La estructura actual contempla retirada y cascada por borrado físico, pero **no implementa caducidad de registros revocados por tiempo**; no declarar cumplimiento legal ni eliminación integral por ese hecho.
+
+
+## 8. Comparación económica preliminar de procesadores — 2026-10-13 (SIN ACTIVACIÓN)
+
+**Alcance:** membresía voluntaria Amigo de PAZO, USD 2.99/mes, pago doméstico estadounidense en USD. Se consultaron fuentes oficiales publicadas, sin abrir cuentas, crear planes, instalar SDKs ni generar cobros.
+
+| Alternativa | Tarifa ilustrativa por cobro | Coste teórico a USD 2.99 | Neto teórico | Condiciones |
+| --- | --- | --- | --- | --- |
+| PayPal Checkout estándar | 3.49% + USD 0.49 | USD 0.59435 | USD 2.39565 | No equivale a cotización definitiva del producto de suscripciones ni confirma ausencia de cargos opcionales |
+| Stripe Payments tarjeta doméstica + Billing por volumen | 2.9% + USD 0.30, más 0.7% de Billing | USD 0.40764 | USD 2.58236 | Supone plan Billing pay-as-you-go, tarjeta doméstica y sin otros cargos |
+
+Cifras matemáticas sin redondeo individual de la tasa intermedia; los proveedores redondean y aplican tarifas realmente vigentes en cada cargo. Impuestos, devoluciones, disputas, conversión, pagos internacionales y servicios opcionales excluidos. **Ventaja teórica Stripe de USD 0.18671 por transacción, USD 18.671 por 100 transacciones**; no es una predicción de margen de PAZO. Tarifas sujetas a elegibilidad y revisión de cuenta mercantil.
+
+**Fuentes oficiales consultadas (2026-10-13):**
+- PayPal Merchant Fees (last updated 2026-10-01): https://www.paypal.com/us/business/paypal-business-fees
+- Stripe Billing pay-as-you-go 0.7%, sin cuota fija en esa modalidad: https://stripe.com/billing/pricing
+- Stripe Payments tarjeta doméstica 2.9% + 30 centavos: https://stripe.com/pricing
+- PayPal Subscriptions webhooks: https://developer.paypal.com/subscriptions/webhooks/
+- Stripe Billing/Checkout: https://stripe.com/payments/checkout
+
+**Recomendación técnica provisional:** preferir **Stripe Payments + Billing pay-as-you-go** como candidato principal para modelado y comparación final, por menor coste ilustrativo a USD 2.99 y flujos de cobro recurrente documentados. **No elegir aún irrevocablemente**: verificar aprobación de la cuenta operadora, disponibilidad efectiva, métodos de pago, reembolsos/disputas, cargos de Billing y tarifas finales; PayPal permanece alternativa. No usar Checkout/URL de retorno como acreditación: planificar verificación webhook autenticada, consulta server-side de factura/cobro, ledger idempotente y cobertura temporal confirmada. El cambio a proveedor no altera consentimiento PET-ONLY.
+
+**Gate previo a cualquier integración pagada:** selección expresa del Product Owner del procesador/cuenta receptora, revisión de tarifas contractuales, documentos de Privacy/Terms, modelo de cancelación y reembolsos, autorización específica de entitlements/webhooks/plan. **NO crear producto, plan, claves, endpoint, migración, ni activar entitlement.**
