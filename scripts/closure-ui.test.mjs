@@ -63,6 +63,7 @@ const {PetView}=await load('components/views/PetView.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
+const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
 test.after(()=>{
   const target=fs.realpathSync(compiled)
@@ -71,6 +72,61 @@ test.after(()=>{
 })
 const buttonText = b => b.findAll(n=>typeof n.type==='string').flatMap(n=>n.children.filter(c=>typeof c==='string')).join(' ')
 const button = (root, needle) => root.findAllByType('button').find(b=>buttonText(b).includes(needle))
+
+test('F13 Community Lifestyle Option 4 uses real cover, open identity, owner/membership states and existing callbacks', async () => {
+  const original={
+    id:'community-synthetic',name:'A real community name',description:'Real community description',
+    category:'Interest',species:'perro',zone:'Los Angeles',membersCount:3,
+    ownerUserId:'synthetic-owner',imageUrl:'https://synthetic.invalid/community-cover.png',
+    status:'active',isJoined:false,role:undefined,
+  }
+  let backs=0, memberships=0
+  const props={community:original,isOwner:false,postsCount:2,canJoin:true,
+    isMembershipBusy:false,onBack(){backs++},onMembership(){memberships++},lang:'es'}
+  const html=renderToStaticMarkup(React.createElement(CommunityLifestyleHero,props))
+  assert.ok(html.includes(original.imageUrl))
+  assert.ok(html.includes(original.name))
+  assert.ok(html.includes('A real community name'))
+  assert.ok(html.includes('Real community description'))
+  assert.ok(html.includes('Los Angeles'))
+  assert.ok(html.includes('Identidad de comunidad'))
+  assert.ok(html.includes('viewBox="0 0 390 55"')) // Organic cover -> content transition.
+  assert.ok(html.includes('3'))
+  assert.ok(html.includes('2'))
+  assert.ok(!html.includes('Community #'))
+  let renderer
+  await act(async()=>{renderer=create(React.createElement(CommunityLifestyleHero,props))})
+  assert.ok(button(renderer.root,'Unirme a la comunidad'))
+  await act(async()=>button(renderer.root,'Unirme a la comunidad').props.onClick())
+  await act(async()=>button(renderer.root,'Volver a Explorar').props.onClick())
+  assert.equal(memberships,1)
+  assert.equal(backs,1)
+  await act(async()=>renderer.update(React.createElement(CommunityLifestyleHero,{
+    ...props,community:{...original,isJoined:true},canJoin:true,
+  })))
+  assert.ok(button(renderer.root,'Salir de la comunidad'))
+  await act(async()=>renderer.update(React.createElement(CommunityLifestyleHero,{
+    ...props,community:{...original,role:'owner',isJoined:true},isOwner:true,
+  })))
+  assert.ok(!button(renderer.root,'Salir de la comunidad'))
+  assert.ok(JSON.stringify(renderer.toJSON()).includes('Admin'))
+  await act(async()=>renderer.update(React.createElement(CommunityLifestyleHero,{
+    ...props,community:{...original,status:'archived'},canJoin:false,
+  })))
+  assert.ok(!button(renderer.root,'Unirme a la comunidad'))
+  await act(async()=>renderer.unmount())
+  const view=fs.readFileSync('src/components/views/CommunityDetailView.tsx','utf8')
+  assert.ok(view.includes('<CommunityLifestyleHero'))
+  assert.ok(view.includes("postsCount={posts.length}"))
+  assert.ok(view.includes('onMembership={() => void handleMembership()}'))
+  assert.ok(view.includes("aria-pressed={activeTab === key}"))
+  assert.ok(view.includes("setActiveTab(key)"))
+  for(const identifier of ['handleCreatePost','toggleComments','handleDeleteComment','handleLike','handleRemoveMember','handleSaveEdit','handleArchive','CommunityFeatureExperimentCard']){
+    assert.ok(view.includes(identifier),identifier)
+  }
+  assert.ok(view.includes('onSubmit={handleCreatePost}'))
+  assert.ok(!view.includes('rounded-[2.4rem] pazo-glass-card'))
+})
 
 test('F13 Community Option 6 empty state matches map concept, preserves real create callback, and does not invent communities', async () => {
   for(const [lang,heading,cta] of [
