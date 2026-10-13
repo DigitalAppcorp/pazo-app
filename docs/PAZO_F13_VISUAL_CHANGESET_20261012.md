@@ -50,6 +50,15 @@
 - **Impacto de datos:** ninguna nueva captura, colección, evento, tabla o política; `docs/PAZO_DATA_INVENTORY.md` sin cambio de categorías.
 - **Map/Lugares congelado**; no modificar `MapView`/Mapbox. CI de código y aceptación visual constituyen gates independientes.
 
+## F13 — Publicaciones Feed: acciones compactas (2026-10-12, PO)
+
+- PO mostró captura de desborde de «Seguir» y «Denunciar» en cabecera PostCard, y autorizó menú de 3 puntos para «Denunciar» y «Ocultar».
+- Código `71f44cb7` en `src/components/views/HomeView.tsx`: distribución horizontal de cabecera con `min-w-0`, información de mascota truncable y etiqueta de recomendación adaptativa; `Seguir` permanece visible si corresponde y `Denunciar` se mueve al menú `···`. No alterar acciones de comentario/like/save.
+- «Ocultar publicación» no existía como contrato de backend. Se implementa **solo para este feed en memoria React**, sin escribir Supabase ni fingir preferencia permanente: quita la tarjeta de la lista en la vista actual, muestra aviso «Publicación oculta en este feed» y permite **Deshacer**. Se reinicia al montar otra vez el feed. Reportar mantiene el flujo real `ReportDialog` y los checks `canReport`/no propias.
+- Menú `role=menu` con nombres ES/EN, `aria-expanded`, cierre por botón, fuera o Escape; se evita `overflow-hidden` del artículo para que el panel no se corte en los bordes; foto conserva su recorte propio.
+- Prueba `scripts/closure-ui.test.mjs` `50a0a1f1` ejercita aparición del menú, Report condicional, ocultamiento local y deshacer.
+- No se modificó ningún servicio, SQL, esquema Supabase, mapa/Lugares o rama `main`. **CI de HEAD y aceptación visual PO son gates independientes.**
+
 ## Stage acceptance
 - Each block: code diff review, TS build/affected checks, browser comparison with supplied screenshots and Product Owner visual acceptance.
 - A GitHub push/CI pass is not visual approval or F13 completion.
