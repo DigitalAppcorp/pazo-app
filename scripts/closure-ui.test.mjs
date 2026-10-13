@@ -60,6 +60,7 @@ const {NotificationsModal}=await load('components/modals/NotificationsModal.js')
 const {OnboardingView}=await load('components/views/OnboardingView.js')
 const {HomeView}=await load('components/views/HomeView.js')
 const {PetView}=await load('components/views/PetView.js')
+const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {createCommunityPost,deleteCommunityPost}=await load('services/communityService.js')
 test.after(()=>{
   const target=fs.realpathSync(compiled)
@@ -161,6 +162,33 @@ test('T04 mixed feed label is For you and demo nearby interest cannot write', as
   assert.deepEqual(calls,[])
   await act(async()=>renderer.unmount())
 })
+test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {
+  const base={
+    targetPetId:'someone-elses-pet',
+    canReport:true,
+    currentPetId:'my-pet',
+    ownedPetIds:['my-pet'],
+    onClose(){},
+    lang:'es'
+  }
+  const external=renderToStaticMarkup(React.createElement(PublicProfileView,base))
+  assert.ok(external.includes('aria-label="Opciones del perfil"'))
+  assert.ok(external.includes('aria-haspopup="menu"'))
+  assert.ok(!external.includes('Denunciar perfil')) // Visible only after opening menu.
+  const own=renderToStaticMarkup(React.createElement(PublicProfileView,{
+    ...base,targetPetId:'my-pet',ownedPetIds:['my-pet']
+  }))
+  assert.ok(!own.includes('aria-haspopup="menu"'))
+  const profile=fs.readFileSync('src/components/views/PublicProfileView.tsx','utf8')
+  const editor=fs.readFileSync('src/components/views/PetView.tsx','utf8')
+  assert.ok(profile.includes("Boolean(petProfile.bio?.trim())"))
+  assert.ok(!profile.includes('Denunciar perfil</button>'))
+  assert.ok(profile.includes('IconCommunity')&&profile.includes('IconDocument')&&profile.includes('IconHeart'))
+  assert.ok(editor.includes('id="pazo-pet-bio"'))
+  assert.ok(editor.includes('value={editForm.bio}'))
+  assert.ok(editor.includes('bio: editForm.bio'))
+})
+
 test('F13 feed post actions stay inside an accessible overflow menu; hide can be undone', async () => {
   const post={
     id:'synthetic-feed-post',petId:'another-pet',petName:'Second pet',petSpecies:'perro',
