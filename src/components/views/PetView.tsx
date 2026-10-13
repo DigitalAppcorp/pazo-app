@@ -121,8 +121,8 @@ export const PetView = ({
   }, [showSettings])
 
   const handleEditClick = () => {
-    if (!canManagePet) { onRequireAccount(); return }
     setShowSettings(false)
+    if (!canManagePet) { onRequireAccount(); return }
     setEditForm(buildEditForm())
     setEditPhotoFile(null)
     setIsEditing(true)

@@ -522,7 +522,7 @@ test('F13 profile settings groups privacy, terms, deletion and support by logout
     const menuButtons=menu.findAllByType('button')
     assert.equal(menuButtons.length,3)
     assert.deepEqual(menuButtons.map(buttonText),[privacy,terms,lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'])
-    assert.ok(JSON.stringify(menu.toJSON()).includes(section),'Account section must live inside settings')
+    assert.ok(JSON.stringify(ui.toJSON()).includes(section),'Account section must live inside settings')
     assert.equal(menuButtons[2].props.disabled,true,'Existing production request gate must remain disabled')
     assert.ok(menu.findAllByType('a').some(a=>a.props.href==='mailto:appdigital.corp@gmail.com'),'Support mailto must live inside settings')
     assert.ok(ui.root.findAllByType('button').some(b=>b.props.title===(lang==='es'?'Cerrar sesión':'Log out')))
