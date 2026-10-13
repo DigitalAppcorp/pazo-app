@@ -1050,33 +1050,67 @@ test('F16 gratitude wall preview has consent-safe two-column placeholders and wo
   assert.ok(!content.includes('border-')&&!content.includes('ring-'),'No new outlined surfaces')
 })
 
-test('F16 pet-specific gratitude participation simulates reversible selection without recording consent', async () => {
+test('F16 per-pet consent notice approved in ES/EN never persists preview decisions', async () => {
   const pets=[
     {id:'p1',name:'Luna',species:'perro',photoUrl:'https://synthetic.invalid/luna.png'},
     {id:'p2',name:'Kira',species:'gato',photoUrl:'https://synthetic.invalid/kira.png'}
   ]
-  for(const lang of ['es','en']) {
+  for(const [lang,authorize,remove,decline,prefix,visibility] of [
+    ['es','Autorizar a Luna · Simulación','Quitar del muro · Simulación','Ahora no','Si autorizas a Luna','incluso sin iniciar sesión'],
+    ['en','Allow Luna · Preview','Remove from the wall · Preview','Not now','If you authorize Luna','including visitors who are not signed in']
+  ]) {
     let ui
     await act(async()=>{ui=create(React.createElement(GratitudeParticipationPreview,{pets,lang,onClose(){}}))})
-    const root=ui.root
-    const options=()=>root.findAllByType('button').filter(b=>b.props['aria-pressed']!==undefined)
-    assert.equal(options().length,2)
-    assert.equal(options().filter(b=>b.props['aria-pressed']).length,0)
-    await act(async()=>options()[0].props.onClick())
-    assert.equal(options()[0].props['aria-pressed'],true)
-    assert.equal(options()[1].props['aria-pressed'],false)
-    await act(async()=>options()[0].props.onClick())
-    assert.equal(options()[0].props['aria-pressed'],false)
-    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Sin guardar cambios':'Changes are not saved'))
+    const root=ui.root, snapshot=()=>JSON.stringify(ui.toJSON())
+    const cards=()=>root.findAllByType('button').filter(b=>b.props['aria-expanded']!==undefined)
+    assert.equal(cards().length,2)
+    assert.equal(cards()[0].props['aria-expanded'],false)
+    assert.ok(!snapshot().includes(prefix))
+    await act(async()=>cards()[0].props.onClick())
+    assert.equal(cards()[0].props['aria-expanded'],true)
+    assert.ok(snapshot().includes(prefix))
+    assert.ok(snapshot().includes(visibility))
+    assert.ok(snapshot().includes(lang==='es'?'datos de pago':'payment details'))
+    assert.ok(snapshot().includes(lang==='es'?'capturas o copias':'screenshots or copies'))
+    assert.ok(button(root,authorize))
+    await act(async()=>button(root,decline).props.onClick())
+    assert.equal(cards()[0].props['aria-expanded'],false)
+    await act(async()=>cards()[0].props.onClick())
+    await act(async()=>button(root,authorize).props.onClick())
+    assert.ok(snapshot().includes(lang==='es'?'Seleccionada solo en esta simulación':'Selected in this preview only'))
+    assert.equal(cards()[1].props['aria-expanded'],false)
+    assert.ok(!snapshot().includes(lang==='es'?'Participa en el muro':'Appears on the gratitude wall'))
+    await act(async()=>cards()[0].props.onClick())
+    assert.ok(button(root,remove))
+    await act(async()=>button(root,remove).props.onClick())
+    assert.ok(!snapshot().includes(lang==='es'?'Seleccionada solo en esta simulación':'Selected in this preview only'))
+    assert.ok(snapshot().includes(lang==='es'?'Sin guardar cambios':'Changes are not saved'))
     await act(async()=>ui.unmount())
+    let reopened
+    await act(async()=>{reopened=create(React.createElement(GratitudeParticipationPreview,{pets,lang,onClose(){}}))})
+    assert.ok(!JSON.stringify(reopened.toJSON()).includes(lang==='es'?'Seleccionada solo en esta simulación':'Selected in this preview only'))
+    await act(async()=>reopened.unmount())
   }
-  const content=fs.readFileSync('src/features/supporter/components/GratitudeParticipationPreview.tsx','utf8')
+  const src=fs.readFileSync('src/features/supporter/components/GratitudeParticipationPreview.tsx','utf8')
   const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
   assert.ok(pet.includes('setShowGratitudeParticipation(true)'))
   assert.ok(pet.includes('pets={availablePets}'))
   assert.ok(pet.includes('<GratitudeParticipationPreview'))
-  assert.ok(!content.includes('supabase')&&!content.includes('localStorage')&&!content.includes('fetch('))
-  assert.ok(!content.includes('border-')&&!content.includes('ring-'),'No new outlined surfaces')
+  assert.ok(!src.includes('supabase')&&!src.includes('localStorage')&&!src.includes('fetch(')&&!src.includes('sessionStorage'))
+  assert.ok(!src.includes('border-')&&!src.includes('ring-'))
+})
+
+test('F16 consent preview empty state is bilingual', async () => {
+  for(const [lang,empty] of [
+    ['es','Agrega una mascota para poder elegir si participará.'],
+    ['en','Add a pet before choosing whether they will participate.']
+  ]) {
+    let ui
+    await act(async()=>{ui=create(React.createElement(GratitudeParticipationPreview,{pets:[],lang,onClose(){}}))})
+    assert.ok(JSON.stringify(ui.toJSON()).includes(empty))
+    assert.equal(ui.root.findAllByType('button').filter(b=>b.props['aria-expanded']!==undefined).length,0)
+    await act(async()=>ui.unmount())
+  }
 })
 
 test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {
