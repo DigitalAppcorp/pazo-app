@@ -888,6 +888,8 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
     const rendered=renderToStaticMarkup(React.createElement(SupporterProfileBackdrop,{theme:option.id}))
     assert.ok(rendered.includes('data-supporter-theme="'+option.id+'"'),'Distinct decorative layer exists: '+option.id)
     assert.ok(rendered.includes('aria-hidden="true"'),'All decorations are ignored by screenreaders')
+    assert.ok(rendered.includes('pazo-supporter-float'),'Every variant has animated ornaments')
+    assert.ok(rendered.includes('animation-duration'),'Each ornament has a distinct pace')
     assert.ok(!rendered.includes('Amigo de PAZO'),'No false supporter status in the background layer')
   }
   const selected=[]
@@ -920,7 +922,7 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
 })
 
 test('F16 discoverable customization opens from Mi mascota with own pet, no link, payment or persistence', async () => {
-  const pet={id:'owned-cat',name:'Luna',species:'gato',photoUrl:'https://synthetic.invalid/luna.jpg',age:'2',bio:'Amiga de todos'}
+  const pet={id:'owned-cat',name:'Luna',species:'gato',photoUrl:'https://synthetic.invalid/luna.jpg',age:'2',breed:'Mestiza',bio:'Amiga de todos'}
   const makeProps=lang=>({
     currentPet:pet,canManagePet:true,canModerate:false,onRequireAccount(){},
     availablePets:[pet],onSelectPet(){},onPetUpdated(){},onAddPet(){},
@@ -950,6 +952,20 @@ test('F16 discoverable customization opens from Mi mascota with own pet, no link
     assert.equal(button(dialog,nature).props['aria-pressed'],true)
     await act(async()=>button(dialog,original).props.onClick())
     assert.equal(ui.root.findAllByProps({'data-supporter-theme':'nature'}).length,0)
+    const stars=lang==='es'?'Cielo estrellado':'Starry sky'
+    await act(async()=>button(dialog,stars).props.onClick())
+    const darkCard=ui.root.findAll(n=>n.props['aria-label']===(lang==='es'?'Simulación de tu perfil social':'Your social profile mockup'))[0]
+    assert.ok(darkCard.props.className.includes('bg-[#1B2D5C]'),'Dark mode uses a night-blue base beneath fading art')
+    const heading=darkCard.findAllByType('h3')[0]
+    assert.ok(heading.props.className.includes('text-[#FCFAF2]'),'Pet name is ivory on dark blue')
+    for(const p of darkCard.findAllByType('p')){
+      if (p.children.includes('Mestiza') || p.children.includes('Amiga de todos')) {
+        assert.ok(p.props.className.includes('text-[#F0F4EB]'),'Pet biography and breed remain legible')
+      }
+    }
+    await act(async()=>button(dialog,original).props.onClick())
+    assert.ok(darkCard.props.className.includes('bg-[#F8F5EC]'),'Original profile restores warm surface')
+    assert.ok(heading.props.className.includes('text-[#204E4A]'),'Original profile restores PAZO green name')
     assert.ok(button(dialog,close))
     await act(async()=>button(dialog,close).props.onClick())
     assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
@@ -964,6 +980,11 @@ test('F16 discoverable customization opens from Mi mascota with own pet, no link
   assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'No payment or preferences are written')
   assert.ok(!preview.includes('Guardar')&&!preview.includes('Save Changes'),'Do not promise saving before entitlement backend is installed')
   assert.ok(!preview.includes('border-')&&!preview.includes('ring-')&&!preview.includes('outline-'),'No outlined UI')
+  const css=fs.readFileSync('src/index.css','utf8')
+  assert.ok(css.includes('@keyframes pazoSupporterGentleFloat'))
+  assert.ok(css.includes('translate3d(3px, -6px, 0) rotate(2deg)'),'Float movement stays within a subtle range')
+  assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion disables ornamental animation')
+  assert.ok(!preview.includes('animate-float'),'Text and portrait must never float')
 })
 
 test('F13 approved lifestyle profile exposes only permitted actions and real bio editing', () => {

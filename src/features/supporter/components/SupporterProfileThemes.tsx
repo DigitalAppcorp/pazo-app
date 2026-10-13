@@ -32,12 +32,14 @@ export const SUPPORTER_PROFILE_THEMES = [
 export type SupporterProfileThemeId = typeof SUPPORTER_PROFILE_THEMES[number]['id']
 export type SupporterProfileThemeSelection = SupporterProfileThemeId | null
 
+// Stagger and phase-offset a quiet 2-axis float. Positions/rotations stay fixed on
+// their outer wrappers so movement never shifts the real pet identity or layout.
 const decorativePositions = [
-  { left: '73%', top: '12%', width: 66, rotation: -18, opacity: 0.75 },
-  { left: '14%', top: '29%', width: 38, rotation: 16, opacity: 0.42 },
-  { left: '89%', top: '51%', width: 52, rotation: 15, opacity: 0.6 },
-  { left: '51%', top: '8%', width: 28, rotation: -10, opacity: 0.5 },
-  { left: '59%', top: '58%', width: 24, rotation: 25, opacity: 0.25 },
+  { left: '73%', top: '12%', width: 66, rotation: -18, opacity: 0.75, duration: '6.8s', delay: '-1.5s' },
+  { left: '14%', top: '29%', width: 38, rotation: 16, opacity: 0.42, duration: '7.6s', delay: '-4.2s' },
+  { left: '89%', top: '51%', width: 52, rotation: 15, opacity: 0.6, duration: '5.9s', delay: '-2.7s' },
+  { left: '51%', top: '8%', width: 28, rotation: -10, opacity: 0.5, duration: '8.2s', delay: '-5.3s' },
+  { left: '59%', top: '58%', width: 24, rotation: 25, opacity: 0.25, duration: '7.1s', delay: '-0.6s' },
 ] as const
 
 const ThemeDecoration = ({ theme, color }: { theme: SupporterProfileThemeId; color: string }) => {
@@ -109,21 +111,30 @@ export const SupporterProfileBackdrop = ({ theme }: { theme: SupporterProfileThe
             opacity: spot.opacity,
           }}
         >
-          <ThemeDecoration theme={theme} color={variant.ink} />
+          <span
+            className="pazo-supporter-float block h-full w-full"
+            style={{ animationDuration: spot.duration, animationDelay: spot.delay, animationDirection: index % 2 === 0 ? 'normal' : 'reverse' }}
+          >
+            <ThemeDecoration theme={theme} color={variant.ink} />
+          </span>
         </span>
       ))}
       {theme === 'stars' && (
-        <svg className="absolute left-[9%] top-[12%] h-24 w-24 fill-[#F5E4A5]/85" viewBox="0 0 100 100" aria-hidden="true">
+        <svg className="pazo-supporter-float absolute left-[9%] top-[12%] h-24 w-24 fill-[#F5E4A5]/85" style={{ animationDuration: '8.6s', animationDelay: '-3.1s' }} viewBox="0 0 100 100" aria-hidden="true">
           <path d="M68 10a37 37 0 1 0 23 64C48 84 27 35 68 10Z" />
         </svg>
       )}
       {theme === 'adventure' && (
+        <>
+        <svg className="pazo-supporter-float absolute bottom-[160px] right-[12%] h-[50px] w-[50px] fill-[#FFF4AD]" style={{ animationDuration: '8s', animationDelay: '-4.6s' }} viewBox="0 0 50 50" aria-hidden="true">
+          <circle cx="25" cy="25" r="24" />
+        </svg>
         <svg className="absolute bottom-0 left-0 h-[230px] w-full opacity-70" viewBox="0 0 500 230" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-          <circle cx="411" cy="42" r="25" fill="#FFF4AD"/>
           <path d="M0 204 128 35l92 125L315 45 500 204v26H0Z" fill="#72B9B4" />
           <path d="m87 89 41-54 40 54-40-21Z M278 96l37-51 42 51-42-20Z" fill="#F4FFF9" />
           <path d="M0 200q115-55 240 7t260-31v54H0Z" fill="#4A9C80" />
         </svg>
+        </>
       )}
     </div>
   )

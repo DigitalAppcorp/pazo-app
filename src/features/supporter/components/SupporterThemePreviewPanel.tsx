@@ -67,23 +67,26 @@ export const SupporterThemePreviewPanel = ({ pet, lang, onClose }: SupporterThem
 
         <section
           aria-label={lang === 'es' ? 'Simulación de tu perfil social' : 'Your social profile mockup'}
-          className="relative isolate min-h-[405px] overflow-hidden rounded-[32px] bg-[#F8F5EC] px-6 pb-10 pt-8 shadow-[0_8px_30px_rgba(32,78,74,0.06)]"
+          className={'relative isolate min-h-[405px] overflow-hidden rounded-[32px] px-6 pb-10 pt-8 shadow-[0_8px_30px_rgba(32,78,74,0.06)] transition-colors duration-300 ' + (theme === 'stars' ? 'bg-[#1B2D5C]' : 'bg-[#F8F5EC]')}
         >
           {theme && <SupporterProfileBackdrop theme={theme} />}
+          {theme === 'stars' && (
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 top-[170px] bg-gradient-to-b from-[#17264A]/5 via-[#17264A]/45 to-[#17264A]/65" />
+          )}
           <div className="relative z-10">
             <div className="flex h-[132px] w-[132px] items-center justify-center overflow-hidden rounded-full bg-[#E9EFE6] shadow-[0_12px_28px_rgba(32,78,74,0.14)]">
               {pet.photoUrl
                 ? <img src={pet.photoUrl} alt={pet.name} className="h-full w-full object-cover" />
                 : <IconPaw size={56} className="text-[#204E4A]/40" />}
             </div>
-            <h3 className="mt-6 break-words text-[clamp(34px,10vw,48px)] font-black leading-tight tracking-[-0.04em] text-[#204E4A]">
+            <h3 className={'mt-6 break-words text-[clamp(34px,10vw,48px)] font-black leading-tight tracking-[-0.04em] transition-colors duration-300 ' + (theme === 'stars' ? 'text-[#FCFAF2]' : 'text-[#204E4A]')}>
               {pet.name}
             </h3>
             <span className="mt-2 inline-flex rounded-full bg-[#E1E53F]/85 px-4 py-1.5 text-[14px] font-extrabold uppercase text-[#204E4A]">
               {pet.species}
             </span>
-            {pet.breed && <p className="mt-3 text-[13px] font-semibold text-[#315B55]">{pet.breed}</p>}
-            {Boolean(pet.bio?.trim()) && <p className="mt-4 max-w-[40ch] whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed text-[#315B55]">{pet.bio}</p>}
+            {pet.breed && <p className={'mt-3 text-[13px] font-semibold transition-colors duration-300 ' + (theme === 'stars' ? 'text-[#F0F4EB]' : 'text-[#315B55]')}>{pet.breed}</p>}
+            {Boolean(pet.bio?.trim()) && <p className={'mt-4 max-w-[40ch] whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed transition-colors duration-300 ' + (theme === 'stars' ? 'text-[#F0F4EB]' : 'text-[#315B55]')}>{pet.bio}</p>}
           </div>
         </section>
 

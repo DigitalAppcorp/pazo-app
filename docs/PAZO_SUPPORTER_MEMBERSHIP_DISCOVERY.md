@@ -123,6 +123,10 @@ El PO confirmó «listo, ya quedó». **Los PNG NO están aún en el repositorio
 
 El Product Owner aprobó los **cinco estilos del concepto visual original**: Clásico PAZO, Naturaleza, Corazones, Cielo estrellado y Aventura. Inicialmente se implementó una vista previa detrás de una URL especial. El PO señaló que era una UX incorrecta y aprobó **«Mi mascota → Menú y Utilidades → Personalizar perfil»** como navegación normal. Ahora hay una pantalla/panel de preview con datos públicos reales de la mascota activa, cinco fondos + Original; sin URLs secretas, sin acceso por el perfil de otras mascotas, y mensaje visible de **«En desarrollo»**. Los fondos se generan como ornamentos vectoriales locales; no son fotos ni contenido social inventado. No hay almacenamiento, consulta de pago, insignia falsificada, asignación de tema a perfiles ajenos ni cambios de Supabase. **Todavía NO equivale a una personalización funcional para suscriptores.** Requiere prueba y aprobación visual antes de integrarse con entitlement y preferencias seguras.
 
+### Refinamiento visual aprobado: flotación y contraste (PO 2026-10-13)
+
+El PO eligió **flotación vertical suave + deriva lateral/rotación mínima (opción B)** sobre los cinco fondos, sin mover imagen, nombre, controles ni bio. Se añade movimiento decorativo asincrónico ligero y se respeta `prefers-reduced-motion`. El tema «Cielo estrellado» usa tipografía marfil y una superficie azul oscuro continua para garantizar legibilidad donde antes se mezclaban textos verde oscuro sobre azul; temas luminosos conservan los colores actuales. El preview sigue sin posibilidad de guardar ni entitlement, y requiere validación visual del PO en Vite.
+
 ## 7. Entitlement
 
 Fuente de verdad:
