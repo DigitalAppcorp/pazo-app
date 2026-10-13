@@ -58,6 +58,10 @@ Herramientas empleadas: Supabase `list_tables` (public, verbose), `list_migratio
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml): job existente `f14-postgres` prueba el **borrador** contra DB efímera tras operaciones F14; run `38473628996` (verify + PostgreSQL SUCCESS). **Además se auditó el esquema alojado después de aplicarlo**: RLS forzada, 0 consentimientos, roles y funciones correctos. Esto NO es verificación de cobertura PayPal.
 - Criterio posterior: auditar RLS combinadas `pets_public_read`/`f14_moderated_pets_select`, exposición `profiles.paypal_subscription_id`, efectos de deletion SOP, retención/consentimiento, textos legales y flujo con proveedor real. **La base de consentimientos es insuficiente para publicar mascotas aunque sus pruebas pasen.**
 
+### F16 GATE siguiente: textos finales ES/EN y entitlement (propuesta, NO implementada)
+
+La revisión PO del copy contextual por mascota y el contrato de pagos está en [`docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md`](PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md). PayPal **no** está aprobado como procesador definitivo; comprobar tarifas y elegibilidad antes de cualquier configuración. No hay nuevas migraciones, servidores, eventos ni permisos desplegados. El helper `supporter_private.wall_has_verified_entitlement()` conserva su retorno false.
+
 ## 4. Pruebas obligatorias para el futuro gate de implementación
 
 - Sin membresía, sin permiso, permiso revocado, entitlement vencido/reembolsado o mascota moderada → 0 filas públicas.

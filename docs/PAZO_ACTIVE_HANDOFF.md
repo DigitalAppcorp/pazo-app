@@ -183,6 +183,13 @@
 - **A01 actual se mantiene exactamente como fue aprobada visualmente:** el pequeño acceso «Conoce a los Amigos de PAZO» bajo el mensaje introductorio permite llegar al muro sin registrarse. No cambiarlo durante el gate de entitlements/consentimiento.
 - Antes de iniciar el futuro rediseño: pedir referencias y aprobación visual PO; planificar cómo conservar/regresar el enlace público al muro y no alterar autenticación, onboarding, registro, login, uso móvil o beneficios en desarrollo. Tratarlo como proyecto visual separado sujeto a gate propio. La membresía F16 mantiene prioridad actual.
 
+## 1X. F16 — propuesta de copy de consentimiento ES/EN y contrato de pagos, sin ejecución (2026-10-13)
+
+- El PO pidió «Perfecto, sigamos» tras decidir **posponer el rediseño de la bienvenida**. Se mantuvo congelado A01 tal como fue aprobado en Vite y se continuó el gate siguiente de membresías, sin escribir en Supabase ni modificar código UI.
+- **Nuevo documento de revisión PO:** [`docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md`](PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md). Incluye texto contextual por mascota ES/EN, botones inequívocos para autorizar/retirar, estados de guardado/error, lectura anónima explicada, advertencia honesta sobre capturas externas, revocación sin cobro y ausencia de permisos globales. **NO APROBADO AÚN**: no presentar como términos legales públicos ni incorporar `wall_consent_v1` a UI real.
+- Se verificaron docs oficiales PayPal (Subscriptions API, eventos webhook, validación, tarifas US actualizadas 2026-10-01). Arquitectura recomendada separa `subscription_status` de períodos **efectivamente pagados**, validando captura/refund/reversals y firma webhook. `BILLING.SUBSCRIPTION.ACTIVATED` no prueba cobro; `CANCELLED` no implica necesariamente acceso pagado hasta la próxima factura. Tarifas estándares PayPal Checkout US publicadas `3.49% + USD 0.49`, **no se asumieron como tarifa definitiva de suscripción**.
+- Gate pendiente PO: aprobar texto bilingüe, escoger proveedor tras comparar comisiones/condiciones, retención del consentimiento y acceso al muro para usuarios ya autenticados. **NO tocar stub `wall_has_verified_entitlement() = false`**, no crear planes ni suscripciones, ningún webhook, nuevas migraciones, UI real, merge ni Vercel. F16 sigue BACKLOG; PR #44 DRAFT.
+
 ## 2. Tarea inmediata — MAPA/LUGARES: Opción 3 aprobada
 
 El PO envió capturas del módulo antiguo y eligió **Opción 3: mapa inmersivo con carrusel** entre varias referencias; posteriormente AUTORIZÓ PROGRAMAR. Esta autorización reemplaza el congelamiento anterior del mapa; NO autoriza mutación SQL ni proveedores de pago. **El código ya está implementado en PR #44 y CI PASS; aceptación visual pendiente.**

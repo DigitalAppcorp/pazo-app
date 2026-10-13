@@ -159,6 +159,10 @@ El PO confirmó «si aprobado» a las reglas expuestas en `docs/PAZO_SUPPORTER_W
 
 El PO autorizó primero preparar SQL y pruebas, y después autorizó avanzar con la instalación de **solo los consentimientos privados**. Se aplicó al proyecto Supabase con versión `20261013215221`, fuente canónica `supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql`. La base añade `supporter_private.wall_consents` + RPC autenticadas de consentimiento por mascota; **0 filas tras la instalación**, RLS forzada y sin acceso directo ni consulta pública. La función de comprobación de membresía **devuelve false** y bloquea toda autorización positiva hasta recibir otro gate PO de pagos verificables y texto final de consentimiento. Validación: CI `38473628996` SUCCESS y catálogos Supabase READ ONLY PASS. `Mi mascota` sigue con selección simulada (no utiliza aún la RPC); `is_founder`/`paypal_subscription_id` nunca son fuente de pago. No hay PayPal, cobros, lista pública, insignias activadas, merge ni Vercel.
 
+### Propuesta ES/EN de consentimiento y arquitectura de verificación de pagos (2026-10-13)
+
+Documento [`docs/PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md`](PAZO_F16_CONSENT_COPY_BILLING_VERIFICATION_GATE_20261013.md) creado por continuación del PO. **PROPUESTA, NO APROBACIÓN FINAL DE COPY NI PAGOS.** Resuelve redacción por mascota, lectura pública sin cuenta, ausencia de datos humanos, retirada, errores, reautorización tras expiración y estados bilingües. Contrato de billing propuesto: webhook auténtico, cobro completo verificado, ledger `paid_through`, refund/reversal, idempotencia y exclusión pública si no está cubierto. PayPal es candidato a evaluar con condiciones comerciales vigentes y la tarifa fija es sustancial con USD 2.99. No crear plan/checkout, no cambiar Supabase, no modificar UI aprobada ni sustituir stub false. Esperar gate específico PO.
+
 ## 7. Entitlement
 
 Fuente de verdad:
