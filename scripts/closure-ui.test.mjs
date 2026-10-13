@@ -116,8 +116,10 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
   assert.deepEqual(buttons().map(b=>b.props['aria-label']),['Home','Communities','Create','Map','My Pet'])
   await act(async()=>{ui.unmount()})
   const css=fs.readFileSync('src/index.css','utf8')
-  for(const part of ['.pazo-liquid-indicator','.pazo-liquid-surface','@property --pazo-liquid-center','background: #FFF8EB','top: 14px','bottom: -3px','-webkit-mask-image: radial-gradient(circle 30px','mask-image: radial-gradient(circle 30px','transparent 0 29px, #000 30px','transition: --pazo-liquid-center 460ms','background: #204E4A','box-shadow: 0 8px 17px','@keyframes pazoLiquidSettle','prefers-reduced-motion: reduce', '.pazo-liquid-surface, .pazo-liquid-indicator { transition: none','animation: none; transform: translateY(-15px)'])assert.ok(css.includes(part),part)
+  for(const part of ['.pazo-liquid-indicator','.pazo-liquid-surface','@property --pazo-liquid-center','background: #FFFFFF','top: 14px','bottom: -3px','-webkit-mask-image: radial-gradient(circle 30px','mask-image: radial-gradient(circle 30px','transparent 0 29px, #000 30px','transition: --pazo-liquid-center 460ms','background: #204E4A','box-shadow: 0 8px 17px','@keyframes pazoLiquidSettle','prefers-reduced-motion: reduce', '.pazo-liquid-surface, .pazo-liquid-indicator { transition: none','animation: none; transform: translateY(-15px)'])assert.ok(css.includes(part),part)
   const surfaceCss=css.split('.pazo-liquid-surface {')[1].split('}')[0]
+  assert.ok(surfaceCss.includes('background: #FFFFFF'),'Only navigation surface becomes pure white')
+  assert.ok(!surfaceCss.includes('#FFF8EB'),'Previous cream fill must be removed')
   assert.ok(!/border\s*:|outline\s*:|ring\s*:/.test(surfaceCss),'Carved bar must not introduce outlines or borders')
   assert.ok(!css.includes('pazo-liquid-notch'),'Old painted cream notch must not remain')
   assert.ok(!css.includes('background: radial-gradient(circle at 30% 20%'),'Plastic gradient must be removed')

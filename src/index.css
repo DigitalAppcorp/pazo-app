@@ -136,7 +136,7 @@
 }
 
 
-/* F13: compact cream navigation with a small moving top recess.
+/* F13: compact white navigation with a small moving top recess.
    One mask cuts the curve; nothing is drawn on top of the bar to fake the gap. */
 @property --pazo-liquid-center {
   syntax: '<percentage>';
@@ -151,7 +151,7 @@
   bottom: -3px;
   left: 0;
   border-radius: 12px 12px 14px 14px;
-  background: #FFF8EB;
+  background: #FFFFFF;
   box-shadow: 0 4px 16px rgba(32, 78, 74, 0.06);
   /* Circle: orb center is track y=12px; mask center is surface y=-2px.
      The 30px cut around its 23px radius exposes 7px of the real app background. */
