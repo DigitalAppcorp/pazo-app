@@ -157,3 +157,14 @@ test('flow with concrete lab RPC adapters remains fail closed without authoritat
   'f16_lab_read_known_reversal_ids','f16_lab_release_claim',
  ])
 })
+
+test('partial refund cannot reach finance RPC until the ledger supports each refund ID',async()=>{
+ const x=setup()
+ await assert.rejects(x.stores.financeStore.commitClaimedReversal({
+  eventId:EVENT,leaseToken:TOKEN,candidate:{
+   provider:'paypal',externalPaymentId:SALE,kind:'partially_refunded',
+   verifiedAt:'2026-10-14T11:16:00Z',
+  },
+ }),/invalid_request/)
+ assert.deepEqual(x.calls,[])
+})
