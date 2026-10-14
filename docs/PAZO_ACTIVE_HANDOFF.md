@@ -2,7 +2,16 @@
 
 > **LEER PRIMERO.** Este es el estado operativo, no una cronología. Historial integral anterior preservado en Git en commit `61eb2fd2` (versión previa de este archivo), y alcance visual F13 en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. AI = ejecutor técnico principal; usuario = Product Owner. Seguir reglas de `AGENTS.md` y Project Brain OS canónico v1.4.1 en `DigitalAppcorp/project-brain-os`.
 
-## F16 — Nuevo receptor PayPal Sandbox en código, NO desplegado (2026-10-14 UTC)
+## F16 — EDGE INERTE DESPLEGADA Y HTTP 503 VERIFICADO (2026-10-14 UTC)
+
+- **AUTORIZACIÓN EXPRESA del PO** para desplegar EXCLUSIVAMENTE la nueva `f16-paypal-webhook` en estado **inerte** y comprobar HTTP 503. NO incluye secretos, activación, cambio de webhook PayPal, nuevas bases/migraciones, cobros ni membresías. Esa autorización fue consumida.
+- **Preflight costo:** organización Supabase plan `free`, PAZO tenía tres Edge Functions; la cuarta no crea un cargo fijo. La cuota actual de la documentación de funciones es 100 funciones Free / 500 000 invocaciones mensuales (respuesta HTTP 503 cuenta como una invocación). Ningún plan/add-on/Spend Cap modificado.
+- **Despliegue ejecutado:** `mcp__Supabase__deploy_edge_function` con solo cinco archivos versionados (`index.ts`, `receiver.mjs`, `core.mjs`, `paypalSandboxPostback.mjs`, `paypalInboxAdapter.mjs`), nombre nuevo `f16-paypal-webhook`, `verify_jwt=false` para firmantes externos. Devuelta `ACTIVE v1`, ID `b0da866f-aae3-4785-99a3-6a6314e3c3c8`. **ACTIVE solo indica despliegue, NO procesado de webhooks**: bloqueo inmutable en código `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` y `supabase/config.toml enabled=false` siguen intactos.
+- **Smoke HTTP alojado real PASS:** workflow temporal `F16 Inert Hosted HTTP One-Time`, [run #38512959544](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38512959544), `completed/success`, GET sin secretos a `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook` → exactamente **HTTP 503** y body JSON `{"code":"f16_receiver_not_released"}`. Sin payers, firma ni eventos enviados. El workflow temporal fue eliminado en commit `d15c65dc` para no repetir invocaciones facturables en futuros commits.
+- **Postflight alojado SELECT PASS:** cuatro tablas privadas F16 todavía **0 filas**, `supporter_private.wall_has_verified_entitlement(NULL)=false`; PayPal/F14 Edge no cambiaron (`paypal-webhook` v30, `f14-moderation-purge` v42, `f14-moderation-reconcile` v29). Organización Supabase sigue Free. Sin modificaciones al webhook PayPal Sandbox ID `6N7889790V1467139`, sus eventos, URL ni secretos.
+- **Siguiente gate separado:** verificar/instalar solo secretos Sandbox con procedimiento aprobado, reforzar idempotencia/abuso, después PO GO expreso para ACTIVAR el nuevo receptor y ensayar firmas auténticas; solo entonces aprobar actualización de URL/eventos del webhook EXISTENTE. No tocar `paypal-webhook` v30 ni `profiles.is_founder`. F16 integral no está cerrada y PR #44 continúa DRAFT.
+
+## F16 — Receptor preparado anteriormente (histórico antes del deploy 2026-10-14 UTC)
 
 **Runbook operativo preparado, sin ejecución:** `docs/PAZO_F16_WEBHOOK_SANDBOX_DEPLOY_RUNBOOK_20261014.md`, separa autorización para secretos/despliegue inerte/activación/cambio del webhook Sandbox, pruebas reales y rollback. Mantener nuevo slug sin desplegar hasta GO PO; nunca redirigir pagos a `paypal-webhook` v30.\n\n
 
