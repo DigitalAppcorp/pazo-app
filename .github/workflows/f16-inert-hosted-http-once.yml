@@ -1,0 +1,21 @@
+name: F16 Inert Hosted HTTP One-Time
+on:
+  pull_request:
+    branches:
+      - release/mvp-beta-fast-track-20261010
+permissions:
+  contents: read
+jobs:
+  check-inert-webhook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Probe only the newly deployed disabled F16 function
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook'
+          status=$(curl --silent --show-error --max-time 15 --retry 0 --output "$RUNNER_TEMP/disabled-webhook-response.json" --write-out '%{http_code}' "$url")
+          test "$status" = "503" || { echo "FAIL: expected 503, got $status"; exit 1; }
+          node -e "const fs=require('node:fs');const data=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/disabled-webhook-response.json','utf8'));if(data.code!=='f16_receiver_not_released')throw Error('Wrong F16 response');"
+          echo 'PASS: hosted F16 deployed, HTTP 503 f16_receiver_not_released; no auth, events, or secrets transmitted'
