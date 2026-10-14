@@ -1,0 +1,42 @@
+name: F16 Disposable PostgreSQL Lab
+
+on:
+  pull_request:
+    branches:
+      - release/mvp-beta-fast-track-20261010
+
+permissions:
+  contents: read
+
+jobs:
+  f16-inbox-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+          POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US --locale=en_US.UTF-8
+        ports:
+          - 55441:5432
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Prepare existing audited synthetic catalog and F16 consent baseline
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+      - name: Execute F16 inbox RLS, RPC and 32-call concurrency lab
+        run: bash scripts/f16-postgres-inbox-lab.sh
