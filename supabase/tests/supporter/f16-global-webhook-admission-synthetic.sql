@@ -65,7 +65,8 @@ SET ROLE postgres;
 UPDATE supporter_private.f16_webhook_request_budget
 SET window_number=0,admitted=0 WHERE bucket='minute';
 UPDATE supporter_private.f16_webhook_request_budget
-SET window_number=0,admitted=2000 WHERE bucket='day';
+SET window_number=pg_catalog.floor(pg_catalog.date_part('epoch',pg_catalog.clock_timestamp())/86400)::bigint,
+    admitted=2000 WHERE bucket='day';
 RESET ROLE;
 
 SET ROLE service_role;
