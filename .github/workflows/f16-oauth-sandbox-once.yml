@@ -1,34 +1,24 @@
-name: F16 Sandbox OAuth One-Time
+name: F16 Inert v10 HTTP One-Time
 on:
   pull_request:
     branches: [release/mvp-beta-fast-track-20261010]
 permissions:
   contents: read
 jobs:
-  verify-oauth-once:
+  verify-restored-inert-f16:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      - name: Invoke time-boxed server-only OAuth probe, never display credentials
+      - name: Verify restored v10 GET and POST reject webhooks without any credentials
         shell: bash
         run: |
           set -euo pipefail
           url='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook'
-          result="$RUNNER_TEMP/f16-sandbox-oauth-check.json"
-          status=$(curl --silent --show-error --retry 0 --max-time 24 --request POST \
-            --header 'x-pazo-f16-oauth-check: HBMRuw-qm4Qs-gs39CsMG13O7AEO38CRrudQsoyRr28kqQIF' \
-            --output "$result" --write-out '%{http_code}' "$url")
-          node -e '
-            const fs=require("node:fs");
-            const body=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
-            if(process.argv[2]!=="200"||body.code!=="sandbox_oauth_verified"){
-              console.error("F16 OAuth did not pass:",String(body.code||"unknown").slice(0,90),"HTTP",process.argv[2]);
-              process.exit(1);
-            }
-            console.log("PASS F16 sandbox OAuth: server authenticated; no token, secret, subscription or payment exposed");
-          ' -- "$result" "$status"
-          status_get=$(curl --silent --show-error --retry 0 --max-time 15 --request GET \
-            --output "$RUNNER_TEMP/f16-get.json" --write-out '%{http_code}' "$url")
-          test "$status_get" = "503"
-          node -e 'const fs=require("node:fs");if(JSON.parse(fs.readFileSync(process.argv[1],"utf8")).code!=="f16_receiver_not_released")process.exit(1)' "$RUNNER_TEMP/f16-get.json"
-          echo 'PASS F16: unrelated requests stay disabled (GET 503)'
+          for method in GET POST; do
+            body="$RUNNER_TEMP/restored-v10-$method.json"
+            status=$(curl --silent --show-error --retry 0 --max-time 15 --request "$method" \
+              --output "$body" --write-out '%{http_code}' "$url")
+            test "$status" = '503' || { echo "FAIL: $method HTTP $status"; exit 1; }
+            node -e 'const fs=require("node:fs");const j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(j.code!=="f16_receiver_not_released")process.exit(1)' "$body"
+            echo "PASS restored F16 v10 $method: HTTP 503 f16_receiver_not_released"
+          done
