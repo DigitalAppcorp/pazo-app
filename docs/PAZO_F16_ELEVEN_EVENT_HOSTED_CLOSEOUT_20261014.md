@@ -1,5 +1,13 @@
 # PAZO F16 — Hosted 11-event backend closeout (2026-10-14 UTC)
 
+## Checkpoint local de Codex — PAUSADO por login PayPal Developer (2026-10-14)
+
+Codex confirmó checkout local `C:\Users\osori\PAZO-F13-preview` con fast-forward PASS hasta `f492c5951dcb85ba330d883cbb4a5a5b16e0e9fd`, árbol limpio, sin scripts ni mutaciones. El propietario aún no ha completado el login PayPal Developer Sandbox: sesión caducada y Chrome requiere su clave biométrica/passkey. **No delegar ni intentar sortear el login, no solicitar secretos en el chat.**
+
+**Datos NO comprobados:** categoría del servicio del callback original = **desconocida**; propiedad = **desconocida**; dependencias activas = **desconocidas**. Codex no visitó callback, no cambió recursos, no envió test ni Resend. Esto NO demuestra que no haya consumidores.
+
+Gate A Supabase `20261014094349` y Gate B Edge `f16-paypal-webhook` v13 están PASS; **NO repetir**. El script `ApplyWebhook` permanece bloqueado. Siguiente paso único: PO inicia sesión en Chrome con su biometría; Codex reanuda auditoría **estrictamente de lectura** del webhook Sandbox existente y entrega solo categoría/propiedad/dependencia en resultado saneado. PayPal Live, pago/checkout/entitlement y merge continúan fuera de alcance.
+
 **GATE A: PASS — SQL installed**. **GATE B: PASS — Edge deployed.**
 
 ## Scope and authorization

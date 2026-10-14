@@ -1,5 +1,13 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## BLOQUEO DE ACCESO ACTUAL — PAYPAL DEVELOPER LOGIN PENDIENTE (2026-10-14)
+
+- **Checkpoint Codex:** `git pull --ff-only` PASS, checkout `C:\Users\osori\PAZO-F13-preview`, rama `f13/section-titles-20261012`, HEAD `f492c5951dcb85ba330d883cbb4a5a5b16e0e9fd`, cambios locales 0. Ningún script ni infraestructura ejecutados.
+- La sesión PayPal Developer **caducó**; abrir la misma app Sandbox en Chrome requiere autenticación mediante passkey/biometría **del usuario**. Esperar acción del propietario en la computadora. Codex no pide ni copia credenciales.
+- Categoría de destino del webhook previo = **DESCONOCIDA**, propiedad = **DESCONOCIDA**, dependencias = **DESCONOCIDAS**; no asumir ausencia. No se visitó ni envió tráfico al callback, no se editó PayPal, no se usó Resend.
+- Gate A de once eventos `20261014094349` y Gate B Edge v13 ya PASS. **No repetir migración ni deploy**. No tocar `$F16ElevenEventBackendReady = $false` y no ejecutar `-Check ApplyWebhook`. El GO previo de PayPal no sustituye comprobación de dependencia del host.
+- Solo cuando el propietario complete login: auditoría en PayPal Sandbox de **lectura** sobre webhook `6N7889790V1467139`, reportar categoría del servicio, propiedad y dependencias confirmadas sin URL, tokens ni payload. Ante falta de evidencia, `desconocido` y mantener PAUSED. Cualquier otra mutación requiere gate PO propio.
+
 ## ESTADO OPERATIVO PRIORITARIO — 11 EVENTOS PREPARADOS EN HOST, PATCH PAYPAL AÚN BLOQUEADO (2026-10-14)
 
 - Gate SQL y Gate Edge autorizados por PO se aplicaron y verificaron: Supabase migración `20261014094349`, Edge `f16-paypal-webhook` v13 ACTIVE, permiten 11 tipos y conservan seguridad. Prueba GET 405/unsigned POST 400 PASS. Sin comprobación firmada PayPal auténtica.
