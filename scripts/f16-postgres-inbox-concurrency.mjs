@@ -3,7 +3,8 @@
 import {spawn} from 'node:child_process'
 
 const HOST='127.0.0.1',PORT='55441',DB='f14_synthetic',USER='f14_admin'
-if(!process.env.GITHUB_ACTIONS || !process.env.PGPASSWORD ||
+if(process.env.GITHUB_ACTIONS!=='true' ||
+  process.env.PGPASSWORD!=='f14_synthetic_ci_only' ||
   process.env.PAZO_SUPABASE_PROJECT_ID || process.env.SUPABASE_DB_URL ||
   process.env.DATABASE_URL) throw Error('F16 concurrency test requires disposable CI-only PostgreSQL')
 
