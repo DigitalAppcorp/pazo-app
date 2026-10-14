@@ -24,8 +24,8 @@ export function createF16SandboxWebhookReceiver({env,fetchImpl=fetch}={}) {
   let verifySignature,inbox
   try {
     verifySignature=createPaypalSandboxPostbackVerifier({
-      clientId:get('PAYPAL_CLIENT_ID'),
-      clientSecret:get('PAYPAL_CLIENT_SECRET'),fetchImpl,
+      clientId:get('PAZO_F16_PAYPAL_CLIENT_ID'),
+      clientSecret:get('PAZO_F16_PAYPAL_CLIENT_SECRET'),fetchImpl,
     })
     inbox=createPaypalVerifiedEventInbox({
       projectUrl:PROJECT,serviceRoleKey:get('SUPABASE_SERVICE_ROLE_KEY'),
