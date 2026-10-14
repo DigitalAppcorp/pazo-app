@@ -1,5 +1,18 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## BLOQUEO ACTUAL — DIAGNÓSTICO READ-ONLY ANTES DE MODIFICAR (2026-10-14)
+
+El PO ejecutó `-Check ApplyWebhook` y recibió `stage=resource_preflight`, `reason=webhook_events_unexpected`, `outcome=no_mutation_attempted`: no hubo PATCH. La advertencia genérica previa de PowerShell ya fue corregida (código 2 = preflight sin cambio; código 3 = posible PATCH con estado incierto).
+
+La causa exacta aún es desconocida: el contrato exigía exactamente los seis eventos de suscripción previstos, sin extras. **No eliminar otros eventos, no cambiar el ID, no relajar la allowlist ni repetir ApplyWebhook** hasta diagnosticar. Ejecutar solo lectura después de actualizar la rama:
+
+```powershell
+git pull --ff-only origin f13/section-titles-20261012
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\f16-paypal-sandbox-plan.ps1 -Check Resources
+```
+
+El JSON saneado ahora añade `configuredEventsCount`, `recognizedEvents`, `missingSubscriptionEvents`, `unexpectedEventsCount`, `duplicateEventsCount`, `wildcardPresent`; nunca retorna URL real ni nombres arbitrarios de eventos externos. El PO puede pegar únicamente esa salida, sin secretos. Los pasos de escritura a continuación están **SUSPENDIDOS hasta revisión del resultado**.
+
 **Estado actual (2026-10-14): EXECUTOR LOCAL PREPARADO, PAYPAL AÚN SIN MODIFICAR.**
 
 ## Permiso y alcance
