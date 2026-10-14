@@ -1,5 +1,13 @@
 # PAZO F16 — conservar ocho eventos Sandbox + tres PAYMENT.SALE
 
+## ACTUALIZACIÓN DE ESTADO 2026-10-14 — GATES A+B HOSTED: PASS
+
+- Autorización PO `si` entregada expresamente por Codex para aplicar exclusivamente SQL de los 11 tipos, auditar, y **solo después** desplegar Edge Sandbox. Ejecutado y cerrado en ese orden.
+- Migración registrada en Supabase con **versión real `20261014094349`**, renombrada en GitHub de la versión CLI original `20261014085430` a `supabase/migrations/20261014094349_f16_preserve_two_subscription_lifecycle_events.sql` sin cambiar contenido SQL. Postflight: restricción inbox y RPC permiten once eventos; owner, SECURITY DEFINER, search_path vacío, RLS forzado y privilegios service_role exclusivos preservados; 0 entradas financieras/eventos/cuota.
+- Edge `f16-paypal-webhook` desplegada versión **13 ACTIVE**, ocho archivos idénticos a GitHub SHA `277d52e6`, latch true, solo Sandbox, JWT desactivado exclusivamente por webhook firmado; legacy v35 intacta. Smoke HTTP real [#38544817793](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38544817793) GET 405, POST no firmado 400 (PASS). Sin notificación firmada auténtica ni pagos.
+- PayPal **NO modificado**: webhook con destino distinto, ocho eventos existentes y tres SALE faltantes. Script `ApplyWebhook` permanece bloqueado por revisión pendiente del host externo anterior; se requiere identificar dependencia/propiedad antes de redirigir.
+- Evidencia/stop rules: `docs/PAZO_F16_ELEVEN_EVENT_HOSTED_CLOSEOUT_20261014.md`. El texto histórico inferior «no aplicar sin GO» queda superado **solo para la migración aplicada y Edge v13**, NO habilita cambios PayPal.
+
 **Estado (2026-10-14 UTC): PREPARADO EN GITHUB, NO DESPLEGADO NI APLICADO.**
 **Alcance de aprobación vigente:** el PO autorizó editar el webhook PayPal EXISTENTE, pero NO ha autorizado aún una nueva migración de Supabase ni desplegar un receptor que procese 11 tipos. Detener `ApplyWebhook` hasta ambos PASS.
 

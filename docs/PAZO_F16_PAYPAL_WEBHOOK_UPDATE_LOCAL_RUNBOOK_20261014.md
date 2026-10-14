@@ -1,5 +1,13 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## ESTADO OPERATIVO PRIORITARIO — 11 EVENTOS PREPARADOS EN HOST, PATCH PAYPAL AÚN BLOQUEADO (2026-10-14)
+
+- Gate SQL y Gate Edge autorizados por PO se aplicaron y verificaron: Supabase migración `20261014094349`, Edge `f16-paypal-webhook` v13 ACTIVE, permiten 11 tipos y conservan seguridad. Prueba GET 405/unsigned POST 400 PASS. Sin comprobación firmada PayPal auténtica.
+- **NO se cambió PayPal:** el webhook Sandbox `6N7889790V1467139` sigue con ocho eventos existentes, faltan tres `PAYMENT.SALE.*`, URL clasificada `different_host`. Su host anterior no está auditado y podría ser otra integración; desviarlo sin comprobar rompería recepción de eventos previos.
+- **Conservar bloqueo `$F16ElevenEventBackendReady = $false`** en `scripts/f16-paypal-sandbox-plan.ps1`. No ejecutar `-Check ApplyWebhook`, ni modificar manualmente el Dashboard, hasta que la auditoría del destino antiguo establezca propiedad y que no existe integración afectada; después yo prepararé el desbloqueo y tests, con el GO de PayPal original aún limitado al webhook y eventos aprobados.
+- En el código de GitHub la versión CLI de la migración se renombró para coincidir con el historial Supabase: `supabase/migrations/20261014094349_f16_preserve_two_subscription_lifecycle_events.sql`. No ejecutar su SQL de nuevo.
+- Archivo de cierre: `docs/PAZO_F16_ELEVEN_EVENT_HOSTED_CLOSEOUT_20261014.md`. Avisos inferiores de «no aplicado» quedan históricos.
+
 ## Actualización prioritaria: conservar ocho eventos antes de aplicar PayPal PATCH (2026-10-14)
 
 La salida local del PO identificó los dos eventos extras como `BILLING.SUBSCRIPTION.CREATED` y `BILLING.SUBSCRIPTION.RE-ACTIVATED`. Son tipos del catálogo PayPal Sandbox; deben conservarse además de los seis originales. El PATCH correcto, una vez autorizado el backend, será **8 eventos existentes + 3 PAYMENT.SALE.* = 11**, sin borrar eventos ni crear webhooks.
