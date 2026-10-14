@@ -1,0 +1,27 @@
+name: F16 Generate Eleven-Event Migration Name (One-Time)
+on:
+  pull_request:
+    branches: [release/mvp-beta-fast-track-20261010]
+permissions:
+  contents: read
+jobs:
+  generate-offline-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Supabase CLI migration new locally, no database connection
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          npx --yes supabase@2.120.0 migration new --help >/dev/null
+          npx --yes supabase@2.120.0 migration new f16_preserve_two_subscription_lifecycle_events
+          file=$(find supabase/migrations -maxdepth 1 -name '*_f16_preserve_two_subscription_lifecycle_events.sql' -printf '%f\n' | sort | tail -n 1)
+          [[ "$file" =~ ^[0-9]{14}_f16_preserve_two_subscription_lifecycle_events\.sql$ ]]
+          echo "PAZO_F16_CLI_MIGRATION=$file"
+          echo 'PASS: named offline; no hosted SQL or PayPal changes'
