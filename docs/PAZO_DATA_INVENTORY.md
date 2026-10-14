@@ -375,3 +375,8 @@ Auditoría de código independiente de la prueba de Codex: `src/components/views
 ### F16 — Retención 90 días (aprobada, aún sin datos alojados)
 
 El PO aprobó 90 días para identificadores de webhooks **tras conciliación definitiva**, sin borrado automático de pendientes/disputados. La migración F16 todavía no aplicada incluye `retention_hold=true` por defecto y `retention_released_at` para impedir eliminación antes de la conciliación validada. Solo existe vista previa de conteos, sin DELETE ni tareas programadas. Pagos, devoluciones, disputas, reversos y demás metadatos financieros mantienen plazo de conservación pendiente. Fuente `docs/PAZO_F16_RETENTION_APPROVED_GATE_20261013.md`.
+
+
+### F16 — Ledger PayPal únicamente en pruebas aisladas
+
+Se preparó **solo SQL de laboratorio**, no instalado en Supabase alojado: `paypal_payment_entries` (ID opaco de pago, ID opaco de suscripción, owner UUID de fixture, plan, USD, monto en centavos, fecha y estado bloqueado/no acreditado) y `paypal_payment_reversals` (ID opaco de pago, tipo y fecha de reversión). Ningún nombre, correo de PayPal, tarjeta, payload completo ni secreto. En caso de reversión previa, el registro del pago queda bloqueado. **No se están recolectando datos reales mediante este prototipo.** Retención financiera, vínculo real de identidad, baja de cuenta y obligación contable siguen pendientes; la retención aprobada de 90 días aplica solo a webhooks conciliados. Evidencia: `docs/PAZO_F16_FINANCIAL_LEDGER_LAB_GATE_20261013.md`.
