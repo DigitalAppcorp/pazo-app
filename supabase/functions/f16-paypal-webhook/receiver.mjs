@@ -5,6 +5,7 @@
 import {createSafeF16WebhookHandler} from './core.mjs'
 import {createPaypalSandboxPostbackVerifier} from './paypalSandboxPostback.mjs'
 import {createPaypalVerifiedEventInbox} from './paypalInboxAdapter.mjs'
+import {assessF16SandboxConfig} from './sandboxConfigPreflight.mjs'
 
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const WEBHOOK='6N7889790V1467139'
@@ -17,10 +18,8 @@ export function createF16SandboxWebhookReceiver({env,fetchImpl=fetch}={}) {
   const get=typeof env?.get==='function'?(key)=>env.get(key):()=>undefined
   // Fail closed if unset, Live, different merchant endpoint or plan; NEVER
   // fall back to Live. PayPal credentials and Supabase role key remain server-only.
-  if(get('PAYPAL_ENV')!=='sandbox' ||
-     get('PAYPAL_WEBHOOK_ID')!==WEBHOOK ||
-     get('PAYPAL_PLAN_ID')!==PLAN ||
-     get('SUPABASE_URL')!==PROJECT ||
+  // This check never logs or returns credentials and never trusts Live mode.
+  if(!assessF16SandboxConfig(env).ready ||
      typeof fetchImpl!=='function') return unavailable
   let verifySignature,inbox
   try {
