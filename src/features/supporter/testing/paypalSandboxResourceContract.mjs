@@ -22,7 +22,7 @@ function destinationCategory(value) {
   if(u.hostname.endsWith('.supabase.co'))return 'different_supabase_project'
   return 'different_host'
 }
-export function assessF16SandboxResources(plan,webhook) {
+export function assessF16SandboxResources(plan,webhook,officialCatalog=null) {
   const p=assessPazoSandboxPlan(plan)
   const w=webhook && typeof webhook==='object' && !Array.isArray(webhook) ? webhook : null
   const idMatches=w?.id===PAZO_SANDBOX_WEBHOOK_ID
@@ -36,6 +36,22 @@ export function assessF16SandboxResources(plan,webhook) {
   const missingSubscriptionEvents=PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6).filter(e=>!eventTypes.has(e))
   const unexpectedEventsCount=eventNames.filter(n=>!PAZO_REQUIRED_PAYPAL_EVENTS.includes(n)).length
   const duplicateEventsCount=eventNames.length-new Set(eventNames).size
+  // Extra event names are emitted ONLY if independently confirmed by PayPal's
+  // authenticated public event-type catalogue from the SAME Sandbox REST app.
+  // Arbitrary strings from webhook registrations are NEVER reflected to stdout.
+  const catalogTypes=Array.isArray(officialCatalog?.event_types)?
+    officialCatalog.event_types:null
+  const catalogValid=catalogTypes!==null &&
+    catalogTypes.length>0 && catalogTypes.length<=500 &&
+    catalogTypes.every(t=>typeof t?.name==='string')
+  const documentedEventPattern=/^[A-Z][A-Z0-9-]*(?:\\.[A-Z][A-Z0-9-]*){1,5}$/
+  const available=catalogValid?
+    new Set(catalogTypes.map(t=>t.name).filter(n=>n.length<=128&&documentedEventPattern.test(n))):
+    new Set()
+  const additionalProviderEvents=eventNames.filter(n=>
+    typeof n==='string' && !PAZO_REQUIRED_PAYPAL_EVENTS.includes(n) &&
+    available.has(n) && documentedEventPattern.test(n))
+  const unresolvedAdditionalEventsCount=unexpectedEventsCount-additionalProviderEvents.length
   const destination=idMatches?destinationCategory(w?.url):'not_available'
   return {
     environment:'sandbox',readOnly:true,
@@ -50,6 +66,9 @@ export function assessF16SandboxResources(plan,webhook) {
       recognizedEvents,
       missingSubscriptionEvents,
       unexpectedEventsCount,
+      additionalProviderEvents,
+      unresolvedAdditionalEventsCount,
+      officialCatalogStatus:catalogValid?'verified':'unavailable',
       duplicateEventsCount,
       wildcardPresent:eventTypes.has('*'),
       eventConfigurationComplete:!!idMatches&&missingEvents.length===0,
