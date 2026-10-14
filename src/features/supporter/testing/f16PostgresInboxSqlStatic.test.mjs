@@ -75,7 +75,7 @@ test('isolated F16 SQL runner fails before invoking psql without CI consent',()=
 
 test('CLI-generated migration keeps exact audited lab DDL and cannot alter supporter entitlement',()=>{
   const migration=readFileSync(
-    'supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql','utf8')
+    'supabase/migrations/20261014042616_f16_private_verified_event_inbox.sql','utf8')
   const ddlStart='CREATE TABLE supporter_private.paypal_verified_event_inbox'
   const labBody=sql.slice(sql.indexOf(ddlStart),sql.lastIndexOf('COMMIT;')).trim()
   const migrationBody=migration.slice(migration.indexOf(ddlStart),migration.lastIndexOf('COMMIT;')).trim()
@@ -89,7 +89,7 @@ test('CLI-generated migration keeps exact audited lab DDL and cannot alter suppo
 
 test('retention preview cannot mutate events and requires explicit terminal release',()=>{
  const preview=readFileSync('supabase/queries/f16_paypal_inbox_retention_preview_READ_ONLY.sql','utf8')
- const migration=readFileSync('supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql','utf8')
+ const migration=readFileSync('supabase/migrations/20261014042616_f16_private_verified_event_inbox.sql','utf8')
  assert.match(preview,/BEGIN READ ONLY;/)
  assert.match(preview,/retention_hold IS FALSE/)
  assert.match(preview,/processing_state = 'processed'/)
