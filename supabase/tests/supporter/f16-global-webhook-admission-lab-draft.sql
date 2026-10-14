@@ -32,8 +32,8 @@ BEGIN
   IF NOT pg_catalog.pg_try_advisory_xact_lock(16162026, 20261014) THEN
     RETURN false;
   END IF;
-  v_minute:=pg_catalog.floor(pg_catalog.extract(epoch FROM pg_catalog.clock_timestamp())/60)::bigint;
-  v_day:=pg_catalog.floor(pg_catalog.extract(epoch FROM pg_catalog.clock_timestamp())/86400)::bigint;
+  v_minute:=pg_catalog.floor(pg_catalog.date_part('epoch',pg_catalog.clock_timestamp())/60)::bigint;
+  v_day:=pg_catalog.floor(pg_catalog.date_part('epoch',pg_catalog.clock_timestamp())/86400)::bigint;
   SELECT window_number, admitted INTO v_minute_bucket, v_minute_count
     FROM supporter_private.f16_webhook_request_budget WHERE bucket='minute';
   SELECT window_number, admitted INTO v_day_bucket, v_day_count
