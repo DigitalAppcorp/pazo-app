@@ -9,7 +9,7 @@ const PLAN='P-14V25407JP6850922NLHMDKI'
 const ISO=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/
 const EVENT_TYPES=new Set(['PAYMENT.SALE.COMPLETED','PAYMENT.SALE.REFUNDED'])
 const SALE_RESULTS=new Set(['inserted_uncredited','duplicate_uncredited','inserted_blocked','duplicate_blocked'])
-const REV_RESULTS=new Set(['reversal_recorded','reversal_duplicate'])
+const REV_RESULTS=new Set(['refund_recorded_partial','refund_recorded_full','refund_duplicate'])
 const CLAIM_KEYS=['attempt','event_type','lease_expires_at','lease_token','provider_event_id']
 const INTENT_KEYS=['external_subscription_id','id','owner_id','plan_id','provider','state']
 const invalid=()=>{throw Error('f16_lab_rpc_invalid_request')}
@@ -106,7 +106,7 @@ export function createF16PrivateLabRpcStores({rpcClient,labDatabase}={}){
        !UUID.test(candidate.ownerId||'')||planId!==PLAN||
        candidate.grossMinorUnits!==299||candidate.currency!=='USD'||
        !utc(candidate.completedAt))invalid()
-   const outcome=await call('f16_lab_commit_claimed_sale',{
+   const outcome=await call('f16_lab_commit_claimed_sale_v2',{
     p_event_id:evt,p_lease_token:leaseToken,
     p_payment_id:candidate.externalPaymentId,
     p_subscription_id:candidate.externalSubscriptionId,
@@ -119,11 +119,20 @@ export function createF16PrivateLabRpcStores({rpcClient,labDatabase}={}){
   async commitClaimedReversal({eventId:evt,leaseToken,candidate}={}){
    eventId(evt);token(leaseToken)
    if(candidate?.provider!=='paypal'||!ref(candidate.externalPaymentId)||
-       candidate.kind!=='refunded'||
+       !SUB.test(candidate.externalSubscriptionId||'')||
+       !ref(candidate.externalRefundId)||
+       !Number.isInteger(candidate.refundMinorUnits)||
+       candidate.refundMinorUnits<1||candidate.refundMinorUnits>299||
+       !['PARTIALLY_REFUNDED','REFUNDED'].includes(candidate.providerStatus)||
+       candidate.kind!==(candidate.providerStatus==='REFUNDED'?'refunded':'partially_refunded')||
        !utc(candidate.verifiedAt))invalid()
-   const outcome=await call('f16_lab_commit_claimed_reversal',{
+   const outcome=await call('f16_lab_commit_claimed_refund',{
     p_event_id:evt,p_lease_token:leaseToken,
-    p_payment_id:candidate.externalPaymentId,p_kind:candidate.kind,
+    p_sale_id:candidate.externalPaymentId,
+    p_subscription_id:candidate.externalSubscriptionId,
+    p_refund_id:candidate.externalRefundId,
+    p_refund_minor:candidate.refundMinorUnits,
+    p_provider_status:candidate.providerStatus,
     p_verified_at:candidate.verifiedAt,
    })
    if(!REV_RESULTS.has(outcome))throw Error('f16_private_rpc_contract_mismatch')
