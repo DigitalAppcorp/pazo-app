@@ -10,6 +10,12 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate F16 — Confirmación automática de destino webhook Sandbox (2026-10-13)
+
+- El PO volvió a confirmar el Webhook ID Sandbox `6N7889790V1467139`, consistente con la lectura anterior de PayPal; el ID **no demuestra que la URL registrada sea la de Supabase**.
+- Se agregó auditoría **READ ONLY** `scripts/f16-paypal-verify-webhook-destination-readonly.mjs` (consulta oficial `GET /v1/notifications/webhooks/6N7889790V1467139`) y se amplió el runner PowerShell existente: `powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\\scripts\\f16-paypal-sandbox-plan.ps1 -Check Destination`. Solo imprime `webhookIdMatches`, `destinationMatches` y `status`; no imprime el URL real, secretos o tokens. Compara exacto contra `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook`. Ejecutar localmente con credenciales Sandbox del PO, después de pull si no hay cambios locales.
+- **El resultado real de este preflight aún NO se ha recibido**, no afirmar `destinationMatches=true`. Incluso si coincide, la función desplegada v30 tiene problemas críticos (actualiza `profiles.is_founder`, no concilia pagos y `PAYPAL_ENV` no falla cerrado). **No añadir eventos ni desplegar cambios alojados todavía.** Informe detallado: `docs/PAZO_F16_EXISTING_SUPABASE_PAYPAL_WEBHOOK_AUDIT_20261013.md`.
+
 ## Gate F16 — Edge Function PayPal ya desplegada, NO apta para membresía (2026-10-13)
 
 - Auditoría READ ONLY con conector Supabase al proyecto `mrybvqdebbgcayuvgkkr`: Edge Function `paypal-webhook` **ACTIVE, v30, verify_jwt=false**. Ruta de invocación convencional: `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook`. **NO CONFIRMADO** que la URL del webhook PayPal ID `6N7889790V1467139` apunte a ella. Enlace de Dashboard proporcionado por PO NO es URL de callback.
