@@ -16,3 +16,10 @@ Después de comprobar el E2E de 4 eventos firmados, el inbox sigue protegido con
 La RPC **no existe** en Supabase hosted; no usar el adaptador contra producción ni publicar endpoint cliente. No se preparó una migración versionada porque el proyecto exige generarla mediante Supabase CLI y requiere GO antes de aplicarla. No se procesaron los cuatro webhooks reales. Ninguna membresía o cobro se activó.
 
 Siguiente fase técnica: diseñar y ejecutar **claim/lease/retry ACID** en PostgreSQL descartable, protocolo de recuperación ante fallos, y separar reversos confirmados del lifecycle. Solo entonces solicitar autorización específica para alojar nuevas RPC y desplegar worker limitado. Los 90 días de retención del inbox empiezan únicamente tras conciliación definitiva; retención de ledger/intent continúa pendiente.
+
+## Evidencia final de este gate, antes del handoff (2026-10-14)
+
+- GitHub commit técnico/QA `95eb6378f2142584f3eb45d2ed62e998ac05f97b`: [CI general PASS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38561691334), [PostgreSQL disposable PASS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38561691223).
+- CI anterior en `8fe0bd58` no corría el SQL test por `set -u` y lectura directa de variable opcional; corregido en `b310de60`. En `b310de60`, PG mostró fallo de aserción por fixture sintético de ledger no vacío; corregido en `95eb6378` con comparación de conteos antes/después. Ninguna reparación cambió Supabase alojado.
+- Supabase READ ONLY posterior: cuatro inbox `pending`, cero intenciones/pagos/reversos/consentimientos; Edge v13 ACTIVE y lector `public.f16_paypal_read_verified_inbox(text)` **AUSENTE** en hosting.
+- Estas verificaciones sustentan PASS solo del **contrato DRAFT en LAB**; las versiones posteriores de documentación requieren comprobar su CI por HEAD. No autoriza deploy ni ejecución sobre eventos reales.
