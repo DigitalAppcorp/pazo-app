@@ -1,11 +1,14 @@
 # PAZO F16 — Decisión pendiente: retención, eliminación y recuperación de pagos
 
+**ACTUALIZACIÓN VERIFIED HOSTED (2026-10-14 UTC):** el Product Owner autorizó y se aplicaron únicamente las dos migraciones F16 en Supabase `mrybvqdebbgcayuvgkkr`; tablas privadas de eventos, intenciones, pagos y reversos están instaladas, vacías (0 filas), con RLS forzada y RPC de servidor restringidas. Versiones alojadas: `20261014042616_f16_private_verified_event_inbox.sql` y `20261014042646_f16_private_intents_financial_ledger.sql`. NO se desplegaron Edge Functions, NO se modificó PayPal/webhook ni se activaron cobros, períodos pagados o membresías. Las afirmaciones históricas inferiores «NO APLICADAS» se refieren al momento anterior a este gate; NO se deben tratar como estado actual. Retención de ledger e intenciones pendiente.
+
+
 **Estado:** propuesta para Product Owner; NO APROBADA, NO IMPLEMENTADA. Versión 2026-10-13. Este documento es un diseño de privacidad/producto, no asesoría legal. NO activar eliminación automática ni beneficios hasta aprobación.
 
 ## Evidencia y límites actuales
 
 - PayPal Sandbox: plan existente **USD 2.99 mensual**, `P-14V25407JP6850922NLHMDKI`. Webhook `6N7889790V1467139` con URL de dashboard mal configurada; no recibe hoy el receptor F16.
-- Migración `20261014032018_f16_private_verified_event_inbox.sql` **creada con Supabase CLI y validada únicamente en PostgreSQL descartable**. Permite guardar ID y tipo de evento, fechas técnicas y estado/reintentos. No almacena emails, datos de tarjeta, cuerpo del webhook ni datos de comprador; estos IDs siguen siendo **datos potencialmente vinculables** a una persona a través del proveedor.
+- Migración `20261014042616_f16_private_verified_event_inbox.sql` **creada con Supabase CLI y validada únicamente en PostgreSQL descartable**. Permite guardar ID y tipo de evento, fechas técnicas y estado/reintentos. No almacena emails, datos de tarjeta, cuerpo del webhook ni datos de comprador; estos IDs siguen siendo **datos potencialmente vinculables** a una persona a través del proveedor.
 - No hay contabilidad de pagos instalada ni cuentas con entitlement F16 activado. `wall_has_verified_entitlement()=false` permanece.
 - La política de privacidad de PAZO prohíbe recopilar datos personales «por si acaso» y exige categorías, motivo, mínimo, retención y tratamiento de bajas definidos.
 
