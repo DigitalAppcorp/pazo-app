@@ -27,3 +27,19 @@ test('webhook receiver builds from static Sandbox API, narrow RPC and no user pa
  assert.match(inbox,/f16_paypal_record_verified_event/)
  assert.doesNotMatch(receiver,/api-m\.paypal\.com(?!\.sandbox)/)
 })
+
+test('F16 must not read or require generic PayPal secrets used by legacy v30',()=>{
+  const paths=[
+    'supabase/functions/f16-paypal-webhook/receiver.mjs',
+    'supabase/functions/f16-paypal-webhook/sandboxConfigPreflight.mjs',
+    'supabase/functions/f16-paypal-webhook/.env.example',
+  ]
+  for(const path of paths){
+    const code=readFileSync(path,'utf8')
+    // Project-wide PAYPAL_* is consumed by the legacy v30 webhook.
+    // The new F16 receiver must use its own PAZO_F16_PAYPAL_* names.
+    assert.doesNotMatch(code,/(?<!PAZO_F16_)PAYPAL_(?:ENV|CLIENT_ID|CLIENT_SECRET|PLAN_ID|WEBHOOK_ID)/,
+      'generic project-wide PayPal configuration forbidden in F16: '+path)
+    assert.match(code,/PAZO_F16_PAYPAL_/)
+  }
+})
