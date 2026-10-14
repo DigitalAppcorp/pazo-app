@@ -260,6 +260,7 @@ jobs:
           test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_refund_multievent_ledger_lab_DRAFT_DO_NOT_APPLY.sql
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-multievent-ledger-synthetic.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-cumulative-status-out-of-order-synthetic.sql
           node scripts/f16-refund-multievent-concurrency.mjs
           echo 'PASS F16: unique refunds, owner binding, cumulative minor, late sale hold'
 
