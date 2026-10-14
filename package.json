@@ -20,7 +20,8 @@
     "test:pwa": "node scripts/pwa-check.mjs",
     "test:closure": "node --experimental-strip-types --test scripts/closure-core.test.mjs scripts/closure-ui.test.mjs",
     "test:f16:synthetic": "node --test src/features/supporter/testing/*.test.mjs",
-    "verify:f16:paypal:sandbox:plan": "node scripts/f16-paypal-verify-plan-readonly.mjs"
+    "verify:f16:paypal:sandbox:plan": "node scripts/f16-paypal-verify-plan-readonly.mjs",
+    "verify:f16:paypal:sandbox:webhooks": "node scripts/f16-paypal-verify-webhooks-readonly.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
