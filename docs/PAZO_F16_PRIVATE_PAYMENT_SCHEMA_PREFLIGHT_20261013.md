@@ -60,3 +60,19 @@ Se preparó el código SQL de ensayo en `supabase/tests/supporter/f16-payment-in
 - **Gate PostgreSQL real PENDIENTE**: el workflow no ejecuta actualmente los tres scripts SQL; el intento de integrar esa ejecución al CI no fue aceptado por la herramienta. NO marcar SQL/ACL/concurrencia como PASS hasta una ejecución real verificada y registrada.
 
 Antes de convertir este borrador en migración se debe utilizar `supabase migration new f16_private_verified_event_inbox` con CLI oficial sobre un checkout local limpio, revisar el archivo resultante y probarlo en una base desechable. Luego solicitar GO del Product Owner ANTES de aplicar al proyecto `mrybvqdebbgcayuvgkkr`. La configuración PayPal existente sigue sin cambios.
+
+## Gate de ejecución único para PostgreSQL aislado
+
+**Preparado, todavía NO ejecutado contra PostgreSQL:** `scripts/f16-postgres-inbox-lab.sh`. Reutiliza exclusivamente el servicio PostgreSQL 17 desechable de las pruebas F14 de GitHub Actions (`127.0.0.1:55441`, base `f14_synthetic`, rol `f14_admin`), y verifica ambiente `GITHUB_ACTIONS=true`, contraseña pública de fixture de CI, ausencia de variables de conexión a Supabase alojado y cimentación previa F16 de consentimientos.
+
+Orden de ejecución del gate, tras `supabase/tests/f14/catalog-baseline.sql` y el DDL de consentimiento F16 cargados **solo en ese laboratorio**:
+
+```bash
+bash scripts/f16-postgres-inbox-lab.sh
+```
+
+El ejecutor usa el SQL de prueba de inbox con `SET ROLE postgres`, audita permisos/RLS, ejecuta las pruebas sintéticas transaccionales y 32 solicitudes paralelas al RPC. El ejecutor y el script de concurrencia tienen guardas contra ejecución en otro entorno. Este procedimiento no emplea servicios pagados nuevos, ni Supabase hospedado ni credenciales reales.
+
+La prueba de **sintaxis y rechazo fuera del laboratorio** fue comprobada separadamente; la suite estática F16 cubre también estas guardas. La ejecución PostgreSQL end-to-end continúa **BLOQUEADA** porque no se pudo integrar este paso al workflow alojado con las herramientas disponibles. Un CI verde de pruebas estáticas **no autoriza** migración.
+
+**Criterio de cierre:** evidencia del job con estado SUCCESS para DDL, metadatos, pruebas de roles y 32 llamadas concurrentes. Después comparar la revisión SQL con el contrato F16 y solo entonces crear archivo de migración auténtica mediante CLI local. La decisión de retención/propósito y autorización del Product Owner son gates separados previos a cualquier SQL hospedado.
