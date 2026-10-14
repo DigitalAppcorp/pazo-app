@@ -56,3 +56,15 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/f16-retention-90-day-synthetic.sql
           echo 'PASS: versioned F16 migration and 32-way concurrency in disposable PostgreSQL only'
+
+      - name: Check F16 operator retention preview stays zero without reconciled ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/queries/f16_paypal_inbox_retention_preview_READ_ONLY.sql)
+          if [[ "$result" != "0|4|4" ]]; then
+            echo "FAIL: F16 retention preview must protect every unresolved event in lab" >&2
+            exit 1
+          fi
+          echo "PASS F16: 0 eligible events, 4 held, 4 nonterminal; no mutation"
