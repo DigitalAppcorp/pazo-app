@@ -11,7 +11,7 @@ const HEADERS={
   'paypal-transmission-sig':'transmission_sig',
   'paypal-transmission-time':'transmission_time',
 }
-function requireCertUrl(value) {
+export function requireCertUrl(value) {
   let cert
   try { cert=new URL(value) } catch { return false }
   return cert.protocol==='https:' && ALLOWED_CERT_HOSTS.has(cert.hostname) &&
