@@ -28,11 +28,11 @@ El Product Owner escribió **«aprobado»** tras la propuesta de ledger multirre
 | P09 | Retención de solicitudes de privacidad | Registrar evidencia mínima de solicitud, respuesta y excepción, separada de contenido personal y financiero. | Confirmar si CCPA/CPRA aplica a Alvarado Solutions LLC y plazos obligatorios bajo el régimen aplicable |
 | P10 | Integración de PayPal | Confirmar con el proveedor el GET auténtico de venta/reembolso y el historial completo, incluyendo disputas fuera de ventanas de 31 días; no usar Payments v1 depreciada sin verificación de disponibilidad y plan de compatibilidad. | Aprobación de ensayo nuevo Sandbox con cuenta Auth vinculada; proceso de incidentes y refund |
 
-## Hallazgo nuevo — P06 no se puede cerrar con el ledger actual
+## Estado de ingeniería P06 tras aprobación técnica
 
-En el ensayo PG17 se confirmó que el diseño actual permite una sola reversión por venta y no puede representar dos refunds parciales o una secuencia parcial→total con IDs de refund distintos. La corrección **solo offline** bloquea el commit automático de `partially_refunded` tanto en `privateProviderProofFlow.mjs` como en `privateLabRpcStores.mjs`. El SQL DRAFT aún debe endurecerse antes de cualquier despliegue. **Esto no aprueba una política de devoluciones**, solo evita marcar un evento como conciliado mientras falta contabilidad multievento.
+**Hecho aprobado y probado SOLO EN LAB:** la estructura multireembolso por `refund_id` independiente, vinculado a venta y suscripción, supera el límite histórico de un único tombstone por venta. El servicio y las RPC `f16_lab_*` DRAFT pueden registrar varias devoluciones parciales, sin conceder entitlements. Una ventana temporal de PayPal puede mostrar ya `REFUNDED` mientras un evento de 199 centavos se procesa antes que el refund de 100 centavos: el ledger debe sumar los centavos verificados de cada ID individual y no derivar el importe de un estado global. Se agregó la prueba `f16-refund-cumulative-status-out-of-order-synthetic.sql` y el informe `docs/PAZO_F16_P06_BENEFITS_AND_RETENTION_DECISION_GATE_20261014.md`.
 
-Informe técnico y propuesta sin migración: `docs/PAZO_F16_MULTI_REFUND_RECONCILIATION_GATE_20261014.md`. Es necesaria una decisión P06 expresa antes de diseñar la retención y cobertura de reembolsos múltiples.
+**Lo NO aprobado:** la respuesta comercial ante un refund parcial, el momento de suspensión o continuación de beneficios, la duración contractual de ciclos cubiertos, el tratamiento de disputas y el plazo/forma de eliminación de registros financieros. **Aceptar evidencia financiera no equivale a asignar beneficios**. Mantener el bloqueo de cualquier entitlement hasta que la fuente de periodos esté verificada y el PO autorice expresamente la política P05/P06.
 
 ## Regla de ingeniería activa mientras P01–P10 no estén aprobadas
 
