@@ -25,6 +25,13 @@ test('webhook receiver builds from static Sandbox API, narrow RPC and no user pa
  assert.match(receiver,/createPaypalSandboxPostbackVerifier/)
  assert.match(receiver,/createPaypalVerifiedEventInbox/)
  assert.match(inbox,/f16_paypal_record_verified_event/)
+ const core=readFileSync('supabase/functions/f16-paypal-webhook/core.mjs','utf8')
+ const gate=readFileSync('supabase/functions/f16-paypal-webhook/workerAdmissionGate.mjs','utf8')
+ assert.match(core,/f16WorkerAdmissionGate/)
+ assert.match(core,/admissionGate\.tryEnter\(\)/)
+ assert.match(core,/finally\s*\{[\s\S]*release\(\)/)
+ assert.match(gate,/maxInFlight=4, maxPerWindow=60/)
+ assert.match(gate,/export const f16WorkerAdmissionGate=createF16WorkerAdmissionGate\(\)/)
  assert.doesNotMatch(receiver,/api-m\.paypal\.com(?!\.sandbox)/)
 })
 
