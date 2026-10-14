@@ -1,5 +1,15 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
 
+## F16 — MIGRACIÓN GLOBAL CLI VERSIONADA Y CI AISLADA (2026-10-14 UTC)
+
+- **Autorización PO «ok sigamos»** para PREPARAR la migración y revisión operativa; no existe GO para SQL alojado, Edge activa, modificación de PayPal, cobros ni membresías.
+- **Generación legítima de nombre con Supabase CLI:** `supabase migration new f16_global_webhook_admission` ejecutado mediante CLI 2.120.0 en el runner efímero de GitHub Actions [#38525547649](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38525547649). Resultado: `20261014070015_f16_global_webhook_admission.sql`. Workflow temporal retirado sin guardar acceso a bases.
+- **Código versionado en rama PR #44:** `supabase/migrations/20261014070015_f16_global_webhook_admission.sql`, derivado del laboratorio que ya pasó CI; `supabase/queries/f16_global_admission_preflight_READ_ONLY.sql`; la CI PostgreSQL ahora ejecuta **la migración real** en base 17 descartable y valida ACL/RLS/concurrencia/restricciones, sin aplicar a PAZO.
+- **Auditoría REMOTA read-only hoy:** `supporter_private.f16_webhook_request_budget` ausente y `public.f16_paypal_try_admit_global()` ausente; cuatro tablas financieras (inbox, intenciones, pagos, reversos) con **cero filas** y guard de entitlement `false`. Edge F16 alojada v10 inerte, latch false. No cambiaron PayPal/webhook, secretos, correo, Live, membresías, ni infraestructura de costo.
+- **Riesgo residual vigente:** RPC compartida impide más de 30 verificaciones/minuto y 2000/día de salida (umbrales provisionales), pero NO evita que invocaciones entrantes cuenten en el plan Free, ni garantiza reintentos/capacidad para eventos auténticos bajo flood. Antes de activar, revisar recuperación basada en conciliación, protección de ingreso o aceptación PO del riesgo limitado a Sandbox. No declarar disponibilidad ni seguridad End-to-End.
+- **Gate NEXT recomendado:** solicitar aprobación **exclusiva para aplicar una vez la migración versionada a Supabase**; preflight remoto de ACL/catálogo/versión y postflight de rol/privilegios/cero filas, manteniendo receptor F16 en estado 503 sin habilitar checkout. Luego GO distinto para desplegar receptor activo y otro para modificar el webhook existente `6N7889790V1467139` y sus tres eventos faltantes. Procedimiento: `docs/PAZO_F16_GLOBAL_ADMISSION_SQL_GATE_20261014.md`.
+- **Estado PR #44:** DRAFT; no merge en main, no Vercel. No pedir al PO repetir OAuth/GET PayPal o pruebas F16 previas.
+
 ## F16 — PRESUPUESTO GLOBAL OFFLINE + PLAN FREE CONFIRMADO (2026-10-14 UTC)
 
 - **Autorización PO:** «ok dale» para definir e implementar en GitHub, SIN desplegar, protección compartida contra abuso y control de costos compatible con PAZO. **Ninguna aplicación de SQL ni activación de receptor** incluida. Se comprobó con documentación Supabase actual que Free incluye 500,000 invocaciones Edge mensuales compartidas por organización, sin cobro por exceso pero con posibles restricciones Fair Use. El Spend Cap configurable es de Pro, no Free. No se ha contratado ninguna prestación ni creado otro proyecto.
