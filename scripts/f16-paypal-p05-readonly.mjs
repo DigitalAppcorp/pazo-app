@@ -24,6 +24,13 @@ export function summarizeF16P05ReadOnlySnapshot(snapshot) {
    regular.pricing_scheme?.fixed_price?.value==='2.99',
   subscriptionPlanOverride:yesNo(s?.plan_overridden),
   subscriptionQuantityOne:s?.quantity==='1',
+  effectiveTermsConsistent:isKnownPlan&&p.status==='ACTIVE'&&
+   regular?.tenure_type==='REGULAR'&&
+   regular.frequency?.interval_unit==='MONTH'&&
+   regular.frequency?.interval_count===1&&
+   regular.pricing_scheme?.fixed_price?.currency_code==='USD'&&
+   regular.pricing_scheme?.fixed_price?.value==='2.99'&&
+   s?.plan_overridden===false&&s?.quantity==='1',
   subscriptionCurrentlyCancelled:s?.status==='CANCELLED',
   observedFailedPaymentCount:Number.isSafeInteger(s?.billing_info?.failed_payments_count)&&
    s.billing_info.failed_payments_count>=0?
@@ -61,7 +68,7 @@ export async function runF16P05ReadOnlyDiagnostic({
   const data=await reader.read(sub)
   const summary=summarizeF16P05ReadOnlySnapshot(data)
   print(JSON.stringify(summary,null,2))
-  return summary.merchantReadSucceeded&&summary.currentPlanMatches299Monthly?0:1
+  return summary.merchantReadSucceeded&&summary.effectiveTermsConsistent?0:1
  }catch{
   warn('BLOCKED: PayPal Sandbox merchant read failed. No raw response, credentials, buyer data or reference IDs were printed.')
   return 2
