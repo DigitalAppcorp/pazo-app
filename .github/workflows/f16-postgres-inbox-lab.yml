@@ -151,3 +151,19 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/f16-preserved-lifecycle-events-synthetic.sql
           echo 'PASS F16: 8 preserved + 3 SALE, no grants, no production change'
+
+      - name: F16 draft private inbox reader RPC - disposable PostgreSQL only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$PGPASSWORD" = f14_synthetic_ci_only
+          test -z "$SUPABASE_DB_URL"
+          test -z "$DATABASE_URL"
+          echo 'Installing DRAFT-only RPC into disposable CI PostgreSQL (NOT hosted)'
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/queries/f16_read_verified_inbox_rpc_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-private-inbox-read-rpc-synthetic.sql
+          echo 'PASS F16: service-only inbox RPC with exact minimal data and deny-by-default roles'

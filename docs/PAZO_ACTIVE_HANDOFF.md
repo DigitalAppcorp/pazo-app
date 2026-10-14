@@ -30,6 +30,14 @@
 - Se implementó `sandboxReversalEvidence.mjs` con tests offline de refunds completos/parciales, `REVERSED` y reverso llegado **antes** del pago. Solo produce candidato **no acreditado** si PayPal merchant independiente ha relacionado evento/venta original y plan/monto exactos; nunca confía en el ID del webhook como ID de pago ni crea entitlements.
 - No existe adaptador desplegado que obtenga la prueba independiente real de refund; por tanto los cuatro eventos reales siguen pending, sin writes, ni reembolsos ficticios. Próximo gate: proveedor original sale/reversal read-only y RPC privada transaccional tras revisión legal. Documento `docs/PAZO_F16_SANDBOX_REVERSAL_EVIDENCE_GATE_20261014.md`.
 
+## F16 — LECTURA PRIVADA RPC PREPARADA, SOLO GITHUB/LAB (2026-10-14)
+
+- **Avance aprobado «ok sigamos»**: auditoría hosted mostró `4 inbox pending, 0 intents, 0 pagos, 0 reversals` y que aún **NO existe función lectora** de inbox con permisos restringidos. No se permite SELECT directo a `service_role`, `anon` ni `authenticated` sobre la tabla. El lector no concede premium.
+- `supabase/queries/f16_read_verified_inbox_rpc_DRAFT_DO_NOT_APPLY.sql` propone `public.f16_paypal_read_verified_inbox(text)`, `SECURITY DEFINER` sin search_path, dueño postgres, cuatro campos mínimos, `EXECUTE` solo `service_role`. Es **borrador, NO migración, NO instalado hosted**; migración definitiva exige `supabase migration new` y autorización PO específica.
+- `privateInboxReadAdapter.mjs` de solo servidor valida host PAZO fijo, referencia, forma estricta de 4 campos, gestión saneada de errores y compone `createF16ServerInboxGate`. En producción aún no se puede invocar: RPC alojada no existe.
+- Test Node sintético y lab PG17 descartable en CI prueban denegación `anon`/`authenticated`, sin `SELECT` directo a tabla, RLS forzado, nulos, ID malicioso y cero ledger/entitlements. Evidencia CI pendiente de verificar tras commit.
+- Siguiente gate: preparar operaciones de claim/lease/retry con transacciones, pruebas de concurrencia y retención; presentar aplicación SQL/Edge hosted solo con gate explícito. Los cuatro eventos reales siguen intactos en pending.
+
 ## 1. Modo de trabajo actual — solo Product Owner + ChatGPT
 
 El Product Owner **dio por terminado el experimento de coordinación con Codex** y ordenó continuar como antes, **directamente con ChatGPT como responsable técnico principal** (producto, arquitectura, implementación, GitHub, Supabase, pruebas, documentación y gates). **NO crear ni delegar nuevas tareas a Codex.** Si una acción exige físicamente su Chrome/Windows, facilitar al PO el comando o acción mínima, recibir el resultado y continuar nosotros. No pedir ni registrar secretos; no inferir autorización de su antigua delegación experimental.
