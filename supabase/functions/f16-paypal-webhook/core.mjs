@@ -25,7 +25,7 @@ const reply=(status,code,retryAfter=null)=>new Response(JSON.stringify({code}),{
   },
 })
 export function createSafeF16WebhookHandler({environment,webhookId,planId,verifySignature,inbox,
-  admissionGate=f16WorkerAdmissionGate}={}) {
+  admissionGate=f16WorkerAdmissionGate,globalAdmission=null}={}) {
   return async function handle(request) {
     if(request.method!=='POST') return reply(405,'method_not_allowed')
     // This F16 test integration is Sandbox-only until a separately approved Live gate.
@@ -80,6 +80,16 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
     const release=admissionGate.tryEnter()
     if(typeof release!=='function')return reply(503,'f16_worker_busy',5)
     try {
+      // Cross-isolate gate: a server-authenticated, durable, global budget.
+      // This is optional only for isolated core tests. The actual receiver ALWAYS
+      // constructs this adapter; if its RPC is missing it fails closed (503).
+      if(globalAdmission!==null) {
+        if(typeof globalAdmission?.tryAdmit!=='function')return reply(503,'f16_global_budget_unavailable',5)
+        let globallyApproved=false
+        try {globallyApproved=(await globalAdmission.tryAdmit())===true}
+        catch {return reply(503,'f16_global_budget_unavailable',5)}
+        if(!globallyApproved)return reply(503,'f16_global_budget_exhausted',5)
+      }
       let valid=false
       try {
         valid=(await verifySignature({headers:request.headers,event,rawBody:bytes,webhookId,environment}))===true
