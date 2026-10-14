@@ -60,3 +60,9 @@ El Product Owner ejecutó la lectura autenticada `GET /v1/notifications/webhooks
 **Interpretación:** PayPal reconoce el ID de webhook, pero el registro NO apunta exactamente a la URL canónica de la función existente en Supabase. No se conoce su URL real. No presupongas que es otra empresa o otro proyecto; una barra final u otro path también causan mismatch. Se amplió `inspectPazoWebhookDestination` para clasificar de forma cerrada la diferencia sin mostrar hostname/path/query/credenciales. El PO puede ejecutar el mismo `-Check Destination` tras actualizar el código para obtener `destinationCategory`.
 
 **Gate seguridad inalterado:** incluso si el destino es una simple variación de la ruta correcta, NO redirigir todavía notificaciones a `paypal-webhook` v30, porque la función activa escribe `profiles.is_founder` desde el estado de la suscripción y carece de conciliación de pagos/idempotencia. En todo caso, todo cambio PayPal, Supabase, secretos o despliegue requiere autorización separada.
+
+## Confirmación posterior del destino: PANEL ADMINISTRATIVO (2026-10-13)
+
+El PO indicó que la dirección del webhook Sandbox registrada en PayPal tiene `supabase.com/dashboard`. Este host y segmento corresponden al panel administrativo de Supabase, **no** a un endpoint de ejecución `*.supabase.co/functions/v1/<slug>`. No se mostró la URL completa, por lo que **no se infiere su ruta exacta ni sus posibles parámetros**. El resultado autenticado `different_host` es consistente.
+
+**El bloqueo de seguridad continúa:** NO reemplazar el destino por la URL de la función `paypal-webhook` v30, ya que podría actualizar `public.profiles.is_founder` incorrectamente; tampoco sumar eventos de venta/reembolso todavía. Crear y probar adaptador F16 con verificación de firma, referencia mínima en inbox durable y conciliación server-side; obtener autorización independiente para cambios SQL, secretos, despliegue y actualización **del mismo webhook Sandbox**.
