@@ -5,6 +5,16 @@
 
 **Estado actual: NO-GO para desplegar o cobrar.** Este documento distingue código testeado de operaciones reales. PR #44 DRAFT en `f13/section-titles-20261012`. Ninguna de estas tareas altera el backend alojado o PayPal por sí sola.
 
+
+## Gate adicional: receptor HTTP verificado, bloqueado para despliegue (2026-10-14 UTC)
+
+- **Código listo para QA offline, no desplegado:** `supabase/functions/f16-paypal-webhook/receiver.mjs` ensambla el manejador `core.mjs`, el verificador real de firma vía `POST https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature` y el adaptador de registro durable `f16_paypal_record_verified_event`, ahora **instalado y verificado** en Supabase alojado tras autorización PO de solo SQL. Sandbox es obligatorio; faltan variables, credenciales, plan/webhook ID o proyecto fijo → HTTP 503 y ninguna operación remota.
+- **Protección contra payload DoS:** `core.mjs` limita lectura incremental del body a 65,536 bytes aunque `Content-Length` no exista, conserva bytes originales para firma, rechaza JSON/eventos inválidos, y no reconoce entrega si la verificación falla o el RPC privado no confirma durabilidad. No guarda payload ni datos de persona.
+- **Punto de entrada Edge creado, cerrado:** `supabase/functions/f16-paypal-webhook/index.ts`; barrera de código `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`. Se añadió `[functions.f16-paypal-webhook]` en `supabase/config.toml`, con **`enabled=false`** y `verify_jwt=false` solo porque los webhooks externos no traen JWT y la aplicación debe comprobar firmas PayPal. No cambiar ninguno de estos bloqueos hasta gate de despliegue separado.
+- **Pruebas:** `f16WebhookReceiverComposition.test.mjs` comprueba integración completa simulada de OAuth PayPal, respuesta `SUCCESS`/firma inválida, escritura limitada, duplicado, fallos DB, live-vs-sandbox, certificado adversarial y cuerpo fragmentado excesivo. `f16WebhookDeploymentGate.test.mjs` bloquea regresión del latch y la configuración; todas las pruebas F16 se ejecutan en CI por `test:f16:synthetic`.
+- **Auditoría externa read-only de funciones alojadas:** sigue existiendo `paypal-webhook` v30 antiguo; **no existe ninguna función Edge desplegada** con slug `f16-paypal-webhook`. El webhook Sandbox sigue mal dirigido; no modificarlo aún.
+- **NO-GO persiste:** falta confirmar firma con envío real de PayPal Sandbox, instalar secretos mediante flujo aprobado, despliegue controlado de receptor (primero inerte), definir reversos y reconciliación periódica, throttling/rate limits y atribución de entorno, completar checkout idempotente y criterios legales/privacidad para registros financieros. **La autorización del PO anterior se limitó a las dos migraciones SQL y no concede autorización para activar Edge Functions, costos/infra ni PayPal.**
+
 ## Implementado en GitHub (aún no activado)
 
 - **Autenticación:** `verifiedAuthOwner.mjs` obtiene el owner mediante `supabase.auth.getUser(token)` en el servidor, rechaza sesión anónima, token inválido y suplantación del owner enviado por cliente. `verifySandboxSubscriptionOwner.mjs` compone la identidad Auth con la intención privada y la consulta real de suscripción PayPal mediante `paypalSandboxTransactions.mjs`. Tests con mocks/HTTP sintético; aún no existe endpoint instalado que use una sesión de verdad.
