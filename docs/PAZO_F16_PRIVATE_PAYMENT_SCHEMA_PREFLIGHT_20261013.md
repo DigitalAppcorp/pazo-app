@@ -1,5 +1,8 @@
 # PAZO F16 — Preflight para esquema privado de pagos (sin aplicar)
 
+**ACTUALIZACIÓN VERIFIED HOSTED (2026-10-14 UTC):** el Product Owner autorizó y se aplicaron únicamente las dos migraciones F16 en Supabase `mrybvqdebbgcayuvgkkr`; tablas privadas de eventos, intenciones, pagos y reversos están instaladas, vacías (0 filas), con RLS forzada y RPC de servidor restringidas. Versiones alojadas: `20261014042616_f16_private_verified_event_inbox.sql` y `20261014042646_f16_private_intents_financial_ledger.sql`. NO se desplegaron Edge Functions, NO se modificó PayPal/webhook ni se activaron cobros, períodos pagados o membresías. Las afirmaciones históricas inferiores «NO APLICADAS» se refieren al momento anterior a este gate; NO se deben tratar como estado actual. Retención de ledger e intenciones pendiente.
+
+
 **Fecha:** 2026-10-13. **Estado:** diseño propuesto, no migración, no autorización SQL. Rama `f13/section-titles-20261012`, PR #44 DRAFT. No publicar, desplegar ni conceder entitlement.
 
 ## Evidencia READ ONLY del Supabase alojado
@@ -96,7 +99,7 @@ Quedaron realmente ejecutados en la base aislada: borrador SQL de inbox, tests d
 
 ## Migración versionada CLI creada y probada — nuevo gate 2026-10-14 UTC
 
-- **Supabase CLI real** versión `2.120.0` ejecutó en GitHub Actions (sin conexión DB): `supabase migration new f16_private_verified_event_inbox`, produciendo literalmente `supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql`. Evidencia [workflow #38505704285](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505704285), `completed/success`, salida `CLI_GENERATED_F16_FILENAME=20261014032018_f16_private_verified_event_inbox.sql`. El archivo se incorporó al repositorio en PR #44; NO se aplicó alojado.
+- **Supabase CLI real** versión `2.120.0` ejecutó en GitHub Actions (sin conexión DB): `supabase migration new f16_private_verified_event_inbox`, produciendo literalmente `supabase/migrations/20261014042616_f16_private_verified_event_inbox.sql`. Evidencia [workflow #38505704285](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505704285), `completed/success`, salida `CLI_GENERATED_F16_FILENAME=20261014042616_f16_private_verified_event_inbox.sql`. El archivo se incorporó al repositorio en PR #44; NO se aplicó alojado.
 - La migración contiene **exactamente el DDL verificado del borrador SQL del laboratorio**, sin guardas de sesión descartable y sin `\set` de psql. Se añadió prueba de paridad a `src/features/supporter/testing/f16PostgresInboxSqlStatic.test.mjs`; el CI del commit `c89ec0d` pasó: [#38505937212](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505937212).
 - **PASS PostgreSQL real de la MIGRACIÓN versionada**, no solo del borrador: [#38505817725](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505817725) y repetición [#38505937104](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505937104), ambas exitosas. Aplicó la migración únicamente en la base `f14_synthetic` temporal, ejecutó tests SQL RLS/ACL/idempotencia y validó 32 llamadas simultáneas (4 únicas).
 - La infraestructura de nombre CLI era temporal y se eliminó el workflow de preflight después de obtener y comprobar el nombre generado para evitar ejecuciones/costo repetitivo. Se mantiene el workflow de PostgreSQL descartable para regresiones.
