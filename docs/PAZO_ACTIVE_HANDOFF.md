@@ -2,6 +2,13 @@
 
 > **LEER PRIMERO.** Este es el estado operativo, no una cronología. Historial integral anterior preservado en Git en commit `61eb2fd2` (versión previa de este archivo), y alcance visual F13 en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. AI = ejecutor técnico principal; usuario = Product Owner. Seguir reglas de `AGENTS.md` y Project Brain OS canónico v1.4.1 en `DigitalAppcorp/project-brain-os`.
 
+## F16 — SECRETS SANDBOX AUTORIZADOS, INGRESO UI PENDIENTE (2026-10-13 LA)
+
+- **PO autorizado:** usuario respondió «sí» para configurar en Supabase las cinco variables aisladas `PAZO_F16_PAYPAL_*` (Sandbox). No cubre activar Edge/webhook, modificar PAYPAL_* legado, desplegar otra versión, cobrar ni crear membresías.
+- **No se han escrito secretos:** el conector Supabase de ChatGPT **no ofrece** herramientas para listar o cambiar Edge Secrets. Se debe introducir Client ID/Secret directamente en Supabase Dashboard, nunca en chat o GitHub. Instrucciones exactas: `docs/PAZO_F16_SANDBOX_SECRETS_OPERATOR_GATE_20261013.md`, enlaza el proyecto PAZO y Developer PayPal. La autorización de configurar está registrada, pero **estado OPERATIVO PENDIENTE DE INTERVENCIÓN DEL PO**.
+- Variables públicas conocidas: `PAZO_F16_PAYPAL_ENV=sandbox`, `PAZO_F16_PAYPAL_WEBHOOK_ID=6N7889790V1467139`, `PAZO_F16_PAYPAL_PLAN_ID=P-14V25407JP6850922NLHMDKI`. Se exige Client ID/Secret **de la misma aplicación merchant Sandbox** que posee el plan/webhook. No crear apps nuevas ni usar credenciales Live.
+- Docs Supabase actuales permiten agregar secrets vía Dashboard Edge Function Secrets, rol Owner/Admin. `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` se inyectan y NO deben crearse. Los `PAYPAL_*` genéricos pertenecen a la función vieja v30: NO cambiarlos. El código F16 de rama está namespaced y probado; Edge hosted todavía versión 1 inerte HTTP 503. **Siguiente paso:** PO confirma «cinco nombres guardados» sin revelar valores; entonces continuar preflight/diagnóstico sin alterar funciones hasta gate específico.
+
 ## F16 — AISLAMIENTO DE SECRETOS v30/F16 (2026-10-13 LA)
 
 - **AUDITORÍA READ ONLY del código alojado `paypal-webhook` v30:** lee las cinco variables **genéricas** `PAYPAL_ENV`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID`, `PAYPAL_PLAN_ID`. Secrets de Supabase Edge tienen alcance global dentro del proyecto. Cambiarlas para F16 alteraría potencialmente el comportamiento de la función antigua; especialmente PAYPAL_ENV, que v30 usa para seleccionar Sandbox/Live. **PROHIBIDO modificar esas variables genéricas** durante F16.
