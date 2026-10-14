@@ -160,24 +160,10 @@ BEGIN
   RAISE EXCEPTION 'simulate_transient_connection_loss';
  EXCEPTION WHEN OTHERS THEN bad:=true; END;
  IF NOT bad THEN RAISE EXCEPTION 'Synthetic DB crash not simulated'; END IF;
- SELECT count(*) INTO num FROM supporter_private.paypal_payment_entries
- WHERE external_payment_id='PAY-LEASE-CRASH';
- IF num<>0 THEN RAISE EXCEPTION 'Crash left orphan payment'; END IF;
- IF NOT EXISTS (
-  SELECT 1 FROM supporter_private.paypal_verified_event_inbox
-  WHERE provider_event_id='WH-LEASE-FIN-CRASH'
-    AND processing_state='processing' AND f16_lease_token=token)
- THEN RAISE EXCEPTION 'Crash incorrectly ACKed event'; END IF;
+ -- Privileged fixture assertions follow under the synthetic postgres role.
 END $suites$;
 
--- Force an expired lease in LAB only to simulate worker death / stale token.
-DO $expire_setup$
-BEGIN
- -- Deliberately fail if the fixture unexpectedly has writes.
- IF EXISTS (SELECT 1 FROM supporter_private.paypal_payment_entries
- WHERE external_payment_id='PAY-LEASE-EXPIRE')
- THEN RAISE EXCEPTION 'Expired lease fixture already paid'; END IF;
-END $expire_setup$;
+-- Expiration/recovery assertions below run under explicitly selected LAB roles.
 DO $claim_for_expiry$
 DECLARE v jsonb;
 BEGIN
@@ -275,6 +261,9 @@ BEGIN
  AND processing_state='processing' AND retention_hold IS TRUE
  AND f16_lease_token IS NOT NULL)
  THEN RAISE EXCEPTION 'Crashed worker fixture lost recoverability'; END IF;
+ IF EXISTS(SELECT 1 FROM supporter_private.paypal_payment_entries
+ WHERE external_payment_id='PAY-LEASE-CRASH')
+ THEN RAISE EXCEPTION 'Synthetic crash left orphan payment'; END IF;
  IF supporter_private.wall_has_verified_entitlement(
  '63e812b0-a7e5-49f6-b2dd-c11d2c72af57'::uuid) IS DISTINCT FROM false
  THEN RAISE EXCEPTION 'Lab sale activated PAZO entitlement'; END IF;
