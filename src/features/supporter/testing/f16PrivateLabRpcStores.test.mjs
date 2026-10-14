@@ -19,8 +19,8 @@ const results={
  f16_lab_recover_expired:1,
  f16_lab_read_bound_intent_by_subscription:intent,
  f16_lab_read_known_reversal_ids:[],
- f16_lab_commit_claimed_sale:'inserted_uncredited',
- f16_lab_commit_claimed_reversal:'reversal_recorded',
+ f16_lab_commit_claimed_sale_v2:'inserted_uncredited',
+ f16_lab_commit_claimed_refund:'refund_recorded_full',
 }
 function setup(patch={},fail=false){
  const calls=[]
@@ -45,14 +45,16 @@ test('exact RPC names, typed inputs and owner projection; never legacy RPC',asyn
  }),'inserted_uncredited')
  assert.equal(await x.stores.financeStore.commitClaimedReversal({
   eventId:EVENT,leaseToken:TOKEN,candidate:{
-   provider:'paypal',externalPaymentId:SALE,kind:'refunded',verifiedAt:'2026-10-14T11:16:00Z',
+   provider:'paypal',externalPaymentId:SALE,externalSubscriptionId:SUB,
+   externalRefundId:'REFUND-F16-READ123',refundMinorUnits:299,
+   providerStatus:'REFUNDED',kind:'refunded',verifiedAt:'2026-10-14T11:16:00Z',
   },
- }),'reversal_recorded')
+ }),'refund_recorded_full')
  assert.deepEqual(x.calls.map(c=>c.name),[
   'f16_lab_claim_verified_inbox','f16_lab_read_bound_intent_by_subscription',
   'f16_lab_read_known_reversal_ids','f16_lab_release_claim',
-  'f16_lab_recover_expired','f16_lab_commit_claimed_sale',
-  'f16_lab_commit_claimed_reversal'])
+  'f16_lab_recover_expired','f16_lab_commit_claimed_sale_v2',
+  'f16_lab_commit_claimed_refund'])
  assert.deepEqual(x.calls[5].args,{
   p_event_id:EVENT,p_lease_token:TOKEN,p_payment_id:SALE,
   p_subscription_id:SUB,p_owner_id:UUID,p_plan_id:PLAN,p_minor:299,
@@ -109,7 +111,7 @@ test('service errors must be sanitized, unknown finance response never marked su
  const x=setup({},true)
  await assert.rejects(x.stores.leaseStore.claim(REF),e=>{
   assert.equal(e.message,'f16_private_rpc_unavailable');return true})
- const y=setup({f16_lab_commit_claimed_sale:'already_processed'})
+ const y=setup({f16_lab_commit_claimed_sale_v2:'already_processed'})
  await assert.rejects(y.stores.financeStore.commitClaimedSale({
   eventId:EVENT,leaseToken:TOKEN,candidate,planId:PLAN,
  }),/contract_mismatch/)
@@ -158,7 +160,7 @@ test('flow with concrete lab RPC adapters remains fail closed without authoritat
  ])
 })
 
-test('partial refund cannot reach finance RPC until the ledger supports each refund ID',async()=>{
+test('separate refund ID and amount required before any refund RPC',async()=>{
  const x=setup()
  await assert.rejects(x.stores.financeStore.commitClaimedReversal({
   eventId:EVENT,leaseToken:TOKEN,candidate:{
@@ -167,4 +169,16 @@ test('partial refund cannot reach finance RPC until the ledger supports each ref
   },
  }),/invalid_request/)
  assert.deepEqual(x.calls,[])
+ const y=setup({f16_lab_commit_claimed_refund:'refund_recorded_partial'})
+ const outcome=await y.stores.financeStore.commitClaimedReversal({
+  eventId:EVENT,leaseToken:TOKEN,candidate:{
+   provider:'paypal',externalPaymentId:SALE,externalSubscriptionId:SUB,
+   externalRefundId:'REFUND-F16-100',refundMinorUnits:100,
+   kind:'partially_refunded',providerStatus:'PARTIALLY_REFUNDED',
+   verifiedAt:'2026-10-14T11:16:00Z',
+  },
+ })
+ assert.equal(outcome,'refund_recorded_partial')
+ assert.equal(y.calls[0].name,'f16_lab_commit_claimed_refund')
+ assert.equal(y.calls[0].args.p_refund_minor,100)
 })
