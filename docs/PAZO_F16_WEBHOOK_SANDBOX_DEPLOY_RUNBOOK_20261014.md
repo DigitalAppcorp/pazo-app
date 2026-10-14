@@ -2,6 +2,14 @@
 
 **Estado:** DESPLIEGUE INERTE AUTORIZADO, EJECUTADO Y VERIFICADO; ACTUALIZACIÓN/ACTIVACIÓN DE PAYPAL NO-GO. Se requiere GO independiente para secretos, activar receptor, cambiar webhook y permitir pagos.
 
+## V7 namespaced inerte: ejecutado con aprobación PO (2026-10-14 UTC)
+
+- Autorización PO **limitada** a desplegar el código F16 que lee `PAZO_F16_PAYPAL_*`, conservando `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` y comprobar HTTP 503. **Ejecutado**, Edge F16 instalada como **versión 7** en `mrybvqdebbgcayuvgkkr` con seis archivos, incluyendo `sandboxConfigPreflight.mjs`.
+- `get_edge_function` confirmó en la versión alojada que el latch sigue desactivado y que `receiver.mjs` importa el preflight que exige claves F16 aisladas. Las cinco variables se ingresaron según confirmación del PO, **pero no se leyó ningún secreto ni se verificó su validez con OAuth**.
+- Prueba HTTP de extremo externo **PASS**: [GitHub Actions #38518547361](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38518547361), GET y POST vacío: `503` + `f16_receiver_not_released`. Sin payload, firmas ni comprador; ninguna operación de PayPal. Se eliminó el workflow de un solo uso tras PASS.
+- Postflight: otras Edge alojadas en `paypal-webhook` v35, `f14-moderation-purge` v47 y `f14-moderation-reconcile` v34, sin alterar; F16 inbox/intents/pagos/reversos siguen 0 filas, sin beneficios (`wall_has_verified_entitlement(NULL)=false`). El receptor **no procesa webhooks**.
+- **Gate pendiente:** mecanismo de verificación OAuth Sandbox no invasivo y separado, bajo nueva autorización, sin recibir eventos reales ni conceder beneficios. No se tocaron ni autorizaron webhook PayPal, secretos, Live, cobros o membresías.
+
 ## Gate PO: despliegue INERTE ejecutado, resto sigue NO-GO (2026-10-14 UTC)
 
 **Aprobación PO específica consumida:** desplegar SOLAMENTE `f16-paypal-webhook` desactivada para comprobar respuesta HTTP 503. Ejecutado en Supabase Free sin nuevo proyecto/plan/adicionales. La nueva Edge aparece `ACTIVE v1` (ID `b0da866f-aae3-4785-99a3-6a6314e3c3c8`), pero su `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` cancela cualquier solicitud antes de leer secretos o webhooks. `supabase/config.toml enabled=false` sigue para evitar despliegues automáticos; `verify_jwt=false` solo porque el proveedor no lleva JWT y la futura lógica tendrá que verificar firma.
