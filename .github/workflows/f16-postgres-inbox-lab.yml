@@ -184,3 +184,17 @@ jobs:
             -f supabase/tests/supporter/f16-inbox-claim-lease-synthetic.sql
           node scripts/f16-inbox-lease-concurrency.mjs
           echo 'PASS F16: ACID claims, token ownership, backoff, expired recovery, no money'
+
+      - name: F16 lease-owned atomic finance and concurrency - PG17 lab only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_lease_bound_finance_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-lease-bound-finance-synthetic.sql
+          node scripts/f16-lease-bound-finance-concurrency.mjs
+          echo 'PASS F16: lease-owned sale/reversal atomicity and concurrent replay; no hosted use'
