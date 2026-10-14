@@ -5,7 +5,7 @@ import {inspectPazoWebhookDestination,PAZO_EXPECTED_WEBHOOK_URL,PAZO_SANDBOX_WEB
 
 test('matches exact expected Supabase function URL but never prints callback URL',()=>{
  const r=inspectPazoWebhookDestination({id:PAZO_SANDBOX_WEBHOOK_ID,url:PAZO_EXPECTED_WEBHOOK_URL})
- assert.deepEqual(r,{ok:true,status:'destination_matches',webhookIdMatches:true,destinationMatches:true})
+ assert.deepEqual(r,{ok:true,status:'destination_matches',webhookIdMatches:true,destinationMatches:true,destinationCategory:'exact_match'})
  assert.equal(JSON.stringify(r).includes('supabase.co'),false)
 })
 test('rejects altered ID, host, path and secret query strings',()=>{
@@ -64,4 +64,30 @@ test('script classifies OAuth 401, never calls webhook endpoint',()=>{
  const r=run('oauth_failed')
  assert.equal(r.status,2,r.stderr)
  assert.match(r.stderr,/oauth_token failed: HTTP 401 \(invalid_client\)/)
+})
+
+test('categorizes callback mismatch without exposing any full host/path/query',()=>{
+ const cases=[
+  [PAZO_EXPECTED_WEBHOOK_URL+'/', 'trailing_slash'],
+  ['https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/other','same_project_different_path'],
+  ['https://some-other-project.supabase.co/functions/v1/paypal-webhook','different_supabase_project'],
+  ['https://callback.other-company.example/hook','different_host'],
+  ['http://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook','non_https'],
+  [PAZO_EXPECTED_WEBHOOK_URL+'?token=DO_NOT_EXPOSE', 'has_extra_parameters_or_credentials'],
+  ['https://username:password@mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook','has_extra_parameters_or_credentials'],
+  ['', 'invalid_or_missing'],
+ ]
+ for(const [url,category] of cases) {
+   const r=inspectPazoWebhookDestination({id:PAZO_SANDBOX_WEBHOOK_ID,url})
+   assert.equal(r.ok,false,url)
+   assert.equal(r.destinationCategory,category,url)
+   assert.equal(JSON.stringify(r).includes(url),false)
+   assert.equal(JSON.stringify(r).includes('DO_NOT_EXPOSE'),false)
+   assert.equal(JSON.stringify(r).includes('password'),false)
+ }
+})
+test('never reports URL category for wrong webhook ID',()=>{
+ const r=inspectPazoWebhookDestination({id:'WRONG',url:PAZO_EXPECTED_WEBHOOK_URL+'?secret=123'})
+ assert.equal(r.destinationCategory,'not_available')
+ assert.equal(r.status,'webhook_id_mismatch')
 })
