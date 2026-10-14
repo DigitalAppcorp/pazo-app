@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {spawnSync} from 'node:child_process'
+import {readFileSync} from 'node:fs'
 import {PAZO_SANDBOX_WEBHOOK_ID} from './paypalSandboxWebhookDestinationContract.mjs'
 import {PAZO_REQUIRED_PAYPAL_EVENTS} from './paypalSandboxWebhookContract.mjs'
 import {PAZO_F16_EXPECTED_WEBHOOK_URL} from './paypalSandboxResourceContract.mjs'
@@ -113,4 +114,11 @@ test('local affirmative confirmation is mandatory',()=>{
  const r=simulate('no_approval')
  assert.equal(r.status,1)
  assert.match(r.stderr,/explicit_local_confirmation_required/)
+})
+
+test('PowerShell ApplyWebhook is blocked until hosted eleven-event backend has separate release approval',()=>{
+ const ps=readFileSync('scripts/f16-paypal-sandbox-plan.ps1','utf8')
+ assert.match(ps,/\$F16ElevenEventBackendReady = \$false/)
+ assert.match(ps,/if \(\$Check -eq 'ApplyWebhook' -and -not \$F16ElevenEventBackendReady\)/)
+ assert.match(ps,/11-event receiver and inbox migration are not installed/)
 })
