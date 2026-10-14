@@ -76,9 +76,14 @@ export function auditF16P05ProposedCycleMapping({
  // record of paid time; overlapping proposals are ambiguous even if a
  // sale happens to have the correct price.
  periods.sort((a,b)=>a[0]-b[0])
- for(let i=1;i<periods.length;i++)
-  if(periods[i][0]<periods[i-1][1])
+ let latestEnd=Number.NEGATIVE_INFINITY
+ for(const [start,end] of periods){
+  // Use the maximum previous end, not only the immediately preceding
+  // interval. A long parent period can overlap multiple shorter periods.
+  if(start<latestEnd)
    return deny('overlapping_candidate_cycle_intervals')
+  latestEnd=Math.max(latestEnd,end)
+ }
  if(!complete)return deny('no_proposed_cycle_evidence')
  if(unresolved)return deny('sale_or_cycle_origin_evidence_missing',{
   candidateCount:complete,uncertainCount:unresolved,
