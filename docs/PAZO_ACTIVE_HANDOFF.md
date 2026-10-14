@@ -2,6 +2,14 @@
 
 > **LEER PRIMERO.** Este es el estado operativo, no una cronología. Historial integral anterior preservado en Git en commit `61eb2fd2` (versión previa de este archivo), y alcance visual F13 en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. AI = ejecutor técnico principal; usuario = Product Owner. Seguir reglas de `AGENTS.md` y Project Brain OS canónico v1.4.1 en `DigitalAppcorp/project-brain-os`.
 
+## F16 — Nuevo receptor PayPal Sandbox en código, NO desplegado (2026-10-14 UTC)
+
+- Continuación solicitada PO: implementar en GitHub el **receptor seguro de webhooks**, sin autorización nueva para despliegue/secretos/PayPal. Rama `f13/section-titles-20261012`; PR #44 DRAFT, sin merge.
+- Nuevos `supabase/functions/f16-paypal-webhook/receiver.mjs`, `index.ts`, pruebas `src/features/supporter/testing/f16WebhookReceiverComposition.test.mjs` y `f16WebhookDeploymentGate.test.mjs`. Composición Sandbox-only de validación de firma PayPal + RPC de inbox durable. El `core.mjs` ahora limita mediante streaming bodies de hasta 65,536 bytes aunque el remitente no declare su longitud. Efectos: **solo inserción de ID/tipo de evento verificado, sin PII, founder, ledger ni entitlement**.
+- **Protección doble sin habilitar:** `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` en `index.ts`, `enabled=false` en `supabase/config.toml`. `verify_jwt=false` es requisito de firma de proveedor externo; no significa que esté publicado. No activar latch, permitir despliegue ni modificar host PayPal sin aprobación separada PO.
+- Auditoría hosted read-only `list_edge_functions`: `f16-paypal-webhook` **NO está desplegada**, antigua `paypal-webhook` v30 sigue presente/insegura para entitlements, sin cambios. Dos migraciones F16 sí aplicadas previamente y verificadas con 0 registros. Webhook existente `6N7889790V1467139` **no ha sido reconfigurado**.
+- Gate siguiente: comprobar CI general y laboratorio en HEAD, auditoría de firma real Sandbox y configuración de secretos, reintentos/abuso y bloqueo de destinatario; despliegue de receptor inicialmente inerte con aprobación PO nueva. La política de conservación financiera, checkout idempotente, reembolsos y períodos de cobertura quedan pendientes antes de activar membresías. Detalle: `docs/PAZO_F16_SANDBOX_RELEASE_GATE_20261014.md`.
+
 ## F16 — MIGRACIONES HOSTED APLICADAS CON AUTORIZACIÓN PO (2026-10-14 UTC)
 
 - **GATE APROBADO explícitamente:** el PO autorizó aplicar **únicamente** las dos migraciones privadas F16 en el Supabase alojado `mrybvqdebbgcayuvgkkr`, con tablas inicialmente vacías y **sin** activar cobros, membresías, funciones Edge ni modificar webhook PayPal. Se aplicaron ambas mediante el conector oficial `apply_migration`; **SUCCESS**, y verificadas luego mediante SELECT read-only.
