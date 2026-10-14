@@ -167,3 +167,20 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/f16-private-inbox-read-rpc-synthetic.sql
           echo 'PASS F16: service-only inbox RPC with exact minimal data and deny-by-default roles'
+
+      - name: F16 isolated lease claim retry recovery race - disposable PostgreSQL only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/queries/f16_inbox_claim_lease_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-inbox-claim-lease-synthetic.sql
+          node scripts/f16-inbox-lease-concurrency.mjs
+          echo 'PASS F16: ACID claims, token ownership, backoff, expired recovery, no money'
