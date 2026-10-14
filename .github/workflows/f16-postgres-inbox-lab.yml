@@ -113,4 +113,6 @@ jobs:
             -f supabase/tests/supporter/f16-subscription-intent-rpc-synthetic.sql
           PAZO_F16_MIGRATION_QA=true node scripts/f16-postgres-ledger-concurrency.mjs
           PAZO_F16_MIGRATION_QA=true node scripts/f16-postgres-owner-binding-concurrency.mjs
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-atomic-payment-event-migration-synthetic.sql
           echo 'PASS F16: versioned private owner/ledger migration, RPC ACLs and concurrency in disposable PostgreSQL'
