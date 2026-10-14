@@ -4,6 +4,8 @@
 
 ## F16 — Nuevo receptor PayPal Sandbox en código, NO desplegado (2026-10-14 UTC)
 
+**Runbook operativo preparado, sin ejecución:** `docs/PAZO_F16_WEBHOOK_SANDBOX_DEPLOY_RUNBOOK_20261014.md`, separa autorización para secretos/despliegue inerte/activación/cambio del webhook Sandbox, pruebas reales y rollback. Mantener nuevo slug sin desplegar hasta GO PO; nunca redirigir pagos a `paypal-webhook` v30.\n\n
+
 - Continuación solicitada PO: implementar en GitHub el **receptor seguro de webhooks**, sin autorización nueva para despliegue/secretos/PayPal. Rama `f13/section-titles-20261012`; PR #44 DRAFT, sin merge.
 - Nuevos `supabase/functions/f16-paypal-webhook/receiver.mjs`, `index.ts`, pruebas `src/features/supporter/testing/f16WebhookReceiverComposition.test.mjs` y `f16WebhookDeploymentGate.test.mjs`. Composición Sandbox-only de validación de firma PayPal + RPC de inbox durable. El `core.mjs` ahora limita mediante streaming bodies de hasta 65,536 bytes aunque el remitente no declare su longitud. Efectos: **solo inserción de ID/tipo de evento verificado, sin PII, founder, ledger ni entitlement**.
 - **Protección doble sin habilitar:** `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` en `index.ts`, `enabled=false` en `supabase/config.toml`. `verify_jwt=false` es requisito de firma de proveedor externo; no significa que esté publicado. No activar latch, permitir despliegue ni modificar host PayPal sin aprobación separada PO.
