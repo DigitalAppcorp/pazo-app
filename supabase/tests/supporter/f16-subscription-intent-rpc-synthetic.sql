@@ -91,8 +91,15 @@ BEGIN
  IF record->>'external_subscription_id' <> 'I-MOCK-OWNER' OR
     record->>'state' <> 'bound'
  THEN RAISE EXCEPTION 'persisted subscription owner mismatch'; END IF;
- IF EXISTS(SELECT 1 FROM supporter_private.paypal_subscription_intents
- WHERE intent_id=intent AND owner_id=other)
+ -- A service-role client must NOT select private schema tables directly;
+ -- the narrow service-only RPC is the sole sanctioned read path.
+ rejected:=false;
+ BEGIN
+  PERFORM 1 FROM supporter_private.paypal_subscription_intents
+   WHERE intent_id=intent AND owner_id=other;
+ EXCEPTION WHEN insufficient_privilege THEN rejected:=true; END;
+ IF NOT rejected THEN RAISE EXCEPTION 'service_role can read private table directly'; END IF;
+ IF record->>'owner_id' IS DISTINCT FROM owner::text
  THEN RAISE EXCEPTION 'stolen subscription owner'; END IF;
  RAISE NOTICE 'PASS F16: service-only private RPC create/read/bind cannot reassign subscription';
 END $service$;
