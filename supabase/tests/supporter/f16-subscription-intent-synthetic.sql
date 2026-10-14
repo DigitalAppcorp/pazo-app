@@ -30,7 +30,9 @@ DECLARE
  plan text := 'P-14V25407JP6850922NLHMDKI';
  result text;
  denied boolean;
+ payment_count_before bigint;
 BEGIN
+ SELECT count(*) INTO payment_count_before FROM supporter_private.paypal_payment_entries;
  INSERT INTO supporter_private.paypal_subscription_intents
   (intent_id,owner_id,plan_id) VALUES
   ('intent-a-abcdefghijklmnop',a,plan),
@@ -88,7 +90,7 @@ BEGIN
  IF EXISTS(SELECT 1 FROM supporter_private.paypal_subscription_intents
            WHERE owner_id=b AND external_subscription_id IS NOT NULL)
  THEN RAISE EXCEPTION 'Other owner acquired subscription'; END IF;
- IF EXISTS(SELECT 1 FROM supporter_private.paypal_payment_entries)
+ IF (SELECT count(*) FROM supporter_private.paypal_payment_entries) IS DISTINCT FROM payment_count_before
  THEN RAISE EXCEPTION 'Intent binding wrote payment'; END IF;
  RAISE NOTICE 'PASS F16 ownership: cross-owner, forged custom_id, wrong plan, replay and conflicting subscription denied';
 END $cases$;
