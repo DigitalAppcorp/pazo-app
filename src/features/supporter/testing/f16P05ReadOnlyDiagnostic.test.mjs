@@ -74,6 +74,7 @@ test('P05 validated merchant read produces sanitized diagnostic only and never g
  assert.equal(data.environment,'sandbox')
  assert.equal(data.merchantReadSucceeded,true)
  assert.equal(data.currentPlanMatches299Monthly,true)
+ assert.equal(data.effectiveTermsConsistent,true)
  assert.equal(data.observedFailedPaymentCount,2)
  assert.equal(data.retryScheduled,true)
  assert.equal(data.billingPeriodProven,false)
@@ -101,6 +102,25 @@ test('P05 merchant mismatch does not fabricate a period or leak a payer',async()
  assert.equal(out.mayGrantEntitlement,false)
  assert.equal(out.paidThrough,null)
  assert.equal(lines.join('').includes('private-buyer@example.com'),false)
+})
+test('P05 valid generic plan cannot report PASS for overridden, missing flag or multi-quantity subscription',async()=>{
+ for(const changes of [
+  {plan_overridden:true},{plan_overridden:undefined},{quantity:'2'},
+  {quantity:undefined},
+ ]){
+  const output=[]
+  const code=await runF16P05ReadOnlyDiagnostic({
+   env:ENV,
+   readerFactory:()=>({read:async()=>snapshot(changes)}),
+   print:x=>output.push(x),warn:x=>output.push(x),
+  })
+  assert.equal(code,1)
+  const details=JSON.parse(output.join(''))
+  assert.equal(details.currentPlanMatches299Monthly,true)
+  assert.equal(details.effectiveTermsConsistent,false)
+  assert.equal(details.mayGrantEntitlement,false)
+  assert.equal(details.paidThrough,null)
+ }
 })
 test('P05 API failure can only emit a generic sanitized blocking message',async()=>{
  const logged=[]
