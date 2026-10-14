@@ -134,6 +134,16 @@ test('partial refund is an evidence-only ledger candidate after separate refund 
  assert.equal(x.calls.includes('commit_reversal'),true)
  assert.equal(x.calls.at(-1),'commit_reversal')
 })
+test('final 199-cent refund after earlier partial can report cumulative REFUNDED',async()=>{
+ const x=setup({kind:refundRef.eventType,txStatus:'REFUNDED',
+   refund:{refundMinorUnits:199}})
+ const result=await x.flow.process(refundRef,WINDOW)
+ assert.equal(result.recorded,true)
+ assert.equal(result.entitlement,false)
+ assert.equal(result.reason,'refund_recorded_full')
+ assert.equal(x.calls.at(-1),'commit_reversal')
+})
+
 test('refund original mismatch, pending refund, history ambiguity and event spoof fail closed',async()=>{
  for(const change of [
   {refund:{originalSaleId:'DIFFERENT'}},
