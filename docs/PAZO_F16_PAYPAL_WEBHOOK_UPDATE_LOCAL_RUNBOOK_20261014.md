@@ -1,5 +1,13 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## Actualización prioritaria: conservar ocho eventos antes de aplicar PayPal PATCH (2026-10-14)
+
+La salida local del PO identificó los dos eventos extras como `BILLING.SUBSCRIPTION.CREATED` y `BILLING.SUBSCRIPTION.RE-ACTIVATED`. Son tipos del catálogo PayPal Sandbox; deben conservarse además de los seis originales. El PATCH correcto, una vez autorizado el backend, será **8 eventos existentes + 3 PAYMENT.SALE.* = 11**, sin borrar eventos ni crear webhooks.
+
+El receptor alojado F16 v12 y el RPC de inbox PostgreSQL solo permiten los nueve tipos originalmente previstos. Por lo tanto **NO REDIRIGIR AHORA**: dos eventos firmados quedarían `200 verified_unhandled_event` sin almacenamiento persistente. GitHub prepara `20261014085430_f16_preserve_two_subscription_lifecycle_events.sql` (NO APLICADA) y receptor con 11 tipos para un gate PO independiente. `scripts/f16-paypal-sandbox-plan.ps1` tiene `$F16ElevenEventBackendReady=$false`; `-Check ApplyWebhook` se bloquea sin pedir credenciales. Solo `-Check Resources` permanece permitido.
+
+Después de GO SQL y GO Edge (con pruebas y auditoría read-only, no PayPal), quitar y probar el latch; entonces hacer la modificación **ya autorizada** mediante un único PATCH local 8→11, con GET postflight y sin retry automático ante incertidumbre. Ver `docs/PAZO_F16_ELEVEN_EVENT_BACKEND_GATE_20261014.md`. El destino previo apunta a host ajeno a PAZO; la redirección puede interrumpir una integración anterior, lo que exige revisar si sigue en uso.
+
 ## Preflight observado: dos eventos PayPal extra, todavía sin modificar (2026-10-14)
 
 El webhook actual tiene **8 eventos**, no 6: los 6 BILLING.SUBSCRIPTION aprobados y 2 extras no identificados. Los 3 PAYMENT.SALE siguen ausentes. `-Check ApplyWebhook` abortó antes de PATCH, de modo que **no se hizo ninguna modificación a PayPal**.
