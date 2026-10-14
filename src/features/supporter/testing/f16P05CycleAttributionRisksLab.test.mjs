@@ -65,7 +65,9 @@ test('P05 overdue and recovered payments must not be converted into another paid
  const x=examine(s=>{
   s.subscription.billing_info.outstanding_balance=money('2.99')
   s.subscription.billing_info.failed_payments_count=2
-  s.subscription.billing_info.next_payment_retry_time='2026-10-18T00:00:00Z'
+  s.subscription.billing_info.last_failed_payment={
+   time:'2026-10-13T19:00:00Z',amount:money('2.99'),
+   next_payment_retry_time:'2026-10-18T00:00:00Z'}
  })
  safe(x)
  assert.equal(x.reason,'debt_retry_or_unknown_history_requires_cycle_evidence')
@@ -111,7 +113,9 @@ test('P05 invalid failed payment or negative balance evidence is quarantined, no
   s=>s.subscription.billing_info.outstanding_balance={currency_code:'EUR',value:'2.99'},
   s=>s.subscription.billing_info.failed_payments_count=-1,
   s=>s.subscription.billing_info.failed_payments_count='0',
-  s=>s.subscription.billing_info.next_payment_retry_time='2026-99-99',
+  s=>s.subscription.billing_info.last_failed_payment={
+   time:'2026-10-13T19:00:00Z',amount:money('2.99'),
+   next_payment_retry_time:'2026-99-99'},
   s=>s.subscription.billing_info.last_failed_payment={
    amount:money('2.99'),time:'yesterday',payer_email:'buyer@example.com'},
   s=>s.subscription.billing_info.cycle_executions=[{tenure_type:'TRIAL',cycles_completed:-3}],
