@@ -2,6 +2,13 @@
 
 > **LEER PRIMERO.** Este es el estado operativo, no una cronología. Historial integral anterior preservado en Git en commit `61eb2fd2` (versión previa de este archivo), y alcance visual F13 en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. AI = ejecutor técnico principal; usuario = Product Owner. Seguir reglas de `AGENTS.md` y Project Brain OS canónico v1.4.1 en `DigitalAppcorp/project-brain-os`.
 
+## F16 — PO CONFIRMÓ CINCO SECRETOS, AÚN SIN VERIFICACIÓN OAUTH (2026-10-13 LA)
+
+- El PO confirmó **«listo, implementadas las 5»** después de instrucciones para guardar `PAZO_F16_PAYPAL_ENV`, `_WEBHOOK_ID`, `_PLAN_ID`, `_CLIENT_ID`, `_CLIENT_SECRET` en Supabase Secrets Dashboard. **Registrar como confirmación del PO, NO como validación independiente**: el conector Supabase conectado sigue sin ofrecer list/set Edge Secrets. Nunca pedir ni registrar credenciales.
+- Auditoría real posterior con `get_edge_function`: nueva `f16-paypal-webhook` alojada reporta ahora **v6** y mantiene `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`, por lo que no se habilitó recepción. Su código `receiver.mjs` es anterior a la actualización namespaced; `receiver.mjs` en GitHub PR #44 sí exige `PAZO_F16_PAYPAL_*`. **NO redeplegar sin otro GO específico del PO**; no inferir que las claves funcionan aún.
+- Supabase hosted: `supporter_private.paypal_verified_event_inbox`, `paypal_subscription_intents`, `paypal_payment_entries`, `paypal_payment_reversals` continúan vacías (0 filas) y guard de membresías `wall_has_verified_entitlement(NULL)=false`. La antigua `paypal-webhook` aparece v35 en la auditoría actual; no se la cambió en este paso.
+- Fuente de la confirmación y siguiente gate: `docs/PAZO_F16_SANDBOX_SECRETS_OPERATOR_GATE_20261013.md`. Próxima autorización: redeploy exclusivamente código namespaced en estado inerte + smoke 503 y cero pagos, sin cambios a PayPal/secretos. **OAuth Sandbox verificado, firma real, checkout y entitlement siguen PENDIENTES y requieren gates distintos.**
+
 ## F16 — SECRETS SANDBOX AUTORIZADOS, INGRESO UI PENDIENTE (2026-10-13 LA)
 
 - **PO autorizado:** usuario respondió «sí» para configurar en Supabase las cinco variables aisladas `PAZO_F16_PAYPAL_*` (Sandbox). No cubre activar Edge/webhook, modificar PAYPAL_* legado, desplegar otra versión, cobrar ni crear membresías.
