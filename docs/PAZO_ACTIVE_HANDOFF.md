@@ -30,7 +30,7 @@
 - **Último gate implementado**: `supabase/queries/f16_read_verified_inbox_rpc_DRAFT_DO_NOT_APPLY.sql`, `privateInboxReadAdapter.mjs`, `src/features/supporter/testing/f16PrivateInboxReadAdapter.test.mjs`, `supabase/tests/supporter/f16-private-inbox-read-rpc-synthetic.sql`. Contrato de futura `public.f16_paypal_read_verified_inbox(text)`, 4 campos mínimos; función SECURITY DEFINER dueña postgres, `EXECUTE` solamente `service_role`, sin `SELECT` directo a tablas privadas. **Esta RPC NO EXISTE en hosted**, verificado `to_regprocedure(...) IS NOT NULL = false`. SQL actual es **DRAFT, NO migración oficial, NO APLICAR**. Pruebas aisladas PG/Node PASS en `95eb6378`.
 - Documento técnico del gate: `docs/PAZO_F16_SERVICE_ONLY_INBOX_READ_GATE_20261014.md`; evidencias real E2E `docs/PAZO_F16_GENUINE_SANDBOX_WEBHOOK_E2E_PASS_20261014.md`. Retención del inbox: **90 días solo después de conciliación definitiva**; pendientes y disputados no se purgan. Retención de intents, ledger y tombstones aún sin decisión PO.
 
-## 3. ÚNICO SIGUIENTE GATE — P05 decisión sobre periodos pagados, NO HOTEL ALOJADO
+## 3. ÚNICO SIGUIENTE GATE — P05 decisión sobre periodos pagados, NO SUPABASE ALOJADO
 
 **PO aprobó P06-A–E comercial (2026-10-14):** cancelación para cobros futuros sin anular automáticamente periodos ya pagados, fallido/pendiente no da cobertura, parcial exige revisión de ciclo sin prorrateo, total verificado afecta solamente ciclo original, disputas bloquean nuevas acreditaciones sin asumir fraude. `p06BenefitPolicyLab.mjs` es clasificador puro offline, nunca concede ni revoca beneficios ni hace cobros, junto con pruebas de 512 estados. **No hay autorización de activación real**.
 
