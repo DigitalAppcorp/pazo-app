@@ -223,3 +223,16 @@ jobs:
           test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-finance-cutover-transaction-rehearsal.sql
           echo 'PASS F16: legacy routes denied and lease financial settlement verified; all changes rolled back'
+
+      - name: F16 private financial account deletion exposure - disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_financial_deletion_exposure_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-financial-deletion-exposure-synthetic.sql
+          echo 'PASS F16: owner finance exposure and deletion blockers, no hosted actions'
