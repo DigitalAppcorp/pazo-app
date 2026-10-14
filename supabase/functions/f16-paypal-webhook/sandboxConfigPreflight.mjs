@@ -3,13 +3,13 @@
 // Supabase automatically injects the SUPABASE_* values; do not attempt to
 // create custom secrets under that reserved prefix.
 const EXPECTED=Object.freeze({
-  PAYPAL_ENV:'sandbox',
-  PAYPAL_WEBHOOK_ID:'6N7889790V1467139',
-  PAYPAL_PLAN_ID:'P-14V25407JP6850922NLHMDKI',
+  PAZO_F16_PAYPAL_ENV:'sandbox',
+  PAZO_F16_PAYPAL_WEBHOOK_ID:'6N7889790V1467139',
+  PAZO_F16_PAYPAL_PLAN_ID:'P-14V25407JP6850922NLHMDKI',
   SUPABASE_URL:'https://mrybvqdebbgcayuvgkkr.supabase.co',
 })
 const REQUIRED_SECRETS=Object.freeze([
-  'PAYPAL_CLIENT_ID','PAYPAL_CLIENT_SECRET','SUPABASE_SERVICE_ROLE_KEY',
+  'PAZO_F16_PAYPAL_CLIENT_ID','PAZO_F16_PAYPAL_CLIENT_SECRET','SUPABASE_SERVICE_ROLE_KEY',
 ])
 const PRINTABLE=/^[\x21-\x7E]{8,512}$/
 export function assessF16SandboxConfig(env){
@@ -24,7 +24,7 @@ export function assessF16SandboxConfig(env){
     const value=get(name)
     if(value===undefined || value===null || value==='')missing.push(name)
     else if(typeof value!=='string'||!PRINTABLE.test(value)||
-       (name==='PAYPAL_CLIENT_ID'&&value.includes(':')) ||
+       (name==='PAZO_F16_PAYPAL_CLIENT_ID'&&value.includes(':')) ||
        (name==='SUPABASE_SERVICE_ROLE_KEY'&&value.length<24) ||
        (name==='SUPABASE_SERVICE_ROLE_KEY'&&/\s/.test(value))
     )invalid.push(name)
