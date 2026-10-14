@@ -5,6 +5,7 @@
 import {createSafeF16WebhookHandler} from './core.mjs'
 import {createPaypalSandboxPostbackVerifier} from './paypalSandboxPostback.mjs'
 import {createPaypalVerifiedEventInbox} from './paypalInboxAdapter.mjs'
+import {createF16GlobalAdmission} from './globalAdmissionAdapter.mjs'
 import {assessF16SandboxConfig} from './sandboxConfigPreflight.mjs'
 
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
@@ -21,7 +22,7 @@ export function createF16SandboxWebhookReceiver({env,fetchImpl=fetch}={}) {
   // This check never logs or returns credentials and never trusts Live mode.
   if(!assessF16SandboxConfig(env).ready ||
      typeof fetchImpl!=='function') return unavailable
-  let verifySignature,inbox
+  let verifySignature,inbox,globalAdmission
   try {
     verifySignature=createPaypalSandboxPostbackVerifier({
       clientId:get('PAZO_F16_PAYPAL_CLIENT_ID'),
@@ -31,11 +32,15 @@ export function createF16SandboxWebhookReceiver({env,fetchImpl=fetch}={}) {
       projectUrl:PROJECT,serviceRoleKey:get('SUPABASE_SERVICE_ROLE_KEY'),
       fetchImpl,
     })
+    globalAdmission=createF16GlobalAdmission({
+      projectUrl:PROJECT,serviceRoleKey:get('SUPABASE_SERVICE_ROLE_KEY'),
+      fetchImpl,
+    })
   } catch {
     return unavailable
   }
   return createSafeF16WebhookHandler({
     environment:'sandbox',webhookId:WEBHOOK,planId:PLAN,
-    verifySignature,inbox,
+    verifySignature,inbox,globalAdmission,
   })
 }
