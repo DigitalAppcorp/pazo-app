@@ -80,4 +80,71 @@ END;
 $body$;
 REVOKE ALL ON FUNCTION supporter_private.f16_lab_bind_subscription(text,uuid,text,text,text)
  FROM PUBLIC,anon,authenticated,service_role;
+
+-- Prototype ONLY: backend service_role RPC gateway for server-verified owner.
+-- These functions are in PUBLIC because PostgREST exposes RPC from public,
+-- but EXECUTE is REVOKED from PUBLIC, anon and authenticated atomically.
+CREATE FUNCTION public.f16_paypal_create_private_intent(
+ p_owner_id uuid,p_intent_id text
+) RETURNS boolean
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $body$
+DECLARE inserted boolean;
+BEGIN
+ IF p_owner_id IS NULL OR p_intent_id IS NULL OR
+    p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+ THEN RAISE EXCEPTION 'Invalid server intent reference' USING ERRCODE='22023'; END IF;
+ INSERT INTO supporter_private.paypal_subscription_intents
+ (intent_id,owner_id,plan_id)
+ VALUES (p_intent_id,p_owner_id,'P-14V25407JP6850922NLHMDKI')
+ ON CONFLICT (intent_id) DO NOTHING RETURNING true INTO inserted;
+ RETURN inserted IS TRUE;
+END;
+$body$;
+ALTER FUNCTION public.f16_paypal_create_private_intent(uuid,text) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.f16_paypal_create_private_intent(uuid,text)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.f16_paypal_create_private_intent(uuid,text) TO service_role;
+
+CREATE FUNCTION public.f16_paypal_read_private_intent(
+ p_intent_id text
+) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $body$
+DECLARE v supporter_private.paypal_subscription_intents%ROWTYPE;
+BEGIN
+ IF p_intent_id IS NULL OR
+    p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+ THEN RAISE EXCEPTION 'Invalid intent reference' USING ERRCODE='22023'; END IF;
+ SELECT * INTO v FROM supporter_private.paypal_subscription_intents
+ WHERE intent_id=p_intent_id;
+ IF NOT FOUND THEN RETURN NULL; END IF;
+ RETURN pg_catalog.jsonb_build_object(
+ 'id',v.intent_id,'owner_id',v.owner_id,'plan_id',v.plan_id,
+ 'state',v.state,'external_subscription_id',v.external_subscription_id);
+END;
+$body$;
+ALTER FUNCTION public.f16_paypal_read_private_intent(text) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.f16_paypal_read_private_intent(text)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.f16_paypal_read_private_intent(text) TO service_role;
+
+CREATE FUNCTION public.f16_paypal_bind_private_intent(
+ p_intent_id text,p_owner_id uuid,p_subscription_id text,p_plan_id text
+) RETURNS text
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $body$
+BEGIN
+ IF p_intent_id IS NULL OR
+    p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+ THEN RAISE EXCEPTION 'Invalid intent reference' USING ERRCODE='22023'; END IF;
+ RETURN supporter_private.f16_lab_bind_subscription(
+ p_intent_id,p_owner_id,p_subscription_id,p_plan_id,p_intent_id);
+END;
+$body$;
+ALTER FUNCTION public.f16_paypal_bind_private_intent(text,uuid,text,text) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.f16_paypal_bind_private_intent(text,uuid,text,text)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.f16_paypal_bind_private_intent(text,uuid,text,text) TO service_role;
+
 COMMIT;
