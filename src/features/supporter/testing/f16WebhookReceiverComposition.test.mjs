@@ -22,6 +22,8 @@ function make({settings=SETTINGS,verification='SUCCESS',inbox=true,dbOk=true}={}
  const calls=[]
  const fetchImpl=async (url,options)=>{
    calls.push({url,options})
+   if(url.endsWith('/rest/v1/rpc/f16_paypal_try_admit_global'))
+     return {ok:true,json:async()=>true}
    if(url.endsWith('/v1/oauth2/token'))
      return {ok:true,json:async()=>({token_type:'Bearer',access_token:'mock'})}
    if(url.endsWith('/v1/notifications/verify-webhook-signature'))
@@ -39,11 +41,12 @@ test('Sandbox signature SUCCESS persists only minimal event reference',async()=>
  const f=make(),response=await f.handle(f.request())
  assert.equal(response.status,202)
  assert.deepEqual(f.calls.map(x=>x.url),[
+  'https://mrybvqdebbgcayuvgkkr.supabase.co/rest/v1/rpc/f16_paypal_try_admit_global',
   'https://api-m.sandbox.paypal.com/v1/oauth2/token',
   'https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature',
   'https://mrybvqdebbgcayuvgkkr.supabase.co/rest/v1/rpc/f16_paypal_record_verified_event',
  ])
- const payload=JSON.parse(f.calls[2].options.body)
+ const payload=JSON.parse(f.calls[3].options.body)
  assert.deepEqual(payload,{p_provider_event_id:'WH-TEST-01',
   p_event_type:'PAYMENT.SALE.COMPLETED'})
  assert.equal(JSON.stringify(payload).includes('must-not-store'),false)
@@ -57,7 +60,7 @@ test('Sandbox replay is idempotent; missing durable inbox fails closed',async()=
 test('invalid PayPal signature never touches private Supabase RPC',async()=>{
  const f=make({verification:'FAILURE'})
  assert.equal((await f.handle(f.request())).status,401)
- assert.equal(f.calls.length,2)
+ assert.equal(f.calls.length,3)
 })
 test('missing or Live configuration refuses all network calls',async()=>{
  for(const bad of [
