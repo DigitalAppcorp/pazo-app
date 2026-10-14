@@ -3,6 +3,7 @@
 // Requires an authenticated PayPal signature verifier AND a durable private inbox.
 // Never writes profiles/is_founder or grants memberships.
 import {f16WorkerAdmissionGate} from './workerAdmissionGate.mjs'
+import {requireCertUrl} from './paypalSandboxPostback.mjs'
 const EVENT_TYPES = new Set([
   'BILLING.SUBSCRIPTION.ACTIVATED',
   'BILLING.SUBSCRIPTION.UPDATED',
@@ -41,6 +42,11 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
       if(typeof value!=='string' || value.length===0 || value.length>2048)
         return reply(400,'missing_or_invalid_headers')
     }
+    // Reject obviously forged/non-Sandbox signature envelopes BEFORE any RPC
+    // or PayPal OAuth call. Preserve fail-closed response and never log the URL.
+    if(request.headers.get('paypal-auth-algo')!=='SHA256withRSA' ||
+       !requireCertUrl(request.headers.get('paypal-cert-url')))
+      return reply(503,'verification_unavailable')
     const declared=Number(request.headers.get('content-length'))
     if(request.headers.has('content-length') && (!Number.isSafeInteger(declared) || declared<0 || declared>LIMIT))
       return reply(413,'invalid_body_size')
