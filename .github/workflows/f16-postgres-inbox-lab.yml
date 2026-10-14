@@ -104,7 +104,7 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-disposable-lab-to-migration-reset.sql
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
-            -c 'SET ROLE postgres;' -f supabase/migrations/20261014040722_f16_private_intents_financial_ledger.sql
+            -c 'SET ROLE postgres;' -f supabase/migrations/20261014042646_f16_private_intents_financial_ledger.sql
           sed 's/f16_lab_record/f16_private_record/g' supabase/tests/supporter/f16-financial-ledger-synthetic.sql | \
             psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1
           sed 's/f16_lab_bind_subscription/f16_private_bind_subscription/g' supabase/tests/supporter/f16-subscription-intent-synthetic.sql | \
