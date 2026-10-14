@@ -1,5 +1,8 @@
 # PAZO F16 — Gate de ledger financiero aislado
 
+**ACTUALIZACIÓN VERIFIED HOSTED (2026-10-14 UTC):** el Product Owner autorizó y se aplicaron únicamente las dos migraciones F16 en Supabase `mrybvqdebbgcayuvgkkr`; tablas privadas de eventos, intenciones, pagos y reversos están instaladas, vacías (0 filas), con RLS forzada y RPC de servidor restringidas. Versiones alojadas: `20261014042616_f16_private_verified_event_inbox.sql` y `20261014042646_f16_private_intents_financial_ledger.sql`. NO se desplegaron Edge Functions, NO se modificó PayPal/webhook ni se activaron cobros, períodos pagados o membresías. Las afirmaciones históricas inferiores «NO APLICADAS» se refieren al momento anterior a este gate; NO se deben tratar como estado actual. Retención de ledger e intenciones pendiente.
+
+
 **Estado:** PASS en PostgreSQL 17 descartable, **solo laboratorio**; NO aplicado al Supabase alojado, no migration, no worker deploy, no entitlement, no cobros Live. Product Owner autorizó continuar ingeniería local, **no** mutaciones alojadas. PR #44 DRAFT, rama `f13/section-titles-20261012`.
 
 ## Alcance de laboratorio implementado
