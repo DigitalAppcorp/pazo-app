@@ -11,7 +11,8 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const DENY=(reason)=>Object.freeze({recorded:false,entitlement:false,reason})
 const SALE='PAYMENT.SALE.COMPLETED',REFUND='PAYMENT.SALE.REFUNDED'
 const safeResults=new Set(['inserted_uncredited','duplicate_uncredited',
- 'inserted_blocked','duplicate_blocked','reversal_recorded','reversal_duplicate'])
+ 'inserted_blocked','duplicate_blocked','refund_recorded_partial',
+ 'refund_recorded_full','refund_duplicate'])
 export function createF16PrivateProviderProofFlow({
  leaseStore,eventReader,subscriptionReader,originalReader,
  loadPrivateBoundIntent,verifyAuthOwner,loadKnownReversalIds,financeStore,
@@ -102,10 +103,12 @@ export function createF16PrivateProviderProofFlow({
   const intent=await inspectOwner(original.subscriptionId,observed)
   if(!intent)return DENY('owner_not_independently_verified')
   const tx=matchedTransaction(observed,refund.originalSaleId)
-  const kind=refund.refundMinorUnits===299?'REFUNDED':'PARTIALLY_REFUNDED'
-  // Transaction history is independent of refund resource. Inconsistency
-  // blocks closure, rather than guessing whether refund is full or partial.
-  if(!tx||tx.status!==kind)return DENY('refund_history_not_concordant')
+  // The current transaction status reflects the CUMULATIVE state, not
+  // necessarily the amount of this individual PayPal refund. A second refund
+  // of 199 cents after 100 cents can correctly report REFUNDED.
+  const kind=tx?.status
+  if(kind!=='REFUNDED'&&kind!=='PARTIALLY_REFUNDED')
+   return DENY('refund_history_not_concordant')
   const decision=assessPaypalSandboxReversalEvidence({
    environment:'sandbox',
    inbox:{ready:true,entitlement:false,
@@ -125,11 +128,16 @@ export function createF16PrivateProviderProofFlow({
   })
   if(decision.candidateForTombstone!==true||decision.entitlement!==false)
    return DENY('refund_reconciliation_blocked')
-  // F16 P06 pending: one tombstone per sale cannot represent successive
-  // partial refunds safely. Keep these cases unprocessed for review.
-  if(decision.candidate?.kind==='partially_refunded')
-   return DENY('partial_refund_ledger_not_ready')
-  return Object.freeze({ready:true,type:'refund',candidate:decision.candidate})
+  // Each independently verified refund has its OWN ID and amount. The new
+  // LAB ONLY DB RPC enforces cumulative <=299, exact final state, lease,
+  // dedupe and original sale hold; coverage / entitlement remain DISABLED.
+  if(!decision.candidate||decision.candidate.externalPaymentId!==refund.originalSaleId)
+   return DENY('refund_identity_not_confirmed')
+  return Object.freeze({ready:true,type:'refund',candidate:Object.freeze({
+   ...decision.candidate,externalSubscriptionId:original.subscriptionId,
+   externalRefundId:refund.id,refundMinorUnits:refund.refundMinorUnits,
+   providerStatus:kind,
+  })})
  }
  return Object.freeze({
   async process(ref,window){
@@ -170,7 +178,7 @@ export function createF16PrivateProviderProofFlow({
        })
       if(!safeResults.has(result)||(
         proof.type==='sale'&&!result.endsWith('_uncredited')&&!result.endsWith('_blocked')
-       )||(proof.type==='refund'&&!result.startsWith('reversal_')))
+       )||(proof.type==='refund'&&!result.startsWith('refund_')))
        throw Error('f16_financial_commit_unconfirmed')
       committed=true
       answer=Object.freeze({recorded:true,entitlement:false,reason:result})
