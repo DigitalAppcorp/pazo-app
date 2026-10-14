@@ -30,3 +30,15 @@
 5. Solo después de receptor durable/seguro y deploy de Sandbox confirmado: agregar eventos al webhook EXISTENTE, demostrar entregas reales, verificar merchant/plan/monto/pagos, y seguir aprobación individual de muro; nunca equiparar entrega con entitlement.
 
 El contrato general permanece en `docs/PAZO_F16_PAYPAL_RECONCILIATION_MODEL_20261013.md`. Auditoría de código/Supabase con lectura directa, no inferencia de capturas.
+
+## Verificación automatizada del callback — gate pendiente
+
+El PO reconfirmó `6N7889790V1467139`, pero **no ha confirmado la URL**. La API de Webhooks de PayPal documenta `GET /v1/notifications/webhooks/{webhook_id}` para leer los detalles de un webhook; se implementó auditoría READ ONLY con ese endpoint:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\\scripts\\f16-paypal-sandbox-plan.ps1 -Check Destination
+```
+
+La consulta utiliza credenciales Sandbox introducidas de forma oculta localmente y compara el campo `url` del registro contra la URL exacta esperada de la Edge Function de PAZO. No muestra el URL ni secretos: solo el resultado saneado `destinationMatches`. Debe ejecutarlo el PO en Windows antes de afirmar que el registro apunta a Supabase. No mide disponibilidad, seguridad del código ni delivery; **ningún cambio del lado de PayPal o Supabase queda autorizado por esta lectura**.
+
+Referencia PayPal (endpoint GET y objeto de webhook): https://developer.paypal.com/api/webhooks/v1/definitions/webhook/ .
