@@ -99,3 +99,21 @@ test('PENDING transaction can be read but never gives ledger candidate or covera
  assert.equal(verdict.acceptedForLedger,false)
  assert.equal(verdict.entitlement,false)
 })
+
+test('Auth-owned binding reads actual Sandbox subscription details and strips payer PII',async()=>{
+ const x=build()
+ const item=await x.reader.readSubscription(SUB)
+ assert.deepEqual(item,{id:SUB,plan_id:PLAN,custom_id:'intent-correlation-123',status:'ACTIVE'})
+ assert.equal(x.calls.length,2)
+ assert.equal(x.calls[0].url,'https://api-m.sandbox.paypal.com/v1/oauth2/token')
+ assert.equal(x.calls[1].url,'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/'+SUB)
+ assert.equal(x.calls.every(c=>c.options.redirect==='error'),true)
+ assert.equal(JSON.stringify(item).includes('private@example.com'),false)
+})
+test('subscription-only reader rejects wrong IDs before network',async()=>{
+ const x=build()
+ for(const id of ['https://evil.example','I-OTHER?x=1','I-a/b','']){
+   await assert.rejects(x.reader.readSubscription(id),/invalid_subscription_id/)
+ }
+ assert.equal(x.calls.length,0)
+})
