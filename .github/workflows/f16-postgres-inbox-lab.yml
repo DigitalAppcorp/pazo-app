@@ -38,5 +38,19 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -c 'SET ROLE postgres;' \
             -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
-      - name: Execute F16 inbox RLS, RPC and 32-call concurrency lab
-        run: bash scripts/f16-postgres-inbox-lab.sh
+      - name: Execute CLI-generated F16 migration on disposable PostgreSQL and verify security
+        run: |
+          set -euo pipefail
+          migration=$(find supabase/migrations -maxdepth 1 -type f -name '*_f16_private_verified_event_inbox.sql' | sort | tail -n 1)
+          if [[ -z "$migration" || ! -f "$migration" ]]; then
+            echo 'BLOCKED: F16 CLI-generated migration is missing'
+            exit 1
+          fi
+          echo "Testing versioned migration $(basename "$migration") ONLY in disposable PostgreSQL"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f "$migration"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-payment-inbox-metadata.sql \
+            -f supabase/tests/supporter/f16-payment-inbox-synthetic.sql
+          node scripts/f16-postgres-inbox-concurrency.mjs
+          echo 'PASS: versioned F16 migration and 32-way concurrency in disposable PostgreSQL only'
