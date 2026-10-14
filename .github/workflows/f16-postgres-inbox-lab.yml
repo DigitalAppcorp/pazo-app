@@ -136,3 +136,18 @@ jobs:
             -f supabase/queries/f16_global_admission_preflight_READ_ONLY.sql)
           test "$preflight" = 't|t|t|t|f|f|t' || { echo 'FAIL F16: budget preflight privileges/security mismatch' >&2; exit 1; }
           echo 'PASS F16: versioned migration, security preflight, isolation and global concurrency'
+
+      - name: F16 eleven-event inbox contract — additive migration in disposable DB only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/migrations/20261014085430_f16_preserve_two_subscription_lifecycle_events.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-preserved-lifecycle-events-synthetic.sql
+          echo 'PASS F16: 8 preserved + 3 SALE, no grants, no production change'
