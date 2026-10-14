@@ -14,6 +14,7 @@ const source=()=>({
  intent:{id:INTENT,ownerId:OWNER,provider:'paypal',state:'bound',
   verifiedOwnerBinding:true,planId:PLAN,externalSubscriptionId:SUB},
  subscription:{id:SUB,plan_id:PLAN,custom_id:INTENT,status:'ACTIVE',
+  plan_overridden:false,quantity:'1',
   start_time:'2026-10-01T19:00:00Z',
   billing_info:{last_payment:{time:'2026-10-13T19:00:00Z',amount:money('2.99')},
    next_billing_time:'2026-11-01T19:00:00Z',
