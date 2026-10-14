@@ -47,7 +47,7 @@ test('postback uses only Sandbox endpoints, verified header mapping, original ra
   assert.equal(JSON.parse(payload).auth_algo,'SHA256withRSA')
   assert.equal(JSON.parse(payload).transmission_id,'transmission-1')
   assert.equal(JSON.parse(payload).cert_url,HEADER_VALUES['paypal-cert-url'])
-  assert.equal(x.calls[0].options.redirect,undefined) // redirect guard is added by shared fetch wrapper
+  assert.equal(x.calls[0].options.redirect,'error') // never follow provider redirects
   assert.equal((x.calls[1].options.body||'').includes('offline-token'),false)
 })
 test('wrong environment fails before OAuth fetch',async()=>{
