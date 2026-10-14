@@ -18,7 +18,10 @@ test('new F16 webhook entrypoint cannot be deployed or enabled accidentally',()=
 test('webhook receiver builds from static Sandbox API, narrow RPC and no user payload',()=>{
  const receiver=readFileSync('supabase/functions/f16-paypal-webhook/receiver.mjs','utf8')
  const inbox=readFileSync('supabase/functions/f16-paypal-webhook/paypalInboxAdapter.mjs','utf8')
- assert.match(receiver,/PAYPAL_ENV'\)!=='sandbox'/)
+ const configGate=readFileSync('supabase/functions/f16-paypal-webhook/sandboxConfigPreflight.mjs','utf8')
+ assert.match(receiver,/assessF16SandboxConfig\(env\)\.ready/)
+ assert.match(configGate,/PAYPAL_ENV:'sandbox'/)
+ assert.match(configGate,/PAYPAL_WEBHOOK_ID:'6N7889790V1467139'/)
  assert.match(receiver,/createPaypalSandboxPostbackVerifier/)
  assert.match(receiver,/createPaypalVerifiedEventInbox/)
  assert.match(inbox,/f16_paypal_record_verified_event/)
