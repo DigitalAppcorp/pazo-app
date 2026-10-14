@@ -11,6 +11,10 @@ const EVENT_TYPES = new Set([
   'BILLING.SUBSCRIPTION.SUSPENDED',
   'BILLING.SUBSCRIPTION.EXPIRED',
   'BILLING.SUBSCRIPTION.PAYMENT.FAILED',
+  // Preserve the PO-observed Sandbox lifecycle events. A validated signature
+  // and durable inbox write are mandatory, but neither event grants benefits.
+  'BILLING.SUBSCRIPTION.CREATED',
+  'BILLING.SUBSCRIPTION.RE-ACTIVATED',
   'PAYMENT.SALE.COMPLETED',
   'PAYMENT.SALE.REFUNDED',
   'PAYMENT.SALE.REVERSED',

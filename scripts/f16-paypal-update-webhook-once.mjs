@@ -77,7 +77,7 @@ async function run(){
   const final=await request(webhookPath,{method:'GET',headers})
   if(!verifiedF16WebhookConfiguration(final))
    throw Error('postflight_needs_review')
-  announce('updated_and_verified','same_webhook_nine_events_f16_destination')
+  announce('updated_and_verified','same_webhook_eleven_events_f16_destination')
  }catch(error){
   // Do not blindly retry: the PATCH may have reached PayPal even if it timed out.
   const outcome=wrote?'mutation_outcome_uncertain_manual_review':'no_mutation_attempted'

@@ -6,6 +6,7 @@ import {PAZO_REQUIRED_PAYPAL_EVENTS} from './paypalSandboxWebhookContract.mjs'
 import {PAZO_F16_EXPECTED_WEBHOOK_URL} from './paypalSandboxResourceContract.mjs'
 import {
  buildApprovedF16WebhookPatch,sameWebhookSnapshot,verifiedF16WebhookConfiguration,
+ PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS,
 } from './paypalSandboxWebhookPatchContract.mjs'
 
 const plan={
@@ -18,18 +19,21 @@ const plan={
 const original=()=>({
  id:PAZO_SANDBOX_WEBHOOK_ID,
  url:'https://another-host.invalid/callback?private=SECRET_DO_NOT_PRINT',
- event_types:PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6).map(name=>({name})),
+ event_types:[...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6),...PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS].map(name=>({name})),
 })
 const final=()=>({...original(),url:PAZO_F16_EXPECTED_WEBHOOK_URL,
- event_types:PAZO_REQUIRED_PAYPAL_EVENTS.map(name=>({name}))})
-test('one PATCH changes only existing URL and includes all nine approved events',()=>{
+ event_types:[...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6),...PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS,...PAZO_REQUIRED_PAYPAL_EVENTS.slice(6)].map(name=>({name}))})
+test('one PATCH changes only existing URL and includes all eleven approved events',()=>{
  const result=buildApprovedF16WebhookPatch(plan,original())
  assert.equal(result.status,'patch_required')
  assert.deepEqual(result.patch.map(x=>({op:x.op,path:x.path})),[
   {op:'replace',path:'/url'}, {op:'replace',path:'/event_types'}])
  assert.equal(result.patch[0].value,PAZO_F16_EXPECTED_WEBHOOK_URL)
- assert.deepEqual(result.patch[1].value,PAZO_REQUIRED_PAYPAL_EVENTS.map(name=>({name})))
+ assert.deepEqual(result.patch[1].value,[...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6),...PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS,...PAZO_REQUIRED_PAYPAL_EVENTS.slice(6)].map(name=>({name})))
  assert.equal(verifiedF16WebhookConfiguration(final()),true)
+ assert.equal(original().event_types.length,8)
+ assert.equal(final().event_types.length,11)
+ assert.deepEqual(final().event_types.slice(6,8).map(x=>x.name),PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS)
  assert.equal(buildApprovedF16WebhookPatch(plan,final()).status,'already_configured')
  assert.equal(buildApprovedF16WebhookPatch(plan,final()).patch,null)
  assert.equal(sameWebhookSnapshot(original(),structuredClone(original())),true)
@@ -41,6 +45,8 @@ test('mismatches, unexpected events, wildcards and partial writes are blocked',(
   {...original(),event_types:[...original().event_types,{name:'PAYMENT.CAPTURE.COMPLETED'}]},
   {...original(),event_types:[{name:'*'}]},
   {...original(),event_types:original().event_types.slice(1)},
+  {...original(),event_types:original().event_types.filter(x=>x.name!=='BILLING.SUBSCRIPTION.CREATED')},
+  {...original(),event_types:original().event_types.filter(x=>x.name!=='BILLING.SUBSCRIPTION.RE-ACTIVATED')},
   {...original(),event_types:[...original().event_types,...PAZO_REQUIRED_PAYPAL_EVENTS.slice(6,7).map(name=>({name}))]},
   {...original(),url:PAZO_F16_EXPECTED_WEBHOOK_URL},
   {...final(),url:'https://another-host.invalid'},
@@ -91,7 +97,7 @@ test('one OAuth, one plan GET, two webhook GETs, one PATCH, one verification GET
  const r=simulate('success')
  assert.equal(r.status,0,r.stderr)
  assert.match(r.stdout,/updated_and_verified/)
- assert.match(r.stdout,/same_webhook_nine_events_f16_destination/)
+ assert.match(r.stdout,/same_webhook_eleven_events_f16_destination/)
 })
 test('drift prevents any PATCH and fails closed',()=>{
  const r=simulate('drift')

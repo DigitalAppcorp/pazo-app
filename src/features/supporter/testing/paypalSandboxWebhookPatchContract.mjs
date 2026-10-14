@@ -5,8 +5,16 @@ import {PAZO_REQUIRED_PAYPAL_EVENTS} from './paypalSandboxWebhookContract.mjs'
 import {PAZO_SANDBOX_WEBHOOK_ID} from './paypalSandboxWebhookDestinationContract.mjs'
 import {PAZO_F16_EXPECTED_WEBHOOK_URL} from './paypalSandboxResourceContract.mjs'
 
-const ORIGINAL=PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6)
+// These two were verified by the PO in the same PayPal Sandbox app (8 total).
+// Preserve them; never silently delete existing subscription lifecycle events.
+export const PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS=Object.freeze([
+ 'BILLING.SUBSCRIPTION.CREATED',
+ 'BILLING.SUBSCRIPTION.RE-ACTIVATED',
+])
+const ORIGINAL=Object.freeze([...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6),
+ ...PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS])
 const ADDED=PAZO_REQUIRED_PAYPAL_EVENTS.slice(6)
+const ALL_APPROVED=Object.freeze([...ORIGINAL,...ADDED])
 function fail(reason){throw Error(reason)}
 function namesForWebhook(hook){
  if(hook?.id!==PAZO_SANDBOX_WEBHOOK_ID)fail('webhook_identity_mismatch')
@@ -18,7 +26,7 @@ function namesForWebhook(hook){
  const names=hook.event_types.map(x=>x.name)
  if(names.length!==new Set(names).size || names.includes('*'))
    fail('webhook_events_ambiguous')
- if(names.some(n=>!PAZO_REQUIRED_PAYPAL_EVENTS.includes(n)) ||
+ if(names.some(n=>!ALL_APPROVED.includes(n)) ||
    ORIGINAL.some(n=>!names.includes(n)))
    fail('webhook_events_unexpected')
  const pending=ADDED.filter(n=>!names.includes(n))
@@ -35,7 +43,7 @@ export function buildApprovedF16WebhookPatch(plan,hook){
  if(!inspected.ok || inspected.warnings.length)
    fail('plan_contract_mismatch')
  const names=namesForWebhook(hook)
- const alreadyConfigured=names.length===PAZO_REQUIRED_PAYPAL_EVENTS.length &&
+ const alreadyConfigured=names.length===ALL_APPROVED.length &&
    hook.url===PAZO_F16_EXPECTED_WEBHOOK_URL
  if(alreadyConfigured)return Object.freeze({status:'already_configured',patch:null})
  if(names.length!==ORIGINAL.length)fail('webhook_events_unexpected')
@@ -58,7 +66,7 @@ export function verifiedF16WebhookConfiguration(hook){
     hook.url!==PAZO_F16_EXPECTED_WEBHOOK_URL ||
     !Array.isArray(hook.event_types))return false
  const names=hook.event_types.map(x=>x?.name)
- return names.length===PAZO_REQUIRED_PAYPAL_EVENTS.length &&
+ return names.length===ALL_APPROVED.length &&
    new Set(names).size===names.length &&
-   PAZO_REQUIRED_PAYPAL_EVENTS.every(n=>names.includes(n))
+   ALL_APPROVED.every(n=>names.includes(n))
 }
