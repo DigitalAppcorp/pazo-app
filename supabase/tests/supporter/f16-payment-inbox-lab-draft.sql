@@ -58,89 +58,11 @@ CREATE TABLE supporter_private.paypal_verified_event_inbox (
       AND retention_released_at >= processed_at
     )
   ),
-  -- Paid-event correlation is still private and never grants coverage.
+  -- Private event-to-payment reference; no paid access.
   reconciled_payment_id text
     CONSTRAINT f16_inbox_reconciled_payment_ref CHECK (
       reconciled_payment_id IS NULL OR
-      reconciled_payment_id ~ '^[A-Za-z0-9._-]{3,128}
-    CONSTRAINT f16_inbox_error_code CHECK (
-      last_error_code IS NULL OR last_error_code ~ '^[a-z_]{1,48}$'
-    ),
-  CONSTRAINT f16_inbox_processed_only_when_processed
-    CHECK (processed_at IS NULL OR processing_state='processed')
-);
-
--- No owner/customer/provider payload, payer email, payment data or card data
--- may be written into this minimal event-reference inbox.
-ALTER TABLE supporter_private.paypal_verified_event_inbox ENABLE ROW LEVEL SECURITY;
-ALTER TABLE supporter_private.paypal_verified_event_inbox FORCE ROW LEVEL SECURITY;
-REVOKE ALL ON TABLE supporter_private.paypal_verified_event_inbox
-FROM PUBLIC, anon, authenticated, service_role;
--- supporter_private schema itself remains unexposed to all Data API roles.
-
-CREATE FUNCTION public.f16_paypal_record_verified_event(
-  p_provider_event_id text, p_event_type text
-) RETURNS boolean
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $function$
-DECLARE
-  v_inserted boolean;
-  v_existing_type text;
-BEGIN
-  IF p_provider_event_id IS NULL
-     OR p_provider_event_id !~ '^[A-Za-z0-9._-]{1,128}$'
-     OR p_event_type IS NULL OR p_event_type NOT IN (
-       'BILLING.SUBSCRIPTION.ACTIVATED',
-       'BILLING.SUBSCRIPTION.UPDATED',
-       'BILLING.SUBSCRIPTION.CANCELLED',
-       'BILLING.SUBSCRIPTION.SUSPENDED',
-       'BILLING.SUBSCRIPTION.EXPIRED',
-       'BILLING.SUBSCRIPTION.PAYMENT.FAILED',
-       'PAYMENT.SALE.COMPLETED',
-       'PAYMENT.SALE.REFUNDED',
-       'PAYMENT.SALE.REVERSED'
-     )
-  THEN
-    RAISE EXCEPTION 'Unsupported verified event reference'
-      USING ERRCODE = '22023';
-  END IF;
-
-  -- The unique primary key serializes concurrent first inserts. Never UPDATE
-  -- the row on webhook retries; don't reset processing state or timestamps.
-  INSERT INTO supporter_private.paypal_verified_event_inbox AS inbox
-    (provider_event_id,event_type)
-  VALUES (p_provider_event_id,p_event_type)
-  ON CONFLICT (provider_event_id) DO NOTHING
-  RETURNING true INTO v_inserted;
-
-  IF v_inserted IS TRUE THEN
-    RETURN true;
-  END IF;
-
-  SELECT inbox.event_type INTO v_existing_type
-  FROM supporter_private.paypal_verified_event_inbox AS inbox
-  WHERE inbox.provider_event_id=p_provider_event_id;
-
-  -- Fail closed on a repeated PayPal event ID containing another event type:
-  -- it must not be falsely acknowledged as the same event.
-  IF v_existing_type IS DISTINCT FROM p_event_type THEN
-    RAISE EXCEPTION 'Verified event reference conflicts with existing event'
-      USING ERRCODE = '22023';
-  END IF;
-  RETURN false;
-END;
-$function$;
-
-ALTER FUNCTION public.f16_paypal_record_verified_event(text,text)
-OWNER TO postgres;
-REVOKE ALL ON FUNCTION public.f16_paypal_record_verified_event(text,text)
-FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.f16_paypal_record_verified_event(text,text)
-TO service_role;
-COMMIT;
-
+      reconciled_payment_id ~ '^[A-Za-z0-9._-]{3,128}$'
     ),
   last_error_code text
     CONSTRAINT f16_inbox_error_code CHECK (
