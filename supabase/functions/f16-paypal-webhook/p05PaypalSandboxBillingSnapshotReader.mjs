@@ -11,6 +11,8 @@ const utc=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/
 const date=s=>typeof s==='string'&&utc.test(s)&&
  Number.isFinite(Date.parse(s))&&
  new Date(Date.parse(s)).toISOString().replace(/\.000Z$/,'Z')===s?s:null
+const dateMaybe=v=>v===undefined?undefined:date(v)
+const moneyMaybe=v=>v===undefined?undefined:money(v)
 function money(v){
  if(!v||v.currency_code!=='USD'||typeof v.value!=='string'||
   !AMOUNT.test(v.value))return null
@@ -38,7 +40,7 @@ function cycle(c){
    interval_count:c.frequency?.interval_count,
   }),
   pricing_scheme:Object.freeze({
-   fixed_price:money(c.pricing_scheme?.fixed_price),
+   fixed_price:moneyMaybe(c.pricing_scheme?.fixed_price),
   }),
  })
 }
@@ -86,15 +88,15 @@ export function createF16P05SandboxBillingSnapshotReader({
    // billing_info.last_failed_payment, not billing_info itself.
    const fail=bi?.last_failed_payment
    const details=Object.freeze({
-    outstanding_balance:money(bi?.outstanding_balance),
+    outstanding_balance:moneyMaybe(bi?.outstanding_balance),
     failed_payments_count:bi?.failed_payments_count,
     last_payment:bi?.last_payment?Object.freeze({
-     time:date(bi.last_payment.time),amount:money(bi.last_payment.amount),
+     time:dateMaybe(bi.last_payment.time),amount:moneyMaybe(bi.last_payment.amount),
     }):undefined,
-    next_billing_time:date(bi?.next_billing_time),
+    next_billing_time:dateMaybe(bi?.next_billing_time),
     last_failed_payment:fail?Object.freeze({
-     time:date(fail.time),amount:money(fail.amount),
-     next_payment_retry_time:date(fail.next_payment_retry_time),
+     time:dateMaybe(fail.time),amount:moneyMaybe(fail.amount),
+     next_payment_retry_time:dateMaybe(fail.next_payment_retry_time),
     }):undefined,
     cycle_executions:bi?.cycle_executions?.map(x=>Object.freeze({
      tenure_type:x.tenure_type,sequence:x.sequence,
@@ -106,14 +108,14 @@ export function createF16P05SandboxBillingSnapshotReader({
     billing_cycles:Object.freeze(rawPlan.billing_cycles.map(cycle)),
     payment_preferences:Object.freeze({
      auto_bill_outstanding:rawPlan.payment_preferences?.auto_bill_outstanding,
-     setup_fee:money(rawPlan.payment_preferences?.setup_fee),
+     setup_fee:moneyMaybe(rawPlan.payment_preferences?.setup_fee),
     }),
    })
    const subscription=Object.freeze({
     id:raw.id,plan_id:raw.plan_id,custom_id:raw.custom_id,
     status:raw.status,plan_overridden:raw.plan_overridden,
     quantity:raw.quantity,
-    start_time:date(raw.start_time),billing_info:details,
+    start_time:dateMaybe(raw.start_time),billing_info:details,
    })
    return Object.freeze({
     merchantScopedByPayPalApi:true,planScopedByPayPalApi:true,
