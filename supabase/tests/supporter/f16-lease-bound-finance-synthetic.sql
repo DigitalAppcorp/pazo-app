@@ -193,9 +193,8 @@ DO $expired$
 DECLARE v uuid; bad boolean:=false;
         owner uuid:='63e812b0-a7e5-49f6-b2dd-c11d2c72af57';
 BEGIN
- SELECT f16_lease_token INTO v FROM public.f16_lab_claim_verified_inbox('WH-LEASE-FIN-EXPIRE',120);
- -- claim must return NULL while existing lease is present; v remains NULL.
- IF v IS NOT NULL THEN RAISE EXCEPTION 'Expired lease was silently stolen'; END IF;
+ IF public.f16_lab_claim_verified_inbox('WH-LEASE-FIN-EXPIRE',120) IS NOT NULL
+ THEN RAISE EXCEPTION 'Expired lease was silently stolen'; END IF;
  -- A worker cannot commit even with its stale token.
  -- Test obtains the known fixture token through the privileged synthetic test,
  -- separately below, never through a production client.
@@ -204,6 +203,7 @@ SET LOCAL ROLE postgres;
 CREATE TEMP TABLE f16_old_token ON COMMIT DROP AS
  SELECT f16_lease_token AS token FROM supporter_private.paypal_verified_event_inbox
  WHERE provider_event_id='WH-LEASE-FIN-EXPIRE';
+GRANT SELECT ON f16_old_token TO service_role;
 SET LOCAL ROLE service_role;
 DO $expire_commit$
 DECLARE v uuid; bad boolean:=false;
@@ -264,11 +264,17 @@ BEGIN
  THEN RAISE EXCEPTION 'Reversal did not block previously credited sale'; END IF;
  IF EXISTS (SELECT 1 FROM supporter_private.paypal_verified_event_inbox
  WHERE provider_event_id LIKE 'WH-LEASE-FIN-%'
+   AND provider_event_id<>'WH-LEASE-FIN-CRASH'
    AND (processing_state<>'processed' OR f16_lease_token IS NOT NULL
         OR f16_lease_expires_at IS NOT NULL
         OR reconciled_payment_id IS NULL AND event_type LIKE 'PAYMENT.%'
         OR retention_hold IS DISTINCT FROM true))
  THEN RAISE EXCEPTION 'Claims were not retired atomically'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM supporter_private.paypal_verified_event_inbox
+ WHERE provider_event_id='WH-LEASE-FIN-CRASH'
+ AND processing_state='processing' AND retention_hold IS TRUE
+ AND f16_lease_token IS NOT NULL)
+ THEN RAISE EXCEPTION 'Crashed worker fixture lost recoverability'; END IF;
  IF supporter_private.wall_has_verified_entitlement(
  '63e812b0-a7e5-49f6-b2dd-c11d2c72af57'::uuid) IS DISTINCT FROM false
  THEN RAISE EXCEPTION 'Lab sale activated PAZO entitlement'; END IF;
