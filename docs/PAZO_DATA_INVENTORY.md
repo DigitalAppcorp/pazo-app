@@ -370,3 +370,8 @@ El PO aprobó publicar **appdigital.corp@gmail.com** como correo receptor de con
 ## Reconciliación adicional de terceros (2026-10-10)
 
 Auditoría de código independiente de la prueba de Codex: `src/components/views/OnboardingView.tsx` carga una imagen externa desde `images.unsplash.com` en la bienvenida A01. Añadir Unsplash/CDN de imagen como **recurso de terceros identificado en código**, con posibles metadatos técnicos de solicitud del navegador; no se verificaron políticas/retención de ese host ni se modificó el diseño. `src/services/observability.ts` transmite eventos a PostHog solo si existe token VITE, pero `captureException` incluye mensajes/stack/componentStack con redacción basada en patrones limitados; **no declarar anonimización completa**. Ambos requieren cierre de privacidad previo a beta; detalles en `docs/PAZO_MVP_PRIVACY_OPERATIONS_RECONCILIATION_20261010.md`.
+
+
+### F16 — Retención 90 días (aprobada, aún sin datos alojados)
+
+El PO aprobó 90 días para identificadores de webhooks **tras conciliación definitiva**, sin borrado automático de pendientes/disputados. La migración F16 todavía no aplicada incluye `retention_hold=true` por defecto y `retention_released_at` para impedir eliminación antes de la conciliación validada. Solo existe vista previa de conteos, sin DELETE ni tareas programadas. Pagos, devoluciones, disputas, reversos y demás metadatos financieros mantienen plazo de conservación pendiente. Fuente `docs/PAZO_F16_RETENTION_APPROVED_GATE_20261013.md`.
