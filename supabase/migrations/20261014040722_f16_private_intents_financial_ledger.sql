@@ -262,4 +262,116 @@ REVOKE ALL ON FUNCTION supporter_private.f16_private_record_payment(text,text,uu
 REVOKE ALL ON FUNCTION supporter_private.f16_private_record_reversal(text,text,timestamptz)
  FROM PUBLIC,anon,authenticated,service_role;
 
+
+-- Service-only atomic processing of a SALE event already verified/re-read
+-- from PayPal Sandbox by the backend worker. Database cannot verify API
+-- responses on its own; no browser and no subscription ACTIVE shortcut.
+CREATE FUNCTION public.f16_paypal_commit_verified_sale(
+ p_event_id text,p_payment_id text,p_subscription_id text,p_owner_id uuid,
+ p_plan_id text,p_minor integer,p_currency text,p_completed_at timestamptz
+) RETURNS text
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $body$
+DECLARE inbox supporter_private.paypal_verified_event_inbox%ROWTYPE;
+        saved supporter_private.paypal_payment_entries%ROWTYPE;
+        decision text;
+BEGIN
+ SELECT * INTO inbox FROM supporter_private.paypal_verified_event_inbox
+ WHERE provider_event_id=p_event_id FOR UPDATE;
+ IF NOT FOUND OR inbox.event_type<>'PAYMENT.SALE.COMPLETED' OR
+   inbox.processing_state NOT IN ('pending','processing','processed')
+ THEN RAISE EXCEPTION 'Sale event not eligible for reconciliation'
+     USING ERRCODE='22023'; END IF;
+ IF NOT EXISTS (
+   SELECT 1 FROM supporter_private.paypal_subscription_intents AS i
+   WHERE i.external_subscription_id=p_subscription_id
+     AND i.owner_id=p_owner_id AND i.plan_id=p_plan_id AND i.state='bound'
+ ) THEN RAISE EXCEPTION 'Verified owner/subscription binding missing'
+     USING ERRCODE='22023'; END IF;
+ IF inbox.processing_state='processed' THEN
+   IF inbox.reconciled_payment_id IS DISTINCT FROM p_payment_id
+   THEN RAISE EXCEPTION 'Event already processed for another payment'
+       USING ERRCODE='22023'; END IF;
+   SELECT * INTO saved FROM supporter_private.paypal_payment_entries
+     WHERE external_payment_id=p_payment_id;
+   IF NOT FOUND OR saved.external_subscription_id IS DISTINCT FROM p_subscription_id
+     OR saved.owner_id IS DISTINCT FROM p_owner_id
+     OR saved.plan_id IS DISTINCT FROM p_plan_id
+     OR saved.gross_minor_units IS DISTINCT FROM p_minor
+     OR saved.currency IS DISTINCT FROM p_currency
+     OR saved.completed_at IS DISTINCT FROM p_completed_at
+   THEN RAISE EXCEPTION 'Processed event does not match durable ledger'
+       USING ERRCODE='22023'; END IF;
+   RETURN 'already_processed';
+ END IF;
+ decision:=supporter_private.f16_private_record_payment(
+   p_payment_id,p_subscription_id,p_owner_id,p_plan_id,p_minor,p_currency,p_completed_at);
+ UPDATE supporter_private.paypal_verified_event_inbox
+   SET processing_state='processed',processed_at=pg_catalog.clock_timestamp(),
+     reconciled_payment_id=p_payment_id,
+     retention_hold=true,retention_released_at=NULL,last_error_code=NULL
+ WHERE provider_event_id=p_event_id;
+ -- No paid coverage, founder badge, or retention release happens here.
+ RETURN decision;
+END;
+$body$;
+ALTER FUNCTION public.f16_paypal_commit_verified_sale(
+ text,text,text,uuid,text,integer,text,timestamptz) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.f16_paypal_commit_verified_sale(
+ text,text,text,uuid,text,integer,text,timestamptz)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.f16_paypal_commit_verified_sale(
+ text,text,text,uuid,text,integer,text,timestamptz) TO service_role;
+
+-- Independently verified PayPal reversal/refund, safe even before the sale.
+-- Ambiguous partial-refund histories are deliberately NOT overwritten.
+CREATE FUNCTION public.f16_paypal_commit_verified_reversal(
+ p_event_id text,p_payment_id text,p_kind text,p_verified_at timestamptz
+) RETURNS text
+LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $body$
+DECLARE inbox supporter_private.paypal_verified_event_inbox%ROWTYPE;
+        saved supporter_private.paypal_payment_reversals%ROWTYPE;
+        decision text;
+BEGIN
+ SELECT * INTO inbox FROM supporter_private.paypal_verified_event_inbox
+ WHERE provider_event_id=p_event_id FOR UPDATE;
+ IF NOT FOUND OR inbox.processing_state NOT IN ('pending','processing','processed')
+    OR (
+      (inbox.event_type='PAYMENT.SALE.REVERSED' AND p_kind<>'reversed')
+      OR (inbox.event_type='PAYMENT.SALE.REFUNDED'
+          AND p_kind NOT IN ('refunded','partially_refunded'))
+      OR inbox.event_type NOT IN ('PAYMENT.SALE.REVERSED','PAYMENT.SALE.REFUNDED')
+    )
+ THEN RAISE EXCEPTION 'Reversal event not eligible for reconciliation'
+     USING ERRCODE='22023'; END IF;
+ IF inbox.processing_state='processed' THEN
+   IF inbox.reconciled_payment_id IS DISTINCT FROM p_payment_id
+   THEN RAISE EXCEPTION 'Reversal already processed for another payment'
+       USING ERRCODE='22023'; END IF;
+   SELECT * INTO saved FROM supporter_private.paypal_payment_reversals
+     WHERE external_payment_id=p_payment_id;
+   IF NOT FOUND OR saved.reversal_kind IS DISTINCT FROM p_kind OR
+      saved.provider_verified_at IS DISTINCT FROM p_verified_at
+   THEN RAISE EXCEPTION 'Reversal evidence conflicts with ledger'
+       USING ERRCODE='22023'; END IF;
+   RETURN 'already_processed';
+ END IF;
+ decision:=supporter_private.f16_private_record_reversal(
+   p_payment_id,p_kind,p_verified_at);
+ UPDATE supporter_private.paypal_verified_event_inbox
+   SET processing_state='processed',processed_at=pg_catalog.clock_timestamp(),
+     reconciled_payment_id=p_payment_id,
+     retention_hold=true,retention_released_at=NULL,last_error_code=NULL
+ WHERE provider_event_id=p_event_id;
+ RETURN decision;
+END;
+$body$;
+ALTER FUNCTION public.f16_paypal_commit_verified_reversal(
+ text,text,text,timestamptz) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.f16_paypal_commit_verified_reversal(
+ text,text,text,timestamptz) FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.f16_paypal_commit_verified_reversal(
+ text,text,text,timestamptz) TO service_role;
+
 COMMIT;
