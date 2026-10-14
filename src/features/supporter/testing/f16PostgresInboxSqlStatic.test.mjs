@@ -3,6 +3,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
+import {spawnSync} from 'node:child_process'
 import {PAZO_REQUIRED_PAYPAL_EVENTS} from './paypalSandboxWebhookContract.mjs'
 const sql=readFileSync('supabase/tests/supporter/f16-payment-inbox-lab-draft.sql','utf8')
 const metadata=readFileSync('supabase/tests/supporter/f16-payment-inbox-metadata.sql','utf8')
@@ -49,4 +50,25 @@ test('PG lab-only authorization and stateful-retry tests exist',()=>{
  assert.match(scenarios,/processing_state='quarantined'/)
  assert.match(scenarios,/WH-F16-VALID-001/)
  assert.match(scenarios,/ROLLBACK;/)
+})
+
+test('isolated F16 SQL runner fails before invoking psql without CI consent',()=>{
+  const runner=readFileSync('scripts/f16-postgres-inbox-lab.sh','utf8')
+  assert.match(runner,/GITHUB_ACTIONS/)
+  assert.match(runner,/PGPASSWORD/)
+  assert.match(runner,/f14_synthetic/)
+  assert.match(runner,/127\.0\.0\.1/)
+  assert.match(runner,/f16-postgres-inbox-concurrency\.mjs/)
+  assert.doesNotMatch(runner,/supabase db push|apply_migration|SUPABASE_ACCESS_TOKEN/i)
+  if(process.platform==='win32')return
+  const syntax=spawnSync('bash',['-n','scripts/f16-postgres-inbox-lab.sh'],{
+    encoding:'utf8',timeout:5000,
+  })
+  assert.equal(syntax.status,0,syntax.stderr)
+  const rejection=spawnSync('bash',['scripts/f16-postgres-inbox-lab.sh'],{
+    encoding:'utf8',timeout:5000,
+    env:{PATH:process.env.PATH},
+  })
+  assert.equal(rejection.status,2,rejection.stderr)
+  assert.match(rejection.stderr,/BLOCKED/)
 })
