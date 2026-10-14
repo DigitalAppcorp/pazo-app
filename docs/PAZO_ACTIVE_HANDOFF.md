@@ -10,6 +10,13 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## F16 — Ledger de pagos y reembolsos SOLO LABORATORIO (2026-10-13 / 14 UTC)
+
+- Se construyó `supabase/tests/supporter/f16-financial-ledger-lab-draft.sql`: tablas privadas `paypal_payment_entries` y `paypal_payment_reversals` **únicamente en SQL desechable de pruebas**, NO una migración lista para deploy. Payment ID único, USD 299 centavos y plan Sandbox aprobado; los pagos son `uncredited` o `blocked_reversal`, nunca entitlement. Protección RLS/ACL y funciones SECURITY INVOKER privadas.
+- `supabase/tests/supporter/f16-financial-ledger-synthetic.sql` y `scripts/f16-postgres-ledger-concurrency.mjs` confirman idempotencia, rechazos de contradicciones, reversing antes/después del cobro, 25 llamadas concurrentes y dos tombstones por dos pagos distintos. **PASS real** en GitHub Actions [#38507542554](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38507542554); evidencia en `docs/PAZO_F16_FINANCIAL_LEDGER_LAB_GATE_20261013.md`.
+- **Lo que FALTA:** intención vinculada a Auth y PayPal de forma segura, comprobación real de reversos y períodos facturados con API PayPal, worker transaccional y reintentos, retención legal de comprobantes y baja de cuenta, migración oficial del ledger generada vía CLI. No interpretar el PG PASS del prototipo como evidencia de pago real.
+- **Prohibido aplicar SQL alojado sin aprobación nueva del PO.** Hosted Supabase `mrybvqdebbgcayuvgkkr` sin ledger ni RPC nueva; `wall_has_verified_entitlement() = false`, `profiles.is_founder` y PayPal Sandbox webhook sin cambios. PR #44 sigue DRAFT y sin merge.
+
 ## F16: PO aprobó retención de 90 días
 
 - Opción A aprobada por PO: conservar identificadores de eventos PayPal **90 días después de conciliación definitiva**. Pendientes, disputados o retenidos no se borran automáticamente. Plazos de ledger/reversos e intentos siguen pendientes. Fuente: `docs/PAZO_F16_RETENTION_APPROVED_GATE_20261013.md`.
