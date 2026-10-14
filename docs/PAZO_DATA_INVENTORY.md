@@ -266,6 +266,12 @@ PayPal.
 - plan de autorización, migración y reconciliación de pagos, reversos y meses pagados; no usar insignia fundador;
 - cancelación/UX y Privacy Policy/Terms definitivos. Precio/plan F16 USD 2.99/mes **ya aprobado y validado**.
 
+### F16 — Inbox privada de eventos PayPal (solo propuesta, NO instalada)
+
+Borrador SQL de laboratorio: `supabase/tests/supporter/f16-payment-inbox-lab-draft.sql`. **No existe como tabla de pagos alojada**, no se ha activado webhook ni comenzado a almacenar eventos reales. Solo prevé ID de evento opaco, tipo autorizado, marcas temporales, estado, contador de reintentos y código de error enumerado; sin payload completo, nombres, correos, números de tarjeta, credenciales, ubicación ni identificación de mascota. Función RPC prevista **exclusivamente server-to-server** y sin visibilidad directa en Data API. Ninguna cobertura o estado de fundador resulta de registrar el evento.
+
+**Pendiente antes de implementación:** definir finalidad/retención limitada y derechos de eliminación frente a transacciones/refunds, confirmar utilidad contable, implementar conciliación verdadera y probar permisos/privacidad en PostgreSQL desechable. El SQL no es migración, no está autorizado para aplicar a Supabase y las pruebas SQL de roles/concurrencia siguen pendientes. Plan y gate técnico: `docs/PAZO_F16_PRIVATE_PAYMENT_SCHEMA_PREFLIGHT_20261013.md`.
+
 ## 13. Hosting / deployment
 
 **Proveedor previsto/actual a verificar**
