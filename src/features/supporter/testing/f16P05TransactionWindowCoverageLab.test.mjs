@@ -13,8 +13,8 @@ const second={subscriptionId:sub,merchantScopedByPayPalApi:true,httpOk:true,
  startTime:mid,endTime:end,totalPages:1,totalItems:1,
  transactions:[t('SALE-WINDOW-TWO','2026-11-12T00:00:00Z')]}
 const setup=(patch={})=>({subscriptionId:sub,requestedStart:start,requestedEnd:end,
- windows:[{...first,transactions:[...first.transactions]},
- {...second,transactions:[...second.transactions]}],...patch})
+ windows:[{...first,transactions:first.transactions.map(x=>({...x}))},
+ {...second,transactions:second.transactions.map(x=>({...x}))}],...patch})
 const run=mutate=>{const x=setup();mutate?.(x);return assessF16P05WindowCoverage(x)}
 const safe=r=>{
  assert.equal(r.globalFinancialCoverage,false)
