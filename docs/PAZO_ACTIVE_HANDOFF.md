@@ -2,6 +2,14 @@
 
 > **LEER PRIMERO.** Este es el estado operativo, no una cronología. Historial integral anterior preservado en Git en commit `61eb2fd2` (versión previa de este archivo), y alcance visual F13 en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. AI = ejecutor técnico principal; usuario = Product Owner. Seguir reglas de `AGENTS.md` y Project Brain OS canónico v1.4.1 en `DigitalAppcorp/project-brain-os`.
 
+## F16 — AISLAMIENTO DE SECRETOS v30/F16 (2026-10-13 LA)
+
+- **AUDITORÍA READ ONLY del código alojado `paypal-webhook` v30:** lee las cinco variables **genéricas** `PAYPAL_ENV`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID`, `PAYPAL_PLAN_ID`. Secrets de Supabase Edge tienen alcance global dentro del proyecto. Cambiarlas para F16 alteraría potencialmente el comportamiento de la función antigua; especialmente PAYPAL_ENV, que v30 usa para seleccionar Sandbox/Live. **PROHIBIDO modificar esas variables genéricas** durante F16.
+- **CORRECCIÓN IMPLEMENTADA SOLO EN RAMA, sin despliegue:** F16 fue aislada a `PAZO_F16_PAYPAL_ENV`, `PAZO_F16_PAYPAL_CLIENT_ID`, `PAZO_F16_PAYPAL_CLIENT_SECRET`, `PAZO_F16_PAYPAL_WEBHOOK_ID`, `PAZO_F16_PAYPAL_PLAN_ID`. `receiver.mjs` usa exclusivamente las claves namespaced y el `sandboxConfigPreflight.mjs` las exige. Plantilla `.env.example`, tests de configuración/composición y un nuevo test anti-regresión `f16WebhookDeploymentGate.test.mjs` prohíben claves genéricas. NO activar Live ni cambiar `paypal-webhook` v30.
+- Docs Supabase confirman inyección automática de `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`, reservados; no crear secretos `SUPABASE_`. Runbook actualizado: `docs/PAZO_F16_WEBHOOK_SANDBOX_DEPLOY_RUNBOOK_20261014.md`.
+- **NO SE HA TOCADO ningún secreto.** El conector Supabase no expone `list_secrets` ni `set_secrets`. Hosted Edge F16 sigue v1 INERTE con respuesta HTTP 503 y latch=false; cambios de namespace aún no se publicaron, se requiere nueva autorización de despliegue para activar después. PayPal webhook ID `6N7889790V1467139` sin cambios; cuatro tablas F16 alojadas con 0 filas, guard de membresías FALSE, PR #44 DRAFT.
+- Gate siguiente: revisar CI nuevo, solicitar aprobación PO independiente para configurar únicamente las claves F16 con nuevo prefijo mediante Supabase Secrets Dashboard/flujo seguro, nunca pegarlas aquí; validar existencia OAuth Sandbox sin escribir pagos, luego gate separado para desplegar/activar receptor y cambiar webhook. PayPal Simulator no acredita firma postback para eventos reales.
+
 ## F16 — PREFLIGHT DE SECRETOS SANDBOX (CÓDIGO, SIN CAMBIOS HOSTED) — 2026-10-13 LA
 
 - Se continuó ingeniería para siguiente gate pero **NO hay autorización nueva** para modificar secretos, cambiar webhook de PayPal ni activar función. El receptor F16 alojado **permanece v1 inerte, HTTP 503**, y `supabase/config.toml` tiene `enabled=false` y `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` en el entrypoint. PR #44 sigue DRAFT, sin merge.
