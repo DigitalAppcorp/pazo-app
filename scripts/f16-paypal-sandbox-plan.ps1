@@ -39,7 +39,13 @@ try {
         }
         if ($LASTEXITCODE -ne 0) {
             if ($Check -eq 'ApplyWebhook') {
-                Write-Warning 'Update was not verified. A PATCH may have reached PayPal. DO NOT retry before a read-only -Check Resources.'
+                if ($LASTEXITCODE -eq 2) {
+                    Write-Warning 'Preflight BLOCKED before PATCH. No PayPal mutation was attempted. Run read-only -Check Resources to inspect the mismatch.'
+                } elseif ($LASTEXITCODE -eq 3) {
+                    Write-Warning 'PATCH may have reached PayPal; outcome uncertain. DO NOT retry before read-only -Check Resources.'
+                } else {
+                    Write-Warning 'Update not verified; outcome uncertain. DO NOT retry before read-only -Check Resources.'
+                }
             } else {
                 Write-Warning 'Preflight BLOCKED or needs review. No PayPal data was changed.'
             }
