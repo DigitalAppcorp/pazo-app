@@ -1,5 +1,14 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
 
+## GATE F16 ANTIABUSO LOCAL IMPLEMENTADO (2026-10-14) — SOLO EN RAMA
+
+- **Autorización PO:** «sí» para endurecer receptor y pruebas **únicamente en GitHub**, sin desplegar, alterar PayPal/Supabase, cobrar ni acreditar membresías. Se consumió la autorización de ingeniería de rama exclusivamente.
+- **Implementación:** nuevo `supabase/functions/f16-paypal-webhook/workerAdmissionGate.mjs`; `core.mjs` exige cupo por isolate ANTES de llamadas remotas a PayPal y DB. Se permiten hasta 4 verificaciones activas y 60 por 60 s **en cada isolate**; denegación responde HTTP 503 `f16_worker_busy` con `Retry-After: 5`, nunca ACK 2xx ni escritura. Liberación de cupo con `finally` aun ante firma inválida, fallo remoto, duplicado o error DB. La inbox mantiene idempotencia persistida y la entrada de 65 KiB ya se valida antes.
+- **Pruebas adversariales:** `src/features/supporter/testing/f16WebhookAdmissionGate.test.mjs` (concurrencia, cuota temporal, fallo del proveedor/DB, duplicados, JSON inválido y fail-closed), `f16WebhookDeploymentGate.test.mjs` reforzado para prevenir retirada accidental. CI de rama previamente SUCCESS en [run #38523083336](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38523083336) y PG [#38523083350](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38523083350) sobre commit `e4013d8`. CI de los últimos commits documentales debe evaluarse aparte; no confundir código probado con HEAD actual.
+- **LÍMITE IMPORTANTE:** protección **local del worker, no global**; instancias nuevas pueden procesar más solicitudes, los ataques todavía generan invocaciones de Supabase y eventos legítimos pueden retrasarse. Deben definirse controles de ingreso/distribuidos, presupuesto/alertas, observabilidad minimizada y pruebas reales de reintentos antes de GO de activación. No se creó proveedor/costo ni se configuró gateway. Ver `docs/PAZO_F16_WEBHOOK_SANDBOX_DEPLOY_RUNBOOK_20261014.md`.
+- **Próximo gate recomendado:** arquitectura/operaciones del control global y presupuesto SIN activar; luego autorización nueva para activar exclusivamente `f16-paypal-webhook` Sandbox, seguida de otro GO separado para corregir webhook PayPal existente (actualmente `different_host`, faltan 3 eventos). El plan $2.99 y el webhook ID ya son PASS local, no pedir repetir. Mantener `PR #44 DRAFT` y `main` intacto.
+
+
 ## F16 — GATE DE RECURSOS EXISTENTES: PASS LOCAL / RECEPCIÓN NO-GO (2026-10-14)
 
 - **Evidencia nueva entregada por PO (salida saneada real del preflight local):** `-Check Resources` respondió `environment=sandbox`, `readOnly=true`, `resourcesAccessible=true`. El par de credenciales Sandbox ingresado **localmente** obtuvo OAuth y GET satisfactorios para el plan existente `P-14V25407JP6850922NLHMDKI` y el webhook `6N7889790V1467139`. Plan: `ACTIVE`, `USD 2.99`, `MONTH/1`, sin `issues` ni `warnings`. Webhook: `idMatches=true`.
