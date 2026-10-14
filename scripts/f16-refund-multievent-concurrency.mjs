@@ -41,18 +41,16 @@ function commit(id,token,refund,minor,status,time){
 const first='WH-RACE-REFUND-100', second='WH-RACE-REFUND-199'
 const t1=await claim(first),t2=await claim(second)
 const date1='2026-10-14T12:00:00Z',date2='2026-10-14T12:15:00Z'
-// Two workers may attempt final/refund in different orders. If the final
-// evidence reaches SQL first, it MUST fail until the earlier partial commits.
+// PayPal can already report REFUNDED for the whole sale when each unique
+// refund is fetched later. Both commits must succeed in either order; one
+// persists the intermediate 100/199 cent total and the other reaches 299.
 const results=await Promise.allSettled([
- commit(first,t1,'REFUND-RACE-100',100,'PARTIALLY_REFUNDED',date1),
+ commit(first,t1,'REFUND-RACE-100',100,'REFUNDED',date1),
  commit(second,t2,'REFUND-RACE-199',199,'REFUNDED',date2),
 ])
-if(results[0].status!=='fulfilled'||results[0].value!=='refund_recorded_partial')
- throw Error('Initial partial refund failed to settle')
-const final=results[1].status==='fulfilled'?results[1].value:
- await commit(second,t2,'REFUND-RACE-199',199,'REFUNDED',date2)
-if(final!=='refund_recorded_full')
- throw Error('Final refund not settled on safe retry')
+const settled=results.filter(x=>x.status==='fulfilled').map(x=>x.value).sort()
+if(settled.join('|')!=='refund_recorded_full|refund_recorded_partial')
+ throw Error('Out-of-order cumulative REFUNDED commits did not settle exactly once each')
 const id='WH-RACE-REFUND-DUP',token=await claim(id)
 const outcomes=await Promise.allSettled(Array.from({length:12},
  ()=>commit(id,token,'REFUND-RACE-100',100,'PARTIALLY_REFUNDED',date1)))
