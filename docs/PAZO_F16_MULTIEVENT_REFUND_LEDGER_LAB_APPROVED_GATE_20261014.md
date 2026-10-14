@@ -7,7 +7,7 @@
 **SQL DRAFT exclusivamente PostgreSQL 17 descartable:**
 
 - `supabase/queries/f16_refund_multievent_ledger_lab_DRAFT_DO_NOT_APPLY.sql` define `supporter_private.f16_lab_refund_events`: una fila privada por `refund_id` único, con ID de evento de PayPal, `original_sale_id`, `subscription_id`, USD, centavos, estado de PayPal y timestamp verificado. Sin pagador, email, tarjeta ni cuerpo de webhook.
-- `supporter_private.f16_lab_refund_sale_holds` mantiene una fila bloqueadora por venta original, importe acumulado de refunds únicos, contador de refunds y estado `partial` o `full`. Existe aunque la venta original aún no esté registrada.
+- `supporter_private.f16_lab_refund_sale_holds` mantiene una fila bloqueadora por venta original **y su suscripción exacta**, importe acumulado de refunds únicos, contador de refunds y estado `partial` o `full`. Existe aunque la venta original aún no esté registrada. Un reembolso de otra suscripción BOUND no puede mezclarse con ese hold, y la venta tardía con suscripción ajena también debe fallar atómicamente.
 - `public.f16_lab_commit_claimed_refund` exige lease UUID vigente, evento privado verificado `PAYMENT.SALE.REFUNDED`, firma/validación anterior realizada por servidor, intención `bound` a suscripción, moneda/centavos exactos y suma total no superior a 299. `PARTIALLY_REFUNDED` solo si el acumulado es menor a 299; `REFUNDED` solo cuando alcanza exactamente 299. Inserción de refund + hold de venta + bloqueo del ledger antiguo si existe + ACK son **una transacción**.
 - `public.f16_lab_commit_claimed_sale_v2` reutiliza la validación lease-bound de venta, y con la misma llave de advisory lock consulta hold previo para finalizar `blocked_reversal` si existió un refund antes que la venta. Las dos funciones financieras LAB antiguas de service_role (sale y reversal) se revocan **dentro de la misma transacción de instalación DRAFT**; no deja una vía para saltarse el bloqueo por refund. Las viejas RPC alojadas continúan sin modificar y son inseguras para un worker.
 - Dos lectores privados actualizados en `supabase/queries/f16_refund_multievent_readers_lab_DRAFT_DO_NOT_APPLY.sql`: las consultas de reversos conocidos detectan nuevos refunds y orphan refunds; la revisión de baja de cuenta cuenta los refunds vinculados por intención privada, incluso antes de registrar una venta.
@@ -17,7 +17,7 @@
 
 ## Pruebas y límites
 
-- `supabase/tests/supporter/f16-refund-multievent-ledger-synthetic.sql` ensaya refund 100 centavos + 199 centavos, replay de refund ID, exceso sobre 299 bloqueado sin ACK, refund completo antes de venta, venta tardía bloqueada, lease inválido y RLS, terminando con ROLLBACK.
+- `supabase/tests/supporter/f16-refund-multievent-ledger-synthetic.sql` ensaya refund 100 centavos + 199 centavos, replay de refund ID, exceso sobre 299 bloqueado sin ACK, intento entre suscripciones distintas, refund completo antes de venta, venta tardía bloqueada, lease inválido y RLS, terminando con ROLLBACK.
 - `supabase/tests/supporter/f16-refund-multievent-readers-synthetic.sql` protege la lectura de refund previo a venta durante borrado de cuenta; evita retornar un historial falsamente vacío.
 - `scripts/f16-refund-multievent-concurrency.mjs` usa exclusivamente la DB PG17 de GitHub Actions para carreras 100+199, reintento seguro tras orden invertido y doce llamadas concurrentes contra el mismo token/refund ID.
 - Suites Node verifican payload de refund ID/importe, respuesta `refund_recorded_partial`/`refund_recorded_full`, ausencia de beneficios y sanitización de fallos.
