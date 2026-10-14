@@ -8,6 +8,12 @@ El Product Owner escribió **«aprobado»** tras la propuesta de ledger multirre
 
 **Implementación de política offline:** `supabase/functions/f16-paypal-webhook/p06BenefitPolicyLab.mjs` devuelve exclusivamente instrucciones de revisión para un solo ciclo; todas las salidas niegan autorización directa de grant/revoke/billing y mantienen `paidThrough:null`. Pruebas en `src/features/supporter/testing/f16P06BenefitPolicyLab.test.mjs`. Referencia canónica de P06-A–E: `docs/PAZO_F16_P06_BENEFITS_AND_RETENTION_DECISION_GATE_20261014.md`.
 
+## P05 — Evaluación de evidencia terminada solo en laboratorio; decisión comercial pendiente
+
+La auditoría oficial PayPal confirmó que `billing_cycles[].frequency`, `subscription.billing_info.last_payment.time`, `next_billing_time` y el historial de `transactions` describen frecuencia, última fecha de cobro, siguiente fecha programada y pagos, **pero no acreditan por sí solos el periodo exacto cubierto por cada pago**. PayPal puede reintentar cobros fallidos y acumular saldos; cancelación puede hacer desaparecer `next_billing_time`. No usar `completedAt + 30 días`, ni un mes por cada `PAYMENT.SALE.COMPLETED` sin atribución de ciclo.
+
+Nuevo evaluador cerrado `supabase/functions/f16-paypal-webhook/p05BillingEvidenceLab.mjs` y pruebas `src/features/supporter/testing/f16P05BillingEvidenceLab.test.mjs`. Compara identidad BOUND/Auth verificada, fuente merchant PayPal Sandbox, plan mensual 2.99 USD, venta original comprobada y transacción concordante. Solo emite señales mínimas; **siempre `coverageReady:false`, `paidThrough:null`, `periodStart:null`, `periodEnd:null` y `entitlement:false`**. Informe: `docs/PAZO_F16_P05_BILLING_PERIOD_EVIDENCE_GATE_20261014.md`. **No se aprobó P05**, solo se probó qué fuentes son insuficientes; definir método de ciclos verificados con PO, PayPal y reglas contractuales antes de migración o acreditación.
+
 ## Principios ya acordados — no volver a decidir
 
 - Núcleo social y funciones de ayuda/rescate gratuitos. Membresía opcional «Amigo de PAZO» de **USD 2.99 mensuales** por PayPal, con insignia, estilos de perfil y muro de mascotas solo tras pago real acreditado; consentimientos por mascota y revocables.
