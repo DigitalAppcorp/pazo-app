@@ -380,3 +380,8 @@ El PO aprobó 90 días para identificadores de webhooks **tras conciliación def
 ### F16 — Ledger PayPal únicamente en pruebas aisladas
 
 Se preparó **solo SQL de laboratorio**, no instalado en Supabase alojado: `paypal_payment_entries` (ID opaco de pago, ID opaco de suscripción, owner UUID de fixture, plan, USD, monto en centavos, fecha y estado bloqueado/no acreditado) y `paypal_payment_reversals` (ID opaco de pago, tipo y fecha de reversión). Ningún nombre, correo de PayPal, tarjeta, payload completo ni secreto. En caso de reversión previa, el registro del pago queda bloqueado. **No se están recolectando datos reales mediante este prototipo.** Retención financiera, vínculo real de identidad, baja de cuenta y obligación contable siguen pendientes; la retención aprobada de 90 días aplica solo a webhooks conciliados. Evidencia: `docs/PAZO_F16_FINANCIAL_LEDGER_LAB_GATE_20261013.md`.
+
+
+### F16 — Intenciones de suscripción (solo prototipo sintético)
+
+Prototipo de PostgreSQL descartable `paypal_subscription_intents`: identificador de correlación, UUID Auth del propietario, proveedor `paypal`, plan Sandbox, estado y referencia opaca de suscripción tras vinculación. Se utilizan **únicamente IDs y dueños sintéticos** de pruebas; ninguna colección ni almacenamiento nuevo en Supabase alojado. Deben crearse desde una sesión Auth verificada en backend y contrastarse con la API PayPal antes de guardar; no confiar en metadatos editables ni en valores del navegador. Sin nombres reales, correos, documentos, datos de tarjeta, importes por usuario, beneficios ni cobertura. **Retención/expiración de intenciones todavía no decidida**, distinta de los 90 días aprobados para webhooks conciliados. Fuente: `docs/PAZO_F16_OWNER_BINDING_LAB_GATE_20261013.md`.
