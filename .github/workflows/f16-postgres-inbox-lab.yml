@@ -261,3 +261,16 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_refund_multievent_ledger_lab_DRAFT_DO_NOT_APPLY.sql
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-multievent-ledger-synthetic.sql
           echo 'PASS F16: unique refunds, owner binding, cumulative minor, late sale hold'
+
+      - name: F16 multi-refund private read and deletion audit - disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_refund_multievent_readers_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-multievent-readers-synthetic.sql
+          echo 'PASS F16: refund-before-sale visible to private reviewer; no new public ACL'
