@@ -1,5 +1,9 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## ESTADO VIGENTE: CHATGPT EJECUTOR ÚNICO, PAYPAL HOST EN AUDITORÍA (2026-10-14)
+
+El PO finalizó el experimento con Codex: **las siguientes instrucciones locales se dirigirán directamente al propietario**, sin agentes intermediarios. Migración F16 de once eventos **`20261014094349`** y Edge F16 Sandbox **v13** están aplicadas y verificadas; **no repetir**. El webhook PayPal existente NO fue modificado; URL anterior categorizada como `different_host` y propiedad, categoría y dependencias continúan `desconocidas`. La sesión Developer requiere login/passkey local del propietario. Tras login, inspeccionar únicamente en modo lectura, sin visitar callback ni usar Resend. Mantener `$F16ElevenEventBackendReady = $false` en `ApplyWebhook` hasta revisión explícita de seguridad sobre el destino anterior. Snapshot corto: `docs/PAZO_ACTIVE_HANDOFF.md`; registro histórico: `docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_THROUGH_20261014.md`.
+
 ## BLOQUEO DE ACCESO ACTUAL — PAYPAL DEVELOPER LOGIN PENDIENTE (2026-10-14)
 
 - **Checkpoint Codex:** `git pull --ff-only` PASS, checkout `C:\Users\osori\PAZO-F13-preview`, rama `f13/section-titles-20261012`, HEAD `f492c5951dcb85ba330d883cbb4a5a5b16e0e9fd`, cambios locales 0. Ningún script ni infraestructura ejecutados.
