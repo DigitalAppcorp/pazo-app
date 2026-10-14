@@ -35,7 +35,7 @@ BEGIN
  IF v IS NULL OR v->>'id'<>i OR v->>'owner_id'<>a::text OR
     v->>'external_subscription_id'<>'I-READ-BOUND-QA' OR
     v->>'state'<>'bound' OR
-    pg_catalog.jsonb_object_length(v)<>6
+    (SELECT count(*) FROM pg_catalog.jsonb_object_keys(v))<>6
  THEN RAISE EXCEPTION 'Service bound owner projection mismatch'; END IF;
  IF public.f16_lab_read_bound_intent_by_subscription('I-NOTFOUND-QA') IS NOT NULL
  THEN RAISE EXCEPTION 'Nonexistent subscription returned owner'; END IF;
