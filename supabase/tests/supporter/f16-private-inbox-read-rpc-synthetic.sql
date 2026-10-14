@@ -1,6 +1,12 @@
 -- F16 service-only RPC synthetic security test. NEVER run on PAZO hosted.
 \set ON_ERROR_STOP on
 BEGIN;
+-- Earlier disposable migration tests intentionally leave synthetic ledger
+-- fixtures. Verify this READ-only RPC test changes NONE of those fixtures.
+CREATE TEMP TABLE f16_read_financial_before ON COMMIT DROP AS
+ SELECT
+   (SELECT count(*)::bigint FROM supporter_private.paypal_payment_entries) AS payments,
+   (SELECT count(*)::bigint FROM supporter_private.paypal_payment_reversals) AS reversals;
 DO $preflight$
 BEGIN
  IF current_database()<>'f14_synthetic' OR session_user<>'f14_admin'
@@ -71,9 +77,11 @@ END $auth$;
 SET LOCAL ROLE postgres;
 DO $economy$
 BEGIN
- IF (SELECT COUNT(*) FROM supporter_private.paypal_payment_entries) <> 0
- OR (SELECT COUNT(*) FROM supporter_private.paypal_payment_reversals) <> 0
- THEN RAISE EXCEPTION 'Read test unexpectedly wrote payment ledger'; END IF;
+ IF (SELECT COUNT(*) FROM supporter_private.paypal_payment_entries)
+       <> (SELECT payments FROM f16_read_financial_before)
+ OR (SELECT COUNT(*) FROM supporter_private.paypal_payment_reversals)
+       <> (SELECT reversals FROM f16_read_financial_before)
+ THEN RAISE EXCEPTION 'Read test altered existing synthetic financial ledger'; END IF;
  IF supporter_private.wall_has_verified_entitlement(NULL::uuid)
  THEN RAISE EXCEPTION 'Read test granted entitlement'; END IF;
 END $economy$;
