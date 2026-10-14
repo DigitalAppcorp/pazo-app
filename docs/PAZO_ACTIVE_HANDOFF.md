@@ -10,6 +10,13 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate F16 — Edge Function PayPal ya desplegada, NO apta para membresía (2026-10-13)
+
+- Auditoría READ ONLY con conector Supabase al proyecto `mrybvqdebbgcayuvgkkr`: Edge Function `paypal-webhook` **ACTIVE, v30, verify_jwt=false**. Ruta de invocación convencional: `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook`. **NO CONFIRMADO** que la URL del webhook PayPal ID `6N7889790V1467139` apunte a ella. Enlace de Dashboard proporcionado por PO NO es URL de callback.
+- Riesgos graves confirmados por el código desplegado: escribe `public.profiles.is_founder` como `subscription.status==='ACTIVE'`, confundiendo insignia fundador con membresía; carece de comprobación de cobros, meses, reversos e idempotencia; `PAYPAL_ENV` desconocido/ausente selecciona **Live** por defecto. Usa postback oficial para firma (punto positivo), pero ese control NO reemplaza la conciliación.
+- **BLOQUEO DE SEGURIDAD:** NO agregar aún los tres eventos faltantes, NO despliegue/sobreescritura de la función v30, NO mutar Supabase ni emitir entitlements. Antes: confirmar destino del webhook en PayPal, preparar sustitución segura y tests en rama; gate explícito para SQL, secrets, deploy y cambios PayPal. Fuente de verdad y plan de mitigación: `docs/PAZO_F16_EXISTING_SUPABASE_PAYPAL_WEBHOOK_AUDIT_20261013.md`.
+- Plan Sandbox P-14V25407JP6850922NLHMDKI ya PASS 2.99 USD mensual, no reabrir verificación.
+
 ## Gate operativo F16 — Webhook Sandbox EXISTENTE, eventos incompletos (2026-10-13)
 
 - El Product Owner ejecutó el preflight autenticado de **solo lectura** para webhooks con la misma app Sandbox. Salida verificada por informe del PO: `environment=sandbox`, `ok=false`, `status=needs_webhook_configuration`, `count=1`, candidato `webhookId=6N7889790V1467139`, `httpsUrl=true`. No crear segundo webhook ni afirmar que no existe ninguno.
