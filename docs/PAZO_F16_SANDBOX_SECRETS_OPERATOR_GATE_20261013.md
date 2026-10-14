@@ -2,7 +2,20 @@
 
 **Gate del PO:** autorizó configurar los cinco secretos **exclusivos F16**, sin activar Edge, mover webhook, cambiar el plan, cobrar ni conceder membresías.
 
-**Estado de ejecución:** preparación y guía completadas, **ingreso de secretos en Supabase PENDIENTE**. El conector Supabase de ChatGPT permite auditar funciones, pero actualmente **no dispone de acciones para escribir ni listar secretos Edge**. No declarar la configuración completada sin comprobación posterior en la interfaz. Nunca pedir credenciales en este chat ni ponerlas en GitHub, CI, documentos, screenshots o consola.
+**Estado de ejecución:** usuario confirmó cinco secretos guardados en Supabase; valores y OAuth aún no verificados técnicamente. El conector Supabase de ChatGPT permite auditar funciones, pero actualmente **no dispone de acciones para escribir ni listar secretos Edge**. No declarar la configuración completada sin comprobación posterior en la interfaz. Nunca pedir credenciales en este chat ni ponerlas en GitHub, CI, documentos, screenshots o consola.
+
+## Confirmación del Product Owner — cinco secretos guardados (2026-10-13 LA)
+
+El usuario confirmó expresamente: **«listo, implementadas las 5»**. Se registra como **confirmación del operador de que guardó cinco variables en Supabase**. El conector Supabase actual no lista ni revela secretos; por lo tanto, la existencia, los valores, la cuenta mercantil Sandbox y el éxito de OAuth **NO ESTÁN VERIFICADOS TÉCNICAMENTE**. No usar esta confirmación como prueba de autenticación PayPal o autorización de recepción.
+
+### Preflight posterior a su confirmación
+
+- Hosted `f16-paypal-webhook`: versión **6** según `list_edge_functions`, `verify_jwt=false`. Fuente alojada inspeccionada con `get_edge_function`: `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`, responde `f16_receiver_not_released`; **inactiva para procesar webhooks**. Su `receiver.mjs` todavía lee nombres genéricos `PAYPAL_*` porque es código de despliegue anterior.
+- Branch GitHub `f13/section-titles-20261012`: `receiver.mjs` y `sandboxConfigPreflight.mjs` exigen los **nombres aislados** `PAZO_F16_PAYPAL_*`; no se ha redeplegado este nuevo código, y el latch permanece apagado.
+- En Supabase alojado, las cuatro tablas F16 siguen con **0 filas** y `wall_has_verified_entitlement(NULL)=false`.
+- Los secretos genéricos que usa `paypal-webhook` legacy v35 y la URL/eventos en PayPal **no se han modificado en esta operación por el asistente**.
+
+**Siguiente gate de despliegue, requiere autorización PO independiente:** publicar la versión namespaced manteniendo explícitamente `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`; probar 503 y cero escrituras sin acceder a credenciales. Un gate separado posterior deberá verificar en servidor el OAuth de Sandbox de forma protegida y sin mostrar secretos; activar el webhook, modificar el destino PayPal, procesar cobros o dar membresías no están autorizados.
 
 ## Dónde se introducen
 
