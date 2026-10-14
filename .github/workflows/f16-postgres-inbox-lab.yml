@@ -128,7 +128,7 @@ jobs:
           echo 'Testing CLI-generated F16 global budget migration ONLY on disposable PostgreSQL'
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -c 'SET ROLE postgres;' \
-            -f supabase/migrations/20261014070015_f16_global_webhook_admission.sql
+            -f supabase/migrations/20261014073658_f16_global_webhook_admission.sql
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/f16-global-webhook-admission-synthetic.sql
           node scripts/f16-global-budget-concurrency.mjs
