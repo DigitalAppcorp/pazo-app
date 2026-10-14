@@ -10,6 +10,12 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate F16 — Auditoría READ ONLY del catálogo SQL y diseño de esquema privado (2026-10-13)
+
+- Auditoría real **solo lectura** en Supabase `mrybvqdebbgcayuvgkkr`: `supporter_private` contiene `wall_consents` (0 filas reportadas en lectura), sin tablas de pagos/ledger/subscriptions/webhooks en `public` o `supporter_private`; `supporter_private.wall_has_verified_entitlement(p_owner_id uuid)` permanece como guard y no hay RPC `f16_paypal_record_verified_event`. Se usaron `list_tables` y SELECT de catálogos únicamente, cero cambios en BD.
+- **Esquema candidato documentado, NO MIGRACIÓN NI SQL APLICADO**: `docs/PAZO_F16_PRIVATE_PAYMENT_SCHEMA_PREFLIGHT_20261013.md`, define propuesta de `subscription_intents`, inbox idempotente, ledger por payment_id único, reversal tombstones y períodos diferidos. Retención/derecho de supresión y período pagado aún NO DECIDIDOS; nunca deducir el período de webhook o ACTIVE.
+- CI del pipeline event → intent → subscription/transaction → candidate (NO ENTITLEMENT) **SUCCESS** en run `38503385005` commit `7924ca0`, pruebas offline. PR #44 DRAFT, sin deploy, PayPal sin cambios. Próximo: resolver diseño de retención/cobertura, generar migración con CLI local y pruebas PostgreSQL aisladas; gate de autorización PO antes de aplicar Supabase, secretos, despliegue o webhook.
+
 ## Gate F16 — Conciliador de transacciones PayPal SOLO LECTURA (2026-10-13)
 
 - Autorización vigente: trabajo de implementación en código GitHub, no Supabase ni PayPal alojados. PR #44 DRAFT, rama `f13/section-titles-20261012`. Último gate anterior: OAuth/Plan Sandbox PASS `P-14V25407JP6850922NLHMDKI` ACTIVE USD 2.99 mensual; webhook Sandbox existente `6N7889790V1467139` apunta a `supabase.com/dashboard` y carece de 3 `PAYMENT.SALE.*`. Función vieja `paypal-webhook` v30 activa pero insegura para F16. **No repetir estos diagnósticos y no cambiar URLs ni deployed v30.**
