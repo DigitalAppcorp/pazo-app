@@ -1,5 +1,13 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
 
+## F16 — EDGE v11 INERTE DESPLEGADA Y HTTP REAL 503 PASS (2026-10-14 UTC)
+
+- **GO explícito PO «sí» consumido exclusivamente para desplegar una nueva versión INERTE** de `f16-paypal-webhook` en Supabase proyecto `mrybvqdebbgcayuvgkkr`. **Nuevo receptor v11 ACTIVE en infraestructura, pero DESACTIVADO en lógica** por `const F16_SANDBOX_RECEIVER_RELEASE_APPROVED = false`; `verify_jwt=false` preservado por la excepción de webhook externo, sin autenticación PayPal procesada por la barrera.
+- Bundle desplegado exacto desde HEAD GitHub previo `4c6324f8e4fb196835dcf20f9ef957a566f24be2`: `index.ts`, `receiver.mjs`, `core.mjs`, `paypalSandboxPostback.mjs`, `paypalInboxAdapter.mjs`, `sandboxConfigPreflight.mjs`, `workerAdmissionGate.mjs`, `globalAdmissionAdapter.mjs`. `get_edge_function` comprobó 8/8 archivos coincidentes **byte a byte** con GitHub, sin modificaciones en runtime.
+- **HTTP REAL de comprobación, no mock:** workflow de GitHub Actions de un solo uso [#38531593132](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38531593132) **SUCCESS**: GET → HTTP 503 `f16_receiver_not_released`; POST → HTTP 503 `f16_receiver_not_released`. Workflow efímero `f16-inert-v11-smoke-once.yml` eliminado posteriormente, no dejar test temporal permanente ni reclamar que se ensayó firma.
+- **Postflight Supabase READ ONLY:** cuatro tablas financieras F16 con **0 filas**, presupuesto global instalado con **0 admisiones**, `wall_has_verified_entitlement(NULL)=false`; el legado `paypal-webhook` permanece versión **35**, sin tocar. El webhook PayPal existente ID `6N7889790V1467139` conserva destino `different_host` y faltan 3 eventos SALE; no se modificó.
+- **NO-GO restante:** v11 inerte no autentica webhooks reales, no genera pagos y no valida recuperación 503. Requiere autorización PO distinta para cambiar el latch/desplegar receptor Sandbox ACTIVO; otro GO independiente para editar destino y lista de eventos del webhook EXISTENTE; luego prueba real PayPal Sandbox antes de cualquier ledger/checkout/entitlement. PayPal Live continúa bloqueado. PR #44 sigue DRAFT, sin merge ni Vercel. La afirmación histórica «Edge v10» de secciones inferiores se sustituye con esta auditoría.
+
 ## F16 — REENTREGA Y RECUPERACIÓN DE WEBHOOKS: AUDITORÍA SIN ACTIVACIÓN (2026-10-14)
 
 - **Orden PO:** «ok sigamos» después del SQL global PASS; alcance conservador = revisar respuesta HTTP/reintentos y preparar recuperación, no activar funciones ni PayPal. Una nueva prueba automatizada propuesta fue **bloqueada por controles de seguridad de la plataforma**; no se eludió el bloqueo ni se reclama PASS de esa prueba.
