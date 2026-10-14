@@ -10,6 +10,12 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate operativo F16 — Plan PayPal Sandbox VALIDADO (2026-10-13)
+
+- **PASS obtenido por el PO en Windows y compartido en chat (2026-10-13):** el preflight autenticado devolvió `environment=sandbox`, `ok=true`, `issues=[]`, `warnings=[]`, plan `P-14V25407JP6850922NLHMDKI` `ACTIVE`, `USD 2.99`, `MONTH/1`. Gate plan **SUPERADO**; OAuth 401 previo resuelto. No pedir repetir lo ya verificado, nunca solicitar secretos/tokens en chat.
+- **Siguiente gate F16: Webhooks Sandbox (NO VERIFICADOS).** Implementado preflight **READ ONLY**, con comando `powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\\scripts\\f16-paypal-sandbox-plan.ps1 -Check Webhooks` tras pull limpio. Solo consulta `GET /v1/notifications/webhooks` de esa app; analiza eventos de suscripciones, lista IDs (no URLs), no crea ni modifica nada. Si no hay webhook, diseñar listener/registro con autorización aparte. Si existe, comprobar seguridad/entrega real antes de activar membresías.
+- Documentación de contrato: `docs/PAZO_F16_PAYPAL_RECONCILIATION_MODEL_20261013.md`. PR #44 DRAFT, no merge, nada Live, sin cambios Supabase ni cobros autorizados.
+
 ## Gate operativo F16 — Plan PayPal Sandbox identificado (2026-10-13)
 
 - **Plan ID Sandbox entregado por el PO:** `P-14V25407JP6850922NLHMDKI`. ID no secreto; **aún NO verificado contra PayPal**. El PO declara que ya existen app/API Sandbox, plan de suscripción y medios de pago configurados; NO crear recursos duplicados.
