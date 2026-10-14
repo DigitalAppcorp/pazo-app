@@ -68,3 +68,14 @@ jobs:
             exit 1
           fi
           echo "PASS F16: 0 eligible events, 4 held, 4 nonterminal; no mutation"
+
+      - name: F16 private ledger + reversal order tests in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-financial-ledger-lab-draft.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-financial-ledger-synthetic.sql
+          node scripts/f16-postgres-ledger-concurrency.mjs
+          echo 'PASS F16: ledger remains private, reversible and cannot grant entitlement'
