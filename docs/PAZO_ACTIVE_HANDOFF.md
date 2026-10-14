@@ -29,6 +29,13 @@ El Product Owner **dio por terminado el experimento de coordinación con Codex**
 - **Siguiente gate abierto:** validación de una **entrega real firmada PayPal Sandbox**, bajo GO específico del PO antes de generar cualquier suscripción o evento. El simulador PayPal crea mock eventos que NO pueden pasar la verificación postback utilizada por F16; no usarlo como criterio PASS. Contrastar PayPal entrega vs inbox seguro y ninguna concesión premium. Referencia `docs/PAZO_F16_PAYPAL_WEBHOOK_PATCH_CLOSEOUT_20261014.md`.
 - **Sin más cambios económicos:** Live, checkout, pagos reales, membresías, ledger y beneficiarios OFF. PR #44 permanece Draft; no merge ni Vercel.
 
+## F16 — Prueba REAL Sandbox: GO del PO, ejecución pendiente (2026-10-14)
+
+- El PO respondió «si» a **una sola suscripción de prueba con comprador Sandbox, recepción real firmada y cancelación**, sin dinero real, PayPal Live, checkout abierto ni entitlements. No repetir PATCH del webhook ni migración/Edge (ya PASS).
+- Intenté preparar/publicar ejecutor local de una sola prueba, pero la publicación fue bloqueada por controles de seguridad; NO se creó ningún script de compra ni suscripción PayPal. No eludir ese bloqueo. Tampoco existe conexión autorizada PayPal en mis herramientas; no manipular credenciales en chat/GitHub.
+- Auditoría Supabase alojada solo lectura después del GO: Edge `f16-paypal-webhook` v13 ACTIVE, inbox 0, intenciones 0, pagos 0, reversos 0, admisiones 0. No afirmar entrega auténtica; esto no equivale a falla.
+- Nuevo documento canónico: `docs/PAZO_F16_AUTHENTIC_SANDBOX_EVENT_TEST_GATE_20261014.md`, estado AUTORIZADO / PENDIENTE. Próximo requisito del PO: comprobar si dispone de cuenta **Personal Sandbox buyer** distinta de comerciante en Developer → Testing Tools → Sandbox Accounts. No pedir email/contraseña. Solo ejecutar create/cancel por una vía local aislada permitida con recuperación garantizada; no simular evento mock porque falla verificación de firma postback.
+
 ## 5. Otros temas abiertos que no deben romper F16
 
 - F13 Mapbox inmersivo **opción 3** aprobada: mapa sin contenedor, bordes difuminados, búsqueda/filtros flotantes, tarjetas en carrusel horizontal; tarjeta solo centra mapa, pin 2D/3D abre panel animado. Código y CI anteriores PASS, QA final runtime de ese ajuste pendiente. Ver `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`.
