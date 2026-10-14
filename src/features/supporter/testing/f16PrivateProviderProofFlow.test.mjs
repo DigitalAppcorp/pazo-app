@@ -122,11 +122,14 @@ test('refund must re-read independent refund event, original refund, original sa
  assert.deepEqual(x.calls,['claim','event','refund_event','refund','original',
   'transactions','intent','auth','commit_reversal'])
 })
-test('partial refund creates conservative tombstone only if refund amount and provider history match',async()=>{
+test('partial refund remains unprocessed while multiple refund events lack separate ledger rows',async()=>{
  const x=setup({kind:refundRef.eventType,txStatus:'PARTIALLY_REFUNDED',
    refund:{refundMinorUnits:100}})
- assert.equal((await x.flow.process(refundRef,WINDOW)).recorded,true)
- assert.equal(x.calls.includes('commit_reversal'),true)
+ const result=await x.flow.process(refundRef,WINDOW)
+ assert.deepEqual(result,{recorded:false,entitlement:false,
+   reason:'partial_refund_ledger_not_ready'})
+ assert.equal(x.calls.includes('commit_reversal'),false)
+ assert.equal(x.calls.at(-1),'release')
 })
 test('refund original mismatch, pending refund, history ambiguity and event spoof fail closed',async()=>{
  for(const change of [
