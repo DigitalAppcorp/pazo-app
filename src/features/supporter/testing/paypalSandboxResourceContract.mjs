@@ -44,7 +44,7 @@ export function assessF16SandboxResources(plan,webhook,officialCatalog=null) {
   const catalogValid=catalogTypes!==null &&
     catalogTypes.length>0 && catalogTypes.length<=500 &&
     catalogTypes.every(t=>typeof t?.name==='string')
-  const documentedEventPattern=/^[A-Z][A-Z0-9-]*(?:\\.[A-Z][A-Z0-9-]*){1,5}$/
+  const documentedEventPattern=/^[A-Z][A-Z0-9-]*(?:\.[A-Z][A-Z0-9-]*){1,5}$/
   const available=catalogValid?
     new Set(catalogTypes.map(t=>t.name).filter(n=>n.length<=128&&documentedEventPattern.test(n))):
     new Set()
