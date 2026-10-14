@@ -1,8 +1,21 @@
 # PAZO F16 — Runbook de despliegue SEGURO del nuevo receptor PayPal Sandbox
 
+## F16 — SQL GLOBAL APLICADO EN SUPABASE, RECEPTOR INERTE (2026-10-14)
+
+- Autorización explícita PO «sí»: **únicamente SQL**. `apply_migration` PASS con el contenido exacto de la migración originalmente denominada `20261014070015_f16_global_webhook_admission.sql` (blob `e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8`).
+- Supabase registra versión **`20261014073658`**, nombre **`f16_global_webhook_admission`**. La fuente se renombró en GitHub a `supabase/migrations/20261014073658_f16_global_webhook_admission.sql`, preservando los mismos bytes SQL y actualizando CI. La versión original `20261014070015` nunca se registró; **NO reejecutar ni duplicar**.
+- Postflight alojado: tabla privada de 2 filas; RLS forzada; propietario de tabla/función `postgres`; RPC SECURITY DEFINER y search_path vacío; `anon` y `authenticated` sin EXECUTE, `service_role` con EXECUTE; los tres roles sin permisos directos de tabla. Cuatro tablas financieras con 0 filas; entitlement FALSE.
+- `f16-paypal-webhook` alojada sigue en versión 10, `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`; código de rama nuevo NO desplegado. PayPal Sandbox/Live, webhook, checkout, secret variables, cargos, membresías y otras Edge sin intervención.
+- **Riesgo residual:** presupuesto global DB limita trabajo saliente pero NO invocaciones Edge ni asegura recuperación ante 503. Próximo gate separado: proteger la recepción y demostrar recuperación/idempotencia Sandbox antes de desplegar; cambio de URL/eventos de PayPal requiere otra autorización distinta. PR #44 sigue DRAFT.
+- Los avisos históricos inferiores «SQL pendiente/no aplicado» describen estados anteriores y quedan sustituidos por este bloque.
+
+
+**Actualización del runbook:** la migración de cuota global YA está aplicada. No seguir instrucciones históricas de aplicar esta migración otra vez. La Edge F16 continúa bloqueada. Para activar, auditar reintentos/limites y desplegar una versión nueva bajo GO separado.
+
+
 ## Actualización prioritaria — Migración SQL CLI F16 preparada (2026-10-14)
 
-- La migración `20261014070015_f16_global_webhook_admission.sql` está en GitHub (PR #44), pero NO se aplicó en Supabase alojado. Se generó su nombre con la CLI oficial Supabase en un runner aislado y se eliminó el workflow temporal.
+- La migración `20261014073658_f16_global_webhook_admission.sql` está en GitHub (PR #44), pero NO se aplicó en Supabase alojado. Se generó su nombre con la CLI oficial Supabase en un runner aislado y se eliminó el workflow temporal.
 - La CI prueba el archivo versionado exacto y los controles de permisos/ventanas/concurrencia en PostgreSQL 17 descartable. El nuevo preflight `supabase/queries/f16_global_admission_preflight_READ_ONLY.sql` solo inspecciona estado/ACL/RLS, sin datos personales ni cambios.
 - El riesgo residual de llamadas HTTP que cuentan en la cuota Supabase Free y denegación de eventos legítimos mediante agotamiento deliberado de presupuesto sigue abierto. Ningún presupuesto global es un firewall. La recuperación por reintentos y conciliación aún necesita pruebas Sandbox reales.
 - Próximo GO separado: aplicar SOLO el SQL versionado, manteniendo Edge inerte y sin tocar PayPal. Ver `docs/PAZO_F16_GLOBAL_ADMISSION_SQL_GATE_20261014.md` para pre/postflight y rollback.
@@ -16,7 +29,7 @@
 - Límites técnicos tentativos: **30 intentos por minuto, 2,000 por día**, compartidos entre instancias que usen la misma base. El contador se reinicia por ventana UTC. Estos umbrales no son límites de Supabase ni decisión definitiva del PO; su activación requiere aprobación específica considerando retrasos de webhooks legítimos.
 - `globalAdmissionAdapter.mjs` usa la clave server-side solamente con RPC POST de host Supabase fijo; `receiver.mjs` lo exige en el ensamblaje futuro; `core.mjs` hace la admisión después del control barato worker-local y antes del OAuth/firma/inbox. Si no existe la RPC, está inaccesible, saturada, o responde algo distinto de booleano, devuelve **503 reintentable**, sin PayPal, datos persistidos ni ACK 2xx. Se ha añadido rechazo previo de certificados/algoritmos obviamente no válidos antes de gastar presupuesto.
 - El laboratorio CI descartable ejecuta ACL/RLS/owner, 30 admisiones de ventana, cuota diaria, recuperación y 40 procesos PostgreSQL paralelos; también hay pruebas sintéticas de adaptador y test de contrato que obliga al receptor futuro a llevar el guard global. No se utiliza una clave de Supabase alojado, no se crean datos reales ni se despliega una función Edge.
-- **Migración SQL versionada PREPARADA, NO APLICADA:** `supabase/migrations/20261014070015_f16_global_webhook_admission.sql`, nombre generado mediante Supabase CLI 2.120.0 en GitHub Actions. El CI ejecuta este archivo exacto en PostgreSQL 17 descartable. No está instalado en PAZO alojado. Para aplicar solo SQL se requiere autorización independiente del PO; el receptor v10 seguirá inerte. Procedimiento y reversión: `docs/PAZO_F16_GLOBAL_ADMISSION_SQL_GATE_20261014.md`.
+- **Migración SQL versionada PREPARADA, NO APLICADA:** `supabase/migrations/20261014073658_f16_global_webhook_admission.sql`, nombre generado mediante Supabase CLI 2.120.0 en GitHub Actions. El CI ejecuta este archivo exacto en PostgreSQL 17 descartable. No está instalado en PAZO alojado. Para aplicar solo SQL se requiere autorización independiente del PO; el receptor v10 seguirá inerte. Procedimiento y reversión: `docs/PAZO_F16_GLOBAL_ADMISSION_SQL_GATE_20261014.md`.
 
 **Lo que NO protege**: cualquier HTTP que llegue al endpoint continúa contando como invocación, incluso si devuelve 503; la cuota global añade una consulta a DB por solicitud sintácticamente plausible y un atacante puede intentar agotar los 30 cupos/minuto enviando falsificaciones. No es firewall ni autenticación del emisor; solo la verificación posterior de la firma PayPal acredita autenticidad. El límite por trazas recursivas de Edge Functions no cubre tráfico de entrada (https://supabase.com/docs/guides/functions/recursive-functions). La red de Edge puede generar múltiples isolates (https://supabase.com/docs/guides/troubleshooting/edge-function-cpu-limits).
 

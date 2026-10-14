@@ -1,11 +1,24 @@
 # PAZO F16 — Gate de instalación de cuota global de webhooks Sandbox
 
+## F16 — SQL GLOBAL APLICADO EN SUPABASE, RECEPTOR INERTE (2026-10-14)
+
+- Autorización explícita PO «sí»: **únicamente SQL**. `apply_migration` PASS con el contenido exacto de la migración originalmente denominada `20261014070015_f16_global_webhook_admission.sql` (blob `e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8`).
+- Supabase registra versión **`20261014073658`**, nombre **`f16_global_webhook_admission`**. La fuente se renombró en GitHub a `supabase/migrations/20261014073658_f16_global_webhook_admission.sql`, preservando los mismos bytes SQL y actualizando CI. La versión original `20261014070015` nunca se registró; **NO reejecutar ni duplicar**.
+- Postflight alojado: tabla privada de 2 filas; RLS forzada; propietario de tabla/función `postgres`; RPC SECURITY DEFINER y search_path vacío; `anon` y `authenticated` sin EXECUTE, `service_role` con EXECUTE; los tres roles sin permisos directos de tabla. Cuatro tablas financieras con 0 filas; entitlement FALSE.
+- `f16-paypal-webhook` alojada sigue en versión 10, `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`; código de rama nuevo NO desplegado. PayPal Sandbox/Live, webhook, checkout, secret variables, cargos, membresías y otras Edge sin intervención.
+- **Riesgo residual:** presupuesto global DB limita trabajo saliente pero NO invocaciones Edge ni asegura recuperación ante 503. Próximo gate separado: proteger la recepción y demostrar recuperación/idempotencia Sandbox antes de desplegar; cambio de URL/eventos de PayPal requiere otra autorización distinta. PR #44 sigue DRAFT.
+- Los avisos históricos inferiores «SQL pendiente/no aplicado» describen estados anteriores y quedan sustituidos por este bloque.
+
+
+**Estado de este gate: cerrado, SOLO SQL.** El plan original de pasos de aplicación inferior queda archivado. La instalación de la función/receptor y cualquier corrección de PayPal siguen pendientes de nuevos GO.
+
+
 **Estado: PREPARADO Y VALIDADO EN LABORATORIO. NO INSTALADO EN SUPABASE.**
 **Autorización PO vigente:** crear y verificar código, pruebas y migración en GitHub. NO autorizó ejecutar DDL alojado, cambiar PayPal, desplegar Edge, activar checkout, crear cargos ni entregar membresías.
 
 ## Artefactos y dependencia estricta
 
-- Migración CLI versionada: `supabase/migrations/20261014070015_f16_global_webhook_admission.sql`. Nombre generado con Supabase CLI 2.120.0 en GitHub Actions de un solo uso [#38525547649](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38525547649); el generador temporal se eliminó.
+- Migración CLI versionada: `supabase/migrations/20261014073658_f16_global_webhook_admission.sql`. Nombre generado con Supabase CLI 2.120.0 en GitHub Actions de un solo uso [#38525547649](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38525547649); el generador temporal se eliminó.
 - `supabase/queries/f16_global_admission_preflight_READ_ONLY.sql`: confirma solo existencia/ACL/RLS/propietario, sin leer personas ni transacciones. Pre-migración debe devolver tabla/rpc ausentes; pos-migración debe comprobar `t|t|t|t|f|f|t` para los siete indicadores en orden.
 - `.github/workflows/f16-postgres-inbox-lab.yml` aplica la **misma migración** contra PostgreSQL 17 descartable e inspecciona ACL/RLS, límite diario y minuto, y 40 intentos simultáneos.
 - Código F16 preparado: `globalAdmissionAdapter.mjs` + `workerAdmissionGate.mjs`, con dependencia cerrada en `receiver.mjs` y `core.mjs`. Ninguno está desplegado en el receptor alojado v10.
