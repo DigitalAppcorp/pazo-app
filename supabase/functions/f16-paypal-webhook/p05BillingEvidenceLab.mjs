@@ -42,6 +42,13 @@ export function assessF16P05BillingFacts({
   subscription.plan_id!==PAZO_SANDBOX_PLAN||
   subscription.custom_id!==intent.id)
   return no('subscription_owner_mismatch')
+ // PayPal can override plan attributes for one subscription. Checking
+ // only GET /plans/{id} is insufficient to establish that THIS specific
+ // agreement has the expected monthly amount and cycle.
+ if(subscription.plan_overridden!==false)
+  return no('subscription_plan_override_unverified')
+ if(subscription.quantity!==undefined&&subscription.quantity!=='1')
+  return no('subscription_quantity_unverified')
  if(!plan||plan.id!==PAZO_SANDBOX_PLAN||plan.status!=='ACTIVE'||
   !Array.isArray(plan.billing_cycles)||plan.billing_cycles.length!==1)
   return no('plan_cycle_structure_unproven')
