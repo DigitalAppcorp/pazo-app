@@ -31,6 +31,7 @@ const ids=[
  'intent-c-parallelclaim000',
  'intent-d-parallelclaim000',
 ]
+const originalPaymentCount=await run('SELECT count(*) FROM supporter_private.paypal_payment_entries')
 await run(`INSERT INTO supporter_private.paypal_subscription_intents
   (intent_id,owner_id,plan_id) VALUES
   ('${ids[0]}','${OWNER_A}'::uuid,'${PLAN}'),
@@ -55,5 +56,5 @@ const second=await run(`SELECT count(*) FROM supporter_private.paypal_subscripti
  WHERE external_subscription_id='I-SANDBOX-CLAIM-02'`)
 if(second!=='1')throw Error('PayPal subscription ID claimed multiple times')
 const payments=await run('SELECT count(*) FROM supporter_private.paypal_payment_entries')
-if(payments!=='0')throw Error('Binding unexpectedly credited payment')
+if(payments!==originalPaymentCount)throw Error('Binding unexpectedly created payment')
 console.log('PASS F16 owner binding: 27 race attempts; one intent per subscription, no cross-owner claim, zero payments')
