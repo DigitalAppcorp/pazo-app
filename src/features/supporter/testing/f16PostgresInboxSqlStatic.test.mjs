@@ -72,3 +72,17 @@ test('isolated F16 SQL runner fails before invoking psql without CI consent',()=
   assert.equal(rejection.status,2,rejection.stderr)
   assert.match(rejection.stderr,/BLOCKED/)
 })
+
+test('CLI-generated migration keeps exact audited lab DDL and cannot alter supporter entitlement',()=>{
+  const migration=readFileSync(
+    'supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql','utf8')
+  const ddlStart='CREATE TABLE supporter_private.paypal_verified_event_inbox'
+  const labBody=sql.slice(sql.indexOf(ddlStart),sql.lastIndexOf('COMMIT;')).trim()
+  const migrationBody=migration.slice(migration.indexOf(ddlStart),migration.lastIndexOf('COMMIT;')).trim()
+  assert.ok(migration.includes('PREPARED MIGRATION'))
+  assert.equal(migrationBody,labBody,'versioned DDL must match PostgreSQL-tested lab DDL')
+  assert.doesNotMatch(migration,/\\set ON_ERROR_STOP|f14_synthetic|CURRENT_DATABASE\(\)/i)
+  assert.doesNotMatch(migration,/\b(?:UPDATE|INSERT\s+INTO|DELETE\s+FROM)\s+public\.profiles\b/i)
+  assert.doesNotMatch(migration,/CREATE\s+TABLE\s+supporter_private\.coverage_periods/i)
+  assert.doesNotMatch(migration,/ALTER\s+FUNCTION\s+supporter_private\.wall_has_verified_entitlement/i)
+})
