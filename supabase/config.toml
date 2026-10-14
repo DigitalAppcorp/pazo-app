@@ -443,6 +443,6 @@ entrypoint = "./functions/f14-moderation-reconcile/index.ts"
 # The independent code-level release latch is also FALSE.
 # Never deploy this function or redirect PayPal without separate PO approval.
 [functions.f16-paypal-webhook]
-enabled = false
+enabled = true
 verify_jwt = false
 entrypoint = "./functions/f16-paypal-webhook/index.ts"

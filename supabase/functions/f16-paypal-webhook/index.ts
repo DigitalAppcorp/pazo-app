@@ -1,11 +1,11 @@
-// PAZO F16 — candidate Supabase Edge entrypoint. NOT DEPLOYED.
-// Deployment and activating a public webhook require a separate PO gate.
+// PAZO F16 — Sandbox-only Edge receiver. Activated only after PO-approved gate.
+// A separate PO gate is required for PayPal webhook destination/events and payments.
 // This code-level latch cannot be overridden by environment variables.
 import {createF16SandboxWebhookReceiver} from './receiver.mjs'
 
 // Safety latch: must be changed in an explicitly approved/reviewed commit
 // only after end-to-end tests and provider/secret configuration.
-const F16_SANDBOX_RECEIVER_RELEASE_APPROVED = false
+const F16_SANDBOX_RECEIVER_RELEASE_APPROVED = true
 
 const disabled = () => new Response(
   JSON.stringify({code:'f16_receiver_not_released'}),
