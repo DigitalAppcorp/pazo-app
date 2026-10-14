@@ -10,6 +10,14 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## F16 GATE: MIGRACIÓN VERSIONADA generada por CLI, PG real PASS — sin deploy (2026-10-13 / 2026-10-14 UTC)
+
+- **Archivo generado por Supabase CLI v2.120.0**: `supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql`. Verificado por CI `F16 Migration Filename Preflight` #38505704285 que imprimió el nombre exacto; nunca se inventó timestamp. El workflow temporal fue eliminado tras uso para ahorrar ejecuciones.
+- El DDL de la migración es idéntico al borrador `supabase/tests/supporter/f16-payment-inbox-lab-draft.sql` salvo envoltura de laboratorio; prueba de paridad agregada. **MIGRACIÓN versionada PostgreSQL real PASS** con `#38505817725` y repetición `#38505937104`; 32 RPC concurrentes, 4 IDs únicos, cero duplicados, ACL/RLS, permisos por rol. CI general de la prueba de paridad #38505937212 SUCCESS.
+- **NO APLICAR AL SUPABASE ALOJADO sin gate PO.** Es archivo versionado EN PR #44 DRAFT; `supporter_private.wall_has_verified_entitlement()=false` continúa; no hay ledger, cobros, entitlement, cambios de founder, PayPal webhook ni Edge desplegados. La base alojada `mrybvqdebbgcayuvgkkr` no tiene la tabla nueva.
+- **DECISIÓN DE RETENCIÓN PENDIENTE:** documento `docs/PAZO_F16_PAYMENT_DATA_RETENTION_DECISION_20261013.md`, clasifica inbox (opciones 90/180 días tras cierre), intentos, pagos, reversos, eliminación de cuenta y borrado de terceros. Son propuestas, NO política PO aprobada. No se ha programado purga ni elegido plazo.
+- Próximo gate: confirmar política de retención y tratamiento de solicitudes de eliminación antes de despliegue, ampliar SQL transaccional para intentos/ledger/reversos sin activar cobertura, probar PG y presentar cambios/costo/rollback para autorización alojada específica. PR #44 DRAFT sin merge ni activación de miembros.
+
 ## F16 GATE: PostgreSQL REAL aislado PASS (2026-10-13)
 
 - **PASS VERIFICADO** — nuevo workflow independiente `.github/workflows/f16-postgres-inbox-lab.yml`, ejecución **38505266445** (SUCCESS), commit inicial `8165b6be693056927620a34144d861382e3fec8d`: https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505266445. No reutilizar las notas históricas inferiores que decían «no se pudo integrar CI» o «sin SQL PASS».
