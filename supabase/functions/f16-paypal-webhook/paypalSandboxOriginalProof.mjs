@@ -50,6 +50,18 @@ export function createF16PaypalSandboxOriginalReader({clientId,clientSecret,fetc
   })
  }
  return Object.freeze({
+  async readVerifiedRefundEvent(eventId){
+   if(typeof eventId!=='string'||!REF.test(eventId))
+    throw Error('f16_original_reference_invalid')
+   const bearer=await token()
+   const data=await json(fetchImpl,'/v1/notifications/webhooks-events/'+encodeURIComponent(eventId),{
+     method:'GET',headers:{Authorization:'Bearer '+bearer,Accept:'application/json'},
+   })
+   if(data.id!==eventId||data.event_type!=='PAYMENT.SALE.REFUNDED'||
+      !REF.test(data.resource?.id||''))
+     throw Error('f16_refund_event_unverified')
+   return Object.freeze({eventId,eventType:data.event_type,refundId:data.resource.id})
+  },
   async readSale(saleId){
    const data=await get('sale',saleId)
    const sub=data.billing_agreement_id
