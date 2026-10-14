@@ -1,5 +1,8 @@
 # PAZO F16 — Gate de seguridad y entrega Sandbox (2026-10-14 UTC)
 
+**ACTUALIZACIÓN VERIFIED HOSTED (2026-10-14 UTC):** el Product Owner autorizó y se aplicaron únicamente las dos migraciones F16 en Supabase `mrybvqdebbgcayuvgkkr`; tablas privadas de eventos, intenciones, pagos y reversos están instaladas, vacías (0 filas), con RLS forzada y RPC de servidor restringidas. Versiones alojadas: `20261014042616_f16_private_verified_event_inbox.sql` y `20261014042646_f16_private_intents_financial_ledger.sql`. NO se desplegaron Edge Functions, NO se modificó PayPal/webhook ni se activaron cobros, períodos pagados o membresías. Las afirmaciones históricas inferiores «NO APLICADAS» se refieren al momento anterior a este gate; NO se deben tratar como estado actual. Retención de ledger e intenciones pendiente.
+
+
 **Estado actual: NO-GO para desplegar o cobrar.** Este documento distingue código testeado de operaciones reales. PR #44 DRAFT en `f13/section-titles-20261012`. Ninguna de estas tareas altera el backend alojado o PayPal por sí sola.
 
 ## Implementado en GitHub (aún no activado)
@@ -7,8 +10,8 @@
 - **Autenticación:** `verifiedAuthOwner.mjs` obtiene el owner mediante `supabase.auth.getUser(token)` en el servidor, rechaza sesión anónima, token inválido y suplantación del owner enviado por cliente. `verifySandboxSubscriptionOwner.mjs` compone la identidad Auth con la intención privada y la consulta real de suscripción PayPal mediante `paypalSandboxTransactions.mjs`. Tests con mocks/HTTP sintético; aún no existe endpoint instalado que use una sesión de verdad.
 - **Checkout Sandbox sin cobro automático:** `paypalSandboxSubscriptionCreate.mjs` construye POST autenticado a `api-m.sandbox.paypal.com/v1/billing/subscriptions`, plan fijo `P-14V25407JP6850922NLHMDKI`, correlación opaca `custom_id`, `PayPal-Request-Id` estable para el intento, y validación cerrada de enlace Sandbox. `sandboxCheckoutFlow.mjs` separa preparar y confirmar; no concede entitlement. **NO se llamó al API para crear suscripciones reales.**
 - **Intenciones y libro financiero privado:** `intentStoreAdapter.mjs`, `atomicFinanceStoreAdapter.mjs` solo invocan RPCs de service_role en host Supabase fijo; ninguna clave pasa al navegador. Migraciones preparadas (NO APLICADAS):
-  - `supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql`
-  - `supabase/migrations/20261014040722_f16_private_intents_financial_ledger.sql` (nombre generado mediante Supabase CLI 2.120.0)
+  - `supabase/migrations/20261014042616_f16_private_verified_event_inbox.sql`
+  - `supabase/migrations/20261014042646_f16_private_intents_financial_ledger.sql` (nombre generado mediante Supabase CLI 2.120.0)
   RLS forzada, tabla privada, RPCs service-only, unicidad por evento, suscripción y pago, reembolso fuera de orden y asientos ACID con el inbox. Ninguna función marca membresía activa.
 - **Conciliación sin acceso pagado:** `sandboxSaleWorker.mjs` utiliza `readOnlyReconciler` (relectura de evento, suscripción, transacción, owner e información de reversos desde fuentes confiables) y después `atomicFinanceStoreAdapter.mjs`. Rechaza ingresos/entitlements ante incertidumbre. **No está conectado a un cron ni desplegado.** En refund/reversal todavía falta confirmar la referencia exacta del pago original con PayPal, por lo que deben quedar en cuarentena.
 - **Retención de webhooks:** PO aprobó 90 días **desde conciliación definitiva**; hold predeterminado TRUE, conteo preview READ ONLY, sin purga. Ledger financiero y tombstones no tienen duración aprobada.
