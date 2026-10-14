@@ -39,6 +39,7 @@ jobs:
       - name: F16 synthetic reconciliation and Sandbox preflight syntax (offline)
         run: |
           node --check scripts/f16-paypal-verify-plan-readonly.mjs
+          node --check scripts/f16-paypal-verify-webhooks-readonly.mjs
           npm run test:f16:synthetic
 
       - name: Build
