@@ -34,7 +34,9 @@ CREATE INDEX f16_lab_refund_by_sale_idx
  ON supporter_private.f16_lab_refund_events(original_sale_id);
 CREATE TABLE supporter_private.f16_lab_refund_sale_holds (
  original_sale_id text PRIMARY KEY
-  CHECK(original_sale_id ~ '^[A-Za-z0-9._-]{3,128}
+  CHECK(original_sale_id ~ '^[A-Za-z0-9._-]{3,128}$'),
+ subscription_id text NOT NULL
+  CHECK(subscription_id ~ '^I-[A-Za-z0-9_-]{3,70}$'),
  refunded_minor integer NOT NULL CHECK(refunded_minor BETWEEN 1 AND 299),
  refund_count integer NOT NULL CHECK(refund_count>0),
  refund_state text NOT NULL CHECK(refund_state IN ('partial','full')),
