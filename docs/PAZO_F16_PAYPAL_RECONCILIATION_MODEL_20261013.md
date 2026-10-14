@@ -139,3 +139,11 @@ Fuentes oficiales: https://developer.paypal.com/api/rest/webhooks/rest/ (última
 Eventos mínimos a revisar: `BILLING.SUBSCRIPTION.ACTIVATED`, `CANCELLED`, `EXPIRED`, `SUSPENDED`, `UPDATED`, `PAYMENT.FAILED`, y `PAYMENT.SALE.COMPLETED`, `REFUNDED`, `REVERSED`. Los nombres exactos proceden de https://developer.paypal.com/subscriptions/webhooks . Los eventos son insumos de conciliación, no fuente suficiente de entitlements.
 
 **Gate posterior**: identificar webhook existente o diseñar/autorizar listener seguro y su registro en app Sandbox; ejecutar flujo auténtico con cuenta de comprador de prueba y verificar firmas y cobros. Sin despliegue, migraciones alojadas, creación de recursos PayPal, Live ni activación de muro por este paso.
+
+## 11. Resultado de auditoría webhook Sandbox del PO — 2026-10-13
+
+**Lectura REAL de PayPal obtenida por el PO (solamente datos sanitizados):** un webhook registrado en la app Sandbox; ID `6N7889790V1467139`, `httpsUrl=true`, seis eventos contractuales `BILLING.SUBSCRIPTION.*` presentes, faltan `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.REFUNDED`, `PAYMENT.SALE.REVERSED`. Estos tres sí pertenecen al catálogo oficial de eventos de suscripción: https://developer.paypal.com/subscriptions/webhooks/ .
+
+**Interpretación precisa:** `needs_webhook_configuration` indica **registro existente pero suscripción a eventos incompleta**; no falta el webhook en sí. `httpsUrl=true` solo prueba un URL HTTPS sintácticamente válido, no entrega, titularidad, disponibilidad, seguridad, ni confianza de certificados. Receptor final/entitlements NO implementados ni verificados.
+
+**Gate para editar el registro:** primero confirmar en la propia app Sandbox que ese ID tiene una URL de callback que realmente pertenece a PAZO y sirve eventos en HTTPS. No revelar consultas/tokens secretos del URL. Si es placeholder, sitio de otra integración o ruta inexistente, NO agregar eventos ni reenviar datos. Diseñar/autorizar despliegue seguro del receptor y política de endpoint antes de modificar registro. Si es listener seguro de PAZO efectivamente activo, **propuesta pendiente de autorización explícita**: editar el webhook existente y sumar los 3 `PAYMENT.SALE` sin eliminar eventos ya suscritos; re-ejecutar preflight; probar entrega real, autenticidad de firma y reconciliación. No crear segundo webhook, ni Live, ni SQL alojado por defecto.
