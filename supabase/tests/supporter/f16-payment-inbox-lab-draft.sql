@@ -46,6 +46,18 @@ CREATE TABLE supporter_private.paypal_verified_event_inbox (
     CONSTRAINT f16_inbox_nonnegative_attempts CHECK (attempt_count >= 0),
   next_attempt_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
   processed_at timestamptz,
+  -- Default-deny until the future audited ledger/worker proves this event
+  -- is terminal, fully reconciled and free from disputes or reversals.
+  retention_hold boolean NOT NULL DEFAULT true,
+  retention_released_at timestamptz,
+  CONSTRAINT f16_release_only_after_reconciliation CHECK (
+    retention_hold OR (
+      processing_state = 'processed'
+      AND processed_at IS NOT NULL
+      AND retention_released_at IS NOT NULL
+      AND retention_released_at >= processed_at
+    )
+  ),
   last_error_code text
     CONSTRAINT f16_inbox_error_code CHECK (
       last_error_code IS NULL OR last_error_code ~ '^[a-z_]{1,48}$'
