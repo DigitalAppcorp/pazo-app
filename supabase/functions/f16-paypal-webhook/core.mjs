@@ -2,6 +2,7 @@
 // NOT deployed, NOT a replacement for the existing paypal-webhook v30.
 // Requires an authenticated PayPal signature verifier AND a durable private inbox.
 // Never writes profiles/is_founder or grants memberships.
+import {f16WorkerAdmissionGate} from './workerAdmissionGate.mjs'
 const EVENT_TYPES = new Set([
   'BILLING.SUBSCRIPTION.ACTIVATED',
   'BILLING.SUBSCRIPTION.UPDATED',
@@ -18,16 +19,20 @@ const HEADERS=[
   'paypal-transmission-sig', 'paypal-auth-algo', 'paypal-cert-url',
 ]
 const LIMIT=65536
-const reply=(status,code)=>new Response(JSON.stringify({code}),{
-  status,headers:{'content-type':'application/json','cache-control':'no-store'},
+const reply=(status,code,retryAfter=null)=>new Response(JSON.stringify({code}),{
+  status,headers:{'content-type':'application/json','cache-control':'no-store',
+    ...(retryAfter===null?{}:{'retry-after':String(retryAfter)}),
+  },
 })
-export function createSafeF16WebhookHandler({environment,webhookId,planId,verifySignature,inbox}={}) {
+export function createSafeF16WebhookHandler({environment,webhookId,planId,verifySignature,inbox,
+  admissionGate=f16WorkerAdmissionGate}={}) {
   return async function handle(request) {
     if(request.method!=='POST') return reply(405,'method_not_allowed')
     // This F16 test integration is Sandbox-only until a separately approved Live gate.
     if(environment!=='sandbox' || typeof webhookId!=='string' || !webhookId ||
         typeof planId!=='string' || !/^P-[A-Za-z0-9]+$/.test(planId) ||
-        typeof verifySignature!=='function' || typeof inbox?.insertIfAbsent!=='function')
+        typeof verifySignature!=='function' || typeof inbox?.insertIfAbsent!=='function' ||
+        typeof admissionGate?.tryEnter!=='function')
       return reply(503,'integration_not_configured')
     if(request.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase()!=='application/json')
       return reply(415,'unsupported_content_type')
@@ -69,22 +74,32 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
       typeof event.id!=='string' || !/^[A-Za-z0-9._-]{1,128}$/.test(event.id) ||
       typeof event.event_type!=='string' || event.event_type.length>128)
       return reply(400,'invalid_event')
-    let valid=false
+    // Admission happens only after cheap size/shape checks, before any paid
+    // outbound PayPal request. Denied deliveries MUST be retryable, not ACKed.
+    // This gate is shared per worker, not a substitute for an upstream firewall.
+    const release=admissionGate.tryEnter()
+    if(typeof release!=='function')return reply(503,'f16_worker_busy',5)
     try {
-      valid=(await verifySignature({headers:request.headers,event,rawBody:bytes,webhookId,environment}))===true
-    } catch {return reply(503,'verification_unavailable')}
-    if(!valid) return reply(401,'signature_invalid')
-    // Unknown, verified events are not business actions; do not persist their payload.
-    if(!EVENT_TYPES.has(event.event_type)) return reply(200,'verified_unhandled_event')
-    try {
-      // The inbox adapter MUST atomically persist (provider,eventId) or report a
-      // previously persisted duplicate. It MUST NOT credit a user or mutate profiles.
-      const created=await inbox.insertIfAbsent({
-        provider:'paypal',eventId:event.id,eventType:event.event_type,
-      })
-      if(created===true) return reply(202,'verified_event_queued')
-      if(created===false) return reply(200,'duplicate_verified_event')
-      return reply(503,'inbox_not_durable')
-    } catch {return reply(503,'inbox_unavailable')}
+      let valid=false
+      try {
+        valid=(await verifySignature({headers:request.headers,event,rawBody:bytes,webhookId,environment}))===true
+      } catch {return reply(503,'verification_unavailable')}
+      if(!valid) return reply(401,'signature_invalid')
+      // Unknown, verified events are not business actions; do not persist their payload.
+      if(!EVENT_TYPES.has(event.event_type)) return reply(200,'verified_unhandled_event')
+      try {
+        // The inbox adapter MUST atomically persist (provider,eventId) or report a
+        // previously persisted duplicate. It MUST NOT credit a user or mutate profiles.
+        const created=await inbox.insertIfAbsent({
+          provider:'paypal',eventId:event.id,eventType:event.event_type,
+        })
+        if(created===true) return reply(202,'verified_event_queued')
+        if(created===false) return reply(200,'duplicate_verified_event')
+        return reply(503,'inbox_not_durable')
+      } catch {return reply(503,'inbox_unavailable')}
+    } finally {
+      // Release on signature failure, invalid/unhandled events, duplicates and DB faults.
+      release()
+    }
   }
 }
