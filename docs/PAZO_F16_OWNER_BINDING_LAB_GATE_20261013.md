@@ -1,5 +1,8 @@
 # PAZO F16 — Binding Auth/PayPal en laboratorio
 
+**ACTUALIZACIÓN VERIFIED HOSTED (2026-10-14 UTC):** el Product Owner autorizó y se aplicaron únicamente las dos migraciones F16 en Supabase `mrybvqdebbgcayuvgkkr`; tablas privadas de eventos, intenciones, pagos y reversos están instaladas, vacías (0 filas), con RLS forzada y RPC de servidor restringidas. Versiones alojadas: `20261014042616_f16_private_verified_event_inbox.sql` y `20261014042646_f16_private_intents_financial_ledger.sql`. NO se desplegaron Edge Functions, NO se modificó PayPal/webhook ni se activaron cobros, períodos pagados o membresías. Las afirmaciones históricas inferiores «NO APLICADAS» se refieren al momento anterior a este gate; NO se deben tratar como estado actual. Retención de ledger e intenciones pendiente.
+
+
 **Estado:** PASS de contrato y PostgreSQL 17 **descartable**, NO desplegado ni instalado. PR #44 DRAFT; sin cambios en PayPal, Supabase alojado, fundadores, entitlement ni cobros reales.
 
 ## Flujo de titularidad, no de cobro
