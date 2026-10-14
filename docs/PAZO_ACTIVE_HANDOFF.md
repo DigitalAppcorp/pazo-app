@@ -1,5 +1,15 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-13
 
+## F16 — COMPROBACIÓN CONJUNTA READ ONLY PREPARADA EN GITHUB (2026-10-14 UTC)
+
+- El PO autorizó comprobar por GET el plan y webhook Sandbox existentes desde Supabase, sin pagos, suscripciones, secretos expuestos ni cambios PayPal. La plataforma bloqueó el despliegue de un diagnóstico temporal. **NO se ejecutó esa consulta desde Supabase** ni se consumió el resultado de PayPal para estos dos recursos.
+- Postflight tras bloqueo (READ ONLY): Edge `f16-paypal-webhook` **v10 inerte** con latch `false`, 6 archivos; cuatro tablas financieras F16 con 0 registros; rama PR #44 sin workflow temporal. No fue necesario restaurar, ya que el despliegue no se realizó.
+- Alternativa no invasiva **solo GitHub**: `scripts/f16-paypal-verify-resources-readonly.mjs`, verificador puro `src/features/supporter/testing/paypalSandboxResourceContract.mjs`, pruebas aisladas y `-Check Resources` en `scripts/f16-paypal-sandbox-plan.ps1`. Reutiliza UNA llamada OAuth Sandbox y hace únicamente GET de `/v1/billing/plans/P-14V25407JP6850922NLHMDKI` y `/v1/notifications/webhooks/6N7889790V1467139`. Compara el destino con el receptor F16 `f16-paypal-webhook`, **no** con `paypal-webhook` legacy inseguro. No muestra URL de callback, secreto, token ni payload.
+- **Estado real: IMPLEMENTADO EN RAMA; COMPROBACIÓN PAYPAL DE RECURSOS PENDIENTE.** Un PASS local demostraría que el par de credenciales introducido localmente consulta ambos recursos, pero NO demostraría por sí solo que es idéntico al almacenado en Supabase ni validaría firmas, entregas o cobros. No marcar gate remoto PASS sin evidencia.
+- Paso local cuando CI quede verde: `powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\\scripts\\f16-paypal-sandbox-plan.ps1 -Check Resources` desde la rama actual y con árbol local limpio. Credenciales solicitadas interactivamente por PowerShell; jamás enviarlas al chat. La salida saneada es segura para revisión. No ejecutar `-Check Destination` como gate F16: esa auditoría histórica apunta al receptor legacy.
+- NO-GO: activar Edge, cambiar URL/eventos de webhook, crear suscripciones, emitir entitlements, mutar SQL o merge de PR #44 sin gate independiente.
+
+
 ## F16 — PAYPAL SANDBOX OAUTH REAL PASS; EDGE RESTAURADA INERTE v10 (2026-10-14 UTC)
 
 - **Autorización PO:** el Product Owner autorizó exclusivamente una comprobación OAuth de credenciales Sandbox desde servidor, sin tokens/secretos expuestos, sin suscripciones/pagos, sin activar webhook ni entitlement. El gate OAuth **ha pasado**; se consumió la autorización concreta.
