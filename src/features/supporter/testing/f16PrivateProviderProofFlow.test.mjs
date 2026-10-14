@@ -41,7 +41,7 @@ function setup(overrides={}){
   claim:async ref=>{calls.push('claim');if(overrides.claimThrows)throw Error('no db');
    return overrides.claim===undefined?{
     provider_event_id:ref.eventId,event_type:ref.eventType,
-    lease_token:TOKEN,attempt:1,
+    lease_token:TOKEN,attempt:1,lease_expires_at:'2099-10-14T13:00:00Z',
    }:overrides.claim},
   release:async(id,token,reason)=>{calls.push('release');assert.equal(token,TOKEN);
    assert.equal(reason,'unverified_provider_state')
@@ -170,4 +170,17 @@ test('mismatched database lease cannot be treated as provider proof',async()=>{
 })
 test('requires every injected server-only component',()=>{
  assert.throws(()=>createF16PrivateProviderProofFlow(),/not_configured/)
+})
+
+test('expired lease refuses ALL PayPal requests before authorization or writes',async()=>{
+ const x=setup({claim:{provider_event_id:SALE,event_type:saleRef.eventType,
+   lease_token:TOKEN,attempt:1,lease_expires_at:'2026-01-01T00:00:00Z'}})
+ await assert.rejects(x.flow.process(saleRef,WINDOW),/inconsistent_claim_requires_private_recovery/)
+ assert.deepEqual(x.calls,['claim'])
+})
+test('caller cannot replace PayPal subscription ID via transaction-window metadata',async()=>{
+ const x=setup()
+ const result=await x.flow.process(saleRef,{...WINDOW,subscriptionId:'I-FAKE'})
+ assert.equal(result.recorded,true)
+ assert.deepEqual(x.calls,['claim','event','transactions','intent','auth','original','reversals','commit_sale'])
 })
