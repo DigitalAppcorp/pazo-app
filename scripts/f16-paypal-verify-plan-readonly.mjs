@@ -24,7 +24,6 @@ async function main() {
     console.error('BLOCKED: configure PAYPAL_SANDBOX_CLIENT_ID and PAYPAL_SANDBOX_CLIENT_SECRET securely in your local environment. Do NOT paste them into a chat, a git file, or a console screenshot.')
     process.exitCode=2;return
   }
-  let stage='oauth_token'
   const format=inspectCredentialFormat(id,secret)
   if (!format.ok) {
     console.error('BLOCKED: local credential format check failed: '+format.reason)
