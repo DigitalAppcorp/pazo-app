@@ -86,3 +86,16 @@ test('CLI-generated migration keeps exact audited lab DDL and cannot alter suppo
   assert.doesNotMatch(migration,/CREATE\s+TABLE\s+supporter_private\.coverage_periods/i)
   assert.doesNotMatch(migration,/ALTER\s+FUNCTION\s+supporter_private\.wall_has_verified_entitlement/i)
 })
+
+test('retention preview cannot mutate events and requires explicit terminal release',()=>{
+ const preview=readFileSync('supabase/queries/f16_paypal_inbox_retention_preview_READ_ONLY.sql','utf8')
+ const migration=readFileSync('supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql','utf8')
+ assert.match(preview,/BEGIN READ ONLY;/)
+ assert.match(preview,/retention_hold IS FALSE/)
+ assert.match(preview,/processing_state = 'processed'/)
+ assert.match(preview,/INTERVAL '90 days'/)
+ assert.doesNotMatch(preview,/^\s*(?:DELETE|UPDATE|INSERT|TRUNCATE|ALTER|DROP)\s/gim)
+ assert.match(migration,/retention_hold boolean NOT NULL DEFAULT true/)
+ assert.match(migration,/f16_release_only_after_reconciliation/)
+ assert.match(migration,/retention_released_at >= processed_at/)
+})
