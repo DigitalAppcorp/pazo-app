@@ -24,6 +24,16 @@
 
 **Este ensayo no comprueba una API PayPal real, no valida credenciales del proveedor, no fija periodos pagados y no reemplaza revisión legal de retención.** Los registros actuales de PayPal alojado siguen pendientes y no vinculados a Auth. La función `PAYMENT.SALE.REVERSED` continúa bloqueada por falta de corroboración externa independiente. Ante errores, devoluciones fuera de orden o historial incompleto, los eventos quedan retenidos para reconciliación, sin autorizar membresías.
 
+## Verificación de HEAD técnico
+
+Commit técnico `6de032f561ce5a6b061c48d7b41321707e3b4ac7`:
+[CI general SUCCESS #38644980684](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38644980684) y
+[F16 Disposable PostgreSQL Lab SUCCESS #38644980867](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38644980867).
+
+Los test nuevos incluyen concurrencia de refunds, paso parcial → total, deduplicación del mismo refund ID, intento de exceso sobre 299 centavos, error de lease, asociación explícita a suscripción BOUND, prohibición de mezclar dos suscripciones en un mismo hold, refund previo a venta, lectura conservadora de orphans y revisión privada de bajas de cuenta. El lector conserva `NULL` ante incertidumbre global; el test no debe usar SELECT directo sobre `supporter_private` desde service_role. La CI confirma las ACL restrictivas.
+
+Un fallo intermedio fue causado por duplicación de SQL después de `COMMIT` durante edición textual; corregido y validado antes del resultado final. El PG lab muestra que la función SQL está contenida una sola vez. No hubo ninguna operación en Supabase hosted.
+
 ## Lo que falta para autorizar hosted
 
 1. Resolver retención/anonimización financiera y bajas, política P06 de cobertura y consecuencias de parcial/total/disputa. Una fila financiera `refund_recorded_partial` **no** concede ni revoca automáticamente beneficios.
