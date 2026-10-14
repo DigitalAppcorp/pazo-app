@@ -53,4 +53,6 @@ jobs:
             -f supabase/tests/supporter/f16-payment-inbox-metadata.sql \
             -f supabase/tests/supporter/f16-payment-inbox-synthetic.sql
           node scripts/f16-postgres-inbox-concurrency.mjs
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-retention-90-day-synthetic.sql
           echo 'PASS: versioned F16 migration and 32-way concurrency in disposable PostgreSQL only'
