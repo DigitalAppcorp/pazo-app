@@ -23,6 +23,33 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
      !/^[\x21-\x7e]{8,512}$/.test(clientSecret) || typeof fetchImpl!=='function')
     throw Error('sandbox_reader_not_configured')
   return {
+    // This read is separately usable to verify Auth-owned subscription binding
+    // BEFORE any paid transaction or entitlement is considered.
+    async readSubscription(subscriptionId){
+      if(typeof subscriptionId!=='string' || !SUBSCRIPTION_REF.test(subscriptionId))
+        throw Error('invalid_subscription_id')
+      const token=await readJson(fetchImpl,HOST+'/v1/oauth2/token',{
+        method:'POST',headers:{
+          Authorization:'Basic '+btoa(clientId+':'+clientSecret),
+          'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json',
+        },
+        body:'grant_type=client_credentials',
+      })
+      if(token.token_type?.toLowerCase()!=='bearer' ||
+         typeof token.access_token!=='string' || !token.access_token)
+        throw Error('sandbox_oauth_invalid')
+      const subscription=await readJson(fetchImpl,
+        HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId),{
+          method:'GET',
+          headers:{Authorization:'Bearer '+token.access_token,Accept:'application/json'},
+        })
+      if(subscription.id!==subscriptionId) throw Error('subscription_response_mismatch')
+      // Do not return subscriber name, payer email, approval links or tokens.
+      return Object.freeze({
+        id:subscription.id,plan_id:subscription.plan_id,
+        custom_id:subscription.custom_id,status:subscription.status,
+      })
+    },
     async read({subscriptionId,startTime,endTime}={}){
       if(typeof subscriptionId!=='string' || !SUBSCRIPTION_REF.test(subscriptionId))
         throw Error('invalid_subscription_id')
