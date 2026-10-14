@@ -1,4 +1,13 @@
-# PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-13
+# PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
+
+## F16 — GATE DE RECURSOS EXISTENTES: PASS LOCAL / RECEPCIÓN NO-GO (2026-10-14)
+
+- **Evidencia nueva entregada por PO (salida saneada real del preflight local):** `-Check Resources` respondió `environment=sandbox`, `readOnly=true`, `resourcesAccessible=true`. El par de credenciales Sandbox ingresado **localmente** obtuvo OAuth y GET satisfactorios para el plan existente `P-14V25407JP6850922NLHMDKI` y el webhook `6N7889790V1467139`. Plan: `ACTIVE`, `USD 2.99`, `MONTH/1`, sin `issues` ni `warnings`. Webhook: `idMatches=true`.
+- **Configuración todavía incorrecta (no activar):** `destinationCategory=different_host`, `destinationMatchesF16=false`; no inferir ni publicar URL real a partir del clasificador. Faltan **exactamente** `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.REFUNDED`, `PAYMENT.SALE.REVERSED`; `eventConfigurationComplete=false`, `safeToActivate=false`. No crear otros recursos ni apuntar a la función antigua `paypal-webhook`.
+- **Alcance probatorio:** este PASS confirma que las **credenciales introducidas en Windows por el PO** acceden a ambos objetos PayPal Sandbox. El OAuth ejecutado anteriormente en Supabase Edge es PASS independiente, pero **no se comprobó que el par de credenciales local sea idéntico al de los secretos alojados**; tampoco se han probado firma, entrega, comprador, conciliación ni pagos.
+- **Postflight read-only Supabase 2026-10-14:** `f16-paypal-webhook` alojada en **v10**, latch de código `false`; `paypal_verified_event_inbox`, `paypal_subscription_intents`, `paypal_payment_entries`, `paypal_payment_reversals` siguen con **0 filas** y `wall_has_verified_entitlement(NULL)=false`. PR #44 permanece DRAFT, branch de trabajo no fusionada.
+- **Siguiente gate preciso:** revisar el receptor existente en la rama y cerrar protección contra abuso/traffic flood, preflight de costos y pruebas offline de firma/error/duplicados antes de solicitar GO separado para desplegar versión F16 activada **solo Sandbox**. Solamente después de validar receptor real, pedir otro GO para **actualizar** el webhook existente: ruta exacta `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook`, preservar los 6 tipos anteriores y añadir los 3 `PAYMENT.SALE.*`. No tocar PayPal Live, `profiles.is_founder`, checkout, entitlement, SQL ni membresías con el permiso vigente.
+- **CI del verificador conjunto:** rama verificada en [CI #38521596647](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38521596647) y pruebas [PostgreSQL #38521596666](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38521596666), ambos SUCCESS antes de esta actualización documental. El reporte local del PO no es un resultado de CI y queda identificado como tal.
 
 ## F16 — COMPROBACIÓN CONJUNTA READ ONLY PREPARADA EN GITHUB (2026-10-14 UTC)
 
