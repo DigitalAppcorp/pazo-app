@@ -5,9 +5,12 @@ param(
 )
 # It prompts in PowerShell and removes process environment variables after node exits.
 $ErrorActionPreference = 'Stop'
-# F16 safety latch: do NOT route PayPal to the currently deployed 9-event
-# receiver until the separately approved 11-event SQL + Edge gates PASS.
-$F16ElevenEventBackendReady = $false
+# F16 SQL migration 20261014094349 and hosted Edge v13 for 11 events passed.
+# Product Owner verified existing PayPal Sandbox URL points to the Supabase
+# ADMINISTRATION DASHBOARD, not a webhook listener. The Node contract permits
+# PATCH only if the webhook ID, original URL and all 8 events still match exactly.
+# No update of unrelated webhooks, any Live resource, checkout or entitlement.
+$F16ElevenEventBackendReady = $true
 if ($Check -eq 'ApplyWebhook' -and -not $F16ElevenEventBackendReady) {
     Write-Warning 'BLOCKED: 11-event receiver and inbox migration are not installed in hosted Supabase. Do not PATCH PayPal yet.'
     exit 2

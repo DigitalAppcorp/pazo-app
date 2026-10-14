@@ -7,7 +7,7 @@ import {PAZO_REQUIRED_PAYPAL_EVENTS} from './paypalSandboxWebhookContract.mjs'
 import {PAZO_F16_EXPECTED_WEBHOOK_URL} from './paypalSandboxResourceContract.mjs'
 import {
  buildApprovedF16WebhookPatch,sameWebhookSnapshot,verifiedF16WebhookConfiguration,
- PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS,
+ PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS,PAZO_VERIFIED_PREVIOUS_SANDBOX_WEBHOOK_URL,
 } from './paypalSandboxWebhookPatchContract.mjs'
 
 const plan={
@@ -19,7 +19,7 @@ const plan={
 }
 const original=()=>({
  id:PAZO_SANDBOX_WEBHOOK_ID,
- url:'https://another-host.invalid/callback?private=SECRET_DO_NOT_PRINT',
+ url:PAZO_VERIFIED_PREVIOUS_SANDBOX_WEBHOOK_URL,
  event_types:[...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6),...PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS].map(name=>({name})),
 })
 const final=()=>({...original(),url:PAZO_F16_EXPECTED_WEBHOOK_URL,
@@ -43,6 +43,9 @@ test('one PATCH changes only existing URL and includes all eleven approved event
 test('mismatches, unexpected events, wildcards and partial writes are blocked',()=>{
  const scenarios=[
   {...original(),id:'DIFFERENT'},
+  {...original(),url:'https://another-host.invalid/callback?private=SECRET_DO_NOT_PRINT'},
+  {...original(),url:PAZO_VERIFIED_PREVIOUS_SANDBOX_WEBHOOK_URL+'?private=SECRET_DO_NOT_PRINT'},
+  {...original(),url:PAZO_VERIFIED_PREVIOUS_SANDBOX_WEBHOOK_URL+'/extra'},
   {...original(),event_types:[...original().event_types,{name:'PAYMENT.CAPTURE.COMPLETED'}]},
   {...original(),event_types:[{name:'*'}]},
   {...original(),event_types:original().event_types.slice(1)},
@@ -60,7 +63,9 @@ function simulate(mode){
  const fixturePlan=JSON.stringify(plan),fixtureOld=JSON.stringify(original()),fixtureFinal=JSON.stringify(final())
  const stub=[
  'const mode='+JSON.stringify(mode)+';',
- 'const plan='+fixturePlan+';', 'let current='+fixtureOld+';', 'let calls=[];',
+ 'const plan='+fixturePlan+';', 'let current='+fixtureOld+';', 
+ 'if(mode==="wrong_prior_host")current={...current,url:"https://another-host.invalid/callback?private=SECRET_DO_NOT_PRINT"};',
+ 'let calls=[];',
  'globalThis.fetch=async(url,opts)=>{',
  'const u=String(url);const method=opts.method;',
  'calls.push({u,method});',
@@ -91,7 +96,7 @@ function simulate(mode){
  })
  assert.equal(result.error,undefined,String(result.error))
  assert.doesNotMatch(result.stdout+result.stderr,
-  /SECRET_DO_NOT_PRINT|PRIVATE_FAIL_TOKEN|SECRET_BEARER|TEST_SANDBOX_SECRET|another-host\.invalid|\/callback\?private/)
+  /SECRET_DO_NOT_PRINT|PRIVATE_FAIL_TOKEN|SECRET_BEARER|TEST_SANDBOX_SECRET|another-host\.invalid|\/callback\?private|supabase\.com\/dashboard/)
  return result
 }
 test('one OAuth, one plan GET, two webhook GETs, one PATCH, one verification GET; redact output',()=>{
@@ -99,6 +104,12 @@ test('one OAuth, one plan GET, two webhook GETs, one PATCH, one verification GET
  assert.equal(r.status,0,r.stderr)
  assert.match(r.stdout,/updated_and_verified/)
  assert.match(r.stdout,/same_webhook_eleven_events_f16_destination/)
+})
+test('unverified prior URL blocks any PATCH, even with valid webhook ID and 8 events',()=>{
+ const r=simulate('wrong_prior_host')
+ assert.equal(r.status,2)
+ assert.match(r.stderr,/webhook_previous_destination_not_verified/)
+ assert.match(r.stderr,/no_mutation_attempted/)
 })
 test('drift prevents any PATCH and fails closed',()=>{
  const r=simulate('drift')
@@ -116,9 +127,9 @@ test('local affirmative confirmation is mandatory',()=>{
  assert.match(r.stderr,/explicit_local_confirmation_required/)
 })
 
-test('PowerShell ApplyWebhook is blocked until hosted eleven-event backend has separate release approval',()=>{
+test('PowerShell ApplyWebhook gate opens only after hosted eleven-event backend PASS; strict URL guard remains',()=>{
  const ps=readFileSync('scripts/f16-paypal-sandbox-plan.ps1','utf8')
- assert.match(ps,/\$F16ElevenEventBackendReady = \$false/)
+ assert.match(ps,/\$F16ElevenEventBackendReady = \$true/)
  assert.match(ps,/if \(\$Check -eq 'ApplyWebhook' -and -not \$F16ElevenEventBackendReady\)/)
  assert.match(ps,/11-event receiver and inbox migration are not installed/)
 })

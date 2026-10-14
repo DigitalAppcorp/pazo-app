@@ -11,6 +11,11 @@ export const PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS=Object.freeze([
  'BILLING.SUBSCRIPTION.CREATED',
  'BILLING.SUBSCRIPTION.RE-ACTIVATED',
 ])
+// The Product Owner read the existing Sandbox webhook URL directly in PayPal.
+// It points to the Supabase management dashboard, NOT an HTTP event listener.
+// A different old URL is a hard stop, not permission to redirect another receiver.
+export const PAZO_VERIFIED_PREVIOUS_SANDBOX_WEBHOOK_URL=
+ 'https://supabase.com/dashboard/project/mrybvqdebbgcayuvgkkr/functions'
 const ORIGINAL=Object.freeze([...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6),
  ...PAZO_PRESERVED_PAYPAL_EXTRA_EVENTS])
 const ADDED=PAZO_REQUIRED_PAYPAL_EVENTS.slice(6)
@@ -34,8 +39,8 @@ function namesForWebhook(hook){
    fail('webhook_events_partially_changed')
  if(pending.length===0 && hook.url!==PAZO_F16_EXPECTED_WEBHOOK_URL)
    fail('webhook_configuration_partially_changed')
- if(pending.length===3 && hook.url===PAZO_F16_EXPECTED_WEBHOOK_URL)
-   fail('webhook_configuration_partially_changed')
+ if(pending.length===3 && hook.url!==PAZO_VERIFIED_PREVIOUS_SANDBOX_WEBHOOK_URL)
+   fail('webhook_previous_destination_not_verified')
  return names
 }
 export function buildApprovedF16WebhookPatch(plan,hook){
