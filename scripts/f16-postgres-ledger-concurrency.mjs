@@ -1,5 +1,6 @@
 // PAZO F16: concurrent financial lab only. No hosted Supabase connection.
 import {spawn} from 'node:child_process'
+const migrationQa=process.env.PAZO_F16_MIGRATION_QA==='true'
 
 if(process.env.GITHUB_ACTIONS!=='true' ||
   process.env.PGPASSWORD!=='f14_synthetic_ci_only' ||
@@ -24,10 +25,10 @@ function sqlRun(query){
     reject(Error('Isolated F16 ledger SQL failed: '+err.slice(0,160))))
  })
 }
-const payment=id=>`SELECT supporter_private.f16_lab_record_payment(
+const payment=id=>`SELECT supporter_private.${migrationQa?'f16_private_record':'f16_lab_record'}_payment(
  '${id}','I-PAZO-TEST','${OWNER}'::uuid,'${PLAN}',
  299,'USD',TIMESTAMPTZ '${WHEN}')`
-const reversal=id=>`SELECT supporter_private.f16_lab_record_reversal(
+const reversal=id=>`SELECT supporter_private.${migrationQa?'f16_private_record':'f16_lab_record'}_reversal(
  '${id}','refunded',TIMESTAMPTZ '${WHEN}')`
 const count=async(sql,expect,msg)=>{
  const v=await sqlRun(sql)
