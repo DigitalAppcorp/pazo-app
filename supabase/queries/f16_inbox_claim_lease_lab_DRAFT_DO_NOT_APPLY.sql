@@ -33,7 +33,7 @@ DECLARE v supporter_private.paypal_verified_event_inbox%ROWTYPE;
 BEGIN
  IF (p_provider_event_id IS NOT NULL AND
      p_provider_event_id !~ '^[A-Za-z0-9._-]{1,128}$')
-    OR p_lease_seconds NOT BETWEEN 15 AND 300
+    OR p_lease_seconds IS NULL OR p_lease_seconds NOT BETWEEN 15 AND 300
  THEN RAISE EXCEPTION 'Invalid claim request' USING ERRCODE='22023'; END IF;
  -- Both candidate choice and state transition occur under one row lock.
  -- Expired leases are NOT silently stolen; the explicit recovery RPC requeues.
