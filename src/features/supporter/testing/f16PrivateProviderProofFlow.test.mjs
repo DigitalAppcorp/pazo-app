@@ -144,6 +144,16 @@ test('final 199-cent refund after earlier partial can report cumulative REFUNDED
  assert.equal(x.calls.at(-1),'commit_reversal')
 })
 
+test('cumulative provider REFUNDED does not determine this individual refund credit',async()=>{
+ const x=setup({kind:refundRef.eventType,txStatus:'REFUNDED',
+  refund:{refundMinorUnits:199},commitResult:'refund_recorded_partial'})
+ const r=await x.flow.process(refundRef,WINDOW)
+ assert.deepEqual(r,{recorded:true,entitlement:false,reason:'refund_recorded_partial'})
+ assert.equal(x.calls.at(-1),'commit_reversal')
+ // The atomic DB sees only 199 cents so far; provider status is cumulative.
+ // This is financial evidence, never paid-through or entitlement.
+})
+
 test('refund original mismatch, pending refund, history ambiguity and event spoof fail closed',async()=>{
  for(const change of [
   {refund:{originalSaleId:'DIFFERENT'}},
