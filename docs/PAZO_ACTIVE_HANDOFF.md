@@ -2,6 +2,15 @@
 
 **Cómo usarlo:** este archivo corto prevalece sobre el historial anterior, conservado completo y sin alterar en [`docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_THROUGH_20261014.md`](archive/PAZO_ACTIVE_HANDOFF_HISTORY_THROUGH_20261014.md) y en Git. Project Brain OS canónico v1.4.1: `DigitalAppcorp/project-brain-os/SKILL.md`. Leer también `AGENTS.md`, `docs/PAZO_MASTER_ROADMAP.md` y el gate específico. **No reiniciar decisiones tomadas ni repetir migraciones aplicadas.**
 
+## F16 — E2E REAL PAYPAL SANDBOX: RECEPCIÓN FIRMADA PASS (2026-10-14 UTC)
+
+- **PO informó «aprobada y cancelada»** una sola suscripción desde PayPal **Personal Sandbox** con botón oficial. No compartir ni requerir credenciales/ID/event IDs.
+- **ChatGPT verificó directamente en Supabase READ ONLY** Edge `f16-paypal-webhook` **v13 ACTIVE**, 4 registros privados **verificados**, todos pending con timestamps UTC: `BILLING.SUBSCRIPTION.CREATED` (11:15:28), `ACTIVATED` (11:15:51), `PAYMENT.SALE.COMPLETED` (11:15:59) y `CANCELLED` (11:16:16), una vez cada uno.
+- **Edge logs proveedor alojado:** ruta exacta F16, versión **13**, **4 POST HTTP 202** coincidentes temporalmente con esos eventos. El manejador solo permite `202 verified_event_queued` tras firma PayPal postback validada e inserción durable. Esto es **PASS REAL de recepción verificada**, NO una simulación PayPal.
+- **Barrera económica intacta:** intents 0, payment_entries 0, reversals 0, wall_consents 0, eventos fuera de pending 0, retention_hold true, admisiones globales 5 (no interpretarlas como 5 eventos). Ningún cargo real, entitlement, perfil o premium acreditado por esta prueba Sandbox. No borrar los 4 eventos.
+- **Alcance exacto:** suscripción iniciada y cancelada **según PO** + webhook CANCELLED observado; estado actual de esa suscripción por GET PayPal independiente NO comprobado desde ChatGPT. No afirmar chequeo REST de cancelación ni reenvío/duplicado, que siguen NO PROBADOS. No volver a crear la suscripción. SQL `20261014094349`, Edge v13 y PATCH webhook once-event ya PASS, NO repetir.
+- **Gate siguiente:** reconciliación financiera/atribución segura/idempotencia, pruebas sintéticas y diseño previo a activar worker/checkout/badges; requerirá nuevo GO. Sin Codex, sin PayPal Live ni despliegue Vercel/merge. Reporte `docs/PAZO_F16_GENUINE_SANDBOX_WEBHOOK_E2E_PASS_20261014.md`.
+
 ## 1. Modo de trabajo actual — solo Product Owner + ChatGPT
 
 El Product Owner **dio por terminado el experimento de coordinación con Codex** y ordenó continuar como antes, **directamente con ChatGPT como responsable técnico principal** (producto, arquitectura, implementación, GitHub, Supabase, pruebas, documentación y gates). **NO crear ni delegar nuevas tareas a Codex.** Si una acción exige físicamente su Chrome/Windows, facilitar al PO el comando o acción mínima, recibir el resultado y continuar nosotros. No pedir ni registrar secretos; no inferir autorización de su antigua delegación experimental.

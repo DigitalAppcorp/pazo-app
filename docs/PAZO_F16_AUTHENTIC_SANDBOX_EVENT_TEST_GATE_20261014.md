@@ -1,4 +1,7 @@
-# PAZO F16 — Gate de evento genuino PayPal Sandbox, autorizado pero no ejecutado
+# PAZO F16 — Gate de evento genuino PayPal Sandbox (histórico + cierre de recepción real)
+
+> **SUPERADO PARCIALMENTE — 2026-10-14 UTC:** la prueba autorizada se ejecutó en PayPal Personal Sandbox por el PO: aprobó y canceló. ChatGPT comprobó alojado en Supabase **4 eventos firmados y persistidos** con **4 POST HTTP 202** de Edge v13 (`CREATED`, `ACTIVATED`, `PAYMENT.SALE.COMPLETED`, `CANCELLED`), todo pendiente y sin contabilidad ni membresía. **Recepción real E2E PASS**. El GET REST final de la suscripción **no fue ejecutado** por ChatGPT; no simular evidencia PayPal. El protocolo previo a continuación es solo historial; NO pedir volver a crear suscripción. Ver `docs/PAZO_F16_GENUINE_SANDBOX_WEBHOOK_E2E_PASS_20261014.md`.
+
 
 **Estado (2026-10-14): AUTORIZADO / EJECUCIÓN PENDIENTE.**
 
