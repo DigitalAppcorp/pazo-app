@@ -33,14 +33,22 @@ export function createReadOnlyF16Reconciler({
       // The server-side intent lookup must verify owner + correlation.
       const intent=await loadVerifiedIntent(event.externalSubscriptionId)
       if(!intent) return reject('no_verified_owner_intent')
+      if(intent.state!=='bound'||intent.planId!=='P-14V25407JP6850922NLHMDKI'||
+         intent.externalSubscriptionId!==event.externalSubscriptionId||
+         intent.verifiedOwnerBinding!==true)
+        return reject('owner_intent_not_bound')
       const observed=await subscriptionReader.read({
         subscriptionId:event.externalSubscriptionId,startTime,endTime,
       })
       if(observed.lookupSubscriptionId!==event.externalSubscriptionId ||
          !Array.isArray(observed.transactions))
         return reject('provider_subscription_history_invalid')
-      const transaction=observed.transactions.find(t=>t.id===event.externalPaymentId)
-      if(!transaction) return reject('payment_not_present_in_provider_history')
+      const matches=observed.transactions.filter(t=>t?.id===event.externalPaymentId)
+      if(matches.length===0) return reject('payment_not_present_in_provider_history')
+      // Never select an arbitrary row when the provider/adaptor returns two
+      // records for one payment ID. Even if they look equal, quarantine.
+      if(matches.length!==1) return reject('ambiguous_provider_payment_id')
+      const transaction=matches[0]
       // This must be durable DB state. If unknown/unavailable, the assessor
       // rejects; do not treat a missing table as an empty successful reversal set.
       const knownReversalIds=await loadKnownReversalIds(event.externalSubscriptionId)

@@ -1,6 +1,8 @@
 // PAZO F16 - Sandbox payment reconciliation DECISION, not a database mutation.
 // All inputs must originate from server-side authenticated intent and the PayPal
 // Subscription + List Transactions API (never browser/webhook resource snapshots).
+// Even completed Sandbox payments without a durable BOUND Auth intent remain
+// unclaimed; the one-time UI Sandbox buyer test must NEVER accrue to a PAZO user.
 // A valid transaction is only a ledger candidate. It cannot grant an entitlement
 // until an independently supported coverage period and reversal checks exist.
 export const PAZO_SANDBOX_PLAN='P-14V25407JP6850922NLHMDKI'
@@ -14,7 +16,8 @@ export function assessPaypalSandboxPayment({
   transactionLookupSubscriptionId,merchantScopedByPayPalApi,knownReversalIds,
 }={}) {
   if(environment!=='sandbox') return blocked('not_sandbox')
-  if(!intent || intent.provider!=='paypal' || intent.verifiedOwnerBinding!==true ||
+  if(!intent || intent.provider!=='paypal' || intent.planId!==PAZO_SANDBOX_PLAN ||
+    intent.state!=='bound' || intent.verifiedOwnerBinding!==true ||
     !UUID.test(intent.ownerId||'') || !REF.test(intent.id||'') ||
     !REF.test(intent.externalSubscriptionId||''))
     return blocked('missing_trusted_owner_binding')
@@ -26,7 +29,9 @@ export function assessPaypalSandboxPayment({
   if(merchantScopedByPayPalApi!==true) return blocked('merchant_not_confirmed')
   if(!transaction || !REF.test(transaction.id||''))
     return blocked('missing_payment_id')
-  if(!Array.isArray(knownReversalIds)) return blocked('reversal_state_unknown')
+  if(!Array.isArray(knownReversalIds) ||
+     knownReversalIds.some(id=>typeof id!=='string'||!REF.test(id)))
+    return blocked('reversal_state_unknown')
   if(knownReversalIds.includes(transaction.id)) return blocked('payment_reversed')
   if(transaction.status!=='COMPLETED') return blocked('payment_not_completed')
   const gross=transaction.amount_with_breakdown?.gross_amount

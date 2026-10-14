@@ -12,7 +12,7 @@ function setup(patch={}){
  const event={eventId:ID,eventType:ref.eventType,externalPaymentId:SALE,
    externalSubscriptionId:SUB,requiresReversalReview:false}
  const intent={id:'intent-correlation-123',provider:'paypal',ownerId:OWNER,
-   externalSubscriptionId:SUB,verifiedOwnerBinding:true}
+   externalSubscriptionId:SUB,planId:PLAN,state:'bound',verifiedOwnerBinding:true}
  const observed={lookupSubscriptionId:SUB,merchantScopedByPayPalApi:true,
    subscription:{id:SUB,plan_id:PLAN,custom_id:'intent-correlation-123',status:'ACTIVE'},
    transactions:[{id:SALE,status:'COMPLETED',time:'2026-10-13T19:00:00Z',
@@ -74,4 +74,28 @@ test('reversals and unavailable reversal state never qualify for ledger',async()
 })
 test('read-only reconciler has no implicit persistence or founder grant capability',()=>{
  assert.throws(()=>createReadOnlyF16Reconciler({}),/not_configured/)
+})
+
+test('Sandbox sale event without durable bound owner cannot become a ledger candidate',async()=>{
+ for(const intent of [null,
+  {id:'intent-correlation-123',provider:'paypal',ownerId:OWNER,
+   externalSubscriptionId:SUB,planId:PLAN,state:'pending',verifiedOwnerBinding:true},
+  {id:'intent-correlation-123',provider:'paypal',ownerId:OWNER,
+   externalSubscriptionId:SUB,planId:'P-OTHER',state:'bound',verifiedOwnerBinding:true},
+ ]) {
+  const x=setup({intent})
+  const result=await x.reconciler.inspect(ref,{startTime:'2026-10-01T00:00:00Z',endTime:'2026-10-31T00:00:00Z'})
+  assert.equal(result.acceptedForLedger,false)
+  assert.equal(result.entitlement,false)
+  assert.deepEqual(x.calls,['event','intent'])
+ }
+})
+test('ambiguous provider payment IDs fail closed before reversal lookup',async()=>{
+ const tx={id:SALE,status:'COMPLETED',time:'2026-10-13T19:00:00Z',
+  amount_with_breakdown:{gross_amount:{currency_code:'USD',value:'2.99'}}}
+ const x=setup({observed:{transactions:[tx,{...tx,status:'REFUNDED'}]}})
+ const result=await x.reconciler.inspect(ref)
+ assert.equal(result.reason,'ambiguous_provider_payment_id')
+ assert.equal(result.acceptedForLedger,false)
+ assert.deepEqual(x.calls,['event','intent','transactions'])
 })

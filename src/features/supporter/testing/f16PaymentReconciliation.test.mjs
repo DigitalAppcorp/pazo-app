@@ -8,7 +8,8 @@ function context() {
  return {
   environment:'sandbox',
   intent:{id:'intent-correlation-123',provider:'paypal',ownerId,
-    externalSubscriptionId:subscriptionId,verifiedOwnerBinding:true},
+    externalSubscriptionId:subscriptionId,planId:PAZO_SANDBOX_PLAN,
+    state:'bound',verifiedOwnerBinding:true},
   subscription:{id:subscriptionId,plan_id:PAZO_SANDBOX_PLAN,custom_id:'intent-correlation-123',status:'ACTIVE'},
   transactionLookupSubscriptionId:subscriptionId,
   merchantScopedByPayPalApi:true,
@@ -47,6 +48,9 @@ test('no attribution to wrong owner, intent, subscription, plan or merchant',()=
   {intent:{...c.intent,ownerId:'wrong'}},
   {intent:{...c.intent,provider:'stripe'}},
   {intent:{...c.intent,verifiedOwnerBinding:false}},
+  {intent:{...c.intent,state:'pending'}},
+  {intent:{...c.intent,state:'revoked'}},
+  {intent:{...c.intent,planId:'P-OTHER'}},
   {intent:{...c.intent,externalSubscriptionId:'I-OTHER'}},
   {subscription:{...c.subscription,custom_id:'wrong-intent'}},
   {subscription:{...c.subscription,plan_id:'P-OTHER'}},
@@ -75,6 +79,7 @@ test('unknown reversal state and pre-existing tombstone deny candidate',()=>{
  const c=context()
  assert.equal(assessPaypalSandboxPayment({...c,knownReversalIds:undefined}).reason,'reversal_state_unknown')
  assert.equal(assessPaypalSandboxPayment({...c,knownReversalIds:['9AE123456789']}).reason,'payment_reversed')
+ assert.equal(assessPaypalSandboxPayment({...c,knownReversalIds:['https://invalid.example/xx']}).reason,'reversal_state_unknown')
 })
 test('reversal signal requires independent provider evidence',()=>{
  assert.deepEqual(assessPaypalSandboxReversal({

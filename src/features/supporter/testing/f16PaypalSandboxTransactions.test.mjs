@@ -9,7 +9,8 @@ const START='2026-10-01T00:00:00Z'
 const END='2026-10-31T00:00:00Z'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const OWNER='63e812b0-a7e5-49f6-b2dd-c11d2c72af57'
-function build({oauthOk=true,subOk=true,listOk=true,totalPages=1,txStatus='COMPLETED'}={}){
+function build({oauthOk=true,subOk=true,listOk=true,totalPages=1,totalItems=1,
+ txStatus='COMPLETED',repeatPaymentId=false}={}){
  const calls=[]
  const fetchImpl=async(url,options)=>{
    calls.push({url,options})
@@ -19,10 +20,13 @@ function build({oauthOk=true,subOk=true,listOk=true,totalPages=1,txStatus='COMPL
      ok:subOk,json:async()=>({id:SUB,plan_id:PLAN,custom_id:'intent-correlation-123',
        status:'ACTIVE',subscriber:{email_address:'private@example.com'}})}
    if(url.startsWith('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/'+SUB+'/transactions?'))return {
-     ok:listOk,json:async()=>({transactions:[{id:'CAPTURE1234',status:txStatus,time:'2026-10-13T19:00:00Z',
+     ok:listOk,json:async()=>({transactions:[
+       {id:'CAPTURE1234',status:txStatus,time:'2026-10-13T19:00:00Z',
        payer_email:'secretpayer@example.com',amount_with_breakdown:{
-         gross_amount:{currency_code:'USD',value:'2.99'}}}],
-       total_pages:totalPages,total_items:1})}
+         gross_amount:{currency_code:'USD',value:'2.99'}}},
+       ...(repeatPaymentId?[{id:'CAPTURE1234',status:'REFUNDED',time:'2026-10-13T19:00:00Z',
+         amount_with_breakdown:{gross_amount:{currency_code:'USD',value:'2.99'}}}]:[])
+      ],total_pages:totalPages,total_items:totalItems})}
    throw Error('non_allowlisted_destination')
  }
  return {reader:createPaypalSandboxSubscriptionReader({clientId:ID,clientSecret:SECRET,fetchImpl}),calls}
@@ -53,7 +57,7 @@ test('read-only provider data feeds candidate-only decision, not membership',asy
  const result=assessPaypalSandboxPayment({
   environment:'sandbox',
   intent:{id:'intent-correlation-123',provider:'paypal',ownerId:OWNER,
-    externalSubscriptionId:SUB,verifiedOwnerBinding:true},
+    externalSubscriptionId:SUB,planId:PLAN,state:'bound',verifiedOwnerBinding:true},
   subscription:s.subscription,transaction:s.transactions[0],
   transactionLookupSubscriptionId:s.lookupSubscriptionId,
   merchantScopedByPayPalApi:s.merchantScopedByPayPalApi,knownReversalIds:[],
@@ -116,4 +120,18 @@ test('subscription-only reader rejects wrong IDs before network',async()=>{
    await assert.rejects(x.reader.readSubscription(id),/invalid_subscription_id/)
  }
  assert.equal(x.calls.length,0)
+})
+
+test('provider metadata missing or contradictory is not accepted as exhaustive history',async()=>{
+ for(const args of [{totalPages:null},{totalItems:null},{totalPages:2},{totalItems:2},
+                    {totalPages:0},{totalItems:-1}]){
+  const x=build(args)
+  await assert.rejects(x.reader.read({subscriptionId:SUB,startTime:START,endTime:END}),
+    /incomplete_transaction_history/)
+ }
+})
+test('duplicate provider payment IDs fail closed, without PII disclosure',async()=>{
+ const x=build({repeatPaymentId:true,totalItems:2})
+ await assert.rejects(x.reader.read({subscriptionId:SUB,startTime:START,endTime:END}),
+  /ambiguous_transaction_history/)
 })

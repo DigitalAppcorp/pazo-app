@@ -1,7 +1,8 @@
 // F16 server-only read adapter for existing PayPal Sandbox subscriptions.
 // Does not create payments or subscriptions, persist state, log PII or grant access.
 const HOST='https://api-m.sandbox.paypal.com'
-const SUBSCRIPTION_REF=/^[A-Za-z0-9_-]{3,50}$/
+const SUBSCRIPTION_REF=/^I-[A-Za-z0-9_-]{3,70}$/
+const PAYMENT_REF=/^[A-Za-z0-9._-]{3,128}$/
 const UTC=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/
 function canonicalUtc(s){
   if(typeof s!=='string' || !UTC.test(s)) return null
@@ -75,11 +76,20 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
         method:'GET',headers,
       })
       // Do not trust a partial page as a complete statement of payment/reversal.
-      if(!Array.isArray(list.transactions) ||
-        (list.total_pages!==undefined && list.total_pages!==1 &&
-          !(list.total_pages===0 && list.transactions.length===0)) ||
-        (list.total_items!==undefined && list.total_items!==list.transactions.length) ||
-        list.transactions.length>500) throw Error('incomplete_transaction_history')
+      if(!Array.isArray(list.transactions) || list.transactions.length>500 ||
+        !Number.isInteger(list.total_pages) || !Number.isInteger(list.total_items) ||
+        list.total_pages<0 || list.total_items<0 ||
+        (list.total_pages!==1 &&
+          !(list.total_pages===0 && list.total_items===0 &&
+            list.transactions.length===0)) ||
+        list.total_items!==list.transactions.length)
+        throw Error('incomplete_transaction_history')
+      // Provider statements must never contain conflicting or ambiguous IDs.
+      // Dropping a duplicate silently could make a sale appear valid.
+      const ids=list.transactions.map(tx=>tx?.id)
+      if(ids.some(id=>typeof id!=='string'||!PAYMENT_REF.test(id)) ||
+         new Set(ids).size!==ids.length)
+        throw Error('ambiguous_transaction_history')
       // Restrict the output. Provider response may have payer email and links.
       return {
         lookupSubscriptionId:subscriptionId,
