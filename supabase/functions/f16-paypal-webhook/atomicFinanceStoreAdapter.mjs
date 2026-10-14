@@ -8,7 +8,8 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const REF=/^[A-Za-z0-9._-]{3,128}$/
 const DATE=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/
 function validDate(text){
- return typeof text==='string'&&DATE.test(text)&&Number.isFinite(Date.parse(text))
+ return typeof text==='string'&&DATE.test(text)&&Number.isFinite(Date.parse(text))&&
+   new Date(text).toISOString().replace(/\.000Z$/,'Z')===text
 }
 export function createAtomicFinanceStore({
  projectUrl,serviceRoleKey,fetchImpl=fetch,
