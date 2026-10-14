@@ -14,6 +14,8 @@ BEGIN
  THEN RAISE EXCEPTION 'F16 refund multievent requires disposable PG17 + lease finance baseline'; END IF;
 END $guard$;
 
+-- provider_status is a snapshot of the SALE's cumulative PayPal status
+-- on first sight. It may advance without changing immutable refund identity.
 CREATE TABLE supporter_private.f16_lab_refund_events (
  refund_id text PRIMARY KEY CHECK(refund_id ~ '^[A-Za-z0-9._-]{3,128}$'),
  provider_event_id text NOT NULL UNIQUE
@@ -103,7 +105,6 @@ BEGIN
   IF existing.original_sale_id IS DISTINCT FROM p_sale_id
      OR existing.subscription_id IS DISTINCT FROM p_subscription_id
      OR existing.refund_minor IS DISTINCT FROM p_refund_minor
-     OR existing.provider_status IS DISTINCT FROM p_provider_status
      OR existing.verified_at IS DISTINCT FROM p_verified_at
   THEN RAISE EXCEPTION 'Conflicting refund ID evidence' USING ERRCODE='22023'; END IF;
   answer:='refund_duplicate';
@@ -116,8 +117,15 @@ BEGIN
     USING ERRCODE='22023'; END IF;
   prior:=COALESCE(prior,0);
   total:=prior+p_refund_minor;
-  IF total>299 OR (p_provider_status='REFUNDED' AND total<>299)
-     OR (p_provider_status='PARTIALLY_REFUNDED' AND total>=299)
+  -- PayPal transaction status is CUMULATIVE at query time, whereas
+  -- p_refund_minor is the distinct original refund's immutable amount.
+  -- A later full refund may already have changed the transaction to
+  -- REFUNDED while this *earlier* refund is being reconciled out of order.
+  -- Never infer that this refund covers all 299 cents from REFUNDED alone.
+  -- The only source of local full/partial state is SUM(DISTINCT refund_id).
+  -- Underreported provider status PARTIALLY_REFUNDED when 299 is already
+  -- locally reconciled remains inconsistent and cannot be acknowledged.
+  IF total>299 OR (p_provider_status='PARTIALLY_REFUNDED' AND total>=299)
   THEN RAISE EXCEPTION 'Refund total and merchant status disagree' USING ERRCODE='22023'; END IF;
   INSERT INTO supporter_private.f16_lab_refund_events
   (refund_id,provider_event_id,original_sale_id,subscription_id,
