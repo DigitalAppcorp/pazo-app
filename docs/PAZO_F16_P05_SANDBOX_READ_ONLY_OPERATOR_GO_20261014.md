@@ -1,12 +1,12 @@
 # PAZO F16-P05 — Diagnóstico merchant Sandbox de solo lectura: alcance y GO
 
-**Fecha:** 2026-10-14. **Estado:** artefacto PREPARADO, ejecutable únicamente cuando exista **autorización específica del Product Owner**. NO se consultó PayPal merchant real. F16 EN CURSO, PR #44 DRAFT, beta NO-GO.
+**Fecha:** 2026-10-14. **Estado:** Product Owner **APROBÓ** explícitamente el GO de **solo lectura merchant PayPal Sandbox del plan y UNA suscripción EXISTENTE** al responder «si». Ejecución operativa **PENDIENTE**, porque este chat no tiene las credenciales privadas del Windows del PO ni conector directo PayPal; no hay consultas reales ejecutadas. NO aprobó ningún pago, migración, worker ni P05 comercial. F16 EN CURSO, PR #44 DRAFT, beta NO-GO.
 
 ## Gate material que cierra esta propuesta
 
 Los ensayos P05 existentes verificaron integridad de datos sintéticos, pero no demuestran que el PayPal merchant **de esta aplicación** devuelva realmente los campos requeridos. Se terminó el punto de ejecución opcional `scripts/f16-paypal-p05-readonly.mjs` para el lector privado `p05PaypalSandboxBillingSnapshotReader.mjs`. Éste es un instrumento operativo de diagnóstico, **NO** un checkout, un worker o una migración.
 
-### Alcance técnico exacto para pedir al PO
+### Alcance técnico exacto autorizado por el PO
 
 - **Proveedor y entorno:** `api-m.sandbox.paypal.com` del comercio Sandbox existente, nunca Live.
 - **Credenciales:** solo variables **locales** del operador, `PAYPAL_SANDBOX_CLIENT_ID` y `PAYPAL_SANDBOX_CLIENT_SECRET`; no copiarlas al chat, Git, logs, screenshots o Supabase. No lectura de secretos almacenados en Supabase.
@@ -17,13 +17,15 @@ Los ensayos P05 existentes verificaron integridad de datos sintéticos, pero no 
 - **Salida protegida:** `billingPeriodProven:false`, `cycleAttributionProven:false`, `financialHistoryComplete:false`, `mayGrantEntitlement:false`, `paidThrough:null`; fallos genéricos, sin cuerpos del proveedor.
 - **Guard del comando:** si faltan credenciales o ID válidos no realiza ninguna llamada. No se ha ejecutado el comando con credenciales reales al redactar este documento.
 
-**Contrato de comando local**, solo después del GO y con variables configuradas por el operador en un entorno privado:
+**Contrato de comando local**, autorizado ya el GO de lectura, únicamente cuando las variables estén configuradas de forma privada por el operador:
 
 ```powershell
 node scripts/f16-paypal-p05-readonly.mjs
 ```
 
 No se debe pegar en el chat la configuración de las variables. El operador puede compartir únicamente la salida JSON sanitizada.
+
+**Salida / código de diagnóstico:** salir con código `0` ahora requiere plan mensual USD 2.99 **y además** `plan_overridden:false` y `quantity:'1'` explícitos; de faltar estos últimos se retorna `1` sin conceder nada. El resultado incluye `effectiveTermsConsistent`. Fallo de red/acceso/suscripción o configuración produce `2`. **No** equiparar ninguno de estos códigos a aprobación de un periodo `paid_through` (siempre `null`).
 
 ## Estado de las decisiones
 
@@ -43,6 +45,6 @@ Las cinco reglas anteriores son **propuesta técnica**, NO aceptación del Produ
 
 El diagnóstico tiene pruebas offline `src/features/supporter/testing/f16P05ReadOnlyDiagnostic.test.mjs` para: credenciales/ID obligatorios, sin peticiones si faltan, salida sanitizada, fallo sin detalles sensibles, cambios de plan, deuda y prohibición universal de entitlement. Las pruebas usan `readerFactory` simulado; deben confirmarse por CI sobre HEAD exacto después de cada cambio.
 
-**Decisión requerida:** autorización explícita del PO para **solo lectura merchant Sandbox de la suscripción ya existente**, dentro de los tres endpoints anteriores y sin ningún cambio en sistemas reales. No inferir autorización a partir de un simple «ok sigamos». Si no se concede, conservar P05 como gate pendiente y no continuar simulaciones redundantes.
+**GO RESUELTO, EJECUCIÓN PENDIENTE:** el PO dio autorización expresa para la lectura merchant Sandbox de un único recurso de suscripción existente y su plan mediante OAuth y los dos GET declarados, sin otros cambios. No repetir la solicitud de GO para exactamente este alcance. Falta ejecutar en Windows con credenciales localmente disponibles y la referencia `I-...` del registro existente. La salida del script es resumen seguro sin PII. La suscripción se puede localizar en la sesión business Sandbox en https://www.sandbox.paypal.com/billing/subscriptions, según guía oficial PayPal, sin crear otra. Al obtener JSON sanitizado, analizarlo antes de decidir un siguiente gate. Si faltan credenciales, solicitar configuración PRIVADA, jamás pegarlas en el chat.
 
 **Restantes:** retención financiera P01–P04/P09 y privacidad de baja, pagos auténticos Auth BOUND, backend protegido con lease y P05 contractual, antes de activar F16 en producción.
