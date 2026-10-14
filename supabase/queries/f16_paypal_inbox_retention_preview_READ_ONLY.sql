@@ -10,7 +10,7 @@ SELECT
     AND e.processed_at IS NOT NULL
     AND e.retention_hold IS FALSE
     AND e.retention_released_at IS NOT NULL
-    AND pg_catalog.greatest(e.processed_at,e.retention_released_at)
+    AND GREATEST(e.processed_at,e.retention_released_at)
       <= pg_catalog.now() - INTERVAL '90 days'
   )::bigint AS eligible_preview_only,
   pg_catalog.count(*) FILTER (
