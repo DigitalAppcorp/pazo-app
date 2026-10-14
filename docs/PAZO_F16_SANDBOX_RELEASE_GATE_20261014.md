@@ -1,0 +1,34 @@
+# PAZO F16 — Gate de seguridad y entrega Sandbox (2026-10-14 UTC)
+
+**Estado actual: NO-GO para desplegar o cobrar.** Este documento distingue código testeado de operaciones reales. PR #44 DRAFT en `f13/section-titles-20261012`. Ninguna de estas tareas altera el backend alojado o PayPal por sí sola.
+
+## Implementado en GitHub (aún no activado)
+
+- **Autenticación:** `verifiedAuthOwner.mjs` obtiene el owner mediante `supabase.auth.getUser(token)` en el servidor, rechaza sesión anónima, token inválido y suplantación del owner enviado por cliente. `verifySandboxSubscriptionOwner.mjs` compone la identidad Auth con la intención privada y la consulta real de suscripción PayPal mediante `paypalSandboxTransactions.mjs`. Tests con mocks/HTTP sintético; aún no existe endpoint instalado que use una sesión de verdad.
+- **Checkout Sandbox sin cobro automático:** `paypalSandboxSubscriptionCreate.mjs` construye POST autenticado a `api-m.sandbox.paypal.com/v1/billing/subscriptions`, plan fijo `P-14V25407JP6850922NLHMDKI`, correlación opaca `custom_id`, `PayPal-Request-Id` estable para el intento, y validación cerrada de enlace Sandbox. `sandboxCheckoutFlow.mjs` separa preparar y confirmar; no concede entitlement. **NO se llamó al API para crear suscripciones reales.**
+- **Intenciones y libro financiero privado:** `intentStoreAdapter.mjs`, `atomicFinanceStoreAdapter.mjs` solo invocan RPCs de service_role en host Supabase fijo; ninguna clave pasa al navegador. Migraciones preparadas (NO APLICADAS):
+  - `supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql`
+  - `supabase/migrations/20261014040722_f16_private_intents_financial_ledger.sql` (nombre generado mediante Supabase CLI 2.120.0)
+  RLS forzada, tabla privada, RPCs service-only, unicidad por evento, suscripción y pago, reembolso fuera de orden y asientos ACID con el inbox. Ninguna función marca membresía activa.
+- **Conciliación sin acceso pagado:** `sandboxSaleWorker.mjs` utiliza `readOnlyReconciler` (relectura de evento, suscripción, transacción, owner e información de reversos desde fuentes confiables) y después `atomicFinanceStoreAdapter.mjs`. Rechaza ingresos/entitlements ante incertidumbre. **No está conectado a un cron ni desplegado.** En refund/reversal todavía falta confirmar la referencia exacta del pago original con PayPal, por lo que deben quedar en cuarentena.
+- **Retención de webhooks:** PO aprobó 90 días **desde conciliación definitiva**; hold predeterminado TRUE, conteo preview READ ONLY, sin purga. Ledger financiero y tombstones no tienen duración aprobada.
+- **Pruebas:** `.github/workflows/f16-postgres-inbox-lab.yml` ejecuta PostgreSQL 17 descartable, DDL versionado, ACL/RLS, 32 eventos concurrentes, 25 llamadas payment/reversal, 27 reclamaciones de suscripción, RPC service-only, evento + ledger atómico, transacción rollback, 90 días y ausencia de cobertura. `npm run test:f16:synthetic` incluye pruebas de Auth y PayPal con adaptadores offline. Un PASS de CI nunca constituye un Sandbox real E2E.
+
+## GATES BLOQUEANTES antes de cualquier despliegue
+
+1. **Idempotencia de inicio de checkout:** el flujo `prepare` aún crea nueva intención en cada llamada; PayPal-Request-Id solo retiene idempotencia por un período limitado. Diseñar token por operación único `(owner,request_id)`, prevención de múltiples suscripciones y recuperación de intentos parcialmente creados. Hasta entonces **NO exponer POST start**.
+2. **Ciclo de vida y privacidad de intenciones:** política de expiración/purga para pendientes, respaldo de eliminación de cuenta y retención limitada no aprobada. La ley aplicable a registros financieros/devoluciones es independiente; revisar con profesional de impuestos/privacidad antes de fijar plazo y DELETE. Fuente: `docs/PAZO_F16_PAYMENT_DATA_RETENTION_DECISION_20261013.md`.
+3. **Edge Functions reales:** falta entrypoint Deno final, configuración de Supabase/Auth, CORS allowlist específico del origen publicado, protección ante abuso/rate limiting, secretos de Sandbox, verificación de `auth.getUser` real, callback HTTPS y pruebas browser. `paypal-webhook` v30 actual es **INSEGURO para F16** (escribe `profiles.is_founder` y no concilia cobros); NO redirigirle eventos ni modificarlo como atajo.
+4. **PayPal webhook:** el webhook existente `6N7889790V1467139` apunta a `supabase.com/dashboard` (no invocable). Carece de `PAYMENT.SALE.COMPLETED/REFUNDED/REVERSED`. No modificar dirección/eventos hasta desplegar receptor nuevo verificable y aprobar el gate alojado.
+5. **Conciliación de reversos y períodos:** PayPal refund/reversal exige identificar el pago original con datos del proveedor, no del navegador ni una suposición; diseñar retries, cuarentena, reconciliación temporal y período pagado exacto antes de `wall_has_verified_entitlement()`. La función actual debe seguir devolviendo FALSE.
+6. **Derechos del usuario/Privacy:** integrar tablas en el SOP F14 de eliminación de cuenta, desactivar renovación, anonimización/separación financiera según ley, borrar consentimientos y tratar datos en backups/proveedor. UI de membresía debe distinguir de fundadores y depender del opt-in por mascota.
+7. **Autorización independiente:** aprobar aplicación de migraciones alojadas, costo/uso de funciones y secretos, despliegue y cambio del MISMO webhook Sandbox. Después, comprador Sandbox E2E, firma, duplicados, reembolso real, cancelación, privacidad y regresión. PayPal Live y cobros reales requieren otro GO específico.
+
+## Fuentes externas contrastadas
+
+- PayPal Create Subscription: https://developer.paypal.com/api/subscriptions/v1/subscriptions-create
+- PayPal subscription details/transactions: https://developer.paypal.com/api/subscriptions/v1/subscriptions-get y https://developer.paypal.com/api/subscriptions/v1/subscriptions-transactions
+- Plazos de controversias PayPal: https://www.paypal.com/us/cshelp/article/plazos-para-la-presentaci%C3%B3n-de-controversias-help1173?locale.x=es_US
+- IRS retención de documentos: https://www.irs.gov/es/businesses/small-businesses-self-employed/how-long-should-i-keep-records
+
+**Conclusión operativa:** la mayor parte del contrato SQL y del servidor Sandbox está preparada y auditada offline. **No declarar F16 completa** antes de su instalación alojada autorizada, proveedor Sandbox E2E real, cobertura comprobada, consentimiento/muro y reconciliación de alcance. Sin cambios PayPal/Supabase hosted a esta fecha.
