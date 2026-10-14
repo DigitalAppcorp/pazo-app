@@ -25,6 +25,11 @@
 - `sandboxSaleWorker` ahora **requiere** este gate antes de pedir datos al proveedor o intentar RPC de ledger; evento de ciclo de vida no es pago, y `PAYMENT.SALE.REFUNDED/REVERSED` debe atribuirse al **pago original con evidencia independiente**, no inferir desde webhook. El gate nuevo es módulo offline sin entrada HTTP, scheduler ni lector DB conectado, por lo que NO procesa los cuatro eventos reales pendientes.
 - Tests adicionales comprueban 11 clases admitidas, rechazo de referencias falsas, estados de inbox, revocación/cancelación sin crédito, código de error redacted y ausencia de efecto financiero en eventos no autorizados. El procesamiento real queda sujeto a gate alojado independiente después de definición de retención, conciliación proveedor y fallos de reverso.
 
+## F16 — CANDIDATO DE REVERSO DESACOPLADO, SOLO PRUEBA (2026-10-14)
+
+- Se implementó `sandboxReversalEvidence.mjs` con tests offline de refunds completos/parciales, `REVERSED` y reverso llegado **antes** del pago. Solo produce candidato **no acreditado** si PayPal merchant independiente ha relacionado evento/venta original y plan/monto exactos; nunca confía en el ID del webhook como ID de pago ni crea entitlements.
+- No existe adaptador desplegado que obtenga la prueba independiente real de refund; por tanto los cuatro eventos reales siguen pending, sin writes, ni reembolsos ficticios. Próximo gate: proveedor original sale/reversal read-only y RPC privada transaccional tras revisión legal. Documento `docs/PAZO_F16_SANDBOX_REVERSAL_EVIDENCE_GATE_20261014.md`.
+
 ## 1. Modo de trabajo actual — solo Product Owner + ChatGPT
 
 El Product Owner **dio por terminado el experimento de coordinación con Codex** y ordenó continuar como antes, **directamente con ChatGPT como responsable técnico principal** (producto, arquitectura, implementación, GitHub, Supabase, pruebas, documentación y gates). **NO crear ni delegar nuevas tareas a Codex.** Si una acción exige físicamente su Chrome/Windows, facilitar al PO el comando o acción mínima, recibir el resultado y continuar nosotros. No pedir ni registrar secretos; no inferir autorización de su antigua delegación experimental.
