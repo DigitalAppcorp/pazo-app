@@ -1,5 +1,15 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-13
 
+## F16 — V7 NAMESPACED INERTE DESPLEGADA, HTTP GET/POST 503 PASS (2026-10-13 LA / 14 UTC)
+
+- **GO PO específico ejecutado:** el PO autorizó actualizar **únicamente** `f16-paypal-webhook` a código con nombres de variables `PAZO_F16_PAYPAL_*`, conservando la función inerte, y verificar de nuevo HTTP 503. No autorizó modificar secretos, activar recepción ni cambiar PayPal o beneficios.
+- **Edge hosted:** Supabase project `mrybvqdebbgcayuvgkkr`, función `f16-paypal-webhook` desplegada versión **7** (ID `b0da866f-aae3-4785-99a3-6a6314e3c3c8`) con **seis archivos**: `index.ts`, `receiver.mjs`, `core.mjs`, `paypalSandboxPostback.mjs`, `paypalInboxAdapter.mjs`, `sandboxConfigPreflight.mjs`. Inspección de `get_edge_function` confirmó `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` y nuevo preflight de `PAZO_F16_PAYPAL_*`. `supabase/config.toml enabled=false` permanece intacto; el despliegue explícito de v7 no habilitó el procesamiento.
+- **HTTP externo real PASS:** GitHub Actions temporal `F16 Inert v7 Hosted HTTP One-Time` [run #38518547361](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38518547361), `success`, GET y POST (vacío, sin payload/secretos) dieron exactamente **HTTP 503** con `{"code":"f16_receiver_not_released"}`. El workflow temporal se retiró inmediatamente (commit `153a57bcd0984a4ffed689d71a219e25fc8125a1`).
+- **Postflight hosted:** otras tres funciones **sin cambios**: `paypal-webhook` v35, `f14-moderation-purge` v47, `f14-moderation-reconcile` v34. Cuatro tablas F16 privadas con **0 filas cada una**; `wall_has_verified_entitlement(NULL)=false`, sin pago ni permiso de membresía. No se cambió secreto ni configuración del webhook PayPal.
+- Los cinco secretos `PAZO_F16_PAYPAL_*` fueron confirmados como guardados **por el PO**, pero el conector no expone `list_secrets` ni `set_secrets`: **no está comprobada técnicamente su presencia ni su validez OAuth**. El latch `false` impide intentar autenticación PayPal desde este receptor. **Próximo gate separado:** diagnóstico de OAuth Sandbox aislado, fail-closed, sin exponer secretos ni activar webhook, y autorización PO nueva antes de desplegar dicho diagnóstico. Activación, cambios PayPal y cobranzas siguen NO-GO.
+- PR #44 DRAFT; no merge, no cambio a ramas de release/main. Detalles del procedimiento: `docs/PAZO_F16_WEBHOOK_SANDBOX_DEPLOY_RUNBOOK_20261014.md`.
+
+
 > **LEER PRIMERO.** Este es el estado operativo, no una cronología. Historial integral anterior preservado en Git en commit `61eb2fd2` (versión previa de este archivo), y alcance visual F13 en `docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`. AI = ejecutor técnico principal; usuario = Product Owner. Seguir reglas de `AGENTS.md` y Project Brain OS canónico v1.4.1 en `DigitalAppcorp/project-brain-os`.
 
 ## F16 — PO CONFIRMÓ CINCO SECRETOS, AÚN SIN VERIFICACIÓN OAUTH (2026-10-13 LA)
