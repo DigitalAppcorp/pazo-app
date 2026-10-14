@@ -4,7 +4,7 @@
 const BASE='https://api-m.sandbox.paypal.com'
 const REF=/^[A-Za-z0-9._-]{3,128}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
-const UTC=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d:(?:\d\d)(?:\.\d+)?Z$/
+const UTC=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/
 function date(value) {
  if(typeof value!=='string'||!UTC.test(value))return null
  const millis=Date.parse(value)
