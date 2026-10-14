@@ -89,3 +89,26 @@ test('oversized chunked body is rejected before any provider calls',async()=>{
  assert.equal((await f.handle(req)).status,413)
  assert.equal(f.calls.length,0)
 })
+
+test('two PayPal-created/reactivated events require signature plus durable minimal inbox, never entitlement',async()=>{
+ for(const type of ['BILLING.SUBSCRIPTION.CREATED','BILLING.SUBSCRIPTION.RE-ACTIVATED']){
+  const event={id:'WH-TEST-'+type,event_type:type,
+   resource:{payer_email:'never-store@example.invalid',customer_id:'SECRET_CUSTOMER'}}
+  const f=make()
+  const response=await f.handle(f.request(JSON.stringify(event)))
+  assert.equal(response.status,202,'signed known lifecycle event must queue only after persistence')
+  const inboxRequest=f.calls.find(x=>x.url.endsWith('/rest/v1/rpc/f16_paypal_record_verified_event'))
+  assert.ok(inboxRequest,'known lifecycle event must not be silently ignored')
+  const body=JSON.parse(inboxRequest.options.body)
+  assert.deepEqual(body,{p_provider_event_id:event.id,p_event_type:type})
+  assert.doesNotMatch(inboxRequest.options.body,/never-store|SECRET_CUSTOMER|payer_email/)
+  assert.equal(f.calls.length,4,'one DB quota, OAuth, signature verification and inbox only')
+  const duplicate=make({inbox:false})
+  const retry=await duplicate.handle(duplicate.request(JSON.stringify(event)))
+  assert.equal(retry.status,200)
+  const invalid=make({verification:'FAILURE'})
+  const rejected=await invalid.handle(invalid.request(JSON.stringify(event)))
+  assert.equal(rejected.status,401)
+  assert.equal(invalid.calls.length,3,'invalid signature never writes inbox')
+ }
+})
