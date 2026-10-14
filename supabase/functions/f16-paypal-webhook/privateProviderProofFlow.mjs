@@ -125,6 +125,10 @@ export function createF16PrivateProviderProofFlow({
   })
   if(decision.candidateForTombstone!==true||decision.entitlement!==false)
    return DENY('refund_reconciliation_blocked')
+  // F16 P06 pending: one tombstone per sale cannot represent successive
+  // partial refunds safely. Keep these cases unprocessed for review.
+  if(decision.candidate?.kind==='partially_refunded')
+   return DENY('partial_refund_ledger_not_ready')
   return Object.freeze({ready:true,type:'refund',candidate:decision.candidate})
  }
  return Object.freeze({
