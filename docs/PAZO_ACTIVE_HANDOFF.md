@@ -1,5 +1,14 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
 
+## F16 — REENTREGA Y RECUPERACIÓN DE WEBHOOKS: AUDITORÍA SIN ACTIVACIÓN (2026-10-14)
+
+- **Orden PO:** «ok sigamos» después del SQL global PASS; alcance conservador = revisar respuesta HTTP/reintentos y preparar recuperación, no activar funciones ni PayPal. Una nueva prueba automatizada propuesta fue **bloqueada por controles de seguridad de la plataforma**; no se eludió el bloqueo ni se reclama PASS de esa prueba.
+- **Contrato PayPal verificado en documentación oficial 2026:** entregas no-2xx pueden reintentarse hasta **25 veces en 3 días**; agotado ese plazo, el panel Sandbox Webhooks Events permite revisar y solicitar reenvío manual. Dashboard filtra últimos 30 días; el API ofrece GET de listado. No interpretar reenvío como prueba de cobro ni de owner.
+- **Código F16 existente auditado:** cuota local/global o falta de PayPal/inbox → 503 sin ACK; firma inválida → 401; evento verificado recién insertado → 202; repetición verificada con mismo ID/tipo → 200; colisión ID/tipo o fallo de durabilidad → 503. Son contratos de código/offline, NO proveedor real.
+- **Nuevo runbook:** `docs/PAZO_F16_SANDBOX_REDELIVERY_RECOVERY_GATE_20261014.md`: matriz exacta de GO separados para receptor, cambio del webhook existente, prueba con comprador Sandbox, evento auténtico, segundo envío/duplicado, recuperación tras 503 y revisión manual de fallidos, sin Live/entitlements. Ningún PayPal POST/resend ni despliegue ejecutados.
+- **Nuevo diagnóstico READ ONLY:** `supabase/queries/f16_webhook_delivery_recovery_preview_READ_ONLY.sql`, únicamente conteos agregados, sin identificadores ni PII. Ejecutado en Supabase alojado: todos los estados de inbox/conciliación en 0, `paypal_payment_entries=0`, `paypal_payment_reversals=0`, `total_global_budget_admissions=0`. Precaución: un evento nunca entregado **NO aparece** en inbox; requiere contraste independiente con PayPal.
+- **GO siguiente:** diseño/pruebas adicionales offline y, solo con autorización PO separada, despliegue activo **solo** Sandbox y reparación del webhook `6N7889790V1467139` (dominio `different_host`, tres tipos PAYMENT.SALE faltantes). `f16-paypal-webhook` alojado permanece v10 con latch FALSE. PR #44 DRAFT, nada a main, PayPal Live, checkout, cobros ni membresías.
+
 ## F16 — SQL GLOBAL APLICADO EN SUPABASE, RECEPTOR INERTE (2026-10-14)
 
 - Autorización explícita PO «sí»: **únicamente SQL**. `apply_migration` PASS con el contenido exacto de la migración originalmente denominada `20261014070015_f16_global_webhook_admission.sql` (blob `e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8`).
