@@ -2,6 +2,10 @@
 
 **Versión:** propuesta para decisión de Product Owner, 2026-10-14. **Estado:** no aprobada como política legal/comercial ni configurada en Supabase. F16 NO-GO, PR #44 Draft.
 
+## Alcance de aprobación posterior — arquitectura P06, no política de beneficios
+
+El Product Owner escribió **«aprobado»** tras la propuesta de ledger multirreembolso. Queda aprobada **solo la arquitectura técnica**: refund ID independiente, enlace a sale original, importe USD en centavos, deduplicación y acumulado exacto, hold incluso si refund llega antes de sale y atomicidad con token lease. Prototipo en `supabase/queries/f16_refund_multievent_ledger_lab_DRAFT_DO_NOT_APPLY.sql`, lectores F14/F16 en `f16_refund_multievent_readers_lab_DRAFT_DO_NOT_APPLY.sql`, flujos privados Node y pruebas PostgreSQL CI. Informe `docs/PAZO_F16_MULTIEVENT_REFUND_LEDGER_LAB_APPROVED_GATE_20261014.md`. Ninguna migración SQL oficial creada ni aplicada. **P06 continúa pendiente en lo comercial/legal**: pérdida o prorrateo de beneficios tras parcial/total, disputas, renovación, cobertura e insignias conmemorativas. También siguen pendientes P01–P05 y P07–P10, incluidos plazos y eliminación de datos financieros.
+
 ## Principios ya acordados — no volver a decidir
 
 - Núcleo social y funciones de ayuda/rescate gratuitos. Membresía opcional «Amigo de PAZO» de **USD 2.99 mensuales** por PayPal, con insignia, estilos de perfil y muro de mascotas solo tras pago real acreditado; consentimientos por mascota y revocables.
