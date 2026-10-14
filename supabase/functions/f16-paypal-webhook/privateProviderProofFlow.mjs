@@ -61,7 +61,7 @@ export function createF16PrivateProviderProofFlow({
   if(!REF.test(event.externalPaymentId||'')||
      !SUB.test(event.externalSubscriptionId||''))return DENY('missing_sale_link')
   const sub=event.externalSubscriptionId
-  const observed=await subscriptionReader.read({subscriptionId:sub,...window})
+  const observed=await subscriptionReader.read({subscriptionId:sub,startTime:window.startTime,endTime:window.endTime})
   const intent=await inspectOwner(sub,observed)
   if(!intent) return DENY('owner_not_independently_verified')
   const transaction=matchedTransaction(observed,event.externalPaymentId)
@@ -98,7 +98,7 @@ export function createF16PrivateProviderProofFlow({
   if(!SUB.test(original.subscriptionId||'')||
      !matchingOriginal(original,refund.originalSaleId,original.subscriptionId))
    return DENY('original_sale_unverified')
-  const observed=await subscriptionReader.read({subscriptionId:original.subscriptionId,...window})
+  const observed=await subscriptionReader.read({subscriptionId:original.subscriptionId,startTime:window.startTime,endTime:window.endTime})
   const intent=await inspectOwner(original.subscriptionId,observed)
   if(!intent)return DENY('owner_not_independently_verified')
   const tx=matchedTransaction(observed,refund.originalSaleId)
@@ -141,7 +141,11 @@ export function createF16PrivateProviderProofFlow({
    if(claimed?.provider_event_id!==ref.eventId||
      claimed.event_type!==ref.eventType||
      !UUID.test(claimed.lease_token||'')||
-     claimed.attempt<1||claimed.attempt>5)
+     !Number.isInteger(claimed.attempt)||
+     claimed.attempt<1||claimed.attempt>5||
+     typeof claimed.lease_expires_at!=='string'||
+     !Number.isFinite(Date.parse(claimed.lease_expires_at))||
+     Date.parse(claimed.lease_expires_at)<=Date.now())
     throw Error('f16_inconsistent_claim_requires_private_recovery')
    let committed=false,answer=DENY('provider_proof_unavailable')
    try {
