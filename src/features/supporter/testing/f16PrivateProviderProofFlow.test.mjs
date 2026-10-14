@@ -57,7 +57,10 @@ function setup(overrides={}){
   commitClaimedReversal:async proof=>{calls.push('commit_reversal')
    assert.equal(proof.leaseToken,TOKEN)
    assert.equal(proof.candidate.externalPaymentId,PAYMENT)
-   return overrides.commitResult??'reversal_recorded'},
+   assert.equal(proof.candidate.externalRefundId,refund.id)
+   assert.equal(proof.candidate.externalSubscriptionId,SUB)
+   assert.equal(proof.candidate.providerStatus,overrides.txStatus??'REFUNDED')
+   return overrides.commitResult??'refund_recorded_full'},
  }
  const flow=createF16PrivateProviderProofFlow({
   leaseStore,eventReader:reader,subscriptionReader,originalReader,
@@ -118,25 +121,25 @@ test('sale canceled subscription can remain historic candidate only when origina
 test('refund must re-read independent refund event, original refund, original sale and history',async()=>{
  const x=setup({kind:refundRef.eventType,txStatus:'REFUNDED'})
  const result=await x.flow.process(refundRef,WINDOW)
- assert.deepEqual(result,{recorded:true,entitlement:false,reason:'reversal_recorded'})
+ assert.deepEqual(result,{recorded:true,entitlement:false,reason:'refund_recorded_full'})
  assert.deepEqual(x.calls,['claim','event','refund_event','refund','original',
   'transactions','intent','auth','commit_reversal'])
 })
-test('partial refund remains unprocessed while multiple refund events lack separate ledger rows',async()=>{
+test('partial refund is an evidence-only ledger candidate after separate refund ID proof',async()=>{
  const x=setup({kind:refundRef.eventType,txStatus:'PARTIALLY_REFUNDED',
    refund:{refundMinorUnits:100}})
  const result=await x.flow.process(refundRef,WINDOW)
- assert.deepEqual(result,{recorded:false,entitlement:false,
-   reason:'partial_refund_ledger_not_ready'})
- assert.equal(x.calls.includes('commit_reversal'),false)
- assert.equal(x.calls.at(-1),'release')
+ assert.deepEqual(result,{recorded:true,entitlement:false,
+   reason:'refund_recorded_full'})
+ assert.equal(x.calls.includes('commit_reversal'),true)
+ assert.equal(x.calls.at(-1),'commit_reversal')
 })
 test('refund original mismatch, pending refund, history ambiguity and event spoof fail closed',async()=>{
  for(const change of [
   {refund:{originalSaleId:'DIFFERENT'}},
   {refund:{state:'pending'}},
   {refund:{refundMinorUnits:0}},
-  {refund:{refundMinorUnits:100}},
+  {refund:{refundMinorUnits:300}},
   {txStatus:'COMPLETED'},
   {refundEvent:{eventId:'WH-DIFFERENT'}},
   {original:{grossMinorUnits:300}},
