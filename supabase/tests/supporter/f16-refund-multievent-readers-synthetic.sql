@@ -53,9 +53,30 @@ BEGIN
   '2026-10-13T19:00:00Z')<>'inserted_blocked'
  THEN RAISE EXCEPTION 'Sale bypassed private early refund hold'; END IF;
  ids:=public.f16_lab_read_known_reversal_ids('I-REFUND-READ-V2');
- IF ids IS NULL OR pg_catalog.jsonb_typeof(ids)<>'array'
+ IF ids IS NOT NULL THEN
+  IF pg_catalog.jsonb_typeof(ids)<>'array'
     OR NOT ids @> '["SALE-REFUND-READ-V2"]'::jsonb
- THEN RAISE EXCEPTION 'Recorded refund missing from known reversal IDs'; END IF;
+  THEN RAISE EXCEPTION 'Recorded refund missing from known reversal IDs'; END IF;
+ ELSE
+  -- Shared synthetic catalog can contain independent unresolved reversed events.
+  -- In that case NULL is REQUIRED globally; it must never become [].
+  IF NOT EXISTS (
+   SELECT 1 FROM supporter_private.paypal_verified_event_inbox i
+   WHERE i.event_type IN ('PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED')
+    AND i.processing_state<>'processed'
+  ) AND NOT EXISTS (
+   SELECT 1 FROM supporter_private.paypal_payment_reversals r
+   WHERE NOT EXISTS (
+    SELECT 1 FROM supporter_private.paypal_payment_entries e
+    WHERE e.external_payment_id=r.external_payment_id)
+  ) AND NOT EXISTS (
+   SELECT 1 FROM supporter_private.f16_lab_refund_events r
+   WHERE NOT EXISTS (
+    SELECT 1 FROM supporter_private.paypal_payment_entries e
+    WHERE e.external_payment_id=r.original_sale_id)
+  )
+  THEN RAISE EXCEPTION 'Reversal history returned NULL without a reason'; END IF;
+ END IF;
 END $proof$;
 ROLLBACK;
 SELECT 'PASS F16: multi-refund reader sees early refund and blocked sale, service-only';
