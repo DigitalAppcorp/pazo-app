@@ -1,6 +1,6 @@
 # F16 — Read-only PayPal Sandbox plan or webhook check. NEVER saves secrets.
 param(
-    [ValidateSet('Plan', 'Webhooks', 'Destination')]
+    [ValidateSet('Plan', 'Webhooks', 'Destination', 'Resources')]
     [string]$Check = 'Plan'
 )
 # It prompts in PowerShell and removes process environment variables after node exits.
@@ -16,7 +16,9 @@ try {
     [Environment]::SetEnvironmentVariable('PAYPAL_SANDBOX_CLIENT_SECRET', [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr), 'Process')
     Push-Location (Resolve-Path (Join-Path $PSScriptRoot '..'))
     try {
-        if ($Check -eq 'Destination') {
+        if ($Check -eq 'Resources') {
+            & node 'scripts/f16-paypal-verify-resources-readonly.mjs'
+        } elseif ($Check -eq 'Destination') {
             & node 'scripts/f16-paypal-verify-webhook-destination-readonly.mjs'
         } elseif ($Check -eq 'Webhooks') {
             & node 'scripts/f16-paypal-verify-webhooks-readonly.mjs'
