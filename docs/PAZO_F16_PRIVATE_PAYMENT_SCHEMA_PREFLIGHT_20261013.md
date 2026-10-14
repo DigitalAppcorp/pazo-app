@@ -57,13 +57,13 @@ Se preparó el código SQL de ensayo en `supabase/tests/supporter/f16-payment-in
 - `supabase/tests/supporter/f16-payment-inbox-synthetic.sql`: pruebas con roles `anon`, `authenticated` y `service_role`, caso único, repetición, rechazo de tipos maliciosos y preservación de estados; concluye en ROLLBACK.
 - `scripts/f16-postgres-inbox-concurrency.mjs`: 32 solicitudes RPC en ocho sesiones paralelas por lote (cuatro IDs), verifica exactamente un INSERT por ID. Exige entorno GitHub Actions y PostgreSQL descartable.
 - `src/features/supporter/testing/f16PostgresInboxSqlStatic.test.mjs`: guardas estáticas ejecutadas por la suite F16 ya enlazada a CI; no representan certificación de funcionamiento SQL.
-- **Gate PostgreSQL real PENDIENTE**: el workflow no ejecuta actualmente los tres scripts SQL; el intento de integrar esa ejecución al CI no fue aceptado por la herramienta. NO marcar SQL/ACL/concurrencia como PASS hasta una ejecución real verificada y registrada.
+- **Estado histórico superado:** la integración inicial fue bloqueada; se creó un workflow de laboratorio independiente y PostgreSQL real PASS en #38505266445. Ver sección de gate verificado.
 
 Antes de convertir este borrador en migración se debe utilizar `supabase migration new f16_private_verified_event_inbox` con CLI oficial sobre un checkout local limpio, revisar el archivo resultante y probarlo en una base desechable. Luego solicitar GO del Product Owner ANTES de aplicar al proyecto `mrybvqdebbgcayuvgkkr`. La configuración PayPal existente sigue sin cambios.
 
 ## Gate de ejecución único para PostgreSQL aislado
 
-**Preparado, todavía NO ejecutado contra PostgreSQL:** `scripts/f16-postgres-inbox-lab.sh`. Reutiliza exclusivamente el servicio PostgreSQL 17 desechable de las pruebas F14 de GitHub Actions (`127.0.0.1:55441`, base `f14_synthetic`, rol `f14_admin`), y verifica ambiente `GITHUB_ACTIONS=true`, contraseña pública de fixture de CI, ausencia de variables de conexión a Supabase alojado y cimentación previa F16 de consentimientos.
+**Ejecutado y aprobado en PostgreSQL descartable con el workflow #38505266445:** `scripts/f16-postgres-inbox-lab.sh`. Reutiliza exclusivamente el servicio PostgreSQL 17 desechable de las pruebas F14 de GitHub Actions (`127.0.0.1:55441`, base `f14_synthetic`, rol `f14_admin`), y verifica ambiente `GITHUB_ACTIONS=true`, contraseña pública de fixture de CI, ausencia de variables de conexión a Supabase alojado y cimentación previa F16 de consentimientos.
 
 Orden de ejecución del gate, tras `supabase/tests/f14/catalog-baseline.sql` y el DDL de consentimiento F16 cargados **solo en ese laboratorio**:
 
@@ -73,6 +73,23 @@ bash scripts/f16-postgres-inbox-lab.sh
 
 El ejecutor usa el SQL de prueba de inbox con `SET ROLE postgres`, audita permisos/RLS, ejecuta las pruebas sintéticas transaccionales y 32 solicitudes paralelas al RPC. El ejecutor y el script de concurrencia tienen guardas contra ejecución en otro entorno. Este procedimiento no emplea servicios pagados nuevos, ni Supabase hospedado ni credenciales reales.
 
-La prueba de **sintaxis y rechazo fuera del laboratorio** fue comprobada separadamente; la suite estática F16 cubre también estas guardas. La ejecución PostgreSQL end-to-end continúa **BLOQUEADA** porque no se pudo integrar este paso al workflow alojado con las herramientas disponibles. Un CI verde de pruebas estáticas **no autoriza** migración.
+La prueba de **sintaxis y rechazo fuera del laboratorio** fue comprobada separadamente; la suite estática F16 cubre también estas guardas. El workflow de laboratorio independiente **superó la ejecución PostgreSQL real** (#38505266445). El PASS del laboratorio **no autoriza** una migración alojada.
 
 **Criterio de cierre:** evidencia del job con estado SUCCESS para DDL, metadatos, pruebas de roles y 32 llamadas concurrentes. Después comparar la revisión SQL con el contrato F16 y solo entonces crear archivo de migración auténtica mediante CLI local. La decisión de retención/propósito y autorización del Product Owner son gates separados previos a cualquier SQL hospedado.
+
+## Gate verificado: PostgreSQL 17 aislado PASS — 2026-10-13
+
+**Resultado comprobado en GitHub Actions:** [F16 Disposable PostgreSQL Lab, ejecución #38505266445](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38505266445) — `completed/success` para el commit `8165b6be`. Se creó el workflow `.github/workflows/f16-postgres-inbox-lab.yml` con un contenedor PostgreSQL 17 propio y efímero de CI, sin conexiones a Supabase alojado ni a PayPal.
+
+La etapa `Execute F16 inbox RLS, RPC and 32-call concurrency lab` terminó `success`. Los logs del job confirman:
+
+```text
+PASS F16: 32 concurrent RPC calls across 4 unique IDs; exactly 4 rows, no duplicate credit
+PASS F16: disposable PostgreSQL inbox permissions, idempotency and concurrency
+```
+
+Quedaron realmente ejecutados en la base aislada: borrador SQL de inbox, tests de metadatos RLS/ACL/owner/`search_path`, operaciones desde `anon`, `authenticated` y `service_role`, idempotencia, rechazo de tipos inválidos e IDs conflictivos, preservación del estado ante reintentos y las 32 llamadas concurrentes. El workflow utiliza `actions/checkout@v7`, PostgreSQL `17.11` y el fixture `f14_synthetic`; no instaló migraciones en PAZO alojado.
+
+**Alcance de PASS:** valida **solo** el diseño SQL de laboratorio y su comportamiento en PostgreSQL 17. No certifica retención legal, procedimiento de eliminación, procesamiento duradero de pagos, reversos transaccionales, cobertura, estados de usuario, ni seguridad de un listener realmente desplegado. La tabla alojada y la RPC de pagos siguen ausentes; el guard de entitlement F16 continúa bloqueado. La ejecución de prueba **no es** autorización para desplegar.
+
+**Próximo gate:** decidir retención/borrado de referencias y reconciliación ante reversos, generar con CLI un archivo real `supabase migration new` sin inventar timestamp, portar el DDL revisado fuera del guard de laboratorio, ensayar la migración y política de rollback; solicitar GO del Product Owner **antes** de toda mutación Supabase o PayPal.
