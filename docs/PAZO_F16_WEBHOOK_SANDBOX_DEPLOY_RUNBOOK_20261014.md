@@ -1,5 +1,12 @@
 # PAZO F16 — Runbook de despliegue SEGURO del nuevo receptor PayPal Sandbox
 
+## Operación siguiente — webhook PayPal Sandbox autorizado pero no modificado (2026-10-14)
+
+- PO autorizó editar solamente el webhook EXISTENTE `6N7889790V1467139` para fijar destino F16 y preservar seis eventos actuales más tres `PAYMENT.SALE.*`. No se ha llamado al PATCH desde ChatGPT: no hay conector PayPal ni disponibilidad de secretos de la sesión local Windows.
+- Implementación local en GitHub: `-Check ApplyWebhook` solicita confirmación, obtiene credenciales ocultas, verifica que el plan de 2.99/mes corresponde al mismo REST app, vuelve a leer webhook para detectar drift, hace un único PATCH y GET postflight. No imprime URL original, secretos ni respuesta PayPal. Ante fallo parcial o timeout: NO reintentar ciegamente; solo preflight `-Check Resources`.
+- Instrucciones concretas `docs/PAZO_F16_PAYPAL_WEBHOOK_UPDATE_LOCAL_RUNBOOK_20261014.md`. Hasta resultado local verificado, URL y eventos PayPal continúan **PENDIENTES**, sin certificación de entrega. No crear webhook alternativo ni usar Edge legacy.
+- F16 alojado v12 Sandbox activo, solo firma validada permite inbox, pero no checkout, pago ni entitlement. Hacer auditar resultado cuando PO envíe JSON saneado y pedir GO aparte para evento de comprador real.
+
 ## Estado actual prioritario F16 — Sandbox receptor v12 habilitado, PayPal sin redirección (2026-10-14)
 
 - `f16-paypal-webhook` alojada v12 tiene latch `true`, 8 fuentes; código restringido a Sandbox, firma remota verificada antes de escribir referencia mínima al inbox. `paypal-webhook` legacy v35 no modificado.
