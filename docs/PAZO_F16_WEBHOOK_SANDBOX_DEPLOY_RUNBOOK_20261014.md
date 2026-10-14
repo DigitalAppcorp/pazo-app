@@ -1,5 +1,12 @@
 # PAZO F16 — Runbook de despliegue SEGURO del nuevo receptor PayPal Sandbox
 
+## ACTUALIZACIÓN FINAL — receptor F16 v11 inerte verificado externamente (2026-10-14)
+
+- PO aprobó un **despliegue únicamente inerte**. Supabase Edge `f16-paypal-webhook` pasó de v10 a **v11** con 8 fuentes exactas del HEAD de GitHub `4c6324f8...` incluidas `workerAdmissionGate.mjs` y `globalAdmissionAdapter.mjs`. El latch quedó **false** y continúa sin atender notificaciones. El endpoint sigue con `verify_jwt=false` por ser futuro webhook PayPal, pero la barrera de código impide toda ejecución real.
+- Comprobación HTTP auténtica (GitHub Actions [#38531593132](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38531593132)): GET y POST **503 `f16_receiver_not_released`**; workflow temporal retirado. Postflight Supabase 0 eventos, 0 intentos, 0 pagos, 0 reversos, 0 admisiones globales y 0 membresías; `paypal-webhook` legacy v35 no modificado.
+- **Este GO ya se ejecutó.** Los avisos inferiores que dicen v10 o «no desplegado» son checkpoints históricos y NO aplican al estado actual. La nueva fuente está instalada pero NO activada; ningún evento firmado real ni reenvío PayPal ha sido probado.
+- **Siguiente gate (necesita aprobación distinta):** determinar si aceptar el riesgo restante en Sandbox, activar latch y desplegar receptor F16 para recibir webhooks; por separado y DESPUÉS, cambiar el destino/eventos del webhook PayPal existente; validar firma auténtica, idempotencia y recuperación antes de avanzar con membresías. Live y pagos reales fuera de alcance.
+
 ## Gate siguiente — recuperación de entregas PayPal (2026-10-14)
 
 - Documentación oficial: HTTP no-2xx admite hasta 25 reintentos PayPal durante 3 días; reenvío manual en el panel Sandbox tras fallo definitivo (https://developer.paypal.com/api/rest/webhooks/rest/). La lista/API de eventos no acredita pagos ni suscripciones.
