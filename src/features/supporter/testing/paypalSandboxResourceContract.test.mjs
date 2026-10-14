@@ -34,6 +34,40 @@ test('classifies legacy, other-host and incomplete events, without copying URLs'
   assert.equal(other.webhook.missingEvents.length,PAZO_REQUIRED_PAYPAL_EVENTS.length)
   assert.equal(other.safeToActivate,false)
 })
+test('read-only mismatch diagnosis reveals only approved PayPal event names, never unknown raw names',()=>{
+ const old=validWebhook()
+ const extra='UNEXPECTED.PRIVATE_CUSTOM_TOKEN_DO_NOT_PRINT'
+ const hook={...old,
+  url:'https://untrusted.invalid/callback?secret=DO_NOT_PRINT',
+  event_types:[
+   ...PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6).map(name=>({name})),
+   {name:extra},
+  ],
+ }
+ const result=assessF16SandboxResources(validPlan(),hook)
+ assert.equal(result.webhook.configuredEventsCount,7)
+ assert.equal(result.webhook.unexpectedEventsCount,1)
+ assert.equal(result.webhook.duplicateEventsCount,0)
+ assert.deepEqual(result.webhook.missingSubscriptionEvents,[])
+ assert.deepEqual(result.webhook.missingEvents,PAZO_REQUIRED_PAYPAL_EVENTS.slice(6))
+ assert.deepEqual(result.webhook.recognizedEvents,PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6))
+ assert.equal(result.webhook.wildcardPresent,false)
+ assert.doesNotMatch(JSON.stringify(result),/UNEXPECTED|PRIVATE_CUSTOM|DO_NOT_PRINT|untrusted\\.invalid|secret=/)
+ const missing={...hook,event_types:[
+  ...PAZO_REQUIRED_PAYPAL_EVENTS.slice(1,6).map(name=>({name})),
+ ]}
+ const m=assessF16SandboxResources(validPlan(),missing)
+ assert.deepEqual(m.webhook.missingSubscriptionEvents,[PAZO_REQUIRED_PAYPAL_EVENTS[0]])
+ assert.equal(m.webhook.configuredEventsCount,5)
+ assert.equal(m.webhook.unexpectedEventsCount,0)
+ const repeated={...hook,event_types:[{name:'*'},{name:'*'}]}
+ const w=assessF16SandboxResources(validPlan(),repeated)
+ assert.equal(w.webhook.wildcardPresent,true)
+ assert.equal(w.webhook.duplicateEventsCount,1)
+ assert.equal(w.webhook.unexpectedEventsCount,2)
+ assert.doesNotMatch(JSON.stringify(w),/"recognizedEvents":\\["\\*"\\]/)
+})
+
 test('fails closed for wrong resource ID, invalid plans and secret-bearing URLs',()=>{
   const changed={...validWebhook(),id:'OTHER',url:'https://secret.example/hook?secret=TOP_SECRET'}
   const r=assessF16SandboxResources(validPlan(),changed)
