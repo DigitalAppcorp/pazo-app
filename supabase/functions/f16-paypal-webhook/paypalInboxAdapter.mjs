@@ -11,7 +11,7 @@ export function createPaypalVerifiedEventInbox({projectUrl,serviceRoleKey,fetchI
     async insertIfAbsent(item) {
       if(item?.provider!=='paypal' ||
           typeof item.eventId!=='string' || !/^[A-Za-z0-9._-]{1,128}$/.test(item.eventId) ||
-          typeof item.eventType!=='string' || !/^[A-Z0-9._]{1,128}$/.test(item.eventType))
+          typeof item.eventType!=='string' || !/^[A-Z0-9._-]{1,128}$/.test(item.eventType))
         throw Error('invalid_verified_event_reference')
       // Static URL: never send server API keys to a host from a webhook or client.
       const response=await fetchImpl(RPC,{
