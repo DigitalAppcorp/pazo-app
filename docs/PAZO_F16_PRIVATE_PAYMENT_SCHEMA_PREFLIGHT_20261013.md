@@ -39,3 +39,24 @@
 **Costos:** este preflight se ejecuta mediante herramientas existentes y no crea recursos facturables. SQL alojado y Edge Function podrían generar uso/cuota según plan; comprobar antes de solicitar GO de ejecución.
 
 **Referencias:** `docs/PAZO_F16_PAYPAL_RECONCILIATION_MODEL_20261013.md`, `docs/PAZO_F16_EXISTING_SUPABASE_PAYPAL_WEBHOOK_AUDIT_20261013.md`, `docs/PAZO_PRIVACY_DATA_GOVERNANCE.md`, `docs/PAZO_DATA_INVENTORY.md`, `docs/PAZO_MVP_MANUAL_DELETION_SOP_20261010.md`.
+
+## Avance de laboratorio — inbox privada de eventos, NO desplegada (2026-10-13)
+
+Se preparó el código SQL de ensayo en `supabase/tests/supporter/f16-payment-inbox-lab-draft.sql`, **NO** bajo `supabase/migrations/`. El script incluye un bloqueo explícito: solo puede abrir una transacción en la base descartable `f14_synthetic`, con sesión de operador `f14_admin`, PostgreSQL 17 y la cimentación previa del muro. Esto impide reutilizarlo accidentalmente como DDL hospedado; **no constituye una migración Supabase**.
+
+### Alcance exacto del borrador
+
+- Crea únicamente `supporter_private.paypal_verified_event_inbox`, con ID de evento PayPal único, tipo de evento aprobado, instante de verificación, estado de procesamiento, intentos y siguiente reintento. Sin pagos, datos de tarjeta, payload completo, correos, secretos, `profiles.is_founder` ni entitlement.
+- Activa **RLS forzada**, sin políticas permisivas y sin acceso directo a la tabla o al esquema privado para `anon`, `authenticated` ni `service_role`.
+- Crea `public.f16_paypal_record_verified_event(text,text)` como `SECURITY DEFINER` con propietario `postgres`, `search_path=''`, argumentos validados, `EXECUTE` exclusivamente para `service_role`. Un ID nuevo retorna TRUE; el mismo ID/tipo retorna FALSE sin modificar el estado; ID igual/tipo distinto falla.
+- **No** define caducidad ni limpieza automática de eventos, porque la política de retención, reembolsos y derechos de supresión necesita decisión expresa. **No desplegar este borrador** antes de resolver esa política y diseñar el worker/operaciones.
+
+### Evidencia y límites de tests
+
+- `supabase/tests/supporter/f16-payment-inbox-metadata.sql`: pruebas de metadatos RLS, owner, grants y `search_path` en PostgreSQL descartable.
+- `supabase/tests/supporter/f16-payment-inbox-synthetic.sql`: pruebas con roles `anon`, `authenticated` y `service_role`, caso único, repetición, rechazo de tipos maliciosos y preservación de estados; concluye en ROLLBACK.
+- `scripts/f16-postgres-inbox-concurrency.mjs`: 32 solicitudes RPC en ocho sesiones paralelas por lote (cuatro IDs), verifica exactamente un INSERT por ID. Exige entorno GitHub Actions y PostgreSQL descartable.
+- `src/features/supporter/testing/f16PostgresInboxSqlStatic.test.mjs`: guardas estáticas ejecutadas por la suite F16 ya enlazada a CI; no representan certificación de funcionamiento SQL.
+- **Gate PostgreSQL real PENDIENTE**: el workflow no ejecuta actualmente los tres scripts SQL; el intento de integrar esa ejecución al CI no fue aceptado por la herramienta. NO marcar SQL/ACL/concurrencia como PASS hasta una ejecución real verificada y registrada.
+
+Antes de convertir este borrador en migración se debe utilizar `supabase migration new f16_private_verified_event_inbox` con CLI oficial sobre un checkout local limpio, revisar el archivo resultante y probarlo en una base desechable. Luego solicitar GO del Product Owner ANTES de aplicar al proyecto `mrybvqdebbgcayuvgkkr`. La configuración PayPal existente sigue sin cambios.
