@@ -37,10 +37,16 @@ BEGIN
  IF NOT public.f16_paypal_create_private_intent(owner,i)
  OR public.f16_paypal_bind_private_intent(i,owner,'I-REFUND-V2',plan)<>'new_binding'
  THEN RAISE EXCEPTION 'Missing synthetic bound subscription'; END IF;
+ IF NOT public.f16_paypal_create_private_intent(
+  owner,'intent-6599f187-2f49-492d-af2a-466d986f4c17')
+ OR public.f16_paypal_bind_private_intent(
+  'intent-6599f187-2f49-492d-af2a-466d986f4c17',owner,
+  'I-REFUND-OTHER',plan)<>'new_binding'
+ THEN RAISE EXCEPTION 'Missing second synthetic binding'; END IF;
  FOREACH ev IN ARRAY ARRAY[
  'WH-V2-PARTIAL-A','WH-V2-FINAL-B','WH-V2-DUPLICATE-A',
  'WH-V2-OVERPAY','WH-V2-EARLY-REFUND','WH-V2-SALE-LATE',
- 'WH-V2-WRONG-LEASE'] LOOP
+ 'WH-V2-WRONG-LEASE','WH-V2-CROSS-SUB'] LOOP
   IF NOT public.f16_paypal_record_verified_event(ev,
    CASE WHEN ev='WH-V2-SALE-LATE' THEN 'PAYMENT.SALE.COMPLETED'
         ELSE 'PAYMENT.SALE.REFUNDED' END)
@@ -91,6 +97,18 @@ BEGIN
   'REFUNDED','2026-10-14T12:20:00Z');
  IF decision<>'refund_recorded_full' THEN RAISE EXCEPTION 'Early refund refused'; END IF;
 
+ -- A separately BOUND subscription may never claim the same original
+ -- sale's accumulated refund hold, even with a valid private service lease.
+ v:=public.f16_lab_claim_verified_inbox('WH-V2-CROSS-SUB',120);
+ denied:=false;
+ BEGIN
+  PERFORM public.f16_lab_commit_claimed_refund(
+   'WH-V2-CROSS-SUB',(v->>'lease_token')::uuid,
+   'SALE-V2-BEFORE','I-REFUND-OTHER','REFUND-V2-CROSS',1,
+   'PARTIALLY_REFUNDED','2026-10-14T12:22:00Z');
+ EXCEPTION WHEN invalid_parameter_value THEN denied:=true; END;
+ IF NOT denied THEN RAISE EXCEPTION 'Cross-subscription refund contaminated another hold'; END IF;
+
  v:=public.f16_lab_claim_verified_inbox('WH-V2-WRONG-LEASE',120);
  denied:=false;
  BEGIN
@@ -137,6 +155,10 @@ BEGIN
    WHERE external_payment_id='SALE-V2-BEFORE'
    AND entry_state='blocked_reversal')
  THEN RAISE EXCEPTION 'Refund-before-sale was credited'; END IF;
+ IF NOT EXISTS (SELECT 1 FROM supporter_private.paypal_verified_event_inbox
+   WHERE provider_event_id='WH-V2-CROSS-SUB' AND processing_state='processing'
+   AND retention_hold AND f16_lease_token IS NOT NULL)
+ THEN RAISE EXCEPTION 'Rejected cross-subscription event was acknowledged'; END IF;
  IF NOT EXISTS (SELECT 1 FROM supporter_private.paypal_verified_event_inbox
    WHERE provider_event_id='WH-V2-OVERPAY' AND processing_state='processing'
    AND retention_hold AND f16_lease_token IS NOT NULL)
