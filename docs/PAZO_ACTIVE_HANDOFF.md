@@ -10,6 +10,13 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate F16 — Origen del desvío identificado: URL de DASHBOARD en PayPal (2026-10-13)
+
+- El Product Owner identificó el destino del webhook Sandbox `6N7889790V1467139` como **`supabase.com/dashboard`** (hostname `supabase.com` y segmento `/dashboard`, sin URL completa). Esto **NO es el endpoint invocable de una Edge Function**: es el dominio/ruta del panel administrativo de Supabase. La consulta anterior ya había confirmado `destinationCategory=different_host` y `webhookIdMatches=true`. No solicitar nuevamente Webhook ID, Plan ID ni diagnóstico de host.
+- URL *esperada* de la Edge Function heredada: `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook`, pero **NO cambiar aún el webhook** a esa URL: versión desplegada v30 escribe en `profiles.is_founder` desde el estado de la suscripción y carece de conciliación e inbox idempotente. Un redireccionamiento ahora crearía riesgo innecesario.
+- **Siguiente gate de ejecución:** completar receptor F16 aislado Sandbox con verificación efectiva de PayPal, inbox privada transaccional aprobada y sin efectos sobre founder; auditar seguridad y CI; después pedir autorización específica para SQL/secretos/despliegue y modificación **del webhook existente** (no crear otro), agregando los tres `PAYMENT.SALE.*` faltantes. NINGÚN despliegue, mutación alojada, cobro Live o activación de consentimientos autorizado por la respuesta del PO.
+- CI del último HEAD anterior `9c1818a` **SUCCESS**, run `38501091915`. PR #44 permanece DRAFT.
+
 ## Gate F16 — Destino confirmado en OTRO HOST; receptor F16 seguro en desarrollo local (2026-10-13)
 
 - PO ejecutó preflight PayPal Sandbox con ID `6N7889790V1467139` y devolvió `destinationCategory=different_host`, `webhookIdMatches=true`, `destinationMatches=false`. **Hecho:** el destino configurado es otro dominio que no coincide con el dominio del proyecto Supabase PAZO. **Desconocido:** cuál es el dominio exacto y si pertenece al PO; no asumir URL ni redirigir automáticamente, no sumar los 3 eventos `PAYMENT.SALE.*`.
