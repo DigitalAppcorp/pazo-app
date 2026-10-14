@@ -68,7 +68,8 @@ export function assessF16P05CycleAttributionRisks({
    lastFailed.amount?.currency_code!=='USD'||
    minor(lastFailed.amount.value)===null))
   return unknown()
- const retry=info.next_payment_retry_time
+ // PayPal keeps the retry timestamp under last_failed_payment.
+ const retry=lastFailed?.next_payment_retry_time
  if(retry!==undefined&&!validUtc(retry))return unknown()
  const executions=info.cycle_executions
  if(executions!==undefined&&(!Array.isArray(executions)||executions.length>3||
