@@ -24,6 +24,12 @@
 | P09 | Retención de solicitudes de privacidad | Registrar evidencia mínima de solicitud, respuesta y excepción, separada de contenido personal y financiero. | Confirmar si CCPA/CPRA aplica a Alvarado Solutions LLC y plazos obligatorios bajo el régimen aplicable |
 | P10 | Integración de PayPal | Confirmar con el proveedor el GET auténtico de venta/reembolso y el historial completo, incluyendo disputas fuera de ventanas de 31 días; no usar Payments v1 depreciada sin verificación de disponibilidad y plan de compatibilidad. | Aprobación de ensayo nuevo Sandbox con cuenta Auth vinculada; proceso de incidentes y refund |
 
+## Hallazgo nuevo — P06 no se puede cerrar con el ledger actual
+
+En el ensayo PG17 se confirmó que el diseño actual permite una sola reversión por venta y no puede representar dos refunds parciales o una secuencia parcial→total con IDs de refund distintos. La corrección **solo offline** bloquea el commit automático de `partially_refunded` tanto en `privateProviderProofFlow.mjs` como en `privateLabRpcStores.mjs`. El SQL DRAFT aún debe endurecerse antes de cualquier despliegue. **Esto no aprueba una política de devoluciones**, solo evita marcar un evento como conciliado mientras falta contabilidad multievento.
+
+Informe técnico y propuesta sin migración: `docs/PAZO_F16_MULTI_REFUND_RECONCILIATION_GATE_20261014.md`. Es necesaria una decisión P06 expresa antes de diseñar la retención y cobertura de reembolsos múltiples.
+
 ## Regla de ingeniería activa mientras P01–P10 no estén aprobadas
 
 **Conservación defensiva ≠ política de retención definitiva.** No se inicia eliminación automática de filas financieras; no se concede entitlement, insignia ni períodos pagados; el usuario puede seguir utilizando PAZO gratis; cualquier baja con señales financieras queda en revisión manual bajo F14. Retener indefinidamente tampoco se aprueba como política legal: se debe documentar y resolver cada bloqueo con minimización y revisión de obligaciones.
