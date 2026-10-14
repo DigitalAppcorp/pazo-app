@@ -31,6 +31,12 @@ Fuentes oficiales revisadas:
 
 Pruebas `src/features/supporter/testing/f16P05BillingEvidenceLab.test.mjs`: pago correcto sin intervalo, cancelación sin próxima fecha, deuda pendiente/cobro atrasado, varios pagos, venta duplicada, estado de pago no completado, propietario/merchant falso, trial/plan anual, otros importes/cargos, fecha imposible, falta de datos y rechazo de PII. Corre en `test:f16:synthetic` sin acceso al proveedor ni credenciales.
 
+## Avance adicional: clasificación de retries y deuda sin atribución de meses
+
+Nueva revisión específica de ciclos: `docs/PAZO_F16_P05_CYCLE_ATTRIBUTION_RISK_GATE_20261014.md`. A la evidencia de plan/sale originales se agregó el contrato de auditoría `p05CycleAttributionRisksLab.mjs`, que examina estados actuales `outstanding_balance`, `failed_payments_count`, `next_payment_retry_time`, `cycle_executions` y `auto_bill_outstanding`. Los campos ausentes se representan como **desconocidos**, no como prueba de saldo cero. Un contador de fallos `0` después de pago tampoco demuestra que nunca hubo reintentos.
+
+PayPal puede reintentar cobros y trasladar importes no cobrados al siguiente ciclo; esto invalida la inferencia «cada pago de USD 2.99 = nuevo mes». El contrato nuevo devuelve siempre `cycleVerified:false`, `mayCreatePaidPeriod:false`, `mayGrantBenefits:false`, `mayCountCommemorativeMonth:false`, `paidThrough:null` y ninguna fecha de cobertura. Pruebas `f16P05CycleAttributionRisksLab.test.mjs` cubren 72 combinaciones y los estados de deuda/cancelación. **Ninguna regla de asignación a ciclos se aprobó ni se desplegó.**
+
 ## Decisión P05 aún necesaria — no inferir
 
 La opción conservadora recomendada es definir **un identificador de ciclo único y comienzo/fin sustentados por reglas contractuales explícitas + evidencia del proveedor**. Eso requiere resolver cómo se asignan ventas a ciclos, pagos tardíos, meses de diferente duración, suspensión, trial, saldos de recuperación y duplicados; definir cómo se prueba exhaustivamente la ausencia de refund/disputa para ese ciclo. No crear una tabla `paid_periods` alojada ni contabilizar insignias hasta tener esos criterios aprobados y probados con nuevo Sandbox Auth realmente BOUND.
