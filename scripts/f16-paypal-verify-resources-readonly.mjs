@@ -47,11 +47,14 @@ async function main(){
     // Optional failure must never block this resource read-only check or print
     // provider errors. No raw webhook URL or unknown event labels are emitted.
     let catalog=null
-    try {
-      catalog=await readJson('/v1/notifications/webhooks-event-types',
-        {method:'GET',headers:bearer},'catalog_lookup')
-    } catch { /* catalogStatus becomes unavailable; no raw names shown */ }
-    const result=assessF16SandboxResources(plan,webhook,catalog)
+    const preliminary=assessF16SandboxResources(plan,webhook)
+    if(preliminary.webhook.idMatches&&preliminary.webhook.unexpectedEventsCount>0){
+      try {
+        catalog=await readJson('/v1/notifications/webhooks-event-types',
+          {method:'GET',headers:bearer},'catalog_lookup')
+      } catch { /* catalogStatus becomes unavailable; no raw names shown */ }
+    }
+    const result=catalog?assessF16SandboxResources(plan,webhook,catalog):preliminary
     console.log(JSON.stringify(result,null,2))
     // A valid 0 only proves read access to both existing resources by these credentials.
     if(!result.resourcesAccessible||result.plan.warnings.length)process.exitCode=1
