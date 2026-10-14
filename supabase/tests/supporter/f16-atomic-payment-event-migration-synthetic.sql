@@ -90,6 +90,10 @@ BEGIN
  EXCEPTION WHEN invalid_parameter_value THEN rejected:=true; END;
  IF NOT rejected THEN RAISE EXCEPTION 'event reused for another payment'; END IF;
 
+END $scenario$;
+RESET ROLE;
+DO $verify$
+BEGIN
  IF (SELECT count(*) FROM supporter_private.paypal_payment_entries
    WHERE external_payment_id LIKE 'PAY-ATOMIC-%') <> 2 OR
    (SELECT count(*) FROM supporter_private.paypal_payment_entries
@@ -109,7 +113,8 @@ BEGIN
  AND (processing_state<>'processed' OR reconciled_payment_id IS NULL
       OR retention_hold IS FALSE))
  THEN RAISE EXCEPTION 'processed payment event not safely persisted/held'; END IF;
+ IF supporter_private.wall_has_verified_entitlement('63e812b0-a7e5-49f6-b2dd-c11d2c72af57'::uuid) IS DISTINCT FROM false
+ THEN RAISE EXCEPTION 'fake coverage was activated'; END IF;
  RAISE NOTICE 'PASS F16 atomic ledger: sale/refund ordering, rollback on invalid data, idempotent events, zero coverage';
-END $scenario$;
-RESET ROLE;
+END $verify$;
 ROLLBACK;
