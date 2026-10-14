@@ -119,7 +119,7 @@ export function createF16PrivateLabRpcStores({rpcClient,labDatabase}={}){
   async commitClaimedReversal({eventId:evt,leaseToken,candidate}={}){
    eventId(evt);token(leaseToken)
    if(candidate?.provider!=='paypal'||!ref(candidate.externalPaymentId)||
-       !['refunded','partially_refunded'].includes(candidate.kind)||
+       candidate.kind!=='refunded'||
        !utc(candidate.verifiedAt))invalid()
    const outcome=await call('f16_lab_commit_claimed_reversal',{
     p_event_id:evt,p_lease_token:leaseToken,
