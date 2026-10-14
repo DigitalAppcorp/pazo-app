@@ -243,8 +243,8 @@ PostHog.
 
 ## 12. Pagos / Supporter
 
-**Estado**
-Checkout frontend desactivado. Webhook endurecido. Membresía no reactivada.
+**Estado (revisado 2026-10-13)**
+Checkout frontend desactivado. **Webhook heredado activo en Supabase, auditado como NO APTO para activar membresías F16**: actualiza `profiles.is_founder` al comprobar estado ACTIVE sin pago conciliado, sin inbox idempotente y selecciona Live por defecto si falta `PAYPAL_ENV`. Webhook Sandbox existente apunta a **otro host**, no al endpoint Supabase esperado. No se ha vinculado ni reconfigurado el webhook, no hay cobros ni membresías F16 reales. Plan Sandbox USD 2.99 mensual validado con API por el PO.
 
 **Proveedor**
 PayPal.
@@ -260,12 +260,11 @@ PayPal.
 - credenciales de PayPal.
 
 **Pendiente**
-- secretos reales;
-- webhook Sandbox/Live;
-- precio;
-- beneficios;
-- cancelación/UX;
-- Privacy Policy/Terms.
+- configurar secretos exclusivamente del lado servidor con entorno Sandbox/Live separado (sin registrar credenciales);
+- confirmar titularidad del host de callback de webhook Sandbox, diseñar receptor seguro y entrega efectiva;
+- inbox privada transaccional con datos operativos mínimos: IDs de evento y tipo PayPal, referencia de transacción por verificar, sin payload completo/PII/credenciales; retención por aprobar;
+- plan de autorización, migración y reconciliación de pagos, reversos y meses pagados; no usar insignia fundador;
+- cancelación/UX y Privacy Policy/Terms definitivos. Precio/plan F16 USD 2.99/mes **ya aprobado y validado**.
 
 ## 13. Hosting / deployment
 
