@@ -14,6 +14,10 @@ La auditoría oficial PayPal confirmó que `billing_cycles[].frequency`, `subscr
 
 Nuevo evaluador cerrado `supabase/functions/f16-paypal-webhook/p05BillingEvidenceLab.mjs` y pruebas `src/features/supporter/testing/f16P05BillingEvidenceLab.test.mjs`. Compara identidad BOUND/Auth verificada, fuente merchant PayPal Sandbox, plan mensual 2.99 USD, venta original comprobada y transacción concordante. Solo emite señales mínimas; **siempre `coverageReady:false`, `paidThrough:null`, `periodStart:null`, `periodEnd:null` y `entitlement:false`**. Informe: `docs/PAZO_F16_P05_BILLING_PERIOD_EVIDENCE_GATE_20261014.md`. **No se aprobó P05**, solo se probó qué fuentes son insuficientes; definir método de ciclos verificados con PO, PayPal y reglas contractuales antes de migración o acreditación.
 
+## P05 — Hallazgo adicional de retries, saldo acumulado y meses no atribuibles
+
+La guía PayPal revisada el **14-oct-2026** (publicación **14-sep-2026**) confirma reintentos tras fallos y agregación de importes fallidos a ciclos posteriores. Un pago de USD 2.99 puede liquidar deuda anterior; **no equivale por sí mismo a un mes nuevo**, aunque el estado actual de saldo sea cero. Nuevo `p05CycleAttributionRisksLab.mjs` y tests de **72 combinaciones** detectan saldo, retries y ausencia de historial completo, con todas las salidas `cycleVerified:false` y `mayGrantBenefits:false`. El informe `docs/PAZO_F16_P05_CYCLE_ATTRIBUTION_RISK_GATE_20261014.md` detalla las opciones de modelo por `cycle_key`, cobranza atrasada, pagos combinados y días 29/30/31, **todavía NO aprobadas por PO**. La aprobación comercial previa P06-A–E permanece intacta: se aplica solo una vez que P05 determina el ciclo correcto.
+
 ## Principios ya acordados — no volver a decidir
 
 - Núcleo social y funciones de ayuda/rescate gratuitos. Membresía opcional «Amigo de PAZO» de **USD 2.99 mensuales** por PayPal, con insignia, estilos de perfil y muro de mascotas solo tras pago real acreditado; consentimientos por mascota y revocables.
