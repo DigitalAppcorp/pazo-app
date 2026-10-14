@@ -1,0 +1,30 @@
+name: F16 Eleven-Event Sandbox HTTP Smoke (One-Time)
+on:
+  pull_request:
+    branches: [release/mvp-beta-fast-track-20261010]
+permissions:
+  contents: read
+jobs:
+  f16-safe-public-negative-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify GET=405 and unsigned POST=400; do not use credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook'
+          getbody="$RUNNER_TEMP/eleven-get.json"
+          getstatus=$(curl --silent --show-error --retry 0 --max-time 15 -X GET \
+            --output "$getbody" --write-out '%{http_code}' "$url")
+          test "$getstatus" = 405 || { echo "FAIL GET status $getstatus"; exit 1; }
+          node -e 'let j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));if(j.code!=="method_not_allowed")process.exit(1)' "$getbody"
+          echo 'PASS F16 v13 GET 405 method_not_allowed'
+          postbody="$RUNNER_TEMP/eleven-post.json"
+          poststatus=$(curl --silent --show-error --retry 0 --max-time 15 -X POST \
+            -H 'Content-Type: application/json' --data '{}' \
+            --output "$postbody" --write-out '%{http_code}' "$url")
+          test "$poststatus" = 400 || { echo "FAIL unsigned POST status $poststatus"; exit 1; }
+          node -e 'let j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));if(j.code!=="missing_or_invalid_headers")process.exit(1)' "$postbody"
+          echo 'PASS F16 v13 unsigned POST 400 missing_or_invalid_headers'
+          echo 'NO real PayPal event, tokens, account data, payments or premium access were used.'
