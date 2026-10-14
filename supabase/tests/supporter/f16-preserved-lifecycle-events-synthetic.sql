@@ -2,6 +2,8 @@
 -- Run ONLY in disposable f14_synthetic PostgreSQL 17, not hosted PAZO.
 \set ON_ERROR_STOP on
 BEGIN;
+CREATE TEMP TABLE f16_ledger_snapshot ON COMMIT DROP AS
+ SELECT count(*)::bigint AS total FROM supporter_private.paypal_payment_entries;
 DO $preflight$
 BEGIN
   IF current_database()<>'f14_synthetic' OR session_user<>'f14_admin'
@@ -57,7 +59,8 @@ BEGIN
   END;
   IF NOT bad_type THEN RAISE EXCEPTION 'F16 allowed unknown arbitrary type'; END IF;
   SELECT count(*) INTO accidental FROM supporter_private.paypal_payment_entries;
-  IF accidental<>0 THEN RAISE EXCEPTION 'F16 extra event wrote financial ledger'; END IF;
+  IF accidental<>(SELECT total FROM f16_ledger_snapshot)
+  THEN RAISE EXCEPTION 'F16 extra event changed financial ledger'; END IF;
   IF supporter_private.wall_has_verified_entitlement(NULL::uuid)
   THEN RAISE EXCEPTION 'F16 extra event granted entitlement'; END IF;
 END $integrity$;
