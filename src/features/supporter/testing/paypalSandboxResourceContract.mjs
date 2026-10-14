@@ -26,9 +26,16 @@ export function assessF16SandboxResources(plan,webhook) {
   const p=assessPazoSandboxPlan(plan)
   const w=webhook && typeof webhook==='object' && !Array.isArray(webhook) ? webhook : null
   const idMatches=w?.id===PAZO_SANDBOX_WEBHOOK_ID
-  const eventTypes=Array.isArray(w?.event_types) ?
-    new Set(w.event_types.map(e=>e?.name).filter(x=>typeof x==='string')) : new Set()
+  // Only recognize names from our fixed, public PayPal event allowlist.
+  // Never reflect arbitrary event names, original webhook URLs or payloads.
+  const rawTypes=idMatches&&Array.isArray(w?.event_types)?w.event_types:[]
+  const eventNames=rawTypes.map(e=>e?.name)
+  const eventTypes=new Set(eventNames.filter(x=>typeof x==='string'))
+  const recognizedEvents=PAZO_REQUIRED_PAYPAL_EVENTS.filter(e=>eventTypes.has(e))
   const missingEvents=PAZO_REQUIRED_PAYPAL_EVENTS.filter(e=>!eventTypes.has('*')&&!eventTypes.has(e))
+  const missingSubscriptionEvents=PAZO_REQUIRED_PAYPAL_EVENTS.slice(0,6).filter(e=>!eventTypes.has(e))
+  const unexpectedEventsCount=eventNames.filter(n=>!PAZO_REQUIRED_PAYPAL_EVENTS.includes(n)).length
+  const duplicateEventsCount=eventNames.length-new Set(eventNames).size
   const destination=idMatches?destinationCategory(w?.url):'not_available'
   return {
     environment:'sandbox',readOnly:true,
@@ -39,6 +46,12 @@ export function assessF16SandboxResources(plan,webhook) {
       destinationCategory:destination,
       destinationMatchesF16:destination==='f16_receiver',
       missingEvents,
+      configuredEventsCount:rawTypes.length,
+      recognizedEvents,
+      missingSubscriptionEvents,
+      unexpectedEventsCount,
+      duplicateEventsCount,
+      wildcardPresent:eventTypes.has('*'),
       eventConfigurationComplete:!!idMatches&&missingEvents.length===0,
     },
     // Read access alone is NEVER permission to enable a receiver, checkout or entitlement.
