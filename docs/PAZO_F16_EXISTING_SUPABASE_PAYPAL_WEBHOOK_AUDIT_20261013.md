@@ -76,3 +76,19 @@ Se incorporó un adaptador del receptor nuevo **solo para pruebas en rama**, sin
 - `src/features/supporter/testing/f16PaypalSandboxPostback.test.mjs`: tests aislados sin llamadas reales de red para raw JSON, ruta Sandbox, rechazo Live, cabeceras, URLs/certificados engañosos, fallo OAuth/PayPal y conexión con el receptor sintético. **CI debe confirmar PASS en el HEAD correspondiente antes de considerar estable esta implementación.**
 
 **Límites duros:** el core todavía **NO tiene un entrypoint de Edge Function desplegable ni un inbox persistente/SQL alojado ni reconcilia importes/cobros**. Este código no alcanza el gate de despliegue ni el de suscripción real. Hay que diseñar/aprobar DDL privado, IAM/RLS/privilegios, retención y recuperación, luego implementar adapter de inbox y reconciliación; solicitar autorización específica del PO ANTES de tocar la base alojada, secretos, desplegar función o actualizar el registro PayPal existente. Nunca usar el enlace administrativo `supabase.com/dashboard` como webhook listener.
+
+## Contrato RPC de inbox propuesto — NO APLICADO
+
+Adaptador **solo de código**, preparado en `supabase/functions/f16-paypal-webhook/paypalInboxAdapter.mjs` y probado con `src/features/supporter/testing/f16PaypalVerifiedEventInbox.test.mjs`. Fija la URL del proyecto Supabase de PAZO, nunca acepta hosts extraídos del webhook ni del navegador y utiliza una credencial privilegiada solo en memoria de servidor. **No existe aún** la función SQL `public.f16_paypal_record_verified_event`; una llamada real al RPC debe fallar. La ausencia del RPC debe seguir siendo bloqueo, NO argumento para conceder privilegios al cliente.
+
+Propuesta de contrato para diseñar antes de solicitar un gate de migración alojada:
+
+| Elemento futuro | Contrato necesario |
+| --- | --- |
+| `supporter_private.paypal_verified_event_inbox` | Evento mínimo: ID opaco de proveedor como clave única, tipo de evento, marca de recepción, estado de procesamiento y control de reintentos; ningún correo, payload de PayPal, token ni tarjeta |
+| `public.f16_paypal_record_verified_event(p_provider_event_id text, p_event_type text)` | RPC restringida a `service_role`: inserción atómica, retorna `true` si creó fila, `false` ante duplicado; fallo transaccional propaga error para que receptor NO devuelva 2xx |
+| Privilegios | REVOKE EXECUTE FROM PUBLIC, anon, authenticated; GRANT a service_role **en una única migración transaccional**; RLS habilitada y defensa en profundidad sobre tabla privada; función con `SET search_path` seguro |
+| Retención y auditoría | Pendiente de decisión PO/privacidad. No borrar automáticamente eventos de reembolso o reversión mientras puedan alterar cobertura |
+| Reconciliación posterior | Debe existir worker/retry que procese inbox hacia ledger verificado por API de PayPal, incluido evento recibido fuera de orden; **no emitir ACK 2xx en entorno real antes de tener worker probado**, aunque la inbox ya sea durable |
+
+**No se creó migración ni se implementó worker todavía**: el próximo gate es fijar diseño/retención, generar archivo de migración mediante CLI según AGENTS, auditar grants y pedir aprobación del PO **antes de aplicar en Supabase**. La función v30 sigue operativa sin cambios, pero la URL PayPal registrada apunta al dashboard administrativo y no a ese receptor.
