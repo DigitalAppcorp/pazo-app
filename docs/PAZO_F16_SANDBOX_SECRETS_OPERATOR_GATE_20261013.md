@@ -1,5 +1,16 @@
 # PAZO F16 — Configuración aprobada de secretos PayPal Sandbox
 
+## Gate OAuth Sandbox real verificado (2026-10-14 UTC)
+
+El PO aprobó la verificación OAuth **únicamente de Sandbox** y se ejecutó desde Supabase Edge, usando directamente las credenciales `PAZO_F16_PAYPAL_*` previamente guardadas. La solicitud se dirigió a `https://api-m.sandbox.paypal.com/v1/oauth2/token` con `grant_type=client_credentials`. **PASS real de servidor:** PayPal emitió una respuesta OAuth con un access token y tipo Bearer válidos. No se expusieron ni almacenaron client ID, client secret o token, no se inició checkout ni se envió solicitud Live.
+
+Evidencia: [GitHub Actions OAuth #38519508312 — rerun SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38519508312). El diagnóstico temporal de Edge estuvo limitado por reto, expiración y una sola solicitud por instancia, y nunca aceptó webhooks. **Se restauró la Edge a v10**, misma lógica que la v7 namespaced, con `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`; [HTTP GET/POST 503 #38519702384 PASS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38519702384). Se eliminó el workflow temporal tras el resultado.
+
+Postflight Supabase: cuatro tablas financieras F16 0 filas, `wall_has_verified_entitlement(NULL)=false`, las otras tres Edge sin cambios (v35/v47/v34). Las claves `PAYPAL_*` genéricas legacy, secretos y webhook de PayPal no se modificaron.
+
+**Límite:** autenticación exitosa **NO** demuestra que el plan y el webhook pertenezcan a la app merchant Sandbox, ni verifica firmas de entrega reales. Debe autorizarse una consulta de **solo lectura** para comprobar esa correspondencia; todavía no se autorizaron activación de webhook, cobros ni membresías.
+
+
 **Gate del PO:** autorizó configurar los cinco secretos **exclusivos F16**, sin activar Edge, mover webhook, cambiar el plan, cobrar ni conceder membresías.
 
 **Estado de ejecución:** usuario confirmó cinco secretos guardados en Supabase; valores y OAuth aún no verificados técnicamente. El conector Supabase de ChatGPT permite auditar funciones, pero actualmente **no dispone de acciones para escribir ni listar secretos Edge**. No declarar la configuración completada sin comprobación posterior en la interfaz. Nunca pedir credenciales en este chat ni ponerlas en GitHub, CI, documentos, screenshots o consola.
