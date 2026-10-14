@@ -3,10 +3,10 @@ import assert from 'node:assert/strict'
 import {createF16SandboxWebhookReceiver} from '../../../../supabase/functions/f16-paypal-webhook/receiver.mjs'
 
 const SETTINGS={
- PAYPAL_ENV:'sandbox',PAYPAL_WEBHOOK_ID:'6N7889790V1467139',
- PAYPAL_PLAN_ID:'P-14V25407JP6850922NLHMDKI',
- PAYPAL_CLIENT_ID:'fixture-client-xxxxxxxx',
- PAYPAL_CLIENT_SECRET:'fixture-credential-xxxxxxxx',
+ PAZO_F16_PAYPAL_ENV:'sandbox',PAZO_F16_PAYPAL_WEBHOOK_ID:'6N7889790V1467139',
+ PAZO_F16_PAYPAL_PLAN_ID:'P-14V25407JP6850922NLHMDKI',
+ PAZO_F16_PAYPAL_CLIENT_ID:'fixture-client-xxxxxxxx',
+ PAZO_F16_PAYPAL_CLIENT_SECRET:'fixture-credential-xxxxxxxx',
  SUPABASE_URL:'https://mrybvqdebbgcayuvgkkr.supabase.co',
  SUPABASE_SERVICE_ROLE_KEY:'fixture-key-xxxxxxxxxxxxxxxxxxxxxxxx',
 }
@@ -61,9 +61,9 @@ test('invalid PayPal signature never touches private Supabase RPC',async()=>{
 })
 test('missing or Live configuration refuses all network calls',async()=>{
  for(const bad of [
-  {PAYPAL_ENV:'live'},{PAYPAL_ENV:undefined},{PAYPAL_WEBHOOK_ID:'WRONG'},
-  {PAYPAL_PLAN_ID:'WRONG'},{SUPABASE_URL:'https://wrong.invalid'},
-  {PAYPAL_CLIENT_SECRET:undefined},{SUPABASE_SERVICE_ROLE_KEY:undefined},
+  {PAZO_F16_PAYPAL_ENV:'live'},{PAZO_F16_PAYPAL_ENV:undefined},{PAZO_F16_PAYPAL_WEBHOOK_ID:'WRONG'},
+  {PAZO_F16_PAYPAL_PLAN_ID:'WRONG'},{SUPABASE_URL:'https://wrong.invalid'},
+  {PAZO_F16_PAYPAL_CLIENT_SECRET:undefined},{SUPABASE_SERVICE_ROLE_KEY:undefined},
  ]){
   const f=make({settings:{...SETTINGS,...bad}})
   assert.equal((await f.handle(f.request())).status,503)
