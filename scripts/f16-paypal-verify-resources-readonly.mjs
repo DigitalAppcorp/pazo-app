@@ -43,7 +43,15 @@ async function main(){
     stage='webhook_lookup'
     const webhook=await readJson('/v1/notifications/webhooks/'+PAZO_SANDBOX_WEBHOOK_ID,
       {method:'GET',headers:bearer},stage)
-    const result=assessF16SandboxResources(plan,webhook)
+    // Authenticated PayPal catalogue supplies only public, documented event names.
+    // Optional failure must never block this resource read-only check or print
+    // provider errors. No raw webhook URL or unknown event labels are emitted.
+    let catalog=null
+    try {
+      catalog=await readJson('/v1/notifications/webhooks-event-types',
+        {method:'GET',headers:bearer},'catalog_lookup')
+    } catch { /* catalogStatus becomes unavailable; no raw names shown */ }
+    const result=assessF16SandboxResources(plan,webhook,catalog)
     console.log(JSON.stringify(result,null,2))
     // A valid 0 only proves read access to both existing resources by these credentials.
     if(!result.resourcesAccessible||result.plan.warnings.length)process.exitCode=1
