@@ -4,6 +4,12 @@
 
 **Estado de ejecución:** usuario confirmó cinco secretos guardados en Supabase; valores y OAuth aún no verificados técnicamente. El conector Supabase de ChatGPT permite auditar funciones, pero actualmente **no dispone de acciones para escribir ni listar secretos Edge**. No declarar la configuración completada sin comprobación posterior en la interfaz. Nunca pedir credenciales en este chat ni ponerlas en GitHub, CI, documentos, screenshots o consola.
 
+## Confirmación posterior: Edge F16 namespaced v7 publicada (2026-10-14 UTC)
+
+El PO autorizó exclusivamente **redeploy inerte** con el nuevo lector de `PAZO_F16_PAYPAL_*`; se aplicó **versión 7** a `f16-paypal-webhook` (sin tocar otras funciones, secretos ni PayPal). `get_edge_function` confirmó código de preflight namespaced y `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`; HTTP externo real GET y POST vacío devolvieron **503** con `f16_receiver_not_released` en [GitHub Actions #38518547361](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38518547361). El workflow de prueba ya fue eliminado. Tablas F16 con 0 registros, `wall_has_verified_entitlement(NULL)=false`.
+
+**Sin verificar aún:** los valores de los cinco secretos y que el Client ID/Secret autentiquen realmente con PayPal Sandbox; el conector no puede leerlos. La próxima validación OAuth requiere otro gate y nunca debe exponer el token. El receptor sigue sin procesar webhooks ni pagos.
+
 ## Confirmación del Product Owner — cinco secretos guardados (2026-10-13 LA)
 
 El usuario confirmó expresamente: **«listo, implementadas las 5»**. Se registra como **confirmación del operador de que guardó cinco variables en Supabase**. El conector Supabase actual no lista ni revela secretos; por lo tanto, la existencia, los valores, la cuenta mercantil Sandbox y el éxito de OAuth **NO ESTÁN VERIFICADOS TÉCNICAMENTE**. No usar esta confirmación como prueba de autenticación PayPal o autorización de recepción.
