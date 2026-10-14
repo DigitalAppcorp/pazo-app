@@ -1,5 +1,13 @@
 # PAZO F16 — Runbook de despliegue SEGURO del nuevo receptor PayPal Sandbox
 
+## Lectura de recursos PayPal ya realizada por PO — 2026-10-14 (prevalece sobre checkpoints anteriores)
+
+- **GATE DE ACCESO LOCAL A RECURSOS = PASS.** El preflight `-Check Resources` ejecutado por el PO devolvió plan `P-14V25407JP6850922NLHMDKI` `ACTIVE` (`USD 2.99` / `MONTH/1`, sin issues/warnings), webhook `6N7889790V1467139` con ID coincidente y acceso a ambos mediante el mismo par de credenciales **introducidas localmente**. La autenticación OAuth desde Supabase se había probado por separado; **equivalencia exacta entre credenciales locales y las de Supabase no demostrada**.
+- **Webhooks = CONFIGURACIÓN BLOQUEADA**: `destinationCategory=different_host` (no reconstruir URL real), no apunta a `f16-paypal-webhook`, y faltan exactamente `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.REFUNDED`, `PAYMENT.SALE.REVERSED`. Conservar seis eventos `BILLING.SUBSCRIPTION.*` ya configurados. `safeToActivate=false` es correcto.
+- **Receptor Supabase todavía NO recibe**: `f16-paypal-webhook` alojada v10 inerte (`F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`), GET/POST normal 503 previamente validado. Cuatro tablas financieras F16 vacías y guard de entitlement `false`, comprobados nuevamente en modo solo lectura. No editar el webhook mientras destino seguro no esté habilitado y verificado.
+- **Secuencia pendiente:** (1) cerrar revisión antiabuso/rate limits, verificación de firma/errores, costo y logging mínimo del receptor; (2) autorización PO nueva para activar y desplegar solamente el receptor Sandbox; (3) nueva autorización PO para modificar **el webhook existente**, cambiando destino por ruta F16 y añadiendo los tres eventos sin borrar los seis anteriores; (4) prueba auténtica end-to-end con comprador Sandbox y conciliación, sin membresías hasta un gate ulterior.
+- Un `PASS` de configuración **no** valida firma, entrega de eventos ni pagos. El simulador de PayPal genera mock events no verificables por postback con webhook real: https://developer.paypal.com/api/rest/webhooks/simulator/ .
+
 **Estado:** DESPLIEGUE INERTE AUTORIZADO, EJECUTADO Y VERIFICADO; ACTUALIZACIÓN/ACTIVACIÓN DE PAYPAL NO-GO. Se requiere GO independiente para secretos, activar receptor, cambiar webhook y permitir pagos.
 
 ## V7 namespaced inerte: ejecutado con aprobación PO (2026-10-14 UTC)
