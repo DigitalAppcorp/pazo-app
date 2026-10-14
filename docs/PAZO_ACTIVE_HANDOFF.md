@@ -10,6 +10,12 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## F16: PO aprobó retención de 90 días
+
+- Opción A aprobada por PO: conservar identificadores de eventos PayPal **90 días después de conciliación definitiva**. Pendientes, disputados o retenidos no se borran automáticamente. Plazos de ledger/reversos e intentos siguen pendientes. Fuente: `docs/PAZO_F16_RETENTION_APPROVED_GATE_20261013.md`.
+- Migración preparada, aún no aplicada: `20261014032018_f16_private_verified_event_inbox.sql`. Incorpora `retention_hold=true` por defecto y liberación verificable. Vista previa `supabase/queries/f16_paypal_inbox_retention_preview_READ_ONLY.sql` solo cuenta candidatos, sin purga.
+- Prueba de PostgreSQL descartable #38506795258 SUCCESS con frontera 90 días, bloqueos y liberación tardía. No hay cron, despliegue, pago real ni cambios Supabase alojado. PR #44 sigue DRAFT; siguiente gate es ledger/worker y aprobación independiente de retención financiera/limpieza.
+
 ## F16 GATE: MIGRACIÓN VERSIONADA generada por CLI, PG real PASS — sin deploy (2026-10-13 / 2026-10-14 UTC)
 
 - **Archivo generado por Supabase CLI v2.120.0**: `supabase/migrations/20261014032018_f16_private_verified_event_inbox.sql`. Verificado por CI `F16 Migration Filename Preflight` #38505704285 que imprimió el nombre exacto; nunca se inventó timestamp. El workflow temporal fue eliminado tras uso para ahorrar ejecuciones.
