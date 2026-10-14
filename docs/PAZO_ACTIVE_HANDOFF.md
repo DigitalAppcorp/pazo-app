@@ -10,6 +10,14 @@
 - PAZO del PO en Windows PowerShell: clon `$env:USERPROFILE\PAZO-F13-preview`; Vite `http://localhost:5173/`. Estado Git local y sesión actual: **NO OBSERVADOS**. Antes de dar `git pull --ff-only`, pedir `git status --short` y solo hacer pull si está limpio. No `reset --hard` ni copiar secretos. No usar Vercel para QA ni fusionar el PR sin gate.
 - El módulo que se está trabajando ahora es **F16 «Amigo de PAZO»**, aún **BACKLOG / prototipos + infraestructura parcial**, sin cobros ni membresías activas. La F13 UX/UI sigue abierta en paralelo; no darla por completada.
 
+## Gate F16 — Destino confirmado en OTRO HOST; receptor F16 seguro en desarrollo local (2026-10-13)
+
+- PO ejecutó preflight PayPal Sandbox con ID `6N7889790V1467139` y devolvió `destinationCategory=different_host`, `webhookIdMatches=true`, `destinationMatches=false`. **Hecho:** el destino configurado es otro dominio que no coincide con el dominio del proyecto Supabase PAZO. **Desconocido:** cuál es el dominio exacto y si pertenece al PO; no asumir URL ni redirigir automáticamente, no sumar los 3 eventos `PAYMENT.SALE.*`.
+- Para desbloquear el routing se necesitará confirmar **solo el hostname de destino**, sin path, parámetros ni credenciales, desde PayPal Developer. Aún no hay autorización para editar PayPal, desplegar Edge Function o cambiar SQL.
+- Auditoría alojada confirmó `supabase/functions/paypal-webhook/index.ts` v30 actualmente ACTIVE con riesgo de escritura `profiles.is_founder` por `subscription.status=ACTIVE`, sin conciliación real/idempotencia y sin fail-closed de `PAYPAL_ENV`. **No tocar endpoint alojado v30**.
+- Se agregó **solo código de pruebas**, no desplegado, `supabase/functions/f16-paypal-webhook/core.mjs` con `createSafeF16WebhookHandler` y tests `src/features/supporter/testing/f16SafeWebhookIntake.test.mjs`. Exige `sandbox`, firma confirmada por adaptador externo y `inbox.insertIfAbsent` durable; falla cerrado 503 sin ambos; nunca toca fundador/entitlement. **No contiene entrypoint ni adapter de BD real**, por lo que es un contrato ejecutable para QA, no un webhook listo para producción. No activar nuevo endpoint hasta cierre de retención, migración y pruebas.
+- Fuente de verdad: `docs/PAZO_F16_EXISTING_SUPABASE_PAYPAL_WEBHOOK_AUDIT_20261013.md` y `docs/PAZO_F16_PAYPAL_RECONCILIATION_MODEL_20261013.md`. PR #44 DRAFT, sin merge; sin cambios alojados.
+
 ## Gate F16 — PayPal Sandbox confirma DESTINO DISTINTO (2026-10-13)
 
 - Product Owner ejecutó `-Check Destination` con la misma app Sandbox. Resultado REAL compartido: `environment=sandbox`, `webhookIdMatches=true`, `destinationMatches=false`, `status=destination_mismatch` para `6N7889790V1467139`. **NO apunta exactamente** a `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/paypal-webhook`. No se conoce el destino registrado, no inventarlo; podría ser barra final, función diferente, proyecto diferente o dominio ajeno.
