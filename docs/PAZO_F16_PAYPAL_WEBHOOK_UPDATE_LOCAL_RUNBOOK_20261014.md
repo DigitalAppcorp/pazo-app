@@ -1,5 +1,10 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## ESTADO CANÓNICO FINAL DEL PATCH (2026-10-14): PASS, NO REPETIR
+
+El PO ejecutó la actualización una sola vez y devolvió `updated_and_verified` para el webhook existente, URL F16 y 11 eventos exactos. **No repetir `-Check ApplyWebhook`; no requiere más credenciales PayPal para este gate.** SQL `20261014094349` y Edge v13 siguen PASS. Postflight Supabase read-only: inbox/intent/pagos/reversiones/admissions 0. Ninguna entrega PayPal auténtica firmada probada todavía. **Siguiente gate**: evento Sandbox real desde la misma app, bajo GO distinto antes de crear suscripciones/eventos. No usar simulador mock como validación de firma postback. Ver `docs/PAZO_F16_PAYPAL_WEBHOOK_PATCH_CLOSEOUT_20261014.md`. Las instrucciones y estados debajo son HISTÓRICOS/SUPERADOS, no se ejecutan.
+
+
 ## F16 — PAYPAL DESTINO ANTIGUO IDENTIFICADO POR PO: PANEL SUPABASE, NO CALLBACK (2026-10-14)
 
 - **Evidencia nueva reportada directamente por Product Owner desde el campo Webhook URL de la app PayPal Sandbox:** `https://supabase.com/dashboard/project/mrybvqdebbgcayuvgkkr/functions`. Es URL del **dashboard de administración** `supabase.com/dashboard/…`, no URL pública de función `<project>.supabase.co/functions/v1/<function>`. Esta confusión explica `different_host` en la auditoría GET anterior y no representa un receptor funcional del webhook. **No se ha observado prueba de entrega auténtica**, ni una auditoría de los historiales de PayPal. Si la API devuelve un URL distinto, **ABORTAR antes de PATCH**.
