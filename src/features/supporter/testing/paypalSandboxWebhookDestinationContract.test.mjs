@@ -81,7 +81,7 @@ test('categorizes callback mismatch without exposing any full host/path/query',(
    const r=inspectPazoWebhookDestination({id:PAZO_SANDBOX_WEBHOOK_ID,url})
    assert.equal(r.ok,false,url)
    assert.equal(r.destinationCategory,category,url)
-   assert.equal(JSON.stringify(r).includes(url),false)
+   if (url) assert.equal(JSON.stringify(r).includes(url),false)
    assert.equal(JSON.stringify(r).includes('DO_NOT_EXPOSE'),false)
    assert.equal(JSON.stringify(r).includes('password'),false)
  }
