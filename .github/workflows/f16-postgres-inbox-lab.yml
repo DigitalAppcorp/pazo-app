@@ -132,4 +132,7 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/f16-global-webhook-admission-synthetic.sql
           node scripts/f16-global-budget-concurrency.mjs
-          echo 'PASS F16: global budget SQL isolated, never applied to PAZO hosted'
+          preflight=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/queries/f16_global_admission_preflight_READ_ONLY.sql)
+          test "$preflight" = 't|t|t|t|f|f|t' || { echo 'FAIL F16: budget preflight privileges/security mismatch' >&2; exit 1; }
+          echo 'PASS F16: versioned migration, security preflight, isolation and global concurrency'
