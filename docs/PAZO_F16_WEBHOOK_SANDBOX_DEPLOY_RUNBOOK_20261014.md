@@ -1,11 +1,19 @@
 # PAZO F16 — Runbook de despliegue SEGURO del nuevo receptor PayPal Sandbox
 
-**Estado:** PREPARACIÓN TÉCNICA. NO-GO / NO AUTORIZADO PARA DESPLIEGUE. Este runbook no ejecuta acciones alojadas. El PO autorizó solamente las dos migraciones F16 ya aplicadas; se requiere **GO separado** para activar Edge, instalar secretos y modificar PayPal.
+**Estado:** DESPLIEGUE INERTE AUTORIZADO, EJECUTADO Y VERIFICADO; ACTUALIZACIÓN/ACTIVACIÓN DE PAYPAL NO-GO. Se requiere GO independiente para secretos, activar receptor, cambiar webhook y permitir pagos.
+
+## Gate PO: despliegue INERTE ejecutado, resto sigue NO-GO (2026-10-14 UTC)
+
+**Aprobación PO específica consumida:** desplegar SOLAMENTE `f16-paypal-webhook` desactivada para comprobar respuesta HTTP 503. Ejecutado en Supabase Free sin nuevo proyecto/plan/adicionales. La nueva Edge aparece `ACTIVE v1` (ID `b0da866f-aae3-4785-99a3-6a6314e3c3c8`), pero su `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false` cancela cualquier solicitud antes de leer secretos o webhooks. `supabase/config.toml enabled=false` sigue para evitar despliegues automáticos; `verify_jwt=false` solo porque el proveedor no lleva JWT y la futura lógica tendrá que verificar firma.
+
+**HTTP real verificado:** workflow de un único uso `38512959544` SUCCESS: GET sin autorización, datos ni secretos a la nueva función → **503** y `f16_receiver_not_released`; el workflow de prueba fue borrado tras pasar para no realizar invocaciones repetidas. **Postflight:** cuatro tablas F16 con 0 filas, muro `false`, otras tres Edge con las mismas versiones (v30/v42/v29). No se hizo ningún cambio en PayPal, su webhook ID/URL/eventos, Edge secrets ni `profiles.is_founder`.
+
+**Los pasos 2, 4, 5, 6 y 7 inferiores siguen PENDIENTES y requieren aprobaciones independientes; el paso 3 de despliegue inerte ya pasó.** La cuota actual del plan Free contiene 500 000 invocaciones/mes, y la documentación actual establece máximo 100 funciones/proyecto Free; un 503 cuenta como invocación. No se conoce un cobro específico por crear esta cuarta función.
 
 ## Estado comprobado
 
 - Supabase project: `mrybvqdebbgcayuvgkkr`. Inbox, intenciones, pagos y reversos privados ya están instalados y vacíos, y su acceso está restringido al servidor. No hay períodos acreditados ni beneficios pagados.
-- Edge existente: `paypal-webhook` v30, **no utilizar** como destino; puede escribir `profiles.is_founder` desde `ACTIVE`. Nuevo slug `f16-paypal-webhook` **NO desplegado**.
+- Edge existente: `paypal-webhook` v30, **no utilizar** como destino; puede escribir `profiles.is_founder` desde `ACTIVE`. Nuevo slug `f16-paypal-webhook` **DESPLEGADO v1 PERO INERTE**, HTTP 503 validado.
 - PayPal Sandbox: plan `P-14V25407JP6850922NLHMDKI`; webhook existente `6N7889790V1467139` apunta a un destino de dashboard, no a la nueva Edge Function. Falta sumar eventos de venta/reembolso/reversión. **No actualizar todavía**.
 - Código F16: `supabase/functions/f16-paypal-webhook/index.ts` con `F16_SANDBOX_RECEIVER_RELEASE_APPROVED=false`; `supabase/config.toml` con `enabled=false`, `verify_jwt=false`. El endpoint no acepta eventos hasta una modificación de código específicamente aprobada.
 
