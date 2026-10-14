@@ -60,7 +60,7 @@ function setup(overrides={}){
    assert.equal(proof.candidate.externalRefundId,refund.id)
    assert.equal(proof.candidate.externalSubscriptionId,SUB)
    assert.equal(proof.candidate.providerStatus,overrides.txStatus??'REFUNDED')
-   return overrides.commitResult??'refund_recorded_full'},
+   return overrides.commitResult??(proof.candidate.providerStatus==='PARTIALLY_REFUNDED'?'refund_recorded_partial':'refund_recorded_full')},
  }
  const flow=createF16PrivateProviderProofFlow({
   leaseStore,eventReader:reader,subscriptionReader,originalReader,
@@ -130,7 +130,7 @@ test('partial refund is an evidence-only ledger candidate after separate refund 
    refund:{refundMinorUnits:100}})
  const result=await x.flow.process(refundRef,WINDOW)
  assert.deepEqual(result,{recorded:true,entitlement:false,
-   reason:'refund_recorded_full'})
+   reason:'refund_recorded_partial'})
  assert.equal(x.calls.includes('commit_reversal'),true)
  assert.equal(x.calls.at(-1),'commit_reversal')
 })
