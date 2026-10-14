@@ -1,5 +1,6 @@
 // F16: concurrent subscription claim verification in disposable PG only.
 import {spawn} from 'node:child_process'
+const migrationQa=process.env.PAZO_F16_MIGRATION_QA==='true'
 
 if(process.env.GITHUB_ACTIONS!=='true' ||
    process.env.PGPASSWORD!=='f14_synthetic_ci_only' ||
@@ -23,7 +24,7 @@ function run(query) {
     reject(Error('F16 isolated owner SQL rejected: '+stderr.slice(0,160))))
  })
 }
-const bind=(id,owner,sub)=>`SELECT supporter_private.f16_lab_bind_subscription(
+const bind=(id,owner,sub)=>`SELECT supporter_private.${migrationQa?'f16_private_bind_subscription':'f16_lab_bind_subscription'}(
   '${id}','${owner}'::uuid,'${sub}','${PLAN}','${id}')`
 const ids=[
  'intent-a-parallelclaim000',
