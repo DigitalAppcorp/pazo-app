@@ -1,5 +1,13 @@
 # PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
 
+## Preflight observado: dos eventos PayPal extra, todavía sin modificar (2026-10-14)
+
+El webhook actual tiene **8 eventos**, no 6: los 6 BILLING.SUBSCRIPTION aprobados y 2 extras no identificados. Los 3 PAYMENT.SALE siguen ausentes. `-Check ApplyWebhook` abortó antes de PATCH, de modo que **no se hizo ninguna modificación a PayPal**.
+
+Para identificar los extras de manera segura, `-Check Resources` ahora obtiene opcionalmente el catálogo oficial de eventos PayPal mediante GET y añade `additionalProviderEvents`, `unresolvedAdditionalEventsCount` y `officialCatalogStatus`. Solo publica nombres de eventos verificados por PayPal, nunca etiquetas arbitrarias ni la URL anterior. Cualquier fallo de catálogo mantiene el diagnóstico en solo lectura.
+
+**No repetir ApplyWebhook:** reenviar dos tipos adicionales a F16 podría hacer que un receptor distinto deje de procesarlos. Primero confirmar cuáles son y decidir si se deben preservar y procesar, no borrarlos silenciosamente.
+
 ## BLOQUEO ACTUAL — DIAGNÓSTICO READ-ONLY ANTES DE MODIFICAR (2026-10-14)
 
 El PO ejecutó `-Check ApplyWebhook` y recibió `stage=resource_preflight`, `reason=webhook_events_unexpected`, `outcome=no_mutation_attempted`: no hubo PATCH. La advertencia genérica previa de PowerShell ya fue corregida (código 2 = preflight sin cambio; código 3 = posible PATCH con estado incierto).

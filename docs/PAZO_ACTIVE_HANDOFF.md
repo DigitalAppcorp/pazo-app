@@ -1,5 +1,12 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
 
+## F16 — EVENTOS PAYPAL EXTRA IDENTIFICACIÓN PENDIENTE (2026-10-14)
+
+- Resultado del PO `-Check Resources`: plan Sandbox 2.99 USD/mes y ID webhook correctos; destino `different_host`; **8 eventos configurados** (6 BILLING.SUBSCRIPTION necesarios + 2 adicionales aún sin nombre), faltan tres `PAYMENT.SALE.*`, sin duplicados ni wildcard. El intento anterior `-Check ApplyWebhook` fue detenido en preflight con `outcome=no_mutation_attempted`, ningún PATCH.
+- Se implementó **GET read-only opcional** del catálogo público oficial PayPal `/v1/notifications/webhooks-event-types`, bajo credenciales locales del mismo app, solo cuando hay tipos extras. `-Check Resources` expone únicamente `additionalProviderEvents` verificados con catálogo, `unresolvedAdditionalEventsCount` y `officialCatalogStatus`; no reproduce valores extraños de webhook, URL destino anterior, secret ni payload. Si falla catálogo, solo informa conteo, sin bloquear preflight.
+- Pruebas `paypalSandboxEventCatalogDiagnostic.test.mjs` PASS en CI; análisis de nombres públicos corroborado con PayPal Developer Subscriptions webhooks. **Conservar los 2 extras hasta evaluar su finalidad**: redirigirlos podría romper funciones existentes dado que F16 solo procesa 9 tipos definidos y otros se ACKean como ignored. `-Check ApplyWebhook` sigue BLOQUEADO.
+- PO: con árbol local limpio, `git pull --ff-only origin f13/section-titles-20261012`, luego `powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\f16-paypal-sandbox-plan.ps1 -Check Resources`. Compartir solo JSON saneado. F16 Edge v12 activa solo Sandbox; PayPal no modificado, Live/checkout/entitlement NO-GO. PR #44 DRAFT.
+
 ## F16 — PAYPAL WEBHOOK PATCH PRECHECK BLOQUEADO, CERO MUTACIONES (2026-10-14)
 
 - **Evidencia enviada por el PO desde PowerShell:** `{"environment":"sandbox","status":"blocked","stage":"resource_preflight","reason":"webhook_events_unexpected","outcome":"no_mutation_attempted","doNotRetryWithoutReadOnlyVerification":true}`. Por la ubicación del fallo, se ejecutaron solo OAuth Sandbox y GET read-only a plan/webhook; **NO se emitió PATCH**. El mensaje genérico antiguo de PowerShell «A PATCH may have reached PayPal» era incorrectamente alarmante para código de salida 2.
