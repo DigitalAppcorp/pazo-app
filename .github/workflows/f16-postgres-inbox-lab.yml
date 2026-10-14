@@ -116,3 +116,20 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/f16-atomic-payment-event-migration-synthetic.sql
           echo 'PASS F16: versioned private owner/ledger migration, RPC ACLs and concurrency in disposable PostgreSQL'
+
+      - name: F16 shared admission cap — isolated PostgreSQL 17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          echo 'Testing F16 shared budget ONLY on disposable PostgreSQL'
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/tests/supporter/f16-global-webhook-admission-lab-draft.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-global-webhook-admission-synthetic.sql
+          node scripts/f16-global-budget-concurrency.mjs
+          echo 'PASS F16: global budget SQL isolated, never applied to PAZO hosted'
