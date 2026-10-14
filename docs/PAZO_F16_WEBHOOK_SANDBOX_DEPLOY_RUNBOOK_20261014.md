@@ -1,5 +1,13 @@
 # PAZO F16 — Runbook de despliegue SEGURO del nuevo receptor PayPal Sandbox
 
+## Gate siguiente — recuperación de entregas PayPal (2026-10-14)
+
+- Documentación oficial: HTTP no-2xx admite hasta 25 reintentos PayPal durante 3 días; reenvío manual en el panel Sandbox tras fallo definitivo (https://developer.paypal.com/api/rest/webhooks/rest/). La lista/API de eventos no acredita pagos ni suscripciones.
+- Runbook específico: `docs/PAZO_F16_SANDBOX_REDELIVERY_RECOVERY_GATE_20261014.md`. Condiciones de recepción, duplicados, recuperación, 503, reenvío manual, privacidad y GO separados. No probar la entrega real con mock/simulador como si fuera evidencia auténtica.
+- Nuevo preview agregado `supabase/queries/f16_webhook_delivery_recovery_preview_READ_ONLY.sql`, sin IDs ni datos personales. Se verificó directamente: 0 inbox, 0 pendientes, 0 cuarentenas, 0 pagos/reversos, 0 admisiones globales.
+- Un intento de agregar una suite automatizada nueva recibió un bloqueo de seguridad del host; **no fue creado ni probado**. Mantener los tests actuales de composición/quotas y sus evidencias previas, sin sobredeclarar.
+- Sigue NO-GO para activar F16/payments o reparar URL/eventos de webhook PayPal; se requiere GO específico separado y prueba de proveedor real. El receptor alojado continúa v10 inerte, el SQL global está instalado.
+
 ## F16 — SQL GLOBAL APLICADO EN SUPABASE, RECEPTOR INERTE (2026-10-14)
 
 - Autorización explícita PO «sí»: **únicamente SQL**. `apply_migration` PASS con el contenido exacto de la migración originalmente denominada `20261014070015_f16_global_webhook_admission.sql` (blob `e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8`).
