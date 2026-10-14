@@ -34,7 +34,7 @@ export function assessPaypalSandboxPayment({
     return blocked('incorrect_currency_or_amount')
   if(typeof transaction.time!=='string' || !DATE.test(transaction.time) ||
       !Number.isFinite(Date.parse(transaction.time)) ||
-      new Date(transaction.time).toISOString()!==transaction.time.replace(/\.000Z$/,'Z'))
+      new Date(transaction.time).toISOString().replace(/\.000Z$/,'Z')!==transaction.time)
     return blocked('invalid_payment_time')
   // No period is derived from the event timestamp, nor "one month" guessed.
   // No idempotency is claimed until atomic unique(provider, payment_id) exists.
