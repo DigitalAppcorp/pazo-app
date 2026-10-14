@@ -39,10 +39,29 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
     const declared=Number(request.headers.get('content-length'))
     if(request.headers.has('content-length') && (!Number.isSafeInteger(declared) || declared<0 || declared>LIMIT))
       return reply(413,'invalid_body_size')
-    let bytes
-    try { bytes=new Uint8Array(await request.arrayBuffer()) }
-    catch { return reply(400,'unreadable_body') }
-    if(bytes.length===0 || bytes.length>LIMIT) return reply(413,'invalid_body_size')
+    // Stream with an actual byte limit: Content-Length may be missing,
+    // false, or chunked. Reading arrayBuffer() unbounded risks memory exhaustion.
+    const chunks=[]
+    let total=0
+    try {
+      const reader=request.body?.getReader()
+      if(!reader) return reply(400,'unreadable_body')
+      while(true) {
+        const {done,value}=await reader.read()
+        if(done) break
+        if(!(value instanceof Uint8Array)) return reply(400,'unreadable_body')
+        total+=value.byteLength
+        if(total>LIMIT) {
+          await reader.cancel().catch(()=>{})
+          return reply(413,'invalid_body_size')
+        }
+        chunks.push(value)
+      }
+    } catch { return reply(400,'unreadable_body') }
+    if(total===0) return reply(413,'invalid_body_size')
+    const bytes=new Uint8Array(total)
+    let offset=0
+    for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength}
     let event
     try {event=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes))}
     catch {return reply(400,'invalid_json')}
