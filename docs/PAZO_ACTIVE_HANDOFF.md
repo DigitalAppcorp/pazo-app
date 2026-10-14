@@ -1,5 +1,15 @@
 # PAZO — ACTIVE HANDOFF | Snapshot operativo 2026-10-14
 
+## F16 — RECEPTOR SANDBOX v12 ACTIVO, HTTP REAL PASS (2026-10-14 UTC)
+
+- **GO explícito del Product Owner «ok dale» consumido EXCLUSIVAMENTE para activar receptor Sandbox.** GitHub commit de liberación `aac99f4cfa29173c69ecdcb1f61b84cdc076f0ee` cambió el latch a `F16_SANDBOX_RECEIVER_RELEASE_APPROVED = true` y `[functions.f16-paypal-webhook] enabled = true`; `verify_jwt=false` se mantiene por el mecanismo de autenticación de firmas PayPal. Tests contractuales F16 ahora exigen Sandbox únicamente.
+- **Supabase alojada `mrybvqdebbgcayuvgkkr`:** `f16-paypal-webhook` **v12 ACTIVE** con 8 módulos (`index.ts`, `receiver.mjs`, `core.mjs`, `paypalSandboxPostback.mjs`, `paypalInboxAdapter.mjs`, `sandboxConfigPreflight.mjs`, `workerAdmissionGate.mjs`, `globalAdmissionAdapter.mjs`). Estado exacto v12 y latch TRUE revisados mediante `get_edge_function`. Legado `paypal-webhook` sigue v35 SIN CAMBIOS.
+- **Prueba HTTP real externa SIN CABECERAS FIRMADAS:** GitHub Actions efímera [#38532805881](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38532805881) SUCCESS: `GET` → 405 `method_not_allowed`; `POST` JSON `{}` → 400 `missing_or_invalid_headers`; no se enviaron credenciales ni eventos legítimos, ni se consultó PayPal. Workflow de prueba retirado luego del PASS.
+- **Postflight READ ONLY Supabase:** `paypal_verified_event_inbox=0`, `paypal_subscription_intents=0`, `paypal_payment_entries=0`, `paypal_payment_reversals=0`, presupuesto `f16_webhook_request_budget` admitidos **0**, `wall_has_verified_entitlement(NULL)=false`. No perfiles/fundadores ni membresías concedidas.
+- **RIESGOS/NO-GO:** la validación con una notificación auténtica PayPal, firma, 202/200 y reenvío 503 TODAVÍA NO SE REALIZÓ. El webhook Sandbox existente `6N7889790V1467139` continúa con destino `different_host` y sin `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.REFUNDED`, `PAYMENT.SALE.REVERSED`. **NO cambiarlo sin GO aparte del PO.** PayPal Live, crear suscripciones, checkout, cargos, badges/entitlements, cron, y merge a main siguen NO-GO. El límite global DB protege verificaciones costosas, **no invocaciones a Edge** ni garantiza recuperación ante tráfico hostil.
+- **Siguiente gate:** previa autorización independiente, actualizar SOLO la URL del webhook existente y completar tres eventos sin borrar los seis existentes; después nueva autorización para comprador Sandbox/evento real E2E. PR #44 sigue DRAFT. Todas las menciones anteriores a v11 inerte son historia y quedan sustituidas por este bloque.
+
+
 ## F16 — EDGE v11 INERTE DESPLEGADA Y HTTP REAL 503 PASS (2026-10-14 UTC)
 
 - **GO explícito PO «sí» consumido exclusivamente para desplegar una nueva versión INERTE** de `f16-paypal-webhook` en Supabase proyecto `mrybvqdebbgcayuvgkkr`. **Nuevo receptor v11 ACTIVE en infraestructura, pero DESACTIVADO en lógica** por `const F16_SANDBOX_RECEIVER_RELEASE_APPROVED = false`; `verify_jwt=false` preservado por la excepción de webhook externo, sin autenticación PayPal procesada por la barrera.

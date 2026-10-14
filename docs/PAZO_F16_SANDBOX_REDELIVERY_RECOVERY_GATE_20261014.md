@@ -1,5 +1,14 @@
 # PAZO F16 — Sandbox webhook redelivery and loss-recovery gate
 
+## Estado actual prioritario F16 — Sandbox receptor v12 habilitado, PayPal sin redirección (2026-10-14)
+
+- `f16-paypal-webhook` alojada v12 tiene latch `true`, 8 fuentes; código restringido a Sandbox, firma remota verificada antes de escribir referencia mínima al inbox. `paypal-webhook` legacy v35 no modificado.
+- CI y lab PG SUCCESS del commit de liberación [#38532397473](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38532397473) / [#38532397403](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38532397403). Prueba HTTP real [#38532805881](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38532805881): GET 405, POST sin firma 400; test temporal retirado. Host no recibió PayPal real.
+- Auditoría Supabase posterior: 0 inbox, 0 intenciones, 0 pagos, 0 reversos, 0 admisiones del presupuesto, 0 entitlements. Ningún cargo ni suscripción.
+- El webhook PayPal Sandbox `6N7889790V1467139` aún apunta a dominio diferente; faltan tres eventos PAYMENT.SALE. **No editar hasta otro GO específico.** El paso anterior (solo receptor activo) quedó cerrado. Antes de considerar entrega auténtica PASS se requiere cambio de URL/eventos y prueba de envío auténtico autorizados por separado.
+- Los párrafos históricos que hablan de v10/v11 inertes o receptor NO-GO fueron superados en cuanto a la activación técnica. Continúan NO-GO PayPal Live, checkout, pagos reales, entitlement, conciliación y beta pública.
+
+
 **STATUS (2026-10-14): DESIGN/READ-ONLY AUDIT. NOT A LIVE PROVIDER TEST.**
 Scope approved by PO: continue planning and verifying F16; this document does NOT authorize deploying Edge, changing PayPal, issuing requests to generate payments, or granting membership.
 
