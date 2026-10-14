@@ -42,3 +42,21 @@ powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\\scripts\\f16-paypal
 La consulta utiliza credenciales Sandbox introducidas de forma oculta localmente y compara el campo `url` del registro contra la URL exacta esperada de la Edge Function de PAZO. No muestra el URL ni secretos: solo el resultado saneado `destinationMatches`. Debe ejecutarlo el PO en Windows antes de afirmar que el registro apunta a Supabase. No mide disponibilidad, seguridad del código ni delivery; **ningún cambio del lado de PayPal o Supabase queda autorizado por esta lectura**.
 
 Referencia PayPal (endpoint GET y objeto de webhook): https://developer.paypal.com/api/webhooks/v1/definitions/webhook/ .
+
+## Resultado real de verificación del destino: MISMATCH (2026-10-13)
+
+El Product Owner ejecutó la lectura autenticada `GET /v1/notifications/webhooks/6N7889790V1467139` por medio del runner seguro y compartió una salida sin URLs ni secretos:
+
+```json
+{
+  "environment": "sandbox",
+  "ok": false,
+  "status": "destination_mismatch",
+  "webhookIdMatches": true,
+  "destinationMatches": false
+}
+```
+
+**Interpretación:** PayPal reconoce el ID de webhook, pero el registro NO apunta exactamente a la URL canónica de la función existente en Supabase. No se conoce su URL real. No presupongas que es otra empresa o otro proyecto; una barra final u otro path también causan mismatch. Se amplió `inspectPazoWebhookDestination` para clasificar de forma cerrada la diferencia sin mostrar hostname/path/query/credenciales. El PO puede ejecutar el mismo `-Check Destination` tras actualizar el código para obtener `destinationCategory`.
+
+**Gate seguridad inalterado:** incluso si el destino es una simple variación de la ruta correcta, NO redirigir todavía notificaciones a `paypal-webhook` v30, porque la función activa escribe `profiles.is_founder` desde el estado de la suscripción y carece de conciliación de pagos/idempotencia. En todo caso, todo cambio PayPal, Supabase, secretos o despliegue requiere autorización separada.
