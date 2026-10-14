@@ -1,0 +1,101 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {createPaypalSandboxSubscriptionReader} from '../../../../supabase/functions/f16-paypal-webhook/paypalSandboxTransactions.mjs'
+import {assessPaypalSandboxPayment} from '../../../../supabase/functions/f16-paypal-webhook/paymentReconciliation.mjs'
+const ID='offline-test-client-id'
+const SECRET='offline-test-client-secret'
+const SUB='I-PAZO12345'
+const START='2026-10-01T00:00:00Z'
+const END='2026-10-31T00:00:00Z'
+const PLAN='P-14V25407JP6850922NLHMDKI'
+const OWNER='63e812b0-a7e5-49f6-b2dd-c11d2c72af57'
+function build({oauthOk=true,subOk=true,listOk=true,totalPages=1,txStatus='COMPLETED'}={}){
+ const calls=[]
+ const fetchImpl=async(url,options)=>{
+   calls.push({url,options})
+   if(url==='https://api-m.sandbox.paypal.com/v1/oauth2/token')return {
+     ok:oauthOk,json:async()=>({token_type:'Bearer',access_token:'mock-paypal-secret-token'})}
+   if(url==='https://api-m.sandbox.paypal.com/v1/billing/subscriptions/'+SUB)return {
+     ok:subOk,json:async()=>({id:SUB,plan_id:PLAN,custom_id:'intent-correlation-123',
+       status:'ACTIVE',subscriber:{email_address:'private@example.com'}})}
+   if(url.startsWith('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/'+SUB+'/transactions?'))return {
+     ok:listOk,json:async()=>({transactions:[{id:'CAPTURE1234',status:txStatus,time:'2026-10-13T19:00:00Z',
+       payer_email:'secretpayer@example.com',amount_with_breakdown:{
+         gross_amount:{currency_code:'USD',value:'2.99'}}}],
+       total_pages:totalPages,total_items:1})}
+   throw Error('non_allowlisted_destination')
+ }
+ return {reader:createPaypalSandboxSubscriptionReader({clientId:ID,clientSecret:SECRET,fetchImpl}),calls}
+}
+test('authenticates and reads subscription and transactions from fixed Sandbox endpoints',async()=>{
+ const x=build()
+ const s=await x.reader.read({subscriptionId:SUB,startTime:START,endTime:END})
+ assert.equal(x.calls.length,3)
+ assert.deepEqual(x.calls.map(x=>new URL(x.url).pathname),[
+  '/v1/oauth2/token',
+  '/v1/billing/subscriptions/'+SUB,
+  '/v1/billing/subscriptions/'+SUB+'/transactions',
+ ])
+ assert.equal(x.calls[0].options.headers.Authorization,'Basic '+btoa(ID+':'+SECRET))
+ assert.equal(new URL(x.calls[2].url).searchParams.get('start_time'),START)
+ assert.equal(new URL(x.calls[2].url).searchParams.get('end_time'),END)
+ assert.equal(x.calls.every(x=>x.options.redirect==='error'),true)
+ assert.equal(x.calls[2].options.headers.Authorization,'Bearer mock-paypal-secret-token')
+ assert.equal(s.lookupSubscriptionId,SUB)
+ assert.equal(s.transactions[0].status,'COMPLETED')
+ assert.equal(JSON.stringify(s).includes('private@example.com'),false)
+ assert.equal(JSON.stringify(s).includes('secretpayer@example.com'),false)
+ assert.equal(JSON.stringify(s).includes('mock-paypal-secret-token'),false)
+})
+test('read-only provider data feeds candidate-only decision, not membership',async()=>{
+ const x=build()
+ const s=await x.reader.read({subscriptionId:SUB,startTime:START,endTime:END})
+ const result=assessPaypalSandboxPayment({
+  environment:'sandbox',
+  intent:{id:'intent-correlation-123',provider:'paypal',ownerId:OWNER,
+    externalSubscriptionId:SUB,verifiedOwnerBinding:true},
+  subscription:s.subscription,transaction:s.transactions[0],
+  transactionLookupSubscriptionId:s.lookupSubscriptionId,
+  merchantScopedByPayPalApi:s.merchantScopedByPayPalApi,knownReversalIds:[],
+ })
+ assert.equal(result.acceptedForLedger,true)
+ assert.equal(result.entitlement,false)
+})
+test('untrusted subscription IDs and transaction ranges fail before API request',async()=>{
+ const x=build()
+ for(const subscriptionId of ['I-A?admin=true','https://bad.example','../etc/passwd','']) {
+  await assert.rejects(x.reader.read({subscriptionId,startTime:START,endTime:END}),/invalid_subscription_id/)
+ }
+ for(const pair of [
+  ['2026-10-31T00:00:00Z','2026-10-01T00:00:00Z'],
+  ['2026-01-01T00:00:00Z','2026-10-01T00:00:00Z'],
+  ['not-time',END],['2026-02-30T00:00:00Z',END],
+ ]) {
+  await assert.rejects(x.reader.read({subscriptionId:SUB,startTime:pair[0],endTime:pair[1]}),/invalid_transaction_window/)
+ }
+ assert.equal(x.calls.length,0)
+})
+test('partial pages never qualify as exhaustive refund evidence',async()=>{
+ const x=build({totalPages:2})
+ await assert.rejects(x.reader.read({subscriptionId:SUB,startTime:START,endTime:END}),/incomplete_transaction_history/)
+})
+test('OAuth or PayPal errors fail closed, no raw response disclosure',async()=>{
+ for(const params of [{oauthOk:false},{subOk:false},{listOk:false}]){
+  const x=build(params)
+  await assert.rejects(x.reader.read({subscriptionId:SUB,startTime:START,endTime:END}))
+ }
+})
+test('PENDING transaction can be read but never gives ledger candidate or coverage',async()=>{
+ const x=build({txStatus:'PENDING'})
+ const s=await x.reader.read({subscriptionId:SUB,startTime:START,endTime:END})
+ const verdict=assessPaypalSandboxPayment({
+  environment:'sandbox',
+  intent:{id:'intent-correlation-123',provider:'paypal',ownerId:OWNER,
+    externalSubscriptionId:SUB,verifiedOwnerBinding:true},
+  subscription:s.subscription,transaction:s.transactions[0],
+  transactionLookupSubscriptionId:s.lookupSubscriptionId,
+  merchantScopedByPayPalApi:s.merchantScopedByPayPalApi,knownReversalIds:[],
+ })
+ assert.equal(verdict.acceptedForLedger,false)
+ assert.equal(verdict.entitlement,false)
+})
