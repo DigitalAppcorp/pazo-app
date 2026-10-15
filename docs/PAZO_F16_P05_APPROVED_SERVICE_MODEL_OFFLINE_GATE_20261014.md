@@ -31,6 +31,18 @@
 
 **Importante:** la etiqueta de origen `PROPOSED_PAZO_TERMS_AND_PROVIDER_ANCHOR` no prueba ninguna firma, aceptación del usuario ni captura merchant. No convertir este laboratorio en un boundary operativo. El setupFee del PayPal Sandbox real continúa NULL; nunca tratarlo como 0.
 
+## Nueva investigación: diferencia entre fecha UTC y día calendario (2026-10-14)
+
+**Verificación del código de origen:** en el único ensayo Auth BOUND, `scripts/f16-sandbox-auth-bound-e2e.mjs` hizo POST `/v1/billing/subscriptions` enviando `plan_id` y `custom_id`, **sin** campo `start_time`. Por tanto, el proveedor administró el calendario efectivo. Un `subscription.start_time` retornado posteriormente no es evidencia de que PAZO solicitara ese timestamp como ancla de renovación.
+
+La evidencia REAL fue `start_time=2026-10-15T02:03:31Z` y próxima facturación en evento de activación `2026-11-14T10:00:00Z`. Al REPRESENTAR ambos timestamps en `America/Los_Angeles`, corresponden a **14-oct-2026 19:03:31 PDT** y **14-nov-2026 02:00:00 PST**. Ambos son día local **14**, aunque en UTC son días 15 y 14 y la hora es diferente. El cambio PDT→PST ocurrió entre ambas fechas. Esto genera la **HIPÓTESIS** de calendario merchant expresado en una zona local, pero el ambiente/merchant PayPal aún no ha certificado cuál zona utiliza, cómo normaliza horarios ni que `next_billing_time` sea fin de cobertura.
+
+Laboratorio `src/features/supporter/testing/p05LocalCalendarInterpretationLab.mjs` y pruebas `p05LocalCalendarInterpretationLab.test.mjs`: compara fechas en UTC y en la zona Los Ángeles SOLO para detectar patrones, verifica cronología y cambios de offset de horario; la salida máxima `DATE_PATTERN_CANDIDATE_ONLY` mantiene `providerTimeZoneVerified:false`, `saleToCycleVerified:false`, `paidThrough:null`, `mayGrantBenefits:false`. No se imprime identificador, dato del pagador ni timestamp específico en salida del analizador.
+
+**Diseño a evitar:** no imponer `UTC + 1 month` al `subscription.start_time` como política contractual antes de reconciliar el calendario merchant. No forzar una zona horaria PayPal basándose en el lugar donde vive el usuario. En futuros contratos se registrará por separado: hora de inicio que devuelve PayPal, próxima factura observada, zona de presentación al usuario, y fuente contractual/aceptación; solo después de validación se podrá conectar el ciclo de servicio a una venta. La API PayPal ofrece fechas en RFC3339 y permite un `start_time` opcional en creación; ninguna de estas propiedades prueba directamente la asignación de un pago a un período.
+
+Fuentes: https://developer.paypal.com/api/subscriptions/v1/definitions/subscription/ ; https://developer.paypal.com/platforms/subscriptions/customize/future-date/ ; https://developer.paypal.com/subscriptions/payment-failure-retry/ . No mezclar reglas del sistema Braintree Recurring Billing con Subscriptions v1.
+
 ## Próximo gate
 
 Auditar/fijar fuentes server-only y contrato de aceptación del usuario, sincronización verdadera con PayPal bajo variaciones de calendario, evidencia independiente venta→ciclo, reembolsos/disputas, retención y condiciones legales. Solo después de validar esas reglas se propondrá al PO una migración privada versionada/worker con permisos explícitos separados. La suscripción virtual original quedó cancelada; no ejecutar más compras para resolver este gate. F16 EN CURSO, PR #44 DRAFT, lanzamiento pagos NO-GO.
