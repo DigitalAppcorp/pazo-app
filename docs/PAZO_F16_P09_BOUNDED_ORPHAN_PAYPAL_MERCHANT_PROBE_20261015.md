@@ -19,7 +19,7 @@ P07 hace una sola reserva antes de emitir PayPal create POST. Si la respuesta se
 
 ## Evidencia de pruebas
 
-Commit [85a08dec](https://github.com/DigitalAppcorp/pazo-app/commit/85a08dec962de574607e4c873c31deceb8a88fd1): **CI general SUCCESS + F16 Disposable PostgreSQL Lab SUCCESS**. Tests Node y PostgreSQL sintéticos agregados: 0/1/2 coincidencias, intento extranjero, ID/lista inválida, plan falso, status desconocido, carrera de reintentos cerrada en P07, tiempo de claim, rechazo de usuarios sin Auth, GET solo, no PII. Nuevos tests de timestamp PG y dobles custom IDs requieren CI del nuevo HEAD. Sin PayPal OAuth real.
+Commit [85a08dec](https://github.com/DigitalAppcorp/pazo-app/commit/85a08dec962de574607e4c873c31deceb8a88fd1): **CI general SUCCESS + F16 Disposable PostgreSQL Lab SUCCESS**. Tests Node y PostgreSQL sintéticos agregados: 0/1/2 coincidencias, intento extranjero, ID/lista inválida, plan falso, status desconocido, carrera de reintentos cerrada en P07, tiempo de claim, rechazo de usuarios sin Auth, GET solo, no PII. Nuevas pruebas de timestamp PostgreSQL, normalización UTC y dobles custom IDs también **CI general + F16 Disposable PostgreSQL Lab SUCCESS** en commit técnico [`06d93f8`](https://github.com/DigitalAppcorp/pazo-app/commit/06d93f8e1d928ac91fdccd9b373fb1f7b6d4064e). Sin PayPal OAuth real.
 
 ## Gates restantes
 
