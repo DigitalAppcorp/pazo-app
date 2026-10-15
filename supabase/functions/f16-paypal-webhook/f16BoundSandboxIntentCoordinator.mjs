@@ -27,8 +27,15 @@ export function createF16BoundSandboxIntentCoordinator({
    readPayPalSubscription,bindPrivateIntent,newIntentId]
    .some(fn=>typeof fn!=='function'))
   throw Error('f16_bound_sandbox_not_configured')
+ // The binding MUST precede buyer approval. An already ACTIVE,
+ // CANCELLED or SUSPENDED subscription cannot be claimed as a new E2E
+ // probe, even if its plan_id/custom_id happen to match.
  const preflight=createF16OwnerBindingPreflight({
-  resolveOwnerFromVerifiedSession,loadPrivateIntent,readPayPalSubscription,
+  resolveOwnerFromVerifiedSession,loadPrivateIntent,
+  readPayPalSubscription:async(subscriptionId)=>{
+   const item=await readPayPalSubscription(subscriptionId)
+   return item?.status==='APPROVAL_PENDING'?item:null
+  },
  })
  return Object.freeze({
   // STOP 1: this inserts a private intent when backed by real service_role.
