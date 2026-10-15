@@ -146,6 +146,7 @@ test('signed intake + resolver with unknown payment returns retry 503 and no inb
   planId:PLAN,verifySignature:async()=>true,
   inbox:{insertIfAbsent:async x=>{queue.push(x);return true}},
   disputeCaptureApproved:true,
+  verifyDisputeRetentionRelease:async()=>true,
   assessTrustedDisputeScope:ctx.resolve.assessTrustedDisputeScope,
  })
  const headers={
@@ -169,6 +170,7 @@ test('positive mocked scope is ONLY a prerequisite to minimal inbox acceptance',
   planId:PLAN,verifySignature:async()=>true,
   inbox:{insertIfAbsent:async x=>{queue.push(x);return true}},
   disputeCaptureApproved:true,
+  verifyDisputeRetentionRelease:async()=>true,
   assessTrustedDisputeScope:ctx.resolve.assessTrustedDisputeScope,
  })
  const headers={
