@@ -111,6 +111,12 @@ test('foreign owner, invalid input, missing consent never leaks terms',async()=>
   assert.equal(r.status,400);assert.deepEqual(h.calls,[])
  }
 })
+test('unexpected prototype-like locale cannot produce a downloadable receipt',async()=>{
+ const h=harness({saved:{...sample(),locale:'__proto__'}})
+ const r=await h.handler(request('acknowledgement'))
+ assert.equal(r.status,503)
+ assert.ok(!(await r.text()).includes(sample().exactCopy))
+})
 test('receipt RPC goes only to service role and rejects malformed owner proof',async()=>{
  const logs=[]
  const api=createPazoCheckoutConsentStore({

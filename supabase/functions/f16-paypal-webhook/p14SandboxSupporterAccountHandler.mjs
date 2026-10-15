@@ -104,7 +104,7 @@ export function createPazoSandboxSupporterAccountHandler({
   })}catch{return outgoing(plain(503,'private_acknowledgement_unavailable'))}
   if(x===null)return outgoing(plain(404,'acknowledgement_not_found'))
   if(!x||x.ownerId!==owner||x.intentId!==payload.intentId||
-     !(x.locale in lang)||!VERSION.test(x.termsVersion||'')||
+     !['es','en'].includes(x.locale)||!VERSION.test(x.termsVersion||'')||
      !HASH.test(x.termsDigest||'')||typeof x.exactCopy!=='string'||
      x.exactCopy.length<100||x.exactCopy.length>12000||
      typeof x.consentedAt!=='string'||!Number.isFinite(Date.parse(x.consentedAt))||
