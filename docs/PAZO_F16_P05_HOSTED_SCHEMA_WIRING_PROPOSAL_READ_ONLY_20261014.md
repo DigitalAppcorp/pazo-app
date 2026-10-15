@@ -23,7 +23,7 @@ Se recomienda **NO** crear otra tabla para intenciones, inbox, venta o reverso. 
 
 **A. `supporter_private.paypal_terms_acceptances` — evidencia precheckout**
 - `intent_id` text PK/FK `paypal_subscription_intents(intent_id)`, `owner_id` uuid verificado contra intent. `offer_version` text, `offer_sha256` hex64, `cancel_notice_version`, `privacy_notice_version`, `acknowledged_at` timestamptz, `recorded_at` timestamptz generado por servidor.
-- Registrar aceptación mediante una operación server-only con identidad Auth confirmada y contenido/versiones publicadas, sin checkbox premarcado; no permitir que el cliente fije `owner_id`, `acknowledged_at` o SHA arbitrarios. **Orden temporal:** primero aceptación validada, luego creación PayPal. Si no se acepta, NO llamar POST a PayPal.
+- Primero crear `intent` privado en estado pending sin acción PayPal; después registrar la aceptación mediante una operación server-only con identidad Auth confirmada y contenido/versiones publicadas, sin checkbox premarcado; no permitir que el cliente fije `owner_id`, `acknowledged_at` o SHA arbitrarios. **Orden temporal:** primero aceptación validada, luego creación PayPal. Si no se acepta, NO llamar POST a PayPal.
 - Inmutabilidad/versionado: cambiar condiciones exige nuevo registro/versión de evento, no sobrescribir aceptación anterior. Como `intent_id` es único, el MVP primera compra tiene una aceptación para ese intento; cambios posteriores requieren entidad/version separada antes de implementarlos.
 - Retención y borrado/anonimización financiera: **pendientes**; sin aprobación NO insertar.
 
@@ -44,8 +44,10 @@ Se recomienda **NO** crear otra tabla para intenciones, inbox, venta o reverso. 
 ## 3. Secuencia futura de integración (sin tocar la prueba original)
 
 ```text
-Auth verificada -> oferta/terms ES-EN publicados -> opt-in explícito
-    -> aceptación privada versionada por servidor -> intent privado
+Auth verificada -> oferta/terms ES-EN publicados
+    -> intent PENDING privado (sin crear PayPal todavía)
+    -> opt-in explícito -> aceptación privada versionada por servidor
+       (FK al intent PENDING; necesariamente antes del PayPal POST)
     -> creación PayPal (idempotente) -> BOUND verificado
     -> webhook ACTIVATED firmado -> lectura merchant snapshot
     -> append-only calendario prospectivo (fecha de billing observada)
