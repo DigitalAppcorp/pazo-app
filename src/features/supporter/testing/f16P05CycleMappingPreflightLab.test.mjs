@@ -48,7 +48,7 @@ test('P05 two separate sales assigned to one period are never two months',()=>{
 test('P05 a recovered payment from prior cycle stays under manual review',()=>{
  for(const kind of ['retry','outstanding_capture','unknown']){
   const x=check(p=>p.proposedMappings[1].allocationKind=kind)
-  safe(x);assert.equal(x.reason,'recovered_payment_cycle_policy_unapproved')
+  safe(x);assert.equal(x.reason,'recovered_payment_requires_verified_original_cycle')
   assert.equal(x.nonregularCount,1)
  }
 })
