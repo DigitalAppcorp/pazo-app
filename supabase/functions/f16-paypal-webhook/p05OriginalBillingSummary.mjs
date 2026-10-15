@@ -14,7 +14,7 @@ export function summarizeF16P05ExistingBilling({state,snapshot}={}){
    !snapshot?.merchantScopedByPayPalApi||!snapshot?.planScopedByPayPalApi)
    return no('original_sandbox_binding_or_merchant_evidence_missing')
  const sub=snapshot.subscription,plan=snapshot.plan
- if(!sub||!plan||snapshot.lookupSubscriptionId!==state.subscriptionId||
+ if(!sub||!plan||sub.status!=='CANCELLED'||snapshot.lookupSubscriptionId!==state.subscriptionId||
     sub.id!==state.subscriptionId||sub.custom_id!==state.intentId||
     sub.plan_id!==state.plan||plan.id!==state.plan)
    return no('original_sandbox_subscription_or_plan_mismatch')
