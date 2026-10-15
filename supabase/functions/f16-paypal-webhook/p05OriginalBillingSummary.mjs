@@ -44,7 +44,7 @@ export function summarizeF16P05ExistingBilling({state,snapshot}={}){
      regular.frequency?.interval_count===1?'MONTH_1':null,
    planPrice:safeMoney(regular?.pricing_scheme?.fixed_price),
    setupFee:safeMoney(plan.payment_preferences?.setup_fee),
-   currentPlanTermsVerified:knownMonthly,
+   currentPlanTermsVerified:knownMonthly===true,
    subscriptionStartTime:safeTime(sub.start_time),
    lastPayment:info.last_payment?{
      time:safeTime(info.last_payment.time),amount:safeMoney(info.last_payment.amount),
