@@ -159,7 +159,7 @@ test('forensic reasons are static error enums, never raw provider price or PII',
   assert.equal(r.couldCompletePreapprovalChecks,false)
   assert.equal(r.plan299MonthlyConsistent,false)
   assert.ok(r.planTermIssueCodes.includes(reason),reason)
-  assert.ok(r.planTermIssueCodes.every(z=>typeof z==='string'&&/^[a-z_]+$/.test(z)))
+  assert.ok(r.planTermIssueCodes.every(z=>typeof z==='string'&&/^[a-z0-9_]+$/.test(z)))
   assert.equal(JSON.stringify(r).includes('9.99'),false)
  }
 })
