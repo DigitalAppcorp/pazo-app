@@ -20,4 +20,13 @@ ALTER TABLE supporter_private.paypal_verified_event_inbox
  ADD COLUMN reconciled_payment_id text,
  ADD COLUMN last_error_code text
  CHECK (last_error_code IS NULL OR last_error_code ~ '^[a-z_]{1,48}$');
+-- A legacy test asserts this isolated table remains empty. It is NOT an
+-- assertion that this review table exists in hosted Supabase.
+CREATE TABLE supporter_private.paypal_first_period_reviews (
+ assertion_id text PRIMARY KEY
+);
+ALTER TABLE supporter_private.paypal_first_period_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE supporter_private.paypal_first_period_reviews FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON supporter_private.paypal_first_period_reviews
+ FROM PUBLIC,anon,authenticated,service_role;
 COMMIT;
