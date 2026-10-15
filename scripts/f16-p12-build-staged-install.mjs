@@ -28,7 +28,7 @@ const headings=[
  '-- 03 P10 review-gated recovered ID binding\n',
 ]
 const front=output.slice(0,output.indexOf(headings[0]))
-const last=output.slice(output.indexOf('-- Validate all grants AFTER staging'))
+const last=output.slice(output.indexOf('\n-- Validate all grants AFTER staging'))
 assert.ok(front.includes('DO $p12_gate$'))
 assert.ok(last.includes('DO $p12_post$'))
 const regenerated=front+sources.map((s,i)=>headings[i]+s+'\n').join('')+last
