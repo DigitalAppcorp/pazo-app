@@ -150,3 +150,6 @@ jobs:
             -f supabase/drafts/f16_p05_inbox_claim_v1_DO_NOT_APPLY.sql \
             -f supabase/tests/supporter/p05-inbox-claim-security.sql \
             -f supabase/tests/supporter/p05-inbox-claim-synthetic.sql
+
+      - name: F16 P05 real two-session claim concurrency (disposable only)
+        run: node scripts/f16-p05-inbox-claim-concurrency.mjs
