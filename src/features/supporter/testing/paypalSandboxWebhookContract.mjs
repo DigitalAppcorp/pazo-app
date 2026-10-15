@@ -12,6 +12,11 @@ export const PAZO_REQUIRED_PAYPAL_EVENTS = Object.freeze([
   'PAYMENT.SALE.REFUNDED',
   'PAYMENT.SALE.REVERSED',
 ])
+export const PAZO_REQUIRED_PAYPAL_DISPUTE_EVENTS = Object.freeze([
+  'CUSTOMER.DISPUTE.CREATED',
+  'CUSTOMER.DISPUTE.UPDATED',
+  'CUSTOMER.DISPUTE.RESOLVED',
+])
 function httpsEndpoint(value) {
   try {
     const url = new URL(value)
@@ -22,7 +27,8 @@ function httpsEndpoint(value) {
 }
 export function assessPazoSandboxWebhooks(payload) {
   if (!payload || !Array.isArray(payload.webhooks)) {
-    return { ok:false, status:'invalid_response', count:0, candidates:[] }
+    return { ok:false,financialReconciliationReady:false,
+      status:'invalid_response', count:0, candidates:[] }
   }
   const hooks=payload.webhooks
   const candidates=hooks.slice(0,20).map(hook=>{
@@ -31,10 +37,19 @@ export function assessPazoSandboxWebhooks(payload) {
       hook.event_types.filter(e=>typeof e?.name==='string').map(e=>e.name) : [])
     const missing=eventNames.has('*') ? [] : PAZO_REQUIRED_PAYPAL_EVENTS.filter(e=>!eventNames.has(e))
     const httpsUrl=httpsEndpoint(hook?.url)
-    return {webhookId:id,httpsUrl,missingEvents:missing,subscriptionEventsConfigured:!!id && httpsUrl && missing.length===0}
+    const missingDisputeEvents=eventNames.has('*') ? [] :
+      PAZO_REQUIRED_PAYPAL_DISPUTE_EVENTS.filter(e=>!eventNames.has(e))
+    return {webhookId:id,httpsUrl,missingEvents:missing,
+      missingDisputeEvents,
+      subscriptionEventsConfigured:!!id && httpsUrl && missing.length===0,
+      financialRiskEventsConfigured:!!id && httpsUrl && missing.length===0 &&
+        missingDisputeEvents.length===0}
   })
   const ok=candidates.some(c=>c.subscriptionEventsConfigured)
   // A positive result only verifies configuration as returned by PayPal:
   // endpoint reachability, source authenticity and actual event delivery remain untested.
-  return {ok,status:ok?'subscriptions_configured':'needs_webhook_configuration',count:hooks.length,candidates}
+  const financialReconciliationReady=candidates.some(c=>c.financialRiskEventsConfigured)
+  return {ok,financialReconciliationReady,
+    status:ok?'subscriptions_configured':'needs_webhook_configuration',
+    count:hooks.length,candidates}
 }
