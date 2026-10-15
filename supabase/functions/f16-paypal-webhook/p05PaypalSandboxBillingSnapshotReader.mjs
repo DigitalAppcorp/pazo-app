@@ -10,7 +10,8 @@ const AMOUNT=/^\d{1,9}\.\d{2}$/
 const utc=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/
 const date=s=>typeof s==='string'&&utc.test(s)&&
  Number.isFinite(Date.parse(s))&&
- new Date(Date.parse(s)).toISOString().replace(/\.000Z$/,'Z')===s?s:null
+ (new Date(Date.parse(s)).toISOString()===s||
+  new Date(Date.parse(s)).toISOString().replace(/\.000Z$/,'Z')===s)?s:null
 const dateMaybe=v=>v===undefined?undefined:date(v)
 const moneyMaybe=v=>v===undefined?undefined:money(v)
 function money(v){
