@@ -57,6 +57,15 @@ export async function inspectSupporterGateway({
    503:'preflight_http_503_unavailable',
   })[httpStatus]||'preflight_http_unexpected'
   // Static enum only; never expose raw provider body, headers or URL.
+  if(httpStatus===503){
+   // Whitelist only a server-generated static code; never print raw bodies.
+   let code
+   try{code=(await preflight.json())?.code}catch{}
+   if(code==='account_origin_not_configured')
+    return denied('preflight_503_origin_not_configured')
+   if(code==='supporter_account_not_configured')
+    return denied('preflight_503_runtime_not_configured')
+  }
   return denied(reason)
  }
  const headers=headerList(preflight?.headers?.get('access-control-allow-headers'))

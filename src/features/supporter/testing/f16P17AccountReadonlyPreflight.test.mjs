@@ -108,6 +108,25 @@ test('P18 identifies preflight HTTP class without revealing body or secrets',asy
   assert.ok(!JSON.stringify(result).includes(KEY))
  }
 })
+test('P18 503 identifies configured-origin blocker by whitelisted code only',async()=>{
+ const originMissing=await inspectSupporterGateway({
+  origin:ORIGIN,allowNetwork:true,
+  fetchImpl:async()=>({
+   status:503,headers:headers({'content-type':'application/json'}),
+   json:async()=>({code:'account_origin_not_configured',secret:'DO_NOT_ECHO'}),
+  }),
+ })
+ assert.equal(originMissing.reason,'preflight_503_origin_not_configured')
+ assert.ok(!JSON.stringify(originMissing).includes('DO_NOT_ECHO'))
+ const runtimeMissing=await inspectSupporterGateway({
+  origin:ORIGIN,allowNetwork:true,
+  fetchImpl:async()=>({
+   status:503,headers:headers({'content-type':'application/json'}),
+   json:async()=>({code:'supporter_account_not_configured'}),
+  }),
+ })
+ assert.equal(runtimeMissing.reason,'preflight_503_runtime_not_configured')
+})
 test('only authorized diagnostic request bodies, no billing or cancellation',()=>{
  const src=fs.readFileSync(
   new URL('../../../../scripts/f16-p17-account-readonly-preflight.mjs',import.meta.url),
