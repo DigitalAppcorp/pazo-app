@@ -6,7 +6,7 @@ import {inspectSupporterGateway,validStableOrigin}
 const ORIGIN='https://pazo.example'
 const TOKEN='mock.jwt.token.abcdefghijklmnopqrstuvwxyz0123456'
 const KEY='sb_publishable_SYNTHETIC_KEY'
-const URL='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-supporter-account'
+const ENDPOINT='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-supporter-account'
 const CORS={'access-control-allow-origin':ORIGIN,
  'access-control-allow-methods':'POST',
  'access-control-allow-headers':'authorization,content-type,apikey',
@@ -17,7 +17,7 @@ function fixture({badOrigin=false,badList=false,fullPage=false,
  const requests=[]
  const fetchImpl=async (url,init)=>{
   requests.push({url,init})
-  assert.equal(url,URL)
+  assert.equal(url,ENDPOINT)
   assert.equal(init.redirect,'error')
   assert.ok(['OPTIONS','POST'].includes(init.method))
   assert.equal(init.headers.Origin,ORIGIN)
