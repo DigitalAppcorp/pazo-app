@@ -83,3 +83,92 @@ test('unrecognized signed event safely ignored without writing',async()=>{
   assert.equal((await h(x.request({id:'WH-UNKNOWN',event_type:'RANDOM.EVENT'}))).status,200)
   assert.equal(x.queued.length,0)
 })
+
+const disputeTypes=['CUSTOMER.DISPUTE.CREATED','CUSTOMER.DISPUTE.UPDATED',
+ 'CUSTOMER.DISPUTE.RESOLVED']
+test('signed disputes have capture DISABLED without changing buyer payments',async()=>{
+ for(const eventType of disputeTypes){
+  let providerChecks=0
+  const x=setup({verifySignature:async()=>{providerChecks++;return true}})
+  const handler=createSafeF16WebhookHandler(x.config)
+  const resp=await handler(x.request({id:'WH-DISPUTE-111',event_type:eventType,
+   resource:{dispute_id:'PP-D-FAKE',buyer_email:'PRIVATE@example.invalid'}}))
+  assert.equal(resp.status,503)
+  assert.equal((await resp.json()).code,'dispute_intake_not_released')
+  assert.equal(providerChecks,1)
+  assert.equal(x.queued.length,0)
+ }
+})
+test('invalid PayPal signature cannot invoke dispute ownership resolver',async()=>{
+ const x=setup({verifySignature:async()=>false})
+ let scopes=0
+ const handler=createSafeF16WebhookHandler({...x.config,
+  disputeCaptureApproved:true,assessTrustedDisputeScope:async()=>{
+   scopes++;return 'confirmed_pazo'}})
+ assert.equal((await handler(x.request({id:'WH-DISPUTE-111',
+  event_type:disputeTypes[0]}))).status,401)
+ assert.equal(scopes,0)
+ assert.equal(x.queued.length,0)
+})
+test('approved capture without a PAZO scope resolver cannot store disputes',async()=>{
+ const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
+  disputeCaptureApproved:true})
+ const resp=await handler(x.request({id:'WH-DISPUTE-111',
+  event_type:disputeTypes[0]}))
+ assert.equal(resp.status,503)
+ assert.equal(x.queued.length,0)
+})
+test('unattributed or thrown dispute scope fails closed without data retention',async()=>{
+ for(const result of ['unknown',null,'confirmed_elsewhere',true]){
+  const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
+   disputeCaptureApproved:true,
+   assessTrustedDisputeScope:async()=>result})
+  const resp=await handler(x.request({id:'WH-DISPUTE-111',
+   event_type:disputeTypes[0],resource:{payer:'PRIVATE@example.invalid'}}))
+  assert.equal(resp.status,503)
+  assert.equal(x.queued.length,0)
+  assert.equal(JSON.stringify(await resp.json()).includes('PRIVATE'),false)
+ }
+ const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
+  disputeCaptureApproved:true,
+  assessTrustedDisputeScope:async()=>{throw Error('payer email PRIVATE@example.invalid')}})
+ assert.equal((await handler(x.request({id:'WH-DISPUTE-111',
+  event_type:disputeTypes[1]}))).status,503)
+ assert.equal(x.queued.length,0)
+})
+test('independently proved non-PAZO dispute receives no stored reference',async()=>{
+ const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
+  disputeCaptureApproved:true,
+  assessTrustedDisputeScope:async()=> 'outside_pazo'})
+ const r=await handler(x.request({id:'WH-DISPUTE-111',
+  event_type:disputeTypes[1]}))
+ assert.equal(r.status,200)
+ assert.equal((await r.json()).code,'verified_non_pazo_dispute')
+ assert.equal(x.queued.length,0)
+})
+test('confirmed PAZO dispute minimal evidence is queued only after signature',async()=>{
+ for(const eventType of disputeTypes){
+  const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
+   disputeCaptureApproved:true,
+   assessTrustedDisputeScope:async({eventId,eventType:type})=>{
+    assert.equal(eventId,'WH-DISPUTE-111')
+    assert.equal(type,eventType)
+    return 'confirmed_pazo'
+   }})
+  const e={id:'WH-DISPUTE-111',event_type:eventType,
+   resource:{messages:[{text:'PRIVATE@example.invalid'}]}}
+  assert.equal((await handler(x.request(e))).status,202)
+  assert.equal((await handler(x.request(e))).status,200)
+  assert.deepEqual(x.queued,[{provider:'paypal',
+   eventId:'WH-DISPUTE-111',eventType}])
+  assert.equal(JSON.stringify(x.queued).includes('PRIVATE'),false)
+ }
+})
+test('confirmed dispute with durable inbox rejection is retryable 503',async()=>{
+ const x=setup({inbox:{insertIfAbsent:async()=>{throw Error('db write failed')}}})
+ const h=createSafeF16WebhookHandler({...x.config,disputeCaptureApproved:true,
+  assessTrustedDisputeScope:async()=> 'confirmed_pazo'})
+ assert.equal((await h(x.request({id:'WH-DISPUTE-111',
+  event_type:disputeTypes[2]}))).status,503)
+ assert.equal(x.queued.length,0)
+})
