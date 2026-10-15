@@ -1,5 +1,5 @@
-// F16 draft intake core for future Supabase Edge Function.
-// NOT deployed, NOT a replacement for the existing paypal-webhook v30.
+// PAZO F16 webhook intake core; original receiver is already deployed in Sandbox.
+// Dispute intake changes in this branch are NOT DEPLOYED and default DISABLED.
 // Requires an authenticated PayPal signature verifier AND a durable private inbox.
 // Never writes profiles/is_founder or grants memberships.
 import {f16WorkerAdmissionGate} from './workerAdmissionGate.mjs'
