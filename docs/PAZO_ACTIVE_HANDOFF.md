@@ -4,6 +4,9 @@
 
 ## F16-P12 — INSTALACIÓN STAGING P06–P10 PREPARADA, NO HOSTED (2026-10-15)
 
+- **Validación técnica F16-P12 (2026-10-15):** [HEAD de código `8d68d6b`](https://github.com/DigitalAppcorp/pazo-app/commit/8d68d6b96a5cd76d275036c984af27724b17412b) **CI general SUCCESS, f16-p12-staged-install SUCCESS y F16 Disposable PostgreSQL Lab SUCCESS**. El instalador consolidado pasó en PG17 sintético con P06 y P10 originales; la fixture adicional solo repone tablas históricas auxiliares para tests, no afirma que `paypal_first_period_reviews` esté alojada. Ninguna escritura Supabase hosted, PayPal ni beneficio. Sigue sin GO para migración real.
+
+
 - PO «ok sigamos»: autorizó preparación de código/SQL y validación desechable, **no SQL Supabase alojado ni buyer/Edge/Live**. Bundle staging transaccional `supabase/drafts/f16_p12_staged_install_REQUIRES_PO_GO.sql` a partir de P06/P07+P08+P10 con preflight actual PG17/roles/RLS/pgcrypto/unique external sub y postflight grants `anon/authenticated` bloqueados, ofertas vacías y `wall_has_verified_entitlement=false`. No genera migración CLI ni publica términos. Script `scripts/f16-p12-build-staged-install.mjs --verify` detecta drift de fuentes. CI añade ensayo PostgreSQL aislado. Doc `docs/PAZO_F16_P12_STAGED_SCHEMA_INSTALL_GATE_20261015.md`.
 - Pendientes sin simular GO: legal+retención P01–P09, copia ES/EN definitiva, PO expreso para migración alojada y versión real CLI, operator/Edge OFF, PayPal Sandbox buyer+worker financiero, refunds/disputes, posterior Live. PR #44 DRAFT, Amigo $2.99 opcional OFF, PAZO gratis.
 
