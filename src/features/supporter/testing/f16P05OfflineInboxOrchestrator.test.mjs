@@ -72,7 +72,8 @@ test('matching merchant sale is quarantined for cycle review, never paid',async(
  assert.deepEqual(calls,[
   'claim',
   ['read',{eventId:EVENT,claimToken:TOKEN}],
-  ['merchant',{eventId:EVENT,eventType:'PAYMENT.SALE.COMPLETED'}],
+  ['merchant',{eventId:EVENT,eventType:'PAYMENT.SALE.COMPLETED',
+   claimToken:TOKEN}],
   ['finish',{eventId:EVENT,claimToken:TOKEN,
    outcome:'review',reasonCode:'cycle_unproven'}],
  ])
