@@ -13,7 +13,7 @@ import {stdin as input,stdout as output} from 'node:process'
 import {createClient} from '@supabase/supabase-js'
 import {createF16BoundSandboxIntentCoordinator} from '../supabase/functions/f16-paypal-webhook/f16BoundSandboxIntentCoordinator.mjs'
 import {createVerifiedAuthOwnerResolver} from '../supabase/functions/f16-paypal-webhook/verifiedAuthOwner.mjs'
-import {createPaypalSandboxSubscriptionReader} from '../supabase/functions/f16-paypal-webhook/paypalSandboxTransactions.mjs'
+import {createF16P05SandboxBillingSnapshotReader} from '../supabase/functions/f16-paypal-webhook/p05PaypalSandboxBillingSnapshotReader.mjs'
 const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const HOST='https://api-m.sandbox.paypal.com'
 const PLAN='P-14V25407JP6850922NLHMDKI'
@@ -143,6 +143,9 @@ export async function performF16SandboxE2E(c){
  save(state,true) // First reservation blocks accidental second purchase on restart.
  const admin=client(c.service),login=client(c.service)
  const reader=createPaypalSandboxSubscriptionReader({clientId:c.id,clientSecret:c.secret})
+ const effectiveReader=createF16P05SandboxBillingSnapshotReader({
+  clientId:c.id,clientSecret:c.secret,
+ })
  const newEmail='pazo-f16-'+randomUUID()+'@example.com'
  const pass='Q9!'+randomBytes(32).toString('base64url')
  let stage='reserved'
@@ -176,7 +179,19 @@ export async function performF16SandboxE2E(c){
      provider:'paypal',state:data.state,
      externalSubscriptionId:data.external_subscription_id}
    },
-   readPayPalSubscription:id=>reader.readSubscription(id),
+   readPayPalSubscription:async id=>{
+    const snapshot=await effectiveReader.read(id)
+    const s=snapshot.subscription,p=snapshot.plan
+    if(s?.plan_overridden!==false||s?.quantity!=='1'||
+     p?.status!=='ACTIVE'||p.billing_cycles?.length!==1||
+     p.billing_cycles[0]?.tenure_type!=='REGULAR'||
+     p.billing_cycles[0]?.frequency?.interval_unit!=='MONTH'||
+     p.billing_cycles[0]?.frequency?.interval_count!==1||
+     p.billing_cycles[0]?.pricing_scheme?.fixed_price?.currency_code!=='USD'||
+     p.billing_cycles[0]?.pricing_scheme?.fixed_price?.value!=='2.99')
+     return null
+    return {id:s.id,plan_id:s.plan_id,custom_id:s.custom_id,status:s.status}
+   },
    bindPrivateIntent:async({ownerId,intentId,subscriptionId,planId})=>{
     const {data,error}=await admin.rpc('f16_paypal_bind_private_intent',{
      p_owner_id:ownerId,p_intent_id:intentId,
