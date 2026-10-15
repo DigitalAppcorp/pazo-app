@@ -1,6 +1,14 @@
 # PAZO F16 — Matriz de retención, bajas, reembolsos y cobertura
 
-**Versión:** 2026-10-14. **Estado:** P06-A–E APROBADA comercialmente por Product Owner; P05, P06-F/G/H/I en dimensiones no cubiertas, P01–P04, P07–P10 y retención financiera todavía pendientes. Ninguna regla aplicada en Supabase; F16 NO-GO, PR #44 Draft.
+**Versión:** 2026-10-14. **Estado:** P05-L (política comercial de pago atrasado y calendario verificado) y P06-A–E APROBADAS por Product Owner. **P05 implementativa** (prueba de cycle_key/ancla exacta/evidencia Auth BOUND), P06-F/G/H/I no cubiertas, P01–P04, P07–P10 y retención financiera todavía pendientes. Ninguna regla P05/P06 aplicada en Supabase; F16 NO-GO, PR #44 Draft.
+
+## Decisión más reciente — P05-L APROBADA por el Product Owner el 14-oct-2026
+
+El PO respondió explícitamente **«sí»** a esta regla comercial: **los pagos atrasados o recuperados se imputan al ciclo histórico que originó la deuda, solo si hay evidencia que permita demostrarlo; no regalan ni desplazan un mes de cobertura al día del cobro.** Si se desconoce el ciclo concreto o la prueba es insuficiente, el ingreso se pone en **revisión sin activar beneficios**. Las fechas de los períodos vienen del **calendario contractual merchant verificado**, nunca de `completedAt+30 días`.
+
+Esta aprobación **NO cierra íntegramente P05**: ni `cycle_key`, ni el ancla exacta de calendario/timezone, ni la prueba Auth BOUND de nueva suscripción, ni reconciliación de cobros agrupados, ni retroactividades ni retención financiera quedan autorizados o probados. Además **NO autoriza** writes SQL alojados, worker/Edge/cron, PayPal Sandbox nueva compra, Live, entitlements, merge/Vercel. Nuevo documento canónico: `docs/PAZO_F16_P05_LATE_PAYMENT_POLICY_APPROVED_20261014.md`. El clasificador `p05CycleMappingPreflightLab.mjs` mantiene `mayGrantBenefits:false` para todas las entradas y cambia solo el motivo de pago recuperado a `recovered_payment_requires_verified_original_cycle`, pues la política está aprobada pero **falta evidencia de ciclo**. La salida de la lectura merchant Sandbox previa confirmó plan/condiciones/cancelación, no período liquidado.
+
+**Precedencia:** esta decisión P05-L posterior **sustituye únicamente** toda mención histórica a «política de pagos atrasados P05 sin aprobar» en párrafos anteriores de esta matriz. Sigue siendo verdadera la afirmación de que P05 completo está pendiente. La decisión P06-A–E aprobada anteriormente se conserva sin alteración.
 
 ## Alcance de aprobaciones posteriores — ledger multireembolso y política comercial P06-A–E
 
