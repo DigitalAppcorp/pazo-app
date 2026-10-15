@@ -15,6 +15,7 @@ import {createF16BoundSandboxIntentCoordinator} from '../supabase/functions/f16-
 import {createVerifiedAuthOwnerResolver} from '../supabase/functions/f16-paypal-webhook/verifiedAuthOwner.mjs'
 import {createF16P05SandboxBillingSnapshotReader} from '../supabase/functions/f16-paypal-webhook/p05PaypalSandboxBillingSnapshotReader.mjs'
 import {assessPazoSandboxPlan} from '../src/features/supporter/testing/paypalSandboxPlanContract.mjs'
+import {assessF16PendingSandboxReadOnly} from '../supabase/functions/f16-paypal-webhook/f16PendingSandboxReadOnlyAssessment.mjs'
 const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const HOST='https://api-m.sandbox.paypal.com'
 const PLAN='P-14V25407JP6850922NLHMDKI'
@@ -160,6 +161,29 @@ async function statusReadonly(c,state){
    reason:'sandbox_get_failed',
    networkWrites:0,mayGrantBenefits:false,paidThrough:null}
  }
+}
+// Forensics only: same already-created subscription + private intent + Auth user.
+// Reads ONLY. Does NOT reopen --run, bind, cancel, authorize buyer or grant.
+async function diagnosePending(c,state){
+ if(!state?.subscriptionId||!state?.intentId||!state?.authOwnerId)
+  return assessF16PendingSandboxReadOnly({savedState:state})
+ const admin=client(c.service)
+ // Both RPC and Auth admin operations below are READ ONLY, scoped to
+ // the exact locally recorded intent and user from the existing attempt.
+ const {data:privateIntent,error:intentError}=
+  await admin.rpc('f16_paypal_read_private_intent',{p_intent_id:state.intentId})
+ if(intentError)throw Error('f16_readonly_private_intent_unavailable')
+ const {data:authUser,error:authError}=
+  await admin.auth.admin.getUserById(state.authOwnerId)
+ if(authError&&authError.status!==404)
+  throw Error('f16_readonly_auth_verification_unavailable')
+ const path='/v1/billing/subscriptions/'+encodeURIComponent(state.subscriptionId)
+ const sub=await paypal(c,'GET',path)
+ const plan=await paypal(c,'GET','/v1/billing/plans/'+encodeURIComponent(PLAN))
+ return assessF16PendingSandboxReadOnly({
+  savedState:state,subscription:sub,plan,privateIntent,
+  authOwnerExists:!authError&&authUser?.user?.id===state.authOwnerId,
+ })
 }
 // Read-only diagnostic for the SAME local test only, no new purchase or grant.
 // Can be run after cancellation when PayPal transaction listing catches up.
@@ -338,6 +362,11 @@ async function main(){
  if(mode==='--status-readonly'){
   requireConfig(c)
   ok(await statusReadonly(c,load()))
+  return
+ }
+ if(mode==='--diagnose-readonly'){
+  requireConfig(c)
+  ok(await diagnosePending(c,load()))
   return
  }
  if(mode==='--inspect'){
