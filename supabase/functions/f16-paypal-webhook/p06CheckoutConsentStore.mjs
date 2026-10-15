@@ -65,6 +65,25 @@ export function createPazoCheckoutConsentStore({
     termsVersion:x.termsVersion,termsDigest:x.termsDigest,
     planId:PLAN,createdAt:x.createdAt,state:x.state})
   },
+  async readRecoveryForOwner({ownerId,requestKey}={}){
+   if(!UUID.test(ownerId||'')||!UUID.test(requestKey||''))
+    throw Error('pazo_checkout_recovery_lookup_invalid')
+   const x=await rpc('f16_p08_read_checkout_recovery',{
+    p_owner_id:ownerId,p_request_key:requestKey,
+   })
+   if(x===null)return null
+   if(!x||x.ownerId!==ownerId||x.requestKey!==requestKey||
+      !INTENT.test(x.intentId||'')||x.planId!==PLAN||
+      !GOOD.has(x.state)||typeof x.providerCreateClaimed!=='boolean'||
+      (x.state==='pending'&&x.subscriptionId!==null)||
+      (x.state==='bound'&&
+       (x.providerCreateClaimed!==true||
+        !/^I-[A-Za-z0-9_-]{3,70}$/.test(x.subscriptionId||''))))fail()
+   return Object.freeze({ownerId:x.ownerId,requestKey:x.requestKey,
+    intentId:x.intentId,planId:PLAN,state:x.state,
+    providerCreateClaimed:x.providerCreateClaimed,
+    subscriptionId:x.subscriptionId})
+  },
   async claimProviderCreate({ownerId,requestKey,intentId}={}){
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
       !INTENT.test(intentId||''))

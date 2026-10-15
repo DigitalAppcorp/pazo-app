@@ -23,6 +23,9 @@ BEGIN
  OR has_function_privilege('anon','public.f16_p07_claim_provider_create(uuid,uuid,text)','EXECUTE')
  OR has_function_privilege('authenticated','public.f16_p07_claim_provider_create(uuid,uuid,text)','EXECUTE')
  OR NOT has_function_privilege('service_role','public.f16_p07_claim_provider_create(uuid,uuid,text)','EXECUTE')
+ OR has_function_privilege('anon','public.f16_p08_read_checkout_recovery(uuid,uuid)','EXECUTE')
+ OR has_function_privilege('authenticated','public.f16_p08_read_checkout_recovery(uuid,uuid)','EXECUTE')
+ OR NOT has_function_privilege('service_role','public.f16_p08_read_checkout_recovery(uuid,uuid)','EXECUTE')
  OR has_table_privilege('service_role','supporter_private.paypal_p06_checkout_attempts','SELECT')
  THEN RAISE EXCEPTION 'P06 untrusted RPC or table access'; END IF;
  IF (SELECT count(*) FROM pg_class c WHERE
@@ -105,6 +108,14 @@ BEGIN
   (SELECT count(*) FROM supporter_private.paypal_subscription_intents
    WHERE owner_id=owner)!=1
  THEN RAISE EXCEPTION 'P06 same-key idempotency failed'; END IF;
+ -- The recovery RPC reads only the exact matched owner/key; no writes.
+ IF public.f16_p08_read_checkout_recovery(owner,key_a)->>'state'<>'pending'
+ OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimed'<>'false'
+ OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'subscriptionId' IS NOT NULL
+ OR public.f16_p08_read_checkout_recovery(owner,key_b) IS NOT NULL
+ OR public.f16_p08_read_checkout_recovery(
+   '77777777-1111-4111-8111-111111111111',key_a) IS NOT NULL
+ THEN RAISE EXCEPTION 'P08 untrusted/private pending recovery'; END IF;
  -- Before PayPal, a single atomic durable claim across any number of calls.
  -- An incorrect owner/key/intent may never consume the genuine claim.
  IF public.f16_p07_claim_provider_create(owner,key_b,a->>'intentId') THEN
@@ -118,6 +129,9 @@ BEGIN
  IF (SELECT count(*) FROM supporter_private.paypal_p06_checkout_attempts
    WHERE owner_id=owner AND provider_create_claimed_at IS NOT NULL)<>1
  THEN RAISE EXCEPTION 'P07 provider claim not durable'; END IF;
+ IF public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimed'<>'true'
+ OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'subscriptionId' IS NOT NULL
+ THEN RAISE EXCEPTION 'P08 claimed pending recovery invalid'; END IF;
  IF a->>'createdAt' IS NULL OR b->>'createdAt' IS NULL
  THEN RAISE EXCEPTION 'P06 missing durable consent creation date'; END IF;
  BEGIN
@@ -136,6 +150,9 @@ BEGIN
  WHERE intent_id=a->>'intentId';
  IF public.f16_p07_claim_provider_create(owner,key_a,a->>'intentId')
  THEN RAISE EXCEPTION 'P07 bound checkout reclaimed provider create'; END IF;
+ IF public.f16_p08_read_checkout_recovery(owner,key_a)->>'state'<>'bound'
+ OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'subscriptionId'<>'I-P06-SYNTH-BOUND'
+ THEN RAISE EXCEPTION 'P08 recovery did not preserve bound provider ID'; END IF;
  c:=public.f16_p06_begin_checkout(owner,key_a,'es',version,digest,true);
  IF c->>'intentId'<>a->>'intentId' OR c->>'state'<>'bound'
  THEN RAISE EXCEPTION 'P06 repeat bind state not preserved'; END IF;

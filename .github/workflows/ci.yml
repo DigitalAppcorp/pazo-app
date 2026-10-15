@@ -183,4 +183,5 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -c 'SET ROLE postgres;' \
             -f supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql \
+            -f supabase/drafts/f16_p08_read_checkout_recovery_DO_NOT_APPLY.sql \
             -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql
