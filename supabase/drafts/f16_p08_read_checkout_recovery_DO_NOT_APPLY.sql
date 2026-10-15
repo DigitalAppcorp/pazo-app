@@ -25,6 +25,7 @@ AS $read$
   'intentId',i.intent_id,'planId',i.plan_id,
   'state',i.state,
   'providerCreateClaimed',a.provider_create_claimed_at IS NOT NULL,
+  'providerCreateClaimedAt',a.provider_create_claimed_at,
   'subscriptionId',CASE WHEN i.state='bound'
     THEN i.external_subscription_id ELSE NULL END
  )

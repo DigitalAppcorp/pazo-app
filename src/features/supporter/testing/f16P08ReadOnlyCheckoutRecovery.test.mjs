@@ -13,7 +13,8 @@ const PLAN='P-14V25407JP6850922NLHMDKI'
 const request=new Request('https://api.example/recover',{
  headers:{Authorization:'Bearer SYNTHETIC_TOKEN'}})
 const base=()=>({ownerId:OWNER,requestKey:KEY,intentId:INTENT,
- planId:PLAN,state:'bound',providerCreateClaimed:true,subscriptionId:SUB})
+ planId:PLAN,state:'bound',providerCreateClaimed:true,
+ providerCreateClaimedAt:'2026-10-15T12:00:00Z',subscriptionId:SUB})
 function harness(overrides={}){
  const calls=[]
  const api=create({

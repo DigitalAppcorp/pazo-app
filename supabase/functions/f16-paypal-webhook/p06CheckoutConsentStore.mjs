@@ -75,6 +75,10 @@ export function createPazoCheckoutConsentStore({
    if(!x||x.ownerId!==ownerId||x.requestKey!==requestKey||
       !INTENT.test(x.intentId||'')||x.planId!==PLAN||
       !GOOD.has(x.state)||typeof x.providerCreateClaimed!=='boolean'||
+      (x.providerCreateClaimed===true&&
+       (typeof x.providerCreateClaimedAt!=='string'||
+        !Number.isFinite(Date.parse(x.providerCreateClaimedAt))))||
+      (x.providerCreateClaimed===false&&x.providerCreateClaimedAt!==null)||
       (x.state==='pending'&&x.subscriptionId!==null)||
       (x.state==='bound'&&
        (x.providerCreateClaimed!==true||
@@ -82,6 +86,7 @@ export function createPazoCheckoutConsentStore({
    return Object.freeze({ownerId:x.ownerId,requestKey:x.requestKey,
     intentId:x.intentId,planId:PLAN,state:x.state,
     providerCreateClaimed:x.providerCreateClaimed,
+    providerCreateClaimedAt:x.providerCreateClaimedAt,
     subscriptionId:x.subscriptionId})
   },
   async claimProviderCreate({ownerId,requestKey,intentId}={}){
