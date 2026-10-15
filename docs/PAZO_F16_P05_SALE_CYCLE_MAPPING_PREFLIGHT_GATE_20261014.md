@@ -2,6 +2,8 @@
 
 **Fecha:** 14 de octubre de 2026. **Estado:** ensayo offline de integridad para P05; NO constituye aprobación comercial de `cycle_key`, política de recuperación, fechas de servicio o despliegue en Supabase. PR #44 DRAFT.
 
+> **Actualización de aprobación comercial (14-oct-2026, posterior al texto histórico):** el PO **APROBÓ P05-L**: pagos atrasados/recuperados asignados al ciclo **original** que originó deuda solamente con prueba merchant/contractual independiente; nunca añaden automáticamente otro mes, y sin prueba quedan en revisión sin beneficios. El calendario de cobertura requiere límites contractuales verificados, no `payment +30 días`. **No se aprobó íntegramente la implementación P05**: sigue pendiente `cycle_key` efectivo, ancla de fechas/huso, evidencia E2E Auth BOUND y cualquier activación hosted. Fuente canónica: `docs/PAZO_F16_P05_LATE_PAYMENT_POLICY_APPROVED_20261014.md`. Cualquier marca antigua de «P05/política de pagos atrasados no aprobada» en este archivo es una fotografía anterior y queda sustituida **solo en esta dimensión comercial**.
+
 ## Por qué hace falta este control
 
 PayPal permite planes de facturación mensual, reintenta pagos fallidos y puede trasladar saldos impagos al ciclo posterior. La vista actual de `next_billing_time`, `last_payment`, `outstanding_balance` y `failed_payments_count` no demuestra cuál factura/ciclo original recibió una venta concreta. La documentación PayPal señala que el contador de fallos se reinicia tras cobrar correctamente y que un saldo de pago fallido puede agregarse al siguiente ciclo.
