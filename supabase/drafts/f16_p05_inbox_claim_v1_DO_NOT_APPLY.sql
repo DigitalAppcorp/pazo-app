@@ -64,30 +64,27 @@ BEGIN
    AND i.attempt_count < 5
    AND (i.processing_state='pending' OR i.processing_state='processing')
  ORDER BY i.verified_at, i.provider_event_id
- FOR UPDATE OF i SKIP LOCKED
- LIMIT 1;
+ LIMIT 1 FOR UPDATE OF i SKIP LOCKED;
  IF NOT FOUND THEN RETURN NULL; END IF;
 
- RETURN (
-  SELECT pg_catalog.jsonb_build_object(
-   'eventId',i.provider_event_id,
-   'eventType',i.event_type,
-   'verifiedAt',i.verified_at,
-   'processingState',i.processing_state,
-   'attemptCount',i.attempt_count,
-   'leaseToken',i.p05_claim_token,
-   'leaseExpiresAt',i.next_attempt_at
-  )
-  FROM (
-   UPDATE supporter_private.paypal_verified_event_inbox
-     SET processing_state='processing',
-         attempt_count=attempt_count+1,
-         p05_claim_token=pg_catalog.gen_random_uuid(),
-         next_attempt_at=now_at + interval '5 minutes'
-   WHERE provider_event_id=r.provider_event_id
-   RETURNING *
-  ) i
+ UPDATE supporter_private.paypal_verified_event_inbox
+ SET processing_state='processing',
+     attempt_count=attempt_count+1,
+     p05_claim_token=pg_catalog.gen_random_uuid(),
+     next_attempt_at=now_at + interval '5 minutes'
+ WHERE provider_event_id=r.provider_event_id
+ RETURNING provider_event_id,event_type,verified_at,processing_state,
+  attempt_count,p05_claim_token,next_attempt_at INTO r;
+ RETURN pg_catalog.jsonb_build_object(
+   'eventId',r.provider_event_id,
+   'eventType',r.event_type,
+   'verifiedAt',r.verified_at,
+   'processingState',r.processing_state,
+   'attemptCount',r.attempt_count,
+   'leaseToken',r.p05_claim_token,
+   'leaseExpiresAt',r.next_attempt_at
  );
+
 END
 $claim$;
 
