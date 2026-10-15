@@ -91,14 +91,59 @@ async function cancel(c,state){
   return true
  }catch{return false}
 }
+// Read-only diagnostic for the SAME local test only, no new purchase or grant.
+// Can be run after cancellation when PayPal transaction listing catches up.
+async function inspect(c,state){
+ if(!SUB.test(state?.subscriptionId||'')||!state?.intentId||!state?.authOwnerId)
+  throw Error('f16_inspect_no_bound_sandbox_reference')
+ const admin=client(c.service)
+ const {data:bound,error}=await admin.rpc('f16_paypal_read_private_intent',{
+  p_intent_id:state.intentId,
+ })
+ if(error)throw Error('f16_inspect_private_intent_unavailable')
+ const privateBound=bound?.state==='bound'&&
+  bound.owner_id===state.authOwnerId&&
+  bound.external_subscription_id===state.subscriptionId&&
+  bound.plan_id===PLAN
+ const startMs=Date.parse(state.createdAt)
+ const endMs=Date.now()
+ if(!Number.isFinite(startMs)||endMs-startMs>30*24*60*60*1000)
+  throw Error('f16_inspect_window_expired')
+ const path='/v1/billing/subscriptions/'+encodeURIComponent(state.subscriptionId)
+ const sub=await paypal(c,'GET',path)
+ if(sub.id!==state.subscriptionId||sub.plan_id!==PLAN||
+  sub.custom_id!==state.intentId)throw Error('f16_inspect_paypal_mismatch')
+ const start=new Date(startMs-3600000).toISOString().replace(/\.\d{3}Z$/,'Z')
+ const end=new Date(endMs+60000).toISOString().replace(/\.\d{3}Z$/,'Z')
+ const data=await paypal(c,'GET',path+'/transactions?'+new URLSearchParams({
+  start_time:start,end_time:end,
+ }))
+ if(!Array.isArray(data.transactions)||!Number.isSafeInteger(data.total_pages)||
+  !Number.isSafeInteger(data.total_items)||data.total_items!==data.transactions.length||
+  (data.total_pages!==1&&!(data.total_pages===0&&data.total_items===0)))
+  throw Error('f16_inspect_partial_provider_history')
+ const completed=data.transactions.filter(tx=>
+  tx?.status==='COMPLETED'&&
+  tx?.amount_with_breakdown?.gross_amount?.currency_code==='USD'&&
+  tx?.amount_with_breakdown?.gross_amount?.value==='2.99')
+ return {
+  environment:'sandbox',step:'read_only_inspect',
+  merchantScopeVerified:true,privateAuthBindingConfirmed:privateBound,
+  subscriptionCancelled:sub.status==='CANCELLED',
+  completed299SalesObserved:completed.length,
+  transactionWindowOnly:true,
+  financialHistoryComplete:false,cycleVerified:false,
+  mayGrantBenefits:false,paidThrough:null,
+ }
+}
 export async function performF16SandboxE2E(c){
  requireConfig(c)
  if(load())throw Error('f16_existing_test_state_no_duplicate')
- let state={requestId:randomUUID(),phase:'reserved'}
+ let state={requestId:randomUUID(),phase:'reserved',createdAt:new Date().toISOString()}
  save(state,true) // First reservation blocks accidental second purchase on restart.
  const admin=client(c.service),login=client(c.service)
  const reader=createPaypalSandboxSubscriptionReader({clientId:c.id,clientSecret:c.secret})
- const newEmail='pazo-f16-'+randomUUID()+'@example.invalid'
+ const newEmail='pazo-f16-'+randomUUID()+'@example.com'
  const pass='Q9!'+randomBytes(32).toString('base64url')
  let stage='reserved'
  try{
@@ -106,7 +151,7 @@ export async function performF16SandboxE2E(c){
    email:newEmail,password:pass,email_confirm:true,
   })
   if(created.error||!created.data?.user?.id)throw Error('f16_auth_create_failed')
-  stage='auth_created';state={...state,phase:stage};save(state)
+  stage='auth_created';state={...state,phase:stage,authOwnerId:created.data.user.id};save(state)
   const signed=await login.auth.signInWithPassword({email:newEmail,password:pass})
   if(signed.error||signed.data?.user?.id!==created.data.user.id||
    !signed.data.session?.access_token)throw Error('f16_auth_login_failed')
@@ -194,6 +239,11 @@ async function main(){
    supabaseServerSecretConfigured:valid(c.service),
    previousTestExists:Boolean(load()),
    mayGrantBenefits:false})
+  return
+ }
+ if(mode==='--inspect'){
+  requireConfig(c);const state=load()
+  ok(await inspect(c,state))
   return
  }
  if(mode==='--cancel-only'){
