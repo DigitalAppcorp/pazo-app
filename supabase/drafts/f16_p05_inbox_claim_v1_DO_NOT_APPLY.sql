@@ -244,12 +244,12 @@ COMMIT;
 
  THEN RETURN false; END IF;
  IF p_outcome='retry' THEN
-  IF p_reason_code NOT IN (
+  IF p_reason_code IS NULL OR p_reason_code NOT IN (
    'merchant_unavailable','read_unavailable','temporarily_incomplete')
   THEN RAISE EXCEPTION 'p05_finish_reason_not_allowed'
    USING ERRCODE='22023'; END IF;
  ELSIF p_outcome='review' THEN
-  IF p_reason_code NOT IN (
+  IF p_reason_code IS NULL OR p_reason_code NOT IN (
    'foreign_reference','missing_evidence','reversal_possible',
    'cycle_unproven','manual_review')
   THEN RAISE EXCEPTION 'p05_finish_reason_not_allowed'
