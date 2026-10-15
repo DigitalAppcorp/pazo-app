@@ -15,6 +15,8 @@ $g$;
 CREATE TABLE supporter_private.paypal_subscription_intents (
  intent_id text PRIMARY KEY,
  owner_id uuid NOT NULL,
+ provider text NOT NULL DEFAULT 'paypal',
+ bound_at timestamptz,
  plan_id text NOT NULL,
  state text NOT NULL CHECK(state IN ('pending','bound')),
  external_subscription_id text UNIQUE
