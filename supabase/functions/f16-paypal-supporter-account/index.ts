@@ -87,11 +87,11 @@ Deno.serve(async(request:Request)=>{
   const headers=(request.headers.get('access-control-request-headers')||'')
    .split(',').map(x=>x.trim().toLowerCase()).filter(Boolean)
   if(request.headers.get('access-control-request-method')!=='POST'||
-     headers.some(h=>!['authorization','content-type'].includes(h)))
+     headers.some(h=>!['authorization','content-type','apikey'].includes(h)))
    return addCors(reply(403,'preflight_not_allowed'))
   return new Response(null,{status:204,headers:{...cors,
    'access-control-allow-methods':'POST',
-   'access-control-allow-headers':'authorization, content-type',
+   'access-control-allow-headers':'authorization, content-type, apikey',
    'access-control-max-age':'600'}})
  }
  if(request.method!=='POST')return addCors(reply(405,'method_not_allowed'))

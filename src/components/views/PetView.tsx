@@ -7,6 +7,7 @@ import { ModerationAccess } from '../../features/moderation/ModerationAccess'
 import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
 import { SupporterThemePreviewPanel } from '../../features/supporter/components/SupporterThemePreviewPanel'
 import { GratitudeParticipationPreview } from '../../features/supporter/components/GratitudeParticipationPreview'
+import { SupporterAccountManagement } from '../../features/supporter/components/SupporterAccountManagement'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
@@ -68,6 +69,8 @@ export const PetView = ({
   const [showSupporterThemePreview, setShowSupporterThemePreview] = useState(false)
   const supporterPreviewEntryRef = useRef<HTMLButtonElement>(null)
   const [showGratitudeParticipation, setShowGratitudeParticipation] = useState(false)
+  const [showSupporterAccount, setShowSupporterAccount] = useState(false)
+  const supporterAccountEntryRef = useRef<HTMLButtonElement>(null)
   const gratitudeParticipationEntryRef = useRef<HTMLButtonElement>(null)
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
@@ -654,6 +657,22 @@ export const PetView = ({
           </h3>
           <ModerationAccess enabled={canModerate} lang={lang} />
 
+          {canManagePet && (
+            <button ref={supporterAccountEntryRef} type="button"
+              onClick={() => setShowSupporterAccount(true)}
+              className="flex w-full items-center justify-between rounded-[2rem] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F5F7EE] focus-visible:bg-[#E1E53F]/30">
+              <span className="min-w-0">
+                <span className="block text-[16px] font-extrabold text-[#204E4A]">
+                  {lang === 'es' ? 'Gestionar Amigo de PAZO' : 'Manage Friend of PAZO'}
+                </span>
+                <span className="block text-[12px] font-medium text-[#5C7470]">
+                  {lang === 'es' ? 'Estado, cancelar renovación y aceptación' : 'Status, cancel renewal and acceptance'}
+                </span>
+              </span>
+              <span aria-hidden="true" className="ml-2 text-xl font-extrabold text-[#5C7470]">›</span>
+            </button>
+          )}
+
           {/* Discoverable under Mi mascota, not a secret link, fake entitlement or Settings item. */}
           <button
             ref={supporterPreviewEntryRef}
@@ -822,6 +841,12 @@ export const PetView = ({
             </p>
           </div>
         </div>
+      )}
+      {showSupporterAccount && (
+        <SupporterAccountManagement lang={lang} onClose={() => {
+          setShowSupporterAccount(false)
+          supporterAccountEntryRef.current?.focus()
+        }} />
       )}
       {showSupporterThemePreview && (
         <SupporterThemePreviewPanel
