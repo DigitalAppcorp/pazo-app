@@ -2,6 +2,7 @@
 // Input from server-side PRIVATE sources only. Never a bind/write/entitlement.
 // Output is deliberately sanitized: no owner, intent, subscription, token,
 // URL, payer, email or raw provider data. No implicit month/coverage credit.
+import {assessPazoSandboxPlan} from '../../../src/features/supporter/testing/paypalSandboxPlanContract.mjs'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const statusSet=new Set(['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'])
@@ -30,7 +31,8 @@ export function assessF16PendingSandboxReadOnly({
   subscriptionIdMatches:false,subscriptionPlanMatches:false,
   customIdMatches:false,privateIntentPending:false,privateIntentOwnerMatches:false,
   authOwnerExists:authOwnerExists===true,
-  plan299MonthlyConsistent:false,planOverrideExplicitlyFalse:false,
+  plan299MonthlyConsistent:false,planTermIssueCodes:[],
+  planValidator:'canonical_sandbox_plan_contract',planOverrideExplicitlyFalse:false,
   quantityOneExplicit:false,quantityReported:false,
   approvalLinkSignal:approvalLinkSignal(subscription?.links),
   couldCompletePreapprovalChecks:false,
@@ -50,20 +52,28 @@ export function assessF16PendingSandboxReadOnly({
   privateIntent?.owner_id===savedState.authOwnerId&&
   privateIntent?.plan_id===PLAN&&
   privateIntent?.external_subscription_id===null
- const cycles=plan?.billing_cycles
- const cycle=Array.isArray(cycles)&&cycles.length===1?cycles[0]:null
- const fixed=cycle?.pricing_scheme?.fixed_price
- result.plan299MonthlyConsistent=
-  plan?.id===PLAN&&plan?.status==='ACTIVE'&&
-  cycle?.tenure_type==='REGULAR'&&
-  cycle?.frequency?.interval_unit==='MONTH'&&
-  Number(cycle?.frequency?.interval_count)===1&&
-  Number(cycle?.total_cycles)===0&&
-  fixed?.currency_code==='USD'&&fixed?.value==='2.99'&&
-  (plan?.payment_preferences?.setup_fee===undefined||
-   (plan.payment_preferences.setup_fee?.currency_code==='USD'&&
-    ['0','0.00'].includes(plan.payment_preferences.setup_fee.value)))&&
-  plan?.quantity_supported!==true
+ // Keep the exact same currency/period/fee semantics as the operator's
+ // remote preflight. Earlier forensic logic used a stricter string equality
+ // for zero setup fee and could disagree with an already-PASS canonical plan.
+ // Return ONLY issue code enums; NEVER the raw merchant plan or pricing.
+ const planResult=assessPazoSandboxPlan(plan)
+ const allowedIssues=new Set([
+  'invalid_response','plan_id_mismatch','plan_not_active',
+  'unexpected_billing_cycles_or_trial','not_monthly',
+  'finite_billing_cycles','price_not_usd_2_99',
+  'nonzero_or_unknown_setup_fee','quantity_supported_review',
+  'tax_configuration_review','quantity_supported_not_false',
+ ])
+ const issues=[
+  ...planResult.issues,...planResult.warnings,
+  ...(plan?.quantity_supported===true?[]:
+   plan?.quantity_supported===false||plan?.quantity_supported===undefined?[]:
+   ['quantity_supported_not_false']),
+ ].filter(issue=>allowedIssues.has(issue))
+ result.planTermIssueCodes=issues
+ result.plan299MonthlyConsistent=planResult.ok&&
+  planResult.warnings.length===0&&
+  (plan?.quantity_supported===false||plan?.quantity_supported===undefined)
  result.planOverrideExplicitlyFalse=subscription?.plan_overridden===false
  result.quantityReported=subscription?.quantity!==undefined&&
   subscription?.quantity!==null
