@@ -4,9 +4,11 @@
 // The actual PayPal event -> subscription -> BOUND intent bridge is NOT wired.
 const REF=/^[A-Za-z0-9._-]{3,128}$/
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-const UTC=/^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?Z$/
+// PostgreSQL jsonb_build_object(timestamptz) uses +00:00 and can retain
+// microseconds; PayPal's ISO timestamps may instead end with Z.
+const UTC=/^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,6})?(?:Z|\+00:00)$/
 const isUtc=s=>typeof s==='string'&&UTC.test(s)&&Number.isFinite(Date.parse(s))&&
- [new Date(s).toISOString(),new Date(s).toISOString().replace(/\.000Z$/,'Z')].includes(s)
+ new Date(s).toISOString().slice(0,19)===s.slice(0,19)
 const exactly=(v,keys)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
  Object.keys(v).sort().join('|')===keys.slice().sort().join('|')
 const CLAIM=['eventId','eventType','verifiedAt','processingState','attemptCount',
