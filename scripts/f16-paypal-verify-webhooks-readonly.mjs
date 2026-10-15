@@ -40,8 +40,10 @@ async function main() {
     },stage)
     const result=assessPazoSandboxWebhooks(response)
     console.log(JSON.stringify({environment:'sandbox',...result},null,2))
-    // Complete event subscriptions are necessary but NOT evidence of reachable endpoints.
-    if(!result.ok) process.exitCode=1
+    // Sale webhooks alone cannot establish financial history: disputes need
+    // separate events and future end-to-end handling/retention approval.
+    // A nonzero exit blocks financial reconciliation, not free PAZO features.
+    if(!result.ok || !result.financialReconciliationReady) process.exitCode=1
   } catch (err) {
     const msg=err instanceof Error && /^HTTP [0-9]{3}(?: \((?:invalid_client|invalid_request|unauthorized_client|invalid_grant|unsupported_grant_type|temporarily_unavailable)\))?$/.test(err.message) ? err.message : 'request_failed'
     console.error('BLOCKED: PayPal Sandbox '+stage+' failed: '+msg)
