@@ -1,6 +1,6 @@
 // PAZO F16-P05 — proposed sale-to-cycle mapping audit, OFFLINE ONLY.
 // Not a source of PayPal truth or a grant/revoke/paid-through mechanism.
-// P05 cycle anchor, delinquency mapping and benefit rules remain unapproved.
+// PO approved delinquency policy; proof, exact cycle anchor and hosted activation remain pending.
 const ID=/^[A-Za-z0-9._-]{3,128}$/
 const CYCLE=/^[A-Za-z0-9._:-]{3,128}$/
 const UTC=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/
@@ -88,7 +88,7 @@ export function auditF16P05ProposedCycleMapping({
  if(unresolved)return deny('sale_or_cycle_origin_evidence_missing',{
   candidateCount:complete,uncertainCount:unresolved,
  })
- if(recovered)return deny('recovered_payment_cycle_policy_unapproved',{
+ if(recovered)return deny('recovered_payment_requires_verified_original_cycle',{
   candidateCount:complete,nonregularCount:recovered,
  })
  if(observedSales.length>complete)
@@ -96,7 +96,8 @@ export function auditF16P05ProposedCycleMapping({
    candidateCount:complete,unmappedSaleCount:observedSales.length-complete,
   })
  // Even entirely consistent proposals do NOT establish merchant settlement
- // allocation: the authoritative cycle proof & legal policy remain pending.
+ // allocation. Commercial policy is PO-approved; authoritative cycle
+ // provenance, calendar anchor and deployment gate remain unverified.
  return deny('cycle_proposals_consistent_not_authorized',{
   candidateCount:complete,
  })
