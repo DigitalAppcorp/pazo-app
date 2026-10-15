@@ -135,7 +135,8 @@ test('read-only merchant adapter joins private scope only with an existing payme
    assert.equal(sellerTransactionId,SALE)
    return ledgerPresent?payment:null
   },
-  readPrivateBoundIntentBySubscription:async({subscriptionId})=>{
+  readPrivateBoundIntentBySubscription:async({subscriptionId,expectedOwnerId})=>{
+   assert.equal(expectedOwnerId,payment.ownerId)
    ownerReads++
    assert.equal(subscriptionId,payment.externalSubscriptionId)
    return {subscriptionId,ownerId:payment.ownerId,
