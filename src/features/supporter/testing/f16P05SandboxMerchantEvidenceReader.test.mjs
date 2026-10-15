@@ -230,3 +230,36 @@ test('token and provider failures never emit raw provider body or secrets',async
   /sandbox_read_only_auth_invalid/)
  assert.equal(c.calls.length,1)
 })
+
+test('external fetch errors cannot leak a secret into worker diagnostics',async()=>{
+ const reader=create({
+  clientId:'PAYPAL_TEST_ID',clientSecret:'PAYPAL_TEST_SECRET',
+  windowStart:'2026-10-15T02:03:31Z',windowEnd:'2026-10-15T04:00:00Z',
+  readTrustedBoundIntent:async()=>({id:INTENT,ownerId:OWNER,state:'bound',
+   provider:'paypal',subscriptionId:SID,planId:PLAN}),
+  readTrustedInboxRefs:async()=>[{id:EID,type:'PAYMENT.SALE.COMPLETED',
+   verifiedAt:authTime,processingState:'processing'}],
+  fetchImpl:async()=>{throw Error('private@example.com:SECRET_PAYPAL_TOKEN')},
+ })
+ await assert.rejects(reader.inspect({intentId:INTENT,saleEventId:EID}),
+  e=>e.message==='paypal_read_only_transport_unavailable')
+})
+test('private intent/inbox read exceptions never disclose internal details',async()=>{
+ const base={
+  clientId:'PAYPAL_TEST_ID',clientSecret:'PAYPAL_TEST_SECRET',
+  windowStart:'2026-10-15T02:03:31Z',windowEnd:'2026-10-15T04:00:00Z',
+  readTrustedBoundIntent:async()=>({id:INTENT,ownerId:OWNER,state:'bound',
+   provider:'paypal',subscriptionId:SID,planId:PLAN}),
+  readTrustedInboxRefs:async()=>[{id:EID,type:'PAYMENT.SALE.COMPLETED',
+   verifiedAt:authTime,processingState:'processing'}],
+  fetchImpl:async()=>({ok:false}),
+ }
+ const first=create({...base,readTrustedBoundIntent:async()=>{
+  throw Error('private@example.com:ACCOUNT_TOKEN')}})
+ await assert.rejects(first.inspect({intentId:INTENT,saleEventId:EID}),
+  e=>e.message==='private_bound_intent_read_unavailable')
+ const second=create({...base,readTrustedInboxRefs:async()=>{
+  throw Error('private@example.com:ACCOUNT_TOKEN')}})
+ await assert.rejects(second.inspect({intentId:INTENT,saleEventId:EID}),
+  e=>e.message==='private_signed_inbox_read_unavailable')
+})
