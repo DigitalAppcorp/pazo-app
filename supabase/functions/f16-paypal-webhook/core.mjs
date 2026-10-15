@@ -124,7 +124,7 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
           return reply(503,'dispute_scope_unavailable',300)
         let scope
         try {scope=await assessTrustedDisputeScope({
-          eventId:event.id,eventType:event.event_type,event,
+          eventId:event.id,eventType:event.event_type,
         })} catch {return reply(503,'dispute_scope_unavailable',300)}
         // 'outside_pazo' MUST be provider+private-ledger attested, not a
         // caller-supplied flag; otherwise retry without ACK or storage.
