@@ -75,15 +75,26 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
       const list=await readJson(fetchImpl,endpoint+'/transactions?'+params,{
         method:'GET',headers,
       })
-      // Do not trust a partial page as a complete statement of payment/reversal.
+      // PayPal may omit total_pages/total_items. Never infer global
+      // financial coverage from a single response or from missing totals.
+      // A next-page link is an explicit indication that this read is partial.
       if(!Array.isArray(list.transactions) || list.transactions.length>500 ||
-        !Number.isInteger(list.total_pages) || !Number.isInteger(list.total_items) ||
-        list.total_pages<0 || list.total_items<0 ||
-        (list.total_pages!==1 &&
-          !(list.total_pages===0 && list.total_items===0 &&
-            list.transactions.length===0)) ||
-        list.total_items!==list.transactions.length)
+        (list.total_pages!==undefined &&
+          (!Number.isInteger(list.total_pages) || list.total_pages<0)) ||
+        (list.total_items!==undefined &&
+          (!Number.isInteger(list.total_items) || list.total_items<0)) ||
+        (list.links!==undefined && (!Array.isArray(list.links) ||
+          list.links.some(link=>!link || typeof link!=='object' ||
+            typeof link.rel!=='string'))) ||
+        list.links?.some(link=>link.rel.toLowerCase()==='next') ||
+        (list.total_pages!==undefined && list.total_pages!==1 &&
+          !(list.total_pages===0 && list.transactions.length===0 &&
+            (list.total_items===undefined || list.total_items===0))) ||
+        (list.total_items!==undefined &&
+          list.total_items!==list.transactions.length))
         throw Error('incomplete_transaction_history')
+      const paginationMetadataComplete=
+        list.total_pages!==undefined && list.total_items!==undefined
       // Provider statements must never contain conflicting or ambiguous IDs.
       // Dropping a duplicate silently could make a sale appear valid.
       const ids=list.transactions.map(tx=>tx?.id)
@@ -94,6 +105,9 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
       return {
         lookupSubscriptionId:subscriptionId,
         merchantScopedByPayPalApi:true, // evidence of successful merchant-app scoped reads, NOT paid-period proof
+        paginationMetadataComplete,
+        globalFinancialCoverage:false,
+        mayGrantBenefits:false,
         subscription:{id:subscription.id,plan_id:subscription.plan_id,
           custom_id:subscription.custom_id,status:subscription.status},
         transactions:list.transactions.map(tx=>({
