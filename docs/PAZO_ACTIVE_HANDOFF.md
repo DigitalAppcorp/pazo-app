@@ -2,6 +2,12 @@
 
 **Autoridad:** Product Owner (PO). Modo Project Brain OS `DigitalAppcorp/project-brain-os` v1.4.1. Producto `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, [PR #44](https://github.com/DigitalAppcorp/pazo-app/pull/44) DRAFT. **F16 EN CURSO / beta de pagos NO-GO.** El snapshot es autoritativo frente a banners antiguos de `docs/PAZO_MASTER_ROADMAP.md`; historial completo del handoff anterior disponible en [Git](https://github.com/DigitalAppcorp/pazo-app/blob/17389a6659c7f6ff6721ef34a127332e45d22a61/docs/PAZO_ACTIVE_HANDOFF.md). No asumir que pruebas offline = backend aplicado, ni que este HEAD está merged o desplegado. Estado del checkout público deshabilitado/no habilitado para beta de pagos; no cambiar.
 
+## F16-P11 — AUDITORÍA REAL HOSTED Y SIGUIENTE GO (2026-10-15)
+
+- **PO «0o sigue»:** se auditó Supabase **SOLO READ-ONLY** en `mrybvqdebbgcayuvgkkr`; PostgreSQL 17.11 activo. Conteos reales: 1 intent (BOUND), 8 inbox PENDING, 0 entradas ledger y 0 reversos. Catalog: P06 offers/attempts NO instaladas; P10 RPC NO instalada. Core RPC financieras verificadas sin EXECUTE anon/auth. Edge `f16-paypal-webhook` ACTIVE v13, no worker; también existe `paypal-webhook` v35 independiente (no tocar). Versiones alojadas F16 base 20261013/20261014, no P06–P10. Ningún efecto de escritura ni PayPal.
+- Nuevo `supabase/queries/f16_p11_hosted_payment_readiness_READ_ONLY.sql`, con prueba Node `f16P11HostedPaymentReadiness.test.mjs`, contiene solo conteos y catálogo sin IDs ni PII y estado `mayGrantBenefits=false`. Verificado vía SQL real de consultas equivalentes, **no** activa checkout.
+- **Siguiente GO que importa:** preparar versión instalable P06–P10 únicamente tras términos ES/EN definitivos, revisión de retención/legal P01–P09 y permiso PO **explícito de migración Sandbox**; Edge OFF y test E2E buyer requieren autorizaciones aparte. No repetir 8 eventos QA ni crear otro trabajo de simulación como sustituto de cobro funcional. PR #44 DRAFT, Live/beneficios NO-GO. Documento `docs/PAZO_F16_P11_HOSTED_READINESS_GATE_20261015.md`.
+
 ## F16-P10 — RECOVERED BINDING ATÓMICO LAB, CI + POSTGRES PASS (2026-10-15)
 
 - **PO «ok sigue»:** aprobado avanzar SOLO código/pruebas en PR #44 rama `f13/section-titles-20261012`, NO migrar SQL hosted, desplegar Edge, crear buyer/subscripciones, reproducir QA histórico, conceder benefits, Live ni fusionar el PR. [Commit técnico `e469bf3`](https://github.com/DigitalAppcorp/pazo-app/commit/e469bf3223c4fdc131348eddbbd89f2c81cd14e4), **CI general SUCCESS + F16 Disposable PostgreSQL Lab SUCCESS**.
