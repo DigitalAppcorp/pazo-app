@@ -27,6 +27,18 @@ BEGIN
 END;
 $p05_disposable_only$;
 
+-- Strengthen parent-table references without duplicating ledger or inbox.
+-- These redundant composite UNIQUE constraints enable declarative composite
+-- FKs that block cross-subscription sale IDs and wrong event types.
+-- They alter parent tables ONLY inside disposable SQL; future hosted rollout
+-- requires a separate index/lock/idempotency review and explicit PO GO.
+ALTER TABLE supporter_private.paypal_payment_entries
+  ADD CONSTRAINT paypal_payment_entries_p05_sale_subscription_key
+  UNIQUE (external_payment_id, external_subscription_id);
+ALTER TABLE supporter_private.paypal_verified_event_inbox
+  ADD CONSTRAINT paypal_verified_event_inbox_p05_event_type_key
+  UNIQUE (provider_event_id, event_type);
+
 -- One pre-PayPal purchase acknowledgement per pending private intent.
 -- The backend MUST verify Auth ownership against intent.owner_id before insert.
 -- Do not FK to auth.users with CASCADE: consent evidence may need to outlive
@@ -64,9 +76,13 @@ CREATE TABLE supporter_private.paypal_activation_schedule_evidence (
   external_subscription_id text PRIMARY KEY
     REFERENCES supporter_private.paypal_subscription_intents
       (external_subscription_id) ON DELETE RESTRICT,
-  activation_event_id text NOT NULL UNIQUE
+  activation_event_id text NOT NULL UNIQUE,
+  activation_event_type text NOT NULL DEFAULT 'BILLING.SUBSCRIPTION.ACTIVATED'
+    CHECK (activation_event_type = 'BILLING.SUBSCRIPTION.ACTIVATED'),
+  CONSTRAINT p05_activation_event_type_fk
+    FOREIGN KEY (activation_event_id, activation_event_type)
     REFERENCES supporter_private.paypal_verified_event_inbox
-      (provider_event_id) ON DELETE RESTRICT,
+      (provider_event_id, event_type) ON DELETE RESTRICT,
   activated_at timestamptz NOT NULL,
   merchant_observed_at timestamptz NOT NULL,
   observed_next_billing_at timestamptz NOT NULL,
@@ -87,12 +103,18 @@ CREATE TABLE supporter_private.paypal_first_period_reviews (
   external_subscription_id text PRIMARY KEY
     REFERENCES supporter_private.paypal_activation_schedule_evidence
       (external_subscription_id) ON DELETE RESTRICT,
-  external_payment_id text NOT NULL UNIQUE
+  external_payment_id text NOT NULL UNIQUE,
+  CONSTRAINT p05_sale_matches_subscription_fk
+    FOREIGN KEY (external_payment_id, external_subscription_id)
     REFERENCES supporter_private.paypal_payment_entries
-      (external_payment_id) ON DELETE RESTRICT,
-  sale_event_id text NOT NULL UNIQUE
+      (external_payment_id, external_subscription_id) ON DELETE RESTRICT,
+  sale_event_id text NOT NULL UNIQUE,
+  sale_event_type text NOT NULL DEFAULT 'PAYMENT.SALE.COMPLETED'
+    CHECK (sale_event_type = 'PAYMENT.SALE.COMPLETED'),
+  CONSTRAINT p05_sale_event_type_fk
+    FOREIGN KEY (sale_event_id, sale_event_type)
     REFERENCES supporter_private.paypal_verified_event_inbox
-      (provider_event_id) ON DELETE RESTRICT,
+      (provider_event_id, event_type) ON DELETE RESTRICT,
   candidate_start_at timestamptz NOT NULL,
   candidate_end_exclusive_at timestamptz NOT NULL,
   review_state text NOT NULL DEFAULT 'requires_review'
