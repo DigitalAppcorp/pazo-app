@@ -49,6 +49,8 @@ test('pending subscription evidence may look consistent but never permits bind, 
  assert.equal(r.couldCompletePreapprovalChecks,true)
  assert.equal(r.approvalLinkSignal,'sandbox_get')
  assert.equal(r.plan299MonthlyConsistent,true)
+ assert.deepEqual(r.planTermIssueCodes,[])
+ assert.equal(r.planValidator,'canonical_sandbox_plan_contract')
  assert.equal(r.planOverrideExplicitlyFalse,true)
  assert.equal(r.quantityOneExplicit,true)
  assert.equal(r.privateIntentPending,true)
@@ -127,5 +129,37 @@ test('missing or corrupted saved private references never produces a positive re
   const r=scan(x)
   assert.equal(r.reason,'incomplete_local_reference')
   assert.equal(r.couldCompletePreapprovalChecks,false)
+ }
+})
+
+
+test('forensic plan criteria exactly match preflight when PayPal represents a zero fee as 0.0 or 0',()=>{
+ for(const zero of ['0','0.0','0.00']){
+  const x=example()
+  x.plan.payment_preferences.setup_fee.value=zero
+  const r=scan(x)
+  assert.equal(r.plan299MonthlyConsistent,true)
+  assert.deepEqual(r.planTermIssueCodes,[])
+  assert.equal(r.couldCompletePreapprovalChecks,true)
+ }
+})
+test('forensic reasons are static error enums, never raw provider price or PII',()=>{
+ const cases=[
+  [x=>x.plan.billing_cycles[0].pricing_scheme.fixed_price.value='9.99','price_not_usd_2_99'],
+  [x=>x.plan.payment_preferences.setup_fee.value='1.00','nonzero_or_unknown_setup_fee'],
+  [x=>x.plan.billing_cycles[0].total_cycles=2,'finite_billing_cycles'],
+  [x=>x.plan.quantity_supported=true,'quantity_supported_review'],
+  [x=>x.plan.quantity_supported='true','quantity_supported_not_false'],
+  [x=>x.plan.taxes={percentage:'7.00'},'tax_configuration_review'],
+  [x=>x.plan.billing_cycles[0].frequency.interval_unit='WEEK','not_monthly'],
+ ]
+ for(const [mutate,reason] of cases){
+  const x=example();mutate(x)
+  const r=scan(x)
+  assert.equal(r.couldCompletePreapprovalChecks,false)
+  assert.equal(r.plan299MonthlyConsistent,false)
+  assert.ok(r.planTermIssueCodes.includes(reason),reason)
+  assert.ok(r.planTermIssueCodes.every(z=>typeof z==='string'&&/^[a-z_]+$/.test(z)))
+  assert.equal(JSON.stringify(r).includes('9.99'),false)
  }
 })
