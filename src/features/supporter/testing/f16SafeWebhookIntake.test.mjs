@@ -150,7 +150,8 @@ test('confirmed PAZO dispute minimal evidence is queued only after signature',as
  for(const eventType of disputeTypes){
   const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
    disputeCaptureApproved:true,
-   assessTrustedDisputeScope:async({eventId,eventType:type})=>{
+   assessTrustedDisputeScope:async({eventId,eventType:type,...unexpected})=>{
+    assert.deepEqual(unexpected,{}) // no raw webhook, payer or dispute payload
     assert.equal(eventId,'WH-DISPUTE-111')
     assert.equal(type,eventType)
     return 'confirmed_pazo'
