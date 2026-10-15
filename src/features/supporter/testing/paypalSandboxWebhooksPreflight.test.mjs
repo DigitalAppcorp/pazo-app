@@ -1,13 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { PAZO_REQUIRED_PAYPAL_EVENTS } from './paypalSandboxWebhookContract.mjs'
+import { PAZO_REQUIRED_PAYPAL_EVENTS,
+ PAZO_REQUIRED_PAYPAL_DISPUTE_EVENTS } from './paypalSandboxWebhookContract.mjs'
 
 const ID='offline_client_id'
 const SECRET='offline_client_secret'
 function run(mode) {
   const fixture={webhooks:[{id:'WH-TEST123',url:'https://example.com/paypal/events',
-    event_types:PAZO_REQUIRED_PAYPAL_EVENTS.map(name=>({name}))}]}
+    event_types:[...PAZO_REQUIRED_PAYPAL_EVENTS,
+      ...(mode==='ready_complete'?PAZO_REQUIRED_PAYPAL_DISPUTE_EVENTS:[])].map(name=>({name}))}]}
   const stub=[
     'const mode = '+JSON.stringify(mode)+';',
     'const fixture = '+JSON.stringify(fixture)+';',
@@ -33,11 +35,19 @@ function run(mode) {
   assert.equal((r.stdout+r.stderr).includes('example.com'),false,'webhook URL must not be printed')
   return r
 }
-test('reports existing webhook configuration using only offline mocks',()=>{
+test('sale subscriptions may be configured yet dispute coverage blocks finance',()=>{
   const r=run('ready')
-  assert.equal(r.status,0,r.stderr)
+  assert.equal(r.status,1,r.stderr)
   assert.match(r.stdout,/"subscriptions_configured"/)
+  assert.match(r.stdout,/"financialReconciliationReady": false/)
+  assert.match(r.stdout,/"CUSTOMER.DISPUTE.CREATED"/)
   assert.match(r.stdout,/"webhookId": "WH-TEST123"/)
+})
+test('the read-only preflight returns success only with matching dispute coverage',()=>{
+  const r=run('ready_complete')
+  assert.equal(r.status,0,r.stderr)
+  assert.match(r.stdout,/"financialReconciliationReady": true/)
+  assert.match(r.stdout,/"subscriptions_configured"/)
 })
 test('distinguishes missing webhook from PayPal authentication error',()=>{
   const empty=run('no_hooks')
