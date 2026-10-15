@@ -21,11 +21,18 @@ const validEventTypes=new Set([
 ])
 const invalid=reason=>{throw Error(reason)}
 async function readJson(fetchImpl,url,opts){
- const response=await fetchImpl(url,{
-  ...opts,redirect:'error',signal:AbortSignal.timeout(12000),
- })
+ let response
+ try{
+  response=await fetchImpl(url,{
+   ...opts,redirect:'error',signal:AbortSignal.timeout(12000),
+  })
+ }catch{
+  invalid('paypal_read_only_transport_unavailable')
+ }
  if(!response?.ok)invalid('paypal_read_only_http_unavailable')
- const json=await response.json()
+ let json
+ try{json=await response.json()}
+ catch{invalid('paypal_read_only_json_invalid')}
  if(!json||typeof json!=='object'||Array.isArray(json))
   invalid('paypal_read_only_json_invalid')
  return json
@@ -73,7 +80,9 @@ export function createP05SandboxMerchantEvidenceReader({
     invalid('server_scoped_refs_invalid')
    // Resolve all merchant identifiers from the private internal worker scope.
    // A browser-controlled subscriptionId never chooses the PayPal account.
-   const intent=await readTrustedBoundIntent({intentId})
+   let intent
+   try{intent=await readTrustedBoundIntent({intentId})}
+   catch{invalid('private_bound_intent_read_unavailable')}
    if(!intent||intent.id!==intentId||intent.state!=='bound'||
     intent.provider!=='paypal'||!UUID.test(intent.ownerId||'')||
     !SUB.test(intent.subscriptionId||'')||!REF.test(intent.planId||''))
@@ -81,7 +90,9 @@ export function createP05SandboxMerchantEvidenceReader({
    const subscriptionId=intent.subscriptionId
    // Only an internal authenticated service-owned inbox reader supplies refs.
    // Browser-supplied signature flags are never accepted.
-   const inboxEventRefs=await readTrustedInboxRefs({intentId,subscriptionId,saleEventId})
+   let inboxEventRefs
+   try{inboxEventRefs=await readTrustedInboxRefs({intentId,subscriptionId,saleEventId})}
+   catch{invalid('private_signed_inbox_read_unavailable')}
    if(!Array.isArray(inboxEventRefs)||inboxEventRefs.length>20||
     inboxEventRefs.some(x=>!x||!REF.test(x.id||'')||
       !validEventTypes.has(x.type)||!utc(x.verifiedAt)||
