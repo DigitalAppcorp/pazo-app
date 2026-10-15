@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "f16-p05-retention-decision-register-v1",
+  "environment": "sandbox",
+  "effect": "DRAFT_REVIEW_ONLY",
+  "review": {
+    "legal": "pending",
+    "taxAccounting": "pending",
+    "privacy": "pending",
+    "productOwnerClassApproval": "pending",
+    "providerBackups": "pending"
+  },
+  "records": [
+    {
+      "code": "P01",
+      "category": "affirmative_renewal_consent",
+      "purpose": "demonstrate offer version and explicit affirmative consent",
+      "scope": "pazo_only",
+      "minimum": "ca_bpc_17602_a6_if_applicable",
+      "durationDecision": "conditional_minimum_identified",
+      "hold": "contract_open_or_claim_active",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P02",
+      "category": "sale_and_accounting_ledger",
+      "purpose": "financial integrity and tax substantiation",
+      "scope": "pazo_only",
+      "minimum": "tax_and_claim_specific_review",
+      "durationDecision": "pending",
+      "hold": "unsettled_payment_or_claim",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P03",
+      "category": "dispute_and_reversal_evidence",
+      "purpose": "verify merchant case and prevent incorrect credits",
+      "scope": "pazo_attributed_only",
+      "minimum": "case_and_provider_retention_review",
+      "durationDecision": "pending",
+      "hold": "dispute_or_claim_open",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P04",
+      "category": "signed_minimal_event_inbox",
+      "purpose": "signed webhook deduplication and auditable reconciliation",
+      "scope": "pazo_only",
+      "minimum": "distinct_from_ledger_ttl",
+      "durationDecision": "pending",
+      "hold": "retention_hold_or_unreconciled_event",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P05",
+      "category": "sanitized_operational_logs",
+      "purpose": "security and reliability with no payer data",
+      "scope": "no_pii",
+      "minimum": "operational_ttl_review",
+      "durationDecision": "pending",
+      "hold": "documented_incident_hold",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P06",
+      "category": "privacy_request_and_response_records",
+      "purpose": "demonstrate privacy request compliance if relevant law applies",
+      "scope": "request_metadata_only",
+      "minimum": "ccpa_11_ccr_7101_if_applicable",
+      "durationDecision": "conditional_minimum_identified",
+      "hold": "open_request_or_regulatory_hold",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P07",
+      "category": "backups_and_account_deletion",
+      "purpose": "controlled restoration and deletion without reactivating erased accounts",
+      "scope": "minimized_restore_data",
+      "minimum": "provider_backup_review",
+      "durationDecision": "pending",
+      "hold": "lawful_preservation_only",
+      "erasure": "manual_class_review_only"
+    },
+    {
+      "code": "P09",
+      "category": "immutable_offer_acknowledgment_and_notices",
+      "purpose": "reconstruct offer, cancellation and notice delivered to buyer",
+      "scope": "pazo_only",
+      "minimum": "contractual_and_renewal_law_review",
+      "durationDecision": "pending",
+      "hold": "contract_or_claim_open",
+      "erasure": "manual_class_review_only"
+    }
+  ],
+  "controls": {
+    "disputeCaptureApproved": false,
+    "financialDeletionApproved": false,
+    "bulkDisputeImportApproved": false,
+    "retentionPolicyEffective": false,
+    "serviceRoleDeploymentApproved": false,
+    "paidThrough": null,
+    "mayGrantBenefits": false
+  }
+}
