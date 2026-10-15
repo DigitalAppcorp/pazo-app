@@ -8,7 +8,7 @@ const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const REF=/^[A-Za-z0-9._-]{3,128}$/
 const UTC=/^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\dZ$/
 const utc=s=>typeof s==='string'&&UTC.test(s)&&Number.isFinite(Date.parse(s))&&
- new Date(s).toISOString().replace(/\.000Z$/,'Z')===s
+ (new Date(s).toISOString()===s||new Date(s).toISOString().replace(/\.000Z$/,'Z')===s)
 const credential=s=>typeof s==='string'&&/^[\x21-\x7e]{8,512}$/.test(s)&&!s.includes(':')
 const secret=s=>typeof s==='string'&&/^[\x21-\x7e]{8,512}$/.test(s)
 const validEventTypes=new Set([
@@ -38,9 +38,10 @@ const projectEvent=e=>({
     total:e.resource?.amount?.total}}:undefined,
 })
 export function createP05SandboxMerchantEvidenceReader({
- clientId,clientSecret,windowStart,windowEnd,fetchImpl=fetch,
+ clientId,clientSecret,windowStart,windowEnd,readTrustedInboxRefs,fetchImpl=fetch,
 }={}){
- if(!credential(clientId)||!secret(clientSecret)||typeof fetchImpl!=='function')
+ if(!credential(clientId)||!secret(clientSecret)||typeof fetchImpl!=='function'||
+  typeof readTrustedInboxRefs!=='function')
   invalid('sandbox_read_only_reader_not_configured')
  if(!utc(windowStart)||!utc(windowEnd)||
   Date.parse(windowStart)>=Date.parse(windowEnd)||
@@ -65,12 +66,16 @@ export function createP05SandboxMerchantEvidenceReader({
   return projectEvent(e)
  }
  return Object.freeze({
-  async inspect({subscriptionId,saleEventId,inboxEventRefs=[]}={}){
-   if(!SUB.test(subscriptionId||'')||!REF.test(saleEventId||'')||
-    !Array.isArray(inboxEventRefs)||inboxEventRefs.length>20||
+  async inspect({subscriptionId,saleEventId}={}){
+   if(!SUB.test(subscriptionId||'')||!REF.test(saleEventId||''))
+    invalid('server_scoped_refs_invalid')
+   // Only an internal authenticated service-owned inbox reader supplies refs.
+   // Browser-supplied signature flags are never accepted.
+   const inboxEventRefs=await readTrustedInboxRefs({subscriptionId,saleEventId})
+   if(!Array.isArray(inboxEventRefs)||inboxEventRefs.length>20||
     inboxEventRefs.some(x=>!x||!REF.test(x.id||'')||
-      !validEventTypes.has(x.type)||typeof x.signedIngressVerified!=='boolean'||
-      x.signedIngressVerified!==true)||
+      !validEventTypes.has(x.type)||!utc(x.verifiedAt)||
+      !['processing','processed'].includes(x.processingState))||
     new Set(inboxEventRefs.map(x=>x.id)).size!==inboxEventRefs.length)
     invalid('server_scoped_refs_invalid')
    // Event refs MUST come from trusted private signed-inbox read, not caller.
