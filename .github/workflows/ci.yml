@@ -130,3 +130,15 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
             -f supabase/tests/supporter/consent-metadata.sql \
             -f supabase/tests/supporter/consent-synthetic.sql
+
+      # F16-P05: SQL draft lives under supabase/drafts NOT migrations.
+      # An explicit database/session guard prevents execution outside
+      # the disposable f14_synthetic PostgreSQL CI service.
+      - name: F16 P05 draft schema security and synthetic integrity ONLY
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/tests/supporter/p05-disposable-parent-fixture.sql \
+            -f supabase/drafts/f16_p05_private_prospective_evidence_v1_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-draft-security-metadata.sql \
+            -f supabase/tests/supporter/p05-draft-synthetic-cases.sql
