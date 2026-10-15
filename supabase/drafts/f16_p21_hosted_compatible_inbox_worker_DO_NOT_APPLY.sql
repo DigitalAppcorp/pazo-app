@@ -7,7 +7,7 @@
 BEGIN;
 DO $p21_only_disposable$
 DECLARE
- column_name text;
+ required_column_name text;
  existing_columns text[] := ARRAY[
  'attempt_count','next_attempt_at','processed_at','retention_hold',
  'last_error_code','retention_released_at','reconciled_payment_id'
@@ -27,18 +27,18 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_schema='supporter_private'
       AND table_name='paypal_verified_event_inbox'
-      AND column_name='p05_claim_token')
+      AND information_schema.columns.column_name='p05_claim_token')
  THEN RAISE EXCEPTION 'P21 schema already present; manual reconciliation'
    USING ERRCODE='55000';
  END IF;
- FOREACH column_name IN ARRAY existing_columns LOOP
+ FOREACH required_column_name IN ARRAY existing_columns LOOP
   IF NOT EXISTS(
    SELECT 1 FROM information_schema.columns
    WHERE table_schema='supporter_private'
     AND table_name='paypal_verified_event_inbox'
-    AND information_schema.columns.column_name=column_name
+    AND information_schema.columns.column_name=required_column_name
   ) THEN
-   RAISE EXCEPTION 'P21 missing required hosted inbox column %',column_name
+   RAISE EXCEPTION 'P21 missing required hosted inbox column %',required_column_name
     USING ERRCODE='55000';
   END IF;
  END LOOP;
