@@ -142,3 +142,11 @@ jobs:
             -f supabase/drafts/f16_p05_private_prospective_evidence_v1_DO_NOT_APPLY.sql \
             -f supabase/tests/supporter/p05-draft-security-metadata.sql \
             -f supabase/tests/supporter/p05-draft-synthetic-cases.sql
+
+      - name: F16 P05 event inbox claim draft with disabled rollout (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p05_inbox_claim_v1_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-inbox-claim-security.sql \
+            -f supabase/tests/supporter/p05-inbox-claim-synthetic.sql
