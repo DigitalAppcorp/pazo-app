@@ -6,7 +6,7 @@ import {calculateP05DraftUtcWindow as window,
 const policy=(anchorUtc='2026-10-10T10:00:00Z')=>({
  version:1,cadence:'MONTH_1',currency:'USD',priceMinor:299,setupFeeMinor:0,
  timezone:'UTC',anchorUtc,monthEndRule:'CLAMP_RETURN_TO_ANCHOR_DAY',
- origin:'PROPOSED_PAzo_TERMS_AND_PROVIDER_ANCHOR',
+ origin:'PROPOSED_PAZO_TERMS_AND_PROVIDER_ANCHOR',
 })
 const args=()=>({
  policy:policy(),cycleIndex:0,observedProviderNextBillingUtc:'2026-11-10T10:00:00Z',
