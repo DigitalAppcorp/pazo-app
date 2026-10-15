@@ -100,12 +100,13 @@ BEGIN
  IF public.f16_p05_draft_read_pazo_payment_by_sale('SALE-OWNER-A-001')
   IS NOT NULL
  THEN RAISE EXCEPTION 'wrong currency was accepted'; END IF;
- UPDATE supporter_private.paypal_payment_entries
- SET currency='USD',entry_state='not_paid'
- WHERE external_payment_id='SALE-OWNER-A-001';
- IF public.f16_p05_draft_read_pazo_payment_by_sale('SALE-OWNER-A-001')
-  IS NOT NULL
- THEN RAISE EXCEPTION 'unapproved state was accepted'; END IF;
+ -- The synthetic schema, like hosted, constrains entry_state.
+ BEGIN
+  UPDATE supporter_private.paypal_payment_entries
+   SET entry_state='not_paid' WHERE external_payment_id='SALE-OWNER-A-001';
+  RAISE EXCEPTION 'synthetic ledger accepted invalid financial state';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
  IF EXISTS(SELECT 1 FROM supporter_private.paypal_first_period_reviews)
  THEN RAISE EXCEPTION 'attribution reader generated paid-period review'; END IF;
 END
