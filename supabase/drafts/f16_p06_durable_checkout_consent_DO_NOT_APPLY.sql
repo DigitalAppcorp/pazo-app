@@ -29,6 +29,28 @@ CREATE TABLE supporter_private.paypal_p06_offers (
  PRIMARY KEY(version,locale),
  CHECK(version ~ '^pazo-supporter-[a-z0-9.-]{3,40}$')
 );
+-- After publication, the exact wording and digest are immutable.
+-- To correct a document, insert a NEW version; never rewrite evidence.
+CREATE FUNCTION supporter_private.f16_p06_forbid_published_offer_mutation()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $immutable$
+BEGIN
+ IF OLD.published_at IS NOT NULL THEN
+  RAISE EXCEPTION 'Published recurring offer must remain immutable'
+   USING ERRCODE='42501';
+ END IF;
+ RETURN CASE WHEN TG_OP='DELETE' THEN OLD ELSE NEW END;
+END
+$immutable$;
+REVOKE ALL ON FUNCTION
+ supporter_private.f16_p06_forbid_published_offer_mutation()
+ FROM PUBLIC,anon,authenticated,service_role;
+CREATE TRIGGER f16_p06_published_offer_immutable
+ BEFORE UPDATE OR DELETE
+ ON supporter_private.paypal_p06_offers
+ FOR EACH ROW
+ EXECUTE FUNCTION supporter_private.f16_p06_forbid_published_offer_mutation();
+
 ALTER TABLE supporter_private.paypal_p06_offers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supporter_private.paypal_p06_offers FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON supporter_private.paypal_p06_offers
