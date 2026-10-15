@@ -2,6 +2,11 @@
 
 **Autoridad:** Product Owner (PO). Modo Project Brain OS `DigitalAppcorp/project-brain-os` v1.4.1. Producto `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, [PR #44](https://github.com/DigitalAppcorp/pazo-app/pull/44) DRAFT. **F16 EN CURSO / beta de pagos NO-GO.** El snapshot es autoritativo frente a banners antiguos de `docs/PAZO_MASTER_ROADMAP.md`; historial completo del handoff anterior disponible en [Git](https://github.com/DigitalAppcorp/pazo-app/blob/17389a6659c7f6ff6721ef34a127332e45d22a61/docs/PAZO_ACTIVE_HANDOFF.md). No asumir que pruebas offline = backend aplicado, ni que este HEAD está merged o desplegado. Estado del checkout público deshabilitado/no habilitado para beta de pagos; no cambiar.
 
+## F16-P12 — INSTALACIÓN STAGING P06–P10 PREPARADA, NO HOSTED (2026-10-15)
+
+- PO «ok sigamos»: autorizó preparación de código/SQL y validación desechable, **no SQL Supabase alojado ni buyer/Edge/Live**. Bundle staging transaccional `supabase/drafts/f16_p12_staged_install_REQUIRES_PO_GO.sql` a partir de P06/P07+P08+P10 con preflight actual PG17/roles/RLS/pgcrypto/unique external sub y postflight grants `anon/authenticated` bloqueados, ofertas vacías y `wall_has_verified_entitlement=false`. No genera migración CLI ni publica términos. Script `scripts/f16-p12-build-staged-install.mjs --verify` detecta drift de fuentes. CI añade ensayo PostgreSQL aislado. Doc `docs/PAZO_F16_P12_STAGED_SCHEMA_INSTALL_GATE_20261015.md`.
+- Pendientes sin simular GO: legal+retención P01–P09, copia ES/EN definitiva, PO expreso para migración alojada y versión real CLI, operator/Edge OFF, PayPal Sandbox buyer+worker financiero, refunds/disputes, posterior Live. PR #44 DRAFT, Amigo $2.99 opcional OFF, PAZO gratis.
+
 ## F16-P11 — AUDITORÍA REAL HOSTED Y SIGUIENTE GO (2026-10-15)
 
 - **PO «0o sigue»:** se auditó Supabase **SOLO READ-ONLY** en `mrybvqdebbgcayuvgkkr`; PostgreSQL 17.11 activo. Conteos reales: 1 intent (BOUND), 8 inbox PENDING, 0 entradas ledger y 0 reversos. Catalog: P06 offers/attempts NO instaladas; P10 RPC NO instalada. Core RPC financieras verificadas sin EXECUTE anon/auth. Edge `f16-paypal-webhook` ACTIVE v13, no worker; también existe `paypal-webhook` v35 independiente (no tocar). Versiones alojadas F16 base 20261013/20261014, no P06–P10. Ningún efecto de escritura ni PayPal.
