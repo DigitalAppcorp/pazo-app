@@ -51,8 +51,8 @@ test('no opt-in, prechecked consent, cancellation or acknowledgement blocks',()=
  }
 })
 test('all actual hosted gates unavailable in current PAZO remain blocked',()=>{
- const missing=['sameMediumOnlineCancellationVerified',
-  'annualRenewalReminderVerified','retainableAcknowledgementDelivered',
+ const missing=['retainableAcknowledgementDelivered',
+  'sameMediumOnlineCancellationVerified','annualRenewalReminderVerified',
   'saleToServiceCycleVerified','refundAndDisputeCoverageVerified',
   'financialRetentionAndDeletionReviewed','providerBackupsAndDataDeletionReviewed']
  const r=run(x=>{for(const k of missing)x.controls[k]=false})
