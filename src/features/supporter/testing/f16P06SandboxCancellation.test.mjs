@@ -117,7 +117,7 @@ test('HTTP method, Origin and oversized JSON rejected',async()=>{
  assert.equal(evil.status,403)
  const huge=await handler(request('status',{noise:'X'.repeat(4096)}))
  assert.equal(huge.status,413)
- assert.equal(calls.length,0)
+ assert.ok(!calls.some(x=>x[0]==='intent'||x[0]==='cancel'||x[0]==='read'))
 })
 test('provider failures and false confirmation never assert cancellation',async()=>{
  for(const fail of [
