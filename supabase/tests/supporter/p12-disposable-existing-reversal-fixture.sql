@@ -20,6 +20,16 @@ CREATE TABLE supporter_private.paypal_payment_reversals (
  provider_verified_at timestamptz NOT NULL,
  recorded_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp()
 );
+-- Extra CI-only assertion table used by the legacy P06 synthetic test.
+-- NOT an assertion that this table exists on hosted Supabase.
+CREATE TABLE supporter_private.paypal_first_period_reviews (
+ assertion_id text PRIMARY KEY
+);
+ALTER TABLE supporter_private.paypal_first_period_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE supporter_private.paypal_first_period_reviews FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON supporter_private.paypal_first_period_reviews
+ FROM PUBLIC,anon,authenticated,service_role;
+
 ALTER TABLE supporter_private.paypal_payment_reversals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supporter_private.paypal_payment_reversals FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON supporter_private.paypal_payment_reversals
