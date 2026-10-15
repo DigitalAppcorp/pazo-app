@@ -83,10 +83,9 @@ export function createF16P05SourceCorrelationInspector(adapters={}){
     if(tx.status!=='COMPLETED'||
       !money(tx.amount_with_breakdown?.gross_amount)||!date(tx.time))
       return no('merchant_sale_amount_state_or_time_invalid')
-    // Event create time and transaction time can legitimately differ.
-    // Do not infer service interval from one or both timestamps.
-    if(date(event.create_time) && Date.parse(event.create_time)<Date.parse(tx.time)-86400000)
-      return no('webhook_creation_precedes_sale_outside_safe_window')
+    // Event creation and transaction time can differ: neither defines a cycle.
+    if(event.create_time!==undefined&&!date(event.create_time))
+      return no('merchant_event_timestamp_invalid')
     return matched()
    }catch{
     // No raw PayPal responses, contact data, secrets or IDs in diagnostics.
