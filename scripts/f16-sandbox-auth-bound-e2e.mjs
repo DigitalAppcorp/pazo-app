@@ -142,7 +142,6 @@ export async function performF16SandboxE2E(c){
  let state={requestId:randomUUID(),phase:'reserved',createdAt:new Date().toISOString()}
  save(state,true) // First reservation blocks accidental second purchase on restart.
  const admin=client(c.service),login=client(c.service)
- const reader=createPaypalSandboxSubscriptionReader({clientId:c.id,clientSecret:c.secret})
  const effectiveReader=createF16P05SandboxBillingSnapshotReader({
   clientId:c.id,clientSecret:c.secret,
  })
