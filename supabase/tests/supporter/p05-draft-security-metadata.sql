@@ -40,6 +40,20 @@ BEGIN
  AND c.contype='u' AND c.conname='paypal_first_period_reviews_external_payment_id_key')
  THEN RAISE EXCEPTION 'F16 P05 payment unique ownership absent'; END IF;
 
+ IF NOT EXISTS (
+  SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+  WHERE t.oid='supporter_private.paypal_first_period_reviews'::regclass
+   AND c.contype='f' AND c.conname='p05_sale_matches_subscription_fk'
+ ) OR NOT EXISTS (
+  SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+  WHERE t.oid='supporter_private.paypal_first_period_reviews'::regclass
+   AND c.contype='f' AND c.conname='p05_sale_event_type_fk'
+ ) OR NOT EXISTS (
+  SELECT 1 FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid
+  WHERE t.oid='supporter_private.paypal_activation_schedule_evidence'::regclass
+   AND c.contype='f' AND c.conname='p05_activation_event_type_fk'
+ ) THEN RAISE EXCEPTION 'F16 P05 composite identity constraints missing'; END IF;
+
  IF EXISTS (
   SELECT 1 FROM information_schema.columns
   WHERE table_schema='supporter_private'
