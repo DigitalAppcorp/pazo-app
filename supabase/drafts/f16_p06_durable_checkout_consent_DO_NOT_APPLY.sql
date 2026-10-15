@@ -160,7 +160,17 @@ BEGIN
  SELECT * INTO offer FROM supporter_private.paypal_p06_offers
  WHERE version=p_terms_version AND locale=p_locale
   AND published_at IS NOT NULL AND sha256=p_terms_digest
-  AND plan_id='P-14V25407JP6850922NLHMDKI' AND price_minor=299;
+  AND plan_id='P-14V25407JP6850922NLHMDKI' AND price_minor=299
+  AND EXISTS (
+    SELECT 1 FROM supporter_private.paypal_p06_offers counterpart
+    WHERE counterpart.version=p_terms_version
+      AND counterpart.locale<>p_locale
+      AND counterpart.published_at IS NOT NULL
+      AND counterpart.plan_id='P-14V25407JP6850922NLHMDKI'
+      AND counterpart.currency='USD'
+      AND counterpart.price_minor=299
+      AND counterpart.cadence='MONTH_1'
+  );
  IF NOT FOUND THEN RAISE EXCEPTION 'Offer terms not published'
   USING ERRCODE='42501'; END IF;
  new_id:='intent-'||pg_catalog.gen_random_uuid()::text;
