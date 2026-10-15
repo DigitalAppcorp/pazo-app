@@ -154,3 +154,11 @@ jobs:
 
       - name: F16 P05 real two-session claim concurrency (disposable only)
         run: node scripts/f16-p05-inbox-claim-concurrency.mjs
+
+      - name: F16 P05 inverse claimed subscription ID (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p05_claimed_subscription_inverse_lookup_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-claimed-subscription-inverse-security.sql \
+            -f supabase/tests/supporter/p05-claimed-subscription-inverse-synthetic.sql
