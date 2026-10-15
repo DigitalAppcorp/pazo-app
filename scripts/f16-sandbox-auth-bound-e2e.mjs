@@ -14,6 +14,7 @@ import {createClient} from '@supabase/supabase-js'
 import {createF16BoundSandboxIntentCoordinator} from '../supabase/functions/f16-paypal-webhook/f16BoundSandboxIntentCoordinator.mjs'
 import {createVerifiedAuthOwnerResolver} from '../supabase/functions/f16-paypal-webhook/verifiedAuthOwner.mjs'
 import {createF16P05SandboxBillingSnapshotReader} from '../supabase/functions/f16-paypal-webhook/p05PaypalSandboxBillingSnapshotReader.mjs'
+import {assessPazoSandboxPlan} from '../src/features/supporter/testing/paypalSandboxPlanContract.mjs'
 const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const HOST='https://api-m.sandbox.paypal.com'
 const PLAN='P-14V25407JP6850922NLHMDKI'
@@ -71,6 +72,30 @@ async function paypal(c,method,path,body,requestId){
  if(!data||typeof data!=='object'||Array.isArray(data))
   throw Error('f16_sandbox_response_invalid')
  return data
+}
+// READ ONLY remote preflight. Ensures a valid service-level Supabase key and
+// existing PayPal plan BEFORE reserving/creating any test assets.
+// The missing Auth ID is deliberately synthetic, never another user's data.
+async function validateRemote(c){
+ requireConfig(c)
+ const admin=client(c.service)
+ const fakeId='00000000-0000-4000-8000-000000000000'
+ const {data:unusedIntent,error:intentError}=await admin.rpc(
+  'f16_paypal_read_private_intent',{p_intent_id:'intent-'+fakeId})
+ if(intentError||unusedIntent!==null)throw Error('f16_supabase_service_rpc_not_ready')
+ const {error:userError}=await admin.auth.admin.getUserById(fakeId)
+ if(!userError||userError.status!==404)
+  throw Error('f16_supabase_auth_admin_not_ready')
+ const plan=await paypal(c,'GET','/v1/billing/plans/'+encodeURIComponent(PLAN))
+ const check=assessPazoSandboxPlan(plan)
+ if(!check.ok||check.warnings.length)
+  throw Error('f16_existing_paypal_plan_not_ready')
+ if(plan.quantity_supported!==false&&plan.quantity_supported!==undefined)
+  throw Error('f16_plan_quantity_contract_unexpected')
+ return Object.freeze({environment:'sandbox',step:'remote_readonly_validation',
+  supabasePrivateReadReady:true,supabaseAuthAdminReady:true,
+  paypalPlanReady:true,quantitySupported:false,networkReadOnly:true,
+  writes:0,mayGrantBenefits:false})
 }
 async function cancel(c,state){
  if(!SUB.test(state?.subscriptionId||''))return false
@@ -139,6 +164,8 @@ async function inspect(c,state){
 export async function performF16SandboxE2E(c){
  requireConfig(c)
  if(load())throw Error('f16_existing_test_state_no_duplicate')
+ // No test data or lock file is created if provider/admin credentials fail.
+ ok(await validateRemote(c))
  let state={requestId:randomUUID(),phase:'reserved',createdAt:new Date().toISOString()}
  save(state,true) // First reservation blocks accidental second purchase on restart.
  const admin=client(c.service),login=client(c.service)
@@ -207,7 +234,7 @@ export async function performF16SandboxE2E(c){
   stage='paypal_post_requested';state={...state,phase:stage};save(state)
   // Never retry an uncertain PayPal POST using a new request ID.
   const sub=await paypal(c,'POST','/v1/billing/subscriptions',{
-   plan_id:PLAN,quantity:'1',custom_id:prep.intentId,
+   plan_id:PLAN,custom_id:prep.intentId,
   },state.requestId)
   if(!SUB.test(sub.id||'')||sub.status!=='APPROVAL_PENDING')
    throw Error('f16_sandbox_subscription_not_pending')
@@ -253,6 +280,11 @@ async function main(){
    supabaseServerSecretConfigured:valid(c.service),
    previousTestExists:Boolean(load()),
    mayGrantBenefits:false})
+  return
+ }
+ if(mode==='--validate-remote'){
+  if(load())throw Error('f16_existing_test_state_no_duplicate')
+  ok(await validateRemote(c))
   return
  }
  if(mode==='--inspect'){
