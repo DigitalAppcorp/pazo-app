@@ -97,24 +97,37 @@ async function validateRemote(c){
   paypalPlanReady:true,quantitySupported:false,networkReadOnly:true,
   writes:0,mayGrantBenefits:false})
 }
+// PayPal Subscriptions v1 cancellation is supported only for ACTIVE or
+// SUSPENDED. APPROVAL_PENDING/APPROVED must NOT be buyer-approved merely
+// to make the cancel endpoint accept them (PayPal: subscriptions.cancel-422).
+export function classifyF16SubscriptionCancellation(status){
+ if(status==='CANCELLED')return 'already_cancelled'
+ if(status==='ACTIVE'||status==='SUSPENDED')return 'can_cancel'
+ if(status==='APPROVAL_PENDING'||status==='APPROVED')
+  return 'await_buyer_no_cancellation_api'
+ return 'unsupported_status'
+}
 async function cancel(c,state){
- if(!SUB.test(state?.subscriptionId||''))return false
+ if(!SUB.test(state?.subscriptionId||''))return 'cancel_unverified'
  const path='/v1/billing/subscriptions/'+encodeURIComponent(state.subscriptionId)
  try{
   const before=await paypal(c,'GET',path)
   if(before.id!==state.subscriptionId||before.plan_id!==PLAN||
-   before.custom_id!==state.intentId)return false
-  if(before.status==='CANCELLED'){
-   save({...state,phase:'cancelled'});return true
+   before.custom_id!==state.intentId)return 'cancel_unverified'
+  const eligibility=classifyF16SubscriptionCancellation(before.status)
+  if(eligibility==='already_cancelled'){
+   save({...state,phase:'cancelled'});return 'cancelled'
   }
-  if(!['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED'].includes(before.status))
-   return false
+  if(eligibility==='await_buyer_no_cancellation_api')
+   return 'approval_not_cancellable'
+  if(eligibility!=='can_cancel')return 'cancel_unverified'
   await paypal(c,'POST',path+'/cancel',{reason:'PAZO authorized one-time Sandbox QA cleanup'})
   const after=await paypal(c,'GET',path)
-  if(after.id!==state.subscriptionId||after.status!=='CANCELLED')return false
+  if(after.id!==state.subscriptionId||after.status!=='CANCELLED')
+   return 'cancel_unverified'
   save({...state,phase:'cancelled'})
-  return true
- }catch{return false}
+  return 'cancelled'
+ }catch{return 'cancel_unverified'}
 }
 // Safe recovery diagnostic. GET on the one saved Sandbox reference only.
 // No cancellations, purchases, Auth writes, private DB reads or token output.
@@ -295,9 +308,12 @@ export async function performF16SandboxE2E(c){
   ok(info(stage,'buyer_approved_not_paid_cycle_proof'))
  }finally{
   if(state.subscriptionId){
-   const done=await cancel(c,state)
-   ok(info(done?'cancelled':'cancel_unverified',
-    done?'paypal_sandbox_cancellation_verified':'use_cancel_only_no_second_purchase'))
+   const cancellation=await cancel(c,state)
+   ok(info(cancellation==='cancelled'?'cancelled':
+    cancellation==='approval_not_cancellable'?'approval_not_cancellable':'cancel_unverified',
+    cancellation==='cancelled'?'paypal_sandbox_cancellation_verified':
+    cancellation==='approval_not_cancellable'?'do_not_approve_buyer_or_retry_purchase':
+    'use_status_readonly_no_second_purchase'))
   }else ok(info('no_known_subscription',
    'uncertain_paypal_post_must_be_checked_manually_not_retried'))
  }
@@ -332,9 +348,12 @@ async function main(){
  if(mode==='--cancel-only'){
   requireConfig(c);const state=load()
   if(!state?.subscriptionId)throw Error('f16_missing_existing_subscription')
-  const done=await cancel(c,state)
-  ok(info(done?'cancelled':'cancel_unverified',
-   done?'sandbox_cancellation_verified':'manual_check_required'))
+  const cancellation=await cancel(c,state)
+  ok(info(cancellation==='cancelled'?'cancelled':
+   cancellation==='approval_not_cancellable'?'approval_not_cancellable':'cancel_unverified',
+   cancellation==='cancelled'?'sandbox_cancellation_verified':
+   cancellation==='approval_not_cancellable'?'do_not_approve_buyer_or_retry_purchase':
+   'manual_check_required'))
   return
  }
  if(mode!=='--run')throw Error('f16_unsupported_mode')
