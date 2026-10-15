@@ -227,3 +227,38 @@ jobs:
         run: |
           psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p14_checkout_acknowledgement_DO_NOT_APPLY.sql -f supabase/tests/supporter/p14-checkout-acknowledgement-synthetic.sql
 
+  f16-p21-worker-schema-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+        ports:
+          - 55443:5432
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify reviewed P05 claim code is unchanged
+        run: node scripts/f16-p21-verify-staged-worker.mjs
+      - name: Bootstrap disposable private inbox in hosted-equivalent shape
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-disposable-parent-fixture.sql -f supabase/tests/supporter/p21-existing-hosted-inbox-fixture.sql
+      - name: Install only staged P21 functions with worker OFF
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p21_hosted_compatible_inbox_worker_DO_NOT_APPLY.sql
+      - name: Check service-only permissions, historical cutoff and fencing
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-inbox-claim-security.sql -f supabase/tests/supporter/p05-inbox-claim-synthetic.sql -f supabase/tests/supporter/p05-inbox-finish-synthetic.sql -f supabase/tests/supporter/p21-no-historical-processing-synthetic.sql
