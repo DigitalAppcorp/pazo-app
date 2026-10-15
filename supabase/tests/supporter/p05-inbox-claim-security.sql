@@ -9,7 +9,8 @@ BEGIN
  FOR f IN SELECT p.oid,p.proname,p.prosecdef,p.proconfig
   FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
   WHERE n.nspname='public' AND p.proname IN
-   ('f16_p05_draft_claim_next_verified_event','f16_p05_draft_read_claimed_event')
+   ('f16_p05_draft_claim_next_verified_event','f16_p05_draft_read_claimed_event',
+    'f16_p05_draft_finish_claimed_event')
  LOOP
   IF NOT f.prosecdef OR
    NOT ('search_path=""'=ANY(f.proconfig))
@@ -22,7 +23,8 @@ BEGIN
  IF (SELECT count(*)
      FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
      WHERE n.nspname='public' AND p.proname IN
-      ('f16_p05_draft_claim_next_verified_event','f16_p05_draft_read_claimed_event'))<>2
+      ('f16_p05_draft_claim_next_verified_event','f16_p05_draft_read_claimed_event',
+    'f16_p05_draft_finish_claimed_event'))<>3
  THEN RAISE EXCEPTION 'P05 privileged functions missing'; END IF;
  IF NOT EXISTS (SELECT 1 FROM supporter_private.p05_inbox_worker_gate
   WHERE id=1 AND NOT enabled AND not_before IS NULL)
