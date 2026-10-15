@@ -77,7 +77,7 @@ test('owner mismatches, unbound intents and unknown plan fail closed before paym
  for(const change of [
   d=>d.intent.ownerId='b1f87879-c8a1-41ca-b43b-c088c0f26a2b',
   d=>d.intent.state='pending',
-  d=>d.intent.subscriptionId='I-OTHER',
+  d=>d.intent.subscriptionId='INVALID-SUBSCRIPTION',
   d=>d.intent.provider='stripe',
   d=>d.intent.planId='',
  ]){const {r,calls}=await run(change)
