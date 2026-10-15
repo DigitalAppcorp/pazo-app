@@ -1,3 +1,5 @@
+> **ACTUALIZACIÓN DEL PRODUCT OWNER — 14-OCT-2026:** La propuesta de inicio del **primer período contractual** al confirmarse activación y pago, y fin en la **siguiente facturación PayPal observada y adoptada como límite contractual PAZO**, fue **APROBADA solo para suscripciones futuras**. Ver `docs/PAZO_F16_P05_FIRST_SERVICE_PERIOD_POLICY_APPROVED_20261014.md`. Los párrafos históricos inferiores que aún la llamen «NO APROBADA» reflejan el estado anterior, no un nuevo gate. Siguen pendientes atribución real de venta→ciclo, consentimiento efectivo, retención, revisión legal, renovaciones, Hosted SQL, ledger, beneficios y lanzamiento.
+
 # PAZO F16 — Gate de términos, cancelación y retención para Amigo de PAZO
 
 **Fecha:** 2026-10-14. **Estado:** REVISIÓN DE PRODUCTO / LEGAL PENDIENTE. **No publicable.** Se conserva la decisión PO previa: PAZO es gratuita; el aporte opcional `Amigo de PAZO` se oferta a USD 2.99/mes y su facturación recurrente la administra PayPal. Este documento es un **borrador de requisitos**, no Términos aceptados, texto jurídico final, datos recolectados o habilitación de checkout. PR #44 DRAFT, F16 NO-GO.
