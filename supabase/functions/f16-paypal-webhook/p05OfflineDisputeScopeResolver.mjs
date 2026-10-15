@@ -61,7 +61,8 @@ export function createP05OfflineDisputeScopeResolver(adapters={}){
    let intent
    try{
     intent=await adapters.readPrivateBoundIntentBySubscription({
-     subscriptionId:payment.externalSubscriptionId})
+     subscriptionId:payment.externalSubscriptionId,
+     expectedOwnerId:payment.ownerId})
    }catch{return INVALID}
    if(!validIntent(intent,payment))return INVALID
    // Ownership only: NOT a paid cycle, reversal determination or permission
