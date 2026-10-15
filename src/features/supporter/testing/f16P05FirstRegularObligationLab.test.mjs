@@ -68,6 +68,8 @@ test('snapshot counts alone NEVER erase a recorded failure/recovered debt',()=>{
   'PAYMENT.SALE.REFUNDED',
   'PAYMENT.SALE.REVERSED',
   'CUSTOMER.DISPUTE.CREATED',
+  'CUSTOMER.DISPUTE.UPDATED',
+  'CUSTOMER.DISPUTE.RESOLVED',
   'PAYMENT.SALE.PENDING',
  ]){
   const result=run(x=>x.webhookJournal.events.push({type,at:'2026-10-15T03:35:00Z'}))
