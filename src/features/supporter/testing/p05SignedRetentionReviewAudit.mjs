@@ -23,9 +23,13 @@ const result=(phase,reason)=>Object.freeze({
  mayRecordPayment:false,mayGrantBenefits:false,paidThrough:null,
  dbWrites:0,providerCalls:0,
 })
-const parseTime=x=>typeof x==='string'&&
- /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(x)&&
- Number.isFinite(Date.parse(x))&&new Date(x).toISOString()===x.replace('Z','.000Z')
+function parseTime(x){
+ if(typeof x!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(x))
+  return null
+ const ms=Date.parse(x)
+ return Number.isFinite(ms)&&new Date(ms).toISOString()===x.replace('Z','.000Z')
+  ?ms:null
+}
 function decodeSignature(x){
  if(typeof x!=='string'||!B64.test(x))return null
  try {
