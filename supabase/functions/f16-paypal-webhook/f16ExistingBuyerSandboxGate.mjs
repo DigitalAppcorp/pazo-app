@@ -1,7 +1,7 @@
 // F16 strictly read-only preflight for the EXISTING Auth-bound subscription.
 // No new user, intent, purchase, admin change, grant, cancellation or buyer approval.
 import {assessPazoSandboxPlan} from '../../../src/features/supporter/testing/paypalSandboxPlanContract.mjs'
-const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
+const PROJECT_URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
@@ -16,7 +16,7 @@ const deny=reason=>Object.freeze({
 export function assessF16ExistingBuyerSandboxGate({
  state,privateIntent,subscription,plan,
 }={}){
- if(state?.environment!=='sandbox'||state?.project!==URL||
+ if(state?.environment!=='sandbox'||state?.project!==PROJECT_URL||
   state?.plan!==PLAN||state?.phase!=='bound_before_approval'||
   state?.recoveryPhase!=='bound_verified'||!SUB.test(state?.subscriptionId||'')||
   !UUID.test(state?.authOwnerId||'')||!INTENT.test(state?.intentId||''))
