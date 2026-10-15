@@ -72,3 +72,17 @@ test('F16 remote validation without private env fails before network or writes',
  assert.equal(o.why,'f16_missing_private_env')
  assert.equal(o.mayGrantBenefits,false)
 })
+
+test('F16 cancellation diagnostic without credentials cannot call PayPal or mutate data',()=>{
+ const r=spawnSync(process.execPath,[script,'--status-readonly'],{
+  encoding:'utf8',timeout:20000,
+  env:{...process.env,PAYPAL_SANDBOX_CLIENT_ID:'',
+   PAYPAL_SANDBOX_CLIENT_SECRET:'',PAZO_F16_SUPABASE_SECRET_KEY:''},
+ })
+ assert.equal(r.status,2)
+ const x=JSON.parse(r.stderr)
+ assert.equal(x.step,'BLOCKED')
+ assert.equal(x.why,'f16_missing_private_env')
+ assert.equal(x.mayGrantBenefits,false)
+ assert.equal(x.paidThrough,null)
+})
