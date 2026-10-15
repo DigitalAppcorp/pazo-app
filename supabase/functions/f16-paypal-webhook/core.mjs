@@ -4,6 +4,14 @@
 // Never writes profiles/is_founder or grants memberships.
 import {f16WorkerAdmissionGate} from './workerAdmissionGate.mjs'
 import {requireCertUrl} from './paypalSandboxPostback.mjs'
+// Disputes can refer to unrelated transactions for the same PayPal merchant.
+// The server-only scope resolver must prove PAZO ownership before any inbox DML.
+// Gate stays OFF until legal retention, SQL allowlist and PayPal webhook changes.
+const DISPUTE_EVENT_TYPES = new Set([
+  'CUSTOMER.DISPUTE.CREATED',
+  'CUSTOMER.DISPUTE.UPDATED',
+  'CUSTOMER.DISPUTE.RESOLVED',
+])
 const EVENT_TYPES = new Set([
   'BILLING.SUBSCRIPTION.ACTIVATED',
   'BILLING.SUBSCRIPTION.UPDATED',
@@ -18,6 +26,7 @@ const EVENT_TYPES = new Set([
   'PAYMENT.SALE.COMPLETED',
   'PAYMENT.SALE.REFUNDED',
   'PAYMENT.SALE.REVERSED',
+  ...DISPUTE_EVENT_TYPES,
 ])
 const HEADERS=[
   'paypal-transmission-id', 'paypal-transmission-time',
@@ -30,7 +39,8 @@ const reply=(status,code,retryAfter=null)=>new Response(JSON.stringify({code}),{
   },
 })
 export function createSafeF16WebhookHandler({environment,webhookId,planId,verifySignature,inbox,
-  admissionGate=f16WorkerAdmissionGate,globalAdmission=null}={}) {
+  admissionGate=f16WorkerAdmissionGate,globalAdmission=null,
+  disputeCaptureApproved=false,assessTrustedDisputeScope=null}={}) {
   return async function handle(request) {
     if(request.method!=='POST') return reply(405,'method_not_allowed')
     // This F16 test integration is Sandbox-only until a separately approved Live gate.
@@ -105,6 +115,22 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
         valid=(await verifySignature({headers:request.headers,event,rawBody:bytes,webhookId,environment}))===true
       } catch {return reply(503,'verification_unavailable')}
       if(!valid) return reply(401,'signature_invalid')
+      if(DISPUTE_EVENT_TYPES.has(event.event_type)) {
+        // Explicit, immutable code-level operator release is required BEFORE
+        // signing up to PayPal dispute events or deploying a matching SQL RPC.
+        // A signed merchant event may concern an unrelated business payment.
+        if(disputeCaptureApproved!==true) return reply(503,'dispute_intake_not_released',300)
+        if(typeof assessTrustedDisputeScope!=='function')
+          return reply(503,'dispute_scope_unavailable',300)
+        let scope
+        try {scope=await assessTrustedDisputeScope({
+          eventId:event.id,eventType:event.event_type,event,
+        })} catch {return reply(503,'dispute_scope_unavailable',300)}
+        // 'outside_pazo' MUST be provider+private-ledger attested, not a
+        // caller-supplied flag; otherwise retry without ACK or storage.
+        if(scope==='outside_pazo')return reply(200,'verified_non_pazo_dispute')
+        if(scope!=='confirmed_pazo')return reply(503,'dispute_scope_unverified',300)
+      }
       // Unknown, verified events are not business actions; do not persist their payload.
       if(!EVENT_TYPES.has(event.event_type)) return reply(200,'verified_unhandled_event')
       try {
