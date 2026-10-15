@@ -13,7 +13,7 @@ const CORS={'access-control-allow-origin':ORIGIN,
  'cache-control':'no-store'}
 const headers=x=>new Headers(x)
 function fixture({badOrigin=false,badList=false,fullPage=false,
- badHeaders=false,httpFailure=false}={}){
+ badHeaders=false,httpFailure=false,preflightStatus=204}={}){
  const requests=[]
  const fetchImpl=async (url,init)=>{
   requests.push({url,init})
@@ -22,7 +22,7 @@ function fixture({badOrigin=false,badList=false,fullPage=false,
   assert.ok(['OPTIONS','POST'].includes(init.method))
   assert.equal(init.headers.Origin,ORIGIN)
   if(init.method==='OPTIONS')
-   return{status:204,headers:headers({...CORS,
+   return{status:preflightStatus,headers:headers({...CORS,
     ...(badOrigin?{'access-control-allow-origin':'https://evil.invalid'}:{}),
     ...(badHeaders?{'access-control-allow-headers':'authorization_extra, content-type, apikey'}:{})
    })}
@@ -88,6 +88,24 @@ test('host mismatch, partial header names, provider outage, excessive list block
   assert.equal(r.phase,'BLOCKED')
   assert.equal(m.requests.filter(x=>x.init.method==='POST').length,
    args.badOrigin||args.badHeaders?0:1)
+ }
+})
+test('P18 identifies preflight HTTP class without revealing body or secrets',async()=>{
+ const cases=[
+  [401,'preflight_http_401_authentication_gate'],
+  [403,'preflight_http_403_origin_or_gateway_denial'],
+  [404,'preflight_http_404_route_missing'],
+  [503,'preflight_http_503_unavailable'],
+ ]
+ for(const [code,reason] of cases){
+  const h=fixture({preflightStatus:code})
+  const result=await inspectSupporterGateway({origin:ORIGIN,
+   bearer:TOKEN,publishableKey:KEY,allowNetwork:true,fetchImpl:h.fetchImpl})
+  assert.equal(result.phase,'BLOCKED')
+  assert.equal(result.reason,reason)
+  assert.deepEqual(h.requests.map(x=>x.init.method),['OPTIONS'])
+  assert.ok(!JSON.stringify(result).includes(TOKEN))
+  assert.ok(!JSON.stringify(result).includes(KEY))
  }
 })
 test('only authorized diagnostic request bodies, no billing or cancellation',()=>{

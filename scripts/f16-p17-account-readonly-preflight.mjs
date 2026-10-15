@@ -48,6 +48,17 @@ export async function inspectSupporterGateway({
     'Access-Control-Request-Headers':'authorization,content-type,apikey'},
   })
  }catch{return denied('preflight_transport_unavailable')}
+ const httpStatus=preflight?.status
+ if(httpStatus!==204) {
+  const reason=({
+   401:'preflight_http_401_authentication_gate',
+   403:'preflight_http_403_origin_or_gateway_denial',
+   404:'preflight_http_404_route_missing',
+   503:'preflight_http_503_unavailable',
+  })[httpStatus]||'preflight_http_unexpected'
+  // Static enum only; never expose raw provider body, headers or URL.
+  return denied(reason)
+ }
  const headers=headerList(preflight?.headers?.get('access-control-allow-headers'))
  const methods=headerList(preflight?.headers?.get('access-control-allow-methods'))
  if(preflight?.status!==204||
