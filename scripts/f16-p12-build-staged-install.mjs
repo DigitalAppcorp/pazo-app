@@ -33,8 +33,8 @@ assert.ok(front.includes('DO $p12_gate$'))
 assert.ok(last.includes('DO $p12_post$'))
 const regenerated=front+sources.map((s,i)=>headings[i]+s+'\n').join('')+last
 assert.equal(output,regenerated,'P12 bundle drifted from reviewed source drafts')
-assert.equal((output.match(/\bBEGIN;/g)||[]).length>3,true,
- 'SQL plpgsql BEGIN blocks expected; top-level transactions need human review')
+assert.equal((output.match(/^BEGIN;$/gm)||[]).length,1,
+ 'Exactly one top-level SQL transaction expected')
 assert.equal((output.match(/^\s*COMMIT;/gm)||[]).length,1)
 assert.equal((output.match(/^CREATE FUNCTION public\.f16_p/gm)||[]).length,5)
 for(const n of ['PAYMENT.SALE.COMPLETED','paypal_payment_entries']){
