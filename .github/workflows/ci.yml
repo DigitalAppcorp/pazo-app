@@ -43,12 +43,6 @@ jobs:
           node --check scripts/f16-paypal-verify-webhook-destination-readonly.mjs
           npm run test:f16:synthetic
 
-      - name: F16-P18 one-time read-only CORS OPTIONS smoke (no auth tokens)
-        env:
-          PAZO_F16_STABLE_ORIGIN: https://pazo-app-t83r-dbm658bgd-digitalapp.vercel.app
-          PAZO_F16_P17_READ_ONLY_GO: I_AUTHORIZE_READ_ONLY
-        run: node scripts/f16-p17-account-readonly-preflight.mjs
-
       - name: Build
         env:
           VITE_APP_RELEASE: ${{ github.sha }}

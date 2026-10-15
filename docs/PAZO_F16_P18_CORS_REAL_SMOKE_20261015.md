@@ -1,3 +1,5 @@
+> **Resultado final verificado (2026-10-15):** CI sobre el commit `78fdfa5` obtuvo `preflight_503_origin_not_configured` desde Edge v3. La variable `PAZO_F16_APP_ORIGIN` falta o su valor no supera el validador de origen HTTPS exacto. Este bloqueo es real, no sintético. El último commit técnico `7cb4480` separa lista/descarga de términos del modo PayPal, con CI+PG Lab PASS. La Edge de gestión está ahora ACTIVE **v4** `verify_jwt=true`; el preflight no se pudo declarar PASS sin que un operador configure el origen. El conector no ofrece gestión de secretos. Se quitó la prueba de red temporal de CI y se conservaron pruebas locales permanentes. DB: 0 ofertas, 0 aceptaciones, 0 ledger, 8 eventos históricos pending; webhooks sin cambios. Un preview conocido `https://pazo-app-t83r-dbm658bgd-digitalapp.vercel.app` puede servir como **origen temporal de QA**, no como dominio estable de producción.
+
 # PAZO F16-P18 — Corrección comprobable de preflight sin credenciales
 **Fecha:** 2026-10-15. PR #44 DRAFT. No Checkout, no Live, no compras ni cancelaciones reales.
 
