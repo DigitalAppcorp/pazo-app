@@ -1,6 +1,15 @@
 -- P25 postgres 17 disposable only. All review rows rolled back.
 \set ON_ERROR_STOP on
 BEGIN;
+-- The minimal P05 synthetic parent omits the existing hosted reversal table.
+-- Reconstruct only the assertion surface inside this rolled-back test.
+CREATE TABLE supporter_private.paypal_payment_reversals (
+ external_payment_id text PRIMARY KEY
+);
+ALTER TABLE supporter_private.paypal_payment_reversals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE supporter_private.paypal_payment_reversals FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON supporter_private.paypal_payment_reversals
+ FROM PUBLIC,anon,authenticated,service_role;
 DO $setup$
 DECLARE t timestamptz:=pg_catalog.clock_timestamp();
 BEGIN
