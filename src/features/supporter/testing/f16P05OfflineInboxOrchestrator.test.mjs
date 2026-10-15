@@ -45,7 +45,16 @@ function fixture(overrides={}){
    calls.push(['finish',args])
    return true
   },
-  ...overrides,
+ }
+ // Record mock adapter invocations even when a test substitutes the function.
+ // Test callbacks do not get access to fixture internals during destructuring.
+ for(const [name,fn] of Object.entries(overrides)){
+  adapters[name]=async (...args)=>{
+   calls.push(name==='claimNextVerifiedEvent'?'claim':
+    [name==='readClaimedEvent'?'read':
+     name==='inspectMerchantEvidence'?'merchant':'finish',args[0]])
+   return fn(...args)
+  }
  }
  return {calls,worker:create(adapters)}
 }
@@ -70,13 +79,13 @@ test('matching merchant sale is quarantined for cycle review, never paid',async(
 })
 test('disabled rollout / empty claim has no reads or finishes',async()=>{
  const {r,calls}=await run({claimNextVerifiedEvent:async()=>{
-  calls.push('claim');return null
+  return null
  }})
  assert.equal(r.phase,'NO_CLAIM');assert.deepEqual(calls,['claim'])
 })
 test('claim transport failure yields no merchant or finish',async()=>{
  const {r,calls}=await run({claimNextVerifiedEvent:async()=>{
-  calls.push('claim');throw Error('buyer@example.invalid SECRETPAYPAL123456')
+  throw Error('buyer@example.invalid SECRETPAYPAL123456')
  }})
  assert.equal(r.phase,'CLAIM_UNAVAILABLE');assert.deepEqual(calls,['claim'])
 })
@@ -93,7 +102,7 @@ test('malformed and foreign claims never initiate merchant or finish',async()=>{
   x=>x.buyerEmail='buyer@example.invalid',
  ]){
   const {r,calls}=await run({claimNextVerifiedEvent:async()=>{
-   calls.push('claim');const c=claim();change(c);return c
+   const c=claim();change(c);return c
   }})
   assert.equal(r.phase,'CLAIM_REJECTED')
   assert.deepEqual(calls,['claim'])
@@ -108,7 +117,7 @@ test('wrong or expired read evidence gets review with existing claim token',asyn
   x=>x.privateContact='buyer@example.invalid',
  ]){
   const {r,calls}=await run({readClaimedEvent:async args=>{
-   calls.push(['read',args]);const value=read();change(value);return value
+   const value=read();change(value);return value
   }})
   assert.equal(r.phase,'REVIEW_REQUESTED')
   assert.equal(r.reason,'missing_evidence')
@@ -117,7 +126,7 @@ test('wrong or expired read evidence gets review with existing claim token',asyn
 })
 test('read exceptions are transient retry, with allowlisted reason only',async()=>{
  const {r,calls}=await run({readClaimedEvent:async args=>{
-  calls.push(['read',args]);throw Error('buyer@example.invalid')
+  throw Error('buyer@example.invalid')
  }})
  assert.equal(r.phase,'RETRY_REQUESTED')
  assert.equal(r.reason,'read_unavailable')
