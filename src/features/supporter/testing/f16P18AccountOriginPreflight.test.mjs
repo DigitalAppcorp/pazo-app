@@ -58,3 +58,19 @@ test('P18 Edge composition guards POST separately after CORS preflight',()=>{
  assert.ok(block.includes('runtime.manage(request)'))
  assert.ok(!block.includes('mayGrantBenefits:true'))
 })
+
+test('P18 read-only account and receipt do not depend on PayPal mode',()=>{
+ const src=fs.readFileSync(
+  new URL('../../../../supabase/functions/f16-paypal-supporter-account/index.ts',import.meta.url),
+  'utf8')
+ const should=src.slice(src.indexOf('const shouldRun=():boolean=>'),
+  src.indexOf('function createRuntime(){'))
+ assert.ok(should.includes("SUPABASE_SERVICE_ROLE_KEY"))
+ assert.ok(!should.includes('PAZO_F16_PAYPAL_ENV'))
+ assert.ok(src.includes("if(['status','cancel'].includes(data.action) &&"))
+ assert.ok(src.includes("Deno.env.get('PAZO_F16_PAYPAL_ENV')!=='sandbox'"))
+ const list=src.indexOf("if(data.action==='list')")
+ const guard=src.indexOf("if(['status','cancel'].includes(data.action)")
+ assert.ok(list>=0 && guard>list)
+ assert.ok(src.includes('runtime.resolveAuthenticatedOwner(request)'))
+})

@@ -17,9 +17,10 @@ const reply=(status:number,code:string,extra:Record<string,unknown>={})=>
  paidThrough:null,mayGrantBenefits:false,mayCreateSubscription:false,...extra}),
  {status,headers:{'content-type':'application/json',
   'cache-control':'no-store','x-content-type-options':'nosniff'}})
+// A verified user may READ their own account and receipt without PayPal
+// credentials. Only status/cancel actions ever contact the Sandbox provider.
 const shouldRun=():boolean=>
  Deno.env.get('SUPABASE_URL')===BASE &&
- Deno.env.get('PAZO_F16_PAYPAL_ENV')==='sandbox' &&
  !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 function createRuntime(){
@@ -103,6 +104,9 @@ Deno.serve(async(request:Request)=>{
    return addCors(reply(200,'account_list_verified',{accounts}))
   }catch{return addCors(reply(503,'account_list_unavailable'))}
  }
+ if(['status','cancel'].includes(data.action) &&
+    Deno.env.get('PAZO_F16_PAYPAL_ENV')!=='sandbox')
+  return addCors(reply(503,'paypal_sandbox_not_configured'))
  if(['status','cancel','acknowledgement'].includes(data.action))
   return addCors(await runtime.manage(request))
  return addCors(reply(400,'invalid_request'))
