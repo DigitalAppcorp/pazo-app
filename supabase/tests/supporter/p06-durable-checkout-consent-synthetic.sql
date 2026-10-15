@@ -111,6 +111,7 @@ BEGIN
  -- The recovery RPC reads only the exact matched owner/key; no writes.
  IF public.f16_p08_read_checkout_recovery(owner,key_a)->>'state'<>'pending'
  OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimed'<>'false'
+ OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimedAt' IS NOT NULL
  OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'subscriptionId' IS NOT NULL
  OR public.f16_p08_read_checkout_recovery(owner,key_b) IS NOT NULL
  OR public.f16_p08_read_checkout_recovery(
@@ -129,7 +130,10 @@ BEGIN
  IF (SELECT count(*) FROM supporter_private.paypal_p06_checkout_attempts
    WHERE owner_id=owner AND provider_create_claimed_at IS NOT NULL)<>1
  THEN RAISE EXCEPTION 'P07 provider claim not durable'; END IF;
- IF public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimed'<>'true'
+ IF public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimedAt' IS NULL
+ OR NOT pg_catalog.jsonb_typeof(
+  public.f16_p08_read_checkout_recovery(owner,key_a)->'providerCreateClaimedAt')='string'
+ OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'providerCreateClaimed'<>'true'
  OR public.f16_p08_read_checkout_recovery(owner,key_a)->>'subscriptionId' IS NOT NULL
  THEN RAISE EXCEPTION 'P08 claimed pending recovery invalid'; END IF;
  IF a->>'createdAt' IS NULL OR b->>'createdAt' IS NULL

@@ -24,7 +24,7 @@ function provider(overrides={}){
    ok:true,json:async()=>overrides.list??{
     subscriptions:[{id:SUB}],links:[]}}
   if(url.startsWith(HOST+'/v1/billing/subscriptions/'))return{
-   ok:true,json:async()=>overrides.details??{
+   ok:true,json:async()=>overrides.detailById?.[url.split('/').pop()]??overrides.details??{
     id:SUB,plan_id:PLAN,custom_id:INTENT,
     status:'APPROVAL_PENDING',subscriber:{email_address:'private@test.invalid'},
     links:[{href:'https://secret.invalid'}]}}
@@ -108,6 +108,18 @@ test('next page, full page, malformed id, conflicting plan fail closed',async()=
   assert.equal((await p.api.examine({intentId:INTENT,claimedAt:CLAIM})).outcome,
    expected)
  }
+})
+test('two distinct PayPal subscriptions sharing the same custom_id are never accepted',async()=>{
+ const second='I-SYNTHETIC-PAZO-456'
+ const p=provider({list:{subscriptions:[{id:SUB},{id:second}],links:[]},
+  detailById:{
+   [SUB]:{id:SUB,plan_id:PLAN,custom_id:INTENT,status:'APPROVAL_PENDING'},
+   [second]:{id:second,plan_id:PLAN,custom_id:INTENT,status:'CANCELLED'},
+  }})
+ const result=await p.api.examine({intentId:INTENT,claimedAt:CLAIM})
+ assert.equal(result.outcome,'DUPLICATE_MATCHING_INTENTS')
+ assert.equal(JSON.stringify(result).includes(SUB),false)
+ assert.equal(JSON.stringify(result).includes(second),false)
 })
 test('malformed provider scope does not call PayPal',async()=>{
  const p=provider()
