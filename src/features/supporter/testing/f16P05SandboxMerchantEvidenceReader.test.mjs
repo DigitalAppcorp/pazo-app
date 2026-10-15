@@ -4,14 +4,18 @@ import {createP05SandboxMerchantEvidenceReader as create}
  from '../../../../supabase/functions/f16-paypal-webhook/p05SandboxMerchantEvidenceReader.mjs'
 
 const SID='I-SYNTHETICFIRST123',SALE='SALE-PRIVATE123'
+const INTENT='intent-private123',OWNER='63e812b0-a7e5-49f6-b2dd-c11d2c72af57'
+const PLAN='P-TESTPLAN12345'
 const EID='WH-SALE-PRIVATE123',BAD='WH-REFUNDED123'
 const authTime='2026-10-15T03:20:39Z'
 const ctx=(modify=()=>{})=>{
+ const intent={id:INTENT,ownerId:OWNER,state:'bound',provider:'paypal',
+  subscriptionId:SID,planId:PLAN}
  const refs=[{id:EID,type:'PAYMENT.SALE.COMPLETED',
   verifiedAt:authTime,processingState:'processing'}]
  const responses={
   token:{token_type:'Bearer',access_token:'SANDBOX_MOCK_TOKEN_ONLY'},
-  sub:{id:SID,plan_id:'P-TESTPLAN12345',custom_id:'intent-private123',
+  sub:{id:SID,plan_id:PLAN,custom_id:INTENT,
    status:'ACTIVE',subscriber:{email_address:'private@example.com'}},
   tx:{total_pages:1,total_items:1,links:[],
    transactions:[{id:SALE,status:'COMPLETED',time:'2026-10-15T03:20:33Z',
@@ -25,7 +29,7 @@ const ctx=(modify=()=>{})=>{
   badEvent:{id:BAD,event_type:'PAYMENT.SALE.REFUNDED',
    create_time:'2026-10-15T03:30:37Z',resource:{payer_email:'private@example.com'}},
  }
- modify({refs,responses})
+ modify({refs,responses,intent})
  const calls=[], privateReads=[]
  const fetchImpl=async(url,opts)=>{
   calls.push({url,method:opts.method,hasSecret:!!opts.headers?.Authorization})
@@ -44,7 +48,8 @@ const ctx=(modify=()=>{})=>{
  const reader=create({
   clientId:'PAYPAL_TEST_ID',clientSecret:'PAYPAL_TEST_SECRET',
   windowStart:'2026-10-15T02:03:31Z',windowEnd:'2026-10-15T04:00:00Z',
-  readTrustedInboxRefs:async args=>{privateReads.push(args);return refs},
+  readTrustedBoundIntent:async args=>{privateReads.push({kind:'intent',args});return intent},
+  readTrustedInboxRefs:async args=>{privateReads.push({kind:'inbox',args});return refs},
   fetchImpl,
  })
  return {reader,calls,privateReads,refs,responses}
@@ -65,13 +70,16 @@ const assertSafe=result=>{
 }
 const run=async modify=>{
  const c=ctx(modify)
- const result=await c.reader.inspect({subscriptionId:SID,saleEventId:EID})
+ const result=await c.reader.inspect({intentId:INTENT,saleEventId:EID})
  assertSafe(result)
  return {...c,result}
 }
 test('sandbox OAuth POST + 3 HTTPS GET are read-only; only minimum projections leave reader',async()=>{
  const {result,calls,privateReads}=await run()
- assert.deepEqual(privateReads,[{subscriptionId:SID,saleEventId:EID}])
+ assert.deepEqual(privateReads,[
+  {kind:'intent',args:{intentId:INTENT}},
+  {kind:'inbox',args:{intentId:INTENT,subscriptionId:SID,saleEventId:EID}},
+ ])
  assert.equal(calls.length,4)
  assert.equal(calls[0].method,'POST') // OAuth only, never payment request
  assert.ok(calls.slice(1).every(c=>c.method==='GET'))
@@ -81,6 +89,29 @@ test('sandbox OAuth POST + 3 HTTPS GET are read-only; only minimum projections l
  assert.deepEqual(result.lifecycleEventTypes,['PAYMENT.SALE.COMPLETED'])
  assert.deepEqual(Object.keys(result.subscription).sort(),
   ['custom_id','id','plan_id','status'].sort())
+})
+test('subscription identifier is selected internally from the bound intent',async()=>{
+ const c=ctx()
+ const result=await c.reader.inspect({intentId:INTENT,saleEventId:EID,
+  subscriptionId:'I-FOREIGN-BROWSER123'})
+ assertSafe(result)
+ assert.equal(result.subscription.id,SID)
+ assert.deepEqual(c.privateReads[0],{kind:'intent',args:{intentId:INTENT}})
+})
+test('malformed or unbound private intent blocks before any PayPal read',async()=>{
+ for(const mutate of [
+  x=>x.state='pending',
+  x=>x.ownerId='not-a-uuid',
+  x=>x.subscriptionId='malformed',
+  x=>x.planId=null,
+  x=>x.provider='stripe',
+ ]){
+  const c=ctx(({intent})=>mutate(intent))
+  await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}),
+   /private_bound_intent_scope_invalid/)
+  assert.equal(c.calls.length,0)
+  assert.equal(c.privateReads.length,1)
+ }
 })
 test('missing pagination metadata is not treated as complete',async()=>{
  const {result}=await run(({responses})=>{
@@ -113,14 +144,14 @@ test('server-owned inbox lookup is required; a browser boolean is never enough',
   x=>x.push({...x[0]}),
  ]){
   const c=ctx(({refs})=>mutate(refs))
-  await assert.rejects(c.reader.inspect({subscriptionId:SID,saleEventId:EID}))
+  await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}))
   assert.equal(c.calls.length,0)
  }
 })
 test('invalid subscription or event reference fails before any token request',async()=>{
  for(const invalid of [
-  {subscriptionId:'https://example.com',saleEventId:EID},
-  {subscriptionId:SID,saleEventId:'../inject'},
+  {intentId:'https://example.com',saleEventId:EID},
+  {intentId:INTENT,saleEventId:'../inject'},
  ]){
   const c=ctx()
   await assert.rejects(c.reader.inspect(invalid),/server_scoped_refs_invalid/)
@@ -146,7 +177,7 @@ test('PayPal event body must match the exact signed-inbox ID and type',async()=>
   x=>x.create_time='2026-02-30T03:20:37Z',
  ]){
   const c=ctx(({responses})=>mutate(responses.event))
-  await assert.rejects(c.reader.inspect({subscriptionId:SID,saleEventId:EID}))
+  await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}))
  }
 })
 test('sale event requires the bound subscription and exact merchant transaction',async()=>{
@@ -157,7 +188,7 @@ test('sale event requires the bound subscription and exact merchant transaction'
   x=>x.resource.state='pending',
  ]){
   const c=ctx(({responses})=>mutate(responses.event))
-  await assert.rejects(c.reader.inspect({subscriptionId:SID,saleEventId:EID}))
+  await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}))
  }
 })
 test('merchant transaction mismatch, duplicate sale and non-completed state reject',async()=>{
@@ -168,7 +199,7 @@ test('merchant transaction mismatch, duplicate sale and non-completed state reje
   x=>x.transactions=[],
  ]){
   const c=ctx(({responses})=>mutate(responses.tx))
-  await assert.rejects(c.reader.inspect({subscriptionId:SID,saleEventId:EID}))
+  await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}))
  }
 })
 test('signed refund event can be observed but NEVER certifies clear refund coverage',async()=>{
@@ -188,13 +219,13 @@ test('the reader cannot assert coverage of a full event journal from a small inb
 })
 test('wrong merchant subscription ID rejects and does not output any PII',async()=>{
  const c=ctx(({responses})=>{responses.sub.id='I-FOREIGN123'})
- await assert.rejects(c.reader.inspect({subscriptionId:SID,saleEventId:EID}),
-  /merchant_subscription_id_mismatch/)
+ await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}),
+  /merchant_subscription_binding_mismatch/)
 })
 test('token and provider failures never emit raw provider body or secrets',async()=>{
  const c=ctx(({responses})=>{responses.token={token_type:'Bearer',
   access_token:'xx'}})
- await assert.rejects(c.reader.inspect({subscriptionId:SID,saleEventId:EID}),
+ await assert.rejects(c.reader.inspect({intentId:INTENT,saleEventId:EID}),
   /sandbox_read_only_auth_invalid/)
  assert.equal(c.calls.length,1)
 })
