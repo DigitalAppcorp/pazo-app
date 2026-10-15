@@ -124,6 +124,33 @@ test('wrong or expired read evidence gets review with existing claim token',asyn
   assert.equal(calls.filter(x=>Array.isArray(x)&&x[0]==='merchant').length,0)
  }
 })
+test('PostgreSQL JSONB UTC +00:00 and six-digit microseconds are valid evidence',async()=>{
+ const verified='2026-10-15T03:20:39.123456+00:00'
+ const lease='2026-10-15T03:25:39.999999+00:00'
+ const {r}=await run({
+  claimNextVerifiedEvent:async()=>{
+   const c=claim();c.verifiedAt=verified;c.leaseExpiresAt=lease;return c
+  },
+  readClaimedEvent:async()=>{
+   const e=read();e.verifiedAt=verified;return e
+  },
+ })
+ assert.equal(r.phase,'REVIEW_REQUESTED')
+ assert.equal(r.reason,'cycle_unproven')
+})
+test('non-UTC offsets, microsecond overflow and impossible calendar dates reject',async()=>{
+ for(const bad of [
+  '2026-10-15T03:20:39-07:00',
+  '2026-10-15T03:20:39.1234567+00:00',
+  '2026-02-30T03:20:39+00:00',
+ ]){
+  const {r}=await run({claimNextVerifiedEvent:async()=>{
+   const c=claim();c.verifiedAt=bad;return c
+  }})
+  assert.equal(r.phase,'CLAIM_REJECTED')
+ }
+})
+
 test('read exceptions are transient retry, with allowlisted reason only',async()=>{
  const {r,calls}=await run({readClaimedEvent:async args=>{
   throw Error('buyer@example.invalid')
