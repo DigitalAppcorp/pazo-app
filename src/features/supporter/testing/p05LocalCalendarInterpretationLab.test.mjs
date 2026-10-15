@@ -37,7 +37,7 @@ test('real sandbox dates align by LA calendar day 14, not UTC, but prove NO cycl
  assert.equal(r.independentProviderBillingAnchorStillRequired,true)
 })
 test('a one-month equality in UTC is still not payment proof',()=>{
- const r=check(d=>d.observedNextBillingUtc='2026-11-15T02:03:31Z')
+ const r=check(d=>d.observedNextBillingUtc='2026-11-15T10:03:31Z')
  assert.equal(r.phase,'DATE_PATTERN_CANDIDATE_ONLY')
  assert.equal(r.utcFollowingMonthSameDay,true)
  assert.equal(r.localFollowingMonthSameDay,false)
