@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import {classifyF16SubscriptionCancellation} from '../../../../scripts/f16-sandbox-auth-bound-e2e.mjs'
 import {spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
 
@@ -85,4 +86,16 @@ test('F16 cancellation diagnostic without credentials cannot call PayPal or muta
  assert.equal(x.why,'f16_missing_private_env')
  assert.equal(x.mayGrantBenefits,false)
  assert.equal(x.paidThrough,null)
+})
+
+test('F16 never tries to cancel a subscription before buyer approval',()=>{
+ for(const status of ['APPROVAL_PENDING','APPROVED']){
+  assert.equal(classifyF16SubscriptionCancellation(status),'await_buyer_no_cancellation_api')
+ }
+ assert.equal(classifyF16SubscriptionCancellation('ACTIVE'),'can_cancel')
+ assert.equal(classifyF16SubscriptionCancellation('SUSPENDED'),'can_cancel')
+ assert.equal(classifyF16SubscriptionCancellation('CANCELLED'),'already_cancelled')
+ for(const status of ['EXPIRED',undefined,'unknown']){
+  assert.equal(classifyF16SubscriptionCancellation(status),'unsupported_status')
+ }
 })
