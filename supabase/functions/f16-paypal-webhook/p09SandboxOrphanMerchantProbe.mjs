@@ -17,7 +17,7 @@ const response=(phase,extra={})=>Object.freeze({
 const denied=reason=>response('BLOCKED',{reason})
 const secret=x=>typeof x==='string'&&/^[\x21-\x7e]{8,512}$/.test(x)
 const isoTime=t=>typeof t==='string'&&Number.isFinite(Date.parse(t))&&
- /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/.test(t)
+ /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(t)
 
 export function createPazoSandboxOrphanMerchantReader({
  clientId,clientSecret,fetchImpl=fetch,

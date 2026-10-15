@@ -130,6 +130,19 @@ test('private recovery RPC uses service role and validates exact response',async
  await assert.rejects(store.readRecoveryForOwner({ownerId:OWNER,requestKey:'BAD'}))
  assert.equal(seen.length,1)
 })
+test('private RPC normalizes timestamptz offsets to canonical UTC',async()=>{
+ const {createPazoCheckoutConsentStore}=await import(
+  '../../../../supabase/functions/f16-paypal-webhook/p06CheckoutConsentStore.mjs')
+ const store=createPazoCheckoutConsentStore({
+  projectUrl:'https://mrybvqdebbgcayuvgkkr.supabase.co',
+  serviceRoleKey:'MOCK_SERVER_ONLY_KEY_1234567890',
+  fetchImpl:async()=>({ok:true,json:async()=>({
+   ...base(),providerCreateClaimedAt:'2026-10-15T08:00:00-04:00',
+  })}),
+ })
+ const answer=await store.readRecoveryForOwner({ownerId:OWNER,requestKey:KEY})
+ assert.equal(answer.providerCreateClaimedAt,'2026-10-15T12:00:00.000Z')
+})
 test('unconfigured dependency prohibits any recovery',()=>{
  assert.throws(()=>create({}),/pazo_checkout_recovery_not_configured/)
 })

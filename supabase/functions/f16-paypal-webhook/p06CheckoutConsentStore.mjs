@@ -86,7 +86,8 @@ export function createPazoCheckoutConsentStore({
    return Object.freeze({ownerId:x.ownerId,requestKey:x.requestKey,
     intentId:x.intentId,planId:PLAN,state:x.state,
     providerCreateClaimed:x.providerCreateClaimed,
-    providerCreateClaimedAt:x.providerCreateClaimedAt,
+    providerCreateClaimedAt:x.providerCreateClaimedAt===null?null:
+     new Date(x.providerCreateClaimedAt).toISOString(),
     subscriptionId:x.subscriptionId})
   },
   async claimProviderCreate({ownerId,requestKey,intentId}={}){

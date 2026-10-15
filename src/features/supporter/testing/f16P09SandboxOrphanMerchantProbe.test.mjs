@@ -121,6 +121,14 @@ test('two distinct PayPal subscriptions sharing the same custom_id are never acc
  assert.equal(JSON.stringify(result).includes(SUB),false)
  assert.equal(JSON.stringify(result).includes(second),false)
 })
+test('merchant probe accepts PostgreSQL offset timestamp for same instant',async()=>{
+ const p=provider()
+ const answer=await p.api.examine({intentId:INTENT,
+  claimedAt:'2026-10-15T08:00:00-04:00'})
+ assert.equal(answer.outcome,'ONE_UNBOUND_CANDIDATE_REVIEW_ONLY')
+ const url=new URL(p.calls[1].url)
+ assert.ok(url.searchParams.get('created_after').startsWith('2026-10-15T11:59'))
+})
 test('malformed provider scope does not call PayPal',async()=>{
  const p=provider()
  for(const args of [
