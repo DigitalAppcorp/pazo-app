@@ -178,14 +178,14 @@ test('unattributed or thrown dispute scope fails closed without data retention',
   event_type:disputeTypes[1]}))).status,503)
  assert.equal(x.queued.length,0)
 })
-test('independently proved non-PAZO dispute receives no stored reference',async()=>{
+test('unproven outside-PAZO claim must not ACK and must not persist',async()=>{
  const x=setup(),handler=createSafeF16WebhookHandler({...x.config,
   disputeCaptureApproved:true,verifyDisputeRetentionRelease:async()=>true,
   assessTrustedDisputeScope:async()=> 'outside_pazo'})
  const r=await handler(x.request({id:'WH-DISPUTE-111',
   event_type:disputeTypes[1]}))
- assert.equal(r.status,200)
- assert.equal((await r.json()).code,'verified_non_pazo_dispute')
+ assert.equal(r.status,503)
+ assert.equal((await r.json()).code,'dispute_scope_unverified')
  assert.equal(x.queued.length,0)
 })
 test('confirmed PAZO dispute minimal evidence is queued only after signature',async()=>{
