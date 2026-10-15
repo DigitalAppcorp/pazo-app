@@ -165,7 +165,8 @@ test('read exceptions are transient retry, with allowlisted reason only',async()
 })
 test('dispute/refund/reversal events never become sales, quarantine for review',async()=>{
  for(const type of ['PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED',
-  'CUSTOMER.DISPUTE.CREATED']){
+  'CUSTOMER.DISPUTE.CREATED','CUSTOMER.DISPUTE.UPDATED',
+  'CUSTOMER.DISPUTE.RESOLVED']){
   const {calls,r}=await run({
    claimNextVerifiedEvent:async()=>{const c=claim();c.eventType=type;return c},
    readClaimedEvent:async()=>{const c=read();c.type=type;return c},
