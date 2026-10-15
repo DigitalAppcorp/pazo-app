@@ -75,7 +75,7 @@ try{
  assert.notEqual(exit,0,'anon must not execute private claim RPC')
  console.log('PASS P05 two-session SKIP LOCKED, lease, historical cutoff, anon deny (synthetic)')
 }finally{
- for(const s of sessions)s.close()
+ for(const child of sessions)child.stdin.end('ROLLBACK;\n\\q\n')
  try{
   run("BEGIN;SET ROLE postgres;UPDATE supporter_private.p05_inbox_worker_gate SET enabled=false,not_before=NULL WHERE id=1;DELETE FROM supporter_private.paypal_verified_event_inbox WHERE provider_event_id IN ('"+id+"','"+old+"');COMMIT;")
  }catch{/* disposable CI process is thrown away */}
