@@ -166,6 +166,7 @@ test('strict Sandbox window bounds prevent unbounded history requests',()=>{
  ]){
   assert.throws(()=>create({
    clientId:'PAYPAL_TEST_ID',clientSecret:'PAYPAL_TEST_SECRET',
+   readTrustedBoundIntent:async()=>({}),
    readTrustedInboxRefs:async()=>[],fetchImpl:async()=>({ok:false}),...values,
   }),/window_invalid/)
  }
