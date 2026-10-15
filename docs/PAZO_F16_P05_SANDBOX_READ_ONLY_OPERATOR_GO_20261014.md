@@ -1,6 +1,6 @@
 # PAZO F16-P05 — Diagnóstico merchant Sandbox de solo lectura: alcance y GO
 
-**Fecha:** 2026-10-14. **Estado:** Product Owner **APROBÓ** explícitamente el GO de **solo lectura merchant PayPal Sandbox del plan y UNA suscripción EXISTENTE** al responder «si». Ejecución operativa **PENDIENTE**, porque este chat no tiene las credenciales privadas del Windows del PO ni conector directo PayPal; no hay consultas reales ejecutadas. NO aprobó ningún pago, migración, worker ni P05 comercial. F16 EN CURSO, PR #44 DRAFT, beta NO-GO.
+**Fecha:** 2026-10-14. **Estado:** GO del Product Owner para solo lectura merchant PayPal Sandbox de UNA suscripción existente **APROBADO Y EJECUTADO POR EL OPERADOR EN WINDOWS**, con JSON resumido devuelto al chat. Verificada la coherencia de plan y suscripción, **NO** el ciclo efectivamente pagado ni el historial financiero. El asistente no tuvo acceso a credenciales ni consultó PayPal directamente: esta evidencia procede de la **salida sanitizada que compartió el operador**. NO hubo GO de nuevas compras, migraciones, worker ni activación de beneficios; P05 comercial sigue pendiente. F16 EN CURSO, PR #44 DRAFT, beta NO-GO.
 
 ## Gate material que cierra esta propuesta
 
@@ -27,6 +27,36 @@ No se debe pegar en el chat la configuración de las variables. El operador pued
 
 **Salida / código de diagnóstico:** salir con código `0` ahora requiere plan mensual USD 2.99 **y además** `plan_overridden:false` y `quantity:'1'` explícitos; de faltar estos últimos se retorna `1` sin conceder nada. El resultado incluye `effectiveTermsConsistent`. Fallo de red/acceso/suscripción o configuración produce `2`. **No** equiparar ninguno de estos códigos a aprobación de un periodo `paid_through` (siempre `null`).
 
+## Evidencia E2E READ ONLY obtenida del operador (2026-10-14)
+
+El Product Owner ejecutó desde `C:\\Users\\osori\\PAZO-F13-preview` el comando `node scripts/f16-paypal-p05-readonly.mjs` con variables merchant Sandbox y un ID de **suscripción existente**, tras corregir el uso de `Read-Host`. Compartió una salida JSON sanitizada con los siguientes resultados:
+
+| Atributo del diagnóstico | Valor |
+|---|---|
+| `environment` / `diagnostic` | `sandbox` / `p05_read_only` |
+| `merchantReadSucceeded` | `true` |
+| `currentPlanMatches299Monthly` | `true` |
+| `subscriptionPlanOverride` | `false` |
+| `subscriptionQuantityOne` | `true` |
+| `effectiveTermsConsistent` | `true` |
+| `subscriptionCurrentlyCancelled` | `true` |
+| `observedFailedPaymentCount` | `0` |
+| `balanceKnown` | `false` |
+| `nextBillingPresent` | `false` |
+| `lastFailedPaymentPresent` | `false` |
+| `retryScheduled` | `false` |
+| `billingPeriodProven` / `cycleAttributionProven` | `false` / `false` |
+| `financialHistoryComplete` / `mayGrantEntitlement` | `false` / `false` |
+| `paidThrough` | `null` |
+
+**Interpretación estricta:** la cuenta merchant autorizada pudo leer por API el plan y la suscripción individual de prueba, que no tenía override y tenía cantidad 1; la suscripción ya estaba CANCELLED. `observedFailedPaymentCount=0` es un snapshot, no demuestra ausencia histórica de fallos. `balanceKnown=false` significa **sin dato de saldo**, no saldo igual a cero. `nextBillingPresent=false` es congruente con cancelación, **no prueba** `paidThrough` ni cuándo comenzó/terminó el servicio; ausencia de `lastFailedPayment` y de retry tampoco demuestra que jamás existieran. No usar el pago Sandbox previo como si estuviese enlazado a una cuenta de PAZO Auth: **nunca estuvo BOUND**. No conservar ni publicar identificador de suscripción, datos de comprador o credenciales en los documentos.
+
+Este resultado da **PASS limitado al gate de lectura del plan/contrato vigente de la suscripción**. **NO es E2E de compra Auth BOUND ni autorización de `cycle_key`, `paid_through`, meses conmemorativos o estados de membresía.**
+
+**Auditoría Supabase alojado adicional de solo lectura (mismo día):** 4 webhooks firmados, los 4 `pending`, 0 intents, 0 ledger, 0 reversals, 0 consents. Sin SQL/Edge/worker nuevos.
+
+**Próximo gate, requiere GO distinto:** prueba controlada de una **nueva** suscripción Sandbox vinculada a Auth PAZO, con merchant intent BOUND y seguimiento preciso del período de facturación; eso podría involucrar un cobro simulado Sandbox y una escritura alojada, **no incluidos** en el GO de lectura anterior. La política P05 de ciclo histórico para pagos atrasados, ancla 28/29/30/31 y retención financiera también espera decisiones PO. **No repetir** el GET read-only ya satisfactorio ni crear suscripciones sin un permiso concreto.
+
 ## Estado de las decisiones
 
 **P06-A–E aprobada comercialmente**: cancelar renovaciones no anula periodo pagado; fallido/pendiente no acredita; parcial exige revisión sin prorratear; total afecta solo ciclo original; disputa bloquea nueva acreditación.
@@ -45,6 +75,6 @@ Las cinco reglas anteriores son **propuesta técnica**, NO aceptación del Produ
 
 El diagnóstico tiene pruebas offline `src/features/supporter/testing/f16P05ReadOnlyDiagnostic.test.mjs` para: credenciales/ID obligatorios, sin peticiones si faltan, salida sanitizada, fallo sin detalles sensibles, cambios de plan, deuda y prohibición universal de entitlement. Las pruebas usan `readerFactory` simulado; deben confirmarse por CI sobre HEAD exacto después de cada cambio.
 
-**GO RESUELTO, EJECUCIÓN PENDIENTE:** el PO dio autorización expresa para la lectura merchant Sandbox de un único recurso de suscripción existente y su plan mediante OAuth y los dos GET declarados, sin otros cambios. No repetir la solicitud de GO para exactamente este alcance. Falta ejecutar en Windows con credenciales localmente disponibles y la referencia `I-...` del registro existente. La salida del script es resumen seguro sin PII. La suscripción se puede localizar en la sesión business Sandbox en https://www.sandbox.paypal.com/billing/subscriptions, según guía oficial PayPal, sin crear otra. Al obtener JSON sanitizado, analizarlo antes de decidir un siguiente gate. Si faltan credenciales, solicitar configuración PRIVADA, jamás pegarlas en el chat.
+**GO Y EJECUCIÓN DE LECTURA RESUELTOS (solo plan + suscripción):** el PO dio autorización expresa para la lectura merchant Sandbox de un único recurso de suscripción existente y su plan mediante OAuth y los dos GET declarados, sin otros cambios. No repetir la solicitud de GO para exactamente este alcance. El operador **ya lo ejecutó** en su Windows y compartió únicamente la salida JSON segura, registrada arriba. La suscripción se puede localizar en la sesión business Sandbox en https://www.sandbox.paypal.com/billing/subscriptions, según guía oficial PayPal, sin crear otra. Al obtener JSON sanitizado, analizarlo antes de decidir un siguiente gate. Si faltan credenciales, solicitar configuración PRIVADA, jamás pegarlas en el chat.
 
 **Restantes:** retención financiera P01–P04/P09 y privacidad de baja, pagos auténticos Auth BOUND, backend protegido con lease y P05 contractual, antes de activar F16 en producción.
