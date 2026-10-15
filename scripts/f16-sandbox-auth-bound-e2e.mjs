@@ -116,6 +116,38 @@ async function cancel(c,state){
   return true
  }catch{return false}
 }
+// Safe recovery diagnostic. GET on the one saved Sandbox reference only.
+// No cancellations, purchases, Auth writes, private DB reads or token output.
+async function statusReadonly(c,state){
+ if(!state||!SUB.test(state.subscriptionId||'')||!state.intentId)
+  return {environment:'sandbox',step:'status_readonly',
+   savedPhase:typeof state?.phase==='string'?state.phase:'unknown',
+   hasSavedSubscriptionReference:SUB.test(state?.subscriptionId||''),
+   merchantReadSucceeded:false,reason:'no_complete_local_subscription_reference',
+   networkWrites:0,mayGrantBenefits:false,paidThrough:null}
+ try{
+  const sub=await paypal(c,'GET',
+   '/v1/billing/subscriptions/'+encodeURIComponent(state.subscriptionId))
+  const validStatus=new Set(['APPROVAL_PENDING','APPROVED','ACTIVE',
+   'SUSPENDED','CANCELLED','EXPIRED'])
+  return {
+   environment:'sandbox',step:'status_readonly',savedPhase:state.phase,
+   hasSavedSubscriptionReference:true,
+   merchantReadSucceeded:true,
+   subscriptionStatus:validStatus.has(sub?.status)?sub.status:'UNKNOWN',
+   subscriptionIdMatches:sub?.id===state.subscriptionId,
+   planMatches:sub?.plan_id===PLAN,
+   customIdMatches:sub?.custom_id===state.intentId,
+   networkWrites:0,mayGrantBenefits:false,paidThrough:null,
+  }
+ }catch{
+  return {environment:'sandbox',step:'status_readonly',
+   savedPhase:typeof state.phase==='string'?state.phase:'unknown',
+   hasSavedSubscriptionReference:true,merchantReadSucceeded:false,
+   reason:'sandbox_get_failed',
+   networkWrites:0,mayGrantBenefits:false,paidThrough:null}
+ }
+}
 // Read-only diagnostic for the SAME local test only, no new purchase or grant.
 // Can be run after cancellation when PayPal transaction listing catches up.
 async function inspect(c,state){
@@ -285,6 +317,11 @@ async function main(){
  if(mode==='--validate-remote'){
   if(load())throw Error('f16_existing_test_state_no_duplicate')
   ok(await validateRemote(c))
+  return
+ }
+ if(mode==='--status-readonly'){
+  requireConfig(c)
+  ok(await statusReadonly(c,load()))
   return
  }
  if(mode==='--inspect'){
