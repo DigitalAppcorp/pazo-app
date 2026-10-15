@@ -40,7 +40,8 @@ const reply=(status,code,retryAfter=null)=>new Response(JSON.stringify({code}),{
 })
 export function createSafeF16WebhookHandler({environment,webhookId,planId,verifySignature,inbox,
   admissionGate=f16WorkerAdmissionGate,globalAdmission=null,
-  disputeCaptureApproved=false,assessTrustedDisputeScope=null}={}) {
+  disputeCaptureApproved=false,assessTrustedDisputeScope=null,
+  verifyDisputeRetentionRelease=null}={}) {
   return async function handle(request) {
     if(request.method!=='POST') return reply(405,'method_not_allowed')
     // This F16 test integration is Sandbox-only until a separately approved Live gate.
@@ -120,6 +121,17 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
         // signing up to PayPal dispute events or deploying a matching SQL RPC.
         // A signed merchant event may concern an unrelated business payment.
         if(disputeCaptureApproved!==true) return reply(503,'dispute_intake_not_released',300)
+        // Separate privacy/retention approval from merchant ownership and
+        // technical capture gate. This trusted server-side verifier remains
+        // UNCONFIGURED until category, hold, access, backup and deletion rules
+        // are formally approved. It only sees event type + environment.
+        if(typeof verifyDisputeRetentionRelease!=='function')
+          return reply(503,'dispute_retention_not_approved',300)
+        let privacyAllowed=false
+        try {privacyAllowed=(await verifyDisputeRetentionRelease({
+          eventType:event.event_type,environment}))===true}
+        catch {return reply(503,'dispute_retention_not_approved',300)}
+        if(!privacyAllowed)return reply(503,'dispute_retention_not_approved',300)
         if(typeof assessTrustedDisputeScope!=='function')
           return reply(503,'dispute_scope_unavailable',300)
         let scope
