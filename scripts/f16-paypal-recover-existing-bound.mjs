@@ -19,6 +19,7 @@ const URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const HOST='https://api-m.sandbox.paypal.com'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const FILE=join(homedir(),process.platform==='win32'?'AppData\\Local\\PAZO-F16-E2E':'.pazo-f16-e2e','sandbox-state.json')
+const CLAIM=FILE+'.recover-claimed'
 const SECRET=/^[\x21-\x7e]{8,4096}$/
 const options={auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
 const result=(phase,reason)=>Object.freeze({
@@ -90,6 +91,7 @@ async function inspect(c,state){
  return {gate,admin}
 }
 export async function preflightExistingRecovery(env=process.env){
+ if(existsSync(CLAIM))throw Error('f16_recovery_already_claimed')
  const c=secrets(env),state=readSaved()
  const {gate}=await inspect(c,state)
  return Object.freeze({
@@ -103,10 +105,18 @@ export async function bindExistingRecovery(env=process.env){
  // Enforce the gate even when called programmatically, not just via CLI.
  if(env.PAZO_F16_RECOVERY_WRITE_GO!=='EXISTING_QA_AUTH_AND_INTENT_ONLY')
   throw Error('f16_explicit_existing_test_write_go_required')
+ if(existsSync(CLAIM))throw Error('f16_recovery_already_claimed')
  const c=secrets(env),state=readSaved()
  const {gate,admin}=await inspect(c,state)
  if(gate.safeToReauthenticate!==true||gate.safeToBind!==true)
   throw Error('f16_existing_binding_preflight_blocked')
+ // Atomic, never-removed one-shot claim blocks concurrent operators and
+ // accidental re-runs even if the main JSON write or hosted API times out.
+ try{
+  writeFileSync(CLAIM,'one_qa_auth_and_one_existing_intent_only\n',{
+   encoding:'utf8',flag:'wx',mode:0o600,
+  })
+ }catch{throw Error('f16_recovery_atomic_claim_unavailable_or_exists')}
  // The marker is written BEFORE any hosted write. Uncertain success NEVER
  // permits a second automatic password reset or provider action.
  updateSaved({...state,recoveryPhase:'auth_recovery_requested'})
