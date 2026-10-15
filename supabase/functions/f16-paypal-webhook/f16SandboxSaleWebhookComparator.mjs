@@ -1,6 +1,8 @@
 // PAZO F16 — pure read-only evidence comparison. Never authorizes financial writes.
 const ref=/^[A-Za-z0-9._-]{3,128}$/
-const money=x=>x?.currency_code==='USD'&&x?.value==='2.99'
+const merchantMoney=x=>x?.currency_code==='USD'&&x?.value==='2.99'
+// PAYMENT.SALE.COMPLETED uses Payments v1 sale shape, NOT modern money fields.
+const saleMoney=x=>x?.currency==='USD'&&x?.total==='2.99'
 const result=(phase,reason)=>Object.freeze({phase,reason,mayGrantBenefits:false,mayRecordPayment:false,cycleVerified:false,paidThrough:null})
 export function compareF16SandboxSaleEvidence({subscription,transaction,event,inboxEventId}={}){
   if(!subscription||!transaction||!event||!inboxEventId)
@@ -13,7 +15,7 @@ export function compareF16SandboxSaleEvidence({subscription,transaction,event,in
     return result('MISMATCH','webhook_event_type_mismatch')
   if(subscription.status!=='CANCELLED'||!/^I-[A-Za-z0-9_-]{3,70}$/.test(subscription.id||''))
     return result('INCONCLUSIVE','subscription_status_or_id_unverified')
-  if(transaction.status!=='COMPLETED'||!money(transaction.amount_with_breakdown?.gross_amount))
+  if(transaction.status!=='COMPLETED'||!merchantMoney(transaction.amount_with_breakdown?.gross_amount))
     return result('MISMATCH','merchant_sale_details_mismatch')
   const sale=event.resource
   if(!sale||typeof sale!=='object'||!ref.test(sale.id||''))
@@ -27,7 +29,7 @@ export function compareF16SandboxSaleEvidence({subscription,transaction,event,in
     return result('MISMATCH','webhook_subscription_mismatch')
   if(sale.state!=='completed'&&sale.state!=='COMPLETED')
     return result('INCONCLUSIVE','webhook_sale_status_not_confirmed')
-  if(!money(sale.amount))
+  if(!saleMoney(sale.amount))
     return result('MISMATCH','webhook_sale_amount_mismatch')
   return result('MATCH','exact_sale_webhook_and_subscription_references_match_only')
 }
