@@ -59,6 +59,8 @@ import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
+import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
+import { isSupporterAccountHash, leaveSupporterAccountRoute } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -170,10 +172,14 @@ function PazoMain() {
   } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
+  const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(
+    () => isSupporterAccountHash(window.location.hash)
+  )
 
   useEffect(() => {
     const syncPublicRoute = () => {
       setPublicRescueRoute(getPublicRescueRoute())
+      setSupporterAccountRoute(isSupporterAccountHash(window.location.hash))
     }
 
     window.addEventListener('hashchange', syncPublicRoute)
@@ -1488,6 +1494,16 @@ function PazoMain() {
     )
   }
 
+  // Accessible to the verified account holder even when pet loading fails
+  // or the account has no pets. A subscription must not depend on a pet.
+  if (user && isSupporterAccountRoute) {
+    return <SupporterAccountManagement lang={lang}
+      onClose={() => {
+        leaveSupporterAccountRoute(window.location)
+        setSupporterAccountRoute(false)
+      }} />
+  }
+
   if (user && (petBootstrap?.userId !== user.id || petBootstrap.status === 'loading')) {
     return (
       <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
@@ -1515,6 +1531,10 @@ function PazoMain() {
             className="w-full rounded-full bg-[#204E4A] text-white py-3 font-extrabold cursor-pointer">
             {lang === 'es' ? 'Reintentar' : 'Try again'}
           </button>
+          <a href="#/account/supporter"
+            className="block w-full rounded-full bg-[#E1E53F]/50 py-3 text-center text-sm font-bold text-[#204E4A]">
+            {lang === 'es' ? 'Gestionar suscripción de apoyo' : 'Manage support subscription'}
+          </a>
         </main>
       </div>
     )

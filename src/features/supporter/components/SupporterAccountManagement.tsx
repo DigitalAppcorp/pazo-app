@@ -118,8 +118,13 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
       const link = document.createElement('a')
       link.href = href
       link.download = 'pazo-accepted-terms.txt'
+      document.body.appendChild(link)
       link.click()
-      URL.revokeObjectURL(href)
+      // Revoking synchronously can abort a download in some browsers.
+      setTimeout(() => {
+        link.remove()
+        URL.revokeObjectURL(href)
+      }, 1500)
     } catch {setError(true)} finally {setBusy(false)}
   }
 
