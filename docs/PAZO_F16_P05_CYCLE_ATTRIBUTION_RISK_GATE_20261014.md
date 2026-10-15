@@ -2,6 +2,8 @@
 
 **Fecha:** 14 de octubre de 2026. **Estado:** ingeniería offline, NO decisión de cobertura P05, NO creación de migración oficial ni cambios alojados. PR #44 DRAFT.
 
+> **Actualización de aprobación comercial (14-oct-2026, posterior al texto histórico):** el PO **APROBÓ P05-L**: pagos atrasados/recuperados asignados al ciclo **original** que originó deuda solamente con prueba merchant/contractual independiente; nunca añaden automáticamente otro mes, y sin prueba quedan en revisión sin beneficios. El calendario de cobertura requiere límites contractuales verificados, no `payment +30 días`. **No se aprobó íntegramente la implementación P05**: sigue pendiente `cycle_key` efectivo, ancla de fechas/huso, evidencia E2E Auth BOUND y cualquier activación hosted. Fuente canónica: `docs/PAZO_F16_P05_LATE_PAYMENT_POLICY_APPROVED_20261014.md`. Cualquier marca antigua de «P05/política de pagos atrasados no aprobada» en este archivo es una fotografía anterior y queda sustituida **solo en esta dimensión comercial**.
+
 ## Hallazgo auditado
 
 La guía oficial PayPal sobre reintentos, actualizada **14-sep-2026**, documenta que, después de fallar, PayPal puede reintentar cada cinco días, **hasta dos veces en un ciclo**, y si no logra cobrar, suma el monto pendiente al siguiente ciclo. Configuraciones de `auto_bill_outstanding` pueden cobrar saldos acumulados; después de ciertos fallos una suscripción se suspende. Una transacción posterior (aunque su importe sea USD 2.99) puede liquidar saldo histórico en vez de abrir un nuevo mes de servicio.
