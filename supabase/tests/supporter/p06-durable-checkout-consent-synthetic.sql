@@ -62,7 +62,7 @@ BEGIN
  -- Once published, no text, publication state or row may be altered/deleted.
  BEGIN
   UPDATE supporter_private.paypal_p06_offers SET exact_copy=raw_en
-   WHERE version=version AND locale='es';
+   WHERE locale='es';
   RAISE EXCEPTION 'P06 published ES copy was mutable';
  EXCEPTION WHEN insufficient_privilege THEN NULL;
  END;
