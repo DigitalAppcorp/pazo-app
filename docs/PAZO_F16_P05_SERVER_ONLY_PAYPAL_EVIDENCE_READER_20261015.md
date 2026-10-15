@@ -2,6 +2,16 @@
 
 **Fecha:** 2026-10-15. **Fase:** F16-P05, PR #44 DRAFT. El PO dio «ok go» para avanzar el gate de lectura autenticada de evidencia, no para crear/cobrar suscripciones ni aplicar SQL/backend. Todos los efectos financieros continúan NO-GO. La app PAZO es gratuita; Amigo de PAZO es apoyo opcional.
 
+## RPC de intención privada YA EXISTENTE, auditada en hosted de solo lectura
+
+Se comprobó mediante consulta `SELECT pg_get_functiondef` que `public.f16_paypal_read_private_intent(p_intent_id text)` existe, es `SECURITY DEFINER`, `search_path=''`, requiere `intent-UUIDv4`, devuelve `jsonb` con `id`, `owner_id`, `plan_id`, `state`, `external_subscription_id`; `EXECUTE` para `service_role` solamente, denegado a `anon/authenticated`. Ninguna mutación fue ejecutada en esta auditoría.
+
+Nuevo módulo `supabase/functions/f16-paypal-webhook/p05ServerOnlyBoundIntentReader.mjs`: lector inactivo que **reutiliza esta RPC existente**, con endpoint exacto `https://mrybvqdebbgcayuvgkkr.supabase.co/rest/v1/rpc/f16_paypal_read_private_intent`, clave `service_role` solo server y `fetchImpl` inyectable. Valida intent UUIDv4, respuesta exacta esperada, owner UUID, `plan_id` Sandbox fijo, `state:bound` y `external_subscription_id` válido. Proyecta snake_case a `{id,ownerId,provider:'paypal',state,planId,subscriptionId}`; descarta cualquier PII/extra. No habilita OAuth PayPal ni derechos.
+
+`src/features/supporter/testing/f16P05ServerOnlyBoundIntentReader.test.mjs` prueba URL/rol/argumento, salida mínima, valores ajenos, falsos `owner_id`, intent pendiente, respuesta null y excepciones con secretos que se convierten a error fijo; **solo mocks**. Puede servir como callback `readTrustedBoundIntent` del lector merchant **dentro de futuro worker interno autenticado**, no desde navegador.
+
+**Bloqueo decisivo:** no existe aún una interfaz `service_role` de **lectura privada del inbox firmemente acotada al evento, con claim/locking de estado**, como `readTrustedInboxRefs`. No conceder acceso SELECT amplio a `service_role` ni crear una función `SECURITY DEFINER` pública sin revisar autenticación, ownership e idempotencia; requiere propuesta SQL versionada y aprobación PO específica.
+
 ## Implementación añadida en GitHub, sin ejecución sobre PayPal real
 
 - `supabase/functions/f16-paypal-webhook/p05SandboxMerchantEvidenceReader.mjs`: fábrica `createP05SandboxMerchantEvidenceReader` de servidor **no conectada** a la Edge Function, UI, worker ni cron. Usa endpoint fijo **`https://api-m.sandbox.paypal.com`**. Proporciona función `inspect({intentId,saleEventId})`; nunca acepta `subscriptionId` del navegador como fuente del merchant.
