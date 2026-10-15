@@ -65,6 +65,29 @@ export function createPazoCheckoutConsentStore({
     termsVersion:x.termsVersion,termsDigest:x.termsDigest,
     planId:PLAN,createdAt:x.createdAt,state:x.state})
   },
+  async readAcknowledgementForOwner({ownerId,intentId}={}){
+   if(!UUID.test(ownerId||'')||!INTENT.test(intentId||''))
+    throw Error('pazo_acknowledgement_identity_invalid')
+   const x=await rpc('f16_p14_read_owner_checkout_acknowledgement',{
+    p_owner_id:ownerId,p_intent_id:intentId,
+   })
+   if(x===null)return null
+   if(!x||x.ownerId!==ownerId||x.intentId!==intentId||
+     !['es','en'].includes(x.locale)||!VERSION.test(x.termsVersion||'')||
+     !HASH.test(x.termsDigest||'')||
+     typeof x.exactCopy!=='string'||x.exactCopy.length<100||
+     x.exactCopy.length>12000||
+     typeof x.consentedAt!=='string'||
+     !Number.isFinite(Date.parse(x.consentedAt))||
+     x.priceMinor!==299||x.currency!=='USD'||x.cadence!=='MONTH_1')
+    fail()
+   return Object.freeze({
+    ownerId, intentId, locale:x.locale, termsVersion:x.termsVersion,
+    termsDigest:x.termsDigest,exactCopy:x.exactCopy,
+    consentedAt:new Date(x.consentedAt).toISOString(),
+    priceMinor:299,currency:'USD',cadence:'MONTH_1',
+   })
+  },
   async readRecoveryForOwner({ownerId,requestKey}={}){
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||''))
     throw Error('pazo_checkout_recovery_lookup_invalid')
