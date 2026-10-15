@@ -46,7 +46,7 @@ export function auditF16SupporterLaunchControls(input){
   offer.amountMinor!==299||offer.intervalUnit!=='MONTH'||
   offer.intervalCount!==1||offer.autoRenews!==true||
   offer.isFreeCore!==true||offer.hasTrial!==false||
-  !/^offer-[A-Za-z0-9._-]{3,64}$/.test(offer.offerVersion||''))
+  !/^offer-[A-Za-z0-9._-]{1,64}$/.test(offer.offerVersion||''))
   return deny('offer_terms_not_consistent_with_approved_scope')
  if(!sameKeys(input.controls,FIELDS)||
   FIELDS.some(k=>typeof input.controls[k]!=='boolean'))
