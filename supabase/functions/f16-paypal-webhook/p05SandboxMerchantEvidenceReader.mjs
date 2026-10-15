@@ -1,11 +1,12 @@
 // PAZO F16-P05 — INACTIVE, SERVER-ONLY PayPal Sandbox evidence reader.
 // Not deployed, not imported by checkout/webhook/entitlement code. No DB writes.
-// An authorized future service worker (not an end-user session) must scope
-// subscriptionId/eventRefs to a privately BOUND intent and VERIFIED inbox.
-// Calling this module by itself does NOT verify that authorization boundary.
+// An authorized future worker (not an end-user session) must provide
+// readTrustedBoundIntent and readTrustedInboxRefs as privileged private reads.
+// Mock callbacks are NOT actual authorization or evidence attestation.
 const HOST='https://api-m.sandbox.paypal.com'
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const REF=/^[A-Za-z0-9._-]{3,128}$/
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const UTC=/^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?Z$/
 const utc=s=>typeof s==='string'&&UTC.test(s)&&Number.isFinite(Date.parse(s))&&
  (new Date(s).toISOString()===s||new Date(s).toISOString().replace(/\.000Z$/,'Z')===s)
@@ -38,10 +39,11 @@ const projectEvent=e=>({
     total:e.resource?.amount?.total}}:undefined,
 })
 export function createP05SandboxMerchantEvidenceReader({
- clientId,clientSecret,windowStart,windowEnd,readTrustedInboxRefs,fetchImpl=fetch,
+ clientId,clientSecret,windowStart,windowEnd,readTrustedBoundIntent,
+ readTrustedInboxRefs,fetchImpl=fetch,
 }={}){
  if(!credential(clientId)||!secret(clientSecret)||typeof fetchImpl!=='function'||
-  typeof readTrustedInboxRefs!=='function')
+  typeof readTrustedInboxRefs!=='function'||typeof readTrustedBoundIntent!=='function')
   invalid('sandbox_read_only_reader_not_configured')
  if(!utc(windowStart)||!utc(windowEnd)||
   Date.parse(windowStart)>=Date.parse(windowEnd)||
@@ -66,12 +68,20 @@ export function createP05SandboxMerchantEvidenceReader({
   return projectEvent(e)
  }
  return Object.freeze({
-  async inspect({subscriptionId,saleEventId}={}){
-   if(!SUB.test(subscriptionId||'')||!REF.test(saleEventId||''))
+  async inspect({intentId,saleEventId}={}){
+   if(!REF.test(intentId||'')||!REF.test(saleEventId||''))
     invalid('server_scoped_refs_invalid')
+   // Resolve all merchant identifiers from the private internal worker scope.
+   // A browser-controlled subscriptionId never chooses the PayPal account.
+   const intent=await readTrustedBoundIntent({intentId})
+   if(!intent||intent.id!==intentId||intent.state!=='bound'||
+    intent.provider!=='paypal'||!UUID.test(intent.ownerId||'')||
+    !SUB.test(intent.subscriptionId||'')||!REF.test(intent.planId||''))
+    invalid('private_bound_intent_scope_invalid')
+   const subscriptionId=intent.subscriptionId
    // Only an internal authenticated service-owned inbox reader supplies refs.
    // Browser-supplied signature flags are never accepted.
-   const inboxEventRefs=await readTrustedInboxRefs({subscriptionId,saleEventId})
+   const inboxEventRefs=await readTrustedInboxRefs({intentId,subscriptionId,saleEventId})
    if(!Array.isArray(inboxEventRefs)||inboxEventRefs.length>20||
     inboxEventRefs.some(x=>!x||!REF.test(x.id||'')||
       !validEventTypes.has(x.type)||!utc(x.verifiedAt)||
@@ -90,7 +100,9 @@ export function createP05SandboxMerchantEvidenceReader({
     readJson(fetchImpl,endpoint+'/transactions?'+params,{method:'GET',headers}),
     Promise.all(inboxEventRefs.map(x=>eventGet(headers,x.id))),
    ])
-   if(sub.id!==subscriptionId)invalid('merchant_subscription_id_mismatch')
+   if(sub.id!==subscriptionId||sub.plan_id!==intent.planId||
+    sub.custom_id!==intentId||!['ACTIVE','CANCELLED'].includes(sub.status))
+    invalid('merchant_subscription_binding_mismatch')
    if(!Array.isArray(list.transactions)||list.transactions.length>500)
     invalid('merchant_transaction_list_invalid')
    // "complete" here is at most the response's requested date window,
