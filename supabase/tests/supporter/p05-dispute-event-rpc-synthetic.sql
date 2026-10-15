@@ -38,13 +38,13 @@ BEGIN
 
  FOREACH evt IN ARRAY types LOOP
   inserted:=public.f16_paypal_record_verified_event(
-   'WH-P05-'+pg_catalog.replace(evt,'.','-'),evt);
+   'WH-P05-'||pg_catalog.replace(evt,'.','-'),evt);
   IF inserted IS NOT TRUE THEN RAISE EXCEPTION 'First insert not created'; END IF;
   inserted:=public.f16_paypal_record_verified_event(
-   'WH-P05-'+pg_catalog.replace(evt,'.','-'),evt);
+   'WH-P05-'||pg_catalog.replace(evt,'.','-'),evt);
   IF inserted IS NOT FALSE THEN RAISE EXCEPTION 'Duplicate not idempotent'; END IF;
   IF NOT EXISTS(SELECT 1 FROM supporter_private.paypal_verified_event_inbox
-   WHERE provider_event_id='WH-P05-'+pg_catalog.replace(evt,'.','-')
+   WHERE provider_event_id='WH-P05-'||pg_catalog.replace(evt,'.','-')
    AND event_type=evt AND processing_state='pending')
   THEN RAISE EXCEPTION 'Missing minimal pending event'; END IF;
  END LOOP;
