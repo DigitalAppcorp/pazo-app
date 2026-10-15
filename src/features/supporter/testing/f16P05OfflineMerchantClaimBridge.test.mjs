@@ -38,8 +38,8 @@ test('PayPal event -> sub -> fenced private intent correlation is candidate only
  const r=await inspect(bridge);safe(r)
  assert.equal(r.kind,'sale_correlated_candidate')
  assert.deepEqual(calls,[
-  ['event',{eventId}],
-  ['sub',{subscriptionId:subId}],
+  ['event',{eventId,claimToken}],
+  ['sub',{subscriptionId:subId,eventId,claimToken}],
   ['resolve',{eventId,claimToken,
    merchantSubscriptionId:subId,merchantCustomIntentId:intentId}],
  ])
