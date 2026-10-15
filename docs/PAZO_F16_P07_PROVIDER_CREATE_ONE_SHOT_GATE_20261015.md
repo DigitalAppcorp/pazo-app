@@ -21,4 +21,4 @@ P06 conservaba consentimiento idempotente por `(ownerId,requestKey)`, pero en es
 `f16P06Checkout.test.mjs`: claim primero; pérdida de respuesta, repetición, carreras en orquestador y rechazo sin claim.
 `p06-durable-checkout-consent-synthetic.sql`: permisos RPC y claim atómico one-shot con claves/propietarios distintos, persistencia, rechazo tras bind.
 
-**Gate siguiente:** confirmar CI general y PostgreSQL Lab de este HEAD; revisión de términos ES/EN, cancelación/retención, origen merchant, nueva migración Sandbox autorizada por PO y prueba real controlada, sin reusar los 8 eventos QA históricos.
+**CI general SUCCESS y PostgreSQL Lab SUCCESS** del commit técnico `c9fcb6b` (2026-10-15). La primera ejecución falló por formato del regex SQL; se corrigió y reejecutó completo, ambas verificaciones aprobaron. **Gate siguiente:** revisión de términos ES/EN, cancelación/retención, origen merchant, nueva migración Sandbox autorizada por PO y prueba real controlada, sin reusar los 8 eventos QA históricos.
