@@ -42,7 +42,7 @@ test('all three dispute types: exact merchant seller ID and private ledger-bound
   assert.deepEqual(ctx.calls,[
    ['event',{eventId:E}],['dispute',{disputeId:D}],
    ['payment',{sellerTransactionId:SALE}],
-   ['intent',{subscriptionId:SUB}],
+   ['intent',{subscriptionId:SUB,expectedOwnerId:OWNER}],
   ])
   assert.equal(JSON.stringify(await run(ctx,type)).includes('private.example'),false)
  }
