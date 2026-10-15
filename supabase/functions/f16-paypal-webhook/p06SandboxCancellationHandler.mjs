@@ -73,7 +73,7 @@ export function createPazoSandboxCancellationHandler({
     }
     const state=await provider.cancel(args)
     if(state?.status!=='CANCELLED')
-      return json(503,'cancellation_unconfirmed')
+      return json(503,'paypal_confirmation_required')
     // Cancellation changes future renewals, NOT independently proven paid cover.
     return json(200,'future_renewals_cancelled',{providerStatus:'CANCELLED',
       cancelled:true})
