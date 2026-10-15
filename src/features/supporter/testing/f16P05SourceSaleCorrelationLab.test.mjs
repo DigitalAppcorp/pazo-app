@@ -45,8 +45,8 @@ const fixture=mutate=>{
   readBoundIntent:async args=>{calls.push('intent');assert.deepEqual(args,{ownerId:OWNER,intentId:INTENT});return d.intent},
   readSignedInboxEvent:async args=>{calls.push('inbox');assert.deepEqual(args,{eventId:EVENT,eventType:'PAYMENT.SALE.COMPLETED'});return d.inbox},
   getMerchantWebhookEvent:async args=>{calls.push('event');assert.deepEqual(args,{eventId:EVENT});return d.event},
-  getMerchantSubscription:async args=>{calls.push('sub');assert.deepEqual(args,{subscriptionId:SUB});return d.sub},
-  listMerchantTransactions:async args=>{calls.push('tx');assert.deepEqual(args,{subscriptionId:SUB});return d.transactions},
+  getMerchantSubscription:async args=>{calls.push('sub');assert.deepEqual(args,{subscriptionId:d.intent.subscriptionId});return d.sub},
+  listMerchantTransactions:async args=>{calls.push('tx');assert.deepEqual(args,{subscriptionId:d.intent.subscriptionId});return d.transactions},
  })
  return {inspector,calls}
 }
@@ -84,6 +84,10 @@ test('owner mismatches, unbound intents and unknown plan fail closed before paym
   assert.equal(r.reason,'private_bound_intent_not_proven')
   assert.deepEqual(calls,['auth','intent'])
  }
+})
+test('foreign but structurally valid subscription in intent is caught by merchant GET',async()=>{
+ const {r}=await run(d=>d.intent.subscriptionId='I-FOREIGNVALID123')
+ assert.equal(r.reason,'merchant_subscription_binding_mismatch')
 })
 test('inbox must identify the signed sale event, not an activation, stranger or quarantine',async()=>{
  for(const mutate of [
