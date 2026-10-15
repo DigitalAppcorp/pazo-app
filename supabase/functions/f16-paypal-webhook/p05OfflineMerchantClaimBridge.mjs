@@ -18,7 +18,7 @@ export function createP05OfflineMerchantClaimBridge(adapters={}){
    if(!REF.test(eventId||'')||eventType!=='PAYMENT.SALE.COMPLETED'||
      !UUID.test(claimToken||''))return kind('insufficient_evidence')
    let event
-   try{event=await adapters.getMerchantEvent({eventId})}
+   try{event=await adapters.getMerchantEvent({eventId,claimToken})}
    catch{return kind('retryable_outage')}
    if(!event||event.id!==eventId||
     event.event_type!=='PAYMENT.SALE.COMPLETED')
@@ -32,7 +32,7 @@ export function createP05OfflineMerchantClaimBridge(adapters={}){
    let sub
    try{
     sub=await adapters.getMerchantSubscription({
-     subscriptionId:sale.billing_agreement_id})
+     subscriptionId:sale.billing_agreement_id,eventId,claimToken})
    }catch{return kind('retryable_outage')}
    if(!sub||sub.id!==sale.billing_agreement_id||
     sub.plan_id!==PLAN||
