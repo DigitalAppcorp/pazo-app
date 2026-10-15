@@ -58,3 +58,17 @@ test('F16 unsupported CLI mode does not create a subscription or reveal details'
  assert.equal(o.mayGrantBenefits,false)
  assert.equal(o.paidThrough,null)
 })
+
+test('F16 remote validation without private env fails before network or writes',()=>{
+ const r=spawnSync(process.execPath,[script,'--validate-remote'],{
+  encoding:'utf8',timeout:20000,
+  env:{...process.env,PAYPAL_SANDBOX_CLIENT_ID:'',
+   PAYPAL_SANDBOX_CLIENT_SECRET:'',PAZO_F16_SUPABASE_SECRET_KEY:''},
+ })
+ assert.equal(r.status,2)
+ assert.equal(r.stdout,'')
+ const o=JSON.parse(r.stderr)
+ assert.equal(o.step,'BLOCKED')
+ assert.equal(o.why,'f16_missing_private_env')
+ assert.equal(o.mayGrantBenefits,false)
+})
