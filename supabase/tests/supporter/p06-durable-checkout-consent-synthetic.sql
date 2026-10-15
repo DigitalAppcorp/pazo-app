@@ -40,8 +40,8 @@ BEGIN
  INSERT INTO supporter_private.paypal_p06_offers(
   version,locale,exact_copy,plan_id,published_at)
  VALUES(version,'es',raw,'P-14V25407JP6850922NLHMDKI',pg_catalog.clock_timestamp());
- SELECT sha256 INTO digest FROM supporter_private.paypal_p06_offers
- WHERE version='pazo-supporter-p06.v1' AND locale='es';
+ SELECT o.sha256 INTO digest FROM supporter_private.paypal_p06_offers o
+ WHERE o.version='pazo-supporter-p06.v1' AND o.locale='es';
  IF digest IS NULL THEN RAISE EXCEPTION 'P06 digest generation missing'; END IF;
  IF public.f16_p06_read_published_offer('en') IS NOT NULL
  THEN RAISE EXCEPTION 'P06 cross-locale leaked incorrect version'; END IF;
