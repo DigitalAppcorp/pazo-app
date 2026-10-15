@@ -10,6 +10,7 @@ DECLARE
  version text:='pazo-supporter-p06.v1';
  raw text:='Amigo de PAZO es una suscripción opcional de 2.99 USD al mes que se renueva automáticamente. Puedes cancelarla por internet. La aplicación principal permanece gratuita. Este texto es solo sintético.';
  digest text;
+ raw_en text:='PAZO Friend is an optional monthly subscription costing 2.99 USD. It renews automatically until cancelled online. The main PAZO application remains entirely free. Synthetic test only.';
  a jsonb;b jsonb;c jsonb;
 BEGIN
  IF current_database()<>'f14_synthetic' OR session_user<>'f14_admin'
@@ -43,8 +44,42 @@ BEGIN
  SELECT o.sha256 INTO digest FROM supporter_private.paypal_p06_offers o
  WHERE o.version='pazo-supporter-p06.v1' AND o.locale='es';
  IF digest IS NULL THEN RAISE EXCEPTION 'P06 digest generation missing'; END IF;
+ -- Publish a single language must NOT expose checkout to either locale.
  IF public.f16_p06_read_published_offer('en') IS NOT NULL
- THEN RAISE EXCEPTION 'P06 cross-locale leaked incorrect version'; END IF;
+ OR public.f16_p06_read_published_offer('es') IS NOT NULL
+ THEN RAISE EXCEPTION 'P06 advertised incomplete bilingual offer'; END IF;
+ BEGIN
+  PERFORM public.f16_p06_begin_checkout(owner,key_a,'es',version,digest,true);
+  RAISE EXCEPTION 'P06 started checkout before bilingual publication';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+ INSERT INTO supporter_private.paypal_p06_offers(
+  version,locale,exact_copy,plan_id,published_at)
+ VALUES(version,'en',raw_en,'P-14V25407JP6850922NLHMDKI',
+  pg_catalog.clock_timestamp());
+ IF public.f16_p06_read_published_offer('en')->>'exactCopy'<>raw_en
+ THEN RAISE EXCEPTION 'P06 EN offer not available after paired publication'; END IF;
+ -- Once published, no text, publication state or row may be altered/deleted.
+ BEGIN
+  UPDATE supporter_private.paypal_p06_offers SET exact_copy=raw_en
+   WHERE version=version AND locale='es';
+  RAISE EXCEPTION 'P06 published ES copy was mutable';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+ BEGIN
+  UPDATE supporter_private.paypal_p06_offers SET published_at=NULL
+   WHERE locale='en';
+  RAISE EXCEPTION 'P06 could withdraw published EN terms';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+ BEGIN
+  DELETE FROM supporter_private.paypal_p06_offers WHERE locale='es';
+  RAISE EXCEPTION 'P06 deleted immutable published offer';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+ IF (SELECT count(*) FROM supporter_private.paypal_p06_offers
+  WHERE version='pazo-supporter-p06.v1' AND published_at IS NOT NULL)<>2
+ THEN RAISE EXCEPTION 'P06 published evidence not preserved'; END IF;
  a:=public.f16_p06_read_published_offer('es');
  IF a->>'termsDigest'<>digest OR a->>'exactCopy'<>raw
  THEN RAISE EXCEPTION 'P06 returned mismatching terms copy or digest'; END IF;
