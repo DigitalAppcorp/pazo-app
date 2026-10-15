@@ -26,10 +26,11 @@ $gate$;
 CREATE FUNCTION public.f16_p05_draft_resolve_claimed_subscription(
  p_event_id text,
  p_claim_token uuid,
- p_merchant_subscription_id text)
+ p_merchant_subscription_id text,
+ p_merchant_custom_intent_id text)
 RETURNS jsonb
 LANGUAGE sql
-STABLE
+VOLATILE
 SECURITY DEFINER
 SET search_path = ''
 AS $lookup$
@@ -47,6 +48,29 @@ AS $lookup$
  ON s.external_subscription_id=p_merchant_subscription_id
  WHERE p_event_id ~ '^[A-Za-z0-9._-]{3,128}$'
   AND p_claim_token IS NOT NULL
+  AND p_merchant_custom_intent_id ~ '^intent-[A-Za-z0-9_-]{12,90}
+  AND p_merchant_subscription_id ~ '^I-[A-Za-z0-9_-]{3,70}$'
+  AND e.provider_event_id=p_event_id
+  AND e.event_type='PAYMENT.SALE.COMPLETED'
+  AND e.verified_at>=g.not_before
+  AND e.processing_state='processing'
+  AND e.p05_claim_token=p_claim_token
+  AND e.next_attempt_at>pg_catalog.clock_timestamp()
+  AND s.intent_id=p_merchant_custom_intent_id
+  AND s.provider='paypal'
+  AND s.state='bound'
+  AND s.bound_at IS NOT NULL
+  AND s.plan_id='P-14V25407JP6850922NLHMDKI'
+  AND s.owner_id IS NOT NULL
+ LIMIT 1
+$lookup$;
+
+REVOKE ALL ON FUNCTION public.f16_p05_draft_resolve_claimed_subscription(
+ text,uuid,text,text) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f16_p05_draft_resolve_claimed_subscription(
+ text,uuid,text,text) TO service_role;
+COMMIT;
+
   AND p_merchant_subscription_id ~ '^I-[A-Za-z0-9_-]{3,70}$'
   AND e.provider_event_id=p_event_id
   AND e.event_type='PAYMENT.SALE.COMPLETED'
