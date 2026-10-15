@@ -28,6 +28,7 @@ export function createPazoSandboxVerifiedCheckout({
 }={}){
  if(typeof resolveAuthenticatedOwner!=='function'||typeof admit!=='function'||
   typeof consentStore?.beginForOwner!=='function'||
+  typeof consentStore?.claimProviderCreate!=='function'||
   typeof subscriptionCreator?.create!=='function'||
   typeof subscriptionReader?.readSubscription!=='function'||
   typeof intentStore?.bindVerified!=='function'||
@@ -70,6 +71,14 @@ export function createPazoSandboxVerifiedCheckout({
       now()-Date.parse(record.createdAt)<0||
       now()-Date.parse(record.createdAt)>MAX_RETRY_AGE)
     return fail('checkout_requires_manual_recovery')
+   // Persist a one-way claim BEFORE any PayPal subscription creation POST.
+   // A lost HTTP response can mean PayPal created the subscription; never
+   // send another POST for the same consent attempt without reconciliation.
+   let claimed
+   try{claimed=await consentStore.claimProviderCreate({
+     ownerId:owner,requestKey:consent.requestKey,intentId:record.intentId,
+   })}catch{return fail('provider_create_claim_unavailable')}
+   if(claimed!==true)return fail('checkout_requires_manual_recovery')
    const intent={id:record.intentId,ownerId:owner,provider:'paypal',
      state:'pending',planId:PLAN,verifiedOwnerBinding:true}
    let created

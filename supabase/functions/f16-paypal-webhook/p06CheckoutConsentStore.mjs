@@ -65,5 +65,17 @@ export function createPazoCheckoutConsentStore({
     termsVersion:x.termsVersion,termsDigest:x.termsDigest,
     planId:PLAN,createdAt:x.createdAt,state:x.state})
   },
+  async claimProviderCreate({ownerId,requestKey,intentId}={}){
+   if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
+      !INTENT.test(intentId||''))
+     throw Error('pazo_provider_create_claim_invalid')
+   const result=await rpc('f16_p07_claim_provider_create',{
+    p_owner_id:ownerId,p_request_key:requestKey,p_intent_id:intentId,
+   })
+   if(typeof result!=='boolean')fail()
+   // false = already claimed, mismatched, or no longer pending.
+   // It is NEVER a license to retry PayPal's mutation.
+   return result
+  },
  })
 }

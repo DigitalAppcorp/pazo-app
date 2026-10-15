@@ -66,6 +66,9 @@ CREATE TABLE supporter_private.paypal_p06_checkout_attempts (
  terms_sha256 text NOT NULL CHECK(terms_sha256 ~ '^[0-9a-f]{64}$'),
  consented_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
  created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+ -- One-way durable permission for exactly one attempted PayPal POST.
+ -- NULL means not attempted; non-NULL means unknown/sent/possibly accepted.
+ provider_create_claimed_at timestamptz,
  retention_hold boolean NOT NULL DEFAULT true,
  PRIMARY KEY(owner_id,request_key),
  FOREIGN KEY(terms_version,locale)
@@ -188,6 +191,58 @@ BEGIN
   'state','pending');
 END
 $begin$;
+
+-- P07 one-shot creation claim. Atomic on hosted PostgreSQL only after a
+-- separate release gate; it NEVER calls PayPal or credits a service period.
+-- Every subsequent retry (even after a transport timeout) must be recovered
+-- by an operator/merchant read, never by issuing another POST.
+CREATE FUNCTION public.f16_p07_claim_provider_create(
+ p_owner_id uuid,p_request_key uuid,p_intent_id text)
+RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $claim$
+DECLARE
+ attempt supporter_private.paypal_p06_checkout_attempts%ROWTYPE;
+ linked supporter_private.paypal_subscription_intents%ROWTYPE;
+BEGIN
+ IF p_owner_id IS NULL OR p_request_key IS NULL OR
+    p_intent_id IS NULL OR
+    p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f16_p06_read_published_offer(text)
+ TO service_role;
+REVOKE ALL ON FUNCTION public.f16_p06_begin_checkout(uuid,uuid,text,text,text,boolean)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f16_p06_begin_checkout(uuid,uuid,text,text,text,boolean)
+ TO service_role;
+COMMIT;
+
+ THEN RAISE EXCEPTION 'Invalid private provider create claim'
+  USING ERRCODE='22023'; END IF;
+ PERFORM pg_catalog.pg_advisory_xact_lock(
+  pg_catalog.hashtextextended(p_owner_id::text,0));
+ SELECT * INTO attempt FROM supporter_private.paypal_p06_checkout_attempts
+ WHERE owner_id=p_owner_id AND request_key=p_request_key FOR UPDATE;
+ IF NOT FOUND OR attempt.intent_id<>p_intent_id OR
+    attempt.provider_create_claimed_at IS NOT NULL THEN
+  RETURN false;
+ END IF;
+ SELECT * INTO linked FROM supporter_private.paypal_subscription_intents
+ WHERE intent_id=p_intent_id AND owner_id=p_owner_id FOR UPDATE;
+ IF NOT FOUND OR linked.state<>'pending' OR
+    linked.plan_id<>'P-14V25407JP6850922NLHMDKI' OR
+    linked.provider<>'paypal' THEN RETURN false; END IF;
+ UPDATE supporter_private.paypal_p06_checkout_attempts
+ SET provider_create_claimed_at=pg_catalog.clock_timestamp()
+ WHERE owner_id=p_owner_id AND request_key=p_request_key
+   AND provider_create_claimed_at IS NULL;
+ RETURN FOUND;
+END
+$claim$;
+
+REVOKE ALL ON FUNCTION public.f16_p07_claim_provider_create(uuid,uuid,text)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.f16_p07_claim_provider_create(uuid,uuid,text)
+ TO service_role;
 
 REVOKE ALL ON FUNCTION public.f16_p06_read_published_offer(text)
  FROM PUBLIC,anon,authenticated;

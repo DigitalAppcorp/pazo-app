@@ -2,6 +2,11 @@
 
 **Autoridad:** Product Owner (PO). Modo Project Brain OS `DigitalAppcorp/project-brain-os` v1.4.1. Producto `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, [PR #44](https://github.com/DigitalAppcorp/pazo-app/pull/44) DRAFT. **F16 EN CURSO / beta de pagos NO-GO.** El snapshot es autoritativo frente a banners antiguos de `docs/PAZO_MASTER_ROADMAP.md`; historial completo del handoff anterior disponible en [Git](https://github.com/DigitalAppcorp/pazo-app/blob/17389a6659c7f6ff6721ef34a127332e45d22a61/docs/PAZO_ACTIVE_HANDOFF.md). No asumir que pruebas offline = backend aplicado, ni que este HEAD está merged o desplegado. Estado del checkout público deshabilitado/no habilitado para beta de pagos; no cambiar.
 
+## F16-P07 — PROTECCIÓN ONE-SHOT ANTES DE CREAR SUSCRIPCIÓN (2026-10-15)
+
+- **PO «ok sigue»:** autorización para implementación branch-only + pruebas. Nueva reserva PostgreSQL `provider_create_claimed_at` y RPC privada `f16_p07_claim_provider_create` en `supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql`; exige primera llamada atómica ligada a owner/key/intent y rechazo de reintentos. `p06CheckoutConsentStore.mjs` y `p06SandboxVerifiedCheckout.mjs` requieren claim ANTES del POST PayPal; un timeout/ambigüedad deja estado manual, nunca segundo POST automático. Pruebas Node y PG desechable añadidas. Documento: `docs/PAZO_F16_P07_PROVIDER_CREATE_ONE_SHOT_GATE_20261015.md`. **CI y PG pendientes de verificar para este cambio**.
+- **No habilita resuscripción tras cancelación:** índice por owner sigue; requiere otro diseño de períodos, evidencia y opt-in. Sin GO de SQL alojado/Edge/PayPal nuevas compras/worker/Live, no borrar claims ni acreditar períodos. PR #44 DRAFT, PAZO core gratuito, Amigo opcional USD2.99/mes, F16 NO-GO.
+
 ## F16-P06 — CHECKPOINT RECUPERADO TRAS INTERRUPCIÓN: OFERTA BILINGÜE INMUTABLE (2026-10-15)
 
 - **Solicitud del PO:** retomar exactamente donde se cortó checkout PayPal Sandbox, períodos y ofertas. Rama `f13/section-titles-20261012`, PR #44 DRAFT; al recuperar, el HEAD era `cb04958c`, con CI + F16 Disposable PG SUCCESS, donde quedó el trigger de inmutabilidad de términos publicados. No replicar todo ese trabajo.

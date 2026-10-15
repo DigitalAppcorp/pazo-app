@@ -12,6 +12,7 @@ const consent=()=>({requestKey:KEY,locale:'es',termsVersion:'pazo-supporter-p06.
  termsDigest:'a'.repeat(64),affirmativeConsent:true})
 function harness(overrides={}){
  const calls=[]
+ let providerClaimed=false
  const api=create({
   resolveAuthenticatedOwner:async request=>{
    calls.push('auth')
@@ -25,6 +26,12 @@ function harness(overrides={}){
     termsVersion:'pazo-supporter-p06.v1',termsDigest:'a'.repeat(64),
     planId:PLAN,createdAt:TIME,state:'pending',
    }:overrides.saved
+  },claimProviderCreate:async x=>{
+    calls.push(['claim',x])
+    if(overrides.claimError)throw Error('PRIVATE_STORE_ERROR')
+    if(overrides.claim===false||providerClaimed)return false
+    providerClaimed=true
+    return true
   }},
   subscriptionCreator:{create:async x=>{
    calls.push(['create',x])
@@ -65,11 +72,12 @@ test('verified consent before PayPal create/GET; binding is NOT a payment',async
  assert.equal(r.phase,'APPROVAL_PENDING')
  assert.equal(r.approvalUrl.startsWith('https://www.sandbox.paypal.com/'),true)
  assert.deepEqual(calls.map(x=>typeof x==='string'?x:x[0]),
-  ['auth','admit','consent','create','read','bind'])
+  ['auth','admit','consent','claim','create','read','bind'])
  assert.equal(calls[2][1].ownerId,OWNER)
  assert.equal(calls[2][1].affirmativeConsent,true)
- assert.equal(calls[3][1].intent.id,INTENT)
- assert.deepEqual(calls[5][1],{intentId:INTENT,ownerId:OWNER,
+ assert.deepEqual(calls[3][1],{ownerId:OWNER,requestKey:KEY,intentId:INTENT})
+ assert.equal(calls[4][1].intent.id,INTENT)
+ assert.deepEqual(calls[6][1],{intentId:INTENT,ownerId:OWNER,
   externalSubscriptionId:SUB,provider:'paypal',planId:PLAN})
 })
 test('no explicit opt-in, missing version/hash or unknown key means no writes',async()=>{
@@ -125,6 +133,33 @@ test('PayPal POST ambiguity or DB bind failure reports recovery, no approval',as
   assert.equal(r.phase,'BLOCKED')
   assert.equal('approvalUrl' in r,false)
  }
+})
+test('failed/denied durable create claim never contacts PayPal',async()=>{
+ for(const x of [{claim:false},{claimError:true}]){
+  const {api,calls}=harness(x)
+  const r=secure(await api.begin({request,consent:consent()}))
+  assert.equal(r.phase,'BLOCKED')
+  assert.equal(r.reason,x.claimError?'provider_create_claim_unavailable':
+   'checkout_requires_manual_recovery')
+  assert.ok(!calls.some(c=>Array.isArray(c)&&c[0]==='create'))
+ }
+})
+test('ambiguous PayPal response cannot trigger a second POST on retry',async()=>{
+ const {api,calls}=harness({createError:true})
+ const first=secure(await api.begin({request,consent:consent()}))
+ assert.equal(first.reason,'paypal_checkout_pending_recovery')
+ const second=secure(await api.begin({request,consent:consent()}))
+ assert.equal(second.reason,'checkout_requires_manual_recovery')
+ assert.equal(calls.filter(x=>Array.isArray(x)&&x[0]==='create').length,1)
+})
+test('concurrent checkout requests share one private creation claim',async()=>{
+ const {api,calls}=harness()
+ const results=await Promise.all([
+  api.begin({request,consent:consent()}),
+  api.begin({request,consent:consent()}),
+ ])
+ assert.deepEqual(results.map(x=>secure(x).phase).sort(),['APPROVAL_PENDING','BLOCKED'])
+ assert.equal(calls.filter(x=>Array.isArray(x)&&x[0]==='create').length,1)
 })
 test('pending checkout older than 48 hours cannot cause another provider POST',async()=>{
  const {api,calls}=harness({saved:{ownerId:OWNER,intentId:INTENT,

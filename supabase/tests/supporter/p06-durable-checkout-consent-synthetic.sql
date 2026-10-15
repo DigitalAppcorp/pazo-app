@@ -20,6 +20,9 @@ BEGIN
  OR has_function_privilege('authenticated','public.f16_p06_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
  OR NOT has_function_privilege('service_role','public.f16_p06_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
  OR has_function_privilege('anon','public.f16_p06_read_published_offer(text)','EXECUTE')
+ OR has_function_privilege('anon','public.f16_p07_claim_provider_create(uuid,uuid,text)','EXECUTE')
+ OR has_function_privilege('authenticated','public.f16_p07_claim_provider_create(uuid,uuid,text)','EXECUTE')
+ OR NOT has_function_privilege('service_role','public.f16_p07_claim_provider_create(uuid,uuid,text)','EXECUTE')
  OR has_table_privilege('service_role','supporter_private.paypal_p06_checkout_attempts','SELECT')
  THEN RAISE EXCEPTION 'P06 untrusted RPC or table access'; END IF;
  IF (SELECT count(*) FROM pg_class c WHERE
@@ -102,6 +105,19 @@ BEGIN
   (SELECT count(*) FROM supporter_private.paypal_subscription_intents
    WHERE owner_id=owner)!=1
  THEN RAISE EXCEPTION 'P06 same-key idempotency failed'; END IF;
+ -- Before PayPal, a single atomic durable claim across any number of calls.
+ -- An incorrect owner/key/intent may never consume the genuine claim.
+ IF public.f16_p07_claim_provider_create(owner,key_b,a->>'intentId') THEN
+  RAISE EXCEPTION 'P07 mismatched request key claimed provider create'; END IF;
+ IF public.f16_p07_claim_provider_create(
+   '77777777-1111-4111-8111-111111111111',key_a,a->>'intentId') THEN
+  RAISE EXCEPTION 'P07 foreign owner claimed provider create'; END IF;
+ IF NOT public.f16_p07_claim_provider_create(owner,key_a,a->>'intentId')
+ OR public.f16_p07_claim_provider_create(owner,key_a,a->>'intentId')
+ THEN RAISE EXCEPTION 'P07 provider create claim not one shot'; END IF;
+ IF (SELECT count(*) FROM supporter_private.paypal_p06_checkout_attempts
+   WHERE owner_id=owner AND provider_create_claimed_at IS NOT NULL)<>1
+ THEN RAISE EXCEPTION 'P07 provider claim not durable'; END IF;
  IF a->>'createdAt' IS NULL OR b->>'createdAt' IS NULL
  THEN RAISE EXCEPTION 'P06 missing durable consent creation date'; END IF;
  BEGIN
@@ -118,6 +134,8 @@ BEGIN
   SET state='bound',external_subscription_id='I-P06-SYNTH-BOUND',
       bound_at=pg_catalog.clock_timestamp()
  WHERE intent_id=a->>'intentId';
+ IF public.f16_p07_claim_provider_create(owner,key_a,a->>'intentId')
+ THEN RAISE EXCEPTION 'P07 bound checkout reclaimed provider create'; END IF;
  c:=public.f16_p06_begin_checkout(owner,key_a,'es',version,digest,true);
  IF c->>'intentId'<>a->>'intentId' OR c->>'state'<>'bound'
  THEN RAISE EXCEPTION 'P06 repeat bind state not preserved'; END IF;
