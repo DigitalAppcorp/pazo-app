@@ -100,6 +100,9 @@ export async function preflightExistingRecovery(env=process.env){
  })
 }
 export async function bindExistingRecovery(env=process.env){
+ // Enforce the gate even when called programmatically, not just via CLI.
+ if(env.PAZO_F16_RECOVERY_WRITE_GO!=='EXISTING_QA_AUTH_AND_INTENT_ONLY')
+  throw Error('f16_explicit_existing_test_write_go_required')
  const c=secrets(env),state=readSaved()
  const {gate,admin}=await inspect(c,state)
  if(gate.safeToReauthenticate!==true||gate.safeToBind!==true)
