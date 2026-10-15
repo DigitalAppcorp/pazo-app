@@ -53,8 +53,7 @@ test('P18 Edge composition guards POST separately after CORS preflight',()=>{
  assert.ok(block.indexOf('resolvePazoAccountOriginGate')<
   block.indexOf('if(!shouldRun())'))
  assert.ok(block.includes("if(!shouldRun())return addCors(reply(503"))
- assert.ok(block.includes('if(request.method!==\\'POST\\')')||
-  block.includes("if(request.method!=='POST')"))
+ assert.ok(block.includes("if(request.method!=='POST')"))
  assert.ok(block.includes('runtime.resolveAuthenticatedOwner(request)'))
  assert.ok(block.includes('runtime.manage(request)'))
  assert.ok(!block.includes('mayGrantBenefits:true'))
