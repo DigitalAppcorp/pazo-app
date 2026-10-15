@@ -1,3 +1,5 @@
+> **DECISIÓN POSTERIOR DEL PRODUCT OWNER — 14-OCT-2026:** Se aprobó el primer período futuro desde la activación PayPal con pago verificado hasta la siguiente fecha de facturación observada, **como regla contractual de PAZO**, con condiciones aceptadas previamente y conciliación independiente. Los puntos históricos de «ancla pendiente» de este archivo están superados *solo respecto del primer período*; no se aprobó imponer un huso propio ni generar meses siguientes por calendario. Véase `docs/PAZO_F16_P05_FIRST_SERVICE_PERIOD_POLICY_APPROVED_20261014.md`. F16 aún NO-GO.
+
 # PAZO F16-P05 — Modelo de servicio mensual aprobado; ancla concreta en evaluación
 
 **Decisión del Product Owner:** 14-oct-2026: «ok, hagamoslo» después de aclarar explícitamente que PAZO definirá sus períodos de servicio mensuales **coordinados con PayPal** y el usuario aceptará las condiciones al suscribirse, **sin negociar fechas individuales**. La aplicación PAZO es y continuará gratuita en sus funciones generales; esto aplica solo al aporte opcional **Amigo de PAZO**. Este GO permite **diseño y pruebas offline**, no backend alojado, PayPal Live ni acreditaciones.
