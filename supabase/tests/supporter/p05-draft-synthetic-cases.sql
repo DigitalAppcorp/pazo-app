@@ -110,10 +110,44 @@ BEGIN
  VALUES (v_second,'22222222-2222-4222-8222-222222222222',
   'P-SYNTHETICPLAN','bound',v_sub2);
 
+ -- Wrong event class is forbidden by composite FK, even if event ID exists.
+ BEGIN
+  INSERT INTO supporter_private.paypal_activation_schedule_evidence
+   (external_subscription_id,activation_event_id,activated_at,
+    merchant_observed_at,observed_next_billing_at)
+  VALUES (v_sub2,'WH-SALE-222',v_start,v_start+interval '1 minute',v_end);
+  RAISE EXCEPTION 'SALE event unexpectedly accepted as ACTIVATED';
+ EXCEPTION WHEN foreign_key_violation THEN NULL;
+ END;
+
  INSERT INTO supporter_private.paypal_activation_schedule_evidence
   (external_subscription_id,activation_event_id,activated_at,
    merchant_observed_at,observed_next_billing_at)
  VALUES (v_sub2,'WH-ACT-222',v_start,v_start+interval '1 minute',v_end);
+
+ -- Wrong subscription ledger payment (unused sale id) must fail at DB layer.
+ INSERT INTO supporter_private.paypal_payment_entries
+  (external_payment_id,external_subscription_id,entry_state)
+ VALUES ('SALE-SYNTH-333',v_sub,'uncredited');
+ BEGIN
+  INSERT INTO supporter_private.paypal_first_period_reviews
+   (external_subscription_id,external_payment_id,sale_event_id,
+    candidate_start_at,candidate_end_exclusive_at)
+  VALUES (v_sub2,'SALE-SYNTH-333','WH-SALE-222',v_start,v_end);
+  RAISE EXCEPTION 'Payment for subscription 111 assigned to 222';
+ EXCEPTION WHEN foreign_key_violation THEN NULL;
+ END;
+
+ -- Wrong event class in a valid subscription/ledger must also fail.
+ BEGIN
+  INSERT INTO supporter_private.paypal_first_period_reviews
+   (external_subscription_id,external_payment_id,sale_event_id,
+    candidate_start_at,candidate_end_exclusive_at)
+  VALUES (v_sub2,'SALE-SYNTH-222','WH-ACT-111',v_start,v_end);
+  RAISE EXCEPTION 'ACTIVATED event unexpectedly accepted as sale';
+ EXCEPTION WHEN foreign_key_violation THEN NULL;
+ END;
+
 
  BEGIN
   INSERT INTO supporter_private.paypal_first_period_reviews
