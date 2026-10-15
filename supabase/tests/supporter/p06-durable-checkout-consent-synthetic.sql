@@ -77,8 +77,8 @@ BEGIN
   RAISE EXCEPTION 'P06 deleted immutable published offer';
  EXCEPTION WHEN insufficient_privilege THEN NULL;
  END;
- IF (SELECT count(*) FROM supporter_private.paypal_p06_offers
-  WHERE version='pazo-supporter-p06.v1' AND published_at IS NOT NULL)<>2
+ IF (SELECT count(*) FROM supporter_private.paypal_p06_offers o
+  WHERE o.version='pazo-supporter-p06.v1' AND o.published_at IS NOT NULL)<>2
  THEN RAISE EXCEPTION 'P06 published evidence not preserved'; END IF;
  a:=public.f16_p06_read_published_offer('es');
  IF a->>'termsDigest'<>digest OR a->>'exactCopy'<>raw
