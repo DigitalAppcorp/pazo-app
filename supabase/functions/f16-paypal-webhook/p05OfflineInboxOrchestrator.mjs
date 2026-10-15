@@ -86,7 +86,8 @@ export function createP05OfflineInboxOrchestrator(adapters={}){
       // -> subscription ID -> privately BOUND intent. THIS MODULE does not
       // authenticate it, and never promotes a 'match' to financial credit.
       const evidence=await adapters.inspectMerchantEvidence({
-       eventId:claim.eventId,eventType:claim.eventType})
+       eventId:claim.eventId,eventType:claim.eventType,
+       claimToken:claim.leaseToken})
       disposition=exactly(evidence,['kind'])&&
        Object.hasOwn(mappings,evidence.kind)?
        mappings[evidence.kind]:['review','missing_evidence']
