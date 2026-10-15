@@ -35,7 +35,7 @@ REVOKE ALL ON supporter_private.paypal_p06_offers
  FROM PUBLIC,anon,authenticated,service_role;
 
 CREATE TABLE supporter_private.paypal_p06_checkout_attempts (
- owner_id uuid NOT NULL REFERENCES auth.users(id),
+ owner_id uuid NOT NULL,
  request_key uuid NOT NULL,
  intent_id text NOT NULL UNIQUE
   REFERENCES supporter_private.paypal_subscription_intents(intent_id),
@@ -92,6 +92,8 @@ BEGIN
  THEN RAISE EXCEPTION 'Explicit checkout consent or input missing'
  USING ERRCODE='22023'; END IF;
  -- The caller must be service_role with a Supabase Auth getUser() proof.
+ IF NOT EXISTS(SELECT 1 FROM auth.users u WHERE u.id=p_owner_id)
+ THEN RAISE EXCEPTION 'Unknown owner' USING ERRCODE='42501'; END IF;
  -- Serialize all checkout attempts per same owner in one transaction.
  PERFORM pg_catalog.pg_advisory_xact_lock(
   pg_catalog.hashtextextended(p_owner_id::text, 0));
