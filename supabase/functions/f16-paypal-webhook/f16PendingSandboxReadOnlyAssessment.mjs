@@ -49,7 +49,6 @@ export function assessF16PendingSandboxReadOnly({
   privateIntent?.id===savedState.intentId&&
   privateIntent?.owner_id===savedState.authOwnerId&&
   privateIntent?.plan_id===PLAN&&
-  privateIntent?.provider==='paypal'&&
   privateIntent?.external_subscription_id===null
  const cycles=plan?.billing_cycles
  const cycle=Array.isArray(cycles)&&cycles.length===1?cycles[0]:null
