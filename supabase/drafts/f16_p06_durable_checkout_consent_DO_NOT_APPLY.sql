@@ -20,8 +20,7 @@ CREATE TABLE supporter_private.paypal_p06_offers (
  locale text NOT NULL CHECK(locale IN ('es','en')),
  exact_copy text NOT NULL CHECK(length(exact_copy) BETWEEN 100 AND 12000),
  sha256 text GENERATED ALWAYS AS (
-  pg_catalog.encode(extensions.digest(pg_catalog.convert_to(exact_copy,'UTF8'),
-  'sha256'),'hex')) STORED,
+  pg_catalog.encode(extensions.digest(exact_copy,'sha256'),'hex')) STORED,
  plan_id text NOT NULL CHECK(plan_id='P-14V25407JP6850922NLHMDKI'),
  currency text NOT NULL DEFAULT 'USD' CHECK(currency='USD'),
  price_minor integer NOT NULL DEFAULT 299 CHECK(price_minor=299),
