@@ -92,6 +92,17 @@ AS $offer$
  FROM supporter_private.paypal_p06_offers o
  WHERE p_locale IN('es','en') AND o.locale=p_locale
   AND o.published_at IS NOT NULL
+  -- The launch version must exist in BOTH languages before either offer
+  -- may be shown or signed; prevent a single-locale accidental release.
+  AND EXISTS (
+    SELECT 1 FROM supporter_private.paypal_p06_offers counterpart
+    WHERE counterpart.version=o.version AND counterpart.locale<>o.locale
+      AND counterpart.published_at IS NOT NULL
+      AND counterpart.plan_id=o.plan_id
+      AND counterpart.currency=o.currency
+      AND counterpart.price_minor=o.price_minor
+      AND counterpart.cadence=o.cadence
+  )
  ORDER BY o.published_at DESC
  LIMIT 1
 $offer$;
