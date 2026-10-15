@@ -17,7 +17,6 @@ BEGIN
   IF NOT has_function_privilege('service_role',f.oid,'EXECUTE')
     OR has_function_privilege('anon',f.oid,'EXECUTE')
     OR has_function_privilege('authenticated',f.oid,'EXECUTE')
-    OR has_function_privilege('public',f.oid,'EXECUTE')
   THEN RAISE EXCEPTION 'P05 function % has invalid EXECUTE grants',f.proname; END IF;
  END LOOP;
  IF (SELECT count(*)
