@@ -177,3 +177,10 @@ jobs:
             -f supabase/drafts/f16_p05_dispute_private_ledger_read_DO_NOT_APPLY.sql \
             -f supabase/tests/supporter/p05-dispute-private-ledger-security.sql \
             -f supabase/tests/supporter/p05-dispute-private-ledger-synthetic.sql
+
+      - name: F16 P06 durable checkout consent and per-owner idempotency (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql
