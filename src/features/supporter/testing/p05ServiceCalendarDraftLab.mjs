@@ -15,7 +15,7 @@ function validatePolicy(p){
  if(!fields(p,names)||p.version!==1||p.cadence!=='MONTH_1'||
   p.currency!=='USD'||p.priceMinor!==299||p.setupFeeMinor!==0||
   p.timezone!=='UTC'||p.monthEndRule!=='CLAMP_RETURN_TO_ANCHOR_DAY'||
-  p.origin!=='PROPOSED_PAzo_TERMS_AND_PROVIDER_ANCHOR')return false
+  p.origin!=='PROPOSED_PAZO_TERMS_AND_PROVIDER_ANCHOR')return false
  return parse(p.anchorUtc)!==null
 }
 function boundary(anchor,index){
