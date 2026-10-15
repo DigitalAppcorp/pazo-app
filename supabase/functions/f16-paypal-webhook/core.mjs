@@ -138,9 +138,10 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
         try {scope=await assessTrustedDisputeScope({
           eventId:event.id,eventType:event.event_type,
         })} catch {return reply(503,'dispute_scope_unavailable',300)}
-        // 'outside_pazo' MUST be provider+private-ledger attested, not a
-        // caller-supplied flag; otherwise retry without ACK or storage.
-        if(scope==='outside_pazo')return reply(200,'verified_non_pazo_dispute')
+        // No trusted exclusion attestation exists today. Treat even a claimed
+        // 'outside_pazo' as unresolved to avoid silently losing merchant data.
+        // A future verified exclusion path needs independent provider evidence,
+        // reviewer approval and its own separate release gate.
         if(scope!=='confirmed_pazo')return reply(503,'dispute_scope_unverified',300)
       }
       // Unknown, verified events are not business actions; do not persist their payload.
