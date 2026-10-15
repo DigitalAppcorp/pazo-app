@@ -2,6 +2,7 @@
 // Server-side authenticated, no public subscription creation, no benefits.
 // PayPal cancellation is initiated ONLY on explicit user action.
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2'
+import {resolvePazoAccountOriginGate,withCors} from './accountOriginGateP18.mjs'
 import {createVerifiedAuthOwnerResolver} from '../f16-paypal-webhook/verifiedAuthOwner.mjs'
 import {createF16IntentStore} from '../f16-paypal-webhook/intentStoreAdapter.mjs'
 import {createF16GlobalAdmission} from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
@@ -16,19 +17,9 @@ const reply=(status:number,code:string,extra:Record<string,unknown>={})=>
  paidThrough:null,mayGrantBenefits:false,mayCreateSubscription:false,...extra}),
  {status,headers:{'content-type':'application/json',
   'cache-control':'no-store','x-content-type-options':'nosniff'}})
-function validOrigin(value:string|undefined){
- if(!value)return false
- try{
-  const p=new URL(value)
-  return p.protocol==='https:'&&p.origin===value&&
-    p.pathname==='/'&&p.search===''&&p.hash===''&&
-    p.username===''&&p.password===''&&p.port===''
- }catch{return false}
-}
 const shouldRun=():boolean=>
  Deno.env.get('SUPABASE_URL')===BASE &&
  Deno.env.get('PAZO_F16_PAYPAL_ENV')==='sandbox' &&
- validOrigin(Deno.env.get('PAZO_F16_APP_ORIGIN')) &&
  !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 function createRuntime(){
@@ -74,26 +65,13 @@ async function listForOwner(ownerId:string,key:string){
   canDownloadAcceptance:x.canDownloadAcceptance}))
 }
 Deno.serve(async(request:Request)=>{
- if(!shouldRun())return reply(503,'supporter_account_not_configured')
- const origin=Deno.env.get('PAZO_F16_APP_ORIGIN')!
- if(request.headers.get('origin')!==origin)
-  return reply(403,'origin_not_allowed')
- const cors={'access-control-allow-origin':origin,'vary':'Origin',
-  'cache-control':'no-store','x-content-type-options':'nosniff'}
- const addCors=(res:Response)=>new Response(res.body,{
-  status:res.status,statusText:res.statusText,
-  headers:{...Object.fromEntries(res.headers),...cors}})
- if(request.method==='OPTIONS'){
-  const headers=(request.headers.get('access-control-request-headers')||'')
-   .split(',').map(x=>x.trim().toLowerCase()).filter(Boolean)
-  if(request.headers.get('access-control-request-method')!=='POST'||
-     headers.some(h=>!['authorization','content-type','apikey'].includes(h)))
-   return addCors(reply(403,'preflight_not_allowed'))
-  return new Response(null,{status:204,headers:{...cors,
-   'access-control-allow-methods':'POST',
-   'access-control-allow-headers':'authorization, content-type, apikey',
-   'access-control-max-age':'600'}})
- }
+ const gate=resolvePazoAccountOriginGate(request,Deno.env.get('PAZO_F16_APP_ORIGIN'))
+ if(gate.response)return gate.response
+ const cors=gate.cors!
+ const addCors=(res:Response)=>withCors(res,cors)
+ // Runtime configuration is required only for POSTs. An authorized origin
+ // can diagnose unavailable Sandbox configuration without PayPal traffic.
+ if(!shouldRun())return addCors(reply(503,'supporter_account_not_configured'))
  if(request.method!=='POST')return addCors(reply(405,'method_not_allowed'))
  if(!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))
   return addCors(reply(415,'json_required'))
