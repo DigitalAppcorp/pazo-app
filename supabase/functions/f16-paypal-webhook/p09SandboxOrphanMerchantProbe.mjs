@@ -36,8 +36,7 @@ export function createPazoSandboxOrphanMerchantReader({
    return value
   }catch{throw Error('orphan_provider_malformed')}
  }
- return Object.freeze({
-  async examine({intentId,claimedAt}={}){
+ async function scan({intentId,claimedAt}={},privateCandidate=false){
    if(!INTENT.test(intentId||'')||!isoTime(claimedAt))
     throw Error('orphan_probe_scope_invalid')
    const time=Date.parse(claimedAt)
@@ -70,6 +69,7 @@ export function createPazoSandboxOrphanMerchantReader({
       new Set(ids).size!==ids.length)
     return Object.freeze({outcome:'AMBIGUOUS_MERCHANT_LIST'})
    let matches=0
+   let matched=null
    for(const id of ids){
     // Strictly bounded GET requests; no email/payer/links leave this function.
     const row=await request(HOST+'/v1/billing/subscriptions/'+encodeURIComponent(id),{
@@ -79,15 +79,26 @@ export function createPazoSandboxOrphanMerchantReader({
        typeof row.custom_id!=='string'||!STATUSES.has(row.status))
      return Object.freeze({outcome:'MERCHANT_DETAILS_INCOMPLETE'})
     if(row.plan_id!==PLAN)return Object.freeze({outcome:'MERCHANT_PLAN_MISMATCH'})
-    if(row.custom_id===intentId)matches++
+    if(row.custom_id===intentId){matches++;matched={id,status:row.status}}
     if(matches>1)return Object.freeze({outcome:'DUPLICATE_MATCHING_INTENTS'})
    }
    // Do not report zero results as proof of absence: delayed indexing,
    // PayPal paging semantics and wider merchant history remain unproven.
+   if(privateCandidate&&matches===1){
+    if(matched.status!=='APPROVAL_PENDING')
+     return Object.freeze({outcome:'MERCHANT_STATUS_REVIEW_REQUIRED'})
+    // INTERNAL ONLY. Never expose subscriptionId from a public-facing route.
+    return Object.freeze({outcome:'ONE_UNBOUND_CANDIDATE_REVIEW_ONLY',
+      subscriptionId:matched.id})
+   }
    return Object.freeze({outcome:matches===1?
      'ONE_UNBOUND_CANDIDATE_REVIEW_ONLY':'NO_CANDIDATE_PROVEN'})
-  },
- })
+  }
+  return Object.freeze({
+   examine:args=>scan(args,false),
+   // Internal trusted composition only; the public recovery probe uses examine.
+   examinePrivate:args=>scan(args,true),
+  })
 }
 
 export function createPazoSandboxOrphanRecoveryProbe({

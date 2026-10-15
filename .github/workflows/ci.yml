@@ -184,4 +184,6 @@ jobs:
             -c 'SET ROLE postgres;' \
             -f supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql \
             -f supabase/drafts/f16_p08_read_checkout_recovery_DO_NOT_APPLY.sql \
-            -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql
+            -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql \
+            -f supabase/drafts/f16_p10_recovered_checkout_binding_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p10-recovered-checkout-binding-synthetic.sql

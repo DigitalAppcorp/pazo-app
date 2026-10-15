@@ -90,6 +90,22 @@ export function createPazoCheckoutConsentStore({
      new Date(x.providerCreateClaimedAt).toISOString(),
     subscriptionId:x.subscriptionId})
   },
+  async bindRecoveredForOwner({
+   ownerId,requestKey,intentId,subscriptionId,
+  }={}){
+   if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
+      !INTENT.test(intentId||'')||
+      !/^I-[A-Za-z0-9_-]{3,70}$/.test(subscriptionId||''))
+     throw Error('pazo_recovered_binding_arguments_invalid')
+   // Caller MUST perform independent merchant GET + authenticated operator gate.
+   // SQL enforces one claim, exact owner/key/intent and unique external sub.
+   const result=await rpc('f16_p10_bind_recovered_checkout',{
+    p_owner_id:ownerId,p_request_key:requestKey,
+    p_intent_id:intentId,p_subscription_id:subscriptionId,
+   })
+   if(result!=='new_binding'&&result!=='already_bound')fail()
+   return result
+  },
   async claimProviderCreate({ownerId,requestKey,intentId}={}){
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
       !INTENT.test(intentId||''))
