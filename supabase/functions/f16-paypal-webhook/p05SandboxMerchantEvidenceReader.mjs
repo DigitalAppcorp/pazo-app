@@ -6,7 +6,7 @@
 const HOST='https://api-m.sandbox.paypal.com'
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const REF=/^[A-Za-z0-9._-]{3,128}$/
-const UTC=/^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\dZ$/
+const UTC=/^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?Z$/
 const utc=s=>typeof s==='string'&&UTC.test(s)&&Number.isFinite(Date.parse(s))&&
  (new Date(s).toISOString()===s||new Date(s).toISOString().replace(/\.000Z$/,'Z')===s)
 const credential=s=>typeof s==='string'&&/^[\x21-\x7e]{8,512}$/.test(s)&&!s.includes(':')
