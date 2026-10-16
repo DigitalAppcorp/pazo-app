@@ -40,7 +40,19 @@ plazo específico para **prueba de consentimiento expreso** en California
 (3 años o 1 año después del fin del contrato, el mayor); esa clasificación
 NO determina por sí sola el plazo para esta tabla de reconciliación.
 
-**Propuesta de criterio, sin duración todavía aprobada:**
+**Recomendación de producto para decisión del PO (NO APROBADA):**
+conservar el vínculo mientras la suscripción esté activa y hasta **3 años
+desde su cierre definitivo**, salvo una disputa/reembolso todavía en trámite
+o una obligación jurídica/contable aplicable que exija un plazo mayor.
+El cómputo empieza en la terminación efectiva del contrato, no en el
+webhook inicial; documentar la fecha de cierre con evidencia del proveedor.
+La excepción debe ser limitada al expediente afectado y revisada
+periódicamente. Antes del lanzamiento, revisión legal/contable y validación
+del ciclo real de supresión en backups. Este plazo de tres años se propone
+como criterio interno conservador, **no** como obligación legal específica
+demostrada para esta relación.
+
+**Criterios operativos para revisión:**
 1. Mantener la relación mientras se use para identificar una suscripción
    activa o resolver cobros/reembolsos/disputas relacionados.
 2. A partir de cierre/cancelación, aplicar un plazo máximo concreto, que el
