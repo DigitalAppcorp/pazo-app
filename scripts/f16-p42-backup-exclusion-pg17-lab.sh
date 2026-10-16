@@ -3,11 +3,11 @@
 # Fixed placeholder bytes are public test data, NOT a usable signing key.
 set -euo pipefail
 fail() { echo "P42_BACKUP_LAB_BLOCKED: $1" >&2; exit 1; }
-[[ "\${GITHUB_ACTIONS:-}" == "true" ]] || fail "NOT_CI"
-[[ "\${PGPASSWORD:-}" == "f14_synthetic_ci_only" ]] || fail "WRONG_LOGIN"
-[[ -z "\${DATABASE_URL:-}" && -z "\${SUPABASE_DB_URL:-}" &&
-   -z "\${SUPABASE_ACCESS_TOKEN:-}" && -z "\${PAZO_SUPABASE_PROJECT_ID:-}" &&
-   -z "\${PGSERVICE:-}" ]] || fail "REMOTE_CONFIG_PRESENT"
+[[ "${GITHUB_ACTIONS:-}" == "true" ]] || fail "NOT_CI"
+[[ "${PGPASSWORD:-}" == "f14_synthetic_ci_only" ]] || fail "WRONG_LOGIN"
+[[ -z "${DATABASE_URL:-}" && -z "${SUPABASE_DB_URL:-}" &&
+   -z "${SUPABASE_ACCESS_TOKEN:-}" && -z "${PAZO_SUPABASE_PROJECT_ID:-}" &&
+   -z "${PGSERVICE:-}" ]] || fail "REMOTE_CONFIG_PRESENT"
 for cmd in pg_dump pg_restore psql grep mktemp; do
   command -v "$cmd" >/dev/null || fail "MISSING_TOOL"
 done
