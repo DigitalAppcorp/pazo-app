@@ -7,15 +7,16 @@ export function createP28HistoricalHostedReader({projectUrl,serviceRoleKey,
  if(scope!=='SERVER_ONLY_HISTORICAL_REVIEW'||projectUrl!==BASE||
    typeof serviceRoleKey!=='string'||serviceRoleKey.length<32||
    typeof fetchImpl!=='function')return async()=>null
- return async({eventId,requestId}={})=>{
+ return async({eventId,requestId,eventFingerprint}={})=>{
   if(typeof eventId!=='string'||!ID.test(eventId)||
-   typeof requestId!=='string'||!/^[0-9a-f-]{36}$/i.test(requestId))return null
+   typeof requestId!=='string'||!/^[0-9a-f-]{36}$/i.test(requestId)||
+   typeof eventFingerprint!=='string'||!/^[0-9a-f]{64}$/.test(eventFingerprint))return null
   try{
    const response=await fetchImpl(BASE+'/rest/v1/rpc/f16_p28_read_historical_candidate_exact',{
     method:'POST',redirect:'error',signal:AbortSignal.timeout(10000),
     headers:{apikey:serviceRoleKey,Authorization:'Bearer '+serviceRoleKey,
      'content-type':'application/json',Accept:'application/json'},
-    body:JSON.stringify({p_event_id:eventId,p_request_id:requestId})
+    body:JSON.stringify({p_event_id:eventId,p_request_id:requestId,p_event_fingerprint:eventFingerprint})
    })
    if(!response.ok)return null
    const row=await response.json()
