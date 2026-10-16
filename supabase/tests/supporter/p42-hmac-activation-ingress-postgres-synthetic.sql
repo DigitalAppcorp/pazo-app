@@ -5,6 +5,22 @@ DO $guard$ BEGIN
  IF current_database()<>'f14_synthetic' OR session_user<>'f14_admin'
  THEN RAISE EXCEPTION 'P42 PG17 only' USING ERRCODE='42501'; END IF;
 END $guard$;
+CREATE FUNCTION public.f16_p42_test_build_mac(p_message text)
+RETURNS text LANGUAGE plpgsql SECURITY INVOKER SET search_path=''
+AS $mac$
+DECLARE v_schema text; v_key bytea; v_mac text;
+BEGIN
+ SELECT k.key_bytes INTO v_key FROM supporter_private.p42_lab_activation_signing_keys k
+ WHERE k.key_id='LAB_V1';
+ SELECT n.nspname INTO v_schema FROM pg_catalog.pg_extension e
+ JOIN pg_catalog.pg_namespace n ON n.oid=e.extnamespace WHERE e.extname='pgcrypto';
+ EXECUTE pg_catalog.format(
+ 'SELECT pg_catalog.encode(%I.hmac($1,$2,$3),''hex'')',v_schema)
+ INTO v_mac USING pg_catalog.convert_to(p_message,'UTF8'),v_key,'sha256';
+ RETURN v_mac;
+END $mac$;
+REVOKE ALL ON FUNCTION public.f16_p42_test_build_mac(text)
+FROM PUBLIC,anon,authenticated,service_role;
 INSERT INTO supporter_private.paypal_subscription_intents
 (intent_id,owner_id,provider,plan_id,state,external_subscription_id,bound_at)
 VALUES('intent-44444444-4444-4444-8444-444444444444',
@@ -24,21 +40,17 @@ to_char(clock_timestamp() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"')::text
 'LAB_V1'::text AS key_id, ''::text AS mac, ''::text AS changed_mac,
 ''::text AS nonactivation_mac, ''::text AS expired_time, ''::text AS expired_mac;
 UPDATE p42_input i SET
- mac=encode(public.hmac(convert_to('p42|LAB_V1|'||i.event_id||'|'||
- i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text,'UTF8'),
- (SELECT key_bytes FROM supporter_private.p42_lab_activation_signing_keys),'sha256'),'hex'),
- changed_mac=encode(public.hmac(convert_to('p42|LAB_V1|'||i.event_id||'|'||
- 'I-P42-OTHER'||'|'||i.issued_at||'|'||i.nonce::text,'UTF8'),
- (SELECT key_bytes FROM supporter_private.p42_lab_activation_signing_keys),'sha256'),'hex'),
- nonactivation_mac=encode(public.hmac(convert_to('p42|LAB_V1|P42-NOT-ACT|'||
- i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text,'UTF8'),
- (SELECT key_bytes FROM supporter_private.p42_lab_activation_signing_keys),'sha256'),'hex'),
+ mac=public.f16_p42_test_build_mac('p42|LAB_V1|'||i.event_id||'|'||
+ i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text),
+ changed_mac=public.f16_p42_test_build_mac('p42|LAB_V1|'||i.event_id||'|'||
+ 'I-P42-OTHER'||'|'||i.issued_at||'|'||i.nonce::text),
+ nonactivation_mac=public.f16_p42_test_build_mac('p42|LAB_V1|P42-NOT-ACT|'||
+ i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text),
  expired_time=to_char((clock_timestamp()-interval '3 minutes') AT TIME ZONE 'UTC',
  'YYYY-MM-DD"T"HH24:MI:SS"Z"');
-UPDATE p42_input i SET expired_mac=encode(public.hmac(convert_to(
+UPDATE p42_input i SET expired_mac=public.f16_p42_test_build_mac(
  'p42|LAB_V1|'||i.event_id||'|'||i.subscription_id||'|'||
- i.expired_time||'|'||i.nonce::text,'UTF8'),
- (SELECT key_bytes FROM supporter_private.p42_lab_activation_signing_keys),'sha256'),'hex');
+ i.expired_time||'|'||i.nonce::text);
 GRANT SELECT ON p42_input TO service_role;
 SET LOCAL ROLE service_role;
 DO $assert$
