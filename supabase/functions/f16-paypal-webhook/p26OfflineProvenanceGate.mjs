@@ -49,6 +49,19 @@ export function assessP26FirstObligationEvidence({
     consent.immutablePublishedOffer!==true||
     consent.sha256Verified!==true)
   return deny('original_consent_not_attested')
+ // The existing pazo-supporter-sandbox.qa* acceptance explicitly grants
+ // NO paid service period or benefits. Even a genuinely consented QA sale
+ // must not be promoted to a prospective paid-service contract.
+ // These flags must eventually originate from an independently verified
+ // immutable, published *service* offer; this OFFLINE gate cannot attest
+ // them on its own.
+ if(consent.offerPurpose!=='PAID_SERVICE_PROSPECTIVE'||
+    consent.firstPeriodContractAttested!==true||
+    consent.qaOnly!==false||
+    typeof consent.termsVersion!=='string'||
+    consent.termsVersion.length<8||
+    /(?:^|[.-])qa(?:[.\d-]|$)/i.test(consent.termsVersion))
+  return deny('prospective_paid_service_terms_not_attested')
  if(!reviewReservation||reviewReservation.state!=='review_required'||
     reviewReservation.intentId!==privateBinding.intentId||
     reviewReservation.ownerId!==privateBinding.ownerId||
