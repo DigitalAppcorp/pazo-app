@@ -1,3 +1,5 @@
+> **F16-P43 — INVENTARIO LOCAL WINDOWS CONFIRMADO POR OPERADOR (2026-10-16).** Codex reporta `supabase` y `psql` ausentes, Vercel CLI 63.1.2 presente, archivos credenciales privados ausentes. Sin DB ni secretos generados. Preparado `scripts/f16-p43-next-prereqs-readonly.ps1` para estado de Node/Scoop y autenticación Vercel/team via `whoami`/`teams ls`, sin leer variables ni credenciales; instalación de Supabase CLI/psql queda en manos del operador. Ver `docs/PAZO_F16_P43_INVENTORY_RESULT_NEXT_LOCAL_GATE_20261016.md`. Vercel team `digitalapp` por confirmar; CLI temporal podría crear rol y requiere gate; not_before/not_after sin decisión. F16 NO-GO, P42/P21 OFF, P40/ledger 0.
+
 ## F16-P43 — INVENTARIO LOCAL CLI / VERCEL SIN SECRETOS (2026-10-16)
 
 - PO indicó «ok go» para continuar **comprobaciones** sin solicitar credenciales temporales ni resetear DB. Vercel connector `list_teams` devolvió **0 teams** accesibles; `digitalapp` permanece sin autorización para leer nombres/destinos de variables. No afirmar que entorno Vercel fue auditado.
