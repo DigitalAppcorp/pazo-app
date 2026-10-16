@@ -8,7 +8,7 @@ SET LOCAL lock_timeout='4s';
 SET LOCAL statement_timeout='30s';
 DO $preflight$
 BEGIN
- IF pg_catalog.current_user<>'postgres'
+ IF current_user<>'postgres'
  OR NOT (
   (pg_catalog.current_database()='f14_synthetic'
      AND session_user='f14_admin')
