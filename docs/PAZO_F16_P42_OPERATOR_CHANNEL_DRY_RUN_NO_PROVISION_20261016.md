@@ -70,3 +70,17 @@ Referencias oficiales: https://supabase.com/docs/reference/cli/supabase-secrets-
 **Resultado global:** `P42_OPERATOR_CHANNEL_DESIGN_AND_PG17_REVOKE_PASS_HOSTED_CHANNEL_UNVERIFIED_NO_PROVISIONING`.
 
 **Próxima intervención mínima del PO (sin claves):** cuando se decida verificar el canal real en otro gate, entrar solo en `Connect` de Supabase y confirmar si muestra modo Direct IPv6 o Session Pooler con certificado CA descargable. **No enviar host completo, contraseña, token ni enlace que contenga credenciales en chat.** No ejecutaremos P43 otra vez.
+
+
+## 6. Certificado CA descargado — verificación local OFFLINE (2026-10-16)
+
+- PO confirmó explícitamente **«certificado descargado»** después de navegar a Supabase `Database → Settings → SSL Configuration → Download certificate`. `PASS` como **afirmación del titular de descarga local**, no inspección criptográfica ni comprobación de archivo por parte del agente. Ningún certificado, ruta local, contraseña, token o URI se compartió con ChatGPT/GitHub.
+- Se preparó `scripts/f16-p42-verify-local-ca-offline.ps1`: valida **solo propiedades estructurales locales** de un X.509 descargado, entre ellas CA (`BasicConstraints`), período de validez, ausencia de clave privada, tamaño y formato razonable. **No abre red**, no invoca `psql`, no accede al proveedor, no modifica almacén de certificados del SO, no registra rutas/subject/serial, no compara con la CA Supabase oficial y no demuestra `verify-full` ni privilegios de escritura DB.
+- El script debe ejecutarse **únicamente** en la estación privada del PO que posee el archivo, después de sincronizar el repo, usando PowerShell 7 y ruta local completa al archivo, sin aportar el certificado al chat:
+  ```powershell
+  pwsh -NoProfile -File .\scripts\f16-p42-verify-local-ca-offline.ps1 -CaCertificatePath 'C:\RUTA_PRIVADA\certificado-ca.crt'
+  ```
+  La ruta es ilustrativa, no una ruta inventada a un archivo existente. El PO informará **solo** la categoría `P42_LOCAL_CA_FILE_STRUCTURAL_PASS_OFFLINE` o `P42_LOCAL_CA_FILE_CHECK_BLOCKED`. No pegar texto de certificados.
+- Tras `PASS` local habrá que corroborar el **origen del CA** y comprobar `Session pooler` en Connect, hostname/usuario exactos **solo localmente**. La conexión real TLS con `sslmode=verify-full` y permisos DBA exige otra autorización expresa; **NO reutilizar ni repetir P43**.
+- El `SSL enforcement` del servidor aparecía desactivado en captura previa; **no modificar ese switch**. El cliente podrá exigir TLS validado independientemente de ese estado.
+- **Resultado de este checkpoint:** `P42_CA_DOWNLOADED_PO_ATTESTED_LOCAL_CA_FILE_TEST_PENDING_HOSTED_WRITE_UNVERIFIED`. F16 NO-GO, PR #44 Draft; no provisión P42, T0, Edge, grants, worker, checkout, cobros ni PayPal.
