@@ -30,7 +30,7 @@ CREATE FUNCTION public.f16_p42_lab_register_authenticated_activation(
 AS $fn$
 DECLARE v_secret bytea; v_expected text; v_owner uuid; v_count integer;
         v_inserted boolean; v_match boolean;
-        v_issued_at timestamptz; v_message text;
+        v_issued_at timestamptz; v_message text; v_hmac_schema text;
 BEGIN
  IF p_event_id IS NULL OR p_event_id !~ '^[A-Za-z0-9._-]{3,128}$'
  OR p_subscription_id IS NULL OR p_subscription_id !~ '^I-[A-Za-z0-9_-]{3,70}$'
@@ -50,8 +50,13 @@ BEGIN
  IF v_secret IS NULL THEN RETURN false; END IF;
  v_message:='p42|LAB_V1|'||p_event_id||'|'||p_subscription_id
    ||'|'||p_issued_at||'|'||p_nonce::text;
- v_expected:=pg_catalog.encode(public.hmac(
-   pg_catalog.convert_to(v_message,'UTF8'),v_secret,'sha256'),'hex');
+ SELECT n.nspname INTO v_hmac_schema FROM pg_catalog.pg_extension e
+ JOIN pg_catalog.pg_namespace n ON n.oid=e.extnamespace
+ WHERE e.extname='pgcrypto';
+ IF v_hmac_schema IS NULL THEN RETURN false; END IF;
+ EXECUTE pg_catalog.format(
+ 'SELECT pg_catalog.encode(%I.hmac($1,$2,$3),''hex'')',v_hmac_schema)
+ INTO v_expected USING pg_catalog.convert_to(v_message,'UTF8'),v_secret,'sha256';
  IF v_expected<>p_mac_hex THEN RETURN false; END IF;
  -- No marker asserted by an arbitrary caller counts as provider attestation.
  -- The receiver signing key is NOT proof of a PayPal settlement or paid period.
