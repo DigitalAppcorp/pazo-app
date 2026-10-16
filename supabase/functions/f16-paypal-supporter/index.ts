@@ -83,9 +83,12 @@ function addCors(response:Response,origin:string){
  headers.set('cache-control','no-store')
  return new Response(response.body,{status:response.status,headers})
 }
+// F16-P06 SAFE DEPLOY 2026-10-16: STATIC NO-GO, regardless of project secrets.
+// Enabling QA requires a NEW source review and separate PO GO + redeploy.
+const QA_CHECKOUT_RELEASE_APPROVED = false
 Deno.serve(async(request:Request)=>{
- // A separate private env flag is mandatory; NO public or Live release.
- if(Deno.env.get('PAZO_F16_P06_QA_ENABLE')!=='true')
+ if(!QA_CHECKOUT_RELEASE_APPROVED ||
+    Deno.env.get('PAZO_F16_P06_QA_ENABLE')!=='true')
   return reply(503,'paid_supporter_checkout_not_released')
  let runtime
  try{runtime=compose()}catch{return reply(503,'checkout_unavailable')}
