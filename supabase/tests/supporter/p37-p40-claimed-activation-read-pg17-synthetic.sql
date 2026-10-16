@@ -7,12 +7,14 @@ DO $guard$ BEGIN
  OR session_user<>'f14_admin' OR current_user<>'postgres'
  THEN RAISE EXCEPTION 'P37 P40 PG17 LAB ONLY'; END IF;
  IF pg_catalog.has_function_privilege('anon',
- 'public.f16_p37_lab_read_claimed_activation(text,uuid)','EXECUTE')
+ 'public.f16_p37_read_claimed_activation(text,uuid)','EXECUTE')
  OR pg_catalog.has_function_privilege('authenticated',
- 'public.f16_p37_lab_read_claimed_activation(text,uuid)','EXECUTE')
+ 'public.f16_p37_read_claimed_activation(text,uuid)','EXECUTE')
  OR NOT pg_catalog.has_function_privilege('service_role',
- 'public.f16_p37_lab_read_claimed_activation(text,uuid)','EXECUTE')
+ 'public.f16_p37_read_claimed_activation(text,uuid)','EXECUTE')
  THEN RAISE EXCEPTION 'P37 RPC ACL not service-only'; END IF;
+ IF pg_catalog.to_regprocedure('public.f16_p37_read_claimed_activation(text,uuid)') IS NULL
+ THEN RAISE EXCEPTION 'P37 hosted compatible read RPC not staged'; END IF;
  IF pg_catalog.has_table_privilege('service_role',
  'supporter_private.paypal_verified_activation_bindings','SELECT')
  THEN RAISE EXCEPTION 'P37 exposed private P40 table'; END IF;
@@ -42,6 +44,10 @@ VALUES
   'processing','cccccccc-cccc-4ccc-8ccc-cccccccccccc',
   pg_catalog.clock_timestamp()+interval '5 minutes',true);
 
+UPDATE supporter_private.paypal_verified_event_inbox
+ SET attempt_count=1
+ WHERE provider_event_id IN ('P37-P40-ACT','P37-P40-UNBOUND','P37-P40-SALE');
+
 INSERT INTO supporter_private.paypal_verified_activation_bindings
  (provider_event_id,subscription_id,owner_id)
 VALUES('P37-P40-ACT','I-P37-OWNER','11111111-1111-4111-8111-111111111111');
@@ -49,13 +55,13 @@ VALUES('P37-P40-ACT','I-P37-OWNER','11111111-1111-4111-8111-111111111111');
 DO $checks$
 DECLARE p jsonb;
 BEGIN
- IF public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
+ IF public.f16_p37_read_claimed_activation('P37-P40-ACT',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') IS NOT NULL
  THEN RAISE EXCEPTION 'P37 worker OFF accepted claim'; END IF;
  UPDATE supporter_private.p05_inbox_worker_gate
  SET enabled=true,not_before=pg_catalog.clock_timestamp()-interval '1 minute'
  WHERE id=1;
- p:=public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
+ p:=public.f16_p37_read_claimed_activation('P37-P40-ACT',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
  IF p IS NULL OR p->>'subscriptionId'<>'I-P37-OWNER'
  OR p->>'source'<>'p40_inbox_binding_claim'
@@ -63,23 +69,23 @@ BEGIN
  OR p->>'leaseCurrent'<>'true'
  OR p?'signatureVerified' OR p?'ownerId'
  THEN RAISE EXCEPTION 'P37 valid P40 claim invalid or forged signature flag'; END IF;
- IF public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
+ IF public.f16_p37_read_claimed_activation('P37-P40-ACT',
   'dddddddd-dddd-4ddd-8ddd-dddddddddddd') IS NOT NULL
- OR public.f16_p37_lab_read_claimed_activation('P37-P40-UNBOUND',
+ OR public.f16_p37_read_claimed_activation('P37-P40-UNBOUND',
   'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb') IS NOT NULL
- OR public.f16_p37_lab_read_claimed_activation('P37-P40-SALE',
+ OR public.f16_p37_read_claimed_activation('P37-P40-SALE',
   'cccccccc-cccc-4ccc-8ccc-cccccccccccc') IS NOT NULL
  THEN RAISE EXCEPTION 'P37 mismatched lease, unbound or sale event passed'; END IF;
  UPDATE supporter_private.paypal_verified_event_inbox
  SET next_attempt_at=pg_catalog.clock_timestamp()-interval '10 seconds'
  WHERE provider_event_id='P37-P40-ACT';
- IF public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
+ IF public.f16_p37_read_claimed_activation('P37-P40-ACT',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') IS NOT NULL
  THEN RAISE EXCEPTION 'P37 expired lease passed'; END IF;
  UPDATE supporter_private.paypal_verified_event_inbox
  SET next_attempt_at=pg_catalog.clock_timestamp()+interval '5 minutes',
   retention_hold=false WHERE provider_event_id='P37-P40-ACT';
- IF public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
+ IF public.f16_p37_read_claimed_activation('P37-P40-ACT',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') IS NOT NULL
  THEN RAISE EXCEPTION 'P37 released retention hold passed'; END IF;
  UPDATE supporter_private.paypal_verified_event_inbox
@@ -87,7 +93,7 @@ BEGIN
  UPDATE supporter_private.p05_inbox_worker_gate
  SET not_before=pg_catalog.clock_timestamp()+interval '5 minutes'
  WHERE id=1;
- IF public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
+ IF public.f16_p37_read_claimed_activation('P37-P40-ACT',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') IS NOT NULL
  THEN RAISE EXCEPTION 'P37 prospective cutoff passed improperly'; END IF;
  -- The disposable F16-P21 fixture creates payment_entries but not
