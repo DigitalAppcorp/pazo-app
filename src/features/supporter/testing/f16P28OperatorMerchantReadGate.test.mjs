@@ -9,7 +9,7 @@ const request=(token=key,body=data)=>new Request('https://example.invalid/admin'
 const deps=()=>{let calls=0;return {get calls(){return calls},readLeasedEvent:async()=>{calls++;return {
  id:data.eventId,type:'PAYMENT.SALE.COMPLETED',processingState:'processing',liveLease:true,prospective:true}},
  merchantReader:{getMerchantEvent:async()=>{calls++;return {id:data.eventId,resource:{billing_agreement_id:'I-P28-ONE'}}},
- getMerchantSubscription:async()=>{calls++;return {id:'I-P28-ONE'}}}}}
+ getMerchantSubscription:async()=>{calls++;return {id:'I-P28-ONE',custom_id:'intent-77777777-7777-4777-8777-777777777777',plan_id:'P-14V25407JP6850922NLHMDKI'}}}}}
 const safe=async(res)=>{const body=await res.json();assert.equal(body.mayRecordPayment,false);assert.equal(body.mayGrantBenefits,false)
  assert.equal(body.paidThrough,null);assert.ok(!JSON.stringify(body).includes(data.eventId))}
 test('disabled endpoint authenticates before any work',async()=>{
