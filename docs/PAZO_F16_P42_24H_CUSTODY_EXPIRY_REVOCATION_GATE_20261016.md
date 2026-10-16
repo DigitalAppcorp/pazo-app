@@ -116,3 +116,11 @@ Aprobar una **provisión futura** solo cuando se registren:
 - El estado histórico de `MFA=X` en la captura previa del equipo es anterior a este alta. No inferir que la organización exige MFA: el plan Free no permite imponerlo globalmente. Tampoco tratar la presencia de botones como prueba de escritura de secretos.
 - **Próximo gate:** PO verifica segundo factor TOTP y conserva acceso; equipo técnico continúa solo con revisión de mecanismos de custodia, expiración, backups y revocación, sin claves. Todos los controles financieros y P42 permanecen OFF.
 - Marcador: `P42_OWNER_MFA_PRIMARY_UI_PASS_BACKUP_PENDING_NO_PROVISIONING`.
+
+## 10. Evidencia visual — segundo factor MFA registrado (2026-10-16)
+
+- Nueva captura aportada por el Product Owner de **Account → Security** muestra simultáneamente **Google Authenticator** y **Microsoft Authenticator** registrados como factores TOTP para la cuenta Supabase Owner. **MFA primario + segundo factor REGISTRADOS — PASS visual**.
+- La captura no prueba que los factores residan en dispositivos físicamente independientes, que exista almacenamiento de recuperación fuera del dispositivo principal ni que se hayan validado mediante dos inicios de sesión recientes; no atribuir esos estados como comprobados. Si están en el mismo dispositivo, el respaldo ante pérdida física sigue siendo insuficiente.
+- Queda **CERRADA la dependencia de agregar otro autenticador**. Se continúa al gate de custodia PostgreSQL, reversión coordinada Edge/DB, revisión de permisos y backups y expiración 24 horas; sin pedir más capturas MFA ni crear secretos.
+- Confirmada por documentación oficial la capacidad de quitar un secreto Edge con `supabase secrets unset NAME` (https://supabase.com/docs/reference/cli/supabase-secrets-unset); la existencia de ese comando NO prueba que el ejecutor pueda revocar de forma segura ni que se haya ejecutado. Preparar método privado y verificación no sensible sin usar credenciales en argumentos, logs o chat.
+- **Estado:** `P42_OWNER_TWO_TOTP_UI_PASS_CUSTODY_REVOCATION_PENDING_NO_PROVISIONING`, F16 NO-GO, PR #44 Draft, writer P42/P21/checkout/ledger/beneficios OFF; ninguna nueva consulta o mutación PostgreSQL atribuida a esta actualización.
