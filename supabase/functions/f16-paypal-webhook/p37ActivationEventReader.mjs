@@ -12,8 +12,9 @@ export function createP37ActivationEventReader({enabled=false,readClaimedActivat
   try{
    const claim=await readClaimedActivation({eventId:activationEventId,claimToken:activationClaimToken})
    if(claim?.id!==activationEventId||claim?.type!=='BILLING.SUBSCRIPTION.ACTIVATED'||
-    claim?.processingState!=='processing'||claim?.subscriptionId!==subscriptionId||
-    claim?.signatureVerified!==true)return null
+    claim?.processingState!=='processing'||
+    claim?.subscriptionId!==subscriptionId||claim?.signatureVerified!==true||
+    claim?.source!=='verified_inbox_claim' || claim?.leaseCurrent!==true)return null
    const token=await getAccessToken()
    if(typeof token!=='string'||token.length<8)return null
    const response=await fetchImpl(HOST+'/v1/notifications/webhooks-events/'+encodeURIComponent(activationEventId),{
