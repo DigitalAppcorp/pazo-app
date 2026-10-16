@@ -1,5 +1,5 @@
 // F16-P37: private read-only P40 activation under a live P21 claim.
-// OFF BY DEFAULT; targets a hosted-compatible candidate RPC that is NOT installed yet.
+// OFF BY DEFAULT; targets hosted P37 private RPC installed 2026-10-16, with P21/P42 OFF.
 // Do not import in browser, active Edge, cron or payment/benefit writer.
 // The P40 binding is a DB reference, not independent signature attestation:
 // trusted PayPal ingress + P42 signing must be separately deployed/verified.
