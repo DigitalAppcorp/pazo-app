@@ -14,7 +14,7 @@ export function createP28AuditedCandidateReader({recordAudit,readCandidate,finge
    if(typeof eventFingerprint!=='string'||!/^[0-9a-f]{64}$/.test(eventFingerprint))return null
    const audit=await recordAudit(Object.freeze({requestId,eventFingerprint,action:'historical_candidate_exact_read'}))
    if(audit?.persisted!==true||audit?.requestId!==requestId)return null
-   return await readCandidate({eventId,requestId})
+   return await readCandidate({eventId,requestId,eventFingerprint})
   }catch{return null}
  }
 }
