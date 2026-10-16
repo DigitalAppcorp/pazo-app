@@ -122,6 +122,35 @@ BEGIN
  f.event_id,'I-P42-FOREIGN',f.issued_at,f.nonce,f.key_id,f.foreign_mac)
  THEN RAISE EXCEPTION 'P42 event reassigned even with valid foreign MAC'; END IF;
 END $as_service$;
+-- A freshly RECEIVED signature may have been ISSUED within the prior
+-- 120 seconds but after a key's 24h not_after the writer must reject it.
+-- Original P42 function incorrectly accepted this idempotent replay.
+SET LOCAL ROLE postgres;
+CREATE TEMP TABLE p42_absolute_expiry ON COMMIT DROP AS
+ SELECT f.event_id,f.sub_id,f.key_id,f.nonce,
+ to_char((clock_timestamp()-interval '30 seconds') AT TIME ZONE 'UTC',
+ 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::text AS issued_at,
+ ''::text AS mac
+ FROM p42_candidate_fixture f;
+UPDATE p42_absolute_expiry f SET
+ mac=public.f16_p42_test_hosted_mac('p42|sandbox|'||f.key_id||'|'||
+ f.event_id||'|'||f.sub_id||'|'||f.issued_at||'|'||f.nonce::text);
+UPDATE supporter_private.p42_activation_signing_keys
+ SET not_after=clock_timestamp()-interval '5 seconds'
+ WHERE key_id='P42_V1';
+GRANT SELECT ON p42_absolute_expiry TO service_role;
+SET LOCAL ROLE service_role;
+DO $absolute_expiry$
+DECLARE f record;
+BEGIN
+ SELECT * INTO f FROM p42_absolute_expiry;
+ IF f.issued_at::timestamptz >= (SELECT not_after
+   FROM supporter_private.p42_activation_signing_keys WHERE key_id='P42_V1')
+ THEN RAISE EXCEPTION 'P42 expiry fixture must be issued BEFORE expiry'; END IF;
+ IF public.f16_p42_register_authenticated_activation(
+  f.event_id,f.sub_id,f.issued_at,f.nonce,f.key_id,f.mac)
+ THEN RAISE EXCEPTION 'P42 accepted MAC after ABSOLUTE key expiry'; END IF;
+END $absolute_expiry$;
 SET LOCAL ROLE postgres;
 UPDATE supporter_private.p42_activation_signing_keys
  SET not_after=clock_timestamp()-interval '1 minute' WHERE key_id='P42_V1';
