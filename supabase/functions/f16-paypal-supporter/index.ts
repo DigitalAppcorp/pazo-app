@@ -1,6 +1,6 @@
-// PAZO F16: a REAL consumer-facing endpoint composition (UNRELEASED).
-// Change the hard-coded false only in separately authorized release commit.
-// Never deploy with sandbox checkout ON while legal disclosure/retention is pending.
+// PAZO F16: consumer-facing Sandbox QA checkout, DEFAULT DENIED.
+// Only one private allowlisted Supabase Auth owner can exercise test checkout.
+// The QA gate is not legal approval for public or Live subscriptions.
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2'
 import {createVerifiedAuthOwnerResolver}
  from '../f16-paypal-webhook/verifiedAuthOwner.mjs'
@@ -20,8 +20,9 @@ import {createPazoSandboxCancellationHandler}
  from '../f16-paypal-webhook/p06SandboxCancellationHandler.mjs'
 import {createF16GlobalAdmission}
  from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
+import {isP06SandboxQaAuthorized}
+ from './p06SandboxQaGate.mjs'
 
-const RELEASE_APPROVED=false
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const reply=(status,code)=>new Response(JSON.stringify({
@@ -83,7 +84,9 @@ function addCors(response:Response,origin:string){
  return new Response(response.body,{status:response.status,headers})
 }
 Deno.serve(async(request:Request)=>{
- if(!RELEASE_APPROVED)return reply(503,'paid_supporter_checkout_not_released')
+ // A separate private env flag is mandatory; NO public or Live release.
+ if(Deno.env.get('PAZO_F16_P06_QA_ENABLE')!=='true')
+  return reply(503,'paid_supporter_checkout_not_released')
  let runtime
  try{runtime=compose()}catch{return reply(503,'checkout_unavailable')}
  if(request.headers.get('origin')!==runtime.origin)
@@ -101,6 +104,12 @@ Deno.serve(async(request:Request)=>{
  if(!data||typeof data!=='object'||Array.isArray(data)||
   typeof data.action!=='string')
   return addCors(reply(400,'invalid_request'),runtime.origin)
+ // Always verify identity with Supabase Auth server. Never trust browser UID.
+ let qaOwner: string | null = null
+ try{qaOwner=await runtime.resolveAuthenticatedOwner(request)}catch{qaOwner=null}
+ if(!isP06SandboxQaAuthorized({getEnv:(k:string)=>Deno.env.get(k),
+      verifiedOwnerId:qaOwner}))
+  return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
  if(data.action==='status'||data.action==='cancel')
   return addCors(await runtime.manage(request),runtime.origin)
  let result
