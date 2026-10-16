@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — INVENTARIO WINDOWS RECIBIDO / VERIFICACIÓN VERCEL PENDIENTE (2026-10-16)
+
+- Codex reportó inventario local: `supabase=NOT_INSTALLED`, `psql=NOT_INSTALLED`, `vercel=INSTALLED 63.1.2`, sin `database.credential.xml` ni `connection.json`. Reportó ruta `INVENTARIO_20261016.txt` LOCAL que no fue abierta por ChatGPT. No se puede inferir autenticación DB o acceso al equipo Vercel de tener el CLI instalado.
+- Se agregó `scripts/f16-p43-next-prereqs-readonly.ps1`: comprueba node/npm/scoop/psql/supabase y ejecuta solamente `vercel whoami` y `vercel teams ls`; **no imprime salida sin filtrar de CLI, emails/tokens/IDs ni valores de variables**; informa estados y marcador `P43_TOOLING_SCOPE_READ_ONLY_NO_SECRETS`. No hace login, link, env pull, db dump, cambios Supabase/PayPal/Vercel.
+- Nueva orden local y fuentes de instalación oficiales `docs/PAZO_F16_P43_INVENTORY_RESULT_NEXT_LOCAL_GATE_20261016.md`: Supabase CLI por Scoop o npx con Node 20+, `psql` cliente oficial Windows sin servidor adicional. Local installs NO ejecutadas desde ChatGPT. Antes de ensayar credenciales temporales revisar flags y solicitar gate separado (podría crear rol secreto); antes de reset DB cerrar impacto Vercel 403.
+- P42/P21 OFF, P40/ledger 0, clave real ausente. No inventar fechas de validez `not_before` ni `not_after`. F16 NO-GO; PR #44 DRAFT; P28 diferido.
+
 ## F16-P43 — INVENTARIO LOCAL CLI / VERCEL SIN SECRETOS (2026-10-16)
 
 - PO indicó «ok go» para continuar **comprobaciones** sin solicitar credenciales temporales ni resetear DB. Vercel connector `list_teams` devolvió **0 teams** accesibles; `digitalapp` permanece sin autorización para leer nombres/destinos de variables. No afirmar que entorno Vercel fue auditado.
