@@ -64,7 +64,7 @@ test('P18 read-only account and receipt do not depend on PayPal mode',()=>{
   new URL('../../../../supabase/functions/f16-paypal-supporter-account/index.ts',import.meta.url),
   'utf8')
  const should=src.slice(src.indexOf('const shouldRun=():boolean=>'),
-  src.indexOf('function createRuntime(){'))
+  src.indexOf('function createRuntime('))
  assert.ok(should.includes("SUPABASE_SERVICE_ROLE_KEY"))
  assert.ok(!should.includes('PAZO_F16_PAYPAL_ENV'))
  assert.ok(src.includes("if(['status','cancel'].includes(data.action) &&"))
