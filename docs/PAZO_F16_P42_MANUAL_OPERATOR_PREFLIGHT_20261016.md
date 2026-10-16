@@ -50,6 +50,8 @@ Se auditó `scripts/backup-database.ps1` en esta rama. Ejecuta `pg_dump --format
 
 **No bloquear ciegamente los respaldos de PAZO para producir una clave efímera.** El próximo gate necesita diseñar y comprobar una política fiable que preserve backups de otros datos **sin incluir `key_bytes`**, o aislar y controlar la retención de cualquier copia. El método debe comprobarse con un PostgreSQL desechable y respaldos sintéticos antes de generar el primer secreto. Los backups previos a la primera clave P42 no contienen una clave que todavía no existía; la incertidumbre afecta copias posteriores. Queda pendiente cualquier decisión específica sobre scripts de backup. No tocar `backup-database.ps1` ahora sin auditoría y prueba de restauración correspondientes.
 
+**Posible solución compatible con PostgreSQL 17, todavía NO implementada:** `pg_dump --exclude-table-data=supporter_private.p42_activation_signing_keys` mantiene el esquema de esa tabla y omite sus filas. La opción está documentada en https://www.postgresql.org/docs/17/app-pgdump.html . Si se selecciona, es obligatorio probar sobre PG17 descartable que el dump contenga el esquema pero nunca la fila sintética de secreto, comprobar `pg_restore --list`, verificar restauración, y que los backups no se hayan enviado ni copiado a otros destinos. **No agregar el flag al script alojado ni afirmar protección hasta aprobar y pasar ese gate de backup**.
+
 **Estado backup:** `BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY`.
 
 ## 6. Hitos del turno manual (NO operativos todavía)
