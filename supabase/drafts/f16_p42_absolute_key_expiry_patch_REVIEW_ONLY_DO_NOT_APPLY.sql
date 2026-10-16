@@ -1,6 +1,6 @@
 -- F16-P42 FUTURE CUTOFF HARDENING — REVIEW_ONLY_DO_NOT_APPLY.
 -- Exactly one previously installed SECURITY DEFINER function body changed.
--- Corrects 24h absolute expiry: after not_after, even a MAC issued 30s
+-- Corrects 24h absolute expiry: after not_after (or without a finite not_after), even a MAC issued 30s
 -- earlier must NOT pass via the 120-second issued_at tolerance.
 -- NO signing material generated or provisioned. No Edge secrets or grants.
 -- NO-GO for applying to hosted without explicit PO authorization.
@@ -67,8 +67,9 @@ BEGIN
  FROM supporter_private.p42_activation_signing_keys k
  WHERE k.key_id=p_key_id AND k.enabled=true;
  IF v_key IS NULL OR v_issued_at<v_key_cutoff
- OR (v_key_end IS NOT NULL AND (v_issued_at>=v_key_end
- OR pg_catalog.clock_timestamp()>=v_key_end))
+ OR v_key_end IS NULL
+ OR v_issued_at>=v_key_end
+ OR pg_catalog.clock_timestamp()>=v_key_end
  OR v_issued_at<v_gate_cutoff THEN RETURN false; END IF;
  v_message:='p42|sandbox|'||p_key_id||'|'||p_event_id||'|'||
  p_subscription_id||'|'||p_issued_at||'|'||p_nonce::text;
