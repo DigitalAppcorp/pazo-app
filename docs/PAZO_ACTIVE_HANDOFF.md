@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — EJECUCIÓN LOCAL AGRUPADA DE CODEX AUTORIZADA (2026-10-16)
+
+- PO indicó «ok vale sigamos con codex» tras proponer delegar instalaciones gratuitas locales y diagnóstico sin cambios alojados. Preparada orden única `docs/PAZO_F16_P43_CODEX_LOCAL_SETUP_OPERATOR_ORDER_20261016.md` para Codex; este chat **no tiene control directo** de la PC y no declara ejecutadas las instalaciones.
+- Alcance: verificar Node/psql/Supabase CLI, usar `npx --yes supabase --help` si Node>=20 (solo CLI efímera, puede descargar npm cache), instalar únicamente PostgreSQL client `psql` desde fuente oficial y revisar `vercel whoami`/team `digitalapp`. Login Vercel privado solamente por el usuario cuando sea necesario; auditoría de variables solo nombres/destinos y si CLI garantiza no exponer valores.
+- **Prohibido bajo este GO:** `supabase db dump`/dry-run (posibles credenciales/roles temporales), crear rol/JIT, reset de password, `supabase link`, tocar Supabase DB/secrets/Edge, grants, PayPal, checkout, worker, beneficios, comprar Sandbox o Live. Fechas not_before/not_after no aprobadas; F16 NO-GO, PR #44 DRAFT y P28 diferido.
+- Salida solicitada a Codex: reporte local sanitizado `RESULTADO_P43_CODEX_LOCAL_SETUP_20261016.md`, marcador READY o PARTIAL sin mutaciones hosted. No pedir que el usuario comparta credenciales.
+
 ## F16-P43 — VERCEL NO VERIFICADO, NODE/NPX COMO ALTERNATIVA A SCOOP (2026-10-16)
 
 - Codex reportó segundo inventario local: `NODE=AVAILABLE`, `NPM=AVAILABLE`, `SCOOP=MISSING`, `PSQL=MISSING`, `SUPABASE_CLI=MISSING`, `VERCEL_SESSION=NOT_VERIFIED`, `VERCEL_DIGITALAPP_TEAM=NOT_CHECKED`. Reportó `PREREQUISITOS_20261016.txt` solo en Windows; no se abrió en ChatGPT. `NOT_VERIFIED` **no** prueba falta de login: causa no observada.
