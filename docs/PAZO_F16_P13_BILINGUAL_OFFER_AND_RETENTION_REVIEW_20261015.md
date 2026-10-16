@@ -41,3 +41,16 @@ Fuentes internas: `docs/PAZO_F16_P06_BENEFITS_AND_RETENTION_DECISION_GATE_202610
 5. **Sin permiso de compra ni release por defecto.** El PR sigue DRAFT; `paidThrough=null` y `mayGrantBenefits=false`.
 
 Prueba CI: `src/features/supporter/testing/f16P13OfferCopyDraft.test.mjs` comprueba alcance, ES/EN, los marcadores y que P12 no publica este borrador.
+
+## Actualización 2026-10-16 — regla contractual prospectiva incorporada al borrador
+
+**Cambios únicamente branch, NO-GO publicado.** Se completó una omisión textual concreta de `src/features/supporter/offerCopyDraftP13.mjs`: ahora las versiones **ES/EN** describen la regla P05 previamente aprobada para el PRIMER período, `[activation_time, observed_next_billing_time)`, **condicionada** a titular/consentimiento, activación PayPal autenticada, venta `COMPLETED` de cargo regular y atribución de primera obligación. La próxima facturación es un **límite de servicio establecido por PAZO**, no una certificación del proveedor de período abonado. Deuda, cobros tardíos/reintentados, reembolsos/disputas y evidencia insuficiente bloquean beneficios. No se calculan 30 días desde venta.
+
+- El texto todavía informa que los cuatro reconocimientos no están enteramente disponibles, y conserva los marcadores de cancelación directa y comprobante retenible; **debe ser revisado, completado y aceptado por PO/legal antes de crear una nueva versión inmutable**.
+- Este borrador **no sustituye** la oferta QA ya publicada y consentida `pazo-supporter-sandbox.qa20261016-v1`: aquella acepta un experimento de Sandbox sin período ni beneficios; no reescribir condiciones retroactivamente. La prueba P44 tampoco autoriza un ciclo pagado.
+- Los campos `status:'REVIEW_ONLY_NOT_PUBLISHED'`, `mayPublish:false`, `mayShowAsPurchaseOffer:false`, `mayStartPayPalCheckout:false`, `mayGrantBenefits:false` permanecen intactos. Ningún SQL/Edge/checkout utiliza estas cadenas.
+- La prueba `f16P13OfferCopyDraft.test.mjs` recibió dos casos dirigidos nuevos para comprobar el ancla temporal explícita y los flags de no publicación; **no es verificación legal ni de merchant auténtico**.
+- La revisión G1 de conservación/alcance de disputas NO fue aprobada por este GO. Registro canónico en `docs/PAZO_F16_P05_RETENTION_DECISION_REGISTER_20261015.json`, no alterado; consolidación operativa en `PAZO_F16_P05_RETENTION_DECISION_PACKET_20261015.md`.
+- Pendientes finales de copy: disponibilidad real de beneficios, identificación legal/comercial del vendedor, precio total/impuestos aplicables, enlace de cancelación online operativo, acuse realmente retenible, avisos reglamentarios, texto y aprobación de política de retención, versión/hash ES/EN final. Antes de LIVE se requiere verificación jurídica de aplicabilidad California BPC §17602.
+
+**No se creó una oferta contratable ni fue ejecutado código financiero.** Los cambios de código son solo borrador ES/EN y pruebas offline.
