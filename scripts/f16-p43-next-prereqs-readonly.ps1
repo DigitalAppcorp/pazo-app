@@ -13,6 +13,20 @@ function Test-LocalTool([string]$name) {
 
 Write-Output ('NODE=' + $(if (Test-LocalTool 'node') { 'AVAILABLE' } else { 'MISSING' }))
 Write-Output ('NPM=' + $(if (Test-LocalTool 'npm') { 'AVAILABLE' } else { 'MISSING' }))
+$nodeMajor = -1
+if (Test-LocalTool 'node') {
+  try {
+    $nodeTool = Get-Command 'node' -ErrorAction Stop | Select-Object -First 1
+    $v = @(& $nodeTool.Source --version 2>&1) | Out-String
+    if ($LASTEXITCODE -eq 0 -and $v -match '(?m)^v(?<major>[0-9]{1,3})\.[0-9]+\.') {
+      $nodeMajor = [int]$Matches.major
+    }
+  } catch {
+    $nodeMajor = -1
+  }
+}
+Write-Output ('NODE_MAJOR=' + $(if ($nodeMajor -ge 0) { $nodeMajor } else { 'UNKNOWN' }))
+Write-Output ('SUPABASE_NPX_ELIGIBLE=' + $(if ($nodeMajor -ge 20) { 'YES' } elseif ($nodeMajor -ge 0) { 'NO' } else { 'UNKNOWN' }))
 Write-Output ('SCOOP=' + $(if (Test-LocalTool 'scoop') { 'AVAILABLE' } else { 'MISSING' }))
 Write-Output ('PSQL=' + $(if (Test-LocalTool 'psql') { 'AVAILABLE' } else { 'MISSING' }))
 Write-Output ('SUPABASE_CLI=' + $(if (Test-LocalTool 'supabase') { 'AVAILABLE' } else { 'MISSING' }))
