@@ -12,9 +12,9 @@ const EXACT_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/
 function utcMillis(value) {
   if (typeof value !== 'string' || !EXACT_UTC.test(value)) return NaN
   const n = Date.parse(value)
-  return Number.isFinite(n) && new Date(n).toISOString() ===
-    value.replace(/\.000Z$/, 'Z') .replace(/Z$/, value.endsWith('.000Z') ? '.000Z' : 'Z')
-    ? n : NaN
+  if (!Number.isFinite(n)) return NaN
+  const iso = new Date(n).toISOString()
+  return (iso === value || (!value.includes('.') && iso === value.slice(0, -1) + '.000Z')) ? n : NaN
 }
 function result(reason, ok = false) {
   return Object.freeze({
