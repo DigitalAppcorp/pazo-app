@@ -171,3 +171,14 @@ Esta sección **sustituye los requisitos históricos de designar obligatoriament
 No se crearon secretos ni tareas, no se conectó PostgreSQL, no se modificaron Edge/PayPal ni se habilitaron cobros por esta decisión.
 
 **Marcador vigente:** `P42_SINGLE_CUSTODIAN_DESIGN_ONLY_UNAVAILABLE_FALLBACK_NO_GO`.
+
+
+## 14. Gate de respaldo — script corregido y laboratorio ampliado PASS (2026-10-16)
+
+Por GO PO «ok go» del gate inmediatamente anterior, se modificó `scripts/backup-database.ps1` para incluir `--exclude-table-data=supporter_private.p42_activation_signing_keys` SOLO en la llamada `pg_dump`, conservando esquema de P42 y datos de las demás tablas. El experimento PG17 del mismo proyecto se amplió a FK, índices, vista, función, ACL, RLS/Force RLS, y se comprobó restauración en otra DB descartable con cero filas P42. Adicionalmente el CI PowerShell exige la presencia exacta del flag por inspección estática del comando real.
+
+**Evidencia técnica:** commit `5474577b428c548b0759861735a6d91eef75a52d`, F16 Disposable PostgreSQL Lab run `38926912820` **SUCCESS**, CI run `38926912803` **SUCCESS**. Informe `docs/PAZO_F16_P42_BACKUP_EXCLUSION_PG17_VERIFICATION_20261016.md`.
+
+**Cierre acotado:** el antiguo bloqueo de que **el script Windows carece del filtro** queda resuelto en la rama actual y probado sintéticamente. No se ha ejecutado el script contra datos alojados tras el cambio, ni restaurado el catálogo completo PAZO con este flag. Quedan sin verificar otros comandos de backup, snapshots de terceros, respaldos antiguos y retención de material residual. El test tampoco autoriza omitir protección de backups en un eventual GO de provisión.
+
+**Persisten las prohibiciones:** clave P42 no generada, no T0/Texp, acceso DB WRITE TLS no probado, revocación Edge real no ensayada, custodio PO único con riesgo humano pendiente de aprobación, writer P42/P21/EXECUTE/checkout/pagos/beneficios sin habilitar. El estado global de provisión continúa **NO-GO**.
