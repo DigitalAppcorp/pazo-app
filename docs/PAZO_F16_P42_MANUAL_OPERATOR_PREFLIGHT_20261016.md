@@ -93,3 +93,12 @@ En `Texp=T0+24h`, un humano con permisos ejecuta:
 El PO eligió la **alternativa segura sin otro administrador**. El responsable principal sigue siendo PO Owner con dos factores MFA ya registrados; no crear permisos para terceros. Se requiere recuperación del propio titular en dispositivos/medios independientes, disponibilidad personal para Texp, validación de ambos canales, backups aislados y un GO nuevo. **Ningún control exclusivamente manual puede garantizar limpieza a una hora fija si esa única persona está indisponible.** Ver `docs/PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md`.
 
 **Gate:** `P42_SINGLE_CUSTODIAN_DESIGN_ONLY_UNAVAILABLE_FALLBACK_NO_GO`; sin generar/provisionar P42, sin SQL ni Edge hosted y sin habilitar cobros.
+
+
+## 9. Evidencia PG17: exclusión y restore sintético PASS (2026-10-16)
+
+**Síntesis:** CI F16 Disposable PostgreSQL Lab run `38925576845` SUCCESS, CI general run `38925576708` SUCCESS para SHA `2fa8d74d`. Ensayo nuevo `scripts/f16-p42-backup-exclusion-pg17-lab.sh` y workflow PG17: control negativo del dump sin exclusión (fila P42 sintética incluida), control con `--exclude-table-data=supporter_private.p42_activation_signing_keys` (esquema retenido, datos P42 omitidos, benignos retenidos), y restauración a otra DB descartable (0 claves, 1 control, RLS + FORCE RLS + columna intactos). Se usaron solo bytes deterministas ficticios y credenciales de servicio CI, sin hosted.
+
+**Documento de evidencia:** `docs/PAZO_F16_P42_BACKUP_EXCLUSION_PG17_VERIFICATION_20261016.md`. **Este PASS NO modifica el script real** `scripts/backup-database.ps1`; aún no hay protección efectiva contra respaldo accidental de futura `key_bytes`. El bloqueo `BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY` **PERMANECE**.
+
+**Siguiente acción técnica:** preparar una propuesta de cambio acotado del comando `pg_dump` Windows y un ensayo más amplio de restore, **sin aplicarlo** antes del GO independiente. Custodio PO único confirmado; no existe un segundo administrador, T0/Texp siguen sin definir, acceso DB WRITE/Edge unset no validado y provisión NO-GO.
