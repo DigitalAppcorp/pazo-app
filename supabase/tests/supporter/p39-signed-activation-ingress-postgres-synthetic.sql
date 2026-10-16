@@ -34,15 +34,15 @@ BEGIN
  IF public.f16_p39_lab_register_signed_activation(
  'P39-ACT-ONE','I-P39-SUB-TWO','postback_verified_sandbox_activation')
  THEN RAISE EXCEPTION 'P39 event transferred to another account'; END IF;
+END $test$;
+SET LOCAL ROLE postgres;
+DO $assert$
+BEGIN
  IF pg_catalog.has_table_privilege('service_role',
  'supporter_private.p38_lab_verified_activation_binding','INSERT')
  OR pg_catalog.has_table_privilege('service_role',
  'supporter_private.p38_lab_verified_activation_binding','SELECT')
  THEN RAISE EXCEPTION 'P39 service_role private table grant exposed'; END IF;
-END $test$;
-SET LOCAL ROLE postgres;
-DO $assert$
-BEGIN
  IF (SELECT count(*) FROM supporter_private.p38_lab_verified_activation_binding)<>1
  OR EXISTS(SELECT 1 FROM supporter_private.p38_lab_verified_activation_binding
  WHERE subscription_id<>'I-P39-SUB-ONE'
