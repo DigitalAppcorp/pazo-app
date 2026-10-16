@@ -1,8 +1,5 @@
--- PAZO F16-P28: HOSTED REVIEW CANDIDATE. NOT AUTHORIZED TO APPLY.
--- Adapted from PG17-only rehearsal. Installs ONLY an isolated minimal audit log.
--- Does not install historical metadata reader, activate worker, or grant benefits.
--- Fingerprint must be HMAC-SHA256 of exact event ID with server-held secret,
--- never bare SHA256 (guessable IDs) and never raw identifiers.
+-- PAZO F16-P28 hosted audit review candidate. DO NOT APPLY without PO authorization.
+-- Audit stores only request UUID and HMAC-SHA256 fingerprint; never event IDs.
 BEGIN;
 DO $preflight$
 BEGIN
@@ -17,82 +14,24 @@ END
 $preflight$;
 CREATE TABLE supporter_private.p28_historical_read_audit (
  request_id uuid PRIMARY KEY,
- event_fingerprint text NOT NULL CHECK (event_fingerprint ~ '^[0-9a-f]{64} NOT NULL DEFAULT 'historical_candidate_exact_read'
-   CHECK(action='historical_candidate_exact_read'),
+ event_fingerprint text NOT NULL CHECK (event_fingerprint ~ '^[0-9a-f]{64}$'),
+ action text NOT NULL DEFAULT 'historical_candidate_exact_read'
+  CHECK (action='historical_candidate_exact_read'),
  created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp()
 );
 ALTER TABLE supporter_private.p28_historical_read_audit ENABLE ROW LEVEL SECURITY;
 ALTER TABLE supporter_private.p28_historical_read_audit FORCE ROW LEVEL SECURITY;
-REVOKE ALL ON TABLE supporter_private.p28_historical_read_audit
+REVOKE ALL ON supporter_private.p28_historical_read_audit
  FROM PUBLIC,anon,authenticated,service_role;
-CREATE FUNCTION public.f16_p28_draft_ack_historical_audit(p_request_id uuid,p_event_fingerprint text)
+CREATE FUNCTION public.f16_p28_draft_ack_historical_audit(
+ p_request_id uuid,p_event_fingerprint text)
 RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $fn$
 BEGIN
  IF p_request_id IS NULL OR p_event_fingerprint IS NULL OR
-    p_event_fingerprint !~ '^[0-9a-f]{64}
- IF NOT FOUND THEN RETURN NULL; END IF;
- RETURN pg_catalog.jsonb_build_object('persisted',true,'requestId',p_request_id);
-END
-$fn$;
-REVOKE ALL ON FUNCTION public.f16_p28_draft_ack_historical_audit(uuid,text)
- FROM PUBLIC,anon,authenticated;
-GRANT EXECUTE ON FUNCTION public.f16_p28_draft_ack_historical_audit(uuid,text)
- TO service_role;
-COMMIT;
-),
- action text NOT NULL DEFAULT 'historical_candidate_exact_read'
-   CHECK(action='historical_candidate_exact_read'),
- created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp()
-);
-ALTER TABLE supporter_private.p28_historical_read_audit ENABLE ROW LEVEL SECURITY;
-ALTER TABLE supporter_private.p28_historical_read_audit FORCE ROW LEVEL SECURITY;
-REVOKE ALL ON TABLE supporter_private.p28_historical_read_audit
- FROM PUBLIC,anon,authenticated,service_role;
-CREATE FUNCTION public.f16_p28_draft_ack_historical_audit(p_request_id uuid)
-RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
-AS $fn$
-BEGIN
- IF p_request_id IS NULL THEN RETURN NULL; END IF;
- INSERT INTO supporter_private.p28_historical_read_audit(request_id)
- VALUES(p_request_id) ON CONFLICT(request_id) DO NOTHING;
- IF NOT FOUND THEN RETURN NULL; END IF;
- RETURN pg_catalog.jsonb_build_object('persisted',true,'requestId',p_request_id);
-END
-$fn$;
-REVOKE ALL ON FUNCTION public.f16_p28_draft_ack_historical_audit(uuid,text)
- FROM PUBLIC,anon,authenticated;
-GRANT EXECUTE ON FUNCTION public.f16_p28_draft_ack_historical_audit(uuid,text)
- TO service_role;
-COMMIT;
- THEN RETURN NULL; END IF;
+    p_event_fingerprint !~ '^[0-9a-f]{64}$' THEN RETURN NULL; END IF;
  INSERT INTO supporter_private.p28_historical_read_audit(request_id,event_fingerprint)
  VALUES(p_request_id,p_event_fingerprint) ON CONFLICT(request_id) DO NOTHING;
- IF NOT FOUND THEN RETURN NULL; END IF;
- RETURN pg_catalog.jsonb_build_object('persisted',true,'requestId',p_request_id);
-END
-$fn$;
-REVOKE ALL ON FUNCTION public.f16_p28_draft_ack_historical_audit(uuid,text)
- FROM PUBLIC,anon,authenticated;
-GRANT EXECUTE ON FUNCTION public.f16_p28_draft_ack_historical_audit(uuid,text)
- TO service_role;
-COMMIT;
-),
- action text NOT NULL DEFAULT 'historical_candidate_exact_read'
-   CHECK(action='historical_candidate_exact_read'),
- created_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp()
-);
-ALTER TABLE supporter_private.p28_historical_read_audit ENABLE ROW LEVEL SECURITY;
-ALTER TABLE supporter_private.p28_historical_read_audit FORCE ROW LEVEL SECURITY;
-REVOKE ALL ON TABLE supporter_private.p28_historical_read_audit
- FROM PUBLIC,anon,authenticated,service_role;
-CREATE FUNCTION public.f16_p28_draft_ack_historical_audit(p_request_id uuid)
-RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
-AS $fn$
-BEGIN
- IF p_request_id IS NULL THEN RETURN NULL; END IF;
- INSERT INTO supporter_private.p28_historical_read_audit(request_id)
- VALUES(p_request_id) ON CONFLICT(request_id) DO NOTHING;
  IF NOT FOUND THEN RETURN NULL; END IF;
  RETURN pg_catalog.jsonb_build_object('persisted',true,'requestId',p_request_id);
 END
