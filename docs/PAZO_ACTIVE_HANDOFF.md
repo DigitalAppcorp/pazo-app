@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P42 — PREFLIGHT DE PROVISIÓN SIN SECRETOS, SOLO LECTURA (2026-10-16)
+
+- Usuario indicó «ok go» para continuar tras instalar P42 inerte. Se avanzó únicamente en **controles read-only**, sin aceptar como nuevo GO para clave real, grant, Edge, PayPal, worker o ingesta de eventos.
+- Nuevo `supabase/queries/f16_p42_provisioning_structural_preflight_READ_ONLY.sql` falla si hay claves, gate ON, pagos o P40 poblada, RLS/ACL degradadas, SECURITY DEFINER/search_path inesperado o extensión ausente. El mismo SQL devolvió `P42_STRUCTURAL_PASS_NO_PROVISIONING_AUTHORITY` en Supabase alojado, sin mutar registros.
+- CI general `38862474610` PASS y PostgreSQL descartable `38862475023` PASS tras corregir la representación normalizada `search_path=""`.
+- Procedimiento futuro y barreras: `docs/PAZO_F16_P42_SECRET_PROVISIONING_OPERATIONS_NO_GO_20261016.md`. El conector Supabase disponible no permite gestionar variables seguras Edge; la custodia dual requiere canal/acción seguro separado, sin pegar secreto en chat o GitHub.
+- **Aún pendiente PO GO independiente** para generación/custodia de clave real y política operativa; NINGUNA clave aprovisionada. P40 0, P42 OFF, P21 OFF, ledger 0, F16 NO-GO, PR #44 DRAFT, P28 diferido.
+
 ## F16-P42 — INFRAESTRUCTURA DESACTIVADA INSTALADA / POSTFLIGHT PASS (2026-10-16)
 
 - **GO del Product Owner:** «sí» expresamente para instalar solo P42 sin claves reales, sin ejecución del writer y con compuerta apagada. Migración `20261016062849_f16_p42_keys_and_writer_inert` aplicada en Supabase alojado y archivo `supabase/migrations/20261016062849_f16_p42_keys_and_writer_inert.sql` versionado.
