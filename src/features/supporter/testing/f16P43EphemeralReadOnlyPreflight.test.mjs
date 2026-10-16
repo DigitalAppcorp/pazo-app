@@ -56,5 +56,5 @@ test('P43 fails closed on project mismatch, altered role, weak password, quotes'
 });
 
 test('P43 never runs provider during parser import; no command line args means no execution', () => {
-  assert.equal(extractCliCredentials(''), Object(extractCliCredentials('')));
+  assert.deepEqual(extractCliCredentials(''), { ok: false, category: 'MISSING_FIELD' });
 });
