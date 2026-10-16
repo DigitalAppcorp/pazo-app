@@ -51,3 +51,50 @@ Un checklist de pruebas sintéticas debe demostrar que falta de totales, `next` 
 - `docs/PAZO_F16_P23_HISTORY_DISPUTE_SNAPSHOT_GATE_20261015.md`
 - `docs/PAZO_F16_P30_FINANCIAL_GATE_RECONCILIATION_20261015.md`
 - PayPal Developer: https://developer.paypal.com/api/subscriptions/v1/definitions/transaction/ ; https://developer.paypal.com/subscriptions/webhooks ; https://developer.paypal.com/api/subscriptions/v1
+
+---
+
+## Gate de ejecución prospectiva P44→P26 — conciliación de fuentes (2026-10-16)
+
+**Precedencia sobre la interpretación del caso:** Esta sección se basa en lectura directa del runtime, documentos canónicos y metadatos alojados de Supabase. Diferenciar la compra histórica previa de la **prueba QA reciente**:
+
+1. La exclusión de contrato retrospectivo en `PAZO_F16_P05_FIRST_SERVICE_PERIOD_POLICY_APPROVED_20261014.md` se refiere a la **primera suscripción histórica**, no prueba ausencia de consentimiento en el comprador QA posterior.
+2. Supabase alojado contiene `paypal_p06_offers` **2 filas publicadas** para `pazo-supporter-sandbox.qa20261016-v1` (ES/EN), y `paypal_p06_checkout_attempts` **1 aceptación con digest SHA256** y claim de creación proveedor. Hay 2 intents `bound`, 12 eventos inbox, 3 eventos SALE y ledger 0. Estos conteos no vinculan por sí solos el único consentimiento a un `saleId` concreto. P44 v2 verificó el vínculo owner/intent y el acuse en la ejecución autorizada previa; su resultado final siguió `REVIEW_REQUIRED`.
+3. El **texto QA aceptado** en `src/features/supporter/sandboxQaOfferCopyP06.mjs` declara expresamente *«Esta prueba no activa ... un período pagado ... ni otros beneficios»*; tampoco adopta explícitamente `[activation_time, observed_next_billing_time)` como período de servicio de pago. **Aceptar la suscripción QA sí ocurrió; aceptar el contrato prospectivo de prestaciones NO se deduce de ello.** No intentar aplicar a esta prueba la regla destinada a contratos de servicio futuros.
+4. Los informes de correlación comercial y la QA siguen siendo evidencia válida de consentimiento, seguridad de checkout/cancelación y origen PayPal. No descalificar su valor técnico ni crear otra compra solo para reproducirlos.
+5. La función alojada `f16-paypal-sandbox-sale-review` v2 es un diagnóstico **de una sola ejecución** con expiración `2026-10-17T00:00:00Z`; ya produjo `merchant_refs_correlated_pagination_incomplete`. **No repetir, renovar ni ampliar** ese endpoint para superar una política contractual.
+
+### Contrato de fuente auténtica para el primer ciclo — ya cubierto por módulos offline
+
+| Evidencia | Fuente auténtica requerida | Implementación existente | Estado / fallo que bloquea |
+| --- | --- | --- | --- |
+| Owner, intención y aceptación original | `supabase.auth.getUser`, RPC P06 de aceptación con SHA/versión, private `bound` server-side | P06 checkout + `p26OfflineProvenanceGate.mjs` | Confirmado para una prueba QA, pero términos específicos no autorizan prestaciones; nueva aceptación necesaria para oferta con derechos |
+| Evento SALE original firmado | Inbox verificada y `GET /v1/notifications/webhooks-events/{event_id}` | Webhook firmado, P22 RPC instalada, `p27OfflineProvenanceReview.mjs` | P21 worker y lease prospectivo OFF; eventos históricos no pasan cutoff |
+| Sale merchant correlacionada | `GET /v1/payments/sale/{sale_id}`, confirmar venta, monto/moneda, subscription | `p29MerchantSaleReader.mjs`, P44 v2 | Identidad reciente correlacionada, no cargo REGULAR/atribución de obligación |
+| Plan, suscripción y activación | `GET /v1/billing/plans/{plan_id}`, `GET /v1/billing/subscriptions/{id}`, evento firmado ACTIVATED, **snapshot contemporáneo** | `p05OriginalBillingSummary.mjs`, P34–P36, `p05FirstRegularObligationLab.mjs` | No inferir desde `next_billing_time` de una suscripción ya cancelada; setup fee/override/deuda/trial a comprobar |
+| Transacciones del ciclo | `GET /v1/billing/subscriptions/{id}/transactions?start_time&end_time`, rangos server-owned y sin huecos | `paypalSandboxTransactions.mjs`, P05 ventanas, P23 | P44 v2 solo consultó el 16-oct; `total_pages`/`total_items` ausentes o `next` requieren REVIEW; nunca global por una página |
+| Refunds/reversos | Eventos firmados + fuente de refunds correspondiente a SALE original (legado v1, no simular CAPTURE v2) | P24 y P29; ledger multireembolso en laboratorio | Ninguna prueba de cobertura total; 0 reversos locales ≠ 0 refunds merchant |
+| Disputas | `GET /v1/customer/disputes?disputed_transaction_id={sale}` y detalles si las hay, seguimiento de webhooks scoped | P23 snapshot, `p05SandboxDisputeMerchantReaders.mjs` | Receptor alojado `core.mjs` **no** procesa `CUSTOMER.DISPUTE.*`; falta política alcance/retención |
+| Primera obligación y adjudicación | Fuente contractual y lease activo con cutoff prospectivo, reserva única P25, revalidación atómica para ledger | P25 draft, P26 draft/PG17, P26/P27 offline | P25/P26 **no instalados**; P42 escritor OFF/sin claves; ninguna autorización de pago |
+
+**Consideraciones API oficiales:** `List transactions for subscription` documenta `start_time`/`end_time` como parámetros de rango; no inventar un parámetro `page` de transacciones. `List disputes` acepta `disputed_transaction_id` y sus propias reglas de paginación. `GET /v1/payments/sale/{id}` pertenece a API PayPal v1 **deprecated** pero se usa para esta SALE original; no reemplazarlo ingenuamente por `GET /v2/payments/captures/{id}` sin cambiar el modelo y validar compatibilidad.
+
+### Regla de revisión temporal: lo imposible no puede bloquear para siempre sin decisión
+
+La **ausencia de disputas o reembolsos FUTUROS nunca se puede demostrar hoy**. Evitar exigir una constancia de «ninguna disputa en toda la vida futura», que no existe. Propuesta técnica para futura aprobación de producto/compliance: definir `coverageAsOf` (instantánea autenticada y acotada al instante), más ingesta continua firmada, reconsultas controladas, holds y **asientos compensatorios** ante refunds/disputas posteriores, sin convertir nunca un snapshot vacío en certeza global. Esta semántica **NO está aprobada aquí** y no autoriza beneficios ni revoca automáticamente períodos. Antes de activarla, resolver los dos allowlists de disputa (Edge y RPC), retención, exclusión de terceros y reversos idempotentes.
+
+### Ruta mínima para habilitar más adelante una prueba prospectiva (SIN ejecutarla ahora)
+
+1. **Cerrar oferta de servicio aplicable y retención:** diferenciar los términos ES/EN para una suscripción que sí conceda derechos, incluyendo inicio/fin `[activation_time, observed_next_billing_time)`, privacidad, cancelación, consentimiento durable y retención legal. No modificar retrospectivamente la versión QA inmutable.
+2. **Auditar fuentes y permisos existentes:** reutilizar P06/P22 (ya instalada)/P23/P24/P25/P26/P27, conectar únicamente funciones nuevas indispensables para procedencia real; no crear una segunda tabla de pagos. Mantener RPC P42 inaccesible a service_role mientras no haya custodia de claves aprobada.
+3. **Decidir captura/retención de disputas:** scope por sale, registrar solo datos mínimos e ingesta verificada, monitoreo/compensación posterior; revisión legal/comercial por PO. La modificación coordinada del receptor y RPC necesita GO de migración + GO de deploy, por separado.
+4. **Preparar ensayos dirigidos en laboratorio** que reutilicen suites existentes; un primer ciclo futuro con consentimiento correcto, evento firmado y merchant GET; negativos de refund, disputa, deuda, retry, paginación omitida, owner y lease. No repetir 889 tests por ritual.
+5. **Sólo tras cerrar esos gates**, solicitar permiso específico para una única prueba prospectiva Sandbox *nueva*, si continúa siendo indispensable. El GO genérico «ok go» de este gate no autoriza esa compra ni PayPal Live, altas reales, worker, SQL, entitlements, cron ni despliegue.
+
+### Inventario alojado leído el 2026-10-16 (sin cambios)
+
+- Public RPC: `f16_p22_resolve_bound_under_claim` **instalada**, `f16_p28_draft_ack_historical_audit` instalada, `f16_p42_register_authenticated_activation` instalada pero sin derecho de EXECUTE a `service_role`.
+- No aparecen RPC P24/P25/P26 instaladas, ni tablas privadas P25/P26. La tabla de auditoría P28 sí existe.
+- `p05_inbox_worker_gate.enabled=false`, `p42_activation_writer_gate.enabled=false`; ledger 0, reversos 0, P40 0, claves P42 0. Una comprobación read-only de conteos no constituye un dictamen exhaustivo de seguridad ni prueba de saldo merchant.
+
+**Resultado de este gate:** `P44_REVIEW_REQUIRED_HISTORICAL_CORRELATION_RETAINED; PROSPECTIVE_EVIDENCE_EXECUTION_CONTRACT_DOCUMENTED; NO_HOSTED_ACTION`. La próxima intervención técnica debe centrarse en preparar la **captura atestiguada de evidencia prospectiva**, empezando por política de disputas/retención y términos de período; NO otra P44 de la suscripción QA cerrada.
