@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P40 — DDL ALOJADA DE TABLA VACÍA INSTALADA / POSTFLIGHT PASS (2026-10-15)
+
+- **PO autorizó por «sí» la estructura vacía exclusivamente** después de aprobar categoría privada y retención provisional. Migración `20261016055145_f16_p40_empty_private_activation_bindings` instalada en Supabase mediante migrador oficial; versión GitHub alineada.
+- Postflight read-only: `supporter_private.paypal_verified_activation_bindings` **0 filas**, RLS FORCE, 1 trigger de integridad, ninguna autorización DML directa anon/authenticated/service_role; P39 writer **NO instalado**. Worker OFF, ledger **0**, inbox **8** y intents **1**, sin alteraciones.
+- La tabla **no puede recibir registros mediante la API actual**. Sin GET Merchant, sin origen firmado SQL independiente, sin política técnica de eliminación/backups ni términos P06 completados.
+- **Siguiente Gate:** diseño de escritor de origen verificable y lifecycle/borrado bajo revisión legal; PO debe dar autorización independiente para writer, Edge, worker y nuevos pagos, si se proponen. P28 diferido, F16 NO-GO y PR #44 DRAFT.
+- Auditoría: `docs/PAZO_F16_P40_HOSTED_EMPTY_SCHEMA_POSTFLIGHT_20261015.md`.
+
 ## F16-P41 — RETENCIÓN PROVISIONAL APROBADA / BORRADO NO AUTORIZADO (2026-10-15)
 
 - El PO respondió explícitamente **«sí»** a retener el vínculo privado evento PayPal ↔ suscripción ↔ UID durante la suscripción activa y **3 años calendario tras el cierre contractual efectivo**, sujeto a revisión legal/contable; disputas, reembolsos y obligaciones justificadas pueden imponer una retención específica mayor, con revisión. Esto es un criterio provisional de producto, NO asesoría legal ni permiso para instalar/retener registros nuevos en hosted.
