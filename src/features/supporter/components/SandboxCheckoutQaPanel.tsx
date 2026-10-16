@@ -30,8 +30,8 @@ const approveUrl = (raw: unknown): string | null => {
   if (typeof raw !== 'string' || raw.length > 2048) return null
   try {
     const u = new URL(raw)
-    return u.protocol === 'https:' && u.hostname === 'www.sandbox.paypal.com' &&
-      !u.username && !u.password && !u.port && u.pathname.startsWith('/webapps/billing/subscriptions/')
+    return u.protocol === 'https:' && ['www.sandbox.paypal.com','sandbox.paypal.com'].includes(u.hostname) &&
+      !u.username && !u.password && !u.port && u.pathname.startsWith('/webapps/billing/subscriptions')
       ? u.toString() : null
   } catch { return null }
 }
