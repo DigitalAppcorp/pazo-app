@@ -39,20 +39,23 @@ function validOrigin(value){
    url.origin===value
  }catch{return false}
 }
+// This checkout uses isolated QA-only redirect secrets.
+// Do not overwrite the existing project-wide PAZO_F16_APP_ORIGIN;
+// other released Edge Functions may depend on that value.
 function compose(){
  const env=Deno.env
  const get=(k:string)=>env.get(k)
  if(get('PAZO_F16_PAYPAL_ENV')!=='sandbox'||
   get('PAZO_F16_PAYPAL_PLAN_ID')!==PLAN||
   get('SUPABASE_URL')!==BASE||
-  !validOrigin(get('PAZO_F16_APP_ORIGIN')))
+  !validOrigin(get('PAZO_F16_P06_QA_APP_ORIGIN')))
   throw Error('supporter_server_release_not_configured')
- const origin=get('PAZO_F16_APP_ORIGIN')!
+ const origin=get('PAZO_F16_P06_QA_APP_ORIGIN')!
  const key=get('SUPABASE_SERVICE_ROLE_KEY')!
  const clientId=get('PAZO_F16_PAYPAL_CLIENT_ID')!
  const clientSecret=get('PAZO_F16_PAYPAL_CLIENT_SECRET')!
- const returnUrl=get('PAZO_F16_PAYPAL_RETURN_URL')!
- const cancelUrl=get('PAZO_F16_PAYPAL_CANCEL_URL')!
+ const returnUrl=get('PAZO_F16_P06_QA_RETURN_URL')!
+ const cancelUrl=get('PAZO_F16_P06_QA_CANCEL_URL')!
  if(new URL(returnUrl).origin!==origin||new URL(cancelUrl).origin!==origin)
   throw Error('consumer_redirect_origin_mismatch')
  const supabase=createClient(BASE,key,{auth:{
