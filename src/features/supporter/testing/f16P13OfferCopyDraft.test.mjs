@@ -56,3 +56,21 @@ test('P13 disclosure has no route to published offer or checkout',()=>{
   assert.ok(!sql.includes(locale[lang].exactCopy))
  }
 })
+
+test('draft describes PO-approved activation-to-merchant billing boundary without authorizing access',()=>{
+ const es=locale.es.exactCopy,en=locale.en.exactCopy
+ for(const [copy,checks] of [
+  [es,[/activación PayPal comprobada/,/próxima fecha de facturación observada/,/límite de servicio acordado por PAZO/,/30 días contados desde el cobro/,/recompensas de ese ciclo permanecerán en revisión/]],
+  [en,[/PayPal activation time verified by PAZO/,/next billing date observed by PAZO at activation/,/PAZO contractual service boundary/,/30-day period starting on the charge date/,/rewards for the affected cycle remain under review/]],
+ ]) for(const pattern of checks)assert.match(copy,pattern)
+ assert.equal(plan.status,'REVIEW_ONLY_NOT_PUBLISHED')
+ assert.equal(plan.mayPublish,false)
+ assert.equal(plan.mayStartPayPalCheckout,false)
+ assert.equal(plan.mayGrantBenefits,false)
+})
+test('draft does not claim historical Sandbox QA terms authorize a paid interval',()=>{
+ for(const copy of [locale.es.exactCopy,locale.en.exactCopy]){
+  assert.doesNotMatch(copy,/pazo-supporter-sandbox\.qa20261016-v1/)
+  assert.doesNotMatch(copy,/paidThrough\s*[:=]\s*['"]?2026/)
+ }
+})
