@@ -14,9 +14,9 @@
 
 **Custodio principal DESIGNADO por decisión expresa del Product Owner (2026-10-16):** el propio Product Owner asumirá la eliminación manual supervisada de `P42_V1` en Edge Secrets y PostgreSQL al futuro vencimiento `Texp=T0+24h`, o antes ante incidente. Su cuenta Supabase Owner y sus dos TOTP constan por evidencia visual previa; **esta designación NO verifica la capacidad de escritura PostgreSQL, el acceso de retirada Edge ni la disponibilidad real a una hora todavía sin fijar**. No publicar nombre, email ni credenciales.
 
-**Suplente:** aún sin designar, permisos y disponibilidad **NO CONFIRMADOS**. Si no existe persona alternativa con acceso independiente ya verificado, el plan manual de 24h es operacionalmente frágil. No prometer disponibilidad de ChatGPT, Codex, un computador Windows apagado o un recordatorio como si fueran operadores de revocación.
+**Decisión PO posterior — sin suplente administrativo:** el PO eligió preparar una alternativa en la que únicamente él conserva acceso a Edge/PostgreSQL. **No se incorporará otro administrador** bajo el alcance actual. Una cuenta/dispositivo de recuperación controlado por la misma persona puede reducir el riesgo de pérdida de credenciales, pero **no puede suplir su indisponibilidad física** y NO garantiza eliminación manual puntual. Diseño íntegro: `docs/PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md`.
 
-**Antes de pedir un GO de provisión**, obtener decisión explícita sobre principal y suplente (preferiblemente cuenta distinta, mínimo privilegio, MFA), y confirmar su presencia para el futuro vencimiento `Texp=T0+24h` y acceso a ambos destinos. No invitar a un miembro nuevo ni cambiar roles/costos en este gate. Si no existe suplente, escalar al PO el riesgo y conservar **NO-GO** hasta resolver la continuidad.
+**Antes de pedir un GO de provisión**, con el diseño de custodio único, confirmar que el PO conserva la capacidad de recuperarse de una pérdida de sesión/dispositivo, y que estará personalmente disponible con ambos canales probados en `Texp=T0+24h`. El riesgo de indisponibilidad humana persiste sin suplente: mantener **NO-GO** hasta documentar y aceptar expresamente ese riesgo y cerrar los gates técnicos. No invitar un segundo administrador ni crear costos. La selección del diseño NO es autorización para generar ni guardar material.
 
 ## 3. Canal administrativo PostgreSQL: diseño de aceptación, NO acceso verificado
 
@@ -67,7 +67,7 @@ En `Texp=T0+24h`, un humano con permisos ejecuta:
 4. Comparar ambas evidencias y tiempo UTC con el laboratorio sintético `f16P42RevocationEvidenceLab`. Su resultado máximo es solo `P42_REVOCATION_METADATA_CANDIDATE_ONLY`: requiere juicio del operador sobre autenticidad de lecturas.
 5. Registrar solo `T0`, `Texp`, instante real de eliminación UTC, rol del ejecutor, categoría de resultado, hash de **código** de auditoría si corresponde, y límites de backup. Nunca secretos ni hashes de la clave.
 
-**Ausencia/incidente:** activar suplente sin esperar Texp en fuga; si no hay operador o un destino permanece accesible, `P42_MANUAL_REVOCATION_OVERDUE_BLOCKED`; no reactivar ni reemitir clave y solicitar intervención. La expiración lógica no equivale a borrado.
+**Ausencia/incidente:** si el PO detecta incidente o pérdida futura de disponibilidad, revocar anticipadamente por sí mismo cuando aún tenga acceso; si no puede operar en el vencimiento, no hay custodio humano alternativo. Marcar `P42_MANUAL_REVOCATION_OVERDUE_BLOCKED`, mantener todo procesamiento cerrado, no afirmar borrado, y retirar cuando el PO recupere acceso. La expiración lógica no equivale a destrucción física.
 
 ## 7. Checklist de aprobación para siguiente gate
 
@@ -75,7 +75,7 @@ En `Texp=T0+24h`, un humano con permisos ejecuta:
 |---|---|
 | Owner + dos TOTP de Supabase | PASS visual |
 | Responsable principal PO | **DESIGNADO** mediante confirmación PO 2026-10-16; capacidades operativas aún no verificadas |
-| Suplente humano + permisos | PENDIENTE |
+| Alternativa sin suplente | **DISEÑO ELEGIDO**, sin garantía de eliminación si PO no está disponible; riesgo residual no aprobado para provisión |
 | Conexión PostgreSQL de escritura TLS/parametrizada | NO VERIFICADA |
 | Edge `unset` verificable sin material | Procedimiento DOCUMENTADO; no ejecutado |
 | Copia `pg_dump` no captura `key_bytes` | **BLOQUEO IDENTIFICADO** |
@@ -86,3 +86,10 @@ En `Texp=T0+24h`, un humano con permisos ejecuta:
 | Cobros/beneficios y permisos P42 | NO-GO |
 
 **Resultado:** `P42_MANUAL_OPERATOR_CHANNEL_AND_BACKUP_PREFLIGHT_NO_GO`. Ninguna escritura, provisión, tarea programada, plan pagado ni acceso PostgreSQL adicional está autorizada por este documento.
+
+
+## 8. Diseño de custodio único (decisión posterior PO, 2026-10-16)
+
+El PO eligió la **alternativa segura sin otro administrador**. El responsable principal sigue siendo PO Owner con dos factores MFA ya registrados; no crear permisos para terceros. Se requiere recuperación del propio titular en dispositivos/medios independientes, disponibilidad personal para Texp, validación de ambos canales, backups aislados y un GO nuevo. **Ningún control exclusivamente manual puede garantizar limpieza a una hora fija si esa única persona está indisponible.** Ver `docs/PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md`.
+
+**Gate:** `P42_SINGLE_CUSTODIAN_DESIGN_ONLY_UNAVAILABLE_FALLBACK_NO_GO`; sin generar/provisionar P42, sin SQL ni Edge hosted y sin habilitar cobros.
