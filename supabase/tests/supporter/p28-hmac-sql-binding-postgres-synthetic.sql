@@ -1,7 +1,7 @@
 \set ON_ERROR_STOP on
 BEGIN;
 DO $test$
-DECLARE a text; ok boolean; wrong boolean; replay boolean; n int;
+DECLARE a text; ok boolean; wrong boolean; replay boolean; n int; ext_schema text;
 BEGIN
  IF current_database()<>'f14_synthetic' OR session_user<>'f14_admin'
  THEN RAISE EXCEPTION 'disposable only'; END IF;
@@ -11,8 +11,12 @@ BEGIN
  INSERT INTO supporter_private.paypal_verified_event_inbox(provider_event_id,event_type,processing_state,retention_hold)
  VALUES ('WH-P28-A-HMAC','PAYMENT.SALE.COMPLETED','pending',true),
  ('WH-P28-B-HMAC','PAYMENT.SALE.COMPLETED','pending',true);
- a:=pg_catalog.encode(public.hmac(pg_catalog.convert_to('WH-P28-A-HMAC','UTF8'),
- pg_catalog.convert_to('PAZO_P28_DISPOSABLE_KEY_2026_NOT_A_REAL_SECRET','UTF8'),'sha256'),'hex');
+ SELECT n.nspname INTO ext_schema FROM pg_catalog.pg_extension x
+ JOIN pg_catalog.pg_namespace n ON n.oid=x.extnamespace WHERE x.extname='pgcrypto';
+ IF ext_schema IS NULL THEN RAISE EXCEPTION 'pgcrypto absent'; END IF;
+ EXECUTE pg_catalog.format('SELECT pg_catalog.encode(%I.hmac($1,$2,$3),''hex'')',ext_schema)
+ INTO a USING pg_catalog.convert_to('WH-P28-A-HMAC','UTF8'),
+ pg_catalog.convert_to('PAZO_P28_DISPOSABLE_KEY_2026_NOT_A_REAL_SECRET','UTF8'),'sha256';
  INSERT INTO supporter_private.p28_historical_read_audit(request_id,event_fingerprint)
  VALUES ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',a);
  wrong:=public.f16_p28_lab_hmac_consume('WH-P28-B-HMAC','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
