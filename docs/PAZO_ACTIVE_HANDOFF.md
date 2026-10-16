@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — PO AUTORIZÓ CLAVE REAL SANDBOX, PROVISIÓN BLOQUEADA POR CANAL (2026-10-16)
+
+- Product Owner contestó **«sí»** a generar/provisionar clave real interna exclusivamente de Sandbox en Edge Secret Store y tabla privada P42, manteniendo todos los gates OFF; esto **NO autoriza** writer, EXECUTE, Edge deploy, worker, checkout, ledger ni pagos.
+- En Chat conector Supabase NO incluye gestión de secretos Edge. Docs oficiales: `https://supabase.com/docs/guides/functions/secrets`; la provisión dual no puede ejecutarse aquí sin riesgo de dejar clave solo en DB o exponerla. **CERO claves reales generadas o instaladas en este turno; cero cambios P43 a hosted**.
+- Handoff de ejecución privada `docs/PAZO_F16_P43_SANDBOX_KEY_PROVISIONING_SECURE_HANDOFF_20261016.md` exige comprobar ambos canales antes de crear secreto, generar 32 bytes CSPRNG en memoria privada, configurar Edge, insertar valor idéntico mediante DB TLS parametrizada y sin historial de SQL, `P42_V1` inicialmente **enabled=false**, gate P42 OFF, EXECUTE denegado; rollback/compensación y postflight. Nunca revelar clave en chat, SQL editor, logs o repo.
+- Continuar preferentemente en **ChatGPT Work** con acceso seguro al Dashboard Supabase y vía privada de DB. Si no existe acceso administrable a ambas plataformas, solicitar una acción concreta al PO en vez de simular éxito. F16 NO-GO, P28 diferido, PR #44 DRAFT.
+
 ## F16-P42 — PREFLIGHT DE PROVISIÓN SIN SECRETOS, SOLO LECTURA (2026-10-16)
 
 - Usuario indicó «ok go» para continuar tras instalar P42 inerte. Se avanzó únicamente en **controles read-only**, sin aceptar como nuevo GO para clave real, grant, Edge, PayPal, worker o ingesta de eventos.
