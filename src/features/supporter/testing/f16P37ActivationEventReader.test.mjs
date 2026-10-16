@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {createP37ActivationEventReader} from '../../../../supabase/functions/f16-paypal-webhook/p37ActivationEventReader.mjs'
 const args={activationEventId:'WH-P37-ACT',activationClaimToken:'11111111-1111-4111-8111-111111111111',subscriptionId:'I-P37-TEST'}
-const claim={id:args.activationEventId,type:'BILLING.SUBSCRIPTION.ACTIVATED',processingState:'processing',subscriptionId:args.subscriptionId,signatureVerified:true}
+const claim={id:args.activationEventId,type:'BILLING.SUBSCRIPTION.ACTIVATED',processingState:'processing',subscriptionId:args.subscriptionId,signatureVerified:true,source:'verified_inbox_claim',leaseCurrent:true}
 test('disabled-by-default activation reader has no side effects',async()=>{
  let calls=0
  const read=createP37ActivationEventReader({readClaimedActivation:async()=>{calls++},getAccessToken:async()=>{calls++}})
