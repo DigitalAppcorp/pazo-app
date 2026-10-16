@@ -14,6 +14,9 @@ done
 export PGHOST=127.0.0.1 PGPORT=55441 PGUSER=f14_admin PGDATABASE=f14_synthetic
 [[ "$(psql -XAtq -v ON_ERROR_STOP=1 -c "SELECT current_database() || '|' || session_user;")" == "f14_synthetic|f14_admin" ]] || fail "WRONG_DATABASE"
 [[ "$(pg_dump --version)" == *"PostgreSQL) 17."* ]] || fail "WRONG_CLIENT_VERSION"
+# A separate database in the existing disposable PG17 service, not other tests.
+psql -X -q -v ON_ERROR_STOP=1 -d postgres -c "CREATE DATABASE f14_p42_backup_source;"
+export PGDATABASE=f14_p42_backup_source
 scratch="$(mktemp -d)"
 trap 'rm -rf -- "$scratch"' EXIT
 chmod 700 "$scratch"
