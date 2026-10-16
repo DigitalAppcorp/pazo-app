@@ -6,7 +6,7 @@
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const EVENT=/^[A-Za-z0-9._-]{3,128}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const EXPECTED=['id','type','processingState','subscriptionId','source','leaseCurrent']
 const valid=o=>o&&typeof o==='object'&&!Array.isArray(o)&&
  Object.keys(o).sort().join('|')===EXPECTED.slice().sort().join('|')&&
@@ -21,19 +21,6 @@ export function createP37PrivateActivationClaimReader({
   serviceRoleKey.length>=24&&serviceRoleKey.length<=4096&&
   !/\s/.test(serviceRoleKey)&&typeof fetchImpl==='function'
  return Object.freeze({
-  // Non-sensitive preflight classification for disposable CI troubleshooting.
-  // Reports no configuration values, secrets, tokens or user identity.
-  preflight:({eventId,claimToken}={})=>Object.freeze({
-   eventValid:EVENT.test(eventId||''),claimValid:UUID.test(claimToken||''),
-   abortController:typeof AbortController==='function',
-   timer:typeof setTimeout==='function',
-   enabled:enabled===true,host:projectUrl===HOST,
-   keyType:typeof serviceRoleKey==='string',
-   keyLength:typeof serviceRoleKey==='string'&&
-    serviceRoleKey.length>=24&&serviceRoleKey.length<=4096,
-   keyWhitespace:typeof serviceRoleKey==='string'&&!/\s/.test(serviceRoleKey),
-   transport:typeof fetchImpl==='function',ready,
-  }),
   async readClaimedActivation({eventId,claimToken}={}){
    if(!ready||!EVENT.test(eventId||'')||!UUID.test(claimToken||''))return null
    const controller=new AbortController()
