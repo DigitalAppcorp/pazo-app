@@ -395,7 +395,7 @@ jobs:
 
       - name: P37 P40 claim-scoped activation read, disabled-by-default, PG17 ROLLBACK only
         run: |
-          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p37_p40_claimed_activation_read_PG17_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p37-p40-claimed-activation-read-pg17-synthetic.sql
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p37_p40_claimed_activation_read_PG17_ONLY_DO_NOT_APPLY.sql -f supabase/drafts/f16_p37_hosted_private_claim_read_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p37-p40-claimed-activation-read-pg17-synthetic.sql
 
       - name: P42 authenticated activation HMAC ingress and key isolation (PG17 only)
         run: |
