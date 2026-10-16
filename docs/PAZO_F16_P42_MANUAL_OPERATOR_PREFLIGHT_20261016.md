@@ -112,3 +112,14 @@ El PO eligió la **alternativa segura sin otro administrador**. El responsable p
 - **`BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY` resuelto exclusivamente para backups lógicos FUTUROS que invoquen ESTE script versionado.** Inventario de otros exportadores, backups anteriores, snapshots físicos/terceros y restore integral del PAZO alojado: pendientes. No afirmar eliminación universal de bytes.
 - Canal PostgreSQL de escritura TLS+parámetros sigue UNVERIFIED, Edge unset no ejecutado, modelo PO único sin respaldo humano; no T0, no clave y no GO de provisión ni de pagos.
 **Marcador:** `P42_BACKUP_SCRIPT_EXCLUSION_PATCHED_PG17_RESTORE_EXPANDED_PASS_HOSTED_UNTOUCHED`.
+
+
+## 11. Rehearsal de eliminación exacta y política de canales (2026-10-16)
+
+**Orden PO «ok go» limitada a pruebas locales/PG17, NO credenciales ni accesos hosted.** En `supabase/tests/supporter/p42-manual-revocation-postgres-synthetic.sql` se verificaron en PostgreSQL 17 descartable: selección exacta `P42_V1`, cero eliminación al apuntar a versión inexistente, una fila eliminada y `P42_V2` preservada, segunda invocación = cero filas, chequeo de gates/ledger/ACL inertes y `ROLLBACK` completo. Inmediatamente después el preflight P42 READ ONLY existente volvió a confirmar cero claves y protección intacta.
+
+**Evidencia:** commit `c70a0958fade1617a52c2e6db12ea2e4c55cba3c`; [CI 38927865532](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38927865532) SUCCESS; [F16 Disposable PG17 38927865578](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38927865578) SUCCESS. Resultado `P42_MANUAL_DB_REVOCATION_ROLLBACK_PG17_PASS_ONLY`. No se ha generado ni depositado una clave real, ni se ha ejecutado ninguna transacción en Supabase hosted.
+
+**Runbook nuevo:** `docs/PAZO_F16_P42_OPERATOR_CHANNEL_DRY_RUN_NO_PROVISION_20261016.md`. Valida documentación oficial de Supabase para PSQL (`verify-full`, certificado CA y modo Direct o Session Pooler) y CLI de secretos (`secrets unset/list`), sin alegar acceso privilegiado real o acción Edge ejecutada.
+
+**Bloqueos restantes estrictos:** sin prueba de sesión PostgreSQL WRITE `verify-full` alojada, sin `unset` real Edge, sin inventario total de backups/snapshots, sin aceptación expresa del riesgo de custodio único y sin GO de provisión. No repetir P43 ni probar SQL con contraseña real sin una autorización separada.
