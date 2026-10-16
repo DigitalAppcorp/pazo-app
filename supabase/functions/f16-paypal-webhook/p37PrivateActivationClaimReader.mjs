@@ -23,10 +23,12 @@ export function createP37PrivateActivationClaimReader({
  return Object.freeze({
   async readClaimedActivation({eventId,claimToken}={}){
    if(!ready||!EVENT.test(eventId||'')||!UUID.test(claimToken||''))return null
+   const controller=new AbortController()
+   const timeout=setTimeout(()=>controller.abort(),12000)
    try{
     const response=await fetchImpl(
      HOST+'/rest/v1/rpc/f16_p37_lab_read_claimed_activation',{
-      method:'POST',redirect:'error',signal:AbortSignal.timeout(12000),
+      method:'POST',redirect:'error',signal:controller.signal,
       headers:{apikey:serviceRoleKey,
        Authorization:'Bearer '+serviceRoleKey,
        Accept:'application/json','Content-Type':'application/json'},
@@ -41,6 +43,7 @@ export function createP37PrivateActivationClaimReader({
      leaseCurrent:true,
     })
    }catch{return null}
+   finally{clearTimeout(timeout)}
   },
  })
 }
