@@ -34,9 +34,9 @@ END $test$;
 
 -- Synthetic key exists ONLY within this rolled-back transaction.
 INSERT INTO supporter_private.p42_activation_signing_keys
-(key_id,key_bytes,enabled,not_before)
+(key_id,key_bytes,enabled,not_before,not_after)
 VALUES('P42_V1',convert_to('P42_PG17_FAKE_KEY_1234567890_NOT_REAL','UTF8'),true,
-clock_timestamp()-interval '10 minutes');
+clock_timestamp()-interval '10 minutes',clock_timestamp()+interval '24 hours');
 INSERT INTO supporter_private.paypal_subscription_intents
  (intent_id,owner_id,provider,plan_id,state,external_subscription_id,bound_at)
 VALUES('intent-77777777-7777-4777-8777-777777777777',
@@ -171,6 +171,19 @@ END $expired_key$;
 SET LOCAL ROLE postgres;
 UPDATE supporter_private.p42_activation_signing_keys
  SET not_after=NULL WHERE key_id='P42_V1';
+SET LOCAL ROLE service_role;
+DO $missing_expiry$
+DECLARE f record;
+BEGIN
+ SELECT * INTO f FROM p42_candidate_fixture;
+ IF public.f16_p42_register_authenticated_activation(
+ f.event_id,f.sub_id,f.issued_at,f.nonce,f.key_id,f.mac)
+ THEN RAISE EXCEPTION 'P42 accepted key without finite expiry'; END IF;
+END $missing_expiry$;
+SET LOCAL ROLE postgres;
+UPDATE supporter_private.p42_activation_signing_keys
+ SET not_after=clock_timestamp()+interval '24 hours'
+ WHERE key_id='P42_V1';
 UPDATE supporter_private.p42_activation_writer_gate
  SET not_before=clock_timestamp()+interval '1 minute' WHERE id=1;
 SET LOCAL ROLE service_role;
