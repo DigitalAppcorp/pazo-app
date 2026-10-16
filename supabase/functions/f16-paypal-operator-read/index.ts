@@ -2,6 +2,7 @@
 // NOT deployed by this commit. Does NOT serve checkout, worker or ledger.
 import {createP28OperatorMerchantRead} from '../f16-paypal-webhook/p28OperatorMerchantReadGate.mjs'
 import {createP28HostedLeaseReader} from '../f16-paypal-webhook/p28HostedLeaseReader.mjs'
+import {createP28PrivateBindingReader} from '../f16-paypal-webhook/p28PrivateBindingReader.mjs'
 import {createP05SandboxClaimScopedMerchantReaders} from '../f16-paypal-webhook/p05SandboxClaimScopedMerchantReaders.mjs'
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const env=(name:string)=>Deno.env.get(name)
@@ -24,6 +25,9 @@ Deno.serve((request:Request)=>{
  })
  return createP28OperatorMerchantRead({
   enabled,operatorKey:env('PAZO_F16_OPERATOR_READ_KEY'),
-  readLeasedEvent,merchantReader
+  readLeasedEvent,merchantReader,
+  resolvePrivateBinding:createP28PrivateBindingReader({
+   projectUrl:BASE,serviceRoleKey:serviceKey,scope:'SERVER_ONLY_READ_GATE'
+  })
  })(request)
 })
