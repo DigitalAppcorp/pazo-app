@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P42 — BORRADOR ALOJABLE SELLADO Y ENSAYADO (2026-10-16)
+
+- Nuevo contrato SQL `supabase/drafts/f16_p42_hosted_keys_and_disabled_writer_REVIEW_ONLY_DO_NOT_APPLY.sql`: 0 claves, gate OFF, RPC pública sin EXECUTE PUBLIC/anon/authenticated/service_role, preflight seguro P40/P21/ledger. Firma HMAC aislada por dominio literal `p42|sandbox|` y cutoff de clave/gate. Ningún cambio Supabase real.
+- Adaptador de contrato `supabase/functions/f16-paypal-webhook/p42HostedContractRecorder.mjs` OFF por defecto, no importado a receiver. En pruebas usa exclusivamente clave sintética; producción necesita secreto y autorización independientes.
+- PG17 prueba inerte y adversarial + test Node del firmante: **PASS** general `38860828060`, PG17 `38860828106` (commit `d9a3815`).
+- Postflight Supabase de solo lectura: P40 filas 0, worker OFF, ledger 0, tabla de claves P42 ausente, gate P42 ausente, RPC P42 ausente.
+- **Siguiente GO PO:** revisar `docs/PAZO_F16_P42_HOSTED_DISABLED_KEYS_ROTATION_PROPOSAL_20261016.md` y dar autorización **distinta** para instalar solo infraestructura sellada; la clave real, grant/activación, Edge, PayPal/worker/cobros y retención legal requieren sus GO independientes. P28 diferido, F16 NO-GO y PR #44 DRAFT.
+
 ## F16-P42 — PO AUTORIZÓ PREPARAR INFRAESTRUCTURA PARA INSTALACIÓN POSTERIOR (2026-10-16)
 
 - **PO «sí»:** preparar borrador hosted de claves y RPC P42 **sin instalarla**, mantener todo desactivado. No autorizó generar/proveer secreto real, escritor P42, grant, Edge, worker, PayPal, datos alojados nuevos, pagos o beneficios.
