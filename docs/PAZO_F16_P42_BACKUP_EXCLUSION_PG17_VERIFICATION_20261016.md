@@ -38,3 +38,20 @@ El script real sigue ejecutando `pg_dump` completo **sin** `--exclude-table-data
 5. Solicitar GO nuevo y separado para una futura provisión P42 solo después de cerrar todos los gates técnicos; writer P42, worker P21, checkout, ledger, pagos, beneficios, LIVE y grants permanecen fuera de alcance.
 
 **Estado final:** `P42_PG17_BACKUP_EXCLUSION_LAB_PASS_HOSTED_BACKUP_UNCHANGED_NO_PROVISIONING`.
+
+
+## 2026-10-16 — actualización aprobada del exportador Windows y prueba ampliada
+
+**Autorización PO:** «ok go» frente a la petición específica de incorporar la exclusión `P42` a `scripts/backup-database.ps1` y realizar una restauración más amplia en PostgreSQL desechable. Sin autorización para volver a ejecutar backups de Supabase alojado, usar CLI administrativo P43, generar/provisionar secretos, modificar SQL/Edge ni activar pagos.
+
+- El comando de exportación del **script operativo versionado** `scripts/backup-database.ps1` incluye ahora `--exclude-table-data=supporter_private.p42_activation_signing_keys`. No se alteraron los demás parámetros de `pg_dump`, el manejo de credenciales, el comando `pg_dumpall --roles-only --no-role-passwords`, exportación de inventario Storage, manifest, política local de cifrado/off-site ni los archivos de backup preexistentes.
+- El workflow CI general añadió una verificación **PowerShell estática sin ejecutar respaldos** que encuentra exactamente la llamada `pg_dump` y exige la exclusión de datos P42; prohíbe los flags `--exclude-table` completo y `--schema-only`/`--data-only`, preservando esquema y restantes datos. Sintaxis PowerShell PASS en CI.
+- El script `scripts/f16-p42-backup-exclusion-pg17-lab.sh` mantiene un control negativo de backup completo y un control positivo de tabla P42 excluida; la restauración se amplió para probar **filas relacionadas, foreign key, índice secundario, vista, función SQL, ACL PUBLIC, RLS y FORCE RLS, columna key_bytes, y cero filas de claves**. Todo usa bytes de prueba deterministas en dos bases PG17 descartables. No tiene conexión ni datos reales de PAZO.
+- **Primer intento de ampliación:** fallo de una función SQL sintética mal delimitada; causa localizada en el script de test, corregida antes de la ejecución final. No se tocó el exportador Windows durante esa corrección.
+- **Commit de aprobación de pruebas:** `5474577b428c548b0759861735a6d91eef75a52d`.
+- [F16 Disposable PostgreSQL Lab #38926912820](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38926912820): **SUCCESS**, prueba P42 backup `success`.
+- [CI general #38926912803](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38926912803): prueba PowerShell para exclusión `success` y parser PowerShell `success` (revisar conclusión del workflow general en la reconciliación final si queda otro paso ejecutándose).
+
+**Límites persistentes:** no equivale a restauración completa del catálogo alojado de PAZO ni a prueba de cada ruta de exportación o backup físico. El script versionado protege sus **futuros dumps lógicos**; otros scripts/herramientas podrían omitir la exclusión, y archivos de backup **anteriores no son modificados o borrados**. El bloqueo sobre el *argumento omitido en backup-database.ps1* se considera corregido en código y probado en lab/CI; la verificación de inventario de backups/consumidores y una restauración completa real siguen fuera del alcance. P42 no tiene clave generada ni T0; ausencia de key en hosted no se re-verificó en este turno.
+
+**Marcador:** `P42_BACKUP_SCRIPT_EXCLUSION_PATCHED_PG17_RESTORE_EXPANDED_PASS_HOSTED_UNTOUCHED`. F16 NO-GO, PR #44 DRAFT.
