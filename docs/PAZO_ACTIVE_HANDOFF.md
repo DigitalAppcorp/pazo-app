@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P40 — DECISIÓN PO DE ALMACENAMIENTO LIMITADO (2026-10-15)
+
+- **APROBADO**: guardar de forma privada, con propósito exclusivo de conciliación de suscripciones, el vínculo `provider_event_id` ↔ `subscription_id` ↔ `owner_id`; `created_at` como auditoría técnica mínima. NO hay autorización de instalar la tabla alojada, de definir plazo de retención implícitamente, ni de habilitar writer/worker/checkout/beneficios/PayPal.
+- **Borrador hospedado SOLO PARA REVISIÓN**: `supabase/drafts/f16_p40_private_activation_storage_hosted_REVIEW_ONLY_DO_NOT_APPLY.sql`; tabla privada con PK/FK, RLS FORCE, sin permisos de aplicación, trigger de propietario BOUND y evento ACTIVATED, campos inmutables, ninguna RPC de escritura o lectura. No almacenará payload, email, tarjeta, tokens ni PII adicional.
+- **Prueba del mismo esquema en PG17 sintético**: `supabase/tests/supporter/p40-private-activation-storage-postgres-synthetic.sql`; verifica integridad cruzada, rechazo de eventos no ACTIVATED, unicidad, inmutabilidad, permisos y cero contabilidad. CI PASS #38856619514, F16 PG lab PASS #38856619470 en commit `cbbb982`. El diseño no acredita PayPal/proveedor y no es un cobro.
+- **Política pendiente**: especificar duración tras cierre, manejo de disputas/legal holds, backups y eliminación. La retención de prueba de consentimiento expreso no equivale a retención obligatoria de este vínculo financiero. Documento `docs/PAZO_F16_P40_PRIVATE_BINDING_STORAGE_RETENTION_REVIEW_20261015.md`.
+- **Siguiente GO del PO**: cerrar retención/revisión de privacidad, después autorizar explícitamente instalación del esquema P40 si sigue siendo útil. Separadamente: writer firmado, integración de Merchant GET, worker P21 y cualquier evento de compra o ledger. P28 sigue diferido; PR #44 DRAFT.
+
 ## F16-P38/P39 — FIRMA WEBHOOK → VÍNCULO DE ACTIVACIÓN (2026-10-15; LAB, NO-GO HOSTED)
 
 - **PO:** pidió continuar todos los gates técnicos hasta requerir su intervención, sin activar cobros y con P28 diferido.
