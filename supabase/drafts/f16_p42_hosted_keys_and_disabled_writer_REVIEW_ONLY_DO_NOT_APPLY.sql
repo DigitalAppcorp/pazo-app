@@ -99,7 +99,7 @@ BEGIN
  IF v_key IS NULL OR v_issued_at<v_key_cutoff
  OR (v_key_end IS NOT NULL AND v_issued_at>=v_key_end)
  OR v_issued_at<v_gate_cutoff THEN RETURN false; END IF;
- v_message:='p42|'||p_key_id||'|'||p_event_id||'|'||
+ v_message:='p42|sandbox|'||p_key_id||'|'||p_event_id||'|'||
  p_subscription_id||'|'||p_issued_at||'|'||p_nonce::text;
  SELECT n.nspname INTO v_pgcrypto_schema
  FROM pg_catalog.pg_extension x
