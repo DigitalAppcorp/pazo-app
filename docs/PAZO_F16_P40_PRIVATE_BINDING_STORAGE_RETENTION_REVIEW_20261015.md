@@ -4,10 +4,10 @@
 LIMITADO** de la relación evento de activación ↔ suscripción de PayPal ↔ propietario
 interno para conciliar cobros y prevenir atribuciones indebidas.
 
-**NO APROBADO** por esa respuesta: migración Supabase alojada, plazo de
-retención, política de borrado/backup, RPC que inserte vínculos, activación
-de webhooks/worker, compra PayPal Sandbox, cobros LIVE, ledger, beneficios
-o publicación de términos. La app general PAZO permanece gratuita.
+**NO APROBADO** por las decisiones del PO: migración Supabase alojada,
+plazo definitivo de retención validado jurídicamente, política técnica de
+borrado/backup, RPC que inserte vínculos, activación de webhooks/worker,
+compra PayPal Sandbox, cobros LIVE, ledger, beneficios o publicación de términos. La app general PAZO permanece gratuita.
 
 ## Categoría y minimización aprobadas
 - `provider_event_id` — identificador pseudónimo del evento firmado.
@@ -33,14 +33,14 @@ público ni dato para analítica. `subscription_id` no se expone por API públic
 - El trigger **no** autentica por sí solo la firma PayPal: se requiere
   proveedor de procedencia validada y frontera de permisos independiente.
 
-## Retención — propuesta para DECISIÓN PENDIENTE
+## Retención — criterio provisional APROBADO por el PO para diseño (2026-10-15)
 El plazo de retención de esta relación no debe copiarse automáticamente del
 consentimiento de renovación. La documentación legal del proyecto identifica
 plazo específico para **prueba de consentimiento expreso** en California
 (3 años o 1 año después del fin del contrato, el mayor); esa clasificación
 NO determina por sí sola el plazo para esta tabla de reconciliación.
 
-**Recomendación de producto para decisión del PO (NO APROBADA):**
+**Decisión explícita del PO: SÍ al criterio provisional, condicionado a revisión legal/contable antes de instalación o lanzamiento:**
 conservar el vínculo mientras la suscripción esté activa y hasta **3 años
 desde su cierre definitivo**, salvo una disputa/reembolso todavía en trámite
 o una obligación jurídica/contable aplicable que exija un plazo mayor.
@@ -55,8 +55,9 @@ demostrada para esta relación.
 **Criterios operativos para revisión:**
 1. Mantener la relación mientras se use para identificar una suscripción
    activa o resolver cobros/reembolsos/disputas relacionados.
-2. A partir de cierre/cancelación, aplicar un plazo máximo concreto, que el
-   PO definirá tras revisión contable/legal de reclamaciones y obligaciones.
+2. A partir del cierre **efectivo y comprobado** del contrato, contar tres
+   años calendario, no tres años desde el webhook ni desde pulsar cancelar.
+   Una cancelación de renovación no acredita el fin del servicio.
 3. Si hay un hold legal/financiero justificado, extender con revisión explícita,
    acceso restringido y trazabilidad de la excepción.
 4. Una vez vencido el plazo y liberados los holds, eliminar también de copias
@@ -64,12 +65,14 @@ demostrada para esta relación.
 5. Coordinar solicitud de eliminación de cuenta, retenciones obligatorias,
    acceso de operadores y política pública de privacidad antes de desplegar.
 
-Hasta definir **plazo máximo, inicio de cómputo, excepciones y tratamiento
-de backups**, no está aprobado insertar filas alojadas ni habilitar un
-mecanismo automático de borrado. El borrador no tiene escritor ni borrador.
+El plazo y origen contractual quedan **provisionalmente definidos por el PO**,
+pero las excepciones, tratamiento de backups, alcance jurídico y mecanismo
+de supresión aún necesitan revisión. Por ello **no está aprobado** insertar
+filas alojadas ni habilitar un mecanismo automático de borrado. El borrador no tiene escritor ni borrador.
 
 ## Gates independientes aún abiertos
-A. Aprobación de retención y reconciliación Privacy/Data Inventory/Terms.
+A. Criterio provisional de retención aprobado; falta revisión jurídica/contable,
+   excepciones, backups, eliminación y reconciliación de Privacy/Data Inventory/Terms.
 B. Revisión PO del SQL hospedado definitivo y GO explícito de DDL.
 C. Contrato de writer vinculado únicamente al webhook realmente verificado;
    el valor string `postback_verified_sandbox_activation` NO es firma.
