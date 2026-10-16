@@ -23,7 +23,7 @@ export function classifyVercelEnvTable(source) {
   // column and environment column, or an explicit "No Environment Variables".
   const formatOk = lines.some((line) =>
     /\b(?:name|key)\b/i.test(line) &&
-    /\b(?:environment|target)\b/i.test(line));
+    /\b(?:environments?|targets?)\b/i.test(line));
   const empty = /no environment variables (?:found|set|defined)/i.test(stripped);
   if (!formatOk && !empty) return { state: 'UNRECOGNIZED', dbNames: [], targets: [] };
   if (empty && !formatOk) return { state: 'EMPTY', dbNames: [], targets: [] };
