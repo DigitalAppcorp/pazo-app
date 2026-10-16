@@ -44,7 +44,7 @@ CREATE VIEW supporter_private.p42_backup_parent_count AS
  SELECT count(*)::bigint AS total FROM supporter_private.p42_backup_parent;
 CREATE FUNCTION supporter_private.p42_backup_lookup(p_id bigint)
  RETURNS text LANGUAGE sql STABLE
- AS $ SELECT name FROM supporter_private.p42_backup_parent WHERE id=p_id $;
+ AS 'SELECT name FROM supporter_private.p42_backup_parent WHERE id=p_id';
 GRANT SELECT ON supporter_private.p42_backup_benign_control TO PUBLIC;
 INSERT INTO supporter_private.p42_activation_signing_keys(key_id,key_bytes,enabled,not_before,not_after)
 VALUES('P42_V1',decode(repeat('a1',32),'hex'),false,
