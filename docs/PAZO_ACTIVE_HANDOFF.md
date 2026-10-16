@@ -1,3 +1,13 @@
+# PAZO F16 — QA local publicada y verificada (2026-10-16)
+
+**Integración QA P06/P18 CERRADA — reutilización, no recreación.** HEAD verificado en GitHub `bb1d57c01ff01092ef3c7bd96df2d35240150ce6` (rama `f13/section-titles-20261012`, PR #44 sigue OPEN/DRAFT). Este último commit publica **únicamente** `src/features/supporter/testing/f16P06QaAccountOrigin.test.mjs`, con **10** casos. La salida local de Codex reporta 19/19 PASS en suite dirigida y clon limpio, 11 archivos candidatos equivalentes tras imports, 3 casos previamente cubiertos por P18 y 1 conservado como evidencia histórica. El informe detallado local `RESULTADO_F16_QA_TEST_PUBLICATION_20261016.md` no está montado en el repositorio; no afirmar que se leyó íntegro. La verificación independiente en GitHub del commit `bb1d57c` confirmó que **CI = SUCCESS** y **F16 Disposable PostgreSQL Lab = SUCCESS**. NO repetir ejecución local o tests de compra.
+
+**Código QA reconciliado:** helper `supabase/functions/f16-paypal-supporter-account/p06QaAccountOrigin.mjs` y gestión de cuenta `index.ts` coinciden en lógica con runtime v10, conservando imports canónicos en GitHub. El checkout `supabase/functions/f16-paypal-supporter/index.ts` en GitHub mantiene `QA_CHECKOUT_RELEASE_APPROVED = false`; la función QA alojada v7 se había desplegado con latch restringido `true` durante pruebas; divergencia **intencional** hasta gate separado y nunca motivo de redeploy automático. No se desplegó código, no se modificaron datos SQL/financieros.
+
+**Siguiente fase técnica: F16-P44 REVIEW_REQUIRED.** En una única ejecución previa `review` HTTP 200 hubo correlación entre venta Sandbox y evento original, pero `merchant_refs_correlated_pagination_incomplete`: las transacciones por ventanas, períodos contractuales y evidencia de reembolsos/disputas NO están exhaustivamente acreditados. Los componentes P05/P23/P24/P29/P31/P32 ya existen para reutilizar, en gran parte OFFLINE/SYNTHETIC; distinguir tests sintéticos de prueba merchant real. No volver a llamar P44 ni repetir pagos. La función aislada `f16-paypal-sandbox-sale-review` v2 tiene caducidad `2026-10-17T00:00:00Z`; su vencimiento NO autoriza ampliación/redeploy. Resolver por análisis contractual y diseño de cobertura independiente de solo lectura, con nueva aprobación específica si requiere una operación alojada. Mantener P21 OFF, P42 OFF, ledger/paidThrough/beneficios sin habilitar, PayPal Live OFF.
+
+---
+
 # PAZO F16 — Reconciliación QA de prueba aislada (2026-10-16)
 
 **GO vigente:** PO aprobó consolidar únicamente trabajo ya verificado de QA y evitar duplicados. NO autoriza despliegue, nueva compra, habilitar P21/P42, ledger, Live ni beneficios.
