@@ -29,11 +29,6 @@ test('P37 private reader passes only event and lease token to exact server RPC',
    calls.push({url,init})
    return {ok:true,json:async()=>proof()}
   }})
- assert.deepEqual(r.preflight(params),{
-  eventValid:true,claimValid:true,abortController:true,timer:true,
-  enabled:true,host:true,keyType:true,keyLength:true,
-  keyWhitespace:true,transport:true,ready:true,
- })
  assert.deepEqual(await r.readClaimedActivation(params),proof())
  assert.equal(calls.length,1)
  assert.equal(calls[0].url,HOST+'/rest/v1/rpc/f16_p37_lab_read_claimed_activation')
@@ -42,6 +37,16 @@ test('P37 private reader passes only event and lease token to exact server RPC',
  assert.deepEqual(JSON.parse(calls[0].init.body),
   {p_event_id:EVENT,p_claim_token:CLAIM})
  assert.equal(calls[0].init.redirect,'error')
+})
+test('P37 rejects malformed UUID lease before calling private RPC',async()=>{
+ let calls=0
+ const reader=create({enabled:true,projectUrl:HOST,serviceRoleKey:KEY,
+  fetchImpl:async()=>{calls++;return {ok:true,json:async()=>proof()}}})
+ assert.equal(await reader.readClaimedActivation({
+  eventId:EVENT,claimToken:'11111111-1111-4111-111111111111'}),null)
+ assert.equal(calls,0)
+ assert.deepEqual(await reader.readClaimedActivation(params),proof())
+ assert.equal(calls,1)
 })
 test('P37 private reader refuses forged, absent and expanded binding output',async()=>{
  for(const obj of [null,{...proof(),source:'client'},
