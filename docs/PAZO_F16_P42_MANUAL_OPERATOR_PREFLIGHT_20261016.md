@@ -10,9 +10,9 @@
 - PostgreSQL: `supporter_private.p42_activation_signing_keys` con `key_id='P42_V1'`, `key_bytes` de 32 bytes, `enabled=false`, `not_before=T0`, `not_after=T0+24h` UTC. `T0` no elegido y jamás debe fijarse como fecha actual durante esta preparación.
 - Acceso de `public.f16_p42_register_authenticated_activation` a roles API = denegado, writer P42 OFF, worker P21 OFF; no checkout/pagos/beneficios/PayPal Live. El `service_role` no puede inspeccionar `key_bytes`.
 
-## 2. Operador humano (decisión PENDIENTE)
+## 2. Operador humano (principal CONFIRMADO, suplente PENDIENTE)
 
-**Candidato para custodio principal:** Product Owner, cuenta Owner del equipo Supabase y dos autenticadores registrados según capturas. Esto NO le designa unilateralmente ni demuestra acceso PostgreSQL con escritura.
+**Custodio principal DESIGNADO por decisión expresa del Product Owner (2026-10-16):** el propio Product Owner asumirá la eliminación manual supervisada de `P42_V1` en Edge Secrets y PostgreSQL al futuro vencimiento `Texp=T0+24h`, o antes ante incidente. Su cuenta Supabase Owner y sus dos TOTP constan por evidencia visual previa; **esta designación NO verifica la capacidad de escritura PostgreSQL, el acceso de retirada Edge ni la disponibilidad real a una hora todavía sin fijar**. No publicar nombre, email ni credenciales.
 
 **Suplente:** aún sin designar, permisos y disponibilidad **NO CONFIRMADOS**. Si no existe persona alternativa con acceso independiente ya verificado, el plan manual de 24h es operacionalmente frágil. No prometer disponibilidad de ChatGPT, Codex, un computador Windows apagado o un recordatorio como si fueran operadores de revocación.
 
@@ -52,6 +52,8 @@ Se auditó `scripts/backup-database.ps1` en esta rama. Ejecuta `pg_dump --format
 
 **Posible solución compatible con PostgreSQL 17, todavía NO implementada:** `pg_dump --exclude-table-data=supporter_private.p42_activation_signing_keys` mantiene el esquema de esa tabla y omite sus filas. La opción está documentada en https://www.postgresql.org/docs/17/app-pgdump.html . Si se selecciona, es obligatorio probar sobre PG17 descartable que el dump contenga el esquema pero nunca la fila sintética de secreto, comprobar `pg_restore --list`, verificar restauración, y que los backups no se hayan enviado ni copiado a otros destinos. **No agregar el flag al script alojado ni afirmar protección hasta aprobar y pasar ese gate de backup**.
 
+**Designación del custodio no modifica los bloqueos del gate.** Antes de un futuro GO se debe confirmar suplente con permisos independientes, agenda exacta y canales de revocación probados. No se ha establecido `T0` ni `Texp`; no se programó tarea ni se provisionó ninguna clave.
+
 **Estado backup:** `BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY`.
 
 ## 6. Hitos del turno manual (NO operativos todavía)
@@ -72,7 +74,7 @@ En `Texp=T0+24h`, un humano con permisos ejecuta:
 | Requisito | Resultado actual |
 |---|---|
 | Owner + dos TOTP de Supabase | PASS visual |
-| Responsable principal PO | PROPUESTO, no designado |
+| Responsable principal PO | **DESIGNADO** mediante confirmación PO 2026-10-16; capacidades operativas aún no verificadas |
 | Suplente humano + permisos | PENDIENTE |
 | Conexión PostgreSQL de escritura TLS/parametrizada | NO VERIFICADA |
 | Edge `unset` verificable sin material | Procedimiento DOCUMENTADO; no ejecutado |
