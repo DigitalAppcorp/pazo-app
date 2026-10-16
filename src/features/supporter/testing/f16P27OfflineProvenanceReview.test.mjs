@@ -63,3 +63,95 @@ test('P27 declines tampered merchant and owner evidence',async()=>{
   check(r);assert.ok(['REVIEW_REQUIRED','DENIED'].includes(r.phase))
  }
 })
+
+test('P27 rejects malformed event or lease without merchant network calls',async()=>{
+ const inputs=[
+  {eventId:'../WH-P27-01',claimToken:token},
+  {eventId:'WH-P27-01',claimToken:'not-a-lease'},
+  {eventId:'',claimToken:token},
+  {eventId:'WH-P27-01',claimToken:null},
+ ]
+ for(const input of inputs){
+  let calls=0
+  const a=base()
+  a.merchantReader.getMerchantEvent=async()=>{calls++;throw Error('unsafe network')}
+  a.merchantReader.getMerchantSubscription=async()=>{calls++;throw Error('unsafe network')}
+  a.readPrivateReviewContext=async()=>{calls++;throw Error('unsafe private read')}
+  const r=await create(a).inspect(input)
+  check(r);assert.equal(r.phase,'DENIED')
+  assert.equal(r.reason,'invalid_claim_request')
+  assert.equal(calls,0)
+ }
+})
+test('P27 fences private event and lease before any history, refund or dispute reads',async()=>{
+ for(const alter of [
+  x=>{x.claim.eventId='WH-P27-FOREIGN'},
+  x=>{x.claim.leaseToken='33333333-3333-4333-8333-333333333333'},
+ ]){
+  const a=base()
+  const baseRead=a.readPrivateReviewContext
+  a.readPrivateReviewContext=async args=>{
+   const x=await baseRead(args);alter(x);return x
+  }
+  let inspections=0
+  for(const name of ['inspectHistory','inspectRefunds','inspectDisputes'])
+   a[name]=async()=>{inspections++;throw Error('downstream inspection forbidden')}
+  const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+  check(r);assert.equal(r.phase,'DENIED')
+  assert.equal(r.reason,'private_claim_context_mismatch')
+  assert.equal(inspections,0)
+ }
+})
+test('P27 reuses P26 owner, P06 and P25 checks before inspecting merchant history',async()=>{
+ const invalid=[
+  x=>{x.privateBinding.ownerId='33333333-3333-4333-8333-333333333333'},
+  x=>{x.consent.validP06=false},
+  x=>{x.consent.sha256Verified=false},
+  x=>{x.reviewReservation.saleId='SALE-FOREIGN'},
+  x=>{x.reviewReservation.obligationOrdinal=1},
+  x=>{x.originalEvent.signatureStatus='unverified'},
+  x=>{x.claim.prospectiveCutoffPassed=false},
+  x=>{x.claim.leaseValid=false},
+ ]
+ for(const alter of invalid){
+  const a=base(),read=a.readPrivateReviewContext
+  a.readPrivateReviewContext=async args=>{
+   const context=await read(args);alter(context);return context
+  }
+  let inspected=0
+  for(const name of ['inspectHistory','inspectRefunds','inspectDisputes'])
+   a[name]=async()=>{inspected++;throw Error('unauthorized inspection')}
+  const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+  check(r);assert.equal(r.phase,'DENIED')
+  assert.equal(inspected,0)
+ }
+})
+test('P27 valid synthetic P25/P26 path inspects exact sale only and stays review-only',async()=>{
+ const a=base(),calls=[]
+ a.inspectHistory=async args=>{
+  calls.push(['history',args]);return {phase:'WINDOWS_CHECKED_REVIEW_ONLY'}
+ }
+ a.inspectRefunds=async args=>{
+  calls.push(['refund',args]);return {phase:'NO_REFUND_REFS_REVIEW_ONLY'}
+ }
+ a.inspectDisputes=async args=>{
+  calls.push(['dispute',args]);return {phase:'DISPUTE_SNAPSHOT_EMPTY_REVIEW_ONLY'}
+ }
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r);assert.equal(r.phase,'REVIEW_REQUIRED')
+ assert.equal(r.reason,'merchant_source_cycle_reversals_and_atomic_credit_unproven')
+ assert.equal(calls.length,3)
+ for(const [category,args] of calls){
+  assert.equal(args.eventId,'WH-P27-01')
+  assert.equal(args.claimToken,token)
+  if(category!=='history')assert.equal(args.saleId,'SALE-P27-01')
+  else assert.equal(Object.hasOwn(args,'saleId'),false)
+ }
+})
+test('P27 unavailable downstream evidence does not record payment or grant rights',async()=>{
+ const a=base()
+ a.inspectDisputes=async()=>{throw Error('merchant unavailable')}
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r);assert.equal(r.phase,'REVIEW_REQUIRED')
+ assert.equal(r.reason,'merchant_or_private_evidence_unavailable')
+})
