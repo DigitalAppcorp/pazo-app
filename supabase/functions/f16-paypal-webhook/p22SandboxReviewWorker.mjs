@@ -7,6 +7,8 @@ import {createP05SandboxClaimScopedMerchantReaders}
  from './p05SandboxClaimScopedMerchantReaders.mjs'
 import {createP05OfflineMerchantClaimBridge}
  from './p05OfflineMerchantClaimBridge.mjs'
+import {createP22PrivateLeaseRpcAdapter}
+ from './p22PrivateLeaseRpcAdapter.mjs'
 export function createP22SandboxReviewWorker({
  scope='DISABLED',leaseStore,merchantReader,
 }={}){
@@ -45,4 +47,33 @@ export function createP22SandboxOfflineMockComposer({leaseStore,
  })
  return createP22SandboxReviewWorker({
   scope:'OFFLINE_SYNTHETIC_TEST_ONLY',leaseStore,merchantReader})
+}
+
+// F16 closure: connect the EXISTING P21/P22 privileged RPC adapter to the
+// EXISTING claimed PayPal Sandbox merchant GET reader and review-only worker.
+// NOT IMPORTED by any active Edge function, cron, frontend or billing writer.
+// This is an assembly seam for disposable, network-mocked validation ONLY.
+// An actual hosted activation requires separately approved server entry point,
+// external authorization, secret custody, cutoff and audit. Never pass live
+// service-role or merchant secrets through frontend/request data.
+export function createP22SandboxPrivilegedReviewComposition({
+ scope='DISABLED',projectUrl,serviceRoleKey,
+ clientId,clientSecret,fetchImpl,
+}={}){
+ if(scope!=='OFFLINE_SYNTHETIC_TEST_ONLY')
+  return createP22SandboxReviewWorker()
+ // Require a deliberately injected network transport: there is no default
+ // global fetch path for this test composition.
+ if(typeof fetchImpl!=='function')
+  throw Error('p22_privileged_composition_requires_test_transport')
+ const leaseStore=createP22PrivateLeaseRpcAdapter({
+  projectUrl,serviceRoleKey,fetchImpl,
+ })
+ const merchantReader=createP05SandboxClaimScopedMerchantReaders({
+  clientId,clientSecret,fetchImpl,
+  readClaimedEvent:params=>leaseStore.readClaimedEvent(params),
+ })
+ return createP22SandboxReviewWorker({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',leaseStore,merchantReader,
+ })
 }
