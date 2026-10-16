@@ -37,12 +37,12 @@ try {
       # Parse PEM ourselves and import decoded DER only. This avoids
       # runtime-specific CreateFromPemFile overload differences in PowerShell.
       $pem = [regex]::Match($asText,
-        '(?s)-----BEGIN CERTIFICATE-----\\s*(?<b64>[A-Za-z0-9+/=\\s]+?)\\s*-----END CERTIFICATE-----')
+        '(?s)-----BEGIN CERTIFICATE-----\s*(?<b64>[A-Za-z0-9+/=\s]+?)\s*-----END CERTIFICATE-----')
       if (-not $pem.Success -or $pem.Value.Trim() -cne $asText.Trim()) {
         throw 'pem'
       }
       $der = [Convert]::FromBase64String(
-        ($pem.Groups['b64'].Value -replace '\\s','')
+        ($pem.Groups['b64'].Value -replace '\s','')
       )
       try {
         $cert = [Security.Cryptography.X509Certificates.X509Certificate2]::new($der)
