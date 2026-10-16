@@ -31,7 +31,7 @@ test('P37 private reader passes only event and lease token to exact server RPC',
   }})
  assert.deepEqual(await r.readClaimedActivation(params),proof())
  assert.equal(calls.length,1)
- assert.equal(calls[0].url,HOST+'/rest/v1/rpc/f16_p37_lab_read_claimed_activation')
+ assert.equal(calls[0].url,HOST+'/rest/v1/rpc/f16_p37_read_claimed_activation')
  assert.equal(calls[0].init.method,'POST')
  assert.equal(calls[0].init.headers.Authorization,'Bearer '+KEY)
  assert.deepEqual(JSON.parse(calls[0].init.body),
