@@ -13,7 +13,7 @@ test('historical RPC reader rejects absent server scope and key with zero networ
 })
 test('historical exact-ID transport uses private RPC POST and redacts response',async()=>{
  let count=0
- const read=create({projectUrl:base,serviceRoleKey:key,scope:'SERVER_ONLY_HISTORICAL_REVIEW',
+ const read=create({projectUrl:base,serviceRoleKey:key,scope:'SERVER_ONLY_HISTORICAL_REVIEW',fingerprintEvent:async()=>args.eventFingerprint,
   fetchImpl:async(url,options)=>{
    count++;assert.equal(url,base+'/rest/v1/rpc/f16_p28_read_historical_candidate_exact')
    assert.equal(options.method,'POST')
@@ -29,4 +29,14 @@ test('uninstalled or rejecting RPC fails closed',async()=>{
  const read=create({projectUrl:base,serviceRoleKey:key,scope:'SERVER_ONLY_HISTORICAL_REVIEW',
   fetchImpl:async()=>({ok:false,status:404})})
  assert.equal(await read(args),null)
+})
+
+test('event B cannot reuse event A audited fingerprint even if RPC would respond',async()=>{
+ let count=0
+ const read=create({projectUrl:base,serviceRoleKey:key,scope:'SERVER_ONLY_HISTORICAL_REVIEW',
+  fingerprintEvent:async event=>event===args.eventId?args.eventFingerprint:'b'.repeat(64),
+  fetchImpl:async()=>{count++;return {ok:true,json:async()=>({id:'WH-P28-B',processingState:'pending'})}}
+ })
+ assert.equal(await read({...args,eventId:'WH-P28-B'}),null)
+ assert.equal(count,0)
 })
