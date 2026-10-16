@@ -24,7 +24,7 @@ BEGIN
  WHERE e.provider_event_id=p_event_id AND e.event_type='BILLING.SUBSCRIPTION.ACTIVATED'
  AND e.verified_at IS NOT NULL AND e.retention_hold=true)
  THEN RETURN false; END IF;
- SELECT pg_catalog.count(*),pg_catalog.min(i.owner_id)
+ SELECT pg_catalog.count(*),(pg_catalog.array_agg(i.owner_id))[1]
  INTO v_count,v_owner FROM supporter_private.paypal_subscription_intents i
  WHERE i.external_subscription_id=p_subscription_id
  AND i.provider='paypal' AND i.state='bound'
