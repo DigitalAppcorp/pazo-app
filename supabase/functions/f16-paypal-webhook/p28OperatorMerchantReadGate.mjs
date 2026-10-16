@@ -12,7 +12,7 @@ const eq=(a,b)=>{
  return diff===0
 }
 export function createP28OperatorMerchantRead({
- enabled=false,operatorKey,readLeasedEvent,merchantReader,
+ enabled=false,operatorKey,readLeasedEvent,merchantReader,resolvePrivateBinding,
 }={}){
  return async(request)=>{
   if(request.method!=='POST')return response(405,'method_not_allowed')
@@ -23,7 +23,8 @@ export function createP28OperatorMerchantRead({
   if(!enabled)return response(503,'merchant_read_disabled')
   if(typeof readLeasedEvent!=='function'||!merchantReader||
    typeof merchantReader.getMerchantEvent!=='function'||
-   typeof merchantReader.getMerchantSubscription!=='function')
+   typeof merchantReader.getMerchantSubscription!=='function'||
+   typeof resolvePrivateBinding!=='function')
    return response(503,'lease_reader_unavailable')
   if(request.headers.get('content-type')?.split(';')[0]!=='application/json')
    return response(415,'invalid_content_type')
@@ -54,6 +55,15 @@ export function createP28OperatorMerchantRead({
       !/^intent-[A-Za-z0-9_-]{12,90}$/.test(sub.custom_id)||
       sub.plan_id!=='P-14V25407JP6850922NLHMDKI')
     return response(409,'merchant_subscription_mismatch')
+   const bound=await resolvePrivateBinding({
+    eventId:body.eventId,claimToken:body.claimToken,
+    subscriptionId:sub.id,intentId:sub.custom_id})
+   if(bound?.intentId!==sub.custom_id||bound?.subscriptionId!==sub.id||
+      bound?.planId!=='P-14V25407JP6850922NLHMDKI'||
+      bound?.state!=='bound'||
+      typeof bound?.ownerId!=='string'||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bound.ownerId))
+    return response(409,'private_binding_not_verified')
    // No IDs or payment metadata in HTTP response. No ledger writes.
    return response(200,'merchant_refs_correlated_review_only')
   }catch{return response(503,'merchant_read_unavailable')}
