@@ -26,7 +26,7 @@ test('null, foreign, stale and wrongly shaped proof fails closed',async()=>{
 test('untrusted claim parameters or RPC exception never attest',async()=>{
  let calls=0
  const adapter=create({callServiceRpc:async()=>{calls++;throw Error('unavailable')}})
- assert.equal(await adapter({eventId:'bad',claimToken}),null)
+ assert.equal(await adapter({eventId:'invalid!',claimToken}),null)
  assert.equal(calls,0)
  assert.equal(await adapter({eventId,claimToken}),null)
  assert.equal(calls,1)
