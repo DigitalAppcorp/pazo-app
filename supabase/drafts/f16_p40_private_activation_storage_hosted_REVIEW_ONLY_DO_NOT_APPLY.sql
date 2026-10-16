@@ -1,6 +1,11 @@
 -- F16-P40 — SCHEMA CANDIDATE FOR REVIEW. DO NOT APPLY IN HOSTED.
 -- This SQL is a nonfinancial storage proposal only. The Product Owner approved
--- the limited data category, NOT hosted installation, retention, or any writer.
+-- the limited data category AND a provisional active+3-calendar-years-after-close
+-- retention criterion (subject to legal/backup review); NOT hosted installation,
+-- any writer, retention deletion, or grant of service benefits.
+-- CAUTION: This schema intentionally has NO trusted termination/hold source,
+-- no retention sweeper and an immutable FK; it cannot yet execute the approved
+-- retention policy. The lifecycle/deletion gate must close before hosted use.
 -- No write RPC, client grant, paidThrough, account benefit or financial ledger.
 BEGIN;
 SET LOCAL lock_timeout = '4s';
