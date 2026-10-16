@@ -276,3 +276,20 @@ jobs:
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_refund_multievent_readers_lab_DRAFT_DO_NOT_APPLY.sql
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-multievent-readers-synthetic.sql
           echo 'PASS F16: refund-before-sale visible to private reviewer; no new public ACL'
+
+      - name: P42 backup data-exclusion and restore - disposable PG17 ONLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "\${GITHUB_ACTIONS:-}" = true
+          test -z "\${DATABASE_URL:-}"
+          test -z "\${SUPABASE_DB_URL:-}"
+          test -z "\${SUPABASE_ACCESS_TOKEN:-}"
+          test -z "\${PAZO_SUPABASE_PROJECT_ID:-}"
+          # Client and server are both postgres:17.11; the same existing
+          # disposable PG service handles two NEW isolated lab databases.
+          # Never mount project secrets, user files, or hosted access tokens.
+          docker run --rm --network host -i \
+            -e GITHUB_ACTIONS=true \
+            -e PGPASSWORD=f14_synthetic_ci_only \
+            postgres:17.11 bash -s < scripts/f16-p42-backup-exclusion-pg17-lab.sh
