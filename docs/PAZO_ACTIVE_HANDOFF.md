@@ -1,3 +1,17 @@
+# F16-P42 — vencimiento absoluto de 24h ensayado (2026-10-16)
+
+**Trabajo técnico entregado, NO aplicado a hosted:** el parche `supabase/drafts/f16_p42_absolute_key_expiry_patch_REVIEW_ONLY_DO_NOT_APPLY.sql` se basa en la función P42 **ya instalada** y cambia exclusivamente su validación de ventana para rechazar `not_after IS NULL`, rechazar `issued_at >= not_after` y rechazar cualquier llamada recibida cuando `clock_timestamp() >= not_after`. Corrige la brecha documentada de una MAC emitida antes de vencer la clave pero entregada hasta 120 segundos después. No modifica grants, tablas, secretos, writer ni P21. El parche verifica gates OFF, cero filas P42/ledger/P40 y RPC existente; en laboratorio `f14_synthetic` valida rol, y en hosted está expresamente **NO-GO**, exigiendo aprobación SQL independiente.
+
+**Pruebas dirigidas añadidas al fichero EXISTENTE:** `supabase/tests/supporter/p42-hosted-disabled-writer-pg17-rehearsal.sql`. Antes del vencimiento permite la firma sintética legítima con `not_after` finito; después, incluso con emisión previa, rechaza; `not_after=NULL` rechaza; conserva revocación, intent binding, idempotencia, ausencia de pagos y reversión ROLLBACK. CI ensaya el candidato en PostgreSQL desechable **sin usar bytes auténticos**. Commit con ensayo final `70c9e6c7151ddd09f83e2e2c218066ef306ea3d4`: **F16 Disposable PostgreSQL Lab SUCCESS** (run `38983466647`) y **CI SUCCESS** (run `38983466691`).
+
+**Estado alojado posterior leído sin mutación:** `p42_activation_signing_keys=0`, P42 writer OFF, P21 worker OFF, P40 bindings 0, ledger 0, P42 RPC sin EXECUTE para `service_role`/`anon`/`authenticated`. La RPC **alojada aún tiene el cuerpo anterior**: no afirmar que cutoff fue corregido en hosted.
+
+**Decisiones PO que se conservan:** futura clave `P42_V1` de **24h exactas** `T0..T0+24h`, **revocación manual** por un solo custodio (PO), no automación y no segundo administrador. NO se definió T0, NO se probó la doble provisión Edge+DB; no generar secreto ni habilitar grants/worker/checkouts. `scripts/f16-p42-session-pooler-tls-readonly-once.ps1` y los ensayos CA/backup/revocación ya existentes deben reutilizarse, no duplicarse.
+
+**Siguiente gate más corto:** obtener GO separado para instalar **exclusivamente el parche P42 de rechazo tras expiración** con writer/gates OFF y ninguna key, ejecutar solo una migración versionada y comprobar body/grants/gates por SELECT. **Eso no autoriza provisionar claves, cambiar Edge Secrets, T0, desplegar funciones ni activar pagos.** Después de ese parche, la provisión privada de los dos almacenes continúa BLOCKED hasta que PO apruebe canal seguro y disponibilidad de revocación manual.
+
+---
+
 # F16-P37 — Hosted read-only RPC INSTALLED (2026-10-16)
 
 **PO GO recibido únicamente para instalación SQL P37:** en Supabase `mrybvqdebbgcayuvgkkr`, migración alojada versión `20261016234350` / nombre `f16_p37_service_only_claimed_activation_read` aplicada **SUCCESS**. Versionada idéntica en SQL ejecutable (encabezado documental adaptado) como `supabase/migrations/20261016234350_f16_p37_service_only_claimed_activation_read.sql`. Source audited: `supabase/drafts/f16_p37_hosted_private_claim_read_REVIEW_ONLY_DO_NOT_APPLY.sql` sha `1d951f89927d0e5faf48e37f87d03c29e8386518`. El draft con nombre DO_NOT_APPLY sigue como referencia; **NO ejecutar de nuevo**.
