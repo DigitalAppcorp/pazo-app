@@ -3,7 +3,7 @@
 // Hosted implementation is not enabled or deployed by this module.
 const EVENT=/^[A-Za-z0-9._-]{3,128}$/
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-const ISO=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|\+00:00)$/
+const ISO=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|\+00:00)$/
 export function createP28LeaseAttestationAdapter({callServiceRpc}={}){
  if(typeof callServiceRpc!=='function')throw Error('service_rpc_required')
  return async({eventId,claimToken}={})=>{
