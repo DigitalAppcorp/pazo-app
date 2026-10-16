@@ -102,3 +102,13 @@ El PO eligió la **alternativa segura sin otro administrador**. El responsable p
 **Documento de evidencia:** `docs/PAZO_F16_P42_BACKUP_EXCLUSION_PG17_VERIFICATION_20261016.md`. **Este PASS NO modifica el script real** `scripts/backup-database.ps1`; aún no hay protección efectiva contra respaldo accidental de futura `key_bytes`. El bloqueo `BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY` **PERMANECE**.
 
 **Siguiente acción técnica:** preparar una propuesta de cambio acotado del comando `pg_dump` Windows y un ensayo más amplio de restore, **sin aplicarlo** antes del GO independiente. Custodio PO único confirmado; no existe un segundo administrador, T0/Texp siguen sin definir, acceso DB WRITE/Edge unset no validado y provisión NO-GO.
+
+
+## 10. Exportador P42 corregido por GO PO, ensayo ampliado PASS (2026-10-16)
+
+- `scripts/backup-database.ps1` fue modificado **solo en el comando `pg_dump`**, con `--exclude-table-data=supporter_private.p42_activation_signing_keys`; conserva todas las demás exportaciones y estructura de P42.
+- El control negativo confirma que sin flag se copian datos P42; con flag se omiten filas de `key_bytes`, conservando esquema. Ampliación en PG17 desechable validó datos relacionados (FK), índices, vistas, función SQL, ACL, RLS/Force RLS y restauración a base nueva. CI validó el comando PowerShell real sin ejecutarlo.
+- Evidencia [`PG17 #38926912820`](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38926912820) y [`CI #38926912803`](https://github.com/DigitalAppcorp/pazo-app/actions/runs/38926912803), ambos SUCCESS para commit técnico `5474577b428c548b0759861735a6d91eef75a52d`. Informe `docs/PAZO_F16_P42_BACKUP_EXCLUSION_PG17_VERIFICATION_20261016.md`.
+- **`BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY` resuelto exclusivamente para backups lógicos FUTUROS que invoquen ESTE script versionado.** Inventario de otros exportadores, backups anteriores, snapshots físicos/terceros y restore integral del PAZO alojado: pendientes. No afirmar eliminación universal de bytes.
+- Canal PostgreSQL de escritura TLS+parámetros sigue UNVERIFIED, Edge unset no ejecutado, modelo PO único sin respaldo humano; no T0, no clave y no GO de provisión ni de pagos.
+**Marcador:** `P42_BACKUP_SCRIPT_EXCLUSION_PATCHED_PG17_RESTORE_EXPANDED_PASS_HOSTED_UNTOUCHED`.
