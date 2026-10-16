@@ -54,7 +54,7 @@ jobs:
       - name: Operator PowerShell syntax without credentials or provider calls
         shell: pwsh
         run: |
-          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1','scripts/f16-paypal-sandbox-plan.ps1')) {
+          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1','scripts/f16-paypal-sandbox-plan.ps1','scripts/f16-p43-db-access-readonly.ps1')) {
             $tokens=$null; $parseErrors=$null
             [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $file),[ref]$tokens,[ref]$parseErrors) | Out-Null
             if ($parseErrors.Count) { throw "PowerShell syntax error in $file" }
