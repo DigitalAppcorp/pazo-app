@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P42 — PO AUTORIZÓ PREPARAR INFRAESTRUCTURA PARA INSTALACIÓN POSTERIOR (2026-10-16)
+
+- **PO «sí»:** preparar borrador hosted de claves y RPC P42 **sin instalarla**, mantener todo desactivado. No autorizó generar/proveer secreto real, escritor P42, grant, Edge, worker, PayPal, datos alojados nuevos, pagos o beneficios.
+- **Borrador para revisión, NO MIGRATION:** `supabase/drafts/f16_p42_hosted_keys_and_disabled_writer_REVIEW_ONLY_DO_NOT_APPLY.sql`. Preflight P40 vacía, gate P21 OFF, ledger 0, pgcrypto; tabla privada de claves **sin filas**; gate P42 **false**; RPC `public.f16_p42_register_authenticated_activation` creada en el ensayo pero **sin EXECUTE** para roles API/service_role. RLS FORCE. Sin importación en Edge.
+- **Contrato de prueba:** `supabase/tests/supporter/p42-hosted-disabled-writer-pg17-rehearsal.sql` compara la misma DDL en PG17, ensaya permiso/clave/revocación/evento histórico/owner/cruce sin pagos. CI general y PG17 SUCCESS en commit `3f7a936`, runs #38860287370 / #38860287454.
+- **Política de secretos/rotación:** propuesta con CSPRNG, almacenamiento independiente, custodia del backend y de Postgres, ventanas y revocación; pendiente PO + revisión de acceso/backup; NUNCA crear clave real ni introducirla en chat/código.
+- **Siguiente permiso PO:** revisar política de claves y migración exacta para una autorización **diferente** de instalación vacía y apagada. Permisos de escritura/Edge/PayPal, retención y financial F16 permanecen independientes; P28 diferido. `docs/PAZO_F16_P42_HOSTED_DISABLED_KEYS_ROTATION_PROPOSAL_20261016.md`.
+
 ## F16-P42 — INGESTA DE ACTIVACIÓN CON HMAC AISLADA (2026-10-16)
 
 - **Problema P39:** la etiqueta `postback_verified_sandbox_activation` enviada por `service_role` es falsificable. **NO instalar P39 writer original en Supabase**.
