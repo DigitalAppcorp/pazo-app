@@ -1,3 +1,15 @@
+# F16-P42 — APPLY BLOCKED BY TOOL SAFETY (2026-10-16)
+
+**PO GO específico:** el PO autorizó aplicar solo `supabase/drafts/f16_p42_absolute_key_expiry_patch_REVIEW_ONLY_DO_NOT_APPLY.sql`, sin generar claves, sin Edge secrets, sin activar gates o conceder permisos. El candidato (blob Git `2961f9a8933d2e342cb04c681e8adbb8fae82046`) había pasado CI `38983466691` y PG17 `38983466647`; comparación exacta con migración P42 inicial `ceb24e4b` confirmó que el único cambio del cuerpo era rechazar `not_after IS NULL` y `clock_timestamp() >= not_after`.
+
+**Intento real:** una comprobación estática local demasiado amplia abortó antes de emitir cualquier SQL; al corregir la validación estática y llamar al conector de Supabase para instalar el cambio, la operación fue **bloqueada por controles de seguridad de la herramienta**. No hay registro de migración aplicada ni respuesta de ejecución. **NO reintentar ni usar otro canal para eludir el bloqueo** sin que se resuelva apropiadamente el control de seguridad. No crear una migración marcada instalada en GitHub mientras no exista en hosted.
+
+**Postflight alojado independiente de solo lectura:** función P42 existe **pero sigue SIN** el predicado de vencimiento absoluto `clock_timestamp()>=v_key_end`; última migración sigue siendo `20261016234350_f16_p37_service_only_claimed_activation_read`. Claves P42 0, writer P42 OFF, worker P21 OFF, P40 0, ledger 0, reversals 0; `anon/authenticated/service_role EXECUTE=false`. Ninguna clave se generó, ningún webhook desplegado, ningún cobro ni beneficio acreditado.
+
+**Estado:** `P42_HOSTED_ABSOLUTE_EXPIRY_PATCH_BLOCKED_BY_TOOL_SAFETY`; `P42_PROVISIONING_NO_GO`; `F16_NO_GO`; PR #44 continúa DRAFT. La prueba de laboratorio PASS no equivale al parche alojado instalado. Continuar solo con trabajo no bloqueado hasta resolución del control por canal autorizado; no activar el writer ni usar P42 antes del cutoff corregido.
+
+---
+
 # F16-P42 — vencimiento absoluto de 24h ensayado (2026-10-16)
 
 **Trabajo técnico entregado, NO aplicado a hosted:** el parche `supabase/drafts/f16_p42_absolute_key_expiry_patch_REVIEW_ONLY_DO_NOT_APPLY.sql` se basa en la función P42 **ya instalada** y cambia exclusivamente su validación de ventana para rechazar `not_after IS NULL`, rechazar `issued_at >= not_after` y rechazar cualquier llamada recibida cuando `clock_timestamp() >= not_after`. Corrige la brecha documentada de una MAC emitida antes de vencer la clave pero entregada hasta 120 segundos después. No modifica grants, tablas, secretos, writer ni P21. El parche verifica gates OFF, cero filas P42/ledger/P40 y RPC existente; en laboratorio `f14_synthetic` valida rol, y en hosted está expresamente **NO-GO**, exigiendo aprobación SQL independiente.
