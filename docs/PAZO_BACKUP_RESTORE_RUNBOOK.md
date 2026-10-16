@@ -2,6 +2,8 @@
 
 > **GATE F16-P42 (2026-10-16, SIN PROVISIÓN):** `scripts/backup-database.ps1` actualmente ejecuta un `pg_dump` completo sin omitir los datos de `supporter_private.p42_activation_signing_keys`. Si una clave real `P42_V1` se aprovisionara, un respaldo nuevo durante su ventana de 24 horas podría conservar `key_bytes` más allá de la revocación manual. **No se ha creado esa clave.** Antes de un GO futuro hay que validar en PostgreSQL desechable una exclusión de datos P42 que preserve el esquema/restauración (candidato PostgreSQL 17: `--exclude-table-data=supporter_private.p42_activation_signing_keys`), inventariar respaldos locales/off-site y aprobar expresamente el cambio. **No suspender ni modificar backups reales solo por esta advertencia.** Evidencia: [preflight P42](PAZO_F16_P42_MANUAL_OPERATOR_PREFLIGHT_20261016.md). F16 NO-GO; este documento no habilita claves, SQL alojado ni pagos.
 
+> **EVIDENCIA P42 PG17 (2026-10-16):** prueba en GitHub Actions `38925576845` SUCCESS confirmó que un `pg_dump --exclude-table-data=supporter_private.p42_activation_signing_keys` puede preservar esquema/RLS de la tabla, omitir fila sintética y restaurar otros datos en PostgreSQL descartable. Evidencia en [P42 backup PG17](PAZO_F16_P42_BACKUP_EXCLUSION_PG17_VERIFICATION_20261016.md). **No se ha aplicado esa exclusión al script Windows real `scripts/backup-database.ps1`.** La exposición potencial de `key_bytes` en futuros dumps reales continúa BLOQUEADA; tampoco se ha verificado la restauración completa de PAZO con ese cambio. Nada de esto autoriza provisión P42 ni interrupción de respaldos existentes.
+
 # PAZO — Backup & Restore Runbook
 
 **Estado:** ACTIVO / pre-Beta  
