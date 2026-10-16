@@ -5,6 +5,10 @@ const sql=readFileSync(new URL('../../../../supabase/drafts/f16_p28_historical_a
 test('hosted P28 audit review candidate installs only minimal audit objects',()=>{
  assert.match(sql,/CREATE TABLE supporter_private\.p28_historical_read_audit/)
  assert.match(sql,/FORCE ROW LEVEL SECURITY/)
+ assert.match(sql,/event_fingerprint text NOT NULL/)
+ assert.match(sql,/p_event_fingerprint text/)
+ assert.match(sql,/HMAC-SHA256/)
+ assert.doesNotMatch(sql,/request_id uuid PRIMARY KEY,\s*action text/)
  assert.match(sql,/REVOKE ALL ON TABLE supporter_private\.p28_historical_read_audit/)
  assert.match(sql,/REVOKE ALL ON FUNCTION/)
  assert.match(sql,/TO service_role/)
