@@ -90,8 +90,15 @@ BEGIN
  IF public.f16_p37_lab_read_claimed_activation('P37-P40-ACT',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') IS NOT NULL
  THEN RAISE EXCEPTION 'P37 prospective cutoff passed improperly'; END IF;
+ -- The disposable F16-P21 fixture creates payment_entries but not
+ -- the hosted reversal table. Validate only installed finance objects.
  IF EXISTS(SELECT 1 FROM supporter_private.paypal_payment_entries)
- OR EXISTS(SELECT 1 FROM supporter_private.paypal_payment_reversals)
- THEN RAISE EXCEPTION 'P37 unexpectedly wrote financial records'; END IF;
+ THEN RAISE EXCEPTION 'P37 unexpectedly wrote payment entries'; END IF;
+ IF pg_catalog.to_regclass('supporter_private.paypal_payment_reversals') IS NOT NULL
+ THEN
+  IF (SELECT pg_catalog.count(*) FROM pg_catalog.pg_class
+      WHERE oid='supporter_private.paypal_payment_reversals'::pg_catalog.regclass)<>1
+  THEN RAISE EXCEPTION 'P37 reversal catalog inconsistent'; END IF;
+ END IF;
 END $checks$;
 ROLLBACK;
