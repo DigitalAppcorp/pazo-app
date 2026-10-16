@@ -1,7 +1,7 @@
 \set ON_ERROR_STOP on
 BEGIN;
 DO $test$
-DECLARE extension_schema text; good_fp text; old_fp text; v2_ok boolean; v1_rejected boolean; repeated boolean; revoked_rejected boolean;
+DECLARE extension_schema text; good_fp text; old_fp text; v2_ok boolean; v1_rejected boolean; repeated boolean; revoked_rejected boolean; double_active_blocked boolean:=false;
 BEGIN
  IF current_database()<>'f14_synthetic' OR session_user<>'f14_admin' THEN RAISE EXCEPTION 'lab only'; END IF;
  SELECT n.nspname INTO extension_schema FROM pg_catalog.pg_extension x JOIN pg_catalog.pg_namespace n
@@ -21,6 +21,12 @@ BEGIN
  v1_rejected:=public.f16_p28_lab_versioned_consume('WH-P28-ROTATION','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
  v2_ok:=public.f16_p28_lab_versioned_consume('WH-P28-ROTATION','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
  repeated:=public.f16_p28_lab_versioned_consume('WH-P28-ROTATION','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+ BEGIN
+  INSERT INTO supporter_private.p28_lab_key_versions(key_version,active,revoked,synthetic_secret)
+  VALUES('v3',true,false,'P28_SYNTHETIC_V3_ONLY_NOT_REAL_SECRET_2026');
+ EXCEPTION WHEN unique_violation THEN double_active_blocked:=true;
+ END;
+ IF NOT double_active_blocked THEN RAISE EXCEPTION 'multiple active keys permitted'; END IF;
  UPDATE supporter_private.p28_lab_key_versions SET revoked=true,active=false WHERE key_version='v2';
  revoked_rejected:=public.f16_p28_lab_versioned_consume('WH-P28-ROTATION','cccccccc-cccc-4ccc-8ccc-cccccccccccc');
  IF v1_rejected OR NOT v2_ok OR repeated OR revoked_rejected THEN
