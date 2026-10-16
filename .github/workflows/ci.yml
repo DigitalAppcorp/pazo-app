@@ -268,6 +268,29 @@ jobs:
             -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql \
             -f supabase/drafts/f16_p10_recovered_checkout_binding_DO_NOT_APPLY.sql \
             -f supabase/tests/supporter/p10-recovered-checkout-binding-synthetic.sql
+      - name: F16 P06 approved QA bilingual offer publish staging (disposable PG17 ONLY)
+        run: |
+          node --test src/features/supporter/testing/f16P06StagedOfferSqlReview.test.mjs
+          # Guard must reject missing explicit publication flag; no partial rows.
+          if psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p06_sandbox_qa_approved_offer_REQUIRES_NEW_PUBLISH_GO.sql >/dev/null 2>&1; then
+            echo 'P06 staging incorrectly accepted unapproved publish'; exit 1
+          fi
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c "SET ROLE postgres; SET pazo.f16_p06_qa_publish_go='PO_EXPLICIT_QA_OFFER_PUBLISH_AFTER_OWNER_GATE';" \
+            -f supabase/drafts/f16_p06_sandbox_qa_approved_offer_REQUIRES_NEW_PUBLISH_GO.sql
+          # Replaying an already published immutable pair must be rejected.
+          if psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c "SET ROLE postgres; SET pazo.f16_p06_qa_publish_go='PO_EXPLICIT_QA_OFFER_PUBLISH_AFTER_OWNER_GATE';" \
+            -f supabase/drafts/f16_p06_sandbox_qa_approved_offer_REQUIRES_NEW_PUBLISH_GO.sql >/dev/null 2>&1; then
+            echo 'P06 staging incorrectly allowed second publish'; exit 1
+          fi
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic \
+            -v ON_ERROR_STOP=1 -c "SET ROLE postgres; SELECT count(*)::text || '|' || count(DISTINCT locale)::text || '|' || count(DISTINCT sha256)::text FROM supporter_private.paypal_p06_offers WHERE version='pazo-supporter-sandbox.qa20261016-v1';")
+          test "$result" = "2|2|2"
+          echo 'P06 sandbox QA bilingual offer exact copy, guard, and idempotency PASS (DISPOSABLE only)'
+
   f16-p12-staged-install:
     runs-on: ubuntu-latest
     timeout-minutes: 10
