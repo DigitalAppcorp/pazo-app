@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P42 — INGESTA DE ACTIVACIÓN CON HMAC AISLADA (2026-10-16)
+
+- **Problema P39:** la etiqueta `postback_verified_sandbox_activation` enviada por `service_role` es falsificable. **NO instalar P39 writer original en Supabase**.
+- **Laboratorio P42:** `f16_p42_hmac_scoped_activation_ingress_pg17_ONLY_DO_NOT_APPLY.sql` + `p42LabSignedActivationRecorder.mjs`. Verifica HMAC SHA256 de evento/sub/fecha/nonce, TTL 120s, clave privada inaccesible por DML service_role, revocación, corte prospectivo por versión, intent BOUND, idempotencia e imposibilidad de reasignación. No concede pagos ni acceso.
+- **Pruebas:** PG17/CI PASS commit `053391f`; prueba adicional de cutoff PASS `6a8c848`; composición full receptor→firmante→RPC offline añadida, CI posterior por confirmar.
+- **Alcance:** P40 sigue alojada vacía, worker OFF, ledger 0, P28 diferido y PR #44 DRAFT. La clave P42 es SINTÉTICA y la RPC P42 existe SOLO en PostgreSQL descartable; receiver alojado no importa este código.
+- **Gate próximo PO:** política técnica final de retención/borrado/backup, GO separado para crear y rotar secreto HMAC alojado, writer protegido, Edge y luego buyer PayPal/worker. Sin esas autorizaciones no instalar ni activar. `docs/PAZO_F16_P42_CRYPTOGRAPHIC_INGRESS_SECURITY_LAB_20261016.md`.
+
 ## F16-P40 — DDL ALOJADA DE TABLA VACÍA INSTALADA / POSTFLIGHT PASS (2026-10-15)
 
 - **PO autorizó por «sí» la estructura vacía exclusivamente** después de aprobar categoría privada y retención provisional. Migración `20261016055145_f16_p40_empty_private_activation_bindings` instalada en Supabase mediante migrador oficial; versión GitHub alineada.
