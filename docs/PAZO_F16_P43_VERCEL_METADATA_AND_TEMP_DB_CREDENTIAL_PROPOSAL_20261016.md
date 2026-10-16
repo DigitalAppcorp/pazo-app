@@ -146,4 +146,4 @@ incluye escribir P42, Edge secrets, reset DB, pagos, workers, ni
 beneficios. Pendiente todavía definir `not_before`/`not_after`
 de la futura clave.
 
-Referencia oficial: https://supabase.com/docs/guides/troubleshooting/permission-denied-when-deleting-the-cli_login-postgres-role-808bae
+Referencia oficial: https://supabase.com/docs/guides/troubleshooting/permission-denied-when-deleting-the-cli_login_postgres-role-808bae
