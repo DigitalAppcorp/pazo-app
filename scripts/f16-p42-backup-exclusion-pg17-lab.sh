@@ -107,9 +107,11 @@ SELECT (SELECT count(*) FROM supporter_private.p42_activation_signing_keys)::tex
  || '|' || (SELECT count(*) FROM pg_indexes
               WHERE schemaname='supporter_private'
                 AND indexname='p42_backup_child_note_idx')::text
- || '|' || (SELECT CASE WHEN has_table_privilege('PUBLIC',
-                   'supporter_private.p42_backup_benign_control','SELECT')
-                  THEN 't' ELSE 'f' END);
+ || '|' || (SELECT CASE WHEN EXISTS (
+   SELECT 1 FROM pg_class c CROSS JOIN LATERAL aclexplode(c.relacl) a
+   WHERE c.oid='supporter_private.p42_backup_benign_control'::regclass
+     AND a.grantee=0 AND a.privilege_type='SELECT'
+ ) THEN 't' ELSE 'f' END);
 SQL
 )"
 [[ "$actual" == "0|1|synthetic-business-data-survives|true|t|2|1|2|alpha|1|1|t" ]] || fail "RESTORE_FAILED"
