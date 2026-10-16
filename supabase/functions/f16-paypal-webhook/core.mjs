@@ -41,7 +41,8 @@ const reply=(status,code,retryAfter=null)=>new Response(JSON.stringify({code}),{
 export function createSafeF16WebhookHandler({environment,webhookId,planId,verifySignature,inbox,
   admissionGate=f16WorkerAdmissionGate,globalAdmission=null,
   disputeCaptureApproved=false,assessTrustedDisputeScope=null,
-  verifyDisputeRetentionRelease=null}={}) {
+  verifyDisputeRetentionRelease=null,
+  activationBindingEnabled=false,verifiedActivationRecorder=null}={}) {
   return async function handle(request) {
     if(request.method!=='POST') return reply(405,'method_not_allowed')
     // This F16 test integration is Sandbox-only until a separately approved Live gate.
@@ -147,11 +148,28 @@ export function createSafeF16WebhookHandler({environment,webhookId,planId,verify
       // Unknown, verified events are not business actions; do not persist their payload.
       if(!EVENT_TYPES.has(event.event_type)) return reply(200,'verified_unhandled_event')
       try {
-        // The inbox adapter MUST atomically persist (provider,eventId) or report a
-        // previously persisted duplicate. It MUST NOT credit a user or mutate profiles.
+        // Optional, UNRELEASED activation attribution. Never enabled by receiver
+        // composition without a separately approved private persistence RPC.
+        const activationBindingRequested=activationBindingEnabled===true &&
+          event.event_type==='BILLING.SUBSCRIPTION.ACTIVATED'
+        if(activationBindingRequested && (
+          typeof verifiedActivationRecorder?.bindVerifiedActivation!=='function' ||
+          typeof event.resource?.id!=='string' ||
+          !/^I-[A-Za-z0-9_-]{3,70}$/.test(event.resource.id)
+        )) return reply(503,'activation_binding_unavailable')
+        // First persist the signed event ID. If activation linkage fails, return
+        // retryable 503; a verified duplicate retries the linkage idempotently.
         const created=await inbox.insertIfAbsent({
           provider:'paypal',eventId:event.id,eventType:event.event_type,
         })
+        if(created!==true && created!==false)return reply(503,'inbox_not_durable')
+        if(activationBindingRequested){
+          const bound=await verifiedActivationRecorder.bindVerifiedActivation({
+            eventId:event.id,subscriptionId:event.resource.id,
+            origin:'postback_verified_sandbox_activation'
+          })
+          if(bound!==true)return reply(503,'activation_binding_unavailable')
+        }
         if(created===true) return reply(202,'verified_event_queued')
         if(created===false) return reply(200,'duplicate_verified_event')
         return reply(503,'inbox_not_durable')
