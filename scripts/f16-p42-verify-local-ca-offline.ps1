@@ -9,6 +9,7 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$stage = 'INPUT'
 
 try {
   if (-not [IO.Path]::IsPathFullyQualified($CaCertificatePath)) {
@@ -20,12 +21,14 @@ try {
   if ($info.Length -lt 100 -or $info.Length -gt 65536) { throw 'size' }
   if ($info.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'reparse' }
 
+  $stage = 'FILE_BYTES'
   $bytes = [IO.File]::ReadAllBytes($path)
   try {
     # Supabase provides a downloadable root CA certificate (PEM or DER).
     # Detect private-key material in any text certificate, fail closed.
     $asText = [Text.Encoding]::ASCII.GetString($bytes)
     if ($asText -match '-----BEGIN [^-]*PRIVATE KEY-----') { throw 'private' }
+    $stage = 'X509_DECODE'
     if ($asText -match '-----BEGIN CERTIFICATE-----') {
       if (([regex]::Matches($asText,'-----BEGIN CERTIFICATE-----')).Count -ne 1 -or
           ([regex]::Matches($asText,'-----END CERTIFICATE-----')).Count -ne 1) {
@@ -37,13 +40,16 @@ try {
     }
     try {
       if ($cert.HasPrivateKey) { throw 'private' }
+      $stage = 'DATE_VALIDITY'
       $now = [DateTime]::UtcNow
       if ($cert.NotBefore.ToUniversalTime() -gt $now -or
           $cert.NotAfter.ToUniversalTime() -le $now) { throw 'validity' }
+      $stage = 'CA_BASIC_CONSTRAINTS'
       $basic = $cert.Extensions |
         Where-Object { $_ -is [Security.Cryptography.X509Certificates.X509BasicConstraintsExtension] } |
         Select-Object -First 1
       if ($null -eq $basic -or -not $basic.CertificateAuthority) { throw 'not-ca' }
+      $stage = 'CA_KEY_USAGE'
       $keyUsage = $cert.Extensions |
         Where-Object { $_ -is [Security.Cryptography.X509Certificates.X509KeyUsageExtension] } |
         Select-Object -First 1
@@ -52,6 +58,7 @@ try {
             [Security.Cryptography.X509Certificates.X509KeyUsageFlags]::KeyCertSign)) {
         throw 'not-signing-ca'
       }
+      $stage = 'PASSED'
       Write-Output 'P42_LOCAL_CA_FILE_STRUCTURAL_PASS_OFFLINE'
       Write-Output 'P42_CA_PROVENANCE_AND_SERVER_TLS_VERIFY_FULL_NOT_CHECKED'
       Write-Output 'P42_HOSTED_DB_WRITE_UNVERIFIED_NO_PROVISIONING'
@@ -63,5 +70,5 @@ try {
   }
 } catch {
   # Errors deliberately omit path, certificate metadata and exception details.
-  throw 'P42_LOCAL_CA_FILE_CHECK_BLOCKED: invalid/unreadable/non-CA file; no network or database changes'
+  throw "P42_LOCAL_CA_FILE_CHECK_BLOCKED_$stage`: no network or database changes"
 }
