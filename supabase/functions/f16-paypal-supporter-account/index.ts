@@ -4,6 +4,7 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2'
 import {resolvePazoAccountOriginGate,withCors} from './accountOriginGateP18.mjs'
 import {createVerifiedAuthOwnerResolver} from '../f16-paypal-webhook/verifiedAuthOwner.mjs'
+import {selectP06AccountOrigin,createP06QaAccountOwnerResolver} from './p06QaAccountOrigin.mjs'
 import {createF16IntentStore} from '../f16-paypal-webhook/intentStoreAdapter.mjs'
 import {createF16GlobalAdmission} from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
 import {createPazoCheckoutConsentStore} from '../f16-paypal-webhook/p06CheckoutConsentStore.mjs'
@@ -23,11 +24,14 @@ const shouldRun=():boolean=>
  Deno.env.get('SUPABASE_URL')===BASE &&
  !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-function createRuntime(){
+function createRuntime(origin:string,qaOnly:boolean){
  const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
  const auth=createClient(BASE,key,{auth:{
   autoRefreshToken:false,persistSession:false}})
- const resolveAuthenticatedOwner=createVerifiedAuthOwnerResolver({authClient:auth})
+ const resolveAuthenticatedOwner=createP06QaAccountOwnerResolver({
+  resolveOwner:createVerifiedAuthOwnerResolver({authClient:auth}),
+  qaOnly,getEnv:(k:string)=>Deno.env.get(k),
+ })
  const limiter=createF16GlobalAdmission({projectUrl:BASE,serviceRoleKey:key})
  const admit=()=>limiter.tryAdmit()
  const privateIntentStore=createF16IntentStore({projectUrl:BASE,serviceRoleKey:key})
@@ -44,7 +48,7 @@ function createRuntime(){
  }
  const manage=createPazoSandboxSupporterAccountHandler({
   resolveAuthenticatedOwner,privateIntentStore,admit,provider,consentStore,
-  trustedOrigins:[Deno.env.get('PAZO_F16_APP_ORIGIN')!],
+  trustedOrigins:[origin],
  })
  return{key,resolveAuthenticatedOwner,admit,manage}
 }
@@ -66,7 +70,10 @@ async function listForOwner(ownerId:string,key:string){
   canDownloadAcceptance:x.canDownloadAcceptance}))
 }
 Deno.serve(async(request:Request)=>{
- const gate=resolvePazoAccountOriginGate(request,Deno.env.get('PAZO_F16_APP_ORIGIN'))
+ const {configuredOrigin,qaOnly}=selectP06AccountOrigin({
+  request,getEnv:(k:string)=>Deno.env.get(k),
+ })
+ const gate=resolvePazoAccountOriginGate(request,configuredOrigin)
  if(gate.response)return gate.response
  const cors=gate.cors!
  const addCors=(res:Response)=>withCors(res,cors)
@@ -89,7 +96,7 @@ Deno.serve(async(request:Request)=>{
     typeof data.action!=='string')
   return addCors(reply(400,'invalid_request'))
  let runtime
- try{runtime=createRuntime()}catch{return addCors(reply(503,'account_service_unavailable'))}
+ try{runtime=createRuntime(configuredOrigin!,qaOnly)}catch{return addCors(reply(503,'account_service_unavailable'))}
  if(data.action==='list'){
   if(Object.keys(data).join(',')!=='action')
    return addCors(reply(400,'invalid_request'))
