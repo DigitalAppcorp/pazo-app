@@ -15,6 +15,7 @@ CREATE TABLE supporter_private.p42_lab_activation_signing_keys(
  key_id text PRIMARY KEY CHECK(key_id='LAB_V1'),
  key_bytes bytea NOT NULL CHECK(pg_catalog.octet_length(key_bytes)>=32),
  enabled boolean NOT NULL DEFAULT false,
+ not_before timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
  rotated_at timestamptz
 );
 ALTER TABLE supporter_private.p42_lab_activation_signing_keys ENABLE ROW LEVEL SECURITY;
@@ -31,6 +32,7 @@ AS $fn$
 DECLARE v_secret bytea; v_expected text; v_owner uuid; v_count integer;
         v_inserted boolean; v_match boolean;
         v_issued_at timestamptz; v_message text; v_hmac_schema text;
+        v_provider_cutoff timestamptz;
 BEGIN
  IF p_event_id IS NULL OR p_event_id !~ '^[A-Za-z0-9._-]{3,128}$'
  OR p_subscription_id IS NULL OR p_subscription_id !~ '^I-[A-Za-z0-9_-]{3,70}$'
@@ -44,7 +46,7 @@ BEGIN
  IF pg_catalog.abs(pg_catalog.date_part('epoch',
  (pg_catalog.clock_timestamp()-v_issued_at)))>120
  THEN RETURN false; END IF;
- SELECT k.key_bytes INTO v_secret
+ SELECT k.key_bytes,k.not_before INTO v_secret,v_provider_cutoff
  FROM supporter_private.p42_lab_activation_signing_keys k
  WHERE k.key_id=p_key_id AND k.enabled=true;
  IF v_secret IS NULL THEN RETURN false; END IF;
@@ -68,7 +70,7 @@ BEGIN
  IF v_count<>1 THEN RETURN false; END IF;
  IF NOT EXISTS(SELECT 1 FROM supporter_private.paypal_verified_event_inbox e
  WHERE e.provider_event_id=p_event_id AND e.event_type='BILLING.SUBSCRIPTION.ACTIVATED'
- AND e.verified_at IS NOT NULL AND e.retention_hold=true)
+ AND e.verified_at>=v_provider_cutoff AND e.retention_hold=true)
  THEN RETURN false; END IF;
  INSERT INTO supporter_private.paypal_verified_activation_bindings
  (provider_event_id,subscription_id,owner_id)
