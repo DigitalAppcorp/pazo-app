@@ -108,3 +108,11 @@ Aprobar una **provisión futura** solo cuando se registren:
 - La organización PAZO está en plan Free; la aplicación obligatoria de MFA a nivel organización solo está disponible en Pro/Team/Enterprise y **no se recomienda subir de plan** para este gate. MFA individual sí puede configurarse sin ese cambio. Referencias: https://supabase.com/docs/guides/platform/multi-factor-authentication y https://supabase.com/docs/guides/platform/mfa/org-mfa-enforcement
 - **Siguiente dependencia humana:** PO configura y verifica MFA en la cuenta Owner; después se revisa custodia DB TLS parametrizada y revocación real set/unset con operación privada, sin crear secreto real ni de prueba en este paso.
 - Estado: `P42_OWNER_UI_CONFIRMED_MFA_PENDING_NO_PROVISIONING`; F16 NO-GO, PR #44 Draft, writer/worker/checkout/pagos OFF.
+
+## 9. Evidencia visual posterior de MFA primario (2026-10-16)
+
+- PO aportó nueva captura de **Supabase Account → Security**, con **Google Authenticator** registrado como factor TOTP. **EVIDENCIA VISUAL PASS — MFA PRIMARIO REGISTRADO**. La captura no documenta una autenticación de inicio de sesión con desafío MFA ni acredita un segundo factor.
+- La advertencia de Supabase invita a registrar **Add another app** para evitar bloqueo permanente. **Factor de respaldo: PENDIENTE**. Recomendar un segundo dispositivo o aplicación diferente; nunca publicar el QR, token de configuración, código TOTP o capturas de ellos.
+- El estado histórico de `MFA=X` en la captura previa del equipo es anterior a este alta. No inferir que la organización exige MFA: el plan Free no permite imponerlo globalmente. Tampoco tratar la presencia de botones como prueba de escritura de secretos.
+- **Próximo gate:** PO verifica segundo factor TOTP y conserva acceso; equipo técnico continúa solo con revisión de mecanismos de custodia, expiración, backups y revocación, sin claves. Todos los controles financieros y P42 permanecen OFF.
+- Marcador: `P42_OWNER_MFA_PRIMARY_UI_PASS_BACKUP_PENDING_NO_PROVISIONING`.
