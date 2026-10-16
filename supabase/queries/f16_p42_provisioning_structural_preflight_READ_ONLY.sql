@@ -38,7 +38,8 @@ BEGIN
  IF NOT EXISTS (
  SELECT 1 FROM pg_catalog.pg_proc p
  WHERE p.oid='public.f16_p42_register_authenticated_activation(text,text,text,uuid,text,text)'::regprocedure
- AND p.prosecdef AND 'search_path=' = ANY(p.proconfig))
+ AND p.prosecdef AND ('search_path=' = ANY(p.proconfig)
+ OR 'search_path=""' = ANY(p.proconfig)))
  THEN RAISE EXCEPTION 'P42 RPC definer/search_path drifted' USING ERRCODE='42501'; END IF;
  IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_extension WHERE extname='pgcrypto')
  THEN RAISE EXCEPTION 'P42 required pgcrypto absent' USING ERRCODE='55000'; END IF;
