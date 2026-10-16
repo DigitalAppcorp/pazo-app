@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
+import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
 
 type Account = {
   intentId: string
@@ -22,6 +23,7 @@ const intentPattern = /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-
 export function SupporterAccountManagement({lang, onClose}: Props) {
   const [accounts, setAccounts] = useState<Account[] | null>(null)
   const [busy, setBusy] = useState(false)
+  const [showSandboxQa, setShowSandboxQa] = useState(false)
   const [error, setError] = useState(false)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
@@ -149,6 +151,16 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
           {label('PAZO continúa siendo gratis. El estado de PayPal no confirma un período pagado ni concede beneficios.',
             'PAZO remains free. PayPal status does not establish a paid period or grant benefits.')}
         </p>
+        {import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' && (
+          <div className="space-y-3">
+            <button type="button" onClick={()=>setShowSandboxQa(v=>!v)}
+              className={control}>
+              {label(showSandboxQa?'Cerrar prueba Sandbox':'Abrir prueba Sandbox',
+                showSandboxQa?'Close Sandbox test':'Open Sandbox test')}
+            </button>
+            {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
+          </div>
+        )}
         {error && (
           <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
             {label('No pudimos confirmar la operación en el servidor. No se ha mostrado ningún cambio como completado.',
