@@ -297,3 +297,7 @@ jobs:
 
       - name: P28 two-session atomic historical audit consumption
         run: node scripts/f16-p28-single-use-concurrency.mjs
+
+      - name: P28 SQL HMAC event-binding adversarial test in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_hmac_sql_binding_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-hmac-sql-binding-postgres-synthetic.sql
