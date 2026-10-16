@@ -29,6 +29,10 @@ test('P37 private reader passes only event and lease token to exact server RPC',
    calls.push({url,init})
    return {ok:true,json:async()=>proof()}
   }})
+ assert.deepEqual(r.preflight(),{
+  enabled:true,host:true,keyType:true,keyLength:true,
+  keyWhitespace:true,transport:true,ready:true,
+ })
  assert.deepEqual(await r.readClaimedActivation(params),proof())
  assert.equal(calls.length,1)
  assert.equal(calls[0].url,HOST+'/rest/v1/rpc/f16_p37_lab_read_claimed_activation')
