@@ -93,8 +93,13 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
         (list.total_items!==undefined &&
           list.total_items!==list.transactions.length))
         throw Error('incomplete_transaction_history')
+      // PayPal documents these totals as OPTIONAL. Absent totals are not an
+      // error, but they cannot establish an exhaustive transaction history.
       const paginationMetadataComplete=
         list.total_pages!==undefined && list.total_items!==undefined
+      const paginationEvidence=paginationMetadataComplete
+        ? 'single_page_totals_consistent'
+        : 'provider_totals_absent_review_required'
       // Provider statements must never contain conflicting or ambiguous IDs.
       // Dropping a duplicate silently could make a sale appear valid.
       const ids=list.transactions.map(tx=>tx?.id)
@@ -106,6 +111,8 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
         lookupSubscriptionId:subscriptionId,
         merchantScopedByPayPalApi:true, // evidence of successful merchant-app scoped reads, NOT paid-period proof
         paginationMetadataComplete,
+        paginationEvidence,
+        requiresIndependentHistoryCoverage:!paginationMetadataComplete,
         globalFinancialCoverage:false,
         mayGrantBenefits:false,
         subscription:{id:subscription.id,plan_id:subscription.plan_id,
