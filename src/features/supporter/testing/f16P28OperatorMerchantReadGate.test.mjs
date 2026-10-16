@@ -6,7 +6,7 @@ const data={eventId:'WH-P28-001',claimToken:'22222222-2222-4222-8222-22222222222
 const request=(token=key,body=data)=>new Request('https://example.invalid/admin',{method:'POST',headers:{
  authorization:'Bearer '+token,'content-type':'application/json'
 },body:JSON.stringify(body)})
-const deps=()=>{let calls=0;return {get calls(){return calls},readLeasedEvent:async()=>{calls++;return {
+const deps=()=>{let calls=0;return {get calls(){return calls},resolvePrivateBinding:async()=>{calls++;return {intentId:'intent-77777777-7777-4777-8777-777777777777',subscriptionId:'I-P28-ONE',planId:'P-14V25407JP6850922NLHMDKI',state:'bound',ownerId:'11111111-1111-4111-8111-111111111111'}},readLeasedEvent:async()=>{calls++;return {
  id:data.eventId,type:'PAYMENT.SALE.COMPLETED',processingState:'processing',liveLease:true,prospective:true}},
  merchantReader:{getMerchantEvent:async()=>{calls++;return {id:data.eventId,resource:{billing_agreement_id:'I-P28-ONE'}}},
  getMerchantSubscription:async()=>{calls++;return {id:'I-P28-ONE',custom_id:'intent-77777777-7777-4777-8777-777777777777',plan_id:'P-14V25407JP6850922NLHMDKI'}}}}}
@@ -25,7 +25,7 @@ test('missing trusted claim adapter fails closed',async()=>{
 test('read-only correlation emits no identifiers',async()=>{
  const d=deps(),h=create({...d,enabled:true,operatorKey:key})
  const res=await h(request());assert.equal(res.status,200);await safe(res)
- assert.equal(d.calls,3)
+ assert.equal(d.calls,4)
 })
 test('invalid lease, foreign sale, bad parameters refuse',async()=>{
  const d=deps()
@@ -52,4 +52,23 @@ test('merchant subscription lacking intended plan or custom intent never passes'
   })(request())
   assert.equal(r.status,409);await safe(r)
  }
+})
+
+test('private binding missing, foreign owner or intent prevents success',async()=>{
+ for(const invalid of [null,{},{
+   intentId:'intent-foreignforeignforeign',subscriptionId:'I-P28-ONE',
+   planId:'P-14V25407JP6850922NLHMDKI',state:'bound',
+   ownerId:'11111111-1111-4111-8111-111111111111'
+  },{
+   intentId:'intent-77777777-7777-4777-8777-777777777777',
+   subscriptionId:'I-P28-ONE',planId:'P-14V25407JP6850922NLHMDKI',
+   state:'bound',ownerId:'not-an-owner'
+  }]){
+  const r=await create({...deps(),enabled:true,operatorKey:key,
+   resolvePrivateBinding:async()=>invalid})(request())
+  assert.equal(r.status,409);await safe(r)
+ }
+ const r=await create({...deps(),enabled:true,operatorKey:key,
+  resolvePrivateBinding:undefined})(request())
+ assert.equal(r.status,503);await safe(r)
 })
