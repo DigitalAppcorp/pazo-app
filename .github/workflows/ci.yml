@@ -290,3 +290,7 @@ jobs:
       - name: P28 audited historical exact-ID read in disposable PG17
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_candidate_exact_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audited-read-postgres-synthetic.sql
+
+      - name: P28 atomic single-use historical audit in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_single_use_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-single-use-postgres-synthetic.sql
