@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {createP37ActivationEventReader} from '../../../../supabase/functions/f16-paypal-webhook/p37ActivationEventReader.mjs'
 const args={activationEventId:'WH-P37-ACT',activationClaimToken:'11111111-1111-4111-8111-111111111111',subscriptionId:'I-P37-TEST'}
-const claim={id:args.activationEventId,type:'BILLING.SUBSCRIPTION.ACTIVATED',processingState:'processing',subscriptionId:args.subscriptionId,signatureVerified:true,source:'verified_inbox_claim',leaseCurrent:true}
+const claim={id:args.activationEventId,type:'BILLING.SUBSCRIPTION.ACTIVATED',processingState:'processing',subscriptionId:args.subscriptionId,source:'p40_inbox_binding_claim',leaseCurrent:true}
 test('disabled-by-default activation reader has no side effects',async()=>{
  let calls=0
  const read=createP37ActivationEventReader({readClaimedActivation:async()=>{calls++},getAccessToken:async()=>{calls++}})
@@ -16,7 +16,7 @@ test('isolated merchant GET requires independently claimed activation',async()=>
  assert.equal(fetched,1)
 })
 test('unsigned, mismatched or stale activation claim denies before merchant GET',async()=>{
- for(const bad of [{...claim,signatureVerified:false},{...claim,subscriptionId:'I-OTHER'},{...claim,processingState:'pending'}]){
+ for(const bad of [{...claim,source:'caller_claimed_signature'},{...claim,signatureVerified:true},{...claim,subscriptionId:'I-OTHER'},{...claim,processingState:'pending'},{...claim,leaseCurrent:false}]){
   let called=0
   const read=createP37ActivationEventReader({enabled:true,readClaimedActivation:async()=>bad,getAccessToken:async()=>{called++},fetchImpl:async()=>{called++}})
   assert.equal(await read(args),null);assert.equal(called,0)
