@@ -1,8 +1,8 @@
 // PAZO F16-P43 — one authorized ephemeral CLI login and one P42 READ-ONLY SQL.
 // NEVER print raw CLI/psql output or a password. Never execute CLI output.
 import { spawnSync } from 'node:child_process';
-import { existsSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
+import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PROJECT = 'mrybvqdebbgcayuvgkkr';
@@ -79,6 +79,34 @@ function run() {
   const sqlHash = execute('git', ['hash-object', '--path', REL_SQL, SQL]);
   if (!sqlHash.ok || sqlHash.stdout.trim() !== SQL_BLOB) {
     console.log('P43_BLOCKED_SQL_BLOB_MISMATCH');
+    return 2;
+  }
+  // Validate tool versions against the tested local baseline before requesting
+  // any provider credential. These metadata commands do not contact the DB.
+  const cliVersion = execute('supabase', ['--version'], {
+    shell: process.platform === 'win32',
+  });
+  const pgVersion = execute('psql', ['--version']);
+  if (!cliVersion.ok || !/(^|\s)2\.121\.0(\s|$)/.test(cliVersion.stdout.trim()) ||
+    !pgVersion.ok || !/\b17\.11\b/.test(pgVersion.stdout)) {
+    console.log('P43_BLOCKED_LOCAL_TOOL_VERSION_DRIFT');
+    return 2;
+  }
+  // One authorized attempt: durable local marker is created EXCLUSIVELY,
+  // BEFORE CLI is invoked. Never delete/retry it without new PO approval.
+  if (!process.env.LOCALAPPDATA) {
+    console.log('P43_BLOCKED_NO_LOCALAPPDATA');
+    return 2;
+  }
+  const lockDir = join(process.env.LOCALAPPDATA, 'PAZO', 'CodexOps');
+  mkdirSync(lockDir, { recursive: true });
+  const attemptLock = join(lockDir, 'p43-ephemeral-readonly-one-attempt-20261016.lock');
+  try {
+    writeFileSync(attemptLock, 'P43_ATTEMPT_CLAIMED_NO_SECRETS\n', {
+      encoding: 'utf8', flag: 'wx', mode: 0o600,
+    });
+  } catch {
+    console.log('P43_BLOCKED_ONE_ATTEMPT_ALREADY_CLAIMED');
     return 2;
   }
   // Exactly ONE authorized provider credential request, possibly creating
