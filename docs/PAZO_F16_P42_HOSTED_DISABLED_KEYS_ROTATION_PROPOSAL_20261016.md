@@ -23,6 +23,9 @@ No está en `supabase/migrations/`; NO EJECUTAR en hosted sin nuevo GO.
 - Tabla privada `supporter_private.p42_activation_writer_gate`:
   fila única `id=1`, `enabled=false`, `not_before=NULL`.
   RLS FORCE y REVOKE ALL.
+- El MAC incluye un **dominio literal `p42|sandbox|`**, separando entornos;
+  no reutilizar la misma clave en Sandbox y Live. La futura firma
+  del runtime debe coincidir exactamente con este contrato.
 - `public.f16_p42_register_authenticated_activation(...)`:
   SECURITY DEFINER con search_path vacío y mínimos argumentos; acepta
   solo evento de activación, sucripción BOUND del plan correcto, origen
