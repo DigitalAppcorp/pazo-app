@@ -11,7 +11,7 @@ export function createP28HistoricalReviewAssembly({
  const scope=enabled?'SERVER_ONLY_HISTORICAL_REVIEW':'DISABLED'
  const fingerprintEvent=createP28EventFingerprint({secret:hmacSecret,cryptoImpl})
  const recordAudit=createP28HostedAuditWriter({projectUrl,serviceRoleKey,fetchImpl,scope})
- const readCandidate=createP28HistoricalHostedReader({projectUrl,serviceRoleKey,fetchImpl,scope})
+ const readCandidate=createP28HistoricalHostedReader({projectUrl,serviceRoleKey,fetchImpl,scope,fingerprintEvent})
  const auditedRead=createP28AuditedCandidateReader({fingerprintEvent,recordAudit,readCandidate})
  return createP28HistoricalCandidateInventory({enabled,operatorKey,readCandidate:auditedRead})
 }
