@@ -6,6 +6,15 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P38/P39 — FIRMA WEBHOOK → VÍNCULO DE ACTIVACIÓN (2026-10-15; LAB, NO-GO HOSTED)
+
+- **PO:** pidió continuar todos los gates técnicos hasta requerir su intervención, sin activar cobros y con P28 diferido.
+- **CI PG17 P38:** commit `e3acc94`, general SUCCESS #38855128883, PostgreSQL SUCCESS #38855128862. Tabla/RPC experimental liga evento activación↔suscripción↔owner con lease/cutoff P21, RLS FORCE y rechazos cross-owner.
+- **P39:** `core.mjs` ahora ofrece una opción `activationBindingEnabled=false` (valor predeterminado) que solo usa `event.resource.id` DESPUÉS de PayPal postback verificado; persiste primero el inbox, después la vinculación; 503/retry cuando falla, incluso si el evento ya estaba en inbox. El receiver alojado NO activa ni importa la nueva ruta.
+- **Laboratorio:** P39 RPC `f16_p39_lab_register_signed_activation` idempotente, no concedente, con propietario y suscripción de intent BOUND; adaptador HTTP privado `p39ActivationInboxAdapter.mjs` deshabilitado por defecto. Pruebas negativas: firma rechazada, token de origen inventado, evento distinto, reasignación cross-subscriber, falla RPC, replay y sin pagos. P39 CI general y PG17 SUCCESS en `5ce9a3a` (run #38855852925, #38855852867); resultados posteriores por confirmar si existen.
+- **Límite crítico:** cadena de origen desde el webhook verificado al RPC sigue confiando en el servicio privilegiado; PostgreSQL NO verifica por sí mismo la firma del PayPal webhook ni un GET Merchant. La etiqueta de procedencia no es prueba criptográfica autónoma. Es necesario aprobar política de retención y revisar permisos antes de DDL.
+- **Siguiente autorización PO necesaria:** revisión de términos ES/EN P06, cancelación y confirmación conservable; GO separado para la migración alojada específica de vinculación (todavía no instalada), GO separado para reconfigurar Edge, y GO financiero para buyer nuevo/worker/ledger. No inferirlo de `ok go`. Actualmente P21 gate OFF, inbox histórico intacto, pagos 0, P38/39 NO instalados en hosted y PR #44 DRAFT.
+
 ## F16-P25 — PRIMERA OBLIGACIÓN: RESERVA DE REVISIÓN ÚNICA, NO CONTABILIZACIÓN (2026-10-15)
 
 - **PO «ok siguamos»:** continuar implementación técnica F16; sin autorización de DDL alojada P25, activación de gate P21, comprador/cobro de PayPal, merchant live, términos publicados ni beneficios. PR #44 DRAFT. Previews automáticos permitidos.
