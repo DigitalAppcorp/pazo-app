@@ -281,6 +281,10 @@ jobs:
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p38_verified_activation_binding_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p38-activation-binding-postgres-synthetic.sql
 
+      - name: P39 trusted activation ingress registration and anti-reassignment (PG17 only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p39_signed_activation_ingress_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p39-signed-activation-ingress-postgres-synthetic.sql
+
       - name: P28 minimal administrative audit transaction tests in disposable PostgreSQL
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_audit_ledger_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audit-postgres-synthetic.sql
