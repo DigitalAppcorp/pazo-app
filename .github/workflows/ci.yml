@@ -289,6 +289,10 @@ jobs:
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p40_private_activation_storage_hosted_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p40-private-activation-storage-postgres-synthetic.sql
 
+      - name: P42 authenticated activation HMAC ingress and key isolation (PG17 only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p42_hmac_scoped_activation_ingress_pg17_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p42-hmac-activation-ingress-postgres-synthetic.sql
+
       - name: P28 minimal administrative audit transaction tests in disposable PostgreSQL
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_audit_ledger_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audit-postgres-synthetic.sql
