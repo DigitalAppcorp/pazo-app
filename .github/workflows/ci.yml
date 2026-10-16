@@ -79,6 +79,50 @@ jobs:
           }
           Write-Output 'P42 real backup pg_dump argument guard PASS (static; no database accessed)'
 
+      - name: P42 CA offline structural validator - synthetic X509 only
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $rsa = [Security.Cryptography.RSA]::Create(2048)
+          $request = [Security.Cryptography.X509Certificates.CertificateRequest]::new(
+            'CN=PAZO ephemeral CI test CA',
+            $rsa,
+            [Security.Cryptography.HashAlgorithmName]::SHA256,
+            [Security.Cryptography.RSASignaturePadding]::Pkcs1
+          )
+          $request.CertificateExtensions.Add(
+            [Security.Cryptography.X509Certificates.X509BasicConstraintsExtension]::new($true,$false,0,$true)
+          )
+          $request.CertificateExtensions.Add(
+            [Security.Cryptography.X509Certificates.X509KeyUsageExtension]::new(
+              [Security.Cryptography.X509Certificates.X509KeyUsageFlags]::KeyCertSign,$true
+            )
+          )
+          $cert = $request.CreateSelfSigned([DateTimeOffset]::UtcNow.AddHours(-1),[DateTimeOffset]::UtcNow.AddHours(24))
+          try {
+            $caPath = Join-Path $env:RUNNER_TEMP 'p42-synthetic-ca.pem'
+            [IO.File]::WriteAllText($caPath, $cert.ExportCertificatePem())
+            $status = @(& ./scripts/f16-p42-verify-local-ca-offline.ps1 -CaCertificatePath $caPath)
+            if ($status[0] -ne 'P42_LOCAL_CA_FILE_STRUCTURAL_PASS_OFFLINE' -or
+                $status[1] -ne 'P42_CA_PROVENANCE_AND_SERVER_TLS_VERIFY_FULL_NOT_CHECKED' -or
+                $status[2] -ne 'P42_HOSTED_DB_WRITE_UNVERIFIED_NO_PROVISIONING') {
+              throw 'P42 offline CA validator status mismatch'
+            }
+            $invalidPath = Join-Path $env:RUNNER_TEMP 'p42-synthetic-invalid.pem'
+            [IO.File]::WriteAllText($invalidPath,'not a certificate')
+            $rejected = $false
+            try {
+              & ./scripts/f16-p42-verify-local-ca-offline.ps1 -CaCertificatePath $invalidPath | Out-Null
+            } catch {
+              $rejected = $_.Exception.Message -match 'P42_LOCAL_CA_FILE_CHECK_BLOCKED'
+            }
+            if (-not $rejected) { throw 'P42 validator did not reject invalid file' }
+            Write-Output 'P42_CA_STRUCTURAL_CHECK_CI_SYNTHETIC_PASS_NO_NETWORK'
+          } finally {
+            $cert.Dispose()
+            $rsa.Dispose()
+          }
+
       - name: Lint (legacy debt is currently non-blocking)
         continue-on-error: true
         run: npm run lint
