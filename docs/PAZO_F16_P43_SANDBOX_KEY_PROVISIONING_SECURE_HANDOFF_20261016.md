@@ -1,5 +1,7 @@
 # PAZO F16-P43 — provisión de clave Sandbox: handoff seguro para ejecución con gestor de secretos
 
+> **ACTUALIZACIÓN 2026-10-16 — BLOQUEO VIGENTE.** La autorización histórica descrita abajo NO se debe ejecutar con el permiso de preparación actual. El PO aprobó una **vigencia futura de 24 horas** pero ordenó expresamente **no generar ni provisionar** la clave hasta superar un nuevo gate de verificación. Los dos destinos fueron identificados y la política propuesta de custodia, inicio UTC, expiración y revocación está en [P42 gate 24h](PAZO_F16_P42_24H_CUSTODY_EXPIRY_REVOCATION_GATE_20261016.md). Mantener P42 writer, P21 worker, checkout, ledger, beneficios y permisos EXECUTE apagados. La provisión requerirá nuevo GO inequívoco.
+
 **16-oct-2026.** El Product Owner autorizó expresamente generar y provisionar
 una clave aleatoria REAL **exclusivamente para Sandbox** en PostgreSQL
 y en el almacén privado de secretos de Supabase Edge, manteniendo
