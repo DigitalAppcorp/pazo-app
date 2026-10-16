@@ -1,3 +1,17 @@
+# PAZO F16 — Gate de ejecución prospectiva (2026-10-16)
+
+**Hallazgo central:** la suscripción histórica excluida por P05 no es idéntica a la compra QA de P44. El entorno alojado **sí** contiene 2 ofertas ES/EN publicadas `pazo-supporter-sandbox.qa20261016-v1` y 1 aceptación P06 con SHA y provider-create claim. Pero **los términos QA aceptados excluyen cualquier período pagado o beneficio**, no adoptan la fórmula prospectiva de servicio. No negar el consentimiento QA; conservarlo como evidencia de seguridad y PayPal, sin acreditar `paidThrough`.
+
+**Contrato de ejecución documentado y fuente prioritaria:** `docs/PAZO_F16_P44_MERCHANT_COVERAGE_REUSE_GATE_20261016.md`, sección `Gate de ejecución prospectiva P44→P26` añadida en commit `8a74e522`. Reutilizar `p05ProspectiveEvidenceContractLab.mjs`, `p26OfflineProvenanceGate.mjs`, `p27OfflineProvenanceReview.mjs` y suites existentes; no recrearlos. Son laboratorios NO autenticadores. La prueba P44 v2 `merchant_refs_correlated_pagination_incomplete` conserva evidencia de sale/intent, pero nunca crea período ni contrato prospectivo.
+
+**Inventario confirmado read-only en Supabase:** P22 RPC instalada; P28 audit RPC instalada; P42 RPC instalada pero no habilitada; P24/P25/P26 RPC y tablas P25/P26 ausentes. P21 worker OFF; P42 writer OFF; ledger/reversals/P40/P42 keys = 0. Webhook v18 carece de eventos `CUSTOMER.DISPUTE.*`. 2 intents bound, 12 eventos inbox, 2 ofertas publicadas QA, 1 checkout con consentimiento/hashing. No hubo PayPal GET nuevos, compras, Edge deploy, SQL de escritura, ni alteración financiera.
+
+**Punto pendiente realmente bloqueante:** fuente auténtica `provider plan/activation/sale/transaction window` y manejo de refunds/disputas **as-of + compensación futura** bajo retención/scope aprobados; aceptación de términos **de servicio** previo a primer cargo prospectivo. Una ausencia de disputas futuras es imposible de certificar en el presente: documentada propuesta de ventana `coverageAsOf` + monitoreo y reversos idempotentes, **NO aprobada**. No aceptar snapshot vacío como certificación global. La función diagnóstica v2 expira el 2026-10-17T00:00:00Z; no repetirla ni extenderla.
+
+**Siguiente gate:** preparar política de retención/alcance de disputas y contrato ES/EN prospectivo antes de cualquier integración financiera alojada, y validar adaptadores existentes mediante ensayos dirigidos. Se precisa GO separado para cualquier SQL, captura/Edge, worker, prueba nueva, ledger, beneficios o Live. PR #44 DRAFT, F16 NO-GO.
+
+---
+
 # F16-P44 — Auditoría de fuentes y cobertura 2026-10-16
 
 **Resultado:** `REVIEW_REQUIRED` conservado; no nuevos lectores, no nuevos tests duplicados, no nuevos GET PayPal, no invocar P44 otra vez. **Informe canónico actual:** [`docs/PAZO_F16_P44_MERCHANT_COVERAGE_REUSE_GATE_20261016.md`](PAZO_F16_P44_MERCHANT_COVERAGE_REUSE_GATE_20261016.md).
