@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — VERCEL NO VERIFICADO, NODE/NPX COMO ALTERNATIVA A SCOOP (2026-10-16)
+
+- Codex reportó segundo inventario local: `NODE=AVAILABLE`, `NPM=AVAILABLE`, `SCOOP=MISSING`, `PSQL=MISSING`, `SUPABASE_CLI=MISSING`, `VERCEL_SESSION=NOT_VERIFIED`, `VERCEL_DIGITALAPP_TEAM=NOT_CHECKED`. Reportó `PREREQUISITOS_20261016.txt` solo en Windows; no se abrió en ChatGPT. `NOT_VERIFIED` **no** prueba falta de login: causa no observada.
+- Script `scripts/f16-p43-next-prereqs-readonly.ps1` actualizado para `NODE_MAJOR`, `SUPABASE_NPX_ELIGIBLE`, `VERCEL_SESSION_REASON` y `VERCEL_TEAM_REASON`: clasificación de fallos Vercel sin revelar CLI raw stdout/stderr, email ni tokens. No autenticación, links, env, instalaciones ni cambios hosted.
+- Si Node >=20, la opción oficial CLI para operador es `npx --yes supabase --help` / `npx --yes supabase db dump --help`, que pueden descargar paquete a cache local con permiso del usuario, pero no contactan DB ni emiten credenciales. `npm install -g supabase` no está soportado; no ejecutar `db dump --dry-run` hasta nuevo gate. `psql` sigue ausente.
+- Guía: `docs/PAZO_F16_P43_VERCEL_NOT_VERIFIED_NODE_NPX_GATE_20261016.md`. Si `LOGIN_REQUIRED_OR_EXPIRED`, usuario inicia sesión Vercel de forma privada; si `FORBIDDEN_OR_SCOPE`, falta autorización al team. No leer variables Vercel hasta acceso explícito.
+- P43 NO-GO para clave real, JIT/rol temporal, reset DB, grant, Edge, worker, PayPal/checkout y finanzas. Fechas `not_before`/`not_after` aún no definidas. PR #44 DRAFT, P28 diferido.
+
 ## F16-P43 — INVENTARIO WINDOWS RECIBIDO / VERIFICACIÓN VERCEL PENDIENTE (2026-10-16)
 
 - Codex reportó inventario local: `supabase=NOT_INSTALLED`, `psql=NOT_INSTALLED`, `vercel=INSTALLED 63.1.2`, sin `database.credential.xml` ni `connection.json`. Reportó ruta `INVENTARIO_20261016.txt` LOCAL que no fue abierta por ChatGPT. No se puede inferir autenticación DB o acceso al equipo Vercel de tener el CLI instalado.
