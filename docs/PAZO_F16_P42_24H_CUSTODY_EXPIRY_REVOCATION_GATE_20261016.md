@@ -83,7 +83,7 @@ Aprobar una **provisión futura** solo cuando se registren:
 - [ ] Canal privado real de escritura y eliminación Edge + DB, TLS verificado, cero args/logs/SQL Editor con secretos.
 - [ ] Política verificada de backups, snapshots, auditoría y recuperación ante compromiso; aceptación expresa de exposición residual.
 - [ ] Semántica `T0` y `not_after=T0+24h` aprobadas por PO; fecha UTC solo se concreta al ejecutar bajo nuevo GO.
-- [ ] Revocación **manual supervisada** aprobada; custodio y respaldo designados, disponibilidad confirmada para `Texp=T0+24h`, permisos de retiro Edge/DB verificados, alarma opcional y secuencia ensayada en sintético. No existe mecanismo de auto-borrado aprobado.
+- [ ] Revocación **manual supervisada** aprobada y custodio PO designado; bajo el modelo sin suplente, recuperación de acceso por el propio PO, disponibilidad confirmada para `Texp=T0+24h`, permisos Edge/DB verificados, riesgo de indisponibilidad humana expresamente aceptado en gate separado, y ensayos de retirada. Alarma opcional no borra secretos.
 - [ ] Postflight específico metadata-only para fila `P42_V1` apagada y secret Edge presente; posterior cleanup verificado en ambos destinos.
 - [ ] Confirmación fresca de preflight vacío y sin drift antes de cualquier nueva mutación.
 - [ ] Autorización PO independiente, inequívoca, **para generar/provisionar `P42_V1` y revocarla** en los dos destinos, y ninguna otra operación.
@@ -157,3 +157,17 @@ Aprobar una **provisión futura** solo cuando se registren:
 **Estado del gate:** `P42_MANUAL_OPERATOR_CHANNEL_AND_BACKUP_PREFLIGHT_NO_GO`. Siguiente decisión humana mínima: confirmar custodio principal; después suplente y metodología de backups/canal privado, siempre antes de solicitar cualquier GO de provisión.
 
 **Checkpoint 2026-10-16:** designación voluntaria del Product Owner como custodio principal **PASS de decisión**; suplente **pendiente**. Ningún dato bancario/credencial compartido; no se creó secreto ni se fijó fecha de provisión. El criterio `P42_MANUAL_OPERATOR_CHANNEL_AND_BACKUP_PREFLIGHT_NO_GO` sigue vigente hasta pruebas privadas de canales, backups, aceptación suplente y nuevo GO de provisión.
+
+## 13. Decisión PO: alternativa sin suplente humano con acceso (2026-10-16)
+
+**Se eligió preparar una alternativa con custodio único: solo el Product Owner tendrá acceso administrativo y será quien realice la revocación manual supervisada.** No invitar a otra persona ni compartir credenciales. Contrato específico: `docs/PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md`.
+
+Esta sección **sustituye los requisitos históricos de designar obligatoriamente un segundo custodio humano** para el diseño elegido, pero no resuelve la disponibilidad. La doble MFA del titular puede ayudar a recuperar acceso si usa medios independientes, pero no reemplaza a un operador ausente. Con retiro exclusivamente manual, **no existe garantía de eliminación física puntual a las 24 horas si el PO no puede actuar**. El secreto tampoco desaparece automáticamente mediante `not_after`.
+
+**Preparación permitida:** revisión de recuperación de la cuenta Owner, pruebas privadas/sintéticas de las dos vías de retirada, respaldo sin copiar `key_bytes`, ventanas horarias prospectivas y eventual recordatorio aprobado cuando T0 exista. Mantener `P42_V1.enabled=false`, writer P42 OFF, worker P21 OFF, EXECUTE denegado y ninguna operación financiera.
+
+**Provisión aún NO-GO:** además de las pruebas de canal y backups, requiere consentimiento PO futuro **separado** que reconozca específicamente el riesgo de revocación tardía sin suplente, fijar futura ventana de 24 horas y disponibilidad comprobada del titular. Si el PO prevé no poder atender el vencimiento, **no generar ni provisionar**. Si falla la eliminación, `P42_MANUAL_REVOCATION_OVERDUE_BLOCKED` y no declarar limpieza.
+
+No se crearon secretos ni tareas, no se conectó PostgreSQL, no se modificaron Edge/PayPal ni se habilitaron cobros por esta decisión.
+
+**Marcador vigente:** `P42_SINGLE_CUSTODIAN_DESIGN_ONLY_UNAVAILABLE_FALLBACK_NO_GO`.
