@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyVercelEnvTable } from '../../../scripts/f16-p43-vercel-db-env-names-readonly.mjs';
+import { classifyVercelEnvTable } from '../../../../scripts/f16-p43-vercel-db-env-names-readonly.mjs';
 
 test('P43 emits only allowlisted DB variable names and enum targets', () => {
   const raw = [
