@@ -70,6 +70,26 @@ pero las excepciones, tratamiento de backups, alcance jurídico y mecanismo
 de supresión aún necesitan revisión. Por ello **no está aprobado** insertar
 filas alojadas ni habilitar un mecanismo automático de borrado. El borrador no tiene escritor ni borrador.
 
+## Ensayo P41 de conservación y revisión manual (sin borrar)
+
+- `supabase/functions/f16-paypal-webhook/p41ActivationBindingRetentionLab.mjs`:
+  solo calcula tres **años calendario** desde el fin contractual merchant
+  corroborado, **no** desde el clic en cancelar. Un fin en 29-feb se
+  contabiliza conservadoramente al 1-mar del tercer año si no es bisiesto.
+- Rechaza fecha/identidad insuficientes, conciliación incompleta, disputas,
+  devoluciones pendientes, legal hold, política de backups no revisada
+  y validación legal no realizada.
+- En caso aparentemente elegible, únicamente establece
+  `eligibleForHumanReview=true`; `mayDelete=false`,
+  `mayEraseBackups=false` y `mayMutateHosted=false` siempre.
+- Los tests sintéticos P41 del commit `158d972` pasaron CI general
+  `38857338297` y PostgreSQL descartable `38857338281`.
+- **Gate técnico sin resolver:** la tabla P40 tiene una FK restrictiva y
+  un trigger de inmutabilidad, **sin** fuente verificada de terminación,
+  sistema de holds o borrador/ejecutor de retención. Una tabla vacía podría
+  ensayarse, pero no aprobar ingesta real hasta resolver eliminación y
+  backups con arquitectura y revisión legal aprobadas.
+
 ## Gates independientes aún abiertos
 A. Criterio provisional de retención aprobado; falta revisión jurídica/contable,
    excepciones, backups, eliminación y reconciliación de Privacy/Data Inventory/Terms.
