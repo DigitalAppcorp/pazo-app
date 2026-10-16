@@ -96,7 +96,7 @@ Deno.serve(async(request:Request)=>{
   return reply(403,'origin_not_allowed')
  if(request.method==='OPTIONS')return addCors(new Response(null,{status:204,
   headers:{'access-control-allow-methods':'POST, OPTIONS',
-   'access-control-allow-headers':'authorization, content-type'}}),runtime.origin)
+   'access-control-allow-headers':'authorization, apikey, content-type'}}),runtime.origin)
  if(request.method!=='POST')return addCors(reply(405,'method_not_allowed'),runtime.origin)
  let data
  try{
