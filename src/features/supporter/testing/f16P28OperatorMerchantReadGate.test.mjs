@@ -39,3 +39,17 @@ test('invalid lease, foreign sale, bad parameters refuse',async()=>{
  const r=await create({...d,operatorKey:key,enabled:true})(request(key,{...data,url:'https://evil.invalid'}))
  assert.equal(r.status,400);await safe(r)
 })
+
+test('merchant subscription lacking intended plan or custom intent never passes',async()=>{
+ const standard=deps()
+ for(const sub of [
+  {id:'I-P28-ONE',plan_id:'P-FOREIGN',custom_id:'intent-77777777-7777-4777-8777-777777777777'},
+  {id:'I-P28-ONE',plan_id:'P-14V25407JP6850922NLHMDKI'},
+  {id:'I-P28-ONE',plan_id:'P-14V25407JP6850922NLHMDKI',custom_id:'intent-bad'}
+ ]){
+  const r=await create({...standard,enabled:true,operatorKey:key,
+    merchantReader:{...standard.merchantReader,getMerchantSubscription:async()=>sub}
+  })(request())
+  assert.equal(r.status,409);await safe(r)
+ }
+})
