@@ -32,19 +32,23 @@ VALUES('intent-44444444-4444-4444-8444-444444444444',
 INSERT INTO supporter_private.paypal_verified_event_inbox
 (provider_event_id,event_type,verified_at,retention_hold)
 VALUES('P42-ACT-ONE','BILLING.SUBSCRIPTION.ACTIVATED',clock_timestamp(),true),
-('P42-NOT-ACT','PAYMENT.SALE.COMPLETED',clock_timestamp(),true);
+('P42-NOT-ACT','PAYMENT.SALE.COMPLETED',clock_timestamp(),true),
+('P42-HISTORICAL','BILLING.SUBSCRIPTION.ACTIVATED',clock_timestamp()-interval '2 hours',true);
 CREATE TEMP TABLE p42_input ON COMMIT DROP AS
 SELECT 'P42-ACT-ONE'::text AS event_id,'I-P42-OWNER'::text AS subscription_id,
 to_char(clock_timestamp() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"')::text AS issued_at,
 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid AS nonce,
 'LAB_V1'::text AS key_id, ''::text AS mac, ''::text AS changed_mac,
-''::text AS nonactivation_mac, ''::text AS expired_time, ''::text AS expired_mac;
+''::text AS nonactivation_mac, ''::text AS old_event_mac,
+''::text AS expired_time, ''::text AS expired_mac;
 UPDATE p42_input i SET
  mac=public.f16_p42_test_build_mac('p42|LAB_V1|'||i.event_id||'|'||
  i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text),
  changed_mac=public.f16_p42_test_build_mac('p42|LAB_V1|'||i.event_id||'|'||
  'I-P42-OTHER'||'|'||i.issued_at||'|'||i.nonce::text),
  nonactivation_mac=public.f16_p42_test_build_mac('p42|LAB_V1|P42-NOT-ACT|'||
+ i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text),
+ old_event_mac=public.f16_p42_test_build_mac('p42|LAB_V1|P42-HISTORICAL|'||
  i.subscription_id||'|'||i.issued_at||'|'||i.nonce::text),
  expired_time=to_char((clock_timestamp()-interval '3 minutes') AT TIME ZONE 'UTC',
  'YYYY-MM-DD"T"HH24:MI:SS"Z"');
@@ -65,6 +69,8 @@ BEGIN
  p.event_id,p.subscription_id,p.expired_time,p.nonce,p.key_id,p.expired_mac)
  OR public.f16_p42_lab_register_authenticated_activation(
  'P42-NOT-ACT',p.subscription_id,p.issued_at,p.nonce,p.key_id,p.nonactivation_mac)
+ OR public.f16_p42_lab_register_authenticated_activation(
+ 'P42-HISTORICAL',p.subscription_id,p.issued_at,p.nonce,p.key_id,p.old_event_mac)
  THEN RAISE EXCEPTION 'P42 forged, mismatched, expired or wrong type accepted'; END IF;
  valid:=public.f16_p42_lab_register_authenticated_activation(
  p.event_id,p.subscription_id,p.issued_at,p.nonce,p.key_id,p.mac);
