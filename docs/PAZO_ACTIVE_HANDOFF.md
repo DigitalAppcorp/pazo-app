@@ -1,3 +1,11 @@
+# PAZO — F16-P44 correlación comercial (actualización 2026-10-16)
+
+**Resultado de ejecución único reportado por operador:** `REVIEW_REQUIRED — merchant_refs_correlated_pagination_incomplete`, HTTP 200, una llamada `review` sin reintentos; venta Sandbox y evento original correlacionados. Se conserva la distinción: sin cobertura completa del historial, períodos, refund/dispute, ni permiso de ledger/beneficios.
+
+**Corrección branch-only, NO desplegada:** `87d42357` añade evidencia explícita de paginación opcional y marca revisión independiente cuando PayPal omite `total_pages`/`total_items`; `5fe0bcc5` incorpora dos tests offline para metadatos ausentes y totales coherentes. **No eleva evidencia incompleta a PASS**. CI/PostgreSQL estaban queued al observarse; comprobar resultados antes de declarar validación. Función alojada v2 no cambiada; cero compras nuevas, cero nuevas invocaciones, P21/P42/ledger/beneficios/Live OFF. Siguiente paso: verificar CI y preparar un procedimiento independiente de cobertura histórica y reembolsos/disputas sin saltarse controles. La ventana diagnóstica de v2 expira el 2026-10-17 00:00 UTC: no repetirla.
+
+---
+
 # PAZO — ACTIVE HANDOFF | punto de recuperación F16-P44
 **Última verificación:** 2026-10-16, Supabase/GitHub leídos directamente en esta conversación.  
 **Product Owner:** usuario; autoriza ejecución técnica por ChatGPT/Codex dentro de gates aprobados.  
