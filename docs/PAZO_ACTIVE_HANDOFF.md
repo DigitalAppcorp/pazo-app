@@ -6,6 +6,15 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — CÓDEX: ACCESO DB LOCAL READ-ONLY PREPARADO, PASSWORD DESCONOCIDO (2026-10-16)
+
+- Codex reportó continuidad «Continúa P43 con Supabase» y preflight exacto blob `ac9246a0106ebefd6d425a549d9f207242760eec` **PASS**; Edge Secrets visible en Chrome, sin clave P42. No hay contraseña DB disponible ni sesión administrativa PostgreSQL local. Ninguna clave nueva o mutación hosted.
+- **Nueva ruta preparada** `scripts/f16-p43-db-access-readonly.ps1`: Windows PowerShell 7 + psql, secreto de contraseña pedido con `Read-Host -AsSecureString` solo en consola local, entregado al proceso hijo por variable de entorno temporal, `sslmode=verify-full` con certificado CA y preflight SQL READ-ONLY. No acepta URI que contenga contraseña, no realiza escrituras ni provisión, no imprime secretos; parser PowerShell en CI.
+- Plan del siguiente paso: `docs/PAZO_F16_P43_LOCAL_DB_ACCESS_READ_ONLY_PLAN_20261016.md`. Datos de host/role desde Dashboard **Connect** (Direct IPv6 o Session Pooler IPv4, puerto 5432) y cert SSL local. Obtener la contraseña DB **existente** desde custodio/gestor autorizado. Si nadie la conoce, pedir autorización PO independiente para eventual restablecimiento planificado, con auditoría de consumidores; NO cambiarla por iniciativa propia.
+- **Decisiones de fechas NO encontradas**: `not_before` es NOT NULL y «futuro» no fija hora; `not_after` nullable no implica vencimiento aprobado. Los 120 segundos aplican al token HMAC, NO a la clave. NO elegir ventana ni provisionar hasta aprobación PO.
+- Resultado esperado al ejecutar script local y disponer de password: `P43_DB_ACCESS_READ_ONLY_PASS` más `P42_STRUCTURAL_PASS_NO_PROVISIONING_AUTHORITY`. Este resultado no autoriza generar, instalar ni usar la clave.
+- P42/P21 OFF, P40 vacío, ledger 0; Live NO-GO; P28 diferido; PR #44 DRAFT. Próximo gate: acceso DB de solo lectura real y aprobación PO de ventana / custodia. Ningún nuevo gasto, secreto, DDL, writer ni pago autorizado.
+
 ## F16-P43 — PO AUTORIZÓ CLAVE REAL SANDBOX, PROVISIÓN BLOQUEADA POR CANAL (2026-10-16)
 
 - Product Owner contestó **«sí»** a generar/provisionar clave real interna exclusivamente de Sandbox en Edge Secret Store y tabla privada P42, manteniendo todos los gates OFF; esto **NO autoriza** writer, EXECUTE, Edge deploy, worker, checkout, ledger ni pagos.
