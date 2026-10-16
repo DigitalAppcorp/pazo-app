@@ -49,7 +49,10 @@ export function createP28OperatorMerchantRead({
     return response(409,'merchant_event_mismatch')
    const sub=await merchantReader.getMerchantSubscription({
     ...body,subscriptionId:event.resource.billing_agreement_id})
-   if(sub?.id!==event.resource.billing_agreement_id)
+   if(sub?.id!==event.resource.billing_agreement_id||
+      typeof sub.custom_id!=='string'||
+      !/^intent-[A-Za-z0-9_-]{12,90}$/.test(sub.custom_id)||
+      sub.plan_id!=='P-14V25407JP6850922NLHMDKI')
     return response(409,'merchant_subscription_mismatch')
    // No IDs or payment metadata in HTTP response. No ledger writes.
    return response(200,'merchant_refs_correlated_review_only')
