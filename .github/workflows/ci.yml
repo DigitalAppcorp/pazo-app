@@ -286,3 +286,7 @@ jobs:
           # Disposable PG17 only: remove lab draft objects before rehearsing alternate hosted candidate.
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres; DROP FUNCTION public.f16_p28_draft_ack_historical_audit(uuid); DROP TABLE supporter_private.p28_historical_read_audit;'
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_audit_hosted_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-hosted-audit-rehearsal-postgres-synthetic.sql
+
+      - name: P28 audited historical exact-ID read in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_candidate_exact_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audited-read-postgres-synthetic.sql
