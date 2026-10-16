@@ -6,6 +6,12 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — AUDITORÍA VERCEL DE METADATOS PASS; ACCESO TEMPORAL DB SIN GO (2026-10-16)
+
+- Codex informó lectura local de `scripts/f16-p43-vercel-db-env-names-readonly.mjs` con `pazo-app=METADATA_PARSED`, `pazo-app_DB_CONNECTION_KEY_COUNT=0`, `pazo-app-t83r=METADATA_PARSED`, `pazo-app-t83r_DB_CONNECTION_KEY_COUNT=0`, `P43_VERCEL_METADATA_REVIEW_ONLY_NO_SECRETS`. Informe Windows solo indicado por operador; no se inspeccionó archivo local desde ChatGPT. PASS solo del conjunto de nombres del lector: NO prueba ausencia general de dependencias DB, conectores o secretos con alias.
+- `docs/PAZO_F16_P43_VERCEL_METADATA_AND_TEMP_DB_CREDENTIAL_PROPOSAL_20261016.md` actualizado con evidencia y siguiente gate. Supabase CLI 2.121.0 y psql 17.11 están listos, pero **falta GO explícito** para obtener credencial efímera del proveedor (posible rol `cli_login_postgres`) y ejecutar un único P42 structural preflight SQL READ ONLY por canal local seguro. No ejecutar `db dump --dry-run`, activar JIT, resetear password ni emitir credenciales mientras falta GO.
+- Claves P42 0, gate writer P42 OFF, worker P21 OFF, P40 0, pagos 0 conforme al último estado comprobado. Vigencia `not_before` y `not_after` de la clave real no decidida. F16 NO-GO; PR #44 DRAFT; P28 diferido.
+
 ## F16-P43 — HERRAMIENTAS LOCALES LISTAS / METADATOS VERCEL Y ROL TEMPORAL BAJO GATE (2026-10-16)
 
 - Codex informó Supabase CLI **2.121.0**, `psql` **17.11**, sesión Vercel/team `digitalapp` disponibles en Windows; los 4 flags de `db dump` presentes. Informe completo solo en ruta Windows indicada por el operador, no accesible desde este chat. Sin claves generadas ni mutaciones hosted.
