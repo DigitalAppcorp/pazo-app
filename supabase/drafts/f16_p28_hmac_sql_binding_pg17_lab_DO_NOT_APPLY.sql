@@ -6,6 +6,8 @@ DO $guard$ BEGIN
  OR current_user<>'postgres' THEN RAISE EXCEPTION 'DISPOSABLE ONLY'; END IF;
 END $guard$;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Lab-only normalization: pgcrypto may be preinstalled under a different schema.
+ALTER EXTENSION pgcrypto SET SCHEMA public;
 CREATE FUNCTION public.f16_p28_lab_hmac_consume(
  p_event_id text,p_request_id uuid)
 RETURNS boolean LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
