@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — GO EXPLÍCITO: UNA SOLA CREDENCIAL CLI EFÍMERA + PREFLIGHT P42 SOLO LECTURA (2026-10-16)
+
+- PO respondió **«sí»** a la solicitud específica de una credencial administrativa temporal de Supabase y **un único preflight P42 READ ONLY** desde la PC de Codex, tras controles de seguridad. Esto sustituye únicamente el gate de acceso que las secciones P43 históricas señalaban como SIN GO; **NO** amplía autorizaciones de provisión/activación financiera.
+- Ejecutor versionado `scripts/f16-p43-ephemeral-readonly-preflight.mjs` con parser estricto de CLI, comparación del SQL blob `ac9246a0106ebefd6d425a549d9f207242760eec`, Supabase CLI 2.121.0 y psql 17.11, TLS verify-full, SQL READ ONLY, salida exclusivamente de marcadores. Incluye archivo local de un solo intento, que **no debe borrarse para repetir** sin nuevo GO. CLI dry-run puede crear rol `cli_login_postgres`.
+- SOP aprobado `docs/PAZO_F16_P43_APPROVED_EPHEMERAL_DB_READONLY_EXECUTION_20261016.md`. Código CI y tests sintéticos sin autenticación real; **la credencial y el psql desde Windows aún NO se ejecutaron desde este chat**. Codex debe verificar CA privado, entornos sin logging de secretos y ejecutar **una sola vez**; si no cumple, NO ejecutar. Tras ejecutar reportar solo marcadores sanitized.
+- Se mantiene **cero autorización** para password reset, rol JIT, P42 signing key/Edge Secrets, RLS/grants, writer/worker, P40, PayPal buyer/Live, cobros/beneficios. Fechas `not_before/not_after` de futura clave P42 no decididas. F16 NO-GO, PR #44 DRAFT, P28 diferido.
+
 ## F16-P43 — AUDITORÍA VERCEL DE METADATOS PASS; ACCESO TEMPORAL DB SIN GO (2026-10-16)
 
 - Codex informó lectura local de `scripts/f16-p43-vercel-db-env-names-readonly.mjs` con `pazo-app=METADATA_PARSED`, `pazo-app_DB_CONNECTION_KEY_COUNT=0`, `pazo-app-t83r=METADATA_PARSED`, `pazo-app-t83r_DB_CONNECTION_KEY_COUNT=0`, `P43_VERCEL_METADATA_REVIEW_ONLY_NO_SECRETS`. Informe Windows solo indicado por operador; no se inspeccionó archivo local desde ChatGPT. PASS solo del conjunto de nombres del lector: NO prueba ausencia general de dependencias DB, conectores o secretos con alias.
