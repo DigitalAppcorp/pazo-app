@@ -10,7 +10,7 @@ const END='2026-10-31T00:00:00Z'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const OWNER='63e812b0-a7e5-49f6-b2dd-c11d2c72af57'
 function build({oauthOk=true,subOk=true,listOk=true,totalPages=1,totalItems=1,
- txStatus='COMPLETED',repeatPaymentId=false}={}){
+ txStatus='COMPLETED',repeatPaymentId=false,omitTotals=false}={}){
  const calls=[]
  const fetchImpl=async(url,options)=>{
    calls.push({url,options})
@@ -26,7 +26,7 @@ function build({oauthOk=true,subOk=true,listOk=true,totalPages=1,totalItems=1,
          gross_amount:{currency_code:'USD',value:'2.99'}}},
        ...(repeatPaymentId?[{id:'CAPTURE1234',status:'REFUNDED',time:'2026-10-13T19:00:00Z',
          amount_with_breakdown:{gross_amount:{currency_code:'USD',value:'2.99'}}}]:[])
-      ],total_pages:totalPages,total_items:totalItems})}
+      ],...(omitTotals?{}:{total_pages:totalPages,total_items:totalItems})})}
    throw Error('non_allowlisted_destination')
  }
  return {reader:createPaypalSandboxSubscriptionReader({clientId:ID,clientSecret:SECRET,fetchImpl}),calls}
@@ -134,4 +134,25 @@ test('duplicate provider payment IDs fail closed, without PII disclosure',async(
  const x=build({repeatPaymentId:true,totalItems:2})
  await assert.rejects(x.reader.read({subscriptionId:SUB,startTime:START,endTime:END}),
   /ambiguous_transaction_history/)
+})
+
+// PayPal documents the pagination totals as optional; absence stays REVIEW.
+test('optional PayPal totals do not promote a correlated sale to complete coverage',async()=>{
+ const x=build({omitTotals:true})
+ const result=await x.reader.read({subscriptionId:SUB,startTime:START,endTime:END})
+ assert.equal(result.transactions.length,1)
+ assert.equal(result.paginationMetadataComplete,false)
+ assert.equal(result.paginationEvidence,'provider_totals_absent_review_required')
+ assert.equal(result.requiresIndependentHistoryCoverage,true)
+ assert.equal(result.globalFinancialCoverage,false)
+ assert.equal(result.mayGrantBenefits,false)
+})
+test('consistent single-page totals prove only the bounded window, never global coverage',async()=>{
+ const x=build()
+ const result=await x.reader.read({subscriptionId:SUB,startTime:START,endTime:END})
+ assert.equal(result.paginationMetadataComplete,true)
+ assert.equal(result.paginationEvidence,'single_page_totals_consistent')
+ assert.equal(result.requiresIndependentHistoryCoverage,false)
+ assert.equal(result.globalFinancialCoverage,false)
+ assert.equal(result.mayGrantBenefits,false)
 })
