@@ -6,6 +6,15 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — EVALUACIÓN DEL RESET DB: NO REALIZAR TODAVÍA (2026-10-16)
+
+- PO autorizó exclusivamente **evaluar impacto de recuperar/restablecer password PostgreSQL**, NO autoriza cambiarla. Informe read-only `docs/PAZO_F16_P43_POSTGRES_PASSWORD_RESET_IMPACT_20261016.md`.
+- Edge Functions alojadas **6 ACTIVE**, sus fuentes no muestran uso explícito de `SUPABASE_DB_URL`, `DATABASE_URL`, `PGPASSWORD` o `POSTGRES_PASSWORD`; pg_stat_activity instantáneo muestra cuatro sesiones internas Supabase y ninguna externa identificable; ambos hallazgos NO excluyen conexiones intermitentes/dependencias indirectas.
+- **Vercel 2 proyectos PAZO** `pazo-app` y `pazo-app-t83r` encontrados; auditoría de nombres de variables y rutas quedó en **403 de autorización del equipo**, bloqueo para afirmar impacto seguro.
+- **Nueva vía menos riesgosa:** `scripts/backup-database.ps1` contiene ruta `$SupabaseCli` para preparación de credenciales administrativas temporales vía CLI; documentación Supabase confirma rol `cli_login_postgres`, pero compatibilidad/flags/uso en equipo local NO verificados ni autorizados para ejecutar ahora. No confundir con acceso temporal/JIT deshabilitado por defecto. Verificar existencia de credential XML local **sin abrir valor** y disponibilidad `supabase`, `psql`, Docker.
+- Restablecer `postgres` puede romper consumidores DB directos y generar rechazo transitorio `28P01` del pooler, según documentación oficial. Recomendar no resetear hasta cerrar Vercel, otros clientes/jobs y alternativas.
+- **SIN MUTACIONES**: ninguna contraseña, clave real P42, roles, grants, worker, checkout, PayPal, Edge o cobro cambiados. P42/P21 OFF; P40 0, ledger 0. Las fechas `not_before`/`not_after` siguen sin decisión explícita PO, no inventarlas.
+
 ## F16-P43 — CÓDEX: ACCESO DB LOCAL READ-ONLY PREPARADO, PASSWORD DESCONOCIDO (2026-10-16)
 
 - Codex reportó continuidad «Continúa P43 con Supabase» y preflight exacto blob `ac9246a0106ebefd6d425a549d9f207242760eec` **PASS**; Edge Secrets visible en Chrome, sin clave P42. No hay contraseña DB disponible ni sesión administrativa PostgreSQL local. Ninguna clave nueva o mutación hosted.
