@@ -1,5 +1,5 @@
 // F16-P37: private read-only P40 activation under a live P21 claim.
-// OFF BY DEFAULT; calls a PG17-only RPC that is NOT installed in Supabase.
+// OFF BY DEFAULT; targets a hosted-compatible candidate RPC that is NOT installed yet.
 // Do not import in browser, active Edge, cron or payment/benefit writer.
 // The P40 binding is a DB reference, not independent signature attestation:
 // trusted PayPal ingress + P42 signing must be separately deployed/verified.
@@ -27,7 +27,7 @@ export function createP37PrivateActivationClaimReader({
    const timeout=setTimeout(()=>controller.abort(),12000)
    try{
     const response=await fetchImpl(
-     HOST+'/rest/v1/rpc/f16_p37_lab_read_claimed_activation',{
+     HOST+'/rest/v1/rpc/f16_p37_read_claimed_activation',{
       method:'POST',redirect:'error',signal:controller.signal,
       headers:{apikey:serviceRoleKey,
        Authorization:'Bearer '+serviceRoleKey,
