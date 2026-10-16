@@ -3,7 +3,7 @@
 **Fecha:** 2026-10-16. **Entorno objetivo:** Sandbox. **Proyecto Supabase existente:** `mrybvqdebbgcayuvgkkr`.
 **Rama de trabajo:** `f13/section-titles-20261012`; PR #44 DRAFT.
 **Estado:** PROCEDIMIENTO PROPUESTO / PROVISIÓN NO AUTORIZADA POR ESTE DOCUMENTO. F16 NO-GO.
-**Decisión PO ya aprobada:** vigencia de la futura clave P42 = **24 horas**. No es autorización actual para generar, provisionar, activar, desplegar ni cobrar.
+**Decisiones PO aprobadas:** vigencia de la futura clave P42 = **24 horas** y método de **revocación manual supervisada**, mediante custodio autorizado y verificación en ambos destinos. **No hay revocación física automática** ni se ha fijado fecha T0. Estas decisiones solo autorizan preparar el procedimiento, **NO generar/provisionar, eliminar secretos existentes, cambiar permisos, activar, desplegar ni cobrar**.
 
 ## 1. Reconciliación de identidad de los dos destinos
 
@@ -71,7 +71,7 @@ Nada en los puntos anteriores concede autoridad para una operación actual.
 
 **Incidente antes del vencimiento:** gate y grants primero, luego deshabilitación/eliminación DB y `unset` Edge; no esperar 24 horas. Ante inconsistencia Edge/DB, no reparar habilitando escritor: revocar versión, evaluar causa y solicitar un nuevo GO para cualquier reemplazo. No repetir ni reactivar `P42_V1` tras revocación.
 
-**Automatización obligatoria antes del GO:** elegir/verificar un mecanismo privado de alarma y ejecución de limpieza con evidencia de éxito/fallo; los timestamps SQL y los recordatorios no son una acción de eliminación. No existe todavía tal tarea instalada y no debe afirmarse que haya expiración/revocación automática.
+**Decisión PO — revocación MANUAL supervisada (sin ejecución automática):** antes de un futuro GO, asignar por escrito un custodio humano con capacidad verificada de borrar el secreto Edge y la fila DB, más un reemplazo autorizado; fijar un turno confirmado para `Texp = T0 + 24 horas UTC` y una lista de comprobaciones. Opcionalmente programar alarmas para el custodio, pero **no confundir el recordatorio con eliminación**: ningún cron, webhook ni tarea de borrado automático queda autorizada. Al llegar `Texp`, el custodio realiza ambos retiros y comprueba ausencia; dejar evidencia con hora UTC y estados sin material secreto. Si el operador o respaldo no pueden estar disponibles para `Texp`, **NO PROVISIONAR**. Si venciera la ventana sin limpieza verificada, marcar `P42_MANUAL_REVOCATION_OVERDUE_BLOCKED`, conservar writer P42/worker P21/EXECUTE OFF, activar escalamiento inmediato y retirar en cuanto exista acceso; nunca afirmar que los bytes se eliminaron solos.
 
 **Rotación:** el secreto Edge de nombre fijo no suministra por sí solo soporte de doble versión concurrente. Rotar a `P42_V2` exige diseño explícito de identificación de clave en runtime, capacidad Edge real de coexistencia/rollback y nuevo gate; nunca sobreescribir silenciosamente la variable mientras el receptor pudiera aceptar `P42_V1`. Para el presente gate solo aplica una versión apagada de 24h, sin uso.
 
@@ -83,7 +83,7 @@ Aprobar una **provisión futura** solo cuando se registren:
 - [ ] Canal privado real de escritura y eliminación Edge + DB, TLS verificado, cero args/logs/SQL Editor con secretos.
 - [ ] Política verificada de backups, snapshots, auditoría y recuperación ante compromiso; aceptación expresa de exposición residual.
 - [ ] Semántica `T0` y `not_after=T0+24h` aprobadas por PO; fecha UTC solo se concreta al ejecutar bajo nuevo GO.
-- [ ] Método de expiración/limpieza y responsable probado en entorno sintético, con evidencia y falla cerrada.
+- [ ] Revocación **manual supervisada** aprobada; custodio y respaldo designados, disponibilidad confirmada para `Texp=T0+24h`, permisos de retiro Edge/DB verificados, alarma opcional y secuencia ensayada en sintético. No existe mecanismo de auto-borrado aprobado.
 - [ ] Postflight específico metadata-only para fila `P42_V1` apagada y secret Edge presente; posterior cleanup verificado en ambos destinos.
 - [ ] Confirmación fresca de preflight vacío y sin drift antes de cualquier nueva mutación.
 - [ ] Autorización PO independiente, inequívoca, **para generar/provisionar `P42_V1` y revocarla** en los dos destinos, y ninguna otra operación.
@@ -124,3 +124,21 @@ Aprobar una **provisión futura** solo cuando se registren:
 - Queda **CERRADA la dependencia de agregar otro autenticador**. Se continúa al gate de custodia PostgreSQL, reversión coordinada Edge/DB, revisión de permisos y backups y expiración 24 horas; sin pedir más capturas MFA ni crear secretos.
 - Confirmada por documentación oficial la capacidad de quitar un secreto Edge con `supabase secrets unset NAME` (https://supabase.com/docs/reference/cli/supabase-secrets-unset); la existencia de ese comando NO prueba que el ejecutor pueda revocar de forma segura ni que se haya ejecutado. Preparar método privado y verificación no sensible sin usar credenciales en argumentos, logs o chat.
 - **Estado:** `P42_OWNER_TWO_TOTP_UI_PASS_CUSTODY_REVOCATION_PENDING_NO_PROVISIONING`, F16 NO-GO, PR #44 Draft, writer P42/P21/checkout/ledger/beneficios OFF; ninguna nueva consulta o mutación PostgreSQL atribuida a esta actualización.
+
+
+## 11. Decisión PO de cierre — revocación manual supervisada (2026-10-16)
+
+**APROBADO PARA PREPARACIÓN DOCUMENTAL. NO-GO PARA PROVISIÓN.** La decisión vigente es **revocar manualmente después de la ventana de 24 horas**, no implementar ni suponer eliminación automática. Esta sección prevalece sobre propuestas históricas de automatización de limpieza sin alterar el TTL HMAC de 120 s.
+
+**Procedimiento humano propuesto para posterior revisión**:
+1. Antes de un futuro GO de provisión, identificar custodio nominal autorizado con acceso real a Edge Secrets y a PostgreSQL TLS con parámetros, e identificar suplente con capacidad ya comprobada. El Product Owner debe confirmar que el responsable puede estar disponible durante la ventana de vencimiento; **no asumir disponibilidad** a partir del rol Owner de Supabase.
+2. En el futuro GO separado, establecer `T0` UTC y registrar `Texp = T0 + 24 horas`; la clave estaría siempre `enabled=false`, gate false y sin grants. Confirmar agenda del operador y suplente para `Texp`; no provisionar si existe riesgo previsible de ausencia. No se crea automáticamente ningún recordatorio desde este documento.
+3. A `Texp` (o antes si incidente), el custodio ejecuta retiro del secreto Edge **únicamente** `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX` y de la fila `P42_V1` en PostgreSQL con procedimiento administrativo previamente verificado, sin exponer `key_bytes`. Mantener inertes P42/P21/RPC; NO usar acceso de solo lectura P43 como permiso de escritura.
+4. Obtener lectura independiente reciente de **ausencia de nombre Edge** y **cero filas de clave DB**, más gate false, sin EXECUTE para roles de aplicación, P21 false, P40/ledger sin nuevos datos. La aceptación requiere ambas confirmaciones; un acuse de DELETE/unset no basta. Aplicar la revisión humana al verificador sintético de evidencias, que solo produce candidato, nunca certificado de revocación alojada.
+5. Registrar operador, fecha prevista/real UTC, resultado y excepciones en bitácora sin secretos, identificadores sensibles ni hashes de clave. Los respaldos/dumps existentes mantienen riesgo residual hasta su retención/ciclo de purga; no afirmar destrucción universal.
+6. Si el custodio no puede operar o falla uno de los almacenes: resultado `BLOCKED`, ejecutar compensación/retirada faltante lo antes posible por el suplente, verificar nuevamente; **no reactivar** `P42_V1`, no volver a provisionar y no habilitar pagos. Escalamiento inmediato al PO; no inventar éxito ni prolongar las 24 horas.
+7. La **vigencia lógica** termina a las 24 h, pero la **eliminación física depende del humano**. El procedimiento no impone garantía de horario automática, y P42 sigue con acceso de ejecución denegado. La tolerancia de 120 s por HMAC no permite extender la clave; corregir el cutoff absoluto del servidor antes de un gate diferente que habilitase la RPC.
+
+**Pruebas y autoridad:** el ensayo offline previo de dos destinos prueba solo reglas de metadatos; NO demuestra ejecución manual ni acceso al proveedor. El siguiente gate requiere custodia DB TLS parametrizada, verificación de backup, acceso de eliminación Edge y agenda humana, seguido de autorización inequívoca de provisión + revocación manual en turno aparte. Nada en este cambio modifica Supabase ni permite writer, worker, checkout, PayPal Live/Sandbox buyer, ledger, beneficios, deploy, merge ni infraestructura facturable.
+
+**Marcador:** `P42_MANUAL_SUPERVISED_REVOCATION_POLICY_APPROVED_NO_PROVISIONING`.
