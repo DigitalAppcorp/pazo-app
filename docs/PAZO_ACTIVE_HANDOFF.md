@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — INVENTARIO LOCAL CLI / VERCEL SIN SECRETOS (2026-10-16)
+
+- PO indicó «ok go» para continuar **comprobaciones** sin solicitar credenciales temporales ni resetear DB. Vercel connector `list_teams` devolvió **0 teams** accesibles; `digitalapp` permanece sin autorización para leer nombres/destinos de variables. No afirmar que entorno Vercel fue auditado.
+- Preparado `scripts/f16-p43-local-tooling-inventory.ps1` para Windows PowerShell 7: imprime estado y versiones de `supabase`, `psql`, `vercel`; para credenciales DPAPI solo indica existencia del archivo, no lo abre. Nunca ejecuta `supabase db dump/link/login`, no obtiene roles temporales ni toca Supabase.
+- `docs/PAZO_F16_P43_LOCAL_CLI_VERCEL_ACCESS_REVIEW_20261016.md` da instrucciones para Codex y resultado `P43_TOOLING_INVENTORY_ONLY_NO_DB_AUTH_OR_MUTATION`, no un acceso DB validado. CLI temporal requiere nueva revisión/GO ya que puede emitir credenciales y crear rol; `not_before`/`not_after` continúan sin decisión.
+- Sin clave P42, cambios a gates, password, checkout, transacciones ni despliegues. F16 NO-GO, P28 diferido, PR #44 DRAFT.
+
 ## F16-P43 — EVALUACIÓN DEL RESET DB: NO REALIZAR TODAVÍA (2026-10-16)
 
 - PO autorizó exclusivamente **evaluar impacto de recuperar/restablecer password PostgreSQL**, NO autoriza cambiarla. Informe read-only `docs/PAZO_F16_P43_POSTGRES_PASSWORD_RESET_IMPACT_20261016.md`.
