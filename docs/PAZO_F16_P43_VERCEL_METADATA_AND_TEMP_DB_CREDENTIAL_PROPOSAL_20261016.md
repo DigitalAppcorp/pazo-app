@@ -105,3 +105,45 @@ como cobros autorizados; fase F16 NO-GO, PR #44 DRAFT, P28 diferido.
 PC + autorización PO exclusiva para acceso administrativo temporal
 READ-ONLY (no provisioning). No existe GO para Live, secretos P42,
 worker, checkout ni beneficios.
+
+## Resultado de auditoría Vercel — completado como metadata (2026-10-16)
+
+El operador informó que ejecutó el lector local de solo metadatos en ambos
+proyectos, sin imprimir valores de variables:
+
+```text
+pazo-app=METADATA_PARSED
+pazo-app_DB_CONNECTION_KEY_COUNT=0
+pazo-app-t83r=METADATA_PARSED
+pazo-app-t83r_DB_CONNECTION_KEY_COUNT=0
+P43_VERCEL_METADATA_REVIEW_ONLY_NO_SECRETS
+```
+
+Este resultado es **PASS para el objetivo acotado del lector**:
+salida reconocida y cero identificadores de conexión PostgreSQL
+que coincidan con las reglas implementadas. **No prueba ausencia
+general de clientes DB**, de nombres personalizados ni de conexiones
+fuera de Vercel. Se informó una ruta local `VERCEL_DB_ENV_NAMES_20261016.txt`
+que no se abrió desde este chat; los valores anteriores provienen del
+mensaje del operador, no de un examen directo del archivo.
+
+**Gate siguiente: pendiente aprobación específica del Product Owner.**
+El mecanismo Supabase CLI 2.121.0 de credenciales efímeras puede
+crear/actualizar el rol temporal gestionado `cli_login_postgres`.
+No se ha ejecutado, no se ha emitido token/password, no se ha
+restablecido `postgres`, no se habilitó JIT y no se realizó ninguna
+inserción o provisión P42.
+
+Alcance del GO solicitado al PO, si lo concede: un solo intento
+controlado desde la PC de Codex para obtener una credencial temporal
+oficial de Supabase CLI y ejecutar **solamente**
+`supabase/queries/f16_p42_provisioning_structural_preflight_READ_ONLY.sql`
+mediante `psql`, con rol/plazo/TLS verificados, captura privada
+exclusivamente en memoria, sin revelar credenciales a chat/GitHub/logs;
+mantener todos los controles apagados. Si no hay canal privado
+verificable, no ejecutar ni emitir credencial. El GO NO
+incluye escribir P42, Edge secrets, reset DB, pagos, workers, ni
+beneficios. Pendiente todavía definir `not_before`/`not_after`
+de la futura clave.
+
+Referencia oficial: https://supabase.com/docs/guides/troubleshooting/permission-denied-when-deleting-the-cli_login-postgres-role-808bae
