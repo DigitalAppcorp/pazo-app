@@ -23,7 +23,10 @@ export function createP37PrivateActivationClaimReader({
  return Object.freeze({
   // Non-sensitive preflight classification for disposable CI troubleshooting.
   // Reports no configuration values, secrets, tokens or user identity.
-  preflight:()=>Object.freeze({
+  preflight:({eventId,claimToken}={})=>Object.freeze({
+   eventValid:EVENT.test(eventId||''),claimValid:UUID.test(claimToken||''),
+   abortController:typeof AbortController==='function',
+   timer:typeof setTimeout==='function',
    enabled:enabled===true,host:projectUrl===HOST,
    keyType:typeof serviceRoleKey==='string',
    keyLength:typeof serviceRoleKey==='string'&&
