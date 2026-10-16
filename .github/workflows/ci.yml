@@ -64,6 +64,21 @@ jobs:
             if ($parseErrors.Count) { throw "PowerShell syntax error in $file" }
           }
 
+      - name: Enforce P42 data-only exclusion in real PowerShell backup command (static)
+        shell: pwsh
+        run: |
+          $script = Get-Content -LiteralPath scripts/backup-database.ps1 -Raw
+          $calls = [regex]::Matches($script, "(?s)Invoke-PazoPg\s+'pg_dump'\s+@\((?<args>.*?)\)\s+'database-private\.log'")
+          if ($calls.Count -ne 1) { throw 'P42: unexpected number of pg_dump commands' }
+          $args = $calls[0].Groups['args'].Value
+          if (-not $args.Contains("'--exclude-table-data=supporter_private.p42_activation_signing_keys'")) {
+            throw 'P42: pg_dump must exclude only key table data'
+          }
+          if ($args -match '--exclude-table=' -or $args -match '--schema-only' -or $args -match '--data-only') {
+            throw 'P42: full schema and other data must remain in logical backup'
+          }
+          Write-Output 'P42 real backup pg_dump argument guard PASS (static; no database accessed)'
+
       - name: Lint (legacy debt is currently non-blocking)
         continue-on-error: true
         run: npm run lint
