@@ -270,7 +270,7 @@ jobs:
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p25_first_obligation_review_reservation_DO_NOT_APPLY.sql -f supabase/tests/supporter/p25-first-obligation-review-reservation-synthetic.sql
       - name: P26 blocked ledger transactional integrity in isolated PostgreSQL
         run: |
-          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p26_blocked_ledger_schema_DO_NOT_APPLY.sql -f supabase/tests/supporter/p26-blocked-ledger-postgres-synthetic.sql
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p26_blocked_ledger_schema_DO_NOT_APPLY.sql -f supabase/tests/supporter/p26-blocked-ledger-postgres-synthetic.sql -f supabase/tests/supporter/p30-no-direct-credit-postgres-synthetic.sql
       - name: P26 two-session duplicate reservation contention (disposable only)
         run: node scripts/f16-p26-blocked-ledger-concurrency.mjs
       - name: Install P22 fenced bound-intent read in disposable PostgreSQL ONLY
