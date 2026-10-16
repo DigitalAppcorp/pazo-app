@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P43 — HERRAMIENTAS LOCALES LISTAS / METADATOS VERCEL Y ROL TEMPORAL BAJO GATE (2026-10-16)
+
+- Codex informó Supabase CLI **2.121.0**, `psql` **17.11**, sesión Vercel/team `digitalapp` disponibles en Windows; los 4 flags de `db dump` presentes. Informe completo solo en ruta Windows indicada por el operador, no accesible desde este chat. Sin claves generadas ni mutaciones hosted.
+- Conector Vercel de este chat continúa **403** para scope `digitalapp`. Preparado `scripts/f16-p43-vercel-db-env-names-readonly.mjs` que llama CLI local `vercel env ls --scope digitalapp --project <ID> --no-color` para 2 proyectos fijos, captura output privado y emite únicamente **nombres** de variables DB y enums de destino; no valores, tokens, respuesta cruda ni archivos. Si tabla no interpretable: NO CIERRE, no inventar ausencia. Tests sintéticos de sanitización CI.
+- Propuesta de acceso `cli_login_postgres` y preflight SQL READ ONLY en `docs/PAZO_F16_P43_VERCEL_METADATA_AND_TEMP_DB_CREDENTIAL_PROPOSAL_20261016.md`: `db dump --dry-run` puede emitir credenciales/crear rol temporal; **NO EJECUTADO NI AUTORIZADO POR ESTE MENSAJE**. Requiere GO separado PO y revisión de captura en memoria/TLS/caducidad. NO restablecer password ni activar JIT.
+- Próximo: Codex ejecuta auditoría de Vercel por metadata en PC y comparte marcadores sanitizados. P42/P21 OFF, P40 0, ledger 0, F16 NO-GO, PR #44 DRAFT, P28 diferido. Vigencia `not_before/not_after` sin decisión PO.
+
 ## F16-P43 — EJECUCIÓN LOCAL AGRUPADA DE CODEX AUTORIZADA (2026-10-16)
 
 - PO indicó «ok vale sigamos con codex» tras proponer delegar instalaciones gratuitas locales y diagnóstico sin cambios alojados. Preparada orden única `docs/PAZO_F16_P43_CODEX_LOCAL_SETUP_OPERATOR_ORDER_20261016.md` para Codex; este chat **no tiene control directo** de la PC y no declara ejecutadas las instalaciones.
