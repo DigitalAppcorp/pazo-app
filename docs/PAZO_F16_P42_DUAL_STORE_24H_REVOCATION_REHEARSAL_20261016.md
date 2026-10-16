@@ -2,7 +2,7 @@
 
 > **ACTUALIZACIÓN PO — 2026-10-16:** Se aprobó preparar **revocación manual supervisada** después de 24 horas, no limpieza automática. Este documento es el ensayo offline; ejecutar `unset` Edge y retirar fila DB exigirá un GO independiente, operador y suplente confirmados, y lectura posterior de ambos destinos. La condición sigue siendo `F16 NO-GO`; claves reales 0. Contrato principal: [P42 custodia y revocación 24h](PAZO_F16_P42_24H_CUSTODY_EXPIRY_REVOCATION_GATE_20261016.md).
 
-**Fecha:** 2026-10-16. **Proyecto:** `mrybvqdebbgcayuvgkkr`.
+> **PRECEDENCIA PO (2026-10-16):** se eligió un **único custodio administrativo**. El requisito histórico de un suplente humano ya no aplica al diseño, pero la falta de continuidad si el PO está indisponible sigue siendo un riesgo sin aceptar para provisión. Ver [alternativa de custodio único](PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md).\n\n**Fecha:** 2026-10-16. **Proyecto:** `mrybvqdebbgcayuvgkkr`.
 **Rama:** `f13/section-titles-20261012`; PR #44 DRAFT; F16 NO-GO.
 **Permiso PO «ok go»**: preparar/verificar custodia, revocación y ensayo OFFLINE; no generar/provisionar clave P42 real ni utilizar PostgreSQL/Edge con operaciones de escritura.
 
@@ -24,9 +24,9 @@
 ## Procedimiento de dos destinos para un futuro GO distinto (NO EJECUTAR AHORA)
 
 **Preparación previa obligatoria**:
-1. Nombrar custodio humano (PO Owner como opción) y un revocador alterno; probar acceso a Edge `unset` y sesión administrativa DB con TLS `verify-full` y consultas parametrizadas. P43 temporal de solo lectura no da autorización de escritura.
+1. Custodio principal: PO confirmado. El PO optó por continuar el diseño **sin otro administrador ni revocador humano alterno**. Comprobar dos vías de recuperación bajo control del mismo PO (no garantiza disponibilidad), acceso Edge `unset` y sesión DB administrativa TLS `verify-full` con parámetros. P43 read-only no autoriza escritura. Ver el gate de custodio único vigente.
 2. Acordar política real de backups y eliminación de material, y comprobar que los seis runtimes Edge pueden auditarse respecto al secreto de proyecto. Cualquier exportación/dump durante la ventana podría capturar `key_bytes`: bloquear exportaciones voluntarias no cifradas y documentar todos los destinos de backup; no prometer borrado de copias históricas.
-3. **Decisión PO: revocación manual supervisada.** Reservar un turno humano confirmado en `Texp=T0+24h` UTC, con custodio y suplente autorizados y medios de acceso disponibles. Una alarma o recordatorio puede apoyar a la persona, pero **no ejecuta `unset` ni borra DB**. No exigir ni crear tareas de borrado automático, cron, GitHub Actions con credenciales admin ni infraestructura nueva. **NO provisionar** si no hay disponibilidad humana verificable para el vencimiento.
+3. **Decisión PO: revocación manual supervisada por custodio único.** Reservar disponibilidad comprobada del propio PO en `Texp=T0+24h` UTC; no designar segundo administrador. Una alarma opcional puede recordar pero **no ejecuta `unset` ni elimina DB**. Sin garantía física si el PO no está disponible. **NO provisionar** hasta cierre técnico de backups/canales y consentimiento PO nuevo y específico que acepte ese riesgo. No crear cron ni infraestructura nueva.
 4. Preflight vacío de P42 fresco y `T0` UTC prospectivo solo después de un nuevo GO. No repetir el login temporal P43 ni el chequeo ya cerrado por curiosidad.
 
 **Revocación operativa MANUAL supervisada prevista** (en `Texp=T0+24h`, o anticipada por incidente; sin eliminación automática):
@@ -41,7 +41,7 @@
 - `not_before=T0`, `not_after=T0+24h` UTC y `enabled=false` siempre en este ensayo de custodia.
 - El TTL HMAC de 120 segundos no es duración de la clave.
 - La RPC P42 tal como está verificada tolera un HMAC emitido antes de `not_after` aun si se invoca hasta 120 s después del vencimiento; antes de un gate posterior de habilitación, **fijar y probar** condición absoluta de `clock_timestamp()<not_after`.
-- El diseño de 24h **no garantiza eliminación física automática**. El custodio y su suplente deben ejecutar y verificar el retiro manual, con constancia de hora. Si se retrasa, marcar `P42_MANUAL_REVOCATION_OVERDUE_BLOCKED` y escalar, sin ampliar la validez lógica ni reclamar limpieza completa.
+- El diseño de 24h **no garantiza eliminación física automática ni continuidad humana sin suplente**. El único custodio PO deberá realizar/validar el retiro manual, con constancia de hora. Si el PO no puede hacerlo, marcar `P42_MANUAL_REVOCATION_OVERDUE_BLOCKED`, mantener procesamiento bloqueado y retirar cuando se recupere el acceso, sin ampliar validez lógica ni declarar limpieza completa.
 - Si se llega a `T0` sin haber terminado ambos almacenes y preparación de cleanup, abortar y compensar. No desplazar ventana sin nuevo GO.
 
 ## Criterios de gate
@@ -54,7 +54,7 @@
 | Procedimiento de limpieza reversible de dos almacenes | DOCUMENTADO; no probado hosted |
 | Validación adversarial de metadatos | CÓDIGO DE LABORATORIO; no equivale a prueba hosted |
 | Acceso privado DB de escritura TLS y sin logs | PENDIENTE |
-| Revocación manual supervisada con custodio + suplente disponibles al vencimiento | DECISIÓN PO APROBADA; designación y ensayo PENDIENTES |
+| Revocación manual supervisada por PO único | DISEÑO ELEGIDO; riesgo sin sustituto, disponibilidad/operación real PENDIENTES |
 | Inventario backups/exposición de secrets de proyecto | PENDIENTE |
 | Clave P42 real | **0 — NO GENERAR** |
 | Writer P42 / Worker P21 / Checkout / Pago / Beneficios | **OFF / NO-GO** |
