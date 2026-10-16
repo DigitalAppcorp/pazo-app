@@ -4,7 +4,7 @@
 
 Dormant `p37PrivateActivationClaimReader.mjs` and its Node fixtures now use the exact `f16_p37_read_claimed_activation` route, still **enabled=false** by default, not referenced by deployed webhook/cron/browser. PG17 rollback-only `p37-p40-claimed-activation-read-pg17-synthetic.sql` tests the exact SQL candidate (lease, owner association, wrong token, non-activation, absent binding, timeout, hold/cutoff, no finance). GitHub workflow executes SQL only against disposable PG17; no hosted DDL. The candidate has no installed `public.f16_p37_read_claimed_activation` RPC until separately approved and migrated. **P42 event-signing/verified ingress remains not provisioned**; P40 association never equals standalone PayPal signature verification.
 
-CI checks for commit `13890701454703de82359e4fc525de1c5355ffe1`: PG17 workflow run `38982618775` SUCCESS; CI run `38982618786` was still in progress when this handoff was written; consult GitHub directly before asserting both PASS.
+CI checks for commit `13890701454703de82359e4fc525de1c5355ffe1`: **PG17 run `38982618775` SUCCESS** and **CI run `38982618786` SUCCESS**. Both confirmed directly on GitHub after completion.
 
 **Next installation gate (not given):** PO must explicitly approve this exact reviewed hosted read-only DDL/ACL. If approved, run a single reviewed versioned migration with postflight `anon/auth=false, service_role execute=true, P21/P42 OFF, keys/bindings/ledger 0`; then separately approve a trusted P42 custody/ingress activation with backup/retention controls and an end-to-end Sandbox experiment. No default GO for keys, payments, webhooks, live checkout, ledger or benefits. P44 historical REVIEW_REQUIRED; PR #44 DRAFT.
 
