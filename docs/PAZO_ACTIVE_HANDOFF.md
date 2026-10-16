@@ -2,6 +2,10 @@
 
 **Autoridad:** Product Owner (PO). Modo Project Brain OS `DigitalAppcorp/project-brain-os` v1.4.1. Producto `DigitalAppcorp/pazo-app`, rama `f13/section-titles-20261012`, [PR #44](https://github.com/DigitalAppcorp/pazo-app/pull/44) DRAFT. **F16 EN CURSO / beta de pagos NO-GO.** El snapshot es autoritativo frente a banners antiguos de `docs/PAZO_MASTER_ROADMAP.md`; historial completo del handoff anterior disponible en [Git](https://github.com/DigitalAppcorp/pazo-app/blob/17389a6659c7f6ff6721ef34a127332e45d22a61/docs/PAZO_ACTIVE_HANDOFF.md). No asumir que pruebas offline = backend aplicado, ni que este HEAD está merged o desplegado. Estado del checkout público deshabilitado/no habilitado para beta de pagos; no cambiar.
 
+## F16 — DECISIÓN PO: COBROS PROSPECTIVOS PRIORITARIOS; P28 DIFERIDO (2026-10-15)
+
+El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
+
 ## F16-P25 — PRIMERA OBLIGACIÓN: RESERVA DE REVISIÓN ÚNICA, NO CONTABILIZACIÓN (2026-10-15)
 
 - **PO «ok siguamos»:** continuar implementación técnica F16; sin autorización de DDL alojada P25, activación de gate P21, comprador/cobro de PayPal, merchant live, términos publicados ni beneficios. PR #44 DRAFT. Previews automáticos permitidos.
