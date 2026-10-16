@@ -92,3 +92,10 @@ Aprobar una **provisión futura** solo cuando se registren:
 
 **Marcador documental de esta revisión:** `P42_24H_CUSTODY_EXPIRY_REVOCATION_DRAFT_NO_PROVISIONING`.
 **Estado operativo:** NO-GO hasta verificar controles y obtener aprobación PO aparte.
+
+## 7. Confirmación de interfaz Edge y postflight futuro (2026-10-16)
+
+- El Product Owner confirma que ve los controles de **agregar y eliminar secretos** en Supabase Edge Functions → Secrets. **Es comprobación visual, NO prueba que su rol pueda guardar/borrar**: la documentación vigente de Supabase restringe cambios a `Owner` o `Administrator`; los miembros `Developer` pueden visualizar la pantalla. Falta confirmar rol y capacidad de revocación, **sin pulsar Save ni crear un secreto de prueba**.
+- Documentación oficial: https://supabase.com/docs/guides/functions/secrets — las nuevas variables quedan legibles de inmediato para Edge Functions. En la auditoría de solo lectura conector se observaron seis Edge Functions desplegadas; ausencia del nombre literal en el contenido consultado no prueba aislamiento de secretos compartidos del proyecto.
+- Se añadió `supabase/queries/f16_p42_24h_inactive_key_metadata_postflight_READ_ONLY.sql`: **para uso futuro únicamente, después de un GO de provisión aparte**. En una transacción de solo lectura comprueba única fila `P42_V1`, `enabled=false`, `not_before` aún futuro, `not_after=not_before+24h`, writer/worker OFF, P40/ledger vacío, RLS forzada y grants RPC ausentes. No selecciona `key_bytes` ni verifica material Edge. **No ejecutar ahora**: actualmente 0 filas es el estado correcto y este postflight debe fallar. Verificación del archivo: inspección estática y lectura GitHub PASS; sin prueba SQL PG17 ni ejecución alojada todavía.
+- **Próximo mínimo paso humano:** confirmar rol `Owner`/`Administrator` de Supabase con lectura en la administración del equipo/organización. Después revisar canal DB administrado con TLS y operaciones paramétricas, y mecanismo realmente verificable de revocación Edge/DB a las 24h. Aún no generar ni provisionar clave.
