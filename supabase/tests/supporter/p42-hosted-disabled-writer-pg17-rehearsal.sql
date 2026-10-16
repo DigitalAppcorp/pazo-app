@@ -138,15 +138,20 @@ UPDATE p42_absolute_expiry f SET
 UPDATE supporter_private.p42_activation_signing_keys
  SET not_after=clock_timestamp()-interval '5 seconds'
  WHERE key_id='P42_V1';
-GRANT SELECT ON p42_absolute_expiry TO service_role;
-SET LOCAL ROLE service_role;
-DO $absolute_expiry$
+DO $fixture_preflight$
 DECLARE f record;
 BEGIN
  SELECT * INTO f FROM p42_absolute_expiry;
  IF f.issued_at::timestamptz >= (SELECT not_after
    FROM supporter_private.p42_activation_signing_keys WHERE key_id='P42_V1')
  THEN RAISE EXCEPTION 'P42 expiry fixture must be issued BEFORE expiry'; END IF;
+END $fixture_preflight$;
+GRANT SELECT ON p42_absolute_expiry TO service_role;
+SET LOCAL ROLE service_role;
+DO $absolute_expiry$
+DECLARE f record;
+BEGIN
+ SELECT * INTO f FROM p42_absolute_expiry;
  IF public.f16_p42_register_authenticated_activation(
   f.event_id,f.sub_id,f.issued_at,f.nonce,f.key_id,f.mac)
  THEN RAISE EXCEPTION 'P42 accepted MAC after ABSOLUTE key expiry'; END IF;
