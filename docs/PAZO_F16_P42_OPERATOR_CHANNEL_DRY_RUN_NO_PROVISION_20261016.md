@@ -84,3 +84,11 @@ Referencias oficiales: https://supabase.com/docs/reference/cli/supabase-secrets-
 - Tras `PASS` local habrá que corroborar el **origen del CA** y comprobar `Session pooler` en Connect, hostname/usuario exactos **solo localmente**. La conexión real TLS con `sslmode=verify-full` y permisos DBA exige otra autorización expresa; **NO reutilizar ni repetir P43**.
 - El `SSL enforcement` del servidor aparecía desactivado en captura previa; **no modificar ese switch**. El cliente podrá exigir TLS validado independientemente de ese estado.
 - **Resultado de este checkpoint:** `P42_CA_DOWNLOADED_PO_ATTESTED_LOCAL_CA_FILE_TEST_PENDING_HOSTED_WRITE_UNVERIFIED`. F16 NO-GO, PR #44 Draft; no provisión P42, T0, Edge, grants, worker, checkout, cobros ni PayPal.
+
+
+## 7. Verificación CI del parser CA (2026-10-16)
+
+- `scripts/f16-p42-verify-local-ca-offline.ps1` está implementado como **verificador local sin red**; acepta ruta absoluta a fichero, rechaza archivo que contiene private key, tamaño inválido, CA no habilitada o certificado vencido. Valida X.509 con decode PEM base64 a DER (o DER directo); no imprime subject, serial, thumbprint, ruta ni bytes. **No verifica la procedencia Supabase** ni el hostname/servidor TLS, y nunca importa CA a trust store Windows.
+- En el primer ensayo CI se detectó incompatibilidad de factory PEM en el runner PowerShell; reemplazada por decode explícito de PEM/DER sin salida sensible. **El paso de CI sobre certificado CA sintético terminó SUCCESS** en el commit `74bda386eae481f2087f8037a2d0095994db49f4`, run `38930340290`, y rechazó archivo inválido. El workflow general puede tener pasos adicionales en curso; no presentar ese resultado como prueba del archivo descargado por el PO.
+- **Siguiente prueba humana** (no se ha ejecutado): en la PC del PO, desde la carpeta del repositorio actualizado de esta rama, correr `pwsh -NoProfile -File .\scripts\f16-p42-verify-local-ca-offline.ps1 -CaCertificatePath 'RUTA_ABSOLUTA_AL_CA_DESCARGADO'`. El PO comparte **solo etiqueta PASS/BLOCKED**, no archivo ni mensaje con ruta, ni salida de `openssl`, ni parámetros de conexión.
+- Por diseño este script no reutiliza login P43 y no puede verificar DB WRITE/Edge unset; eso sigue necesitando autorización nueva antes de una operación alojada. Clave real no generada, T0 no fijado, F16/P42 NO-GO.
