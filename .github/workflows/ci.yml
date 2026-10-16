@@ -316,6 +316,18 @@ jobs:
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p42_hosted_keys_and_disabled_writer_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p42-hosted-disabled-writer-pg17-rehearsal.sql
 
+      - name: P42 manually supervised DB revocation - PG17 rollback only
+        run: |
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/tests/supporter/p42-manual-revocation-postgres-synthetic.sql
+          echo 'P42 exact key deletion and ROLLBACK PASS: DB disposable only, no provider secrets'
+
       - name: P42 read-only provisioning structural preflight (PG17)
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_p42_provisioning_structural_preflight_READ_ONLY.sql
