@@ -41,7 +41,7 @@ BEGIN
  BEGIN
   v_issued_at:=p_issued_at::timestamptz;
  EXCEPTION WHEN others THEN RETURN false; END;
- IF pg_catalog.abs(pg_catalog.extract(epoch from
+ IF pg_catalog.abs(pg_catalog.date_part('epoch',
  (pg_catalog.clock_timestamp()-v_issued_at)))>120
  THEN RETURN false; END IF;
  SELECT k.key_bytes INTO v_secret
