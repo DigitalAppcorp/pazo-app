@@ -281,11 +281,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "\${GITHUB_ACTIONS:-}" = true
-          test -z "\${DATABASE_URL:-}"
-          test -z "\${SUPABASE_DB_URL:-}"
-          test -z "\${SUPABASE_ACCESS_TOKEN:-}"
-          test -z "\${PAZO_SUPABASE_PROJECT_ID:-}"
+          test "${GITHUB_ACTIONS:-}" = true
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
           # Client and server are both postgres:17.11; the same existing
           # disposable PG service handles two NEW isolated lab databases.
           # Never mount project secrets, user files, or hosted access tokens.
