@@ -1,3 +1,13 @@
+# F16-P44 — Auditoría de fuentes y cobertura 2026-10-16
+
+**Resultado:** `REVIEW_REQUIRED` conservado; no nuevos lectores, no nuevos tests duplicados, no nuevos GET PayPal, no invocar P44 otra vez. **Informe canónico actual:** [`docs/PAZO_F16_P44_MERCHANT_COVERAGE_REUSE_GATE_20261016.md`](PAZO_F16_P44_MERCHANT_COVERAGE_REUSE_GATE_20261016.md).
+
+Se revisaron los componentes reales P05, P23, P24, P29, P32 y sus pruebas existentes, y la fuente de la función Edge P44 v2. La correlación comercial del diagnóstico proviene de una consulta que cubrió solamente `2026-10-16T00:00:00Z` hasta su momento de ejecución: **no es historia total**. Los totales de paginación ausentes no permiten certificar cobertura. No hay evidencia independiente de ciclo REGULAR, ancla contractual o cobertura reembolsos/disputas. El `core.mjs` de `f16-paypal-webhook` alojada v18 tampoco reconoce `CUSTOMER.DISPUTE.CREATED/UPDATED/RESOLVED`, confirmando brecha de alcance. Reglas originales P05 de primer período y pagos tardíos se conservan.
+
+SQL READ ONLY post-auditoría: **ledger 0, reversals 0, P40 0, signing keys P42 0, P21 OFF, writer P42 OFF**. PR #44 continúa DRAFT; no se desplegó, no se compró nada, no hubo writes ni invocaciones. Cualquier futura consulta alojada necesita contrato concreto de procedencia/cobertura y GO específico del PO. **No se permite evadir la expiración del diagnóstico P44 v2.** Siguiente trabajo: diseño documental/validación offline de evidencia faltante, no recrear infraestructura.
+
+---
+
 # PAZO F16 — QA local publicada y verificada (2026-10-16)
 
 **Integración QA P06/P18 CERRADA — reutilización, no recreación.** HEAD verificado en GitHub `bb1d57c01ff01092ef3c7bd96df2d35240150ce6` (rama `f13/section-titles-20261012`, PR #44 sigue OPEN/DRAFT). Este último commit publica **únicamente** `src/features/supporter/testing/f16P06QaAccountOrigin.test.mjs`, con **10** casos. La salida local de Codex reporta 19/19 PASS en suite dirigida y clon limpio, 11 archivos candidatos equivalentes tras imports, 3 casos previamente cubiertos por P18 y 1 conservado como evidencia histórica. El informe detallado local `RESULTADO_F16_QA_TEST_PUBLICATION_20261016.md` no está montado en el repositorio; no afirmar que se leyó íntegro. La verificación independiente en GitHub del commit `bb1d57c` confirmó que **CI = SUCCESS** y **F16 Disposable PostgreSQL Lab = SUCCESS**. NO repetir ejecución local o tests de compra.
