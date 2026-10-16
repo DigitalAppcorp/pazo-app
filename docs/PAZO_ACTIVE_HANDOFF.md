@@ -6,6 +6,13 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P41 — RETENCIÓN PROVISIONAL APROBADA / BORRADO NO AUTORIZADO (2026-10-15)
+
+- El PO respondió explícitamente **«sí»** a retener el vínculo privado evento PayPal ↔ suscripción ↔ UID durante la suscripción activa y **3 años calendario tras el cierre contractual efectivo**, sujeto a revisión legal/contable; disputas, reembolsos y obligaciones justificadas pueden imponer una retención específica mayor, con revisión. Esto es un criterio provisional de producto, NO asesoría legal ni permiso para instalar/retener registros nuevos en hosted.
+- `supabase/functions/f16-paypal-webhook/p41ActivationBindingRetentionLab.mjs` + pruebas sintéticas comprueban cierre merchant, coincidencia del propietario, conciliación completa, ausencia de holds, calendario de tres años (incluido 29-feb), revisión de backups y legal. **NUNCA autorizan borrado, eliminación de backups, pagos ni migraciones.** No leer el botón «cancelar» como fecha del fin contractual.
+- **Pendientes independientes:** revisión legal de retención/borrado/backups y textos/consentimiento P06, autorización explícita para DDL alojada P40, implementación privada de verificación de origen y escritor P39, Edge/worker/PayPal nuevos y ledger. P28 diferido; F16 NO-GO y PR #44 DRAFT.
+- Documento de decisión: `docs/PAZO_F16_P40_PRIVATE_BINDING_STORAGE_RETENTION_REVIEW_20261015.md`.
+
 ## F16-P40 — DECISIÓN PO DE ALMACENAMIENTO LIMITADO (2026-10-15)
 
 - **APROBADO**: guardar de forma privada, con propósito exclusivo de conciliación de suscripciones, el vínculo `provider_event_id` ↔ `subscription_id` ↔ `owner_id`; `created_at` como auditoría técnica mínima. NO hay autorización de instalar la tabla alojada, de definir plazo de retención implícitamente, ni de habilitar writer/worker/checkout/beneficios/PayPal.
