@@ -21,6 +21,16 @@ export function createP37PrivateActivationClaimReader({
   serviceRoleKey.length>=24&&serviceRoleKey.length<=4096&&
   !/\s/.test(serviceRoleKey)&&typeof fetchImpl==='function'
  return Object.freeze({
+  // Non-sensitive preflight classification for disposable CI troubleshooting.
+  // Reports no configuration values, secrets, tokens or user identity.
+  preflight:()=>Object.freeze({
+   enabled:enabled===true,host:projectUrl===HOST,
+   keyType:typeof serviceRoleKey==='string',
+   keyLength:typeof serviceRoleKey==='string'&&
+    serviceRoleKey.length>=24&&serviceRoleKey.length<=4096,
+   keyWhitespace:typeof serviceRoleKey==='string'&&!/\s/.test(serviceRoleKey),
+   transport:typeof fetchImpl==='function',ready,
+  }),
   async readClaimedActivation({eventId,claimToken}={}){
    if(!ready||!EVENT.test(eventId||'')||!UUID.test(claimToken||''))return null
    const controller=new AbortController()
