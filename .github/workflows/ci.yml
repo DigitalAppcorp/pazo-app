@@ -301,3 +301,7 @@ jobs:
       - name: P28 SQL HMAC event-binding adversarial test in disposable PG17
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_hmac_sql_binding_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-hmac-sql-binding-postgres-synthetic.sql
+
+      - name: P28 versioned HMAC rotation and revocation in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_versioned_hmac_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-versioned-hmac-postgres-synthetic.sql
