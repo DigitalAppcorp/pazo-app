@@ -24,7 +24,7 @@ test('Publication is gated, atomic and confined to two QA offer rows',()=>{
  assert.match(sql,/pazo\.f16_p06_qa_publish_go/)
  assert.match(sql,/PO_EXPLICIT_QA_OFFER_PUBLISH_AFTER_OWNER_GATE/)
  assert.match(sql,/IF EXISTS \(SELECT 1 FROM supporter_private\.paypal_p06_offers\)/)
- assert.match(sql,/IF EXISTS \(SELECT 1 FROM supporter_private\.paypal_p06_checkout_attempts\)/)
+ assert.match(sql,/(?:IF|OR) EXISTS \(SELECT 1 FROM supporter_private\.paypal_p06_checkout_attempts\)/)
  assert.match(sql,/^BEGIN;$/m)
  assert.match(sql,/^COMMIT;$/m)
  assert.equal((sql.match(/\bINSERT INTO\b/g)||[]).length,1)
