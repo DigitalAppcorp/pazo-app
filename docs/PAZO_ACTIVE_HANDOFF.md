@@ -6,6 +6,14 @@
 
 El Product Owner aprobó explícitamente priorizar el sistema de cobros y diferir P28 deshabilitado. P28 no es dependencia obligatoria del desarrollo de cobros prospectivos; NO queda cerrado ni se autoriza omitir requisitos financieros. Continuar F16 P06/P21-P27 con código y pruebas sintéticas exclusivamente. Mantener checkout, worker P21, endpoint histórico, PayPal merchant live, beneficios y nuevos pagos apagados; PR #44 DRAFT. Cualquier migración alojada o activación necesita un GO específico. Próximo: cerrar evidencia merchant y contratos/consentimiento P06 con gates de refunds, disputes y ledger idempotente.
 
+## F16-P42 — INFRAESTRUCTURA DESACTIVADA INSTALADA / POSTFLIGHT PASS (2026-10-16)
+
+- **GO del Product Owner:** «sí» expresamente para instalar solo P42 sin claves reales, sin ejecución del writer y con compuerta apagada. Migración `20261016062849_f16_p42_keys_and_writer_inert` aplicada en Supabase alojado y archivo `supabase/migrations/20261016062849_f16_p42_keys_and_writer_inert.sql` versionado.
+- **Postflight confirmado:** `supporter_private.p42_activation_signing_keys` 0 filas; `p42_activation_writer_gate.enabled=false` / `not_before=NULL`; ambas RLS FORCE, service_role sin DML; RPC `public.f16_p42_register_authenticated_activation` instalada pero **EXECUTE false** para anon/authenticated/service_role; P40 0 filas, worker P21 OFF, pagos 0, inbox 8, intents 1. Cero claves reales.
+- **Preflight CI:** `ccda1f5` general PASS #38861314593 / PG17 PASS #38861314423. Se alineó nombre de migración GitHub con versión que registró Supabase para evitar reejecución.
+- **Siguientes gates NO aprobados:** creación/custodia/rotación de clave real; activación de gate/EXECUTE, integración y despliegue Edge, registrar vínculos, buyer Sandbox, worker P21, checkout, ledger, concesión de beneficios. Revisión legal/retención y backups pendiente. P28 histórico diferido; F16 NO-GO; PR #44 DRAFT.
+- Postflight: `docs/PAZO_F16_P42_HOSTED_INERT_INSTALL_POSTFLIGHT_20261016.md`.
+
 ## F16-P42 — BORRADOR ALOJABLE SELLADO Y ENSAYADO (2026-10-16)
 
 - Nuevo contrato SQL `supabase/drafts/f16_p42_hosted_keys_and_disabled_writer_REVIEW_ONLY_DO_NOT_APPLY.sql`: 0 claves, gate OFF, RPC pública sin EXECUTE PUBLIC/anon/authenticated/service_role, preflight seguro P40/P21/ledger. Firma HMAC aislada por dominio literal `p42|sandbox|` y cutoff de clave/gate. Ningún cambio Supabase real.
