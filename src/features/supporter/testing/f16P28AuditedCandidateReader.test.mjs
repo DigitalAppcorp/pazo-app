@@ -17,7 +17,7 @@ test('durably acknowledged audit runs first with no event identifier',async()=>{
   order.push('audit');assert.deepEqual(audit,{requestId:input.requestId,eventFingerprint:fp,action:'historical_candidate_exact_read'})
   return {persisted:true,requestId:audit.requestId}
  },readCandidate:async args=>{
-  order.push('read');assert.deepEqual(args,input)
+  order.push('read');assert.deepEqual(args,{...input,eventFingerprint:fp})
   return {id:args.eventId,processingState:'pending'}
  }})
  assert.deepEqual(await h(input),{id:input.eventId,processingState:'pending'})
