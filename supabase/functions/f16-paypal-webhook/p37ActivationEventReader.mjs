@@ -1,5 +1,7 @@
 // F16-P37: claim-scoped PayPal Sandbox activation event GET. OFFLINE ONLY.
-// The service-owned claim verifier must authenticate the independent event.
+// The private P37 RPC checks P21 lease + P40 binding + BOUND owner;
+// P40 does NOT independently prove PayPal signature. The ingress/P42 writer
+// must already be separately authenticated before this adapter may be enabled.
 // This adapter never credits money, grants benefits or verifies a cycle.
 const HOST='https://api-m.sandbox.paypal.com'
 const REF=/^[A-Za-z0-9._-]{3,128}$/
@@ -13,8 +15,9 @@ export function createP37ActivationEventReader({enabled=false,readClaimedActivat
    const claim=await readClaimedActivation({eventId:activationEventId,claimToken:activationClaimToken})
    if(claim?.id!==activationEventId||claim?.type!=='BILLING.SUBSCRIPTION.ACTIVATED'||
     claim?.processingState!=='processing'||
-    claim?.subscriptionId!==subscriptionId||claim?.signatureVerified!==true||
-    claim?.source!=='verified_inbox_claim' || claim?.leaseCurrent!==true)return null
+    claim?.subscriptionId!==subscriptionId||
+    claim?.source!=='p40_inbox_binding_claim'||claim?.leaseCurrent!==true||
+    Object.hasOwn(claim,'signatureVerified')||Object.hasOwn(claim,'ownerId'))return null
    const token=await getAccessToken()
    if(typeof token!=='string'||token.length<8)return null
    const response=await fetchImpl(HOST+'/v1/notifications/webhooks-events/'+encodeURIComponent(activationEventId),{
