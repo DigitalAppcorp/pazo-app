@@ -1,0 +1,94 @@
+# PAZO F16-P42 — Gate operativo de custodia, vigencia 24 h y revocación (SOLO PREPARACIÓN)
+
+**Fecha:** 2026-10-16. **Entorno objetivo:** Sandbox. **Proyecto Supabase existente:** `mrybvqdebbgcayuvgkkr`.
+**Rama de trabajo:** `f13/section-titles-20261012`; PR #44 DRAFT.
+**Estado:** PROCEDIMIENTO PROPUESTO / PROVISIÓN NO AUTORIZADA POR ESTE DOCUMENTO. F16 NO-GO.
+**Decisión PO ya aprobada:** vigencia de la futura clave P42 = **24 horas**. No es autorización actual para generar, provisionar, activar, desplegar ni cobrar.
+
+## 1. Reconciliación de identidad de los dos destinos
+
+Fuentes fijadas:
+- Contrato histórico: `docs/PAZO_F16_P43_SANDBOX_KEY_PROVISIONING_SECURE_HANDOFF_20261016.md` en `047503875d52604c55cdd8fd226d28d3b859be05`.
+- Infraestructura inerte: `supabase/migrations/20261016062849_f16_p42_keys_and_writer_inert.sql`.
+- Preflight vacío: `supabase/queries/f16_p42_provisioning_structural_preflight_READ_ONLY.sql`.
+- Postflight histórico: `docs/PAZO_F16_P42_HOSTED_INERT_INSTALL_POSTFLIGHT_20261016.md`.
+
+| Destino | Identidad exacta | Estado requerido después de una provisión futura |
+| --- | --- | --- |
+| Supabase Edge Function Secrets del proyecto | `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX` | Presente únicamente durante ventana aprobada, **sin conectar el receptor** |
+| PostgreSQL, esquema privado | `supporter_private.p42_activation_signing_keys` fila `key_id='P42_V1'`, columna `key_bytes` | Mismos 32 bytes decodificados; `enabled=false`, `not_before` futuro, `not_after` finito |
+| P42 writer | `supporter_private.p42_activation_writer_gate` | `enabled=false`, `not_before=NULL` |
+| RPC P42 | `public.f16_p42_register_authenticated_activation(text,text,text,uuid,text,text)` | Sin `EXECUTE` para `PUBLIC`, `anon`, `authenticated` ni `service_role` |
+| P21 / P40 / ledger | Módulos privados existentes | Worker OFF, cero vínculos de activación y cero entradas de pagos |
+
+El nombre «Sandbox» y el prefijo `p42|sandbox|` no implican por sí solos aislamiento físico: Edge Secrets pertenece al **proyecto Supabase** y sus funciones pueden consultar variables de entorno del proyecto. Auditar todos los consumidores Edge y operadores con acceso antes de exponer material, aunque el writer esté apagado. No crear un segundo proyecto ni gasto sin aprobación específica.
+
+## 2. Política de custodia propuesta
+
+- **Responsable de autorización y registro:** Product Owner. **Operador/custodio único durante la operación:** persona concreta designada por el PO, pendiente de identificación y validación de permisos. Un operador debe controlar *ambos* canales en la misma sesión privada; no delegar bytes de un destino a otra persona, a un chat ni a un agente con logs de subprocesos.
+- **Permiso Edge:** verificar previamente Owner/Administrator o permiso equivalente que pueda crear y borrar secretos. Verificar el método realmente disponible mediante Dashboard/API/CLI y cómo protege argumentos, cuerpo HTTPS, consola, archivos y logs. No suponer que el conector de ChatGPT escribe secretos; no transmitir claves mediante CLI `NAME=VALUE` visible en argumentos, `.env` persistentes, portapapeles no controlado o historial.
+- **Permiso DB:** sesión administrativa PostgreSQL con TLS `verify-full`, CA de origen comprobado, sentencias parametrizadas/bind y logging de parámetros deshabilitado; nunca usar el SQL Editor para pegar bytes. El acceso temporal P43 de **solo lectura** no concede autoridad de escritura ni debe reutilizarse por su mera existencia.
+- **Generación eventual:** CSPRNG de sistema operativo, 32 bytes reales, distintos de PayPal, JWT, Supabase API y pruebas; una sola instancia efímera de proceso entrega HEX (64 caracteres) al canal Edge y bytes decodificados al canal DB, sin material en salida/logs. No se genera ahora.
+- **Retención:** ninguna copia legible deliberada fuera de esos dos destinos. Examinar políticas reales de backups/restores, acceso admin, registros de consola y respuesta a incidentes antes de autorización. Borrar buffers y temporales cuando el entorno lo admita, sin prometer borrado criptográfico de memoria, snapshots ni backups.
+- **Inspección:** el operador solo registra nombre/ID de clave, proyecto, fechas UTC, resultado, identidad/rol de operador y estados de seguridad. No publicar clave, fragmentos de ella, hashes derivados, SQL con parámetros ni pantallas que la revelen.
+
+**Condición bloqueante:** si no existe un canal privado capaz de poner material en *ambos* destinos sin filtrarlo a logs, scripts, argumentos o historiales, NO generar la clave. Tampoco efectuar DB-solo ni Edge-solo como salida aceptada.
+
+## 3. Semántica exacta de las 24 horas
+
+**Política propuesta para aprobación operativa:** seleccionar antes de crear la clave un instante UTC futuro `T0` (inicio de la ventana), con tiempo suficiente para confirmar *ambos* destinos antes de `T0`.
+- `not_before = T0`.
+- `not_after = T0 + 24 horas exactas` (no `NULL`, no «fin de día» local).
+- La hora de creación y la de escritura no extienden `T0`; si no se termina correctamente antes de `T0`, abortar, compensar ambos destinos y pedir una **nueva** autorización para nueva ventana. No modificar `T0` silenciosamente después.
+- En esta preparación y durante toda la ventana: `enabled=false`, gate OFF, grants ausentes. El objetivo es custodiar material, **no usarlo**.
+- El TTL de firma HMAC de **120 segundos es distinto** de la vigencia de 24 horas. No usarlo como retención o duración de clave.
+- **Hallazgo de código:** la RPC instalada comprueba `issued_at < not_after` y tolera hasta 120 segundos respecto del reloj del servidor; no comprueba `clock_timestamp() < not_after`. Si se habilitara en otro gate, una firma emitida antes del vencimiento podría entrar durante ese margen posterior. **Corregir y probar cutoff absoluto del servidor antes de cualquier GO de ejecución**. Para este gate el escritor y todos los grants siguen OFF.
+- `not_after` limita aceptación lógica cuando exista ejecución autorizada; **no elimina** automáticamente el secreto Edge ni los bytes DB. La destrucción/revocación debe ser una operación aparte, programada y verificable, no una suposición sobre Supabase.
+
+## 4. Transacción distribuida con compensación (NO EJECUTAR AÚN)
+
+No existe transacción ACID compartida entre Edge Secrets y PostgreSQL. El procedimiento futuro deberá:
+1. Verificar proyecto, operador, permisos de set/unset, CA, logging, backups y posibilidad REAL de confirmar presencia sin revelar valores; confirmar dos canales listos **antes de generar**.
+2. Revalidar read-only el preflight estructural vacío EXACTO de P42, **en un nuevo gate autorizado**. P43 PASS ya cerrado no se repite.
+3. Establecer `T0`, `not_after` y custodio; comprobar controles de expiración/revocación preparados antes de crear bytes.
+4. Generar una sola clave privada en memoria del ejecutor; aprovisionar Edge, después insertar DB con una transacción parametrizada y `enabled=false`.
+5. Confirmar mediante metadatos independientes: presencia del nombre Edge (sin valor), existencia de una sola fila `P42_V1` (sin SELECT de `key_bytes`), duración exacta, `enabled=false`, writer/worker OFF, sin grants ni P40/ledger. Esta verificación acredita **la entrega del mismo buffer en la operación**, no demuestra por sí sola equivalencia criptográfica leída de vuelta entre almacenes; la prueba HMAC extremo a extremo queda para gate posterior y **no** debe ejecutarse con escritor apagado.
+6. Si falla DB después de Edge: **unset Edge** inmediatamente y verificar ausencia. Si falla confirmación posterior a DB: detener, mantener gates OFF, deshabilitar/eliminar fila por el operador autorizado y retirar Edge; confirmar los dos destinos sin material.
+7. Si hay timeout/respuesta ambigua en cualquiera de los dos gestores, **NO reintentar a ciegas ni generar una segunda clave**: inspección de metadatos y compensación controlada hasta quedar ambos ausentes; registrar estado incierto como BLOCKED.
+8. Postflight de estado **aprovisionado pero inactivo** requiere chequeo propio: el preflight actual exige 0 filas y fallará intencionalmente después de provisionar.
+
+Nada en los puntos anteriores concede autoridad para una operación actual.
+
+## 5. Expiración, revocación y emergencia
+
+**Responsable:** mismo custodio autorizado, con respaldo nombrado y probado ANTES del futuro GO. La autorización futura de provisión debe incluir expresamente permiso y mecanismo de **revocación/limpieza**, incluso si el PO no está disponible en el vencimiento.
+
+**Al vencimiento de `not_after` (o antes por sospecha):**
+1. Confirmar writer P42 OFF y P21 OFF; si hubiera drift, suspender inmediatamente, revocar `EXECUTE` desde rol administrativo y escalar incidente. En el gate actual estos permisos nunca deben activarse.
+2. Desactivar la versión DB (o confirmar `enabled=false`), retirar el secreto Edge `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX` usando `secrets unset` o mecanismo Dashboard/API verificado, y retirar la fila de bytes mediante procedimiento administrativo **expresamente autorizado** tras registrar únicamente metadatos no secretos.
+3. Validar ausencia Edge + ausencia de material DB, `EXECUTE=false` para roles de aplicación, gate OFF, worker OFF y ausencia de nuevos vínculos/pagos. La permanencia de copias en backups debe documentarse como exposición residual hasta vencer su política real.
+4. Registrar hora UTC, custodio, resultado y excepciones sin material secreto; escalar si no se puede verificar limpieza. **No declarar revocación total** si algún almacén o backup sigue accesible.
+
+**Incidente antes del vencimiento:** gate y grants primero, luego deshabilitación/eliminación DB y `unset` Edge; no esperar 24 horas. Ante inconsistencia Edge/DB, no reparar habilitando escritor: revocar versión, evaluar causa y solicitar un nuevo GO para cualquier reemplazo. No repetir ni reactivar `P42_V1` tras revocación.
+
+**Automatización obligatoria antes del GO:** elegir/verificar un mecanismo privado de alarma y ejecución de limpieza con evidencia de éxito/fallo; los timestamps SQL y los recordatorios no son una acción de eliminación. No existe todavía tal tarea instalada y no debe afirmarse que haya expiración/revocación automática.
+
+**Rotación:** el secreto Edge de nombre fijo no suministra por sí solo soporte de doble versión concurrente. Rotar a `P42_V2` exige diseño explícito de identificación de clave en runtime, capacidad Edge real de coexistencia/rollback y nuevo gate; nunca sobreescribir silenciosamente la variable mientras el receptor pudiera aceptar `P42_V1`. Para el presente gate solo aplica una versión apagada de 24h, sin uso.
+
+## 6. Gate de verificación pendiente — fail closed
+
+Aprobar una **provisión futura** solo cuando se registren:
+- [ ] Identidad y permiso demostrados del custodio; respaldo/revocador designado.
+- [ ] Cobertura de funciones Edge capaces de leer secretos del proyecto, control de operadores/admin y limitaciones del proveedor.
+- [ ] Canal privado real de escritura y eliminación Edge + DB, TLS verificado, cero args/logs/SQL Editor con secretos.
+- [ ] Política verificada de backups, snapshots, auditoría y recuperación ante compromiso; aceptación expresa de exposición residual.
+- [ ] Semántica `T0` y `not_after=T0+24h` aprobadas por PO; fecha UTC solo se concreta al ejecutar bajo nuevo GO.
+- [ ] Método de expiración/limpieza y responsable probado en entorno sintético, con evidencia y falla cerrada.
+- [ ] Postflight específico metadata-only para fila `P42_V1` apagada y secret Edge presente; posterior cleanup verificado en ambos destinos.
+- [ ] Confirmación fresca de preflight vacío y sin drift antes de cualquier nueva mutación.
+- [ ] Autorización PO independiente, inequívoca, **para generar/provisionar `P42_V1` y revocarla** en los dos destinos, y ninguna otra operación.
+
+**No son parte de este gate**: grants de ejecución, levantar writer P42 o worker P21, desplegar/conectar `receiver.mjs`, activar checkout, PayPal Sandbox buyer, Live, registrar ledger/períodos/beneficios, atribuir pagos históricos o cerrar retención legal P40/P41.
+
+**Marcador documental de esta revisión:** `P42_24H_CUSTODY_EXPIRY_REVOCATION_DRAFT_NO_PROVISIONING`.
+**Estado operativo:** NO-GO hasta verificar controles y obtener aprobación PO aparte.
