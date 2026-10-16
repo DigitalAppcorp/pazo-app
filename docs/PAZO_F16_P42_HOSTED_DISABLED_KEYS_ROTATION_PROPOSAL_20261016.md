@@ -71,6 +71,22 @@ No está en `supabase/migrations/`; NO EJECUTAR en hosted sin nuevo GO.
    «suscripción activa + 3 años tras terminación confirmada» no es
    todavía una implementación de borrado ni dictamen legal.
 
+## Adaptador de backend de contrato P42 (NO CONECTADO)
+
+- `supabase/functions/f16-paypal-webhook/p42HostedContractRecorder.mjs`:
+  desactivado por defecto, admite únicamente host Supabase configurado,
+  key ID versionado `P42_V1` (sin clave), y genera HMAC SHA-256
+  `p42|sandbox|keyId|eventId|subscriptionId|issuedAt|nonce`.
+  No se importa en `receiver.mjs`, no invoca PayPal y no incluye
+  material criptográfico en el repositorio.
+- `src/features/supporter/testing/f16P42HostedContractRecorder.test.mjs`
+  comprueba mediante `fetchImpl` simulado la equivalencia criptográfica
+  contra HMAC de Node, rechazo de host/versión/fuente inválidos,
+  ausencia de envío de claves y modo OFF.
+- La firma interna identifica solamente al backend que posee la clave;
+  **no convierte una venta en pago acreditado**. El secreto real debe
+  obtenerse de un proveedor seguro y no insertarse en chat ni frontend.
+
 ## Prueba antes de GO
 
 La CI ejecuta este MISMO archivo en PG17 desechable,
