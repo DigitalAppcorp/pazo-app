@@ -29,7 +29,8 @@ test('P37 private reader passes only event and lease token to exact server RPC',
    calls.push({url,init})
    return {ok:true,json:async()=>proof()}
   }})
- assert.deepEqual(r.preflight(),{
+ assert.deepEqual(r.preflight(params),{
+  eventValid:true,claimValid:true,abortController:true,timer:true,
   enabled:true,host:true,keyType:true,keyLength:true,
   keyWhitespace:true,transport:true,ready:true,
  })
