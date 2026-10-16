@@ -5,6 +5,7 @@ import {
 } from '../../../../supabase/functions/f16-paypal-webhook/p22PrivateLeaseRpcAdapter.mjs'
 import {
  createP22SandboxReviewWorker,createP22SandboxOfflineMockComposer,
+ createP22SandboxPrivilegedReviewComposition,
 } from '../../../../supabase/functions/f16-paypal-webhook/p22SandboxReviewWorker.mjs'
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const KEY='synthetic_SERVICE_ROLE_KEY_1234567890123456'
@@ -179,4 +180,102 @@ test('P22 PayPal path uses ONLY OAuth and subscription/event GET in offline mock
  assert.ok(urls.some(x=>x.method==='GET'))
  assert.ok(urls.filter(x=>x.method==='POST').every(x=>x.url.endsWith('/v1/oauth2/token')))
  assert.ok(urls.every(x=>x.url.startsWith('https://api-m.sandbox.paypal.com/')))
+})
+
+test('P22 privileged composition remains disabled with no network or credentials',async()=>{
+ let calls=0
+ const worker=createP22SandboxPrivilegedReviewComposition({
+  fetchImpl:async()=>{calls++;throw Error('unexpected_network')},
+ })
+ const r=await worker.runOnce()
+ SAFE(r);assert.equal(r.phase,'DISABLED');assert.equal(calls,0)
+ assert.throws(()=>createP22SandboxPrivilegedReviewComposition({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',projectUrl:BASE,
+  serviceRoleKey:KEY,clientId:'SYNTHETIC_CLIENT_ID',
+  clientSecret:'SYNTHETIC_CLIENT_SECRET',
+ }),/requires_test_transport/)
+})
+test('P22 privileged composition uses existing private RPC and merchant GET contracts only',async()=>{
+ const calls=[]
+ const worker=createP22SandboxPrivilegedReviewComposition({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',projectUrl:BASE,
+  serviceRoleKey:KEY,clientId:'SYNTHETIC_CLIENT_ID',
+  clientSecret:'SYNTHETIC_CLIENT_SECRET',
+  fetchImpl:async(url,init)=>{
+   calls.push({url,method:init.method,body:init.body})
+   if(url.startsWith(BASE+'/rest/v1/rpc/')){
+    assert.equal(init.method,'POST')
+    assert.equal(init.headers.Authorization,'Bearer '+KEY)
+    assert.equal(init.headers.apikey,KEY)
+    const rpc=url.split('/').at(-1)
+    const data={
+     f16_p05_draft_claim_next_verified_event:claim(),
+     f16_p05_draft_read_claimed_event:read(),
+     f16_p22_resolve_bound_under_claim:bound(),
+     f16_p05_draft_finish_claimed_event:true,
+    }
+    assert.ok(Object.hasOwn(data,rpc))
+    return success(data[rpc])
+   }
+   assert.ok(url.startsWith('https://api-m.sandbox.paypal.com/'))
+   if(url.endsWith('/v1/oauth2/token')){
+    assert.equal(init.method,'POST')
+    return success({token_type:'Bearer',access_token:'SYNTHETIC_ACCESS_TOKEN'})
+   }
+   assert.equal(init.method,'GET')
+   if(url.endsWith('/v1/notifications/webhooks-events/'+EVT))
+    return success({id:EVT,event_type:'PAYMENT.SALE.COMPLETED',
+     create_time:WHEN,resource:{id:'SALE-P22-ONE',
+      billing_agreement_id:SUB,state:'completed',
+      amount:{currency:'USD',total:'2.99'},
+      payer_email:'should-not-leak@example.test'}})
+   if(url.endsWith('/v1/billing/subscriptions/'+SUB))
+    return success({id:SUB,plan_id:PLAN,custom_id:ID,status:'CANCELLED',
+     subscriber:{email_address:'should-not-leak@example.test'}})
+   throw Error('unexpected_endpoint')
+  },
+ })
+ const result=await worker.runOnce()
+ SAFE(result)
+ assert.equal(result.phase,'REVIEW_REQUESTED')
+ assert.equal(result.reason,'cycle_unproven')
+ assert.equal(result.dispositionConfirmed,true)
+ assert.equal(calls.filter(x=>x.url.endsWith('f16_p05_draft_claim_next_verified_event')).length,1)
+ assert.equal(calls.filter(x=>x.url.endsWith('f16_p05_draft_finish_claimed_event')).length,1)
+ assert.equal(calls.filter(x=>x.method==='GET').length,3)
+ assert.ok(calls.every(x=>x.method==='GET'||x.url.includes('/rpc/')||
+   x.url.endsWith('/v1/oauth2/token')))
+ assert.ok(!JSON.stringify(result).includes('should-not-leak'))
+})
+test('P22 privileged composition sees disabled inbox as idle and never calls PayPal',async()=>{
+ const calls=[]
+ const worker=createP22SandboxPrivilegedReviewComposition({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',projectUrl:BASE,
+  serviceRoleKey:KEY,clientId:'SYNTHETIC_CLIENT_ID',
+  clientSecret:'SYNTHETIC_CLIENT_SECRET',
+  fetchImpl:async(url,init)=>{
+   calls.push({url,method:init.method})
+   assert.equal(url,BASE+'/rest/v1/rpc/f16_p05_draft_claim_next_verified_event')
+   return success(null)
+  },
+ })
+ const result=await worker.runOnce()
+ SAFE(result);assert.equal(result.phase,'NO_CLAIM')
+ assert.equal(calls.length,1)
+})
+test('P22 privileged composition unavailable private RPC cannot reach provider',async()=>{
+ const calls=[]
+ const worker=createP22SandboxPrivilegedReviewComposition({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',projectUrl:BASE,
+  serviceRoleKey:KEY,clientId:'SYNTHETIC_CLIENT_ID',
+  clientSecret:'SYNTHETIC_CLIENT_SECRET',
+  fetchImpl:async(url)=>{
+   calls.push(url)
+   assert.equal(url,BASE+'/rest/v1/rpc/f16_p05_draft_claim_next_verified_event')
+   return {ok:false,status:503}
+  },
+ })
+ const result=await worker.runOnce()
+ SAFE(result);assert.equal(result.phase,'CLAIM_UNAVAILABLE')
+ assert.equal(calls.length,1)
 })
