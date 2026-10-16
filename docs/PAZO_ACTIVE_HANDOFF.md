@@ -1,3 +1,20 @@
+# PAZO F16 — Reconciliación QA de prueba aislada (2026-10-16)
+
+**GO vigente:** PO aprobó consolidar únicamente trabajo ya verificado de QA y evitar duplicados. NO autoriza despliegue, nueva compra, habilitar P21/P42, ledger, Live ni beneficios.
+
+**Evidencia local remitida por operador:** `LOCAL_COMPARE_COMPLETED`: clon principal limpio, HEAD local `870ea27d2cd80757585e0973f07e60e9df146c90`; baseline de aquel inventario `e8a56d8b20cf77ccaefd3f4e8dbbbc3f96120202`. **883 archivos idénticos; 3 diferencias F16 eran actualizaciones remotas**, no código local nuevo. Directorios operativos fuera de Git contienen helper `p06-live-qa/account-qa-candidate/p06QaAccountOrigin.mjs`, pruebas `account-qa-origin.test.mjs` con 14 casos, fuentes de gestión/checkout QA y seis informes P06/P43/P44. NO se revisó aquí el texto completo de esos archivos locales: no inferir equivalencia total ni recrear las 14 pruebas. Una única ejecución previa del auditor; NO repetirla.
+
+**Intervención en rama posterior al baseline:**
+- `8de00b08`: guard `supabase/functions/f16-paypal-supporter-account/p06QaAccountOrigin.mjs` recuperado de la Edge Function alojada v10, con import reubicado al guard canónico existente `../f16-paypal-supporter/p06SandboxQaGate.mjs`. El contenido lógico coincide con runtime; no duplica el guard.
+- `f04f6572`: `f16-paypal-supporter-account/index.ts` versiona la lógica QA de selección de origen y autenticación de único propietario ya desplegada; preserva imports canónicos del repositorio.
+- `e99b7ab2`: actualiza el test P18 para reconocer la nueva firma de `createRuntime`. No sustituye ni repite los 14 tests aislados.
+- **NO se cambió** `supabase/functions/f16-paypal-supporter/index.ts`: el checkout en GitHub conserva `QA_CHECKOUT_RELEASE_APPROVED=false`; en runtime Sandbox v7 está `true` por la prueba restringida. No sincronizar esos flags sin GO específico.
+- Código de rama exclusivamente: **NO se desplegaron** funciones ni se ejecutaron pagos o pruebas E2E. CI del HEAD `e99b7ab2` se vio queued/in_progress, consultar conclusión antes de declarar PASS.
+
+**Gate local siguiente y único:** en PC/Codex, verificar `git status --porcelain` vacío, rama `f13/section-titles-20261012`, HEAD local esperado `870ea27d2cd80757585e0973f07e60e9df146c90` y remoto aprobado; entonces `git fetch origin f13/section-titles-20261012` + `git merge --ff-only origin/f13/section-titles-20261012`. Si hay drift, STOP. Después comparar exactos `p06-live-qa/account-qa-candidate/` y `account-qa-origin.test.mjs` con nuevos archivos remotos, deduplicar esos 14 tests y adaptar rutas/imports solamente si hace falta; hacer tests dirigidos SOLO tras verificar la diferencia. Preservar informes operativos P06/P43/P44 sanitizados. **No ejecutar scripts de compra, no redeploy, no escribir DB, no push automático de fuentes QA con latch true.** Si el contenido local difiere del guard alojado, clasificar REVIEW_REQUIRED y documentar before/after antes de mezclar.
+
+---
+
 # PAZO — F16-P44 correlación comercial (actualización 2026-10-16)
 
 **Resultado de ejecución único reportado por operador:** `REVIEW_REQUIRED — merchant_refs_correlated_pagination_incomplete`, HTTP 200, una llamada `review` sin reintentos; venta Sandbox y evento original correlacionados. Se conserva la distinción: sin cobertura completa del historial, períodos, refund/dispute, ni permiso de ledger/beneficios.
