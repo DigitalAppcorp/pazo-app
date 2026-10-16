@@ -1,3 +1,13 @@
+# F16 — Términos prospectivos ES/EN y alcance de disputas: gate de revisión 2026-10-16
+
+**Entregado solo en rama, ningún release:** `src/features/supporter/offerCopyDraftP13.mjs` ahora incorpora en español e inglés la condición P05 aprobada `[activación PayPal validada, siguiente facturación merchant observada en activación)`, sujeta a cargo regular y primera obligación auténticos; no usa `COMPLETED+30 días`. Las recompensas aún no están operativas. Se añadieron **dos tests** en `f16P13OfferCopyDraft.test.mjs`; status de borrador y todos los flags de checkout/benefits continúan en `false`. Documentado en `docs/PAZO_F16_P13_BILINGUAL_OFFER_AND_RETENTION_REVIEW_20261015.md`. No reusar como oferta P06 publicada, ni alterar `pazo-supporter-sandbox.qa20261016-v1` ya aceptada sin beneficios.
+
+**No recrear trabajo P03:** existe diseño y código offline de scope de disputas `p05SandboxDisputeMerchantReaders`, `p05OfflineDisputeScopeResolver`, `p05ServerOnlyDisputeLedgerReaders`, y RPC read-only en `f16_p05_dispute_private_ledger_read_DO_NOT_APPLY.sql`. Ledger alojado = 0 => no se puede corroborar que una disputa corresponda a PAZO; `unknown`, no ACK `outside_pazo`. El receptor alojado aún no conserva eventos `CUSTOMER.DISPUTE.*` y no debe deployarse sin política+gate. Reglas P06-A–E **ya aprobadas**, inbox 90d **solo conciliados sin hold**, CA ARL §17602(a)(6) consentimiento (si aplica) 3 años desde aceptación o 1 tras término, plazo mayor. P02/P03 ledger/disputas/backup y retención fiscal **sin plazo aprobado**. El registro de decisiones JSON y firmas siguen pendientes, no se cambiaron.
+
+**Checklist consolidado, NO autorizado:** `docs/PAZO_F16_P05_RETENTION_DECISION_PACKET_20261015.md`. La corrección útil fue precisar copy y próximos gates de firma de G1; **no activar captura, borrado, PayPal Live, P21/P42, transacciones ni beneficios**. El siguiente paso operativo no es código duplicado: (1) confirmar revisión legal/contable y producto de términos/retención; (2) disponibilidad técnica de beneficios/cancelación/acuse; (3) solo con GO específico revisar migración RPC mínima P03 y captura Sandbox ya diseñadas. P44 permanece `REVIEW_REQUIRED`; PR #44 DRAFT.
+
+---
+
 # PAZO F16 — Gate de ejecución prospectiva (2026-10-16)
 
 **Hallazgo central:** la suscripción histórica excluida por P05 no es idéntica a la compra QA de P44. El entorno alojado **sí** contiene 2 ofertas ES/EN publicadas `pazo-supporter-sandbox.qa20261016-v1` y 1 aceptación P06 con SHA y provider-create claim. Pero **los términos QA aceptados excluyen cualquier período pagado o beneficio**, no adoptan la fórmula prospectiva de servicio. No negar el consentimiento QA; conservarlo como evidencia de seguridad y PayPal, sin acreditar `paidThrough`.
