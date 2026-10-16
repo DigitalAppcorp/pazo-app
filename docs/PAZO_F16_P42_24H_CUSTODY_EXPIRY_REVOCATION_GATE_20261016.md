@@ -142,3 +142,16 @@ Aprobar una **provisión futura** solo cuando se registren:
 **Pruebas y autoridad:** el ensayo offline previo de dos destinos prueba solo reglas de metadatos; NO demuestra ejecución manual ni acceso al proveedor. El siguiente gate requiere custodia DB TLS parametrizada, verificación de backup, acceso de eliminación Edge y agenda humana, seguido de autorización inequívoca de provisión + revocación manual en turno aparte. Nada en este cambio modifica Supabase ni permite writer, worker, checkout, PayPal Live/Sandbox buyer, ledger, beneficios, deploy, merge ni infraestructura facturable.
 
 **Marcador:** `P42_MANUAL_SUPERVISED_REVOCATION_POLICY_APPROVED_NO_PROVISIONING`.
+
+
+## 12. Auditoría del canal administrativo y respaldos (2026-10-16)
+
+**Nuevo GO PO «ok go» limitado a continuar la verificación y preparación, no a escribir en Supabase.** Informe específico `docs/PAZO_F16_P42_MANUAL_OPERATOR_PREFLIGHT_20261016.md`.
+
+- **Canal PostgreSQL de escritura:** aún `UNVERIFIED`. La prueba efímera P43 anterior confirmó SOLO lectura; no autoriza ni demuestra capacidad de escritura. Para un siguiente gate autorizado, validar cliente administrativo en máquina privada con TLS `verify-full` + CA real y operaciones parametrizadas, sin contraseñas/secretos en shell, chat, SQL Editor, logs ni argumentos. **No repetir P43 ni resetear contraseña.**
+- **Custodio:** Product Owner con rol Owner y dos TOTP = **candidato** principal; falta su aceptación expresa como operador de revocación a Texp. Suplente real con permiso y disponibilidad comprobados = `PENDING`. No inventar identidad o acceso de una persona.
+- **Revocación Edge:** mecanismo documentado de `secrets unset` / Dashboard, nunca ejecutado; verificación independiente por ausencia del nombre. DB: una eliminación exacta de `P42_V1` con comprobación de afectación y lectura posterior de 0 filas, una vez autorizada la operación real. Dos destinos deben pasar; un acuse aislado es insuficiente.
+- **Hallazgo material de backups:** `scripts/backup-database.ps1` actual utiliza `pg_dump --format=custom` de DB completa; **no excluye datos de `supporter_private.p42_activation_signing_keys`**. Futuros backups dentro de ventana P42 podrían conservar `key_bytes` después del retiro. Flag potencial PostgreSQL 17 `--exclude-table-data=supporter_private.p42_activation_signing_keys` documentado oficialmente; prueba aislada de export/restore aún NO realizada. El runbook de backups recibió aviso de protección, **sin cambiar comportamiento del respaldo**. Bloqueo `BLOCKED_BACKUP_EXPORT_COULD_COPY_P42_KEY`.
+- **Operación manual sigue aprobada solo como diseño** con 24 h a partir de T0 aún NO fijado. No se programaron recordatorios porque no hay fecha/hora de vencimiento. La expiración lógica no es limpieza física. `writer P42=false`, `P21=false`, `EXECUTE=false`, checkout/pagos/beneficios NO-GO sin alterar desde esta revisión.
+
+**Estado del gate:** `P42_MANUAL_OPERATOR_CHANNEL_AND_BACKUP_PREFLIGHT_NO_GO`. Siguiente decisión humana mínima: confirmar custodio principal; después suplente y metodología de backups/canal privado, siempre antes de solicitar cualquier GO de provisión.
