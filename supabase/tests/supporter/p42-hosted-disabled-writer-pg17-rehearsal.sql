@@ -73,13 +73,13 @@ SELECT 'P42-NEW-EVENT'::text AS event_id,'I-P42-NEW'::text AS sub_id,
  ''::text AS mac, ''::text AS old_mac, ''::text AS wrong_type_mac,
  ''::text AS foreign_mac;
 UPDATE p42_candidate_fixture f SET
-mac=public.f16_p42_test_hosted_mac('p42|P42_V1|'||f.event_id||'|'||f.sub_id
+mac=public.f16_p42_test_hosted_mac('p42|sandbox|P42_V1|'||f.event_id||'|'||f.sub_id
  ||'|'||f.issued_at||'|'||f.nonce::text),
-old_mac=public.f16_p42_test_hosted_mac('p42|P42_V1|P42-OLD-EVENT|'||f.sub_id
+old_mac=public.f16_p42_test_hosted_mac('p42|sandbox|P42_V1|P42-OLD-EVENT|'||f.sub_id
  ||'|'||f.issued_at||'|'||f.nonce::text),
-wrong_type_mac=public.f16_p42_test_hosted_mac('p42|P42_V1|P42-WRONG-TYPE|'||f.sub_id
+wrong_type_mac=public.f16_p42_test_hosted_mac('p42|sandbox|P42_V1|P42-WRONG-TYPE|'||f.sub_id
  ||'|'||f.issued_at||'|'||f.nonce::text),
-foreign_mac=public.f16_p42_test_hosted_mac('p42|P42_V1|'||f.event_id||'|I-P42-FOREIGN|'
+foreign_mac=public.f16_p42_test_hosted_mac('p42|sandbox|P42_V1|'||f.event_id||'|I-P42-FOREIGN|'
  ||f.issued_at||'|'||f.nonce::text);
 
 -- Even with an artificially provisioned key, disabled gate denies.
@@ -122,6 +122,32 @@ BEGIN
  f.event_id,'I-P42-FOREIGN',f.issued_at,f.nonce,f.key_id,f.foreign_mac)
  THEN RAISE EXCEPTION 'P42 event reassigned even with valid foreign MAC'; END IF;
 END $as_service$;
+SET LOCAL ROLE postgres;
+UPDATE supporter_private.p42_activation_signing_keys
+ SET not_after=clock_timestamp()-interval '1 minute' WHERE key_id='P42_V1';
+SET LOCAL ROLE service_role;
+DO $expired_key$
+DECLARE f record;
+BEGIN
+ SELECT * INTO f FROM p42_candidate_fixture;
+ IF public.f16_p42_register_authenticated_activation(
+ f.event_id,f.sub_id,f.issued_at,f.nonce,f.key_id,f.mac)
+ THEN RAISE EXCEPTION 'P42 expired key window accepted'; END IF;
+END $expired_key$;
+SET LOCAL ROLE postgres;
+UPDATE supporter_private.p42_activation_signing_keys
+ SET not_after=NULL WHERE key_id='P42_V1';
+UPDATE supporter_private.p42_activation_writer_gate
+ SET not_before=clock_timestamp()+interval '1 minute' WHERE id=1;
+SET LOCAL ROLE service_role;
+DO $cutoff$
+DECLARE f record;
+BEGIN
+ SELECT * INTO f FROM p42_candidate_fixture;
+ IF public.f16_p42_register_authenticated_activation(
+ f.event_id,f.sub_id,f.issued_at,f.nonce,f.key_id,f.mac)
+ THEN RAISE EXCEPTION 'P42 future gate cutoff accepted'; END IF;
+END $cutoff$;
 SET LOCAL ROLE postgres;
 UPDATE supporter_private.p42_activation_signing_keys
  SET enabled=false WHERE key_id='P42_V1';
