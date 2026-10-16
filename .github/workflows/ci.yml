@@ -276,3 +276,7 @@ jobs:
       - name: Install P22 fenced bound-intent read in disposable PostgreSQL ONLY
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p22_claim_scoped_bound_intent_DO_NOT_APPLY.sql -f supabase/tests/supporter/p22-claim-scoped-bound-intent-synthetic.sql
+
+      - name: P28 minimal administrative audit transaction tests in disposable PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_audit_ledger_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audit-postgres-synthetic.sql
