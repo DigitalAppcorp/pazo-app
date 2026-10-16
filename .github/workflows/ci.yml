@@ -16,6 +16,34 @@ permissions:
   contents: read
 
 jobs:
+  # F16-P06 PO GO 2026-10-16. TEMPORARY; remove after first verified run.
+  # No credentials; one GET; never POST or call PayPal.
+  f16-p06-one-shot-external-deny-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: F16 P06 hosted unauthenticated DENY check (one GET, no credentials)
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-supporter'
+          status=$(curl --silent --show-error --max-time 20 --connect-timeout 7 --retry 0 --request GET --output /tmp/f16-p06-deny-body --write-out '%{http_code}' "$url")
+          case "$status" in
+            401|403)
+              echo "F16_P06_GATEWAY_UNAUTH_DENY_HTTP_${status}_PASS"
+              ;;
+            503)
+              if grep --quiet --fixed-strings 'paid_supporter_checkout_not_released' /tmp/f16-p06-deny-body; then
+                echo 'F16_P06_HANDLER_503_STATIC_NO_GO_PASS'
+              else
+                echo 'F16_P06_BLOCKED_UNEXPECTED_503_BODY'; exit 1
+              fi
+              ;;
+            *)
+              echo 'F16_P06_BLOCKED_UNEXPECTED_HTTP_STATUS'
+              exit 1
+              ;;
+          esac
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
