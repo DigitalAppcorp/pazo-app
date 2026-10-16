@@ -58,11 +58,29 @@ jobs:
       - name: Operator PowerShell syntax without credentials or provider calls
         shell: pwsh
         run: |
-          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1','scripts/f16-paypal-sandbox-plan.ps1','scripts/f16-p43-db-access-readonly.ps1','scripts/f16-p43-local-tooling-inventory.ps1','scripts/f16-p43-next-prereqs-readonly.ps1')) {
+          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1','scripts/f16-paypal-sandbox-plan.ps1','scripts/f16-p43-db-access-readonly.ps1','scripts/f16-p43-local-tooling-inventory.ps1','scripts/f16-p43-next-prereqs-readonly.ps1','scripts/f16-p42-session-pooler-tls-readonly-once.ps1')) {
             $tokens=$null; $parseErrors=$null
             [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $file),[ref]$tokens,[ref]$parseErrors) | Out-Null
             if ($parseErrors.Count) { throw "PowerShell syntax error in $file" }
           }
+
+      - name: P42 one-shot TLS probe preflight rejects unsafe hosts without connecting
+        shell: pwsh
+        run: |
+          $result = @(& ./scripts/f16-p42-session-pooler-tls-readonly-once.ps1 -DbHost 'invalid.example.com' -CaCertificatePath '/missing-test-ca.pem')
+          if ($result[0] -ne 'P42_TLS_READ_ONLY_ONCE_BLOCKED_PRECHECK_INPUT' -or
+              $result[1] -ne 'P42_NO_PROVISIONING_NO_PAYMENTS') {
+            throw 'P42 one-shot local-only input guard failed'
+          }
+          $script = Get-Content -LiteralPath 'scripts/f16-p42-session-pooler-tls-readonly-once.ps1' -Raw
+          if (-not $script.Contains("PGSSLMODE'] = 'verify-full'") -or
+              -not $script.Contains('BEGIN TRANSACTION READ ONLY;') -or
+              -not $script.Contains("default_transaction_read_only=on") -or
+              -not $script.Contains('pg_catalog.pg_stat_ssl') -or
+              -not $script.Contains('WaitForExit(25000)')) {
+            throw 'P42 one-shot local-only required fail-closed controls missing'
+          }
+          Write-Output 'P42_TLS_PROBE_OFFLINE_STATIC_AND_INPUT_GUARD_PASS_ONLY'
 
       - name: Enforce P42 data-only exclusion in real PowerShell backup command (static)
         shell: pwsh
