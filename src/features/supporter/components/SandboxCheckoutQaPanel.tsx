@@ -120,8 +120,8 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
             onChange={e=>setConsent(e.target.checked)}
             disabled={attempted.current}
             className="mt-1 h-5 w-5 accent-[#204E4A]"/>
-          <span>{label('Acepto la suscripción mensual de US$2.99 y su renovación automática; podré cancelar futuras renovaciones.',
-            'I agree to the US$2.99 monthly subscription and automatic renewals; I can cancel future renewals.')}</span>
+          <span>{label('Acepto la prueba simulada de US$2.99/mes con renovación automática en PayPal Sandbox, sin dinero real.',
+            'I accept the simulated US$2.99/month automatic-renewal test in PayPal Sandbox, with no real money.')}</span>
         </label>
         <button type="button" onClick={()=>void begin()}
           disabled={!consent||busy||phase!=='ready'||attempted.current}
