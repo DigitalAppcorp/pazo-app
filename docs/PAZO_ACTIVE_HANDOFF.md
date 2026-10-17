@@ -1,3 +1,23 @@
+# F16 FAST TRACK — PERÍODOS PRIVADOS EN PG17 PASS; HOSTED/Live NO-GO (2026-10-17)
+
+**Continuación de la prioridad PO:** Amigo de PAZO $2.99 USD mensual con los cuatro beneficios aprobados, sin anual ni quitar funciones gratuitas. Enfoque de entrega comercial mínima en vez de ampliar P42. PR #44 DRAFT, rama `f13/section-titles-20261012`.
+
+**Hecho nuevo en código, SIN hosted:**
+- `supabase/drafts/f16_mvp_verified_paid_period_source_DISPOSABLE_ONLY.sql`: primer esquema mínimo privado de pagos/servicio: id de venta, owner, subscription, términos inmutables, precio 299 USD centavos, ventana exacta, unicidad de ciclos; bloqueos de refunds/disputas; lectura privada de períodos activos e hitos; RLS FORCED, roles API sin SELECT/WRITE/EXECUTE. Incluye guarda contra ejecutarlo fuera de base desechable `f14_synthetic`; **NO ES MIGRACIÓN DE PRODUCCIÓN**.
+- `supabase/tests/supporter/f16-mvp-private-paid-periods-synthetic.sql`: pruebas de período pagado, expiración, segundo mes futuro, reembolso parcial, hold, duplicación de intervalos y permisos; todas las inserciones dentro de ROLLBACK.
+- `.github/workflows/f16-postgres-inbox-lab.yml`: PG17 disposable ejecuta nuevo SQL+test, sin conectar PAZO hosted.
+- **Evidencia** commit `65089ddb6e1de5fc8d56f10b2cbf98d3f36209e9`: workflow **PG Lab #39037033412 SUCCESS**, **CI #39037033348 SUCCESS**.
+- Road map detallado y contraste QA/Live en `docs/PAZO_F16_MVP_LIVE_FAST_TRACK_20261017.md`, actualizado mediante commit `151e810b36c8b39fc009cf7ab15ce0da0dd43350`. El último commit documental requiere confirmar checks.
+- Beneficios en frontend y proyección servidor anteriores siguen rama/CIs PASS; **no están conectados a cobros reales**. Cuatro recortes PNG del arte original recuperado de Biblioteca disponibles como ZIP de conversación, aún NO están en GitHub.
+
+**Siguiente trabajo ya delimitado, no otra auditoría P42:** conectar fuente privada a un reconciliador PayPal Live verificado/identity bound y preparar una migración versionada con criterios de entorno. Completar UI de badge perfil/Feed, persistencia de 5 temas, muro público consentido y 3/6/12 badges, luego consentimiento/acuse/cancelación Live; Sandbox E2E y un GO explícito Live. Antes de insertar cualquier período real requiere evidencia externa merchant y protección contra reembolso/disputa. No usar `BILLING.SUBSCRIPTION.ACTIVATED` como prueba de pago ni tratar cancelación como refund.
+
+**NINGUNA** migración/credencial/clave/checkout/función Live/pago/beneficio fue activado por este fast track. P42/P21 OFF, DB signing keys P42 0 conforme último preflight. PR #44 DRAFT, F16 Live NO-GO.
+
+**Marcador:** `F16_FAST_TRACK_WALL_UI_AND_SERVER_PROJECTION_CI_PASS_PG17_PERIOD_SOURCE_PASS_LIVE_PENDING`.
+
+---
+
 # F16 — FAST TRACK AMIGO DE PAZO con cuatro beneficios; código inicial validado (2026-10-17)
 
 **Nueva prioridad aprobada por el PO:** lanzar lo antes posible la suscripción voluntaria **$2.99/mes**, con los **cuatro beneficios ya aprobados**, sin plan anual ni retirar funciones gratuitas. No interpretar el deseo de rapidez como GO para cobrar en Live sin pagos y beneficios verificables. Se prioriza `docs/PAZO_F16_MVP_LIVE_FAST_TRACK_20261017.md` (nuevo contrato de ruta crítica) sobre nuevas exploraciones no bloqueantes de P42.
