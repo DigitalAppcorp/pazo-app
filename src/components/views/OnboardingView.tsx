@@ -221,9 +221,12 @@ export const OnboardingView = ({
                 </p>
               </div>
 
-              <div className="pointer-events-none relative z-[1] flex min-h-[190px] flex-1 items-end justify-center px-1">
+              {/* Correct reference scale: artwork spans the hero while title stays live DOM. */}
+              <div aria-hidden="true"
+                className="pointer-events-none absolute inset-x-[-8%] bottom-[35px] z-[1]">
                 <WelcomeAnimatedCompanion/>
               </div>
+              <div className="pointer-events-none min-h-[188px] flex-1" aria-hidden="true"/>
               <div aria-hidden="true" className="relative z-10 flex shrink-0 items-center justify-center gap-2.5 pb-4 pt-1">
                 <span className="h-2 w-2 rounded-full bg-white"/>
                 <span className="h-2 w-2 rounded-full bg-white/45"/>
