@@ -6,6 +6,7 @@ import { SandboxV2AccountPanel } from './SandboxV2AccountPanel'
 import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
 import { SupporterBenefitsHome } from './SupporterBenefitsHome'
+import { SupporterOfferB } from './SupporterOfferB'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
 import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
 import type { Pet } from '../../../types/pazo'
@@ -31,7 +32,6 @@ const intentPattern = /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-
 export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [accounts, setAccounts] = useState<Account[] | null>(null)
   const [busy, setBusy] = useState(false)
-  const [showSandboxQa, setShowSandboxQa] = useState(false)
   const [error, setError] = useState(false)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
@@ -142,13 +142,6 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   }
 
   const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]/55 disabled:opacity-50'
-  const primary = 'min-h-12 rounded-full bg-[#204E4A] px-6 py-3 text-sm font-extrabold text-white transition-colors hover:bg-[#32635D] focus-visible:bg-[#32635D] disabled:opacity-50'
-  const benefits = [
-    [label('Una insignia especial', 'A special badge'), label('En el perfil y junto a tus publicaciones.', 'On your pet profile and feed posts.')],
-    [label('Cinco fondos para tu mascota', 'Five pet backgrounds'), label('Personaliza su perfil con estilos únicos.', 'Personalize their profile with unique styles.')],
-    [label('Un lugar en nuestro muro', 'A place on our thank-you wall'), label('Solo para las mascotas que tú autorices.', 'Only for pets you explicitly choose.')],
-    [label('Reconocimiento a tu constancia', 'A thank-you for continued support'), label('Insignias conmemorativas a los 3, 6 y 12 meses pagados.', 'Milestone badges after 3, 6 and 12 completed paid months.')],
-  ]
   if (membership.kind === 'verified') {
     return <SupporterBenefitsHome lang={lang} onClose={onClose} pet={pet}
       milestone={membership.milestone} qa={qaV2Screen}/>
@@ -184,79 +177,30 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           </button>
         </div>}
         {membership.kind === 'inactive' && <>
-        <section aria-labelledby="supporter-offer-title"
-          className="relative overflow-hidden rounded-[32px] bg-[#E6EDDB] px-5 pb-6 pt-7 sm:px-7">
-          <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#E1E53F]/35 blur-3xl"/>
-          <div className="relative">
-            <p className="text-xs font-extrabold uppercase tracking-widest text-[#52716A]">
-              {label('Gracias por ser parte de PAZO', 'Thank you for being part of PAZO')}
-            </p>
-            <h3 id="supporter-offer-title" className="mt-3 max-w-[18ch] text-[clamp(27px,7vw,38px)] font-black leading-tight tracking-tight">
-              {label('Ayúdanos a mantener vivo este pequeño mundo', 'Help keep this little world going')}
-            </h3>
-            <p className="mt-3 max-w-[48ch] text-sm leading-relaxed text-[#476862]">
-              {label('PAZO es gratis y seguirá ofreciendo sus herramientas principales sin membresía. Tu apoyo voluntario nos ayuda a mantenerlo y mejorarlo.',
-                'PAZO is free, and its core tools will remain available without a membership. Your voluntary support helps us maintain and improve it.')}
-            </p>
-            <div className="mt-5 flex flex-wrap items-baseline gap-x-2">
-              <strong className="text-4xl font-black tabular-nums">US$2.99</strong>
-              <span className="text-sm font-bold text-[#476862]">{label('al mes','per month')}</span>
-            </div>
-            <p className="mt-1 text-xs font-medium text-[#52716A]">
-              {label('Suscripción voluntaria · Renovación mensual · Puedes cancelar las próximas renovaciones.',
-                'Voluntary subscription · Monthly renewal · You can cancel future renewals.')}
-            </p>
-          </div>
-        </section>
-
-        <section aria-labelledby="supporter-benefits-title" className="space-y-3">
-          <h3 id="supporter-benefits-title" className="px-1 text-lg font-black">
-            {label('Un gracias especial por tu apoyo', 'A special thank-you for your support')}
-          </h3>
-          <div className="grid min-w-0 grid-cols-1 gap-2">
-            {benefits.map(([name, description], index) => (
-              <div key={name} className="flex min-w-0 items-start gap-3 rounded-[22px] bg-white px-4 py-3.5 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
-                <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/35 font-black text-[#204E4A]">
-                  {index + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h4 className="break-words text-sm font-extrabold leading-snug">{name}</h4>
-                  <p className="mt-1 break-words text-[12px] leading-relaxed text-[#5C7470]">{description}</p>
-                </div>
+          <SupporterOfferB lang={lang}>
+            {qaV2Screen ? (
+              <SandboxCheckoutQaPanel lang={lang} inline/>
+            ) : (
+              <div className="space-y-2">
+                <button type="button" disabled
+                  className="min-h-12 w-full cursor-not-allowed rounded-full bg-[#E1E53F]/45 px-5 py-3 text-[14px] font-extrabold text-[#6D8780]">
+                  {label('Continuar con PayPal','Continue with PayPal')}
+                </button>
+                <p role="status" className="text-center text-[12px] leading-relaxed text-[#5C7470]">
+                  {label('Las suscripciones todavía no están disponibles. Puedes seguir disfrutando de PAZO gratis.',
+                    'Subscriptions are not available yet. You can keep enjoying PAZO for free.')}
+                </p>
               </div>
-            ))}
-          </div>
-          <p className="px-1 text-xs leading-relaxed text-[#5C7470]">
-            {label('Tus beneficios se activan cuando PAZO confirma tu pago.',
-              'Your benefits activate when PAZO confirms your payment.')}
-          </p>
-        </section>
-
-        <section aria-label={label('Elegir cómo continuar', 'Choose how to continue')}
-          className="space-y-3 rounded-[28px] bg-white p-5 shadow-[0_4px_20px_rgba(32,78,74,0.04)]">
-          {qaV2Screen ? (
-            <>
-              <p className="text-xs font-bold text-[#476862]">
-                {label('Modo de prueba: PayPal Sandbox utiliza dinero ficticio. No estás haciendo un pago real.',
-                  'Test mode: PayPal Sandbox uses test money. You are not making a real payment.')}
-              </p>
-              {!showSandboxQa && <button type="button" className={primary}
-                onClick={() => setShowSandboxQa(true)}>
-                {label('Apoyar a PAZO · Prueba Sandbox', 'Support PAZO · Sandbox test')}
-              </button>}
-              {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
-            </>
-          ) : (
-            <p role="status" className="rounded-2xl bg-[#F0F3ED] px-4 py-3 text-sm font-semibold text-[#476862]">
-              {label('Las suscripciones todavía no están disponibles. Puedes seguir disfrutando de PAZO gratis.',
-                'Subscriptions are not available yet. You can keep enjoying PAZO for free.')}
+            )}
+            <p className="px-1 text-center text-[11px] leading-relaxed text-[#5C7470]">
+              {label('PAZO seguirá siendo gratis para todos. Renovación mensual y cancelación disponible.',
+                'PAZO will remain free for everyone. Monthly renewal and cancellation available.')}
             </p>
-          )}
-          <button type="button" onClick={onClose} className="min-h-11 w-full rounded-full bg-[#F0F3ED] px-4 py-3 text-sm font-bold text-[#204E4A] hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/45">
-            {label('Ahora no, seguir usando PAZO', 'Not now, keep using PAZO')}
-          </button>
-        </section>
-
+            <button type="button" onClick={onClose}
+              className="min-h-11 w-full rounded-full bg-[#EEF2E9] px-4 py-3 text-sm font-bold text-[#204E4A] hover:bg-[#E3EBD8] focus-visible:bg-[#E3EBD8]">
+              {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
+            </button>
+          </SupporterOfferB>
         </>}
         {(qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
