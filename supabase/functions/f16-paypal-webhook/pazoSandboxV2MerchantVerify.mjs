@@ -77,6 +77,24 @@ export function createPazoSandboxV2MerchantVerifier({
    if(ids.some(id=>typeof id!=='string'||!ID.test(id))||
       new Set(ids).size!==ids.length)
     fail('invalid_merchant_transaction_ids')
+   const reversals=ledger.transactions.filter(tx=>
+    ['PARTIALLY_REFUNDED','REFUNDED'].includes(tx.status))
+   // The provider's subscription-scoped list is authoritative for this
+   // sale's association; independently GET it before placing the hold.
+   if(reversals.length===1&&ledger.transactions.length===1&&
+      confirmSaleAmount(reversals[0].amount_with_breakdown?.gross_amount)){
+    const tx=reversals[0]
+    const sale=await read(HOST+'/v1/payments/sale/'+encodeURIComponent(tx.id),
+     {method:'GET',headers})
+    if(sale.id!==tx.id||!['refunded','partially_refunded'].includes(sale.state)||
+       sale.amount?.currency!=='USD'||sale.amount?.total!=='2.99')
+     fail('refund_merchant_get_mismatch')
+    const reason=sale.state==='refunded'?'refunded':'partially_refunded'
+    if(await markReversal({ownerId,intentId,saleId:tx.id,reason})!==true)
+     fail('refund_not_durably_held')
+    return Object.freeze({phase:'verified_sandbox_reversal',environment:'sandbox',
+     paidThrough:null,cycleVerified:false,mayGrantBenefits:false})
+   }
    const good=ledger.transactions.filter(tx=>
     tx.status==='COMPLETED'&&
     confirmSaleAmount(tx.amount_with_breakdown?.gross_amount))
