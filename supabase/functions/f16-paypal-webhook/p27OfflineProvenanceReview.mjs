@@ -111,6 +111,11 @@ export function createP27OfflineProvenanceReview({
     inspectRefunds({eventId,claimToken,saleId:event.resource.id}),
     inspectDisputes({eventId,claimToken,saleId:event.resource.id}),
    ])
+   // A server callback may hold the same object reference as the first
+   // private read. Check the captured projection BEFORE passing that object
+   // into another evaluator; it may have been mutated during merchant awaits.
+   if(reviewFence(privateContext)!==initialFence)
+    return safe('REVIEW_REQUIRED','private_claim_or_obligation_changed_during_review')
    const result=assessP26FirstObligationEvidence({
     ...source,history,refunds,disputes,
    })
