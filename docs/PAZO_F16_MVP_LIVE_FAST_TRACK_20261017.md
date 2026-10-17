@@ -53,3 +53,11 @@ Solo después de PASS integral Sandbox de caso pagado, renovación/cancelación,
 - No migraciones hosted, emisión nueva de claves/Live, créditos, checkout ni beneficios reales bajo el GO de programación.
 
 **Estado resumido:** código de primer slice + proyección server-only en PR DRAFT; cuatro beneficios aún NO conectados a pagos reales. La próxima intervención técnica debe ser **A + B**, no otra auditoría P42, antes de pasar a C. Cerrado solo cuando se compruebe con evidencia de merchant real y QA visual del PO.
+
+## Avance posterior — fuente privada de períodos (PG17 sintético, no instalado)
+- `supabase/drafts/f16_mvp_verified_paid_period_source_DISPOSABLE_ONLY.sql`: tabla privada de pruebas de pago regular Live, con moneda/cantidad fijas 299 USD-cents, propietario, evento merchant, digest de términos, intervalo acotado a 32 días, unicidad por venta y por ciclo, RLS forzado, **sin grants** a roles API. Tabla separada de bloqueos por refund/disputa y proyección privada server-only.
+- Protección deliberada `current_database() = 'f14_synthetic'`: imposible aplicar este draft directamente en el Supabase hosted de PAZO. Un operador deberá **transformarlo en migración versionada aprobada** después de revisión técnica; NO quitar el guard como atajo ni aplicar en SQL Editor. No incluye ingestión PayPal, plan Live ni activación.
+- `supabase/tests/supporter/f16-mvp-private-paid-periods-synthetic.sql`: sin registros iniciales no hay cobertura; un ciclo conciliado sintético la habilita; hold de refund parcial la retira hasta revisión; mes futuro no se cuenta; vencimiento la retira; intervalos solapados bloquean. Test usa transacción y ROLLBACK.
+- `.github/workflows/f16-postgres-inbox-lab.yml`: nuevo paso al final que se ejecuta **únicamente** en PostgreSQL 17 desechable con credenciales sintéticas. Commit `65089ddb6e1de5fc8d56f10b2cbf98d3f36209e9`: [PG Lab #39037033412](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39037033412) **SUCCESS** y [CI #39037033348](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39037033348) **SUCCESS**.
+- **Próximo trabajo esencial:** conectar un reconciliador comercial Live autenticado a la fuente de períodos y probar la frontera de permisos/consentimiento antes de generar una migración hospedada. El esquema sintético por sí solo NO autoriza emitir una suscripción.
+
