@@ -1,3 +1,15 @@
+# F16-P25/P26/P27 — revisión privada antes de historia comercial, laboratorio PASS (2026-10-16)
+
+**Se continúa F16 sin intentar sortear bloqueo P42.** P25 (reserva única ordinal 0 review-only), P26 (comprobador de procedencia offline + ledger candidato siempre bloqueado) y P27 (puente merchant offline) **ya existían** y NO se han recreado. Se cerró una brecha de orden en `p27OfflineProvenanceReview.mjs`: ahora valida evento/UUID claim, compara evento+token exactos con contexto privado, llama a `assessP26FirstObligationEvidence` para exigir evento firmado, owner/intent BOUND, consentimiento P06 y reserva P25 coherente **antes** de leer historial, refunds o disputas. Si falla alguna condición, bloquea antes de hacer inspecciones adicionales. El camino positivo sintético sigue `REVIEW_REQUIRED`, `mayRecordPayment=false`, `mayGrantBenefits=false`, `paidThrough=null`.
+
+**Nueva barrera contractual P26:** un consentimiento P06 **QA-only** (versión `pazo-supporter-sandbox.qa20261016-v1`) nunca se admite como acuerdo de **servicio pagado**. El gate offline exige `offerPurpose='PAID_SERVICE_PROSPECTIVE'`, `firstPeriodContractAttested=true`, `qaOnly=false`, versión no-QA para continuar a comprobación de historia. Estos son **inputs esperados de una futura fuente autenticada**, no evidencia atestiguada por el gate offline. El contrato prospectivo ES/EN aún está sin publicar; no hay condiciones para atribuir servicio a la compra pasada. Tests dirigidos P26/P27 negativos frente a consentimientos QA, leases y propietarios falsos.
+
+**Evidencia:** commits técnicos `344fd0347a9ebd867e81ca02243dc91cfede4513` (fencing P27), `2d462b1a4c1155c9d2a14861c4a3a3a4e8f32121` (protección QA P26) y suites dirigidas hasta `28e509384d7031082abcdf05969a0e8079879a2e` — CI `38984326066` SUCCESS, F16 Disposable PostgreSQL Lab `38984325976` SUCCESS. Documento P26 corregido en `docs/PAZO_F16_P26_MERCHANT_PROVENANCE_LEDGER_GATE_20261015.md`.
+
+**Estado alojado (consulta read-only):** P25/P26 tablas/RPC **ausentes**; P21 y P42 OFF; P40, claves P42, ledger y reversos en cero. No hubo otra compra, PayPal merchant GET, escritura SQL, despliegue ni privilegio financiero. El parche P42 de vencimiento sigue `BLOCKED BY TOOL SAFETY`; no solicitar a operador eludir ese control. **Siguiente camino habilitado:** continuar integración contractual y conciliación prospectiva sin confundir QA con servicio; cualquier migration, Edge deploy, seller read alojado, key provision, checkout o ledger requiere gate concreto. PR #44 DRAFT, F16 NO-GO para cobros/beneficios. No repetir pruebas previas que ya pasaron.
+
+---
+
 # F16-P42 — APPLY BLOCKED BY TOOL SAFETY (2026-10-16)
 
 **PO GO específico:** el PO autorizó aplicar solo `supabase/drafts/f16_p42_absolute_key_expiry_patch_REVIEW_ONLY_DO_NOT_APPLY.sql`, sin generar claves, sin Edge secrets, sin activar gates o conceder permisos. El candidato (blob Git `2961f9a8933d2e342cb04c681e8adbb8fae82046`) había pasado CI `38983466691` y PG17 `38983466647`; comparación exacta con migración P42 inicial `ceb24e4b` confirmó que el único cambio del cuerpo era rechazar `not_after IS NULL` y `clock_timestamp() >= not_after`.
