@@ -1,3 +1,11 @@
+# F16-P42 — Edge Secrets: ausencia del nombre P42 confirmada visualmente (2026-10-17)
+
+**Evidencia visual aportada por el Product Owner:** Dashboard Supabase de PAZO > Edge Functions > **Secrets** > lista de **Custom secrets**, búsqueda exacta por nombre `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX` mostró `No results found`. Resultado: **no hay entrada visible con ese nombre en Custom secrets, bajo el filtro mostrado**. Esto NO es una exportación integral del inventario ni prueba de aislamiento físico de variables de otras funciones; no confundir con una consulta en la lista de Edge Functions que se había realizado anteriormente. No se pulsó `Save`, no se estableció valor y ningún byte secreto se compartió.
+
+**Reconciliación con el postflight previo de PostgreSQL:** `supporter_private.p42_activation_signing_keys=0`, P42 writer OFF, P21 worker OFF, RPC con expiración absoluta y sin EXECUTE para roles de aplicación, ledger y P40 en cero. **Se comprobó ausencia nominal en los dos destinos; esto NO da GO de provisión.** Permanecen bloqueantes: canal administrativo privado PostgreSQL de escritura con TLS `verify-full` y tratamiento parametrizado sin registros de secretos (en el intento anterior no estuvo disponible la contraseña existente); validación de revocación real Edge sin secretos; inventario y retención de backups/administradores; riesgo de custodio único y horario T0/Texp; consentimiento explícito PO de generación/provisión. No intentar otro `P43` ni regenerar contraseñas por inferencia, no usar SQL Editor para pegar material de clave, no activar checkout/worker/grants/ledger. Próximo paso: preguntar al PO solo si dispone de la contraseña **existente** en un gestor privado, sin solicitar que la comparta en chat. PR #44 sigue DRAFT y F16 pagos NO-GO.
+
+---
+
 # F16-P42 — custodia 24h: preflight privado READ-ONLY, provisión NO-GO (2026-10-16)
 
 **Siguiente gate autorizado por `ok go`: auditar custodia/revocación P42 tras instalación del parche absoluto.** Se completó auditoría solo lectura alojada y escaneo del código desplegado de **8** Edge Functions, SIN nueva clave ni ejecución de procedimientos de borrado; resultado `P42_CUSTODY_READONLY_AUDIT_PASS_BUT_PROVISIONING_NO_GO`.
