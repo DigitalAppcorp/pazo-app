@@ -325,3 +325,19 @@ jobs:
             -f supabase/tests/supporter/f16-mvp-four-benefits-pg17-synthetic.sql)
           test "$result" = F16_MVP_FOUR_BENEFITS_PG17_SYNTHETIC_PASS
           echo 'PASS F16 MVP: profile themes, badges, milestones, opt-in and dispute blocks'
+
+      - name: F16 MVP merchant period writer — disposable PG17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_mvp_operator_period_writer_DISPOSABLE_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-mvp-private-period-writer-synthetic.sql)
+          test "$result" = F16_MVP_PRIVATE_PERIOD_WRITER_IDEMPOTENT_PG17_PASS
+          echo 'PASS F16 MVP: private idempotent merchant periods, owner and dispute holds'
