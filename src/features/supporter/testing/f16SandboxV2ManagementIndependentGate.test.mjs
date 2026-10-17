@@ -22,6 +22,7 @@ test('F16 Sandbox: cancel and download stay possible after new checkout is close
 test('F16 Sandbox: default-off management does not silently activate PayPal',()=>{
  assert.doesNotMatch(edge,/QA_V2_MANAGEMENT_RELEASE_APPROVED = true/)
  assert.doesNotMatch(edge,/QA_CHECKOUT_RELEASE_APPROVED = true/)
- assert.match(edge,/verifiedOwnerId:qaOwner/)
+ assert.match(edge,/runtime\.canBuy\(qaOwner\)/)
+ assert.match(edge,/f16_qa_v2_owner_can_checkout/)
  assert.match(edge,/if\(!qaOwner\)/)
 })
