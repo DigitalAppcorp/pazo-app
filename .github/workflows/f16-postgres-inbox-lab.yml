@@ -293,3 +293,19 @@ jobs:
             -e GITHUB_ACTIONS=true \
             -e PGPASSWORD=f14_synthetic_ci_only \
             postgres:17.11 bash -s < scripts/f16-p42-backup-exclusion-pg17-lab.sh
+
+      - name: F16 MVP verified paid-period source — disposable PG17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_mvp_verified_paid_period_source_DISPOSABLE_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-mvp-private-paid-periods-synthetic.sql)
+          test "$result" = F16_MVP_PRIVATE_PERIODS_PG17_SYNTHETIC_PASS
+          echo 'PASS F16 MVP: private verified cycles, review holds, expires, denies API roles'
