@@ -21,6 +21,7 @@ type AccountResult = {
 type Props = {lang: 'es' | 'en'; onClose: () => void}
 
 const host = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
+const qaV2Screen = import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true'
 const intentPattern = /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export function SupporterAccountManagement({lang, onClose}: Props) {
   const [accounts, setAccounts] = useState<Account[] | null>(null)
@@ -140,9 +141,9 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           <div>
             <h2 id="supporter-account-title" className="text-xl font-black">
-              {label('Gestionar Amigo de PAZO','Manage Friend of PAZO')}
+              {qaV2Screen?label('Amigo de PAZO · Sandbox','Friend of PAZO · Sandbox'):label('Gestionar Amigo de PAZO','Manage Friend of PAZO')}
             </h2>
-            <p className="text-sm text-[#5C7470]">{label('Solo gestión de cuentas · No hay compras disponibles','Account management only · Purchases unavailable')}</p>
+            <p className="text-sm text-[#5C7470]">{qaV2Screen?label('Pruebas con saldo ficticio de PayPal','PayPal test-money only'):label('Solo gestión de cuentas · No hay compras disponibles','Account management only · Purchases unavailable')}</p>
           </div>
           <button ref={closeRef} type="button" onClick={onClose} disabled={busy}
             className={control}>{label('Cerrar','Close')}</button>
@@ -185,7 +186,7 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
         {import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
           <SupporterWallConsentSettings lang={lang} />
         )}
-        {accounts?.map(account=>(
+        {!qaV2Screen && accounts?.map(account=>(
           <div key={account.intentId} className="space-y-3 rounded-3xl bg-white p-5 shadow-sm">
             <h3 className="text-base font-extrabold">
               {label('Suscripción de apoyo','Support subscription')}
