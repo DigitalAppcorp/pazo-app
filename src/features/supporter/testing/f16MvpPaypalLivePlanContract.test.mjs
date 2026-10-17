@@ -35,10 +35,6 @@ test('F16 MVP: no live plan ID, wrong merchant plan or inactive fails closed',()
 });
 test('F16 MVP: trial, additional cycle, finite cycle, annual and weekly blocked',()=>{
  const good=plan().billing_cycles[0];
- for(const variation of [
-  [good,{...good,tenure_type:'TRIAL',sequence:2}],
-  [good],
- ]) {/* no-op: build adversarial cases below without provider calls */}
  for(const p of [
   plan({billing_cycles:[{...good,tenure_type:'TRIAL'},good]}),
   plan({billing_cycles:[{...good,total_cycles:12}]}),
