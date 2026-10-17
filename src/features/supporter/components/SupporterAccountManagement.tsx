@@ -163,8 +163,7 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
             {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
           </div>
         )}
-        {import.meta.env.DEV &&
-          import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
+        {import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
           import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
             <SupporterSandboxBenefitsStatus lang={lang} />
           )}
