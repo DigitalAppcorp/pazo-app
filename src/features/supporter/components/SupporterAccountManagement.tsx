@@ -41,13 +41,15 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const label = (es: string, en: string) => spanish ? es : en
 
   useEffect(() => {
+    // Member home owns its own close/keyboard handling.
+    if (membership.kind === 'verified') return
     closeRef.current?.focus()
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !busy) onClose()
     }
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [busy, onClose])
+  }, [busy, onClose, membership.kind])
 
   const call = async (body: Record<string, unknown>, download = false) => {
     const config = getPublicSupabaseConfig(import.meta.env)
