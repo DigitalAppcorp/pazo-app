@@ -1056,9 +1056,10 @@ test('F16 per-pet consent notice approved in ES/EN never persists preview decisi
   }
   const src=fs.readFileSync('src/features/supporter/components/GratitudeParticipationPreview.tsx','utf8')
   const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
-  assert.ok(pet.includes('setShowGratitudeParticipation(true)'))
-  assert.ok(pet.includes('pets={availablePets}'))
-  assert.ok(pet.includes('<GratitudeParticipationPreview'))
+  const member=fs.readFileSync('src/features/supporter/components/SupporterBenefitsHome.tsx','utf8')
+  assert.ok(!pet.includes('setShowGratitudeParticipation(true)'),'No duplicated wall card in My Pet')
+  assert.ok(member.includes('<SupporterWallConsentSettings lang={lang}'),'Member manages live per-pet wall opt-in')
+  assert.ok(!member.includes('<GratitudeParticipationPreview'),'Preview is not mistaken for saved consent')
   assert.ok(!src.includes('supabase')&&!src.includes('localStorage')&&!src.includes('fetch(')&&!src.includes('sessionStorage'))
   assert.ok(!src.includes('border-')&&!src.includes('ring-'))
 })
