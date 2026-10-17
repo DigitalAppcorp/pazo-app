@@ -1,3 +1,19 @@
+# F16 — SANDBOX V2 QA LOCALHOST CORREGIDO Y DESPLEGADO (2026-10-17)
+
+**Retomado tras petición PO «vuelve a trabajar en donde te quedaste».** No crear cuenta nueva ni alterar la anterior. CI del commit previo `be5d5e89914436e714fd88952ba0fef513fc6168`: [CI SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39054377142) y [PG Lab SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39054377186).
+
+**Estado real Supabase verificado:** allowlist QA `enabled` y no vencida para 1 cuenta existente; 2 ofertas V2 publicadas ES/EN; 0 intentos de compra V2, 0 períodos de pago, 0 holds. No aprobación PayPal efectuada aún. PayPal Live OFF, P06 v1 histórico intacto.
+
+**Bug bloqueante localizado y corregido:** el Edge dedicado permitía `localhost:5173`, pero los constructores anidados `p14SandboxSupporterAccountHandler` y `p06SandboxCancellationHandler` rechazaban todos los orígenes HTTP y lanzaban 503 en `compose()`. Corregido con parámetro `allowLoopbackQa=false` por defecto. Solo `f16-paypal-supporter-v2-qa/index.ts` lo activa mediante `QA_LOCAL_ORIGINS.has(origin)`, con dos orígenes exactos `http://localhost:5173` y `http://127.0.0.1:5173`; todo otro HTTP rechazado, los endpoints legacy conservan HTTPS-only. Tests `src/features/supporter/testing/f16SandboxExactLocalOrigin.test.mjs` verificaron default deny, local opt-in y rechazo de port alternativo. Commit `2fae8e693f3531712bdd8bdffd7907490b672b17`: [CI SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39055648194) y [PG Lab SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39055648208). **Edge redeployed** `f16-paypal-supporter-v2-qa` **ACTIVE v3**, JWT obligatorio. No redeploy del viejo Edge, no Live.
+
+**Siguiente paso humano REAL, no simulable por el asistente:** en Windows, dentro del clon PAZO de rama `f13/section-titles-20261012`, hacer `git pull --ff-only` y `powershell -ExecutionPolicy Bypass -File .\\scripts\\f16-run-real-sandbox-qa.ps1` (usa config pública y flags QA solo para Vite), abrir `http://localhost:5173/#/account/supporter` e iniciar sesión con la cuenta de pruebas existente. `Abrir prueba Sandbox`, revisar términos cuatro beneficios, aceptar checkbox y presionar `Probar suscripción en PayPal Sandbox` **UNA VEZ**. PayPal redirige temporalmente al viejo HTTPS Preview porque su URL de retorno debe ser HTTPS; después el comprador regresa manualmente a localhost, pulsa `Actualizar prueba` y `Verificar pago real Sandbox`. NO repetir el botón de compra tras respuesta desconocida, pues PayPal POST está one-shot. Comprobar en PAZO insignias originales, 5 fondos, muro consentido/desconsentido y futura cancelación de solo la V2. **Vercel no admite preview nuevo actualmente: cuota API diaria HTTP 402; NO pagar ni cambiar plan para QA.**
+
+**Limitación explícita:** no se afirma E2E final hasta que el usuario apruebe con cuenta buyer PayPal Sandbox y el GET merchant acredite USD 2.99. `f16_qa_v2_record_verified_first_cycle` y QA UI están preparados; el verificador es intencionalmente estricto y ante historial incompleto/sale/fechas faltantes rechaza sin conceder beneficios. Investigar logs y proveedor si falla antes de reintentar checkout.
+
+**Marcador:** `F16_SANDBOX_V2_EDGE_V3_LOCALHOST_CI_PG_PASS_AWAIT_HUMAN_APPROVAL`.
+
+---
+
 # F16 — PAYPAL SANDBOX V2 LOCAL QA READY FOR HUMAN BUYER, NO LIVE (2026-10-17)
 
 **Product Owner directive:** work without stopping until a real, executable Sandbox test of the **four approved benefits** is possible. Reuse the owner's existing test Auth + pet; no new account; no prototypes; not PayPal Live.
