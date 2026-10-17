@@ -13,15 +13,18 @@ const keys=(obj,required)=>obj&&typeof obj==='object'&&!Array.isArray(obj)&&
  Object.keys(obj).sort().join('|')===required.slice().sort().join('|')
 export function createPazoSandboxCancellationHandler({
   resolveAuthenticatedOwner,privateIntentStore,admit,provider,
-  trustedOrigins=[],
+  trustedOrigins=[],allowLoopbackQa=false,
 }={}){
+ const qaLoopback=new Set(['http://localhost:5173','http://127.0.0.1:5173'])
  if(typeof resolveAuthenticatedOwner!=='function'||
   typeof privateIntentStore?.load!=='function'||
   typeof admit!=='function'||
   typeof provider?.read!=='function'||
   typeof provider?.cancel!=='function'||
+  typeof allowLoopbackQa!=='boolean'||
   !Array.isArray(trustedOrigins)||trustedOrigins.some(v=>
-    typeof v!=='string'||!v.startsWith('https://')))
+    typeof v!=='string'||(!v.startsWith('https://')&&
+      !(allowLoopbackQa&&qaLoopback.has(v)))))
   throw Error('pazo_cancellation_handler_not_configured')
  const allowed=new Set(trustedOrigins)
  return async request=>{
