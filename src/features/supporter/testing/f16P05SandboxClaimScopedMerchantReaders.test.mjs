@@ -77,7 +77,7 @@ test('scoped merchant reader GETs only claimed event and matching subscription',
  assert.equal(calls.filter(x=>x.url?.includes('webhooks-events/')).length,3)
  assert.equal(calls.filter(x=>x.url?.includes('billing/subscriptions/')).length,1)
  const allPaypal=calls.filter(x=>x.source==='paypal')
- assert.equal(allPaypal.filter(x=>x.method==='POST').length,4)
+ assert.equal(allPaypal.filter(x=>x.method==='POST').length,5)
  assert.ok(allPaypal.filter(x=>x.method==='POST').every(
   x=>x.url===HOST+'/v1/oauth2/token'))
  assert.equal(calls.filter(x=>x.url?.includes('/payments/sale/')).length,1)
