@@ -102,50 +102,58 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
   }
   return (
     <section aria-labelledby="f16-qa-checkout-title"
-      className={inline ? 'min-w-0 space-y-3' : 'space-y-4 rounded-[28px] bg-[#F0F3ED] p-4 sm:p-5'}>
+      className={inline ? 'min-w-0 space-y-2' : 'space-y-4 rounded-[28px] bg-[#F0F3ED] p-4 sm:p-5'}>
       <h3 id="f16-qa-checkout-title" className={inline ? 'sr-only' : 'text-lg font-black'}>
         {label('Confirmar mi apoyo · Sandbox','Confirm my support · Sandbox')}
       </h3>
-      <p className={inline
-        ? 'rounded-xl bg-[#EDF1E8] px-3 py-2 text-center text-[11px] font-bold leading-relaxed text-[#476862]'
-        : 'text-sm text-[#476862]'}>
-        {label('Solo PayPal Sandbox · Dinero ficticio · Los beneficios requieren pago verificado.',
-          'PayPal Sandbox only · Test money · Benefits require a verified payment.')}
-      </p>
-      {phase==='loading'&&<p role="status">{label('Consultando la oferta…','Checking offer…')}</p>}
-      {phase==='blocked'&&<p role="status">
-        {label('No está publicada la nueva oferta Sandbox con cuatro beneficios. La prueba antigua no permite activarlos.',
-          'The new four-benefit Sandbox offer has not been published. The previous test cannot grant them.')}
+
+      {phase==='loading'&&<p role="status" className="py-2 text-center text-[12px] text-[#476862]">
+        {label('Consultando las condiciones…','Checking subscription terms…')}
       </p>}
-      {offer&&<div className="space-y-4">
-        <details className={inline
-          ? 'group rounded-[18px] bg-[#EFF3E9] px-4 py-2'
-          : 'group rounded-[22px] bg-white p-4'}
-          aria-label={label('Condiciones completas de la prueba','Full test terms')}>
-          <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold text-[#204E4A] focus-visible:bg-[#E1E53F]/35">
-            {label('Leer condiciones de renovación y beneficios','Read renewal and benefit terms')}
-          </summary>
-          <div className="whitespace-pre-wrap pt-3 text-[13px] leading-relaxed text-[#476862]">{offer.exactCopy}</div>
-        </details>
-        <label className="flex min-h-11 items-start gap-3 rounded-2xl px-1 py-1 text-[12px] font-medium leading-relaxed text-[#476862]">
+      {phase==='blocked'&&<p role="alert" className="rounded-xl bg-[#FCE5D8] p-3 text-[12px] text-[#204E4A]">
+        {label('Esta oferta de prueba no está disponible. No es posible iniciar el pago.',
+          'This test offer is unavailable. Checkout cannot start.')}
+      </p>}
+
+      {offer&&<div className={inline ? 'space-y-2' : 'space-y-4'}>
+        <label className="flex min-h-11 items-start gap-2.5 px-1 text-[11px] font-medium leading-[1.45] text-[#476862]">
           <input type="checkbox" checked={consent}
             onChange={e=>setConsent(e.target.checked)}
             disabled={attempted.current}
-            className="mt-1 h-5 w-5 accent-[#204E4A]"/>
-          <span>{label('He leído y acepto las condiciones de esta prueba de US$2.99/mes con renovación automática y cuatro beneficios, sin dinero real.',
-            'I have read and accept the terms of this US$2.99/month automatically renewing test with four benefits and no real money.')}</span>
+            className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#204E4A]"/>
+          <span>{label('Acepto la suscripción de prueba de US$2.99 al mes, con renovación automática. Puedo cancelar las futuras renovaciones.',
+            'I accept the US$2.99/month test subscription with automatic renewal. I can cancel future renewals.')}</span>
         </label>
+        <details className={inline ? 'px-1 text-[11px] text-[#476862]' : 'rounded-[18px] bg-white p-3'}
+          aria-label={label('Condiciones completas de la prueba','Full test terms')}>
+          <summary className={inline
+            ? 'min-h-6 cursor-pointer text-[11px] font-semibold underline decoration-[#B9C8B6] underline-offset-2 focus-visible:bg-[#E1E53F]/30'
+            : 'min-h-11 cursor-pointer py-2 text-sm font-extrabold text-[#204E4A] focus-visible:bg-[#E1E53F]/35'}>
+            {label('Leer las condiciones completas','Read full terms')}
+          </summary>
+          <div className="max-h-[35dvh] overflow-y-auto whitespace-pre-wrap pt-2 text-[12px] leading-relaxed text-[#476862]">{offer.exactCopy}</div>
+        </details>
         <button type="button" onClick={()=>void begin()}
           disabled={!consent||busy||phase!=='ready'||attempted.current}
           className={inline
-            ? 'min-h-12 w-full rounded-full bg-[#E1E53F] px-5 py-3 text-[14px] font-extrabold text-[#204E4A] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150] disabled:cursor-not-allowed disabled:bg-[#E1E53F]/40 disabled:text-[#6D8780]'
+            ? 'min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-2.5 text-[13px] font-extrabold text-[#204E4A] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150] disabled:cursor-not-allowed disabled:opacity-50'
             : 'min-h-11 rounded-full bg-[#204E4A] px-5 py-3 text-sm font-bold text-white disabled:opacity-50'}>
-          {label('Continuar con PayPal Sandbox','Continue with PayPal Sandbox')}
+          <span className="inline-flex items-center justify-center gap-2">
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[21px] w-[21px] fill-[#003087]">
+              <path d="M8.1 2.2h7.5c4.9 0 6.3 3 5.6 6.3-.9 4.2-4 6.2-8.5 6.2h-2.5l-1.7 7.1H3.6L8.1 2.2Z"/>
+              <path d="M10 7.6h6.1c4.3 0 5.8 2.6 5 6.4-.6 3.8-3.6 5.2-7.3 5.2H8l2-11.6Z" fill="#009CDE"/>
+            </svg>
+            {label('Continuar con PayPal','Continue with PayPal')}
+          </span>
         </button>
+        <p className="text-center text-[10px] leading-relaxed text-[#5C7470]">
+          {label('PayPal Sandbox · Solo dinero ficticio · Renovación mensual',
+            'PayPal Sandbox · Test money only · Monthly renewal')}
+        </p>
       </div>}
-      {phase==='pending'&&<p role="status" className="text-sm">
-        {label('Solicitud enviada o pendiente de verificación. Por seguridad no se repetirá automáticamente. No se ha acreditado ningún pago.',
-          'Request sent or awaiting verification. It will not retry automatically. No payment has been credited.')}
+      {phase==='pending'&&<p role="status" className="rounded-xl bg-[#E8EEDC] p-3 text-[12px] leading-relaxed text-[#204E4A]">
+        {label('Solicitud enviada o pendiente de verificación. No vuelvas a iniciar el pago; PAZO no ha acreditado beneficios todavía.',
+          'Request sent or awaiting verification. Do not restart checkout; PAZO has not granted benefits yet.')}
       </p>}
     </section>
   )
