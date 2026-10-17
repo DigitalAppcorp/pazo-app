@@ -6,7 +6,7 @@ DECLARE
  owner uuid:='61111111-1111-4111-8111-111111111111';
  foreign_owner uuid:='62222222-2222-4222-8222-222222222222';
  request_key uuid:='74444444-4444-4444-8444-444444444444';
- intent_id text;
+ v_intent text;
  digest text;
  result jsonb;
 BEGIN
@@ -34,9 +34,9 @@ BEGIN
  IF digest IS NULL THEN RAISE EXCEPTION 'V2 offer missing'; END IF;
  result:=public.f16_qa_v2_begin_checkout(owner,request_key,'es',
   'pazo-supporter-sandbox.benefits-v2',digest,true);
- intent_id:=result->>'intentId';
- result:=public.f16_qa_v2_read_owner_account(owner,intent_id);
- IF result->>'intentId'<>intent_id OR result->>'state'<>'pending'
+ v_intent:=result->>'intentId';
+ result:=public.f16_qa_v2_read_owner_account(owner,v_intent);
+ IF result->>'intentId'<>v_intent OR result->>'state'<>'pending'
  OR result->>'provider'<>'paypal'
  OR result->>'termsVersion'<>'pazo-supporter-sandbox.benefits-v2'
  OR result->>'termsDigest'<>digest
@@ -44,20 +44,20 @@ BEGIN
  OR pg_catalog.length(result->>'exactCopy')<500
  OR result->>'consentedAt' IS NULL
  THEN RAISE EXCEPTION 'V2 pending account missing correct accepted terms'; END IF;
- IF public.f16_qa_v2_read_owner_account(owner,NULL)->>'intentId'<>intent_id
+ IF public.f16_qa_v2_read_owner_account(owner,NULL)->>'intentId'<>v_intent
  THEN RAISE EXCEPTION 'V2 account list for owner failed'; END IF;
  IF public.f16_qa_v2_read_owner_account(owner,
    'intent-72222222-2222-4222-8222-222222222222') IS NOT NULL
  THEN RAISE EXCEPTION 'Historical V1 subscription leaked via V2 reader'; END IF;
- IF public.f16_qa_v2_read_owner_account(foreign_owner,intent_id) IS NOT NULL
+ IF public.f16_qa_v2_read_owner_account(foreign_owner,v_intent) IS NOT NULL
  THEN RAISE EXCEPTION 'Foreign owner accessed private V2 record'; END IF;
  IF public.f16_qa_v2_read_owner_account(owner,'not-an-intent') IS NOT NULL
  THEN RAISE EXCEPTION 'Invalid intent ID was accepted'; END IF;
  -- Merchant binding is a separate verified operation in runtime.
  UPDATE supporter_private.paypal_subscription_intents
  SET state='bound',external_subscription_id='I-PAYPAL-SYNTH-V2',bound_at=pg_catalog.clock_timestamp()
- WHERE intent_id=intent_id AND owner_id=owner;
- result:=public.f16_qa_v2_read_owner_account(owner,intent_id);
+ WHERE intent_id=v_intent AND owner_id=owner;
+ result:=public.f16_qa_v2_read_owner_account(owner,v_intent);
  IF result->>'state'<>'bound'
  OR result->>'externalSubscriptionId'<>'I-PAYPAL-SYNTH-V2'
  THEN RAISE EXCEPTION 'Bound V2 intent missing from scoped account'; END IF;
@@ -65,7 +65,7 @@ BEGIN
  -- owner still owns the subscription even after benefit access expires.
  UPDATE supporter_private.f16_sandbox_qa_owners
  SET status='disabled' WHERE owner_id=owner;
- IF public.f16_qa_v2_read_owner_account(owner,intent_id)->>'state'<>'bound'
+ IF public.f16_qa_v2_read_owner_account(owner,v_intent)->>'state'<>'bound'
  THEN RAISE EXCEPTION 'Expired QA entitlement prevented account cancellation lookup'; END IF;
 END $test$;
 RESET ROLE;
