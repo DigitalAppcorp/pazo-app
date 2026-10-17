@@ -1,3 +1,15 @@
+# F16 — ORDEN ACTUAL DEL PRODUCT OWNER: UI Y BENEFICIOS SANDBOX ANTES DE LIVE (2026-10-17)
+
+**Corrección expresa del PO:** detener el salto a PayPal Live. Aunque los cuatro PNG originales están versionados y CI/PG17 pasa, **NO se han aprobado visualmente** las insignias dentro de las pantallas reales, los cinco fondos, el muro de agradecimiento ni la pantalla final de pago/cancelación; **NO se ha ejecutado E2E Sandbox del nuevo contrato con los cuatro beneficios**. El comprador Sandbox anterior de P44 aceptó una oferta de QA que explícitamente no concedía recompensas. No reutilizarlo como demostración de beneficios.
+
+**PRIORIDAD 1 ACTIVA (sustituye los pasos Live anteriores):** `docs/PAZO_F16_UI_AND_SANDBOX_BEFORE_LIVE_GATE_20261017.md`, creado commit `705509b363f59b09a8a8e08eb66a0914e67714ab`. Presentar al PO capturas/QA navegable de **(a)** oferta y botón PayPal en la posición discreta aprobada, **(b)** cuatro insignias sobre avatar/perfil/Feed, **(c)** cinco fondos en perfil real, **(d)** muro/opt-in/opt-out y **(e)** pantalla gestión/cancelación; elegir los ajustes visuales y programarlos. Seguidamente probar compra Sandbox nueva con oferta que sí incluye recompensas, acreditación privada, beneficios, revocaciones, expiración y cancelación. Evitar test histórico repetido P42/43.
+
+**Bloqueo Live:** NO solicitar crear/activar plan Live, ID Live, app/secrets/webhook Live, cambios en Supabase alojado ni cobros hasta aprobar **UX + E2E Sandbox + GO del PO**. Confirmación previa «PayPal Business» se conserva como hecho, pero **NO hace falta ninguna acción allí ahora**. `docs/PAZO_F16_PAYPAL_BUSINESS_LIVE_PLAN_SETUP_20261017.md` queda POSPUESTO y NO es el siguiente gate. PR #44 continúa DRAFT; flags de beneficios públicos OFF; no nuevos deployments. PAZO gratis, Supporter voluntario $2.99 mensual, cuatro beneficios originales.
+
+**Distinción de evidencias:** Codex QA de cuatro PNG en tamaños 32/66 = assets y componentes cargan, **no equivale a aceptación visual de la integración**; tests SQL/JS/PG17 = infraestructura, **no E2E con PayPal y pantallas reales**. Solicitar captura y revisión humana antes de pasar de gate. **Estado:** `F16_UX_REVIEW_SANDBOX_E2E_PENDING_LIVE_HOLD`.
+
+---
+
 # F16 LIVE — PayPal Business CONFIRMADO; plan de producción en preparación (2026-10-17)
 
 **PO confirmó explícitamente «sí bussines++»:** la cuenta comercial para recibir los ingresos PAZO **YA ES PAYPAL BUSINESS**. No volver a pedir si la cuenta es Personal/Business. **Todavía NO se ha verificado app REST Live, Plan ID Live, Webhook ID Live ni credenciales Live**; ni el titular ni Codex los han aportado a esta fase. No inferir que Sandbox es Live.
