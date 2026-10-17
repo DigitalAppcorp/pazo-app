@@ -21,12 +21,14 @@ export function createP22SandboxReviewWorker({
   ['claimNextVerifiedEvent','readClaimedEvent',
    'resolveClaimedSubscription','finishClaimedEvent']
    .some(k=>typeof leaseStore[k]!=='function')||
-  !merchantReader||['getMerchantEvent','getMerchantSubscription']
+  !merchantReader||['getMerchantEvent','getMerchantSubscription',
+   'getIndependentMerchantSale']
    .some(k=>typeof merchantReader[k]!=='function'))
   throw Error('p22_synthetic_worker_missing_adapters')
  const bridge=createP05OfflineMerchantClaimBridge({
   getMerchantEvent:params=>merchantReader.getMerchantEvent(params),
   getMerchantSubscription:params=>merchantReader.getMerchantSubscription(params),
+  getIndependentMerchantSale:params=>merchantReader.getIndependentMerchantSale(params),
   resolveClaimedSubscription:params=>leaseStore.resolveClaimedSubscription(params),
  })
  const worker=createP05OfflineInboxOrchestrator({
