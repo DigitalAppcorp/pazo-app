@@ -1,3 +1,30 @@
+# F16 FAST TRACK — CUATRO BENEFICIOS CONECTADOS EN LAB/FRONT; LIVE TODAVÍA NO (2026-10-17)
+
+**PO «ok go»:** seguir programación acelerada de Amigo de PAZO $2.99 mensual con insignia perfil/Feed, cinco fondos, muro consentimiento y medallas 3/6/12, manteniendo PAZO gratis. PR #44 DRAFT, rama `f13/section-titles-20261012`. Sin autorización para merchant Live, pago real, migración hosted, publicación ni despliegue manual. No reabrir P42 como bloqueo para desarrollar.
+
+**Backend completado SOLO EN PG17 DESCARTABLE:**
+- `supabase/drafts/f16_mvp_four_benefits_backend_DISPOSABLE_ONLY.sql`: amplía períodos privados ya ensayados; theme por mascota con RLS, RPC Auth/owner de guardar/resetear, proyección pública limitada de badge/tema/hito, muro consentido + cobertura verificada. Solo dentro de `f14_synthetic` (guarda explícita anti-hosted). El stub hosted `wall_has_verified_entitlement` **permanece `SELECT false`** y no hay períodos pagados reales.
+- `supabase/tests/supporter/f16-mvp-four-benefits-pg17-synthetic.sql`: prueba lado usuario gratis, owner pagado, bloqueos de cross-owner, permiso revocable, muro de anon, disputa y expiración. Funciones/tables no filtraron datos financieros. Resultados **PG Lab #39038470241 SUCCESS** para revisión frontend subsecuente; corrección de pruebas de ACL/RPC + setup JWT previamente incluida.
+- Reutilizó `f16_mvp_verified_paid_period_source_DISPOSABLE_ONLY.sql` y proyección server-only `pazoSupporterBenefitsV1.mjs`.
+
+**Front-end default-off:**
+- `SupporterThemeSaveControl.tsx` y panel `SupporterThemePreviewPanel.tsx`: guardado propietario autenticado, DB verifica período y relectura confirma persistencia; conserva preview PO aprobado cuando flag OFF.
+- `PublicProfileView.tsx`: fondo desde `pazo_supporter_public_pet_benefits`, nunca desde localStorage, fallback seguro sin cobertura, contraste marfil para Cielo estrellado. Sin PNG de badge todavía.
+- `GratitudeWallLive.tsx`: galería real basada exclusivamente en `pazo_supporter_public_wall` sin mascotas fake; componente preview A01 permanece cuando el flag OFF.
+- `SupporterWallConsentSettings.tsx`: ya integrado en cuenta, permiso individual por mascota del dueño con relectura; backend y UI deniegan opt-in sin entitlement.
+- Todos los caminos nuevos dependen de `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'`, **OFF por defecto**. **No activar** hasta backend alojado, merchant y assets completos, QA visual.
+- **CI integral** con TypeScript/build y reglas de UI, **SUCCESS #39038470240**; PG lab correspondiente **SUCCESS #39038470241** en commit `4fbec595a1fe10615f6ff757b2a0c57a497a458b`. Las correcciones no debilitaron guardas: solo aceptan theme desde servidor y preservan preview predeterminado.
+
+**Configuración PayPal Live preparada SIN conexión:** `pazoPaypalLivePlanContract.mjs` y test `f16MvpPaypalLivePlanContract.test.mjs`: rechaza plan con trial, precio distinto de 2.99 USD, otra cadencia, periodos finitos, impuestos/setup no revisados; nunca devuelve permiso de checkout ni beneficios. Documentación `docs/PAZO_F16_MVP_LIVE_FAST_TRACK_20261017.md`, actualización commit `326704f5906c5a467a298f56f5d805a9c1339e16`; workflow de documentos/HEAD final por verificar.
+
+**PENDIENTE INMEDIATO:** (1) insertar assets PNG originales elegidos desde Biblioteca en GitHub y colocarlos en perfil, Feed y 3/6/12 medallas; (2) implementar backend real de reclamo de pago PayPal/merchant + período autoritativo + webhook de refunds/disputas en una migración separada, jamás promocionar fixture; (3) preparar oferta ES/EN, consentimiento durable, comprobante, cancelación online, plan/credenciales MERCHANT Live privadas; (4) probar única ruta Sandbox E2E completa con las cuatro recompensas y visual QA PO, y solo entonces solicitar GO de una transacción Live supervisada. Sin claves/checkout/ledger reales creados ahora.
+
+**Controles históricos:** P42/P21 siguen OFF, P42 signing keys 0 y pagos registrados 0 según último preflight real. P42 one-shots consumidos, EDGE read local pendiente; NO repetir ni convertir QA en Live. PR #44 sigue DRAFT; no se fusionó ni se tocó Supabase alojado.
+
+**Marcador:** `F16_MVP_FOUR_PERKS_PG17_AND_GATED_UI_PASS_LIVE_PROOF_INTEGRATION_PENDING`.
+
+---
+
 # F16 FAST TRACK — PERÍODOS PRIVADOS EN PG17 PASS; HOSTED/Live NO-GO (2026-10-17)
 
 **Continuación de la prioridad PO:** Amigo de PAZO $2.99 USD mensual con los cuatro beneficios aprobados, sin anual ni quitar funciones gratuitas. Enfoque de entrega comercial mínima en vez de ampliar P42. PR #44 DRAFT, rama `f13/section-titles-20261012`.
