@@ -1,3 +1,13 @@
+# F16 — UX de Amigo de PAZO aprobada (2026-10-17)
+
+El PO aprobó un único botón bajo Mi mascota: sin membresía verificada abre la invitación (US$2.99/mes voluntario); con cobertura pagada verificada usa estilo decorado y abre Mis beneficios. El área del miembro reúne la insignia 0/3/6/12, los cinco fondos, permisos del muro por mascota y gestión/cancelación. Compra de diseños adicionales de insignias: idea futura, no implementada.
+
+Implementado en PR #44 DRAFT: hook de estado mediante mascotas propias y RPC de beneficios, botón condicional en PetView, SupporterBenefitsHome y rutas condicionales en SupporterAccountManagement. Aviso automático compacto implementado solo como presentación y SIN activar; requiere datos elegibles verificados y rechazo de 30 días persistido con revisión de privacidad. No se ejecutaron compras, migraciones ni cambios PayPal Live.
+
+Pendiente: CI/PG17 del HEAD nuevo, QA visual real, vinculación de elegibilidad y E2E Sandbox V2. No fusionar el PR ni activar Live hasta gates.
+
+---
+
 # F16 — EXPERIENCIA DE PRODUCTO «AMIGO DE PAZO» IMPLEMENTADA EN PR #44; QA VISUAL PENDIENTE (2026-10-17)
 
 **GO PO «de acuerdo, go» después de auditoría UX:** convertir el checkout administrativo en recorrido natural de apoyo voluntario, mantener precio US$2.99/mes, cuatro recompensas, PAZO gratuito, cierre sin penalizaciones, y separación explícita de pruebas/Live. Se adoptó como **política de invitación futura**: ≥7 días de cuenta, ≥3 días activos/14, ≥5 acciones significativas en ≥2 superficies y 30 días de silencio tras «Ahora no», sin onboarding, primera sesión, rescate o interacción ocupada. **No inferir actividad sin fuente comprobada.**
