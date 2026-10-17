@@ -256,10 +256,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         </section>
 
         </>}
-        {(qaV2Screen || accounts === null || (accounts?.length ?? 0)>0) && <section aria-labelledby="supporter-manage-title" className="space-y-3">
-          {qaV2Screen && <p className="rounded-2xl bg-[#F0F3ED] p-3 text-xs font-bold text-[#476862]">
-            {label('Solo entorno de pruebas: consulta de solicitudes y cancelación V2.', 'Test environment only: V2 requests and cancellation.')}
-          </p>}
+        {(qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
+          <section aria-labelledby="supporter-manage-title" className="space-y-3">
+          <details open={!qaV2Screen} className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+            <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold focus-visible:bg-[#E1E53F]/30">
+              {qaV2Screen
+                ? label('Gestionar mi prueba de PayPal Sandbox', 'Manage my PayPal Sandbox test')
+                : label('Administrar mi suscripción', 'Manage my subscription')}
+            </summary>
           <h3 id="supporter-manage-title" className="px-1 text-lg font-black">
             {label('Mi membresía', 'My membership')}
           </h3>
@@ -318,6 +322,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
               ))}
             </>
           )}
+          </details>
         </section>}
 
         {membership.kind === 'unavailable' && import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
