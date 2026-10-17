@@ -149,7 +149,7 @@ test('F16 phone-frame offer stays single-column and covers shell navigation',()=
  assert.match(design,/min-w-0 flex-1/)
  assert.match(offer,/overscroll-contain/)
  assert.match(member,/overscroll-contain/)
- assert.match(offer,/SandboxCheckoutQaPanel lang={lang} inline\/>)
+ assert.ok(offer.includes('<SandboxCheckoutQaPanel lang={lang} inline/>'))
  assert.match(design,/Muro de agradecimiento/)
 })
 
