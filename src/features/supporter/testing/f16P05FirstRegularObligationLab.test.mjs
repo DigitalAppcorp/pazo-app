@@ -182,3 +182,21 @@ test('128 combinations never authorize payment or membership',()=>{
  }
  assert.equal(n,128)
 })
+
+test('additional distinct SALE.COMPLETED or activation blocks first obligation',()=>{
+ for(const type of ['PAYMENT.SALE.COMPLETED',
+  'BILLING.SUBSCRIPTION.ACTIVATED']){
+  const r=run(x=>x.webhookJournal.events.push({
+   type,at:'2026-10-15T03:45:00Z',
+  }))
+  assert.equal(r.reason,
+   'multiple_activation_or_sale_events_require_manual_reconciliation')
+ }
+})
+test('cancellation alone does not masquerade as a second sale',()=>{
+ const r=run(x=>x.webhookJournal.events.push({
+  type:'BILLING.SUBSCRIPTION.CANCELLED',at:'2026-10-15T03:50:00Z',
+ }))
+ assert.equal(r.phase,'CLEAN_FIRST_CHARGE_CANDIDATE_ONLY')
+ assert.equal(r.mayRecordPayment,false)
+})
