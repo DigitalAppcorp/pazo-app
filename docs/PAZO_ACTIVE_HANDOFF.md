@@ -1,3 +1,21 @@
+# F16 MVP — escritura privada de períodos idempotente probada en PG17 (2026-10-17)
+
+**GO PO «ok go»:** continuar acelerando la membresía voluntaria **Amigo de PAZO US$2.99 al mes**, los cuatro beneficios originales, app gratuita; sin activar pagos Live, desplegar ni tocar DB alojada. Rama `f13/section-titles-20261012`, PR #44 DRAFT. **No más rondas P42** para avanzar interfaz comercial.
+
+**Nuevo código de esta tanda, ya probado en aislado:**
+- `supabase/drafts/f16_mvp_operator_period_writer_DISPOSABLE_ONLY.sql`: función operadora en esquema privado para crear un período pagado ya conciliado, con owner `auth.users` y bloqueo de fila, replay de la misma venta estrictamente idempotente, bloqueo de replays alterados, duplicados/solapamientos, precio único 299 USD centavos, términos digeridos y prohibición de `merchant_verified_at` futuro. Una segunda función registra un bloqueo por disputa/reembolso, con replay idempotente **sin poder quitar holds**. Solo DB invoker `postgres` y `f14_synthetic`; **no invocable por anon/authenticated/service_role**.
+- `supabase/tests/supporter/f16-mvp-private-period-writer-synthetic.sql` prueba insert, replay, venta adulterada, solapamiento, owner desconocido, merchant timestamp imposible, disputa, repetición y ACL; rollback completo. `.github/workflows/f16-postgres-inbox-lab.yml` añade este gate solo a PG17 descartable.
+- **Evidencia:** commit `4202a279d8cca2c731f45f5c7f79ea144b3c76b2`, [CI #39041408100](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39041408100) **SUCCESS** y [PG Lab #39041408102](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39041408102) **SUCCESS**.
+- Procedimiento y límites: `docs/PAZO_F16_MVP_IDEMPOTENT_PERIOD_WRITER_GATE_20261017.md`, commit `c28d0dc8ba12065ef2581f32170a23b1a0eedf7a`. **La firma de PayPal, merchant real, reversals, consentimiento, fechas exactas y atribución Auth siguen siendo responsabilidad de un lector autorizado antes de conectar escritor**. La nueva función no está en Supabase alojado, no admite transacciones reales, y no concede beneficios por sí sola.
+
+**Arte original auditado, todavía no incorporado a GitHub:** `pazo-supporter-insignias-4.zip` extraído en el entorno de trabajo; SHA256 `281503c0638d1d9e3ea752263f9e2a72be5a584f172af73d17358a6c970182b5`, cuatro PNG RGBA originales 543×545 con hashes idénticos a `scripts/f16-stage-approved-supporter-badges.ps1`. Los cuatro originales están listos para Codex local: ejecutar script desde el checkout y commitear cuatro `public/supporter/*.png`, pruebas/build y QA visual. Se probaron versiones web optimizadas para estudio, pero **NO reemplazar el arte aprobado por versiones reducidas sin revisar con PO**. No afirmar archivos publicados.
+
+**Siguiente operación necesaria:** incorporar esos PNG a PR #44 a través de Codex; construir el reconciliador merchant autorizado que produzca períodos contractuales correctos y gestione refunds/disputas; preparar checkout Live separado con cancelación online, avisos y acuse. Solo una vez acreditada la nueva ruta completa Sandbox solicitar GO supervisado para primer cobro Live; mantener flag `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED` apagado.
+
+**Resultado hasta ahora:** pruebas aisladas PASS, P42/worker/checkout Live OFF, 0 pagos/0 claves P42 en última lectura hospedada; no ejecutar migraciones `DISPOSABLE_ONLY` allí. `F16_MVP_PRIVATE_WRITER_DISPOSABLE_PASS_HOSTED_LIVE_NO_GO`.
+
+---
+
 # F16 MVP — medallas tras período completo; venta PayPal comprobada con transacciones (2026-10-17)
 
 **GO Product Owner:** «ok go» continuar cierre acelerado de **Amigo de PAZO $2.99 USD al mes con los cuatro beneficios originales**. PR #44 DRAFT rama `f13/section-titles-20261012`. Este GO autoriza trabajo de código, repositorio y ensayos aislados, **NO** habilitar PayPal Live, migrar hosted, crear claves ni cobrar dinero real. No reabrir P42 histórico.
