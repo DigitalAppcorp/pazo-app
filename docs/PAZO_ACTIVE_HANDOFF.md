@@ -1,3 +1,19 @@
+# F16 — REUTILIZAR CUENTA YA EXISTENTE PARA PRUEBA SANDBOX (2026-10-17)
+
+**Última decisión del PO:** usar su cuenta PAZO de pruebas existente y su mascota; **NO crear una cuenta nueva**. El PO confirmó que esos datos son de QA y serán descartados al lanzamiento MVP. No escribir el correo ni UID en código, docs o logs.
+
+**Preflight real Supabase, lectura acotada por la cuenta aportada en chat:** exactamente 1 Auth, 1 mascota, 1 checkout P06 histórico y 1 intent vinculado (bound); 0 pagos. El checkout anterior tiene una aceptación v1 SIN beneficios. Un índice único `p06_one_checkout_per_owner` y `f16_p06_begin_checkout` impiden legítimamente iniciar otra compra con el mismo dueño si se reutiliza ese circuito. **NO borrar/reasignar/modificar checkout ni términos antiguos, ni tratar esa compra como v2.**
+
+**Acción real autorizada y ya aplicada:** insertar solo ese Auth propietario en `supporter_private.f16_sandbox_qa_owners` con `status='disabled'`, `expires_at=clock_timestamp()+interval '7 days'`, usando búsqueda por email solo en SQL privado en Supabase. Postflight: 1 propietario QA preparado/desactivado, 0 habilitados, 0 períodos pagos, 0 temas, 0 holds, 1 checkout anterior intacto, 0 entries contables, 0 insignias públicas. **Sin compras ni cambios a PayPal, Vercel, Edge o Live.** No registrar correo de cuenta de prueba en GitHub.
+
+**Solución de código para la segunda suscripción:** `supabase/drafts/f16_qa_v2_same_owner_second_checkout_PG17_ONLY.sql`, nueva tabla `f16_sandbox_qa_v2_checkout_attempts` privada con RLS forzado y dos RPC `f16_qa_v2_begin_checkout` / `f16_qa_v2_claim_provider_create`, solamente service_role. Mantiene P06 v1 intacto, requiere owner QA habilitado temporalmente y aceptación independiente v2 publicada ES/EN, y solo permite una solicitud PayPal idempotente v2. **Sólo PG17 por ahora, NO INSTALADA HOSTED.** Fixture y pruebas en `supabase/tests/supporter/f16-qa-v2-owner-fixture-pg17.sql` y `f16-qa-v2-existing-owner-checkout-synthetic.sql`; workflow `.github/workflows/f16-postgres-inbox-lab.yml` commit `73250af92bd9da30634348959e36e73521b4814d`, verificar su CI/PG Lab antes de autorizar instalación de esa ruta. Los servicios Edge P06 todavía llaman RPC antigua, por lo que quedan OFF hasta conectar el adaptador V2, consulta de status/cancelación V2 y el webhook+período Sandbox verificados.
+
+**Siguiente acción técnica:** confirmar PG17 V2 sin alterar historial, integrar Edge QA servidor/consentimiento V2 con lease PayPal; instalar v2 solo tras validación + permiso QA, habilitar owner temporal y offer v2 sin tocar v1, efectuar **una** compra Sandbox supervisada y verificar la activación de los cuatro beneficios reales dentro de PAZO. Nunca pedir nueva cuenta al PO ni hacer migraciones de Live o P42.
+
+**Marcador:** `F16_EXISTING_QA_OWNER_STAGED_DISABLED_V2_SEPARATE_CHECKOUT_PG17_PENDING`.
+
+---
+
 # F16 — Sandbox QA backend de CUATRO BENEFICIOS instalado e INERTE (2026-10-17)
 
 **Segundo paso completado después del GO del PO «sí»:** Supabase proyecto `mrybvqdebbgcayuvgkkr`, nueva migración aplicada **`20261017161221_f16_sandbox_qa_verified_benefits_reads`** y versionada en `supabase/migrations/20261017161221_f16_sandbox_qa_verified_benefits_reads.sql`. Procede del borrador `supabase/drafts/f16_sandbox_qa_benefits_read_and_theme_hosted_PO_APPROVED_20261017.sql`, comprobado **antes** con ejecución y ROLLBACK contra el esquema alojado (PASS). El control PO actual solo autoriza Sandbox aislado, NO Live ni creación de pago.
