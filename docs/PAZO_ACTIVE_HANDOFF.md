@@ -1,3 +1,17 @@
+# F16 LIVE — PayPal Business CONFIRMADO; plan de producción en preparación (2026-10-17)
+
+**PO confirmó explícitamente «sí bussines++»:** la cuenta comercial para recibir los ingresos PAZO **YA ES PAYPAL BUSINESS**. No volver a pedir si la cuenta es Personal/Business. **Todavía NO se ha verificado app REST Live, Plan ID Live, Webhook ID Live ni credenciales Live**; ni el titular ni Codex los han aportado a esta fase. No inferir que Sandbox es Live.
+
+**Paso más rápido:** la guía PayPal Business actualizada 2026-10-01 permite crear directamente el plan comercial desde `Sales > Subscriptions > Create plan`, sin desarrollar un catálogo adicional. El PO/Codex pueden dejar un **borrador**: `Amigo de PAZO`, USD 2.99 por mes, recurrente indefinido, sin trial/setup, con cuatro beneficios aprobados y descripción exacta; NO activar el plan ni checkout público sin autorización adicional. Recuperar únicamente el `Plan ID` público `P-...` y confirmar estado/merchant; jamás compartir Client Secret ni token. Operativa exacta `docs/PAZO_F16_PAYPAL_BUSINESS_LIVE_PLAN_SETUP_20261017.md`, creada en commit `4856b09088e3e9a4b5c485e0e67e029c4a6b6c6c`. Los aspectos fiscales/aviso recurrente y URL real de retorno no están decididos; no inventarlos.
+
+**Estado técnico:** PR #44 DRAFT, cuatro PNG originales publicados en `77708dd0c1e34e164161c12305b57cbdbc05b690`, CI y PG Lab del handoff `4d374e3a013fbe5bce52d63e88237f6e6ae69b9b` **SUCCESS** (runs 39042913272/39042913281). Código de períodos privados/entitlements solo probado offline/PG17, aún no instalado hosted ni relacionado con un cobro Live; todos los beneficios públicos y pagos siguen OFF. No reabrir P42 histórico.
+
+**Siguiente paso de integración:** una vez identificado el Plan ID Live, validar read-only el plan contra el contrato `pazoPaypalLivePlanContract.mjs`, preparar app/webhook Live separados y completar ciclo conciliado -> cuatro beneficios, cancelación online y acuse. Requerir GO específico antes de cualquier cargo/activación de usuarios reales.
+
+**Marcador:** `F16_PAYPAL_BUSINESS_CONFIRMED_LIVE_PLAN_ID_PENDING_NO_LIVE_PAYMENT`.
+
+---
+
 # F16 MVP — cuatro insignias PNG originales incorporadas y QA local PASS (2026-10-17)
 
 **Orden expresa del Product Owner:** incorporar únicamente las cuatro insignias aprobadas desde `pazo-supporter-insignias-4.zip`, comprobar componentes existentes, pruebas/build y publicar en la misma rama; sin rediseño ni activaciones. Rama `f13/section-titles-20261012`, PR #44 DRAFT. Checkout sincronizado por fast-forward a `1bbd216411cdedd6a39d2fdc3a9cfb4b5b0a08ff` y limpio antes de instalar.
