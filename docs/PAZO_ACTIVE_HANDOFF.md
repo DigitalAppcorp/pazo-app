@@ -1,3 +1,15 @@
+# F16-P42 — GO EXPLÍCITO PO: único intento PostgreSQL privado READ ONLY (2026-10-17)
+
+El PO respondió **«Autorizo P42»** inmediatamente después de la revisión del commit `0adfa50dd5fac3adf05a3e36674dd834b262b704` y de la pregunta inequívoca para **UNA prueba privada READ ONLY**. Esta es autorización de ejecución **exclusivamente** del intento `P42-NEW-PASSWORD-20261017-01`, según `docs/PAZO_F16_P42_NEW_PASSWORD_PRIVATE_READONLY_ONCE_PROCEDURE_20261017.md` y `scripts/f16-p42-session-pooler-tls-readonly-once.ps1` del commit revisado. **NO se ha ejecutado por ChatGPT**; el ejecutor será Codex en la computadora Windows del PO.
+
+Codex debe seguir el procedimiento exacto: sincronización segura conservando cambios locales, chequeos offline de `pwsh`, `psql`, CA oficial y hostname del Session Pooler PAZO ya confirmado, verificar ausencia del lock/resultado de ese ID, abrir **una** ventana privada fuera de grabaciones; apartarse de esa ventana antes del prompt. PO teclea personalmente su nueva password PostgreSQL en entrada oculta. **No leer/recibir/transcribir/registrar contraseña, PGPASSWORD, conexiones URI, stdout/stderr privados, logs crudos o pantalla del prompt.** `PGSSLMODE=verify-full` y contrato SQL READ ONLY + ROLLBACK. Codex solo consulta el archivo local del resultado de marcador estático, sin inspeccionar secretos, y comunica PASS/BLOCKED. Un intento consumido NO se repite, aunque resulte BLOCKED o ambiguo; no borrar lock. Si hay desajuste de versión/código, abortar antes de conexión y solicitar revisión; no modificar el script aprobado.
+
+Esta autorización **NO** incluye P43, acceso temporal, cambio de password, SQL Editor, DDL/DML, provisionamiento de clave P42, Edge Secrets, permisos, pagos, PayPal, workers, checkout, ledger, beneficios ni despliegues. PR #44 continúa DRAFT y finanzas NO-GO. Un PASS demuestra solo autenticación y TLS cliente→pooler y transacción read-only; no habilita escrituras ni secretos.
+
+**Estado:** `P42-NEW-PASSWORD-20261017-01_APPROVED_NOT_EXECUTED`. Al completarse, registrar únicamente marcador sanitizado en handoff y detenerse a la espera de siguiente GO.
+
+---
+
 # F16-P42 — TLS cliente corregido y procedimiento de contraseña nueva preparado (2026-10-17)
 
 **GO vigente: integrar correcciones locales, pruebas offline y procedimiento; NO conectar ni pedir contraseña.** El parche de Windows fue preservado y el clon sincronizado por fast-forward hasta 98fd59e9054a7cedfad1052c97ee90c969c34191 antes de integrar. La contraseña nueva informada por PO sigue SIN VERIFICAR; no atribuir el fallo histórico a password incorrecta.
