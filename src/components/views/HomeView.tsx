@@ -194,6 +194,27 @@ export const HomeView = ({
   const [isSubmittingNearby, setIsSubmittingNearby] = useState(false)
   const [verifiedFeedBadges,setVerifiedFeedBadges] = useState<Record<string,VerifiedFeedBadge>>({})
   const badgeQueriesMade=useRef<Set<string>>(new Set())
+  const [badgeRefreshCycle,setBadgeRefreshCycle]=useState(0)
+
+  // No perpetual client-side entitlement cache. Revalidate current badges on
+  // tab return and every minute; clear displayed claims BEFORE new RPC result.
+  useEffect(()=>{
+    if(!supporterBadgesEnabled)return
+    const refresh=()=>{
+      badgeQueriesMade.current.clear()
+      setVerifiedFeedBadges({})
+      setBadgeRefreshCycle(c=>c+1)
+    }
+    const onVisibility=()=>{
+      if(document.visibilityState==='visible')refresh()
+    }
+    document.addEventListener('visibilitychange',onVisibility)
+    const clock=setInterval(refresh,60000)
+    return ()=>{
+      document.removeEventListener('visibilitychange',onVisibility)
+      clearInterval(clock)
+    }
+  },[])
 
   useEffect(()=>{
     if(!supporterBadgesEnabled)return
@@ -210,7 +231,7 @@ export const HomeView = ({
         setVerifiedFeedBadges(prev=>({...prev,...verified}))
       }).catch(()=>{/* Closed: never show badges on a failed lookup. */})
     return ()=>{alive=false}
-  },[posts,verifiedFeedBadges])
+  },[posts,verifiedFeedBadges,badgeRefreshCycle])
 
   const handleToggleComments = async (postId: string) => {
     if (activeCommentsPostId === postId) {
