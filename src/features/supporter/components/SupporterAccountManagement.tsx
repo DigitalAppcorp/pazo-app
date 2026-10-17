@@ -5,6 +5,9 @@ import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
 import { SandboxV2AccountPanel } from './SandboxV2AccountPanel'
 import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
+import { SupporterBenefitsHome } from './SupporterBenefitsHome'
+import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
+import type { Pet } from '../../../types/pazo'
 
 type Account = {
   intentId: string
@@ -19,12 +22,12 @@ type AccountResult = {
   cancelled?: boolean
   paidThrough?: null
 }
-type Props = {lang: 'es' | 'en'; onClose: () => void}
+type Props = {lang: 'es' | 'en'; onClose: () => void; pet?: Pet}
 
 const host = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const qaV2Screen = import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true'
 const intentPattern = /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-export function SupporterAccountManagement({lang, onClose}: Props) {
+export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [accounts, setAccounts] = useState<Account[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [showSandboxQa, setShowSandboxQa] = useState(false)
@@ -33,6 +36,7 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
   const [cancelDone, setCancelDone] = useState<string | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus(pet?.id)
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
 
@@ -142,6 +146,10 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
     [label('Un lugar en nuestro muro', 'A place on our thank-you wall'), label('Solo para las mascotas que tú autorices.', 'Only for pets you explicitly choose.')],
     [label('Reconocimiento a tu constancia', 'A thank-you for continued support'), label('Insignias conmemorativas a los 3, 6 y 12 meses pagados.', 'Milestone badges after 3, 6 and 12 completed paid months.')],
   ]
+  if (membership.kind === 'verified') {
+    return <SupporterBenefitsHome lang={lang} onClose={onClose} pet={pet}
+      milestone={membership.milestone} qa={qaV2Screen}/>
+  }
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="supporter-account-title"
       className="fixed inset-0 z-[115] overflow-y-auto bg-[#FAF8F5] text-[#204E4A]">
@@ -161,6 +169,17 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
       </div>
 
       <main className="mx-auto max-w-xl space-y-5 px-4 pb-12 pt-4">
+        {membership.kind === 'checking' && <p role="status" className="rounded-3xl bg-white p-5 text-sm font-semibold">
+          {label('Comprobando tu membresía…','Checking your membership…')}
+        </p>}
+        {membership.kind === 'unavailable' && <div role="alert" className="space-y-3 rounded-3xl bg-[#FCE5D8] p-5 text-sm">
+          <p>{label('No pudimos verificar tu membresía. Por seguridad no te mostraremos una invitación a pagar hasta comprobar el estado.',
+            'We could not verify your membership. For safety, the payment invitation is hidden until status is confirmed.')}</p>
+          <button type="button" className={control} onClick={refreshMembership}>
+            {label('Intentar de nuevo','Try again')}
+          </button>
+        </div>}
+        {membership.kind === 'inactive' && <>
         <section aria-labelledby="supporter-offer-title"
           className="relative overflow-hidden rounded-[32px] bg-[#E6EDDB] px-5 pb-6 pt-7 sm:px-7">
           <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#E1E53F]/35 blur-3xl"/>
@@ -234,7 +253,11 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
           </button>
         </section>
 
-        <section aria-labelledby="supporter-manage-title" className="space-y-3">
+        </>}
+        {(qaV2Screen || accounts === null || (accounts?.length ?? 0)>0) && <section aria-labelledby="supporter-manage-title" className="space-y-3">
+          {qaV2Screen && <p className="rounded-2xl bg-[#F0F3ED] p-3 text-xs font-bold text-[#476862]">
+            {label('Solo entorno de pruebas: consulta de solicitudes y cancelación V2.', 'Test environment only: V2 requests and cancellation.')}
+          </p>}
           <h3 id="supporter-manage-title" className="px-1 text-lg font-black">
             {label('Mi membresía', 'My membership')}
           </h3>
@@ -293,9 +316,9 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
               ))}
             </>
           )}
-        </section>
+        </section>}
 
-        {import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
+        {membership.kind === 'unavailable' && import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
           <section aria-labelledby="supporter-rewards-title" className="space-y-3">
             <h3 id="supporter-rewards-title" className="px-1 text-lg font-black">
               {label('Mis recompensas', 'My rewards')}
