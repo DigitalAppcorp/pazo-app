@@ -65,6 +65,7 @@ REVOKE ALL ON TABLE supporter_private.f16_mvp_paid_period_holds
 -- This function is restricted to private DBA/operator at this stage.
 -- The caller timestamp is ONLY for synthetic scenario checks; a deployed
 -- read RPC must use pg_catalog.clock_timestamp(), never browser time.
+-- Milestones count only FULLY ELAPSED service windows with cleared merchant proof.
 -- Only independently verified merchant COMPLETE regular payments may INSERT
 -- a proof. This function does NOT ingest/verify PayPal data on its own.
 CREATE FUNCTION supporter_private.f16_mvp_private_period_projection(
@@ -94,7 +95,7 @@ WITH clear_periods AS (
   ) AS no_overlap
 ), eligible AS (
   SELECT
-    count(*)::integer AS settled_months,
+    count(*) FILTER (WHERE c.service_end <= p_as_of)::integer AS settled_months,
     max(c.service_end) FILTER (WHERE p_as_of < c.service_end) AS paid_through,
     count(*) FILTER (WHERE p_as_of < c.service_end) > 0 AS active
   FROM clear_periods c
