@@ -31,7 +31,7 @@ SELECT '61111111-1111-4111-8111-111111111111',
  o.locale,o.version,o.sha256 FROM supporter_private.paypal_p06_offers o
  WHERE o.version='pazo-supporter-sandbox.qa20261016-v1' AND o.locale='es';
 DO $test$
-DECLARE owner_id uuid:='61111111-1111-4111-8111-111111111111';
+DECLARE v_owner uuid:='61111111-1111-4111-8111-111111111111';
  request_a uuid:='74444444-4444-4444-8444-444444444444';
  request_b uuid:='75555555-5555-4555-8555-555555555555';
  digest text;
@@ -41,47 +41,56 @@ BEGIN
  WHERE version='pazo-supporter-sandbox.benefits-v2' AND locale='es';
  IF digest IS NULL THEN RAISE EXCEPTION 'V2 published offer absent'; END IF;
  BEGIN
-  PERFORM public.f16_qa_v2_begin_checkout(owner_id,request_a,'es',
+  PERFORM public.f16_qa_v2_begin_checkout(v_owner,request_a,'es',
    'pazo-supporter-sandbox.qa20261016-v1',digest,true);
   RAISE EXCEPTION 'Old offer accepted for V2 benefits';
  EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
  BEGIN
-  PERFORM public.f16_qa_v2_begin_checkout(owner_id,request_a,'es',
+  PERFORM public.f16_qa_v2_begin_checkout(v_owner,request_a,'es',
    'pazo-supporter-sandbox.benefits-v2',digest,false);
   RAISE EXCEPTION 'Unmarked consent was accepted';
  EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
  BEGIN
-  PERFORM public.f16_qa_v2_begin_checkout(owner_id,request_a,'es',
+  PERFORM public.f16_qa_v2_begin_checkout(v_owner,request_a,'es',
    'pazo-supporter-sandbox.benefits-v2',repeat('a',64),true);
   RAISE EXCEPTION 'Forged acceptance hash accepted';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
- a:=public.f16_qa_v2_begin_checkout(owner_id,request_a,'es',
+ a:=public.f16_qa_v2_begin_checkout(v_owner,request_a,'es',
    'pazo-supporter-sandbox.benefits-v2',digest,true);
- b:=public.f16_qa_v2_begin_checkout(owner_id,request_a,'es',
+ b:=public.f16_qa_v2_begin_checkout(v_owner,request_a,'es',
    'pazo-supporter-sandbox.benefits-v2',digest,true);
  IF a->>'intentId' IS NULL OR b->>'intentId'<>a->>'intentId'
  OR a->>'state'<>'pending'
  OR (SELECT count(*) FROM supporter_private.f16_sandbox_qa_v2_checkout_attempts
-   WHERE owner_id=owner_id)<>1
+   WHERE owner_id=v_owner)<>1
  THEN RAISE EXCEPTION 'New V2 idempotency was not isolated'; END IF;
  BEGIN
-  PERFORM public.f16_qa_v2_begin_checkout(owner_id,request_b,'es',
+  PERFORM public.f16_qa_v2_begin_checkout(v_owner,request_b,'es',
    'pazo-supporter-sandbox.benefits-v2',digest,true);
   RAISE EXCEPTION 'A second V2 key was accepted';
  EXCEPTION WHEN unique_violation THEN NULL; END;
- IF NOT public.f16_qa_v2_claim_provider_create(owner_id,request_a,a->>'intentId')
- OR public.f16_qa_v2_claim_provider_create(owner_id,request_a,a->>'intentId')
+ IF NOT public.f16_qa_v2_claim_provider_create(v_owner,request_a,a->>'intentId')
+ OR public.f16_qa_v2_claim_provider_create(v_owner,request_a,a->>'intentId')
  THEN RAISE EXCEPTION 'PayPal POST claim was not one-shot'; END IF;
  IF (SELECT count(*) FROM supporter_private.paypal_p06_checkout_attempts
-   WHERE owner_id=owner_id AND terms_version='pazo-supporter-sandbox.qa20261016-v1')<>1
+   WHERE owner_id=v_owner AND terms_version='pazo-supporter-sandbox.qa20261016-v1')<>1
  OR (SELECT count(*) FROM supporter_private.paypal_subscription_intents
-   WHERE owner_id=owner_id)<>2
+   WHERE owner_id=v_owner)<>2
  THEN RAISE EXCEPTION 'Existing P06 history modified or V2 not separated'; END IF;
 END $test$;
 DO $test$
 BEGIN
  UPDATE supporter_private.f16_sandbox_qa_owners SET status='disabled'
  WHERE owner_id='61111111-1111-4111-8111-111111111111';
+ BEGIN
+  PERFORM public.f16_qa_v2_begin_checkout(
+   '61111111-1111-4111-8111-111111111111',
+   '75555555-5555-4555-8555-555555555555','es',
+   'pazo-supporter-sandbox.benefits-v2',
+   (SELECT sha256 FROM supporter_private.paypal_p06_offers
+    WHERE version='pazo-supporter-sandbox.benefits-v2' AND locale='es'),true);
+  RAISE EXCEPTION 'Disabled owner opened a new checkout';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  IF public.f16_qa_v2_claim_provider_create(
    '61111111-1111-4111-8111-111111111111',
    '74444444-4444-4444-8444-444444444444',
