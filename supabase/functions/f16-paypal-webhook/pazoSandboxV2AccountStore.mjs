@@ -16,7 +16,7 @@ export function createPazoSandboxV2AccountStore({
     serviceRoleKey.length<24||/\s/.test(serviceRoleKey)||
     typeof fetchImpl!=='function')reject()
  async function queryV2OwnerRecord(ownerId,intentId=null){
-  if(!UUID.test(ownerId||''))throw Error('qa_v2_owner_id_invalid')
+  if(!UUID.test(ownerId||''))throw Error('qa_v2_owner_id_invalid_type_'+typeof ownerId+'_length_'+String(ownerId??'').length)
   if(intentId!==null&&!INTENT.test(intentId))throw Error('qa_v2_intent_id_invalid')
   let response
   try{
