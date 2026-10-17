@@ -54,7 +54,8 @@ export function projectVerifiedSupporterBenefits(input) {
   // No free 30-day extrapolation; a cancelled subscription retains an
   // independently proven paid period but never extends it by itself.
   const current=verified.find(c=>c.from<=now && now<c.to);
-  const milestones=[3,6,12].filter(n=>verified.length>=n);
+  const maturedCycles=verified.filter(c=>c.from<=now).length;
+  const milestones=[3,6,12].filter(n=>maturedCycles>=n);
   result.state='SERVER_VERIFIED';
   result.active=Boolean(current);
   result.paidThrough=current ? new Date(current.to).toISOString() : null;
@@ -62,8 +63,8 @@ export function projectVerifiedSupporterBenefits(input) {
   result.postAvatarBadge=result.active;
   result.themesEnabled=result.active;
   result.themeIds=result.active ? [...SUPPORTER_THEME_IDS] : [];
-  result.milestones=milestones;
-  result.highestMilestone=milestones.length?milestones[milestones.length-1]:0;
+  result.milestones=result.active ? milestones : [];
+  result.highestMilestone=result.active && milestones.length ? milestones[milestones.length-1] : 0;
   // Public wall requires paid entitlement AND a separate affirmative
   // persisted consent linked to the SAME owner/pet. No opt-in by default.
   if(result.active) {
