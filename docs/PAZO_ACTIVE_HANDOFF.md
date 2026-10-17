@@ -1,3 +1,25 @@
+# F16 MVP — cuatro insignias PNG originales incorporadas y QA local PASS (2026-10-17)
+
+**Orden expresa del Product Owner:** incorporar únicamente las cuatro insignias aprobadas desde `pazo-supporter-insignias-4.zip`, comprobar componentes existentes, pruebas/build y publicar en la misma rama; sin rediseño ni activaciones. Rama `f13/section-titles-20261012`, PR #44 DRAFT. Checkout sincronizado por fast-forward a `1bbd216411cdedd6a39d2fdc3a9cfb4b5b0a08ff` y limpio antes de instalar.
+
+**Commit de arte:** `77708dd0c1e34e164161c12305b57cbdbc05b690`, exclusivamente cuatro PNG en `public/supporter/`:
+
+- `amigo-pazo-inicio.png`
+- `amigo-pazo-3-meses.png`
+- `amigo-pazo-6-meses.png`
+- `amigo-pazo-12-meses.png`
+
+Ejecutado `scripts/f16-stage-approved-supporter-badges.ps1` sin modificarlo. SHA256 del ZIP `281503c0638d1d9e3ea752263f9e2a72be5a584f172af73d17358a6c970182b5` y hashes de los cuatro originales idénticos al contrato del instalador. PNG RGBA **543×545**, sin recomprimir, generar ni rediseñar. El manifiesto del ZIP no se incorporó al repositorio. Copias del build en `dist/supporter/` verificadas byte a byte por hash.
+
+**Integración comprobada sin cambios de runtime:** rutas y etiquetas de `SupporterBadge.tsx` coinciden con los cuatro archivos; `PublicProfileView.tsx` y `HomeView.tsx` ya consumen ese componente detrás de prueba RPC y `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED`. El flag de la compilación de producción permanece **OFF**. No fueron necesarias correcciones de código ni tests nuevos.
+
+**Validación local:** 11/11 pruebas existentes `f16MvpServerBenefits.test.mjs` y 1/1 prueba UI dirigida `F16 approved supporter themes`: PASS. `npm run build`: PASS, con advertencia de tamaño de chunks; no se ejecutó manualmente la suite histórica completa. Verificación aislada adicional del componente real: 16 combinaciones ES/EN y pequeño/grande, ocultación de estado inactivo o milestone inválido, ocho archivos originales/build y sus dimensiones: PASS. Navegador local: ocho imágenes cargadas, cuatro variantes a **32×32 y 66×66**, tamaño natural 543×545. Arte revisado visualmente. La galería QA usó datos sintéticos y archivos del build, con conexiones externas bloqueadas; **no es una sesión de beneficios públicos ni un E2E con Supabase**. Captura y evidencias conservadas localmente; servidor y pestaña QA cerrados.
+
+**Publicación:** commit de arte separado del registro documental. Verificar CI/PG Lab del HEAD publicado antes de afirmar SUCCESS remoto; los resultados locales anteriores sí fueron observados. No desplegar Vercel ni fusionar PR #44.
+
+**Alcance restante intacto:** ningún acceso ni modificación de Supabase alojado, PayPal, checkout, beneficios públicos, flags financieros, pagos o períodos acreditados por esta tarea. Las fases de conciliación y autorización financiera conservan sus gates anteriores. Este cambio solo incorpora los recursos originales y no habilita la membresía Live.
+
+---
 # F16 MVP — escritura privada de períodos idempotente probada en PG17 (2026-10-17)
 
 **GO PO «ok go»:** continuar acelerando la membresía voluntaria **Amigo de PAZO US$2.99 al mes**, los cuatro beneficios originales, app gratuita; sin activar pagos Live, desplegar ni tocar DB alojada. Rama `f13/section-titles-20261012`, PR #44 DRAFT. **No más rondas P42** para avanzar interfaz comercial.
