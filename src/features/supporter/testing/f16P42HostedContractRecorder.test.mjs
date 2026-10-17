@@ -7,6 +7,7 @@ const config={
  enabled:true,projectUrl:'https://mrybvqdebbgcayuvgkkr.supabase.co',
  serviceRoleKey:'TEST_SERVER_CREDENTIAL_NOT_REAL_123456',
  keyId:'P42_V1',keyBytes,subtleImpl:webcrypto.subtle,
+ keyNotBefore:'2026-10-16T00:00:00Z',keyNotAfter:'2026-10-17T00:00:00Z',
  makeNonce:()=> 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
  now:()=>new Date('2026-10-16T15:01:00Z')
 }
@@ -51,4 +52,64 @@ test('no signing on wrong source, wrong key, short key or mismatched host',async
 test('network rejection and invalid RPC output never claim success',async()=>{
  for(const fetchImpl of [async()=>({ok:false}),async()=>({ok:true,json:async()=>({ok:true})}),async()=>{throw Error('mock network down')}])
   assert.equal(await create({...config,fetchImpl}).bindVerifiedActivation(payload),false)
+})
+
+test('P42 signing is disabled without finite exact 24-hour UTC custody window',async()=>{
+ let calls=0
+ for(const change of [
+  {keyNotBefore:undefined},
+  {keyNotAfter:undefined},
+  {keyNotBefore:'2026-10-16T01:00:00Z'},
+  {keyNotAfter:'2026-10-17T00:00:01Z'},
+  {keyNotAfter:'2026-10-16T23:59:59Z'},
+  {keyNotAfter:'2026-10-17T00:00:00-07:00'},
+  {keyNotBefore:'2026-02-30T00:00:00Z'},
+  {keyNotAfter:'not-a-date'},
+ ]){
+  const signer=create({...config,...change,
+   fetchImpl:async()=>{calls++;return {ok:true,json:async()=>true}}})
+  assert.equal(await signer.bindVerifiedActivation(payload),false)
+ }
+ assert.equal(calls,0)
+})
+test('P42 rejects timestamps outside key window with zero RPC attempts',async()=>{
+ let calls=0
+ for(const time of [
+  '2026-10-15T23:59:59Z',
+  '2026-10-17T00:00:00Z',
+  '2026-10-17T00:00:01Z',
+ ]){
+  const signer=create({...config,now:()=>new Date(time),
+   fetchImpl:async()=>{calls++;return {ok:true,json:async()=>true}}})
+  assert.equal(await signer.bindVerifiedActivation(payload),false,time)
+ }
+ assert.equal(calls,0)
+})
+test('P42 permits end-minus-one-second only as signed request with no paid rights',async()=>{
+ let calls=0
+ const signer=create({...config,now:()=>new Date('2026-10-16T23:59:59Z'),
+  fetchImpl:async(url,args)=>{
+   calls++;const body=JSON.parse(args.body)
+   assert.equal(body.p_issued_at,'2026-10-16T23:59:59Z')
+   return {ok:true,json:async()=>true}
+  }})
+ assert.equal(await signer.bindVerifiedActivation(payload),true)
+ assert.equal(calls,1)
+})
+test('P42 refuses to submit HMAC if custody expires during asynchronous sign',async()=>{
+ let tick=0,submitted=0
+ const signer=create({...config,
+  now:()=>new Date(++tick===1?'2026-10-16T23:59:59Z':'2026-10-17T00:00:00Z'),
+  fetchImpl:async()=>{submitted++;return {ok:true,json:async()=>true}}})
+ assert.equal(await signer.bindVerifiedActivation(payload),false)
+ assert.equal(tick,2)
+ assert.equal(submitted,0)
+})
+test('P42 refuses backwards server clock during signing without an RPC request',async()=>{
+ let tick=0,submitted=0
+ const signer=create({...config,
+  now:()=>new Date(++tick===1?'2026-10-16T15:01:00Z':'2026-10-16T15:00:59Z'),
+  fetchImpl:async()=>{submitted++;return {ok:true,json:async()=>true}}})
+ assert.equal(await signer.bindVerifiedActivation(payload),false)
+ assert.equal(submitted,0)
 })
