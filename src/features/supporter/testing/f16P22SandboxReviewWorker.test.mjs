@@ -96,6 +96,7 @@ test('P22 worker with fully correlated synthetic sale only quarantines',async()=
     state:'completed',amount:{currency:'USD',total:'2.99'}}}},
   getMerchantSubscription:async()=>{calls.push('subscription');return{
    id:SUB,plan_id:PLAN,custom_id:ID,status:'CANCELLED'}},
+  getIndependentMerchantSale:async()=>({id:'SALE-P22-ONE',billing_agreement_id:SUB,state:'completed',amount:{currency:'USD',total:'2.99'}}),
  }
  const w=createP22SandboxReviewWorker({
   scope:'OFFLINE_SYNTHETIC_TEST_ONLY',leaseStore,merchantReader})
@@ -124,6 +125,7 @@ test('P22 missing binding never credits or reports success',async()=>{
      state:'completed',amount:{currency:'USD',total:'2.99'}}}),
    getMerchantSubscription:async()=>({
     id:SUB,plan_id:PLAN,custom_id:ID,status:'ACTIVE'}),
+   getIndependentMerchantSale:async()=>({id:'SALE-P22-ONE',billing_agreement_id:SUB,state:'completed',amount:{currency:'USD',total:'2.99'}}),
   }})
  const r=await w.runOnce();SAFE(r)
  assert.equal(r.phase,'REVIEW_REQUESTED')
@@ -169,6 +171,8 @@ test('P22 PayPal path uses ONLY OAuth and subscription/event GET in offline mock
   if(url.endsWith('/v1/billing/subscriptions/'+SUB))
    return success({id:SUB,plan_id:PLAN,custom_id:ID,status:'ACTIVE',
     subscriber:{email_address:'payer@example.invalid'}})
+  if(url.endsWith('/v1/payments/sale/SALE-P22-ONE'))
+   return success({id:'SALE-P22-ONE',billing_agreement_id:SUB,state:'completed',amount:{currency:'USD',total:'2.99'},payer_email:'payer@example.invalid'})
   throw Error('unexpected endpoint '+url)
  }
  const w=createP22SandboxOfflineMockComposer({leaseStore,
@@ -232,6 +236,8 @@ test('P22 privileged composition uses existing private RPC and merchant GET cont
    if(url.endsWith('/v1/billing/subscriptions/'+SUB))
     return success({id:SUB,plan_id:PLAN,custom_id:ID,status:'CANCELLED',
      subscriber:{email_address:'should-not-leak@example.test'}})
+   if(url.endsWith('/v1/payments/sale/SALE-P22-ONE'))
+    return success({id:'SALE-P22-ONE',billing_agreement_id:SUB,state:'completed',amount:{currency:'USD',total:'2.99'},payer_email:'should-not-leak@example.test'})
    throw Error('unexpected_endpoint')
   },
  })
@@ -242,7 +248,7 @@ test('P22 privileged composition uses existing private RPC and merchant GET cont
  assert.equal(result.dispositionConfirmed,true)
  assert.equal(calls.filter(x=>x.url.endsWith('f16_p05_draft_claim_next_verified_event')).length,1)
  assert.equal(calls.filter(x=>x.url.endsWith('f16_p05_draft_finish_claimed_event')).length,1)
- assert.equal(calls.filter(x=>x.method==='GET').length,3)
+ assert.equal(calls.filter(x=>x.method==='GET').length,5)
  assert.ok(calls.every(x=>x.method==='GET'||x.url.includes('/rpc/')||
    x.url.endsWith('/v1/oauth2/token')))
  assert.ok(!JSON.stringify(result).includes('should-not-leak'))
@@ -278,4 +284,33 @@ test('P22 privileged composition unavailable private RPC cannot reach provider',
  const result=await worker.runOnce()
  SAFE(result);assert.equal(result.phase,'CLAIM_UNAVAILABLE')
  assert.equal(calls.length,1)
+})
+
+test('P22 fails closed when original independent sale is missing or refunded',async()=>{
+ for(const sale of [null,{
+  id:'SALE-P22-ONE',billing_agreement_id:SUB,state:'refunded',
+  amount:{currency:'USD',total:'2.99'},
+ }]){
+  let boundReads=0,finished
+  const store={
+   claimNextVerifiedEvent:async()=>claim(),
+   readClaimedEvent:async()=>read(),
+   resolveClaimedSubscription:async()=>{boundReads++;return bound()},
+   finishClaimedEvent:async x=>{finished=x;return true},
+  }
+  const merchantReader={
+   getMerchantEvent:async()=>({id:EVT,event_type:'PAYMENT.SALE.COMPLETED',
+    resource:{id:'SALE-P22-ONE',billing_agreement_id:SUB,state:'completed',
+     amount:{currency:'USD',total:'2.99'}}}),
+   getMerchantSubscription:async()=>({id:SUB,plan_id:PLAN,custom_id:ID,status:'ACTIVE'}),
+   getIndependentMerchantSale:async()=>sale,
+  }
+  const result=await createP22SandboxReviewWorker({
+   scope:'OFFLINE_SYNTHETIC_TEST_ONLY',leaseStore:store,merchantReader}).runOnce()
+  SAFE(result)
+  assert.equal(result.phase,'REVIEW_REQUESTED')
+  assert.equal(result.reason,'missing_evidence')
+  assert.equal(boundReads,0)
+  assert.equal(finished.outcome,'review')
+ }
 })
