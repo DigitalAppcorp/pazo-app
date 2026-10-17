@@ -69,3 +69,18 @@ test('P26 incomplete refund/dispute/history is review only',()=>{
 test('P26 no inputs is denied and has no side effects',()=>{
  const r=assess();safe(r);assert.equal(r.phase,'DENIED')
 })
+
+test('P26 refuses QA-only terms even with authentic consent and matching merchant sale',()=>{
+ for(const edit of [
+  x=>{x.consent.offerPurpose='SANDBOX_QA'},
+  x=>{x.consent.qaOnly=true},
+  x=>{x.consent.firstPeriodContractAttested=false},
+  x=>{x.consent.termsVersion='pazo-supporter-sandbox.qa20261016-v1'},
+  x=>{delete x.consent.termsVersion},
+ ]){
+  const evidence=valid();edit(evidence)
+  const r=assess(evidence);safe(r)
+  assert.equal(r.phase,'DENIED')
+  assert.equal(r.reason,'prospective_paid_service_terms_not_attested')
+ }
+})
