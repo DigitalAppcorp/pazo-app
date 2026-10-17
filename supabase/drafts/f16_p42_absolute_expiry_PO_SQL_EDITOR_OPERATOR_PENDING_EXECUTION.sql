@@ -142,10 +142,10 @@ END $postflight$;
 DO $strict_postflight$
 BEGIN
  IF (
-  SELECT pg_catalog.position(
-   'clock_timestamp()>=v_key_end' IN
+  SELECT pg_catalog.strpos(
    pg_catalog.regexp_replace(pg_catalog.pg_get_functiondef(oid),
-    '[[:space:]]+','','g'))
+    '[[:space:]]+','','g'),
+   'clock_timestamp()>=v_key_end')
   FROM pg_catalog.pg_proc
   WHERE oid='public.f16_p42_register_authenticated_activation(text,text,text,uuid,text,text)'::regprocedure
  )=0
@@ -172,10 +172,10 @@ COMMIT;
 -- Human operator: success requires COMMIT and final result with all flags expected.
 SELECT pg_catalog.jsonb_build_object(
  'p42_absolute_expiry',
- (SELECT pg_catalog.position(
-  'clock_timestamp()>=v_key_end' IN
+ (SELECT pg_catalog.strpos(
   pg_catalog.regexp_replace(pg_catalog.pg_get_functiondef(p.oid),
-   '[[:space:]]+','','g'))>0
+   '[[:space:]]+','','g'),
+  'clock_timestamp()>=v_key_end')>0
   FROM pg_catalog.pg_proc p
   WHERE p.oid='public.f16_p42_register_authenticated_activation(text,text,text,uuid,text,text)'::regprocedure),
  'p42_signing_keys',(SELECT pg_catalog.count(*) FROM supporter_private.p42_activation_signing_keys),
