@@ -27,7 +27,11 @@ test('real PAZO QA displays only V2 subscriber actions, not P06 historic cancell
  assert.match(qaAccount,/functions\/v1\/f16-paypal-supporter-v2-qa/)
  assert.match(qaAccount,/action:'verify_payment'/)
  assert.match(qaAccount,/result\.mayGrantBenefits===true/)
- assert.match(original,/!qaV2Screen && accounts\?\.map/)
+ // In the refreshed product UX, the QA V2 and legacy P06 branches are
+ // mutually exclusive. Never allow P06 historic cancellation from QA.
+ assert.match(original,/qaV2Screen \? \(\s*<SandboxV2AccountPanel lang=\{lang\}\/>\s*\) : \(\s*<>/)
+ assert.match(original,/accounts\?\.map\(account/)
+ assert.match(original,/if \(!qaV2Screen\) void refresh\(\)/)
  assert.match(qaAccount,/amigo-pazo-inicio\.png/)
  assert.match(qaAccount,/amigo-pazo-3-meses\.png/)
  assert.match(qaAccount,/amigo-pazo-6-meses\.png/)
