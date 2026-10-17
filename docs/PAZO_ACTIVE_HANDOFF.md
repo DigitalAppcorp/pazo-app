@@ -1,3 +1,19 @@
+# F16 — CHECKOUT SANDBOX Y CANCELACIÓN V2 CON COMPuERTAS INDEPENDIENTES (2026-10-17)
+
+**PO «ok go» activo:** avanzar exclusivamente integración **Sandbox** con los cuatro beneficios originales, sobre la cuenta PAZO de prueba existente y su mascota. **No PayPal Live, no nuevas cuentas, no maquetas.**
+
+**Corrección de seguridad de esta tanda:** el nuevo `f16-paypal-supporter/index.ts` ahora usa DOS gates estáticos OFF independientes: `QA_CHECKOUT_RELEASE_APPROVED=false` y `QA_V2_MANAGEMENT_RELEASE_APPROVED=false`. Cuando se autorice el experimento se pueden activar ambos para una única compra Sandbox, y **después cerrar compras sin impedir consultar/cancelar la suscripción V2 ya existente**. La administración valida getUser, origen exacto HTTPS, `pazoSandboxV2AccountStore` V2-only, PayPal GET `subscription.id + plan_id + custom_id` y confirmación posterior a cancelación. La V1 histórica jamás puede encontrarse ni cancelarse mediante V2. La nueva UI en `SandboxV2AccountPanel.tsx` está bajo el panel real PAZO y solo aparece en modo DEV/QA, con confirmación explícita y aceptación V2 descargable. Ninguno de los dos gates se habilitó ni se desplegó Edge.
+
+**Estado Supabase hospedado desde migración `20261017165014_f16_sandbox_qa_v2_owner_account_read_only`:** lectura V2 únicamente service_role, deny anon/auth; 0 intentos V2, 1 P06 histórico y dos intenciones totales, 0 períodos QA, 0 compradores QA enabled, V2 oferta ES/EN todavía sin publicar, cero grants financieros y ningún nuevo pago. No repetir esas migraciones.
+
+**Pruebas a comprobar antes de dar GO:** el CI y PG17 tras el último cambio de tests `406c453a806c443b5856d3b9fd8060476d59070d`. Las pruebas de release guard añaden la segunda compuerta, comprobando que ambas inician OFF. `f16SandboxV2ManagementIndependentGate.test.mjs` exige que una compra cerrada no quite cancelación al propietario.
+
+**Siguiente única dependencia real para prueba E2E:** conectar una venta **`PAYMENT.SALE.COMPLETED` verificada en PayPal Sandbox** a un período QA privado de V2 asociado al propietario, jamás por ACTIVE/redirect. Cubrir holds y fechas contractuales. Luego activar solo owner QA, nueva oferta v2 ES/EN y el Edge Sandbox de ensayo aislado para ejecutar una compra con el PO y ver los cuatro beneficios en PAZO. No ampliar P42/Live.
+
+**Marcador:** `F16_SANDBOX_V2_OWNER_CANCEL_INDEPENDENT_CHECKOUT_OFF_PERIOD_PROOF_PENDING`.
+
+---
+
 # F16 — GESTIÓN DE LA SEGUNDA SUSCRIPCIÓN SANDBOX V2: CI/PG PASS, NO PAYMENT (2026-10-17)
 
 **Prioridad PO:** ejecutar UNA compra **PayPal Sandbox** con los cuatro beneficios reales, en la cuenta PAZO de prueba ya existente, y revisar UI/perfil/Feed/muro/cancelación en la app. **NO** crear cuenta nueva, no Live/P42, no repetir P06 histórico ni inventar premios. PR #44 DRAFT, rama `f13/section-titles-20261012`.
