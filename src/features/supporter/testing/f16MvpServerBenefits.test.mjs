@@ -80,13 +80,17 @@ test('F16 MVP: invalid windows and duplicate consent fail closed',()=>{
   ])assert.equal(projectVerifiedSupporterBenefits(v).state,'UNVERIFIED');
 });
 test('F16 MVP: milestone thresholds count unique verified paid cycles only',()=>{
-  const cycles=Array.from({length:12},(_,i)=>{
+  const cycles=Array.from({length:13},(_,i)=>{
     const a=new Date(Date.UTC(2026,0+i,1)).toISOString().replace('.000Z','Z');
     const b=new Date(Date.UTC(2026,1+i,1)).toISOString().replace('.000Z','Z');
     return cycle({cycleId:'cycle-'+String(i).padStart(3,'0'),saleId:'sale-'+String(i).padStart(3,'0'),
       serviceStartsAt:a,serviceEndsAt:b});
   });
-  const p=projectVerifiedSupporterBenefits(input({cycles,now:'2026-12-18T00:00:00Z'}));
+  const beforeAnniversary=projectVerifiedSupporterBenefits(input({
+    cycles:cycles.slice(0,12),now:'2026-12-18T00:00:00Z'
+  }));
+  assert.deepEqual(beforeAnniversary.milestones,[3,6]);
+  const p=projectVerifiedSupporterBenefits(input({cycles,now:'2027-01-18T00:00:00Z'}));
   assert.deepEqual(p.milestones,[3,6,12]);assert.equal(p.highestMilestone,12);
   const p2=projectVerifiedSupporterBenefits(input({cycles:cycles.slice(0,5),now:'2026-04-18T00:00:00Z'}));
   assert.deepEqual(p2.milestones,[3]);assert.equal(p2.highestMilestone,3);
@@ -102,4 +106,18 @@ test('F16 MVP: future prepaid months must not count as elapsed support',()=>{
   ],now:'2026-10-18T00:00:00Z'}));
   assert.equal(p.active,true);
   assert.deepEqual(p.milestones,[]);
+});
+
+test('F16 MVP: a third monthly payment still needs its service window to finish',()=>{
+ const cycles=Array.from({length:4},(_,i)=>cycle({
+  cycleId:'distinct-cycle-'+i,saleId:'distinct-sale-'+i,
+  serviceStartsAt:new Date(Date.UTC(2026,0+i,1)).toISOString().replace('.000Z','Z'),
+  serviceEndsAt:new Date(Date.UTC(2026,1+i,1)).toISOString().replace('.000Z','Z'),
+ }));
+ const before=projectVerifiedSupporterBenefits(input({cycles:cycles.slice(0,3),now:'2026-03-15T00:00:00Z'}));
+ assert.equal(before.active,true);
+ assert.deepEqual(before.milestones,[]);
+ const after=projectVerifiedSupporterBenefits(input({cycles,now:'2026-04-15T00:00:00Z'}));
+ assert.equal(after.active,true);
+ assert.deepEqual(after.milestones,[3]);
 });
