@@ -417,3 +417,80 @@ test('P27 incomplete refund/dispute history skips first-period and refund raw re
   assert.equal(calls,0)
  }
 })
+
+test('P27 rechecks leased private context after merchant queries',async()=>{
+ const a=base(),read=a.readPrivateReviewContext
+ let reads=0
+ a.readPrivateReviewContext=async scope=>{
+  const c=await read(scope);reads++
+  if(reads===2)c.claim.leaseValid=false
+  return c
+ }
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r)
+ assert.equal(reads,2)
+ assert.equal(r.phase,'REVIEW_REQUIRED')
+ assert.equal(r.reason,'private_claim_or_obligation_changed_during_review')
+})
+test('P27 rejects a post-merchant owner, offer or P25 reservation change',async()=>{
+ for(const modify of [
+  c=>{c.privateBinding.ownerId='33333333-3333-4333-8333-333333333333'},
+  c=>{c.reviewReservation.saleId='SALE-FORGED'},
+  c=>{c.consent.sha256Verified=false},
+  c=>{c.consent.termsVersion='pazo-supporter-sandbox.qa20261016-v1'},
+  c=>{c.consent.termsDigest='b'.repeat(64)},
+  c=>{c.consent.acceptedAt='2026-10-16T09:05:00Z'},
+  c=>{c.originalEvent.signatureStatus='unverified'},
+  c=>{c.claim.prospectiveCutoffPassed=false},
+ ]){
+  const a=base(),read=a.readPrivateReviewContext
+  let calls=0
+  a.readPrivateReviewContext=async params=>{
+   const c=await read(params)
+   if(++calls===2)modify(c)
+   return c
+  }
+  const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+  check(r)
+  assert.equal(calls,2)
+  assert.equal(r.reason,'private_claim_or_obligation_changed_during_review')
+ }
+})
+test('P27 rejects a shared object changed by a merchant callback before second read',async()=>{
+ const a=base()
+ const same=await a.readPrivateReviewContext()
+ a.readPrivateReviewContext=async()=>same
+ a.inspectDisputes=async()=>{
+  same.claim.leaseValid=false
+  return {phase:'DISPUTE_SNAPSHOT_EMPTY_REVIEW_ONLY'}
+ }
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r)
+ assert.equal(r.reason,'private_claim_or_obligation_changed_during_review')
+})
+test('P27 only returns clean REVIEW_REQUIRED after second consistent private check',async()=>{
+ const a=base(),read=a.readPrivateReviewContext
+ let calls=0
+ a.readPrivateReviewContext=async args=>{
+  calls++
+  assert.deepEqual(args,{eventId:'WH-P27-01',claimToken:token,
+   subscriptionId:'I-P27-ONE',intentId:intent})
+  return read(args)
+ }
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r)
+ assert.equal(calls,2)
+ assert.equal(r.reason,'merchant_source_cycle_reversals_and_atomic_credit_unproven')
+})
+test('P27 unavailable final private re-read cannot authorize financial rights',async()=>{
+ const a=base(),read=a.readPrivateReviewContext
+ let calls=0
+ a.readPrivateReviewContext=async args=>{
+  if(++calls===2)throw Error('leased state became unavailable')
+  return read(args)
+ }
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r)
+ assert.equal(calls,2)
+ assert.equal(r.reason,'merchant_or_private_evidence_unavailable')
+})
