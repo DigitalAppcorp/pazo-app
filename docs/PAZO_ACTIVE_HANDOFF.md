@@ -1,3 +1,22 @@
+# F16-P42 — preparación de dos canales privados completada en laboratorio, hosted NO-GO (2026-10-17)
+
+**GO limitado por PO:** «ok go» tras `P43B_EPHEMERAL_DB_READ_ONLY_PASS` autorizó **PREPARAR/AUDITAR SOLO EN LABORATORIO** el canal PostgreSQL parametrizado + Supabase Edge Secrets privado. Se reutilizó el diseño de `docs/PAZO_F16_P42_24H_CUSTODY_EXPIRY_REVOCATION_GATE_20261016.md`, `docs/PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md` y pruebas backup PG17. No usar el GO para otra conexión PAZO, emisión de nuevo `cli_login_postgres`, escritura hosted, secreto, modificación de seguridad, pagos o despliegue.
+
+**Implementación en PR #44 DRAFT:**
+- `scripts/f16-p42-private-dual-channel.offline.mjs` (sin red/DB/CLI/env/llaves reales) y `src/features/supporter/testing/f16P42PrivateDualChannelOffline.test.mjs` (contrato de `$1`–`$4` con parámetro BYTEA, TTL 24h exactas UTC y descriptores HTTP `POST/GET/DELETE /v1/projects/{ref}/secrets`, solo nombre Edge `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX`; rechazo de material productivo; simulación de compensación fail-closed).
+- `scripts/f16-p42-backup-exclusion-pg17-lab.sh` extendido dentro de PG17 desechable para `PREPARE/EXECUTE` INSERT sintético `P42_V2` (bytes fijos `a7`), DELETE exacto `P42_V2`, 24 horas, ROLLBACK y conservación de `P42_V1` ficticia; no es prueba de protocolo client-side `pg`, roles WRITE hosted ni Edge real.
+- Diseño/limitaciones `docs/PAZO_F16_P42_PRIVATE_DUAL_CHANNEL_OFFLINE_GATE_20261017.md`. Management API verificada contra documentación Supabase: `POST/GET/DELETE https://api.supabase.com/v1/projects/{ref}/secrets` por HTTPS; body privado vs CLI `NAME=VALUE` (argv) o `--env-file` (fichero). Necesita OWNER/ADMIN + permiso `edge_functions_secrets_write/read` y token privado; NO pedir ni exponerlos ahora. El nuevo secret sería de alcance proyecto y disponible inmediatamente, no exclusivamente de función.
+
+**Evidencia pruebas:** último commit técnico `93000826218ae470ee0e2d9816e676b91cfd6997`: workflow **CI #39031383944 SUCCESS**, **F16 Disposable PostgreSQL Lab #39031383885 SUCCESS**, ambos con datos sintéticos y sin hosted. El commit documental posterior `0c2ba15e602d0064d47208bf73357c14e3fa75e5` no altera scripts/test; sus nuevos workflows se deben comprobar antes de declarar ese HEAD PASS. **No se ha ejecutado el flujo HTTP ni un SQL de escritura real**.
+
+**Estado de autoridad:** P43B PASS de lectura, su lock consumido, nueva credencial NO emitida en este gate; P42 clave real 0, T0 aún sin fijar, `enabled=false`/P42 writer OFF/P21 worker OFF/RPC EXECUTE denegado según último preflight, ninguna provisión Edge, ledger/checkout/pagos/beneficios NO-GO. Contrato futuro P42_V1 vigencia 24h con PO custodio ÚNICO y revocación MANUAL; riesgo humano y copias físicas todavía pendientes. El backup lógico excluye key_bytes pero no acredita snapshots alojados.
+
+**Próximo gate lógico:** diseñar cliente privado real con bind parameters + transporte HTTPS sin logs de body, CI con mocks, guardas de proyecto/roles; después obtener **GO NUEVO específico para acreditar únicamente permiso WRITE hospedado de forma inocua/limitada** y disponibilidad Edge, sin generar clave. Un GO ulterior para P42 provisionamiento real/compensación y otro para activar finanzas. No relanzar scripts P43/P43B ni reutilizar IDs/locks.
+
+**Marcador:** `P42_PRIVATE_DUAL_CHANNEL_SYNTHETIC_PASS_HOSTED_WRITE_AND_EDGE_UNVERIFIED`; F16 FINANCIAL NO-GO; PR #44 DRAFT.
+
+---
+
 # F16-P43B — PASS de acceso temporal CLI, avance a diseño canal privado WRITE (2026-10-17)
 
 **Resultado comunicado por el Product Owner desde Codex Windows**, después del GO exclusivo `P43B-EPHEMERAL-20261017-01`:
