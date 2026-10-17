@@ -14,12 +14,15 @@ function mock(mutate=()=>{}){
    payer_email:'private@example.invalid'}}
  const sub={id:subId,plan_id:planId,custom_id:intentId,status:'ACTIVE',
   payer_email:'private@example.invalid'}
+ const original={id:'SALE-ONE-SYNTHETIC',billing_agreement_id:subId,
+  state:'completed',amount:{currency:'USD',total:'2.99'}}
  const bound={intentId,subscriptionId:subId,planId,state:'bound',ownerId}
  const calls=[]
- mutate({event,sub,bound})
+ mutate({event,sub,bound,original})
  const bridge=create({
   getMerchantEvent:async args=>{calls.push(['event',args]);return event},
   getMerchantSubscription:async args=>{calls.push(['sub',args]);return sub},
+  getIndependentMerchantSale:async args=>{calls.push(['sale',args]);return original},
   resolveClaimedSubscription:async args=>{calls.push(['resolve',args]);return bound},
  })
  return {bridge,calls}
@@ -40,6 +43,7 @@ test('PayPal event -> sub -> fenced private intent correlation is candidate only
  assert.deepEqual(calls,[
   ['event',{eventId,claimToken}],
   ['sub',{subscriptionId:subId,eventId,claimToken}],
+  ['sale',{saleId:'SALE-ONE-SYNTHETIC',eventId,claimToken}],
   ['resolve',{eventId,claimToken,
    merchantSubscriptionId:subId,merchantCustomIntentId:intentId}],
  ])
@@ -97,6 +101,7 @@ test('missing private intent or database exception fails closed',async()=>{
  const empty=create({
   getMerchantEvent:async()=>mockEvent(),
   getMerchantSubscription:async()=>mockSubscription(),
+  getIndependentMerchantSale:async()=>({id:'SALE-ONE-SYNTHETIC',billing_agreement_id:subId,state:'completed',amount:{currency:'USD',total:'2.99'}}),
   resolveClaimedSubscription:async()=>null,
  })
  function mockEvent(){return {id:eventId,event_type:'PAYMENT.SALE.COMPLETED',
@@ -108,6 +113,7 @@ test('missing private intent or database exception fails closed',async()=>{
  const broken=create({
   getMerchantEvent:async()=>mockEvent(),
   getMerchantSubscription:async()=>mockSubscription(),
+  getIndependentMerchantSale:async()=>({id:'SALE-ONE-SYNTHETIC',billing_agreement_id:subId,state:'completed',amount:{currency:'USD',total:'2.99'}}),
   resolveClaimedSubscription:async()=>{throw Error('private@example.invalid DB_SECRET')},
  })
  assert.equal((await inspect(broken)).kind,'read_error')
@@ -121,6 +127,8 @@ test('PayPal GET errors never expose secrets or falsely report matches',async()=
      state:'completed',amount:{currency:'USD',total:'2.99'}}}),
    getMerchantSubscription:async()=>({id:subId,plan_id:planId,
     custom_id:intentId,status:'ACTIVE'}),
+   getIndependentMerchantSale:async()=>({id:'SALE-ONE-SYNTHETIC',
+    billing_agreement_id:subId,state:'completed',amount:{currency:'USD',total:'2.99'}}),
    resolveClaimedSubscription:async()=>({intentId,subscriptionId:subId,
     planId,state:'bound',ownerId}),
   }
@@ -154,4 +162,25 @@ test('worker integration ends a clean correlation in REVIEW and no benefits',asy
 })
 test('adapter interface required; no backend side effects',()=>{
  assert.throws(()=>create({}),/p05_merchant_claim_bridge_unconfigured/)
+})
+
+test('claim bridge never resolves owner without independent P29 SALE identity',async()=>{
+ for(const mutation of [
+  x=>{x.original.id='SALE-FOREIGN'},
+  x=>{x.original.billing_agreement_id='I-FOREIGN'},
+  x=>{x.original.amount.total='5.99'},
+  x=>{x.original.state='refunded'},
+ ]){
+  const {bridge,calls}=mock(mutation)
+  const result=await inspect(bridge);safe(result)
+  assert.equal(result.kind,'insufficient_evidence')
+  assert.equal(calls.some(x=>x[0]==='resolve'),false)
+ }
+})
+test('missing independent SALE source cannot instantiate prospective bridge',()=>{
+ assert.throws(()=>create({
+  getMerchantEvent:async()=>null,
+  getMerchantSubscription:async()=>null,
+  resolveClaimedSubscription:async()=>null,
+ }),/p05_merchant_claim_bridge_unconfigured/)
 })
