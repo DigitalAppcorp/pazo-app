@@ -11,13 +11,14 @@ const safe=(phase,reason)=>Object.freeze({phase,reason,environment:'sandbox',
  networkPaymentWrites:0})
 export function createP27OfflineProvenanceReview({
  scope='DISABLED', merchantReader,readPrivateReviewContext,
- inspectHistory,inspectRefunds,inspectDisputes,
+ readIndependentMerchantSale,inspectHistory,inspectRefunds,inspectDisputes,
 }={}){
  if(scope!=='OFFLINE_SYNTHETIC_TEST_ONLY')
   return Object.freeze({inspect:async()=>safe('DISABLED','scope_disabled')})
  if(!merchantReader||typeof merchantReader.getMerchantEvent!=='function'||
   typeof merchantReader.getMerchantSubscription!=='function'||
-  [readPrivateReviewContext,inspectHistory,inspectRefunds,inspectDisputes]
+  [readPrivateReviewContext,readIndependentMerchantSale,
+   inspectHistory,inspectRefunds,inspectDisputes]
    .some(x=>typeof x!=='function'))
   throw Error('p27_offline_dependencies_required')
  return Object.freeze({async inspect({eventId,claimToken}={}){
@@ -48,7 +49,8 @@ export function createP27OfflineProvenanceReview({
    const source={
     ...privateContext,
     merchantSale:{
-     id:event.resource.id,eventId,status:event.resource.state,
+     id:event.resource.id,eventId,
+     status:['COMPLETED','completed'].includes(event.resource.state)?'COMPLETED':null,
      currency:event.resource.amount?.currency,
      amountMinor:event.resource.amount?.total==='2.99'?299:null,
      subscriptionId:sub.id,
@@ -63,6 +65,20 @@ export function createP27OfflineProvenanceReview({
    if(preflight.phase!=='REVIEW_REQUIRED'||
       preflight.reason!=='merchant_history_incomplete')
     return safe(preflight.phase,preflight.reason)
+   // Reuse the independent original SALE GET reader P29 only AFTER the
+   // P26 identity/consent/reservation preflight. A signed webhook event is
+   // not independent confirmation of the merchant sale's current state.
+   // This synthetic callback must be backed by a lease-fenced server-only
+   // reader in a separately authorized hosted execution; never by UI data.
+   const originalSale=await readIndependentMerchantSale({
+    saleId:event.resource.id,eventId,claimToken,
+   })
+   if(!originalSale||originalSale.id!==event.resource.id||
+      originalSale.billing_agreement_id!==sub.id||
+      !['COMPLETED','completed'].includes(originalSale.state)||
+      originalSale.amount?.currency!=='USD'||
+      originalSale.amount?.total!=='2.99')
+    return safe('REVIEW_REQUIRED','independent_merchant_sale_unverified')
    // Offline-only observations; even all three cannot attest global
    // coverage or authorize a ledger write or paid service period.
    const [history,refunds,disputes]=await Promise.all([
