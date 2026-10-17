@@ -1,3 +1,13 @@
+# PAZO A01 — Bienvenida refinada ilustrada con motion aprobado (2026-10-17)
+
+**Autorización del PO:** pantalla A01 basada en referencia verde salvia con ilustración de perrito, paleta PAZO verde/crema/lima, **texto sin cambios de la propuesta refinada** «Hecho con amor para las mascotas» y «Únete y descubre la mejor app social para mascotas». Mantener Comenzar, Ya tengo una cuenta, Demo, idioma y enlace público «Conoce a los Amigos de PAZO». PO autorizó expresamente animación independiente del perro (respiración, cola, parpadeo, leve gesto/cabeza) y de adornos (corazones, líneas, hojas), baja amplitud, elegante y reducida si la configuración del usuario lo solicita.
+
+**Cambios branch PR #44 DRAFT:** solo A01 en `src/components/views/OnboardingView.tsx`, sin tocar estados ni handlers A02–A04, auth, demo o muro; nuevo `src/features/onboarding/components/WelcomeAnimatedCompanion.tsx`, vector original por capas con animación real independiente (no captura estática ni placeholder de imagen externa); `src/index.css` añade `pazoWelcomeDogEnter`, `pazoWelcomeBreathe`, `pazoWelcomeTail`, `pazoWelcomeHeadTilt`, `pazoWelcomeEyes/WelcomeBlink`, `pazoWelcomeHeart`, `pazoWelcomeLine`, etc. `prefers-reduced-motion` cancela todo el movimiento de A01 y deja los ojos abiertos y el perrito visible. Header idioma y logo; hero verde centrado; tarjeta ilustrada; link Amigos no comercial a muro; botones existentes persistentes y centro desplazable en móviles cortos. Footer conserva versión de compilación discretamente.
+
+**Gate pendiente:** CI/PG del commit final, captura real usuario con altura 667/860 y 360–430px, test manual ES/EN, retorno de muro, navegación hacia A02, login y Demo. La ilustración en SVG está construida en código como interpretación del perrito aprobado: **requiere comparación visual del PO**, no afirmar pixel-perfect por CI. No pagos, migraciones, nuevos datos/eventos, servicios externos o Live; PR DRAFT sin merge.
+
+---
+
 # F16 — Muro de agradecimiento Opción D aprobado por PO, implementado en rama (2026-10-17)
 
 **GO del PO:** «Opción D» (timeline / vista cronológica), con objetos ilustrados que reutilicen **la misma animación suave de personalización de perfil**; implementar **pantalla vacía y pantalla con mascotas** como en las dos imágenes referenciales aprobadas. Sin badges, nombres, meses ni fotos simulados en vistas públicas.
