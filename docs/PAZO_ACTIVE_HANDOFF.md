@@ -1,3 +1,13 @@
+# F16-P42 — PO confirma restablecimiento de password PostgreSQL (2026-10-17)
+
+**Nuevo dato de PO:** "ya la cambié, muy tarde". El operador **ya restableció la contraseña del rol PostgreSQL desde Supabase Dashboard**, siguiendo una instrucción anterior. **La nueva contraseña NO se recibió ni se inspeccionó**, y su autenticación contra Session Pooler continúa SIN VERIFICAR. No solicitarla por chat ni registrar en GitHub, logs o scripts. No repetir restablecimiento ni probar el password anterior. Este evento revoca la recomendación previa de "pausar rotación si aún no se ejecutó": la rotación YA se realizó.
+
+**Postflight remoto de solo lectura, 2026-10-17:** Supabase Management API consultada y PostgreSQL SQL executor ejecutó exclusivamente `select current_database() = 'postgres' as correct_database, current_setting('server_version_num')::integer >= 170000 as postgres_17_or_newer, now() is not null as select_works;`: los tres valores `true`. **Esto demuestra que la DB responde por la ruta administrada, NO que la contraseña nueva autentique por pooler, que PAZO frontend/end-to-end funcione, ni que backups privados no se afecten.** Auditoría previa indica bajo riesgo app Vercel/Edge, pero clientes persistentes `psql/pg_dump` con contraseña antigua necesitarían actualizarse.
+
+**Acción siguiente segura:** Codex local termina auditoría offline y guarda bajo revisión los cambios de clasificación/TLS aún NO COMMIT/PUSH. Preparar conexión privada a PostgreSQL con contraseña NUEVA introducida por PO en prompt oculto, sin captura ni registro; verificar TLS cliente→pooler vía `sslmode=verify-full`, y SQL `SELECT` READ ONLY sin tratar `pg_stat_ssl` del backend como prueba TLS cliente→pooler. Cualquier intento remoto requiere **GO nuevo y explícito**. No generar/provisionar clave P42, no duplicar P43 consumido, no activar worker, checkout, cobros, beneficios, ni modificar DB bajo un mero GO de verificación. PR #44 DRAFT, F16 NO-GO.
+
+---
+
 # F16-P42 — auditoría offline Codex sobre falso bloqueo TLS (2026-10-17)
 
 **Evidencia reportada por el PO, no inspeccionada en disco por este chat:** Codex informó auditoría local sin nuevas conexiones PostgreSQL, PowerShell/`psql`/2 CA correctos, 12 pruebas offline PASS, y modificaciones LOCALES SIN COMMIT/PUSH a `scripts/f16-p42-session-pooler-tls-readonly-once.ps1` para clasificación de fallos, limpieza de proceso y preferencia TLS. Informe solo disponible en Windows del PO: `continuidad/RESULTADO_P42_AUDITORIA_LOCAL_OFFLINE_20261017.md`; **no se ha leído el archivo íntegro**. El reporte no valida contraseña ni handshake remoto. No atribuir fallo a autenticación.
