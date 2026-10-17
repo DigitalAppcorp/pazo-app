@@ -71,7 +71,7 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
       if(!live)return
       const o=r?.offer
       if(r.phase!=='PUBLISHED_OFFER'||!o||
-        o.locale!==lang||!VERSION.test(o.version||'')||
+        o.locale!==lang||
         !DIGEST.test(o.termsDigest||'')||o.version!==BENEFITS_V2||
         typeof o.exactCopy!=='string'||o.exactCopy.length<100||
         !(lang==='es' ?
