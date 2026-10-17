@@ -115,6 +115,19 @@ BEGIN
  IF EXISTS(SELECT 1 FROM public.pazo_supporter_public_wall(48)
    WHERE pet_id='42222222-2222-4222-8222-222222222222')
  THEN RAISE EXCEPTION 'Free pet leaked to public wall'; END IF;
+ IF (SELECT count(*) FROM public.pazo_supporter_public_badges_batch(ARRAY[
+       '41111111-1111-4111-8111-111111111111'::uuid,
+       '42222222-2222-4222-8222-222222222222'::uuid
+     ])) <> 2
+ THEN RAISE EXCEPTION 'Feed batch lost a pet'; END IF;
+ IF (SELECT count(*) FROM public.pazo_supporter_public_badges_batch(ARRAY[
+       '41111111-1111-4111-8111-111111111111'::uuid
+     ]) AS b WHERE b.badge AND b.milestone=3) <> 1
+ THEN RAISE EXCEPTION 'Verified Feed badge or milestone wrong'; END IF;
+ IF EXISTS (SELECT 1 FROM public.pazo_supporter_public_badges_batch(ARRAY[
+       '42222222-2222-4222-8222-222222222222'::uuid
+     ]) AS b WHERE b.badge OR b.milestone<>0)
+ THEN RAISE EXCEPTION 'Free pet obtained Feed badge'; END IF;
 END $test$;
 
 -- Refund/dispute blocks current benefits but must not delete stored consent.
