@@ -33,7 +33,7 @@ test('Both languages disclose real four perks, renewal, free product, separate w
    assert.ok(text.length>750 && text.length<11500)
    assert.match(text,/2\.99/)
    assert.match(text,/Sandbox/i)
-   assert.match(text,locale==='es'?/SIN DINERO REAL/:/NO REAL MONEY/)
+   assert.match(text,locale==='es'?/NO SE UTILIZA DINERO REAL/:/NO REAL MONEY/)
    for(const fragment of locale==='es'
      ? ['insignia Amigo de PAZO','cinco fondos','muro público','3, 6 y 12','consentimiento','renovación automática']
      : ['Friend of PAZO badge','five pet profile themes','public Thank You','3, 6 and 12','consent','automatically renewed']){
