@@ -21,14 +21,14 @@ function verifiedProof(raw: unknown): Proof | null {
   return proof as Proof
 }
 
-export function useSupporterMembershipStatus(petId?:string) {
+export function useSupporterMembershipStatus(petId?:string, enabled=true) {
   const [status,setStatus] = useState<SupporterStatus>(noStatus('checking'))
   const [revision,setRevision] = useState(0)
   const refresh = useCallback(() => setRevision(value => value + 1),[])
   useEffect(() => {
     let cancelled = false
     setStatus(noStatus('checking'))
-    if (!benefitsEnabled) {
+    if (!enabled || !benefitsEnabled) {
       setStatus(noStatus('inactive'))
       return () => {cancelled = true}
     }
@@ -55,6 +55,6 @@ export function useSupporterMembershipStatus(petId?:string) {
     void read().then(value => {if(!cancelled)setStatus(value)})
       .catch(() => {if(!cancelled)setStatus(noStatus('unavailable'))})
     return () => {cancelled=true}
-  },[petId,revision])
+  },[petId,enabled,revision])
   return {status,refresh}
 }
