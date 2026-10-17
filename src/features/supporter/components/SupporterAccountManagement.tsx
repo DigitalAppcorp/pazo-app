@@ -217,11 +217,10 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
                 {label('Modo de prueba: PayPal Sandbox utiliza dinero ficticio. No estás haciendo un pago real.',
                   'Test mode: PayPal Sandbox uses test money. You are not making a real payment.')}
               </p>
-              <button type="button" className={primary} aria-expanded={showSandboxQa}
-                onClick={() => setShowSandboxQa(value => !value)}>
-                {label(showSandboxQa ? 'Ocultar confirmación de apoyo' : 'Apoyar a PAZO · Prueba Sandbox',
-                  showSandboxQa ? 'Hide support confirmation' : 'Support PAZO · Sandbox test')}
-              </button>
+              {!showSandboxQa && <button type="button" className={primary}
+                onClick={() => setShowSandboxQa(true)}>
+                {label('Apoyar a PAZO · Prueba Sandbox', 'Support PAZO · Sandbox test')}
+              </button>}
               {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
             </>
           ) : (
