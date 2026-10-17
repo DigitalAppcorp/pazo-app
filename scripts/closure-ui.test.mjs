@@ -953,6 +953,59 @@ test('F16 supporter customization is routed through a verified membership, not a
   assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion contract intact')
 })
 
+test('A01 PO-approved welcome preserves sign-up, login, demo, locale and public wall', async()=>{
+  for(const [lang,title,subtitle,signup,login,wall] of [
+    ['es','Hecho con amor','Únete y descubre la mejor app social para mascotas','Comenzar','Ya tengo una cuenta','Conoce a los Amigos de PAZO'],
+    ['en','Made with love','Join and discover the best social app for pets','Get started','I already have an account','Meet the PAZO Friends']
+  ]) {
+    let logins=0, demos=0, locales=0, ui
+    const render=()=>React.createElement(OnboardingView,{
+      initialStep:'A01',lang,onComplete(){},onSkipToLogin(){logins++},
+      onQuickDemo(){demos++},onToggleLang(){locales++}
+    })
+    await act(async()=>{ui=create(render())})
+    const snapshot=()=>JSON.stringify(ui.toJSON())
+    assert.ok(snapshot().includes(title))
+    assert.ok(snapshot().includes(subtitle))
+    assert.ok(snapshot().includes('para las mascotas')||lang==='en')
+    assert.ok(button(ui.root,wall))
+    assert.ok(button(ui.root,signup))
+    assert.ok(button(ui.root,login))
+    assert.ok(button(ui.root,'Demo'))
+    const companion=ui.root.findAll(n=>n.props?.className==='pazo-welcome-dog h-full w-full overflow-visible')
+    assert.equal(companion.length,1,'Corgi is layered SVG, not flat screenshot')
+    assert.ok(ui.root.findAll(n=>n.props?.className==='pazo-welcome-tail').length===1)
+    assert.ok(ui.root.findAll(n=>n.props?.className==='pazo-welcome-blink').length===1)
+    await act(async()=>button(ui.root,'Demo').props.onClick())
+    await act(async()=>button(ui.root,login).props.onClick())
+    assert.equal(demos,1)
+    assert.equal(logins,1)
+    const languageButton=ui.root.findAllByType('button').find(b=>b.props['aria-label']===
+      (lang==='es'?'Cambiar a inglés':'Switch to Spanish'))
+    assert.ok(languageButton)
+    await act(async()=>languageButton.props.onClick())
+    assert.equal(locales,1)
+    await act(async()=>button(ui.root,signup).props.onClick())
+    assert.ok(snapshot().includes(lang==='es'?'Correo electrónico':'Email'),'Comenzar opens original A02')
+    await act(async()=>ui.unmount())
+  }
+  const source=fs.readFileSync('src/components/views/OnboardingView.tsx','utf8')
+  const mascot=fs.readFileSync('src/features/onboarding/components/WelcomeAnimatedCompanion.tsx','utf8')
+  const css=fs.readFileSync('src/index.css','utf8')
+  assert.ok(source.includes('overflow-y-auto overscroll-contain'),'Short-phone center scroll retained')
+  assert.ok(source.includes('shrink-0 space-y-2.5 pb-1'),'Primary actions stay pinned')
+  assert.ok(!source.includes('photo-1543466835-00a7907e9de1'),'No prior remote stock hero image')
+  assert.ok(!mascot.includes('setInterval')&&!mascot.includes('setTimeout'))
+  assert.ok(!mascot.includes('fetch(')&&!mascot.includes('localStorage'),'Decorative layer does not collect anything')
+  for(const name of ['pazoWelcomeDogEnter','pazoWelcomeBreathe','pazoWelcomeTail','pazoWelcomeHeadTilt',
+    'pazoWelcomeEyes','pazoWelcomeBlink','pazoWelcomeHeart','pazoWelcomeLine'])
+    assert.ok(css.includes('@keyframes '+name),name)
+  assert.ok(css.includes('@media (prefers-reduced-motion: reduce)'))
+  assert.ok(css.includes('.pazo-welcome-eyes { opacity: 1; }'))
+  assert.ok(css.includes('.pazo-welcome-blink { opacity: 0; }'))
+  assert.ok(!source.includes('ring-')&&!mascot.includes('outline-'),'No UI outlines in new surfaces')
+})
+
 test('F16 gratitude wall is accessible from welcome A01 without login, not in Explore', async () => {
   const search=fs.readFileSync('src/components/views/GlobalSearchView.tsx','utf8')
   assert.ok(!search.includes('showGratitudeWall')&&!search.includes('GratitudeWallPreview'),'Explore must remain a search-only experience')
