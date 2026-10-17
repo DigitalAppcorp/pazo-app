@@ -1,3 +1,30 @@
+# F16 MVP — ORIGINAL INSIGNIAS EN PERFIL/FEED + MERCHANT LIVE LECTURA AISLADA PASS (2026-10-17)
+
+**Product Owner «ok go»:** continuar cierre más rápido de Amigo de PAZO mensual **$2.99**, con los cuatro beneficios aprobados; jamás habilitar Live sin confirmación del comercio y entrega de beneficios. PR #44 DRAFT, rama `f13/section-titles-20261012`. No incrementar alcance P42.
+
+**Implementación de esta tanda en GitHub:**
+- `src/features/supporter/components/SupporterBadge.tsx`: selección solo de cuatro insignias **originales** (inicio/3/6/12 meses) desde `public/supporter/amigo-pazo-*.png`, sin inventar íconos en su lugar. El componente solo aparece cuando el backend verifica entitlement y la insignia existe.
+- `PublicProfileView.tsx`: insignia en avatar principal y publicaciones del perfil, distintivo de fundador independiente. Se conservan los cinco fondos aprobados, sujetos a RPC.
+- `HomeView.tsx`: insignia junto al autor del Feed, consultas únicas por lotes de 48 mascotas a `pazo_supporter_public_badges_batch`, no una por tarjeta. Revalida cada 60 segundos y al devolver foco a pestaña; antes de la respuesta limpia caché para no mantener beneficios caducados.
+- `supabase/drafts/f16_mvp_four_benefits_backend_DISPOSABLE_ONLY.sql`: función pública solo lectura y acotada `pazo_supporter_public_badges_batch(uuid[])` añadida sobre el backend **SOLO PG17 sintético**. Seguridad ACL igual, sin IDs de dueño ni pagos. `supabase/tests/supporter/f16-mvp-four-benefits-pg17-synthetic.sql` prueba mascotas gratuitas/pagadas, rechazo batch >48 o null, refund/disputa y anonimato. Nunca ejecutar estos drafts en Supabase alojado.
+- `scripts/f16-stage-approved-supporter-badges.ps1` valida ZIP exacto SHA256 `281503c0638d1d9e3ea752263f9e2a72be5a584f172af73d17358a6c970182b5` y cada PNG, instala cuatro PNG originales localmente en `public/supporter`. **Todavía no están commiteados los binarios**; Codex local Windows debe importar desde el ZIP descargado de la conversación, verificar CI/visual y hacer commit con esas cuatro imágenes SIN activar Live ni flag. ZIP original `pazo-supporter-insignias-4.zip` adjunto ya compartido; NO usar arte improvisado.
+- `supabase/functions/f16-paypal-webhook/pazoPaypalLiveSaleEvidenceReader.mjs` + `src/features/supporter/testing/f16MvpPaypalLiveSaleEvidenceReader.test.mjs`: por defecto **disabled**, consulta solo vía lectura privada y una claimed verified webhook previamente autenticada. Tres GET PayPal **Live** separados Sale/Subscription/Plan, valida dueño/consentimiento/plan del merchant, estado COMPLETED, $2.99 USD. Incluso PASS = `REVIEW_REQUIRED`, `mayRecordPayment=false`, `mayCreatePaidPeriod=false`, `mayGrantBenefits=false`, `mayCheckout=false`, `paidThrough=null`. No se llamó a PayPal real; siempre falta una fuente temporal de períodos y reversals. Ver `docs/PAZO_F16_MVP_BADGES_AND_LIVE_SALE_READ_GATE_20261017.md`.
+- TODOS los nuevos elementos visuales permanecen ocultos por `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'` (no definida/activada). No confundir código compilable con funciones ya instaladas en hosted. El backend PG17 solo vive en Actions.
+
+**EVIDENCIAS**: commit `a268ca29dcd965f1d30c8be52fe23e6e8d404bf0` CI **SUCCESS #39039494841** y PG Lab **SUCCESS #39039494756**; refresco Feed `9b5646cf23caa345dc398011412aaa1b3cd35eb9` CI **SUCCESS #39039567220**, PG Lab **SUCCESS #39039567262**; límites API batch `8ec7d4c95903cdcf3e59265e218083a3a6f11c63` CI **SUCCESS #39039675090** y PG Lab **SUCCESS #39039675086**. Docs en commit `8061373a0e11424306b96d4908f72d8848cb4ef1`, su workflow fue iniciado, comprobar resultado del HEAD/handoff posterior.
+
+**SIGUIENTE PASO MÁS CORTO:** 
+1. Codex local importa cuatro PNG originales desde paquete validado y los commitea (solo binarios originales) en rama PR #44. Ejecutar build/QA visual.
+2. Diseñar e implementar migración alojada aprobable desde drafts **sin la guarda desechable** tras auditoría y verificación de owner/payments/retention/ACL. Integrar servicio Live revisor con períodos reales: signature verified webhook + Sale GET + Subscription/Plan GET + owner/terms + refunds/disputes/lease + vencimiento del ciclo. No se ha autorizado aplicar hosted todavía.
+3. Preparar oferta exacta ES/EN (cuatro beneficios), consentimiento renovaciones automáticas y acuse descargable, Webhook ID/plan Live con merchant del PO, cancelación PayPal Live online real. Probar esta ruta E2E Sandbox (sin repetir Sandbox histórico ajeno).
+4. Revisión legal/comercial, QA visual y GO expreso PO de una operación Live supervisada. **NO poner botón de pago activo aún**.
+
+**Controles según último query hosted de solo lectura:** P42 keys 0, P42 writer OFF, P21 worker OFF, ledger rows 0; nuevas tablas/funciones de beneficios **no existen** en proyecto real. No deployments, nuevos secretos ni compras. P42 one-shots consumidos; PR #44 DRAFT.
+
+**Marcador:** `F16_MVP_ORIGINAL_BADGES_PUBLISHED_ONLY_AFTER_ASSET_IMPORT_LIVE_SALE_READER_DISABLED_CI_GREEN_NO_LIVE`.
+
+---
+
 # F16 FAST TRACK — CUATRO BENEFICIOS CONECTADOS EN LAB/FRONT; LIVE TODAVÍA NO (2026-10-17)
 
 **PO «ok go»:** seguir programación acelerada de Amigo de PAZO $2.99 mensual con insignia perfil/Feed, cinco fondos, muro consentimiento y medallas 3/6/12, manteniendo PAZO gratis. PR #44 DRAFT, rama `f13/section-titles-20261012`. Sin autorización para merchant Live, pago real, migración hosted, publicación ni despliegue manual. No reabrir P42 como bloqueo para desarrollar.
