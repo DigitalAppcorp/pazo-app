@@ -157,3 +157,21 @@ test('P27 unavailable downstream evidence does not record payment or grant right
  check(r);assert.equal(r.phase,'REVIEW_REQUIRED')
  assert.equal(r.reason,'merchant_or_private_evidence_unavailable')
 })
+
+test('P27 denies QA-only agreement before history, refunds or dispute inspection',async()=>{
+ const a=base(),read=a.readPrivateReviewContext
+ a.readPrivateReviewContext=async input=>{
+  const x=await read(input)
+  x.consent.offerPurpose='SANDBOX_QA'
+  x.consent.qaOnly=true
+  x.consent.termsVersion='pazo-supporter-sandbox.qa20261016-v1'
+  return x
+ }
+ let checks=0
+ for(const name of ['inspectHistory','inspectRefunds','inspectDisputes'])
+  a[name]=async()=>{checks++;throw Error('QA evidence must not continue')}
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r);assert.equal(r.phase,'DENIED')
+ assert.equal(r.reason,'prospective_paid_service_terms_not_attested')
+ assert.equal(checks,0)
+})
