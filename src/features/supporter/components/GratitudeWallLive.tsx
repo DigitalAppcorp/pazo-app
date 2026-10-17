@@ -37,7 +37,7 @@ export function GratitudeWallLive({lang,onClose}:Props){
   useEffect(()=>{
     let active=true
     setLoading(true);setError(false);setRows([])
-    void supabase.rpc('pazo_supporter_public_wall',{p_limit:48})
+    void Promise.resolve(supabase.rpc('pazo_supporter_public_wall',{p_limit:48}))
       .then(({data,error:backendError})=>{
         if(!active)return
         if(backendError||!validWallRows(data))throw Error('PUBLIC_WALL_UNTRUSTED')
