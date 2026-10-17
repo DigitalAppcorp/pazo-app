@@ -972,7 +972,7 @@ test('F16 gratitude wall is accessible from welcome A01 without login, not in Ex
     assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
     await act(async()=>button(ui.root,entry).props.onClick())
     assert.equal(ui.root.findAllByProps({role:'dialog'}).length,1,'Opening wall does not require a session')
-    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Aún no hay mascotas participantes':'No participating pets yet'))
+    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Todavía no hay mascotas inscritas voluntariamente.':'No pets have opted in yet.'))
     const dialog=ui.root.findAllByProps({role:'dialog'})[0]
     const close=dialog.findAllByType('button').find(b=>b.props['aria-label']===back)
     assert.ok(close,'Return button names welcome correctly')
@@ -984,7 +984,7 @@ test('F16 gratitude wall is accessible from welcome A01 without login, not in Ex
   }
 })
 
-test('F16 gratitude wall preview has consent-safe two-column placeholders and working category tabs ES/EN', async () => {
+test('F16 option D wall shows consent-safe empty illustration and working chronological filters ES/EN', async () => {
   for(const [lang,all,recent,longtime] of [
     ['es','Todos','Recientes','Más tiempo apoyando'],
     ['en','All','Recent','Longtime supporters'],
@@ -993,15 +993,17 @@ test('F16 gratitude wall preview has consent-safe two-column placeholders and wo
     await act(async()=>{ui=create(React.createElement(GratitudeWallPreview,{lang,onClose(){}}))})
     const root=ui.root
     assert.equal(root.findAllByProps({role:'dialog'}).length,1)
-    assert.equal(root.findAllByProps({'aria-label':lang==='es'?'Cuadrícula de mascotas':'Pet grid'}).length,1)
-    assert.equal(root.findAllByProps({'aria-hidden':'true'}).filter(x=>typeof x.props.className==='string'&&x.props.className.includes('grid grid-cols-2')).length,1)
+    assert.equal(root.findAllByProps({'aria-label':lang==='es'?'Estado vacío del muro':'Empty wall'}).length,1)
+    assert.ok(root.findAll(n=>typeof n.props.className==='string'&&n.props.className.includes('pazo-supporter-float')).length>=4,
+      'Reuse the profile customization floating motion for decorations, not content')
+    assert.equal(root.findAllByType('article').length,0,'No invented members in public preview')
     assert.ok(button(root,all))
     assert.equal(button(root,all).props['aria-pressed'],true)
     await act(async()=>button(root,recent).props.onClick())
     assert.equal(button(root,recent).props['aria-pressed'],true)
     await act(async()=>button(root,longtime).props.onClick())
     assert.equal(button(root,longtime).props['aria-pressed'],true)
-    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Aún no hay mascotas participantes':'No participating pets yet'))
+    assert.ok(JSON.stringify(ui.toJSON()).includes(lang==='es'?'Todavía no hay mascotas inscritas voluntariamente.':'No pets have opted in yet.'))
     assert.ok(!JSON.stringify(ui.toJSON()).includes('@luna')&&!JSON.stringify(ui.toJSON()).includes('12 MESES'))
     await act(async()=>ui.unmount())
   }
