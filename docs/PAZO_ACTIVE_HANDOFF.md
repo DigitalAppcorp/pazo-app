@@ -1,3 +1,22 @@
+# F16-P42 — Windows ephemeral zero-row WRITE PASS; intento consumido (2026-10-17)
+
+**Ejecución verificada por Codex en la computadora Windows del Product Owner**, bajo su autorización expresa para `P42-WRITE-EPHEMERAL-20261017-01`. Checkout sincronizado por fast-forward a `0b011104f84f4e12d7bfe738ffc9ecce1df6f6f2`, limpio antes de ejecutar; ejecutor, parser importado y SQL coincidentes con ese commit. CI `39033226251` y PostgreSQL Lab `39033226233`: **SUCCESS observado** para ese HEAD. PR #44 permanece OPEN/DRAFT. Cinco pruebas offline dirigidas del nuevo gate: **5/5 PASS**; no se repitió localmente la suite histórica ni compras.
+
+**Preflight:** Supabase CLI `2.121.0`, psql `17.11` con hash validado, CA oficial vigente comparada por bytes con el endpoint público HTTPS, sesión CLI y acceso al proyecto confirmados por metadatos privados read-only. No se publicaron ruta CA, certificados, hosts, credenciales ni salida privada. Lock nuevo ausente antes de iniciar; sin clientes PostgreSQL activos ni transcripción obligatoria detectada.
+
+**Una única ejecución** de `scripts/f16-p42-ephemeral-zero-row-write-once.mjs`, SQL inmutable `supabase/queries/f16_p42_ephemeral_zero_row_write_probe_ONCE.sql` (blob `cdd7bc9033671fea01263d55e05510d7e82a6cdc`): una invocación de credencial CLI temporal oficial, un psql con TLS `verify-full`, identidad `session_user` efímera y `current_user=postgres`, INSERT protegido por `WHERE false` (**0 filas, sin bytes secretos**), **ROLLBACK** y postflight READ ONLY. Exit code **0** y marcadores exactos:
+
+```text
+P42_EPHEMERAL_ZERO_ROW_WRITE_PASS
+P42_EPHEMERAL_ZERO_KEYS_GATES_OFF_POSTFLIGHT_PASS
+P42_EDGE_SECRET_WRITE_UNVERIFIED_NO_PROVISIONING_NO_PAYMENT
+```
+
+**Postflight del SQL aprobado:** claves P42 **0**, writer P42 **OFF**, worker P21 **OFF**, bindings **0** y ledger **0**. La guarda previa también confirmó RPC P42 sin EXECUTE para `service_role`. La solicitud CLI puede crear/renovar el rol temporal administrado; ese efecto acotado estaba autorizado. No se observó un TTL concreto. Salidas CLI/psql capturadas en memoria privada; solo marcadores sanitizados registrados. Sin contraseña permanente, reintentos, borrado de locks, claves reales, Edge Secrets, activaciones financieras ni despliegues.
+
+**Intento CONSUMIDO:** lock `p42-write-ephemeral-20261017-01.lock` preservado; no relanzar este ID ni P43/P43B. Informes operativos sanitizados y bloqueos históricos conservados localmente. El PASS acredita únicamente el INSERT cero filas y el canal temporal probado; **no** acredita inserción de material criptográfico ni permisos de escritura Edge. **Edge Secrets WRITE sigue UNVERIFIED; provisión P42 y F16 financiero NO-GO.** Codex se detuvo en Supabase tras PASS; cualquier siguiente operación requiere autorización independiente.
+
+---
 # F16-P42 — hosted PostgreSQL zero-row WRITE rolled back; ephemeral login pending (2026-10-17)
 
 **GO PO:** permiso para acreditar canal administrativo con operación inocua y delimitada, **sin claves ni cobros**. PR #44 DRAFT, rama `f13/section-titles-20261012`, Brain OS 1.4.1.
