@@ -127,6 +127,87 @@
   animation: pulseSoft 3s ease-in-out infinite;
 }
 
+/* A01 — approved welcome motion. The illustration is layered: breath, blink,
+   tail and head are independent; ornamental shapes drift at different phases.
+   Text, CTA targets and the hero layout remain completely stationary. */
+@keyframes pazoWelcomeDogEnter {
+  from { opacity: .75; transform: translate3d(0, 10px, 0) scale(.975); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes pazoWelcomeBreathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.022); }
+}
+@keyframes pazoWelcomeTail {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(9deg); }
+}
+@keyframes pazoWelcomeHeadTilt {
+  0%, 34%, 66%, 100% { transform: rotate(0deg); }
+  44%, 53% { transform: rotate(-2.5deg); }
+}
+@keyframes pazoWelcomeEyes {
+  0%, 39%, 41%, 75%, 77%, 100% { opacity: 1; }
+  40%, 76% { opacity: 0; }
+}
+@keyframes pazoWelcomeBlink {
+  0%, 39%, 41%, 75%, 77%, 100% { opacity: 0; }
+  40%, 76% { opacity: 1; }
+}
+@keyframes pazoWelcomeTongue {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(2px) scaleY(1.025); }
+}
+@keyframes pazoWelcomeHeart {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(-5deg); opacity: .78; }
+  55% { transform: translate3d(3px, -6px, 0) scale(1.035) rotate(4deg); opacity: 1; }
+}
+@keyframes pazoWelcomeLine {
+  0%, 100% { transform: translateX(0); opacity: .75; }
+  50% { transform: translateX(3px); opacity: .95; }
+}
+.pazo-welcome-dog {
+  animation: pazoWelcomeDogEnter 650ms cubic-bezier(.18, 1, .28, 1) both;
+}
+.pazo-welcome-breath {
+  transform-box: view-box;
+  transform-origin: 50% 90%;
+  animation: pazoWelcomeBreathe 4.1s ease-in-out 650ms infinite;
+}
+.pazo-welcome-tail {
+  transform-box: view-box;
+  transform-origin: 36% 72%;
+  animation: pazoWelcomeTail 1.85s ease-in-out 650ms infinite;
+}
+.pazo-welcome-head {
+  transform-box: view-box;
+  transform-origin: 50% 61%;
+  animation: pazoWelcomeHeadTilt 9.3s ease-in-out 650ms infinite;
+}
+.pazo-welcome-eyes { animation: pazoWelcomeEyes 8.1s linear 650ms infinite; }
+.pazo-welcome-blink { opacity: 0; animation: pazoWelcomeBlink 8.1s linear 650ms infinite; }
+.pazo-welcome-tongue {
+  transform-box: fill-box;
+  transform-origin: 50% 12%;
+  animation: pazoWelcomeTongue 3.6s ease-in-out 650ms infinite;
+}
+.pazo-welcome-heart { animation: pazoWelcomeHeart 7.1s ease-in-out infinite; }
+.pazo-welcome-heart--delay { animation-delay: -4.3s; animation-direction: reverse; }
+.pazo-welcome-leaf { animation: pazoWelcomeHeart 7.8s ease-in-out -3.2s infinite; }
+.pazo-welcome-line { animation: pazoWelcomeLine 11s ease-in-out infinite; }
+.pazo-welcome-line--slow { animation-duration: 14s; animation-delay: -4.2s; }
+@media (prefers-reduced-motion: reduce) {
+  .pazo-welcome-dog, .pazo-welcome-breath, .pazo-welcome-tail,
+  .pazo-welcome-head, .pazo-welcome-eyes, .pazo-welcome-blink,
+  .pazo-welcome-tongue, .pazo-welcome-heart, .pazo-welcome-leaf,
+  .pazo-welcome-line {
+    animation: none !important;
+    transform: none !important;
+  }
+  .pazo-welcome-eyes { opacity: 1; }
+  .pazo-welcome-blink { opacity: 0; }
+}
+
 /* F13: superficie cristal uniforme; elevación suave, sin borde ni aro. */
 @layer components {
   .pazo-glass-card {
