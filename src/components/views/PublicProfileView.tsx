@@ -7,6 +7,7 @@ import { IconPaw, IconDocument, IconCommunity, IconHeart } from '../icons/PazoIc
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 import { SupporterProfileBackdrop, type SupporterProfileThemeId } from '../../features/supporter/components/SupporterProfileThemes'
+import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
 
 const supporterVisualsEnabled = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
 type PublicSupporterPerks = {badge: boolean; theme: SupporterProfileThemeId | null; milestone: 0 | 3 | 6 | 12}
@@ -329,6 +330,11 @@ export const PublicProfileView = ({
                     <IconPaw size={61} className="text-[#204E4A]/40" />
                   )}
                 </div>
+                {supporterVisualsEnabled && supporterPerks?.badge && (
+                  <span className="absolute -bottom-3 -left-2 z-20" aria-label={lang === 'es' ? 'Insignia de Amigo de PAZO' : 'PAZO Friend badge'}>
+                    <SupporterBadge active={true} milestone={supporterPerks.milestone} size="large" lang={lang} />
+                  </span>
+                )}
                 {isFounder && (
                   <div
                     className="absolute bottom-1 right-0 flex h-[46px] items-center gap-1 rounded-full bg-[#E1E53F] px-3 text-[#204E4A] shadow-[0_5px_12px_rgba(32,78,74,0.14)]"
@@ -352,6 +358,11 @@ export const PublicProfileView = ({
                 <h2 className={'max-w-[90%] break-words text-[clamp(39px,10vw,56px)] font-black leading-[1.03] tracking-[-0.05em] ' + (supporterPerks?.theme === 'stars' ? 'text-[#FCFAF2]' : 'text-[#204E4A]')}>
                   {petProfile.name}
                 </h2>
+                {supporterVisualsEnabled && supporterPerks?.badge && (
+                  <p className="mt-2 text-[12px] font-extrabold tracking-tight" aria-label={lang === 'es' ? 'Miembro verificado Amigo de PAZO' : 'Verified PAZO Friend'}>
+                    {lang === 'es' ? 'Amigo de PAZO' : 'PAZO Friend'}
+                  </p>
+                )}
                 <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-[#E1E53F]/75 px-4 py-1.5 text-[14px] font-extrabold uppercase text-[#204E4A]">
                     {petProfile.species}
@@ -426,7 +437,12 @@ export const PublicProfileView = ({
                             ) : <IconPaw size={21} className="text-[#204E4A]/50"/>}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="truncate text-[17px] font-black leading-tight text-[#204E4A]">{petProfile.name}</h3>
+                            <div className="flex min-w-0 items-center gap-2">
+                              <h3 className="truncate text-[17px] font-black leading-tight text-[#204E4A]">{petProfile.name}</h3>
+                              {supporterVisualsEnabled && supporterPerks?.badge && (
+                                <SupporterBadge active milestone={supporterPerks.milestone} lang={lang}/>
+                              )}
+                            </div>
                             <p className="mt-0.5 text-[12px] text-[#71847F]">{post.timeAgo}</p>
                           </div>
                           {canReport && !ownedPetIds.includes(targetPetId) && (
