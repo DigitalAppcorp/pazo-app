@@ -106,6 +106,7 @@ function compose(requestOrigin:string){
  const manage=createPazoSandboxSupporterAccountHandler({
   resolveAuthenticatedOwner,admit,privateIntentStore:v2AccountStore,
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
+  allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
  return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,resolveAuthenticatedOwner,admit,canBuy}
 }
