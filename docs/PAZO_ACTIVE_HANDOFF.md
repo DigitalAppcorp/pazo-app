@@ -1,3 +1,15 @@
+# F16-P42 — incidente #45 de revisión del bloqueo de seguridad (2026-10-16)
+
+**NO-GO para instalar el parche alojado y NO eludir el bloqueo del conector.** PO `ok go` confirma seguir el desbloqueo legítimo de P42. Read-only Supabase: el cuerpo hosted de `f16_p42_register_authenticated_activation` todavía carece de `clock_timestamp() >= v_key_end`, última migración P37 `20261016234350`, función owner postgres SECURITY DEFINER `search_path=''`, `anon/authenticated/service_role EXECUTE=false`; P21/P42 OFF, P42 keys 0, P40 bindings 0, ledger 0, reversals 0. La instalación específica del mismo SQL ya fue **rechazada por controles de seguridad de la herramienta**, no por un error SQL demostrado. **No reintentar a través de otro canal para esquivar ese control.**
+
+La comprobación de permisos de la app conectada `Supabase` devolvió **app-specific `Allow all actions`**; por tanto, el rechazo no se explica por `Always ask` ni falta de permiso de ese ajuste. La documentación OpenAI confirma que app permissions NO cancelan safety protections y remite estos casos a soporte. Se creó [GitHub issue #45](https://github.com/DigitalAppcorp/pazo-app/issues/45) con candidato SQL inmutable (`supabase/drafts/f16_p42_absolute_key_expiry_patch_REVIEW_ONLY_DO_NOT_APPLY.sql`, Git blob `2961f9a8933d2e342cb04c681e8adbb8fae82046`), preflight metadata, CI `38983466691` PASS, PG17 `38983466647` PASS, alcance de un solo cuerpo `CREATE OR REPLACE FUNCTION`, evidencia solo lectura, solicitud de revisión y postflight. El mensaje literal/request ID del rechazo **no están disponibles**: no inventarlos.
+
+**Única intervención humana externa que queda para el bloqueo de ChatGPT:** PO abre [OpenAI Support](https://help.openai.com/en/articles/6614161-how-can-i-contact-support) mediante la burbuja de chat y solicita revisión del control de seguridad del conector Supabase; puede citar issue #45 y adjuntar captura saneada/ID si lo tiene. No se envió ticket automáticamente. No reclamar que soporte haya aprobado o que el SQL esté instalado.
+
+**Gate posterior condicionado:** solo cuando el control se resuelva por vía autorizada, instalar UNA migración del SQL ya auditado (sin claves ni grants, worker/checkout/ledger OFF), comprobar postflight SQL y registrar historial; siguen requeridos autorización separada de custodia 24h, provisión real y posterior integración comercial. **No retrasar MVP gratuito por P42 si se puede avanzar en paralelo**, pero no confundir CI sintético con cobro funcional.
+
+---
+
 # F16-P42 — 24h signer preflight before HMAC and RPC (2026-10-16)
 
 **Avance de código en rama; hosted sin cambios.** Se auditó P42 tras el probe read-only P22 y se confirmó que `scripts/backup-database.ps1` YA incluye `--exclude-table-data=supporter_private.p42_activation_signing_keys`, con PG17 restore ampliado previamente PASS. NO repetir ese trabajo ni atribuir garantía sobre copias físicas/preexistentes.
