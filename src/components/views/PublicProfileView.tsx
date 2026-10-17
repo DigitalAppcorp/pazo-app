@@ -6,6 +6,20 @@ import { PublicProfileTabs } from '../../features/profile/components/PublicProfi
 import { IconPaw, IconDocument, IconCommunity, IconHeart } from '../icons/PazoIcons'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
+import { SupporterProfileBackdrop, type SupporterProfileThemeId } from '../../features/supporter/components/SupporterProfileThemes'
+
+const supporterVisualsEnabled = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
+type PublicSupporterPerks = {badge: boolean; theme: SupporterProfileThemeId | null; milestone: 0 | 3 | 6 | 12}
+const supporterThemes = new Set(['classic', 'nature', 'hearts', 'stars', 'adventure'])
+function acceptPublicSupporterPerks(raw: unknown): PublicSupporterPerks | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const value = raw as Record<string, unknown>
+  if (typeof value.badge !== 'boolean' ||
+      (value.theme !== null && (typeof value.theme !== 'string' || !supporterThemes.has(value.theme))) ||
+      ![0,3,6,12].includes(value.milestone as number) ||
+      (!value.badge && (value.theme !== null || value.milestone !== 0))) return null
+  return value as PublicSupporterPerks
+}
 
 interface PublicProfileViewProps {
   targetPetId: string
@@ -39,6 +53,7 @@ export const PublicProfileView = ({
   const [followersCount, setFollowersCount] = useState<number>(0)
   const [followingCount, setFollowingCount] = useState<number>(0)
   const [isFounder, setIsFounder] = useState<boolean>(false)
+  const [supporterPerks, setSupporterPerks] = useState<PublicSupporterPerks | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -161,6 +176,18 @@ export const PublicProfileView = ({
   }, [targetPetId])
 
   useEffect(() => {
+    let active=true
+    setSupporterPerks(null)
+    if (!supporterVisualsEnabled) return () => {active=false}
+    void supabase.rpc('pazo_supporter_public_pet_benefits',{p_pet_id:targetPetId})
+      .then(({data,error})=>{
+        if (!active || error) return
+        setSupporterPerks(acceptPublicSupporterPerks(data))
+      }).catch(()=>{ if(active)setSupporterPerks(null) })
+    return () => {active=false}
+  },[targetPetId])
+
+  useEffect(() => {
     setProfileMenuOpen(false)
     setPostMenuId(null)
     setPostReportId(null)
@@ -200,6 +227,9 @@ export const PublicProfileView = ({
 
   return (
     <div className="absolute inset-0 z-[100] flex flex-col overflow-x-hidden overflow-y-auto bg-[#F8F5EC] font-sans text-[#204E4A] antialiased animate-slide-up">
+      {/* Supporter cosmetics are server-verified only; default-off preview unaffected. */}
+      {supporterVisualsEnabled && supporterPerks?.theme &&
+        <SupporterProfileBackdrop theme={supporterPerks.theme} />}
       {/* Warm open canvas, not a card and never a synthetic cover photograph. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[540px] overflow-hidden">
         <div className="absolute -left-36 -top-32 h-80 w-80 rounded-full bg-[#EFE9D6]/55 blur-[75px]" />
@@ -319,17 +349,17 @@ export const PublicProfileView = ({
                 <svg aria-hidden="true" className="pointer-events-none absolute -right-1 top-1 h-14 w-14 text-[#D8DA7E]" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round">
                   <path d="m15 26 12-17M22 43l22-10M38 51l12-2" />
                 </svg>
-                <h2 className="max-w-[90%] break-words text-[clamp(39px,10vw,56px)] font-black leading-[1.03] tracking-[-0.05em] text-[#204E4A]">
+                <h2 className={'max-w-[90%] break-words text-[clamp(39px,10vw,56px)] font-black leading-[1.03] tracking-[-0.05em] ' + (supporterPerks?.theme === 'stars' ? 'text-[#FCFAF2]' : 'text-[#204E4A]')}>
                   {petProfile.name}
                 </h2>
                 <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-[#E1E53F]/75 px-4 py-1.5 text-[14px] font-extrabold uppercase text-[#204E4A]">
                     {petProfile.species}
                   </span>
-                  {petProfile.breed && <span className="text-[13px] font-semibold text-[#607B73]">{petProfile.breed}</span>}
+                  {petProfile.breed && <span className={'text-[13px] font-semibold ' + (supporterPerks?.theme === 'stars' ? 'text-[#F0F4EB]' : 'text-[#607B73]')}>{petProfile.breed}</span>}
                 </div>
                 {Boolean(petProfile.bio?.trim()) && (
-                  <p className="mt-5 max-w-[40ch] whitespace-pre-wrap break-words text-[16px] font-medium leading-relaxed text-[#315B55]">
+                  <p className={'mt-5 max-w-[40ch] whitespace-pre-wrap break-words text-[16px] font-medium leading-relaxed ' + (supporterPerks?.theme === 'stars' ? 'text-[#F0F4EB]' : 'text-[#315B55]')}>
                     {petProfile.bio}
                   </p>
                 )}
