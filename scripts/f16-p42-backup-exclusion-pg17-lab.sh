@@ -58,6 +58,51 @@ INSERT INTO supporter_private.p42_backup_child(id,parent_id,note)
 VALUES(50,11,'linked-data-1'),(51,12,'linked-data-2');
 SQL
 
+
+# Exercise server-side parameter placeholders on this disposable database ONLY.
+# PREPARE/EXECUTE with PUBLIC fixture bytes; not proof of client wire bind logging
+# or a hosted writable role. Transaction ROLLBACK protects backup source state.
+bind_status="$(psql -X -Atq -v ON_ERROR_STOP=1 <<'SQL'
+BEGIN;
+DO $scope$
+BEGIN
+ IF current_database()<>'f14_p42_backup_source'
+    OR session_user<>'f14_admin'
+    OR current_setting('server_version_num')::int NOT BETWEEN 170000 AND 179999
+    OR (SELECT count(*) FROM supporter_private.p42_activation_signing_keys)<>1
+ THEN RAISE EXCEPTION 'synthetic PG17 bind lab identity or baseline mismatch'; END IF;
+END $scope$;
+PREPARE p42_offline_insert(text,bytea,timestamptz,timestamptz) AS
+ INSERT INTO supporter_private.p42_activation_signing_keys
+ (key_id,key_bytes,enabled,not_before,not_after)
+ VALUES($1,$2,false,$3,$4) RETURNING key_id,enabled;
+EXECUTE p42_offline_insert('P42_V2',decode(repeat('a7',32),'hex'),
+ '2027-01-20T12:00:00Z'::timestamptz,'2027-01-21T12:00:00Z'::timestamptz);
+DO $check$
+BEGIN
+ IF (SELECT count(*) FROM supporter_private.p42_activation_signing_keys)<>2
+ OR (SELECT enabled FROM supporter_private.p42_activation_signing_keys WHERE key_id='P42_V2') IS DISTINCT FROM false
+ OR (SELECT not_after - not_before FROM supporter_private.p42_activation_signing_keys WHERE key_id='P42_V2')<> interval '24 hours'
+ THEN RAISE EXCEPTION 'synthetic parameterized insert gate failed'; END IF;
+END $check$;
+PREPARE p42_offline_delete(text) AS
+ DELETE FROM supporter_private.p42_activation_signing_keys
+ WHERE key_id=$1 RETURNING key_id;
+EXECUTE p42_offline_delete('P42_V2');
+DO $check2$
+BEGIN
+ IF (SELECT count(*) FROM supporter_private.p42_activation_signing_keys)<>1
+ OR (SELECT count(*) FROM supporter_private.p42_activation_signing_keys WHERE key_id='P42_V1')<>1
+ THEN RAISE EXCEPTION 'synthetic exact-key deletion gate failed'; END IF;
+END $check2$;
+ROLLBACK;
+SELECT 'P42_PRIVATE_PARAMETERIZED_PG17_ROLLBACK_PASS_ONLY';
+SQL
+)"
+[[ "$(printf '%s\n' "$bind_status" | tail -n 1)" == "P42_PRIVATE_PARAMETERIZED_PG17_ROLLBACK_PASS_ONLY" ]] || fail "SYNTHETIC_PARAMETERIZED_LAB_FAILED"
+[[ "$(psql -XAtq -v ON_ERROR_STOP=1 -c 'SELECT count(*) FROM supporter_private.p42_activation_signing_keys;')" == 1 ]] || fail "SYNTHETIC_ROLLBACK_FAILED"
+echo "P42_PRIVATE_PARAMETERIZED_PG17_ROLLBACK_PASS_ONLY"
+
 # Control: the original unrestricted pg_dump includes key material.
 pg_dump --format=custom --create --file="$scratch/unfiltered.dump"
 pg_restore --list "$scratch/unfiltered.dump" > "$scratch/unfiltered.toc"
