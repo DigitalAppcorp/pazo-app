@@ -179,7 +179,7 @@ export const PublicProfileView = ({
     let active=true
     setSupporterPerks(null)
     if (!supporterVisualsEnabled) return () => {active=false}
-    void supabase.rpc('pazo_supporter_public_pet_benefits',{p_pet_id:targetPetId})
+    void Promise.resolve(supabase.rpc('pazo_supporter_public_pet_benefits',{p_pet_id:targetPetId}))
       .then(({data,error})=>{
         if (!active || error) return
         setSupporterPerks(acceptPublicSupporterPerks(data))
