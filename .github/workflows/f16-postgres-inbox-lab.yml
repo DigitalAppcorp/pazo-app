@@ -380,3 +380,19 @@ jobs:
             -f supabase/tests/supporter/f16-qa-v2-existing-owner-checkout-synthetic.sql)
           test "$result" = F16_QA_V2_EXISTING_OWNER_SECOND_CHECKOUT_PG17_PASS
           echo 'PASS F16: same buyer can start distinct V2 terms without rewriting historical P06'
+
+      - name: F16 V2 owner-scoped subscription receipt read — PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_qa_v2_owner_scoped_account_READ_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-qa-v2-private-account-read-pg17.sql)
+          test "$result" = F16_QA_V2_PRIVATE_ACCOUNT_READ_PG17_PASS
+          echo 'PASS F16: only V2 accepted subscription is readable/cancellable by its owner'
