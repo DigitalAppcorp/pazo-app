@@ -109,6 +109,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
           {label('Gracias, Amigos de PAZO','Thank you, PAZO Friends')}
         </h1>
         <button ref={closeRef} type="button" onClick={onClose}
+          aria-label={previewOnly?label('Volver a bienvenida','Back to welcome'):label('Volver','Back')}
           className="min-h-11 shrink-0 rounded-full bg-[#E1E53F] px-4 py-2.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#EFF16D] focus-visible:bg-[#EFF16D]">
           {label('Volver','Back')}
         </button>
