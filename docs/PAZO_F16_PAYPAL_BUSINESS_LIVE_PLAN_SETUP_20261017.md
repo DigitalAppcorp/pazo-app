@@ -1,3 +1,5 @@
+> **POSPUESTO POR ORDEN POSTERIOR DEL PO (2026-10-17):** no crear plan Live ni pedir Plan ID ahora. La prioridad es aprobar primero la pantalla de cobro, insignias, fondos, muro y gestión; después ejecutar Sandbox E2E con los cuatro beneficios. Ver `docs/PAZO_F16_UI_AND_SANDBOX_BEFORE_LIVE_GATE_20261017.md`. Live queda bloqueado hasta otro GO.
+
 # F16 — Configuración comercial mínima PayPal Business LIVE (2026-10-17)
 
 **Confirmación del Product Owner:** la cuenta que recibirá los pagos de PAZO **es PayPal Business**. No solicitar nuevamente esa información. **No** se ha confirmado aún que exista una app REST **Live**, un plan Live ni un webhook Live. La existencia de Sandbox NO sustituye los recursos Live.
