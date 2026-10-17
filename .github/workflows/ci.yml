@@ -43,6 +43,7 @@ jobs:
           node --check scripts/f16-paypal-verify-webhook-destination-readonly.mjs
           node --check scripts/f16-p43-vercel-db-env-names-readonly.mjs
           node --check scripts/f16-p43-ephemeral-readonly-preflight.mjs
+          node --check scripts/f16-p43b-ephemeral-readonly-preflight.mjs
           node --test src/features/supporter/testing/f16P43EphemeralReadOnlyPreflight.test.mjs
           node --test src/features/supporter/testing/f16P43VercelDbEnvNamesReadOnly.test.mjs
           npm run test:f16:synthetic
