@@ -134,7 +134,7 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
           {label('Probar suscripción en PayPal Sandbox','Test subscription in PayPal Sandbox')}
         </button>
       </div>}
-      {import.meta.env.DEV && import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
+      {import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
         <SandboxV2AccountPanel lang={lang} />}
       {phase==='pending'&&<p role="status" className="text-sm">
         {label('Solicitud enviada o pendiente de verificación. Por seguridad no se repetirá automáticamente. No se ha acreditado ningún pago.',
