@@ -1,3 +1,17 @@
+# F16 SANDBOX — SAME EXISTING QA USER SELECTED, NEW CHECKOUT V2 PRIVATE HOSTED (2026-10-17)
+
+**PO explicit choice:** use the already existing test PAZO account+pet, not create a new Auth. Never place actual email, internal Auth UUID, passwords or test credentials in this public GitHub file. Preflight private DB: exactly 1 Auth account matched, 1 owned pet, 1 P06 historical bound checkout and 1 bound subscription intent, 0 credited payments; existing P06 `p06_one_checkout_per_owner` prevents a new attempt through the old API. P06 v1 accepted terms without perks; must not change or credit them.
+
+**Host actions completed with prior Sandbox-only PO authorization and choice of account:** manually registered precisely that account in `supporter_private.f16_sandbox_qa_owners`, `status='disabled'`, `expires_at=clock_timestamp()+7 days` at insert time; postflight 1 staged disabled owner, 0 enabled owners, 0 QA credits, 0 badges, old 1 checkout intact. **NO user membership, checkout, provider POST or live**.
+
+**Second distinct checkout code and installed schema:** `supabase/drafts/f16_qa_v2_same_owner_second_checkout_PG17_ONLY.sql` uses private `f16_sandbox_qa_v2_checkout_attempts` (own unique account+request key), `public.f16_qa_v2_begin_checkout` and `public.f16_qa_v2_claim_provider_create` restricted to `service_role`, owner must be temporarily allowlisted `enabled` and have separate immutable V2 offer ES/EN published with digest. Own V1 historical checkout is unchanged. Verified disposable PostgreSQL lab and CI on commit `73250af92bd9da30634348959e36e73521b4814d`: CI `39049267379` SUCCESS, PG17 `39049267416` SUCCESS. After successful hosted dry-run ROLLBACK, applied migration `20261017162650_f16_sandbox_qa_v2_second_checkout_same_owner`, versioned exactly at `supabase/migrations/20261017162650_f16_sandbox_qa_v2_second_checkout_same_owner.sql` (commit `da4edff42f970caabf6890d1f4edcb346e6e41cd`). Hosted postflight: 0 V2 attempts, 1 historical V1 attempt, 2 historical intents, 0 payments, 0 QA periods/holds, 2 unpublished V2 language rows, 1 disabled QA owner, 0 enabled; `service_role` may call V2 RPC, client roles may not. No provider create claim executed.
+
+**Next actual coding before Sandbox purchase:** connect *server* `p06CheckoutConsentStore` and `f16-paypal-supporter` composition to V2 begin/claim RPCs with Auth owner proof, never to legacy V1 store, and route cancellation/status to the V2 bound intent (legacy P06 cancel could target wrong subscription). Then integrate verified Sandbox SALE.COMPLETED into QA period ledger and refund reconciliation, release V2 terms on the QA-only private allowlist, enable existing owner with short expiry, deploy Sandbox-only Edge to an authorized test origin and supervised buyer. DO NOT enable UI flags publicly. Never treat approval/redirect as payment. Run browser E2E of all four rewards and cancellation. PO requests to see/test inside PAZO, no stand-alone prototyping and no PayPal Live.
+
+**Current next result:** `F16_V2_EXISTING_OWNER_STAGED_WITH_NEW_HOSTED_CHECKOUT_RPC_DISABLED_NO_PROVIDER_CALL`.
+
+---
+
 # F16 — REUTILIZAR CUENTA YA EXISTENTE PARA PRUEBA SANDBOX (2026-10-17)
 
 **Última decisión del PO:** usar su cuenta PAZO de pruebas existente y su mascota; **NO crear una cuenta nueva**. El PO confirmó que esos datos son de QA y serán descartados al lanzamiento MVP. No escribir el correo ni UID en código, docs o logs.
