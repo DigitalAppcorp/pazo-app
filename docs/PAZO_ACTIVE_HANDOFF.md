@@ -1,3 +1,20 @@
+# F16 MVP — medallas tras período completo; venta PayPal comprobada con transacciones (2026-10-17)
+
+**GO Product Owner:** «ok go» continuar cierre acelerado de **Amigo de PAZO $2.99 USD al mes con los cuatro beneficios originales**. PR #44 DRAFT rama `f13/section-titles-20261012`. Este GO autoriza trabajo de código, repositorio y ensayos aislados, **NO** habilitar PayPal Live, migrar hosted, crear claves ni cobrar dinero real. No reabrir P42 histórico.
+
+**Corregido y comprobado:**
+- Las medallas 3/6/12 requieren **períodos reales completamente transcurridos y acreditados** (`service_end <= as_of`), no se anticipan por 3.º pago si el período sigue en curso. Implementado en `supabase/drafts/f16_mvp_verified_paid_period_source_DISPOSABLE_ONLY.sql` y `pazoSupporterBenefitsV1.mjs`, pruebas SQL y JS actualizadas. Commit `b33d0502a343fa122ed569fae2e47a32816cb7be`; **CI #39040388115 SUCCESS**, **PG Lab #39040388110 SUCCESS**.
+- Nuevo `pazoPaypalLiveSubscriptionTransactionsProof.mjs` valida PayPal Subscriptions v1 Transactions (COMPLETED exacto, gross US$2.99, id/tiempo del evento, sin refund, sin truncamiento de páginas); `pazoPaypalLiveSaleEvidenceReader.mjs` ahora exige 4 GET PayPal: Sale, Subscription, Plan y Subscription Transactions, todo en modo **disabled**. `merchantSaleCandidate` solo `REVIEW_REQUIRED`, jamás `mayCreatePaidPeriod`, `mayGrantBenefits` ni `mayCheckout`. Pruebas `f16MvpPaypalSubscriptionTransactionsProof.test.mjs` y `f16MvpPaypalLiveSaleEvidenceReader.test.mjs`; commit `fe450aeca3187db52facfcc03fff3db961536e4b`, **CI #39040660793 SUCCESS**, **PG Lab #39040660795 SUCCESS**.
+- Nota de límites: consulta de transacciones por ventana ±48h no sustituye historial de reversals posterior; no demuestra fechas del período ni merchant identity final. Falta writer privado ligado a evidencia de cobro, intervalos contractuales, refunds/disputas y prueba Live.
+- `docs/PAZO_F16_MVP_COMPLETED_PERIODS_AND_PAYPAL_TRANSACTIONS_GATE_20261017.md` es el gate completo. Se verificó el ZIP auténtico con cuatro insignias y SHA256; **los binarios PNG originales todavía NO se subieron a GitHub** porque el canal en este chat no transfiere directamente sus bytes. Codex local debe ejecutar `scripts/f16-stage-approved-supporter-badges.ps1` contra el ZIP original, hacer commit **solo** de los cuatro PNG y comprobar QA visual. El script/hashes están listos, así como los componentes de insignia en Feed/perfil detrás del flag disabled.
+- El CI del último HEAD con actualización de docs/handoff debe verificarse después de escribir este bloque; no atribuirle resultados no vistos.
+
+**Siguiente acción sin nuevos experimentos P42:** Codex importa badges, se integra el reconciliador privado de pagos/servicio en un entorno aislado con revisión de seguridad y rollback; se prepara un endpoint Live cerrado por defecto y cancelación digital con confirmación. Solicitar GO específico antes de Supabase alojado y primer pago real. PR #44 DRAFT, sin nuevas publicaciones.
+
+**Marcador:** `F16_MVP_COMPLETED_PERIOD_MEDALS_AND_PAYPAL_TRANSACTION_CROSSCHECK_CI_PASS_LIVE_NO_GO`.
+
+---
+
 # F16 MVP — ORIGINAL INSIGNIAS EN PERFIL/FEED + MERCHANT LIVE LECTURA AISLADA PASS (2026-10-17)
 
 **Product Owner «ok go»:** continuar cierre más rápido de Amigo de PAZO mensual **$2.99**, con los cuatro beneficios aprobados; jamás habilitar Live sin confirmación del comercio y entrega de beneficios. PR #44 DRAFT, rama `f13/section-titles-20261012`. No incrementar alcance P42.
