@@ -1,3 +1,15 @@
+# F16 — Captura real del PO: gate visual NO aprobado; corrección de layout en PR #44 (2026-10-17)
+
+El usuario aportó captura móvil de la pantalla real «Amigo de PAZO» sin membresía. **Hallazgos visuales:** sección superior parcialmente fuera de vista, tarjetas 2x2 demasiado estrechas que cortaban el texto del cuarto beneficio, navegación inferior y botón flotante superpuestos con la oferta, demasiado texto técnico visible. Captura = evidencia de problema; NO evidencia de aceptación visual.
+
+**Causa auditada:** `SupporterAccountManagement` estaba anidado dentro de `PetView` y del `main` con `overflow-y-auto` bajo HeaderBar y BottomNav; `grid gap-2 sm:grid-cols-2` cambiaba a dos columnas según el viewport desktop aunque PAZO ocupa un marco `sm:max-w-[430px]`. No arreglar con fuentes más pequeñas.
+
+**Correcciones solo de código/QA en rama:** `App.tsx` identifica el contenedor `data-pazo-app-shell`; `SupporterScreenPortal.tsx` monta ambos destinos (invitación y beneficios pagados) sobre ese contenedor, fuera del scroll de Mi mascota, manteniendo el ancho del dispositivo y ocultando navegación subyacente; acceso directo `#/account/supporter` sin shell sigue usando document.body. Tarjetas de beneficios de la oferta a **una columna** con texto `min-w-0`/`break-words`, padding menor y confirmación de pagos con copy no técnico. Se conserva la prueba QA y gestión de suscripciones, sin modificar contratos/beneficios o cobros. Nueva prueba de regresión estática para panel estrecho, portal y navegación. **CI del último HEAD, captura posterior del PO y prueba de miembro con cobertura pendiente**. No se ha controlado el navegador del usuario ni desplegado vista previa manual.
+
+Sin Supabase, PayPal Live/Sandbox, Vercel, SQL, compras ni merge por este cambio. Gate siguiente: refresh en equipo local `git pull --ff-only`, volver a abrir desde Mi mascota y enviar nueva captura móvil con la tarjeta y botones visibles; contrastar miembro pagado solamente tras período verificado en Sandbox. **Marcador:** `F16_MOBILE_LAYOUT_CAPTURE_FAIL_PORTAL_FIX_PENDING_REVIEW`.
+
+---
+
 # F16 — Gate de QA visual en PAZO local: preview disponible, aceptación pendiente (2026-10-17)
 
 GO del PO para continuar QA. GitHub CI y PostgreSQL Lab GREEN para el conjunto UI inicial y QA explícito (commit `811c9fdf`, [CI #39062155504](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39062155504), [PG #39062155514](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39062155514)). El último commit de prueba de cuenta completa requiere CI independiente. **No declarar QA visual en navegador aprobado.**
