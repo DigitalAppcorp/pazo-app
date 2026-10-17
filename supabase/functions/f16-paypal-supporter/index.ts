@@ -26,8 +26,6 @@ import {createPazoSandboxV2MerchantVerifier}
  from '../f16-paypal-webhook/pazoSandboxV2MerchantVerify.mjs'
 import {createF16GlobalAdmission}
  from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
-import {isP06SandboxQaAuthorized}
- from './p06SandboxQaGate.mjs'
 
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const PLAN='P-14V25407JP6850922NLHMDKI'
@@ -77,6 +75,16 @@ function compose(){
  const cancellation=createPazoSandboxCancellationProvider({clientId,clientSecret})
  const v2AccountStore=createPazoSandboxV2AccountStore({projectUrl:BASE,serviceRoleKey:key})
  const v2ProofStore=createPazoSandboxV2ProofStore({projectUrl:BASE,serviceRoleKey:key})
+ const canBuy=async(ownerId:string)=>{
+  const r=await fetch(BASE+'/rest/v1/rpc/f16_qa_v2_owner_can_checkout',{
+   method:'POST',redirect:'error',signal:AbortSignal.timeout(12000),
+   headers:{apikey:key,Authorization:'Bearer '+key,
+    'content-type':'application/json',Accept:'application/json'},
+   body:JSON.stringify({p_owner_id:ownerId})
+  })
+  if(!r.ok)return false
+  return (await r.json())===true
+ }
  const merchantVerifier=createPazoSandboxV2MerchantVerifier({
   clientId,clientSecret,commitVerified:v2ProofStore.commitVerified,
   markReversal:v2ProofStore.markReversal})
@@ -90,7 +98,7 @@ function compose(){
   resolveAuthenticatedOwner,admit,privateIntentStore:v2AccountStore,
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
  })
- return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,resolveAuthenticatedOwner,admit}
+ return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,resolveAuthenticatedOwner,admit,canBuy}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -176,8 +184,7 @@ Deno.serve(async(request:Request)=>{
  if(!QA_CHECKOUT_RELEASE_APPROVED ||
     Deno.env.get('PAZO_F16_P06_QA_ENABLE')!=='true')
   return addCors(reply(503,'paid_supporter_checkout_not_released'),runtime.origin)
- if(!isP06SandboxQaAuthorized({getEnv:(k:string)=>Deno.env.get(k),
-      verifiedOwnerId:qaOwner}))
+ if(!await runtime.canBuy(qaOwner))
   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
  let result
  if(data.action==='offer'){
