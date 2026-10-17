@@ -1,3 +1,19 @@
+# F16-P42 — Edge Secrets READ ONLY preparado, ejecución privada pendiente (2026-10-17)
+
+**Autorización PO:** «sí» para una sola consulta privada READ ONLY de presencia del nombre `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX`. No hay autorización de POST/DELETE, generación de secretos P42, nuevo token, escrituras DB, pagos o despliegues. PR #44 DRAFT, rama `f13/section-titles-20261012`.
+
+**Preparación:** `scripts/f16-p42-edge-secrets-readonly-once.mjs` (Windows/Node 22, intento único `P42-EDGE-GET-20261017-01`, lock distinto, HTTPS GET con token **preexistente** si se encuentra en entorno local o `supabase secrets list --project-ref` desde CLI ya autenticada), proyección de nombre **exacto** y salida exclusivamente sanitizada. La respuesta oficial GET puede incluir valores secretos; nunca enviarla al chat/terminal/CI, ni copiar digests o nombres ajenos. `src/features/supporter/testing/f16P42EdgeSecretsReadonlyOnce.test.mjs` añade pruebas de entradas adversariales y no repetición. Procedimiento: `docs/PAZO_F16_P42_EDGE_SECRETS_READ_ONLY_GATE_20261017.md`.
+
+**Evidencia verificada:** código `10c4264c4dcc6e454008fdc38cbf79ce8c6400e3`, pruebas `78ccc53fc6dcf555460f9f7de7b2114018a9004f` **CI #39034540800 SUCCESS** y **PG Lab #39034540752 SUCCESS**; documento `23ccfbb59aba3bb70e9e8a5158f3798c3e463996`. CI del commit final documental/handoff debe comprobarse aparte. **El canal remoto de Secrets NO se ejecutó desde ChatGPT; no afirmar READ PASS.** El conector Supabase no expone list/secrets de Management API.
+
+**Siguiente paso único:** Codex en la computadora Windows del PO verifica HEAD/CI, sesión Supabase CLI existente, Node 22, ausencia del lock nuevo y ejecución privada sin grabaciones, y corre **una sola vez**:
+`node .\\scripts\\f16-p42-edge-secrets-readonly-once.mjs --execute-approved-readonly --attempt-id P42-EDGE-GET-20261017-01 --private-one-shot`
+Publica **únicamente** los marcadores `P42_EDGE_READ_ONLY_PASS_TARGET_NAME_ABSENT` o `P42_EDGE_READ_ONLY_PASS_TARGET_NAME_PRESENT_REVIEW_REQUIRED`, `P42_EDGE_SECRETS_READ_VERIFIED_WRITE_UNVERIFIED` y `P42_NO_KEY_GENERATION_NO_PROVISION_NO_PAYMENT` (o error sanitizado). No repetir ante error; lock consumido. Si aparece P42 presente, revisar sin proceder a escritura. P43/P43B/P42-WRITE previos CONSUMIDOS.
+
+**Estado conservado:** canal PG efímero WRITE cero filas PASS informado por Codex y en handoff anterior; PostgreSQL keys 0, P42 writer/P21 worker OFF, bindings/ledger 0 según último preflight. **Edge WRITE UNVERIFIED, P42 provisioning y F16 financiero NO-GO**. T0 no elegido; custodio único PO, ventana 24h y revocación MANUAL futuros.
+
+---
+
 # F16-P42 — Windows ephemeral zero-row WRITE PASS; intento consumido (2026-10-17)
 
 **Ejecución verificada por Codex en la computadora Windows del Product Owner**, bajo su autorización expresa para `P42-WRITE-EPHEMERAL-20261017-01`. Checkout sincronizado por fast-forward a `0b011104f84f4e12d7bfe738ffc9ecce1df6f6f2`, limpio antes de ejecutar; ejecutor, parser importado y SQL coincidentes con ese commit. CI `39033226251` y PostgreSQL Lab `39033226233`: **SUCCESS observado** para ese HEAD. PR #44 permanece OPEN/DRAFT. Cinco pruebas offline dirigidas del nuevo gate: **5/5 PASS**; no se repitió localmente la suite histórica ni compras.
