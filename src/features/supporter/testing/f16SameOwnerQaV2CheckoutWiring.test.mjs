@@ -14,10 +14,13 @@ test('F16 Sandbox: existing PAZO Auth owner begins a fresh V2 checkout, never ov
  assert.match(edge,/data\.consent\?\.termsVersion!==SANDBOX_BENEFITS_OFFER_V2/)
  assert.match(edge,/const QA_CHECKOUT_RELEASE_APPROVED = false/)
 })
-test('F16 Sandbox: status/cancel V2 never resolve or cancel prior P06 subscription',()=>{
- assert.match(edge,/qa_v2_subscription_management_not_connected/)
- assert.doesNotMatch(edge,/return addCors\(await runtime\.manage\(request\),runtime\.origin\)/)
- assert.match(store,/qa_v2_acknowledgement_read_requires_new_binding/)
+test('F16 Sandbox: status/cancel V2 only use owner-scoped store, not old P06 binding',()=>{
+ assert.match(edge,/createPazoSandboxV2AccountStore/)
+ assert.match(edge,/privateIntentStore:v2AccountStore/)
+ assert.match(edge,/consentStore:v2AccountStore/)
+ assert.match(edge,/runtime\.manage\(request\)/)
+ assert.match(edge,/const QA_CHECKOUT_RELEASE_APPROVED = false/)
+ assert.doesNotMatch(edge,/privateIntentStore:store,\s*provider:cancellation/)
  assert.match(store,/qa_v2_recovery_read_requires_new_binding/)
  assert.match(store,/qa_v2_recovery_bind_requires_new_binding/)
 })
