@@ -18,21 +18,25 @@ const plan={id:PLAN,status:'ACTIVE',quantity_supported:false,billing_cycles:[{
 const sale={id:SALE,state:'completed',billing_agreement_id:SUB,
   amount:{currency:'USD',total:'2.99'}}
 const sub={id:SUB,plan_id:PLAN,status:'ACTIVE',quantity:'1',plan_overridden:false}
+const completedTx={id:SALE,status:'COMPLETED',time:'2026-10-17T11:22:00Z',amount_with_breakdown:{gross_amount:{currency_code:'USD',value:'2.99'}}}
+const transactions={transactions:[completedTx],total_items:1,total_pages:1}
 const verified={sourceEnvironment:'live',webhookSignatureVerified:true,leaseOwned:true,
   eventId:EVENT,eventType:'PAYMENT.SALE.COMPLETED',
   saleId:SALE,subscriptionId:SUB,ownerId:OWNER,
   offerTermsSha256:HEX,ownerIntentVerified:true,acceptedOfferVerified:true,
-  expectedPlanId:PLAN}
+  expectedPlanId:PLAN,verifiedWebhookTime:'2026-10-17T11:30:00Z'}
 const fixture=(changes={})=>{
  const calls=[]
- const resources=[sale,sub,plan]
+ const resources=[sale,sub,plan,transactions]
  const read=()=>structuredClone({...verified,...changes.claim})
  const fetchImpl=async(url,opts)=>{
    calls.push({url,method:opts.method,redirect:opts.redirect})
    const found=resources.find((v,i)=>url.endsWith(
-     ['/v1/payments/sale/'+SALE,'/v1/billing/subscriptions/'+SUB,'/v1/billing/plans/'+PLAN][i]
+     ['/v1/payments/sale/'+SALE,'/v1/billing/subscriptions/'+SUB,'/v1/billing/plans/'+PLAN,
+      '/v1/billing/subscriptions/'+SUB+'/transactions?start_time=2026-10-15T11%3A30%3A00Z&end_time=2026-10-19T11%3A30%3A00Z'][i]
    ))
-   const value=changes.responses ? changes.responses[calls.length-1] : found
+   const value=changes.responses && calls.length<=changes.responses.length
+     ? changes.responses[calls.length-1] : found
    return {ok:value!==null,status:value===null?404:200,
      headers:{get:()=> 'application/json'},
      text:async()=>JSON.stringify(value)}
@@ -55,7 +59,7 @@ test('F16 live evidence: default disabled issues zero requests',async()=>{
  assert.equal(result.mayGrantBenefits,false)
  assert.equal(called,false)
 })
-test('F16 live evidence: 3 independent authorized GETs yield review candidate only',async()=>{
+test('F16 live evidence: 4 independent authorized GETs yield review candidate only',async()=>{
  const env=fixture(),result=await env.make()(args)
  assert.equal(result.phase,'REVIEW_REQUIRED')
  assert.equal(result.merchantSaleCandidate,true)
@@ -64,9 +68,9 @@ test('F16 live evidence: 3 independent authorized GETs yield review candidate on
  assert.equal(result.paidThrough,null)
  for(const k of ['mayGrantBenefits','mayCreatePaidPeriod','mayCheckout','mayRecordPayment'])
   assert.equal(result[k],false)
- assert.equal(env.calls.length,3)
- assert.deepEqual(env.calls.map(c=>c.method),['GET','GET','GET'])
- assert.deepEqual(env.calls.map(c=>c.redirect),['error','error','error'])
+ assert.equal(env.calls.length,4)
+ assert.deepEqual(env.calls.map(c=>c.method),['GET','GET','GET','GET'])
+ assert.deepEqual(env.calls.map(c=>c.redirect),['error','error','error','error'])
  assert.ok(env.calls.every(c=>c.url.startsWith('https://api-m.paypal.com/')))
 })
 test('F16 live evidence: cancellation retains merchant candidate without inventing paid date',async()=>{
@@ -131,4 +135,25 @@ test('F16 live evidence: 404, unexpected JSON, failure/timeout never authorizes 
  const failed=await throwing(args)
  assert.equal(failed.phase,'BLOCKED')
  assert.equal(failed.mayGrantBenefits,false)
+})
+
+test('F16 live evidence: PayPal v1 pending/refunded/partial/collision or incomplete list never grants a candidate',async()=>{
+ for(const tx of [
+   {...completedTx,status:'PENDING'},
+   {...completedTx,status:'REFUNDED'},
+   {...completedTx,status:'PARTIALLY_REFUNDED'},
+   {...completedTx,amount_with_breakdown:{gross_amount:{currency_code:'EUR',value:'2.99'}}},
+ ]){
+  const env=fixture({responses:[sale,sub,plan,{transactions:[tx],total_items:1,total_pages:1}]});
+  const result=await env.make()(args)
+  assert.equal(result.phase,'BLOCKED');assert.equal(result.mayGrantBenefits,false)
+ }
+ for(const list of [
+   {transactions:[completedTx],total_items:2,total_pages:2},
+   {transactions:[completedTx,completedTx],total_items:2,total_pages:1},
+ ]){
+  const env=fixture({responses:[sale,sub,plan,list]})
+  const result=await env.make()(args)
+  assert.equal(result.phase,'BLOCKED')
+ }
 })
