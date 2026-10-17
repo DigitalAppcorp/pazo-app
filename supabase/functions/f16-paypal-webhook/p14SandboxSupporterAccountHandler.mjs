@@ -38,15 +38,19 @@ const present=x=>[
 
 export function createPazoSandboxSupporterAccountHandler({
  resolveAuthenticatedOwner,privateIntentStore,admit,provider,
- consentStore,trustedOrigins=[],
+ consentStore,trustedOrigins=[],allowLoopbackQa=false,
 }={}){
+ const qaLoopback=new Set(['http://localhost:5173','http://127.0.0.1:5173'])
  if(typeof resolveAuthenticatedOwner!=='function'||
     typeof consentStore?.readAcknowledgementForOwner!=='function'||
+    typeof allowLoopbackQa!=='boolean'||
     !Array.isArray(trustedOrigins)||trustedOrigins.some(o=>
-     typeof o!=='string'||!/^https:\/\/[^/]+$/.test(o)))
+     typeof o!=='string'||(!/^https:\/\/[^/]+$/.test(o) &&
+      !(allowLoopbackQa&&qaLoopback.has(o)))))
   throw Error('pazo_p14_account_endpoint_not_configured')
  const cancel=createPazoSandboxCancellationHandler({
   resolveAuthenticatedOwner,privateIntentStore,admit,provider,trustedOrigins,
+  allowLoopbackQa,
  })
  const allow=new Set(trustedOrigins)
  return async request=>{
