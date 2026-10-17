@@ -13,6 +13,9 @@ const base=()=>({
     state:'COMPLETED',amount:{currency:'USD',total:'2.99'}}}),
   getMerchantSubscription:async()=>({id:'I-P27-ONE',custom_id:intent,status:'ACTIVE'})
  },
+ readIndependentMerchantSale:async()=>({id:'SALE-P27-01',
+  billing_agreement_id:'I-P27-ONE',state:'completed',
+  amount:{currency:'USD',total:'2.99'}}),
  readPrivateReviewContext:async()=>({
   claim:{workerEnabled:true,status:'processing',eventId:'WH-P27-01',
    leaseToken:token,leaseValid:true,prospectiveCutoffPassed:true},
@@ -174,4 +177,70 @@ test('P27 denies QA-only agreement before history, refunds or dispute inspection
  check(r);assert.equal(r.phase,'DENIED')
  assert.equal(r.reason,'prospective_paid_service_terms_not_attested')
  assert.equal(checks,0)
+})
+
+test('P27 requires independent SALE GET before history, refund and dispute checks',async()=>{
+ for(const sale of [null,
+  {id:'SALE-OTHER',billing_agreement_id:'I-P27-ONE',state:'completed',amount:{currency:'USD',total:'2.99'}},
+  {id:'SALE-P27-01',billing_agreement_id:'I-OTHER',state:'completed',amount:{currency:'USD',total:'2.99'}},
+  {id:'SALE-P27-01',billing_agreement_id:'I-P27-ONE',state:'refunded',amount:{currency:'USD',total:'2.99'}},
+  {id:'SALE-P27-01',billing_agreement_id:'I-P27-ONE',state:'completed',amount:{currency:'USD',total:'5.99'}},
+ ]){
+  const a=base();a.readIndependentMerchantSale=async()=>sale
+  let inspected=0
+  for(const k of ['inspectHistory','inspectRefunds','inspectDisputes'])
+   a[k]=async()=>{inspected++;throw Error('unverified_sale_must_not_proceed')}
+  const result=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+  check(result);assert.equal(result.phase,'REVIEW_REQUIRED')
+  assert.equal(result.reason,'independent_merchant_sale_unverified')
+  assert.equal(inspected,0)
+ }
+})
+test('P27 P29 reader only receives exact leased original sale ID',async()=>{
+ const a=base(),visited=[]
+ a.readIndependentMerchantSale=async params=>{
+  visited.push(['sale',params])
+  return {id:'SALE-P27-01',billing_agreement_id:'I-P27-ONE',
+   state:'completed',amount:{currency:'USD',total:'2.99'}}
+ }
+ a.inspectHistory=async()=>{visited.push(['history']);return {phase:'WINDOWS_CHECKED_REVIEW_ONLY'}}
+ a.inspectRefunds=async()=>{visited.push(['refunds']);return {phase:'NO_REFUND_REFS_REVIEW_ONLY'}}
+ a.inspectDisputes=async()=>{visited.push(['disputes']);return {phase:'DISPUTE_SNAPSHOT_EMPTY_REVIEW_ONLY'}}
+ const result=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(result)
+ assert.deepEqual(visited[0],['sale',{saleId:'SALE-P27-01',eventId:'WH-P27-01',claimToken:token}])
+ assert.equal(visited.length,4)
+ assert.equal(result.reason,'merchant_source_cycle_reversals_and_atomic_credit_unproven')
+})
+test('P27 denies unsafe P06/lease context before independent SALE GET',async()=>{
+ for(const alter of [
+  x=>{x.consent.validP06=false},
+  x=>{x.claim.leaseValid=false},
+  x=>{x.reviewReservation.saleId='SALE-FOREIGN'},
+  x=>{x.consent.qaOnly=true},
+ ]){
+  const a=base(),read=a.readPrivateReviewContext
+  a.readPrivateReviewContext=async params=>{const context=await read(params);alter(context);return context}
+  let calls=0;a.readIndependentMerchantSale=async()=>{calls++;throw Error('forbidden')}
+  const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+  check(r);assert.equal(r.phase,'DENIED');assert.equal(calls,0)
+ }
+})
+test('P27 accepts provider lowercase completed event only for review after P29 match',async()=>{
+ const a=base()
+ a.merchantReader.getMerchantEvent=async()=>({
+  id:'WH-P27-01',event_type:'PAYMENT.SALE.COMPLETED',
+  resource:{id:'SALE-P27-01',billing_agreement_id:'I-P27-ONE',
+   state:'completed',amount:{currency:'USD',total:'2.99'}}
+ })
+ const result=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(result);assert.equal(result.phase,'REVIEW_REQUIRED')
+ assert.equal(result.reason,'merchant_source_cycle_reversals_and_atomic_credit_unproven')
+})
+test('P27 disabled or absent independent sale reader cannot authorize finance',async()=>{
+ const a=base();delete a.readIndependentMerchantSale
+ assert.throws(()=>create(a),/p27_offline_dependencies_required/)
+ a.scope='DISABLED'
+ const result=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(result);assert.equal(result.phase,'DISABLED')
 })
