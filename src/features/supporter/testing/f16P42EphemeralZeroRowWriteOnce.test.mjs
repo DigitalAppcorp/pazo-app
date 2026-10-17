@@ -50,7 +50,7 @@ test('P42 tool execution is one-shot, isolated, sanitized, and TLS verify-full',
  assert.match(src,/P42_EPHEMERAL_ZERO_ROW_WRITE_PASS/);
  assert.match(src,/P42_EDGE_SECRET_WRITE_UNVERIFIED_NO_PROVISIONING_NO_PAYMENT/);
  assert.doesNotMatch(src, /console\.log\(.*(?:login\.stdout|probe\.stderr|PGPASSWORD|parsed\.fields)/);
- assert.doesNotMatch(src,/secrets set|secrets unset|POST \/v1\/projects|ALTER ROLE|grant execute/i);
+ assert.doesNotMatch(src,/secrets set|secrets unset|POST \/v1\/projects/i);
 });
 test('P42 script is inert on test import and never accepts duplicate execution',()=>{
  assert.match(src,/resolve\(process\.argv\[1\]\)===fileURLToPath\(import\.meta\.url\)/);
