@@ -1,3 +1,17 @@
+# F16 — auditoría de impacto de rotación de contraseña PostgreSQL (2026-10-17)
+
+**Petición PO:** investigar exhaustivamente impacto antes de restablecer password `postgres`; permitir SQL Editor solo si es seguro. **Se realizó exclusivamente lectura** en Vercel, repo, Edge desplegado, catálogo PostgreSQL y documentación oficial. **NO se rotó contraseña, no se hizo ALTER ROLE, no se generó/provisionó clave P42, no se usó SQL Editor con secreto.**
+
+**Conclusión:** app Vercel/Edge de PAZO tiene **BAJO riesgo de ruptura directa** por rotación: 2 proyectos Vercel, 14 variables en total revisadas por **nombres/metadatos sin decrypt**, sin variables de credencial Postgres directa ni conectores; 8 Edge functions desplegadas examinadas, APIs Supabase, sin referencias detectadas a `SUPABASE_DB_URL/PGPASSWORD/DATABASE_URL/pg`; app usa publishable/anon keys. DB sin cron, servidores FDW, subscriptions ni Vault secret, sesión activa solo instantánea con clientes internos. **No garantiza ausencia de consumidores desconocidos:** equipos Windows, VPS/Hostinger, IDE/PSQL, conexiones esporádicas y trabajos locales no fueron accesibles.
+
+**Riesgo operacional identificado:** `scripts/backup-database.ps1` usa conexión PG directa `psql/pg_dump/pg_dumpall`; alternativa A `%LOCALAPPDATA%/PAZO/CodexOps/connection.json` + credencial privada DPAPI `database.credential.xml`, potencial obsolescencia al rotar, alternativa B Supabase CLI admin temporal. No se constató si la opción A está configurada, ni tarea programada; **no rotar hasta comprobar**. Script de conexión P42 anterior no completó por no poseer contraseña. Tests CI utilizan PG17 sintético independiente.
+
+**Recomendación:** no cambiar password simplemente para destrabar P42. Estudiar acceso temporal documentado de Supabase como camino alternativo (disabled por defecto, requiere SSL enforced, mapping rol y nuevo GO para cualquier cambio). Reset, si finalmente necesario, SOLO Dashboard `Database > Settings`, no SQL Editor ni `ALTER ROLE` improvisado. SQL Editor válido para DDL sin secretos como expiración P42 ya instalada; **NO** pegar `key_bytes` HMAC en SQL Editor por historial/logs. P42 doble almacén y revocación aún NO-GO. **Documento íntegro:** `docs/PAZO_F16_DB_PASSWORD_ROTATION_IMPACT_AUDIT_20261017.md`.
+
+**Siguiente intervención humana segura, solo metadatos locales:** PO puede confirmar existencia (no abrir/capturar contenido) de `%LOCALAPPDATA%/PAZO/CodexOps/connection.json` y `database.credential.xml` y si se ejecuta respaldo automático desde esa máquina, además de confirmar cualquier conector no gestionado en VPS/IDE. Sin pedir credenciales al PO, sin reintentar scripts históricos one-shot o P43. Continuar desde ese dato o estudiar estado SSL/JIT de forma no mutadora. PR #44 permanece DRAFT, worker/writer/ledger y beneficios OFF.
+
+---
+
 # F16-P42 — Edge Secrets: ausencia del nombre P42 confirmada visualmente (2026-10-17)
 
 **Evidencia visual aportada por el Product Owner:** Dashboard Supabase de PAZO > Edge Functions > **Secrets** > lista de **Custom secrets**, búsqueda exacta por nombre `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX` mostró `No results found`. Resultado: **no hay entrada visible con ese nombre en Custom secrets, bajo el filtro mostrado**. Esto NO es una exportación integral del inventario ni prueba de aislamiento físico de variables de otras funciones; no confundir con una consulta en la lista de Edge Functions que se había realizado anteriormente. No se pulsó `Save`, no se estableció valor y ningún byte secreto se compartió.
