@@ -1,3 +1,13 @@
+# F16 — REVISIÓN VISUAL PO: Opción B no fiel; corrección de proporciones en rama (2026-10-17)
+
+**Evidencia:** usuario compartió dos capturas lado a lado de la maqueta elegida B frente al PAZO real. La implementación anterior no cumplía: cabecera extra «Entorno de prueba / Volver a PAZO», titular dividido en cuatro líneas por insignia en el mismo flex, hero excesivamente alto, filas sobredimensionadas y consentimiento/CTA PayPal fuera de la primera pantalla. **PO NO ACEPTÓ** ese resultado. Priorizar fidelidad visual al diseño aprobado, no «parecido razonable».
+
+**Corrección acotada, rama PR #44 DRAFT:** `SupporterOfferB.tsx` deja de reservar una columna al arte; fija título de 3 líneas con ancho controlado y coloca `amigo-pazo-inicio.png` decorativamente en posición absoluta en hero compacto. Filas cuatro beneficios de altura mínima ~49px, icono 36px y separación 6px; sigue copy ES/EN, precio US$2.99. `SupporterAccountManagement.tsx` elimina subtítulo QA invasivo en cabecera y botón ancho, crea flecha de regreso y título centrado, reduce espaciado exterior, elimina botón secundario masivo. `SandboxCheckoutQaPanel.tsx` conserva consulta de oferta publicada V2+digest, `offer.exactCopy` en disclosure expandible, checkbox inicialmente desmarcado, bloqueo de compra one-shot, validación de URL PayPal Sandbox y mensajes de fallo; presenta copy de consentimiento conciso, botón amarillo y nota de dinero ficticio compactos después de beneficios. **No modificar contratos/PayPal, no activar Live, no usar cobros.** Pruebas específicas apuntan a proporciones y safety, pero **no sustituyen captura visual real**.
+
+**Siguiente gate:** CI/PG del HEAD más reciente; después operador actualiza localhost, compara screenshot 360–390px del mismo flujo incluyendo el CTA. Si la UX aún difiere, no declarar aprobado. El mockup muestra status bar iOS simulado; no insertar status bar falso en PWA. Para 320px o alturas cortas se permite scroll sin ocultar CTA permanentemente. Los controles técnicos QA continúan colapsados y no forman parte de experiencia Live. Aviso automático OFF. P42/Live OFF, PR DRAFT sin merge.
+
+---
+
 # F16 — Oferta Amigo de PAZO, diseño Opción B aprobado e implementado en rama (2026-10-17)
 
 **Autorización expresa del Product Owner:** implementar la Opción B elegida de cuatro maquetas: titular «Pequeñas acciones, grandes historias», diseño minimalista cálido verde/crema, insignia oficial aprobada como ilustración *decorativa* (no estado concedido), precio US$2.99/mes, cuatro filas horizontales: insignia perfil/Feed, cinco fondos, muro por autorización individual y medallas tras 3/6/12 meses pagados, casilla desmarcada y botón amarillo «Continuar con PayPal», «Ahora no».
