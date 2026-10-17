@@ -106,7 +106,11 @@ test('draft statements distinguish ephemeral map location, persisted check-ins a
   const places=readFileSync(new URL('../../services/placeCheckinService.ts',import.meta.url),'utf8')
   const rescue=readFileSync(new URL('../../services/rescueService.ts',import.meta.url),'utf8')
   assert.match(map,/navigator\.geolocation\.getCurrentPosition/)
-  assert.match(map,/onClick=\{handleUseLocation\}/)
+  const mapStage=readFileSync(new URL('../places/components/ImmersivePlacesStage.tsx',import.meta.url),'utf8')
+  assert.match(map,/onUseLocation=\{handleUseLocation\}/)
+  assert.match(mapStage,/onClick=\{onUseLocation\}/)
+  assert.match(mapStage,/Location is only used with permission; never stored/)
+
   for (const col of ['place_id','pet_id','visible']) assert.ok(places.includes(col))
   for (const field of ['p_reporter_name','p_reporter_phone','p_message','p_location']) assert.ok(rescue.includes(field))
   assert.equal(LEGAL_RELEASE_READY,true)

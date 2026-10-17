@@ -8,6 +8,7 @@ import {
 import { IconCheck, IconCommunity, IconPlus } from '../icons/PazoIcons'
 import { CreateCommunityModal } from '../modals/CreateCommunityModal'
 import { CommunityDetailView } from './CommunityDetailView'
+import { CommunitiesEmptyState } from '../../features/communities/components/CommunitiesEmptyState'
 
 interface CommunitiesViewProps {
   currentPet: Pet | null
@@ -135,10 +136,6 @@ export const CommunitiesView = ({
       <div className="space-y-4 animate-slide-up pb-6">
         <div className="flex items-start justify-between gap-3 px-1">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E1E53F] px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] shadow-xs">
-              <IconCommunity size={13} />
-              {lang === 'es' ? 'Comunidades' : 'Communities'}
-            </span>
             <h2 className="mt-2 text-2xl font-black tracking-tight text-[#204E4A]">
               {lang === 'es'
                 ? 'Encuentra tu comunidad.'
@@ -155,7 +152,7 @@ export const CommunitiesView = ({
             type="button"
             onClick={() => setIsCreateCommunityOpen(true)}
             disabled={!currentPet || !canUseCommunities}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2 text-[10px] font-black text-[#204E4A] shadow-xs disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2 text-[13px] font-black text-[#204E4A] shadow-xs disabled:opacity-50"
           >
             <IconPlus size={14} />
             {lang === 'es' ? 'Crear' : 'Create'}
@@ -163,7 +160,7 @@ export const CommunitiesView = ({
         </div>
 
         {!canUseCommunities ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+          <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
             <p className="text-xs font-black text-[#204E4A]">
               {lang === 'es'
                 ? 'Inicia sesión con una cuenta real para usar Comunidades.'
@@ -175,25 +172,19 @@ export const CommunitiesView = ({
             <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#204E4A]/20 border-t-[#204E4A]" />
           </div>
         ) : communities.length === 0 ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
-            <p className="text-xs font-black text-[#204E4A]">
-              {lang === 'es'
-                ? 'Todavía no hay comunidades.'
-                : 'No communities yet.'}
-            </p>
-            <p className="mt-1 text-[10px] text-[#5C7470]">
-              {lang === 'es'
-                ? 'Puedes crear la primera desde aquí.'
-                : 'You can create the first one here.'}
-            </p>
-          </div>
+          <CommunitiesEmptyState
+            lang={lang}
+            canCreate={Boolean(currentPet) && canUseCommunities}
+            onCreate={() => setIsCreateCommunityOpen(true)}
+          />
         ) : (
           <div className="space-y-3">
-            {communities.map((community) => (
+            {communities.map((community, index) => (
               <div
                 key={community.id}
                 role="button"
                 tabIndex={0}
+                style={{ animationDelay: `${Math.min(index, 3) * 12}ms` }}
                 onClick={() => setSelectedCommunityId(community.id)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
@@ -201,7 +192,7 @@ export const CommunitiesView = ({
                     setSelectedCommunityId(community.id)
                   }
                 }}
-                className="w-full cursor-pointer rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-all hover:shadow-md"
+                className="pazo-community-card-enter w-full cursor-pointer rounded-[2rem] bg-white p-4 text-left shadow-[0_3px_16px_rgba(32,78,74,0.04)] transition-shadow hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-3.5">
                   <div className="flex min-w-0 items-center gap-3">
@@ -223,10 +214,10 @@ export const CommunitiesView = ({
                       <h3 className="truncate text-xs font-extrabold text-[#204E4A]">
                         {community.name}
                       </h3>
-                      <p className="mt-0.5 line-clamp-1 text-[11px] text-[#5C7470]">
+                      <p className="mt-0.5 line-clamp-1 text-[14px] text-[#5C7470]">
                         {community.description}
                       </p>
-                      <span className="mt-0.5 block text-[10px] font-semibold text-[#5C7470]/70">
+                      <span className="mt-0.5 block text-[13px] font-semibold text-[#5C7470]/70">
                         {community.membersCount.toLocaleString()}{' '}
                         {lang === 'es' ? 'miembros' : 'members'}
                         {community.zone ? ` · ${community.zone}` : ''}

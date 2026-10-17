@@ -249,12 +249,9 @@ export const CareModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm bg-white rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center pb-2">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-              {lang === 'es' ? 'Agenda privada' : 'Private agenda'}
-            </span>
             <h3 className="text-xl font-black text-[#204E4A] mt-1">
               {lang === 'es' ? `Cuidados de ${petName}` : `${petName}'s care`}
             </h3>
@@ -311,7 +308,7 @@ export const CareModal = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+              <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                 {lang === 'es' ? 'Título' : 'Title'}
               </label>
               <input
@@ -327,7 +324,7 @@ export const CareModal = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Categoría' : 'Category'}
                 </label>
                 <select
@@ -349,7 +346,7 @@ export const CareModal = ({
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Fecha' : 'Date'}
                 </label>
                 <input
@@ -367,7 +364,7 @@ export const CareModal = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Hora opcional' : 'Optional time'}
                 </label>
                 <input
@@ -385,7 +382,7 @@ export const CareModal = ({
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Repetir' : 'Repeat'}
                 </label>
                 <select
@@ -408,7 +405,7 @@ export const CareModal = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+              <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                 {lang === 'es' ? 'Recordarme' : 'Remind me'}
               </label>
               <select
@@ -436,7 +433,7 @@ export const CareModal = ({
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+              <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                 {lang === 'es' ? 'Notas opcionales' : 'Optional notes'}
               </label>
               <textarea
@@ -451,7 +448,7 @@ export const CareModal = ({
             </div>
 
             {formError && (
-              <p className="text-[11px] text-[#EC7357] font-bold">{formError}</p>
+              <p className="text-[14px] text-[#EC7357] font-bold">{formError}</p>
             )}
 
             <button
@@ -475,7 +472,7 @@ export const CareModal = ({
                 ? 'No pudimos cargar la agenda en este momento.'
                 : 'We could not load the agenda right now.'}
             </p>
-            <p className="text-[11px] text-[#5C7470]">
+            <p className="text-[14px] text-[#5C7470]">
               {lang === 'es'
                 ? 'Puedes volver a intentarlo sin perder nada.'
                 : 'You can try again without losing anything.'}
@@ -494,7 +491,7 @@ export const CareModal = ({
                 <p className="font-extrabold text-sm text-[#204E4A]">
                   {lang === 'es' ? 'No hay cuidados pendientes.' : 'No pending care yet.'}
                 </p>
-                <p className="text-[11px] text-[#5C7470]">
+                <p className="text-[14px] text-[#5C7470]">
                   {lang === 'es'
                     ? 'Añade el próximo cuidado de tu mascota para tenerlo presente.'
                     : 'Add your pet’s next care item to keep it on your radar.'}
@@ -518,22 +515,22 @@ export const CareModal = ({
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-extrabold text-[#204E4A]">{item.title}</span>
-                          <span className="text-[9px] uppercase tracking-wide font-bold text-[#5C7470]">
+                          <span className="text-[12px] uppercase tracking-wide font-bold text-[#5C7470]">
                             {statusLabel(item)}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#5C7470] mt-1">
+                        <p className="text-[14px] text-[#5C7470] mt-1">
                           {CATEGORY_LABELS[item.category][lang]} · {formatDate(item.dueDate, lang)}
                           {item.dueTime ? ` · ${item.dueTime}` : ''}
                         </p>
                         {item.recurrence !== 'none' && (
-                          <p className="text-[10px] text-[#5C7470] mt-1">
+                          <p className="text-[13px] text-[#5C7470] mt-1">
                             {lang === 'es' ? 'Repite: ' : 'Repeats: '}
                             {RECURRENCE_LABELS[item.recurrence][lang]}
                           </p>
                         )}
                         {item.notes && (
-                          <p className="text-[10px] text-[#5C7470]/85 mt-1 line-clamp-2">
+                          <p className="text-[13px] text-[#5C7470]/85 mt-1 line-clamp-2">
                             {item.notes}
                           </p>
                         )}
@@ -544,7 +541,7 @@ export const CareModal = ({
                         onClick={() =>
                           runAction(`complete:${item.id}`, () => onCompleteCare(item))
                         }
-                        className="text-[11px] font-bold text-[#204E4A] bg-white border border-[#204E4A]/15 px-3 py-1.5 rounded-full disabled:opacity-50 cursor-pointer shrink-0"
+                        className="text-[14px] font-bold text-[#204E4A] bg-white border border-[#204E4A]/15 px-3 py-1.5 rounded-full disabled:opacity-50 cursor-pointer shrink-0"
                       >
                         {lang === 'es' ? 'Hecho' : 'Done'}
                       </button>
@@ -554,7 +551,7 @@ export const CareModal = ({
                       <button
                         onClick={() => startEdit(item)}
                         disabled={Boolean(busyKey)}
-                        className="text-[10px] font-bold text-[#5C7470] hover:text-[#204E4A] cursor-pointer"
+                        className="text-[13px] font-bold text-[#5C7470] hover:text-[#204E4A] cursor-pointer"
                       >
                         {lang === 'es' ? 'Editar' : 'Edit'}
                       </button>
@@ -570,7 +567,7 @@ export const CareModal = ({
                           }
                         }}
                         disabled={Boolean(busyKey)}
-                        className="text-[10px] font-bold text-[#EC7357] cursor-pointer"
+                        className="text-[13px] font-bold text-[#EC7357] cursor-pointer"
                       >
                         {lang === 'es' ? 'Eliminar' : 'Remove'}
                       </button>
@@ -604,11 +601,11 @@ export const CareModal = ({
                       <span className="font-extrabold text-[#204E4A] block">
                         {completion.title}
                       </span>
-                      <span className="text-[10px] text-[#5C7470] block mt-0.5">
+                      <span className="text-[13px] text-[#5C7470] block mt-0.5">
                         {CATEGORY_LABELS[completion.category][lang]} ·{' '}
                         {formatDate(completion.scheduledDate, lang)}
                       </span>
-                      <span className="text-[10px] text-[#5C7470]/75 block mt-1">
+                      <span className="text-[13px] text-[#5C7470]/75 block mt-1">
                         {lang === 'es' ? 'Completado: ' : 'Completed: '}
                         {new Date(completion.completedAt).toLocaleString(
                           lang === 'es' ? 'es-US' : 'en-US'
@@ -625,7 +622,7 @@ export const CareModal = ({
                             () => onUndoCompletion(completion)
                           )
                         }
-                        className="text-[10px] font-bold text-[#5C7470] hover:text-[#204E4A] cursor-pointer self-start"
+                        className="text-[13px] font-bold text-[#5C7470] hover:text-[#204E4A] cursor-pointer self-start"
                       >
                         {lang === 'es' ? 'Deshacer' : 'Undo'}
                       </button>
@@ -636,7 +633,7 @@ export const CareModal = ({
             )}
 
             {isHistoryLoading && (
-              <div className="py-3 text-center text-[11px] text-[#5C7470]">
+              <div className="py-3 text-center text-[14px] text-[#5C7470]">
                 {lang === 'es' ? 'Cargando historial…' : 'Loading history…'}
               </div>
             )}

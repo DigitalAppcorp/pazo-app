@@ -436,3 +436,13 @@ entrypoint = "./functions/f14-moderation-purge/index.ts"
 enabled = false
 verify_jwt = true
 entrypoint = "./functions/f14-moderation-reconcile/index.ts"
+
+# F16 new PayPal Sandbox webhook receptor — SOURCE ONLY, DEPLOYMENT BLOCKED.
+# Incoming PayPal notifications do not have PAZO JWTs, so verify_jwt=false;
+# code must verify the PayPal signature and persist before ACK.
+# The independent code-level release latch is also FALSE.
+# Never deploy this function or redirect PayPal without separate PO approval.
+[functions.f16-paypal-webhook]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/f16-paypal-webhook/index.ts"

@@ -72,15 +72,12 @@ export const CreateModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-slide-up">
-      <div className="w-full sm:max-w-sm bg-white rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full sm:max-w-sm pazo-glass-modal rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         {mode === 'menu' ? (
           <>
             {/* Header del menú de acciones */}
             <div className="flex justify-between items-center pb-2">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-                  Pazo Action
-                </span>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
                   {lang === 'es' ? 'Crear y Compartir' : 'Create & Share'}
                 </h3>
@@ -227,7 +224,7 @@ export const CreateModal = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#5C7470] mb-1">
+                <label className="block text-[14px] font-bold text-[#5C7470] mb-1">
                   {lang === 'es' ? '¿Qué compartieron hoy?' : 'What did you share today?'}
                 </label>
                 <textarea
@@ -279,7 +276,7 @@ export const CreateModal = ({
                   <button
                     type="button"
                     onClick={() => setAudience('public')}
-                    className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'public'
+                    className={`px-3 py-1 rounded-full text-[14px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'public'
                       ? 'bg-[#204E4A] text-[#E1E53F]'
                       : 'bg-white text-[#5C7470]'
                       }`}
@@ -289,7 +286,7 @@ export const CreateModal = ({
                   <button
                     type="button"
                     onClick={() => setAudience('community')}
-                    className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'community'
+                    className={`px-3 py-1 rounded-full text-[14px] font-bold transition-all cursor-pointer shadow-xs ${audience === 'community'
                       ? 'bg-[#204E4A] text-[#E1E53F]'
                       : 'bg-white text-[#5C7470]'
                       }`}
@@ -328,7 +325,7 @@ export const CreateModal = ({
 
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-[#FAF8F5] rounded-2xl shadow-xs">
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Nombre de la actividad' : 'Activity Name'}
                 </label>
                 <input
@@ -339,7 +336,7 @@ export const CreateModal = ({
               </div>
 
               <div className="p-3 bg-[#FAF8F5] rounded-2xl shadow-xs">
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Lugar público & Hora' : 'Public Place & Time'}
                 </label>
                 <input

@@ -3,6 +3,23 @@
 /* F13: una sola familia tipográfica para PAZO, basada en el perfil público. */
 @theme {
   --font-sans: 'Quicksand', 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* F13: escala estándar +3px. Los valores arbitrarios requieren revisión por vista. */
+  --text-xs: 0.9375rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 1.0625rem;
+  --text-sm--line-height: 1.4;
+  --text-base: 1.1875rem;
+  --text-base--line-height: 1.5;
+  --text-lg: 1.3125rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.4375rem;
+  --text-xl--line-height: 1.35;
+  --text-2xl: 1.6875rem;
+  --text-2xl--line-height: 1.3;
+  --text-3xl: 2.0625rem;
+  --text-3xl--line-height: 1.2;
+  --text-4xl: 2.4375rem;
+  --text-4xl--line-height: 1.15;
 }
 
 @layer base {
@@ -74,6 +91,20 @@
   }
 }
 
+/* F16: restrained organic floating for ornamentation only (no UI/text movement). */
+@keyframes pazoSupporterGentleFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  33% { transform: translate3d(3px, -6px, 0) rotate(2deg); }
+  66% { transform: translate3d(-3px, -2px, 0) rotate(-1.5deg); }
+}
+.pazo-supporter-float {
+  animation: pazoSupporterGentleFloat 7s ease-in-out infinite;
+  transform-origin: center center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pazo-supporter-float { animation: none !important; }
+}
+
 .animate-slide-up {
   animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -94,6 +125,202 @@
 
 .animate-pulse-soft {
   animation: pulseSoft 3s ease-in-out infinite;
+}
+
+/* F13: superficie cristal uniforme; elevación suave, sin borde ni aro. */
+@layer components {
+  .pazo-glass-card {
+    background-color: rgba(255, 255, 255, 0.76);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 8px 26px rgba(32, 78, 74, 0.07);
+  }
+  .pazo-glass-modal {
+    background-color: rgba(250, 248, 245, 0.94);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    backdrop-filter: blur(24px) saturate(1.2);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .pazo-glass-card, .pazo-glass-modal {
+    background-color: #FAF8F5;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+
+/* F13: compact white navigation with a small moving top recess.
+   One mask cuts the curve; nothing is drawn on top of the bar to fake the gap. */
+@property --pazo-liquid-center {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 10%;
+}
+
+.pazo-liquid-surface {
+  position: absolute;
+  top: 14px;
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  border-radius: 12px 12px 14px 14px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(32, 78, 74, 0.06);
+  /* Circle: orb center is track y=12px; mask center is surface y=-2px.
+     The 30px cut around its 23px radius exposes 7px of the real app background. */
+  -webkit-mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -2px,
+    transparent 0 29px, #000 30px);
+  mask-image: radial-gradient(circle 30px at var(--pazo-liquid-center) -2px,
+    transparent 0 29px, #000 30px);
+  transition: --pazo-liquid-center 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+}
+
+.pazo-liquid-indicator {
+  position: absolute;
+  top: -11px;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #204E4A;
+  box-shadow: 0 8px 17px rgba(32, 78, 74, 0.20);
+  transition: left 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+}
+
+.pazo-liquid-icon {
+  transform: translateY(0);
+  transition: transform 320ms ease, color 180ms ease;
+}
+
+/* Invisible idle labels still occupy flex space; shift only inactive glyphs
+   into the vertical center of the actual white nav surface (y=14..79). */
+.pazo-liquid-icon--idle {
+  transform: translateY(15px);
+}
+
+.pazo-liquid-icon--active {
+  transform: translateY(-15px);
+  animation: pazoLiquidSettle 420ms cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+
+@keyframes pazoLiquidSettle {
+  0% { transform: translateY(-3px) scale(0.91); }
+  66% { transform: translateY(-19px) scale(1.08); }
+  100% { transform: translateY(-15px) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pazo-liquid-surface, .pazo-liquid-indicator { transition: none; }
+  .pazo-liquid-icon--active { animation: none; transform: translateY(-15px); }
+}
+
+
+/* F13: liquid segmented control for the social pet profile.
+   The pill moves; the underlying tab handlers and content do not change. */
+.pazo-profile-tab-indicator {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 18px) / 2);
+  border-radius: 9999px;
+  background: #204E4A;
+  box-shadow: 0 5px 12px rgba(32, 78, 74, 0.15);
+  transform: translateX(0);
+  transition: transform 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+  will-change: transform;
+}
+.pazo-profile-tab-indicator[data-active="info"] {
+  transform: translateX(calc(100% + 6px));
+}
+.pazo-profile-tab-icon--active {
+  animation: pazoProfileTabSettle 380ms cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+@keyframes pazoProfileTabSettle {
+  0% { transform: translateY(1px) scale(0.94); }
+  65% { transform: translateY(-2px) scale(1.06); }
+  100% { transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pazo-profile-tab-indicator { transition: none; will-change: auto; }
+  .pazo-profile-tab-icon--active { animation: none; }
+}
+
+
+/* F13 liquid segmented tabs: one moving solid-green surface shared by all choices. */
+.pazo-choice-indicator {
+  position: absolute;
+  background: #204E4A;
+  box-shadow: 0 3px 10px rgba(32, 78, 74, 0.12);
+  transform: translateX(0);
+  transition: transform 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+  border-radius: 9999px;
+}
+.pazo-choice-indicator--community {
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 20px) / 3);
+}
+.pazo-choice-indicator--community[data-active="info"] {
+  transform: translateX(calc(100% + 4px));
+}
+.pazo-choice-indicator--community[data-active="members"] {
+  transform: translateX(calc(200% + 8px));
+}
+.pazo-choice-indicator--pet {
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 2);
+  border-radius: 12px;
+}
+.pazo-choice-indicator--pet[data-active="myposts"] {
+  transform: translateX(100%);
+}
+.pazo-choice-label--active {
+  display: inline-block;
+  animation: pazoProfileTabSettle 380ms cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+.pazo-search-filter-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: #204E4A;
+  border-radius: 9999px;
+  transition: transform 460ms cubic-bezier(0.22, 1.26, 0.36, 1),
+    width 460ms cubic-bezier(0.22, 1.26, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pazo-choice-indicator, .pazo-search-filter-indicator { transition: none; }
+  .pazo-choice-label--active { animation: none; }
+}
+
+
+/* F13 community discovery: quiet entrance once each real result is mounted.
+   Small capped stagger keeps a full list responsive, never hides reduced-motion cards. */
+@keyframes pazoCommunityCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pazo-community-card-enter {
+  animation: pazoCommunityCardEnter 160ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pazo-community-card-enter {
+    animation: none;
+  }
 }
 
 /* Sombra sutil Pazo para reemplazar contornos */

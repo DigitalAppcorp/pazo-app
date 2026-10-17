@@ -207,7 +207,7 @@ export const CreatePostModal = ({
 
     return (
         <div className="fixed inset-0 bg-[#204E4A]/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-fade-in">
-            <div className="bg-[#FAF8F5] w-full sm:max-w-md rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="pazo-glass-modal w-full sm:max-w-md rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
 
                 <div className="flex justify-between items-center pb-2 border-b border-[#204E4A]/10">
                     <div className="flex items-center gap-2">

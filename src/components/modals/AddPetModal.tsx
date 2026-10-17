@@ -131,12 +131,9 @@ export const AddPetModal = ({ isOpen, onClose, onPetCreated, lang }: AddPetModal
 
   return (
     <div className="absolute inset-0 z-[160] bg-[#204E4A]/35 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-5">
-      <div className="w-full max-w-md max-h-[92%] overflow-y-auto bg-[#FDFBF7] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-6 space-y-5">
+      <div className="w-full max-w-md max-h-[92%] overflow-y-auto pazo-glass-modal rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-6 space-y-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full">
-              {lang === 'es' ? 'Nueva mascota' : 'New pet'}
-            </span>
             <h2 className="text-2xl font-black text-[#204E4A] mt-2">
               {lang === 'es' ? 'Añadir a tu familia' : 'Add to your family'}
             </h2>
@@ -162,7 +159,7 @@ export const AddPetModal = ({ isOpen, onClose, onPetCreated, lang }: AddPetModal
               {photoPreview ? (
                 <img src={photoPreview} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-[10px] font-bold text-[#5C7470] text-center px-2">
+                <span className="text-[13px] font-bold text-[#5C7470] text-center px-2">
                   {lang === 'es' ? 'Añadir foto' : 'Add photo'}
                 </span>
               )}
@@ -238,7 +235,7 @@ export const AddPetModal = ({ isOpen, onClose, onPetCreated, lang }: AddPetModal
           />
 
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+            <span className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
               {lang === 'es' ? 'Intereses privados' : 'Private interests'}
             </span>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -250,7 +247,7 @@ export const AddPetModal = ({ isOpen, onClose, onPetCreated, lang }: AddPetModal
                     key={interest}
                     type="button"
                     onClick={() => toggleInterest(interest)}
-                    className={`text-[9px] font-bold px-3 py-2 rounded-full cursor-pointer transition-colors ${selected
+                    className={`text-[12px] font-bold px-3 py-2 rounded-full cursor-pointer transition-colors ${selected
                       ? 'bg-[#204E4A] text-[#E1E53F]'
                       : 'bg-white text-[#5C7470]'
                     }`}

@@ -1,0 +1,180 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+import {evaluateSupporterPitchEligibility as eligible, SUPPORTER_PITCH_POLICY as policy} from '../supporterPitchEligibility.mjs'
+
+const now = Date.UTC(2026, 9, 17)
+const DAY = 24 * 60 * 60 * 1000
+const valid = () => ({
+  isSupporter:false, isFirstSession:false, inOnboarding:false,
+  inRescueFlow:false, isBusy:false,
+  accountCreatedAtMs: now - 8*DAY, activeDaysInLast14:3,
+  meaningfulActions:5, distinctActionSurfaces:2, lastDismissedAtMs:null,
+})
+
+test('F16 invitation requires established value and never interrupts rescue/onboarding',()=>{
+ assert.equal(policy.minimumAccountDays,7)
+ assert.equal(policy.dismissalCooldownDays,30)
+ assert.deepEqual(eligible(valid(),now),{eligible:true,reason:'eligible'})
+ for(const input of [
+   {...valid(),accountCreatedAtMs:now-6*DAY},
+   {...valid(),activeDaysInLast14:2},
+   {...valid(),meaningfulActions:4},
+   {...valid(),distinctActionSurfaces:1},
+   {...valid(),isFirstSession:true},
+   {...valid(),inOnboarding:true},
+   {...valid(),inRescueFlow:true},
+   {...valid(),isBusy:true},
+   {...valid(),isSupporter:true},
+   {...valid(),isSupporter:undefined},
+   {...valid(),lastDismissedAtMs:now-29*DAY},
+   {...valid(),lastDismissedAtMs:now+DAY},
+   {...valid(),activeDaysInLast14:15},
+   {...valid(),meaningfulActions:undefined},
+   {},
+   null,
+ ])assert.equal(eligible(input,now).eligible,false,JSON.stringify(input))
+ assert.equal(eligible({...valid(),lastDismissedAtMs:now-30*DAY},now).eligible,true)
+ assert.equal(eligible(valid(),NaN).eligible,false)
+})
+
+test('F16 product page retains no-purchase path and real server-verified checkout',()=>{
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const design=readFileSync(new URL('../components/SupporterOfferB.tsx',import.meta.url),'utf8')
+ const checkout=readFileSync(new URL('../components/SandboxCheckoutQaPanel.tsx',import.meta.url),'utf8')
+ const account=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
+ const pet=readFileSync(new URL('../../../components/views/PetView.tsx',import.meta.url),'utf8')
+ assert.match(design,/Pequeñas acciones, grandes historias/)
+ assert.match(design,/US\$2\.99/)
+ assert.match(design,/amigo-pazo-inicio\.png/)
+ assert.match(page,/Ahora no, seguir usando PAZO/)
+ assert.match(page,/onClick=\{onClose\}/)
+ assert.match(page,/Las suscripciones todavía no están disponibles/)
+ assert.match(page,/qaV2Screen \?/)
+ assert.match(page,/SandboxCheckoutQaPanel/)
+ assert.match(page,/SandboxV2AccountPanel/)
+ assert.match(page,/SupporterWallConsentSettings/)
+ assert.match(page,/VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED/)
+ assert.match(pet,/Conoce cómo apoyar nuestra comunidad/)
+ assert.match(checkout,/action:'begin'/)
+ assert.match(checkout,/affirmativeConsent:true/)
+ assert.match(checkout,/!consent\|\|busy\|\|phase!=='ready'\|\|attempted.current/)
+ assert.match(checkout,/approveUrl/)
+ assert.match(checkout,/offer.exactCopy/)
+ assert.match(checkout,/<details/)
+ assert.doesNotMatch(checkout,/import \{ SandboxV2AccountPanel \}/)
+ assert.match(account,/action:'verify_payment'/)
+ assert.match(account,/result\.cycleVerified!==true/)
+ assert.match(account,/action:'cancel'/)
+ assert.match(account,/confirmCancellation:true/)
+})
+
+test('F16 eligibility policy does not collect or write activity and does not auto-trigger without reviewed signals',()=>{
+ const evaluator=readFileSync(new URL('../supporterPitchEligibility.mjs',import.meta.url),'utf8')
+ assert.doesNotMatch(evaluator,/localStorage|sessionStorage|\.insert\(|\.upsert\(|\.rpc\(|fetch\(|navigator\./)
+ assert.match(evaluator,/supporter_state_unverified/)
+ assert.match(evaluator,/dismissal_cooldown/)
+})
+
+test('F16 verified owner gets a decorated member-only entry and real benefit controls',()=>{
+ const pet=readFileSync(new URL('../../../components/views/PetView.tsx',import.meta.url),'utf8')
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const home=readFileSync(new URL('../components/SupporterBenefitsHome.tsx',import.meta.url),'utf8')
+ const proof=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
+ assert.ok(pet.includes("supporterStatus.kind==='verified'"))
+ assert.ok(pet.includes('bg-[#E6EDDB]'))
+ assert.ok(pet.includes('setShowSupporterAccount(true)'))
+ assert.ok(page.includes("membership.kind === 'verified'"))
+ assert.ok(page.includes("membership.kind === 'inactive'"))
+ assert.ok(page.includes('SupporterBenefitsHome'))
+ assert.ok(home.includes('SupporterThemePreviewPanel'))
+ assert.ok(home.includes('SupporterWallConsentSettings'))
+ assert.ok(home.includes('SandboxV2AccountPanel'))
+ assert.ok(home.includes('SupporterBadge active'))
+ assert.ok(proof.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"))
+ assert.ok(proof.includes("if (!enabled || !benefitsEnabled)"))
+ assert.ok(!proof.includes('localStorage'))
+ assert.ok(!proof.includes('sessionStorage'))
+})
+
+test('F16 prompt is available as a non-blocking component, but automatic delivery is not live',()=>{
+ const prompt=readFileSync(new URL('../components/SupporterInvitationPrompt.tsx',import.meta.url),'utf8')
+ const page=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
+ const pet=readFileSync(new URL('../../../components/views/PetView.tsx',import.meta.url),'utf8')
+ assert.ok(prompt.includes('onExplore'))
+ assert.ok(prompt.includes('onDismiss'))
+ assert.ok(prompt.includes('Ahora no'))
+ assert.ok(prompt.includes('PAZO seguirá siendo gratis'))
+ assert.ok(!page.includes('<SupporterInvitationPrompt'))
+ assert.ok(pet.includes('<SupporterInvitationPrompt'))
+ assert.ok(pet.includes('invitationPreviewRequested'))
+ assert.ok(pet.includes("import.meta.env.DEV"))
+ assert.ok(pet.includes("VITE_PAZO_F16_SANDBOX_QA_UI === 'true'"))
+ assert.ok(pet.includes("get('supporter_preview') === '1'"))
+ assert.ok(pet.includes("supporterStatus.kind === 'inactive'"))
+ assert.ok(pet.includes('!dismissedInvitationPreview'))
+ assert.ok(prompt.includes('previewOnly'))
+ assert.ok(!page.includes('<SupporterInvitationPrompt'))
+})
+
+test('F16 membership is account-scoped across owned pets, never the selected pet only',()=>{
+ const pet=readFileSync(new URL('../../../components/views/PetView.tsx',import.meta.url),'utf8')
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const hook=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
+ assert.ok(pet.includes('useSupporterMembershipStatus(undefined, canManagePet)'))
+ assert.ok(page.includes('useSupporterMembershipStatus()'))
+ assert.ok(!page.includes('useSupporterMembershipStatus(pet?.id)'))
+ assert.ok(hook.includes("eq('owner_id',user!.id)"))
+ assert.ok(hook.includes('for(const pet of pets)'))
+ assert.ok(hook.includes('if(proof.badge) {active=true'))
+ assert.ok(hook.includes("return active ? {kind:'verified',milestone} : noStatus('inactive')"))
+ assert.ok(hook.includes("catch(() => {if(!cancelled)setStatus(noStatus('unavailable'))"))
+})
+
+test('F16 phone-frame offer stays single-column and covers shell navigation',()=>{
+ const offer=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const member=readFileSync(new URL('../components/SupporterBenefitsHome.tsx',import.meta.url),'utf8')
+ const portal=readFileSync(new URL('../components/SupporterScreenPortal.tsx',import.meta.url),'utf8')
+ const app=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
+ assert.match(app,/data-pazo-app-shell/)
+ assert.match(portal,/createPortal\(/)
+ assert.match(portal,/querySelector\('\[data-pazo-app-shell\]'\)/)
+ assert.match(portal,/shell \? 'absolute' : 'fixed'/)
+ assert.match(portal,/inset-0 z-\[115\]/)
+ assert.match(offer,/<SupporterScreenPortal>/)
+ assert.match(member,/<SupporterScreenPortal>/)
+ const design=readFileSync(new URL('../components/SupporterOfferB.tsx',import.meta.url),'utf8')
+ assert.match(design,/grid min-w-0 grid-cols-1 gap-2/)
+ assert.doesNotMatch(design,/sm:grid-cols-2/)
+ assert.match(design,/min-w-0 flex-1/)
+ assert.match(offer,/overscroll-contain/)
+ assert.match(member,/overscroll-contain/)
+ assert.ok(offer.includes('<SandboxCheckoutQaPanel lang={lang} inline/>'))
+ assert.match(design,/Muro de agradecimiento/)
+})
+
+test('F16 option B keeps signed PayPal Sandbox consent and one-shot checkout unchanged',()=>{
+ const design=readFileSync(new URL('../components/SupporterOfferB.tsx',import.meta.url),'utf8')
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const checkout=readFileSync(new URL('../components/SandboxCheckoutQaPanel.tsx',import.meta.url),'utf8')
+ const badgeLabels=['Insignia especial','5 fondos especiales','Muro de agradecimiento','Medallas por antigüedad']
+ for(const label of badgeLabels)assert.ok(design.includes(label),label)
+ assert.ok(design.includes('amigo-pazo-inicio.png'),'Original approved badge is decorative offer artwork')
+ assert.ok(design.includes('alt="" aria-hidden="true"'),'Badge in offer is not a false entitlement')
+ assert.ok(design.includes('Pequeñas acciones, grandes historias.'))
+ assert.ok(!design.includes('fetch(')&&!design.includes('supabase.'),'Layout cannot trigger purchases')
+ assert.ok(page.includes('<SupporterOfferB lang={lang}>'))
+ assert.ok(page.includes('<SandboxCheckoutQaPanel lang={lang} inline/>'),'Checkout directly follows offer, not a second modal')
+ assert.ok(!page.includes('setShowSandboxQa(true)'),'No duplicate purchase entry')
+ assert.ok(checkout.includes("o.version!==BENEFITS_V2"),'Must accept published v2 terms')
+ assert.ok(checkout.includes('checked={consent}'))
+ assert.ok(checkout.includes("setConsent(false)"),'Each offer opens unchecked')
+ assert.ok(checkout.includes('affirmativeConsent:true'))
+ assert.ok(checkout.includes("disabled={!consent||busy||phase!=='ready'||attempted.current}"))
+ assert.ok(checkout.includes('attempted.current=true'),'Purchase must remain one-shot')
+ assert.ok(checkout.includes("data.phase==='APPROVAL_PENDING'"))
+ assert.ok(checkout.includes("window.location.assign(url)"))
+ assert.ok(checkout.includes('bg-[#E1E53F]'),'Approved option B PayPal CTA is lime')
+ assert.ok(page.includes('Las suscripciones todavía no están disponibles'),'Public/Live checkout remains OFF')
+ assert.ok(page.includes('button type="button" disabled'),'Public/Live PayPal button cannot charge')
+})

@@ -18,17 +18,10 @@ import {
   startPlaceCheckin,
 } from '../../services/placeCheckinService'
 import { recordPlaceUsageEvent } from '../../services/placeTelemetryService'
-import { MapboxMap } from '../../features/places/map/MapboxMap'
+import { ImmersivePlacesStage } from '../../features/places/components/ImmersivePlacesStage'
 import { SuggestPlaceModal } from '../modals/SuggestPlaceModal'
 import { PlaceFeatureExperimentCard } from '../validation/PlaceFeatureExperimentCard'
-import {
-  IconCheck,
-  IconClose,
-  IconExplore,
-  IconPaw,
-  IconPin,
-  IconPlus,
-} from '../icons/PazoIcons'
+import { IconClose } from '../icons/PazoIcons'
 
 interface MapViewProps {
   currentPet: Pet | null
@@ -63,12 +56,6 @@ const categoryLabel = (
     lang === 'es' ? 'es' : 'en'
   ] || category
 
-const formatDistance = (distanceKm?: number) => {
-  if (distanceKm === undefined) return ''
-  if (distanceKm < 1) return `${Math.max(1, Math.round(distanceKm * 1000))} m`
-  return `${distanceKm.toFixed(distanceKm < 10 ? 1 : 0)} km`
-}
-
 const formatExpiry = (value: string, lang: 'es' | 'en') =>
   new Intl.DateTimeFormat(lang === 'es' ? 'es-US' : 'en-US', {
     hour: 'numeric',
@@ -89,6 +76,8 @@ export const MapView = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
+  // A new request also re-centers repeated taps on the same carousel card.
+  const [mapFocusRequest, setMapFocusRequest] = useState<{ placeId: string } | null>(null)
   const [activeCheckin, setActiveCheckin] =
     useState<ActivePlaceCheckin | null>(null)
   const [isCheckinBusy, setIsCheckinBusy] = useState(false)
@@ -192,8 +181,16 @@ export const MapView = ({
     [places, selectedPlaceId]
   )
 
+  // Carousel taps pan/zoom the map without opening the check-in detail.
+  const handleFocusPlace = (placeId: string) => {
+    setSelectedPlaceId(null)
+    setMapFocusRequest({ placeId })
+  }
+
+  // Map pins (2D/3D) still open the complete details and check-in actions.
   const handleSelectPlace = (placeId: string) => {
     setSelectedPlaceId(placeId)
+    setMapFocusRequest({ placeId })
     const place = places.find((item) => item.id === placeId)
 
     if (canUsePlaces && place) {
@@ -224,6 +221,7 @@ export const MapView = ({
     setSearchQuery('')
     setCategory('all')
     setSelectedPlaceId(requestedPlaceId)
+    setMapFocusRequest({ placeId: requestedPlaceId })
 
     if (canUsePlaces) {
       void recordPlaceUsageEvent({
@@ -399,232 +397,39 @@ export const MapView = ({
 
   return (
     <>
-      <div className="space-y-4 animate-slide-up pb-8">
-        <div className="flex items-start justify-between gap-3 px-1">
-          <div>
-            <span className="inline-block rounded-full bg-[#E1E53F] px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] shadow-xs">
-              {lang === 'es' ? 'Lugares' : 'Places'}
-            </span>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-[#204E4A]">
-              {lang === 'es'
-                ? 'Explora con tu mascota.'
-                : 'Explore with your pet.'}
-            </h2>
-            <p className="mt-1 max-w-lg text-xs leading-relaxed text-[#5C7470]">
-              {lang === 'es'
-                ? 'Descubre lugares pet-friendly. Tu ubicación solo se usa si tú la activas y nunca se guarda.'
-                : 'Discover pet-friendly places. Your location is only used when you choose and is never stored.'}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsSuggestOpen(true)}
-            disabled={!canUsePlaces}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-[10px] font-black text-[#204E4A] shadow-sm disabled:opacity-50"
-          >
-            <IconPlus size={14} />
-            {lang === 'es' ? 'Sugerir' : 'Suggest'}
-          </button>
-        </div>
-
-        <div className="space-y-2">
-          <div className="relative">
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              onBlur={handleSearchCommit}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') handleSearchCommit()
-              }}
-              placeholder={
-                lang === 'es'
-                  ? 'Buscar lugar, zona o dirección...'
-                  : 'Search place, area, or address...'
-              }
-              className="w-full rounded-full bg-white py-3 pl-11 pr-4 text-xs text-[#204E4A] shadow-sm outline-none ring-1 ring-transparent focus:ring-[#204E4A]/15"
-            />
-            <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5C7470]">
-              <IconExplore size={16} />
-            </div>
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {categoryOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => handleCategory(option.value)}
-                className={
-                  'shrink-0 rounded-full px-3.5 py-2 text-[10px] font-bold shadow-xs transition-all ' +
-                  (category === option.value
-                    ? 'bg-[#204E4A] text-[#E1E53F]'
-                    : 'bg-white text-[#5C7470]')
-                }
-              >
-                {lang === 'es' ? option.es : option.en}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-[2.2rem] bg-white p-2 shadow-sm">
-          <div className="h-[43vh] min-h-[300px] max-h-[520px]">
-            <MapboxMap
-              places={displayPlaces}
-              selectedPlaceId={selectedPlaceId}
-              userLocation={userLocation}
-              onSelectPlace={handleSelectPlace}
-              lang={lang}
-            />
-          </div>
-
-          <div className="flex items-start justify-between gap-3 p-3">
-            <div className="min-w-0">
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470]">
-                {lang === 'es' ? 'Privacidad' : 'Privacy'}
-              </p>
-              <p className="mt-0.5 text-[10px] leading-relaxed text-[#5C7470]">
-                {locationMessage ||
-                  (lang === 'es'
-                    ? 'PAZO no solicita tu ubicación automáticamente.'
-                    : 'PAZO never requests your location automatically.')}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleUseLocation}
-              disabled={isLocating}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#E1E53F] px-4 py-2.5 text-[10px] font-black text-[#204E4A] shadow-xs disabled:opacity-50"
-            >
-              <IconPin size={14} />
-              {isLocating
-                ? lang === 'es'
-                  ? 'Buscando...'
-                  : 'Locating...'
-                : userLocation
-                  ? lang === 'es'
-                    ? 'Ubicación activa'
-                    : 'Location active'
-                  : lang === 'es'
-                    ? 'Usar mi ubicación'
-                    : 'Use my location'}
-            </button>
-          </div>
-        </div>
-
-        <section className="space-y-3">
-          <div className="flex items-end justify-between px-1">
-            <div>
-              <h3 className="text-sm font-black text-[#204E4A]">
-                {lang === 'es' ? 'Lugares disponibles' : 'Available places'}
-              </h3>
-              <p className="mt-0.5 text-[10px] text-[#5C7470]">
-                {displayPlaces.length}{' '}
-                {lang === 'es' ? 'resultados' : 'results'}
-              </p>
-            </div>
-
-            {activeCheckin && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F]/45 px-3 py-1.5 text-[9px] font-extrabold text-[#204E4A]">
-                <IconCheck size={12} />
-                {lang === 'es' ? 'Check-in activo' : 'Active check-in'}
-              </span>
-            )}
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center rounded-[2rem] bg-white py-8 shadow-sm">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#204E4A]/20 border-t-[#204E4A]" />
-            </div>
-          ) : loadError ? (
-            <div className="rounded-[2rem] bg-white p-5 text-center shadow-sm">
-              <p className="text-xs font-black text-[#204E4A]">{loadError}</p>
-              <button
-                type="button"
-                onClick={() => void loadPlaces()}
-                className="mt-3 rounded-full bg-[#E1E53F] px-4 py-2 text-[10px] font-black text-[#204E4A]"
-              >
-                {lang === 'es' ? 'Reintentar' : 'Retry'}
-              </button>
-            </div>
-          ) : displayPlaces.length === 0 ? (
-            <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
-              <IconPin size={22} className="mx-auto text-[#204E4A]/50" />
-              <p className="mt-2 text-xs font-black text-[#204E4A]">
-                {lang === 'es'
-                  ? 'No encontramos lugares con esos filtros.'
-                  : 'No places match those filters.'}
-              </p>
-              <p className="mt-1 text-[10px] text-[#5C7470]">
-                {lang === 'es'
-                  ? 'Puedes cambiar la búsqueda o sugerir un lugar para revisión.'
-                  : 'Change the search or suggest a place for review.'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {displayPlaces.map((place) => (
-                <button
-                  key={place.id}
-                  type="button"
-                  onClick={() => handleSelectPlace(place.id)}
-                  className={
-                    'w-full rounded-[2rem] bg-white p-4 text-left shadow-sm transition-all ' +
-                    (selectedPlaceId === place.id
-                      ? 'ring-2 ring-[#E1E53F]'
-                      : 'ring-1 ring-transparent')
-                  }
-                >
-                  <div className="flex gap-3">
-                    <img
-                      src={place.photoUrl}
-                      alt={place.name}
-                      className="h-20 w-20 shrink-0 rounded-[1.4rem] bg-[#FAF8F5] object-cover"
-                    />
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="truncate text-xs font-black text-[#204E4A]">
-                            {place.name}
-                          </p>
-                          <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wide text-[#5C7470]">
-                            {categoryLabel(place.category, lang)}
-                            {' · '}
-                            {place.zone}
-                          </p>
-                        </div>
-
-                        {place.distanceKm !== undefined && (
-                          <span className="shrink-0 rounded-full bg-[#FAF8F5] px-2.5 py-1 text-[9px] font-bold text-[#204E4A]">
-                            {formatDistance(place.distanceKm)}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="mt-2 line-clamp-2 text-[10px] leading-relaxed text-[#5C7470]">
-                        {place.description || place.address}
-                      </p>
-
-                      <div className="mt-2 flex items-center gap-1.5 text-[9px] font-bold text-[#204E4A]">
-                        <IconPaw size={12} />
-                        {place.activePresenceCount || 0}{' '}
-                        {lang === 'es'
-                          ? 'mascotas presentes'
-                          : 'pets present'}
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
-
+      <div className="relative h-full min-h-0 w-full animate-fade-in">
+        <ImmersivePlacesStage
+          lang={lang}
+          places={displayPlaces}
+          categoryOptions={categoryOptions}
+          category={category}
+          onCategory={handleCategory}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearchCommit={handleSearchCommit}
+          selectedPlaceId={mapFocusRequest?.placeId ?? selectedPlaceId}
+          focusPlaceRequest={mapFocusRequest}
+          onFocusPlace={handleFocusPlace}
+          onSelectPlace={handleSelectPlace}
+          userLocation={userLocation}
+          locationMessage={locationMessage}
+          isLocating={isLocating}
+          onUseLocation={handleUseLocation}
+          canSuggest={canUsePlaces}
+          onSuggest={() => setIsSuggestOpen(true)}
+          activeCheckin={Boolean(activeCheckin)}
+          isLoading={isLoading}
+          loadError={loadError}
+          onRetry={() => void loadPlaces()}
+        >
         {selectedPlace && (
-          <section className="rounded-[2.3rem] bg-white p-5 shadow-md ring-1 ring-[#204E4A]/5">
+          <section
+            key={selectedPlace.id}
+            role="dialog"
+            aria-modal="false"
+            aria-label={lang === 'es' ? 'Detalle del lugar' : 'Place details'}
+            className="absolute inset-x-3 bottom-3 top-[102px] z-40 overflow-y-auto overscroll-contain rounded-[2.15rem] bg-[#FFFCF6]/98 p-5 shadow-[0_12px_44px_rgba(32,78,74,0.2)] backdrop-blur-xl motion-safe:animate-[slideUpFade_320ms_ease-out_both]"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
@@ -961,6 +766,7 @@ export const MapView = ({
             )}
           </section>
         )}
+        </ImmersivePlacesStage>
       </div>
 
       <SuggestPlaceModal

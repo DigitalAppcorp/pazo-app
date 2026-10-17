@@ -8,6 +8,25 @@ import { FollowButton } from '../shared/FollowButton'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
+import { SupporterBadge, type SupporterMilestone } from '../../features/supporter/components/SupporterBadge'
+
+const supporterBadgesEnabled = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
+const PET_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+type VerifiedFeedBadge = {badge: boolean; milestone: SupporterMilestone}
+function parseFeedBadgeRows(value:unknown, ids:string[]): Record<string,VerifiedFeedBadge>|null {
+  if (!Array.isArray(value) || value.length>ids.length) return null
+  const accepted=new Set(ids)
+  const out:Record<string,VerifiedFeedBadge>={}
+  for(const item of value) {
+    if (!item || typeof item!=='object'|| !accepted.has(item.pet_id) ||
+      Object.prototype.hasOwnProperty.call(out,item.pet_id) ||
+      typeof item.badge!=='boolean'||![0,3,6,12].includes(item.milestone) ||
+      (!item.badge && item.milestone!==0)) return null
+    out[item.pet_id]={badge:item.badge,milestone:item.milestone}
+  }
+  if(Object.keys(out).length!==ids.length)return null
+  return out
+}
 
 interface HomeViewProps {
   posts: Post[]
@@ -98,10 +117,74 @@ const formatTimeAgo = (createdAt: string | undefined, fallback: string, lang: 'e
   return postDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', options)
 }
 
+/**
+ * PAZO's decorative preview for the unreleased nearby feed.
+ * Buildings, pets and pins are illustrations only; no location or nearby-user data.
+ */
+const NearbyNeighborhoodArtwork = () => (
+  <svg
+    viewBox="0 0 340 178"
+    aria-hidden="true"
+    focusable="false"
+    className="mx-auto block h-auto w-full max-w-[340px]"
+    fill="none"
+  >
+    <path d="M10 147c17-12 50-11 72-5 23-17 60-19 87-8 25-17 63-15 85-1 32-7 56 1 76 16v17H10z" fill="#DDEBD9" />
+    <ellipse cx="171" cy="165" rx="142" ry="8" fill="#B8D6CA" opacity=".45"/>
+    {/* A small neighborhood, not a live location map. */}
+    <rect x="55" y="63" width="68" height="74" rx="6" fill="#FFFCF6"/>
+    <path d="m46 67 42-36 44 36c4 4 1 9-4 9H50c-6 0-8-5-4-9Z" fill="#E7AA88"/>
+    <rect x="78" y="91" width="21" height="46" rx="10.5" fill="#90BCAF"/>
+    <rect x="62" y="85" width="13" height="17" rx="4" fill="#D4EAE4"/>
+    <rect x="101" y="85" width="13" height="17" rx="4" fill="#D4EAE4"/>
+    <rect x="155" y="51" width="78" height="87" rx="7" fill="#F8F1DD"/>
+    <path d="m146 55 47-38 47 38c4 4 2 9-4 9h-86c-6 0-8-5-4-9Z" fill="#204E4A"/>
+    <rect x="188" y="94" width="23" height="44" rx="11" fill="#DCA981"/>
+    <rect x="163" y="79" width="17" height="18" rx="5" fill="#BBDAD0"/>
+    <rect x="213" y="79" width="14" height="18" rx="5" fill="#BBDAD0"/>
+    <path d="M265 120V81" stroke="#6D9E83" strokeWidth="8" strokeLinecap="round"/>
+    <circle cx="253" cy="76" r="22" fill="#B8D4A2"/>
+    <circle cx="274" cy="65" r="23" fill="#C8DFB1"/>
+    <circle cx="289" cy="83" r="18" fill="#ACCCA0"/>
+    <path d="M30 137V106" stroke="#82A487" strokeWidth="6" strokeLinecap="round"/>
+    <circle cx="26" cy="99" r="17" fill="#C5DDAE"/>
+    <circle cx="41" cy="97" r="15" fill="#B0CE9C"/>
+    {/* Dog peeking in front of the house. */}
+    <path d="M102 131c-11-11-22-6-21 7 0 8 7 13 14 10Z" fill="#A56E57"/>
+    <ellipse cx="117" cy="135" rx="29" ry="25" fill="#DFB18B"/>
+    <path d="M98 115c-9-4-17 2-17 14 0 9 6 15 13 12l10-14Z" fill="#9C6853"/>
+    <path d="M134 116c9-4 16 4 16 15 0 9-6 14-13 11l-7-15Z" fill="#A57355"/>
+    <ellipse cx="107" cy="131" rx="3.5" ry="4.3" fill="#204E4A"/>
+    <ellipse cx="128" cy="131" rx="3.5" ry="4.3" fill="#204E4A"/>
+    <ellipse cx="118" cy="144" rx="12" ry="9" fill="#F7DEBF"/>
+    <path d="M114 140c2-3 7-3 9 0 1 2-2 5-5 5s-6-3-4-5Z" fill="#204E4A"/>
+    <path d="M118 145c-2 4-6 4-8 2m8-2c2 4 6 4 8 2" stroke="#204E4A" strokeWidth="1.7" strokeLinecap="round"/>
+    {/* Cat with little paws. */}
+    <path d="m226 132 3-25 17 12 14-1 17-12 3 26Z" fill="#8FB6A6"/>
+    <ellipse cx="253" cy="139" rx="29" ry="25" fill="#A6CDBA"/>
+    <path d="m231 118 3-14 13 13m15 0 13-13 3 14" fill="#8FB6A6"/>
+    <ellipse cx="242" cy="134" rx="3" ry="4" fill="#204E4A"/>
+    <ellipse cx="265" cy="134" rx="3" ry="4" fill="#204E4A"/>
+    <path d="M250 145c2-2 5-2 7 0-1 3-2 4-4 4-2 0-3-1-3-4Z" fill="#EC7357"/>
+    <path d="M253 150c-2 3-5 3-7 2m7-2c2 3 5 3 7 2" stroke="#204E4A" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="m230 145 16 3m-17 4 16-1m35-6-16 3m17 4-16-1" stroke="#204E4A" strokeWidth="1.4" strokeLinecap="round" opacity=".6"/>
+    {/* Future nearby markers: aesthetic, not actual GPS pins. */}
+    <path d="M82 5c-13 0-23 10-23 22 0 17 23 34 23 34s23-17 23-34C105 15 95 5 82 5Z" fill="#204E4A"/>
+    <circle cx="82" cy="27" r="8.5" fill="#E1E53F"/>
+    <path d="M285 12c-12 0-21 9-21 21 0 15 21 30 21 30s21-15 21-30c0-12-9-21-21-21Z" fill="#E1E53F"/>
+    <circle cx="285" cy="33" r="7.5" fill="#204E4A"/>
+    <circle cx="312" cy="111" r="4" fill="#EC7357" opacity=".65"/>
+    <circle cx="28" cy="67" r="4" fill="#E1E53F"/>
+    <path d="M305 128c4-5 7-5 11 0m-6-8c3-3 5-3 7 0" stroke="#204E4A" strokeWidth="2.5" strokeLinecap="round" opacity=".45"/>
+  </svg>
+)
+
 export const HomeView = ({
   posts, canReport, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
 }: HomeViewProps) => {
   const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
+  const [hiddenPostIds, setHiddenPostIds] = useState<Set<string>>(() => new Set())
+  const [lastHiddenPostId, setLastHiddenPostId] = useState<string | null>(null)
   const [feedFilter, setFeedFilter] = useState<'following' | 'nearby'>('following')
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null)
   const [loadingCommentsPostId, setLoadingCommentsPostId] = useState<string | null>(null)
@@ -109,6 +192,46 @@ export const HomeView = ({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [hasVotedNearby, setHasVotedNearby] = useState(false)
   const [isSubmittingNearby, setIsSubmittingNearby] = useState(false)
+  const [verifiedFeedBadges,setVerifiedFeedBadges] = useState<Record<string,VerifiedFeedBadge>>({})
+  const badgeQueriesMade=useRef<Set<string>>(new Set())
+  const [badgeRefreshCycle,setBadgeRefreshCycle]=useState(0)
+
+  // No perpetual client-side entitlement cache. Revalidate current badges on
+  // tab return and every minute; clear displayed claims BEFORE new RPC result.
+  useEffect(()=>{
+    if(!supporterBadgesEnabled)return
+    const refresh=()=>{
+      badgeQueriesMade.current.clear()
+      setVerifiedFeedBadges({})
+      setBadgeRefreshCycle(c=>c+1)
+    }
+    const onVisibility=()=>{
+      if(document.visibilityState==='visible')refresh()
+    }
+    document.addEventListener('visibilitychange',onVisibility)
+    const clock=setInterval(refresh,60000)
+    return ()=>{
+      document.removeEventListener('visibilitychange',onVisibility)
+      clearInterval(clock)
+    }
+  },[])
+
+  useEffect(()=>{
+    if(!supporterBadgesEnabled)return
+    let alive=true
+    const ids=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
+      .filter(id=>PET_UUID.test(id)&&!badgeQueriesMade.current.has(id)).slice(0,48)
+    if(ids.length===0)return
+    for(const id of ids)badgeQueriesMade.current.add(id)
+    void Promise.resolve(supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+      .then(({data,error})=>{
+        if(!alive||error)return
+        const verified=parseFeedBadgeRows(data,ids)
+        if(!verified)return
+        setVerifiedFeedBadges(prev=>({...prev,...verified}))
+      }).catch(()=>{/* Closed: never show badges on a failed lookup. */})
+    return ()=>{alive=false}
+  },[posts,verifiedFeedBadges,badgeRefreshCycle])
 
   const handleToggleComments = async (postId: string) => {
     if (activeCommentsPostId === postId) {
@@ -158,54 +281,109 @@ export const HomeView = ({
     finally { setIsSubmittingNearby(false) }
   }
 
-  const displayedPosts = posts.filter((post) => feedFilter === 'following' ? true : !post.isRecommended)
+  const handleHidePost = (postId: string) => {
+    setHiddenPostIds((previous) => new Set(previous).add(postId))
+    setLastHiddenPostId(postId)
+  }
+
+  const handleUndoHide = () => {
+    if (!lastHiddenPostId) return
+    setHiddenPostIds((previous) => {
+      const next = new Set(previous)
+      next.delete(lastHiddenPostId)
+      return next
+    })
+    setLastHiddenPostId(null)
+  }
+
+  const displayedPosts = posts.filter((post) => !hiddenPostIds.has(post.id) && (feedFilter === 'following' || !post.isRecommended))
 
   return (
-    <div className="space-y-4 animate-slide-up pb-6">
-      <div className="flex justify-between items-center px-1">
-        <div>
-          <h2 className="text-xl font-black text-[#204E4A] tracking-tight">
-            {lang === 'es' ? 'Su pequeno mundo.' : 'Their little world.'}
+    <div className="space-y-3 animate-slide-up pb-6">
+      {/* F13: título y filtros en la misma fila; en pantallas estrechas se apilan juntos sin espacio muerto. */}
+      <div className="px-1">
+        <div className="grid grid-cols-[minmax(0,1fr)_170px] items-center gap-x-2 gap-y-2 max-[360px]:grid-cols-1">
+          <h2 className="min-w-0 text-[clamp(16px,4vw,20px)] font-black leading-tight tracking-tight text-[#204E4A]">
+            {lang === 'es' ? 'Su pequeño mundo.' : 'Their little world.'}
           </h2>
-          <p className="text-[11px] text-[#5C7470]">
-            {lang === 'es' ? 'Historias y momentos de tu comunidad' : 'Stories and moments from your community'}
-          </p>
-        </div>
-        <div className="bg-[#FAF8F5] p-1 rounded-full flex gap-1 shadow-xs">
-          <button onClick={() => setFeedFilter('following')} className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-sm' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
-            {lang === 'es' ? 'Para ti' : 'For you'}
-          </button>
-          <button onClick={handleSelectNearby} className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-sm' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
-            {lang === 'es' ? 'Cerca · Próximamente' : 'Nearby · Coming soon'}
-          </button>
+          <div
+            className="flex h-[42px] w-[170px] max-w-full items-stretch gap-0.5 rounded-full bg-white/30 p-0.5 backdrop-blur-sm max-[360px]:ml-auto"
+            role="group"
+            aria-label={lang === 'es' ? 'Filtrar publicaciones' : 'Filter posts'}
+          >
+            <button
+              type="button"
+              aria-pressed={feedFilter === 'following'}
+              onClick={() => setFeedFilter('following')}
+              className={`min-w-0 flex-[1_1_40%] rounded-full px-1 text-[9.5px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+            >
+              {lang === 'es' ? 'Para ti' : 'For you'}
+            </button>
+            <button
+              type="button"
+              aria-pressed={feedFilter === 'nearby'}
+              onClick={handleSelectNearby}
+              className={`min-w-0 flex-[1_1_60%] rounded-full px-0.5 text-center text-[8.5px] font-bold leading-[1.2] transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+            >
+              {lang === 'es' ? <>Cerca ·<span className="block">Próximamente</span></> : <>Nearby ·<span className="block">Coming soon</span></>}
+            </button>
+          </div>
         </div>
       </div>
       {feedFilter === 'nearby' ? (
-        <div className="bg-white rounded-[2.2rem] p-8 text-center border border-[#204E4A]/10 shadow-[0_4px_20px_rgba(32,78,74,0.05)] my-6 space-y-4 animate-fade-in">
-          <div className="w-16 h-16 rounded-2xl bg-[#E1E53F]/30 text-[#204E4A] flex items-center justify-center mx-auto mb-2">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+        <section
+          aria-label={lang === 'es' ? 'Vista previa de comunidad cercana' : 'Nearby community preview'}
+          className="my-5 overflow-hidden rounded-[2.25rem] bg-white/80 px-5 pb-6 pt-4 text-center shadow-[0_8px_30px_rgba(32,78,74,0.06)] backdrop-blur-xl animate-fade-in sm:px-7"
+        >
+          <div className="mx-auto max-w-[340px] rounded-[1.6rem] bg-gradient-to-b from-[#F4F5E9] via-[#F6F7EF] to-[#E8F1E8] px-1 pt-1">
+            <NearbyNeighborhoodArtwork />
           </div>
-          <h3 className="text-lg font-black text-[#204E4A]">{lang === 'es' ? 'Comunidad en tu vecindario' : 'Neighborhood community'}</h3>
-          <p className="text-xs text-[#5C7470] leading-relaxed max-w-[260px] mx-auto font-medium">
-            {lang === 'es' ? 'Estamos trabajando fuertemente para construir el feed basado en geolocalizacion que te conecte al instante con mascotas y duenos cercanos.' : 'We are working on a location-based feed to connect you with nearby pets and their people.'}
+
+          <p className="mt-4 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#628079]">
+            {lang === 'es' ? 'Próximamente en PAZO' : 'Coming soon to PAZO'}
           </p>
-          {hasVotedNearby ? (
-            <div className="bg-[#204E4A] text-[#E1E53F] p-3.5 rounded-2xl text-xs font-bold inline-flex items-center gap-2">
-              <span>&#x2713; {lang === 'es' ? 'Gracias por ayudarnos a priorizar!' : 'Thanks for your support!'}</span>
-            </div>
-          ) : (
-            <button onClick={handleNearbyInterest} disabled={isSubmittingNearby || !canReport} className="bg-[#204E4A] hover:bg-[#183d3a] text-[#E1E53F] font-black px-6 py-3 rounded-full text-xs shadow-md transition-all cursor-pointer active:scale-95">
-              {!canReport ? (lang === 'es' ? 'Inicia sesión para expresar interés' : 'Sign in to express interest') : isSubmittingNearby ? (lang === 'es' ? 'Registrando...' : 'Saving...') : (lang === 'es' ? 'Me interesa esta funcion' : 'I am interested')}
-            </button>
-          )}
-        </div>
+          <h3 className="mx-auto mt-1.5 max-w-[285px] text-[clamp(19px,5.3vw,23px)] font-black leading-tight text-[#204E4A]">
+            {lang === 'es' ? 'Un mundo de mascotas a tu alrededor' : 'A world of pets around you'}
+          </h3>
+          <p className="mx-auto mt-2 max-w-[280px] text-[13px] font-medium leading-relaxed text-[#5C7470]">
+            {lang === 'es'
+              ? 'Imagina descubrir publicaciones de mascotas y personas de tu comunidad cercana.'
+              : 'Imagine discovering posts from pets and people in your nearby community.'}
+          </p>
+          <div className="mt-5">
+            {hasVotedNearby ? (
+              <div role="status" className="inline-flex max-w-full items-center gap-2 rounded-full bg-[#E5EFE6] px-4 py-3 text-[13px] font-extrabold text-[#204E4A]">
+                <span aria-hidden="true">✓</span>
+                <span>{lang === 'es' ? '¡Gracias por ayudarnos a priorizar!' : 'Thanks for helping us prioritize!'}</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleNearbyInterest}
+                disabled={isSubmittingNearby || !canReport}
+                className="inline-flex min-h-[46px] max-w-full items-center justify-center rounded-full bg-[#204E4A] px-5 py-3 text-center text-[13px] font-extrabold leading-snug text-[#E1E53F] shadow-[0_5px_15px_rgba(32,78,74,0.14)] transition-colors hover:bg-[#183d3a] focus-visible:bg-[#346C62] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {!canReport
+                  ? (lang === 'es' ? 'Inicia sesión para expresar interés' : 'Sign in to express interest')
+                  : isSubmittingNearby
+                    ? (lang === 'es' ? 'Registrando...' : 'Saving...')
+                    : (lang === 'es' ? 'Me interesa esta función' : 'I am interested')}
+              </button>
+            )}
+          </div>
+        </section>
       ) : (
         <div className="space-y-4">
-          {displayedPosts.length === 0 && (
-            <div className="rounded-[2rem] bg-white p-7 text-center space-y-2 border border-[#204E4A]/10">
+          {lastHiddenPostId && (
+            <div role="status" className="flex items-center justify-between gap-3 rounded-2xl bg-white/75 px-4 py-2.5 text-[13px] font-semibold text-[#5C7470] backdrop-blur-sm">
+              <span>{lang === 'es' ? 'Publicación oculta en este feed' : 'Post hidden from this feed'}</span>
+              <button type="button" onClick={handleUndoHide} className="shrink-0 rounded-full px-2 py-1 font-extrabold text-[#204E4A] underline underline-offset-2">
+                {lang === 'es' ? 'Deshacer' : 'Undo'}
+              </button>
+            </div>
+          )}
+          {displayedPosts.length === 0 && !lastHiddenPostId && (
+            <div className="rounded-[2rem] pazo-glass-card p-7 text-center space-y-2 border border-[#204E4A]/10">
               <h3 className="text-base font-black text-[#204E4A]">
                 {lang === 'es' ? 'Todavía no hay publicaciones' : 'No posts yet'}
               </h3>
@@ -220,8 +398,10 @@ export const HomeView = ({
             <PostCard
               key={post.id}
               post={post}
+              supporterBadge={verifiedFeedBadges[post.petId]}
               canReport={canReport}
               onReport={(kind,id,label) => setReportTarget({kind,id,label})}
+              onHidePost={handleHidePost}
               currentPetId={canReport ? currentPetId : ''}
               ownedPetIds={ownedPetIds}
               lang={lang}
@@ -245,9 +425,11 @@ export const HomeView = ({
 }
 
 interface PostCardProps {
+  supporterBadge?: VerifiedFeedBadge
   post: Post
   canReport: boolean
   onReport: (kind: 'feed_post' | 'feed_comment', id: string, label?: string) => void
+  onHidePost: (postId: string) => void
   currentPetId: string
   ownedPetIds: string[]
   lang: 'es' | 'en'
@@ -263,14 +445,33 @@ interface PostCardProps {
   onSendComment: (postId: string) => void
 }
 
-const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, currentPetId, ownedPetIds, lang, isCommentsOpen, newCommentText, onLikePost, onSavePost, onSelectPetProfile, onToggleComments, isCommentsLoading, isSubmittingComment, onCommentTextChange, onSendComment }: PostCardProps) => {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!menuOpen || typeof document === 'undefined') return
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !menuRef.current?.contains(event.target)) setMenuOpen(false)
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [menuOpen])
+
   const displayTime = formatTimeAgo(post.createdAt, post.timeAgo, lang)
   const displayCommentsCount = post.commentsCount ?? post.comments.length
   const elementRef = usePostTracking(post.id, post.isAuthorDeleted ? '' : currentPetId)
 
 
   if (post.isAuthorDeleted) return (
-    <article ref={elementRef as React.RefObject<HTMLElement>} className="rounded-[2.2rem] bg-white p-5 shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
+    <article ref={elementRef as React.RefObject<HTMLElement>} className="rounded-[2.2rem] pazo-glass-card p-5 shadow-[0_4px_20px_rgba(32,78,74,0.05)]">
       <div className="flex items-center gap-3 text-[#204E4A]">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF8F5]"><IconPaw size={18}/></div>
         <p className="text-sm font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
@@ -294,36 +495,90 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
   )
 
   return (
-    <article ref={elementRef as React.RefObject<HTMLElement>} className="bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden transition-all">
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div onClick={() => onSelectPetProfile(post.petId)} className={`w-10 h-10 rounded-full overflow-hidden shadow-xs shrink-0 cursor-pointer ${post.isRecommended ? 'p-0.5 bg-gradient-to-tr from-[#E1E53F] to-[#204E4A]' : ''}`}>
-            <img src={post.petAvatar} alt={post.petName} className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <h3 onClick={() => onSelectPetProfile(post.petId)} className="font-extrabold text-sm text-[#204E4A] leading-tight flex items-center gap-1.5 cursor-pointer hover:underline">
-              <span>{post.petName}</span>
+    <article ref={elementRef as React.RefObject<HTMLElement>} className="pazo-glass-card relative rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] transition-all">
+      <div className="relative z-10 flex min-w-0 items-start gap-2 p-3.5 sm:p-4">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5">
+          <button type="button" onClick={() => onSelectPetProfile(post.petId)} aria-label={lang === 'es' ? `Ver perfil de ${post.petName}` : `View ${post.petName}'s profile`} className={`h-10 w-10 shrink-0 overflow-hidden rounded-full shadow-xs ${post.isRecommended ? 'bg-gradient-to-tr from-[#E1E53F] to-[#204E4A] p-0.5' : ''}`}>
+            <img src={post.petAvatar} alt="" className="h-full w-full rounded-full object-cover" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+              <button type="button" onClick={() => onSelectPetProfile(post.petId)} className="max-w-full truncate text-left text-[16px] font-extrabold leading-tight text-[#204E4A] hover:underline">
+                {post.petName}
+              </button>
+              {supporterBadgesEnabled && supporterBadge?.badge && (
+                <SupporterBadge active milestone={supporterBadge.milestone} lang={lang}/>
+              )}
               {post.isRecommended ? (
-                <span className="text-[9px] uppercase font-black px-2 py-0.5 bg-[#E1E53F]/40 text-[#204E4A] rounded-md flex items-center gap-1 shadow-xs">
-                  <span className="w-2.5 h-2.5 flex items-center justify-center"><IconPaw size={10} /></span>
+                <span className="inline-flex max-w-full shrink-0 items-center gap-1 rounded-lg bg-[#E1E53F]/40 px-1.5 py-0.5 text-[10px] font-black uppercase text-[#204E4A]">
+                  <IconPaw size={10} />
                   <span>{lang === 'es' ? 'Sugerencia' : 'Suggested'}</span>
                 </span>
               ) : (
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-[#FAF8F5] text-[#5C7470] rounded-full shadow-xs">{post.petSpecies}</span>
+                <span className="max-w-full truncate rounded-full bg-[#FAF8F5] px-1.5 py-0.5 text-[11px] font-bold uppercase text-[#5C7470]">
+                  {post.petSpecies}
+                </span>
               )}
-            </h3>
-            <p className="text-[11px] text-[#5C7470]">{post.location} &bull; {displayTime}</p>
+            </div>
+            <p className="mt-0.5 truncate text-[12px] text-[#5C7470]">{post.location} &bull; {displayTime}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <FollowButton
-            currentPetId={currentPetId}
-            targetPetId={post.petId}
-            canFollow={!ownedPetIds.includes(post.petId)}
-            lang={lang}
-          />
-          {canReport && !ownedPetIds.includes(post.petId) && <button type="button" onClick={() => onReport('feed_post', post.id, describeReportSubject('feed_post', post.petName, post.text, lang))}
-            className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
+        <div className="flex shrink-0 items-start gap-1">
+          {Boolean(currentPetId) && !ownedPetIds.includes(post.petId) && (
+            <div className="shrink-0">
+              <FollowButton
+                currentPetId={currentPetId}
+                targetPetId={post.petId}
+                canFollow={true}
+                lang={lang}
+                variant="feed"
+              />
+            </div>
+          )}
+          <div ref={menuRef} className="relative shrink-0">
+            <button
+              type="button"
+              aria-label={lang === 'es' ? `Más opciones de ${post.petName}` : `More options for ${post.petName}`}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((previous) => !previous)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FAF8F5]/90 text-[#204E4A] transition-colors hover:bg-[#E1E53F]/30"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                <circle cx="5" cy="12" r="1.7" />
+                <circle cx="12" cy="12" r="1.7" />
+                <circle cx="19" cy="12" r="1.7" />
+              </svg>
+            </button>
+            {menuOpen && (
+              <div role="menu" aria-label={lang === 'es' ? 'Opciones de publicación' : 'Post options'} className="absolute right-0 top-full z-40 mt-1.5 w-[180px] rounded-2xl bg-white/95 p-1.5 shadow-[0_10px_30px_rgba(32,78,74,0.17)] backdrop-blur-xl">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onHidePost(post.id)
+                  }}
+                  className="w-full rounded-xl px-3 py-2.5 text-left text-[13px] font-bold text-[#204E4A] hover:bg-[#FAF8F5]"
+                >
+                  {lang === 'es' ? 'Ocultar publicación' : 'Hide post'}
+                </button>
+                {canReport && !ownedPetIds.includes(post.petId) && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onReport('feed_post', post.id, describeReportSubject('feed_post', post.petName, post.text, lang))
+                    }}
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-[13px] font-bold text-[#5C7470] hover:bg-[#FAF8F5]"
+                  >
+                    {lang === 'es' ? 'Denunciar' : 'Report'}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
       {post.photoUrl && (
@@ -368,7 +623,7 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
           )}
         </p>
         {displayCommentsCount > 0 && !isCommentsOpen && (
-          <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="text-[11px] font-semibold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer block pt-1">
+          <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="text-[14px] font-semibold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer block pt-1">
             {lang === 'es' ? `Ver ${displayCommentsCount} comentario${displayCommentsCount > 1 ? 's' : ''}...` : `View all ${displayCommentsCount} comment${displayCommentsCount > 1 ? 's' : ''}...`}
           </button>
         )}
@@ -389,10 +644,10 @@ const PostCard = ({ post, canReport, onReport, currentPetId, ownedPetIds, lang, 
                         </span>
                       )}
                     </span>
-                    <span className="block text-[9px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
+                    <span className="block text-[12px] text-[#5C7470]/60 mt-0.5">{formatTimeAgo(comment.createdAt, comment.timeAgo, lang)}</span>
                     {canReport && (!comment.authorPetId || !ownedPetIds.includes(comment.authorPetId)) && <button type="button"
                       onClick={() => onReport('feed_comment', comment.id, describeReportSubject('feed_comment', comment.authorName, comment.text, lang))}
-                      className="mt-1 text-[10px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
+                      className="mt-1 text-[13px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   </div>
                 </div>
               ))}

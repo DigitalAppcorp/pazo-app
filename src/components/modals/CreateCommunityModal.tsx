@@ -102,10 +102,10 @@ export const CreateCommunityModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#204E4A]/80 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="max-h-[92vh] w-full overflow-y-auto rounded-t-[2.8rem] bg-[#FAF8F5] p-6 shadow-2xl sm:max-w-lg sm:rounded-[2.8rem]">
+      <div className="max-h-[92vh] w-full overflow-y-auto rounded-t-[2.8rem] pazo-glass-modal p-6 shadow-2xl sm:max-w-lg sm:rounded-[2.8rem]">
         <div className="mb-5 flex items-center justify-between border-b border-[#204E4A]/10 pb-3">
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#5C7470]">
+            <p className="text-[13px] font-extrabold uppercase tracking-widest text-[#5C7470]">
               {lang === 'es' ? 'Nueva comunidad' : 'New community'}
             </p>
             <h3 className="text-lg font-black text-[#204E4A]">
@@ -263,7 +263,7 @@ export const CreateCommunityModal = ({
             )}
           </div>
 
-          <div className="rounded-2xl bg-white p-3 text-[10px] leading-relaxed text-[#5C7470]">
+          <div className="rounded-2xl bg-white p-3 text-[13px] leading-relaxed text-[#5C7470]">
             {lang === 'es'
               ? `La comunidad se creará como pública. ${currentPet?.name || 'Tu mascota'} será la identidad visible inicial de tu membership.`
               : `The community will be public. ${currentPet?.name || 'Your pet'} will be the initial visible identity for your membership.`}

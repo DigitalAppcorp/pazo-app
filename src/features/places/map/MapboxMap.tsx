@@ -4,10 +4,11 @@ import { loadMapboxGl } from './mapboxLoader'
 
 interface MapboxMapProps {
   places: PetPlace[]
-  selectedPlaceId?: string | null
+  focusPlaceRequest?: { placeId: string } | null
   userLocation?: EphemeralLocation | null
   onSelectPlace: (placeId: string) => void
   lang: 'es' | 'en'
+  immersive?: boolean
 }
 
 const DEFAULT_CENTER: [number, number] = [-118.2437, 34.0522]
@@ -35,6 +36,71 @@ const placeModelExpression = () => {
   ]
 }
 
+/**
+ * A crisp custom PAZO map pin generated locally in the browser. No external
+ * icon requests or geolocation. The glyph denotes a real place category.
+ */
+const drawPazoCategoryPin = (category: string): ImageData => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 72
+  canvas.height = 88
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Canvas 2D unavailable for PAZO map pins')
+  ctx.scale(2, 2)
+  const light = category === 'food' || category === 'pet_store'
+  ctx.fillStyle = light ? '#E1E53F' : '#204E4A'
+  ctx.beginPath()
+  ctx.moveTo(18, 43)
+  ctx.bezierCurveTo(14, 35, 2, 23, 2, 17)
+  ctx.bezierCurveTo(2, 8, 9, 2, 18, 2)
+  ctx.bezierCurveTo(27, 2, 34, 8, 34, 17)
+  ctx.bezierCurveTo(34, 23, 22, 35, 18, 43)
+  ctx.fill()
+  ctx.fillStyle = light ? '#204E4A' : '#F9FAEF'
+  ctx.lineWidth = 2
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.strokeStyle = ctx.fillStyle
+  const line = (...coords: number[]) => {
+    ctx.beginPath()
+    ctx.moveTo(coords[0], coords[1])
+    for (let i = 2; i < coords.length; i += 2) ctx.lineTo(coords[i], coords[i + 1])
+    ctx.stroke()
+  }
+  if (category === 'park') {
+    line(18, 10, 11, 19, 25, 19, 18, 10)
+    line(13, 16, 10, 23, 26, 23, 23, 16)
+    line(18, 23, 18, 29)
+  } else if (category === 'trail') {
+    ctx.beginPath()
+    ctx.arc(18, 12, 3, 0, Math.PI * 2)
+    ctx.fill()
+    line(18, 16, 15, 22, 20, 24, 24, 29)
+    line(15, 22, 9, 24)
+    line(17, 24, 12, 30)
+  } else if (category === 'food') {
+    line(11, 12, 11, 29)
+    line(8, 12, 8, 20, 14, 20, 14, 12)
+    line(24, 12, 24, 29)
+    line(24, 12, 21, 18, 24, 22)
+  } else if (category === 'veterinary') {
+    ctx.fillRect(15, 10, 6, 19)
+    ctx.fillRect(9, 16, 18, 6)
+  } else if (category === 'pet_store') {
+    line(10, 13, 13, 25, 26, 25)
+    line(13, 15, 28, 15, 25, 22, 14, 22)
+    ctx.beginPath(); ctx.arc(16, 29, 2, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(25, 29, 2, 0, Math.PI * 2); ctx.fill()
+  } else {
+    // Grooming: a minimal four-toe paw pictogram.
+    for (const [x, y] of [[11, 15], [16, 11], [22, 11], [27, 15]]) {
+      ctx.beginPath();ctx.ellipse(x, y, 2, 3, 0, 0, Math.PI * 2);ctx.fill()
+    }
+    ctx.beginPath();ctx.ellipse(19, 23, 8, 6, 0, 0, Math.PI * 2);ctx.fill()
+  }
+  return ctx.getImageData(0, 0, canvas.width, canvas.height)
+}
+
 const toGeoJson = (places: PetPlace[]) => ({
   type: 'FeatureCollection',
   features: places.map((place) => ({
@@ -54,10 +120,11 @@ const toGeoJson = (places: PetPlace[]) => ({
 
 export const MapboxMap = ({
   places,
-  selectedPlaceId,
+  focusPlaceRequest,
   userLocation,
   onSelectPlace,
   lang,
+  immersive = false,
 }: MapboxMapProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<any>(null)
@@ -176,54 +243,25 @@ export const MapboxMap = ({
             data: toGeoJson(placesRef.current),
           })
 
+          // Low zoom: original PAZO category glyphs in map pins, not generic dots.
+          // At close zoom the already installed reusable 3D models still take over.
+          for (const category of ['park', 'trail', 'food', 'veterinary', 'grooming', 'pet_store'] as const) {
+            const image = drawPazoCategoryPin(category)
+            if (!map.hasImage(`pazo-pin-${category}`)) {
+              map.addImage(`pazo-pin-${category}`, image, { pixelRatio: 2 })
+            }
+          }
           map.addLayer({
             id: 'pazo-place-pins',
-            type: 'circle',
+            type: 'symbol',
             source: 'pazo-places',
-            paint: {
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                8,
-                5,
-                13,
-                9,
-                16,
-                13,
-              ],
-              'circle-color': [
-                'match',
-                ['get', 'category'],
-                'park',
-                '#6E9F72',
-                'trail',
-                '#8B7B61',
-                'food',
-                '#D89B68',
-                'veterinary',
-                '#7D9CB8',
-                'grooming',
-                '#B88BA8',
-                'pet_store',
-                '#C3A14A',
-                '#204E4A',
-              ],
-              'circle-stroke-color': '#FAF8F5',
-              'circle-stroke-width': 2,
-              'circle-opacity': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                11,
-                0.96,
-                13.5,
-                0.52,
-                15,
-                0.12,
-                16,
-                0,
-              ],
+            maxzoom: 13.25,
+            layout: {
+              'icon-image': ['concat', 'pazo-pin-', ['get', 'category']],
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.75, 12.5, 1],
+              'icon-anchor': 'bottom',
+              'icon-allow-overlap': false,
+              'icon-padding': 3,
             },
           })
 
@@ -333,9 +371,9 @@ export const MapboxMap = ({
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !selectedPlaceId) return
+    if (!map || !focusPlaceRequest) return
 
-    const place = places.find((item) => item.id === selectedPlaceId)
+    const place = places.find((item) => item.id === focusPlaceRequest.placeId)
     if (!place) return
 
     map.flyTo({
@@ -344,7 +382,7 @@ export const MapboxMap = ({
       pitch: 58,
       duration: 700,
     })
-  }, [places, selectedPlaceId])
+  }, [places, focusPlaceRequest])
 
   useEffect(() => {
     const map = mapRef.current
@@ -353,9 +391,19 @@ export const MapboxMap = ({
     syncUserMarker(map, window.mapboxgl, userLocation, lang)
   }, [lang, userLocation])
 
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined' || !containerRef.current) return
+    const observer = new ResizeObserver(() => mapRef.current?.resize?.())
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
+
   if (error) {
     return (
-      <div className="flex h-full min-h-64 items-center justify-center rounded-[2rem] bg-[#E7ECEA] p-5 text-center">
+      <div className={immersive
+        ? "flex h-full w-full items-center justify-center bg-[#E7ECEA] p-5 text-center"
+        : "flex h-full min-h-64 items-center justify-center rounded-[2rem] bg-[#E7ECEA] p-5 text-center"
+      }>
         <div>
           <p className="text-xs font-black text-[#204E4A]">
             {lang === 'es' ? 'Mapa no disponible' : 'Map unavailable'}
@@ -371,7 +419,10 @@ export const MapboxMap = ({
   return (
     <div
       ref={containerRef}
-      className="h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]"
+      className={immersive
+        ? "h-full w-full bg-[#E7ECEA]"
+        : "h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]"
+      }
       aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'}
     />
   )

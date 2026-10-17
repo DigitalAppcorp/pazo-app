@@ -1,0 +1,102 @@
+# PAZO F16-P40 — almacenamiento privado de vinculación PayPal: decisión y retención
+
+**2026-10-15 — Product Owner aprobó expresamente el PRINCIPIO DE ALMACENAMIENTO
+LIMITADO** de la relación evento de activación ↔ suscripción de PayPal ↔ propietario
+interno para conciliar cobros y prevenir atribuciones indebidas.
+
+**NO APROBADO** por las decisiones del PO: migración Supabase alojada,
+plazo definitivo de retención validado jurídicamente, política técnica de
+borrado/backup, RPC que inserte vínculos, activación de webhooks/worker,
+compra PayPal Sandbox, cobros LIVE, ledger, beneficios o publicación de términos. La app general PAZO permanece gratuita.
+
+## Categoría y minimización aprobadas
+- `provider_event_id` — identificador pseudónimo del evento firmado.
+- `subscription_id` — referencia de suscripción del proveedor.
+- `owner_id` — UID interno de propietario, privado.
+- `created_at` — marca técnica de registro necesaria para auditoría mínima.
+
+NO almacenar email, nombre de persona, token OAuth, raw webhook payload,
+IP, datos de tarjeta/pagador, dirección, secreto ni información publicitaria.
+La relación se considera **dato personal financiero privado**, no contenido
+público ni dato para analítica. `subscription_id` no se expone por API pública.
+
+## Borrador alojado de SOLO ESQUEMA — NO APLICAR
+`supabase/drafts/f16_p40_private_activation_storage_hosted_REVIEW_ONLY_DO_NOT_APPLY.sql`
+
+- Guard de base/rol + gate del worker apagado y ledger sin pagos.
+- PK por `provider_event_id` y FK estricta a inbox privado.
+- Trigger de integridad: evento ACTIVATED verificado en inbox, intent BOUND,
+  propietario exacto, plan aprobado; registro inmutable.
+- RLS ENABLED + FORCE, REVOKE ALL para PUBLIC/anon/authenticated/service_role.
+- Ninguna RPC de creación/lectura y ningún permiso cliente; cero pagos/beneficios.
+- Prueba del MISMO esquema en PostgreSQL 17 desechable con casos adversariales.
+- El trigger **no** autentica por sí solo la firma PayPal: se requiere
+  proveedor de procedencia validada y frontera de permisos independiente.
+
+## Retención — criterio provisional APROBADO por el PO para diseño (2026-10-15)
+El plazo de retención de esta relación no debe copiarse automáticamente del
+consentimiento de renovación. La documentación legal del proyecto identifica
+plazo específico para **prueba de consentimiento expreso** en California
+(3 años o 1 año después del fin del contrato, el mayor); esa clasificación
+NO determina por sí sola el plazo para esta tabla de reconciliación.
+
+**Decisión explícita del PO: SÍ al criterio provisional, condicionado a revisión legal/contable antes de instalación o lanzamiento:**
+conservar el vínculo mientras la suscripción esté activa y hasta **3 años
+desde su cierre definitivo**, salvo una disputa/reembolso todavía en trámite
+o una obligación jurídica/contable aplicable que exija un plazo mayor.
+El cómputo empieza en la terminación efectiva del contrato, no en el
+webhook inicial; documentar la fecha de cierre con evidencia del proveedor.
+La excepción debe ser limitada al expediente afectado y revisada
+periódicamente. Antes del lanzamiento, revisión legal/contable y validación
+del ciclo real de supresión en backups. Este plazo de tres años se propone
+como criterio interno conservador, **no** como obligación legal específica
+demostrada para esta relación.
+
+**Criterios operativos para revisión:**
+1. Mantener la relación mientras se use para identificar una suscripción
+   activa o resolver cobros/reembolsos/disputas relacionados.
+2. A partir del cierre **efectivo y comprobado** del contrato, contar tres
+   años calendario, no tres años desde el webhook ni desde pulsar cancelar.
+   Una cancelación de renovación no acredita el fin del servicio.
+3. Si hay un hold legal/financiero justificado, extender con revisión explícita,
+   acceso restringido y trazabilidad de la excepción.
+4. Una vez vencido el plazo y liberados los holds, eliminar también de copias
+   y backups según política efectiva y límites técnicos revisados.
+5. Coordinar solicitud de eliminación de cuenta, retenciones obligatorias,
+   acceso de operadores y política pública de privacidad antes de desplegar.
+
+El plazo y origen contractual quedan **provisionalmente definidos por el PO**,
+pero las excepciones, tratamiento de backups, alcance jurídico y mecanismo
+de supresión aún necesitan revisión. Por ello **no está aprobado** insertar
+filas alojadas ni habilitar un mecanismo automático de borrado. El borrador no tiene escritor ni borrador.
+
+## Ensayo P41 de conservación y revisión manual (sin borrar)
+
+- `supabase/functions/f16-paypal-webhook/p41ActivationBindingRetentionLab.mjs`:
+  solo calcula tres **años calendario** desde el fin contractual merchant
+  corroborado, **no** desde el clic en cancelar. Un fin en 29-feb se
+  contabiliza conservadoramente al 1-mar del tercer año si no es bisiesto.
+- Rechaza fecha/identidad insuficientes, conciliación incompleta, disputas,
+  devoluciones pendientes, legal hold, política de backups no revisada
+  y validación legal no realizada.
+- En caso aparentemente elegible, únicamente establece
+  `eligibleForHumanReview=true`; `mayDelete=false`,
+  `mayEraseBackups=false` y `mayMutateHosted=false` siempre.
+- Los tests sintéticos P41 del commit `158d972` pasaron CI general
+  `38857338297` y PostgreSQL descartable `38857338281`.
+- **Gate técnico sin resolver:** la tabla P40 tiene una FK restrictiva y
+  un trigger de inmutabilidad, **sin** fuente verificada de terminación,
+  sistema de holds o borrador/ejecutor de retención. Una tabla vacía podría
+  ensayarse, pero no aprobar ingesta real hasta resolver eliminación y
+  backups con arquitectura y revisión legal aprobadas.
+
+## Gates independientes aún abiertos
+A. Criterio provisional de retención aprobado; falta revisión jurídica/contable,
+   excepciones, backups, eliminación y reconciliación de Privacy/Data Inventory/Terms.
+B. Revisión PO del SQL hospedado definitivo y GO explícito de DDL.
+C. Contrato de writer vinculado únicamente al webhook realmente verificado;
+   el valor string `postback_verified_sandbox_activation` NO es firma.
+D. Pruebas de reintentos/out-of-order y correlación merchant real.
+E. GO separado PayPal Sandbox buyer, activación worker, checkout y ledger.
+
+**Estado:** PR #44 DRAFT; P28 histórico diferido; worker OFF; pagos = 0.

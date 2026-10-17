@@ -1,5 +1,5 @@
 import { canUseAccountFeatures } from './features/auth/accountAccess'
-import { getNotificationSightingId } from './features/notifications/notificationSource'
+import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { useState, useEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -59,6 +59,8 @@ import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
+import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
+import { isSupporterAccountHash, leaveSupporterAccountRoute } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -170,10 +172,14 @@ function PazoMain() {
   } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
+  const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(
+    () => isSupporterAccountHash(window.location.hash)
+  )
 
   useEffect(() => {
     const syncPublicRoute = () => {
       setPublicRescueRoute(getPublicRescueRoute())
+      setSupporterAccountRoute(isSupporterAccountHash(window.location.hash))
     }
 
     window.addEventListener('hashchange', syncPublicRoute)
@@ -196,7 +202,7 @@ function PazoMain() {
   const [isDemoUser, setIsDemoUser] = useState(false)
   const [authMode, setAuthMode] = useState<'onboarding' | 'login'>('onboarding')
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
-  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>('A01')
+  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>('A01')
 
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
@@ -1375,10 +1381,17 @@ function PazoMain() {
 
   const handleOpenNotification = async (notification: PazoNotification) => {
     const sightingId = getNotificationSightingId(notification)
-    if (!canUseAccount || !sightingId) return
+    const joinedCommunityId = getNotificationCommunityId(notification)
+    if (!canUseAccount || (!sightingId && !joinedCommunityId)) return
 
     setIsNotificationsOpen(false)
-    setSelectedSightingId(sightingId)
+    if (joinedCommunityId) {
+      setCommunityTargetId(joinedCommunityId)
+      setCommunityTargetKey((value) => value + 1)
+      setActiveTab('comunidades')
+    } else if (sightingId) {
+      setSelectedSightingId(sightingId)
+    }
 
     if (!notification.read) {
       try {
@@ -1481,6 +1494,16 @@ function PazoMain() {
     )
   }
 
+  // Accessible to the verified account holder even when pet loading fails
+  // or the account has no pets. A subscription must not depend on a pet.
+  if (user && isSupporterAccountRoute) {
+    return <SupporterAccountManagement lang={lang}
+      onClose={() => {
+        leaveSupporterAccountRoute(window.location)
+        setSupporterAccountRoute(false)
+      }} />
+  }
+
   if (user && (petBootstrap?.userId !== user.id || petBootstrap.status === 'loading')) {
     return (
       <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
@@ -1508,6 +1531,10 @@ function PazoMain() {
             className="w-full rounded-full bg-[#204E4A] text-white py-3 font-extrabold cursor-pointer">
             {lang === 'es' ? 'Reintentar' : 'Try again'}
           </button>
+          <a href="#/account/supporter"
+            className="block w-full rounded-full bg-[#E1E53F]/50 py-3 text-center text-sm font-bold text-[#204E4A]">
+            {lang === 'es' ? 'Gestionar suscripción de apoyo' : 'Manage support subscription'}
+          </a>
         </main>
       </div>
     )
@@ -1517,7 +1544,7 @@ function PazoMain() {
 
   return (
     <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
-      <div className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
+      <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
@@ -1604,9 +1631,6 @@ function PazoMain() {
 
               <div className="my-auto space-y-5">
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-                    Pazo Acceso
-                  </span>
                   <h2 className="text-3xl font-black text-[#204E4A]">
                     {forgotPasswordMode
                       ? (lang === 'es' ? 'Recuperar contraseña' : 'Reset your password')
@@ -1777,7 +1801,9 @@ function PazoMain() {
 
             <main
               ref={mainScrollRef}
-              className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
+              className={activeTab === 'mapa'
+                ? 'relative min-h-0 flex-1 overflow-hidden p-0'
+                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5'}
               onScroll={(event) => {
                 const element = event.currentTarget
                 tabScrollPositionsRef.current[activeTab] = element.scrollTop
