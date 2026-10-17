@@ -20,6 +20,19 @@ VALUES ('41111111-1111-4111-8111-111111111111',
        ('42222222-2222-4222-8222-222222222222',
         '32222222-2222-4222-8222-222222222222','Test Mascota B','perro');
 
+-- Perform permission metadata checks AS postgres: private schema is not
+-- visible to anon/authenticated, so SQL introspection by those roles would
+-- correctly raise insufficient_privilege rather than giving false.
+DO $acl$
+BEGIN
+ IF has_table_privilege('anon','supporter_private.f16_mvp_pet_themes','SELECT')
+ OR has_table_privilege('service_role','supporter_private.f16_mvp_pet_themes','SELECT')
+ OR has_function_privilege('anon','public.pazo_supporter_set_pet_theme(uuid,text)','EXECUTE')
+ OR has_function_privilege('service_role','public.pazo_supporter_set_pet_theme(uuid,text)','EXECUTE')
+ OR has_function_privilege('authenticated','supporter_private.wall_has_verified_entitlement(uuid)','EXECUTE')
+ THEN RAISE EXCEPTION 'Secret role ACL leaked'; END IF;
+END $acl$;
+
 -- Public reads are permitted but must start as false, with zero private rows.
 SET LOCAL ROLE anon;
 DO $test$
@@ -30,12 +43,7 @@ BEGIN
  THEN RAISE EXCEPTION 'Free pet received public badge'; END IF;
  IF EXISTS(SELECT 1 FROM public.pazo_supporter_public_wall(48))
  THEN RAISE EXCEPTION 'Wall must start empty'; END IF;
- IF has_table_privilege('anon','supporter_private.f16_mvp_pet_themes','SELECT')
- OR has_table_privilege('service_role','supporter_private.f16_mvp_pet_themes','SELECT')
- OR has_function_privilege('anon','public.pazo_supporter_set_pet_theme(uuid,text)','EXECUTE')
- OR has_function_privilege('service_role','public.pazo_supporter_set_pet_theme(uuid,text)','EXECUTE')
- OR has_function_privilege('authenticated','supporter_private.wall_has_verified_entitlement(uuid)','EXECUTE')
- THEN RAISE EXCEPTION 'Secret role ACL leaked'; END IF;
+
 END $test$;
 
 -- Authenticated owner cannot buy benefits using only UI or consent.
