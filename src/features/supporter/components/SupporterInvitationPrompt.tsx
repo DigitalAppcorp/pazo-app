@@ -2,6 +2,7 @@ type Props = {
   lang:'es'|'en'
   onExplore:()=>void
   onDismiss:()=>void
+  previewOnly?:boolean
 }
 
 /**
@@ -9,10 +10,14 @@ type Props = {
  * server-derived eligibility signal and persisted 30-day dismissal exist.
  * Never mounts in onboarding, rescue or an uncertain supporter state.
  */
-export function SupporterInvitationPrompt({lang,onExplore,onDismiss}:Props) {
+export function SupporterInvitationPrompt({lang,onExplore,onDismiss,previewOnly=false}:Props) {
  const t=(es:string,en:string)=>lang==='es'?es:en
  return <aside aria-labelledby="pazo-supporter-prompt-title"
    className="fixed inset-x-4 bottom-20 z-[80] mx-auto max-w-[380px] rounded-[28px] bg-[#E6EDDB] p-5 text-[#204E4A] shadow-[0_12px_40px_rgba(32,78,74,0.16)]">
+   {previewOnly && <p className="mb-2 text-[11px] font-bold text-[#52716A]">
+     {t('Vista previa QA: este aviso todavía no se muestra automáticamente.',
+        'QA preview: this invitation is not shown automatically yet.')}
+   </p>}
    <p className="text-xs font-extrabold uppercase tracking-widest text-[#52716A]">
      {t('Un pequeño gracias por estar aquí','A little thank-you for being here')}
    </p>
