@@ -1,3 +1,22 @@
+# F16 — FAST TRACK AMIGO DE PAZO con cuatro beneficios; código inicial validado (2026-10-17)
+
+**Nueva prioridad aprobada por el PO:** lanzar lo antes posible la suscripción voluntaria **$2.99/mes**, con los **cuatro beneficios ya aprobados**, sin plan anual ni retirar funciones gratuitas. No interpretar el deseo de rapidez como GO para cobrar en Live sin pagos y beneficios verificables. Se prioriza `docs/PAZO_F16_MVP_LIVE_FAST_TRACK_20261017.md` (nuevo contrato de ruta crítica) sobre nuevas exploraciones no bloqueantes de P42.
+
+**Código nuevo PR #44 DRAFT**:
+- `src/features/supporter/components/SupporterWallConsentSettings.tsx`, conectado en `SupporterAccountManagement.tsx` bajo `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'`, **desactivado por defecto**. Usa RPC hosted previamente auditadas `pazo_wall_my_consents`, `pazo_wall_consent_enable`, `pazo_wall_consent_disable`: Auth/getUser, mascota propia, revisión explícita de permiso, confirmación server-side por nueva lectura y retirada incluso tras cancelación. La RPC `supporter_private.wall_has_verified_entitlement` alojada es aún `SELECT false`: NO indica una capacidad de inscribir mascotas real hasta fuente de períodos pagados.
+- `supabase/functions/f16-paypal-webhook/pazoSupporterBenefitsV1.mjs`: **proyección server-only**, no desplegada ni conectada a datos hosted. Calcula badge perfil/autor, 5 temas aprobados, muro solo opt-in y medallas 3/6/12 de períodos únicos conciliados y ya iniciados; no auto-extiende por status PayPal ni readmitir refunds/fallos/disputas. Nuevos casos negativos `src/features/supporter/testing/f16MvpServerBenefits.test.mjs`.
+- Los PNG originales para las cuatro medallas se localizaron en Biblioteca (fuente `Insignias brillantes Amigo de PAZO.png`); se generaron **cuatro recortes transparentes originales** en ZIP de entrega de conversación. Esos binarios todavía **no están subidos a GitHub ni integrados en UI**. No recrear otra gráfica. Confirmar elección del arte exacto contra lo aprobado antes de integrar.
+
+**Validación:** commit frontend `1f669517d89fe4796282fdccc7c6535a4c35f407`, CI #39035845862 **SUCCESS** y PG Lab #39035846015 **SUCCESS**. Código servidor y tests revisados en commit `d5bb852b39804830b3859d5dff35bcb7bdd1f5eb`, CI #39036348503 **SUCCESS** y PG Lab #39036348527 **SUCCESS**. Documento fast-track `cb16082f7be5094fd198c1ecd2e86e422ab2da64`, CI #39036583471 **SUCCESS** y PG Lab #39036583528 **SUCCESS**. El commit solo documental de este handoff necesita checks propios. No se ha desplegado ni migrado nada alojado, creado un PayPal Live plan, cobrado dinero ni concedido beneficio.
+
+**BLOQUEOS REALES de un pago público HOY:** la función de checkout desplegable `f16-paypal-supporter/index.ts` y gestión `f16-paypal-supporter-account` son **Sandbox QA** con allowlist/guardas, no Live; los términos actuales de QA no conceden beneficios. Hosted `supporter_private.paypal_payment_entries` carece de `service_start/service_end`, sus estados son `uncredited|blocked_reversal`; no hay período real acreditado. `wall_has_verified_entitlement` responde siempre false. Hacen falta modelo mínimo de períodos pagados comprobados, creación/renovación segura, P06 consentimiento Live y cancelación online real + recibo/retención, presentación de 4 beneficios con assets y pruebas Sandbox integrales. **No basta** activar un botón; nunca transformar suscripción Sandbox en una compra Live o premiar tras redirección.
+
+**PRÓXIMO GATE DE IMPLEMENTACIÓN:** diseñar e implementar **fuente servidor autoritativa mínima de períodos** (reciclar P05/P06/P22/P24/P29/P32), conectarla a badge/tema/muro/medallas en QA, y construir checkout/cancel Live separado con términos ES/EN revisados. Sin reabrir los one-shot P43/P43B/P42-WRITE ni iniciar otro ciclo de pruebas P42 para avanzar UI. La migración/activación PayPal Live/cobro requiere control PO explícito y evidencia E2E. PR #44 permanece DRAFT, PAZO gratis. No ejecutar P42-EDGE-GET en este gate.
+
+**Marcador:** `F16_FAST_TRACK_CODE_CI_PASS_FOUR_BENEFITS_NOT_LIVE_PROVISIONING_NO_GO`.
+
+---
+
 # F16-P42 — Edge Secrets READ ONLY preparado, ejecución privada pendiente (2026-10-17)
 
 **Autorización PO:** «sí» para una sola consulta privada READ ONLY de presencia del nombre `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX`. No hay autorización de POST/DELETE, generación de secretos P42, nuevo token, escrituras DB, pagos o despliegues. PR #44 DRAFT, rama `f13/section-titles-20261012`.
