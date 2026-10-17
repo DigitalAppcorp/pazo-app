@@ -20,6 +20,10 @@ import {createPazoSandboxSupporterAccountHandler}
  from '../f16-paypal-webhook/p14SandboxSupporterAccountHandler.mjs'
 import {createPazoSandboxV2AccountStore}
  from '../f16-paypal-webhook/pazoSandboxV2AccountStore.mjs'
+import {createPazoSandboxV2ProofStore}
+ from '../f16-paypal-webhook/pazoSandboxV2ProofStore.mjs'
+import {createPazoSandboxV2MerchantVerifier}
+ from '../f16-paypal-webhook/pazoSandboxV2MerchantVerify.mjs'
 import {createF16GlobalAdmission}
  from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
 import {isP06SandboxQaAuthorized}
@@ -72,6 +76,10 @@ function compose(){
  const reader=createPaypalSandboxSubscriptionReader({clientId,clientSecret})
  const cancellation=createPazoSandboxCancellationProvider({clientId,clientSecret})
  const v2AccountStore=createPazoSandboxV2AccountStore({projectUrl:BASE,serviceRoleKey:key})
+ const v2ProofStore=createPazoSandboxV2ProofStore({projectUrl:BASE,serviceRoleKey:key})
+ const merchantVerifier=createPazoSandboxV2MerchantVerifier({
+  clientId,clientSecret,commitVerified:v2ProofStore.commitVerified,
+  markReversal:v2ProofStore.markReversal})
  const limiter=createF16GlobalAdmission({projectUrl:BASE,serviceRoleKey:key})
  const admit=()=>limiter.tryAdmit()
  const checkout=createPazoSandboxVerifiedCheckout({
@@ -82,7 +90,7 @@ function compose(){
   resolveAuthenticatedOwner,admit,privateIntentStore:v2AccountStore,
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
  })
- return {origin,checkout,manage,consentStore,v2AccountStore,resolveAuthenticatedOwner,admit}
+ return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,resolveAuthenticatedOwner,admit}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -125,11 +133,30 @@ Deno.serve(async(request:Request)=>{
  // Existing V2 subscription management must work even when buying is OFF.
  // Each account lookup is scoped to getUser() + a V2 acceptance row; no
  // legacy P06 subscription can be cancelled through these routes.
- const isManagement=['status','cancel','acknowledgement','list'].includes(data.action)
+ const isManagement=['status','cancel','acknowledgement','list','verify_payment'].includes(data.action)
  if(isManagement && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return addCors(reply(503,'qa_v2_management_not_released'),runtime.origin)
  if(isManagement && ['status','cancel','acknowledgement'].includes(data.action))
   return addCors(await runtime.manage(request),runtime.origin)
+ if(data.action==='verify_payment'){
+  if(Object.keys(data).sort().join('|')!=='action')
+   return addCors(reply(400,'invalid_request'),runtime.origin)
+  try{
+   if(await runtime.admit()!==true)
+    return addCors(reply(429,'rate_limited'),runtime.origin)
+   const account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})
+   if(!account||account.state!=='bound'||!account.externalSubscriptionId)
+    return addCors(reply(409,'v2_subscription_not_bound'),runtime.origin)
+   const state=await runtime.merchantVerifier.verifyFirstPaidCycle({
+    ownerId:qaOwner,intentId:account.intentId,
+    subscriptionId:account.externalSubscriptionId,
+    termsVersion:account.termsVersion,
+   })
+   return addCors(new Response(JSON.stringify({ok:true,code:state.phase,
+    environment:'sandbox',...state}),{
+    status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
+  }catch{return addCors(reply(503,'sandbox_merchant_payment_not_verified'),runtime.origin)}
+ }
  if(data.action==='list'){
   if(Object.keys(data).sort().join('|')!=='action')
    return addCors(reply(400,'invalid_request'),runtime.origin)
