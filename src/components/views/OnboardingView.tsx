@@ -241,7 +241,7 @@ export const OnboardingView = ({
             <span aria-hidden="true" className="text-[18px] leading-none">›</span>
           </button>
 
-          <div className="shrink-0 space-y-2.5 pb-1">
+          <div className="shrink-0 space-y-2.5 pb-2">
             <button type="button" onClick={() => setStep('A02')}
               className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-3 text-[17px] font-extrabold text-[#204E4A] shadow-[0_7px_20px_rgba(225,229,63,0.28)] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150]">
               {lang === 'es' ? 'Comenzar' : 'Get started'}
