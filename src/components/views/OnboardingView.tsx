@@ -8,6 +8,7 @@ import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
+import { WelcomeAnimatedCompanion } from '../../features/onboarding/components/WelcomeAnimatedCompanion'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
@@ -169,84 +170,94 @@ export const OnboardingView = ({
       <div className="absolute top-1/2 -left-28 w-60 h-60 bg-[#204E4A]/5 rounded-full blur-2xl pointer-events-none"></div>
 
       {step === 'A01' && (
-        /* ================= A01 / BIENVENIDA ================= */
-        <div className="flex min-h-0 h-full flex-col justify-between relative z-10 animate-slide-up">
-          <header className="flex shrink-0 justify-between items-center pt-2">
+        /* ================= A01 / BIENVENIDA · PO APPROVED ================= */
+        <div className="relative z-10 flex h-full min-h-0 flex-col gap-3">
+          <header className="flex shrink-0 items-center justify-between pb-1 pt-2">
             <div className="flex items-center gap-2">
-              <span className="font-black text-2xl tracking-tighter text-[#204E4A]">pazo.</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-[#E1E53F] animate-pulse-soft"></span>
+              <span className="text-[29px] font-black tracking-tighter text-[#204E4A]">pazo.</span>
+              <span aria-hidden="true" className="h-3 w-3 rounded-full bg-[#E1E53F]"/>
             </div>
-            <button
-              onClick={onToggleLang}
-              className="text-[14px] font-extrabold tracking-widest px-3 py-1.5 rounded-full bg-white text-[#204E4A] cursor-pointer soft-button"
-            >
+            <button type="button" onClick={onToggleLang}
+              aria-label={lang === 'es' ? 'Cambiar a inglés' : 'Switch to Spanish'}
+              className="min-h-11 rounded-full bg-white px-4 py-2.5 text-[14px] font-extrabold tracking-wide text-[#204E4A] shadow-[0_4px_13px_rgba(32,78,74,0.06)] hover:bg-[#EEF2E4] focus-visible:bg-[#E1E53F]/55">
               {lang === 'es' ? 'ES ▾' : 'EN ▾'}
             </button>
           </header>
 
-          {/* Allow center content to scroll on short phones; keep main actions visible. */}
+          {/* A short phone scrolls only the illustration, never hiding the main actions. */}
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
-            <div className="my-auto space-y-4 py-3">
-            <div className="relative">
-              <div className="w-full h-64 rounded-[2.2rem] overflow-hidden shadow-[0_12px_32px_rgba(32,78,74,0.12)] soft-card">
-                <img
-                  src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=900&auto=format&fit=crop"
-                  alt={lang === 'es' ? "Mascotas felices" : "Happy pets"}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#204E4A]/45 via-transparent to-transparent"></div>
-                <div className="absolute bottom-3.5 left-3.5 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-[14px] font-bold text-[#204E4A]">{lang === 'es' ? "Los Ángeles • Comunidad Abierta" : "Los Angeles • Open community"}</span>
-                </div>
+            <section aria-labelledby="pazo-welcome-title"
+              className="relative isolate flex min-h-[420px] w-full flex-1 flex-col overflow-hidden rounded-[34px] bg-[#A2BB76] text-white shadow-[0_10px_28px_rgba(32,78,74,0.055)]">
+              <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
+                viewBox="0 0 380 510" preserveAspectRatio="none">
+                <path className="pazo-welcome-line" d="M231-22Q212 53 291 85T397 58M290-13Q264 77 340 110T399 144"
+                  stroke="#E9EDC6" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+                <path className="pazo-welcome-line pazo-welcome-line--slow"
+                  d="M-25 308Q69 264 73 350T-35 449M-14 457Q98 389 126 499"
+                  stroke="#EEF0CB" strokeWidth="2.6" fill="none" strokeLinecap="round"/>
+              </svg>
+              <span aria-hidden="true" className="pazo-welcome-heart absolute right-[10%] top-[40%] z-10 text-[#EAF0C0]">
+                <svg width="25" height="30" viewBox="0 0 28 33" fill="currentColor">
+                  <path d="M14 29Q-4 14 5 6 12 0 14 11 22 0 28 9 31 18 14 29Z"/>
+                </svg>
+              </span>
+              <span aria-hidden="true" className="pazo-welcome-heart pazo-welcome-heart--delay absolute left-[9%] top-[52%] z-10 text-[#F5E6B8]">
+                <svg width="19" height="21" viewBox="0 0 28 33" fill="currentColor">
+                  <path d="M14 29Q-4 14 5 6 12 0 14 11 22 0 28 9 31 18 14 29Z"/>
+                </svg>
+              </span>
+
+              <div className="relative z-10 shrink-0 px-6 pt-9">
+                <h1 id="pazo-welcome-title"
+                  className="max-w-[290px] text-[clamp(27px,7.9vw,34px)] font-black leading-[1.06] tracking-tight">
+                  {lang === 'es'
+                    ? <>Hecho con amor<br/>para las mascotas</>
+                    : <>Made with love<br/>for pets</>}
+                </h1>
+                <p className="mt-4 max-w-[285px] text-[clamp(13px,3.7vw,15px)] font-medium leading-[1.45] text-[#FFFAEB]">
+                  {lang === 'es'
+                    ? 'Únete y descubre la mejor app social para mascotas'
+                    : 'Join and discover the best social app for pets'}
+                </p>
               </div>
 
-            </div>
-
-            <div className="space-y-1.5 text-left">
-              <h1 className="text-[37px] sm:text-[41px] font-black leading-[1.08] tracking-tight text-[#204E4A]">
-                {lang === 'es' ? "Su mundo, más cerca." : "Their world, closer."}
-              </h1>
-              <p className="text-[16px] leading-relaxed text-[#5C7470]">
-                {lang === 'es' ? "Comparte su vida. Encuentra tu comunidad. Cuida lo que más quieres." : "Share their life. Find your community. Care for those you love."}
-              </p>
-              <button
-                ref={gratitudeWelcomeLinkRef}
-                type="button"
-                onClick={() => setShowGratitudeWall(true)}
-                className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl px-1.5 py-2 text-left text-[13px] font-semibold text-[#57776F] transition-colors hover:text-[#204E4A] focus-visible:bg-[#E1E53F]/35 focus-visible:text-[#204E4A]"
-              >
-                <IconPaw size={16} className="shrink-0 text-[#7A9B8E]" />
-                <span>{lang === 'es' ? 'Conoce a los Amigos de PAZO' : 'Meet the PAZO Friends'}</span>
-                <span aria-hidden="true" className="text-[18px] leading-none">›</span>
-              </button>
-            </div>
-            </div>
+              <div className="pointer-events-none relative z-[1] flex min-h-[190px] flex-1 items-end justify-center px-1">
+                <WelcomeAnimatedCompanion/>
+              </div>
+              <div aria-hidden="true" className="relative z-10 flex shrink-0 items-center justify-center gap-2.5 pb-4 pt-1">
+                <span className="h-2 w-2 rounded-full bg-white"/>
+                <span className="h-2 w-2 rounded-full bg-white/45"/>
+                <span className="h-2 w-2 rounded-full bg-white/45"/>
+              </div>
+            </section>
           </div>
 
-          <div className="shrink-0 space-y-2.5 pb-2">
-            <button
-              onClick={() => setStep('A02')}
-              className="w-full bg-[#E1E53F] hover:bg-[#d8dc35] text-[#204E4A] font-extrabold text-[18px] py-4 rounded-full shadow-[0_8px_25px_rgba(225,229,63,0.38)] transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>{lang === 'es' ? "Comenzar" : "Get started"}</span>
-            </button>
+          {/* Approved public gratitude-wall entry, separate from registration. */}
+          <button ref={gratitudeWelcomeLinkRef} type="button"
+            onClick={() => setShowGratitudeWall(true)}
+            className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full px-2 py-2 text-center text-[12px] font-bold text-[#52756F] hover:bg-[#F0F2E8] focus-visible:bg-[#E1E53F]/35">
+            <IconPaw size={17} className="shrink-0 text-[#759C8D]"/>
+            <span>{lang === 'es' ? 'Conoce a los Amigos de PAZO' : 'Meet the PAZO Friends'}</span>
+            <span aria-hidden="true" className="text-[18px] leading-none">›</span>
+          </button>
 
+          <div className="shrink-0 space-y-2.5 pb-1">
+            <button type="button" onClick={() => setStep('A02')}
+              className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-3 text-[17px] font-extrabold text-[#204E4A] shadow-[0_7px_20px_rgba(225,229,63,0.28)] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150]">
+              {lang === 'es' ? 'Comenzar' : 'Get started'}
+            </button>
             <div className="flex gap-2">
-              <button
-                onClick={onSkipToLogin}
-                className="flex-1 bg-white hover:bg-neutral-50 text-[#204E4A] font-bold text-[18px] py-4 rounded-full shadow-sm transition-all cursor-pointer soft-button"
-              >
-                {lang === 'es' ? "Ya tengo una cuenta" : "I already have an account"}
+              <button type="button" onClick={onSkipToLogin}
+                className="min-h-12 min-w-0 flex-1 rounded-full bg-white px-3 py-3 text-[clamp(12px,3.4vw,15px)] font-extrabold text-[#204E4A] shadow-[0_4px_14px_rgba(32,78,74,0.055)] hover:bg-[#F0F2E8] focus-visible:bg-[#E1E53F]/40">
+                {lang === 'es' ? 'Ya tengo una cuenta' : 'I already have an account'}
               </button>
-              <button
-                onClick={onQuickDemo}
-                className="px-4 bg-[#204E4A]/5 hover:bg-[#204E4A]/10 text-[#204E4A] font-bold text-xs py-3 rounded-full transition-all cursor-pointer"
-              >
+              <button type="button" onClick={onQuickDemo}
+                className="min-h-12 shrink-0 rounded-full bg-[#ECEDE8] px-4 py-3 text-[14px] font-bold text-[#204E4A] hover:bg-[#E1E9D5] focus-visible:bg-[#E1E53F]/40">
                 Demo
               </button>
             </div>
-            <p aria-label={lang === 'es' ? "Versión de PAZO" : "PAZO version"} className="pt-1 text-center text-[13px] font-medium tracking-[0.05em] tabular-nums text-[#5C7470]/65">
+            <p aria-label={lang === 'es' ? 'Versión de PAZO' : 'PAZO version'}
+              className="pt-0.5 text-center text-[10px] font-medium tracking-[0.04em] text-[#5C7470]/60">
               {lang === 'es' ? 'Versión' : 'Version'} {pazoBuildVersion}
             </p>
           </div>
