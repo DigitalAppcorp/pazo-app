@@ -31,6 +31,10 @@ import {createF16GlobalAdmission}
 
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const QA_ORIGIN='https://pazo-app-t83r-git-f13-section-titles-20261012-digitalapp.vercel.app'
+// Local Vite execution of REAL PAZO for same-owner Sandbox end-to-end,
+// while Vercel deployment is quota-limited. No arbitrary HTTP origins.
+const QA_LOCAL_ORIGINS=new Set(['http://localhost:5173','http://127.0.0.1:5173'])
+const QA_BROWSER_ORIGINS=new Set([QA_ORIGIN,...QA_LOCAL_ORIGINS])
 const PLAN='P-14V25407JP6850922NLHMDKI'
 // Old P06 buyer offer explicitly said no perks. Never sell benefit QA using it.
 const SANDBOX_BENEFITS_OFFER_V2='pazo-supporter-sandbox.benefits-v2'
@@ -51,21 +55,23 @@ function validOrigin(value){
 // This checkout uses isolated QA-only redirect secrets.
 // Do not overwrite the existing project-wide PAZO_F16_APP_ORIGIN;
 // other released Edge Functions may depend on that value.
-function compose(){
+function compose(requestOrigin:string){
  const env=Deno.env
  const get=(k:string)=>env.get(k)
  if(get('PAZO_F16_PAYPAL_ENV')!=='sandbox'||
   get('PAZO_F16_PAYPAL_PLAN_ID')!==PLAN||
   get('SUPABASE_URL')!==BASE||
-  !validOrigin(QA_ORIGIN))
+  !validOrigin(QA_ORIGIN)||!QA_BROWSER_ORIGINS.has(requestOrigin))
   throw Error('supporter_server_release_not_configured')
- const origin=QA_ORIGIN
+ const origin=requestOrigin
  const key=get('SUPABASE_SERVICE_ROLE_KEY')!
  const clientId=get('PAZO_F16_PAYPAL_CLIENT_ID')!
  const clientSecret=get('PAZO_F16_PAYPAL_CLIENT_SECRET')!
- const returnUrl=origin+'/'
- const cancelUrl=origin+'/'
- if(new URL(returnUrl).origin!==origin||new URL(cancelUrl).origin!==origin)
+ // PayPal requires HTTPS redirects; after approval the buyer reopens
+ // http://localhost:5173 to verify the real payment in PAZO.
+ const returnUrl=QA_ORIGIN+'/'
+ const cancelUrl=QA_ORIGIN+'/'
+ if(new URL(returnUrl).origin!==QA_ORIGIN||new URL(cancelUrl).origin!==QA_ORIGIN)
   throw Error('consumer_redirect_origin_mismatch')
  const supabase=createClient(BASE,key,{auth:{
   autoRefreshToken:false,persistSession:false}})
@@ -120,7 +126,10 @@ Deno.serve(async(request:Request)=>{
  if(!QA_CHECKOUT_RELEASE_APPROVED && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return reply(503,'sandbox_qa_features_not_released')
  let runtime
- try{runtime=compose()}catch{return reply(503,'checkout_unavailable')}
+ const incomingOrigin=request.headers.get('origin')
+ if(!incomingOrigin||!QA_BROWSER_ORIGINS.has(incomingOrigin))
+  return reply(403,'sandbox_qa_origin_required')
+ try{runtime=compose(incomingOrigin)}catch{return reply(503,'checkout_unavailable')}
  if(request.headers.get('origin')!==runtime.origin)
   return reply(403,'origin_not_allowed')
  if(request.method==='OPTIONS')return addCors(new Response(null,{status:204,
