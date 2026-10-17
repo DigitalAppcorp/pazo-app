@@ -10,9 +10,9 @@ const VERSION=/^pazo-supporter-[a-z0-9.-]{3,40}$/
 const GOOD=new Set(['pending','bound'])
 const fail=()=>{throw Error('pazo_checkout_private_rpc_unavailable')}
 export function createPazoCheckoutConsentStore({
- projectUrl,serviceRoleKey,fetchImpl=fetch,
+ projectUrl,serviceRoleKey,fetchImpl=fetch,qaV2=false,
 }={}){
- if(projectUrl!==BASE||typeof serviceRoleKey!=='string'||
+ if(typeof qaV2!=='boolean'||projectUrl!==BASE||typeof serviceRoleKey!=='string'||
     serviceRoleKey.length<24||/\s/.test(serviceRoleKey)||
     typeof fetchImpl!=='function')
   throw Error('pazo_checkout_store_not_configured')
@@ -49,7 +49,9 @@ export function createPazoCheckoutConsentStore({
     !['es','en'].includes(locale)||!VERSION.test(termsVersion||'')||
     !HASH.test(termsDigest||'')||affirmativeConsent!==true)
     throw Error('pazo_checkout_explicit_consent_missing')
-   const x=await rpc('f16_p06_begin_checkout',{
+   if(qaV2 && termsVersion!=='pazo-supporter-sandbox.benefits-v2')
+    throw Error('sandbox_qa_v2_acceptance_required')
+   const x=await rpc(qaV2?'f16_qa_v2_begin_checkout':'f16_p06_begin_checkout',{ 
     p_owner_id:ownerId,p_request_key:requestKey,p_locale:locale,
     p_terms_version:termsVersion,p_terms_digest:termsDigest,
     p_affirmative:true,
@@ -66,6 +68,7 @@ export function createPazoCheckoutConsentStore({
     planId:PLAN,createdAt:x.createdAt,state:x.state})
   },
   async readAcknowledgementForOwner({ownerId,intentId}={}){
+   if(qaV2)throw Error('qa_v2_acknowledgement_read_requires_new_binding')
    if(!UUID.test(ownerId||'')||!INTENT.test(intentId||''))
     throw Error('pazo_acknowledgement_identity_invalid')
    const x=await rpc('f16_p14_read_owner_checkout_acknowledgement',{
@@ -89,6 +92,7 @@ export function createPazoCheckoutConsentStore({
    })
   },
   async readRecoveryForOwner({ownerId,requestKey}={}){
+   if(qaV2)throw Error('qa_v2_recovery_read_requires_new_binding')
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||''))
     throw Error('pazo_checkout_recovery_lookup_invalid')
    const x=await rpc('f16_p08_read_checkout_recovery',{
@@ -114,6 +118,7 @@ export function createPazoCheckoutConsentStore({
     subscriptionId:x.subscriptionId})
   },
   async bindRecoveredForOwner({
+   if(qaV2)throw Error('qa_v2_recovery_bind_requires_new_binding')
    ownerId,requestKey,intentId,subscriptionId,
   }={}){
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
@@ -133,7 +138,7 @@ export function createPazoCheckoutConsentStore({
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
       !INTENT.test(intentId||''))
      throw Error('pazo_provider_create_claim_invalid')
-   const result=await rpc('f16_p07_claim_provider_create',{
+   const result=await rpc(qaV2?'f16_qa_v2_claim_provider_create':'f16_p07_claim_provider_create',{ 
     p_owner_id:ownerId,p_request_key:requestKey,p_intent_id:intentId,
    })
    if(typeof result!=='boolean')fail()
