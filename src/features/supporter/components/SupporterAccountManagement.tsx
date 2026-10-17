@@ -6,6 +6,7 @@ import { SandboxV2AccountPanel } from './SandboxV2AccountPanel'
 import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
 import { SupporterBenefitsHome } from './SupporterBenefitsHome'
+import { SupporterScreenPortal } from './SupporterScreenPortal'
 import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
 import type { Pet } from '../../../types/pazo'
 
@@ -153,8 +154,9 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       milestone={membership.milestone} qa={qaV2Screen}/>
   }
   return (
+    <SupporterScreenPortal>
     <div role="dialog" aria-modal="true" aria-labelledby="supporter-account-title"
-      className="fixed inset-0 z-[115] overflow-y-auto bg-[#FAF8F5] text-[#204E4A]">
+      className="h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#FAF8F5] text-[#204E4A]">
       <div className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-3 backdrop-blur-xl">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           <div>
@@ -170,7 +172,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         </div>
       </div>
 
-      <main className="mx-auto max-w-xl space-y-5 px-4 pb-12 pt-4">
+      <main className="mx-auto w-full min-w-0 max-w-xl space-y-4 px-4 pb-10 pt-4">
         {membership.kind === 'checking' && <p role="status" className="rounded-3xl bg-white p-5 text-sm font-semibold">
           {label('Comprobando tu membresía…','Checking your membership…')}
         </p>}
@@ -211,22 +213,22 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           <h3 id="supporter-benefits-title" className="px-1 text-lg font-black">
             {label('Un gracias especial por tu apoyo', 'A special thank-you for your support')}
           </h3>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 gap-2">
             {benefits.map(([name, description], index) => (
-              <div key={name} className="flex gap-3 rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+              <div key={name} className="flex min-w-0 items-start gap-3 rounded-[22px] bg-white px-4 py-3.5 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
                 <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/35 font-black text-[#204E4A]">
                   {index + 1}
                 </span>
-                <div>
-                  <h4 className="text-sm font-extrabold">{name}</h4>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[#5C7470]">{description}</p>
+                <div className="min-w-0 flex-1">
+                  <h4 className="break-words text-sm font-extrabold leading-snug">{name}</h4>
+                  <p className="mt-1 break-words text-[12px] leading-relaxed text-[#5C7470]">{description}</p>
                 </div>
               </div>
             ))}
           </div>
           <p className="px-1 text-xs leading-relaxed text-[#5C7470]">
-            {label('Las recompensas se habilitan únicamente cuando PAZO verifica el período pagado. Nunca por solo regresar de PayPal.',
-              'Rewards become available only after PAZO verifies the paid period, never just because you returned from PayPal.')}
+            {label('Tus beneficios se activan cuando PAZO confirma tu pago.',
+              'Your benefits activate when PAZO confirms your payment.')}
           </p>
         </section>
 
@@ -345,5 +347,6 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         )}
       </main>
     </div>
+    </SupporterScreenPortal>
   )
 }
