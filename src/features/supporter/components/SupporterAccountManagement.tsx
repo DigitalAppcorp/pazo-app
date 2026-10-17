@@ -36,7 +36,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
   const [cancelDone, setCancelDone] = useState<string | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
-  const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus(pet?.id)
+  const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
 
