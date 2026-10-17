@@ -150,22 +150,24 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     <SupporterScreenPortal>
     <div role="dialog" aria-modal="true" aria-labelledby="supporter-account-title"
       className="h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#FAF8F5] text-[#204E4A]">
-      <div className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-3 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
-          <div>
-            <h2 id="supporter-account-title" className="text-xl font-black">
-              {label('Amigo de PAZO','Friend of PAZO')}
-            </h2>
-            {qaV2Screen && <p className="text-[11px] font-bold text-[#5C7470]">
-              {label('Entorno de prueba · PayPal Sandbox', 'Test environment · PayPal Sandbox')}
-            </p>}
-          </div>
+      <header className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-2 backdrop-blur-xl">
+        <div className="mx-auto grid min-h-11 max-w-xl grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
           <button ref={closeRef} type="button" onClick={onClose} disabled={busy}
-            className={control}>{label('Volver a PAZO','Back to PAZO')}</button>
+            aria-label={label('Volver a PAZO','Back to PAZO')}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.06)] hover:bg-[#E7EDDC] focus-visible:bg-[#E1E53F]/50">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m14 5-7 7 7 7M8 12h12"/>
+            </svg>
+          </button>
+          <h2 id="supporter-account-title" className="min-w-0 text-center text-[13px] font-extrabold text-[#204E4A]">
+            {label('Amigo de PAZO','Friend of PAZO')}
+          </h2>
+          <span aria-hidden="true" className="h-11 w-11"/>
         </div>
-      </div>
+      </header>
 
-      <main className="mx-auto w-full min-w-0 max-w-xl space-y-4 px-4 pb-10 pt-4">
+      <main className="mx-auto w-full min-w-0 max-w-xl space-y-2.5 px-4 pb-7 pt-1">
         {membership.kind === 'checking' && <p role="status" className="rounded-3xl bg-white p-5 text-sm font-semibold">
           {label('Comprobando tu membresía…','Checking your membership…')}
         </p>}
@@ -192,12 +194,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                 </p>
               </div>
             )}
-            <p className="px-1 text-center text-[11px] leading-relaxed text-[#5C7470]">
-              {label('PAZO seguirá siendo gratis para todos. Renovación mensual y cancelación disponible.',
-                'PAZO will remain free for everyone. Monthly renewal and cancellation available.')}
+            <p className="px-1 text-center text-[10px] leading-relaxed text-[#5C7470]">
+              {label('PAZO seguirá siendo gratis para todos.','PAZO will remain free for everyone.')}
             </p>
             <button type="button" onClick={onClose}
-              className="min-h-11 w-full rounded-full bg-[#EEF2E9] px-4 py-3 text-sm font-bold text-[#204E4A] hover:bg-[#E3EBD8] focus-visible:bg-[#E3EBD8]">
+              className="min-h-9 w-full rounded-full px-4 py-2 text-center text-[12px] font-bold text-[#204E4A] underline decoration-[#A6BBB1] underline-offset-4 hover:bg-[#E9EEDC] focus-visible:bg-[#E1E53F]/30">
               {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
             </button>
           </SupporterOfferB>
