@@ -1,3 +1,17 @@
+# F16 — EXPERIENCIA DE PRODUCTO «AMIGO DE PAZO» IMPLEMENTADA EN PR #44; QA VISUAL PENDIENTE (2026-10-17)
+
+**GO PO «de acuerdo, go» después de auditoría UX:** convertir el checkout administrativo en recorrido natural de apoyo voluntario, mantener precio US$2.99/mes, cuatro recompensas, PAZO gratuito, cierre sin penalizaciones, y separación explícita de pruebas/Live. Se adoptó como **política de invitación futura**: ≥7 días de cuenta, ≥3 días activos/14, ≥5 acciones significativas en ≥2 superficies y 30 días de silencio tras «Ahora no», sin onboarding, primera sesión, rescate o interacción ocupada. **No inferir actividad sin fuente comprobada.**
+
+**Implementación GitHub en la misma rama:** `SupporterAccountManagement.tsx` muestra oferta simple ES/EN, cuatro beneficios y «Ahora no»; mantiene la compra pública DESHABILITADA y el checkout únicamente bajo flag QA existente. El panel QA V2 funciona mediante los mismos endpoints autenticados; comprobación/cancelación quedan en «Mi membresía», separados de la oferta. `SandboxCheckoutQaPanel.tsx` conserva términos exactos publicados accesibles en <details>, casilla obligatoria inicialmente sin marcar, `begin` idempotente y redirección validada; se retiró panel V2 anidado. `SandboxV2AccountPanel.tsx` coloca muestras de insignias bajo detalle voluntario y no informa «pago aún no verificado» tras `paidThrough` confirmado. Entrada de `PetView.tsx` explica apoyo voluntario. `supporterPitchEligibility.mjs` define **evaluador puro fail-closed**, sin rastreo ni almacenamiento. Pruebas de regresión `f16SupporterProductExperience.test.mjs` para copy, flags, requisitos y privilegios.
+
+**NO completado / gates:** no existe todavía el origen aprobado y verificado de los contadores 14d, acciones y rechazos; por privacidad **NO se integró disparador de invitación ni recolección nueva de actividad**, ni cooldown persistente. No declarar pitch automático en funcionamiento. Para ello: diseño de señales mínimas y retención, revisión de gobernanza e inventario, pruebas que verifiquen 30 días sin mostrar la invitación y exclusión de rescates. La UI requiere prueba en dispositivo/navegador con evidencia 360-390px y escritorio, estados pendiente/éxito/error/renovación/cancelación, retroalimentación y aprobación visual PO. Código/GitHub CI/PG Lab **a confirmar para HEAD**; no se declara E2E Sandbox. Controles de backend permanecen sin cambios; no se solicitó PayPal Sandbox de nuevo ni se activó Live, migraciones o recursos pagados. PR #44 DRAFT, no merge.
+
+**Siguiente gate:** verificar CI para commits de UI/test, realizar capturas QA locales, presentar cambios visuales PO, luego cerrar señales de elegibilidad con minimización antes de habilitar invitaciones. **No repetir P42/P43 ni crear otra compra Sandbox antes del gate UX.**
+
+**Marcador:** `F16_NATURAL_SUPPORT_UI_BRANCH_ONLY_QA_AND_ELIGIBILITY_TRIGGER_PENDING`.
+
+---
+
 # F16 — SANDBOX V2 QA LOCALHOST CORREGIDO Y DESPLEGADO (2026-10-17)
 
 **Retomado tras petición PO «vuelve a trabajar en donde te quedaste».** No crear cuenta nueva ni alterar la anterior. CI del commit previo `be5d5e89914436e714fd88952ba0fef513fc6168`: [CI SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39054377142) y [PG Lab SUCCESS](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39054377186).
