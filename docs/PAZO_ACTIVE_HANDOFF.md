@@ -1,3 +1,13 @@
+# F16 — Oferta Amigo de PAZO, diseño Opción B aprobado e implementado en rama (2026-10-17)
+
+**Autorización expresa del Product Owner:** implementar la Opción B elegida de cuatro maquetas: titular «Pequeñas acciones, grandes historias», diseño minimalista cálido verde/crema, insignia oficial aprobada como ilustración *decorativa* (no estado concedido), precio US$2.99/mes, cuatro filas horizontales: insignia perfil/Feed, cinco fondos, muro por autorización individual y medallas tras 3/6/12 meses pagados, casilla desmarcada y botón amarillo «Continuar con PayPal», «Ahora no».
+
+**Código en PR #44 DRAFT:** nuevo `SupporterOfferB.tsx` (composición e iconografía no interactiva, ES/EN) reemplaza la pantalla comercial antigua en `SupporterAccountManagement.tsx`. El mismo `SandboxCheckoutQaPanel.tsx` recibe `inline` para presentar el consentimiento y CTA dentro del diseño sin un botón intermedio; **NO hay segundo flujo de cobro**. Mantiene oferta publicada V2 versionada, digest exacto, casilla inicialmente FALSE, invocación `begin` autenticada one-shot y URL PayPal Sandbox validada. La oferta del usuario sin membresía usa `SupporterScreenPortal`; membresía verificada sigue a `SupporterBenefitsHome`. El PayPal público/Live conserva botón **deshabilitado**, sin planificación de checkout público en este cambio. La gestión de pruebas sigue plegada. No se modificaron PayPal, Supabase/SQL, Edge, Vercel ni datos; no hubo pagos.
+
+**Calidad pendiente:** pruebas CI/PG para HEAD definitivo, revisión real en marco móvil 360–430 px y desktop, screenshot/aceptación visual del Product Owner; confirmación real Sandbox V2/beneficios aún no completada. La elección del diseño B autoriza implementación, NO marca revisión en navegador ni GO Live. **Marcador** `F16_OPTION_B_IMPLEMENTED_BRANCH_QA_VISUAL_REQUIRED_LIVE_OFF`.
+
+---
+
 # F16 — Captura real del PO: gate visual NO aprobado; corrección de layout en PR #44 (2026-10-17)
 
 El usuario aportó captura móvil de la pantalla real «Amigo de PAZO» sin membresía. **Hallazgos visuales:** sección superior parcialmente fuera de vista, tarjetas 2x2 demasiado estrechas que cortaban el texto del cuarto beneficio, navegación inferior y botón flotante superpuestos con la oferta, demasiado texto técnico visible. Captura = evidencia de problema; NO evidencia de aceptación visual.
