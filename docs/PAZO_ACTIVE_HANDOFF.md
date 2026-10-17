@@ -1,3 +1,11 @@
+# F16 — EXISTING TEST OWNER V2 EDGE ADAPTER WIRED, ALL MONEY STILL OFF (2026-10-17)
+
+**Latest code after same-owner QA schema deployed:** `p06CheckoutConsentStore.mjs` now accepts opt-in `qaV2:true`, routes `beginForOwner` to `f16_qa_v2_begin_checkout` and provider one-time claim to `f16_qa_v2_claim_provider_create`, refuses a V1 terms version. `f16-paypal-supporter/index.ts` passes `qaV2:true`. Its checkout release `QA_CHECKOUT_RELEASE_APPROVED=false` remains OFF. The old account-management cancel/status implementation can target the previously bound P06 subscription, **so V2 status/cancel are deliberately blocked 503** until a new bound-intent-scoped V2 management handler is complete. Recovery/acknowledgement helpers in V2 mode also fail closed pending new V2-specific reads. New contract test `src/features/supporter/testing/f16SameOwnerQaV2CheckoutWiring.test.mjs`, commit `28617617dee41e01118e433609f1f77ff98ef270`, verify GitHub CI/PG checks after this handoff.
+
+**What remains:** create V2-scoped recovery, receipt, status and provider cancellation; verify webhook and merchant payment with own V2 intent; register QA-only paid period with correct full service window/refunds; authorize temporarily one already staged owner, publish V2 offer and deploy ONLY Sandbox QA Edge + local preview with right origin; let PO approve Sandbox buyer and inspect all four real benefits. User does NOT need to create account or pet or provide secret. No new payment/benefits attempted.
+
+---
+
 # F16 SANDBOX — SAME EXISTING QA USER SELECTED, NEW CHECKOUT V2 PRIVATE HOSTED (2026-10-17)
 
 **PO explicit choice:** use the already existing test PAZO account+pet, not create a new Auth. Never place actual email, internal Auth UUID, passwords or test credentials in this public GitHub file. Preflight private DB: exactly 1 Auth account matched, 1 owned pet, 1 P06 historical bound checkout and 1 bound subscription intent, 0 credited payments; existing P06 `p06_one_checkout_per_owner` prevents a new attempt through the old API. P06 v1 accepted terms without perks; must not change or credit them.
