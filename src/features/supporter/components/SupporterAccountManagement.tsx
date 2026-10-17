@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
 import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
+import { SandboxV2AccountPanel } from './SandboxV2AccountPanel'
 import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
 
@@ -82,7 +83,7 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
     } catch { setError(true); setAccounts(null) }
     finally { setBusy(false) }
   }
-  useEffect(() => { void refresh() }, [])
+  useEffect(() => { if (!qaV2Screen) void refresh() }, [])
 
   const checkStatus = async (intentId: string) => {
     setBusy(true)
@@ -133,110 +134,187 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
     } catch {setError(true)} finally {setBusy(false)}
   }
 
-  const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-50'
+  const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]/55 disabled:opacity-50'
+  const primary = 'min-h-12 rounded-full bg-[#204E4A] px-6 py-3 text-sm font-extrabold text-white transition-colors hover:bg-[#32635D] focus-visible:bg-[#32635D] disabled:opacity-50'
+  const benefits = [
+    [label('Una insignia especial', 'A special badge'), label('En el perfil y junto a tus publicaciones.', 'On your pet profile and feed posts.')],
+    [label('Cinco fondos para tu mascota', 'Five pet backgrounds'), label('Personaliza su perfil con estilos únicos.', 'Personalize their profile with unique styles.')],
+    [label('Un lugar en nuestro muro', 'A place on our thank-you wall'), label('Solo para las mascotas que tú autorices.', 'Only for pets you explicitly choose.')],
+    [label('Reconocimiento a tu constancia', 'A thank-you for continued support'), label('Insignias conmemorativas a los 3, 6 y 12 meses pagados.', 'Milestone badges after 3, 6 and 12 completed paid months.')],
+  ]
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="supporter-account-title"
       className="fixed inset-0 z-[115] overflow-y-auto bg-[#FAF8F5] text-[#204E4A]">
-      <div className="sticky top-0 z-10 bg-[#FAF8F5]/95 px-4 py-4 backdrop-blur-xl">
+      <div className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-3 backdrop-blur-xl">
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
           <div>
             <h2 id="supporter-account-title" className="text-xl font-black">
-              {qaV2Screen?label('Amigo de PAZO · Sandbox','Friend of PAZO · Sandbox'):label('Gestionar Amigo de PAZO','Manage Friend of PAZO')}
+              {label('Amigo de PAZO','Friend of PAZO')}
             </h2>
-            <p className="text-sm text-[#5C7470]">{qaV2Screen?label('Pruebas con saldo ficticio de PayPal','PayPal test-money only'):label('Solo gestión de cuentas · No hay compras disponibles','Account management only · Purchases unavailable')}</p>
+            {qaV2Screen && <p className="text-[11px] font-bold text-[#5C7470]">
+              {label('Entorno de prueba · PayPal Sandbox', 'Test environment · PayPal Sandbox')}
+            </p>}
           </div>
           <button ref={closeRef} type="button" onClick={onClose} disabled={busy}
-            className={control}>{label('Cerrar','Close')}</button>
+            className={control}>{label('Volver a PAZO','Back to PAZO')}</button>
         </div>
       </div>
-      <div className="mx-auto max-w-xl space-y-4 px-4 py-5">
-        <p className="text-sm text-[#5C7470]">
-          {label('PAZO continúa siendo gratis. El estado de PayPal no confirma un período pagado ni concede beneficios.',
-            'PAZO remains free. PayPal status does not establish a paid period or grant benefits.')}
-        </p>
-        {import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' && (
-          <div className="space-y-3">
-            <button type="button" onClick={()=>setShowSandboxQa(v=>!v)}
-              className={control}>
-              {label(showSandboxQa?'Cerrar prueba Sandbox':'Abrir prueba Sandbox',
-                showSandboxQa?'Close Sandbox test':'Open Sandbox test')}
-            </button>
-            {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
-          </div>
-        )}
-        {import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
-          import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
-            <SupporterSandboxBenefitsStatus lang={lang} />
-          )}
-        {error && (
-          <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
-            {label('No pudimos confirmar la operación en el servidor. No se ha mostrado ningún cambio como completado.',
-              'The server could not confirm this action. No change is shown as completed.')}
-            <button type="button" onClick={()=>void refresh()} disabled={busy}
-              className={'ml-2 '+control}>{label('Reintentar','Retry')}</button>
-          </div>
-        )}
-        {accounts === null && !error && <p role="status">{label('Consultando…','Checking…')}</p>}
-        {accounts?.length === 0 && (
-          <p className="rounded-3xl bg-white p-5 text-sm shadow-sm">
-            {label('Esta cuenta no tiene una suscripción Amigo de PAZO registrada. No necesitas suscribirte para seguir usando PAZO.',
-              'This account has no recorded Friend of PAZO subscription. PAZO remains free.')}
-          </p>
-        )}
-        {import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
-          <SupporterWallConsentSettings lang={lang} />
-        )}
-        {!qaV2Screen && accounts?.map(account=>(
-          <div key={account.intentId} className="space-y-3 rounded-3xl bg-white p-5 shadow-sm">
-            <h3 className="text-base font-extrabold">
-              {label('Suscripción de apoyo','Support subscription')}
-            </h3>
-            <p className="text-sm text-[#5C7470]">
-              {account.state === 'bound'
-                ? label('Vinculada a PayPal (pago no verificado)','Linked to PayPal (payment unverified)')
-                : label('Solicitud pendiente de revisión','Pending review')}
+
+      <main className="mx-auto max-w-xl space-y-5 px-4 pb-12 pt-4">
+        <section aria-labelledby="supporter-offer-title"
+          className="relative overflow-hidden rounded-[32px] bg-[#E6EDDB] px-5 pb-6 pt-7 sm:px-7">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#E1E53F]/35 blur-3xl"/>
+          <div className="relative">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-[#52716A]">
+              {label('Gracias por ser parte de PAZO', 'Thank you for being part of PAZO')}
             </p>
-            {status[account.intentId] && (
-              <p role="status" className="text-sm">
-                {label('Estado informado por PayPal: ','PayPal-reported status: ')}
-                <strong>{status[account.intentId]}</strong>
-              </p>
-            )}
-            {cancelDone === account.intentId && <p role="status" className="text-sm font-bold text-[#204E4A]">
-              {label('PayPal confirmó la cancelación de futuras renovaciones.','PayPal confirmed future renewals are cancelled.')}
-            </p>}
-            <div className="flex flex-wrap gap-2">
-              {account.state === 'bound' && (
-                <button type="button" disabled={busy} onClick={()=>void checkStatus(account.intentId)}
-                  className={control}>{label('Consultar estado','Check status')}</button>
-              )}
-              {account.canDownloadAcceptance && (
-                <button type="button" disabled={busy} onClick={()=>void download(account.intentId)}
-                  className={control}>{label('Descargar aceptación','Download acceptance')}</button>
-              )}
-              {account.state === 'bound' && status[account.intentId] !== 'CANCELLED' &&
-                cancelDone !== account.intentId && (
-                  <button type="button" disabled={busy}
-                    onClick={()=>setCancelConfirm(account.intentId)} className={control}>
-                    {label('Cancelar renovación','Cancel renewal')}
-                  </button>
-                )}
+            <h3 id="supporter-offer-title" className="mt-3 max-w-[18ch] text-[clamp(27px,7vw,38px)] font-black leading-tight tracking-tight">
+              {label('Ayúdanos a mantener vivo este pequeño mundo', 'Help keep this little world going')}
+            </h3>
+            <p className="mt-3 max-w-[48ch] text-sm leading-relaxed text-[#476862]">
+              {label('PAZO es gratis y seguirá ofreciendo sus herramientas principales sin membresía. Tu apoyo voluntario nos ayuda a mantenerlo y mejorarlo.',
+                'PAZO is free, and its core tools will remain available without a membership. Your voluntary support helps us maintain and improve it.')}
+            </p>
+            <div className="mt-5 flex flex-wrap items-baseline gap-x-2">
+              <strong className="text-4xl font-black tabular-nums">US$2.99</strong>
+              <span className="text-sm font-bold text-[#476862]">{label('al mes','per month')}</span>
             </div>
-            {cancelConfirm === account.intentId && (
-              <div className="space-y-2 rounded-3xl bg-[#FCE5D8] p-4">
-                <p className="text-sm">{label('¿Confirmas que deseas detener las futuras renovaciones de esta suscripción?',
-                  'Confirm that you want to stop future renewals of this subscription?')}</p>
-                <div className="flex flex-wrap gap-2">
-                  <button type="button" disabled={busy} className={control}
-                    onClick={()=>void cancel(account.intentId)}>{label('Sí, cancelar renovación','Yes, cancel renewal')}</button>
-                  <button type="button" disabled={busy} className={control}
-                    onClick={()=>setCancelConfirm(null)}>{label('Mantener','Keep renewal')}</button>
+            <p className="mt-1 text-xs font-medium text-[#52716A]">
+              {label('Suscripción voluntaria · Renovación mensual · Puedes cancelar las próximas renovaciones.',
+                'Voluntary subscription · Monthly renewal · You can cancel future renewals.')}
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="supporter-benefits-title" className="space-y-3">
+          <h3 id="supporter-benefits-title" className="px-1 text-lg font-black">
+            {label('Un gracias especial por tu apoyo', 'A special thank-you for your support')}
+          </h3>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {benefits.map(([name, description], index) => (
+              <div key={name} className="flex gap-3 rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+                <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/35 font-black text-[#204E4A]">
+                  {index + 1}
+                </span>
+                <div>
+                  <h4 className="text-sm font-extrabold">{name}</h4>
+                  <p className="mt-1 text-[12px] leading-relaxed text-[#5C7470]">{description}</p>
                 </div>
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
+          <p className="px-1 text-xs leading-relaxed text-[#5C7470]">
+            {label('Las recompensas se habilitan únicamente cuando PAZO verifica el período pagado. Nunca por solo regresar de PayPal.',
+              'Rewards become available only after PAZO verifies the paid period, never just because you returned from PayPal.')}
+          </p>
+        </section>
+
+        <section aria-label={label('Elegir cómo continuar', 'Choose how to continue')}
+          className="space-y-3 rounded-[28px] bg-white p-5 shadow-[0_4px_20px_rgba(32,78,74,0.04)]">
+          {qaV2Screen ? (
+            <>
+              <p className="text-xs font-bold text-[#476862]">
+                {label('Modo de prueba: PayPal Sandbox utiliza dinero ficticio. No estás haciendo un pago real.',
+                  'Test mode: PayPal Sandbox uses test money. You are not making a real payment.')}
+              </p>
+              <button type="button" className={primary} aria-expanded={showSandboxQa}
+                onClick={() => setShowSandboxQa(value => !value)}>
+                {label(showSandboxQa ? 'Ocultar confirmación de apoyo' : 'Apoyar a PAZO · Prueba Sandbox',
+                  showSandboxQa ? 'Hide support confirmation' : 'Support PAZO · Sandbox test')}
+              </button>
+              {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
+            </>
+          ) : (
+            <p role="status" className="rounded-2xl bg-[#F0F3ED] px-4 py-3 text-sm font-semibold text-[#476862]">
+              {label('Las suscripciones todavía no están disponibles. Puedes seguir disfrutando de PAZO gratis.',
+                'Subscriptions are not available yet. You can keep enjoying PAZO for free.')}
+            </p>
+          )}
+          <button type="button" onClick={onClose} className="min-h-11 w-full rounded-full bg-[#F0F3ED] px-4 py-3 text-sm font-bold text-[#204E4A] hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/45">
+            {label('Ahora no, seguir usando PAZO', 'Not now, keep using PAZO')}
+          </button>
+        </section>
+
+        <section aria-labelledby="supporter-manage-title" className="space-y-3">
+          <h3 id="supporter-manage-title" className="px-1 text-lg font-black">
+            {label('Mi membresía', 'My membership')}
+          </h3>
+          {qaV2Screen ? (
+            <SandboxV2AccountPanel lang={lang}/>
+          ) : (
+            <>
+              {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
+                {label('No pudimos consultar tu suscripción. No mostraremos ningún cambio como completado.',
+                  'Could not check your subscription. No change will be shown as completed.')}
+                <button type="button" onClick={() => void refresh()} disabled={busy}
+                  className={control}>{label('Reintentar', 'Retry')}</button>
+              </div>}
+              {accounts === null && !error && <p role="status">{label('Consultando…','Checking…')}</p>}
+              {accounts?.length === 0 && <p className="rounded-3xl bg-white p-5 text-sm">
+                {label('No tienes una suscripción registrada. PAZO sigue siendo gratis.',
+                  'You have no recorded subscription. PAZO remains free.')}
+              </p>}
+              {accounts?.map(account => (
+                <div key={account.intentId} className="space-y-3 rounded-3xl bg-white p-5 shadow-sm">
+                  <h4 className="text-base font-extrabold">{label('Suscripción de apoyo','Support subscription')}</h4>
+                  <p className="text-sm text-[#5C7470]">
+                    {account.state === 'bound'
+                      ? label('Vinculada a PayPal; período pagado no verificado.', 'Linked to PayPal; paid period unverified.')
+                      : label('Solicitud pendiente de revisión', 'Pending review')}
+                  </p>
+                  {status[account.intentId] && <p role="status" className="text-sm">
+                    {label('Estado informado por PayPal: ','PayPal-reported status: ')}
+                    <strong>{status[account.intentId]}</strong>
+                  </p>}
+                  {cancelDone === account.intentId && <p role="status" className="text-sm font-bold">
+                    {label('Cancelada la próxima renovación.','Future renewals cancelled.')}
+                  </p>}
+                  <div className="flex flex-wrap gap-2">
+                    {account.state === 'bound' && <button type="button" disabled={busy}
+                      onClick={() => void checkStatus(account.intentId)} className={control}>
+                      {label('Actualizar estado','Refresh status')}</button>}
+                    {account.canDownloadAcceptance && <button type="button" disabled={busy}
+                      onClick={() => void download(account.intentId)} className={control}>
+                      {label('Descargar condiciones aceptadas','Download accepted terms')}</button>}
+                    {account.state === 'bound' && status[account.intentId] !== 'CANCELLED' &&
+                      cancelDone !== account.intentId && <button type="button" disabled={busy}
+                        onClick={() => setCancelConfirm(account.intentId)} className={control}>
+                        {label('Cancelar renovación','Cancel renewal')}</button>}
+                  </div>
+                  {cancelConfirm === account.intentId && <div className="space-y-3 rounded-2xl bg-[#FCE5D8] p-4">
+                    <p className="text-sm">{label('¿Quieres detener los próximos cobros de esta suscripción?',
+                      'Stop future charges for this subscription?')}</p>
+                    <button type="button" disabled={busy} className={control}
+                      onClick={() => void cancel(account.intentId)}>
+                      {label('Sí, cancelar renovación','Yes, cancel renewal')}</button>
+                    <button type="button" disabled={busy} className={control}
+                      onClick={() => setCancelConfirm(null)}>{label('Mantener suscripción','Keep subscription')}</button>
+                  </div>}
+                </div>
+              ))}
+            </>
+          )}
+        </section>
+
+        {import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
+          <section aria-labelledby="supporter-rewards-title" className="space-y-3">
+            <h3 id="supporter-rewards-title" className="px-1 text-lg font-black">
+              {label('Mis recompensas', 'My rewards')}
+            </h3>
+            <p className="px-1 text-xs text-[#5C7470]">
+              {label('Tu mascota solo recibirá beneficios con cobertura verificada. Puedes retirar su permiso del muro en cualquier momento.',
+                'Your pet receives rewards only with verified coverage. You can withdraw wall permission any time.')}
+            </p>
+            <SupporterWallConsentSettings lang={lang}/>
+            {qaV2Screen && <details className="rounded-3xl bg-[#F0F3ED] p-4">
+              <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold focus-visible:bg-[#E1E53F]/40">
+                {label('Detalles de verificación · Solo pruebas','Verification details · Tests only')}
+              </summary>
+              <SupporterSandboxBenefitsStatus lang={lang}/>
+            </details>}
+          </section>
+        )}
+      </main>
     </div>
   )
 }
