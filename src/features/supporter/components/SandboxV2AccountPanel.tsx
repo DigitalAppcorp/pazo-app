@@ -26,7 +26,7 @@ export function SandboxV2AccountPanel({lang}:Props){
   if(!config||config.url!==HOST)throw Error('INVALID_QA_CONFIG')
   const {data:{session},error:e}=await supabase.auth.getSession()
   if(e||!session?.access_token)throw Error('LOGIN_REQUIRED')
-  const response=await fetch(HOST+'/functions/v1/f16-paypal-supporter',{
+  const response=await fetch(HOST+'/functions/v1/f16-paypal-supporter-v2-qa',{
    method:'POST',headers:{authorization:'Bearer '+session.access_token,
     apikey:config.key,'content-type':'application/json'},
    cache:'no-store',body:JSON.stringify(payload),
