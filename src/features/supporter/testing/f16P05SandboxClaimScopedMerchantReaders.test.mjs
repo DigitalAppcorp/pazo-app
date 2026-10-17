@@ -23,6 +23,9 @@ const fixture=(mutate=()=>{})=>{
     payer:{payer_info:{email:'buyer@private.example'}}}},
   subscription:{id:SUB,plan_id:PLAN,custom_id:INTENT,status:'CANCELLED',
    subscriber:{email_address:'buyer@private.example',payer_id:'SECRET_PAYER'}},
+  sale:{id:SALE,billing_agreement_id:SUB,state:'completed',
+   amount:{currency:'USD',total:'2.99'},
+   payer:{email:'buyer@private.example'}},
   token:{token_type:'Bearer',access_token:'MOCK_ACCESS_TOKEN_PRIVATE'},
   proof:{id:E,type:'PAYMENT.SALE.COMPLETED',
    verifiedAt:'2026-10-15T03:20:39+00:00',processingState:'processing'},
@@ -45,6 +48,8 @@ const fixture=(mutate=()=>{})=>{
     return {ok:true,json:async()=>payload.event}
    if(url===HOST+'/v1/billing/subscriptions/'+SUB)
     return {ok:true,json:async()=>payload.subscription}
+   if(url===HOST+'/v1/payments/sale/'+SALE)
+    return {ok:true,json:async()=>payload.sale}
    throw Error('unexpected mock URL')
   },
  }
@@ -63,17 +68,21 @@ test('scoped merchant reader GETs only claimed event and matching subscription',
  const {reader,calls}=fixture()
  const event=await reader.getMerchantEvent(claim)
  const sub=await reader.getMerchantSubscription({...claim,subscriptionId:SUB})
- safe(event);safe(sub)
+ const original=await reader.getIndependentMerchantSale({...claim,saleId:SALE})
+ safe(event);safe(sub);safe(original)
  assert.equal(event.resource.billing_agreement_id,SUB)
  assert.equal(event.resource.id,SALE)
  assert.deepEqual(sub,{id:SUB,plan_id:PLAN,custom_id:INTENT,status:'CANCELLED'})
- assert.equal(calls.filter(x=>x.source==='inbox').length,2)
- assert.equal(calls.filter(x=>x.url?.includes('webhooks-events/')).length,2)
+ assert.equal(calls.filter(x=>x.source==='inbox').length,3)
+ assert.equal(calls.filter(x=>x.url?.includes('webhooks-events/')).length,3)
  assert.equal(calls.filter(x=>x.url?.includes('billing/subscriptions/')).length,1)
  const allPaypal=calls.filter(x=>x.source==='paypal')
- assert.equal(allPaypal.filter(x=>x.method==='POST').length,3)
+ assert.equal(allPaypal.filter(x=>x.method==='POST').length,4)
  assert.ok(allPaypal.filter(x=>x.method==='POST').every(
   x=>x.url===HOST+'/v1/oauth2/token'))
+ assert.equal(calls.filter(x=>x.url?.includes('/payments/sale/')).length,1)
+ assert.deepEqual(original,{id:SALE,billing_agreement_id:SUB,state:'completed',
+  amount:{currency:'USD',total:'2.99'}})
  assert.ok(allPaypal.filter(x=>x.method!=='POST').every(x=>x.method==='GET'))
 })
 test('unclaimed invalid references cannot reach OAuth or event GET',async()=>{
@@ -221,4 +230,21 @@ test('30 rejected merchant combinations cannot create paid cycle',async()=>{
   safe(result);seen++
  }
  assert.equal(seen,48)
+})
+
+test('P29 original SALE GET refuses foreign sale before merchant request',async()=>{
+ const {reader,calls}=fixture()
+ const r=await reader.getIndependentMerchantSale({...claim,saleId:'SALE-FOREIGN999'})
+ assert.equal(r,null)
+ assert.equal(calls.some(x=>x.url?.includes('/payments/sale/')),false)
+})
+test('P29 independent original SALE rejects mismatch and never leaks payer',async()=>{
+ for(const alter of [
+  s=>{s.id='SALE-FOREIGN'},s=>{s.billing_agreement_id='I-FOREIGN'},
+  s=>{s.amount.total='5.99'},s=>{s.state='refunded'},
+ ]){
+  const {reader}=fixture(x=>alter(x.sale))
+  const value=await reader.getIndependentMerchantSale({...claim,saleId:SALE})
+  assert.equal(value,null)
+ }
 })
