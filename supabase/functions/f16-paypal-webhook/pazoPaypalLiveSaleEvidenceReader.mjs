@@ -4,6 +4,7 @@
 // Caller must independently enforce verified webhook lease, bound owner,
 // preexisting consent and merchant/Live credential custody.
 import {validatePazoPaypalLiveMonthlyPlan} from './pazoPaypalLivePlanContract.mjs'
+import {reviewPazoLiveSubscriptionTransactions} from './pazoPaypalLiveSubscriptionTransactionsProof.mjs'
 
 const HOST='https://api-m.paypal.com'
 const SALE=/^[A-Za-z0-9._-]{3,128}$/
@@ -54,6 +55,9 @@ export function createPazoPaypalLiveSaleEvidenceReader({
          record?.leaseOwned===undefined || record.leaseOwned!==true ||
          record?.eventId!==eventId ||
          record?.eventType!=='PAYMENT.SALE.COMPLETED' ||
+         typeof record.verifiedWebhookTime!=='string' ||
+         !/^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d{1,6})?Z$/.test(record.verifiedWebhookTime) ||
+         !Number.isFinite(Date.parse(record.verifiedWebhookTime)) ||
          record?.saleId!==saleId ||
          !SUB.test(record.subscriptionId||'') ||
          !UUID.test(record.ownerId||'') ||
@@ -85,6 +89,22 @@ export function createPazoPaypalLiveSaleEvidenceReader({
         path:'/v1/billing/plans/'+encodeURIComponent(expectedPlanId)})
       if(validatePazoPaypalLiveMonthlyPlan(plan,expectedPlanId).ready!==true)
         return deny('live_plan_terms_unverified')
+      // Cross-check the Subscriptions v1 captured payment ledger too, not
+      // solely legacy Sale GET or ACTIVE subscription status. All pages must
+      // be present. Time window comes from the VERIFIED merchant webhook.
+      const at=Date.parse(record.verifiedWebhookTime)
+      const since=new Date(at-48*3600000).toISOString().replace('.000Z','Z')
+      const until=new Date(at+48*3600000).toISOString().replace('.000Z','Z')
+      const transactionList=await getJson({fetchImpl,token,
+        path:'/v1/billing/subscriptions/'+encodeURIComponent(record.subscriptionId)+
+          '/transactions?start_time='+encodeURIComponent(since)+
+          '&end_time='+encodeURIComponent(until)})
+      const transactionProof=reviewPazoLiveSubscriptionTransactions({
+        document:transactionList,expectedTransactionId:saleId,
+        verifiedWebhookTime:record.verifiedWebhookTime,
+      })
+      if(transactionProof.transactionVerified!==true)
+        return deny('subscription_transaction_not_independently_cleared')
       // No "30 days" or "next_billing_time" inference. Seller identity, real
       // contract cycle and reversal history must be reconciled separately.
       return Object.freeze({
