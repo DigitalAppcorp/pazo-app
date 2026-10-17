@@ -1,3 +1,17 @@
+# F16 — Gate de QA visual en PAZO local: preview disponible, aceptación pendiente (2026-10-17)
+
+GO del PO para continuar QA. GitHub CI y PostgreSQL Lab GREEN para el conjunto UI inicial y QA explícito (commit `811c9fdf`, [CI #39062155504](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39062155504), [PG #39062155514](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39062155514)). El último commit de prueba de cuenta completa requiere CI independiente. **No declarar QA visual en navegador aprobado.**
+
+Hallazgo en pestaña PAZO localhost del usuario, inspeccionada solo en modo lectura: todavía cargaba la versión antigua con tres accesos separados «Amigo de PAZO» / «Personalizar perfil» / «Participar en el muro». El equipo local debe detener servidor Vite y hacer `git switch f13/section-titles-20261012`, `git pull --ff-only`, reiniciar `powershell -ExecutionPolicy Bypass -File .\\scripts\\f16-run-real-sandbox-qa.ps1`. Verificar nuevo botón único bajo Mi mascota y oferta sin membre­sía. No se controló ni modificó remotamente el PC; no hay screenshot/aceptación visual actualizados.
+
+Cambio dirigido para evitar upsell incorrecto: `PetView` y `SupporterAccountManagement` consumen `useSupporterMembershipStatus()` a nivel **cuenta**, comprobando mascotas del mismo owner y RPC servidor; cambiar mascota no debe volver a ofrecer pago si existe cobertura verificada. No se infiere cobertura por redirect, PayPal ACTIVE o estado local. La gestión QA V2 queda bajo sección opcional/colapsable en pantalla de oferta para no mezclar marketing con diagnósticos. Sin membresía, oferta y botón «Ahora no»; con prueba pagada real verificada, centro de beneficios.
+
+Se habilitó exclusivamente una vista previa manual/visual del aviso compacto en **QA local** (no automático ni producción): arrancar script localhost y abrir `http://localhost:5173/?supporter_preview=1#`, entrar a Mi mascota de una cuenta sin cobertura verificada. El aviso se superpone discretamente y permite «Conocer Amigo de PAZO» o «Ahora no», sin crear eventos, sin retención de rechazo y sin cobros. Está protegido por `import.meta.env.DEV`, flag QA, query explícita y estado no-miembro; fuera de esta URL queda OFF. **NO significa elegibilidad automática activa:** 7/3/5/2/30 permanece por conectar a fuente de actividad minimizada + cooldown persistente revisado por privacidad.
+
+Sin nuevas compras Sandbox, sin cambios a Supabase/PayPal/Vercel/Live, sin merge. Próximo gate: usuario actualiza localhost y facilita captura o revisión visual; luego Sandbox V2 E2E con consentimiento separado, bajo nueva autorización antes de cobro.
+
+---
+
 # F16 — UX de Amigo de PAZO aprobada (2026-10-17)
 
 El PO aprobó un único botón bajo Mi mascota: sin membresía verificada abre la invitación (US$2.99/mes voluntario); con cobertura pagada verificada usa estilo decorado y abre Mis beneficios. El área del miembro reúne la insignia 0/3/6/12, los cinco fondos, permisos del muro por mascota y gestión/cancelación. Compra de diseños adicionales de insignias: idea futura, no implementada.
