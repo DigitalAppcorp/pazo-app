@@ -65,6 +65,7 @@ const {BottomNav}=await load('components/BottomNav.js')
 const {PublicProfileView}=await load('components/views/PublicProfileView.js')
 const {SupporterThemePreviewPicker,SupporterProfileBackdrop,SUPPORTER_PROFILE_THEMES}=await load('features/supporter/components/SupporterProfileThemes.js')
 const {SupporterThemePreviewPanel}=await load('features/supporter/components/SupporterThemePreviewPanel.js')
+const {SupporterSandboxBenefitsStatus}=await load('features/supporter/components/SupporterSandboxBenefitsStatus.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
 const {GratitudeWallPreview}=await load('features/supporter/components/GratitudeWallPreview.js')
 const {GratitudeParticipationPreview}=await load('features/supporter/components/GratitudeParticipationPreview.js')
@@ -1216,4 +1217,60 @@ test('T16 actual upload succeeds normally and keeps the exact reference after a 
     return e.name==='CommunityMediaPendingError' && e.storagePath===uploaded[2]
   })
   insertResult={error:null}
+})
+
+test('F16 Sandbox account status: only server-verified paid pet shows original badge and public wall consent',async()=>{
+  const database=globalThis.__PAZO_CLOSURE_TEST_DB__
+  const originalAuth=database.auth.getUser
+  const originalFrom=database.from
+  const originalRpc=database.rpc
+  const OWNER='11111111-1111-4111-8111-111111111111'
+  const PET='41111111-1111-4111-8111-111111111111'
+  const row={id:PET,name:'Mascota QA'}
+  const setup=({badge=false,consent=false,wall=false,error=false})=>{
+    database.auth.getUser=async()=>({data:{user:{id:OWNER}},error:null})
+    database.from=table=>{
+      assert.equal(table,'pets')
+      return {select:()=>({eq:(key,value)=>{
+        assert.equal(key,'owner_id');assert.equal(value,OWNER)
+        return {limit:async count=>{assert.equal(count,8);return {data:[row],error:null}}}
+      }})}
+    }
+    database.rpc=async (name)=>{
+      if(error)return {data:null,error:{code:'QA_DISCONNECTED'}}
+      if(name==='pazo_wall_my_consents')
+        return {data:[{pet_id:PET,opted_in:consent}],error:null}
+      if(name==='pazo_supporter_public_wall')
+        return {data:wall?[{pet_id:PET,pet_name:'Mascota QA',photo_url:null,milestone:0}]:[],error:null}
+      if(name==='pazo_supporter_public_pet_benefits')
+        return {data:{badge,theme:null,milestone:0},error:null}
+      throw Error('Unexpected QA RPC '+name)
+    }
+  }
+  try{
+    for(const scenario of [
+      {badge:false,consent:false,wall:false,expectedImage:false},
+      {badge:true,consent:false,wall:false,expectedImage:true},
+      {badge:true,consent:true,wall:true,expectedImage:true},
+      {badge:false,consent:true,wall:true,expectedImage:false,expectedError:true},
+      {error:true,expectedImage:false,expectedError:true},
+    ]) {
+      setup(scenario)
+      let view
+      await act(async()=>{view=create(React.createElement(SupporterSandboxBenefitsStatus,{lang:'es'}))})
+      const images=view.root.findAllByType('img')
+      assert.equal(images.length>0,scenario.expectedImage,
+        'Cannot manufacture original supporter badge in '+JSON.stringify(scenario))
+      if(scenario.expectedImage)
+        assert.ok(images[0].props.src.includes('/supporter/amigo-pazo-inicio.png'))
+      assert.equal(view.root.findAll(n=>n.props.role==='alert').length>0,
+        Boolean(scenario.expectedError))
+      await act(async()=>{view.unmount()})
+    }
+  }finally{
+    database.auth.getUser=originalAuth
+    database.from=originalFrom
+    if(originalRpc===undefined)delete database.rpc
+    else database.rpc=originalRpc
+  }
 })
