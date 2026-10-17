@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
 import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
+import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 
 type Account = {
   intentId: string
@@ -175,6 +176,9 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
             {label('Esta cuenta no tiene una suscripción Amigo de PAZO registrada. No necesitas suscribirte para seguir usando PAZO.',
               'This account has no recorded Friend of PAZO subscription. PAZO remains free.')}
           </p>
+        )}
+        {import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
+          <SupporterWallConsentSettings lang={lang} />
         )}
         {accounts?.map(account=>(
           <div key={account.intentId} className="space-y-3 rounded-3xl bg-white p-5 shadow-sm">
