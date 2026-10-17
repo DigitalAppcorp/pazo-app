@@ -25,6 +25,8 @@ import {isP06SandboxQaAuthorized}
 
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const PLAN='P-14V25407JP6850922NLHMDKI'
+// Old P06 buyer offer explicitly said no perks. Never sell benefit QA using it.
+const SANDBOX_BENEFITS_OFFER_V2='pazo-supporter-sandbox.benefits-v2'
 const reply=(status,code)=>new Response(JSON.stringify({
  ok:false,code,paidThrough:null,mayGrantBenefits:false,
 }),{status,headers:{'content-type':'application/json',
@@ -127,12 +129,15 @@ Deno.serve(async(request:Request)=>{
       await runtime.admit()!==true)
     return addCors(reply(403,'not_authorized'),runtime.origin)
    const offer=await runtime.consentStore.readOffer({locale:data.locale})
-   result=offer?{phase:'PUBLISHED_OFFER',offer,
-     entitlement:false,paidThrough:null}:{phase:'OFFER_UNAVAILABLE'}
+   result=offer?.version===SANDBOX_BENEFITS_OFFER_V2
+     ? {phase:'PUBLISHED_OFFER',offer,entitlement:false,paidThrough:null}
+     : {phase:'OFFER_UNAVAILABLE'}
   }catch{return addCors(reply(503,'offer_unavailable'),runtime.origin)}
  }else if(data.action==='begin'){
   if(Object.keys(data).sort().join('|')!=='action|consent')
    return addCors(reply(400,'invalid_request'),runtime.origin)
+  if(data.consent?.termsVersion!==SANDBOX_BENEFITS_OFFER_V2)
+   return addCors(reply(409,'new_four_benefit_sandbox_terms_required'),runtime.origin)
   result=await runtime.checkout.begin({request,consent:data.consent})
  }else return addCors(reply(400,'invalid_request'),runtime.origin)
  return addCors(new Response(JSON.stringify(result),{
