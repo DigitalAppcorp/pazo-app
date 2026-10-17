@@ -2,6 +2,8 @@
 // P26 fail-closed assessment. No live imports, no network by default,
 // no ledger, no payment or entitlement writer.
 import {assessP26FirstObligationEvidence} from './p26OfflineProvenanceGate.mjs'
+import {assessF16P05FirstRegularObligation} from './p05FirstRegularObligationLab.mjs'
+import {assessP24RefundLineage} from './p24RefundLineageLab.mjs'
 const REF=/^[A-Za-z0-9._-]{3,128}$/
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const safe=(phase,reason)=>Object.freeze({phase,reason,environment:'sandbox',
@@ -12,13 +14,15 @@ const safe=(phase,reason)=>Object.freeze({phase,reason,environment:'sandbox',
 export function createP27OfflineProvenanceReview({
  scope='DISABLED', merchantReader,readPrivateReviewContext,
  readIndependentMerchantSale,inspectHistory,inspectRefunds,inspectDisputes,
+ readFirstObligationEvidence,readRefundLineageEvidence,
 }={}){
  if(scope!=='OFFLINE_SYNTHETIC_TEST_ONLY')
   return Object.freeze({inspect:async()=>safe('DISABLED','scope_disabled')})
  if(!merchantReader||typeof merchantReader.getMerchantEvent!=='function'||
   typeof merchantReader.getMerchantSubscription!=='function'||
   [readPrivateReviewContext,readIndependentMerchantSale,
-   inspectHistory,inspectRefunds,inspectDisputes]
+   inspectHistory,inspectRefunds,inspectDisputes,
+   readFirstObligationEvidence,readRefundLineageEvidence]
    .some(x=>typeof x!=='function'))
   throw Error('p27_offline_dependencies_required')
  return Object.freeze({async inspect({eventId,claimToken}={}){
@@ -89,6 +93,39 @@ export function createP27OfflineProvenanceReview({
    const result=assessP26FirstObligationEvidence({
     ...source,history,refunds,disputes,
    })
+   // Do not inspect raw contractual/refund evidence until every P26
+   // merchant-history and dispute snapshot gate has been considered.
+   if(result.reason!=='merchant_source_cycle_reversals_and_atomic_credit_unproven')
+    return safe(result.phase,result.reason)
+   const scope={eventId,claimToken,saleId:event.resource.id,
+    subscriptionId:sub.id,intentId:sub.custom_id}
+   const firstEvidence=await readFirstObligationEvidence(scope)
+   // Bind both independent synthetic lab contracts to the SAME original
+   // service acceptance, sale, owner intent and subscription.
+   if(!firstEvidence||firstEvidence.contract?.saleId!==scope.saleId||
+      firstEvidence.contract?.subscriptionId!==scope.subscriptionId||
+      firstEvidence.contract?.intentId!==scope.intentId||
+      firstEvidence.contract?.termsDigest!==privateContext.consent?.termsDigest||
+      firstEvidence.contract?.termsAcceptedAt!==privateContext.consent?.acceptedAt)
+    return safe('REVIEW_REQUIRED','first_obligation_contract_binding_missing')
+   const first=assessF16P05FirstRegularObligation(firstEvidence)
+   if(first.phase!=='CLEAN_FIRST_CHARGE_CANDIDATE_ONLY')
+    return safe('REVIEW_REQUIRED','first_regular_obligation_ambiguous')
+   const lineageEvidence=await readRefundLineageEvidence(scope)
+   const chargedAt=firstEvidence.transactionHistory?.transactions?.[0]?.processedAt
+   if(!lineageEvidence||
+      lineageEvidence.originalSale?.id!==scope.saleId||
+      lineageEvidence.originalSale?.completedAt!==chargedAt||
+      lineageEvidence.originalSale?.grossMinor!==299||
+      lineageEvidence.originalSale?.currency!=='USD')
+    return safe('REVIEW_REQUIRED','refund_lineage_sale_binding_missing')
+   const lineage=assessP24RefundLineage(lineageEvidence)
+   if(lineage.phase!==refunds?.phase)
+    return safe('REVIEW_REQUIRED','refund_summary_lineage_inconsistent')
+   // Any completed, partial or pending refund still freezes the first
+   // obligation; no synthetic receipt ever establishes global coverage.
+   if(lineage.phase!=='NO_REFUND_REFS_REVIEW_ONLY')
+    return safe('REVIEW_REQUIRED','refund_lineage_requires_review')
    return safe(result.phase,result.reason)
   }catch{return safe('REVIEW_REQUIRED','merchant_or_private_evidence_unavailable')}
  }})
