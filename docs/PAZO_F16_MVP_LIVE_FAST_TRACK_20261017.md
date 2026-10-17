@@ -61,3 +61,25 @@ Solo después de PASS integral Sandbox de caso pagado, renovación/cancelación,
 - `.github/workflows/f16-postgres-inbox-lab.yml`: nuevo paso al final que se ejecuta **únicamente** en PostgreSQL 17 desechable con credenciales sintéticas. Commit `65089ddb6e1de5fc8d56f10b2cbf98d3f36209e9`: [PG Lab #39037033412](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39037033412) **SUCCESS** y [CI #39037033348](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39037033348) **SUCCESS**.
 - **Próximo trabajo esencial:** conectar un reconciliador comercial Live autenticado a la fuente de períodos y probar la frontera de permisos/consentimiento antes de generar una migración hospedada. El esquema sintético por sí solo NO autoriza emitir una suscripción.
 
+
+## Avance 2026-10-17 — beneficios integrados en laboratorio y UI protegida
+
+**Backend exclusivamente desechable, NO instalado:**
+- `supabase/drafts/f16_mvp_four_benefits_backend_DISPOSABLE_ONLY.sql` se instala SOLO tras el draft sintético de períodos pagados y SOLO en `f14_synthetic`. Registra selección de fondo en tabla privada protegida por RLS FORCED, RPC de cambio del **propietario autenticado** `pazo_supporter_set_pet_theme`; la ruta pública `pazo_supporter_public_pet_benefits` devuelve exclusivamente badge/tema/hito, sin identidad financiera. `pazo_supporter_public_wall` presenta exclusivamente mascotas con consentimiento no revocado Y coverage actual. Reactiva `wall_has_verified_entitlement` solo dentro del disposable PG17, **nunca en PAZO alojado**.
+- `supabase/tests/supporter/f16-mvp-four-benefits-pg17-synthetic.sql`: sin período no habilita fondos/consentimiento; propietario pagado activa tema y opt-in; otro propietario no puede alterar fondos; anon ve solo mascota consentida, nunca UID personal; disputa bloquea visualización; revocación funciona después de pérdida de cobertura. Todas las filas de laboratorio se revierten.
+- **CI de PostgreSQL** `#39037998669` SUCCESS para el draft después de corregir introspección ACL y formato de salida de JWT sintético. `.github/workflows/f16-postgres-inbox-lab.yml` ejecuta ambos laboratorios en servicio PG17 aislado.
+
+**Front-end y prestaciones visibles, permanentemente OFF por defecto:**
+- `SupporterThemeSaveControl.tsx`: Auth.getUser, propietario verificado, obtener estado actual del servidor, guardar tema permitido por RPC y volver a leer para confirmar. UI no puede concederse beneficios desde browser. Integrado en `SupporterThemePreviewPanel.tsx`, conserva preview aprobado; `SupporterProfileThemes.tsx` distingue entre preview y modalidad de guardado.
+- `PublicProfileView.tsx`: consulta `pazo_supporter_public_pet_benefits` solamente cuando `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'`; fondo aprobado y legibilidad Cielo estrellado se aplican exclusivamente con respuesta validada de backend.
+- `GratitudeWallLive.tsx`: lista sin pagadores ficticios, respuesta limitada de RPC pública, orden básico Todos/Recientes/Más tiempo, estados vacío/cargando/error. `GratitudeWallPreview.tsx` mantiene el diseño preview aprobado si el flag no está activado.
+- `SupporterWallConsentSettings.tsx` existente sigue asociado a la gestión personal y exige consentimiento individual.
+- **Aún NO están implementados en UI** los PNG originales de insignia junto al avatar del Feed/perfil/medallas; se recuperaron los assets del usuario en su Biblioteca, pero no están incorporados a GitHub. No poner un icono aproximado en su lugar.
+- `pazoSupporterBenefitsV1.mjs` y `f16MvpServerBenefits.test.mjs` contienen la proyección server-only verificada offline. No sustituye el reclamo de venta/verificación merchant.
+
+**Contrato de Live:**
+- `supabase/functions/f16-paypal-webhook/pazoPaypalLivePlanContract.mjs` y `src/features/supporter/testing/f16MvpPaypalLivePlanContract.test.mjs` validan de modo **puro y sin red** que un futuro plan PayPal Live tenga exactamente un ciclo REGULAR mensual indefinido de US$2.99, sin trial, setup fee, taxes no revisados, unidades adicionales, precio variable ni cargo pendiente. Todo retorna `mayCheckout:false`/`mayGrantBenefits:false` incluso en PASS. El identificador de plan **Live** aún no existe/verificado en este trabajo.
+- PayPal Live HTTP, Merchant GET, credenciales Live, Terms ES/EN, recibos, cancelación online y conciliar primer período real todavía **NO ESTÁN CONECTADOS NI AUTORIZADOS PARA PÚBLICO**. No confundir esta validación estática con una transacción ni con el Sandbox QA anterior.
+- **Pruebas:** CI posterior al último cambio frontend debe comprobarse antes de declarar este UI slice listo; la pantalla no se ha sometido aún a QA visual del PO. El trabajo permanece PR #44 DRAFT sin deploy, checkout ni grants hosted.
+
+**Secuencia restante corta:** (1) incorporar imágenes PNG originales, badge perfil/Feed y medallas; (2) convertir draft privado en migración auditada, conectar reconciliación merchant Live y entitlement; (3) preparar plan/copy/acuse/cancelación Live, pruebas E2E de Sandbox de la nueva ruta; (4) aprobación visual/comercial/Legal y GO expreso para un único cobro real. No ampliar P42 como condición de desarrollo.
