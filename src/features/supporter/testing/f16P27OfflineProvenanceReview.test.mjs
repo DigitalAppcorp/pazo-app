@@ -2,6 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {createP27OfflineProvenanceReview as create}
  from '../../../../supabase/functions/f16-paypal-webhook/p27OfflineProvenanceReview.mjs'
+import {createP29MerchantSaleReader}
+ from '../../../../supabase/functions/f16-paypal-webhook/p29MerchantSaleReader.mjs'
 const token='22222222-2222-4222-8222-222222222222'
 const intent='intent-77777777-7777-4777-8777-777777777777'
 const owner='11111111-1111-4111-8111-111111111111'
@@ -243,4 +245,33 @@ test('P27 disabled or absent independent sale reader cannot authorize finance',a
  a.scope='DISABLED'
  const result=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
  check(result);assert.equal(result.phase,'DISABLED')
+})
+
+test('P27 integrates existing P29 PayPal SALE reader with exact synthetic original GET',async()=>{
+ const a=base(),calls=[]
+ a.readIndependentMerchantSale=createP29MerchantSaleReader({
+  enabled:true,
+  readClaimedMerchantEvent:async scope=>{
+   calls.push(['claim',scope])
+   return a.merchantReader.getMerchantEvent(scope)
+  },
+  getAccessToken:async()=> 'SYNTHETIC_TOKEN_NOT_A_CREDENTIAL',
+  fetchImpl:async (url,options)=>{
+   calls.push(['GET',url])
+   assert.equal(options.method,'GET')
+   assert.equal(url,'https://api-m.sandbox.paypal.com/v1/payments/sale/SALE-P27-01')
+   return {ok:true,json:async()=>({
+    id:'SALE-P27-01',billing_agreement_id:'I-P27-ONE',
+    state:'completed',amount:{currency:'USD',total:'2.99'},
+    payer:{email:'never-return-to-p27@example.invalid'},
+   })}
+  },
+ })
+ const r=await create(a).inspect({eventId:'WH-P27-01',claimToken:token})
+ check(r)
+ assert.equal(r.phase,'REVIEW_REQUIRED')
+ assert.equal(r.reason,'merchant_source_cycle_reversals_and_atomic_credit_unproven')
+ assert.deepEqual(calls,[['claim',{eventId:'WH-P27-01',claimToken:token}],
+  ['GET','https://api-m.sandbox.paypal.com/v1/payments/sale/SALE-P27-01']])
+ assert.ok(!JSON.stringify(r).includes('never-return-to-p27'))
 })
