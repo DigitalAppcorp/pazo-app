@@ -1,3 +1,15 @@
+# A01 — Revisión visual rechazada: corrección del perrito con arte de referencia (2026-10-17)
+
+**Evidencia del PO:** dos capturas comparativas: izquierda PAZO real tras commit `578ef8e`; derecha diseño visual previamente aprobado. **NO ACEPTADO** por notable pérdida de fidelidad. El perrito SVG improvisado era de estilo plano, postura rígida, ojos/rostro distintos, cuerpo más geométrico y hojas/sombras inferiores simplificadas. Tamaños generales y copy estaban más cerca; error principal era haber *redibujado* el arte aprobado sin conservarlo.
+
+**Corrección implementada solo en PR #44 DRAFT, rama `f13/section-titles-20261012`:** la ilustración usada ahora procede de la referencia aprobada enviada por el PO, recortada al área decorativa sin textos ni botones, optimizada como WebP y empaquetada en `public/onboarding/welcome-approved-art.svg` para usarla de forma autocontenida/offline. El SVG reutiliza la misma imagen en tres máscaras/grupos separados de cuerpo, cabeza y cola; CSS interno añade respiración sutil, ligera inclinación de cabeza y meneo de cola, con `prefers-reduced-motion`. El arte no contiene texto visible de producto ni enlaces: el título aprobado ES/EN, botones Comenzar/A02, Iniciar sesión, Demo, idioma, muro público y versión siguen siendo DOM normal. `WelcomeAnimatedCompanion.tsx` dejó de dibujar un perro diferente y ahora sirve el recurso aprobado. `OnboardingView.tsx` sitúa el recurso al fondo del hero, con escalado limitado en alturas reducidas, y adapta el verde de la tarjeta a los tonos de la referencia. Animaciones decorativas exteriores preservadas y desfasadas; **no afirmar que tiene parpadeo auténtico de ojos**, porque la ilustración fuente ya los representa sonrientes/cerrados.
+
+**Pruebas:** `scripts/closure-ui.test.mjs` protege que la ilustración aprobada se use, que el SVG tenga capas y `prefers-reduced-motion`, que no contenga título/CTA rasterizados y que registro, login, Demo, idioma y muro sigan operativos. **CI, PostgreSQL Lab y QA visual deben verificarse sobre HEAD definitivo**. En particular, no declarar fidelidad aprobada hasta recibir nueva captura a 390–430 px y verificar ausencia de huecos en las máscaras al animarse, y que texto/CTA no se corten en 667 px de alto. No SQL, migraciones, PayPal/Supabase/Vercel, pago, Live ni merge por este cambio.
+
+**Marcador:** `A01_APPROVED_ART_REUSED_VISUAL_REVIEW_PENDING`.
+
+---
+
 # PAZO A01 — Bienvenida refinada ilustrada con motion aprobado (2026-10-17)
 
 **Autorización del PO:** pantalla A01 basada en referencia verde salvia con ilustración de perrito, paleta PAZO verde/crema/lima, **texto sin cambios de la propuesta refinada** «Hecho con amor para las mascotas» y «Únete y descubre la mejor app social para mascotas». Mantener Comenzar, Ya tengo una cuenta, Demo, idioma y enlace público «Conoce a los Amigos de PAZO». PO autorizó expresamente animación independiente del perro (respiración, cola, parpadeo, leve gesto/cabeza) y de adornos (corazones, líneas, hojas), baja amplitud, elegante y reducida si la configuración del usuario lo solicita.
