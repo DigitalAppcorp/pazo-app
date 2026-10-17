@@ -22,7 +22,7 @@ type ServerResult = {
   mayGrantBenefits?: boolean
   paidThrough?: null
 }
-type Props = {lang: 'es' | 'en'}
+type Props = {lang: 'es' | 'en'; inline?: boolean}
 const HOST = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const DIGEST = /^[0-9a-f]{64}$/
 // Previous P06 QA terms explicitly excluded benefits: NEVER reuse them.
@@ -36,7 +36,7 @@ const approveUrl = (raw: unknown): string | null => {
       ? u.toString() : null
   } catch { return null }
 }
-export function SandboxCheckoutQaPanel({lang}: Props) {
+export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
   const [offer,setOffer] = useState<Offer | null>(null)
   const [busy,setBusy] = useState(false)
   const [consent,setConsent] = useState(false)
@@ -102,13 +102,15 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
   }
   return (
     <section aria-labelledby="f16-qa-checkout-title"
-      className="space-y-4 rounded-[28px] bg-[#F0F3ED] p-4 sm:p-5">
-      <h3 id="f16-qa-checkout-title" className="text-lg font-black">
+      className={inline ? 'min-w-0 space-y-3' : 'space-y-4 rounded-[28px] bg-[#F0F3ED] p-4 sm:p-5'}>
+      <h3 id="f16-qa-checkout-title" className={inline ? 'sr-only' : 'text-lg font-black'}>
         {label('Confirmar mi apoyo · Sandbox','Confirm my support · Sandbox')}
       </h3>
-      <p className="text-sm text-[#476862]">
-        {label('Esta es una prueba con PayPal Sandbox: no se usa dinero real. Los beneficios solo se activan después de comprobar el pago en el servidor.',
-          'This is a PayPal Sandbox test with no real money. Benefits activate only after server-side payment verification.')}
+      <p className={inline
+        ? 'rounded-xl bg-[#EDF1E8] px-3 py-2 text-center text-[11px] font-bold leading-relaxed text-[#476862]'
+        : 'text-sm text-[#476862]'}>
+        {label('Solo PayPal Sandbox · Dinero ficticio · Los beneficios requieren pago verificado.',
+          'PayPal Sandbox only · Test money · Benefits require a verified payment.')}
       </p>
       {phase==='loading'&&<p role="status">{label('Consultando la oferta…','Checking offer…')}</p>}
       {phase==='blocked'&&<p role="status">
@@ -116,13 +118,16 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
           'The new four-benefit Sandbox offer has not been published. The previous test cannot grant them.')}
       </p>}
       {offer&&<div className="space-y-4">
-        <details className="group rounded-[22px] bg-white p-4" aria-label={label('Condiciones completas de la prueba','Full test terms')}>
+        <details className={inline
+          ? 'group rounded-[18px] bg-[#EFF3E9] px-4 py-2'
+          : 'group rounded-[22px] bg-white p-4'}
+          aria-label={label('Condiciones completas de la prueba','Full test terms')}>
           <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold text-[#204E4A] focus-visible:bg-[#E1E53F]/35">
             {label('Leer condiciones de renovación y beneficios','Read renewal and benefit terms')}
           </summary>
           <div className="whitespace-pre-wrap pt-3 text-[13px] leading-relaxed text-[#476862]">{offer.exactCopy}</div>
         </details>
-        <label className="flex min-h-11 items-start gap-3 text-sm font-semibold">
+        <label className="flex min-h-11 items-start gap-3 rounded-2xl px-1 py-1 text-[12px] font-medium leading-relaxed text-[#476862]">
           <input type="checkbox" checked={consent}
             onChange={e=>setConsent(e.target.checked)}
             disabled={attempted.current}
@@ -132,8 +137,10 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
         </label>
         <button type="button" onClick={()=>void begin()}
           disabled={!consent||busy||phase!=='ready'||attempted.current}
-          className="min-h-11 rounded-full bg-[#204E4A] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">
-          {label('Continuar a PayPal Sandbox','Continue to PayPal Sandbox')}
+          className={inline
+            ? 'min-h-12 w-full rounded-full bg-[#E1E53F] px-5 py-3 text-[14px] font-extrabold text-[#204E4A] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150] disabled:cursor-not-allowed disabled:bg-[#E1E53F]/40 disabled:text-[#6D8780]'
+            : 'min-h-11 rounded-full bg-[#204E4A] px-5 py-3 text-sm font-bold text-white disabled:opacity-50'}>
+          {label('Continuar con PayPal Sandbox','Continue with PayPal Sandbox')}
         </button>
       </div>}
       {phase==='pending'&&<p role="status" className="text-sm">
