@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { IconHeart, IconPaw } from '../../../components/icons/PazoIcons'
+import { GratitudeWallLive } from './GratitudeWallLive'
 
 type GratitudeOrder = 'all' | 'recent' | 'longtime'
 
@@ -29,6 +30,11 @@ export const GratitudeWallPreview = ({ lang, onClose }: GratitudeWallPreviewProp
     { key: 'recent', es: 'Recientes', en: 'Recent' },
     { key: 'longtime', es: 'Más tiempo apoyando', en: 'Longtime supporters' },
   ] as const
+
+  // Keep existing PO-approved preview as default. The real gallery is visible
+  // only after payment/consent RPCs and original assets pass the release gate.
+  if (import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true')
+    return <GratitudeWallLive lang={lang} onClose={onClose} />
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="pazo-gratitude-title"
