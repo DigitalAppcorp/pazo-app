@@ -3,7 +3,7 @@
 // bound subscription for the same owner. Only the SQL V2 join is authoritative.
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const HASH=/^[a-f0-9]{64}$/
 const VERSION='pazo-supporter-sandbox.benefits-v2'
@@ -16,7 +16,7 @@ export function createPazoSandboxV2AccountStore({
     serviceRoleKey.length<24||/\s/.test(serviceRoleKey)||
     typeof fetchImpl!=='function')reject()
  async function queryV2OwnerRecord(ownerId,intentId=null){
-  if(!UUID.test(ownerId||''))throw Error('qa_v2_owner_id_invalid_type_'+typeof ownerId+'_length_'+String(ownerId??'').length)
+  if(!UUID.test(ownerId||''))throw Error('qa_v2_owner_id_invalid')
   if(intentId!==null&&!INTENT.test(intentId))throw Error('qa_v2_intent_id_invalid')
   let response
   try{
