@@ -128,6 +128,16 @@ BEGIN
        '42222222-2222-4222-8222-222222222222'::uuid
      ]) AS b WHERE b.badge OR b.milestone<>0)
  THEN RAISE EXCEPTION 'Free pet obtained Feed badge'; END IF;
+ BEGIN
+  PERFORM public.pazo_supporter_public_badges_batch(
+    array_fill('41111111-1111-4111-8111-111111111111'::uuid,ARRAY[49]));
+  RAISE EXCEPTION 'Unbounded public badge batch was allowed';
+ EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
+ BEGIN
+  PERFORM public.pazo_supporter_public_badges_batch(
+    ARRAY[NULL::uuid]);
+  RAISE EXCEPTION 'Null pet ID allowed in batch';
+ EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
 END $test$;
 
 -- Refund/dispute blocks current benefits but must not delete stored consent.
