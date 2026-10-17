@@ -7,7 +7,7 @@ import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 type Props={lang:'es'|'en'}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
- providerStatus?:string;cancelled?:boolean;paidThrough?:null;mayGrantBenefits?:boolean}
+ providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -19,6 +19,7 @@ export function SandboxV2AccountPanel({lang}:Props){
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
  const [confirm,setConfirm]=useState(false)
  const [cancelled,setCancelled]=useState(false)
+ const [paidThrough,setPaidThrough]=useState<string|null>(null)
  const t=(es:string,en:string)=>lang==='es'?es:en
  const call=async(payload:object,acknowledgement=false)=>{
   const config=getPublicSupabaseConfig(import.meta.env)
@@ -33,8 +34,11 @@ export function SandboxV2AccountPanel({lang}:Props){
   if(!response.ok)throw Error('QA_SERVER_UNAVAILABLE')
   if(acknowledgement)return response
   const result=await response.json() as Result
-  if(!result||result.paidThrough!==null||
-    result.mayGrantBenefits===true)throw Error('UNTRUSTED_QA_STATUS')
+  if(!result|| (result.paidThrough!==null&&result.paidThrough!==undefined &&
+    !Number.isFinite(Date.parse(result.paidThrough))) ||
+    (result.mayGrantBenefits===true &&
+      !(result.cycleVerified===true&&typeof result.paidThrough==='string')))
+    throw Error('UNTRUSTED_QA_STATUS')
   return result
  }
  const refresh=async()=>{
@@ -51,6 +55,18 @@ export function SandboxV2AccountPanel({lang}:Props){
   finally{setLoading(false)}
  }
  useEffect(()=>{void refresh()},[])
+ const verifyPayment=async()=>{
+  if(!account||account.state!=='bound'||busy)return
+  setBusy(true);setError(false)
+  try{
+   const result=await call({action:'verify_payment'}) as Result
+   if(result.ok!==true||result.code!=='verified_first_sandbox_cycle'||
+      result.cycleVerified!==true||result.mayGrantBenefits!==true||
+      typeof result.paidThrough!=='string')
+    throw Error('NO_VERIFIED_SANDBOX_PAYMENT')
+   setPaidThrough(result.paidThrough)
+  }catch{setError(true)}finally{setBusy(false)}
+ }
  const getStatus=async()=>{
   if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false)
@@ -123,6 +139,10 @@ export function SandboxV2AccountPanel({lang}:Props){
        :t('Suscripción Sandbox vinculada; pago aún no verificado.',
         'Sandbox subscription linked; payment not yet verified.')}
      </p>
+     {paidThrough&&<p role="status" className="rounded-2xl bg-[#E8EFEB] p-3 text-sm font-extrabold">
+      {t('Período Sandbox verificado hasta: ','Sandbox period verified until: ')}
+      {new Date(paidThrough).toLocaleDateString(lang==='es'?'es-US':'en-US')}
+     </p>}
      {providerStatus&&<p role="status" className="text-sm">
       {t('Estado del proveedor: ','Provider status: ')}{providerStatus}
      </p>}
@@ -130,6 +150,10 @@ export function SandboxV2AccountPanel({lang}:Props){
       <button type="button" className={button} onClick={()=>void download()} disabled={busy}>
        {t('Descargar aceptación V2','Download V2 acceptance')}
       </button>
+      {account.state==='bound'&&<button type="button" className={button}
+        onClick={()=>void verifyPayment()} disabled={busy}>
+        {t('Verificar pago real Sandbox','Verify actual Sandbox payment')}
+      </button>}
       {account.state==='bound'&&<button type="button" className={button}
         onClick={()=>void getStatus()} disabled={busy}>
         {t('Consultar PayPal Sandbox','Check PayPal Sandbox')}
