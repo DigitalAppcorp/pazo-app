@@ -86,11 +86,20 @@ test('F16 MVP: milestone thresholds count unique verified paid cycles only',()=>
     return cycle({cycleId:'cycle-'+String(i).padStart(3,'0'),saleId:'sale-'+String(i).padStart(3,'0'),
       serviceStartsAt:a,serviceEndsAt:b});
   });
-  const p=projectVerifiedSupporterBenefits(input({cycles,now:'2026-10-18T00:00:00Z'}));
+  const p=projectVerifiedSupporterBenefits(input({cycles,now:'2026-12-18T00:00:00Z'}));
   assert.deepEqual(p.milestones,[3,6,12]);assert.equal(p.highestMilestone,12);
   const p2=projectVerifiedSupporterBenefits(input({cycles:cycles.slice(0,5),now:'2026-04-18T00:00:00Z'}));
   assert.deepEqual(p2.milestones,[3]);assert.equal(p2.highestMilestone,3);
   const p3=projectVerifiedSupporterBenefits(input({cycles:[...cycles.slice(0,2),
     {...cycles[2],financialState:'REFUNDED'}],now:'2026-02-18T00:00:00Z'}));
   assert.deepEqual(p3.milestones,[]);
+});
+
+test('F16 MVP: future prepaid months must not count as elapsed support',()=>{
+  const p=projectVerifiedSupporterBenefits(input({cycles:[
+    cycle(),cycle({cycleId:'cycle-002',saleId:'sale-002',serviceStartsAt:'2026-11-01T00:00:00Z',serviceEndsAt:'2026-12-01T00:00:00Z'}),
+    cycle({cycleId:'cycle-003',saleId:'sale-003',serviceStartsAt:'2026-12-01T00:00:00Z',serviceEndsAt:'2027-01-01T00:00:00Z'}),
+  ],now:'2026-10-18T00:00:00Z'}));
+  assert.equal(p.active,true);
+  assert.deepEqual(p.milestones,[]);
 });
