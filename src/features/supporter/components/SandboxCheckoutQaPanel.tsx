@@ -25,7 +25,8 @@ type ServerResult = {
 type Props = {lang: 'es' | 'en'}
 const HOST = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const DIGEST = /^[0-9a-f]{64}$/
-const VERSION = /^pazo-supporter-[a-z0-9.-]{3,40}$/
+// Previous P06 QA terms explicitly excluded benefits: NEVER reuse them.
+const BENEFITS_V2='pazo-supporter-sandbox.benefits-v2'
 const approveUrl = (raw: unknown): string | null => {
   if (typeof raw !== 'string' || raw.length > 2048) return null
   try {
@@ -71,8 +72,11 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
       const o=r?.offer
       if(r.phase!=='PUBLISHED_OFFER'||!o||
         o.locale!==lang||!VERSION.test(o.version||'')||
-        !DIGEST.test(o.termsDigest||'')||
+        !DIGEST.test(o.termsDigest||'')||o.version!==BENEFITS_V2||
         typeof o.exactCopy!=='string'||o.exactCopy.length<100||
+        !(lang==='es' ?
+          /insignia Amigo de PAZO/.test(o.exactCopy) && /cinco fondos/.test(o.exactCopy) && /muro público/.test(o.exactCopy) :
+          /Friend of PAZO badge/.test(o.exactCopy) && /five pet profile themes/.test(o.exactCopy) && /public Thank You/.test(o.exactCopy))||
         o.priceMinor!==299||o.currency!=='USD'||o.cadence!=='MONTH_1'){
         setPhase('blocked');return
       }
@@ -103,13 +107,13 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
         {label('Prueba PayPal Sandbox','PayPal Sandbox test')}
       </h3>
       <p className="text-sm text-[#476862]">
-        {label('Solo cuenta de pruebas autorizada. No se usa dinero real ni se activan beneficios por regresar de PayPal.',
-          'Authorized test account only. No real money or benefits from a PayPal return.')}
+        {label('Prueba exclusiva de los cuatro beneficios. No se usa dinero real; las insignias y los fondos se activan únicamente después de verificar un período pagado, no por regresar de PayPal.',
+          'Four-benefit Sandbox test only. No real money; badges and themes require an independently verified paid period, not a PayPal redirect.')}
       </p>
       {phase==='loading'&&<p role="status">{label('Consultando la oferta…','Checking offer…')}</p>}
       {phase==='blocked'&&<p role="status">
-        {label('La prueba no está habilitada o faltan términos publicados.',
-          'Testing is unavailable or the published offer is missing.')}
+        {label('No está publicada la nueva oferta Sandbox con cuatro beneficios. La prueba antigua no permite activarlos.',
+          'The new four-benefit Sandbox offer has not been published. The previous test cannot grant them.')}
       </p>}
       {offer&&<div className="space-y-4">
         <div className="whitespace-pre-wrap rounded-2xl bg-white p-4 text-sm leading-relaxed text-[#204E4A]">
@@ -120,8 +124,8 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
             onChange={e=>setConsent(e.target.checked)}
             disabled={attempted.current}
             className="mt-1 h-5 w-5 accent-[#204E4A]"/>
-          <span>{label('Acepto la prueba simulada de US$2.99/mes con renovación automática en PayPal Sandbox, sin dinero real.',
-            'I accept the simulated US$2.99/month automatic-renewal test in PayPal Sandbox, with no real money.')}</span>
+          <span>{label('Acepto la prueba PayPal Sandbox por US$2.99 mensuales, con renovación automática y los cuatro beneficios descritos, sin dinero real.',
+            'I accept the US$2.99/month automatically renewing PayPal Sandbox test with the four stated benefits and no real money.')}</span>
         </label>
         <button type="button" onClick={()=>void begin()}
           disabled={!consent||busy||phase!=='ready'||attempted.current}
