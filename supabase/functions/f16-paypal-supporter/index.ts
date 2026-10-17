@@ -94,10 +94,12 @@ function addCors(response:Response,origin:string){
 // F16-P06 SAFE DEPLOY 2026-10-16: STATIC NO-GO, regardless of project secrets.
 // Enabling QA requires a NEW source review and separate PO GO + redeploy.
 const QA_CHECKOUT_RELEASE_APPROVED = false
+// Cancel/receipt/status must remain possible after the purchase gate closes.
+// This second release gate also starts OFF and requires a reviewed QA deploy.
+const QA_V2_MANAGEMENT_RELEASE_APPROVED = false
 Deno.serve(async(request:Request)=>{
- if(!QA_CHECKOUT_RELEASE_APPROVED ||
-    Deno.env.get('PAZO_F16_P06_QA_ENABLE')!=='true')
-  return reply(503,'paid_supporter_checkout_not_released')
+ if(!QA_CHECKOUT_RELEASE_APPROVED && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
+  return reply(503,'sandbox_qa_features_not_released')
  let runtime
  try{runtime=compose()}catch{return reply(503,'checkout_unavailable')}
  if(request.headers.get('origin')!==runtime.origin)
@@ -118,12 +120,15 @@ Deno.serve(async(request:Request)=>{
  // Always verify identity with Supabase Auth server. Never trust browser UID.
  let qaOwner: string | null = null
  try{qaOwner=await runtime.resolveAuthenticatedOwner(request)}catch{qaOwner=null}
- if(!isP06SandboxQaAuthorized({getEnv:(k:string)=>Deno.env.get(k),
-      verifiedOwnerId:qaOwner}))
-  return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
- // V2 reads join ONLY the new acceptance row, never legacy P06. PayPal
- // status/cancel also re-GET independent merchant subscription + custom_id.
- if(['status','cancel','acknowledgement'].includes(data.action))
+ if(!qaOwner)
+  return addCors(reply(401,'authentication_required'),runtime.origin)
+ // Existing V2 subscription management must work even when buying is OFF.
+ // Each account lookup is scoped to getUser() + a V2 acceptance row; no
+ // legacy P06 subscription can be cancelled through these routes.
+ const isManagement=['status','cancel','acknowledgement','list'].includes(data.action)
+ if(isManagement && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
+  return addCors(reply(503,'qa_v2_management_not_released'),runtime.origin)
+ if(isManagement && ['status','cancel','acknowledgement'].includes(data.action))
   return addCors(await runtime.manage(request),runtime.origin)
  if(data.action==='list'){
   if(Object.keys(data).sort().join('|')!=='action')
@@ -139,6 +144,14 @@ Deno.serve(async(request:Request)=>{
      status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
   }catch{return addCors(reply(503,'qa_v2_account_list_unavailable'),runtime.origin)}
  }
+ // New subscriptions remain separately disabled after QA ends, without
+ // removing an owner's ability to cancel an already bound V2 subscription.
+ if(!QA_CHECKOUT_RELEASE_APPROVED ||
+    Deno.env.get('PAZO_F16_P06_QA_ENABLE')!=='true')
+  return addCors(reply(503,'paid_supporter_checkout_not_released'),runtime.origin)
+ if(!isP06SandboxQaAuthorized({getEnv:(k:string)=>Deno.env.get(k),
+      verifiedOwnerId:qaOwner}))
+  return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
  let result
  if(data.action==='offer'){
   if(Object.keys(data).sort().join('|')!=='action|locale')
