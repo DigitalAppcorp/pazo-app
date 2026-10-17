@@ -20,7 +20,9 @@ const base=()=>({
    signatureStatus:'verified',persistedInVerifiedInbox:true},
   privateBinding:{intentId:intent,subscriptionId:'I-P27-ONE',ownerId:owner,state:'bound'},
   consent:{validP06:true,intentId:intent,ownerId:owner,
-   immutablePublishedOffer:true,sha256Verified:true},
+   immutablePublishedOffer:true,sha256Verified:true,
+   offerPurpose:'PAID_SERVICE_PROSPECTIVE',firstPeriodContractAttested:true,
+   qaOnly:false,termsVersion:'pazo-supporter-service-p27lab-v1'},
   reviewReservation:{state:'review_required',intentId:intent,ownerId:owner,
    eventId:'WH-P27-01',saleId:'SALE-P27-01',obligationOrdinal:0}
  }),
