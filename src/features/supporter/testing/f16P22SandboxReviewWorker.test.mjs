@@ -6,6 +6,7 @@ import {
 import {
  createP22SandboxReviewWorker,createP22SandboxOfflineMockComposer,
  createP22SandboxPrivilegedReviewComposition,
+ createP22ExistingLeaseReadOnlyComposition,
 } from '../../../../supabase/functions/f16-paypal-webhook/p22SandboxReviewWorker.mjs'
 const BASE='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const KEY='synthetic_SERVICE_ROLE_KEY_1234567890123456'
@@ -313,4 +314,108 @@ test('P22 fails closed when original independent sale is missing or refunded',as
   assert.equal(boundReads,0)
   assert.equal(finished.outcome,'review')
  }
+})
+
+const claimedSaleProbeMock=({claimState=read(),saleState='completed',stale=false}={})=>{
+ const calls=[]
+ let claimReads=0
+ const transport=async(url,init)=>{
+  const route=url.split('/').at(-1)
+  calls.push({url,method:init.method})
+  if(url.startsWith(BASE+'/rest/v1/rpc/')){
+   assert.equal(init.method,'POST')
+   assert.equal(init.headers.Authorization,'Bearer '+KEY)
+   assert.ok([
+    'f16_p05_draft_read_claimed_event',
+    'f16_p22_resolve_bound_under_claim',
+   ].includes(route),'no claim-next/finish/financial RPC permitted')
+   if(route==='f16_p05_draft_read_claimed_event'){
+    claimReads++
+    if(stale&&claimReads>4)return success(null)
+    return success(claimState)
+   }
+   return success(bound())
+  }
+  assert.ok(url.startsWith('https://api-m.sandbox.paypal.com/'))
+  if(url.endsWith('/v1/oauth2/token')){
+   assert.equal(init.method,'POST')
+   return success({token_type:'Bearer',access_token:'SYNTHETIC_ACCESS_TOKEN'})
+  }
+  assert.equal(init.method,'GET')
+  if(url.endsWith('/v1/notifications/webhooks-events/'+EVT))
+   return success({id:EVT,event_type:'PAYMENT.SALE.COMPLETED',
+    create_time:WHEN,resource:{id:'SALE-P22-ONE',
+     billing_agreement_id:SUB,state:'completed',amount:{currency:'USD',total:'2.99'},
+     payer_email:'never-expose@example.invalid'}})
+  if(url.endsWith('/v1/billing/subscriptions/'+SUB))
+   return success({id:SUB,plan_id:PLAN,custom_id:ID,status:'CANCELLED',
+    subscriber:{email_address:'never-expose@example.invalid'}})
+  if(url.endsWith('/v1/payments/sale/SALE-P22-ONE'))
+   return success({id:'SALE-P22-ONE',billing_agreement_id:SUB,
+    state:saleState,amount:{currency:'USD',total:'2.99'},
+    payer_email:'never-expose@example.invalid'})
+  throw Error('unexpected merchant endpoint')
+ }
+ return {calls,run:createP22ExistingLeaseReadOnlyComposition({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',projectUrl:BASE,
+  serviceRoleKey:KEY,clientId:'SYNTHETIC_CLIENT_ID',
+  clientSecret:'SYNTHETIC_CLIENT_SECRET',fetchImpl:transport,
+ })}
+}
+test('P22 existing-lease probe is disabled by default with zero network calls',async()=>{
+ let calls=0
+ const p=createP22ExistingLeaseReadOnlyComposition({
+  fetchImpl:async()=>{calls++;throw Error('should never call')},
+ })
+ const r=await p.inspect({eventId:EVT,claimToken:TOKEN})
+ assert.equal(r.phase,'DISABLED')
+ assert.equal(r.mayRecordPayment,false)
+ assert.equal(calls,0)
+})
+test('P22 existing-lease probe only reads existing lease, PayPal GETs and bound owner',async()=>{
+ const {run,calls}=claimedSaleProbeMock()
+ const r=await run.inspect({eventId:EVT,claimToken:TOKEN})
+ assert.equal(r.phase,'REVIEW_REQUIRED')
+ assert.equal(r.reason,'first_regular_cycle_and_reversals_unproven')
+ assert.equal(r.merchantCorrelationCandidateOnly,true)
+ assert.equal(r.mayRecordPayment,false)
+ assert.equal(r.mayGrantBenefits,false)
+ assert.equal(r.paidThrough,null)
+ assert.equal(r.dbWrites,0)
+ const sql=calls.filter(x=>x.url.includes('/rest/v1/rpc/'))
+ assert.equal(sql.filter(x=>x.url.endsWith('f16_p22_resolve_bound_under_claim')).length,1)
+ assert.equal(sql.filter(x=>x.url.endsWith('f16_p05_draft_read_claimed_event')).length,5)
+ assert.equal(calls.filter(x=>x.url.endsWith('/v1/payments/sale/SALE-P22-ONE')).length,1)
+ assert.equal(calls.some(x=>/claim_next|finish_claimed|commit|credit/.test(x.url)),false)
+ for(const privateText of [KEY,TOKEN,'never-expose@example.invalid',
+  EVT,'SALE-P22-ONE',ID,SUB])
+  assert.equal(JSON.stringify(r).includes(privateText),false)
+})
+test('P22 existing-lease probe stops before merchant GET with no active signed claim',async()=>{
+ const {run,calls}=claimedSaleProbeMock({claimState:null})
+ const r=await run.inspect({eventId:EVT,claimToken:TOKEN})
+ assert.equal(r.reason,'original_signed_claim_missing')
+ assert.equal(calls.length,1)
+ assert.equal(calls[0].url,BASE+'/rest/v1/rpc/f16_p05_draft_read_claimed_event')
+})
+test('P22 existing-lease probe refuses refunded original sale before owner lookup',async()=>{
+ const {run,calls}=claimedSaleProbeMock({saleState:'refunded'})
+ const r=await run.inspect({eventId:EVT,claimToken:TOKEN})
+ assert.equal(r.reason,'merchant_sale_or_owner_unproven')
+ assert.equal(r.merchantCorrelationCandidateOnly,false)
+ assert.equal(calls.some(x=>x.url.endsWith('f16_p22_resolve_bound_under_claim')),false)
+})
+test('P22 existing-lease probe catches expiration after slow PayPal GETs',async()=>{
+ const {run,calls}=claimedSaleProbeMock({stale:true})
+ const r=await run.inspect({eventId:EVT,claimToken:TOKEN})
+ assert.equal(r.reason,'existing_lease_changed_during_reads')
+ assert.equal(r.mayRecordPayment,false)
+ assert.equal(calls.some(x=>x.url.endsWith('f16_p22_resolve_bound_under_claim')),true)
+})
+test('P22 existing-lease probe requires an explicit injected test transport',()=>{
+ assert.throws(()=>createP22ExistingLeaseReadOnlyComposition({
+  scope:'OFFLINE_SYNTHETIC_TEST_ONLY',projectUrl:BASE,
+  serviceRoleKey:KEY,clientId:'SYNTHETIC_CLIENT_ID',
+  clientSecret:'SYNTHETIC_CLIENT_SECRET',
+ }),/p22_readonly_requires_test_transport/)
 })
