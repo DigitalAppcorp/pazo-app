@@ -113,6 +113,34 @@ REVOKE ALL ON FUNCTION public.pazo_supporter_public_pet_benefits(uuid)
 GRANT EXECUTE ON FUNCTION public.pazo_supporter_public_pet_benefits(uuid)
  TO anon,authenticated;
 
+-- Feed uses ONE bounded, output-only query for displayed distinct pet IDs.
+-- Never return owner IDs, subscription details, dates or payment records.
+CREATE FUNCTION public.pazo_supporter_public_badges_batch(p_pet_ids uuid[])
+RETURNS TABLE(pet_id uuid,badge boolean,milestone integer)
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $f$
+BEGIN
+ IF p_pet_ids IS NULL OR pg_catalog.array_length(p_pet_ids,1) IS NULL
+    OR pg_catalog.array_length(p_pet_ids,1)>48
+    OR pg_catalog.array_position(p_pet_ids,NULL) IS NOT NULL
+ THEN RAISE EXCEPTION 'Invalid batch' USING ERRCODE='22023'; END IF;
+ RETURN QUERY
+ SELECT ids.id,
+   COALESCE((benefits.value->>'badge')::boolean,false),
+   COALESCE((benefits.value->>'milestone')::integer,0)
+ FROM (SELECT DISTINCT req.pet_id AS id
+       FROM pg_catalog.unnest(p_pet_ids) AS req(pet_id)) ids
+ CROSS JOIN LATERAL (
+   SELECT public.pazo_supporter_public_pet_benefits(ids.id) AS value
+ ) AS benefits;
+END;
+$f$;
+ALTER FUNCTION public.pazo_supporter_public_badges_batch(uuid[]) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.pazo_supporter_public_badges_batch(uuid[])
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_supporter_public_badges_batch(uuid[])
+ TO anon,authenticated;
+
 -- A public gallery lists only opted-in pets with CURRENT verified coverage.
 -- No owner UUID, email, subscription identifiers or payment fields exposed.
 CREATE FUNCTION public.pazo_supporter_public_wall(p_limit integer DEFAULT 48)
