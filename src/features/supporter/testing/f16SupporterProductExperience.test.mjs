@@ -114,3 +114,17 @@ test('F16 prompt is available as a non-blocking component, but automatic deliver
  assert.ok(prompt.includes('previewOnly'))
  assert.ok(!page.includes('<SupporterInvitationPrompt'))
 })
+
+test('F16 membership is account-scoped across owned pets, never the selected pet only',()=>{
+ const pet=readFileSync(new URL('../../../components/views/PetView.tsx',import.meta.url),'utf8')
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const hook=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
+ assert.ok(pet.includes('useSupporterMembershipStatus(undefined, canManagePet)'))
+ assert.ok(page.includes('useSupporterMembershipStatus()'))
+ assert.ok(!page.includes('useSupporterMembershipStatus(pet?.id)'))
+ assert.ok(hook.includes("eq('owner_id',user!.id)"))
+ assert.ok(hook.includes('for(const pet of pets)'))
+ assert.ok(hook.includes('if(proof.badge) {active=true'))
+ assert.ok(hook.includes("return active ? {kind:'verified',milestone} : noStatus('inactive')"))
+ assert.ok(hook.includes("catch(() => {if(!cancelled)setStatus(noStatus('unavailable'))"))
+})
