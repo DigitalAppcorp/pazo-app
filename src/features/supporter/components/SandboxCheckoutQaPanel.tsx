@@ -51,7 +51,7 @@ export function SandboxCheckoutQaPanel({lang}: Props) {
     if (!config || config.url !== HOST) throw Error('bad_client_config')
     const {data:{session},error}=await supabase.auth.getSession()
     if (error || !session?.access_token) throw Error('not_signed_in')
-    const res=await fetch(HOST+'/functions/v1/f16-paypal-supporter',{
+    const res=await fetch(HOST+'/functions/v1/f16-paypal-supporter-v2-qa',{
       method:'POST',headers:{
         authorization:'Bearer '+session.access_token,
         apikey:config.key,'content-type':'application/json',
