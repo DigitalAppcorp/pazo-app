@@ -15,6 +15,6 @@ export function WelcomeAnimatedCompanion() {
     width={360}
     height={239}
     draggable={false}
-    className="pazo-welcome-dog block h-auto w-full max-w-none select-none object-contain"
+    className="pazo-welcome-dog block h-full w-full max-w-none select-none object-contain"
   />
 }
