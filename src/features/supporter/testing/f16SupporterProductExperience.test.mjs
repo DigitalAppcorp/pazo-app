@@ -166,7 +166,7 @@ test('F16 option B keeps signed PayPal Sandbox consent and one-shot checkout unc
  assert.ok(page.includes('<SupporterOfferB lang={lang}>'))
  assert.ok(page.includes('<SandboxCheckoutQaPanel lang={lang} inline/>'),'Checkout directly follows offer, not a second modal')
  assert.ok(!page.includes('setShowSandboxQa(true)'),'No duplicate purchase entry')
- assert.ok(checkout.includes("offer.version!==BENEFITS_V2"),'Must accept published v2 terms')
+ assert.ok(checkout.includes("o.version!==BENEFITS_V2"),'Must accept published v2 terms')
  assert.ok(checkout.includes('checked={consent}'))
  assert.ok(checkout.includes("setConsent(false)"),'Each offer opens unchecked')
  assert.ok(checkout.includes('affirmativeConsent:true'))
