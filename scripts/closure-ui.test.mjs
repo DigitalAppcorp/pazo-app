@@ -68,6 +68,7 @@ const {SupporterThemePreviewPanel}=await load('features/supporter/components/Sup
 const {SupporterSandboxBenefitsStatus}=await load('features/supporter/components/SupporterSandboxBenefitsStatus.js')
 const {PublicProfileTabs}=await load('features/profile/components/PublicProfileTabs.js')
 const {GratitudeWallPreview}=await load('features/supporter/components/GratitudeWallPreview.js')
+const {GratitudeWallScene}=await load('features/supporter/components/GratitudeWallScene.js')
 const {GratitudeParticipationPreview}=await load('features/supporter/components/GratitudeParticipationPreview.js')
 const {LiquidChoiceTabs}=await load('components/ui/LiquidChoiceTabs.js')
 const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchFilters.js')
@@ -1013,6 +1014,50 @@ test('F16 option D wall shows consent-safe empty illustration and working chrono
   assert.ok(welcome.includes('<GratitudeWallPreview'),'Wall is accessible from welcome A01')
   assert.ok(!content.includes('supabase')&&!content.includes('localStorage'),'No paying pets or consent inferred from browser')
   assert.ok(!content.includes('border-')&&!content.includes('ring-'),'No new outlined surfaces')
+})
+
+
+test('F16 option D chronological cards only show validated server props, with honest milestone ordering',async()=>{
+  const rows=[
+    {pet_id:'11111111-1111-4111-8111-111111111111',pet_name:'Luna',photo_url:'https://synthetic.invalid/luna.png',milestone:0},
+    {pet_id:'22222222-2222-4222-8222-222222222222',pet_name:'Milo',photo_url:null,milestone:12},
+    {pet_id:'33333333-3333-4333-8333-333333333333',pet_name:'Toby',photo_url:null,milestone:3},
+  ]
+  let ui
+  const render=tab=>React.createElement(GratitudeWallScene,{rows,tab,lang:'es',onClose(){},onTabChange(){}})
+  await act(async()=>{ui=create(render('all'))})
+  const names=()=>ui.root.findAllByType('article').map(card=>card.findAllByType('h2')[0].children.join(''))
+  assert.deepEqual(names(),['Luna','Milo','Toby'])
+  assert.ok(JSON.stringify(ui.toJSON()).includes('Hito verificado: 12 meses'))
+  assert.ok(!JSON.stringify(ui.toJSON()).includes('Apoyando desde hace 12 meses'),'Milestone is not an exact tenure')
+  assert.ok(!JSON.stringify(ui.toJSON()).includes('unverified purchase'))
+  await act(async()=>ui.update(render('recent')))
+  assert.deepEqual(names(),['Toby','Milo','Luna'],'Most recent consent first, not invented payment chronology')
+  await act(async()=>ui.update(render('longtime')))
+  assert.deepEqual(names(),['Milo','Toby','Luna'],'Known milestones used as verified coarse ordering')
+  await act(async()=>ui.unmount())
+  let failure
+  await act(async()=>{failure=create(React.createElement(GratitudeWallScene,{
+    rows:[],tab:'all',lang:'en',onClose(){},onTabChange(){},error:true,onRetry(){}
+  }))})
+  assert.equal(failure.root.findAllByType('article').length,0)
+  assert.equal(failure.root.findAllByProps({role:'alert'}).length,1)
+  assert.equal(failure.root.findAllByProps({'aria-label':'Empty wall'}).length,0,
+    'RPC failure must not be misrepresented as zero consenting pets')
+  await act(async()=>failure.unmount())
+  const css=fs.readFileSync('src/index.css','utf8')
+  const wall=fs.readFileSync('src/features/supporter/components/GratitudeWallScene.tsx','utf8')
+  const live=fs.readFileSync('src/features/supporter/components/GratitudeWallLive.tsx','utf8')
+  const sql=fs.readFileSync('supabase/migrations/20261017161221_f16_sandbox_qa_verified_benefits_reads.sql','utf8')
+  assert.ok(wall.includes('pazo-supporter-float'))
+  assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'))
+  assert.ok(wall.includes('/supporter/gratitude-empty-pets.svg'))
+  assert.ok(live.includes("supabase.rpc('pazo_supporter_public_wall'"))
+  assert.ok(live.includes('validWallRows(data)'))
+  assert.ok(sql.includes('c.revoked_at IS NULL'))
+  assert.ok(sql.includes("(b.value->>'badge')::boolean IS TRUE"))
+  assert.ok(sql.includes('ORDER BY c.granted_at ASC,p.id ASC'))
+  assert.ok(!wall.includes('border-')&&!wall.includes('ring-'),'No outlined wall surfaces')
 })
 
 test('F16 per-pet consent notice approved in ES/EN never persists preview decisions', async () => {
