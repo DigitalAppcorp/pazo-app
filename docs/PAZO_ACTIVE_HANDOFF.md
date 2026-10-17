@@ -1,3 +1,23 @@
+# F16 — SANDBOX REAL CON CUATRO BENEFICIOS: CÓDIGO V2 LISTO, COMPRA NUEVA PENDIENTE (2026-10-17)
+
+**Objetivo PO re-confirmado:** «por fin, muy bien vamos a ello» = realizar **en PAZO** compra PayPal **Sandbox** con cuatro beneficios auténticos, corregir allí las pantallas que el PO vea, cancelar y verificar expiración/reembolsos; **NO** más maquetas separadas, P43, PayPal Live ni nuevo despliegue público.
+
+**Entregado en PR #44 DRAFT, código y laboratorio, sin tocar hosted:**
+- `src/features/supporter/sandboxBenefitsOfferV2.mjs`: nueva oferta ES/EN **Sandbox beneficio real QA**, versión `pazo-supporter-sandbox.benefits-v2`, precio USD 2.99/mes simulado, cuatro beneficios exactos. `mayPublish=false` y `mayCreateCheckout=false` mientras no haya publicación separada. Original P06 `pazo-supporter-sandbox.qa20261016-v1` decía explícitamente SIN beneficios, por lo que **NUNCA** autoriza perks retroactivamente.
+- `src/features/supporter/components/SandboxCheckoutQaPanel.tsx`: fail-closed si server ofrece vieja versión sin beneficios; nuevo copy acepta los 4 beneficios y sigue casilla desmarcada. `supabase/functions/f16-paypal-supporter/index.ts` también bloquea `begin` v1 y `offer` v1 aunque browser sea modificado. **Latch servidor QA_CHECKOUT_RELEASE_APPROVED=false INTACTO**, no checkout abierto.
+- `SupporterSandboxBenefitsStatus.tsx` integrado en `SupporterAccountManagement.tsx` SOLO cuando `import.meta.env.DEV && VITE_PAZO_F16_SANDBOX_QA_UI==='true' && VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED==='true'`: examina los RPC reales para mascota propia, insignia original, fondo persistido, consentimiento individual y vista pública del muro, sin mentir sobre pagos ni conceder por redirección PayPal.
+- `scripts/f16-sandbox-benefits-v2-disposable-offer-sql.mjs`: reproduce publicación de v2 en PG17 solo `f14_synthetic`, manteniendo intactos dos términos históricos; test en workflow PG17. No es migración hosted.
+- `src/features/supporter/testing/f16SandboxFourBenefitsOfferV2.test.mjs` + `scripts/closure-ui.test.mjs`: comprueba copy nuevo/antiguo, bloqueo browser/backend de versión v1, y componente real de estado con RPC sintética/verificada, incluyendo fallos/casos negativos. `supabase/tests/supporter/f16-mvp-four-benefits-pg17-synthetic.sql`: cinco temas individualmente, guardado/restauración, milestones 3/12 y degradación por refund, wall/consent y denegación gratis. **CI SUCCESS #39047189109** y **PG Lab SUCCESS #39047189112**, commit `7926bdf89690593fcb8dde84d472edb8e6024fa7`.
+- Nueva prioridad aclarada en `docs/PAZO_F16_UI_AND_SANDBOX_BEFORE_LIVE_GATE_20261017.md`, commit `71f692c5fb6dd496014f17180142fe08569013dc`.
+
+**Hosted estado REAL (read-only verificado):** 2 filas de ofertas Sandbox v1 `pazo-supporter-sandbox.qa20261016-v1`, 1 intento de compra histórico y 0 ofertas v2. El sitio no puede comprar v2 ni demostrar beneficios mientras la nueva versión y un ledger Sandbox QA no estén instalados y el checkout no esté habilitado de manera aislada. Sin información de secretos divulgada.
+
+**Siguiente gate es OPERATIVO, no más visualizaciones:** preparar arquitectura/migración **SOLO Sandbox QA** con allowlist de nueva cuenta Auth descartable, nueva oferta v2 inmutable, recibos PayPal Sandbox firmados + Merchant GET + fechas de período, fuente de acreditación QA privada y proyección de 4 beneficios, cancelación PayPal Sandbox. Contrastar ACL/RLS, pedir GO específico al PO antes de insertar ofertas o activar Edge/desplegar hosted. Ejecutar primer E2E real, mostrar pantallas auténticas al PO para corregir. No reutilizar la compra P44 antigua, no conceder por aprobación o PayPal `ACTIVE`, no hacer 12 pagos para probar 12 meses (usar laboratorios PG17), no tocar P42/Live.
+
+**CI del nuevo handoff es documental y por confirmar.** PR #44 DRAFT, no merge/preview/payments. **Marcador `F16_SANDBOX_BENEFITS_V2_DEVELOPED_LIVE_OFF_REAL_SANDBOX_BUY_PENDING`.**
+
+---
+
 # F16 — ORDEN ACTUAL DEL PRODUCT OWNER: UI Y BENEFICIOS SANDBOX ANTES DE LIVE (2026-10-17)
 
 **Corrección expresa del PO:** detener el salto a PayPal Live. Aunque los cuatro PNG originales están versionados y CI/PG17 pasa, **NO se han aprobado visualmente** las insignias dentro de las pantallas reales, los cinco fondos, el muro de agradecimiento ni la pantalla final de pago/cancelación; **NO se ha ejecutado E2E Sandbox del nuevo contrato con los cuatro beneficios**. El comprador Sandbox anterior de P44 aceptó una oferta de QA que explícitamente no concedía recompensas. No reutilizarlo como demostración de beneficios.
