@@ -1,3 +1,15 @@
+# F16 — Muro de agradecimiento Opción D aprobado por PO, implementado en rama (2026-10-17)
+
+**GO del PO:** «Opción D» (timeline / vista cronológica), con objetos ilustrados que reutilicen **la misma animación suave de personalización de perfil**; implementar **pantalla vacía y pantalla con mascotas** como en las dos imágenes referenciales aprobadas. Sin badges, nombres, meses ni fotos simulados en vistas públicas.
+
+**Código, PR #44 DRAFT, rama `f13/section-titles-20261012`:** Nuevo `GratitudeWallScene.tsx` es UI compartida con cabecera «Gracias, Amigos de PAZO», explicación clara de autorización + cobertura, filtros Todos/Recientes/Más tiempo apoyando, lista cronológica visual para mascotas reales, estado vacío ilustrado, carga/error/reintento, ES/EN, foco y Escape. SVG original `public/supporter/gratitude-empty-pets.svg` muestra perro y gato **solo como ilustración decorativa**, no miembros inventados. Corazones/huellas/estrellas flotan con `pazo-supporter-float` y el CSS canónico `pazoSupporterGentleFloat`, desactivado por `prefers-reduced-motion`; no animar nombres, retratos, filtros ni tarjetas.
+
+**Integridad:** `GratitudeWallLive.tsx` conserva `supabase.rpc('pazo_supporter_public_wall',{p_limit:48})` + validación de UUID/nombre/foto HTTPS/hito, solo muestra filas cuyo backend confirma consentimiento por mascota no revocado y cobertura pagada vigente. `GratitudeWallPreview.tsx` bajo release flag OFF muestra **el mismo diseño vacío** sin RPC ni cuenta, para bienvenida A01 pública. La función SQL existente ordena por `wall_consents.granted_at ASC`: filtro Recientes invierte ese orden; Más tiempo apoyando usa **hitos verificados** 0/3/6/12 y no inventa fechas o tiempo exacto de apoyo. El backend actual no devuelve mensajes por mascota ni raza, por lo que cada tarjeta usa una frase de agradecimiento genérica, sin atribuir texto inventado al dueño.
+
+**QA:** `scripts/closure-ui.test.mjs` actualizado para estado vacío (sin cuadrícula fantasma) y pruebas de orden real, filtros ES/EN, error distinto de cero filas, decoraciones / accesibilidad reducida, SQL contractual. CI y PostgreSQL Lab del HEAD deben verificarse después. **Aún falta captura visual/aceptación PO** en localhost para 360–430 px y estado de lista con datos reales autorizados (no generar test records automáticamente). No migraciones SQL, ninguna modificación en consentimientos reales, Supabase hosted, Vercel o PayPal, ni GO Live, ni merge. **Marcador:** `F16_GRATITUDE_WALL_OPTION_D_CODE_BRANCH_QA_VISUAL_PENDING`.
+
+---
+
 # F16 — REVISIÓN VISUAL PO: Opción B no fiel; corrección de proporciones en rama (2026-10-17)
 
 **Evidencia:** usuario compartió dos capturas lado a lado de la maqueta elegida B frente al PAZO real. La implementación anterior no cumplía: cabecera extra «Entorno de prueba / Volver a PAZO», titular dividido en cuatro líneas por insignia en el mismo flex, hero excesivamente alto, filas sobredimensionadas y consentimiento/CTA PayPal fuera de la primera pantalla. **PO NO ACEPTÓ** ese resultado. Priorizar fidelidad visual al diseño aprobado, no «parecido razonable».
