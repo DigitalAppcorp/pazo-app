@@ -64,7 +64,7 @@ function compose(){
   autoRefreshToken:false,persistSession:false}})
  const resolveAuthenticatedOwner=createVerifiedAuthOwnerResolver({authClient:supabase})
  const store=createF16IntentStore({projectUrl:BASE,serviceRoleKey:key})
- const consentStore=createPazoCheckoutConsentStore({projectUrl:BASE,serviceRoleKey:key})
+ const consentStore=createPazoCheckoutConsentStore({projectUrl:BASE,serviceRoleKey:key,qaV2:true})
  const provider=createPaypalSandboxSubscriptionCreator({
   clientId,clientSecret,returnUrl,cancelUrl})
  const reader=createPaypalSandboxSubscriptionReader({clientId,clientSecret})
@@ -118,8 +118,10 @@ Deno.serve(async(request:Request)=>{
  if(!isP06SandboxQaAuthorized({getEnv:(k:string)=>Deno.env.get(k),
       verifiedOwnerId:qaOwner}))
   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+ // V1's management handler would resolve the old bound subscription.
+ // Never route a V2 buyer to it; implement a scoped V2 status/cancel path first.
  if(data.action==='status'||data.action==='cancel')
-  return addCors(await runtime.manage(request),runtime.origin)
+  return addCors(reply(503,'qa_v2_subscription_management_not_connected'),runtime.origin)
  let result
  if(data.action==='offer'){
   if(Object.keys(data).sort().join('|')!=='action|locale')
