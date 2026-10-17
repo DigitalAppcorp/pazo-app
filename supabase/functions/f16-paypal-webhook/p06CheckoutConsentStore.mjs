@@ -118,9 +118,9 @@ export function createPazoCheckoutConsentStore({
     subscriptionId:x.subscriptionId})
   },
   async bindRecoveredForOwner({
-   if(qaV2)throw Error('qa_v2_recovery_bind_requires_new_binding')
    ownerId,requestKey,intentId,subscriptionId,
   }={}){
+   if(qaV2)throw Error('qa_v2_recovery_bind_requires_new_binding')
    if(!UUID.test(ownerId||'')||!UUID.test(requestKey||'')||
       !INTENT.test(intentId||'')||
       !/^I-[A-Za-z0-9_-]{3,70}$/.test(subscriptionId||''))
