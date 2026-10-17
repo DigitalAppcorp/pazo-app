@@ -1,3 +1,29 @@
+# F16-P43B — PASS de acceso temporal CLI, avance a diseño canal privado WRITE (2026-10-17)
+
+**Resultado comunicado por el Product Owner desde Codex Windows**, después del GO exclusivo `P43B-EPHEMERAL-20261017-01`:
+
+```text
+P43B_EPHEMERAL_DB_READ_ONLY_PASS
+P42_STRUCTURAL_PASS_NO_PROVISIONING_AUTHORITY
+P43B_NO_REAL_KEY_NO_CHECKOUT_NO_PAYMENT
+```
+
+**Interpretación restringida:** se ejecutó satisfactoriamente el nuevo procedimiento `scripts/f16-p43b-ephemeral-readonly-preflight.mjs` para autenticarse usando el rol temporal `cli_login_postgres` vía Supabase CLI y efectuar el SQL estructural P42 fijado por hash, con `PGSSLMODE=verify-full` y transacción SQL `READ ONLY`. Marcadores reportados por Codex; **no es una segunda auditoría de registros privados por ChatGPT**. El GO y lock `P43B-EPHEMERAL-20261017-01` quedan **CONSUMIDOS**, nunca relanzar el script ni borrar locks. Éxito NO significa que exista sesión/contraseña efímera vigente para siguientes operaciones; futuras emisiones requieren nuevo GO y protocolo propio. No usar contraseña PostgreSQL permanente para avanzar ni activación de JIT.
+
+**Resolución:** desbloqueado el **canal de lectura administrativa temporal**; NO validado **canal de escritura privada parametrizada** para `supporter_private.p42_activation_signing_keys` ni entrega/retiro seguro del secreto Edge `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX`. **NO se generó/provisionó clave P42 ni se habilitó writer P42, worker P21, checkout, cobros, contabilidad o beneficios.** PR #44 DRAFT. Hosted P42 absoluto-expiry patch ya instalado anteriormente; no repetir.
+
+**Próximo gate recomendado (SOLO DISEÑO/AUDITORÍA OFFLINE, SIN GENERAR CLAVES):**
+1. **Reusar documentos existentes**: `docs/PAZO_F16_P42_24H_CUSTODY_EXPIRY_REVOCATION_GATE_20261016.md`, `docs/PAZO_F16_P42_OPERATOR_CHANNEL_DRY_RUN_NO_PROVISION_20261016.md`, `docs/PAZO_F16_P43_SANDBOX_KEY_PROVISIONING_SECURE_HANDOFF_20261016.md` y contrato `supabase/queries/f16_p42_provisioning_structural_preflight_READ_ONLY.sql`. No duplicar el diseño.
+2. Auditar **sin conectarse** si el rol efímero de Supabase CLI con `SET ROLE postgres` puede respaldar futuras sesiones de escritura solo cuando se apruebe explícitamente, y cómo se pasará material por **bind parameters** sin SQL literal/logs/argv ni GitHub. Un READ ONLY PASS no demuestra WRITE. Diseñar pequeño laboratorio PG17 desechable para validar transacción parametrizada, compensación y bloqueo antes de probar hosted.
+3. Validar un canal **secreto Edge de escritura/retirada en memoria** mediante interfaz oficial soportada (Dashboard/API/CLI) sin `NAME=VALUE` en argumentos, archivos `.env`, historial, chat o transcripciones. Exigir que ambos destinos estén disponibles y cuenten con operador/custodio verificado antes de crear bytes.
+4. Mantener la política PO ya elegida de `T0` UTC futuro, `not_after=T0+24h` y revocación manual supervisada; verificar capacidad real de `unset` y `DELETE` supervisados y riesgos de backups/Edge secrets compartidos. Necesita custodio disponible durante vencimiento y decisión de riesgo residual.
+5. Preparar postflight **metadata-only** para una fila `P42_V1` `enabled=false`, gate OFF, sin `EXECUTE`, y secret Edge presente, distinto del SQL P43B que exige **cero** filas. También preparar procedimiento compensatorio Edge/DB; no prometer atomicidad entre almacenes.
+6. Tras revisión y tests offline, solicitar GO NUEVO e independiente para cualquier prueba hosted de permisos/write; un GO aún posterior para generar/provisionar misma clave en Edge + DB. Ningún GO implícito para compras/PayPal/live.
+
+**Estado del hito:** `P43B_EPHEMERAL_DB_READ_ONLY_PASS_REPORTED_AND_CONSUMED`; **P42 PRIVATE WRITE + EDGE SECRET CHANNEL UNVERIFIED**; **F16 FINANCIAL NO-GO**.
+
+---
+
 # F16-P43B — GO explícito del Product Owner: único acceso temporal CLI READ ONLY (2026-10-17)
 
 **GO inequívoco recibido:** «Autorizo P43B». Se concede **exactamente UN intento** `P43B-EPHEMERAL-20261017-01` usando el script `scripts/f16-p43b-ephemeral-readonly-preflight.mjs` preparado en la rama `f13/section-titles-20261012`, PR #44 DRAFT, según `docs/PAZO_F16_P43B_EPHEMERAL_CLI_READONLY_PREPARATION_20261017.md`. **Preparación CI validada previamente:** commit `5b7afe615eecffaf07f59c7cf8676a83191dcf1a`, workflow CI `39030040038` SUCCESS y laboratorio PostgreSQL desechable `39030039986` SUCCESS; el procedimiento del script y el lock `p43b-ephemeral-readonly-one-attempt-20261017-01.lock` revisados sin drift. Este commit de documentación posterior sólo registra el GO; no altera código ejecutable. **No hay ejecución desde este chat.**
