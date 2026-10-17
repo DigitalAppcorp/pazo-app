@@ -1,5 +1,5 @@
 import {useEffect, useRef} from 'react'
-import {IconCat, IconDog, IconHeart, IconPaw, IconSparkle} from '../../../components/icons/PazoIcons'
+import {IconHeart, IconPaw, IconSparkle} from '../../../components/icons/PazoIcons'
 import {SupporterBadge} from './SupporterBadge'
 
 export type WallEntry = {
@@ -48,18 +48,11 @@ function WallEmpty({lang,previewOnly=false}:{lang:'es'|'en';previewOnly?:boolean
     className="relative isolate mt-4 min-h-[380px] overflow-hidden rounded-[30px] bg-white px-5 pb-10 pt-8 shadow-[0_8px_24px_rgba(32,78,74,0.045)]">
     <WallOrnaments/>
     <div className="relative z-10 mx-auto flex max-w-[320px] flex-col items-center text-center">
-      <div aria-hidden="true" className="relative flex h-[188px] w-[230px] items-center justify-center">
-        <div className="absolute inset-x-5 bottom-2 h-[156px] rounded-full bg-[#E7EFD9]/75"/>
-        <div className="absolute left-[18px] top-[13px] h-12 w-12 rounded-full bg-[#FCE5D4]/85"/>
-        <div className="absolute right-[19px] top-[45px] h-9 w-9 rounded-full bg-[#EFF0BE]/90"/>
-        <span className="absolute bottom-5 left-7 flex h-[118px] w-[118px] items-center justify-center rounded-[40%] bg-[#E8B88F]/95 text-[#754D31] shadow-[0_8px_16px_rgba(125,78,50,0.12)]">
-          <IconDog size={90}/>
-        </span>
-        <span className="absolute bottom-3 right-6 flex h-[106px] w-[95px] items-center justify-center rounded-[40%] bg-[#F3E8DD] text-[#87958D] shadow-[0_7px_13px_rgba(32,78,74,0.08)]">
-          <IconCat size={72}/>
-        </span>
-        <span className="absolute left-[45%] top-0 text-[#E9A77D]">
-          <span className="pazo-supporter-float block" style={{animationDuration:'7.3s',animationDelay:'-2.2s'}}><IconHeart filled size={34}/></span>
+      <div aria-hidden="true" className="relative flex h-[198px] w-[265px] items-center justify-center">
+        <img src="/supporter/gratitude-empty-pets.svg" alt="" width="265" height="196"
+          className="h-[196px] w-[265px] object-contain"/>
+        <span className="absolute left-[43%] top-0 text-[#E9A77D]">
+          <span className="pazo-supporter-float block" style={{animationDuration:'7.3s',animationDelay:'-2.2s'}}><IconHeart filled size={27}/></span>
         </span>
       </div>
       <h2 className="mt-5 text-[clamp(21px,5.8vw,26px)] font-black leading-[1.18] tracking-tight text-[#204E4A]">
