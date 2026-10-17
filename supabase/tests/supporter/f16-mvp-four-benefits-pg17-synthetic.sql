@@ -64,7 +64,7 @@ BEGIN
  THEN RAISE EXCEPTION 'Unpaid user could not reset original theme'; END IF;
 END $test$;
 
--- Insert three synthetic, distinct and non-overlapping month cycles.
+-- Insert three FULLY COMPLETED cycles and a fourth CURRENT paid cycle.
 SET LOCAL ROLE postgres;
 INSERT INTO supporter_private.f16_mvp_paid_period_proofs
 (provider_sale_id,provider_subscription_id,owner_id,cycle_key,provider_event_id,
@@ -72,14 +72,18 @@ INSERT INTO supporter_private.f16_mvp_paid_period_proofs
 VALUES
 ('PAYMENT-MVP-001','I-TEST-MVP-01','31111111-1111-4111-8111-111111111111',
  'MVP-CYCLE-001','EVT-MVP-001',repeat('f',64),
-  pg_catalog.clock_timestamp()-interval '65 days',
-  pg_catalog.clock_timestamp()-interval '35 days',pg_catalog.clock_timestamp()),
+  pg_catalog.clock_timestamp()-interval '95 days',
+  pg_catalog.clock_timestamp()-interval '65 days',pg_catalog.clock_timestamp()),
 ('PAYMENT-MVP-002','I-TEST-MVP-01','31111111-1111-4111-8111-111111111111',
  'MVP-CYCLE-002','EVT-MVP-002',repeat('f',64),
-  pg_catalog.clock_timestamp()-interval '35 days',
-  pg_catalog.clock_timestamp()-interval '5 days',pg_catalog.clock_timestamp()),
+  pg_catalog.clock_timestamp()-interval '65 days',
+  pg_catalog.clock_timestamp()-interval '35 days',pg_catalog.clock_timestamp()),
 ('PAYMENT-MVP-003','I-TEST-MVP-01','31111111-1111-4111-8111-111111111111',
  'MVP-CYCLE-003','EVT-MVP-003',repeat('f',64),
+  pg_catalog.clock_timestamp()-interval '35 days',
+  pg_catalog.clock_timestamp()-interval '5 days',pg_catalog.clock_timestamp()),
+('PAYMENT-MVP-004','I-TEST-MVP-01','31111111-1111-4111-8111-111111111111',
+ 'MVP-CYCLE-004','EVT-MVP-004',repeat('f',64),
   pg_catalog.clock_timestamp()-interval '5 days',
   pg_catalog.clock_timestamp()+interval '25 days',pg_catalog.clock_timestamp());
 
@@ -144,7 +148,7 @@ END $test$;
 SET LOCAL ROLE postgres;
 INSERT INTO supporter_private.f16_mvp_paid_period_holds
 (provider_sale_id,hold_id,hold_kind,verified_at)
-VALUES ('PAYMENT-MVP-003','HOLD-MVP-003','dispute',pg_catalog.clock_timestamp());
+VALUES ('PAYMENT-MVP-004','HOLD-MVP-004','dispute',pg_catalog.clock_timestamp());
 SET LOCAL ROLE anon;
 DO $test$
 DECLARE v jsonb;
