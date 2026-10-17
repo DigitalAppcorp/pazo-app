@@ -1,3 +1,17 @@
+# F16-P42 — custodia 24h: preflight privado READ-ONLY, provisión NO-GO (2026-10-16)
+
+**Siguiente gate autorizado por `ok go`: auditar custodia/revocación P42 tras instalación del parche absoluto.** Se completó auditoría solo lectura alojada y escaneo del código desplegado de **8** Edge Functions, SIN nueva clave ni ejecución de procedimientos de borrado; resultado `P42_CUSTODY_READONLY_AUDIT_PASS_BUT_PROVISIONING_NO_GO`.
+
+**Postflight:** función P42 en hosted mantiene cutoff `v_key_end IS NULL` y `clock_timestamp()>=v_key_end`; 0 signing keys, P21/P42 OFF, 0 P40, 0 ledger, 0 reversals, RLS+FORCE RLS en signing_keys, `anon/authenticated/service_role/PUBLIC EXECUTE=false`. `pg_stat_ssl.ssl=true` en sesión del conector, pero canal administrativo local `verify-full` + WRITE del Product Owner **NO VERIFICADO**. SQL config observada `log_statement=ddl`, `log_parameter_max_length=-1`, `log_parameter_max_length_on_error=0`, `log_min_error_statement=error`; no afirmar ausencia de logs. Nunca pegar bytes de clave en SQL Editor o chat. Nunca reejecutar parche P42 instalado.
+
+**Superficie Edge:** `list_edge_functions` mostró 8 funciones `ACTIVE`, inspeccionados los contenidos desplegados de las 8 con `get_edge_function`, ninguna referencia literal a `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX` o RPC/tabla P42. **Esto NO demuestra aislamiento de secrets compartidos del proyecto ni ausencia de lectores dinámicos**, y la integración no dispone de gestión/listado de secretos Edge. Inventario NAME-ONLY requiere verificación del PO en Dashboard (jamás valores). Backup lógico del script versionado ya excluye key_bytes y PG17 restore PASS histórico; no volver a hacerlo. Otros backups/snapshots/accesos no certificados.
+
+**Dependencia pendiente que realmente bloquea:** intento local one-shot previo Session Pooler/TLS `P42_TLS_ONE_SHOT_EXISTING_PASSWORD_UNAVAILABLE_BLOCKED_NO_HOSTED_CHANGE`; no repetir ni reciclar P43 ephemeral, no resetear password ni crear un login adicional por inferencia. Custodia elegida PO único, revocación manual 24h SIN garantía física si PO está ausente; requiere aceptación expresa del riesgo y confirmación de disponibilidad futura `T0/Texp`, ambos destinos bajo control privado, canal DB de escritura sin secreto en logs, mecanismo de `unset` verificable, backups/retención y GO nuevo e inequívoco. **No generar `P42_V1`**. Aprobación futura de custodia es distinta de grants/worker/checkout/contabilidad y beneficios.
+
+**Documento actualizado:** `docs/PAZO_F16_P42_MANUAL_OPERATOR_PREFLIGHT_20261016.md` sección 12. **Único paso humano ahora:** abrir Supabase Dashboard → Edge Functions → Secrets y comprobar **solo presencia/ausencia del nombre exacto** `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX`. Si presenta valor o un secreto desconocido, no copiarlo ni borrar nada; reportar únicamente presente/ausente. PR #44 DRAFT y F16 financiero NO-GO.
+
+---
+
 # F16-P42 — INSTALACIÓN ADMINISTRATIVA CONFIRMADA + POSTFLIGHT SQL (2026-10-16)
 
 **ÉXITO verificado directamente después de ejecución por el Product Owner en el SQL Editor oficial de Supabase** (captura de 1 fila `p42_operator_postflight`). Script ejecutado: `supabase/drafts/f16_p42_absolute_expiry_PO_SQL_EDITOR_OPERATOR_PENDING_EXECUTION.sql`, versión validada en commit `444b3cdd97a7cb996d85663fc2c26f35087ed499`. ChatGPT **NO** usó `apply_migration` ni intentó sortear un control mediante otra herramienta: el PO ejecutó con su sesión administrativa en el Dashboard. **NO EJECUTAR DE NUEVO.**
