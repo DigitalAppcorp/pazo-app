@@ -48,8 +48,8 @@ END $test$;
 
 -- Authenticated owner cannot buy benefits using only UI or consent.
 SET LOCAL ROLE authenticated;
-SELECT pg_catalog.set_config('request.jwt.claim.sub',
-  '31111111-1111-4111-8111-111111111111',true);
+DO $jwt$ BEGIN PERFORM pg_catalog.set_config('request.jwt.claim.sub',
+  '31111111-1111-4111-8111-111111111111',true); END $jwt$;
 DO $test$
 BEGIN
  BEGIN
@@ -84,8 +84,8 @@ VALUES
   pg_catalog.clock_timestamp()+interval '25 days',pg_catalog.clock_timestamp());
 
 SET LOCAL ROLE authenticated;
-SELECT pg_catalog.set_config('request.jwt.claim.sub',
-  '31111111-1111-4111-8111-111111111111',true);
+DO $jwt$ BEGIN PERFORM pg_catalog.set_config('request.jwt.claim.sub',
+  '31111111-1111-4111-8111-111111111111',true); END $jwt$;
 DO $test$
 DECLARE v jsonb;
 BEGIN
@@ -135,8 +135,8 @@ END $test$;
 
 -- Opt-out works even after membership is blocked.
 SET LOCAL ROLE authenticated;
-SELECT pg_catalog.set_config('request.jwt.claim.sub',
-  '31111111-1111-4111-8111-111111111111',true);
+DO $jwt$ BEGIN PERFORM pg_catalog.set_config('request.jwt.claim.sub',
+  '31111111-1111-4111-8111-111111111111',true); END $jwt$;
 DO $test$
 BEGIN
  IF NOT public.pazo_wall_consent_disable('41111111-1111-4111-8111-111111111111')
