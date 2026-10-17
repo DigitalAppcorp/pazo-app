@@ -91,8 +91,19 @@ SET LOCAL ROLE authenticated;
 DO $jwt$ BEGIN PERFORM pg_catalog.set_config('request.jwt.claim.sub',
   '31111111-1111-4111-8111-111111111111',true); END $jwt$;
 DO $test$
-DECLARE v jsonb;
+DECLARE v jsonb; t text;
 BEGIN
+ FOR t IN SELECT pg_catalog.unnest(ARRAY['classic','nature','hearts','stars','adventure']) LOOP
+  IF NOT public.pazo_supporter_set_pet_theme('41111111-1111-4111-8111-111111111111',t)
+  THEN RAISE EXCEPTION 'Verified owner could not save every approved cosmetic theme'; END IF;
+  v:=public.pazo_supporter_public_pet_benefits('41111111-1111-4111-8111-111111111111');
+  IF v->>'badge'<>'true' OR v->>'theme'<>t
+  THEN RAISE EXCEPTION 'Saved theme was not reflected publicly: %',t; END IF;
+ END LOOP;
+ IF NOT public.pazo_supporter_set_pet_theme('41111111-1111-4111-8111-111111111111',NULL)
+ THEN RAISE EXCEPTION 'Failed to restore original background'; END IF;
+ v:=public.pazo_supporter_public_pet_benefits('41111111-1111-4111-8111-111111111111');
+ IF v->>'theme' IS NOT NULL THEN RAISE EXCEPTION 'Original theme restore was not reflected'; END IF;
  IF NOT public.pazo_supporter_set_pet_theme('41111111-1111-4111-8111-111111111111','stars')
  THEN RAISE EXCEPTION 'Verified user could not save theme'; END IF;
  BEGIN
@@ -143,6 +154,50 @@ BEGIN
   RAISE EXCEPTION 'Null pet ID allowed in batch';
  EXCEPTION WHEN invalid_parameter_value THEN NULL; END;
 END $test$;
+
+-- Rehearse 12 FULLY COMPLETED synthetic periods plus current period.
+-- This is not 12 claimed PayPal payments. All test rows ROLLBACK.
+SET LOCAL ROLE postgres;
+WITH anchor AS (
+ SELECT service_start AS end_before_first
+ FROM supporter_private.f16_mvp_paid_period_proofs
+ WHERE provider_sale_id='PAYMENT-MVP-001'
+), periods AS (
+ SELECT n,
+  end_before_first-interval '270 days'+(n-1)*interval '30 days' AS starts,
+  end_before_first-interval '270 days'+n*interval '30 days' AS ends
+ FROM anchor CROSS JOIN pg_catalog.generate_series(1,9) n
+)
+INSERT INTO supporter_private.f16_mvp_paid_period_proofs
+(provider_sale_id,provider_subscription_id,owner_id,cycle_key,
+ provider_event_id,offer_terms_sha256,service_start,service_end,merchant_verified_at)
+SELECT 'PAYMENT-MVP-EVOLUTION-'||n,'I-TEST-MVP-01',
+ '31111111-1111-4111-8111-111111111111'::uuid,
+ 'MVP-EVOLUTION-CYCLE-'||n,'EVT-MVP-EVOLUTION-'||n,
+ repeat('f',64),starts,ends,pg_catalog.clock_timestamp()
+FROM periods;
+SET LOCAL ROLE anon;
+DO $milestones$
+DECLARE result jsonb;
+BEGIN
+ result:=public.pazo_supporter_public_pet_benefits('41111111-1111-4111-8111-111111111111');
+ IF result->>'badge'<>'true' OR result->>'milestone'<>'12'
+ THEN RAISE EXCEPTION 'Twelve fully elapsed paid cycles did not create 12-month badge'; END IF;
+END $milestones$;
+-- One earlier period is refunded: 11 genuine eligible cycles remain, so 12
+-- month medal must disappear while current paid period remains active.
+SET LOCAL ROLE postgres;
+INSERT INTO supporter_private.f16_mvp_paid_period_holds
+(provider_sale_id,hold_id,hold_kind,verified_at)
+VALUES ('PAYMENT-MVP-001','HOLD-MVP-EARLY-REFUND','refunded',pg_catalog.clock_timestamp());
+SET LOCAL ROLE anon;
+DO $milestones$
+DECLARE result jsonb;
+BEGIN
+ result:=public.pazo_supporter_public_pet_benefits('41111111-1111-4111-8111-111111111111');
+ IF result->>'badge'<>'true' OR result->>'milestone'<>'6'
+ THEN RAISE EXCEPTION 'Refunded history did not remove 12-month badge safely'; END IF;
+END $milestones$;
 
 -- Refund/dispute blocks current benefits but must not delete stored consent.
 SET LOCAL ROLE postgres;
