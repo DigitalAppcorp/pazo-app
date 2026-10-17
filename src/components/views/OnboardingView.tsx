@@ -187,7 +187,7 @@ export const OnboardingView = ({
           {/* A short phone scrolls only the illustration, never hiding the main actions. */}
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
             <section aria-labelledby="pazo-welcome-title"
-              className="relative isolate flex min-h-[420px] w-full flex-1 flex-col overflow-hidden rounded-[34px] bg-[#A2BB76] text-white shadow-[0_10px_28px_rgba(32,78,74,0.055)]">
+              className="relative isolate flex min-h-[420px] w-full flex-1 flex-col overflow-hidden rounded-[34px] bg-[linear-gradient(145deg,#A2BB78_0%,#9BB670_58%,#A5BC72_100%)] text-white shadow-[0_10px_28px_rgba(32,78,74,0.055)]">
               <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
                 viewBox="0 0 380 510" preserveAspectRatio="none">
                 <path className="pazo-welcome-line" d="M231-22Q212 53 291 85T397 58M290-13Q264 77 340 110T399 144"
@@ -223,7 +223,7 @@ export const OnboardingView = ({
 
               {/* Correct reference scale: artwork spans the hero while title stays live DOM. */}
               <div aria-hidden="true"
-                className="pointer-events-none absolute inset-x-[-8%] bottom-[35px] z-[1]">
+                className="pointer-events-none absolute inset-x-[-8%] bottom-[35px] z-[1] flex h-[calc(100%-210px)] max-h-[285px] items-end justify-center">
                 <WelcomeAnimatedCompanion/>
               </div>
               <div className="pointer-events-none min-h-[188px] flex-1" aria-hidden="true"/>
