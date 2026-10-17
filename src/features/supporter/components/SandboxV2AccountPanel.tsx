@@ -111,9 +111,9 @@ export function SandboxV2AccountPanel({lang}:Props){
  }
  const button='min-h-11 rounded-full bg-[#204E4A] px-4 py-2 text-xs font-extrabold text-white disabled:opacity-40'
  return <section aria-labelledby="qa-v2-account-title"
-    className="space-y-3 rounded-[24px] bg-white p-4 text-[#204E4A]">
+    className="space-y-3 rounded-[24px] bg-white p-4 text-[#204E4A] shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
    <h4 id="qa-v2-account-title" className="text-base font-black">
-    {t('Mi nueva prueba Sandbox con beneficios','My new four-benefit Sandbox test')}
+    {t('Estado de mi suscripción de prueba','My test subscription status')}
    </h4>
    <p className="text-xs leading-relaxed text-[#476862]">
     {t('Esta prueba es independiente de la suscripción anterior. El estado de PayPal no demuestra un período pagado.',
@@ -131,8 +131,11 @@ export function SandboxV2AccountPanel({lang}:Props){
     {t('Todavía no existe una segunda suscripción Sandbox.',
       'No second Sandbox subscription has been created yet.')}
    </p>}
-   <section className="space-y-2 rounded-2xl bg-[#F0F3ED] p-3"
+   <details className="space-y-2 rounded-2xl bg-[#F0F3ED] p-3"
      aria-label={t('Comparación de las cuatro insignias originales','Four original badges inspection')}>
+     <summary className="min-h-11 cursor-pointer py-2 text-xs font-extrabold focus-visible:bg-[#E1E53F]/40">
+       {t('Ver ejemplos de insignias','View badge examples')}
+     </summary>
     <p className="text-xs font-semibold">
      {t('Revisión visual de archivos originales: estas muestras NO representan beneficios concedidos.',
       'Original artwork inspection only: these samples do NOT represent granted benefits.')}
@@ -149,14 +152,14 @@ export function SandboxV2AccountPanel({lang}:Props){
       <span className="text-[10px] font-bold text-center">{caption}</span>
      </div>)}
     </div>
-   </section>
+   </details>
    {account&&<div className="space-y-3">
      <p role="status" className="text-sm font-bold">
-      {account.state==='pending'
-       ?t('Solicitud registrada; no hay pago verificado.',
-        'Request recorded; no verified payment.')
-       :t('Suscripción Sandbox vinculada; pago aún no verificado.',
-        'Sandbox subscription linked; payment not yet verified.')}
+      {paidThrough
+       ? t('Pago de prueba verificado para este período.', 'Test payment verified for this period.')
+       : account.state==='pending'
+       ? t('Solicitud registrada; no hay pago verificado.', 'Request recorded; no verified payment.')
+       : t('Suscripción Sandbox vinculada; pago aún no verificado.', 'Sandbox subscription linked; payment not yet verified.')}
      </p>
      {paidThrough&&<p role="status" className="rounded-2xl bg-[#E8EFEB] p-3 text-sm font-extrabold">
       {t('Período Sandbox verificado hasta: ','Sandbox period verified until: ')}
