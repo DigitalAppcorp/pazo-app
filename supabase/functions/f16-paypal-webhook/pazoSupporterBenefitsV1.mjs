@@ -54,7 +54,8 @@ export function projectVerifiedSupporterBenefits(input) {
   // No free 30-day extrapolation; a cancelled subscription retains an
   // independently proven paid period but never extends it by itself.
   const current=verified.find(c=>c.from<=now && now<c.to);
-  const maturedCycles=verified.filter(c=>c.from<=now).length;
+  const maturedCycles=verified.filter(c=>c.to<=now).length;
+  // Completed service windows only; new paid month is never a completed milestone.
   const milestones=[3,6,12].filter(n=>maturedCycles>=n);
   result.state='SERVER_VERIFIED';
   result.active=Boolean(current);
