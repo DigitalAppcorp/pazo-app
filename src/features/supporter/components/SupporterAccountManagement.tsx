@@ -3,6 +3,7 @@ import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
 import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
 import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
+import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
 
 type Account = {
   intentId: string
@@ -162,6 +163,11 @@ export function SupporterAccountManagement({lang, onClose}: Props) {
             {showSandboxQa && <SandboxCheckoutQaPanel lang={lang}/>}
           </div>
         )}
+        {import.meta.env.DEV &&
+          import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
+          import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
+            <SupporterSandboxBenefitsStatus lang={lang} />
+          )}
         {error && (
           <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
             {label('No pudimos confirmar la operación en el servidor. No se ha mostrado ningún cambio como completado.',
