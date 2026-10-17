@@ -1,3 +1,17 @@
+# F16 — Sandbox V2 instalada como QA privado NO PUBLICADO en Supabase (2026-10-17)
+
+**Autorización PO explícita:** «sí» a instalar únicamente entorno de pruebas PayPal Sandbox con propietario descartable, sin alterar pagos históricos ni habilitar Live. **Aplicado** con Supabase `apply_migration`: versión exacta **`20261017160619_f16_sandbox_benefits_v2_private_qa_staging`**, proyecto `mrybvqdebbgcayuvgkkr`. SQL idéntico al versionado en `supabase/migrations/20261017160619_f16_sandbox_benefits_v2_private_qa_staging.sql`, originado en borrador `supabase/drafts/f16_sandbox_benefits_v2_hosted_qa_staging_PO_APPROVED_20261017.sql`. Antes se ejecutó el mismo SQL en transacción con **ROLLBACK** contra la misma DB (PASS), sin dejar artefactos.
+
+**Postflight HOSTED real y verificado**: v2 `pazo-supporter-sandbox.benefits-v2` tiene **dos textos ES/EN, ambos `published_at IS NULL`**; oferta histórica v1 conservada publicada ES/EN (2); un checkout histórico permanece igual (1); `paypal_payment_entries=0`; tabla de owners autorizados QA=0, períodos QA=0, holds QA=0, fondos QA=0; **4/4 tablas nuevas con RLS FORCE** y **0 accesos SELECT a anon/authenticated/service_role**. La lectura `public.f16_p06_read_published_offer` sigue devolviendo **v1**, no v2. Checkout Edge `QA_CHECKOUT_RELEASE_APPROVED=false` sigue cerrado, sin despliegue Edge/Vercel, claves, suscripciones nuevas ni pagos. Panel visual de QA real compilable en PR #44, flag desactivado. **No afirmar E2E Sandbox realizado.**
+
+**Seguridad**: nueva zona de QA en `supporter_private.f16_sandbox_qa_owners` (lista privada inicialmente VACÍA), `f16_sandbox_qa_paid_periods` (venta/evento únicos, owner con FK al allowlist, USD 299, contrato v2, períodos 1-32 días, Sandbox obligatorio), `f16_sandbox_qa_holds` y `f16_sandbox_qa_pet_themes`. Sin funciones `GRANT` de escritura, sin RPC público nuevo. Los asesores de seguridad reportan `RLS sin policies` para esas cuatro tablas privadas; es **deliberado: RLS deny-all + REVOKE ALL** (no dar políticas de lectura). P42/Live siguen OFF.
+
+**SIGUIENTE ACCIÓN PARA E2E REAL**: antes de publicar v2 o activar el checkout, crear/identificar **UNA cuenta Supabase Auth descartable y UNA mascota de QA**, ajenas a los dos intentos Sandbox anteriores. PO no debe compartir contraseña, correo privado ni tokens. Obtener su UUID de manera privada autorizada, revisar entorno/origin y que no exista intento anterior, insertar en allowlist QA limitada en tiempo SOLO con autorización ya existente y preflight, configurar/deplegar EDGE Sandbox (actual latch OFF) y publicar la nueva oferta solo cuando la ruta de evidencia merchant/periodos + cuatro beneficios esté conectada. Entonces usar buyer PayPal Sandbox supervisado para nueva aprobación y pago, cancelación, wall opt-in/out y QA móvil real. Nunca migrar documentos `DISPOSABLE_ONLY` ni cambiar flags Live para pruebas. PR #44 sigue DRAFT.
+
+**Marcador operativo:** `F16_SANDBOX_V2_HOSTED_EMPTY_STAGING_PASS_BUYER_NOT_SELECTED_CHECKOUT_OFF_LIVE_OFF`.
+
+---
+
 # F16 — SANDBOX REAL CON CUATRO BENEFICIOS: CÓDIGO V2 LISTO, COMPRA NUEVA PENDIENTE (2026-10-17)
 
 **Objetivo PO re-confirmado:** «por fin, muy bien vamos a ello» = realizar **en PAZO** compra PayPal **Sandbox** con cuatro beneficios auténticos, corregir allí las pantallas que el PO vea, cancelar y verificar expiración/reembolsos; **NO** más maquetas separadas, P43, PayPal Live ni nuevo despliegue público.
