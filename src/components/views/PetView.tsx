@@ -8,6 +8,7 @@ import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
 import { SupporterAccountManagement } from '../../features/supporter/components/SupporterAccountManagement'
 import { useSupporterMembershipStatus } from '../../features/supporter/useSupporterMembershipStatus'
 import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
+import { SupporterInvitationPrompt } from '../../features/supporter/components/SupporterInvitationPrompt'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
@@ -67,8 +68,14 @@ export const PetView = ({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showSupporterAccount, setShowSupporterAccount] = useState(false)
+  const [dismissedInvitationPreview, setDismissedInvitationPreview] = useState(false)
   const supporterAccountEntryRef = useRef<HTMLButtonElement>(null)
   const { status: supporterStatus } = useSupporterMembershipStatus(undefined, canManagePet)
+  // Explicit localhost QA visual preview. No automatic targeting, tracking or cooldown writes.
+  const invitationPreviewRequested = import.meta.env.DEV &&
+    import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('supporter_preview') === '1'
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
   const [showSettings, setShowSettings] = useState(false)
@@ -817,6 +824,13 @@ export const PetView = ({
           supporterAccountEntryRef.current?.focus()
         }} />
       )}
+      {canManagePet && invitationPreviewRequested && !dismissedInvitationPreview &&
+        !showSupporterAccount && supporterStatus.kind === 'inactive' && (
+          <SupporterInvitationPrompt lang={lang} previewOnly
+            onExplore={() => { setDismissedInvitationPreview(true); setShowSupporterAccount(true) }}
+            onDismiss={() => setDismissedInvitationPreview(true)}
+          />
+        )}
       {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
       {showDeletionRequest && <DeletionRequestDialog lang={lang} onClose={() => setShowDeletionRequest(false)} />}
     </div>
