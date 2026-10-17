@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Pet } from '../../../types/pazo'
 import { IconPaw } from '../../../components/icons/PazoIcons'
+import { SupporterThemeSaveControl } from './SupporterThemeSaveControl'
 import {
   SupporterProfileBackdrop,
   SupporterThemePreviewPicker,
@@ -13,7 +14,8 @@ interface SupporterThemePreviewPanelProps {
   onClose: () => void
 }
 
-// A discoverable product preview, not a payment/entitlement or persistence surface.
+// Discovery preview remains the default. Persistence is owner/server gated and opt-in for release.
+const liveBenefitsUI = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
 export const SupporterThemePreviewPanel = ({ pet, lang, onClose }: SupporterThemePreviewPanelProps) => {
   const [theme, setTheme] = useState<SupporterProfileThemeSelection>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -42,7 +44,8 @@ export const SupporterThemePreviewPanel = ({ pet, lang, onClose }: SupporterThem
               {lang === 'es' ? 'Personalizar perfil' : 'Customize profile'}
             </h2>
             <p className="text-[12px] font-medium text-[#5C7470]">
-              {lang === 'es' ? 'Amigo de PAZO · Vista previa' : 'Amigo de PAZO · Preview'}
+              {liveBenefitsUI ? (lang === 'es' ? 'Amigo de PAZO · Personalización' : 'PAZO Friend · Customization')
+                : (lang === 'es' ? 'Amigo de PAZO · Vista previa' : 'Amigo de PAZO · Preview')}
             </p>
           </div>
           <button
@@ -59,11 +62,12 @@ export const SupporterThemePreviewPanel = ({ pet, lang, onClose }: SupporterThem
       <div className="mx-auto w-full max-w-xl space-y-4 px-4 pb-10 pt-3">
         <p className="rounded-[20px] bg-[#F0F3ED] px-4 py-3 text-[13px] font-semibold leading-relaxed text-[#476862]">
           {lang === 'es'
-            ? 'Explora cómo podría verse el perfil de tu mascota. Función en desarrollo: los temas aún no se pueden guardar ni publicar.'
-            : 'Explore how your pet profile could look. Feature in development: themes cannot be saved or published yet.'}
+            ? (liveBenefitsUI ? 'Explora los fondos de Amigo de PAZO. Guardar requiere una mensualidad verificada.' : 'Explora cómo podría verse el perfil de tu mascota. Función en desarrollo: los temas aún no se pueden guardar ni publicar.')
+            : (liveBenefitsUI ? 'Explore PAZO Friend backgrounds. Saving requires a verified paid month.' : 'Explore how your pet profile could look. Feature in development: themes cannot be saved or published yet.')}
         </p>
 
-        <SupporterThemePreviewPicker value={theme} onChange={setTheme} lang={lang} />
+        <SupporterThemePreviewPicker value={theme} onChange={setTheme} lang={lang} enabled={liveBenefitsUI} />
+        {liveBenefitsUI && <SupporterThemeSaveControl petId={pet.id} selectedTheme={theme} lang={lang} onLoaded={setTheme} />}
 
         <section
           aria-label={lang === 'es' ? 'Simulación de tu perfil social' : 'Your social profile mockup'}
@@ -92,8 +96,8 @@ export const SupporterThemePreviewPanel = ({ pet, lang, onClose }: SupporterThem
 
         <p role="status" className="px-2 text-center text-[12px] font-medium text-[#5C7470]">
           {lang === 'es'
-            ? 'Solo vista previa. Tu perfil público no ha cambiado.'
-            : 'Preview only. Your public profile has not changed.'}
+            ? (liveBenefitsUI ? 'Los cambios solo aparecerán en tu perfil cuando PAZO confirme que se guardaron.' : 'Solo vista previa. Tu perfil público no ha cambiado.')
+            : (liveBenefitsUI ? 'Changes appear publicly only after PAZO confirms they were saved.' : 'Preview only. Your public profile has not changed.')}
         </p>
       </div>
     </div>
