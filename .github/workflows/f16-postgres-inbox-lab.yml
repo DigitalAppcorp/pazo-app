@@ -341,3 +341,24 @@ jobs:
             -f supabase/tests/supporter/f16-mvp-private-period-writer-synthetic.sql)
           test "$result" = F16_MVP_PRIVATE_PERIOD_WRITER_IDEMPOTENT_PG17_PASS
           echo 'PASS F16 MVP: private idempotent merchant periods, owner and dispute holds'
+
+      - name: F16 new four-benefit Sandbox offer, historical terms intact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          # P06 store and legacy terms are never modified in PAZO hosted here.
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql
+          temporary_sql=$(mktemp)
+          trap 'rm -f "$temporary_sql"' EXIT
+          node scripts/f16-sandbox-benefits-v2-disposable-offer-sql.mjs > "$temporary_sql"
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f "$temporary_sql")
+          echo "$result" | grep -qx F16_SANDBOX_V2_OFFER_PG17_REHEARSAL_PASS
+          echo 'PASS F16: new four-benefit QA offer; original no-reward acceptance stays immutable'
