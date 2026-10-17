@@ -1,7 +1,9 @@
 -- PAZO F16 QA V2: owner-and-intent-scoped account receipt/status read.
 -- Independently query the NEW V2 checkout attempt, never a historical P06
 -- subscription that happens to share this Auth owner.
--- Service-role only. Provider status/cancellation still requires PayPal GET.
+-- Service-role only. NULL p_intent_id reads the unique V2 attempt for this
+-- authenticated owner for the account screen; non-NULL requires exact match.
+-- Provider status/cancellation still requires PayPal GET.
 BEGIN;
 DO $guard$
 BEGIN
@@ -43,8 +45,31 @@ AS $read$
    ON o.version=a.terms_version AND o.locale=a.locale
    AND o.sha256=a.terms_sha256
  WHERE p_owner_id IS NOT NULL
-  AND p_intent_id IS NOT NULL
-  AND p_intent_id ~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+  AND (p_intent_id IS NULL OR p_intent_id ~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
+  AND a.owner_id=p_owner_id
+  AND (p_intent_id IS NULL OR a.intent_id=p_intent_id)
+  AND a.terms_version='pazo-supporter-sandbox.benefits-v2'
+  AND i.provider='paypal' AND i.plan_id='P-14V25407JP6850922NLHMDKI'
+  AND i.state IN ('pending','bound')
+  AND o.currency='USD' AND o.price_minor=299 AND o.cadence='MONTH_1'
+ LIMIT 1
+$read$;
+ALTER FUNCTION public.f16_qa_v2_read_owner_account(uuid,text) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.f16_qa_v2_read_owner_account(uuid,text)
+ FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.f16_qa_v2_read_owner_account(uuid,text)
+ TO service_role;
+
+DO $post$
+BEGIN
+ IF has_function_privilege('anon','public.f16_qa_v2_read_owner_account(uuid,text)','EXECUTE')
+ OR has_function_privilege('authenticated','public.f16_qa_v2_read_owner_account(uuid,text)','EXECUTE')
+ OR NOT has_function_privilege('service_role','public.f16_qa_v2_read_owner_account(uuid,text)','EXECUTE')
+ THEN RAISE EXCEPTION 'F16 V2 account read ACL mismatch'
+  USING ERRCODE='42501'; END IF;
+END $post$;
+COMMIT;
+)
   AND a.owner_id=p_owner_id AND a.intent_id=p_intent_id
   AND a.terms_version='pazo-supporter-sandbox.benefits-v2'
   AND i.provider='paypal' AND i.plan_id='P-14V25407JP6850922NLHMDKI'
