@@ -663,10 +663,10 @@ export const PetView = ({
               className="flex w-full items-center justify-between rounded-[2rem] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F5F7EE] focus-visible:bg-[#E1E53F]/30">
               <span className="min-w-0">
                 <span className="block text-[16px] font-extrabold text-[#204E4A]">
-                  {lang === 'es' ? 'Gestionar Amigo de PAZO' : 'Manage Friend of PAZO'}
+                  {lang === 'es' ? 'Amigo de PAZO' : 'Friend of PAZO'}
                 </span>
                 <span className="block text-[12px] font-medium text-[#5C7470]">
-                  {lang === 'es' ? 'Estado, cancelar renovación y aceptación' : 'Status, cancel renewal and acceptance'}
+                  {lang === 'es' ? 'Conoce cómo apoyar a PAZO · US$2.99 al mes' : 'See how to support PAZO · US$2.99 per month'}
                 </span>
               </span>
               <span aria-hidden="true" className="ml-2 text-xl font-extrabold text-[#5C7470]">›</span>
