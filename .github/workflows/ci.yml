@@ -76,11 +76,15 @@ jobs:
           if (-not $script.Contains("PGSSLMODE'] = 'verify-full'") -or
               -not $script.Contains('BEGIN TRANSACTION READ ONLY;') -or
               -not $script.Contains("default_transaction_read_only=on") -or
-              -not $script.Contains('pg_catalog.pg_stat_ssl') -or
+              $script.Contains('pg_catalog.pg_stat_ssl') -or
+              -not $script.Contains("PGGSSENCMODE'] = 'disable'") -or
+              -not $script.Contains("PGSSLMINPROTOCOLVERSION'] = 'TLSv1.2'") -or
+              -not $script.Contains("PGSSLMAXPROTOCOLVERSION'] = 'TLSv1.3'") -or
               -not $script.Contains('WaitForExit(25000)')) {
             throw 'P42 one-shot local-only required fail-closed controls missing'
           }
           Write-Output 'P42_TLS_PROBE_OFFLINE_STATIC_AND_INPUT_GUARD_PASS_ONLY'
+          & ./src/features/supporter/testing/f16P42SessionPoolerTlsReadOnly.offline.ps1
 
       - name: Enforce P42 data-only exclusion in real PowerShell backup command (static)
         shell: pwsh

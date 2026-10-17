@@ -1,7 +1,7 @@
 # PAZO F16/P42 — NEW one-shot TLS session-pooler connection check.
-# NOT P43. Explicit PO approval 2026-10-16: one read-only hosted check.
-# Performs exactly one psql connection, a READ ONLY transaction and a TLS
-# metadata SELECT. Never reads key bytes or changes DB/Edge/finance.
+# NOT P43. Preparation is not authorization: a NEW explicit PO GO is required.
+# Client libpq enforces TLS verify-full; SQL checks only database/read-only.
+# Never uses backend TLS metadata as evidence for the client-to-pooler hop.
 # Password entered locally at a hidden prompt; do NOT allow Codex to type it.
 # Never run in CI, remote agents, shared desktops, or recorded shells.
 [CmdletBinding()]
@@ -9,10 +9,27 @@ param(
   [Parameter(Mandatory=$true)]
   [string]$DbHost,
   [Parameter(Mandatory=$true)]
-  [string]$CaCertificatePath
+  [string]$CaCertificatePath,
+  [switch]$ExecuteApprovedReadOnly,
+  [string]$AttemptId
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+# Files contain only an exclusive claim and a static result, never credentials.
+function New-P42ReadOnlyAttempt {
+  param([string]$RootDirectory, [string]$Id)
+  if ($Id -cnotmatch '^[A-Z0-9][A-Z0-9-]{7,63}$' -or
+      -not [IO.Path]::IsPathFullyQualified($RootDirectory)) { throw 'invalid attempt' }
+  [void][IO.Directory]::CreateDirectory($RootDirectory)
+  $result = Join-Path $RootDirectory "p42-tls-$Id.result.txt"
+  if ([IO.File]::Exists($result)) { throw 'attempt result already exists' }
+  $lock = Join-Path $RootDirectory "p42-tls-$Id.lock"
+  $stream = [IO.File]::Open($lock,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
+  $stream.Dispose()
+  return $result
+}
+
 $projectRef = 'mrybvqdebbgcayuvgkkr'
 $expectedUser = "postgres.$projectRef"
 $stage = 'INPUT'
@@ -21,6 +38,9 @@ $process = $null
 $psi = $null
 $ptr = [IntPtr]::Zero
 $didStart = $false
+$ownsAttemptLock = $false
+$resultFile = $null
+$probeMarker = $null
 
 try {
   # Host comes only from Supabase Dashboard Connect > Session pooler; never
@@ -31,6 +51,12 @@ try {
   if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true') {
     throw 'not a private workstation'
   }
+  $stage = 'AUTHORIZATION'
+  if (-not $ExecuteApprovedReadOnly -or
+      $AttemptId -cnotmatch '^[A-Z0-9][A-Z0-9-]{7,63}$') {
+    throw 'new explicit authorization and attempt id required'
+  }
+  $stage = 'INPUT'
   $caPath = [IO.Path]::GetFullPath($CaCertificatePath)
   if (-not [IO.Path]::IsPathFullyQualified($CaCertificatePath) -or
       -not [IO.File]::Exists($caPath)) { throw 'missing CA file' }
@@ -44,8 +70,13 @@ try {
     Select-Object -First 1
   if ($null -eq $psql) { throw 'psql not installed' }
 
+  $stage = 'ATTEMPT_CLAIM'
+  if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { throw 'private state directory missing' }
+  $resultFile = New-P42ReadOnlyAttempt -RootDirectory (Join-Path $env:LOCALAPPDATA 'PAZO/CodexOps') -Id $AttemptId
+  $ownsAttemptLock = $true
+
   Write-Host 'P42: una conexión READ ONLY, PostgreSQL Session pooler, SSL verify-full.'
-  Write-Host 'Sin P43, sin lecturas P42 ni escrituras; aborta si no conoces la contraseña EXISTENTE de la base.'
+  Write-Host 'Sin P43, sin lecturas P42 ni escrituras; aborta si no tienes la contraseña NUEVA ya establecida por el propietario.'
   Write-Host 'Introduce tú la contraseña en esta consola local; no la compartas con Codex.'
   $stage = 'AUTH_PROMPT'
   $securePassword = Read-Host 'Contraseña de PostgreSQL (entrada oculta)' -AsSecureString
@@ -60,14 +91,8 @@ BEGIN TRANSACTION READ ONLY;
 SET LOCAL statement_timeout = '5000ms';
 SELECT CASE WHEN current_database() = 'postgres'
   AND current_setting('transaction_read_only') = 'on'
-  AND EXISTS (
-    SELECT 1 FROM pg_catalog.pg_stat_ssl
-    WHERE pid = pg_catalog.pg_backend_pid()
-      AND ssl IS TRUE
-      AND version IN ('TLSv1.2','TLSv1.3')
-  )
   THEN 'P42_SESSION_POOLER_TLS_VERIFY_FULL_READ_ONLY_PASS'
-  ELSE 'P42_SESSION_POOLER_TLS_OR_READONLY_BLOCKED'
+  ELSE 'P42_SESSION_POOLER_READONLY_CONTRACT_BLOCKED'
 END;
 ROLLBACK;
 '@
@@ -93,7 +118,12 @@ ROLLBACK;
   $psi.Environment['PGPORT'] = '5432'
   $psi.Environment['PGUSER'] = $expectedUser
   $psi.Environment['PGDATABASE'] = 'postgres'
+  # Force TLS even if a local GSSAPI setup exists; never silently prefer GSS.
+  $psi.Environment['PGGSSENCMODE'] = 'disable'
   $psi.Environment['PGSSLMODE'] = 'verify-full'
+  $psi.Environment['PGSSLMINPROTOCOLVERSION'] = 'TLSv1.2'
+  $psi.Environment['PGSSLMAXPROTOCOLVERSION'] = 'TLSv1.3'
+  $psi.Environment['PGSSLNEGOTIATION'] = 'postgres'
   $psi.Environment['PGSSLROOTCERT'] = $caPath
   $psi.Environment['PGCONNECT_TIMEOUT'] = '10'
   $psi.Environment['PGAPPNAME'] = 'pazo_p42_new_tls_readonly_once'
@@ -121,28 +151,41 @@ ROLLBACK;
   [void]$psi.Environment.Remove('PGPASSWORD')
   $stdoutTask = $process.StandardOutput.ReadToEndAsync()
   $stderrTask = $process.StandardError.ReadToEndAsync()
+  $stage = 'WAIT_FOR_EXIT'
   if (-not $process.WaitForExit(25000)) {
+    $stage = 'PROCESS_TIMEOUT'
     $process.Kill($true)
     $process.WaitForExit()
     throw 'time limit exceeded'
   }
+  $stage = 'OUTPUT_READ'
   $out = $stdoutTask.GetAwaiter().GetResult()
   $err = $stderrTask.GetAwaiter().GetResult()
-  if ($process.ExitCode -ne 0) { throw 'psql failed' }
+  if ($process.ExitCode -ne 0) {
+    $stage = 'PSQL_EXIT_NONZERO'
+    throw 'psql failed'
+  }
+  if ($out.Trim() -ceq 'P42_SESSION_POOLER_READONLY_CONTRACT_BLOCKED') {
+    $stage = 'READONLY_CONTRACT'
+    throw 'database or readonly contract failed'
+  }
   if ($out.Trim() -cne 'P42_SESSION_POOLER_TLS_VERIFY_FULL_READ_ONLY_PASS') {
+    $stage = 'UNEXPECTED_OUTPUT'
     throw 'TLS or readonly contract failed'
   }
   $stage = 'PASSED'
-  Write-Output 'P42_SESSION_POOLER_TLS_VERIFY_FULL_READ_ONLY_PASS'
+  $probeMarker = 'P42_SESSION_POOLER_TLS_VERIFY_FULL_READ_ONLY_PASS'
+  Write-Output $probeMarker
   Write-Output 'P42_HOSTED_WRITE_PERMISSION_NOT_VERIFIED'
   Write-Output 'P42_NO_PROVISIONING_NO_PAYMENTS'
 } catch {
   # Never echo raw psql errors: they can carry hosts/usernames/paths.
   if ($didStart) {
-    Write-Output 'P42_TLS_READ_ONLY_ONCE_BLOCKED_AFTER_CONNECTION_ATTEMPT'
+    $probeMarker = "P42_TLS_READ_ONLY_ONCE_BLOCKED_AFTER_CONNECTION_ATTEMPT_$stage"
   } else {
-    Write-Output "P42_TLS_READ_ONLY_ONCE_BLOCKED_PRECHECK_$stage"
+    $probeMarker = "P42_TLS_READ_ONLY_ONCE_BLOCKED_PRECHECK_$stage"
   }
+  Write-Output $probeMarker
   Write-Output 'P42_NO_PROVISIONING_NO_PAYMENTS'
 } finally {
   if ($ptr -ne [IntPtr]::Zero) {
@@ -150,8 +193,19 @@ ROLLBACK;
   }
   if ($null -ne $psi) { [void]$psi.Environment.Remove('PGPASSWORD') }
   if ($null -ne $process) {
-    if (-not $process.HasExited) { $process.Kill($true);$process.WaitForExit() }
+    if ($didStart -and -not $process.HasExited) { $process.Kill($true);$process.WaitForExit() }
     $process.Dispose()
   }
   if ($null -ne $securePassword) { $securePassword.Dispose() }
+  if ($ownsAttemptLock -and $null -ne $probeMarker) {
+    try {
+      $resultStream = [IO.File]::Open($resultFile,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
+      try {
+        $resultBytes = [Text.Encoding]::ASCII.GetBytes($probeMarker + [Environment]::NewLine)
+        $resultStream.Write($resultBytes,0,$resultBytes.Length)
+      } finally { $resultStream.Dispose() }
+    } catch {
+      Write-Output 'P42_TLS_READ_ONLY_ONCE_BLOCKED_RESULT_RECORD'
+    }
+  }
 }

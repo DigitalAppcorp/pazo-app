@@ -1,3 +1,17 @@
+# F16-P42 — TLS cliente corregido y procedimiento de contraseña nueva preparado (2026-10-17)
+
+**GO vigente: integrar correcciones locales, pruebas offline y procedimiento; NO conectar ni pedir contraseña.** El parche de Windows fue preservado y el clon sincronizado por fast-forward hasta 98fd59e9054a7cedfad1052c97ee90c969c34191 antes de integrar. La contraseña nueva informada por PO sigue SIN VERIFICAR; no atribuir el fallo histórico a password incorrecta.
+
+**Cambio de contrato:** scripts/f16-p42-session-pooler-tls-readonly-once.ps1 exige TLS cliente→Session Pooler por libpq verify-full, CA/hostname, GSS desactivado y TLS1.2–1.3. El SQL solo verifica base postgres y transacción READ ONLY, con ROLLBACK; se eliminó pg_stat_ssl como evidencia de ese enlace. El TLS pooler→PostgreSQL es otro tramo y no se declara validado por este gate. Se conservan la clasificación sanitizada y limpieza corregidas del parche local.
+
+**Preparación verificable:** autorización explícita por switch e ID, lock CreateNew antes del prompt y resultado estático exclusivo en estado privado local. Pruebas offline incorporadas (27 checks aislados); el workflow CI ahora comprueba TLS cliente y ejecuta esas pruebas, sin conexión alojada. No se publicaron certificados, contraseñas, backups ni informes privados. Revisar las conclusiones CI del nuevo commit antes de declarar SUCCESS.
+
+**Siguiente paso único, BLOQUEADO hasta GO nuevo:** PO revisa el commit y autoriza UNA conexión con la contraseña NUEVA por el procedimiento [P42 privado](PAZO_F16_P42_NEW_PASSWORD_PRIVATE_READONLY_ONCE_PROCEDURE_20261017.md), intento P42-NEW-PASSWORD-20261017-01. Codex prepara rutas/host ya confirmado, abre ventana privada, deja de capturar/interactuar y lee solo marcador sanitizado. Ningún prompt, lock de ese intento o conexión se ha iniciado durante esta integración. No repetir ni borrar locks consumidos; no ejecutar P43/P44 ni reutilizar credenciales históricas.
+
+**Alcance excluido:** reset de password, cambios Supabase/SQL Editor, signing keys P42, DDL/DML, checkout, worker/writer, ledger, cobros, beneficios o despliegues. PASS futuro será acceso READ ONLY, no permisos de escritura ni provisión. PR #44 sigue DRAFT y F16 financiera NO completada.
+
+---
+
 # F16-P42 — PO confirma restablecimiento de password PostgreSQL (2026-10-17)
 
 **Nuevo dato de PO:** "ya la cambié, muy tarde". El operador **ya restableció la contraseña del rol PostgreSQL desde Supabase Dashboard**, siguiendo una instrucción anterior. **La nueva contraseña NO se recibió ni se inspeccionó**, y su autenticación contra Session Pooler continúa SIN VERIFICAR. No solicitarla por chat ni registrar en GitHub, logs o scripts. No repetir restablecimiento ni probar el password anterior. Este evento revoca la recomendación previa de "pausar rotación si aún no se ejecutó": la rotación YA se realizó.
