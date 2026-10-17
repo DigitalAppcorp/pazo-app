@@ -1,3 +1,15 @@
+# F16-P42 — intento privado con contraseña candidata BLOCKED tras conexión (2026-10-17)
+
+**Resultado reportado por Codex/Product Owner:** `P42_TLS_READ_ONLY_ONCE_BLOCKED_AFTER_CONNECTION_ATTEMPT`. Las precondiciones locales fueron declaradas PASS (PowerShell 7, `psql`, verificación de CA/canal); script `scripts/f16-p42-session-pooler-tls-readonly-once.ps1` alcanzó una única ejecución de `psql` y finalizó BLOCKED. El script sanitiza por diseño todas las causas posteriores a `$process.Start()`: **no se puede atribuir** a password incorrecto, TLS/certificado, red/pooler, tiempo de espera, ni a una condición de script. **No hubo retries, escrituras o cambios Supabase.** El PO tecleó personalmente contraseña candidata desde Google Password Manager sin revelar el valor a Codex ni chat.
+
+**Verificación independiente NO MUTADORA:** Management API Supabase `get_project` reportó `ACTIVE_HEALTHY` us-east-1. Agregaciones de logs de Postgres/pooler de últimas 24h no contienen suficiente contexto/correlación para atribuir causa a la ejecución individual (no exponer mensajes crudos ni IP/usuario). No inventar diagnóstico de fallo.
+
+**Gate:** segundo GO one-shot otorgado 2026-10-17 **CONSUMIDO** por el intento. `P42_CANDIDATE_PASSWORD_NOT_VALIDATED_SESSION_POOLER_READONLY_BLOCKED_NO_RETRY`. **No** repetir `psql`, ni P43, probar variantes de contraseña, resetear DB, ejecutar SQL con secreto, habilitar JIT, generar/provisionar signing key, activar P21/P42, ledger, beneficios, suscripciones o cobros sin autorización adicional con alcance preciso. CA instalado en computadora no prueba handshake `verify-full` correcto.
+
+**Próximo paso permitido:** análisis estático local *sin red y sin secreto* de `pwsh`/`psql` (versiones/rutas), formato/cadena de certificados CA (fechas, huella SHA-256 para comparación con origen oficial, validación offline), y argumentos/compatibilidad del script; no leer ni compartir valores de password, `PGPASSWORD`, archivos de credenciales, capturas de consola con prompt, mensajes crudos del error. Diseñar error reporting FUTURO mediante categorías generales verificables sin exponer IP/host/usuario/credenciales; solicitar nuevo GO antes de una conexión. Ruta de restablecimiento por Dashboard o acceso temporal aún **sin aprobación**. PR #44 DRAFT, F16 NO-GO.
+
+---
+
 # F16-P42 — nuevo GO puntual para prueba privada PostgreSQL READ ONLY (2026-10-17)
 
 **PO aprobó literalmente «sí»** a realizar **UN** nuevo intento de conexión PostgreSQL **solo lectura** con contraseña candidata de origen privado en Google Password Manager (entrada sitio `supabase.com`, usuario `DigitalAppcorp's Project`; NO se conoce si es la password DB). Nunca extraer, copiar a chat, código, logs, SQL Editor, GitHub o agentes. Esta autorización nueva y específica sustituye solamente el NO-RETRY del intento P42 anterior por **un intento adicional**, sin autorizar repetición ilimitada, reset de la contraseña, CLI/JIT temporal, creación de claves P42, Edge secret, SQL de escritura, activación de worker o cobros.
