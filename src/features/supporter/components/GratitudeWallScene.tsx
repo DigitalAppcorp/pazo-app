@@ -91,7 +91,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
   const tabs:readonly {value:WallTab;es:string;en:string}[]=[
     {value:'all',es:'Todos',en:'All'},
     {value:'recent',es:'Recientes',en:'Recent'},
-    {value:'longtime',es:'Más tiempo apoyando',en:'Longest supporting'},
+    {value:'longtime',es:'Más tiempo apoyando',en:'Longtime supporters'},
   ]
   const shown=wallSort(rows,tab)
   return <div role="dialog" aria-modal="true" aria-labelledby="pazo-gratitude-title"
