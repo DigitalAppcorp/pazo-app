@@ -993,7 +993,7 @@ test('A01 PO-approved welcome preserves sign-up, login, demo, locale and public 
   const mascot=fs.readFileSync('src/features/onboarding/components/WelcomeAnimatedCompanion.tsx','utf8')
   const css=fs.readFileSync('src/index.css','utf8')
   assert.ok(source.includes('overflow-y-auto overscroll-contain'),'Short-phone center scroll retained')
-  assert.ok(source.includes('shrink-0 space-y-2.5 pb-1'),'Primary actions stay pinned')
+  assert.ok(source.includes('shrink-0 space-y-2.5 pb-2'),'Primary actions stay pinned')
   assert.ok(!source.includes('photo-1543466835-00a7907e9de1'),'No prior remote stock hero image')
   assert.ok(!mascot.includes('setInterval')&&!mascot.includes('setTimeout'))
   assert.ok(!mascot.includes('fetch(')&&!mascot.includes('localStorage'),'Decorative layer does not collect anything')
