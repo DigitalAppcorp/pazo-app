@@ -10,7 +10,7 @@ const PLAN='P-14V25407JP6850922NLHMDKI'
 const kind=k=>Object.freeze({kind:k})
 export function createP05OfflineMerchantClaimBridge(adapters={}){
  const keys=['getMerchantEvent','getMerchantSubscription',
-  'resolveClaimedSubscription']
+  'getIndependentMerchantSale','resolveClaimedSubscription']
  if(keys.some(k=>typeof adapters[k]!=='function'))
   throw Error('p05_merchant_claim_bridge_unconfigured')
  return Object.freeze({
@@ -39,6 +39,21 @@ export function createP05OfflineMerchantClaimBridge(adapters={}){
     !INTENT.test(sub.custom_id||'')||
     !['ACTIVE','CANCELLED'].includes(sub.status))
     return kind('foreign_reference')
+   // P29 independently reads the original legacy SALE by exact event-
+   // scoped ID and subscription. A matching webhook alone is insufficient.
+   // A missing/mismatched sale never reaches the private owner resolver.
+   let original
+   try{
+    original=await adapters.getIndependentMerchantSale({
+     saleId:sale.id,eventId,claimToken,
+    })
+   }catch{return kind('retryable_outage')}
+   if(!original||original.id!==sale.id||
+      original.billing_agreement_id!==sub.id||
+      !['completed','COMPLETED'].includes(original.state)||
+      original.amount?.currency!=='USD'||
+      original.amount?.total!=='2.99')
+    return kind('insufficient_evidence')
    // This RPC may return an owner only during a valid event lease and after
    // checking subscriptionId AND merchant custom_id. Its SQL can't itself
    // prove that a caller truly fetched either value from PayPal.
