@@ -53,7 +53,7 @@ test('F16 product page retains no-purchase path and real server-verified checkou
  assert.match(page,/SandboxV2AccountPanel/)
  assert.match(page,/SupporterWallConsentSettings/)
  assert.match(page,/VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED/)
- assert.match(pet,/Conoce cómo apoyar a PAZO/)
+ assert.match(pet,/Conoce cómo apoyar nuestra comunidad/)
  assert.match(checkout,/action:'begin'/)
  assert.match(checkout,/affirmativeConsent:true/)
  assert.match(checkout,/!consent\|\|busy\|\|phase!=='ready'\|\|attempted.current/)
