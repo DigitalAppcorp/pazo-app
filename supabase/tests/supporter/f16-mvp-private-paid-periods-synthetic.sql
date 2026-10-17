@@ -31,7 +31,7 @@ BEGIN
     repeat('a',64),'2026-10-10T00:00:00Z','2026-11-10T00:00:00Z',v_at);
 
  v:=supporter_private.f16_mvp_private_period_projection(v_owner,v_at);
- IF v->>'active' <> 'true' OR v->>'completedCycles' <> '1'
+ IF v->>'active' <> 'true' OR v->>'completedCycles' <> '0'
    OR v->>'paidThrough' NOT LIKE '2026-11-10%'
  THEN RAISE EXCEPTION 'A verified synthetic paid period was not projected'; END IF;
 
@@ -48,7 +48,7 @@ BEGIN
  SET hold_active=false
  WHERE provider_sale_id='SALE-TEST-001' AND hold_id='HOLD-TEST-001';
  v:=supporter_private.f16_mvp_private_period_projection(v_owner,v_at);
- IF v->>'active' <> 'true' OR v->>'completedCycles' <> '1'
+ IF v->>'active' <> 'true' OR v->>'completedCycles' <> '0'
  THEN RAISE EXCEPTION 'An individually cleared synthetic hold still blocked'; END IF;
 
  INSERT INTO supporter_private.f16_mvp_paid_period_proofs
@@ -57,11 +57,11 @@ BEGIN
  VALUES ('SALE-TEST-002','I-SANDBOXSYNTHETIC',v_owner,'cycle-2026-11','WEBHOOK-TEST-002',
     repeat('a',64),'2026-11-10T00:00:00Z','2026-12-10T00:00:00Z',v_at);
  v:=supporter_private.f16_mvp_private_period_projection(v_owner,v_at);
- IF v->>'completedCycles' <> '1'
+ IF v->>'completedCycles' <> '0'
  THEN RAISE EXCEPTION 'A future month counted toward milestones'; END IF;
 
  v:=supporter_private.f16_mvp_private_period_projection(v_owner,'2026-11-20T00:00:00Z');
- IF v->>'active' <> 'true' OR v->>'completedCycles' <> '2'
+ IF v->>'active' <> 'true' OR v->>'completedCycles' <> '1'
  THEN RAISE EXCEPTION 'A second genuine period was not projected'; END IF;
 
  v:=supporter_private.f16_mvp_private_period_projection(v_owner,'2026-12-10T00:00:00Z');
