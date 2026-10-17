@@ -5,6 +5,7 @@ import {SupporterThemePreviewPanel} from './SupporterThemePreviewPanel'
 import {SupporterWallConsentSettings} from './SupporterWallConsentSettings'
 import {SandboxV2AccountPanel} from './SandboxV2AccountPanel'
 import {SupporterSandboxBenefitsStatus} from './SupporterSandboxBenefitsStatus'
+import {SupporterScreenPortal} from './SupporterScreenPortal'
 
 type Props = {
  lang:'es'|'en'
@@ -33,8 +34,9 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
    <span className="block text-[15px] font-extrabold text-[#204E4A]">{title}</span>
    <span className="mt-1 block text-xs leading-relaxed text-[#5C7470]">{subtitle}</span>
  </span>
- return <div role="dialog" aria-modal="true" aria-labelledby="friend-benefits-title"
-   className="fixed inset-0 z-[115] overflow-y-auto bg-[#FAF8F5] text-[#204E4A]">
+ return <SupporterScreenPortal>
+ <div role="dialog" aria-modal="true" aria-labelledby="friend-benefits-title"
+   className="h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#FAF8F5] text-[#204E4A]">
    <header className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-3 backdrop-blur-xl">
      <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
        <h2 className="text-[20px] font-black" id="friend-benefits-title">{t('Amigo de PAZO','Friend of PAZO')}</h2>
@@ -44,7 +46,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
        </button>
      </div>
    </header>
-   <main className="mx-auto max-w-xl space-y-4 px-4 pb-12 pt-4">
+   <main className="mx-auto w-full min-w-0 max-w-xl space-y-4 px-4 pb-10 pt-4">
      <section className="flex items-center gap-4 rounded-[30px] bg-[#E6EDDB] p-5">
        <SupporterBadge active milestone={milestone} lang={lang} size="large"/>
        <div className="min-w-0">
@@ -102,4 +104,5 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
    </main>
    {showThemes&&pet&&<SupporterThemePreviewPanel pet={pet} lang={lang} onClose={()=>setShowThemes(false)}/>}
  </div>
+ </SupporterScreenPortal>
 }
