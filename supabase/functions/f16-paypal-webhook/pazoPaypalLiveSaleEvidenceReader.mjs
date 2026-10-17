@@ -56,7 +56,7 @@ export function createPazoPaypalLiveSaleEvidenceReader({
          record?.eventId!==eventId ||
          record?.eventType!=='PAYMENT.SALE.COMPLETED' ||
          typeof record.verifiedWebhookTime!=='string' ||
-         !/^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d{1,6})?Z$/.test(record.verifiedWebhookTime) ||
+         !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?Z$/.test(record.verifiedWebhookTime) ||
          !Number.isFinite(Date.parse(record.verifiedWebhookTime)) ||
          record?.saleId!==saleId ||
          !SUB.test(record.subscriptionId||'') ||
