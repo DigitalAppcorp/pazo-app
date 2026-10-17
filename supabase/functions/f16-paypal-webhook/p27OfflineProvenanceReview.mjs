@@ -11,6 +11,26 @@ const safe=(phase,reason)=>Object.freeze({phase,reason,environment:'sandbox',
  mayCreatePaidPeriod:false,mayGrantBenefits:false,
  financialHistoryComplete:false,paidThrough:null,dbWrites:0,
  networkPaymentWrites:0})
+// Stable, minimal projection of the server-owned review fence. This is NOT
+// authentication, only a defense against evidence changing between awaits.
+// The eventual SQL financial writer MUST revalidate and lock these rows
+// atomically in the SAME transaction as any ledger write.
+const reviewFence=c=>JSON.stringify([
+ c?.claim?.eventId,c?.claim?.leaseToken,c?.claim?.workerEnabled,
+ c?.claim?.status,c?.claim?.leaseValid,c?.claim?.prospectiveCutoffPassed,
+ c?.originalEvent?.id,c?.originalEvent?.eventType,
+ c?.originalEvent?.signatureStatus,c?.originalEvent?.persistedInVerifiedInbox,
+ c?.privateBinding?.ownerId,c?.privateBinding?.intentId,
+ c?.privateBinding?.subscriptionId,c?.privateBinding?.state,
+ c?.consent?.validP06,c?.consent?.intentId,c?.consent?.ownerId,
+ c?.consent?.immutablePublishedOffer,c?.consent?.sha256Verified,
+ c?.consent?.offerPurpose,c?.consent?.firstPeriodContractAttested,
+ c?.consent?.qaOnly,c?.consent?.termsVersion,c?.consent?.termsDigest,
+ c?.consent?.acceptedAt,c?.reviewReservation?.state,
+ c?.reviewReservation?.intentId,c?.reviewReservation?.ownerId,
+ c?.reviewReservation?.eventId,c?.reviewReservation?.saleId,
+ c?.reviewReservation?.obligationOrdinal,
+])
 export function createP27OfflineProvenanceReview({
  scope='DISABLED', merchantReader,readPrivateReviewContext,
  readIndependentMerchantSale,inspectHistory,inspectRefunds,inspectDisputes,
@@ -50,6 +70,7 @@ export function createP27OfflineProvenanceReview({
    if(privateContext.claim?.eventId!==eventId||
       privateContext.claim?.leaseToken!==claimToken)
     return safe('DENIED','private_claim_context_mismatch')
+   const initialFence=reviewFence(privateContext)
    const source={
     ...privateContext,
     merchantSale:{
@@ -126,6 +147,20 @@ export function createP27OfflineProvenanceReview({
    // obligation; no synthetic receipt ever establishes global coverage.
    if(lineage.phase!=='NO_REFUND_REFS_REVIEW_ONLY')
     return safe('REVIEW_REQUIRED','refund_lineage_requires_review')
+   // The merchant GETs above are asynchronous. A lease may expire, an
+   // obligation may be reassigned or consent revoked while they run.
+   // Fail closed on the latest server-owned review projection, then re-run
+   // P26's authorization-free consistency check. Still NOT an atomic commit.
+   const finalContext=await readPrivateReviewContext({
+    eventId,claimToken,subscriptionId:sub.id,intentId:sub.custom_id,
+   })
+   if(!finalContext||reviewFence(finalContext)!==initialFence)
+    return safe('REVIEW_REQUIRED','private_claim_or_obligation_changed_during_review')
+   const finalReview=assessP26FirstObligationEvidence({
+    ...source,...finalContext,history,refunds,disputes,
+   })
+   if(finalReview.reason!=='merchant_source_cycle_reversals_and_atomic_credit_unproven')
+    return safe('REVIEW_REQUIRED','private_claim_or_obligation_changed_during_review')
    return safe(result.phase,result.reason)
   }catch{return safe('REVIEW_REQUIRED','merchant_or_private_evidence_unavailable')}
  }})
