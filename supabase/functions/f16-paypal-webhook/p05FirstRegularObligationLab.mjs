@@ -114,9 +114,16 @@ export function assessF16P05FirstRegularObligation(input={}){
  // into a trusted proof. Even a clean journal cannot prove future reversals.
  if(j.events.some(e=>FAILURE_EVENTS.has(e.type)))
   return reject('retry_debt_or_reversal_history_requires_original_cycle_review')
- if(!j.events.some(e=>e.type==='BILLING.SUBSCRIPTION.ACTIVATED')||
-  !j.events.some(e=>e.type==='PAYMENT.SALE.COMPLETED'))
+ const activations=j.events.filter(e=>e.type==='BILLING.SUBSCRIPTION.ACTIVATED')
+ const completedSales=j.events.filter(e=>e.type==='PAYMENT.SALE.COMPLETED')
+ if(activations.length===0||completedSales.length===0)
   return reject('initial_sale_or_activation_event_not_accounted_for')
+ // The single merchant transaction cannot be attributed to first regular
+ // obligation when the signed lifecycle has another distinct activation or
+ // SALE.COMPLETED. Event-type and timestamp alone do NOT prove sale identity;
+ // the earlier source-correlation gate must still match signed sale IDs.
+ if(activations.length!==1||completedSales.length!==1)
+  return reject('multiple_activation_or_sale_events_require_manual_reconciliation')
  if(!exact(f,K.financial)||f.coverage!=='complete'||
   f.refunds!=='clear'||f.disputes!=='clear'||f.reversals!=='clear')
   return reject('refund_dispute_or_reversal_coverage_incomplete')
