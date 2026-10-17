@@ -1,3 +1,26 @@
+# F16-P42 — hosted PostgreSQL zero-row WRITE rolled back; ephemeral login pending (2026-10-17)
+
+**GO PO:** permiso para acreditar canal administrativo con operación inocua y delimitada, **sin claves ni cobros**. PR #44 DRAFT, rama `f13/section-titles-20261012`, Brain OS 1.4.1.
+
+**REAL alojado Supabase `mrybvqdebbgcayuvgkkr`, ejecutado por ChatGPT:**
+- `cli_login_postgres` existe y tiene `pg_has_role(...,'postgres','SET')=true`. Conector usa `postgres`, que **no** puede `SET ROLE cli_login_postgres`; esto no simula autenticación efímera real.
+- `postgres` ejecutó `INSERT ... SELECT NULL::bytea ... WHERE false` bajo `BEGIN; ... ROLLBACK`, **0 filas**. Postflight read-only independiente: P42 keys 0, writer OFF, P21 OFF, bindings 0, ledger 0, `service_role` sin EXECUTE. No secretos generados ni escrituras persistentes.
+- 8 Edge Functions alojadas inspeccionadas por fuente: ninguna contiene referencia textual directa a `PAZO_F16_P42_SANDBOX_HMAC_KEY_HEX`. No demuestra inexistencia de consumidores indirectos ni privilegios de Edge Secrets. El conector **no tiene** Management Secrets API.
+- Detalle y limitaciones: `docs/PAZO_F16_P42_HOSTED_PRIVILEGE_ZERO_ROW_GATE_20261017.md`.
+
+**Preparación P42 solo para estación Windows privada (NO ejecutada):**
+- SQL fijo `supabase/queries/f16_p42_ephemeral_zero_row_write_probe_ONCE.sql`, código `scripts/f16-p42-ephemeral-zero-row-write-once.mjs`, pruebas `src/features/supporter/testing/f16P42EphemeralZeroRowWriteOnce.test.mjs`.
+- Gate único nuevo `P42-WRITE-EPHEMERAL-20261017-01`: solo emisión CLI efímera separada (puede actualizar rol), TLS verify-full + CA, `session_user` temporal y `SET ROLE postgres`, INSERT de 0 filas/ROLLBACK y postflight; lock `p42-write-ephemeral-20261017-01.lock`. No relanzar P43/P43B ni borrar locks.
+- CI inicial `#39032977127` FAILURE **solo test de regex que emparejó patrón defensivo**, 985/986 tests PASS y PG lab SUCCESS `#39032977155`; corregido por commit `840c573ee2cfb0e351bc50228211121debf8215a`. **CI del commit corregido por confirmar**; no pedir ejecutar script hasta PASS del HEAD.
+- Edge Secrets READ/WRITE permisos **sin verificar**; ningún GET/POST/DELETE de secrets, ningún token extraído, ninguna provisión `P42_V1`, `T0` no fijado.
+- El PO continúa custodio único para futura clave 24h y revocación manual. F16 financiero **NO-GO**.
+
+**Siguiente paso concreto:** verificar CI de `840c573`; si PASS, el PO ejecuta **una sola vez** el script nuevo en su Windows privado usando la CA previamente descargada, sin compartir credenciales ni rutas sensibles, y devuelve SOLO los tres marcadores sanitizados. Si BLOCKED, no reintentar. Después determinar método privado de verificación de permisos Edge sin crear secreto; el GO actual no autoriza probar POST/DELETE.
+
+**Marcador:** `P42_POSTGRES_ZERO_ROW_HOSTED_ROLLBACK_PASS_EPHEMERAL_OPERATOR_PENDING_EDGE_WRITE_UNVERIFIED`.
+
+---
+
 # F16-P42 — transporte privado simulado verificado; hosted NO-GO (2026-10-17)
 
 **Autoridad PO:** «ok go» para preparación y pruebas sin credenciales reales. **No** autoriza claves P42, nuevo acceso efímero al DB, Edge Secrets hosted, SQL WRITE, activación financiera ni despliegues. **Rama:** `f13/section-titles-20261012`; **PR #44 DRAFT**; Brain OS 1.4.1.
