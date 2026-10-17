@@ -3,6 +3,7 @@
 // Only OAuth token POST and scoped merchant GETs; no subscription/payment writes.
 // Ingress signature was verified by the existing inbox boundary, NOT by this file.
 // readClaimedEvent MUST be a service-only RPC that validates eventId + claimToken.
+import {createP29MerchantSaleReader} from './p29MerchantSaleReader.mjs'
 const HOST='https://api-m.sandbox.paypal.com'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const EVENT=/^[A-Za-z0-9._-]{3,128}$/
@@ -89,8 +90,20 @@ export function createP05SandboxClaimScopedMerchantReaders({
    fail('p05_paypal_sandbox_sale_event_mismatch')
   return projection(e)
  }
+ // P29 reuses the same PRIVATE verified event check and OAuth closure.
+ // The bearer token never escapes the server-only reader interface.
+ const independentSale=createP29MerchantSaleReader({
+  enabled:true,
+  readClaimedMerchantEvent:merchantEvent,
+  getAccessToken:async()=>{
+   const headers=await authorize()
+   return headers.Authorization.slice('Bearer '.length)
+  },
+  fetchImpl,
+ })
  return Object.freeze({
   getMerchantEvent:merchantEvent,
+  getIndependentMerchantSale:independentSale,
   async getMerchantSubscription({subscriptionId,eventId,claimToken}={}){
    if(!SUB.test(subscriptionId||''))fail('p05_subscription_ref_invalid')
    // Recheck the active lease + original merchant event immediately before
