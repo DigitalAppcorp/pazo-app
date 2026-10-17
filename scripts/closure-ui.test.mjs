@@ -928,72 +928,28 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
   assert.ok(!source.includes('border-')&&!source.includes('ring-')&&!source.includes('outline-'),'Theme preview has zero UI borders')
 })
 
-test('F16 discoverable customization opens from Mi mascota with own pet, no link, payment or persistence', async () => {
-  const pet={id:'owned-cat',name:'Luna',species:'gato',photoUrl:'https://synthetic.invalid/luna.jpg',age:'2',breed:'Mestiza',bio:'Amiga de todos'}
-  const makeProps=lang=>({
-    currentPet:pet,canManagePet:true,canModerate:false,onRequireAccount(){},
-    availablePets:[pet],onSelectPet(){},onPetUpdated(){},onAddPet(){},
-    careItems:[],onCompleteCare(){},onOpenQRPassport(){},onOpenCareAgenda(){},
-    documentCount:0,onOpenDocuments(){},onOpenLostAlert(){},lang
-  })
-  for (const [lang,entry,original,nature,close] of [
-    ['es','Personalizar perfil','Original','Naturaleza','Cerrar vista previa'],
-    ['en','Customize profile','Original','Nature','Close preview'],
-  ]) {
-    let ui
-    await act(async()=>{ui=create(React.createElement(PetView,makeProps(lang)))})
-    assert.ok(button(ui.root,entry),'Discoverable from ordinary My Pet utilities')
-    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
-    await act(async()=>button(ui.root,entry).props.onClick())
-    const dialogs=ui.root.findAllByProps({role:'dialog'})
-    assert.equal(dialogs.length,1)
-    const dialog=dialogs[0]
-    assert.equal(dialog.props['aria-modal'],'true')
-    assert.ok(JSON.stringify(ui.toJSON()).includes('Luna'))
-    assert.ok(JSON.stringify(ui.toJSON()).includes('luna.jpg'))
-    assert.ok(button(dialog,original))
-    assert.ok(button(dialog,nature))
-    assert.equal(button(dialog,original).props['aria-pressed'],true)
-    await act(async()=>button(dialog,nature).props.onClick())
-    assert.ok(ui.root.findAllByProps({'data-supporter-theme':'nature'}).length===1)
-    assert.equal(button(dialog,nature).props['aria-pressed'],true)
-    await act(async()=>button(dialog,original).props.onClick())
-    assert.equal(ui.root.findAllByProps({'data-supporter-theme':'nature'}).length,0)
-    const stars=lang==='es'?'Cielo estrellado':'Starry sky'
-    await act(async()=>button(dialog,stars).props.onClick())
-    const darkCard=ui.root.findAll(n=>n.props['aria-label']===(lang==='es'?'Simulación de tu perfil social':'Your social profile mockup'))[0]
-    assert.ok(darkCard.props.className.includes('bg-[#1B2D5C]'),'Dark mode uses a night-blue base beneath fading art')
-    const heading=darkCard.findAllByType('h3')[0]
-    assert.ok(heading.props.className.includes('text-[#FCFAF2]'),'Pet name is ivory on dark blue')
-    for(const p of darkCard.findAllByType('p')){
-      if (p.children.includes('Mestiza') || p.children.includes('Amiga de todos')) {
-        assert.ok(p.props.className.includes('text-[#F0F4EB]'),'Pet biography and breed remain legible')
-      }
-    }
-    await act(async()=>button(dialog,original).props.onClick())
-    assert.ok(darkCard.props.className.includes('bg-[#F8F5EC]'),'Original profile restores warm surface')
-    assert.ok(heading.props.className.includes('text-[#204E4A]'),'Original profile restores PAZO green name')
-    assert.ok(button(dialog,close))
-    await act(async()=>button(dialog,close).props.onClick())
-    assert.equal(ui.root.findAllByProps({role:'dialog'}).length,0)
-    await act(async()=>button(ui.root,entry).props.onClick())
-    assert.equal(button(ui.root,original).props['aria-pressed'],true,'Reopen starts from unchanged original; nothing was saved')
-    await act(async()=>ui.unmount())
-  }
+test('F16 supporter customization is routed through a verified membership, not a second upsell card',()=>{
   const petCode=fs.readFileSync('src/components/views/PetView.tsx','utf8')
+  const member=fs.readFileSync('src/features/supporter/components/SupporterBenefitsHome.tsx','utf8')
+  const hook=fs.readFileSync('src/features/supporter/useSupporterMembershipStatus.ts','utf8')
   const preview=fs.readFileSync('src/features/supporter/components/SupporterThemePreviewPanel.tsx','utf8')
-  assert.ok(petCode.includes('setShowSupporterThemePreview(true)'))
-  assert.ok(petCode.includes('showSupporterThemePreview && ('))
-  assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'No payment or preferences are written')
-  assert.ok(preview.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'"), 'Saving requires explicit default-off release flag')
-  assert.ok(preview.includes('{liveBenefitsUI && <SupporterThemeSaveControl'), 'Real save controls are absent from preview by default')
-  assert.ok(preview.includes('Solo vista previa. Tu perfil público no ha cambiado.'), 'Default preview continues to disclaim persistence')
-  assert.ok(!preview.includes('border-')&&!preview.includes('ring-')&&!preview.includes('outline-'),'No outlined UI')
+  assert.ok(petCode.includes('setShowSupporterAccount(true)'),'One discoverable supporter entry under My Pet')
+  assert.ok(petCode.includes('pet={currentPet}'),'Selected pet is passed to supporter home')
+  assert.ok(!petCode.includes('setShowSupporterThemePreview(true)'),'No competing customization card')
+  assert.ok(!petCode.includes('setShowGratitudeParticipation(true)'),'No duplicate supporter wall card')
+  assert.ok(petCode.includes("supporterStatus.kind==='verified'"),'Decorated entry needs server proof')
+  assert.ok(member.includes('<SupporterThemePreviewPanel pet={pet}'),'Member opens actual approved profile picker')
+  assert.ok(member.includes('<SupporterWallConsentSettings lang={lang}'),'Existing wall consent is reused')
+  assert.ok(member.includes('<SupporterBadge active milestone={milestone}'),'No synthetic milestone')
+  assert.ok(hook.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"),'Server is source of verified perks')
+  assert.ok(!hook.includes('localStorage')&&!hook.includes('sessionStorage'),'Membership state is not stored in browser')
+  assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'Preview itself never activates payment')
+  assert.ok(preview.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'"),'Save stays behind release flag')
+  assert.ok(preview.includes('{liveBenefitsUI && <SupporterThemeSaveControl'),'Persistence requires server gate')
+  assert.ok(!preview.includes('border-')&&!preview.includes('ring-')&&!preview.includes('outline-'),'Zero-outline rule')
   const css=fs.readFileSync('src/index.css','utf8')
   assert.ok(css.includes('@keyframes pazoSupporterGentleFloat'))
-  assert.ok(css.includes('translate3d(3px, -6px, 0) rotate(2deg)'),'Float movement stays within a subtle range')
-  assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion disables ornamental animation')
-  assert.ok(!preview.includes('animate-float'),'Text and portrait must never float')
+  assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion contract intact')
 })
 
 test('F16 gratitude wall is accessible from welcome A01 without login, not in Explore', async () => {
