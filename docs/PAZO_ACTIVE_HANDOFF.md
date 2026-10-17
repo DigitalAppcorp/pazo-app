@@ -1,3 +1,22 @@
+# F16-P42 — transporte privado simulado verificado; hosted NO-GO (2026-10-17)
+
+**Autoridad PO:** «ok go» para preparación y pruebas sin credenciales reales. **No** autoriza claves P42, nuevo acceso efímero al DB, Edge Secrets hosted, SQL WRITE, activación financiera ni despliegues. **Rama:** `f13/section-titles-20261012`; **PR #44 DRAFT**; Brain OS 1.4.1.
+
+**Implementación acotada:**
+- `scripts/f16-p42-private-transport-lab.mjs`: transportes simulados en memoria `POST/GET/DELETE` y `pg.query({text,values})`, únicamente bytes sintéticos `a7`. Sin llamadas de red, SQL real, secretos productivos, CLI, logs, `.env`, generar claves o tocar Supabase.
+- `src/features/supporter/testing/f16P42PrivateTransportLab.test.mjs`: 12 casos sobre orden de operaciones, ventana 24 h heredada del contrato, compensación de fallo DB, timeouts tras mutación, revocación manual simulada, ausencia independiente y salidas sanitizadas.
+- `docs/PAZO_F16_P42_PRIVATE_TRANSPORT_SIMULATION_GATE_20261017.md`: diseño, evidencia y límites. Los documentos P42 previos se reutilizaron, no reemplazaron.
+- **Commits:** código `9bbc73c92dec9f36d7d099eea1b53ff1422dd0e2`; tests `afe2b5a3ca67464588b65c606d67a866abe2627f`; gate doc `dc2df940ece77e4599dffbec3664193788693fc7`.
+- **Verificación:** prueba del prototipo local 12/12 PASS; workflow **CI SUCCESS #39032204533** y **F16 Disposable PostgreSQL Lab SUCCESS #39032204576** en commit de tests. Workflow del commit documental: **PG Lab SUCCESS #39032275290**, CI **in_progress** al registrar este checkpoint. No declarar HEAD final CI PASS hasta consultarlo. Fallos ajenos Vercel por límite de builds no equivalen a fallo del laboratorio P42.
+
+**Límites:** P43B read-only anterior PASS (informe PO), lock consumido. Permisos WRITE hosted, TLS/CA operator, Management API autenticada, revocación real, consumidores Edge, backup/snapshots y T0 **NO verificados**. 0 claves P42 según el último preflight anterior, sin nueva consulta alojada por este gate. P42 writer OFF, P21 OFF, ledger/beneficios/checkout/PayPal Live **NO-GO**. PO custodio único, vigencia 24h desde futuro T0 UTC y revocación manual siguen vigentes.
+
+**Siguiente gate único:** comprobar CI del HEAD actualizado, luego preparar protocolo **separado** de auditoría de privilegios WRITE con petición de **GO explícito nuevo** antes de cualquier acceso hosted. Un GO todavía posterior será necesario para generar y entregar una clave real; **no** inferirlo de este «ok go».
+
+**Marcador:** `P42_SYNTHETIC_TRANSPORT_CODE_CI_PASS_HOSTED_UNTOUCHED_FINANCIAL_NO_GO`.
+
+---
+
 # F16-P42 — preparación de dos canales privados completada en laboratorio, hosted NO-GO (2026-10-17)
 
 **GO limitado por PO:** «ok go» tras `P43B_EPHEMERAL_DB_READ_ONLY_PASS` autorizó **PREPARAR/AUDITAR SOLO EN LABORATORIO** el canal PostgreSQL parametrizado + Supabase Edge Secrets privado. Se reutilizó el diseño de `docs/PAZO_F16_P42_24H_CUSTODY_EXPIRY_REVOCATION_GATE_20261016.md`, `docs/PAZO_F16_P42_SINGLE_CUSTODIAN_SAFE_ALTERNATIVE_20261016.md` y pruebas backup PG17. No usar el GO para otra conexión PAZO, emisión de nuevo `cli_login_postgres`, escritura hosted, secreto, modificación de seguridad, pagos o despliegue.
