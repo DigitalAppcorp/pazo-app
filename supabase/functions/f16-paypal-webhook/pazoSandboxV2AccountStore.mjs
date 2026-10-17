@@ -15,7 +15,7 @@ export function createPazoSandboxV2AccountStore({
  if(projectUrl!==BASE||typeof serviceRoleKey!=='string'||
     serviceRoleKey.length<24||/\s/.test(serviceRoleKey)||
     typeof fetchImpl!=='function')reject()
- async function readForOwner(ownerId,intentId=null){
+ async function queryV2OwnerRecord(ownerId,intentId=null){
   if(!UUID.test(ownerId||'')||(intentId!==null&&!INTENT.test(intentId)))reject()
   let response
   try{
@@ -49,12 +49,12 @@ export function createPazoSandboxV2AccountStore({
  }
  return Object.freeze({
   async readForOwner({ownerId}={}){
-   return readForOwner(ownerId)
+   return queryV2OwnerRecord(ownerId)
   },
   // Owner argument is mandatory. No listing/query by arbitrary intent alone.
   async load(intentId,ownerId){
    if(!INTENT.test(intentId||'')||!UUID.test(ownerId||''))reject()
-   const record=await readForOwner(ownerId,intentId)
+   const record=await queryV2OwnerRecord(ownerId,intentId)
    if(!record)return null
    return Object.freeze({
     id:record.intentId,ownerId:record.ownerId,provider:'paypal',
@@ -64,7 +64,7 @@ export function createPazoSandboxV2AccountStore({
   },
   async readAcknowledgementForOwner({ownerId,intentId}={}){
    if(!UUID.test(ownerId||'')||!INTENT.test(intentId||''))reject()
-   const x=await readForOwner(ownerId,intentId)
+   const x=await queryV2OwnerRecord(ownerId,intentId)
    if(!x)return null
    return Object.freeze({
     ownerId:x.ownerId,intentId:x.intentId,
