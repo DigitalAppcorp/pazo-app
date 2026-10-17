@@ -1,3 +1,13 @@
+# F16-P42 — nuevo GO puntual para prueba privada PostgreSQL READ ONLY (2026-10-17)
+
+**PO aprobó literalmente «sí»** a realizar **UN** nuevo intento de conexión PostgreSQL **solo lectura** con contraseña candidata de origen privado en Google Password Manager (entrada sitio `supabase.com`, usuario `DigitalAppcorp's Project`; NO se conoce si es la password DB). Nunca extraer, copiar a chat, código, logs, SQL Editor, GitHub o agentes. Esta autorización nueva y específica sustituye solamente el NO-RETRY del intento P42 anterior por **un intento adicional**, sin autorizar repetición ilimitada, reset de la contraseña, CLI/JIT temporal, creación de claves P42, Edge secret, SQL de escritura, activación de worker o cobros.
+
+**Ejecución pendiente en computadora local por el PO**, NO hecha desde ChatGPT: utilizar el script existente `scripts/f16-p42-session-pooler-tls-readonly-once.ps1` (no modificar ni recrear) con `pwsh` PowerShell 7 en terminal privada, CA certificado oficial descargado en su equipo, Host obtenido en Dashboard Connect → Session pooler, puerto 5432 y `postgres.mrybvqdebbgcayuvgkkr`; el script fuerza SSL `verify-full`, sesión `READ ONLY` y único `psql` con password por entrada oculta. Nunca aceptar Connection URI completa; evitar capturas de contraseña y consola grabada. Primero verificar localmente rutas y herramientas, sin adivinar. En ausencia de CA, host validado, PowerShell 7 o psql, **detenerse antes de intentar autenticarse**. No confiar en el nombre de entrada del gestor como prueba de pertenencia a este proyecto. El resultado de éxito esperado es `P42_SESSION_POOLER_TLS_VERIFY_FULL_READ_ONLY_PASS` + `P42_HOSTED_WRITE_PERMISSION_NOT_VERIFIED` + `P42_NO_PROVISIONING_NO_PAYMENTS`; cualquier `BLOCKED` consume el intento y requiere nueva evaluación. No reintentar automáticamente ni cambiar credenciales.
+
+**Estado:** `P42_NEW_CANDIDATE_PASSWORD_READONLY_ATTEMPT_AUTHORIZED_NOT_EXECUTED`. Hosted P42 expiración absoluta instalado; claves 0, P21/P42 OFF y finanzas NO-GO. Handoff de resultado solo con código de estado sanitizado; PR #44 DRAFT.
+
+---
+
 # F16 — auditoría de impacto de rotación de contraseña PostgreSQL (2026-10-17)
 
 **Petición PO:** investigar exhaustivamente impacto antes de restablecer password `postgres`; permitir SQL Editor solo si es seguro. **Se realizó exclusivamente lectura** en Vercel, repo, Edge desplegado, catálogo PostgreSQL y documentación oficial. **NO se rotó contraseña, no se hizo ALTER ROLE, no se generó/provisionó clave P42, no se usó SQL Editor con secreto.**
