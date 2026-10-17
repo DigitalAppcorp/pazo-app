@@ -26,7 +26,7 @@ test('real PAZO QA displays only V2 subscriber actions, not P06 historic cancell
  assert.match(checkout,/functions\/v1\/f16-paypal-supporter-v2-qa/)
  assert.match(qaAccount,/functions\/v1\/f16-paypal-supporter-v2-qa/)
  assert.match(qaAccount,/action:'verify_payment'/)
- assert.match(qaAccount,/mayGrantBenefits!==true/)
+ assert.match(qaAccount,/result\.mayGrantBenefits===true/)
  assert.match(original,/!qaV2Screen && accounts\?\.map/)
  assert.match(qaAccount,/amigo-pazo-inicio\.png/)
  assert.match(qaAccount,/amigo-pazo-3-meses\.png/)
