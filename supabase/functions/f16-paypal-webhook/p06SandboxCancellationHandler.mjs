@@ -57,7 +57,7 @@ export function createPazoSandboxCancellationHandler({
   try{if(await admit({ownerId:owner,action:payload.action})!==true)
     return json(429,'rate_limited')}catch{return json(503,'admission_unavailable')}
   let intent
-  try{intent=await privateIntentStore.load(payload.intentId)}
+  try{intent=await privateIntentStore.load(payload.intentId,owner)}
   catch{return json(503,'account_lookup_unavailable')}
   if(!intent||intent.ownerId!==owner||intent.state!=='bound'||
     intent.provider!=='paypal'||intent.planId!==PLAN||
