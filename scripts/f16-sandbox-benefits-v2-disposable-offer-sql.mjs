@@ -27,6 +27,17 @@ BEGIN
  THEN RAISE EXCEPTION 'V2 already published: immutable SQL'
    USING ERRCODE='23505'; END IF;
 END $guard$;
+-- This legacy fixture represents the PREVIOUS offer with NO rewards.
+-- Never backfill its acceptances to v2 or change its immutable wording.
+INSERT INTO supporter_private.paypal_p06_offers
+ (version,locale,exact_copy,plan_id,currency,price_minor,cadence,published_at)
+VALUES
+ (${q(legacy.version)},'es',
+  'PRUEBA SANDBOX HISTORICA: no da acceso a insignias, fondos, muro ni premios. Es un registro de prueba anterior sin recompensas y no puede utilizarse para activar beneficios. Contrato inmutable.',
+  ${q(policy.planId)},'USD',299,'MONTH_1',pg_catalog.clock_timestamp()-interval '1 day'),
+ (${q(legacy.version)},'en',
+  'HISTORICAL SANDBOX TEST: no badges, profile themes, wall or medals were promised. This is an older QA record without supporter perks and may never activate benefits. Immutable terms.',
+  ${q(policy.planId)},'USD',299,'MONTH_1',pg_catalog.clock_timestamp()-interval '1 day');
 INSERT INTO supporter_private.paypal_p06_offers
  (version,locale,exact_copy,plan_id,currency,price_minor,cadence,published_at)
 VALUES
@@ -47,6 +58,9 @@ BEGIN
     OR (SELECT COUNT(*) FROM supporter_private.paypal_p06_offers
        WHERE version=${q(policy.version)} AND published_at IS NOT NULL)<>2
  THEN RAISE EXCEPTION 'Sandbox v2 copy, locale or hash drift'; END IF;
+ IF (SELECT COUNT(*) FROM supporter_private.paypal_p06_offers
+   WHERE version=${q(legacy.version)} AND published_at IS NOT NULL)<>2
+ THEN RAISE EXCEPTION 'Legacy Sandbox no-benefit offer was overwritten'; END IF;
  IF EXISTS(SELECT 1 FROM supporter_private.paypal_p06_checkout_attempts
      WHERE terms_version=${q(policy.version)})
  THEN RAISE EXCEPTION 'No Sandbox checkout can be fabricated by publishing an offer'; END IF;
