@@ -917,7 +917,11 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
   const profile=fs.readFileSync('src/components/views/PublicProfileView.tsx','utf8')
   const source=fs.readFileSync('src/features/supporter/components/SupporterProfileThemes.tsx','utf8')
   assert.ok(!source.includes('pazo_theme_preview')&&!source.includes('import.meta.env.DEV'),'No secret URL or development-only gate')
-  assert.ok(!profile.includes('SupporterThemePreviewPicker')&&!profile.includes('SupporterProfileBackdrop'),'Public profiles cannot be customized without verified entitlement')
+  assert.ok(!profile.includes('SupporterThemePreviewPicker') &&
+    profile.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'") &&
+    profile.includes('supporterVisualsEnabled && supporterPerks?.theme') &&
+    profile.includes('pazo_supporter_public_pet_benefits'),
+    'Public themes are rendered only from verified server proof, behind default-off release flag')
   assert.ok(profile.includes('get_pet_founder_status'),'Legacy verified status flow remains unchanged')
   assert.ok(!source.includes('localStorage')&&!source.includes('supabase'),'Theme preview never writes user preferences or payment status')
   assert.ok(!source.includes('border-')&&!source.includes('ring-')&&!source.includes('outline-'),'Theme preview has zero UI borders')
