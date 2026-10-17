@@ -81,7 +81,7 @@ test('F16 live evidence: webhook, owner, consent and environment are hard requir
   {sourceEnvironment:'sandbox'},{webhookSignatureVerified:false},
   {leaseOwned:false},{ownerIntentVerified:false},{acceptedOfferVerified:false},
   {eventType:'BILLING.SUBSCRIPTION.ACTIVATED'},{ownerId:'not-a-uuid'},
-  {offerTermsSha256:'bad'},{saleId:'SALE-FORGED'},{subscriptionId:'I-DIFFERENT'},
+  {offerTermsSha256:'bad'},{saleId:'SALE-FORGED'},
   {expectedPlanId:'P-OTHER'}, {eventId:'OTHER'},
  ]) {
   const env=fixture({claim})
@@ -89,6 +89,13 @@ test('F16 live evidence: webhook, owner, consent and environment are hard requir
   assert.equal(result.phase,'BLOCKED')
   assert.equal(env.calls.length,0)
  }
+})
+test('F16 live evidence: a forged but structurally valid subscription is rejected by independent Sale GET',async()=>{
+ const env=fixture({claim:{subscriptionId:'I-DIFFERENT'}})
+ const result=await env.make()(args)
+ assert.equal(result.phase,'BLOCKED')
+ assert.equal(env.calls.length,1)
+ assert.equal(result.mayCreatePaidPeriod,false)
 })
 test('F16 live evidence: modified amount, subscription, plan or trial are blocked',async()=>{
  const variations=[
