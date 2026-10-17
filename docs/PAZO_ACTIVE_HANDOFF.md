@@ -1,3 +1,15 @@
+# F16-P42 — INSTALACIÓN ADMINISTRATIVA CONFIRMADA + POSTFLIGHT SQL (2026-10-16)
+
+**ÉXITO verificado directamente después de ejecución por el Product Owner en el SQL Editor oficial de Supabase** (captura de 1 fila `p42_operator_postflight`). Script ejecutado: `supabase/drafts/f16_p42_absolute_expiry_PO_SQL_EDITOR_OPERATOR_PENDING_EXECUTION.sql`, versión validada en commit `444b3cdd97a7cb996d85663fc2c26f35087ed499`. ChatGPT **NO** usó `apply_migration` ni intentó sortear un control mediante otra herramienta: el PO ejecutó con su sesión administrativa en el Dashboard. **NO EJECUTAR DE NUEVO.**
+
+**Postflight independiente (solo SELECT vía Supabase conectado, posterior a la captura):** función `public.f16_p42_register_authenticated_activation(text,text,text,uuid,text,text)` tiene `absolute_expiry_guard=true` y `null_end_guard=true`; owner `postgres`, `SECURITY DEFINER=true`, `search_path=""`; `p42_signing_keys=0`, `p42_writer_enabled=false`, `p21_worker_enabled=false`, `p40_bindings=0`, `ledger=0`, `reversals=0`; `anon/authenticated/service_role/PUBLIC EXECUTE=false`. Estado de pagos **NO-GO**. No se suministró clave, no se activó P42/P21, no PayPal GET ni nuevo checkout; el firmador Edge sigue apagado.
+
+**Diferencia de historial importante:** ejecutar por SQL Editor realiza el cambio de función pero NO crea una fila en `supabase_migrations.schema_migrations`. La última versión listada sigue `20261016234350_f16_p37_service_only_claimed_activation_read`. Este es un **desfase de procedencia de migraciones**, no evidencia de que el parche faltó. NO aplicar otra vez el SQL ni insertar a mano una fila en migration history. En un futuro gate de reconciliación de schema, conservar evidencia del script ejecutado, comparar definición exacta en hosted, consultar método oficial de baseline/repair y documentar procedimiento sin doble aplicación ni permisos extra.
+
+**El bloqueo técnico de vencimiento absoluto P42 queda RESUELTO en hosted**; no declarar F16 completada ni activar secretos. El incidente GitHub #45 (safety del conector) ahora es un antecedente: la vía administrativa oficial del PO instaló el parche, pero **no se probó que haya cambiado la seguridad del conector ChatGPT**. Gate siguiente separado: revalidar custodia/revocación manual 24h, conexión segura Edge+PG, backup residual, oferta prospectiva ES/EN, evidencia PayPal merchant/facturación/reversos y ledger idempotente. PO debe aprobar por separado cualquier nueva provisión, grants, worker, checkout y beneficios. PR #44 DRAFT, F16 NO-GO financiero.
+
+---
+
 # F16-P42 — PO SQL Editor operator packet prepared; NOT installed (2026-10-16)
 
 **PO autorizó proceder con ruta administrativa oficial** después de bloqueo del conector Supabase. No reintentar la acción de escritura bloqueada por ChatGPT; PO ejecutará personalmente dentro de SQL Editor del Dashboard bajo su cuenta Owner, no mediante ChatGPT ni por un servicio o acceso de terceros. **Todavía NO se ejecutó** script y la base alojada no cambió. El issue #45 de revisión del conector permanece abierto para el conector, no constituye éxito de instalación.
