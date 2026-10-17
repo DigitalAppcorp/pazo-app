@@ -32,7 +32,7 @@ const fixture=(changes={})=>{
    const found=resources.find((v,i)=>url.endsWith(
      ['/v1/payments/sale/'+SALE,'/v1/billing/subscriptions/'+SUB,'/v1/billing/plans/'+PLAN][i]
    ))
-   const value=changes.responses?.[calls.length-1]??found
+   const value=changes.responses ? changes.responses[calls.length-1] : found
    return {ok:value!==null,status:value===null?404:200,
      headers:{get:()=> 'application/json'},
      text:async()=>JSON.stringify(value)}
