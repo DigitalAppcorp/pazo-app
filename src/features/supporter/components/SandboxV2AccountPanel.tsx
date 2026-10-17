@@ -131,6 +131,25 @@ export function SandboxV2AccountPanel({lang}:Props){
     {t('Todavía no existe una segunda suscripción Sandbox.',
       'No second Sandbox subscription has been created yet.')}
    </p>}
+   <section className="space-y-2 rounded-2xl bg-[#F0F3ED] p-3"
+     aria-label={t('Comparación de las cuatro insignias originales','Four original badges inspection')}>
+    <p className="text-xs font-semibold">
+     {t('Revisión visual de archivos originales: estas muestras NO representan beneficios concedidos.',
+      'Original artwork inspection only: these samples do NOT represent granted benefits.')}
+    </p>
+    <div className="grid grid-cols-4 gap-2">
+     {([
+      ['amigo-pazo-inicio.png',t('Inicio','Start')],
+      ['amigo-pazo-3-meses.png',t('3 meses','3 months')],
+      ['amigo-pazo-6-meses.png',t('6 meses','6 months')],
+      ['amigo-pazo-12-meses.png',t('12 meses','12 months')],
+     ] as const).map(([file,caption])=><div key={file} className="flex flex-col items-center gap-1">
+      <img src={'/supporter/'+file} alt={caption} loading="lazy"
+       className="h-[52px] w-[52px] object-contain"/>
+      <span className="text-[10px] font-bold text-center">{caption}</span>
+     </div>)}
+    </div>
+   </section>
    {account&&<div className="space-y-3">
      <p role="status" className="text-sm font-bold">
       {account.state==='pending'
