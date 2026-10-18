@@ -1,3 +1,11 @@
+# F16 — PayPal CTA Card Central: opción 2 lime, logo azul legible (2026-10-18)
+
+El PO eligió **opción 2** tras ver el botón verde oscuro con logo PayPal azul de poco contraste: cambiar solo botón de `SandboxCheckoutQaPanel.tsx` a **lima PAZO `#E1E53F` y texto verde `#204E4A`**, conservando los azules originales `#003087`/`#009CDE` del logo, agrandado a 25px. Variante deshabilitada usa lima pálido `#EEF1B7` SIN reducir opacidad del logo; nunca habilita checkout sin aceptación explícita. Hover/focus lima más claro, cero contornos. Tests estructurales actualizados. Commit funcional `bbde81a08ed417adcfe9b039156eca2933e9c092`, **CI + 6 PG Labs 7/7 SUCCESS**; PR #44 DRAFT en `f13/section-titles-20261012`. Ningún cambio de backend, consentimiento, cobros, planes o Live. Pendiente: Product Owner recarga Vite y valida contraste real, estado no consentido y activo SIN pagar.
+
+**Gate:** `F16_CARD_CENTRAL_PAYPAL_LIME_CODE_PASS_VISUAL_PO_PENDING_LIVE_OFF`.
+
+---
+
 # F16 — Card Central PO-approved layout implemented in PR #44 (2026-10-18)
 
 PO selected image option **4 / «Card Central»** and explicitly requested faithful implementation, not another copy-only change. Replaced the prior hero + vertical benefit list with an actual **floating official gold medal** centered over one white invitation card, centered approved title/copy/US$2.99, **forest-green «Quiero apoyar a PAZO» + «Continuar con PayPal»** CTA, legal checkbox and terms inside the card, then a separate compact **single horizontal row of four thank-you icons**. Cream outer canvas, discreet motifs, rounded cards without visual contours, PAZO-free promise below and voluntary exit maintained. Existing backend-verified rights, offer exactCopy/digest, consent, anti-duplicate charge protections, QA status and Live OFF are unchanged. UX CTA precedes checkbox visually but remains disabled until explicit affirmative consent.
