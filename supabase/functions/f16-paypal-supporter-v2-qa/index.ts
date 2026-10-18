@@ -28,6 +28,8 @@ import {createPazoSandboxV2ProofStore}
  from '../f16-paypal-webhook/pazoSandboxV2ProofStore.mjs'
 import {createPazoSandboxV2MerchantVerifier}
  from '../f16-paypal-webhook/pazoSandboxV2MerchantVerify.mjs'
+import {createPazoSandboxV2InventoryRead}
+ from '../f16-paypal-webhook/pazoSandboxV2InventoryRead.mjs'
 import {createF16GlobalAdmission}
  from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
 
@@ -98,6 +100,7 @@ function compose(requestOrigin:string){
   if(!r.ok)return false
   return (await r.json())===true
  }
+ const inventoryRead=createPazoSandboxV2InventoryRead({clientId,clientSecret})
  const merchantVerifier=createPazoSandboxV2MerchantVerifier({
   clientId,clientSecret,commitVerified:v2ProofStore.commitVerified,
   markReversal:v2ProofStore.markReversal})
@@ -118,7 +121,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,reader,resolveAuthenticatedOwner,admit,canBuy}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,reader,resolveAuthenticatedOwner,admit,canBuy}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -201,6 +204,30 @@ Deno.serve(async(request:Request)=>{
   return addCors(reply(503,'qa_v2_management_not_released'),runtime.origin)
  if(isManagement && ['status','cancel','acknowledgement'].includes(data.action))
   return addCors(await runtime.manage(request),runtime.origin)
+ // Read-only merchant inventory diagnostics for 404; NOT a retry grant.
+ if(data.action==='audit_retry_inventory'){
+  if(Object.keys(data).sort().join('|')!=='action|intentId'||
+    !/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId||''))
+   return addCors(reply(400,'invalid_request'),runtime.origin)
+  if(!await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  try{
+   if(await runtime.admit()!==true)
+    return addCors(reply(429,'rate_limited'),runtime.origin)
+   const account=await runtime.v2AccountStore.readForOwner({
+     ownerId:qaOwner,intentId:data.intentId})
+   if(!account||account.state!=='bound'||!account.externalSubscriptionId)
+    return addCors(reply(409,'private_account_read_unavailable'),runtime.origin)
+   const evidence=await runtime.inventoryRead.inspect({
+     subscriptionId:account.externalSubscriptionId,planId:account.planId})
+   return addCors(new Response(JSON.stringify({
+     ok:true,...evidence,merchantAuditGrantIssued:false,
+     paidThrough:null,mayRecordPayment:false,mayGrantBenefits:false
+   }),{status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
+  }catch{
+   return addCors(reply(503,'merchant_inventory_read_unavailable'),runtime.origin)
+  }
+ }
  // Recover only the original PayPal approval for an already-bound QA V2
  // attempt. No PayPal POST creates a second subscription; no paid entitlement.
  if(data.action==='resume_approval'){
