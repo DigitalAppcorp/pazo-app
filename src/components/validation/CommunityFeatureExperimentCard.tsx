@@ -92,7 +92,7 @@ export const CommunityFeatureExperimentCard = ({
   return (
     <div
       ref={cardRef}
-      className="rounded-[1.6rem] bg-[#FAF8F5] p-4 ring-1 ring-[#204E4A]/5"
+      className="rounded-[1.6rem] bg-[#FAF8F5] p-4 shadow-[0_4px_14px_rgba(32,78,74,0.035)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
