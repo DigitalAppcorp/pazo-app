@@ -232,8 +232,9 @@ export const PublicProfileView = ({
       {/* Supporter cosmetics are server-verified only; default-off preview unaffected. */}
       {supporterVisualsEnabled && supporterPerks?.theme &&
         <SupporterProfileBackdrop theme={supporterPerks.theme} />}
-      {/* Warm open canvas, not a card and never a synthetic cover photograph. */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[540px] overflow-hidden">
+      {/* Original PAZO decorations are exclusive to the uncustomized profile.
+          A server-verified custom theme owns the complete decorative layer. */}
+      {!(supporterVisualsEnabled && supporterPerks?.theme) && <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[540px] overflow-hidden">
         <div className="absolute -left-36 -top-32 h-80 w-80 rounded-full bg-[#EFE9D6]/55 blur-[75px]" />
         <svg className="absolute right-[-14px] top-[132px] h-28 w-24 text-[#D9D6A8]/65" viewBox="0 0 100 120" fill="currentColor">
           <ellipse cx="29" cy="32" rx="8" ry="16" transform="rotate(-20 29 32)" />
@@ -353,9 +354,9 @@ export const PublicProfileView = ({
               </div>
 
               <div className="relative mt-5">
-                <svg aria-hidden="true" className="pointer-events-none absolute -right-1 top-1 h-14 w-14 text-[#D8DA7E]" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round">
+                {!(supporterVisualsEnabled && supporterPerks?.theme) && <svg aria-hidden="true" className="pointer-events-none absolute -right-1 top-1 h-14 w-14 text-[#D8DA7E]" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round">
                   <path d="m15 26 12-17M22 43l22-10M38 51l12-2" />
-                </svg>
+                </svg>}
                 <h2 className={'max-w-[90%] break-words text-[clamp(39px,10vw,56px)] font-black leading-[1.03] tracking-[-0.05em] ' + (supporterPerks?.theme === 'stars' ? 'text-[#FCFAF2]' : 'text-[#204E4A]')}>
                   {petProfile.name}
                 </h2>
