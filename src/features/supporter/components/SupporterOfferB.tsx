@@ -40,33 +40,33 @@ export function SupporterOfferB({lang,children}:Props) {
   ]
   return <>
     <section aria-labelledby="supporter-offer-title"
-      className="relative isolate min-h-[211px] overflow-hidden rounded-[26px] bg-gradient-to-br from-[#FAF8F5] via-[#F7F7EF] to-[#EEF3E4] px-2 pb-3 pt-2">
-      <span aria-hidden="true" className="pointer-events-none absolute -right-5 top-2 h-24 w-24 rounded-full bg-[#E1EBCF]/45 blur-xl"/>
-      <span aria-hidden="true" className="pointer-events-none absolute right-12 top-2 h-8 w-4 -rotate-20 rounded-full bg-[#E2ECC7]/80"/>
-      <span aria-hidden="true" className="pointer-events-none absolute right-3 top-6 h-9 w-5 rotate-25 rounded-full bg-[#D8E6D3]/65"/>
-      <div className="relative">
-        <h3 id="supporter-offer-title" className="relative z-10 max-w-[255px] text-[clamp(24px,6.8vw,28px)] font-black leading-[1.04] tracking-tight text-[#204E4A]">
-          {lang==='es'
-            ? <><span className="block">Pequeñas</span><span className="block">acciones, grandes</span><span className="block">historias.</span></>
-            : <><span className="block">Small acts,</span><span className="block">big stories.</span></>}
+      className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FAF8F5] via-[#F7F7EF] to-[#EEF3E4] px-5 pb-5 pt-5">
+      <span aria-hidden="true" className="pointer-events-none absolute -right-4 -top-6 h-28 w-28 rounded-full bg-[#E1EBCF]/50 blur-2xl"/>
+      <div className="relative z-10 flex items-start gap-2">
+        <h3 id="supporter-offer-title" className="min-w-0 flex-1 text-[clamp(24px,6.5vw,28px)] font-black leading-[1.12] tracking-tight text-[#204E4A]">
+          {t('Ayuda a que PAZO siga creciendo','Help PAZO keep growing')}
         </h3>
         <img src="/supporter/amigo-pazo-inicio.png" alt="" aria-hidden="true"
-          width="126" height="126"
-          className="pointer-events-none absolute right-[-1px] top-[63px] z-0 h-[116px] w-[116px] object-contain drop-shadow-[0_5px_7px_rgba(32,78,74,0.12)]"/>
-        <p className="relative z-10 mt-3 max-w-[215px] text-[11px] font-medium leading-[1.45] text-[#476862]">
-          {t('Tu apoyo ayuda a que PAZO siga creciendo y conectando mascotas, personas y comunidades.',
-            'Your support helps PAZO grow and connect pets, people and communities.')}
-        </p>
-        <div className="relative z-10 mt-3 inline-flex max-w-full items-baseline gap-1.5 rounded-full bg-[#F2F5DE] px-3 py-1.5 text-[#204E4A]">
-          <strong className="text-[27px] font-black tracking-tight tabular-nums">US$2.99</strong>
-          <span className="text-[11px] font-bold">{t('al mes','per month')}</span>
-        </div>
+          width="90" height="90" decoding="async"
+          className="pointer-events-none h-[88px] w-[88px] shrink-0 object-contain drop-shadow-[0_5px_7px_rgba(32,78,74,0.10)]"/>
+      </div>
+      <p className="relative z-10 mt-4 text-[14px] font-medium leading-[1.6] text-[#476862]">
+        {t('PAZO está dando sus primeros pasos y aún tenemos mucho por construir. Con tu apoyo podemos seguir cuidando este pequeño mundo, mejorándolo y creando nuevas experiencias para ti, tu mascota y toda nuestra comunidad.',
+          'PAZO is taking its first steps, and there is still so much to build. With your support, we can keep caring for this little world, making it better and creating new experiences for you, your pet and our entire community.')}
+      </p>
+      <div className="relative z-10 mt-4 inline-flex max-w-full items-baseline gap-1.5 rounded-full bg-[#F2F5DE] px-4 py-2 text-[#204E4A]">
+        <strong className="text-[27px] font-black tracking-tight tabular-nums">US$2.99</strong>
+        <span className="text-[13px] font-bold">{t('al mes','per month')}</span>
       </div>
     </section>
 
-    <section aria-labelledby="supporter-benefits-title" className="space-y-2">
-      <h3 id="supporter-benefits-title" className="px-1 text-[15px] font-black text-[#204E4A]">
-        {t('Lo que recibirás','What you get')}
+    <section aria-label={t('Colaboración voluntaria','Voluntary support')} className="space-y-2">
+      {children}
+    </section>
+
+    <section aria-labelledby="supporter-benefits-title" className="space-y-2 pt-2">
+      <h3 id="supporter-benefits-title" className="px-1 text-[19px] font-black text-[#204E4A]">
+        {t('Como agradecimiento','As a thank-you')}
       </h3>
       <ul className="grid min-w-0 grid-cols-1 gap-1.5">
         {benefits.map(benefit=><li key={benefit.kind}
@@ -75,19 +75,11 @@ export function SupporterOfferB({lang,children}:Props) {
             <BenefitGlyph kind={benefit.kind}/>
           </span>
           <div className="min-w-0 flex-1">
-            <h4 className="break-words text-[12px] font-extrabold leading-tight text-[#204E4A]">{benefit.title}</h4>
-            <p className="mt-0.5 break-words text-[10px] leading-snug text-[#5C7470]">{benefit.description}</p>
+            <h4 className="break-words text-[14px] font-extrabold leading-tight text-[#204E4A]">{benefit.title}</h4>
+            <p className="mt-0.5 break-words text-[12px] leading-snug text-[#5C7470]">{benefit.description}</p>
           </div>
-          <svg aria-hidden="true" className="h-4 w-4 shrink-0 text-[#8BA5A1]" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m9 5 7 7-7 7"/>
-          </svg>
         </li>)}
       </ul>
-    </section>
-
-    <section aria-label={t('Colaboración voluntaria','Voluntary support')} className="space-y-2">
-      {children}
     </section>
   </>
 }
