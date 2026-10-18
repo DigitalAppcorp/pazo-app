@@ -541,6 +541,9 @@ function PazoMain() {
   // initial page, this rechecks existing cards and changes badges atomically.
   const badgePetSignature=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
     .sort().join('|')
+  // The interval must inspect newly loaded comments, not a stale page snapshot.
+  const displayedPostsRef=useRef(posts)
+  displayedPostsRef.current=posts
   useEffect(()=>{
     if(!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
     let alive=true
@@ -551,19 +554,35 @@ function PazoMain() {
       const version=feedLoadVersionRef.current
       const petId=activePetIdRef.current
       try{
-        const snapshot=posts
-        const checked=await attachVerifiedFeedBadges(snapshot,
-          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
-        await preloadVerifiedFeedBadgeArt(checked)
+        const snapshot=displayedPostsRef.current
+        const visibleComments=snapshot.flatMap(post=>post.comments)
+        const [checked,checkedComments]=await Promise.all([
+          attachVerifiedFeedBadges(snapshot,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids})),
+          attachVerifiedCommentBadges(visibleComments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids})),
+        ])
+        await preloadVerifiedFeedBadgeArt([...checked,...checkedComments])
         if(!alive||feedLoadVersionRef.current!==version||activePetIdRef.current!==petId)return
         const badgeByPet=new Map(checked.filter(p=>!p.isAuthorDeleted)
           .map(p=>[p.petId,p.supporterBadge] as const))
-        setPosts(previous=>previous.map(post=>badgeByPet.has(post.petId)
-          ?{...post,supporterBadge:badgeByPet.get(post.petId)}:post))
+        const commentBadgesByPet=new Map(checkedComments.map(c=>[c.authorPetId,c.supporterBadge] as const))
+        setPosts(previous=>previous.map(post=>({
+          ...post,
+          supporterBadge:badgeByPet.has(post.petId)?badgeByPet.get(post.petId):post.supporterBadge,
+          comments:post.comments.map(comment=>({
+            ...comment,
+            supporterBadge:comment.authorPetId&&commentBadgesByPet.has(comment.authorPetId)
+              ?commentBadgesByPet.get(comment.authorPetId):undefined,
+          })),
+        })))
       }catch(error){
         if(alive&&feedLoadVersionRef.current===version&&activePetIdRef.current===petId){
           // Never retain a prior paid display claim when rechecking fails.
-          setPosts(previous=>previous.map(post=>({...post,supporterBadge:undefined})))
+          setPosts(previous=>previous.map(post=>({
+            ...post,supporterBadge:undefined,
+            comments:post.comments.map(comment=>({...comment,supporterBadge:undefined})),
+          })))
           console.error('PAZO Feed badge revalidation unavailable:',error)
         }
       }finally{inFlight=false}
