@@ -401,6 +401,8 @@ test('F16 Feed owner joins payment badge evidence BEFORE committing a visible pa
  assert.ok(app.includes('const enrichedPage=interactionsPage.map('))
  assert.ok(app.indexOf('const enrichedPage=interactionsPage.map(')<app.indexOf('setPosts(enrichedPage)'))
  assert.ok(app.includes('attachVerifiedFeedBadges([newPost]'))
+ assert.ok(app.includes('await preloadVerifiedFeedBadgeArt(enrichedPage)'),'Paint waits for official badge image decode')
+ assert.ok(app.includes('await preloadVerifiedFeedBadgeArt(resolved)'),'New post paint waits for its badge artwork')
  assert.ok(feed.includes('supporterBadge={post.supporterBadge}'))
  assert.ok(!feed.includes('badgeQueriesMade'),'No asynchronous badge lookup on render')
  assert.ok(!feed.includes("pazo_supporter_public_badges_batch"))
