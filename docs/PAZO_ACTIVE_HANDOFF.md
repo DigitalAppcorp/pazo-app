@@ -1,3 +1,18 @@
+# F16 — UI visual pass Amigo de PAZO aprobado por PO e implementado en rama (2026-10-18)
+
+**PO aprobó las 3 propuestas** de rediseño visual: inicio Amigo de PAZO, personalización de perfil, muro de agradecimiento. Se aplicaron en **PR #44 DRAFT rama `f13/section-titles-20261012`**, sin cambiar PayPal/Live, main ni finanzas.
+- `SupporterBenefitsHome`: hero `Ya eres Amigo de PAZO`, acciones insignia, fondos, muro, medallas 3/6/12 basadas en proyección verificada; tarjeta de membresía y diagnósticos Sandbox ocultos en detalles secundarios.
+- `SupporterThemePreviewPanel`, `SupporterProfileThemes`, `SupporterThemeSaveControl`: UI móvil coherente con PAZO, vista previa con datos reales, seis opciones originales, scroll horizontal, CTA `Guardar cambios`. La RPC write actual conserva verificación owner/entitlement y postflight; seleccionar no escribe.
+- `SupporterWallConsentSettings`: tarjetas reales por mascota, consentimiento explícito revocable, acceso a `GratitudeWallLive` read-only. Se conservan exactamente `pazo_wall_consent_enable/disable` y verificación posterior. No opt-in automático.
+- Sin fecha inventada en hero: el hook solo expone estado+hito; período real se ve en detalles de membresía. Cualquier fecha futura en hero requiere lectura segura específica y otro gate si necesario.
+- Pruebas estructurales F16 añadidas; **CI pendiente de última ejecución**. No se han realizado pruebas visuales en Vite de esta versión ni aprobado resultado renderizado.
+- Informe canónico: `docs/F16_PAZO_FRIEND_APPROVED_VISUAL_PASS_20261018.md`.
+- Próximo gate: esperar CI, sincronizar clon Vite del PO con estado limpio, comprobar móviles/teclado/reduced-motion; QA real de guardar fondo, revocar/autorizar muro, visitante público y elegibilidad de cuenta no pagada. No hacer otro pago ni cancelar todavía.
+
+**Gate:** `F16_APPROVED_VISUAL_PASS_BRANCH_IMPLEMENTED_RENDERED_PO_REVIEW_PENDING_LIVE_OFF`.
+
+---
+
 # F16 — PO grabación beneficios → checking → beneficios: salto UI corregido en PR #44 (2026-10-18)
 
 PO mostró video corto donde el panel real `Tus beneficios están disponibles` aparece pero transitoriamente vuelve a `Comprobando tu membresía...` y luego recupera beneficios. Causa verificable: `useSupporterMembershipStatus` vaciaba todo estado verificado a `checking` al revalidar, desmontando `SupporterBenefitsHome` y sus apartados abiertos. Código corregido en rama: para relectura mismo alcance y miembro ya verificado mantiene el panel mientras consulta al backend, siempre reemplaza en `inactive/unavailable`; un cambio de cuenta Auth limpia el estado y fuerza nueva consulta, al igual que cambio de mascota. **No** se conceden beneficios por cliente ni PayPal `ACTIVE`; las RPC siguen siendo fuente de verdad. Añadida regresión al set F16. Solo código/documentación, sin DB/Live/main/cobros. El video NO ha probado aún fondos, muro, caducidad ni cancelación. Ver `docs/F16_AUTO_MEMBERSHIP_SANDBOX_QA_GATE_20261018.md`. CI de último HEAD debe comprobarse antes de pedir que PO actualice Vite local.
