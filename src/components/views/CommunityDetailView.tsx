@@ -1,4 +1,8 @@
 import { CommunityMediaPendingError, COMMUNITY_MEDIA_BUCKET } from '../../features/communities/communityMediaCleanup'
+import { supabase } from '../../services/supabaseClient'
+import { attachVerifiedCommentBadges, preloadVerifiedFeedBadgeArt } from '../../features/supporter/verifiedFeedPostBadges'
+import { supporterBenefitsUiEnabled } from '../../features/supporter/supporterUiRelease'
+import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { useCallback, useEffect, useState } from 'react'
 import type {
@@ -116,9 +120,14 @@ export const CommunityDetailView = ({
         fetchCommunityPosts(communityId, currentPet?.id),
       ])
 
+      const decoratedPosts=supporterBenefitsUiEnabled
+        ?await attachVerifiedCommentBadges(nextPosts,
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        :nextPosts
+      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(decoratedPosts)
       setCommunity(nextCommunity)
       setMembers(nextMembers)
-      setPosts(nextPosts)
+      setPosts(decoratedPosts)
       if (exitUiEnabled) {
         try { setOwnershipOffer(await fetchCommunityOwnershipOffer(communityId)) }
         catch { setOwnershipOffer(null) }
@@ -142,7 +151,12 @@ export const CommunityDetailView = ({
 
   const refreshPosts = async () => {
     const nextPosts = await fetchCommunityPosts(communityId, currentPet?.id)
-    setPosts(nextPosts)
+    const decoratedPosts=supporterBenefitsUiEnabled
+      ?await attachVerifiedCommentBadges(nextPosts,
+        async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+      :nextPosts
+    if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(decoratedPosts)
+    setPosts(decoratedPosts)
   }
 
   const handleMembership = async () => {
@@ -249,12 +263,19 @@ export const CommunityDetailView = ({
     }
   }
 
-  const loadComments = async (postId: string) => {
+  const loadComments = async (postId: string):Promise<boolean> => {
     try {
       const comments = await fetchCommunityPostComments(postId)
-      setCommentsByPost((current) => ({ ...current, [postId]: comments }))
+      const decoratedComments=supporterBenefitsUiEnabled
+        ?await attachVerifiedCommentBadges(comments,
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        :comments
+      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(decoratedComments)
+      setCommentsByPost((current) => ({ ...current, [postId]: decoratedComments }))
+      return true
     } catch (error) {
       console.error('Error loading Community comments:', error)
+      return false
     }
   }
 
@@ -265,9 +286,9 @@ export const CommunityDetailView = ({
       return
     }
 
-    setOpenCommentsFor(postId)
     setCommentDraft('')
-    await loadComments(postId)
+    // Resolve all membership badges before the first visible comment.
+    if(await loadComments(postId))setOpenCommentsFor(postId)
   }
 
   const handleAddComment = async (postId: string) => {
@@ -651,9 +672,19 @@ export const CommunityDetailView = ({
                   {lang === 'es' ? 'Ver comentarios' : 'View comments'} ({post.commentsCount})
                 </button>
                 {openCommentsFor === post.id && <div className="space-y-2">
-                  {(commentsByPost[post.id] || []).map(comment => <div key={comment.id} className="rounded-2xl bg-[#FAF8F5] p-3 text-xs">
-                    <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
-                    <p className="mt-1 text-[#5C7470]">{comment.body}</p>
+                  {(commentsByPost[post.id] || []).map(comment => <div key={comment.id} className="flex items-start gap-2 rounded-2xl bg-[#FAF8F5] p-3 text-xs">
+                    <div className="relative h-8 w-8 shrink-0">
+                      <img src={comment.authorAvatar} alt="" className="h-full w-full rounded-full object-cover"/>
+                      {supporterBenefitsUiEnabled&&comment.supporterBadge?.badge&&(
+                        <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                          <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
+                      <p className="mt-1 text-[#5C7470]">{comment.body}</p>
+                    </div>
                   </div>)}
                 </div>}
               </article>
@@ -664,11 +695,14 @@ export const CommunityDetailView = ({
               >
                 <div className="flex min-w-0 items-start justify-between gap-2 px-4 pb-3 pt-4">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={post.authorAvatar}
-                      alt={post.authorName}
-                      className="h-11 w-11 shrink-0 rounded-full bg-[#F0F3E9] object-cover shadow-sm"
-                    />
+                    <div className="relative h-11 w-11 shrink-0">
+                      <img src={post.authorAvatar} alt={post.authorName} className="h-full w-full rounded-full bg-[#F0F3E9] object-cover shadow-sm"/>
+                      {supporterBenefitsUiEnabled&&post.supporterBadge?.badge&&(
+                        <span className="pointer-events-none absolute -bottom-1 -right-1 z-10" aria-label={lang==='es'?'Insignia de Amigo de PAZO verificada':'Verified PAZO Friend badge'}>
+                          <SupporterBadge active milestone={post.supporterBadge.milestone} lang={lang} size="mini"/>
+                        </span>
+                      )}
+                    </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-[16px] font-black leading-snug text-[#204E4A]">
@@ -741,11 +775,14 @@ export const CommunityDetailView = ({
                   <div className="mx-3 mb-3 space-y-3 rounded-[1.4rem] bg-[#F4F5ED] p-4">
                     {(commentsByPost[post.id] || []).map((comment) => (
                       <div key={comment.id} className="flex items-start gap-2.5">
-                        <img
-                          src={comment.authorAvatar}
-                          alt={comment.authorName}
-                          className="h-9 w-9 shrink-0 rounded-full object-cover"
-                        />
+                        <div className="relative h-9 w-9 shrink-0">
+                          <img src={comment.authorAvatar} alt={comment.authorName} className="h-full w-full rounded-full object-cover"/>
+                          {supporterBenefitsUiEnabled&&comment.supporterBadge?.badge&&(
+                            <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                              <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
+                            </span>
+                          )}
+                        </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
                             <p className="text-[13px] font-black text-[#204E4A]">
