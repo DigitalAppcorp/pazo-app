@@ -62,8 +62,10 @@ test('F16 rejects hostile, forged, duplicate or invalid PayPal approval links',a
  ]
  for(const href of bad){
   const {client}=fake({links:[{rel:'approve',method:'GET',href}]})
-  await assert.rejects(()=>client.readSubscription(id,{includeApprovalLink:true}),
-   'Invalid approval link must fail closed: '+href.slice(0,45))
+  const response=await client.readSubscription(id,{includeApprovalLink:true})
+  assert.equal(response.approvalUrl,null,'Untrusted URL is never returned')
+  assert.equal(response.approvalLinkState,'rejected')
+  assert.equal(response.status,'APPROVAL_PENDING','Status remains independently readable')
  }
  for(const links of [
    [{rel:'approve',method:'POST',href:link}],
@@ -71,7 +73,9 @@ test('F16 rejects hostile, forged, duplicate or invalid PayPal approval links',a
    'unexpected'
  ]){
   const {client}=fake({links})
-  await assert.rejects(()=>client.readSubscription(id,{includeApprovalLink:true}))
+  const response=await client.readSubscription(id,{includeApprovalLink:true})
+  assert.equal(response.approvalUrl,null)
+  assert.equal(response.approvalLinkState,'rejected')
  }
 })
 test('F16 V2 recovery server requires authenticated owner + linked original + plan match, never grants payment',()=>{
@@ -80,6 +84,10 @@ test('F16 V2 recovery server requires authenticated owner + linked original + pl
  const checkout=readFileSync(new URL('../components/SandboxCheckoutQaPanel.tsx',import.meta.url),'utf8')
  for(const clause of [
   "data.action==='resume_approval'",
+  "'sandbox_admission_unavailable'",
+  "'private_account_read_unavailable'",
+  "'paypal_subscription_read_unavailable'",
+  "'approval_link_rejected'",
   "runtime.v2AccountStore.readForOwner({ownerId:qaOwner})",
   "a.state!=='bound'||!a.externalSubscriptionId",
   'includeApprovalLink:true',
@@ -113,4 +121,20 @@ test('F16 Sandbox account recovery remains reachable after merchant status failu
  assert.ok(panel.includes("setRecoveryMessage('unavailable')"))
  assert.ok(panel.includes("providerStatus==='CANCELLED'")||panel.includes("result.phase==='CANCELLED'"))
  assert.ok(!panel.includes('attempted.current=false'))
+})
+
+test('F16 diagnostic codes are static and cannot leak owner, PayPal PII or raw provider messages',()=>{
+ const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
+ const begin=edge.indexOf("if(data.action==='resume_approval'){")
+ const end=edge.indexOf("if(data.action==='verify_payment'){",begin)
+ assert.ok(begin>0&&end>begin)
+ const stage=edge.slice(begin,end)
+ assert.ok(stage.includes("runtime.v2AccountStore.readForOwner({ownerId:qaOwner})"))
+ assert.ok(stage.includes("runtime.reader.readSubscription("))
+ assert.ok(!stage.includes('subscriptionCreator.create'))
+ assert.ok(!stage.includes('console.log'))
+ assert.ok(!stage.includes('err.message'))
+ assert.ok(!stage.includes('e.message'))
+ assert.ok(!stage.includes('merchant.subscriber'))
+ assert.ok(stage.includes('mayRecordPayment:false,mayGrantBenefits:false'))
 })
