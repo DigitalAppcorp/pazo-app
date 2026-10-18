@@ -23,6 +23,7 @@ export interface AdminExperiment {
  choices:{option:string;votes:number}[]
 }
 export interface AdminVoter {user_id:string;email:string|null;interested_at:string;choice:string|null;source:string}
+export interface AdminAudience {user_id:string;email:string|null;first_viewed:string;last_viewed:string;interested:boolean;choice:string|null}
 const call=async<T>(fn:string,args?:Record<string,unknown>):Promise<T>=>{
  const {data,error}=await supabase.rpc(fn,args)
  if(error)throw error
@@ -34,6 +35,7 @@ export const adminOverview=(days:7|30|90)=>call<AdminOverview>('pazo_admin_overv
 export const adminUsers=(offset:number)=>call<AdminUser[]>('pazo_admin_users',{p_limit:30,p_offset:offset})
 export const adminExperiments=()=>call<AdminExperiment[]>('pazo_admin_experiments')
 export const adminVoters=(moduleKey:string)=>call<AdminVoter[]>('pazo_admin_voters',{p_module_key:moduleKey,p_limit:40})
+export const adminAudience=(moduleKey:string)=>call<AdminAudience[]>('pazo_admin_audience',{p_module_key:moduleKey,p_limit:40})
 const sections:Record<string,string>={
  inicio:'feed',comunidades:'communities',mapa:'places',mascota:'profile'
 }
