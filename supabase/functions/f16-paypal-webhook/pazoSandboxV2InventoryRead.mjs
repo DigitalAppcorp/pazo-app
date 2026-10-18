@@ -51,19 +51,35 @@ export function createPazoSandboxV2InventoryRead({clientId,clientSecret,fetchImp
    const headers={Authorization:'Bearer '+t.access_token,Accept:'application/json'}
    const found=[]
    let fullyEnumerated=false
+   let allRowsVerified=true
    for(let page=1;page<=MAX_PAGES;page++){
     const params=new URLSearchParams({plan_ids:PLAN,page_size:String(PER_PAGE),page:String(page)})
     const response=await api(HOST+'/v1/billing/subscriptions?'+params,{method:'GET',headers},'inventory')
-    if(!Array.isArray(response.subscriptions)||response.subscriptions.length>PER_PAGE)
-      error('inventory_malformed')
+    // A successful HTTP status alone cannot prove the merchant returned a
+    // complete subscription collection. Never coerce an absent list to [].
+    if(!Array.isArray(response.subscriptions))
+      return report('merchant_inventory_collection_unverified')
+    if(response.subscriptions.length>PER_PAGE)
+      return report('merchant_inventory_page_unverified')
     const rows=response.subscriptions
     for(const row of rows){
-     if(!row||!SUB.test(row.id||'')||row.plan_id!==PLAN||!STATES.has(row.status))
-       error('inventory_malformed')
-     if(row.id===subscriptionId)found.push(row.status)
+     // PayPal may omit optional fields or include unexpected list records.
+     // Unrelated/partial rows must NOT hide a fully verified exact match,
+     // and must NEVER be treated as evidence that the target is absent.
+     if(!row||typeof row!=='object'||Array.isArray(row)||!SUB.test(row.id||'')){
+      allRowsVerified=false;continue
+     }
+     if(row.id===subscriptionId){
+      if(row.plan_id!==PLAN||!STATES.has(row.status))
+       return report('original_merchant_details_unverified')
+      found.push(row.status)
+     }else if(row.plan_id!==PLAN||!STATES.has(row.status)){
+      allRowsVerified=false
+     }
     }
     if(response.links!==undefined&&(!Array.isArray(response.links)||
-       response.links.some(x=>!x||typeof x.rel!=='string')))error('inventory_malformed')
+       response.links.some(x=>!x||typeof x.rel!=='string')))
+      return report('merchant_inventory_pagination_unverified')
     const hasNext=response.links?.some(x=>x.rel==='next')===true
     if(!hasNext&&rows.length<PER_PAGE){fullyEnumerated=true;break}
     if(!hasNext&&response.total_pages!==undefined&&
@@ -77,10 +93,11 @@ export function createPazoSandboxV2InventoryRead({clientId,clientSecret,fetchImp
     if(!hasNext&&rows.length===0){fullyEnumerated=true;break}
    }
    if(found.length>1)return report('duplicate_original_in_inventory')
-   if(!fullyEnumerated)return report('merchant_inventory_pagination_incomplete')
    if(found.length===1)return report('original_merchant_resource_found',{
-     providerStatus:found[0],merchantInventoryEnumerated:true
+     providerStatus:found[0],merchantInventoryEnumerated:fullyEnumerated&&allRowsVerified
    })
+   if(!allRowsVerified)return report('merchant_inventory_rows_unverified')
+   if(!fullyEnumerated)return report('merchant_inventory_pagination_incomplete')
    // Absence in one credential's merchant inventory CANNOT prove noncollectibility
    // in a different app/merchant, or exclude delayed payments.
    return report('original_not_in_current_merchant_inventory',{
