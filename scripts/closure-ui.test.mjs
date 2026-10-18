@@ -36,6 +36,11 @@ const compileDirectory = directory => {
   for(const entry of fs.readdirSync(directory,{withFileTypes:true})) {
     const source=path.join(directory,entry.name)
     if(entry.isDirectory()) {compileDirectory(source);continue}
+    if(entry.name.endsWith('.mjs')) {
+      const output=path.join(compiled,path.relative('src',source))
+      fs.mkdirSync(path.dirname(output),{recursive:true});fs.copyFileSync(source,output)
+      continue
+    }
     if(!/\.tsx?$/.test(entry.name)||/\.d\.ts$/.test(entry.name)) continue
     const relative=path.relative('src',source)
     const normalized=relative.replaceAll('\\','/')
@@ -47,7 +52,7 @@ const compileDirectory = directory => {
     code=ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2023,module:ts.ModuleKind.ESNext,jsx:ts.JsxEmit.ReactJSX}}).outputText
     code=code.replace(/(from\s+|import\s*)(['"])(\.[^'"]+)\2/g,(_all,prefix,quote,specifier)=>{
       const js=specifier.replace(/\.tsx?$/,'.js')
-      return prefix+quote+(/\.js$/.test(js)?js:js+'.js')+quote
+      return prefix+quote+(/\.(?:js|mjs)$/.test(js)?js:js+'.js')+quote
     }).replaceAll('import.meta.env',JSON.stringify(syntheticEnv)).replaceAll('__PAZO_BUILD_VERSION__',JSON.stringify('0.0.0'))
     const output=path.join(compiled,relative.replace(/\.tsx?$/,'.js'))
     fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,code)
