@@ -101,16 +101,20 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false)
   try{
-   const result=await call({action:'status',intentId:account.intentId}) as Result
-   if(result.ok!==true||typeof result.providerStatus!=='string')
+   // The existing v4 owner-scoped PayPal GET also verifies provider status.
+   // Avoid the older cancellation-management status path.
+   const result=await call({action:'resume_approval'}) as Result
+   if(result.ok!==true||typeof result.phase!=='string'||
+      !['APPROVAL_PENDING','APPROVED','ACTIVE','CANCELLED','EXPIRED','SUSPENDED'].includes(result.phase))
     throw Error('NO_MERCHANT_CONFIRMATION')
-   setProviderStatus(result.providerStatus)
-   setRecoveryMessage(null)
-   setCancelled(result.providerStatus==='CANCELLED')
+   setProviderStatus(result.phase)
+   setRecoveryMessage(result.phase==='APPROVAL_PENDING'&&result.code==='approval_link_unavailable'
+     ? 'unavailable':null)
+   setCancelled(result.phase==='CANCELLED')
   }catch{setError(true)}finally{setBusy(false)}
  }
  const resumeApproval=async()=>{
-  if(!account||account.state!=='bound'||providerStatus!=='APPROVAL_PENDING'||busy)return
+  if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
    const result=await call({action:'resume_approval'}) as Result
@@ -122,6 +126,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     return
    }
    if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_link_unavailable'){
+    setProviderStatus('APPROVAL_PENDING')
     setRecoveryMessage('unavailable');return
    }
    if(typeof result.phase==='string'&&
@@ -222,13 +227,15 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
      {providerStatus&&<p role="status" className="text-sm">
       {t('Estado del proveedor: ','Provider status: ')}{providerStatus}
      </p>}
-     {providerStatus==='APPROVAL_PENDING'&&<div className="space-y-2 rounded-2xl bg-[#EDF2E1] p-3">
+     {account.state==='bound'&&!paidThrough&&!cancelled&&
+      (providerStatus===null||providerStatus==='APPROVAL_PENDING')&&
+      <div className="space-y-2 rounded-2xl bg-[#EDF2E1] p-3">
        <p className="text-[12px] leading-relaxed text-[#204E4A]">
-         {t('Todavía no aprobaste esta suscripción en PayPal. Puedes continuar la misma solicitud, sin crear otra.',
-           'You have not yet approved this subscription in PayPal. You can continue the same request without creating another.')}
+         {t('Puedes retomar tu solicitud anterior. PAZO consultará primero a PayPal y solo abrirá la aprobación si todavía está pendiente; no creará otra suscripción.',
+           'You can continue the previous request. PAZO will first check PayPal and open approval only if it is still pending; it will not create another subscription.')}
        </p>
        <button type="button" className={button} onClick={()=>void resumeApproval()} disabled={busy}>
-         {t('Continuar la aprobación en PayPal','Continue approval in PayPal')}
+         {t('Retomar en PayPal','Continue in PayPal')}
        </button>
      </div>}
      {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#FCE5D8] p-3 text-[12px] leading-relaxed text-[#204E4A]">
