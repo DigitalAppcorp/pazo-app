@@ -940,11 +940,19 @@ function PazoMain() {
 
       // Comments and verified membership arrive in one visible payload.
       // Never show a paid author's comment first without their badge.
-      const loadedComments=supporterBenefitsUiEnabled
-        ?await attachVerifiedCommentBadges(rawComments,
-          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
-        :rawComments
-      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(loadedComments)
+      let loadedComments:PostComment[]=rawComments
+      if(supporterBenefitsUiEnabled){
+        try{
+          loadedComments=await attachVerifiedCommentBadges(rawComments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(loadedComments)
+        }catch(error){
+          // Badge verification may fail, but reading comments must remain free.
+          // A missing proof never produces a synthetic paid badge.
+          console.error('PAZO comments badge evidence unavailable:',error)
+          loadedComments=rawComments
+        }
+      }
 
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
@@ -995,15 +1003,15 @@ function PazoMain() {
         await preloadVerifiedFeedBadgeArt(verified)
         authorCommentBadge=verified[0].supporterBadge
       }catch(error){
+        // The optional badge cannot break a free commenting workflow.
+        // Keep it absent until verification works; never claim paid membership.
         console.error('PAZO comment badge verification unavailable:',error)
-        commentingPostIdsRef.current.delete(operationKey)
-        return false
       }
       // A pet switch or feed refresh invalidates the pending author identity.
-      if(activePetIdRef.current!==actorPet.id){
-        commentingPostIdsRef.current.delete(operationKey)
-        return false
-      }
+    }
+    if(activePetIdRef.current!==actorPet.id){
+      commentingPostIdsRef.current.delete(operationKey)
+      return false
     }
 
     const optimisticComment = {
