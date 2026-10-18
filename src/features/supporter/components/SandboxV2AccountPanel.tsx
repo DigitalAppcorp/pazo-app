@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 import {SandboxCheckoutQaPanel} from './SandboxCheckoutQaPanel'
+import {classifySandboxV2Recovery} from '../sandboxV2RecoveryState.mjs'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
@@ -29,7 +30,9 @@ const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 
 export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection}:Props){
  const initialAccountCheck=useRef(false)
+ const inspectionSeq=useRef(0)
  const [account,setAccount]=useState<Account|null>(null)
+ const [recoveryStage,setRecoveryStage]=useState('unverified')
  const [accounts,setAccounts]=useState<Account[]>([])
  const [retryEligibility,setRetryEligibility]=useState<'unknown'|'checking'|'approved'|'blocked'>('unknown')
  const [inventoryState,setInventoryState]=useState<'unknown'|'checking'|'found'|'missing'|'partial'|'error'>('unknown')
@@ -88,7 +91,42 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     throw Error('UNTRUSTED_QA_STATUS')
   return result
  }
+ const inspectAccountProvider=async(a:Account,inspection:number)=>{
+  // Read-only, owner-bound PayPal GET. This never starts a subscription,
+  // credits paid status, or navigates without an explicit button press.
+  if(a.state!=='bound'){
+   if(inspection===inspectionSeq.current)setRecoveryStage('creation_unconfirmed')
+   return
+  }
+  setRecoveryStage('checking')
+  try{
+   const result=await call({action:'resume_approval',intentId:a.intentId}) as Result
+   if(inspection!==inspectionSeq.current)return
+   if(result.ok!==true||!['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(result.phase||''))
+    throw Error('paypal_subscription_read_unavailable')
+   const recovery=classifySandboxV2Recovery({accountState:a.state,providerStatus:result.phase,
+    providerCode:result.code})
+   setProviderStatus(result.phase||null)
+   setRecoveryStage(recovery.phase)
+   setRecoveryMessage(recovery.phase==='approval_link_unavailable'?'unavailable':null)
+   setCancelled(result.phase==='CANCELLED')
+  }catch(error){
+   if(inspection!==inspectionSeq.current)return
+   const code=error instanceof Error?error.message:''
+   const recovery=classifySandboxV2Recovery({accountState:a.state,providerError:code||'unavailable'})
+   setProviderStatus(null)
+   setRecoveryStage(recovery.phase)
+   setRecoveryMessage(code==='paypal_subscription_not_found'?'missing':
+    code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
+    code==='paypal_subscription_access_denied'||code==='paypal_subscription_response_mismatch'?'access':
+    code==='paypal_network_unavailable'||code==='paypal_provider_unavailable'||code==='paypal_provider_rate_limited'?'network':
+    code==='private_account_read_unavailable'?'account':
+    code==='sandbox_qa_owner_required'||code==='merchant_owner_plan_mismatch'?'restricted':'provider')
+  }
+ }
  const refresh=async()=>{
+  const inspection=++inspectionSeq.current
+  setProviderStatus(null);setRecoveryStage('checking');setRecoveryMessage(null);setCancelled(false)
   setErrorKind('account')
   onAccountInspection?.('checking')
   setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown')
@@ -103,6 +141,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    setAccounts(result.accounts)
    setAccount(found)
    onAccountInspection?.(found?.state||'none')
+   if(found)void inspectAccountProvider(found,inspection)
+   else setRecoveryStage('no_confirmed_subscription')
   }catch{setError(true);onAccountInspection?.('unavailable')}
   finally{setLoading(false)}
  }
@@ -132,22 +172,10 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  }
  const getStatus=async()=>{
   if(!account||account.state!=='bound'||busy)return
-  setErrorKind('status')
-  setBusy(true);setError(false)
-  try{
-   // The existing v4 owner-scoped PayPal GET also verifies provider status.
-   // Avoid the older cancellation-management status path.
-   const result=await call({action:'resume_approval',intentId:account.intentId}) as Result
-   if(result.ok!==true||typeof result.phase!=='string'||
-      !['APPROVAL_PENDING','APPROVED','ACTIVE','CANCELLED','EXPIRED','SUSPENDED'].includes(result.phase))
-    throw Error('NO_MERCHANT_CONFIRMATION')
-   setProviderStatus(result.phase)
-   setRecoveryMessage(result.phase==='APPROVAL_PENDING'&&result.code==='approval_link_unavailable'
-     ? 'unavailable':null)
-   setCancelled(result.phase==='CANCELLED')
-  }catch{setError(true)}finally{setBusy(false)}
+  const inspection=++inspectionSeq.current
+  await inspectAccountProvider(account,inspection)
  }
- const resumeApproval=async()=>{
+  const resumeApproval=async()=>{
   if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
@@ -161,15 +189,19 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    }
    if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_link_unavailable'){
     setProviderStatus('APPROVAL_PENDING')
+    setRecoveryStage('approval_link_unavailable')
     setRecoveryMessage('unavailable');return
    }
    if(typeof result.phase==='string'&&
       ['ACTIVE','APPROVED','CANCELLED','EXPIRED','SUSPENDED'].includes(result.phase)){
-    setProviderStatus(result.phase);setRecoveryMessage('changed');return
+    setProviderStatus(result.phase)
+    setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerStatus:result.phase}).phase)
+    setRecoveryMessage('changed');return
    }
    throw Error('UNKNOWN_RECOVERY')
   }catch(error){
    const code=error instanceof Error?error.message:''
+   setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerError:code||'unavailable'}).phase)
    setRecoveryMessage(code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
     code==='paypal_subscription_not_found'?'missing':
     code==='paypal_subscription_access_denied'||code==='paypal_subscription_response_mismatch'?'access':
@@ -225,7 +257,9 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  }
  const selectAccount=(a:Account)=>{
   if(busy)return
-  setAccount(a);setProviderStatus(null);setRecoveryMessage(null)
+  const inspection=++inspectionSeq.current
+  setAccount(a);setProviderStatus(null);setRecoveryMessage(null);setRecoveryStage('checking')
+  void inspectAccountProvider(a,inspection)
   setConfirm(false);setCancelled(false);setPaidThrough(null)
   setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
  }
@@ -239,6 +273,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
       result.code!=='future_renewals_cancelled')
     throw Error('CANCEL_NOT_CONFIRMED')
    setCancelled(true);setProviderStatus('CANCELLED');setConfirm(false)
+   setRecoveryStage('terminal_needs_financial_reconciliation')
   }catch{setError(true)}finally{setBusy(false)}
  }
  const download=async()=>{
@@ -335,11 +370,30 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
       {t('Período Sandbox verificado hasta: ','Sandbox period verified until: ')}
       {new Date(paidThrough).toLocaleDateString(lang==='es'?'es-US':'en-US')}
      </p>}
+     {recoveryStage==='checking'&&<p role="status" className="text-xs text-[#476862]">
+      {t('Comprobando automáticamente la solicitud anterior, sin iniciar pagos…',
+        'Checking the existing request automatically without starting payments…')}
+     </p>}
+     {recoveryStage==='merchant_missing_needs_reconciliation'&&<p role="status"
+       className="rounded-2xl bg-[#FCE5D8] p-3 text-xs leading-relaxed">
+      {t('La solicitud se creó, pero PayPal ya no reconoce su identificador. No hubo pago verificado. PAZO conserva el historial y requiere conciliación administrativa antes de otro intento. No necesitas repetir la consulta.',
+        'The request was created, but PayPal no longer recognizes its ID. No payment was verified. PAZO preserves its history and needs merchant reconciliation before another attempt. No need to repeat the lookup.')}
+     </p>}
+     {recoveryStage==='approval_not_payment'&&<p role="status"
+       className="rounded-2xl bg-[#EDF2E1] p-3 text-xs leading-relaxed">
+      {t('PayPal reconoce la aprobación, pero todavía falta comprobar un pago real. No se ha activado una membresía.',
+        'PayPal recognizes approval, but an actual payment still needs verification. No membership was activated.')}
+     </p>}
+     {recoveryStage==='terminal_needs_financial_reconciliation'&&<p role="status"
+       className="rounded-2xl bg-[#EDF2E1] p-3 text-xs leading-relaxed">
+      {t('PayPal indica que esta solicitud terminó. Antes de iniciar otra se revisarán pagos y eventos pendientes.',
+        'PayPal reports this request is terminal. Payments and pending events must be reconciled before starting another.')}
+     </p>}
      {providerStatus&&<p role="status" className="text-sm">
       {t('Estado del proveedor: ','Provider status: ')}{providerStatus}
      </p>}
      {account.state==='bound'&&!paidThrough&&!cancelled&&
-      (providerStatus===null||providerStatus==='APPROVAL_PENDING')&&
+      recoveryStage==='approval_resumable'&&
       <div className="space-y-2 rounded-2xl bg-[#EDF2E1] p-3">
        <p className="text-[12px] leading-relaxed text-[#204E4A]">
          {t('Puedes retomar tu solicitud anterior. PAZO consultará primero a PayPal y solo abrirá la aprobación si todavía está pendiente; no creará otra suscripción.',
@@ -392,8 +446,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
         onClick={()=>void verifyPayment()} disabled={busy}>
         {t('Verificar pago real Sandbox','Verify actual Sandbox payment')}
       </button>}
-      {account.state==='bound'&&<button type="button" className={button}
-        onClick={()=>void getStatus()} disabled={busy}>
+      {account.state==='bound'&&recoveryStage!=='merchant_missing_needs_reconciliation'&&<button type="button" className={button}
+        onClick={()=>void getStatus()} disabled={busy||recoveryStage==='checking'}>
         {t('Consultar PayPal Sandbox','Check PayPal Sandbox')}
       </button>}
       {account.state==='bound'&&['ACTIVE','SUSPENDED'].includes(providerStatus||'')&&!cancelled&&<button type="button" className={button}
