@@ -1,3 +1,19 @@
+# F16 — Implementación multiintento y despliegue Sandbox QA v8 (2026-10-18)
+
+**Estado verificable en GitHub/Supabase, no un pago efectuado.** PO autorizó completar la implementación. En PR #44 DRAFT rama `f13/section-titles-20261012`, HEAD de código `cbae0fd126f54edd43ff38610d33e2b0ba75dda9`:
+
+- Implementados: lector `pazoSandboxV2MultiAccountStore.mjs` con historia por Auth owner y selección exacta del intent, adaptación de `list`, `resume_approval`, `verify_payment`, cancelación y constancia, CTA UI de elegibilidad y checkout de reintento con consentimiento bilingüe explícito, idempotencia y controles SQL contra doble POST o pago tardío. No mezclar P06 con V2.
+- **Migraciones aplicadas SUCCESS y postflight PASS en Supabase `mrybvqdebbgcayuvgkkr`:** `f16_sandbox_v2_append_only_checkout_retries` y `f16_sandbox_v2_multiattempt_account_read_and_finance`. SQL privado, RLS FORCE, RPC BEGIN service_role, otorgamiento de elegibilidad merchant exclusivamente DBA/operador privilegiado. Browser `authenticated` no ejecuta BEGIN y Edge/service_role no inserta grants.
+- **Edge QA `f16-paypal-supporter-v2-qa` v8 ACTIVE, verify_jwt=true**, 15/15 archivos contra commit `cbae0fd...`. `QA_V2_RETRY_RELEASE_APPROVED=true` permite consultar elegibilidad owner-only, pero **0 retry_grants** hacen imposible abrir nuevo pago con SQL actual; `retry_begin` falla cerrado sin evidencia. No se generaron subscriptions PayPal, Live ni entitlements.
+- Postflight DB: **1 V2 original, 0 nuevos retry attempts, 0 retry grants, 0 periodos Sandbox verificados, 0 paypal_payment_entries, 0 activation bindings.** No borrar la V2 anterior.
+- GitHub Actions del último código, todos SUCCESS: CI `39131973249`, lab F16 `39131973116`, lab de reintentos `39131973307`, lab multiintento `39131973302`. Vercel Preview sigue con limitación de builds; no se compró upgrade.
+- **ÚNICO BLOQUEO PARA PODER PAGAR OTRA VEZ:** intento V2 antiguo devuelve PayPal Sandbox HTTP 404, no prueba terminación ni ausencia de cargo en otro merchant/app. Verificar independientemente la app/merchant que creó el plan y subscription, inventario completo de suscripciones PayPal y cobertura de transacciones, reembolsos, disputas/webhooks; sin credenciales/PII en GitHub o chat. NO insertar grant ficticio, NO saltar `MERCHANT_CONFIRMED_ABSENT` por solo 404, no ejecutar nuevo POST ni afirmar botón de cobro utilizable. Solo después de evidence digest y reconciliación aprobada podrá DBA crear grant privado y UI mostrar reintento.
+- PAZO local del usuario `C:\\Users\\osori\\PAZO-F13-preview` requiere `git pull --ff-only` en la rama y reinicio de servidor local para cargar la UI actual. ChatGPT Browser no pudo acceder a localhost por permisos de extensión. PR DRAFT sin merge a main.
+
+**Marcador:** `F16_V2_RETRY_SQL_HOSTED_PASS_QA_EDGE_V8_AUTHENTICATED_ELIGIBILITY_ON_ZERO_GRANTS_MERCHANT_404_RECONCILIATION_REQUIRED`.
+
+---
+
 # F16 — Reintentos de aprobación PayPal Sandbox: migración + política + laboratorio PASS (2026-10-18)
 
 **PO autorizó «sí» PROGRAMAR y PROBAR aisladamente**, sin aprobar aplicación de SQL alojado ni nuevo pago. Se implementó en rama `f13/section-titles-20261012` / PR #44 DRAFT:
