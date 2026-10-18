@@ -10,6 +10,8 @@ import {createF16IntentStore}
  from '../f16-paypal-webhook/intentStoreAdapter.mjs'
 import {createPazoCheckoutConsentStore}
  from '../f16-paypal-webhook/p06CheckoutConsentStore.mjs'
+import {createPazoSandboxV2RetryConsentStore}
+ from '../f16-paypal-webhook/pazoSandboxV2RetryConsentStore.mjs'
 import {createPaypalSandboxSubscriptionCreator}
  from '../f16-paypal-webhook/paypalSandboxSubscriptionCreate.mjs'
 import {createPaypalSandboxSubscriptionReader}
@@ -78,6 +80,8 @@ function compose(requestOrigin:string){
  const resolveAuthenticatedOwner=createVerifiedAuthOwnerResolver({authClient:supabase})
  const store=createF16IntentStore({projectUrl:BASE,serviceRoleKey:key})
  const consentStore=createPazoCheckoutConsentStore({projectUrl:BASE,serviceRoleKey:key,qaV2:true})
+ const retryConsentStore=createPazoSandboxV2RetryConsentStore({
+  projectUrl:BASE,serviceRoleKey:key,offerStore:consentStore})
  const provider=createPaypalSandboxSubscriptionCreator({
   clientId,clientSecret,returnUrl,cancelUrl})
  const reader=createPaypalSandboxSubscriptionReader({clientId,clientSecret})
@@ -103,12 +107,18 @@ function compose(requestOrigin:string){
   resolveAuthenticatedOwner,admit,consentStore,
   subscriptionCreator:provider,subscriptionReader:reader,intentStore:store,
  })
+ // PREPARED ONLY: requires a reconciled merchant grant + SQL migration +
+ // owner account/read path. Hard disabled independently of Sandbox checkout.
+ const retryCheckout=createPazoSandboxVerifiedCheckout({
+  resolveAuthenticatedOwner,admit,consentStore:retryConsentStore,
+  subscriptionCreator:provider,subscriptionReader:reader,intentStore:store,
+ })
  const manage=createPazoSandboxSupporterAccountHandler({
   resolveAuthenticatedOwner,admit,privateIntentStore:v2AccountStore,
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,reader,resolveAuthenticatedOwner,admit,canBuy}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,reader,resolveAuthenticatedOwner,admit,canBuy}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -123,6 +133,9 @@ const QA_CHECKOUT_RELEASE_APPROVED = true
 // Cancel/receipt/status must remain possible after the purchase gate closes.
 // This second release gate also starts OFF and requires a reviewed QA deploy.
 const QA_V2_MANAGEMENT_RELEASE_APPROVED = true
+// F16 retry: 404 alone never authorizes a new PayPal subscription. SQL proof,
+// merchant reconciliation, and a separate Product Owner release required.
+const QA_V2_RETRY_RELEASE_APPROVED = false
 Deno.serve(async(request:Request)=>{
  if(!QA_CHECKOUT_RELEASE_APPROVED && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return reply(503,'sandbox_qa_features_not_released')
@@ -154,6 +167,34 @@ Deno.serve(async(request:Request)=>{
  // Existing V2 subscription management must work even when buying is OFF.
  // Each account lookup is scoped to getUser() + a V2 acceptance row; no
  // legacy P06 subscription can be cancelled through these routes.
+ // Nothing below may execute retry RPCs or create a subscription while OFF.
+ if(data.action==='retry_status'||data.action==='retry_begin'){
+  if(!QA_V2_RETRY_RELEASE_APPROVED)
+   return addCors(reply(503,'sandbox_retry_not_released'),runtime.origin)
+  if(!QA_CHECKOUT_RELEASE_APPROVED||!await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  if(data.action==='retry_status'){
+   if(Object.keys(data).sort().join('|')!=='action')
+    return addCors(reply(400,'invalid_request'),runtime.origin)
+   try{
+    if(await runtime.admit()!==true)
+     return addCors(reply(429,'rate_limited'),runtime.origin)
+    const eligible=await runtime.retryConsentStore.isEligible({ownerId:qaOwner})
+    return addCors(new Response(JSON.stringify({ok:true,environment:'sandbox',eligible,
+     entitlement:false,mayRecordPayment:false,mayGrantBenefits:false,paidThrough:null}),
+     {status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
+   }catch{return addCors(reply(503,'retry_eligibility_unavailable'),runtime.origin)}
+  }
+  if(Object.keys(data).sort().join('|')!=='action|consent'||
+     data.consent?.termsVersion!==SANDBOX_BENEFITS_OFFER_V2)
+   return addCors(reply(400,'new_four_benefit_sandbox_terms_required'),runtime.origin)
+  // Guarded durable SQL begin + one-shot provider-create claim; no implicit
+  // retries even if a merchant POST times out. No entitlement on return.
+  const result=await runtime.retryCheckout.begin({request,consent:data.consent})
+  return addCors(new Response(JSON.stringify(result),{
+   status:result.phase==='APPROVAL_PENDING'?200:409,
+   headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
+ }
  const isManagement=['status','cancel','acknowledgement','list','verify_payment','resume_approval'].includes(data.action)
  if(isManagement && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return addCors(reply(503,'qa_v2_management_not_released'),runtime.origin)
