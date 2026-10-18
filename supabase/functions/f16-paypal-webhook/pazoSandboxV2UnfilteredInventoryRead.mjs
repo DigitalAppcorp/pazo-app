@@ -83,6 +83,10 @@ export function createPazoSandboxV2UnfilteredInventoryRead({
      found=row.status
     }
     const hasNext=result.links?.some(x=>x.rel==='next')===true
+    if(Number.isInteger(result.total_pages)&&(
+      (hasNext&&result.total_pages===page)||
+      (!hasNext&&result.total_pages>page&&rows.length<PER_PAGE)))
+     return report('unfiltered_inventory_pagination_unverified')
     if(!hasNext&&rows.length<PER_PAGE){complete=true;break}
     if(!hasNext&&Number.isInteger(result.total_pages)&&
       result.total_pages===page){complete=true;break}
