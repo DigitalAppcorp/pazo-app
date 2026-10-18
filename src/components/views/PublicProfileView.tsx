@@ -246,7 +246,7 @@ export const PublicProfileView = ({
         <svg className="absolute left-[-25px] top-[360px] h-28 w-28 text-[#D6CAAD]/60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 55C7 47 10 30 22 28c11-2 16 8 18 15l14-14c7-7 18 0 18 9 0 7-6 11-12 17 8 6 14 15 6 23-7 8-17 3-23-5L28 87c-8 6-17-1-17-10 0-8 4-14 9-22Z" />
         </svg>
-      </div>
+      </div>}
 
       <header className="sticky top-0 z-30 bg-[#F8F5EC]/95 backdrop-blur-xl">
         <div className="mx-auto grid h-[70px] w-full max-w-xl grid-cols-[48px_minmax(0,1fr)_48px] items-center gap-3 px-4">
