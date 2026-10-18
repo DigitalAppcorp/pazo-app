@@ -300,3 +300,20 @@ test('F16 no-pet membership is owner-only read-only; no synthetic pets or billin
  assert.ok(migration.includes('TO authenticated'))
  assert.ok(!migration.includes('INSERT INTO')&&!migration.includes('UPDATE supporter_private'))
 })
+
+
+test('F16 member management does not flicker or close during background revalidation',()=>{
+ const hook=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const home=readFileSync(new URL('../components/SupporterBenefitsHome.tsx',import.meta.url),'utf8')
+ assert.ok(hook.includes("setStatus(previous=>sameScope&&previous.kind==='verified'"))
+ assert.ok(hook.includes("previous:noStatus('checking')"))
+ assert.ok(hook.includes("const sameScope=lastScope.current.petId===petId"))
+ assert.ok(hook.includes("lastScope.current.enabled===enabled"))
+ assert.ok(hook.includes("supabase.auth.onAuthStateChange"))
+ assert.ok(hook.includes("if(changed){setStatus(noStatus('checking'));refresh()}"))
+ assert.ok(hook.includes(".catch(() => {if(!cancelled)setStatus(noStatus('unavailable'))})"))
+ assert.ok(page.includes("if (membership.kind === 'verified')"))
+ assert.ok(home.includes("setShowMembership(v=>!v)"))
+ assert.ok(!hook.includes('mayGrantBenefits:true'))
+})
