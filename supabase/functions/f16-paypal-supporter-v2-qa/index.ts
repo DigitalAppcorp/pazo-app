@@ -30,6 +30,8 @@ import {createPazoSandboxV2MerchantVerifier}
  from '../f16-paypal-webhook/pazoSandboxV2MerchantVerify.mjs'
 import {createPazoSandboxV2InventoryRead}
  from '../f16-paypal-webhook/pazoSandboxV2InventoryRead.mjs'
+import {createPazoSandboxV2UnfilteredInventoryRead}
+ from '../f16-paypal-webhook/pazoSandboxV2UnfilteredInventoryRead.mjs'
 import {createPazoSandboxV2CreatedEventCandidateStore}
  from '../f16-paypal-webhook/pazoSandboxV2CreatedEventCandidateStore.mjs'
 import {createPazoSandboxV2CreatedEventAudit}
@@ -105,6 +107,7 @@ function compose(requestOrigin:string){
   return (await r.json())===true
  }
  const inventoryRead=createPazoSandboxV2InventoryRead({clientId,clientSecret})
+ const unfilteredInventoryRead=createPazoSandboxV2UnfilteredInventoryRead({clientId,clientSecret})
  const createdCandidateStore=createPazoSandboxV2CreatedEventCandidateStore({
   projectUrl:BASE,serviceRoleKey:key})
  const createdEventAudit=createPazoSandboxV2CreatedEventAudit({clientId,clientSecret})
@@ -128,7 +131,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,createdCandidateStore,createdEventAudit,reader,resolveAuthenticatedOwner,admit,canBuy}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,resolveAuthenticatedOwner,admit,canBuy}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -230,8 +233,17 @@ Deno.serve(async(request:Request)=>{
     return addCors(reply(409,'private_account_read_unavailable'),runtime.origin)
    const evidence=await runtime.inventoryRead.inspect({
      subscriptionId:account.externalSubscriptionId,planId:account.planId})
+   // Secondary unfiltered merchant scope: never infer absence or issue grants
+   // from a partial/failed scan. Distinct from the plan-filtered collection.
+   let broader={code:'unfiltered_inventory_read_unavailable',merchantInventoryEnumerated:false}
+   try{broader=await runtime.unfilteredInventoryRead.inspect({
+     subscriptionId:account.externalSubscriptionId,planId:account.planId})}
+   catch{/* Fail-closed, retain the first scope's diagnostic. */}
    return addCors(new Response(JSON.stringify({
-     ok:true,...evidence,merchantAuditGrantIssued:false,
+     ok:true,...evidence,unfilteredCode:broader.code,
+     unfilteredProviderStatus:'providerStatus' in broader?broader.providerStatus:null,
+     unfilteredInventoryEnumerated:broader.merchantInventoryEnumerated===true,
+     merchantAuditGrantIssued:false,
      paidThrough:null,mayRecordPayment:false,mayGrantBenefits:false
    }),{status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
   }catch(error){
