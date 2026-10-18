@@ -36,7 +36,7 @@ export function SupporterOfferB({lang,children}:Props) {
     {kind:'badge',title:t('Insignia especial','Special badge'),description:t('En perfil y publicaciones','On profiles and posts')},
     {kind:'themes',title:t('5 fondos especiales','5 special backgrounds'),description:t('Personaliza el perfil de tu mascota','Customize your pet profile')},
     {kind:'wall',title:t('Muro de agradecimiento','Thank-you wall'),description:t('Solo si tú autorizas a cada mascota','Only if you opt in each pet')},
-    {kind:'milestone',title:t('Medallas por antigüedad','Support milestones'),description:t('Al completar 3, 6 y 12 meses pagados','After 3, 6 and 12 completed paid months')},
+    {kind:'milestone',title:t('Medallas por antigüedad','Support milestones'),description:t('Reconocimientos por el tiempo de apoyo','Recognition for the time you have supported PAZO')},
   ]
   return <>
     <section aria-labelledby="supporter-offer-title"
