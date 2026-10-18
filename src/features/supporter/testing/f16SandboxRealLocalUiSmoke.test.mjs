@@ -11,7 +11,7 @@ const original=source('../components/SupporterAccountManagement.tsx')
 test('actual PAZO Vite QA uses exact localhost origin and only Sandbox provider',()=>{
  assert.match(cli,/npm run dev -- --host localhost --port 5173 --strictPort/)
  assert.match(cli,/VITE_PAZO_F16_SANDBOX_QA_UI = 'true'/)
- assert.match(cli,/VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED = 'true'/)
+ assert.match(cli,/VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED = 'false'/)
  assert.match(cli,/VITE_SUPABASE_URL = 'https:\/\/mrybvqdebbgcayuvgkkr.supabase.co'/)
  assert.match(edge,/new Set\(\['http:\/\/localhost:5173','http:\/\/127.0.0.1:5173'\]\)/)
  assert.match(edge,/const QA_CHECKOUT_RELEASE_APPROVED = true/)
