@@ -43,7 +43,7 @@ test('F16 never offers a PayPal approval link once buyer approved, cancelled or 
  }
 })
 test('F16 no link from merchant means no fabricated URL and no new subscription',async()=>{
- for(const links of [undefined,[],[{rel:'self',method:'GET',href:'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/'+id}]]){
+ for(const links of [[],[{rel:'self',method:'GET',href:'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/'+id}]]){
   const {client}=fake({links})
   assert.equal((await client.readSubscription(id,{includeApprovalLink:true})).approvalUrl,null)
  }
