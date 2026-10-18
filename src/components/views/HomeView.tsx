@@ -8,7 +8,7 @@ import { FollowButton } from '../shared/FollowButton'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
-import { SupporterBadge, type SupporterMilestone } from '../../features/supporter/components/SupporterBadge'
+import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
 import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
 
 const supporterBadgesEnabled = supporterBenefitsUiEnabled
