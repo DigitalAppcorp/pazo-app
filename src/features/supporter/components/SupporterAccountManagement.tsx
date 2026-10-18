@@ -9,6 +9,7 @@ import { SupporterBenefitsHome } from './SupporterBenefitsHome'
 import { SupporterOfferB } from './SupporterOfferB'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
 import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
+import {supporterBenefitsUiEnabled} from '../supporterUiRelease'
 import type { Pet } from '../../../types/pazo'
 
 type Account = {
@@ -244,7 +245,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} reviewRevision={qaReviewRevision}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
@@ -301,7 +302,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           </details>
         </section>}
 
-        {membership.kind === 'unavailable' && import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' && (
+        {membership.kind === 'unavailable' && supporterBenefitsUiEnabled && (
           <section aria-labelledby="supporter-rewards-title" className="space-y-3">
             <h3 id="supporter-rewards-title" className="px-1 text-lg font-black">
               {label('Mis recompensas', 'My rewards')}
