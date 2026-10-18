@@ -37,7 +37,7 @@ export const adminExperiments=()=>call<AdminExperiment[]>('pazo_admin_experiment
 export const adminVoters=(moduleKey:string)=>call<AdminVoter[]>('pazo_admin_voters',{p_module_key:moduleKey,p_limit:40})
 export const adminAudience=(moduleKey:string)=>call<AdminAudience[]>('pazo_admin_audience',{p_module_key:moduleKey,p_limit:40})
 const sections:Record<string,string>={
- inicio:'feed',comunidades:'communities',mapa:'places',mascota:'profile'
+ inicio:'feed',comunidades:'communities',mapa:'places',mascota:'profile',explore:'explore'
 }
 /** Coarse, explicit top-level screen access only. One write per section per day. */
 export async function recordAdminActivity(tab:string):Promise<void>{
