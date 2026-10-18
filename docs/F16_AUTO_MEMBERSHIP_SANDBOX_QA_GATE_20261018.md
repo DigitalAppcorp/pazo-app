@@ -24,3 +24,6 @@
 - Sigue pendiente ubicación exacta de mini-insignia sobre el avatar (código anterior la dibuja junto al nombre), no ocultarlo ni declararlo aprobado.
 
 **Gate:** `F16_AUTO_MEMBER_SWITCH_BRANCH_IMPLEMENTED_OWNER_RPC_DEPLOY_GO_PENDING_E2E_PENDING_LIVE_OFF`.
+
+## Corrección complementaria del lanzador local
+El script `scripts/f16-run-real-sandbox-qa.ps1` se ajustó para iniciar `VITE_PAZO_F16_SANDBOX_QA_UI=true` con `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED=false`. La presentación de los beneficios QA se permite por `import.meta.env.DEV + loopback + flag QA`, siempre leyendo la cobertura real de Supabase. No se requiere publicar, activar o editar manualmente el flag global de beneficios después de un pago; el script no concede privilegios.
