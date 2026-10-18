@@ -1,3 +1,17 @@
+# F16 — PayPal Sandbox inventory read-only QA v9 (2026-10-18)
+
+**ÚLTIMO ESTADO:** PO dio GO para terminar UX/backend de retry. Edge `f16-paypal-supporter-v2-qa` **v9 ACTIVE / verify_jwt=true** en Supabase `mrybvqdebbgcayuvgkkr`, con **16/16 archivos cotejados exactamente** contra código GH commit `40855926cf844e87bcc3f37bf209df4572660adc`. Las dos migraciones de retry y multi-intento ya están instaladas y validadas (ver handoff inferior). No mezclar P06 y V2.
+
+- Nueva función `pazoSandboxV2InventoryRead.mjs`: GET read-only de inventario PayPal Sandbox `/v1/billing/subscriptions?plan_ids=...&page_size=20&page=N`, hasta 25 páginas, OAuth con secretos ya alojados en Edge. Si original aparece, devuelve solo estado enumerado; si no aparece, resultado no es prueba de ausencia global. Valida IDs/plan, no transmite identidad, buyer, otros recursos ni tokens, no escribe en merchant/ledger/DB. Test `f16SandboxV2InventoryRead.test.mjs`.
+- Nueva acción owner-authenticated `audit_retry_inventory` (sólo intento privado y merchant plan vinculados) y botón QA `Investigar suscripción en PayPal` en `SandboxV2AccountPanel`. La UI muestra si encontró el intento original, no encontró dentro del merchant actual, o falta cobertura. No se generan grants ni compras. Cliente local necesita pull + reinicio.
+- Cuatro ejecuciones GH Actions SUCCESS en commit `40855926...`: CI `39132581052`, lab F16 `39132581126`, lab retry `39132581083` y PG17 multi-intento `39132581058`.
+- Postflight v9: **historial V2 1, retry attempts 0, retry grants 0, paid periods 0, ledger entries 0, activation bindings 0**, funciones BEGIN no accesibles a authenticated, service_role no puede insertar merchant grants. QA release flag permite **consultar elegibilidad**, pero **no permite crear nuevas suscripciones sin conciliación y grant privado válido**.
+- **BLOQUEO REAL:** GET PayPal anterior HTTP 404 no prueba que merchant original sea el mismo o que no exista carga tardía. Los datos comerciales no se verificaron con cuenta Business original (no existe acceso PayPal merchant en ChatGPT ni JWT del usuario). NO fabricar ni insertar evidencia, NO presentar botón de cobro como activo, NO habilitar PayPal Live, no merge a main. Próxima acción: owner QA autenticado puede ejecutar `Investigar suscripción en PayPal` dentro del módulo después de actualizar PAZO local, y operador reconcilia la app propietaria, totalidad de transacciones/reembolsos/disputas/inbox. Una vez evidencia verificable, sólo DBA/operador privado introduce grant con digest exacto y el mismo CTA habilita el nuevo checkout con consentimiento.
+
+**Marcador:** `F16_SANDBOX_V2_MULTIATTEMPT_INSTALLED_EDGE_V9_INVENTORY_READONLY_PASS_ZERO_GRANTS_RETRY_CHECKOUT_BLOCKED_MERCHANT_RECONCILIATION_PENDING`.
+
+---
+
 # F16 — Implementación multiintento y despliegue Sandbox QA v8 (2026-10-18)
 
 **Estado verificable en GitHub/Supabase, no un pago efectuado.** PO autorizó completar la implementación. En PR #44 DRAFT rama `f13/section-titles-20261012`, HEAD de código `cbae0fd126f54edd43ff38610d33e2b0ba75dda9`:
