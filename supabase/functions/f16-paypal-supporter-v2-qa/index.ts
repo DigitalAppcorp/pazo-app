@@ -181,7 +181,21 @@ Deno.serve(async(request:Request)=>{
   let merchant
   try{merchant=await runtime.reader.readSubscription(
     account.externalSubscriptionId,{includeApprovalLink:true})}
-  catch{return addCors(reply(503,'paypal_subscription_read_unavailable'),runtime.origin)}
+  catch(error){
+   // No provider error text or subscriber data may escape the Edge boundary.
+   // Only static, reviewed codes returned by the Sandbox read adapter.
+   const safe=new Set([
+    'paypal_oauth_denied','paypal_oauth_invalid_token',
+    'paypal_subscription_not_found','paypal_subscription_access_denied',
+    'paypal_provider_rate_limited','paypal_provider_unavailable',
+    'paypal_provider_request_rejected','paypal_provider_invalid_response',
+    'paypal_subscription_response_mismatch','paypal_network_unavailable',
+   ])
+   const diagnostic=error instanceof Error&&safe.has(error.message)
+     ?error.message:'paypal_subscription_read_unavailable'
+   return addCors(reply(diagnostic==='paypal_provider_rate_limited'?429:503,
+    diagnostic),runtime.origin)
+  }
   if(merchant.id!==account.externalSubscriptionId||
      merchant.plan_id!==PLAN||merchant.custom_id!==account.intentId)
    return addCors(reply(409,'merchant_owner_plan_mismatch'),runtime.origin)
