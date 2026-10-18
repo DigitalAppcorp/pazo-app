@@ -925,7 +925,7 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
   const source=fs.readFileSync('src/features/supporter/components/SupporterProfileThemes.tsx','utf8')
   assert.ok(!source.includes('pazo_theme_preview')&&!source.includes('import.meta.env.DEV'),'No secret URL or development-only gate')
   assert.ok(!profile.includes('SupporterThemePreviewPicker') &&
-    profile.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'") &&
+    profile.includes('supporterBenefitsUiEnabled') &&
     profile.includes('supporterVisualsEnabled && supporterPerks?.theme') &&
     profile.includes('pazo_supporter_public_pet_benefits'),
     'Public themes are rendered only from verified server proof, behind default-off release flag')
@@ -950,7 +950,7 @@ test('F16 supporter customization is routed through a verified membership, not a
   assert.ok(hook.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"),'Server is source of verified perks')
   assert.ok(!hook.includes('localStorage')&&!hook.includes('sessionStorage'),'Membership state is not stored in browser')
   assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'Preview itself never activates payment')
-  assert.ok(preview.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'"),'Save stays behind release flag')
+  assert.ok(preview.includes('supporterBenefitsUiEnabled'),'Save stays behind release flag')
   assert.ok(preview.includes('{liveBenefitsUI && <SupporterThemeSaveControl'),'Persistence requires server gate')
   assert.ok(!preview.includes('border-')&&!preview.includes('ring-')&&!preview.includes('outline-'),'Zero-outline rule')
   const css=fs.readFileSync('src/index.css','utf8')
