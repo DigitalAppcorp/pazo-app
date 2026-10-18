@@ -478,7 +478,7 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
                 </span>
               )}
             </div>
-            <p className="mt-0.5 truncate text-[12px] text-[#5C7470]">{post.location} &bull; {displayTime}</p>
+            <p className="mt-0.5 truncate text-[12px] text-[#5C7470]">{post.location ? <>{post.location} &bull; </> : null}{displayTime}</p>
           </div>
         </div>
         <div className="flex shrink-0 items-start gap-1">
