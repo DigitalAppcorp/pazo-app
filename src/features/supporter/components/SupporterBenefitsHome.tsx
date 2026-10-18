@@ -113,13 +113,21 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
     {feature('medal',t('Medallas de antigüedad','Milestone badges'),
       t('Reconocimientos de 3, 6 y 12 meses.','Recognition at 3, 6 and 12 months.'),
       ()=>setShowMilestones(value=>!value),false,showMilestones)}
-    {showMilestones&&<div className="mx-3 mb-3 space-y-2 rounded-[20px] bg-[#F4F5EE] px-4 py-3">
-     {[3,6,12].map(months=><div key={months} className="flex items-center justify-between gap-3 text-[14px]">
-      <span className="font-bold text-[#204E4A]">{t(`${months} meses completados`,`${months} completed months`)}</span>
-      <span className={'rounded-full px-3 py-1.5 text-[13px] font-bold '+(milestone>=months?'bg-[#D8E7CB] text-[#204E4A]':'bg-white text-[#617670]')}>
-       {milestone>=months?t('Conseguida','Earned'):t('Pendiente','Pending')}
-      </span>
-     </div>)}
+    {showMilestones&&<div className="mx-3 mb-3 space-y-3 rounded-[22px] bg-[#F4F5EE] px-4 py-4">
+     <p className="text-[16px] font-black leading-snug text-[#204E4A]">
+      {t('Tu apoyo merece reconocimiento','Your support deserves recognition')}
+     </p>
+     <p className="text-[14px] leading-relaxed text-[#476862]">
+      {t('PAZO agradece el tiempo que llevas apoyando nuestra comunidad. Al completar 3, 6 y 12 meses pagados y verificados, tu mascota recibe una nueva insignia.',
+        'PAZO celebrates the time you spend supporting our community. After 3, 6 and 12 completed, verified paid months, your pet receives a new badge.')}
+     </p>
+     <div aria-label={t('Hitos de agradecimiento','Recognition milestones')} className="grid grid-cols-3 gap-2 pt-1">
+      {([3,6,12] as const).map(months=><div key={months} className={'rounded-[18px] px-2 py-3 text-center '+(milestone>=months?'bg-[#DCE9C8]':'bg-white')}>
+       <p className="text-[20px] font-black leading-none text-[#204E4A]">{months}</p>
+       <p className="mt-1 text-[12px] font-semibold text-[#52716A]">{t('meses','months')}</p>
+       {milestone>=months&&<p className="mt-2 text-[12px] font-black text-[#204E4A]">{t('Reconocido','Earned')}</p>}
+      </div>)}
+     </div>
     </div>}
    </section>
    <section className="rounded-[26px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">
