@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react'
+import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 
@@ -12,6 +12,7 @@ const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
+ const initialAccountCheck=useRef(false)
  const [account,setAccount]=useState<Account|null>(null)
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
@@ -57,7 +58,12 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
   }catch{setError(true);onAccountInspection?.('unavailable')}
   finally{setLoading(false)}
  }
- useEffect(()=>{void refresh()},[])
+ useEffect(()=>{
+  // React Strict Mode reruns effects in local QA. Avoid duplicate admission checks.
+  if(initialAccountCheck.current)return
+  initialAccountCheck.current=true
+  void refresh()
+ },[])
  const verifyPayment=async()=>{
   if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false)
