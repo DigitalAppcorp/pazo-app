@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
+import {IconHeart,IconPaw} from '../../../components/icons/PazoIcons'
+import {GratitudeWallLive} from './GratitudeWallLive'
 
 type OwnedPet = { id: string; name: string; photo_url: string | null }
 type Consent = { pet_id: string; opted_in: boolean }
@@ -23,6 +25,7 @@ export function SupporterWallConsentSettings({ lang }: Props) {
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
+  const [showPublicWall,setShowPublicWall]=useState(false)
   const isEs = lang === 'es'
   const label = (es: string, en: string) => isEs ? es : en
 
@@ -100,64 +103,82 @@ export function SupporterWallConsentSettings({ lang }: Props) {
     }
   }
 
-  const button = 'min-h-11 rounded-full bg-[#E1E53F]/75 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] disabled:opacity-50'
-  return <section aria-labelledby="supporter-consent-title" className="space-y-3 rounded-3xl bg-white p-5 shadow-sm">
-    <h3 id="supporter-consent-title" className="text-lg font-black">
-      {label('Participar en el muro de agradecimiento','Join the gratitude wall')}
-    </h3>
-    <p className="text-[13px] leading-relaxed text-[#476862]">
-      {label(
-        'La inscripción nunca es automática. Solo las mascotas que autorices y tengan cobertura pagada verificada podrán mostrarse públicamente. Puedes retirar un permiso cuando quieras, incluso después de cancelar.',
-        'Opt-in is never automatic. Only pets you authorize with verified paid coverage can appear publicly. You can withdraw consent anytime, including after cancellation.'
-      )}
-    </p>
-    {loading && <p role="status" className="text-sm">{label('Consultando permisos…','Checking permissions…')}</p>}
-    {error && <div role="alert" className="space-y-2 rounded-2xl bg-[#FCE5D8] p-3 text-sm">
-      <p>{error}</p><button type="button" className={button} disabled={loading||!!pendingId}
-        onClick={()=>void refresh()}>{label('Actualizar permisos','Refresh permissions')}</button>
-    </div>}
-    {ready && pets.length===0 && <p role="status" className="text-sm">
-      {label('No hay mascotas propias disponibles.','No owned pets available.')}
+  const button = 'min-h-11 rounded-full bg-[#E1E53F] px-5 py-2.5 text-[12px] font-extrabold text-[#204E4A] transition-colors hover:bg-[#F0F27C] focus-visible:bg-[#E9EF8A] disabled:opacity-50'
+  return <section aria-labelledby="supporter-consent-title" className="space-y-5 pb-4">
+    <div className="flex flex-col items-center px-3 pt-3 text-center">
+      <span aria-hidden="true" className="flex h-[70px] w-[70px] items-center justify-center rounded-full bg-[#F3E8DD] text-[#204E4A]">
+        <IconHeart filled size={35}/>
+      </span>
+      <h3 id="supporter-consent-title" className="mt-4 max-w-[320px] text-[23px] font-black leading-tight">
+        {label('Ellos también son parte de PAZO','They are part of PAZO too')}
+      </h3>
+      <p className="mt-3 max-w-[35ch] text-[13px] leading-relaxed text-[#5C7470]">
+        {label('Tú eliges qué mascotas aparecen en nuestro muro. Puedes retirar el permiso cuando quieras.',
+          'You choose which pets appear on our wall. Withdraw permission whenever you want.')}
+      </p>
+    </div>
+    {loading&&<p role="status" className="rounded-[22px] bg-white p-4 text-center text-[12px]">
+      {label('Consultando permisos…','Checking permissions…')}
     </p>}
-    {ready && pets.map(pet=>{
+    {error&&<div role="alert" className="space-y-3 rounded-[22px] bg-[#FCE5D8] p-4 text-[12px]">
+      <p>{error}</p>
+      <button type="button" className={button} disabled={loading||!!pendingId} onClick={()=>void refresh()}>
+        {label('Actualizar permisos','Refresh permissions')}
+      </button>
+    </div>}
+    {ready&&pets.length===0&&<p role="status" className="rounded-[23px] bg-white p-5 text-center text-[13px] text-[#476862]">
+      {label('Aún no tienes mascotas para mostrar en el muro.','You do not have any pets to show on the wall yet.')}
+    </p>}
+    {ready&&pets.map(pet=>{
       const granted=optedIn.includes(pet.id)
       const confirming=confirmId===pet.id
-      return <div key={pet.id} className="space-y-3 rounded-2xl bg-[#F8F5EC] p-4">
+      return <article key={pet.id} className="space-y-4 rounded-[27px] bg-white p-4 shadow-[0_5px_22px_rgba(32,78,74,0.04)]">
         <div className="flex items-center gap-3">
-          {pet.photo_url && <img src={pet.photo_url} alt="" className="h-12 w-12 rounded-full object-cover"/>}
+          <span className="flex h-[67px] w-[67px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E9EFE6]">
+            {pet.photo_url
+              ?<img src={pet.photo_url} alt="" className="h-full w-full object-cover"/>
+              :<IconPaw size={31} className="text-[#204E4A]/45"/>}
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-black">{pet.name}</p>
-            <p className="text-xs text-[#5C7470]">
-              {granted ? label('Permiso registrado','Consent recorded')
-                : label('Sin autorización para el muro','Not authorized for the wall')}
+            <p className="truncate text-[17px] font-black text-[#204E4A]">{pet.name}</p>
+            <p role="status" className="mt-1 flex items-center gap-2 text-[12px] text-[#5C7470]">
+              <span aria-hidden="true" className={'h-2 w-2 shrink-0 rounded-full '+(granted?'bg-[#6E9E75]':'bg-[#C6CDBB]')}/>
+              {granted?label('Visible en el muro','Visible on the wall'):
+                label('No aparece en el muro','Not shown on the wall')}
             </p>
           </div>
         </div>
         {granted
-          ? <button className={button} type="button" disabled={!!pendingId}
-              onClick={()=>void change(pet.id,false)}>
-              {label('Retirar permiso','Withdraw consent')}
+          ? <button className="min-h-11 w-full rounded-full bg-[#EFF2EA] px-4 py-3 text-[12px] font-black text-[#204E4A] hover:bg-[#E5EBD8] focus-visible:bg-[#E1E53F]/35" type="button"
+              disabled={!!pendingId} onClick={()=>void change(pet.id,false)}>
+              {pendingId===pet.id?label('Actualizando permiso…','Updating permission…'):
+                label('Retirar del muro','Remove from wall')}
             </button>
-          : confirming ? <div className="space-y-3">
-            <p className="text-[13px] leading-relaxed text-[#476862]">
-              {label(
-                'Si aceptas, el nombre, foto pública e insignia Amigo de PAZO de esta mascota podrán aparecer en el muro, visible incluso sin iniciar sesión. No mostraremos datos personales, correo ni pagos. Retirar el permiso quita la mascota del muro de PAZO, pero no borra capturas ajenas.',
-                'If you opt in, this pet’s name, public photo and PAZO Friend badge may appear on a wall visible even to signed-out visitors. We never show personal details, email or payments. Withdrawal removes your pet from PAZO’s wall, not third-party screenshots.'
-              )}
+          : confirming ? <div className="space-y-4 rounded-[20px] bg-[#F8F5EC] p-4">
+            <p className="text-[12px] leading-relaxed text-[#476862]">
+              {label('Al autorizar, el nombre, foto pública e insignia Amigo de PAZO de esta mascota podrán aparecer en un muro visible sin iniciar sesión. Nunca se mostrarán tu correo ni datos de pago. Podrás retirar el permiso cuando quieras; las capturas ajenas no se pueden borrar.',
+                'When you opt in, this pet’s name, public photo and PAZO Friend badge may appear on a wall visible without signing in. Your email and payment data will not be shown. You can withdraw at any time; third-party screenshots cannot be removed.')}
             </p>
             <div className="flex flex-wrap gap-2">
               <button className={button} type="button" disabled={!!pendingId}
                 onClick={()=>void change(pet.id,true)}>{label('Sí, autorizar','Yes, opt in')}</button>
-              <button className={button} type="button" disabled={!!pendingId}
+              <button className="min-h-11 rounded-full bg-white px-5 py-2.5 text-[12px] font-bold text-[#204E4A] hover:bg-[#EFF3E7] focus-visible:bg-[#E1E53F]/35" type="button" disabled={!!pendingId}
                 onClick={()=>setConfirmId(null)}>{label('Ahora no','Not now')}</button>
             </div>
           </div>
-          : <button className={button} type="button" disabled={!!pendingId}
+          : <button className={button+' w-full'} type="button" disabled={!!pendingId}
               onClick={()=>setConfirmId(pet.id)}>
               {label('Revisar y autorizar','Review and authorize')}
-            </button>
-        }
-      </div>
+            </button>}
+      </article>
     })}
+    <button type="button" onClick={()=>setShowPublicWall(true)}
+      className="min-h-12 w-full rounded-full bg-[#E8EEDD] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#DFE9D0] focus-visible:bg-[#E1E53F]/40">
+      {label('Conocer el muro público','View the public wall')}
+      <span aria-hidden="true" className="ml-2">›</span>
+    </button>
+    {showPublicWall&&<div className="fixed inset-0 z-[120] bg-[#FAF8F5]">
+      <GratitudeWallLive lang={lang} onClose={()=>setShowPublicWall(false)}/>
+    </div>}
   </section>
 }
