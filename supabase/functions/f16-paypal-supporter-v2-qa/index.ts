@@ -133,9 +133,10 @@ const QA_CHECKOUT_RELEASE_APPROVED = true
 // Cancel/receipt/status must remain possible after the purchase gate closes.
 // This second release gate also starts OFF and requires a reviewed QA deploy.
 const QA_V2_MANAGEMENT_RELEASE_APPROVED = true
-// F16 retry: 404 alone never authorizes a new PayPal subscription. SQL proof,
-// merchant reconciliation, and a separate Product Owner release required.
-const QA_V2_RETRY_RELEASE_APPROVED = false
+// F16 Sandbox QA retry only: explicit PO go, merchant grants still ZERO.
+// 404 alone never authorizes a new PayPal subscription. Private evidence grant,
+// owner allowlist and a fresh consent remain mandatory before any POST.
+const QA_V2_RETRY_RELEASE_APPROVED = true
 Deno.serve(async(request:Request)=>{
  if(!QA_CHECKOUT_RELEASE_APPROVED && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return reply(503,'sandbox_qa_features_not_released')
