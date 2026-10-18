@@ -34,6 +34,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [retryEligibility,setRetryEligibility]=useState<'unknown'|'checking'|'approved'|'blocked'>('unknown')
  const [inventoryState,setInventoryState]=useState<'unknown'|'checking'|'found'|'missing'|'partial'|'error'>('unknown')
  const [inventoryMerchantStatus,setInventoryMerchantStatus]=useState<string|null>(null)
+ const [inventoryDiagnostic,setInventoryDiagnostic]=useState<'auth'|'scope'|'request'|'network'|'invalid'|'service'|'rate'|'unknown'>('unknown')
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
@@ -68,6 +69,12 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     'paypal_provider_request_rejected','paypal_provider_invalid_response',
     'paypal_subscription_response_mismatch','paypal_network_unavailable',
     'sandbox_qa_owner_required','merchant_owner_plan_mismatch',
+    'inventory_oauth_denied','inventory_token_denied',
+    'inventory_merchant_scope_unavailable','inventory_request_rejected',
+    'inventory_endpoint_unavailable','inventory_rate_limited',
+    'inventory_provider_unavailable','inventory_malformed',
+    'inventory_network_unavailable','inventory_oauth_invalid',
+    'inventory_binding_unverified','merchant_inventory_read_unavailable',
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
   }
@@ -83,7 +90,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const refresh=async()=>{
   setErrorKind('account')
   onAccountInspection?.('checking')
-  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null)
+  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown')
   try {
    const result=await call({action:'list'}) as Result
    if(result.ok!==true||result.phase!=='V2_ACCOUNTS'||
@@ -193,14 +200,24 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    }else if(result.code==='original_not_in_current_merchant_inventory'&&result.merchantInventoryEnumerated===true){
     setInventoryState('missing')
    }else setInventoryState('partial')
-  }catch{setInventoryState('error')}
+  }catch(error){
+   const code=error instanceof Error?error.message:''
+   setInventoryDiagnostic(['inventory_oauth_denied','inventory_token_denied','inventory_oauth_invalid'].includes(code)?'auth':
+     code==='inventory_merchant_scope_unavailable'?'scope':
+     code==='inventory_request_rejected'||code==='inventory_endpoint_unavailable'?'request':
+     code==='inventory_rate_limited'?'rate':
+     code==='inventory_network_unavailable'?'network':
+     code==='inventory_malformed'?'invalid':
+     code==='inventory_provider_unavailable'?'service':'unknown')
+   setInventoryState('error')
+  }
   finally{setBusy(false)}
  }
  const selectAccount=(a:Account)=>{
   if(busy)return
   setAccount(a);setProviderStatus(null);setRecoveryMessage(null)
   setConfirm(false);setCancelled(false);setPaidThrough(null)
-  setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setError(false)
+  setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setError(false)
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -408,8 +425,29 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
             : inventoryState==='partial'
               ? t('La consulta no acreditó cobertura completa. No hay permiso para crear otra suscripción.',
                   'The query did not establish complete coverage. No new subscription is allowed.')
-              : t('No se pudo consultar el inventario comercial de PayPal. No se inició un cobro.',
-                  'PayPal merchant inventory could not be checked. No payment was started.')}
+              : inventoryDiagnostic==='auth'
+                ? t('PayPal rechazó la autenticación comercial. Hay que verificar la aplicación Sandbox y sus permisos; no se inició un cobro.',
+                    'PayPal rejected merchant authentication. Verify the Sandbox app and permissions; no charge was started.')
+                : inventoryDiagnostic==='scope'
+                  ? t('La aplicación Sandbox no tiene permiso para consultar las suscripciones del comerciante. No se inició un cobro.',
+                      'This Sandbox app lacks permission to list merchant subscriptions. No charge was started.')
+                  : inventoryDiagnostic==='request'
+                    ? t('PayPal rechazó la petición de inventario o no habilita esa ruta para esta cuenta. No se inició un cobro.',
+                        'PayPal rejected this inventory request or the endpoint is unavailable for this account. No charge was started.')
+                    : inventoryDiagnostic==='rate'
+                      ? t('PayPal está limitando temporalmente las consultas. No se inició un cobro.',
+                          'PayPal is temporarily rate-limiting requests. No charge was started.')
+                      : inventoryDiagnostic==='network'
+                        ? t('La conexión con PayPal falló. No se inició un cobro.',
+                            'PayPal network connection failed. No charge was started.')
+                        : inventoryDiagnostic==='invalid'
+                          ? t('PayPal devolvió información que no se pudo validar. Necesitamos revisión comercial antes de reintentar.',
+                              'PayPal returned data that could not be validated. Merchant review is required before a retry.')
+                          : inventoryDiagnostic==='service'
+                            ? t('El servicio de inventario de PayPal no respondió correctamente. No se inició un cobro.',
+                                'PayPal inventory service failed. No charge was started.')
+                            : t('No se pudo completar el diagnóstico comercial de PayPal. No se inició un cobro.',
+                                'PayPal merchant diagnostic could not be completed. No charge was started.')}
        </p>}
        {retryEligibility==='blocked'&&<p role="status" className="text-xs">{t('Aún falta conciliación comercial de PayPal. No se inició otro cobro.',
          'PayPal merchant reconciliation is still required. No new charge was initiated.')}</p>}
