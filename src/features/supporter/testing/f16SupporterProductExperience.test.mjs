@@ -200,3 +200,22 @@ test('F16 option B mobile screenshot corrections enforce compact hierarchy witho
  assert.ok(!checkout.includes('Solo PayPal Sandbox · Dinero ficticio · Los beneficios requieren pago verificado.'),'No oversized early warning block')
  assert.ok(page.includes('Ahora no, seguir usando PAZO'),'One-tap exit remains')
 })
+
+test('F16 Sandbox checkout explains linked subscription and transient offer failures without repeating begin',()=>{
+ const checkout=readFileSync(new URL('../components/SandboxCheckoutQaPanel.tsx',import.meta.url),'utf8')
+ assert.ok(checkout.includes("res.status===429"),'Rate limiting must be distinguished from missing offer')
+ assert.ok(checkout.includes("res.status===403"),'Account restrictions must not look like purchase success')
+ assert.ok(checkout.includes("res.status===409 && value?.phase==='ALREADY_LINKED_NOT_PAYMENT_VERIFIED'"),
+   'An already bound subscription requires management, never another checkout')
+ assert.ok(checkout.includes("setBeginFailure(code==='qa_already_linked'"))
+ assert.ok(checkout.includes('Ya existe una suscripción Sandbox vinculada'))
+ assert.ok(checkout.includes('No repitas el pago'))
+ assert.ok(checkout.includes("setOfferRevision(n=>n+1)"),'User can retry only a read-only offer lookup')
+ assert.ok(checkout.includes("call({action:'offer',locale:lang})"))
+ assert.ok(checkout.includes('},[lang,offerRevision])'))
+ assert.ok(checkout.includes('attempted.current=true'),'One-shot begin guard must survive transient failure while mounted')
+ assert.ok(!checkout.includes('attempted.current=false'),'No reset of purchase guard on failures')
+ assert.ok(checkout.includes("disabled={!consent||busy||phase!=='ready'||attempted.current}"))
+ assert.ok(checkout.includes("window.location.assign(url)"),'Only approved PayPal sandbox URL is navigable')
+ assert.ok(checkout.includes('payPal')===false||checkout.includes('approveUrl'),'Keep approved URL validation')
+})
