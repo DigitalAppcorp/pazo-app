@@ -163,7 +163,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
             <h2 className="w-full break-words text-[16px] font-black leading-tight text-[#204E4A]">{pet.pet_name}</h2>
             <p className="text-[12px] font-semibold leading-tight text-[#5C7470]">
               {pet.milestone>0
-                ?label(`${pet.milestone} meses apoyando`,`${pet.milestone} months supporting`)
+                ?label(`${pet.milestone} meses verificados`,`${pet.milestone} verified months`)
                 :label('Amigo de PAZO','PAZO Friend')}
             </p>
           </article>)}
