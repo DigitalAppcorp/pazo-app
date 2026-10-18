@@ -108,7 +108,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,resolveAuthenticatedOwner,admit,canBuy}
+ return {origin,checkout,manage,consentStore,v2AccountStore,merchantVerifier,reader,resolveAuthenticatedOwner,admit,canBuy}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -154,11 +154,43 @@ Deno.serve(async(request:Request)=>{
  // Existing V2 subscription management must work even when buying is OFF.
  // Each account lookup is scoped to getUser() + a V2 acceptance row; no
  // legacy P06 subscription can be cancelled through these routes.
- const isManagement=['status','cancel','acknowledgement','list','verify_payment'].includes(data.action)
+ const isManagement=['status','cancel','acknowledgement','list','verify_payment','resume_approval'].includes(data.action)
  if(isManagement && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return addCors(reply(503,'qa_v2_management_not_released'),runtime.origin)
  if(isManagement && ['status','cancel','acknowledgement'].includes(data.action))
   return addCors(await runtime.manage(request),runtime.origin)
+ // Recover only the original PayPal approval for an already-bound QA V2
+ // attempt. No PayPal POST creates a second subscription; no paid entitlement.
+ if(data.action==='resume_approval'){
+  if(Object.keys(data).sort().join('|')!=='action')
+   return addCors(reply(400,'invalid_request'),runtime.origin)
+  if(!QA_CHECKOUT_RELEASE_APPROVED||!await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  try{
+   if(await runtime.admit()!==true)
+    return addCors(reply(429,'rate_limited'),runtime.origin)
+   const a=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})
+   if(!a||a.state!=='bound'||!a.externalSubscriptionId)
+    return addCors(reply(409,'existing_v2_subscription_not_bound'),runtime.origin)
+   const remote=await runtime.reader.readSubscription(
+     a.externalSubscriptionId,{includeApprovalLink:true})
+   if(remote.id!==a.externalSubscriptionId||
+      remote.plan_id!==PLAN||remote.custom_id!==a.intentId)
+    return addCors(reply(409,'merchant_owner_plan_mismatch'),runtime.origin)
+   if(!['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(remote.status))
+    return addCors(reply(409,'merchant_status_unrecognized'),runtime.origin)
+   return addCors(new Response(JSON.stringify({
+     ok:true,environment:'sandbox',phase:remote.status,
+     code:remote.status==='APPROVAL_PENDING'
+       ? remote.approvalUrl?'approval_can_resume':'approval_link_unavailable'
+       : 'approval_no_longer_pending',
+     approvalUrl:remote.status==='APPROVAL_PENDING'?remote.approvalUrl:null,
+     entitlement:false,mayRecordPayment:false,mayGrantBenefits:false,
+     paidThrough:null,
+   }),{status:200,headers:{'content-type':'application/json',
+      'cache-control':'no-store'}}),runtime.origin)
+  }catch{return addCors(reply(503,'original_approval_recovery_unavailable'),runtime.origin)}
+ }
  if(data.action==='verify_payment'){
   if(Object.keys(data).sort().join('|')!=='action')
    return addCors(reply(400,'invalid_request'),runtime.origin)
