@@ -88,7 +88,7 @@ export const SupporterThemePreviewPanel=({pet,lang,onClose}:SupporterThemePrevie
       t('Explora los diseños. Aún no puedes guardarlos.','Explore the designs. Saving is not yet available.')}
     </p>
     <SupporterThemePreviewPicker value={theme} onChange={setTheme} lang={lang} enabled={liveBenefitsUI}/>
-    {liveBenefitsUI&&<SupporterThemeSaveControl petId={pet.id} selectedTheme={theme} lang={lang} onLoaded={setTheme}/>}
+    {liveBenefitsUI && <SupporterThemeSaveControl petId={pet.id} selectedTheme={theme} lang={lang} onLoaded={setTheme}/>}
     {!liveBenefitsUI&&<p role="status" className="mt-3 text-center text-[12px] text-[#5C7470]">
       {t('Solo vista previa. Tu perfil público no ha cambiado.','Preview only. Your public profile is unchanged.')}
     </p>}
