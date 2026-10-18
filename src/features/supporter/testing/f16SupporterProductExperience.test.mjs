@@ -396,7 +396,7 @@ test('F16 Feed owner joins payment badge evidence BEFORE committing a visible pa
  const app=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
  const helper=readFileSync(new URL('../verifiedFeedPostBadges.ts',import.meta.url),'utf8')
  const feed=readFileSync(new URL('../../../components/views/HomeView.tsx',import.meta.url),'utf8')
- assert.ok(app.includes('attachVerifiedFeedBadges(page,ids=>'))
+ assert.ok(app.includes('attachVerifiedFeedBadges(page,async ids=>'))
  assert.ok(app.includes('Promise.all(['))
  assert.ok(app.includes('const enrichedPage=interactionsPage.map('))
  assert.ok(app.indexOf('const enrichedPage=interactionsPage.map(')<app.indexOf('setPosts(enrichedPage)'))
