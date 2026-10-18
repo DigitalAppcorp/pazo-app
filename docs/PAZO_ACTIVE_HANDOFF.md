@@ -1,3 +1,15 @@
+# F16 — PayPal Sandbox respuesta parcial: lector seguro QA v11 (2026-10-18)
+
+**PO reportó** pantalla `PayPal devolvió información que no se pudo validar`, tras diagnóstico Edge v10. Esa categoría procede de `inventory_malformed` por respuesta JSON incompleta o por fila/plan/estado/paginación no conformes; **no** se ha recuperado el cuerpo comercial ni se ha probado cuál campo concreto falló. PayPal documenta `GET /v1/billing/subscriptions` con `subscriptions` como lista filtrable por `plan_ids`: https://developer.paypal.com/api/subscriptions/v1/subscriptions-list/ .
+
+**Corrección en PR #44 (DRAFT):** `pazoSandboxV2InventoryRead.mjs` ya no exige que todos los registros de PayPal estén completos/filtrados para verificar un exact-match. Puede informar un original exactamente identificado y con status+plan verificables, aunque otras filas estén incompletas, pero **nunca concede permisos de retry ni acredita pago**. Si la lista falta, una fila ajena es parcial, el original carece de plan/estado, sobran elementos o no se puede asegurar paginación, devuelve códigos de evidencia parcial y NO declara ausencia. UI `SandboxV2AccountPanel` presenta categorías seguras en español e inglés; 4 casos nuevos de pruebas sintéticas. Commits `3816aad2`, `412ab52e`, `c0eceabb`.
+
+**Instalación y pruebas:** CI **SUCCESS 39135431907**, F16 PG **SUCCESS 39135431898**, V2 retry PG **SUCCESS 39135431897**, multiattempt PG **SUCCESS 39135431909**. Edge `f16-paypal-supporter-v2-qa` **v11 ACTIVE JWT true**, 16/16 archivos cotejados con GitHub `c0eceabb21ed5355edef959ce7af7a09fc75a7b9`. Host DB 1 intento V2 original, 0 nuevos intentos, 0 grants, 0 períodos de pago verificados, 0 entradas financieras. No hubo PayPal POST ni cambios a PayPal Live. 
+
+**Siguiente verificación:** usuario `git pull --ff-only origin f13/section-titles-20261012` si árbol limpio, reiniciar Vite, click **una sola vez** `Investigar suscripción en PayPal`. Leer mensaje nuevo; si sigue parcial, investigar merchant desde PayPal Business original y conciliar pagos/disputas. **Nunca** dar grant tras 404, pago incompleto o consulta parcial. No merge a main. Marcador `F16_V2_MERCHANT_LIST_PARTIAL_QA_EDGE_V11_PASS_WAIT_MERCHANT_PROOF_ZERO_GRANTS`.
+
+---
+
 # F16 — Diagnóstico de fallo en inventario PayPal Sandbox (2026-10-18)
 
 **Evidencia PO:** al pulsar `Investigar suscripción en PayPal` en PAZO local, el panel V2 informó `No se pudo consultar el inventario comercial de PayPal`. Query read-only de logs confirmó `POST /functions/v1/f16-paypal-supporter-v2-qa` HTTP **503** a las 14:06:01 UTC, mientras la autenticación Supabase y RPC `f16_qa_v2_multi_list_owner_accounts` respondieron correctamente. La Edge v9 ocultaba todas las causas del error bajo `merchant_inventory_read_unavailable`; **no** se verificó todavía si PayPal devolvió 400,401,403,404,429,5xx u otro fallo. API de listado `GET /v1/billing/subscriptions` está documentada oficialmente por PayPal: https://developer.paypal.com/api/subscriptions/v1/subscriptions-list/ .
