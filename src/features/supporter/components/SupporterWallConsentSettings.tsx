@@ -103,7 +103,7 @@ export function SupporterWallConsentSettings({ lang }: Props) {
     }
   }
 
-  const button = 'min-h-11 rounded-full bg-[#E1E53F] px-5 py-2.5 text-[12px] font-extrabold text-[#204E4A] transition-colors hover:bg-[#F0F27C] focus-visible:bg-[#E9EF8A] disabled:opacity-50'
+  const button = 'min-h-11 rounded-full bg-[#E1E53F] px-5 py-2.5 text-[14px] font-extrabold text-[#204E4A] transition-colors hover:bg-[#F0F27C] focus-visible:bg-[#E9EF8A] disabled:opacity-50'
   return <section aria-labelledby="supporter-consent-title" className="space-y-5 pb-4">
     <div className="flex flex-col items-center px-3 pt-3 text-center">
       <span aria-hidden="true" className="flex h-[70px] w-[70px] items-center justify-center rounded-full bg-[#F3E8DD] text-[#204E4A]">
@@ -112,21 +112,21 @@ export function SupporterWallConsentSettings({ lang }: Props) {
       <h3 id="supporter-consent-title" className="mt-4 max-w-[320px] text-[23px] font-black leading-tight">
         {label('Ellos también son parte de PAZO','They are part of PAZO too')}
       </h3>
-      <p className="mt-3 max-w-[35ch] text-[13px] leading-relaxed text-[#5C7470]">
+      <p className="mt-3 max-w-[35ch] text-[14px] leading-relaxed text-[#5C7470]">
         {label('Tú eliges qué mascotas aparecen en nuestro muro. Puedes retirar el permiso cuando quieras.',
           'You choose which pets appear on our wall. Withdraw permission whenever you want.')}
       </p>
     </div>
-    {loading&&<p role="status" className="rounded-[22px] bg-white p-4 text-center text-[12px]">
+    {loading&&<p role="status" className="rounded-[22px] bg-white p-4 text-center text-[14px]">
       {label('Consultando permisos…','Checking permissions…')}
     </p>}
-    {error&&<div role="alert" className="space-y-3 rounded-[22px] bg-[#FCE5D8] p-4 text-[12px]">
+    {error&&<div role="alert" className="space-y-3 rounded-[22px] bg-[#FCE5D8] p-4 text-[14px]">
       <p>{error}</p>
       <button type="button" className={button} disabled={loading||!!pendingId} onClick={()=>void refresh()}>
         {label('Actualizar permisos','Refresh permissions')}
       </button>
     </div>}
-    {ready&&pets.length===0&&<p role="status" className="rounded-[23px] bg-white p-5 text-center text-[13px] text-[#476862]">
+    {ready&&pets.length===0&&<p role="status" className="rounded-[23px] bg-white p-5 text-center text-[14px] text-[#476862]">
       {label('Aún no tienes mascotas para mostrar en el muro.','You do not have any pets to show on the wall yet.')}
     </p>}
     {ready&&pets.map(pet=>{
@@ -141,7 +141,7 @@ export function SupporterWallConsentSettings({ lang }: Props) {
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[17px] font-black text-[#204E4A]">{pet.name}</p>
-            <p role="status" className="mt-1 flex items-center gap-2 text-[12px] text-[#5C7470]">
+            <p role="status" className="mt-1 flex items-center gap-2 text-[14px] text-[#5C7470]">
               <span aria-hidden="true" className={'h-2 w-2 shrink-0 rounded-full '+(granted?'bg-[#6E9E75]':'bg-[#C6CDBB]')}/>
               {granted?label('Visible en el muro','Visible on the wall'):
                 label('No aparece en el muro','Not shown on the wall')}
@@ -149,20 +149,20 @@ export function SupporterWallConsentSettings({ lang }: Props) {
           </div>
         </div>
         {granted
-          ? <button className="min-h-11 w-full rounded-full bg-[#EFF2EA] px-4 py-3 text-[12px] font-black text-[#204E4A] hover:bg-[#E5EBD8] focus-visible:bg-[#E1E53F]/35" type="button"
+          ? <button className="min-h-11 w-full rounded-full bg-[#EFF2EA] px-4 py-3 text-[14px] font-black text-[#204E4A] hover:bg-[#E5EBD8] focus-visible:bg-[#E1E53F]/35" type="button"
               disabled={!!pendingId} onClick={()=>void change(pet.id,false)}>
               {pendingId===pet.id?label('Actualizando permiso…','Updating permission…'):
                 label('Retirar del muro','Remove from wall')}
             </button>
           : confirming ? <div className="space-y-4 rounded-[20px] bg-[#F8F5EC] p-4">
-            <p className="text-[12px] leading-relaxed text-[#476862]">
+            <p className="text-[14px] leading-relaxed text-[#476862]">
               {label('Al autorizar, el nombre, foto pública e insignia Amigo de PAZO de esta mascota podrán aparecer en un muro visible sin iniciar sesión. Nunca se mostrarán tu correo ni datos de pago. Podrás retirar el permiso cuando quieras; las capturas ajenas no se pueden borrar.',
                 'When you opt in, this pet’s name, public photo and PAZO Friend badge may appear on a wall visible without signing in. Your email and payment data will not be shown. You can withdraw at any time; third-party screenshots cannot be removed.')}
             </p>
             <div className="flex flex-wrap gap-2">
               <button className={button} type="button" disabled={!!pendingId}
                 onClick={()=>void change(pet.id,true)}>{label('Sí, autorizar','Yes, opt in')}</button>
-              <button className="min-h-11 rounded-full bg-white px-5 py-2.5 text-[12px] font-bold text-[#204E4A] hover:bg-[#EFF3E7] focus-visible:bg-[#E1E53F]/35" type="button" disabled={!!pendingId}
+              <button className="min-h-11 rounded-full bg-white px-5 py-2.5 text-[14px] font-bold text-[#204E4A] hover:bg-[#EFF3E7] focus-visible:bg-[#E1E53F]/35" type="button" disabled={!!pendingId}
                 onClick={()=>setConfirmId(null)}>{label('Ahora no','Not now')}</button>
             </div>
           </div>
@@ -173,7 +173,7 @@ export function SupporterWallConsentSettings({ lang }: Props) {
       </article>
     })}
     <button type="button" onClick={()=>setShowPublicWall(true)}
-      className="min-h-12 w-full rounded-full bg-[#E8EEDD] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#DFE9D0] focus-visible:bg-[#E1E53F]/40">
+      className="min-h-12 w-full rounded-full bg-[#E8EEDD] px-4 py-3 text-[14px] font-black text-[#204E4A] hover:bg-[#DFE9D0] focus-visible:bg-[#E1E53F]/40">
       {label('Conocer el muro público','View the public wall')}
       <span aria-hidden="true" className="ml-2">›</span>
     </button>
