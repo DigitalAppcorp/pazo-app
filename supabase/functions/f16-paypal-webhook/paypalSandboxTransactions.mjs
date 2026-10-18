@@ -3,6 +3,30 @@
 const HOST='https://api-m.sandbox.paypal.com'
 const SUBSCRIPTION_REF=/^I-[A-Za-z0-9_-]{3,70}$/
 const PAYMENT_REF=/^[A-Za-z0-9._-]{3,128}$/
+// A merchant GET can expose an existing buyer-approval link. Never derive a
+// ba_token or create a second subscription for an abandoned checkout.
+const APPROVAL_HOSTS=new Set(['sandbox.paypal.com','www.sandbox.paypal.com'])
+function pendingApprovalLink(subscription) {
+  if(subscription.status!=='APPROVAL_PENDING')return null
+  const links=subscription.links
+  if(links===undefined)return null
+  if(!Array.isArray(links)||links.length>10)throw Error('untrusted_subscription_links')
+  const approve=links.filter(x=>x?.rel==='approve')
+  if(approve.length===0)return null
+  if(approve.length!==1||approve[0].method!=='GET'||
+     typeof approve[0].href!=='string'||approve[0].href.length>2048)
+    throw Error('untrusted_subscription_approval')
+  const raw=approve[0].href
+  let u
+  try{u=new URL(raw)}catch{throw Error('untrusted_subscription_approval')}
+  if(u.protocol!=='https:'||!APPROVAL_HOSTS.has(u.hostname)||
+    u.username||u.password||u.port||u.hash||u.toString()!==raw||
+    !u.pathname.startsWith('/webapps/billing/subscriptions')||
+    !/^BA-[A-Za-z0-9_-]{6,128}$/.test(u.searchParams.get('ba_token')||'')||
+    [...u.searchParams.keys()].some(key=>key!=='ba_token'))
+    throw Error('untrusted_subscription_approval')
+  return raw
+}
 const UTC=/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/
 function canonicalUtc(s){
   if(typeof s!=='string' || !UTC.test(s)) return null
@@ -26,7 +50,7 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
   return {
     // This read is separately usable to verify Auth-owned subscription binding
     // BEFORE any paid transaction or entitlement is considered.
-    async readSubscription(subscriptionId){
+    async readSubscription(subscriptionId,{includeApprovalLink=false}={}){
       if(typeof subscriptionId!=='string' || !SUBSCRIPTION_REF.test(subscriptionId))
         throw Error('invalid_subscription_id')
       const token=await readJson(fetchImpl,HOST+'/v1/oauth2/token',{
@@ -45,10 +69,14 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
           headers:{Authorization:'Bearer '+token.access_token,Accept:'application/json'},
         })
       if(subscription.id!==subscriptionId) throw Error('subscription_response_mismatch')
-      // Do not return subscriber name, payer email, approval links or tokens.
+      // No subscriber PII or token logging. Approval URL is returned only
+      // on a deliberate owner-authenticated recovery call, never normal reads.
       return Object.freeze({
         id:subscription.id,plan_id:subscription.plan_id,
         custom_id:subscription.custom_id,status:subscription.status,
+        ...(includeApprovalLink===true
+          ? {approvalUrl:pendingApprovalLink(subscription)}
+          : {}),
       })
     },
     async read({subscriptionId,startTime,endTime}={}){
