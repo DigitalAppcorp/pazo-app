@@ -402,7 +402,27 @@ Deno.serve(async(request:Request)=>{
    return addCors(new Response(JSON.stringify({ok:true,code:state.phase,
     environment:'sandbox',...state}),{
     status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
-  }catch{return addCors(reply(503,'sandbox_merchant_payment_not_verified'),runtime.origin)}
+  }catch(error){
+   // Fixed diagnostics only for the authenticated owner. No merchant payload,
+   // sale ID, subscription ID, payer details or exception text leaves Edge.
+   const cause=error instanceof Error?error.message:''
+   const known:Record<string,string>={
+    qa_v2_merchant_merchant_period_dates_missing:'sandbox_payment_period_evidence_missing',
+    qa_v2_merchant_incomplete_subscription_transactions:'sandbox_payment_history_evidence_missing',
+    qa_v2_merchant_regular_paid_sale_not_unique_or_reversed:'sandbox_payment_sale_evidence_missing',
+    qa_v2_merchant_sale_time_not_in_first_cycle:'sandbox_payment_sale_evidence_missing',
+    qa_v2_merchant_independent_sale_not_completed:'sandbox_payment_sale_evidence_missing',
+    qa_v2_merchant_refund_merchant_get_mismatch:'sandbox_payment_sale_evidence_missing',
+    qa_v2_merchant_provider_get_unavailable:'sandbox_payment_provider_read_unavailable',
+    qa_v2_merchant_network_unavailable:'sandbox_payment_provider_read_unavailable',
+    qa_v2_merchant_invalid_provider_reply:'sandbox_payment_provider_read_unavailable',
+    qa_v2_merchant_oauth_invalid:'sandbox_payment_provider_read_unavailable',
+    qa_v2_merchant_durable_period_not_confirmed:'sandbox_payment_recording_unavailable',
+    qa_v2_proof_rpc_unavailable:'sandbox_payment_recording_unavailable',
+    qa_v2_merchant_refund_not_durably_held:'sandbox_payment_recording_unavailable',
+   }
+   return addCors(reply(503,known[cause]||'sandbox_merchant_payment_not_verified'),runtime.origin)
+  }
  }
  if(data.action==='list'){
   if(Object.keys(data).sort().join('|')!=='action')
