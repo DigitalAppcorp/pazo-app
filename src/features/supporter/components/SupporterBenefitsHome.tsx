@@ -32,6 +32,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
  const [showWall,setShowWall]=useState(false)
  const [showMembership,setShowMembership]=useState(false)
  const [showDetails,setShowDetails]=useState(false)
+ const [showMilestones,setShowMilestones]=useState(false)
  const [showSandboxTools,setShowSandboxTools]=useState(false)
  const closeRef=useRef<HTMLButtonElement>(null)
  const t=(es:string,en:string)=>lang==='es'?es:en
@@ -111,7 +112,15 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
       ()=>setShowWall(true))}
     {feature('medal',t('Medallas de antigüedad','Milestone badges'),
       t('Reconocimientos de 3, 6 y 12 meses.','Recognition at 3, 6 and 12 months.'),
-      ()=>setShowDetails(value=>!value),false,showDetails)}
+      ()=>setShowMilestones(value=>!value),false,showMilestones)}
+    {showMilestones&&<div className="mx-3 mb-3 space-y-2 rounded-[20px] bg-[#F4F5EE] px-4 py-3">
+     {[3,6,12].map(months=><div key={months} className="flex items-center justify-between gap-3 text-[12px]">
+      <span className="font-bold text-[#204E4A]">{t(`${months} meses completados`,`${months} completed months`)}</span>
+      <span className={'rounded-full px-3 py-1.5 text-[11px] font-bold '+(milestone>=months?'bg-[#D8E7CB] text-[#204E4A]':'bg-white text-[#617670]')}>
+       {milestone>=months?t('Conseguida','Earned'):t('Pendiente','Pending')}
+      </span>
+     </div>)}
+    </div>}
    </section>
    <section className="rounded-[26px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">
     {feature('card',t('Mi membresía','My membership'),
