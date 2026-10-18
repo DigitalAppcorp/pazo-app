@@ -87,7 +87,7 @@ test('F16 retry adapter fails closed on changed owner, missing new consent and p
  await assert.rejects(()=>store.isEligible({ownerId:'arbitrary'}))
  assert.equal(calls.length,2,'Invalid consent never reaches private SQL RPC')
 })
-test('F16 retry remains unreleased, original P06 and V2 never modified by retry migration',()=>{
+test('F16 retry is owner-scoped and requires a private merchant grant, original P06 and V2 remain intact',()=>{
  const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
  const sql=readFileSync(new URL('../../../../supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql',import.meta.url),'utf8')
  const migrationNames=[
@@ -96,7 +96,7 @@ test('F16 retry remains unreleased, original P06 and V2 never modified by retry 
   'f16_qa_v2_retry_claim_provider_create',
  ]
  for(const name of migrationNames)assert.ok(sql.includes(name),name)
- assert.ok(edge.includes('const QA_V2_RETRY_RELEASE_APPROVED = false'))
+ assert.ok(edge.includes('const QA_V2_RETRY_RELEASE_APPROVED = true'))
  assert.ok(edge.includes("reply(503,'sandbox_retry_not_released')"))
  assert.ok(edge.indexOf("if(!QA_V2_RETRY_RELEASE_APPROVED)")<edge.indexOf('runtime.retryCheckout.begin'))
  assert.ok(edge.includes("data.action==='retry_status'"))
@@ -120,5 +120,5 @@ test('F16 retry remains unreleased, original P06 and V2 never modified by retry 
  assert.ok(sql.includes('provider_create_claimed_at IS NULL'))
  assert.ok(sql.includes('FORCE ROW LEVEL SECURITY'))
  assert.ok(sql.includes('REVOKE ALL ON'))
- assert.ok(!edge.includes('QA_V2_RETRY_RELEASE_APPROVED = true'))
+ assert.ok(edge.includes('QA_V2_RETRY_RELEASE_APPROVED = true'))
 })
