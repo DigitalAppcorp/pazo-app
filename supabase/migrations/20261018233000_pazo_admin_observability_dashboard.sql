@@ -267,7 +267,7 @@ end $$;
 -- Admin-only viewers: who saw a fake door vs who explicitly voted.
 create or replace function public.pazo_admin_audience(p_module_key text,p_limit integer default 40)
 returns jsonb language plpgsql stable security definer set search_path=''
-as $
+as $$
 declare result jsonb;
 begin
  if not public.pazo_is_admin() then raise exception 'Admin access required' using errcode='42501'; end if;
@@ -291,7 +291,7 @@ begin
  left join public.module_validation_intents t
    on t.user_id=v.user_id and t.module_key=p_module_key;
  return result;
-end $;
+end $$;
 
 revoke execute on function public.pazo_is_admin() from public,anon;
 revoke execute on function public.pazo_track_activity(text) from public,anon;
