@@ -131,6 +131,13 @@ La identidad social es la mascota, no el humano.
 
 ## 3. Feed / UGC social
 
+**Ubicación de publicaciones — corrección QA 2026-10-18:**
+- `pet_private_details.zone` es información privada del perfil; no debe copiarse silenciosamente a `posts.location`, que es un dato social público.
+- `CreatePostModal` permite elegir voluntariamente mostrar una ciudad/zona (casilla apagada por defecto), con aclaración visible de que será pública. Se precarga en el campo **no publicado** la zona privada de la mascota para que el titular la revise y la edite únicamente si decide compartirla.
+- Sin autorización: el cliente envía `location: null` explícito, evita el default antiguo y el Feed solo muestra la antigüedad de la publicación, sin GPS, direcciones o separador vacío.
+- Auditoría read-only halló 4 posts antiguos con `Los Ángeles, CA` hardcoded. No se han corregido esas filas ni se ha copiado su zona privada: cualquier backfill/limpieza requiere aprobación del PO, migración y alcance preciso. También se detectó default SQL heredado `Los Ángeles • Local` que debe eliminarse en una migración autorizada, no por la UI.
+- No se agregó geolocalización del dispositivo ni telemetría nueva. Visibilidad social explícita y función de eliminar cuenta se conservan.
+
 **Datos**
 - posts;
 - fotos;
