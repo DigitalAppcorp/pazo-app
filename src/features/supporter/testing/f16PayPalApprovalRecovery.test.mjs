@@ -98,7 +98,7 @@ test('F16 V2 recovery server requires authenticated owner + linked original + pl
   "runtime.canBuy(qaOwner)"
  ])assert.ok(edge.includes(clause),clause)
  assert.ok(!edge.includes('subscriptionCreator.create({intent:a}'))
- assert.ok(panel.includes("providerStatus===null||providerStatus==='APPROVAL_PENDING'"),'Pending buyer can resume directly without an unreliable preliminary status call')
+ assert.ok(panel.includes("recoveryStage==='approval_resumable'"),'Pending buyer can resume directly without an unreliable preliminary status call')
  assert.ok(panel.includes("t('Retomar en PayPal'"))
  assert.ok(panel.includes("call({action:'resume_approval',intentId:account.intentId})"))
  assert.ok(!panel.includes("call({action:'status'"),'Read-only merchant verification uses the v4 owner-bound path')
@@ -111,10 +111,10 @@ test('F16 V2 recovery server requires authenticated owner + linked original + pl
  assert.ok(!checkout.includes('attempted.current=false'))
 })
 
-test('F16 Sandbox account recovery remains reachable after merchant status failure',()=>{
+test('F16 Sandbox account recovery only offers approval after verified merchant status',()=>{
  const panel=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
  assert.ok(panel.includes("account.state==='bound'&&!paidThrough&&!cancelled"))
- assert.ok(panel.includes("providerStatus===null||providerStatus==='APPROVAL_PENDING'"))
+ assert.ok(panel.includes("recoveryStage==='approval_resumable'"))
  assert.ok(panel.includes("call({action:'resume_approval',intentId:account.intentId})"))
  assert.ok(panel.includes("setErrorKind('status')"))
  assert.ok(panel.includes("setErrorKind('payment')"))
