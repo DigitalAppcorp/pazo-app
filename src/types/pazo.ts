@@ -20,6 +20,7 @@ export interface Pet {
 
 export interface PostComment {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   authorPetId?: string
   authorName: string
   authorPet: string
@@ -93,6 +94,7 @@ export interface CommunityMember {
 
 export interface CommunityPostComment {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   postId: string
   authorPetId: string
   authorName: string
@@ -105,6 +107,7 @@ export interface CommunityPostComment {
 
 export interface CommunityPost {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   communityId: string
   authorUserId: string
   authorPetId: string
