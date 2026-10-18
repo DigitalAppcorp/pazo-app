@@ -50,3 +50,40 @@ export async function attachVerifiedFeedBadges(
    :resolved.get(post.petId)!,
  }))
 }
+
+const BADGE_FILES:Record<SupporterBadgeEvidence['milestone'],string>={
+ 0:'amigo-pazo-inicio.png',
+ 3:'amigo-pazo-3-meses.png',
+ 6:'amigo-pazo-6-meses.png',
+ 12:'amigo-pazo-12-meses.png',
+}
+const decodedArtwork=new Map<string,Promise<void>>()
+
+/**
+ * Browser image decoding is also completed before rendering a paid post.
+ * Thus the first visible frame includes both the author photo and its badge.
+ * Never preload a paid badge from a guessed entitlement.
+ */
+export async function preloadVerifiedFeedBadgeArt(posts:readonly Post[]):Promise<void>{
+ if(typeof Image==='undefined')return // node tests / SSR
+ const awarded=[...new Set(posts.filter(p=>p.supporterBadge?.badge)
+  .map(p=>p.supporterBadge!.milestone))]
+ await Promise.all(awarded.map(milestone=>{
+  const src='/supporter/'+BADGE_FILES[milestone]
+  let promise=decodedArtwork.get(src)
+  if(!promise){
+   promise=new Promise<void>((resolve,reject)=>{
+    const artwork=new Image()
+    artwork.onload=()=>resolve()
+    artwork.onerror=()=>reject(Error('FEED_BADGE_ARTWORK_UNAVAILABLE'))
+    artwork.src=src
+    if(typeof artwork.decode==='function'){
+     void artwork.decode().then(resolve,()=>reject(Error('FEED_BADGE_ARTWORK_UNAVAILABLE')))
+    }else if(artwork.complete&&artwork.naturalWidth>0)resolve()
+   })
+   decodedArtwork.set(src,promise)
+   void promise.catch(()=>decodedArtwork.delete(src))
+  }
+  return promise
+ }))
+}
