@@ -21,7 +21,14 @@ export function createPazoSandboxV2InventoryRead({clientId,clientSecret,fetchImp
   try{r=await fetchImpl(url,{...init,redirect:'error',signal:AbortSignal.timeout(12000)})}
   catch{error('inventory_network_unavailable')}
   if(!r?.ok){
-   if(r?.status===401||r?.status===403)error('inventory_merchant_scope_unavailable')
+   // Fixed diagnostic categories only. Never forward merchant payload, URI,
+   // credentials, PayPal debug identifiers or error messages to a browser.
+   if(stage==='oauth'&&(r?.status===401||r?.status===403))
+    error('inventory_oauth_denied')
+   if(r?.status===401)error('inventory_token_denied')
+   if(r?.status===403)error('inventory_merchant_scope_unavailable')
+   if(r?.status===400)error('inventory_request_rejected')
+   if(r?.status===404)error('inventory_endpoint_unavailable')
    if(r?.status===429)error('inventory_rate_limited')
    error('inventory_provider_unavailable')
   }
