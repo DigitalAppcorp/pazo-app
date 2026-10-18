@@ -408,3 +408,33 @@ test('F16 Feed owner joins payment badge evidence BEFORE committing a visible pa
  assert.ok(helper.includes('FEED_BADGE_INCOMPLETE_RESPONSE'))
  assert.ok(helper.includes('if(posts.length===0)return []'))
 })
+
+
+test('F16 Feed badges are already verified on initial payload; fail closed without a delayed badge',async()=>{
+ const {attachVerifiedFeedBadges}=await import('../verifiedFeedPostBadges.ts')
+ const id=i=>'00000000-0000-4000-8000-'+String(i).padStart(12,'0')
+ const input=[{id:'p1',petId:id(1),petName:'Luna'},{id:'p2',petId:id(2),petName:'Milo'},{id:'p3',petId:id(1),petName:'Luna'}]
+ let calls=0
+ const page=await attachVerifiedFeedBadges(input,async ids=>{
+  calls++
+  return {data:ids.map(pet_id=>({pet_id,badge:pet_id===id(1),milestone:0})),error:null}
+ })
+ assert.equal(calls,1,'Batch one network read for one page')
+ assert.deepEqual(page.map(p=>p.supporterBadge?.badge),[true,false,true])
+ assert.equal(input[0].supporterBadge,undefined,'Do not mutate original post')
+ await assert.rejects(attachVerifiedFeedBadges(input,async()=>({data:[],error:null})),/FEED_BADGE_EVIDENCE_UNAVAILABLE/)
+ await assert.rejects(attachVerifiedFeedBadges(input,async()=>({
+  data:[{pet_id:id(1),badge:true,milestone:12},{pet_id:id(1),badge:true,milestone:12}],error:null,
+ })),/FEED_BADGE_BAD_RESPONSE/)
+ await assert.rejects(attachVerifiedFeedBadges(input,async ids=>({
+  data:ids.map(pet_id=>({pet_id,badge:false,milestone:3})),error:null,
+ })),/FEED_BADGE_BAD_RESPONSE/)
+ const many=Array.from({length:60},(_,i)=>({id:'post-'+i,petId:id(i+1)}))
+ const chunks=[]
+ const manyResult=await attachVerifiedFeedBadges(many,async ids=>{
+  chunks.push(ids.length)
+  return {data:ids.map(pet_id=>({pet_id,badge:false,milestone:0})),error:null}
+ })
+ assert.deepEqual(chunks,[48,12])
+ assert.equal(manyResult.length,60)
+})
