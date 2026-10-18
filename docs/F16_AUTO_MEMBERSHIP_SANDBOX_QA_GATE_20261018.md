@@ -27,3 +27,13 @@
 
 ## Corrección complementaria del lanzador local
 El script `scripts/f16-run-real-sandbox-qa.ps1` se ajustó para iniciar `VITE_PAZO_F16_SANDBOX_QA_UI=true` con `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED=false`. La presentación de los beneficios QA se permite por `import.meta.env.DEV + loopback + flag QA`, siempre leyendo la cobertura real de Supabase. No se requiere publicar, activar o editar manualmente el flag global de beneficios después de un pago; el script no concede privilegios.
+
+
+## Postflight autorizado: lectura owner-only instalada
+PO autorizó explícitamente «sí» aplicar solamente la nueva función de lectura. Supabase `mrybvqdebbgcayuvgkkr`, mismo proyecto PAZO con rutas aisladas Sandbox; no se instaló una base nueva ni se tocó checkout.
+- Preflight SQL: `current_database()=postgres`, RPC `pazo_supporter_my_account_status()` ausente, proyección privada y RPC mascota presentes, y migración de nombre aún no instalada. PR #44 `f13/section-titles-20261012` DRAFT, no merged. Migración canónica leída de GitHub sin modificaciones: `20261018213000_f16_sandbox_qa_owner_membership_read.sql`.
+- `apply_migration` ejecutó **solo** `f16_sandbox_qa_owner_membership_read` y devolvió `success=true`. Versión efectiva asignada por Supabase a la migración: **`20261018184603`** (el nombre conserva el archivo fuente canónico con fecha de edición distinta).
+- Catálogo postflight: `public.pazo_supporter_my_account_status()` existe; `SECURITY DEFINER`, owner `postgres`, `search_path=''`, parámetros **ninguno**, retorno jsonb, `auth.uid()` y `supporter_private.f16_sandbox_qa_projection` presentes. EXECUTE: `anon=false`, `authenticated=true`, `service_role=false`.
+- Cobertura financiera pre/post idéntica: `paid_periods=1`, `holds=0`, `enabled_qa_owners=2`, `saved_themes=0`, `wall_consents=0`, `legacy_payment_entries=0`, `pending_sale_events=4`. La migración solo creó una RPC, sin tocar ventas, renovaciones, consentimientos, perfiles ni Live.
+- **Estado operativo:** la lectura de cuenta sin mascota está instalada pero **no hay E2E autenticado en Vite todavía**. Para probar, sincronizar el PR #44 en Antigravity con `git status --short`, `git pull --ff-only` si está limpio; ejecutar `./scripts/f16-run-real-sandbox-qa.ps1` en PowerShell desde raíz con Vite local. Evaluar cuenta pagada, gratis, sin mascota y pendiente, sin comprar nuevamente en la cuenta pagadora ni cambiar flags financieros. El retorno de PayPal a Vercel protegido todavía exige QA específica antes de Live.
+**Gate:** `F16_QA_OWNER_ACCOUNT_READ_RPC_INSTALLED_ACL_PASS_FINANCIAL_ZERO_CHANGE_WAIT_BROWSER_E2E`.
