@@ -378,8 +378,9 @@ test('F16 user-approved corrections match PAZO type scale, compact wall and orig
  assert.ok(feed.includes('size="mini"'))
  assert.ok(profile.includes('size="mini"'))
  assert.ok(!feed.includes('<SupporterBadge active milestone={supporterBadge.milestone} lang={lang}/>'),'Badge may not shift Sugerencia')
- assert.ok(feed.includes('[feedBadgeIds,badgeRefreshCycle]'),'Avoid cancelling entitlement request after likes or comments')
- assert.ok(feed.includes("supabase.rpc('pazo_supporter_public_badges_batch'"))
+ assert.ok(feed.includes('supporterBadge={post.supporterBadge}'),'Feed must render badge from its initial verified post payload')
+ assert.ok(!feed.includes('badgeRefreshCycle'),'Feed must not issue post-render badge lookups')
+ assert.ok(!feed.includes("supabase.rpc('pazo_supporter_public_badges_batch'"))
  assert.ok(profile.includes('!(supporterVisualsEnabled && supporterPerks?.theme)'),'Custom background excludes original decorative canvas')
  assert.ok(profile.includes('<SupporterProfileBackdrop theme={supporterPerks.theme} />'))
  assert.ok(benefits.includes('Tu apoyo merece reconocimiento'))
@@ -388,4 +389,22 @@ test('F16 user-approved corrections match PAZO type scale, compact wall and orig
  for(const content of [wall,benefits,theme]) {
   assert.ok(!/className=["'][^"']*(?:border-|outline-|focus-visible:ring-)/.test(content),'Preserve PO zero-outline rule')
  }
+})
+
+
+test('F16 Feed owner joins payment badge evidence BEFORE committing a visible page',()=>{
+ const app=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
+ const helper=readFileSync(new URL('../verifiedFeedPostBadges.ts',import.meta.url),'utf8')
+ const feed=readFileSync(new URL('../../../components/views/HomeView.tsx',import.meta.url),'utf8')
+ assert.ok(app.includes('attachVerifiedFeedBadges(page,ids=>'))
+ assert.ok(app.includes('Promise.all(['))
+ assert.ok(app.includes('const enrichedPage=interactionsPage.map('))
+ assert.ok(app.indexOf('const enrichedPage=interactionsPage.map(')<app.indexOf('setPosts(enrichedPage)'))
+ assert.ok(app.includes('attachVerifiedFeedBadges([newPost]'))
+ assert.ok(feed.includes('supporterBadge={post.supporterBadge}'))
+ assert.ok(!feed.includes('badgeQueriesMade'),'No asynchronous badge lookup on render')
+ assert.ok(!feed.includes("pazo_supporter_public_badges_batch"))
+ assert.ok(helper.includes('FEED_BADGE_EVIDENCE_UNAVAILABLE'))
+ assert.ok(helper.includes('FEED_BADGE_INCOMPLETE_RESPONSE'))
+ assert.ok(helper.includes('if(posts.length===0)return []'))
 })
