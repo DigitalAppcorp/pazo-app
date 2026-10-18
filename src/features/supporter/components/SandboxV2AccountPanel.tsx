@@ -9,7 +9,7 @@ type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'c
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
- approvalUrl?:string|null;eligible?:boolean}
+ approvalUrl?:string|null;eligible?:boolean;merchantInventoryEnumerated?:boolean}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
  if(typeof raw!=='string'||raw.length>2048)return null
@@ -32,6 +32,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [account,setAccount]=useState<Account|null>(null)
  const [accounts,setAccounts]=useState<Account[]>([])
  const [retryEligibility,setRetryEligibility]=useState<'unknown'|'checking'|'approved'|'blocked'>('unknown')
+ const [inventoryState,setInventoryState]=useState<'unknown'|'checking'|'found'|'missing'|'partial'|'error'>('unknown')
+ const [inventoryMerchantStatus,setInventoryMerchantStatus]=useState<string|null>(null)
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
@@ -81,7 +83,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const refresh=async()=>{
   setErrorKind('account')
   onAccountInspection?.('checking')
-  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown')
+  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null)
   try {
    const result=await call({action:'list'}) as Result
    if(result.ok!==true||result.phase!=='V2_ACCOUNTS'||
@@ -178,11 +180,27 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    setRetryEligibility(x.ok===true&&x.eligible===true?'approved':'blocked')
   }catch{setRetryEligibility('blocked')}
  }
+ const checkMerchantInventory=async()=>{
+  if(!account||account.state!=='bound'||busy)return
+  setBusy(true);setInventoryState('checking')
+  try{
+   const result=await call({action:'audit_retry_inventory',intentId:account.intentId}) as Result
+   if(result.ok!==true)throw Error('MERCHANT_INVENTORY_NOT_VERIFIED')
+   if(result.code==='original_merchant_resource_found'&&
+     ['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(result.providerStatus||'')){
+    setInventoryMerchantStatus(result.providerStatus||null)
+    setInventoryState('found')
+   }else if(result.code==='original_not_in_current_merchant_inventory'&&result.merchantInventoryEnumerated===true){
+    setInventoryState('missing')
+   }else setInventoryState('partial')
+  }catch{setInventoryState('error')}
+  finally{setBusy(false)}
+ }
  const selectAccount=(a:Account)=>{
   if(busy)return
   setAccount(a);setProviderStatus(null);setRecoveryMessage(null)
   setConfirm(false);setCancelled(false);setPaidThrough(null)
-  setRetryEligibility('unknown');setError(false)
+  setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setError(false)
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -375,6 +393,24 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
          onClick={()=>void checkRetry()} disabled={busy||retryEligibility==='checking'}>
          {retryEligibility==='checking'?t('Verificando…','Verifying…'):t('Comprobar si puedo volver a intentar','Check if I can try again')}
        </button>}
+       {account.state==='bound'&&<button type="button" className={button}
+        onClick={()=>void checkMerchantInventory()} disabled={busy||inventoryState==='checking'}>
+        {inventoryState==='checking'?t('Consultando inventario…','Checking merchant inventory…'):
+          t('Investigar suscripción en PayPal','Investigate subscription in PayPal')}
+       </button>}
+       {inventoryState!=='unknown'&&inventoryState!=='checking'&&<p role="status" className="text-xs">
+        {inventoryState==='found'
+          ? t('PayPal encontró el intento original. Estado: '+inventoryMerchantStatus+'. No se inició otro pago.',
+              'PayPal found the original request. Status: '+inventoryMerchantStatus+'. No new payment was started.')
+          : inventoryState==='missing'
+            ? t('La aplicación comercial actual no muestra el intento original. Aún hay que verificar el comerciante y pagos anteriores antes de crear otro.',
+                'The current merchant app does not list the original request. Merchant ownership and payments still require reconciliation.')
+            : inventoryState==='partial'
+              ? t('La consulta no acreditó cobertura completa. No hay permiso para crear otra suscripción.',
+                  'The query did not establish complete coverage. No new subscription is allowed.')
+              : t('No se pudo consultar el inventario comercial de PayPal. No se inició un cobro.',
+                  'PayPal merchant inventory could not be checked. No payment was started.')}
+       </p>}
        {retryEligibility==='blocked'&&<p role="status" className="text-xs">{t('Aún falta conciliación comercial de PayPal. No se inició otro cobro.',
          'PayPal merchant reconciliation is still required. No new charge was initiated.')}</p>}
        {retryEligibility==='approved'&&<SandboxCheckoutQaPanel lang={lang} inline retry onReviewExisting={()=>void refresh()}/>}
