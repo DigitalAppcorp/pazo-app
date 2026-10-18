@@ -138,3 +138,57 @@ test('F16 diagnostic codes are static and cannot leak owner, PayPal PII or raw p
  assert.ok(!stage.includes('merchant.subscriber'))
  assert.ok(stage.includes('mayRecordPayment:false,mayGrantBenefits:false'))
 })
+
+test('F16 PayPal Sandbox differentiates OAuth from subscription GET failures without exposing provider payloads',async()=>{
+ const diagnostics=[
+  {stage:'oauth',status:401,code:'paypal_oauth_denied'},
+  {stage:'oauth',status:403,code:'paypal_oauth_denied'},
+  {stage:'oauth',status:500,code:'paypal_provider_unavailable'},
+  {stage:'subscription',status:404,code:'paypal_subscription_not_found'},
+  {stage:'subscription',status:401,code:'paypal_subscription_access_denied'},
+  {stage:'subscription',status:403,code:'paypal_subscription_access_denied'},
+  {stage:'subscription',status:429,code:'paypal_provider_rate_limited'},
+  {stage:'subscription',status:502,code:'paypal_provider_unavailable'},
+ ]
+ for(const {stage,status,code} of diagnostics){
+  const requests=[]
+  const reader=createPaypalSandboxSubscriptionReader({
+   clientId:'sandbox-client-123',clientSecret:'sandbox-secret-456',
+   fetchImpl:async(url,options)=>{
+    requests.push({url,method:options.method})
+    const oauth=url.endsWith('/v1/oauth2/token')
+    if((oauth&&stage==='oauth')||(!oauth&&stage==='subscription'))
+     return {ok:false,status,json:async()=>{throw Error('raw-provider-secret-must-not-be-parsed')}}
+    return {ok:true,status:200,json:async()=>({
+      token_type:'Bearer',access_token:'token-do-not-log',
+    })}
+   }
+  })
+  await assert.rejects(()=>reader.readSubscription(id,{includeApprovalLink:true}),
+   error=>error.message===code&&
+    !error.message.includes('token')&&
+    !error.message.includes('provider-secret'))
+  assert.deepEqual(requests.map(x=>x.method),stage==='oauth'?['POST']:['POST','GET'])
+  assert.ok(requests.every(x=>x.url.startsWith('https://api-m.sandbox.paypal.com/')))
+ }
+})
+test('F16 provider network errors are sanitized and never create a second subscription',async()=>{
+ const reader=createPaypalSandboxSubscriptionReader({
+  clientId:'sandbox-client-123',clientSecret:'sandbox-secret-456',
+  fetchImpl:async()=>{throw Error('secret-payer-PII-network-info')}
+ })
+ await assert.rejects(()=>reader.readSubscription(id,{includeApprovalLink:true}),
+  error=>error.message==='paypal_network_unavailable')
+ const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
+ const panel=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
+ assert.ok(edge.includes("'paypal_oauth_denied'"))
+ assert.ok(edge.includes("'paypal_subscription_not_found'"))
+ assert.ok(edge.includes("'paypal_subscription_access_denied'"))
+ assert.ok(edge.includes("'paypal_network_unavailable'"))
+ assert.ok(!edge.includes('console.log(error)'))
+ assert.ok(panel.includes("recoveryMessage==='oauth'"))
+ assert.ok(panel.includes("recoveryMessage==='missing'"))
+ assert.ok(panel.includes("recoveryMessage==='access'"))
+ assert.ok(panel.includes("recoveryMessage==='network'"))
+ assert.ok(edge.includes('mayRecordPayment:false,mayGrantBenefits:false'))
+})
