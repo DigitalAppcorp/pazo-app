@@ -430,9 +430,19 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
         {lang === 'es' ? 'Ver comentarios' : 'View comments'} ({displayCommentsCount})
       </button>
       {isCommentsOpen && <div className="mt-3 space-y-2">
-        {post.comments.map(comment => <div key={comment.id} className="rounded-2xl bg-[#FAF8F5] p-3 text-xs">
-          <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
-          <p className="mt-1 text-[#5C7470]">{comment.text}</p>
+        {post.comments.map(comment => <div key={comment.id} className="flex items-start gap-2 rounded-2xl bg-[#FAF8F5] p-3 text-xs">
+          <div className="relative h-8 w-8 shrink-0">
+            <img src={comment.authorAvatar} alt="" className="h-full w-full rounded-full object-cover"/>
+            {supporterBadgesEnabled&&comment.supporterBadge?.badge&&(
+              <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
+              </span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
+            <p className="mt-1 text-[#5C7470]">{comment.text}</p>
+          </div>
         </div>)}
       </div>}
     </article>
@@ -580,7 +590,14 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
               {post.comments.map((comment) => (
                 <div key={comment.id} className="text-xs flex gap-2 items-start">
-                  <img src={comment.authorAvatar} alt={comment.authorPet} className="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" />
+                  <div className="relative mt-0.5 h-8 w-8 shrink-0">
+                    <img src={comment.authorAvatar} alt={comment.authorPet} className="h-full w-full rounded-full object-cover"/>
+                    {supporterBadgesEnabled && comment.supporterBadge?.badge && (
+                      <span className="pointer-events-none absolute -bottom-1 -right-1 z-10" aria-label={lang==='es'?'Insignia verificada de Amigo de PAZO':'Verified PAZO Friend badge'}>
+                        <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
+                      </span>
+                    )}
+                  </div>
                   <div className="flex-1 bg-[#FAF8F5] p-2.5 rounded-2xl shadow-xs">
                     <span className="font-bold text-[#204E4A] mr-1.5">{comment.authorName} ({comment.authorPet}):</span>
                     <span className="text-[#5C7470]">{comment.text}
