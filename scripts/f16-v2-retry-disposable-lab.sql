@@ -130,6 +130,46 @@ BEGIN
  THEN RAISE EXCEPTION 'Historical V2 attempt mutated'; END IF;
 END $test$;
 
+-- Late payment evidence arriving AFTER consent but BEFORE merchant-create
+-- must prevent a second billable subscription despite a previously approved grant.
+INSERT INTO auth.users VALUES ('66666666-6666-4666-8666-666666666666');
+INSERT INTO supporter_private.f16_sandbox_qa_owners VALUES
+('66666666-6666-4666-8666-666666666666','enabled','2030-01-01');
+INSERT INTO supporter_private.paypal_subscription_intents VALUES
+('intent-77777777-7777-4777-8777-777777777777',
+ '66666666-6666-4666-8666-666666666666','paypal',
+ 'P-14V25407JP6850922NLHMDKI','bound','I-TEST-LATE01');
+INSERT INTO supporter_private.f16_sandbox_qa_v2_checkout_attempts VALUES
+('66666666-6666-4666-8666-666666666666','88888888-8888-4888-8888-888888888888',
+ 'intent-77777777-7777-4777-8777-777777777777','es',
+ 'pazo-supporter-sandbox.benefits-v2',repeat('f',64),pg_catalog.clock_timestamp());
+INSERT INTO supporter_private.f16_sandbox_qa_v2_retry_grants
+ (owner_id,predecessor_intent_id,predecessor_subscription_id,resolution,
+  merchant_scope_verified,merchant_terminal_verified,all_transactions_reconciled,
+  webhook_inbox_reconciled,no_outstanding_charge,no_collectible_subscription,
+  evidence_digest,provider_checked_at,reconciliation_checked_at,approved_at)
+ VALUES ('66666666-6666-4666-8666-666666666666',
+ 'intent-77777777-7777-4777-8777-777777777777','I-TEST-LATE01',
+ 'MERCHANT_CONFIRMED_ABSENT',true,true,true,true,true,true,repeat('b',64),
+ '2026-10-18 15:00:00+00','2026-10-18 15:00:00+00','2026-10-18 15:01:00+00');
+DO $test$
+DECLARE attempt jsonb;
+BEGIN
+ attempt:=public.f16_qa_v2_retry_begin_checkout(
+  '66666666-6666-4666-8666-666666666666','99999999-9999-4999-8999-999999999999',
+  'es','pazo-supporter-sandbox.benefits-v2',repeat('f',64),true);
+ INSERT INTO supporter_private.paypal_payment_entries(owner_id,external_subscription_id)
+ VALUES('66666666-6666-4666-8666-666666666666','I-TEST-LATE01');
+ IF public.f16_qa_v2_retry_claim_provider_create(
+   '66666666-6666-4666-8666-666666666666','99999999-9999-4999-8999-999999999999',
+   attempt->>'intentId')
+ THEN RAISE EXCEPTION 'Late original payment did NOT stop provider-create claim'; END IF;
+ IF EXISTS(SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts
+   WHERE owner_id='66666666-6666-4666-8666-666666666666'
+   AND provider_create_claimed_at IS NOT NULL)
+ THEN RAISE EXCEPTION 'Late payment falsely marked provider-create claimed'; END IF;
+END $test$;
+
 -- Grantee checks (without impersonating a hosted account).
 DO $test$
 BEGIN
