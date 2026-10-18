@@ -10,7 +10,7 @@ import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
 import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
-import {attachVerifiedFeedBadges} from './features/supporter/verifiedFeedPostBadges'
+import {attachVerifiedFeedBadges,preloadVerifiedFeedBadgeArt} from './features/supporter/verifiedFeedPostBadges'
 import {supporterBenefitsUiEnabled} from './features/supporter/supporterUiRelease'
 import {
   fetchLatestUnreadSightingNotification,
@@ -496,6 +496,7 @@ function PazoMain() {
       const enrichedPage=interactionsPage.map((post,index)=>({
         ...post,supporterBadge:badgedPage[index].supporterBadge,
       }))
+      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(enrichedPage)
 
       if (feedLoadVersionRef.current !== loadVersion) return
 
@@ -1045,6 +1046,7 @@ function PazoMain() {
       try{
         const resolved=await attachVerifiedFeedBadges([newPost],
           async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(resolved)
         publishedPost=resolved[0]
       }catch(error){
         console.error('PAZO badge verification unavailable for newly created post:',error)
