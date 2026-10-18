@@ -198,6 +198,20 @@ BEGIN
  OR NOT EXISTS(SELECT 1 FROM supporter_private.paypal_subscription_intents i
    WHERE i.intent_id=p_intent_id AND i.owner_id=p_owner_id AND i.state='pending'
     AND i.provider='paypal' AND i.plan_id='P-14V25407JP6850922NLHMDKI')
+ -- Reconcile once more immediately before the irreversible merchant POST.
+ -- A late event between consent and provider-create claim must FAIL CLOSED.
+ OR EXISTS(SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants g
+   JOIN supporter_private.f16_sandbox_qa_paid_periods p
+     ON p.owner_id=g.owner_id AND p.provider_subscription_id=g.predecessor_subscription_id
+   WHERE g.grant_id=a.grant_id AND g.owner_id=p_owner_id)
+ OR EXISTS(SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants g
+   JOIN supporter_private.paypal_payment_entries p
+     ON p.owner_id=g.owner_id AND p.external_subscription_id=g.predecessor_subscription_id
+   WHERE g.grant_id=a.grant_id AND g.owner_id=p_owner_id)
+ OR EXISTS(SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants g
+   JOIN supporter_private.paypal_verified_activation_bindings p
+     ON p.owner_id=g.owner_id AND p.subscription_id=g.predecessor_subscription_id
+   WHERE g.grant_id=a.grant_id AND g.owner_id=p_owner_id)
  THEN RETURN false; END IF;
  UPDATE supporter_private.f16_sandbox_qa_v2_retry_attempts
  SET provider_create_claimed_at=pg_catalog.clock_timestamp()
