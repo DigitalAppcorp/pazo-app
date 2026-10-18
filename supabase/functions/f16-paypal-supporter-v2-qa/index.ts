@@ -166,30 +166,39 @@ Deno.serve(async(request:Request)=>{
    return addCors(reply(400,'invalid_request'),runtime.origin)
   if(!QA_CHECKOUT_RELEASE_APPROVED||!await runtime.canBuy(qaOwner))
    return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
-  try{
-   if(await runtime.admit()!==true)
-    return addCors(reply(429,'rate_limited'),runtime.origin)
-   const a=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})
-   if(!a||a.state!=='bound'||!a.externalSubscriptionId)
-    return addCors(reply(409,'existing_v2_subscription_not_bound'),runtime.origin)
-   const remote=await runtime.reader.readSubscription(
-     a.externalSubscriptionId,{includeApprovalLink:true})
-   if(remote.id!==a.externalSubscriptionId||
-      remote.plan_id!==PLAN||remote.custom_id!==a.intentId)
-    return addCors(reply(409,'merchant_owner_plan_mismatch'),runtime.origin)
-   if(!['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(remote.status))
-    return addCors(reply(409,'merchant_status_unrecognized'),runtime.origin)
-   return addCors(new Response(JSON.stringify({
-     ok:true,environment:'sandbox',phase:remote.status,
-     code:remote.status==='APPROVAL_PENDING'
-       ? remote.approvalUrl?'approval_can_resume':'approval_link_unavailable'
-       : 'approval_no_longer_pending',
-     approvalUrl:remote.status==='APPROVAL_PENDING'?remote.approvalUrl:null,
-     entitlement:false,mayRecordPayment:false,mayGrantBenefits:false,
-     paidThrough:null,
-   }),{status:200,headers:{'content-type':'application/json',
-      'cache-control':'no-store'}}),runtime.origin)
-  }catch{return addCors(reply(503,'original_approval_recovery_unavailable'),runtime.origin)}
+  // All requests are owner-scoped and read-only. Safe diagnostic categories
+  // contain NO PayPal subscription IDs, payer data, URLs or raw provider output.
+  let admission
+  try{admission=await runtime.admit()}
+  catch{return addCors(reply(503,'sandbox_admission_unavailable'),runtime.origin)}
+  if(admission!==true)
+   return addCors(reply(429,'rate_limited'),runtime.origin)
+  let account
+  try{account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})}
+  catch{return addCors(reply(503,'private_account_read_unavailable'),runtime.origin)}
+  if(!account||account.state!=='bound'||!account.externalSubscriptionId)
+   return addCors(reply(409,'existing_v2_subscription_not_bound'),runtime.origin)
+  let merchant
+  try{merchant=await runtime.reader.readSubscription(
+    account.externalSubscriptionId,{includeApprovalLink:true})}
+  catch{return addCors(reply(503,'paypal_subscription_read_unavailable'),runtime.origin)}
+  if(merchant.id!==account.externalSubscriptionId||
+     merchant.plan_id!==PLAN||merchant.custom_id!==account.intentId)
+   return addCors(reply(409,'merchant_owner_plan_mismatch'),runtime.origin)
+  if(!['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(merchant.status))
+   return addCors(reply(409,'merchant_status_unrecognized'),runtime.origin)
+  const code=merchant.status==='APPROVAL_PENDING'
+   ? merchant.approvalUrl?'approval_can_resume'
+     : merchant.approvalLinkState==='rejected'?'approval_link_rejected'
+     : 'approval_link_unavailable'
+   : 'approval_no_longer_pending'
+  return addCors(new Response(JSON.stringify({
+    ok:true,environment:'sandbox',phase:merchant.status,code,
+    approvalUrl:merchant.status==='APPROVAL_PENDING'?merchant.approvalUrl:null,
+    entitlement:false,mayRecordPayment:false,mayGrantBenefits:false,
+    paidThrough:null,
+  }),{status:200,headers:{'content-type':'application/json',
+    'cache-control':'no-store'}}),runtime.origin)
  }
  if(data.action==='verify_payment'){
   if(Object.keys(data).sort().join('|')!=='action')
