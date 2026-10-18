@@ -1,3 +1,15 @@
+# F16 — Segunda cuenta descartable QA preparada, no creada (2026-10-18)
+
+**PO aprobó seguir con pruebas independientes de Sandbox sin tocar el owner V2 huérfano.** La auditoría SQL real encontró 2 bloqueos adicionales que habrían rechazado al Auth nuevo: `public.f16_qa_v2_owner_can_checkout` y `public.f16_qa_v2_begin_checkout` exigían historial `paypal_p06_checkout_attempts` V1. Se preparó migración `supabase/migrations/20261018193000_f16_sandbox_fresh_owner_qa_admission.sql` que elimina SOLO ese requisito anacrónico, manteniendo Auth+lista privada habilitada/expirable, consentimiento V2 bilingüe, claim y un único primer V2 por owner, sin cambiar P06, el owner original, pago/ledger ni Live. **MIGRACIÓN NO APLICADA**; necesita PO GO separado. Cuenta Auth nueva NO creada, y su autorización QA tampoco insertada.
+
+**PG17 laboratorio sintético PASS** `scripts/f16-v2-fresh-owner-disposable-lab.sql`, GitHub workflow `f16-v2-fresh-owner-disposable-lab.yml`. Simula antiguo con V1 y V2 existente, nuevo Auth sin P06 habilitado, no habilitado denegado, mismo request_key idempotente y segundo request_key bloqueado, cero pagos. **6/6 workflows SUCCESS** en commit `a5a953b205275c870db57b3ae21461f1f471f448`: CI, 4 PG17 labs anteriores y nuevo PG17 fresh owner. Documentado `docs/F16_SECOND_DISPOSABLE_QA_ACCOUNT_20261018.md`.
+
+**Próximo gate:** PO autoriza aplicar solo nueva migración; luego registro Auth de prueba legítimo sin contraseña compartida, QA allowlist privada de UUID concreto y vencimiento corto bajo GO separado. **Primera prueba en cuenta nueva debe buscar completar pago y cancelación**, no abandonar primero, pues el límite de una primera tentativa por owner sigue vigente. La recuperación real del owner huérfano sigue bloqueada; NO introducir grants, no cambiar inbox `CREATED` pending, no PayPal Live, no main. PR #44 DRAFT.
+
+**Marcador:** `F16_SECOND_AUTH_QA_FRESH_OWNER_ADMISSION_PG17_PASS_MIGRATION_STAGED_PO_GO_REQUIRED`.
+
+---
+
 # F16 — Inventario completo PayPal negativo; diagnóstico de recuperación delimitado (2026-10-18)
 
 **Nuevo resultado real de la cuenta Auth QA (captura Product Owner):** después de pulsar `Investigar suscripción en PayPal` con Edge `f16-paypal-supporter-v2-qa` v14, la UI mostró **(a)** «El inventario del plan no muestra el intento original» y **(b)** «La solicitud tampoco aparece en el inventario completo sin filtro de plan». Según contrato del frontend, este segundo texto solo corresponde a `unfiltered_inventory_original_absent` con `unfilteredInventoryEnumerated=true`. Esto confirma que **el mismo merchant y API credentials no presentan el ID original en ninguna de las dos listas que PAZO consultó**. No repetir el botón de investigación; ya está completado.
