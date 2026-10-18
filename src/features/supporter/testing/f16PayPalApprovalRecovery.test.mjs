@@ -116,7 +116,7 @@ test('F16 Sandbox account recovery only offers approval after verified merchant 
  assert.ok(panel.includes("account.state==='bound'&&!paidThrough&&!cancelled"))
  assert.ok(panel.includes("recoveryStage==='approval_resumable'"))
  assert.ok(panel.includes("call({action:'resume_approval',intentId:account.intentId})"))
- assert.ok(panel.includes("setErrorKind('status')"))
+ assert.ok(panel.includes("await inspectAccountProvider(account,inspection)"))
  assert.ok(panel.includes("setErrorKind('payment')"))
  assert.ok(panel.includes("setRecoveryMessage('unavailable')"))
  assert.ok(panel.includes("providerStatus==='CANCELLED'")||panel.includes("result.phase==='CANCELLED'"))
