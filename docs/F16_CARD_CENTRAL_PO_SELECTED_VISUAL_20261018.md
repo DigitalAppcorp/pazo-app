@@ -1,3 +1,5 @@
+> **Ajuste visual PO aprobado, 2026-10-18 — CTA PayPal opción 2:** el Product Owner detectó que el logo azul de PayPal era ilegible sobre el botón verde bosque en su captura real, y seleccionó explícitamente **opción 2: fondo lima claro, texto verde oscuro, logo PayPal azul original visible**. Aplicado en `SandboxCheckoutQaPanel.tsx` (botones inline/standalone, normal/focus/hover/disabled), icono ampliado a 25px y sin opacidad artificial en estado deshabilitado. Se mantienen `disabled={!consent||busy||phase!=='ready'||attempted.current}`, consentimiento desmarcado inicialmente, términos exactos, idempotencia y pago Sandbox. Regresión añadida a `f16SupporterProductExperience.test.mjs`; código `bbde81a08ed417adcfe9b039156eca2933e9c092` **GitHub Actions 7/7 SUCCESS**. Sigue pendiente aceptación visual en Vite. No toca PayPal, SQL, Edge, Live, main ni backend.
+
 # F16 — «Card Central», referencia visual seleccionada por el Product Owner
 
 **2026-10-18. Estado de código: 7/7 GitHub Actions PASS; aceptación visual real pendiente.**
