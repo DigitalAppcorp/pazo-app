@@ -107,18 +107,26 @@ test('PayPal successful HTTP with missing collection never proves absence',async
  assert.equal(response.mayRetry,false)
  assert.equal(response.merchantInventoryEnumerated,undefined)
 })
-test('unrelated rows with missing fields never prove absence or block exact proof',async()=>{
- const other={id:'I-OTHER-ABC123',plan_id:PLAN}
+test('unrelated list rows may lack status and plan; valid IDs suffice for inventory membership',async()=>{
+ const other={id:'I-OTHER-ABC123'}
  const {reader:absent}=make([{subscriptions:[other],links:[]}])
  const absentResult=await absent.inspect({subscriptionId:SUB,planId:PLAN})
- assert.equal(absentResult.code,'merchant_inventory_rows_unverified')
+ assert.equal(absentResult.code,'original_not_in_current_merchant_inventory')
+ assert.equal(absentResult.merchantInventoryEnumerated,true)
  assert.equal(absentResult.mayRetry,false)
  const {reader:present}=make([{subscriptions:[other,row('CANCELLED')],links:[]}])
  const presentResult=await present.inspect({subscriptionId:SUB,planId:PLAN})
  assert.equal(presentResult.code,'original_merchant_resource_found')
  assert.equal(presentResult.providerStatus,'CANCELLED')
- assert.equal(presentResult.merchantInventoryEnumerated,false)
+ assert.equal(presentResult.merchantInventoryEnumerated,true)
  assert.equal(presentResult.mayRetry,false)
+})
+test('unrelated list entries without a trustworthy ID cannot prove the original absent',async()=>{
+ const {reader}=make([{subscriptions:[{plan_id:PLAN,status:'ACTIVE'}],links:[]}])
+ const r=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(r.code,'merchant_inventory_rows_unverified')
+ assert.equal(r.merchantInventoryEnumerated,undefined)
+ assert.equal(r.mayRetry,false)
 })
 test('untrusted provider field for exact original stays unverified',async()=>{
  const {reader}=make([{subscriptions:[{id:SUB,plan_id:PLAN}],links:[]}])
