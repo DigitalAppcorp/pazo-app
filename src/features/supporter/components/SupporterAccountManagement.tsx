@@ -36,6 +36,9 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [status, setStatus] = useState<Record<string, string>>({})
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
   const [cancelDone, setCancelDone] = useState<string | null>(null)
+  // An authenticated, already-bound V2 attempt must be managed, never offered a new request key.
+  const [qaV2AccountState,setQaV2AccountState] = useState<'checking'|'none'|'pending'|'bound'|'unavailable'>('checking')
+  const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
   const closeRef = useRef<HTMLButtonElement>(null)
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
   const spanish = lang === 'es'
@@ -181,7 +184,26 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         {membership.kind === 'inactive' && <>
           <SupporterOfferB lang={lang}>
             {qaV2Screen ? (
-              <SandboxCheckoutQaPanel lang={lang} inline/>
+              qaV2AccountState==='none'
+                ? <SandboxCheckoutQaPanel lang={lang} inline/>
+                : <div role="status" className="space-y-3 rounded-[18px] bg-[#EFF3E7] px-4 py-3 text-[12px] leading-relaxed text-[#204E4A]">
+                    <p>{qaV2AccountState==='bound'
+                      ? label('Ya existe una suscripción Sandbox vinculada a esta cuenta. PAZO no puede crear otra. Consulta su estado y, si falta la aprobación, recuperaremos el enlace de la operación existente.',
+                        'A Sandbox subscription is already linked to this account. PAZO cannot create another. Check its status; if approval is still needed, the original approval link must be recovered.')
+                      : qaV2AccountState==='pending'
+                        ? label('Ya existe una solicitud de suscripción Sandbox pendiente. No se iniciará una segunda.',
+                          'A Sandbox subscription request is pending. A second one will not be started.')
+                        : qaV2AccountState==='unavailable'
+                          ? label('No se pudo comprobar si ya tienes una suscripción Sandbox. El pago permanece bloqueado hasta verificarlo.',
+                            'Could not verify whether you already have a Sandbox subscription. Checkout remains blocked until it is verified.')
+                          : label('Comprobando si ya existe una suscripción Sandbox para evitar cobros duplicados…',
+                            'Checking for an existing Sandbox subscription to prevent duplicate payments…')}</p>
+                    <button type="button" onClick={()=>setQaManagementOpen(true)}
+                      disabled={qaV2AccountState==='checking'}
+                      className="min-h-11 w-full rounded-full bg-white px-4 py-2 text-[12px] font-extrabold text-[#204E4A] hover:bg-[#E6EDD9] focus-visible:bg-[#E1E53F]/35 disabled:opacity-50">
+                      {label('Consultar mi suscripción Sandbox','Review my Sandbox subscription')}
+                    </button>
+                  </div>
             ) : (
               <div className="space-y-2">
                 <button type="button" disabled
@@ -205,7 +227,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         </>}
         {(qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
-          <details open={!qaV2Screen} className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
+          <details open={qaManagementOpen} onToggle={e=>setQaManagementOpen(e.currentTarget.open)}
+            className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
             <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold focus-visible:bg-[#E1E53F]/30">
               {qaV2Screen
                 ? label('Gestionar mi prueba de PayPal Sandbox', 'Manage my PayPal Sandbox test')
@@ -215,7 +238,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
