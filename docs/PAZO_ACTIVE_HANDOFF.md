@@ -1,3 +1,17 @@
+# F16 — Checkout Sandbox 409 después de un abandono: recuperación accesible (2026-10-18)
+
+**Nueva captura PO (03:16 UTC):** casilla marcada, CTA gris y «PayPal no se abrió o la respuesta quedó sin confirmar»; usuario no puede pagar. Logs read-only de Edge muestran POST **409 a las 03:16:10 UTC** a `f16-paypal-supporter-v2-qa`, precedido de POST 200. La cuenta QA que tiene el intento V2 sigue `enabled` y autorización temporal vigente (consulta agregada de DB, sin exponer IDs). El 409 es compatible con intentar crear otra suscripción cuando ya hay objeto Sandbox V2 asociado. No afirmar que cada evento pertenece a un browser concreto sin correlación autenticada.
+
+**Diagnóstico UI:** `SandboxCheckoutQaPanel` mantiene `attempted.current=true` después del begin (correcto contra duplicados), pero en `pending` dejaba el botón deshabilitado sin acción para pasar al flujo de recuperación; `SupporterAccountManagement` podía tener `qaV2AccountState='none'` de una consulta anterior y mostrar checkout de nuevo incluso después de crear el objeto PayPal.
+
+**Fix SOLO frontend PR #44 DRAFT:** `SandboxCheckoutQaPanel.tsx` recibe `onReviewExisting`, muestra **«Revisar mi solicitud de PayPal»** al quedar `pending` por cualquier resultado no confirmado, sin repetir POST de `begin`. `SupporterAccountManagement.tsx` abre gestión y pone estado checking, aumenta `qaReviewRevision`; `SandboxV2AccountPanel.tsx` reconsulta *únicamente* `action:'list'` al recibir `reviewRevision`, y ofrece luego `Consultar PayPal Sandbox` → `Continuar la aprobación en PayPal` si estado `APPROVAL_PENDING`. Sin IDs cliente, sin resetear intentos, sin cambios a Edge v4, migrations, Live, beneficios ni cobros. Tests de product experience/smoke actualizados.
+
+**Usuario:** tras `git pull --ff-only` y reiniciar el script local, volver a la pantalla `Amigo de PAZO`, ir a «Gestionar mi prueba» o usar nuevo «Revisar mi solicitud de PayPal». Dentro, `Actualizar prueba` y `Consultar PayPal Sandbox`. Si provider `APPROVAL_PENDING`, pulsa retomar aprobación; **sin obligación de pagar durante QA**. Si el enlace original no aparece, no crear otro objeto por ahora; se necesita lógica de expiración/retirada y nuevo intento reconciliado, que sigue gate pendiente.
+
+**Estado:** fix de UI en rama; verificar CI/PG y visual QA PO del recorrido; Sandbox Edge **v4 sigue deploy ACTIVE**, no nuevo deployment necesario para fix UI.
+
+---
+
 # F16 — Edge QA V2 v4 desplegada con recuperación read-only (2026-10-18)
 
 **Autorización explícita PO**: «sí» para publicar **únicamente** recuperación de aprobación PayPal Sandbox `resume_approval`, sin activar Live ni crear nuevas suscripciones.
