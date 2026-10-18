@@ -1,3 +1,11 @@
+## Postflight autorizado y aplicado — 2026-10-18
+
+Tras GO explícito del PO se **aplicó** la migración read-only `f16_v2_created_webhook_candidate_readonly` a Supabase `mrybvqdebbgcayuvgkkr` y se **desplegó** `f16-paypal-supporter-v2-qa` como **v13 ACTIVE, verify_jwt=true**, 18 archivos, nuevo route owner-only `audit_created_webhook` habilitado. Los 15 módulos antiguos no cambiaron frente al código hospedado de v12. La UI en rama PR #44 contiene el botón «Verificar origen de solicitud» que consulta esa ruta, pero el Vite local no se ha sincronizado automáticamente.
+
+ACL postflight: anon/auth no pueden ejecutar RPC, service_role sí. Resultados: 1 candidato de evento CREATED, 0 nuevos reintentos, 0 grants, 0 pagos, 0 períodos, 0 activaciones, 1 inbox CREATED sigue `pending`. CI + 4 PG labs **SUCCESS** (39141841083/39141841057/39141841209/39141841135/39141841067, commit `e1d62816`). **El GET real del evento PayPal está PENDIENTE de que el owner QA invoque el botón desde su sesión**; no se ha atribuido la identidad por fecha ni se ha inventado resultado. Ningún nuevo checkout, pago, cierre de inbox o Live autorizado.
+
+---
+
 # PAZO F16 — Conciliación de webhook CREATED y solicitud V2 abandonada
 
 **Fecha:** 2026-10-18 · **Ámbito:** solo Sandbox, PR #44 DRAFT · **Estado:** preparación técnica aprobada en CI, NO instalada en Supabase alojado.
