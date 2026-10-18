@@ -17,4 +17,7 @@ PO corrigió explícitamente la interpretación tipográfica: el error era **tip
 - El PO debe comprobar capturas de las 6 correcciones **en Vite local**: tamaño legible, 2+ mascotas por fila en muro, velocidad perceptible de badge (dependiente RPC), chip Sugerencia intacto, arte base oculto en perfil custom y hitos explicativos. No confundir build PASS con aceptación visual.
 - Restricción permanente `AGENTS.md`: cero contornos de tarjetas, botones, foco, solo campos de texto justificados; QA mantiene estilos preexistentes.
 
-**Gate:** `F16_PO_TYPOGRAPHY_AND_FIVE_VISUAL_CORRECTIONS_IN_BRANCH_CI_REVIEW_PENDING`.
+## CI de código verificado
+La última ejecución **funcional** del commit `97a6d5d3b776e05ccf9efe748e7164b48720aa34` concluyó **7/7 SUCCESS**: CI con `tsc -b` + Vite build, pruebas de interfaz y seis laboratorios PostgreSQL F16. La primera ejecución detectó una aserción de copy del muro y la siguiente detectó una llave JSX faltante en `PublicProfileView`; ambas fueron corregidas antes del PASS final. **No reemplaza QA visual** con el PO.
+
+**Gate:** `F16_PO_TYPOGRAPHY_AND_FIVE_VISUAL_CORRECTIONS_CODE_7_OF_7_PASS_VITE_PO_REVIEW_PENDING`.
