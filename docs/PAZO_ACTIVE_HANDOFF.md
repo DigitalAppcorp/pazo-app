@@ -1,3 +1,17 @@
+# F16 — Backend Sandbox V16 desplegado con GO PO; esperando verificar pago existente (2026-10-18)
+
+PO concedió GO para instalar solo la corrección del verificador en `f16-paypal-supporter-v2-qa`. Preflight: PR #44 DRAFT con CI + seis laboratorios 7/7 SUCCESS; hosted v15 ACTIVE JWT true; 19 dependencias cotejadas y únicamente dos módulos modificados. Despliegue único confirmado a Supabase: **v16 ACTIVE / verify_jwt=true / 19 archivos**. Readback confirmó guardas para totales PayPal opcionales y códigos de diagnóstico fijos sin PII. El resto del checkout y funciones Live no se desplegaron. Histórico 404 pendiente aislado.
+
+Postflight READ-ONLY: 4 `paypal_subscription_intents` totales, 0 pagos acreditados, 0 períodos QA acreditados, 4 webhooks `PAYMENT.SALE.COMPLETED` `pending` (incluye históricos). Ninguna compra o cancelación nueva, ningún registro financiero cambiado ni merge a main. `f16-paypal-webhook` v19, `f16-paypal-supporter` v8, `f16-paypal-supporter-account` v11 observados, sin mutaciones en ellos. PR #44 sigue DRAFT.
+
+**Siguiente acción PO:** actualizar Vite local en la rama `f13/section-titles-20261012` (`git status --short` y `git pull --ff-only` si está limpio); regresar a la cuenta Auth **que posee la suscripción ACTIVE reciente**, no asumir que es `ba99883@gmail.com` (la auditoría anterior no encontró intentos asociados a esta). Presionar una vez `Verificar pago real Sandbox` en el panel de esa cuenta; compartir pantalla del período acreditado o diagnóstico. No volver a pagar, no cambiar cuenta, no cancelar antes de verificar el período. Retorno de PayPal a Vercel protegido sigue pendiente como defecto UX independiente.
+
+Informe: `docs/F16_SANDBOX_V2_PAYMENT_VERIFIER_OPTIONAL_TOTALS_20261018.md`.
+
+**Gate:** `F16_SANDBOX_V16_ACTIVE_NO_NEW_PAYMENT_WAIT_EXISTING_OWNER_VERIFICATION`.
+
+---
+
 # F16 — Verificador Sandbox V2 corregido en PR #44; despliegue pendiente (2026-10-18)
 
 **Nuevo GO PO:** «sí» para corregir el verificador de pagos tras screenshot de PayPal `ACTIVE` + 503 de `verify_payment`. Solamente rama `f13/section-titles-20261012`: se corrigió la exigencia de totales opcionales PayPal en `pazoSandboxV2MerchantVerify.mjs`, con guardas de paginación contradictoria, enlace next, venta única, GET de venta independiente, vínculo owner/intent/plan, importes, reversos y fechas; se añadieron códigos de error fijos y presentación privada sin PII, así como regresiones sintéticas. **CI+6 PG labs 7/7 SUCCESS** en commit funcional `2501b1d`. La causa concreta del 503 anterior aún no está demostrada porque la Edge antigua lo ocultaba.
