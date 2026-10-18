@@ -34,7 +34,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [error,setError]=useState(false)
  const [errorKind,setErrorKind]=useState<'account'|'status'|'payment'|'other'>('other')
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
- const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|null>(null)
+ const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|'provider'|'account'|'admission'|'restricted'|null>(null)
  const [confirm,setConfirm]=useState(false)
  const [cancelled,setCancelled]=useState(false)
  const [paidThrough,setPaidThrough]=useState<string|null>(null)
@@ -49,7 +49,18 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     apikey:config.key,'content-type':'application/json'},
    cache:'no-store',body:JSON.stringify(payload),
   })
-  if(!response.ok)throw Error('QA_SERVER_UNAVAILABLE')
+  if(!response.ok){
+   // Classify known, fixed server codes only. Never render provider output.
+   let code=''
+   try{const body=await response.json();code=typeof body?.code==='string'?body.code:''}
+   catch{/* no trusted diagnostic */}
+   const allowed=new Set([
+    'sandbox_admission_unavailable','private_account_read_unavailable',
+    'paypal_subscription_read_unavailable','rate_limited',
+    'sandbox_qa_owner_required','merchant_owner_plan_mismatch',
+   ])
+   throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
+  }
   if(acknowledgement)return response
   const result=await response.json() as Result
   if(!result|| (result.paidThrough!==null&&result.paidThrough!==undefined &&
@@ -138,8 +149,13 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     setProviderStatus(result.phase);setRecoveryMessage('changed');return
    }
    throw Error('UNKNOWN_RECOVERY')
-  }catch{setRecoveryMessage('failed')}
-  finally{setBusy(false)}
+  }catch(error){
+   const code=error instanceof Error?error.message:''
+   setRecoveryMessage(code==='paypal_subscription_read_unavailable'?'provider':
+    code==='private_account_read_unavailable'?'account':
+    code==='sandbox_admission_unavailable'||code==='rate_limited'?'admission':
+    code==='sandbox_qa_owner_required'||code==='merchant_owner_plan_mismatch'?'restricted':'failed')
+  }finally{setBusy(false)}
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -258,7 +274,19 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
          : recoveryMessage==='changed'
            ? t('El estado de PayPal cambió. Comprueba el pago antes de intentar una operación nueva.',
                'PayPal status changed. Check payment before attempting a new operation.')
-           : t('No pudimos recuperar la aprobación original. No se ha solicitado otro cobro.',
+           : recoveryMessage==='provider'
+            ? t('PayPal no permitió consultar la solicitud anterior. PAZO no creó otra ni registró un pago; hace falta revisar la conexión del servidor con PayPal.',
+                'PayPal subscription lookup failed. PAZO did not create another or record a payment; the server-to-PayPal connection needs review.')
+          : recoveryMessage==='account'
+            ? t('No se pudo verificar la vinculación privada de esta solicitud. No se inició otro cobro.',
+                'Could not verify the private ownership of this request. No further charge was initiated.')
+          : recoveryMessage==='admission'
+            ? t('La comprobación está limitada temporalmente. No intentes crear otra solicitud.',
+                'Verification is temporarily rate-limited. Do not create another request.')
+          : recoveryMessage==='restricted'
+            ? t('La solicitud necesita revisión de autorización o coincidencia con PayPal. No se abrió otra compra.',
+                'Account authorization or PayPal matching requires review. No other checkout was opened.')
+          : t('No pudimos recuperar la aprobación original. No se ha solicitado otro cobro.',
                'Could not recover the original approval. No other payment was requested.')}
      </p>}
      <div className="flex flex-wrap gap-2">
