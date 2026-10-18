@@ -10,7 +10,8 @@ type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'c
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
- approvalUrl?:string|null;eligible?:boolean;merchantInventoryEnumerated?:boolean}
+ approvalUrl?:string|null;eligible?:boolean;merchantInventoryEnumerated?:boolean;
+ correlated?:boolean;eventReconciled?:boolean;mayRetry?:boolean}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
  if(typeof raw!=='string'||raw.length>2048)return null
@@ -36,6 +37,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [accounts,setAccounts]=useState<Account[]>([])
  const [retryEligibility,setRetryEligibility]=useState<'unknown'|'checking'|'approved'|'blocked'>('unknown')
  const [inventoryState,setInventoryState]=useState<'unknown'|'checking'|'found'|'missing'|'partial'|'error'>('unknown')
+ const [createdEventAudit,setCreatedEventAudit]=useState<'unknown'|'checking'|'matched'|'mismatch'|'unavailable'|'missing'|'error'>('unknown')
  const [inventoryMerchantStatus,setInventoryMerchantStatus]=useState<string|null>(null)
  const [inventoryDiagnostic,setInventoryDiagnostic]=useState<'auth'|'scope'|'request'|'network'|'invalid'|'service'|'rate'|'unknown'>('unknown')
  const [inventoryPayloadIssue,setInventoryPayloadIssue]=useState<'collection'|'page'|'rows'|'original'|'pagination'|'unknown'>('unknown')
@@ -79,6 +81,12 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     'inventory_provider_unavailable','inventory_malformed',
     'inventory_network_unavailable','inventory_oauth_invalid',
     'inventory_binding_unverified','merchant_inventory_read_unavailable',
+    'created_inbox_candidate_unavailable','created_inbox_candidate_untrusted',
+    'created_audit_binding_unverified','created_audit_network_unavailable',
+    'created_audit_oauth_denied','created_audit_event_not_found',
+    'created_audit_access_denied','created_audit_rate_limited',
+    'created_audit_provider_unavailable','created_audit_invalid_response',
+    'created_audit_invalid_token','created_audit_unavailable',
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
   }
@@ -129,7 +137,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   setProviderStatus(null);setRecoveryStage('checking');setRecoveryMessage(null);setCancelled(false)
   setErrorKind('account')
   onAccountInspection?.('checking')
-  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown')
+  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown')
   try {
    const result=await call({action:'list'}) as Result
    if(result.ok!==true||result.phase!=='V2_ACCOUNTS'||
@@ -255,13 +263,28 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   }
   finally{setBusy(false)}
  }
+ const auditCreatedEvent=async()=>{
+  if(!account||account.state!=='bound'||busy)return
+  setBusy(true);setCreatedEventAudit('checking')
+  try{
+   const result=await call({action:'audit_created_webhook',intentId:account.intentId}) as Result
+   if(result.ok!==true||result.eventReconciled!==false||result.mayRetry!==false||
+      result.paidThrough!==null||result.mayGrantBenefits!==false)
+    throw Error('UNTRUSTED_CREATED_EVENT_REVIEW')
+   setCreatedEventAudit(result.code==='created_event_matches_bound_subscription'&&result.correlated===true
+    ?'matched':result.code==='created_event_candidate_unavailable'?'unavailable':'mismatch')
+  }catch(error){
+   const code=error instanceof Error?error.message:''
+   setCreatedEventAudit(code==='created_audit_event_not_found'?'missing':'error')
+  }finally{setBusy(false)}
+ }
  const selectAccount=(a:Account)=>{
   if(busy)return
   const inspection=++inspectionSeq.current
   setAccount(a);setProviderStatus(null);setRecoveryMessage(null);setRecoveryStage('checking')
   void inspectAccountProvider(a,inspection)
   setConfirm(false);setCancelled(false);setPaidThrough(null)
-  setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
+  setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -479,6 +502,29 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
         {inventoryState==='checking'?t('Consultando inventario…','Checking merchant inventory…'):
           t('Investigar suscripción en PayPal','Investigate subscription in PayPal')}
        </button>}
+       {account.state==='bound'&&<button type="button" className={button}
+        onClick={()=>void auditCreatedEvent()} disabled={busy||createdEventAudit==='checking'}>
+        {createdEventAudit==='checking'
+          ? t('Verificando el evento…','Checking the event…')
+          : t('Verificar origen de solicitud','Verify request origin')}
+       </button>}
+       {createdEventAudit!=='unknown'&&createdEventAudit!=='checking'&&<p role="status"
+         className="text-xs leading-relaxed">
+        {createdEventAudit==='matched'
+          ? t('El evento firmado de creación corresponde a esta solicitud de PayPal. Esto no verifica un pago ni permite iniciar otra suscripción.',
+              'The signed creation event matches this PayPal request. This does not verify payment or permit another subscription.')
+          : createdEventAudit==='mismatch'
+            ? t('El evento de creación recuperado no coincide con esta solicitud. No se cambió ningún registro ni se autorizó un cobro.',
+                'The recovered creation event does not match this request. No record or billing authorization was changed.')
+          : createdEventAudit==='unavailable'
+            ? t('No se identificó un único evento pendiente y verificable. Se conserva el historial para conciliación.',
+                'No single verifiable pending event was identified. History remains preserved for reconciliation.')
+          : createdEventAudit==='missing'
+            ? t('PayPal no encuentra el evento de creación original. No se puede dar por cancelada la suscripción solo por esta respuesta.',
+                'PayPal cannot find the original creation event. This response alone does not mean the subscription was cancelled.')
+            : t('No se pudo completar la consulta del evento de PayPal. No se inició otro pago.',
+                'The PayPal event check could not be completed. No new payment was initiated.')}
+       </p>}
        {inventoryState!=='unknown'&&inventoryState!=='checking'&&<p role="status" className="text-xs">
         {inventoryState==='found'
           ? t('PayPal encontró el intento original. Estado: '+inventoryMerchantStatus+'. No se inició otro pago.',
