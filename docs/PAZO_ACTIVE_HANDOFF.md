@@ -1,3 +1,17 @@
+# F16 — Auditoría de causa raíz: bloqueo viejo confirmado; PayPal 404 aún sin causa (2026-10-18)
+
+**PO GO: auditoría y reproducción sin cobros.** Fuente detallada: `docs/F16_V2_ABANDONMENT_ROOT_CAUSE_20261018.md`. Se verificó con **lectura SQL real** que `public.f16_qa_v2_begin_checkout` conserva `IF EXISTS ... WHERE owner_id=p_owner_id THEN RAISE EXCEPTION 'One v2 attempt per owner'`, sin distinguir si el intento está pagado. El primer V2 quedó `bound` solo después de POST + GET PayPal `APPROVAL_PENDING` con `plan_id/custom_id` válidos. `bound` NO significa pagado. La nueva ruta multiintento necesita un grant comercial privado; al haber 0 grants no puede abrir otra compra.
+
+**Prueba comportamental incorporada en la rama PR #44:** `src/features/supporter/testing/f16AbandonedV2RootCause.test.mjs` reproduce sintéticamente primera URL de aprobación no pagada + salida del comprador + rechazo del nuevo `requestKey`; cuenta PayPal POST **1**, `paidThrough:null`, `entitlement:false`. Replay de la misma llave vinculada no duplica el POST. Esta prueba es reproducción del contrato SQL, no prueba de por qué PayPal devuelve 404.
+
+**GitHub SUCCESS 4/4 en commit `bed0780c5e1a34c39af897a4897be3e1271eed50`:** CI `39138437947`, F16 PG `39138437956`, Retry PG17 `39138437962`, Multiattempt PG17 `39138437954`. Live, Supabase hosted, PayPal, fondos, merchant grant y main NO modificados.
+
+**Hechos heredados:** PO comprobó misma cuenta Business y credenciales inmutadas; inventario PayPal no lista el external V2, muestra 0 activas/impagadas, 3 canceladas históricas; movimientos 17–18 oct vacíos; SQL 1 V2 bound, 0 sale entries/paid periods/activation bindings/retry grants y un webhook CREATED `pending`. No preguntar otra vez al PO por credenciales o mismas capturas. La desaparición del ID PayPal está **sin explicación verificada**; no inventar terminal/cancelación ni grant por 404. El siguiente gate es preparar conciliación administrativa mínima del evento CREATED pendiente y condición merchant no cobrable; documentar evidencia antes de activar retry.
+
+**Marcador:** `F16_ABANDONED_V2_LEGACY_OWNER_LOCK_REPRODUCED_CI_PASS_PAYPAL_404_EXTERNAL_UNKNOWN_ZERO_GRANTS`.
+
+---
+
 # F16 — Confirmación PO de SAME MERCHANT, no repetir preguntas (2026-10-18)
 
 **Decisión / hecho confirmado directamente por Product Owner, reiterado:** las credenciales PayPal Sandbox, cuenta Business comercial y aplicación son las mismas desde las pruebas anteriores; no se cambiaron. **No volver a solicitar confirmar merchant, credenciales o revisar las mismas pantallas.** Esto sustituye el supuesto especulativo de que el 404 se debía a un cambio deliberado de credenciales. La API creó/bind V2 y posteriormente no la reconoce (404); el mismo merchant Business muestra 3 suscripciones CANCELLED (2 coinciden con PAZO histórico, ninguna es la V2), 0 ACTIVE, 0 UNPAID y ningún movimiento del 17–18 oct en actividad filtrada Todas/All, según capturas PO. El listado API retorna 'original_not_in_current_merchant_inventory'; esto no confirma cancelación técnica por PayPal del V2.
