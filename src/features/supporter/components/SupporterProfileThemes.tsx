@@ -151,10 +151,10 @@ export const SupporterThemePreviewPicker = ({value,onChange,lang,enabled=false}:
  <section aria-label={lang==='es'?'Vista previa de fondos':'Background preview'}
   className="relative">
   <div className="mb-3 flex items-center justify-between gap-2">
-   <p className="text-[12px] font-bold text-[#476862]">
+   <p className="text-[14px] font-bold text-[#476862]">
     {lang==='es'?'Fondos disponibles':'Available backgrounds'}
    </p>
-   <span className="rounded-full bg-[#F4EDD8] px-3 py-1.5 text-[10px] font-bold text-[#6A6557]">
+   <span className="rounded-full bg-[#F4EDD8] px-3 py-1.5 text-[12px] font-bold text-[#6A6557]">
     {lang==='es'?(enabled?'AMIGO DE PAZO':'EN DESARROLLO'):(enabled?'PAZO FRIEND':'IN DEVELOPMENT')}
    </span>
   </div>
@@ -165,7 +165,7 @@ export const SupporterThemePreviewPicker = ({value,onChange,lang,enabled=false}:
     <span aria-hidden="true" className={'flex h-[58px] w-[58px] items-center justify-center rounded-[18px] text-[20px] font-bold '+(value===null?'bg-[#204E4A] text-white':'bg-[#F8F5EC] text-[#204E4A]')}>
      ·
     </span>
-    <span className="max-w-[85px] text-[11px] font-bold leading-tight text-[#204E4A]">
+    <span className="max-w-[85px] text-[13px] font-bold leading-tight text-[#204E4A]">
      {lang==='es'?'Original':'Original'}
     </span>
    </button>
@@ -177,13 +177,13 @@ export const SupporterThemePreviewPicker = ({value,onChange,lang,enabled=false}:
       style={{background:option.surface}}>
       <span className="h-7 w-7 rounded-full opacity-70" style={{background:option.swatch}}/>
      </span>
-     <span className={'max-w-[85px] text-[11px] font-bold leading-tight '+(value===option.id?'text-[#204E4A] underline decoration-[#E1E53F] decoration-[3px] underline-offset-[5px]':'text-[#5C7470]')}>
+     <span className={'max-w-[85px] text-[13px] font-bold leading-tight '+(value===option.id?'text-[#204E4A] underline decoration-[#E1E53F] decoration-[3px] underline-offset-[5px]':'text-[#5C7470]')}>
       {lang==='es'?option.labelEs:option.labelEn}
      </span>
     </button>
    ))}
   </div>
-  <p className="mt-1 px-1 text-[11px] text-[#617670]" aria-live="polite">
+  <p className="mt-1 px-1 text-[13px] text-[#617670]" aria-live="polite">
    {lang==='es'
     ?(enabled?'Selecciona un fondo y confirma el guardado de forma segura.':'Prueba los diseños; no se guardan cambios ni se activa ninguna membresía.')
     :(enabled?'Choose a background, then confirm saving securely.':'Explore the designs; no changes are saved or membership activated.')}
