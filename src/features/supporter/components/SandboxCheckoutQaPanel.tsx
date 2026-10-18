@@ -152,10 +152,11 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
               : label('No pudimos consultar la oferta Sandbox. Esto no significa que haya dejado de existir.',
                 'Could not check the Sandbox offer. This does not mean it no longer exists.')}
         </p>
-        <button type="button" onClick={()=>setOfferRevision(n=>n+1)}
-          className="min-h-11 rounded-full bg-white px-4 py-2 text-[12px] font-extrabold text-[#204E4A] hover:bg-[#F0F3ED] focus-visible:bg-[#E1E53F]/40">
-          {label('Volver a consultar la oferta','Check the offer again')}
-        </button>
+        {(offerFailure==='rate_limited'||offerFailure==='unavailable')&&
+          <button type="button" onClick={()=>setOfferRevision(n=>n+1)}
+            className="min-h-11 rounded-full bg-white px-4 py-2 text-[12px] font-extrabold text-[#204E4A] hover:bg-[#F0F3ED] focus-visible:bg-[#E1E53F]/40">
+            {label('Volver a consultar la oferta','Check the offer again')}
+          </button>}
       </div>}
 
       {offer&&<div className={inline ? 'space-y-2' : 'space-y-4'}>
