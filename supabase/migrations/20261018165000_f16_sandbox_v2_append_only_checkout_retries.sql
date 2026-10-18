@@ -113,7 +113,7 @@ CREATE FUNCTION public.f16_qa_v2_retry_begin_checkout(
 RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $fn$
 DECLARE
- g supporter_private.f16_sandbox_qa_v2_retry_grants%ROWTYPE;
+ selected_grant supporter_private.f16_sandbox_qa_v2_retry_grants%ROWTYPE;
  stored_retry supporter_private.f16_sandbox_qa_v2_retry_attempts%ROWTYPE;
  stored_intent supporter_private.paypal_subscription_intents%ROWTYPE;
  new_id text;
@@ -150,7 +150,7 @@ BEGIN
    SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants g
    WHERE g.predecessor_intent_id=a.intent_id AND g.owner_id=p_owner_id AND g.approved_at IS NOT NULL)
  ) THEN RAISE EXCEPTION 'Existing retry unresolved' USING ERRCODE='23505'; END IF;
- SELECT * INTO g FROM supporter_private.f16_sandbox_qa_v2_retry_grants g0
+ SELECT * INTO selected_grant FROM supporter_private.f16_sandbox_qa_v2_retry_grants g0
  WHERE g0.owner_id=p_owner_id AND g0.approved_at IS NOT NULL
  AND NOT EXISTS(SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts a0
  WHERE a0.grant_id=g0.grant_id)
@@ -170,7 +170,7 @@ BEGIN
  VALUES(new_id,p_owner_id,'paypal','P-14V25407JP6850922NLHMDKI','pending');
  INSERT INTO supporter_private.f16_sandbox_qa_v2_retry_attempts
  (owner_id,request_key,intent_id,grant_id,locale,terms_version,terms_sha256)
- VALUES(p_owner_id,p_request_key,new_id,g.grant_id,p_locale,p_terms_version,p_terms_digest);
+ VALUES(p_owner_id,p_request_key,new_id,selected_grant.grant_id,p_locale,p_terms_version,p_terms_digest);
  RETURN pg_catalog.jsonb_build_object('ownerId',p_owner_id,'requestKey',p_request_key,
  'intentId',new_id,'planId','P-14V25407JP6850922NLHMDKI',
  'state','pending','locale',p_locale,'termsVersion',p_terms_version,
