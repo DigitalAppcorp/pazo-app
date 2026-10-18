@@ -508,3 +508,67 @@ test('F16 PayPal CTA option 2 uses lime surface and preserves brand-blue logo at
  assert.ok(checkout.includes("affirmativeConsent:true"))
  assert.ok(checkout.includes("window.location.assign(url)"))
 })
+
+
+test('F16 member badges on all authored comments are verified before showing comment threads',async()=>{
+ const {attachVerifiedCommentBadges}=await import('../verifiedFeedPostBadges.ts')
+ const id=i=>'00000000-0000-4000-8000-'+String(i).padStart(12,'0')
+ const input=[
+  {id:'one',authorPetId:id(1),body:'First member'},
+  {id:'two',authorPetId:id(2),body:'Not a supporter'},
+  {id:'three',authorPetId:id(1),body:'Same supporter again'},
+  {id:'preserved',authorPetId:undefined,body:'Deleted author thread'},
+ ]
+ let calls=0
+ const comments=await attachVerifiedCommentBadges(input,async petIds=>{
+  calls++
+  assert.deepEqual(petIds,[id(1),id(2)],'Verify the commenter pet, not the surrounding post owner')
+  return {data:petIds.map(pet_id=>({pet_id,badge:pet_id===id(1),milestone:pet_id===id(1)?3:0})),error:null}
+ })
+ assert.equal(calls,1)
+ assert.deepEqual(comments.map(comment=>comment.supporterBadge?.badge),[true,false,true,undefined])
+ assert.equal(comments[0].supporterBadge?.milestone,3)
+ assert.equal(input[0].supporterBadge,undefined,'Do not mutate source comments')
+ assert.equal((await attachVerifiedCommentBadges([],async()=>{throw Error('No call expected')})).length,0)
+ const deleted=await attachVerifiedCommentBadges([{id:'gone',authorPetId:undefined}],async()=>{throw Error('No call expected')})
+ assert.equal(deleted[0].supporterBadge,undefined)
+ await assert.rejects(attachVerifiedCommentBadges(input,async()=>({data:[],error:null})),/FEED_BADGE_EVIDENCE_UNAVAILABLE/)
+ await assert.rejects(attachVerifiedCommentBadges(input,async ids=>({
+  data:ids.map(pet_id=>({pet_id,badge:false,milestone:12})),error:null,
+ })),/FEED_BADGE_BAD_RESPONSE/)
+ const lots=Array.from({length:60},(_,i)=>({id:'comment-'+i,authorPetId:id(i+1)}))
+ const chunks=[]
+ const verified=await attachVerifiedCommentBadges(lots,async ids=>{
+  chunks.push(ids.length)
+  return {data:ids.map(pet_id=>({pet_id,badge:false,milestone:0})),error:null}
+ })
+ assert.deepEqual(chunks,[48,12])
+ assert.equal(verified.length,60)
+})
+
+test('F16 badge entitlement is rendered with avatar on feed, new comments and community threads',()=>{
+ const app=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
+ const feed=readFileSync(new URL('../../../components/views/HomeView.tsx',import.meta.url),'utf8')
+ const community=readFileSync(new URL('../../../components/views/CommunityDetailView.tsx',import.meta.url),'utf8')
+ const typings=readFileSync(new URL('../../../types/pazo.ts',import.meta.url),'utf8')
+ const helper=readFileSync(new URL('../verifiedFeedPostBadges.ts',import.meta.url),'utf8')
+ assert.ok(typings.includes('export interface PostComment {')&&typings.includes('supporterBadge?:SupporterBadgeEvidence'))
+ assert.ok(typings.includes('export interface CommunityPostComment {'))
+ assert.ok(typings.includes('export interface CommunityPost {'))
+ assert.ok(app.includes('attachVerifiedCommentBadges(rawComments'))
+ assert.ok(app.includes('await preloadVerifiedFeedBadgeArt(loadedComments)'))
+ assert.ok(app.includes('supporterBadge:authorCommentBadge'),'An optimistic author badge is verified first')
+ assert.ok(app.indexOf('let authorCommentBadge')<app.indexOf('const optimisticComment ='))
+ assert.ok(feed.includes('comment.supporterBadge?.badge'))
+ assert.ok(feed.includes('milestone={comment.supporterBadge.milestone}'))
+ assert.ok(community.includes('attachVerifiedCommentBadges(comments'))
+ assert.ok(community.includes('attachVerifiedCommentBadges(nextPosts'))
+ assert.ok(community.includes('await preloadVerifiedFeedBadgeArt(decoratedComments)'))
+ assert.ok(community.includes('await preloadVerifiedFeedBadgeArt(decoratedPosts)'))
+ assert.ok(community.includes('comment.supporterBadge?.badge'))
+ assert.ok(community.includes('post.supporterBadge?.badge'))
+ assert.ok(helper.includes('FEED_BADGE_INCOMPLETE_RESPONSE'))
+ assert.ok(!feed.includes("supabase.rpc('pazo_supporter_public_badges_batch'"),
+  'Feed component must never fetch paid badge after rendering a comment')
+ for(const code of [feed,community])assert.ok(!/focus-visible:ring-|focus-visible:outline-/.test(code),'No new focus contours')
+})
