@@ -86,25 +86,25 @@ export function SupporterThemeSaveControl({petId, selectedTheme, lang, onLoaded}
   const changed=selectedTheme!==current
   return <section className="mt-4 space-y-3"
    aria-label={label('Guardar fondo de la mascota','Save pet background')}>
-   {busy&&<p role="status" className="text-center text-[12px] text-[#5C7470]">
+   {busy&&<p role="status" className="text-center text-[14px] text-[#5C7470]">
     {label('Verificando tu perfil…','Verifying your profile…')}
    </p>}
-   {!busy&&!error&&!eligible&&<p role="status" className="rounded-[18px] bg-[#F0F3ED] p-3 text-[12px] text-[#5C7470]">
+   {!busy&&!error&&!eligible&&<p role="status" className="rounded-[18px] bg-[#F0F3ED] p-3 text-[14px] text-[#5C7470]">
     {label('Puedes probar los fondos. Guardar requiere una mensualidad verificada.',
       'You can preview backgrounds. Saving requires a verified paid month.')}
    </p>}
    {error&&<div role="alert" className="space-y-2 rounded-[18px] bg-[#FCE5D8] p-3">
-    <p className="text-[12px] text-[#9F472E]">{label('No pudimos confirmar el cambio. El fondo anterior se conserva.',
+    <p className="text-[14px] text-[#9F472E]">{label('No pudimos confirmar el cambio. El fondo anterior se conserva.',
       'We could not confirm the change. The previous background remains.')}</p>
-    <p className="text-[11px] text-[#9F472E]">{label('Vuelve a abrir la personalización para consultar el estado.',
+    <p className="text-[13px] text-[#9F472E]">{label('Vuelve a abrir la personalización para consultar el estado.',
       'Reopen customization to check the saved state.')}</p>
    </div>}
-   {saved&&<p role="status" className="rounded-[18px] bg-[#E6EDDB] px-4 py-3 text-center text-[12px] font-bold text-[#204E4A]">
+   {saved&&<p role="status" className="rounded-[18px] bg-[#E6EDDB] px-4 py-3 text-center text-[14px] font-bold text-[#204E4A]">
     {label('Cambios guardados y confirmados en PAZO.','Changes saved and confirmed by PAZO.')}
    </p>}
    <button type="button" onClick={()=>void save()}
     disabled={busy||error||!changed||(!eligible&&selectedTheme!==null)}
-    className="min-h-12 w-full rounded-full bg-[#204E4A] px-5 py-3 text-[14px] font-extrabold text-white shadow-[0_5px_16px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#315D56] focus-visible:bg-[#35685D] disabled:cursor-not-allowed disabled:bg-[#A5B9B3] disabled:shadow-none">
+    className="min-h-12 w-full rounded-full bg-[#204E4A] px-5 py-3 text-[16px] font-extrabold text-white shadow-[0_5px_16px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#315D56] focus-visible:bg-[#35685D] disabled:cursor-not-allowed disabled:bg-[#A5B9B3] disabled:shadow-none">
     {label('Guardar cambios','Save changes')}
    </button>
   </section>
