@@ -116,8 +116,8 @@ BEGIN
  PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_owner_id::text,16));
  SELECT i.* INTO v_intent
  FROM supporter_private.paypal_subscription_intents i
- JOIN (SELECT owner_id,intent_id,terms_version,terms_sha256,provider_create_claimed_at FROM supporter_private.f16_sandbox_qa_v2_checkout_attempts
- UNION ALL SELECT owner_id,intent_id,terms_version,terms_sha256,provider_create_claimed_at FROM supporter_private.f16_sandbox_qa_v2_retry_attempts) a
+ JOIN (SELECT owner_id,intent_id,locale,terms_version,terms_sha256,provider_create_claimed_at FROM supporter_private.f16_sandbox_qa_v2_checkout_attempts
+ UNION ALL SELECT owner_id,intent_id,locale,terms_version,terms_sha256,provider_create_claimed_at FROM supporter_private.f16_sandbox_qa_v2_retry_attempts) a
  ON a.intent_id=i.intent_id AND a.owner_id=i.owner_id
  JOIN supporter_private.f16_sandbox_qa_owners qa ON qa.owner_id=i.owner_id
  JOIN supporter_private.paypal_p06_offers o
