@@ -16,6 +16,7 @@ type Offer = {
 }
 type ServerResult = {
   phase?: string
+  code?: string
   offer?: Offer
   approvalUrl?: string
   entitlement?: boolean
@@ -41,6 +42,10 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
   const [busy,setBusy] = useState(false)
   const [consent,setConsent] = useState(false)
   const [phase,setPhase] = useState<'loading' | 'ready' | 'blocked' | 'pending'>('loading')
+  // Only the *published offer* can be retried; beginning a subscription remains one-shot.
+  const [offerRevision,setOfferRevision] = useState(0)
+  const [offerFailure,setOfferFailure] = useState<'rate_limited' | 'restricted' | 'unavailable' | 'invalid_offer' | null>(null)
+  const [beginFailure,setBeginFailure] = useState<'already_linked' | 'rate_limited' | 'restricted' | 'unknown' | null>(null)
   const key = useRef<string | null>(null)
   const attempted = useRef(false)
   const spanish=lang==='es'
@@ -56,8 +61,16 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
         apikey:config.key,'content-type':'application/json',
       },body:JSON.stringify(payload),cache:'no-store',
     })
-    if(!res.ok)throw Error('not_authorized_or_unavailable')
-    const value=await res.json() as ServerResult
+    let value: ServerResult
+    try {value=await res.json() as ServerResult}
+    catch {throw Error('invalid_qa_response')}
+    if(!res.ok) {
+      if(res.status===429)throw Error('qa_rate_limited')
+      if(res.status===403)throw Error('qa_restricted')
+      if(res.status===409 && value?.phase==='ALREADY_LINKED_NOT_PAYMENT_VERIFIED')
+        throw Error('qa_already_linked')
+      throw Error('qa_request_unavailable')
+    }
     if(value?.entitlement===true || value?.mayGrantBenefits===true ||
        value?.paidThrough !== null)throw Error('untrusted_paid_response')
     return value
@@ -67,6 +80,8 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
     setPhase('loading')
     setOffer(null)
     setConsent(false)
+    setOfferFailure(null)
+    // A read-only recheck is allowed after an error; never reissue begin.
     void call({action:'offer',locale:lang}).then(r=>{
       if(!live)return
       const o=r?.offer
@@ -78,17 +93,25 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
           /insignia Amigo de PAZO/.test(o.exactCopy) && /cinco fondos/.test(o.exactCopy) && /muro público/.test(o.exactCopy) :
           /Friend of PAZO badge/.test(o.exactCopy) && /five pet profile themes/.test(o.exactCopy) && /public Thank You/.test(o.exactCopy))||
         o.priceMinor!==299||o.currency!=='USD'||o.cadence!=='MONTH_1'){
+        setOfferFailure('invalid_offer')
         setPhase('blocked');return
       }
       setOffer(o);setPhase('ready')
-    }).catch(()=>{if(live)setPhase('blocked')})
+    }).catch(error=>{
+      if(!live)return
+      const code=error instanceof Error ? error.message : ''
+      setOfferFailure(code==='qa_rate_limited'?'rate_limited':
+        code==='qa_restricted'?'restricted':'unavailable')
+      setPhase('blocked')
+    })
     return ()=>{live=false}
-  },[lang])
+  },[lang,offerRevision])
   const begin=async()=>{
     if(!offer || !consent || busy || attempted.current || phase!=='ready')return
     attempted.current=true
     key.current ||= crypto.randomUUID()
     setBusy(true)
+    setBeginFailure(null)
     setPhase('pending')
     try{
       const data=await call({action:'begin',consent:{
@@ -97,8 +120,14 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
       }})
       const url=data.phase==='APPROVAL_PENDING'?approveUrl(data.approvalUrl):null
       if(url){window.location.assign(url);return}
-    }catch{ /* Failed/ambiguous responses MUST NOT trigger another PayPal POST. */ }
-    finally{setBusy(false)}
+    }catch(error) {
+      // Failed/ambiguous responses MUST NOT trigger another PayPal POST.
+      // Render only safe error categories; never expose raw provider or user data.
+      const code=error instanceof Error ? error.message : ''
+      setBeginFailure(code==='qa_already_linked'?'already_linked':
+        code==='qa_rate_limited'?'rate_limited':
+        code==='qa_restricted'?'restricted':'unknown')
+    }finally{setBusy(false)}
   }
   return (
     <section aria-labelledby="f16-qa-checkout-title"
@@ -110,10 +139,24 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
       {phase==='loading'&&<p role="status" className="py-2 text-center text-[12px] text-[#476862]">
         {label('Consultando las condiciones…','Checking subscription terms…')}
       </p>}
-      {phase==='blocked'&&<p role="alert" className="rounded-xl bg-[#FCE5D8] p-3 text-[12px] text-[#204E4A]">
-        {label('Esta oferta de prueba no está disponible. No es posible iniciar el pago.',
-          'This test offer is unavailable. Checkout cannot start.')}
-      </p>}
+      {phase==='blocked'&&<div role="alert" className="space-y-2 rounded-xl bg-[#FCE5D8] p-3 text-[12px] text-[#204E4A]">
+        <p>{offerFailure==='rate_limited'
+          ? label('Demasiadas consultas a PayPal Sandbox. Espera un momento antes de volver a consultar la oferta.',
+            'Too many PayPal Sandbox checks. Please wait before checking the offer again.')
+          : offerFailure==='restricted'
+            ? label('Esta cuenta o sesión no está autorizada para la prueba Sandbox. No intentes otra suscripción.',
+              'This account or session is not authorized for Sandbox testing. Do not start another subscription.')
+            : offerFailure==='invalid_offer'
+              ? label('No se pudo comprobar la versión y las condiciones de esta oferta. El pago permanece bloqueado.',
+                'Could not verify this offer version and terms. Checkout remains blocked.')
+              : label('No pudimos consultar la oferta Sandbox. Esto no significa que haya dejado de existir.',
+                'Could not check the Sandbox offer. This does not mean it no longer exists.')}
+        </p>
+        <button type="button" onClick={()=>setOfferRevision(n=>n+1)}
+          className="min-h-11 rounded-full bg-white px-4 py-2 text-[12px] font-extrabold text-[#204E4A] hover:bg-[#F0F3ED] focus-visible:bg-[#E1E53F]/40">
+          {label('Volver a consultar la oferta','Check the offer again')}
+        </button>
+      </div>}
 
       {offer&&<div className={inline ? 'space-y-2' : 'space-y-4'}>
         <label className="flex min-h-11 items-start gap-2.5 px-1 text-[11px] font-medium leading-[1.45] text-[#476862]">
@@ -151,9 +194,19 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
             'PayPal Sandbox · Test money only · Monthly renewal')}
         </p>
       </div>}
-      {phase==='pending'&&<p role="status" className="rounded-xl bg-[#E8EEDC] p-3 text-[12px] leading-relaxed text-[#204E4A]">
-        {label('Solicitud enviada o pendiente de verificación. No vuelvas a iniciar el pago; PAZO no ha acreditado beneficios todavía.',
-          'Request sent or awaiting verification. Do not restart checkout; PAZO has not granted benefits yet.')}
+      {phase==='pending'&&<p role={beginFailure?'alert':'status'}
+        className="rounded-xl bg-[#E8EEDC] p-3 text-[12px] leading-relaxed text-[#204E4A]">
+        {beginFailure==='already_linked'
+          ? label('Ya existe una suscripción Sandbox vinculada. No abras otra. Consulta «Gestionar mi prueba de PayPal Sandbox» para revisar la operación existente.',
+            'A Sandbox subscription is already linked. Do not start another. Open “Manage my PayPal Sandbox test” to review it.')
+          : beginFailure==='rate_limited'
+            ? label('Se alcanzó el límite temporal de consultas. No repitas el pago. Consulta tu prueba existente más tarde.',
+              'The temporary request limit was reached. Do not repeat checkout. Check your existing test later.')
+            : beginFailure==='restricted'
+              ? label('No se autorizó este intento. No se abrirá PayPal; consulta el estado de tu prueba existente.',
+                'This attempt was not authorized. PayPal will not open; check your existing test status.')
+              : label('PayPal no se abrió o la respuesta quedó sin confirmar. No repitas el pago: revisa la suscripción desde «Gestionar mi prueba de PayPal Sandbox».',
+                'PayPal did not open or the response is unconfirmed. Do not retry payment: review the subscription in “Manage my PayPal Sandbox test”.')}
       </p>}
     </section>
   )
