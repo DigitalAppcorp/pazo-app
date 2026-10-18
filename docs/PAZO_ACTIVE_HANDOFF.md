@@ -1,3 +1,11 @@
+# F16 — Correcciones PO sobre tipografía y cinco aspectos visuales (2026-10-18)
+
+GO PO «ok go» tras aclarar: **Amigo de PAZO tenía letra demasiado pequeña**; había que igualar tamaños originales de PAZO, NO reducirlos. En PR #44 DRAFT rama `f13/section-titles-20261012` se amplió tipografía (PAZO Feed: nombre 16px, metadatos 12px; microcopy de panel 14px, títulos de ítems 16px); muro público rediseñado como grid 2 columnas con retratos/insignias compactas; mini-insignia oficial de 20px anclada a avatar de autor de Feed y publicaciones de perfil (no empuja `Sugerencia`); corrección de una dependencia de re-render que cancelaba consulta RPC de insignias y asset pequeño eager; arte de perfil original se oculta detrás de fondo personalizado verificado; sección 3/6/12 explica agradecimiento y recompensa en lugar de lista "Pendiente". Todos los derechos permanecen confirmados server-side, no se muestran insignias sintéticas. Cero contornos. No DB/PayPal/Live/main ni cobros nuevos. Regresiones en `f16SupporterProductExperience.test.mjs`; esperar último 7/7 y PO QA visual real antes de declarar PASS del diseño. Informe: `docs/F16_PAZO_TYPOGRAPHY_WALL_BADGE_CORRECTIONS_20261018.md`.
+
+**Gate:** `F16_PO_TYPOGRAPHY_AND_FIVE_VISUAL_CORRECTIONS_IN_BRANCH_CI_REVIEW_PENDING`.
+
+---
+
 # F16 — UI visual pass Amigo de PAZO aprobado por PO e implementado en rama (2026-10-18)
 
 **PO aprobó las 3 propuestas** de rediseño visual: inicio Amigo de PAZO, personalización de perfil, muro de agradecimiento. Se aplicaron en **PR #44 DRAFT rama `f13/section-titles-20261012`**, sin cambiar PayPal/Live, main ni finanzas.
