@@ -36,7 +36,7 @@ export const fetchSmartFeed = async (userId: string, userInterests: string[]): P
         petName: wasAuthorDeleted(p) ? 'Autor eliminado' : p.pet_name,
         petSpecies: wasAuthorDeleted(p) ? 'otro' : p.pet_species,
         petAvatar: wasAuthorDeleted(p) ? '' : p.pet_avatar,
-        location: wasAuthorDeleted(p) ? '' : p.location,
+        location: wasAuthorDeleted(p) ? '' : (p.location || ''),
         timeAgo: 'Hace un momento',
         createdAt: p.created_at,
         isRecommended: false,
@@ -57,7 +57,7 @@ export const fetchSmartFeed = async (userId: string, userInterests: string[]): P
         petName: wasAuthorDeleted(p) ? 'Autor eliminado' : p.pet_name,
         petSpecies: wasAuthorDeleted(p) ? 'otro' : p.pet_species,
         petAvatar: wasAuthorDeleted(p) ? '' : p.pet_avatar,
-        location: wasAuthorDeleted(p) ? '' : p.location,
+        location: wasAuthorDeleted(p) ? '' : (p.location || ''),
         timeAgo: 'Hace un momento',
         createdAt: p.created_at,
         isRecommended: true, // <--- Esto activa la etiqueta "Sugerencia" en la interfaz
