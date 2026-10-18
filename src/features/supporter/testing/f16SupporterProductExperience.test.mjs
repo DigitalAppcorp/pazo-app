@@ -354,3 +354,38 @@ test('F16 approved PAZO visual pass keeps benefits prominent and Sandbox diagnos
  }
  assert.ok(!home.includes('18/11/2026'),'Never hardcode a membership expiration date in design')
 })
+
+
+test('F16 user-approved corrections match PAZO type scale, compact wall and original/custom profile isolation',()=>{
+ const feed=readFileSync(new URL('../../../components/views/HomeView.tsx',import.meta.url),'utf8')
+ const profile=readFileSync(new URL('../../../components/views/PublicProfileView.tsx',import.meta.url),'utf8')
+ const wall=readFileSync(new URL('../components/GratitudeWallScene.tsx',import.meta.url),'utf8')
+ const benefits=readFileSync(new URL('../components/SupporterBenefitsHome.tsx',import.meta.url),'utf8')
+ const badge=readFileSync(new URL('../components/SupporterBadge.tsx',import.meta.url),'utf8')
+ const theme=readFileSync(new URL('../components/SupporterThemePreviewPanel.tsx',import.meta.url),'utf8')
+ const grant=readFileSync(new URL('../components/SupporterThemeSaveControl.tsx',import.meta.url),'utf8')
+ assert.ok(feed.includes('text-[16px] font-extrabold'),'PAZO Feed name scale is 16 px')
+ assert.ok(feed.includes('text-[12px] text-[#5C7470]'),'PAZO Feed location/time scale is 12 px')
+ assert.ok(benefits.includes('text-[16px] font-black'),'Benefit item names inherit the same 16 px hierarchy')
+ assert.ok(theme.includes('text-[14px]'),'Theme supporting text must be readable')
+ assert.ok(grant.includes('text-[14px]'),'The saved-theme status must be legible')
+ assert.ok(wall.includes('grid grid-cols-2 gap-2.5'),'Wall should show more pets in two columns without a search requirement')
+ assert.ok(wall.includes('w-full break-words text-[16px]'),'Compact wall still uses readable pet names')
+ assert.ok(wall.includes('wallSort(rows,tab)'),'The original verified source/tab sort remains authoritative')
+ assert.ok(badge.includes("size==='mini'?'h-[20px] w-[20px]'"))
+ assert.ok(badge.includes('loading="eager"'))
+ assert.ok(feed.includes('absolute -bottom-1 -right-1 z-10 block h-[20px]'))
+ assert.ok(feed.includes('size="mini"'))
+ assert.ok(profile.includes('size="mini"'))
+ assert.ok(!feed.includes('<SupporterBadge active milestone={supporterBadge.milestone} lang={lang}/>'),'Badge may not shift Sugerencia')
+ assert.ok(feed.includes('[feedBadgeIds,badgeRefreshCycle]'),'Avoid cancelling entitlement request after likes or comments')
+ assert.ok(feed.includes("supabase.rpc('pazo_supporter_public_badges_batch'"))
+ assert.ok(profile.includes('!(supporterVisualsEnabled && supporterPerks?.theme)'),'Custom background excludes original decorative canvas')
+ assert.ok(profile.includes('<SupporterProfileBackdrop theme={supporterPerks.theme} />'))
+ assert.ok(benefits.includes('Tu apoyo merece reconocimiento'))
+ assert.ok(benefits.includes('PAZO agradece el tiempo'))
+ assert.ok(!benefits.includes("t('Pendiente','Pending')"),'Milestones are recognition, not a checklist')
+ for(const content of [wall,benefits,theme]) {
+  assert.ok(!/className=["'][^"']*(?:border-|outline-|focus-visible:ring-)/.test(content),'Preserve PO zero-outline rule')
+ }
+})
