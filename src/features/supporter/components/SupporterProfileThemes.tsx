@@ -147,45 +147,46 @@ interface SupporterThemePreviewPickerProps {
   enabled?: boolean
 }
 
-export const SupporterThemePreviewPicker = ({ value, onChange, lang, enabled = false }: SupporterThemePreviewPickerProps) => (
-  <section
-    aria-label={lang === 'es' ? 'Vista previa de fondos' : 'Background preview'}
-    className="relative z-20 mb-5 rounded-[26px] bg-white/95 p-3.5 shadow-[0_10px_30px_rgba(32,78,74,0.10)]"
-  >
-    <div className="mb-2 flex items-center justify-between gap-2 px-1">
-      <p className="text-[12px] font-black text-[#204E4A]">
-        {lang === 'es' ? (enabled ? 'Fondos disponibles' : 'Vista previa de temas') : (enabled ? 'Available backgrounds' : 'Theme preview')}
-      </p>
-      <span className="rounded-full bg-[#F4EDD8] px-2 py-1 text-[10px] font-extrabold text-[#6A6557]">
-        {lang === 'es' ? (enabled ? 'AMIGO DE PAZO' : 'EN DESARROLLO') : (enabled ? 'PAZO FRIEND' : 'IN DEVELOPMENT')}
-      </span>
-    </div>
-    <div role="group" aria-label={lang === 'es' ? 'Elegir decoración' : 'Choose decoration'} className="flex gap-2 overflow-x-auto pb-1">
-      <button
-        type="button"
-        aria-pressed={value === null}
-        onClick={() => onChange(null)}
-        className={'shrink-0 rounded-2xl px-3 py-2.5 text-[12px] font-bold transition-colors ' + (value === null ? 'bg-[#204E4A] text-white' : 'bg-[#F4F1E9] text-[#204E4A] hover:bg-[#E7ECE7]')}
-      >
-        {lang === 'es' ? 'Original' : 'Original'}
-      </button>
-      {SUPPORTER_PROFILE_THEMES.map((option) => (
-        <button
-          key={option.id}
-          type="button"
-          aria-pressed={value === option.id}
-          onClick={() => onChange(option.id)}
-          className={'flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2 text-[12px] font-bold transition-colors ' + (value === option.id ? 'bg-[#204E4A] text-white' : 'bg-[#F4F1E9] text-[#204E4A] hover:bg-[#E7ECE7]')}
-        >
-          <span aria-hidden="true" className="h-6 w-6 shrink-0 rounded-full shadow-[0_1px_5px_rgba(32,78,74,0.12)]" style={{ background: option.swatch }} />
-          <span>{lang === 'es' ? option.labelEs : option.labelEn}</span>
-        </button>
-      ))}
-    </div>
-    <p className="mt-1.5 px-1 text-[11px] font-medium text-[#617670]" aria-live="polite">
-      {lang === 'es'
-        ? (enabled ? 'Selecciona un fondo y confirma el guardado de forma segura.' : 'Prueba los diseños; no se guardan cambios ni se activa ninguna membresía.')
-        : (enabled ? 'Choose a background, then confirm saving securely.' : 'Explore the designs; no changes are saved or membership activated.')}
-    </p>
-  </section>
+export const SupporterThemePreviewPicker = ({value,onChange,lang,enabled=false}:SupporterThemePreviewPickerProps) => (
+ <section aria-label={lang==='es'?'Vista previa de fondos':'Background preview'}
+  className="relative">
+  <div className="mb-3 flex items-center justify-between gap-2">
+   <p className="text-[12px] font-bold text-[#476862]">
+    {lang==='es'?'Fondos disponibles':'Available backgrounds'}
+   </p>
+   <span className="rounded-full bg-[#F4EDD8] px-3 py-1.5 text-[10px] font-bold text-[#6A6557]">
+    {lang==='es'?(enabled?'AMIGO DE PAZO':'EN DESARROLLO'):(enabled?'PAZO FRIEND':'IN DEVELOPMENT')}
+   </span>
+  </div>
+  <div role="group" aria-label={lang==='es'?'Elegir decoración':'Choose decoration'}
+   className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-3">
+   <button type="button" aria-pressed={value===null} onClick={()=>onChange(null)}
+    className="flex min-w-[74px] shrink-0 snap-start flex-col items-center gap-2 rounded-[18px] py-2 text-center hover:bg-[#F4F5EE] focus-visible:bg-[#E1E53F]/35">
+    <span aria-hidden="true" className={'flex h-[58px] w-[58px] items-center justify-center rounded-[18px] text-[20px] font-bold '+(value===null?'bg-[#204E4A] text-white':'bg-[#F8F5EC] text-[#204E4A]')}>
+     ·
+    </span>
+    <span className="max-w-[85px] text-[11px] font-bold leading-tight text-[#204E4A]">
+     {lang==='es'?'Original':'Original'}
+    </span>
+   </button>
+   {SUPPORTER_PROFILE_THEMES.map(option=>(
+    <button key={option.id} type="button" aria-pressed={value===option.id}
+     onClick={()=>onChange(option.id)}
+     className="flex min-w-[82px] shrink-0 snap-start flex-col items-center gap-2 rounded-[18px] px-1 py-2 text-center hover:bg-[#F4F5EE] focus-visible:bg-[#E1E53F]/35">
+     <span aria-hidden="true" className={'flex h-[58px] w-[58px] items-center justify-center rounded-[18px] '+(value===option.id?'shadow-[0_7px_18px_rgba(32,78,74,0.18)]':'')}
+      style={{background:option.surface}}>
+      <span className="h-7 w-7 rounded-full opacity-70" style={{background:option.swatch}}/>
+     </span>
+     <span className={'max-w-[85px] text-[11px] font-bold leading-tight '+(value===option.id?'text-[#204E4A] underline decoration-[#E1E53F] decoration-[3px] underline-offset-[5px]':'text-[#5C7470]')}>
+      {lang==='es'?option.labelEs:option.labelEn}
+     </span>
+    </button>
+   ))}
+  </div>
+  <p className="mt-1 px-1 text-[11px] text-[#617670]" aria-live="polite">
+   {lang==='es'
+    ?(enabled?'Selecciona un fondo y confirma el guardado de forma segura.':'Prueba los diseños; no se guardan cambios ni se activa ninguna membresía.')
+    :(enabled?'Choose a background, then confirm saving securely.':'Explore the designs; no changes are saved or membership activated.')}
+  </p>
+ </section>
 )
