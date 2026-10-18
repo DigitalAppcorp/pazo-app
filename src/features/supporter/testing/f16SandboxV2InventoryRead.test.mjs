@@ -47,7 +47,9 @@ test('merchant scope denial and invalid payload fail closed',async()=>{
  const {reader}=make([],false)
  await assert.rejects(reader.inspect({subscriptionId:SUB,planId:PLAN}),/inventory_merchant_scope_unavailable/)
  const invalid=make([{subscriptions:[{...row('ACTIVE'),plan_id:'P-OTHER'}],links:[]}])
- await assert.rejects(invalid.reader.inspect({subscriptionId:SUB,planId:PLAN}),/inventory_malformed/)
+ const unexpected=await invalid.reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(unexpected.code,'original_merchant_details_unverified')
+ assert.equal(unexpected.mayRetry,false)
  await assert.rejects(invalid.reader.inspect({subscriptionId:SUB,planId:'P-OTHER'}),/inventory_binding_unverified/)
 })
 
@@ -96,4 +98,37 @@ test('Edge never echoes merchant data, tokens or provider response on inventory 
  assert.ok(!edge.includes('console.log(error)'))
  assert.ok(panel.includes("inventoryDiagnostic==='scope'"))
  assert.ok(panel.includes("inventoryDiagnostic==='auth'"))
+})
+
+test('PayPal successful HTTP with missing collection never proves absence',async()=>{
+ const {reader}=make([{links:[]}])
+ const response=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(response.code,'merchant_inventory_collection_unverified')
+ assert.equal(response.mayRetry,false)
+ assert.equal(response.merchantInventoryEnumerated,undefined)
+})
+test('unrelated rows with missing fields never prove absence or block exact proof',async()=>{
+ const other={id:'I-OTHER-ABC123',plan_id:PLAN}
+ const {reader:absent}=make([{subscriptions:[other],links:[]}])
+ const absentResult=await absent.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(absentResult.code,'merchant_inventory_rows_unverified')
+ assert.equal(absentResult.mayRetry,false)
+ const {reader:present}=make([{subscriptions:[other,row('CANCELLED')],links:[]}])
+ const presentResult=await present.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(presentResult.code,'original_merchant_resource_found')
+ assert.equal(presentResult.providerStatus,'CANCELLED')
+ assert.equal(presentResult.merchantInventoryEnumerated,false)
+ assert.equal(presentResult.mayRetry,false)
+})
+test('untrusted provider field for exact original stays unverified',async()=>{
+ const {reader}=make([{subscriptions:[{id:SUB,plan_id:PLAN}],links:[]}])
+ const x=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(x.code,'original_merchant_details_unverified')
+ assert.equal(x.mayRetry,false)
+})
+test('unexpected PayPal pagination or oversized page never counts as complete',async()=>{
+ const invalid=make([{subscriptions:[],links:[{rel:7}]}])
+ assert.equal((await invalid.reader.inspect({subscriptionId:SUB,planId:PLAN})).code,'merchant_inventory_pagination_unverified')
+ const oversized=make([{subscriptions:Array.from({length:21},()=>row('ACTIVE')),links:[]}])
+ assert.equal((await oversized.reader.inspect({subscriptionId:SUB,planId:PLAN})).code,'merchant_inventory_page_unverified')
 })
