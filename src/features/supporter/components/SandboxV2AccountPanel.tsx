@@ -32,6 +32,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
+ const [errorKind,setErrorKind]=useState<'account'|'status'|'payment'|'other'>('other')
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
  const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|null>(null)
  const [confirm,setConfirm]=useState(false)
@@ -59,6 +60,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   return result
  }
  const refresh=async()=>{
+  setErrorKind('account')
   onAccountInspection?.('checking')
   setLoading(true);setError(false);setAccount(null)
   try {
@@ -86,7 +88,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   if(reviewRevision>0)void refresh()
  },[reviewRevision])
  const verifyPayment=async()=>{
-  if(!account||account.state!=='bound'||busy)return
+  if(!account||account.state!=='bound'||!['APPROVED','ACTIVE'].includes(providerStatus||'')||busy)return
+  setErrorKind('payment')
   setBusy(true);setError(false)
   try{
    const result=await call({action:'verify_payment'}) as Result
@@ -99,6 +102,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  }
  const getStatus=async()=>{
   if(!account||account.state!=='bound'||busy)return
+  setErrorKind('status')
   setBusy(true);setError(false)
   try{
    // The existing v4 owner-scoped PayPal GET also verifies provider status.
@@ -183,8 +187,17 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    </button>
    {loading&&<p role="status" className="text-sm">{t('Consultando cuenta…','Checking account…')}</p>}
    {error&&<p role="alert" className="rounded-2xl bg-[#FCE5D8] p-3 text-sm">
-    {t('No fue posible verificar esta operación. No se mostrará como completada.',
-      'Could not verify the operation. It will not be shown as complete.')}
+    {errorKind==='account'
+      ? t('No pudimos consultar tu solicitud Sandbox. Puedes actualizar la prueba más tarde; no se inició un cobro.',
+          'Could not read your Sandbox request. You can check again later; no charge was started.')
+      : errorKind==='status'
+        ? t('No pudimos obtener el estado actual de PayPal. Puedes usar «Retomar en PayPal» para consultar la aprobación original.',
+            'Could not read PayPal’s current status. Use “Continue in PayPal” to check the original approval.')
+        : errorKind==='payment'
+          ? t('No se pudo verificar ningún pago. PAZO no ha activado la membresía.',
+              'No payment could be verified. PAZO has not activated the membership.')
+          : t('No fue posible verificar esta operación. No se mostrará como completada.',
+              'Could not verify the operation. It will not be shown as complete.')}
    </p>}
    {!loading&&!error&&!account&&<p role="status" className="text-sm">
     {t('Todavía no existe una segunda suscripción Sandbox.',
@@ -252,7 +265,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
       <button type="button" className={button} onClick={()=>void download()} disabled={busy}>
        {t('Descargar aceptación V2','Download V2 acceptance')}
       </button>
-      {account.state==='bound'&&<button type="button" className={button}
+      {account.state==='bound'&&['APPROVED','ACTIVE'].includes(providerStatus||'')&&
+       <button type="button" className={button}
         onClick={()=>void verifyPayment()} disabled={busy}>
         {t('Verificar pago real Sandbox','Verify actual Sandbox payment')}
       </button>}
