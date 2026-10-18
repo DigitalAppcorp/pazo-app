@@ -1,3 +1,15 @@
+# F16 — Auditoría cuatro beneficios reales, sin cambios financieros (2026-10-18)
+
+La auditoría READ ONLY de Backend/PR #44 confirma **1 período pagado de prueba US$2.99 verificado y vigente hasta 18-nov-2026**, proyección QA `active=true` y **2 mascotas elegibles con `badge=true,milestone=0`** por RPC individuales y batch. El backend alojado tiene las RPC reales de insignias, fondos, muro y opt-in/out; RLS FORCE impide lectura directa privada. **0 temas guardados, 0 consentimientos, 0 entradas muro, 0 publicaciones de las mascotas pagadoras**: todavía falta QA E2E de cada beneficio.
+
+**Gate clave:** `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED=true` en Vite local (independiente de `VITE_PAZO_F16_SANDBOX_QA_UI=true`) es necesario para revelar la UI; valor local no verificado. La pestaña Vite inspeccionada en lectura pertenecía a la cuenta histórica del intento 404, **no** al titular del período pagado. Navegar mediante **Mi mascota → Amigo de PAZO** de la cuenta pagadora: `PetView` pasa `pet` y habilita personalización; la ruta directa `#/account/supporter` NO pasa mascota, deshabilitando el botón de personalización del hogar de beneficios. La mini-insignia de Feed está al lado del nombre y NO sobre avatar como aprobó PO; requiere ajuste. Mensaje `approval_not_payment` obsoleto persiste tras verificar pago. No probar cancelación hasta cubrir los cuatro beneficios; cero nuevas compras.
+
+Ver informe exacto: `docs/F16_REAL_SANDBOX_FOUR_BENEFITS_AUDIT_20261018.md`. **NO se ha hecho prueba UI autenticada de guardado de fondos, opt-in/out del muro, visitantes, renovación/cancelación, expiración real ni tres hitos completos**. PR #44 DRAFT, Live/main intactos. Requiere gate local QA/PO antes de declarar F16 finalizada.
+
+**Gate:** `F16_QA_VERIFIED_PERIOD_BENEFIT_BACKEND_REAL_UI_FLAG_AND_E2E_PENDING_LIVE_NO_GO`.
+
+---
+
 # F16 — Backend Sandbox V16 desplegado con GO PO; esperando verificar pago existente (2026-10-18)
 
 PO concedió GO para instalar solo la corrección del verificador en `f16-paypal-supporter-v2-qa`. Preflight: PR #44 DRAFT con CI + seis laboratorios 7/7 SUCCESS; hosted v15 ACTIVE JWT true; 19 dependencias cotejadas y únicamente dos módulos modificados. Despliegue único confirmado a Supabase: **v16 ACTIVE / verify_jwt=true / 19 archivos**. Readback confirmó guardas para totales PayPal opcionales y códigos de diagnóstico fijos sin PII. El resto del checkout y funciones Live no se desplegaron. Histórico 404 pendiente aislado.
