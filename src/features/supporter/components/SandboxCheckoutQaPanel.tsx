@@ -3,7 +3,8 @@ import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
 
 // F16 P06: owner-only Sandbox QA purchase experience, HIDDEN from public builds.
-// Server still enforces a separate, private test-UID allowlist and disabled default.
+// Local Vite Sandbox admits confirmed Auth owners automatically after explicit
+// consent. Live and duplicate-charge protections remain server enforced.
 // No membership/badge claim is ever inferred from PayPal approval or redirect.
 type Offer = {
   version: string
@@ -144,7 +145,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
           ? label('Demasiadas consultas a PayPal Sandbox. Espera un momento antes de volver a consultar la oferta.',
             'Too many PayPal Sandbox checks. Please wait before checking the offer again.')
           : offerFailure==='restricted'
-            ? label('Esta cuenta o sesión no está autorizada para la prueba Sandbox. No intentes otra suscripción.',
+            ? label('No se pudo autorizar esta sesión para Sandbox. Verifica tu correo y vuelve a iniciar sesión; no repitas un pago pendiente.',
               'This account or session is not authorized for Sandbox testing. Do not start another subscription.')
             : offerFailure==='invalid_offer'
               ? label('No se pudo comprobar la versión y las condiciones de esta oferta. El pago permanece bloqueado.',
