@@ -208,7 +208,7 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
        ? t('Pago de prueba verificado para este período.', 'Test payment verified for this period.')
        : account.state==='pending'
        ? t('Solicitud registrada; no hay pago verificado.', 'Request recorded; no verified payment.')
-       : t('Suscripción Sandbox vinculada; pago aún no verificado.', 'Sandbox subscription linked; payment not yet verified.')}
+       : t('Solicitud PayPal registrada. No se ha verificado un pago ni activado una membresía.', 'PayPal request recorded. No payment or membership has been verified.')}
      </p>
      {paidThrough&&<p role="status" className="rounded-2xl bg-[#E8EFEB] p-3 text-sm font-extrabold">
       {t('Período Sandbox verificado hasta: ','Sandbox period verified until: ')}
@@ -248,7 +248,7 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
         onClick={()=>void getStatus()} disabled={busy}>
         {t('Consultar PayPal Sandbox','Check PayPal Sandbox')}
       </button>}
-      {account.state==='bound'&&!cancelled&&<button type="button" className={button}
+      {account.state==='bound'&&['ACTIVE','SUSPENDED'].includes(providerStatus||'')&&!cancelled&&<button type="button" className={button}
         onClick={()=>setConfirm(true)} disabled={busy}>
         {t('Cancelar próxima renovación V2','Cancel V2 renewal')}
       </button>}
