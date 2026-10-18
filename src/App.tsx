@@ -10,6 +10,8 @@ import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
 import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
+import {attachVerifiedFeedBadges} from './features/supporter/verifiedFeedPostBadges'
+import {supporterBenefitsUiEnabled} from './features/supporter/supporterUiRelease'
 import {
   fetchLatestUnreadSightingNotification,
   fetchNotifications,
@@ -482,7 +484,18 @@ function PazoMain() {
         pagination, selection, socialRows.length, recommendationRows.length, FEED_PAGE_SIZE
       )
 
-      const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
+      // Resolve membership BEFORE publishing posts. Two backend reads may run
+      // concurrently, but the Feed receives one completed Post+badge payload.
+      // On RPC failure, preserve the cursor and show the existing retry UI.
+      const [interactionsPage,badgedPage]=await Promise.all([
+        enrichPostsWithInteractions(page,pet.id),
+        supporterBenefitsUiEnabled
+          ?attachVerifiedFeedBadges(page,ids=>supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          :Promise.resolve(page),
+      ])
+      const enrichedPage=interactionsPage.map((post,index)=>({
+        ...post,supporterBadge:badgedPage[index].supporterBadge,
+      }))
 
       if (feedLoadVersionRef.current !== loadVersion) return
 
@@ -979,18 +992,34 @@ function PazoMain() {
     }
   }
 
-  const handlePostCreated = (newPost: Post) => {
-    if (
-      feedPaginationRef.current.petId === currentPet.id
-      && feedPaginationRef.current.socialPetIds.includes(newPost.petId)
-    ) {
-      feedPaginationRef.current.socialOffset += 1
+  const handlePostCreated = async (newPost:Post) => {
+    const petAtCreation=currentPet.id
+    const versionAtCreation=feedLoadVersionRef.current
+    // Newly created posts also arrive with their verified author badge.
+    // The insert already happened in CreatePostModal; never POST a duplicate.
+    let publishedPost=newPost
+    if(supporterBenefitsUiEnabled){
+      try{
+        const resolved=await attachVerifiedFeedBadges([newPost],
+          ids=>supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        publishedPost=resolved[0]
+      }catch(error){
+        console.error('PAZO badge verification unavailable for newly created post:',error)
+        setIsCreatePostOpen(false)
+        setActiveTab('inicio')
+        if(activePetIdRef.current===petAtCreation)
+          void loadFeedForPet(currentPet)
+        return
+      }
     }
-
-    setPosts((prevPosts) => [newPost, ...prevPosts])
-    setProfilePosts((prevPosts) =>
-      newPost.petId === currentPet.id ? [newPost, ...prevPosts] : prevPosts
-    )
+    if(feedLoadVersionRef.current!==versionAtCreation ||
+       activePetIdRef.current!==petAtCreation)return
+    if(feedPaginationRef.current.petId===petAtCreation &&
+       feedPaginationRef.current.socialPetIds.includes(publishedPost.petId))
+      feedPaginationRef.current.socialOffset+=1
+    setPosts(previous=>[publishedPost,...previous.filter(post=>post.id!==publishedPost.id)])
+    setProfilePosts(previous=>publishedPost.petId===petAtCreation
+      ?[publishedPost,...previous.filter(post=>post.id!==publishedPost.id)]:previous)
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
   }
