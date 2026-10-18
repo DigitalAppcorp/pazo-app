@@ -63,19 +63,21 @@ export function createPazoSandboxV2InventoryRead({clientId,clientSecret,fetchImp
       return report('merchant_inventory_page_unverified')
     const rows=response.subscriptions
     for(const row of rows){
-     // PayPal may omit optional fields or include unexpected list records.
-     // Unrelated/partial rows must NOT hide a fully verified exact match,
-     // and must NEVER be treated as evidence that the target is absent.
+     // List payloads can omit fields unrelated to exact ID matching.
+     // Missing/invalid IDs still invalidate proof of absence; a verified
+     // exact match must have a matching plan and supported status.
      if(!row||typeof row!=='object'||Array.isArray(row)||!SUB.test(row.id||'')){
       allRowsVerified=false;continue
      }
      if(row.id===subscriptionId){
+      // For the EXACT original, prove both plan and provider status.
       if(row.plan_id!==PLAN||!STATES.has(row.status))
        return report('original_merchant_details_unverified')
       found.push(row.status)
-     }else if(row.plan_id!==PLAN||!STATES.has(row.status)){
-      allRowsVerified=false
      }
+     // Other subscriptions need only a valid ID to rule out an exact match.
+     // Their plan/status are not required by PAZO and may be omitted by
+     // list responses. A row without a valid ID still fails absence proof.
     }
     if(response.links!==undefined&&(!Array.isArray(response.links)||
        response.links.some(x=>!x||typeof x.rel!=='string')))
