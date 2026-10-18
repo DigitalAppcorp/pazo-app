@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 const read=path=>readFileSync(new URL('../../../../'+path,import.meta.url),'utf8')
-const migration=read('supabase/migrations/20261018233000_pazo_admin_observability_dashboard.sql')
+const migration=read('supabase/migrations/20261018234721_pazo_admin_observability_dashboard_20261018.sql')
 const access=read('src/features/moderation/ModerationAccess.tsx')
 const board=read('src/features/admin/components/AdminDashboard.tsx')
 const client=read('src/features/admin/adminDashboardService.ts')
