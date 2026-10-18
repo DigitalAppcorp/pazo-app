@@ -75,7 +75,17 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
         id:subscription.id,plan_id:subscription.plan_id,
         custom_id:subscription.custom_id,status:subscription.status,
         ...(includeApprovalLink===true
-          ? {approvalUrl:pendingApprovalLink(subscription)}
+          ? (()=>{
+              // An invalid/missing merchant link MUST NOT erase a separately
+              // verified status. Never forward suspicious link bytes to UI.
+              try {
+                const approvalUrl=pendingApprovalLink(subscription)
+                return {approvalUrl,approvalLinkState:
+                  approvalUrl?'available':'missing'}
+              }catch{
+                return {approvalUrl:null,approvalLinkState:'rejected'}
+              }
+            })()
           : {}),
       })
     },
