@@ -1,0 +1,52 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {createPazoSandboxV2InventoryRead}
+ from '../../../../supabase/functions/f16-paypal-webhook/pazoSandboxV2InventoryRead.mjs'
+const SUB='I-ORIGINAL-TEST-123'
+const PLAN='P-14V25407JP6850922NLHMDKI'
+const row=status=>({id:SUB,plan_id:PLAN,status})
+const make=(pages,scope=true)=>{
+ const calls=[]
+ const reader=createPazoSandboxV2InventoryRead({clientId:'client1234',clientSecret:'secret1234',
+ fetchImpl:async(url,opts)=>{
+  calls.push({url,method:opts.method,headers:opts.headers})
+  if(url.endsWith('/oauth2/token'))
+   return {ok:true,json:async()=>({access_token:'TEST_PRIVATE_TOKEN',token_type:'Bearer'})}
+  if(!scope)return {ok:false,status:403}
+  const page=Number(new URL(url).searchParams.get('page'))
+  return {ok:true,json:async()=>pages[page-1]??{subscriptions:[],links:[]}}
+ }})
+ return{reader,calls}
+}
+test('exact subscription found by merchant-wide inventory never grants retry',async()=>{
+ const {reader,calls}=make([{subscriptions:[row('APPROVAL_PENDING')],links:[]}])
+ const a=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(a.code,'original_merchant_resource_found')
+ assert.equal(a.providerStatus,'APPROVAL_PENDING')
+ assert.equal(a.mayRetry,false)
+ assert.equal(a.mayGrantBenefits,false)
+ assert.equal(calls[0].method,'POST')
+ assert.equal(calls[1].method,'GET')
+ assert.ok(!JSON.stringify(a).includes(SUB))
+ assert.ok(!JSON.stringify(a).includes('TEST_PRIVATE_TOKEN'))
+})
+test('merchant list not containing original never authorizes retry',async()=>{
+ const {reader}=make([{subscriptions:[],links:[]}])
+ const a=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(a.code,'original_not_in_current_merchant_inventory')
+ assert.equal(a.mayRetry,false)
+})
+test('pagination exhaustiveness is required for historical absence',async()=>{
+ const first=Array.from({length:20},(_,i)=>({id:'I-PAGE-TEST-'+i,plan_id:PLAN,status:'ACTIVE'}))
+ const {reader}=make([{subscriptions:first,links:[]},{subscriptions:[],links:[]}])
+ const a=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+ assert.equal(a.merchantInventoryEnumerated,true)
+ assert.equal(a.mayRetry,false)
+})
+test('merchant scope denial and invalid payload fail closed',async()=>{
+ const {reader}=make([],false)
+ await assert.rejects(reader.inspect({subscriptionId:SUB,planId:PLAN}),/inventory_merchant_scope_unavailable/)
+ const invalid=make([{subscriptions:[{...row('ACTIVE'),plan_id:'P-OTHER'}],links:[]}])
+ await assert.rejects(invalid.reader.inspect({subscriptionId:SUB,planId:PLAN}),/inventory_malformed/)
+ await assert.rejects(invalid.reader.inspect({subscriptionId:SUB,planId:'P-OTHER'}),/inventory_binding_unverified/)
+})
