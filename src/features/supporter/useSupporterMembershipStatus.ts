@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import {supabase} from '../../services/supabaseClient'
 import {supporterBenefitsUiEnabled, SUPPORTER_PAYMENT_VERIFIED_EVENT} from './supporterUiRelease'
 
@@ -25,7 +25,20 @@ function verifiedProof(raw: unknown): Proof | null {
 export function useSupporterMembershipStatus(petId?:string, enabled=true) {
   const [status,setStatus] = useState<SupporterStatus>(noStatus('checking'))
   const [revision,setRevision] = useState(0)
+  const lastScope = useRef({petId,enabled})
+  const lastOwnerId = useRef<string|null>(null)
   const refresh = useCallback(() => setRevision(value => value + 1),[])
+  useEffect(() => {
+    // Switching PAZO accounts must never briefly expose the previous owner's UI.
+    // SIGNED_IN for the SAME owner can fire on refocus, so do not clear on it.
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{
+      const nextOwnerId=session?.user?.id??null
+      const changed=lastOwnerId.current!==null && lastOwnerId.current!==nextOwnerId
+      lastOwnerId.current=nextOwnerId
+      if(changed){setStatus(noStatus('checking'));refresh()}
+    })
+    return ()=>subscription.unsubscribe()
+  },[refresh])
   useEffect(() => {
     if (!enabled || !benefitsEnabled) return
     // Switching back from PayPal or verifying a payment re-reads the SERVER.
@@ -40,7 +53,14 @@ export function useSupporterMembershipStatus(petId?:string, enabled=true) {
   }, [enabled,refresh])
   useEffect(() => {
     let cancelled = false
-    setStatus(noStatus('checking'))
+    const sameScope=lastScope.current.petId===petId &&
+      lastScope.current.enabled===enabled
+    lastScope.current={petId,enabled}
+    // Revalidating a KNOWN paid account must not unmount its management
+    // panel. If server proof fails or expires, the resolved result immediately
+    // replaces this prior state; all writes/public reads stay server-gated.
+    setStatus(previous=>sameScope&&previous.kind==='verified'
+      ?previous:noStatus('checking'))
     if (!enabled || !benefitsEnabled) {
       setStatus(noStatus('inactive'))
       return () => {cancelled = true}
@@ -48,6 +68,7 @@ export function useSupporterMembershipStatus(petId?:string, enabled=true) {
     const read = async ():Promise<SupporterStatus> => {
       const {data:{user},error:authError} = await supabase.auth.getUser()
       if(authError || !UUID.test(user?.id || ''))throw Error('OWNER_UNVERIFIED')
+      lastOwnerId.current=user!.id
       const query = supabase.from('pets').select('id').eq('owner_id',user!.id)
       const {data:pets,error:petError} = petId
         ? await query.eq('id',petId).limit(1)
