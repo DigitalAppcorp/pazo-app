@@ -109,7 +109,7 @@ COMMIT;
  ON CONFLICT (sale_id,event_id) DO UPDATE SET
    reason=EXCLUDED.reason,verified_at=EXCLUDED.verified_at;
  RETURN true;
-END $function$
+END $function$;
 
 
 CREATE OR REPLACE FUNCTION public.f16_qa_v2_record_verified_first_cycle(p_owner_id uuid, p_intent_id text, p_sale_id text, p_sale_completed_at timestamp with time zone, p_service_start timestamp with time zone, p_service_end timestamp with time zone)
@@ -216,7 +216,7 @@ COMMIT;
  p_service_start,p_service_end,pg_catalog.clock_timestamp());
  RETURN pg_catalog.jsonb_build_object('phase','verified_first_sandbox_cycle',
    'cycleVerified',true,'periodEnd',p_service_end);
-END $function$
+END $function$;
 
 
 
