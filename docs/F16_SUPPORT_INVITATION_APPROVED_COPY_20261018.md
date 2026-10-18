@@ -33,3 +33,8 @@ El frontend no debe exigir visualmente «meses pagados y verificados». **Los re
 **Seguridad:** no se modificó `sandboxBenefitsOfferV2.mjs`, `offer.exactCopy`, términos contractuales, digest, Supabase, Edge, cancelación, cobros, flags, `main` ni PayPal Live. Texto promocional ≠ texto contractual; las condiciones V2 siguen disponibles y explícitas. No activar Live ni publicar cambios hasta aprobación visual del PO y scope/gates.
 
 **Gate:** `F16_SUPPORT_INVITATION_COPY_IMPLEMENTED_BRANCH_VISUAL_PO_REVIEW_PENDING`.
+
+## Validación técnica final
+Código funcional `b651ea427cb3bfadfbcb4b281a921ae351ef29eb`: GitHub Actions **7/7 SUCCESS**, CI (compilación, pruebas y contrato de copy) + seis laboratorios PostgreSQL. Una prueba obsoleta que exigía el eslogan anterior fue corregida; no se cambió el copy aprobado. Ningún cambio de cobro, elegibilidad, PayPal, Supabase ni entorno Live. La prueba **visual en Vite local** y la aprobación del resultado renderizado por el PO siguen pendientes.
+
+**Gate actualizado:** `F16_SUPPORT_INVITATION_COPY_CODE_7_OF_7_PASS_VISUAL_REVIEW_PENDING`.
