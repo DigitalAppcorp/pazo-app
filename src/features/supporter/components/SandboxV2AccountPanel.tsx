@@ -11,7 +11,9 @@ type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:bool
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
  approvalUrl?:string|null;eligible?:boolean;merchantInventoryEnumerated?:boolean;
- correlated?:boolean;eventReconciled?:boolean;mayRetry?:boolean}
+ correlated?:boolean;eventReconciled?:boolean;mayRetry?:boolean;
+ unfilteredCode?:string;unfilteredProviderStatus?:string|null;
+ unfilteredInventoryEnumerated?:boolean}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
  if(typeof raw!=='string'||raw.length>2048)return null
@@ -39,6 +41,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [inventoryState,setInventoryState]=useState<'unknown'|'checking'|'found'|'missing'|'partial'|'error'>('unknown')
  const [createdEventAudit,setCreatedEventAudit]=useState<'unknown'|'checking'|'matched'|'mismatch'|'unavailable'|'missing'|'error'>('unknown')
  const [inventoryMerchantStatus,setInventoryMerchantStatus]=useState<string|null>(null)
+ const [unfilteredInventoryState,setUnfilteredInventoryState]=useState<'unknown'|'found'|'absent'|'partial'>('unknown')
+ const [unfilteredMerchantStatus,setUnfilteredMerchantStatus]=useState<string|null>(null)
  const [inventoryDiagnostic,setInventoryDiagnostic]=useState<'auth'|'scope'|'request'|'network'|'invalid'|'service'|'rate'|'unknown'>('unknown')
  const [inventoryPayloadIssue,setInventoryPayloadIssue]=useState<'collection'|'page'|'rows'|'original'|'pagination'|'unknown'>('unknown')
  const [loading,setLoading]=useState(true)
@@ -137,7 +141,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   setProviderStatus(null);setRecoveryStage('checking');setRecoveryMessage(null);setCancelled(false)
   setErrorKind('account')
   onAccountInspection?.('checking')
-  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown')
+  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setUnfilteredInventoryState('unknown');setUnfilteredMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown')
   try {
    const result=await call({action:'list'}) as Result
    if(result.ok!==true||result.phase!=='V2_ACCOUNTS'||
@@ -234,6 +238,13 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   try{
    const result=await call({action:'audit_retry_inventory',intentId:account.intentId}) as Result
    if(result.ok!==true)throw Error('MERCHANT_INVENTORY_NOT_VERIFIED')
+   if(result.unfilteredCode==='unfiltered_inventory_original_found'&&
+     ['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(result.unfilteredProviderStatus||'')){
+    setUnfilteredInventoryState('found');setUnfilteredMerchantStatus(result.unfilteredProviderStatus||null)
+   }else if(result.unfilteredCode==='unfiltered_inventory_original_absent'&&
+      result.unfilteredInventoryEnumerated===true){
+    setUnfilteredInventoryState('absent');setUnfilteredMerchantStatus(null)
+   }else{setUnfilteredInventoryState('partial');setUnfilteredMerchantStatus(null)}
    if(result.code==='original_merchant_resource_found'&&
      ['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(result.providerStatus||'')){
     setInventoryMerchantStatus(result.providerStatus||null)
@@ -284,7 +295,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   setAccount(a);setProviderStatus(null);setRecoveryMessage(null);setRecoveryStage('checking')
   void inspectAccountProvider(a,inspection)
   setConfirm(false);setCancelled(false);setPaidThrough(null)
-  setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
+  setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setUnfilteredInventoryState('unknown');setUnfilteredMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -530,8 +541,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
           ? t('PayPal encontró el intento original. Estado: '+inventoryMerchantStatus+'. No se inició otro pago.',
               'PayPal found the original request. Status: '+inventoryMerchantStatus+'. No new payment was started.')
           : inventoryState==='missing'
-            ? t('La aplicación comercial actual no muestra el intento original. Aún hay que verificar el comerciante y pagos anteriores antes de crear otro.',
-                'The current merchant app does not list the original request. Merchant ownership and payments still require reconciliation.')
+            ? t('El inventario del plan no muestra el intento original. PAZO comprobará también todas las suscripciones del comerciante antes de concluir; todavía no es seguro iniciar otro.',
+                'The plan-filtered merchant inventory does not list the original request. PAZO also checks the unfiltered list; retry remains blocked.')
             : inventoryState==='partial'
               ? inventoryPayloadIssue==='collection'
                 ? t('PayPal respondió sin una lista de suscripciones verificable. Eso no demuestra que el intento anterior haya terminado.',
@@ -570,6 +581,16 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
                                 'PayPal inventory service failed. No charge was started.')
                             : t('No se pudo completar el diagnóstico comercial de PayPal. No se inició un cobro.',
                                 'PayPal merchant diagnostic could not be completed. No charge was started.')}
+       </p>}
+       {unfilteredInventoryState!=='unknown'&&<p role="status" className="text-xs leading-relaxed">
+        {unfilteredInventoryState==='found'
+          ? t('En el inventario general de PayPal aparece la solicitud original. Estado: '+unfilteredMerchantStatus+'. No se autorizó otro cobro.',
+              'The general PayPal inventory contains the original request. Status: '+unfilteredMerchantStatus+'. No new charge was authorized.')
+          : unfilteredInventoryState==='absent'
+            ? t('La solicitud tampoco aparece en el inventario completo sin filtro de plan. Esto fortalece la evidencia de ausencia, pero no acredita que ya no pueda cobrarse.',
+                'The request is also absent from the unfiltered merchant inventory. This strengthens the absence evidence, but does not prove it can never bill.')
+            : t('No pudimos verificar de forma completa el inventario comercial sin filtrar. No se autorizó un nuevo intento.',
+                'We could not fully verify the unfiltered merchant inventory. No new attempt was authorized.')}
        </p>}
        {retryEligibility==='blocked'&&<p role="status" className="text-xs">{t('Aún falta conciliación comercial de PayPal. No se inició otro cobro.',
          'PayPal merchant reconciliation is still required. No new charge was initiated.')}</p>}
