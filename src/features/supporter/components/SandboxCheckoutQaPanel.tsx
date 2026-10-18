@@ -23,7 +23,7 @@ type ServerResult = {
   mayGrantBenefits?: boolean
   paidThrough?: null
 }
-type Props = {lang: 'es' | 'en'; inline?: boolean}
+type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void}
 const HOST = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const DIGEST = /^[0-9a-f]{64}$/
 // Previous P06 QA terms explicitly excluded benefits: NEVER reuse them.
@@ -37,7 +37,7 @@ const approveUrl = (raw: unknown): string | null => {
       ? u.toString() : null
   } catch { return null }
 }
-export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
+export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting}: Props) {
   const [offer,setOffer] = useState<Offer | null>(null)
   const [busy,setBusy] = useState(false)
   const [consent,setConsent] = useState(false)
@@ -195,7 +195,8 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
             'PayPal Sandbox · Test money only · Monthly renewal')}
         </p>
       </div>}
-      {phase==='pending'&&<p role={beginFailure?'alert':'status'}
+      {phase==='pending'&&<div className="space-y-2">
+       <p role={beginFailure?'alert':'status'}
         className="rounded-xl bg-[#E8EEDC] p-3 text-[12px] leading-relaxed text-[#204E4A]">
         {beginFailure==='already_linked'
           ? label('Ya existe una suscripción Sandbox vinculada. No abras otra. Consulta «Gestionar mi prueba de PayPal Sandbox» para revisar la operación existente.',
@@ -208,7 +209,12 @@ export function SandboxCheckoutQaPanel({lang,inline=false}: Props) {
                 'This attempt was not authorized. PayPal will not open; check your existing test status.')
               : label('PayPal no se abrió o la respuesta quedó sin confirmar. No repitas el pago: revisa la suscripción desde «Gestionar mi prueba de PayPal Sandbox».',
                 'PayPal did not open or the response is unconfirmed. Do not retry payment: review the subscription in “Manage my PayPal Sandbox test”.')}
-      </p>}
+       </p>
+       {onReviewExisting&&<button type="button" onClick={onReviewExisting}
+         className="min-h-11 w-full rounded-full bg-[#204E4A] px-4 py-2.5 text-[12px] font-extrabold text-white hover:bg-[#31615B] focus-visible:bg-[#31615B]">
+         {label('Revisar mi solicitud de PayPal','Review my PayPal request')}
+       </button>}
+      </div>}
     </section>
   )
 }
