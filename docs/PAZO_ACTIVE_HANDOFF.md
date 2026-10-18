@@ -1,3 +1,15 @@
+# F16 — Diagnóstico comercial sin filtro: Edge Sandbox v14 ACTIVE (2026-10-18)
+
+**PO “ok go” para la siguiente conciliación read-only.** Tras comprobar que PayPal documenta inventario total sin `plan_ids`, se añadió `pazoSandboxV2UnfilteredInventoryRead.mjs` y se amplió la ruta owner-only `audit_retry_inventory` para consultar tanto inventario filtrado como inventario general de PayPal, **solo GET** (OAuth POST para token). La UI del botón existente **«Investigar suscripción en PayPal»** enseña ambos resultados sin PII ni IDs de terceros. No equivale a capacidad de cobro terminal: ausencia en inventarios o 404 NO crea retry grants ni permite segundo POST.
+
+**Deploy:** `f16-paypal-supporter-v2-qa` v**14 ACTIVE / verify_jwt=true**, 19 archivos. Checks commit `f2de49dd6bef3d2dd41f4d297dd0f59cfb61c8b7`: **CI + 4 PG17 laboratorios SUCCESS 5/5** (39143572546, 39143572547, 39143572559, 39143572617, 39143572612). Hosted postflight: original V2=1, retry=0, grants=0, payments=0, paid periods=0, activation bindings=0, `CREATED pending=1`. `p05_inbox_worker_gate.enabled=false`: no se activó ni cerró el inbox, no debe marcarse `processed` por un simple CREATED; PayPal Live/main intactos y PR #44 DRAFT.
+
+**Evidencia pendiente:** el GET general a PayPal no se ha ejecutado todavía desde sesión Auth del PO; para hacerlo, actualizar Vite local y pulsar **solo una vez** el botón existente «Investigar suscripción en PayPal». Ya no repetir «Verificar origen de solicitud» (resultado exact correlation PASS), credenciales o pantallas Business. Informe `docs/F16_V2_UNFILTERED_MERCHANT_RECONCILIATION_20261018.md`. Nuevo pago todavía bloqueado.
+
+**Gate:** `F16_UNFILTERED_MERCHANT_CENSUS_V14_DEPLOYED_CI_5PASS_ZERO_FINANCIAL_WRITES_WAIT_OWNER_READ`.
+
+---
+
 # F16 — Correlación real del webhook PayPal V2 CONFIRMADA por QA (2026-10-18)
 
 **Nuevo resultado posterior al deploy Edge Sandbox v13**: el Product Owner ejecutó el botón owner-scoped **«Verificar origen de solicitud»** desde PAZO local y compartió captura del estado exacto: **«El evento firmado de creación corresponde a esta solicitud de PayPal. Esto no verifica un pago ni permite iniciar otra suscripción.»** La ruta `audit_created_webhook` devuelve ese mensaje SOLO para `created_event_matches_bound_subscription` con `correlated:true`, luego de consultar `GET /v1/notifications/webhooks-events/{id}`, verificar el ID del evento con el inbox firmado y cotejar `resource.id` exacto con el ID de la suscripción privada; coteja también `custom_id` y `plan_id` cuando el proveedor los incluye. Esta evidencia elimina la hipótesis de que PAZO hubiera inventado una creación no existente en PayPal. **No confirma aprobación, cobro, estado actual ni cancelación.** No usar la captura para atribuir cobros.
