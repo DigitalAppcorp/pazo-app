@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Pet } from '../../../types/pazo'
 import { IconPaw } from '../../../components/icons/PazoIcons'
 import { SupporterThemeSaveControl } from './SupporterThemeSaveControl'
+import {supporterBenefitsUiEnabled} from '../supporterUiRelease'
 import {
   SupporterProfileBackdrop,
   SupporterThemePreviewPicker,
@@ -15,7 +16,7 @@ interface SupporterThemePreviewPanelProps {
 }
 
 // Discovery preview remains the default. Persistence is owner/server gated and opt-in for release.
-const liveBenefitsUI = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
+const liveBenefitsUI = supporterBenefitsUiEnabled
 export const SupporterThemePreviewPanel = ({ pet, lang, onClose }: SupporterThemePreviewPanelProps) => {
   const [theme, setTheme] = useState<SupporterProfileThemeSelection>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
