@@ -235,7 +235,7 @@ test('F16 QA V2 one-attempt owner cannot be offered a second Sandbox subscriptio
  assert.ok(page.includes('Ya existe una solicitud de PayPal Sandbox registrada'))
  assert.ok(page.includes('No se pudo comprobar si ya tienes una suscripción Sandbox'))
  assert.ok(page.includes('Consultar mi suscripción Sandbox'))
- assert.ok(page.includes('onClick={()=>setQaManagementOpen(true)}'))
+ assert.ok(page.includes('onClick={reviewExistingQaRequest}'))
  assert.ok(management.includes("onAccountInspection?.(found?.state||'none')"))
  assert.ok(management.includes("onAccountInspection?.('unavailable')"))
  assert.ok(management.includes("onAccountInspection?.('checking')"))
