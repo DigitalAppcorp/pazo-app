@@ -1,3 +1,13 @@
+# F16 — Confirmación PO de SAME MERCHANT, no repetir preguntas (2026-10-18)
+
+**Decisión / hecho confirmado directamente por Product Owner, reiterado:** las credenciales PayPal Sandbox, cuenta Business comercial y aplicación son las mismas desde las pruebas anteriores; no se cambiaron. **No volver a solicitar confirmar merchant, credenciales o revisar las mismas pantallas.** Esto sustituye el supuesto especulativo de que el 404 se debía a un cambio deliberado de credenciales. La API creó/bind V2 y posteriormente no la reconoce (404); el mismo merchant Business muestra 3 suscripciones CANCELLED (2 coinciden con PAZO histórico, ninguna es la V2), 0 ACTIVE, 0 UNPAID y ningún movimiento del 17–18 oct en actividad filtrada Todas/All, según capturas PO. El listado API retorna 'original_not_in_current_merchant_inventory'; esto no confirma cancelación técnica por PayPal del V2.
+
+**Último read-only SQL:** 1 V2 bound creada el 2026-10-17 19:41Z; desde entonces inbox **1 BILLING.SUBSCRIPTION.CREATED** verificado, estado `pending`, no procesado, sin registro de pago ligado; 0 payment entries, 0 reversals, 0 paid periods, 0 verified activations. El evento CREATED **NO es dinero ni aprobación**. `f16_sandbox_qa_v2_retry_grants=0`, `retry_attempts=0`. El bloqueo restante debe resolverse mediante reconciliación administrativa del evento lifecycle pendiente y documentación de ausencia merchant/recurrencia, sin fabricar datos, no bypassear SQL ni crear otro pago a ciegas. No hay que repetir con PO las comprobaciones ya entregadas.
+
+**Siguiente gate técnico:** `F16_MERCHANT_SAME_CREDENTIALS_CONFIRMED_CREATED_INBOX_PENDING_ZERO_CHARGES_RETRY_GRANT_NOT_YET_ELIGIBLE`. PAZO sigue gratis y PayPal Live OFF.
+
+---
+
 # F16 — Merchant inventory: exact-ID correction, Edge QA v12 (2026-10-18)
 
 **Diagnóstico PO:** en QA Sandbox `Investigar suscripción en PayPal` devolvió `PayPal devolvió registros incompletos`. Esto indicaba `merchant_inventory_rows_unverified`, sin precisar qué fila o campo fallaba; no era prueba de pago ni de ausencia. La implementación v11 exigía plan/status también a suscripciones AJENAS al ID V2, condición innecesaria para búsqueda de pertenencia al inventario. API oficial: https://developer.paypal.com/api/subscriptions/v1/subscriptions-list/ .
