@@ -110,3 +110,31 @@ test('SQL inbox candidate is read-only, one-at-a-time and not a retry grant',()=
  /INSERT\s+INTO\s+supporter_private\./i,/GRANT\s+(INSERT|UPDATE|DELETE)/i])
   assert.ok(!forbidden.test(sql),String(forbidden))
 })
+
+
+test('Hosted audit route remains owner-only, read-only and never admits a payment or grants',()=>{
+ const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
+ const ui=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
+ const beginning=edge.indexOf("if(data.action==='audit_created_webhook'){")
+ const ending=edge.indexOf("if(data.action==='resume_approval'){",beginning)
+ assert.ok(beginning>=0&&ending>beginning)
+ const part=edge.slice(beginning,ending)
+ for(const expected of [
+  "QA_V2_CREATED_WEBHOOK_AUDIT_RELEASE_APPROVED = true",
+  "runtime.canBuy(qaOwner)",
+  "runtime.v2AccountStore.readForOwner({",
+  "runtime.createdCandidateStore.readForOwner({",
+  "runtime.createdEventAudit.inspect({",
+  "eventReconciled:false","mayRetry:false","mayRecordPayment:false",
+ ]){
+  assert.ok((expected.includes("QA_V2_")?edge:part).includes(expected),expected)
+ }
+ assert.ok(!part.includes('subscriptionCreator.create('))
+ assert.ok(!part.includes('retryCheckout.begin('))
+ assert.ok(!part.includes('markReversal('))
+ assert.ok(!part.includes('commitVerified('))
+ assert.ok(ui.includes("action:'audit_created_webhook',intentId:account.intentId"))
+ assert.ok(ui.includes("createdEventAudit==='matched'"))
+ assert.ok(ui.includes("createdEventAudit==='missing'"))
+ assert.ok(!ui.includes('window.location.assign(result.approvalUrl)'))
+})
