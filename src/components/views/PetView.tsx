@@ -686,7 +686,7 @@ export const PetView = ({
                         ? (lang==='es'?'Consultando tu membresía…':'Checking your membership…')
                         : supporterStatus.kind==='unavailable'
                           ? (lang==='es'?'Consultar estado de membresía':'Check membership status')
-                          : (lang==='es'?'Conoce cómo apoyar nuestra comunidad':'See how to support our community')}
+                          : (lang==='es'?'Apoya por US$2.99 al mes':'Support PAZO for US$2.99/month')}
                   </span>
                 </span>
               </span>
