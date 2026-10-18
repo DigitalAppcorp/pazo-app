@@ -164,10 +164,10 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
         <button type="button" onClick={()=>void begin()}
           disabled={!consent||busy||phase!=='ready'||attempted.current}
           className={inline
-            ? 'min-h-[49px] w-full rounded-full bg-[#204E4A] px-4 py-2.5 text-[14px] font-extrabold text-white shadow-[0_6px_16px_rgba(32,78,74,0.15)] transition-colors hover:bg-[#32645B] focus-visible:bg-[#32645B] disabled:cursor-not-allowed disabled:bg-[#73968B] disabled:text-white'
-            : 'min-h-11 rounded-full bg-[#204E4A] px-5 py-3 text-sm font-bold text-white disabled:opacity-50'}>
+            ? 'min-h-[49px] w-full rounded-full bg-[#E1E53F] px-4 py-2.5 text-[14px] font-extrabold text-[#204E4A] shadow-[0_6px_16px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:cursor-not-allowed disabled:bg-[#EEF1B7] disabled:text-[#204E4A]'
+            : 'min-h-11 rounded-full bg-[#E1E53F] px-5 py-3 text-sm font-bold text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:cursor-not-allowed disabled:bg-[#EEF1B7] disabled:text-[#204E4A]'}>
           <span className="inline-flex items-center justify-center gap-2">
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[21px] w-[21px] fill-[#003087]">
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[25px] w-[25px] shrink-0 fill-[#003087]">
               <path d="M8.1 2.2h7.5c4.9 0 6.3 3 5.6 6.3-.9 4.2-4 6.2-8.5 6.2h-2.5l-1.7 7.1H3.6L8.1 2.2Z"/>
               <path d="M10 7.6h6.1c4.3 0 5.8 2.6 5 6.4-.6 3.8-3.6 5.2-7.3 5.2H8l2-11.6Z" fill="#009CDE"/>
             </svg>
