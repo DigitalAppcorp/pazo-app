@@ -1,3 +1,13 @@
+# F16 — Owner-only Sandbox membership RPC INSTALLED with PO GO (2026-10-18)
+
+GO PO: «sí» a instalar exclusivamente la función de lectura de membresía asociada al dueño Auth, incluso sin mascotas. Se cotejó migración canónica `supabase/migrations/20261018213000_f16_sandbox_qa_owner_membership_read.sql` con PR #44 DRAFT y preflight hosted; `apply_migration` devolvió `success=true`, migration version alojada **20261018184603**, name `f16_sandbox_qa_owner_membership_read`. Postflight `public.pazo_supporter_my_account_status()` presente, SECURITY DEFINER owner postgres, sin parámetros, `auth.uid()`, `search_path=''`, acceso **authenticated sí / anon no / service_role no**, prueba de catálogo PASS.
+
+Finanzas pre/post constantes: **1 período Sandbox pagado**, 0 holds, 2 QA owners habilitados, 0 fondos guardados, 0 consents, 0 legacy payment entries y 4 `PAYMENT.SALE.COMPLETED` inbox pendientes incluyendo histórico. **Sin pagos nuevos, DML financiero, cambios PayPal, otros deploys ni main/Live.** Código de UI automática está en rama `f13/section-titles-20261012` PR #44; falta sincronizar y probar Vite con cuenta pagada/gratuita/sin mascotas/pendiente; todavía no hay PASS del navegador ni aprobación del PO. Persisten redirección PayPal a preview protegido y diferencia visual insignia Feed.
+
+Informe y gate: `docs/F16_AUTO_MEMBERSHIP_SANDBOX_QA_GATE_20261018.md` — `F16_QA_OWNER_ACCOUNT_READ_RPC_INSTALLED_ACL_PASS_FINANCIAL_ZERO_CHANGE_WAIT_BROWSER_E2E`.
+
+---
+
 # F16 — Cambio automático de oferta a panel tras pago verificado; código PR #44 (2026-10-18)
 
 **PO GO:** corregir la integración de membresía en todas las cuentas Sandbox sin concesiones manuales; perfil no pagador ve botón de US$2.99/oferta; miembro pagado abre panel real. Se aplicó en **código de rama `f13/section-titles-20261012`**, no en main ni Live.
