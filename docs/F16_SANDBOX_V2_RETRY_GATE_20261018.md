@@ -1,5 +1,8 @@
 # PAZO F16 — Reintentos de PayPal Sandbox tras abandono
 
+**Postflight 2026-10-18:** migraciones SQL instaladas; Edge QA v9 JWT true con inventario comercial de solo lectura, 16/16 archivos verificados; CI y tres PG17 labs exitosos (commit `40855926`). Nuevo CTA `Investigar suscripción en PayPal` consulta inventario asociado a merchant/app actual, sin mutar merchant ni generar grants. Cero intentos nuevos, cero grants, cero paidThrough. Falta investigar merchant de origen del 404 y toda exposición a cobro tardío antes de grant. PayPal Live NO habilitado; nueva compra aún bloqueada.
+
+
 **Estado actualizado 2026-10-18:** dos migraciones aplicadas a Supabase y Edge QA v8 publicada, tras PO GO. El control owner-only para consultar elegibilidad está ON, pero **0 merchant reconciliation grants** y **0 retry attempts**: aún NO es posible efectuar una compra de reintento. PayPal Live OFF, PR #44 DRAFT sin merge. CI y tres laboratorios PG17 SUCCESS. El 404 original requiere evidencia independiente antes de un grant.
 
 ## Problema confirmado
