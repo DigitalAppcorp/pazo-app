@@ -49,6 +49,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
  const [errorKind,setErrorKind]=useState<'account'|'status'|'payment'|'other'>('other')
+ const [paymentIssue,setPaymentIssue]=useState<'history'|'period'|'sale'|'provider'|'record'|'generic'>('generic')
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
  const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|'provider'|'account'|'admission'|'restricted'|'oauth'|'missing'|'access'|'network'|null>(null)
  const [confirm,setConfirm]=useState(false)
@@ -91,6 +92,11 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     'created_audit_access_denied','created_audit_rate_limited',
     'created_audit_provider_unavailable','created_audit_invalid_response',
     'created_audit_invalid_token','created_audit_unavailable',
+    'sandbox_payment_period_evidence_missing',
+    'sandbox_payment_history_evidence_missing',
+    'sandbox_payment_sale_evidence_missing',
+    'sandbox_payment_provider_read_unavailable',
+    'sandbox_payment_recording_unavailable',
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
   }
@@ -171,7 +177,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  },[reviewRevision])
  const verifyPayment=async()=>{
   if(!account||account.state!=='bound'||!['APPROVED','ACTIVE'].includes(providerStatus||'')||busy)return
-  setErrorKind('payment')
+  setErrorKind('payment');setPaymentIssue('generic')
   setBusy(true);setError(false)
   try{
    const result=await call({action:'verify_payment',intentId:account.intentId}) as Result
@@ -180,7 +186,15 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
       typeof result.paidThrough!=='string')
     throw Error('NO_VERIFIED_SANDBOX_PAYMENT')
    setPaidThrough(result.paidThrough)
-  }catch{setError(true)}finally{setBusy(false)}
+  }catch(error){
+   const code=error instanceof Error?error.message:''
+   setPaymentIssue(code==='sandbox_payment_history_evidence_missing'?'history':
+    code==='sandbox_payment_period_evidence_missing'?'period':
+    code==='sandbox_payment_sale_evidence_missing'?'sale':
+    code==='sandbox_payment_provider_read_unavailable'?'provider':
+    code==='sandbox_payment_recording_unavailable'?'record':'generic')
+   setError(true)
+  }finally{setBusy(false)}
  }
  const getStatus=async()=>{
   if(!account||account.state!=='bound'||busy)return
@@ -351,8 +365,23 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
         ? t('No pudimos obtener el estado actual de PayPal. Puedes usar «Retomar en PayPal» para consultar la aprobación original.',
             'Could not read PayPal’s current status. Use “Continue in PayPal” to check the original approval.')
         : errorKind==='payment'
-          ? t('No se pudo verificar ningún pago. PAZO no ha activado la membresía.',
-              'No payment could be verified. PAZO has not activated the membership.')
+          ? paymentIssue==='history'
+            ? t('No se pudo comprobar el historial completo de transacciones Sandbox. No se acreditó un período pagado.',
+                'Sandbox transaction history could not be verified. No paid period was credited.')
+            : paymentIssue==='period'
+            ? t('Faltan fechas verificables del período de cobro en PayPal. No se acreditó la membresía.',
+                'PayPal billing period dates could not be verified. Membership was not credited.')
+            : paymentIssue==='sale'
+            ? t('No se pudo comprobar una única venta válida para esta suscripción. No se acreditó la membresía.',
+                'A single eligible sale for this subscription could not be verified. Membership was not credited.')
+            : paymentIssue==='provider'
+            ? t('PayPal no permitió completar la consulta del pago Sandbox. No se acreditó la membresía.',
+                'The Sandbox merchant payment read did not complete. Membership was not credited.')
+            : paymentIssue==='record'
+            ? t('La venta requiere revisión antes de guardar el período pagado. No se acreditó la membresía.',
+                'The sale needs review before a paid period can be saved. Membership was not credited.')
+            : t('No se pudo verificar ningún pago. PAZO no ha activado la membresía.',
+                'No payment could be verified. PAZO has not activated the membership.')
           : t('No fue posible verificar esta operación. No se mostrará como completada.',
               'Could not verify the operation. It will not be shown as complete.')}
    </p>}
