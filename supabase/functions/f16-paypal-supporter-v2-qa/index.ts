@@ -22,8 +22,8 @@ import {createPazoSandboxCancellationProvider}
  from '../f16-paypal-webhook/p06SandboxCancellationProvider.mjs'
 import {createPazoSandboxSupporterAccountHandler}
  from '../f16-paypal-webhook/p14SandboxSupporterAccountHandler.mjs'
-import {createPazoSandboxV2AccountStore}
- from '../f16-paypal-webhook/pazoSandboxV2AccountStore.mjs'
+import {createPazoSandboxV2MultiAccountStore}
+ from '../f16-paypal-webhook/pazoSandboxV2MultiAccountStore.mjs'
 import {createPazoSandboxV2ProofStore}
  from '../f16-paypal-webhook/pazoSandboxV2ProofStore.mjs'
 import {createPazoSandboxV2MerchantVerifier}
@@ -86,7 +86,7 @@ function compose(requestOrigin:string){
   clientId,clientSecret,returnUrl,cancelUrl})
  const reader=createPaypalSandboxSubscriptionReader({clientId,clientSecret})
  const cancellation=createPazoSandboxCancellationProvider({clientId,clientSecret})
- const v2AccountStore=createPazoSandboxV2AccountStore({projectUrl:BASE,serviceRoleKey:key})
+ const v2AccountStore=createPazoSandboxV2MultiAccountStore({projectUrl:BASE,serviceRoleKey:key})
  const v2ProofStore=createPazoSandboxV2ProofStore({projectUrl:BASE,serviceRoleKey:key})
  const canBuy=async(ownerId:string)=>{
   const r=await fetch(BASE+'/rest/v1/rpc/f16_qa_v2_owner_can_checkout',{
@@ -203,7 +203,9 @@ Deno.serve(async(request:Request)=>{
  // Recover only the original PayPal approval for an already-bound QA V2
  // attempt. No PayPal POST creates a second subscription; no paid entitlement.
  if(data.action==='resume_approval'){
-  if(Object.keys(data).sort().join('|')!=='action')
+  if(!((Object.keys(data).sort().join('|')==='action')||
+    (Object.keys(data).sort().join('|')==='action|intentId'&&
+     /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId||''))))
    return addCors(reply(400,'invalid_request'),runtime.origin)
   if(!QA_CHECKOUT_RELEASE_APPROVED||!await runtime.canBuy(qaOwner))
    return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
@@ -215,7 +217,7 @@ Deno.serve(async(request:Request)=>{
   if(admission!==true)
    return addCors(reply(429,'rate_limited'),runtime.origin)
   let account
-  try{account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})}
+  try{account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner,intentId:data.intentId})}
   catch{return addCors(reply(503,'private_account_read_unavailable'),runtime.origin)}
   if(!account||account.state!=='bound'||!account.externalSubscriptionId)
    return addCors(reply(409,'existing_v2_subscription_not_bound'),runtime.origin)
@@ -256,12 +258,14 @@ Deno.serve(async(request:Request)=>{
     'cache-control':'no-store'}}),runtime.origin)
  }
  if(data.action==='verify_payment'){
-  if(Object.keys(data).sort().join('|')!=='action')
+  if(!((Object.keys(data).sort().join('|')==='action')||
+    (Object.keys(data).sort().join('|')==='action|intentId'&&
+     /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId||''))))
    return addCors(reply(400,'invalid_request'),runtime.origin)
   try{
    if(await runtime.admit()!==true)
     return addCors(reply(429,'rate_limited'),runtime.origin)
-   const account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})
+   const account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner,intentId:data.intentId})
    if(!account||account.state!=='bound'||!account.externalSubscriptionId)
     return addCors(reply(409,'v2_subscription_not_bound'),runtime.origin)
    const state=await runtime.merchantVerifier.verifyFirstPaidCycle({
@@ -280,9 +284,7 @@ Deno.serve(async(request:Request)=>{
   try{
    if(await runtime.admit()!==true)
     return addCors(reply(429,'rate_limited'),runtime.origin)
-   const account=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})
-   const accounts=account?[{intentId:account.intentId,state:account.state,
-     canDownloadAcceptance:true}]:[]
+   const accounts=await runtime.v2AccountStore.listForOwner({ownerId:qaOwner})
    return addCors(new Response(JSON.stringify({ok:true,phase:'V2_ACCOUNTS',
      accounts,entitlement:false,paidThrough:null,mayGrantBenefits:false}),{
      status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
