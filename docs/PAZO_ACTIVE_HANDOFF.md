@@ -1,3 +1,21 @@
+# F16 — Aprobación PayPal abandonada NO es membresía: retomar sin segundo POST (2026-10-18)
+
+**PO reporta comportamiento real:** abrió PayPal desde la pantalla de US$2.99 pero salió antes de aprobar/pagar porque no tenía la cuenta a mano. Esto es abandono normal del checkout. No implica suscripción activa ni autorización de renovación. El error de producto es que el intento privado V2 `bound` (merchant creó un objeto `APPROVAL_PENDING`, todavía sin aprobación) se trataba como bloqueante indefinidamente. Requisito PO: usuario puede salir y volver; jamás conceder beneficios ni decir «membresía activa» antes de **pago real confirmado**; no producir cargos o suscripciones duplicados.
+
+**Evidencia:** PayPal documenta `APPROVAL_PENDING` como «buyer has not approved» y `APPROVED/ACTIVE` como estados distintos de ciclo pagado verificado. PayPal API técnicamente debe crear el objeto de suscripción antes de presentar su URL de aprobación, pero el producto mantiene `entitlement=false`, sin beneficios ni período de pago hasta reconciliación de cargo completado. Un `bound` en PAZO solo significa referencia de comercio enlazada; no membresía.
+
+**Corrección preparada SOLO EN RAMA PR #44 DRAFT (NO desplegada):**
+- `supabase/functions/f16-paypal-webhook/paypalSandboxTransactions.mjs`: `readSubscription(subscriptionId,{includeApprovalLink:true})` consulta mediante OAuth + GET la suscripción **existente**. Solo deja salir el enlace `rel=approve` con método GET en estado `APPROVAL_PENDING`, host y ruta exactos de Sandbox, token `ba_token` validado, cero construcción/guess de URLs, sin exponer PII. Los GET normales nunca devuelven links.
+- `supabase/functions/f16-paypal-supporter-v2-qa/index.ts`: nueva acción `resume_approval` sin ID controlado por cliente; Auth + allowlist + owner V2 private + `state=bound` + plan fijo + `custom_id=intentId` + consulta actual del merchant + limitador; devuelve URL original si PayPal aún la ofrece, o estado seguro sin link. **No llama `create`, no muta DB, no activa membership/beneficios.** Disponible solo con release gates QA y administración habilitados. NO afecta Live.
+- `SandboxV2AccountPanel.tsx`: «Consultar PayPal Sandbox» muestra `APPROVAL_PENDING`; «Continuar la aprobación en PayPal» llama `resume_approval`, valida la URL otra vez y navega, con respuesta segura si no hay enlace. Estados `APPROVED/ACTIVE/CANCELLED/EXPIRED` NO vuelven a abrir aprobación. UI padre distingue «solicitud registrada» de «membresía activa»; botón para cancelar renovación solamente tras proveedor `ACTIVE/SUSPENDED`. Sólo lectura hasta que el propio usuario navegue a PayPal y decida.
+- Pruebas en `f16PayPalApprovalRecovery.test.mjs`: URL auténtica, cero POST create, enlaces falsos, estado no pendiente, ausencia de URL y contratos V2; mantener gates existentes.
+
+**LÍMITE IMPORTANTE:** PayPal GET puede no retornar `rel=approve` cuando la solicitud lleva tiempo abandonada. En ese caso la UX enseña mensaje claro y mantiene la membresía inactiva, **sin fabricar un enlace**. Para casos `EXPIRED/CANCELLED` o sin link, MVP necesitará flujo transaccional versionado para cerrar/verificar en PayPal la antigua, reconciliar cobros/webhooks, permitir **una** nueva solicitud con nueva clave solo si no puede cobrarse la anterior, y vigilar llegada tardía de pagos. Requiere diseño SQL/aislamiento y autorización separada PO antes de aplicar. No borrar ni resetear `paypal_subscription_intents` por comodidad.
+
+**Gates:** CI/PG final, auditoría de deploy de Edge y explícito GO para desplegar cambio en Supabase sandbox; **no está operativo en localhost por solo hacer git pull**. Después de desplegar: prueba de abandono, regreso, `APPROVAL_PENDING`, read-only resume, consentimiento conservado, sin cargo/beneficios tras abandono, y pago real Sandbox solo por acción PO. No Live, merge ni migraciones ejecutadas.
+
+---
+
 # F16 — Causa verificada de PayPal Sandbox sin redirección: UN intento V2 ya vinculado (2026-10-18)
 
 **Reporte PO:** captura de «Amigo de PAZO» con consentimiento marcado, CTA apagado y «PayPal no se abrió o la respuesta quedó sin confirmar». Backend no ha demostrado que el último clic aprobara o pagara nada. Antes de este incidente hubo varias recargas/clics y errores.
