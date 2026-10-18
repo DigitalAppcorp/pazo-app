@@ -24,7 +24,7 @@ export interface AdminExperiment {
 }
 export interface AdminVoter {user_id:string;email:string|null;interested_at:string;choice:string|null;source:string}
 export interface AdminAudience {user_id:string;email:string|null;first_viewed:string;last_viewed:string;interested:boolean;choice:string|null}
-const call=async<T>(fn:string,args?:Record<string,unknown>):Promise<T>=>{
+async function call<T>(fn:string,args?:Record<string,unknown>):Promise<T>{
  const {data,error}=await supabase.rpc(fn,args)
  if(error)throw error
  if(data===null||data===undefined)throw Error('PAZO_ADMIN_EMPTY_RESPONSE')
