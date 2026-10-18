@@ -114,7 +114,7 @@ RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $fn$
 DECLARE
  g supporter_private.f16_sandbox_qa_v2_retry_grants%ROWTYPE;
- a supporter_private.f16_sandbox_qa_v2_retry_attempts%ROWTYPE;
+ stored_retry supporter_private.f16_sandbox_qa_v2_retry_attempts%ROWTYPE;
  stored_intent supporter_private.paypal_subscription_intents%ROWTYPE;
  new_id text;
 BEGIN
@@ -126,18 +126,18 @@ BEGIN
  THEN RAISE EXCEPTION 'New affirmative QA V2 consent required' USING ERRCODE='22023'; END IF;
  PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_owner_id::text,0));
  -- Idempotent replay MUST use exactly the original consent and intent.
- SELECT * INTO a FROM supporter_private.f16_sandbox_qa_v2_retry_attempts
+ SELECT * INTO stored_retry FROM supporter_private.f16_sandbox_qa_v2_retry_attempts
   WHERE owner_id=p_owner_id AND request_key=p_request_key FOR UPDATE;
  IF FOUND THEN
-  IF a.locale IS DISTINCT FROM p_locale OR a.terms_version IS DISTINCT FROM p_terms_version
-    OR a.terms_sha256 IS DISTINCT FROM p_terms_digest
+  IF stored_retry.locale IS DISTINCT FROM p_locale OR stored_retry.terms_version IS DISTINCT FROM p_terms_version
+    OR stored_retry.terms_sha256 IS DISTINCT FROM p_terms_digest
   THEN RAISE EXCEPTION 'Retry consent mismatch' USING ERRCODE='22023'; END IF;
   SELECT * INTO stored_intent FROM supporter_private.paypal_subscription_intents
-   WHERE intent_id=a.intent_id AND owner_id=p_owner_id;
+   WHERE intent_id=stored_retry.intent_id AND owner_id=p_owner_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'Retry intent disappeared' USING ERRCODE='23503'; END IF;
   RETURN pg_catalog.jsonb_build_object('ownerId',p_owner_id,'requestKey',p_request_key,
     'intentId',stored_intent.intent_id,'planId',stored_intent.plan_id,'state',stored_intent.state,
-    'locale',a.locale,'termsVersion',a.terms_version,'termsDigest',a.terms_sha256,'createdAt',a.created_at);
+    'locale',stored_retry.locale,'termsVersion',stored_retry.terms_version,'termsDigest',stored_retry.terms_sha256,'createdAt',stored_retry.created_at);
  END IF;
  IF NOT public.f16_qa_v2_retry_eligibility(p_owner_id)
  THEN RAISE EXCEPTION 'Merchant reconciliation authorization missing' USING ERRCODE='42501'; END IF;
