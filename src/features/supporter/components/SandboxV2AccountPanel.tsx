@@ -4,14 +4,14 @@ import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en'}
+type Props={lang:'es'|'en';onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang}:Props){
+export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
  const [account,setAccount]=useState<Account|null>(null)
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
@@ -42,6 +42,7 @@ export function SandboxV2AccountPanel({lang}:Props){
   return result
  }
  const refresh=async()=>{
+  onAccountInspection?.('checking')
   setLoading(true);setError(false);setAccount(null)
   try {
    const result=await call({action:'list'}) as Result
@@ -50,8 +51,10 @@ export function SandboxV2AccountPanel({lang}:Props){
       result.accounts.some(a=>!INTENT.test(a.intentId||'')||
        !['pending','bound'].includes(a.state)||a.canDownloadAcceptance!==true))
     throw Error('UNTRUSTED_QA_LIST')
-   setAccount(result.accounts[0]||null)
-  }catch{setError(true)}
+   const found=result.accounts[0]||null
+   setAccount(found)
+   onAccountInspection?.(found?.state||'none')
+  }catch{setError(true);onAccountInspection?.('unavailable')}
   finally{setLoading(false)}
  }
  useEffect(()=>{void refresh()},[])
