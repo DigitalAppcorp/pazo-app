@@ -1,3 +1,13 @@
+# F16 — Verificador Sandbox V2 corregido en PR #44; despliegue pendiente (2026-10-18)
+
+**Nuevo GO PO:** «sí» para corregir el verificador de pagos tras screenshot de PayPal `ACTIVE` + 503 de `verify_payment`. Solamente rama `f13/section-titles-20261012`: se corrigió la exigencia de totales opcionales PayPal en `pazoSandboxV2MerchantVerify.mjs`, con guardas de paginación contradictoria, enlace next, venta única, GET de venta independiente, vínculo owner/intent/plan, importes, reversos y fechas; se añadieron códigos de error fijos y presentación privada sin PII, así como regresiones sintéticas. **CI+6 PG labs 7/7 SUCCESS** en commit funcional `2501b1d`. La causa concreta del 503 anterior aún no está demostrada porque la Edge antigua lo ocultaba.
+
+**NO desplegado:** Edge `f16-paypal-supporter-v2-qa` alojada continúa v15, PR #44 DRAFT; no hubo cambios a Live, main, webhook/inbox, períodos/grants ni nuevo intento/cancelación PayPal. Próximo gate: **GO explícito del PO para despliegue exclusivo de Edge QA**, luego un solo `Verificar pago real Sandbox` desde la misma cuenta Auth de la solicitud existente, sin nueva compra. Mantener separado el problema histórico 404. Informe: `docs/F16_SANDBOX_V2_PAYMENT_VERIFIER_OPTIONAL_TOTALS_20261018.md`.
+
+**Gate:** `F16_V2_MERCHANT_OPTIONAL_TOTALS_AND_SAFE_DIAGNOSTICS_CODE_PASS_7_OF_7_DEPLOY_GO_PENDING`.
+
+---
+
 # F16 — Revisión administrativa tras GO: aún 1 QA owner activo (2026-10-18)
 
 PO reiteró GO para continuar habilitación 48h del segundo owner QA Auth existente. Supabase project `mrybvqdebbgcayuvgkkr` respondió ACTIVE_HEALTHY. Consulta READ ONLY `SELECT COUNT(*) ... FROM supporter_private.f16_sandbox_qa_owners` devolvió `qa_owner_rows=1`, `active_qa_owners=1`: **segundo owner aún NO habilitado**. El anterior intento de DML para la autorización quedó bloqueado por protecciones de herramienta sin ejecución confirmada; evitar reiterar/cambiar mecanismo como evasión. No realizar POST PayPal hasta que se compruebe entrada temporal QA exacta. Cuenta original, PayPal Live y main intactos.
