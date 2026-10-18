@@ -30,6 +30,10 @@ import {createPazoSandboxV2MerchantVerifier}
  from '../f16-paypal-webhook/pazoSandboxV2MerchantVerify.mjs'
 import {createPazoSandboxV2InventoryRead}
  from '../f16-paypal-webhook/pazoSandboxV2InventoryRead.mjs'
+import {createPazoSandboxV2CreatedEventCandidateStore}
+ from '../f16-paypal-webhook/pazoSandboxV2CreatedEventCandidateStore.mjs'
+import {createPazoSandboxV2CreatedEventAudit}
+ from '../f16-paypal-webhook/pazoSandboxV2CreatedEventAudit.mjs'
 import {createF16GlobalAdmission}
  from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
 
@@ -101,6 +105,9 @@ function compose(requestOrigin:string){
   return (await r.json())===true
  }
  const inventoryRead=createPazoSandboxV2InventoryRead({clientId,clientSecret})
+ const createdCandidateStore=createPazoSandboxV2CreatedEventCandidateStore({
+  projectUrl:BASE,serviceRoleKey:key})
+ const createdEventAudit=createPazoSandboxV2CreatedEventAudit({clientId,clientSecret})
  const merchantVerifier=createPazoSandboxV2MerchantVerifier({
   clientId,clientSecret,commitVerified:v2ProofStore.commitVerified,
   markReversal:v2ProofStore.markReversal})
@@ -121,7 +128,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,reader,resolveAuthenticatedOwner,admit,canBuy}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,createdCandidateStore,createdEventAudit,reader,resolveAuthenticatedOwner,admit,canBuy}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -140,6 +147,9 @@ const QA_V2_MANAGEMENT_RELEASE_APPROVED = true
 // 404 alone never authorizes a new PayPal subscription. Private evidence grant,
 // owner allowlist and a fresh consent remain mandatory before any POST.
 const QA_V2_RETRY_RELEASE_APPROVED = true
+// Separate read-only CREATED event correlation gate. The matching private
+// SQL RPC has NOT been installed or authorized; keep this OFF on deployment.
+const QA_V2_CREATED_WEBHOOK_AUDIT_RELEASE_APPROVED = false
 Deno.serve(async(request:Request)=>{
  if(!QA_CHECKOUT_RELEASE_APPROVED && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return reply(503,'sandbox_qa_features_not_released')
@@ -237,6 +247,53 @@ Deno.serve(async(request:Request)=>{
    const code=error instanceof Error&&known.has(error.message)
     ?error.message:'merchant_inventory_read_unavailable'
    return addCors(reply(code==='inventory_rate_limited'?429:503,code),runtime.origin)
+  }
+ }
+ // Server-only review of the original VERIFIED CREATED inbox candidate.
+ // PREPARED ONLY until private read-only SQL migration has a separate PO GO.
+ // This does not ACK or mutate pending inbox rows and never issues retry grants.
+ if(data.action==='audit_created_webhook'){
+  if(!QA_V2_CREATED_WEBHOOK_AUDIT_RELEASE_APPROVED)
+   return addCors(reply(503,'created_audit_not_released'),runtime.origin)
+  if(Object.keys(data).sort().join('|')!=='action|intentId'||
+    !/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId||''))
+   return addCors(reply(400,'invalid_request'),runtime.origin)
+  if(!await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  try{
+   if(await runtime.admit()!==true)
+    return addCors(reply(429,'rate_limited'),runtime.origin)
+   const account=await runtime.v2AccountStore.readForOwner({
+    ownerId:qaOwner,intentId:data.intentId})
+   if(!account||account.state!=='bound'||!account.externalSubscriptionId)
+    return addCors(reply(409,'private_account_read_unavailable'),runtime.origin)
+   // Signed inbox provenance and uniqueness come from the protected SQL RPC.
+   const candidate=await runtime.createdCandidateStore.readForOwner({
+    ownerId:qaOwner,intentId:account.intentId})
+   if(!candidate)
+    return addCors(new Response(JSON.stringify({ok:true,
+     environment:'sandbox',code:'created_event_candidate_unavailable',
+     correlated:false,eventReconciled:false,mayRetry:false,mayRecordPayment:false,
+     mayGrantBenefits:false,paidThrough:null
+    }),{status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
+   const result=await runtime.createdEventAudit.inspect({
+    eventId:candidate.eventId,eventType:candidate.eventType,
+    subscriptionId:account.externalSubscriptionId,
+    intentId:account.intentId,planId:account.planId})
+   return addCors(new Response(JSON.stringify({ok:true,...result}),{
+    status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
+  }catch(error){
+   const known=new Set([
+    'created_inbox_candidate_unavailable','created_inbox_candidate_untrusted',
+    'created_audit_binding_unverified','created_audit_network_unavailable',
+    'created_audit_oauth_denied','created_audit_event_not_found',
+    'created_audit_access_denied','created_audit_rate_limited',
+    'created_audit_provider_unavailable','created_audit_invalid_response',
+    'created_audit_invalid_token'
+   ])
+   const diagnostic=error instanceof Error&&known.has(error.message)
+    ?error.message:'created_audit_unavailable'
+   return addCors(reply(diagnostic==='created_audit_rate_limited'?429:503,diagnostic),runtime.origin)
   }
  }
  // Recover only the original PayPal approval for an already-bound QA V2
