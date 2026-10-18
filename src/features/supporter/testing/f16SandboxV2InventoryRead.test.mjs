@@ -50,3 +50,50 @@ test('merchant scope denial and invalid payload fail closed',async()=>{
  await assert.rejects(invalid.reader.inspect({subscriptionId:SUB,planId:PLAN}),/inventory_malformed/)
  await assert.rejects(invalid.reader.inspect({subscriptionId:SUB,planId:'P-OTHER'}),/inventory_binding_unverified/)
 })
+
+test('inventory distinguishes auth, permissions, endpoint, malformed and rate-limit',async()=>{
+ for(const [status,expected] of [
+  [400,'inventory_request_rejected'],
+  [401,'inventory_token_denied'],
+  [403,'inventory_merchant_scope_unavailable'],
+  [404,'inventory_endpoint_unavailable'],
+  [429,'inventory_rate_limited'],
+  [500,'inventory_provider_unavailable']
+ ]){
+  const {reader}=createHttpStatusReader(status)
+  await assert.rejects(reader.inspect({subscriptionId:SUB,planId:PLAN}),e=>{
+   assert.equal(e.message,expected)
+   assert.equal(JSON.stringify(e).includes(SUB),false)
+   return true
+  })
+ }
+})
+function createHttpStatusReader(status,stage='list'){
+ const reader=createPazoSandboxV2InventoryRead({
+  clientId:'client1234',clientSecret:'secret1234',
+  fetchImpl:async(url)=>url.endsWith('/oauth2/token')&&stage!=='oauth'
+   ? {ok:true,json:async()=>({access_token:'PRIVATE',token_type:'Bearer'})}
+   : {ok:false,status}
+ })
+ return {reader}
+}
+test('OAuth rejects are distinguishable from merchant list failures',async()=>{
+ for(const status of [401,403]){
+  const {reader}=createHttpStatusReader(status,'oauth')
+  await assert.rejects(reader.inspect({subscriptionId:SUB,planId:PLAN}),
+   /inventory_oauth_denied/)
+ }
+})
+test('Edge never echoes merchant data, tokens or provider response on inventory errors',async()=>{
+ // Runtime envelope contracts are static and allowlisted.
+ const {readFileSync}=await import('node:fs')
+ const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
+ const panel=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
+ assert.ok(edge.includes("'inventory_merchant_scope_unavailable'"))
+ assert.ok(edge.includes("'inventory_oauth_denied'"))
+ assert.ok(edge.includes("'inventory_endpoint_unavailable'"))
+ assert.ok(edge.includes("'merchant_inventory_read_unavailable'"))
+ assert.ok(!edge.includes('console.log(error)'))
+ assert.ok(panel.includes("inventoryDiagnostic==='scope'"))
+ assert.ok(panel.includes("inventoryDiagnostic==='auth'"))
+})
