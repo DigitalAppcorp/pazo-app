@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
+import {SandboxCheckoutQaPanel} from './SandboxCheckoutQaPanel'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
@@ -8,7 +9,7 @@ type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'c
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
- approvalUrl?:string|null}
+ approvalUrl?:string|null;eligible?:boolean}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
  if(typeof raw!=='string'||raw.length>2048)return null
@@ -29,6 +30,8 @@ const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection}:Props){
  const initialAccountCheck=useRef(false)
  const [account,setAccount]=useState<Account|null>(null)
+ const [accounts,setAccounts]=useState<Account[]>([])
+ const [retryEligibility,setRetryEligibility]=useState<'unknown'|'checking'|'approved'|'blocked'>('unknown')
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
@@ -78,15 +81,16 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const refresh=async()=>{
   setErrorKind('account')
   onAccountInspection?.('checking')
-  setLoading(true);setError(false);setAccount(null)
+  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown')
   try {
    const result=await call({action:'list'}) as Result
    if(result.ok!==true||result.phase!=='V2_ACCOUNTS'||
-      !Array.isArray(result.accounts)||result.accounts.length>1||
+      !Array.isArray(result.accounts)||result.accounts.length>20||
       result.accounts.some(a=>!INTENT.test(a.intentId||'')||
        !['pending','bound'].includes(a.state)||a.canDownloadAcceptance!==true))
     throw Error('UNTRUSTED_QA_LIST')
    const found=result.accounts[0]||null
+   setAccounts(result.accounts)
    setAccount(found)
    onAccountInspection?.(found?.state||'none')
   }catch{setError(true);onAccountInspection?.('unavailable')}
@@ -108,7 +112,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   setErrorKind('payment')
   setBusy(true);setError(false)
   try{
-   const result=await call({action:'verify_payment'}) as Result
+   const result=await call({action:'verify_payment',intentId:account.intentId}) as Result
    if(result.ok!==true||result.code!=='verified_first_sandbox_cycle'||
       result.cycleVerified!==true||result.mayGrantBenefits!==true||
       typeof result.paidThrough!=='string')
@@ -123,7 +127,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   try{
    // The existing v4 owner-scoped PayPal GET also verifies provider status.
    // Avoid the older cancellation-management status path.
-   const result=await call({action:'resume_approval'}) as Result
+   const result=await call({action:'resume_approval',intentId:account.intentId}) as Result
    if(result.ok!==true||typeof result.phase!=='string'||
       !['APPROVAL_PENDING','APPROVED','ACTIVE','CANCELLED','EXPIRED','SUSPENDED'].includes(result.phase))
     throw Error('NO_MERCHANT_CONFIRMATION')
@@ -137,7 +141,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
-   const result=await call({action:'resume_approval'}) as Result
+   const result=await call({action:'resume_approval',intentId:account.intentId}) as Result
    if(result.ok!==true)throw Error('INVALID_QA_RESUME')
    if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_can_resume'){
     const url=safeSandboxApprovalUrl(result.approvalUrl)
@@ -165,6 +169,21 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     code==='sandbox_admission_unavailable'||code==='rate_limited'?'admission':
     code==='sandbox_qa_owner_required'||code==='merchant_owner_plan_mismatch'?'restricted':'failed')
   }finally{setBusy(false)}
+ }
+ const checkRetry=async()=>{
+  if(busy||loading)return
+  setRetryEligibility('checking')
+  try{
+   const x=await call({action:'retry_status'}) as Result
+   setRetryEligibility(x.ok===true&&x.environment===undefined&&x.eligible===true?'approved':
+     x.ok===true&&x.eligible===true?'approved':'blocked')
+  }catch{setRetryEligibility('blocked')}
+ }
+ const selectAccount=(a:Account)=>{
+  if(busy)return
+  setAccount(a);setProviderStatus(null);setRecoveryMessage(null)
+  setConfirm(false);setCancelled(false);setPaidThrough(null)
+  setRetryEligibility('unknown');setError(false)
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -250,6 +269,16 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
      </div>)}
     </div>
    </details>
+   {accounts.length>1&&<div className="space-y-2 rounded-2xl bg-[#F0F3ED] p-3">
+     <p className="text-[12px] font-extrabold">{t('Historial de solicitudes','Request history')}</p>
+     <div className="flex flex-wrap gap-2">{accounts.map((a,i)=><button key={a.intentId}
+       type="button" disabled={busy} onClick={()=>selectAccount(a)}
+       aria-pressed={account?.intentId===a.intentId}
+       className={'min-h-11 rounded-full px-3 py-2 text-xs font-bold '+
+         (account?.intentId===a.intentId?'bg-[#204E4A] text-white':'bg-white text-[#204E4A]')}>
+       {t('Intento ','Attempt ')}{accounts.length-i} · {a.state==='bound'?'PayPal':t('Pendiente','Pending')}
+      </button>)}</div>
+    </div>}
    {account&&<div className="space-y-3">
      <p role="status" className="text-sm font-bold">
       {paidThrough
@@ -340,6 +369,17 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
         </button>
        </div>
       </div>}
+     {account.intentId===accounts[0]?.intentId&&!paidThrough&&<div className="space-y-2 rounded-2xl bg-[#EDF2E1] p-3">
+       <p className="text-xs leading-relaxed">{t('Para volver a pagar se necesita comprobar que el intento anterior no pueda cobrarse. PAZO no activará otra solicitud por un error 404.',
+         'Before trying again, PAZO must verify the old attempt cannot bill. A 404 error does not authorize another subscription.')}</p>
+       {retryEligibility!=='approved'&&<button type="button" className={button}
+         onClick={()=>void checkRetry()} disabled={busy||retryEligibility==='checking'}>
+         {retryEligibility==='checking'?t('Verificando…','Verifying…'):t('Comprobar si puedo volver a intentar','Check if I can try again')}
+       </button>}
+       {retryEligibility==='blocked'&&<p role="status" className="text-xs">{t('Aún falta conciliación comercial de PayPal. No se inició otro cobro.',
+         'PayPal merchant reconciliation is still required. No new charge was initiated.')}</p>}
+       {retryEligibility==='approved'&&<SandboxCheckoutQaPanel lang={lang} inline retry onReviewExisting={()=>void refresh()}/>}
+     </div>}
      {cancelled&&<p role="status" className="text-sm font-extrabold">
        {t('PayPal confirmó que las futuras renovaciones V2 están canceladas.',
        'PayPal confirmed that future V2 renewals are cancelled.')}
