@@ -1,3 +1,17 @@
+# F16 — Migración nueva cuenta QA aplicada; email existente, aún sin habilitar (2026-10-18)
+
+**GO explícito PO** concedido para aplicar **exclusivamente** `supabase/migrations/20261018193000_f16_sandbox_fresh_owner_qa_admission.sql`. Se aplicó correctamente al Supabase `mrybvqdebbgcayuvgkkr`, registrada como migración `f16_sandbox_fresh_owner_qa_admission` (20261018163723). Postflight DDL + ACL PASS: `f16_qa_v2_owner_can_checkout` y `f16_qa_v2_begin_checkout` ya no exigen prueba P06 histórica; mantienen verificación `auth.users`, allowlist privada `enabled` con `expires_at`, consentimiento explícito V2/offer bilingüe, serialización owner/idempotencia y máximo 1 primer intento por owner. Ambos RPC `anon=false`, `authenticated=false`, `service_role=true` para EXECUTE; security advisor sin nuevos findings apuntando a ellos. **NO cambios en Edge QA, PayPal, Live ni main.**
+
+**Identidad destinada a QA:** correo confirmado que proporcionó el PO ya corresponde a **1 usuario existente en Auth**, no es un nuevo registro. Por privacidad no almacenar email/UUID en GitHub. Ese usuario no coincide con owner del V2 huérfano, no tiene pruebas P06 ni V2 originales ni reintentos, y **NO** figura en allowlist QA. **No se ha creado Auth ni autorizado todavía su checkout.** Si se reutiliza, no se debe llamar “descartable” ni eliminar luego sin aprobación expresa, porque la cuenta Auth existía previamente.
+
+**Postflight financiero:** QA allowlist 1 propietario original habilitado; primer V2=1, retries=0, grants=0, payments=0, paid periods=0, CREATED original sigue pending=1. Función gating original sigue funcionando para owner ya habilitado. CI y cinco laboratorios PG17 6/6 SUCCESS de la preparación (commit `a5a953b2`).
+
+**Siguiente gate concreto:** pedir al PO consentimiento para **habilitar temporalmente por 48 horas la cuenta Auth existente que indicó**, sin crear ni eliminar Auth ni tocar el owner huérfano. Con un GO explícito, operación admin guardada en `supporter_private.f16_sandbox_qa_owners` para exactamente un Auth confirmado y sin intenciones previas, caducidad automática; verificar 2 allowlisted, 1 original V2, 0 nuevos payments/grants. No crear checkout o pasar por PayPal hasta consentimiento individual posterior. PR #44 sigue DRAFT.
+
+**Marcador:** `F16_FRESH_OWNER_GATE_MIGRATION_APPLIED_PASS_AUTH_ACCOUNT_EXISTS_QA_ALLOWLIST_NOT_GRANTED`.
+
+---
+
 # F16 — Segunda cuenta descartable QA preparada, no creada (2026-10-18)
 
 **PO aprobó seguir con pruebas independientes de Sandbox sin tocar el owner V2 huérfano.** La auditoría SQL real encontró 2 bloqueos adicionales que habrían rechazado al Auth nuevo: `public.f16_qa_v2_owner_can_checkout` y `public.f16_qa_v2_begin_checkout` exigían historial `paypal_p06_checkout_attempts` V1. Se preparó migración `supabase/migrations/20261018193000_f16_sandbox_fresh_owner_qa_admission.sql` que elimina SOLO ese requisito anacrónico, manteniendo Auth+lista privada habilitada/expirable, consentimiento V2 bilingüe, claim y un único primer V2 por owner, sin cambiar P06, el owner original, pago/ledger ni Live. **MIGRACIÓN NO APLICADA**; necesita PO GO separado. Cuenta Auth nueva NO creada, y su autorización QA tampoco insertada.
