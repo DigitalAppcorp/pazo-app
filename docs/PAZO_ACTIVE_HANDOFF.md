@@ -1,3 +1,15 @@
+# F16 — Webhook CREATED: conciliación exacta preparada sin desplegar (2026-10-18)
+
+**PO GO para seguir desarrollo; auditoría de lectura:** SQL real devuelve **1 CREATED verificado `pending`** 9.315923 s tras el V2 original (no es atribución por ID). El proveedor devolvió 404 para la suscripción, y los registros comerciales visuales no muestran cobros ni suscripciones activas; la causa externa del 404 continúa sin prueba. NO repetir al PO revisión de merchant ni credenciales.
+
+**Implementación PR #44:** `pazoSandboxV2CreatedEventAudit.mjs` obtiene por GET del merchant el evento exacto del inbox y comprueba `event.id/event_type/resource.id`, además de custom_id/plan cuando existen, contra la cuenta privada; la nueva RPC owner-bound `f16_qa_v2_read_created_webhook_candidate` es **solo candidata por ventana temporal, cardinalidad exactamente 1**, sin inferir coincidencia por tiempo. Nuevo Edge QA `audit_created_webhook` limitado a Auth+allowlist y **QA_V2_CREATED_WEBHOOK_AUDIT_RELEASE_APPROVED=false**. No devuelve event IDs, credenciales, nombres ni PII. `correlated` no implica `eventReconciled` ni permiso de cobro. `20261018190000_f16_v2_created_webhook_candidate_readonly.sql` está versionada **PERO NO APLICADA**; requiere autorización de instalación separada antes de habilitar Edge read-only.
+
+**Validación** en SHA `d576e1517007d7a152119694672ce67df4e5bf5c`: CI SUCCESS `39140987566`, cuatro laboratorios PG17 SUCCESS `39140987623/39140987602/39140987606/39140987732` (incluido nuevo test SQL con ACL, ambigüedad, dueño). Hosted Supabase no mutado, Edge QA v12 intacta, Live OFF; DB último estado 1 V2, 0 grants/retries/pagos/periodos/activaciones, 1 CREATED pending. Informe `docs/F16_V2_CREATED_WEBHOOK_RECONCILIATION_20261018.md`.
+
+**NEXT GATE:** PO autoriza por separado instalar *solo* migración read-only + desplegar/habilitar diagnóstico read-only QA; NO autoriza retry grant, PayPal POST ni checkout Live. Si PayPal devuelve 404 del **evento** o evidencia dispareja, detener y no considerar reconciliado. Resolver cobros tardíos/recurrencia independientemente antes de cualquier reintento.
+
+---
+
 # F16 — Recuperación automática del intento abandonado preparada en PR #44 (2026-10-18)
 
 **PO autorizó implementar el flujo de recuperación de PAZO para futuros abandonos**, sin manipular pagos ni inferir un estado de PayPal. Cambios SOLO en GitHub rama `f13/section-titles-20261012`, PR #44 DRAFT; **SIN despliegue de Vercel/Edge**, SIN SQL alojado nuevo, SIN cambios a main o Live, SIN nuevo PayPal POST. 
