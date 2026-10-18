@@ -217,11 +217,14 @@ export const HomeView = ({
     }
   },[])
 
+  // The badge request must not be cancelled on every like, save, comment or
+  // cosmetic React re-render: those changes don't alter the pet set.
+  const feedBadgeIds=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
+    .filter(id=>PET_UUID.test(id)).slice(0,48).join('|')
   useEffect(()=>{
-    if(!supporterBadgesEnabled)return
+    if(!supporterBadgesEnabled || !feedBadgeIds)return
     let alive=true
-    const ids=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
-      .filter(id=>PET_UUID.test(id)&&!badgeQueriesMade.current.has(id)).slice(0,48)
+    const ids=feedBadgeIds.split('|').filter(id=>!badgeQueriesMade.current.has(id))
     if(ids.length===0)return
     for(const id of ids)badgeQueriesMade.current.add(id)
     void Promise.resolve(supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
@@ -230,9 +233,9 @@ export const HomeView = ({
         const verified=parseFeedBadgeRows(data,ids)
         if(!verified)return
         setVerifiedFeedBadges(prev=>({...prev,...verified}))
-      }).catch(()=>{/* Closed: never show badges on a failed lookup. */})
+      }).catch(()=>{/* Fail closed. Retry on next managed refresh, never invent a badge. */})
     return ()=>{alive=false}
-  },[posts,verifiedFeedBadges,badgeRefreshCycle])
+  },[feedBadgeIds,badgeRefreshCycle])
 
   const handleToggleComments = async (postId: string) => {
     if (activeCommentsPostId === postId) {
@@ -499,17 +502,21 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
     <article ref={elementRef as React.RefObject<HTMLElement>} className="pazo-glass-card relative rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] transition-all">
       <div className="relative z-10 flex min-w-0 items-start gap-2 p-3.5 sm:p-4">
         <div className="flex min-w-0 flex-1 items-start gap-2.5">
-          <button type="button" onClick={() => onSelectPetProfile(post.petId)} aria-label={lang === 'es' ? `Ver perfil de ${post.petName}` : `View ${post.petName}'s profile`} className={`h-10 w-10 shrink-0 overflow-hidden rounded-full shadow-xs ${post.isRecommended ? 'bg-gradient-to-tr from-[#E1E53F] to-[#204E4A] p-0.5' : ''}`}>
-            <img src={post.petAvatar} alt="" className="h-full w-full rounded-full object-cover" />
-          </button>
+          <div className="relative h-10 w-10 shrink-0">
+            <button type="button" onClick={() => onSelectPetProfile(post.petId)} aria-label={lang === 'es' ? `Ver perfil de ${post.petName}` : `View ${post.petName}'s profile`} className={`h-10 w-10 overflow-hidden rounded-full shadow-xs ${post.isRecommended ? 'bg-gradient-to-tr from-[#E1E53F] to-[#204E4A] p-0.5' : ''}`}>
+              <img src={post.petAvatar} alt="" className="h-full w-full rounded-full object-cover" />
+            </button>
+            {supporterBadgesEnabled && supporterBadge?.badge && (
+              <span className="pointer-events-none absolute -bottom-1 -right-1 z-10 block h-[20px] w-[20px]" aria-label={lang === 'es' ? 'Insignia de Amigo de PAZO verificada' : 'Verified PAZO Friend badge'}>
+                <SupporterBadge active milestone={supporterBadge.milestone} lang={lang} size="mini"/>
+              </span>
+            )}
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
               <button type="button" onClick={() => onSelectPetProfile(post.petId)} className="max-w-full truncate text-left text-[16px] font-extrabold leading-tight text-[#204E4A] hover:underline">
                 {post.petName}
               </button>
-              {supporterBadgesEnabled && supporterBadge?.badge && (
-                <SupporterBadge active milestone={supporterBadge.milestone} lang={lang}/>
-              )}
               {post.isRecommended ? (
                 <span className="inline-flex max-w-full shrink-0 items-center gap-1 rounded-lg bg-[#E1E53F]/40 px-1.5 py-0.5 text-[10px] font-black uppercase text-[#204E4A]">
                   <IconPaw size={10} />
