@@ -66,30 +66,8 @@ AS $function$
 DECLARE v_sale supporter_private.f16_sandbox_qa_paid_periods%ROWTYPE;
 BEGIN
  IF p_owner_id IS NULL OR p_intent_id IS NULL
- OR p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
-BEGIN
- IF EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants)
- OR EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts)
- OR public.f16_qa_v2_retry_eligibility('11111111-1111-4111-8111-111111111111'::uuid)
- OR pg_catalog.has_function_privilege('authenticated','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_function_privilege('anon','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_table_privilege('service_role','supporter_private.f16_sandbox_qa_v2_retry_grants','INSERT')
- THEN RAISE EXCEPTION 'F16 retry migration postflight failed' USING ERRCODE='42501'; END IF;
-END $post$;
-COMMIT;
-
- OR p_sale_id IS NULL OR p_sale_id !~ '^[A-Za-z0-9._-]{6,110}
-BEGIN
- IF EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants)
- OR EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts)
- OR public.f16_qa_v2_retry_eligibility('11111111-1111-4111-8111-111111111111'::uuid)
- OR pg_catalog.has_function_privilege('authenticated','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_function_privilege('anon','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_table_privilege('service_role','supporter_private.f16_sandbox_qa_v2_retry_grants','INSERT')
- THEN RAISE EXCEPTION 'F16 retry migration postflight failed' USING ERRCODE='42501'; END IF;
-END $post$;
-COMMIT;
-
+ OR p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+ OR p_sale_id IS NULL OR p_sale_id !~ '^[A-Za-z0-9._-]{6,110}$'
  OR p_reason NOT IN ('refunded','partially_refunded','reversed','disputed')
  THEN RAISE EXCEPTION 'Invalid V2 merchant reversal proof' USING ERRCODE='22023'; END IF;
  SELECT p.* INTO v_sale
@@ -111,7 +89,6 @@ COMMIT;
  RETURN true;
 END $function$;
 
-
 CREATE OR REPLACE FUNCTION public.f16_qa_v2_record_verified_first_cycle(p_owner_id uuid, p_intent_id text, p_sale_id text, p_sale_completed_at timestamp with time zone, p_service_start timestamp with time zone, p_service_end timestamp with time zone)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -123,30 +100,8 @@ DECLARE v_intent supporter_private.paypal_subscription_intents%ROWTYPE;
  v_cycle text;
 BEGIN
  IF p_owner_id IS NULL OR p_intent_id IS NULL
- OR p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
-BEGIN
- IF EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants)
- OR EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts)
- OR public.f16_qa_v2_retry_eligibility('11111111-1111-4111-8111-111111111111'::uuid)
- OR pg_catalog.has_function_privilege('authenticated','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_function_privilege('anon','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_table_privilege('service_role','supporter_private.f16_sandbox_qa_v2_retry_grants','INSERT')
- THEN RAISE EXCEPTION 'F16 retry migration postflight failed' USING ERRCODE='42501'; END IF;
-END $post$;
-COMMIT;
-
- OR p_sale_id IS NULL OR p_sale_id !~ '^[A-Za-z0-9._-]{6,110}
-BEGIN
- IF EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants)
- OR EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts)
- OR public.f16_qa_v2_retry_eligibility('11111111-1111-4111-8111-111111111111'::uuid)
- OR pg_catalog.has_function_privilege('authenticated','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_function_privilege('anon','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_table_privilege('service_role','supporter_private.f16_sandbox_qa_v2_retry_grants','INSERT')
- THEN RAISE EXCEPTION 'F16 retry migration postflight failed' USING ERRCODE='42501'; END IF;
-END $post$;
-COMMIT;
-
+ OR p_intent_id !~ '^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+ OR p_sale_id IS NULL OR p_sale_id !~ '^[A-Za-z0-9._-]{6,110}$'
  OR p_sale_completed_at IS NULL OR p_service_start IS NULL OR p_service_end IS NULL
  OR p_service_start>pg_catalog.clock_timestamp()
  OR p_service_start<pg_catalog.clock_timestamp()-interval '14 days'
@@ -169,18 +124,7 @@ COMMIT;
  ON o.version=a.terms_version AND o.locale=a.locale AND o.sha256=a.terms_sha256
  WHERE i.owner_id=p_owner_id AND i.intent_id=p_intent_id AND i.state='bound'
  AND i.provider='paypal' AND i.plan_id='P-14V25407JP6850922NLHMDKI'
- AND i.external_subscription_id ~ '^I-[A-Za-z0-9_-]{3,70}
-BEGIN
- IF EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_grants)
- OR EXISTS (SELECT 1 FROM supporter_private.f16_sandbox_qa_v2_retry_attempts)
- OR public.f16_qa_v2_retry_eligibility('11111111-1111-4111-8111-111111111111'::uuid)
- OR pg_catalog.has_function_privilege('authenticated','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_function_privilege('anon','public.f16_qa_v2_retry_begin_checkout(uuid,uuid,text,text,text,boolean)','EXECUTE')
- OR pg_catalog.has_table_privilege('service_role','supporter_private.f16_sandbox_qa_v2_retry_grants','INSERT')
- THEN RAISE EXCEPTION 'F16 retry migration postflight failed' USING ERRCODE='42501'; END IF;
-END $post$;
-COMMIT;
-
+ AND i.external_subscription_id ~ '^I-[A-Za-z0-9_-]{3,70}$'
  AND a.terms_version='pazo-supporter-sandbox.benefits-v2'
  AND a.provider_create_claimed_at IS NOT NULL
  AND o.published_at IS NOT NULL AND o.currency='USD' AND o.price_minor=299
@@ -217,9 +161,6 @@ COMMIT;
  RETURN pg_catalog.jsonb_build_object('phase','verified_first_sandbox_cycle',
    'cycleVerified',true,'periodEnd',p_service_end);
 END $function$;
-
-
-
 
 DO $check$
 BEGIN
