@@ -1,3 +1,15 @@
+# F16 — Feed badge at FIRST visible render, directly implemented by ChatGPT (2026-10-18)
+
+PO demonstrated that mini PAZO Friend badge appeared long after post while Sugerencia appeared at once; asked why delegate to Codex. ChatGPT directly fixed the problem in `f13/section-titles-20261012` PR #44 DRAFT.
+
+**Root cause:** `HomeView` rendered posts first and then fetched `pazo_supporter_public_badges_batch` in a second useEffect, adding the badge late. **Fix:** `App.tsx` now awaits validated server badge evidence and decoded official PNG *before* committing feed posts, for both paginated loads and newly created posts. The Post typed payload contains `supporterBadge`; `HomeView` contains **no late badge RPC** and displays the prevalidated 20px mini on author avatar without moving `Sugerencia`. A strict 48-ID batch resolver rejects malformed/incomplete response and preserves retry/cursors; user is never falsely shown as nonpaying because badge response is pending. Short interval/tab return revalidation uses same authoritative RPC and clears the badge upon failure; no grants from client, localStorage entitlement, or fabricated values. Two network requests are awaited/coalesced **before first UI frame**; not yet a single SQL query. The profile public separate RPC remains out of this Feed scope.
+
+Functional commit `08ce300b828ac50092d9873bd4a382ce0b5138df` **7/7 GitHub Actions SUCCESS (CI + six PG labs)**. No backend, live, main or financial records changed, no Codex required. Report `docs/F16_FEED_BADGE_SAME_FIRST_PAINT_FIX_20261018.md`. **Next:** PO sync clean Antigravity clone, run `scripts/f16-run-real-sandbox-qa.ps1`, cold-start Feed and test actual first visible paint/badge with own paid post (feliciano) and pending/other author, plus paginated feed; CI is NOT PO visual acceptance. Do not repeat PayPal payment.
+
+**Gate:** `F16_FEED_BADGE_FIRST_RENDER_CODE_7_OF_7_PASS_WAIT_PO_BROWSER_COLD_LOAD`.
+
+---
+
 # F16 — Six PO-directed typography and visual corrections CODE PASS 7/7 (2026-10-18)
 
 PO: UI scale was **too small** compared with PAZO; correction is to enlarge small typography, not shrink oversized titles. Implemented and verified in PR #44 DRAFT, branch `f13/section-titles-20261012`:
