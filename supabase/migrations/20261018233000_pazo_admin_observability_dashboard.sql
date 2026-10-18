@@ -263,6 +263,36 @@ begin
  return result;
 end $$;
 
+
+-- Admin-only viewers: who saw a fake door vs who explicitly voted.
+create or replace function public.pazo_admin_audience(p_module_key text,p_limit integer default 40)
+returns jsonb language plpgsql stable security definer set search_path=''
+as $
+declare result jsonb;
+begin
+ if not public.pazo_is_admin() then raise exception 'Admin access required' using errcode='42501'; end if;
+ if p_module_key is null or length(p_module_key)>80 or p_limit is null or p_limit<1 or p_limit>50 then
+  raise exception 'Invalid audience query' using errcode='22023';
+ end if;
+ with per_account as (
+  select user_id,min(created_at) first_viewed,max(created_at) last_viewed
+  from public.module_validation_views
+  where module_key=p_module_key group by user_id
+  order by last_viewed desc limit p_limit
+ )
+ select coalesce(jsonb_agg(jsonb_build_object(
+   'user_id',u.id,'email',u.email,'first_viewed',v.first_viewed,
+   'last_viewed',v.last_viewed,'interested',i.user_id is not null,
+   'choice',t.intent_key) order by v.last_viewed desc),'[]'::jsonb)
+ into result from per_account v
+ join auth.users u on u.id=v.user_id
+ left join public.module_validation_interests i
+   on i.user_id=v.user_id and i.module_key=p_module_key
+ left join public.module_validation_intents t
+   on t.user_id=v.user_id and t.module_key=p_module_key;
+ return result;
+end $;
+
 revoke execute on function public.pazo_is_admin() from public,anon;
 revoke execute on function public.pazo_track_activity(text) from public,anon;
 revoke execute on function public.pazo_admin_overview(integer) from public,anon;
@@ -274,4 +304,6 @@ grant execute on function public.pazo_track_activity(text) to authenticated;
 grant execute on function public.pazo_admin_overview(integer) to authenticated;
 grant execute on function public.pazo_admin_users(integer,integer) to authenticated;
 grant execute on function public.pazo_admin_experiments() to authenticated;
+revoke execute on function public.pazo_admin_audience(text,integer) from public,anon;
 grant execute on function public.pazo_admin_voters(text,integer) to authenticated;
+grant execute on function public.pazo_admin_audience(text,integer) to authenticated;
