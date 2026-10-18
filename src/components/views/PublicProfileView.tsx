@@ -149,7 +149,7 @@ export const PublicProfileView = ({
             petName: p.pet_name,
             petSpecies: p.pet_species,
             petAvatar: p.pet_avatar,
-            location: p.location,
+            location: p.location || '',
             timeAgo: 'Reciente',
             createdAt: p.created_at,
             isRecommended: false,
