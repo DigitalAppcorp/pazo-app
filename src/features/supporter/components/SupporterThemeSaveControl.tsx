@@ -84,26 +84,28 @@ export function SupporterThemeSaveControl({petId, selectedTheme, lang, onLoaded}
     } finally {setBusy(false)}
   }
   const changed=selectedTheme!==current
-  return <section className="space-y-2 rounded-[20px] bg-white/95 px-4 py-4 shadow-sm"
-    aria-label={label('Guardar fondo de la mascota','Save pet background')}>
-    {busy && <p role="status" className="text-[12px] text-[#5C7470]">
-      {label('Verificando tu perfil…','Verifying your profile…')}
-    </p>}
-    {!busy && !error && !eligible && <p role="status" className="text-[12px] text-[#5C7470]">
-      {label('Puedes explorar los fondos. Para guardar uno exclusivo necesitas una mensualidad verificada.',
-        'You can preview backgrounds. A verified paid month is required to save an exclusive one.')}
-    </p>}
-    {error && <p role="alert" className="text-[12px] text-[#9F472E]">
-      {label('No se pudo confirmar el cambio. Tu perfil conservará su diseño anterior.',
-        'The change could not be confirmed. Your profile keeps its previous design.')}
-    </p>}
-    {saved && <p role="status" className="text-[12px] font-bold text-[#204E4A]">
-      {label('Fondo guardado y confirmado en PAZO.','Background saved and verified by PAZO.')}
-    </p>}
-    <button type="button" onClick={()=>void save()}
-      disabled={busy || error || !changed || (!eligible && selectedTheme!==null)}
-      className="min-h-11 rounded-full bg-[#204E4A] px-5 py-3 text-[13px] font-bold text-white disabled:opacity-40">
-      {label('Guardar para mi mascota','Save for my pet')}
-    </button>
+  return <section className="mt-4 space-y-3"
+   aria-label={label('Guardar fondo de la mascota','Save pet background')}>
+   {busy&&<p role="status" className="text-center text-[12px] text-[#5C7470]">
+    {label('Verificando tu perfil…','Verifying your profile…')}
+   </p>}
+   {!busy&&!error&&!eligible&&<p role="status" className="rounded-[18px] bg-[#F0F3ED] p-3 text-[12px] text-[#5C7470]">
+    {label('Puedes probar los fondos. Guardar requiere una mensualidad verificada.',
+      'You can preview backgrounds. Saving requires a verified paid month.')}
+   </p>}
+   {error&&<div role="alert" className="space-y-2 rounded-[18px] bg-[#FCE5D8] p-3">
+    <p className="text-[12px] text-[#9F472E]">{label('No pudimos confirmar el cambio. El fondo anterior se conserva.',
+      'We could not confirm the change. The previous background remains.')}</p>
+    <p className="text-[11px] text-[#9F472E]">{label('Vuelve a abrir la personalización para consultar el estado.',
+      'Reopen customization to check the saved state.')}</p>
+   </div>}
+   {saved&&<p role="status" className="rounded-[18px] bg-[#E6EDDB] px-4 py-3 text-center text-[12px] font-bold text-[#204E4A]">
+    {label('Cambios guardados y confirmados en PAZO.','Changes saved and confirmed by PAZO.')}
+   </p>}
+   <button type="button" onClick={()=>void save()}
+    disabled={busy||error||!changed||(!eligible&&selectedTheme!==null)}
+    className="min-h-12 w-full rounded-full bg-[#204E4A] px-5 py-3 text-[14px] font-extrabold text-white shadow-[0_5px_16px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#315D56] focus-visible:bg-[#35685D] disabled:cursor-not-allowed disabled:bg-[#A5B9B3] disabled:shadow-none">
+    {label('Guardar cambios','Save changes')}
+   </button>
   </section>
 }
