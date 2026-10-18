@@ -74,10 +74,11 @@ export async function preloadVerifiedFeedBadgeArt(posts:readonly Post[]):Promise
   if(!promise){
    promise=new Promise<void>((resolve,reject)=>{
     const artwork=new Image()
-    artwork.onload=()=>resolve()
+    const canDecode=typeof artwork.decode==='function'
     artwork.onerror=()=>reject(Error('FEED_BADGE_ARTWORK_UNAVAILABLE'))
+    if(!canDecode)artwork.onload=()=>resolve()
     artwork.src=src
-    if(typeof artwork.decode==='function'){
+    if(canDecode){
      void artwork.decode().then(resolve,()=>reject(Error('FEED_BADGE_ARTWORK_UNAVAILABLE')))
     }else if(artwork.complete&&artwork.naturalWidth>0)resolve()
    })
