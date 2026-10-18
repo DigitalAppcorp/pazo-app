@@ -149,7 +149,7 @@ const QA_V2_MANAGEMENT_RELEASE_APPROVED = true
 const QA_V2_RETRY_RELEASE_APPROVED = true
 // Separate read-only CREATED event correlation gate. The matching private
 // SQL RPC has NOT been installed or authorized; keep this OFF on deployment.
-const QA_V2_CREATED_WEBHOOK_AUDIT_RELEASE_APPROVED = false
+const QA_V2_CREATED_WEBHOOK_AUDIT_RELEASE_APPROVED = true
 Deno.serve(async(request:Request)=>{
  if(!QA_CHECKOUT_RELEASE_APPROVED && !QA_V2_MANAGEMENT_RELEASE_APPROVED)
   return reply(503,'sandbox_qa_features_not_released')
