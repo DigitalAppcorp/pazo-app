@@ -1,3 +1,13 @@
+# F16 — Invitación Amigo de PAZO: copy aprobado e integrado, código 7/7 PASS (2026-10-18)
+
+PO confirmó como **texto definitivo literal** de la invitación: título «Ayuda a que PAZO siga creciendo» y cuerpo «PAZO está dando sus primeros pasos y aún tenemos mucho por construir. Con tu apoyo podemos seguir cuidando este pequeño mundo, mejorándolo y creando nuevas experiencias para ti, tu mascota y toda nuestra comunidad.». Precio US$2.99/mes, CTA «Quiero apoyar a PAZO» (PayPal explícito), leyenda «PAZO seguirá siendo gratis para todos.» y sección secundaria «Como agradecimiento» con los cuatro reconocimientos. Medallas: «Tu apoyo merece reconocimiento» y texto cálido de agradecimiento elegido por el PO; las reglas 3/6/12 meses pagados/no revertidos no cambiaron. Mantener mensaje centrado en invitación voluntaria a contribuir, NO vender funcionalidades como producto principal. No reformular copy sin nuevo GO PO.
+
+Código ajustado en `SupporterOfferB.tsx`, `SandboxCheckoutQaPanel.tsx`, `SupporterAccountManagement.tsx`, `SupporterBenefitsHome.tsx`, tests F16; sin tocar términos contractuales Sandbox V2, digest, consentimiento, lógica de cobro, Supabase, PayPal Live ni `main`. **Commit funcional `b651ea427cb3bfadfbcb4b281a921ae351ef29eb`: 7/7 GitHub Actions SUCCESS** (CI + 6 PG labs). PR #44 sigue **DRAFT**, sin merge. Reporte `docs/F16_SUPPORT_INVITATION_APPROVED_COPY_20261018.md`. **Pendiente Vite local + aceptación visual del PO**; no declarar F16 completa por copy/CI.
+
+**Gate:** `F16_SUPPORT_INVITATION_COPY_CODE_7_OF_7_PASS_VISUAL_REVIEW_PENDING_LIVE_OFF`.
+
+---
+
 # F16 — Feed badge at FIRST visible render, directly implemented by ChatGPT (2026-10-18)
 
 PO demonstrated that mini PAZO Friend badge appeared long after post while Sugerencia appeared at once; asked why delegate to Codex. ChatGPT directly fixed the problem in `f13/section-titles-20261012` PR #44 DRAFT.
