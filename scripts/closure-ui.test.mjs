@@ -1351,3 +1351,34 @@ test('F16 Sandbox account status: only server-verified paid pet shows original b
     else database.rpc=originalRpc
   }
 })
+
+
+test('Feed location comes from an explicit author choice, never a hardcoded city or private zone leak',()=>{
+  const createPost=fs.readFileSync('src/components/modals/CreatePostModal.tsx','utf8')
+  const feed=fs.readFileSync('src/components/views/HomeView.tsx','utf8')
+  const app=fs.readFileSync('src/App.tsx','utf8')
+  const profile=fs.readFileSync('src/components/views/PublicProfileView.tsx','utf8')
+  const postService=fs.readFileSync('src/services/postService.ts','utf8')
+  assert.ok(!createPost.includes("location: 'Los Ángeles, CA'"),'No fake location in new post writes')
+  assert.ok(createPost.includes('const [shareLocation, setShareLocation] = useState(false)'),
+    'Private location is never public by default')
+  assert.ok(createPost.includes("setPostLocation(currentPet?.zone?.trim() || '')"),
+    'Author can opt to use their own private-zone value deliberately')
+  assert.ok(createPost.includes('checked={shareLocation}')&&createPost.includes('onChange={(e)=>setShareLocation(e.target.checked)}'),
+    'Location disclosure requires a visible opt-in')
+  assert.ok(createPost.includes("Se mostrará públicamente. Comparte solo ciudad o zona, no tu dirección."),
+    'Disclosure of location visibility is explicit and discourages street addresses')
+  assert.ok(createPost.includes('location: selectedLocation,'),
+    'Write the selected location or explicit null, not a default city')
+  assert.ok(createPost.includes('shareLocation?postLocation.trim():null'),
+    'Unchecked location must be persisted as NULL')
+  assert.ok(createPost.includes('maxLength={90}'))
+  assert.ok(createPost.includes("location: newPostData.location || ''"))
+  assert.ok(feed.includes('post.location ? <>{post.location} &bull; </> : null'),
+    'Omit the separator and label if location was not disclosed')
+  assert.ok(app.includes("location: wasAuthorDeleted(post) ? '' : (post.location || '')"))
+  assert.ok(profile.includes("location: p.location || ''"))
+  assert.ok(postService.includes("(p.location || '')"))
+  assert.ok(!createPost.includes('navigator.geolocation')&&!createPost.includes('getCurrentPosition'),
+    'No implicit device GPS collection')
+})
