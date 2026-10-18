@@ -1,3 +1,17 @@
+# F16 — Edge QA V2 v4 desplegada con recuperación read-only (2026-10-18)
+
+**Autorización explícita PO**: «sí» para publicar **únicamente** recuperación de aprobación PayPal Sandbox `resume_approval`, sin activar Live ni crear nuevas suscripciones.
+
+**DESPLIEGUE COMPLETADO y leído de vuelta:** Supabase `mrybvqdebbgcayuvgkkr`, Edge slug `f16-paypal-supporter-v2-qa` **versión 4, ACTIVE**, `verify_jwt=true`. Reemplazo de v3 únicamente de `functions/f16-paypal-supporter-v2-qa/index.ts` y `functions/f16-paypal-webhook/paypalSandboxTransactions.mjs`; las 12 dependencias restantes permanecen idénticas. `get_edge_function` postflight devolvió 14/14 archivos idénticos al commit de código `8b3c193c3764c311b55c9e8e87a8ca1e76987c02` y JWT intacto. `resume_approval` llama PayPal por consulta OAuth + GET del objeto YA vinculado a la cuenta autenticada, revisa plan fijo, custom_id/intento de la cuenta y estado `APPROVAL_PENDING`; solo devuelve enlace `approve` HTTPS Sandbox validado, o fallo seguro. **Cero `POST` a crear suscripción** en la ruta nueva, cero concesión de períodos pagados/entitlements. Los demás comandos `list`/`status`/`cancel`/`verify_payment` no se cambiaron. No se cambiaron flags de Live ni ambientes/secrets; no migraciones SQL.
+
+**Integridad datos:** lectura agregada después de publicar confirma **1 intento V2 vinculado**, `provider_create_claimed=true`, suscripción vinculada; sin nuevas solicitudes registradas por despliegue. No se mostraron identificadores sensibles de PayPal, emails o UID. **Aún no probado el recorrido autenticado en navegador** ni confirmado que PayPal GET devuelva `rel=approve`, pues la app no debe simular la identidad del usuario.
+
+**Acción PO para prueba:** en `C:\\Users\\osori\\PAZO-F13-preview` hacer `git switch f13/section-titles-20261012`, `git pull --ff-only`, reiniciar `powershell -ExecutionPolicy Bypass -File .\\scripts\\f16-run-real-sandbox-qa.ps1`. En `Mi mascota > Amigo de PAZO > Consultar mi suscripción Sandbox`, expandir panel si está plegado, `Actualizar prueba`, `Consultar PayPal Sandbox`. Si estado proveedor es `APPROVAL_PENDING`, opción `Continuar la aprobación en PayPal` debe pedir el enlace original con `resume_approval`; usuario puede salir sin aceptar/pagar, y no se activa membresía. Si link ausente/expirado, interfaz informa bloqueo real; **nueva solicitud tras abandono todavía NO implementada** y exige gate de migración/reconciliación. Si estado ACTIVE, verificar pago con herramientas aprobadas, nunca asumir que ACTIVE=período pagado. No pulsar «Continuar con PayPal» como nuevo checkout.
+
+**Estado:** `F16_QA_RESUME_EDGE_V4_DEPLOYED_POSTFLIGHT_PASS_BROWSER_USER_E2E_PENDING`; PR #44 aún DRAFT, no merge, no Live.
+
+---
+
 # F16 — Aprobación PayPal abandonada NO es membresía: retomar sin segundo POST (2026-10-18)
 
 **PO reporta comportamiento real:** abrió PayPal desde la pantalla de US$2.99 pero salió antes de aprobar/pagar porque no tenía la cuenta a mano. Esto es abandono normal del checkout. No implica suscripción activa ni autorización de renovación. El error de producto es que el intento privado V2 `bound` (merchant creó un objeto `APPROVAL_PENDING`, todavía sin aprobación) se trataba como bloqueante indefinidamente. Requisito PO: usuario puede salir y volver; jamás conceder beneficios ni decir «membresía activa» antes de **pago real confirmado**; no producir cargos o suscripciones duplicados.
