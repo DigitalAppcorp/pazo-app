@@ -18,7 +18,7 @@
     "test:ops": "node --check scripts/f14-verify-trial-storage-identity.mjs && node --check scripts/backup-storage.mjs && node --check scripts/verify-storage-export.mjs && node --check scripts/verify-single-media.mjs && node --test scripts/storage-backup.test.mjs",
     "test:f14": "node --experimental-strip-types --test supabase/functions/f14-moderation-purge/core.test.mjs supabase/functions/f14-moderation-purge/storageInfo.test.mjs supabase/functions/f14-moderation-purge/publicUrl.test.mjs supabase/functions/f14-moderation-purge/trialScope.test.mjs scripts/f14-media-purge-contract.test.mjs scripts/f14-media-url-alias-contract.test.mjs scripts/f14-admin-reconciliation-contract.test.mjs",
     "test:pwa": "node scripts/pwa-check.mjs",
-    "test:closure": "node --experimental-strip-types --test scripts/closure-core.test.mjs scripts/closure-ui.test.mjs",
+    "test:closure": "node --experimental-strip-types --test scripts/closure-core.test.mjs scripts/closure-ui.test.mjs src/features/admin/testing/adminDashboard.test.mjs",
     "test:f16:synthetic": "node --test src/features/supporter/testing/*.test.mjs",
     "verify:f16:paypal:sandbox:plan": "node scripts/f16-paypal-verify-plan-readonly.mjs",
     "verify:f16:paypal:sandbox:webhooks": "node scripts/f16-paypal-verify-webhooks-readonly.mjs"
