@@ -16,14 +16,16 @@ const sub={id:subscriptionId,plan_id:'P-14V25407JP6850922NLHMDKI',
  billing_info:{next_billing_time:END}}
 function subject({subscription=sub,transactions=[tx],sale={id:tx.id,state:'completed',
  amount:{currency:'USD',total:'2.99'},billing_agreement_id:subscriptionId},
- pages=1,items=transactions.length,now=NOW}={}){
+ pages=1,items=transactions.length,links=[],now=NOW}={}){
  const urls=[],commits=[],holds=[]
  const fetchImpl=async(url,opts)=>{
   urls.push([url,opts.method])
   let data
   if(url===HOST+'/v1/oauth2/token')data={token_type:'Bearer',access_token:'synthetic-oauth-not-secret'}
   else if(url===HOST+'/v1/billing/subscriptions/'+subscriptionId)data=subscription
-  else if(url.includes('/transactions?'))data={transactions,total_pages:pages,total_items:items,links:[]}
+  else if(url.includes('/transactions?'))data={transactions,
+   ...(pages===null?{}:{total_pages:pages}),
+   ...(items===null?{}:{total_items:items}),links}
   else if(url===HOST+'/v1/payments/sale/'+tx.id)data=sale
   else throw Error('unexpected merchant URL '+url)
   return {ok:true,json:async()=>data}
@@ -52,6 +54,28 @@ test('completed USD 2.99 merchant sale creates exactly one verifiable first paid
  assert.equal(x.commits[0].serviceStart,'2026-10-15T03:20:37.000Z')
  assert.ok(x.urls.some(([url])=>url.includes('/transactions?')))
  assert.ok(x.urls.some(([url])=>url.endsWith('/v1/payments/sale/SALE-V2-00001')))
+})
+test('PayPal optional pagination totals do not hide a single independently verified sale',async()=>{
+ for(const opts of [{pages:null,items:null},{pages:null},{items:null}]){
+  const x=subject(opts)
+  const r=await x.verify()
+  assert.equal(r.cycleVerified,true)
+  assert.equal(x.commits.length,1)
+  assert.equal(x.urls.filter(([url])=>url.includes('/v1/payments/sale/')).length,1)
+ }
+})
+test('ambiguous or malformed transaction pagination never records paid periods',async()=>{
+ for(const opts of [
+  {pages:2},{pages:0},{items:99},
+  {pages:null,items:null,links:[{rel:'next',href:'https://api-m.sandbox.paypal.com/next'}]},
+  {pages:null,items:null,links:[{rel:'NEXT'}]},
+  {pages:null,items:null,links:'invalid'},
+  {pages:null,items:null,links:[null]},
+ ]){
+  const x=subject(opts)
+  await assert.rejects(x.verify(),/incomplete_subscription_transactions/)
+  assert.equal(x.commits.length,0)
+ }
 })
 test('approval ACTIVE without a merchant paid transaction never creates perks',async()=>{
  const x=subject({transactions:[]})
