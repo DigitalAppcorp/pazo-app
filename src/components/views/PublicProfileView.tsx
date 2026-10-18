@@ -433,17 +433,21 @@ export const PublicProfileView = ({
                     {petPosts.map((post) => (
                       <article key={post.id} className="relative rounded-[32px] bg-white/95 pb-1 shadow-[0_8px_28px_rgba(32,78,74,0.06)]">
                         <div className="flex min-w-0 items-center gap-3 px-4 py-4">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E9EFE6]">
-                            {petProfile.photoUrl ? (
-                              <img src={petProfile.photoUrl} alt="" className="h-full w-full object-cover"/>
-                            ) : <IconPaw size={21} className="text-[#204E4A]/50"/>}
+                          <div className="relative h-11 w-11 shrink-0">
+                            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#E9EFE6]">
+                              {petProfile.photoUrl ? (
+                                <img src={petProfile.photoUrl} alt="" className="h-full w-full object-cover"/>
+                              ) : <IconPaw size={21} className="text-[#204E4A]/50"/>}
+                            </div>
+                            {supporterVisualsEnabled && supporterPerks?.badge && (
+                              <span className="pointer-events-none absolute -bottom-1 -right-1 z-10" aria-label={lang === 'es' ? 'Insignia verificada de Amigo de PAZO' : 'Verified PAZO Friend badge'}>
+                                <SupporterBadge active milestone={supporterPerks.milestone} lang={lang} size="mini"/>
+                              </span>
+                            )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex min-w-0 items-center gap-2">
                               <h3 className="truncate text-[17px] font-black leading-tight text-[#204E4A]">{petProfile.name}</h3>
-                              {supporterVisualsEnabled && supporterPerks?.badge && (
-                                <SupporterBadge active milestone={supporterPerks.milestone} lang={lang}/>
-                              )}
                             </div>
                             <p className="mt-0.5 text-[12px] text-[#71847F]">{post.timeAgo}</p>
                           </div>
