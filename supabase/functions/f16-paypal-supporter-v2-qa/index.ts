@@ -224,8 +224,19 @@ Deno.serve(async(request:Request)=>{
      ok:true,...evidence,merchantAuditGrantIssued:false,
      paidThrough:null,mayRecordPayment:false,mayGrantBenefits:false
    }),{status:200,headers:{'content-type':'application/json','cache-control':'no-store'}}),runtime.origin)
-  }catch{
-   return addCors(reply(503,'merchant_inventory_read_unavailable'),runtime.origin)
+  }catch(error){
+   // Diagnostic is a reviewed fixed code only, never PayPal's raw response.
+   const known=new Set([
+    'inventory_oauth_denied','inventory_token_denied',
+    'inventory_merchant_scope_unavailable','inventory_request_rejected',
+    'inventory_endpoint_unavailable','inventory_rate_limited',
+    'inventory_provider_unavailable','inventory_malformed',
+    'inventory_network_unavailable','inventory_oauth_invalid',
+    'inventory_binding_unverified'
+   ])
+   const code=error instanceof Error&&known.has(error.message)
+    ?error.message:'merchant_inventory_read_unavailable'
+   return addCors(reply(code==='inventory_rate_limited'?429:503,code),runtime.origin)
   }
  }
  // Recover only the original PayPal approval for an already-bound QA V2
