@@ -223,14 +223,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                 </p>
               </div>
             )}
-            <p className="px-1 text-center text-[10px] leading-relaxed text-[#5C7470]">
+            <p className="px-1 text-center text-[13px] leading-relaxed text-[#5C7470]">
               {label('PAZO seguirá siendo gratis para todos.','PAZO will remain free for everyone.')}
             </p>
-            <button type="button" onClick={onClose}
-              className="min-h-9 w-full rounded-full px-4 py-2 text-center text-[12px] font-bold text-[#204E4A] underline decoration-[#A6BBB1] underline-offset-4 hover:bg-[#E9EEDC] focus-visible:bg-[#E1E53F]/30">
-              {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
-            </button>
           </SupporterOfferB>
+          <button type="button" onClick={onClose}
+            className="min-h-11 w-full rounded-full px-4 py-2 text-center text-[13px] font-bold text-[#204E4A] underline decoration-[#A6BBB1] underline-offset-4 hover:bg-[#E9EEDC] focus-visible:bg-[#E1E53F]/30">
+            {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
+          </button>
         </>}
         {(qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
