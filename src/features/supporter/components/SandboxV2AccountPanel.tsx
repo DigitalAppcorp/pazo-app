@@ -35,6 +35,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [inventoryState,setInventoryState]=useState<'unknown'|'checking'|'found'|'missing'|'partial'|'error'>('unknown')
  const [inventoryMerchantStatus,setInventoryMerchantStatus]=useState<string|null>(null)
  const [inventoryDiagnostic,setInventoryDiagnostic]=useState<'auth'|'scope'|'request'|'network'|'invalid'|'service'|'rate'|'unknown'>('unknown')
+ const [inventoryPayloadIssue,setInventoryPayloadIssue]=useState<'collection'|'page'|'rows'|'original'|'pagination'|'unknown'>('unknown')
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
@@ -90,7 +91,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const refresh=async()=>{
   setErrorKind('account')
   onAccountInspection?.('checking')
-  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown')
+  setLoading(true);setError(false);setAccount(null);setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown')
   try {
    const result=await call({action:'list'}) as Result
    if(result.ok!==true||result.phase!=='V2_ACCOUNTS'||
@@ -199,7 +200,16 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     setInventoryState('found')
    }else if(result.code==='original_not_in_current_merchant_inventory'&&result.merchantInventoryEnumerated===true){
     setInventoryState('missing')
-   }else setInventoryState('partial')
+   }else{
+    setInventoryPayloadIssue(
+      result.code==='merchant_inventory_collection_unverified'?'collection':
+      result.code==='merchant_inventory_page_unverified'?'page':
+      result.code==='merchant_inventory_rows_unverified'?'rows':
+      result.code==='original_merchant_details_unverified'?'original':
+      result.code==='merchant_inventory_pagination_unverified'||
+        result.code==='merchant_inventory_pagination_incomplete'?'pagination':'unknown')
+    setInventoryState('partial')
+   }
   }catch(error){
    const code=error instanceof Error?error.message:''
    setInventoryDiagnostic(['inventory_oauth_denied','inventory_token_denied','inventory_oauth_invalid'].includes(code)?'auth':
@@ -217,7 +227,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   if(busy)return
   setAccount(a);setProviderStatus(null);setRecoveryMessage(null)
   setConfirm(false);setCancelled(false);setPaidThrough(null)
-  setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setError(false)
+  setRetryEligibility('unknown');setInventoryState('unknown');setInventoryMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -423,8 +433,20 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
             ? t('La aplicación comercial actual no muestra el intento original. Aún hay que verificar el comerciante y pagos anteriores antes de crear otro.',
                 'The current merchant app does not list the original request. Merchant ownership and payments still require reconciliation.')
             : inventoryState==='partial'
-              ? t('La consulta no acreditó cobertura completa. No hay permiso para crear otra suscripción.',
-                  'The query did not establish complete coverage. No new subscription is allowed.')
+              ? inventoryPayloadIssue==='collection'
+                ? t('PayPal respondió sin una lista de suscripciones verificable. Eso no demuestra que el intento anterior haya terminado.',
+                    'PayPal responded without a verifiable subscription list. The old request is not proven terminated.')
+                : inventoryPayloadIssue==='rows'
+                  ? t('PayPal devolvió registros incompletos. No podemos confirmar la ausencia de la suscripción anterior.',
+                      'PayPal returned incomplete records. We cannot prove the original subscription is absent.')
+                  : inventoryPayloadIssue==='original'
+                    ? t('PayPal devolvió el intento anterior sin estado o plan comprobable. No se autorizó otro pago.',
+                        'PayPal returned the original request without a verifiable status or plan. No new payment was authorized.')
+                    : inventoryPayloadIssue==='pagination'||inventoryPayloadIssue==='page'
+                      ? t('No pudimos comprobar todo el historial paginado de PayPal. El nuevo pago sigue bloqueado.',
+                          'PayPal pagination could not be fully verified. New checkout remains blocked.')
+                      : t('La consulta no acreditó cobertura completa. No hay permiso para crear otra suscripción.',
+                          'The query did not establish complete coverage. No new subscription is allowed.')
               : inventoryDiagnostic==='auth'
                 ? t('PayPal rechazó la autenticación comercial. Hay que verificar la aplicación Sandbox y sus permisos; no se inició un cobro.',
                     'PayPal rejected merchant authentication. Verify the Sandbox app and permissions; no charge was started.')
