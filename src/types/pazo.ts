@@ -29,7 +29,12 @@ export interface PostComment {
   createdAt?: string // Soporte nativo para timestamp dinámico en comentarios
 }
 
+// Display-only proof from the existing public, server-calculated entitlement RPC.
+// It is NOT authority to write benefits, charge, cancel, or modify a membership.
+export type SupporterBadgeEvidence={badge:boolean;milestone:0|3|6|12}
+
 export interface Post {
+  supporterBadge?:SupporterBadgeEvidence
   id: string
   petId: string
   isAuthorDeleted?: boolean
