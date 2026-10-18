@@ -12,13 +12,11 @@ export function ModerationAccess({enabled,lang}:{enabled:boolean;lang:'es'|'en'}
  useEffect(()=>{
   let live=true
   if(!enabled){setAllowed(false);setAdminAllowed(false);setScreen(null);return}
-  void Promise.all([isModerator(),checkAdmin()])
-   .then(([moderation,admin])=>{
-     if(!live)return
-     setAllowed(moderation)
-     setAdminAllowed(admin)
-   })
-   .catch(()=>{if(live){setAllowed(false);setAdminAllowed(false)}})
+  // Analytics deployment must never break the existing moderation queue.
+  void isModerator().then(moderation=>{if(live)setAllowed(moderation)})
+   .catch(()=>{if(live)setAllowed(false)})
+  void checkAdmin().then(admin=>{if(live)setAdminAllowed(admin)})
+   .catch(()=>{if(live)setAdminAllowed(false)})
   return ()=>{live=false}
  },[enabled])
  if(!enabled||!allowed)return null
