@@ -41,6 +41,7 @@ import {
 import type {
   Pet,
   Post,
+  PostComment,
   CareItem,
   CareCompletion,
   CareItemInput,
@@ -903,7 +904,7 @@ function PazoMain() {
 
       if (error) throw error
 
-      const rawComments = (data || []).map((row: any) => {
+      const rawComments:PostComment[] = (data || []).map((row: any) => {
         const author = Array.isArray(row.author) ? row.author[0] : row.author
 
         return {
@@ -970,7 +971,7 @@ function PazoMain() {
     if(supporterBenefitsUiEnabled){
       try{
         const verified=await attachVerifiedCommentBadges(
-          [{authorPetId:actorPet.id}],
+          [{authorPetId:actorPet.id,supporterBadge:undefined}],
           async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
         await preloadVerifiedFeedBadgeArt(verified)
         authorCommentBadge=verified[0].supporterBadge
