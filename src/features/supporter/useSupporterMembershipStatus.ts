@@ -1,9 +1,10 @@
 import {useCallback, useEffect, useState} from 'react'
 import {supabase} from '../../services/supabaseClient'
+import {supporterBenefitsUiEnabled, SUPPORTER_PAYMENT_VERIFIED_EVENT} from './supporterUiRelease'
 
 // A public, derived pet-benefit RPC is the only available authority for F16
 // Sandbox perks. Payment redirects, stored flags and PayPal ACTIVE are not proof.
-const benefitsEnabled = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
+const benefitsEnabled = supporterBenefitsUiEnabled
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const themes = new Set(['classic','nature','hearts','stars','adventure'])
 export type SupporterStatus = {
@@ -25,6 +26,18 @@ export function useSupporterMembershipStatus(petId?:string, enabled=true) {
   const [status,setStatus] = useState<SupporterStatus>(noStatus('checking'))
   const [revision,setRevision] = useState(0)
   const refresh = useCallback(() => setRevision(value => value + 1),[])
+  useEffect(() => {
+    if (!enabled || !benefitsEnabled) return
+    // Switching back from PayPal or verifying a payment re-reads the SERVER.
+    // No local flag, redirect, or event grants a membership.
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    window.addEventListener(SUPPORTER_PAYMENT_VERIFIED_EVENT, refresh)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener(SUPPORTER_PAYMENT_VERIFIED_EVENT, refresh)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [enabled,refresh])
   useEffect(() => {
     let cancelled = false
     setStatus(noStatus('checking'))
