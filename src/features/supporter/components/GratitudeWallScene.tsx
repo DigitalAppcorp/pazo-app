@@ -113,7 +113,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
       <div className="relative mx-auto min-h-full w-full max-w-xl px-4 pb-10 pt-2">
         <div aria-hidden="true" className="pointer-events-none absolute -left-8 -top-2 h-28 w-28 rounded-full bg-[#E8EED8]/40 blur-[32px]"/>
         <section aria-label={label('Acerca del muro','About the wall')}
-          className="relative isolate overflow-hidden rounded-[25px] bg-gradient-to-r from-[#FBE6D8] via-[#FCEBE0] to-[#F8E5D9] px-4 py-5">
+          className="relative isolate overflow-hidden rounded-[25px] bg-gradient-to-r from-[#FBE6D8] via-[#FCEBE0] to-[#F8E5D9] px-4 py-3">
           <WallOrnaments quiet/>
           <div className="relative z-10 flex items-start gap-3">
             <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FAD9C3] text-[#DA805C]">
@@ -147,34 +147,25 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
         </div>}
         {!loading&&!error&&shown.length===0&&<WallEmpty lang={lang} previewOnly={previewOnly}/>}
         {!loading&&!error&&shown.length>0&&<section aria-label={label('Mascotas participantes','Participating pets')}
-          className="relative mt-4 space-y-3 pb-3">
-          <span aria-hidden="true" className="absolute bottom-0 left-[22px] top-6 w-0.5 rounded-full bg-[#DCE7D5]"/>
+          className="relative mt-3 grid grid-cols-2 gap-2.5 pb-3 sm:gap-3">
           {shown.map(pet=><article key={pet.pet_id}
-            className="relative flex min-h-[110px] items-center gap-3 rounded-[24px] bg-white p-3 shadow-[0_5px_18px_rgba(32,78,74,0.055)]">
-            <span aria-hidden="true" className="absolute -left-1 top-[40%] z-10 flex h-7 w-7 items-center justify-center rounded-full bg-[#E1E53F] text-[#204E4A]">
-              <IconPaw size={17}/>
-            </span>
-            <div className="relative ml-4 h-[76px] w-[76px] shrink-0">
+            className="relative flex min-h-[172px] flex-col items-center justify-start gap-2 rounded-[24px] bg-white px-2.5 pb-3 pt-3 text-center shadow-[0_5px_18px_rgba(32,78,74,0.055)]">
+            <div className="relative h-[82px] w-[82px] shrink-0 sm:h-[90px] sm:w-[90px]">
               <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#EEF0DF]">
                 {pet.photo_url
-                  ? <img src={pet.photo_url} alt="" className="h-full w-full object-cover" loading="lazy"/>
-                  : <IconPaw size={34} className="text-[#204E4A]/35"/>}
+                  ?<img src={pet.photo_url} alt="" className="h-full w-full object-cover" loading="lazy"/>
+                  :<IconPaw size={34} className="text-[#204E4A]/35"/>}
               </div>
-              <span className="absolute -bottom-2 -right-2">
+              <span aria-hidden="false" className="absolute -bottom-1 -right-2 z-10">
                 <SupporterBadge active milestone={pet.milestone} lang={lang}/>
               </span>
             </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="break-words text-[17px] font-black leading-snug text-[#204E4A]">{pet.pet_name}</h2>
-              <p className="mt-1 text-[13px] font-medium leading-relaxed text-[#5C7470]">
-                {label('Gracias por ser parte de nuestra comunidad.','Thank you for being part of our community.')}
-              </p>
-              <p className="mt-2 inline-flex max-w-full items-center rounded-full bg-[#EEF2DF] px-2.5 py-1 text-[12px] font-bold text-[#204E4A]">
-                {pet.milestone>0
-                  ? label(`Hito verificado: ${pet.milestone} meses`,`Verified milestone: ${pet.milestone} months`)
-                  : label('Amigo de PAZO verificado','Verified PAZO Friend')}
-              </p>
-            </div>
+            <h2 className="w-full break-words text-[16px] font-black leading-tight text-[#204E4A]">{pet.pet_name}</h2>
+            <p className="text-[12px] font-semibold leading-tight text-[#5C7470]">
+              {pet.milestone>0
+                ?label(`${pet.milestone} meses apoyando`,`${pet.milestone} months supporting`)
+                :label('Amigo de PAZO','PAZO Friend')}
+            </p>
           </article>)}
         </section>}
       </div>
