@@ -188,7 +188,10 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
               <path d="M8.1 2.2h7.5c4.9 0 6.3 3 5.6 6.3-.9 4.2-4 6.2-8.5 6.2h-2.5l-1.7 7.1H3.6L8.1 2.2Z"/>
               <path d="M10 7.6h6.1c4.3 0 5.8 2.6 5 6.4-.6 3.8-3.6 5.2-7.3 5.2H8l2-11.6Z" fill="#009CDE"/>
             </svg>
-            {retry?label('Volver a intentar con PayPal','Try again with PayPal'):label('Continuar con PayPal','Continue with PayPal')}
+            <span className="flex flex-col items-center gap-0.5">
+              <span>{retry?label('Volver a intentar con PayPal','Try again with PayPal'):label('Quiero apoyar a PAZO','I want to support PAZO')}</span>
+              {!retry&&<span className="text-[11px] font-semibold leading-tight">{label('Continuar con PayPal','Continue with PayPal')}</span>}
+            </span>
           </span>
         </button>
         <p className="text-center text-[10px] leading-relaxed text-[#5C7470]">
