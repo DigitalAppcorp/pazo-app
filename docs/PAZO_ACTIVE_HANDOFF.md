@@ -1,3 +1,19 @@
+# F16 — Merchant inventory: exact-ID correction, Edge QA v12 (2026-10-18)
+
+**Diagnóstico PO:** en QA Sandbox `Investigar suscripción en PayPal` devolvió `PayPal devolvió registros incompletos`. Esto indicaba `merchant_inventory_rows_unverified`, sin precisar qué fila o campo fallaba; no era prueba de pago ni de ausencia. La implementación v11 exigía plan/status también a suscripciones AJENAS al ID V2, condición innecesaria para búsqueda de pertenencia al inventario. API oficial: https://developer.paypal.com/api/subscriptions/v1/subscriptions-list/ .
+
+**Corrección:** `pazoSandboxV2InventoryRead.mjs` ahora comprueba únicamente ID sintácticamente válido de filas ajenas y exige `plan_id` y `status` estrictos **solo al ID exacto del intento original**; entradas sin ID todavía invalidan ausencia. Paginar completamente sigue siendo obligatorio para ausencia dentro de merchant actual y nunca habilita reintento automáticamente. Añadidas pruebas de lista con campos opcionales ausentes, exact-match con status válido y fila sin ID con rechazo seguro. GitHub commits `bbbaa873` y `ade31181`, PR #44 DRAFT en `f13/section-titles-20261012`.
+
+**CI:** cuatro checks **SUCCESS** para SHA `ade3118165d3ed7766148e6208792573f867d775`: CI `39135944634`, F16 PG17 `39135944584`, Retry PG17 `39135944641`, Multiattempt PG17 `39135944652`.
+
+**Supabase:** Edge `f16-paypal-supporter-v2-qa` **v12 ACTIVE, verify_jwt=true**, 16/16 archivos coinciden con el código GH; único cambio alojado fue lector inventory, no checkout. Postflight SQL read-only: 1 V2 original, **0 reintentos, 0 grants, 0 períodos Sandbox pagados, 0 entradas financieras**. PayPal Live y main no modificados. 
+
+**Siguiente:** como cambió solo el backend, usuario QA autenticado puede pulsar `Investigar suscripción en PayPal` **una vez** SIN git pull ni reiniciar Vite (si ya ve la UI actual). Si devuelve `no aparece en merchant actual`, sigue requiriéndose verificar cuál merchant/app creó original y reconciliar cobros/reembolsos/disputas/pagos tardíos antes de crear grant. Si aún indica registros incompletos, NO seguir flexibilizando a ciegas: inspeccionar evidencia estructural minimizada con operador y confirmar merchant de origen. Jamás registrar grant basándose solo en 404 o datos parciales.
+
+**Marcador:** `F16_V2_SANDBOX_INVENTORY_EXACT_ID_MATCH_QA_V12_PASS_ZERO_GRANTS_AWAIT_OWNER_CHECK`.
+
+---
+
 # F16 — PayPal Sandbox respuesta parcial: lector seguro QA v11 (2026-10-18)
 
 **PO reportó** pantalla `PayPal devolvió información que no se pudo validar`, tras diagnóstico Edge v10. Esa categoría procede de `inventory_malformed` por respuesta JSON incompleta o por fila/plan/estado/paginación no conformes; **no** se ha recuperado el cuerpo comercial ni se ha probado cuál campo concreto falló. PayPal documenta `GET /v1/billing/subscriptions` con `subscriptions` como lista filtrable por `plan_ids`: https://developer.paypal.com/api/subscriptions/v1/subscriptions-list/ .
