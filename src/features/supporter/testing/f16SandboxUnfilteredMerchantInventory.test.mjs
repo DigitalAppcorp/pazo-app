@@ -69,6 +69,18 @@ test('malformed, oversized or untrusted rows are not proof of merchant absence',
   assert.equal(result.mayRetry,false)
  }
 })
+test('inconsistent provider total_pages metadata cannot complete the scan',async()=>{
+ for(const page of [
+  {subscriptions:[],links:[],total_pages:2},
+  {subscriptions:[{id:'I-OTHER'}],links:[{rel:'next'}],total_pages:1},
+ ]){
+  const {reader}=setup([page])
+  const result=await reader.inspect({subscriptionId:SUB,planId:PLAN})
+  assert.equal(result.code,'unfiltered_inventory_pagination_unverified')
+  assert.equal(result.merchantInventoryEnumerated,false)
+  assert.equal(result.mayRetry,false)
+ }
+})
 test('exact ID with wrong plan, unsupported state or duplicate remains unverified',async()=>{
  for(const rows of [
   [{...row('ACTIVE'),plan_id:'P-OTHER'}],
