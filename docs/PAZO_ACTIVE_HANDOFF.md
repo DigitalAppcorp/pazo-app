@@ -1,3 +1,15 @@
+# F16 — Card Central PO-approved layout implemented in PR #44 (2026-10-18)
+
+PO selected image option **4 / «Card Central»** and explicitly requested faithful implementation, not another copy-only change. Replaced the prior hero + vertical benefit list with an actual **floating official gold medal** centered over one white invitation card, centered approved title/copy/US$2.99, **forest-green «Quiero apoyar a PAZO» + «Continuar con PayPal»** CTA, legal checkbox and terms inside the card, then a separate compact **single horizontal row of four thank-you icons**. Cream outer canvas, discreet motifs, rounded cards without visual contours, PAZO-free promise below and voluntary exit maintained. Existing backend-verified rights, offer exactCopy/digest, consent, anti-duplicate charge protections, QA status and Live OFF are unchanged. UX CTA precedes checkbox visually but remains disabled until explicit affirmative consent.
+
+Files changed: `SupporterOfferB.tsx`, `SandboxCheckoutQaPanel.tsx`, `SupporterAccountManagement.tsx`, and F16 product-experience tests. Functional commit **`06cb189e6ea1d088f7c5244a50122cb000acbe2b` → GitHub Actions 7/7 PASS** (CI + 6 PG laboratories), no migrations, no PayPal changes, no main merge. PR #44 remains DRAFT. Visual reference screenshot supplied by PO in current chat; design/handoff report `docs/F16_CARD_CENTRAL_PO_SELECTED_VISUAL_20261018.md`.
+
+**Next gate:** Product Owner must pull clean local Antigravity repo, restart PAZO Vite QA and visually compare actual page to **option 4** (medal overlap, card/CTA, four-across thanks icons); no payment required. Do not declare pixel-exact or visually accepted on CI alone. Preserve approved exact invitation copy.
+
+**Gate:** `F16_CARD_CENTRAL_CODE_7_OF_7_PASS_WAIT_PO_VITE_VISUAL_ACCEPTANCE`.
+
+---
+
 # F16 — Invitación Amigo de PAZO: copy aprobado e integrado, código 7/7 PASS (2026-10-18)
 
 PO confirmó como **texto definitivo literal** de la invitación: título «Ayuda a que PAZO siga creciendo» y cuerpo «PAZO está dando sus primeros pasos y aún tenemos mucho por construir. Con tu apoyo podemos seguir cuidando este pequeño mundo, mejorándolo y creando nuevas experiencias para ti, tu mascota y toda nuestra comunidad.». Precio US$2.99/mes, CTA «Quiero apoyar a PAZO» (PayPal explícito), leyenda «PAZO seguirá siendo gratis para todos.» y sección secundaria «Como agradecimiento» con los cuatro reconocimientos. Medallas: «Tu apoyo merece reconocimiento» y texto cálido de agradecimiento elegido por el PO; las reglas 3/6/12 meses pagados/no revertidos no cambiaron. Mantener mensaje centrado en invitación voluntaria a contribuir, NO vender funcionalidades como producto principal. No reformular copy sin nuevo GO PO.
