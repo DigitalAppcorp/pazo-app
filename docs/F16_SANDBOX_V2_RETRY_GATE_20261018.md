@@ -1,6 +1,6 @@
 # PAZO F16 — Reintentos de PayPal Sandbox tras abandono
 
-**Estado:** código y migración en PR #44 DRAFT. No aplicados a Supabase alojada. PayPal Live OFF. Aprobación Product Owner: implementar y probar en laboratorio; **no** autoriza migración ni activar cobros.
+**Estado actualizado 2026-10-18:** dos migraciones aplicadas a Supabase y Edge QA v8 publicada, tras PO GO. El control owner-only para consultar elegibilidad está ON, pero **0 merchant reconciliation grants** y **0 retry attempts**: aún NO es posible efectuar una compra de reintento. PayPal Live OFF, PR #44 DRAFT sin merge. CI y tres laboratorios PG17 SUCCESS. El 404 original requiere evidencia independiente antes de un grant.
 
 ## Problema confirmado
 - P06 fue una prueba antigua pagada y cancelada.
@@ -28,7 +28,7 @@
 - `scripts/f16-v2-retry-disposable-lab.sql` y `.github/workflows/f16-v2-retry-disposable-lab.yml`: SQL PostgreSQL 17 desechable con pruebas de grant incompleto, alta, repetición, claim único, RLS/ACL y pago tardío.
 
 ## Bloqueos explícitos antes de un lanzamiento
-**NO basta** la migración: falta cerrar el reconciliador del comerciante que pueda aportar evidencia verificable para `MERCHANT_CONFIRMED_ABSENT`, y que el lector de cuenta/aceptación, verificación de pago y cancelación seleccionen el intento activo más reciente sin perder el P06 y primer V2. El frontend final de reintento debe quedar conectado únicamente cuando esas rutas pasen E2E. El flag permanece OFF y ninguna nueva suscripción debe crearse aún.
+**Migraciones instaladas y QA v8 desplegada, no equivalente a autorización de pago:** falta cerrar el reconciliador del comerciante que pueda aportar evidencia verificable para `MERCHANT_CONFIRMED_ABSENT`, y que el lector de cuenta/aceptación, verificación de pago y cancelación seleccionen el intento activo más reciente sin perder el P06 y primer V2. El frontend final de reintento debe quedar conectado únicamente cuando esas rutas pasen E2E. El flag permanece OFF y ninguna nueva suscripción debe crearse aún.
 
 ## Secuencia para próximos gates (no ejecutar sin PO)
 - CI y ensayo PG 17 completos + revisar migración con diffs.
