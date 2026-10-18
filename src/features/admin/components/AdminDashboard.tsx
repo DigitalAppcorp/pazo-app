@@ -103,7 +103,7 @@ export function AdminDashboard({lang,onClose}:{lang:'es'|'en';onClose:()=>void})
      </div>}
     {overview&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
      {section==='summary'&&<>
-      <Note>{l('Datos de PAZO en pruebas. Los importes de PayPal Sandbox NO son recaudación real. Actividad medida solo desde que se instaló el registro diario.','Staging data. PayPal Sandbox payments are NOT real revenue. Activity is measured only since daily tracking started.')}</Note>
+      <Note>{l('Datos de PAZO en pruebas. Los importes de PayPal Sandbox NO son recaudación real. Actividad medida solo desde que se instaló el registro diario.','Staging data. PayPal Sandbox payments are NOT real revenue. Activity is measured only since daily tracking started.')} {l('Medición desde','Tracking since')}: {overview.activity.tracking_since}.</Note>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
        <Stat label={l('Cuentas','Accounts')} value={n(overview.people.registered)}/>
        <Stat label={l('Mascotas','Pets')} value={n(overview.people.pets)}/>
