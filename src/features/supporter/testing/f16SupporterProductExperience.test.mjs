@@ -56,7 +56,7 @@ test('F16 product page retains no-purchase path and real server-verified checkou
  assert.match(page,/SandboxV2AccountPanel/)
  assert.match(page,/SupporterWallConsentSettings/)
  assert.match(page,/supporterBenefitsUiEnabled/)
- assert.match(pet,/Apoya por US\\$2\\.99 al mes/)
+ assert.ok(pet.includes('Apoya por US$2.99 al mes'))
  assert.ok(checkout.includes("action:retry?'retry_begin':'begin'"))
  assert.match(checkout,/affirmativeConsent:true/)
  assert.match(checkout,/!consent\|\|busy\|\|phase!=='ready'\|\|attempted.current/)
