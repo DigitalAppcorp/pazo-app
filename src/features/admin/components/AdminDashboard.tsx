@@ -1,7 +1,7 @@
 import { useCallback,useEffect,useState } from 'react'
 import {
- adminOverview,adminUsers,adminExperiments,adminVoters,
- type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,
+ adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
+ type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
 } from '../adminDashboardService'
 
 type Section='summary'|'users'|'finance'|'ideas'|'infra'
@@ -40,6 +40,7 @@ export function AdminDashboard({lang,onClose}:{lang:'es'|'en';onClose:()=>void})
  const [userOffset,setUserOffset]=useState(0)
  const [voterKey,setVoterKey]=useState('')
  const [voters,setVoters]=useState<AdminVoter[]|null>(null)
+ const [audience,setAudience]=useState<AdminAudience[]|null>(null)
  const [voterBusy,setVoterBusy]=useState(false)
  const [loading,setLoading]=useState(true)
  const [error,setError]=useState('')
@@ -57,10 +58,12 @@ export function AdminDashboard({lang,onClose}:{lang:'es'|'en';onClose:()=>void})
  },[period,userOffset,lang])
  useEffect(()=>{void refresh()},[refresh])
  const selectDoor=async(key:string)=>{
-  if(voterKey===key){setVoterKey('');setVoters(null);return}
-  setVoterKey(key);setVoters(null);setVoterBusy(true)
-  try{setVoters(await adminVoters(key))}
-  catch(err){setError(err instanceof Error?err.message:'Error al consultar votos')}
+  if(voterKey===key){setVoterKey('');setVoters(null);setAudience(null);return}
+  setVoterKey(key);setVoters(null);setAudience(null);setVoterBusy(true)
+  try{
+   const [votes,visitors]=await Promise.all([adminVoters(key),adminAudience(key)])
+   setVoters(votes);setAudience(visitors)
+  }catch(err){setError(err instanceof Error?err.message:'Error al consultar votos')}
   finally{setVoterBusy(false)}
  }
  return <div role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
@@ -189,13 +192,23 @@ export function AdminDashboard({lang,onClose}:{lang:'es'|'en';onClose:()=>void})
         className="mt-3 rounded-full bg-[#E1E53F] px-4 py-2 text-[12px] font-bold focus-visible:bg-[#EBF27A]">
         {voterKey===item.key?l('Ocultar votantes','Hide voters'):l('Ver quién mostró interés','View interested users')}
        </button>
-       {voterKey===item.key&&<div className="mt-3 space-y-1.5 rounded-2xl bg-[#F4F6EE] p-3">
-        {voterBusy&&<p className="text-[12px]">{l('Cargando votantes…','Loading voters…')}</p>}
-        {voters?.length===0&&<p className="text-[12px] text-[#5C7470]">{l('Sin votos registrados.','No recorded voters.')}</p>}
-        {voters?.map((v,i)=><div key={v.user_id+'-'+i} className="text-[12px]">
+       {voterKey===item.key&&<div className="mt-3 space-y-2 rounded-2xl bg-[#F4F6EE] p-3">
+        {voterBusy&&<p className="text-[12px]">{l('Cargando participación…','Loading participation…')}</p>}
+        {voters?.length===0&&<p className="text-[12px] text-[#5C7470]">{l('Sin votos registrados.','No recorded votes.')}</p>}
+        {voters?.length? <div className="space-y-1">
+         <p className="text-[12px] font-black">{l('Personas que votaron','Interested voters')}</p>
+         {voters.map((v,i)=><p key={v.user_id+'-'+i} className="break-words text-[12px]">
           <span className="font-bold">{v.email||v.user_id}</span>
           <span className="ml-2 text-[#5C7470]">{v.choice?optionLabels[v.choice]||v.choice:l('Interés general','General interest')}</span>
-         </div>)}
+         </p>)}
+        </div>:null}
+        {audience?.length? <div className="space-y-1 pt-2">
+         <p className="text-[12px] font-black">{l('Personas que vieron la función','People who saw the feature')}</p>
+         {audience.map((v,i)=><p key={v.user_id+'-'+i} className="break-words text-[12px]">
+          <span className="font-bold">{v.email||v.user_id}</span>
+          <span className="ml-2 text-[#5C7470]">{v.interested?l('Votó','Voted'):l('Solo la vio','Viewed only')}</span>
+         </p>)}
+        </div>:null}
        </div>}
       </article>)}</div>
      </>}
