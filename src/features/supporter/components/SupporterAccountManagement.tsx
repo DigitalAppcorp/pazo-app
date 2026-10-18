@@ -188,8 +188,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                 ? <SandboxCheckoutQaPanel lang={lang} inline/>
                 : <div role="status" className="space-y-3 rounded-[18px] bg-[#EFF3E7] px-4 py-3 text-[12px] leading-relaxed text-[#204E4A]">
                     <p>{qaV2AccountState==='bound'
-                      ? label('Ya existe una suscripción Sandbox vinculada a esta cuenta. PAZO no puede crear otra. Consulta su estado y, si falta la aprobación, recuperaremos el enlace de la operación existente.',
-                        'A Sandbox subscription is already linked to this account. PAZO cannot create another. Check its status; if approval is still needed, the original approval link must be recovered.')
+                      ? label('Ya existe una solicitud de PayPal Sandbox registrada. Eso NO significa que tengas membresía ni pago activo. Puedes consultar la solicitud y, si sigue pendiente, retomar su aprobación sin crear otra.',
+                        'A PayPal Sandbox request is already recorded. This does NOT mean you have a paid membership. You can check it and continue its approval if still pending without creating another request.')
                       : qaV2AccountState==='pending'
                         ? label('Ya existe una solicitud de suscripción Sandbox pendiente. No se iniciará una segunda.',
                           'A Sandbox subscription request is pending. A second one will not be started.')
