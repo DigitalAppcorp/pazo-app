@@ -228,7 +228,7 @@ test('F16 QA V2 one-attempt owner cannot be offered a second Sandbox subscriptio
  assert.ok(page.includes("qaV2AccountState==='none'"),'Only a confirmed no-account result can show the payment CTA')
  assert.ok(page.includes("const [qaV2AccountState,setQaV2AccountState]"))
  assert.ok(page.includes('onAccountInspection={setQaV2AccountState}'))
- assert.ok(page.includes('Ya existe una suscripción Sandbox vinculada'))
+ assert.ok(page.includes('Ya existe una solicitud de PayPal Sandbox registrada'))
  assert.ok(page.includes('No se pudo comprobar si ya tienes una suscripción Sandbox'))
  assert.ok(page.includes('Consultar mi suscripción Sandbox'))
  assert.ok(page.includes('onClick={()=>setQaManagementOpen(true)}'))
