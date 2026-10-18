@@ -14,95 +14,134 @@ type Props = {
  milestone:SupporterMilestone
  qa:boolean
 }
-
+type IconName='paw'|'palette'|'heart'|'medal'|'card'
+const BenefitIcon=({name}: {name:IconName})=>{
+ const paths:Record<IconName,string>={
+  paw:'M8 9.5c-.8 0-1.5-.9-1.5-2s.7-2 1.5-2 1.5.9 1.5 2-.7 2-1.5 2Zm8 0c-.8 0-1.5-.9-1.5-2s.7-2 1.5-2 1.5.9 1.5 2-.7 2-1.5 2ZM5 14c-.9 0-1.5-.8-1.5-1.8s.6-1.7 1.5-1.7 1.5.7 1.5 1.7S5.9 14 5 14Zm14 0c-.9 0-1.5-.8-1.5-1.8s.6-1.7 1.5-1.7 1.5.7 1.5 1.7S19.9 14 19 14Zm-7 6c-2.1 0-3-1-4.6-.8-1.7.2-3-1.1-2.2-2.8 1-2 2.6-3.9 4.5-4.7.9-.4 1.5-.5 2.3-.5s1.4.1 2.3.5c1.9.8 3.5 2.7 4.5 4.7.8 1.7-.5 3-2.2 2.8-1.6-.2-2.5.8-4.6.8Z',
+  palette:'M12 3a9 9 0 1 0 0 18h2a2 2 0 0 0 1-4 1 1 0 0 1 1-2h2a4 4 0 0 0 3-4 9 9 0 0 0-9-8ZM7 11h.01M11 7h.01M16 8h.01',
+  heart:'M12 21s-9-5.5-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-9 11-9 11Z',
+  medal:'m12 14 4 2.5-1 5.5-3-2-3 2-1-5.5 4-2.5ZM7 3h10l2 5-7 6-7-6 2-5Zm2 0 3 7 3-7',
+  card:'M3 5h18v14H3V5Zm0 5h18',
+ }
+ return <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <path d={paths[name]}/>
+ </svg>
+}
 export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
  const [showThemes,setShowThemes]=useState(false)
  const [showWall,setShowWall]=useState(false)
  const [showMembership,setShowMembership]=useState(false)
  const [showDetails,setShowDetails]=useState(false)
+ const [showSandboxTools,setShowSandboxTools]=useState(false)
  const closeRef=useRef<HTMLButtonElement>(null)
  const t=(es:string,en:string)=>lang==='es'?es:en
  useEffect(()=>{
-   closeRef.current?.focus()
-   const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&!showThemes)onClose()}
-   window.addEventListener('keydown',escape)
-   return ()=>window.removeEventListener('keydown',escape)
- },[onClose,showThemes])
- const row='flex min-h-20 w-full items-center justify-between gap-3 rounded-[24px] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F2F5EA] focus-visible:bg-[#E1E53F]/30'
- const iconBox='flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/35 font-black text-[#204E4A]'
+  closeRef.current?.focus()
+ },[])
+ useEffect(()=>{
+  const escape=(event:KeyboardEvent)=>{
+   if(event.key!=='Escape'||showThemes)return
+   if(showWall){setShowWall(false);return}
+   if(showMembership){setShowMembership(false);return}
+   onClose()
+  }
+  window.addEventListener('keydown',escape)
+  return ()=>window.removeEventListener('keydown',escape)
+ },[onClose,showThemes,showWall,showMembership])
+
+ const row='flex min-h-[78px] w-full items-center gap-3 rounded-[23px] px-3 py-3 text-left transition-colors hover:bg-[#F1F4EB] focus-visible:bg-[#E1E53F]/35 disabled:opacity-55'
+ const iconBox='flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-[#ECF0D7] text-[#204E4A]'
+ const caption='text-[12px] leading-relaxed text-[#5C7470]'
  const item=(title:string,subtitle:string) => <span className="min-w-0 flex-1">
-   <span className="block text-[15px] font-extrabold text-[#204E4A]">{title}</span>
-   <span className="mt-1 block text-xs leading-relaxed text-[#5C7470]">{subtitle}</span>
- </span>
+   <span className="block text-[14px] font-black text-[#204E4A]">{title}</span>
+   <span className={'mt-1 block '+caption}>{subtitle}</span>
+  </span>
+ const feature=(name:IconName,title:string,description:string,action:()=>void,disabled=false,expanded?:boolean)=>
+  <button type="button" className={row} onClick={action} disabled={disabled} aria-expanded={expanded}>
+   <span className={iconBox}><BenefitIcon name={name}/></span>
+   {item(title,description)}
+   <span className="px-1 text-2xl font-light text-[#47726B]" aria-hidden="true">›</span>
+  </button>
  return <SupporterScreenPortal>
  <div role="dialog" aria-modal="true" aria-labelledby="friend-benefits-title"
-   className="h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#FAF8F5] text-[#204E4A]">
-   <header className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-3 backdrop-blur-xl">
-     <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
-       <h2 className="text-[20px] font-black" id="friend-benefits-title">{t('Amigo de PAZO','Friend of PAZO')}</h2>
-       <button type="button" ref={closeRef} onClick={onClose}
-         className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-extrabold shadow-sm hover:bg-[#E1E53F]/30 focus-visible:bg-[#E1E53F]/40">
-         {t('Volver a PAZO','Back to PAZO')}
-       </button>
+  className="h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#FAF8F5] text-[#204E4A]">
+  <header className="sticky top-0 z-20 bg-[#FAF8F5]/95 px-4 py-3 backdrop-blur-xl">
+   <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
+    <h2 className="text-[19px] font-black" id="friend-benefits-title">{showWall?t('Muro de agradecimiento','Thank-you wall'):t('Amigo de PAZO','Friend of PAZO')}</h2>
+    <button type="button" ref={closeRef} onClick={()=>showWall?setShowWall(false):onClose()}
+     className="min-h-11 rounded-full bg-white px-4 py-2.5 text-[13px] font-bold shadow-[0_3px_15px_rgba(32,78,74,0.05)] hover:bg-[#E6EDDB] focus-visible:bg-[#E1E53F]/50">
+     {showWall?t('Volver a beneficios','Back to benefits'):t('Volver a PAZO','Back to PAZO')}
+    </button>
+   </div>
+  </header>
+  <main className="mx-auto w-full min-w-0 max-w-xl space-y-4 px-4 pb-10 pt-3">
+  {showWall ? <SupporterWallConsentSettings lang={lang}/> : <>
+   <section aria-label={t('Membresía activa','Active membership')}
+    className="flex flex-col items-center gap-2 rounded-[32px] bg-[#E8EEDD] px-6 py-7 text-center">
+    <SupporterBadge active milestone={milestone} lang={lang} size="large"/>
+    <h3 className="mt-2 text-[22px] font-black leading-tight">{t('Ya eres Amigo de PAZO','You are a PAZO Friend')}</h3>
+    <p className="max-w-[31ch] text-[13px] leading-relaxed text-[#476862]">
+     {t('Gracias por ayudar a que PAZO siga siendo gratis para todos.','Thanks for helping keep PAZO free for everyone.')}
+    </p>
+    <p role="status" className="mt-2 rounded-full bg-white/80 px-4 py-2 text-[12px] font-black text-[#204E4A]">
+     {t('Membresía activa y verificada','Verified active membership')}
+    </p>
+    <p className="text-[11px] text-[#5C7470]">
+     {t('Consulta la vigencia y renovación en Mi membresía.','Review paid-through date and renewal under My membership.')}
+    </p>
+   </section>
+   <h3 className="px-1 pt-1 text-[17px] font-black">{t('Tus beneficios','Your benefits')}</h3>
+   <section aria-label={t('Beneficios de Amigo de PAZO','PAZO Friend benefits')}
+    className="rounded-[28px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">
+    {feature('paw',t('Tu insignia','Your badge'),
+      milestone>0?t(`Reconocimiento de ${milestone} meses completados.`,`Recognition for ${milestone} completed months.`):
+       t('Visible en perfil y publicaciones.','Shown on profiles and posts.'),
+      ()=>setShowDetails(value=>!value),false,showDetails)}
+    {showDetails&&<div className="mx-3 mb-3 rounded-[20px] bg-[#F4F5EE] p-4">
+     <div className="flex items-center gap-3"><SupporterBadge active milestone={milestone} lang={lang}/>
+      <p className={caption}>{t('La insignia depende de los pagos verificados de tu cuenta.','Your badge is based on verified paid periods.')}</p>
      </div>
-   </header>
-   <main className="mx-auto w-full min-w-0 max-w-xl space-y-4 px-4 pb-10 pt-4">
-     <section className="flex items-center gap-4 rounded-[30px] bg-[#E6EDDB] p-5">
-       <SupporterBadge active milestone={milestone} lang={lang} size="large"/>
-       <div className="min-w-0">
-         <p className="text-xs font-bold text-[#52716A]">{t('¡Gracias por colaborar!','Thank you for supporting!')}</p>
-         <h3 className="mt-1 text-xl font-black">{t('Tus beneficios están disponibles','Your benefits are available')}</h3>
-         <p className="mt-1 text-xs text-[#476862]">
-           {milestone>0?t(`Insignia de ${milestone} meses completados.`,`Badge for ${milestone} completed months.`):
-             t('Insignia de Amigo de PAZO activa.','Your PAZO Friend badge is active.')}
-         </p>
-       </div>
-     </section>
-     <h3 className="px-1 text-lg font-black">{t('Mis beneficios','My benefits')}</h3>
-     <button type="button" className={row} onClick={()=>setShowThemes(true)}
-       disabled={!pet} aria-label={t('Personalizar perfil','Customize profile')}>
-       <span aria-hidden="true" className={iconBox}><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 3a9 9 0 1 0 0 18h2a2 2 0 0 0 1-4 1 1 0 0 1 1-2h2a4 4 0 0 0 3-4 9 9 0 0 0-9-8Z"/><circle cx="7" cy="11" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="16" cy="8" r="1"/></svg></span>
-       {item(t('Personalizar perfil','Customize profile'),pet
-         ?t('Elige y guarda uno de los cinco fondos.','Choose and save one of five backgrounds.')
-         :t('Abre Mi mascota para elegir el perfil que personalizarás.','Open My Pet to select the profile to customize.'))}
-       <span aria-hidden="true" className="text-xl font-bold">›</span>
-     </button>
-     <button type="button" className={row} onClick={()=>setShowWall(value=>!value)} aria-expanded={showWall}>
-       <span aria-hidden="true" className={iconBox}><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 21s-9-5.5-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-9 11-9 11Z"/></svg></span>
-       {item(t('Muro de agradecimiento','Thank-you wall'),t('Autoriza o retira cada mascota por separado.','Opt in or withdraw each pet separately.'))}
-       <span aria-hidden="true" className="text-xl font-bold">›</span>
-     </button>
-     {showWall&&<SupporterWallConsentSettings lang={lang}/>}
-     <section className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
-       <div className="flex items-center gap-3">
-         <span className={iconBox}><SupporterBadge active milestone={milestone} lang={lang}/></span>
-         {item(t('Mis insignias','My badges'),t('La insignia actual refleja únicamente períodos verificados.','Your current badge reflects only verified paid periods.'))}
-       </div>
-       <p className="mt-3 text-xs leading-relaxed text-[#5C7470]">
-         {t('Los reconocimientos de 3, 6 y 12 meses aparecen cuando se cumplen los períodos pagados. No es necesario comprarlos por separado.',
-           'Milestone badges appear after 3, 6 and 12 completed paid months. No separate purchase is needed.')}
-       </p>
-     </section>
-     <button type="button" className={row} onClick={()=>setShowMembership(v=>!v)} aria-expanded={showMembership}>
-       <span aria-hidden="true" className={iconBox}><svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></svg></span>
-       {item(t('Mi membresía','My membership'),t('Consulta tu suscripción, condiciones y cancelación.','View subscription details, terms and cancellation.'))}
-       <span aria-hidden="true" className="text-xl font-bold">›</span>
-     </button>
-     {showMembership && (qa
-       ? <SandboxV2AccountPanel lang={lang}/>
-       : <p role="status" className="rounded-2xl bg-white p-4 text-sm text-[#476862]">
-           {t('La administración de cobros reales sigue desactivada hasta el lanzamiento.',
-             'Live billing management remains unavailable until launch.')}
-         </p>)}
-     {qa&&<details open={showDetails} onToggle={event=>setShowDetails(event.currentTarget.open)}
-       className="rounded-3xl bg-[#F0F3ED] p-4">
-       <summary className="min-h-11 cursor-pointer py-2 text-sm font-bold focus-visible:bg-[#E1E53F]/35">
-         {t('Diagnóstico de beneficios · Solo QA','Benefit diagnostics · QA only')}
-       </summary>
-       <SupporterSandboxBenefitsStatus lang={lang}/>
-     </details>}
-   </main>
-   {showThemes&&pet&&<SupporterThemePreviewPanel pet={pet} lang={lang} onClose={()=>setShowThemes(false)}/>}
+    </div>}
+    {feature('palette',t('Personalizar perfil','Customize profile'),
+      pet?t('Elige y guarda uno de cinco fondos.','Choose and save one of five backgrounds.'):
+       t('Abre desde Mi mascota para seleccionar un perfil.','Open from My Pet to choose a profile.'),
+      ()=>setShowThemes(true),!pet)}
+    {feature('heart',t('Muro de agradecimiento','Thank-you wall'),
+      t('Tú eliges qué mascotas aparecen.','Choose which pets appear.'),
+      ()=>setShowWall(true))}
+    {feature('medal',t('Medallas de antigüedad','Milestone badges'),
+      t('Reconocimientos de 3, 6 y 12 meses.','Recognition at 3, 6 and 12 months.'),
+      ()=>setShowDetails(value=>!value),false,showDetails)}
+   </section>
+   <section className="rounded-[26px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">
+    {feature('card',t('Mi membresía','My membership'),
+      t('Pago, renovación y cancelación.','Payment, renewal and cancellation.'),
+      ()=>setShowMembership(v=>!v),false,showMembership)}
+    {showMembership && <div className="space-y-3 px-3 pb-4">
+      <p className={caption}>{t('Los detalles de tu suscripción se consultan directamente en PayPal.','Your subscription details come directly from PayPal.')}</p>
+      {qa ? <div className="space-y-2">
+        <details open={showSandboxTools} onToggle={event=>setShowSandboxTools(event.currentTarget.open)}
+          className="rounded-[20px] bg-[#EFF3E8] p-3">
+          <summary className="min-h-11 cursor-pointer py-3 text-[12px] font-bold focus-visible:bg-[#E1E53F]/40">
+           {t('Herramientas de prueba Sandbox','Sandbox test tools')}
+          </summary>
+          <SandboxV2AccountPanel lang={lang}/>
+        </details>
+      </div> : <p role="status" className={caption}>
+        {t('La administración de cobros reales sigue desactivada hasta el lanzamiento.',
+           'Live billing management remains unavailable until launch.')}
+      </p>}
+    </div>}
+   </section>
+   {qa&&<details className="rounded-[24px] bg-[#F0F3ED] px-4 py-2">
+    <summary className="min-h-11 cursor-pointer py-3 text-[12px] font-bold focus-visible:bg-[#E1E53F]/35">
+     {t('Diagnóstico de beneficios · Solo QA','Benefit diagnostics · QA only')}
+    </summary>
+    <SupporterSandboxBenefitsStatus lang={lang}/>
+   </details>}
+  </>}
+  </main>
+  {showThemes&&pet&&<SupporterThemePreviewPanel pet={pet} lang={lang} onClose={()=>setShowThemes(false)}/>}
  </div>
  </SupporterScreenPortal>
 }
