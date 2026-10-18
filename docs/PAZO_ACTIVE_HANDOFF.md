@@ -1,3 +1,11 @@
+# F16 — Revisión administrativa tras GO: aún 1 QA owner activo (2026-10-18)
+
+PO reiteró GO para continuar habilitación 48h del segundo owner QA Auth existente. Supabase project `mrybvqdebbgcayuvgkkr` respondió ACTIVE_HEALTHY. Consulta READ ONLY `SELECT COUNT(*) ... FROM supporter_private.f16_sandbox_qa_owners` devolvió `qa_owner_rows=1`, `active_qa_owners=1`: **segundo owner aún NO habilitado**. El anterior intento de DML para la autorización quedó bloqueado por protecciones de herramienta sin ejecución confirmada; evitar reiterar/cambiar mecanismo como evasión. No realizar POST PayPal hasta que se compruebe entrada temporal QA exacta. Cuenta original, PayPal Live y main intactos.
+
+**Gate:** `F16_SECOND_QA_OWNER_APPROVED_ACTIVE_COUNT_1_MANUAL_AUTHORIZED_ADMIN_GATE_PENDING`.
+
+---
+
 # F16 — Migración nueva cuenta QA aplicada; email existente, aún sin habilitar (2026-10-18)
 
 **GO explícito PO** concedido para aplicar **exclusivamente** `supabase/migrations/20261018193000_f16_sandbox_fresh_owner_qa_admission.sql`. Se aplicó correctamente al Supabase `mrybvqdebbgcayuvgkkr`, registrada como migración `f16_sandbox_fresh_owner_qa_admission` (20261018163723). Postflight DDL + ACL PASS: `f16_qa_v2_owner_can_checkout` y `f16_qa_v2_begin_checkout` ya no exigen prueba P06 histórica; mantienen verificación `auth.users`, allowlist privada `enabled` con `expires_at`, consentimiento explícito V2/offer bilingüe, serialización owner/idempotencia y máximo 1 primer intento por owner. Ambos RPC `anon=false`, `authenticated=false`, `service_role=true` para EXECUTE; security advisor sin nuevos findings apuntando a ellos. **NO cambios en Edge QA, PayPal, Live ni main.**
