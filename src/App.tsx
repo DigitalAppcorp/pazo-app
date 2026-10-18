@@ -10,7 +10,7 @@ import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
 import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
-import {attachVerifiedFeedBadges,preloadVerifiedFeedBadgeArt} from './features/supporter/verifiedFeedPostBadges'
+import {attachVerifiedFeedBadges,attachVerifiedCommentBadges,preloadVerifiedFeedBadgeArt} from './features/supporter/verifiedFeedPostBadges'
 import {supporterBenefitsUiEnabled} from './features/supporter/supporterUiRelease'
 import {
   fetchLatestUnreadSightingNotification,
@@ -903,7 +903,7 @@ function PazoMain() {
 
       if (error) throw error
 
-      const loadedComments = (data || []).map((row: any) => {
+      const rawComments = (data || []).map((row: any) => {
         const author = Array.isArray(row.author) ? row.author[0] : row.author
 
         return {
@@ -918,9 +918,17 @@ function PazoMain() {
         }
       })
 
+      // Comments and verified membership arrive in one visible payload.
+      // Never show a paid author's comment first without their badge.
+      const loadedComments=supporterBenefitsUiEnabled
+        ?await attachVerifiedCommentBadges(rawComments,
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        :rawComments
+      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(loadedComments)
+
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
-          post.id === postId
+          post.id === postId && !post.commentsLoaded
             ? {
                 ...post,
                 comments: loadedComments,
@@ -956,7 +964,30 @@ function PazoMain() {
     const temporaryId = `temp-comment-${crypto.randomUUID()}`
     const createdAt = new Date().toISOString()
 
+    // Verify this pet's badge before showing the optimistic comment.
+    // No membership is inferred from the owner, previous post or login.
+    let authorCommentBadge:Post['supporterBadge']
+    if(supporterBenefitsUiEnabled){
+      try{
+        const verified=await attachVerifiedCommentBadges(
+          [{authorPetId:actorPet.id}],
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(verified)
+        authorCommentBadge=verified[0].supporterBadge
+      }catch(error){
+        console.error('PAZO comment badge verification unavailable:',error)
+        commentingPostIdsRef.current.delete(operationKey)
+        return false
+      }
+      // A pet switch or feed refresh invalidates the pending author identity.
+      if(activePetIdRef.current!==actorPet.id){
+        commentingPostIdsRef.current.delete(operationKey)
+        return false
+      }
+    }
+
     const optimisticComment = {
+      supporterBadge:authorCommentBadge,
       id: temporaryId,
       authorPetId: actorPet.id,
       authorName: actorPet.name,
