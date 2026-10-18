@@ -20,7 +20,7 @@ export function SupporterBadge({
   active:boolean
   milestone?:SupporterMilestone
   lang:'es'|'en'
-  size?:'small'|'large'
+  size?:'mini'|'small'|'large'
 }){
   const [failedAsset,setFailedAsset]=useState<string|null>(null)
   if(!active || !Object.prototype.hasOwnProperty.call(badgeFiles,milestone)) return null
@@ -33,9 +33,9 @@ export function SupporterBadge({
     src={'/supporter/' + file}
     alt={label}
     title={label}
-    decoding="async"
-    loading="lazy"
+    decoding="sync"
+    loading="eager"
     onError={()=>setFailedAsset(file)}
-    className={(size==='large'?'h-[66px] w-[66px]':'h-8 w-8')+' shrink-0 object-contain'}
+    className={(size==='large'?'h-[66px] w-[66px]':size==='mini'?'h-[20px] w-[20px]':'h-8 w-8')+' shrink-0 object-contain'}
   />
 }
