@@ -1,3 +1,17 @@
+# F16 — Recuperación automática del intento abandonado preparada en PR #44 (2026-10-18)
+
+**PO autorizó implementar el flujo de recuperación de PAZO para futuros abandonos**, sin manipular pagos ni inferir un estado de PayPal. Cambios SOLO en GitHub rama `f13/section-titles-20261012`, PR #44 DRAFT; **SIN despliegue de Vercel/Edge**, SIN SQL alojado nuevo, SIN cambios a main o Live, SIN nuevo PayPal POST. 
+
+**Entregado:** `src/features/supporter/sandboxV2RecoveryState.mjs` + declaración `.d.mts`; `SandboxV2AccountPanel.tsx` hace inspección **automática y solo lectura** del intento propio al cargar o seleccionar otro, con protección contra respuestas atrasadas (`inspectionSeq`), mediante ruta existente `resume_approval` (solo merchant GET). El usuario únicamente puede abrir la URL de aprobación con pulsación explícita y si el servidor verifica `APPROVAL_PENDING` y link válido. `404` se clasifica como `merchant_missing_needs_reconciliation`, oculta la invitación insegura de reanudar y presenta causa y gestión comercial requerida SIN presentar pagado/terminal. `APPROVED`/`ACTIVE` no conceden paidThrough ni beneficios, `CANCELLED`/`EXPIRED` no habilitan nueva alta sin grant. La cuenta y consentimientos originales siguen intactos. Pruebas: `f16SandboxV2RecoveryState.test.mjs`, ajuste de contrato `f16PayPalApprovalRecovery.test.mjs`; reparado harness sintético `scripts/closure-ui.test.mjs` para resolver `.mjs` importados desde TSX (copia módulo y conserva extensión).
+
+**Validación GitHub SHA `c6aa8a7d938cd254c1771485f09675f44492e65b`: 4/4 SUCCESS** — CI `39139940695`, F16 PostgreSQL `39139940634`, F16 retry PostgreSQL `39139940589`, F16 multiattempt PostgreSQL `39139940680`. Postflight SQL **solo lectura:** 1 primer intento V2, 0 reintentos, 0 grants privados, 0 períodos pagados, 0 entradas de pago, 0 activaciones, 1 webhook CREATED pendiente desde el intento. PayPal Sandbox Edge QA instalada permanece v12; **NO se ha aplicado frontend a la computadora/preview local del PO**. Al actualizar checkout local desde branch el usuario podrá ver nueva recuperación sin desplegar Edge, usando ruta vigente.
+
+**Gate real pendiente:** resolver reconciliación administrativa del CREATED y condición no cobrable del subscription ID V2 (GET PayPal 404 / inventory absent), sin fabricar prueba. La nueva UX NO crea grants ni desbloquea una segunda suscripción. Requiere paso separado autorizado si se pretende modificar Supabase o crear pagos. No volver a pedir confirmación de credenciales o capturas de merchant ya aportadas. No confundir CI PASS con pago listo.
+
+**Marcador:** `F16_V2_ABANDONED_CHECKOUT_AUTO_RECOVERY_UI_CI_4PASS_ZERO_FINANCIAL_WRITES_AWAIT_MERCHANT_RECONCILIATION`.
+
+---
+
 # F16 — Auditoría de causa raíz: bloqueo viejo confirmado; PayPal 404 aún sin causa (2026-10-18)
 
 **PO GO: auditoría y reproducción sin cobros.** Fuente detallada: `docs/F16_V2_ABANDONMENT_ROOT_CAUSE_20261018.md`. Se verificó con **lectura SQL real** que `public.f16_qa_v2_begin_checkout` conserva `IF EXISTS ... WHERE owner_id=p_owner_id THEN RAISE EXCEPTION 'One v2 attempt per owner'`, sin distinguir si el intento está pagado. El primer V2 quedó `bound` solo después de POST + GET PayPal `APPROVAL_PENDING` con `plan_id/custom_id` válidos. `bound` NO significa pagado. La nueva ruta multiintento necesita un grant comercial privado; al haber 0 grants no puede abrir otra compra.
