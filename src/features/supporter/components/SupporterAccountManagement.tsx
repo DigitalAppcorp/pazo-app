@@ -39,6 +39,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   // An authenticated, already-bound V2 attempt must be managed, never offered a new request key.
   const [qaV2AccountState,setQaV2AccountState] = useState<'checking'|'none'|'pending'|'bound'|'unavailable'>('checking')
   const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
+  const [qaReviewRevision,setQaReviewRevision] = useState(0)
+  const reviewExistingQaRequest = () => {
+    setQaManagementOpen(true)
+    setQaV2AccountState('checking')
+    setQaReviewRevision(n=>n+1)
+  }
   const closeRef = useRef<HTMLButtonElement>(null)
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
   const spanish = lang === 'es'
@@ -185,7 +191,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           <SupporterOfferB lang={lang}>
             {qaV2Screen ? (
               qaV2AccountState==='none'
-                ? <SandboxCheckoutQaPanel lang={lang} inline/>
+                ? <SandboxCheckoutQaPanel lang={lang} inline onReviewExisting={reviewExistingQaRequest}/>
                 : <div role="status" className="space-y-3 rounded-[18px] bg-[#EFF3E7] px-4 py-3 text-[12px] leading-relaxed text-[#204E4A]">
                     <p>{qaV2AccountState==='bound'
                       ? label('Ya existe una solicitud de PayPal Sandbox registrada. Eso NO significa que tengas membresía ni pago activo. Puedes consultar la solicitud y, si sigue pendiente, retomar su aprobación sin crear otra.',
@@ -198,7 +204,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                             'Could not verify whether you already have a Sandbox subscription. Checkout remains blocked until it is verified.')
                           : label('Comprobando si ya existe una suscripción Sandbox para evitar cobros duplicados…',
                             'Checking for an existing Sandbox subscription to prevent duplicate payments…')}</p>
-                    <button type="button" onClick={()=>setQaManagementOpen(true)}
+                    <button type="button" onClick={reviewExistingQaRequest}
                       disabled={qaV2AccountState==='checking'}
                       className="min-h-11 w-full rounded-full bg-white px-4 py-2 text-[12px] font-extrabold text-[#204E4A] hover:bg-[#E6EDD9] focus-visible:bg-[#E1E53F]/35 disabled:opacity-50">
                       {label('Consultar mi suscripción Sandbox','Review my Sandbox subscription')}
@@ -238,7 +244,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} reviewRevision={qaReviewRevision}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
