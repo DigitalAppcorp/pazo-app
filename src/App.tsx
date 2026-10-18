@@ -534,6 +534,49 @@ function PazoMain() {
     await loadFeedPageForPet(pet, true)
   }
 
+  // Verified badge snapshots are presentation-only. Revalidate while the Feed
+  // is in use; never keep a departed member's badge indefinitely. Unlike the
+  // initial page, this rechecks existing cards and changes badges atomically.
+  const badgePetSignature=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
+    .sort().join('|')
+  useEffect(()=>{
+    if(!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
+    let alive=true
+    let inFlight=false
+    const refresh=async()=>{
+      if(inFlight)return
+      inFlight=true
+      const version=feedLoadVersionRef.current
+      const petId=activePetIdRef.current
+      try{
+        const snapshot=posts
+        const checked=await attachVerifiedFeedBadges(snapshot,
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        if(!alive||feedLoadVersionRef.current!==version||activePetIdRef.current!==petId)return
+        const badgeByPet=new Map(checked.filter(p=>!p.isAuthorDeleted)
+          .map(p=>[p.petId,p.supporterBadge] as const))
+        setPosts(previous=>previous.map(post=>badgeByPet.has(post.petId)
+          ?{...post,supporterBadge:badgeByPet.get(post.petId)}:post))
+      }catch(error){
+        if(alive&&feedLoadVersionRef.current===version&&activePetIdRef.current===petId){
+          // Never retain a prior paid display claim when rechecking fails.
+          setPosts(previous=>previous.map(post=>({...post,supporterBadge:undefined})))
+          console.error('PAZO Feed badge revalidation unavailable:',error)
+        }
+      }finally{inFlight=false}
+    }
+    const onReturn=()=>{
+      if(document.visibilityState==='visible')void refresh()
+    }
+    document.addEventListener('visibilitychange',onReturn)
+    const interval=setInterval(()=>void refresh(),60000)
+    return ()=>{
+      alive=false
+      document.removeEventListener('visibilitychange',onReturn)
+      clearInterval(interval)
+    }
+  },[badgePetSignature,activeTab,currentPet.id])
+
   const loadMoreFeed = async () => {
     if (
       feedLoadMoreInFlightRef.current
