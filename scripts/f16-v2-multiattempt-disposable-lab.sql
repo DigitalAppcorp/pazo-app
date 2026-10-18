@@ -9,6 +9,8 @@ ALTER TABLE supporter_private.paypal_p06_offers
 ALTER TABLE supporter_private.f16_sandbox_qa_v2_checkout_attempts
  ADD COLUMN created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
  ADD COLUMN consented_at timestamptz NOT NULL DEFAULT clock_timestamp();
+UPDATE supporter_private.f16_sandbox_qa_v2_checkout_attempts
+ SET created_at=clock_timestamp()-interval '2 days';
 ALTER TABLE supporter_private.f16_sandbox_qa_paid_periods
  ADD COLUMN sale_id text UNIQUE,
  ADD COLUMN event_id text,
@@ -52,18 +54,18 @@ COMMIT;
 DO $assert$
 DECLARE
   records jsonb; latest jsonb; first jsonb;
-  owner_id uuid:='11111111-1111-4111-8111-111111111111';
+  v_owner uuid:='11111111-1111-4111-8111-111111111111';
   retry_intent text;
   result jsonb;
 BEGIN
   SELECT intent_id INTO retry_intent
   FROM supporter_private.f16_sandbox_qa_v2_retry_attempts
-  WHERE owner_id=owner_id ORDER BY created_at DESC LIMIT 1;
+  WHERE owner_id=v_owner ORDER BY created_at DESC LIMIT 1;
   IF retry_intent IS NULL THEN RAISE EXCEPTION 'Synthetic retry missing'; END IF;
   UPDATE supporter_private.paypal_subscription_intents
     SET state='bound',external_subscription_id='I-TEST-RETRY-PAID01'
     WHERE intent_id=retry_intent;
-  records:=public.f16_qa_v2_multi_list_owner_accounts(owner_id);
+  records:=public.f16_qa_v2_multi_list_owner_accounts(v_owner);
   IF jsonb_array_length(records)<>2
     OR records->0->>'intentId'<>retry_intent
     OR records->1->>'intentId'<>'intent-33333333-3333-4333-8333-333333333333'
@@ -74,14 +76,14 @@ BEGIN
   IF records->0->>'exactCopy' IS NULL OR records->1->>'exactCopy' IS NULL
   THEN RAISE EXCEPTION 'Immutable acceptance not available'; END IF;
   result:=public.f16_qa_v2_record_verified_first_cycle(
-   owner_id,retry_intent,'SALE-SYNTHETIC-001',
+   v_owner,retry_intent,'SALE-SYNTHETIC-001',
    clock_timestamp()-interval '1 hour',
    clock_timestamp()-interval '1 day',
    clock_timestamp()+interval '29 days');
   IF result->>'phase'<>'verified_first_sandbox_cycle'
   THEN RAISE EXCEPTION 'Retry paid cycle not matched'; END IF;
   IF NOT public.f16_qa_v2_mark_merchant_sale_reversal(
-    owner_id,retry_intent,'SALE-SYNTHETIC-001','refunded')
+    v_owner,retry_intent,'SALE-SYNTHETIC-001','refunded')
   THEN RAISE EXCEPTION 'Retry reversal not recorded'; END IF;
   IF NOT EXISTS(SELECT 1 FROM supporter_private.f16_sandbox_qa_holds
     WHERE sale_id='SALE-SYNTHETIC-001')
