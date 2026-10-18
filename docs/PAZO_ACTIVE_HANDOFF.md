@@ -1,3 +1,17 @@
+# F16 — Revisión de botón PayPal Sandbox intermitente; UX segura sin duplicar (2026-10-17)
+
+**Reporte PO:** pulsó «Continuar con PayPal», aparentemente no ocurrió nada; al recargar apareció tarjeta naranja «Esta oferta de prueba no está disponible» y desapareció después de otra recarga, reapareciendo el CTA. Captura real suministrada. **No está confirmado un pago nuevo ni que el clic llegara a PayPal. No iniciar otro checkout por inercia.**
+
+**Evidencia disponible, sin atribución de cada solicitud a la cuenta del PO:** consulta read-only a Supabase `function_edge_logs` alrededor del incidente mostró respuestas a `f16-paypal-supporter-v2-qa` con HTTP **429**, **409** y **403**, junto con 200 posteriores. El 429 indica límite transitorio, 409 puede significar conflicto/ya vinculada y 403 denegación de acceso. La pantalla de cuenta QA mostró estado **suscripción Sandbox vinculada y pago todavía no verificado** (confiar en la verificación del backend, no en una etiqueta aislada). Endpoint `begin` opera one-shot, y `ALREADY_LINKED_NOT_PAYMENT_VERIFIED` nunca genera una segunda suscripción. No atribuir un cargo a una respuesta HTTP.
+
+**Bug UX hallado:** `SandboxCheckoutQaPanel.tsx` transformaba TODOS los errores del `offer` en «oferta no disponible» sin reconsulta, y tragaba silenciosamente la causa de un `begin` fallido/ya vinculado, dejando un estado `pending` genérico hasta recarga. La ausencia de redirección no significa que se pueda repetir `begin` con una clave nueva.
+
+**Fix solo en PR #44 DRAFT:** clasifica 429/rate limit, 403/QA no permitida, 409/ALREADY_LINKED y fallos desconocidos; explica que no debe repetirse el pago y remite a «Gestionar mi prueba de PayPal Sandbox»/consulta de estado. Permite reconsultar **solamente** la oferta publicada, manualmente y sin `begin`; cero reintentos automáticos de pago, `attempted.current` irreversible mientras el panel esté montado, y `approveUrl` solo para PayPal Sandbox validado. Sin cambios al Edge remoto ni a DB/payments/PayPal o Live. Test de regresión añadido en `f16SupporterProductExperience.test.mjs`.
+
+**Gates:** CI/PG del último SHA, reabrir PAZO en QA local, comprobar mensaje de estado cuando ya haya cuenta vinculada y reconsulta de oferta sin disparar compra. Para confirmar dinero pagado/ciclo, usar proceso existente de lectura/verificación explícita en panel de prueba; no confundir `APPROVAL_PENDING`/vínculo con período pagado. Sin autorizar cobros Live, nueva solicitud Sandbox, Vercel ni merge.
+
+---
+
 # A01 — Fix animación de cola sin recorte de césped (2026-10-17)
 
 **Reporte PO con captura ampliada:** al girar la cola del perrito de A01 aparecía un círculo/máscara que desplazaba césped y parte del fondo. **Causa verificada en `public/onboarding/welcome-approved-art.svg`:** capa `tail` duplicaba la *escena WebP completa* bajo `clipPath(#tailClip)`, y la capa `body` restaba `tailShape`, produciendo agujeros visibles al rotar. El propio fondo tenía animación `pazoRefBreathe`, causando desplazamiento de pasto.
