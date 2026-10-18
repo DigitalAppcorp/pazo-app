@@ -58,12 +58,12 @@ function WallEmpty({lang,previewOnly=false}:{lang:'es'|'en';previewOnly?:boolean
       <h2 className="mt-5 text-[clamp(21px,5.8vw,26px)] font-black leading-[1.18] tracking-tight text-[#204E4A]">
         {es?'Todavía no hay mascotas inscritas voluntariamente.':'No pets have opted in yet.'}
       </h2>
-      <p className="mt-4 max-w-[30ch] text-[13px] leading-relaxed text-[#476862]">
+      <p className="mt-4 max-w-[30ch] text-[14px] leading-relaxed text-[#476862]">
         {es
           ? 'Cuando una familia tenga una membresía verificada y autorice aparecer aquí, su mascota formará parte de este muro.'
           : 'Once a family has a verified membership and opts their pet in, that pet will appear on this wall.'}
       </p>
-      {previewOnly&&<p className="mt-3 text-[11px] font-semibold text-[#6A807A]">
+      {previewOnly&&<p className="mt-3 text-[13px] font-semibold text-[#6A807A]">
         {es?'Las mascotas se mostrarán solamente después de su autorización.':'Pets appear only after permission is granted.'}
       </p>}
     </div>
@@ -98,12 +98,12 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
     className="absolute inset-0 z-[110] flex min-h-0 flex-col overflow-hidden bg-[#FAF8F5] text-[#204E4A]">
     <header className="relative z-10 shrink-0 bg-[#FAF8F5]/95 px-4 pb-2 pt-4 backdrop-blur-xl">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-2">
-        <h1 id="pazo-gratitude-title" className="min-w-0 text-[clamp(17px,5vw,20px)] font-black leading-tight">
+        <h1 id="pazo-gratitude-title" className="min-w-0 text-[clamp(18px,5vw,21px)] font-black leading-tight">
           {label('Gracias, Amigos de PAZO','Thank you, PAZO Friends')}
         </h1>
         <button ref={closeRef} type="button" onClick={onClose}
           aria-label={previewOnly?label('Volver a bienvenida','Back to welcome'):label('Volver','Back')}
-          className="min-h-11 shrink-0 rounded-full bg-[#E1E53F] px-4 py-2.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#EFF16D] focus-visible:bg-[#EFF16D]">
+          className="min-h-11 shrink-0 rounded-full bg-[#E1E53F] px-4 py-2.5 text-[14px] font-bold text-[#204E4A] hover:bg-[#EFF16D] focus-visible:bg-[#EFF16D]">
           {label('Volver','Back')}
         </button>
       </div>
@@ -119,7 +119,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
             <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FAD9C3] text-[#DA805C]">
               <IconHeart filled size={23}/>
             </span>
-            <p className="min-w-0 text-[12px] font-medium leading-[1.55] text-[#204E4A]">
+            <p className="min-w-0 text-[14px] font-medium leading-[1.55] text-[#204E4A]">
               {label('Cada mascota aparece aquí porque su familia lo autorizó y tiene una membresía Amigo de PAZO verificada. PAZO sigue siendo gratuito.',
                 'Every pet here has their family’s permission and a verified PAZO Friend membership. PAZO remains free.')}
             </p>
@@ -129,7 +129,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
         <nav aria-label={label('Orden del muro','Wall order')} className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {tabs.map(item=><button key={item.value} type="button"
             aria-pressed={tab===item.value} onClick={()=>onTabChange(item.value)}
-            className={'min-h-11 shrink-0 rounded-full px-4 py-2 text-[12px] font-extrabold transition-colors focus-visible:bg-[#DCEBCA] ' +
+            className={'min-h-11 shrink-0 rounded-full px-4 py-2 text-[14px] font-extrabold transition-colors focus-visible:bg-[#DCEBCA] ' +
               (tab===item.value?'bg-[#204E4A] text-white':'bg-white text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.035)] hover:bg-[#E9F0DF]')}>
             {es?item.es:item.en}
           </button>)}
@@ -138,7 +138,7 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
         {loading&&<p role="status" className="mt-5 rounded-2xl bg-white p-5 text-sm">
           {label('Consultando el muro…','Loading the wall…')}
         </p>}
-        {error&&<div role="alert" className="mt-4 space-y-3 rounded-2xl bg-[#FCE5D8] p-5 text-[13px]">
+        {error&&<div role="alert" className="mt-4 space-y-3 rounded-2xl bg-[#FCE5D8] p-5 text-[14px]">
           <p>{label('No pudimos verificar las mascotas del muro.','Could not verify the wall entries.')}</p>
           {onRetry&&<button type="button" onClick={onRetry}
             className="min-h-11 rounded-full bg-[#204E4A] px-4 py-2.5 font-bold text-white hover:bg-[#32635D] focus-visible:bg-[#32635D]">
@@ -166,10 +166,10 @@ export function GratitudeWallScene({lang,onClose,rows,tab,onTabChange,loading=fa
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="break-words text-[17px] font-black leading-snug text-[#204E4A]">{pet.pet_name}</h2>
-              <p className="mt-1 text-[11px] font-medium leading-relaxed text-[#5C7470]">
+              <p className="mt-1 text-[13px] font-medium leading-relaxed text-[#5C7470]">
                 {label('Gracias por ser parte de nuestra comunidad.','Thank you for being part of our community.')}
               </p>
-              <p className="mt-2 inline-flex max-w-full items-center rounded-full bg-[#EEF2DF] px-2.5 py-1 text-[10px] font-bold text-[#204E4A]">
+              <p className="mt-2 inline-flex max-w-full items-center rounded-full bg-[#EEF2DF] px-2.5 py-1 text-[12px] font-bold text-[#204E4A]">
                 {pet.milestone>0
                   ? label(`Hito verificado: ${pet.milestone} meses`,`Verified milestone: ${pet.milestone} months`)
                   : label('Amigo de PAZO verificado','Verified PAZO Friend')}
