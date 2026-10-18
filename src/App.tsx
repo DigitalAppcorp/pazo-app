@@ -1,4 +1,5 @@
 import { canUseAccountFeatures } from './features/auth/accountAccess'
+import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { useState, useEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
@@ -280,6 +281,19 @@ function PazoMain() {
   // Estados globales para superficies y deep-links internos.
   const [selectedPublicProfileId, setSelectedPublicProfileId] = useState<string | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  useEffect(()=>{
+    if(!user||petBootstrap?.userId!==user.id||petBootstrap.status!=='ready')return
+    const screen=isSearchOpen?'explore':activeTab
+    const day=new Date().toISOString().slice(0,10)
+    const key='pazo_daily_activity_'+user.id+'_'+day+'_'+screen
+    try{if(sessionStorage.getItem(key)==='1')return}catch{/* Browsing without storage still works */}
+    void recordAdminActivity(screen).then(()=>{
+      try{sessionStorage.setItem(key,'1')}catch{/* Optional measurement */}
+    }).catch(()=>{
+      // Analytics is optional; never block opening or navigating PAZO.
+    })
+  },[user?.id,petBootstrap?.userId,petBootstrap?.status,activeTab,isSearchOpen])
 
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
