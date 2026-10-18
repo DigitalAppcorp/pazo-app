@@ -1,7 +1,9 @@
 // PAZO F16: ISOLATED Sandbox V2-ONLY checkout and account management.
 // This Edge slug is NOT the legacy production or P06 endpoint. Requires
-// authenticated Auth owner + private expiring QA allowlist + exact preview origin.
-// Only one private allowlisted Supabase Auth owner can exercise test checkout.
+// authenticated Auth owner; local Sandbox checkout auto-enrols on consent.
+// Nonlocal preview retains exact private QA allowlist + preview origin.
+// Sandbox-only Local Vite allows confirmed Auth owners; global rate limit and
+// one-shot original V2 intent remain server/database enforced.
 // The QA gate is not legal approval for public or Live subscriptions.
 import {createClient} from 'npm:@supabase/supabase-js@2.117.2'
 import {createVerifiedAuthOwnerResolver}
@@ -106,6 +108,22 @@ function compose(requestOrigin:string){
   if(!r.ok)return false
   return (await r.json())===true
  }
+ // A previously unregistered, confirmed PAZO owner enters QA only after an
+ // explicit local Sandbox checkout consent. No browser-provided owner ID.
+ // This RPC is service_role-only, and keeps disabled/historical rows unchanged.
+ const autoAdmitLocalOwner=async(ownerId:string)=>{
+  if(!QA_LOCAL_ORIGINS.has(origin)||!/^([0-9a-f]{8}-){1}[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(ownerId))
+   return false
+  try{
+   const r=await fetch(BASE+'/rest/v1/rpc/f16_qa_v2_auto_admit_local_sandbox_owner',{
+    method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000),
+    headers:{apikey:key,Authorization:'Bearer '+key,
+     'content-type':'application/json',Accept:'application/json'},
+    body:JSON.stringify({p_owner_id:ownerId})
+   })
+   return r.ok&&(await r.json())===true
+  }catch{return false}
+ }
  const inventoryRead=createPazoSandboxV2InventoryRead({clientId,clientSecret})
  const unfilteredInventoryRead=createPazoSandboxV2UnfilteredInventoryRead({clientId,clientSecret})
  const createdCandidateStore=createPazoSandboxV2CreatedEventCandidateStore({
@@ -131,7 +149,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,resolveAuthenticatedOwner,admit,canBuy}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -402,8 +420,27 @@ Deno.serve(async(request:Request)=>{
  // removing an owner's ability to cancel an already bound V2 subscription.
  if(!QA_CHECKOUT_RELEASE_APPROVED)
   return addCors(reply(503,'paid_supporter_checkout_not_released'),runtime.origin)
- if(!await runtime.canBuy(qaOwner))
-  return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+ // In local Vite Sandbox only, authenticated owners may READ the offer
+ // without a manually inserted allowlist row. The durable QA row is created
+ // exclusively for an explicitly consented 'begin' request below.
+ const localSandbox=QA_LOCAL_ORIGINS.has(runtime.origin)
+ if(data.action==='begin' && localSandbox){
+  const c=data.consent
+  if(Object.keys(data).sort().join('|')!=='action|consent'||
+     !c||typeof c!=='object'||Array.isArray(c)||
+     Object.keys(c).sort().join('|')!=='affirmativeConsent|locale|requestKey|termsDigest|termsVersion'||
+     c.affirmativeConsent!==true||
+     !['es','en'].includes(c.locale)||
+     c.termsVersion!==SANDBOX_BENEFITS_OFFER_V2||
+     !/^[a-f0-9]{64}$/.test(c.termsDigest||'')||
+     !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(c.requestKey||''))
+   return addCors(reply(400,'explicit_sandbox_consent_required'),runtime.origin)
+  if(!await runtime.autoAdmitLocalOwner(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+ }else if(!localSandbox || data.action!=='offer'){
+  if(!await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+ }
  let result
  if(data.action==='offer'){
   if(Object.keys(data).sort().join('|')!=='action|locale')
