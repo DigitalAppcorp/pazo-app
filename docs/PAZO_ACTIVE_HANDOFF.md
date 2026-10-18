@@ -1,3 +1,15 @@
+# Feed — Ubicación fija incorrecta «Los Ángeles, CA»: nuevo post FIX 7/7 PASS (2026-10-18)
+
+PO mostró dos posts de mascotas distintas con ubicación «Los Ángeles, CA» aunque sus datos de zona de perfil podían variar. Raíz exacta: `CreatePostModal.tsx` escribía literalmente `location: 'Los Ángeles, CA'`. Auditoría **read-only** Supabase staging: 4 posts, los 4 con ese valor; 1 caso difiere de `pet_private_details.zone`, que es **privado**. DB tiene default residual `Los Ángeles • Local`. Por privacidad, **no** copiar zona privada al post público sin consentimiento ni inferir ubicaciones pasadas.
+
+Código en PR #44 DRAFT `f13/section-titles-20261012`: nueva casilla explícita (OFF por defecto) para mostrar ubicación en publicación, con campo editable precargado desde zona privada **sólo para aprobación del propio autor**; si no se marca, se envía `posts.location=NULL`, sin ciudad fija. Aviso claro de visibilidad pública, no GPS ni domicilio. `HomeView` no pinta separador de ubicación vacía; mapeos Feed/perfil/servicio toleran null. Test en `scripts/closure-ui.test.mjs`. **Commit funcional `d8928e55ddc8103d9ddeedf4e1ce96af55bf50fc` 7/7 CI + seis PG labs SUCCESS**; sin cambios SQL ni datos, Live/main/PayPal intactos. Docs `docs/PAZO_FEED_POST_LOCATION_CORRECTION_20261018.md`; inventario privacidad actualizado.
+
+**Pendiente explícito de GO PO:** quitar el default SQL falso y limpiar sólo las 4 filas anteriores con `Los Ángeles, CA` a NULL mediante migración acotada y validación pre/post, **nunca copiar zona privada**. Las 4 publicaciones viejas seguirán mostrando valor erróneo hasta reparación autorizada; no declarar bug totalmente resuelto. Antes del GO, sólo código para nuevos posts; validar Vite sin compartir ciudad y con ciudad introducida.
+
+**Gate:** `FEED_LOCATION_NEW_POSTS_CODE_7_OF_7_PASS_LEGACY_DB_REPAIR_REQUIRES_PO_GO`.
+
+---
+
 # F16 — Insignia Amigo de PAZO visible en comentarios y posts de Comunidad (2026-10-18)
 
 PO mostró captura de un comentario de `feliciano (perro)` sin mini-insignia aunque la mascota tenía una membresía verificada. Debe aparecer tanto al publicar como al comentar **sobre cualquier post**. Implementación directa en PR #44 DRAFT rama `f13/section-titles-20261012`:
