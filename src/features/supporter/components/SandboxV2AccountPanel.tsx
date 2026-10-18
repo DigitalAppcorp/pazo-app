@@ -4,7 +4,7 @@ import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -26,7 +26,7 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
+export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection}:Props){
  const initialAccountCheck=useRef(false)
  const [account,setAccount]=useState<Account|null>(null)
  const [loading,setLoading]=useState(true)
@@ -80,6 +80,11 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
   initialAccountCheck.current=true
   void refresh()
  },[])
+ useEffect(()=>{
+  // Explicit user-triggered review after an ambiguous or 409 checkout.
+  // This action reads the existing account; it NEVER invokes begin.
+  if(reviewRevision>0)void refresh()
+ },[reviewRevision])
  const verifyPayment=async()=>{
   if(!account||account.state!=='bound'||busy)return
   setBusy(true);setError(false)
