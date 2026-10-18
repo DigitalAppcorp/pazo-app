@@ -1,3 +1,19 @@
+# F16 — Six PO-directed typography and visual corrections CODE PASS 7/7 (2026-10-18)
+
+PO: UI scale was **too small** compared with PAZO; correction is to enlarge small typography, not shrink oversized titles. Implemented and verified in PR #44 DRAFT, branch `f13/section-titles-20261012`:
+1. PAZO baseline 16px name/12px metadata applied; supporting copy increased in member screens.
+2. Gratitude wall = compact 2-column portraits with 16px names, verified badges; existing RPC/sort preserved.
+3. HomeView badge = server-verified 20px avatar overlay at bottom-right, eager asset, batch RPC lookup with stable visible pet signature (avoid cancellation on likes/comments), without displacing "Sugerencia".
+4. Same mini avatar badge on public profile posts.
+5. Original PAZO paw/bone/spark decorations are hidden when verified custom profile backdrop exists.
+6. 3/6/12-month milestones explain PAZO's gratitude and verified months, not a cold list of Pending.
+
+**Functional commit `97a6d5d3b776e05ccf9efe748e7164b48720aa34`: GitHub Actions CI + 6 PG labs 7/7 SUCCESS.** First checks caught a dated mural assertion and missing JSX closing brace; corrected before final PASS. Reports `docs/F16_PAZO_TYPOGRAPHY_WALL_BADGE_CORRECTIONS_20261018.md`; docs commits after functional PASS are not app code changes. No Supabase/PayPal changes, new charges, payments, entitlements, migrations, Live, merge or main. Still **NOT VISUAL-APPROVED** by PO; real Vite screenshots, initial avatar badge latency and multi-pet feed must be checked. Existing account eligibility and consent terms remain unchanged.
+
+**Gate:** `F16_VISUAL_PO_CORRECTIONS_CODE_PASS_7_OF_7_VITE_REVIEW_PENDING_LIVE_OFF`.
+
+---
+
 # F16 — Correcciones PO sobre tipografía y cinco aspectos visuales (2026-10-18)
 
 GO PO «ok go» tras aclarar: **Amigo de PAZO tenía letra demasiado pequeña**; había que igualar tamaños originales de PAZO, NO reducirlos. En PR #44 DRAFT rama `f13/section-titles-20261012` se amplió tipografía (PAZO Feed: nombre 16px, metadatos 12px; microcopy de panel 14px, títulos de ítems 16px); muro público rediseñado como grid 2 columnas con retratos/insignias compactas; mini-insignia oficial de 20px anclada a avatar de autor de Feed y publicaciones de perfil (no empuja `Sugerencia`); corrección de una dependencia de re-render que cancelaba consulta RPC de insignias y asset pequeño eager; arte de perfil original se oculta detrás de fondo personalizado verificado; sección 3/6/12 explica agradecimiento y recompensa en lugar de lista "Pendiente". Todos los derechos permanecen confirmados server-side, no se muestran insignias sintéticas. Cero contornos. No DB/PayPal/Live/main ni cobros nuevos. Regresiones en `f16SupporterProductExperience.test.mjs`; esperar último 7/7 y PO QA visual real antes de declarar PASS del diseño. Informe: `docs/F16_PAZO_TYPOGRAPHY_WALL_BADGE_CORRECTIONS_20261018.md`.
