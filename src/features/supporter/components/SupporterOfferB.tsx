@@ -27,7 +27,8 @@ function BenefitGlyph({kind}:{kind:BenefitKind}) {
 }
 
 /**
- * PO-approved option B visual only. No client-side PayPal calls or entitlement
+ * PO-approved Card Central reference: a floating medal, one invitation card,
+ * and a compact four-token thank-you strip. No client-side PayPal or entitlement
  * flags live here; children hosts the existing server-authoritative checkout.
  */
 export function SupporterOfferB({lang,children}:Props) {
@@ -38,48 +39,56 @@ export function SupporterOfferB({lang,children}:Props) {
     {kind:'wall',title:t('Muro de agradecimiento','Thank-you wall'),description:t('Solo si tú autorizas a cada mascota','Only if you opt in each pet')},
     {kind:'milestone',title:t('Medallas por antigüedad','Support milestones'),description:t('Reconocimientos por el tiempo de apoyo','Recognition for the time you have supported PAZO')},
   ]
-  return <>
-    <section aria-labelledby="supporter-offer-title"
-      className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FAF8F5] via-[#F7F7EF] to-[#EEF3E4] px-5 pb-5 pt-5">
-      <span aria-hidden="true" className="pointer-events-none absolute -right-4 -top-6 h-28 w-28 rounded-full bg-[#E1EBCF]/50 blur-2xl"/>
-      <div className="relative z-10 flex items-start gap-2">
-        <h3 id="supporter-offer-title" className="min-w-0 flex-1 text-[clamp(24px,6.5vw,28px)] font-black leading-[1.12] tracking-tight text-[#204E4A]">
-          {t('Ayuda a que PAZO siga creciendo','Help PAZO keep growing')}
-        </h3>
-        <img src="/supporter/amigo-pazo-inicio.png" alt="" aria-hidden="true"
-          width="90" height="90" decoding="async"
-          className="pointer-events-none h-[88px] w-[88px] shrink-0 object-contain drop-shadow-[0_5px_7px_rgba(32,78,74,0.10)]"/>
-      </div>
-      <p className="relative z-10 mt-4 text-[14px] font-medium leading-[1.6] text-[#476862]">
-        {t('PAZO está dando sus primeros pasos y aún tenemos mucho por construir. Con tu apoyo podemos seguir cuidando este pequeño mundo, mejorándolo y creando nuevas experiencias para ti, tu mascota y toda nuestra comunidad.',
-          'PAZO is taking its first steps, and there is still so much to build. With your support, we can keep caring for this little world, making it better and creating new experiences for you, your pet and our entire community.')}
-      </p>
-      <div className="relative z-10 mt-4 inline-flex max-w-full items-baseline gap-1.5 rounded-full bg-[#F2F5DE] px-4 py-2 text-[#204E4A]">
-        <strong className="text-[27px] font-black tracking-tight tabular-nums">US$2.99</strong>
-        <span className="text-[13px] font-bold">{t('al mes','per month')}</span>
-      </div>
-    </section>
-
-    <section aria-label={t('Colaboración voluntaria','Voluntary support')} className="space-y-2">
-      {children}
-    </section>
-
-    <section aria-labelledby="supporter-benefits-title" className="space-y-2 pt-2">
-      <h3 id="supporter-benefits-title" className="px-1 text-[19px] font-black text-[#204E4A]">
-        {t('Como agradecimiento','As a thank-you')}
-      </h3>
-      <ul className="grid min-w-0 grid-cols-1 gap-1.5">
-        {benefits.map(benefit=><li key={benefit.kind}
-          className="flex min-h-[49px] min-w-0 items-center gap-2.5 rounded-[18px] bg-white px-3 py-2 shadow-[0_3px_12px_rgba(32,78,74,0.035)]">
-          <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECF1DD] text-[#204E4A]">
-            <BenefitGlyph kind={benefit.kind}/>
-          </span>
-          <div className="min-w-0 flex-1">
-            <h4 className="break-words text-[14px] font-extrabold leading-tight text-[#204E4A]">{benefit.title}</h4>
-            <p className="mt-0.5 break-words text-[12px] leading-snug text-[#5C7470]">{benefit.description}</p>
+  return (
+    <div data-pazo-supporter-layout="card-central" className="mx-auto w-full max-w-[420px] space-y-4">
+      {/* Central card is the invitation, not a benefits storefront. The
+          official medal is artwork only; never an unverified entitlement. */}
+      <div className="relative pt-[57px]">
+        <span aria-hidden="true" className="pointer-events-none absolute left-[21%] top-6 h-6 w-[5px] -rotate-[27deg] rounded-full bg-[#73B38E]"/>
+        <span aria-hidden="true" className="pointer-events-none absolute left-[28%] top-2 h-4 w-[5px] rotate-[-42deg] rounded-full bg-[#73B38E]"/>
+        <span aria-hidden="true" className="pointer-events-none absolute right-[21%] top-6 h-6 w-[5px] rotate-[27deg] rounded-full bg-[#73B38E]"/>
+        <span aria-hidden="true" className="pointer-events-none absolute right-[28%] top-2 h-4 w-[5px] rotate-[42deg] rounded-full bg-[#73B38E]"/>
+        <section aria-labelledby="supporter-offer-title"
+          className="relative rounded-[30px] bg-white px-5 pb-5 pt-[72px] text-center shadow-[0_12px_34px_rgba(32,78,74,0.065)] sm:px-7">
+          <img src="/supporter/amigo-pazo-inicio.png" alt="" aria-hidden="true"
+            width="136" height="136" decoding="async"
+            className="pointer-events-none absolute left-1/2 top-[-62px] z-10 h-[134px] w-[134px] -translate-x-1/2 object-contain drop-shadow-[0_8px_8px_rgba(32,78,74,0.13)]"/>
+          <h3 id="supporter-offer-title" className="mx-auto max-w-[300px] text-[clamp(21px,5.8vw,24px)] font-black leading-[1.16] tracking-tight text-[#204E4A]">
+            {t('Ayuda a que PAZO siga creciendo','Help PAZO keep growing')}
+          </h3>
+          <p className="mx-auto mt-3 max-w-[330px] text-[14px] font-medium leading-[1.55] text-[#476862]">
+            {t('PAZO está dando sus primeros pasos y aún tenemos mucho por construir. Con tu apoyo podemos seguir cuidando este pequeño mundo, mejorándolo y creando nuevas experiencias para ti, tu mascota y toda nuestra comunidad.',
+              'PAZO is taking its first steps, and there is still so much to build. With your support, we can keep caring for this little world, making it better and creating new experiences for you, your pet and our entire community.')}
+          </p>
+          <div className="mx-auto mt-4 inline-flex max-w-full items-baseline gap-1.5 rounded-full bg-[#F0F4DE] px-5 py-2 text-[#204E4A]">
+            <strong className="text-[26px] font-black tracking-tight tabular-nums">US$2.99</strong>
+            <span className="text-[12px] font-bold">{t('al mes','per month')}</span>
           </div>
-        </li>)}
-      </ul>
-    </section>
-  </>
+          <section aria-label={t('Colaboración voluntaria','Voluntary support')} className="mt-4 min-w-0">
+            {children}
+          </section>
+        </section>
+      </div>
+
+      {/* Four small thank-you tokens form a separate, quiet footer.
+          Details remain in the unchanged full subscription terms. */}
+      <section aria-labelledby="supporter-benefits-title"
+        className="rounded-[25px] bg-white/65 px-3 pb-3 pt-3 text-center">
+        <h3 id="supporter-benefits-title" className="text-[17px] font-black leading-snug text-[#204E4A]">
+          {t('Como agradecimiento','As a thank-you')}
+        </h3>
+        <ul className="mt-3 grid min-w-0 grid-cols-4 gap-1.5">
+          {benefits.map(benefit=><li key={benefit.kind}
+            className="flex min-h-[92px] min-w-0 flex-col items-center rounded-[18px] bg-white px-1 py-2.5 shadow-[0_4px_13px_rgba(32,78,74,0.035)]"
+            aria-label={benefit.title+': '+benefit.description}>
+            <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EDF2DF] text-[#204E4A]">
+              <BenefitGlyph kind={benefit.kind}/>
+            </span>
+            <p className="mt-1.5 break-words text-[11px] font-extrabold leading-[1.2] text-[#204E4A]">{benefit.title}</p>
+            <span className="sr-only">{benefit.description}</span>
+          </li>)}
+        </ul>
+      </section>
+    </div>
+  )
 }
