@@ -88,7 +88,7 @@ test('F16 V2 recovery server requires authenticated owner + linked original + pl
   "'private_account_read_unavailable'",
   "'paypal_subscription_read_unavailable'",
   "'approval_link_rejected'",
-  "runtime.v2AccountStore.readForOwner({ownerId:qaOwner})",
+  "runtime.v2AccountStore.readForOwner({ownerId:qaOwner,intentId:data.intentId})",
   "account.state!=='bound'||!account.externalSubscriptionId",
   'includeApprovalLink:true',
   'merchant.plan_id!==PLAN||merchant.custom_id!==account.intentId',
@@ -100,10 +100,10 @@ test('F16 V2 recovery server requires authenticated owner + linked original + pl
  assert.ok(!edge.includes('subscriptionCreator.create({intent:a}'))
  assert.ok(panel.includes("providerStatus===null||providerStatus==='APPROVAL_PENDING'"),'Pending buyer can resume directly without an unreliable preliminary status call')
  assert.ok(panel.includes("t('Retomar en PayPal'"))
- assert.ok(panel.includes("call({action:'resume_approval'})"))
+ assert.ok(panel.includes("call({action:'resume_approval',intentId:account.intentId})"))
  assert.ok(!panel.includes("call({action:'status'"),'Read-only merchant verification uses the v4 owner-bound path')
  assert.ok(panel.includes("!['APPROVED','ACTIVE'].includes(providerStatus||'')"),'Do not offer paid-cycle verification before approval')
- assert.ok(panel.includes("call({action:'resume_approval'})"))
+ assert.ok(panel.includes("call({action:'resume_approval',intentId:account.intentId})"))
  assert.ok(panel.includes('safeSandboxApprovalUrl(result.approvalUrl)'))
  assert.ok(panel.includes('window.location.assign(url)'))
  assert.ok(panel.includes("recoveryMessage==='unavailable'"))
@@ -115,7 +115,7 @@ test('F16 Sandbox account recovery remains reachable after merchant status failu
  const panel=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
  assert.ok(panel.includes("account.state==='bound'&&!paidThrough&&!cancelled"))
  assert.ok(panel.includes("providerStatus===null||providerStatus==='APPROVAL_PENDING'"))
- assert.ok(panel.includes("call({action:'resume_approval'})"))
+ assert.ok(panel.includes("call({action:'resume_approval',intentId:account.intentId})"))
  assert.ok(panel.includes("setErrorKind('status')"))
  assert.ok(panel.includes("setErrorKind('payment')"))
  assert.ok(panel.includes("setRecoveryMessage('unavailable')"))
@@ -129,7 +129,7 @@ test('F16 diagnostic codes are static and cannot leak owner, PayPal PII or raw p
  const end=edge.indexOf("if(data.action==='verify_payment'){",begin)
  assert.ok(begin>0&&end>begin)
  const stage=edge.slice(begin,end)
- assert.ok(stage.includes("runtime.v2AccountStore.readForOwner({ownerId:qaOwner})"))
+ assert.ok(stage.includes("runtime.v2AccountStore.readForOwner({ownerId:qaOwner,intentId:data.intentId})"))
  assert.ok(stage.includes("runtime.reader.readSubscription("))
  assert.ok(!stage.includes('subscriptionCreator.create'))
  assert.ok(!stage.includes('console.log'))
