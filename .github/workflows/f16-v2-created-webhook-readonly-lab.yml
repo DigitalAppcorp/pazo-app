@@ -1,0 +1,45 @@
+name: F16 V2 Created Webhook Readonly Lab
+
+on:
+  push:
+    branches: [f13/section-titles-20261012]
+    paths:
+      - 'supabase/migrations/20261018190000_f16_v2_created_webhook_candidate_readonly.sql'
+      - 'scripts/f16-v2-created-webhook-candidate-lab.sql'
+      - '.github/workflows/f16-v2-created-webhook-readonly-lab.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20261018190000_f16_v2_created_webhook_candidate_readonly.sql'
+      - 'scripts/f16-v2-created-webhook-candidate-lab.sql'
+      - '.github/workflows/f16-v2-created-webhook-readonly-lab.yml'
+permissions:
+  contents: read
+jobs:
+  created-webhook-readonly-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-data
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
+      - name: Check read-only CREATED candidate and owner isolation
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: synthetic-only-no-hosted-data
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/f16-v2-created-webhook-candidate-lab.sql
