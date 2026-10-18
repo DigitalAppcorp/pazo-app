@@ -1,3 +1,19 @@
+# F16 — Cambio automático de oferta a panel tras pago verificado; código PR #44 (2026-10-18)
+
+**PO GO:** corregir la integración de membresía en todas las cuentas Sandbox sin concesiones manuales; perfil no pagador ve botón de US$2.99/oferta; miembro pagado abre panel real. Se aplicó en **código de rama `f13/section-titles-20261012`**, no en main ni Live.
+
+- `supporterUiRelease.ts` centraliza UI: local `DEV + VITE_PAZO_F16_SANDBOX_QA_UI=true + hostname loopback` o release público explícito. **NO concede** pagos ni beneficios; el servidor conserva la autoridad. Se conectó Hook + Feed + perfil público + temas + muro.
+- `SandboxV2AccountPanel` obtiene `ACTIVE` desde PayPal para el intento ya vinculado, hace una sola verificación merchant `verify_payment` de la venta actual, y **solo con período acreditado** dispara refresco de cobertura server-side. Corrección de aviso aprobación antiguo tras pago. No POST begin ni segundo checkout.
+- `PetView`: sin cobertura muestra US$2.99 mensuales y abre la oferta; con RPC verificada renderiza botón destacado y `SupporterBenefitsHome`; el estado vuelve a consultarse al regresar de PayPal o tras evento de confirmación sin PII.
+- El lanzador `scripts/f16-run-real-sandbox-qa.ps1` usa `VITE_PAZO_F16_SANDBOX_QA_UI=true` y **mantiene `VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED=false`**, sin forzar release público.
+- SQL de solo lectura `supabase/migrations/20261018213000_f16_sandbox_qa_owner_membership_read.sql` **PREPARADA NO INSTALADA**; RPC `pazo_supporter_my_account_status()` responde booleano activo+hito para la cuenta `auth.uid()`, sin exigir mascota. Auth solamente, ninguna DML financiera, sin exponer IDs. Debe recibir **GO PO separado de aplicación de migración**; hasta entonces cuenta sin mascotas falla cerrado.
+- Snapshot anterior read-only: 8 Auth confirmados, **5 sin mascotas**, 2 QA owners enabled, 1 período pagado. Sin operaciones reales desde esta implementación. E2E en navegador con cuentas pagada/gratuita/pendiente **NO EJECUTADO** ni aprobado; hay que sincronizar la rama local y verificar el resultado.
+- Sigue pendiente la redirección PayPal a Vercel protegido (el retorno manual a local provoca verificación automática sin un clic de pago, pero no arregla la URL externa); no declararlo listo para Live. Mini-insignia del Feed sigue junto al nombre vs avatar aprobado; se revisará dentro de pruebas de beneficios. Se conservan las reglas de consentimiento muro y sin badges falsos.
+
+Informe: `docs/F16_AUTO_MEMBERSHIP_SANDBOX_QA_GATE_20261018.md`. CI/PG17 PASS solo del código cuando se verifique el último commit; NO significa UI aceptada. **GATE:** `F16_AUTO_MEMBER_SWITCH_CODE_READY_OWNER_RPC_INSTALL_GO_PENDING_E2E_PENDING_LIVE_OFF`.
+
+---
+
 # F16 — Auditoría cuatro beneficios reales, sin cambios financieros (2026-10-18)
 
 La auditoría READ ONLY de Backend/PR #44 confirma **1 período pagado de prueba US$2.99 verificado y vigente hasta 18-nov-2026**, proyección QA `active=true` y **2 mascotas elegibles con `badge=true,milestone=0`** por RPC individuales y batch. El backend alojado tiene las RPC reales de insignias, fondos, muro y opt-in/out; RLS FORCE impide lectura directa privada. **0 temas guardados, 0 consentimientos, 0 entradas muro, 0 publicaciones de las mascotas pagadoras**: todavía falta QA E2E de cada beneficio.
