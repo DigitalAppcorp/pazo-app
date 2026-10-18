@@ -3,10 +3,11 @@ import {supabase} from '../../../services/supabaseClient'
 import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 import {SandboxCheckoutQaPanel} from './SandboxCheckoutQaPanel'
 import {classifySandboxV2Recovery} from '../sandboxV2RecoveryState.mjs'
+import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onPaidVerified?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -31,8 +32,10 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection}:Props){
+export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection,onPaidVerified}:Props){
  const initialAccountCheck=useRef(false)
+ const autoVerifiedIntents=useRef<Set<string>>(new Set())
+ const paymentReadInFlight=useRef(false)
  const inspectionSeq=useRef(0)
  const [account,setAccount]=useState<Account|null>(null)
  const [recoveryStage,setRecoveryStage]=useState('unverified')
@@ -128,6 +131,11 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    setRecoveryStage(recovery.phase)
    setRecoveryMessage(recovery.phase==='approval_link_unavailable'?'unavailable':null)
    setCancelled(result.phase==='CANCELLED')
+   // The existing bound subscription is only a CANDIDATE until merchant proof.
+   if(result.phase==='ACTIVE'&&!autoVerifiedIntents.current.has(a.intentId)){
+    autoVerifiedIntents.current.add(a.intentId)
+    void verifyExistingPayment(a,inspection)
+   }
   }catch(error){
    if(inspection!==inspectionSeq.current)return
    const code=error instanceof Error?error.message:''
@@ -175,18 +183,27 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   // This action reads the existing account; it NEVER invokes begin.
   if(reviewRevision>0)void refresh()
  },[reviewRevision])
- const verifyPayment=async()=>{
-  if(!account||account.state!=='bound'||!['APPROVED','ACTIVE'].includes(providerStatus||'')||busy)return
+ const verifyExistingPayment=async(a:Account,inspection:number)=>{
+  if(a.state!=='bound'||paymentReadInFlight.current)return
+  paymentReadInFlight.current=true
   setErrorKind('payment');setPaymentIssue('generic')
   setBusy(true);setError(false)
   try{
-   const result=await call({action:'verify_payment',intentId:account.intentId}) as Result
+   // Merchant GET + owner/intent/period/reversal checks remain mandatory.
+   // The frontend cannot grant entitlement from provider ACTIVE or a redirect.
+   const result=await call({action:'verify_payment',intentId:a.intentId}) as Result
    if(result.ok!==true||result.code!=='verified_first_sandbox_cycle'||
       result.cycleVerified!==true||result.mayGrantBenefits!==true||
       typeof result.paidThrough!=='string')
     throw Error('NO_VERIFIED_SANDBOX_PAYMENT')
+   if(inspection!==inspectionSeq.current)return
    setPaidThrough(result.paidThrough)
+   setRecoveryStage('paid_verified')
+   // Notify relevant screens to re-fetch the genuine server projection.
+   onPaidVerified?.()
+   window.dispatchEvent(new Event(SUPPORTER_PAYMENT_VERIFIED_EVENT))
   }catch(error){
+   if(inspection!==inspectionSeq.current)return
    const code=error instanceof Error?error.message:''
    setPaymentIssue(code==='sandbox_payment_history_evidence_missing'?'history':
     code==='sandbox_payment_period_evidence_missing'?'period':
@@ -194,7 +211,11 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     code==='sandbox_payment_provider_read_unavailable'?'provider':
     code==='sandbox_payment_recording_unavailable'?'record':'generic')
    setError(true)
-  }finally{setBusy(false)}
+  }finally{paymentReadInFlight.current=false;setBusy(false)}
+ }
+ const verifyPayment=async()=>{
+  if(!account||account.state!=='bound'||!['APPROVED','ACTIVE'].includes(providerStatus||'')||busy)return
+  await verifyExistingPayment(account,inspectionSeq.current)
  }
  const getStatus=async()=>{
   if(!account||account.state!=='bound'||busy)return
@@ -442,7 +463,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
       {t('La solicitud se creó, pero PayPal ya no reconoce su identificador. No hubo pago verificado. PAZO conserva el historial y requiere conciliación administrativa antes de otro intento. No necesitas repetir la consulta.',
         'The request was created, but PayPal no longer recognizes its ID. No payment was verified. PAZO preserves its history and needs merchant reconciliation before another attempt. No need to repeat the lookup.')}
      </p>}
-     {recoveryStage==='approval_not_payment'&&<p role="status"
+     {recoveryStage==='approval_not_payment'&&!paidThrough&&<p role="status"
        className="rounded-2xl bg-[#EDF2E1] p-3 text-xs leading-relaxed">
       {t('PayPal reconoce la aprobación, pero todavía falta comprobar un pago real. No se ha activado una membresía.',
         'PayPal recognizes approval, but an actual payment still needs verification. No membership was activated.')}
