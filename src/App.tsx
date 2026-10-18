@@ -553,6 +553,7 @@ function PazoMain() {
         const snapshot=posts
         const checked=await attachVerifiedFeedBadges(snapshot,
           async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(checked)
         if(!alive||feedLoadVersionRef.current!==version||activePetIdRef.current!==petId)return
         const badgeByPet=new Map(checked.filter(p=>!p.isAuthorDeleted)
           .map(p=>[p.petId,p.supporterBadge] as const))
