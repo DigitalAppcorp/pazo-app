@@ -1,3 +1,17 @@
+# F16 — Diagnóstico de fallo en inventario PayPal Sandbox (2026-10-18)
+
+**Evidencia PO:** al pulsar `Investigar suscripción en PayPal` en PAZO local, el panel V2 informó `No se pudo consultar el inventario comercial de PayPal`. Query read-only de logs confirmó `POST /functions/v1/f16-paypal-supporter-v2-qa` HTTP **503** a las 14:06:01 UTC, mientras la autenticación Supabase y RPC `f16_qa_v2_multi_list_owner_accounts` respondieron correctamente. La Edge v9 ocultaba todas las causas del error bajo `merchant_inventory_read_unavailable`; **no** se verificó todavía si PayPal devolvió 400,401,403,404,429,5xx u otro fallo. API de listado `GET /v1/billing/subscriptions` está documentada oficialmente por PayPal: https://developer.paypal.com/api/subscriptions/v1/subscriptions-list/ .
+
+**Fix completado:** en PR #44 DRAFT rama `f13/section-titles-20261012`, commit `10e768111f1c0a683557f07ff5ede5b99f17481d`, `pazoSandboxV2InventoryRead.mjs` discrimina errores seguros por etapa (OAuth, acceso/token, merchant scope, solicitud inválida, endpoint, tasa, red, JSON, proveedor). La Edge `audit_retry_inventory` devuelve sólo códigos allowlisted y la UI mensajes claros bilingües, sin payloads ni IDs de PayPal. Pruebas adicionales con respuestas HTTP sintéticas y privacidad.
+
+**Verificación:** GitHub Actions **4/4 SUCCESS**: CI `39134754625`, PG17 retry `39134754525`, PG17 multiattempt `39134754572`, F16 PG `39134754659`. **Supabase Edge QA `f16-paypal-supporter-v2-qa` v10 ACTIVE**, JWT true, **16/16 archivos cotejados** contra commit anterior. DB después de publicar: 1 intento V2 original, 0 reintentos, 0 grants, 0 períodos Sandbox pagados en DB, 0 entradas financieras. No Live, no checkout nuevo, no merge.
+
+**Siguiente acción PO:** actualizar repo en Vite local (git pull --ff-only en rama si árbol limpio), reiniciar Vite, tocar **una vez** `Investigar suscripción en PayPal` y compartir **sólo** el texto seguro de respuesta. Si el error indica merchant scope/oauth, investigar la app Business original; si es 400/404, revisar petición/permisos del API. Si no se resuelve reconciliación completa de posibles cargos o pagos tardíos, **no** emitir grant ni crear otra suscripción. El 404 anterior por GET de sub ID nunca es evidencia suficiente.
+
+**Estado:** `F16_V2_INVENTORY_FAIL_DIAGNOSTICS_EDGE_V10_PASS_WAIT_PO_SAFE_RESULT_NO_GRANTS`.
+
+---
+
 # F16 — PayPal Sandbox inventory read-only QA v9 (2026-10-18)
 
 **ÚLTIMO ESTADO:** PO dio GO para terminar UX/backend de retry. Edge `f16-paypal-supporter-v2-qa` **v9 ACTIVE / verify_jwt=true** en Supabase `mrybvqdebbgcayuvgkkr`, con **16/16 archivos cotejados exactamente** contra código GH commit `40855926cf844e87bcc3f37bf209df4572660adc`. Las dos migraciones de retry y multi-intento ya están instaladas y validadas (ver handoff inferior). No mezclar P06 y V2.
