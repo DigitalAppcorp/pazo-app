@@ -1,3 +1,19 @@
+# ADMIN — Centro de control integral, backend Supabase instalado (2026-10-18)
+
+**Orden explícita PO:** construir panel de administración completo para PAZO (cuentas, mascotas, pagos, recaudación, checkouts incompletos, uso frecuente, Supabase, fake doors y prioridades), conservando denuncias existentes; PO autorizó implementar. **PR #44 DRAFT** `f13/section-titles-20261012`, no tocar main/Live.
+
+**Backend staging INSTALADO** con `mcp__Supabase__apply_migration`: versión **`20261018234721`**, `pazo_admin_observability_dashboard_20261018`; archivo exacto versionado `supabase/migrations/20261018234721_pazo_admin_observability_dashboard_20261018.sql`. `admin_private.admin_grants` separado de `moderation_private.moderator_grants` y seeded **solo porque había exactamente un moderador**. `app_activity_daily` registra usuario UUID/día/categoría de módulo por RPC idempotente, no contenido ni GPS. Cinco RPC de lectura: `pazo_admin_overview/users/experiments/voters/audience` y gate `pazo_is_admin`, sin grants directos a tablas. Postflight: 1 admin grant, anon EXECUTE false, authenticated direct SELECT false y ensayo identidad ajena bloqueada; respuestas verdaderas del administrador válidas (11 módulos catalogados), sin exponer correos/UID a logs.
+
+**UI integrada** en `ModerationAccess` como «Centro de control» solo para cuenta admin: Resumen, Cuentas, Apoyo, Interés, Supabase. Denuncias y medios pendientes independientes y sin regresión al fallar nueva RPC. Se registran accesos a secciones principales una vez por usuario/día/sección, desde esta versión (no adivinar datos históricos). Fake doors de Comunidades y Lugares usan registro existente de views/interests, más opciones optativas de intención `use/create/explore`. Ranking por cuentas únicas y interés; muestra insuficiente <30. Usuarios/mascotas, Sandbox acreditado y checkouts sin período, actividad medida y bytes PG/Storage, con semántica honesta. Todos los cobros Sandbox simulados están separados de Live y las métricas oficiales de egress/factura NO están disponibles.
+
+**Preflight**: 8 cuentas Auth, 5 mascotas, un período USD2.99 de Sandbox, 0 vistas/votos registrados en fake doors, 41 eventos Lugares, 40 Búsqueda, PG ~17.5MB. Estas cifras son un snapshot de pruebas, no métrica live permanente.
+
+**Docs** `docs/PAZO_ADMIN_CONTROL_CENTER_20261018.md`, inventario privacidad actualizado. **BLOQUEO DE RELEASE**: QA de render Vite en cuenta administradora, gobernanza de privacidad (retención 90d u otra aprobada y actualización Política), datos oficiales Supabase e informe comercial Live requieren integraciones autorizadas adicionales. No declarar todo terminado ni visualmente aprobado solo por SQL/CI. F16 no se declara cerrado; no merge a main. La última auditoría de acceso SQL es PASS.
+
+**Gate:** `ADMIN_CONTROL_CENTER_STAGING_BACKEND_INSTALLED_UI_CODE_REVIEW_PO_VISUAL_PRIVACY_PENDING`.
+
+---
+
 # Feed — Ubicación fija incorrecta «Los Ángeles, CA»: nuevo post FIX 7/7 PASS (2026-10-18)
 
 PO mostró dos posts de mascotas distintas con ubicación «Los Ángeles, CA» aunque sus datos de zona de perfil podían variar. Raíz exacta: `CreatePostModal.tsx` escribía literalmente `location: 'Los Ángeles, CA'`. Auditoría **read-only** Supabase staging: 4 posts, los 4 con ese valor; 1 caso difiere de `pet_private_details.zone`, que es **privado**. DB tiene default residual `Los Ángeles • Local`. Por privacidad, **no** copiar zona privada al post público sin consentimiento ni inferir ubicaciones pasadas.
