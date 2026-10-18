@@ -92,7 +92,7 @@ test('F16 V2 recovery server requires authenticated owner + linked original + pl
   "account.state!=='bound'||!account.externalSubscriptionId",
   'includeApprovalLink:true',
   'merchant.plan_id!==PLAN||merchant.custom_id!==account.intentId',
-  "remote.status==='APPROVAL_PENDING'",
+  "merchant.status==='APPROVAL_PENDING'",
   'entitlement:false,mayRecordPayment:false,mayGrantBenefits:false',
   "QA_CHECKOUT_RELEASE_APPROVED",
   "runtime.canBuy(qaOwner)"
