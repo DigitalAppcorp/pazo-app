@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Post } from '../../types/pazo'
+import type { Post, SupporterBadgeEvidence } from '../../types/pazo'
 import { IconBookmark, IconPaw } from '../icons/PazoIcons'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS, DEMO_COMMENT_MOTIFS } from '../../data/mockData'
@@ -12,23 +12,6 @@ import { SupporterBadge, type SupporterMilestone } from '../../features/supporte
 import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
 
 const supporterBadgesEnabled = supporterBenefitsUiEnabled
-const PET_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-type VerifiedFeedBadge = {badge: boolean; milestone: SupporterMilestone}
-function parseFeedBadgeRows(value:unknown, ids:string[]): Record<string,VerifiedFeedBadge>|null {
-  if (!Array.isArray(value) || value.length>ids.length) return null
-  const accepted=new Set(ids)
-  const out:Record<string,VerifiedFeedBadge>={}
-  for(const item of value) {
-    if (!item || typeof item!=='object'|| !accepted.has(item.pet_id) ||
-      Object.prototype.hasOwnProperty.call(out,item.pet_id) ||
-      typeof item.badge!=='boolean'||![0,3,6,12].includes(item.milestone) ||
-      (!item.badge && item.milestone!==0)) return null
-    out[item.pet_id]={badge:item.badge,milestone:item.milestone}
-  }
-  if(Object.keys(out).length!==ids.length)return null
-  return out
-}
-
 interface HomeViewProps {
   posts: Post[]
   canReport: boolean
@@ -193,49 +176,6 @@ export const HomeView = ({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [hasVotedNearby, setHasVotedNearby] = useState(false)
   const [isSubmittingNearby, setIsSubmittingNearby] = useState(false)
-  const [verifiedFeedBadges,setVerifiedFeedBadges] = useState<Record<string,VerifiedFeedBadge>>({})
-  const badgeQueriesMade=useRef<Set<string>>(new Set())
-  const [badgeRefreshCycle,setBadgeRefreshCycle]=useState(0)
-
-  // No perpetual client-side entitlement cache. Revalidate current badges on
-  // tab return and every minute; clear displayed claims BEFORE new RPC result.
-  useEffect(()=>{
-    if(!supporterBadgesEnabled)return
-    const refresh=()=>{
-      badgeQueriesMade.current.clear()
-      setVerifiedFeedBadges({})
-      setBadgeRefreshCycle(c=>c+1)
-    }
-    const onVisibility=()=>{
-      if(document.visibilityState==='visible')refresh()
-    }
-    document.addEventListener('visibilitychange',onVisibility)
-    const clock=setInterval(refresh,60000)
-    return ()=>{
-      document.removeEventListener('visibilitychange',onVisibility)
-      clearInterval(clock)
-    }
-  },[])
-
-  // The badge request must not be cancelled on every like, save, comment or
-  // cosmetic React re-render: those changes don't alter the pet set.
-  const feedBadgeIds=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
-    .filter(id=>PET_UUID.test(id)).slice(0,48).join('|')
-  useEffect(()=>{
-    if(!supporterBadgesEnabled || !feedBadgeIds)return
-    let alive=true
-    const ids=feedBadgeIds.split('|').filter(id=>!badgeQueriesMade.current.has(id))
-    if(ids.length===0)return
-    for(const id of ids)badgeQueriesMade.current.add(id)
-    void Promise.resolve(supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
-      .then(({data,error})=>{
-        if(!alive||error)return
-        const verified=parseFeedBadgeRows(data,ids)
-        if(!verified)return
-        setVerifiedFeedBadges(prev=>({...prev,...verified}))
-      }).catch(()=>{/* Fail closed. Retry on next managed refresh, never invent a badge. */})
-    return ()=>{alive=false}
-  },[feedBadgeIds,badgeRefreshCycle])
 
   const handleToggleComments = async (postId: string) => {
     if (activeCommentsPostId === postId) {
@@ -402,7 +342,7 @@ export const HomeView = ({
             <PostCard
               key={post.id}
               post={post}
-              supporterBadge={verifiedFeedBadges[post.petId]}
+              supporterBadge={post.supporterBadge}
               canReport={canReport}
               onReport={(kind,id,label) => setReportTarget({kind,id,label})}
               onHidePost={handleHidePost}
@@ -429,7 +369,7 @@ export const HomeView = ({
 }
 
 interface PostCardProps {
-  supporterBadge?: VerifiedFeedBadge
+  supporterBadge?: SupporterBadgeEvidence
   post: Post
   canReport: boolean
   onReport: (kind: 'feed_post' | 'feed_comment', id: string, label?: string) => void
