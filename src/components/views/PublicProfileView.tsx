@@ -8,8 +8,9 @@ import { ReportDialog } from '../../features/moderation/ReportDialog'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 import { SupporterProfileBackdrop, type SupporterProfileThemeId } from '../../features/supporter/components/SupporterProfileThemes'
 import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
+import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
 
-const supporterVisualsEnabled = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
+const supporterVisualsEnabled = supporterBenefitsUiEnabled
 type PublicSupporterPerks = {badge: boolean; theme: SupporterProfileThemeId | null; milestone: 0 | 3 | 6 | 12}
 const supporterThemes = new Set(['classic', 'nature', 'hearts', 'stars', 'adventure'])
 function acceptPublicSupporterPerks(raw: unknown): PublicSupporterPerks | null {
