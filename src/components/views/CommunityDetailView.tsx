@@ -120,11 +120,17 @@ export const CommunityDetailView = ({
         fetchCommunityPosts(communityId, currentPet?.id),
       ])
 
-      const decoratedPosts=supporterBenefitsUiEnabled
-        ?await attachVerifiedCommentBadges(nextPosts,
-          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
-        :nextPosts
-      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(decoratedPosts)
+      let decoratedPosts=nextPosts
+      if(supporterBenefitsUiEnabled){
+        try{
+          decoratedPosts=await attachVerifiedCommentBadges(nextPosts,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(decoratedPosts)
+        }catch(error){
+          console.error('PAZO community post badge verification unavailable:',error)
+          decoratedPosts=nextPosts
+        }
+      }
       setCommunity(nextCommunity)
       setMembers(nextMembers)
       setPosts(decoratedPosts)
@@ -151,11 +157,17 @@ export const CommunityDetailView = ({
 
   const refreshPosts = async () => {
     const nextPosts = await fetchCommunityPosts(communityId, currentPet?.id)
-    const decoratedPosts=supporterBenefitsUiEnabled
-      ?await attachVerifiedCommentBadges(nextPosts,
-        async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
-      :nextPosts
-    if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(decoratedPosts)
+    let decoratedPosts=nextPosts
+    if(supporterBenefitsUiEnabled){
+      try{
+        decoratedPosts=await attachVerifiedCommentBadges(nextPosts,
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(decoratedPosts)
+      }catch(error){
+        console.error('PAZO community post badge verification unavailable:',error)
+        decoratedPosts=nextPosts
+      }
+    }
     setPosts(decoratedPosts)
   }
 
@@ -266,11 +278,18 @@ export const CommunityDetailView = ({
   const loadComments = async (postId: string):Promise<boolean> => {
     try {
       const comments = await fetchCommunityPostComments(postId)
-      const decoratedComments=supporterBenefitsUiEnabled
-        ?await attachVerifiedCommentBadges(comments,
-          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
-        :comments
-      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(decoratedComments)
+      let decoratedComments=comments
+      if(supporterBenefitsUiEnabled){
+        try{
+          decoratedComments=await attachVerifiedCommentBadges(comments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(decoratedComments)
+        }catch(error){
+          // Membership is optional; a badge lookup cannot block a free thread.
+          console.error('PAZO community comment badge verification unavailable:',error)
+          decoratedComments=comments
+        }
+      }
       setCommentsByPost((current) => ({ ...current, [postId]: decoratedComments }))
       return true
     } catch (error) {
