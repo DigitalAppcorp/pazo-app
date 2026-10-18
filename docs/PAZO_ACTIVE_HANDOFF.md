@@ -1,3 +1,15 @@
+# F16 — Insignia Amigo de PAZO visible en comentarios y posts de Comunidad (2026-10-18)
+
+PO mostró captura de un comentario de `feliciano (perro)` sin mini-insignia aunque la mascota tenía una membresía verificada. Debe aparecer tanto al publicar como al comentar **sobre cualquier post**. Implementación directa en PR #44 DRAFT rama `f13/section-titles-20261012`:
+- `PostComment`, `CommunityPostComment` y `CommunityPost` ahora llevan evidencia opcional `supporterBadge` verificada con RPC pública existente `pazo_supporter_public_badges_batch` por ID de **mascota autora del comentario** (nunca por la del post).
+- Feed al expandir comentarios: carga/valida/predecodifica PNG **antes del primer render del hilo**; al enviar nuevo comentario: verifica el autor antes de pintar el optimista; en UI insignia oficial mini 20px sobre esquina inferior derecha del avatar del comentarista. También comentarios conservados de un post eliminado.
+- Comunidades: misma mini-insignia para publicaciones y comentarios, incluidos hilos de posts eliminados. La consulta de badges nunca concede derechos, usa 48-ID batches con dedupe y validación estricta. El Feed revalida insignias de posts **y comentarios abiertos** cada 60s/visibilidad.
+- Resiliencia: si RPC/imagen fallan, se oculta el badge sin prueba, **pero los comentarios siguen siendo una función gratuita**: se pueden leer y publicar; en ese caso una medalla puede faltar hasta que se pueda verificar de nuevo, sin fingir beneficios.
+
+Commit funcional `46aca598a33a902e6c5b60d49b3bd0dbbedc2c8e` **CI y seis PG labs 7/7 SUCCESS**; docs `docs/F16_SUPPORTER_BADGES_ON_COMMENTS_20261018.md`. Sin cambios a PayPal, Supabase SQL, funciones Edge, entitlements, Live o `main`. **Gate:** `F16_SUPPORTER_COMMENT_BADGES_CODE_7_OF_7_PASS_VITE_PO_QA_PENDING`. Para PO: sincronizar clon, iniciar Vite, comprobar comentario de `feliciano` en post de `bretman`, comentar nuevo, probar Comunidades e hilo conservado; no hacer nuevos pagos. CI ≠ aceptación visual.
+
+---
+
 # F16 — PayPal CTA Card Central: opción 2 lime, logo azul legible (2026-10-18)
 
 El PO eligió **opción 2** tras ver el botón verde oscuro con logo PayPal azul de poco contraste: cambiar solo botón de `SandboxCheckoutQaPanel.tsx` a **lima PAZO `#E1E53F` y texto verde `#204E4A`**, conservando los azules originales `#003087`/`#009CDE` del logo, agrandado a 25px. Variante deshabilitada usa lima pálido `#EEF1B7` SIN reducir opacidad del logo; nunca habilita checkout sin aceptación explícita. Hover/focus lima más claro, cero contornos. Tests estructurales actualizados. Commit funcional `bbde81a08ed417adcfe9b039156eca2933e9c092`, **CI + 6 PG Labs 7/7 SUCCESS**; PR #44 DRAFT en `f13/section-titles-20261012`. Ningún cambio de backend, consentimiento, cobros, planes o Live. Pendiente: Product Owner recarga Vite y valida contraste real, estado no consentido y activo SIN pagar.
