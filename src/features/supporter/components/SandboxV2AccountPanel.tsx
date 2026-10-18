@@ -175,8 +175,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
   setRetryEligibility('checking')
   try{
    const x=await call({action:'retry_status'}) as Result
-   setRetryEligibility(x.ok===true&&x.environment===undefined&&x.eligible===true?'approved':
-     x.ok===true&&x.eligible===true?'approved':'blocked')
+   setRetryEligibility(x.ok===true&&x.eligible===true?'approved':'blocked')
   }catch{setRetryEligibility('blocked')}
  }
  const selectAccount=(a:Account)=>{
