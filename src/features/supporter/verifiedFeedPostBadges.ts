@@ -1,4 +1,4 @@
-import type {Post, SupporterBadgeEvidence} from '../../types/pazo'
+import type {Post, PostComment, CommunityPostComment, SupporterBadgeEvidence} from '../../types/pazo'
 
 const PET_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const MILESTONES=new Set([0,3,6,12])
@@ -18,12 +18,9 @@ export type ReadVerifiedBadgeBatch=(petIds:string[])=>Promise<{
  * If verification is unavailable, reject the page for the existing retry state.
  * Never silently present a verified paid author as a free author due to latency.
  */
-export async function attachVerifiedFeedBadges(
- posts:readonly Post[],
- read:ReadVerifiedBadgeBatch,
-):Promise<Post[]>{
- if(posts.length===0)return []
- const petIds=[...new Set(posts.filter(post=>!post.isAuthorDeleted).map(post=>post.petId))]
+async function readVerifiedPetBadges(
+ petIds:readonly string[],read:ReadVerifiedBadgeBatch,
+):Promise<Map<string,SupporterBadgeEvidence>>{
  if(petIds.some(id=>!PET_UUID.test(id)))throw Error('FEED_BADGE_INVALID_PET_ID')
  const resolved=new Map<string,SupporterBadgeEvidence>()
  for(let start=0;start<petIds.length;start+=BATCH_MAX){
@@ -43,11 +40,39 @@ export async function attachVerifiedFeedBadges(
   }
   if(ids.some(id=>!resolved.has(id)))throw Error('FEED_BADGE_INCOMPLETE_RESPONSE')
  }
+ return resolved
+}
+
+export async function attachVerifiedFeedBadges(
+ posts:readonly Post[],read:ReadVerifiedBadgeBatch,
+):Promise<Post[]>{
+ if(posts.length===0)return []
+ const petIds=[...new Set(posts.filter(post=>!post.isAuthorDeleted).map(post=>post.petId))]
+ const resolved=await readVerifiedPetBadges(petIds,read)
  return posts.map(post=>({
   ...post,
   supporterBadge:post.isAuthorDeleted
    ?{badge:false,milestone:0}
    :resolved.get(post.petId)!,
+ }))
+}
+
+/**
+ * Feed and Communities comments must display their verified badge on the
+ * comment's FIRST visible paint, not after a second React render. Never
+ * inherit badge proof from the surrounding post's author. Missing/deleted
+ * author pets never gain invented rights.
+ */
+export async function attachVerifiedCommentBadges<
+ T extends Pick<PostComment|CommunityPostComment,'authorPetId'|'supporterBadge'>
+>(comments:readonly T[],read:ReadVerifiedBadgeBatch):Promise<T[]>{
+ if(comments.length===0)return []
+ const petIds=[...new Set(comments.map(comment=>comment.authorPetId)
+   .filter((id):id is string=>typeof id==='string'&&PET_UUID.test(id)))]
+ const resolved=await readVerifiedPetBadges(petIds,read)
+ return comments.map(comment=>({
+  ...comment,
+  supporterBadge:comment.authorPetId?resolved.get(comment.authorPetId):undefined,
  }))
 }
 
@@ -64,7 +89,7 @@ const decodedArtwork=new Map<string,Promise<void>>()
  * Thus the first visible frame includes both the author photo and its badge.
  * Never preload a paid badge from a guessed entitlement.
  */
-export async function preloadVerifiedFeedBadgeArt(posts:readonly Post[]):Promise<void>{
+export async function preloadVerifiedFeedBadgeArt(posts:readonly {supporterBadge?:SupporterBadgeEvidence}[]):Promise<void>{
  if(typeof Image==='undefined')return // node tests / SSR
  const awarded=[...new Set(posts.filter(p=>p.supporterBadge?.badge)
   .map(p=>p.supporterBadge!.milestone))]
