@@ -366,7 +366,7 @@ function PazoMain() {
     petName: wasAuthorDeleted(post) ? 'Autor eliminado' : post.pet_name,
     petSpecies: wasAuthorDeleted(post) ? 'otro' : post.pet_species,
     petAvatar: wasAuthorDeleted(post) ? '' : post.pet_avatar,
-    location: wasAuthorDeleted(post) ? '' : post.location,
+    location: wasAuthorDeleted(post) ? '' : (post.location || ''),
     timeAgo: 'Hace un momento',
     createdAt: post.created_at,
     isRecommended,
