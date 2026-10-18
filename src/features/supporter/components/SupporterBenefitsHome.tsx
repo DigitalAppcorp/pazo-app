@@ -52,9 +52,9 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
 
  const row='flex min-h-[78px] w-full items-center gap-3 rounded-[23px] px-3 py-3 text-left transition-colors hover:bg-[#F1F4EB] focus-visible:bg-[#E1E53F]/35 disabled:opacity-55'
  const iconBox='flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-[#ECF0D7] text-[#204E4A]'
- const caption='text-[12px] leading-relaxed text-[#5C7470]'
+ const caption='text-[14px] leading-relaxed text-[#5C7470]'
  const item=(title:string,subtitle:string) => <span className="min-w-0 flex-1">
-   <span className="block text-[14px] font-black text-[#204E4A]">{title}</span>
+   <span className="block text-[16px] font-black text-[#204E4A]">{title}</span>
    <span className={'mt-1 block '+caption}>{subtitle}</span>
   </span>
  const feature=(name:IconName,title:string,description:string,action:()=>void,disabled=false,expanded?:boolean)=>
@@ -70,7 +70,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
    <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
     <h2 className="text-[19px] font-black" id="friend-benefits-title">{showWall?t('Muro de agradecimiento','Thank-you wall'):t('Amigo de PAZO','Friend of PAZO')}</h2>
     <button type="button" ref={closeRef} onClick={()=>showWall?setShowWall(false):onClose()}
-     className="min-h-11 rounded-full bg-white px-4 py-2.5 text-[13px] font-bold shadow-[0_3px_15px_rgba(32,78,74,0.05)] hover:bg-[#E6EDDB] focus-visible:bg-[#E1E53F]/50">
+     className="min-h-11 rounded-full bg-white px-4 py-2.5 text-[14px] font-bold shadow-[0_3px_15px_rgba(32,78,74,0.05)] hover:bg-[#E6EDDB] focus-visible:bg-[#E1E53F]/50">
      {showWall?t('Volver a beneficios','Back to benefits'):t('Volver a PAZO','Back to PAZO')}
     </button>
    </div>
@@ -81,17 +81,17 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
     className="flex flex-col items-center gap-2 rounded-[32px] bg-[#E8EEDD] px-6 py-7 text-center">
     <SupporterBadge active milestone={milestone} lang={lang} size="large"/>
     <h3 className="mt-2 text-[22px] font-black leading-tight">{t('Ya eres Amigo de PAZO','You are a PAZO Friend')}</h3>
-    <p className="max-w-[31ch] text-[13px] leading-relaxed text-[#476862]">
+    <p className="max-w-[31ch] text-[14px] leading-relaxed text-[#476862]">
      {t('Gracias por ayudar a que PAZO siga siendo gratis para todos.','Thanks for helping keep PAZO free for everyone.')}
     </p>
-    <p role="status" className="mt-2 rounded-full bg-white/80 px-4 py-2 text-[12px] font-black text-[#204E4A]">
+    <p role="status" className="mt-2 rounded-full bg-white/80 px-4 py-2 text-[14px] font-black text-[#204E4A]">
      {t('Membresía activa y verificada','Verified active membership')}
     </p>
-    <p className="text-[11px] text-[#5C7470]">
+    <p className="text-[13px] text-[#5C7470]">
      {t('Consulta la vigencia y renovación en Mi membresía.','Review paid-through date and renewal under My membership.')}
     </p>
    </section>
-   <h3 className="px-1 pt-1 text-[17px] font-black">{t('Tus beneficios','Your benefits')}</h3>
+   <h3 className="px-1 pt-1 text-[19px] font-black">{t('Tus beneficios','Your benefits')}</h3>
    <section aria-label={t('Beneficios de Amigo de PAZO','PAZO Friend benefits')}
     className="rounded-[28px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">
     {feature('paw',t('Tu insignia','Your badge'),
@@ -114,9 +114,9 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
       t('Reconocimientos de 3, 6 y 12 meses.','Recognition at 3, 6 and 12 months.'),
       ()=>setShowMilestones(value=>!value),false,showMilestones)}
     {showMilestones&&<div className="mx-3 mb-3 space-y-2 rounded-[20px] bg-[#F4F5EE] px-4 py-3">
-     {[3,6,12].map(months=><div key={months} className="flex items-center justify-between gap-3 text-[12px]">
+     {[3,6,12].map(months=><div key={months} className="flex items-center justify-between gap-3 text-[14px]">
       <span className="font-bold text-[#204E4A]">{t(`${months} meses completados`,`${months} completed months`)}</span>
-      <span className={'rounded-full px-3 py-1.5 text-[11px] font-bold '+(milestone>=months?'bg-[#D8E7CB] text-[#204E4A]':'bg-white text-[#617670]')}>
+      <span className={'rounded-full px-3 py-1.5 text-[13px] font-bold '+(milestone>=months?'bg-[#D8E7CB] text-[#204E4A]':'bg-white text-[#617670]')}>
        {milestone>=months?t('Conseguida','Earned'):t('Pendiente','Pending')}
       </span>
      </div>)}
@@ -131,7 +131,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
       {qa ? <div className="space-y-2">
         <details open={showSandboxTools} onToggle={event=>setShowSandboxTools(event.currentTarget.open)}
           className="rounded-[20px] bg-[#EFF3E8] p-3">
-          <summary className="min-h-11 cursor-pointer py-3 text-[12px] font-bold focus-visible:bg-[#E1E53F]/40">
+          <summary className="min-h-11 cursor-pointer py-3 text-[14px] font-bold focus-visible:bg-[#E1E53F]/40">
            {t('Herramientas de prueba Sandbox','Sandbox test tools')}
           </summary>
           <SandboxV2AccountPanel lang={lang}/>
@@ -143,7 +143,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
     </div>}
    </section>
    {qa&&<details className="rounded-[24px] bg-[#F0F3ED] px-4 py-2">
-    <summary className="min-h-11 cursor-pointer py-3 text-[12px] font-bold focus-visible:bg-[#E1E53F]/35">
+    <summary className="min-h-11 cursor-pointer py-3 text-[14px] font-bold focus-visible:bg-[#E1E53F]/35">
      {t('Diagnóstico de beneficios · Solo QA','Benefit diagnostics · QA only')}
     </summary>
     <SupporterSandboxBenefitsStatus lang={lang}/>
