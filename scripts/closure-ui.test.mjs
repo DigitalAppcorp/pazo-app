@@ -1101,7 +1101,7 @@ test('F16 option D chronological cards only show validated server props, with ho
   await act(async()=>{ui=create(render('all'))})
   const names=()=>ui.root.findAllByType('article').map(card=>card.findAllByType('h2')[0].children.join(''))
   assert.deepEqual(names(),['Luna','Milo','Toby'])
-  assert.ok(JSON.stringify(ui.toJSON()).includes('Hito verificado: 12 meses'))
+  assert.ok(JSON.stringify(ui.toJSON()).includes('12 meses verificados'))
   assert.ok(!JSON.stringify(ui.toJSON()).includes('Apoyando desde hace 12 meses'),'Milestone is not an exact tenure')
   assert.ok(!JSON.stringify(ui.toJSON()).includes('unverified purchase'))
   await act(async()=>ui.update(render('recent')))
