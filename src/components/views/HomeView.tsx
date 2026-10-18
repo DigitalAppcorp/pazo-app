@@ -9,8 +9,9 @@ import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
 import { SupporterBadge, type SupporterMilestone } from '../../features/supporter/components/SupporterBadge'
+import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
 
-const supporterBadgesEnabled = import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'
+const supporterBadgesEnabled = supporterBenefitsUiEnabled
 const PET_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 type VerifiedFeedBadge = {badge: boolean; milestone: SupporterMilestone}
 function parseFeedBadgeRows(value:unknown, ids:string[]): Record<string,VerifiedFeedBadge>|null {
