@@ -68,10 +68,21 @@ export function createPazoSandboxV2MerchantVerifier({
    const url=HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+
      '/transactions?'+new URLSearchParams({start_time:startISO,end_time:endISO})
    const ledger=await read(url,{method:'GET',headers})
+   // PayPal marks total_pages, total_items and links as OPTIONAL.
+   // Missing totals do not prove global coverage; verify the single bounded
+   // subscription-scoped sale independently below, never infer a paid period
+   // from pagination metadata or an ACTIVE subscription alone.
+   const linksOk=ledger.links===undefined||
+     (Array.isArray(ledger.links)&&ledger.links.length<=10&&
+      ledger.links.every(link=>link&&typeof link==='object'&&
+       typeof link.rel==='string')&&
+      !ledger.links.some(link=>link.rel.toLowerCase()==='next'))
    if(!Array.isArray(ledger.transactions)||
-      ledger.total_pages!==1||ledger.total_items!==ledger.transactions.length||
       ledger.transactions.length===0||ledger.transactions.length>5||
-      ledger.links?.some(link=>link?.rel==='next'))
+      (ledger.total_pages!==undefined&&ledger.total_pages!==1)||
+      (ledger.total_items!==undefined&&
+       ledger.total_items!==ledger.transactions.length)||
+      !linksOk)
     fail('incomplete_subscription_transactions')
    const ids=ledger.transactions.map(tx=>tx?.id)
    if(ids.some(id=>typeof id!=='string'||!ID.test(id))||
