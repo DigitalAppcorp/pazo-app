@@ -23,7 +23,7 @@ type ServerResult = {
   mayGrantBenefits?: boolean
   paidThrough?: null
 }
-type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void}
+type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void; retry?:boolean}
 const HOST = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const DIGEST = /^[0-9a-f]{64}$/
 // Previous P06 QA terms explicitly excluded benefits: NEVER reuse them.
@@ -37,7 +37,7 @@ const approveUrl = (raw: unknown): string | null => {
       ? u.toString() : null
   } catch { return null }
 }
-export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting}: Props) {
+export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry=false}: Props) {
   const [offer,setOffer] = useState<Offer | null>(null)
   const [busy,setBusy] = useState(false)
   const [consent,setConsent] = useState(false)
@@ -114,7 +114,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting}: Pro
     setBeginFailure(null)
     setPhase('pending')
     try{
-      const data=await call({action:'begin',consent:{
+      const data=await call({action:retry?'retry_begin':'begin',consent:{
         requestKey:key.current,locale:offer.locale,termsVersion:offer.version,
         termsDigest:offer.termsDigest,affirmativeConsent:true,
       }})
@@ -187,7 +187,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting}: Pro
               <path d="M8.1 2.2h7.5c4.9 0 6.3 3 5.6 6.3-.9 4.2-4 6.2-8.5 6.2h-2.5l-1.7 7.1H3.6L8.1 2.2Z"/>
               <path d="M10 7.6h6.1c4.3 0 5.8 2.6 5 6.4-.6 3.8-3.6 5.2-7.3 5.2H8l2-11.6Z" fill="#009CDE"/>
             </svg>
-            {label('Continuar con PayPal','Continue with PayPal')}
+            {retry?label('Volver a intentar con PayPal','Try again with PayPal'):label('Continuar con PayPal','Continue with PayPal')}
           </span>
         </button>
         <p className="text-center text-[10px] leading-relaxed text-[#5C7470]">
