@@ -7,8 +7,23 @@ import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 type Props={lang:'es'|'en';onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
- providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean}
+ providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
+ approvalUrl?:string|null}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
+const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
+ if(typeof raw!=='string'||raw.length>2048)return null
+ try {
+  const url=new URL(raw)
+  return url.protocol==='https:'&&
+   ['sandbox.paypal.com','www.sandbox.paypal.com'].includes(url.hostname)&&
+   !url.username&&!url.password&&!url.port&&!url.hash&&
+   url.toString()===raw&&
+   url.pathname.startsWith('/webapps/billing/subscriptions')&&
+   /^BA-[A-Za-z0-9_-]{6,128}$/.test(url.searchParams.get('ba_token')||'')&&
+   [...url.searchParams.keys()].every(k=>k==='ba_token') ? raw:null
+ }catch{return null}
+}
+
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
@@ -18,6 +33,7 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState(false)
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
+ const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|null>(null)
  const [confirm,setConfirm]=useState(false)
  const [cancelled,setCancelled]=useState(false)
  const [paidThrough,setPaidThrough]=useState<string|null>(null)
@@ -84,8 +100,32 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
    if(result.ok!==true||typeof result.providerStatus!=='string')
     throw Error('NO_MERCHANT_CONFIRMATION')
    setProviderStatus(result.providerStatus)
+   setRecoveryMessage(null)
    setCancelled(result.providerStatus==='CANCELLED')
   }catch{setError(true)}finally{setBusy(false)}
+ }
+ const resumeApproval=async()=>{
+  if(!account||account.state!=='bound'||providerStatus!=='APPROVAL_PENDING'||busy)return
+  setBusy(true);setError(false);setRecoveryMessage(null)
+  try {
+   const result=await call({action:'resume_approval'}) as Result
+   if(result.ok!==true)throw Error('INVALID_QA_RESUME')
+   if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_can_resume'){
+    const url=safeSandboxApprovalUrl(result.approvalUrl)
+    if(!url)throw Error('UNTRUSTED_APPROVAL_LINK')
+    window.location.assign(url)
+    return
+   }
+   if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_link_unavailable'){
+    setRecoveryMessage('unavailable');return
+   }
+   if(typeof result.phase==='string'&&
+      ['ACTIVE','APPROVED','CANCELLED','EXPIRED','SUSPENDED'].includes(result.phase)){
+    setProviderStatus(result.phase);setRecoveryMessage('changed');return
+   }
+   throw Error('UNKNOWN_RECOVERY')
+  }catch{setRecoveryMessage('failed')}
+  finally{setBusy(false)}
  }
  const cancel=async()=>{
   if(!account||account.state!=='bound'||!confirm||busy)return
@@ -176,6 +216,25 @@ export function SandboxV2AccountPanel({lang,onAccountInspection}:Props){
      </p>}
      {providerStatus&&<p role="status" className="text-sm">
       {t('Estado del proveedor: ','Provider status: ')}{providerStatus}
+     </p>}
+     {providerStatus==='APPROVAL_PENDING'&&<div className="space-y-2 rounded-2xl bg-[#EDF2E1] p-3">
+       <p className="text-[12px] leading-relaxed text-[#204E4A]">
+         {t('Todavía no aprobaste esta suscripción en PayPal. Puedes continuar la misma solicitud, sin crear otra.',
+           'You have not yet approved this subscription in PayPal. You can continue the same request without creating another.')}
+       </p>
+       <button type="button" className={button} onClick={()=>void resumeApproval()} disabled={busy}>
+         {t('Continuar la aprobación en PayPal','Continue approval in PayPal')}
+       </button>
+     </div>}
+     {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#FCE5D8] p-3 text-[12px] leading-relaxed text-[#204E4A]">
+       {recoveryMessage==='unavailable'
+         ? t('PayPal no devolvió el enlace original. No se creó otra solicitud; esta operación necesita recuperación controlada.',
+             'PayPal did not return the original approval link. No new request was made; this operation requires controlled recovery.')
+         : recoveryMessage==='changed'
+           ? t('El estado de PayPal cambió. Comprueba el pago antes de intentar una operación nueva.',
+               'PayPal status changed. Check payment before attempting a new operation.')
+           : t('No pudimos recuperar la aprobación original. No se ha solicitado otro cobro.',
+               'Could not recover the original approval. No other payment was requested.')}
      </p>}
      <div className="flex flex-wrap gap-2">
       <button type="button" className={button} onClick={()=>void download()} disabled={busy}>
