@@ -490,7 +490,7 @@ function PazoMain() {
       const [interactionsPage,badgedPage]=await Promise.all([
         enrichPostsWithInteractions(page,pet.id),
         supporterBenefitsUiEnabled
-          ?attachVerifiedFeedBadges(page,ids=>supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          ?attachVerifiedFeedBadges(page,async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
           :Promise.resolve(page),
       ])
       const enrichedPage=interactionsPage.map((post,index)=>({
@@ -1001,7 +1001,7 @@ function PazoMain() {
     if(supporterBenefitsUiEnabled){
       try{
         const resolved=await attachVerifiedFeedBadges([newPost],
-          ids=>supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
         publishedPost=resolved[0]
       }catch(error){
         console.error('PAZO badge verification unavailable for newly created post:',error)
