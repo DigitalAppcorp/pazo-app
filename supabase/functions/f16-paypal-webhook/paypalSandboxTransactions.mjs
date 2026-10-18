@@ -42,6 +42,32 @@ async function readJson(fetchImpl,url,options){
   if(!body || typeof body!=='object' || Array.isArray(body)) throw Error('malformed_sandbox_response')
   return body
 }
+// Narrow, non-leaking Sandbox GET diagnostic. Only classify HTTP status and
+// transport stage; never read or return provider error bodies, tokens or PII.
+async function readSubscriptionDiagnostic(fetchImpl,url,options,stage){
+ let r
+ try{
+  r=await fetchImpl(url,{...options,redirect:'error',signal:AbortSignal.timeout(12000)})
+ }catch{throw Error('paypal_network_unavailable')}
+ if(!r?.ok){
+  const status=r?.status
+  if(status===429)throw Error('paypal_provider_rate_limited')
+  if(stage==='oauth'&&(status===401||status===403))
+   throw Error('paypal_oauth_denied')
+  if(stage==='subscription'&&status===404)
+   throw Error('paypal_subscription_not_found')
+  if(stage==='subscription'&&(status===401||status===403))
+   throw Error('paypal_subscription_access_denied')
+  if(Number.isInteger(status)&&status>=500)
+   throw Error('paypal_provider_unavailable')
+  throw Error('paypal_provider_request_rejected')
+ }
+ let value
+ try{value=await r.json()}catch{throw Error('paypal_provider_invalid_response')}
+ if(!value||typeof value!=='object'||Array.isArray(value))
+  throw Error('paypal_provider_invalid_response')
+ return value
+}
 export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fetchImpl=fetch}={}){
   if(typeof clientId!=='string' || !/^[\x21-\x7e]{8,512}$/.test(clientId) ||
      clientId.includes(':') || typeof clientSecret!=='string' ||
@@ -53,22 +79,22 @@ export function createPaypalSandboxSubscriptionReader({clientId,clientSecret,fet
     async readSubscription(subscriptionId,{includeApprovalLink=false}={}){
       if(typeof subscriptionId!=='string' || !SUBSCRIPTION_REF.test(subscriptionId))
         throw Error('invalid_subscription_id')
-      const token=await readJson(fetchImpl,HOST+'/v1/oauth2/token',{
+      const token=await readSubscriptionDiagnostic(fetchImpl,HOST+'/v1/oauth2/token',{
         method:'POST',headers:{
           Authorization:'Basic '+btoa(clientId+':'+clientSecret),
           'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json',
         },
         body:'grant_type=client_credentials',
-      })
+      },'oauth')
       if(token.token_type?.toLowerCase()!=='bearer' ||
          typeof token.access_token!=='string' || !token.access_token)
-        throw Error('sandbox_oauth_invalid')
-      const subscription=await readJson(fetchImpl,
+        throw Error('paypal_oauth_invalid_token')
+      const subscription=await readSubscriptionDiagnostic(fetchImpl,
         HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId),{
           method:'GET',
           headers:{Authorization:'Bearer '+token.access_token,Accept:'application/json'},
-        })
-      if(subscription.id!==subscriptionId) throw Error('subscription_response_mismatch')
+        },'subscription')
+      if(subscription.id!==subscriptionId) throw Error('paypal_subscription_response_mismatch')
       // No subscriber PII or token logging. Approval URL is returned only
       // on a deliberate owner-authenticated recovery call, never normal reads.
       return Object.freeze({
