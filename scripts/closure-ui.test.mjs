@@ -17,7 +17,8 @@ const calls=[]
 const petInputs=[]
 globalThis.__PAZO_CLOSURE_TEST_PET_INPUTS__=petInputs
 globalThis.__PAZO_CLOSURE_TEST_DB__={
-  auth:{getUser:async()=>({data:{user:hasUser?{id:'synthetic-uploader'}:null},error:null})},
+  auth:{getUser:async()=>({data:{user:hasUser?{id:'synthetic-uploader'}:null},error:null}),
+    onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},
   from(table){
     calls.push(['from',table])
     return {insert:async payload=>{calls.push(['insert',payload]);return insertResult},
