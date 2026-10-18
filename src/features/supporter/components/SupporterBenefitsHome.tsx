@@ -118,8 +118,8 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
       {t('Tu apoyo merece reconocimiento','Your support deserves recognition')}
      </p>
      <p className="text-[14px] leading-relaxed text-[#476862]">
-      {t('PAZO agradece el tiempo que llevas apoyando nuestra comunidad. Al completar 3, 6 y 12 meses pagados y verificados, tu mascota recibe una nueva insignia.',
-        'PAZO celebrates the time you spend supporting our community. After 3, 6 and 12 completed, verified paid months, your pet receives a new badge.')}
+      {t('PAZO agradece el tiempo que llevas apoyando nuestra comunidad. Con el paso del tiempo, tu mascota recibe nuevos reconocimientos que reflejan ese apoyo.',
+        'PAZO is grateful for the time you have spent supporting our community. As time goes by, your pet earns new badges that reflect your support.')}
      </p>
      <div aria-label={t('Hitos de agradecimiento','Recognition milestones')} className="grid grid-cols-3 gap-2 pt-1">
       {([3,6,12] as const).map(months=><div key={months} className={'rounded-[18px] px-2 py-3 text-center '+(milestone>=months?'bg-[#DCE9C8]':'bg-white')}>
