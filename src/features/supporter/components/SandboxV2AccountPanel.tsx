@@ -34,7 +34,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
  const [error,setError]=useState(false)
  const [errorKind,setErrorKind]=useState<'account'|'status'|'payment'|'other'>('other')
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
- const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|'provider'|'account'|'admission'|'restricted'|null>(null)
+ const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|'provider'|'account'|'admission'|'restricted'|'oauth'|'missing'|'access'|'network'|null>(null)
  const [confirm,setConfirm]=useState(false)
  const [cancelled,setCancelled]=useState(false)
  const [paidThrough,setPaidThrough]=useState<string|null>(null)
@@ -57,6 +57,11 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    const allowed=new Set([
     'sandbox_admission_unavailable','private_account_read_unavailable',
     'paypal_subscription_read_unavailable','rate_limited',
+    'paypal_oauth_denied','paypal_oauth_invalid_token',
+    'paypal_subscription_not_found','paypal_subscription_access_denied',
+    'paypal_provider_rate_limited','paypal_provider_unavailable',
+    'paypal_provider_request_rejected','paypal_provider_invalid_response',
+    'paypal_subscription_response_mismatch','paypal_network_unavailable',
     'sandbox_qa_owner_required','merchant_owner_plan_mismatch',
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
@@ -151,7 +156,11 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
    throw Error('UNKNOWN_RECOVERY')
   }catch(error){
    const code=error instanceof Error?error.message:''
-   setRecoveryMessage(code==='paypal_subscription_read_unavailable'?'provider':
+   setRecoveryMessage(code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
+    code==='paypal_subscription_not_found'?'missing':
+    code==='paypal_subscription_access_denied'||code==='paypal_subscription_response_mismatch'?'access':
+    code==='paypal_network_unavailable'||code==='paypal_provider_unavailable'||code==='paypal_provider_rate_limited'?'network':
+    code==='paypal_subscription_read_unavailable'||code==='paypal_provider_request_rejected'||code==='paypal_provider_invalid_response'?'provider':
     code==='private_account_read_unavailable'?'account':
     code==='sandbox_admission_unavailable'||code==='rate_limited'?'admission':
     code==='sandbox_qa_owner_required'||code==='merchant_owner_plan_mismatch'?'restricted':'failed')
@@ -268,7 +277,19 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
        </button>
      </div>}
      {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#FCE5D8] p-3 text-[12px] leading-relaxed text-[#204E4A]">
-       {recoveryMessage==='unavailable'
+       {recoveryMessage==='oauth'
+         ? t('PayPal rechazó la autenticación del servidor. Revisaremos las credenciales Sandbox sin compartirlas en el chat.',
+             'PayPal rejected server authentication. Sandbox credentials require review without sharing them in chat.')
+         : recoveryMessage==='missing'
+           ? t('PayPal Sandbox no encontró esta suscripción. Debemos conciliar la operación previa antes de iniciar otra.',
+               'PayPal Sandbox could not find this subscription. The prior request must be reconciled before another checkout.')
+         : recoveryMessage==='access'
+           ? t('Las credenciales actuales no permiten consultar la suscripción original. Verificaremos la aplicación Sandbox correspondiente.',
+               'The current credentials cannot access the original subscription. Its Sandbox app must be verified.')
+         : recoveryMessage==='network'
+           ? t('PayPal no respondió correctamente o limitó la consulta. No repitas el pago mientras revisamos la conexión.',
+               'PayPal did not respond correctly or rate-limited the lookup. Do not retry checkout while connection is investigated.')
+         : recoveryMessage==='unavailable'
          ? t('PayPal no devolvió el enlace original. No se creó otra solicitud; esta operación necesita recuperación controlada.',
              'PayPal did not return the original approval link. No new request was made; this operation requires controlled recovery.')
          : recoveryMessage==='changed'
