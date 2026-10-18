@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { FeatureIntentChoice } from '../../features/validation/components/FeatureIntentChoice'
 import {
   hasFeatureExperimentInterest,
   recordFeatureExperimentInterest,
@@ -130,6 +131,7 @@ export const CommunityFeatureExperimentCard = ({
                   : "I'm interested"}
         </button>
       </div>
+      {isInterested && <FeatureIntentChoice moduleKey={moduleKey} source={source} lang={lang}/>}
     </div>
   )
 }
