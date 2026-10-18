@@ -1,3 +1,11 @@
+# F16 — PO grabación beneficios → checking → beneficios: salto UI corregido en PR #44 (2026-10-18)
+
+PO mostró video corto donde el panel real `Tus beneficios están disponibles` aparece pero transitoriamente vuelve a `Comprobando tu membresía...` y luego recupera beneficios. Causa verificable: `useSupporterMembershipStatus` vaciaba todo estado verificado a `checking` al revalidar, desmontando `SupporterBenefitsHome` y sus apartados abiertos. Código corregido en rama: para relectura mismo alcance y miembro ya verificado mantiene el panel mientras consulta al backend, siempre reemplaza en `inactive/unavailable`; un cambio de cuenta Auth limpia el estado y fuerza nueva consulta, al igual que cambio de mascota. **No** se conceden beneficios por cliente ni PayPal `ACTIVE`; las RPC siguen siendo fuente de verdad. Añadida regresión al set F16. Solo código/documentación, sin DB/Live/main/cobros. El video NO ha probado aún fondos, muro, caducidad ni cancelación. Ver `docs/F16_AUTO_MEMBERSHIP_SANDBOX_QA_GATE_20261018.md`. CI de último HEAD debe comprobarse antes de pedir que PO actualice Vite local.
+
+**Gate:** `F16_MEMBER_UI_REVALIDATION_FLICKER_FIXED_BRANCH_BROWSER_RETEST_PENDING`.
+
+---
+
 # F16 — Owner-only Sandbox membership RPC INSTALLED with PO GO (2026-10-18)
 
 GO PO: «sí» a instalar exclusivamente la función de lectura de membresía asociada al dueño Auth, incluso sin mascotas. Se cotejó migración canónica `supabase/migrations/20261018213000_f16_sandbox_qa_owner_membership_read.sql` con PR #44 DRAFT y preflight hosted; `apply_migration` devolvió `success=true`, migration version alojada **20261018184603**, name `f16_sandbox_qa_owner_membership_read`. Postflight `public.pazo_supporter_my_account_status()` presente, SECURITY DEFINER owner postgres, sin parámetros, `auth.uid()`, `search_path=''`, acceso **authenticated sí / anon no / service_role no**, prueba de catálogo PASS.
