@@ -1,3 +1,11 @@
+## Estado postflight autorizado — 2026-10-18
+
+GO del PO recibido para instalar **únicamente** `20261018193000_f16_sandbox_fresh_owner_qa_admission.sql`, que fue aplicada y verificada en Supabase como `f16_sandbox_fresh_owner_qa_admission`. Acceso a ambas RPC exclusivamente por `service_role`, exigencia P06 eliminada, allowlist/Auth/expiración y límite idempotente preservados, pruebas PG17 + CI PASS.
+
+El correo indicado por PO **ya existe como Auth confirmado** y no coincide con el Auth ligado al V2 huérfano; tiene 0 P06/V2/retry, sin allowlist. No se creó usuario nuevo, ni se habilitó aún su acceso QA: PO debe confirmar que desea utilizar esta cuenta previamente existente durante **48 horas**, sin eliminarla ni cambiarle la contraseña. No poner correo ni identificador personal en repositorios. Estado SQL: 1 QA owner enabled, 1 V2 original, 0 retries/grants/payments/periodos y 1 `CREATED` pending.
+
+---
+
 # PAZO F16 — Segunda cuenta QA descartable (preparación, no alta)
 
 **Fecha:** 2026-10-18. **Autorización PO:** avanzar con una cuenta PAZO Auth de prueba independiente para verificar el primer checkout PayPal Sandbox desde cero. La autorización presente permite preparación de código/pruebas; NO es un GO separado para instalar nueva migración ni crear/autorizar un Auth user sin conocer su identidad.
