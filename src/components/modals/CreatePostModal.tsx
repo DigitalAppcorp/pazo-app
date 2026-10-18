@@ -176,7 +176,7 @@ export const CreatePostModal = ({
                 petName: newPostData.pet_name,
                 petSpecies: newPostData.pet_species,
                 petAvatar: newPostData.pet_avatar,
-                location: newPostData.location,
+                location: newPostData.location || '',
                 timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
                 createdAt: newPostData.created_at,
                 isRecommended: false,
