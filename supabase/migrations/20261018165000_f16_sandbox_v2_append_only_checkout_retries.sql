@@ -115,7 +115,7 @@ AS $fn$
 DECLARE
  g supporter_private.f16_sandbox_qa_v2_retry_grants%ROWTYPE;
  a supporter_private.f16_sandbox_qa_v2_retry_attempts%ROWTYPE;
- i supporter_private.paypal_subscription_intents%ROWTYPE;
+ stored_intent supporter_private.paypal_subscription_intents%ROWTYPE;
  new_id text;
 BEGIN
  IF p_owner_id IS NULL OR p_request_key IS NULL
@@ -132,11 +132,11 @@ BEGIN
   IF a.locale IS DISTINCT FROM p_locale OR a.terms_version IS DISTINCT FROM p_terms_version
     OR a.terms_sha256 IS DISTINCT FROM p_terms_digest
   THEN RAISE EXCEPTION 'Retry consent mismatch' USING ERRCODE='22023'; END IF;
-  SELECT * INTO i FROM supporter_private.paypal_subscription_intents
+  SELECT * INTO stored_intent FROM supporter_private.paypal_subscription_intents
    WHERE intent_id=a.intent_id AND owner_id=p_owner_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'Retry intent disappeared' USING ERRCODE='23503'; END IF;
   RETURN pg_catalog.jsonb_build_object('ownerId',p_owner_id,'requestKey',p_request_key,
-    'intentId',i.intent_id,'planId',i.plan_id,'state',i.state,
+    'intentId',stored_intent.intent_id,'planId',stored_intent.plan_id,'state',stored_intent.state,
     'locale',a.locale,'termsVersion',a.terms_version,'termsDigest',a.terms_sha256,'createdAt',a.created_at);
  END IF;
  IF NOT public.f16_qa_v2_retry_eligibility(p_owner_id)
