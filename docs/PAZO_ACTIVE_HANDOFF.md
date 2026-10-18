@@ -1,3 +1,13 @@
+# A01 — Fix animación de cola sin recorte de césped (2026-10-17)
+
+**Reporte PO con captura ampliada:** al girar la cola del perrito de A01 aparecía un círculo/máscara que desplazaba césped y parte del fondo. **Causa verificada en `public/onboarding/welcome-approved-art.svg`:** capa `tail` duplicaba la *escena WebP completa* bajo `clipPath(#tailClip)`, y la capa `body` restaba `tailShape`, produciendo agujeros visibles al rotar. El propio fondo tenía animación `pazoRefBreathe`, causando desplazamiento de pasto.
+
+**Corrección autorizada por PO y aplicada solo al PR #44 DRAFT:** regenerado el **mismo recurso** SVG autocontenido desde la ilustración oficial aprobada. La capa `sceneWithoutTail` es el paisaje estático con el área del rabo restaurada; `onlyTail` contiene únicamente el rabo RGBA sin pasto/hojas/fondo, extraído por segmentación de color + silueta y con unión al cuerpo suavizada; `scene` mantiene el original para cabeza. La capa `body` quedó totalmente inmóvil; `tail` solo mueve `onlyTail` con punto de pivote `121px 177px`, arco de ±1.5° y 3.8s. Se conservan movimiento suave de cabeza y `prefers-reduced-motion`. **No usar recortes SVG que reproduzcan la imagen completa en una máscara rotatoria** ni mover pasto. Se probaron offline fotogramas de ángulo -1.5°/0/+1.5° y no se observó el círculo. Prueba de regresión estática actualizada `scripts/closure-ui.test.mjs`: tres escenas autocontenidas, máscara antigua ausente, paisaje inmóvil, pivote y amplitud restringidos.
+
+**Pendiente:** CI/PG del SHA más reciente y captura real del PO tras `git pull --ff-only` y reiniciar Vite / recarga dura; no confundir imagen offline con aceptación visual en navegador. No PayPal, Supabase, SQL, despliegues, pagos ni merge. **Marcador:** `A01_TAIL_ISOLATED_NO_MOVING_GRASS_QA_VISUAL_PENDING`.
+
+---
+
 # A01 — Revisión visual rechazada: corrección del perrito con arte de referencia (2026-10-17)
 
 **Evidencia del PO:** dos capturas comparativas: izquierda PAZO real tras commit `578ef8e`; derecha diseño visual previamente aprobado. **NO ACEPTADO** por notable pérdida de fidelidad. El perrito SVG improvisado era de estilo plano, postura rígida, ojos/rostro distintos, cuerpo más geométrico y hojas/sombras inferiores simplificadas. Tamaños generales y copy estaban más cerca; error principal era haber *redibujado* el arte aprobado sin conservarlo.
