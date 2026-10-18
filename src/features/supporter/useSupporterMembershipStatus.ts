@@ -52,9 +52,23 @@ export function useSupporterMembershipStatus(petId?:string, enabled=true) {
       const {data:pets,error:petError} = petId
         ? await query.eq('id',petId).limit(1)
         : await query.limit(101)
-      if(petError || !Array.isArray(pets) || pets.length===0 ||
-        pets.length>100 || pets.some(p=>!UUID.test(p?.id || '')) ||
+      if(petError || !Array.isArray(pets) || pets.length>100 ||
+        pets.some(p=>!UUID.test(p?.id || '')) ||
         (petId && pets[0]?.id!==petId))throw Error('PETS_UNVERIFIED')
+      // A paid subscription belongs to the Auth account, not to a pet.
+      // The authenticated owner-only RPC is read-only and supplies no
+      // payment, personal or subscription IDs. Never invent a pet to enroll.
+      if(pets.length===0){
+        if(petId)throw Error('PETS_UNVERIFIED')
+        const {data,error}=await supabase.rpc('pazo_supporter_my_account_status')
+        const v=data as {active?:unknown;milestone?:unknown}|null
+        if(error || !v || typeof v.active!=='boolean' ||
+           ![0,3,6,12].includes(v.milestone as number) ||
+           (!v.active && v.milestone!==0))
+          throw Error('OWNER_COVERAGE_UNVERIFIED')
+        return v.active ? {kind:'verified',milestone:v.milestone as 0|3|6|12}
+          : noStatus('inactive')
+      }
       let milestone:0|3|6|12 = 0
       let active = false
       for(const pet of pets) {
