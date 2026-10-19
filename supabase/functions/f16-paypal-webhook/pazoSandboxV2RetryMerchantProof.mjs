@@ -19,7 +19,7 @@ export function createPazoSandboxV2RetryMerchantProof({
  if(!goodSecret(clientId)||clientId.includes(':')||!goodSecret(clientSecret)||
   typeof fetchImpl!=='function'||typeof now!=='function'||
   typeof inventoryRead?.inspect!=='function'||
-  typeof createdCandidateStore?.readForOwner!=='function'||
+  typeof createdCandidateStore?.readForOwnerMulti!=='function'||
   typeof createdEventAudit?.inspect!=='function')fail()
  async function req(url,init={}){
   let r
@@ -131,7 +131,7 @@ export function createPazoSandboxV2RetryMerchantProof({
       checkedAt-created<60000||checkedAt-created>30*86400000)fail()
    // The signed, held CREATED inbox event must independently match the
    // exact subscription under the same current merchant app credentials.
-   const candidate=await createdCandidateStore.readForOwner({ownerId,intentId})
+   const candidate=await createdCandidateStore.readForOwnerMulti({ownerId,intentId})
    if(!candidate)fail()
    const signed=await createdEventAudit.inspect({
     eventId:candidate.eventId,eventType:candidate.eventType,
