@@ -76,6 +76,13 @@ Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL no
 - El PO reportó que completó un pago de prueba; capturas posteriores de una cuenta muestran período hasta **19/11/2026** y PayPal ACTIVE. Lectura DB **19-oct**: `supporter_private.f16_sandbox_qa_paid_periods` ahora **2 filas**, `supporter_private.paypal_payment_entries` **0 filas** (este último ledger distinto no implica ausencia de prueba pagada). Investigar conciliación de la última venta firmada / correspondencia owner antes de release; no declarar contabilidad global o Live-ready solo por eventos webhook.
 - No hacer más pruebas/cargos por iniciativa propia sin gate; no activar beneficios por redirect; mantener permisos y entitlements detrás de evidencia verificada.
 
+## Ruta lanzamiento MVP → Live solicitada (19-oct-2026)
+- Product Owner pidió terminar faltantes y preparar cambio Live en panel tras beta; **sin activar por simple publicación**. Ruta canónica: `docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md` (R0–R9: F16, beneficios, seguridad, privacidad, UX, Vercel, PWA, finanzas y GO Live). Código/CI ≠ QA visual/E2E/backend.
+- Estado PRE-RUTA HEAD `0d3ac9cdeb7ef330e03b66180eccec47ca135b7a` CI+6 labs PASS, PR #44 DRAFT. OAuth Sandbox admin real PO PASS. Runtime DB `sandbox`, Live false.
+- Vercel API 403 para scope `digitalapp` al leer proyecto/deploy/alias; faltará autorización/CLI. Supabase Advisor: SEC DEFINER públicos y RLS privados requieren auditoría sin revocar a ciegas. No inventar alojamiento listo.
+- Guard `scripts/pazo-release-guard.mjs` en CI: prueba puramente estática que mantiene Live OFF y checkout QA/Legacy cerrado; no valida pago/hosting.
+- No pedir dominio hasta beta; resolver entre tanto código y tests offline, SQL versionado pendiente GO específico. Limpieza visual «Mi membresía», QA beneficios, conciliación Sandbox, media moderación, PWA y release continúan como gates reales.
+
 ## Seguridad, alcance y continuación
 - Supabase project ref `mrybvqdebbgcayuvgkkr` (solo identificador público), GitHub PR #44 DRAFT. Nunca compartir secrets, IDs de compradores ni payment tokens en handoff.
 - F13 diseño aprobado: mapa full-bleed opción 3, barra blanca/isotipo verde, perfiles/mensajería/avisos y fake doors; F14 eliminación QA E2E con protecciones. No reabrir decisiones de módulos, no degradar «cero contornos».

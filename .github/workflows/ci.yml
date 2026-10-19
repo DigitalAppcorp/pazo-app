@@ -48,6 +48,9 @@ jobs:
           node --test src/features/supporter/testing/f16P43VercelDbEnvNamesReadOnly.test.mjs
           npm run test:f16:synthetic
 
+      - name: F16 MVP beta-to-Live release static guard
+        run: npm run test:release:guard
+
       - name: Build
         env:
           VITE_APP_RELEASE: ${{ github.sha }}
