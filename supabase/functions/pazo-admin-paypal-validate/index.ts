@@ -67,9 +67,11 @@ Deno.serve(async req=>{
   })
   const validated=token.ok
   // Never relay OAuth response body/tokens, merchant identifiers or secrets.
-  await rpc('pazo_admin_paypal_service_mark_validation',{
+  const saved=await rpc('pazo_admin_paypal_service_mark_validation',{
    p_environment:env,p_actor:user.id,p_success:validated
   })
+  if(!saved.ok||await saved.json()!==true)
+   return json({ok:false,code:'validation_record_unavailable'},503,cors)
   return json({ok:validated,environment:env,
    code:validated?'credentials_valid':'credentials_invalid',
    live_checkout_enabled:false},validated?200:422,cors)
