@@ -311,8 +311,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </p>}
                     {qaPayAction==='unavailable'&&qaV2AccountState==='bound'&&
                       <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
-                        {label('No pudimos verificar el intento anterior con PayPal. No se inició otro cobro.',
-                          'We could not open PayPal. We are resolving an issue with this payment to avoid duplicate subscriptions. No new charge was initiated.')}
+                        {label('No pudimos preparar otro intento de pago. No se inició ningún cobro.',
+                          'We could not prepare another payment attempt. No charge was started.')}
+                        {qaRecoveryDiagnostic&&<span className="mt-1 block text-[11px] opacity-75">
+                          {label('Referencia de diagnóstico: ','Diagnostic reference: ')}{qaRecoveryDiagnostic}
+                        </span>}
                       </p>}
                     {qaV2AccountState==='unavailable'&&
                       <p role="alert" className="text-[13px] leading-relaxed text-[#526F63]">
