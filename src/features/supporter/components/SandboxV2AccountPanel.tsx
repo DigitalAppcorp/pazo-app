@@ -111,6 +111,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
     'recovery_check_provider','recovery_check_cancel_eligibility',
     'recovery_check_cancel_provider','recovery_check_merchant_evidence',
     'recovery_check_grant','recovery_check_unavailable',
+    'recovery_cancel_pre_not_found','recovery_cancel_pre_denied','recovery_cancel_post_rejected','recovery_cancel_post_not_found','recovery_cancel_post_denied','recovery_cancel_after_not_found','recovery_cancel_status_pending','recovery_cancel_status_changed','recovery_cancel_owner_mismatch','recovery_cancel_oauth','recovery_cancel_provider_unavailable','recovery_cancel_unclassified', 
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
   }
@@ -291,15 +292,27 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
     recovery_check_grant:'R7',retry_proof_not_accepted:'R7',
     pending_cancellation_preflight_blocked:'R4',
     pending_cancellation_confirmation_missing:'R5',
+    recovery_cancel_pre_not_found:'R5-01',
+    recovery_cancel_pre_denied:'R5-02',
+    recovery_cancel_post_rejected:'R5-03',
+    recovery_cancel_post_not_found:'R5-04',
+    recovery_cancel_post_denied:'R5-05',
+    recovery_cancel_after_not_found:'R5-06',
+    recovery_cancel_status_pending:'R5-07',
+    recovery_cancel_status_changed:'R5-08',
+    recovery_cancel_owner_mismatch:'R5-09',
+    recovery_cancel_oauth:'R5-10',
+    recovery_cancel_provider_unavailable:'R5-11',
+    recovery_cancel_unclassified:'R5-12',
     paypal_subscription_read_unavailable:'R3',
     merchant_owner_plan_mismatch:'R8',existing_subscription_not_terminal:'R9'
    }
    onRecoveryDiagnostic?.(diagnosticCodes[code]||'R0')
    setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerError:code||'unavailable'}).phase)
-   onResumeStatus?.([...(code.startsWith('recovery_check_')?['recovery_check_']:[]),
+   onResumeStatus?.([...(code.startsWith('recovery_check_')||code.startsWith('recovery_cancel_')?['recovery_check_','recovery_cancel_']:[]),
     'pending_cancellation_preflight_blocked',
     'pending_cancellation_confirmation_missing','retry_merchant_reconciliation_pending',
-    'retry_proof_not_accepted','existing_subscription_not_terminal'].some(value=>code===value||value==='recovery_check_'&&code.startsWith(value))
+    'retry_proof_not_accepted','existing_subscription_not_terminal'].some(value=>code===value||(value==='recovery_check_'||value==='recovery_cancel_')&&code.startsWith(value))
       ?'reconciliation_needed':'unavailable')
    setRecoveryMessage(code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
     code==='paypal_subscription_not_found'?'missing':
