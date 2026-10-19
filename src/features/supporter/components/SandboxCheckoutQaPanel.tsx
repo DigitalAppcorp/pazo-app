@@ -26,7 +26,7 @@ type ServerResult = {
   mayGrantBenefits?: boolean
   paidThrough?: null
 }
-type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void; retry?:boolean}
+type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void; retry?:boolean; onOfferState?:(state:'loading'|'ready'|'blocked')=>void; refreshRevision?:number}
 const HOST = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const DIGEST = /^[0-9a-f]{64}$/
 // Previous P06 QA terms explicitly excluded benefits: NEVER reuse them.
@@ -40,7 +40,7 @@ const approveUrl = (raw: unknown): string | null => {
       ? u.toString() : null
   } catch { return null }
 }
-export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry=false}: Props) {
+export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry=false,onOfferState,refreshRevision=0}: Props) {
   const [offer,setOffer] = useState<Offer | null>(null)
   const [busy,setBusy] = useState(false)
   const [consent,setConsent] = useState(false)
@@ -51,6 +51,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
   const [beginFailure,setBeginFailure] = useState<'already_linked' | 'rate_limited' | 'restricted' | 'unknown' | null>(null)
   const key = useRef<string | null>(null)
   const attempted = useRef(false)
+  useEffect(()=>{onOfferState?.(phase)},[phase,onOfferState])
   const spanish=lang==='es'
   const label=(es:string,en:string)=>spanish?es:en
   async function call(payload: object): Promise<ServerResult> {
@@ -108,7 +109,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
       setPhase('blocked')
     })
     return ()=>{live=false}
-  },[lang,offerRevision])
+  },[lang,offerRevision,refreshRevision])
   const begin=async()=>{
     if(!offer || !consent || busy || attempted.current || phase!=='ready')return
     attempted.current=true
