@@ -66,6 +66,12 @@ export function AdminPayPalSettings({lang}:Props){
   if(!Number.isFinite(cents)||cents<99||cents>100000){
    setError(t('Precio inválido.','Invalid price.'));return
   }
+  if(plan.trim()&&!/^P-[A-Za-z0-9]{10,75}$/.test(plan.trim())){
+   setError(t('El identificador del plan no es válido.','The plan ID is invalid.'));return
+  }
+  if(origin.trim()&&!/^https:\/\/[a-z0-9][a-z0-9.-]{1,240}(:443)?$/.test(origin.trim().toLowerCase())){
+   setError(t('Escribe solo el dominio HTTPS, sin rutas ni parámetros.','Enter only an HTTPS origin, without paths or query parameters.'));return
+  }
   setBusy(true);setError('');setNotice('')
   try{
    const {data,error:dbError}=await supabase.rpc('pazo_admin_paypal_save_draft',{
@@ -78,8 +84,9 @@ export function AdminPayPalSettings({lang}:Props){
   }catch{setError(safeError())}finally{setBusy(false)}
  }
  const saveCredentials=async()=>{
-  if(!clientId.trim()||!clientSecret.trim()){
-   setError(t('Introduce las dos credenciales.','Enter both credentials.'));return
+  if(!/^[A-Za-z0-9_-]{20,256}$/.test(clientId.trim())||
+     !/^[A-Za-z0-9_-]{20,512}$/.test(clientSecret.trim())){
+   setError(t('Introduce ambas credenciales completas de PayPal.','Enter both complete PayPal credentials.'));return
   }
   setBusy(true);setError('');setNotice('')
   try{
