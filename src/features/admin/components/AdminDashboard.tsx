@@ -1,6 +1,7 @@
 import { useCallback,useEffect,useState } from 'react'
 import { createPortal } from 'react-dom'
-import { AdminGlyph,AdminDonut,AdminCohortColumns,type AdminGlyphName } from './AdminVisuals'
+import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGlyphName } from './AdminVisuals'
+import './AdminDashboard.css'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
@@ -29,7 +30,7 @@ const moduleNames:Record<string,string>={feed:'Feed',explore:'Explorar',places:'
 const optionLabels:Record<string,string>={use:'Usarlo',create:'Crear u organizar',
  explore:'Explorar lo que otros comparten',share:'Compartir',other:'Otro'}
 function Stat({label,value,note,accent,icon}:{label:string;value:string|number;note?:string;accent?:boolean;icon?:AdminGlyphName}){
- return <div className="flex min-h-[132px] min-w-0 items-center gap-3.5 rounded-[21px] bg-white px-4 py-5 shadow-[0_7px_27px_rgba(32,78,74,0.045)] xl:px-5">
+ return <div className="pazo-admin-kpi flex min-h-[136px] min-w-0 items-center gap-3.5 rounded-[21px] bg-white px-4 py-5 shadow-[0_8px_30px_rgba(32,78,74,0.065)] xl:px-5">
   {icon&&<span aria-hidden="true" className={'flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full '+
    (accent?'bg-[#E4F9DC] text-[#17823E]':icon==='crown'?'bg-[#FFF0D6] text-[#E0982C]':'bg-[#E2F8E8] text-[#166D54]')}>
    <AdminGlyph name={icon} size={26}/>
@@ -49,11 +50,11 @@ function AdminNavIcon({section}:{section:Section}){
 function DashboardPanel({title,description,children,action}:{
  title:string;description?:string;children:React.ReactNode;action?:()=>void
 }){
- return <section className="min-w-0 rounded-[20px] bg-white p-5 shadow-[0_6px_28px_rgba(32,78,74,0.055)] lg:p-6">
+ return <section className="pazo-admin-panel min-w-0 rounded-[20px] bg-white p-5 shadow-[0_7px_29px_rgba(32,78,74,0.06)] lg:p-6">
   <div className="flex items-start justify-between gap-3">
    <div className="min-w-0"><h3 className="text-[17px] font-black tracking-tight text-[#1D322D] lg:text-[19px]">{title}</h3>
     {description&&<p className="mt-1 text-[13px] text-[#71857F]">{description}</p>}</div>
-   {action&&<button type="button" onClick={action} aria-label={title} className="rounded-full bg-[#F2F5EC] px-3 py-1.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">Ver</button>}
+   {action&&<button type="button" onClick={action} aria-label={title} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#204E4A] hover:bg-[#E9F1E3] focus-visible:bg-[#E1E53F]"><AdminGlyph name="chevron" size={19}/></button>}
   </div>
   <div className="mt-5">{children}</div>
  </section>
@@ -107,15 +108,15 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
  </select>
  return createPortal(<div role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
     data-pazo-admin-responsive="true"
-    className="fixed inset-0 z-[200] flex h-[100dvh] w-full overflow-hidden bg-[#F7F8F5] font-sans text-[#204E4A] lg:grid lg:grid-cols-[265px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
+    className="pazo-admin fixed inset-0 z-[200] flex h-[100dvh] w-full overflow-hidden bg-[#F8F9F6] font-sans text-[#204E4A] lg:grid lg:grid-cols-[265px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
   {/* Portal escapes the 430px mobile app shell on desktop; the rest of PAZO stays mobile-only. */}
-  <aside className="hidden min-h-0 flex-col bg-white px-5 pb-5 pt-6 shadow-[5px_0_30px_rgba(32,78,74,0.025)] lg:flex">
-   <p className="px-3 text-[36px] font-black tracking-[-0.07em] text-[#204E4A]">pazo<span className="text-[#E1E53F]">.</span></p>
+  <aside className="pazo-admin-sidebar hidden min-h-0 flex-col bg-white px-5 pb-5 pt-6 shadow-[5px_0_30px_rgba(32,78,74,0.025)] lg:flex">
+   <p className="pazo-admin-wordmark px-3 text-[40px] font-black tracking-[-0.07em] text-[#204E4A]">pazo<span className="text-[#E1E53F]">.</span></p>
    <div className="mt-6 flex items-center gap-3 rounded-[18px] bg-[#F9FAF7] px-3 py-4">
     <span aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E1E53F] text-[#204E4A]"><AdminGlyph name="crown" size={25}/></span>
     <div><p className="text-[13px] font-black">{l('Centro de control','Control center')}</p><p className="text-[11px] font-medium text-[#71857F]">{l('Administrador','Administrator')}</p></div>
    </div>
-   <nav aria-label={l('Secciones del panel','Dashboard sections')} className="mt-5 flex flex-1 flex-col gap-1 overflow-y-auto">
+   <nav aria-label={l('Secciones del panel','Dashboard sections')} className="pazo-admin-navigation mt-5 flex flex-1 flex-col gap-1 overflow-y-auto">
     {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
      onClick={()=>selectSection(item.key)}
      className={'flex min-h-[47px] w-full items-center gap-4 rounded-[14px] px-4 text-left text-[15px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
@@ -123,16 +124,19 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      <AdminNavIcon section={item.key}/><span>{lang==='es'?item.es:item.en}</span>
     </button>)}
    </nav>
-   <div className="rounded-[20px] bg-[#F2F6E9] p-4 text-[12px] font-medium leading-relaxed text-[#476862]">
-    <p className="font-black">{l('PAZO para todos','PAZO for everyone')}</p>
-    <p className="mt-1">{l('Este panel solo es visible para administradores autorizados.','This panel is only visible to authorized administrators.')}</p>
+   <div className="pazo-admin-sidebar-message flex min-h-[134px] items-center gap-2 overflow-hidden rounded-[20px] bg-[#F5F9EE] px-2 py-3">
+    <img src="/supporter/gratitude-empty-pets.svg" alt="" className="h-[108px] w-[99px] shrink-0 object-contain" aria-hidden="true"/>
+    <div className="min-w-0 pr-2">
+     <p className="text-[12px] font-black leading-snug text-[#204E4A]">{l('PAZO seguirá siendo gratis para todos','PAZO will remain free for everyone')}</p>
+     <p className="mt-2 text-[11px] font-medium leading-snug text-[#698278]">{l('Administración privada y protegida','Private, protected administration')}</p>
+    </div>
    </div>
    <button type="button" onClick={onClose} className="mt-4 min-h-11 rounded-full bg-[#F5F6F1] px-4 text-[13px] font-bold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">
     {l('Volver a PAZO','Back to PAZO')}
    </button>
   </aside>
   <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-   <header className="z-10 shrink-0 bg-[#F7F8F5]/95 px-4 pb-3 pt-4 backdrop-blur-md sm:px-6 lg:px-8 lg:pb-5 lg:pt-7">
+   <header className="pazo-admin-header z-10 shrink-0 bg-[#F8F9F6]/95 px-4 pb-3 pt-4 backdrop-blur-md sm:px-6 lg:px-8 lg:pb-4 lg:pt-6">
     <div className="mx-auto flex w-full max-w-[1600px] items-start justify-between gap-3">
      <div className="min-w-0">
       <p className="text-[11px] font-black tracking-wide text-[#739087] lg:hidden">pazo. · ADMIN</p>
@@ -144,9 +148,16 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </p>
      </div>
      <div className="flex shrink-0 items-center gap-2">
-      <span className="hidden items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] font-bold text-[#476862] shadow-sm sm:flex">
-       <span className="h-2 w-2 rounded-full bg-[#38B66B]"/> {l('Datos de prueba','Test data')}
-      </span>
+      <div className="hidden items-center gap-2 lg:flex">
+       {periodSelector}
+       <button type="button" onClick={()=>void refresh()} disabled={loading}
+        className="flex min-h-11 items-center gap-2 rounded-[15px] bg-white px-4 text-[13px] font-extrabold text-[#204E4A] shadow-sm hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-60">
+        <AdminGlyph name="activity" size={17}/>{l('Actualizar','Refresh')}
+       </button>
+       <span className="flex min-h-11 items-center gap-2 rounded-[15px] bg-white px-4 text-[12px] font-bold text-[#476862] shadow-sm">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#26B957]"/>{l('Datos de prueba','Test data')}
+       </span>
+      </div>
       <button type="button" onClick={onClose} className="min-h-11 rounded-full bg-white px-4 py-2 text-[12px] font-extrabold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] lg:hidden">
        {l('Volver','Back')}
       </button>
@@ -162,9 +173,9 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </button>)}
     </nav>
    </header>
-   <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3 sm:px-6 lg:px-7 lg:pt-4">
-    <div className="mx-auto max-w-[1600px] space-y-5 lg:space-y-6">
-     <div className="flex flex-wrap items-center justify-between gap-3">
+   <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 lg:px-7 lg:pt-1">
+    <div className="mx-auto max-w-[1600px] space-y-4 lg:space-y-4">
+     <div className="flex flex-wrap items-center justify-between gap-3 lg:hidden">
       <p className="text-[12px] font-semibold text-[#6A8079]">
        {overview?l('Actualizado: ','Updated: ')+new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US'):'—'}
       </p>
@@ -193,7 +204,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
        <Stat icon="money" label={l('Recaudado · Sandbox','Collected · Sandbox')} value={money(overview.support.sandbox_gross_minor)}
         note={l('Pago ficticio, no ingresos reales','Test money, not live revenue')} accent/>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+      <div className="pazo-admin-analytics-row grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
        <div className="min-w-0 xl:col-span-5">
         <DashboardPanel title={l('Crecimiento de usuarios','User growth')} action={()=>selectSection('users')}>
          <div className="mb-1 flex flex-wrap gap-4 text-[12px] font-semibold text-[#5B736C]">
@@ -208,32 +219,27 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
          <p className="text-[12px] leading-snug text-[#70857E]">{l('Cuentas existentes agrupadas por fecha de alta. No es una serie histórica.','Existing accounts grouped by signup date. This is not a historical time series.')}</p>
         </DashboardPanel>
        </div>
-       <div className="min-w-0 xl:col-span-5">
+       <div className="min-w-0 xl:col-span-4">
         <DashboardPanel title={l('Actividad de la app','App activity')} action={()=>selectSection('activity')}>
          <div className="mb-4 flex flex-wrap gap-3 text-[12px] font-semibold text-[#6A8277]">
           <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-[#196D55]"/> {l('Usuarios únicos','Unique users')}</span>
           <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-[#91CC66]"/> {l('Por módulo','Per module')}</span>
          </div>
-         <div className="min-h-[225px] space-y-3">
-          {Object.entries(overview.activity.module_counts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([key,count],i)=>
-           <div key={key} className="flex items-center gap-3">
-            <span className="w-[94px] shrink-0 truncate text-[13px] font-semibold text-[#4B6B61]">{moduleNames[key]||key}</span>
-            <div className="h-[15px] min-w-0 flex-1 overflow-hidden rounded-full bg-[#EBF0E9]">
-             <div className={'h-full rounded-full '+(i%2?'bg-[#8DCE67]':'bg-[#248760]')}
-              style={{width:(100*count/Math.max(1,overview.activity.active_period))+'%'}}/>
-            </div>
-            <strong className="w-8 text-right text-[13px] font-black">{n(count)}</strong>
-           </div>)}
-          {Object.keys(overview.activity.module_counts).length===0&&
-           <div className="flex min-h-[210px] flex-col items-center justify-center gap-3 text-center">
-            <span className="rounded-full bg-[#EDF5E9] p-4 text-[#4F9773]"><AdminGlyph name="activity" size={30}/></span>
-            <p className="max-w-[290px] text-[14px] font-semibold text-[#72877E]">{l('Aún no hay actividad registrada en este período.','No activity has been recorded for this period yet.')}</p>
-           </div>}
-         </div>
+         {Object.keys(overview.activity.module_counts).length>0?
+          <AdminModuleRings
+           items={Object.entries(overview.activity.module_counts).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([key,count],i)=>({
+            name:moduleNames[key]||key,value:count,color:['#156A50','#8DCE67','#EFB764','#788CD9'][i]
+           }))}
+           base={overview.activity.active_period}
+           centerLabel={l('activos','active')}/>
+          :<div className="flex min-h-[205px] flex-col items-center justify-center gap-3 text-center">
+           <span className="rounded-full bg-[#EDF5E9] p-4 text-[#4F9773]"><AdminGlyph name="activity" size={30}/></span>
+           <p className="max-w-[290px] text-[14px] font-semibold text-[#72877E]">{l('Aún no hay actividad registrada en este período.','No activity has been recorded for this period yet.')}</p>
+          </div>}
          <p className="mt-3 text-[12px] leading-snug text-[#71857F]">{l('Días con acceso registrado por módulo. No representa sesiones ni tiempo conectado.','Tracked unique users by module, not sessions or time spent.')}</p>
         </DashboardPanel>
        </div>
-       <div className="min-w-0 xl:col-span-2">
+       <div className="min-w-0 md:col-span-2 xl:col-span-3">
         <DashboardPanel title={l('Estado del sistema','System status')} action={()=>selectSection('infra')}>
          <div className="space-y-1">
           {[
@@ -262,18 +268,28 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
           <p className="text-[12px] text-[#617C73]">{l('Acreditado en pruebas','Verified test total')}</p>
          </div>
         </div>
-        <div className="mt-5 grid grid-cols-3 gap-3">
-         {[
-          {name:l('Períodos','Periods'),value:overview.support.sandbox_verified_periods,color:'#2F9668'},
-          {name:l('Intentos','Attempts'),value:overview.support.checkout_attempts,color:'#90CE6E'},
-          {name:l('Sin verificar','Unverified'),value:overview.support.attempts_without_verified_period,color:'#E4AD4C'}
-         ].map(item=><div key={item.name} className="flex flex-col justify-end gap-2">
-           <div className="flex h-[68px] items-end">
-            <div className="w-full rounded-t-[7px]" style={{backgroundColor:item.color,height:(item.value?Math.max(9,item.value/Math.max(1,overview.support.checkout_attempts,overview.support.sandbox_verified_periods)*65):0)+'px'}}/>
-           </div>
-           <p className="text-center text-[11px] font-semibold text-[#657D73]">{item.name}</p>
-           <strong className="text-center text-[14px]">{item.value}</strong>
-         </div>)}
+        <div className="pazo-admin-finance-breakdown mt-5 grid grid-cols-[minmax(0,1fr)_minmax(125px,0.85fr)] items-center gap-4">
+         <div className="flex min-h-[145px] items-end justify-around gap-3 rounded-[16px] bg-[#FAFCF7] px-4 pb-3 pt-4">
+          {[
+           {name:l('Períodos','Periods'),value:overview.support.sandbox_verified_periods,color:'#2F9668'},
+           {name:l('Intentos','Attempts'),value:overview.support.checkout_attempts,color:'#90CE6E'},
+           {name:l('Sin verificar','Unverified'),value:overview.support.attempts_without_verified_period,color:'#E4AD4C'}
+          ].map(item=><div key={item.name} className="flex h-[123px] min-w-0 flex-1 flex-col items-center justify-end gap-2">
+           <strong className="text-[15px] font-black text-[#294E45]">{item.value}</strong>
+           <div className="w-full max-w-[62px] rounded-t-[8px]" style={{backgroundColor:item.color,height:(item.value?Math.max(12,item.value/Math.max(1,overview.support.checkout_attempts,overview.support.sandbox_verified_periods)*76):3)+'px',opacity:item.value?1:.2}}/>
+          </div>)}
+         </div>
+         <div className="space-y-4">
+          {[
+           {name:l('Períodos','Periods'),value:overview.support.sandbox_verified_periods,color:'#2F9668'},
+           {name:l('Intentos','Attempts'),value:overview.support.checkout_attempts,color:'#90CE6E'},
+           {name:l('Sin verificar','Unverified'),value:overview.support.attempts_without_verified_period,color:'#E4AD4C'}
+          ].map(item=><div key={item.name} className="flex items-center gap-2 text-[12px]">
+           <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{backgroundColor:item.color}}/>
+           <span className="min-w-0 flex-1 text-[#526F63]">{item.name}</span>
+           <strong className="text-[14px] text-[#294E45]">{item.value}</strong>
+          </div>)}
+         </div>
         </div>
         <p className="mt-3 text-[11px] text-[#72887B]">{l('Sandbox: dinero ficticio. No incluye ingresos Live.','Sandbox test money; Live revenue unavailable.')}</p>
        </DashboardPanel>
@@ -295,14 +311,14 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
         <p className="mt-3 text-[11px] text-[#748981]">{l('Entre las cuentas de la página cargada; no es un ranking global.','From loaded accounts, not a global ranking.')}</p>
        </DashboardPanel>
        <DashboardPanel title={l('Fake Doors · interés','Fake Doors · interest')} action={()=>selectSection('ideas')}>
-        <div className="space-y-2">{experiments.slice(0,5).map((item,i)=>
-         <div key={item.key} className="flex min-h-[42px] items-center gap-2.5">
+        <div className="space-y-2.5">{experiments.slice(0,5).map((item,i)=>
+         <div key={item.key} className="flex min-h-[45px] items-center gap-2.5">
           <span className="w-5 shrink-0 text-[13px] font-black">{i+1}</span>
           <span className={'flex h-8 w-8 shrink-0 items-center justify-center rounded-full '+(i%3===0?'bg-[#DDF4D4] text-[#267F45]':i%3===1?'bg-[#E8EBFF] text-[#435DCA]':'bg-[#FFF0DB] text-[#C28034]')}>
            <AdminGlyph name="compass" size={17}/>
           </span>
           <div className="min-w-0 flex-1">
-           <p className="truncate text-[12px] font-bold text-[#253D36]">{item.name}</p>
+           <p className="truncate text-[13px] font-bold text-[#253D36]">{item.name}</p>
            <p className="text-[11px] text-[#799084]">{item.viewers} {l('vistas','views')}</p>
           </div>
           <div className="h-2.5 w-[21%] shrink-0 overflow-hidden rounded-full bg-[#EDF1EC]">
@@ -310,7 +326,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
           </div>
           <strong className="w-7 shrink-0 text-right text-[12px]">{item.interested}</strong>
          </div>)}</div>
-        <p className="mt-3 text-[11px] text-[#758A82]">{l('Con menos de 30 vistas, la muestra es insuficiente.','Fewer than 30 views is an insufficient sample.')}</p>
+        <p className="mt-4 text-[12px] text-[#758A82]">{l('Con menos de 30 vistas, la muestra es insuficiente.','Fewer than 30 views is an insufficient sample.')}</p>
        </DashboardPanel>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
