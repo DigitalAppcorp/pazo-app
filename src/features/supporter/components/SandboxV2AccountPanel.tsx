@@ -8,7 +8,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onRecoveryDiagnostic?:(code:string|null)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onRecoveryDiagnostic?:(code:string|null)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void;onQaPendingReset?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -33,7 +33,7 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onRecoveryDiagnostic,onResumeStatus,onPaidVerified}:Props){
+export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onRecoveryDiagnostic,onResumeStatus,onPaidVerified,onQaPendingReset}:Props){
  const lastHandledResumeRequest=useRef(0)
  const initialAccountCheck=useRef(false)
  const autoVerifiedIntents=useRef<Set<string>>(new Set())
@@ -111,6 +111,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
     'recovery_check_provider','recovery_check_cancel_eligibility',
     'recovery_check_cancel_provider','recovery_check_merchant_evidence',
     'recovery_check_grant','recovery_check_unavailable',
+    'recovery_check_qa_created','recovery_check_qa_status','recovery_check_qa_archive',
+    'qa_created_event_unverified','qa_pending_status_changed','qa_archive_not_authorized',
     'recovery_cancel_pre_not_found','recovery_cancel_pre_denied','recovery_cancel_post_rejected','recovery_cancel_post_not_found','recovery_cancel_post_denied','recovery_cancel_after_not_found','recovery_cancel_status_pending','recovery_cancel_status_changed','recovery_cancel_owner_mismatch','recovery_cancel_oauth','recovery_cancel_provider_unavailable','recovery_cancel_unclassified', 
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
@@ -259,6 +261,15 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
      clearSandboxApproval({ownerId:current.data.session.user.id})
    const result=await call({action:'recover_retry',intentId:account.intentId}) as Result
    if(result.ok!==true)throw Error('INVALID_QA_RESUME')
+   if(result.phase==='QA_ABANDONED_PENDING_RESET'&&
+      result.code==='qa_fresh_consent_required'&&result.mayGrantBenefits===false){
+    // No PayPal cancellation or financial status is implied.
+    setAccount(null);setAccounts([]);setRecoveryStage('unverified')
+    onAccountInspection?.('none')
+    onResumeStatus?.('idle')
+    onQaPendingReset?.()
+    return
+   }
    if(result.phase==='RETRY_READY'&&result.code==='reconciled_retry_ready'&&result.eligible===true){
     setRecoveryStage('terminal_needs_financial_reconciliation')
     setRetryEligibility('approved')
@@ -290,6 +301,9 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
     recovery_check_provider:'R3',recovery_check_cancel_eligibility:'R4',
     recovery_check_cancel_provider:'R5',recovery_check_merchant_evidence:'R6',
     recovery_check_grant:'R7',retry_proof_not_accepted:'R7',
+    recovery_check_qa_created:'QA1',recovery_check_qa_status:'QA2',
+    recovery_check_qa_archive:'QA3',qa_created_event_unverified:'QA1',
+    qa_pending_status_changed:'QA2',qa_archive_not_authorized:'QA3',
     pending_cancellation_preflight_blocked:'R4',
     pending_cancellation_confirmation_missing:'R5',
     recovery_cancel_pre_not_found:'R5-01',
