@@ -1,3 +1,22 @@
+## Diseño visual aprobado por Product Owner — Responsive escritorio y móvil (18-oct-2026)
+
+PO eligió explícitamente la referencia **«Resumen general»** de PAZO con sidebar izquierda, KPI superiores y mosaico de tarjetas blancas, verde, lima y fondo crema. Esta referencia contenía datos *ilustrativos* (no reales) y módulos de series históricas, mapa geográfico y uptime que **no existen todavía** como fuentes en PAZO; no copiar esos números ni simular ingresos/usuarios/rendimiento o mapa basado en zonas privadas.
+
+**Decisión de arquitectura visual:** actualmente PAZO general conserva deliberadamente un shell móvil de ~430px centrado en desktop. **Solo el Centro de control** se monta con `createPortal(...,document.body)` para escapar a ese marco y usar ancho completo de viewport en escritorio, sin alterar Home/Feed/perfiles. CSS responsive por ancho disponible (no UA/device fingerprint):
+- **Móvil (<768px):** cabecera compacta «pazo. · ADMIN», botón Volver, tabs horizontales con scroll, KPI 2 columnas y paneles de contenido apilados con scroll vertical; targets >=44px.
+- **Tablet (768–1023px):** tarjetas KPI 4 columnas cuando entren; paneles 2 columnas, tabs accesibles en horizontal.
+- **Escritorio (>=1024px):** sidebar fija de 235–255px, cabecera «Resumen general», selector período y mosaico 4 KPIs + bloques de crecimiento de altas 7/30, actividad por módulos, tamaño real PostgreSQL/Storage, estado de apoyo Sandbox, cuentas con más días activos medidos, ranking fake doors, actividad social, eventos de Lugares y moderación. Grilla principal máxima 1500px, responsive mediante CSS `lg:`/`xl:`.
+- Mismas 5 rutas administrativas **funcionales** (Resumen/Cuentas/Apoyo/Interés/Supabase) en ambas presentaciones. Al abrir denuncias usa el componente de moderación existente, sin abrir una vista falsa.
+- La selección de sección/filtros es la misma React state, no se montan instancias duplicadas y no se vuelve a autenticar al cambiar ancho. El privilegio sigue siendo servidor-only `pazo_is_admin`.
+- Tarjetas y formas redondeadas sin contornos; tipografía Quicksand/Nunito y colores PAZO. Nada de emoji/pictogramas.
+- Los widgets que en referencia tenían series temporales, gráficos de distribución geográfica, facturación Live, uptime o cifras «en tiempo real» muestran **solo métricas reales del RPC instalado** o sustitutos descriptivos honestos. No hay streaming; «Actualizado» es la hora de la consulta. Registros de actividad empiezan desde que se desplegó el tracking.
+
+Archivos: `src/features/admin/components/AdminDashboard.tsx`, `src/features/moderation/ModerationAccess.tsx` y regresión de diseño `src/features/admin/testing/adminDashboard.test.mjs`. **Sin cambios SQL, billing, entitlements, PayPal Live, main o sistema PWA general**.
+
+**Gate:** `ADMIN_RESPONSIVE_VISUAL_IMPLEMENTED_CODE_CI_PENDING_PO_MOBILE_DESKTOP_ACCEPTANCE`. La captura aprobada orienta arquitectura; resultado renderizado todavía debe revisarlo el PO en Vite (360/390px y navegador desktop ~1280/1440px).
+
+---
+
 # PAZO — Centro de control del administrador, primera integración operativa
 **Fecha:** 2026-10-18. **Autorización PO:** «quiero todo … no pares hasta que esté todo terminado, tienes mi autorización».
 **Estado:** backend Supabase staging instalado; código en PR #44 DRAFT; CI PASS en commit funcional y QA visual/usuario real todavía pendiente.
