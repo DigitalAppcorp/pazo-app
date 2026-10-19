@@ -94,3 +94,21 @@ test('No implicit historical scan or unbounded time windows',async()=>{
  }
  assert.equal(calls.length,0)
 })
+
+test('Refund evidence reads original subscription+transaction and never edits benefits',async()=>{
+ for(const [status,kind,review] of [
+  ['REFUNDED','refunded',false],['PARTIALLY_REFUNDED','partially_refunded',true]
+ ]){
+  const {reader,calls}=base({transactionChange:{status}})
+  const r=await reader.readRefundEvidence(arg)
+  assert.equal(r.verified,true)
+  assert.equal(r.refundKind,kind)
+  assert.equal(r.holdReviewRequired,review)
+  assert.equal(r.mayMutateBenefits,false)
+  assert.equal(r.paidThrough,null)
+  assert.ok(calls.every(x=>x.url.startsWith('https://api-m.paypal.com/')))
+  assert.ok(!JSON.stringify(r).includes('private@example.com'))
+ }
+ const {reader}=base()
+ await assert.rejects(()=>reader.readRefundEvidence(arg),/live_provider_evidence_unavailable/)
+})

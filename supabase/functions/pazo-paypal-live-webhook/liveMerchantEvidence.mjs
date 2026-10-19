@@ -57,18 +57,12 @@ export function createPaypalLiveMerchantEvidenceReader({
   return Object.freeze({id:d.id,plan_id:d.plan_id,custom_id:d.custom_id,
    status:d.status,merchantGeneration,sourceEnvironment:'live'})
  }
- return Object.freeze({
-  async readVerifiedSubscription({subscriptionId,intentId,expectedGeneration}={}){
-   if(expectedGeneration!==merchantGeneration)fail()
-   return subscription(subscriptionId,intentId)
-  },
-  async readCompletedSale({subscriptionId,intentId,saleId,expectedGeneration,
+ async function transactionForSale({subscriptionId,intentId,saleId,expectedGeneration,
    startTime,endTime}={}){
    if(expectedGeneration!==merchantGeneration||!SALE.test(saleId||'')||
     !date(startTime)||!date(endTime)||Date.parse(endTime)<=Date.parse(startTime)||
     Date.parse(endTime)-Date.parse(startTime)>31*86400000)fail()
-   // Exact subscription owner/plan/provider link established independently
-   // before reading merchant's transactions. Do NOT infer from webhook custom_id.
+   // Read the subscription from the pinned merchant first, then its payments.
    await subscription(subscriptionId,intentId)
    const t=await token()
    const path='/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+
@@ -78,21 +72,41 @@ export function createPaypalLiveMerchantEvidenceReader({
    if(!Array.isArray(d.transactions)||d.transactions.length>500||
     !Number.isSafeInteger(d.total_pages)||d.total_pages!==1||
     !Number.isSafeInteger(d.total_items)||d.total_items!==d.transactions.length)
-    fail() // Never rely on partial/unread pages to grant a paid period.
+    fail()
    const matching=d.transactions.filter(x=>x?.id===saleId)
    if(matching.length!==1)fail()
    const x=matching[0]
-   if(x.status!=='COMPLETED'||x.amount_with_breakdown?.gross_amount?.currency_code!=='USD'||
+   if(x.amount_with_breakdown?.gross_amount?.currency_code!=='USD'||
     x.amount_with_breakdown?.gross_amount?.value!=='2.99'||!date(x.time)||
     Date.parse(x.time)<Date.parse(startTime)||
     Date.parse(x.time)>Date.parse(endTime))fail()
-   // Deliberately discard payer names, email, card details, tokens, links.
-   // A service period must be derived from separately verified billing-cycle
-   // evidence, NOT automatically from transaction time or ACTIVE status.
+   return x // Never return unfiltered transaction outside this module.
+ }
+ return Object.freeze({
+  async readVerifiedSubscription({subscriptionId,intentId,expectedGeneration}={}){
+   if(expectedGeneration!==merchantGeneration)fail()
+   return subscription(subscriptionId,intentId)
+  },
+  async readCompletedSale(args={}){
+   const x=await transactionForSale(args)
+   if(x.status!=='COMPLETED')fail()
    return Object.freeze({verified:true,sourceEnvironment:'live',
-    merchantGeneration,subscriptionId,intentId,saleId,
-    amountMinor:299,currency:'USD',paidAt:x.time,
+    merchantGeneration,subscriptionId:args.subscriptionId,intentId:args.intentId,
+    saleId:args.saleId,amountMinor:299,currency:'USD',paidAt:x.time,
     servicePeriodVerified:false,paidThrough:null,mayGrantBenefits:false})
+  },
+  async readRefundEvidence(args={}){
+   const x=await transactionForSale(args)
+   if(!['REFUNDED','PARTIALLY_REFUNDED'].includes(x.status))fail()
+   // Partial refunds need explicit business policy. Never automatically
+   // revoke an entire paid period or grant paidThrough from this response.
+   return Object.freeze({verified:true,sourceEnvironment:'live',
+    merchantGeneration,subscriptionId:args.subscriptionId,intentId:args.intentId,
+    saleId:args.saleId,status:x.status,
+    refundKind:x.status==='REFUNDED'?'refunded':'partially_refunded',
+    amountMinor:299,currency:'USD',originalPaymentAt:x.time,
+    holdReviewRequired:x.status==='PARTIALLY_REFUNDED',
+    mayMutateBenefits:false,paidThrough:null})
   }
  })
 }
