@@ -184,14 +184,36 @@ BEGIN
  RETURN true;
 END $f$;
 
+-- Read-only, redacted administrative audit. Never includes Vault contents.
+CREATE OR REPLACE FUNCTION public.pazo_admin_paypal_audit()
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+AS $f$
+DECLARE result jsonb;
+BEGIN
+ IF auth.uid() IS NULL OR NOT EXISTS(
+  SELECT 1 FROM admin_private.admin_grants WHERE user_id=auth.uid()
+ ) THEN RAISE EXCEPTION 'not authorized' USING ERRCODE='42501'; END IF;
+ SELECT COALESCE(jsonb_agg(row_data ORDER BY recorded_at DESC),'[]'::jsonb)
+ INTO result FROM (
+  SELECT recorded_at,jsonb_build_object(
+    'environment',environment,'kind',kind,'recorded_at',recorded_at,
+    'actor',left(actor_id::text,8),'details',details
+  ) row_data FROM admin_private.paypal_gateway_change_log
+  ORDER BY recorded_at DESC LIMIT 30
+ ) x;
+ RETURN result;
+END $f$;
+
 REVOKE ALL ON FUNCTION public.pazo_admin_paypal_settings() FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.pazo_admin_paypal_save_draft(text,text,integer,text,text) FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.pazo_admin_paypal_save_credentials(text,text,text) FROM PUBLIC,anon,authenticated,service_role;
+REVOKE ALL ON FUNCTION public.pazo_admin_paypal_audit() FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.pazo_admin_paypal_service_credentials(text,uuid) FROM PUBLIC,anon,authenticated,service_role;
 REVOKE ALL ON FUNCTION public.pazo_admin_paypal_service_mark_validation(text,uuid,boolean) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_admin_paypal_settings() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_admin_paypal_save_draft(text,text,integer,text,text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_admin_paypal_save_credentials(text,text,text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.pazo_admin_paypal_audit() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_admin_paypal_service_credentials(text,uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_admin_paypal_service_mark_validation(text,uuid,boolean) TO service_role;
 COMMIT;
