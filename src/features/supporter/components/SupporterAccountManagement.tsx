@@ -46,6 +46,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [,setQaRecoveryStage] = useState('unverified')
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed'>('idle')
+  const [qaRecoveryDiagnostic,setQaRecoveryDiagnostic]=useState<string|null>(null)
   const [paypalReturnKind] = useState(() => supporterPaypalReturnKind(window.location.hash))
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
@@ -297,8 +298,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </button>}
                     {qaPayAction==='reconciliation_needed'&&qaV2AccountState==='bound'&&
                       <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
-                        {label('PayPal todavía no confirma que la solicitud anterior esté cerrada. No se inició otro cobro. Vuelve a intentarlo más tarde.',
-                          'PayPal has not confirmed that the earlier request is closed. No new charge was started. Try again later.')}
+                        {label('No pudimos confirmar la solicitud anterior con PayPal. No se inició otro cobro.',
+                          'We could not verify the earlier request with PayPal. No new charge was started.')}
+                        {qaRecoveryDiagnostic&&<span className="mt-1 block text-[11px] opacity-75">
+                          {label('Referencia de diagnóstico: ','Diagnostic reference: ')}{qaRecoveryDiagnostic}
+                        </span>}
                       </p>}
                     {qaPayAction==='unavailable'&&qaV2AccountState==='bound'&&
                       <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
@@ -345,7 +349,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onResumeStatus={setQaPayAction} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onRecoveryDiagnostic={setQaRecoveryDiagnostic} onResumeStatus={setQaPayAction} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
