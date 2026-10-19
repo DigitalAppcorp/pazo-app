@@ -24,3 +24,10 @@ Este archivo **no habilita pagos ni permite siquiera ejecutar las RPC de escritu
 Antes de instalar: mostrar al PO SQL, consecuencias para datos/retención, preflight READ-ONLY del proyecto y pedir autorización específica. Después de instalar: revisar tablas vacías, grants/ACL, selector OFF y comprobar que los endpoints Sandbox conserven exactamente su versión. Cada despliegue Edge o habilitación de escritura es **otro gate independiente**.
 
 No usar esta preparación como evidencia de que PayPal Live puede activarse hoy desde el panel.
+
+## Segundo archivo versionado, acceso aún denegado
+`supabase/migrations/20261019234500_pazo_f16_live_intent_private_staging.sql` instala únicamente dos funciones privadas ungranted:
+1. `pazo_live_intent_begin`: al iniciar un checkout futuro exige que un selector de comercio Live esté verdaderamente activo y con generación no retirada, obtiene plan desde base de datos, congela dueño/consentimiento/versión/digest e inserta una intención o recupera la misma sin crear un duplicado. No puede ser ejecutada desde Supabase browser ni actualmente desde `service_role`.
+2. `pazo_live_intent_claim_once`: reserva mediante un UPDATE transaccional el derecho a crear UNA suscripción PayPal, solo para owner/intent/requestKey/generation exactos, dentro de 48 horas y antes de la primera llamada al proveedor. Una segunda llamada devuelve false; fallo o timeout posterior obliga a conciliación, no a crear otra suscripción.
+
+La ejecución real necesita la autorización PO de DDL y otra autorización para roles/backend/grants; esta propuesta **todavía no crea ningún comprador** en Supabase alojado. Las pruebas de laboratorio usan un selector abierto solo en PostgreSQL desechable.
