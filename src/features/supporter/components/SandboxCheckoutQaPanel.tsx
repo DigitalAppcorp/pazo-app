@@ -51,7 +51,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
   const [beginFailure,setBeginFailure] = useState<'already_linked' | 'rate_limited' | 'restricted' | 'unknown' | null>(null)
   const key = useRef<string | null>(null)
   const attempted = useRef(false)
-  useEffect(()=>{onOfferState?.(phase)},[phase,onOfferState])
+  useEffect(()=>{if(phase!=='pending')onOfferState?.(phase)},[phase,onOfferState])
   const spanish=lang==='es'
   const label=(es:string,en:string)=>spanish?es:en
   async function call(payload: object): Promise<ServerResult> {
