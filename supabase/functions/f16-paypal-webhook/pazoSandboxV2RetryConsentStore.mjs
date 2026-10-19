@@ -27,6 +27,25 @@ export function createPazoSandboxV2RetryConsentStore({
  }
  return Object.freeze({
   readOffer:({locale}={})=>offerStore.readOffer({locale}),
+  // Server-only: proof comes from PayPal's signed CREATED event,
+  // complete webhook enumeration, exact subscription GET / merchant
+  // inventory, and zero local/merchant financial transactions.
+  // This does not record a payment or immediately create a subscription.
+  async approveReconciled({ownerId,intentId,subscriptionId,
+    resolution,evidenceDigest,checkedAt}={}){
+   if(!UUID.test(ownerId||'')||!INTENT.test(intentId||'')||
+     !/^I-[A-Za-z0-9_-]{3,70}$/.test(subscriptionId||'')||
+     !['CANCELLED','EXPIRED','MERCHANT_CONFIRMED_ABSENT'].includes(resolution)||
+     !HASH.test(evidenceDigest||'')||
+     typeof checkedAt!=='string'||!Number.isFinite(Date.parse(checkedAt)))
+    throw Error('retry_reconciliation_invalid')
+   const r=await rpc('f16_qa_v2_issue_reconciled_retry',{
+    p_owner_id:ownerId,p_intent_id:intentId,
+    p_subscription_id:subscriptionId,p_resolution:resolution,
+    p_evidence_digest:evidenceDigest,p_checked_at:checkedAt})
+   if(typeof r!=='boolean')throw Error('retry_reconciliation_untrusted')
+   return r
+  },
   async isEligible({ownerId}={}){
    if(!UUID.test(ownerId||''))throw Error('invalid_retry_owner')
    const r=await rpc('f16_qa_v2_retry_eligibility',{p_owner_id:ownerId})
