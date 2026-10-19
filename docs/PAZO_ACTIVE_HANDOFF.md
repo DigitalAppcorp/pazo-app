@@ -94,6 +94,9 @@ Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL no
 - `liveProviderReadOnly.mjs`: OAuth y GET de plan/webhook en API Live con URLs fijas; valida contrato US$2.99/mes, sin trial/setup, webhook dedicado HTTPS Supabase y eventos. Ningún token/PII en salida. Pruebas negativas en CI. Todavía **no importado en Edge alojada**, no hay credenciales Live ni webhook implementado/entrega demostrada, nunca habilita cobros.
 - Continuar desde la ruta R0–R9, sin presentar este lector offline como gateway LIVE operativo ni crear planes/credenciales por cuenta del PO.
 
+## Vercel ya legible sin forzar teamId — corrección del bloqueo R8
+- PO confirmó sesión real en dashboard de `digitalapp`. La conexión permite leer proyecto `pazo-app-t83r`, versiones, alias, dominio verificado, nombres de variables (decrypt=false) si se omite el parámetro teamId en lecturas; el 403 anterior era específico del scope forzado. **No pedir reconexión**. Último preview inspeccionado READY a SHA `8569384`, no HEAD del PR #44; producción screenshot main `5163c18` es versión antigua. Vercel tiene SSO protection de previews y los env F16 son específicos de rama. R8 pasa de acceso BLOCKED a read-only PASS; el lanzamiento aún no autorizado. Ver `docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md`.
+
 ## Seguridad, alcance y continuación
 - Supabase project ref `mrybvqdebbgcayuvgkkr` (solo identificador público), GitHub PR #44 DRAFT. Nunca compartir secrets, IDs de compradores ni payment tokens en handoff.
 - F13 diseño aprobado: mapa full-bleed opción 3, barra blanca/isotipo verde, perfiles/mensajería/avisos y fake doors; F14 eliminación QA E2E con protecciones. No reabrir decisiones de módulos, no degradar «cero contornos».
