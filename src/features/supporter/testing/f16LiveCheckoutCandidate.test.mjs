@@ -1,8 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-import {createPaypalLiveSubscriptionProvider,publicBetaOrigin,validLiveApprovalUrl} from '../../../supabase/functions/pazo-paypal-live-checkout/liveSubscriptionProvider.mjs'
-import {createPazoLiveVerifiedCheckout} from '../../../supabase/functions/pazo-paypal-live-checkout/liveCheckoutCandidate.mjs'
+import {createPaypalLiveSubscriptionProvider,publicBetaOrigin,validLiveApprovalUrl} from '../../../../supabase/functions/pazo-paypal-live-checkout/liveSubscriptionProvider.mjs'
+import {createPazoLiveVerifiedCheckout} from '../../../../supabase/functions/pazo-paypal-live-checkout/liveCheckoutCandidate.mjs'
 const owner='12345678-1234-4234-8234-123456789abc'
 const key='23456789-1234-4234-8234-123456789abc'
 const intent='intent-12345678-1234-4234-8234-123456789abc'
@@ -45,7 +45,7 @@ test('Live checkout OFF by default and server entrypoint carries irreversible ha
   .begin({request:request(),consent})
  assert.equal(result.phase,'BLOCKED');assert.equal(result.entitlement,false)
  assert.equal(c.metrics().consented,0)
- const src=readFileSync(new URL('../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
+ const src=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
  assert.match(src,/const LIVE_CHECKOUT_RELEASED=false/)
 })
 test('Only one durable consent claim can lead to one pending remote subscription',async()=>{
