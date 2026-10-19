@@ -243,6 +243,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                         className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67]">
                         {label('Continuar con PayPal','Continue with PayPal')}
                       </button>}
+                    {qaV2AccountState==='bound'&&
+                      ['merchant_missing_needs_reconciliation','approval_link_unavailable'].includes(qaRecoveryStage)&&
+                      <a href="mailto:appdigital.corp@gmail.com?subject=Ayuda%20para%20retomar%20mi%20apoyo%20a%20PAZO"
+                        className="flex min-h-11 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-2.5 text-center text-[13px] font-extrabold text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67]">
+                        {label('Pedir ayuda para continuar','Get help to continue')}
+                      </a>}
                     <button type="button" onClick={reviewExistingQaRequest}
                       disabled={qaV2AccountState==='checking'}
                       className="min-h-11 w-full rounded-full bg-white px-4 py-2.5 text-[13px] font-extrabold text-[#204E4A] hover:bg-[#E6EDD9] focus-visible:bg-[#E1E53F]/35 disabled:opacity-50">
