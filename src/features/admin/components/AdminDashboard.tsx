@@ -181,150 +181,177 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </div>}
     {overview&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
 
+
      {section==='summary'&&<>
-      <Note>{l('Datos de PAZO en pruebas. Los importes de PayPal Sandbox NO son recaudación real. Actividad medida solo desde que se instaló el registro diario.','Staging data. PayPal Sandbox payments are NOT real revenue. Activity is measured only since daily tracking started.')} {l('Medición desde','Tracking since')}: {overview.activity.tracking_since}.</Note>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:gap-4">
-       <Stat label={l('Usuarios registrados','Registered users')} value={n(overview.people.registered)}
-         note={l('Altas en los últimos 30 días: ','New in last 30 days: ')+n(overview.people.new_30d)}/>
-       <Stat label={l('Mascotas','Pets')} value={n(overview.people.pets)}
-         note={l('Cuentas con mascota: ','Accounts with pets: ')+n(overview.people.with_pet)}/>
-       <Stat label={l('Amigos de PAZO · Sandbox','PAZO friends · Sandbox')} value={n(overview.support.sandbox_covered_accounts)}
-         note={l('Cobertura de prueba verificada','Verified test coverage')}/>
-       <Stat label={l('Total acreditado · Sandbox','Verified total · Sandbox')} value={money(overview.support.sandbox_gross_minor)}
-         note={l('Dinero ficticio, no ingresos reales','Fictional funds, not real revenue')} accent/>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+       <Stat icon="users" label={l('Usuarios registrados','Registered users')} value={n(overview.people.registered)}
+        note={l('Nuevos últimos 30 días: ','New in last 30 days: ')+n(overview.people.new_30d)}/>
+       <Stat icon="paw" label={l('Mascotas','Pets')} value={n(overview.people.pets)}
+        note={l('Cuentas con mascotas: ','Accounts with pets: ')+n(overview.people.with_pet)}/>
+       <Stat icon="crown" label={l('Membresías · Sandbox','Memberships · Sandbox')} value={n(overview.support.sandbox_covered_accounts)}
+        note={l('Cobertura verificada en pruebas','Verified test coverage')}/>
+       <Stat icon="money" label={l('Recaudado · Sandbox','Collected · Sandbox')} value={money(overview.support.sandbox_gross_minor)}
+        note={l('Pago ficticio, no ingresos reales','Test money, not live revenue')} accent/>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
        <div className="min-w-0 xl:col-span-5">
-        <DashboardPanel title={l('Crecimiento de usuarios','User growth')} description={l('Altas verificadas, no proyecciones','Verified signups, not projections')} action={()=>setSection('users')}>
-         <div className="space-y-5 py-2">
-          {[
-           {label:l('Nuevas cuentas · 7 días','New accounts · 7 days'),value:overview.people.new_7d},
-           {label:l('Nuevas cuentas · 30 días','New accounts · 30 days'),value:overview.people.new_30d},
-           {label:l('Cuentas con mascota','Accounts with pets'),value:overview.people.with_pet},
-          ].map((m,i)=><div key={m.label}>
-           <div className="mb-2 flex items-center justify-between gap-3 text-[12px]">
-            <span className="font-semibold text-[#5C7470]">{m.label}</span><strong className="text-[14px] text-[#204E4A]">{n(m.value)}</strong>
-           </div>
-           <div className="h-[15px] overflow-hidden rounded-full bg-[#EFF4E9]">
-            <div className={'h-full rounded-full '+(i===1?'bg-[#85C961]':'bg-[#204E4A]')}
-             style={{width:(m.value===0?0:Math.max(2,100*m.value/Math.max(1,overview.people.registered)))+'%'}}/>
-           </div>
-          </div>)}
+        <DashboardPanel title={l('Crecimiento de usuarios','User growth')} action={()=>selectSection('users')}>
+         <div className="mb-1 flex flex-wrap gap-4 text-[12px] font-semibold text-[#5B736C]">
+          <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-[#176C52]"/> {l('Antiguas','Older')}</span>
+          <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-[#8DCE67]"/> {l('Nuevas','New')}</span>
          </div>
-         <p className="mt-4 text-[11px] text-[#71857F]">{l('Porcentaje calculado sobre el total de cuentas actuales. No es una serie histórica.','Percentages use total existing accounts, not a historical series.')}</p>
+         <AdminCohortColumns
+          prior={Math.max(0,overview.people.registered-overview.people.new_30d)}
+          older={Math.max(0,overview.people.new_30d-overview.people.new_7d)}
+          recent={overview.people.new_7d}
+          labels={lang==='es'?['Hace más de 30 días','Entre 8 y 30 días','Últimos 7 días']:['Over 30 days ago','8–30 days ago','Last 7 days']}/>
+         <p className="text-[12px] leading-snug text-[#70857E]">{l('Cuentas existentes agrupadas por fecha de alta. No es una serie histórica.','Existing accounts grouped by signup date. This is not a historical time series.')}</p>
         </DashboardPanel>
        </div>
        <div className="min-w-0 xl:col-span-5">
-        <DashboardPanel title={l('Actividad de la app','App activity')} description={l('Usuarios únicos por sección en el período','Unique users per section in selected period')}>
-         <div className="space-y-3">
-          {Object.entries(overview.activity.module_counts).sort((a,b)=>b[1]-a[1]).map(([key,count])=>
+        <DashboardPanel title={l('Actividad de la app','App activity')} action={()=>selectSection('activity')}>
+         <div className="mb-4 flex flex-wrap gap-3 text-[12px] font-semibold text-[#6A8277]">
+          <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-[#196D55]"/> {l('Usuarios únicos','Unique users')}</span>
+          <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-[#91CC66]"/> {l('Por módulo','Per module')}</span>
+         </div>
+         <div className="min-h-[225px] space-y-3">
+          {Object.entries(overview.activity.module_counts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([key,count],i)=>
            <div key={key} className="flex items-center gap-3">
-            <span className="w-24 shrink-0 truncate text-[12px] font-bold text-[#506E66]">{moduleNames[key]||key}</span>
-            <div className="h-[11px] min-w-0 flex-1 overflow-hidden rounded-full bg-[#EDF2E8]">
-             <div className="h-full rounded-full bg-[#4EA76D]"
+            <span className="w-[94px] shrink-0 truncate text-[13px] font-semibold text-[#4B6B61]">{moduleNames[key]||key}</span>
+            <div className="h-[15px] min-w-0 flex-1 overflow-hidden rounded-full bg-[#EBF0E9]">
+             <div className={'h-full rounded-full '+(i%2?'bg-[#8DCE67]':'bg-[#248760]')}
               style={{width:(100*count/Math.max(1,overview.activity.active_period))+'%'}}/>
             </div>
-            <span className="w-8 text-right text-[12px] font-extrabold">{n(count)}</span>
+            <strong className="w-8 text-right text-[13px] font-black">{n(count)}</strong>
            </div>)}
           {Object.keys(overview.activity.module_counts).length===0&&
-           <p className="py-8 text-center text-[13px] text-[#7C908A]">{l('Aún no hay actividad medida para este período.','No tracked activity for this period yet.')}</p>}
+           <div className="flex min-h-[210px] flex-col items-center justify-center gap-3 text-center">
+            <span className="rounded-full bg-[#EDF5E9] p-4 text-[#4F9773]"><AdminGlyph name="activity" size={30}/></span>
+            <p className="max-w-[290px] text-[14px] font-semibold text-[#72877E]">{l('Aún no hay actividad registrada en este período.','No activity has been recorded for this period yet.')}</p>
+           </div>}
          </div>
-         <p className="mt-4 text-[11px] text-[#71857F]">{l('No representa sesiones ni tiempo conectado.','Not sessions or time spent.')}</p>
+         <p className="mt-3 text-[12px] leading-snug text-[#71857F]">{l('Días con acceso registrado por módulo. No representa sesiones ni tiempo conectado.','Tracked unique users by module, not sessions or time spent.')}</p>
         </DashboardPanel>
        </div>
        <div className="min-w-0 xl:col-span-2">
-        <DashboardPanel title={l('Estado del sistema','System status')} action={()=>setSection('infra')}>
-         <div className="space-y-3 text-[12px]">
-          <div className="flex items-center justify-between gap-2"><span>PostgreSQL</span><strong>{bytes(overview.resources.database_bytes)}</strong></div>
-          <div className="h-px bg-[#F0F3EB]"/>
-          <div className="flex items-center justify-between gap-2"><span>Storage</span><strong>{bytes(overview.resources.storage_estimated_bytes)}</strong></div>
-          <div className="h-px bg-[#F0F3EB]"/>
-          <div className="flex items-center justify-between gap-2"><span>{l('Objetos','Objects')}</span><strong>{n(overview.resources.stored_objects)}</strong></div>
-          <div className="h-px bg-[#F0F3EB]"/>
-          <div className="flex items-center justify-between gap-2"><span>{l('Egreso','Egress')}</span><strong>{l('Sin fuente','Unknown')}</strong></div>
+        <DashboardPanel title={l('Estado del sistema','System status')} action={()=>selectSection('infra')}>
+         <div className="space-y-1">
+          {[
+           {key:'database' as const,name:'Supabase DB',info:bytes(overview.resources.database_bytes),good:true},
+           {key:'layers' as const,name:'Storage',info:bytes(overview.resources.storage_estimated_bytes),good:true},
+           {key:'chart' as const,name:l('Egreso','Egress'),info:l('Sin fuente','Unknown'),good:false},
+           {key:'activity' as const,name:l('Disponibilidad','Uptime'),info:l('Sin fuente','Unknown'),good:false}
+          ].map(item=><div key={item.name} className="flex min-h-[48px] items-center justify-between gap-2 border-0 py-1">
+            <span className="flex items-center gap-2.5 text-[12px] font-semibold text-[#4E6E63]"><AdminGlyph name={item.key} size={18}/>{item.name}</span>
+            <strong className={'text-[11px] '+(item.good?'text-[#138A53]':'text-[#8E9A94]')}>{item.info}</strong>
+           </div>)}
          </div>
-         <p className="mt-5 text-[11px] leading-relaxed text-[#71857F]">{l('Consumo parcial; no hay monitor de disponibilidad ni cuotas oficiales.','Partial usage; no uptime or official quota feed.')}</p>
+         <p className="mt-3 text-[11px] leading-snug text-[#8A9890]">{l('Medidas parciales; no confirma operatividad ni cuota.','Partial measurements; no uptime or quota claim.')}</p>
         </DashboardPanel>
        </div>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-       <DashboardPanel title={l('Amigo de PAZO','PAZO Friend')} description={l('Información financiera de prueba','Sandbox financial information')} action={()=>setSection('finance')}>
+       <DashboardPanel title={l('Membresías','Memberships')} action={()=>selectSection('finance')}>
         <div className="grid grid-cols-2 gap-3">
-         <div className="rounded-[17px] bg-[#F5F8EE] p-3">
-          <p className="text-[24px] font-black">{overview.support.sandbox_covered_accounts}</p>
-          <p className="text-[11px] text-[#647C75]">{l('Cobertura vigente','Current coverage')}</p>
+         <div className="rounded-[17px] bg-[#F7FAF4] p-3">
+          <p className="text-[26px] font-black text-[#204E4A]">{n(overview.support.sandbox_covered_accounts)}</p>
+          <p className="text-[12px] text-[#617C73]">{l('Cobertura Sandbox','Sandbox coverage')}</p>
          </div>
-         <div className="rounded-[17px] bg-[#F5F8EE] p-3">
-          <p className="text-[22px] font-black">{money(overview.support.sandbox_gross_minor)}</p>
-          <p className="text-[11px] text-[#647C75]">{l('Pruebas acreditadas','Verified tests')}</p>
+         <div className="rounded-[17px] bg-[#F7FAF4] p-3">
+          <p className="text-[25px] font-black text-[#204E4A]">{money(overview.support.sandbox_gross_minor)}</p>
+          <p className="text-[12px] text-[#617C73]">{l('Acreditado en pruebas','Verified test total')}</p>
          </div>
         </div>
-        <div className="mt-4 space-y-2 text-[12px]">
-         <p className="flex justify-between"><span>{l('Intentos de pago','Checkout attempts')}</span><strong>{overview.support.checkout_attempts}</strong></p>
-         <p className="flex justify-between"><span>{l('Intentos sin acreditar','Unverified attempts')}</span><strong>{overview.support.attempts_without_verified_period}</strong></p>
-         <p className="flex justify-between"><span>{l('Ingresos Live','Live revenue')}</span><strong>{l('No disponible','Unavailable')}</strong></p>
-        </div>
-       </DashboardPanel>
-       <DashboardPanel title={l('Usuarios más frecuentes','Most frequent users')} description={l('Días distintos de actividad medida en 30 días','Distinct active days in 30 days')} action={()=>setSection('users')}>
-        <div className="space-y-3">
-         {[...users].sort((a,b)=>b.active_days_30-a.active_days_30).slice(0,5).map((u,i)=>
-          <div key={u.user_id} className="flex items-center gap-3">
-           <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E7F2E2] text-[12px] font-black">{i+1}</span>
-           <div className="min-w-0 flex-1"><p className="truncate text-[13px] font-extrabold">{u.pets[0]?.name||l('Cuenta sin mascota','Account without pets')}</p>
-            <p className="truncate text-[11px] text-[#71857F]">{u.email||l('Sin correo','No email')}</p></div>
-           <strong className="text-[12px]">{u.active_days_30} {l('días','days')}</strong>
-          </div>)}
-         {users.length===0&&<p className="py-4 text-[12px] text-[#71857F]">{l('Todavía no hay cuentas para mostrar.','No accounts to show yet.')}</p>}
-        </div>
-        <p className="mt-3 text-[11px] text-[#7C908A]">{l('Listado orientativo: primera página de cuentas.','Indicative: first page of accounts.')}</p>
-       </DashboardPanel>
-       <DashboardPanel title={l('Fake Doors · interés','Fake Doors · interest')} description={l('Votos confirmados, ordenados por interés','Verified votes, ranked by interest')} action={()=>setSection('ideas')}>
-        <div className="space-y-3">{experiments.slice(0,5).map((item,i)=>
-         <div key={item.key} className="flex items-center gap-3">
-          <span className="w-5 text-[13px] font-black text-[#739087]">{i+1}</span>
-          <div className="min-w-0 flex-1">
-           <p className="truncate text-[12px] font-bold">{item.name}</p>
-           <div className="mt-1 h-2 overflow-hidden rounded-full bg-[#EFF3E8]">
-            <div className="h-full rounded-full bg-[#4FA96B]" style={{width:(100*item.interested/Math.max(1,...experiments.map(x=>x.interested)))+'%'}}/>
+        <div className="mt-5 grid grid-cols-3 gap-3">
+         {[
+          {name:l('Períodos','Periods'),value:overview.support.sandbox_verified_periods,color:'#2F9668'},
+          {name:l('Intentos','Attempts'),value:overview.support.checkout_attempts,color:'#90CE6E'},
+          {name:l('Sin verificar','Unverified'),value:overview.support.attempts_without_verified_period,color:'#E4AD4C'}
+         ].map(item=><div key={item.name} className="flex flex-col justify-end gap-2">
+           <div className="flex h-[68px] items-end">
+            <div className="w-full rounded-t-[7px]" style={{backgroundColor:item.color,height:(item.value?Math.max(9,item.value/Math.max(1,overview.support.checkout_attempts,overview.support.sandbox_verified_periods)*65):0)+'px'}}/>
            </div>
+           <p className="text-center text-[11px] font-semibold text-[#657D73]">{item.name}</p>
+           <strong className="text-center text-[14px]">{item.value}</strong>
+         </div>)}
+        </div>
+        <p className="mt-3 text-[11px] text-[#72887B]">{l('Sandbox: dinero ficticio. No incluye ingresos Live.','Sandbox test money; Live revenue unavailable.')}</p>
+       </DashboardPanel>
+       <DashboardPanel title={l('Usuarios más frecuentes','Most frequent users')} action={()=>selectSection('users')}>
+        <div className="space-y-2">
+         {[...users].sort((a,b)=>b.active_days_30-a.active_days_30).slice(0,5).map((u,i)=>
+          <div key={u.user_id} className="flex min-h-[46px] items-center gap-3">
+           <span className={'flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full font-black '+(i===0?'bg-[#DCF4DE] text-[#25824F]':'bg-[#EAF0E7] text-[#567266]')}>
+            {u.pets[0]?.name?.slice(0,1)?.toUpperCase()||i+1}
+           </span>
+           <div className="min-w-0 flex-1">
+            <p className="truncate text-[14px] font-black text-[#253E35]">{u.pets[0]?.name||l('Cuenta sin mascota','Account without pets')}</p>
+            <p className="truncate text-[11px] text-[#7B8E85]">{l('Actividad registrada','Recorded activity')}</p>
+           </div>
+           <span className="text-[12px] font-bold text-[#467F5F]">{u.active_days_30} {l('días','days')}</span>
+          </div>)}
+         {users.length===0&&<p className="text-[13px] text-[#71857F]">{l('Sin cuentas para mostrar.','No accounts to show.')}</p>}
+        </div>
+        <p className="mt-3 text-[11px] text-[#748981]">{l('Entre las cuentas de la página cargada; no es un ranking global.','From loaded accounts, not a global ranking.')}</p>
+       </DashboardPanel>
+       <DashboardPanel title={l('Fake Doors · interés','Fake Doors · interest')} action={()=>selectSection('ideas')}>
+        <div className="space-y-2">{experiments.slice(0,5).map((item,i)=>
+         <div key={item.key} className="flex min-h-[42px] items-center gap-2.5">
+          <span className="w-5 shrink-0 text-[13px] font-black">{i+1}</span>
+          <span className={'flex h-8 w-8 shrink-0 items-center justify-center rounded-full '+(i%3===0?'bg-[#DDF4D4] text-[#267F45]':i%3===1?'bg-[#E8EBFF] text-[#435DCA]':'bg-[#FFF0DB] text-[#C28034]')}>
+           <AdminGlyph name="compass" size={17}/>
+          </span>
+          <div className="min-w-0 flex-1">
+           <p className="truncate text-[12px] font-bold text-[#253D36]">{item.name}</p>
+           <p className="text-[11px] text-[#799084]">{item.viewers} {l('vistas','views')}</p>
           </div>
-          <span className="w-8 text-right text-[12px] font-black">{item.interested}</span>
+          <div className="h-2.5 w-[21%] shrink-0 overflow-hidden rounded-full bg-[#EDF1EC]">
+           <div className="h-full rounded-full bg-[#51B277]" style={{width:100*item.interested/Math.max(1,...experiments.map(v=>v.interested))+'%'}}/>
+          </div>
+          <strong className="w-7 shrink-0 text-right text-[12px]">{item.interested}</strong>
          </div>)}</div>
-        <p className="mt-3 text-[11px] text-[#71857F]">{l('Con menos de 30 vistas, la muestra es insuficiente.','Fewer than 30 views is an insufficient sample.')}</p>
+        <p className="mt-3 text-[11px] text-[#758A82]">{l('Con menos de 30 vistas, la muestra es insuficiente.','Fewer than 30 views is an insufficient sample.')}</p>
        </DashboardPanel>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-       <DashboardPanel title={l('Actividad social','Social activity')}>
+       <DashboardPanel title={l('Cuentas y mascotas','Accounts and pets')} action={()=>selectSection('pets')}>
+        <AdminDonut total={overview.people.registered} centerLabel={l('cuentas','accounts')}
+         parts={[
+          {label:l('Con mascota','With pets'),count:overview.people.with_pet,color:'#227D58'},
+          {label:l('Sin mascota','Without pets'),count:overview.people.without_pet,color:'#B8E3BA'}
+         ]}/>
+        <p className="mt-4 text-[12px] text-[#6E8479]">{l('Distribución por registro de mascotas, no por ubicación privada.','By pet ownership; no private geolocation displayed.')}</p>
+       </DashboardPanel>
+       <DashboardPanel title={l('Contenido de la app','App content')} action={()=>selectSection('content')}>
+        <AdminDonut total={overview.people.posts+overview.people.comments+overview.people.communities}
+         centerLabel={l('registros','records')}
+         parts={[
+          {label:l('Publicaciones','Posts'),count:overview.people.posts,color:'#188B63'},
+          {label:l('Comentarios','Comments'),count:overview.people.comments,color:'#6D90EB'},
+          {label:l('Comunidades','Communities'),count:overview.people.communities,color:'#F4BA77'}
+         ]}/>
+        <p className="mt-4 text-[12px] text-[#74877E]">{l('No es un gráfico de tipos de publicaciones.','This is not a post-type breakdown.')}</p>
+       </DashboardPanel>
+       <DashboardPanel title={l('Contenido y moderación','Content and moderation')} action={()=>selectSection('content')}>
         <div className="grid grid-cols-3 gap-2 text-center">
          {[
-          [l('Publicaciones','Posts'),overview.people.posts],
-          [l('Comentarios','Comments'),overview.people.comments],
-          [l('Comunidades','Communities'),overview.people.communities],
-         ].map(([label,value])=><div key={String(label)} className="rounded-[17px] bg-[#F6F8F2] px-1 py-4">
-          <p className="text-[23px] font-black">{value}</p><p className="text-[11px] text-[#637B73]">{label}</p></div>)}
+          {label:l('Posts','Posts'),value:overview.people.posts,icon:'layers' as const,bg:'bg-[#EDF6EB] text-[#3B9A66]'},
+          {label:l('Comentarios','Comments'),value:overview.people.comments,icon:'heart' as const,bg:'bg-[#FFF2DD] text-[#D49341]'},
+          {label:l('Denuncias','Reports'),value:null,icon:'alert' as const,bg:'bg-[#FCEAE9] text-[#CF696A]'}
+         ].map(v=><div key={v.label} className="flex flex-col items-center gap-2 py-3">
+          <span className={'flex h-11 w-11 items-center justify-center rounded-full '+v.bg}><AdminGlyph name={v.icon} size={20}/></span>
+          <strong className="text-[21px] text-[#233B34]">{v.value===null?'—':n(v.value)}</strong>
+          <span className="text-[11px] text-[#75847D]">{v.label}</span>
+         </div>)}
         </div>
-       </DashboardPanel>
-       <DashboardPanel title={l('Lugares y búsqueda','Places and search')}>
-        <div className="grid grid-cols-2 gap-3">
-         <div className="rounded-[18px] bg-[#F5F8EE] p-4 text-center">
-          <p className="text-[25px] font-black">{n(overview.experiments.place_events)}</p>
-          <p className="text-[11px] text-[#637B73]">{l('Eventos de Lugares','Places events')}</p>
-         </div>
-         <div className="rounded-[18px] bg-[#F5F8EE] p-4 text-center">
-          <p className="text-[25px] font-black">{n(overview.experiments.search_events)}</p>
-          <p className="text-[11px] text-[#637B73]">{l('Eventos de búsqueda','Search events')}</p>
-         </div>
-        </div>
-        <p className="mt-3 text-[11px] text-[#71857F]">{l('Eventos registrados, no usuarios únicos.','Recorded events, not unique users.')}</p>
-       </DashboardPanel>
-       <DashboardPanel title={l('Contenido y moderación','Content and moderation')}>
-        <p className="text-[13px] text-[#617B73]">{l('Las denuncias se gestionan en el panel de Moderación existente.','Reports are managed in the existing moderation panel.')}</p>
+        <p className="mt-2 text-[12px] text-[#7B8981]">{l('Denuncias: consultar en el panel de Moderación.','Reports: see the moderation queue.')}</p>
         {onOpenReports&&<button type="button" onClick={onOpenReports}
-         className="mt-5 min-h-11 w-full rounded-[16px] bg-[#F1F5E9] px-4 text-[12px] font-extrabold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">
-          {l('Abrir denuncias','Open reports')}
-         </button>}
+         className="mt-4 min-h-11 w-full rounded-[15px] bg-[#F1F5EF] px-4 text-[13px] font-bold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">
+         {l('Ver panel de denuncias','Open reports panel')}
+        </button>}
        </DashboardPanel>
       </div>
+      <Note>{l('Datos de PAZO en pruebas. Los importes de PayPal Sandbox NO son recaudación real. Actividad medida solo desde que se instaló el registro diario.','Staging data. PayPal Sandbox payments are NOT real revenue. Activity is measured only since daily tracking started.')} {l('Medición desde','Tracking since')}: {overview.activity.tracking_since}.</Note>
      </>}
      {section==='users'&&<>
       <Note>{l('Cuentas autenticadas y mascotas asociadas. Solo administradores pueden consultar esta lista. Los días activos no son sesiones: son días diferentes con uso de módulos medido.','Authenticated accounts and their pets. Only administrators can view this list. Active days are distinct days with tracked usage.')}</Note>
