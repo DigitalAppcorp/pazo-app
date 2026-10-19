@@ -73,7 +73,10 @@ export function createPazoSandboxCancellationProvider({
       const auth=await headers()
       await send(HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+'/cancel',{
         method:'POST',headers:{...auth,'Content-Type':'application/json',
-          'PayPal-Request-Id':'pazo-pending-cancel-'+match[1]},
+          // Max 38 chars. Stable per original consent, so a transport retry
+          // never creates a second cancel action. Previous ID was 56 chars,
+          // which PayPal may reject as an invalid resource.
+          'PayPal-Request-Id':'pc'+match[1]},
         body:JSON.stringify({reason:'Buyer abandoned unapproved checkout in PAZO Sandbox'}),
       },true,'post')
       // PayPal may return HTTP 204 before its subsequent GET reflects the
