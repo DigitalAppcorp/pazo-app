@@ -25,3 +25,6 @@ Los laboratorios \`scripts/f16-live-binding-receipt-disposable-lab.sql\` y \`scr
 4. Después de lanzar la beta HTTPS y con Live aún OFF, realizar la prueba real supervisada de una venta, periodo y cancelación. Activación administrativa solo tras consentimiento y gate PO.
 
 El inbox Sandbox histórico de 26 eventos y sus dos períodos QA siguen independientes; no procesar la cola bajo estas RPC Live.
+
+## Contrato de webhook alineado con la vinculación financiera
+`supabase/functions/pazo-paypal-live-webhook/liveIngress.mjs` requiere ahora que `provePazoScope` resuelva independientemente `ownerId`, `intentId` y `subscriptionId` junto con el merchant generation. Estos valores se pasan al adaptador futuro `recordIfAbsent` **solo en servidor**, no se muestran en la respuesta HTTP. Los RPC privados aún no se llaman: falta composición autenticada y preflight PayPal. La rama mantiene `LIVE_WEBHOOK_RELEASED=false`.
