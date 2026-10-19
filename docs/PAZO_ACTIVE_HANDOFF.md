@@ -83,6 +83,10 @@ Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL no
 - Guard `scripts/pazo-release-guard.mjs` en CI: prueba puramente estática que mantiene Live OFF y checkout QA/Legacy cerrado; no valida pago/hosting.
 - No pedir dominio hasta beta; resolver entre tanto código y tests offline, SQL versionado pendiente GO específico. Limpieza visual «Mi membresía», QA beneficios, conciliación Sandbox, media moderación, PWA y release continúan como gates reales.
 
+## Nuevo adaptador Live read-only sin deploy — F16 MVP
+- `liveProviderReadOnly.mjs`: OAuth y GET de plan/webhook en API Live con URLs fijas; valida contrato US$2.99/mes, sin trial/setup, webhook dedicado HTTPS Supabase y eventos. Ningún token/PII en salida. Pruebas negativas en CI. Todavía **no importado en Edge alojada**, no hay credenciales Live ni webhook implementado/entrega demostrada, nunca habilita cobros.
+- Continuar desde la ruta R0–R9, sin presentar este lector offline como gateway LIVE operativo ni crear planes/credenciales por cuenta del PO.
+
 ## Seguridad, alcance y continuación
 - Supabase project ref `mrybvqdebbgcayuvgkkr` (solo identificador público), GitHub PR #44 DRAFT. Nunca compartir secrets, IDs de compradores ni payment tokens en handoff.
 - F13 diseño aprobado: mapa full-bleed opción 3, barra blanca/isotipo verde, perfiles/mensajería/avisos y fake doors; F14 eliminación QA E2E con protecciones. No reabrir decisiones de módulos, no degradar «cero contornos».

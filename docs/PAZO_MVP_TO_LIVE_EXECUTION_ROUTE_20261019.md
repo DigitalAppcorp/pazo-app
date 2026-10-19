@@ -55,3 +55,6 @@ Supabase Advisor 19-oct: 29 RLS enabled/no policy principalmente esquemas privad
 **Solo con beta oficial:** dominio estable, credenciales Live guardadas en el panel (nunca aquí), merchant/plan Live comprobados y GO del primer cobro real supervisado.
 
 No marcar ninguno de estos pendientes como completado por CI; ruta vigente **MVP_RELEASE_NO_GO / LIVE_NO_GO** hasta evidencias enumeradas.
+
+## Primer adaptador real de comprobación Live — solo código, OFF
+El módulo `supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs` se añadió como **lector de recursos PayPal Live**, sin integración HTTP ni despliegue: realiza OAuth con host fijo `api-m.paypal.com`, GET de Plan ACTIVE único USD2.99/mes ilimitado sin setup fee, GET de webhook registrado exactamente en `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook` y eventos necesarios. Solo emite resultado booleano/código seguro, **nunca tokens ni IDs privados**. `merchantIdentityVerified=false`, `webhookDeliveryVerified=false`, `mayCharge=false`, `mayActivate=false` aun en éxito: lectura de configuración NO acredita entrega de webhooks ni activa checkout. Integrarlo únicamente desde Edge autenticada admin con Vault y con GO exacto, cuando exista app/plan/webhook Live. El endpoint Live todavía NO está desplegado, así que el lector no puede informar PASS real.
