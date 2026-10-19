@@ -52,7 +52,7 @@ export function assessSandboxGatewayCandidate({runtime,candidate,proofs}={}){
     !/^[A-Za-z0-9_-]{8,100}$/.test(candidate.webhook_id))
    reasons.push('candidate_webhook_missing')
  for(const name of proofNames){
-  if(proofs?.[name]!==true)reasons.push('proof_missing_'+name)
+  if(proofs?.[name]!==true)reasons.push('proof_missing_'+name.replace(/[A-Z]/g,letter=>'_'+letter.toLowerCase()))
  }
  // A passing assessment is readiness only, NEVER authority to flip a switch.
  return releaseState(reasons.length===0,reasons)
