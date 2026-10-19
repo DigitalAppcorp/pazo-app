@@ -16,6 +16,8 @@ type Settings={
 }
 type Audit={environment:Env;kind:'draft'|'credentials'|'validation';recorded_at:string;actor:string;details:Record<string,unknown>}
 type Props={lang:'es'|'en'}
+// The inspected hosted Edge is still v3; do not present an inoperable control.
+const LIVE_RESOURCE_INSPECTION_RELEASED=false
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
 const actionClass='min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#E9EF6A] disabled:opacity-50 disabled:cursor-not-allowed'
 const cardClass='min-w-0 rounded-[22px] bg-white p-4 shadow-[0_7px_29px_rgba(32,78,74,.055)] sm:p-6'
@@ -36,6 +38,7 @@ export function AdminPayPalSettings({lang}:Props){
  const [clientId,setClientId]=useState('')
  const [clientSecret,setClientSecret]=useState('')
  const [legacyHealth,setLegacyHealth]=useState<'idle'|'checking'|'verified'|'unavailable'>('idle')
+ const [liveResourceHealth,setLiveResourceHealth]=useState<'idle'|'checking'|'verified'|'unavailable'>('idle')
  const config=settings?.environments.find(x=>x.environment===env)
  const liveConfig=settings?.environments.find(x=>x.environment==='live')
  // Development origin is not a webhook destination or a public PayPal return URL.
@@ -123,6 +126,20 @@ export function AdminPayPalSettings({lang}:Props){
    setLegacyHealth('verified')
   }catch{setLegacyHealth('unavailable')}
  }
+ const inspectLiveResources=async()=>{
+  if(!LIVE_RESOURCE_INSPECTION_RELEASED||env!=='live')return
+  setLiveResourceHealth('checking')
+  try{
+   const {data,error:fnError}=await supabase.functions.invoke('pazo-admin-paypal-validate',{
+    body:{environment:'live',action:'inspect_live_resources'}
+   })
+   if(fnError||data?.ok!==true||data?.code!=='live_resources_read_verified'||
+    data?.mayCharge!==false||data?.mayActivate!==false||
+    data?.live_checkout_enabled!==false||data?.changes_checkout!==false)
+    throw Error('resources not yet verified')
+   setLiveResourceHealth('verified')
+  }catch{setLiveResourceHealth('unavailable')}
+ }
  const validateCredentials=async()=>{
   setBusy(true);setError('');setNotice('')
   try{
@@ -182,6 +199,25 @@ export function AdminPayPalSettings({lang}:Props){
           'No custom domain is needed now. Localhost is only the development interface, not a public webhook endpoint. The existing Sandbox checkout continues to manage the HTTPS return URL until a safe migration.')}
       </p>
     </section>
+    {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
+      <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
+      <p className="mt-2 text-[12px] text-[#6B8077]">
+       {t('Solo lee plan y webhook en PayPal. No prueba entrega real, no crea compras ni activa Live.',
+        'Only reads PayPal plan and webhook. Does not prove delivery, create purchases or activate Live.')}
+      </p>
+      <button type="button" className={'mt-3 '+actionClass}
+       disabled={busy||liveResourceHealth==='checking'||!liveOAuthReady||!livePlanStaged||!liveWebhookStaged}
+       onClick={()=>void inspectLiveResources()}>
+       {t('Comprobar recursos Live','Check Live resources')}
+      </button>
+      <p role="status" className="mt-2 text-[12px] font-semibold">
+       {liveResourceHealth==='verified'?
+        t('Plan y webhook verificados por lectura. Cobros Live apagados.','Plan and webhook read. Live charges OFF.'):
+        liveResourceHealth==='unavailable'?
+        t('No se verificaron los recursos Live.','Live resources could not be verified.'):
+        t('Este control no habilita cobros.','This control never enables charges.')}
+      </p>
+    </section>}
     {env==='sandbox'&&<section className={cardClass} aria-label={t('Pasarela Sandbox actual','Current Sandbox gateway')}>
      <h4 className="text-[17px] font-black">{t('Pasarela Sandbox en uso','Current Sandbox gateway')}</h4>
      <p className="mt-2 text-[13px] leading-relaxed text-[#667E71]">

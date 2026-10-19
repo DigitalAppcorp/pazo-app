@@ -3,6 +3,7 @@
 // Secrets remain in Vault, are read only on this Edge Function via service_role.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {inspectLegacySandboxOAuth} from './legacySandboxHealth.mjs'
+import {inspectLivePaypalResources} from './liveProviderReadOnly.mjs'
 const json=(body:Record<string,unknown>,status=200,origin='')=>
  new Response(JSON.stringify(body),{status,headers:{
   'content-type':'application/json','cache-control':'no-store',
@@ -30,14 +31,18 @@ Deno.serve(async req=>{
   return json({ok:false,code:'configuration_unavailable'},503,cors)
  let env:string
  let inspectActive=false
+ let inspectLive=false
  try{
   const body=await req.json()
   env=body?.environment
   inspectActive=body?.action==='inspect_active_sandbox'
+  inspectLive=body?.action==='inspect_live_resources'
   if(!['sandbox','live'].includes(env)||
     (inspectActive
       ?(env!=='sandbox'||Object.keys(body).length!==2)
-      :(body?.action!==undefined||Object.keys(body).length!==1)))
+      :inspectLive
+        ?(env!=='live'||Object.keys(body).length!==2)
+        :(body?.action!==undefined||Object.keys(body).length!==1)))
    return json({ok:false,code:'invalid_request'},400,cors)
  }catch{return json({ok:false,code:'invalid_request'},400,cors)}
  try{
@@ -82,6 +87,18 @@ Deno.serve(async req=>{
   const credentials=await data.json()
   if(!credentials?.client_id||!credentials?.client_secret)
    return json({ok:false,code:'credentials_not_configured'},409,cors)
+  if(inspectLive){
+   // Admin GoTrue owner was resolved above; service RPC checks the SAME
+   // authenticated owner against the restricted admin grant before Vault read.
+   // Read-only merchant verification: no checkout, key copy or switch.
+   const evidence=await inspectLivePaypalResources({
+    environment:'live',clientId:credentials.client_id,
+    clientSecret:credentials.client_secret,planId:credentials.plan_id,
+    webhookId:credentials.webhook_id,fetchImpl:fetch
+   })
+   return json({...evidence,changes_checkout:false,
+    live_checkout_enabled:false},evidence.ok?200:409,cors)
+  }
   const endpoint=env==='sandbox'?
    'https://api-m.sandbox.paypal.com/v1/oauth2/token':
    'https://api-m.paypal.com/v1/oauth2/token'
