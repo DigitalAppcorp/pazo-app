@@ -94,3 +94,45 @@ test('mobile control center contains comprehensive operator sections and forbids
  assert.ok(board.includes('role="dialog"'))
  assert.ok(!board.includes('focus-visible:ring-')&&!board.includes('focus-visible:outline-'))
 })
+
+
+test('responsive admin dashboard escapes mobile shell and exposes functional layouts at each breakpoint',()=>{
+ assert.ok(board.includes("import { createPortal } from 'react-dom'"),'The desktop dashboard must not inherit the mobile 430px shell')
+ assert.ok(board.includes('createPortal(<div role="dialog"'))
+ assert.ok(board.includes('document.body)'))
+ assert.ok(board.includes('data-pazo-admin-responsive="true"'))
+ assert.ok(board.includes('h-[100dvh] w-full'))
+ assert.ok(board.includes('lg:grid lg:grid-cols-[235px_minmax(0,1fr)]'),'Full-width desktop sidebar/main')
+ assert.ok(board.includes('hidden min-h-0 flex-col')&&board.includes('lg:flex'),'Sidebar hidden on mobile')
+ assert.ok(board.includes('lg:hidden'),'Mobile top navigation does not duplicate the sidebar')
+ assert.ok(board.includes('overflow-x-auto'),'Small-screen tabs remain accessible')
+ assert.ok(board.includes('md:grid-cols-4'),'Tablet KPI columns')
+ assert.ok(board.includes('xl:grid-cols-12'),'Wide desktop mosaic layout')
+ assert.ok(board.includes('min-w-0'),'Avoid horizontal overflow in grid panels')
+ assert.ok(board.includes('min-h-11'),'Minimum touch target for mobile controls')
+ assert.ok(board.includes("aria-current={section===item.key?'page':undefined}"),'Nav communicates active section to screen readers')
+ assert.ok(board.includes('onOpenReports'),'Moderation shortcut is functional')
+ assert.ok(access.includes("onOpenReports={()=>setScreen('reports')}"),'No dead Reports action')
+})
+
+test('executive visual reference uses only actual query fields and never represents sandbox as live revenue',()=>{
+ for(const prop of [
+  'overview.people.registered','overview.people.pets','overview.people.new_7d',
+  'overview.people.new_30d','overview.support.sandbox_covered_accounts',
+  'overview.support.sandbox_gross_minor','overview.activity.module_counts',
+  'overview.experiments.place_events','overview.experiments.search_events',
+  'overview.resources.database_bytes','overview.resources.storage_estimated_bytes',
+ ])assert.ok(board.includes(prop),'Real observable source absent: '+prop)
+ assert.ok(board.includes('No es una serie histórica'))
+ assert.ok(board.includes('Sin fuente'))
+ assert.ok(board.includes('No representa sesiones ni tiempo conectado'))
+ assert.ok(board.includes('No representa sesiones')||board.includes('Not sessions'))
+ assert.ok(board.includes('No es una serie histórica')&&board.includes('No disponible'))
+ assert.ok(!board.includes('1,248')&&!board.includes('1,892')&&!board.includes('$257.14'),
+  'Do not copy illustrative figures from design reference')
+ assert.ok(!board.includes('Tiempo real'),'No streaming data source exists')
+ assert.ok(!board.includes('Operativo'),'Do not claim uptime without a monitoring source')
+ assert.ok(!board.includes('Ubicación de usuarios'),'User-level geolocation is not present in admin sources')
+ assert.ok(!board.includes('focus-visible:ring-')&&!board.includes('focus-visible:outline-'),
+  'No visual rings/contours in PAZO')
+})
