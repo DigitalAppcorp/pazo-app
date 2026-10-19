@@ -24,7 +24,7 @@ test('Live cannot be enabled by drafting, storing credentials or OAuth testing',
  assert.ok(!sql.includes('UPDATE admin_private.paypal_gateway_runtime SET'))
  assert.ok(!page.includes("supabase.rpc('pazo_admin_paypal_activate_live'"))
  assert.ok(page.includes('Guardar borrador'))
- assert.ok(page.includes('no modifica cobros actuales'))
+ assert.match(page,/no modifica cobros actuales/i)
  assert.ok(page.includes('Live está desactivado'))
  assert.ok(edge.includes('live_checkout_enabled:false'))
  assert.ok(!edge.includes('/v1/billing/subscriptions'))
