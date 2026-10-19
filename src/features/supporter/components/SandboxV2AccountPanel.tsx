@@ -3,6 +3,7 @@ import {supabase} from '../../../services/supabaseClient'
 import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 import {SandboxCheckoutQaPanel} from './SandboxCheckoutQaPanel'
 import {classifySandboxV2Recovery} from '../sandboxV2RecoveryState.mjs'
+import {readSandboxApproval,saveSandboxApproval} from '../sandboxApprovalReturn.mjs'
 import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
@@ -232,6 +233,17 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
   onResumeStatus?.('checking')
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
+   // The original approval URL was received from PayPal on create and was
+   // cached before redirect. If the buyer returns from the login screen,
+   // reopening it does not create a second subscription or require a GET
+   // of a subscription PayPal may not expose after checkout abandonment.
+   const current=await supabase.auth.getSession()
+   const ownerId=current.data.session?.user?.id
+   if(ownerId&&!paidThrough&&
+     !['APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(providerStatus||'')){
+    const saved=readSandboxApproval({ownerId,intentId:account.intentId})
+    if(saved){window.location.assign(saved);return}
+   }
    const result=await call({action:'recover_retry',intentId:account.intentId}) as Result
    if(result.ok!==true)throw Error('INVALID_QA_RESUME')
    if(result.phase==='RETRY_READY'&&result.code==='reconciled_retry_ready'&&result.eligible===true){
@@ -243,6 +255,10 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
    if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_can_resume'){
     const url=safeSandboxApprovalUrl(result.approvalUrl)
     if(!url)throw Error('UNTRUSTED_APPROVAL_LINK')
+    const current=await supabase.auth.getSession()
+    if(current.data.session?.user?.id)
+      saveSandboxApproval({ownerId:current.data.session.user.id,
+        intentId:account.intentId,approvalUrl:url})
     window.location.assign(url)
     return
    }
