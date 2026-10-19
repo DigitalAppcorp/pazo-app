@@ -1,4 +1,6 @@
 # PAZO — ACTIVE HANDOFF (estado operativo, 19-oct-2026)
+> **AUDITORÍA DE LANZAMIENTO RECONCILIADA (19-oct-2026):** `docs/PAZO_MVP_LAUNCH_AND_LIVE_AUDIT_20261019.md` prevalece sobre snapshots históricos al juzgar preparación para beta gratuita versus PayPal Live. PR #44 código y 7/7 checks PASS; core social amplio implementado, PO QA histórica válida. Beta social: GO condicional a aceptación UI/seguridad/HTTPS; nueva compra pública OFF. Live mediante panel: NO GO, solo UI/Vault/contratos offline; faltan gateway multi-entorno y webhook/cobro/ledger Live, no prometer activación con un clic. Datos actuales: 8 Auth, 5 mascotas, 4 posts, 2 comunidades; 2 períodos/ventas Sandbox y 26 eventos inbox pendientes en retención. Live false, sin Vault Live. No recrear funcionalidades ya aprobadas ni tocar main/pagos sin GO.
+
 
 > **CHECKPOINT MÁS RECIENTE — RUTA MVP→LIVE:** el Product Owner ordenó avanzar hasta la beta y dejar prevista la conmutación PayPal Live desde admin cuando haya alojamiento oficial HTTPS. Ruta autoritativa R0–R9: `docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md`. **NO** significa activación desatendida: requiere pruebas frescas y GO financiero PO. Desarrollo local siempre Sandbox; dominio oficial aún no existe, no volver a pedirlo ahora.
 >
