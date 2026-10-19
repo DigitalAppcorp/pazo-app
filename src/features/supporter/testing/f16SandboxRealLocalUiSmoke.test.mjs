@@ -29,7 +29,7 @@ test('real PAZO QA displays only V2 subscriber actions, not P06 historic cancell
  assert.match(qaAccount,/result\.mayGrantBenefits===true/)
  // In the refreshed product UX, the QA V2 and legacy P06 branches are
  // mutually exclusive. Never allow P06 historic cancellation from QA.
- assert.ok(original.includes('<SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision}/>'),
+ assert.ok(original.includes('onAccountInspection={setQaV2AccountState}') && original.includes('onRecoveryStage={setQaRecoveryStage}') && original.includes('resumeRevision={qaResumeRevision}'),
    'QA V2 management must remain owner-only and report verified account state')
  assert.match(original,/accounts\?\.map\(account/)
  assert.match(original,/if \(!qaV2Screen\) void refresh\(\)/)
