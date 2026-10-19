@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/paypal/return",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/paypal/cancel",
+      "destination": "/index.html"
+    }
+  ]
+}
