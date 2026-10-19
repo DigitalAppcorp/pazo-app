@@ -8,7 +8,7 @@
 BEGIN;
 SET LOCAL lock_timeout = '3s';
 SET LOCAL statement_timeout = '25s';
-SET LOCAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 
 CREATE TABLE IF NOT EXISTS supporter_private.f16_sandbox_qa_checkout_reset_archive (
  owner_id uuid NOT NULL,
