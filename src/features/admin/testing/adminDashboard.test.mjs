@@ -102,7 +102,7 @@ test('responsive admin dashboard escapes mobile shell and exposes functional lay
  assert.ok(board.includes('document.body)'))
  assert.ok(board.includes('data-pazo-admin-responsive="true"'))
  assert.ok(board.includes('h-[100dvh] w-full'))
- assert.ok(board.includes('lg:grid lg:grid-cols-[235px_minmax(0,1fr)]'),'Full-width desktop sidebar/main')
+ assert.ok(board.includes('lg:grid lg:grid-cols-[265px_minmax(0,1fr)]'),'Full-width desktop sidebar/main')
  assert.ok(board.includes('hidden min-h-0 flex-col')&&board.includes('lg:flex'),'Sidebar hidden on mobile')
  assert.ok(board.includes('lg:hidden'),'Mobile top navigation does not duplicate the sidebar')
  assert.ok(board.includes('overflow-x-auto'),'Small-screen tabs remain accessible')
@@ -135,4 +135,27 @@ test('executive visual reference uses only actual query fields and never represe
  assert.ok(!board.includes('Ubicación de usuarios'),'User-level geolocation is not present in admin sources')
  assert.ok(!board.includes('focus-visible:ring-')&&!board.includes('focus-visible:outline-'),
   'No visual rings/contours in PAZO')
+})
+
+
+test('selected visual is an illustrated high-density analytics dashboard, not tiny text-only cards',()=>{
+ const visuals=read('src/features/admin/components/AdminVisuals.tsx')
+ assert.ok(board.includes("icon='users'")||board.includes('icon="users"'))
+ assert.ok(board.includes('<AdminCohortColumns'),'Signup cohort visualization is data-driven')
+ assert.ok(board.includes('<AdminDonut'),'Real category proportions, not generic progress bars')
+ assert.ok(board.includes('<AdminGlyph'),'Sidebar and cards use actual icons')
+ assert.ok(board.includes('min-h-[132px]'),'KPI cards must have reference-like readable height')
+ assert.ok(board.includes('text-[26px]')&&board.includes('lg:text-[29px]'),'KPI numerical hierarchy')
+ assert.ok(board.includes('grid grid-cols-2 gap-3 lg:grid-cols-4'),'Four prominent desktop KPIs')
+ for(const module of ['Mascotas','Membresías','Actividad','Contenido','Fake Doors','Lugares','Denuncias','Supabase']){
+  assert.ok(board.includes(module),'Missing reference navigation: '+module)
+ }
+ for(const page of ["section==='pets'","section==='activity'","section==='content'","section==='places'"]){
+  assert.ok(board.includes(page),'Unimplemented navigation destination '+page)
+ }
+ assert.ok(board.includes("next==='reports'")&&board.includes('onOpenReports?.()'),
+   'Reports destination must invoke the actual moderation queue')
+ assert.ok(visuals.includes('role="img"'),'Chart visuals have accessible descriptions')
+ assert.ok(visuals.includes('count>0'),'Donut segments must reflect only observed counts')
+ assert.ok(visuals.includes('Math.max(1,total)'),'Chart should handle empty datasets')
 })
