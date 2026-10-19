@@ -280,6 +280,24 @@ Deno.serve(async(request:Request)=>{
   if(Object.keys(data).sort().join('|')!=='action|consent'||
      data.consent?.termsVersion!==SANDBOX_BENEFITS_OFFER_V2)
    return addCors(reply(400,'new_four_benefit_sandbox_terms_required'),runtime.origin)
+  // Recheck the *same* predecessor against PayPal immediately before a
+  // new merchant POST. An old 404/terminal proof cannot be replayed after
+  // PayPal starts showing an approved, active, or collectible subscription.
+  try{
+   const source=await runtime.v2AccountStore.readForOwner({ownerId:qaOwner})
+   if(!source||source.state!=='bound'||!source.externalSubscriptionId||
+     source.planId!==PLAN)
+    return addCors(reply(409,'retry_predecessor_unverified'),runtime.origin)
+   const activeGrant=await runtime.retryConsentStore.isEligible({ownerId:qaOwner})
+   if(activeGrant!==true)
+    return addCors(reply(409,'retry_proof_not_accepted'),runtime.origin)
+   await runtime.retryMerchantProof.verify({
+    ownerId:qaOwner,intentId:source.intentId,
+    subscriptionId:source.externalSubscriptionId,
+    consentedAt:source.consentedAt})
+  }catch{
+   return addCors(reply(409,'retry_merchant_reconciliation_pending'),runtime.origin)
+  }
   // Guarded durable SQL begin + one-shot provider-create claim; no implicit
   // retries even if a merchant POST times out. No entitlement on return.
   const result=await runtime.retryCheckout.begin({request,consent:data.consent})
