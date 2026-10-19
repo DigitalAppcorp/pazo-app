@@ -103,7 +103,7 @@ export function createPazoSandboxCancellationProvider({
       const auth=await headers()
       await send(HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+'/cancel',{
         method:'POST',headers:{...auth,'Content-Type':'application/json',
-          'PayPal-Request-Id':'pazo-cancel-'+match[1]},
+          'PayPal-Request-Id':'ca'+match[1]},
         body:JSON.stringify({reason:'Cancelled by the account holder'}),
       },true)
       // PayPal 204 alone is insufficient: an immediate GET must prove status.
