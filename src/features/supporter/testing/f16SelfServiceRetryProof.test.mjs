@@ -122,3 +122,24 @@ test('automatic retry grant is service-only and never rewrites historical subscr
  assert.ok(child.includes("action:'recover_retry'"))
  assert.ok(child.includes("onResumeStatus?.('retry_ready')"))
 })
+
+test('returning from unapproved PayPal login cancels exact pending resource before a NEW consent',()=>{
+ const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
+ const start=edge.indexOf("if(data.action==='recover_retry')")
+ const end=edge.indexOf("// Recover only the original PayPal approval",start)
+ assert.ok(start>0&&end>start)
+ const scoped=edge.slice(start,end)
+ assert.ok(scoped.includes("merchant.status==='APPROVAL_PENDING'"))
+ assert.ok(scoped.includes('runtime.canAbandonPending(qaOwner)'))
+ assert.ok(scoped.includes('runtime.cancellation.cancelPending({'))
+ assert.ok(scoped.includes("cancelled.status!=='CANCELLED'"))
+ assert.ok(scoped.includes('runtime.retryMerchantProof.verify({'))
+ assert.ok(scoped.includes('runtime.retryConsentStore.approveReconciled({'))
+ assert.ok(scoped.includes("phase:'RETRY_READY'"))
+ assert.ok(scoped.includes('mayGrantBenefits:false'))
+ assert.ok(!scoped.includes("code:'approval_can_resume'"),
+   'Never redirect to a potentially stale BA approval token after abandonment')
+ assert.ok(!scoped.includes('runtime.retryCheckout.begin('),
+   'A new checkout requires a separate affirmative purchase click')
+ assert.ok(!scoped.includes('recordPayment('))
+})
