@@ -20,6 +20,7 @@ function mock(overrides={}){
  let created=0,claimed=0,bound=0,consented=0
  const dependencies={
   releaseReady:true,planId:plan,merchantGeneration:2,
+  now:()=>Date.parse('2026-10-19T18:10:00Z'),
   resolveAuthenticatedOwner:async()=>owner,
   admit:async()=>true,
   consentStore:{
@@ -148,4 +149,31 @@ test('No localhost, Sandbox PayPal redirect, imposter host, HTTP or extra URL pa
   'https://www.paypal.com/webapps/billing/subscriptions?ba_token=X&next=https://evil.invalid'])
   assert.equal(validLiveApprovalUrl(s),false)
  assert.equal(validLiveApprovalUrl(approval),true)
+})
+
+test('expired and future-dated consent records never claim or POST to PayPal',async()=>{
+ for(const createdAt of ['2026-10-16T18:00:00Z','2026-10-19T18:11:00Z']){
+  const c=mock({consentStore:{
+   beginForOwner:async()=>({...record,createdAt}),
+   claimProviderCreate:async()=>{throw Error('should never claim')}
+  }})
+  const r=await createPazoLiveVerifiedCheckout(c.dependencies)
+   .begin({request:request(),consent})
+  assert.equal(r.phase,'BLOCKED')
+  assert.equal(r.reason,'expired_checkout_requires_new_consent')
+  assert.equal(c.metrics().created,0)
+ }
+})
+test('misdirected approval link is rejected even when private provider adapter is replaced',async()=>{
+ const c=mock({subscriptionProvider:{
+  createSubscription:async()=>({subscriptionId:sub,status:'APPROVAL_PENDING',
+   entitlement:false,approvalUrl:'https://www.paypal.com.evil.invalid/webapps/billing/subscriptions?ba_token=X'}),
+  readSubscription:async()=>({id:sub,plan_id:plan,custom_id:intent,status:'APPROVAL_PENDING'})
+ }})
+ const r=await createPazoLiveVerifiedCheckout(c.dependencies).begin({
+  request:request(),consent
+ })
+ assert.equal(r.phase,'BLOCKED')
+ assert.equal(r.reason,'provider_create_response_unverified')
+ assert.equal(c.metrics().bound,0)
 })

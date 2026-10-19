@@ -1,4 +1,5 @@
 // PAZO F16 LIVE recurring checkout orchestration — OFF by default / NOT WIRED.
+import {validLiveApprovalUrl} from './liveSubscriptionProvider.mjs'
 // No payment or entitlement is granted at subscription creation or PayPal
 // approval return. All adapters MUST be authenticated, backend-owned, durable.
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -7,6 +8,7 @@ const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const HASH=/^[a-f0-9]{64}$/
 const VERSION=/^pazo-supporter-live\.[a-z0-9.-]{3,40}$/
+const MAX_CONSENT_AGE_MS=48*3600_000
 const pending=(phase,reason)=>Object.freeze({phase,reason,environment:'live',
  paymentVerified:false,entitlement:false,mayGrantBenefits:false,
  mayRecordPayment:false,paidThrough:null})
@@ -26,7 +28,7 @@ function validConsent(c){
  */
 export function createPazoLiveVerifiedCheckout({
  releaseReady=false,planId,merchantGeneration,resolveAuthenticatedOwner,
- admit,consentStore,subscriptionProvider,intentStore
+ admit,consentStore,subscriptionProvider,intentStore,now=Date.now
 }={}){
  return Object.freeze({
   async begin({request,consent}={}){
@@ -40,7 +42,8 @@ export function createPazoLiveVerifiedCheckout({
     typeof subscriptionProvider?.readSubscription!=='function'||
     typeof intentStore?.bindVerified!=='function')
     return fail('live_backend_not_configured')
-   if(!(request instanceof Request)||!validConsent(consent))
+   if(!(request instanceof Request)||!validConsent(consent)||
+    typeof now!=='function'||!Number.isFinite(now()))
     return fail('affirmative_versioned_consent_required')
    let owner
    try{owner=await resolveAuthenticatedOwner(request)}
@@ -66,6 +69,10 @@ export function createPazoLiveVerifiedCheckout({
      record.locale!==consent.locale||
      !Number.isFinite(Date.parse(record.createdAt)))
      return fail('private_intent_untrusted')
+   // Expired/future consents must be reconciled, not reused for a purchase.
+   const age=now()-Date.parse(record.createdAt)
+   if(age<0||age>MAX_CONSENT_AGE_MS)
+    return fail('expired_checkout_requires_new_consent')
    if(record.state==='bound')return fail('existing_subscription_requires_owner_recovery')
    if(record.state!=='pending')return fail('checkout_requires_manual_recovery')
    // Claim exactly ONCE in SQL BEFORE creating a PayPal subscription. Even
@@ -83,7 +90,7 @@ export function createPazoLiveVerifiedCheckout({
    })}catch{return fail('paypal_create_must_be_reconciled')}
    if(!SUB.test(created?.subscriptionId||'')||
      created.status!=='APPROVAL_PENDING'||created.entitlement!==false||
-     typeof created.approvalUrl!=='string')
+     !validLiveApprovalUrl(created.approvalUrl))
     return fail('provider_create_response_unverified')
    let remote
    try{remote=await subscriptionProvider.readSubscription(created.subscriptionId)}
