@@ -46,7 +46,7 @@ function DashboardPanel({title,description,children,action}:{
   <div className="flex items-start justify-between gap-3">
    <div className="min-w-0"><h3 className="text-[16px] font-black tracking-tight text-[#204E4A] lg:text-[17px]">{title}</h3>
     {description&&<p className="mt-1 text-[12px] text-[#71857F]">{description}</p>}</div>
-   {action&&<button type="button" onClick={action} aria-label={title} className="rounded-full bg-[#F2F5EC] px-3 py-1.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">{action?"Ver":"Ver"}</button>}
+   {action&&<button type="button" onClick={action} aria-label={title} className="rounded-full bg-[#F2F5EC] px-3 py-1.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">Ver</button>}
   </div>
   <div className="mt-4">{children}</div>
  </section>
