@@ -14,6 +14,7 @@ type Settings={
  active_environment:'sandbox';live_checkout_enabled:false;
  checkout_source:string;environments:Config[]
 }
+type Audit={environment:Env;kind:'draft'|'credentials'|'validation';recorded_at:string;actor:string;details:Record<string,unknown>}
 type Props={lang:'es'|'en'}
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
 const actionClass='min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#E9EF6A] disabled:opacity-50 disabled:cursor-not-allowed'
@@ -23,6 +24,7 @@ export function AdminPayPalSettings({lang}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [env,setEnv]=useState<Env>('sandbox')
  const [settings,setSettings]=useState<Settings|null>(null)
+ const [history,setHistory]=useState<Audit[]>([])
  const [loading,setLoading]=useState(true)
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState('')
@@ -37,10 +39,14 @@ export function AdminPayPalSettings({lang}:Props){
  const load=useCallback(async()=>{
   setLoading(true);setError('')
   try{
-   const {data,error:dbError}=await supabase.rpc('pazo_admin_paypal_settings')
+   const [{data,error:dbError},{data:auditData}]=await Promise.all([
+    supabase.rpc('pazo_admin_paypal_settings'),
+    supabase.rpc('pazo_admin_paypal_audit')
+   ])
    if(dbError||!data||!Array.isArray((data as Settings).environments))
     throw Error('no data')
    setSettings(data as Settings)
+   setHistory(Array.isArray(auditData)?(auditData as Audit[]):[])
   }catch{setError(safeError())}
   finally{setLoading(false)}
  },[])
@@ -172,6 +178,18 @@ export function AdminPayPalSettings({lang}:Props){
       </div>
      </section>
     </div>
+    <section className={cardClass}>
+     <h4 className="text-[17px] font-black">{t('Historial de configuración','Configuration history')}</h4>
+     <p className="mt-1 text-[12px] text-[#74877D]">{t('Últimos 30 cambios, sin mostrar credenciales ni secretos.','Last 30 changes, without displaying secrets or credentials.')}</p>
+     <div className="mt-4 space-y-2">
+      {history.length===0?<p className="text-[13px] text-[#7A8C83]">{t('Todavía no hay cambios registrados.','No changes recorded yet.')}</p>:
+       history.map((item,i)=><div key={i} className="flex flex-wrap items-center justify-between gap-2 rounded-[14px] bg-[#F5F8F1] p-3 text-[12px]">
+        <div><strong className="capitalize text-[#204E4A]">{item.environment} · {item.kind==='draft'?t('Borrador','Draft'):item.kind==='credentials'?t('Credenciales','Credentials'):t('Validación','Validation')}</strong>
+         <p className="mt-1 text-[#7A8A7F]">{t('Administrador ','Administrator ')}{item.actor}</p></div>
+        <span className="font-semibold text-[#688078]">{new Date(item.recorded_at).toLocaleString(lang==='es'?'es-US':'en-US')}</span>
+       </div>)}
+     </div>
+    </section>
     <section className={cardClass}>
      <h4 className="text-[17px] font-black">{t('Activación de producción','Production activation')}</h4>
      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
