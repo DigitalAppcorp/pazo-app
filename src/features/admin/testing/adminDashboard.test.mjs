@@ -144,7 +144,7 @@ test('selected visual is an illustrated high-density analytics dashboard, not ti
  assert.ok(board.includes('<AdminCohortColumns'),'Signup cohort visualization is data-driven')
  assert.ok(board.includes('<AdminDonut'),'Real category proportions, not generic progress bars')
  assert.ok(board.includes('<AdminGlyph'),'Sidebar and cards use actual icons')
- assert.ok(board.includes('min-h-[132px]'),'KPI cards must have reference-like readable height')
+ assert.ok(board.includes('min-h-[136px]'),'KPI cards must have reference-like readable height')
  assert.ok(board.includes('text-[26px]')&&board.includes('lg:text-[29px]'),'KPI numerical hierarchy')
  assert.ok(board.includes('grid grid-cols-2 gap-3 lg:grid-cols-4'),'Four prominent desktop KPIs')
  for(const module of ['Mascotas','Membresías','Actividad','Contenido','Fake Doors','Lugares','Denuncias','Supabase']){
@@ -158,4 +158,22 @@ test('selected visual is an illustrated high-density analytics dashboard, not ti
  assert.ok(visuals.includes('role="img"'),'Chart visuals have accessible descriptions')
  assert.ok(visuals.includes('count>0'),'Donut segments must reflect only observed counts')
  assert.ok(visuals.includes('Math.max(1,total)'),'Chart should handle empty datasets')
+})
+
+test('approved dashboard fidelity followup keeps truthful data and visible desktop/mobile action hierarchy',()=>{
+ const visuals=read('src/features/admin/components/AdminVisuals.tsx')
+ const css=read('src/features/admin/components/AdminDashboard.css')
+ assert.ok(board.includes('pazo-admin-header'),'Desktop toolbar must be adjacent to heading')
+ assert.ok(board.includes('lg:hidden'),'Mobile period refresh must stay available')
+ assert.ok(board.includes('pazo-admin-sidebar-message'),'Approved reference includes a friendly illustration')
+ assert.ok(board.includes('/supporter/gratitude-empty-pets.svg'),'Use existing PAZO asset, not fake pet images')
+ assert.ok(board.includes('<AdminModuleRings'),'Use actual tracked module observations for rich analytics')
+ assert.ok(visuals.includes('export function AdminModuleRings'),'Data chart component is present')
+ assert.ok(visuals.includes('Math.max(1,base)'),'Zero audience cannot cause division by zero')
+ assert.ok(visuals.includes('strokeDasharray'),'Data-derived rings have a visible scale')
+ assert.ok(board.includes('No es una serie histórica'),'No invented daily growth')
+ assert.ok(board.includes('Pago ficticio, no ingresos reales'),'Financial test data labeled')
+ assert.ok(css.includes('.pazo-admin-panel'),'Dashboard visual styles remain portal-scoped')
+ assert.ok(!css.includes('border:')&&!css.includes('outline:')&&!css.includes('ring:'),
+  'Approved zero-contour policy applies to admin CSS')
 })
