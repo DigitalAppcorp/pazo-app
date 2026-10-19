@@ -7,7 +7,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onPaidVerified?:()=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onPaidVerified?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -32,7 +32,7 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection,onPaidVerified}:Props){
+export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onPaidVerified}:Props){
  const initialAccountCheck=useRef(false)
  const autoVerifiedIntents=useRef<Set<string>>(new Set())
  const paymentReadInFlight=useRef(false)
@@ -259,6 +259,14 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,onAccountInspection
     code==='sandbox_qa_owner_required'||code==='merchant_owner_plan_mismatch'?'restricted':'failed')
   }finally{setBusy(false)}
  }
+ // A user-initiated action on the invitation can resume ONLY the existing
+ // bound subscription. This never issues a second create/checkout request.
+ useEffect(()=>{
+  if(resumeRevision>0&&account?.state==='bound'&&!busy&&!loading)
+   void resumeApproval()
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[resumeRevision])
+ useEffect(()=>{onRecoveryStage?.(recoveryStage)},[recoveryStage,onRecoveryStage])
  const checkRetry=async()=>{
   if(busy||loading)return
   setRetryEligibility('checking')
