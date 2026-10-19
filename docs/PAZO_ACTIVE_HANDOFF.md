@@ -1,3 +1,17 @@
+# ADMIN — Fidelidad visual: segunda implementación tras rechazo del PO (2026-10-18)
+
+PO comparó la maqueta de dashboard «Resumen general» elegida con el primer resultado real en Vite y señaló la distancia visual: letras muy pequeñas, KPI planos, sidebar escaso y tarjetas vacías. Aceptamos el rechazo: responsive/CI PASS ≠ calco visual. Ya rehíce frontend solo en PR #44 DRAFT:
+- `src/features/admin/components/AdminVisuals.tsx` nuevo, SVG/iconos y gráficos/donas con **datos realmente registrados**.
+- `src/features/admin/components/AdminDashboard.tsx` con sidebar más ancho (265/270 CSS px) y corona; 10 entradas funcionales (incluidas Mascotas, Actividad, Contenido, Lugares y acceso a denuncias existente), números grandes y tarjetas KPI de 132px, disposición 4+3+3+3 cercana al mockup. Móvil responsive sin alterar shell de PAZO para Feed/perfiles.
+- Gráficos muestran cohortes observables, actividad por módulo, cuentas con/sin mascota y contenido; NO existe serie temporal exacta, geolocalización agregada consentida o uptime real, por lo que no inventar líneas/mapa/porcentajes, ni copiar cifras del mockup.
+- `adminDashboard.test.mjs` con regresiones de jerarquía visual y control de datos. Commit de pruebas `8c567599e8cc481b253dbfabffd2a00e50d228a7`: **7/7 GitHub checks SUCCESS**. Cambio posterior de corona `67c624c4f9b0f65b0400fd7070dd9cb9c844da0f`.
+
+Backend administrativo Supabase anteriormente instalado permanece intacto y privado; no se modifica PayPal Live ni main. **Siguiente gate:** PO debe sincronizar Vite y enviar comparativa captura real desktop/móvil; verificar visualmente menú, escala, 4 KPI, bloques, scroll y accesibilidad. **No afirmar «igual al diseño» o «aprobado visualmente» antes de la comparación.** Detalles en `docs/PAZO_ADMIN_CONTROL_CENTER_20261018.md`.
+
+**Gate:** `ADMIN_VISUAL_REFERENCE_REWORK_CI_PASS_PO_VISUAL_REVIEW_PENDING`.
+
+---
+
 # ADMIN — Rediseño responsive escritorio/tablet/móvil autorizado por Product Owner (2026-10-18)
 
 PO seleccionó imagen de referencia **«Resumen general»** (UI clara desktop de pazo., sidebar, 4 KPIs, mosaico de datos). Pedido adicional: «PAZO solo tiene vista mobile; al entrar al panel detectar celular vs computadora y acomodar módulos». No hacer detección invasiva: **CSS breakpoints por viewport** y *Portal React* para que **solo AdminDashboard** escape de `data-pazo-app-shell` max-width ~430px de PAZO. El resto de PAZO permanece móvil y sin cambios.
