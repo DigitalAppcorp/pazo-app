@@ -353,6 +353,104 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </div>
       <Note>{l('Datos de PAZO en pruebas. Los importes de PayPal Sandbox NO son recaudación real. Actividad medida solo desde que se instaló el registro diario.','Staging data. PayPal Sandbox payments are NOT real revenue. Activity is measured only since daily tracking started.')} {l('Medición desde','Tracking since')}: {overview.activity.tracking_since}.</Note>
      </>}
+
+     {section==='pets'&&<>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+       <Stat icon="paw" label={l('Mascotas registradas','Registered pets')} value={overview.people.pets}/>
+       <Stat icon="users" label={l('Cuentas con mascota','Accounts with pets')} value={overview.people.with_pet}/>
+       <Stat icon="users" label={l('Cuentas sin mascota','Accounts without pets')} value={overview.people.without_pet}/>
+       <Stat icon="layers" label={l('Cuentas registradas','Registered accounts')} value={overview.people.registered}/>
+      </div>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+       <DashboardPanel title={l('Distribución de mascotas','Pet ownership')}>
+        <AdminDonut total={overview.people.registered} centerLabel={l('cuentas','accounts')}
+         parts={[
+          {label:l('Con mascota','With pets'),count:overview.people.with_pet,color:'#227D58'},
+          {label:l('Sin mascota','Without pets'),count:overview.people.without_pet,color:'#B8E3BA'}
+         ]}/>
+       </DashboardPanel>
+       <DashboardPanel title={l('Mascotas de las cuentas consultadas','Pets linked to listed accounts')}>
+        <div className="space-y-2">
+         {users.flatMap(u=>u.pets.map(p=>({owner:u.email,id:p.id,name:p.name,species:p.species}))).map(p=>
+          <div key={p.id} className="flex items-center gap-3 rounded-[14px] bg-[#F6F9F4] p-3">
+           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E0F1DE] text-[#238154]">
+            <AdminGlyph name="paw"/>
+           </span>
+           <div className="min-w-0">
+            <p className="truncate text-[14px] font-black">{p.name}</p>
+            <p className="truncate text-[12px] text-[#71847C]">{p.species} · {p.owner||l('Sin correo','No email')}</p>
+           </div>
+          </div>)}
+         {users.every(u=>u.pets.length===0)&&<p className="text-[14px] text-[#71847C]">{l('No hay mascotas en esta página de cuentas.','No pets on this page of accounts.')}</p>}
+        </div>
+        <p className="mt-4 text-[12px] text-[#75877E]">{l('Listado paginado; usa Cuentas para avanzar entre registros.','Paginated list; use Users to browse further.')}</p>
+        <button type="button" onClick={()=>selectSection('users')} className="mt-3 min-h-11 rounded-full bg-[#E1E53F] px-4 text-[13px] font-bold">{l('Ver cuentas','View accounts')}</button>
+       </DashboardPanel>
+      </div>
+     </>}
+     {section==='activity'&&<>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+       <Stat icon="activity" label={l('Usuarios de hoy','Today’s users')} value={overview.activity.today}/>
+       <Stat icon="calendar" label={l('Últimos 7 días','Last 7 days')} value={overview.activity.last_7d}/>
+       <Stat icon="calendar" label={l('Últimos 30 días','Last 30 days')} value={overview.activity.last_30d}/>
+       <Stat icon="users" label={l('Usuarios del período','Period users')} value={overview.activity.active_period}/>
+      </div>
+      <DashboardPanel title={l('Actividad registrada por módulo','Tracked activity per module')} description={l('Cuentas únicas observadas por sección','Unique accounts per section')}>
+       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {Object.entries(overview.activity.module_counts).sort((a,b)=>b[1]-a[1]).map(([key,count])=>
+         <div key={key} className="rounded-[15px] bg-[#F7F9F4] px-4 py-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
+           <span className="text-[14px] font-bold">{moduleNames[key]||key}</span><strong className="text-[16px]">{count}</strong>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-[#E5EDE0]">
+           <div className="h-full rounded-full bg-[#3DA26F]" style={{width:100*count/Math.max(1,overview.activity.active_period)+'%'}}/>
+          </div>
+         </div>)}
+        {Object.keys(overview.activity.module_counts).length===0&&<p className="p-4 text-[14px] text-[#71857F]">{l('Sin datos registrados para este período.','No tracked activity for this period.')}</p>}
+       </div>
+       <p className="mt-4 text-[13px] text-[#71857F]">{l('La actividad se mide por días y secciones, no por sesiones ni duración.','Activity is measured by days and sections, not session count or duration.')} {l('Desde','Since')}: {overview.activity.tracking_since}</p>
+      </DashboardPanel>
+     </>}
+     {section==='content'&&<>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+       <Stat icon="layers" label={l('Publicaciones','Posts')} value={overview.people.posts}/>
+       <Stat icon="heart" label={l('Comentarios','Comments')} value={overview.people.comments}/>
+       <Stat icon="users" label={l('Comunidades','Communities')} value={overview.people.communities}/>
+       <Stat icon="chart" label={l('Total de registros','Total records')} value={overview.people.posts+overview.people.comments+overview.people.communities}/>
+      </div>
+      <DashboardPanel title={l('Contenido registrado en PAZO','Recorded PAZO content')}>
+       <AdminDonut total={overview.people.posts+overview.people.comments+overview.people.communities}
+        centerLabel={l('registros','records')}
+        parts={[
+         {label:l('Publicaciones','Posts'),count:overview.people.posts,color:'#188B63'},
+         {label:l('Comentarios','Comments'),count:overview.people.comments,color:'#6D90EB'},
+         {label:l('Comunidades','Communities'),count:overview.people.communities,color:'#F4BA77'}
+        ]}/>
+       <p className="mt-4 text-[13px] text-[#71857F]">{l('Desglose por registros existentes. Los tipos de publicación todavía no tienen una fuente analítica autorizada.','Breakdown of existing records. Post categories do not have an analytics source yet.')}</p>
+      </DashboardPanel>
+     </>}
+     {section==='places'&&<>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+       <Stat icon="pin" label={l('Eventos de Lugares','Places events')} value={overview.experiments.place_events}/>
+       <Stat icon="search" label={l('Eventos de búsqueda','Search events')} value={overview.experiments.search_events}/>
+       <Stat icon="compass" label={l('Experimentos de Lugares','Places experiments')} value={experiments.filter(x=>x.key.startsWith('places_')).length}/>
+       <Stat icon="heart" label={l('Interés en Lugares','Places interest')} value={experiments.filter(x=>x.key.startsWith('places_')).reduce((sum,x)=>sum+x.interested,0)}
+        note={l('Suma por experimento; puede repetir personas','Sum per experiment; people may overlap')}/>
+      </div>
+      <DashboardPanel title={l('Ideas de Lugares','Places ideas')}>
+       <div className="space-y-3">{experiments.filter(x=>x.key.startsWith('places_')).map((x,i)=>
+        <button key={x.key} type="button" onClick={()=>{setSection('ideas');void selectDoor(x.key)}}
+         className="flex min-h-[60px] w-full items-center gap-3 rounded-[15px] bg-[#F7F9F4] px-4 text-left hover:bg-[#EAF1E4] focus-visible:bg-[#E1E53F]">
+         <span className="text-[14px] font-black">{i+1}</span>
+         <span className="min-w-0 flex-1">
+          <strong className="block truncate text-[15px]">{x.name}</strong>
+          <small className="text-[12px] text-[#71857F]">{x.viewers} {l('vieron','viewed')} · {x.interested} {l('mostraron interés','interested')}</small>
+         </span>
+         <AdminGlyph name="chart" size={19}/>
+        </button>)}</div>
+       <p className="mt-4 text-[13px] text-[#71857F]">{l('Estos eventos son conteos de interacciones, no visitas únicas ni posiciones GPS.','Events are interaction counts, not unique visits or GPS positions.')}</p>
+      </DashboardPanel>
+     </>}
      {section==='users'&&<>
       <Note>{l('Cuentas autenticadas y mascotas asociadas. Solo administradores pueden consultar esta lista. Los días activos no son sesiones: son días diferentes con uso de módulos medido.','Authenticated accounts and their pets. Only administrators can view this list. Active days are distinct days with tracked usage.')}</Note>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4"><Stat label={l('Con mascota','With pets')} value={overview.people.with_pet}/><Stat label={l('Sin mascota','Without pet')} value={overview.people.without_pet}/></div>
