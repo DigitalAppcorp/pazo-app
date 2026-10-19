@@ -21,7 +21,7 @@ export function AdminGlyph({name,size=23}:{name:AdminGlyphName;size?:number}){
   settings:<><circle cx="12" cy="12" r="3"/><path d="m10 2 .5 2.3a8 8 0 0 0-2 1.2L6.4 4.4 4 7l1.2 2a8 8 0 0 0 0 3L3 13l1 3 2.5.3a8 8 0 0 0 2 1.5l-.3 2.3 3.5.9 1.4-2a8 8 0 0 0 2.6-.8l2 1.2 2-3-1.3-1.9a8 8 0 0 0 .5-2.6L22 10l-1-3-2.4-.4a8 8 0 0 0-1.7-1.7L17.1 2h-3.4l-.6 2.2"/></>,
   pin:<><path d="M20 10c0 5.5-8 12-8 12S4 15.5 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.6"/></>,
   check:<path d="m4 12 5 5L20 6"/>,
-  flame:<path d="M12 22c5 0 8-3.7 8-8.2 0-3.2-1.8-5.5-4.7-8.8.2 3.5-1.6 5-2.2 5.1.3-3.5-2.1-6.3-4.2-8.1.3 4.2-5 6.6-5 12.5C3.9 18.9 7.3 22 12 22Z"/>
+  flame:<path d="M12 22c5 0 8-3.7 8-8.2 0-3.2-1.8-5.5-4.7-8.8.2 3.5-1.6 5-2.2 5.1.3-3.5-2.1-6.3-4.2-8.1.3 4.2-5 6.6-5 12.5C3.9 18.9 7.3 22 12 22Z"/>,
   chevron:<path d="m9 5 7 7-7 7"/>
  }
  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{icons[name]}</svg>
