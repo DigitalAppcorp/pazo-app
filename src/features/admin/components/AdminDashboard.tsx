@@ -146,6 +146,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       <p className="mt-1 text-[13px] text-[#647C75] lg:text-[15px]">
        {section==='summary'?l('Así va PAZO, con los datos disponibles','PAZO at a glance, using available data'):l('Centro de administración de PAZO','PAZO administration center')}
       </p>
+      {overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
      </div>
      <div className="flex shrink-0 items-center gap-2">
       <div className="hidden items-center gap-2 lg:flex">
