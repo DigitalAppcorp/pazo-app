@@ -265,3 +265,4 @@ BEGIN
 END $overlap$;
 
 \i scripts/f16-live-cutover-cas-lab.sql
+\i scripts/f16-live-intent-rpc-disposable-lab.sql
