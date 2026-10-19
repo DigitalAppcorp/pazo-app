@@ -107,7 +107,7 @@ export function createPazoSandboxVerifiedCheckout({
       !['new_binding','already_bound'].includes(bound.result))
     return fail('subscription_binding_unconfirmed')
    // Sandbox approval URL is validated by the creator, never from browser.
-   return response('APPROVAL_PENDING',{approvalUrl:created.approvalUrl,
+   return response('APPROVAL_PENDING',{intentId:record.intentId,approvalUrl:created.approvalUrl,
      reason:'buyer_must_approve_at_paypal_then_wait_for_verified_payment'})
   },
  })
