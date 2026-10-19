@@ -1,0 +1,44 @@
+name: F16 Live Gateway Disposable PostgreSQL Lab
+on:
+  pull_request:
+    paths:
+      - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
+      - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - '.github/workflows/f16-live-gateway-disposable-lab.yml'
+  push:
+    branches: [f13/section-titles-20261012]
+    paths:
+      - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
+      - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - '.github/workflows/f16-live-gateway-disposable-lab.yml'
+permissions:
+  contents: read
+jobs:
+  live-gateway-pg17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-data
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install disposable PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
+      - name: Test private merchant generations, Live OFF, idempotency and period integrity
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: synthetic-only-no-hosted-data
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/f16-live-gateway-disposable-lab.sql
