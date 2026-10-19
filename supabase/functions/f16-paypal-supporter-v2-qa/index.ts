@@ -389,7 +389,7 @@ Deno.serve(async(request:Request)=>{
  if(data.action==='recover_retry'){
   if(Object.keys(data).sort().join('|')!=='action|intentId'||
    typeof data.intentId!=='string'||
-   !/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId))
+   !/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId))
    return addCors(reply(400,'invalid_request'),runtime.origin)
   if(!QA_CHECKOUT_RELEASE_APPROVED||!QA_V2_RETRY_RELEASE_APPROVED||
    !await runtime.canBuy(qaOwner))
