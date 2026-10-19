@@ -112,7 +112,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
   <aside className="hidden min-h-0 flex-col bg-white px-5 pb-5 pt-6 shadow-[5px_0_30px_rgba(32,78,74,0.025)] lg:flex">
    <p className="px-3 text-[36px] font-black tracking-[-0.07em] text-[#204E4A]">pazo<span className="text-[#E1E53F]">.</span></p>
    <div className="mt-6 flex items-center gap-3 rounded-[18px] bg-[#F9FAF7] px-3 py-4">
-    <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E1E53F] text-[22px] font-black">P</span>
+    <span aria-hidden="true" className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E1E53F] text-[#204E4A]"><AdminGlyph name="crown" size={25}/></span>
     <div><p className="text-[13px] font-black">{l('Centro de control','Control center')}</p><p className="text-[11px] font-medium text-[#71857F]">{l('Administrador','Administrator')}</p></div>
    </div>
    <nav aria-label={l('Secciones del panel','Dashboard sections')} className="mt-5 flex flex-1 flex-col gap-1 overflow-y-auto">
