@@ -46,7 +46,7 @@ function DashboardPanel({title,description,children,action}:{
   <div className="flex items-start justify-between gap-3">
    <div className="min-w-0"><h3 className="text-[16px] font-black tracking-tight text-[#204E4A] lg:text-[17px]">{title}</h3>
     {description&&<p className="mt-1 text-[12px] text-[#71857F]">{description}</p>}</div>
-   {action&&<button type="button" onClick={action} aria-label={title} className="rounded-full bg-[#F2F5EC] px-3 py-1.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">↗</button>}
+   {action&&<button type="button" onClick={action} aria-label={title} className="rounded-full bg-[#F2F5EC] px-3 py-1.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">{action?"Ver":"Ver"}</button>}
   </div>
   <div className="mt-4">{children}</div>
  </section>
@@ -313,7 +313,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
         <p className="text-[13px] text-[#617B73]">{l('Las denuncias se gestionan en el panel de Moderación existente.','Reports are managed in the existing moderation panel.')}</p>
         {onOpenReports&&<button type="button" onClick={onOpenReports}
          className="mt-5 min-h-11 w-full rounded-[16px] bg-[#F1F5E9] px-4 text-[12px] font-extrabold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">
-          {l('Abrir denuncias','Open reports')} →
+          {l('Abrir denuncias','Open reports')}
          </button>}
        </DashboardPanel>
       </div>
