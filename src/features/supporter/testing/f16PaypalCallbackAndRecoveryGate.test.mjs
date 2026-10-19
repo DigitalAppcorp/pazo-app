@@ -50,3 +50,28 @@ test('recovery always sends exact owner-bound intent into financial preflight',(
  assert.ok(parent.includes("qaPayAction==='reconciliation_needed'"))
  assert.ok(parent.includes('No se inició otro cobro'))
 })
+
+test('recovery rejection reports stage only, never exposes provider payload or buyer identifiers',()=>{
+ const recover=edge.slice(edge.indexOf("if(data.action==='recover_retry')"),
+  edge.indexOf("// Recover only the original PayPal approval"))
+ for(const stage of ['admission','owner_record','paypal_lookup','cancel_eligibility',
+  'paypal_cancel_pending','merchant_evidence','grant_authorization']){
+  assert.ok(recover.includes("stage='"+stage+"'"),'Stage missing '+stage)
+ }
+ assert.ok(recover.includes("failures[stage]||'recovery_check_unavailable'"))
+ assert.ok(!recover.includes('console.log(account)'))
+ assert.ok(!recover.includes('console.error(e)'))
+ const allowed=[
+  'recovery_check_admission','recovery_check_account',
+  'recovery_check_provider','recovery_check_cancel_eligibility',
+  'recovery_check_cancel_provider','recovery_check_merchant_evidence',
+  'recovery_check_grant']
+ for(const code of allowed){
+  assert.ok(edge.includes(code),'No server category '+code)
+  assert.ok(child.includes(code),'Client must preserve safe category '+code)
+ }
+ assert.ok(child.includes("onRecoveryDiagnostic?.(diagnosticCodes[code]||'R0')"))
+ assert.ok(parent.includes('onRecoveryDiagnostic={setQaRecoveryDiagnostic}'))
+ assert.ok(parent.includes('Referencia de diagnóstico: '))
+ assert.ok(!parent.includes('Vuelve a intentarlo más tarde.'))
+});
