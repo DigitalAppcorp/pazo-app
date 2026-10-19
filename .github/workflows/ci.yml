@@ -56,6 +56,9 @@ jobs:
           VITE_APP_RELEASE: ${{ github.sha }}
         run: npm run build
 
+      - name: Verify compiled PWA assets and PayPal return routes
+        run: npm run test:prepreview:dist
+
       - name: F14 media purge regressions
         run: npm run test:f14
 

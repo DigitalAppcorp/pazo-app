@@ -97,6 +97,9 @@ Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL no
 ## Vercel ya legible sin forzar teamId — corrección del bloqueo R8
 - PO confirmó sesión real en dashboard de `digitalapp`. La conexión permite leer proyecto `pazo-app-t83r`, versiones, alias, dominio verificado, nombres de variables (decrypt=false) si se omite el parámetro teamId en lecturas; el 403 anterior era específico del scope forzado. **No pedir reconexión**. Último preview inspeccionado READY a SHA `8569384`, no HEAD del PR #44; producción screenshot main `5163c18` es versión antigua. Vercel tiene SSO protection de previews y los env F16 son específicos de rama. R8 pasa de acceso BLOCKED a read-only PASS; el lanzamiento aún no autorizado. Ver `docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md`.
 
+## Decisión PO: último Preview solo para corroborar (19-oct-2026)
+- Desarrollo y QA deben completarse en PR #44/GitHub y localhost antes de otro Preview. El gate local `scripts/pazo-prepreview-local.ps1` prueba código, build y artefactos PWA, sin deploy ni pagos; CI valida `dist/` tras build. Live sigue OFF, el resultado automatizado no sustituye QA de membresía, finanzas o dispositivos.
+
 ## Seguridad, alcance y continuación
 - Supabase project ref `mrybvqdebbgcayuvgkkr` (solo identificador público), GitHub PR #44 DRAFT. Nunca compartir secrets, IDs de compradores ni payment tokens en handoff.
 - F13 diseño aprobado: mapa full-bleed opción 3, barra blanca/isotipo verde, perfiles/mensajería/avisos y fake doors; F14 eliminación QA E2E con protecciones. No reabrir decisiones de módulos, no degradar «cero contornos».
