@@ -19,7 +19,7 @@ test('actual PAZO Vite QA uses exact localhost origin and only Sandbox provider'
  assert.match(edge,/get\('PAZO_F16_PAYPAL_ENV'\)!=='sandbox'/)
  assert.match(edge,/f16_qa_v2_owner_can_checkout/)
  assert.match(edge,/new Set\(\[QA_ORIGIN,\.\.\.QA_LOCAL_ORIGINS\]\)/)
- assert.match(edge,/const returnUrl=QA_ORIGIN\+'\/'/)
+ assert.match(edge,/const returnUrl=QA_ORIGIN\+'\/paypal\/return'/)
  assert.doesNotMatch(edge,/https:\/\/api-m\.paypal\.com/)
 })
 test('real PAZO QA displays only V2 subscriber actions, not P06 historic cancellation',()=>{
