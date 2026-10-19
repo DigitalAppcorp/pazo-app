@@ -1,4 +1,30 @@
 # PAZO — Ruta de lanzamiento MVP Beta → PayPal Live
+
+## Ruta ejecutiva — cinco etapas (PO: beta gratuita; Live posterior)
+
+Esta sección es el orden vigente para el cierre. Ver dictamen de evidencia en docs/PAZO_MVP_LAUNCH_AND_LIVE_AUDIT_20261019.md. No reabrir módulos sociales ya aprobados salvo regresión demostrada.
+
+### 01. Gateway financiero y administración
+Preservar Sandbox Legacy y cancelaciones. Auditar y reconciliar sin duplicados los 26 eventos del inbox retenido. Implementar en rama gateway server-side con merchant, entorno, generación y plan inmutables; checkout Live independiente, webhook firmado e idempotente, período verificado, refund/disputa, beneficios y cancelación. Completar en admin un selector autenticado con preflight real, confirmación PO, auditoría, kill-switch y rollback. Versionar también el entrypoint alojado del diagnóstico Sandbox sale-review. DoD: pruebas PG17+CI de rutas negativas, sin despliegue/secret/Live activo. DDL hosted o Edge financiera requiere GO específico. Prueba real Live solo después de beta HTTPS.
+
+### 02. Seguridad y operación de beta
+Clasificar cuatro SECURITY DEFINER RPC públicas y su superficie expuesta; verificar protección de contraseñas filtradas en Supabase Auth; revisar rol admin/moderador, manual de reportes y bajas, medios/CDN, privacidad y retención, variables del build. No revocar funciones públicas útiles ni pedir repetir E2E Auth/F14 previamente aprobados. DoD: revisión de privilegios y SOP operativo documentados; sin hallazgos de seguridad críticos pendientes.
+
+### 03. Cierre visual/producto
+PO valida en localhost corrección del parpadeo en entrada Amigo de PAZO, limpieza de Mi membresía, cuatro beneficios (insignias, cinco fondos, muro por opt-in/out y medallas) y el panel admin responsive contra referencia aprobada. Usar datos Sandbox ya verificados, no exigir nueva venta artificial. DoD: capturas y aceptación específica; corregir solo regresiones nuevas.
+
+### 04. Release candidate local
+Ejecutar verify:prepreview, build, artefacto PWA, CI+6 PostgreSQL labs, smoke corto de módulos críticos sin reabrir QA aceptada. Para beta pública: QA Sandbox UI apagada, altas Sandbox desactivadas; no anunciar beneficios públicos como activos sin QA. No exponer cuentas demo o datos falsos como actividad real. DoD: SHA final inmutable, rollback y checklist firmados, PR candidato a Preview.
+
+### 05. Único Preview de aceptación y beta pública
+Solo tras cerrar 01–04, publicar un Preview privado del SHA final. Verificar HTTPS, version, Auth/recovery, PWA real instalada y navegador en Android/iOS, callback/return, refresh, navegación, acceso público sin autenticación Vercel, métricas/errores y rollback. Fijar fecha de vigencia legal al publicar. Pedir GO PO para merge/main/deploy. DoD: beta gratuita accesible, segura y aprobada.
+
+### Activación Live posterior — verificación externa final
+Ya con beta HTTPS oficial, PO configura credenciales, plan y webhook Live por Vault en panel (nunca secretos en chat), se valida merchant/plan/origen, firma y entrega webhook, cancelación/renovación y una transacción real supervisada con reconciliación de período. Tras un GO financiero independiente se cambia SOLO nueva alta Live por selector administrativo auditado. Ni publicar beta ni guardar claves activa cobros. Las suscripciones Sandbox anteriores conservan merchant y gestión originales. No prometer cero cambios si PayPal real descubre incompatibilidades.
+
+Fuera del cierre: mensajería futura informativa, extensiones fake doors, mejoras de rendimiento sin impacto medido, cobertura de egress sin API del proveedor. Beta social y cobros Live son dos gates diferentes.
+
+---
 Fecha: 2026-10-19 · Product Owner: usuario · Ejecutor: ChatGPT / Project Brain OS 1.4.1
 Estado: **EN CURSO / MVP_RELEASE_NO_GO / LIVE_NO_GO**.
 Documento de ejecución, no certificación. Fuente: `AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, PR #44 y gates F14/F16. Los snapshots históricos pueden haber sido supersedidos.
