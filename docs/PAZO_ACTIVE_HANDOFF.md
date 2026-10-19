@@ -1,4 +1,6 @@
 # PAZO — ACTIVE HANDOFF (estado operativo, 19-oct-2026)
+> **F16 MIGRACIÓN INERTE CANDIDATA (19-oct-2026):** preparada `supabase/migrations/20261019234100_pazo_f16_live_gateway_inert_private_staging.sql` (9 tablas privadas y RPC sin grants; checkout Live queda prohibido por CHECK). El lab PostgreSQL 17 verifica el mismo SQL, no un borrador diferente. **NO APLICADA en Supabase** ni autoriza cobros. Ver `docs/PAZO_F16_INERT_HOSTED_STAGING_GATE_20261019.md`. Lo siguiente son stores/RPC service-only y writer con pruebas de propietario e idempotencia; requiere revisión de retención y GO explícito antes de aplicar DDL hosted. Preservar los 26 webhooks Sandbox sin correlación y los 2 períodos QA.
+
 
 > **F16 CONTINUIDAD RECUPERADA — 19-oct-2026, Live OFF / Sandbox preservado.** El usuario pidió continuar tras desconexión. La etapa de código de gateway avanzó en PR #44 hasta `0ffa103f6ead9875a7569d45a9570590b33bd919`, **CI + 7 laboratorios PG17 = 8/8 SUCCESS**. Rama `f13/section-titles-20261012`, PR DRAFT, no merge ni despliegue. El entrypoint de diagnóstico Sandbox `f16-paypal-sandbox-sale-review` se recuperó en GitHub SHA `5831801` y tuvo parity tests; no reescribirlo.
 >
