@@ -1,12 +1,13 @@
 import { useCallback,useEffect,useState } from 'react'
 import { createPortal } from 'react-dom'
+import { AdminPayPalSettings } from './AdminPayPalSettings'
 import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGlyphName } from './AdminVisuals'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
 } from '../adminDashboardService'
 
-type Section='summary'|'users'|'pets'|'finance'|'activity'|'content'|'ideas'|'places'|'infra'|'reports'
+type Section='summary'|'users'|'pets'|'finance'|'activity'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'
 const sections:{key:Section;es:string;en:string;icon:AdminGlyphName}[]=[
  {key:'summary',es:'Resumen',en:'Overview',icon:'chart'},
  {key:'users',es:'Usuarios',en:'Users',icon:'users'},
@@ -18,6 +19,7 @@ const sections:{key:Section;es:string;en:string;icon:AdminGlyphName}[]=[
  {key:'places',es:'Lugares',en:'Places',icon:'pin'},
  {key:'reports',es:'Denuncias',en:'Reports',icon:'alert'},
  {key:'infra',es:'Supabase',en:'Supabase',icon:'database'},
+ {key:'paypal',es:'Configuración · PayPal',en:'Settings · PayPal',icon:'settings'},
 ]
 const n=(number:number)=>number.toLocaleString('es-US')
 const money=(minor:number)=>(minor/100).toLocaleString('es-US',{style:'currency',currency:'USD'})
@@ -186,11 +188,12 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
        </button>
       </div>
      </div>
-     {loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
-     {error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
+     {section==='paypal'&&<AdminPayPalSettings lang={lang}/>}
+     {section!=='paypal'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
+     {section!=='paypal'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
        {l('No fue posible actualizar todos los datos.','Could not refresh all metrics.')} {error}
       </div>}
-    {overview&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
+    {overview&&section!=='paypal'&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
 
 
      {section==='summary'&&<>
