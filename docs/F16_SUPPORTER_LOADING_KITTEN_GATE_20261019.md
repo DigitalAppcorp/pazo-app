@@ -14,3 +14,16 @@ Fecha: 2026-10-19. Producto: PAZO. PO pidió evitar la pantalla incompleta y la 
 ## Restricciones y pruebas pendientes
 No modificar PayPal Live, Supabase DB/Edge, identidad, cobros ni autorización de reintentos. Cambio puramente UI, manteniendo el PR #44 DRAFT.
 No confundir CI PASS con aceptación visual: PO debe comprobar en Vite móvil ancho 390px y escritorio, cuenta nueva, cuenta pendiente, membresía activa, falla lenta y reduced-motion; gate visual pendiente.
+
+## Corrección de la segunda carga visible — 19 de octubre
+
+El PO mostró captura donde, después de salir la animación, la oferta revelaba «Consultando las condiciones…» sin botón PayPal. Causa: `SandboxCheckoutQaPanel` solicitaba la oferta publicada `action:'offer'` recién después de que `qaV2AccountState==='none'` permitía pintar `SupporterOfferB`. La primera implementación esperaba solo membresía y lista de cuentas. No servía para el UX solicitado.
+
+Arreglo frontend en PR #44:
+- `SandboxCheckoutQaPanel` notifica al padre `onOfferState` (`loading|ready|blocked`) y soporta `refreshRevision` solo para releer las condiciones publicadas, nunca crear suscripción automáticamente.
+- `SupporterAccountManagement` incluye `qaOfferState` en el preflight **solo cuando** hace falta un checkout nuevo (`qaV2AccountState==='none'`) o nuevo consentimiento de reintento (`qaPayAction==='retry_ready'`). Los casos de suscripción `bound` no consultan la oferta innecesariamente.
+- La oferta está montada detrás del overlay para que cargue; cabecera y `main` quedan ocultos por `display:none` hasta `phase==='ready'`. En fallo de oferta, pantalla del gatito indica problema y ofrece reintentar; no revela un segundo spinner ni el botón sin condiciones.
+- El reintento de condiciones relee exclusivamente la oferta, no PayPal checkout. Nunca interpreta un timeout o respuesta fallida como cuenta sin membresía. No hay cambios en Supabase, PayPal Live, main, precios ni controles de cobro.
+- Pruebas de contrato actualizadas en `f16SupporterPreparationGate.test.mjs` y `f16SupporterProductExperience.test.mjs`.
+- Gate: compilación/CI y prueba visual local pendientes, no confundir commits con aceptación visual.
+
