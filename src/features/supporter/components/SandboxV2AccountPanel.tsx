@@ -7,7 +7,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable')=>void;onPaidVerified?:()=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready')=>void;onPaidVerified?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -232,8 +232,14 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
   onResumeStatus?.('checking')
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
-   const result=await call({action:'resume_approval',intentId:account.intentId}) as Result
+   const result=await call({action:'recover_retry',intentId:account.intentId}) as Result
    if(result.ok!==true)throw Error('INVALID_QA_RESUME')
+   if(result.phase==='RETRY_READY'&&result.code==='reconciled_retry_ready'&&result.eligible===true){
+    setRecoveryStage('terminal_needs_financial_reconciliation')
+    setRetryEligibility('approved')
+    onResumeStatus?.('retry_ready')
+    return
+   }
    if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_can_resume'){
     const url=safeSandboxApprovalUrl(result.approvalUrl)
     if(!url)throw Error('UNTRUSTED_APPROVAL_LINK')
