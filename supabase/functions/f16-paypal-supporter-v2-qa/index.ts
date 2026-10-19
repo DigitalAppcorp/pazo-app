@@ -139,6 +139,25 @@ function compose(requestOrigin:string){
    return r.ok&&(await r.json())===true
   }catch{return false}
  }
+ // Owner-only, Sandbox-local diagnostic reset: archives the old, unapproved
+ // checkout in PAZO after two fresh merchant reads and signed CREATED proof.
+ // It NEVER mutates/cancels PayPal, grants benefits, or represents a payment.
+ const archiveUnapprovedLocalQa=async({ownerId,intentId,subscriptionId,checkedAt}:{
+  ownerId:string;intentId:string;subscriptionId:string;checkedAt:string
+ })=>{
+  try{
+   const r=await fetch(BASE+'/rest/v1/rpc/f16_qa_v2_archive_pending_approval_qa',{
+    method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000),
+    headers:{apikey:key,Authorization:'Bearer '+key,
+     'content-type':'application/json',Accept:'application/json'},
+    body:JSON.stringify({
+     p_owner_id:ownerId,p_intent_id:intentId,
+     p_subscription_id:subscriptionId,p_provider_checked_at:checkedAt
+    })
+   })
+   return r.ok&&(await r.json())===true
+  }catch{return false}
+ }
  const inventoryRead=createPazoSandboxV2InventoryRead({clientId,clientSecret})
  const unfilteredInventoryRead=createPazoSandboxV2UnfilteredInventoryRead({clientId,clientSecret})
  const createdCandidateStore=createPazoSandboxV2CreatedEventCandidateStore({
@@ -166,7 +185,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,cancellation,canAbandonPending,retryMerchantProof,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,cancellation,canAbandonPending,archiveUnapprovedLocalQa,retryMerchantProof,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -444,6 +463,43 @@ Deno.serve(async(request:Request)=>{
      stage='cancel_eligibility'
      if(!await runtime.canAbandonPending(qaOwner,account.intentId))
       return addCors(reply(409,'pending_cancellation_preflight_blocked'),runtime.origin)
+     if(QA_LOCAL_ORIGINS.has(runtime.origin)){
+       // A merchant GET with APPROVAL_PENDING is not proof of cancellation,
+       // but this disposable Sandbox owner explicitly wants a fresh checkout.
+       // Preserve old merchant intent and audit; never lie that it is terminal.
+       stage='qa_signed_created'
+       const candidate=await runtime.createdCandidateStore.readForOwnerMulti({
+         ownerId:qaOwner,intentId:account.intentId})
+       if(!candidate)return addCors(reply(409,'qa_created_event_unverified'),runtime.origin)
+       const signed=await runtime.createdEventAudit.inspect({
+         eventId:candidate.eventId,eventType:candidate.eventType,
+         subscriptionId:account.externalSubscriptionId,
+         intentId:account.intentId,planId:PLAN})
+       if(signed?.correlated!==true)
+         return addCors(reply(409,'qa_created_event_unverified'),runtime.origin)
+       stage='qa_confirm_pending'
+       const again=await runtime.reader.readSubscription(
+         account.externalSubscriptionId,{includeApprovalLink:false})
+       if(again?.id!==account.externalSubscriptionId||
+          again?.plan_id!==PLAN||again?.custom_id!==account.intentId||
+          again?.status!=='APPROVAL_PENDING')
+        return addCors(reply(409,'qa_pending_status_changed'),runtime.origin)
+       stage='qa_archive'
+       const archived=await runtime.archiveUnapprovedLocalQa({
+         ownerId:qaOwner,intentId:account.intentId,
+         subscriptionId:account.externalSubscriptionId,
+         checkedAt:new Date().toISOString()})
+       if(archived!==true)
+         return addCors(reply(409,'qa_archive_not_authorized'),runtime.origin)
+       return addCors(new Response(JSON.stringify({
+         ok:true,environment:'sandbox',phase:'QA_ABANDONED_PENDING_RESET',
+         code:'qa_fresh_consent_required',approvalUrl:null,
+         paymentVerified:false,paidThrough:null,
+         mayGrantBenefits:false,mayRecordPayment:false,
+         previousPayPalSubscriptionCancelled:false
+       }),{status:200,headers:{'content-type':'application/json',
+         'cache-control':'no-store'}}),runtime.origin)
+     }
      stage='paypal_cancel_pending'
      const cancelled=await runtime.cancellation.cancelPending({
       intentId:account.intentId,subscriptionId:account.externalSubscriptionId})
@@ -505,7 +561,10 @@ Deno.serve(async(request:Request)=>{
     cancel_eligibility:'recovery_check_cancel_eligibility',
     paypal_cancel_pending:'recovery_check_cancel_provider',
     merchant_evidence:'recovery_check_merchant_evidence',
-    grant_authorization:'recovery_check_grant'
+    grant_authorization:'recovery_check_grant',
+    qa_signed_created:'recovery_check_qa_created',
+    qa_confirm_pending:'recovery_check_qa_status',
+    qa_archive:'recovery_check_qa_archive'
    }
    return addCors(reply(409,failures[stage]||'recovery_check_unavailable'),runtime.origin)
   }
