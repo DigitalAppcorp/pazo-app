@@ -413,13 +413,16 @@ Deno.serve(async(request:Request)=>{
   if(!QA_CHECKOUT_RELEASE_APPROVED||!QA_V2_RETRY_RELEASE_APPROVED||
    !await runtime.canBuy(qaOwner))
    return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  let stage='admission'
   try{
    if(await runtime.admit()!==true)
     return addCors(reply(429,'rate_limited'),runtime.origin)
+   stage='owner_record'
    const account=await runtime.v2AccountStore.readForOwner({
     ownerId:qaOwner,intentId:data.intentId})
    if(!account||account.state!=='bound'||!account.externalSubscriptionId||
     account.planId!==PLAN)return addCors(reply(409,'private_account_read_unavailable'),runtime.origin)
+   stage='paypal_lookup'
    let merchant=null,notFound=false
    try{merchant=await runtime.reader.readSubscription(
     account.externalSubscriptionId,{includeApprovalLink:true})}
@@ -438,8 +441,10 @@ Deno.serve(async(request:Request)=>{
      // A saved ba_token may no longer render in PayPal Sandbox. Instead of
      // blindly reopening it, close ONLY the still-unapproved subscription.
      // A separate new affirmative consent is required for any replacement.
+     stage='cancel_eligibility'
      if(!await runtime.canAbandonPending(qaOwner,account.intentId))
       return addCors(reply(409,'pending_cancellation_preflight_blocked'),runtime.origin)
+     stage='paypal_cancel_pending'
      const cancelled=await runtime.cancellation.cancelPending({
       intentId:account.intentId,subscriptionId:account.externalSubscriptionId})
      if(cancelled.status!=='CANCELLED')
@@ -450,10 +455,12 @@ Deno.serve(async(request:Request)=>{
     else if(!['CANCELLED','EXPIRED'].includes(merchant.status))
      return addCors(reply(409,'existing_subscription_not_terminal'),runtime.origin)
    }
+   stage='merchant_evidence'
    const proof=await runtime.retryMerchantProof.verify({
     ownerId:qaOwner,intentId:account.intentId,
     subscriptionId:account.externalSubscriptionId,
     consentedAt:account.consentedAt})
+   stage='grant_authorization'
    const granted=await runtime.retryConsentStore.approveReconciled({
     ownerId:qaOwner,intentId:account.intentId,
     subscriptionId:account.externalSubscriptionId,...proof})
@@ -465,7 +472,19 @@ Deno.serve(async(request:Request)=>{
    }),{status:200,headers:{'content-type':'application/json',
     'cache-control':'no-store'}}),runtime.origin)
   }catch{
-   return addCors(reply(409,'retry_merchant_reconciliation_pending'),runtime.origin)
+   // Stage-only result: no subscriber, subscription, payer, PayPal raw
+   // response, or user identifier. Lets support diagnose instead of
+   // telling every buyer to "try again later".
+   const failures:Record<string,string>={
+    admission:'recovery_check_admission',
+    owner_record:'recovery_check_account',
+    paypal_lookup:'recovery_check_provider',
+    cancel_eligibility:'recovery_check_cancel_eligibility',
+    paypal_cancel_pending:'recovery_check_cancel_provider',
+    merchant_evidence:'recovery_check_merchant_evidence',
+    grant_authorization:'recovery_check_grant'
+   }
+   return addCors(reply(409,failures[stage]||'recovery_check_unavailable'),runtime.origin)
   }
  }
  // Recover only the original PayPal approval for an already-bound QA V2
