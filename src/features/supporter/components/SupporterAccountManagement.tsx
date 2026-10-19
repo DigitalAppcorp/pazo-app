@@ -43,7 +43,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
   const [qaReviewRevision,setQaReviewRevision] = useState(0)
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
-  const [qaRecoveryStage,setQaRecoveryStage] = useState('unverified')
+  const [,setQaRecoveryStage] = useState('unverified')
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
