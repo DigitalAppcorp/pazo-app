@@ -1,7 +1,7 @@
 
 import type {ReactNode} from 'react'
 
-export type AdminGlyphName='users'|'paw'|'crown'|'money'|'activity'|'database'|'layers'|'chart'|'heart'|'alert'|'search'|'compass'|'calendar'|'clock'|'settings'|'pin'|'check'|'flame'
+export type AdminGlyphName='users'|'paw'|'crown'|'money'|'activity'|'database'|'layers'|'chart'|'heart'|'alert'|'search'|'compass'|'calendar'|'clock'|'settings'|'pin'|'check'|'flame'|'chevron'
 export function AdminGlyph({name,size=23}:{name:AdminGlyphName;size?:number}){
  const icons:Record<AdminGlyphName,ReactNode>={
   users:<><circle cx="9" cy="7.5" r="3"/><path d="M2.5 20v-2.2a6.5 6.5 0 0 1 13 0V20M17 4.5a3.2 3.2 0 0 1 0 6.4m1 4a5 5 0 0 1 3.5 5.1"/></>,
@@ -22,6 +22,7 @@ export function AdminGlyph({name,size=23}:{name:AdminGlyphName;size?:number}){
   pin:<><path d="M20 10c0 5.5-8 12-8 12S4 15.5 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.6"/></>,
   check:<path d="m4 12 5 5L20 6"/>,
   flame:<path d="M12 22c5 0 8-3.7 8-8.2 0-3.2-1.8-5.5-4.7-8.8.2 3.5-1.6 5-2.2 5.1.3-3.5-2.1-6.3-4.2-8.1.3 4.2-5 6.6-5 12.5C3.9 18.9 7.3 22 12 22Z"/>
+  chevron:<path d="m9 5 7 7-7 7"/>
  }
  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{icons[name]}</svg>
 }
@@ -78,6 +79,40 @@ export function AdminCohortColumns({prior,older,recent,labels}:{
   </div>
   <div className="flex justify-around gap-3 py-3 text-center">
    {labels.map(v=><p key={v} className="w-1/3 text-[11px] font-semibold leading-snug text-[#768982]">{v}</p>)}
+  </div>
+ </div>
+}
+
+/** Radial module reach: each circle is observed users of that module / all
+ * observed active users in the selected period. Rings may overlap by user;
+ * it is NOT a historical trend or additive share of the audience. */
+export function AdminModuleRings({items,base,centerLabel}:{
+ items:{name:string;value:number;color:string}[];base:number;centerLabel:string
+}){
+ const radii=[79,61,43,25]
+ return <div className="flex min-h-[216px] flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-2">
+  <svg viewBox="0 0 216 208" role="img"
+   aria-label={items.map(v=>v.name+': '+v.value+' de '+base+' usuarios activos').join('; ')}
+   className="h-[188px] w-[188px] shrink-0 overflow-visible">
+   {items.slice(0,4).map((item,i)=>{
+    const radius=radii[i], circumference=2*Math.PI*radius
+    const progress=Math.min(1,Math.max(0,item.value/Math.max(1,base)))
+    return <g key={item.name}>
+     <circle cx="108" cy="104" r={radius} fill="none" stroke="#EFF3ED" strokeWidth="11"/>
+     <circle cx="108" cy="104" r={radius} fill="none" stroke={item.color}
+      strokeWidth="11" strokeLinecap="round" transform="rotate(-90 108 104)"
+      strokeDasharray={circumference*progress+' '+circumference}/>
+    </g>
+   })}
+   <text x="108" y="104" fontSize="26" fontWeight="800" textAnchor="middle" fill="#173D38">{base}</text>
+   <text x="108" y="122" fontSize="11" fontWeight="700" textAnchor="middle" fill="#647E71">{centerLabel}</text>
+  </svg>
+  <div className="w-full min-w-0 flex-1 space-y-3">
+   {items.map(item=><div key={item.name} className="flex items-center gap-2.5 text-[13px]">
+    <span className="h-3 w-3 shrink-0 rounded-full" style={{backgroundColor:item.color}}/>
+    <span className="min-w-0 flex-1 truncate font-semibold text-[#526F63]">{item.name}</span>
+    <strong className="text-[14px] text-[#204E4A]">{item.value}</strong>
+   </div>)}
   </div>
  </div>
 }
