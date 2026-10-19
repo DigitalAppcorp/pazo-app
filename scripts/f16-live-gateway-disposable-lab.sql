@@ -24,8 +24,8 @@ BEGIN
  WHERE c.relname LIKE 'pazo_paypal_%' AND c.relkind='r'
   AND n.nspname IN('admin_private','supporter_private')
   AND c.relrowsecurity AND c.relforcerowsecurity;
- IF tables_count<>7 THEN
-  RAISE EXCEPTION 'expected 7 FORCE RLS private tables, got %',tables_count;
+ IF tables_count<>9 THEN
+  RAISE EXCEPTION 'expected 9 FORCE RLS private tables, got %',tables_count;
  END IF;
  IF has_table_privilege('anon','supporter_private.pazo_paypal_live_paid_periods','SELECT')
   OR has_table_privilege('authenticated','supporter_private.pazo_paypal_live_checkout_intents','SELECT')
