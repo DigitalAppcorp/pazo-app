@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
-import { saveSandboxApproval } from '../sandboxApprovalReturn.mjs'
 
 // F16 P06: owner-only Sandbox QA purchase experience, HIDDEN from public builds.
 // Local Vite Sandbox admits confirmed Auth owners automatically after explicit
@@ -124,12 +123,8 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
       }})
       const url=data.phase==='APPROVAL_PENDING'?approveUrl(data.approvalUrl):null
       if(url){
-        // Pausing on PayPal login must NOT erase the original approval link.
-        // It is bound to the same Auth owner + immutable intent and expires
-        // from this tab after 30 minutes. No second PayPal subscription POST.
-        const {data:{session}}=await supabase.auth.getSession()
-        if(session?.user?.id&&typeof data.intentId==='string')
-          saveSandboxApproval({ownerId:session.user.id,intentId:data.intentId,approvalUrl:url})
+        // Approval tokens are not reusable guarantees. Do not retain them;
+        // the next attempt must verify the prior subscription server-side.
         window.location.assign(url);return
       }
     }catch(error) {
