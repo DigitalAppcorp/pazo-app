@@ -8,7 +8,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onRecoveryDiagnostic?:(code:string|null)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void;onQaPendingReset?:()=>void}
+type Props={lang:'es'|'en';consumer?:boolean;reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onRecoveryDiagnostic?:(code:string|null)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void;onQaPendingReset?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -33,7 +33,7 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onRecoveryDiagnostic,onResumeStatus,onPaidVerified,onQaPendingReset}:Props){
+export function SandboxV2AccountPanel({lang,consumer=false,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onRecoveryDiagnostic,onResumeStatus,onPaidVerified,onQaPendingReset}:Props){
  const lastHandledResumeRequest=useRef(0)
  const initialAccountCheck=useRef(false)
  const autoVerifiedIntents=useRef<Set<string>>(new Set())
@@ -481,6 +481,61 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
    setTimeout(()=>{link.remove();URL.revokeObjectURL(url)},1500)
   }catch{setError(true)}finally{setBusy(false)}
  }
+
+ // Reuse the same owner-bound backend and cancellation operation, but do not
+ // expose the technical Sandbox diagnostic dashboard to ordinary members.
+ if(consumer)return <section aria-label={t('Gestionar membresía','Manage membership')}
+   className="space-y-3 rounded-[20px] bg-[#F4F7F0] p-4 text-[#204E4A]">
+   {loading?<div role="status" className="min-h-[76px] space-y-3" aria-label={t('Consultando membresía','Checking membership')}>
+    <span className="block h-4 w-40 animate-pulse rounded-full bg-[#DCE9D9]"/>
+    <span className="block h-4 w-56 max-w-full animate-pulse rounded-full bg-[#E4EDE3]"/>
+   </div>:<>
+    {paidThrough&&<div className="rounded-[16px] bg-white px-4 py-3">
+      <p className="text-[12px] font-semibold text-[#59746B]">{t('Membresía verificada hasta','Membership verified until')}</p>
+      <p className="mt-1 text-[17px] font-black">{new Date(paidThrough).toLocaleDateString(lang==='es'?'es-US':'en-US')}</p>
+    </div>}
+    {providerStatus&&<p className="text-[13px] text-[#527067]">
+      {t('Estado en PayPal: ','PayPal status: ')}<strong className="text-[#204E4A]">{providerStatus}</strong>
+    </p>}
+    {cancelled&&<p role="status" className="rounded-[14px] bg-white p-3 text-[13px] font-bold">
+      {t('PayPal confirmó la cancelación de futuras renovaciones. El período pagado se conserva.',
+         'PayPal confirmed cancellation of future renewals. Your paid-through period remains unchanged.')}
+    </p>}
+    {error&&<p role="alert" className="rounded-[14px] bg-[#FAEAE0] p-3 text-[13px]">
+      {t('No pudimos actualizar el estado de PayPal. Puedes volver a consultar tu membresía.',
+         'Could not update PayPal status. You can try checking your membership again.')}
+    </p>}
+    {!account&&!error&&<p className="text-[13px] text-[#59746B]">
+      {t('No hay una solicitud V2 disponible para administrar aquí.',
+         'No V2 subscription request is available to manage here.')}
+    </p>}
+    <div className="flex flex-wrap gap-2">
+     <button type="button" className="min-h-11 rounded-full bg-white px-4 py-2 text-[13px] font-bold disabled:opacity-50"
+      onClick={()=>void refresh()} disabled={busy}>
+      {t('Actualizar estado','Refresh status')}
+     </button>
+     {account?.state==='bound'&&['ACTIVE','SUSPENDED'].includes(providerStatus||'')&&!cancelled&&
+      <button type="button" onClick={()=>setConfirm(true)} disabled={busy}
+       className="min-h-11 rounded-full bg-[#204E4A] px-4 py-2 text-[13px] font-bold text-white disabled:opacity-50">
+       {t('Cancelar futuras renovaciones','Cancel future renewals')}
+      </button>}
+    </div>
+    {confirm&&<div className="space-y-3 rounded-[16px] bg-[#FBECE3] p-4 text-[13px]">
+     <p>{t('¿Cancelar las futuras renovaciones de esta suscripción de prueba? Tu período pagado se conserva.',
+       'Cancel future renewals for this test subscription? Your paid-through period remains unchanged.')}</p>
+     <div className="flex flex-wrap gap-2">
+      <button type="button" disabled={busy} onClick={()=>void cancel()}
+       className="min-h-11 rounded-full bg-[#204E4A] px-4 text-[13px] font-bold text-white disabled:opacity-50">
+       {t('Sí, cancelar renovaciones','Yes, cancel renewals')}
+      </button>
+      <button type="button" disabled={busy} onClick={()=>setConfirm(false)}
+       className="min-h-11 rounded-full bg-white px-4 text-[13px] font-bold disabled:opacity-50">
+       {t('Volver','Back')}
+      </button>
+     </div>
+    </div>}
+   </>}
+ </section>
  const button='min-h-11 rounded-full bg-[#204E4A] px-4 py-2 text-xs font-extrabold text-white disabled:opacity-40'
  return <section aria-labelledby="qa-v2-account-title"
     className="space-y-3 rounded-[24px] bg-white p-4 text-[#204E4A] shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
