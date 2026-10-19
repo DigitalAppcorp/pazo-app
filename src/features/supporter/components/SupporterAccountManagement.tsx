@@ -8,6 +8,7 @@ import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus
 import { SupporterBenefitsHome } from './SupporterBenefitsHome'
 import { SupporterOfferB } from './SupporterOfferB'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
+import { supporterPaypalReturnKind } from '../supporterAccountRoute.mjs'
 import { SupporterPreparingScreen } from './SupporterPreparingScreen'
 import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
 import {supporterBenefitsUiEnabled} from '../supporterUiRelease'
@@ -45,6 +46,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [,setQaRecoveryStage] = useState('unverified')
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
+  const [paypalReturnKind] = useState(() => supporterPaypalReturnKind(window.location.hash))
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
   const [qaOfferState,setQaOfferState] = useState<{
@@ -257,6 +259,13 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           </button>
         </div>}
         {membership.kind === 'inactive' && <>
+          {paypalReturnKind&&<p role="status" className="mx-auto mb-3 max-w-[420px] rounded-[16px] bg-[#EBF1E5] px-4 py-3 text-center text-[13px] font-medium leading-relaxed text-[#204E4A]">
+            {paypalReturnKind==='cancel'
+              ?label('Regresaste de PayPal sin completar el pago. Tu cuenta sigue igual; puedes volver a intentarlo.',
+                'You returned from PayPal without completing payment. Your account is unchanged; you can try again.')
+              :label('Volviste de PayPal. Estamos comprobando el resultado; la membresía solo se activará si se verifica el pago.',
+                'You returned from PayPal. We are checking the result; membership activates only when payment is verified.')}
+          </p>}
           <SupporterOfferB lang={lang}>
             {qaV2Screen ? (
               offerRequired
