@@ -38,6 +38,6 @@ export function ModerationAccess({enabled,lang}:{enabled:boolean;lang:'es'|'en'}
   </div>
   {screen==='reports'&&<ModeratorQueue lang={lang} onClose={()=>setScreen(null)}/>}
   {screen==='media'&&<ModerationMediaQueue lang={lang} onClose={()=>setScreen(null)}/>}
-  {adminAllowed&&screen==='dashboard'&&<AdminDashboard lang={lang} onClose={()=>setScreen(null)}/>}
+  {adminAllowed&&screen==='dashboard'&&<AdminDashboard lang={lang} onClose={()=>setScreen(null)} onOpenReports={()=>setScreen('reports')}/>}
  </section>
 }
