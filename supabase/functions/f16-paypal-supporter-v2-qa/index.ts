@@ -446,7 +446,7 @@ Deno.serve(async(request:Request)=>{
      // The merchant-proof verifier below requires signed CREATED evidence,
      // a second terminal GET, and zero scoped transactions. No grant on 404.
     }
-    if(!['CANCELLED','EXPIRED'].includes(merchant.status))
+    else if(!['CANCELLED','EXPIRED'].includes(merchant.status))
      return addCors(reply(409,'existing_subscription_not_terminal'),runtime.origin)
    }
    const proof=await runtime.retryMerchantProof.verify({
