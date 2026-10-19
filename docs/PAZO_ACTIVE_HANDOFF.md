@@ -1,3 +1,15 @@
+# ADMIN — Rediseño responsive escritorio/tablet/móvil autorizado por Product Owner (2026-10-18)
+
+PO seleccionó imagen de referencia **«Resumen general»** (UI clara desktop de pazo., sidebar, 4 KPIs, mosaico de datos). Pedido adicional: «PAZO solo tiene vista mobile; al entrar al panel detectar celular vs computadora y acomodar módulos». No hacer detección invasiva: **CSS breakpoints por viewport** y *Portal React* para que **solo AdminDashboard** escape de `data-pazo-app-shell` max-width ~430px de PAZO. El resto de PAZO permanece móvil y sin cambios.
+
+**Código en PR #44 DRAFT, rama `f13/section-titles-20261012`:** `AdminDashboard.tsx` reemplaza ventana móvil anterior por escritorio sidebar 235–255px (lg), cabecera/resumen y mosaico de métricas reales; tablet KPI y panels en grid; móvil encabezado, tabs horizontales desplazables, KPI 2-col y paneles 1-col, controles táctiles >=44px. `createPortal(..., document.body)` evita el límite de la carcasa Vite. Mismas cinco secciones y autorización `pazo_is_admin` en ambos diseños; `ModerationAccess` enlaza «Abrir denuncias» con el módulo que ya existía. Tests de breakpoints/portal/métricas no inventadas en `adminDashboard.test.mjs`. Sin dependencias, migraciones o callbacks de pago nuevas. No agregar contornos.
+
+**Dato importante:** el mockup tenía 1,248 usuarios, $257.14, mapa de distribución por estado, crecimiento histórico, «Tiempo real» y uptime, todos ilustrativos sin fuentes válidas. La implementación **NO reutiliza cifras ficticias**, ni mapa derivado de zonas privadas, ni streaming inexistente. El panel muestra métricas reales de RPC actual, con etiqueta *Sandbox* y campos sin fuente «No disponible». La referencia es de estética/estructura; aprobación visual pendiente.
+
+Informe: `docs/PAZO_ADMIN_CONTROL_CENTER_20261018.md`. **Gate:** `ADMIN_RESPONSIVE_CODE_IMPLEMENTED_CI_RECHECK_PO_VISUAL_MOBILE_DESKTOP_PENDING`; Live/main/PR Draft intactos.
+
+---
+
 # ADMIN — Centro de control integral, backend Supabase instalado (2026-10-18)
 
 **Orden explícita PO:** construir panel de administración completo para PAZO (cuentas, mascotas, pagos, recaudación, checkouts incompletos, uso frecuente, Supabase, fake doors y prioridades), conservando denuncias existentes; PO autorizó implementar. **PR #44 DRAFT** `f13/section-titles-20261012`, no tocar main/Live.
