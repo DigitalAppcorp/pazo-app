@@ -3,6 +3,9 @@
 // paid service period. Never store payload, payer PII, or grant entitlements.
 import {requireLiveCertUrl} from './livePostback.mjs'
 const LIMIT=65536
+const OWNER=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const TYPES=new Set([
  'BILLING.SUBSCRIPTION.CREATED','BILLING.SUBSCRIPTION.ACTIVATED',
  'BILLING.SUBSCRIPTION.UPDATED','BILLING.SUBSCRIPTION.CANCELLED',
@@ -91,13 +94,18 @@ export function createPazoLiveWebhookIntake({released=false,environment,webhookI
   }catch{return deny(503,'ownership_proof_unavailable')}
   if(scope?.confirmed!==true||scope?.sourceEnvironment!=='live'||
      scope?.ownerIntentVerified!==true||scope?.planVerified!==true||
+     !OWNER.test(scope?.ownerId||'')||
+     !INTENT.test(scope?.intentId||'')||
+     !SUB.test(scope?.subscriptionId||'')||
      !Number.isSafeInteger(scope?.merchantGeneration)||scope.merchantGeneration<1)
    return deny(503,'ownership_proof_unavailable')
   let inserted
   try{
    inserted=await inbox.recordIfAbsent({provider:'paypal',sourceEnvironment:'live',
-    merchantGeneration:scope.merchantGeneration,eventId:event.id,
-    eventType:event.event_type})
+    merchantGeneration:scope.merchantGeneration,
+    ownerId:scope.ownerId,intentId:scope.intentId,
+    subscriptionId:scope.subscriptionId,
+    eventId:event.id,eventType:event.event_type})
   }catch{return deny(503,'durable_inbox_unavailable')}
   if(inserted===true)return deny(202,'verified_live_event_queued')
   if(inserted===false)return deny(200,'duplicate_verified_live_event')

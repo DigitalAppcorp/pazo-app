@@ -15,10 +15,14 @@ const event={id:'WH-EVENT-123',event_type:'PAYMENT.SALE.COMPLETED',
 const request=(body=JSON.stringify(event),more={})=>new Request('https://pazo.example.com/',{
  method:'POST',headers:{...headers,...more},body
 })
+const owner='12345678-1234-4234-8234-123456789abc'
+const intent='intent-12345678-1234-4234-8234-123456789abc'
+const subscription='I-LIVE-SUBSCRIPTION123'
 const configured=()=>({released:true,environment:'live',webhookId:'WH-123456789012',
  verifySignature:async()=>true,
  provePazoScope:async()=>({confirmed:true,sourceEnvironment:'live',
-   ownerIntentVerified:true,planVerified:true,merchantGeneration:1}),
+   ownerIntentVerified:true,planVerified:true,merchantGeneration:1,
+   ownerId:owner,intentId:intent,subscriptionId:subscription}),
  inbox:{recordIfAbsent:async()=>true}})
 test('Live ingress fails closed by default and the deployed entrypoint has a hard OFF latch',async()=>{
  let called=false
@@ -73,7 +77,8 @@ test('Only independently verified LIVE owner-scoped events can enter a durable i
  assert.equal(r.status,202)
  assert.equal(records.length,1)
  assert.deepEqual(records[0],{provider:'paypal',sourceEnvironment:'live',
-  merchantGeneration:1,eventId:event.id,eventType:event.event_type})
+  merchantGeneration:1,ownerId:owner,intentId:intent,
+  subscriptionId:subscription,eventId:event.id,eventType:event.event_type})
  assert.ok(!JSON.stringify(records).includes('ATTACKER_UNTRUSTED'))
  const d=await createPazoLiveWebhookIntake({...configured(),
   inbox:{recordIfAbsent:async()=>false}})(request())
@@ -88,6 +93,12 @@ test('No signature, missing original owner, wrong merchant, or absent DB never A
     ownerIntentVerified:true,planVerified:true,merchantGeneration:1})},
   {provePazoScope:async()=>({confirmed:true,sourceEnvironment:'live',
     ownerIntentVerified:false,planVerified:true,merchantGeneration:1})},
+  {provePazoScope:async()=>({confirmed:true,sourceEnvironment:'live',
+    ownerIntentVerified:true,planVerified:true,merchantGeneration:1,
+    ownerId:'not-a-uuid',intentId:intent,subscriptionId:subscription})},
+  {provePazoScope:async()=>({confirmed:true,sourceEnvironment:'live',
+    ownerIntentVerified:true,planVerified:true,merchantGeneration:1,
+    ownerId:owner,intentId:'unverified-intent',subscriptionId:subscription})},
   {provePazoScope:async()=>{throw Error('PRIVATE_OWNER')}},
   {inbox:{recordIfAbsent:async()=>{throw Error('PRIVATE_LEDGER')}}},
   {inbox:{recordIfAbsent:async()=>null}},
