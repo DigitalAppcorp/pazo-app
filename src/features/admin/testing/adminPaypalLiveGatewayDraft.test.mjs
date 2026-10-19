@@ -46,3 +46,10 @@ test('a Live intent, signed event and paid period cannot silently cross merchant
  assert.match(sql,/UNIQUE\(intent_id,merchant_generation\)/)
  assert.match(sql,/FOREIGN KEY\(intent_id,merchant_generation\)/)
 })
+
+test('a signed nonpayment event cannot back a paid period; one SALE event credits at most one sale',()=>{
+ assert.match(sql,/verified_event_type.*DEFAULT 'PAYMENT\.SALE\.COMPLETED'/s)
+ assert.match(sql,/CHECK\(verified_event_type='PAYMENT\.SALE\.COMPLETED'\)/)
+ assert.match(sql,/UNIQUE\s*\(merchant_generation,provider_event_id,event_type\)/)
+ assert.match(sql,/UNIQUE\s*\(merchant_generation,provider_event_id\)/)
+})

@@ -141,7 +141,94 @@ BEGIN
   RAISE EXCEPTION 'FAIL oversized period accepted';
  EXCEPTION WHEN check_violation THEN NULL; END;
 END $money$;
-DO $done$
+-- A signed CREATED event cannot create a paid period; one verified SALE
+-- event also cannot be used to mint two paid periods.
+INSERT INTO supporter_private.pazo_paypal_live_event_inbox(
+ merchant_generation,provider_event_id,event_type
+) VALUES(1,'WH-EVENT-CREATED','BILLING.SUBSCRIPTION.CREATED');
+DO $negative$
 BEGIN
+ BEGIN
+  INSERT INTO supporter_private.pazo_paypal_live_paid_periods(
+   sale_id,intent_id,merchant_generation,provider_event_id,cycle_key,
+   service_start,service_end,merchant_verified_at
+  ) VALUES('SALE-BAD-CREATED','intent-12345678-1234-4234-8234-123456789abc',
+   1,'WH-EVENT-CREATED','CYCLE-BAD-CREATED',
+   '2026-10-19T00:00:00Z','2026-11-19T00:00:00Z','2026-10-19T00:00:00Z');
+  RAISE EXCEPTION 'FAIL CREATED event yielded paid period';
+ EXCEPTION WHEN foreign_key_violation THEN NULL; END;
+ BEGIN
+  INSERT INTO supporter_private.pazo_paypal_live_paid_periods(
+   sale_id,intent_id,merchant_generation,provider_event_id,cycle_key,
+   service_start,service_end,merchant_verified_at
+  ) VALUES('SALE-BAD-DUPLICATE','intent-12345678-1234-4234-8234-123456789abc',
+   1,'WH-EVENT-123','CYCLE-BAD-DUPLICATE',
+   '2026-11-19T00:00:00Z','2026-12-19T00:00:00Z','2026-11-19T00:00:00Z');
+  RAISE EXCEPTION 'FAIL duplicate use of signed sale event';
+ EXCEPTION WHEN unique_violation THEN NULL; END;
+END $negative$;
+\i supabase/drafts/f16_live_entitlement_projection_DISPOSABLE_ONLY.sql
+DO $projection$
+DECLARE v jsonb;
+BEGIN
+ v:=supporter_private.pazo_live_project_paid_periods(
+  '12345678-1234-4234-8234-123456789abc','2026-10-20T00:00:00Z');
+ IF v->>'active'<>'true' OR (v->>'completedCycles')::int<>0 OR
+  v->>'sourceEnvironment'<>'live'
+ THEN RAISE EXCEPTION 'Live period not reflected by projection'; END IF;
+ v:=supporter_private.pazo_live_project_paid_periods(
+  '33333333-3333-4333-8333-333333333333','2026-10-20T00:00:00Z');
+ IF v->>'active'<>'false' OR (v->>'completedCycles')::int<>0
+ THEN RAISE EXCEPTION 'Another owner received benefits'; END IF;
+END $projection$;
+INSERT INTO supporter_private.pazo_paypal_live_period_holds(
+ sale_id,hold_id,kind,verified_at
+) VALUES('SALE-LIVE-ONE','HOLD-REFUND-ONE','refunded','2026-10-20T00:00:00Z');
+DO $hold$
+DECLARE v jsonb;
+BEGIN
+ v:=supporter_private.pazo_live_project_paid_periods(
+  '12345678-1234-4234-8234-123456789abc','2026-10-20T01:00:00Z');
+ IF v->>'active'<>'false' OR v->>'paidThrough'<>''
+  AND v->>'paidThrough' IS NOT NULL
+ THEN RAISE EXCEPTION 'Held sale still grants Live period'; END IF;
+END $hold$;
+UPDATE supporter_private.pazo_paypal_live_period_holds
+ SET released_at='2026-10-21T00:00:00Z'
+ WHERE sale_id='SALE-LIVE-ONE';
+INSERT INTO supporter_private.pazo_paypal_live_event_inbox(
+ merchant_generation,provider_event_id,event_type
+) VALUES(1,'WH-EVENT-456','PAYMENT.SALE.COMPLETED');
+INSERT INTO supporter_private.pazo_paypal_live_paid_periods(
+ sale_id,intent_id,merchant_generation,provider_event_id,cycle_key,
+ service_start,service_end,merchant_verified_at
+) VALUES('SALE-LIVE-SECOND','intent-12345678-1234-4234-8234-123456789abc',
+ 1,'WH-EVENT-456','CYCLE-SECOND','2026-11-19T00:00:00Z',
+ '2026-12-19T00:00:00Z','2026-11-19T00:00:00Z');
+DO $two$
+DECLARE v jsonb;
+BEGIN
+ v:=supporter_private.pazo_live_project_paid_periods(
+  '12345678-1234-4234-8234-123456789abc','2026-11-20T00:00:00Z');
+ IF v->>'active'<>'true' OR (v->>'completedCycles')::int<>1
+ THEN RAISE EXCEPTION 'Live payment cycle progression incorrect'; END IF;
+END $two$;
+INSERT INTO supporter_private.pazo_paypal_live_event_inbox(
+ merchant_generation,provider_event_id,event_type
+) VALUES(1,'WH-EVENT-789','PAYMENT.SALE.COMPLETED');
+INSERT INTO supporter_private.pazo_paypal_live_paid_periods(
+ sale_id,intent_id,merchant_generation,provider_event_id,cycle_key,
+ service_start,service_end,merchant_verified_at
+) VALUES('SALE-LIVE-OVERLAP','intent-12345678-1234-4234-8234-123456789abc',
+ 1,'WH-EVENT-789','CYCLE-OVERLAP','2026-11-01T00:00:00Z',
+ '2026-12-01T00:00:00Z','2026-11-01T00:00:00Z');
+DO $overlap$
+DECLARE v jsonb;
+BEGIN
+ v:=supporter_private.pazo_live_project_paid_periods(
+  '12345678-1234-4234-8234-123456789abc','2026-11-20T00:00:00Z');
+ IF v->>'active'<>'false' OR (v->>'completedCycles')::int<>0 OR
+  v->>'paidThrough' IS NOT NULL
+ THEN RAISE EXCEPTION 'Overlapping payment windows granted benefits'; END IF;
  RAISE NOTICE 'F16_LIVE_GATEWAY_DISPOSABLE_PG17_PASS_NO_HOSTED_CHANGES';
-END $done$;
+END $overlap$;

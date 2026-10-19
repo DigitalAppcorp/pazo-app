@@ -125,6 +125,8 @@ CREATE TABLE supporter_private.pazo_paypal_live_event_inbox (
   CHECK(processing_state IN('pending','processing','processed','held')),
  verified_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
  PRIMARY KEY(merchant_generation,provider_event_id),
+ CONSTRAINT pazo_paypal_live_inbox_event_type_key UNIQUE
+  (merchant_generation,provider_event_id,event_type),
  CONSTRAINT pazo_paypal_live_inbox_environment_generation
   FOREIGN KEY(source_environment,merchant_generation)
   REFERENCES admin_private.pazo_paypal_merchant_generations(environment,generation)
@@ -144,6 +146,8 @@ CREATE TABLE supporter_private.pazo_paypal_live_paid_periods (
   REFERENCES supporter_private.pazo_paypal_live_checkout_intents(intent_id),
  merchant_generation bigint NOT NULL,
  provider_event_id text NOT NULL,
+ verified_event_type text NOT NULL DEFAULT 'PAYMENT.SALE.COMPLETED'
+  CHECK(verified_event_type='PAYMENT.SALE.COMPLETED'),
  cycle_key text NOT NULL CHECK(cycle_key ~ '^[A-Za-z0-9_-]{6,100}$'),
  amount_minor integer NOT NULL DEFAULT 299 CHECK(amount_minor=299),
  currency text NOT NULL DEFAULT 'USD' CHECK(currency='USD'),
@@ -156,9 +160,11 @@ CREATE TABLE supporter_private.pazo_paypal_live_paid_periods (
   REFERENCES supporter_private.pazo_paypal_live_checkout_intents
    (intent_id,merchant_generation),
  CONSTRAINT pazo_paypal_live_event_binding
-  FOREIGN KEY(merchant_generation,provider_event_id)
+  FOREIGN KEY(merchant_generation,provider_event_id,verified_event_type)
   REFERENCES supporter_private.pazo_paypal_live_event_inbox
-   (merchant_generation,provider_event_id),
+   (merchant_generation,provider_event_id,event_type),
+ CONSTRAINT pazo_paypal_live_single_sale_per_event UNIQUE
+  (merchant_generation,provider_event_id),
  CONSTRAINT pazo_paypal_live_period_duration CHECK(
   service_end>service_start AND
   service_end<=service_start+interval '32 days'),

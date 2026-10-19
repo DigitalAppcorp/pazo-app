@@ -140,3 +140,6 @@ The authenticated `pazo-admin-paypal-validate` code now stages `inspect_live_res
 
 ## F16 — Harden Live plan price preflight
 The read-only PayPal Live plan check now rejects unapproved billing-cycle sequence, tiered prices, missing payment preferences, auto-billing outstanding balances, nonzero taxes and setup fees, in addition to non-monthly or non-US$2.99 plans. It remains a **configuration read, not merchant proof or charging authority**. Tests cover each rejection; Live OFF.
+
+## F16 Live entitlement projection — disposable PG17 only
+Read-only source `supabase/drafts/f16_live_entitlement_projection_DISPOSABLE_ONLY.sql` projects active paid-through and 3/6/12 completed cycles from *independently verified* Live sale periods, respects refund/reversal/dispute holds, strictly isolates the owner and fails closed on overlapping service windows. The signed inbox event used to support a paid period must now be `PAYMENT.SALE.COMPLETED` and cannot be reused for a second sale (composite FK and UNIQUE). PostgreSQL 17 lab checks these invariants. No hosted deployment, no grants to frontend/service_role, no entitlement production release; projection consumes verified source ONLY, not PayPal ACTIVE status.
