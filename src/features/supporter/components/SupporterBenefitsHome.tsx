@@ -36,6 +36,11 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
  const [showSandboxTools,setShowSandboxTools]=useState(false)
  const closeRef=useRef<HTMLButtonElement>(null)
  const t=(es:string,en:string)=>lang==='es'?es:en
+ // Only deliberate localhost QA can see raw troubleshooting tools.
+ const showQaDiagnostics=qa&&import.meta.env.DEV&&
+  typeof window!=='undefined'&&
+  ['localhost','127.0.0.1'].includes(window.location.hostname)&&
+  new URLSearchParams(window.location.search).get('supporter_debug')==='1'
  useEffect(()=>{
   closeRef.current?.focus()
  },[])
@@ -136,21 +141,23 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
       ()=>setShowMembership(v=>!v),false,showMembership)}
     {showMembership && <div className="space-y-3 px-3 pb-4">
       <p className={caption}>{t('Los detalles de tu suscripción se consultan directamente en PayPal.','Your subscription details come directly from PayPal.')}</p>
-      {qa ? <div className="space-y-2">
-        <details open={showSandboxTools} onToggle={event=>setShowSandboxTools(event.currentTarget.open)}
+      {qa ? <>
+        <SandboxV2AccountPanel lang={lang} consumer/>
+        {showQaDiagnostics&&<details open={showSandboxTools}
+          onToggle={event=>setShowSandboxTools(event.currentTarget.open)}
           className="rounded-[20px] bg-[#EFF3E8] p-3">
           <summary className="min-h-11 cursor-pointer py-3 text-[14px] font-bold focus-visible:bg-[#E1E53F]/40">
            {t('Herramientas de prueba Sandbox','Sandbox test tools')}
           </summary>
           <SandboxV2AccountPanel lang={lang}/>
-        </details>
-      </div> : <p role="status" className={caption}>
+        </details>}
+      </> : <p role="status" className={caption}>
         {t('La administración de cobros reales sigue desactivada hasta el lanzamiento.',
            'Live billing management remains unavailable until launch.')}
       </p>}
     </div>}
    </section>
-   {qa&&<details className="rounded-[24px] bg-[#F0F3ED] px-4 py-2">
+   {showQaDiagnostics&&<details className="rounded-[24px] bg-[#F0F3ED] px-4 py-2">
     <summary className="min-h-11 cursor-pointer py-3 text-[14px] font-bold focus-visible:bg-[#E1E53F]/35">
      {t('Diagnóstico de beneficios · Solo QA','Benefit diagnostics · QA only')}
     </summary>
