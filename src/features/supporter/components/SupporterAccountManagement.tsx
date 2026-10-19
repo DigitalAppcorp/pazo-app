@@ -43,7 +43,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaReviewRevision,setQaReviewRevision] = useState(0)
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [qaRecoveryStage,setQaRecoveryStage] = useState('unverified')
-  const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'>('idle')
+  const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
   const continueExistingQaRequest = () => {
     if(qaPayAction==='checking'||qaV2AccountState!=='bound')return
     // One obvious payment action. Server decides whether the old approval
@@ -214,10 +214,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                     </p>
                     {qaV2AccountState==='bound'&&
                       <p className="text-[13px] leading-relaxed text-[#526F63]">
-                        {label('Puedes volver a intentarlo. Tu membresía solo se activará cuando PayPal confirme el pago.',
-                          'You can try again. Your membership activates only after PayPal confirms payment.')}
+                        {label('Si el intento anterior sigue disponible, lo continuaremos. Si terminó y PayPal lo confirma, podrás empezar otro sin perder tu cuenta.',
+                          'If your earlier checkout is available, we will resume it. If it has ended and PayPal verifies this, you can start another with the same account.')}
                       </p>}
-                    {qaV2AccountState==='bound'&&
+                    {qaV2AccountState==='bound'&&qaPayAction!=='retry_ready'&&
                       <button type="button" onClick={continueExistingQaRequest}
                         disabled={qaPayAction==='checking'||qaRecoveryStage==='checking'}
                         className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[15px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:opacity-65">
@@ -225,6 +225,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                           ? label('Conectando con PayPal…','Connecting to PayPal…')
                           : label('Pagar con PayPal','Pay with PayPal')}
                       </button>}
+                    {qaPayAction==='retry_ready'&&qaV2AccountState==='bound'&&
+                      <div className="space-y-2 text-left">
+                        <p role="status" className="text-center text-[13px] font-semibold text-[#436E53]">
+                          {label('Ya puedes volver a intentarlo. Confirma el apoyo para abrir PayPal.',
+                            'You can try again. Confirm the subscription to open PayPal.')}
+                        </p>
+                        <SandboxCheckoutQaPanel lang={lang} inline retry onReviewExisting={reviewExistingQaRequest}/>
+                      </div>}
                     {qaPayAction==='unavailable'&&qaV2AccountState==='bound'&&
                       <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
                         {label('No pudimos abrir PayPal. Estamos resolviendo un problema con este pago para evitar cobros duplicados. No se inició otro cobro.',
