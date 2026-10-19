@@ -81,10 +81,11 @@ function compose(requestOrigin:string){
  const key=get('SUPABASE_SERVICE_ROLE_KEY')!
  const clientId=get('PAZO_F16_PAYPAL_CLIENT_ID')!
  const clientSecret=get('PAZO_F16_PAYPAL_CLIENT_SECRET')!
- // PayPal requires HTTPS redirects; after approval the buyer reopens
- // http://localhost:5173 to verify the real payment in PAZO.
- const returnUrl=QA_ORIGIN+'/'
- const cancelUrl=QA_ORIGIN+'/'
+ // Preserve the subscription context across provider navigation.
+ // Neither callback constitutes a verified charge; entitlement remains
+ // server-authoritative and is checked on the supporter screen.
+ const returnUrl=QA_ORIGIN+'/paypal/return'
+ const cancelUrl=QA_ORIGIN+'/paypal/cancel'
  if(new URL(returnUrl).origin!==QA_ORIGIN||new URL(cancelUrl).origin!==QA_ORIGIN)
   throw Error('consumer_redirect_origin_mismatch')
  const supabase=createClient(BASE,key,{auth:{
