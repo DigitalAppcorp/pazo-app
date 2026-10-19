@@ -8,6 +8,7 @@ const css=readFileSync(new URL('../components/SupporterPreparingScreen.css',impo
 const index=readFileSync(new URL('../../../index.css',import.meta.url),'utf8')
 const checkout=readFileSync(new URL('../components/SandboxCheckoutQaPanel.tsx',import.meta.url),'utf8')
 const member=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
+const qaAccount=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
 
 test('F16 blocks premature offer until BOTH independent server-owned checks settle',()=>{
  assert.match(page,/membership\.kind==='checking'/)
@@ -66,4 +67,11 @@ test('PayPal CTA no longer waits on background provider-status read for display'
  assert.ok(!page.includes("disabled={qaPayAction==='checking'||qaRecoveryStage==='checking'}"))
  assert.ok(page.includes('onClick={continueExistingQaRequest}'))
  assert.ok(checkout.includes("action:retry?'retry_begin':'begin'"),'Checkout uses original guarded merchant actions')
+})
+
+test('late Supabase response cannot reveal an old owner checkout state after Retry',()=>{
+ assert.ok(qaAccount.includes('if(inspection!==inspectionSeq.current)return'))
+ assert.ok(qaAccount.includes("if(inspection===inspectionSeq.current)setLoading(false)"))
+ assert.ok(qaAccount.includes("setError(true);onAccountInspection?.('unavailable')"))
+ assert.ok(page.includes("setQaV2AccountState('checking')"))
 })
