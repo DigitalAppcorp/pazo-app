@@ -64,7 +64,7 @@ import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
-import { isSupporterAccountHash, leaveSupporterAccountRoute } from './features/supporter/supporterAccountRoute.mjs'
+import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -176,9 +176,10 @@ function PazoMain() {
   } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
-  const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(
-    () => isSupporterAccountHash(window.location.hash)
-  )
+  const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(() => {
+    normalizeSupporterPaypalCallback(window.location,window.history)
+    return isSupporterAccountHash(window.location.hash)
+  })
 
   useEffect(() => {
     const syncPublicRoute = () => {
