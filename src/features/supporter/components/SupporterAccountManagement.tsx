@@ -41,6 +41,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaV2AccountState,setQaV2AccountState] = useState<'checking'|'none'|'pending'|'bound'|'unavailable'>('checking')
   const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
   const [qaReviewRevision,setQaReviewRevision] = useState(0)
+  const [qaResumeRevision,setQaResumeRevision] = useState(0)
+  const [qaRecoveryStage,setQaRecoveryStage] = useState('unverified')
+  const continueExistingQaRequest = () => {
+    // Only a user click can request a provider-verified resume. This
+    // never creates an additional subscription or credits a payment.
+    setQaManagementOpen(true)
+    setQaResumeRevision(n=>n+1)
+  }
   const reviewExistingQaRequest = () => {
     setQaManagementOpen(true)
     setQaV2AccountState('checking')
@@ -193,22 +201,44 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {qaV2Screen ? (
               qaV2AccountState==='none'
                 ? <SandboxCheckoutQaPanel lang={lang} inline onReviewExisting={reviewExistingQaRequest}/>
-                : <div role="status" className="space-y-3 rounded-[18px] bg-[#EFF3E7] px-4 py-3 text-[12px] leading-relaxed text-[#204E4A]">
-                    <p>{qaV2AccountState==='bound'
-                      ? label('Ya existe una solicitud de PayPal Sandbox registrada. Eso NO significa que tengas membresía ni pago activo. Puedes consultar la solicitud y, si sigue pendiente, retomar su aprobación sin crear otra.',
-                        'A PayPal Sandbox request is already recorded. This does NOT mean you have a paid membership. You can check it and continue its approval if still pending without creating another request.')
-                      : qaV2AccountState==='pending'
-                        ? label('Ya existe una solicitud de suscripción Sandbox pendiente. No se iniciará una segunda.',
-                          'A Sandbox subscription request is pending. A second one will not be started.')
-                        : qaV2AccountState==='unavailable'
-                          ? label('No se pudo comprobar si ya tienes una suscripción Sandbox. El pago permanece bloqueado hasta verificarlo.',
-                            'Could not verify whether you already have a Sandbox subscription. Checkout remains blocked until it is verified.')
-                          : label('Comprobando si ya existe una suscripción Sandbox para evitar cobros duplicados…',
-                            'Checking for an existing Sandbox subscription to prevent duplicate payments…')}</p>
+                : <div role="status" className="space-y-3 rounded-[21px] bg-[#F0F4E6] px-4 py-4 text-[13px] leading-relaxed text-[#204E4A]">
+                    <p className="text-[15px] font-black">
+                      {qaV2AccountState==='bound'
+                        ? label('Tu pago quedó sin terminar','Your payment was not completed')
+                        : qaV2AccountState==='pending'
+                          ? label('Estamos revisando tu solicitud','We are checking your request')
+                          : qaV2AccountState==='unavailable'
+                            ? label('No pudimos consultar tu pago','We could not check your payment')
+                            : label('Comprobando tu solicitud…','Checking your request…')}
+                    </p>
+                    <p>
+                      {qaV2AccountState==='bound'
+                        ? qaRecoveryStage==='merchant_missing_needs_reconciliation'
+                          ? label('PayPal ya no encuentra tu solicitud anterior. Para evitar un cobro duplicado, necesitamos comprobar que haya terminado antes de dejarte empezar de nuevo.',
+                            'PayPal can no longer find your previous request. We must confirm it has ended before letting you start again, to avoid a duplicate subscription.')
+                          : qaRecoveryStage==='approval_link_unavailable'
+                            ? label('Tu aprobación sigue pendiente, pero PayPal no nos dio un enlace válido para continuar. Revisa el estado de tu solicitud.',
+                              'Your approval is still pending, but PayPal did not return a valid link. Check your request status.')
+                            : label('Saliste de PayPal antes de finalizar. Puedes intentar continuar donde te quedaste. No se iniciará otra suscripción sin comprobar primero la anterior.',
+                              'You left PayPal before finishing. You can try to continue where you left off. We will not start a new subscription without first checking the previous one.')
+                        : qaV2AccountState==='pending'
+                          ? label('Todavía no sabemos si PayPal creó tu solicitud. Vamos a comprobarlo antes de mostrar otro botón de pago.',
+                            'We do not yet know if PayPal created your request. We will check before showing another payment button.')
+                          : qaV2AccountState==='unavailable'
+                            ? label('Por seguridad, no iniciaremos otra suscripción mientras no podamos comprobar el estado de la anterior.',
+                              'For your safety, we will not start another subscription until we can check the previous one.')
+                            : label('Esto puede tardar unos segundos.','This may take a few seconds.')}
+                    </p>
+                    {qaV2AccountState==='bound'&&
+                      !['merchant_missing_needs_reconciliation','approval_link_unavailable','merchant_read_unavailable','creation_unconfirmed','checking'].includes(qaRecoveryStage)&&
+                      <button type="button" onClick={continueExistingQaRequest}
+                        className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67]">
+                        {label('Continuar con PayPal','Continue with PayPal')}
+                      </button>}
                     <button type="button" onClick={reviewExistingQaRequest}
                       disabled={qaV2AccountState==='checking'}
-                      className="min-h-11 w-full rounded-full bg-white px-4 py-2 text-[12px] font-extrabold text-[#204E4A] hover:bg-[#E6EDD9] focus-visible:bg-[#E1E53F]/35 disabled:opacity-50">
-                      {label('Consultar mi suscripción Sandbox','Review my Sandbox subscription')}
+                      className="min-h-11 w-full rounded-full bg-white px-4 py-2.5 text-[13px] font-extrabold text-[#204E4A] hover:bg-[#E6EDD9] focus-visible:bg-[#E1E53F]/35 disabled:opacity-50">
+                      {label('Revisar mi solicitud','Check my request')}
                     </button>
                   </div>
             ) : (
@@ -245,7 +275,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
