@@ -47,6 +47,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
+  const [qaOfferState,setQaOfferState] = useState<'loading'|'ready'|'blocked'>('loading')
+  const [offerRefreshRevision,setOfferRefreshRevision] = useState(0)
   const continueExistingQaRequest = () => {
     if(qaPayAction==='checking'||qaV2AccountState!=='bound')return
     // One obvious payment action. Server decides whether the old approval
@@ -64,13 +66,19 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
-  // Two independent authorities: (1) server-derived membership and
-  // (2) Sandbox owner-only checkout list. Both must resolve before the
-  // payment invitation becomes visible; neither is guessed from cache.
+  // One coherent first paint: server-owned membership, private Sandbox
+  // account list, AND published consent terms must all be ready before
+  // revealing a first/retry checkout. An existing bound approval does not
+  // require the offer endpoint until a new checkout is authorized.
+  const offerRequired=qaV2Screen&&membership.kind==='inactive'&&
+    (qaV2AccountState==='none'||
+      (qaV2AccountState==='bound'&&qaPayAction==='retry_ready'))
   const preparationPending=membership.kind==='checking'||
-    (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')
+    (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
+    (offerRequired&&qaOfferState==='loading')
   const preparationUnavailable=membership.kind==='unavailable'||
-    (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')
+    (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
+    (offerRequired&&qaOfferState==='blocked')
   const preparing=preparationPending||preparationUnavailable
   useEffect(()=>{
     if(!preparationPending){setPreparationSlow(false);return}
@@ -84,9 +92,16 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     // infer a missing subscription from network failure.
     if(membership.kind==='checking'||membership.kind==='unavailable')
       refreshMembership()
-    if(qaV2Screen&&membership.kind==='inactive'){
+    if(qaV2Screen&&membership.kind==='inactive'&&
+      (qaV2AccountState==='checking'||qaV2AccountState==='unavailable')){
       setQaV2AccountState('checking')
       setQaReviewRevision(n=>n+1)
+    }
+    if(offerRequired){
+      // Keep the kitten visible while the same mounted published-offer
+      // component retries a READ only. Never start PayPal automatically.
+      setQaOfferState('loading')
+      setOfferRefreshRevision(n=>n+1)
     }
   }
 
@@ -204,7 +219,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         unavailable={preparationUnavailable} slow={preparationSlow}
         onRetry={retryPreparation} onClose={onClose}/>}
 
-      <header hidden={preparing} className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
+      <header hidden={preparing} style={{display:preparing?'none':undefined}} className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
         <div className="mx-auto grid min-h-11 max-w-xl grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
           <button ref={closeRef} type="button" onClick={onClose} disabled={busy}
             aria-label={label('Volver a PAZO','Back to PAZO')}
@@ -221,7 +236,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         </div>
       </header>
 
-      <main hidden={preparing} className="mx-auto w-full min-w-0 max-w-xl space-y-2.5 px-4 pb-7 pt-1">
+      <main hidden={preparing} style={{display:preparing?'none':undefined}} className="mx-auto w-full min-w-0 max-w-xl space-y-2.5 px-4 pb-7 pt-1">
         {membership.kind === 'checking' && <p role="status" className="rounded-3xl bg-white p-5 text-sm font-semibold">
           {label('Comprobando tu membresía…','Checking your membership…')}
         </p>}
@@ -235,8 +250,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         {membership.kind === 'inactive' && <>
           <SupporterOfferB lang={lang}>
             {qaV2Screen ? (
-              qaV2AccountState==='none'
-                ? <SandboxCheckoutQaPanel lang={lang} inline onReviewExisting={reviewExistingQaRequest}/>
+              offerRequired
+                ? <SandboxCheckoutQaPanel lang={lang} inline
+                    retry={qaPayAction==='retry_ready'}
+                    onOfferState={setQaOfferState}
+                    refreshRevision={offerRefreshRevision}
+                    onReviewExisting={reviewExistingQaRequest}/>
                 : <div className="space-y-3 rounded-[21px] bg-[#F0F4E6] px-4 py-4 text-center text-[14px] leading-relaxed text-[#204E4A]">
                     <p className="text-[16px] font-black">
                       {qaV2AccountState==='bound'
@@ -258,14 +277,6 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                           ? label('Conectando con PayPal…','Connecting to PayPal…')
                           : label('Pagar con PayPal','Pay with PayPal')}
                       </button>}
-                    {qaPayAction==='retry_ready'&&qaV2AccountState==='bound'&&
-                      <div className="space-y-2 text-left">
-                        <p role="status" className="text-center text-[13px] font-semibold text-[#436E53]">
-                          {label('Ya puedes volver a intentarlo. Confirma el apoyo para abrir PayPal.',
-                            'You can try again. Confirm the subscription to open PayPal.')}
-                        </p>
-                        <SandboxCheckoutQaPanel lang={lang} inline retry onReviewExisting={reviewExistingQaRequest}/>
-                      </div>}
                     {qaPayAction==='unavailable'&&qaV2AccountState==='bound'&&
                       <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
                         {label('No pudimos abrir PayPal. Estamos resolviendo un problema con este pago para evitar cobros duplicados. No se inició otro cobro.',
