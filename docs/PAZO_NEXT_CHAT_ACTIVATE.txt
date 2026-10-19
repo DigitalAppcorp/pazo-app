@@ -1,14 +1,15 @@
-ACTIVACIÓN DE CONTINUIDAD PAZO — 18-OCT-2026
+ACTIVACIÓN PAZO — continuidad 19-oct-2026 (LEER, NO REINICIAR)
 
-Activa Project Brain OS v1.4.1 desde DigitalAppcorp/project-brain-os (SKILL.md y patterns/VERIFIABLE_HANDOFF.md).
-Yo soy el Product Owner y tú el ejecutor técnico principal. Continúa PAZO desde el estado REAL del repositorio DigitalAppcorp/pazo-app, PR #44 DRAFT, rama f13/section-titles-20261012.
+Activa Project Brain OS v1.4.1 desde DigitalAppcorp/project-brain-os: lee SKILL.md y patterns/VERIFIABLE_HANDOFF.md.
+Yo soy el Product Owner y tú el ejecutor técnico principal. Trabaja DIRECTAMENTE en GitHub/Supabase cuando esté autorizado; NO delegues a Codex/Gemini.
 
-ANTES DE PROPONER O MODIFICAR CÓDIGO:
-1) Lee AGENTS.md, docs/PAZO_ACTIVE_HANDOFF.md (snapshot compacto), docs/PAZO_ADMIN_VISUAL_FIDELITY_GATE_20261018.md y docs/PAZO_ADMIN_CONTROL_CENTER_20261018.md.
-2) Consulta HEAD actual, CI, el panel AdminDashboard.tsx y AdminVisuals.tsx, y compara con la referencia visual elegida que está en mi Biblioteca de ChatGPT como /Panel de Control PAZO en Tiempo Real (1)(1).png. La captura /image(20261019-014820).png es del PRIMER panel que rechacé, NO necesariamente de la segunda versión en el repo.
-3) El siguiente gate es VALIDAR VISUALMENTE LA SEGUNDA implementación del panel en escritorio/móvil: no repetir propuestas, no preguntar qué diseño elegí, no dar por aprobado solo porque CI está verde. Si faltan ajustes, programarlos directamente y comprobar.
-4) Respeta todas las decisiones aprobadas de PAZO F13/F14/F16, membresía de apoyo US$2.99 Sandbox, insignias, fake doors, privacidad y «cero contornos». Nunca inventes ingresos, usuarios, historial de gráficas ni el estado real de proveedores. No cambies main ni PayPal Live sin nuevo gate.
-5) No delegues programación a Codex u otras IA salvo que te lo pida. Para Vite local, dame comandos exactos de Antigravity, comprobando git status antes de pull.
-6) No me pidas volver a explicar la historia; tienes la documentación y las capturas. Confirma el estado real y sigue el próximo gate.
+Repositorio PAZO: DigitalAppcorp/pazo-app, PR #44 DRAFT, rama f13/section-titles-20261012.
+Lee primero AGENTS.md, docs/PAZO_ACTIVE_HANDOFF.md (snapshot 19-oct), docs/PAZO_MASTER_ROADMAP.md y docs/PAZO_UI_QUALITY_GATE.md. Verifica HEAD remoto, CI, rama y base antes de escribir código. Historial largo archivado en docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_20261019.md y ..._20261018.md, NO es el estado vigente.
 
-La historia previa completa, si realmente la necesitas, está en docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_20261018.md; el roadmap conserva el resto del alcance.
+PUNTO EXACTO: acabas de implementar en PR #44 la limpieza de «Mi membresía» y eliminar el parpadeo en el acceso «Amigo de PAZO» de «Mi mascota». El código tiene CI + 6 labs 7/7 SUCCESS en HEAD de código d5cfed87b5ff699e6855f999ae1ec90eaa77040b (reverificar HEAD actual tras docs). La presentación habitual ya oculta botones de laboratorio; están disponibles solo en Vite local con ?supporter_debug=1, si se necesitan. La cuenta QA pagada mostraba cobertura hasta 19/11/2026 y status PayPal ACTIVE. **NO EXISTE aceptación visual del Product Owner todavía.**
+
+PRÓXIMO GATE: revisar visualmente la NUEVA versión con el PO en Vite. Primero comprobar que el clon C:\Users\osori\PAZO-F13-preview está en esa rama y limpio; si está limpio, git pull --ff-only origin f13/section-titles-20261012 y .\scripts\f16-run-real-sandbox-qa.ps1. Verificar que en «Mi mascota» ya NO parpadee el acceso, y que en «Amigo de PAZO» > «Mi membresía» aparezcan SOLO fecha, estado, actualizar y cancelación confirmada; sin «Descargar aceptación V2», diagnósticos ni ejemplos QA. Si hay defectos, PROGRAMAR corrección directamente y revisar CI, no pedir diseños nuevos. No usar localhost con ?supporter_debug=1 para la prueba normal.
+
+OTROS GATES abiertos y ya aprobados: Configuración → PayPal admin en PR #44 (Vault y OAuth preparados, Live OFF; borradores NO cambian aún el checkout legacy, falta integración runtime + conciliación); fidelidad visual de panel Resumen general según la referencia seleccionada en Library /Panel de Control PAZO en Tiempo Real (1)(1).png (no confundir con las capturas rechazadas); reconciliar venta Sandbox. Detalles y evidencias en snapshot canónico.
+
+Reglas: PAZO y QR gratis, Amigo PAZO $2.99 mensual voluntario; insignias 1/3/6/12 meses verificadas por servidor; no inventar cobros ni usuarios; «cero contornos»; no main, merge, credenciales PayPal Live, datos sensibles ni nuevos pagos sin gate PO. No repitas preguntas ya contestadas.
