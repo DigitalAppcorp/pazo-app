@@ -146,15 +146,9 @@ export function createPazoSandboxV2RetryMerchantProof({
    }else{
     await noTransactions(subscriptionId,created,checkedAt,headers)
    }
-   // For a terminal subscription, an exact PayPal CANCELLED/EXPIRED GET,
-   // zero subscription-scoped transactions and independently verified signed
-   // CREATED event establish the safe replacement boundary. No need to
-   // enumerate the merchant's *entire* event history for an unapproved
-   // terminal subscription. For 404 we STILL demand exhaustive inventory
-   // and event evidence because an unknown subscription may be collectible.
-   const listed=first==='MERCHANT_CONFIRMED_ABSENT_CANDIDATE'
-    ? await events(subscriptionId,intentId,created,checkedAt,headers)
-    : {eventCount:0,createdSeen:true}
+   // Even after verified cancellation, inspect provider events to catch an
+   // unexpected activation/sale that was never credited locally.
+   const listed=await events(subscriptionId,intentId,created,checkedAt,headers)
    const second=await status(subscriptionId,intentId,headers)
    if(second!==first)fail()
    const resolution=first==='MERCHANT_CONFIRMED_ABSENT_CANDIDATE'
