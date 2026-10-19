@@ -62,7 +62,12 @@ const secure=x=>{
  assert.equal(x.mayGrantBenefits,false);assert.equal(x.mayRecordPayment,false)
  assert.equal(x.mayEnableLive,false);assert.equal(x.paidThrough,null)
  assert.ok(!JSON.stringify(x).includes(OWNER))
- assert.ok(!JSON.stringify(x).includes(INTENT))
+ // Owner has already authenticated and consented. It is safe to return
+ // the same immutable *PAZO intent* needed to bind the ephemeral approve
+ // URL in this browser tab. Never expose PayPal's subscription ID.
+ if(x.phase==='APPROVAL_PENDING')
+  assert.equal(x.intentId,INTENT)
+ else assert.ok(!JSON.stringify(x).includes(INTENT))
  assert.ok(!JSON.stringify(x).includes(SUB))
  return x
 }
