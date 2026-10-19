@@ -1,0 +1,14 @@
+ACTIVACIÓN DE CONTINUIDAD PAZO — 18-OCT-2026
+
+Activa Project Brain OS v1.4.1 desde DigitalAppcorp/project-brain-os (SKILL.md y patterns/VERIFIABLE_HANDOFF.md).
+Yo soy el Product Owner y tú el ejecutor técnico principal. Continúa PAZO desde el estado REAL del repositorio DigitalAppcorp/pazo-app, PR #44 DRAFT, rama f13/section-titles-20261012.
+
+ANTES DE PROPONER O MODIFICAR CÓDIGO:
+1) Lee AGENTS.md, docs/PAZO_ACTIVE_HANDOFF.md (snapshot compacto), docs/PAZO_ADMIN_VISUAL_FIDELITY_GATE_20261018.md y docs/PAZO_ADMIN_CONTROL_CENTER_20261018.md.
+2) Consulta HEAD actual, CI, el panel AdminDashboard.tsx y AdminVisuals.tsx, y compara con la referencia visual elegida que está en mi Biblioteca de ChatGPT como /Panel de Control PAZO en Tiempo Real (1)(1).png. La captura /image(20261019-014820).png es del PRIMER panel que rechacé, NO necesariamente de la segunda versión en el repo.
+3) El siguiente gate es VALIDAR VISUALMENTE LA SEGUNDA implementación del panel en escritorio/móvil: no repetir propuestas, no preguntar qué diseño elegí, no dar por aprobado solo porque CI está verde. Si faltan ajustes, programarlos directamente y comprobar.
+4) Respeta todas las decisiones aprobadas de PAZO F13/F14/F16, membresía de apoyo US$2.99 Sandbox, insignias, fake doors, privacidad y «cero contornos». Nunca inventes ingresos, usuarios, historial de gráficas ni el estado real de proveedores. No cambies main ni PayPal Live sin nuevo gate.
+5) No delegues programación a Codex u otras IA salvo que te lo pida. Para Vite local, dame comandos exactos de Antigravity, comprobando git status antes de pull.
+6) No me pidas volver a explicar la historia; tienes la documentación y las capturas. Confirma el estado real y sigue el próximo gate.
+
+La historia previa completa, si realmente la necesitas, está en docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_20261018.md; el roadmap conserva el resto del alcance.
