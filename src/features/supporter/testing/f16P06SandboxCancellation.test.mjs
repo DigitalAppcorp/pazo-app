@@ -154,7 +154,7 @@ test('PayPal Sandbox: GET -> POST -> GET, repeated cancellation idempotent',asyn
     subscriber:{email_address:'PRIVATE_PAYER@example.invalid'}})}
   if(url===HOST+'/v1/billing/subscriptions/'+SUB+'/cancel'){
    assert.equal(opts.method,'POST')
-   assert.equal(opts.headers['PayPal-Request-Id'],'pazo-cancel-'+INTENT.slice(7))
+   assert.equal(opts.headers['PayPal-Request-Id'],'ca'+INTENT.slice(7))
    assert.deepEqual(Object.keys(JSON.parse(opts.body)),['reason'])
    mutations++
    status='CANCELLED'
