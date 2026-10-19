@@ -256,3 +256,5 @@ BEGIN
  THEN RAISE EXCEPTION 'Overlapping payment windows granted benefits'; END IF;
  RAISE NOTICE 'F16_LIVE_GATEWAY_DISPOSABLE_PG17_PASS_NO_HOSTED_CHANGES';
 END $overlap$;
+
+\i scripts/f16-live-cutover-cas-lab.sql

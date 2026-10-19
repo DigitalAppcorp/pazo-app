@@ -64,3 +64,16 @@ test('cancellation claim draft requires original bound owner, rejects replay and
  assert.match(draft,/REVOKE ALL ON FUNCTION/)
  assert.doesNotMatch(draft,/GRANT EXECUTE/)
 })
+
+test('atomic Live cutover and emergency stop SQL is postgres-only, audited and not deployed',()=>{
+ const draft=readFileSync(new URL('../../../../supabase/drafts/f16_live_cutover_atomic_DISPOSABLE_ONLY.sql',import.meta.url),'utf8')
+ assert.match(draft,/current_database\(\)<>'f14_synthetic'/)
+ assert.match(draft,/current_user<>'postgres'/)
+ assert.match(draft,/FOR UPDATE OF e/)
+ assert.match(draft,/WHERE singleton AND revision=p_expected_revision/)
+ assert.match(draft,/INSERT INTO admin_private\.pazo_paypal_switch_audit/)
+ assert.match(draft,/pazo_paypal_stop_new_checkout_atomically/)
+ assert.match(draft,/environment='live' AND live_enabled=true AND kill_switch=false/)
+ assert.match(draft,/REVOKE ALL ON FUNCTION/)
+ assert.doesNotMatch(draft,/GRANT EXECUTE/)
+})
