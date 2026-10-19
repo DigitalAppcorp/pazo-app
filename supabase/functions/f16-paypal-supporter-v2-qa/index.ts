@@ -124,6 +124,18 @@ function compose(requestOrigin:string){
    return r.ok&&(await r.json())===true
   }catch{return false}
  }
+ // SQL-only necessary condition; never decides whether PayPal is cancelled.
+ const canAbandonPending=async(ownerId:string,intentId:string)=>{
+  try{
+   const r=await fetch(BASE+'/rest/v1/rpc/f16_qa_v2_abandonment_preflight',{
+    method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000),
+    headers:{apikey:key,Authorization:'Bearer '+key,
+     'content-type':'application/json',Accept:'application/json'},
+    body:JSON.stringify({p_owner_id:ownerId,p_intent_id:intentId})
+   })
+   return r.ok&&(await r.json())===true
+  }catch{return false}
+ }
  const inventoryRead=createPazoSandboxV2InventoryRead({clientId,clientSecret})
  const unfilteredInventoryRead=createPazoSandboxV2UnfilteredInventoryRead({clientId,clientSecret})
  const createdCandidateStore=createPazoSandboxV2CreatedEventCandidateStore({
@@ -149,7 +161,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,cancellation,canAbandonPending,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -199,6 +211,47 @@ Deno.serve(async(request:Request)=>{
  try{qaOwner=await runtime.resolveAuthenticatedOwner(request)}catch{qaOwner=null}
  if(!qaOwner)
   return addCors(reply(401,'authentication_required'),runtime.origin)
+ // A buyer may explicitly close the ORIGINAL pending approval; no retry
+ // grant is issued and no fresh PayPal create/charge is attempted. The merchant
+ // must GET-verify APPROVAL_PENDING before POST and CANCELLED afterwards.
+ if(data.action==='abandon_pending'){
+  if(!QA_V2_MANAGEMENT_RELEASE_APPROVED)
+   return addCors(reply(503,'qa_v2_management_not_released'),runtime.origin)
+  if(Object.keys(data).sort().join('|')!=='action|confirmAbandon|intentId'||
+    data.confirmAbandon!==true||
+    typeof data.intentId!=='string'||
+    !/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId))
+   return addCors(reply(400,'explicit_pending_cancel_consent_required'),runtime.origin)
+  if(!QA_CHECKOUT_RELEASE_APPROVED||!await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  try{
+   if(await runtime.admit()!==true)
+    return addCors(reply(429,'rate_limited'),runtime.origin)
+   // No fresh charge or user-level mutation if owner/ledger preflight fails.
+   if(!await runtime.canAbandonPending(qaOwner,data.intentId))
+    return addCors(reply(409,'pending_cancellation_preflight_blocked'),runtime.origin)
+   const account=await runtime.v2AccountStore.readForOwner({
+    ownerId:qaOwner,intentId:data.intentId})
+   if(!account||account.state!=='bound'||!account.externalSubscriptionId||
+      account.planId!==PLAN||account.intentId!==data.intentId)
+    return addCors(reply(409,'private_account_read_unavailable'),runtime.origin)
+   const state=await runtime.cancellation.cancelPending({
+    intentId:account.intentId,subscriptionId:account.externalSubscriptionId})
+   if(state.status!=='CANCELLED')
+    return addCors(reply(503,'pending_cancellation_confirmation_missing'),runtime.origin)
+   return addCors(new Response(JSON.stringify({
+    ok:true,code:'pending_approval_cancelled',
+    environment:'sandbox',providerStatus:'CANCELLED',cancelled:true,
+    retryEligible:false,mayRetry:false,mayRecordPayment:false,
+    mayGrantBenefits:false,entitlement:false,paidThrough:null
+   }),{status:200,headers:{'content-type':'application/json',
+    'cache-control':'no-store'}}),runtime.origin)
+  }catch{
+   // Provider 404, rejected/ambiguous status, timeout and missing merchant
+   // evidence all fail closed. Neither grant nor paid state may be fabricated.
+   return addCors(reply(503,'pending_cancellation_confirmation_missing'),runtime.origin)
+  }
+ }
  // Existing V2 subscription management must work even when buying is OFF.
  // Each account lookup is scoped to getUser() + a V2 acceptance row; no
  // legacy P06 subscription can be cancelled through these routes.
