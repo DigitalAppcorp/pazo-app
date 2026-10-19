@@ -24,3 +24,10 @@ La UI de administración es configurable pero no un atajo para habilitar dinero 
 4. Live: verificar dominio estable HTTPS, plan real, webhook, precio, renovación/cancelación, moneda, reconciliación sale/paid period antes de conectar y habilitar checkout.
 5. Último pago Sandbox: hubo evento `PAYMENT.SALE.COMPLETED` más reciente que el último período acreditado; resolver conciliación antes de Live.
 6. No merge #44 ni main/Live sin aprobación explícita del Product Owner para esos pasos.
+
+## 19-oct — Paso intermedio de conexión Sandbox (branch-only)
+- Preparado en PR #44 un diagnóstico **de solo lectura** de la pasarela F16 existente, accesible al administrador desde `Configuración · PayPal`. El servicio comprueba la identidad GoTrue y el grant administrativo antes de intentar OAuth con los **secretos Edge ya instalados**; no copia ni devuelve secretos.
+- El nuevo panel distingue explícitamente el almacenamiento Vault nuevo (vacío) de los secretos Legacy existentes. `Comprobar Sandbox en uso` permite constatar si la pasarela actual aún autentica sin crear suscripciones ni pagos.
+- **Estado al redactar:** código/test staged en la rama; el endpoint alojado NO debe asumirse actualizado hasta despliegue versionado + autorización PO. Una prueba OAuth exitosa solo verifica acceso al merchant Sandbox, no webhooks, renovaciones, historial o conciliación.
+- Los borradores y credenciales Vault todavía NO gobiernan checkout; conectar cambio de origen activo exige mecanismo explícito de activación Sandbox con validación de plan, propietario merchant, webhook, enlaces de vuelta, cancelación y rollback. Live sigue OFF por control DB/UI. No reemplazar por accidente los secretos que protegen suscripciones previas.
+- Siguiente gate: CI de rama y aprobación PO para desplegar **solo** el nuevo diagnóstico read-only; después validar OAuth existente desde panel. Luego diseñar/aplicar el conmutador de credenciales **Sandbox-only**, no Live.

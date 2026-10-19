@@ -35,6 +35,7 @@ export function AdminPayPalSettings({lang}:Props){
  const [webhook,setWebhook]=useState('')
  const [clientId,setClientId]=useState('')
  const [clientSecret,setClientSecret]=useState('')
+ const [legacyHealth,setLegacyHealth]=useState<'idle'|'checking'|'verified'|'unavailable'>('idle')
  const config=settings?.environments.find(x=>x.environment===env)
  const load=useCallback(async()=>{
   setLoading(true);setError('')
@@ -99,6 +100,19 @@ export function AdminPayPalSettings({lang}:Props){
    await load()
   }catch{setError(safeError())}finally{setBusy(false)}
  }
+ const inspectExistingSandbox=async()=>{
+  setLegacyHealth('checking');setError('');setNotice('')
+  try{
+   const {data,error:fnError}=await supabase.functions.invoke('pazo-admin-paypal-validate',{
+    body:{environment:'sandbox',action:'inspect_active_sandbox'}
+   })
+   if(fnError||data?.ok!==true||data?.code!=='legacy_gateway_oauth_valid'||
+      data?.source!=='edge_legacy'||data?.environment!=='sandbox'||
+      data?.changes_checkout!==false||data?.live_checkout_enabled!==false)
+    throw Error('legacy unavailable')
+   setLegacyHealth('verified')
+  }catch{setLegacyHealth('unavailable')}
+ }
  const validateCredentials=async()=>{
   setBusy(true);setError('');setNotice('')
   try{
@@ -135,6 +149,23 @@ export function AdminPayPalSettings({lang}:Props){
    <>
     {error&&<p role="alert" className="rounded-[16px] bg-[#FAEDE7] px-4 py-3 text-[13px] font-semibold text-[#8B4737]">{error}</p>}
     {notice&&<p role="status" className="rounded-[16px] bg-[#EAF4E4] px-4 py-3 text-[13px] font-semibold text-[#296F50]">{notice}</p>}
+    {env==='sandbox'&&<section className={cardClass} aria-label={t('Pasarela Sandbox actual','Current Sandbox gateway')}>
+     <h4 className="text-[17px] font-black">{t('Pasarela Sandbox en uso','Current Sandbox gateway')}</h4>
+     <p className="mt-2 text-[13px] leading-relaxed text-[#667E71]">
+      {t('Los cobros de prueba existentes utilizan secretos privados de Supabase Edge Functions. No necesitas copiarlos a Vault ni volver a ingresarlos. Los campos inferiores preparan una configuración nueva y todavía no sustituyen el checkout.',
+        'Existing test payments use private Supabase Edge Function secrets. You do not need to copy them to Vault or enter them again. The fields below stage a new configuration and do not yet replace checkout.')}
+     </p>
+     <div className="mt-3 flex flex-wrap items-center gap-3">
+      <button type="button" onClick={()=>void inspectExistingSandbox()}
+        disabled={legacyHealth==='checking'}
+        className={actionClass}>{legacyHealth==='checking'?t('Comprobando…','Checking…'):t('Comprobar Sandbox en uso','Check active Sandbox')}</button>
+      <p role="status" className="text-[13px] font-semibold text-[#527067]">
+       {legacyHealth==='verified'?t('OAuth del Sandbox existente: verificado. No se realizaron cobros.','Existing Sandbox OAuth: verified. No payment was made.'):
+        legacyHealth==='unavailable'?t('No se pudo verificar la conexión actual. El checkout existente no se modificó.','Unable to verify the current connection. Existing checkout was not changed.'):
+        t('Comprobación de solo lectura, sin cambiar credenciales ni suscripciones.','Read-only check; no changes to credentials or subscriptions.')}
+      </p>
+     </div>
+    </section>}
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
      <section className={cardClass}>
       <div className="flex items-center gap-3"><span className="rounded-full bg-[#E7F4E2] p-3"><AdminGlyph name="money" size={23}/></span>
@@ -163,14 +194,14 @@ export function AdminPayPalSettings({lang}:Props){
        <p className="rounded-[14px] bg-[#F0F5E9] px-4 py-3 text-[12px] font-semibold text-[#466C5B]">
         {config?.client_id_stored&&config.client_secret_stored?
          t('Se guardaron credenciales para este entorno. Nunca se muestran de nuevo.','Credentials are stored for this environment. They are never displayed again.'):
-         t('Todavía no hay un par de credenciales guardado.','No credential pair has been stored yet.')}
+         t('Este módulo todavía no tiene credenciales guardadas en Vault. Las del Sandbox actual siguen en Edge Functions.','No credentials are stored in this module’s Vault yet. Current Sandbox credentials remain in Edge Functions.')}
        </p>
        <label className="block text-[13px] font-bold">Client ID
         <input value={clientId} onChange={e=>setClientId(e.target.value)} type="password" autoComplete="off" spellCheck={false} className={'mt-2 '+fieldClass} placeholder={t('Pega el Client ID','Paste Client ID')}/></label>
        <label className="block text-[13px] font-bold">Client Secret
         <input value={clientSecret} onChange={e=>setClientSecret(e.target.value)} type="password" autoComplete="new-password" spellCheck={false} className={'mt-2 '+fieldClass} placeholder={t('Pega el Client Secret','Paste Client Secret')}/></label>
        <button type="button" onClick={()=>void saveCredentials()} disabled={busy||!clientId||!clientSecret}
-        className={'w-full '+actionClass}>{t('Guardar credenciales cifradas','Store encrypted credentials')}</button>
+        className={'w-full '+actionClass}>{t('Guardar nuevas credenciales en Vault','Store new credentials in Vault')}</button>
        <button type="button" onClick={()=>void validateCredentials()} disabled={busy||!config?.client_id_stored||!config.client_secret_stored}
         className="min-h-11 w-full rounded-[15px] bg-[#E9F1E5] px-4 py-3 text-[13px] font-black hover:bg-[#DFEACC] disabled:opacity-50">
         {t('Comprobar conexión PayPal','Verify PayPal connection')}

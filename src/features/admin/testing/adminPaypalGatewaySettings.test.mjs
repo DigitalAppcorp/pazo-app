@@ -71,3 +71,18 @@ test('public return origin is constrained and config changes are audited without
  assert.ok(!sql.includes("'client_secret',p_client_secret"))
  assert.ok(!sql.includes("original_secret"))
 })
+
+test('active Sandbox inspection is admin-only, no-op and does not copy secrets or enable Live',()=>{
+ assert.ok(edge.includes('inspectLegacySandboxOAuth'))
+ assert.ok(edge.includes("body?.action==='inspect_active_sandbox'"))
+ assert.ok(edge.includes("api+'/rest/v1/rpc/pazo_admin_paypal_settings'"))
+ assert.ok(edge.includes('if(!permission.ok)'))
+ assert.ok(edge.includes("source:'edge_legacy'"))
+ assert.ok(edge.includes('changes_checkout:false,live_checkout_enabled:false'))
+ assert.ok(page.includes('Comprobar Sandbox en uso'))
+ assert.ok(page.includes("body:{environment:'sandbox',action:'inspect_active_sandbox'}"))
+ assert.ok(page.includes("legacyHealth==='verified'"))
+ assert.ok(!page.includes('PAZO_F16_PAYPAL_CLIENT_SECRET'))
+ assert.ok(!edge.includes("vault.update_secret"))
+ assert.ok(!edge.includes('/v1/billing/subscriptions'))
+})
