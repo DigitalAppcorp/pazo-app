@@ -45,7 +45,7 @@ test('do not replay an old PayPal ba_token after buyer returns from the login sc
  assert.ok(account.includes('clearSandboxApproval({ownerId:current.data.session.user.id})'))
  assert.ok(account.includes("action:'recover_retry'"))
  assert.ok(edge.includes("runtime.cancellation.cancelPending({"))
- assert.ok(edge.includes("runtime.canAbandonPending(qaOwner)"))
+ assert.ok(edge.includes("runtime.canAbandonPending(qaOwner,account.intentId)"))
  assert.ok(edge.includes("retryMerchantProof.verify({"))
  assert.ok(edge.includes("retryConsentStore.approveReconciled({"))
  assert.ok(!checkout.includes('localStorage'))
