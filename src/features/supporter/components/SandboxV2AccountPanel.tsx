@@ -7,7 +7,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onPaidVerified?:()=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable')=>void;onPaidVerified?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -32,7 +32,8 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onPaidVerified}:Props){
+export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onResumeStatus,onPaidVerified}:Props){
+ const lastHandledResumeRequest=useRef(0)
  const initialAccountCheck=useRef(false)
  const autoVerifiedIntents=useRef<Set<string>>(new Set())
  const paymentReadInFlight=useRef(false)
@@ -225,7 +226,10 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
   await inspectAccountProvider(account,inspection)
  }
   const resumeApproval=async()=>{
-  if(!account||account.state!=='bound'||busy)return
+  if(!account||account.state!=='bound'||busy){
+   onResumeStatus?.('unavailable');return
+  }
+  onResumeStatus?.('checking')
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
    const result=await call({action:'resume_approval',intentId:account.intentId}) as Result
@@ -239,18 +243,19 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
    if(result.phase==='APPROVAL_PENDING'&&result.code==='approval_link_unavailable'){
     setProviderStatus('APPROVAL_PENDING')
     setRecoveryStage('approval_link_unavailable')
-    setRecoveryMessage('unavailable');return
+    setRecoveryMessage('unavailable');onResumeStatus?.('unavailable');return
    }
    if(typeof result.phase==='string'&&
       ['ACTIVE','APPROVED','CANCELLED','EXPIRED','SUSPENDED'].includes(result.phase)){
     setProviderStatus(result.phase)
     setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerStatus:result.phase}).phase)
-    setRecoveryMessage('changed');return
+    setRecoveryMessage('changed');onResumeStatus?.('unavailable');return
    }
    throw Error('UNKNOWN_RECOVERY')
   }catch(error){
    const code=error instanceof Error?error.message:''
    setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerError:code||'unavailable'}).phase)
+   onResumeStatus?.('unavailable')
    setRecoveryMessage(code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
     code==='paypal_subscription_not_found'?'missing':
     code==='paypal_subscription_access_denied'||code==='paypal_subscription_response_mismatch'?'access':
@@ -264,10 +269,18 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
  // A user-initiated action on the invitation can resume ONLY the existing
  // bound subscription. This never issues a second create/checkout request.
  useEffect(()=>{
-  if(resumeRevision>0&&account?.state==='bound'&&!busy&&!loading)
-   void resumeApproval()
+  // A click is consumed once, even when an account refresh changes state.
+  // If a request arrives during inspection, wait for the bound account.
+  if(resumeRevision<=lastHandledResumeRequest.current||loading||busy)return
+  if(account?.state!=='bound'){
+   lastHandledResumeRequest.current=resumeRevision
+   onResumeStatus?.('unavailable')
+   return
+  }
+  lastHandledResumeRequest.current=resumeRevision
+  void resumeApproval()
  // eslint-disable-next-line react-hooks/exhaustive-deps
- },[resumeRevision])
+ },[resumeRevision,loading,busy,account])
  useEffect(()=>{onRecoveryStage?.(recoveryStage)},[recoveryStage,onRecoveryStage])
  const abandonPending=async()=>{
   // Only an explicit acknowledgement of the original pending approval
