@@ -67,7 +67,7 @@ test('live plan must be ACTIVE, one monthly unlimited 2.99 USD cycle, no setup f
   {quantity_supported:true}
  ]){
   const p=provider({plan:changed});const r=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
-  assert.equal(r.code,'live_plan_terms_unverified')
+  assert.equal(r.code,changed.status==='CREATED'?'live_plan_unverified':'live_plan_terms_unverified')
   assert.ok(!p.calls.some(v=>v.url.includes('/v1/notifications/webhooks/')))
  }
 })
