@@ -107,6 +107,10 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
     'pending_cancellation_preflight_blocked','pending_cancellation_confirmation_missing',
     'retry_merchant_reconciliation_pending','retry_proof_not_accepted',
     'existing_subscription_not_terminal','merchant_status_unrecognized',
+    'recovery_check_admission','recovery_check_account',
+    'recovery_check_provider','recovery_check_cancel_eligibility',
+    'recovery_check_cancel_provider','recovery_check_merchant_evidence',
+    'recovery_check_grant','recovery_check_unavailable',
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
   }
