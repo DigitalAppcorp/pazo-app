@@ -143,3 +143,6 @@ The read-only PayPal Live plan check now rejects unapproved billing-cycle sequen
 
 ## F16 Live entitlement projection — disposable PG17 only
 Read-only source `supabase/drafts/f16_live_entitlement_projection_DISPOSABLE_ONLY.sql` projects active paid-through and 3/6/12 completed cycles from *independently verified* Live sale periods, respects refund/reversal/dispute holds, strictly isolates the owner and fails closed on overlapping service windows. The signed inbox event used to support a paid period must now be `PAYMENT.SALE.COMPLETED` and cannot be reused for a second sale (composite FK and UNIQUE). PostgreSQL 17 lab checks these invariants. No hosted deployment, no grants to frontend/service_role, no entitlement production release; projection consumes verified source ONLY, not PayPal ACTIVE status.
+
+## F16 cancellation claim — isolated SQL tested, still not installed
+`f16_live_cancel_claim_DISPOSABLE_ONLY.sql`: private owner-scoped one-way cancellation claim, even if new purchases are OFF. Uniqueness prevents two cancellation POSTs for the same binding. No anon/auth/service_role EXECUTE; PostgreSQL 17 lab checks replay and wrong owner. Live account manager must later call this through a specifically PO-approved service-only RPC before touching PayPal. Never auto-retry ambiguous cancellation.

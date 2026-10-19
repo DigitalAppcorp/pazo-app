@@ -53,3 +53,14 @@ test('a signed nonpayment event cannot back a paid period; one SALE event credit
  assert.match(sql,/UNIQUE\s*\(merchant_generation,provider_event_id,event_type\)/)
  assert.match(sql,/UNIQUE\s*\(merchant_generation,provider_event_id\)/)
 })
+
+test('cancellation claim draft requires original bound owner, rejects replay and has no runtime grants',()=>{
+ const draft=readFileSync(new URL('../../../../supabase/drafts/f16_live_cancel_claim_DISPOSABLE_ONLY.sql',import.meta.url),'utf8')
+ assert.match(draft,/current_database\(\)<>'f14_synthetic'/)
+ assert.match(draft,/ON CONFLICT \(intent_id\) DO NOTHING/)
+ assert.match(draft,/i\.owner_id=p_owner_id/)
+ assert.match(draft,/i\.state='bound'/)
+ assert.match(draft,/GET DIAGNOSTICS claimed = ROW_COUNT/)
+ assert.match(draft,/REVOKE ALL ON FUNCTION/)
+ assert.doesNotMatch(draft,/GRANT EXECUTE/)
+})

@@ -167,6 +167,30 @@ BEGIN
   RAISE EXCEPTION 'FAIL duplicate use of signed sale event';
  EXCEPTION WHEN unique_violation THEN NULL; END;
 END $negative$;
+\i supabase/drafts/f16_live_cancel_claim_DISPOSABLE_ONLY.sql
+DO $cancel_claim$
+DECLARE first_claim boolean; second_claim boolean; wrong_owner boolean;
+BEGIN
+ first_claim:=supporter_private.pazo_live_claim_cancel_once(
+  '12345678-1234-4234-8234-123456789abc',
+  'intent-12345678-1234-4234-8234-123456789abc',1);
+ second_claim:=supporter_private.pazo_live_claim_cancel_once(
+  '12345678-1234-4234-8234-123456789abc',
+  'intent-12345678-1234-4234-8234-123456789abc',1);
+ wrong_owner:=supporter_private.pazo_live_claim_cancel_once(
+  '33333333-3333-4333-8333-333333333333',
+  'intent-12345678-1234-4234-8234-123456789abc',1);
+ IF first_claim<>true OR second_claim<>false OR wrong_owner<>false OR
+  (SELECT count(*) FROM supporter_private.pazo_paypal_live_cancel_claims)<>1
+ THEN RAISE EXCEPTION 'Live owner cancellation claim is not unique or owner-scoped'; END IF;
+ IF has_function_privilege('anon',
+  'supporter_private.pazo_live_claim_cancel_once(uuid,text,bigint)','EXECUTE') OR
+  has_function_privilege('authenticated',
+  'supporter_private.pazo_live_claim_cancel_once(uuid,text,bigint)','EXECUTE') OR
+  has_function_privilege('service_role',
+  'supporter_private.pazo_live_claim_cancel_once(uuid,text,bigint)','EXECUTE')
+ THEN RAISE EXCEPTION 'Unreleased cancellation RPC has executable grants'; END IF;
+END $cancel_claim$;
 \i supabase/drafts/f16_live_entitlement_projection_DISPOSABLE_ONLY.sql
 DO $projection$
 DECLARE v jsonb;
