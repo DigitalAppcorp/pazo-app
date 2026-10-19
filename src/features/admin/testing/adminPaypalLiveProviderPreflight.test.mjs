@@ -4,7 +4,7 @@ import {inspectLivePaypalResources,EXPECTED_WEBHOOK,REQUIRED_EVENTS} from '../..
 const config={environment:'live',clientId:'ABCDEFGHIJKL1234567890',clientSecret:'abcdeFGHIJ1234567890XYZ',
  planId:'P-1234567890ABCDE',webhookId:'WH-12345678900',expectedWebhookUrl:EXPECTED_WEBHOOK}
 const plan={id:config.planId,status:'ACTIVE',quantity_supported:false,
- billing_cycles:[{tenure_type:'REGULAR',total_cycles:0,frequency:{interval_unit:'MONTH',interval_count:1},
+ billing_cycles:[{tenure_type:'REGULAR',sequence:1,total_cycles:0,frequency:{interval_unit:'MONTH',interval_count:1},
   pricing_scheme:{fixed_price:{currency_code:'USD',value:'2.99'}}}],
  payment_preferences:{setup_fee:{currency_code:'USD',value:'0.00'}}}
 const webhook={id:config.webhookId,url:EXPECTED_WEBHOOK,
@@ -64,7 +64,15 @@ test('live plan must be ACTIVE, one monthly unlimited 2.99 USD cycle, no setup f
   {billing_cycles:[{...plan.billing_cycles[0],pricing_scheme:{fixed_price:{currency_code:'USD',value:'9.99'}}}]},
   {billing_cycles:[{...plan.billing_cycles[0],total_cycles:12}]},
   {payment_preferences:{setup_fee:{currency_code:'USD',value:'10.00'}}},
-  {quantity_supported:true}
+  {quantity_supported:true},
+  {billing_cycles:[{...plan.billing_cycles[0],sequence:2}]},
+  {billing_cycles:[{...plan.billing_cycles[0],pricing_scheme:{
+    ...plan.billing_cycles[0].pricing_scheme,tiers:[{starting_quantity:'1'}]
+  }}]},
+  {payment_preferences:{...plan.payment_preferences,auto_bill_outstanding:true}},
+  {payment_preferences:undefined},
+  {tax_percentage:'5.0'},
+  {taxes:{percentage:'5.0',inclusive:true}}
  ]){
   const p=provider({plan:changed});const r=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
   assert.equal(r.code,changed.status==='CREATED'?'live_plan_unverified':'live_plan_terms_unverified')

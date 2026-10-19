@@ -55,15 +55,23 @@
     return invalid('live_plan_terms_unverified')
    const cycle=plan.billing_cycles[0]
    const recurring=cycle?.tenure_type==='REGULAR'&&
+    cycle?.sequence===1&&
     cycle?.frequency?.interval_unit==='MONTH'&&
     cycle?.frequency?.interval_count===1&&
     cycle?.total_cycles===0&&
     cycle?.pricing_scheme?.fixed_price?.currency_code==='USD'&&
-    cycle?.pricing_scheme?.fixed_price?.value==='2.99'
-   const setup=plan?.payment_preferences?.setup_fee
+    cycle?.pricing_scheme?.fixed_price?.value==='2.99'&&
+    cycle?.pricing_scheme?.tiers===undefined
+   const preferences=plan?.payment_preferences
+   const setup=preferences?.setup_fee
    const noSetup=!setup||(setup.currency_code==='USD'&&
-    Number(setup.value)===0)
-   if(!recurring||!noSetup||plan.quantity_supported===true)
+    setup.value==='0.00')
+   const noTax=plan.tax_percentage===undefined&&
+    (plan.taxes===undefined||
+      (Number(plan.taxes.percentage||0)===0&&plan.taxes.inclusive!==true))
+   if(!recurring||!preferences||!noSetup||
+    preferences.auto_bill_outstanding===true||!noTax||
+    plan.quantity_supported===true)
     return invalid('live_plan_terms_unverified')
    const webhook=await asJson(fetchImpl,'/v1/notifications/webhooks/'+encodeURIComponent(webhookId),{
     method:'GET',headers

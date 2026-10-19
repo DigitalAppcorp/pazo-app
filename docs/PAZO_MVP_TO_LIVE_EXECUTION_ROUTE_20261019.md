@@ -137,3 +137,6 @@ Se implementaron `liveAccountManagement.mjs` y `liveHistoricalProvider.mjs` con 
 
 ## F16 — admin Live resource inspection wired but kept hidden (branch-only)
 The authenticated `pazo-admin-paypal-validate` code now stages `inspect_live_resources`: GoTrue JWT + admin-grant Vault RPC → Live API GET plan and webhook, sanitized result with `mayCharge=false`, `mayActivate=false`, `changes_checkout=false`. Admin UI has a staged control behind `LIVE_RESOURCE_INSPECTION_RELEASED=false` because Supabase hosted admin Edge is **still v3**, without this action. No button visible in current beta, no checkout change, no production deployment, and NO Live verification claim. Deployment later requires specific PO GO and exact hosted postflight parity.
+
+## F16 — Harden Live plan price preflight
+The read-only PayPal Live plan check now rejects unapproved billing-cycle sequence, tiered prices, missing payment preferences, auto-billing outstanding balances, nonzero taxes and setup fees, in addition to non-monthly or non-US$2.99 plans. It remains a **configuration read, not merchant proof or charging authority**. Tests cover each rejection; Live OFF.
