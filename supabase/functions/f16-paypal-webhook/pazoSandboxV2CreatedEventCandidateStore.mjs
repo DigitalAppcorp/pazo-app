@@ -12,13 +12,12 @@ export function createPazoSandboxV2CreatedEventCandidateStore({
  if(projectUrl!==BASE||typeof serviceRoleKey!=='string'||
   serviceRoleKey.length<24||/\s/.test(serviceRoleKey)||
   typeof fetchImpl!=='function')throw Error('created_inbox_store_not_configured')
- return Object.freeze({
-  async readForOwner({ownerId,intentId}={}){
+ async function readWithRpc({ownerId,intentId}={},rpcName){
    if(!UUID.test(ownerId||'')||!INTENT.test(intentId||''))
     throw Error('created_inbox_owner_unverified')
    let response
    try{
-    response=await fetchImpl(BASE+'/rest/v1/rpc/f16_qa_v2_read_created_webhook_candidate',{
+    response=await fetchImpl(BASE+'/rest/v1/rpc/'+rpcName,{
      method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000),
      headers:{apikey:serviceRoleKey,Authorization:'Bearer '+serviceRoleKey,
       'content-type':'application/json',Accept:'application/json'},
@@ -39,5 +38,8 @@ export function createPazoSandboxV2CreatedEventCandidateStore({
     eventId:item.eventId,eventType:item.eventType,verifiedAt:item.verifiedAt
    })
   }
+ return Object.freeze({
+  readForOwner:args=>readWithRpc(args,'f16_qa_v2_read_created_webhook_candidate'),
+  readForOwnerMulti:args=>readWithRpc(args,'f16_qa_v2_read_created_webhook_candidate_multi')
  })
 }
