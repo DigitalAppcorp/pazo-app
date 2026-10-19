@@ -26,7 +26,7 @@ type ServerResult = {
   mayGrantBenefits?: boolean
   paidThrough?: null
 }
-type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void; retry?:boolean; onOfferState?:(state:'loading'|'ready'|'blocked')=>void; refreshRevision?:number}
+type Props = {lang: 'es' | 'en'; inline?: boolean; onReviewExisting?: ()=>void; retry?:boolean; onOfferState?:(state:'loading'|'ready'|'blocked',mode:'initial'|'retry')=>void; refreshRevision?:number}
 const HOST = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
 const DIGEST = /^[0-9a-f]{64}$/
 // Previous P06 QA terms explicitly excluded benefits: NEVER reuse them.
@@ -51,7 +51,7 @@ export function SandboxCheckoutQaPanel({lang,inline=false,onReviewExisting,retry
   const [beginFailure,setBeginFailure] = useState<'already_linked' | 'rate_limited' | 'restricted' | 'unknown' | null>(null)
   const key = useRef<string | null>(null)
   const attempted = useRef(false)
-  useEffect(()=>{if(phase!=='pending')onOfferState?.(phase)},[phase,onOfferState])
+  useEffect(()=>{if(phase!=='pending')onOfferState?.(phase,retry?'retry':'initial')},[phase,retry,onOfferState])
   const spanish=lang==='es'
   const label=(es:string,en:string)=>spanish?es:en
   async function call(payload: object): Promise<ServerResult> {
