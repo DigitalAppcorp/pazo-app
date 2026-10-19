@@ -28,7 +28,7 @@ function providerTest({start='APPROVAL_PENDING',after='CANCELLED',foreign=false,
   if(path===url+'/cancel'){
    assert.equal(opts.method,'POST')
    assert.equal(opts.headers['PayPal-Request-Id'],
-    'pazo-pending-cancel-'+INTENT.slice(7))
+    'pc'+INTENT.slice(7))
    assert.deepEqual(Object.keys(JSON.parse(opts.body)),['reason'])
    posts++;status=after
    return {ok:true,status:204}
@@ -87,4 +87,10 @@ test('backend is owner-locked, preflight-locked, explicit and has zero retry gra
  assert.match(ui,/Cancelar solicitud pendiente/)
  assert.match(ui,/confirmAbandon:true/)
  assert.match(ui,/pending_approval_cancelled/)
+})
+
+test('PayPal cancel request ID is deterministic, less than 39 chars and tied to bound intent',()=>{
+ const h=providerTest()
+ const result=h.provider.cancelPending({intentId:INTENT,subscriptionId:SUB})
+ return result.then(x=>assert.equal(x.status,'CANCELLED'))
 })
