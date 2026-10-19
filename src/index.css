@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Admin styles stay scoped to the fullscreen portal, never the mobile PWA. */
+@import "./features/admin/components/AdminDashboard.css";
 
 /* F13: una sola familia tipográfica para PAZO, basada en el perfil público. */
 @theme {
