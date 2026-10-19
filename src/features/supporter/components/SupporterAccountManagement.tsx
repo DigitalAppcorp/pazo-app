@@ -204,7 +204,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                 : <div role="status" className="space-y-3 rounded-[21px] bg-[#F0F4E6] px-4 py-4 text-[13px] leading-relaxed text-[#204E4A]">
                     <p className="text-[15px] font-black">
                       {qaV2AccountState==='bound'
-                        ? label('Tu pago quedó sin terminar','Your payment was not completed')
+                        ? qaRecoveryStage==='approval_not_payment'||qaRecoveryStage==='paid_verified'
+                          ? label('Estamos verificando tu pago','We are verifying your payment')
+                          : qaRecoveryStage==='terminal_needs_financial_reconciliation'
+                            ? label('Tu solicitud anterior ha terminado','Your previous request has ended')
+                            : label('Tu pago quedó pendiente','Your payment was left pending')
                         : qaV2AccountState==='pending'
                           ? label('Estamos revisando tu solicitud','We are checking your request')
                           : qaV2AccountState==='unavailable'
@@ -219,7 +223,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                           : qaRecoveryStage==='approval_link_unavailable'
                             ? label('Tu aprobación sigue pendiente, pero PayPal no nos dio un enlace válido para continuar. Revisa el estado de tu solicitud.',
                               'Your approval is still pending, but PayPal did not return a valid link. Check your request status.')
-                            : label('Saliste de PayPal antes de finalizar. Puedes intentar continuar donde te quedaste. No se iniciará otra suscripción sin comprobar primero la anterior.',
+                            : qaRecoveryStage==='approval_not_payment'||qaRecoveryStage==='paid_verified'
+                              ? label('PayPal respondió, pero PAZO todavía está comprobando si existe un pago verificado.', 'PayPal responded, but PAZO is still checking for a verified payment.')
+                            : qaRecoveryStage==='terminal_needs_financial_reconciliation'
+                              ? label('Estamos comprobando si se puede iniciar una nueva solicitud sin crear cobros duplicados.', 'We are checking whether a new request can be started without duplicate charges.')
+                            : label('Saliste de PayPal antes de finalizar. Si la solicitud sigue disponible, puedes continuarla sin crear otra.',
                               'You left PayPal before finishing. You can try to continue where you left off. We will not start a new subscription without first checking the previous one.')
                         : qaV2AccountState==='pending'
                           ? label('Todavía no sabemos si PayPal creó tu solicitud. Vamos a comprobarlo antes de mostrar otro botón de pago.',
@@ -230,7 +238,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                             : label('Esto puede tardar unos segundos.','This may take a few seconds.')}
                     </p>
                     {qaV2AccountState==='bound'&&
-                      !['merchant_missing_needs_reconciliation','approval_link_unavailable','merchant_read_unavailable','creation_unconfirmed','checking'].includes(qaRecoveryStage)&&
+                      qaRecoveryStage==='approval_resumable'&&
                       <button type="button" onClick={continueExistingQaRequest}
                         className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67]">
                         {label('Continuar con PayPal','Continue with PayPal')}
