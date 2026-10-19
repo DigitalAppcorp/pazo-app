@@ -38,6 +38,11 @@ Esta auditoría es **inventario íntegro de árbol/PR + verificación de workflo
   - Fuente técnica: https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
   - Fuente técnica: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
 
+## Diferencia inventario Edge alojado ↔ control de versiones (nuevo hallazgo)
+- Supabase tiene **10 Edge Functions ACTIVE**. El árbol fuente contiene **9 carpetas de funciones** (excluida `.env.example`). En particular `f16-paypal-sandbox-sale-review` **v3 ACTIVE / verify_jwt=true** aparece en Supabase pero NO existe `supabase/functions/f16-paypal-sandbox-sale-review/index.ts` en el PR #44. Sus 4 helpers sí están bajo `supabase/functions/f16-paypal-webhook/`.
+- Inspección del entrypoint alojado: es un **diagnóstico Sandbox P44 owner-only, read-only**, con validación JWT/owner, sin creación de suscripción ni acreditación de beneficios. La existencia de un POST interno de lectura RPC/PayPal NO significa que inicie un pago. No reescribirlo ni apagarlo sin gate.
+- **Acción técnica pendiente (P1 de reproducibilidad):** recuperar su entrypoint versionado exacto, vincular los helpers compartidos de forma compatible, probar parity y registrar qué SHA/canal lo desplegó. No interpretar su ausencia de carpeta como ausencia de la función; no reinstalar ni activar cobros para cerrarlo.
+
 ## Frontend de release, hosting y PWA
 - \`src/features/supporter/components/SupporterAccountManagement.tsx\`: cuando \`VITE_PAZO_F16_SANDBOX_QA_UI\` no es \`true\`, el botón «Continuar con PayPal» **permanece disabled** con texto «Las suscripciones todavía no están disponibles». **Una beta social gratuita puede operar así** si el PO acepta aplazar las nuevas membresías hasta Live.
 - Vercel: proyecto \`pazo-app-t83r\` y HTTPS existente, protecciones Vercel en despliegues sin dominio personalizado. Producción vista por PO en \`main\` antiguo; los últimos previews READY encontrados tampoco coinciden con el HEAD actual. Las variables \`VITE_PAZO_F16_SANDBOX_QA_UI=true\` y \`...SUPPORTER_BENEFITS_ENABLED=true\` son **Preview restringido de la rama F13**, no certifican configuración pública final.
