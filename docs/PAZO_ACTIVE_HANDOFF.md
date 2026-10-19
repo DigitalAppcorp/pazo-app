@@ -1,5 +1,12 @@
 # PAZO — ACTIVE HANDOFF (estado operativo, 19-oct-2026)
 
+> **CHECKPOINT MÁS RECIENTE — RUTA MVP→LIVE:** el Product Owner ordenó avanzar hasta la beta y dejar prevista la conmutación PayPal Live desde admin cuando haya alojamiento oficial HTTPS. Ruta autoritativa R0–R9: `docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md`. **NO** significa activación desatendida: requiere pruebas frescas y GO financiero PO. Desarrollo local siempre Sandbox; dominio oficial aún no existe, no volver a pedirlo ahora.
+>
+> **Último código probado:** `b75431c32eee995e194e46b134a3b969ecadc910` CI+6 labs 7/7 SUCCESS. PR #44 DRAFT. Lectura de Supabase 19-oct: 2 períodos QA pagados, 2 temas guardados, 2 consentimientos muro, 1 moderador, 1 denuncia, 1 solicitud baja, 0 entradas en ledger alternativo `paypal_payment_entries`. Contadores ≠ conciliación ni E2E. Actualización documental posterior en `696c06b`.
+>
+> **Bloqueo externo de beta:** acceso Vercel `digitalapp` 403 para detalles del proyecto, despliegues y alias; no hay CLI autorizado en este entorno. **Límite de programación actual:** lector Live read-only `liveProviderReadOnly.mjs` implementado/probado en GitHub, todavía NO integrado a Edge ni desplegado. El intento de conectar esa acción al panel fue bloqueado por controles de la herramienta; no se insistió ni hizo commit. Aún faltan gateway financiero Live funcional, pago E2E, webhooks firmados/rollback, QA visual membresía y cierre operativo. No tocar main/Live/hosting por inferencia.
+
+
 **Este es el documento canónico de continuidad.** Estado técnico observado directamente en GitHub/Supabase el 19-oct-2026. Los checkpoints anteriores fueron archivados íntegramente en `docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_20261019.md` y `docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_20261018.md`. **No usar el archivo histórico como estado actual.**
 
 ## Identidad y reglas
