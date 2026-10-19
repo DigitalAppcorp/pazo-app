@@ -174,6 +174,7 @@ test('approved dashboard fidelity followup keeps truthful data and visible deskt
  assert.ok(board.includes('No es una serie histórica'),'No invented daily growth')
  assert.ok(board.includes('Pago ficticio, no ingresos reales'),'Financial test data labeled')
  assert.ok(css.includes('.pazo-admin-panel'),'Dashboard visual styles remain portal-scoped')
+ assert.ok(read('src/index.css').includes('features/admin/components/AdminDashboard.css'),'CSS must be linked from global entry without breaking Node UI closure tests')
  assert.ok(!css.includes('border:')&&!css.includes('outline:')&&!css.includes('ring:'),
   'Approved zero-contour policy applies to admin CSS')
 })
