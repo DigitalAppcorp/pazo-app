@@ -69,6 +69,20 @@ export function useSupporterMembershipStatus(petId?:string, enabled=true) {
       const {data:{user},error:authError} = await supabase.auth.getUser()
       if(authError || !UUID.test(user?.id || ''))throw Error('OWNER_UNVERIFIED')
       lastOwnerId.current=user!.id
+      // Account-wide coverage comes from one owner-scoped, server-derived
+      // RPC instead of loading every pet and reading their benefits separately.
+      // A PayPal redirect or browser-cached flag is never proof of payment.
+      if(!petId){
+        const {data,error}=await supabase.rpc('pazo_supporter_my_account_status')
+        const value=data as {active?:unknown;milestone?:unknown}|null
+        if(error||!value||typeof value.active!=='boolean'||
+           ![0,3,6,12].includes(value.milestone as number)||
+           (!value.active&&value.milestone!==0))
+          throw Error('OWNER_COVERAGE_UNVERIFIED')
+        return value.active
+          ?{kind:'verified',milestone:value.milestone as 0|3|6|12}
+          :noStatus('inactive')
+      }
       const query = supabase.from('pets').select('id').eq('owner_id',user!.id)
       const {data:pets,error:petError} = petId
         ? await query.eq('id',petId).limit(1)
