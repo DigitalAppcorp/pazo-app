@@ -108,6 +108,10 @@ Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL no
 - Auditoría Supabase estrictamente **SELECT**, sin datos identificadores: 2 períodos Sandbox, 2 ventas distintas y 2 eventos distintos; 0 identidades faltantes, 0 precios/ambientes inesperados, 0 períodos inválidos. Inbox de webhooks firmados: **26 eventos `pending`** (13 CREATED, 5 ACTIVATED, 5 PAYMENT.SALE.COMPLETED, 3 CANCELLED); 0 marcados como conciliados. P21/worker seguía inactivo por diseño, por eso `pending` no es una afirmación de 26 pagos sin cobrar. **R2 finanzas/E2E sigue pendiente**: diseñar conciliación idempotente, preservar inbox y no acreditar períodos ni activar worker por un conteo.
 - `supabase/queries/f16_webhook_delivery_recovery_preview_READ_ONLY.sql` ya existe para repetir auditoría agregada; no duplicar consultas por cada chat. `main`, checkout, PayPal Live, Edge financiera y Vercel no se modificaron.
 
+## F16 nueva pieza — gestión histórica Live en código sin despliegue
+- `pazo-paypal-live-checkout/liveAccountManagement.mjs`: consulta/cancelación futura del owner sin depender del selector de nuevos checkouts, prueba merchant generation original y plan. Claim persistente requerido antes de mutación, postflight GET; sin cancelar beneficios pagados.
+- `liveHistoricalProvider.mjs` opera SOLO PayPal Live, con credenciales originales de la generación y sin fallback Sandbox. Falta RPC claim, conexión Edge y QA con cuentas Live reales. Live/checkout siguen OFF.
+
 ## Seguridad, alcance y continuación
 - Supabase project ref `mrybvqdebbgcayuvgkkr` (solo identificador público), GitHub PR #44 DRAFT. Nunca compartir secrets, IDs de compradores ni payment tokens en handoff.
 - F13 diseño aprobado: mapa full-bleed opción 3, barra blanca/isotipo verde, perfiles/mensajería/avisos y fake doors; F14 eliminación QA E2E con protecciones. No reabrir decisiones de módulos, no degradar «cero contornos».
