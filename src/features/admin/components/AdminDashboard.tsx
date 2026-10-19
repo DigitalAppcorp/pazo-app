@@ -1,17 +1,23 @@
 import { useCallback,useEffect,useState } from 'react'
 import { createPortal } from 'react-dom'
+import { AdminGlyph,AdminDonut,AdminCohortColumns,type AdminGlyphName } from './AdminVisuals'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
 } from '../adminDashboardService'
 
-type Section='summary'|'users'|'finance'|'ideas'|'infra'
-const sections:{key:Section;es:string;en:string}[]=[
- {key:'summary',es:'Resumen',en:'Overview'},
- {key:'users',es:'Cuentas',en:'Accounts'},
- {key:'finance',es:'Apoyo',en:'Support'},
- {key:'ideas',es:'Interés',en:'Interest'},
- {key:'infra',es:'Supabase',en:'Supabase'},
+type Section='summary'|'users'|'pets'|'finance'|'activity'|'content'|'ideas'|'places'|'infra'|'reports'
+const sections:{key:Section;es:string;en:string;icon:AdminGlyphName}[]=[
+ {key:'summary',es:'Resumen',en:'Overview',icon:'chart'},
+ {key:'users',es:'Usuarios',en:'Users',icon:'users'},
+ {key:'pets',es:'Mascotas',en:'Pets',icon:'paw'},
+ {key:'finance',es:'Membresías',en:'Memberships',icon:'crown'},
+ {key:'activity',es:'Actividad',en:'Activity',icon:'activity'},
+ {key:'content',es:'Contenido',en:'Content',icon:'layers'},
+ {key:'ideas',es:'Fake Doors',en:'Fake Doors',icon:'compass'},
+ {key:'places',es:'Lugares',en:'Places',icon:'pin'},
+ {key:'reports',es:'Denuncias',en:'Reports',icon:'alert'},
+ {key:'infra',es:'Supabase',en:'Supabase',icon:'database'},
 ]
 const n=(number:number)=>number.toLocaleString('es-US')
 const money=(minor:number)=>(minor/100).toLocaleString('es-US',{style:'currency',currency:'USD'})
@@ -22,38 +28,39 @@ const moduleNames:Record<string,string>={feed:'Feed',explore:'Explorar',places:'
  notifications:'Avisos',supporter:'Amigo de PAZO'}
 const optionLabels:Record<string,string>={use:'Usarlo',create:'Crear u organizar',
  explore:'Explorar lo que otros comparten',share:'Compartir',other:'Otro'}
-function Stat({label,value,note,accent}:{label:string;value:string|number;note?:string;accent?:boolean}){
- return <div className="min-w-0 rounded-[22px] bg-white px-4 py-4 shadow-[0_5px_24px_rgba(32,78,74,0.045)] lg:px-5 lg:py-5">
-  <p className="text-[12px] font-bold text-[#5C7470] lg:text-[13px]">{label}</p>
-  <p className={"mt-2 break-words text-[24px] font-black leading-tight tracking-tight lg:text-[30px] "+(accent?"text-[#168049]":"text-[#204E4A]")}>{value}</p>
-  {note&&<p className="mt-1 text-[11px] leading-snug text-[#5C7470]">{note}</p>}
+function Stat({label,value,note,accent,icon}:{label:string;value:string|number;note?:string;accent?:boolean;icon?:AdminGlyphName}){
+ return <div className="flex min-h-[132px] min-w-0 items-center gap-3.5 rounded-[21px] bg-white px-4 py-5 shadow-[0_7px_27px_rgba(32,78,74,0.045)] xl:px-5">
+  {icon&&<span aria-hidden="true" className={'flex h-[54px] w-[54px] shrink-0 items-center justify-center rounded-full '+
+   (accent?'bg-[#E4F9DC] text-[#17823E]':icon==='crown'?'bg-[#FFF0D6] text-[#E0982C]':'bg-[#E2F8E8] text-[#166D54]')}>
+   <AdminGlyph name={icon} size={26}/>
+  </span>}
+  <div className="min-w-0 flex-1">
+   <p className="text-[13px] font-semibold leading-snug text-[#354D47] lg:text-[14px]">{label}</p>
+   <p className={"mt-1.5 break-words text-[26px] font-black leading-tight tracking-tight lg:text-[29px] "+(accent?"text-[#137946]":"text-[#142D29]")}>{value}</p>
+   {note&&<p className="mt-1.5 text-[12px] font-semibold leading-snug text-[#698079]">{note}</p>}
+  </div>
  </div>
 }
 
 function AdminNavIcon({section}:{section:Section}){
- return <svg aria-hidden="true" className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-  {section==='summary'&&<><path d="M3 11.2 12 4l9 7.2V20H3z"/><path d="M9 20v-6h6v6"/></>}
-  {section==='users'&&<><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-2.4a6 6 0 0 1 12 0V20M17 5a3 3 0 0 1 0 6m1 3a5 5 0 0 1 3 4.5V20"/></>}
-  {section==='finance'&&<><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 15h3"/></>}
-  {section==='ideas'&&<><path d="m12 2 2.5 7.2L22 12l-7.5 2.8L12 22l-2.5-7.2L2 12l7.5-2.8z"/></>}
-  {section==='infra'&&<><ellipse cx="12" cy="5" rx="8.5" ry="3"/><path d="M3.5 5v7c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3V5M3.5 12v7c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-7"/></>}
- </svg>
+ const glyph=sections.find(item=>item.key===section)?.icon||'chart'
+ return <AdminGlyph name={glyph} size={20}/>
 }
 function DashboardPanel({title,description,children,action}:{
  title:string;description?:string;children:React.ReactNode;action?:()=>void
 }){
- return <section className="min-w-0 rounded-[24px] bg-white p-4 shadow-[0_4px_20px_rgba(32,78,74,0.045)] lg:p-5">
+ return <section className="min-w-0 rounded-[20px] bg-white p-5 shadow-[0_6px_28px_rgba(32,78,74,0.055)] lg:p-6">
   <div className="flex items-start justify-between gap-3">
-   <div className="min-w-0"><h3 className="text-[16px] font-black tracking-tight text-[#204E4A] lg:text-[17px]">{title}</h3>
-    {description&&<p className="mt-1 text-[12px] text-[#71857F]">{description}</p>}</div>
+   <div className="min-w-0"><h3 className="text-[17px] font-black tracking-tight text-[#1D322D] lg:text-[19px]">{title}</h3>
+    {description&&<p className="mt-1 text-[13px] text-[#71857F]">{description}</p>}</div>
    {action&&<button type="button" onClick={action} aria-label={title} className="rounded-full bg-[#F2F5EC] px-3 py-1.5 text-[13px] font-bold text-[#204E4A] hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]">Ver</button>}
   </div>
-  <div className="mt-4">{children}</div>
+  <div className="mt-5">{children}</div>
  </section>
 }
 
 function Note({children}:{children:React.ReactNode}){
- return <p className="rounded-[18px] bg-[#EEF2DF] px-3 py-3 text-[12px] leading-relaxed text-[#4A6E67]">{children}</p>
+ return <p className="rounded-[16px] bg-[#EAF1E2] px-4 py-2.5 text-[12px] leading-relaxed text-[#536E64]">{children}</p>
 }
 export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void}){
  const [section,setSection]=useState<Section>('summary')
@@ -81,6 +88,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
   }finally{setLoading(false)}
  },[period,userOffset,lang])
  useEffect(()=>{void refresh()},[refresh])
+ const selectSection=(next:Section)=>{if(next==='reports'){onOpenReports?.();return}setSection(next)}
  const selectDoor=async(key:string)=>{
   if(voterKey===key){setVoterKey('');setVoters(null);setAudience(null);return}
   setVoterKey(key);setVoters(null);setAudience(null);setVoterBusy(true)
@@ -99,18 +107,18 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
  </select>
  return createPortal(<div role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
     data-pazo-admin-responsive="true"
-    className="fixed inset-0 z-[200] flex h-[100dvh] w-full overflow-hidden bg-[#F5F6F1] font-sans text-[#204E4A] lg:grid lg:grid-cols-[235px_minmax(0,1fr)] xl:grid-cols-[255px_minmax(0,1fr)]">
+    className="fixed inset-0 z-[200] flex h-[100dvh] w-full overflow-hidden bg-[#F7F8F5] font-sans text-[#204E4A] lg:grid lg:grid-cols-[265px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
   {/* Portal escapes the 430px mobile app shell on desktop; the rest of PAZO stays mobile-only. */}
-  <aside className="hidden min-h-0 flex-col bg-white px-4 pb-6 pt-6 shadow-[5px_0_30px_rgba(32,78,74,0.025)] lg:flex">
+  <aside className="hidden min-h-0 flex-col bg-white px-5 pb-5 pt-6 shadow-[5px_0_30px_rgba(32,78,74,0.025)] lg:flex">
    <p className="px-3 text-[36px] font-black tracking-[-0.07em] text-[#204E4A]">pazo<span className="text-[#E1E53F]">.</span></p>
-   <div className="mt-8 flex items-center gap-3 rounded-[20px] bg-[#F7F9F2] px-3 py-4">
+   <div className="mt-6 flex items-center gap-3 rounded-[18px] bg-[#F9FAF7] px-3 py-4">
     <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E1E53F] text-[22px] font-black">P</span>
     <div><p className="text-[13px] font-black">{l('Centro de control','Control center')}</p><p className="text-[11px] font-medium text-[#71857F]">{l('Administrador','Administrator')}</p></div>
    </div>
    <nav aria-label={l('Secciones del panel','Dashboard sections')} className="mt-5 flex flex-1 flex-col gap-1 overflow-y-auto">
     {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
-     onClick={()=>setSection(item.key)}
-     className={'flex min-h-12 w-full items-center gap-3 rounded-[16px] px-4 text-left text-[14px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
+     onClick={()=>selectSection(item.key)}
+     className={'flex min-h-[47px] w-full items-center gap-4 rounded-[14px] px-4 text-left text-[15px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
       (section===item.key?'bg-[#E5F0D8] text-[#204E4A]':'text-[#506864] hover:bg-[#F1F6E9]')}>
      <AdminNavIcon section={item.key}/><span>{lang==='es'?item.es:item.en}</span>
     </button>)}
@@ -124,14 +132,14 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
    </button>
   </aside>
   <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
-   <header className="z-10 shrink-0 bg-[#F5F6F1]/95 px-4 pb-3 pt-4 backdrop-blur-md sm:px-6 lg:px-8 lg:pb-5 lg:pt-7">
-    <div className="mx-auto flex w-full max-w-[1500px] items-start justify-between gap-3">
+   <header className="z-10 shrink-0 bg-[#F7F8F5]/95 px-4 pb-3 pt-4 backdrop-blur-md sm:px-6 lg:px-8 lg:pb-5 lg:pt-7">
+    <div className="mx-auto flex w-full max-w-[1600px] items-start justify-between gap-3">
      <div className="min-w-0">
       <p className="text-[11px] font-black tracking-wide text-[#739087] lg:hidden">pazo. · ADMIN</p>
-      <h2 className="text-[24px] font-black tracking-tight text-[#173E39] lg:text-[30px]">
+      <h2 className="text-[26px] font-black tracking-tight text-[#162B29] lg:text-[31px]">
        {section==='summary'?l('Resumen general','General overview'):lang==='es'?sections.find(item=>item.key===section)?.es:sections.find(item=>item.key===section)?.en}
       </h2>
-      <p className="mt-0.5 text-[12px] text-[#647C75] lg:text-[14px]">
+      <p className="mt-1 text-[13px] text-[#647C75] lg:text-[15px]">
        {section==='summary'?l('Así va PAZO, con los datos disponibles','PAZO at a glance, using available data'):l('Centro de administración de PAZO','PAZO administration center')}
       </p>
      </div>
@@ -145,17 +153,17 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      </div>
     </div>
     <nav aria-label={l('Secciones del panel','Dashboard sections')}
-      className="mx-auto mt-4 flex max-w-[1500px] gap-2 overflow-x-auto pb-1 lg:hidden">
+      className="mx-auto mt-4 flex max-w-[1600px] gap-2 overflow-x-auto pb-1 lg:hidden">
      {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
-       onClick={()=>setSection(item.key)}
+       onClick={()=>selectSection(item.key)}
        className={'flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[12px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
         (section===item.key?'bg-[#204E4A] text-white':'bg-white text-[#204E4A] hover:bg-[#E5EDCE]')}>
        <AdminNavIcon section={item.key}/>{lang==='es'?item.es:item.en}
       </button>)}
     </nav>
    </header>
-   <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3 sm:px-6 lg:px-8 lg:pt-4">
-    <div className="mx-auto max-w-[1500px] space-y-5 lg:space-y-6">
+   <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3 sm:px-6 lg:px-7 lg:pt-4">
+    <div className="mx-auto max-w-[1600px] space-y-5 lg:space-y-6">
      <div className="flex flex-wrap items-center justify-between gap-3">
       <p className="text-[12px] font-semibold text-[#6A8079]">
        {overview?l('Actualizado: ','Updated: ')+new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US'):'—'}
