@@ -16,6 +16,15 @@ BEGIN
    USING ERRCODE='42501'; END IF;
 END $requirements$;
 
+-- Signed events must retain the exact PAZO intent binding. NULL is allowed
+-- for an as-yet-uncorrelated event, but such an event can NEVER credit money.
+ALTER TABLE supporter_private.pazo_paypal_live_event_inbox
+ ADD COLUMN linked_intent_id text,
+ ADD CONSTRAINT pazo_live_event_owner_generation_fk
+  FOREIGN KEY(linked_intent_id,merchant_generation)
+  REFERENCES supporter_private.pazo_paypal_live_checkout_intents
+  (intent_id,merchant_generation);
+
 -- Called only AFTER authenticated owner + PayPal Live merchant GET show the
 -- same intent_id (custom_id), plan_id, owner-linked merchant and provider ID.
 -- Does not depend on the new-checkout selector: interrupted purchases must
@@ -68,7 +77,7 @@ CREATE FUNCTION supporter_private.pazo_live_queue_verified_event(
 ) RETURNS text
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $f$
-DECLARE existing_type text; saved_type text;
+DECLARE existing_type text; existing_intent text; saved_type text;
 BEGIN
  IF p_owner IS NULL OR p_intent IS NULL OR p_subscription IS NULL
   OR p_generation IS NULL OR p_generation<1 OR
@@ -90,14 +99,16 @@ BEGIN
    AND i.source_environment='live' AND i.plan_id=m.plan_id
  ) THEN RETURN 'owner_binding_not_verified'; END IF;
  INSERT INTO supporter_private.pazo_paypal_live_event_inbox(
-  merchant_generation,provider_event_id,event_type,source_environment)
- VALUES(p_generation,p_event_id,p_event_type,'live')
+  merchant_generation,provider_event_id,event_type,source_environment,
+  linked_intent_id)
+ VALUES(p_generation,p_event_id,p_event_type,'live',p_intent)
  ON CONFLICT (merchant_generation,provider_event_id) DO NOTHING
  RETURNING event_type INTO saved_type;
  IF saved_type IS NOT NULL THEN RETURN 'queued'; END IF;
- SELECT event_type INTO existing_type
+ SELECT event_type,linked_intent_id INTO existing_type,existing_intent
  FROM supporter_private.pazo_paypal_live_event_inbox
  WHERE merchant_generation=p_generation AND provider_event_id=p_event_id;
+ IF existing_intent IS DISTINCT FROM p_intent THEN RETURN 'event_owner_conflict'; END IF;
  IF existing_type=p_event_type THEN RETURN 'duplicate_verified_event'; END IF;
  RETURN 'event_id_conflict';
 END $f$;
@@ -141,6 +152,7 @@ BEGIN
  SELECT * INTO e FROM supporter_private.pazo_paypal_live_event_inbox
  WHERE merchant_generation=p_generation AND provider_event_id=p_event_id
   AND source_environment='live' AND event_type='PAYMENT.SALE.COMPLETED'
+  AND linked_intent_id=p_intent
  FOR UPDATE;
  IF NOT FOUND THEN RETURN 'signed_completed_sale_event_required'; END IF;
  SELECT * INTO s FROM supporter_private.pazo_paypal_live_paid_periods
