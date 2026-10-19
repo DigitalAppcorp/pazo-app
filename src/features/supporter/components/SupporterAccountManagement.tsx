@@ -8,6 +8,7 @@ import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus
 import { SupporterBenefitsHome } from './SupporterBenefitsHome'
 import { SupporterOfferB } from './SupporterOfferB'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
+import { SupporterPreparingScreen } from './SupporterPreparingScreen'
 import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
 import {supporterBenefitsUiEnabled} from '../supporterUiRelease'
 import type { Pet } from '../../../types/pazo'
@@ -44,6 +45,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [qaRecoveryStage,setQaRecoveryStage] = useState('unverified')
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
+  const [preparationSlow,setPreparationSlow] = useState(false)
+  const [preparationRevision,setPreparationRevision] = useState(0)
   const continueExistingQaRequest = () => {
     if(qaPayAction==='checking'||qaV2AccountState!=='bound')return
     // One obvious payment action. Server decides whether the old approval
@@ -61,6 +64,31 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
+  // Two independent authorities: (1) server-derived membership and
+  // (2) Sandbox owner-only checkout list. Both must resolve before the
+  // payment invitation becomes visible; neither is guessed from cache.
+  const preparationPending=membership.kind==='checking'||
+    (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')
+  const preparationUnavailable=membership.kind==='unavailable'||
+    (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')
+  const preparing=preparationPending||preparationUnavailable
+  useEffect(()=>{
+    if(!preparationPending){setPreparationSlow(false);return}
+    const timeout=window.setTimeout(()=>setPreparationSlow(true),12000)
+    return ()=>window.clearTimeout(timeout)
+  },[preparationPending,preparationRevision])
+  const retryPreparation=()=>{
+    setPreparationSlow(false)
+    setPreparationRevision(n=>n+1)
+    // Re-check the existing server-authoritative membership result. Never
+    // infer a missing subscription from network failure.
+    if(membership.kind==='checking'||membership.kind==='unavailable')
+      refreshMembership()
+    if(qaV2Screen&&membership.kind==='inactive'){
+      setQaV2AccountState('checking')
+      setQaReviewRevision(n=>n+1)
+    }
+  }
 
   useEffect(() => {
     // Member home owns its own close/keyboard handling.
@@ -170,8 +198,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   return (
     <SupporterScreenPortal>
     <div role="dialog" aria-modal="true" aria-labelledby="supporter-account-title"
-      className="h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5ED] text-[#204E4A]">
-      <header className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
+      className="relative h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5ED] text-[#204E4A]">
+      {preparing&&<SupporterPreparingScreen lang={lang}
+        unavailable={preparationUnavailable} slow={preparationSlow}
+        onRetry={retryPreparation} onClose={onClose}/>}
+
+      <header hidden={preparing} className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
         <div className="mx-auto grid min-h-11 max-w-xl grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
           <button ref={closeRef} type="button" onClick={onClose} disabled={busy}
             aria-label={label('Volver a PAZO','Back to PAZO')}
@@ -188,7 +220,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         </div>
       </header>
 
-      <main className="mx-auto w-full min-w-0 max-w-xl space-y-2.5 px-4 pb-7 pt-1">
+      <main hidden={preparing} className="mx-auto w-full min-w-0 max-w-xl space-y-2.5 px-4 pb-7 pt-1">
         {membership.kind === 'checking' && <p role="status" className="rounded-3xl bg-white p-5 text-sm font-semibold">
           {label('Comprobando tu membresía…','Checking your membership…')}
         </p>}
@@ -219,7 +251,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </p>}
                     {qaV2AccountState==='bound'&&qaPayAction!=='retry_ready'&&
                       <button type="button" onClick={continueExistingQaRequest}
-                        disabled={qaPayAction==='checking'||qaRecoveryStage==='checking'}
+                        disabled={qaPayAction==='checking'}
                         className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[15px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:opacity-65">
                         {qaPayAction==='checking'
                           ? label('Conectando con PayPal…','Connecting to PayPal…')
