@@ -50,6 +50,26 @@ INSERT INTO admin_private.pazo_paypal_merchant_generations(
 ) VALUES('live',repeat('a',64),'P-ABCDEFGHIJKLMN','WH-12345678900',
  '11111111-1111-4111-8111-111111111111',
  '22222222-2222-4222-8222-222222222222');
+-- Install a sandbox generation and prove it cannot be attached to a Live intent.
+INSERT INTO admin_private.pazo_paypal_merchant_generations(
+ environment,merchant_fingerprint_sha256,plan_id,webhook_id,
+ client_id_vault,client_secret_vault
+) VALUES('sandbox',repeat('c',64),'P-ABCDEFGHIJKLMN','WH-12345678999',
+ '33333333-3333-4333-8333-333333333333',
+ '44444444-4444-4444-8444-444444444444');
+DO $cross$
+BEGIN
+ BEGIN
+  INSERT INTO supporter_private.pazo_paypal_live_checkout_intents(
+   intent_id,owner_id,request_key,merchant_generation,plan_id,locale,
+   terms_version,terms_digest,affirmative_consent
+  ) VALUES('intent-45678901-1234-4234-8234-123456789abc',
+   '12345678-1234-4234-8234-123456789abc',
+   '45678901-1234-4234-8234-123456789abc',2,'P-ABCDEFGHIJKLMN',
+   'es','pazo-supporter-live.offer-v1',repeat('b',64),true);
+  RAISE EXCEPTION 'FAIL Sandbox merchant generation accepted into Live intent';
+ EXCEPTION WHEN foreign_key_violation THEN NULL; END;
+END $cross$;
 INSERT INTO supporter_private.pazo_paypal_live_checkout_intents(
  intent_id,owner_id,request_key,merchant_generation,plan_id,locale,
  terms_version,terms_digest,affirmative_consent

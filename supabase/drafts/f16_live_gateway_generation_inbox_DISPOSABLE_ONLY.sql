@@ -27,6 +27,7 @@ CREATE TABLE admin_private.pazo_paypal_merchant_generations (
  retired_at timestamptz,
  CONSTRAINT pazo_paypal_generation_natural_key UNIQUE
   (environment,merchant_fingerprint_sha256,plan_id,webhook_id),
+ CONSTRAINT pazo_paypal_generation_environment_key UNIQUE(environment,generation),
  CONSTRAINT pazo_paypal_retirement_order
   CHECK(retired_at IS NULL OR retired_at>=created_at)
 );
@@ -79,8 +80,7 @@ CREATE TABLE supporter_private.pazo_paypal_live_checkout_intents (
   CHECK(intent_id ~ '^intent-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$'),
  owner_id uuid NOT NULL,
  request_key uuid NOT NULL,
- merchant_generation bigint NOT NULL
-  REFERENCES admin_private.pazo_paypal_merchant_generations(generation),
+ merchant_generation bigint NOT NULL,
  source_environment text NOT NULL DEFAULT 'live' CHECK(source_environment='live'),
  plan_id text NOT NULL CHECK(plan_id ~ '^P-[A-Z0-9]{12,40}$'),
  locale text NOT NULL CHECK(locale IN ('es','en')),
@@ -94,6 +94,10 @@ CREATE TABLE supporter_private.pazo_paypal_live_checkout_intents (
    provider_subscription_id ~ '^I-[A-Za-z0-9_-]{3,70}$'),
  state text NOT NULL DEFAULT 'pending' CHECK(state IN ('pending','bound')),
  CONSTRAINT pazo_paypal_live_intent_unique_request UNIQUE(owner_id,request_key),
+ CONSTRAINT pazo_paypal_live_intent_environment_generation FOREIGN KEY
+  (source_environment,merchant_generation)
+  REFERENCES admin_private.pazo_paypal_merchant_generations(environment,generation),
+ CONSTRAINT pazo_paypal_live_intent_generation_key UNIQUE(intent_id,merchant_generation),
  CONSTRAINT pazo_paypal_live_intent_binding_state CHECK(
   (state='pending' AND provider_subscription_id IS NULL) OR
   (state='bound' AND provider_subscription_id IS NOT NULL
@@ -111,8 +115,7 @@ REVOKE ALL ON supporter_private.pazo_paypal_live_checkout_intents
 -- After verified LIVE signature AND independent PAZO merchant/owner proof,
 -- only provider event reference/type is stored. No raw PayPal payload.
 CREATE TABLE supporter_private.pazo_paypal_live_event_inbox (
- merchant_generation bigint NOT NULL
-  REFERENCES admin_private.pazo_paypal_merchant_generations(generation),
+ merchant_generation bigint NOT NULL,
  provider_event_id text NOT NULL
   CHECK(provider_event_id ~ '^[A-Za-z0-9._-]{3,128}$'),
  event_type text NOT NULL
@@ -121,7 +124,10 @@ CREATE TABLE supporter_private.pazo_paypal_live_event_inbox (
  processing_state text NOT NULL DEFAULT 'pending'
   CHECK(processing_state IN('pending','processing','processed','held')),
  verified_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
- PRIMARY KEY(merchant_generation,provider_event_id)
+ PRIMARY KEY(merchant_generation,provider_event_id),
+ CONSTRAINT pazo_paypal_live_inbox_environment_generation
+  FOREIGN KEY(source_environment,merchant_generation)
+  REFERENCES admin_private.pazo_paypal_merchant_generations(environment,generation)
 );
 CREATE INDEX pazo_paypal_live_inbox_pending
  ON supporter_private.pazo_paypal_live_event_inbox(processing_state,verified_at);
@@ -145,6 +151,10 @@ CREATE TABLE supporter_private.pazo_paypal_live_paid_periods (
  service_end timestamptz NOT NULL,
  merchant_verified_at timestamptz NOT NULL,
  recorded_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
+ CONSTRAINT pazo_paypal_live_paid_owner_generation
+  FOREIGN KEY(intent_id,merchant_generation)
+  REFERENCES supporter_private.pazo_paypal_live_checkout_intents
+   (intent_id,merchant_generation),
  CONSTRAINT pazo_paypal_live_event_binding
   FOREIGN KEY(merchant_generation,provider_event_id)
   REFERENCES supporter_private.pazo_paypal_live_event_inbox
