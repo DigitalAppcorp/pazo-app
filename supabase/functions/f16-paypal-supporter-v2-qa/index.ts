@@ -433,15 +433,18 @@ Deno.serve(async(request:Request)=>{
       merchant.plan_id!==PLAN)
      return addCors(reply(409,'merchant_owner_plan_mismatch'),runtime.origin)
     if(merchant.status==='APPROVAL_PENDING'){
-     if(merchant.approvalUrl)
-      return addCors(new Response(JSON.stringify({
-       ok:true,environment:'sandbox',phase:'APPROVAL_PENDING',
-       code:'approval_can_resume',approvalUrl:merchant.approvalUrl,
-       paidThrough:null,mayGrantBenefits:false,mayRecordPayment:false
-      }),{status:200,headers:{'content-type':'application/json',
-       'cache-control':'no-store'}}),runtime.origin)
-     // Missing approval link: no silent cancellation, no second checkout.
-     return addCors(reply(409,'approval_link_unavailable'),runtime.origin)
+     // User explicitly requested to pay again after abandoning an approval.
+     // A saved ba_token may no longer render in PayPal Sandbox. Instead of
+     // blindly reopening it, close ONLY the still-unapproved subscription.
+     // A separate new affirmative consent is required for any replacement.
+     if(!await runtime.canAbandonPending(qaOwner))
+      return addCors(reply(409,'pending_cancellation_preflight_blocked'),runtime.origin)
+     const cancelled=await runtime.cancellation.cancelPending({
+      intentId:account.intentId,subscriptionId:account.externalSubscriptionId})
+     if(cancelled.status!=='CANCELLED')
+      return addCors(reply(409,'pending_cancellation_confirmation_missing'),runtime.origin)
+     // The merchant-proof verifier below requires signed CREATED evidence,
+     // a second terminal GET, and zero scoped transactions. No grant on 404.
     }
     if(!['CANCELLED','EXPIRED'].includes(merchant.status))
      return addCors(reply(409,'existing_subscription_not_terminal'),runtime.origin)
