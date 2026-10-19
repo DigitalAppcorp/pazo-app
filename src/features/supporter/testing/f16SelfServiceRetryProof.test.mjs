@@ -133,6 +133,8 @@ test('returning from unapproved PayPal login cancels exact pending resource befo
  assert.ok(scoped.includes('runtime.canAbandonPending(qaOwner)'))
  assert.ok(scoped.includes('runtime.cancellation.cancelPending({'))
  assert.ok(scoped.includes("cancelled.status!=='CANCELLED'"))
+ assert.ok(scoped.includes("else if(!['CANCELLED','EXPIRED'].includes(merchant.status))"),
+   'Do not reject the stale pre-cancel merchant state after confirmed CANCELLED')
  assert.ok(scoped.includes('runtime.retryMerchantProof.verify({'))
  assert.ok(scoped.includes('runtime.retryConsentStore.approveReconciled({'))
  assert.ok(scoped.includes("phase:'RETRY_READY'"))
