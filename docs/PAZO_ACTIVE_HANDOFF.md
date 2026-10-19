@@ -36,6 +36,14 @@ git pull --ff-only origin f13/section-titles-20261012
 ```
 Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL normal `http://localhost:5173/`. No usar `supporter_debug=1` para validación de vista normal.
 
+## Checkpoint admin Sandbox — Diagnóstico de pasarela existente desplegado (19-oct-2026)
+- PO autorizó explícitamente desplegar **únicamente** `pazo-admin-paypal-validate` para comprobar OAuth de los secretos Sandbox Edge existentes, sin mutaciones de checkout, Vault, suscripciones ni Live.
+- Código en PR #44 rama `f13/section-titles-20261012`, último commit de código probado `0cd43561a89ada50072b434d90f43dd1c5cd3024`: GitHub Actions **7/7 SUCCESS** (CI + 6 labs). La CI incluye las nuevas pruebas de inspección de Sandbox y controles no-op/admin-only.
+- Supabase Edge **`pazo-admin-paypal-validate` v3 ACTIVE, verify_jwt=true**, fuentes `index.ts` y `legacySandboxHealth.mjs` verificadas byte a byte contra GitHub en el postflight. Los Edge `f16-paypal-webhook` v19, `f16-paypal-supporter-account` v11, `f16-paypal-supporter` v8 y `f16-paypal-supporter-v2-qa` v26 no se tocaron. Lectura SQL: `active_environment=sandbox`, `live_checkout_enabled=false`.
+- El panel ahora separa claramente credenciales *Legacy Edge* de borradores Vault. Botón nuevo **«Comprobar Sandbox en uso»** llama acción admin `inspect_active_sandbox` (única consulta a PayPal OAuth, **sin pago**). **Aún NO hay una invocación autenticada real desde el panel ni aceptación PO**; el administrador debe sincronizar Vite y pulsar el botón para validar respuesta. No afirmar OAuth de merchant PASS hasta entonces.
+- Gate posterior, todavía NO ejecutado: integrar el plano de configuración Vault al checkout con prueba de compatibilidad de merchant/plan/webhook, retorno seguro y rollback, primero solo Sandbox; **sin reemplazar automáticamente credenciales de suscripciones antiguas**. Live OFF hasta gate separado.
+- Prioridad F16 «Mi membresía»/parpadeo continúa con aceptación visual PO pendiente, no cerrarla por este despliegue.
+
 ## Otro frente aprobado: panel admin PayPal — PREPARACIÓN FUNCIONAL, LIVE DESACTIVADO
 - PO **aprobó implementar** `Configuración · PayPal` en panel admin para gestionar Sandbox/Live, credenciales, borradores de precio, plan, webhook y dominio de retorno en móvil y desktop. Implementado en `AdminDashboard.tsx`, `AdminPayPalSettings.tsx`. Doc: `docs/PAZO_ADMIN_PAYPAL_GATE_20261019.md`.
 - Migración **aplicada** `supabase/migrations/20261019195500_pazo_admin_paypal_gateway_settings.sql`, tablas privadas `admin_private.paypal_gateway_settings`, audit y runtime; secretos cifrados en Supabase Vault; RPC de lectura admin sin secretos y RPC secret service_role-only. Edge `pazo-admin-paypal-validate` despliegue OAuth sin cobrar. Última lectura: **2 filas de configuración, 0 cambios administrativos, Live=false**; no afirmar que se pegaron credenciales. No repetir migración.
