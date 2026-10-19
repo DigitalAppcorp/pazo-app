@@ -100,6 +100,12 @@ Si `git status --short` muestra cambios, **detener pull** y preservarlos. URL no
 ## Decisión PO: último Preview solo para corroborar (19-oct-2026)
 - Desarrollo y QA deben completarse en PR #44/GitHub y localhost antes de otro Preview. El gate local `scripts/pazo-prepreview-local.ps1` prueba código, build y artefactos PWA, sin deploy ni pagos; CI valida `dist/` tras build. Live sigue OFF, el resultado automatizado no sustituye QA de membresía, finanzas o dispositivos.
 
+## Checkpoint pre-Preview — verificado en CI, no equivale a release (19-oct-2026)
+- El PO estableció que **NO se solicita ni lanza otro Preview** hasta terminar todo lo implementable en GitHub + localhost; Preview final solo corroborará PWA en HTTPS y regresiones antes de una beta real.
+- Código commit `5bbeb6aeb8575f074375638181f44445502df78f`: CI + 6 laboratorios PostgreSQL **7/7 SUCCESS**. Incluye `scripts/pazo-prepreview-local.ps1` y `test:prepreview:dist` en CI después de build: verifica paquete Vite, manifest/íconos PWA, service worker network-only y redirects PayPal a SPA, sin desplegar ni cobrar. Se preserva el gate de PO visual de membresías: no declarar completado.
+- Auditoría Supabase estrictamente **SELECT**, sin datos identificadores: 2 períodos Sandbox, 2 ventas distintas y 2 eventos distintos; 0 identidades faltantes, 0 precios/ambientes inesperados, 0 períodos inválidos. Inbox de webhooks firmados: **26 eventos `pending`** (13 CREATED, 5 ACTIVATED, 5 PAYMENT.SALE.COMPLETED, 3 CANCELLED); 0 marcados como conciliados. P21/worker seguía inactivo por diseño, por eso `pending` no es una afirmación de 26 pagos sin cobrar. **R2 finanzas/E2E sigue pendiente**: diseñar conciliación idempotente, preservar inbox y no acreditar períodos ni activar worker por un conteo.
+- `supabase/queries/f16_webhook_delivery_recovery_preview_READ_ONLY.sql` ya existe para repetir auditoría agregada; no duplicar consultas por cada chat. `main`, checkout, PayPal Live, Edge financiera y Vercel no se modificaron.
+
 ## Seguridad, alcance y continuación
 - Supabase project ref `mrybvqdebbgcayuvgkkr` (solo identificador público), GitHub PR #44 DRAFT. Nunca compartir secrets, IDs de compradores ni payment tokens en handoff.
 - F13 diseño aprobado: mapa full-bleed opción 3, barra blanca/isotipo verde, perfiles/mensajería/avisos y fake doors; F14 eliminación QA E2E con protecciones. No reabrir decisiones de módulos, no degradar «cero contornos».

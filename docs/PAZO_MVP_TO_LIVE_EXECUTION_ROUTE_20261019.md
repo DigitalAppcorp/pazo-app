@@ -79,3 +79,9 @@ El PO decidió no crear más Previews mientras queden piezas por desarrollar. Un
 - Nuevo `scripts/pazo-prepreview-local.ps1`: no hace pull, push, deploy, pagos ni SQL; comprueba rama y árbol limpio, corre `npm run verify:prepreview` (gobierno, guard financiero, F16 sintético, compilación y auditoría del artefacto `dist/`), y restaura los flags de QA del entorno original.
 - CI ejecuta `test:prepreview:dist` tras la compilación para comprobar manifest, iconos, SW network-only, assets producidos y rutas de retorno/cancelación PayPal SPA.
 - PASS de este control significa **solo CODE/BUILD**. No implica aprobación visual, beneficio E2E, PWA instalada, backend financiero listo ni autorización de producción.
+
+## Auditoría pre-Preview financiera agregada (19-oct-2026)
+- Consulta SQL read-only de QA: 2 períodos pagados, 2 `sale_id` distintos, 2 `event_id` distintos; **0** identidad obligatoria ausente, contrato USD 2.99/Sandbox correcto en ambos y fechas verificadas válidas.
+- Buzón de webhooks: **26 pendientes**, desglosados en 13 CREATED, 5 ACTIVATED, 5 SALE.COMPLETED y 3 CANCELLED; 0 ligados a pago en el inbox. Worker financiero sigue OFF deliberadamente, no deducir 26 pagos no cobrados ni completar el ledger alternativo con inserciones artificiales.
+- Gate R2 exige reconciliar contra PayPal las ventas y el inbox, incluyendo idempotencia, refund/dispute, checkout abandonado y mantenimiento de los períodos ya verificados. Conservar eventos retenidos hasta entonces; solo se permite preparación offline sin GO financiero PO.
+- El nuevo gate pre-Preview code/build está verificado con CI + 6 labs **7/7 SUCCESS** en SHA `5bbeb6a`. No hay aceptación E2E ni visual, Preview y beta siguen NO-GO.
