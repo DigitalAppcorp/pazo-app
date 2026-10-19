@@ -8,7 +8,12 @@ BEGIN
  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN; END IF;
 END $roles$;
-\i supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql
+-- Model the two existing hosted admin dependencies in a disposable DB.
+CREATE TABLE admin_private.admin_grants(user_id uuid PRIMARY KEY);
+CREATE TABLE admin_private.paypal_gateway_runtime(
+ singleton bool PRIMARY KEY,active_environment text,live_checkout_enabled bool);
+INSERT INTO admin_private.paypal_gateway_runtime VALUES(true,'sandbox',false);
+\i supabase/migrations/20261019234100_pazo_f16_live_gateway_inert_private_staging.sql
 DO $check$
 DECLARE tables_count integer;
 BEGIN
@@ -167,7 +172,7 @@ BEGIN
   RAISE EXCEPTION 'FAIL duplicate use of signed sale event';
  EXCEPTION WHEN unique_violation THEN NULL; END;
 END $negative$;
-\i supabase/drafts/f16_live_cancel_claim_DISPOSABLE_ONLY.sql
+-- cancel claim installed by the staging migration
 DO $cancel_claim$
 DECLARE first_claim boolean; second_claim boolean; wrong_owner boolean;
 BEGIN
@@ -191,7 +196,7 @@ BEGIN
   'supporter_private.pazo_live_claim_cancel_once(uuid,text,bigint)','EXECUTE')
  THEN RAISE EXCEPTION 'Unreleased cancellation RPC has executable grants'; END IF;
 END $cancel_claim$;
-\i supabase/drafts/f16_live_entitlement_projection_DISPOSABLE_ONLY.sql
+-- projection installed by the staging migration
 DO $projection$
 DECLARE v jsonb;
 BEGIN

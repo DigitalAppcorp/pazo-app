@@ -1,11 +1,9 @@
 -- F16 LIVE gate CAS + rollback rehearsal in disposable DB only.
-CREATE TABLE IF NOT EXISTS admin_private.admin_grants(
- user_id uuid PRIMARY KEY
-);
+-- admin_grants prepared by the staging fixture
 INSERT INTO admin_private.admin_grants(user_id)
  VALUES('12345678-1234-4234-8234-123456789abc')
  ON CONFLICT DO NOTHING;
-\i supabase/drafts/f16_live_cutover_atomic_DISPOSABLE_ONLY.sql
+-- private cutover functions installed by the staging migration
 INSERT INTO admin_private.pazo_paypal_release_evidence(
  proof_id,actor_id,merchant_generation,evidence_sha256,
  all_checks_verified,checked_at,expires_at
