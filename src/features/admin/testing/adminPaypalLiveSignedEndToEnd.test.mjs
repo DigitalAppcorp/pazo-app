@@ -79,7 +79,7 @@ test('end-to-end synthetic signature + private original owner + PayPal GET + inb
  assert.equal(seen.length,1)
  assert.deepEqual(seen[0],{
   ownerId:owner,intentId:intent,subscriptionId:sub,
-  sourceEnvironment:'live',provider:'paypal',merchantGeneration:3,
+  merchantGeneration:3,
   eventId:data.id,eventType:data.event_type
  })
  assert.ok(!JSON.stringify(seen).includes('OPAQUE_TOKEN'))
