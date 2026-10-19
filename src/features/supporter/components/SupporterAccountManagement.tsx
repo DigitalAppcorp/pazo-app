@@ -43,13 +43,16 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaReviewRevision,setQaReviewRevision] = useState(0)
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [qaRecoveryStage,setQaRecoveryStage] = useState('unverified')
+  const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'>('idle')
   const continueExistingQaRequest = () => {
-    // Only a user click can request a provider-verified resume. This
-    // never creates an additional subscription or credits a payment.
-    setQaManagementOpen(true)
+    if(qaPayAction==='checking'||qaV2AccountState!=='bound')return
+    // One obvious payment action. Server decides whether the old approval
+    // can resume; no browser-generated subscription or paid entitlement.
+    setQaPayAction('checking')
     setQaResumeRevision(n=>n+1)
   }
   const reviewExistingQaRequest = () => {
+    setQaPayAction('idle')
     setQaManagementOpen(true)
     setQaV2AccountState('checking')
     setQaReviewRevision(n=>n+1)
@@ -201,59 +204,37 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {qaV2Screen ? (
               qaV2AccountState==='none'
                 ? <SandboxCheckoutQaPanel lang={lang} inline onReviewExisting={reviewExistingQaRequest}/>
-                : <div role="status" className="space-y-3 rounded-[21px] bg-[#F0F4E6] px-4 py-4 text-[13px] leading-relaxed text-[#204E4A]">
-                    <p className="text-[15px] font-black">
+                : <div className="space-y-3 rounded-[21px] bg-[#F0F4E6] px-4 py-4 text-center text-[14px] leading-relaxed text-[#204E4A]">
+                    <p className="text-[16px] font-black">
                       {qaV2AccountState==='bound'
-                        ? qaRecoveryStage==='approval_not_payment'||qaRecoveryStage==='paid_verified'
-                          ? label('Estamos verificando tu pago','We are verifying your payment')
-                          : qaRecoveryStage==='terminal_needs_financial_reconciliation'
-                            ? label('Tu solicitud anterior ha terminado','Your previous request has ended')
-                            : label('Tu pago quedó pendiente','Your payment was left pending')
-                        : qaV2AccountState==='pending'
-                          ? label('Estamos revisando tu solicitud','We are checking your request')
-                          : qaV2AccountState==='unavailable'
-                            ? label('No pudimos consultar tu pago','We could not check your payment')
-                            : label('Comprobando tu solicitud…','Checking your request…')}
-                    </p>
-                    <p>
-                      {qaV2AccountState==='bound'
-                        ? qaRecoveryStage==='merchant_missing_needs_reconciliation'
-                          ? label('PayPal ya no encuentra tu solicitud anterior. Para evitar un cobro duplicado, necesitamos comprobar que haya terminado antes de dejarte empezar de nuevo.',
-                            'PayPal can no longer find your previous request. We must confirm it has ended before letting you start again, to avoid a duplicate subscription.')
-                          : qaRecoveryStage==='approval_link_unavailable'
-                            ? label('Tu aprobación sigue pendiente, pero PayPal no nos dio un enlace válido para continuar. Revisa el estado de tu solicitud.',
-                              'Your approval is still pending, but PayPal did not return a valid link. Check your request status.')
-                            : qaRecoveryStage==='approval_not_payment'||qaRecoveryStage==='paid_verified'
-                              ? label('PayPal respondió, pero PAZO todavía está comprobando si existe un pago verificado.', 'PayPal responded, but PAZO is still checking for a verified payment.')
-                            : qaRecoveryStage==='terminal_needs_financial_reconciliation'
-                              ? label('Estamos comprobando si se puede iniciar una nueva solicitud sin crear cobros duplicados.', 'We are checking whether a new request can be started without duplicate charges.')
-                            : label('Saliste de PayPal antes de finalizar. Si la solicitud sigue disponible, puedes continuarla sin crear otra.',
-                              'You left PayPal before finishing. You can try to continue where you left off. We will not start a new subscription without first checking the previous one.')
-                        : qaV2AccountState==='pending'
-                          ? label('Todavía no sabemos si PayPal creó tu solicitud. Vamos a comprobarlo antes de mostrar otro botón de pago.',
-                            'We do not yet know if PayPal created your request. We will check before showing another payment button.')
-                          : qaV2AccountState==='unavailable'
-                            ? label('Por seguridad, no iniciaremos otra suscripción mientras no podamos comprobar el estado de la anterior.',
-                              'For your safety, we will not start another subscription until we can check the previous one.')
-                            : label('Esto puede tardar unos segundos.','This may take a few seconds.')}
+                        ? label('Tu pago quedó pendiente','Your payment was left pending')
+                        : qaV2AccountState==='unavailable'
+                          ? label('No pudimos comprobar tu pago','We could not check your payment')
+                          : label('Comprobando tu pago…','Checking your payment…')}
                     </p>
                     {qaV2AccountState==='bound'&&
-                      qaRecoveryStage==='approval_resumable'&&
+                      <p className="text-[13px] leading-relaxed text-[#526F63]">
+                        {label('Puedes volver a intentarlo. Tu membresía solo se activará cuando PayPal confirme el pago.',
+                          'You can try again. Your membership activates only after PayPal confirms payment.')}
+                      </p>}
+                    {qaV2AccountState==='bound'&&
                       <button type="button" onClick={continueExistingQaRequest}
-                        className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67]">
-                        {label('Continuar con PayPal','Continue with PayPal')}
+                        disabled={qaPayAction==='checking'||qaRecoveryStage==='checking'}
+                        className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[15px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:opacity-65">
+                        {qaPayAction==='checking'
+                          ? label('Conectando con PayPal…','Connecting to PayPal…')
+                          : label('Pagar con PayPal','Pay with PayPal')}
                       </button>}
-                    {qaV2AccountState==='bound'&&
-                      ['merchant_missing_needs_reconciliation','approval_link_unavailable'].includes(qaRecoveryStage)&&
-                      <a href="mailto:appdigital.corp@gmail.com?subject=Ayuda%20para%20retomar%20mi%20apoyo%20a%20PAZO"
-                        className="flex min-h-11 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-2.5 text-center text-[13px] font-extrabold text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67]">
-                        {label('Pedir ayuda para continuar','Get help to continue')}
-                      </a>}
-                    <button type="button" onClick={reviewExistingQaRequest}
-                      disabled={qaV2AccountState==='checking'}
-                      className="min-h-11 w-full rounded-full bg-white px-4 py-2.5 text-[13px] font-extrabold text-[#204E4A] hover:bg-[#E6EDD9] focus-visible:bg-[#E1E53F]/35 disabled:opacity-50">
-                      {label('Revisar mi solicitud','Check my request')}
-                    </button>
+                    {qaPayAction==='unavailable'&&qaV2AccountState==='bound'&&
+                      <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
+                        {label('No pudimos abrir PayPal. Estamos resolviendo un problema con este pago para evitar cobros duplicados. No se inició otro cobro.',
+                          'We could not open PayPal. We are resolving an issue with this payment to avoid duplicate subscriptions. No new charge was initiated.')}
+                      </p>}
+                    {qaV2AccountState==='unavailable'&&
+                      <p role="alert" className="text-[13px] leading-relaxed text-[#526F63]">
+                        {label('Vuelve a abrir esta pantalla más tarde. No se inició otro cobro.',
+                          'Reopen this screen later. No new charge was initiated.')}
+                      </p>}
                   </div>
             ) : (
               <div className="space-y-2">
@@ -282,14 +263,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
             <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold focus-visible:bg-[#E1E53F]/30">
               {qaV2Screen
-                ? label('Gestionar mi prueba de PayPal Sandbox', 'Manage my PayPal Sandbox test')
+                ? label('Detalles de mi pago de prueba', 'Test payment details')
                 : label('Administrar mi suscripción', 'Manage my subscription')}
             </summary>
           <h3 id="supporter-manage-title" className="px-1 text-lg font-black">
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onResumeStatus={setQaPayAction} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
