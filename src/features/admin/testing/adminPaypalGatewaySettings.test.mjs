@@ -86,3 +86,17 @@ test('active Sandbox inspection is admin-only, no-op and does not copy secrets o
  assert.ok(!edge.includes("vault.update_secret"))
  assert.ok(!edge.includes('/v1/billing/subscriptions'))
 })
+
+test('local development stays Sandbox with deferred official beta domain and a non-activating Live checklist',()=>{
+ assert.ok(page.includes("['localhost','127.0.0.1'].includes(window.location.hostname)"))
+ assert.ok(page.includes('Localhost · Sandbox activo'))
+ assert.ok(page.includes('Dominio oficial de la beta (se puede dejar vacío)'))
+ assert.ok(page.includes('No escribas localhost aquí'))
+ assert.ok(page.includes('webhooks llegan a Supabase por HTTPS'))
+ assert.ok(page.includes('Credenciales Live con OAuth'))
+ assert.ok(page.includes('Webhook Live configurado'))
+ assert.ok(page.includes('Dominio público de la beta'))
+ assert.ok(page.includes('renovaciones, cancelaciones, conciliación y rollback'))
+ assert.ok(page.includes('disabled aria-disabled="true"'))
+ assert.ok(!page.includes('window.location.href='))
+})
