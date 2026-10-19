@@ -167,14 +167,22 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
       result.accounts.some(a=>!INTENT.test(a.intentId||'')||
        !['pending','bound'].includes(a.state)||a.canDownloadAcceptance!==true))
     throw Error('UNTRUSTED_QA_LIST')
+   // A manual retry may have started while the first read was delayed.
+   // Only the latest private owner-list response may reveal checkout UI.
+   if(inspection!==inspectionSeq.current)return
    const found=result.accounts[0]||null
    setAccounts(result.accounts)
    setAccount(found)
    onAccountInspection?.(found?.state||'none')
    if(found)void inspectAccountProvider(found,inspection)
    else setRecoveryStage('no_confirmed_subscription')
-  }catch{setError(true);onAccountInspection?.('unavailable')}
-  finally{setLoading(false)}
+  }catch{
+   if(inspection===inspectionSeq.current){
+    setError(true);onAccountInspection?.('unavailable')
+   }
+  }finally{
+   if(inspection===inspectionSeq.current)setLoading(false)
+  }
  }
  useEffect(()=>{
   // React Strict Mode reruns effects in local QA. Avoid duplicate admission checks.
