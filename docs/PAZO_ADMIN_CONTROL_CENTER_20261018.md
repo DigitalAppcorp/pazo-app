@@ -1,3 +1,21 @@
+## Corrección de fidelidad visual tras comparación PO (2026-10-18)
+
+El Product Owner comparó directamente la **maqueta «Resumen general»** (referencia aprobada) con una captura real de PAZO Vite y señaló que **no se parecían**. Esta crítica quedó aceptada: el primer responsive ya funcional falló el gate de fidelidad visual por escala tipográfica muy pequeña (~11px), tarjetas KPI de poca altura, sidebar incompleto, uso excesivo de barras simples y módulos con grandes zonas vacías. **CI PASS anterior no era aceptación visual.**
+
+Segunda pasada de implementación en PR #44 DRAFT (rama `f13/section-titles-20261012`):
+- `AdminDashboard.tsx`: sidebar escritorio ampliado ~265/270 CSS px, corona real en identidad de administrador, navegación completa y funcional para Resumen/Usuarios/Mascotas/Membresías/Actividad/Contenido/Fake Doors/Lugares/Denuncias/Supabase. Denuncias enlaza la cola real de moderación, no pantalla artificial. Navegación móvil mediante tabs horizontales y sin modificar el resto de la app.
+- KPI de ~132px, grandes iconos circulares con fondo verde o dorado, etiquetas 13–14px, cifras 26–29px, más peso y contraste, contenedores blancos con sombras suaves PAZO. Cabecera y bloques tienen proporción más cercana a la referencia.
+- `AdminVisuals.tsx` **nuevo**: iconografía SVG reutilizable y visualizaciones de cohorte de registro/donut sobre datos reales; sin inventar series temporales o distribución geográfica. «Crecimiento» muestra cuentas **actuales agrupadas por antigüedad** (>30d, 8–30d, últimos 7d), no una serie histórica; «Actividad» muestra usuarios únicos por módulo, no sesiones ni minutos. «Cuentas y mascotas» y «Contenido» usan donas de conteos comprobados.
+- Orden desktop responsive de módulos: 4 KPI → Crecimiento/Actividad/Sistema → Membresías/Usuarios frecuentes/Fake Doors → Cuentas/Mascotas, Contenido y Moderación. Estado del sistema no afirma uptime sin fuente; ingresos se identifican claramente como Sandbox ficticio. El listado de usuarios frecuentes refleja solo la página de cuentas cargada, no un ranking global.
+- Páginas funcionales adicionales `pets`, `activity`, `content`, `places` con los mismos datos y permisos de antes; no nuevos RPC, permisos, migraciones, proveedores o costos.
+- `adminDashboard.test.mjs` amplía regresiones de escala, gráficos con valores reales, menú lateral y rutas utilizables. Commit de comprobación `8c567599e8cc481b253dbfabffd2a00e50d228a7`: **CI + 6 PostgreSQL labs 7/7 SUCCESS**. Ajuste posterior de corona: `67c624c4f9b0f65b0400fd7070dd9cb9c844da0f`.
+
+**Gate aún ABIERTO:** falta captura y evaluación comparativa real de PO en desktop (aprox. 1440px) y móvil (~390px) para evaluar fidelidad de diseño. La referencia contiene gráficas y cifras ilustrativas que no existen en backend; no copiar 1,248 usuarios, 86 membresías, $257.14, % de uso, historial temporal o mapa geográfico ficticio. Backend staging anterior permanece igual y protegido. No tocar `main` ni PayPal Live.
+
+**Gate:** `ADMIN_DESKTOP_REFERENCE_FIDELITY_REWORK_CI_PASS_PO_SCREENSHOT_ACCEPTANCE_PENDING`.
+
+---
+
 ## Diseño visual aprobado por Product Owner — Responsive escritorio y móvil (18-oct-2026)
 
 PO eligió explícitamente la referencia **«Resumen general»** de PAZO con sidebar izquierda, KPI superiores y mosaico de tarjetas blancas, verde, lima y fondo crema. Esta referencia contenía datos *ilustrativos* (no reales) y módulos de series históricas, mapa geográfico y uptime que **no existen todavía** como fuentes en PAZO; no copiar esos números ni simular ingresos/usuarios/rendimiento o mapa basado en zonas privadas.
