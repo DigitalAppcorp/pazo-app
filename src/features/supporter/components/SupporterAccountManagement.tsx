@@ -197,7 +197,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   }
   return (
     <SupporterScreenPortal>
-    <div role="dialog" aria-modal="true" aria-labelledby="supporter-account-title"
+    <div role="dialog" aria-modal="true" aria-labelledby={preparing?undefined:'supporter-account-title'}
+      aria-label={preparing?label('Preparando tu membresía de PAZO','Preparing your PAZO membership'):undefined}
       className="relative h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5ED] text-[#204E4A]">
       {preparing&&<SupporterPreparingScreen lang={lang}
         unavailable={preparationUnavailable} slow={preparationSlow}
