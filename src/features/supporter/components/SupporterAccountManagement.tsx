@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
 import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
@@ -47,8 +47,15 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
-  const [qaOfferState,setQaOfferState] = useState<'loading'|'ready'|'blocked'>('loading')
+  const [qaOfferState,setQaOfferState] = useState<{
+    phase:'loading'|'ready'|'blocked';mode:'initial'|'retry'
+  }>({phase:'loading',mode:'initial'})
   const [offerRefreshRevision,setOfferRefreshRevision] = useState(0)
+  const receiveOfferState=useCallback((phase:'loading'|'ready'|'blocked',
+    mode:'initial'|'retry')=>{
+    setQaOfferState(previous=>previous.phase===phase&&previous.mode===mode
+      ?previous:{phase,mode})
+  },[])
   const continueExistingQaRequest = () => {
     if(qaPayAction==='checking'||qaV2AccountState!=='bound')return
     // One obvious payment action. Server decides whether the old approval
@@ -73,12 +80,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const offerRequired=qaV2Screen&&membership.kind==='inactive'&&
     (qaV2AccountState==='none'||
       (qaV2AccountState==='bound'&&qaPayAction==='retry_ready'))
+  const offerMode=qaPayAction==='retry_ready'?'retry':'initial'
+  const offerReadyForCurrentMode=qaOfferState.mode===offerMode
   const preparationPending=membership.kind==='checking'||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
-    (offerRequired&&qaOfferState==='loading')
+    (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
   const preparationUnavailable=membership.kind==='unavailable'||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
-    (offerRequired&&qaOfferState==='blocked')
+    (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
   const preparing=preparationPending||preparationUnavailable
   useEffect(()=>{
     if(!preparationPending){setPreparationSlow(false);return}
@@ -100,7 +109,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     if(offerRequired){
       // Keep the kitten visible while the same mounted published-offer
       // component retries a READ only. Never start PayPal automatically.
-      setQaOfferState('loading')
+      setQaOfferState({phase:'loading',mode:offerMode})
       setOfferRefreshRevision(n=>n+1)
     }
   }
@@ -253,7 +262,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
               offerRequired
                 ? <SandboxCheckoutQaPanel lang={lang} inline
                     retry={qaPayAction==='retry_ready'}
-                    onOfferState={setQaOfferState}
+                    onOfferState={receiveOfferState}
                     refreshRevision={offerRefreshRevision}
                     onReviewExisting={reviewExistingQaRequest}/>
                 : <div className="space-y-3 rounded-[21px] bg-[#F0F4E6] px-4 py-4 text-center text-[14px] leading-relaxed text-[#204E4A]">
