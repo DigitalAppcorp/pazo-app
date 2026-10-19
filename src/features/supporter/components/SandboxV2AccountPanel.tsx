@@ -56,6 +56,8 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
  const [providerStatus,setProviderStatus]=useState<string|null>(null)
  const [recoveryMessage,setRecoveryMessage]=useState<'unavailable'|'changed'|'failed'|'provider'|'account'|'admission'|'restricted'|'oauth'|'missing'|'access'|'network'|null>(null)
  const [confirm,setConfirm]=useState(false)
+ const [abandonConfirm,setAbandonConfirm]=useState(false)
+ const [abandonedPending,setAbandonedPending]=useState(false)
  const [cancelled,setCancelled]=useState(false)
  const [paidThrough,setPaidThrough]=useState<string|null>(null)
  const t=(es:string,en:string)=>lang==='es'?es:en
@@ -267,6 +269,28 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[resumeRevision])
  useEffect(()=>{onRecoveryStage?.(recoveryStage)},[recoveryStage,onRecoveryStage])
+ const abandonPending=async()=>{
+  // Only an explicit acknowledgement of the original pending approval
+  // can request cancellation; provider state, not browser state, controls it.
+  if(!account||account.state!=='bound'||busy||!abandonConfirm||
+    !['approval_resumable','approval_link_unavailable'].includes(recoveryStage))return
+  setBusy(true);setError(false)
+  try{
+   const x=await call({action:'abandon_pending',
+    intentId:account.intentId,confirmAbandon:true}) as Result
+   if(x.ok!==true||x.code!=='pending_approval_cancelled'||
+    x.providerStatus!=='CANCELLED'||x.cancelled!==true||
+    x.mayGrantBenefits===true||x.paidThrough!==null)
+    throw Error('PENDING_CANCEL_UNCONFIRMED')
+   setProviderStatus('CANCELLED')
+   setCancelled(true)
+   setAbandonedPending(true)
+   setAbandonConfirm(false)
+   setRecoveryStage('terminal_needs_financial_reconciliation')
+  }catch{
+   setRecoveryMessage('failed')
+  }finally{setBusy(false)}
+ }
  const checkRetry=async()=>{
   if(busy||loading)return
   setRetryEligibility('checking')
@@ -337,7 +361,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
   const inspection=++inspectionSeq.current
   setAccount(a);setProviderStatus(null);setRecoveryMessage(null);setRecoveryStage('checking')
   void inspectAccountProvider(a,inspection)
-  setConfirm(false);setCancelled(false);setPaidThrough(null)
+  setConfirm(false);setAbandonConfirm(false);setAbandonedPending(false);setCancelled(false);setPaidThrough(null)
   setRetryEligibility('unknown');setInventoryState('unknown');setCreatedEventAudit('unknown');setInventoryMerchantStatus(null);setUnfilteredInventoryState('unknown');setUnfilteredMerchantStatus(null);setInventoryDiagnostic('unknown');setInventoryPayloadIssue('unknown');setError(false)
  }
  const cancel=async()=>{
@@ -495,6 +519,29 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
          {t('Retomar en PayPal','Continue in PayPal')}
        </button>
      </div>}
+     {account.state==='bound'&&!cancelled&&
+       ['approval_resumable','approval_link_unavailable'].includes(recoveryStage)&&
+       <div className="space-y-3 rounded-[19px] bg-[#F3F5EA] p-3">
+        <p className="text-[12px] font-extrabold">
+         {t('¿Ya no quieres continuar con esta solicitud?',
+           'No longer want to continue this request?')}
+        </p>
+        <p className="text-[12px] leading-relaxed text-[#526F63]">
+         {t('Puedes pedir que PayPal cierre esta aprobación pendiente. Solo se confirmará si PayPal verifica que quedó cancelada. No se inicia otra suscripción automáticamente.',
+           'You can ask PayPal to close this pending approval. We will confirm only after PayPal verifies cancellation. This does not automatically start a new subscription.')}
+        </p>
+        <label className="flex min-h-11 items-start gap-2 text-[12px]">
+         <input type="checkbox" checked={abandonConfirm}
+           onChange={e=>setAbandonConfirm(e.target.checked)}
+           disabled={busy} className="mt-1 h-4 w-4 shrink-0 accent-[#204E4A]"/>
+         <span>{t('Confirmo que quiero cancelar esta aprobación pendiente.',
+           'I confirm that I want to cancel this pending approval.')}</span>
+        </label>
+        <button type="button" className={button} disabled={busy||!abandonConfirm}
+         onClick={()=>void abandonPending()}>
+         {t('Cancelar solicitud pendiente','Cancel pending request')}
+        </button>
+       </div>}
      {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#FCE5D8] p-3 text-[12px] leading-relaxed text-[#204E4A]">
        {recoveryMessage==='oauth'
          ? t('PayPal rechazó la autenticación del servidor. Revisaremos las credenciales Sandbox sin compartirlas en el chat.',
@@ -655,8 +702,11 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
        {retryEligibility==='approved'&&<SandboxCheckoutQaPanel lang={lang} inline retry onReviewExisting={()=>void refresh()}/>}
      </div>}
      {cancelled&&<p role="status" className="text-sm font-extrabold">
-       {t('PayPal confirmó que las futuras renovaciones V2 están canceladas.',
-       'PayPal confirmed that future V2 renewals are cancelled.')}
+       {abandonedPending
+       ? t('PayPal confirmó que la solicitud pendiente se canceló. Aún debemos verificar que puedes iniciar una nueva sin duplicados.',
+           'PayPal confirmed that the pending request was cancelled. We still need to verify it is safe to start a new one.')
+       : t('PayPal confirmó que las futuras renovaciones V2 están canceladas.',
+           'PayPal confirmed that future V2 renewals are cancelled.')}
       </p>}
    </div>}
  </section>
