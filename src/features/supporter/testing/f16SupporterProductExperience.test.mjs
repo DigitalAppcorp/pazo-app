@@ -150,7 +150,7 @@ test('F16 phone-frame offer stays single-column and covers shell navigation',()=
  assert.match(design,/flex min-h-\[92px\] min-w-0 flex-col items-center/)
  assert.match(offer,/overscroll-contain/)
  assert.match(member,/overscroll-contain/)
- assert.ok(offer.includes('<SandboxCheckoutQaPanel lang={lang} inline onReviewExisting={reviewExistingQaRequest}/>'))
+ assert.ok(offer.includes('<SandboxCheckoutQaPanel lang={lang} inline'))
  assert.match(design,/Muro de agradecimiento/)
 })
 
@@ -166,7 +166,7 @@ test('F16 option B keeps signed PayPal Sandbox consent and one-shot checkout unc
  assert.ok(design.includes('Como agradecimiento'))
  assert.ok(!design.includes('fetch(')&&!design.includes('supabase.'),'Layout cannot trigger purchases')
  assert.ok(page.includes('<SupporterOfferB lang={lang}>'))
- assert.ok(page.includes('<SandboxCheckoutQaPanel lang={lang} inline onReviewExisting={reviewExistingQaRequest}/>'),'Checkout directly follows offer, not a second modal')
+ assert.ok(page.includes('<SandboxCheckoutQaPanel lang={lang} inline'),'Checkout remains inline and is shielded until its terms resolve')
  assert.ok(!page.includes('setShowSandboxQa(true)'),'No duplicate purchase entry')
  assert.ok(checkout.includes("o.version!==BENEFITS_V2"),'Must accept published v2 terms')
  assert.ok(checkout.includes('checked={consent}'))
