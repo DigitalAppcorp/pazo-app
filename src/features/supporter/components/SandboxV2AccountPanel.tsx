@@ -8,7 +8,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onRecoveryDiagnostic?:(code:string|null)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -33,7 +33,7 @@ const safeSandboxApprovalUrl=(raw:unknown):string|null=>{
 
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onResumeStatus,onPaidVerified}:Props){
+export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,onAccountInspection,onRecoveryStage,onRecoveryDiagnostic,onResumeStatus,onPaidVerified}:Props){
  const lastHandledResumeRequest=useRef(0)
  const initialAccountCheck=useRef(false)
  const autoVerifiedIntents=useRef<Set<string>>(new Set())
@@ -242,6 +242,7 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
    onResumeStatus?.('unavailable');return
   }
   onResumeStatus?.('checking')
+  onRecoveryDiagnostic?.(null)
   setBusy(true);setError(false);setRecoveryMessage(null)
   try {
    // Never navigate to a cached PayPal ba_token after a login was
@@ -279,10 +280,22 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
    throw Error('UNKNOWN_RECOVERY')
   }catch(error){
    const code=error instanceof Error?error.message:''
+   const diagnosticCodes:Record<string,string>={
+    recovery_check_admission:'R1',recovery_check_account:'R2',
+    recovery_check_provider:'R3',recovery_check_cancel_eligibility:'R4',
+    recovery_check_cancel_provider:'R5',recovery_check_merchant_evidence:'R6',
+    recovery_check_grant:'R7',retry_proof_not_accepted:'R7',
+    pending_cancellation_preflight_blocked:'R4',
+    pending_cancellation_confirmation_missing:'R5',
+    paypal_subscription_read_unavailable:'R3',
+    merchant_owner_plan_mismatch:'R8',existing_subscription_not_terminal:'R9'
+   }
+   onRecoveryDiagnostic?.(diagnosticCodes[code]||'R0')
    setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerError:code||'unavailable'}).phase)
-   onResumeStatus?.(['pending_cancellation_preflight_blocked',
+   onResumeStatus?.([...(code.startsWith('recovery_check_')?['recovery_check_']:[]),
+    'pending_cancellation_preflight_blocked',
     'pending_cancellation_confirmation_missing','retry_merchant_reconciliation_pending',
-    'retry_proof_not_accepted','existing_subscription_not_terminal'].includes(code)
+    'retry_proof_not_accepted','existing_subscription_not_terminal'].some(value=>code===value||value==='recovery_check_'&&code.startsWith(value))
       ?'reconciliation_needed':'unavailable')
    setRecoveryMessage(code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
     code==='paypal_subscription_not_found'?'missing':
