@@ -47,6 +47,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [,setQaRecoveryStage] = useState('unverified')
   const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed'>('idle')
   const [qaRecoveryDiagnostic,setQaRecoveryDiagnostic]=useState<string|null>(null)
+  const [qaPendingReset,setQaPendingReset]=useState(false)
   const [paypalReturnKind] = useState(() => supporterPaypalReturnKind(window.location.hash))
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
@@ -267,6 +268,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
               :label('Volviste de PayPal. Estamos comprobando el resultado; la membresía solo se activará si se verifica el pago.',
                 'You returned from PayPal. We are checking the result; membership activates only when payment is verified.')}
           </p>}
+          {qaPendingReset&&<p role="status" className="rounded-[18px] bg-[#ECF2E6] px-4 py-3 text-center text-[13px] font-medium leading-relaxed text-[#2D5F51]">
+            {label('La solicitud de prueba anterior quedó archivada en PAZO (no cancelada en PayPal). Confirma otra vez los términos para iniciar un pago nuevo.',
+              'Your earlier test request was archived in PAZO (not cancelled at PayPal). Accept the terms again to start a new checkout.')}
+          </p>}
           <SupporterOfferB lang={lang}>
             {qaV2Screen ? (
               offerRequired
@@ -349,7 +354,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Mi membresía', 'My membership')}
           </h3>
           {qaV2Screen ? (
-            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onRecoveryDiagnostic={setQaRecoveryDiagnostic} onResumeStatus={setQaPayAction} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
+            <SandboxV2AccountPanel lang={lang} onAccountInspection={setQaV2AccountState} onRecoveryStage={setQaRecoveryStage} onRecoveryDiagnostic={setQaRecoveryDiagnostic} onResumeStatus={setQaPayAction} onQaPendingReset={()=>setQaPendingReset(true)} onPaidVerified={refreshMembership} reviewRevision={qaReviewRevision} resumeRevision={qaResumeRevision}/>
           ) : (
             <>
               {error && <div role="alert" className="rounded-3xl bg-[#FCE5D8] p-4 text-sm">
