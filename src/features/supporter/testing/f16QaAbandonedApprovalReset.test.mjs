@@ -70,7 +70,7 @@ test('repeatable Sandbox abandonment: no artificial 90-second or five-attempt bl
  const latest=repeat.slice(repeat.indexOf('CREATE OR REPLACE FUNCTION public.f16_qa_v2_archive_pending_approval_qa('))
  assert.ok(latest.includes("a.created_at>now_at+interval '5 seconds'"),'Immediate return from PayPal login must remain eligible')
  assert.ok(!latest.includes("a.created_at>now_at-interval '90 seconds'"))
- assert.doesNotMatch(latest,/z\\.owner_id=p_owner_id\\)>=5(?!\\d)/)
+ assert.doesNotMatch(latest,/z[.]owner_id=p_owner_id[)]>=5(?![0-9])/)
  assert.ok(latest.includes("z.archived_at>now_at-interval '24 hours')>=30"))
  assert.ok(latest.includes("z.owner_id=p_owner_id)>=500"))
  assert.ok(latest.includes('f16_qa_v2_read_created_webhook_candidate_multi(p_owner_id,p_intent_id)'))
