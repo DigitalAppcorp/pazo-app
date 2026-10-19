@@ -45,7 +45,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [qaReviewRevision,setQaReviewRevision] = useState(0)
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [,setQaRecoveryStage] = useState('unverified')
-  const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'>('idle')
+  const [qaPayAction,setQaPayAction] = useState<'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed'>('idle')
   const [paypalReturnKind] = useState(() => supporterPaypalReturnKind(window.location.hash))
   const [preparationSlow,setPreparationSlow] = useState(false)
   const [preparationRevision,setPreparationRevision] = useState(0)
@@ -295,9 +295,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                           ? label('Conectando con PayPal…','Connecting to PayPal…')
                           : label('Pagar con PayPal','Pay with PayPal')}
                       </button>}
+                    {qaPayAction==='reconciliation_needed'&&qaV2AccountState==='bound'&&
+                      <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
+                        {label('PayPal todavía no confirma que la solicitud anterior esté cerrada. No se inició otro cobro. Vuelve a intentarlo más tarde.',
+                          'PayPal has not confirmed that the earlier request is closed. No new charge was started. Try again later.')}
+                      </p>}
                     {qaPayAction==='unavailable'&&qaV2AccountState==='bound'&&
                       <p role="alert" className="rounded-[14px] bg-white p-3 text-[13px] font-medium leading-relaxed text-[#724927]">
-                        {label('No pudimos abrir PayPal. Estamos resolviendo un problema con este pago para evitar cobros duplicados. No se inició otro cobro.',
+                        {label('No pudimos verificar el intento anterior con PayPal. No se inició otro cobro.',
                           'We could not open PayPal. We are resolving an issue with this payment to avoid duplicate subscriptions. No new charge was initiated.')}
                       </p>}
                     {qaV2AccountState==='unavailable'&&
