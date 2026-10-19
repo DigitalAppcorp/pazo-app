@@ -1,0 +1,66 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+const sql=readFileSync(new URL('../../../../supabase/migrations/20261019180000_f16_qa_pending_approval_restart.sql',import.meta.url),'utf8')
+const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
+const child=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
+const parent=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+
+test('sandbox only: preserve original merchant and verified audit, no false cancel',()=>{
+ assert.ok(sql.includes('sandbox_buyer_abandoned_unapproved_checkout_verified_pending_not_cancelled'))
+ assert.ok(sql.includes('pg_catalog.to_jsonb(a)'))
+ assert.ok(sql.includes('pg_catalog.to_jsonb(i)'))
+ assert.ok(sql.includes('pg_advisory_xact_lock'))
+ assert.ok(sql.includes('f16_qa_v2_abandonment_preflight(p_owner_id,p_intent_id)'))
+ assert.ok(sql.includes('f16_qa_v2_read_created_webhook_candidate_multi(p_owner_id,p_intent_id)'))
+ assert.ok(sql.includes('NOT NULL') && sql.includes('RETURNS boolean'))
+ assert.ok(sql.includes("p_provider_checked_at<now_at-interval '20 seconds'"))
+ assert.ok(sql.includes('>=5'))
+ assert.ok(sql.includes('TO service_role'))
+ assert.ok(sql.includes('FROM PUBLIC,anon,authenticated,service_role'))
+ for(const table of ['supporter_private.f16_sandbox_qa_paid_periods',
+  'supporter_private.paypal_payment_entries',
+  'supporter_private.paypal_verified_activation_bindings',
+  'supporter_private.f16_sandbox_qa_v2_retry_grants']){
+  assert.ok(sql.includes(table))
+ }
+ assert.ok(sql.includes('DELETE FROM supporter_private.f16_sandbox_qa_v2_checkout_attempts'))
+ assert.ok(!sql.includes('DELETE FROM supporter_private.paypal_subscription_intents'))
+ assert.ok(!sql.includes('DELETE FROM supporter_private.paypal_verified_event_inbox'))
+ assert.ok(!sql.includes('UPDATE supporter_private.paypal_subscription_intents'))
+ assert.ok(!sql.includes('INSERT INTO supporter_private.f16_sandbox_qa_paid_periods'))
+})
+test('pending reset must be authenticated, local Sandbox and verified twice by PayPal and signed CREATED',()=>{
+ const r=edge.slice(edge.indexOf("if(data.action==='recover_retry')"),
+  edge.indexOf('// Recover only the original PayPal approval'))
+ assert.ok(r.includes("merchant.status==='APPROVAL_PENDING'"))
+ assert.ok(r.includes("QA_LOCAL_ORIGINS.has(runtime.origin)"))
+ assert.ok(r.includes('runtime.canAbandonPending(qaOwner,account.intentId)'))
+ assert.ok(r.includes('runtime.createdCandidateStore.readForOwnerMulti({'))
+ assert.ok(r.includes('runtime.createdEventAudit.inspect({'))
+ assert.ok(r.includes("signed?.correlated!==true"))
+ assert.ok(r.includes('const again=await runtime.reader.readSubscription('))
+ assert.ok(r.includes("again?.status!=='APPROVAL_PENDING'"))
+ assert.ok(r.includes("again?.custom_id!==account.intentId"))
+ assert.ok(r.includes('runtime.archiveUnapprovedLocalQa({'))
+ assert.ok(r.includes("phase:'QA_ABANDONED_PENDING_RESET'"))
+ assert.ok(r.includes("previousPayPalSubscriptionCancelled:false"))
+ assert.ok(r.includes("mayGrantBenefits:false,mayRecordPayment:false"))
+ assert.ok(!r.includes("status:'CANCELLED',code:'qa_fresh_consent_required'"))
+ const guard=r.indexOf('if(QA_LOCAL_ORIGINS.has(runtime.origin))')
+ assert.ok(guard>=0)
+ assert.ok(r.indexOf('runtime.cancellation.cancelPending({')>guard)
+ assert.ok(r.indexOf('return addCors(new Response(JSON.stringify({',guard)<r.indexOf('runtime.cancellation.cancelPending({',guard),
+  'local QA returns before old cancellation path')
+})
+test('after archive, show fresh terms with explicit acknowledgement and never mark payment complete',()=>{
+ assert.ok(child.includes("result.phase==='QA_ABANDONED_PENDING_RESET'"))
+ assert.ok(child.includes("result.code==='qa_fresh_consent_required'"))
+ assert.ok(child.includes("result.mayGrantBenefits===false"))
+ assert.ok(child.includes("onAccountInspection?.('none')"))
+ assert.ok(child.includes("onQaPendingReset?.()"))
+ assert.ok(parent.includes('onQaPendingReset={()=>setQaPendingReset(true)}'))
+ assert.ok(parent.includes('no cancelada en PayPal'))
+ assert.ok(parent.includes("qaV2AccountState==='none'"))
+ assert.ok(parent.includes('<SandboxCheckoutQaPanel lang={lang} inline'))
+})
