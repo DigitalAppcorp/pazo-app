@@ -9,15 +9,24 @@ const secret=x=>typeof x==='string'&&/^[\x21-\x7e]{8,512}$/.test(x)
 const err=(s)=>{throw Error(s)}
 export function createPazoSandboxCancellationProvider({
   clientId,clientSecret,fetchImpl=fetch,
+  waitImpl=ms=>new Promise(resolve=>setTimeout(resolve,ms)),
 }={}){
   if(!secret(clientId)||clientId.includes(':')||!secret(clientSecret)||
-    typeof fetchImpl!=='function')err('pazo_cancel_provider_not_configured')
-  async function send(url,opts,expectNoBody=false){
+    typeof fetchImpl!=='function'||typeof waitImpl!=='function')err('pazo_cancel_provider_not_configured')
+  async function send(url,opts,expectNoBody=false,stage='general'){
     let r
     try {r=await fetchImpl(url,{...opts,redirect:'error',
       signal:AbortSignal.timeout(12000)})}
-    catch {err('pazo_cancel_paypal_transport_unavailable')}
-    if(!r?.ok)err('pazo_cancel_paypal_unavailable')
+    catch {err(stage==='general'?'pazo_cancel_paypal_transport_unavailable':
+      'pazo_cancel_'+stage+'_transport')}
+    if(!r?.ok){
+      if(stage==='general')err('pazo_cancel_paypal_unavailable')
+      const code=[400,401,403,404,422,429,500,503].includes(r?.status)
+       ?String(r.status):'other'
+      // Fixed HTTP category only. Never forward PayPal's response body,
+      // debug ID, payment link, PII or merchant token.
+      err('pazo_cancel_'+stage+'_http_'+code)
+    }
     if(expectNoBody)return null
     try{
       const d=await r.json()
@@ -36,12 +45,12 @@ export function createPazoSandboxCancellationProvider({
       err('pazo_cancel_paypal_oauth_unavailable')
     return {Authorization:'Bearer '+x.access_token,Accept:'application/json'}
   }
-  async function read({intentId,subscriptionId}){
+  async function read({intentId,subscriptionId},stage='general'){
     if(!INTENT.test(intentId||'')||!SUB.test(subscriptionId||''))
       err('pazo_cancel_private_binding_invalid')
     const auth=await headers()
     const sub=await send(HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId),
-      {method:'GET',headers:auth})
+      {method:'GET',headers:auth},false,stage)
     if(sub.id!==subscriptionId||sub.plan_id!==PLAN||sub.custom_id!==intentId||
       !['ACTIVE','CANCELLED','SUSPENDED','APPROVED',
         'APPROVAL_PENDING','EXPIRED'].includes(sub.status))
@@ -58,7 +67,7 @@ export function createPazoSandboxCancellationProvider({
       const match=INTENT.exec(intentId||'')
       if(!match||!SUB.test(subscriptionId||''))
         err('pazo_cancel_private_binding_invalid')
-      const current=await read({intentId,subscriptionId})
+      const current=await read({intentId,subscriptionId},'before')
       if(current.status!=='APPROVAL_PENDING')
         err('pazo_cancel_pending_status_unverified')
       const auth=await headers()
@@ -66,10 +75,18 @@ export function createPazoSandboxCancellationProvider({
         method:'POST',headers:{...auth,'Content-Type':'application/json',
           'PayPal-Request-Id':'pazo-pending-cancel-'+match[1]},
         body:JSON.stringify({reason:'Buyer abandoned unapproved checkout in PAZO Sandbox'}),
-      },true)
-      const final=await read({intentId,subscriptionId})
-      if(final.status!=='CANCELLED')err('pazo_cancel_confirmation_pending')
-      return Object.freeze({status:'CANCELLED'})
+      },true,'post')
+      // PayPal may return HTTP 204 before its subsequent GET reflects the
+      // terminal state. Recheck GET with bounded delay, never repeat POST.
+      for(let check=0;check<3;check++){
+        if(check>0)await waitImpl(check===1?350:750)
+        const final=await read({intentId,subscriptionId},'after')
+        if(final.status==='CANCELLED')
+          return Object.freeze({status:'CANCELLED'})
+        if(final.status!=='APPROVAL_PENDING')
+          err('pazo_cancel_post_status_changed')
+      }
+      err('pazo_cancel_confirmation_pending')
     },
     async cancel({intentId,subscriptionId}={}){
       const match=INTENT.exec(intentId||'')
