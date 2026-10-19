@@ -8,7 +8,7 @@ import {SUPPORTER_PAYMENT_VERIFIED_EVENT} from '../supporterUiRelease'
 
 // This is PAZO's real QA account screen. V2-only owner-scoped endpoint.
 // No browser-selected merchant subscription ID or payment state can be trusted.
-type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready')=>void;onPaidVerified?:()=>void}
+type Props={lang:'es'|'en';reviewRevision?:number;resumeRevision?:number;onAccountInspection?:(state:'checking'|'none'|'pending'|'bound'|'unavailable')=>void;onRecoveryStage?:(stage:string)=>void;onResumeStatus?:(state:'idle'|'checking'|'unavailable'|'retry_ready'|'reconciliation_needed')=>void;onPaidVerified?:()=>void}
 type Account={intentId:string;state:'pending'|'bound';canDownloadAcceptance:boolean}
 type Result={ok?:boolean;code?:string;phase?:string;accounts?:Account[];
  providerStatus?:string;cancelled?:boolean;paidThrough?:string|null;mayGrantBenefits?:boolean;cycleVerified?:boolean;
@@ -104,6 +104,9 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
     'sandbox_payment_sale_evidence_missing',
     'sandbox_payment_provider_read_unavailable',
     'sandbox_payment_recording_unavailable',
+    'pending_cancellation_preflight_blocked','pending_cancellation_confirmation_missing',
+    'retry_merchant_reconciliation_pending','retry_proof_not_accepted',
+    'existing_subscription_not_terminal','merchant_status_unrecognized',
    ])
    throw Error(allowed.has(code)?code:'QA_SERVER_UNAVAILABLE')
   }
@@ -277,7 +280,10 @@ export function SandboxV2AccountPanel({lang,reviewRevision=0,resumeRevision=0,on
   }catch(error){
    const code=error instanceof Error?error.message:''
    setRecoveryStage(classifySandboxV2Recovery({accountState:account.state,providerError:code||'unavailable'}).phase)
-   onResumeStatus?.('unavailable')
+   onResumeStatus?.(['pending_cancellation_preflight_blocked',
+    'pending_cancellation_confirmation_missing','retry_merchant_reconciliation_pending',
+    'retry_proof_not_accepted','existing_subscription_not_terminal'].includes(code)
+      ?'reconciliation_needed':'unavailable')
    setRecoveryMessage(code==='paypal_oauth_denied'||code==='paypal_oauth_invalid_token'?'oauth':
     code==='paypal_subscription_not_found'?'missing':
     code==='paypal_subscription_access_denied'||code==='paypal_subscription_response_mismatch'?'access':
