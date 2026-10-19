@@ -51,6 +51,26 @@ export function createPazoSandboxCancellationProvider({
   }
   return Object.freeze({
     read,
+    // Only for explicit user abandonment of an unapproved Sandbox checkout.
+    // A cancelled/active/approved/unknown subscription is NEVER mutated here.
+    // 204 is not proof of cancellation: exact-owner merchant GET must confirm it.
+    async cancelPending({intentId,subscriptionId}={}){
+      const match=INTENT.exec(intentId||'')
+      if(!match||!SUB.test(subscriptionId||''))
+        err('pazo_cancel_private_binding_invalid')
+      const current=await read({intentId,subscriptionId})
+      if(current.status!=='APPROVAL_PENDING')
+        err('pazo_cancel_pending_status_unverified')
+      const auth=await headers()
+      await send(HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+'/cancel',{
+        method:'POST',headers:{...auth,'Content-Type':'application/json',
+          'PayPal-Request-Id':'pazo-pending-cancel-'+match[1]},
+        body:JSON.stringify({reason:'Buyer abandoned unapproved checkout in PAZO Sandbox'}),
+      },true)
+      const final=await read({intentId,subscriptionId})
+      if(final.status!=='CANCELLED')err('pazo_cancel_confirmation_pending')
+      return Object.freeze({status:'CANCELLED'})
+    },
     async cancel({intentId,subscriptionId}={}){
       const match=INTENT.exec(intentId||'')
       if(!match||!SUB.test(subscriptionId||''))
