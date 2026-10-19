@@ -471,7 +471,30 @@ Deno.serve(async(request:Request)=>{
     paidThrough:null,mayGrantBenefits:false,mayRecordPayment:false
    }),{status:200,headers:{'content-type':'application/json',
     'cache-control':'no-store'}}),runtime.origin)
-  }catch{
+  }catch(error){
+   // Safe operation-specific diagnostic codes for cancelled-but-unapproved
+   // checkout recovery. NEVER relay PayPal raw bodies, debug IDs or URLs.
+   if(stage==='paypal_cancel_pending'){
+     const code=error instanceof Error?error.message:''
+     const cancelFailures:Record<string,string>={
+       pazo_cancel_before_http_404:'recovery_cancel_pre_not_found',
+       pazo_cancel_before_http_403:'recovery_cancel_pre_denied',
+       pazo_cancel_before_http_401:'recovery_cancel_pre_denied',
+       pazo_cancel_post_http_422:'recovery_cancel_post_rejected',
+       pazo_cancel_post_http_404:'recovery_cancel_post_not_found',
+       pazo_cancel_post_http_403:'recovery_cancel_post_denied',
+       pazo_cancel_post_http_401:'recovery_cancel_post_denied',
+       pazo_cancel_after_http_404:'recovery_cancel_after_not_found',
+       pazo_cancel_confirmation_pending:'recovery_cancel_status_pending',
+       pazo_cancel_post_status_changed:'recovery_cancel_status_changed',
+       pazo_cancel_pending_status_unverified:'recovery_cancel_status_changed',
+       pazo_cancel_subscription_mismatch:'recovery_cancel_owner_mismatch',
+       pazo_cancel_paypal_oauth_unavailable:'recovery_cancel_oauth',
+       pazo_cancel_paypal_unavailable:'recovery_cancel_provider_unavailable',
+       pazo_cancel_paypal_transport_unavailable:'recovery_cancel_provider_unavailable'
+     }
+     return addCors(reply(409,cancelFailures[code]||'recovery_cancel_unclassified'),runtime.origin)
+   }
    // Stage-only result: no subscriber, subscription, payer, PayPal raw
    // response, or user identifier. Lets support diagnose instead of
    // telling every buyer to "try again later".
