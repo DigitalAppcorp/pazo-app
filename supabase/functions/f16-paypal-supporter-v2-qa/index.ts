@@ -437,7 +437,7 @@ Deno.serve(async(request:Request)=>{
      // A saved ba_token may no longer render in PayPal Sandbox. Instead of
      // blindly reopening it, close ONLY the still-unapproved subscription.
      // A separate new affirmative consent is required for any replacement.
-     if(!await runtime.canAbandonPending(qaOwner))
+     if(!await runtime.canAbandonPending(qaOwner,account.intentId))
       return addCors(reply(409,'pending_cancellation_preflight_blocked'),runtime.origin)
      const cancelled=await runtime.cancellation.cancelPending({
       intentId:account.intentId,subscriptionId:account.externalSubscriptionId})
