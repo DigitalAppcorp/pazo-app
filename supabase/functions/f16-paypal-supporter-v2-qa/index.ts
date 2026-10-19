@@ -38,6 +38,8 @@ import {createPazoSandboxV2CreatedEventCandidateStore}
  from '../f16-paypal-webhook/pazoSandboxV2CreatedEventCandidateStore.mjs'
 import {createPazoSandboxV2CreatedEventAudit}
  from '../f16-paypal-webhook/pazoSandboxV2CreatedEventAudit.mjs'
+import {createPazoSandboxV2RetryMerchantProof}
+ from '../f16-paypal-webhook/pazoSandboxV2RetryMerchantProof.mjs'
 import {createF16GlobalAdmission}
  from '../f16-paypal-webhook/globalAdmissionAdapter.mjs'
 
@@ -141,6 +143,8 @@ function compose(requestOrigin:string){
  const createdCandidateStore=createPazoSandboxV2CreatedEventCandidateStore({
   projectUrl:BASE,serviceRoleKey:key})
  const createdEventAudit=createPazoSandboxV2CreatedEventAudit({clientId,clientSecret})
+ const retryMerchantProof=createPazoSandboxV2RetryMerchantProof({
+  clientId,clientSecret,inventoryRead,createdCandidateStore,createdEventAudit})
  const merchantVerifier=createPazoSandboxV2MerchantVerifier({
   clientId,clientSecret,commitVerified:v2ProofStore.commitVerified,
   markReversal:v2ProofStore.markReversal})
@@ -161,7 +165,7 @@ function compose(requestOrigin:string){
   provider:cancellation,consentStore:v2AccountStore,trustedOrigins:[origin],
   allowLoopbackQa:QA_LOCAL_ORIGINS.has(origin),
  })
- return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,cancellation,canAbandonPending,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
+ return {origin,checkout,retryCheckout,retryConsentStore,manage,consentStore,v2AccountStore,merchantVerifier,inventoryRead,unfilteredInventoryRead,createdCandidateStore,createdEventAudit,reader,cancellation,canAbandonPending,retryMerchantProof,resolveAuthenticatedOwner,admit,canBuy,autoAdmitLocalOwner}
 }
 function addCors(response:Response,origin:string){
  const headers=new Headers(response.headers)
@@ -377,6 +381,69 @@ Deno.serve(async(request:Request)=>{
    const diagnostic=error instanceof Error&&known.has(error.message)
     ?error.message:'created_audit_unavailable'
    return addCors(reply(diagnostic==='created_audit_rate_limited'?429:503,diagnostic),runtime.origin)
+  }
+ }
+ // This action never creates a subscription. It either returns the
+ // previous approval URL or issues a service-only reconciled retry grant.
+ // A fresh, published-terms acceptance is still required in retry_begin.
+ if(data.action==='recover_retry'){
+  if(Object.keys(data).sort().join('|')!=='action|intentId'||
+   typeof data.intentId!=='string'||
+   !/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.intentId))
+   return addCors(reply(400,'invalid_request'),runtime.origin)
+  if(!QA_CHECKOUT_RELEASE_APPROVED||!QA_V2_RETRY_RELEASE_APPROVED||
+   !await runtime.canBuy(qaOwner))
+   return addCors(reply(403,'sandbox_qa_owner_required'),runtime.origin)
+  try{
+   if(await runtime.admit()!==true)
+    return addCors(reply(429,'rate_limited'),runtime.origin)
+   const account=await runtime.v2AccountStore.readForOwner({
+    ownerId:qaOwner,intentId:data.intentId})
+   if(!account||account.state!=='bound'||!account.externalSubscriptionId||
+    account.planId!==PLAN)return addCors(reply(409,'private_account_read_unavailable'),runtime.origin)
+   let merchant=null,notFound=false
+   try{merchant=await runtime.reader.readSubscription(
+    account.externalSubscriptionId,{includeApprovalLink:true})}
+   catch(e){
+    if(e instanceof Error&&e.message==='paypal_subscription_not_found')
+     notFound=true
+    else return addCors(reply(503,'paypal_subscription_read_unavailable'),runtime.origin)
+   }
+   if(!notFound&&merchant){
+    if(merchant.id!==account.externalSubscriptionId||
+      merchant.custom_id!==account.intentId||
+      merchant.plan_id!==PLAN)
+     return addCors(reply(409,'merchant_owner_plan_mismatch'),runtime.origin)
+    if(merchant.status==='APPROVAL_PENDING'){
+     if(merchant.approvalUrl)
+      return addCors(new Response(JSON.stringify({
+       ok:true,environment:'sandbox',phase:'APPROVAL_PENDING',
+       code:'approval_can_resume',approvalUrl:merchant.approvalUrl,
+       paidThrough:null,mayGrantBenefits:false,mayRecordPayment:false
+      }),{status:200,headers:{'content-type':'application/json',
+       'cache-control':'no-store'}}),runtime.origin)
+     // Missing approval link: no silent cancellation, no second checkout.
+     return addCors(reply(409,'approval_link_unavailable'),runtime.origin)
+    }
+    if(!['CANCELLED','EXPIRED'].includes(merchant.status))
+     return addCors(reply(409,'existing_subscription_not_terminal'),runtime.origin)
+   }
+   const proof=await runtime.retryMerchantProof.verify({
+    ownerId:qaOwner,intentId:account.intentId,
+    subscriptionId:account.externalSubscriptionId,
+    consentedAt:account.consentedAt})
+   const granted=await runtime.retryConsentStore.approveReconciled({
+    ownerId:qaOwner,intentId:account.intentId,
+    subscriptionId:account.externalSubscriptionId,...proof})
+   if(granted!==true)return addCors(reply(409,'retry_proof_not_accepted'),runtime.origin)
+   return addCors(new Response(JSON.stringify({
+    ok:true,environment:'sandbox',phase:'RETRY_READY',
+    code:'reconciled_retry_ready',approvalUrl:null,eligible:true,
+    paidThrough:null,mayGrantBenefits:false,mayRecordPayment:false
+   }),{status:200,headers:{'content-type':'application/json',
+    'cache-control':'no-store'}}),runtime.origin)
+  }catch{
+   return addCors(reply(409,'retry_merchant_reconciliation_pending'),runtime.origin)
   }
  }
  // Recover only the original PayPal approval for an already-bound QA V2
