@@ -19,6 +19,8 @@ const liveWebhookEdge=read('supabase/functions/pazo-paypal-live-webhook/index.ts
 const liveCheckoutHosted=read('supabase/functions/pazo-paypal-live-checkout/liveHostedCheckout.mjs')
 const liveWebhookHosted=read('supabase/functions/pazo-paypal-live-webhook/liveHostedWebhook.mjs')
 const liveProvider=read('supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs')
+const liveSettlementCoordinator=read('supabase/functions/pazo-paypal-live-webhook/liveSettlementReconciliationGate.mjs')
+const provisionAdmin=read('supabase/functions/pazo-admin-paypal-provision/liveVerifiedAdmin.mjs')
 assert.match(sql,/active_environment text NOT NULL DEFAULT 'sandbox' CHECK\(active_environment='sandbox'\)/)
 assert.match(sql,/live_checkout_enabled bool NOT NULL DEFAULT false CHECK\(live_checkout_enabled=false\)/)
 assert.ok(ui.includes('disabled aria-disabled="true"'),'Live activation button must remain blocked')
@@ -32,6 +34,11 @@ assert.ok(live.includes('activationAuthorized:false,checkoutEnabled:false'),'Liv
 assert.ok(history.includes("return block('live_historical_adapter_not_released')"),'Historical Live fallback disabled')
 assert.ok(history.includes("return block('production_checkout_not_released')"),'Live checkout still disabled')
 assert.ok(roadmap.includes('MVP_RELEASE_NO_GO / LIVE_NO_GO'),'No premature beta/live ready claim')
+assert.ok(liveSettlementCoordinator.includes('released=false'),'Financial reconciler must default OFF')
+assert.ok(liveSettlementCoordinator.includes('independent_service_period_unverified'),
+ 'Never grant a billed service period without independent evidence')
+assert.ok(provisionAdmin.includes('proveFreshReauthentication'),
+ 'Privileged admin must require independent session freshness')
 assert.match(liveCheckoutEdge,/const LIVE_CHECKOUT_RELEASED=false/,'Live checkout Edge must stay dormant')
 assert.match(liveWebhookEdge,/const LIVE_WEBHOOK_RELEASED=false/,'Live webhook Edge must stay dormant')
 assert.ok(liveCheckoutHosted.includes("released!==true"),'Live checkout hosted composition must guard its release')
