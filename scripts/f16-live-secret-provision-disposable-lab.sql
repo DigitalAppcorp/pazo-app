@@ -30,9 +30,11 @@ BEGIN
  v:=public.pazo_f16_live_service_provision_generation_read(actor,g);
  IF v->>'planId'<>'P-TESTPLAN1234567890' OR v->>'credentialSource'<>'edge_secrets'
  THEN RAISE EXCEPTION 'Admin metadata mismatch %',v; END IF;
- IF public.pazo_f16_live_service_provision_generation_read(
-  '11111111-1111-4111-8111-111111111111',g) IS NOT NULL
- THEN RAISE EXCEPTION 'Unauthorized admin leaked metadata'; END IF;
+ BEGIN
+  PERFORM public.pazo_f16_live_service_provision_generation_read(
+   '11111111-1111-4111-8111-111111111111',g);
+  RAISE EXCEPTION 'Unauthorized admin read permitted';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  first:=public.pazo_f16_live_service_provision_reserve(
   actor,g,revision,'P-TESTPLAN1234567890','WH-TEST-HOOK-123456',repeat('e',64));
  IF first->>'reserved'<>'true' THEN RAISE EXCEPTION 'Reservation failed: %',first; END IF;
