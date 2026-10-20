@@ -19,6 +19,6 @@ export function normalizePazoDraft(input?:{
 }):PazoAdminDraft|null
 export function savePazoAdminDraftWithReadback(args?:{
  draft:PazoAdminDraft|null
- write:(payload:PazoAdminDraft)=>Promise<unknown>
- read:()=>Promise<unknown>
+ write:(payload:PazoAdminDraft)=>PromiseLike<unknown>
+ read:()=>PromiseLike<unknown>
 }):Promise<PazoAdminDraftOutcome>
