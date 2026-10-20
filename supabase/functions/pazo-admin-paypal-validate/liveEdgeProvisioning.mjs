@@ -16,7 +16,7 @@ const code=(name)=>Object.freeze({ok:false,code:name,liveActivated:false,mayChar
 const fail=(name)=>{throw Error(name)}
 export function createPazoLiveEdgeSecretsProvisioner({
  released=false,getScopedManagementToken,authenticateAdmin,readGeneration,
- verifyProviderResources,fetchImpl=fetch
+ verifyProviderResources,reserveAttempt,recordAttemptOutcome,fetchImpl=fetch
 }={}){
  return async function stage({request,merchantGeneration,clientId,clientSecret,
   confirmation,expectedRevision}={}){
@@ -30,7 +30,8 @@ export function createPazoLiveEdgeSecretsProvisioner({
    !SAFE(clientId)||clientId.includes(':')||!SAFE(clientSecret))
    return code('invalid_provisioning_request')
   if(typeof authenticateAdmin!=='function'||typeof readGeneration!=='function'||
-   typeof verifyProviderResources!=='function'||typeof getScopedManagementToken!=='function'||
+   typeof verifyProviderResources!=='function'||typeof reserveAttempt!=='function'||
+   typeof recordAttemptOutcome!=='function'||typeof getScopedManagementToken!=='function'||
    typeof fetchImpl!=='function')return code('provisioning_backend_unavailable')
   let actor
   try{actor=await authenticateAdmin(request)}catch{return code('admin_verification_unavailable')}
@@ -72,6 +73,24 @@ export function createPazoLiveEdgeSecretsProvisioner({
   try{pat=getScopedManagementToken()}catch{return code('scoped_token_unavailable')}
   if(typeof pat!=='string'||!/^sbp_fc[A-Za-z0-9_-]{12,500}$/.test(pat))
    return code('scoped_token_unavailable')
+  // The server-side adapter MUST atomically reserve one operation for the
+  // generation/revision and durably record its result. In-memory mutexes are
+  // insufficient for multiple Edge isolates; never reuse an uncertain claim.
+  let claim
+  try{claim=await reserveAttempt({actorId:actor.id,
+   merchantGeneration,expectedRevision,planId:stored.planId,
+   webhookId:stored.webhookId,merchantFingerprint:stored.merchantFingerprint})}
+  catch{return code('provisioning_reservation_unavailable')}
+  if(claim?.reserved!==true||!UUID.test(claim?.attemptId||''))
+   return code('provisioning_attempt_not_reserved')
+  const finish=async result=>{
+   try{
+    const saved=await recordAttemptOutcome({attemptId:claim.attemptId,
+     actorId:actor.id,merchantGeneration,resultCode:result.code})
+    if(saved!==true)return code('provisioning_audit_unavailable_manual_review')
+   }catch{return code('provisioning_audit_unavailable_manual_review')}
+   return result
+  }
   const names=['READ_ENABLED','PLAN_ID','WEBHOOK_ID','MERCHANT_FINGERPRINT_SHA256','CLIENT_ID','CLIENT_SECRET']
    .map(field=>'PAZO_F16_LIVE_G'+merchantGeneration+'_'+field)
   const list=async()=>{
@@ -88,11 +107,11 @@ export function createPazoLiveEdgeSecretsProvisioner({
    return new Set(data.map(x=>x.name))
   }
   let before
-  try{before=await list()}catch{return code('secret_preflight_unavailable')}
+  try{before=await list()}catch{return finish(code('secret_preflight_unavailable'))}
   // Existing generation may not be overwritten or silently rotated.
   // Registry/rollout activation is a separate operation with another gate.
   if(names.some(name=>before.has(name)))
-   return code('generation_secrets_already_present')
+   return finish(code('generation_secrets_already_present'))
   const values=['1',stored.planId,stored.webhookId,stored.merchantFingerprint,
    clientId,clientSecret]
   let response
@@ -101,11 +120,11 @@ export function createPazoLiveEdgeSecretsProvisioner({
     Authorization:'Bearer '+pat,'Content-Type':'application/json',
     Accept:'application/json'},
    body:JSON.stringify(names.map((name,i)=>({name,value:values[i]})))
-  })}catch{return code('secret_write_outcome_unknown_manual_review')}
+  })}catch{return finish(code('secret_write_outcome_unknown_manual_review'))}
   // Supabase Management API responds HTTP 201 for bulk create.
   // Ambiguous network or status must NEVER trigger blind retries.
   if(response?.status!==201)
-   return code('secret_write_outcome_unknown_manual_review')
+   return finish(code('secret_write_outcome_unknown_manual_review'))
   let after
   try{after=await list()}catch{return code('secret_write_outcome_unknown_manual_review')}
   if(names.some(name=>!after.has(name)))
@@ -113,8 +132,8 @@ export function createPazoLiveEdgeSecretsProvisioner({
   // Do not add to allowed generations, enable READ_ENABLED in runtime, or
   // flip payment switch automatically. A separate staged readiness/GO gate
   // must reconcile metadata and server-proven credentials.
-  return Object.freeze({ok:true,code:'generation_secret_names_confirmed',
+  return finish(Object.freeze({ok:true,code:'generation_secret_names_confirmed',
    merchantGeneration,secretCount:6,liveActivated:false,
-   mayCharge:false,credentialsExposed:false})
+   mayCharge:false,credentialsExposed:false}))
  }
 }
