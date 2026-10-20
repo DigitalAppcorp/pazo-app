@@ -12,7 +12,7 @@ type Config={
  validated_at:string|null;updated_at:string
 }
 type Settings={
- active_environment:'sandbox';live_checkout_enabled:false;
+ active_environment:Env;live_checkout_enabled:boolean;
  checkout_source:string;environments:Config[]
 }
 type Audit={environment:Env;kind:'draft'|'credentials'|'validation';recorded_at:string;actor:string;details:Record<string,unknown>}
@@ -165,18 +165,18 @@ export function AdminPayPalSettings({lang}:Props){
     <div><h3 className="text-[20px] font-black tracking-tight">{t('Pasarela PayPal','PayPal gateway')}</h3>
      <p className="mt-1 text-[13px] font-medium text-[#6E8379]">{t('Configuración privada de pruebas y producción.','Private test and production settings.')}</p>
     </div>
-    <span className="rounded-full bg-[#E7F2DB] px-3 py-2 text-[12px] font-black text-[#25684A]">{t('Sandbox activo','Sandbox active')}</span>
+    <span className="rounded-full bg-[#E7F2DB] px-3 py-2 text-[12px] font-black text-[#25684A]">{settings?.active_environment==='live'&&settings.live_checkout_enabled?t('Live activo','Live active'):t('Sandbox activo','Sandbox active')}</span>
    </div>
    <div className="mt-5 grid grid-cols-2 gap-2 rounded-[16px] bg-[#F2F6EE] p-1.5" role="group" aria-label={t('Entorno','Environment')}>
     {(['sandbox','live'] as const).map(value=><button type="button" key={value} aria-pressed={env===value}
       onClick={()=>setEnv(value)} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
-      {value==='sandbox'?'Sandbox': 'Live · '+t('preparación','staging')}
+      {value==='sandbox'?'Sandbox': 'Live · '+(settings?.active_environment==='live'&&settings.live_checkout_enabled?t('activo','active'):t('preparación','staging'))}
     </button>)}
    </div>
    <p className="mt-3 text-[12px] leading-relaxed text-[#74877D]">
     {env==='sandbox'
       ?t('Estamos desarrollando y probando en Sandbox. La app puede permanecer en localhost; los webhooks llegan a Supabase por HTTPS. Los datos nuevos del panel aún no cambian el checkout.', 'We are developing and testing in Sandbox. The app can remain on localhost; webhooks reach Supabase through HTTPS. New panel settings do not yet change checkout.')
-      :t('Live se prepara ahora, pero solo podrá activarse después de publicar oficialmente la beta, configurar su dominio HTTPS y superar las pruebas de cobro real supervisadas.', 'Live can be prepared now, but activation requires the official beta launch, a public HTTPS domain and supervised production payment verification.')}
+      :t('La integración Live debe quedar completamente implementada antes de la beta. Cuando este panel habilite la operación, podrás guardar y activar credenciales antes o después del lanzamiento, únicamente tras verificar HTTPS público, comercio, plan, webhook y cobros.', 'Live integration must be fully implemented before the beta. Once this panel releases the operation, you can save and activate credentials before or after launch, only after public HTTPS, merchant, plan, webhook and payments are verified.')}
    </p>
   </div>
   {loading?<div role="status" className={cardClass}>{t('Leyendo configuración privada…','Loading private configuration…')}</div>:
@@ -197,8 +197,8 @@ export function AdminPayPalSettings({lang}:Props){
           <p className="mt-1 text-[12px] text-[#5D756A]">{t('Guardar y comprobar credenciales, plan y webhook sin cobrar.', 'Stage and verify credentials, plan and webhook without charging.')}</p>
         </div>
         <div className="rounded-[15px] bg-[#F7F6EF] px-4 py-3">
-          <p className="text-[13px] font-extrabold">{t('3. Publicar beta', '3. Publish beta')}</p>
-          <p className="mt-1 text-[12px] text-[#5D756A]">{t('Añadir dominio HTTPS y autorizar Live tras las verificaciones finales.', 'Add HTTPS domain and authorize Live after final verification.')}</p>
+          <p className="text-[13px] font-extrabold">{t('3. Verificar y activar','3. Verify and activate')}</p>
+          <p className="mt-1 text-[12px] text-[#5D756A]">{t('Verificar HTTPS, recursos PayPal y activar con autorización; sin depender de fecha de beta.', 'Verify HTTPS and PayPal resources, then explicitly activate; independent of beta date.')}</p>
         </div>
       </div>
       <p className="mt-3 text-[12px] leading-relaxed text-[#6B8077]">
@@ -255,7 +255,7 @@ export function AdminPayPalSettings({lang}:Props){
         <input value={plan} onChange={e=>setPlan(e.target.value)} placeholder="P-..." className={'mt-2 '+fieldClass} autoComplete="off"/></label>
        <label className="block text-[13px] font-bold">{t('Dominio oficial de la beta (se puede dejar vacío)', 'Official beta domain (can be left blank)')}
         <input type="url" value={origin} onChange={e=>setOrigin(e.target.value)} placeholder="https://..." className={'mt-2 '+fieldClass} autoComplete="off"/>
-        <span className="mt-1 block text-[11px] font-medium text-[#86978F]">{t('No escribas localhost aquí. Este campo acepta únicamente un dominio HTTPS público cuando publiques la beta; las rutas de retorno las genera el servidor.', 'Do not enter localhost here. This field accepts only a public HTTPS domain when you publish the beta; the server generates return paths.')}</span></label>
+        <span className="mt-1 block text-[11px] font-medium text-[#86978F]">{t('No escribas localhost aquí. Este campo acepta únicamente una URL HTTPS pública, incluso antes de publicar la beta; las rutas de retorno las genera el servidor.', 'Do not enter localhost here. This field accepts only a public HTTPS origin, even before beta is published; the server generates return paths.')}</span></label>
        <label className="block text-[13px] font-bold">{t('ID del webhook PayPal','PayPal webhook ID')}
         <input value={webhook} onChange={e=>setWebhook(e.target.value)} placeholder="..." className={'mt-2 '+fieldClass} autoComplete="off"/></label>
       </div>
