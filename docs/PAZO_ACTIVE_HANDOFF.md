@@ -1,4 +1,9 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 UTC
+## F16 — MFA TOTP para administrador (20-oct-2026)
+- PO confirmó disponer de Google Authenticator. En rama F13, commit `43f8a3106e929316e8e154c9acdb27654cf6da92`: `AdminPayPalSettings.tsx` ahora monta `AdminPaypalMfaStepUp` en pestaña Live SIN exigir `LIVE_EDGE_PROVISIONING_RELEASED`. Esta bandera SIGUE FALSE y el endpoint alojado `pazo-admin-paypal-provision` v2 SIGUE INERTE (`RELEASE_APPROVED=false`, JWT true). Prueba `adminPaypalLiveMfaUi.test.mjs` actualizada.
+- Estado previo Supabase: un administrador, cero factores TOTP verificados. Cambio de UI SOLO en GitHub; requiere que PO actualice clon Vite local y escanee QR desde su teléfono, sin pegar QR ni códigos en chat. Verificar posteriormente factor TOTP real mediante consulta agregada a `auth.mfa_factors` y exigir paso TOTP reciente para cualquier provisioning.
+- NO desplegar Preview/publicación ni activar PayPal Live por mero enrolamiento MFA. Más adelante completar backend de merchant identity, secretos de gestión con alcance mínimo y worker financiero con GO apropiado.
+
 
 ## F16 — ADMIN EDGE HOSTED INERTE — 20 OCT 2026
 - Función `pazo-admin-paypal-provision` ACTIVE v2, JWT obligatorio, RELEASE_APPROVED=false. Sin operaciones financieras. Ver `docs/PAZO_F16_ADMIN_EDGE_INERT_HOSTED_20261020.md`.
