@@ -59,7 +59,8 @@ test('refund and reversal map exactly to installed hold enums, never a new perio
   ['PAYMENT.SALE.REVERSED','reversed']
  ]){
   const result=await writer.recordVerifiedReversal({
-   binding,receipt:{...sale,eventType,holdId:'HOLD-12345678'}
+   binding,receipt:{...sale,eventType,holdId:'HOLD-12345678',
+    originalSaleVerified:true,providerReversalVerified:true,refundKind:kind}
   })
   assert.equal(result.state,'RECORDED')
   assert.equal(result.paymentRecorded,false)
@@ -89,6 +90,25 @@ test('invalid original merchant, amount or period cannot reach database write',a
  })
  assert.equal(reversal.state,'REVIEW_REQUIRED')
  assert.equal(calls,0)
+})
+test('signed PayPal refund event alone does not write a hold without independent provider proof',async()=>{
+ let mutations=0
+ const writer=createPazoLiveVerifiedSettlementWriter({rpc:async()=>{
+  mutations++;return 'recorded'
+ }})
+ for(const receipt of [
+  {...sale,eventType:'PAYMENT.SALE.REFUNDED',holdId:'HOLD-12345678'},
+  {...sale,eventType:'PAYMENT.SALE.REFUNDED',holdId:'HOLD-12345678',
+   originalSaleVerified:true,providerReversalVerified:false,refundKind:'refunded'},
+  {...sale,eventType:'PAYMENT.SALE.REFUNDED',holdId:'HOLD-12345678',
+   originalSaleVerified:true,providerReversalVerified:true,refundKind:'partially_refunded'}
+ ]){
+  const result=await writer.recordVerifiedReversal({binding,receipt})
+  assert.equal(result.state,'REVIEW_REQUIRED')
+  assert.equal(result.paymentRecorded,false)
+  assert.equal(result.entitlementGranted,false)
+ }
+ assert.equal(mutations,0)
 })
 test('database error and unexpected status are recoverable review states, not success',async()=>{
  const unavailable=createPazoLiveVerifiedSettlementWriter({rpc:async()=>{
