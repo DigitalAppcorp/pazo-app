@@ -60,16 +60,18 @@ export function createPazoLiveRefundReconciliationGate({
    return review('refund_original_recorded_sale_unverified')
   // Do not infer a reversal from a signed event alone. Subscription transaction
   // status must be independently obtained from the original pinned merchant.
+  // Validate window BEFORE resolving merchant credentials or contacting
+  // the original-merchant provider reader.
+  if(!utc(event.searchStart)||!utc(event.searchEnd)||
+    Date.parse(event.searchStart)>=Date.parse(event.searchEnd)||
+    Date.parse(event.searchEnd)-Date.parse(event.searchStart)>31*86400000)
+   return review('refund_audited_search_window_invalid')
   let reader
   try{reader=await readerForGeneration({
    merchantGeneration:binding.merchantGeneration,sourceEnvironment:'live'
   })}catch{return review('refund_original_merchant_unavailable')}
   if(typeof reader?.readRefundEvidence!=='function')
    return review('refund_original_merchant_unavailable')
-  if(!utc(event.searchStart)||!utc(event.searchEnd)||
-    Date.parse(event.searchStart)>=Date.parse(event.searchEnd)||
-    Date.parse(event.searchEnd)-Date.parse(event.searchStart)>31*86400000)
-   return review('refund_audited_search_window_invalid')
   let evidence
   try{evidence=await reader.readRefundEvidence({
    subscriptionId:binding.subscriptionId,intentId:binding.intentId,
