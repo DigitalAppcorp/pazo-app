@@ -4,6 +4,8 @@ on:
     paths:
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-secret-provision-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql'
       - 'scripts/f16-live-admin-origin-disposable-lab.sql'
       - 'supabase/migrations/20261020142448_pazo_f16_admin_owned_live_return_origin.sql'
       - 'scripts/f16-live-service-rpc-bridge-disposable-lab.sql'
@@ -14,6 +16,8 @@ on:
     paths:
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-secret-provision-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql'
       - 'scripts/f16-live-admin-origin-disposable-lab.sql'
       - 'supabase/migrations/20261020142448_pazo_f16_admin_owned_live_return_origin.sql'
       - 'scripts/f16-live-service-rpc-bridge-disposable-lab.sql'
