@@ -1,4 +1,4 @@
-// PAZO F16 — Admin Live Edge secret provisioning HTTP boundary (NOT DEPLOYED).
+// PAZO F16 — Admin Live Edge provisioning HTTP boundary (HOSTED INERT).
 // RELEASE OFF by default. Requires verified Supabase JWT & trusted admin
 // permission adapter passed to liveEdgeProvisioning.mjs after separate GO.
 const TARGET='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-admin-paypal-provision'
