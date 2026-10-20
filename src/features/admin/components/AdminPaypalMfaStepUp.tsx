@@ -16,6 +16,7 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
  const [loading,setLoading]=useState(true)
  const [error,setError]=useState('')
  const [recent,setRecent]=useState(false)
+ const [notice,setNotice]=useState('')
  useEffect(()=>{
   let active=true
   void (async()=>{
@@ -50,6 +51,7 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
    })
    if(deleteError)throw Error('pending_factor_unenroll_failed')
    setPendingFactorId('');setFactorId('');setQrCode('')
+   setNotice(t('Registro pendiente eliminado. Ya puedes configurar el autenticador.','Pending enrollment cleared. You can now set up the authenticator.'))
   }catch{setError(t(
    'No se pudo reiniciar el registro pendiente. Inicia sesión de nuevo e inténtalo.',
    'Could not reset the pending enrollment. Sign in again and retry.'))}
@@ -57,7 +59,7 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
  }
  const enroll=async()=>{
   if(busy||pendingFactorId)return
-  setBusy(true);setError('');setRecent(false)
+  setBusy(true);setError('');setNotice('');setRecent(false)
   try{
    const {data,error:authError}=await supabase.auth.mfa.enroll({
     factorType:'totp',friendlyName:'PAZO Admin'
@@ -139,6 +141,7 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
      'Segundo factor comprobado. La autorización final la verificará el servidor.',
      'MFA confirmed. Final authorization will be checked by the server.')}</p>}
    </>}
+  {notice&&<p role="status" className="mt-2 text-[12px] font-semibold text-[#204E4A]">{notice}</p>}
   {error&&<p className="mt-2 text-[12px] font-semibold text-[#9B4236]"
    role="alert">{error}</p>}
  </section>
