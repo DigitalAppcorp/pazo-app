@@ -269,3 +269,4 @@ END $overlap$;
 \i scripts/f16-live-binding-receipt-disposable-lab.sql
 \i scripts/f16-live-refund-disposable-lab.sql
 \i scripts/f16-live-service-bridge-disposable-lab.sql
+\i scripts/f16-live-historical-merchant-disposable-lab.sql
