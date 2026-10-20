@@ -6,6 +6,7 @@ import {createPazoLiveHostedBindingReader} from './liveHostedBindingRead.mjs'
 import {createPazoLiveOwnerScopeResolver} from './liveOwnerScope.mjs'
 import {createPaypalLiveMerchantEvidenceReader} from './liveMerchantEvidence.mjs'
 import {createPaypalLivePostbackVerifier} from './livePostback.mjs'
+import {createPazoLiveHostedGenerationReader} from './liveHostedGenerationRead.mjs'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const WH=/^[A-Za-z0-9_-]{8,100}$/
 const FINGERPRINT=/^[a-f0-9]{64}$/
@@ -59,4 +60,19 @@ export function createPazoLiveHistoricalReadPipeline({
  // Server-only trusted functions, no credentials ever returned to the caller.
  return Object.freeze({provePazoScope,readerForGeneration,verifierForGeneration,
   findBoundSubscription})
+}
+
+
+// The assembled hosted path is CODE-ONLY until a separate PO-approved,
+// service-role-only Vault RPC exists. This helper cannot create subscriptions,
+// record payments, process inbox events, or enable Live.
+export function createPazoLiveHostedHistoricalVerification({
+ supabaseUrl,serviceRoleKey,fetchImpl=fetch
+}={}){
+ const fetchPrivateGeneration=createPazoLiveHostedGenerationReader({
+  supabaseUrl,serviceRoleKey,fetchImpl
+ })
+ return createPazoLiveHistoricalReadPipeline({
+  supabaseUrl,serviceRoleKey,fetchPrivateGeneration,fetchImpl
+ })
 }
