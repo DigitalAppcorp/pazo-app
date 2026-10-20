@@ -49,10 +49,11 @@ BEGIN
  IF (SELECT count(*) FROM admin_private.pazo_paypal_live_bootstrap_reservations
       WHERE plan_id='P-PAZOTESTABCDE1234')<>1
  THEN RAISE EXCEPTION 'Duplicated merchant bootstrap reservation'; END IF;
- v:=public.pazo_f16_live_service_bootstrap_reserve(
+ BEGIN
+  PERFORM public.pazo_f16_live_service_bootstrap_reserve(
    '23456789-1234-4234-8234-123456789abc','P-PAZOTESTABCDE1234');
- IF v->>'reserved' IS DISTINCT FROM 'false'
- THEN RAISE EXCEPTION 'Wrong actor was allowed to recover generation'; END IF;
+  RAISE EXCEPTION 'Unauthorized different actor accepted';
+ EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  v:=public.pazo_f16_live_service_bootstrap_finalize(
   actor,gen,'P-PAZOTESTABCDE1234','WH-PAZOTESTORIGINAL',repeat('f',64));
  IF v->>'finalized'<>'true' OR (v->>'generation')::bigint<>gen
