@@ -101,7 +101,12 @@ BEGIN
       SELECT 1 FROM supporter_private.pazo_paypal_live_paid_periods p
        WHERE p.merchant_generation=e.merchant_generation AND
         p.provider_event_id=e.provider_event_id))
-    OR (e.event_type IN ('PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED'))
+    OR (e.event_type IN ('PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED') AND NOT EXISTS(
+      SELECT 1 FROM supporter_private.pazo_paypal_live_period_holds h
+      JOIN supporter_private.pazo_paypal_live_paid_periods p ON p.sale_id=h.sale_id
+      WHERE h.hold_id=e.provider_event_id
+       AND p.merchant_generation=e.merchant_generation))
+
    )
  ) THEN RETURN false; END IF;
  UPDATE supporter_private.pazo_paypal_live_event_inbox
