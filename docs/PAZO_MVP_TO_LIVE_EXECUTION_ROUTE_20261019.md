@@ -178,3 +178,6 @@ Se preparó `liveEdgeGenerationSecrets.mjs` con namespaces privados inmutables p
 
 ## F16 — schema Edge credential_source APLICADO (versión instalada)
 Con GO específico del PO se aplicó en Supabase la **única** migración `20261020014049_pazo_f16_live_edge_credential_source_metadata.sql`. Permite generaciones `edge_secrets` con UUID Vault NULL y conserva el modo `vault` con ambos UUID obligatorios. Validado RLS FORCE/ACL sin SELECT; Live OFF, sin comerciantes Live, Sandbox 2 períodos QA/26 eventos intactos. Los textos anteriores que dicen «pendiente» se refieren al estado **anterior** a este GO. Reconciliado filename con versión de la tabla de migraciones; no repetirlo.
+
+## F16 control plane de Edge Secrets (CODE ONLY, 20-oct-2026)
+La ruta administrativa ha sido preparada con `liveEdgeProvisioning.mjs` y `pazo-admin-paypal-provision/index.ts` HARD OFF, plus `AdminPayPalSettings.tsx` distingue correctamente Vault y Edge. Supabase Management API permite POST de secretos con PAT scoped a Edge Function Secrets (Read/Write). Esta capacidad no está desplegada ni conectada a cuenta/sesión/merchant real; faltan adaptadores, auditoría, dominio HTTPS, pagos/billing window y GO independientes. La fecha de publicación beta no conmuta automáticamente Live. Ver `docs/PAZO_F16_ADMIN_EDGE_PROVISIONING_GATE_20261020.md`.
