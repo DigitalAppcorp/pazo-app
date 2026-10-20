@@ -51,6 +51,12 @@
 - Estado posterior: selector nuevo `sandbox,live_enabled=false,kill_switch=true,active_generation=NULL,revision=0`; selector antiguo `sandbox/live_checkout_enabled=false`; 0 merchant generations Live, 0 intents/períodos/eventos Live, 0 cancel claims, 0 switch audit. Sin checkout, cobros, secrets, ni cambios Live. No desplegar nuevos endpoints Edge sin gate PO separado.
 - **Gate siguiente:** completar y revisar autenticación administrativa GoTrue, adaptador de aprovisionamiento/recuperación de secretos, handlers reales checkout/webhook, audit y reconciliación, UI "Guardar y activar"; comprobar HTTPS/PWA. Beta **NO-GO** hasta F16 operativo end-to-end y GO explícitos para despliegue/Live.
 
+## F16 checkout GoTrue — 20 oct, posterior a instalación service-only
+- `524c3293`: `supabase/functions/pazo-paypal-live-checkout/liveGoTrueOwner.mjs` verifica JWT de usuario mediante Supabase GoTrue GET `/auth/v1/user` en proyecto fijo; rechaza token malformado, usuario anónimo, identidad inválida y errores sin fuga. `e0963a71` prueba flujo/rechazos, `63684be5` lo incluye en test:closure. **8/8 Actions SUCCESS** (CI + 7 laboratorios) para `63684be5bb5127972f1a578a5071cd1aaebb3b26`.
+- Este adaptador **todavía NO está inyectado** en un Edge checkout real; `LIVE_CHECKOUT_RELEASED=false` y funciones Live checkout/webhook NO desplegadas. No convertir CODE/CI en capacidad de cobrar.
+- Lectura Vercel sin teamId: últimos despliegues anteriores, SHA más reciente `a218ab3`; ninguno de estos nuevos commits aparece. Sin previews solicitados.
+- Migración **alojada confirmada**: `20261020134900_pazo_f16_live_service_role_rpc_bridges` respaldada en GitHub con el mismo versionamiento. No reaplicar. Solo nueve RPC de service-role añadidas; Live sigue OFF.
+
 ## Identidad, roles y referencias
 - Producto: **PAZO**, PWA social 18+ para mascotas; módulos gratis, QR gratis y aportación voluntaria **Amigo de PAZO US$2.99/mes**. El usuario es el **Product Owner**; ChatGPT es ejecutor técnico directo, **sin delegación a Codex/Gemini** salvo nueva orden explícita.
 - OS: `DigitalAppcorp/project-brain-os`, **v1.4.1**, `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`.
