@@ -2,6 +2,11 @@
 
 **Estado canónico para un nuevo chat.** Este archivo sustituye los banners históricos y las instrucciones obsoletas. Historial íntegro archivado en `docs/archive/PAZO_ACTIVE_HANDOFF_BEFORE_ADMIN_EDGE_PROVISIONING_20261019.md` (más historial Git). Nunca utilizar un checkpoint antiguo por encima de la lectura actual de GitHub/Supabase.
 
+## Continuación de seguridad F16 — 19/20 oct (nuevo chat)
+- Branch-only: `db241725` endurece el receptor HTTP `pazo-admin-paypal-provision/intake.mjs` con validación sintáctica de Bearer JWT, Content-Type exacto JSON/UTF-8 y tamaño real de cuerpo en bytes UTF-8; `f6a2736` agrega casos adversariales en la prueba del receptor. Ninguna función fue desplegada ni se activó Live. **CI del HEAD posterior a estos cambios no se debe presumir PASS hasta comprobar GitHub Actions.**
+- Bloqueo operativo para previews: aunque el PO informó `previewDeploymentsDisabled=true`, la lectura actual de Vercel por conector devolvió 403; no afirmar postflight de ausencia de despliegues sin evidencia Vercel. No ejecutar `vercel deploy` ni habilitar previews.
+- Próximo subgate: confirmar CI+7 labs del último HEAD, comprobar no previews mediante credenciales Vercel autorizadas cuando sea posible; completar autenticación/relectura de generación, auditoría e idempotencia exclusivamente con adaptadores de prueba. El receptor `RELEASE_APPROVED=false` y UI `LIVE_EDGE_PROVISIONING_RELEASED=false` continúan obligatorios.
+
 ## Identidad, roles y referencias
 - Producto: **PAZO**, PWA social 18+ para mascotas; módulos gratis, QR gratis y aportación voluntaria **Amigo de PAZO US$2.99/mes**. El usuario es el **Product Owner**; ChatGPT es ejecutor técnico directo, **sin delegación a Codex/Gemini** salvo nueva orden explícita.
 - OS: `DigitalAppcorp/project-brain-os`, **v1.4.1**, `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`.
