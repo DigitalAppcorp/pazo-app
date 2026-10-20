@@ -1,6 +1,6 @@
 // F16: pure, fail-closed release-readiness *contract* for future Live.
  // This is NOT an endpoint, runtime selector or authorization to charge.
- // Independent evidence must be produced server-side after official beta hosting.
+ // Independent evidence must be produced server-side on a stable public HTTPS origin, before or after beta launch.
 const officialOrigin=(s)=>{
  if(typeof s!=='string'||s.length>250)return false
  try {
@@ -13,12 +13,12 @@ const officialOrigin=(s)=>{
  }catch{return false}
 }
 const proofNames=Object.freeze([
- 'betaPublicHttpsVerified','merchantBusinessVerified',
+ 'applicationPublicHttpsVerified','merchantBusinessVerified',
  'liveAppOwnershipVerified','livePlanProviderVerified',
  'webhookSignatureAndDeliveryVerified','browserReturnVerified',
  'installedPwaReturnVerified','renewalAndCancellationVerified',
  'refundAndReversalVerified','ledgerReconciliationVerified',
- 'rollbackVerified','ownerApprovedLaunch',
+ 'rollbackVerified','ownerApprovedLiveActivation',
 ])
 const blocked=(reasons)=>Object.freeze({
  environment:'live',readiness:reasons.length===0?'preflight_ready':'blocked',
@@ -26,7 +26,7 @@ const blocked=(reasons)=>Object.freeze({
  sourcesToPreserve:Object.freeze(['legacy_sandbox_checkout']),
  reasons:Object.freeze(reasons),
 })
-export function assessLiveBetaCutover({runtime,config,proofs}={}){
+export function assessLivePaymentCutover({runtime,config,proofs}={}){
  const issues=[]
  if(runtime?.active_environment!=='sandbox'||runtime?.live_checkout_enabled!==false||
     runtime?.checkout_source!=='legacy_sandbox_checkout')
@@ -41,10 +41,13 @@ export function assessLiveBetaCutover({runtime,config,proofs}={}){
    issues.push('live_credential_proof_missing')
  if(typeof config?.plan_id!=='string'||!/^P-[A-Za-z0-9]{10,75}$/.test(config.plan_id))
    issues.push('live_plan_missing')
- if(!officialOrigin(config?.return_origin))issues.push('beta_public_origin_missing')
+ if(!officialOrigin(config?.return_origin))issues.push('application_public_origin_missing')
  if(typeof config?.webhook_id!=='string'||!/^[A-Za-z0-9_-]{8,100}$/.test(config.webhook_id))
    issues.push('live_webhook_missing')
  for(const name of proofNames)if(proofs?.[name]!==true)
    issues.push('proof_missing_'+name.replace(/[A-Z]/g,c=>'_'+c.toLowerCase()))
  return blocked(issues)
 }
+
+// Compatibility alias: beta publication date is not a prerequisite for Live readiness.
+export const assessLiveBetaCutover=assessLivePaymentCutover
