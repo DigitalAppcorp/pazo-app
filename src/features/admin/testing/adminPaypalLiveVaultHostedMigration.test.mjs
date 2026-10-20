@@ -20,6 +20,7 @@ test('installed reader is service_role only, Live OFF, original bound generation
  assert.match(hosted,/GRANT EXECUTE ON FUNCTION\s+public\.pazo_f16_live_historical_merchant_secrets\(bigint\) TO service_role/)
  assert.match(hosted,/has_function_privilege\('anon'/)
  assert.match(hosted,/has_function_privilege\('authenticated'/)
- assert.match(hosted,/has_table_privilege\('service_role','vault\.decrypted_secrets','SELECT'\)/)
+ assert.match(hosted,/this migration does not change those existing grants/)
+ assert.doesNotMatch(hosted,/GRANT SELECT|REVOKE SELECT/)
  assert.doesNotMatch(hosted,/GRANT SELECT|CREATE TABLE|ALTER TABLE|INSERT INTO|DELETE FROM|TRUNCATE/)
 })
