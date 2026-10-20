@@ -1,14 +1,9 @@
-// PAZO Live subscription checkout — server-only, never enabled in this PR.
-// Fully disabled until PRIVATE SQL stores + merchant generation + signature
-// verification + period reconciliation have been deployed under PO gates.
-import {createPazoLiveVerifiedCheckout} from './liveCheckoutCandidate.mjs'
+// PAZO F16 — Hosted Live recurring checkout. Code wired, RELEASE OFF.
+// Public beta changes the release latch only after end-to-end merchant,
+// verified webhook, ledger and Product Owner launch gates pass.
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
+import {createPazoLiveHostedCheckout} from './liveHostedCheckout.mjs'
 const LIVE_CHECKOUT_RELEASED=false
-Deno.serve(async(request:Request):Promise<Response>=>{
- if(!LIVE_CHECKOUT_RELEASED)return new Response(JSON.stringify({
-  code:'live_checkout_not_released'}),{status:503,
-  headers:{'content-type':'application/json','cache-control':'no-store'}})
- const checkout=createPazoLiveVerifiedCheckout()
- const result=await checkout.begin({request})
- return new Response(JSON.stringify({code:result.reason}),{status:503,
-  headers:{'content-type':'application/json','cache-control':'no-store'}})
-})
+Deno.serve(createPazoLiveHostedCheckout({
+ released:LIVE_CHECKOUT_RELEASED,getEnv:(name:string)=>Deno.env.get(name)
+}))
