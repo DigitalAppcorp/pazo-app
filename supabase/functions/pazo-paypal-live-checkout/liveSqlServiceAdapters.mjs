@@ -3,6 +3,7 @@
 // The SQL service-only bridges must be individually PO-approved and installed first.
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const ROLE_RPC=Object.freeze({
+ route:'pazo_f16_live_service_active_route',
  begin:'pazo_f16_live_service_checkout_begin',
  claim:'pazo_f16_live_service_provider_claim',
  bind:'pazo_f16_live_service_subscription_bind',
