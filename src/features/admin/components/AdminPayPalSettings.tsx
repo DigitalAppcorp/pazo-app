@@ -126,6 +126,14 @@ export function AdminPayPalSettings({lang}:Props){
   }finally{setBusy(false)}
  }
  const saveCredentials=async()=>{
+  // The legacy Vault is NOT the F16 Edge secrets store. Block the LIVE path
+  // even when invoked by a stale UI, not only by the visible disabled control.
+  if(env==='live'){
+   setClientId('');setClientSecret('')
+   setError(t('Live usa aprovisionamiento privado; Vault está deshabilitado para claves Live.',
+    'Live uses private provisioning; Vault is disabled for Live keys.'))
+   return
+  }
   if(!/^[A-Za-z0-9_-]{20,256}$/.test(clientId.trim())||
      !/^[A-Za-z0-9_-]{20,512}$/.test(clientSecret.trim())){
    setError(t('Introduce ambas credenciales completas de PayPal.','Enter both complete PayPal credentials.'));return
@@ -169,6 +177,11 @@ export function AdminPayPalSettings({lang}:Props){
   }catch{setLiveResourceHealth('unavailable')}
  }
  const validateCredentials=async()=>{
+  if(env==='live'){
+   setError(t('La verificación Live se realizará en el nuevo canal privado.',
+    'Live verification will run through the new private channel.'))
+   return
+  }
   setBusy(true);setError('');setNotice('')
   try{
    const {data,error:fnError}=await supabase.functions.invoke('pazo-admin-paypal-validate',{
@@ -190,7 +203,7 @@ export function AdminPayPalSettings({lang}:Props){
    </div>
    <div className="mt-5 grid grid-cols-2 gap-2 rounded-[16px] bg-[#F2F6EE] p-1.5" role="group" aria-label={t('Entorno','Environment')}>
     {(['sandbox','live'] as const).map(value=><button type="button" key={value} aria-pressed={env===value}
-      disabled={busy} onClick={()=>{setEnv(value);setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
+      disabled={busy} onClick={()=>{setEnv(value);setClientId('');setClientSecret('');setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
       {value==='sandbox'?'Sandbox': 'Live · '+(settings?.active_environment==='live'&&settings.live_checkout_enabled?t('activo','active'):t('preparación','staging'))}
     </button>)}
    </div>
@@ -291,7 +304,7 @@ export function AdminPayPalSettings({lang}:Props){
        <div><h4 className="text-[17px] font-black">{t('Credenciales privadas','Private credentials')}</h4>
         <p className="text-[12px] text-[#768980]">{t('Cifradas en Supabase Vault','Encrypted in Supabase Vault')}</p></div>
       </div>
-      <div className="mt-5 space-y-3">
+      {env==='sandbox'?      <div className="mt-5 space-y-3">
        <p className="rounded-[14px] bg-[#F0F5E9] px-4 py-3 text-[12px] font-semibold text-[#466C5B]">
         {config?.client_id_stored&&config.client_secret_stored?
          t('Se guardaron credenciales para este entorno. Nunca se muestran de nuevo.','Credentials are stored for this environment. They are never displayed again.'):
@@ -314,7 +327,10 @@ export function AdminPayPalSettings({lang}:Props){
          t('Pendiente','Pending')}
         {config?.validated_at&&<span className="mt-1 block text-[11px]">{new Date(config.validated_at).toLocaleString()}</span>}
        </div>
-      </div>
+      </div>:<div className="mt-5 rounded-[14px] bg-[#F0F5E9] px-4 py-4 text-[13px] font-semibold text-[#466C5B]" data-pazo-live-vault-locked="true">
+       {t('Las credenciales PayPal Live no se pegan en Vault. El nuevo canal privado requerirá reautenticación del administrador. El checkout sigue apagado.',
+         'Do not paste PayPal Live credentials into Vault. The new private channel will require administrator reauthentication. Checkout remains OFF.')}
+      </div>}
      </section>
     </div>
     <section className={cardClass}>
