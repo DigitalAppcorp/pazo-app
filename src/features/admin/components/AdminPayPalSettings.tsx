@@ -8,6 +8,7 @@ type Config={
  interval_unit:'MONTH';product_name:string;return_origin:string;webhook_id:string;
  client_id_stored:boolean;client_secret_stored:boolean;
  validation_status:'not_configured'|'not_verified'|'valid'|'invalid';
+ edge_generation_verified?:boolean;
  validated_at:string|null;updated_at:string
 }
 type Settings={
@@ -52,7 +53,7 @@ export function AdminPayPalSettings({lang}:Props){
   liveConfig.client_secret_stored===true&&liveConfig.validation_status==='valid'
  // A PayPal OAuth success in Vault is not evidence that per-generation Edge
  // secrets have been provisioned, verified or pinned to the merchant.
- const liveOAuthReady=LIVE_EDGE_PROVISIONING_RELEASED&&false
+ const liveOAuthReady=LIVE_EDGE_PROVISIONING_RELEASED&&liveConfig?.edge_generation_verified===true
  const livePlanStaged=Boolean(liveConfig?.plan_id&&/^P-[A-Za-z0-9]{10,75}$/.test(liveConfig.plan_id))
  const liveWebhookStaged=Boolean(liveConfig?.webhook_id)
 
