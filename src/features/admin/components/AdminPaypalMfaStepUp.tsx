@@ -60,21 +60,27 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
  const enroll=async()=>{
   if(busy||pendingFactorId)return
   setBusy(true);setError('');setNotice('');setRecent(false)
+  let stage='REQUEST'
   try{
    const {data,error:authError}=await supabase.auth.mfa.enroll({
     factorType:'totp',friendlyName:'PAZO Admin'
    })
-   if(authError||!data?.id)throw Error('mfa_enroll_unavailable')
-   // Keep the new ID for safe recovery if the QR response is malformed.
+   if(authError)throw Error('mfa_enroll_unavailable')
+   stage='FACTOR'
+   if(!data?.id)throw Error('mfa_enroll_unavailable')
    setPendingFactorId(data.id)
+   stage='QR_MISSING'
    const candidate=data.totp?.qr_code
-   if(typeof candidate!=='string'||candidate.length>2000000||
-    !/^data:image\/svg\+xml(?:;charset=utf-8|;utf-8|;utf8|;base64|),/i.test(candidate))
+   if(typeof candidate!=='string')throw Error('mfa_qr_unavailable')
+   stage='QR_SIZE'
+   if(candidate.length>2000000)throw Error('mfa_qr_unavailable')
+   stage='QR_FORMAT'
+   if(!/^data:image\/svg\+xml(?:;charset=utf-8|;utf-8|;utf8|;base64|),/i.test(candidate))
     throw Error('mfa_qr_unavailable')
    setPendingFactorId('');setFactorId(data.id);setQrCode(candidate)
   }catch{setError(t(
-   'No se mostró el QR. Si existe un registro pendiente, reinícialo y vuelve a intentar.',
-   'QR unavailable. If enrollment is pending, reset it and retry.'))}
+   'No se pudo mostrar el autenticador. Código: '+stage+'. No vuelvas a intentarlo; informa solo el código.',
+   'Authenticator setup failed. Code: '+stage+'. Do not retry; report only the code.'))}
   finally{setBusy(false)}
  }
  const verify=async()=>{
@@ -122,6 +128,9 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
       'Scan this QR with an authenticator app. Do not share the QR code.')}</p>
      <img src={qrCode} width="178" height="178"
       className="max-w-full rounded-[10px] bg-white p-2"
+      onError={()=>{setPendingFactorId(factorId);setFactorId('');setQrCode('')
+       setError(t('No se pudo mostrar el QR. Código: QR_IMAGE. Informa solo el código.',
+        'Could not display QR. Code: QR_IMAGE. Report only the code.'))}}
       alt={t('QR de autenticación personal','Personal authentication QR')}/>
     </div>}
     {factorId&&<form onSubmit={e=>{e.preventDefault();void verify()}}
