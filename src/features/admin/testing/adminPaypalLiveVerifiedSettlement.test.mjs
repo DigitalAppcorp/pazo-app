@@ -118,7 +118,10 @@ test('signed and merchant-scoped reversal maps to immutable hold, never a new pe
   const refunded = {
     ...receipt,
     eventType: 'PAYMENT.SALE.REFUNDED',
-    holdId: 'HOLD-12345678'
+    holdId: 'HOLD-12345678',
+    originalSaleVerified: true,
+    providerReversalVerified: true,
+    refundKind: 'refunded'
   }
 
   const d = assessPazoLiveVerifiedReversal({
@@ -134,12 +137,30 @@ test('signed and merchant-scoped reversal maps to immutable hold, never a new pe
     binding,
     receipt: {
       ...refunded,
-      eventType: 'PAYMENT.SALE.REVERSED'
+      eventType: 'PAYMENT.SALE.REVERSED',
+      refundKind: 'reversed'
     }
   })
 
   assert.equal(reversed.ready, true)
   assert.equal(reversed.record.p_kind, 'reversed')
+
+  for (const tamper of [
+    { originalSaleVerified: false },
+    { providerReversalVerified: false },
+    { refundKind: 'partially_refunded' },
+    { refundKind: 'reversed' },
+    { amountMinor: 150 },
+    { currency: 'EUR' },
+    { merchantGeneration: 8 }
+  ]) {
+    const blocked = assessPazoLiveVerifiedReversal({
+      binding, receipt: { ...refunded, ...tamper }
+    })
+    assert.equal(blocked.ready, false)
+    assert.equal(blocked.mayGrantBenefits, false)
+    assert.equal(blocked.record, undefined)
+  }
 
   assert.equal(
     assessPazoLiveVerifiedReversal({
