@@ -56,6 +56,18 @@ export function createPazoLiveEdgeSecretsProvisioner({
    provider?.webhookVerified!==true||provider?.merchantIdentityVerified!==true||
    provider?.isLive!==true||provider?.mayCharge!==false)
    return code('live_provider_resources_unverified')
+  // Validate current generation again after the remote provider check: a stale
+  // admin/merchant revision must never be provisioned into a newer generation.
+  let current
+  try{current=await readGeneration({merchantGeneration,actorId:actor.id})}
+  catch{return code('generation_revalidation_unavailable')}
+  if(current?.revision!==expectedRevision||current?.generation!==stored.generation||
+   current?.environment!=='live'||current?.credentialSource!=='edge_secrets'||
+   current?.isRetired!==false||current?.verifiedAdminId!==actor.id||
+   current?.liveCheckoutEnabled!==false||current?.killSwitch!==true||
+   current?.planId!==stored.planId||current?.webhookId!==stored.webhookId||
+   current?.merchantFingerprint!==stored.merchantFingerprint)
+   return code('generation_changed_during_verification')
   let pat
   try{pat=getScopedManagementToken()}catch{return code('scoped_token_unavailable')}
   if(typeof pat!=='string'||!/^sbp_fc[A-Za-z0-9_-]{12,500}$/.test(pat))
