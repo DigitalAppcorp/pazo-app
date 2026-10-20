@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {AdminGlyph} from './AdminVisuals'
+import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -240,6 +241,10 @@ export function AdminPayPalSettings({lang}:Props){
           'No custom domain is needed now. Localhost is only the development interface, not a public webhook endpoint. The existing Sandbox checkout continues to manage the HTTPS return URL until a safe migration.')}
       </p>
     </section>
+    {env==='live'&&LIVE_EDGE_PROVISIONING_RELEASED&&
+     <AdminPaypalMfaStepUp lang={lang} onVerified={()=>setNotice(t(
+       'Código MFA comprobado. El servidor validará nuevamente la sesión para autorizar credenciales.',
+       'MFA checked. The server will independently validate the session before allowing credentials.'))}/>}
     {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
       <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
       <p className="mt-2 text-[12px] text-[#6B8077]">
