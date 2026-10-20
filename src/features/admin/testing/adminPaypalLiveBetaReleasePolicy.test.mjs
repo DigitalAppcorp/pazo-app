@@ -1,17 +1,17 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {assessLiveBetaCutover} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveBetaReleasePolicy.mjs'
+import {assessLiveBetaCutover,assessLivePaymentCutover} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveBetaReleasePolicy.mjs'
 const old={active_environment:'sandbox',live_checkout_enabled:false,checkout_source:'legacy_sandbox_checkout'}
 const now='2026-10-19T00:00:00.000Z'
 const config={environment:'live',currency:'USD',interval_unit:'MONTH',price_minor:299,
  client_id_stored:true,client_secret_stored:true,validation_status:'valid',
  validated_at:'2026-10-20T00:00:00.000Z',updated_at:now,
  plan_id:'P-1234567890ABCDE',webhook_id:'A1234567890',return_origin:'https://pazo.example.com'}
-const yes={betaPublicHttpsVerified:true,merchantBusinessVerified:true,liveAppOwnershipVerified:true,
+const yes={applicationPublicHttpsVerified:true,merchantBusinessVerified:true,liveAppOwnershipVerified:true,
  livePlanProviderVerified:true,webhookSignatureAndDeliveryVerified:true,browserReturnVerified:true,
  installedPwaReturnVerified:true,renewalAndCancellationVerified:true,refundAndReversalVerified:true,
- ledgerReconciliationVerified:true,rollbackVerified:true,ownerApprovedLaunch:true}
-const check=(over={})=>assessLiveBetaCutover({runtime:old,config,proofs:yes,...over})
+ ledgerReconciliationVerified:true,rollbackVerified:true,ownerApprovedLiveActivation:true}
+const check=(over={})=>assessLivePaymentCutover({runtime:old,config,proofs:yes,...over})
 test('even complete synthetic requirements do not authorize a Live payment or mutate Sandbox',()=>{
  const result=check()
  assert.equal(result.readiness,'preflight_ready')
@@ -22,7 +22,7 @@ test('even complete synthetic requirements do not authorize a Live payment or mu
 test('the undecided beta domain may remain blank but LIVE is blocked until public HTTPS',()=>{
  const result=check({config:{...config,return_origin:''}})
  assert.equal(result.readiness,'blocked')
- assert.ok(result.reasons.includes('beta_public_origin_missing'))
+ assert.ok(result.reasons.includes('application_public_origin_missing'))
 })
 test('localhost, absent proofs, mismatched plan and unapproved release all fail closed',()=>{
  const inputs=[
@@ -33,7 +33,7 @@ test('localhost, absent proofs, mismatched plan and unapproved release all fail 
  {config:{...config,price_minor:499}},
  {config:{...config,validation_status:'not_verified'}},
  {runtime:{...old,live_checkout_enabled:true}},
- {proofs:{...yes,ownerApprovedLaunch:false}},
+ {proofs:{...yes,ownerApprovedLiveActivation:false}},
  {proofs:{...yes,webhookSignatureAndDeliveryVerified:false}},
  {proofs:{...yes,installedPwaReturnVerified:false}},
  {proofs:{...yes,ledgerReconciliationVerified:false}},
@@ -51,4 +51,15 @@ test('the contract never contains or echoes secrets and is not linked to any bil
  const result=check({config:{...config,client_secret:'HIDDEN'}})
  assert.ok(!JSON.stringify(result).includes('HIDDEN'))
  assert.ok(!JSON.stringify(result).includes('1234567890ABCDE'))
+})
+
+test('beta publication date is never a prerequisite for valid Live readiness',()=>{
+ const before=check({proofs:{...yes,betaLaunched:false}})
+ const after=check({proofs:{...yes,betaLaunched:true}})
+ assert.equal(before.readiness,'preflight_ready')
+ assert.equal(after.readiness,'preflight_ready')
+ assert.deepEqual(before.reasons,after.reasons)
+ assert.deepEqual(assessLiveBetaCutover({runtime:old,config,proofs:yes}),check())
+ assert.equal(check({proofs:{...yes,ownerApprovedLiveActivation:false}}).readiness,'blocked')
+ assert.equal(check({proofs:{...yes,applicationPublicHttpsVerified:false}}).readiness,'blocked')
 })
