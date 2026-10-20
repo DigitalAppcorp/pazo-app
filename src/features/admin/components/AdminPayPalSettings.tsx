@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {AdminGlyph} from './AdminVisuals'
+import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
 type Config={
@@ -35,6 +36,7 @@ export function AdminPayPalSettings({lang}:Props){
  const [busy,setBusy]=useState(false)
  const [error,setError]=useState('')
  const [notice,setNotice]=useState('')
+ const [draftFeedback,setDraftFeedback]=useState<{state:'verified'|'rejected'|'uncertain';text:string}|null>(null)
  const [price,setPrice]=useState('2.99')
  const [plan,setPlan]=useState('')
  const [origin,setOrigin]=useState('')
@@ -83,26 +85,41 @@ export function AdminPayPalSettings({lang}:Props){
   setNotice('')
  },[env,config?.updated_at,config?.environment])
  const saveDraft=async()=>{
-  const cents=Math.round(Number(price)*100)
-  if(!Number.isFinite(cents)||cents<99||cents>100000){
-   setError(t('Precio inválido.','Invalid price.'));return
+  const draft=normalizePazoDraft({environment:env,price,planId:plan,origin,webhookId:webhook})
+  if(!draft){
+   setDraftFeedback({state:'rejected',text:t(
+    'No se guardó. Verifica precio, dominio HTTPS sin rutas y los identificadores opcionales de PayPal.',
+    'Not saved. Verify price, HTTPS domain without paths and optional PayPal IDs.')})
+   return
   }
-  if(plan.trim()&&!/^P-[A-Za-z0-9]{10,75}$/.test(plan.trim())){
-   setError(t('El identificador del plan no es válido.','The plan ID is invalid.'));return
-  }
-  if(origin.trim()&&!/^https:\/\/[a-z0-9][a-z0-9.-]{1,240}(:443)?$/.test(origin.trim().toLowerCase())){
-   setError(t('Escribe solo el dominio HTTPS, sin rutas ni parámetros.','Enter only an HTTPS origin, without paths or query parameters.'));return
-  }
-  setBusy(true);setError('');setNotice('')
+  setBusy(true);setError('');setNotice('');setDraftFeedback(null)
   try{
-   const {data,error:dbError}=await supabase.rpc('pazo_admin_paypal_save_draft',{
-    p_environment:env,p_plan_id:plan.trim(),p_price_minor:cents,
-    p_return_origin:origin.trim().toLowerCase(),p_webhook_id:webhook.trim()
+   const outcome=await savePazoAdminDraftWithReadback({
+    draft,
+    write:values=>supabase.rpc('pazo_admin_paypal_save_draft',values),
+    read:()=>supabase.rpc('pazo_admin_paypal_settings')
    })
-   if(dbError||data!==true)throw Error('could not save')
-   setNotice(t('Borrador guardado. No modifica cobros actuales.','Draft saved. Current checkout is unchanged.'))
-   await load()
-  }catch{setError(safeError())}finally{setBusy(false)}
+   if(outcome.state==='verified'&&outcome.settings){
+    setSettings(outcome.settings as Settings)
+    const {data:auditData}=await supabase.rpc('pazo_admin_paypal_audit')
+    if(Array.isArray(auditData))setHistory(auditData as Audit[])
+    setDraftFeedback({state:'verified',text:t(
+     'Borrador guardado y verificado en Supabase. No modifica cobros actuales.',
+     'Draft saved and verified in Supabase. Current checkout is unchanged.')})
+   }else if(outcome.state==='uncertain'){
+    setDraftFeedback({state:'uncertain',text:t(
+     'El guardado pudo efectuarse, pero no fue posible comprobarlo. Recarga antes de volver a intentarlo. Referencia: '+outcome.code,
+     'Save may have occurred but could not be confirmed. Reload before retrying. Reference: '+outcome.code)})
+   }else{
+    setDraftFeedback({state:'rejected',text:t(
+     'Supabase no guardó el borrador. Comprueba tu sesión. Referencia: '+outcome.code,
+     'Supabase did not save the draft. Check your session. Reference: '+outcome.code)})
+   }
+  }catch{
+   setDraftFeedback({state:'rejected',text:t(
+    'No se pudo completar la operación. Comprueba tu sesión y tu conexión.',
+    'Could not complete the operation. Check your session and connection.')})
+  }finally{setBusy(false)}
  }
  const saveCredentials=async()=>{
   if(!/^[A-Za-z0-9_-]{20,256}$/.test(clientId.trim())||
@@ -169,7 +186,7 @@ export function AdminPayPalSettings({lang}:Props){
    </div>
    <div className="mt-5 grid grid-cols-2 gap-2 rounded-[16px] bg-[#F2F6EE] p-1.5" role="group" aria-label={t('Entorno','Environment')}>
     {(['sandbox','live'] as const).map(value=><button type="button" key={value} aria-pressed={env===value}
-      onClick={()=>setEnv(value)} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
+      disabled={busy} onClick={()=>{setEnv(value);setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
       {value==='sandbox'?'Sandbox': 'Live · '+(settings?.active_environment==='live'&&settings.live_checkout_enabled?t('activo','active'):t('preparación','staging'))}
     </button>)}
    </div>
@@ -250,16 +267,20 @@ export function AdminPayPalSettings({lang}:Props){
       </div>
       <div className="mt-5 grid gap-4">
        <label className="block text-[13px] font-bold">{t('Precio mensual (USD)','Monthly price (USD)')}
-        <input type="number" min="0.99" max="1000" step="0.01" value={price} onChange={e=>setPrice(e.target.value)} className={'mt-2 '+fieldClass}/></label>
+        <input type="number" min="0.99" max="1000" step="0.01" value={price} onChange={e=>{setPrice(e.target.value);setDraftFeedback(null)}} className={'mt-2 '+fieldClass}/></label>
        <label className="block text-[13px] font-bold">{t('ID del plan en PayPal','PayPal plan ID')}
-        <input value={plan} onChange={e=>setPlan(e.target.value)} placeholder="P-..." className={'mt-2 '+fieldClass} autoComplete="off"/></label>
+        <input value={plan} onChange={e=>{setPlan(e.target.value);setDraftFeedback(null)}} placeholder="P-..." className={'mt-2 '+fieldClass} autoComplete="off"/></label>
        <label className="block text-[13px] font-bold">{t('Dominio oficial de la beta (se puede dejar vacío)', 'Official beta domain (can be left blank)')}
-        <input type="url" value={origin} onChange={e=>setOrigin(e.target.value)} placeholder="https://..." className={'mt-2 '+fieldClass} autoComplete="off"/>
+        <input type="url" value={origin} onChange={e=>{setOrigin(e.target.value);setDraftFeedback(null)}} placeholder="https://..." className={'mt-2 '+fieldClass} autoComplete="off"/>
         <span className="mt-1 block text-[11px] font-medium text-[#86978F]">{t('No escribas localhost aquí. Este campo acepta únicamente una URL HTTPS pública, incluso antes de publicar la beta; las rutas de retorno las genera el servidor.', 'Do not enter localhost here. This field accepts only a public HTTPS origin, even before beta is published; the server generates return paths.')}</span></label>
        <label className="block text-[13px] font-bold">{t('ID del webhook PayPal','PayPal webhook ID')}
-        <input value={webhook} onChange={e=>setWebhook(e.target.value)} placeholder="..." className={'mt-2 '+fieldClass} autoComplete="off"/></label>
+        <input value={webhook} onChange={e=>{setWebhook(e.target.value);setDraftFeedback(null)}} placeholder="..." className={'mt-2 '+fieldClass} autoComplete="off"/></label>
       </div>
-      <button type="button" className={'mt-5 w-full '+actionClass} onClick={()=>void saveDraft()} disabled={busy}>{t('Guardar borrador','Save draft')}</button>
+      <button type="button" className={'mt-5 w-full '+actionClass} onClick={()=>void saveDraft()} disabled={busy}>{busy?t('Guardando…','Saving…'):t('Guardar borrador','Save draft')}</button>
+      {draftFeedback&&<p data-pazo-draft-result role={draftFeedback.state==='verified'?'status':'alert'} aria-live="polite"
+       className={'mt-3 rounded-[14px] px-4 py-3 text-[13px] font-semibold '+(draftFeedback.state==='verified'?'bg-[#EAF4E4] text-[#296F50]':'bg-[#FAEDE7] text-[#8B4737]')}>
+       {draftFeedback.text}
+      </p>}
      </section>
      <section className={cardClass}>
       <div className="flex items-center gap-3"><span className="rounded-full bg-[#FFF1D8] p-3"><AdminGlyph name="settings" size={23}/></span>
