@@ -111,3 +111,20 @@ test('ambiguous management POST never retries or confirms success',async()=>{
  assert.equal(r.code,'secret_write_outcome_unknown_manual_review')
  assert.equal(sends,1)
 })
+
+test('generation changed during remote PayPal verification blocks secret write',async()=>{
+ let reads=0, requests=0
+ const handler=createPazoLiveEdgeSecretsProvisioner({
+  released:true,
+  authenticateAdmin:async()=>({id,isAdmin:true,freshSession:true}),
+  readGeneration:async()=>({...stub,revision:++reads===1?3:4}),
+  verifyProviderResources:async()=>({oauthVerified:true,planVerified:true,
+   webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false}),
+  getScopedManagementToken:()=>pat,
+  fetchImpl:async()=>{requests++;throw Error('must never be called')}
+ })
+ const result=await handler(args)
+ assert.equal(result.code,'generation_changed_during_verification')
+ assert.equal(reads,2)
+ assert.equal(requests,0)
+})
