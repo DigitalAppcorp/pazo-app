@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {createPazoLiveHistoricalReadPipeline,createPazoLiveHostedHistoricalVerification} from '../../../../supabase/functions/pazo-paypal-live-webhook/liveHistoricalReadPipeline.mjs'
+import {createPazoLiveHistoricalReadPipeline,createPazoLiveEdgeHistoricalVerification} from '../../../../supabase/functions/pazo-paypal-live-webhook/liveHistoricalReadPipeline.mjs'
 const url='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const service='opaque_service_role_key_very_long_for_testing'
 const sub='I-SUBSCRIPTION123'
@@ -91,13 +91,22 @@ test('signature verifier can use original merchant webhook id without showing ke
 
 test('assembled hosted read-only flow checks bound owner, immutable Vault generation and Live GET',async()=>{
  const calls=[]
- const runner=createPazoLiveHostedHistoricalVerification({
-  supabaseUrl:url,serviceRoleKey:service,
+ const edgeSecrets={
+  PAZO_F16_LIVE_HISTORICAL_GENERATIONS:'7',
+  PAZO_F16_LIVE_G7_READ_ENABLED:'1',
+  PAZO_F16_LIVE_G7_PLAN_ID:plan,
+  PAZO_F16_LIVE_G7_WEBHOOK_ID:config.webhookId,
+  PAZO_F16_LIVE_G7_MERCHANT_FINGERPRINT_SHA256:config.merchantFingerprint,
+  PAZO_F16_LIVE_G7_CLIENT_ID:config.clientId,
+  PAZO_F16_LIVE_G7_CLIENT_SECRET:config.clientSecret
+ }
+ const runner=createPazoLiveEdgeHistoricalVerification({
+  supabaseUrl:url,serviceRoleKey:service,released:true,
+  getSecret:key=>edgeSecrets[key],
   fetchImpl:async(endpoint,opts)=>{
    calls.push(endpoint)
    let data
    if(endpoint.endsWith('pazo_f16_live_service_binding_read'))data=bound
-   else if(endpoint.endsWith('pazo_f16_live_historical_merchant_secrets'))data=config
    else if(endpoint.endsWith('/oauth2/token'))data={
     token_type:'Bearer',access_token:'OPAQUE_ACCESS_TOKEN_123456'}
    else if(endpoint.endsWith('/billing/subscriptions/'+sub))data={
@@ -116,9 +125,13 @@ test('assembled hosted read-only flow checks bound owner, immutable Vault genera
  assert.equal(scope.mayGrantBenefits,false)
  assert.equal(scope.mayRecordPayment,false)
  assert.deepEqual(calls.map(x=>x.split('/').pop()),[
-  'pazo_f16_live_service_binding_read',
-  'pazo_f16_live_historical_merchant_secrets',
-  'token',sub
+  'pazo_f16_live_service_binding_read','token',sub
  ])
  assert.ok(!JSON.stringify(scope).includes(config.clientSecret))
+})
+
+test('hosted historical read is released only through explicit Edge gate',()=>{
+ assert.throws(()=>createPazoLiveEdgeHistoricalVerification({
+  supabaseUrl:url,serviceRoleKey:service,getSecret:()=>null
+ }),/live_historical_edge_release_off/)
 })

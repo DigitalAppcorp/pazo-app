@@ -1,12 +1,13 @@
 // PAZO F16 — unlaunched read-only LIVE original-merchant composition.
-// A trusted server adapter must inject fetchPrivateGeneration, sourced from
-// immutable Vault UUID references. No browser-supplied or active merchant
+// A trusted Edge adapter must inject fetchPrivateGeneration sourced from
+// per-generation Edge secrets, never an HTTP RPC returning secrets.
+// No browser-supplied or active merchant
 // credentials. No direct DB writes, payments, badge grants, or Live fallback.
 import {createPazoLiveHostedBindingReader} from './liveHostedBindingRead.mjs'
 import {createPazoLiveOwnerScopeResolver} from './liveOwnerScope.mjs'
 import {createPaypalLiveMerchantEvidenceReader} from './liveMerchantEvidence.mjs'
 import {createPaypalLivePostbackVerifier} from './livePostback.mjs'
-import {createPazoLiveHostedGenerationReader} from './liveHostedGenerationRead.mjs'
+import {createPazoLiveEdgeGenerationSecretReader} from './liveEdgeGenerationSecrets.mjs'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const WH=/^[A-Za-z0-9_-]{8,100}$/
 const FINGERPRINT=/^[a-f0-9]{64}$/
@@ -63,14 +64,14 @@ export function createPazoLiveHistoricalReadPipeline({
 }
 
 
-// The assembled hosted path is CODE-ONLY until a separate PO-approved,
-// service-role-only Vault RPC exists. This helper cannot create subscriptions,
-// record payments, process inbox events, or enable Live.
-export function createPazoLiveHostedHistoricalVerification({
- supabaseUrl,serviceRoleKey,fetchImpl=fetch
+// CODE-ONLY. Strictly server-injected Edge secret accessor, not an RPC.
+// Default OFF so no HTTP handler can activate this accidentally.
+export function createPazoLiveEdgeHistoricalVerification({
+ supabaseUrl,serviceRoleKey,getSecret,released=false,fetchImpl=fetch
 }={}){
- const fetchPrivateGeneration=createPazoLiveHostedGenerationReader({
-  supabaseUrl,serviceRoleKey,fetchImpl
+ if(released!==true)throw Error('live_historical_edge_release_off')
+ const fetchPrivateGeneration=createPazoLiveEdgeGenerationSecretReader({
+  getSecret,released
  })
  return createPazoLiveHistoricalReadPipeline({
   supabaseUrl,serviceRoleKey,fetchPrivateGeneration,fetchImpl
