@@ -9,6 +9,7 @@ const button='min-h-11 rounded-[13px] bg-[#E1E53F] px-4 text-[13px] font-black t
 export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [factorId,setFactorId]=useState('')
+ const [pendingFactorId,setPendingFactorId]=useState('')
  const [qrCode,setQrCode]=useState('')
  const [code,setCode]=useState('')
  const [busy,setBusy]=useState(false)
@@ -22,7 +23,12 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
     const {data,error:authError}=await supabase.auth.mfa.listFactors()
     if(authError)throw authError
     const verified=data?.totp?.find(f=>f.status==='verified')
-    if(active)setFactorId(verified?.id||'')
+    if(active){
+     setFactorId(verified?.id||'')
+     const pending=data?.all?.find(f=>f.factor_type==='totp'&&
+      f.status==='unverified'&&f.id!==verified?.id)
+     setPendingFactorId(verified?'':pending?.id||'')
+    }
    }catch{if(active)setError(t(
     'No pudimos consultar el segundo factor. Revisa tu sesión.',
     'Unable to check MFA factors. Verify your session.'))}
@@ -30,20 +36,43 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
   })()
   return ()=>{active=false}
  },[lang])
+ const resetPending=async()=>{
+  if(busy||!pendingFactorId)return
+  setBusy(true);setError('');setRecent(false)
+  try{
+   // Only remove an UNVERIFIED factor of this signed-in account.
+   const {data,error:listError}=await supabase.auth.mfa.listFactors()
+   if(listError||!data?.all?.some(f=>f.id===pendingFactorId&&
+     f.factor_type==='totp'&&f.status==='unverified'))
+    throw Error('unverified_factor_not_found')
+   const {error:deleteError}=await supabase.auth.mfa.unenroll({
+    factorId:pendingFactorId
+   })
+   if(deleteError)throw Error('pending_factor_unenroll_failed')
+   setPendingFactorId('');setFactorId('');setQrCode('')
+  }catch{setError(t(
+   'No se pudo reiniciar el registro pendiente. Inicia sesión de nuevo e inténtalo.',
+   'Could not reset the pending enrollment. Sign in again and retry.'))}
+  finally{setBusy(false)}
+ }
  const enroll=async()=>{
-  if(busy)return
+  if(busy||pendingFactorId)return
   setBusy(true);setError('');setRecent(false)
   try{
    const {data,error:authError}=await supabase.auth.mfa.enroll({
     factorType:'totp',friendlyName:'PAZO Admin'
    })
    if(authError||!data?.id)throw Error('mfa_enroll_unavailable')
+   // Keep the new ID for safe recovery if the QR response is malformed.
+   setPendingFactorId(data.id)
    const candidate=data.totp?.qr_code
    if(typeof candidate!=='string'||candidate.length>100000||
-    !/^data:image\/svg\+xml(?:;charset=utf-8|;utf8|;base64|,)/i.test(candidate))
+    !/^data:image\/svg\+xml(?:;charset=utf-8|;utf-8|;utf8|;base64|),/i.test(candidate))
     throw Error('mfa_qr_unavailable')
-   setFactorId(data.id);setQrCode(candidate)
-  }catch{setError(t('No se pudo preparar el autenticador.','Authenticator setup unavailable.'))}
+   setPendingFactorId('');setFactorId(data.id);setQrCode(candidate)
+  }catch{setError(t(
+   'No se mostró el QR. Si existe un registro pendiente, reinícialo y vuelve a intentar.',
+   'QR unavailable. If enrollment is pending, reset it and retry.'))}
   finally{setBusy(false)}
  }
  const verify=async()=>{
@@ -79,7 +108,10 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
   </p>
   {loading?<p className="mt-3 text-[12px]" role="status">{t('Comprobando…','Checking…')}</p>:
    <>
-    {!factorId&&<button type="button" className={'mt-3 '+button}
+    {pendingFactorId&&!factorId&&<button type="button" className={'mt-3 '+button}
+     disabled={busy} onClick={()=>void resetPending()}>{t(
+      'Reiniciar registro pendiente','Reset pending enrollment')}</button>}
+    {!factorId&&!pendingFactorId&&<button type="button" className={'mt-3 '+button}
      disabled={busy} onClick={()=>void enroll()}>{t(
       'Configurar autenticador','Set up authenticator')}</button>}
     {qrCode&&<div className="mt-3">
