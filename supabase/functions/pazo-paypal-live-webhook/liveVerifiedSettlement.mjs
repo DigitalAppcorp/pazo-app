@@ -45,6 +45,9 @@ export function assessPazoLiveVerifiedSale({binding,receipt,period}={}){
    p_start:period.serviceStart,p_end:period.serviceEnd
   })})
 }
+// A signed event is NOT enough to create a refund hold: original sale and
+// matching provider reversal must be independently verified on the original
+// merchant. Partial refunds remain review-only, never auto-reversed in full.
 export function assessPazoLiveVerifiedReversal({binding,receipt}={}){
  if(binding?.sourceEnvironment!=='live'||binding?.provider!=='paypal'||
   binding?.ownerVerified!==true||binding?.merchantGenerationVerified!==true||
@@ -59,7 +62,12 @@ export function assessPazoLiveVerifiedReversal({binding,receipt}={}){
   receipt?.merchantGeneration!==binding.merchantGeneration||
   !SALE.test(receipt?.saleId||'')||!SALE.test(receipt?.eventId||'')||
   !SALE.test(receipt?.holdId||'')||
-  !['PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED'].includes(receipt?.eventType))
+  receipt?.originalSaleVerified!==true||
+  receipt?.providerReversalVerified!==true||
+  receipt?.currency!=='USD'||receipt?.amountMinor!==299||
+  !['PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED'].includes(receipt?.eventType)||
+  receipt?.refundKind!==(receipt.eventType==='PAYMENT.SALE.REFUNDED'?
+   'refunded':'reversed'))
   return fail('provider_reversal_not_proven')
  return Object.freeze({ready:true,mayGrantBenefits:false,
   record:Object.freeze({
