@@ -7,6 +7,11 @@
 - Bloqueo operativo para previews: aunque el PO informó `previewDeploymentsDisabled=true`, la lectura actual de Vercel por conector devolvió 403; no afirmar postflight de ausencia de despliegues sin evidencia Vercel. No ejecutar `vercel deploy` ni habilitar previews.
 - Próximo subgate: confirmar CI+7 labs del último HEAD, comprobar no previews mediante credenciales Vercel autorizadas cuando sea posible; completar autenticación/relectura de generación, auditoría e idempotencia exclusivamente con adaptadores de prueba. El receptor `RELEASE_APPROVED=false` y UI `LIVE_EDGE_PROVISIONING_RELEASED=false` continúan obligatorios.
 
+## Continuación posterior F16 (19/20 oct)
+- GitHub Actions del checkpoint `04b6820`: **8/8 SUCCESS** (CI + 7 PostgreSQL disposable labs).
+- `5ca845f`: nueva relectura de generación después de verificar recursos PayPal; falla cerrado si cambian revisión, merchant, plan, webhook, propietario o flags. `ebbaafd`: prueba adversarial de drift. **Pruebas de este último HEAD requieren postflight de CI**.
+- Pendientes genuinos: adaptadores alojados autenticados, auditoría persistente/idempotencia cross-request, verificación PayPal Live real, autorización de despliegue inocuo y acceso Vercel para comprobar previews. No afirmar aptitud de producción. `RELEASE_APPROVED=false`, checkout Live OFF. No reejecutar migraciones.
+
 ## Identidad, roles y referencias
 - Producto: **PAZO**, PWA social 18+ para mascotas; módulos gratis, QR gratis y aportación voluntaria **Amigo de PAZO US$2.99/mes**. El usuario es el **Product Owner**; ChatGPT es ejecutor técnico directo, **sin delegación a Codex/Gemini** salvo nueva orden explícita.
 - OS: `DigitalAppcorp/project-brain-os`, **v1.4.1**, `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`.
