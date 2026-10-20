@@ -32,7 +32,7 @@ export function assessPazoLiveVerifiedSale({binding,receipt,period}={}){
   !iso(period?.serviceStart)||!iso(period?.serviceEnd)||
   period?.providerPeriodVerified!==true||
   Date.parse(period.serviceStart)>=Date.parse(period.serviceEnd)||
-  Date.parse(period.serviceEnd)-Date.parse(period.serviceStart)>35*86400000)
+  Date.parse(period.serviceEnd)-Date.parse(period.serviceStart)>32*86400000)
   return fail('provider_service_period_unverified')
  return Object.freeze({ready:true,mayGrantBenefits:false,
   record:Object.freeze({
@@ -65,6 +65,6 @@ export function assessPazoLiveVerifiedReversal({binding,receipt}={}){
    p_subscription:binding.subscriptionId,p_generation:binding.merchantGeneration,
    p_sale_id:receipt.saleId,p_event_id:receipt.eventId,
    p_hold_id:receipt.holdId,
-   p_kind:receipt.eventType==='PAYMENT.SALE.REFUNDED'?'refund':'reversal'
+   p_kind:receipt.eventType==='PAYMENT.SALE.REFUNDED'?'refunded':'reversed'
   })})
 }
