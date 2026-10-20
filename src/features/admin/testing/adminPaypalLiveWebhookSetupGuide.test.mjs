@@ -8,7 +8,7 @@ import {liveWebhookUrlForGeneration,REQUIRED_EVENTS}
 const staged={
  environment:'live',
  merchantGeneration:7,serverGenerationVerified:true,
- planId:'P-9BR88240215654528NLL3I4I',planVerified:true,
+ planId:'P-ABCDEFGHIJKLMNOP',planVerified:true,
  liveCheckoutEnabled:false,killSwitch:true
 }
 test('the original verified merchant generation creates one exact PayPal Live callback',()=>{
