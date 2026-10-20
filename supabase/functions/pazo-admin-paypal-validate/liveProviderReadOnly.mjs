@@ -3,6 +3,7 @@
  // This module cannot create plans, subscriptions, captures or payments.
  const HOST='https://api-m.paypal.com'
  const EXPECTED_WEBHOOK='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook'
+export const liveWebhookUrlForGeneration=g=>Number.isSafeInteger(g)&&g>=1&&g<=9999?EXPECTED_WEBHOOK+'?generation='+g:null
  const REQUIRED_EVENTS=Object.freeze([
   'PAYMENT.SALE.COMPLETED','PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED',
   'BILLING.SUBSCRIPTION.ACTIVATED','BILLING.SUBSCRIPTION.CANCELLED',
@@ -27,14 +28,15 @@
   }catch{return null}
  }
  export async function inspectLivePaypalResources({
-  environment,clientId,clientSecret,planId,webhookId,
-  expectedWebhookUrl=EXPECTED_WEBHOOK,fetchImpl=fetch
+  environment,clientId,clientSecret,planId,webhookId,merchantGeneration,
+  expectedWebhookUrl=liveWebhookUrlForGeneration(merchantGeneration),fetchImpl=fetch
  }={}){
   // There is no merchant fallback to Sandbox, and no operator-configurable host.
   if(environment!=='live'||!ascii(clientId)||clientId.includes(':')||
    !ascii(clientSecret)||!/^P-[A-Za-z0-9]{10,75}$/.test(planId||'')||
    !/^[A-Za-z0-9_-]{8,100}$/.test(webhookId||'')||
-   expectedWebhookUrl!==EXPECTED_WEBHOOK||typeof fetchImpl!=='function')
+   expectedWebhookUrl!==liveWebhookUrlForGeneration(merchantGeneration)||
+   expectedWebhookUrl===null||typeof fetchImpl!=='function')
    return invalid('live_config_incomplete')
   try{
    const auth=await asJson(fetchImpl,'/v1/oauth2/token',{
@@ -76,7 +78,7 @@
    const webhook=await asJson(fetchImpl,'/v1/notifications/webhooks/'+encodeURIComponent(webhookId),{
     method:'GET',headers
    })
-   if(!webhook||webhook.id!==webhookId||webhook.url!==EXPECTED_WEBHOOK||
+   if(!webhook||webhook.id!==webhookId||webhook.url!==expectedWebhookUrl||
     !Array.isArray(webhook.event_types))
     return invalid('live_webhook_unverified')
    const types=new Set(webhook.event_types.map(e=>typeof e==='string'?e:e?.name))

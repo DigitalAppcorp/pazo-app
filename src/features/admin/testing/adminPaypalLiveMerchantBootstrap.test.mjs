@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {createPaypalLiveMerchantBootstrap} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveMerchantBootstrap.mjs'
-import {EXPECTED_WEBHOOK,REQUIRED_EVENTS} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
+import {liveWebhookUrlForGeneration,REQUIRED_EVENTS} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
 const clientId='TEST_LIVE_ID_12345678901234',clientSecret='TEST_LIVE_SECRET_12345678901234'
 const mk=(status,data)=>new Response(status===204?null:JSON.stringify(data),{
  status,headers:status===204?{}:{'content-type':'application/json'}
@@ -26,7 +26,7 @@ test('Live resource bootstrap creates only merchant setup resources, not a charg
  const product=await x.manager.createProduct({requestId:'product-123456789'})
  const plan=await x.manager.createPlan({productId:product.productId,requestId:'plan-123456789'})
  const activated=await x.manager.activatePlan({planId:plan.planId,requestId:'activate-123456789'})
- const webhook=await x.manager.createWebhook({requestId:'webhook-123456789'})
+ const webhook=await x.manager.createWebhook({requestId:'webhook-123456789',merchantGeneration:7})
  assert.equal(product.mayCharge,false)
  assert.equal(plan.mayCharge,false)
  assert.equal(activated.mayCharge,false)
@@ -43,7 +43,7 @@ test('Live resource bootstrap creates only merchant setup resources, not a charg
  assert.equal(planBody.payment_preferences.auto_bill_outstanding,false)
  assert.equal(planBody.payment_preferences.setup_fee.value,'0.00')
  const webhookBody=JSON.parse(posts[3].body)
- assert.equal(webhookBody.url,EXPECTED_WEBHOOK)
+ assert.equal(webhookBody.url,liveWebhookUrlForGeneration(7))
  assert.deepEqual(webhookBody.event_types,REQUIRED_EVENTS.map(name=>({name})))
  assert.equal(JSON.stringify([product,plan,activated,webhook]).includes(clientSecret),false)
 })
@@ -52,7 +52,8 @@ test('reject malformed credentials and identifiers before provider side effects'
  const x=setup()
  await assert.rejects(x.manager.createPlan({productId:'unknown',requestId:'plan-123456789'}))
  await assert.rejects(x.manager.activatePlan({planId:'wrong',requestId:'activate-123456789'}))
- await assert.rejects(x.manager.createWebhook({requestId:'bad'}))
+ await assert.rejects(x.manager.createWebhook({requestId:'bad',merchantGeneration:7}))
+ await assert.rejects(x.manager.createWebhook({requestId:'webhook-123456789',merchantGeneration:0}))
  assert.equal(x.calls.length,0)
 })
 test('uncertain provider POST is not retried and no result is considered active',async()=>{

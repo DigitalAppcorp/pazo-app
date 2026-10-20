@@ -2,7 +2,7 @@
 // Server-only dependency; NOT imported by any deployed handler.
 // Provider writes must be preceded by a durable SQL generation/attempt claim.
 // This adapter never changes runtime mode, starts checkout or gives benefits.
-import {EXPECTED_WEBHOOK,REQUIRED_EVENTS} from './liveProviderReadOnly.mjs'
+import {liveWebhookUrlForGeneration,REQUIRED_EVENTS} from './liveProviderReadOnly.mjs'
 const HOST='https://api-m.paypal.com'
 const ID=/^[A-Za-z0-9_-]{20,512}$/
 const PRODUCT=/^PROD-[A-Z0-9]{10,32}$/
@@ -77,9 +77,11 @@ export function createPaypalLiveMerchantBootstrap({clientId,clientSecret,fetchIm
    // HTTP ACK is not readiness; caller must independently GET/validate plan.
    return Object.freeze({planId,activationRequestAcknowledged:true,mayCharge:false})
   },
-  async createWebhook({requestId}={}){
+  async createWebhook({requestId,merchantGeneration}={}){
+   const url=liveWebhookUrlForGeneration(merchantGeneration)
+   if(!url)reject()
    const v=await post('/v1/notifications/webhooks',{
-    url:EXPECTED_WEBHOOK,event_types:REQUIRED_EVENTS.map(name=>({name}))
+    url,event_types:REQUIRED_EVENTS.map(name=>({name}))
    },requestId)
    if(!WEBHOOK.test(v?.id||''))reject()
    return Object.freeze({webhookId:v.id,mayCharge:false})

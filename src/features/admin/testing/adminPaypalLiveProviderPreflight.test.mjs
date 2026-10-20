@@ -1,13 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {inspectLivePaypalResources,EXPECTED_WEBHOOK,REQUIRED_EVENTS} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
+import {inspectLivePaypalResources,EXPECTED_WEBHOOK,REQUIRED_EVENTS,liveWebhookUrlForGeneration} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
 const config={environment:'live',clientId:'ABCDEFGHIJKL1234567890',clientSecret:'abcdeFGHIJ1234567890XYZ',
- planId:'P-1234567890ABCDE',webhookId:'WH-12345678900',expectedWebhookUrl:EXPECTED_WEBHOOK}
+ planId:'P-1234567890ABCDE',webhookId:'WH-12345678900',merchantGeneration:7,expectedWebhookUrl:liveWebhookUrlForGeneration(7)}
 const plan={id:config.planId,status:'ACTIVE',quantity_supported:false,
  billing_cycles:[{tenure_type:'REGULAR',sequence:1,total_cycles:0,frequency:{interval_unit:'MONTH',interval_count:1},
   pricing_scheme:{fixed_price:{currency_code:'USD',value:'2.99'}}}],
  payment_preferences:{setup_fee:{currency_code:'USD',value:'0.00'}}}
-const webhook={id:config.webhookId,url:EXPECTED_WEBHOOK,
+const webhook={id:config.webhookId,url:liveWebhookUrlForGeneration(7),
  event_types:REQUIRED_EVENTS.map(name=>({name}))}
 const provider=(overrides={})=>{
  const calls=[]
@@ -47,6 +47,7 @@ test('rejects environment, credentials and webhook URL before network access',as
   {environment:'sandbox'}, {clientId:''},{clientSecret:''},
   {planId:'P-invalid'}, {webhookId:'fake'},
   {expectedWebhookUrl:'http://localhost:5173/'},
+  {merchantGeneration:0},{expectedWebhookUrl:EXPECTED_WEBHOOK},
   {expectedWebhookUrl:'https://evil.invalid/functions/v1/pazo-paypal-live-webhook'}
  ]){
   const r=await inspectLivePaypalResources({...config,...changed,
