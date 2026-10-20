@@ -101,8 +101,12 @@ export function AdminPayPalSettings({lang}:Props){
    })
    if(outcome.state==='verified'&&outcome.settings){
     setSettings(outcome.settings as Settings)
-    const {data:auditData}=await supabase.rpc('pazo_admin_paypal_audit')
-    if(Array.isArray(auditData))setHistory(auditData as Audit[])
+    try{
+     const {data:auditData}=await supabase.rpc('pazo_admin_paypal_audit')
+     if(Array.isArray(auditData))setHistory(auditData as Audit[])
+    }catch{
+     // The persisted draft is still verified even if audit display reload fails.
+    }
     setDraftFeedback({state:'verified',text:t(
      'Borrador guardado y verificado en Supabase. No modifica cobros actuales.',
      'Draft saved and verified in Supabase. Current checkout is unchanged.')})
