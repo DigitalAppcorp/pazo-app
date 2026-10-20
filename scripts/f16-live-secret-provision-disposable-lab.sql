@@ -68,3 +68,28 @@ BEGIN
  THEN RAISE EXCEPTION 'Live gate changed during secret lab'; END IF;
  RAISE NOTICE 'F16_SECRET_PROVISION_DURABLE_RESERVATION_PG17_PASS';
 END $verify$;
+
+
+-- Historical audit cannot be erased or block revocation of admin grants.
+-- Restore the synthetic grant to preserve subsequent disposable tests.
+DO $revocation$
+DECLARE actor uuid='12345678-1234-4234-8234-123456789abc';
+       proof_count integer;
+       func text;
+BEGIN
+ SELECT pg_catalog.pg_get_functiondef('public.pazo_f16_live_service_provision_reserve(uuid,bigint,bigint,text,text,text)'::regprocedure)
+ INTO func;
+ IF func NOT LIKE '%FOR UPDATE%' THEN
+  RAISE EXCEPTION 'Switch/merchant reservation lacks row locks'; END IF;
+ SELECT count(*) INTO proof_count
+ FROM admin_private.pazo_paypal_secret_provision_attempts
+ WHERE actor_id=actor AND result_code='secret_write_outcome_unknown_manual_review';
+ IF proof_count<>1 THEN RAISE EXCEPTION 'Expected immutable audit missing'; END IF;
+ DELETE FROM admin_private.admin_grants WHERE user_id=actor;
+ IF (SELECT count(*) FROM admin_private.pazo_paypal_secret_provision_attempts
+     WHERE actor_id=actor AND result_code='secret_write_outcome_unknown_manual_review')<>1
+ THEN RAISE EXCEPTION 'Revoking admin destroyed audited evidence'; END IF;
+ INSERT INTO admin_private.admin_grants(user_id) VALUES(actor)
+ ON CONFLICT DO NOTHING;
+ RAISE NOTICE 'F16_SECRET_AUDIT_REVOCATION_AND_LOCK_GATES_PASS';
+END $revocation$;
