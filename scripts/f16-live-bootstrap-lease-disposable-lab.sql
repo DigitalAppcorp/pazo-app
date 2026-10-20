@@ -17,6 +17,7 @@ INSERT INTO admin_private.admin_grants(user_id)
  VALUES('12345678-1234-4234-8234-123456789abc') ON CONFLICT DO NOTHING;
 
 \i supabase/drafts/f16_live_bootstrap_generation_REVIEW_REQUIRED.sql
+\i supabase/drafts/f16_live_bootstrap_idempotent_retry_REVIEW_REQUIRED.sql
 \i supabase/drafts/f16_live_durable_inbox_lease_REVIEW_REQUIRED.sql
 DO $verify$
 DECLARE
@@ -41,8 +42,17 @@ BEGIN
  THEN RAISE EXCEPTION 'Unable to reserve genuine DB sequence'; END IF;
  gen:=(attempt->>'generation')::bigint;
  v:=public.pazo_f16_live_service_bootstrap_reserve(actor,'P-PAZOTESTABCDE1234');
+ IF v->>'reserved' IS DISTINCT FROM 'true'
+  OR v->>'replayed' IS DISTINCT FROM 'true'
+  OR (v->>'generation')::bigint<>gen
+ THEN RAISE EXCEPTION 'Repeated reservation did not recover same immutable generation'; END IF;
+ IF (SELECT count(*) FROM admin_private.pazo_paypal_live_bootstrap_reservations
+      WHERE plan_id='P-PAZOTESTABCDE1234')<>1
+ THEN RAISE EXCEPTION 'Duplicated merchant bootstrap reservation'; END IF;
+ v:=public.pazo_f16_live_service_bootstrap_reserve(
+   '23456789-1234-4234-8234-123456789abc','P-PAZOTESTABCDE1234');
  IF v->>'reserved' IS DISTINCT FROM 'false'
- THEN RAISE EXCEPTION 'Duplicate plan reserved another generation'; END IF;
+ THEN RAISE EXCEPTION 'Wrong actor was allowed to recover generation'; END IF;
  v:=public.pazo_f16_live_service_bootstrap_finalize(
   actor,gen,'P-PAZOTESTABCDE1234','WH-PAZOTESTORIGINAL',repeat('f',64));
  IF v->>'finalized'<>'true' OR (v->>'generation')::bigint<>gen
