@@ -33,7 +33,7 @@ test('admin identity only passes GoTrue, authenticated admin RPC and fresh chall
  assert.ok(calls.every(x=>x.auth==='Bearer '+token))
 })
 test('no fresh reauthentication means no access to any financial secret operation',async()=>{
- for(const callback of [undefined,async()=>false,async()=>{throw Error('private')}}){
+ for(const callback of [undefined,async()=>false,async()=>{throw Error('private')}]){
   const {verifier}=make({proveFreshReauthentication:callback})
   assert.equal(await verifier(request()),null)
  }
