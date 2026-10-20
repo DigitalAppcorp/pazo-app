@@ -1,3 +1,5 @@
+> **PO OVERRIDE 20-OCT-2026:** F16 es un requisito pre-beta COMPLETO. Deben estar desarrollados, hospedados y validados antes del lanzamiento: guardar/validar/activar con credenciales desde Admin; plan USD2.99, webhook firmado, checkout Live, renovación, cancelación, estados, conciliación, refunds/disputas, entitlements, auditoría, bloqueo y rollback. El PO podrá activar Live ANTES O DESPUÉS de lanzar beta; la fecha no es condición. Sí exige HTTPS público funcional y pruebas reales del comercio. El código mantiene Live OFF y sin despliegues financieros reales mientras no exista autorización de operación distinta. Los pasos históricos marcados "posterior a beta" han quedado revocados. Ver `docs/PAZO_ACTIVE_HANDOFF.md`.
+
 # PAZO F16 — Administración de secretos Live por generación (GATE NO RELEASE)
 
 Fecha: 20-oct-2026. PR #44 DRAFT, rama `f13/section-titles-20261012`. **No son cobros operativos.** El Product Owner autorizó terminar preparación, no encender transacciones Live antes de publicar beta. Las previews automáticas de Vercel fueron desactivadas por el PO mediante `previewDeploymentsDisabled: true`; no tocar main ni crear previews manuales.
