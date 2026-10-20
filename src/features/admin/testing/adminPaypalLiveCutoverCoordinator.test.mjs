@@ -9,7 +9,7 @@ const proof={origin:'trusted_server',actorId:actor,sourceEnvironment:'live',
  merchantVerified:true,planVerified:true,webhookDeliveryVerified:true,
  browserAndPwaReturnVerified:true,cancelAndRefundVerified:true,
  ledgerAndEntitlementsVerified:true,rollbackVerified:true,
- ownerApprovedLaunch:true,proofId,evidenceSha256:'a'.repeat(64),
+ ownerApprovedLiveActivation:true,proofId,evidenceSha256:'a'.repeat(64),
  checkedAt:'2026-10-19T21:59:00Z',merchantGeneration:2,expectedRevision:5}
 function mock(override={}){
  let writes=0
@@ -61,7 +61,7 @@ test('stale, forged, other operator and incomplete provider evidence cannot swit
   {merchantVerified:false},
   {webhookDeliveryVerified:false},
   {browserAndPwaReturnVerified:false},
-  {ownerApprovedLaunch:false},
+  {ownerApprovedLiveActivation:false},
   {rollbackVerified:false},
   {ledgerAndEntitlementsVerified:false},
   {merchantGeneration:0},
@@ -108,4 +108,14 @@ test('emergency stop does not route customers to Sandbox, and is separate from r
  assert.equal(p.newCheckoutEnabled,false)
  assert.equal(p.mayCharge,false)
  assert.equal(f.writes(),2)
+})
+
+test('Live cutover does not depend on a beta publication date',async()=>{
+ for(const betaLaunched of [false,true]){
+  const f=mock({readFreshServerProof:async()=>({...proof,betaLaunched})})
+  const actual=await createPazoLiveCutoverCoordinator(f.deps)
+   .activate({request:request(),confirmation:'ACTIVAR LIVE PAZO',expectedRevision:5})
+  assert.equal(actual.ok,true)
+  assert.equal(f.writes(),1)
+ }
 })
