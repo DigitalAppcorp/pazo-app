@@ -4,12 +4,16 @@ on:
     paths:
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-service-rpc-bridge-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_service_rpc_bridge_REVIEW_REQUIRED.sql'
       - '.github/workflows/f16-live-gateway-disposable-lab.yml'
   push:
     branches: [f13/section-titles-20261012]
     paths:
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-service-rpc-bridge-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_service_rpc_bridge_REVIEW_REQUIRED.sql'
       - '.github/workflows/f16-live-gateway-disposable-lab.yml'
 permissions:
   contents: read
