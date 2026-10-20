@@ -11,6 +11,8 @@ const history=read('supabase/functions/pazo-admin-paypal-validate/paymentGateway
 const roadmap=read('docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md')
 const provisioningEdge=read('supabase/functions/pazo-admin-paypal-provision/index.ts')
 const provisioningIntake=read('supabase/functions/pazo-admin-paypal-provision/intake.mjs')
+const provisioningReservationDraft=read('supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql')
+const provisioningAdapter=read('supabase/functions/pazo-admin-paypal-provision/liveProvisionSqlStore.mjs')
 const stagingOrchestrator=read('supabase/functions/pazo-admin-paypal-validate/liveEdgeProvisioning.mjs')
 const liveCheckoutEdge=read('supabase/functions/pazo-paypal-live-checkout/index.ts')
 const liveWebhookEdge=read('supabase/functions/pazo-paypal-live-webhook/index.ts')
@@ -35,6 +37,16 @@ assert.match(liveWebhookEdge,/const LIVE_WEBHOOK_RELEASED=false/,'Live webhook E
 assert.ok(liveCheckoutHosted.includes("released!==true"),'Live checkout hosted composition must guard its release')
 assert.ok(liveWebhookHosted.includes("released!==true"),'Live webhook hosted composition must guard its release')
 assert.ok(liveProvider.includes("?generation="),'Live webhook URL must pin original merchant generation')
+assert.ok(provisioningReservationDraft.includes('merchant_generation bigint NOT NULL UNIQUE'),
+ 'Cross-worker reservation uniqueness is required')
+assert.ok(provisioningReservationDraft.includes('FORCE ROW LEVEL SECURITY'),
+ 'Secret reservation audit must use forced RLS')
+assert.ok(provisioningReservationDraft.includes('secret_write_outcome_unknown_manual_review'),
+ 'Uncertain writes require durable review')
+assert.ok(provisioningAdapter.includes('pazo_f16_live_service_provision_reserve'),
+ 'Secret reservation must use durable SQL, not an in-memory mutex')
+assert.ok(!provisioningReservationDraft.includes('client_secret'),
+ 'Secret reservation must not store plaintext provider credentials')
 assert.match(provisioningEdge,/const RELEASE_APPROVED=false/,'Live secret endpoint must remain inert')
 assert.match(ui,/const LIVE_EDGE_PROVISIONING_RELEASED=false/,'Admin Live Edge must stay unreleased')
 assert.match(provisioningIntake,/if\(released!==true\)return deny\(503/,'Intake must reject while unreleased')
