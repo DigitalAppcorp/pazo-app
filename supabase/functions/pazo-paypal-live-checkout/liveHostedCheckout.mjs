@@ -1,0 +1,81 @@
+// PAZO F16 — Hosted Live checkout composition. RELEASE LATCH remains OFF.
+// All identity, merchant selection, consent and admission come from the server.
+// No browser-supplied environment, plan, price, secret, or owner is trusted.
+import {createPazoLiveCheckoutHttpHandler} from './liveCheckoutHttpHandler.mjs'
+import {createPazoLiveGoTrueOwnerResolver} from './liveGoTrueOwner.mjs'
+import {createPazoLiveServiceRpc} from './liveSqlServiceAdapters.mjs'
+import {publicBetaOrigin} from './liveSubscriptionProvider.mjs'
+const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
+const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
+const DIGEST=/^[a-f0-9]{64}$/
+const VERSION=/^pazo-supporter-live\.[a-z0-9.-]{3,40}$/
+const forbidden=(status,code)=>new Response(JSON.stringify({code}),{
+ status,headers:{'content-type':'application/json','cache-control':'no-store'}
+})
+export function createPazoLiveHostedCheckout({
+ released=false,getEnv=()=>undefined,fetchImpl=fetch
+}={}){
+ if(released!==true)return createPazoLiveCheckoutHttpHandler({released:false})
+ let api,anon,service,origin,termsVersion,termsDigest
+ try{
+  api=getEnv('SUPABASE_URL');anon=getEnv('SUPABASE_ANON_KEY')
+  service=getEnv('SUPABASE_SERVICE_ROLE_KEY')
+  origin=getEnv('PAZO_F16_PUBLIC_HTTPS_ORIGIN')
+  termsVersion=getEnv('PAZO_F16_LIVE_TERMS_VERSION')
+  termsDigest=getEnv('PAZO_F16_LIVE_TERMS_DIGEST')
+  if(api!==PROJECT||!publicBetaOrigin(origin)||!VERSION.test(termsVersion||'')||
+   !DIGEST.test(termsDigest||''))throw Error('config')
+ }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
+ let rpc,resolveAuthenticatedOwner
+ try{
+  rpc=createPazoLiveServiceRpc({projectUrl:api,serviceRoleKey:service,fetchImpl})
+  resolveAuthenticatedOwner=createPazoLiveGoTrueOwnerResolver({
+   supabaseUrl:api,anonKey:anon,fetchImpl
+  })
+ }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
+ const readActiveRoute=async()=>rpc('route',{})
+ const getSecret=name=>getEnv(name)
+ const verifyConsent=async({consent})=>
+  consent?.affirmativeConsent===true&&consent?.termsVersion===termsVersion&&
+  consent?.termsDigest===termsDigest&&
+  ['es','en'].includes(consent?.locale)
+ const admit=async({ownerId,action})=>{
+  if(action!=='live_checkout'||!UUID.test(ownerId||''))return false
+  // Fail-closed profile lookup after GoTrue JWT verification.
+  // Account is allowed only after explicit onboarding completion.
+  let response
+  try{
+   response=await fetchImpl(PROJECT+'/rest/v1/profiles?select=id,onboarding_completed&id=eq.'+
+    encodeURIComponent(ownerId),{
+    method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8000),
+    headers:{apikey:service,Authorization:'Bearer '+service,
+     Accept:'application/json'}
+   })
+  }catch{return false}
+  if(!response?.ok||response.status!==200)return false
+  let rows
+  try{rows=await response.json()}catch{return false}
+  return Array.isArray(rows)&&rows.length===1&&
+   rows[0]?.id===ownerId&&rows[0]?.onboarding_completed===true
+ }
+ const serve=createPazoLiveCheckoutHttpHandler({
+  released:true,resolveAuthenticatedOwner,readActiveRoute,getSecret,
+  rpc,admit,verifyConsent,publicOrigin:origin,fetchImpl
+ })
+ return async req=>{
+  if(!(req instanceof Request))return forbidden(400,'invalid_request')
+  const caller=req.headers.get('origin')||''
+  const cors=caller===origin?{
+   'access-control-allow-origin':origin,'access-control-allow-methods':'POST, OPTIONS',
+   'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
+   vary:'Origin'}:{}
+  if(req.method==='OPTIONS')return caller===origin?
+   new Response(null,{status:204,headers:cors}):
+   forbidden(403,'untrusted_origin')
+  if(caller!==origin)return forbidden(403,'untrusted_origin')
+  const response=await serve(req)
+  const headers=new Headers(response.headers)
+  for(const [name,value] of Object.entries(cors))headers.set(name,value)
+  return new Response(response.body,{status:response.status,headers})
+ }
+}
