@@ -214,7 +214,7 @@ export function AdminPayPalSettings({lang}:Props){
    </div>
    <div className="mt-5 grid grid-cols-2 gap-2 rounded-[16px] bg-[#F2F6EE] p-1.5" role="group" aria-label={t('Entorno','Environment')}>
     {(['sandbox','live'] as const).map(value=><button type="button" key={value} aria-pressed={env===value}
-      disabled={busy} onClick={()=>{setEnv(value);setRecentAdminMfa(false);setClientId('');setClientSecret('');setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
+      disabled={busy} onClick={()=>{setEnv(value);setClientId('');setClientSecret('');setRecentAdminMfa(false);setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
       {value==='sandbox'?'Sandbox': 'Live · '+(settings?.active_environment==='live'&&settings.live_checkout_enabled?t('activo','active'):t('preparación','staging'))}
     </button>)}
    </div>
