@@ -126,9 +126,9 @@ export function createPazoLiveEdgeSecretsProvisioner({
   if(response?.status!==201)
    return finish(code('secret_write_outcome_unknown_manual_review'))
   let after
-  try{after=await list()}catch{return code('secret_write_outcome_unknown_manual_review')}
+  try{after=await list()}catch{return finish(code('secret_write_outcome_unknown_manual_review'))}
   if(names.some(name=>!after.has(name)))
-   return code('secret_write_outcome_unknown_manual_review')
+   return finish(code('secret_write_outcome_unknown_manual_review'))
   // Do not add to allowed generations, enable READ_ENABLED in runtime, or
   // flip payment switch automatically. A separate staged readiness/GO gate
   // must reconcile metadata and server-proven credentials.
