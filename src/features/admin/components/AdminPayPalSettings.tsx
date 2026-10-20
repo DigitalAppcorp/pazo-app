@@ -18,6 +18,9 @@ type Audit={environment:Env;kind:'draft'|'credentials'|'validation';recorded_at:
 type Props={lang:'es'|'en'}
 // The inspected hosted Edge is still v3; do not present an inoperable control.
 const LIVE_RESOURCE_INSPECTION_RELEASED=false
+// Vault's legacy staging is NOT the F16 Edge secrets runtime for new Live checkout.
+// This flag becomes true only after the separate service/PO security gate.
+const LIVE_EDGE_PROVISIONING_RELEASED=false
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
 const actionClass='min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#E9EF6A] disabled:opacity-50 disabled:cursor-not-allowed'
 const cardClass='min-w-0 rounded-[22px] bg-white p-4 shadow-[0_7px_29px_rgba(32,78,74,.055)] sm:p-6'
@@ -45,8 +48,11 @@ export function AdminPayPalSettings({lang}:Props){
  const localDevelopment=import.meta.env.DEV&&typeof window!=='undefined'&&
    ['localhost','127.0.0.1'].includes(window.location.hostname)
  const liveDomainReady=Boolean(liveConfig?.return_origin&&/^https:\/\//.test(liveConfig.return_origin))
- const liveOAuthReady=liveConfig?.client_id_stored===true&&
+ const legacyVaultLiveOAuthReady=liveConfig?.client_id_stored===true&&
   liveConfig.client_secret_stored===true&&liveConfig.validation_status==='valid'
+ // A PayPal OAuth success in Vault is not evidence that per-generation Edge
+ // secrets have been provisioned, verified or pinned to the merchant.
+ const liveOAuthReady=LIVE_EDGE_PROVISIONING_RELEASED&&false
  const livePlanStaged=Boolean(liveConfig?.plan_id&&/^P-[A-Za-z0-9]{10,75}$/.test(liveConfig.plan_id))
  const liveWebhookStaged=Boolean(liveConfig?.webhook_id)
 
@@ -299,9 +305,17 @@ export function AdminPayPalSettings({lang}:Props){
     </section>
     <section className={cardClass}>
      <h4 className="text-[17px] font-black">{t('Activación de producción','Production activation')}</h4>
+     <p className="mt-2 text-[12px] leading-relaxed text-[#627970]">
+      {t('El nuevo motor Live utilizará secretos privados de Edge por generación comercial. Las credenciales guardadas antes en Vault son solo preparación heredada: no habilitan ni verifican la conexión del nuevo checkout.',
+         'The new Live engine uses Edge private secrets per merchant generation. Previously stored Vault credentials are legacy staging only and do not enable or verify the new checkout.')}
+     </p>
+     {legacyVaultLiveOAuthReady&&<p className="mt-2 text-[12px] font-semibold text-[#687F73]">
+      {t('OAuth Live de Vault verificado; aprovisionamiento Edge todavía pendiente.',
+         'Legacy Vault Live OAuth verified; Edge provisioning still pending.')}
+     </p>}
      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
       {([
-        [t('Credenciales Live con OAuth','Live credentials with OAuth'),liveOAuthReady],
+        [t('Credenciales Live en Edge verificadas','Verified Live credentials in Edge'),liveOAuthReady],
         [t('Plan Live configurado','Live plan staged'),livePlanStaged],
         [t('Webhook Live configurado','Live webhook staged'),liveWebhookStaged],
         [t('Dominio público de la beta','Public beta domain'),liveDomainReady]
