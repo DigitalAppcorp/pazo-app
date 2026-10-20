@@ -17,9 +17,10 @@ test('enrollment QR is not logged or stored in database and is hidden after succ
  assert.equal(component.includes("console.log"),false)
  assert.equal(component.includes("supabase.rpc("),false)
 })
-test('MFA is integrated but concealed until the separate admin provisioning release',()=>{
+test('MFA enrollment is available in Live settings while credential provisioning remains disabled',()=>{
  assert.ok(admin.includes("const LIVE_EDGE_PROVISIONING_RELEASED=false"))
- assert.ok(admin.includes("env==='live'&&LIVE_EDGE_PROVISIONING_RELEASED&&"))
+ assert.ok(admin.includes("env==='live'&&"))
+ assert.ok(!admin.includes("env==='live'&&LIVE_EDGE_PROVISIONING_RELEASED&&"))
  assert.ok(admin.includes("<AdminPaypalMfaStepUp"))
  assert.ok(admin.includes('data-pazo-live-vault-locked="true"'))
  assert.ok(!admin.includes('LIVE_EDGE_PROVISIONING_RELEASED=true'))
