@@ -21,8 +21,8 @@ BEGIN
   THEN RAISE EXCEPTION 'Service wrapper ACL mismatch: %',sig; END IF;
  END LOOP;
  IF (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-   WHERE n.nspname='public' AND p.proname LIKE 'pazo_f16_live_service_%' AND p.proname<>'pazo_f16_live_service_binding_read')<>8
- THEN RAISE EXCEPTION 'Expected eight service-only RPCs'; END IF;
+   WHERE n.nspname='public' AND p.proname LIKE 'pazo_f16_live_service_%' AND p.proname<>'pazo_f16_live_service_binding_read')<>9
+ THEN RAISE EXCEPTION 'Expected nine service-only RPCs'; END IF;
  IF has_function_privilege('service_role',
   'supporter_private.pazo_live_intent_begin(uuid,uuid,bigint,text,text,text)','EXECUTE')
  THEN RAISE EXCEPTION 'Private RPC exposed directly'; END IF;
@@ -44,6 +44,8 @@ BEGIN
   'pazo-supporter-live.offer-v1',repeat('b',64));
  IF v->>'code'<>'live_checkout_not_released'
  THEN RAISE EXCEPTION 'Live OFF broken by wrapper: %',v; END IF;
+ IF public.pazo_f16_live_service_active_route() IS NOT NULL
+ THEN RAISE EXCEPTION 'OFF gateway exposed active Live route'; END IF;
  PERFORM pg_catalog.set_config('request.jwt.claim.role','',true);
  RAISE NOTICE 'F16_LIVE_SERVICE_BRIDGE_DISPOSABLE_PG17_PASS';
 END $negative$;
