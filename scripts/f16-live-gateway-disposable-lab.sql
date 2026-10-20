@@ -275,3 +275,4 @@ END $overlap$;
 \i scripts/f16-live-admin-origin-disposable-lab.sql
 \i scripts/f16-live-secret-provision-disposable-lab.sql
 \i scripts/f16-live-recorded-sale-read-disposable-lab.sql
+\i scripts/f16-live-bootstrap-lease-disposable-lab.sql
