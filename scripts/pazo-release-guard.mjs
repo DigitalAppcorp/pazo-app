@@ -21,6 +21,7 @@ const liveWebhookHosted=read('supabase/functions/pazo-paypal-live-webhook/liveHo
 const liveProvider=read('supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs')
 const liveSettlementCoordinator=read('supabase/functions/pazo-paypal-live-webhook/liveSettlementReconciliationGate.mjs')
 const provisionAdmin=read('supabase/functions/pazo-admin-paypal-provision/liveVerifiedAdmin.mjs')
+const freshAdminMfa=read('supabase/functions/pazo-admin-paypal-provision/liveFreshMfaProof.mjs')
 const liveRefundCoordinator=read('supabase/functions/pazo-paypal-live-webhook/liveRefundReconciliationGate.mjs')
 const hostedRefundWorker=read('supabase/functions/pazo-paypal-live-webhook/liveHostedRefundWorker.mjs')
 const stagedOriginalSaleReader=read('supabase/drafts/f16_live_service_recorded_sale_reader_REVIEW_REQUIRED.sql')
@@ -50,6 +51,12 @@ assert.ok(liveRefundCoordinator.includes('partial_refund_requires_manual_review'
  'Partial refunds cannot be automatically interpreted as complete')
 assert.ok(liveSettlementCoordinator.includes('independent_service_period_unverified'),
  'Never grant a billed service period without independent evidence')
+assert.ok(freshAdminMfa.includes("payload.aal!=='aal2'"),
+ 'Live secret provisioning must reject AAL1')
+assert.ok(freshAdminMfa.includes("x.method==='totp'"),
+ 'Live admin requires TOTP rather than a refreshed token')
+assert.ok(freshAdminMfa.includes('now-latestMfa>windowSeconds'),
+ 'MFA challenge must be recent, not just a long-lived MFA session')
 assert.ok(provisionAdmin.includes('proveFreshReauthentication'),
  'Privileged admin must require independent session freshness')
 assert.match(liveCheckoutEdge,/const LIVE_CHECKOUT_RELEASED=false/,'Live checkout Edge must stay dormant')
