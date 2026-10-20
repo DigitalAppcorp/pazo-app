@@ -81,3 +81,30 @@ test('authenticated owner must have completed onboarding before any provider cal
  assert.equal((await r.json()).code,'checkout_admission_denied')
  assert.equal(providerCalls,0)
 })
+test('temporary Vercel beta origin and future custom domain are pinned from admin route, not source code',async()=>{
+ const temporary='https://pazo-app-t83r.vercel.app'
+ const future='https://pazo.example.com'
+ for(const activeOrigin of [temporary,future]){
+  let providerCalls=0
+  const h=createPazoLiveHostedCheckout({released:true,
+   getEnv:name=>env[name],
+   fetchImpl:async uri=>{
+    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
+     return response(200,{
+      sourceEnvironment:'live',credentialSource:'edge_secrets',
+      merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN',
+      returnOrigin:activeOrigin
+     })
+    providerCalls++
+    throw Error('unexpected provider or owner access')
+   }
+  })
+  const permitted=await h(req('OPTIONS',activeOrigin))
+  assert.equal(permitted.status,204)
+  assert.equal(permitted.headers.get('access-control-allow-origin'),activeOrigin)
+  const mismatched=await h(req('OPTIONS',activeOrigin===temporary?future:temporary))
+  assert.equal(mismatched.status,403)
+  assert.equal(mismatched.headers.get('access-control-allow-origin'),null)
+  assert.equal(providerCalls,0)
+ }
+})
