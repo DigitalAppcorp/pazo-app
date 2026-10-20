@@ -93,7 +93,7 @@ test('local development stays Sandbox with deferred official beta domain and a n
  assert.ok(page.includes('Dominio oficial de la beta (se puede dejar vacío)'))
  assert.ok(page.includes('No escribas localhost aquí'))
  assert.ok(page.includes('webhooks llegan a Supabase por HTTPS'))
- assert.ok(page.includes('Credenciales Live con OAuth'))
+ assert.ok(page.includes('Credenciales Live en Edge verificadas'))
  assert.ok(page.includes('Webhook Live configurado'))
  assert.ok(page.includes('Dominio público de la beta'))
  assert.ok(page.includes('renovaciones, cancelaciones, conciliación y rollback'))
