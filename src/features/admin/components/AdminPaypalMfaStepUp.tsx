@@ -66,7 +66,7 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
    // Keep the new ID for safe recovery if the QR response is malformed.
    setPendingFactorId(data.id)
    const candidate=data.totp?.qr_code
-   if(typeof candidate!=='string'||candidate.length>100000||
+   if(typeof candidate!=='string'||candidate.length>2000000||
     !/^data:image\/svg\+xml(?:;charset=utf-8|;utf-8|;utf8|;base64|),/i.test(candidate))
     throw Error('mfa_qr_unavailable')
    setPendingFactorId('');setFactorId(data.id);setQrCode(candidate)
