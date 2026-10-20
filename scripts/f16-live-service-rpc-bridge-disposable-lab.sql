@@ -21,7 +21,7 @@ BEGIN
   THEN RAISE EXCEPTION 'Service wrapper ACL mismatch: %',sig; END IF;
  END LOOP;
  IF (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-   WHERE n.nspname='public' AND p.proname LIKE 'pazo_f16_live_service_%')<>8
+   WHERE n.nspname='public' AND p.proname LIKE 'pazo_f16_live_service_%' AND p.proname<>'pazo_f16_live_service_binding_read')<>8
  THEN RAISE EXCEPTION 'Expected eight service-only RPCs'; END IF;
  IF has_function_privilege('service_role',
   'supporter_private.pazo_live_intent_begin(uuid,uuid,bigint,text,text,text)','EXECUTE')
