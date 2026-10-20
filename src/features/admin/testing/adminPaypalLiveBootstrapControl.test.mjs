@@ -148,3 +148,18 @@ test('exact-origin CORS admits the local admin preview but not unapproved sites'
  const blocked=await createPazoLiveMerchantBootstrapControl()(options('http://localhost:5173'))
  assert.equal(blocked.status,503)
 })
+
+test('PO-operated UI remains hidden while the merchant reservation endpoint is inert',()=>{
+ const view=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.meta.url),'utf8')
+ const component=readFileSync(new URL('../components/AdminPaypalMerchantBootstrap.tsx',import.meta.url),'utf8')
+ assert.match(view,/const LIVE_MERCHANT_BOOTSTRAP_RELEASED=false/)
+ assert.match(view,/<AdminPaypalMerchantBootstrap/)
+ assert.match(view,/setRecentAdminMfa\(true\)/)
+ assert.match(component,/mfaRecentlyVerified/)
+ assert.match(component,/const \[state,setState\]=useState/)
+ assert.match(component,/supabase.functions.invoke\('pazo-admin-paypal-bootstrap'/)
+ assert.match(component,/const urlPrefix=/)
+ assert.match(component,/webhook!==urlPrefix\+g/)
+ assert.match(component,/No vuelvas a pulsar el botón/)
+ assert.doesNotMatch(component,/clientSecret|service_role|navigator.clipboard/)
+})
