@@ -22,6 +22,8 @@ const liveProvider=read('supabase/functions/pazo-admin-paypal-validate/liveProvi
 const liveSettlementCoordinator=read('supabase/functions/pazo-paypal-live-webhook/liveSettlementReconciliationGate.mjs')
 const provisionAdmin=read('supabase/functions/pazo-admin-paypal-provision/liveVerifiedAdmin.mjs')
 const liveRefundCoordinator=read('supabase/functions/pazo-paypal-live-webhook/liveRefundReconciliationGate.mjs')
+const hostedRefundWorker=read('supabase/functions/pazo-paypal-live-webhook/liveHostedRefundWorker.mjs')
+const stagedOriginalSaleReader=read('supabase/drafts/f16_live_service_recorded_sale_reader_REVIEW_REQUIRED.sql')
 assert.match(sql,/active_environment text NOT NULL DEFAULT 'sandbox' CHECK\(active_environment='sandbox'\)/)
 assert.match(sql,/live_checkout_enabled bool NOT NULL DEFAULT false CHECK\(live_checkout_enabled=false\)/)
 assert.ok(ui.includes('disabled aria-disabled="true"'),'Live activation button must remain blocked')
@@ -37,6 +39,11 @@ assert.ok(history.includes("return block('production_checkout_not_released')"),'
 assert.ok(roadmap.includes('MVP_RELEASE_NO_GO / LIVE_NO_GO'),'No premature beta/live ready claim')
 assert.ok(liveSettlementCoordinator.includes('released=false'),'Financial reconciler must default OFF')
 assert.ok(liveRefundCoordinator.includes('released=false'),'Refund reconciler must default OFF')
+assert.ok(hostedRefundWorker.includes('released=false'),'Hosted refund worker must default OFF')
+assert.ok(stagedOriginalSaleReader.includes('IS DISTINCT FROM \'service_role\''),
+ 'Original merchant sale read must require service_role')
+assert.ok(stagedOriginalSaleReader.includes('REVOKE ALL ON FUNCTION public.pazo_f16_live_service_recorded_sale_read'),
+ 'Original recorded sale read must not expose owner data to anon')
 assert.ok(liveRefundCoordinator.includes('refund_original_recorded_sale_unverified'),
  'Signed event cannot replace original paid sale evidence')
 assert.ok(liveRefundCoordinator.includes('partial_refund_requires_manual_review'),
