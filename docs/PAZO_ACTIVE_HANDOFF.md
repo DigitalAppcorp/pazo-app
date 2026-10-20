@@ -12,6 +12,14 @@
 - `5ca845f`: nueva relectura de generación después de verificar recursos PayPal; falla cerrado si cambian revisión, merchant, plan, webhook, propietario o flags. `ebbaafd`: prueba adversarial de drift. **Pruebas de este último HEAD requieren postflight de CI**.
 - Pendientes genuinos: adaptadores alojados autenticados, auditoría persistente/idempotencia cross-request, verificación PayPal Live real, autorización de despliegue inocuo y acceso Vercel para comprobar previews. No afirmar aptitud de producción. `RELEASE_APPROVED=false`, checkout Live OFF. No reejecutar migraciones.
 
+## Checkpoint actualizado — 20 oct UTC / F16 hacia beta (prioridad sobre snapshots anteriores)
+- PR #44: rama F13 sin merge; commit técnico `b292c3f` corrige una prueba desactualizada tras introducir reserva/auditoría obligatorias del futuro provisionador Live. El **CI de este HEAD requiere resultado final** antes de afirmar PASS. Los siete laboratorios PG17 previos al fix finalizaron PASS.
+- `fcc7d236` + `7d3f641`: aprovisionamiento Live de Edge ahora exige `reserveAttempt` y `recordAttemptOutcome` inyectados; sin implementaciones persistentes/release, no puede escribir credenciales. Guardia de release `4def1d7` comprueba `RELEASE_APPROVED=false` y `LIVE_EDGE_PROVISIONING_RELEASED=false`. **No se despliega Live**.
+- `a783cd80`: cinco archivos de `f16-paypal-sandbox-sale-review` v3 copiados exactamente de Supabase al repositorio con helpers históricos propios y checksum metadata. Dos helpers difieren de los compartidos actuales; el diagnóstico hospedado tiene ventana temporal expirada. No se modifica el runtime.
+- Read-only Supabase Advisor auditado 20 oct UTC: 4 definer anon intencionalmente públicos a revisión, 38 definer authenticated (35 tienen al menos una referencia sintáctica a identidad/owner o delegado, 3 no: badges batch, content_visible, storage_media_path_unclaimed); esto no prueba la autorización funcional. Cinco RPC admin verifican `pazo_is_admin()` y tres vistas moderación invocan `f14_is_moderator()`. Leaked Password Protection permanece WARN; PO debe revisar el ajuste en Auth.
+- Vercel leíble SIN teamId: últimos Preview siguen hasta `a218ab3`, ninguno de los commits nuevos observado. Supresión total de previews no certificada por listado. No publicar ningún Preview nuevo hasta aprobación PO del RC final.
+- **Beta social gratuita** puede publicarse con QA de pagos OFF, Live OFF, tras visual PO, seguridad Auth, legal/vigencia, smoke/manifest/PWA HTTPS y un único Preview final GO. No confundir avance Live con bloqueo de beta.
+
 ## Identidad, roles y referencias
 - Producto: **PAZO**, PWA social 18+ para mascotas; módulos gratis, QR gratis y aportación voluntaria **Amigo de PAZO US$2.99/mes**. El usuario es el **Product Owner**; ChatGPT es ejecutor técnico directo, **sin delegación a Codex/Gemini** salvo nueva orden explícita.
 - OS: `DigitalAppcorp/project-brain-os`, **v1.4.1**, `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`.

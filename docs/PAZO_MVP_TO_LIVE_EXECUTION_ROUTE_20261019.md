@@ -102,6 +102,10 @@ El módulo `supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.m
 - Dominio Vercel `pazo-app-t83r.vercel.app` verificado; NO confundirlo con un dominio definitivo aprobado de PAZO. Proyecto aplica SSO protection a despliegues excepto dominios personalizados; verificar acceso de usuarios externos e instalación de PWA antes de publicación. Env **metadata solo** revisada: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_MAPBOX_ACCESS_TOKEN`, flags F16 preview branch y observabilidad. No se han revelado ni validado valores de secretos ni cambiado variables.
 - **R8 actualizado: ACCESO A VERCEL READ-ONLY PASS; beta/hosting RC y PWA E2E todavía PENDIENTE.** Requiere inspeccionar deploy del SHA final y build flags efectivos, y aprobación PO antes de publicar/merger. Sandbox activo y Live OFF.
 
+## Continuidad 20 oct UTC — clasificación de bloqueos beta
+El diagnóstico Sandbox P44 alojado `f16-paypal-sandbox-sale-review` v3 ya tiene instantánea exacta versionada bajo `supabase/functions/f16-paypal-sandbox-sale-review/` con sus cinco fuentes; sus helpers históricos no se sustituyeron por los modernos. La función hospedada no cambió y su ventana histórica de consulta ya expiró. Para beta gratuita, no depender de este diagnóstico temporal.
+El nuevo gate de aprovisionamiento Live permanece código inerte y necesita persistencia/autenticación/GO separados; **no bloquear beta social gratis esperando Live**. La auditoría Supabase está en `docs/PAZO_BETA_SECURITY_ADVISOR_AUDIT_20261020.md`: protección de contraseña filtrada WARN y aceptación visual/manual PWA pendientes.
+ 
 ## GATE PRE-PREVIEW — decisión PO: código y localhost primero
 El PO decidió no crear más Previews mientras queden piezas por desarrollar. Un único Preview final servirá para QA HTTPS/PWA y autorización de beta, no para continuar construyendo.
 - Nuevo `scripts/pazo-prepreview-local.ps1`: no hace pull, push, deploy, pagos ni SQL; comprueba rama y árbol limpio, corre `npm run verify:prepreview` (gobierno, guard financiero, F16 sintético, compilación y auditoría del artefacto `dist/`), y restaura los flags de QA del entorno original.

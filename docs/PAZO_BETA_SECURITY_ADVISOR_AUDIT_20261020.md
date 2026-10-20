@@ -18,6 +18,11 @@ Estado: **PRE-BETA REVIEW / SIN AUTORIZACIÓN DE PUBLICACIÓN**. Consulta de sol
 
 **Riesgo residual:** esta lectura de definiciones no es pentest, ni demuestra seguridad de cada RPC subyacente. Las cuatro públicas parecen intencionales, pero el estatus es `REVIEW`, no certificación global. No cambiar un definer por invoker sin test de lectura pública y contratos.
 
+## Revisión estructural adicional de definer authenticated (20 oct UTC)
+- 38/38 funciones catalogadas por PostgreSQL. Una búsqueda de referencias sintácticas a `auth.uid`, `pazo_is_admin`, `f14_is_moderator` u ownership devolvió 35 con referencia y **3 sin referencia obvia**: dos RPC públicas de visibilidad/insignias ya revisadas y `f14_storage_media_path_unclaimed`, que es auth-only y devuelve un booleano sobre claims de medios. Esta búsqueda no sustituye inspección lógica ni descarta bypass.
+- Cinco RPC de panel de analítica (`pazo_admin_overview/users/audience/experiments/voters`) comprueban `public.pazo_is_admin()`; tres RPC de lecturas de moderación (`f14_moderation_queue`, `f14_pending_media`, `f14_media_task`) comprueban `public.f14_is_moderator()`. La función de consulta de media `f14_storage_media_path_unclaimed` no comprueba usuario individual y amerita revisión específica de superficie y llamadas antes del release.
+- SQL fue **solo lectura**; no se modificaron grants de `anon` o `authenticated`.
+
 ## Release blockers reales
 1. Activar o documentar formalmente la excepción de protección de contraseñas filtradas; revalidar aviso.
 2. Verificar superficies `authenticated` SECURITY DEFINER con prioridad a write/moderación/admin.
