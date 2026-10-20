@@ -63,6 +63,6 @@ test('uncertain provider POST is not retried and no result is considered active'
   throw Error('network_timeout_secret_123')
  }
  const adapter=createPaypalLiveMerchantBootstrap({clientId,clientSecret,fetchImpl})
- await assert.rejects(adapter.createWebhook({requestId:'webhook-123456789'}),/network_timeout_secret_123/)
+ await assert.rejects(adapter.createWebhook({requestId:'webhook-123456789'}),/paypal_live_resource_review_required/)
  assert.equal(postCount,1)
 })
