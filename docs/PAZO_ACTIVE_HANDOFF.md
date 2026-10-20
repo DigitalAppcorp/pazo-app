@@ -1,5 +1,12 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 UTC
 
+## Actualizacion F16 20-oct-2026 — 4 bloqueos, sin despliegues financieros
+- CI verificable: commit [`7b1420bf50b529b310c8feadcc4de605fefbfce0`](https://github.com/DigitalAppcorp/pazo-app/commit/7b1420bf50b529b310c8feadcc4de605fefbfce0), **8/8 workflows SUCCESS**, incluido PostgreSQL 17 desechable probando SQL REAL, bloqueo anon/auth, secuencia original, idempotencia, bloqueo de doble finalize, lease y reintento de webhook. PR #44 sigue DRAFT, main y beta intactos.
+- Código nuevo: `liveBootstrapSqlStore.mjs`, `liveInboxLease.mjs`, `liveWebhookEventEvidence.mjs` más 3 pruebas Node. Dos archivos SQL en `supabase/drafts/f16_live_bootstrap_generation_REVIEW_REQUIRED.sql` y `supabase/drafts/f16_live_durable_inbox_lease_REVIEW_REQUIRED.sql`; integrados en `scripts/f16-live-bootstrap-lease-disposable-lab.sql`. **No son HOSTED**. Creación de generación, provisioning, webhook entregado y worker financiero real siguen **NO-GO**.
+- PO verificó con navegador en incógnito acceso sin SSO al host provisional. En PayPal plan Live Amigo de PAZO `P-9BR88240215654528NLL3I4I` sigue ACTIVADO a $2.99/mes; PayPal autenticado mostró `Pagos pendientes de recibo automático: Desactivado` tras cambio PO. Recurso todavía no validado con GET API server.
+- **Siguiente gate condicionado (sin asumir GO implícito):** pedir autorización acotada para **versionar/instalar solamente** dos migraciones de bootstrap/lease en Supabase, revisar diff RLS/ACL y postflight. No toca 0 merchant generations ni pone live_enabled=true, ni cambia kill_switch, secretos, cobros o beneficios. Solo después preparar canal privado MFA, evidencia de comercio vía API Live, reserva real generacional, registro de webhook firmado y worker reconciliador. Requiere otra autorización acotada para cualquier operación comercial o primer pago Live.
+- Instrucciones de no repetir: no volver a crear el plan, a cambiar cobro automático, a reinstalar auditoria SQL anterior, a importar insignias ni a reejecutar Sandbox E2E aprobado.
+
 **LEER PRIMERO EN EL SIGUIENTE CHAT.** Documento operativo actual; reemplaza las 60 KB de checkpoints cronológicos anteriores. Historial íntegro recuperable en Git a partir del commit **`1cfcf2be387978b9eb1338de5bc4424ae39dd419`** y en `docs/archive/`. El servidor alojado y el HEAD remoto comprobados prevalecen sobre este resumen si algo cambia. No reanudar tareas desde una captura de chat truncada.
 
 ## Inicio / responsabilidades
