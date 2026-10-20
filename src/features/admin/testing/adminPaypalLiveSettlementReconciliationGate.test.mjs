@@ -71,6 +71,26 @@ test('only claimed original merchant event with independently proven paid period
  assert.equal(r.paymentRecorded,true)
  assert.deepEqual(counts,{claims:1,binds:1,provider:1,periods:1,writes:1})
 })
+test('PayPal UTC timestamp without milliseconds remains valid; dates without provider proof do not',async()=>{
+ const {gate,counts}=setup({
+  readerForGeneration:async()=>({
+   readCompletedSale:async()=>({...providerSale,paidAt:'2026-11-01T00:00:00Z'})
+  })
+ })
+ const r=await gate({queueEventId})
+ assert.equal(r.state,'RECORDED')
+ assert.equal(counts.writes,1)
+ for(const wrong of ['2026-11-01T00:00:00-05:00','2026-13-01T00:00:00Z']){
+  const {gate:badGate,counts:badCounts}=setup({
+   readerForGeneration:async()=>({
+    readCompletedSale:async()=>({...providerSale,paidAt:wrong})
+   })
+  })
+  const denied=await badGate({queueEventId})
+  assert.equal(denied.code,'provider_completed_sale_not_proven')
+  assert.equal(badCounts.writes,0)
+ }
+})
 test('missing or invalid signed event never reads binding or payment provider',async()=>{
  const variations=[
   {...event,claimed:false},{...event,signatureVerified:false},
