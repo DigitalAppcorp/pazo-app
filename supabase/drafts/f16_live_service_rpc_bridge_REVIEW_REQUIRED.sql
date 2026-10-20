@@ -141,4 +141,34 @@ REVOKE ALL ON FUNCTION public.pazo_f16_live_service_paid_period_projection(uuid,
 GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_paid_period_projection(uuid,timestamptz)
  TO service_role;
 
+
+-- Read only the currently selected Live generation. Never reveal secrets.
+-- Existing historical subscriptions resolve by original generation separately.
+CREATE OR REPLACE FUNCTION public.pazo_f16_live_service_active_route()
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+AS $pazo$
+DECLARE output jsonb;
+BEGIN
+ IF pg_catalog.current_setting('request.jwt.claim.role',true)
+  IS DISTINCT FROM 'service_role'
+ THEN RAISE EXCEPTION 'service authorization required' USING ERRCODE='42501'; END IF;
+ SELECT pg_catalog.jsonb_build_object(
+  'sourceEnvironment','live','merchantGeneration',g.generation,
+  'planId',g.plan_id,'credentialSource',g.credential_source
+ ) INTO output
+ FROM admin_private.pazo_paypal_new_checkout_switch s
+ JOIN admin_private.pazo_paypal_merchant_generations g
+  ON g.generation=s.active_generation
+ WHERE s.singleton=true AND s.environment='live'
+  AND s.live_enabled=true AND s.kill_switch=false
+  AND g.environment='live' AND g.retired_at IS NULL
+  AND g.credential_source='edge_secrets';
+ RETURN output;
+END $pazo$;
+ALTER FUNCTION public.pazo_f16_live_service_active_route() OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.pazo_f16_live_service_active_route()
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_active_route()
+ TO service_role;
+
 COMMIT;
