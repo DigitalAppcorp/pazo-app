@@ -125,6 +125,8 @@ test('generation changed during remote PayPal verification blocks secret write',
   verifyProviderResources:async()=>({oauthVerified:true,planVerified:true,
    webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false}),
   getScopedManagementToken:()=>pat,
+  reserveAttempt:async()=>{throw Error('reservation should not run after revision drift')},
+  recordAttemptOutcome:async()=>{throw Error('audit should not run after revision drift')},
   fetchImpl:async()=>{requests++;throw Error('must never be called')}
  })
  const result=await handler(args)
