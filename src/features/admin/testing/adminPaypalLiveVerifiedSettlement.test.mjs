@@ -96,6 +96,10 @@ test('no auto-generated monthly cycle without independently verified period proo
     { ...period, serviceEnd: '2026-11-01T00:00:00.000Z' },
     { ...period, serviceEnd: '2027-01-01T00:00:00.000Z' },
     { ...period, serviceEnd: '2026-12-01' },
+    { ...period, serviceEnd: '2026-11-31T00:00:00.000Z' },
+    { ...period, serviceEnd: '2026-12-01T00:00:00Z' },
+    { ...period, serviceStart: '2026-02-30T00:00:00.000Z' },
+    { ...period, serviceEnd: '2026-12-01T00:00:00.0000Z' },
     { cycleKey: 'fake' }
   ]
 
