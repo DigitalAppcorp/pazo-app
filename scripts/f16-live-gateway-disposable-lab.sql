@@ -272,3 +272,4 @@ END $overlap$;
 \i scripts/f16-live-historical-merchant-disposable-lab.sql
 \i scripts/f16-live-edge-credential-generation-disposable-lab.sql
 \i scripts/f16-live-service-rpc-bridge-disposable-lab.sql
+\i scripts/f16-live-admin-origin-disposable-lab.sql
