@@ -25,7 +25,6 @@ function mock(change={},generation=config){
    ok:true,status:200,headers:{get:()=> 'application/json'},
    text:async()=>JSON.stringify({token_type:'Bearer',
     access_token:'OPAQUE_ACCESS_TOKEN_123456'})}
-  }
   if(endpoint.includes('/billing/subscriptions/'+sub))return {
    ok:true,status:200,headers:{get:()=> 'application/json'},
    text:async()=>JSON.stringify({id:sub,plan_id:plan,custom_id:intent,status:'ACTIVE'})}
