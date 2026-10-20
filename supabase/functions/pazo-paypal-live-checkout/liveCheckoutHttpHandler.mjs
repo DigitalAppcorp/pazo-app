@@ -57,6 +57,12 @@ export function createPazoLiveCheckoutHttpHandler({
    !Number.isSafeInteger(route.merchantGeneration)||route.merchantGeneration<1||
    !PLAN.test(route.planId||''))
    return reply(503,'live_route_inactive')
+  // Never read private generation secrets for an owner who has not passed
+  // the application's server-only checkout admission.
+  let admitted=false
+  try{admitted=(await admit({ownerId,action:'live_checkout'}))===true}
+  catch{return reply(503,'checkout_admission_unavailable')}
+  if(!admitted)return reply(409,'checkout_admission_denied')
   let clientId,clientSecret
   try{
    const prefix='PAZO_F16_LIVE_G'+route.merchantGeneration+'_'
