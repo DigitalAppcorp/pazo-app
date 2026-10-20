@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const sql=readFileSync(new URL('../../../../supabase/migrations/20261019234100_pazo_f16_live_gateway_inert_private_staging.sql',import.meta.url),'utf8')
+const sql=readFileSync(new URL('../../../../supabase/migrations/20261019235351_pazo_f16_live_gateway_inert_private_staging.sql',import.meta.url),'utf8')
 const lab=readFileSync(new URL('../../../../scripts/f16-live-gateway-disposable-lab.sql',import.meta.url),'utf8')
 test('staged SQL requires existing Sandbox runtime and never releases Live',()=>{
  assert.match(sql,/to_regclass\('admin_private\.paypal_gateway_runtime'\)/)
@@ -12,7 +12,7 @@ test('staged SQL requires existing Sandbox runtime and never releases Live',()=>
   "CHECK(environment='sandbox')","CHECK(live_enabled=false)",
   "CHECK(kill_switch=true)","CHECK(active_generation IS NULL)"
  ])assert.ok(sql.includes(invariant),invariant)
- assert.ok(lab.includes('supabase/migrations/20261019234100_pazo_f16_live_gateway_inert_private_staging.sql'))
+ assert.ok(lab.includes('supabase/migrations/20261019235351_pazo_f16_live_gateway_inert_private_staging.sql'))
 })
 test('inert private model restricts all payment data and privileged functions',()=>{
  const n=(sql.match(/CREATE TABLE /g)||[]).length

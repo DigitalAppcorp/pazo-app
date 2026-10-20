@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const src=readFileSync(new URL('../../../../supabase/migrations/20261019235800_pazo_f16_live_service_binding_readonly_bridge.sql',import.meta.url),'utf8')
+const src=readFileSync(new URL('../../../../supabase/migrations/20261019235552_pazo_f16_live_service_binding_readonly_bridge.sql',import.meta.url),'utf8')
 test('public read-only projection exclusively grants EXECUTE to service_role',()=>{
  assert.match(src,/CREATE OR REPLACE FUNCTION public\.pazo_f16_live_service_binding_read/)
  assert.match(src,/GRANT EXECUTE ON FUNCTION public\.pazo_f16_live_service_binding_read\(text\)\s+TO service_role/)

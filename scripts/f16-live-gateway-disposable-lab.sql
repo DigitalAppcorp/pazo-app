@@ -15,7 +15,7 @@ CREATE TABLE admin_private.admin_grants(user_id uuid PRIMARY KEY);
 CREATE TABLE admin_private.paypal_gateway_runtime(
  singleton bool PRIMARY KEY,active_environment text,live_checkout_enabled bool);
 INSERT INTO admin_private.paypal_gateway_runtime VALUES(true,'sandbox',false);
-\i supabase/migrations/20261019234100_pazo_f16_live_gateway_inert_private_staging.sql
+\i supabase/migrations/20261019235351_pazo_f16_live_gateway_inert_private_staging.sql
 DO $check$
 DECLARE tables_count integer;
 BEGIN

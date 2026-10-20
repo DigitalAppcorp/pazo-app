@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const migration=readFileSync(new URL('../../../../supabase/migrations/20261019235000_pazo_f16_live_verified_binding_and_receipts_private_staging.sql',import.meta.url),'utf8')
+const migration=readFileSync(new URL('../../../../supabase/migrations/20261019235455_pazo_f16_live_verified_binding_and_receipts_private_staging.sql',import.meta.url),'utf8')
 const lab=readFileSync(new URL('../../../../scripts/f16-live-binding-receipt-disposable-lab.sql',import.meta.url),'utf8')
 test('Live subscription, signed event and completed sale are separate private operations',()=>{
  for(const name of ['pazo_live_bind_verified_subscription',

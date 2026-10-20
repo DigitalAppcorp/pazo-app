@@ -1,6 +1,6 @@
 -- F16 signed-event -> original PAZO owner -> verified Live sale rehearsal.
 -- All owner/PayPal GET evidence here is synthetic; NO provider calls or grants.
-\i supabase/migrations/20261019235000_pazo_f16_live_verified_binding_and_receipts_private_staging.sql
+\i supabase/migrations/20261019235455_pazo_f16_live_verified_binding_and_receipts_private_staging.sql
 INSERT INTO supporter_private.pazo_paypal_live_checkout_intents(
  intent_id,owner_id,request_key,merchant_generation,plan_id,locale,
  terms_version,terms_digest,affirmative_consent)

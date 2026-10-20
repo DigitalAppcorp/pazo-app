@@ -1,6 +1,6 @@
 -- Only in f14_synthetic AFTER the CAS rollback rehearsal.
 -- This laboratory drops constraints only in its disposable PostgreSQL copy.
-\i supabase/migrations/20261019234500_pazo_f16_live_intent_private_staging.sql
+\i supabase/migrations/20261019235426_pazo_f16_live_intent_private_staging.sql
 DO $blocked$
 DECLARE r jsonb;
 BEGIN

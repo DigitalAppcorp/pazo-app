@@ -1,5 +1,5 @@
 -- Synthetic service_role bridge security rehearsal (never deployed here).
-\i supabase/migrations/20261019235800_pazo_f16_live_service_binding_readonly_bridge.sql
+\i supabase/migrations/20261019235552_pazo_f16_live_service_binding_readonly_bridge.sql
 DO $bridge$
 DECLARE x jsonb;
 BEGIN

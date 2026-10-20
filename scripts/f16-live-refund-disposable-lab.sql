@@ -1,5 +1,5 @@
 -- F16 Live refund proof/anti-replay — disposable-only synthetic PG17.
-\i supabase/migrations/20261019235400_pazo_f16_live_verified_refund_private_staging.sql
+\i supabase/migrations/20261019235525_pazo_f16_live_verified_refund_private_staging.sql
 DO $refund$
 DECLARE r text;
 BEGIN

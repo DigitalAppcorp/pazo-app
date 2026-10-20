@@ -1,8 +1,10 @@
+> **HOSTED F16 STAGING — 2026-10-19, GO del Product Owner ejecutado (solo infraestructura).** Cinco migraciones PostgreSQL aplicadas en `mrybvqdebbgcayuvgkkr`; versiones registradas: `20261019235351`, `20261019235426`, `20261019235455`, `20261019235525`, `20261019235552`. Todas las nueve tablas privadas están FORCE RLS, vacías y sin SELECT de anon/auth/service_role. Las funciones financieras privadas no otorgan EXECUTE a anon/auth/service_role. Solo `public.pazo_f16_live_service_binding_read(text)` otorga EXECUTE a `service_role` para lectura mínima. Ambos selectores siguen `sandbox/live_enabled=false`; nuevo selector `kill_switch=true` sin generación. Sandbox preserva 2 períodos QA y 26 eventos. No se desplegó Edge Live, no se generó dinero ni hubo merge. La captura de datos financieros Live y el gateway permanecen OFF; son pendientes independientes la autenticación provider Vault, RPC writers service-only, retención, seguridad, UX y beta HTTPS. Las descripciones de “no instalado” bajo este encabezado son **historia anterior al GO**, no estado actual.
+
 # PAZO — F16: migración privada Live INERTE, pendiente de autorización
 Fecha: 2026-10-19. PR #44 DRAFT. **Código en GitHub, no aplicado en Supabase.**
 
 ## Qué prepara
-Migración versionada: `supabase/migrations/20261019234100_pazo_f16_live_gateway_inert_private_staging.sql`.
+Migración versionada: `supabase/migrations/20261019235351_pazo_f16_live_gateway_inert_private_staging.sql`.
 
 - Siete tablas del modelo original de comerciante/plan/generación, selector de nuevas compras, bitácora admin, consentimiento/intento Live, eventos verificados, ventas y reversos.
 - Dos tablas adicionales: solicitud de cancelación única por suscripción e informe de evidencia para eventual conmutación.
@@ -26,7 +28,7 @@ Antes de instalar: mostrar al PO SQL, consecuencias para datos/retención, prefl
 No usar esta preparación como evidencia de que PayPal Live puede activarse hoy desde el panel.
 
 ## Segundo archivo versionado, acceso aún denegado
-`supabase/migrations/20261019234500_pazo_f16_live_intent_private_staging.sql` instala únicamente dos funciones privadas ungranted:
+`supabase/migrations/20261019235426_pazo_f16_live_intent_private_staging.sql` instala únicamente dos funciones privadas ungranted:
 1. `pazo_live_intent_begin`: al iniciar un checkout futuro exige que un selector de comercio Live esté verdaderamente activo y con generación no retirada, obtiene plan desde base de datos, congela dueño/consentimiento/versión/digest e inserta una intención o recupera la misma sin crear un duplicado. No puede ser ejecutada desde Supabase browser ni actualmente desde `service_role`.
 2. `pazo_live_intent_claim_once`: reserva mediante un UPDATE transaccional el derecho a crear UNA suscripción PayPal, solo para owner/intent/requestKey/generation exactos, dentro de 48 horas y antes de la primera llamada al proveedor. Una segunda llamada devuelve false; fallo o timeout posterior obliga a conciliación, no a crear otra suscripción.
 
