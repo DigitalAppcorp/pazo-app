@@ -9,7 +9,7 @@ END $safety$;
 DO $permissions$
 DECLARE r record; sig regprocedure;
 BEGIN
- FOR r IN SELECT oid::regprocedure AS signature
+ FOR r IN SELECT p.oid::regprocedure AS signature
   FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
   WHERE n.nspname='public' AND p.proname LIKE 'pazo_f16_live_service_%'
    AND p.proname<>'pazo_f16_live_service_binding_read'
