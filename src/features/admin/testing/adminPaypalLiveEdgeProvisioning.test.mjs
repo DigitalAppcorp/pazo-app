@@ -24,6 +24,8 @@ function build(changes={},released=true){
   verifyProviderResources:async()=>({oauthVerified:true,planVerified:true,
    webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false}),
   getScopedManagementToken:()=>pat,
+  reserveAttempt:async()=>({reserved:true,attemptId:id}),
+  recordAttemptOutcome:async()=>true,
   fetchImpl:async(url,opts)=>{
    calls.push({url,method:opts.method,
     body:opts.body?JSON.parse(opts.body):null,header:opts.headers.Authorization})
@@ -103,6 +105,8 @@ test('ambiguous management POST never retries or confirms success',async()=>{
   verifyProviderResources:async()=>({oauthVerified:true,planVerified:true,
    webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false}),
   getScopedManagementToken:()=>pat,
+  reserveAttempt:async()=>({reserved:true,attemptId:id}),
+  recordAttemptOutcome:async()=>true,
   fetchImpl:async(_url,opts)=>opts.method==='GET'?{
    ok:true,status:200,json:async()=>[]
   }:(sends++,{ok:false,status:503})
@@ -127,4 +131,49 @@ test('generation changed during remote PayPal verification blocks secret write',
  assert.equal(result.code,'generation_changed_during_verification')
  assert.equal(reads,2)
  assert.equal(requests,0)
+})
+
+test('never calls secret API unless durable generation reservation succeeds',async()=>{
+ let reads=0,fetches=0
+ const handler=createPazoLiveEdgeSecretsProvisioner({
+  released:true,
+  authenticateAdmin:async()=>({id,isAdmin:true,freshSession:true}),
+  readGeneration:async()=>{reads++;return stub},
+  verifyProviderResources:async()=>({oauthVerified:true,planVerified:true,
+   webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false}),
+  getScopedManagementToken:()=>pat,
+  reserveAttempt:async()=>({reserved:false,attemptId:id}),
+  recordAttemptOutcome:async()=>{throw Error('not reached')},
+  fetchImpl:async()=>{fetches++;throw Error('must not call')}
+ })
+ const result=await handler(args)
+ assert.equal(result.code,'provisioning_attempt_not_reserved')
+ assert.equal(reads,2)
+ assert.equal(fetches,0)
+})
+
+test('durable audit failure after secrets POST can never be reported as success',async()=>{
+ const stored=new Set()
+ let calls=0
+ const handler=createPazoLiveEdgeSecretsProvisioner({
+  released:true,
+  authenticateAdmin:async()=>({id,isAdmin:true,freshSession:true}),
+  readGeneration:async()=>stub,
+  verifyProviderResources:async()=>({oauthVerified:true,planVerified:true,
+   webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false}),
+  getScopedManagementToken:()=>pat,
+  reserveAttempt:async()=>({reserved:true,attemptId:id}),
+  recordAttemptOutcome:async()=>false,
+  fetchImpl:async(_url,opts)=>{
+   calls++
+   if(opts.method==='POST')for(const value of JSON.parse(opts.body))stored.add(value.name)
+   return opts.method==='GET'
+    ?{ok:true,status:200,json:async()=>[...stored].map(name=>({name}))}
+    :{ok:true,status:201}
+  }
+ })
+ const result=await handler(args)
+ assert.equal(result.ok,false)
+ assert.equal(result.code,'provisioning_audit_unavailable_manual_review')
+ assert.equal(calls,3)
 })
