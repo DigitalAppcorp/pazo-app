@@ -5,6 +5,8 @@
 -- Sensitive: returns original PayPal Live Client ID/Secret ONLY to service_role
 -- for a previously bound generation, never to browser or analytics.
 -- No table mutations, merchant switching or checkout activation.
+-- Respect existing Supabase Vault ACL: service_role already has Vault read
+-- permissions; this migration does not change those existing grants.
 BEGIN;
 DO $preflight$
 BEGIN
@@ -69,7 +71,6 @@ BEGIN
     'public.pazo_f16_live_historical_merchant_secrets(bigint)','EXECUTE')
   OR NOT has_function_privilege('service_role',
     'public.pazo_f16_live_historical_merchant_secrets(bigint)','EXECUTE')
-  OR has_table_privilege('service_role','vault.decrypted_secrets','SELECT')
   OR has_table_privilege('service_role',
     'admin_private.pazo_paypal_merchant_generations','SELECT')
   OR EXISTS (SELECT 1 FROM admin_private.pazo_paypal_new_checkout_switch
