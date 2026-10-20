@@ -16,7 +16,6 @@ const req=(method='POST',requestOrigin=origin)=>new Request(url+'/functions/v1/p
 const env=Object.freeze({
  SUPABASE_URL:url,SUPABASE_ANON_KEY:'TEST_ANON_KEY_1234567890123456789',
  SUPABASE_SERVICE_ROLE_KEY:'TEST_SERVICE_ROLE_KEY_123456789012345',
- PAZO_F16_PUBLIC_HTTPS_ORIGIN:origin,
  PAZO_F16_LIVE_TERMS_VERSION:'pazo-supporter-live.offer-v1',
  PAZO_F16_LIVE_TERMS_DIGEST:'a'.repeat(64)
 })
@@ -50,7 +49,12 @@ test('missing published terms or backend keys blocks before any provider activit
 })
 test('active host allows only the official HTTPS origin; no wildcard CORS',async()=>{
  const h=createPazoLiveHostedCheckout({released:true,
-  getEnv:name=>env[name],fetchImpl:async()=>{throw Error('unexpected')}})
+  getEnv:name=>env[name],fetchImpl:async(uri)=>{
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
+    return response(200,{sourceEnvironment:'live',credentialSource:'edge_secrets',
+      merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN',returnOrigin:origin})
+   throw Error('unexpected')
+  }})
  const preflight=await h(req('OPTIONS'))
  assert.equal(preflight.status,204)
  assert.equal(preflight.headers.get('access-control-allow-origin'),origin)
@@ -67,7 +71,7 @@ test('authenticated owner must have completed onboarding before any provider cal
   if(uri.includes('/rest/v1/profiles?'))return response(200,[{id:owner,onboarding_completed:false}])
   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
    return response(200,{sourceEnvironment:'live',credentialSource:'edge_secrets',
-    merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN'})
+    merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN',returnOrigin:origin})
   providerCalls++
   throw Error('provider must not be called')
  }

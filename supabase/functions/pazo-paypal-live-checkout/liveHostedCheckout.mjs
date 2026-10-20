@@ -16,14 +16,13 @@ export function createPazoLiveHostedCheckout({
  released=false,getEnv=()=>undefined,fetchImpl=fetch
 }={}){
  if(released!==true)return createPazoLiveCheckoutHttpHandler({released:false})
- let api,anon,service,origin,termsVersion,termsDigest
+ let api,anon,service,termsVersion,termsDigest
  try{
   api=getEnv('SUPABASE_URL');anon=getEnv('SUPABASE_ANON_KEY')
   service=getEnv('SUPABASE_SERVICE_ROLE_KEY')
-  origin=getEnv('PAZO_F16_PUBLIC_HTTPS_ORIGIN')
   termsVersion=getEnv('PAZO_F16_LIVE_TERMS_VERSION')
   termsDigest=getEnv('PAZO_F16_LIVE_TERMS_DIGEST')
-  if(api!==PROJECT||!publicBetaOrigin(origin)||!VERSION.test(termsVersion||'')||
+  if(api!==PROJECT||!VERSION.test(termsVersion||'')||
    !DIGEST.test(termsDigest||''))throw Error('config')
  }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
  let rpc,resolveAuthenticatedOwner
@@ -58,12 +57,14 @@ export function createPazoLiveHostedCheckout({
   return Array.isArray(rows)&&rows.length===1&&
    rows[0]?.id===ownerId&&rows[0]?.onboarding_completed===true
  }
- const serve=createPazoLiveCheckoutHttpHandler({
-  released:true,resolveAuthenticatedOwner,readActiveRoute,getSecret,
-  rpc,admit,verifyConsent,publicOrigin:origin,fetchImpl
- })
  return async req=>{
   if(!(req instanceof Request))return forbidden(400,'invalid_request')
+  let pinned
+  try{pinned=await readActiveRoute()}
+  catch{return forbidden(503,'live_route_unavailable')}
+  if(!pinned||!publicBetaOrigin(pinned.returnOrigin))
+   return forbidden(503,'live_route_inactive')
+  const origin=pinned.returnOrigin
   const caller=req.headers.get('origin')||''
   const cors=caller===origin?{
    'access-control-allow-origin':origin,'access-control-allow-methods':'POST, OPTIONS',
@@ -73,6 +74,11 @@ export function createPazoLiveHostedCheckout({
    new Response(null,{status:204,headers:cors}):
    forbidden(403,'untrusted_origin')
   if(caller!==origin)return forbidden(403,'untrusted_origin')
+  // Origin and merchant are pinned to the same DB revision per request.
+  const serve=createPazoLiveCheckoutHttpHandler({
+   released:true,resolveAuthenticatedOwner,readActiveRoute:async()=>pinned,
+   getSecret,rpc,admit,verifyConsent,publicOrigin:origin,fetchImpl
+  })
   const response=await serve(req)
   const headers=new Headers(response.headers)
   for(const [name,value] of Object.entries(cors))headers.set(name,value)
