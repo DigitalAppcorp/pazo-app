@@ -2,6 +2,7 @@ import {useCallback,useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {AdminGlyph} from './AdminVisuals'
 import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
+import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -24,6 +25,8 @@ const LIVE_RESOURCE_INSPECTION_RELEASED=false
 // Vault's legacy staging is NOT the F16 Edge secrets runtime for new Live checkout.
 // This flag becomes true only after the separate service/PO security gate.
 const LIVE_EDGE_PROVISIONING_RELEASED=false
+// The generation reservation UI is not exposed until the Edge backend gets an explicit PO GO.
+const LIVE_MERCHANT_BOOTSTRAP_RELEASED=false
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
 const actionClass='min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#E9EF6A] disabled:opacity-50 disabled:cursor-not-allowed'
 const cardClass='min-w-0 rounded-[22px] bg-white p-4 shadow-[0_7px_29px_rgba(32,78,74,.055)] sm:p-6'
@@ -31,6 +34,7 @@ function safeError(){return 'No fue posible completar la operación. Verifica tu
 export function AdminPayPalSettings({lang}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [env,setEnv]=useState<Env>('sandbox')
+ const [recentAdminMfa,setRecentAdminMfa]=useState(false)
  const [settings,setSettings]=useState<Settings|null>(null)
  const [history,setHistory]=useState<Audit[]>([])
  const [loading,setLoading]=useState(true)
@@ -242,9 +246,11 @@ export function AdminPayPalSettings({lang}:Props){
       </p>
     </section>
     {env==='live'&&
-     <AdminPaypalMfaStepUp lang={lang} onVerified={()=>setNotice(t(
+     <AdminPaypalMfaStepUp lang={lang} onVerified={()=>{setRecentAdminMfa(true);setNotice(t(
        'Código MFA comprobado. El servidor validará nuevamente la sesión para autorizar credenciales.',
-       'MFA checked. The server will independently validate the session before allowing credentials.'))}/>}
+       'MFA checked. The server will independently validate the session before allowing credentials.'))}}/>}
+    {env==='live'&&LIVE_MERCHANT_BOOTSTRAP_RELEASED&&
+     <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={recentAdminMfa}/>}
     {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
       <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
       <p className="mt-2 text-[12px] text-[#6B8077]">
