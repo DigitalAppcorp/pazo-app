@@ -15,9 +15,10 @@ export function createPaypalLiveMerchantBootstrap({clientId,clientSecret,fetchIm
  if(!ID.test(clientId||'')||!ID.test(clientSecret||'')||
     typeof fetchImpl!=='function')throw Error('paypal_live_credentials_not_ready')
  const request=async(path,options)=>{
-  const response=await fetchImpl(HOST+path,{
+  let response
+  try{response=await fetchImpl(HOST+path,{
    ...options,cache:'no-store',redirect:'error',signal:AbortSignal.timeout(12000)
-  })
+  })}catch{reject()}
   if(!response||![200,201,204].includes(response.status))reject()
   if(response.status===204)return null
   let body
