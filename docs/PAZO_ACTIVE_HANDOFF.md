@@ -78,6 +78,14 @@
 - **NO se aplicó este SQL en Supabase alojado**, no se desbloqueó `pazo-admin-paypal-provision`, no se guardó PAT, no se activó checkout; previamente instalados checkout Live v2 y webhook Live v1 siguen `RELEASED=false`. Sin cambio en main, ninguna preview solicitada. Pendiente revisión y GO migración para instalar reserva persistente.
 - Blockers de F16 siguen: autenticación fresca de administrador/seguridad de token scoped, bootstrap PayPal plan y webhook bajo claims duraderos, reconciliador histórico merchant/venta/ciclos/beneficios, cancelación/reversos, operación completa “Guardar y activar”, tests reales PayPal Live y validación PWA/HTTPS cuando el PO decida dominio. CI sin credenciales no prueba certificación de Live.
 
+## F16 — Continuidad 20 oct 2026: corrección humana + writer de conciliación
+- Product Owner corrigió directamente la prueba `src/features/admin/testing/adminPaypalLiveVerifiedSettlement.test.mjs` en rama `f13/section-titles-20261012`, commit `617e3f47`. Verificación independiente por conector: assertions `p_kind='refunded'` y `p_kind='reversed'`; PR #44 DRAFT, NO merge.
+- CI + 7 laboratorios PostgreSQL **8/8 SUCCESS** en commit PO `617e3f47`.
+- `1881371e` creó `supabase/functions/pazo-paypal-live-webhook/liveVerifiedSettlementWriter.mjs`, writer de recibos y reversiones verificados a las RPC `recordSale` y `recordRefund` ya instaladas; maneja `recorded`/`already_recorded`, errores de red/estados conflictivos y NO concede entitlements. `4885162d` añadió tests de monto, comerciante, período independiente, doble entrega y refunds; `1f5959ff` incluyó suite. **8/8 GitHub Actions SUCCESS sobre `1f5959ff907e47bb415a4443320a8ea8477c9040`**.
+- El writer es **CODE ONLY, NO DEPLOY**: depende de recibos/periodos realmente verificados por proceso server-only aún pendiente. No confundir campos `merchantVerified`/`signatureVerified` de mocks con pruebas PayPal reales. Pago/periodo/histórico/entitlement/activación desde admin continúan NO-GO beta hasta E2E.
+- Postflight read-only Supabase: `environment=sandbox, live_enabled=false, kill_switch=true, active_generation=NULL`; Vercel top previews antiguos hasta `a218ab3`, sin nuevos previews observados. Sin nuevas migraciones ni cambios en main.
+- Próximo gate sin dominio: conectar verificación real merchant-scoped/worker de conciliación, autorización fresca de admin y reserva de secretos persistente, con tests; **NO aplicar borrador `f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql` hasta un GO específico**. Dominio beta sigue sin decidirse.
+
 ## Identidad, roles y referencias
 - Producto: **PAZO**, PWA social 18+ para mascotas; módulos gratis, QR gratis y aportación voluntaria **Amigo de PAZO US$2.99/mes**. El usuario es el **Product Owner**; ChatGPT es ejecutor técnico directo, **sin delegación a Codex/Gemini** salvo nueva orden explícita.
 - OS: `DigitalAppcorp/project-brain-os`, **v1.4.1**, `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`.
