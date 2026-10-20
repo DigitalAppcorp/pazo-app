@@ -25,3 +25,14 @@ test('MFA enrollment is available in Live settings while credential provisioning
  assert.ok(admin.includes('data-pazo-live-vault-locked="true"'))
  assert.ok(!admin.includes('LIVE_EDGE_PROVISIONING_RELEASED=true'))
 })
+
+test('TOTP enrollment accepts Supabase SVG QR content and supports safe unfinished setup recovery',()=>{
+ assert.ok(component.includes(';utf-8|;utf8|;base64|),'))
+ assert.ok(component.includes("data?.all?.find(f=>f.factor_type==='totp'"))
+ assert.ok(component.includes("f.status==='unverified'"))
+ assert.ok(component.includes("supabase.auth.mfa.unenroll({"))
+ assert.ok(component.includes("f.id===pendingFactorId&&"))
+ assert.ok(component.includes('Reiniciar registro pendiente'))
+ assert.ok(component.includes('if(busy||pendingFactorId)return'))
+ assert.equal(component.includes('console.log'),false)
+})
