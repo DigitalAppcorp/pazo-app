@@ -3,6 +3,7 @@
 // SQL compareAndSwapLive and pauseNewCheckout MUST be one transaction with
 // server-verified preflight, rev, operator and append-only audit.
 // Client flags, URL changes and PayPal redirects never activate checkout.
+// A beta publication event/date is not a prerequisite for operator-verified Live.
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[a-f0-9]{12}$/i
 const HASH=/^[a-f0-9]{64}$/
 const MAX_PROOF_AGE=5*60_000
@@ -19,7 +20,7 @@ const exactProof=(proof,actor,revision,now)=>{
   proof?.cancelAndRefundVerified!==true||
   proof?.ledgerAndEntitlementsVerified!==true||
   proof?.rollbackVerified!==true||
-  proof?.ownerApprovedLaunch!==true||
+  proof?.ownerApprovedLiveActivation!==true||
   !UUID.test(proof.proofId||'')||
   !HASH.test(proof.evidenceSha256||'')||
   !Number.isSafeInteger(proof.merchantGeneration)||proof.merchantGeneration<1||
