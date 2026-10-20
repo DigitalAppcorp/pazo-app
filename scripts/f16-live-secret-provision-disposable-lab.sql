@@ -18,7 +18,8 @@ DECLARE
  revision bigint; first jsonb; again jsonb; attempt uuid; v jsonb;
 BEGIN
  SELECT generation INTO STRICT g FROM admin_private.pazo_paypal_merchant_generations
- WHERE merchant_fingerprint_sha256=repeat('e',64);
+ WHERE merchant_fingerprint_sha256=repeat('e',64)
+  AND plan_id='P-TESTPLAN1234567890' AND webhook_id='WH-TEST-HOOK-123456';
  SELECT s.revision INTO STRICT revision FROM admin_private.pazo_paypal_new_checkout_switch s
  WHERE singleton;
  BEGIN
