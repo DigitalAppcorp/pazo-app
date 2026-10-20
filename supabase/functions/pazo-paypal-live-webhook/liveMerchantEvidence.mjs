@@ -10,8 +10,14 @@ const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 const ASCII=s=>typeof s==='string'&&s.length>=8&&s.length<=512&&/^[\x21-\x7e]+$/.test(s)
 const MAX_RESPONSE=65536
 const NO='live_provider_evidence_unavailable'
-const date=(d)=>typeof d==='string'&&Number.isFinite(Date.parse(d))&&
- new Date(d).toISOString()===d
+const date=d=>{
+ if(typeof d!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(d))
+  return false
+ const t=Date.parse(d)
+ if(!Number.isFinite(t))return false
+ const normalized=d.replace(/(?:\.(\d{1,3}))?Z$/,(_match,frac)=>'.'+(frac||'').padEnd(3,'0')+'Z')
+ return new Date(t).toISOString()===normalized
+}
 function fail(){throw Error(NO)}
 async function json(fetchImpl,url,options){
  let response
