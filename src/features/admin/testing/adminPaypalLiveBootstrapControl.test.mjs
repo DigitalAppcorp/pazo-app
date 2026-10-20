@@ -127,3 +127,24 @@ test('no handler deployed with release flag enabled',()=>{
  assert.match(active,/const RELEASE_APPROVED=false/)
  assert.doesNotMatch(staged,/const RELEASE_APPROVED=true/)
 })
+
+test('exact-origin CORS admits the local admin preview but not unapproved sites',async()=>{
+ const handler=createPazoLiveMerchantBootstrapControl({
+  released:true,
+  authenticateAdmin:async()=>null,
+  readAdminSettings:async()=>{throw Error('not reachable')},
+  reserveGeneration:async()=>{throw Error('not reachable')}
+ })
+ const options=origin=>new Request(url,{method:'OPTIONS',headers:{
+  origin,'access-control-request-method':'POST'
+ }})
+ const ok=await handler(options('http://localhost:5173'))
+ assert.equal(ok.status,204)
+ assert.equal(ok.headers.get('access-control-allow-origin'),'http://localhost:5173')
+ assert.match(ok.headers.get('access-control-allow-headers'),/authorization/)
+ const invalid=await handler(options('https://evil.invalid'))
+ assert.equal(invalid.status,403)
+ assert.equal(invalid.headers.get('access-control-allow-origin'),null)
+ const blocked=await createPazoLiveMerchantBootstrapControl()(options('http://localhost:5173'))
+ assert.equal(blocked.status,503)
+})
