@@ -18,7 +18,7 @@ INSERT INTO admin_private.paypal_gateway_settings(environment,plan_id,webhook_id
 UPDATE admin_private.pazo_paypal_new_checkout_switch
  SET environment='sandbox',live_enabled=false,kill_switch=true,active_generation=NULL
  WHERE singleton;
-\i supabase/migrations/20261020150000_pazo_f16_admin_owned_live_return_origin.sql
+\i supabase/migrations/20261020142448_pazo_f16_admin_owned_live_return_origin.sql
 DO $audit$
 DECLARE result jsonb;
 BEGIN
