@@ -1,5 +1,5 @@
-// PAZO F16 — Future Edge admin secret management route.
-// NOT DEPLOYED. No privileges released until separate PO gate.
+// PAZO F16 — HOSTED inert admin provisioning route (JWT required).
+// RELEASE_APPROVED=false: deployed shell only; no privileges or secrets released.
 // Do not flip to true unless the full authenticated orchestration is wired
 // and tested with short-lived admin identity and project-scoped PAT.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
