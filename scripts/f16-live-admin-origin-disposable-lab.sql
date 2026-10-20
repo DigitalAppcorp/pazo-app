@@ -13,6 +13,11 @@ INSERT INTO admin_private.paypal_gateway_settings(environment,plan_id,webhook_id
  ON CONFLICT (environment) DO UPDATE
  SET plan_id=excluded.plan_id,webhook_id=excluded.webhook_id,
   return_origin=excluded.return_origin;
+-- The earlier CAS rehearsal may leave the disposable selector in Live.
+-- Return ONLY the throwaway DB to the documented hosted OFF baseline.
+UPDATE admin_private.pazo_paypal_new_checkout_switch
+ SET environment='sandbox',live_enabled=false,kill_switch=true,active_generation=NULL
+ WHERE singleton;
 \i supabase/migrations/20261020150000_pazo_f16_admin_owned_live_return_origin.sql
 DO $audit$
 DECLARE result jsonb;
