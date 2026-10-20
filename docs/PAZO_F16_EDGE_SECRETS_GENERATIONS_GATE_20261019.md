@@ -2,6 +2,8 @@
 
 Estado al 19-oct-2026: **SOLO CÓDIGO**, PR #44 DRAFT. PayPal Live y los entrypoints `pazo-paypal-live-checkout`/`pazo-paypal-live-webhook` permanecen **hard OFF**. No existe comerciante Live ni dominio beta HTTPS definitivo. No se necesitan credenciales reales para estas pruebas.
 
+> **HOSTED F16 EDGE METADATA — PO GO APPLIED & VERIFIED:** Supabase `mrybvqdebbgcayuvgkkr` aplicó una única migración `20261020014049_pazo_f16_live_edge_credential_source_metadata.sql` (nombre real de `supabase_migrations.schema_migrations`, reflejado en Git). `admin_private.pazo_paypal_merchant_generations` ahora tiene `credential_source text NOT NULL DEFAULT 'vault'`, `client_id_vault/client_secret_vault` NULL permitidos **solo** cuando `credential_source='edge_secrets'`, ambas `CHECK` VALIDATED. RLS ENABLE/FORCE, sin SELECT de anon/auth/service_role; no permisos añadidos. **0 generations/0 Live periods; Live OFF y kill_switch ON; Sandbox QA 2 paid periods + 26 events preserved; secret-returning Vault RPC absent.** No se desplegó Edge, no se provisionaron secretos Live ni se activó checkout. CI del cambio de esquema inicial 8/8 PASS en `a218ab3`; ejecutar CI después del rename documental. Próximo gate: backend admin seguro para provisionar/validar Edge Secrets y reconciliar Live, no ejecutar más SQL sin GO.
+
 ## Por qué cambia la arquitectura
 
 La opción anterior devolvía `client_id` y `client_secret` de Vault por una RPC pública accesible a `service_role`. Aunque no se había publicado, la herramienta bloqueó instalarla. Se retiró la migración automática; el SQL original quedó archivado exclusivamente como **propuesta rechazada** en `supabase/drafts/f16_live_historical_merchant_vault_DEPLOY_PROPOSAL_NOT_APPROVED.sql`. No ejecutarlo ni restaurarlo bajo otro nombre.

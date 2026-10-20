@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const hosted=readFileSync(new URL('../../../../supabase/migrations/20261020003600_pazo_f16_live_edge_credential_source_metadata.sql',import.meta.url),'utf8')
+const hosted=readFileSync(new URL('../../../../supabase/migrations/20261020014049_pazo_f16_live_edge_credential_source_metadata.sql',import.meta.url),'utf8')
 const proposal=readFileSync(new URL('../../../../supabase/drafts/f16_live_edge_credential_source_HOSTED_PROPOSAL_NOT_APPROVED.sql',import.meta.url),'utf8')
 const ddl=s=>s.slice(s.indexOf('ALTER TABLE admin_private.pazo_paypal_merchant_generations'),s.indexOf('-- Final state invariant'))
 test('authorized metadata migration retains reviewed DDL without sensitive side effects',()=>{
