@@ -35,6 +35,12 @@ export function AdminPayPalSettings({lang}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [env,setEnv]=useState<Env>('sandbox')
  const [recentAdminMfa,setRecentAdminMfa]=useState(false)
+ // A session may have aal2 for hours; PO actions require a fresh TOTP event.
+ useEffect(()=>{
+  if(!recentAdminMfa)return
+  const timer=window.setTimeout(()=>setRecentAdminMfa(false),240000)
+  return ()=>window.clearTimeout(timer)
+ },[recentAdminMfa])
  const [settings,setSettings]=useState<Settings|null>(null)
  const [history,setHistory]=useState<Audit[]>([])
  const [loading,setLoading]=useState(true)
@@ -208,7 +214,7 @@ export function AdminPayPalSettings({lang}:Props){
    </div>
    <div className="mt-5 grid grid-cols-2 gap-2 rounded-[16px] bg-[#F2F6EE] p-1.5" role="group" aria-label={t('Entorno','Environment')}>
     {(['sandbox','live'] as const).map(value=><button type="button" key={value} aria-pressed={env===value}
-      disabled={busy} onClick={()=>{setEnv(value);setClientId('');setClientSecret('');setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
+      disabled={busy} onClick={()=>{setEnv(value);setRecentAdminMfa(false);setClientId('');setClientSecret('');setDraftFeedback(null)}} className={'min-h-12 rounded-[13px] px-3 text-[14px] font-black '+(env===value?'bg-white text-[#204E4A] shadow-sm':'text-[#73877D]')}>
       {value==='sandbox'?'Sandbox': 'Live · '+(settings?.active_environment==='live'&&settings.live_checkout_enabled?t('activo','active'):t('preparación','staging'))}
     </button>)}
    </div>
