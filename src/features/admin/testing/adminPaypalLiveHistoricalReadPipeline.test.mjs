@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {createPazoLiveHistoricalReadPipeline} from '../../../../supabase/functions/pazo-paypal-live-webhook/liveHistoricalReadPipeline.mjs'
+import {createPazoLiveHistoricalReadPipeline,createPazoLiveHostedHistoricalVerification} from '../../../../supabase/functions/pazo-paypal-live-webhook/liveHistoricalReadPipeline.mjs'
 const url='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const service='opaque_service_role_key_very_long_for_testing'
 const sub='I-SUBSCRIPTION123'
@@ -87,4 +87,38 @@ test('signature verifier can use original merchant webhook id without showing ke
  assert.equal(typeof validator.verifySignature,'function')
  assert.equal(JSON.stringify(validator).includes(config.clientSecret),false)
  assert.equal(calls.length,0)
+})
+
+test('assembled hosted read-only flow checks bound owner, immutable Vault generation and Live GET',async()=>{
+ const calls=[]
+ const runner=createPazoLiveHostedHistoricalVerification({
+  supabaseUrl:url,serviceRoleKey:service,
+  fetchImpl:async(endpoint,opts)=>{
+   calls.push(endpoint)
+   let data
+   if(endpoint.endsWith('pazo_f16_live_service_binding_read'))data=bound
+   else if(endpoint.endsWith('pazo_f16_live_historical_merchant_secrets'))data=config
+   else if(endpoint.endsWith('/oauth2/token'))data={
+    token_type:'Bearer',access_token:'OPAQUE_ACCESS_TOKEN_123456'}
+   else if(endpoint.endsWith('/billing/subscriptions/'+sub))data={
+    id:sub,plan_id:plan,custom_id:intent,status:'ACTIVE'}
+   else throw Error('unexpected_external_request')
+   return {ok:true,status:200,headers:{get:()=> 'application/json'},
+    text:async()=>JSON.stringify(data)}
+  }
+ })
+ const scope=await runner.provePazoScope({
+  eventId:'WH-EVENT-123',eventType:'PAYMENT.SALE.COMPLETED',
+  resource:{id:'SALE-123',billing_agreement_id:sub},sourceEnvironment:'live'
+ })
+ assert.equal(scope.confirmed,true)
+ assert.equal(scope.ownerId,bound.ownerId)
+ assert.equal(scope.mayGrantBenefits,false)
+ assert.equal(scope.mayRecordPayment,false)
+ assert.deepEqual(calls.map(x=>x.split('/').pop()),[
+  'pazo_f16_live_service_binding_read',
+  'pazo_f16_live_historical_merchant_secrets',
+  'token',sub
+ ])
+ assert.ok(!JSON.stringify(scope).includes(config.clientSecret))
 })
