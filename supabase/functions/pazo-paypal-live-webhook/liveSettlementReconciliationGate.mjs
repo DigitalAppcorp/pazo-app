@@ -13,6 +13,15 @@ const review=code=>Object.freeze({
 const validIso=s=>typeof s==='string'&&
  /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(s)&&
  Number.isFinite(Date.parse(s))&&new Date(s).toISOString()===s
+// PayPal UTC timestamps need not include milliseconds. Billing period
+// evidence is deliberately checked separately using strict canonical dates.
+const validProviderInstant=s=>{
+ if(typeof s!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(s))return false
+ const instant=Date.parse(s)
+ if(!Number.isFinite(instant))return false
+ const canonical=s.replace(/(?:\.(\d{1,3}))?Z$/,(_m,frac)=>'.'+(frac||'').padEnd(3,'0')+'Z')
+ return new Date(instant).toISOString()===canonical
+}
 
 export function createPazoLiveSettlementReconciliationGate({
  released=false,claimVerifiedEvent,findOriginalBinding,readerForGeneration,
@@ -74,7 +83,7 @@ export function createPazoLiveSettlementReconciliationGate({
    sale?.merchantGeneration!==binding.merchantGeneration||
    sale?.subscriptionId!==binding.subscriptionId||sale?.saleId!==event.saleId||
    sale?.amountMinor!==299||sale?.currency!=='USD'||
-   !validIso(sale?.paidAt))
+   !validProviderInstant(sale?.paidAt))
    return review('provider_completed_sale_not_proven')
 
   let period
