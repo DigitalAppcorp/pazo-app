@@ -45,6 +45,27 @@ test('Live transactions require original merchant subscription GET and exact pai
  assert.ok(calls.every(x=>x.url.startsWith('https://api-m.paypal.com/')))
  assert.ok(calls.some(x=>x.url.includes('/transactions?start_time=')))
 })
+test('PayPal ISO UTC seconds without fractional component are valid but invalid dates fail',async()=>{
+ const reader=createPaypalLiveMerchantEvidenceReader({
+  merchantGeneration:7,planId:plan,clientId:'CLIENTABCDEFGH123',
+  clientSecret:'SECRETABCDEFGH123',
+  fetchImpl:async(url)=>{
+   const body=url.endsWith('/oauth2/token')?
+    {token_type:'Bearer',access_token:'OPAQUE_TOKEN_12345'}:
+    url.includes('/transactions?')?
+    {transactions:[{...transaction,time:'2026-10-15T00:00:00Z'}],
+      total_pages:1,total_items:1}:
+    {id:sub,plan_id:plan,custom_id:intent,status:'ACTIVE'}
+   return {ok:true,status:200,headers:{get:()=> 'application/json'},
+    text:async()=>JSON.stringify(body)}
+  }
+ })
+ const data=await reader.readCompletedSale({
+  ...arg,startTime:'2026-10-01T00:00:00Z',endTime:'2026-10-30T00:00:00Z'
+ })
+ assert.equal(data.verified,true)
+ assert.equal(data.servicePeriodVerified,false)
+})
 test('Wrong plan, intent or generation cannot inspect financial transactions',async()=>{
  for(const change of [
   {subscriptionChange:{custom_id:'intent-33333333-3333-4333-8333-333333333333'}},
