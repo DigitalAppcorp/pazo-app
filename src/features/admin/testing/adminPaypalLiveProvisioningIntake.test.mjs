@@ -7,7 +7,7 @@ const body={merchantGeneration:7,clientId:'CLIENT_TEST_123456789',
  clientSecret:'SECRET_TEST_123456789',
  confirmation:'PREPARAR CREDENCIALES LIVE',expectedRevision:0}
 const request=(data=body,headers={})=>new Request(url,{method:'POST',
- headers:{authorization:'Bearer TEST_JWT','content-type':'application/json',...headers},
+ headers:{authorization:'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.dGVzdHNpZw','content-type':'application/json',...headers},
  body:JSON.stringify(data)})
 test('inert new Edge endpoint is OFF, never reads sensitive POST body or calls backend',async()=>{
  let count=0
@@ -43,7 +43,7 @@ test('bad body, extra fields, missing JWT and query injection never reach backen
   request(body,{authorization:''}),
   request(body,{'content-type':'application/x-www-form-urlencoded'}),
   new Request(url+'?generation=7',{method:'POST',headers:{
-   authorization:'Bearer TEST_JWT','content-type':'application/json'},
+   authorization:'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.dGVzdHNpZw','content-type':'application/json'},
    body:JSON.stringify(body)})
  ]
  for(const v of variants){const response=await ingress(v);assert.ok(response.status>=400)}
@@ -57,4 +57,18 @@ test('backend failure never reflects PayPal tokens, credentials or full error',a
  const r=await response.text()
  assert.ok(!r.includes('SENSITIVE'))
  assert.ok(!r.includes(body.clientSecret))
+})
+
+test('reject malformed bearer, extraneous content type, and UTF-8 byte overflow',async()=>{
+ let calls=0
+ const ingress=createPazoLiveProvisioningIntake({released:true,provision:async()=>{calls++}})
+ const variants=[
+  request(body,{authorization:'Bearer not-a-jwt'}),
+  request(body,{authorization:'Bearer x.y.z extra'}),
+  request(body,{'content-type':'application/json; charset=latin1'}),
+  request(body,{'content-type':'application/json; garbage=1'}),
+  request({...body,clientSecret:'é'.repeat(1050)})
+ ]
+ for(const v of variants){const res=await ingress(v);assert.ok(res.status>=400)}
+ assert.equal(calls,0)
 })
