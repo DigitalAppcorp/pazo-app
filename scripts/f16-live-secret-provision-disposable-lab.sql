@@ -1,7 +1,7 @@
 -- F16 secret-reservation lab: disposable PostgreSQL only, no hosted apply.
 DO $guard$
 BEGIN
- IF pg_catalog.current_database()<>'f14_synthetic' OR pg_catalog.current_user<>'postgres'
+ IF current_database()<>'f14_synthetic' OR current_user<>'postgres'
  THEN RAISE EXCEPTION 'DISPOSABLE ONLY' USING ERRCODE='42501'; END IF;
 END $guard$;
 \i supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql
