@@ -9,9 +9,11 @@ const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const SALE=/^[A-Za-z0-9._-]{3,128}$/
 const CYCLE=/^[A-Za-z0-9_-]{6,100}$/
 const fail=code=>Object.freeze({ready:false,reason:code,mayGrantBenefits:false})
-const iso=s=>typeof s==='string'&&s.length>=20&&
- /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/.test(s)&&
- Number.isFinite(Date.parse(s))&&new Date(s).toISOString()===new Date(Date.parse(s)).toISOString()
+// Period proof must have exact canonical UTC milliseconds. In particular,
+// Date.parse() normalizes some invalid calendar dates instead of rejecting them.
+const iso=s=>typeof s==='string'&&
+ /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(s)&&
+ Number.isFinite(Date.parse(s))&&new Date(s).toISOString()===s
 export function assessPazoLiveVerifiedSale({binding,receipt,period}={}){
  if(binding?.sourceEnvironment!=='live'||binding?.provider!=='paypal'||
   binding?.ownerVerified!==true||binding?.merchantGenerationVerified!==true||
