@@ -1,4 +1,9 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 UTC
+## F16 MFA ADMIN — VERIFICADO HOSTED (20-oct-2026)
+- PO completó el vínculo Google Authenticator desde PAZO Vite local. SQL de Supabase/Auth confirma **1 factor TOTP `verified`** y ningún registro `unverified` en cuenta administradora; los logs de GoTrue confirman POST de `challenge` y `verify` con status 200. No volver a pedir QR ni alta TOTP. La UI ahora muestra campo para nuevos códigos, **normal para step-up posterior**, no significa fallo.
+- El enrolamiento verificado es solo el factor de identidad; **cada cambio de secretos Live debe exigir prueba TOTP reciente y autorización de administrador en servidor**. No afirmar que se haya aprovisionado un comercio o webhook por MFA; Live sigue OFF. El PR #44 continúa DRAFT, sin merge ni beta publicada.
+- Se corrigió el diagnóstico del QR en la rama F13 y quedó documentado; no repetir ciclos de intento al mismo error. Siguiente fase: identidad PayPal Live, configuración de generación comercial, secretos privados y webhook firmado mediante gates separados.
+
 ## F16 — Diagnóstico y reparación TOTP MFA (20-oct-2026)
 - El intento real del PO al pulsar «Configurar autenticador» devolvió error de UI. Auth logs alojados confirman `POST /factors` **200** con evento `factor_in_progress`; SQL agregado para la cuenta administradora mostró `1` factor TOTP `unverified`, `0` verified. Por lo tanto NO repetir alta a ciegas.
 - El componente `AdminPaypalMfaStepUp.tsx` rechazaba un formato Supabase válido `data:image/svg+xml;utf-8,...`. Corregido en rama F13 commit `6a142f5`; añadido reconocimiento de `data.all` para factor `unverified` y botón de recuperación con comprobación exacta antes de `mfa.unenroll` **solo del factor pendiente**. Pruebas ampliadas en commit `6e48a3dc45c0d4e0d4c7f847a3fe97823fc442e5` y **8/8 CI PASS**.
