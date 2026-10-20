@@ -241,7 +241,7 @@ export function AdminPayPalSettings({lang}:Props){
           'No custom domain is needed now. Localhost is only the development interface, not a public webhook endpoint. The existing Sandbox checkout continues to manage the HTTPS return URL until a safe migration.')}
       </p>
     </section>
-    {env==='live'&&LIVE_EDGE_PROVISIONING_RELEASED&&
+    {env==='live'&&
      <AdminPaypalMfaStepUp lang={lang} onVerified={()=>setNotice(t(
        'Código MFA comprobado. El servidor validará nuevamente la sesión para autorizar credenciales.',
        'MFA checked. The server will independently validate the session before allowing credentials.'))}/>}
