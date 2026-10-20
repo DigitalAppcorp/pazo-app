@@ -1,8 +1,10 @@
+> **OVERRIDE PO — 20-OCT-2026 / F16_COMPLETE_BEFORE_BETA_RELEASE_NO_GO:** el criterio anterior «beta gratuita primero y programación Live después» fue REVOCADO expresamente. La beta se publica únicamente cuando **TODAS** las rutas PayPal Sandbox y Live están desarrolladas, conectadas, desplegadas bajo gates PO, probadas e integradas en el panel admin. El PO podrá introducir credenciales y usar **Guardar y activar** antes o después del lanzamiento, **sin editar código, SQL, variables ni funciones**. Fecha de beta NO es gate técnico de Live; sí lo son HTTPS público funcional, PayPal real, recursos, firma webhook, períodos/reversos, cancelación, PWA y validación server-only. El registro de credenciales por sí solo no habilita cobros; la operación de guardado/activación debe ser inequívoca y fallar cerrada. **En este momento NO hay permiso para activar cobros o desplegar finanzas Live**. Cualquier texto histórico más abajo que posponga implementar Live después de beta queda supersedido por este override y el handoff canónico.
+
 > **HOSTED F16 STAGING — 2026-10-19, GO del Product Owner ejecutado (solo infraestructura).** Cinco migraciones PostgreSQL aplicadas en `mrybvqdebbgcayuvgkkr`; versiones registradas: `20261019235351`, `20261019235426`, `20261019235455`, `20261019235525`, `20261019235552`. Todas las nueve tablas privadas están FORCE RLS, vacías y sin SELECT de anon/auth/service_role. Las funciones financieras privadas no otorgan EXECUTE a anon/auth/service_role. Solo `public.pazo_f16_live_service_binding_read(text)` otorga EXECUTE a `service_role` para lectura mínima. Ambos selectores siguen `sandbox/live_enabled=false`; nuevo selector `kill_switch=true` sin generación. Sandbox preserva 2 períodos QA y 26 eventos. No se desplegó Edge Live, no se generó dinero ni hubo merge. La captura de datos financieros Live y el gateway permanecen OFF; son pendientes independientes la autenticación provider Vault, RPC writers service-only, retención, seguridad, UX y beta HTTPS. Las descripciones de “no instalado” bajo este encabezado son **historia anterior al GO**, no estado actual.
 
 # PAZO — Ruta de lanzamiento MVP Beta → PayPal Live
 
-## Ruta ejecutiva — cinco etapas (PO: beta gratuita; Live posterior)
+## Ruta ejecutiva — cinco etapas (PO: PayPal Live completamente implementado antes de beta)
 
 Esta sección es el orden vigente para el cierre. Ver dictamen de evidencia en docs/PAZO_MVP_LAUNCH_AND_LIVE_AUDIT_20261019.md. No reabrir módulos sociales ya aprobados salvo regresión demostrada.
 
@@ -21,7 +23,7 @@ Ejecutar verify:prepreview, build, artefacto PWA, CI+6 PostgreSQL labs, smoke co
 ### 05. Único Preview de aceptación y beta pública
 Solo tras cerrar 01–04, publicar un Preview privado del SHA final. Verificar HTTPS, version, Auth/recovery, PWA real instalada y navegador en Android/iOS, callback/return, refresh, navegación, acceso público sin autenticación Vercel, métricas/errores y rollback. Fijar fecha de vigencia legal al publicar. Pedir GO PO para merge/main/deploy. DoD: beta gratuita accesible, segura y aprobada.
 
-### Activación Live posterior — verificación externa final
+### Activación Live opcional antes o después de beta — verificación externa final
 Ya con beta HTTPS oficial, PO configura credenciales, plan y webhook Live por Vault en panel (nunca secretos en chat), se valida merchant/plan/origen, firma y entrega webhook, cancelación/renovación y una transacción real supervisada con reconciliación de período. Tras un GO financiero independiente se cambia SOLO nueva alta Live por selector administrativo auditado. Ni publicar beta ni guardar claves activa cobros. Las suscripciones Sandbox anteriores conservan merchant y gestión originales. No prometer cero cambios si PayPal real descubre incompatibilidades.
 
 Fuera del cierre: mensajería futura informativa, extensiones fake doors, mejoras de rendimiento sin impacto medido, cobertura de egress sin API del proveedor. Beta social y cobros Live son dos gates diferentes.
