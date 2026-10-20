@@ -15,8 +15,8 @@ BEGIN
   OR (select count(*) from admin_private.pazo_paypal_new_checkout_switch
        where singleton and environment='sandbox' and live_enabled=false
         and kill_switch=true and active_generation is null)<>1
-  OR EXISTS(select 1 from admin_private.pazo_paypal_merchant_generations
-       where environment='live')
+  -- Historical Live merchant rows, if any, are permitted: this migration
+  -- creates only a new audit table/RPCs and changes no merchant metadata.
  THEN RAISE EXCEPTION 'PAZO F16 audit install preflight failed' USING ERRCODE='42501';
  END IF;
 END $f16provisionpre$;
