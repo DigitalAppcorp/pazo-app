@@ -1,5 +1,8 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 UTC
 
+## F16 — ADMIN EDGE HOSTED INERTE — 20 OCT 2026
+- Función `pazo-admin-paypal-provision` ACTIVE v2, JWT obligatorio, RELEASE_APPROVED=false. Sin operaciones financieras. Ver `docs/PAZO_F16_ADMIN_EDGE_INERT_HOSTED_20261020.md`.
+
 ## F16 — SQL HOSTED INSTALADO CON GO PO — 20 OCT 2026
 - Supabase proyecto `mrybvqdebbgcayuvgkkr`: usuario aprobó expresamente instalar **dos migraciones** sin activar Live. Aplicadas mediante Supabase con `success:true`. Versiones **`20261020214807_pazo_f16_live_bootstrap_generation_guarded`** y **`20261020214838_pazo_f16_live_durable_inbox_lease_guarded`**; ficheros versionados renombrados en GitHub a esos IDs.
 - Postflight HOSTED: tablas y RPCs presentes; tabla reserva y originales FORCE RLS; anon/auth no EXECUTE bootstrap ni inbox claim/finish; service_role sí; `0` reservas, `0` merchant generations, `0` intentos secretos y `0` inbox. Switch `environment=sandbox,live_enabled=false,kill_switch=true,active_generation=null,revision=0`.
