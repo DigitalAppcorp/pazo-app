@@ -1,4 +1,8 @@
 -- Add Edge-only (nonsecret) generation metadata in disposable PG17.
+-- Earlier CAS lab simulates Live/stop; preserve whatever switch it leaves.
+CREATE TEMP TABLE f16_edge_switch_snapshot AS
+ SELECT singleton,environment,live_enabled,kill_switch,active_generation,revision
+ FROM admin_private.pazo_paypal_new_checkout_switch;
 \i supabase/drafts/f16_live_edge_credential_source_DISPOSABLE_ONLY.sql
 DO $edge_gen$
 DECLARE v bigint; count_bad int;
@@ -40,9 +44,13 @@ BEGIN
  IF has_table_privilege('service_role',
   'admin_private.pazo_paypal_merchant_generations','SELECT') THEN
   RAISE EXCEPTION 'Added Edge generations leaked table privileges'; END IF;
- IF EXISTS(SELECT 1 FROM admin_private.pazo_paypal_new_checkout_switch
-  WHERE singleton AND (environment<>'sandbox' OR live_enabled OR
-   NOT kill_switch OR active_generation IS NOT NULL))
- THEN RAISE EXCEPTION 'Metadata-only adaptation activated Live'; END IF;
+ IF EXISTS(
+  SELECT 1 FROM admin_private.pazo_paypal_new_checkout_switch s
+  FULL OUTER JOIN f16_edge_switch_snapshot b USING(singleton)
+  WHERE s.singleton IS NULL OR b.singleton IS NULL OR
+   (s.environment,s.live_enabled,s.kill_switch,s.active_generation,s.revision)
+    IS DISTINCT FROM
+   (b.environment,b.live_enabled,b.kill_switch,b.active_generation,b.revision)
+ ) THEN RAISE EXCEPTION 'Metadata adaptation mutated checkout switch'; END IF;
  RAISE NOTICE 'F16_EDGE_GENERATION_METADATA_DISPOSABLE_PG17_PASS';
 END $edge_gen$;
