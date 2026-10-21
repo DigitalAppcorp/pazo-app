@@ -1,5 +1,20 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — Cuenta Live del comprador y checkout server-gated (21-oct-2026, avance más reciente)
+
+**Orden PO vigente:** entregar toda la beta con PayPal Live técnicamente listo antes de solicitar claves; único paso final PO introducir Client ID/Secret en Admin y aprobar canary real. NO declarar listo hasta completar release financiero y E2E.
+
+**Tres incrementos cerrados en F13 (NUNCA en main):**
+- **PR #62** squash `b8e8eb3accc75f102b0fe16697aad442531d44fa`, CI **9/9 PASS**: `SupporterLiveCheckoutPanel.tsx` reemplaza el botón Live inerte. Consulta GET de offer ES/EN íntegro `pazo-paypal-live-checkout?locale=...`, obteniendo `live_checkout_ready` exclusivamente si route Live+worker privado `enabled,processingAllowed,healthy` están validados backend. Consentimiento explícito y desmarcado, un solo POST y request UUID; acepta solo URL PayPal oficial, nunca concede beneficios por retorno/ACTIVE. Sandbox QA restringido a DEV localhost. **Checkout Edge sigue compilado OFF y no desplegado para cobrar.**
+- **PR #63** squash `02ee1f3116095661b988b7984a1e6cdea0970797`, CI **9/9 PASS**: nueva Edge `pazo-paypal-live-account` consulta dueño autenticado GoTrue + RPC privada `pazo_f16_live_service_owner_checkouts_read`, respuesta sanitizada (máximo 1 slot abierto, sin subscription ID, merchant, requestKey ni plan). UI no ofrece checkout Live si existen intentos originales o no pudo consultar estado. Edge **v1 ACTIVE, verify_jwt=true** registrada.
+- **PR #64** squash `8d018f7caf4527e6f7408ee8707647601a4241f7`, CI **9/9 PASS**: `action:status` de la misma Edge, obtiene PayPal GET usando generación original de Vault, valida ID, plan_id y custom_id contra intent owner-scoped, devuelve solo `providerStatus`, jamás `paidThrough` o badge. Edge `pazo-paypal-live-account` **v2 ACTIVE, verify_jwt=true** confirmada por postflight hosted. Sin credentials reales aún, este paso solo pudo probarse sintéticamente.
+
+**Supabase postflight:** `merchants=0`, `checkout_intents=0`, `paid_periods=0`; switch `environment=sandbox/live_enabled=false/kill_switch=true/active_generation=null`. No pago ni suscripción real creada. Rutas checkout/webhook Live hard OFF y reversión disponible.
+
+**Próximos gates críticos ANTES de pedir credenciales al PO:** cancelación/autogestión Live real segura con original merchant, recuperación de PayPal CREATE incierto sin duplicado, callback HTTPS/PWA y conciliación, readiness/activación de los latches Edge/DB sin modificación de código posterior (con MFA/GO explícito), despliegue Vercel de F13 a dominio HTTPS accesible sin SSO y smoke móvil, visibilidad del admin y pruebas completas. NO confundir CI verde ni Edge solo lectura con cobertura de dinero. Plan/webhook Live y Sandbox previamente verificados; no repetir, no pedir balances scope.
+
+
+
 ## F16 — Postflight de Codex/owner-slot y comprobación Vercel (21-oct-2026, última actualización)
 
 - PR #60 squash `5fc001de698b99f80b68b24b7cc4ae0405192f69`: recuperación completa Codex y claim HTTPS original. GitHub CI 9/9 PASS.
