@@ -5,6 +5,7 @@ import {createPazoLiveCheckoutHttpHandler} from './liveCheckoutHttpHandler.mjs'
 import {createPazoLiveGoTrueOwnerResolver} from './liveGoTrueOwner.mjs'
 import {createPazoLiveServiceRpc} from './liveSqlServiceAdapters.mjs'
 import {publicBetaOrigin} from './liveSubscriptionProvider.mjs'
+import {createPazoLiveVaultGenerationSecretReader} from '../pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const DIGEST=/^[a-f0-9]{64}$/
@@ -25,11 +26,14 @@ export function createPazoLiveHostedCheckout({
   if(api!==PROJECT||!VERSION.test(termsVersion||'')||
    !DIGEST.test(termsDigest||''))throw Error('config')
  }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
- let rpc,resolveAuthenticatedOwner
+ let rpc,resolveAuthenticatedOwner,readGenerationCredentials
  try{
   rpc=createPazoLiveServiceRpc({projectUrl:api,serviceRoleKey:service,fetchImpl})
   resolveAuthenticatedOwner=createPazoLiveGoTrueOwnerResolver({
    supabaseUrl:api,anonKey:anon,fetchImpl
+  })
+  readGenerationCredentials=createPazoLiveVaultGenerationSecretReader({
+   supabaseUrl:api,serviceRoleKey:service,fetchImpl
   })
  }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
  const readActiveRoute=async()=>rpc('route',{})
@@ -77,7 +81,7 @@ export function createPazoLiveHostedCheckout({
   // Origin and merchant are pinned to the same DB revision per request.
   const serve=createPazoLiveCheckoutHttpHandler({
    released:true,resolveAuthenticatedOwner,readActiveRoute:async()=>pinned,
-   getSecret,rpc,admit,verifyConsent,publicOrigin:origin,fetchImpl
+   getSecret,readGenerationCredentials,rpc,admit,verifyConsent,publicOrigin:origin,fetchImpl
   })
   const response=await serve(req)
   const headers=new Headers(response.headers)
