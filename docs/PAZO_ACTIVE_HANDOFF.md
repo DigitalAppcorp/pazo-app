@@ -1,4 +1,19 @@
-# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
+# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
+
+## Recuperación Codex 21-oct — P1 en ejecución
+
+Área aislada `pazo-live-reconciler`, rama `f16/live-signed-sale-reconciler-20261021`,
+base F13 `4e434b2fb17e981491b13de96a86befdcf7c9fff`. WIP anterior preservado en
+`f16/codex-merchant-identity-handoff-20261020`; lockfile original intacto.
+Orden completa leída; no scope de saldos, nuevas claves ni pruebas Sandbox/recursos.
+Auditoría alojada confirma reserva1, merchant0, inbox Live0, períodos0 y selector OFF.
+
+Entrada firmada con evidencia mínima persistida, lectura bajo lease vigente y
+corroboración GET del evento desde Vault de la generación original: código y
+PG17 local PASS; migración `20261021064239` aún NO APLICADA. No hay pagos ni grants.
+Falta terminar venta/destinatario/período y escritura/finalización atómica, además
+del resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
+No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 
 **CODEX — ORDEN ACTIVA F16/BETA:** Antes de implementar o declarar finalizado cualquier cambio de monetización o lanzamiento, leer y ejecutar integralmente `docs/CODEX_F16_BETA_LAUNCH_COMPLETION_ORDER_20261021.md`. Esa orden concreta el mandato obligatorio del PO: terminar software, backend, QA y preparación antes de pedir claves Live en Administración; únicamente se reserva para el PO el ingreso privado de credenciales y autorización de la prueba/cobro real. No confundir CI PASS con beta lanzable ni posponer F16. 
 

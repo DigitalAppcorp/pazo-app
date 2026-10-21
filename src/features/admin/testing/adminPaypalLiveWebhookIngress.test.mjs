@@ -11,7 +11,8 @@ const headers={
  'paypal-cert-url':cert,
 }
 const event={id:'WH-EVENT-123',event_type:'PAYMENT.SALE.COMPLETED',
- resource:{id:'SALE12345',custom_id:'ATTACKER_UNTRUSTED'}}
+ create_time:'2026-10-19T20:00:00Z',
+ resource:{id:'SALE12345',billing_agreement_id:'I-LIVE-SUBSCRIPTION123',custom_id:'ATTACKER_UNTRUSTED'}}
 const request=(body=JSON.stringify(event),more={})=>new Request('https://pazo.example.com/',{
  method:'POST',headers:{...headers,...more},body
 })
@@ -76,7 +77,10 @@ test('Only independently verified LIVE owner-scoped events can enter a durable i
  const r=await handler(request())
  assert.equal(r.status,202)
  assert.equal(records.length,1)
- assert.deepEqual(records[0],{provider:'paypal',sourceEnvironment:'live',
+ const {signatureEvidence,...queued}=records[0]
+ assert.equal(signatureEvidence.proofSource,'paypal_live_postback_success')
+ assert.equal(signatureEvidence.subjectId,event.resource.id)
+ assert.deepEqual(queued,{provider:'paypal',sourceEnvironment:'live',
   merchantGeneration:1,ownerId:owner,intentId:intent,
   subscriptionId:subscription,eventId:event.id,eventType:event.event_type})
  assert.ok(!JSON.stringify(records).includes('ATTACKER_UNTRUSTED'))

@@ -12,17 +12,21 @@ export function createPazoLiveHostedInbox({
    /\s/.test(serviceRoleKey)||typeof fetchImpl!=='function')
   fail()
  const queueVerifiedEvent=async({
-  ownerId,intentId,subscriptionId,merchantGeneration,eventId,eventType
+  ownerId,intentId,subscriptionId,merchantGeneration,eventId,eventType,signatureEvidence
  })=>{
+  if(signatureEvidence?.proofSource!=='paypal_live_postback_success'||
+   !/^[a-f0-9]{64}$/.test(signatureEvidence.signedBodySha256||'')||
+   signatureEvidence.subscriptionId!==subscriptionId)fail()
   let r
   try{
-   r=await fetchImpl(PROJECT+'/rest/v1/rpc/pazo_f16_live_service_verified_event_queue',{
+   r=await fetchImpl(PROJECT+'/rest/v1/rpc/pazo_f16_live_service_signed_event_queue',{
     method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000),
     headers:{apikey:serviceRoleKey,Authorization:'Bearer '+serviceRoleKey,
      'content-type':'application/json',Accept:'application/json'},
     body:JSON.stringify({
      p_owner:ownerId,p_intent:intentId,p_subscription:subscriptionId,
-     p_generation:merchantGeneration,p_event_id:eventId,p_event_type:eventType
+     p_generation:merchantGeneration,p_event_id:eventId,p_event_type:eventType,
+     p_evidence:signatureEvidence
     })
    })
   }catch{fail()}

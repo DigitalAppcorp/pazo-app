@@ -12,6 +12,7 @@ const headers={
  'paypal-cert-url':'https://api-m.paypal.com/v1/notifications/certs/CERT-ABCDEFG-1234'
 }
 const event={id:'WH-LIVE-TEST123',event_type:'PAYMENT.SALE.COMPLETED',
+ create_time:'2026-10-19T20:00:00Z',
  resource:{id:'SALE-LIVE12345',billing_agreement_id:sub}}
 const mkReq=(hint='7',body=event)=>new Request(
  'https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook'+hint,

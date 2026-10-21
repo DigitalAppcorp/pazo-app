@@ -12,7 +12,11 @@ const r=new Request(origin+'/functions/v1/pazo-paypal-live-webhook?generation=7'
 })
 const event={provider:'paypal',sourceEnvironment:'live',
  merchantGeneration:7,ownerId:owner,intentId:intent,subscriptionId:'I-LIVE12345',
- eventId:'WH-LIVE-EVENT1234',eventType:'PAYMENT.SALE.COMPLETED'}
+ eventId:'WH-LIVE-EVENT1234',eventType:'PAYMENT.SALE.COMPLETED',signatureEvidence:{
+  proofSource:'paypal_live_postback_success',signedBodySha256:'a'.repeat(64),
+  webhookId:'WH-SYNTHETIC1234',subscriptionId:'I-LIVE12345',subjectId:'SALE-SYNTHETIC',
+  providerEventAt:'2026-10-21T06:00:00.000Z',subjectAt:'2026-10-21T06:00:00.000Z',
+  activationAt:null,nextBillingAt:null}}
 test('Hosted webhook entrypoint remains compile-time OFF, with no environment reads',async()=>{
  const src=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-webhook/index.ts',import.meta.url),'utf8')
  assert.match(src,/const LIVE_WEBHOOK_RELEASED=false/)
@@ -41,10 +45,11 @@ test('trusted webhook inbox only persists validated scope to fixed service-only 
   }})
  assert.equal(await inbox.recordIfAbsent(event),true)
  assert.equal(writes.length,1)
- assert.equal(writes[0].url,origin+'/rest/v1/rpc/pazo_f16_live_service_verified_event_queue')
+ assert.equal(writes[0].url,origin+'/rest/v1/rpc/pazo_f16_live_service_signed_event_queue')
  assert.equal(writes[0].body.p_owner,owner)
  assert.equal(writes[0].body.p_generation,7)
  assert.equal(writes[0].body.p_event_type,'PAYMENT.SALE.COMPLETED')
+ assert.deepEqual(writes[0].body.p_evidence,event.signatureEvidence)
  assert.ok(!JSON.stringify(writes[0].body).includes('payer_email'))
 })
 test('duplicate webhook is acknowledged safely; incorrect owner or provider cannot persist',async()=>{
@@ -55,5 +60,6 @@ test('duplicate webhook is acknowledged safely; incorrect owner or provider cann
  assert.equal(await inbox.recordIfAbsent(event),false)
  await assert.rejects(inbox.recordIfAbsent({...event,provider:'stripe'}))
  await assert.rejects(inbox.recordIfAbsent({...event,sourceEnvironment:'sandbox'}))
+ await assert.rejects(inbox.recordIfAbsent({...event,signatureEvidence:undefined}))
  assert.equal(calls,1)
 })

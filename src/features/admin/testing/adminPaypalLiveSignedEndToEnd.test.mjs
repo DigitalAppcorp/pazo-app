@@ -9,6 +9,7 @@ const intent='intent-12345678-1234-4234-8234-123456789abc'
 const sub='I-SUBSCRIPTION123'
 const plan='P-ABCDEFGHIJKLMN'
 const data={id:'WH-EVENT-123',event_type:'PAYMENT.SALE.COMPLETED',
+ create_time:'2026-10-19T20:00:00Z',
  resource:{id:'SALE-123',billing_agreement_id:sub}}
 const headers={
  'content-type':'application/json',
@@ -77,7 +78,11 @@ test('end-to-end synthetic signature + private original owner + PayPal GET + inb
   'token','verify-webhook-signature','token',sub
  ])
  assert.equal(seen.length,1)
- assert.deepEqual(seen[0],{
+ const {signatureEvidence,...queued}=seen[0]
+ assert.equal(signatureEvidence.proofSource,'paypal_live_postback_success')
+ assert.match(signatureEvidence.signedBodySha256,/^[a-f0-9]{64}$/)
+ assert.equal(signatureEvidence.subscriptionId,sub)
+ assert.deepEqual(queued,{
   ownerId:owner,intentId:intent,subscriptionId:sub,
   merchantGeneration:3,
   eventId:data.id,eventType:data.event_type

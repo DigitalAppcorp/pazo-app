@@ -78,7 +78,7 @@ export function createPazoLiveVerifiedInboxAdapter({queueVerifiedEvent}={}){
   throw Error('live_inbox_rpc_unavailable')
  return Object.freeze({
   async recordIfAbsent({provider,sourceEnvironment,merchantGeneration,
-   ownerId,intentId,subscriptionId,eventId,eventType}={}){
+   ownerId,intentId,subscriptionId,eventId,eventType,signatureEvidence}={}){
    if(provider!=='paypal'||sourceEnvironment!=='live'||!OWNER.test(ownerId||'')||
     !INTENT.test(intentId||'')||!SUB.test(subscriptionId||'')||
     !Number.isSafeInteger(merchantGeneration)||merchantGeneration<1||
@@ -88,7 +88,8 @@ export function createPazoLiveVerifiedInboxAdapter({queueVerifiedEvent}={}){
    // derive owner through immutable private table + PayPal provider GET.
    let result
    try{result=await queueVerifiedEvent({
-    ownerId,intentId,subscriptionId,merchantGeneration,eventId,eventType
+    ownerId,intentId,subscriptionId,merchantGeneration,eventId,eventType,
+    ...(signatureEvidence===undefined?{}:{signatureEvidence})
    })}catch{unavailable()}
    if(result==='queued')return true
    if(result==='duplicate_verified_event')return false

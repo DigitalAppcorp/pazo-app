@@ -1,5 +1,14 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+Actualización Codex 21-oct-2026: P1 en ejecución en la rama de recuperación
+`f16/live-signed-sale-reconciler-20261021`. Evidencia mínima firmada, lectura con
+lease y GET del evento de la generación original implementados, SQL local PG17
+con roles/rollback PASS. Closure 376/376, F16 sintético 1193/1193, build y PWA
+dist 4/4 PASS. Vite 8.3.2→8.3.3, audit cero vulnerabilidades. Migración
+`20261021064239` todavía no aplicada; sin nuevo deploy, pagos, secretos o grants.
+Esto no completa el trabajador de períodos/ventas ni P1–P5. **NO-GO** y todavía
+no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. Detalle en el informe del reconciliador.
+
 ## Comprobación privada del ID de comercio Live — 21-oct-2026 UTC
 
 **Estado CODE + CI + HOSTED, no vinculante:** tras confirmar el PO que tiene a la
