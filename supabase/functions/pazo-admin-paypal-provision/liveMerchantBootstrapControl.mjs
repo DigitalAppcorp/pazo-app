@@ -28,10 +28,20 @@ function cors(request){
   'access-control-allow-headers':'authorization,apikey,content-type,x-client-info,x-supabase-api-version,x-region,x-supabase-client-platform,x-supabase-client-platform-version,x-supabase-client-runtime,x-supabase-client-runtime-version',
   'access-control-allow-methods':'POST, OPTIONS'}
 }
-const deny=(status,code,request)=>new Response(JSON.stringify({
- ok:false,code,environment:'live',mayCharge:false,liveActivated:false
-}),{status,headers:{'content-type':'application/json','cache-control':'no-store',
- ...cors(request)}})
+// Only bounded stage labels are logged, never credentials, JWTs, payloads
+// or exception messages. Diagnoses a rare failure without retrying payments.
+const TRACE_CODES=new Set([
+ 'bootstrap_backend_unavailable',
+ 'live_configuration_unavailable','generation_outcome_needs_review'
+])
+const deny=(status,code,request)=>{
+ if(status===503&&TRACE_CODES.has(code))
+  console.warn('PAZO_F16_BOOTSTRAP_STAGE:'+code)
+ return new Response(JSON.stringify({
+  ok:false,code,environment:'live',mayCharge:false,liveActivated:false
+ }),{status,headers:{'content-type':'application/json','cache-control':'no-store',
+  ...cors(request)}})
+}
 export function createPazoLiveMerchantBootstrapControl({
  released=false,authenticateAdmin,readAdminSettings,reserveGeneration
 }={}){
