@@ -1,5 +1,60 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+## Comprobación privada del ID de comercio Live — 21-oct-2026 UTC
+
+**Estado CODE + CI + HOSTED, no vinculante:** tras confirmar el PO que tiene a la
+vista el Merchant ID en PayPal Business real, se implementó el formulario
+`AdminPaypalLiveMerchantMatch.tsx` dentro de Admin→Configuración→PayPal→Live,
+separado de la comprobación de plan/webhook **ya terminada**. Pide ID de comercio
+(13 caracteres), Live Client ID y Live Client Secret **solamente dentro de PAZO**,
+con Supabase TOTP reciente exigido por el servidor. Ninguna clave ni merchant ID se
+introduce en chat o GitHub. El formulario limpia los inputs al enviarlos.
+
+**Seguridad real:** nueva acción `verify_merchant_id` en
+`pazo-admin-paypal-live-inspect/handler.mjs`, no en checkout. Bajo el mismo
+contexto admin, reserva generación1 y Live switch OFF, reutiliza el lector
+solo servidor `readLivePaypalMerchantIdentity` que comprueba plan y webhook y
+consulta temporalmente el ID de la API PayPal Live
+`GET /v1/reporting/balances?currency_code=USD` (requiere permiso
+`reporting/balances/read`). La respuesta de saldos nunca sale del proceso ni
+se persiste. El servidor compara `SHA-256(paypal:live:<merchant_id_del_PO>)`
+con la huella del account_id devuelto por PayPal, descarta ambas referencias
+brutas y las claves, vuelve a comprobar la generación y devuelve solo
+`live_merchant_id_read_match` o código fijo de rechazo. En éxito devuelve
+EXPLÍCITAMENTE `merchantIdentityVerified=false`,
+`merchantBindingStored=false`, `credentialsStored=false`,
+`webhookDeliveryVerified=false`, `mayCharge=false`. Un simple match transitorio
+no es registro de identidad original inmutable ni prueba de firma webhook.
+No se cambia `pazo_paypal_merchant_generations` ni se provisionan secretos.
+
+**Integración:** PR #48 fusionado EXCLUSIVAMENTE a F13, squash
+`3deca88144f0f8f99824f3d3addb832ed6ba0e0e`; CI antes de integrar
+9/9 SUCCESS, incluido Node, TypeScript, PWA y laboratorios PG17.
+Supabase `pazo-admin-paypal-live-inspect` **v4 ACTIVE**, `verify_jwt=true`;
+nueve fuentes alojadas idénticas a F13. No se desplegó frontend público.
+Postflight SQL read-only: reserva1, merchant0, intentos secretos0,
+release_evidence0, períodos Live0, selector sandbox/live=false/kill=true.
+`main` y PR44 DRAFT intactos.
+
+**Siguiente acción PO:** en `PAZO-F13-preview` actualizar la rama F13 local
+SIN descartar `package-lock.json` modificado; refrescar localhost:5173,
+Admin→Configuración→PayPal→Live; verificar TOTP reciente en PAZO;
+nueva sección `Comprobar identidad del comercio Live`: introducir ID visible de
+PayPal Business real + Live Client ID/Secret solo en formulario privado;
+pulsar una vez `Comprobar comercio sin guardar datos`. Reportar solo mensaje
+de estado/código (`live_merchant_id_read_match` o
+`live_merchant_read_permission_required`, etc.), nunca ID/keys/saldos.
+No hay que repetir el botón `Comprobar plan y webhook Live`, ni reservar
+generación/webhook nuevamente.
+
+**Gate pendiente después de un match real:** establecer la huella original
+solo con consentimiento administrativo explícito y registro fiable inmutable,
+provisionar secretos con scope mínimo, probar entrega firmada, conciliación,
+reversiones, checkout/retornos HTTPS/PWA, beneficios y rollback. No dar GO Live
+por el match transitorio.
+
+
+
 ## Cierre verificado del gate de configuración del plan y webhook Live — 21-oct-2026
 
 **Este estado supersede el diagnóstico histórico `live_webhook_events_unexpected` de abajo.** El Product Owner presentó captura de PAZO con mensaje
