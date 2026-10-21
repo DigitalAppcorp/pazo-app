@@ -149,21 +149,42 @@ commit, JWT OFF porque valida capacidad propia antes de admisión service-only.
 Cuatro HTTP reales sin credenciales PASS: sin auth403, invoker inválido403,
 Origin navegador403, GET405; cero CORS. No se leyó ni compartió el invoker.
 
-Scheduler local `20261021145500` instala exclusivamente las extensiones disponibles
-pg_cron1.6.4/pg_net0.20.4, con esquemas/funciones/tablas denegados a clientes y
-servicio. Job por minuto llama solo al tick privado del mismo proyecto. El control
-empieza deshabilitado: no envía HTTP hasta habilitar explícitamente el modo salud.
-Después, un lote activo o menos de55s desde envío impiden otra llamada.
-El header de autenticación se forma dentro de PostgreSQL desde Vault; queda
-temporalmente en la cola privada no registrada de pg_net hasta ser consumido.
-No contiene claves PayPal. Solo los logs técnicos de este job se conservan7d;
-otros jobs y registros financieros permanecen fuera de esa limpieza.
+Scheduler `20261021145500` APLICADO una vez mediante SQL Editor después de dos
+fallos del estado de petición MCP, ambos comprobados sin ejecución. Historial
+registrado explícitamente en la misma transacción; una corrección posterior del
+campo `statements` reparó la serialización de `$'`, sin repetir DDL. Fuente del
+tick canónica MD5 `c08d3977938766fa5e6dcbcc2367ac55` coincide con la revisada.
+pg_cron1.6.4/pg_net0.20.4 nativos instalados; cron por minuto ya ejecutó el tick
+deshabilitado correctamente, sin emitir solicitudes. Control y procesamiento OFF.
+
+El postflight real detectó que Supabase conserva grants PUBLIC sobre `net`:
+su propietario es `supabase_admin` y los REVOKE de postgres son un no-op.
+No afirmar ACL denegada ni una cola privada. Es una restricción documentada de
+[Supabase](https://supabase.com/docs/guides/troubleshooting/revoking-access-to-pg_net-objects-has-no-effect-0bbc16).
+La configuración real expone solo public/graphql_public; net no se expone en la
+Data API. Los logins de base existentes son de plataforma/administración y CLI.
+Ningún header ni contenido de Vault se ha leído ni enviado por el scheduler.
+
+Corrección local `20261021154316`: cada dispatch crea una capacidad aleatoria
+de244bits para UNA admisión durante120s; solo su hash permanece en el control
+privado. Admisión consume el hash bajo lock, incluso si el lote está ocupado.
+El antiguo bearer Vault deja de aceptarse y nunca se coloca en pg_net. La cola
+solo contendrá esta capacidad efímera, legible por logins confiables de la DB,
+sin clave de servicio ni PayPal. La frecuencia55s, lease activo y dispatch vigente
+evitan solapamientos. Rollback operativo invalida dispatch y deshabilita trabajo;
+no restaura autenticación permanente. Corrección pendiente de CI/aplicación.
+Solo los logs técnicos del job se conservan7d; otros registros quedan intactos.
 
 PG17 ejecutó el core exacto extraído de la migración con adaptadores simulados
 cron/net, sin red: OFF, target/auth correctos, frecuencia, exclusión, fallo sin
 invoker, retención aislada y rollback/reapply PASS. El primer ensayo falló por
 un nombre ambiguo de la fixture, corregido; no se relajó el SQL del producto.
-Esto NO valida extensiones nativas; falta instalación/health alojado tras CI.
+PG19 verifica además retiro del bearer, uso único, rechazo de nonce inválido,
+vencimiento, recuperación con nonce distinto y rollback de deshabilitación PASS.
+PG18 falló por comparación CRLF/LF en el guard; se corrigió normalizando solo
+finales de línea antes del hash, sin aceptar otra función. Clusters detenidos.
+Extensiones nativas y cron OFF verificados; falta recorrido HTTP autenticado
+con la corrección instalada y procesamiento desactivado después de CI.
 [Scheduling oficial](https://supabase.com/docs/guides/functions/schedule-functions),
 [pg_net oficial](https://supabase.com/docs/guides/database/extensions/pg_net).
 El hash de Client ID guardado por el preparador Vault identifica la aplicación;

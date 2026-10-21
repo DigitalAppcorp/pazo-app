@@ -29,9 +29,14 @@ clave interna Vault, wrappers con backoff y salud. PG15/HTTP11/governance413,
 CI3503/gateway420 PASS; DDL `20261021144809` APLICADA, cinco RPC nuevas
 service-only y claim/finish antiguos revocados. Edge worker v1 ACTIVE con
 autenticación propia: cuatro rechazos HTTP reales PASS; control/processing OFF.
-Scheduler `20261021145500` solo local; PG17 probó core exacto con mocks cron/net.
-Extensiones nativas y recorrido autenticado de salud aún NO VERIFICADOS.
-Falta scheduler privado alojado, disputas, beneficios, checkout,
+Scheduler `20261021145500` APLICADO por SQL Editor, con historial registrado,
+después de dos fallos MCP sin ejecución. Extensiones nativas y cron OFF PASS.
+Postflight detectó grants PUBLIC de pg_net administrados por Supabase, no
+revocables por postgres; no se emitieron headers. API expone public/graphql_public.
+Corrección local `20261021154316` usa un token aleatorio de una sola admisión/120s,
+sin bearer Vault permanente en cola. PG19/rollback y governance413 PASS; pendiente
+CI/aplicación y recorrido HTTP autenticado de salud con procesamiento OFF.
+Faltan monitoreo de disputas, beneficios, checkout,
 readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
 No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 
