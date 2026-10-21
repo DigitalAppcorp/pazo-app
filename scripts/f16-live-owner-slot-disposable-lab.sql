@@ -3,6 +3,25 @@ DO $guard$ BEGIN
 END $guard$;
 \i supabase/migrations/20261021170408_pazo_f16_live_owner_checkout_slot.sql
 BEGIN;
+-- Earlier disposable labs intentionally retire merchant generation 1 and
+-- change the gateway plan. Restore the synthetic fixture for this isolated
+-- checkout test only (the entire section ROLLBACKs after assertions).
+UPDATE admin_private.pazo_paypal_merchant_generations SET retired_at=NULL
+ WHERE generation=1 AND environment='live';
+UPDATE admin_private.paypal_gateway_settings
+ SET plan_id='P-ABCDEFGHIJKLMN',webhook_id='WH-12345678900',
+  return_origin='https://pazo-app-t83r.vercel.app'
+ WHERE environment='live';
+DO $fixture$ BEGIN
+ IF NOT EXISTS(SELECT 1 FROM admin_private.pazo_paypal_merchant_generations
+  WHERE generation=1 AND environment='live' AND retired_at IS NULL
+    AND plan_id='P-ABCDEFGHIJKLMN') OR
+  NOT EXISTS(SELECT 1 FROM admin_private.paypal_gateway_settings
+   WHERE environment='live' AND plan_id='P-ABCDEFGHIJKLMN'
+    AND webhook_id='WH-12345678900'
+    AND return_origin='https://pazo-app-t83r.vercel.app')
+ THEN RAISE EXCEPTION 'synthetic owner-slot fixture not restored'; END IF;
+END $fixture$;
 UPDATE admin_private.pazo_paypal_new_checkout_switch SET environment='live',live_enabled=true,kill_switch=false,active_generation=1 WHERE singleton;
 DO $slot$
 DECLARE owner_id uuid:='12345678-1234-4234-8234-123456789abc';
