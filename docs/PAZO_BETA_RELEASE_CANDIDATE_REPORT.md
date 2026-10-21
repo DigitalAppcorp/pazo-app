@@ -6,8 +6,13 @@ lease y GET del evento de la generación original implementados, SQL local PG17
 con roles/rollback PASS. Closure 376/376, F16 sintético 1193/1193, build y PWA
 dist 4/4 PASS. Vite 8.3.2→8.3.3, audit cero vulnerabilidades. Migración
 `20261021064239` todavía no aplicada; sin nuevo deploy, pagos, secretos o grants.
-Esto no completa el trabajador de períodos/ventas ni P1–P5. **NO-GO** y todavía
-no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. Detalle en el informe del reconciliador.
+Avance posterior del mismo PR54: worker privado de una venta, origen original
+corroborado, primer período contractual y renovación ordinaria observados,
+escritura pago/refund y cierre de lease en una transacción. Closure397/397,
+F16synthetic1193/1193, verify:prepreview completo/build/dist4/4 y PG17 PASS.
+Migraciones adicionales `20261021071244` y `20261021072337` siguen locales.
+Esto no completa scheduler, todos los eventos/beneficios ni P1–P5. **NO-GO** y
+todavía no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. Detalle en el reconciliador.
 
 ## Comprobación privada del ID de comercio Live — 21-oct-2026 UTC
 

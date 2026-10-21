@@ -50,8 +50,47 @@ vulnerabilidades. [Aviso oficial](https://github.com/advisories/GHSA-587h-7wmj-h
 
 ## Resto de P1 — en curso
 
-Conectar prueba de venta y destinatario independiente, ancla contractual observada,
-escritura con lease y finalización atómica; después renovaciones y reversos.
+### Venta y período observados — segundo bloque de PR54
+
+El lector verifica GET de suscripción/intent/plan bajo OAuth de la generación
+original y la transacción exacta COMPLETED USD2.99. Completa la paginación acotada;
+un next de otro host, suscripción, ventana o con parámetros extra se rechaza sin
+reenviar el bearer. Esta cadena verifica el origen comercial de la venta, no la
+identidad legal del comercio ni un ID derivado del Client ID. La
+[API de transacciones](https://developer.paypal.com/api/subscriptions/v1/subscriptions-transactions)
+y su [schema oficial](https://github.com/paypal/paypal-rest-api-specifications/blob/main/openapi/billing_subscriptions_v1.json)
+definen COMPLETED como crédito a la cuenta del payee. No se consulta balances.
+
+`liveObservedPeriodProof.mjs` exige consentimiento original contra el registro
+de ofertas autorizado, activación firmada persistida y GET corroborado, venta
+original y snapshot merchant fresco. Primer intervalo contractual:
+`[activationAt, nextBillingAt)` observado. Renovación ordinaria: ordinal
+consecutivo, last_payment exacto, cero deuda/fallos y fin anterior verificado
+como nuevo comienzo; el nuevo fin se observa en PayPal. No hay suma de meses.
+Confirmación mayor de24h, cobro fuera de la ventana operativa de6h desde el
+inicio, ciclo omitido, retry, hold o límite contradictorio requieren revisión.
+Las ventanas solo deciden revisión, nunca añaden cobertura. Es una regla
+contractual de PAZO, no un campo de período pagado emitido por PayPal.
+
+`liveDurableSaleWorker.mjs` compone claim→prueba→escritura. Nuevas RPC
+`leased_sale_record` / `leased_refund_record`: exigen lease actual y recibo firmado,
+usan los escritores privados existentes y cierran el lease en una transacción.
+Un token de intento completado permite resolver una respuesta HTTP incierta
+sin duplicar pago/ciclo; cambios en hechos se rechazan. Los bridges financieros
+antiguos sin lease pierden EXECUTE para service_role.
+
+`financial_context_read`, limitada al lease, devuelve solo consentimiento,
+referencias/fechas y riesgos pendientes. No sale al navegador. DDL locales:
+`20261021071244_pazo_f16_live_atomic_leased_settlement.sql` y
+`20261021072337_pazo_f16_live_financial_context.sql`, con rollback OFF y PG17.
+El laboratorio fuerza un fallo entre INSERT y ACK: no sobrevive pago parcial,
+el lease se recupera tras expiración y el replay confirmado es idempotente.
+
+`verify:prepreview` completo PASS en contexto autorizado y perfil sintético
+vacío: closure397/397, F16synthetic1193/1193, build/dist4/4. CI principal se
+amplía a PR/push F13 para ejecutar sus nueve jobs antes omitidos por rama.
+
+Quedan scheduler privado, lifecycle/refunds completos, beneficios y P2–P5.
 El hash de Client ID guardado por el preparador Vault identifica la aplicación;
 no es evidencia de identidad del payee. No convertirlo en un match financiero.
 

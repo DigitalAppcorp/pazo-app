@@ -31,8 +31,9 @@ export function validatePazoPaypalLiveMonthlyPlan(plan,expectedPlanId){
   if(!preferences||typeof preferences!=='object'||
      (preferences.setup_fee &&
        (preferences.setup_fee.currency_code!=='USD'||
-        preferences.setup_fee.value!=='0.00'))||
-     preferences.auto_bill_outstanding===true)
+        typeof preferences.setup_fee.value!=='string'||
+        !/^0(?:\.0{1,2})?$/.test(preferences.setup_fee.value)))||
+     preferences.auto_bill_outstanding!==false)
     return blocked('setup_fee_or_outstanding_bill');
   if(plan.quantity_supported===true || plan.tax_percentage!==undefined ||
      (plan.taxes && (Number(plan.taxes.percentage||0)!==0 ||

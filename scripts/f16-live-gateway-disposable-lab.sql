@@ -279,3 +279,4 @@ END $overlap$;
 \i scripts/f16-live-json-claims-disposable-lab.sql
 \i scripts/f16-live-resource-inspection-disposable-lab.sql
 \i scripts/f16-live-signed-receipt-disposable-lab.sql
+\i scripts/f16-live-atomic-settlement-disposable-lab.sql

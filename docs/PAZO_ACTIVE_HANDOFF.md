@@ -8,11 +8,16 @@ base F13 `4e434b2fb17e981491b13de96a86befdcf7c9fff`. WIP anterior preservado en
 Orden completa leída; no scope de saldos, nuevas claves ni pruebas Sandbox/recursos.
 Auditoría alojada confirma reserva1, merchant0, inbox Live0, períodos0 y selector OFF.
 
-Entrada firmada con evidencia mínima persistida, lectura bajo lease vigente y
-corroboración GET del evento desde Vault de la generación original: código y
-PG17 local PASS; migración `20261021064239` aún NO APLICADA. No hay pagos ni grants.
-Falta terminar venta/destinatario/período y escritura/finalización atómica, además
-del resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
+PR #54 DRAFT hacia F13: entrada firmada, lectura bajo lease y corroboración GET
+desde Vault de la generación original. Ahora añade venta con paginación completa,
+origen OAuth/suscripción/transacción, período contractual observado, renovación
+ordinaria correlacionada y escritura financiera/cierre de lease atómicos.
+No se confunde el hash de Client ID con identidad del beneficiario.
+Gates locales PASS: closure397/397, F16 sintético1193/1193, build y dist4/4.
+PG17 verifica pago/refund, fallos entre escritura y ACK, recuperación y rollback.
+Migraciones `20261021064239`, `20261021071244`, `20261021072337` NO APLICADAS.
+Falta scheduler privado, ciclo de vida/refunds completos, beneficios, checkout,
+readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
 No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 
 **CODEX — ORDEN ACTIVA F16/BETA:** Antes de implementar o declarar finalizado cualquier cambio de monetización o lanzamiento, leer y ejecutar integralmente `docs/CODEX_F16_BETA_LAUNCH_COMPLETION_ORDER_20261021.md`. Esa orden concreta el mandato obligatorio del PO: terminar software, backend, QA y preparación antes de pedir claves Live en Administración; únicamente se reserva para el PO el ingreso privado de credenciales y autorización de la prueba/cobro real. No confundir CI PASS con beta lanzable ni posponer F16. 

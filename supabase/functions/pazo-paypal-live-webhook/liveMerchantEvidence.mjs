@@ -2,6 +2,7 @@
 // Unreleased. Called ONLY after a trusted server resolves immutable merchant
 // generation and account binding, and AFTER cryptographic webhook verification.
 // GET provider facts; NEVER derives paidThrough, grants benefits, or writes DB.
+import {normalizePazoLiveBillingSnapshot} from './liveBillingSnapshot.mjs'
 const HOST='https://api-m.paypal.com'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
@@ -74,12 +75,40 @@ export function createPaypalLiveMerchantEvidenceReader({
    const path='/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+
     '/transactions?start_time='+encodeURIComponent(startTime)+
     '&end_time='+encodeURIComponent(endTime)
-   const d=await json(fetchImpl,HOST+path,{method:'GET',headers:auth(t)})
-   if(!Array.isArray(d.transactions)||d.transactions.length>500||
-    !Number.isSafeInteger(d.total_pages)||d.total_pages!==1||
-    !Number.isSafeInteger(d.total_items)||d.total_items!==d.transactions.length)
-    fail()
-   const matching=d.transactions.filter(x=>x?.id===saleId)
+   let url=HOST+path,expectedPages=null,expectedItems=null,pageCount=0
+   const all=[],seenUrls=new Set(),seenIds=new Set()
+   while(url){
+    if(seenUrls.has(url)||pageCount>=10)fail()
+    seenUrls.add(url);pageCount++
+    const d=await json(fetchImpl,url,{method:'GET',headers:auth(t)})
+    if(!Array.isArray(d.transactions)||!Number.isSafeInteger(d.total_pages)||
+     d.total_pages<1||d.total_pages>10||!Number.isSafeInteger(d.total_items)||
+     d.total_items<1||d.total_items>500)fail()
+    if(expectedPages===null){expectedPages=d.total_pages;expectedItems=d.total_items}
+    if(expectedPages!==d.total_pages||expectedItems!==d.total_items)fail()
+    for(const row of d.transactions){
+     if(!SALE.test(row?.id||'')||seenIds.has(row.id)||all.length>=500)fail()
+     seenIds.add(row.id);all.push(row)
+    }
+    if(d.links!==undefined&&!Array.isArray(d.links))fail()
+    const next=(d.links||[]).filter(x=>x?.rel==='next')
+    if(next.length>1)fail()
+    url=null
+    if(next.length){
+     const link=next[0];let parsed
+     try{parsed=new URL(link.href)}catch{fail()}
+     if(link.method!=='GET'||parsed.origin!==HOST||parsed.username||parsed.password||parsed.hash||
+      parsed.pathname!=='/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)+'/transactions'||
+      parsed.searchParams.get('start_time')!==startTime||parsed.searchParams.get('end_time')!==endTime||
+      [...parsed.searchParams.keys()].some(k=>!['start_time','end_time','page','page_size'].includes(k))||
+      [...parsed.searchParams.keys()].some(k=>parsed.searchParams.getAll(k).length!==1)||
+      (parsed.searchParams.has('page')&&!/^[1-9][0-9]{0,3}$/.test(parsed.searchParams.get('page')))||
+      (parsed.searchParams.has('page_size')&&!/^[1-9][0-9]{0,2}$/.test(parsed.searchParams.get('page_size'))))fail()
+     url=parsed.href
+    }
+   }
+   if(pageCount!==expectedPages||all.length!==expectedItems)fail()
+   const matching=all.filter(x=>x?.id===saleId)
    if(matching.length!==1)fail()
    const x=matching[0]
    if(x.amount_with_breakdown?.gross_amount?.currency_code!=='USD'||
@@ -93,12 +122,23 @@ export function createPaypalLiveMerchantEvidenceReader({
    if(expectedGeneration!==merchantGeneration)fail()
    return subscription(subscriptionId,intentId)
   },
+  async readBillingSnapshot({subscriptionId,intentId,expectedGeneration}={}){
+   if(expectedGeneration!==merchantGeneration||!SUB.test(subscriptionId||'')||!INTENT.test(intentId||''))fail()
+   const t=await token()
+   const raw=await json(fetchImpl,HOST+'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId),
+    {method:'GET',headers:auth(t)})
+   if(raw.id!==subscriptionId||raw.plan_id!==planId||raw.custom_id!==intentId)fail()
+   const plan=await json(fetchImpl,HOST+'/v1/billing/plans/'+encodeURIComponent(planId),
+    {method:'GET',headers:auth(t)})
+   return normalizePazoLiveBillingSnapshot({subscription:raw,plan,subscriptionId,intentId,merchantGeneration})
+  },
   async readCompletedSale(args={}){
    const x=await transactionForSale(args)
    if(x.status!=='COMPLETED')fail()
    return Object.freeze({verified:true,sourceEnvironment:'live',
     merchantGeneration,subscriptionId:args.subscriptionId,intentId:args.intentId,
     saleId:args.saleId,amountMinor:299,currency:'USD',paidAt:x.time,
+    originVerified:true,originSource:'original_generation_subscription_transactions',
     servicePeriodVerified:false,paidThrough:null,mayGrantBenefits:false})
   },
   async readRefundEvidence(args={}){

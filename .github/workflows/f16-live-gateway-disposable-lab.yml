@@ -2,6 +2,11 @@ name: F16 Live Gateway Disposable PostgreSQL Lab
 on:
   pull_request:
     paths:
+      - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
+      - 'supabase/rollbacks/f16_live_financial_context_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_atomic_leased_settlement.sql'
+      - 'scripts/f16-live-atomic-settlement-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_signed_event_evidence.sql'
       - 'scripts/f16-live-signed-receipt-disposable-lab.sql'
       - 'supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql'
@@ -26,6 +31,11 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
+      - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
+      - 'supabase/rollbacks/f16_live_financial_context_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_atomic_leased_settlement.sql'
+      - 'scripts/f16-live-atomic-settlement-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_signed_event_evidence.sql'
       - 'scripts/f16-live-signed-receipt-disposable-lab.sql'
       - 'supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql'

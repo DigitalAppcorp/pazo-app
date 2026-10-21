@@ -82,6 +82,7 @@ export function createPazoLiveSettlementReconciliationGate({
   if(sale?.verified!==true||sale?.sourceEnvironment!=='live'||
    sale?.merchantGeneration!==binding.merchantGeneration||
    sale?.subscriptionId!==binding.subscriptionId||sale?.saleId!==event.saleId||
+   sale?.originVerified!==true||sale?.originSource!=='original_generation_subscription_transactions'||
    sale?.amountMinor!==299||sale?.currency!=='USD'||
    !validProviderInstant(sale?.paidAt))
    return review('provider_completed_sale_not_proven')
@@ -105,7 +106,7 @@ export function createPazoLiveSettlementReconciliationGate({
   const proofBinding=Object.freeze({...binding})
   const receipt=Object.freeze({
    provider:'paypal',sourceEnvironment:'live',
-   merchantVerified:true,signatureVerified:true,subscriptionVerified:true,
+   merchantVerified:sale.originVerified,signatureVerified:event.signatureVerified,subscriptionVerified:true,
    merchantGeneration:binding.merchantGeneration,
    subscriptionId:binding.subscriptionId,saleId:event.saleId,eventId:event.eventId,
    eventType:event.eventType,state:'COMPLETED',amountMinor:299,currency:'USD'
