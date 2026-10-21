@@ -1,5 +1,48 @@
 > **F16 vigente 20-oct / 21 UTC:** 503 corregido HOSTED y reserva real única generación 1. Lector original instalado. PO entregó Webhook ID candidato, todavía sin verificar API. Comprobador privado efímero HOSTED v1/JWTtrue y SQL20261021021050 verificados, bdf31649 CI9/9 SUCCESS, 20 pruebas/PG17/build PASS; falta consulta privada del PO. Live OFF/kill ON, PR44 DRAFT, previews OFF. Ver handoff y PAZO_F16_LIVE_RESOURCE_INSPECTION_20261020.md. Las migraciones técnicas necesarias están autorizadas sin GO repetido; cobros, publicación y aceptación visual conservan sus gates.
 
+## Continuidad Codex recuperada — 21-oct-2026 (vigente)
+
+El PO publicó los dos archivos WIP de Codex desde `pazo-beta-rc` en
+`f16/codex-merchant-identity-handoff-20261020` (respaldo preservado).
+El clon local `PAZO-F13-preview` seguía en `9c034c03` con cambio
+exclusivo en `package-lock.json`; no se alteró esa modificación.
+
+**PR #47 integrado SOLO a F13 (squash `b28e455`), CI 9/9 PASS:**
+lector server-only `liveMerchantIdentityReadOnly.mjs` obtenido de Codex,
+que verifica OAuth/plan/webhook y consulta la API PayPal Live
+`GET /v1/reporting/balances?currency_code=USD` con permiso
+`reporting/balances/read`. Descarta respuesta de saldos, ID bruto y tokens;
+deriva `SHA-256(paypal:live:<account_id>)`. Sin fingerprint comercial
+original fijado por metadatos inmutables del servidor, solo devuelve candidato
+`ok=false / merchantIdentityVerified=false`. El verificador conectado al
+provisioner exige comparar huella original y rechaza mismatches antes de
+cualquier escritura de secretos. El hosted entrypoint permanece OFF.
+
+**PR #46 integrado SOLO a F13 (squash `1e2661f`), CI 9/9 PASS:**
+`pazo-admin-paypal-provision/intake.mjs` admite rutas Edge interna/pública,
+responde preflight CORS solo a Origin y método aprobados, rechaza prefijos,
+sufijos, query y métodos indebidos; OPTIONS nunca llama al backend.
+Se ajustó la release guard para exigir la liberación bloqueada.
+Sin despliegue ni provisión de claves ni activación financiera.
+
+**Postflight alojado solo lectura:** `merchant_generations=0`,
+`secret_provision_attempts=0`, `release_evidence=0`,
+`live_paid_periods=0`. `environment=sandbox`,
+`live_enabled=false`, `kill_switch=true`, `active_generation=null`.
+La generación 1 YA tiene registro real
+`plan_read_verified=true/webhook_read_verified=true` (no repetir).
+`validation_status=not_verified` es intencional hasta validar el comercio,
+entrega de webhook y circuito financiero.
+
+**SIGUIENTE gate real:** verificar por fuente independiente el ID del comercio
+original autorizado y fijar su huella en generación 1 tras MFA reciente y
+aprobación explícita PO; completar registro/secretos con scope mínimo, webhook
+firmado, conciliación, checkout/retornos HTTPS, beneficios y rollback.
+No inventar la huella ni confundir el candidato con identidad original.
+Ningún GO de cobro/producción, ninguna migración alojada en estos dos PR,
+`main` intacto y PR #44 todavía DRAFT.
+
+
 > **ESTADO VERIFICADO 20-OCT-2026 GUATEMALA / 21 UTC:** POST503 reproducido y corregido en17guardasSQLJSON de PostgREST. Commitba9605637c035f873a0e5793937e04aa76e7a551:9/9CI SUCCESS; migraciónHOSTED20261021012636,17definiciones/ACLprotegidas y0reservas/0generaciones/0intentos,LiveOFF. PO autoriza todas las migraciones necesarias sin GO individual; conservar auditoría/versionado/postflight y gates independientes de cobro/publicación/visual. SolicitudPO pendiente: única comprobación administrativa readonly desde localhost actualizado, no reservar todavía. VercelpreviewOFFverificado; portada200pero retornos/manifest/SW404. RC sigueNO-GO. Véanse handoff vigente y PAZO_BETA_RELEASE_CANDIDATE_REPORT.md; no repetir altasMFA/plan/Sandbox aprobado.
 
 > **DECISIÓN PO 20-OCT-2026 — BETA F16_GATE_COMPLETO O NO SE PUBLICA:** antes de beta es obligatorio terminar y desplegar bajo GO toda la lógica de PayPal Sandbox/Live, incluido panel administrativo **Guardar y activar** para que el PO pueda introducir credenciales y operar SIN volver a programar, sea antes o después del lanzamiento. No se autoriza dejar el checkout Live, webhook, períodos, cancelación, renovación, refunds/disputas, beneficios, reglas de reconciliación, selector, auditoría ni rollback para una fase posterior a beta. La fecha de publicación NO condiciona habilitar Live; el HTTPS público real, el comercio válido, las pruebas y autorización explícita SÍ. Live permanece OFF durante desarrollo, no desplegar ni cobrar por este cambio. Se revocan los snapshots históricos contradictorios. Handoff canónico y gate: `docs/PAZO_ACTIVE_HANDOFF.md` y `docs/PAZO_F16_ADMIN_EDGE_PROVISIONING_GATE_20261020.md`.
