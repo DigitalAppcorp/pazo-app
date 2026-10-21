@@ -1,5 +1,36 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+## Cierre verificado del gate de configuración del plan y webhook Live — 21-oct-2026
+
+**Este estado supersede el diagnóstico histórico `live_webhook_events_unexpected` de abajo.** El Product Owner presentó captura de PAZO con mensaje
+`Plan y webhook comprobados y registrados. Claves no guardadas. Live sigue apagado.`
+No repetir comprobación de recursos, ni crear otro webhook o generación.
+
+Lectura SQL alojada **READ ONLY** confirmó exactamente una fila en
+`admin_private.paypal_gateway_change_log`: `kind=validation`,
+`details.scope=live_resource_configuration`, `generation=1`,
+`plan_read_verified=true`, `webhook_read_verified=true`,
+`credentials_stored=false`, `recorded_at=2026-10-21 03:00:48.612283+00`.
+`admin_private.paypal_gateway_settings` tiene `webhook_id=6UA43660E66988355`,
+pero `validation_status=not_verified` y `validated_at=NULL` por contrato:
+es evidencia de lectura de recursos, **no** evidencia de identidad merchant,
+entrega firmada, custodia generacional ni validación financiera.
+Selector alojado `environment=sandbox`, `live_enabled=false`,
+`kill_switch=true`, `active_generation=NULL`. No conceder beneficios.
+Esta prueba se hizo en el código local del PO basado en el commit
+`9c034c03`; el repositorio remoto F13 tiene commits posteriores.
+El `origin/f13` mostrado por `git log` local es una referencia local que
+solo se actualiza con fetch/pull, **no es lectura en tiempo real de GitHub**.
+
+**Próximo trabajo técnico real:** identidad comercial PayPal original,
+fuente y provisión segura de secretos generacionales (sin activar Live),
+webhook firmado y conciliación, checkout/retornos, worker/ledger/entitlements
+y gates de release/PO. El PR #46 es trabajo aislado de CORS del endpoint de
+provisión **no publicado ni fusionado**; revisar QA antes de integrar. No
+mezclarlo con la prueba de recursos ya cerrada. No despliegue público ni cargo
+real sin autorización separada.
+
+
 ## Auditoría complementaria — 21-oct-2026 (continuación tras Codex)
 
 La pantalla Live de PayPal Developer conectada confirma el webhook existente,
