@@ -3,7 +3,19 @@
 // Release requires explicit operator GO and an idempotent SQL recovery path.
 // No PayPal credentials in body, provider writes, checkout, or benefits.
 import {liveWebhookUrlForGeneration} from '../pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
-const TARGET='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-admin-paypal-bootstrap'
+// Supabase may present a routed/internal URL to Deno. Never trust its host
+// as a way to identify the endpoint; the gateway owns routing, and this
+// function only accepts two explicit paths for the SAME assigned slug.
+const ENDPOINT_PATHS=new Set(['/functions/v1/pazo-admin-paypal-bootstrap',
+ '/pazo-admin-paypal-bootstrap'])
+function validEndpoint(request){
+ if(!(request instanceof Request))return false
+ try{
+  const uri=new URL(request.url)
+  return ['http:','https:'].includes(uri.protocol)&&
+   ENDPOINT_PATHS.has(uri.pathname)&&!uri.search&&!uri.hash
+ }catch{return false}
+}
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const ORIGIN='https://pazo-app-t83r.vercel.app'
 const REQUEST_KEYS=['action','confirmation']
@@ -13,7 +25,7 @@ function cors(request){
  const origin=request?.headers?.get?.('origin')||''
  if(!BROWSER_ORIGINS.has(origin))return {'vary':'Origin'}
  return {'vary':'Origin','access-control-allow-origin':origin,
-  'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
+  'access-control-allow-headers':'authorization,apikey,content-type,x-client-info,x-supabase-api-version,x-region,x-supabase-client-platform,x-supabase-client-platform-version,x-supabase-client-runtime,x-supabase-client-runtime-version',
   'access-control-allow-methods':'POST, OPTIONS'}
 }
 const deny=(status,code,request)=>new Response(JSON.stringify({
@@ -25,14 +37,18 @@ export function createPazoLiveMerchantBootstrapControl({
 }={}){
  return async request=>{
   if(released!==true)return deny(503,'merchant_bootstrap_not_released',request)
-  if(request instanceof Request&&request.method==='OPTIONS'&&request.url===TARGET){
+  if(request instanceof Request&&request.method==='OPTIONS'){
+   if(!validEndpoint(request))return deny(400,'invalid_bootstrap_route',request)
    const origin=request.headers.get('origin')||''
    if(!BROWSER_ORIGINS.has(origin))return deny(403,'origin_not_allowed',request)
+   if(request.headers.get('access-control-request-method')!=='POST')
+    return deny(405,'invalid_preflight_method',request)
    return new Response(null,{status:204,headers:{'cache-control':'no-store',
     ...cors(request)}})
   }
-  if(!(request instanceof Request)||request.method!=='POST'||
-   request.url!==TARGET||!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(
+  if(!validEndpoint(request)||request.method!=='POST'||
+   (request.headers.has('origin')&&
+    !BROWSER_ORIGINS.has(request.headers.get('origin')||''))||!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(
     request.headers.get('content-type')||'')||
    Number(request.headers.get('content-length'))>512)
    return deny(400,'invalid_bootstrap_request',request)
