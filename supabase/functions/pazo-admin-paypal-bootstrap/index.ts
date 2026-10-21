@@ -19,7 +19,11 @@ function createHandler(){
   const url=Deno.env.get('SUPABASE_URL')
   const key=Deno.env.get('SUPABASE_ANON_KEY')
   const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if(url!==PROJECT||!key||!service)throw Error('missing_hosted_config')
+  // Only presence/shape of runtime configuration may be logged; never a key.
+  if(url!==PROJECT||!key||!service){
+   console.warn('PAZO_F16_BOOTSTRAP_INIT:HOSTED_CONFIG_UNAVAILABLE')
+   throw Error('missing_hosted_config')
+  }
   const fetchImpl=fetch
   const authenticateAdmin=createPazoLivePrivilegedAdmin({
    supabaseUrl:url,publishableKey:key,fetchImpl
@@ -30,9 +34,13 @@ function createHandler(){
   const {reserveGeneration}=createPazoLiveBootstrapSqlStore({
    projectUrl:url,serviceRoleKey:service,fetchImpl
   })
+  console.info('PAZO_F16_BOOTSTRAP_INIT:DEPENDENCIES_READY')
   return createPazoLiveMerchantBootstrapControl({
    released:true,authenticateAdmin,readAdminSettings,reserveGeneration
   })
- }catch{return createPazoLiveMerchantBootstrapControl()}
+ }catch{
+  console.warn('PAZO_F16_BOOTSTRAP_INIT:DISABLED_ON_CONFIG_FAILURE')
+  return createPazoLiveMerchantBootstrapControl()
+ }
 }
 Deno.serve(createHandler())
