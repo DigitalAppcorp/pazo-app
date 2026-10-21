@@ -19,7 +19,7 @@ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
 AS $pazo$
 DECLARE result jsonb;
 BEGIN
- IF pg_catalog.current_setting('request.jwt.claim.role',true)
+ IF (NULLIF(pg_catalog.current_setting('request.jwt.claims',true),'')::jsonb ->> 'role')
     IS DISTINCT FROM 'service_role'
  THEN RAISE EXCEPTION 'service role required' USING ERRCODE='42501'; END IF;
  IF p_owner IS NULL OR p_intent IS NULL OR

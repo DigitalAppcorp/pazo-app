@@ -67,7 +67,8 @@ test('server errors are sanitized; no secret or PII in error output',async()=>{
 test('staged SQL only exposes service-only function after exact owner and event joins',()=>{
  const sql=readFileSync(new URL('../../../../supabase/drafts/f16_live_service_recorded_sale_reader_REVIEW_REQUIRED.sql',import.meta.url),'utf8')
  assert.match(sql,/SECURITY DEFINER SET search_path=''/)
- assert.match(sql,/current_setting\('request.jwt.claim.role',true\)/)
+ assert.match(sql,/current_setting\('request.jwt.claims',true\)/)
+ assert.doesNotMatch(sql,/request\.jwt\.claim\.role/)
  assert.ok(sql.includes("IS DISTINCT FROM 'service_role'"))
  assert.ok(sql.includes('i.owner_id=p_owner AND i.intent_id=p_intent'))
  assert.ok(sql.includes('p.sale_id=p_sale_id AND p.amount_minor=299'))
@@ -76,4 +77,14 @@ test('staged SQL only exposes service-only function after exact owner and event 
  assert.ok(sql.includes('TO service_role;'))
  assert.equal(sql.includes('UPDATE supporter_private'),false)
  assert.equal(sql.includes('INSERT INTO supporter_private'),false)
+})
+
+test('installable original-sale reader preserves the reviewed read-only SQL body',()=>{
+ const draft=readFileSync(new URL('../../../../supabase/drafts/f16_live_service_recorded_sale_reader_REVIEW_REQUIRED.sql',import.meta.url),'utf8')
+ const installed=readFileSync(new URL('../../../../supabase/migrations/20261021013019_pazo_f16_live_recorded_sale_reader.sql',import.meta.url),'utf8')
+ const body=source=>source.match(/AS \$pazo\$([\s\S]*?)\$pazo\$/)?.[1]
+ assert.equal(typeof body(draft),'string')
+ assert.equal(body(installed),body(draft))
+ assert.match(installed,/relforcerowsecurity/)
+ assert.match(installed,/Original-sale reader ACL postflight failed/)
 })

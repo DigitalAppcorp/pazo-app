@@ -1,4 +1,24 @@
-# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 UTC
+# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
+
+## Actualización vigente — generación1 real reservada y comprobada
+
+check_readiness del PO confirmó configuración y logs alojados POST200 a01:31:25UTC. PO ejecutó después UNAreserva; lecturaDB confirma exactamente1fila,state=reserved,generation=1,planLiveesperado. URLreal `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook?generation=1`. GeneracionesmerchantLive0/secretattempts0; sandbox/LiveOFF/killON/genactivaNULL. **NOreservarotra vez ni repetirMFAalta.** Falta crearwebhook: Chrome no permite controlar pestaña; instrucciones exactas10eventos enviadas y PO pidió lista numerada, ya entregada. Esperar WebhookID sinsecretos. Lectorventasoriginales enpreparaciónconrolesJSON/propietario/generaciónPG17. Migraciones técnicas autorizadas globalmente. Bloques anteriores/posteriores conreservas0sonhistóricos.
+## ESTADO VIGENTE: 503 corregido HOSTED; comprobación administrativa PO pendiente
+
+La orden maestra directa del PO autoriza programación integral de beta por Codex. **El PO también autorizó todas las migraciones necesarias sin pedir GO individual.** Mantener auditoría, versionado, postflight y rollback. Esto no ejecuta una compra Live ni sustituye aceptación visual/publicación final. F13/PR44DRAFT, main intacto.
+
+- CODE/CI: `ba9605637c035f873a0e5793937e04aa76e7a551`, 9/9 workflows SUCCESS; CI39527117678 y LiveGatewayPG17 39527117638. Local verify:prepreviewPASS (closure294/F16synthetic1193/build/dist). PG17 reproduce42501original, reparaJSONclaims y ensaya rollback. QAWindows CRLF/SQLLF/USERPROFILE aislado corregidos sin cambios de producto.
+- CAUSA: logs00:34:32UTC Auth200/admin200/settings200/reserve403; las17RPC comprobaban GUC antigua en vez de `request.jwt.claims` JSON. Fuente SQL alojada exacta reproduce el defecto. No pedir configurar MFA otra vez.
+- HOSTED: instaladaUNAvez `20261021012636_pazo_f16_live_service_json_claims_guard`, SHA256 `c523e2c044a4c1c04fcb2b864b079181b50f5672e0f42d9ed6d0907a9f5a794a`. Fichero alineado al ID real. Postflight17corregidas/17protegidas/0originales; reservas0/generacionesLive0/secretattempts0; sandbox/liveOFF/killON/genNULL/rev0. **NO reinstalar.** Bootstrapv6 intacto; provisionv2/checkoutv2/webhookv1 inertes según fuente leída.
+- LOCAL: clonPO `C:\Users\osori\PAZO-F13-preview` actualizadoff a ba960563; package-lock modificado preexistente preservado byteidénticoSHA20992e0a6f4c6817f31bab124a9f613d0b6dee72eb4220736d541e0a4861e887 y respaldado. Checkout técnico `C:\Users\osori\Downloads\Nuevo pazo app\pazo-beta-rc`. Servidorlocalhost5173 previo sirve UI actual; duplicado127 de Codex cerrado.
+- SIGUIENTEPO, ya solicitado: localhost5173, Ctrl+Shift+R, Admin→Configuración→PayPal→Live, TOTP reciente dentro de PAZO y SOLO **Comprobar configuración (sin reservar)**; devolver confirmación/código saneado. No pulsar reserva antes de evaluar respuesta, no compartir TOTP/QR/tokens. Reserva real única desde cuentaPO sigue pendiente.
+- TRABAJO INDEPENDIENTE: lector service-only de ventas originales para refunds, corregir JSON del draft antes de instalar. Merchant/webhook/custodia/worker/checkout/beneficiosLive incompletos; betaNO-GO.
+- VERCEL: CLIautenticado verifica previewDeploymentsDisabled=true/producciónmain. HTTPSanónimo `/`200appShell, pero `/paypal/return`, `/paypal/cancel`, `/manifest.webmanifest`, `/sw.js`404. Buildlocal correcto no equivale a publicación actual. No deploy web.
+- SEGURIDAD: Advisor40INFO/4anonWARN/38authWARN/contraseñasfiltradasOFF. Cuatrodefinersanónimas revisadas exponen booleano/beneficiospúblicos/muroopt-in; revisión completa abierta. Drift histórico: auditoríasecretos alojada20261020200238, archivo/docs20261020200800; reconciliar nombre, NOreinstalar.
+
+Matriz/gates: `docs/PAZO_BETA_RELEASE_CANDIDATE_REPORT.md`. **No declarar RC final ni cierreF16.** Los bloques siguientes son historia; este checkpoint y catálogo actual prevalecen.
+
+## Historial anterior al diagnóstico corregido
 
 ## F16 — SEGUNDO FALLO 503 / DIAGNOSTICO READ-ONLY (21-oct-2026)
 - PO intentó reservar generación comercial nuevamente. Supabase function_edge_logs `2026-10-21T00:34:31.685` OPTIONS 204 y `00:34:32.928` POST **503**; SQL postflight 0 reservations, 0 merchant generations, LIVE OFF, kill_switch ON. Problema CORS solucionado, segundo bloqueo backend interno.

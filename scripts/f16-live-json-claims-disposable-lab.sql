@@ -23,7 +23,7 @@ BEGIN
  RAISE NOTICE 'F16_JSON_CLAIMS_ORIGINAL_42501_REPRODUCED';
 END $baseline$;
 
-\i supabase/migrations/20261021010702_pazo_f16_live_service_json_claims_guard.sql
+\i supabase/migrations/20261021012636_pazo_f16_live_service_json_claims_guard.sql
 BEGIN;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claim.role','',true),
@@ -119,7 +119,7 @@ END $state$;
 
 -- Rehearse the separately guarded rollback, then re-apply and assert no rows lost.
 \i supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql
-\i supabase/migrations/20261021010702_pazo_f16_live_service_json_claims_guard.sql
+\i supabase/migrations/20261021012636_pazo_f16_live_service_json_claims_guard.sql
 DO $reapply$ BEGIN
  IF (SELECT count(*) FROM admin_private.pazo_paypal_live_bootstrap_reservations
   WHERE plan_id='P-JSONCLAIMSTEST1234')<>1

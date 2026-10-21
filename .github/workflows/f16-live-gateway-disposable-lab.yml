@@ -2,6 +2,8 @@ name: F16 Live Gateway Disposable PostgreSQL Lab
 on:
   pull_request:
     paths:
+      - 'supabase/migrations/*pazo_f16_live_recorded_sale_reader.sql'
+      - 'scripts/f16-live-recorded-sale-read-disposable-lab.sql'
       - 'supabase/migrations/*pazo_f16_live_service_json_claims_guard.sql'
       - 'supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql'
       - 'supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql'
@@ -18,6 +20,8 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
+      - 'supabase/migrations/*pazo_f16_live_recorded_sale_reader.sql'
+      - 'scripts/f16-live-recorded-sale-read-disposable-lab.sql'
       - 'supabase/migrations/*pazo_f16_live_service_json_claims_guard.sql'
       - 'supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql'
       - 'supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql'

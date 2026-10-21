@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs'
 import {createHash} from 'node:crypto'
 const root=new URL('../../../../',import.meta.url)
 const load=path=>readFileSync(new URL(path,root),'utf8').replaceAll('\r\n','\n')
-const migration=load('supabase/migrations/20261021010702_pazo_f16_live_service_json_claims_guard.sql')
+const migration=load('supabase/migrations/20261021012636_pazo_f16_live_service_json_claims_guard.sql')
 const original=load('supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql')
 const rollback=load('supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql')
 const old="pg_catalog.current_setting('request.jwt.claim.role',true)"
