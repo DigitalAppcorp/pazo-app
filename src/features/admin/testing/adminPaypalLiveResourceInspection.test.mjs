@@ -19,6 +19,7 @@ const settings=()=>({active_environment:'sandbox',live_checkout_enabled:false,en
 ]})
 const reservation=()=>({generation:1,planId,webhookId:'',state:'reserved',environment:'live',mayCharge:false})
 function fixture(overrides={}){
+ const {eventTypes=REQUIRED_EVENTS,...depsOverrides}=overrides
  const calls=[]
  const deps={released:true,
   authenticateAdmin:async()=>({id:actorId,isAdmin:true,freshSession:true}),
@@ -37,10 +38,10 @@ function fixture(overrides={}){
      pricing_scheme:{fixed_price:{value:'2.99',currency_code:'USD'}}}],payment_preferences:{auto_bill_outstanding:false}
    })}
    if(dest==='https://api-m.paypal.com/v1/notifications/webhooks/'+webhookId)return {ok:true,json:async()=>({
-    id:webhookId,url:liveWebhookUrlForGeneration(1),event_types:REQUIRED_EVENTS.map(name=>({name}))
+    id:webhookId,url:liveWebhookUrlForGeneration(1),event_types:eventTypes.map(name=>({name}))
    })}
    throw Error('Forbidden network destination')
-  },...overrides}
+  },...depsOverrides}
  return {calls,handler:createLiveResourceInspection(deps)}
 }
 test('resource inspection reads existing reservation without provider or metadata writes',async()=>{
@@ -143,4 +144,32 @@ test('inspection UI masks and clears both private values without persistent brow
  assert.match(source,/payload\.clientId='';payload\.clientSecret=''/)
  assert.match(source,/epoch\.current!==current/)
  assert.doesNotMatch(source,/localStorage|sessionStorage|console\.|navigator\.clipboard|service_role/)
+})
+
+test('additional, duplicate or malformed PayPal webhook events show only safe non-financial details',async()=>{
+ const scenarios=[
+  {types:[...REQUIRED_EVENTS,'UNRELATED.EVENT.TEST'],extra:1,duplicate:0,malformed:0,names:['UNRELATED.EVENT.TEST']},
+  {types:[...REQUIRED_EVENTS,REQUIRED_EVENTS[0]],extra:0,duplicate:1,malformed:0,names:[]},
+  {types:[...REQUIRED_EVENTS,'*'],extra:1,duplicate:0,malformed:1,names:[]}
+ ]
+ for(const scenario of scenarios){
+  const {handler,calls}=fixture({eventTypes:scenario.types})
+  const response=await handler(request())
+  assert.equal(response.status,409)
+  const body=await response.json()
+  assert.equal(body.code,'live_webhook_events_unexpected')
+  assert.deepEqual(body.eventMismatch,{
+   receivedCount:11,extraCount:scenario.extra,duplicateCount:scenario.duplicate,
+   malformedCount:scenario.malformed,unexpectedTypes:scenario.names
+  })
+  assert.equal(body.mayCharge,false)
+  assert.equal(body.liveActivated,false)
+  assert.equal(body.credentialsStored,false)
+  assert.equal(calls.some(x=>x.record),false)
+  assert.doesNotMatch(JSON.stringify(body),/SYNTHETIC_(?:CLIENT|SECRET|OAUTH)/)
+ }
+ const ui=readFileSync(new URL('../components/AdminPaypalLiveResourceCheck.tsx',import.meta.url),'utf8')
+ assert.match(ui,/API event_types=/)
+ assert.match(ui,/unexpectedTypes/)
+ assert.doesNotMatch(ui,/localStorage|sessionStorage|console\.|navigator\.clipboard/)
 })
