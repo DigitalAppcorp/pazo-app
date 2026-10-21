@@ -24,7 +24,7 @@ async function diagnostic(data:unknown,error:unknown):Promise<string>{
  const mismatch=candidate.eventMismatch
  if(!mismatch||typeof mismatch!=='object')return code
  const count=(name:'receivedCount'|'extraCount'|'duplicateCount'|'malformedCount')=>{
-  const raw=name in mismatch?mismatch[name]:null
+  const raw=name in mismatch?(mismatch as Record<string,unknown>)[name]:null
   return typeof raw==='number'&&Number.isSafeInteger(raw)&&raw>=0&&raw<=500?raw:null
  }
  const details=['receivedCount','extraCount','duplicateCount','malformedCount'] as const
