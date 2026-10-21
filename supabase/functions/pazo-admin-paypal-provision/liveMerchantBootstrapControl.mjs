@@ -73,8 +73,10 @@ export function createPazoLiveMerchantBootstrapControl({
   if(!body||Array.isArray(body)||typeof body!=='object'||
    Object.keys(body).length!==2||
    Object.keys(body).some(k=>!REQUEST_KEYS.includes(k))||
-   body.action!=='reserve_generation'||
-   body.confirmation!=='RESERVAR GENERACION LIVE')
+   !((body.action==='reserve_generation'&&
+      body.confirmation==='RESERVAR GENERACION LIVE')||
+     (body.action==='check_readiness'&&
+      body.confirmation==='VERIFICAR CONFIGURACION LIVE')))
    return deny(400,'invalid_bootstrap_request',request)
   let admin
   try{admin=await authenticateAdmin(request)}
@@ -94,6 +96,18 @@ export function createPazoLiveMerchantBootstrapControl({
    live[0].currency!=='USD'||live[0].interval_unit!=='MONTH'||
    live[0].webhook_id!=='')
    return deny(409,'live_draft_not_ready',request)
+  if(body.action==='check_readiness'){
+   // Signed-in admin+recent MFA, exact stored plan and Live OFF verified.
+   // No service-role RPC and absolutely no generation or provider writes.
+   return new Response(JSON.stringify({
+    ok:true,code:'live_configuration_readonly_verified',
+    environment:'live',mayCharge:false,liveActivated:false,
+    generationReserved:false,webhookConfigured:false
+   }),{status:200,headers:{
+    'content-type':'application/json','cache-control':'no-store',
+    ...cors(request)
+   }})
+  }
   let reserved
   try{reserved=await reserveGeneration({
    actorId:admin.id,planId:live[0].plan_id
