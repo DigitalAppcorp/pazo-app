@@ -7,7 +7,8 @@ const ui=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.met
 test('Live renders no editable Client ID / Client Secret fields in legacy Vault',()=>{
  assert.ok(ui.includes("data-pazo-live-vault-locked=\"true\""))
  assert.ok(ui.includes("env==='sandbox'?"))
- assert.ok(ui.includes("Las credenciales PayPal Live no se pegan en Vault"))
+ assert.ok(ui.includes("Las credenciales Live se guardan cifradas mediante el formulario privado de abajo"))
+ assert.ok(ui.includes("LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup"))
  assert.ok(ui.includes("const LIVE_EDGE_PROVISIONING_RELEASED=false"))
 })
 test('legacy credential RPC refuses Live even when called from stale UI code',()=>{

@@ -1,6 +1,6 @@
 // F16 operator-only, nonfinancial PayPal Live credential staging.
 // Uses existing Supabase Vault under a freshly verified admin+TOTP session.
-// Hard-disabled until CI, SQL permission audit and PO review of release path.
+// Released for nonfinancial secret staging only after hosted SQL role audit; checkout Live stays hard OFF.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createPazoLiveVaultSetup} from './liveVaultSetup.mjs'
 import {createPazoLivePrivilegedAdmin}
@@ -9,7 +9,7 @@ import {createPazoAdminLiveDraftReader}
  from '../pazo-admin-paypal-provision/liveAdminDraftReader.mjs'
 import {createLiveResourceStore}
  from '../pazo-admin-paypal-live-inspect/store.mjs'
-const RELEASE_APPROVED=false
+const RELEASE_APPROVED=true
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const fail=()=>{throw Error('secure_configuration_unavailable')}
 function setup(){
