@@ -1,5 +1,48 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## Continuidad Codex recuperada — 21-oct-2026 (vigente)
+
+El PO publicó los dos archivos WIP de Codex desde `pazo-beta-rc` en
+`f16/codex-merchant-identity-handoff-20261020` (respaldo preservado).
+El clon local `PAZO-F13-preview` seguía en `9c034c03` con cambio
+exclusivo en `package-lock.json`; no se alteró esa modificación.
+
+**PR #47 integrado SOLO a F13 (squash `b28e455`), CI 9/9 PASS:**
+lector server-only `liveMerchantIdentityReadOnly.mjs` obtenido de Codex,
+que verifica OAuth/plan/webhook y consulta la API PayPal Live
+`GET /v1/reporting/balances?currency_code=USD` con permiso
+`reporting/balances/read`. Descarta respuesta de saldos, ID bruto y tokens;
+deriva `SHA-256(paypal:live:<account_id>)`. Sin fingerprint comercial
+original fijado por metadatos inmutables del servidor, solo devuelve candidato
+`ok=false / merchantIdentityVerified=false`. El verificador conectado al
+provisioner exige comparar huella original y rechaza mismatches antes de
+cualquier escritura de secretos. El hosted entrypoint permanece OFF.
+
+**PR #46 integrado SOLO a F13 (squash `1e2661f`), CI 9/9 PASS:**
+`pazo-admin-paypal-provision/intake.mjs` admite rutas Edge interna/pública,
+responde preflight CORS solo a Origin y método aprobados, rechaza prefijos,
+sufijos, query y métodos indebidos; OPTIONS nunca llama al backend.
+Se ajustó la release guard para exigir la liberación bloqueada.
+Sin despliegue ni provisión de claves ni activación financiera.
+
+**Postflight alojado solo lectura:** `merchant_generations=0`,
+`secret_provision_attempts=0`, `release_evidence=0`,
+`live_paid_periods=0`. `environment=sandbox`,
+`live_enabled=false`, `kill_switch=true`, `active_generation=null`.
+La generación 1 YA tiene registro real
+`plan_read_verified=true/webhook_read_verified=true` (no repetir).
+`validation_status=not_verified` es intencional hasta validar el comercio,
+entrega de webhook y circuito financiero.
+
+**SIGUIENTE gate real:** verificar por fuente independiente el ID del comercio
+original autorizado y fijar su huella en generación 1 tras MFA reciente y
+aprobación explícita PO; completar registro/secretos con scope mínimo, webhook
+firmado, conciliación, checkout/retornos HTTPS, beneficios y rollback.
+No inventar la huella ni confundir el candidato con identidad original.
+Ningún GO de cobro/producción, ninguna migración alojada en estos dos PR,
+`main` intacto y PR #44 todavía DRAFT.
+
+
 ## Cierre verificado del gate de configuración del plan y webhook Live — 21-oct-2026
 
 **Este estado supersede el diagnóstico histórico `live_webhook_events_unexpected` de abajo.** El Product Owner presentó captura de PAZO con mensaje
