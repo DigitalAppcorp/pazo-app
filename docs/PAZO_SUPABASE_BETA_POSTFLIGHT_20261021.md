@@ -108,3 +108,29 @@ financieras. Datos del navegador son sintéticos, no credenciales realmente guar
 Componente readiness nuevo lint0/0; archivos existentes conservan baseline.
 Build conserva warning de bundle. Harness temporal retirado, capturas y logs
 privados fuera del repo.
+
+## Readiness instalado y código publicado en GitHub
+
+`3dcd8e07` publicado en PR67: **5/5 GitHub Actions SUCCESS** comprobados
+contra ese SHA exacto (verify, live-gateway-pg17, f14-postgres,
+f16-p12-staged-install, f16-p21-worker-schema-rehearsal). La orden adicional
+del PO de subir cada cambio con documentación queda registrada en el handoff.
+
+Migración `20261021223000_pazo_f16_live_admin_readiness` **APLICADA** como
+continuación técnica no financiera autorizada. Auditoría previa: función e
+historial ausentes, selector sandbox/Live=false/kill=true/revision0. Ensayo
+BEGIN/ROLLBACK PASS y ausencia posterior verificada. Instalación e historial
+atómicos; cuerpo SQL alojado idéntico al archivo revisado.
+
+SHA256 del SQL:
+`e4a0355be9d06920e85dc602be5d91e0c5aa480e19789e51a98cce86a6d93828`.
+Postflight: EXECUTE authenticated=true, anon=false, service_role=false; llamada
+sin auth.uid denegada. No se simularon identidades en la base alojada ni se
+presenta ese negativo como prueba de sesión administrativa real. Selector
+permanece sandbox/Live=false/kill=true/generación=null/revision0; intentos y
+períodos pagados0. No llamada PayPal ni publicación Vercel. El párrafo anterior
+«todavía no aplicada» describe el checkpoint previo, ya superado.
+
+Pendientes efectivos: habilitación controlada P4, fuentes checkout/webhook
+actualizadas, validación HTTPS/PWA y canary real con autorización explícita.
+No READY_FOR_PO_CREDENTIALS ni beta lista.

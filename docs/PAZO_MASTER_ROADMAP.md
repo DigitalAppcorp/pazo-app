@@ -1,3 +1,13 @@
+## Actualización — readiness administrativo instalado
+
+PR67: código `3dcd8e07` publicado con 5/5 Actions SUCCESS. Migración readonly
+`20261021223000` APLICADA tras ensayo ROLLBACK y postflight de cuerpo/ACL;
+Live=false/kill=true/sandbox/generación=null/revision0, intentos/períodos0.
+No operación PayPal ni publicación. P4 control financiero y HTTPS/PWA siguen
+pendientes; no pedir claves PayPal todavía. Cada incremento se sube a GitHub
+con documentación por orden expresa del PO. Evidencia y límites:
+`docs/PAZO_SUPABASE_BETA_POSTFLIGHT_20261021.md`.
+
 ## Supabase operativo — 21-oct-2026, 21:47 UTC
 
 PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`

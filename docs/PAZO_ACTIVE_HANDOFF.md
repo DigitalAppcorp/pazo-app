@@ -11,8 +11,11 @@ alojado. Esta orden no autoriza merge a main, publicación ni cobros Live.
 
 Incremento `3dcd8e07` subido y HEAD remoto confirmado: readiness administrativo,
 recuperación de guardado de credenciales y documentación de pruebas incluidas.
-CI de este incremento pendiente de comprobar; no reutilizar los 5/5 SUCCESS
-de `b82ac9ee` como resultado del nuevo commit.
+CI de ese SHA exacto: 5/5 Actions SUCCESS. Migración readonly administrativa
+`20261021223000` APLICADA con ensayo ROLLBACK, cuerpo exacto y ACL verificadas.
+No identidad administrativa real simulada ni operación financiera; selector
+sandbox/Live=false/kill=true/generación=null/revision0, intentos/períodos0.
+Este estado supera la nota inferior que aún decía «NO aplicado».
 
 ## Supabase operativo — 21-oct-2026, 21:47 UTC
 
