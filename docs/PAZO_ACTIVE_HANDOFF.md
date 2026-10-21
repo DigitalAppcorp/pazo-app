@@ -1,5 +1,16 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — Cancelación PayPal Live por propietario completada en código (21-oct-2026)
+
+- **PR #65** fusionado SOLO a F13: SHA `669efafdb5678cae40c5137d7bddc9403c2ab8a3`, **9/9 GitHub Actions SUCCESS**. Implementa consentimiento explícito del titular para cancelar renovaciones Live, gestión del mismo intent del propietario y credenciales de la generación original en Vault. SQL privado reclama antes de POST PayPal y prohíbe repetir. Solo un GET PayPal independiente `CANCELLED` con `subscriptionId+planId+custom_id` coincidentes permite el éxito y el registro confirmado; respuesta HTTP 204 o timeout no prueban cancelación.
+- SQL `pazo_f16_live_service_cancel_finish` **APLICADA** en Supabase, historial versión `20261021192951`. Archivo GitHub renombrado a `supabase/migrations/20261021192951_pazo_f16_live_cancel_finish.sql`. Ejecuta únicamente service_role (anon y authenticated DENIED), nadie puede conceder pagos o beneficios por esta función. DDL validado BEGIN/ROLLBACK antes de aplicar. No existe venta, claim ni suscripción Live real registrada.
+- Edge `pazo-paypal-live-account` **versión 3 ACTIVE, verify_jwt=true**, incluye list/status/cancel por titular. Despliegue y postflight verificados. Interfaz ofrece cancelar únicamente tras lectura original PayPal ACTIVE/SUSPENDED y confirmación adicional, con aviso de conciliación si PayPal no responde; nunca marca cancelado ante ambigüedad. Estado backend pago sigue sandbox/kill true/live false; 0 merchants, 0 intents, 0 cancel_claims, 0 paid_periods.
+- Las pruebas PayPal y PostgreSQL solo han sido sintéticas/estructurales: **NO EXISTE CANCELACIÓN LIVE E2E REAL** sin cuenta/credenciales PayPal Live. NO declarar beta lista. El laboratorio histórico de nueve RPCs se dejó intacto; el SQL nuevo se comprobó en Supabase con rollback y con tests de flujo sin proveedor real.
+- **PENDIENTES prioritarios:** recuperar PayPal CREATE incierto sin segunda suscripción, reconciliación que permita intentar de nuevo tras abandono verificado; definir release seguro de latches de checkout/webhook/worker desde Admin MFA y evidencias sin cambios de código posteriores, desplegar F13 en Vercel sin bloqueo SSO para público, validar retorno PWA HTTPS, pruebas reales autorizadas por PO y examen previo al lanzamiento. Única acción final PO deseada: introducir PayPal Live Client ID/Secret desde Admin y dar GO explícito a cobro.
+- No modificar `main`. No repetir validación de plan/webhook ya aprobada; no requerir permisos de balances PayPal.
+
+
+
 ## F16 — Cuenta Live del comprador y checkout server-gated (21-oct-2026, avance más reciente)
 
 **Orden PO vigente:** entregar toda la beta con PayPal Live técnicamente listo antes de solicitar claves; único paso final PO introducir Client ID/Secret en Admin y aprobar canary real. NO declarar listo hasta completar release financiero y E2E.
