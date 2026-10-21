@@ -6,6 +6,7 @@ import {createPazoLiveDurableSaleWorker} from '../pazo-paypal-live-webhook/liveD
 import {createPazoLiveDurableRefundWorker} from '../pazo-paypal-live-webhook/liveDurableRefundWorker.mjs'
 import {createPazoLiveDurableLifecycleWorker} from '../pazo-paypal-live-webhook/liveDurableLifecycleWorker.mjs'
 import {createPazoLiveDurableDisputeWorker} from '../pazo-paypal-live-webhook/liveDurableDisputeWorker.mjs'
+import {readPazoLiveAcceptedOffer} from '../pazo-paypal-live-checkout/liveOfferRegistry.mjs'
 export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>undefined,fetchImpl=fetch}={}){
  if(released!==true)return createPazoLivePrivateWorkerHttp()
  try{
@@ -13,9 +14,7 @@ export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>und
   const rpc=createPazoLiveServiceRpc({projectUrl,serviceRoleKey,fetchImpl})
   const lease=createPazoLiveInboxLease({projectUrl,serviceRoleKey,fetchImpl,workerRecovery:true})
   const historical=createPazoLiveVaultHistoricalVerification({supabaseUrl:projectUrl,serviceRoleKey,fetchImpl,released:true})
-  const version=getEnv('PAZO_F16_LIVE_TERMS_VERSION'),digest=getEnv('PAZO_F16_LIVE_TERMS_DIGEST')
-  const verifyAcceptedConsent=async c=>/^pazo-supporter-live\.[a-z0-9.-]{3,40}$/.test(version||'')&&
-   /^[a-f0-9]{64}$/.test(digest||'')&&c.termsVersion===version&&c.termsDigest===digest
+  const verifyAcceptedConsent=async c=>c?.affirmativeConsent===true&&readPazoLiveAcceptedOffer(c)!==null
   const options={released:true,lease,rpc,historical}
   return createPazoLivePrivateWorkerHttp({released:true,
    admit:({invoker})=>rpc('workerAdmit',{p_invoker:invoker}),
