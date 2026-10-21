@@ -71,6 +71,21 @@ export function createPazoLiveHostedCheckout({
    new Response(null,{status:204,headers:cors}):
    forbidden(403,'untrusted_origin')
   if(caller!==origin)return forbidden(403,'untrusted_origin')
+  // A valid merchant is not sufficient if the signed-event reconciler is
+  // stopped. A new subscription must not begin without fresh worker health.
+  // This is also the only public read-only readiness signal for the UI:
+  // no token, merchant, internal build, or paid status is disclosed.
+  let worker
+  try{worker=await rpc('workerHealth',{})}
+  catch{return forbidden(503,'live_processing_unavailable')}
+  if(worker?.source!=='private_live_worker_health'||
+     worker.enabled!==true||worker.processingAllowed!==true||
+     worker.healthy!==true)
+   return forbidden(503,'live_processing_unavailable')
+  if(req.method==='GET')return new Response(JSON.stringify({
+    code:'live_checkout_ready',ready:true,mayGrantBenefits:false
+   }),{status:200,headers:{'content-type':'application/json',
+    'cache-control':'no-store','x-content-type-options':'nosniff',...cors}})
   // Origin and merchant are pinned to the same DB revision per request.
   const serve=createPazoLiveCheckoutHttpHandler({
    released:true,resolveAuthenticatedOwner,readActiveRoute:async()=>pinned,
