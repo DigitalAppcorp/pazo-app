@@ -29,3 +29,9 @@ export const getNotificationSightingId = (notification: PazoNotification) =>
   notification.sourceType === 'sighting' && notification.category === 'comunidad'
     ? notification.sourceId || null
     : null
+
+// A community UUID must be explicitly typed. Never treat arbitrary UUIDs as navigable.
+export const getNotificationCommunityId = (notification: PazoNotification) =>
+  notification.sourceType === 'community_join'
+    ? notification.sourceId || null
+    : null

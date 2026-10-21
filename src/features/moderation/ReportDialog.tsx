@@ -112,7 +112,7 @@ export function ReportDialog({ target, onClose, lang }: Props) {
       </div>
       <div className="mt-3 rounded-xl bg-[#204E4A]/[0.06] px-3 py-2 text-xs leading-relaxed" aria-label={es ? 'Contenido seleccionado' : 'Selected content'}>
         <p className="font-semibold break-words">{es ? 'Contenido: ' : 'Content: '}{subjectLabel}</p>
-        <p className="mt-1 text-[10px] text-[#5C7470]">{es ? 'ID de referencia: ' : 'Reference ID: '}{reportTargetShortId(target.id)}</p>
+        <p className="mt-1 text-[13px] text-[#5C7470]">{es ? 'ID de referencia: ' : 'Reference ID: '}{reportTargetShortId(target.id)}</p>
       </div>
       {sent || alreadyReported ? <div role="status" className="mt-5 space-y-3">
         <p className="text-sm">{alreadyReported

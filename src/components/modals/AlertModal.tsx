@@ -4,7 +4,11 @@ import {
   activateLostPetAlert,
   fetchActiveLostPetAlert,
   resolveLostPetAlert,
+  getPetPublicToken,
+  buildPublicRescueUrl,
 } from '../../services/rescueService'
+import { LostAlertReview } from '../../features/rescue/components/LostAlertReview'
+import { ActiveLostAlertPanel } from '../../features/rescue/components/ActiveLostAlertPanel'
 
 interface AlertModalProps {
   isOpen: boolean
@@ -27,6 +31,11 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
   const [details, setDetails] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [publicUrl, setPublicUrl] = useState('')
+  const [isLinkLoading, setIsLinkLoading] = useState(false)
+  const [linkError, setLinkError] = useState('')
+  const [shareFeedback, setShareFeedback] = useState('')
+  const [linkAttempt, setLinkAttempt] = useState(0)
 
   useEffect(() => {
     if (!isOpen || !pet.id) return
@@ -64,6 +73,58 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
       active = false
     }
   }, [isOpen, pet.id, pet.lastSeenLocation])
+
+
+  // Reuse the identical token and public QR route from PassportModal.
+  useEffect(() => {
+    if (!isOpen || step !== 'active' || !pet.id) return
+    let active = true
+    setPublicUrl('')
+    setLinkError('')
+    setShareFeedback('')
+    setIsLinkLoading(true)
+    void getPetPublicToken(pet.id).then((token) => {
+      if (active) setPublicUrl(buildPublicRescueUrl(token))
+    }).catch(() => {
+      if (active) setLinkError(lang === 'es' ? 'No se pudo preparar el enlace del pasaporte.' : 'Could not prepare the passport link.')
+    }).finally(() => {
+      if (active) setIsLinkLoading(false)
+    })
+    return () => { active = false }
+  }, [isOpen, step, pet.id, lang, linkAttempt])
+
+  const isLocalLink = typeof window !== 'undefined'
+    && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)
+  const shareMessage = lang === 'es'
+    ? `Ayudemos a encontrar a ${pet.name}. Consulta su alerta en el pasaporte de PAZO:`
+    : `Help us find ${pet.name}. See the alert on the PAZO passport:`
+
+  const copyPublicLink = async (instagram = false) => {
+    if (!publicUrl) return
+    try {
+      await navigator.clipboard.writeText(publicUrl)
+      setShareFeedback(instagram
+        ? (lang === 'es' ? 'Enlace copiado. Pégalo en Instagram (historia, mensaje o biografía).' : 'Link copied. Paste it into Instagram (story, message or bio).')
+        : (lang === 'es' ? 'Enlace copiado.' : 'Link copied.'))
+    } catch {
+      setShareFeedback(lang === 'es' ? `Copia este enlace manualmente: ${publicUrl}` : `Copy this link manually: ${publicUrl}`)
+    }
+  }
+
+  const shareWhatsApp = () => {
+    if (!publicUrl || isLocalLink) return
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${shareMessage} ${publicUrl}`)}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const shareMore = async () => {
+    if (!publicUrl || isLocalLink) return
+    try {
+      if (navigator.share) await navigator.share({ title: `PAZO · ${pet.name}`, text: shareMessage, url: publicUrl })
+      else await copyPublicLink()
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') setShareFeedback(lang === 'es' ? 'No se pudo compartir. Prueba copiar el enlace.' : 'Could not share. Try copying the link.')
+    }
+  }
 
   if (!isOpen) return null
 
@@ -121,8 +182,8 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm bg-white rounded-[2.8rem] border border-[#EC7357]/30 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+    <div role="dialog" aria-modal="true" aria-label={lang === 'es' ? 'Búsqueda de mascota' : 'Lost pet search'} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs motion-safe:animate-[slideUpFade_260ms_ease-out_both]">
+      <div className="max-h-[calc(100dvh-2rem)] w-full max-w-[420px] space-y-4 overflow-y-auto overscroll-contain rounded-[2.6rem] bg-[#FFFCF6] p-5 shadow-[0_18px_52px_rgba(32,78,74,0.20)] sm:p-6">
         {isLoading ? (
           <div className="py-16 text-center text-xs font-bold text-[#5C7470]">
             {lang === 'es' ? 'Cargando alerta…' : 'Loading alert…'}
@@ -131,9 +192,6 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-2 border-b border-[#204E4A]/10">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-white bg-[#EC7357] px-2.5 py-0.5 rounded-full inline-block">
-                  {lang === 'es' ? 'Emergencia Comunitaria' : 'Community Alert'}
-                </span>
                 <h3 className="text-xl font-black text-[#204E4A] mt-1">
                   {lang === 'es' ? `Busquemos a ${pet.name}.` : `Let's find ${pet.name}.`}
                 </h3>
@@ -146,14 +204,14 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
                 <img src={pet.photoUrl} alt={pet.name} className="w-10 h-10 rounded-xl object-cover" />
                 <div>
                   <span className="font-extrabold text-[#204E4A] block">{pet.name}</span>
-                  <span className="text-[11px] text-[#5C7470]">
+                  <span className="text-[14px] text-[#5C7470]">
                     {pet.species}{pet.breed ? ` • ${pet.breed}` : ''}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Última vez vista' : 'Last seen location'}
                 </label>
                 <input
@@ -167,7 +225,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Fecha y hora aproximada' : 'Approximate date & time'}
                 </label>
                 <input
@@ -179,7 +237,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Descripción' : 'Description'}
                 </label>
                 <textarea
@@ -192,7 +250,7 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
                 />
               </div>
 
-              <div className="p-3 bg-white border border-[#204E4A]/10 rounded-2xl text-[11px] text-[#5C7470]">
+              <div className="p-3 bg-white border border-[#204E4A]/10 rounded-2xl text-[14px] text-[#5C7470]">
                 {lang === 'es'
                   ? 'Tu teléfono y domicilio no se mostrarán. El QR permitirá enviar avisos privados.'
                   : 'Your phone and home address stay hidden. The QR allows private notices.'}
@@ -208,70 +266,16 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
             </div>
           </div>
         ) : step === 'review' ? (
-          <div className="space-y-4">
-            <button onClick={() => setStep('create')} className="text-xs font-bold text-[#5C7470]">
-              ← {lang === 'es' ? 'Modificar datos' : 'Edit info'}
-            </button>
-
-            <div className="text-center space-y-3">
-              <img src={pet.photoUrl} alt={pet.name} className="w-24 h-24 rounded-[2rem] object-cover mx-auto border-3 border-[#EC7357]" />
-              <div>
-                <h3 className="text-2xl font-black text-[#EC7357]">
-                  {lang === 'es' ? `Se busca a ${pet.name}.` : `Searching for ${pet.name}.`}
-                </h3>
-                <p className="text-xs text-[#5C7470] mt-1">{lastSeen}</p>
-              </div>
-              {details && (
-                <div className="p-3 bg-[#FAF8F5] rounded-2xl text-xs text-left">
-                  {details}
-                </div>
-              )}
-              <button
-                onClick={handlePublish}
-                disabled={isSaving}
-                className="w-full bg-[#EC7357] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-full text-xs"
-              >
-                {isSaving
-                  ? (lang === 'es' ? 'Publicando…' : 'Publishing…')
-                  : (lang === 'es' ? 'Publicar alerta' : 'Publish alert')}
-              </button>
-            </div>
-          </div>
+          <LostAlertReview pet={pet} lastSeen={lastSeen} dateTime={dateTime} details={details}
+            lang={lang} isSaving={isSaving} onEdit={() => setStep('create')} onPublish={handlePublish}/>
         ) : (
-          <div className="space-y-4 text-center">
-            <div className="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl mx-auto animate-pulse">
-              !
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-[#204E4A]">
-                {lang === 'es' ? 'Alerta activa' : 'Alert active'}
-              </h3>
-              <p className="text-xs text-[#5C7470] mt-1">
-                {lang === 'es'
-                  ? `El pasaporte QR de ${pet.name} muestra ahora la información de búsqueda.`
-                  : `${pet.name}'s QR passport now shows the search information.`}
-              </p>
-            </div>
-
-            <div className="p-3 bg-[#FFF2EE] rounded-2xl text-left text-xs">
-              <span className="font-bold block">{lastSeen}</span>
-              {details && <span className="text-[#5C7470] block mt-1">{details}</span>}
-            </div>
-
-            <button
-              onClick={handleResolve}
-              disabled={isSaving}
-              className="w-full bg-[#204E4A] disabled:opacity-50 text-[#E1E53F] font-extrabold py-3.5 rounded-full text-xs"
-            >
-              {isSaving
-                ? (lang === 'es' ? 'Finalizando…' : 'Finishing…')
-                : (lang === 'es' ? '¡Ya está en casa! Finalizar alerta' : 'Safe at home — resolve alert')}
-            </button>
-
-            <button onClick={onClose} className="w-full py-2.5 text-xs font-bold text-[#5C7470]">
-              {lang === 'es' ? 'Cerrar ventana' : 'Close'}
-            </button>
-          </div>
+          <ActiveLostAlertPanel pet={pet} lastSeen={lastSeen} details={details} lang={lang}
+            isSaving={isSaving} publicUrl={publicUrl} isLinkLoading={isLinkLoading}
+            linkError={linkError} shareFeedback={shareFeedback} isLocalLink={isLocalLink}
+            onCopy={() => void copyPublicLink()} onWhatsApp={shareWhatsApp}
+            onInstagram={() => void copyPublicLink(true)} onMore={() => void shareMore()}
+            onRetryLink={() => setLinkAttempt((value) => value + 1)}
+            onResolve={handleResolve} onClose={onClose}/>
         )}
       </div>
     </div>

@@ -279,10 +279,10 @@ export const DocumentsModal = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#204E4A]/45 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="w-full sm:max-w-xl max-h-[94vh] bg-[#FAF8F5] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden">
+      <div className="w-full sm:max-w-xl max-h-[94vh] pazo-glass-modal rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden">
         <div className="px-5 pt-5 pb-4 bg-white border-b border-[#204E4A]/10 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] font-black text-[#5C7470]">
+            <p className="text-[13px] uppercase tracking-[0.18em] font-black text-[#5C7470]">
               {lang === 'es' ? 'Privado' : 'Private'}
             </p>
             <h2 className="text-xl font-black text-[#204E4A] mt-1">
@@ -343,14 +343,14 @@ export const DocumentsModal = ({
                   <p className="text-xs font-extrabold text-[#204E4A] truncate">
                     {selectedFile.name}
                   </p>
-                  <p className="text-[10px] text-[#5C7470]">
+                  <p className="text-[13px] text-[#5C7470]">
                     {formatBytes(selectedFile.size)}
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Título' : 'Title'}
                 </label>
                 <input
@@ -362,7 +362,7 @@ export const DocumentsModal = ({
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-[#5C7470] mb-1">
+                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Categoría' : 'Category'}
                 </label>
                 <select
@@ -498,10 +498,10 @@ export const DocumentsModal = ({
                           <p className="text-sm font-extrabold text-[#204E4A] truncate">
                             {document.title}
                           </p>
-                          <p className="text-[10px] font-bold text-[#5C7470] mt-0.5">
+                          <p className="text-[13px] font-bold text-[#5C7470] mt-0.5">
                             {CATEGORY_LABELS[document.category][lang]}
                           </p>
-                          <p className="text-[10px] text-[#5C7470] mt-1">
+                          <p className="text-[13px] text-[#5C7470] mt-1">
                             {formatBytes(document.sizeBytes)} · {formatDate(document.createdAt, lang)}
                           </p>
                         </div>
@@ -512,7 +512,7 @@ export const DocumentsModal = ({
                           type="button"
                           onClick={() => void openPreview(document)}
                           disabled={Boolean(busyKey)}
-                          className="py-2 rounded-full bg-[#E1E53F]/45 text-[#204E4A] text-[11px] font-black cursor-pointer disabled:opacity-50"
+                          className="py-2 rounded-full bg-[#E1E53F]/45 text-[#204E4A] text-[14px] font-black cursor-pointer disabled:opacity-50"
                         >
                           {busyKey === `preview:${document.id}`
                             ? '…'
@@ -522,7 +522,7 @@ export const DocumentsModal = ({
                           type="button"
                           onClick={() => void downloadDocument(document)}
                           disabled={Boolean(busyKey)}
-                          className="py-2 rounded-full bg-[#204E4A]/7 text-[#204E4A] text-[11px] font-black cursor-pointer disabled:opacity-50"
+                          className="py-2 rounded-full bg-[#204E4A]/7 text-[#204E4A] text-[14px] font-black cursor-pointer disabled:opacity-50"
                         >
                           {lang === 'es' ? 'Descargar' : 'Download'}
                         </button>
@@ -530,7 +530,7 @@ export const DocumentsModal = ({
                           type="button"
                           onClick={() => startEdit(document)}
                           disabled={Boolean(busyKey)}
-                          className="py-2 rounded-full bg-[#204E4A]/7 text-[#204E4A] text-[11px] font-black cursor-pointer disabled:opacity-50"
+                          className="py-2 rounded-full bg-[#204E4A]/7 text-[#204E4A] text-[14px] font-black cursor-pointer disabled:opacity-50"
                         >
                           {lang === 'es' ? 'Editar' : 'Edit'}
                         </button>
@@ -538,7 +538,7 @@ export const DocumentsModal = ({
                           type="button"
                           onClick={() => void deleteDocument(document)}
                           disabled={Boolean(busyKey)}
-                          className="py-2 rounded-full bg-[#EC7357]/12 text-[#EC7357] text-[11px] font-black cursor-pointer disabled:opacity-50"
+                          className="py-2 rounded-full bg-[#EC7357]/12 text-[#EC7357] text-[14px] font-black cursor-pointer disabled:opacity-50"
                         >
                           {busyKey === `delete:${document.id}`
                             ? (lang === 'es' ? 'Eliminando…' : 'Deleting…')
@@ -569,13 +569,13 @@ export const DocumentsModal = ({
 
       {preview && (
         <div className="fixed inset-0 z-[60] bg-[#102C29]/80 backdrop-blur-sm p-4 flex items-center justify-center">
-          <div className="w-full max-w-3xl max-h-[92vh] bg-white rounded-[1.75rem] overflow-hidden flex flex-col shadow-2xl">
+          <div className="w-full max-w-3xl max-h-[92vh] pazo-glass-modal rounded-[1.75rem] overflow-hidden flex flex-col shadow-2xl">
             <div className="px-4 py-3 flex items-center justify-between border-b border-[#204E4A]/10">
               <div className="min-w-0">
                 <p className="text-sm font-black text-[#204E4A] truncate">
                   {preview.document.title}
                 </p>
-                <p className="text-[10px] text-[#5C7470]">
+                <p className="text-[13px] text-[#5C7470]">
                   {CATEGORY_LABELS[preview.document.category][lang]}
                 </p>
               </div>

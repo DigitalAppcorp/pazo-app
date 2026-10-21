@@ -1,5 +1,6 @@
 import { canUseAccountFeatures } from './features/auth/accountAccess'
-import { getNotificationSightingId } from './features/notifications/notificationSource'
+import { recordAdminActivity } from './features/admin/adminDashboardService'
+import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { useState, useEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -10,6 +11,8 @@ import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
 import { selectFeedPage } from './features/feed/selectFeedPage'
 import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
+import {attachVerifiedFeedBadges,attachVerifiedCommentBadges,preloadVerifiedFeedBadgeArt} from './features/supporter/verifiedFeedPostBadges'
+import {supporterBenefitsUiEnabled} from './features/supporter/supporterUiRelease'
 import {
   fetchLatestUnreadSightingNotification,
   fetchNotifications,
@@ -39,6 +42,7 @@ import {
 import type {
   Pet,
   Post,
+  PostComment,
   CareItem,
   CareCompletion,
   CareItemInput,
@@ -59,6 +63,8 @@ import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
+import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
+import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -170,10 +176,15 @@ function PazoMain() {
   } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
+  const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(() => {
+    normalizeSupporterPaypalCallback(window.location,window.history)
+    return isSupporterAccountHash(window.location.hash)
+  })
 
   useEffect(() => {
     const syncPublicRoute = () => {
       setPublicRescueRoute(getPublicRescueRoute())
+      setSupporterAccountRoute(isSupporterAccountHash(window.location.hash))
     }
 
     window.addEventListener('hashchange', syncPublicRoute)
@@ -196,7 +207,7 @@ function PazoMain() {
   const [isDemoUser, setIsDemoUser] = useState(false)
   const [authMode, setAuthMode] = useState<'onboarding' | 'login'>('onboarding')
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
-  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>('A01')
+  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>('A01')
 
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
@@ -271,6 +282,19 @@ function PazoMain() {
   // Estados globales para superficies y deep-links internos.
   const [selectedPublicProfileId, setSelectedPublicProfileId] = useState<string | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  useEffect(()=>{
+    if(!user||petBootstrap?.userId!==user.id||petBootstrap.status!=='ready')return
+    const screen=isSearchOpen?'explore':activeTab
+    const day=new Date().toISOString().slice(0,10)
+    const key='pazo_daily_activity_'+user.id+'_'+day+'_'+screen
+    try{if(sessionStorage.getItem(key)==='1')return}catch{/* Browsing without storage still works */}
+    void recordAdminActivity(screen).then(()=>{
+      try{sessionStorage.setItem(key,'1')}catch{/* Optional measurement */}
+    }).catch(()=>{
+      // Analytics is optional; never block opening or navigating PAZO.
+    })
+  },[user?.id,petBootstrap?.userId,petBootstrap?.status,activeTab,isSearchOpen])
 
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
@@ -357,7 +381,7 @@ function PazoMain() {
     petName: wasAuthorDeleted(post) ? 'Autor eliminado' : post.pet_name,
     petSpecies: wasAuthorDeleted(post) ? 'otro' : post.pet_species,
     petAvatar: wasAuthorDeleted(post) ? '' : post.pet_avatar,
-    location: wasAuthorDeleted(post) ? '' : post.location,
+    location: wasAuthorDeleted(post) ? '' : (post.location || ''),
     timeAgo: 'Hace un momento',
     createdAt: post.created_at,
     isRecommended,
@@ -476,7 +500,19 @@ function PazoMain() {
         pagination, selection, socialRows.length, recommendationRows.length, FEED_PAGE_SIZE
       )
 
-      const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
+      // Resolve membership BEFORE publishing posts. Two backend reads may run
+      // concurrently, but the Feed receives one completed Post+badge payload.
+      // On RPC failure, preserve the cursor and show the existing retry UI.
+      const [interactionsPage,badgedPage]=await Promise.all([
+        enrichPostsWithInteractions(page,pet.id),
+        supporterBenefitsUiEnabled
+          ?attachVerifiedFeedBadges(page,async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          :Promise.resolve(page),
+      ])
+      const enrichedPage=interactionsPage.map((post,index)=>({
+        ...post,supporterBadge:badgedPage[index].supporterBadge,
+      }))
+      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(enrichedPage)
 
       if (feedLoadVersionRef.current !== loadVersion) return
 
@@ -514,6 +550,69 @@ function PazoMain() {
   const loadFeedForPet = async (pet: Pet) => {
     await loadFeedPageForPet(pet, true)
   }
+
+  // Verified badge snapshots are presentation-only. Revalidate while the Feed
+  // is in use; never keep a departed member's badge indefinitely. Unlike the
+  // initial page, this rechecks existing cards and changes badges atomically.
+  const badgePetSignature=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
+    .sort().join('|')
+  // The interval must inspect newly loaded comments, not a stale page snapshot.
+  const displayedPostsRef=useRef(posts)
+  displayedPostsRef.current=posts
+  useEffect(()=>{
+    if(!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
+    let alive=true
+    let inFlight=false
+    const refresh=async()=>{
+      if(inFlight)return
+      inFlight=true
+      const version=feedLoadVersionRef.current
+      const petId=activePetIdRef.current
+      try{
+        const snapshot=displayedPostsRef.current
+        const visibleComments=snapshot.flatMap(post=>post.comments)
+        const [checked,checkedComments]=await Promise.all([
+          attachVerifiedFeedBadges(snapshot,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids})),
+          attachVerifiedCommentBadges(visibleComments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids})),
+        ])
+        await preloadVerifiedFeedBadgeArt([...checked,...checkedComments])
+        if(!alive||feedLoadVersionRef.current!==version||activePetIdRef.current!==petId)return
+        const badgeByPet=new Map(checked.filter(p=>!p.isAuthorDeleted)
+          .map(p=>[p.petId,p.supporterBadge] as const))
+        const commentBadgesByPet=new Map(checkedComments.map(c=>[c.authorPetId,c.supporterBadge] as const))
+        setPosts(previous=>previous.map(post=>({
+          ...post,
+          supporterBadge:badgeByPet.has(post.petId)?badgeByPet.get(post.petId):post.supporterBadge,
+          comments:post.comments.map(comment=>({
+            ...comment,
+            supporterBadge:comment.authorPetId&&commentBadgesByPet.has(comment.authorPetId)
+              ?commentBadgesByPet.get(comment.authorPetId):undefined,
+          })),
+        })))
+      }catch(error){
+        if(alive&&feedLoadVersionRef.current===version&&activePetIdRef.current===petId){
+          // Never retain a prior paid display claim when rechecking fails.
+          setPosts(previous=>previous.map(post=>({
+            ...post,supporterBadge:undefined,
+            comments:post.comments.map(comment=>({...comment,supporterBadge:undefined})),
+          })))
+          console.error('PAZO Feed badge revalidation unavailable:',error)
+        }
+      }finally{inFlight=false}
+    }
+    const onReturn=()=>{
+      if(document.visibilityState==='visible')void refresh()
+    }
+    document.addEventListener('visibilitychange',onReturn)
+    const interval=setInterval(()=>void refresh(),60000)
+    return ()=>{
+      alive=false
+      document.removeEventListener('visibilitychange',onReturn)
+      clearInterval(interval)
+    }
+  },[badgePetSignature,activeTab,currentPet.id])
 
   const loadMoreFeed = async () => {
     if (
@@ -649,7 +748,12 @@ function PazoMain() {
     }
 
     return () => { cancelled = true }
-  }, [user, loading, petBootstrapRetry])
+    // Supabase MFA verification refreshes the user object (SIGNED_IN) without
+    // changing the account identity. Rebooting pets on every such refresh
+    // temporarily unmounts PetView/AdminDashboard and loses the pending
+    // security-sensitive operation. Rebootstrap ONLY on a real identity
+    // change, auth loading transition, or explicit retry.
+  }, [user?.id, loading, petBootstrapRetry])
 
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
@@ -839,7 +943,7 @@ function PazoMain() {
 
       if (error) throw error
 
-      const loadedComments = (data || []).map((row: any) => {
+      const rawComments:PostComment[] = (data || []).map((row: any) => {
         const author = Array.isArray(row.author) ? row.author[0] : row.author
 
         return {
@@ -854,9 +958,25 @@ function PazoMain() {
         }
       })
 
+      // Comments and verified membership arrive in one visible payload.
+      // Never show a paid author's comment first without their badge.
+      let loadedComments:PostComment[]=rawComments
+      if(supporterBenefitsUiEnabled){
+        try{
+          loadedComments=await attachVerifiedCommentBadges(rawComments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(loadedComments)
+        }catch(error){
+          // Badge verification may fail, but reading comments must remain free.
+          // A missing proof never produces a synthetic paid badge.
+          console.error('PAZO comments badge evidence unavailable:',error)
+          loadedComments=rawComments
+        }
+      }
+
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
-          post.id === postId
+          post.id === postId && !post.commentsLoaded
             ? {
                 ...post,
                 comments: loadedComments,
@@ -892,7 +1012,30 @@ function PazoMain() {
     const temporaryId = `temp-comment-${crypto.randomUUID()}`
     const createdAt = new Date().toISOString()
 
+    // Verify this pet's badge before showing the optimistic comment.
+    // No membership is inferred from the owner, previous post or login.
+    let authorCommentBadge:Post['supporterBadge']
+    if(supporterBenefitsUiEnabled){
+      try{
+        const verified=await attachVerifiedCommentBadges(
+          [{authorPetId:actorPet.id,supporterBadge:undefined}],
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(verified)
+        authorCommentBadge=verified[0].supporterBadge
+      }catch(error){
+        // The optional badge cannot break a free commenting workflow.
+        // Keep it absent until verification works; never claim paid membership.
+        console.error('PAZO comment badge verification unavailable:',error)
+      }
+      // A pet switch or feed refresh invalidates the pending author identity.
+    }
+    if(activePetIdRef.current!==actorPet.id){
+      commentingPostIdsRef.current.delete(operationKey)
+      return false
+    }
+
     const optimisticComment = {
+      supporterBadge:authorCommentBadge,
       id: temporaryId,
       authorPetId: actorPet.id,
       authorName: actorPet.name,
@@ -973,18 +1116,35 @@ function PazoMain() {
     }
   }
 
-  const handlePostCreated = (newPost: Post) => {
-    if (
-      feedPaginationRef.current.petId === currentPet.id
-      && feedPaginationRef.current.socialPetIds.includes(newPost.petId)
-    ) {
-      feedPaginationRef.current.socialOffset += 1
+  const handlePostCreated = async (newPost:Post) => {
+    const petAtCreation=currentPet.id
+    const versionAtCreation=feedLoadVersionRef.current
+    // Newly created posts also arrive with their verified author badge.
+    // The insert already happened in CreatePostModal; never POST a duplicate.
+    let publishedPost=newPost
+    if(supporterBenefitsUiEnabled){
+      try{
+        const resolved=await attachVerifiedFeedBadges([newPost],
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(resolved)
+        publishedPost=resolved[0]
+      }catch(error){
+        console.error('PAZO badge verification unavailable for newly created post:',error)
+        setIsCreatePostOpen(false)
+        setActiveTab('inicio')
+        if(activePetIdRef.current===petAtCreation)
+          void loadFeedForPet(currentPet)
+        return
+      }
     }
-
-    setPosts((prevPosts) => [newPost, ...prevPosts])
-    setProfilePosts((prevPosts) =>
-      newPost.petId === currentPet.id ? [newPost, ...prevPosts] : prevPosts
-    )
+    if(feedLoadVersionRef.current!==versionAtCreation ||
+       activePetIdRef.current!==petAtCreation)return
+    if(feedPaginationRef.current.petId===petAtCreation &&
+       feedPaginationRef.current.socialPetIds.includes(publishedPost.petId))
+      feedPaginationRef.current.socialOffset+=1
+    setPosts(previous=>[publishedPost,...previous.filter(post=>post.id!==publishedPost.id)])
+    setProfilePosts(previous=>publishedPost.petId===petAtCreation
+      ?[publishedPost,...previous.filter(post=>post.id!==publishedPost.id)]:previous)
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
   }
@@ -1375,10 +1535,17 @@ function PazoMain() {
 
   const handleOpenNotification = async (notification: PazoNotification) => {
     const sightingId = getNotificationSightingId(notification)
-    if (!canUseAccount || !sightingId) return
+    const joinedCommunityId = getNotificationCommunityId(notification)
+    if (!canUseAccount || (!sightingId && !joinedCommunityId)) return
 
     setIsNotificationsOpen(false)
-    setSelectedSightingId(sightingId)
+    if (joinedCommunityId) {
+      setCommunityTargetId(joinedCommunityId)
+      setCommunityTargetKey((value) => value + 1)
+      setActiveTab('comunidades')
+    } else if (sightingId) {
+      setSelectedSightingId(sightingId)
+    }
 
     if (!notification.read) {
       try {
@@ -1481,6 +1648,16 @@ function PazoMain() {
     )
   }
 
+  // Accessible to the verified account holder even when pet loading fails
+  // or the account has no pets. A subscription must not depend on a pet.
+  if (user && isSupporterAccountRoute) {
+    return <SupporterAccountManagement lang={lang}
+      onClose={() => {
+        leaveSupporterAccountRoute(window.location)
+        setSupporterAccountRoute(false)
+      }} />
+  }
+
   if (user && (petBootstrap?.userId !== user.id || petBootstrap.status === 'loading')) {
     return (
       <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
@@ -1508,6 +1685,10 @@ function PazoMain() {
             className="w-full rounded-full bg-[#204E4A] text-white py-3 font-extrabold cursor-pointer">
             {lang === 'es' ? 'Reintentar' : 'Try again'}
           </button>
+          <a href="#/account/supporter"
+            className="block w-full rounded-full bg-[#E1E53F]/50 py-3 text-center text-sm font-bold text-[#204E4A]">
+            {lang === 'es' ? 'Gestionar suscripción de apoyo' : 'Manage support subscription'}
+          </a>
         </main>
       </div>
     )
@@ -1517,7 +1698,7 @@ function PazoMain() {
 
   return (
     <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
-      <div className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
+      <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
@@ -1604,9 +1785,6 @@ function PazoMain() {
 
               <div className="my-auto space-y-5">
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-                    Pazo Acceso
-                  </span>
                   <h2 className="text-3xl font-black text-[#204E4A]">
                     {forgotPasswordMode
                       ? (lang === 'es' ? 'Recuperar contraseña' : 'Reset your password')
@@ -1777,7 +1955,9 @@ function PazoMain() {
 
             <main
               ref={mainScrollRef}
-              className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
+              className={activeTab === 'mapa'
+                ? 'relative min-h-0 flex-1 overflow-hidden p-0'
+                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5'}
               onScroll={(event) => {
                 const element = event.currentTarget
                 tabScrollPositionsRef.current[activeTab] = element.scrollTop

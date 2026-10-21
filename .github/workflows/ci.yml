@@ -3,10 +3,12 @@ name: CI
 on:
   pull_request:
     branches:
+      - f13/section-titles-20261012
       - main
       - release/mvp-beta-fast-track-20261010
   push:
     branches:
+      - f13/section-titles-20261012
       - main
       - release/mvp-beta-fast-track-20261010
       - fix/f14-nosuchkey-verification-20261012
@@ -36,10 +38,28 @@ jobs:
       - name: Hardening + architecture + privacy + ops governance checks
         run: npm run test:governance
 
+      - name: F16 synthetic reconciliation and Sandbox preflight syntax (offline)
+        run: |
+          node --check scripts/f16-paypal-verify-plan-readonly.mjs
+          node --check scripts/f16-paypal-verify-webhooks-readonly.mjs
+          node --check scripts/f16-paypal-verify-webhook-destination-readonly.mjs
+          node --check scripts/f16-p43-vercel-db-env-names-readonly.mjs
+          node --check scripts/f16-p43-ephemeral-readonly-preflight.mjs
+          node --check scripts/f16-p43b-ephemeral-readonly-preflight.mjs
+          node --test src/features/supporter/testing/f16P43EphemeralReadOnlyPreflight.test.mjs
+          node --test src/features/supporter/testing/f16P43VercelDbEnvNamesReadOnly.test.mjs
+          npm run test:f16:synthetic
+
+      - name: F16 MVP beta-to-Live release static guard
+        run: npm run test:release:guard
+
       - name: Build
         env:
           VITE_APP_RELEASE: ${{ github.sha }}
         run: npm run build
+
+      - name: Verify compiled PWA assets and PayPal return routes
+        run: npm run test:prepreview:dist
 
       - name: F14 media purge regressions
         run: npm run test:f14
@@ -47,10 +67,91 @@ jobs:
       - name: Operator PowerShell syntax without credentials or provider calls
         shell: pwsh
         run: |
-          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1')) {
+          foreach ($file in @('scripts/backup-database.ps1','scripts/pack-backup-age.ps1','scripts/f16-paypal-sandbox-plan.ps1','scripts/f16-p43-db-access-readonly.ps1','scripts/f16-p43-local-tooling-inventory.ps1','scripts/f16-p43-next-prereqs-readonly.ps1','scripts/f16-p42-session-pooler-tls-readonly-once.ps1')) {
             $tokens=$null; $parseErrors=$null
             [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD $file),[ref]$tokens,[ref]$parseErrors) | Out-Null
             if ($parseErrors.Count) { throw "PowerShell syntax error in $file" }
+          }
+
+      - name: P42 one-shot TLS probe preflight rejects unsafe hosts without connecting
+        shell: pwsh
+        run: |
+          $result = @(& ./scripts/f16-p42-session-pooler-tls-readonly-once.ps1 -DbHost 'invalid.example.com' -CaCertificatePath '/missing-test-ca.pem')
+          if ($result[0] -ne 'P42_TLS_READ_ONLY_ONCE_BLOCKED_PRECHECK_INPUT' -or
+              $result[1] -ne 'P42_NO_PROVISIONING_NO_PAYMENTS') {
+            throw 'P42 one-shot local-only input guard failed'
+          }
+          $script = Get-Content -LiteralPath 'scripts/f16-p42-session-pooler-tls-readonly-once.ps1' -Raw
+          if (-not $script.Contains("PGSSLMODE'] = 'verify-full'") -or
+              -not $script.Contains('BEGIN TRANSACTION READ ONLY;') -or
+              -not $script.Contains("default_transaction_read_only=on") -or
+              $script.Contains('pg_catalog.pg_stat_ssl') -or
+              -not $script.Contains("PGGSSENCMODE'] = 'disable'") -or
+              -not $script.Contains("PGSSLMINPROTOCOLVERSION'] = 'TLSv1.2'") -or
+              -not $script.Contains("PGSSLMAXPROTOCOLVERSION'] = 'TLSv1.3'") -or
+              -not $script.Contains('WaitForExit(25000)')) {
+            throw 'P42 one-shot local-only required fail-closed controls missing'
+          }
+          Write-Output 'P42_TLS_PROBE_OFFLINE_STATIC_AND_INPUT_GUARD_PASS_ONLY'
+          & ./src/features/supporter/testing/f16P42SessionPoolerTlsReadOnly.offline.ps1
+
+      - name: Enforce P42 data-only exclusion in real PowerShell backup command (static)
+        shell: pwsh
+        run: |
+          $script = Get-Content -LiteralPath scripts/backup-database.ps1 -Raw
+          $calls = [regex]::Matches($script, "(?s)Invoke-PazoPg\s+'pg_dump'\s+@\((?<args>.*?)\)\s+'database-private\.log'")
+          if ($calls.Count -ne 1) { throw 'P42: unexpected number of pg_dump commands' }
+          $args = $calls[0].Groups['args'].Value
+          if (-not $args.Contains("'--exclude-table-data=supporter_private.p42_activation_signing_keys'")) {
+            throw 'P42: pg_dump must exclude only key table data'
+          }
+          if ($args -match '--exclude-table=' -or $args -match '--schema-only' -or $args -match '--data-only') {
+            throw 'P42: full schema and other data must remain in logical backup'
+          }
+          Write-Output 'P42 real backup pg_dump argument guard PASS (static; no database accessed)'
+
+      - name: P42 CA offline structural validator - synthetic X509 only
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $rsa = [Security.Cryptography.RSA]::Create(2048)
+          $request = [Security.Cryptography.X509Certificates.CertificateRequest]::new(
+            'CN=PAZO ephemeral CI test CA',
+            $rsa,
+            [Security.Cryptography.HashAlgorithmName]::SHA256,
+            [Security.Cryptography.RSASignaturePadding]::Pkcs1
+          )
+          $request.CertificateExtensions.Add(
+            [Security.Cryptography.X509Certificates.X509BasicConstraintsExtension]::new($true,$false,0,$true)
+          )
+          $request.CertificateExtensions.Add(
+            [Security.Cryptography.X509Certificates.X509KeyUsageExtension]::new(
+              [Security.Cryptography.X509Certificates.X509KeyUsageFlags]::KeyCertSign,$true
+            )
+          )
+          $cert = $request.CreateSelfSigned([DateTimeOffset]::UtcNow.AddHours(-1),[DateTimeOffset]::UtcNow.AddHours(24))
+          try {
+            $caPath = Join-Path $env:RUNNER_TEMP 'p42-synthetic-ca.pem'
+            [IO.File]::WriteAllText($caPath, $cert.ExportCertificatePem())
+            $status = @(& ./scripts/f16-p42-verify-local-ca-offline.ps1 -CaCertificatePath $caPath)
+            if ($status[0] -ne 'P42_LOCAL_CA_FILE_STRUCTURAL_PASS_OFFLINE' -or
+                $status[1] -ne 'P42_CA_PROVENANCE_AND_SERVER_TLS_VERIFY_FULL_NOT_CHECKED' -or
+                $status[2] -ne 'P42_HOSTED_DB_WRITE_UNVERIFIED_NO_PROVISIONING') {
+              throw 'P42 offline CA validator status mismatch'
+            }
+            $invalidPath = Join-Path $env:RUNNER_TEMP 'p42-synthetic-invalid.pem'
+            [IO.File]::WriteAllText($invalidPath,'not a certificate')
+            $rejected = $false
+            try {
+              & ./scripts/f16-p42-verify-local-ca-offline.ps1 -CaCertificatePath $invalidPath | Out-Null
+            } catch {
+              $rejected = $_.Exception.Message -match 'P42_LOCAL_CA_FILE_CHECK_BLOCKED'
+            }
+            if (-not $rejected) { throw 'P42 validator did not reject invalid file' }
+            Write-Output 'P42_CA_STRUCTURAL_CHECK_CI_SYNTHETIC_PASS_NO_NETWORK'
+          } finally {
+            $cert.Dispose()
+            $rsa.Dispose()
           }
 
       - name: Lint (legacy debt is currently non-blocking)
@@ -112,3 +213,252 @@ jobs:
           node --input-type=module -e 'import fs from "node:fs"; JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + "/backup-catalog.json", "utf8")); console.log("Backup catalog query PASS on synthetic PostgreSQL; no hosted backup certification.");'
       - name: Reconciliation-only two-session lock and idempotency
         run: node scripts/f14-one-object-reconciliation-concurrency.mjs
+
+      # F16 consent foundation. Verify ONLY in this disposable
+      # PostgreSQL service to verify RLS/roles and synthetic-owner behaviour.
+      - name: F16 consent foundation security SQL in disposable PostgreSQL only
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/consent-metadata.sql \
+            -f supabase/tests/supporter/consent-synthetic.sql
+
+      # F16-P05: SQL draft lives under supabase/drafts NOT migrations.
+      # An explicit database/session guard prevents execution outside
+      # the disposable f14_synthetic PostgreSQL CI service.
+      - name: F16 P05 draft schema security and synthetic integrity ONLY
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/tests/supporter/p05-disposable-parent-fixture.sql \
+            -f supabase/drafts/f16_p05_private_prospective_evidence_v1_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-draft-security-metadata.sql \
+            -f supabase/tests/supporter/p05-draft-synthetic-cases.sql
+
+      - name: F16 P05 event inbox claim draft with disabled rollout (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p05_inbox_claim_v1_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-inbox-claim-security.sql \
+            -f supabase/tests/supporter/p05-inbox-claim-synthetic.sql \
+            -f supabase/tests/supporter/p05-inbox-finish-synthetic.sql
+
+      - name: F16 P05 real two-session claim concurrency (disposable only)
+        run: node scripts/f16-p05-inbox-claim-concurrency.mjs
+
+      - name: F16 P05 inverse claimed subscription ID (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p05_claimed_subscription_inverse_lookup_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-claimed-subscription-inverse-security.sql \
+            -f supabase/tests/supporter/p05-claimed-subscription-inverse-synthetic.sql
+
+      - name: F16 P05 signed dispute event RPC draft and permissions (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p05_dispute_event_rpc_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-dispute-event-rpc-synthetic.sql
+
+      - name: F16 P05 dispute ownership service-only ledger reader (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p05_dispute_private_ledger_read_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p05-dispute-private-ledger-security.sql \
+            -f supabase/tests/supporter/p05-dispute-private-ledger-synthetic.sql
+
+      - name: F16 P06 durable checkout consent and per-owner idempotency (disposable only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql \
+            -f supabase/drafts/f16_p08_read_checkout_recovery_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql \
+            -f supabase/drafts/f16_p10_recovered_checkout_binding_DO_NOT_APPLY.sql \
+            -f supabase/tests/supporter/p10-recovered-checkout-binding-synthetic.sql
+      - name: F16 P06 approved QA bilingual offer publish staging (disposable PG17 ONLY)
+        run: |
+          node --test src/features/supporter/testing/f16P06StagedOfferSqlReview.test.mjs
+          # Guard must reject missing explicit publication flag; no partial rows.
+          if psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p06_sandbox_qa_approved_offer_REQUIRES_NEW_PUBLISH_GO.sql >/dev/null 2>&1; then
+            echo 'P06 staging incorrectly accepted unapproved publish'; exit 1
+          fi
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c "SET ROLE postgres; SET pazo.f16_p06_qa_publish_go='PO_EXPLICIT_QA_OFFER_PUBLISH_AFTER_OWNER_GATE';" \
+            -f supabase/drafts/f16_p06_sandbox_qa_approved_offer_REQUIRES_NEW_PUBLISH_GO.sql
+          # Replaying an already published immutable pair must be rejected.
+          if psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c "SET ROLE postgres; SET pazo.f16_p06_qa_publish_go='PO_EXPLICIT_QA_OFFER_PUBLISH_AFTER_OWNER_GATE';" \
+            -f supabase/drafts/f16_p06_sandbox_qa_approved_offer_REQUIRES_NEW_PUBLISH_GO.sql >/dev/null 2>&1; then
+            echo 'P06 staging incorrectly allowed second publish'; exit 1
+          fi
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic \
+            -v ON_ERROR_STOP=1 -c "SET ROLE postgres; SELECT count(*)::text || '|' || count(DISTINCT locale)::text || '|' || count(DISTINCT sha256)::text FROM supporter_private.paypal_p06_offers WHERE version='pazo-supporter-sandbox.qa20261016-v1';")
+          test "$result" = "2|2|2"
+          echo 'P06 sandbox QA bilingual offer exact copy, guard, and idempotency PASS (DISPOSABLE only)'
+
+  f16-p12-staged-install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+          POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US --locale=en_US.UTF-8
+        ports: ["55442:5432"]
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify P12 reviewed SQL composition without database writes
+        run: node scripts/f16-p12-build-staged-install.mjs --verify
+      - name: Bootstrap isolated private-schema prerequisites
+        run: |
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-disposable-parent-fixture.sql
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p12-disposable-existing-reversal-fixture.sql
+      - name: Apply staged candidate in disposable PostgreSQL ONLY
+        run: |
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c "SET ROLE postgres; SET pazo.f16_p12_go='DISPOSABLE_P12_LAB_ONLY';" -f supabase/drafts/f16_p12_staged_install_REQUIRES_PO_GO.sql
+      - name: Validate bilingual offers, one-shot claim and recovery binding
+        run: |
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql -f supabase/tests/supporter/p10-recovered-checkout-binding-synthetic.sql
+      - name: Test P14 exact accepted offer acknowledgement on disposable PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p14_checkout_acknowledgement_DO_NOT_APPLY.sql -f supabase/tests/supporter/p14-checkout-acknowledgement-synthetic.sql
+
+  f16-p21-worker-schema-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+        ports:
+          - 55443:5432
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Verify reviewed P05 claim code is unchanged
+        run: node scripts/f16-p21-verify-staged-worker.mjs
+      - name: Bootstrap disposable private inbox in hosted-equivalent shape
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-disposable-parent-fixture.sql -f supabase/tests/supporter/p21-existing-hosted-inbox-fixture.sql
+      - name: Install only staged P21 functions with worker OFF
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p21_hosted_compatible_inbox_worker_DO_NOT_APPLY.sql
+      - name: Check service-only permissions, historical cutoff and fencing
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-inbox-claim-security.sql -f supabase/tests/supporter/p05-inbox-claim-synthetic.sql -f supabase/tests/supporter/p05-inbox-finish-synthetic.sql -f supabase/tests/supporter/p21-no-historical-processing-synthetic.sql
+      - name: Stage P24 original consent proof only in disposable PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p24-p06-contract-fixture.sql -f supabase/drafts/f16_p24_claim_scoped_consent_lineage_DO_NOT_APPLY.sql -f supabase/tests/supporter/p24-consent-lineage-synthetic.sql
+      - name: P25 stage unique first-obligation REVIEW reservation in isolated PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p25_first_obligation_review_reservation_DO_NOT_APPLY.sql -f supabase/tests/supporter/p25-first-obligation-review-reservation-synthetic.sql
+      - name: P26 blocked ledger transactional integrity in isolated PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p26_blocked_ledger_schema_DO_NOT_APPLY.sql -f supabase/tests/supporter/p26-blocked-ledger-postgres-synthetic.sql -f supabase/tests/supporter/p30-no-direct-credit-postgres-synthetic.sql
+      - name: P26 two-session duplicate reservation contention (disposable only)
+        run: node scripts/f16-p26-blocked-ledger-concurrency.mjs
+      - name: Install P22 fenced bound-intent read in disposable PostgreSQL ONLY
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p22_claim_scoped_bound_intent_DO_NOT_APPLY.sql -f supabase/tests/supporter/p22-claim-scoped-bound-intent-synthetic.sql
+
+      - name: P38 activation binding security in disposable PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p38_verified_activation_binding_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p38-activation-binding-postgres-synthetic.sql
+
+      - name: P39 trusted activation ingress registration and anti-reassignment (PG17 only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p39_signed_activation_ingress_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p39-signed-activation-ingress-postgres-synthetic.sql
+
+      - name: P40 private activation storage hosted-candidate rehearsal in PG17 only
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p40_private_activation_storage_hosted_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p40-private-activation-storage-postgres-synthetic.sql
+
+      - name: P37 P40 claim-scoped activation read, disabled-by-default, PG17 ROLLBACK only
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p37_p40_claimed_activation_read_PG17_ONLY_DO_NOT_APPLY.sql -f supabase/drafts/f16_p37_hosted_private_claim_read_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p37-p40-claimed-activation-read-pg17-synthetic.sql
+
+      - name: P42 authenticated activation HMAC ingress and key isolation (PG17 only)
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p42_hmac_scoped_activation_ingress_pg17_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p42-hmac-activation-ingress-postgres-synthetic.sql
+
+      - name: P42 hosted-disabled keys and RPC rehearsal (disposable PG17 ONLY)
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p42_hosted_keys_and_disabled_writer_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/drafts/f16_p42_absolute_key_expiry_patch_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p42-hosted-disabled-writer-pg17-rehearsal.sql
+
+      - name: P42 manually supervised DB revocation - PG17 rollback only
+        run: |
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/tests/supporter/p42-manual-revocation-postgres-synthetic.sql
+          echo 'P42 exact key deletion and ROLLBACK PASS: DB disposable only, no provider secrets'
+
+      - name: P42 read-only provisioning structural preflight (PG17)
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_p42_provisioning_structural_preflight_READ_ONLY.sql
+
+      - name: P28 minimal administrative audit transaction tests in disposable PostgreSQL
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_audit_ledger_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audit-postgres-synthetic.sql
+
+      - name: P28 hosted audit SQL candidate rehearsal with isolated database
+        run: |
+          # Disposable PG17 only: remove lab draft objects before rehearsing alternate hosted candidate.
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres; DROP FUNCTION public.f16_p28_draft_ack_historical_audit(uuid); DROP TABLE supporter_private.p28_historical_read_audit;'
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_audit_hosted_REVIEW_ONLY_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-hosted-audit-rehearsal-postgres-synthetic.sql
+
+      - name: P28 audited historical exact-ID read in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_candidate_exact_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-audited-read-postgres-synthetic.sql
+
+      - name: P28 atomic single-use historical audit in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_historical_single_use_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-historical-single-use-postgres-synthetic.sql
+
+      - name: P28 two-session atomic historical audit consumption
+        run: node scripts/f16-p28-single-use-concurrency.mjs
+
+      - name: P28 SQL HMAC event-binding adversarial test in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_hmac_sql_binding_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-hmac-sql-binding-postgres-synthetic.sql
+
+      - name: P28 versioned HMAC rotation and revocation in disposable PG17
+        run: |
+          psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_versioned_hmac_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-versioned-hmac-postgres-synthetic.sql

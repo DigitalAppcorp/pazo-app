@@ -1,0 +1,45 @@
+name: F16 Local Sandbox Auto QA Admission Lab
+
+on:
+  push:
+    branches: [f13/section-titles-20261012]
+    paths:
+      - 'supabase/migrations/20261018201000_f16_local_sandbox_automatic_qa_admission.sql'
+      - 'scripts/f16-local-sandbox-auto-qa-admission-lab.sql'
+      - '.github/workflows/f16-local-sandbox-auto-qa-admission-lab.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20261018201000_f16_local_sandbox_automatic_qa_admission.sql'
+      - 'scripts/f16-local-sandbox-auto-qa-admission-lab.sql'
+      - '.github/workflows/f16-local-sandbox-auto-qa-admission-lab.yml'
+permissions:
+  contents: read
+jobs:
+  local-sandbox-auto-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-data
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
+      - name: Verify Auth admission with financial invariants
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: synthetic-only-no-hosted-data
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/f16-local-sandbox-auto-qa-admission-lab.sql

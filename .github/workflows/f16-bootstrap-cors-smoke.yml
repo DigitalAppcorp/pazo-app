@@ -1,0 +1,59 @@
+name: F16 Bootstrap Browser Preflight Smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/f16-bootstrap-cors-smoke.yml'
+      - 'supabase/functions/pazo-admin-paypal-provision/liveMerchantBootstrapControl.mjs'
+      - 'supabase/functions/pazo-admin-paypal-bootstrap/index.ts'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify browser OPTIONS without authenticating or creating a generation
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoint='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-admin-paypal-bootstrap'
+          const origin='http://localhost:5173'
+          const response=await fetch(endpoint,{
+            method:'OPTIONS',
+            headers:{
+              origin,
+              'access-control-request-method':'POST',
+              'access-control-request-headers':'authorization,apikey,content-type,x-client-info'
+            },
+            signal:AbortSignal.timeout(10000)
+          })
+          const allowOrigin=response.headers.get('access-control-allow-origin')
+          const allowMethods=response.headers.get('access-control-allow-methods')||''
+          const allowHeaders=response.headers.get('access-control-allow-headers')||''
+          console.log(JSON.stringify({
+            status:response.status,
+            allowOrigin,
+            postAllowed:allowMethods.includes('POST'),
+            authHeaderAllowed:allowHeaders.toLowerCase().includes('authorization')
+          }))
+          if(response.status!==204||allowOrigin!==origin||
+            !allowMethods.includes('POST')||!allowHeaders.toLowerCase().includes('authorization'))
+            process.exitCode=1
+          // A blocked origin must not receive an Access-Control-Allow-Origin.
+          const unauthorized=await fetch(endpoint,{
+            method:'OPTIONS',
+            headers:{origin:'https://untrusted.invalid',
+              'access-control-request-method':'POST'},
+            signal:AbortSignal.timeout(10000)
+          })
+          console.log(JSON.stringify({
+            deniedOriginStatus:unauthorized.status,
+            deniedOriginAllowed:unauthorized.headers.has('access-control-allow-origin')
+          }))
+          if(unauthorized.status!==403||
+             unauthorized.headers.has('access-control-allow-origin'))
+            process.exitCode=1
+          NODE
