@@ -117,9 +117,11 @@ export function createPazoLiveOwnerAccountRead({released=false,
      !PLAN.test(original.planId||'')||
      !Number.isSafeInteger(original.merchantGeneration)||original.merchantGeneration<1)
     return reply(request,409,'live_status_not_available')
-   const remote=await readProviderStatus({merchantGeneration:original.merchantGeneration,
+   let remote
+   try{remote=await readProviderStatus({merchantGeneration:original.merchantGeneration,
     planId:original.planId,intentId:selected.intentId,
-    subscriptionId:original.subscriptionId})
+    subscriptionId:original.subscriptionId})}
+   catch{return reply(request,503,'live_provider_status_unavailable')}
    if(remote?.id!==original.subscriptionId||remote?.plan_id!==original.planId||
     remote?.custom_id!==selected.intentId||
     !['ACTIVE','APPROVAL_PENDING','APPROVED','SUSPENDED','CANCELLED','EXPIRED'].includes(remote.status))
