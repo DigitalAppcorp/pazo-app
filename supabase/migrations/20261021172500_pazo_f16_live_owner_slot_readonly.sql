@@ -56,4 +56,29 @@ REVOKE ALL ON FUNCTION public.pazo_f16_live_service_owner_slot(uuid,bigint)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_owner_slot(uuid,bigint)
  TO service_role;
+-- Concurrency protection: two browser tabs with different request keys
+-- cannot both insert an unverified subscription intent for one owner.
+-- Same request key remains idempotent through the existing UNIQUE constraint.
+CREATE OR REPLACE FUNCTION supporter_private.pazo_live_owner_slot_insert_guard()
+RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $trigger$
+BEGIN
+ IF NEW.source_environment IS DISTINCT FROM 'live' OR NEW.owner_id IS NULL
+ THEN RAISE EXCEPTION 'invalid live owner slot' USING ERRCODE='23514'; END IF;
+ PERFORM pg_catalog.pg_advisory_xact_lock(
+  pg_catalog.hashtextextended('pazo:live:checkout:owner:'||NEW.owner_id::text,0));
+ IF EXISTS(
+  SELECT 1 FROM supporter_private.pazo_paypal_live_checkout_intents old
+  WHERE old.owner_id=NEW.owner_id AND old.source_environment='live'
+   AND old.request_key IS DISTINCT FROM NEW.request_key
+ )
+ THEN RAISE EXCEPTION 'existing Live checkout requires reconciliation' USING ERRCODE='23514'; END IF;
+ RETURN NEW;
+END $trigger$;
+DROP TRIGGER IF EXISTS pazo_live_owner_slot_insert_guard ON supporter_private.pazo_paypal_live_checkout_intents;
+CREATE TRIGGER pazo_live_owner_slot_insert_guard
+BEFORE INSERT ON supporter_private.pazo_paypal_live_checkout_intents
+FOR EACH ROW EXECUTE FUNCTION supporter_private.pazo_live_owner_slot_insert_guard();
+REVOKE ALL ON FUNCTION supporter_private.pazo_live_owner_slot_insert_guard()
+ FROM PUBLIC,anon,authenticated,service_role;
 COMMIT;
