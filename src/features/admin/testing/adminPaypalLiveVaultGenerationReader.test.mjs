@@ -62,3 +62,16 @@ test('checkout and webhook select per-generation Vault, not browser request or c
  assert.match(checkout,/original\.generation!==route\.merchantGeneration/)
  assert.match(hosted,/createPazoLiveVaultHistoricalVerification/)
 })
+
+test('draft SQL is service-role only, refuses Live credential overwrite and preserves kill switch',()=>{
+ const sql=readFileSync(new URL('../../../../supabase/drafts/F16_LIVE_VAULT_GENERATION_RPCS_REVIEW_REQUIRED.sql',import.meta.url),'utf8')
+ assert.match(sql,/pazo_f16_live_service_vault_prepare/)
+ assert.match(sql,/pazo_f16_live_service_vault_read/)
+ assert.match(sql,/GRANT EXECUTE ON FUNCTION public\.pazo_f16_live_service_vault_read\(bigint\) TO service_role/)
+ assert.match(sql,/p_environment IS DISTINCT FROM 'sandbox'/)
+ assert.match(sql,/vault\.create_secret/)
+ assert.match(sql,/v_draft\.client_id_vault IS NOT NULL/)
+ assert.match(sql,/kill_switch=true AND active_generation IS NULL/)
+ assert.match(sql,/g\.credential_source IN \('vault','edge_secrets'\)/)
+ assert.doesNotMatch(sql,/live_enabled=true[^;]*UPDATE admin_private\.pazo_paypal_new_checkout_switch/)
+})
