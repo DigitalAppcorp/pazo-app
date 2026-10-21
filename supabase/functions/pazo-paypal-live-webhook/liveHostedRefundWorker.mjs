@@ -1,7 +1,7 @@
 // PAZO F16 — unreleased private refund reconciliation worker composition.
 // Neither a public webhook nor a browser can invoke this module by itself.
 // A future server-only scheduler must provide a DURABLE signed-event claimant.
-import {createPazoLiveEdgeHistoricalVerification}
+import {createPazoLiveVaultHistoricalVerification}
  from './liveHistoricalReadPipeline.mjs'
 import {createPazoLiveRecordedSaleReader}
  from './liveHostedRecordedSale.mjs'
@@ -25,9 +25,9 @@ export function createPazoLiveHostedRefundWorker({
   url=getEnv('SUPABASE_URL')
   key=getEnv('SUPABASE_SERVICE_ROLE_KEY')
   if(url!==URL||typeof key!=='string'||key.length<24)throw Error('env')
-  historical=createPazoLiveEdgeHistoricalVerification({
+  historical=createPazoLiveVaultHistoricalVerification({
    supabaseUrl:url,serviceRoleKey:key,released:true,
-   getSecret:name=>getEnv(name),fetchImpl
+   fetchImpl
   })
   recorded=createPazoLiveRecordedSaleReader({
    projectUrl:url,serviceRoleKey:key,fetchImpl

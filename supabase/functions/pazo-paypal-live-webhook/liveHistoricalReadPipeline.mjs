@@ -8,6 +8,7 @@ import {createPazoLiveOwnerScopeResolver} from './liveOwnerScope.mjs'
 import {createPaypalLiveMerchantEvidenceReader} from './liveMerchantEvidence.mjs'
 import {createPaypalLivePostbackVerifier} from './livePostback.mjs'
 import {createPazoLiveEdgeGenerationSecretReader} from './liveEdgeGenerationSecrets.mjs'
+import {createPazoLiveVaultGenerationSecretReader} from './liveVaultGenerationSecrets.mjs'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const WH=/^[A-Za-z0-9_-]{8,100}$/
 const FINGERPRINT=/^[a-f0-9]{64}$/
@@ -72,6 +73,21 @@ export function createPazoLiveEdgeHistoricalVerification({
  if(released!==true)throw Error('live_historical_edge_release_off')
  const fetchPrivateGeneration=createPazoLiveEdgeGenerationSecretReader({
   getSecret,released
+ })
+ return createPazoLiveHistoricalReadPipeline({
+  supabaseUrl,serviceRoleKey,fetchPrivateGeneration,fetchImpl
+ })
+}
+
+// F16 permanent original merchant binding from the encrypted Vault IDs stored
+// on that generation row. Supports reading/cancelling retired generations;
+// never falls back to whichever merchant happens to be active.
+export function createPazoLiveVaultHistoricalVerification({
+ supabaseUrl,serviceRoleKey,released=false,fetchImpl=fetch
+}={}){
+ if(released!==true)throw Error('live_vault_historical_release_off')
+ const fetchPrivateGeneration=createPazoLiveVaultGenerationSecretReader({
+  supabaseUrl,serviceRoleKey,fetchImpl
  })
  return createPazoLiveHistoricalReadPipeline({
   supabaseUrl,serviceRoleKey,fetchPrivateGeneration,fetchImpl

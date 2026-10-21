@@ -3,7 +3,7 @@
 // A signed event is only queued; a separate reconciler must verify sales,
 // subscription periods and reversals before granting any membership benefits.
 import {createPazoLiveGenerationPinnedWebhook} from './liveGenerationPinnedWebhook.mjs'
-import {createPazoLiveEdgeHistoricalVerification} from './liveHistoricalReadPipeline.mjs'
+import {createPazoLiveVaultHistoricalVerification} from './liveHistoricalReadPipeline.mjs'
 import {createPazoLiveHostedInbox} from './liveHostedInbox.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const unavailable=()=>new Response(JSON.stringify({code:'live_webhook_not_released'}),{
@@ -21,9 +21,8 @@ export function createPazoLiveHostedWebhook({
  }catch{return unavailable}
  let pipeline,inbox
  try{
-  pipeline=createPazoLiveEdgeHistoricalVerification({
-   supabaseUrl:url,serviceRoleKey:service,
-   getSecret:name=>getEnv(name),released:true,fetchImpl
+  pipeline=createPazoLiveVaultHistoricalVerification({
+   supabaseUrl:url,serviceRoleKey:service,released:true,fetchImpl
   })
   inbox=createPazoLiveHostedInbox({
    supabaseUrl:url,serviceRoleKey:service,fetchImpl
