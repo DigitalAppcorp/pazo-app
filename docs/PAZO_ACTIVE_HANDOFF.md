@@ -1,5 +1,49 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## Corrección prioritaria: permitir cobros sin permiso de saldos — 21-oct-2026 (vigente)
+
+**Decisión operativa PO:** prioridad que la membresía US$2.99 pueda recibir
+pagos reales correctamente, sin nuevas pruebas innecesarias de identidad.
+La llamada `reporting/balances` provocó
+`live_merchant_read_permission_required`; **ese permiso NO es requisito
+de PayPal para crear suscripciones, configurar webhook o consultar plan**.
+No pedir al PO activar reporting/Transaction Search ni repetir el formulario.
+La coincidencia Merchant ID vía saldos fue un gate artificial introducido
+durante desarrollo. No usarla para bloquear integración financiera.
+
+**Código ya integrado:** PR #49 (squash `5fb025b6`, 9/9 GitHub CI SUCCESS)
+retiró el formulario `AdminPaypalLiveMerchantMatch` del flujo normal de
+Admin→PayPal→Live, sustituyéndolo por un mensaje claro de preparación pendiente.
+Tests de regresión en `adminPaypalLiveMerchantMatch.test.mjs`.
+El lector histórico puede permanecer en repositorio como laboratorio privado,
+pero NO forma parte del criterio de go-live ni debe ser invocado por usuario.
+No hubo migración ni despliegue de frontend/Edge financiero en PR49.
+
+**Estado real de cobros no se sobrestima:** plan y webhook generación1
+comprobados y registrados; Live sin credenciales generacionales, sin generación
+comercial persistente, webhook Live y checkout Live con latches de código OFF,
+rutas de reconciliación/beneficios no activas. Antes de ofrecer pagos en PAZO
+hay que cerrar almacenado seguro de secretos, originales de comerciante con
+MFA y proveedor OAuth/plan ya verificados, ingreso de webhook firmado,
+ventas completadas y cancelación/refund/entitlements, callback HTTPS y GO de
+operación real. No es seguro habilitar solo un botón de PayPal.
+
+**Alternativa inmediata de ingresos, separada de integración en PAZO:**
+PayPal Business permite `Sales → Subscriptions → Create/Manage plan →
+Generate Link` (PayPal ayuda oficial). Puede cobrar recurrencias mediante
+enlace de PayPal sin servidor PAZO, pero **no asigna automáticamente membresía
+ni beneficios en la app**. No publicarlo como Amigo de PAZO integrado sin
+reconcilación explícita con el usuario. Si se usa como transición, informar
+claramente el carácter manual. No inventar ni sintetizar URL de plan.
+
+**Próxima implementación:** dejar de optimizar la consulta de saldos;
+priorizar un recorrido administrativo de una única entrada de credenciales
+con verificación de OAuth/plan/webhook desde Edge, custodia segura por generación,
+ingestión firmada e idempotente, reconciliación y flujo de cobro/cancelación
+end-to-end con pruebas negativas. Mantener main/checkout Live OFF hasta GO
+expreso y prueba financiera supervisada.
+
+
 ## Comprobación privada del ID de comercio Live — 21-oct-2026 UTC
 
 **Estado CODE + CI + HOSTED, no vinculante:** tras confirmar el PO que tiene a la
