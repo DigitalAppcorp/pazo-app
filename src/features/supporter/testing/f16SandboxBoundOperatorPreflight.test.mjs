@@ -1,13 +1,22 @@
-import test from 'node:test'
+import test, {after} from 'node:test'
 import assert from 'node:assert/strict'
 import {classifyF16SubscriptionCancellation} from '../../../../scripts/f16-sandbox-auth-bound-e2e.mjs'
 import {spawnSync} from 'node:child_process'
 import {fileURLToPath} from 'node:url'
+import {mkdtempSync,rmdirSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
+
+// On Windows os.homedir() reads USERPROFILE. Never inspect the real operator's
+// prior Sandbox state while testing an intentionally unconfigured environment.
+const isolatedHome=mkdtempSync(join(tmpdir(),'pazo-f16-operator-test-'))
+const operatorEnv={...process.env,...(process.platform==='win32'?{USERPROFILE:isolatedHome}:{})}
+after(()=>rmdirSync(isolatedHome))
 
 const script=fileURLToPath(new URL('../../../../scripts/f16-sandbox-auth-bound-e2e.mjs',import.meta.url))
 const preflight=env=>spawnSync(process.execPath,[script,'--preflight'],{
  encoding:'utf8',
- env:{...process.env,
+ env:{...operatorEnv,
   PAYPAL_SANDBOX_CLIENT_ID:'',
   PAYPAL_SANDBOX_CLIENT_SECRET:'',
   PAZO_F16_SUPABASE_SECRET_KEY:'',
@@ -49,7 +58,7 @@ test('F16 preflight discloses booleans only, never merchant or Supabase secrets'
 test('F16 unsupported CLI mode does not create a subscription or reveal details',()=>{
  const r=spawnSync(process.execPath,[script,'--send-money-live'],{
  encoding:'utf8',timeout:20000,
- env:{...process.env,PAYPAL_SANDBOX_CLIENT_ID:'',
+ env:{...operatorEnv,PAYPAL_SANDBOX_CLIENT_ID:'',
   PAYPAL_SANDBOX_CLIENT_SECRET:'',PAZO_F16_SUPABASE_SECRET_KEY:''},
  })
  assert.equal(r.status,2)
@@ -63,7 +72,7 @@ test('F16 unsupported CLI mode does not create a subscription or reveal details'
 test('F16 remote validation without private env fails before network or writes',()=>{
  const r=spawnSync(process.execPath,[script,'--validate-remote'],{
   encoding:'utf8',timeout:20000,
-  env:{...process.env,PAYPAL_SANDBOX_CLIENT_ID:'',
+  env:{...operatorEnv,PAYPAL_SANDBOX_CLIENT_ID:'',
    PAYPAL_SANDBOX_CLIENT_SECRET:'',PAZO_F16_SUPABASE_SECRET_KEY:''},
  })
  assert.equal(r.status,2)
@@ -77,7 +86,7 @@ test('F16 remote validation without private env fails before network or writes',
 test('F16 cancellation diagnostic without credentials cannot call PayPal or mutate data',()=>{
  const r=spawnSync(process.execPath,[script,'--status-readonly'],{
   encoding:'utf8',timeout:20000,
-  env:{...process.env,PAYPAL_SANDBOX_CLIENT_ID:'',
+  env:{...operatorEnv,PAYPAL_SANDBOX_CLIENT_ID:'',
    PAYPAL_SANDBOX_CLIENT_SECRET:'',PAZO_F16_SUPABASE_SECRET_KEY:''},
  })
  assert.equal(r.status,2)

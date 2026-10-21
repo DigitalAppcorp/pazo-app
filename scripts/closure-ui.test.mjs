@@ -245,7 +245,7 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
   await act(async()=>{ui.unmount()})
   const css=fs.readFileSync('src/index.css','utf8')
   for(const part of ['.pazo-liquid-indicator','.pazo-liquid-surface','@property --pazo-liquid-center','background: #FFFFFF','top: 14px','bottom: -3px','-webkit-mask-image: radial-gradient(circle 30px','mask-image: radial-gradient(circle 30px','transparent 0 29px, #000 30px','transition: --pazo-liquid-center 460ms','background: #204E4A','box-shadow: 0 8px 17px','@keyframes pazoLiquidSettle','prefers-reduced-motion: reduce', '.pazo-liquid-surface, .pazo-liquid-indicator { transition: none','animation: none; transform: translateY(-15px)'])assert.ok(css.includes(part),part)
-  assert.ok(css.includes('.pazo-liquid-icon--idle {\n  transform: translateY(15px);'),'Idle tab glyphs must align with white bar vertical center')
+  assert.ok(css.replaceAll('\r\n','\n').includes('.pazo-liquid-icon--idle {\n  transform: translateY(15px);'),'Idle tab glyphs must align with white bar vertical center')
   const source=fs.readFileSync('src/components/BottomNav.tsx','utf8')
   assert.ok(source.includes("isActive ? 'pazo-liquid-icon--active text-[#E1E53F]' : 'pazo-liquid-icon--idle'"),'Only idle icons are repositioned')
   const surfaceCss=css.split('.pazo-liquid-surface {')[1].split('}')[0]
@@ -519,7 +519,7 @@ test('F13 Communities list entrance animates only real result cards with capped 
   assert.ok(css.includes('@keyframes pazoCommunityCardEnter'))
   assert.ok(css.includes('translateY(5px)'))
   assert.ok(css.includes('pazoCommunityCardEnter 160ms ease-out'))
-  assert.ok(css.includes('.pazo-community-card-enter {\n    animation: none;'),'Reduced motion disables entrance entirely')
+  assert.ok(css.replaceAll('\r\n','\n').includes('.pazo-community-card-enter {\n    animation: none;'),'Reduced motion disables entrance entirely')
 })
 test('F13 Community Option 6 empty state matches map concept, preserves real create callback, and does not invent communities', async () => {
   for(const [lang,heading,cta] of [

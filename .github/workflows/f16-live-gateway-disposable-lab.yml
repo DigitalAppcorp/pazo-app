@@ -2,6 +2,10 @@ name: F16 Live Gateway Disposable PostgreSQL Lab
 on:
   pull_request:
     paths:
+      - 'supabase/migrations/*pazo_f16_live_service_json_claims_guard.sql'
+      - 'supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql'
+      - 'supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql'
+      - 'scripts/f16-live-json-claims-disposable-lab.sql'
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
       - 'scripts/f16-live-secret-provision-disposable-lab.sql'
@@ -14,6 +18,10 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
+      - 'supabase/migrations/*pazo_f16_live_service_json_claims_guard.sql'
+      - 'supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql'
+      - 'supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql'
+      - 'scripts/f16-live-json-claims-disposable-lab.sql'
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
       - 'scripts/f16-live-secret-provision-disposable-lab.sql'
