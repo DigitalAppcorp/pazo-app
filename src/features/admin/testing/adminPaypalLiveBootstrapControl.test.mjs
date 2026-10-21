@@ -163,3 +163,39 @@ test('PO-operated UI shown only when merchant reservation endpoint is approved',
  assert.match(component,/No vuelvas a pulsar el botón/)
  assert.doesNotMatch(component,/clientSecret|service_role|navigator.clipboard/)
 })
+
+test('Supabase routed URLs pass CORS preflight without bypassing administrator verification',async()=>{
+ let reads=0
+ const handler=createPazoLiveMerchantBootstrapControl({
+  released:true,
+  authenticateAdmin:async()=>{reads++;return {isAdmin:false}},
+  readAdminSettings:async()=>{throw Error('read must not run')},
+  reserveGeneration:async()=>{throw Error('write must not run')}
+ })
+ const preflight=(endpoint,requestedMethod='POST')=>new Request(endpoint,{
+  method:'OPTIONS',headers:{origin:'http://localhost:5173',
+   'access-control-request-method':requestedMethod,
+   'access-control-request-headers':'authorization,apikey,content-type,x-client-info,x-supabase-client-runtime'}
+ })
+ for(const endpoint of [
+  'https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-admin-paypal-bootstrap',
+  'http://edge-runtime.internal/pazo-admin-paypal-bootstrap'
+ ]){
+  const res=await handler(preflight(endpoint))
+  assert.equal(res.status,204)
+  assert.equal(res.headers.get('access-control-allow-origin'),'http://localhost:5173')
+  assert.match(res.headers.get('access-control-allow-headers'),/x-supabase-client-runtime/)
+ }
+ assert.equal(reads,0)
+ const routed=await handler(new Request('http://edge-runtime.internal/pazo-admin-paypal-bootstrap',{
+  method:'POST',headers:{origin:'http://localhost:5173',
+   authorization:bearer,'content-type':'application/json'},
+  body:JSON.stringify({action:'reserve_generation',confirmation:'RESERVAR GENERACION LIVE'})
+ }))
+ assert.equal(routed.status,403)
+ assert.equal(reads,1)
+ const differentSlug=await handler(preflight('http://edge-runtime.internal/not-this-endpoint'))
+ assert.equal(differentSlug.status,400)
+ const invalidMethod=await handler(preflight(url,'DELETE'))
+ assert.equal(invalidMethod.status,405)
+})
