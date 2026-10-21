@@ -18,7 +18,24 @@ async function diagnostic(data:unknown,error:unknown):Promise<string>{
   try{candidate=await error.context.clone().json()}catch{/* Never display raw errors. */}
  }
  const code=candidate&&typeof candidate==='object'&&'code' in candidate?candidate.code:null
- return typeof code==='string'&&safeCodes.has(code)?code:'resource_inspection_unavailable'
+ if(typeof code!=='string'||!safeCodes.has(code))return 'resource_inspection_unavailable'
+ if(code!=='live_webhook_events_unexpected'||!candidate||
+  typeof candidate!=='object'||!('eventMismatch' in candidate))return code
+ const mismatch=candidate.eventMismatch
+ if(!mismatch||typeof mismatch!=='object')return code
+ const count=(name:'receivedCount'|'extraCount'|'duplicateCount'|'malformedCount')=>{
+  const raw=name in mismatch?mismatch[name]:null
+  return typeof raw==='number'&&Number.isSafeInteger(raw)&&raw>=0&&raw<=500?raw:null
+ }
+ const details=['receivedCount','extraCount','duplicateCount','malformedCount'] as const
+ const amounts=details.map(key=>count(key))
+ if(amounts.some(value=>value===null))return code
+ const names='unexpectedTypes' in mismatch?mismatch.unexpectedTypes:null
+ const events=Array.isArray(names)?names.filter((name):name is string=>
+  typeof name==='string'&&/^[A-Z][A-Z0-9._]{0,70}$/.test(name)).slice(0,12):[]
+ return code+' | API event_types='+amounts[0]+
+  ', extra='+amounts[1]+', duplicados='+amounts[2]+
+  ', malformados='+amounts[3]+(events.length?', adicionales: '+events.join(', '):'')
 }
 export function AdminPaypalLiveResourceCheck({lang,mfaRecentlyVerified,onVerified}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
