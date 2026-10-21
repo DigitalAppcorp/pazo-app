@@ -748,7 +748,12 @@ function PazoMain() {
     }
 
     return () => { cancelled = true }
-  }, [user, loading, petBootstrapRetry])
+    // Supabase MFA verification refreshes the user object (SIGNED_IN) without
+    // changing the account identity. Rebooting pets on every such refresh
+    // temporarily unmounts PetView/AdminDashboard and loses the pending
+    // security-sensitive operation. Rebootstrap ONLY on a real identity
+    // change, auth loading transition, or explicit retry.
+  }, [user?.id, loading, petBootstrapRetry])
 
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
