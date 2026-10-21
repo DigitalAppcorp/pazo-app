@@ -126,7 +126,9 @@ test('internal Supabase route preflight is nonfinancial and cannot bypass MFA',a
 test('entrypoint remains hard-off until release security gate and never includes PAT',()=>{
  const file=readFileSync(new URL('../../../../supabase/functions/pazo-admin-paypal-vault/index.ts',import.meta.url),'utf8')
  assert.match(file,/const RELEASE_APPROVED=false/)
- assert.match(file,/pazo_admin_paypal_save_credentials/)
+ assert.match(file,/pazo_f16_live_service_vault_prepare/) 
+ assert.match(file,/pazo_f16_live_service_vault_status/) 
+ assert.doesNotMatch(file,/pazo_admin_paypal_save_credentials/)
  assert.match(file,/pazo_admin_paypal_settings/)
  assert.doesNotMatch(file,/PAZO_F16_SCOPED_MANAGEMENT_TOKEN|api\.supabase\.com\/v1\/projects/)
 })
