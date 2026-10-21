@@ -37,11 +37,15 @@ Corrección `20261021155429` APLICADA tras CI3505/gateway422 de `114756e1`:
 token de una admisión/120s, sin bearer Vault permanente en cola. HTTP autenticado
 real200 worker_idle, nonce consumido y batch cerrado. Cron automático repitió PASS.
 Control enabled solo salud, processing false, LiveOFF y cero pagos/eventos.
-Monitor de disputas local `20261021160103`: GET paginado de venta original,
+Monitor de disputas `20261021162301` APLICADO tras CI3506/gateway423 de `739edcee`:
+GET paginado de venta original,
 casos mínimos, lease/batch exclusivo, full hold/resolución favorable/partial review,
 transacción con ACK y protocolo worker v2. PG24 (incluido NULL) y governance423/423
-PASS; pendiente CI. Todavía sin aplicar/deploy v2.
-Faltan integración alojada de monitoreo, beneficios, checkout,
+PASS. Dos tablas FORCE RLS/service sin lectura directa, claim/finish service-only
+y trigger privado verificados. Edge worker v2 ACTIVE,27/27 fuentes Git739 idénticas;
+cuatro rechazos HTTP sin auth PASS. Cron automático16:27UTC200/healthy/buildv2,
+nonce consumido y lote cerrado; procesamiento OFF/0 eventos/pagos/casos/monitores.
+Faltan beneficios, checkout,
 readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
 No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 

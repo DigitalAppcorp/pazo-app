@@ -120,9 +120,10 @@ Postflight: dos RPC service-only, cuatro columnas y LiveOFF/0 datos financieros.
 PG17 local14 verifica cancelación, fallo de renovación, orden inverso, alcance de
 refund, pago/refund atómico, ACL y rollback/reapply. Nueve pruebas Node nuevas.
 
-Quedan scheduler privado, monitoreo de disputas, beneficios y P2–P5.
+Scheduler privado y monitoreo de disputas están instalados según los bloques
+posteriores; procesamiento financiero OFF. Quedan beneficios y P2–P5.
 
-### Transporte privado y recuperación — cuarto bloque local
+### Transporte privado y recuperación — cuarto bloque instalado
 
 `pazo-paypal-live-worker` prepara un endpoint sin CORS de navegador. Solo POST,
 ruta/cuerpo acotados y una capacidad aleatoria interna permiten pedir admisión;
@@ -191,9 +192,9 @@ LiveOFF/killON/inbox0/períodos0. No claves ni llamadas a PayPal.
 [Scheduling oficial](https://supabase.com/docs/guides/functions/schedule-functions),
 [pg_net oficial](https://supabase.com/docs/guides/database/extensions/pg_net).
 
-### Monitor privado de disputas — código local
+### Monitor privado de disputas — instalado, procesamiento OFF
 
-`20261021160103` añade cola por venta ya registrada, con origen firmado y
+`20261021162301` añade cola por venta ya registrada, con origen firmado y
 generación original; dos tablas FORCE RLS sin grants directos. Claim/finish son
 service-only, ligados al lote activo y al lease exclusivo de esa venta. Primer
 control satisfactorio habilita su elegibilidad futura; no fabrica otro pago ni
@@ -221,13 +222,17 @@ Check y hold se escriben con ACK en una sola transacción. Cadencia operativa:
 es planificación de consultas, no cálculo ni extensión del servicio pagado.
 
 Protocolo worker v2 impide que un endpoint antiguo se declare preparado para
-monitorear: la instalación deja control OFF, heartbeat vacío y build v2; falta
-deploy v2 y repetir SOLO salud tras CI, sin PayPal. PG23 y governance423/423
+monitorear: instalación deja control OFF, heartbeat vacío y build v2. DDL162301
+APLICADA tras CI3506/gateway423 PASS de `739edcee`; dos tablas FORCE RLS sin
+lecturas directas de clientes/servicio, claim/finish service-only. Edge v2 ACTIVE,
+27/27 archivos iguales al commit. Cuatro rechazos HTTP sin credenciales PASS;
+se habilitó SOLO salud y cron automático respondió200 a16:27UTC, buildv2/healthy,
+nonce consumido/lote cerrado y procesamiento0. PG23 y governance423/423
 PASS; PG20/21 detectaron orden incorrecto de aserciones SQL en la fixture,
 corregido separando mutación de lectura. PG22/23 probaron hold, parcial, resolución,
 replay, lease vencido, ACK crash/rollback y no-grant; clusters detenidos.
 PG24 valida además que un outcome NULL no cree un hold por lógica ternaria.
-Último gate CI pendiente antes de instalar.
+Último gate CI PASS antes de instalar; no se ha procesado una disputa real.
 17 Node dirigidas PASS (lector/worker/HTTP). La app PayPal requiere lectura de
 Disputes; su permiso real no se puede afirmar sin OAuth de esa app. Se verificará
 en preparación privada, nunca mediante Reporting/Balances ni pruebas Sandbox.
