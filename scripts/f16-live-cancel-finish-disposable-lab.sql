@@ -15,6 +15,14 @@ BEGIN
 END $acl$;
 
 BEGIN;
+-- Prior disposable labs may have already reconciled this synthetic claim.
+-- Re-seed the test claim *inside ROLLBACK only*; never rely on lab ordering.
+INSERT INTO supporter_private.pazo_paypal_live_cancel_claims(intent_id,merchant_generation)
+SELECT intent_id,merchant_generation
+FROM supporter_private.pazo_paypal_live_checkout_intents
+WHERE intent_id='intent-12345678-1234-4234-8234-123456789abc'
+ AND merchant_generation=1 AND state='bound'
+ON CONFLICT (intent_id) DO UPDATE SET state='claimed',provider_confirmed_at=NULL;
 SET LOCAL request.jwt.claims='{"role":"service_role"}';
 DO $cancel$
 DECLARE i text:='intent-12345678-1234-4234-8234-123456789abc';
