@@ -1,5 +1,29 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+## Auditoría complementaria — 21-oct-2026 (continuación tras Codex)
+
+La pantalla Live de PayPal Developer conectada confirma el webhook existente,
+la URL generacional correcta y los diez eventos *visibles* previstos. El GET
+API de la comprobación anterior devuelve `live_webhook_events_unexpected`;
+no afirmar que el registro necesita borrarse ni que la UI garantiza el
+contenido exacto de `event_types` API. Se corrigió el diagnóstico para
+mostrar cantidades y nombres públicos filtrados, preservando rechazo seguro.
+
+Código `01d937b`: 9/9 workflows SUCCESS
+([CI](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39538281763)).
+Supabase `pazo-admin-paypal-live-inspect` v3 ACTIVE/JWT obligatorio;
+8/8 fuentes idénticas. Ningún cambio de esquema, Merchant, secretos,
+checkout, webhook financiero ni PR/main/frontend desplegado.
+
+Postflight SQL solo lectura: reserva1 reserved, merchant0, intentos secretos0,
+resource audits0, inbox Live0, periodos pagos0. Ambos selectores Sandbox/Live
+mantienen Live desactivado y kill switch ON. **NO-GO** aún: el PO debe repetir
+comprobación privada una vez para obtener diagnóstico específico, sin publicar
+credenciales. Restan verificación mercantil, custodia, entrega webhook firmada,
+worker/ledger/entitlements, pruebas E2E, publicación de PWA y validaciones de
+release descritas a continuación.
+
+
 Fecha: 2026-10-20, America/Guatemala. **Dictamen: NO-GO. No es una beta terminada ni publicada.**
 
 Último código: `9525ece11eb9e87f49b01a13d283de0958a28ec7`, CI9/9 SUCCESS y
