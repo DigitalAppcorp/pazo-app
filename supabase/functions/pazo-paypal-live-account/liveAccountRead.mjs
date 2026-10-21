@@ -7,6 +7,8 @@ const PATHS=new Set(['/pazo-paypal-live-account',
 const ORIGINS=new Set(['https://pazo-app-t83r.vercel.app',
  'http://localhost:5173','http://127.0.0.1:5173'])
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
+const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
+const PLAN=/^P-[A-Z0-9]{12,40}$/
 const INTENT=/^intent-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const reply=(req,status,code,extra={})=>{
  const origin=req?.headers?.get?.('origin')
@@ -55,7 +57,7 @@ export function normalizePazoLiveOwnerSlots(raw){
  return open
 }
 export function createPazoLiveOwnerAccountRead({released=false,
- resolveAuthenticatedOwner,readPrivateOwner}={}){
+ resolveAuthenticatedOwner,readPrivateOwner,readProviderStatus}={}){
  return async request=>{
   if(released!==true)return reply(request,503,'live_account_read_not_released')
   if(!(request instanceof Request))return reply(request,400,'invalid_request')
@@ -88,8 +90,12 @@ export function createPazoLiveOwnerAccountRead({released=false,
    if(body.length>256)throw Error('too_large')
    data=JSON.parse(body)
   }catch{return reply(request,400,'invalid_request')}
-  if(!data||typeof data!=='object'||Array.isArray(data)||
-   Object.keys(data).length!==1||data.action!=='list')
+  if(!data||typeof data!=='object'||Array.isArray(data))
+   return reply(request,400,'invalid_request')
+  const keys=Object.keys(data).sort().join(',')
+  if(!((data.action==='list'&&keys==='action')||
+   (data.action==='status'&&keys==='action,intentId'&&
+    INTENT.test(data.intentId||''))))
    return reply(request,400,'invalid_request')
   let owner
   try{owner=await resolveAuthenticatedOwner(request)}
@@ -98,7 +104,32 @@ export function createPazoLiveOwnerAccountRead({released=false,
   try{
    const slots=await readPrivateOwner({ownerId:owner})
    const accounts=normalizePazoLiveOwnerSlots(slots)
-   return reply(request,200,'live_account_list_verified',{accounts})
+   if(data.action==='list')
+    return reply(request,200,'live_account_list_verified',{accounts})
+   // The browser supplies only a PAZO intent ID; it NEVER chooses the PayPal
+   // subscription ID, merchant generation, owner, plan or credentials.
+   const selected=accounts.find(a=>a.intentId===data.intentId)
+   if(!selected||selected.state!=='bound'||
+     typeof readProviderStatus!=='function')
+    return reply(request,409,'live_status_not_available')
+   const original=slots.accounts.find(a=>a.intentId===selected.intentId)
+   if(!original||!SUB.test(original.subscriptionId||'')||
+     !PLAN.test(original.planId||'')||
+     !Number.isSafeInteger(original.merchantGeneration)||original.merchantGeneration<1)
+    return reply(request,409,'live_status_not_available')
+   let remote
+   try{remote=await readProviderStatus({merchantGeneration:original.merchantGeneration,
+    planId:original.planId,intentId:selected.intentId,
+    subscriptionId:original.subscriptionId})}
+   catch{return reply(request,503,'live_provider_status_unavailable')}
+   if(remote?.id!==original.subscriptionId||remote?.plan_id!==original.planId||
+    remote?.custom_id!==selected.intentId||
+    !['ACTIVE','APPROVAL_PENDING','APPROVED','SUSPENDED','CANCELLED','EXPIRED'].includes(remote.status))
+    return reply(request,503,'live_provider_status_unverified')
+   // ACTIVE is NOT paid. Financial periods are verified separately from signed
+   // sale events and the dedicated original-generation reconciliation worker.
+   return reply(request,200,'live_provider_status_read',{
+    providerStatus:remote.status})
   }catch{return reply(request,503,'live_account_list_unavailable')}
  }
 }

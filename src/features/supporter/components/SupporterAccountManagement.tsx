@@ -142,7 +142,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     const { data: {session}, error: sessionError } = await supabase.auth.getSession()
     // getSession here is ONLY for obtaining bearer; backend verifies getUser().
     if (sessionError || !session?.access_token) throw Error('authentication_required')
-    if(!qaV2Screen && body.action!=='list')throw Error('live_management_not_released')
+    if(!qaV2Screen && !['list','status'].includes(String(body.action)))
+      throw Error('live_management_not_released')
     const endpoint=qaV2Screen?'f16-paypal-supporter-account':'pazo-paypal-live-account'
     const response = await fetch(config.url + '/functions/v1/' + endpoint, {
       method: 'POST',
@@ -399,7 +400,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                         'Live renewal management is being prepared. You can manage automatic payments in PayPal in the meantime.')}
                   </p>}
                   <div className="flex flex-wrap gap-2">
-                    {qaV2Screen && account.state === 'bound' && <button type="button" disabled={busy}
+                    {account.state === 'bound' && <button type="button" disabled={busy}
                       onClick={() => void checkStatus(account.intentId)} className={control}>
                       {label('Actualizar estado','Refresh status')}</button>}
                     {qaV2Screen && account.canDownloadAcceptance && <button type="button" disabled={busy}
