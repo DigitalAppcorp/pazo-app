@@ -1,5 +1,13 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — P4 código de entrypoints candidatos revisado, Live OFF (21-oct-2026)
+
+- **PR #70** squash `b51f092bde6ff036b124d603ec3aff67484b5eef` integrado solo a PR67. GitHub SHA de pruebas `a1fa31e86250590ec8a29f0ab35aa348d6804f27`: **CI general y Live Gateway PG17 SUCCESS**.
+- Nuevos entrypoints **alternativos, NO seleccionados ni desplegados**: `supabase/functions/pazo-paypal-live-checkout/index.release-candidate.ts` y `supabase/functions/pazo-paypal-live-webhook/index.release-candidate.ts`. Permiten ensamblar el runtime financiero **solo tras GO específico**, conservando el default `index.ts` RELEASED=false y `supabase/config.toml` sin ruta alternativa. Tests de runtime comprueban que aun con código candidato armado no hay checkout sin generación activa en SQL y no hay webhook si faltan secretos confiables.
+- `docs/PAZO_F16_RELEASE_CANDIDATE_ENTRYPOINTS_20261021.md` contiene orden de despliegue seguro. **Esto no sustituye P4:** DBA tiene CHECK sandbox/live=false/kill=true/generation=null; antes de cualquier canary requieren migración de cutover revisada + MFA GO admin real + verificación de ambas Edge desplegadas, firmas y worker. No enviar PayPal real, no publicar Vercel, main intacto.
+
+
+
 ## F16 — Gate HTTPS/PWA público automatizado sin credenciales (21-oct-2026)
 
 - **PR #69** fusionado SOLO a rama `f16/beta-completion-20261021`, commit `bad4202d5b224026fc0dade112a882701cba011d`. GitHub SHA `dcecec529d2b7f0ab80fd5565905bac1afa65137`: **CI SUCCESS y F16 Live PG17 SUCCESS**.
