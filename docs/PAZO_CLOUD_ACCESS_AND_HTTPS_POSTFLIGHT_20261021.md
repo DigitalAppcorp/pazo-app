@@ -12,10 +12,15 @@ se considera superado el bloqueo de red documentado abajo, sin atribuir su
 resolución a una publicación de entorno que esta herramienta no ejecutó.
 
 Los dos proyectos conectados al repo tenían `createDeployments=enabled`.
-Se actualizaron a `disabled`, con GET independiente confirmado en ambos,
-para respetar el gate pre-Preview y permitir push/CI sin más despliegues.
-No se tocaron productionBranch=main, aliases, dominios, targets, protección SSO,
-variables o configuración PayPal. No hubo deployment.
+El intento de bloquear builds cambiando ese campo a `disabled` fue incorrecto:
+el push generó el preview secundario `dpl_CddaWi3Tm1tzkRWW4KnfM8dkgtsa`,
+SHA `11d4ee34`, pese al GET del campo. No considerar ese campo evidencia de
+Preview OFF. Se restaura a `enabled` y se corrige con la opción oficial
+`git.deploymentEnabled=false` en `vercel.json`.
+[Documentación Vercel](https://vercel.com/docs/project-configuration/git-configuration#git.deploymentenabled).
+No se tocaron productionBranch=main, dominios, producción, protección SSO,
+variables o configuración PayPal. El preview involuntario no acredita release
+ni aprobación pública y debe retirarse después de validar su identidad.
 
 Supabase CLI2.121 genera enlace oficial, pero exige introducir un código del
 navegador. El intento se canceló sin credencial nueva: no se pidió al usuario
@@ -96,3 +101,18 @@ celular, auditar proyecto/Preview OFF, source alojado/versiones y gates P4.
 No pedir claves PayPal antes de cerrar la ingeniería. Las tres migraciones y
 la Edge de cuenta siguen sin aplicar/desplegar. P4, HTTPS E2E, canary y GO siguen
 BLOCKED como en el [informe de continuación](PAZO_CODEX_BETA_CONTINUATION_20261021.md).
+
+## PR de continuación
+
+[PR67](https://github.com/DigitalAppcorp/pazo-app/pull/67) DRAFT hacia F13,
+SHA inicial `11d4ee342555ec41936e1497664ce24b9bde8c7d`: **5/5 GitHub Actions
+SUCCESS** (verify + Live gateway PG17 + F14 + P12 + P21).
+[CI](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39672633795) y
+[lab PG17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39672633821).
+Los dos status Vercel SUCCESS adicionales no representan CI financiero ni
+aceptación del preview involuntario. No se fusionó el PR.
+
+Se guardó requisito privado `SUPABASE_ACCESS_TOKEN` con destino único
+`api.supabase.com`; no se recibió valor ni se autenticó Supabase. El usuario
+puede suministrarlo en el campo seguro del entorno; nunca por chat. Guardar el
+requisito no introduce el token ni demuestra propagación al runtime.

@@ -5,10 +5,14 @@
 PO autorizó el login oficial por dispositivo; CLI Vercel65 confirmó sesión.
 Auditoría REST: ambos proyectos `pazo-app-t83r` y `pazo-app` están conectados a
 DigitalAppcorp/pazo-app y tenían `gitProviderOptions.createDeployments=enabled`.
-Se cambió exclusivamente ese campo a `disabled` en ambos, con GET postflight
-confirmado. Esto evita previews por push mientras se termina el código, conforme
-al gate pre-Preview vigente; conserva targets, aliases, dominios y main.
-No se lanzó ningún deployment ni operación PayPal.
+Se intentó bloquear automatismos cambiando ese campo a `disabled`; GET confirmó
+el campo pero el push sí generó un preview en el proyecto secundario. Fue un
+error de interpretación: ese campo no impide los builds de Git. No tratar su
+lectura como Preview OFF. Se corrige con `git.deploymentEnabled=false` en
+`vercel.json`, opción oficial que bloquea deployments por commits; los dos
+campos de API se restauran al valor inicial `enabled`. El preview involuntario
+`dpl_CddaWi3Tm1tzkRWW4KnfM8dkgtsa` del SHA `11d4ee34` no es beta aceptada ni
+GO público. Producción, main y controles financieros no cambiaron.
 
 Proyecto principal `prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`: producción READY
 `dpl_E6t1jhXeAN49mS4gSCJufc2wFZ93`, preview READY
