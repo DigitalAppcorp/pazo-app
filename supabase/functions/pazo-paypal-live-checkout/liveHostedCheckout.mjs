@@ -35,8 +35,10 @@ export function createPazoLiveHostedCheckout({
  const readActiveRoute=async()=>rpc('route',{})
  const getSecret=name=>getEnv(name)
  const verifyConsent=async({consent})=>verifyPazoLiveOfferConsent(consent)
- const admit=async({ownerId,action})=>{
-  if(action!=='live_checkout'||!UUID.test(ownerId||''))return false
+ const admit=async({ownerId,action,requestKey,merchantGeneration})=>{
+  if(action!=='live_checkout'||!UUID.test(ownerId||'')||
+   !UUID.test(requestKey||'')||!Number.isSafeInteger(merchantGeneration)||
+   merchantGeneration<1||merchantGeneration>9999)return false
   // Fail-closed profile lookup after GoTrue JWT verification.
   // Account is allowed only after explicit onboarding completion.
   let response
@@ -51,8 +53,19 @@ export function createPazoLiveHostedCheckout({
   if(!response?.ok||response.status!==200)return false
   let rows
   try{rows=await response.json()}catch{return false}
-  return Array.isArray(rows)&&rows.length===1&&
-   rows[0]?.id===ownerId&&rows[0]?.onboarding_completed===true
+  if(!Array.isArray(rows)||rows.length!==1||rows[0]?.id!==ownerId||
+   rows[0]?.onboarding_completed!==true)return false
+  // A previous CREATE may have succeeded even when our response failed.
+  // Never start a second subscription for another requestKey or merchant.
+  // The database also serializes owner inserts against concurrent tabs.
+  let slot
+  try{slot=await rpc('ownerSlot',{p_owner:ownerId,p_generation:merchantGeneration})}
+  catch{return false}
+  if(slot?.state==='none')return true
+  if(slot?.state==='pending_unclaimed'&&
+   slot.requestKey===requestKey&&slot.merchantGeneration===merchantGeneration)
+   return true
+  return false
  }
  return async req=>{
   if(!(req instanceof Request))return forbidden(400,'invalid_request')
