@@ -15,6 +15,10 @@ MCP reales `20261021074014`, `20261021074024`, `20261021074032`, archivos locale
 alineados sin cambiar su SQL. Cinco RPC service-only/RLS FORCE/ACL PASS; bridges
 antiguos sin lease revocados. Reserva1; merchant/inbox/recibos/períodos0; LiveOFF.
 CI3501 cuatro jobs y laboratorio418 PASS. Ningún Edge nuevo liberado aún.
+Lifecycle/refund aplicados en `20261021142517` tras CI3502/gateway419 de `75dfd4e6`;
+postflight dos RPC service-only y cuatro columnas, LiveOFF/0 datos financieros.
+Control/HTTP privado del worker todavía local: PG15 y governance413 PASS.
+Scheduler y endpoint no instalados/desplegados; no es preparación de claves completa.
 Esto no completa scheduler, todos los eventos/beneficios ni P1–P5. **NO-GO** y
 todavía no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. Detalle en el reconciliador.
 

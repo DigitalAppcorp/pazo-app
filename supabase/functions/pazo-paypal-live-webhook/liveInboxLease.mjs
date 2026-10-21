@@ -10,11 +10,12 @@ const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
 const iso=s=>typeof s==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(s)&&
  Number.isFinite(Date.parse(s))&&new Date(s).toISOString()===s
 const fail=()=>{throw Error('live_event_lease_unavailable')}
-export function createPazoLiveInboxLease({projectUrl,serviceRoleKey,fetchImpl=fetch}={}){
+export function createPazoLiveInboxLease({projectUrl,serviceRoleKey,fetchImpl=fetch,workerRecovery=false}={}){
  if(projectUrl!==URL||typeof serviceRoleKey!=='string'||
   serviceRoleKey.length<24||serviceRoleKey.length>8192||
   /\s/.test(serviceRoleKey)||typeof fetchImpl!=='function')fail()
- const paths={claim:'inbox_claim',finish:'inbox_finish',receipt:'signed_receipt_read'}
+ const paths={claim:workerRecovery?'worker_claim':'inbox_claim',
+  finish:workerRecovery?'worker_event_finish':'inbox_finish',receipt:'signed_receipt_read'}
  const post=async(name,body)=>{
   let response
   try{response=await fetchImpl(URL+'/rest/v1/rpc/pazo_f16_live_service_'+paths[name],{

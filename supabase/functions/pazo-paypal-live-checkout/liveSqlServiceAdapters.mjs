@@ -16,6 +16,9 @@ const ROLE_RPC=Object.freeze({
  financialContext:'pazo_f16_live_service_financial_context_read',
  originalRefundSale:'pazo_f16_live_service_refund_sale_binding_read',
  leasedLifecycle:'pazo_f16_live_service_leased_lifecycle_record',
+ workerAdmit:'pazo_f16_live_service_worker_admit',
+ workerComplete:'pazo_f16_live_service_worker_complete',
+ workerHealth:'pazo_f16_live_service_worker_health_read',
  projection:'pazo_f16_live_service_paid_period_projection'
 })
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i

@@ -4,7 +4,7 @@ DO $guard$ BEGIN
 END $guard$;
 \i supabase/migrations/20261021074024_pazo_f16_live_atomic_leased_settlement.sql
 \i supabase/migrations/20261021074032_pazo_f16_live_financial_context.sql
-\i supabase/migrations/20261021074511_pazo_f16_live_lifecycle_and_refund_scope.sql
+\i supabase/migrations/20261021142517_pazo_f16_live_lifecycle_and_refund_scope.sql
 BEGIN;
 INSERT INTO supporter_private.pazo_paypal_live_checkout_intents(
  intent_id,owner_id,request_key,merchant_generation,plan_id,locale,terms_version,terms_digest,
@@ -179,5 +179,5 @@ DELETE FROM supporter_private.pazo_paypal_live_paid_periods;
 \i supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql
 \i supabase/migrations/20261021074024_pazo_f16_live_atomic_leased_settlement.sql
 \i supabase/migrations/20261021074032_pazo_f16_live_financial_context.sql
-\i supabase/migrations/20261021074511_pazo_f16_live_lifecycle_and_refund_scope.sql
+\i supabase/migrations/20261021142517_pazo_f16_live_lifecycle_and_refund_scope.sql
 DO $pass$ BEGIN RAISE NOTICE 'F16_LIVE_ATOMIC_EMPTY_ROLLBACK_REAPPLY_PASS'; END $pass$;

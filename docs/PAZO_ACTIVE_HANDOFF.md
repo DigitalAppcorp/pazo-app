@@ -20,9 +20,14 @@ CI3501 (cuatro jobs) y gateway418 PASS del commit `2f1403f6`. Cinco RPC nuevas
 service-only, RLS FORCE y revocación de bridges antiguos verificadas. Archivos
 alineados con versiones MCP reales, SQL idéntico al revisado. Reserva1,
 merchant0/inbox0/recibos0/períodos0 y selector sandbox/LiveOFF/killON.
-Tercer bloque local: lifecycle/refund durable, estados merchant monotónicos y
-lectura original de venta/fecha para devoluciones tardías; PG14 y Node dirigidos.
-Migración `20261021074511` aún local. Falta scheduler privado, disputas, beneficios, checkout,
+Tercer bloque: lifecycle/refund durable, estados merchant monotónicos y lectura
+original de venta/fecha para devoluciones tardías; PG14, closure406 y CI3502 /
+gateway419 PASS. Migración `20261021142517` APLICADA tras CI de `75dfd4e6`,
+dos RPC service-only y cuatro columnas verificadas, sin datos/cobros Live.
+Cuarto bloque local: transporte HTTP privado, control OFF, admisión por clave
+interna Vault, wrappers con backoff y salud. PG15/HTTP11/governance413 PASS;
+DDL `20261021142708` no aplicada, endpoint no desplegado, cron no instalado.
+Falta scheduler privado alojado, disputas, beneficios, checkout,
 readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
 No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 

@@ -2,6 +2,9 @@ name: F16 Live Gateway Disposable PostgreSQL Lab
 on:
   pull_request:
     paths:
+      - 'supabase/migrations/*pazo_f16_live_private_worker_control.sql'
+      - 'scripts/f16-live-private-worker-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_lifecycle_and_refund_scope.sql'
       - 'supabase/rollbacks/f16_live_lifecycle_refund_scope_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
@@ -33,6 +36,9 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
+      - 'supabase/migrations/*pazo_f16_live_private_worker_control.sql'
+      - 'scripts/f16-live-private-worker-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_lifecycle_and_refund_scope.sql'
       - 'supabase/rollbacks/f16_live_lifecycle_refund_scope_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_financial_context.sql'

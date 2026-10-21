@@ -114,11 +114,34 @@ esa corroboración de recursos SALE, sin crear/capturar/devolver dinero.
 [Schema oficial](https://developer.paypal.com/api/deprecated/payments/v1/schema.json).
 
 Dos RPC/columnas de ciclo de vida están en la migración local
-`20261021074511_pazo_f16_live_lifecycle_and_refund_scope.sql`, NO APLICADA.
+`20261021142517_pazo_f16_live_lifecycle_and_refund_scope.sql`, APLICADA tras
+CI3502/gateway419 PASS de `75dfd4e6`. Nombre alineado con versión MCP, SQL igual.
+Postflight: dos RPC service-only, cuatro columnas y LiveOFF/0 datos financieros.
 PG17 local14 verifica cancelación, fallo de renovación, orden inverso, alcance de
 refund, pago/refund atómico, ACL y rollback/reapply. Nueve pruebas Node nuevas.
 
 Quedan scheduler privado, monitoreo de disputas, beneficios y P2–P5.
+
+### Transporte privado y recuperación — cuarto bloque local
+
+`pazo-paypal-live-worker` prepara un endpoint sin CORS de navegador. Solo POST,
+ruta/cuerpo acotados y una capacidad aleatoria interna permiten pedir admisión;
+el SQL service-only verifica su hash. La capacidad nace dentro de PostgreSQL y
+queda cifrada en Vault, sin llegar al PO, chat, archivos, argumentos o logs.
+No es una clave PayPal ni un token de Management API.
+
+El control empieza `enabled=false / processing_enabled=false`. Un lote privado
+exclusivo de3min admite como máximo un evento; cada evento conserva su lease de2min.
+Los wrappers respetan backoff1/5min y convierten el tercer fallo en held con
+diagnóstico. Revocan EXECUTE de claim/finish antiguos al servicio. Salud devuelve
+solo contadores/códigos/fechas, sin invoker/hash/IDs privados. El modo de salud
+no lee claves de PayPal, no consulta el proveedor y no procesa eventos.
+
+DDL `20261021142708_pazo_f16_live_private_worker_control.sql` aún local. PG15
+prueba ACL, autenticación, OFF, salud, build incorrecto, exclusión, espera,
+agotamiento y rollback/reapply en vacío. Vault es un mock SOLO en ese laboratorio;
+no se presenta como ensayo del cifrado real. HTTP y lease11/11, governance y
+closure413/413 PASS. No hay cron instalado ni endpoint nuevo desplegado todavía.
 El hash de Client ID guardado por el preparador Vault identifica la aplicación;
 no es evidencia de identidad del payee. No convertirlo en un match financiero.
 
