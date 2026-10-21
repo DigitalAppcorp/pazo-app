@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/f16-bootstrap-cors-smoke.yml'
       - 'supabase/functions/pazo-admin-paypal-provision/liveMerchantBootstrapControl.mjs'
+      - 'supabase/functions/pazo-admin-paypal-bootstrap/index.ts'
   workflow_dispatch:
 
 permissions: {}
