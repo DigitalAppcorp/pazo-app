@@ -14,13 +14,48 @@ const SAFE_BOOTSTRAP_CODES=new Set([
  'live_draft_not_ready','verified_admin_required','invalid_bootstrap_request',
  'live_checkout_not_locked','origin_not_allowed'
 ])
+async function safeBootstrapFailure(data:unknown,error:unknown):Promise<string>{
+ let observed=typeof data==='object'&&data!==null&&'code' in data?data.code:null
+ if(typeof observed!=='string'&&error&&typeof error==='object'&&'context' in error){
+  const context=error.context
+  if(context instanceof Response){
+   try{
+    const body:unknown=await context.clone().json()
+    observed=typeof body==='object'&&body!==null&&'code' in body?body.code:null
+   }catch{/* Never expose raw provider data. */}
+  }
+ }
+ return typeof observed==='string'&&SAFE_BOOTSTRAP_CODES.has(observed)?observed:''
+}
 export function AdminPaypalMerchantBootstrap({lang,mfaRecentlyVerified}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [state,setState]=useState<'idle'|'working'|'reserved'|'review'>('idle')
  const [generation,setGeneration]=useState<Generation|null>(null)
  const [failureCode,setFailureCode]=useState('')
+ const [readiness,setReadiness]=useState<'idle'|'checking'|'verified'|'error'>('idle')
+ const [readinessCode,setReadinessCode]=useState('')
+ const checkReadiness=async()=>{
+  if(!mfaRecentlyVerified||readiness==='checking'||state==='working')return
+  setReadiness('checking');setReadinessCode('')
+  try{
+   const {data,error}=await supabase.functions.invoke('pazo-admin-paypal-bootstrap',{
+    method:'POST',body:{
+     action:'check_readiness',confirmation:'VERIFICAR CONFIGURACION LIVE'
+    }
+   })
+   if(error){
+    setReadinessCode(await safeBootstrapFailure(data,error))
+    throw Error('readiness_unverified')
+   }
+   if(data?.ok!==true||data?.code!=='live_configuration_readonly_verified'||
+    data?.mayCharge!==false||data?.liveActivated!==false||
+    data?.generationReserved!==false||data?.webhookConfigured!==false)
+    throw Error('readiness_unverified')
+   setReadiness('verified')
+  }catch{setReadiness('error')}
+ }
  const reserve=async()=>{
-  if(!mfaRecentlyVerified||state!=='idle')return
+  if(!mfaRecentlyVerified||state!=='idle'||readiness!=='verified')return
   setFailureCode('')
   setState('working')
   try{
@@ -30,17 +65,7 @@ export function AdminPaypalMerchantBootstrap({lang,mfaRecentlyVerified}:Props){
     }
    })
    if(error){
-    let observed=data?.code
-    if(typeof observed!=='string'){
-     const context=error && typeof error==='object' && 'context' in error
-      ?error.context:null
-     if(context instanceof Response){
-      try{const body=await context.clone().json();observed=body?.code}
-      catch{/* Network error or invalid response: do not leak details. */}
-     }
-    }
-    if(typeof observed==='string'&&SAFE_BOOTSTRAP_CODES.has(observed))
-     setFailureCode(observed)
+    setFailureCode(await safeBootstrapFailure(data,error))
     throw Error('bootstrap_unverified')
    }
    const g=data?.generation
@@ -65,8 +90,26 @@ export function AdminPaypalMerchantBootstrap({lang,mfaRecentlyVerified}:Props){
   <p className="mt-2 text-[12px] leading-relaxed">{t(
    'Solo reserva un identificador en PAZO. No crea un pago, una suscripción ni un webhook en PayPal.',
    'Reserves an identifier in PAZO only. Does not create a payment, subscription, or PayPal webhook.')}</p>
+  <div className="mt-3 space-y-2">
+   <button className={'w-full '+button} type="button"
+    disabled={!mfaRecentlyVerified||readiness==='checking'||state==='working'||state==='reserved'}
+    onClick={()=>void checkReadiness()}>{t(
+     'Comprobar configuración (sin reservar)',
+     'Check configuration (no reservation)')}</button>
+   {readiness==='checking'&&<p role="status" className="text-[12px]">{t(
+    'Verificando la sesión y configuración, sin crear registros…',
+    'Checking session and settings without writing records…')}</p>}
+   {readiness==='verified'&&<p role="status" className="text-[12px] font-semibold">{t(
+    'Configuración administrativa comprobada. Aún no se ha reservado nada.',
+    'Admin configuration checked. Nothing has been reserved.')}</p>}
+   {readiness==='error'&&<p role="alert" className="text-[12px] font-semibold text-[#9B4236]">{t(
+    'No se pudo comprobar la configuración. No se reservó nada.',
+    'Configuration check failed. Nothing was reserved.')}
+    {readinessCode&&<span className="block" data-pazo-readiness-diagnostic="true">
+     {t('Diagnóstico: ','Diagnostic: ')}{readinessCode}</span>}</p>}
+  </div>
   {state==='idle'&&<button className={'mt-3 '+button} type="button"
-   disabled={!mfaRecentlyVerified} onClick={()=>void reserve()}>{t(
+   disabled={!mfaRecentlyVerified||readiness!=='verified'} onClick={()=>void reserve()}>{t(
     'Reservar generación Live','Reserve Live generation')}</button>}
   {state==='working'&&<p className="mt-3 text-[12px]" role="status">{t(
    'Reservando en Supabase…','Reserving in Supabase…')}</p>}
