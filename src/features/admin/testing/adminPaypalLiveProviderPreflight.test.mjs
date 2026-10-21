@@ -6,7 +6,7 @@ const config={environment:'live',clientId:'ABCDEFGHIJKL1234567890',clientSecret:
 const plan={id:config.planId,status:'ACTIVE',quantity_supported:false,
  billing_cycles:[{tenure_type:'REGULAR',sequence:1,total_cycles:0,frequency:{interval_unit:'MONTH',interval_count:1},
   pricing_scheme:{fixed_price:{currency_code:'USD',value:'2.99'}}}],
- payment_preferences:{setup_fee:{currency_code:'USD',value:'0.00'}}}
+ payment_preferences:{auto_bill_outstanding:false,setup_fee:{currency_code:'USD',value:'0.00'}}}
 const webhook={id:config.webhookId,url:liveWebhookUrlForGeneration(7),
  event_types:REQUIRED_EVENTS.map(name=>({name}))}
 const provider=(overrides={})=>{
@@ -132,6 +132,15 @@ test('setup fee cannot hide cents, signs, exponents or an unsupported currency',
   const p=provider({plan:{payment_preferences:{auto_bill_outstanding:false,setup_fee}}})
   const result=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
   assert.equal(result.ok,false)
+  assert.equal(result.code,'live_plan_terms_unverified')
+  assert.equal(p.calls.some(x=>x.url.includes('/v1/notifications/webhooks/')),false)
+ }
+})
+
+test('automatic arrears billing must be explicitly false, never inferred from a missing field',async()=>{
+ for(const preferences of [{},...['false',0,null,true].map(auto_bill_outstanding=>({auto_bill_outstanding}))]){
+  const p=provider({plan:{payment_preferences:preferences}})
+  const result=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
   assert.equal(result.code,'live_plan_terms_unverified')
   assert.equal(p.calls.some(x=>x.url.includes('/v1/notifications/webhooks/')),false)
  }

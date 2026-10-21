@@ -47,3 +47,8 @@ solo las tres representaciones USD equivalentes `0`, `0.0`, `0.00`, sin converti
 floats ni redondear valores positivos. La regresión reproduce primero el rechazo
 anterior. No se omite ningún control de precio, plazo, impuestos o atraso.
 Este resultado todavía no valida el Webhook ID; el control falla antes de su GET.
+
+El esquema oficial indica `auto_bill_outstanding=true` por defecto. La comprobación
+exige el booleano `false` explícito; un campo ausente, null, 0 o string no acredita
+que esté desactivado. Los fixtures positivos reflejan esa respuesta explícita.
+[Esquema oficial](https://developer.paypal.com/api/subscriptions/v1/schema.json).

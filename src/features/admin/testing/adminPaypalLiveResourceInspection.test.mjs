@@ -34,7 +34,7 @@ function fixture(overrides={}){
    if(dest==='https://api-m.paypal.com/v1/billing/plans/'+planId)return {ok:true,json:async()=>({
     id:planId,status:'ACTIVE',billing_cycles:[{tenure_type:'REGULAR',sequence:1,
      frequency:{interval_unit:'MONTH',interval_count:1},total_cycles:0,
-     pricing_scheme:{fixed_price:{value:'2.99',currency_code:'USD'}}}],payment_preferences:{}
+     pricing_scheme:{fixed_price:{value:'2.99',currency_code:'USD'}}}],payment_preferences:{auto_bill_outstanding:false}
    })}
    if(dest==='https://api-m.paypal.com/v1/notifications/webhooks/'+webhookId)return {ok:true,json:async()=>({
     id:webhookId,url:liveWebhookUrlForGeneration(1),event_types:REQUIRED_EVENTS.map(name=>({name}))

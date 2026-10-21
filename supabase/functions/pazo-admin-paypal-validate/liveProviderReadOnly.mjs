@@ -74,7 +74,7 @@ export const liveWebhookUrlForGeneration=g=>Number.isSafeInteger(g)&&g>=1&&g<=99
     (plan.taxes===undefined||
       (Number(plan.taxes.percentage||0)===0&&plan.taxes.inclusive!==true))
    if(!recurring||!preferences||!noSetup||
-    preferences.auto_bill_outstanding===true||!noTax||
+    preferences.auto_bill_outstanding!==false||!noTax||
     plan.quantity_supported===true)
     return invalid('live_plan_terms_unverified')
    const webhook=await asJson(fetchImpl,'/v1/notifications/webhooks/'+encodeURIComponent(webhookId),{
