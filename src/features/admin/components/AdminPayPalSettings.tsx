@@ -4,6 +4,7 @@ import {AdminGlyph} from './AdminVisuals'
 import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
 import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
 import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
+import {AdminPaypalLiveMerchantMatch} from './AdminPaypalLiveMerchantMatch'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -261,6 +262,8 @@ export function AdminPayPalSettings({lang}:Props){
      <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={recentAdminMfa}/>}
     {env==='live'&&<AdminPaypalLiveResourceCheck lang={lang}
      mfaRecentlyVerified={recentAdminMfa} onVerified={()=>load(false)}/>}
+    {env==='live'&&<AdminPaypalLiveMerchantMatch lang={lang}
+     mfaRecentlyVerified={recentAdminMfa}/>}
     {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
       <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
       <p className="mt-2 text-[12px] text-[#6B8077]">
