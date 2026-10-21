@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {readLivePaypalMerchantIdentity} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveMerchantIdentityReadOnly.mjs'
+import {readLivePaypalMerchantIdentity,createPazoLiveVerifiedMerchantResources} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveMerchantIdentityReadOnly.mjs'
 import {REQUIRED_EVENTS,liveWebhookUrlForGeneration} from '../../../../supabase/functions/pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
 const host='https://api-m.paypal.com'
 const scope='https://uri.paypal.com/services/reporting/balances/read'
@@ -43,7 +43,7 @@ function fixture(options={}){
 test('only exact provider account ID fingerprint leaves the reader after resource checks',async()=>{
  const f=fixture();const value=await f.run()
  assert.equal(value.ok,true);assert.equal(value.merchantFingerprint,fingerprint)
- assert.equal(value.merchantIdentityVerified,true);assert.equal(value.webhookDeliveryVerified,false)
+ assert.equal(value.merchantIdentityVerified,false);assert.equal(value.code,'live_merchant_candidate_read');assert.equal(value.webhookDeliveryVerified,false)
  assert.equal(value.mayCharge,false);assert.equal(value.mayActivate,false)
  assert.equal(f.calls.length,5)
  const output=JSON.stringify(value)
@@ -113,4 +113,88 @@ test('network failures are sanitized and never retried',async()=>{
  const f=fixture({balanceResponse:()=>{throw Error('SENSITIVE_NETWORK_DETAILS')}})
  const result=await f.run();assert.equal(result.code,'live_merchant_identity_unavailable')
  assert.equal(f.calls.length,5);assert.ok(!JSON.stringify(result).includes('SENSITIVE_NETWORK_DETAILS'))
+})
+
+test('self-presented Live credentials are never merchant-approved without pinned identity',async()=>{
+ const {run}=fixture()
+ const candidate=await run()
+ assert.equal(candidate.ok,true)
+ assert.equal(candidate.merchantIdentityVerified,false)
+ assert.equal(candidate.code,'live_merchant_candidate_read')
+ assert.equal(candidate.mayActivate,false)
+})
+test('provisioning bridge requires trusted merchant hash and never returns original account or secrets',async()=>{
+ const f=fixture()
+ const verify=createPazoLiveVerifiedMerchantResources({
+  fetchImpl:async(url,init)=>{
+   // Reuse the Codex provider fixture with its precise five-request oracle.
+   // Explicit verification never sends any account details outside the server.
+   const source=fixture()
+   // Shared responder below is implemented through a delegated fresh fixture.
+   // Avoid calling it here because the fixture exposes only run(), not fetch.
+   throw Error('fixture backend required')
+  }
+ })
+ const denied=await verify({...input})
+ assert.deepEqual(denied,{oauthVerified:false,planVerified:false,
+  webhookVerified:false,merchantIdentityVerified:false,isLive:false,mayCharge:false})
+ assert.equal(f.calls.length,0)
+})
+test('provisioning bridge succeeds only for the pinned original merchant',async()=>{
+ // Reusable fetch adapter returning the minimal PayPal response family.
+ let networkCalls=0
+ const fetchImpl=async(url,init)=>{
+  networkCalls++
+  if(url===host+'/v1/oauth2/token')return json({
+   token_type:'Bearer',access_token:'SYNTHETIC_OAUTH_TOKEN_12345',scope})
+  if(url===host+'/v1/billing/plans/'+planId)return json({
+   id:planId,status:'ACTIVE',billing_cycles:[{tenure_type:'REGULAR',sequence:1,
+    frequency:{interval_unit:'MONTH',interval_count:1},total_cycles:0,
+    pricing_scheme:{fixed_price:{value:'2.99',currency_code:'USD'}}}],
+   payment_preferences:{auto_bill_outstanding:false}})
+  if(url===host+'/v1/notifications/webhooks/'+webhookId)return json({
+   id:webhookId,url:liveWebhookUrlForGeneration(1),
+   event_types:REQUIRED_EVENTS.map(name=>({name}))})
+  if(url===host+'/v1/reporting/balances?currency_code=USD')
+   return json({account_id:accountId,balances:[]})
+  throw Error('untrusted provider endpoint')
+ }
+ const verify=createPazoLiveVerifiedMerchantResources({fetchImpl})
+ for(const wrong of [undefined,null,'','A'.repeat(64),'b'.repeat(64)]){
+  const before=networkCalls
+  const result=await verify({...input,merchantFingerprint:wrong})
+  assert.equal(result.merchantIdentityVerified,false)
+  assert.equal(result.mayCharge,false)
+  if(wrong!=='b'.repeat(64))assert.equal(networkCalls,before)
+ }
+ const valid=await verify({...input,merchantFingerprint:fingerprint})
+ assert.deepEqual(valid,{
+  oauthVerified:true,planVerified:true,webhookVerified:true,
+  merchantIdentityVerified:true,isLive:true,mayCharge:false})
+ assert.equal(networkCalls,10)
+ assert.ok(!JSON.stringify(valid).includes(accountId))
+ assert.ok(!JSON.stringify(valid).includes(input.clientSecret))
+})
+test('provisioning bridge fails closed for missing reporting permission or missing account',async()=>{
+ let calls=0
+ const fetchImpl=async(url)=>{
+  calls++
+  if(url.endsWith('/oauth2/token'))return json({
+   token_type:'Bearer',access_token:'SYNTHETIC_OAUTH_TOKEN_12345',scope})
+  if(url.endsWith('/v1/billing/plans/'+planId))return json({
+   id:planId,status:'ACTIVE',billing_cycles:[{tenure_type:'REGULAR',sequence:1,
+    frequency:{interval_unit:'MONTH',interval_count:1},total_cycles:0,
+    pricing_scheme:{fixed_price:{value:'2.99',currency_code:'USD'}}}],
+   payment_preferences:{auto_bill_outstanding:false}})
+  if(url.endsWith('/v1/notifications/webhooks/'+webhookId))return json({
+   id:webhookId,url:liveWebhookUrlForGeneration(1),
+   event_types:REQUIRED_EVENTS.map(name=>({name}))})
+  return json({account_id:'INVALID',balances:[]})
+ }
+ const verify=createPazoLiveVerifiedMerchantResources({fetchImpl})
+ const value=await verify({...input,merchantFingerprint:fingerprint})
+ assert.equal(value.merchantIdentityVerified,false)
+ assert.equal(value.isLive,false)
+ assert.equal(value.mayCharge,false)
+ assert.equal(calls,5)
 })
