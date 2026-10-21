@@ -1,5 +1,6 @@
-// PAZO F16 — read-only authenticated owner's original Live checkout slot.
-// No subscription creation, provider API, credentials, finance, or cancellation.
+import {createPazoLiveOwnerCancellation} from './liveOwnerCancellation.mjs'
+// PAZO F16 — authenticated owner's original Live subscription management.
+// No payment creation, refund, benefit grant, or browser-derived financial proof.
 // Sanitizes the service-role SQL response: never expose PayPal subscription IDs,
 // request keys, merchant IDs, owner IDs, raw plan, original origin or signatures.
 const PATHS=new Set(['/pazo-paypal-live-account',
@@ -44,11 +45,16 @@ export function normalizePazoLiveOwnerSlots(raw){
    !(entry.providerStatus===null||
     (typeof entry.providerStatus==='string'&&/^[A-Z_]{2,35}$/.test(entry.providerStatus)))||
    !(entry.providerCreateClaimedAt===null||typeof entry.providerCreateClaimedAt==='string')||
-   !(entry.subscriptionId===null||typeof entry.subscriptionId==='string')
+   !(entry.subscriptionId===null||typeof entry.subscriptionId==='string')||
+   !(entry.cancelState==null||['claimed','confirmed','review_required'].includes(entry.cancelState))
   )throw Error('untrusted_owner_slots')
   open.push({intentId:entry.intentId,state:entry.state,
    canDownloadAcceptance:false,
-   needsReconciliation:entry.state==='pending'&&entry.providerCreateClaimedAt!==null})
+   needsReconciliation:entry.state==='pending'&&entry.providerCreateClaimedAt!==null,
+   ...(entry.cancelState!=null ?{
+    cancelInReview:entry.cancelState==='claimed'||entry.cancelState==='review_required',
+    cancelConfirmed:entry.cancelState==='confirmed'
+   }:{})})
  }
  if(open.length>1||
   (open.length===0&&raw.currentIntentId!==null)||
@@ -57,7 +63,8 @@ export function normalizePazoLiveOwnerSlots(raw){
  return open
 }
 export function createPazoLiveOwnerAccountRead({released=false,
- resolveAuthenticatedOwner,readPrivateOwner,readProviderStatus}={}){
+ resolveAuthenticatedOwner,readPrivateOwner,readProviderStatus,
+ claimCancel,finishCancel,postCancel}={}){
  return async request=>{
   if(released!==true)return reply(request,503,'live_account_read_not_released')
   if(!(request instanceof Request))return reply(request,400,'invalid_request')
@@ -95,7 +102,9 @@ export function createPazoLiveOwnerAccountRead({released=false,
   const keys=Object.keys(data).sort().join(',')
   if(!((data.action==='list'&&keys==='action')||
    (data.action==='status'&&keys==='action,intentId'&&
-    INTENT.test(data.intentId||''))))
+    INTENT.test(data.intentId||''))||
+   (data.action==='cancel'&&keys==='action,confirmCancellation,intentId'&&
+    INTENT.test(data.intentId||'')&&data.confirmCancellation===true)))
    return reply(request,400,'invalid_request')
   let owner
   try{owner=await resolveAuthenticatedOwner(request)}
@@ -117,6 +126,21 @@ export function createPazoLiveOwnerAccountRead({released=false,
      !PLAN.test(original.planId||'')||
      !Number.isSafeInteger(original.merchantGeneration)||original.merchantGeneration<1)
     return reply(request,409,'live_status_not_available')
+   if(data.action==='cancel'){
+    // Never trust a browser-provided subscription, plan or merchant. The
+    // owner must request cancellation explicitly; the original DB binding
+    // and its provider generation are fixed before any side effect.
+    const perform=createPazoLiveOwnerCancellation({
+     readProviderStatus,claimCancel,finishCancel,postCancel
+    })
+    const outcome=await perform({ownerId:owner,original:{
+     ...original,intentId:selected.intentId
+    }})
+    if(outcome.confirmed===true&&outcome.providerStatus==='CANCELLED')
+     return reply(request,200,'future_renewals_cancelled',{
+      cancelled:true,providerStatus:'CANCELLED'})
+    return reply(request,409,outcome.code||'live_cancel_requires_reconciliation')
+   }
    let remote
    try{remote=await readProviderStatus({merchantGeneration:original.merchantGeneration,
     planId:original.planId,intentId:selected.intentId,

@@ -20,6 +20,8 @@ type Account = {
   state: 'pending' | 'bound'
   canDownloadAcceptance: boolean
   needsReconciliation?: boolean
+  cancelInReview?: boolean
+  cancelConfirmed?: boolean
 }
 type AccountResult = {
   ok?: boolean
@@ -43,6 +45,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [status, setStatus] = useState<Record<string, string>>({})
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
   const [cancelDone, setCancelDone] = useState<string | null>(null)
+  const [cancelReview, setCancelReview] = useState<string | null>(null)
   // An authenticated, already-bound V2 attempt must be managed, never offered a new request key.
   const [qaV2AccountState,setQaV2AccountState] = useState<'checking'|'none'|'pending'|'bound'|'unavailable'>('checking')
   const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
@@ -142,7 +145,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     const { data: {session}, error: sessionError } = await supabase.auth.getSession()
     // getSession here is ONLY for obtaining bearer; backend verifies getUser().
     if (sessionError || !session?.access_token) throw Error('authentication_required')
-    if(!qaV2Screen && !['list','status'].includes(String(body.action)))
+    if(!qaV2Screen && !['list','status','cancel'].includes(String(body.action)))
       throw Error('live_management_not_released')
     const endpoint=qaV2Screen?'f16-paypal-supporter-account':'pazo-paypal-live-account'
     const response = await fetch(config.url + '/functions/v1/' + endpoint, {
@@ -194,6 +197,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const cancel = async (intentId: string) => {
     setBusy(true)
     setError(false)
+    setCancelReview(null)
     try {
       const data = await call({action:'cancel',intentId,confirmCancellation:true}) as AccountResult
       if (data.code !== 'future_renewals_cancelled' || data.cancelled !== true)
@@ -201,7 +205,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       setCancelDone(intentId)
       setCancelConfirm(null)
       setStatus(current=>({...current,[intentId]:'CANCELLED'}))
-    } catch {setError(true)} finally {setBusy(false)}
+    } catch {setError(true);setCancelReview(intentId)} finally {setBusy(false)}
   }
 
   const download = async (intentId: string) => {
@@ -399,6 +403,17 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       : label('La gestión Live de renovaciones está en preparación. Puedes administrar pagos automáticos desde PayPal mientras tanto.',
                         'Live renewal management is being prepared. You can manage automatic payments in PayPal in the meantime.')}
                   </p>}
+                  {!qaV2Screen && (account.cancelInReview||
+                    cancelReview===account.intentId) && <p role="alert"
+                      className="rounded-[14px] bg-[#FCE5D8] p-3 text-[12px] leading-relaxed text-[#724927]">
+                    {label('Tu solicitud de cancelación necesita comprobación. No volveremos a solicitarla automáticamente; puedes consultar su estado aquí o desde PayPal.',
+                      'Your cancellation needs verification. We will not automatically send it again. You can check its status here or in PayPal.')}
+                  </p>}
+                  {!qaV2Screen&&account.cancelConfirmed&&<p role="status"
+                    className="text-[12px] font-semibold text-[#204E4A]">
+                    {label('Cancelación de próximas renovaciones registrada y verificada.',
+                      'Future renewal cancellation has been verified and recorded.')}
+                  </p>}
                   <div className="flex flex-wrap gap-2">
                     {account.state === 'bound' && <button type="button" disabled={busy}
                       onClick={() => void checkStatus(account.intentId)} className={control}>
@@ -406,7 +421,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                     {qaV2Screen && account.canDownloadAcceptance && <button type="button" disabled={busy}
                       onClick={() => void download(account.intentId)} className={control}>
                       {label('Descargar condiciones aceptadas','Download accepted terms')}</button>}
-                    {qaV2Screen && account.state === 'bound' && status[account.intentId] !== 'CANCELLED' &&
+                    {account.state === 'bound' &&
+                      (qaV2Screen ? status[account.intentId] !== 'CANCELLED' :
+                        ['ACTIVE','SUSPENDED'].includes(status[account.intentId]||'') &&
+                        !account.cancelInReview&&!account.cancelConfirmed) &&
                       cancelDone !== account.intentId && <button type="button" disabled={busy}
                         onClick={() => setCancelConfirm(account.intentId)} className={control}>
                         {label('Cancelar renovación','Cancel renewal')}</button>}
