@@ -113,6 +113,5 @@ export function createPaypalLiveSubscriptionProvider({clientId,clientSecret,plan
     throw Error('live_cancel_provider_unconfirmed')
    return Object.freeze({postAccepted:true,subscriptionId})
   }
- }
  })
 }
