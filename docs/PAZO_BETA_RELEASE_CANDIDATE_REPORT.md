@@ -2,13 +2,28 @@
 
 Fecha: 2026-10-20, America/Guatemala. **Dictamen: NO-GO. No es una beta terminada ni publicada.**
 
-Checkpoint actual: generación 1 real reservada y única, lector de ventas original
+Último código: `9525ece11eb9e87f49b01a13d283de0958a28ec7`, CI9/9 SUCCESS y
+comprobador administrativo HOSTED v2/JWT obligatorio, ocho fuentes verificadas.
+El PO corrigió el ajuste de saldos automáticos en PayPal; lectura UI independiente
+confirma desactivado y USD2.99 mensual. Se reparó el rechazo de cero decimal, sin
+aceptar comisión positiva ni autoarrears desconocido. Después de corregir el
+carácter inicial extra del ID, el PO comunica `live_webhook_events_unexpected`.
+La ruta alojada confirma que plan, GET/ID/URL del webhook y los diez nombres
+requeridos pasaron; sobra alguna entrada o hay repetición. Se solicitaron solo
+los nombres seleccionados antes de cambiar el registro o repetir claves.
+Postflight independiente tras este diagnóstico: 1 reserva generación1 reserved,
+0 merchant/secret attempts/resource audits, sandbox/Live OFF/kill ON/generación
+activa null. Configuración del webhook todavía rechazada. No nuevas migraciones
+ni pruebas financieras.
+
+Hito inicial del comprobador (histórico): generación 1 real reservada y única, lector de ventas original
 instalado; ambos selectores Live OFF. PO aportó Webhook ID candidato, todavía sin
 verificación API. Nuevo canal efímero de comprobación plan/webhook: 20 tests
 dirigidos, PG17 y verify:prepreview PASS; bdf31649 CI9/9 SUCCESS. Migración real
 20261021021050 y endpoint ACTIVEv1/JWTtrue instalados/verificados; ocho fuentes
 coinciden, OPTIONS permitido204, origen ajeno403, sin JWT401. Falta la consulta
-autenticada del PO con claves solo en el formulario privado. No guarda claves
+autenticada del PO con claves solo en el formulario privado. El resultado posterior
+se detalla al inicio de este informe. No guarda claves
 ni prueba identidad merchant, firma o entrega.
 HEAD previo cd9d56cc9a05165bb8fa2f2c4f74dc528a679e64: 9/9 workflows SUCCESS.
 El historial siguiente distingue hitos anteriores; el handoff conserva el estado
@@ -79,6 +94,7 @@ Supabase postflight: 0 funciones originales, 17 corregidas, 17 con ACL/definici�
 | Edge | Versión | Estado del código |
 |---|---|---|
 | pazo-admin-paypal-bootstrap | 6 | reserva autorizada; JWT obligatorio; check_readiness presente |
+| pazo-admin-paypal-live-inspect | 2 | JWT/admin/MFA reciente; claves efímeras, configuración por comprobar |
 | pazo-admin-paypal-provision | 2 | RELEASE_APPROVED=false; JWT obligatorio |
 | pazo-paypal-live-checkout | 2 | LIVE_CHECKOUT_RELEASED=false; JWT obligatorio |
 | pazo-paypal-live-webhook | 1 | LIVE_WEBHOOK_RELEASED=false |

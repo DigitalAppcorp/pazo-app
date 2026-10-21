@@ -1,6 +1,30 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
-## Diagnóstico PROVIDER — términos del plan Live
+## Diagnóstico vigente — eventos del webhook Live
+
+**Estado vigente:** comprobador `pazo-admin-paypal-live-inspect` ACTIVE **v2**, JWT
+obligatorio, ocho fuentes idénticas a `9525ece11eb9e87f49b01a13d283de0958a28ec7`,
+CI9/9 SUCCESS (CI39533646911/LiveGateway39533647024). HTTPS OPTIONS204/sinJWT401.
+Además de cero decimal, exige `auto_bill_outstanding === false` explícito; el
+esquema PayPal indica true por defecto y no se infiere false de un campo ausente.
+23 pruebas dirigidas PASS. SQL sin cambios/reinstalaciones.
+
+Tras corregir el ID a `6UA43660E66988355`, el PO informa ahora
+`live_webhook_events_unexpected`. Según la ruta de la fuente alojada verificada,
+el plan, GET del webhook, ID y URL ya pasaron; también están los diez nombres
+requeridos. El conjunto o la longitud de la lista difiere de diez: existe alguna
+entrada adicional o repetida. No inferir «All events» sin leer la selección real.
+Se pidió copiar solo los nombres seleccionados del registro existente, sin
+guardar cambios ni volver a introducir claves hasta aislar la diferencia.
+Postflight independiente después de este diagnóstico: reserva1/generación1
+reserved, 0 auditorías de recursos, 0 merchant Live, 0 intentos de secretos,
+selector sandbox/Live OFF/kill ON/active_generation null. No hay configuración
+del webhook aceptada ni metadata persistida; identidad y entrega siguen pendientes.
+
+La consulta anterior devolvió `live_webhook_unverified`. El PO volvió a copiar
+exclusivamente ID+URL: el ID inicial tenía una `u` minúscula adicional al principio,
+y la URL coincide exactamente con generación 1. Solo corrigió el campo de PAZO;
+no se modificó el webhook ni se creó otro. Las claves se descartan al enviar.
 
 Primera comprobación real del PO devolvió `live_plan_terms_unverified`: se pasó
 Auth/MFA/reserva/OAuth y se leyó plan ACTIVE, pero NO se validó webhook ni guardó
@@ -13,11 +37,10 @@ conservados. Codex solo abrió el editor y leyó, no guardó cambios financieros
 El editor muestra comisión cero como `0.0`. Corregida comparación textual de cero:
 acepta exclusivamente strings USD `0`, `0.0`, `0.00`, sin redondeo, manteniendo
 rechazo de centavos/signos/exponentes/otra moneda y cobros automáticos de atrasos.
-Regresión reproduce fallo original; CI/deploy de esta corrección pendientes.
-No repetir entrada de claves hasta postflight del comprobador corregido; las claves
-anteriores se descartaron por diseño. No crear otra reserva/plan/webhook.
+La regresión reproduce el fallo original; código y despliegue actuales se detallan
+arriba. No crear otra reserva/plan/webhook ni debilitar controles para pasar el test.
 
-## HOSTED PASS — comprobación privada de plan y webhook; acción PO pendiente
+## Hito inicial — comprobación privada instalada en v1 (histórico)
 
 El PO entregó Webhook ID; conservado exactamente como candidato local de generación
 1, **sin validación API todavía**. No crear webhook, plan o reserva otra vez.
@@ -39,13 +62,13 @@ origen ajeno403, POST sin JWT401. Clon PO actualizado a bdf31649 preservando loc
 previo y Vite sirve formulario HTTP200. Ajuste posterior de recarga silenciosa
 preserva confirmación visible tras éxito; no cambia backend. Ver procedimiento.
 
-PO pendiente: recargar localhost5173, Admin→Configuración→PayPal→Live, TOTP reciente
+Petición inicial al PO: recargar localhost5173, Admin→Configuración→PayPal→Live, TOTP reciente
 solo dentro de PAZO, nueva sección Comprobar plan y webhook Live. Debe mostrar
 generación1; introducir Webhook ID comunicado y claves de app Pazo Live solo en
 el formulario privado, pulsar Comprobar sin guardar claves y devolver texto/código.
 No reservar otra vez ni generar pagos/eventos. No pedir credenciales en chat.
-Aceptación visual del control, API real, identidad merchant y firma/custodia/worker
-siguen pendientes. Estos datos prevalecen sobre los checkpoints históricos.
+La ejecución posterior y el diagnóstico vigente figuran al inicio de este documento.
+Identidad merchant y firma/custodia/worker siguen pendientes.
 
 ## Último checkpoint — lector de ventas originales HOSTED PASS
 
