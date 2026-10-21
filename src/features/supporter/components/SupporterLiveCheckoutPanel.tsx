@@ -54,8 +54,11 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
   void (async()=>{
    try{
     const config=privateConfig()
+    const {data:{session},error}=await supabase.auth.getSession()
+    if(error||!session?.access_token)throw Error('owner_auth_unavailable')
     const res=await fetch(HOST+'/functions/v1/pazo-paypal-live-checkout',{
-     method:'GET',headers:{apikey:config.key,Accept:'application/json'},
+     method:'GET',headers:{apikey:config.key,authorization:'Bearer '+session.access_token,
+      Accept:'application/json'},
      cache:'no-store',signal:controller.signal
     })
     const value=await res.json() as {code?:string;ready?:boolean;mayGrantBenefits?:boolean}
