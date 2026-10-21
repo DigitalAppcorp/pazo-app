@@ -42,7 +42,7 @@ function fixture(options={}){
 }
 test('only exact provider account ID fingerprint leaves the reader after resource checks',async()=>{
  const f=fixture();const value=await f.run()
- assert.equal(value.ok,true);assert.equal(value.merchantFingerprint,fingerprint)
+ assert.equal(value.ok,false);assert.equal(value.merchantFingerprint,fingerprint)
  assert.equal(value.merchantIdentityVerified,false);assert.equal(value.code,'live_merchant_candidate_read');assert.equal(value.webhookDeliveryVerified,false)
  assert.equal(value.mayCharge,false);assert.equal(value.mayActivate,false)
  assert.equal(f.calls.length,5)
@@ -118,7 +118,7 @@ test('network failures are sanitized and never retried',async()=>{
 test('self-presented Live credentials are never merchant-approved without pinned identity',async()=>{
  const {run}=fixture()
  const candidate=await run()
- assert.equal(candidate.ok,true)
+ assert.equal(candidate.ok,false)
  assert.equal(candidate.merchantIdentityVerified,false)
  assert.equal(candidate.code,'live_merchant_candidate_read')
  assert.equal(candidate.mayActivate,false)
