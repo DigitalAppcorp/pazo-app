@@ -1,7 +1,7 @@
 DO $guard$ BEGIN
  IF current_database()<>'f14_synthetic' OR current_user<>'postgres' THEN RAISE EXCEPTION 'DISPOSABLE PG17 ONLY'; END IF;
 END $guard$;
-\i supabase/migrations/20261021170408_pazo_f16_live_owner_checkout_slot.sql
+\i supabase/migrations/20261021181431_pazo_f16_live_owner_checkout_slot.sql
 BEGIN;
 -- Earlier disposable labs intentionally retire merchant generation 1 and
 -- change the gateway plan. Restore the synthetic fixture for this isolated
