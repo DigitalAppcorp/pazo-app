@@ -31,16 +31,19 @@ export function normalizePazoLiveOwnerSlots(raw){
  for(const entry of raw.accounts){
   if(!entry||typeof entry!=='object'||Array.isArray(entry)||
    !INTENT.test(entry.intentId||'')||
-   !['pending','bound'].includes(entry.state)||
    !Number.isInteger(entry.merchantGeneration)||entry.merchantGeneration<1||
    typeof entry.createdAt!=='string'||!Number.isFinite(Date.parse(entry.createdAt))||
-   !(entry.closedAt===null||typeof entry.closedAt==='string')||
+   !(entry.closedAt===null||typeof entry.closedAt==='string'))
+   throw Error('untrusted_owner_slots')
+  // Closed, already-reconciled attempts are history, not active checkout.
+  // Their historical provider status is irrelevant to the active slot.
+  if(entry.closedAt!==null)continue
+  if(!['pending','bound'].includes(entry.state)||
    !(entry.providerStatus===null||
     (typeof entry.providerStatus==='string'&&/^[A-Z_]{2,35}$/.test(entry.providerStatus)))||
    !(entry.providerCreateClaimedAt===null||typeof entry.providerCreateClaimedAt==='string')||
    !(entry.subscriptionId===null||typeof entry.subscriptionId==='string')
   )throw Error('untrusted_owner_slots')
-  if(entry.closedAt!==null)continue
   open.push({intentId:entry.intentId,state:entry.state,
    canDownloadAcceptance:false,
    needsReconciliation:entry.state==='pending'&&entry.providerCreateClaimedAt!==null})
@@ -66,7 +69,7 @@ export function createPazoLiveOwnerAccountRead({released=false,
   if(request.method==='OPTIONS'){
    if(!origin||request.headers.get('access-control-request-method')!=='POST')
     return reply(request,400,'invalid_preflight')
-   const r=reply(request,204,'')
+   const r=reply(request,200,'preflight')
    return new Response(null,{status:204,headers:r.headers})
   }
   if(request.method!=='POST')return reply(request,405,'post_required')
