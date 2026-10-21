@@ -76,7 +76,7 @@ export async function readLivePaypalMerchantIdentity({environment,clientId,clien
   // Merchant identity becomes VERIFIED solely against a fingerprint previously
   // pinned by an independent, trusted, immutable server-side merchant record.
   const pinned=expectedMerchantFingerprint!==undefined
-  return Object.freeze({ok:true,
+  return Object.freeze({ok:pinned,
    code:pinned?'live_merchant_identity_read_verified':'live_merchant_candidate_read',
    environment:'live',merchantFingerprint,merchantIdentityVerified:pinned,
    planReadVerified:true,webhookReadVerified:true,webhookDeliveryVerified:false,
