@@ -29,7 +29,10 @@ function fixtures(overrides={}){
     merchantGeneration:7,sourceEnvironment:'live',locale:'es',
     termsVersion:consent.termsVersion,termsDigest:consent.termsDigest,
     createdAt:new Date().toISOString(),state:'pending'}
-   if(name==='claim')return true
+   if(name==='claim'){
+    assert.equal(params.p_origin,'https://pazo.example.com')
+    return true
+   }
    if(name==='bind')return 'bound'
    throw Error('unexpected_sql_'+name)
   },
