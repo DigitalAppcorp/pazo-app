@@ -5,7 +5,7 @@ const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const ROLE_RPC=Object.freeze({
  route:'pazo_f16_live_service_active_route',
  begin:'pazo_f16_live_service_checkout_begin',
- claim:'pazo_f16_live_service_provider_claim',
+ claim:'pazo_f16_live_service_provider_claim_with_origin',
  bind:'pazo_f16_live_service_subscription_bind',
  cancelClaim:'pazo_f16_live_service_cancel_claim',
  queueEvent:'pazo_f16_live_service_verified_event_queue',
@@ -67,10 +67,12 @@ export function createPazoLiveCheckoutSqlStores({rpc}={}){
     return r
    },
    async claimProviderCreate({ownerId,intentId,requestKey,
-     merchantGeneration,sourceEnvironment}={}){
-    if(sourceEnvironment!=='live'||!INTENT.test(intentId||''))fail()
+     merchantGeneration,sourceEnvironment,originalOrigin}={}){
+    if(sourceEnvironment!=='live'||!INTENT.test(intentId||'')||
+      typeof originalOrigin!=='string'||!/^https:\/\/[a-z0-9][a-z0-9.-]{1,240}$/.test(originalOrigin))fail()
     const r=await rpc('claim',{p_owner:ownerId,p_intent:intentId,
-     p_request_key:requestKey,p_generation:merchantGeneration})
+     p_request_key:requestKey,p_generation:merchantGeneration,
+     p_origin:originalOrigin})
     return r===true
    }
   }),
