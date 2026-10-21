@@ -94,7 +94,7 @@ La portada pública no acredita retornos o instalación PWA. El build local cont
 | Identidad/plan/webhook Live | Parcial | Contratos previos | Incompleto | Sin verificar por API en esta ejecución | Pendiente | Operaciones específicas |
 | Credenciales privadas y Guardar/verificar/activar | Parcial, fail-closed | Contratos previos | Provisión inerte | Pendiente | Pendiente | Custodia/operación pendiente |
 | Checkout, cancelación y retornos Live | Preparados parcialmente | Sintética PASS | Latches OFF; retornos públicos 404 | Sin cobro nuevo | Pendiente | GO financiero separado |
-| Worker/ledger/entitlements | Adaptadores y SQL staged | Sintética PASS | Incompleto | Sin conciliación Live | Pendiente | Gates separados |
+| Worker/ledger/entitlements | Adaptadores y SQL staged | Sintética PASS; lector080b8099 CI9/9 | LectorventaoriginalSTABLEinstalado20261021014400; workerincompleto | Sin conciliación Live | Pendiente | Operaciones pendientes |
 | Insignias | Originales preservados | Closure PASS | Lectores públicos observados usan proyección Sandbox QA | Sin períodos Live | Revisión pendiente | Visual pendiente |
 | Panel desktop/móvil | Existente | Closure PASS | Backend parcial | Métricas sin inventar | Comparación pendiente | Visual pendiente |
 | App social | Existente, sin cambios de producto | MVP/closure PASS | No reescrito | N/A | QA histórico no repetido | Conservar aceptación histórica |
@@ -102,6 +102,8 @@ La portada pública no acredita retornos o instalación PWA. El build local cont
 | Seguridad/privacidad/operación | Auditoría parcial | Governance PASS | Advisor con pendientes | Restauración/alertas no verificadas aquí | Pendiente | Retención/legal/operación pendientes |
 
 ## Seguridad y alcance de la revisión
+
+Auditoría de catálogo: cero tablas públicas accesibles sin RLS, cero vistas públicas accesibles, cero definers públicos usando user_metadata y ninguna función con solo GUC role heredada. Organización Supabase Free; no se aumentó el plan. Scoped PAT está en alpha de despliegue gradual; no asumir disponibilidad ni usar tokens clásicos como atajo.
 
 Security Advisor: 40 INFO RLS sin policies, 4 WARN SECURITY DEFINER anónimas, 38 WARN autenticadas y 1 WARN de protección de contraseñas filtradas desactivada. No se revocaron RPC ni se habilitaron complementos facturables.
 
@@ -116,7 +118,7 @@ Antes de GO beta faltan validación legal/retención real y bajas/backups, prueb
 1. CERRADO: commit ba960563, 9/9 CI y migración17 instalada; check_readiness y reservaúnica corroborados.
 2. CERRADO: postflight17corregidas/17protegidas y selectorOFF. Reserva1 posterior creada por el PO, no por la migración.
 3. CERRADO: clon original actualizadoff, package-lock preservado; check_readiness POST200. No repetir alta MFA ni reserva.
-4. EN CURSO: registro manual webhook appPazoLive con URL real generation1 y10eventos. Chrome no permitió controlar la pestaña; PO tiene pasos numerados. Seguir con identidad/custodia/worker. Lector de ventas originales preparado con pruebas PG17/Node, pendiente instalación; migraciones autorizadas globalmente.
+4. EN CURSO: registro manual webhook appPazoLive con URL real generation1 y10eventos. Chrome no permitió controlar la pestaña; PO tiene pasos numerados. Seguir con identidad/custodia/worker. Lector de ventas originales instalado como20261021014400, ACLservice-only ysmokeREADONLYPASS; migraciones autorizadas globalmente.
 5. Terminar bloques transversales y obtener un SHA final, aceptación PO y GO independientes de publicación y cobros.
 
 **F16 completo antes de beta sigue obligatorio.** Ningún PASS de esta ejecución sustituye HOSTED, PROVIDER, E2E o PO. No se declara cerrado el proyecto ni se promete trabajo en segundo plano.

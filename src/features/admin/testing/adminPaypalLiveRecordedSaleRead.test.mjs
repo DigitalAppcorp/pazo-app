@@ -81,7 +81,7 @@ test('staged SQL only exposes service-only function after exact owner and event 
 
 test('installable original-sale reader preserves the reviewed read-only SQL body',()=>{
  const draft=readFileSync(new URL('../../../../supabase/drafts/f16_live_service_recorded_sale_reader_REVIEW_REQUIRED.sql',import.meta.url),'utf8')
- const installed=readFileSync(new URL('../../../../supabase/migrations/20261021013019_pazo_f16_live_recorded_sale_reader.sql',import.meta.url),'utf8')
+ const installed=readFileSync(new URL('../../../../supabase/migrations/20261021014400_pazo_f16_live_recorded_sale_reader.sql',import.meta.url),'utf8')
  const body=source=>source.match(/AS \$pazo\$([\s\S]*?)\$pazo\$/)?.[1]
  assert.equal(typeof body(draft),'string')
  assert.equal(body(installed),body(draft))

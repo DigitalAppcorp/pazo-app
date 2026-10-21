@@ -4,7 +4,7 @@ BEGIN
  IF current_database()<>'f14_synthetic' OR current_user<>'postgres'
  THEN RAISE EXCEPTION 'DISPOSABLE ONLY' USING ERRCODE='42501'; END IF;
 END $guard$;
-\i supabase/migrations/20261021013019_pazo_f16_live_recorded_sale_reader.sql
+\i supabase/migrations/20261021014400_pazo_f16_live_recorded_sale_reader.sql
 DO $verify$
 DECLARE v jsonb;
  owner_id uuid='12345678-1234-4234-8234-123456789abc';

@@ -1,5 +1,10 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## Último checkpoint — lector de ventas originales HOSTED PASS
+
+InstaladoUNAvez `20261021014400_pazo_f16_live_recorded_sale_reader`, SQLSHA25643450d0d55b26dcd9e6336c4c7faf4579e4626d7f084afa189c5292050bdf817; archivo alineado al ID real sin cambiar bytes. Postflight: STABLE/SECURITYDEFINER/search_pathvacío, ACLexactopostgres+service_role; anon/authenticatedfalse, claimsJSON. LecturaalojadaREADONLYconroleDBservice_role yreferenciassintéticasausentes devolvióNULLsinfilas/beneficios. Reserva1 única intacta, generacionesLive0,selectorOFF. Código080b809943d1b11439d85405ebc722d8e888ab4a9/9CI SUCCESS (CI39528718580/LiveGateway39528718397), PG17roles/owner/generaciónPASS; cambio posterior soloalineaIDsydocumenta.
+
+AÚNPENDIENTE: POestáregistrandowebhookPazoLive conURLgeneration1y10eventos; pasosnumerados yaentregados. EsperarWebhookID,nopedirsecretos. Worker/custodia/identidadmerchant/E2Efinanciero no completos. ScopedPATSupabaseenpublicalpha condesplieguegradual: noasumircapacidadcuenta niusarclassicPATatajo; orgfreeconfirmada. Auditoríacatálogo adicional:0tablaspublicexpuestassinRLS,0viewsaccesibles,0definerspublicqueusenuser_metadata,0funcionesrestantesconsoloGUCroleheredada. Advisorconpendientesconocidos; sinupgradegastos.
 ## Actualización vigente — generación1 real reservada y comprobada
 
 check_readiness del PO confirmó configuración y logs alojados POST200 a01:31:25UTC. PO ejecutó después UNAreserva; lecturaDB confirma exactamente1fila,state=reserved,generation=1,planLiveesperado. URLreal `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook?generation=1`. GeneracionesmerchantLive0/secretattempts0; sandbox/LiveOFF/killON/genactivaNULL. **NOreservarotra vez ni repetirMFAalta.** Falta crearwebhook: Chrome no permite controlar pestaña; instrucciones exactas10eventos enviadas y PO pidió lista numerada, ya entregada. Esperar WebhookID sinsecretos. Lectorventasoriginales enpreparaciónconrolesJSON/propietario/generaciónPG17. Migraciones técnicas autorizadas globalmente. Bloques anteriores/posteriores conreservas0sonhistóricos.
