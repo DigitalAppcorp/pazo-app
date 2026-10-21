@@ -6,7 +6,7 @@ import {createPazoLiveGoTrueOwnerResolver} from './liveGoTrueOwner.mjs'
 import {createPazoLiveServiceRpc} from './liveSqlServiceAdapters.mjs'
 import {publicBetaOrigin} from './liveSubscriptionProvider.mjs'
 import {createPazoLiveVaultGenerationSecretReader} from '../pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs'
-import {verifyPazoLiveOfferConsent} from './liveOfferRegistry.mjs'
+import {getPazoLiveOffer,verifyPazoLiveOfferConsent} from './liveOfferRegistry.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const forbidden=(status,code)=>new Response(JSON.stringify({code}),{
@@ -64,13 +64,37 @@ export function createPazoLiveHostedCheckout({
   const origin=pinned.returnOrigin
   const caller=req.headers.get('origin')||''
   const cors=caller===origin?{
-   'access-control-allow-origin':origin,'access-control-allow-methods':'POST, OPTIONS',
+   'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, OPTIONS',
    'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
    vary:'Origin'}:{}
   if(req.method==='OPTIONS')return caller===origin?
    new Response(null,{status:204,headers:cors}):
    forbidden(403,'untrusted_origin')
   if(caller!==origin)return forbidden(403,'untrusted_origin')
+  // A valid merchant is not sufficient if the signed-event reconciler is
+  // stopped. A new subscription must not begin without fresh worker health.
+  // This is also the only public read-only readiness signal for the UI:
+  // no token, merchant, internal build, or paid status is disclosed.
+  let worker
+  try{worker=await rpc('workerHealth',{})}
+  catch{return forbidden(503,'live_processing_unavailable')}
+  if(worker?.source!=='private_live_worker_health'||
+     worker.enabled!==true||worker.processingAllowed!==true||
+     worker.healthy!==true)
+   return forbidden(503,'live_processing_unavailable')
+  if(req.method==='GET'){
+   let route
+   try{route=new URL(req.url)}catch{return forbidden(400,'invalid_request')}
+   const locale=route.searchParams.get('locale')
+   if(route.searchParams.size!==1||!['es','en'].includes(locale))
+    return forbidden(400,'invalid_offer_locale')
+   const offer=getPazoLiveOffer(locale)
+   if(!offer)return forbidden(503,'offer_unavailable')
+   return new Response(JSON.stringify({
+    code:'live_checkout_ready',ready:true,mayGrantBenefits:false,offer
+   }),{status:200,headers:{'content-type':'application/json',
+    'cache-control':'no-store','x-content-type-options':'nosniff',...cors}})
+  }
   // Origin and merchant are pinned to the same DB revision per request.
   const serve=createPazoLiveCheckoutHttpHandler({
    released:true,resolveAuthenticatedOwner,readActiveRoute:async()=>pinned,
