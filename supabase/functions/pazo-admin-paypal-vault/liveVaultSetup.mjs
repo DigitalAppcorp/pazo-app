@@ -8,7 +8,8 @@ const ORIGINS=new Set(['http://localhost:5173','http://127.0.0.1:5173',
  'https://pazo-app-t83r.vercel.app'])
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const HOOK=/^[A-Za-z0-9_-]{8,100}$/
-const KEY=/^[A-Za-z0-9_-]{20,512}$/
+const KEYID=/^[A-Za-z0-9_-]{20,256}$/
+const KEYSECRET=/^[A-Za-z0-9_-]{20,512}$/
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const MAX=2048
 const cors=req=>{
@@ -67,7 +68,7 @@ export function createPazoLiveVaultSetup({released=false,authenticateAdmin,
    'action,clientId,clientSecret,confirmation'||
    body.action!=='prepare_live_vault'||
    body.confirmation!=='PREPARAR CREDENCIALES LIVE'||
-   !KEY.test(body.clientId)||!KEY.test(body.clientSecret))
+   !KEYID.test(body.clientId)||!KEYSECRET.test(body.clientSecret))
    return reply(req,400,'invalid_setup_request')
   let settings,reservation
   try{
