@@ -6,7 +6,7 @@ import {createPazoLiveGoTrueOwnerResolver} from './liveGoTrueOwner.mjs'
 import {createPazoLiveServiceRpc} from './liveSqlServiceAdapters.mjs'
 import {publicBetaOrigin} from './liveSubscriptionProvider.mjs'
 import {createPazoLiveVaultGenerationSecretReader} from '../pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs'
-import {verifyPazoLiveOfferConsent} from './liveOfferRegistry.mjs'
+import {getPazoLiveOffer,verifyPazoLiveOfferConsent} from './liveOfferRegistry.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const forbidden=(status,code)=>new Response(JSON.stringify({code}),{
@@ -82,10 +82,19 @@ export function createPazoLiveHostedCheckout({
      worker.enabled!==true||worker.processingAllowed!==true||
      worker.healthy!==true)
    return forbidden(503,'live_processing_unavailable')
-  if(req.method==='GET')return new Response(JSON.stringify({
-    code:'live_checkout_ready',ready:true,mayGrantBenefits:false
+  if(req.method==='GET'){
+   let route
+   try{route=new URL(req.url)}catch{return forbidden(400,'invalid_request')}
+   const locale=route.searchParams.get('locale')
+   if(route.searchParams.size!==1||!['es','en'].includes(locale))
+    return forbidden(400,'invalid_offer_locale')
+   const offer=getPazoLiveOffer(locale)
+   if(!offer)return forbidden(503,'offer_unavailable')
+   return new Response(JSON.stringify({
+    code:'live_checkout_ready',ready:true,mayGrantBenefits:false,offer
    }),{status:200,headers:{'content-type':'application/json',
     'cache-control':'no-store','x-content-type-options':'nosniff',...cors}})
+  }
   // Origin and merchant are pinned to the same DB revision per request.
   const serve=createPazoLiveCheckoutHttpHandler({
    released:true,resolveAuthenticatedOwner,readActiveRoute:async()=>pinned,
