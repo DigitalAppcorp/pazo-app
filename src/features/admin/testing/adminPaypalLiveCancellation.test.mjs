@@ -101,7 +101,7 @@ test('PayPal original merchant POST /cancel accepts only 204, never auto-retries
  assert.equal(urls.length,2)
 })
 test('Postgres finish function enforces service role and immutable owner binding, no period credits',()=>{
- const sql=readFileSync(new URL('../../../../supabase/migrations/20261021193000_pazo_f16_live_cancel_finish.sql',import.meta.url),'utf8')
+ const sql=readFileSync(new URL('../../../../supabase/migrations/20261021192951_pazo_f16_live_cancel_finish.sql',import.meta.url),'utf8')
  assert.match(sql,/pazo_f16_live_service_cancel_finish/)
  assert.match(sql,/current_setting\('request\.jwt\.claims'/)
  assert.match(sql,/IS DISTINCT FROM 'service_role'/)
