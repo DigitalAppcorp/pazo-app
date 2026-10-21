@@ -64,7 +64,7 @@ export function createPazoLiveHostedCheckout({
   const origin=pinned.returnOrigin
   const caller=req.headers.get('origin')||''
   const cors=caller===origin?{
-   'access-control-allow-origin':origin,'access-control-allow-methods':'POST, OPTIONS',
+   'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, OPTIONS',
    'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
    vary:'Origin'}:{}
   if(req.method==='OPTIONS')return caller===origin?
