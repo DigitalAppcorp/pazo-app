@@ -1,5 +1,15 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — Gate HTTPS/PWA público automatizado sin credenciales (21-oct-2026)
+
+- **PR #69** fusionado SOLO a rama `f16/beta-completion-20261021`, commit `bad4202d5b224026fc0dade112a882701cba011d`. GitHub SHA `dcecec529d2b7f0ab80fd5565905bac1afa65137`: **CI SUCCESS y F16 Live PG17 SUCCESS**.
+- CLI reproducible `node scripts/f16-public-pwa-http-gate.mjs` exige **7/7 HTTP200 correctos** del origin público `https://pazo-app-t83r.vercel.app`: SPA, callbacks PayPal /return + /cancel sin reflejo de tokens, manifest installable, SW network-only y PNGs 192/512. Rechaza SSO redirección, 404, MIME equivocado y artefactos inconsistentes; imprime únicamente códigos sin datos privados, no contacta PayPal.
+- QA local: cuatro pruebas de GET inyectados (7/7 PASS, callbacks404, SSO, token sintético reflejado, origin no autorizado) dentro de `npm run test:pwa`/CI. Documentación detallada `docs/PAZO_PUBLIC_BETA_HTTP_GATE_20261021.md`.
+- **No declarar HTTP alojado PASS:** la Vercel principal sigue sirviendo un commit F13 anterior, según Vercel metadata; el reporte anterior de Codex encontró 404 en los callbacks y PWA. El gate solo debe ejecutarse sobre nuevo deploy con permiso Preview/producción del PO. `vercel.json` mantiene `git.deploymentEnabled=false`.
+- Flags financieros Live OFF; sin merchant, intentos ni períodos pagados; no se publica `main`, no Preview nuevo, no cobro ni alteración de Supabase. Siguen P4 release/canary y E2E real.
+
+
+
 ## F16 — PWA retorno móvil: arreglo integrado sin despliegue (21-oct-2026, continuidad ChatGPT)
 
 - **PR #68** fusionado **únicamente** en rama PR67 `f16/beta-completion-20261021`, squash `266477a2379b3d33383da7fdd73c3b6d28024554`. CI de la rama de prueba exacta `e38e15255ee5f9fc521b9dd65f3338a9e2de104a`: GitHub CI **SUCCESS** y F16 PG17 Live Gateway **SUCCESS**. No main, no despliegue, no dinero.
