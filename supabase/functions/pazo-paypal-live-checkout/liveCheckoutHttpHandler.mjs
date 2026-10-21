@@ -16,7 +16,7 @@ const reply=(status,code,extra={})=>new Response(
 )
 export function createPazoLiveCheckoutHttpHandler({
  released=false,resolveAuthenticatedOwner,readActiveRoute,getSecret,
- rpc,admit,verifyConsent,publicOrigin,fetchImpl=fetch
+ readGenerationCredentials,rpc,admit,verifyConsent,publicOrigin,fetchImpl=fetch
 }={}){
  return async function serve(request){
   if(released!==true)return reply(503,'live_checkout_not_released')
@@ -53,7 +53,7 @@ export function createPazoLiveCheckoutHttpHandler({
   let route
   try{route=await readActiveRoute()}catch{return reply(503,'live_route_unavailable')}
   if(route?.sourceEnvironment!=='live'||
-   route?.credentialSource!=='edge_secrets'||
+   !['edge_secrets','vault'].includes(route?.credentialSource)||
    !Number.isSafeInteger(route.merchantGeneration)||route.merchantGeneration<1||
    !PLAN.test(route.planId||''))
    return reply(503,'live_route_inactive')
@@ -65,12 +65,24 @@ export function createPazoLiveCheckoutHttpHandler({
   if(!admitted)return reply(409,'checkout_admission_denied')
   let clientId,clientSecret
   try{
-   const prefix='PAZO_F16_LIVE_G'+route.merchantGeneration+'_'
-   const enabled=await getSecret(prefix+'READ_ENABLED')
-   clientId=await getSecret(prefix+'CLIENT_ID')
-   clientSecret=await getSecret(prefix+'CLIENT_SECRET')
-   const pinnedPlan=await getSecret(prefix+'PLAN_ID')
-   if(enabled!=='1'||pinnedPlan!==route.planId)throw Error('key')
+   if(route.credentialSource==='vault'){
+    if(typeof readGenerationCredentials!=='function')throw Error('vault')
+    const original=await readGenerationCredentials({
+     merchantGeneration:route.merchantGeneration,sourceEnvironment:'live'})
+    if(original?.environment!=='live'||original.credentialSource!=='vault'||
+     original.generation!==route.merchantGeneration||
+     original.planId!==route.planId||original.isRetired!==false)
+     throw Error('wrong_original_merchant')
+    clientId=original.clientId
+    clientSecret=original.clientSecret
+   }else{
+    const prefix='PAZO_F16_LIVE_G'+route.merchantGeneration+'_'
+    const enabled=await getSecret(prefix+'READ_ENABLED')
+    clientId=await getSecret(prefix+'CLIENT_ID')
+    clientSecret=await getSecret(prefix+'CLIENT_SECRET')
+    const pinnedPlan=await getSecret(prefix+'PLAN_ID')
+    if(enabled!=='1'||pinnedPlan!==route.planId)throw Error('key')
+   }
   }catch{return reply(503,'live_generation_unavailable')}
   let engine
   try{
