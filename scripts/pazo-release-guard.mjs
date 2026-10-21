@@ -83,7 +83,7 @@ assert.ok(!provisioningReservationDraft.includes('client_secret'),
  'Secret reservation must not store plaintext provider credentials')
 assert.match(provisioningEdge,/const RELEASE_APPROVED=false/,'Live secret endpoint must remain inert')
 assert.match(ui,/const LIVE_EDGE_PROVISIONING_RELEASED=false/,'Admin Live Edge must stay unreleased')
-assert.match(provisioningIntake,/if\(released!==true\)return deny\(503/,'Intake must reject while unreleased')
+assert.match(provisioningIntake,/if\(released!==true\)return deny\(req,503,'live_provisioning_not_released'\)/,'Intake must reject preflight or POST while unreleased')
 assert.match(stagingOrchestrator,/if\(released!==true\)return code\('edge_provisioning_not_released'\)/)
 assert.match(stagingOrchestrator,/reserveAttempt/,'Secret writes need server-side reservation')
 assert.match(stagingOrchestrator,/recordAttemptOutcome/,'Secret writes need durable audit')
