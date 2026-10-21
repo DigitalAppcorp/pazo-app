@@ -1,3 +1,42 @@
+## Continuidad Codex — 21-oct-2026, implementación local verificada
+
+Base de integración auditada por Git: F13 `669efafdb5678cae40c5137d7bddc9403c2ab8a3`;
+PR #66 `d1d34fa230c0928748141adf1f02adb186a99568` revisado: solo alinea el nombre
+de la migración de cancelación ya aplicada y su prueba, más el handoff. Se usó
+como base de `f16/beta-completion-20261021`, sin modificar `main` ni sobrescribir F13.
+No se pudo consultar estado/comentarios/CI de PR mediante API: proxy 403.
+
+Código adicional implementado: reanudación del CREATE original con lease y el
+mismo cuerpo/PayPal-Request-Id dentro de 48h; GET independiente antes del binding;
+reconciliación de cancelaciones inciertas por GET sin segundo POST; cierre de
+slots solo tras estado terminal verificado, sin eventos/cancelaciones pendientes
+ni cobertura sin vencer (incluidos holds); consentimiento nuevo para otro intento;
+descarga ES/EN de condiciones incluso tras cierre; acceso a gestión desde miembro
+verificado; aislamiento ante cambio de usuario; fondos/muro Live basados en períodos
+verificados; agregados administrativos sin saldo/ingreso neto inventado.
+
+Tres migraciones nuevas SOLO preparadas y probadas en PG17 desechable:
+`20261021210000` recovery finish, `20261021213000` cosméticos Live,
+`20261021220000` resumen financiero administrativo. NO instaladas en Supabase.
+La Edge de cuenta actualizada NO fue desplegada. Checkout/webhook siguen hard-OFF
+en el código. No hay cobros, nuevas credenciales ni publicación por estos cambios.
+
+Validación: suite local de gobernanza/F16, build y dist; PG17 con SQL real y
+rollback/reapply; navegador sintético 390/1440px, doble clic, cancelación explícita,
+fuente financiera no disponible y callbacks reales de la SPA sin tokens en URL.
+Estos resultados NO son PayPal Live, PWA instalada HTTPS ni CI remoto.
+
+**Bloqueo operativo actual:** red de APIs/host público devuelve CONNECT403;
+no hay herramientas ni autenticación Supabase/Vercel en esta sesión. Se guardó
+borrador de red añadiendo api.github.com, api.supabase.com, api.vercel.com y
+pazo-app-t83r.vercel.app sin borrar destinos. Guardar no aplica ni publica.
+Falta auditar source/versión alojados antes de instalar/desplegar; también falta
+terminar P4 (readiness y habilitación controlada Admin/DB/Edge), publicación HTTPS
+bajo GO y canary real autorizado. NO pedir claves PayPal todavía.
+No hacer push a ramas conectadas sin verificar primero Preview OFF/cuota.
+Ver informe de esta entrega: `docs/PAZO_CODEX_BETA_CONTINUATION_20261021.md`.
+**Estado global: NO-GO; no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY.**
+
 > **F16 vigente 21-oct:** plan y webhook generación1 YA aprobados; no repetir. PR54 a F13: ocho migraciones aplicadas para firma, venta/refund con ACK atómico, lifecycle, scheduler privado y monitor de disputas. Worker Edgev2,27/27 fuentes verificadas; cron automático200/healthy a16:27UTC con protocolo v2 y0 pagos/eventos/casos. Procesamiento financieroOFF/LiveOFF/killON. pg_net conserva grants de plataforma: net fuera de Data API y capacidad de un uso/120s, sin claves PayPal/servicio en cola. PG24/governance423 yCI3506/gateway423 PASS. Beneficios/checkout/readiness/HTTPS y resto P2–P5 pendientes; no declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. main intacto, claves solo al terminar ingeniería; cobros/publicación requieren GO.
 
 ## MANDATO EXPRESO DEL PRODUCT OWNER — BETA PAZO / PAYPAL LIVE (21 OCT 2026)

@@ -44,7 +44,7 @@ test('owner reads exact open slot, redacted of subscription, merchant and reques
  assert.equal(x.environment,'live')
  assert.equal(x.paidThrough,null)
  assert.equal(x.mayCharge,false)
- assert.deepEqual(x.accounts,[{intentId:intent,state:'pending',canDownloadAcceptance:false,
+ assert.deepEqual(x.accounts,[{intentId:intent,state:'pending',canDownloadAcceptance:true,
   needsReconciliation:false}])
  assert.deepEqual(calls,['owner','private'])
  for(const value of ['P-ABCDEFGHIJKLMN','providerOrigin','subscriptionId','requestKey',owner])
@@ -53,7 +53,7 @@ test('owner reads exact open slot, redacted of subscription, merchant and reques
 test('claimed request is review-only and closed history is not an active blocker',()=>{
  const claim={...row(),providerCreateClaimedAt:'2026-10-21T12:02:00Z'}
  assert.deepEqual(normalizePazoLiveOwnerSlots(slots([claim])),
-  [{intentId:intent,state:'pending',canDownloadAcceptance:false,
+  [{intentId:intent,state:'pending',canDownloadAcceptance:true,
    needsReconciliation:true}])
  assert.deepEqual(normalizePazoLiveOwnerSlots(slots([{
   ...row(),state:'abandoned',closedAt:'2026-10-21T12:10:00Z'}],null)),[])
@@ -106,11 +106,11 @@ test('Edge uses GoTrue and service-only SQL; browser selects only Live owner act
  const account=readFileSync(new URL('../../supporter/components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
  assert.match(index,/createPazoLiveGoTrueOwnerResolver/)
  assert.match(index,/pazo_f16_live_service_owner_checkouts_read/)
- assert.match(index,/const READONLY_RELEASED=true/)
+ assert.match(index,/const ACCOUNT_MANAGEMENT_RELEASED=true/)
  assert.doesNotMatch(index,/PAYPAL_CLIENT_SECRET|createSubscription/)
  assert.match(account,/pazo-paypal-live-account/)
  assert.match(account,/accounts\?\.length===0/)
- assert.match(account,/!\['list','status','cancel'\]\.includes/)
+ assert.match(account,/!\['list','status','cancel','resume','reconcile','abandon','acknowledgement'\]\.includes/)
  assert.match(account,/onClick=\{\(\) => void checkStatus\(account\.intentId\)\}/)
  assert.match(view,/LIVE_VAULT_SETUP_RELEASED=true/)
 })

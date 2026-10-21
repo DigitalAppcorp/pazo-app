@@ -13,6 +13,7 @@ type Props = {
  pet?:Pet
  milestone:SupporterMilestone
  qa:boolean
+ onManageSubscription?:()=>void
 }
 type IconName='paw'|'palette'|'heart'|'medal'|'card'
 const BenefitIcon=({name}: {name:IconName})=>{
@@ -27,7 +28,7 @@ const BenefitIcon=({name}: {name:IconName})=>{
   <path d={paths[name]}/>
  </svg>
 }
-export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
+export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSubscription}:Props) {
  const [showThemes,setShowThemes]=useState(false)
  const [showWall,setShowWall]=useState(false)
  const [showMembership,setShowMembership]=useState(false)
@@ -151,10 +152,11 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa}:Props) {
           </summary>
           <SandboxV2AccountPanel lang={lang}/>
         </details>}
-      </> : <p role="status" className={caption}>
-        {t('La administración de cobros reales sigue desactivada hasta el lanzamiento.',
-           'Live billing management remains unavailable until launch.')}
-      </p>}
+      </> : <button type="button" onClick={onManageSubscription}
+        disabled={!onManageSubscription}
+        className="min-h-11 rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-bold disabled:opacity-50">
+        {t('Administrar mi suscripción','Manage my subscription')}
+      </button>}
     </div>}
    </section>
    {showQaDiagnostics&&<details className="rounded-[24px] bg-[#F0F3ED] px-4 py-2">

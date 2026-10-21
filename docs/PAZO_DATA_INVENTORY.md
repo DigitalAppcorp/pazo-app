@@ -503,3 +503,19 @@ Prototipo de PostgreSQL descartable `paypal_subscription_intents`: identificador
 ### F16 — Migración financiera preparada, NO desplegada (2026-10-14)
 
 Se crearon en GitHub, exclusivamente como **migraciones NO aplicadas**, la inbox de eventos y las tablas privadas `paypal_subscription_intents`, `paypal_payment_entries` y `paypal_payment_reversals`, con IDs opacos de PayPal, UUID propietario, estado, plan USD 2.99, monto/currency, sellos temporales, y relación privada de evento-pago. Un SQL RPC server-only cierra evento+pago o evento+reverso en una transacción, sin cobertura, sin email PayPal, tarjetas, nombres, ubicación, IP, cuerpo de webhook ni credenciales. Los ensayos usan IDs sintéticos. Alojado: **no se están recolectando estos datos** porque no están instaladas las nuevas tablas. No se hizo ninguna petición real de creación de suscripción. La política de 90 días solo afecta IDs de webhook conciliados con hold levantado; **los plazos de intentos y registros financieros siguen sin aprobar**. Antes de lanzar, integrar F14 account deletion y justificar retención contable. Ver `docs/PAZO_F16_SANDBOX_RELEASE_GATE_20261014.md`.
+
+
+### Live: preferencias cosméticas y recuperación — preparado 21-oct-2026
+
+- Tabla nueva local `supporter_private.pazo_live_pet_themes`: pet UUID, owner UUID
+  al guardar, fondo enum y actualización; FORCE RLS, sin lectura/escritura directa
+  por roles cliente/servicio. RPC de escritura verifica Auth, propiedad y cobertura
+  real. Preferencia retirable después de expiry/hold; FK CASCADE de mascota/cuenta.
+- Recuperación utiliza columnas privadas existentes de request/lease, sin nueva
+  identidad, pagador o cuerpo de webhook. Respuestas públicas: intent PAZO, estados
+  cerrados y URL de aprobación oficial solo cuando corresponde; jamás secrets,
+  request key, owner ID o subscription ID. No analítica financiera nueva.
+- RPC administrativa: agregados de períodos, holds e intentos ya existentes;
+  ninguna tabla adicional de métricas, importación de saldos o datos de pagador.
+- Todo lo anterior está probado con fixtures; migraciones y Edge sin aplicar/
+  desplegar en esta ejecución. Los plazos financieros pendientes no se alteran.

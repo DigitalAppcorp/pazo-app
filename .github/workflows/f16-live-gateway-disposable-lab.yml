@@ -30,6 +30,15 @@ on:
       - 'scripts/f16-live-json-claims-disposable-lab.sql'
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-benefits-prerequisites-stage.mjs'
+      - 'scripts/f16-live-admin-finance-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_admin_finance_summary.sql'
+      - 'scripts/f16-live-cosmetic-benefits-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_cosmetic_benefits.sql'
+      - 'supabase/rollbacks/f16_live_cosmetic_benefits_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-owner-recovery-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_owner_recovery_finish.sql'
+      - 'supabase/rollbacks/f16_live_owner_recovery_finish_REVIEW_REQUIRED.sql'
       - 'scripts/f16-live-secret-provision-disposable-lab.sql'
       - 'supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql'
       - 'scripts/f16-live-admin-origin-disposable-lab.sql'
@@ -68,6 +77,15 @@ on:
       - 'scripts/f16-live-json-claims-disposable-lab.sql'
       - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
       - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-benefits-prerequisites-stage.mjs'
+      - 'scripts/f16-live-admin-finance-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_admin_finance_summary.sql'
+      - 'scripts/f16-live-cosmetic-benefits-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_cosmetic_benefits.sql'
+      - 'supabase/rollbacks/f16_live_cosmetic_benefits_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-owner-recovery-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_owner_recovery_finish.sql'
+      - 'supabase/rollbacks/f16_live_owner_recovery_finish_REVIEW_REQUIRED.sql'
       - 'scripts/f16-live-secret-provision-disposable-lab.sql'
       - 'supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql'
       - 'scripts/f16-live-admin-origin-disposable-lab.sql'
@@ -107,4 +125,5 @@ jobs:
           PGPASSWORD: synthetic-only-no-hosted-data
         run: |
           node scripts/f16-live-worker-scheduler-core-stage.mjs
+          node scripts/f16-live-benefits-prerequisites-stage.mjs
           psql -X -v ON_ERROR_STOP=1 -f scripts/f16-live-gateway-disposable-lab.sql

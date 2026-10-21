@@ -323,7 +323,7 @@ test('F16 member management does not flicker or close during background revalida
  assert.ok(hook.includes("supabase.auth.onAuthStateChange"))
  assert.ok(hook.includes("if(changed){setStatus(noStatus('checking'));refresh()}"))
  assert.ok(hook.includes(".catch(() => {if(!cancelled)setStatus(noStatus('unavailable'))})"))
- assert.ok(page.includes("if (membership.kind === 'verified')"))
+ assert.ok(page.includes("if (membership.kind === 'verified'&&!showLiveManagement)"))
  assert.ok(home.includes("setShowMembership(v=>!v)"))
  assert.ok(!hook.includes('mayGrantBenefits:true'))
 })

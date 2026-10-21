@@ -60,21 +60,29 @@ export function createPaypalLiveSubscriptionProvider({clientId,clientSecret,plan
   return response.access_token
  }
  const headers=token=>({Authorization:'Bearer '+token,Accept:'application/json'})
+ const originalCreate=async({intentId,requestKey}={})=>{
+  if(!INTENT.test(intentId||'')||!UUID.test(requestKey||''))
+   throw Error('live_idempotent_intent_unverified')
+  const token=await auth()
+  return apiJson(fetchImpl,'/v1/billing/subscriptions',{
+   method:'POST',headers:{...headers(token),'content-type':'application/json',
+    'PayPal-Request-Id':requestKey},
+   body:JSON.stringify({plan_id:planId,custom_id:intentId,
+    application_context:{return_url:origin+'/paypal/return',
+     cancel_url:origin+'/paypal/cancel',user_action:'SUBSCRIBE_NOW',
+     shipping_preference:'NO_SHIPPING'}})
+  })
+ }
+ const readDetail=async subscriptionId=>{
+  if(!SUB.test(subscriptionId||''))throw Error('live_subscription_id_invalid')
+  const token=await auth()
+  return apiJson(fetchImpl,'/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId),{
+   method:'GET',headers:headers(token)
+  })
+ }
  return Object.freeze({
   async createSubscription({intentId,requestKey}={}){
-   if(!INTENT.test(intentId||'')||!UUID.test(requestKey||''))
-    throw Error('live_idempotent_intent_unverified')
-   const token=await auth()
-   const created=await apiJson(fetchImpl,'/v1/billing/subscriptions',{
-    method:'POST',headers:{...headers(token),'content-type':'application/json',
-     'PayPal-Request-Id':requestKey},
-    body:JSON.stringify({
-     plan_id:planId,custom_id:intentId,
-     application_context:{return_url:origin+'/paypal/return',
-      cancel_url:origin+'/paypal/cancel',user_action:'SUBSCRIBE_NOW',
-      shipping_preference:'NO_SHIPPING'}
-    })
-   })
+   const created=await originalCreate({intentId,requestKey})
    if(!SUB.test(created.id||'')||
       created.status!=='APPROVAL_PENDING'||
       !Array.isArray(created.links))
@@ -86,15 +94,28 @@ export function createPaypalLiveSubscriptionProvider({clientId,clientSecret,plan
     approvalUrl:approval[0],entitlement:false})
   },
   async readSubscription(subscriptionId){
-   if(!SUB.test(subscriptionId||''))throw Error('live_subscription_id_invalid')
-   const token=await auth()
-   const d=await apiJson(fetchImpl,
-    '/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId),{
-     method:'GET',headers:headers(token)
-    })
+   const d=await readDetail(subscriptionId)
    if(d.id!==subscriptionId)return null
    return Object.freeze({id:d.id,plan_id:d.plan_id,custom_id:d.custom_id,
     status:d.status})
+  },
+  // Only the recovery coordinator may call this, after a durable original
+  // request lease within 48h (inside PayPal's 72h idempotency retention).
+  // The request body AND PayPal-Request-Id are identical to the first POST.
+  // There is no automatic retry and this response is never payment proof.
+  async recoverOriginalCreate({intentId,requestKey}={}){
+   const d=await originalCreate({intentId,requestKey})
+   if(!SUB.test(d.id||''))throw Error('live_recovery_response_unverified')
+   return Object.freeze({subscriptionId:d.id})
+  },
+  async readCheckout(subscriptionId){
+   const d=await readDetail(subscriptionId)
+   if(d.id!==subscriptionId)return null
+   const links=Array.isArray(d.links)?d.links.filter(x=>x?.rel==='approve'):[]
+   const approvalUrl=links.length===1&&validLiveApprovalUrl(links[0]?.href)
+    ?links[0].href:null
+   return Object.freeze({id:d.id,plan_id:d.plan_id,custom_id:d.custom_id,
+    status:d.status,approvalUrl})
   },
   // Caller MUST first durably claim the owner's cancellation in SQL.
   // POST can have succeeded even when the network response is lost, so this

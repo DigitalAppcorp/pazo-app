@@ -1,6 +1,7 @@
 import { useCallback,useEffect,useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AdminPayPalSettings } from './AdminPayPalSettings'
+import {AdminLiveFinanceSummary} from './AdminLiveFinanceSummary'
 import { AdminGlyph,AdminDonut,AdminCohortColumns,AdminModuleRings,type AdminGlyphName } from './AdminVisuals'
 import {
  adminOverview,adminUsers,adminExperiments,adminVoters,adminAudience,
@@ -495,9 +496,9 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </div>
      </>}
      {section==='finance'&&<>
-      <Note>{l('Sandbox es dinero ficticio. Una solicitud de pago sin período verificado NO prueba abandono ni cobro. PayPal Live no está integrado como libro contable en este panel.','Sandbox is fictional money. An unverified attempt does NOT prove abandonment or payment. PayPal Live is not reconciled in this view.')}</Note>
+      <AdminLiveFinanceSummary lang={lang}/>
+      <Note>{l('Sandbox es dinero ficticio. Una solicitud sin período verificado no prueba abandono ni cobro. Las cifras Sandbox se muestran separadas del registro Live.','Sandbox is fictional money. An unverified request does not prove abandonment or payment. Sandbox figures are separate from the Live ledger.')}</Note>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-       <Stat label={l('Recaudación real confirmada','Confirmed real revenue')} value={l('Sin fuente Live','No Live source')} note={l('No inventar US$0 como total externo','Not a merchant statement')}/>
        <Stat label={l('Sandbox · bruto verificado','Sandbox · verified gross')} value={money(overview.support.sandbox_gross_minor)}/>
        <Stat label={l('Personas con período Sandbox','Accounts with Sandbox period')} value={overview.support.sandbox_paid_accounts}/>
        <Stat label={l('Cobertura Sandbox vigente','Current Sandbox coverage')} value={overview.support.sandbox_covered_accounts}/>

@@ -290,3 +290,24 @@ La recepción de un email o una solicitud en la app **no equivale a eliminación
 ## Entidad operadora — decisión PO (2026-10-10)
 
 El Product Owner identifica **Alvarado Solutions LLC** como la empresa registrada bajo la cual opera PAZO. Se permite atribuir públicamente al operador de PAZO este nombre en **borradores** de Privacidad y Términos en español e inglés. El PO confirmó **California** como estado de registro; no consta revisión independiente del registro público ni domicilio registral proporcionado. No inventar dirección, agente registrado ni otros datos de identificación. El canal público autorizado es `appdigital.corp@gmail.com`. **La entidad legal y el buzón son conceptos distintos**, no implican permisos extra para cuentas Auth ni una certificación del proceso de bajas. `LEGAL_RELEASE_READY` permanece falso hasta validar tratamientos, retención y procedimiento real de eliminación para la beta pública.
+
+
+## Preferencias y gestión Live — preparación Codex 21-oct-2026
+
+Tres migraciones locales, no aplicadas: recuperación de vínculos originales,
+preferencias cosméticas y agregados admin. La recuperación usa únicamente la
+misma intención/generación/consentimiento y sus columnas de lease ya existentes;
+no hace inventario de otros compradores, no guarda cuerpo PayPal, no registra
+tokens y no modifica períodos financieros. La constancia descargada contiene
+solo oferta original y fecha de aceptación, sin ID PayPal, owner o request key.
+
+`supporter_private.pazo_live_pet_themes` conserva únicamente mascota, propietario
+al elegir, enum de fondo y fecha de actualización. Se separa de Sandbox, se
+oculta al perder cobertura o cambiar propietario y se elimina al quitar la
+preferencia o borrar mascota/cuenta (FK CASCADE). No cambia la retención del
+ledger. Muro requiere el opt-in separado ya existente y permite revocarlo tras
+expirar o recibir un hold. No habilita telemetría nueva.
+
+El resumen financiero es una RPC autenticada que revalida `pazo_is_admin()` y
+solo devuelve conteos/importes agregados de evidencia PAZO, sin identidad de
+comprador o proveedor. No es saldo, ingresos netos ni estado de cuenta PayPal.

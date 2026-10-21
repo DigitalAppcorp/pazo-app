@@ -27,8 +27,10 @@ type AccountResult = {
   ok?: boolean
   code?: string
   accounts?: Account[]
+  acceptances?: {intentId:string;acceptedAt:string}[]
   providerStatus?: string
   cancelled?: boolean
+  approvalUrl?: string
   paidThrough?: null
 }
 type Props = {lang: 'es' | 'en'; onClose: () => void; pet?: Pet}
@@ -40,12 +42,34 @@ const qaV2Screen = import.meta.env.DEV &&
 const intentPattern = /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [accounts, setAccounts] = useState<Account[] | null>(null)
+  const [acceptances,setAcceptances]=useState<{intentId:string;acceptedAt:string}[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
   const [cancelDone, setCancelDone] = useState<string | null>(null)
   const [cancelReview, setCancelReview] = useState<string | null>(null)
+  const [showLiveManagement,setShowLiveManagement] = useState(false)
+  const [recoveryMessage,setRecoveryMessage] = useState<string|null>(null)
+  const operationInFlight=useRef(false)
+  const accountEpoch=useRef(0)
+  const [accountRevision,setAccountRevision]=useState(0)
+  useEffect(()=>{
+    let lastOwner:string|null|undefined
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{
+      const nextOwner=session?.user?.id??null
+      if(lastOwner!==undefined&&lastOwner!==nextOwner){
+        accountEpoch.current++
+        operationInFlight.current=false
+        setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
+        setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
+        setRecoveryMessage(null);setShowLiveManagement(false)
+        setAccountRevision(n=>n+1)
+      }
+      lastOwner=nextOwner
+    })
+    return ()=>subscription.unsubscribe()
+  },[])
   // An authenticated, already-bound V2 attempt must be managed, never offered a new request key.
   const [qaV2AccountState,setQaV2AccountState] = useState<'checking'|'none'|'pending'|'bound'|'unavailable'>('checking')
   const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
@@ -130,22 +154,27 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
 
   useEffect(() => {
     // Member home owns its own close/keyboard handling.
-    if (membership.kind === 'verified') return
+    if (membership.kind === 'verified'&&!showLiveManagement) return
     closeRef.current?.focus()
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !busy) onClose()
+      if (event.key === 'Escape' && !busy) {
+        if(showLiveManagement)setShowLiveManagement(false)
+        else onClose()
+      }
     }
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [busy, onClose, membership.kind])
+  }, [busy, onClose, membership.kind,showLiveManagement])
 
   const call = async (body: Record<string, unknown>, download = false) => {
+    const epoch=accountEpoch.current
     const config = getPublicSupabaseConfig(import.meta.env)
     if (!config || config.url !== host) throw Error('configuration_missing')
     const { data: {session}, error: sessionError } = await supabase.auth.getSession()
     // getSession here is ONLY for obtaining bearer; backend verifies getUser().
     if (sessionError || !session?.access_token) throw Error('authentication_required')
-    if(!qaV2Screen && !['list','status','cancel'].includes(String(body.action)))
+    if(epoch!==accountEpoch.current)throw Error('account_changed')
+    if(!qaV2Screen && !['list','status','cancel','resume','reconcile','abandon','acknowledgement'].includes(String(body.action)))
       throw Error('live_management_not_released')
     const endpoint=qaV2Screen?'f16-paypal-supporter-account':'pazo-paypal-live-account'
     const response = await fetch(config.url + '/functions/v1/' + endpoint, {
@@ -159,14 +188,17 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       cache: 'no-store',
     })
     if (!response.ok) throw Error('server_confirmation_missing')
+    if(epoch!==accountEpoch.current)throw Error('account_changed')
     if (download) return response
     const data = await response.json() as AccountResult
+    if(epoch!==accountEpoch.current)throw Error('account_changed')
     if (!data || data.ok !== true || data.paidThrough !== null)
       throw Error('server_response_untrusted')
     return data
   }
 
   const refresh = async () => {
+    const epoch=accountEpoch.current
     setBusy(true)
     setError(false)
     try {
@@ -176,39 +208,92 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           !['pending','bound'].includes(a.state) ||
           typeof a.canDownloadAcceptance !== 'boolean'))
         throw Error('account_list_invalid')
-      setAccounts(data.accounts)
-    } catch { setError(true); setAccounts(null) }
-    finally { setBusy(false) }
+      const history=data.acceptances??[]
+      if(!Array.isArray(history)||history.length>20||history.some(a=>
+        !intentPattern.test(a?.intentId||'')||typeof a.acceptedAt!=='string'||
+        !Number.isFinite(Date.parse(a.acceptedAt))))throw Error('acceptance_history_invalid')
+      if(epoch===accountEpoch.current){setAccounts(data.accounts);setAcceptances(history)}
+    } catch { if(epoch===accountEpoch.current){setError(true);setAccounts(null)} }
+    finally { if(epoch===accountEpoch.current)setBusy(false) }
   }
-  useEffect(() => { if (!qaV2Screen) void refresh() }, [])
+  useEffect(() => { if (!qaV2Screen) void refresh() }, [accountRevision])
 
   const checkStatus = async (intentId: string) => {
+    const epoch=accountEpoch.current
     setBusy(true)
     setError(false)
     try {
       const data = await call({action:'status',intentId}) as AccountResult
+      if(epoch!==accountEpoch.current)return
       if (typeof data.providerStatus !== 'string')
         throw Error('provider_status_missing')
       setStatus(current => ({...current,[intentId]:data.providerStatus!}))
+      if(data.providerStatus==='CANCELLED'&&data.cancelled===true){
+        setCancelDone(intentId);setCancelReview(null)
+        setAccounts(current=>current?.map(a=>a.intentId===intentId?
+          {...a,cancelInReview:false}:a)??null)
+      }
       setCancelConfirm(null)
-    } catch {setError(true)} finally {setBusy(false)}
+    } catch {if(epoch===accountEpoch.current)setError(true)}
+    finally {if(epoch===accountEpoch.current)setBusy(false)}
   }
 
   const cancel = async (intentId: string) => {
+    const epoch=accountEpoch.current
+    if(operationInFlight.current)return
+    operationInFlight.current=true
     setBusy(true)
     setError(false)
     setCancelReview(null)
     try {
       const data = await call({action:'cancel',intentId,confirmCancellation:true}) as AccountResult
+      if(epoch!==accountEpoch.current)return
       if (data.code !== 'future_renewals_cancelled' || data.cancelled !== true)
         throw Error('paypal_cancellation_unconfirmed')
       setCancelDone(intentId)
       setCancelConfirm(null)
       setStatus(current=>({...current,[intentId]:'CANCELLED'}))
-    } catch {setError(true);setCancelReview(intentId)} finally {setBusy(false)}
+    } catch {if(epoch===accountEpoch.current){setError(true);setCancelReview(intentId)}} finally {
+      if(epoch===accountEpoch.current){operationInFlight.current=false;setBusy(false)}
+    }
+  }
+
+  const recover = async (intentId:string,action:'resume'|'reconcile'|'abandon') => {
+    const epoch=accountEpoch.current
+    if(operationInFlight.current)return
+    operationInFlight.current=true
+    setBusy(true);setError(false);setRecoveryMessage(null)
+    let released=false
+    try{
+      const data=await call({action,intentId}) as AccountResult
+      if(epoch!==accountEpoch.current)return
+      if(data.code==='live_original_approval_ready'){
+        const target=new URL(data.approvalUrl||'')
+        if(target.protocol!=='https:'||target.hostname!=='www.paypal.com'||
+          target.username||target.password||target.port||target.hash||
+          target.pathname!=='/webapps/billing/subscriptions'||
+          target.searchParams.size!==1||!target.searchParams.get('ba_token'))
+          throw Error('untrusted_approval_url')
+        window.location.assign(target.toString())
+      }else if(data.code==='live_checkout_slot_released'){
+        released=true
+        setRecoveryMessage(label('El intento anterior terminó. Para iniciar otro, acepta nuevamente las condiciones.',
+          'The earlier request has ended. Accept the terms again to start another.'))
+      }else if(data.code==='live_original_subscription_verified'&&
+        ['ACTIVE','APPROVED','SUSPENDED','CANCELLED','EXPIRED'].includes(data.providerStatus||'')){
+        setStatus(current=>({...current,[intentId]:data.providerStatus!}))
+        refreshMembership()
+      }else throw Error('recovery_unverified')
+    }catch{
+      if(epoch!==accountEpoch.current)return
+      setRecoveryMessage(label('No pudimos confirmar el intento anterior. No iniciamos otra suscripción; comprueba su estado antes de continuar.',
+        'We could not verify the earlier request. We did not start another subscription; check its status before continuing.'))
+    }finally{if(epoch===accountEpoch.current){operationInFlight.current=false;setBusy(false)}}
+    if(released&&epoch===accountEpoch.current)await refresh()
   }
 
   const download = async (intentId: string) => {
+    const epoch=accountEpoch.current
     setBusy(true)
     setError(false)
     try {
@@ -216,6 +301,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       if (!response.headers.get('content-type')?.startsWith('text/plain'))
         throw Error('unexpected_acknowledgement_type')
       const content = await response.text()
+      if(epoch!==accountEpoch.current)return
       if (content.length < 100 || content.length > 16000)
         throw Error('acknowledgement_untrusted')
       const href = URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'}))
@@ -229,12 +315,14 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         link.remove()
         URL.revokeObjectURL(href)
       }, 1500)
-    } catch {setError(true)} finally {setBusy(false)}
+    } catch {if(epoch===accountEpoch.current)setError(true)}
+    finally {if(epoch===accountEpoch.current)setBusy(false)}
   }
 
   const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]/55 disabled:opacity-50'
-  if (membership.kind === 'verified') {
+  if (membership.kind === 'verified'&&!showLiveManagement) {
     return <SupporterBenefitsHome lang={lang} onClose={onClose} pet={pet}
+      onManageSubscription={()=>setShowLiveManagement(true)}
       milestone={membership.milestone} qa={qaV2Screen}/>
   }
   return (
@@ -248,7 +336,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
 
       <header hidden={preparing} style={{display:preparing?'none':undefined}} className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
         <div className="mx-auto grid min-h-11 max-w-xl grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
-          <button ref={closeRef} type="button" onClick={onClose} disabled={busy}
+          <button ref={closeRef} type="button" onClick={()=>{
+            if(showLiveManagement)setShowLiveManagement(false)
+            else onClose()
+          }} disabled={busy}
             aria-label={label('Volver a PAZO','Back to PAZO')}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.06)] hover:bg-[#E7EDDC] focus-visible:bg-[#E1E53F]/50">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none"
@@ -277,8 +368,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         {membership.kind === 'inactive' && <>
           {paypalReturnKind&&<p role="status" className="mx-auto mb-3 max-w-[420px] rounded-[16px] bg-[#EBF1E5] px-4 py-3 text-center text-[13px] font-medium leading-relaxed text-[#204E4A]">
             {paypalReturnKind==='cancel'
-              ?label('Regresaste de PayPal sin completar el pago. Tu cuenta sigue igual; puedes volver a intentarlo.',
-                'You returned from PayPal without completing payment. Your account is unchanged; you can try again.')
+              ?label('Regresaste de PayPal sin completar el pago. Primero comprobaremos el intento anterior antes de ofrecer otro.',
+                'You returned from PayPal without completing payment. We will verify the earlier request before offering another.')
               :label('Volviste de PayPal. Estamos comprobando el resultado; la membresía solo se activará si se verifica el pago.',
                 'You returned from PayPal. We are checking the result; membership activates only when payment is verified.')}
           </p>}
@@ -354,7 +445,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
           </button>
         </>}
-        {(qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
+        {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#F0F4E6] p-4 text-sm">{recoveryMessage}</p>}
+        {(showLiveManagement || acceptances.length>0 || qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
           <details open={qaManagementOpen} onToggle={e=>setQaManagementOpen(e.currentTarget.open)}
             className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
@@ -386,7 +478,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   <h4 className="text-base font-extrabold">{label('Suscripción de apoyo','Support subscription')}</h4>
                   <p className="text-sm text-[#5C7470]">
                     {account.state === 'bound'
-                      ? label('Vinculada a PayPal; período pagado no verificado.', 'Linked to PayPal; paid period unverified.')
+                      ? membership.kind==='verified'
+                        ?label('Tu cobertura pagada verificada se conserva hasta su vencimiento.',
+                          'Your verified paid coverage remains until expiry.')
+                        :label('Vinculada a PayPal; período pagado no verificado.', 'Linked to PayPal; paid period unverified.')
                       : label('Solicitud pendiente de revisión', 'Pending review')}
                   </p>
                   {status[account.intentId] && <p role="status" className="text-sm">
@@ -400,8 +495,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                     {account.needsReconciliation
                       ? label('PayPal todavía está conciliando esta solicitud. No inicies otra.',
                         'PayPal is still reconciling this request. Do not start another.')
-                      : label('La gestión Live de renovaciones está en preparación. Puedes administrar pagos automáticos desde PayPal mientras tanto.',
-                        'Live renewal management is being prepared. You can manage automatic payments in PayPal in the meantime.')}
+                      : label('Consulta el estado original de PayPal para administrar esta suscripción. Cancelar renovaciones no solicita un reembolso.',
+                        'Check the original PayPal status to manage this subscription. Cancelling renewals does not request a refund.')}
                   </p>}
                   {!qaV2Screen && (account.cancelInReview||
                     cancelReview===account.intentId) && <p role="alert"
@@ -418,9 +513,21 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                     {account.state === 'bound' && <button type="button" disabled={busy}
                       onClick={() => void checkStatus(account.intentId)} className={control}>
                       {label('Actualizar estado','Refresh status')}</button>}
-                    {qaV2Screen && account.canDownloadAcceptance && <button type="button" disabled={busy}
+                    {account.canDownloadAcceptance && <button type="button" disabled={busy}
                       onClick={() => void download(account.intentId)} className={control}>
                       {label('Descargar condiciones aceptadas','Download accepted terms')}</button>}
+                    {!qaV2Screen&&(account.state==='pending'||status[account.intentId]==='APPROVAL_PENDING')&&
+                      <button type="button" disabled={busy} className={control}
+                        onClick={()=>void recover(account.intentId,'resume')}>
+                        {label('Continuar solicitud anterior','Continue earlier request')}</button>}
+                    {!qaV2Screen&&account.state==='pending'&&!account.needsReconciliation&&
+                      <button type="button" disabled={busy} className={control}
+                        onClick={()=>void recover(account.intentId,'abandon')}>
+                        {label('Descartar solicitud sin enviar','Discard unsent request')}</button>}
+                    {!qaV2Screen&&['CANCELLED','EXPIRED'].includes(status[account.intentId]||'')&&
+                      <button type="button" disabled={busy} className={control}
+                        onClick={()=>void recover(account.intentId,'reconcile')}>
+                        {label('Comprobar si puedo volver a suscribirme','Check whether I can subscribe again')}</button>}
                     {account.state === 'bound' &&
                       (qaV2Screen ? status[account.intentId] !== 'CANCELLED' :
                         ['ACTIVE','SUSPENDED'].includes(status[account.intentId]||'') &&
@@ -440,6 +547,16 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   </div>}
                 </div>
               ))}
+              {acceptances.length>0&&<details className="rounded-2xl bg-[#F0F4E6] p-4">
+                <summary className="min-h-11 cursor-pointer py-2 text-sm font-bold">
+                  {label('Condiciones de solicitudes anteriores','Earlier accepted terms')}</summary>
+                <div className="space-y-2">{acceptances.map(item=><button key={item.intentId}
+                  type="button" disabled={busy} className={control}
+                  onClick={()=>void download(item.intentId)}>
+                  {label('Descargar condiciones aceptadas: ','Download accepted terms: ')}
+                  {new Date(item.acceptedAt).toLocaleDateString(lang==='es'?'es-US':'en-US')}
+                </button>)}</div>
+              </details>}
             </>
           )}
           </details>
