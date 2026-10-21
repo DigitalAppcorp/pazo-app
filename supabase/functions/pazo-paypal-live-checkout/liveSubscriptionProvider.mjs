@@ -95,7 +95,7 @@ export function createPaypalLiveSubscriptionProvider({clientId,clientSecret,plan
    if(d.id!==subscriptionId)return null
    return Object.freeze({id:d.id,plan_id:d.plan_id,custom_id:d.custom_id,
     status:d.status})
-  ,
+  },
   // Caller MUST first durably claim the owner's cancellation in SQL.
   // POST can have succeeded even when the network response is lost, so this
   // method never retries. Caller must independently GET and reconcile.
