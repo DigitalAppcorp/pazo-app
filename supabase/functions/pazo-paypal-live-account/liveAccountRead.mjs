@@ -45,11 +45,16 @@ export function normalizePazoLiveOwnerSlots(raw){
    !(entry.providerStatus===null||
     (typeof entry.providerStatus==='string'&&/^[A-Z_]{2,35}$/.test(entry.providerStatus)))||
    !(entry.providerCreateClaimedAt===null||typeof entry.providerCreateClaimedAt==='string')||
-   !(entry.subscriptionId===null||typeof entry.subscriptionId==='string')
+   !(entry.subscriptionId===null||typeof entry.subscriptionId==='string')||
+   !(entry.cancelState==null||['claimed','confirmed','review_required'].includes(entry.cancelState))
   )throw Error('untrusted_owner_slots')
   open.push({intentId:entry.intentId,state:entry.state,
    canDownloadAcceptance:false,
-   needsReconciliation:entry.state==='pending'&&entry.providerCreateClaimedAt!==null})
+   needsReconciliation:entry.state==='pending'&&entry.providerCreateClaimedAt!==null,
+   ...(entry.cancelState!=null ?{
+    cancelInReview:entry.cancelState==='claimed'||entry.cancelState==='review_required',
+    cancelConfirmed:entry.cancelState==='confirmed'
+   }:{})})
  }
  if(open.length>1||
   (open.length===0&&raw.currentIntentId!==null)||
