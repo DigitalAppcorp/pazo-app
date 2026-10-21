@@ -286,3 +286,4 @@ END $overlap$;
 \i scripts/f16-live-dispute-monitor-disposable-lab.sql
 \i scripts/f16-live-immutable-offer-disposable-lab.sql
 \i scripts/f16-live-owner-slot-disposable-lab.sql
+\i scripts/f16-live-cancel-finish-disposable-lab.sql
