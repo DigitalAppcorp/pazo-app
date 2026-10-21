@@ -23,7 +23,7 @@ export function createPazoLiveGenerationPinnedWebhook({
    return error(400,'invalid_request')
   let url
   try{url=new URL(request.url)}catch{return error(400,'invalid_request_url')}
-  if(url.pathname!=='/functions/v1/pazo-paypal-live-webhook'||
+  if(!new Set(['/functions/v1/pazo-paypal-live-webhook','/pazo-paypal-live-webhook']).has(url.pathname)||
    url.searchParams.size!==1||url.searchParams.getAll('generation').length!==1||
    url.hash!==''||!HINT.test(url.searchParams.get('generation')||''))
    return error(400,'invalid_merchant_generation_hint')
