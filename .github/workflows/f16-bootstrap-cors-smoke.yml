@@ -42,4 +42,18 @@ jobs:
           if(response.status!==204||allowOrigin!==origin||
             !allowMethods.includes('POST')||!allowHeaders.toLowerCase().includes('authorization'))
             process.exitCode=1
+          // A blocked origin must not receive an Access-Control-Allow-Origin.
+          const unauthorized=await fetch(endpoint,{
+            method:'OPTIONS',
+            headers:{origin:'https://untrusted.invalid',
+              'access-control-request-method':'POST'},
+            signal:AbortSignal.timeout(10000)
+          })
+          console.log(JSON.stringify({
+            deniedOriginStatus:unauthorized.status,
+            deniedOriginAllowed:unauthorized.headers.has('access-control-allow-origin')
+          }))
+          if(unauthorized.status!==403||
+             unauthorized.headers.has('access-control-allow-origin'))
+            process.exitCode=1
           NODE
