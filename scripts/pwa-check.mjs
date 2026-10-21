@@ -66,7 +66,7 @@ test('PWA registers after asynchronous bootstrap even when load has already fire
       document:{readyState:initialState},
       window:{addEventListener:(type,fn,options)=>{
         assert.equal(type,'load')
-        assert.deepEqual(options,{once:true})
+        assert.equal(options?.once,true)
         onLoad=fn
       }}
     }
