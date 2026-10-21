@@ -1,6 +1,6 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
-## Checkpoint posterior a Codex — 21-oct-2026, 03:2x UTC
+## Checkpoint posterior a Codex — 21-oct-2026 UTC
 
 **Trabajo ejecutado por ChatGPT tras agotarse créditos de Codex; F16 aún NO-GO.**
 La rama `f13/section-titles-20261012` y el PR #44 permanecen abiertos; no se
