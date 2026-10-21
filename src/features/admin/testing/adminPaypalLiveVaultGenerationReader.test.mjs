@@ -39,7 +39,7 @@ test('cross-environment, wrong generation, malformed credentials and absent reco
  }
  assert.equal(hits,0)
  for(const mismatch of [{generation:2},{credentialSource:'edge_secrets'},
-  {planId:'P-OTHER1234567890123'},{clientSecret:'short'},
+  {planId:'bad'},{clientSecret:'short'},
   {sourceEnvironment:'sandbox'}]){
   const reader=createPazoLiveVaultGenerationSecretReader({supabaseUrl:url,
    serviceRoleKey:key,fetchImpl:async()=>response({...entry(),...mismatch})})
