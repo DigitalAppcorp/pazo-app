@@ -60,7 +60,8 @@ export function createPazoLiveCheckoutHttpHandler({
   // Never read private generation secrets for an owner who has not passed
   // the application's server-only checkout admission.
   let admitted=false
-  try{admitted=(await admit({ownerId,action:'live_checkout'}))===true}
+  try{admitted=(await admit({ownerId,action:'live_checkout',
+   requestKey:body.consent.requestKey,merchantGeneration:route.merchantGeneration}))===true}
   catch{return reply(503,'checkout_admission_unavailable')}
   if(!admitted)return reply(409,'checkout_admission_denied')
   let clientId,clientSecret
