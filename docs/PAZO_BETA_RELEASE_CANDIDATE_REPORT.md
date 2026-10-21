@@ -5,8 +5,11 @@ Fecha: 2026-10-20, America/Guatemala. **Dictamen: NO-GO. No es una beta terminad
 Checkpoint actual: generación 1 real reservada y única, lector de ventas original
 instalado; ambos selectores Live OFF. PO aportó Webhook ID candidato, todavía sin
 verificación API. Nuevo canal efímero de comprobación plan/webhook: 20 tests
-dirigidos, PG17 y verify:prepreview PASS; CI del nuevo código e instalación
-pendientes. No guarda claves ni prueba identidad merchant, firma o entrega.
+dirigidos, PG17 y verify:prepreview PASS; bdf31649 CI9/9 SUCCESS. Migración real
+20261021021050 y endpoint ACTIVEv1/JWTtrue instalados/verificados; ocho fuentes
+coinciden, OPTIONS permitido204, origen ajeno403, sin JWT401. Falta la consulta
+autenticada del PO con claves solo en el formulario privado. No guarda claves
+ni prueba identidad merchant, firma o entrega.
 HEAD previo cd9d56cc9a05165bb8fa2f2c4f74dc528a679e64: 9/9 workflows SUCCESS.
 El historial siguiente distingue hitos anteriores; el handoff conserva el estado
 más reciente. No existe todavía candidato final aceptado ni beta publicada.

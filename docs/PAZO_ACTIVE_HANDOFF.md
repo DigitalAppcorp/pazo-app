@@ -1,6 +1,6 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
-## En curso — comprobación privada de plan y webhook
+## HOSTED PASS — comprobación privada de plan y webhook; acción PO pendiente
 
 El PO entregó Webhook ID; conservado exactamente como candidato local de generación
 1, **sin validación API todavía**. No crear webhook, plan o reserva otra vez.
@@ -8,12 +8,25 @@ Consulta actual: reserva 1 única reserved, merchant Live0, sandbox/Live OFF/kil
 HEAD anterior cd9d56cc9a05165bb8fa2f2c4f74dc528a679e64 confirmado 9/9 workflows SUCCESS;
 PR44 OPEN/DRAFT y previews automáticas OFF.
 
-Preparado `pazo-admin-paypal-live-inspect`: GoTrue+admin+MFA reciente, claves
+Instalado `pazo-admin-paypal-live-inspect` ACTIVE v1/JWT obligatorio: GoTrue+admin+MFA reciente, claves
 efímeras introducidas solo en Admin, GET de recursos y registro de metadata tras
 verificar plan y URL/eventos exactos. No guarda/devuelve claves, finaliza merchant
 ni activa cobros. 20 pruebas dirigidas PASS, PG17 roles/rollback PASS,
-verify:prepreview PASS. Migración pendiente de CI e instalación: no pedir claves
-antes del postflight. Ver `PAZO_F16_LIVE_RESOURCE_INSPECTION_20261020.md`.
+verify:prepreview PASS. Código bdf316495c08045b845b79d3b31f2c419c2f426e: CI9/9 SUCCESS
+(CI39531396500/LiveGateway39531396475). Migración aplicada UNA vez con ID real
+20261021021050, SQL SHA392f887b3f457a14f2cafa3fb27955fc38ca0d7492c9299d07cc3d0a526c7da7;
+dos RPC service-only, ACL/owner/search_path verificados. Lectura alojada READ ONLY
+con rol service_role confirma reserva1; 0 nuevos resource audits/secret attempts/
+merchant Live. Ocho fuentes Edge idénticas al commit. HTTPS OPTIONSlocalhost204,
+origen ajeno403, POST sin JWT401. Clon PO actualizado a bdf31649 preservando lockfile
+previo y Vite sirve formulario HTTP200. Ajuste posterior de recarga silenciosa
+preserva confirmación visible tras éxito; no cambia backend. Ver procedimiento.
+
+PO pendiente: recargar localhost5173, Admin→Configuración→PayPal→Live, TOTP reciente
+solo dentro de PAZO, nueva sección Comprobar plan y webhook Live. Debe mostrar
+generación1; introducir Webhook ID comunicado y claves de app Pazo Live solo en
+el formulario privado, pulsar Comprobar sin guardar claves y devolver texto/código.
+No reservar otra vez ni generar pagos/eventos. No pedir credenciales en chat.
 Aceptación visual del control, API real, identidad merchant y firma/custodia/worker
 siguen pendientes. Estos datos prevalecen sobre los checkpoints históricos.
 

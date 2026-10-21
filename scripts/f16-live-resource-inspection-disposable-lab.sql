@@ -21,7 +21,7 @@ ALTER TABLE admin_private.paypal_gateway_change_log ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON admin_private.paypal_gateway_change_log FROM PUBLIC,anon,authenticated,service_role;
 UPDATE admin_private.paypal_gateway_settings SET webhook_id='',
  return_origin='https://pazo-app-t83r.vercel.app' WHERE environment='live';
-\i supabase/migrations/20261021015708_pazo_f16_live_resource_inspection.sql
+\i supabase/migrations/20261021021050_pazo_f16_live_resource_inspection.sql
 BEGIN;
 SET LOCAL ROLE service_role;
 SELECT set_config('request.jwt.claims','{"role":"service_role"}',true);
@@ -94,7 +94,7 @@ DO $deny$ BEGIN
 END $deny$;
 ROLLBACK;
 \i supabase/rollbacks/f16_live_resource_inspection_REVIEW_REQUIRED.sql
-\i supabase/migrations/20261021015708_pazo_f16_live_resource_inspection.sql
+\i supabase/migrations/20261021021050_pazo_f16_live_resource_inspection.sql
 DO $final$ BEGIN
  IF (SELECT count(*) FROM admin_private.paypal_gateway_change_log)<>1
  THEN RAISE EXCEPTION 'Rollback lost audit'; END IF;

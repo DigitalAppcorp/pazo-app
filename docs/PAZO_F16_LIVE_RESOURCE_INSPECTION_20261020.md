@@ -21,14 +21,19 @@ auditoría. Validación global sigue `not_verified`; reserva sigue `reserved`.
 No finaliza merchant ni guarda claves en Vault/Edge Secrets. No activa checkout,
 inbox, conciliador o beneficios. No acredita identidad comercial, entrega o firma.
 
-Migración: `supabase/migrations/20261021015708_pazo_f16_live_resource_inspection.sql`.
+Migración INSTALADA UNA vez: `supabase/migrations/20261021021050_pazo_f16_live_resource_inspection.sql`,
+SHA256 `392f887b3f457a14f2cafa3fb27955fc38ca0d7492c9299d07cc3d0a526c7da7`.
+ACL exacta postgres/service_role, propietario postgres, search_path vacío, sin
+EXECUTE anon/authenticated. Ambas RPC conservan las compuertas OFF.
 Rollback: `supabase/rollbacks/f16_live_resource_inspection_REVIEW_REQUIRED.sql`,
 después de deshabilitar el endpoint; conserva metadata/auditoría existentes.
 
 Pruebas: 17 HTTP/proveedor/metadata y tres React; PG17 con roles reales,
 claims/ACL, generación incorrecta, conflicto de ID, idempotencia, OFF y rollback;
-`verify:prepreview` PASS. CI, instalación y comprobación real del operador se
-registran por separado en el handoff. Identidad merchant, custodia generacional,
+`verify:prepreview` PASS. bdf316495c08045b845b79d3b31f2c419c2f426e: CI9/9 SUCCESS.
+Endpoint ACTIVE v1/JWTtrue; 8/8 fuentes verificadas. HTTPS: OPTIONS permitido204,
+origen ajeno403, POST sin JWT401. La comprobación real del operador todavía no se
+ha ejecutado; requiere claves solo en su formulario privado. Identidad merchant, custodia generacional,
 firma y circuito financiero continúan pendientes.
 
 API oficial: [Webhook details](https://developer.paypal.com/api/webhooks/v1/)
