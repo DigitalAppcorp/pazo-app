@@ -95,6 +95,24 @@ export function createPaypalLiveSubscriptionProvider({clientId,clientSecret,plan
    if(d.id!==subscriptionId)return null
    return Object.freeze({id:d.id,plan_id:d.plan_id,custom_id:d.custom_id,
     status:d.status})
+  ,
+  // Caller MUST first durably claim the owner's cancellation in SQL.
+  // POST can have succeeded even when the network response is lost, so this
+  // method never retries. Caller must independently GET and reconcile.
+  async cancelSubscription(subscriptionId){
+   if(!SUB.test(subscriptionId||''))throw Error('live_subscription_id_invalid')
+   const token=await auth()
+   const response=await fetchImpl(HOST+'/v1/billing/subscriptions/'+
+    encodeURIComponent(subscriptionId)+'/cancel',{
+    method:'POST',redirect:'error',cache:'no-store',
+    signal:AbortSignal.timeout(12000),
+    headers:{...headers(token),'content-type':'application/json'},
+    body:JSON.stringify({reason:'Customer requested cancellation of future renewals'})
+   })
+   if(response?.status!==204||!response.ok)
+    throw Error('live_cancel_provider_unconfirmed')
+   return Object.freeze({postAccepted:true,subscriptionId})
   }
+ }
  })
 }
