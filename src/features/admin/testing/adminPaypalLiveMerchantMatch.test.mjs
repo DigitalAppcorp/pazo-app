@@ -148,3 +148,11 @@ test('merchant ID component never persists private input in storage, URL or logs
  assert.match(source,/merchantBindingStored!==false/)
  assert.doesNotMatch(source,/localStorage|sessionStorage|console\.|navigator\.clipboard|URLSearchParams/)
 })
+
+test('PayPal balance reporting scope is not a required gate in admin Live UI',()=>{
+ const page=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.meta.url),'utf8')
+ assert.match(page,/data-pazo-merchant-balance-check="not-required"/)
+ assert.doesNotMatch(page,/<AdminPaypalLiveMerchantMatch/)
+ assert.match(page,/La lectura de saldos de PayPal no es un requisito/)
+ assert.match(page,/Live permanece apagado/)
+})
