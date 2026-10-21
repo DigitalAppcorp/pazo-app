@@ -4,7 +4,7 @@ DO $guard$ BEGIN
 END $guard$;
 DELETE FROM supporter_private.pazo_paypal_live_cancel_claims;
 DELETE FROM supporter_private.pazo_paypal_live_checkout_intents;
-\i supabase/migrations/20261021164222_pazo_f16_live_immutable_bilingual_offer.sql
+\i supabase/migrations/20261021165838_pazo_f16_live_immutable_bilingual_offer.sql
 BEGIN;
 DO $offer$
 DECLARE owner_id uuid:='12345678-1234-4234-8234-123456789abc';
@@ -81,7 +81,7 @@ BEGIN
 END $offer$;
 ROLLBACK;
 \i supabase/rollbacks/f16_live_immutable_offer_REVIEW_REQUIRED.sql
-\i supabase/migrations/20261021164222_pazo_f16_live_immutable_bilingual_offer.sql
+\i supabase/migrations/20261021165838_pazo_f16_live_immutable_bilingual_offer.sql
 DO $pass$ BEGIN
  IF (SELECT count(*) FROM supporter_private.pazo_live_offer_versions)<>2
  THEN RAISE EXCEPTION 'offer empty rollback/reapply failed'; END IF;

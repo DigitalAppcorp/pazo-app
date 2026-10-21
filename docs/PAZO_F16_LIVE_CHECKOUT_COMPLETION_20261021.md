@@ -27,7 +27,7 @@ no se inventan firmas, plazos contables ni jobs de purga financiera. El inbox ya
 tiene una decisión PO de90d desde conciliación definitiva, con exclusión de
 pending/review/holds; no se aplica a consentimientos, pagos, disputas o backups.
 
-Migración local CLI `20261021164222`: dos ofertas FORCE RLS sin lectura directa
+Migración local CLI `20261021165838`: dos ofertas FORCE RLS sin lectura directa
 de clientes/servicio. CHECK verifica los hashes, normalizando CRLF del transporte.
 Triggers prohíben cambiar/borrar/truncar las versiones registradas. FK de cada
 intento exige versión/idioma/digest exactos. Otro trigger fija owner, requestKey,
