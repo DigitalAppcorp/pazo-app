@@ -1,5 +1,29 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## Acceso Vercel restablecido — 21-oct-2026, continuación móvil
+
+PO autorizó el login oficial por dispositivo; CLI Vercel65 confirmó sesión.
+Auditoría REST: ambos proyectos `pazo-app-t83r` y `pazo-app` están conectados a
+DigitalAppcorp/pazo-app y tenían `gitProviderOptions.createDeployments=enabled`.
+Se cambió exclusivamente ese campo a `disabled` en ambos, con GET postflight
+confirmado. Esto evita previews por push mientras se termina el código, conforme
+al gate pre-Preview vigente; conserva targets, aliases, dominios y main.
+No se lanzó ningún deployment ni operación PayPal.
+
+Proyecto principal `prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`: producción READY
+`dpl_E6t1jhXeAN49mS4gSCJufc2wFZ93`, preview READY
+`dpl_A1oJg62DpV54kEEN7itgQfQTHwhz`; la portada pública sigue antigua y callbacks/PWA
+404 según postflight anterior. SSO protection `all_except_custom_domains`.
+Las APIs y descubrimiento OAuth Vercel ya responden: no volver a pedir publicar
+el entorno por ese bloqueo antiguo. Las credenciales CLI están fuera del repo;
+no se incluyen en bundle ni documentación.
+
+Supabase CLI oficial2.121 requiere código de verificación del navegador; no
+hay sesión administrativa Supabase todavía. No pedir OTP ni tokens por chat.
+Antes de aplicar SQL o desplegar Edge, resolver autenticación segura y auditar
+source/ACL/versiones alojadas. P4 y gates financieros continúan NO-GO.
+
+
 ## Continuidad Codex — 21-oct-2026, implementación local verificada
 
 Base de integración auditada por Git: F13 `669efafdb5678cae40c5137d7bddc9403c2ab8a3`;

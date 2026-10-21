@@ -4,6 +4,23 @@
 Este postflight reemplaza el diagnóstico anterior de bloqueo total de red.
 No cambia el estado de aplicación de SQL, despliegue o release financiero.
 
+## Continuación: Vercel conectado desde el celular
+
+El propietario completó login oficial de dispositivo. Vercel CLI confirma sesión,
+REST lee ambos proyectos PAZO. El descubrimiento OAuth y supabase.com responden200;
+se considera superado el bloqueo de red documentado abajo, sin atribuir su
+resolución a una publicación de entorno que esta herramienta no ejecutó.
+
+Los dos proyectos conectados al repo tenían `createDeployments=enabled`.
+Se actualizaron a `disabled`, con GET independiente confirmado en ambos,
+para respetar el gate pre-Preview y permitir push/CI sin más despliegues.
+No se tocaron productionBranch=main, aliases, dominios, targets, protección SSO,
+variables o configuración PayPal. No hubo deployment.
+
+Supabase CLI2.121 genera enlace oficial, pero exige introducir un código del
+navegador. El intento se canceló sin credencial nueva: no se pidió al usuario
+que enviara ese código por chat. Falta una vía segura de autenticación Supabase.
+
 ## GitHub accesible y PR pendientes revisados
 
 GraphQL y REST autenticados ya responden. PR44 mantiene F13 en
