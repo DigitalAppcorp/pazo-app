@@ -289,3 +289,4 @@ END $overlap$;
 \i scripts/f16-live-owner-recovery-disposable-lab.sql
 \i scripts/f16-live-cosmetic-benefits-disposable-lab.sql
 \i scripts/f16-live-admin-finance-disposable-lab.sql
+\i scripts/f16-live-readiness-disposable-lab.sql

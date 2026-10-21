@@ -1,3 +1,20 @@
+## Supabase operativo — 21-oct-2026, 21:47 UTC
+
+PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`
+**APLICADAS** tras autorización explícita y ensayo alojado con ROLLBACK.
+Postflight ACL/RLS y 6/6 fuentes SQL PASS, nueva tabla vacía. Cuenta Live
+**v4 ACTIVE/JWT ON**, 8/8 fuentes exactas y HTTP negativos401 PASS.
+Live=false, kill=true, sandbox, generación activa null; 0 merchants/intents/
+períodos/inbox. Main y producción Vercel intactos.
+
+P4 avanza con readiness administrativo de lectura y recuperación de estado de
+credenciales; nuevo SQL `20261021223000` aún NO aplicado. Verify:prepreview1788
+PASS, PG17 y Chromium390/1440 PASS. Habilitación financiera controlada sigue
+pendiente; NO beta lista ni READY_FOR_PO_CREDENTIALS. No pedir más tokens ni
+claves PayPal por ahora. Evidencia actual en
+`docs/PAZO_SUPABASE_BETA_POSTFLIGHT_20261021.md`; estados inferiores de falta de
+acceso/SQL nuevo sin aplicar/cuenta sin desplegar son historia superada.
+
 # Continuidad beta — entrega local Codex, 21-oct-2026
 
 **Dictamen: NO-GO. No es una beta terminada, un despliegue ni una prueba Live.**

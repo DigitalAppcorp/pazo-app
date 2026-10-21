@@ -50,3 +50,61 @@ coincidencia de nombre/versiones. Hace falta instalar las tres migraciones
 nuevas ya ensayadas y desplegar cuenta, después de dry-run y CI. Checkout y
 webhook no deben abrirse por actualizar fuentes: P4/readiness y GO financiero
 siguen pendientes. No se pidió guardar claves PayPal todavía.
+
+## Instalación autorizada — 21:30–21:47 UTC
+
+El PO confirmó expresamente instalar las tres migraciones de PR67 y actualizar
+la cuenta manteniendo Live OFF/sin dinero. El rechazo automático previo del
+ensayo alojado quedó resuelto por esa confirmación; no se ejecutó el DDL rechazado
+antes de recibirla.
+
+Las tres migraciones pasaron individualmente BEGIN/ROLLBACK sobre el esquema
+real; se verificó que los objetos nuevos siguieran ausentes. Después se
+instalaron con su registro de historial en la MISMA transacción:
+
+| Versión instalada | Resultado |
+| --- | --- |
+| 20261021210000, recovery finish | PASS |
+| 20261021213000, cosméticos Live | PASS |
+| 20261021220000, finanzas administrativas | PASS |
+
+Postflight real: 6/6 cuerpos SQL coinciden con el código revisado. Recovery y
+terminal-close solo EXECUTE service_role; resumen administrativo solo
+EXECUTE authenticated + revalidación admin dentro de SQL. Proyección pública y
+set_theme mantienen sus grants previstos. Nueva tabla de preferencias RLS FORCE,
+0 filas y sin SELECT anon/authenticated/service_role. Selector sandbox,
+Live=false/kill=true/generación=null; merchants/intents/paid_periods/inbox0.
+No se tocaron datos de cuentas ni se llamó al proveedor PayPal.
+
+`pazo-paypal-live-account` **v4 ACTIVE, verify_jwt=true**, desplegada desde
+fuentes ya verificadas. Nueva configuración explícita de JWT en Git, commit
+`b82ac9ee`, con **5/5 Actions SUCCESS**. Descarga posterior: **8/8 fuentes
+idénticas** al local. HTTP real POST list: sin Auth401, JWT inválido401,
+clave pública sin usuario401. No se presenta como prueba de cuenta Auth positiva
+ni operación PayPal real. La conexión administrativa read_only no permite
+SET ROLE service_role; esa comprobación no pudo ejecutarse allí, y se conserva
+la evidencia de roles real en PG17 y el smoke HTTP negativo.
+
+## P4 — preparación administrativa real, siguiente incremento
+
+RPC `pazo_admin_live_readiness`: proyección admin-only de booleanos y códigos
+cerrados, sin leer secretos ni conceder release. Mantiene
+`releaseControlsReady=false` hasta la futura implementación controlada; no usa
+existencia de SQL como prueba de versiones Edge. UI descarta respuestas de otro
+admin, distingue lectura no disponible y vuelve a consultar tras guardar claves.
+Vault conserva el estado de guardado recibido del backend después de remount y
+no ofrece otro envío tras un resultado incierto; solo consulta de estado.
+
+Nueva migración `20261021223000` con rollback: **preparada, todavía no aplicada**
+en este checkpoint. Gate financiero de activación sigue pendiente; no se pide
+introducir credenciales PayPal aún. El endpoint Vault no cambió en esta entrega.
+
+Verificación de este incremento: verify:prepreview **1,788 pruebas PASS**
+(11+101+3+476+1193+4); PG17 completo PASS con admin/nonadmin/revocación, claves
+sin release, heartbeat vencido, no IDs privados y rollback/reapply de readiness;
+React pruebas de cuenta tardía y guardado incierto/restaurado; Chromium390/1440
+PASS de overflow, teclado, lectura fallida sin estado anterior y cero llamadas
+financieras. Datos del navegador son sintéticos, no credenciales realmente guardadas.
+Componente readiness nuevo lint0/0; archivos existentes conservan baseline.
+Build conserva warning de bundle. Harness temporal retirado, capturas y logs
+privados fuera del repo.

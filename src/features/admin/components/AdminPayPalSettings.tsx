@@ -5,6 +5,7 @@ import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
 import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
 import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
 import {AdminPaypalLiveVaultSetup} from './AdminPaypalLiveVaultSetup'
+import {AdminLiveReadiness} from './AdminLiveReadiness'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -266,7 +267,9 @@ export function AdminPayPalSettings({lang}:Props){
      mfaRecentlyVerified={recentAdminMfa} onVerified={()=>load(false)}/>}
     {env==='live'&&LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup
      lang={lang} mfaRecentlyVerified={recentAdminMfa}
+     credentialsStored={liveConfig?.client_id_stored===true&&liveConfig?.client_secret_stored===true}
      onStored={()=>{void load(false)}}/>}
+    {env==='live'&&<AdminLiveReadiness lang={lang} revision={liveConfig?.updated_at}/>}
     {env==='live'&&<section className="rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]"
      data-pazo-merchant-balance-check="not-required">
       <h4 className="text-[15px] font-black">{t(
