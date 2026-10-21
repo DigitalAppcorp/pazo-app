@@ -2,7 +2,7 @@
 // Unreleased. Called ONLY after a trusted server resolves immutable merchant
 // generation and account binding, and AFTER cryptographic webhook verification.
 // GET provider facts; NEVER derives paidThrough, grants benefits, or writes DB.
-import {normalizePazoLiveBillingSnapshot} from './liveBillingSnapshot.mjs'
+import {normalizePazoLiveBillingSnapshot,canonicalPaypalInstant} from './liveBillingSnapshot.mjs'
 const HOST='https://api-m.paypal.com'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
@@ -62,7 +62,8 @@ export function createPaypalLiveMerchantEvidenceReader({
    d.custom_id!==intentId||!['APPROVAL_PENDING','APPROVED','ACTIVE',
     'SUSPENDED','CANCELLED','EXPIRED'].includes(d.status))fail()
   return Object.freeze({id:d.id,plan_id:d.plan_id,custom_id:d.custom_id,
-   status:d.status,merchantGeneration,sourceEnvironment:'live'})
+   status:d.status,merchantGeneration,sourceEnvironment:'live',
+   statusUpdatedAt:canonicalPaypalInstant(d.status_update_time)})
  }
  async function transactionForSale({subscriptionId,intentId,saleId,expectedGeneration,
    startTime,endTime}={}){
@@ -152,7 +153,26 @@ export function createPaypalLiveMerchantEvidenceReader({
     refundKind:x.status==='REFUNDED'?'refunded':'partially_refunded',
     amountMinor:299,currency:'USD',originalPaymentAt:x.time,
     holdReviewRequired:x.status==='PARTIALLY_REFUNDED',
+    originVerified:true,originSource:'original_generation_subscription_transactions',
+    providerReversalVerified:x.status==='REFUNDED',
     mayMutateBenefits:false,paidThrough:null})
+  },
+  async readReversalEvidence(args={}){
+   const x=await transactionForSale(args)
+   if(x.status!=='REFUNDED')fail()
+   const t=await token()
+   // Subscription SALE resources have no v2 capture ID. Read the original
+   // v1 sale only as corroboration; never create/capture/refund through it.
+   const d=await json(fetchImpl,HOST+'/v1/payments/sale/'+encodeURIComponent(args.saleId),
+    {method:'GET',headers:auth(t)})
+   if(d.id!==args.saleId||d.billing_agreement_id!==args.subscriptionId||d.state!=='refunded'||
+    d.reason_code!=='CHARGEBACK'||d.amount?.currency!=='USD'||d.amount.total!=='2.99'||
+    !date(d.create_time)||Date.parse(d.create_time)!==Date.parse(x.time))fail()
+   return Object.freeze({verified:true,providerReversalVerified:true,sourceEnvironment:'live',merchantGeneration,
+    subscriptionId:args.subscriptionId,intentId:args.intentId,saleId:args.saleId,status:'REFUNDED',
+    refundKind:'reversed',amountMinor:299,currency:'USD',originalPaymentAt:x.time,
+    originVerified:true,originSource:'original_generation_subscription_transactions',
+    holdReviewRequired:false,mayMutateBenefits:false,paidThrough:null})
   }
  })
 }

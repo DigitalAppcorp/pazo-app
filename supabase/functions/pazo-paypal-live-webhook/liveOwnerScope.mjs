@@ -25,17 +25,29 @@ export function requirePazoLiveProviderSubscription(eventType,resource){
  return id
 }
 export function createPazoLiveOwnerScopeResolver({
- findBoundSubscription,readerForGeneration
+ findBoundSubscription,readerForGeneration,findOriginalSaleBinding
 }={}){
  if(typeof findBoundSubscription!=='function'||
   typeof readerForGeneration!=='function')
   throw Error('live_scope_adapters_not_configured')
- return async({eventId,eventType,resource,sourceEnvironment}={})=>{
+ return async({eventId,eventType,resource,sourceEnvironment,merchantGeneration}={})=>{
   if(sourceEnvironment!=='live'||!SALE.test(eventId||''))unavailable()
-  const subscriptionId=requirePazoLiveProviderSubscription(eventType,resource)
-  if(!subscriptionId)unavailable()
+  let subscriptionId=requirePazoLiveProviderSubscription(eventType,resource)
   let record
-  try{record=await findBoundSubscription({subscriptionId})}catch{unavailable()}
+  let originalSaleId=null
+  try{
+   if(!subscriptionId&&['PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED'].includes(eventType)&&
+    Number.isSafeInteger(merchantGeneration)&&typeof findOriginalSaleBinding==='function'){
+    originalSaleId=resource?.sale_id||resource?.id
+    if(!SALE.test(originalSaleId||''))unavailable()
+    record=await findOriginalSaleBinding({merchantGeneration,saleId:originalSaleId})
+    if(record?.recorded!==true||record.saleId!==originalSaleId||record.merchantGeneration!==merchantGeneration)unavailable()
+    subscriptionId=record.subscriptionId
+   }else{
+    if(!subscriptionId)unavailable()
+    record=await findBoundSubscription({subscriptionId})
+   }
+  }catch{unavailable()}
   if(!record||record.provider!=='paypal'||
    record.sourceEnvironment!=='live'||
    record.subscriptionId!==subscriptionId||
@@ -69,6 +81,7 @@ export function createPazoLiveOwnerScopeResolver({
    ownerIntentVerified:true,planVerified:true,
    ownerId:record.ownerId,intentId:record.intentId,
    subscriptionId,merchantGeneration:record.merchantGeneration,
+   ...(originalSaleId?{originalSaleId,originalSaleVerified:true}:{}),
    saleVerified:false,mayRecordPayment:false,mayGrantBenefits:false
   })
  }

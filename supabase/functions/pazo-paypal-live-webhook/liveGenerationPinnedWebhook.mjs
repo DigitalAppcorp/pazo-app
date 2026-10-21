@@ -38,7 +38,7 @@ export function createPazoLiveGenerationPinnedWebhook({
    !/^[A-Za-z0-9_-]{8,100}$/.test(verifier.webhookId))
    return error(503,'merchant_webhook_config_unavailable')
   const verifyOriginalOwner=async input=>{
-   const scope=await provePazoScope(input)
+   const scope=await provePazoScope({...input,merchantGeneration:generation})
    if(scope?.confirmed!==true||scope.merchantGeneration!==generation)
     throw Error('signed_event_other_merchant')
    return scope

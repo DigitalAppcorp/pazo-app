@@ -27,10 +27,11 @@ fechas y dueño; solo entonces entrega evidencia privada al coordinador. Los
 conflictos quedan held y un fallo temporal vuelve a pending bajo el límite de
 reintentos de la cola. No escribe pagos ni períodos.
 
-Migración local: `20261021064239_pazo_f16_live_signed_event_evidence.sql`.
+Migración local: `20261021074014_pazo_f16_live_signed_event_evidence.sql`.
 Rollback previo a credenciales: `f16_live_signed_event_evidence_REVIEW_REQUIRED.sql`;
 rechaza cualquier tabla con recibos y requiere Live OFF, sin CASCADE.
-No instalada hasta observar CI de su commit y repetir el preflight de catálogo.
+Instalada tras CI3501/gateway418 PASS del commit `2f1403f6` y preflight de
+catálogo/LiveOFF; versión MCP real `20261021074014`, archivo alineado con SQL idéntico.
 
 Pruebas dirigidas de Node: firma inválida, datos fuera de alcance, fechas imposibles,
 IDs cruzados, propietario y generación originales, falta de prueba persistida,
@@ -81,16 +82,43 @@ antiguos sin lease pierden EXECUTE para service_role.
 
 `financial_context_read`, limitada al lease, devuelve solo consentimiento,
 referencias/fechas y riesgos pendientes. No sale al navegador. DDL locales:
-`20261021071244_pazo_f16_live_atomic_leased_settlement.sql` y
-`20261021072337_pazo_f16_live_financial_context.sql`, con rollback OFF y PG17.
+`20261021074024_pazo_f16_live_atomic_leased_settlement.sql` y
+`20261021074032_pazo_f16_live_financial_context.sql`, con rollback OFF y PG17.
+Ambas aplicadas una vez tras el mismo CI. Cinco RPC nuevas postgres/definer/
+search_path vacío/service-only, receipt FORCE RLS; bridges viejos ya revocados.
+Postflight: reserva1, merchant/inbox/receipt/períodos0 y selector sandbox/LiveOFF.
 El laboratorio fuerza un fallo entre INSERT y ACK: no sobrevive pago parcial,
 el lease se recupera tras expiración y el replay confirmado es idempotente.
 
 `verify:prepreview` completo PASS en contexto autorizado y perfil sintético
 vacío: closure397/397, F16synthetic1193/1193, build/dist4/4. CI principal se
-amplía a PR/push F13 para ejecutar sus nueve jobs antes omitidos por rama.
+amplía a PR/push F13 para ejecutar sus cuatro jobs antes omitidos por rama,
+además del laboratorio gateway independiente. Ambos workflows SUCCESS en GitHub.
 
-Quedan scheduler privado, lifecycle/refunds completos, beneficios y P2–P5.
+### Ciclo de vida y devoluciones — tercer bloque, local
+
+Worker lifecycle: evento firmado persistido + GET de la suscripción original,
+status y status_update_time. SQL monotónico rechaza contradicciones y evita
+volver de CANCELLED a ACTIVE por entrega atrasada. Actualiza estado/diagnóstico
+de fallo y cierra el lease en una transacción; no modifica períodos ni beneficios.
+PG17 comprueba que cancelar conserva acceso hasta el fin pagado.
+
+Worker refund: reconstruye la fecha y el vínculo de la venta original a partir
+del ledger y recibo firmado. Una devolución meses después usa esa ventana de
+búsqueda, no la fecha reciente del refund. Si el payload carece de subscriptionId,
+solo se resuelve desde la venta previamente registrada de la misma generación.
+Refund completo exige REFUNDED merchant; parcial queda held/revisión. Un reverso
+requiere además lectura del SALE original con CHARGEBACK e importe completo;
+no se inventa un estado de transacción REVERSED. La API antigua se usa solo para
+esa corroboración de recursos SALE, sin crear/capturar/devolver dinero.
+[Schema oficial](https://developer.paypal.com/api/deprecated/payments/v1/schema.json).
+
+Dos RPC/columnas de ciclo de vida están en la migración local
+`20261021074511_pazo_f16_live_lifecycle_and_refund_scope.sql`, NO APLICADA.
+PG17 local14 verifica cancelación, fallo de renovación, orden inverso, alcance de
+refund, pago/refund atómico, ACL y rollback/reapply. Nueve pruebas Node nuevas.
+
+Quedan scheduler privado, monitoreo de disputas, beneficios y P2–P5.
 El hash de Client ID guardado por el preparador Vault identifica la aplicación;
 no es evidencia de identidad del payee. No convertirlo en un match financiero.
 

@@ -21,7 +21,10 @@ export async function createPazoLiveSignedEventReceipt({
  let event
  try{event=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(rawBody))}catch{fail()}
  if(!REF.test(event?.id||'')||typeof event.event_type!=='string')fail()
- const subscriptionId=requirePazoLiveProviderSubscription(event.event_type,event.resource)
+ let subscriptionId=requirePazoLiveProviderSubscription(event.event_type,event.resource)
+ if(subscriptionId===null&&['PAYMENT.SALE.REFUNDED','PAYMENT.SALE.REVERSED'].includes(event.event_type)&&
+  scope.originalSaleVerified===true&&scope.originalSaleId===(event.resource?.sale_id||event.resource?.id))
+  subscriptionId=scope.subscriptionId
  if(!subscriptionId||subscriptionId!==scope.subscriptionId||!REF.test(event.resource.id||''))fail()
  const providerEventAt=instant(event.create_time)
  const subjectAt=event.resource.create_time===undefined?providerEventAt:instant(event.resource.create_time)

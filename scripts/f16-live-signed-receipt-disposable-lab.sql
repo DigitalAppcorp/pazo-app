@@ -3,7 +3,7 @@ DO $guard$ BEGIN
  IF current_database()<>'f14_synthetic' OR current_user<>'postgres'
  THEN RAISE EXCEPTION 'DISPOSABLE PG17 ONLY'; END IF;
 END $guard$;
-\i supabase/migrations/20261021064239_pazo_f16_live_signed_event_evidence.sql
+\i supabase/migrations/20261021074014_pazo_f16_live_signed_event_evidence.sql
 BEGIN;
 INSERT INTO supporter_private.pazo_paypal_live_checkout_intents(
  intent_id,owner_id,request_key,merchant_generation,plan_id,locale,terms_version,terms_digest,
@@ -109,7 +109,7 @@ BEGIN
 END $expiry$;
 ROLLBACK;
 \i supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql
-\i supabase/migrations/20261021064239_pazo_f16_live_signed_event_evidence.sql
+\i supabase/migrations/20261021074014_pazo_f16_live_signed_event_evidence.sql
 DO $restored$ BEGIN
  IF EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_signed_receipts)
  THEN RAISE EXCEPTION 'rollback/reapply retained synthetic receipt data'; END IF;

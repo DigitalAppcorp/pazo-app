@@ -5,12 +5,16 @@ Actualización Codex 21-oct-2026: P1 en ejecución en la rama de recuperación
 lease y GET del evento de la generación original implementados, SQL local PG17
 con roles/rollback PASS. Closure 376/376, F16 sintético 1193/1193, build y PWA
 dist 4/4 PASS. Vite 8.3.2→8.3.3, audit cero vulnerabilidades. Migración
-`20261021064239` todavía no aplicada; sin nuevo deploy, pagos, secretos o grants.
+`20261021074014` aplicada posteriormente como se documenta abajo; sin pagos ni claves.
 Avance posterior del mismo PR54: worker privado de una venta, origen original
 corroborado, primer período contractual y renovación ordinaria observados,
 escritura pago/refund y cierre de lease en una transacción. Closure397/397,
 F16synthetic1193/1193, verify:prepreview completo/build/dist4/4 y PG17 PASS.
-Migraciones adicionales `20261021071244` y `20261021072337` siguen locales.
+Postflight alojado del mismo commit: tres migraciones APLICADAS con versiones
+MCP reales `20261021074014`, `20261021074024`, `20261021074032`, archivos locales
+alineados sin cambiar su SQL. Cinco RPC service-only/RLS FORCE/ACL PASS; bridges
+antiguos sin lease revocados. Reserva1; merchant/inbox/recibos/períodos0; LiveOFF.
+CI3501 cuatro jobs y laboratorio418 PASS. Ningún Edge nuevo liberado aún.
 Esto no completa scheduler, todos los eventos/beneficios ni P1–P5. **NO-GO** y
 todavía no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. Detalle en el reconciliador.
 

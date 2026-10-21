@@ -70,10 +70,11 @@ export function createPazoLiveRefundReconciliationGate({
   try{reader=await readerForGeneration({
    merchantGeneration:binding.merchantGeneration,sourceEnvironment:'live'
   })}catch{return review('refund_original_merchant_unavailable')}
-  if(typeof reader?.readRefundEvidence!=='function')
-   return review('refund_original_merchant_unavailable')
+  const method=event.eventType==='PAYMENT.SALE.REFUNDED'?'readRefundEvidence':'readReversalEvidence'
+  if(typeof reader?.[method]!=='function')return review(event.eventType==='PAYMENT.SALE.REVERSED'?
+   'reversal_requires_separate_original_merchant_proof':'refund_original_merchant_unavailable')
   let evidence
-  try{evidence=await reader.readRefundEvidence({
+  try{evidence=await reader[method]({
    subscriptionId:binding.subscriptionId,intentId:binding.intentId,
    saleId:event.saleId,expectedGeneration:binding.merchantGeneration,
    startTime:event.searchStart,endTime:event.searchEnd
@@ -83,19 +84,21 @@ export function createPazoLiveRefundReconciliationGate({
    evidence?.subscriptionId!==binding.subscriptionId||
    evidence?.intentId!==binding.intentId||
    evidence?.saleId!==event.saleId||
-   evidence?.amountMinor!==299||evidence?.currency!=='USD')
+   evidence?.amountMinor!==299||evidence?.currency!=='USD'||evidence.originVerified!==true||
+   evidence.originSource!=='original_generation_subscription_transactions')
    return review('refund_provider_evidence_unverified')
   // A PayPal subscription transaction REFUNDED supports a full refunded
   // status; PARTIALLY_REFUNDED does not support a full hold automatically.
-  // REVERSED is not part of this transaction-status API: it needs a separate
-  // provider reversal proof and stays review-only in this gate.
-  if(event.eventType!=='PAYMENT.SALE.REFUNDED')
+  // REVERSED is not a transaction status. It requires signed reversal plus
+  // separate original-sale CHARGEBACK corroboration, never an invented enum.
+  if(event.eventType==='PAYMENT.SALE.REVERSED'&&evidence.providerReversalVerified!==true)
    return review('reversal_requires_separate_original_merchant_proof')
   if(evidence.status==='PARTIALLY_REFUNDED'||
    evidence.refundKind==='partially_refunded'||
    evidence.holdReviewRequired===true)
    return review('partial_refund_requires_manual_review')
-  if(evidence.status!=='REFUNDED'||evidence.refundKind!=='refunded'||
+  const refundKind=event.eventType==='PAYMENT.SALE.REFUNDED'?'refunded':'reversed'
+  if(evidence.status!=='REFUNDED'||evidence.refundKind!==refundKind||
    evidence.holdReviewRequired!==false)
    return review('full_refund_not_proven')
 
@@ -106,14 +109,14 @@ export function createPazoLiveRefundReconciliationGate({
    merchantGeneration:binding.merchantGeneration
   })
   const trustedReceipt=Object.freeze({
-   provider:'paypal',sourceEnvironment:'live',merchantVerified:true,
-   signatureVerified:true,subscriptionVerified:true,
+   provider:'paypal',sourceEnvironment:'live',merchantVerified:evidence.originVerified,
+   signatureVerified:event.signatureVerified,subscriptionVerified:true,
    subscriptionId:binding.subscriptionId,
    merchantGeneration:binding.merchantGeneration,
    saleId:event.saleId,eventId:event.eventId,
    holdId:event.eventId,eventType:event.eventType,
-   currency:'USD',amountMinor:299,refundKind:'refunded',
-   originalSaleVerified:true,providerReversalVerified:true
+   currency:'USD',amountMinor:299,refundKind,
+   originalSaleVerified:recorded.recorded,providerReversalVerified:evidence.status==='REFUNDED'&&evidence.holdReviewRequired===false
   })
   try{
    const result=await writer.recordVerifiedReversal({

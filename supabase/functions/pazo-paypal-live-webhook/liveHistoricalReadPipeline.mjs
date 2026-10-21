@@ -10,6 +10,7 @@ import {createPaypalLivePostbackVerifier} from './livePostback.mjs'
 import {createPazoLiveEdgeGenerationSecretReader} from './liveEdgeGenerationSecrets.mjs'
 import {createPazoLiveVaultGenerationSecretReader} from './liveVaultGenerationSecrets.mjs'
 import {createPaypalLiveWebhookEventEvidence} from './liveWebhookEventEvidence.mjs'
+import {createPazoLiveOriginalRefundSaleReader} from './liveOriginalRefundSale.mjs'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const WH=/^[A-Za-z0-9_-]{8,100}$/
 const FINGERPRINT=/^[a-f0-9]{64}$/
@@ -38,6 +39,7 @@ export function createPazoLiveHistoricalReadPipeline({
  const findBoundSubscription=createPazoLiveHostedBindingReader({
   supabaseUrl,serviceRoleKey,fetchImpl
  })
+ const findOriginalSaleBinding=createPazoLiveOriginalRefundSaleReader({projectUrl:supabaseUrl,serviceRoleKey,fetchImpl})
  async function configForGeneration({merchantGeneration,sourceEnvironment}={}){
   if(sourceEnvironment!=='live'||!Number.isSafeInteger(merchantGeneration)||
    merchantGeneration<1)fail()
@@ -62,11 +64,11 @@ export function createPazoLiveHistoricalReadPipeline({
   return createPaypalLiveWebhookEventEvidence({...record,fetchImpl})
  }
  const provePazoScope=createPazoLiveOwnerScopeResolver({
-  findBoundSubscription,readerForGeneration
+  findBoundSubscription,readerForGeneration,findOriginalSaleBinding
  })
  // Server-only trusted functions, no credentials ever returned to the caller.
  return Object.freeze({provePazoScope,readerForGeneration,verifierForGeneration,eventReaderForGeneration,
-  findBoundSubscription})
+  findBoundSubscription,findOriginalSaleBinding})
 }
 
 
