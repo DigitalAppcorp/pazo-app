@@ -38,16 +38,37 @@ function setup(){
     body:JSON.stringify(payload)
    })
   }
-  const saveVault=async({request,clientId,clientSecret}:{request:Request,
-   clientId:string,clientSecret:string})=>{
-   const response=await userRpc(request,'pazo_admin_paypal_save_credentials',{
-    p_environment:'live',p_client_id:clientId,p_client_secret:clientSecret
+  // service-role backend only, never imported by a browser component.
+  // The SQL RPC is atomic: new immutable Vault IDs, generation metadata and
+  // audit commit together, with financial switches locked OFF.
+  const serviceRpc=async(name:string,payload:object)=>{
+   const result=await fetch(PROJECT+'/rest/v1/rpc/'+name,{
+    method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(12000),
+    headers:{apikey:service,Authorization:'Bearer '+service,
+     'content-type':'application/json',Accept:'application/json'},
+    body:JSON.stringify(payload)
    })
-   if(!response.ok||response.status!==200)return false
-   return await response.json()===true
+   if(!result.ok||result.status!==200)fail()
+   return result.json()
   }
-  const readbackVault=async({request,planId,webhookId}:{request:Request,
-   planId:string,webhookId:string})=>{
+  const saveVault=async({actorId,merchantGeneration,planId,webhookId,
+   clientId,clientSecret}:{actorId:string,merchantGeneration:number,
+    planId:string,webhookId:string,clientId:string,clientSecret:string})=>{
+   const result=await serviceRpc('pazo_f16_live_service_vault_prepare',{
+    p_actor:actorId,p_generation:merchantGeneration,p_plan:planId,
+    p_webhook:webhookId,p_client_id:clientId,p_client_secret:clientSecret})
+   return result?.prepared===true&&result.generation===merchantGeneration&&
+    result.vaultStored===true&&result.mayCharge===false&&
+    result.merchantIdentityVerified===false
+  }
+  const readbackVault=async({request,merchantGeneration,planId,webhookId}:{
+    request:Request,merchantGeneration:number,planId:string,webhookId:string})=>{
+   const status=await serviceRpc('pazo_f16_live_service_vault_status',{
+    p_generation:merchantGeneration})
+   if(status?.generation!==merchantGeneration||status.planId!==planId||
+    status.webhookId!==webhookId||status.vaultStored!==true||
+    status.credentialSource!=='vault'||status.environment!=='live'||
+    status.isRetired!==false)return false
    const response=await userRpc(request,'pazo_admin_paypal_settings',{})
    if(!response.ok||response.status!==200)return false
    const result=await response.json()
