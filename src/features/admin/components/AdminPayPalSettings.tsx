@@ -4,7 +4,6 @@ import {AdminGlyph} from './AdminVisuals'
 import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
 import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
 import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
-import {AdminPaypalLiveMerchantMatch} from './AdminPaypalLiveMerchantMatch'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -262,8 +261,14 @@ export function AdminPayPalSettings({lang}:Props){
      <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={recentAdminMfa}/>}
     {env==='live'&&<AdminPaypalLiveResourceCheck lang={lang}
      mfaRecentlyVerified={recentAdminMfa} onVerified={()=>load(false)}/>}
-    {env==='live'&&<AdminPaypalLiveMerchantMatch lang={lang}
-     mfaRecentlyVerified={recentAdminMfa}/>}
+    {env==='live'&&<section className="rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]"
+     data-pazo-merchant-balance-check="not-required">
+      <h4 className="text-[15px] font-black">{t(
+       'Identidad comercial y cobros Live','Live merchant identity and payments')}</h4>
+      <p className="mt-2 text-[12px] leading-relaxed">{t(
+       'La lectura de saldos de PayPal no es un requisito para cobrar suscripciones. No vuelvas a ingresar las claves para esa prueba. Los siguientes pasos pendientes son la vinculación administrativa segura, el registro de credenciales de pago y la comprobación del webhook firmado. Live permanece apagado.',
+       'PayPal balance read permission is not required to charge subscriptions. Do not re-enter credentials for that check. The remaining steps are secure merchant binding, payment credential storage and signed webhook verification. Live remains off.')}</p>
+     </section>}
     {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
       <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
       <p className="mt-2 text-[12px] text-[#6B8077]">
