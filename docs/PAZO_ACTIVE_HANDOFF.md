@@ -1,5 +1,16 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — Codex recuperado e integrado / Checkout owner-slot privado (21-oct-2026, después del PR60)
+
+- PO publicó desde `C:\Users\osori\Downloads\Nuevo pazo app\pazo-live-reconciler` el commit `e27d9fae` con trabajo local Codex recuperado. NO se perdieron fuentes. ZIP revisado. No ejecutar reset/clean en worktree local.
+- El código Codex de oferta Live inmutable, consentimientos y checkout, recuperación owner-slot, lab PG17 y el adaptador de origen HTTPS `pazo_f16_live_service_provider_claim_with_origin` fueron **fusionados solo en F13** por [PR60](https://github.com/DigitalAppcorp/pazo-app/pull/60), squash `5fc001de698b99f80b68b24b7cc4ae0405192f69`. PR60 corrió CI **9/9 SUCCESS**, incluido laboratorio owner-slot y pruebas de privacidad; fixture sintético desechable actualizado para generación retirada, sin datos reales.
+- Supabase proyecto `mrybvqdebbgcayuvgkkr`: SQL migración `pazo_f16_live_owner_checkout_slot` **APLICADA**, historial **20261021181431**; archivo GitHub renombrado a `supabase/migrations/20261021181431_pazo_f16_live_owner_checkout_slot.sql` para coincidir. `20261021165838_pazo_f16_live_immutable_bilingual_offer.sql` ya estaba instalada antes, NO volver a aplicar.
+- Postflight SQL alojado PASS: `service_role` EXECUTE exclusivo de lectura owner, anon/authenticated sin permiso, claim antiguo sin EXECUTE, nuevo claim con origen instalado, 0 intents, 0 paid periods, 0 merchants, `environment=sandbox`, `live_enabled=false`, `kill_switch=true`, `active_generation=NULL`. **No hubo cargo Live.**
+- PR55 (Codex), PR56 (anti-duplicado alternativo), PR58 (wiring de origen) y PR59 (rama divergente) están **superados / NO FUSIONAR**. PR60 es la integración canónica de esos cambios.
+- Aún **NO BETA LISTA**: habilitación controlada checkout/webhook/worker, recuperación provider sin doble CREATE, cierre frontend Live y PWA/callback, pruebas económicas Live canary con credenciales en Admin y GO del PO, métricas y validación dominio/despliegue. Latches de código y BD siguen OFF. Seguir mandato obligatorio en `AGENTS.md` y `docs/CODEX_F16_BETA_LAUNCH_COMPLETION_ORDER_20261021.md`.
+
+
+
 ## Recuperación Codex 21-oct — P1 en ejecución
 
 Área aislada `pazo-live-reconciler`, rama `f16/live-signed-sale-reconciler-20261021`,
