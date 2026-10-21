@@ -4,6 +4,8 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createPazoLiveOwnerAccountRead} from './liveAccountRead.mjs'
 import {createPazoLiveGoTrueOwnerResolver} from '../pazo-paypal-live-checkout/liveGoTrueOwner.mjs'
+import {createPazoLiveVaultGenerationSecretReader} from '../pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs'
+import {createPaypalLiveSubscriptionProvider} from '../pazo-paypal-live-checkout/liveSubscriptionProvider.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const READONLY_RELEASED=true
 const unavailable=()=>createPazoLiveOwnerAccountRead()
@@ -29,8 +31,25 @@ function setup(){
    if(raw.length>24576)throw Error('private_owner_response_too_large')
    return JSON.parse(raw)
   }
+  const readOriginalSecrets=createPazoLiveVaultGenerationSecretReader({
+   supabaseUrl:url,serviceRoleKey:service
+  })
+  const readProviderStatus=async({merchantGeneration,planId,
+   subscriptionId}:{merchantGeneration:number,planId:string,subscriptionId:string})=>{
+   const credentials=await readOriginalSecrets({
+    merchantGeneration,sourceEnvironment:'live'
+   })
+   if(credentials?.environment!=='live'||credentials.generation!==merchantGeneration||
+    credentials.planId!==planId||credentials.credentialSource!=='vault')
+    throw Error('original_merchant_unavailable')
+   const provider=createPaypalLiveSubscriptionProvider({
+    clientId:credentials.clientId,clientSecret:credentials.clientSecret,
+    planId,origin:'https://pazo-app-t83r.vercel.app'
+   })
+   return provider.readSubscription(subscriptionId)
+  }
   return createPazoLiveOwnerAccountRead({released:true,
-   resolveAuthenticatedOwner,readPrivateOwner})
+   resolveAuthenticatedOwner,readPrivateOwner,readProviderStatus})
  }catch{return unavailable()}
 }
 Deno.serve(setup())
