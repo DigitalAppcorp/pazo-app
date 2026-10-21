@@ -72,8 +72,41 @@ export async function readLivePaypalMerchantIdentity({environment,clientId,clien
    n=>n.toString(16).padStart(2,'0')).join('')
   if(expectedMerchantFingerprint!==undefined&&merchantFingerprint!==expectedMerchantFingerprint)
    return invalid('live_merchant_identity_mismatch')
-  return Object.freeze({ok:true,code:'live_merchant_identity_read_verified',environment:'live',
-   merchantFingerprint,merchantIdentityVerified:true,planReadVerified:true,
-   webhookReadVerified:true,webhookDeliveryVerified:false,mayCharge:false,mayActivate:false})
+  // A self-presented PayPal credential proves only the account it can read.
+  // Merchant identity becomes VERIFIED solely against a fingerprint previously
+  // pinned by an independent, trusted, immutable server-side merchant record.
+  const pinned=expectedMerchantFingerprint!==undefined
+  return Object.freeze({ok:true,
+   code:pinned?'live_merchant_identity_read_verified':'live_merchant_candidate_read',
+   environment:'live',merchantFingerprint,merchantIdentityVerified:pinned,
+   planReadVerified:true,webhookReadVerified:true,webhookDeliveryVerified:false,
+   mayCharge:false,mayActivate:false})
  }catch{return invalid(unavailable)}
+}
+
+
+// Bridge from a server-owned immutable generation to the secret provisioner.
+// The 'merchantFingerprint' argument MUST come from readGeneration() after
+// verifying the admin session, not from the browser. No fingerprint == no
+// merchant identity approval, even when PayPal OAuth/plan/webhook all pass.
+export function createPazoLiveVerifiedMerchantResources({fetchImpl=fetch}={}){
+ if(typeof fetchImpl!=='function')throw Error('live_merchant_verifier_unavailable')
+ return async function verifyProviderResources({environment,clientId,clientSecret,
+  planId,webhookId,merchantGeneration,merchantFingerprint}={}){
+  const denied=()=>Object.freeze({oauthVerified:false,planVerified:false,
+   webhookVerified:false,merchantIdentityVerified:false,isLive:false,mayCharge:false})
+  if(!HASH.test(merchantFingerprint||''))return denied()
+  let verified
+  try{
+   verified=await readLivePaypalMerchantIdentity({environment,clientId,clientSecret,
+    planId,webhookId,merchantGeneration,
+    expectedMerchantFingerprint:merchantFingerprint,fetchImpl})
+  }catch{return denied()}
+  if(verified?.ok!==true||verified.merchantIdentityVerified!==true||
+   verified.merchantFingerprint!==merchantFingerprint||
+   verified.planReadVerified!==true||verified.webhookReadVerified!==true||
+   verified.webhookDeliveryVerified!==false)return denied()
+  return Object.freeze({oauthVerified:true,planVerified:true,
+   webhookVerified:true,merchantIdentityVerified:true,isLive:true,mayCharge:false})
+ }
 }
