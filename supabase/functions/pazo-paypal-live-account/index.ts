@@ -1,5 +1,5 @@
-// PAZO F16 — READ ONLY: owner's original PayPal Live checkout requests.
-// Does not contact PayPal or modify subscriptions, payments or benefits.
+// PAZO F16 — owner Live subscription read and explicit cancellation.
+// No checkout creation, payment processing, refunds or entitlement grants.
 // Deployed with Edge JWT verification ON; GoTrue rechecks the bearer.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createPazoLiveOwnerAccountRead} from './liveAccountRead.mjs'
@@ -34,22 +34,54 @@ function setup(){
   const readOriginalSecrets=createPazoLiveVaultGenerationSecretReader({
    supabaseUrl:url,serviceRoleKey:service
   })
-  const readProviderStatus=async({merchantGeneration,planId,
-   subscriptionId}:{merchantGeneration:number,planId:string,subscriptionId:string})=>{
+  const getOriginalProvider=async({merchantGeneration,planId}:{
+   merchantGeneration:number,planId:string
+  })=>{
    const credentials=await readOriginalSecrets({
     merchantGeneration,sourceEnvironment:'live'
    })
    if(credentials?.environment!=='live'||credentials.generation!==merchantGeneration||
     credentials.planId!==planId||credentials.credentialSource!=='vault')
     throw Error('original_merchant_unavailable')
-   const provider=createPaypalLiveSubscriptionProvider({
+   // This origin only satisfies the provider's configuration validator for
+   // server-side GET/CANCEL. No new subscription is created by this endpoint.
+   return createPaypalLiveSubscriptionProvider({
     clientId:credentials.clientId,clientSecret:credentials.clientSecret,
     planId,origin:'https://pazo-app-t83r.vercel.app'
    })
-   return provider.readSubscription(subscriptionId)
   }
+  const readProviderStatus=async({merchantGeneration,planId,subscriptionId}:{
+   merchantGeneration:number,planId:string,subscriptionId:string
+  })=>(await getOriginalProvider({merchantGeneration,planId})).readSubscription(subscriptionId)
+  const postCancel=async({merchantGeneration,planId,subscriptionId}:{
+   merchantGeneration:number,planId:string,subscriptionId:string
+  })=>(await getOriginalProvider({merchantGeneration,planId})).cancelSubscription(subscriptionId)
+  const cancelRpc=async(name:string,args:Record<string,unknown>)=>{
+   const res=await fetch(PROJECT+'/rest/v1/rpc/'+name,{
+    method:'POST',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(10000),
+    headers:{apikey:service,Authorization:'Bearer '+service,
+     'content-type':'application/json',Accept:'application/json'},
+    body:JSON.stringify(args)
+   })
+   if(!res.ok||res.status!==200)throw Error('cancel_claim_unavailable')
+   const value=await res.json()
+   if(typeof value!=='boolean')throw Error('cancel_claim_invalid')
+   return value
+  }
+  const claimCancel=async({ownerId,intentId,merchantGeneration}:{
+   ownerId:string,intentId:string,merchantGeneration:number
+  })=>cancelRpc('pazo_f16_live_service_cancel_claim',{
+   p_owner:ownerId,p_intent:intentId,p_generation:merchantGeneration
+  })
+  const finishCancel=async({ownerId,intentId,merchantGeneration,outcome}:{
+   ownerId:string,intentId:string,merchantGeneration:number,outcome:string
+  })=>cancelRpc('pazo_f16_live_service_cancel_finish',{
+   p_owner:ownerId,p_intent:intentId,p_generation:merchantGeneration,
+   p_outcome:outcome
+  })
   return createPazoLiveOwnerAccountRead({released:true,
-   resolveAuthenticatedOwner,readPrivateOwner,readProviderStatus})
+   resolveAuthenticatedOwner,readPrivateOwner,readProviderStatus,
+   claimCancel,finishCancel,postCancel})
  }catch{return unavailable()}
 }
 Deno.serve(setup())
