@@ -10,7 +10,8 @@ const owner='12345678-1234-4234-8234-123456789abc'
 const consent={requestKey:'23456789-1234-4234-8234-123456789abc',
  termsVersion:getPazoLiveOffer('es').version,termsDigest:getPazoLiveOffer('es').termsDigest,
  locale:'es',affirmativeConsent:true}
-const req=(method='POST',requestOrigin=origin)=>new Request(url+'/functions/v1/pazo-paypal-live-checkout',{
+const req=(method='POST',requestOrigin=origin)=>new Request(url+'/functions/v1/pazo-paypal-live-checkout'+
+ (method==='GET'?'?locale=es':''),{
  method,headers:{origin:requestOrigin,'content-type':'application/json',authorization:'Bearer '+jwt},
  ...(method==='POST'?{body:JSON.stringify({action:'subscribe',consent})}:{})
 })
@@ -129,7 +130,12 @@ test('server readiness requires actual Live route and a healthy private financia
  const status=await h(req('GET'))
  assert.equal(status.status,200)
  const body=await status.json()
- assert.deepEqual(body,{code:'live_checkout_ready',ready:true,mayGrantBenefits:false})
+ assert.equal(body.code,'live_checkout_ready')
+ assert.equal(body.ready,true)
+ assert.equal(body.mayGrantBenefits,false)
+ assert.equal(body.offer?.version,getPazoLiveOffer('es').version)
+ assert.equal(body.offer?.termsDigest,getPazoLiveOffer('es').termsDigest)
+ assert.equal(body.offer?.exactCopy,getPazoLiveOffer('es').exactCopy)
  assert.equal(status.headers.get('access-control-allow-origin'),origin)
  assert.match(status.headers.get('access-control-allow-methods'),/GET/)
  assert.equal(records.length,2)
