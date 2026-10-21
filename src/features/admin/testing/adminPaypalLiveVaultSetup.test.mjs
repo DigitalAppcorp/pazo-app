@@ -130,3 +130,14 @@ test('entrypoint remains hard-off until release security gate and never includes
  assert.match(file,/pazo_admin_paypal_settings/)
  assert.doesNotMatch(file,/PAZO_F16_SCOPED_MANAGEMENT_TOKEN|api\.supabase\.com\/v1\/projects/)
 })
+
+test('UI is masked and held behind release while admin staging endpoint remains OFF',()=>{
+ const widget=readFileSync(new URL('../components/AdminPaypalLiveVaultSetup.tsx',import.meta.url),'utf8')
+ const settings=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.meta.url),'utf8')
+ assert.match(widget,/type="password"/)
+ assert.match(widget,/mfaRecentlyVerified/)
+ assert.match(widget,/payload\.clientId='';payload\.clientSecret=''/)
+ assert.doesNotMatch(widget,/localStorage|sessionStorage|console\.log|navigator\.clipboard/)
+ assert.match(settings,/const LIVE_VAULT_SETUP_RELEASED=false/)
+ assert.match(settings,/LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup/)
+})
