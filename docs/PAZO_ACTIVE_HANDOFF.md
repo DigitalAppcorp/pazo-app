@@ -1,5 +1,22 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## Diagnóstico PROVIDER — términos del plan Live
+
+Primera comprobación real del PO devolvió `live_plan_terms_unverified`: se pasó
+Auth/MFA/reserva/OAuth y se leyó plan ACTIVE, pero NO se validó webhook ni guardó
+metadata. Postflight: reserva1, resourceaudits0, merchant0, secretattempts0 y OFF.
+Lectura directa del plan en PayPal confirmó US$2.99/cada1mes/ilimitado/setup0 y sin
+impuestos, con facturación automática de saldos pendientes ACTIVADA. PO la desmarcó
+y guardó personalmente; readback independiente confirma DESACTIVADA, demás valores
+conservados. Codex solo abrió el editor y leyó, no guardó cambios financieros.
+
+El editor muestra comisión cero como `0.0`. Corregida comparación textual de cero:
+acepta exclusivamente strings USD `0`, `0.0`, `0.00`, sin redondeo, manteniendo
+rechazo de centavos/signos/exponentes/otra moneda y cobros automáticos de atrasos.
+Regresión reproduce fallo original; CI/deploy de esta corrección pendientes.
+No repetir entrada de claves hasta postflight del comprobador corregido; las claves
+anteriores se descartaron por diseño. No crear otra reserva/plan/webhook.
+
 ## HOSTED PASS — comprobación privada de plan y webhook; acción PO pendiente
 
 El PO entregó Webhook ID; conservado exactamente como candidato local de generación

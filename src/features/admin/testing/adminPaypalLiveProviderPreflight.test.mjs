@@ -112,3 +112,27 @@ test('resource check rejects wildcard, unexpected and duplicate webhook subscrip
   assert.equal(result.mayCharge,false)
  }
 })
+
+test('zero setup fee accepts USD decimal zero representations without rounding',async()=>{
+ for(const value of ['0','0.0','0.00']){
+  const p=provider({plan:{payment_preferences:{auto_bill_outstanding:false,
+   setup_fee:{currency_code:'USD',value}}}})
+  const result=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
+  assert.equal(result.ok,true,'Equivalent zero rejected: '+value)
+  assert.equal(result.mayCharge,false)
+ }
+})
+
+test('setup fee cannot hide cents, signs, exponents or an unsupported currency',async()=>{
+ for(const setup_fee of [
+  ...['0.01','0.001','-0','+0','0e0','0.000',' 0','0 ','','00','00.00',0,null]
+   .map(value=>({currency_code:'USD',value})),
+  {currency_code:'EUR',value:'0.00'}
+ ]){
+  const p=provider({plan:{payment_preferences:{auto_bill_outstanding:false,setup_fee}}})
+  const result=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
+  assert.equal(result.ok,false)
+  assert.equal(result.code,'live_plan_terms_unverified')
+  assert.equal(p.calls.some(x=>x.url.includes('/v1/notifications/webhooks/')),false)
+ }
+})

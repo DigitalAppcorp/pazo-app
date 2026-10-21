@@ -68,8 +68,8 @@ export const liveWebhookUrlForGeneration=g=>Number.isSafeInteger(g)&&g>=1&&g<=99
     cycle?.pricing_scheme?.tiers===undefined
    const preferences=plan?.payment_preferences
    const setup=preferences?.setup_fee
-   const noSetup=!setup||(setup.currency_code==='USD'&&
-    setup.value==='0.00')
+   const noSetup=setup===undefined||(setup?.currency_code==='USD'&&
+    typeof setup.value==='string'&&/^0(?:\.0{1,2})?$/.test(setup.value))
    const noTax=plan.tax_percentage===undefined&&
     (plan.taxes===undefined||
       (Number(plan.taxes.percentage||0)===0&&plan.taxes.inclusive!==true))

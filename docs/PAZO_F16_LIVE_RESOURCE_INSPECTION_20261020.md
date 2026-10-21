@@ -38,3 +38,12 @@ firma y circuito financiero continúan pendientes.
 
 API oficial: [Webhook details](https://developer.paypal.com/api/webhooks/v1/)
 y [autenticación Edge](https://supabase.com/docs/guides/functions/auth).
+
+Primera lectura real: el PO recibió `live_plan_terms_unverified`. La pantalla del
+plan confirmó cobro automático de saldos pendientes activado. El PO lo desactivó
+y guardó; lectura independiente confirma el cambio y precio/términos conservados.
+Además el editor muestra importe cero como `0.0`: el comprobador ahora acepta
+solo las tres representaciones USD equivalentes `0`, `0.0`, `0.00`, sin convertir
+floats ni redondear valores positivos. La regresión reproduce primero el rechazo
+anterior. No se omite ningún control de precio, plazo, impuestos o atraso.
+Este resultado todavía no valida el Webhook ID; el control falla antes de su GET.
