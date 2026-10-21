@@ -5,6 +5,17 @@ La orden del PO de completar F16 antes de beta sigue vigente. No solicitar clave
 PayPal todavía. Este checkpoint cierra código comprobable de recuperación,
 beneficios y gestión; la preparación global de release sigue bloqueada.
 
+## Continuación móvil — 20:48 UTC
+
+Vercel autenticado por dispositivo, PR67 DRAFT hacia F13 con código8ad55b04
+**5/5 Actions SUCCESS**. Bloqueo Git correcto en `vercel.json`; preview involuntario
+creado durante el primer ajuste fue retirado y verificado404. La producción
+principal sigue antigua. Falta autenticación Supabase: campo privado
+`SUPABASE_ACCESS_TOKEN` preparado, sin valor. No hay cambios en SQL alojado,
+Edge de cuenta, dinero o main. El [postflight actualizado](PAZO_CLOUD_ACCESS_AND_HTTPS_POSTFLIGHT_20261021.md)
+detalla la corrección y la evidencia; los diagnósticos inferiores de red/PR
+no consultable/sin push pertenecen al checkpoint anterior y quedan superados.
+
 ## Actualización de acceso — 20:30 UTC
 
 GitHub ya accesible: PR66 abierto con 12/12 GitHub Actions SUCCESS y status

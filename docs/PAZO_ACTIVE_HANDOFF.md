@@ -2,6 +2,15 @@
 
 ## Acceso Vercel restablecido — 21-oct-2026, continuación móvil
 
+**Postflight corregido 20:48 UTC:** PR67 DRAFT hacia F13; código
+`8ad55b04` con 5/5 Actions SUCCESS. La corrección `git.deploymentEnabled=false`
+evita nuevos builds observados; el preview involuntario de11d4ee34 se retiró con
+DELETE200/GET404. Producción principal sigue SHA5163c187 y preview antiguo
+a218ab3c. No confundir esos deploys con esta entrega. Requisito privado
+`SUPABASE_ACCESS_TOKEN` guardado, valor aún ausente; faltan auditoría alojada,
+las tres migraciones, Edge de cuenta y P4. No pedir claves PayPal todavía.
+
+
 PO autorizó el login oficial por dispositivo; CLI Vercel65 confirmó sesión.
 Auditoría REST: ambos proyectos `pazo-app-t83r` y `pazo-app` están conectados a
 DigitalAppcorp/pazo-app y tenían `gitProviderOptions.createDeployments=enabled`.

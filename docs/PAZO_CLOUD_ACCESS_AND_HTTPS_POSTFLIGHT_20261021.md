@@ -116,3 +116,32 @@ Se guardó requisito privado `SUPABASE_ACCESS_TOKEN` con destino único
 `api.supabase.com`; no se recibió valor ni se autenticó Supabase. El usuario
 puede suministrarlo en el campo seguro del entorno; nunca por chat. Guardar el
 requisito no introduce el token ni demuestra propagación al runtime.
+
+## Postflight corregido — 20:48 UTC
+
+- Commit `8ad55b048f5fe07352a6c9c151d9bfe38a9f40c5`, PR67: **5/5 GitHub
+  Actions SUCCESS**. `git.deploymentEnabled=false` ya está en la rama remota.
+  No aparece deployment de ese SHA en ninguno de los dos proyectos inspeccionados;
+  el PR ya no muestra status de nuevo build Vercel. No inferir esto del campo
+  `createDeployments`, restaurado a su valor original.
+- Preview involuntario `dpl_CddaWi3Tm1tzkRWW4KnfM8dkgtsa`: identidad verificada
+  por SHA11d4ee34, proyecto secundario, target null y único alias de esta rama.
+  Retirado por DELETE HTTP200; GET independiente HTTP404. Ningún deployment
+  previo o target de producción fue borrado.
+- Principal `pazo-app-t83r`: producción READY en `5163c187eb7c52d85a34e4f32cd89820a4535498`
+  (`main`), preview READY en `a218ab3cbc1ac01b7932da3ce5c3c87ee2c86770`
+  (F13 antiguo). Ninguno contiene esta entrega. No se cambió dominio ni protección.
+- Solo metadata de env revisada, sin leer valores: flag Sandbox QA y beneficios
+  restringidos al preview F13; Mapbox solo preview; configuración Supabase y
+  telemetría con ámbitos existentes. Esto no valida valores, proveedores ni
+  configuración final de release.
+- Comprobaciones focalizadas ejecutadas directamente: callbacks2/2 y artefactos
+  PWA4/4 PASS. No se repitió QA aceptada de otros módulos.
+
+**Siguiente dependencia externa exacta:** suministrar `SUPABASE_ACCESS_TOKEN`
+en el campo privado del entorno con destino api.supabase.com, o conectar una
+herramienta oficial Supabase con acceso a este proyecto. El token no se ha
+recibido y no debe enviarse por chat. La orden de completar ingeniería sigue
+vigente: con acceso, auditar runtime/ACL/versiones antes de aplicar las tres
+migraciones ya ensayadas, desplegar cuenta y completar P4. No hay autorización
+financiera ejecutada, claves Live nuevas ni beta publicada.
