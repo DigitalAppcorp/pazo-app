@@ -1,7 +1,6 @@
 import {useCallback,useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
-import {getPazoLiveOffer} from '../../../../supabase/functions/pazo-paypal-live-checkout/liveOfferRegistry.mjs'
 
 // Live checkout UI is safe to ship while Live remains OFF. The backend must
 // explicitly attest an active merchant AND a healthy private settlement worker.
@@ -40,15 +39,16 @@ const published=(raw:unknown,locale:Locale):raw is Offer=>{
 }
 export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
  const [stage,setStage]=useState<Stage>('checking')
+ const [offer,setOffer]=useState<Offer|null>(null)
  const [accepted,setAccepted]=useState(false)
  const [revision,setRevision]=useState(0)
  const attempted=useRef(false)
  const active=useRef(true)
  const label=(es:string,en:string)=>lang==='es'?es:en
- const offer=getPazoLiveOffer(lang) as Offer|null
  useEffect(()=>{
   active.current=true
   setAccepted(false)
+  setOffer(null)
   setStage('checking')
   const controller=new AbortController()
   void (async()=>{
@@ -56,15 +56,20 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
     const config=privateConfig()
     const {data:{session},error}=await supabase.auth.getSession()
     if(error||!session?.access_token)throw Error('owner_auth_unavailable')
-    const res=await fetch(HOST+'/functions/v1/pazo-paypal-live-checkout',{
+    const res=await fetch(HOST+'/functions/v1/pazo-paypal-live-checkout?locale='+lang,{
      method:'GET',headers:{apikey:config.key,authorization:'Bearer '+session.access_token,
       Accept:'application/json'},
      cache:'no-store',signal:controller.signal
     })
-    const value=await res.json() as {code?:string;ready?:boolean;mayGrantBenefits?:boolean}
-    if(active.current&&!controller.signal.aborted)
-     setStage(res.status===200&&value.code==='live_checkout_ready'&&
-      value.ready===true&&value.mayGrantBenefits===false?'ready':'unavailable')
+    const value=await res.json() as {code?:string;ready?:boolean;
+     mayGrantBenefits?:boolean;offer?:unknown}
+    if(active.current&&!controller.signal.aborted){
+     const valid=res.status===200&&value.code==='live_checkout_ready'&&
+      value.ready===true&&value.mayGrantBenefits===false&&
+      published(value.offer,lang)
+     setOffer(valid?value.offer as Offer:null)
+     setStage(valid?'ready':'unavailable')
+    }
    }catch{if(active.current&&!controller.signal.aborted)setStage('unavailable')}
   })()
   return ()=>{active.current=false;controller.abort()}
