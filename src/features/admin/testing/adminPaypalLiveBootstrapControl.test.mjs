@@ -199,3 +199,15 @@ test('Supabase routed URLs pass CORS preflight without bypassing administrator v
  const invalidMethod=await handler(preflight(url,'DELETE'))
  assert.equal(invalidMethod.status,405)
 })
+
+test('failed live generation request displays only predefined safe diagnostic codes',()=>{
+ const view=readFileSync(new URL('../components/AdminPaypalMerchantBootstrap.tsx',import.meta.url),'utf8')
+ const server=readFileSync(new URL('../../../../supabase/functions/pazo-admin-paypal-provision/liveMerchantBootstrapControl.mjs',import.meta.url),'utf8')
+ assert.match(view,/const SAFE_BOOTSTRAP_CODES=new Set/)
+ assert.match(view,/SAFE_BOOTSTRAP_CODES\.has\(observed\)/)
+ assert.match(view,/context\.clone\(\)\.json\(\)/)
+ assert.match(view,/data-pazo-bootstrap-diagnostic/)
+ assert.doesNotMatch(view,/console\.log|sessionStorage|localStorage/)
+ assert.match(server,/PAZO_F16_BOOTSTRAP_STAGE/)
+ assert.match(server,/TRACE_CODES\.has\(code\)/)
+})
