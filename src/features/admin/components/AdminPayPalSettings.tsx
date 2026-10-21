@@ -26,7 +26,7 @@ const LIVE_RESOURCE_INSPECTION_RELEASED=false
 // This flag becomes true only after the separate service/PO security gate.
 const LIVE_EDGE_PROVISIONING_RELEASED=false
 // The generation reservation UI is not exposed until the Edge backend gets an explicit PO GO.
-const LIVE_MERCHANT_BOOTSTRAP_RELEASED=false
+const LIVE_MERCHANT_BOOTSTRAP_RELEASED=true
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
 const actionClass='min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] hover:bg-[#E9EF6A] disabled:opacity-50 disabled:cursor-not-allowed'
 const cardClass='min-w-0 rounded-[22px] bg-white p-4 shadow-[0_7px_29px_rgba(32,78,74,.055)] sm:p-6'
