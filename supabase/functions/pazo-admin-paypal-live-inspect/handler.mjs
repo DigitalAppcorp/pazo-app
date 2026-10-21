@@ -102,7 +102,9 @@ export function createLiveResourceInspection({released=false,authenticateAdmin,
   if(result?.ok!==true||result.code!=='live_resources_read_verified'||
    result.planReadVerified!==true||result.webhookReadVerified!==true||
    result.mayCharge!==false||result.mayActivate!==false)
-   return reply(req,409,CODES.has(result?.code)?result.code:'live_provider_unavailable')
+   return reply(req,409,CODES.has(result?.code)?result.code:'live_provider_unavailable',
+    result?.code==='live_webhook_events_unexpected'&&result?.eventMismatch
+     ?{eventMismatch:result.eventMismatch}:{})
   let after
   try{after=await context()}catch{return reply(req,503,'resource_metadata_unavailable')}
   if(!after||after.generation!==before.generation||after.planId!==before.planId||
