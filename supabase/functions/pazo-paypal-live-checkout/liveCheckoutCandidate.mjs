@@ -50,7 +50,8 @@ export function createPazoLiveVerifiedCheckout({
    catch{return fail('authentication_unavailable')}
    if(!UUID.test(owner||''))return fail('authenticated_owner_required')
    try{
-    if(await admit({ownerId:owner,action:'live_checkout'})!==true)
+    if(await admit({ownerId:owner,action:'live_checkout',
+     requestKey:consent.requestKey,merchantGeneration})!==true)
      return fail('checkout_admission_denied')
    }catch{return fail('checkout_admission_unavailable')}
    // Only the private SQL store may create an immutable buyer/consent record.
