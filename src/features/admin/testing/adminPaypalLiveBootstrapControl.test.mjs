@@ -211,3 +211,41 @@ test('failed live generation request displays only predefined safe diagnostic co
  assert.match(server,/PAZO_F16_BOOTSTRAP_STAGE/)
  assert.match(server,/TRACE_CODES\.has\(code\)/)
 })
+
+test('MFA-authenticated configuration probe is read-only and never invokes generation SQL',async()=>{
+ let readCount=0,reserveCount=0
+ const handler=createPazoLiveMerchantBootstrapControl({
+  released:true,
+  authenticateAdmin:async()=>({id:actor,isAdmin:true,freshSession:true}),
+  readAdminSettings:async()=>{readCount++;return settings()},
+  reserveGeneration:async()=>{reserveCount++;throw Error('not allowed on probe')}
+ })
+ const request=makeRequest({action:'check_readiness',
+  confirmation:'VERIFICAR CONFIGURACION LIVE'})
+ const res=await handler(request)
+ const d=await res.json()
+ assert.equal(res.status,200)
+ assert.deepEqual(d,{
+  ok:true,code:'live_configuration_readonly_verified',environment:'live',
+  mayCharge:false,liveActivated:false,generationReserved:false,
+  webhookConfigured:false
+ })
+ assert.equal(readCount,1)
+ assert.equal(reserveCount,0)
+ const unverified=createPazoLiveMerchantBootstrapControl({
+  released:true,authenticateAdmin:async()=>({id:actor,isAdmin:true,freshSession:false}),
+  readAdminSettings:async()=>{throw Error('should not read')},
+  reserveGeneration:async()=>{throw Error('should not write')}
+ })
+ assert.equal((await unverified(makeRequest({action:'check_readiness',
+  confirmation:'VERIFICAR CONFIGURACION LIVE'}))).status,403)
+})
+test('bootstrap UI requires read-only readiness success before allowing a write',()=>{
+ const ui=readFileSync(new URL('../components/AdminPaypalMerchantBootstrap.tsx',import.meta.url),'utf8')
+ assert.match(ui,/action:'check_readiness'/)
+ assert.match(ui,/confirmation:'VERIFICAR CONFIGURACION LIVE'/)
+ assert.match(ui,/readiness!=='verified'/)
+ assert.match(ui,/data-pazo-readiness-diagnostic/)
+ assert.match(ui,/Comprobar configuración \(sin reservar\)/)
+ assert.match(ui,/setReadinessCode\(await safeBootstrapFailure/)
+})
