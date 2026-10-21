@@ -26,6 +26,7 @@ const providerSale=Object.freeze({
  verified:true,sourceEnvironment:'live',
  merchantGeneration:7,subscriptionId,saleId,
  amountMinor:299,currency:'USD',paidAt:start,
+ originVerified:true,originSource:'original_generation_subscription_transactions',
  servicePeriodVerified:false,paidThrough:null
 })
 const period=Object.freeze({

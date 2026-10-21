@@ -452,3 +452,10 @@ entrypoint = "./functions/f16-paypal-webhook/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/pazo-admin-paypal-live-inspect/index.ts"
+
+# Internal worker uses a separate random Vault invoker, never a browser JWT.
+# SQL admission + disabled-by-default control are mandatory before one batch.
+[functions.pazo-paypal-live-worker]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/pazo-paypal-live-worker/index.ts"

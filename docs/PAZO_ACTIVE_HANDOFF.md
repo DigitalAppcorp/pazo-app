@@ -1,4 +1,53 @@
-# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
+# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
+
+## Recuperación Codex 21-oct — P1 en ejecución
+
+Área aislada `pazo-live-reconciler`, rama `f16/live-signed-sale-reconciler-20261021`,
+base F13 `4e434b2fb17e981491b13de96a86befdcf7c9fff`. WIP anterior preservado en
+`f16/codex-merchant-identity-handoff-20261020`; lockfile original intacto.
+Orden completa leída; no scope de saldos, nuevas claves ni pruebas Sandbox/recursos.
+Auditoría alojada confirma reserva1, merchant0, inbox Live0, períodos0 y selector OFF.
+
+PR #54 DRAFT hacia F13: entrada firmada, lectura bajo lease y corroboración GET
+desde Vault de la generación original. Ahora añade venta con paginación completa,
+origen OAuth/suscripción/transacción, período contractual observado, renovación
+ordinaria correlacionada y escritura financiera/cierre de lease atómicos.
+No se confunde el hash de Client ID con identidad del beneficiario.
+Gates locales PASS: closure397/397, F16 sintético1193/1193, build y dist4/4.
+PG17 verifica pago/refund, fallos entre escritura y ACK, recuperación y rollback.
+Migraciones `20261021074014`, `20261021074024`, `20261021074032` APLICADAS tras
+CI3501 (cuatro jobs) y gateway418 PASS del commit `2f1403f6`. Cinco RPC nuevas
+service-only, RLS FORCE y revocación de bridges antiguos verificadas. Archivos
+alineados con versiones MCP reales, SQL idéntico al revisado. Reserva1,
+merchant0/inbox0/recibos0/períodos0 y selector sandbox/LiveOFF/killON.
+Tercer bloque: lifecycle/refund durable, estados merchant monotónicos y lectura
+original de venta/fecha para devoluciones tardías; PG14, closure406 y CI3502 /
+gateway419 PASS. Migración `20261021142517` APLICADA tras CI de `75dfd4e6`,
+dos RPC service-only y cuatro columnas verificadas, sin datos/cobros Live.
+Cuarto bloque instalado: transporte HTTP privado, control OFF, admisión por
+clave interna Vault, wrappers con backoff y salud. PG15/HTTP11/governance413,
+CI3503/gateway420 PASS; DDL `20261021144809` APLICADA, cinco RPC nuevas
+service-only y claim/finish antiguos revocados. Edge worker v1 ACTIVE con
+autenticación propia: cuatro rechazos HTTP reales PASS; control/processing OFF.
+Scheduler `20261021145500` APLICADO por SQL Editor, con historial registrado,
+después de dos fallos MCP sin ejecución. Extensiones nativas y cron OFF PASS.
+Postflight detectó grants PUBLIC de pg_net administrados por Supabase, no
+revocables por postgres; no se emitieron headers. API expone public/graphql_public.
+Corrección `20261021155429` APLICADA tras CI3505/gateway422 de `114756e1`:
+token de una admisión/120s, sin bearer Vault permanente en cola. HTTP autenticado
+real200 worker_idle, nonce consumido y batch cerrado. Cron automático repitió PASS.
+Control enabled solo salud, processing false, LiveOFF y cero pagos/eventos.
+Monitor de disputas `20261021162301` APLICADO tras CI3506/gateway423 de `739edcee`:
+GET paginado de venta original,
+casos mínimos, lease/batch exclusivo, full hold/resolución favorable/partial review,
+transacción con ACK y protocolo worker v2. PG24 (incluido NULL) y governance423/423
+PASS. Dos tablas FORCE RLS/service sin lectura directa, claim/finish service-only
+y trigger privado verificados. Edge worker v2 ACTIVE,27/27 fuentes Git739 idénticas;
+cuatro rechazos HTTP sin auth PASS. Cron automático16:27UTC200/healthy/buildv2,
+nonce consumido y lote cerrado; procesamiento OFF/0 eventos/pagos/casos/monitores.
+Faltan beneficios, checkout,
+readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
+No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 
 **CODEX — ORDEN ACTIVA F16/BETA:** Antes de implementar o declarar finalizado cualquier cambio de monetización o lanzamiento, leer y ejecutar integralmente `docs/CODEX_F16_BETA_LAUNCH_COMPLETION_ORDER_20261021.md`. Esa orden concreta el mandato obligatorio del PO: terminar software, backend, QA y preparación antes de pedir claves Live en Administración; únicamente se reserva para el PO el ingreso privado de credenciales y autorización de la prueba/cobro real. No confundir CI PASS con beta lanzable ni posponer F16. 
 

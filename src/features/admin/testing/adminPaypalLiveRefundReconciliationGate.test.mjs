@@ -23,6 +23,7 @@ const recorded=Object.freeze({recorded:true,sourceEnvironment:'live',
 const provider=Object.freeze({verified:true,sourceEnvironment:'live',
  intentId,subscriptionId,merchantGeneration:7,saleId,
  status:'REFUNDED',refundKind:'refunded',amountMinor:299,currency:'USD',
+ originVerified:true,originSource:'original_generation_subscription_transactions',
  holdReviewRequired:false})
 function setup(overrides={}){
  const calls={event:0,binding:0,sale:0,provider:0,write:0}

@@ -278,3 +278,9 @@ END $overlap$;
 \i scripts/f16-live-bootstrap-lease-disposable-lab.sql
 \i scripts/f16-live-json-claims-disposable-lab.sql
 \i scripts/f16-live-resource-inspection-disposable-lab.sql
+\i scripts/f16-live-signed-receipt-disposable-lab.sql
+\i scripts/f16-live-atomic-settlement-disposable-lab.sql
+\i scripts/f16-live-private-worker-disposable-lab.sql
+\i scripts/f16-live-private-scheduler-disposable-lab.sql
+\i scripts/f16-live-single-use-dispatch-disposable-lab.sql
+\i scripts/f16-live-dispute-monitor-disposable-lab.sql

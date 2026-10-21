@@ -3,10 +3,12 @@ name: CI
 on:
   pull_request:
     branches:
+      - f13/section-titles-20261012
       - main
       - release/mvp-beta-fast-track-20261010
   push:
     branches:
+      - f13/section-titles-20261012
       - main
       - release/mvp-beta-fast-track-20261010
       - fix/f14-nosuchkey-verification-20261012

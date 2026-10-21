@@ -2,6 +2,23 @@ name: F16 Live Gateway Disposable PostgreSQL Lab
 on:
   pull_request:
     paths:
+      - 'supabase/migrations/*pazo_f16_live_private_worker_scheduler.sql'
+      - 'scripts/f16-live-worker-scheduler-core-stage.mjs'
+      - 'scripts/f16-live-private-scheduler-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_scheduler_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_private_worker_control.sql'
+      - 'scripts/f16-live-private-worker-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_lifecycle_and_refund_scope.sql'
+      - 'supabase/rollbacks/f16_live_lifecycle_refund_scope_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
+      - 'supabase/rollbacks/f16_live_financial_context_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_atomic_leased_settlement.sql'
+      - 'scripts/f16-live-atomic-settlement-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_signed_event_evidence.sql'
+      - 'scripts/f16-live-signed-receipt-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_resource_inspection.sql'
       - 'scripts/f16-live-resource-inspection-disposable-lab.sql'
       - 'supabase/rollbacks/f16_live_resource_inspection_REVIEW_REQUIRED.sql'
@@ -23,6 +40,23 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
+      - 'supabase/migrations/*pazo_f16_live_private_worker_scheduler.sql'
+      - 'scripts/f16-live-worker-scheduler-core-stage.mjs'
+      - 'scripts/f16-live-private-scheduler-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_scheduler_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_private_worker_control.sql'
+      - 'scripts/f16-live-private-worker-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_lifecycle_and_refund_scope.sql'
+      - 'supabase/rollbacks/f16_live_lifecycle_refund_scope_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
+      - 'supabase/rollbacks/f16_live_financial_context_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_atomic_leased_settlement.sql'
+      - 'scripts/f16-live-atomic-settlement-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_signed_event_evidence.sql'
+      - 'scripts/f16-live-signed-receipt-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql'
       - 'supabase/migrations/*pazo_f16_live_resource_inspection.sql'
       - 'scripts/f16-live-resource-inspection-disposable-lab.sql'
       - 'supabase/rollbacks/f16_live_resource_inspection_REVIEW_REQUIRED.sql'
@@ -71,4 +105,6 @@ jobs:
           PGUSER: postgres
           PGDATABASE: postgres
           PGPASSWORD: synthetic-only-no-hosted-data
-        run: psql -X -v ON_ERROR_STOP=1 -f scripts/f16-live-gateway-disposable-lab.sql
+        run: |
+          node scripts/f16-live-worker-scheduler-core-stage.mjs
+          psql -X -v ON_ERROR_STOP=1 -f scripts/f16-live-gateway-disposable-lab.sql

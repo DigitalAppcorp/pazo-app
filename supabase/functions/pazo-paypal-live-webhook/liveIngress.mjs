@@ -2,6 +2,7 @@
 // A signed merchant event is NOT proof it belongs to PAZO or represents a
 // paid service period. Never store payload, payer PII, or grant entitlements.
 import {requireLiveCertUrl} from './livePostback.mjs'
+import {createPazoLiveSignedEventReceipt} from './liveSignedEventReceipt.mjs'
 const LIMIT=65536
 const OWNER=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const INTENT=/^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -101,11 +102,14 @@ export function createPazoLiveWebhookIntake({released=false,environment,webhookI
    return deny(503,'ownership_proof_unavailable')
   let inserted
   try{
+   const signatureEvidence=await createPazoLiveSignedEventReceipt({
+    signatureVerified:verified,rawBody:bytes,webhookId,scope
+   })
    inserted=await inbox.recordIfAbsent({provider:'paypal',sourceEnvironment:'live',
     merchantGeneration:scope.merchantGeneration,
     ownerId:scope.ownerId,intentId:scope.intentId,
     subscriptionId:scope.subscriptionId,
-    eventId:event.id,eventType:event.event_type})
+    eventId:event.id,eventType:event.event_type,signatureEvidence})
   }catch{return deny(503,'durable_inbox_unavailable')}
   if(inserted===true)return deny(202,'verified_live_event_queued')
   if(inserted===false)return deny(200,'duplicate_verified_live_event')
