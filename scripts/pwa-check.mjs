@@ -82,3 +82,23 @@ test('PWA registers after asynchronous bootstrap even when load has already fire
     assert.equal(calls[0].options.scope,'/')
   }
 })
+
+test('PayPal callback URLs strip provider tokens and retain only a non-financial route marker',async()=>{
+  const {normalizeSupporterPaypalCallback}=await import(
+    '../src/features/supporter/supporterAccountRoute.mjs')
+  for(const [path,kind] of [['/paypal/return','return'],['/paypal/cancel','cancel']]){
+    const state={pazoNavigation:true}
+    const replaced=[]
+    const history={state,replaceState:(nextState,title,url)=>replaced.push({nextState,title,url})}
+    const location={pathname:path,search:'?ba_token=SENSITIVE_DO_NOT_KEEP',
+      hash:'#access_token=DO_NOT_KEEP'}
+    assert.equal(normalizeSupporterPaypalCallback(location,history),true)
+    assert.equal(replaced.length,1)
+    assert.equal(replaced[0].nextState,state)
+    assert.equal(replaced[0].url,'/#/account/supporter?paypal='+kind)
+    assert.ok(!JSON.stringify(replaced).includes('SENSITIVE'))
+    assert.ok(!JSON.stringify(replaced).includes('access_token'))
+  }
+  const history={replaceState:()=>{throw Error('must not mutate unrelated routes')}}
+  assert.equal(normalizeSupporterPaypalCallback({pathname:'/dashboard'},history),false)
+})
