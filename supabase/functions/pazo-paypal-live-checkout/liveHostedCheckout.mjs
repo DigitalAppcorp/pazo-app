@@ -6,10 +6,9 @@ import {createPazoLiveGoTrueOwnerResolver} from './liveGoTrueOwner.mjs'
 import {createPazoLiveServiceRpc} from './liveSqlServiceAdapters.mjs'
 import {publicBetaOrigin} from './liveSubscriptionProvider.mjs'
 import {createPazoLiveVaultGenerationSecretReader} from '../pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs'
+import {verifyPazoLiveOfferConsent} from './liveOfferRegistry.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
-const DIGEST=/^[a-f0-9]{64}$/
-const VERSION=/^pazo-supporter-live\.[a-z0-9.-]{3,40}$/
 const forbidden=(status,code)=>new Response(JSON.stringify({code}),{
  status,headers:{'content-type':'application/json','cache-control':'no-store'}
 })
@@ -17,14 +16,11 @@ export function createPazoLiveHostedCheckout({
  released=false,getEnv=()=>undefined,fetchImpl=fetch
 }={}){
  if(released!==true)return createPazoLiveCheckoutHttpHandler({released:false})
- let api,anon,service,termsVersion,termsDigest
+ let api,anon,service
  try{
   api=getEnv('SUPABASE_URL');anon=getEnv('SUPABASE_ANON_KEY')
   service=getEnv('SUPABASE_SERVICE_ROLE_KEY')
-  termsVersion=getEnv('PAZO_F16_LIVE_TERMS_VERSION')
-  termsDigest=getEnv('PAZO_F16_LIVE_TERMS_DIGEST')
-  if(api!==PROJECT||!VERSION.test(termsVersion||'')||
-   !DIGEST.test(termsDigest||''))throw Error('config')
+  if(api!==PROJECT)throw Error('config')
  }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
  let rpc,resolveAuthenticatedOwner,readGenerationCredentials
  try{
@@ -38,10 +34,7 @@ export function createPazoLiveHostedCheckout({
  }catch{return createPazoLiveCheckoutHttpHandler({released:false})}
  const readActiveRoute=async()=>rpc('route',{})
  const getSecret=name=>getEnv(name)
- const verifyConsent=async({consent})=>
-  consent?.affirmativeConsent===true&&consent?.termsVersion===termsVersion&&
-  consent?.termsDigest===termsDigest&&
-  ['es','en'].includes(consent?.locale)
+ const verifyConsent=async({consent})=>verifyPazoLiveOfferConsent(consent)
  const admit=async({ownerId,action})=>{
   if(action!=='live_checkout'||!UUID.test(ownerId||''))return false
   // Fail-closed profile lookup after GoTrue JWT verification.

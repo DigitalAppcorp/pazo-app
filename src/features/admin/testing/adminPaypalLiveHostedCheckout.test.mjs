@@ -2,12 +2,13 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {createPazoLiveHostedCheckout} from '../../../../supabase/functions/pazo-paypal-live-checkout/liveHostedCheckout.mjs'
+import {getPazoLiveOffer} from '../../../../supabase/functions/pazo-paypal-live-checkout/liveOfferRegistry.mjs'
 const origin='https://pazo.example.com'
 const url='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const jwt='e30.eyJzdWIiOiIxMjM0In0.dGVzdA'
 const owner='12345678-1234-4234-8234-123456789abc'
 const consent={requestKey:'23456789-1234-4234-8234-123456789abc',
- termsVersion:'pazo-supporter-live.offer-v1',termsDigest:'a'.repeat(64),
+ termsVersion:getPazoLiveOffer('es').version,termsDigest:getPazoLiveOffer('es').termsDigest,
  locale:'es',affirmativeConsent:true}
 const req=(method='POST',requestOrigin=origin)=>new Request(url+'/functions/v1/pazo-paypal-live-checkout',{
  method,headers:{origin:requestOrigin,'content-type':'application/json',authorization:'Bearer '+jwt},
@@ -15,9 +16,7 @@ const req=(method='POST',requestOrigin=origin)=>new Request(url+'/functions/v1/p
 })
 const env=Object.freeze({
  SUPABASE_URL:url,SUPABASE_ANON_KEY:'TEST_ANON_KEY_1234567890123456789',
- SUPABASE_SERVICE_ROLE_KEY:'TEST_SERVICE_ROLE_KEY_123456789012345',
- PAZO_F16_LIVE_TERMS_VERSION:'pazo-supporter-live.offer-v1',
- PAZO_F16_LIVE_TERMS_DIGEST:'a'.repeat(64)
+ SUPABASE_SERVICE_ROLE_KEY:'TEST_SERVICE_ROLE_KEY_123456789012345'
 })
 const response=(status,body)=>new Response(JSON.stringify(body),{status,
  headers:{'content-type':'application/json'}})
@@ -38,10 +37,10 @@ test('default OFF has no env reads, provider requests or database effects',async
  assert.equal(reads,0)
  assert.equal(calls,0)
 })
-test('missing published terms or backend keys blocks before any provider activity',async()=>{
+test('missing backend keys blocks before any provider activity; terms require no manual environment settings',async()=>{
  let calls=0
  const h=createPazoLiveHostedCheckout({released:true,
-  getEnv:name=>name==='PAZO_F16_LIVE_TERMS_DIGEST'?null:env[name],
+  getEnv:name=>{assert.ok(!name.startsWith('PAZO_F16_LIVE_TERMS_'));return name==='SUPABASE_SERVICE_ROLE_KEY'?null:env[name]},
   fetchImpl:async()=>{calls++;throw Error('not expected')}})
  const r=await h(req())
  assert.equal(r.status,503)
