@@ -114,9 +114,12 @@ export function createPazoLiveVaultSetup({released=false,authenticateAdmin,
     return reply(req,409,'generation_changed')
   }catch{return reply(req,503,'live_setup_metadata_unavailable')}
   try{
-   const saved=await saveVault({request:req,actorId:actor.id,clientId:id,clientSecret:secret})
+   const saved=await saveVault({request:req,actorId:actor.id,clientId:id,clientSecret:secret,
+    merchantGeneration:reservation.generation,planId:reservation.planId,
+    webhookId:reservation.webhookId})
    if(saved!==true)return reply(req,503,'credential_save_outcome_needs_review')
    const confirmed=await readbackVault({request:req,actorId:actor.id,
+    merchantGeneration:reservation.generation,
     planId:reservation.planId,webhookId:reservation.webhookId})
    if(confirmed!==true)return reply(req,503,'credential_save_outcome_needs_review')
   }catch{return reply(req,503,'credential_save_outcome_needs_review')}
