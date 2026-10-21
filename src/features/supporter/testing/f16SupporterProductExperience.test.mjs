@@ -50,7 +50,9 @@ test('F16 product page retains no-purchase path and real server-verified checkou
  assert.match(design,/amigo-pazo-inicio\.png/)
  assert.match(page,/Ahora no, seguir usando PAZO/)
  assert.match(page,/onClick=\{onClose\}/)
- assert.match(page,/Las suscripciones todavía no están disponibles/)
+ const live=readFileSync(new URL('../components/SupporterLiveCheckoutPanel.tsx',import.meta.url),'utf8')
+ assert.match(page,/<SupporterLiveCheckoutPanel lang=\{lang\}\/>/)
+ assert.match(live,/Las suscripciones todavía no están disponibles/)
  assert.match(page,/qaV2Screen \?/)
  assert.match(page,/SandboxCheckoutQaPanel/)
  assert.match(page,/SandboxV2AccountPanel/)
@@ -177,8 +179,10 @@ test('F16 option B keeps signed PayPal Sandbox consent and one-shot checkout unc
  assert.ok(checkout.includes("data.phase==='APPROVAL_PENDING'"))
  assert.ok(checkout.includes("window.location.assign(url)"))
  assert.ok(checkout.includes('bg-[#E1E53F]'),'PO chose lime-colored PayPal CTA for better blue-logo contrast')
- assert.ok(page.includes('Las suscripciones todavía no están disponibles'),'Public/Live checkout remains OFF')
- assert.ok(page.includes('button type="button" disabled'),'Public/Live PayPal button cannot charge')
+ const live=readFileSync(new URL('../components/SupporterLiveCheckoutPanel.tsx',import.meta.url),'utf8')
+ assert.ok(live.includes('Las suscripciones todavía no están disponibles'),'Live remains unavailable until the backend is released')
+ const edge=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
+ assert.ok(edge.includes('const LIVE_CHECKOUT_RELEASED=false'),'Live payments are still compile-time disabled')
 })
 
 test('F16 option B mobile screenshot corrections enforce compact hierarchy without modifying billing',()=>{
