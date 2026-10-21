@@ -1,5 +1,22 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## En curso — comprobación privada de plan y webhook
+
+El PO entregó Webhook ID; conservado exactamente como candidato local de generación
+1, **sin validación API todavía**. No crear webhook, plan o reserva otra vez.
+Consulta actual: reserva 1 única reserved, merchant Live0, sandbox/Live OFF/kill ON.
+HEAD anterior cd9d56cc9a05165bb8fa2f2c4f74dc528a679e64 confirmado 9/9 workflows SUCCESS;
+PR44 OPEN/DRAFT y previews automáticas OFF.
+
+Preparado `pazo-admin-paypal-live-inspect`: GoTrue+admin+MFA reciente, claves
+efímeras introducidas solo en Admin, GET de recursos y registro de metadata tras
+verificar plan y URL/eventos exactos. No guarda/devuelve claves, finaliza merchant
+ni activa cobros. 20 pruebas dirigidas PASS, PG17 roles/rollback PASS,
+verify:prepreview PASS. Migración pendiente de CI e instalación: no pedir claves
+antes del postflight. Ver `PAZO_F16_LIVE_RESOURCE_INSPECTION_20261020.md`.
+Aceptación visual del control, API real, identidad merchant y firma/custodia/worker
+siguen pendientes. Estos datos prevalecen sobre los checkpoints históricos.
+
 ## Último checkpoint — lector de ventas originales HOSTED PASS
 
 InstaladoUNAvez `20261021014400_pazo_f16_live_recorded_sale_reader`, SQLSHA25643450d0d55b26dcd9e6336c4c7faf4579e4626d7f084afa189c5292050bdf817; archivo alineado al ID real sin cambiar bytes. Postflight: STABLE/SECURITYDEFINER/search_pathvacío, ACLexactopostgres+service_role; anon/authenticatedfalse, claimsJSON. LecturaalojadaREADONLYconroleDBservice_role yreferenciassintéticasausentes devolvióNULLsinfilas/beneficios. Reserva1 única intacta, generacionesLive0,selectorOFF. Código080b809943d1b11439d85405ebc722d8e888ab4a9/9CI SUCCESS (CI39528718580/LiveGateway39528718397), PG17roles/owner/generaciónPASS; cambio posterior soloalineaIDsydocumenta.

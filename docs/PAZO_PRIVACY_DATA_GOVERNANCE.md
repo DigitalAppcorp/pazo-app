@@ -24,6 +24,15 @@
 
 # PAZO — Privacy & Data Governance
 
+Comprobación Live administrativa (20-oct-2026): claves aportadas por el PO solo
+para una petición HTTPS con JWT/admin/MFA reciente; OAuth y GET PayPal, sin
+persistencia de claves en navegador/Vault/Edge y sin logs, analítica o respuesta
+de credenciales/tokens. Solo se conserva Webhook ID y auditoría administrativa
+de configuración en tablas ya privadas. No hay datos de pagador, suscripciones,
+eventos financieros ni beneficios nuevos. No implica política legal de retención
+nueva ni habilitación de captura financiera. Véase
+`PAZO_F16_LIVE_RESOURCE_INSPECTION_20261020.md`.
+
 **Estado:** ACTIVO / BETA GATE  
 **Producto objetivo:** 18+  
 **Propósito:** definir qué puede recopilar, mostrar, registrar o enviar PAZO antes de Beta pública.

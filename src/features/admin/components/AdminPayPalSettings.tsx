@@ -3,6 +3,7 @@ import {supabase} from '../../../services/supabaseClient'
 import {AdminGlyph} from './AdminVisuals'
 import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
 import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
+import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -257,6 +258,8 @@ export function AdminPayPalSettings({lang}:Props){
        'MFA checked. The server will independently validate the session before allowing credentials.'))}}/>}
     {env==='live'&&LIVE_MERCHANT_BOOTSTRAP_RELEASED&&
      <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={recentAdminMfa}/>}
+    {env==='live'&&<AdminPaypalLiveResourceCheck lang={lang}
+     mfaRecentlyVerified={recentAdminMfa} onVerified={load}/>}
     {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
       <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
       <p className="mt-2 text-[12px] text-[#6B8077]">

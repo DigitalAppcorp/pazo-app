@@ -92,6 +92,15 @@
 
 # PAZO — Data & Third-Party Inventory
 
+Comprobador Live privado (20-oct-2026): Client ID/Secret introducidos por el PO,
+en memoria durante solicitud autenticada con MFA; intercambio OAuth/GET únicamente
+con PayPal Live y descarte de tokens/respuestas privadas. No se almacenan claves.
+Datos persistidos: Webhook ID en `admin_private.paypal_gateway_settings` y auditoría
+operacional (actor administrativo, generación, ID, verificaciones booleanas) en
+`paypal_gateway_change_log`, con controles existentes. Sin datos de comprador,
+payload financiero, analítica o nueva finalidad. Custodia generacional/identidad
+merchant/entrega siguen pendientes; no son certificados por este control.
+
 > **Estado de referencia pre-beta (verificado el 2026-10-10, sujeto a cambios de QA):** la descripción antigua de cero datos correspondía al reset anterior, no al estado actual. Había **7 cuentas Auth** (6 originales que deben preservarse y 1 QA descartable ya confirmada), **1 mascota y 1 archivo Storage anteriores**, **1 moderador** y **0 solicitudes de eliminación**. Esta cuenta QA no tenía mascotas ni archivos; su ensayo está reservado a Codex en `docs/PAZO_CODEX_PENDING_QA_20261010.md`. El inventario registra categorías y no sustituye una consulta actual de la base de datos.
 
 **Estado:** ACTIVO / baseline pre-Beta  

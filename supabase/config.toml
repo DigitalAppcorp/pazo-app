@@ -446,3 +446,9 @@ entrypoint = "./functions/f14-moderation-reconcile/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/f16-paypal-webhook/index.ts"
+
+# Recent-MFA administrative resource inspection. No credential custody or payments.
+[functions.pazo-admin-paypal-live-inspect]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/pazo-admin-paypal-live-inspect/index.ts"

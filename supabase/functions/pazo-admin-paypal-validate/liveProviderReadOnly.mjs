@@ -85,6 +85,8 @@ export const liveWebhookUrlForGeneration=g=>Number.isSafeInteger(g)&&g>=1&&g<=99
     return invalid('live_webhook_unverified')
    const types=new Set(webhook.event_types.map(e=>typeof e==='string'?e:e?.name))
    if(REQUIRED_EVENTS.some(e=>!types.has(e)))return invalid('live_webhook_events_missing')
+   if(types.size!==REQUIRED_EVENTS.length||webhook.event_types.length!==REQUIRED_EVENTS.length)
+    return invalid('live_webhook_events_unexpected')
    // GET confirms config only; it does NOT prove real webhook delivery/signature.
    return ok()
   }catch{return invalid('live_provider_unavailable')}

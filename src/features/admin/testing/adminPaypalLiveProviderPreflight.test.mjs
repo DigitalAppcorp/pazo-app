@@ -100,3 +100,15 @@ test('provider rejection and transport failure remain opaque and block charging'
  assert.equal(failure.code,'live_provider_unavailable')
  assert.ok(!JSON.stringify(failure).includes('PRIVATE_RESPONSE'))
 })
+
+test('resource check rejects wildcard, unexpected and duplicate webhook subscriptions',async()=>{
+ for(const events of [
+  [...REQUIRED_EVENTS,'*'],[...REQUIRED_EVENTS,'PAYMENT.CAPTURE.COMPLETED'],
+  [...REQUIRED_EVENTS,REQUIRED_EVENTS[0]]
+ ]){
+  const p=provider({webhook:{event_types:events.map(name=>({name}))}})
+  const result=await inspectLivePaypalResources({...config,fetchImpl:p.fetchImpl})
+  assert.equal(result.code,'live_webhook_events_unexpected')
+  assert.equal(result.mayCharge,false)
+ }
+})
