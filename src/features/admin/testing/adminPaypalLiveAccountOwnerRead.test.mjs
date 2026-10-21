@@ -110,6 +110,55 @@ test('Edge uses GoTrue and service-only SQL; browser routes to Live list without
  assert.doesNotMatch(index,/PAYPAL_CLIENT_SECRET|createSubscription|cancelSubscription/)
  assert.match(account,/pazo-paypal-live-account/)
  assert.match(account,/accounts\?\.length===0/)
- assert.match(account,/!qaV2Screen && body\.action!=='list'/)
+ assert.match(account,/!\['list','status'\]\.includes/)
+ assert.match(account,/onClick=\{\(\) => void checkStatus\(account\.intentId\)\}/)
  assert.match(view,/LIVE_VAULT_SETUP_RELEASED=true/)
+})
+
+test('bound Live owner may read provider status but never paid coverage or provider IDs',async()=>{
+ const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+  providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
+ const seen=[]
+ const {handler}=build({
+  readPrivateOwner:async()=>slots([bound]),
+  readProviderStatus:async arg=>{
+   seen.push(arg)
+   return {id:bound.subscriptionId,plan_id:bound.planId,
+    custom_id:bound.intentId,status:'ACTIVE'}
+  }
+ })
+ const result=await handler(req({action:'status',intentId:intent}))
+ assert.equal(result.status,200)
+ const body=await result.json()
+ assert.equal(body.code,'live_provider_status_read')
+ assert.equal(body.providerStatus,'ACTIVE')
+ assert.equal(body.paidThrough,null)
+ assert.equal(body.mayGrantBenefits,false)
+ assert.equal(body.mayCharge,false)
+ assert.equal(seen.length,1)
+ assert.equal(seen[0].merchantGeneration,1)
+ assert.equal(seen[0].subscriptionId,bound.subscriptionId)
+ for(const secret of [bound.subscriptionId,bound.planId,bound.requestKey,owner])
+  assert.ok(!JSON.stringify(body).includes(secret))
+})
+test('status never consults provider for other owner, pending or wrong subscription',async()=>{
+ let reads=0
+ const pending=build({readProviderStatus:async()=>{reads++}})
+ assert.equal((await pending.handler(req({action:'status',intentId:intent}))).status,409)
+ const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+  providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
+ const unknown=build({readPrivateOwner:async()=>slots([bound]),
+  readProviderStatus:async()=>{reads++;return {id:bound.subscriptionId,
+   plan_id:bound.planId,custom_id:'intent-WRONG',status:'ACTIVE'}}})
+ const res=await unknown.handler(req({action:'status',intentId:intent}))
+ assert.equal(res.status,503)
+ assert.equal((await res.json()).code,'live_provider_status_unverified')
+ assert.equal(reads,1)
+})
+test('Live account reader can read original generation including retired status but cannot cancel',()=>{
+ const edge=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-account/index.ts',import.meta.url),'utf8')
+ assert.match(edge,/createPazoLiveVaultGenerationSecretReader/)
+ assert.match(edge,/createPaypalLiveSubscriptionProvider/)
+ assert.match(edge,/return provider\.readSubscription\(subscriptionId\)/)
+ assert.doesNotMatch(edge,/\.cancelSubscription\(|createSubscription\(|REFUND|service_cancel_claim/)
 })
