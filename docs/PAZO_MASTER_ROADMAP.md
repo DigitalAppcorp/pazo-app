@@ -4,7 +4,10 @@ Base de integración auditada por Git: F13 `669efafdb5678cae40c5137d7bddc9403c2a
 PR #66 `d1d34fa230c0928748141adf1f02adb186a99568` revisado: solo alinea el nombre
 de la migración de cancelación ya aplicada y su prueba, más el handoff. Se usó
 como base de `f16/beta-completion-20261021`, sin modificar `main` ni sobrescribir F13.
-No se pudo consultar estado/comentarios/CI de PR mediante API: proxy 403.
+La API estuvo bloqueada durante esa implementación; el postflight de 20:30 UTC
+ya revisó PR/CI por GraphQL y REST. Ver
+`docs/PAZO_CLOUD_ACCESS_AND_HTTPS_POSTFLIGHT_20261021.md`: PR66 tiene 12/12
+Actions SUCCESS, pero Vercel falla por cuota y los callbacks/PWA públicos dan404.
 
 Código adicional implementado: reanudación del CREATE original con lease y el
 mismo cuerpo/PayPal-Request-Id dentro de 48h; GET independiente antes del binding;
@@ -26,10 +29,12 @@ rollback/reapply; navegador sintético 390/1440px, doble clic, cancelación expl
 fuente financiera no disponible y callbacks reales de la SPA sin tokens en URL.
 Estos resultados NO son PayPal Live, PWA instalada HTTPS ni CI remoto.
 
-**Bloqueo operativo actual:** red de APIs/host público devuelve CONNECT403;
-no hay herramientas ni autenticación Supabase/Vercel en esta sesión. Se guardó
-borrador de red añadiendo api.github.com, api.supabase.com, api.vercel.com y
-pazo-app-t83r.vercel.app sin borrar destinos. Guardar no aplica ni publica.
+**Bloqueo operativo actualizado a 20:30 UTC:** GitHub, Auth Supabase y portada
+HTTPS ya responden; los callbacks y archivos PWA de ese dominio devuelven404.
+Sin autenticación administrativa Supabase/Vercel. El login oficial Vercel sigue
+bloqueado por proxy a vercel.com; se añadieron vercel.com y supabase.com al
+borrador preservando lo anterior. Guardar no aplica: requiere revisión/guardado
+y publicación del entorno de desarrollo, no de PAZO. Postflight enlazado arriba.
 Falta auditar source/versión alojados antes de instalar/desplegar; también falta
 terminar P4 (readiness y habilitación controlada Admin/DB/Edge), publicación HTTPS
 bajo GO y canary real autorizado. NO pedir claves PayPal todavía.

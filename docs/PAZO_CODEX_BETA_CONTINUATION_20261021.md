@@ -5,6 +5,17 @@ La orden del PO de completar F16 antes de beta sigue vigente. No solicitar clave
 PayPal todavía. Este checkpoint cierra código comprobable de recuperación,
 beneficios y gestión; la preparación global de release sigue bloqueada.
 
+## Actualización de acceso — 20:30 UTC
+
+GitHub ya accesible: PR66 abierto con 12/12 GitHub Actions SUCCESS y status
+Vercel FAILURE por cuota. La portada HTTPS pública responde200, pero callbacks
+PayPal y archivos PWA devuelven404. Auth Supabase responde200; no hay acceso
+administrativo de Supabase/Vercel. OAuth Vercel requiere vercel.com, aún bloqueado;
+se guardó ampliación mínima de red, pendiente aplicar/publicar el entorno de
+desarrollo. Los bloqueos de red abajo describen la entrega anterior; el
+[postflight actualizado](PAZO_CLOUD_ACCESS_AND_HTTPS_POSTFLIGHT_20261021.md)
+contiene evidencia real y la acción externa exacta. Ningún deploy, SQL o cobro nuevo.
+
 ## Estado de Git auditado
 
 - `main`: `ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`.
