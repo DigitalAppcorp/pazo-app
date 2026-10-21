@@ -1,5 +1,45 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## F16 — Auditoría de beta y bloqueo operativo real | 21-oct-2026 (actualizado)
+
+**PO exige terminar beta con PayPal Live automático**; no se acepta enlace
+manual PayPal ni activar solo la UI de cobro. Conservar lo probado en Sandbox
+y la auditoría Live de plan/webhook (generación 1), sin volver a pedir scopes
+`reporting/balances/read`.
+
+**Código verificado 21-oct:** PR #50 a F13, commit `fb205063e223c5598a791dd4b2fb14f87a0673b3`,
+GitHub Actions 9/9 SUCCESS, corrige `liveGenerationPinnedWebhook.mjs` para
+aceptar exactamente ambas rutas de Supabase Edge (`/functions/v1/...` y
+`/pazo-paypal-live-webhook`), sin ampliar rutas arbitrarias ni suprimir
+firma, propiedad, generación, idempotencia o kill-switch. No deployed Live.
+
+**Estado hosted SELECT-only:** bootstrap reservation=1,
+merchant_generations=0, secret_provision_attempts=0, inbox Live=0, paid
+periods Live=0; selector sandbox, live_enabled=false,
+kill_switch=true, active_generation=NULL. Checkout Live, receptor webhook
+Live y provisioner tienen hard latches OFF en sus index.ts; el botón de
+pago real NO está certificado. La función admin de prueba de saldos ya no
+es requisito de preparación.
+
+**Bloqueo externo para release/PWA:** conector Vercel para equipo
+`digitalapp` responde `403 forbidden` en get_project,
+list_deployments y list_project_domains (proyecto `pazo-app-t83r`);
+el PO debe reautorizar Vercel para ese equipo o usar CLI local con su
+propio login. NO inferir que el dominio HTTPS público y callbacks estén
+bien por el build/CI local. Tampoco mover a main, desplegar producción ni
+autorizar cobros hasta aprobación final y E2E supervisado.
+
+**Próximos hitos imprescindibles:** finalizar generación comercial
+vinculada a un merchant administrativamente autenticado, provisionar
+credenciales Live server-only con límites mínimos, conectar gateway
+checkout/webhook/worker y cancelaciones/holds, demostrar venta COMPLETED
+con período y reversión idempotentes, QA en HTTPS y PWA instalada,
+security advisor (password leak protection OFF), visual PO, rollback y GO.
+La verificación Merchant vía saldos es descartada; nunca fingir merchant
+verificado sin fuente confiable ni dar beneficios al volver de PayPal.
+
+
+
 ## Corrección prioritaria: permitir cobros sin permiso de saldos — 21-oct-2026 (vigente)
 
 **Decisión operativa PO:** prioridad que la membresía US$2.99 pueda recibir
