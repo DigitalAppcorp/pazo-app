@@ -459,3 +459,9 @@ entrypoint = "./functions/pazo-admin-paypal-live-inspect/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/pazo-paypal-live-worker/index.ts"
+
+# Original-owner account management rechecks GoTrue identity inside the handler.
+[functions.pazo-paypal-live-account]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/pazo-paypal-live-account/index.ts"
