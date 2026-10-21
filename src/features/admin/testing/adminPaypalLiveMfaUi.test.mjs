@@ -36,3 +36,20 @@ test('TOTP enrollment accepts Supabase SVG QR content and supports safe unfinish
  assert.ok(component.includes('if(busy||pendingFactorId)return'))
  assert.equal(component.includes('console.log'),false)
 })
+
+test('MFA SIGNED_IN token rotation does not rebootstrap pets or unmount admin dashboard',()=>{
+ const app=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
+ const auth=readFileSync(new URL('../../../context/AuthContext.tsx',import.meta.url),'utf8')
+ // Supabase challengeAndVerify emits an updated same-account session.
+ assert.ok(auth.includes("supabase.auth.onAuthStateChange("))
+ assert.ok(auth.includes("setUser(nextUser)"))
+ // Identity change and explicit retry still bootstrap. New user objects
+ // representing the SAME account never reset petBootstrap to loading.
+ assert.ok(app.includes("}, [user?.id, loading, petBootstrapRetry])"))
+ assert.ok(!app.includes("}, [user, loading, petBootstrapRetry])"))
+ assert.ok(app.includes("setPetBootstrap({ userId, status: 'loading' })"))
+ assert.ok(app.includes("petBootstrap.status === 'loading'"))
+ assert.ok(app.includes("activeTab === 'mascota'"))
+ assert.ok(component.includes("supabase.auth.mfa.challengeAndVerify({"))
+ assert.ok(admin.includes("setRecentAdminMfa(true)"))
+})
