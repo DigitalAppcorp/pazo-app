@@ -19,7 +19,7 @@ const record={ownerId:owner,requestKey:key,intentId:intent,planId:plan,
 function mock(overrides={}){
  let created=0,claimed=0,bound=0,consented=0
  const dependencies={
-  releaseReady:true,planId:plan,merchantGeneration:2,
+  releaseReady:true,planId:plan,merchantGeneration:2,originalOrigin:origin,
   now:()=>Date.parse('2026-10-19T18:10:00Z'),
   resolveAuthenticatedOwner:async()=>owner,
   admit:async()=>true,
