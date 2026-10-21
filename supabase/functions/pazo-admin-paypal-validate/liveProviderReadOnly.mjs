@@ -12,7 +12,8 @@ export const liveWebhookUrlForGeneration=g=>Number.isSafeInteger(g)&&g>=1&&g<=99
   'BILLING.SUBSCRIPTION.PAYMENT.FAILED'
  ])
  const ascii=s=>typeof s==='string'&&s.length>=8&&s.length<=512&&/^[\x21-\x7e]+$/.test(s)
- const invalid=(code)=>Object.freeze({ok:false,code,mayCharge:false,mayActivate:false})
+ const invalid=(code,eventMismatch)=>Object.freeze({ok:false,code,mayCharge:false,mayActivate:false,
+  ...(eventMismatch?{eventMismatch:Object.freeze(eventMismatch)}:{})})
  const ok=()=>Object.freeze({
   ok:true,code:'live_resources_read_verified',environment:'live',
   planReadVerified:true,webhookReadVerified:true,
@@ -83,10 +84,24 @@ export const liveWebhookUrlForGeneration=g=>Number.isSafeInteger(g)&&g>=1&&g<=99
    if(!webhook||webhook.id!==webhookId||webhook.url!==expectedWebhookUrl||
     !Array.isArray(webhook.event_types))
     return invalid('live_webhook_unverified')
-   const types=new Set(webhook.event_types.map(e=>typeof e==='string'?e:e?.name))
+   const returned=webhook.event_types.map(e=>typeof e==='string'?e:e?.name)
+   const types=new Set(returned)
    if(REQUIRED_EVENTS.some(e=>!types.has(e)))return invalid('live_webhook_events_missing')
-   if(types.size!==REQUIRED_EVENTS.length||webhook.event_types.length!==REQUIRED_EVENTS.length)
-    return invalid('live_webhook_events_unexpected')
+   if(types.size!==REQUIRED_EVENTS.length||returned.length!==REQUIRED_EVENTS.length){
+    // The developer dashboard may summarize event types differently from the API.
+    // Return only counts and syntactically safe public event type identifiers.
+    // Never echo PayPal's raw response, tokens, app identity or other metadata.
+    const unexpected=returned.filter(name=>!REQUIRED_EVENTS.includes(name))
+    const duplicateCount=returned.length-types.size
+    const safeName=name=>typeof name==='string'&&/^[A-Z][A-Z0-9._]{0,70}$/.test(name)
+    return invalid('live_webhook_events_unexpected',{
+     receivedCount:returned.length,
+     extraCount:unexpected.length,
+     duplicateCount,
+     malformedCount:returned.filter(name=>!safeName(name)).length,
+     unexpectedTypes:[...new Set(unexpected.filter(safeName))].slice(0,12)
+    })
+   }
    // GET confirms config only; it does NOT prove real webhook delivery/signature.
    return ok()
   }catch{return invalid('live_provider_unavailable')}
