@@ -4,6 +4,7 @@ import {AdminGlyph} from './AdminVisuals'
 import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
 import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
 import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
+import {AdminPaypalLiveVaultSetup} from './AdminPaypalLiveVaultSetup'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -26,6 +27,8 @@ const LIVE_RESOURCE_INSPECTION_RELEASED=false
 // Vault's legacy staging is NOT the F16 Edge secrets runtime for new Live checkout.
 // This flag becomes true only after the separate service/PO security gate.
 const LIVE_EDGE_PROVISIONING_RELEASED=false
+// The secret-staging Edge remains locked until CI + role security review.
+const LIVE_VAULT_SETUP_RELEASED=false
 // The generation reservation UI is not exposed until the Edge backend gets an explicit PO GO.
 const LIVE_MERCHANT_BOOTSTRAP_RELEASED=true
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
@@ -261,6 +264,9 @@ export function AdminPayPalSettings({lang}:Props){
      <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={recentAdminMfa}/>}
     {env==='live'&&<AdminPaypalLiveResourceCheck lang={lang}
      mfaRecentlyVerified={recentAdminMfa} onVerified={()=>load(false)}/>}
+    {env==='live'&&LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup
+     lang={lang} mfaRecentlyVerified={recentAdminMfa}
+     onStored={()=>{void load(false)}}/>}
     {env==='live'&&<section className="rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]"
      data-pazo-merchant-balance-check="not-required">
       <h4 className="text-[15px] font-black">{t(
