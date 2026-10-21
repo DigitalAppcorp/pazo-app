@@ -1,5 +1,19 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## Orden permanente del PO — cambios y documentación en GitHub
+
+El PO ordenó subir cada cambio a GitHub con su documentación correspondiente.
+Cada incremento debe incluir código/SQL cuando corresponda, motivo, validación
+y estado real de instalación o despliegue; hacer commit y push a la rama de
+continuación y mantener actualizado el PR67. Documentar también los bloqueos
+y las comprobaciones pendientes, sin presentar pruebas locales como CI o E2E
+alojado. Esta orden no autoriza merge a main, publicación ni cobros Live.
+
+Incremento `3dcd8e07` subido y HEAD remoto confirmado: readiness administrativo,
+recuperación de guardado de credenciales y documentación de pruebas incluidas.
+CI de este incremento pendiente de comprobar; no reutilizar los 5/5 SUCCESS
+de `b82ac9ee` como resultado del nuevo commit.
+
 ## Supabase operativo — 21-oct-2026, 21:47 UTC
 
 PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`
