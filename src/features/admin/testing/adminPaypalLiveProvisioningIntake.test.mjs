@@ -141,3 +141,23 @@ test('cross-origin POST is denied before backend and never returns credentials',
  assert.ok(!text.includes('PRIVATE_TOKEN'))
  assert.ok(!text.includes(body.clientSecret))
 })
+
+test('origin prefix confusion and path suffix bypass are refused before privileged backend',async()=>{
+ let calls=0
+ const ingress=createPazoLiveProvisioningIntake({released:true,
+  provision:async()=>{calls++;throw Error('must never be reached')}})
+ for(const [target,origin] of [
+  ['https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-admin-paypal-provision','https://pazo-app-t83r.vercel.app.evil.invalid'],
+  ['http://edge-runtime.internal/pazo-admin-paypal-provision/','http://localhost:5173'],
+  ['http://edge-runtime.internal/pazo-admin-paypal-provision%2F','http://localhost:5173']
+ ]){
+  const res=await ingress(new Request(target,{method:'POST',headers:{
+   origin,'content-type':'application/json',
+   authorization:'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.dGVzdHNpZw'
+  },body:JSON.stringify(body)}))
+  assert.ok(res.status>=400)
+  assert.equal(res.headers.get('access-control-allow-origin'),
+   origin==='http://localhost:5173'?'http://localhost:5173':null)
+ }
+ assert.equal(calls,0)
+})
