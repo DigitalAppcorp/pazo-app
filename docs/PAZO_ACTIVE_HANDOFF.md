@@ -1,5 +1,46 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-20 Guatemala / 21 UTC
 
+## Checkpoint posterior a Codex — 21-oct-2026, 03:2x UTC
+
+**Trabajo ejecutado por ChatGPT tras agotarse créditos de Codex; F16 aún NO-GO.**
+La rama `f13/section-titles-20261012` y el PR #44 permanecen abiertos; no se
+fusionó ni desplegó frontend, no se modificó main ni se activaron cobros.
+Código del cambio `01d937b218c75921bbae9d447fc369dcbc01207f`; 9/9 GitHub
+Actions SUCCESS (CI `39538281763`, Live Gateway PG17 `39538281580`).
+
+La pestaña PayPal Developer **Live** del PO muestra webhook existente
+`6UA43660E66988355`, URL `...?generation=1` y precisamente diez eventos
+visibles (las siete notificaciones BILLING.SUBSCRIPTION.* y tres
+PAYMENT.SALE.* exigidas). Esto NO invalida el diagnóstico anterior
+`live_webhook_events_unexpected`: el resultado del GET API tuvo conjunto o
+longitud distinto de diez. No eliminar ni recrear webhook a ciegas.
+
+Corrección disponible: `liveProviderReadOnly.mjs` conserva la comparación
+estricta y ahora calcula **solo** cantidad recibida, extras, duplicados,
+entradas malformadas y nombres adicionales en sintaxis permitida. La Edge
+privada propaga exclusivamente esos datos inocuos; la pantalla administrativa
+los muestra junto al código seguro. No guarda ni refleja credenciales.
+Regresiones para extras, duplicados y comodín incluidas. **Supabase
+`pazo-admin-paypal-live-inspect` v3 ACTIVE**, `verify_jwt=true`,
+8/8 fuentes alojadas idénticas al commit de código. Sin migraciones nuevas.
+
+Postflight alojado de solo lectura tras v3: 1 reserva, generation1 reserved,
+0 merchant generations, 0 provision attempts, 0 resource audits,
+0 Live inbox events, 0 paid periods. `paypal_gateway_runtime`: sandbox/
+live_checkout_enabled=false; `pazo_paypal_new_checkout_switch`:
+sandbox/live_enabled=false/kill_switch=true/active_generation=null/revision0.
+
+**Acción manual mínima del PO:** actualizar su rama local F13 (no borrar su
+`package-lock.json` preexistente), recargar localhost:5173, realizar MFA
+reciente en Admin y repetir UNA comprobación `Comprobar sin guardar claves`
+con Webhook ID y claves Live **solo dentro de PAZO**, nunca en chat. Compartir
+solo el diagnóstico mostrado (ahora incluirá conteos/nombres adicionales
+permitidos). No volver a reservar generación, no crear webhook nuevo ni
+modificar eventos sin identificar contradicción API/UI. Si devuelve éxito,
+continuar con identidad merchant, custodia, webhook firmado, worker,
+conciliación y prueba E2E, con selectores financieros OFF hasta GO separado.
+
+
 ## Diagnóstico vigente — eventos del webhook Live
 
 **Estado vigente:** comprobador `pazo-admin-paypal-live-inspect` ACTIVE **v2**, JWT
