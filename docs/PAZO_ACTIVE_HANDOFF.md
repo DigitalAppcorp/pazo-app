@@ -1,5 +1,14 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — PWA retorno móvil: arreglo integrado sin despliegue (21-oct-2026, continuidad ChatGPT)
+
+- **PR #68** fusionado **únicamente** en rama PR67 `f16/beta-completion-20261021`, squash `266477a2379b3d33383da7fdd73c3b6d28024554`. CI de la rama de prueba exacta `e38e15255ee5f9fc521b9dd65f3338a9e2de104a`: GitHub CI **SUCCESS** y F16 PG17 Live Gateway **SUCCESS**. No main, no despliegue, no dinero.
+- Corrigió registro de service worker que antes escuchaba `window.load` después de un `import('./App.tsx')` asíncrono; si `load` ya había sucedido, el SW nunca se registraba. Ahora observa `document.readyState` y registra inmediatamente si la página ya cargó, o una sola vez con `load`; conserva network-only.
+- Pruebas ejecutables `scripts/pwa-check.mjs` comprueban ambos órdenes en VM y que los callbacks PayPal /return y /cancel **eliminan tokens de query/fragmento** y navegan al estado de la cuenta sin atribuir pago.
+- Informe detallado `docs/PAZO_PWA_LATE_LOAD_CALLBACK_20261021.md`. **E2E público NO-GO** hasta deploy Vercel autorizado y HTTP200 real para callback/PWA; deployment actual principal sigue con commit antiguo según metadata, sin build nuevo por `git.deploymentEnabled=false`.
+
+
+
 ## Orden permanente del PO — cambios y documentación en GitHub
 
 El PO ordenó subir cada cambio a GitHub con su documentación correspondiente.
