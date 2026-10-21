@@ -120,12 +120,12 @@ test('authenticated settings reader sends only same bearer and drops secret fiel
  assert.equal(calls[0].options.headers.Authorization,bearer)
  assert.equal(calls[0].options.method,'POST')
 })
-test('no handler deployed with release flag enabled',()=>{
+test('only merchant reserve has release flag on; PayPal credential provisioning remains OFF',()=>{
  const staged=readFileSync(new URL('../../../../supabase/functions/pazo-admin-paypal-bootstrap/index.ts',import.meta.url),'utf8')
  const active=readFileSync(new URL('../../../../supabase/functions/pazo-admin-paypal-provision/index.ts',import.meta.url),'utf8')
- assert.match(staged,/const RELEASE_APPROVED=false/)
+ assert.match(staged,/const RELEASE_APPROVED=true/)
  assert.match(active,/const RELEASE_APPROVED=false/)
- assert.doesNotMatch(staged,/const RELEASE_APPROVED=true/)
+ assert.doesNotMatch(staged,/createPaypalLiveMerchantBootstrap\(/)
 })
 
 test('exact-origin CORS admits the local admin preview but not unapproved sites',async()=>{
