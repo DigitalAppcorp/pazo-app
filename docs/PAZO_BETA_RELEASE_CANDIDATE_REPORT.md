@@ -17,8 +17,10 @@ antiguos sin lease revocados. Reserva1; merchant/inbox/recibos/períodos0; LiveO
 CI3501 cuatro jobs y laboratorio418 PASS. Ningún Edge nuevo liberado aún.
 Lifecycle/refund aplicados en `20261021142517` tras CI3502/gateway419 de `75dfd4e6`;
 postflight dos RPC service-only y cuatro columnas, LiveOFF/0 datos financieros.
-Control/HTTP privado del worker todavía local: PG15 y governance413 PASS.
-Scheduler y endpoint no instalados/desplegados; no es preparación de claves completa.
+Control `20261021144809` aplicado tras CI3503/gateway420; OFF y RLS/ACL PASS.
+Edge worker v1 ACTIVE, autenticación propia/SQL privado, 4 rechazos HTTP PASS.
+Scheduler `20261021145500` todavía local: PG17 probó core con mocks, no extensiones
+nativas. Sin prueba autenticada de salud alojada; no es preparación de claves completa.
 Esto no completa scheduler, todos los eventos/beneficios ni P1–P5. **NO-GO** y
 todavía no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. Detalle en el reconciliador.
 

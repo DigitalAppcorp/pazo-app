@@ -137,11 +137,35 @@ diagnóstico. Revocan EXECUTE de claim/finish antiguos al servicio. Salud devuel
 solo contadores/códigos/fechas, sin invoker/hash/IDs privados. El modo de salud
 no lee claves de PayPal, no consulta el proveedor y no procesa eventos.
 
-DDL `20261021142708_pazo_f16_live_private_worker_control.sql` aún local. PG15
+DDL `20261021144809_pazo_f16_live_private_worker_control.sql` APLICADA tras
+CI3503/gateway420 de `9c8c090c`; nombre alineado con versión MCP, SQL idéntico.
+Postflight FORCE RLS, cinco RPC service-only, dos bridges de lease revocados,
+control y procesamiento OFF, 0 eventos/períodos/generaciones comerciales. PG15
 prueba ACL, autenticación, OFF, salud, build incorrecto, exclusión, espera,
 agotamiento y rollback/reapply en vacío. Vault es un mock SOLO en ese laboratorio;
 no se presenta como ensayo del cifrado real. HTTP y lease11/11, governance y
-closure413/413 PASS. No hay cron instalado ni endpoint nuevo desplegado todavía.
+closure413/413 PASS. Edge worker v1 ACTIVE desde25 módulos inmutables de ese
+commit, JWT OFF porque valida capacidad propia antes de admisión service-only.
+Cuatro HTTP reales sin credenciales PASS: sin auth403, invoker inválido403,
+Origin navegador403, GET405; cero CORS. No se leyó ni compartió el invoker.
+
+Scheduler local `20261021145500` instala exclusivamente las extensiones disponibles
+pg_cron1.6.4/pg_net0.20.4, con esquemas/funciones/tablas denegados a clientes y
+servicio. Job por minuto llama solo al tick privado del mismo proyecto. El control
+empieza deshabilitado: no envía HTTP hasta habilitar explícitamente el modo salud.
+Después, un lote activo o menos de55s desde envío impiden otra llamada.
+El header de autenticación se forma dentro de PostgreSQL desde Vault; queda
+temporalmente en la cola privada no registrada de pg_net hasta ser consumido.
+No contiene claves PayPal. Solo los logs técnicos de este job se conservan7d;
+otros jobs y registros financieros permanecen fuera de esa limpieza.
+
+PG17 ejecutó el core exacto extraído de la migración con adaptadores simulados
+cron/net, sin red: OFF, target/auth correctos, frecuencia, exclusión, fallo sin
+invoker, retención aislada y rollback/reapply PASS. El primer ensayo falló por
+un nombre ambiguo de la fixture, corregido; no se relajó el SQL del producto.
+Esto NO valida extensiones nativas; falta instalación/health alojado tras CI.
+[Scheduling oficial](https://supabase.com/docs/guides/functions/schedule-functions),
+[pg_net oficial](https://supabase.com/docs/guides/database/extensions/pg_net).
 El hash de Client ID guardado por el preparador Vault identifica la aplicación;
 no es evidencia de identidad del payee. No convertirlo en un match financiero.
 

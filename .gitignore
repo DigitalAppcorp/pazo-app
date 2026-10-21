@@ -28,3 +28,4 @@ dist-ssr
 .env.*
 !.env.example
 supabase/.temp/
+supabase/tests/supporter/fixtures/f16-live-worker-scheduler-core.generated.sql

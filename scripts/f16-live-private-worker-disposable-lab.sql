@@ -19,7 +19,7 @@ CREATE FUNCTION vault.synthetic_secret_delete() RETURNS trigger LANGUAGE plpgsql
 BEGIN DELETE FROM vault.decrypted_secrets WHERE id=OLD.id; RETURN OLD; END $fake$;
 CREATE TRIGGER synthetic_secret_delete AFTER DELETE ON vault.secrets
  FOR EACH ROW EXECUTE FUNCTION vault.synthetic_secret_delete();
-\i supabase/migrations/20261021142708_pazo_f16_live_private_worker_control.sql
+\i supabase/migrations/20261021144809_pazo_f16_live_private_worker_control.sql
 BEGIN;
 DO $acl$
 DECLARE token text;
@@ -125,7 +125,7 @@ BEGIN
 END $exhaust$;
 ROLLBACK;
 \i supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql
-\i supabase/migrations/20261021142708_pazo_f16_live_private_worker_control.sql
+\i supabase/migrations/20261021144809_pazo_f16_live_private_worker_control.sql
 DO $pass$ BEGIN
  IF NOT EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_worker_control WHERE NOT enabled AND NOT processing_enabled AND completed_runs=0)
  THEN RAISE EXCEPTION 'empty worker rollback/reapply not disabled'; END IF;
