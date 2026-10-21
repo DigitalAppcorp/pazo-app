@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import {runInNewContext} from 'node:vm'
 
 const read = (file) => readFileSync(file, 'utf8')
 const manifest = JSON.parse(read('public/manifest.webmanifest'))
@@ -46,4 +47,38 @@ test('service worker never caches user data or intercepts API calls', () => {
   const reg = read('src/features/pwa/registerPwa.ts')
   assert.match(reg, /import.meta.env.PROD/)
   assert.match(reg, /serviceWorker.register\('\/sw.js'/)
+})
+
+test('PWA registers after asynchronous bootstrap even when load has already fired',async()=>{
+  const source=read('src/features/pwa/registerPwa.ts')
+    .replace('export function registerPazoPwa(): void','function registerPazoPwa()')
+    .replace('import.meta.env.PROD','true')
+  // Execute the production function in a private test context. No browser APIs
+  // or real network access are used.
+  for(const initialState of ['complete','loading']){
+    const calls=[]
+    let onLoad=null
+    const context={
+      navigator:{serviceWorker:{register:async(path,options)=>{
+        calls.push({path,options})
+        return {scope:'/'}
+      }}},
+      document:{readyState:initialState},
+      window:{addEventListener:(type,fn,options)=>{
+        assert.equal(type,'load')
+        assert.deepEqual(options,{once:true})
+        onLoad=fn
+      }}
+    }
+    runInNewContext(source+'\nregisterPazoPwa(); registerPazoPwa();',context)
+    if(initialState==='loading'){
+      assert.equal(calls.length,0,'must not register before load')
+      assert.equal(typeof onLoad,'function')
+      onLoad()
+    }else assert.equal(onLoad,null)
+    await Promise.resolve()
+    assert.equal(calls.length,1,'one SW registration per app boot')
+    assert.equal(calls[0].path,'/sw.js')
+    assert.equal(calls[0].options.scope,'/')
+  }
 })
