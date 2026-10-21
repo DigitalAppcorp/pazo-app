@@ -91,7 +91,7 @@ export function createPazoLiveCheckoutHttpHandler({
    const stores=createPazoLiveCheckoutSqlStores({rpc})
    engine=createPazoLiveVerifiedCheckout({
     releaseReady:true,planId:route.planId,
-    merchantGeneration:route.merchantGeneration,
+    merchantGeneration:route.merchantGeneration,originalOrigin:publicOrigin,
     resolveAuthenticatedOwner:async()=>ownerId,
     admit,consentStore:stores.consentStore,
     subscriptionProvider:provider,intentStore:stores.intentStore
