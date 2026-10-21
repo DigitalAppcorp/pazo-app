@@ -1,5 +1,26 @@
 > **F16 vigente 20-oct / 21 UTC:** 503 corregido HOSTED y reserva real única generación 1. Lector original instalado. PO entregó Webhook ID candidato, todavía sin verificar API. Comprobador privado efímero HOSTED v1/JWTtrue y SQL20261021021050 verificados, bdf31649 CI9/9 SUCCESS, 20 pruebas/PG17/build PASS; falta consulta privada del PO. Live OFF/kill ON, PR44 DRAFT, previews OFF. Ver handoff y PAZO_F16_LIVE_RESOURCE_INSPECTION_20261020.md. Las migraciones técnicas necesarias están autorizadas sin GO repetido; cobros, publicación y aceptación visual conservan sus gates.
 
+## MANDATO EXPRESO DEL PRODUCT OWNER — BETA PAZO / PAYPAL LIVE (21 OCT 2026)
+**PRIORIDAD MÁXIMA. VIGENTE. NO OPCIONAL. NO REINTERPRETAR.**
+
+**Orden textual del Product Owner:** «termina todo lo que tengas que terminar para que yo solamente coloque las credenciales de paypal ya este funcionando, sigue mi orden, no quiero que te desvies, mi orden es que termines ya la beta para sacarla y que dejes todo terminado para que yo solamente guarde las credenciales en el apartado de administracion y ya pueda cobrar, esa es mi orden explicita y quiero que lo anotes en mi pazo de hithub como orden que se tiene que hacer. terminar lo que falta para que al terminar la beta que ya este todo listo para que yo solo tenga que colocar las credenciales para que todo este listo para cobrar y lanzar».
+
+**Definición de terminado (DoD obligatoria y medible):**
+1. La app beta pública (módulos sociales aprobados, panel administrativo responsive, registro/login, moderación, términos, PWA instalada/no instalada) queda compilada, probada, desplegable y validada en HTTPS oficial; no reabrir sin regresión lo ya aceptado por el PO.
+2. Admin → Configuración → PayPal → Live permite a un administrador auténtico con MFA reciente introducir Client ID y Client Secret **dentro de PAZO una sola vez**, con guardado cifrado server-only, confirmación inequívoca y recuperación segura tras refresh. Se usa **el plan US$2.99 mensual, webhook y generación1 YA EXISTENTES**; no exigir permiso PayPal `reporting/balances/read`, pruebas Sandbox adicionales, creación de recursos duplicados, enlaces manuales ni pegar secretos en GitHub/chat/CLI.
+3. Ese flujo privado valida OAuth Live, plan de US$2.99, webhook por generación y evidencia del comercio, vincula de forma auditable la generación original, coloca secretos en el backend y prepara los controles de release. Una simple coincidencia introducida por usuario no se debe confundir con evidencia independiente; los cobros solo se habilitan si todos los checks de transacción y seguridad están satisfechos.
+4. Checkout real dentro de PAZO → consentimiento expreso versionado → creación PayPal con idempotencia → aprobación/retorno HTTPS en navegador y PWA → lectura de PayPal + webhook firmado → inbox durable → ventas/completados/renovaciones → períodos pagados reales → insignias Amigo de PAZO (1/3/6/12 meses) y demás beneficios sin falso grant, con proyección verificada.
+5. Gestión autónoma de cancelaciones, errores/abandono de checkout, reintentos controlados, reembolsos, reversos, disputas, caducidad; conciliación y observabilidad/admin (usuarios, suscripciones, recaudación, abandonos, actividad, fake doors). Kill-switch y rollback probados.
+6. QA end-to-end sintética y en HTTPS, base y RLS, trazabilidad y pruebas del gate financiero, seguridad, accesibilidad/móvil, callback PWA, firma de webhooks y humo real supervisado. Sin release silencioso de `main` ni cobro real no autorizado.
+
+**Experiencia final prevista:** tras la entrega técnica completa, la única configuración rutinaria pendiente del PO debe ser ingresar las credenciales Live en Administración y aprobar personalmente la activación/prueba real que implique dinero. Ningún trámite técnico repetitivo, replanteo del producto o cambio de proveedor como sustituto. Cualquier obstáculo externo verdadero se documenta por nombre con alternativa concreta y mínima ayuda solicitada.
+
+**Flujo de ejecución:** ejecutar sin pausas arbitrarias cambios de código, migraciones técnicas ya autorizadas, pruebas y preparación; usar F13/PR44 como integración y preservar `main` y cualquier dato real hasta GO del PO. Los controles de seguridad del cobro, verificación de pagos y permisos de terceros NO se omiten por urgencia; **nunca marcar «beta lista» ni «Live cobra» sin pruebas reales completas**. Si una dependencia requiere consentimiento/secretos o autorización externa, continuar el resto mientras se espera y preguntar únicamente la intervención imprescindible.
+
+**PRECEDENCIA:** Este mandato reemplaza propuestas previas que aplazaban F16 a después de beta, exigían el scope PayPal de balances, sugerían links PayPal manuales o aceptaban beta incompleta. Se incorpora en handoff y hoja maestra para todo agente, incluyendo Codex.
+
+
+
 ## Corrección prioritaria: permitir cobros sin permiso de saldos — 21-oct-2026 (vigente)
 
 **Decisión operativa PO:** prioridad que la membresía US$2.99 pueda recibir
