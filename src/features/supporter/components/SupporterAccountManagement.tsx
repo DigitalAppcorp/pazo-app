@@ -7,6 +7,7 @@ import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
 import { SupporterBenefitsHome } from './SupporterBenefitsHome'
 import { SupporterOfferB } from './SupporterOfferB'
+import { SupporterLiveCheckoutPanel } from './SupporterLiveCheckoutPanel'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
 import { supporterPaypalReturnKind } from '../supporterAccountRoute.mjs'
 import { SupporterPreparingScreen } from './SupporterPreparingScreen'
@@ -30,7 +31,9 @@ type AccountResult = {
 type Props = {lang: 'es' | 'en'; onClose: () => void; pet?: Pet}
 
 const host = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
-const qaV2Screen = import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true'
+const qaV2Screen = import.meta.env.DEV &&
+  import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
+  typeof window !== 'undefined' && ['localhost','127.0.0.1'].includes(window.location.hostname)
 const intentPattern = /^intent-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [accounts, setAccounts] = useState<Account[] | null>(null)
@@ -324,16 +327,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </p>}
                   </div>
             ) : (
-              <div className="space-y-2">
-                <button type="button" disabled
-                  className="min-h-12 w-full cursor-not-allowed rounded-full bg-[#E1E53F]/45 px-5 py-3 text-[14px] font-extrabold text-[#6D8780]">
-                  {label('Continuar con PayPal','Continue with PayPal')}
-                </button>
-                <p role="status" className="text-center text-[12px] leading-relaxed text-[#5C7470]">
-                  {label('Las suscripciones todavía no están disponibles. Puedes seguir disfrutando de PAZO gratis.',
-                    'Subscriptions are not available yet. You can keep enjoying PAZO for free.')}
-                </p>
-              </div>
+              <SupporterLiveCheckoutPanel lang={lang}/>
             )}
           </SupporterOfferB>
           <p className="mx-auto max-w-[420px] px-1 pt-1 text-center text-[12px] leading-relaxed text-[#5C7470]">
