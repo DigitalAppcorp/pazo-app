@@ -43,13 +43,15 @@ test('idempotent checkout store maps intent and binding without granting entitle
   expectedPlanId:plan,affirmativeConsent:true})
  assert.deepEqual(started,r)
  assert.equal(await consentStore.claimProviderCreate({ownerId:owner,intentId:intent,
-  requestKey,merchantGeneration:7,sourceEnvironment:'live'}),true)
+  requestKey,merchantGeneration:7,sourceEnvironment:'live',
+  originalOrigin:'https://pazo-app-t83r.vercel.app'}),true)
  const bound=await intentStore.bindVerified({ownerId:owner,intentId:intent,
   requestKey,subscriptionId:'I-SAMPLE_SUBSCRIPTION_123',sourceEnvironment:'live',
   planId:plan,merchantGeneration:7,provider:'paypal'})
  assert.deepEqual(bound,{state:'bound',result:'new_binding',entitlement:false})
  assert.deepEqual(operations.map(x=>x.name),['begin','claim','bind'])
  assert.equal(operations[0].payload.p_generation,7)
+ assert.equal(operations[1].payload.p_origin,'https://pazo-app-t83r.vercel.app')
  assert.equal(operations[2].payload.p_subscription,'I-SAMPLE_SUBSCRIPTION_123')
 })
 test('mismatched generation or wrong owner cannot generate a trusted local intent',async()=>{
