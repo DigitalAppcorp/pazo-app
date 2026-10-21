@@ -1,15 +1,19 @@
 // Private, recent-MFA resource check. PayPal credentials live only for this request.
 import {inspectLivePaypalResources,liveWebhookUrlForGeneration}
  from '../pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
+import {readLivePaypalMerchantIdentity} from '../pazo-admin-paypal-validate/liveMerchantIdentityReadOnly.mjs'
 const PATHS=new Set(['/functions/v1/pazo-admin-paypal-live-inspect','/pazo-admin-paypal-live-inspect'])
 const ORIGINS=new Set(['http://localhost:5173','http://127.0.0.1:5173','https://pazo-app-t83r.vercel.app'])
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const HOOK=/^[A-Za-z0-9_-]{8,100}$/
 const KEY=/^[A-Za-z0-9_-]{20,512}$/
+const MERCHANT=/^[2-9A-HJ-NP-Z]{13}$/
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const CODES=new Set(['live_config_incomplete','live_oauth_unverified',
  'live_plan_unverified','live_plan_terms_unverified','live_webhook_unverified',
- 'live_webhook_events_missing','live_webhook_events_unexpected','live_provider_unavailable'])
+ 'live_webhook_events_missing','live_webhook_events_unexpected','live_provider_unavailable',
+ 'live_merchant_oauth_unverified','live_merchant_read_permission_required',
+ 'live_merchant_identity_unverified','live_merchant_identity_unavailable'])
 function cors(req){
  const origin=req?.headers?.get('origin')||''
  return {'vary':'Origin',...(ORIGINS.has(origin)?{
@@ -71,7 +75,11 @@ export function createLiveResourceInspection({released=false,authenticateAdmin,
    body.confirmation==='COMPROBAR RECURSOS LIVE'&&Object.keys(body).length===5&&
    Object.keys(body).every(k=>['action','confirmation','webhookId','clientId','clientSecret'].includes(k))&&
    HOOK.test(body.webhookId||'')&&KEY.test(body.clientId||'')&&KEY.test(body.clientSecret||'')
-  if(!read&&!inspect)return reply(req,400,'invalid_resource_request')
+  const checkMerchant=body.action==='verify_merchant_id'&&
+   body.confirmation==='COMPROBAR COMERCIO LIVE'&&Object.keys(body).length===5&&
+   Object.keys(body).every(k=>['action','confirmation','merchantId','clientId','clientSecret'].includes(k))&&
+   MERCHANT.test(body.merchantId||'')&&KEY.test(body.clientId||'')&&KEY.test(body.clientSecret||'')
+  if(!read&&!inspect&&!checkMerchant)return reply(req,400,'invalid_resource_request')
   const context=async()=>{
    const settings=await readAdminSettings({request:req,actorId:actor.id})
    const live=settings?.environments?.filter(x=>x?.environment==='live')
@@ -92,6 +100,46 @@ export function createLiveResourceInspection({released=false,authenticateAdmin,
   if(read)return reply(req,200,'reserved_generation_read',{
    generation:before.generation,webhookId:before.webhookId,
    webhookUrl:liveWebhookUrlForGeneration(before.generation)})
+  if(checkMerchant){
+   if(!HOOK.test(before.webhookId||''))return reply(req,409,'stored_webhook_conflict')
+   // The merchant ID is supplied inside PAZO under fresh admin MFA. It is NOT
+   // treated as an immutable merchant binding and is NEVER stored here.
+   const proposed=body.merchantId
+   let evidence
+   try{
+    evidence=await readLivePaypalMerchantIdentity({environment:'live',
+     clientId:body.clientId,clientSecret:body.clientSecret,planId:before.planId,
+     webhookId:before.webhookId,merchantGeneration:before.generation,fetchImpl})
+   }catch{evidence=null}
+   body.merchantId='';body.clientId='';body.clientSecret=''
+   if(evidence?.code!=='live_merchant_candidate_read'||
+    evidence?.merchantIdentityVerified!==false||
+    evidence?.planReadVerified!==true||evidence?.webhookReadVerified!==true||
+    evidence?.webhookDeliveryVerified!==false||evidence?.mayCharge!==false||
+    evidence?.mayActivate!==false)
+    return reply(req,409,CODES.has(evidence?.code)?evidence.code:
+     'live_merchant_identity_unavailable')
+   // Compare against independently queried Live merchant account, without
+   // returning raw ID, balance, expected hash or provider credentials.
+   let expected
+   try{
+    const digest=await crypto.subtle.digest('SHA-256',
+     new TextEncoder().encode('paypal:live:'+proposed))
+    expected=Array.from(new Uint8Array(digest),
+     b=>b.toString(16).padStart(2,'0')).join('')
+   }catch{return reply(req,503,'live_merchant_identity_unavailable')}
+   if(expected!==evidence.merchantFingerprint)
+    return reply(req,409,'live_merchant_id_mismatch')
+   let after
+   try{after=await context()}catch{return reply(req,503,'resource_metadata_unavailable')}
+   if(!after||after.generation!==before.generation||after.planId!==before.planId||
+    after.webhookId!==before.webhookId)
+    return reply(req,409,'generation_changed_during_inspection')
+   return reply(req,200,'live_merchant_id_read_match',{
+    generation:before.generation,merchantIdMatched:true,merchantBindingStored:false,
+    planReadVerified:true,webhookReadVerified:true
+   })
+  }
   if(before.webhookId!==''&&before.webhookId!==body.webhookId)
    return reply(req,409,'stored_webhook_conflict')
   const result=await inspectLivePaypalResources({environment:'live',
