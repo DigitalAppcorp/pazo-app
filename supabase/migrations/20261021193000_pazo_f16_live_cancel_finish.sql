@@ -14,7 +14,7 @@ BEGIN
   '{}')::jsonb->>'role' IS DISTINCT FROM 'service_role'
  THEN RAISE EXCEPTION 'service role required' USING ERRCODE='42501'; END IF;
  IF p_owner IS NULL OR p_intent IS NULL OR p_generation NOT BETWEEN 1 AND 9999 OR
-  p_outcome NOT IN ('confirmed','review_required')
+  (p_outcome IS NULL OR p_outcome NOT IN ('confirmed','review_required'))
  THEN RETURN false; END IF;
  -- Retain a prior provider-confirmed cancellation; replays must be idempotent.
  IF p_outcome='confirmed' AND EXISTS(
