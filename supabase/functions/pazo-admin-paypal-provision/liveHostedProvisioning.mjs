@@ -25,7 +25,7 @@ export function createPazoLiveHostedProvisioning({
  // Do not even read environment secrets before the release gate.
  if(released!==true)return async()=>response('live_provisioning_not_released')
  if(typeof getEnv!=='function'||
-    typeof verifyProviderResources!=='function'||
+    (verifyProviderResources!==undefined&&typeof verifyProviderResources!=='function')||
     typeof fetchImpl!=='function')
   return async()=>response('live_provisioning_not_configured')
  let handler
