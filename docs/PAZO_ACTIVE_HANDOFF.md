@@ -1,5 +1,16 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## F16 — Postflight de Codex/owner-slot y comprobación Vercel (21-oct-2026, última actualización)
+
+- PR #60 squash `5fc001de698b99f80b68b24b7cc4ae0405192f69`: recuperación completa Codex y claim HTTPS original. GitHub CI 9/9 PASS.
+- RPC protegidas del slot de checkout Codex **instaladas en Supabase** (historial versión `20261021181431`); PR #61 squash `efbf20d44740244370f844ac90158c62518d3f04` alinea migración GitHub y lab PG17 con esa versión; CI 9/9 PASS.
+- Postflight real: `pazo_f16_live_service_provider_claim_with_origin` instalada, antiguo claim sin EXECUTE service, lectura owner solo service_role (anon/authenticated DENIED). Merchant generaciones 0, Live paid periods 0, checkout intents 0, selector `environment=sandbox/live_enabled=false/kill_switch=true/active_generation=null`. NO hubo cobros Live.
+- **Vercel por fin inspeccionable con plugin**: buscar proyectos sin forzar parámetro `teamId`, luego `get_project({idOrName:'prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH'})`. Proyecto `pazo-app-t83r` Vite, dominios `pazo-app-t83r.vercel.app`, `pazo-app-t83r-digitalapp.vercel.app` y alias de git-main. Último deployment READY reportado `dpl_A1oJg62DpV54kEEN7itgQfQTHwhz` sobre SHA F13 **antiguo** `a218ab3cbc1ac01b7932da3ce5c3c87ee2c86770`, target preview (`null`), NO contiene el checkout actual de F13. `passwordProtection=false`, `ssoProtection.enabled=true`, `deploymentType=all_except_custom_domains`; no consta dominio personalizado en los dominios del proyecto. Antes de GO público verificar accesibilidad anónima real de HTTPS y PWA, seguridad de redirección PayPal, despliegue F13 actual, protección de acceso y que producción no se active sin PO GO.
+- **Gates NO resueltos:** frontend compra Live completo en navegación/PWA, uso del RPC de recuperación y lease desde UI/callback, liberación segura de latches Edge checkout/webhook/worker y DB switch, conciliación de pagos con evidencia COMPLETED (sin permisos de saldos), prueba con credenciales reales en Admin y canary con autorización PO. **Nunca declarar BETA LISTA/LIVE PASS por 9/9 CI.**
+- PR #55/56/58/59 NO FUSIONAR: integraciones superadas por PR60. `main` intacto.
+
+
+
 ## F16 — Codex recuperado e integrado / Checkout owner-slot privado (21-oct-2026, después del PR60)
 
 - PO publicó desde `C:\Users\osori\Downloads\Nuevo pazo app\pazo-live-reconciler` el commit `e27d9fae` con trabajo local Codex recuperado. NO se perdieron fuentes. ZIP revisado. No ejecutar reset/clean en worktree local.
