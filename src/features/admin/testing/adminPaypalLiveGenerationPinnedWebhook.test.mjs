@@ -73,3 +73,23 @@ test('invalid PayPal signature never calls owner resolver or inbox',async()=>{
  assert.equal(r.status,401)
  assert.deepEqual(calls.map(x=>x.kind),['merchant','signature'])
 })
+
+test('Supabase Edge internal route accepts the same signed event but no route variants',async()=>{
+ const {gateway,calls}=build()
+ const requestFor=(path)=>new Request('http://edge-runtime.internal'+path,{
+  method:'POST',headers,body:JSON.stringify(event)})
+ const ok=await gateway(requestFor('/pazo-paypal-live-webhook?generation=7'))
+ assert.equal(ok.status,202)
+ assert.deepEqual(calls.map(x=>x.kind),['merchant','signature','owner','write'])
+ for(const invalid of [
+  '/pazo-paypal-live-webhook/?generation=7',
+  '/pazo-paypal-live-webhook%2F?generation=7',
+  '/not-pazo-paypal-live-webhook?generation=7',
+  '/pazo-paypal-live-webhook?generation=7&source=live'
+ ]){
+  const before=calls.length
+  const result=await gateway(requestFor(invalid))
+  assert.equal(result.status,400,invalid)
+  assert.equal(calls.length,before,'invalid URL cannot read merchant or write events')
+ }
+})
