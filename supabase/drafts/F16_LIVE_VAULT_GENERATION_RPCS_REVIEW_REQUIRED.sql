@@ -155,4 +155,34 @@ REVOKE ALL ON FUNCTION public.pazo_f16_live_service_vault_read(bigint)
 GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_vault_prepare(uuid,bigint,text,text,text,text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_vault_status(bigint) TO service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_vault_read(bigint) TO service_role;
+-- Checkout source is selected ONLY after a future separate gated Live switch.
+-- Keep the existing sandbox/kill CHECK constraints unchanged.
+CREATE OR REPLACE FUNCTION public.pazo_f16_live_service_active_route()
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+AS $f$
+DECLARE output jsonb;
+BEGIN
+ IF (NULLIF(pg_catalog.current_setting('request.jwt.claims',true),'')::jsonb ->> 'role')
+  IS DISTINCT FROM 'service_role'
+ THEN RAISE EXCEPTION 'service authorization required' USING ERRCODE='42501'; END IF;
+ SELECT pg_catalog.jsonb_build_object(
+  'sourceEnvironment','live','merchantGeneration',g.generation,
+  'planId',g.plan_id,'credentialSource',g.credential_source,
+  'returnOrigin',c.return_origin)
+ INTO output
+ FROM admin_private.pazo_paypal_new_checkout_switch s
+ JOIN admin_private.pazo_paypal_merchant_generations g ON g.generation=s.active_generation
+ JOIN admin_private.paypal_gateway_settings c ON c.environment='live'
+  AND c.plan_id=g.plan_id AND c.webhook_id=g.webhook_id
+ WHERE s.singleton=true AND s.environment='live' AND s.live_enabled=true
+  AND s.kill_switch=false AND g.environment='live'
+  AND g.retired_at IS NULL AND g.credential_source IN ('vault','edge_secrets')
+  AND c.return_origin='https://pazo-app-t83r.vercel.app';
+ RETURN output;
+END $f$;
+REVOKE ALL ON FUNCTION public.pazo_f16_live_service_active_route()
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_f16_live_service_active_route()
+ TO service_role;
+
 COMMIT;
