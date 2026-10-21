@@ -28,7 +28,7 @@ const LIVE_RESOURCE_INSPECTION_RELEASED=false
 // This flag becomes true only after the separate service/PO security gate.
 const LIVE_EDGE_PROVISIONING_RELEASED=false
 // The secret-staging Edge remains locked until CI + role security review.
-const LIVE_VAULT_SETUP_RELEASED=false
+const LIVE_VAULT_SETUP_RELEASED=true
 // The generation reservation UI is not exposed until the Edge backend gets an explicit PO GO.
 const LIVE_MERCHANT_BOOTSTRAP_RELEASED=true
 const fieldClass='min-h-12 w-full rounded-[14px] bg-[#F5F8F1] px-4 py-3 text-[14px] font-semibold text-[#204E4A] placeholder:text-[#9BAD9D] focus-visible:bg-[#EFF5DC]'
@@ -363,8 +363,8 @@ export function AdminPayPalSettings({lang}:Props){
         {config?.validated_at&&<span className="mt-1 block text-[11px]">{new Date(config.validated_at).toLocaleString()}</span>}
        </div>
       </div>:<div className="mt-5 rounded-[14px] bg-[#F0F5E9] px-4 py-4 text-[13px] font-semibold text-[#466C5B]" data-pazo-live-vault-locked="true">
-       {t('Las credenciales PayPal Live no se pegan en Vault. El nuevo canal privado requerirá reautenticación del administrador. El checkout sigue apagado.',
-         'Do not paste PayPal Live credentials into Vault. The new private channel will require administrator reauthentication. Checkout remains OFF.')}
+       {t('Las credenciales Live se guardan cifradas mediante el formulario privado de abajo, después de comprobar MFA. El checkout sigue apagado hasta superar la validación financiera.',
+         'Use the private form below to store encrypted PayPal Live credentials after fresh MFA. Checkout remains OFF pending financial release.')}
       </div>}
      </section>
     </div>
