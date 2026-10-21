@@ -17,7 +17,7 @@
     "backup:storage": "node scripts/backup-storage.mjs",
     "test:ops": "node --check scripts/f14-verify-trial-storage-identity.mjs && node --check scripts/backup-storage.mjs && node --check scripts/verify-storage-export.mjs && node --check scripts/verify-single-media.mjs && node --test scripts/storage-backup.test.mjs",
     "test:f14": "node --experimental-strip-types --test supabase/functions/f14-moderation-purge/core.test.mjs supabase/functions/f14-moderation-purge/storageInfo.test.mjs supabase/functions/f14-moderation-purge/publicUrl.test.mjs supabase/functions/f14-moderation-purge/trialScope.test.mjs scripts/f14-media-purge-contract.test.mjs scripts/f14-media-url-alias-contract.test.mjs scripts/f14-admin-reconciliation-contract.test.mjs",
-    "test:pwa": "node scripts/pwa-check.mjs",
+    "test:pwa": "node scripts/pwa-check.mjs && node --test scripts/f16-public-pwa-http-gate.test.mjs",
     "test:release:guard": "node scripts/pazo-release-guard.mjs",
     "test:prepreview:dist": "node --test scripts/pazo-prepreview-dist.test.mjs",
     "verify:prepreview": "npm run test:governance && npm run test:release:guard && npm run test:f16:synthetic && npm run build && npm run test:prepreview:dist",
