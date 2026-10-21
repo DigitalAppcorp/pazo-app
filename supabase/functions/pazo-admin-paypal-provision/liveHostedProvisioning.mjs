@@ -2,9 +2,9 @@
 // No webhook, checkout or entitlement activation. This file is not imported
 // by deployed index.ts. Releasing it requires a separate security/release GO.
 //
-// The verified PayPal merchant identity adapter is intentionally REQUIRED:
-// a matching plan + webhook alone is insufficient to bind historical sales
-// to the original real merchant.
+// The verified PayPal merchant adapter is wired server-side with a mandatory
+// pinned fingerprint read from an immutable generation row. Plan + webhook
+// alone never identify the merchant or permit financial operations.
 import {createPazoLiveProvisioningIntake} from './intake.mjs'
 import {createPazoLivePrivilegedAdmin} from './liveAuthenticatedAdminFactory.mjs'
 import {createPazoLiveProvisionSqlStore} from './liveProvisionSqlStore.mjs'
@@ -12,6 +12,8 @@ import {createPazoScopedManagementTokenReader}
  from './scopedManagementToken.mjs'
 import {createPazoLiveEdgeSecretsProvisioner}
  from '../pazo-admin-paypal-validate/liveEdgeProvisioning.mjs'
+import {createPazoLiveVerifiedMerchantResources}
+ from '../pazo-admin-paypal-validate/liveMerchantIdentityReadOnly.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const response=(code)=>new Response(JSON.stringify({
  ok:false,code,liveActivated:false,mayCharge:false
@@ -33,6 +35,11 @@ export function createPazoLiveHostedProvisioning({
   const publishableKey=getEnv('SUPABASE_ANON_KEY')
   if(projectUrl!==PROJECT||typeof publishableKey!=='string')
    throw Error('server_config_missing')
+  // Never accept client-supplied merchant identity. The verifier compares the
+  // PayPal reporting account against immutable server generation metadata.
+  // A missing original-merchant fingerprint will fail closed without requests.
+  const providerVerifier=verifyProviderResources||
+   createPazoLiveVerifiedMerchantResources({fetchImpl})
   const admin=createPazoLivePrivilegedAdmin({
    supabaseUrl:projectUrl,publishableKey,fetchImpl
   })
@@ -44,7 +51,7 @@ export function createPazoLiveHostedProvisioning({
    released:true,
    authenticateAdmin:admin,
    readGeneration:store.readGeneration,
-   verifyProviderResources,
+   verifyProviderResources:providerVerifier,
    reserveAttempt:store.reserveAttempt,
    recordAttemptOutcome:store.recordAttemptOutcome,
    getScopedManagementToken:readToken,fetchImpl
