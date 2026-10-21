@@ -198,6 +198,7 @@ BEGIN
   'supporter_private.pazo_live_claim_cancel_once(uuid,text,bigint)','EXECUTE')
  THEN RAISE EXCEPTION 'Unreleased cancellation RPC has executable grants'; END IF;
 END $cancel_claim$;
+\i scripts/f16-live-cancel-finish-disposable-lab.sql
 -- projection installed by the staging migration
 DO $projection$
 DECLARE v jsonb;
@@ -286,4 +287,3 @@ END $overlap$;
 \i scripts/f16-live-dispute-monitor-disposable-lab.sql
 \i scripts/f16-live-immutable-offer-disposable-lab.sql
 \i scripts/f16-live-owner-slot-disposable-lab.sql
-\i scripts/f16-live-cancel-finish-disposable-lab.sql
