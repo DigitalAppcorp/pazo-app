@@ -19,6 +19,7 @@ type Account = {
   intentId: string
   state: 'pending' | 'bound'
   canDownloadAcceptance: boolean
+  needsReconciliation?: boolean
 }
 type AccountResult = {
   ok?: boolean
@@ -90,9 +91,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const offerMode=qaPayAction==='retry_ready'?'retry':'initial'
   const offerReadyForCurrentMode=qaOfferState.mode===offerMode
   const preparationPending=membership.kind==='checking'||
+    (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&!error)||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
     (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
   const preparationUnavailable=membership.kind==='unavailable'||
+    (!qaV2Screen&&membership.kind==='inactive'&&error)||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
     (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
   const preparing=preparationPending||preparationUnavailable
@@ -113,6 +116,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       setQaV2AccountState('checking')
       setQaReviewRevision(n=>n+1)
     }
+    if(!qaV2Screen&&error)void refresh()
     if(offerRequired){
       // Keep the kitten visible while the same mounted published-offer
       // component retries a READ only. Never start PayPal automatically.
@@ -138,7 +142,9 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     const { data: {session}, error: sessionError } = await supabase.auth.getSession()
     // getSession here is ONLY for obtaining bearer; backend verifies getUser().
     if (sessionError || !session?.access_token) throw Error('authentication_required')
-    const response = await fetch(config.url + '/functions/v1/f16-paypal-supporter-account', {
+    if(!qaV2Screen && body.action!=='list')throw Error('live_management_not_released')
+    const endpoint=qaV2Screen?'f16-paypal-supporter-account':'pazo-paypal-live-account'
+    const response = await fetch(config.url + '/functions/v1/' + endpoint, {
       method: 'POST',
       headers: {
         authorization: 'Bearer ' + session.access_token,
@@ -161,7 +167,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     setError(false)
     try {
       const data = await call({ action: 'list' }) as AccountResult
-      if (!Array.isArray(data.accounts) || data.accounts.length > 5 ||
+      if (!Array.isArray(data.accounts) || data.accounts.length > (qaV2Screen?5:1) ||
         data.accounts.some(a => !intentPattern.test(a?.intentId || '') ||
           !['pending','bound'].includes(a.state) ||
           typeof a.canDownloadAcceptance !== 'boolean'))
@@ -326,8 +332,13 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                           'Reopen this screen later. No new charge was initiated.')}
                       </p>}
                   </div>
-            ) : (
+            ) : accounts?.length===0 ? (
               <SupporterLiveCheckoutPanel lang={lang}/>
+            ) : (
+              <p role="status" className="rounded-[16px] bg-[#F0F4E6] p-4 text-center text-[12px] leading-relaxed text-[#476862]">
+                {label('Hay una solicitud PayPal Live anterior que debe revisarse antes de iniciar otra suscripción. No se iniciará otro cobro.',
+                  'A previous PayPal Live request must be reviewed before starting another subscription. No new charge will be started.')}
+              </p>
             )}
           </SupporterOfferB>
           <p className="mx-auto max-w-[420px] px-1 pt-1 text-center text-[12px] leading-relaxed text-[#5C7470]">
@@ -380,14 +391,21 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   {cancelDone === account.intentId && <p role="status" className="text-sm font-bold">
                     {label('Cancelada la próxima renovación.','Future renewals cancelled.')}
                   </p>}
+                  {!qaV2Screen&&<p role="status" className="text-[12px] leading-relaxed text-[#526F63]">
+                    {account.needsReconciliation
+                      ? label('PayPal todavía está conciliando esta solicitud. No inicies otra.',
+                        'PayPal is still reconciling this request. Do not start another.')
+                      : label('La gestión Live de renovaciones está en preparación. Puedes administrar pagos automáticos desde PayPal mientras tanto.',
+                        'Live renewal management is being prepared. You can manage automatic payments in PayPal in the meantime.')}
+                  </p>}
                   <div className="flex flex-wrap gap-2">
-                    {account.state === 'bound' && <button type="button" disabled={busy}
+                    {qaV2Screen && account.state === 'bound' && <button type="button" disabled={busy}
                       onClick={() => void checkStatus(account.intentId)} className={control}>
                       {label('Actualizar estado','Refresh status')}</button>}
-                    {account.canDownloadAcceptance && <button type="button" disabled={busy}
+                    {qaV2Screen && account.canDownloadAcceptance && <button type="button" disabled={busy}
                       onClick={() => void download(account.intentId)} className={control}>
                       {label('Descargar condiciones aceptadas','Download accepted terms')}</button>}
-                    {account.state === 'bound' && status[account.intentId] !== 'CANCELLED' &&
+                    {qaV2Screen && account.state === 'bound' && status[account.intentId] !== 'CANCELLED' &&
                       cancelDone !== account.intentId && <button type="button" disabled={busy}
                         onClick={() => setCancelConfirm(account.intentId)} className={control}>
                         {label('Cancelar renovación','Cancel renewal')}</button>}
