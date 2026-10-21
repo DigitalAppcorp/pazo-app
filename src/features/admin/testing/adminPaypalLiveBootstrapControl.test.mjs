@@ -149,10 +149,10 @@ test('exact-origin CORS admits the local admin preview but not unapproved sites'
  assert.equal(blocked.status,503)
 })
 
-test('PO-operated UI remains hidden while the merchant reservation endpoint is inert',()=>{
+test('PO-operated UI shown only when merchant reservation endpoint is approved',()=>{
  const view=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.meta.url),'utf8')
  const component=readFileSync(new URL('../components/AdminPaypalMerchantBootstrap.tsx',import.meta.url),'utf8')
- assert.match(view,/const LIVE_MERCHANT_BOOTSTRAP_RELEASED=false/)
+ assert.match(view,/const LIVE_MERCHANT_BOOTSTRAP_RELEASED=true/)
  assert.match(view,/<AdminPaypalMerchantBootstrap/)
  assert.match(view,/setRecentAdminMfa\(true\)/)
  assert.match(component,/mfaRecentlyVerified/)
