@@ -82,8 +82,11 @@ test('uncertain batch completion and mismatched build do not repeat financial pr
 })
 test('hosted worker health uses service-only admission/completion without reading PayPal or Vault keys',async()=>{
  const calls=[]
- const getEnv=name=>name==='SUPABASE_URL'?'https://mrybvqdebbgcayuvgkkr.supabase.co':
-  name==='SUPABASE_SERVICE_ROLE_KEY'?'SYNTHETIC-SERVICE-KEY-123456789':undefined
+ const getEnv=name=>{
+  assert.ok(!name.startsWith('PAZO_F16_LIVE_TERMS_'))
+  return name==='SUPABASE_URL'?'https://mrybvqdebbgcayuvgkkr.supabase.co':
+   name==='SUPABASE_SERVICE_ROLE_KEY'?'SYNTHETIC-SERVICE-KEY-123456789':undefined
+ }
  const http=createPazoLiveHostedPrivateWorker({released:true,getEnv,fetchImpl:async(url,o)=>{
   calls.push({url,body:JSON.parse(o.body)})
   assert.ok(url.startsWith('https://mrybvqdebbgcayuvgkkr.supabase.co/rest/v1/rpc/'))
