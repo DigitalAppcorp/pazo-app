@@ -3,6 +3,7 @@
 // generation and account binding, and AFTER cryptographic webhook verification.
 // GET provider facts; NEVER derives paidThrough, grants benefits, or writes DB.
 import {normalizePazoLiveBillingSnapshot,canonicalPaypalInstant} from './liveBillingSnapshot.mjs'
+import {createPazoLiveDisputeEvidenceReader} from './liveDisputeEvidence.mjs'
 const HOST='https://api-m.paypal.com'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
@@ -119,6 +120,13 @@ export function createPaypalLiveMerchantEvidenceReader({
    return x // Never return unfiltered transaction outside this module.
  }
  return Object.freeze({
+  async readSaleDisputes(args={}){
+   // Corroborate the exact original subscription and transaction before the
+   // dispute API. Never inspect unrelated merchant or customer transactions.
+   const x=await transactionForSale(args),t=await token()
+   const read=createPazoLiveDisputeEvidenceReader({getJson:path=>json(fetchImpl,HOST+path,{method:'GET',headers:auth(t)})})
+   return read({saleId:args.saleId,originalPaymentAt:x.time,knownDisputeIds:args.knownDisputeIds})
+  },
   async readVerifiedSubscription({subscriptionId,intentId,expectedGeneration}={}){
    if(expectedGeneration!==merchantGeneration)fail()
    return subscription(subscriptionId,intentId)

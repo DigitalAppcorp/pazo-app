@@ -1,6 +1,6 @@
 // Public transport, private capability: only the database-held random invoker
 // plus service-only admission can start one bounded batch. No browser CORS.
-export const PAZO_LIVE_WORKER_BUILD='pazo_live_worker_v1'
+export const PAZO_LIVE_WORKER_BUILD='pazo_live_worker_v2'
 const paths=new Set(['/pazo-paypal-live-worker','/functions/v1/pazo-paypal-live-worker'])
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const reply=(status,code,extra={})=>new Response(JSON.stringify({ok:status===200,code,...extra}),
@@ -46,6 +46,18 @@ export function createPazoLivePrivateWorkerHttp({released=false,admit,complete,w
    typeof admitted.processingAllowed!=='boolean')return reply(503,'worker_build_or_lease_mismatch')
   let outcome='idle',code=input.action==='health'?'worker_health_only':'worker_idle'
   const event=admitted.event
+  if(admitted.monitorDue!==undefined&&typeof admitted.monitorDue!=='boolean')return reply(503,'worker_queue_shape_unverified')
+  if(input.action==='drain'&&admitted.processingAllowed&&admitted.monitorDue===true){
+   if(event!==null||typeof workers.dispute!=='function')return reply(503,'worker_monitor_backend_unavailable')
+   let result
+   try{result=await workers.dispute({batchLease:admitted.leaseToken})}catch{result={outcomeUnknown:true}}
+   if(result?.outcomeUnknown===true){outcome='unknown';code='worker_monitor_outcome_unknown'}
+   else if(['RECORDED','ALREADY_RECORDED'].includes(result?.state)&&result.leaseReleased===true){
+    outcome=result.monitorOutcome==='clear'?'idle':result.monitorOutcome==='unavailable'?'retry':'review'
+    code=outcome==='idle'?'worker_monitor_committed':outcome==='retry'?'worker_monitor_pending':'worker_monitor_requires_review'
+   }else if(result?.state==='NOT_CLAIMED'){code='worker_monitor_idle'}
+   else{outcome='review';code='worker_monitor_requires_review'}
+  }
   if(input.action==='drain'&&admitted.processingAllowed&&event!==null){
    if(!Number.isSafeInteger(event?.merchantGeneration)||event.merchantGeneration<1||event.merchantGeneration>9999||
     !/^[A-Za-z0-9._-]{3,128}$/.test(event?.eventId||'')||typeof event.eventType!=='string')

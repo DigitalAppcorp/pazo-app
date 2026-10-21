@@ -8,7 +8,7 @@ END $guard$;
 GRANT USAGE ON SCHEMA net TO PUBLIC;
 GRANT SELECT,INSERT,UPDATE,DELETE ON net.synthetic_requests TO PUBLIC;
 CREATE TABLE net.http_request_queue(id bigint);
-\i supabase/migrations/20261021154316_pazo_f16_live_worker_single_use_dispatch.sql
+\i supabase/migrations/20261021155429_pazo_f16_live_worker_single_use_dispatch.sql
 BEGIN;
 DO $dispatch$
 DECLARE req bigint; token text; old_token text; admitted jsonb; batch uuid;

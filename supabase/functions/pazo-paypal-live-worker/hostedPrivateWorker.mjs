@@ -5,6 +5,7 @@ import {createPazoLiveVaultHistoricalVerification} from '../pazo-paypal-live-web
 import {createPazoLiveDurableSaleWorker} from '../pazo-paypal-live-webhook/liveDurableSaleWorker.mjs'
 import {createPazoLiveDurableRefundWorker} from '../pazo-paypal-live-webhook/liveDurableRefundWorker.mjs'
 import {createPazoLiveDurableLifecycleWorker} from '../pazo-paypal-live-webhook/liveDurableLifecycleWorker.mjs'
+import {createPazoLiveDurableDisputeWorker} from '../pazo-paypal-live-webhook/liveDurableDisputeWorker.mjs'
 export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>undefined,fetchImpl=fetch}={}){
  if(released!==true)return createPazoLivePrivateWorkerHttp()
  try{
@@ -21,6 +22,7 @@ export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>und
    complete:({leaseToken,outcome,code,build})=>rpc('workerComplete',{
     p_lease:leaseToken,p_outcome:outcome,p_code:code,p_build:build}),
    workers:{sale:createPazoLiveDurableSaleWorker({...options,verifyAcceptedConsent}),
-    refund:createPazoLiveDurableRefundWorker(options),lifecycle:createPazoLiveDurableLifecycleWorker(options)}})
+    refund:createPazoLiveDurableRefundWorker(options),lifecycle:createPazoLiveDurableLifecycleWorker(options),
+    dispute:createPazoLiveDurableDisputeWorker(options)}})
  }catch{return createPazoLivePrivateWorkerHttp()}
 }

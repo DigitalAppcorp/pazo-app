@@ -165,14 +165,15 @@ La configuración real expone solo public/graphql_public; net no se expone en la
 Data API. Los logins de base existentes son de plataforma/administración y CLI.
 Ningún header ni contenido de Vault se ha leído ni enviado por el scheduler.
 
-Corrección local `20261021154316`: cada dispatch crea una capacidad aleatoria
+Corrección local `20261021155429`: cada dispatch crea una capacidad aleatoria
 de244bits para UNA admisión durante120s; solo su hash permanece en el control
 privado. Admisión consume el hash bajo lock, incluso si el lote está ocupado.
 El antiguo bearer Vault deja de aceptarse y nunca se coloca en pg_net. La cola
 solo contendrá esta capacidad efímera, legible por logins confiables de la DB,
 sin clave de servicio ni PayPal. La frecuencia55s, lease activo y dispatch vigente
 evitan solapamientos. Rollback operativo invalida dispatch y deshabilita trabajo;
-no restaura autenticación permanente. Corrección pendiente de CI/aplicación.
+no restaura autenticación permanente. APLICADA con versión MCP155429 después de
+CI3505/gateway422 PASS de `114756e1`; nombre local alineado, cuerpo sin cambios.
 Solo los logs técnicos del job se conservan7d; otros registros quedan intactos.
 
 PG17 ejecutó el core exacto extraído de la migración con adaptadores simulados
@@ -183,10 +184,54 @@ PG19 verifica además retiro del bearer, uso único, rechazo de nonce inválido,
 vencimiento, recuperación con nonce distinto y rollback de deshabilitación PASS.
 PG18 falló por comparación CRLF/LF en el guard; se corrigió normalizando solo
 finales de línea antes del hash, sin aceptar otra función. Clusters detenidos.
-Extensiones nativas y cron OFF verificados; falta recorrido HTTP autenticado
-con la corrección instalada y procesamiento desactivado después de CI.
+Extensiones nativas y recorrido HTTP autenticado PASS a15:55:37UTC: request1,
+HTTP200 worker_idle/processed0, nonce consumido y batch cerrado; cron automático
+repitió PASS a15:57UTC. enabled=true SOLO salud, processing_enabled=false,
+LiveOFF/killON/inbox0/períodos0. No claves ni llamadas a PayPal.
 [Scheduling oficial](https://supabase.com/docs/guides/functions/schedule-functions),
 [pg_net oficial](https://supabase.com/docs/guides/database/extensions/pg_net).
+
+### Monitor privado de disputas — código local
+
+`20261021160103` añade cola por venta ya registrada, con origen firmado y
+generación original; dos tablas FORCE RLS sin grants directos. Claim/finish son
+service-only, ligados al lote activo y al lease exclusivo de esa venta. Primer
+control satisfactorio habilita su elegibilidad futura; no fabrica otro pago ni
+período. La proyección de beneficios debe exigir ese control antes del primer
+grant (pendiente P3). Capacidad acotada: un candidato por lote; uno de cada cinco
+lotes ocupados se reserva al monitor para evitar que los eventos lo posterguen.
+Health/backlog y admisión de checkout todavía se deben integrar en P4/P5.
+
+El lector GET verifica la suscripción/transacción original y recorre todas las
+páginas de disputas filtradas por seller transaction. Lee detalles de cada caso,
+incluidos casos conocidos que desaparecen de la lista. No almacena nombres,
+email, mensajes, documentos ni cuerpos del proveedor. Solo ID, estado, fecha,
+importe y decisión mínima. Rechaza links externos, ciclos, duplicados, páginas
+incompletas y datos de otra venta. No existe POST de respuesta, aceptación,
+conciliación PayPal ni reembolso en este monitor.
+
+Disputa completa abierta o resuelta a favor del comprador crea un hold de esa
+venta. Solo resolución favorable al comercio o cancelación por comprador, con
+transacción COMPLETED e importe reembolsado cero, permite liberar SU hold.
+Otros holds/refunds permanecen. Parciales/resultados ambiguos quedan review y
+conservan cobertura anterior; ausencia/error/permisos no se interpretan como
+clear. Casos previos no pueden desaparecer, retroceder ni reasignarse.
+Check y hold se escriben con ACK en una sola transacción. Cadencia operativa:
+5min para pendiente/review/error,30min para clear con cobertura,1día histórico;
+es planificación de consultas, no cálculo ni extensión del servicio pagado.
+
+Protocolo worker v2 impide que un endpoint antiguo se declare preparado para
+monitorear: la instalación deja control OFF, heartbeat vacío y build v2; falta
+deploy v2 y repetir SOLO salud tras CI, sin PayPal. PG23 y governance423/423
+PASS; PG20/21 detectaron orden incorrecto de aserciones SQL en la fixture,
+corregido separando mutación de lectura. PG22/23 probaron hold, parcial, resolución,
+replay, lease vencido, ACK crash/rollback y no-grant; clusters detenidos.
+PG24 valida además que un outcome NULL no cree un hold por lógica ternaria.
+Último gate CI pendiente antes de instalar.
+17 Node dirigidas PASS (lector/worker/HTTP). La app PayPal requiere lectura de
+Disputes; su permiso real no se puede afirmar sin OAuth de esa app. Se verificará
+en preparación privada, nunca mediante Reporting/Balances ni pruebas Sandbox.
+[Esquema oficial](https://developer.paypal.com/api/customer-disputes/v1/schema.json).
 El hash de Client ID guardado por el preparador Vault identifica la aplicación;
 no es evidencia de identidad del payee. No convertirlo en un match financiero.
 

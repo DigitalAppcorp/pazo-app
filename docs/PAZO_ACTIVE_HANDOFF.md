@@ -33,10 +33,15 @@ Scheduler `20261021145500` APLICADO por SQL Editor, con historial registrado,
 después de dos fallos MCP sin ejecución. Extensiones nativas y cron OFF PASS.
 Postflight detectó grants PUBLIC de pg_net administrados por Supabase, no
 revocables por postgres; no se emitieron headers. API expone public/graphql_public.
-Corrección local `20261021154316` usa un token aleatorio de una sola admisión/120s,
-sin bearer Vault permanente en cola. PG19/rollback y governance413 PASS; pendiente
-CI/aplicación y recorrido HTTP autenticado de salud con procesamiento OFF.
-Faltan monitoreo de disputas, beneficios, checkout,
+Corrección `20261021155429` APLICADA tras CI3505/gateway422 de `114756e1`:
+token de una admisión/120s, sin bearer Vault permanente en cola. HTTP autenticado
+real200 worker_idle, nonce consumido y batch cerrado. Cron automático repitió PASS.
+Control enabled solo salud, processing false, LiveOFF y cero pagos/eventos.
+Monitor de disputas local `20261021160103`: GET paginado de venta original,
+casos mínimos, lease/batch exclusivo, full hold/resolución favorable/partial review,
+transacción con ACK y protocolo worker v2. PG24 (incluido NULL) y governance423/423
+PASS; pendiente CI. Todavía sin aplicar/deploy v2.
+Faltan integración alojada de monitoreo, beneficios, checkout,
 readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
 No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
 

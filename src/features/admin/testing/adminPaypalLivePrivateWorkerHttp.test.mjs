@@ -44,6 +44,18 @@ test('health and processing OFF perform only a bounded health completion',async(
   assert.equal(calls.length,1);assert.equal(calls[0].leaseToken,batch);assert.equal(calls[0].outcome,'idle')
  }
 })
+test('a dispute monitor batch never counts as a new payment, and health never runs its provider reads',async()=>{
+ for(const action of ['drain','health']){
+  let monitored=0;const completions=[]
+  const http=createPazoLivePrivateWorkerHttp({released:true,
+   admit:async()=>({...admitted,event:null,monitorDue:true}),complete:async p=>{completions.push(p);return true},
+   workers:{sale:async()=>assert.fail('sale'),refund:async()=>assert.fail('refund'),lifecycle:async()=>assert.fail('lifecycle'),
+    dispute:async p=>{monitored++;assert.equal(p.batchLease,batch);return {state:'RECORDED',leaseReleased:true,monitorOutcome:'clear'}}}})
+  const result=await (await http(request({body:JSON.stringify({action})}))).json()
+  assert.equal(monitored,action==='drain'?1:0);assert.equal(result.processed,0)
+  assert.equal(completions[0].outcome,'idle');assert.ok(!JSON.stringify(result).includes(batch))
+ }
+})
 test('one admitted event is dispatched once to its exact financial/lifecycle worker',async()=>{
  for(const [type,worker] of [['PAYMENT.SALE.COMPLETED','sale'],['PAYMENT.SALE.REFUNDED','refund'],
   ['PAYMENT.SALE.REVERSED','refund'],['BILLING.SUBSCRIPTION.CANCELLED','lifecycle']]){

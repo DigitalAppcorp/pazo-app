@@ -283,3 +283,4 @@ END $overlap$;
 \i scripts/f16-live-private-worker-disposable-lab.sql
 \i scripts/f16-live-private-scheduler-disposable-lab.sql
 \i scripts/f16-live-single-use-dispatch-disposable-lab.sql
+\i scripts/f16-live-dispute-monitor-disposable-lab.sql
