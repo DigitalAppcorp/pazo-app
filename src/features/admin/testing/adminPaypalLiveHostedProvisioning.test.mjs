@@ -25,7 +25,7 @@ test('released=false must not read ANY environment secret or construct a privile
  assert.equal(accessed,0)
  assert.equal(fetches,0)
 })
-test('no original-merchant PayPal identity verifier means no provisioning',async()=>{
+test('server-default pinned merchant verifier cannot bypass bad project configuration',async()=>{
  let accessed=0
  const handler=createPazoLiveHostedProvisioning({
   released:true,getEnv:()=>{accessed++;return 'secret'}
@@ -33,7 +33,7 @@ test('no original-merchant PayPal identity verifier means no provisioning',async
  const r=await handler(request)
  assert.equal(r.status,503)
  assert.equal((await r.json()).code,'live_provisioning_not_configured')
- assert.equal(accessed,0)
+ assert.equal(accessed,3)
 })
 test('invalid project configuration and absent project token do not expose secrets',async()=>{
  const handler=createPazoLiveHostedProvisioning({
