@@ -1,5 +1,5 @@
 // PAZO F16 LIVE recurring checkout orchestration — OFF by default / NOT WIRED.
-import {validLiveApprovalUrl} from './liveSubscriptionProvider.mjs'
+import {validLiveApprovalUrl,publicBetaOrigin} from './liveSubscriptionProvider.mjs'
 // No payment or entitlement is granted at subscription creation or PayPal
 // approval return. All adapters MUST be authenticated, backend-owned, durable.
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -27,14 +27,14 @@ function validConsent(c){
  * client-side flag is sufficient.
  */
 export function createPazoLiveVerifiedCheckout({
- releaseReady=false,planId,merchantGeneration,resolveAuthenticatedOwner,
+ releaseReady=false,planId,merchantGeneration,originalOrigin,resolveAuthenticatedOwner,
  admit,consentStore,subscriptionProvider,intentStore,now=Date.now
 }={}){
  return Object.freeze({
   async begin({request,consent}={}){
    if(releaseReady!==true)return fail('live_checkout_not_released')
    if(!PLAN.test(planId||'')||!Number.isSafeInteger(merchantGeneration)||
-    merchantGeneration<1||
+    merchantGeneration<1||!publicBetaOrigin(originalOrigin)||
     typeof resolveAuthenticatedOwner!=='function'||typeof admit!=='function'||
     typeof consentStore?.beginForOwner!=='function'||
     typeof consentStore?.claimProviderCreate!=='function'||
@@ -81,7 +81,7 @@ export function createPazoLiveVerifiedCheckout({
    let claimed
    try{claimed=await consentStore.claimProviderCreate({
     ownerId:owner,intentId:record.intentId,requestKey:consent.requestKey,
-    merchantGeneration,sourceEnvironment:'live'
+    merchantGeneration,sourceEnvironment:'live',originalOrigin
    })}catch{return fail('provider_claim_unavailable')}
    if(claimed!==true)return fail('checkout_requires_manual_recovery')
    let created
