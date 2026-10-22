@@ -315,7 +315,7 @@ jobs:
           POSTGRES_DB: f14_synthetic
           POSTGRES_PASSWORD: f14_synthetic_ci_only
           POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US --locale=en_US.UTF-8
-        ports: ["55442:5432"]
+        ports: ["5432"]
         options: >-
           --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
           --health-interval 5s --health-timeout 5s --health-retries 10
@@ -330,19 +330,19 @@ jobs:
         run: node scripts/f16-p12-build-staged-install.mjs --verify
       - name: Bootstrap isolated private-schema prerequisites
         run: |
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-disposable-parent-fixture.sql
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p12-disposable-existing-reversal-fixture.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p05-disposable-parent-fixture.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/tests/supporter/p12-disposable-existing-reversal-fixture.sql
       - name: Apply staged candidate in disposable PostgreSQL ONLY
         run: |
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c "SET ROLE postgres; SET pazo.f16_p12_go='DISPOSABLE_P12_LAB_ONLY';" -f supabase/drafts/f16_p12_staged_install_REQUIRES_PO_GO.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c "SET ROLE postgres; SET pazo.f16_p12_go='DISPOSABLE_P12_LAB_ONLY';" -f supabase/drafts/f16_p12_staged_install_REQUIRES_PO_GO.sql
       - name: Validate bilingual offers, one-shot claim and recovery binding
         run: |
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql -f supabase/tests/supporter/p10-recovered-checkout-binding-synthetic.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/p06-durable-checkout-consent-synthetic.sql -f supabase/tests/supporter/p10-recovered-checkout-binding-synthetic.sql
       - name: Test P14 exact accepted offer acknowledgement on disposable PostgreSQL
         run: |
-          psql -X -h 127.0.0.1 -p 55442 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p14_checkout_acknowledgement_DO_NOT_APPLY.sql -f supabase/tests/supporter/p14-checkout-acknowledgement-synthetic.sql
+          psql -X -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p14_checkout_acknowledgement_DO_NOT_APPLY.sql -f supabase/tests/supporter/p14-checkout-acknowledgement-synthetic.sql
 
   f16-p21-worker-schema-rehearsal:
     runs-on: ubuntu-latest
