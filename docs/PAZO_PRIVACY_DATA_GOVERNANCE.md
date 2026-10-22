@@ -321,3 +321,16 @@ expirar o recibir un hold. No habilita telemetría nueva.
 El resumen financiero es una RPC autenticada que revalida `pazo_is_admin()` y
 solo devuelve conteos/importes agregados de evidencia PAZO, sin identidad de
 comprador o proveedor. No es saldo, ingresos netos ni estado de cuenta PayPal.
+
+
+## Gate F17 — privacidad antes de instalación y lanzamiento
+
+El trabajo de soporte y cortesías del PR #81 está solo en código/drafts; la auditoría de esquema Supabase de 22-oct-2026 confirmó que **no existen las tres nuevas tablas**. No afirmar en textos legales públicos que esos formularios estén funcionando o que se reciban solicitudes antes de aprobar el despliegue SQL y QA de seguridad.
+
+Para la recepción de soporte se consideran sensibles los mensajes libres: lectura exclusiva del administrador, notas internas invisibles al autor, sin inserción de payload en consola/telemetría, límite de admisión por usuario y sin enviar mensajes a servicios de terceros. Fijar retención de tickets y notas, y su flujo de borrado, antes de la beta pública; un FK CASCADE no soluciona solicitudes de borrado pendientes ni un plazo de conservación.
+
+Las concesiones administrativas son beneficios sin cobro. No deben mezclarse con venta verificada, ciclos PayPal ni métricas de recaudación. Acceso a búsquedas por email/nombre de mascota solo admin real, con auditoría de actos de grant/revoke.
+
+El futuro modo mantenimiento requiere demostrar separación completa de superficie: SPA, REST PostgREST, Storage, Realtime, Edge Functions y flujos de cobro (no bloquear cancelaciones, reembolsos ni reconciliación). El SQL preparado **no activa** `pgrst.db_pre_request` y no debe usarse como prueba de bloqueo total sin el gate administrativo explícito. La pantalla por sí sola no es una defensa de datos.
+
+La sugerencia PWA guarda exclusivamente en almacenamiento local la fecha de expiración del descarte, sin tracking ni identificador de usuario, durante un máximo de siete días; no promete detectar una instalación previa abierta en otra pestaña.
