@@ -47,7 +47,7 @@ export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Loc
  const attempted=useRef(false)
  const active=useRef(true)
  const label=(es:string,en:string)=>lang==='es'?es:en
- useEffect(()=>{onAvailabilityChange?.(stage==='checking'?'loading':stage==='ready'?'ready':'blocked')},[stage,onAvailabilityChange])
+ useEffect(()=>{onAvailabilityChange?.(stage==='checking'?'loading':stage==='unavailable'?'blocked':'ready')},[stage,onAvailabilityChange])
  useEffect(()=>{
   active.current=true
   setAccepted(false)
