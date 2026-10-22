@@ -66,6 +66,7 @@ import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
+import { PazoInstallControl } from './features/pwa/components/PazoInstallControl'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
 
@@ -1906,7 +1907,8 @@ function PazoMain() {
                 </div>
               </div>
 
-              <div className="text-center pb-2">
+              <div className="flex shrink-0 flex-col items-center pb-1 text-center">
+                {!forgotPasswordMode && <PazoInstallControl lang={lang} placement="welcome" />}
                 <p className="text-[11px] text-[#5C7470]">Pazo MVP • Los Ángeles • 2026</p>
               </div>
             </div>
