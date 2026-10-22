@@ -1,11 +1,31 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Pet, Post } from '../../types/pazo'
 import { supabase } from '../../services/supabaseClient'
 import { FollowButton } from '../shared/FollowButton'
-import { IconPaw } from '../icons/PazoIcons'
+import { PublicProfileTabs } from '../../features/profile/components/PublicProfileTabs'
+import { IconPaw, IconDocument, IconCommunity, IconHeart } from '../icons/PazoIcons'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import { describeReportSubject } from '../../features/moderation/reportSubject'
+import { SupporterProfileBackdrop, type SupporterProfileThemeId } from '../../features/supporter/components/SupporterProfileThemes'
+import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
+import {supporterBenefitsUiEnabled} from '../../features/supporter/supporterUiRelease'
+
+const supporterVisualsEnabled = supporterBenefitsUiEnabled
+type PublicSupporterPerks = {badge: boolean; theme: SupporterProfileThemeId | null; milestone: 0 | 3 | 6 | 12}
+const supporterThemes = new Set(['classic', 'nature', 'hearts', 'stars', 'adventure'])
+function acceptPublicSupporterPerks(raw: unknown): PublicSupporterPerks | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const value = raw as Record<string, unknown>
+  if (typeof value.badge !== 'boolean' ||
+      (value.theme !== null && (typeof value.theme !== 'string' || !supporterThemes.has(value.theme))) ||
+      ![0,3,6,12].includes(value.milestone as number) ||
+      (!value.badge && (value.theme !== null || value.milestone !== 0))) return null
+  return value as PublicSupporterPerks
+}
 
 interface PublicProfileViewProps {
   targetPetId: string
+  canReport: boolean
   currentPetId?: string
   ownedPetIds: string[]
   onClose: () => void
@@ -14,11 +34,18 @@ interface PublicProfileViewProps {
 
 export const PublicProfileView = ({
   targetPetId,
+  canReport,
   currentPetId,
   ownedPetIds,
   onClose,
   lang,
 }: PublicProfileViewProps) => {
+  const [reportOpen, setReportOpen] = useState(false)
+  const [postReportId, setPostReportId] = useState<string | null>(null)
+  const [postMenuId, setPostMenuId] = useState<string | null>(null)
+  const postMenuRef = useRef<HTMLDivElement | null>(null)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement | null>(null)
   const [petProfile, setPetProfile] = useState<Pet | null>(null)
   const [petPosts, setPetPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -28,6 +55,7 @@ export const PublicProfileView = ({
   const [followersCount, setFollowersCount] = useState<number>(0)
   const [followingCount, setFollowingCount] = useState<number>(0)
   const [isFounder, setIsFounder] = useState<boolean>(false)
+  const [supporterPerks, setSupporterPerks] = useState<PublicSupporterPerks | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -97,7 +125,7 @@ export const PublicProfileView = ({
             ? petData.gender
             : undefined,
           bio: petData.bio || undefined,
-          photoUrl: petData.photo_url || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1',
+          photoUrl: petData.photo_url || '',
           qrId: `PAZO-QR-${petData.id}`,
           isLost: petData.is_lost || false,
         }
@@ -121,7 +149,7 @@ export const PublicProfileView = ({
             petName: p.pet_name,
             petSpecies: p.pet_species,
             petAvatar: p.pet_avatar,
-            location: p.location,
+            location: p.location || '',
             timeAgo: 'Reciente',
             createdAt: p.created_at,
             isRecommended: false,
@@ -149,237 +177,344 @@ export const PublicProfileView = ({
     }
   }, [targetPetId])
 
+  useEffect(() => {
+    let active=true
+    setSupporterPerks(null)
+    if (!supporterVisualsEnabled) return () => {active=false}
+    void Promise.resolve(supabase.rpc('pazo_supporter_public_pet_benefits',{p_pet_id:targetPetId}))
+      .then(({data,error})=>{
+        if (!active || error) return
+        setSupporterPerks(acceptPublicSupporterPerks(data))
+      }).catch(()=>{ if(active)setSupporterPerks(null) })
+    return () => {active=false}
+  },[targetPetId])
+
+  useEffect(() => {
+    setProfileMenuOpen(false)
+    setPostMenuId(null)
+    setPostReportId(null)
+  }, [targetPetId])
+
+  useEffect(() => {
+    if (!profileMenuOpen || typeof document === 'undefined') return
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !profileMenuRef.current?.contains(event.target)) setProfileMenuOpen(false)
+    }
+    const dismissEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setProfileMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('keydown', dismissEscape)
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('keydown', dismissEscape)
+    }
+  }, [profileMenuOpen])
+
+  useEffect(() => {
+    if (!postMenuId || typeof document === 'undefined') return
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !postMenuRef.current?.contains(event.target)) setPostMenuId(null)
+    }
+    const dismissEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPostMenuId(null)
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('keydown', dismissEscape)
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('keydown', dismissEscape)
+    }
+  }, [postMenuId])
+
   return (
-    <div className="absolute inset-0 z-[100] bg-[#FDFBF7] overflow-y-auto animate-slide-up flex flex-col font-['Quicksand','Nunito',sans-serif] antialiased text-[#204E4A]">
+    <div className="absolute inset-0 z-[100] flex flex-col overflow-x-hidden overflow-y-auto bg-[#F8F5EC] font-sans text-[#204E4A] antialiased animate-slide-up">
+      {/* Supporter cosmetics are server-verified only; default-off preview unaffected. */}
+      {supporterVisualsEnabled && supporterPerks?.theme &&
+        <SupporterProfileBackdrop theme={supporterPerks.theme} />}
+      {/* Original PAZO decorations are exclusive to the uncustomized profile.
+          A server-verified custom theme owns the complete decorative layer. */}
+      {!(supporterVisualsEnabled && supporterPerks?.theme) && <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[540px] overflow-hidden">
+        <div className="absolute -left-36 -top-32 h-80 w-80 rounded-full bg-[#EFE9D6]/55 blur-[75px]" />
+        <svg className="absolute right-[-14px] top-[132px] h-28 w-24 text-[#D9D6A8]/65" viewBox="0 0 100 120" fill="currentColor">
+          <ellipse cx="29" cy="32" rx="8" ry="16" transform="rotate(-20 29 32)" />
+          <ellipse cx="49" cy="19" rx="8" ry="16" transform="rotate(12 49 19)" />
+          <ellipse cx="70" cy="29" rx="8" ry="16" transform="rotate(29 70 29)" />
+          <ellipse cx="84" cy="50" rx="7" ry="15" transform="rotate(45 84 50)" />
+          <path d="M21 79C18 66 29 54 40 52c13-3 16 5 28 13 7 5 13 11 9 22-4 11-19 15-32 12-14-3-21-6-24-20Z" />
+        </svg>
+        <svg className="absolute left-[-25px] top-[360px] h-28 w-28 text-[#D6CAAD]/60" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 55C7 47 10 30 22 28c11-2 16 8 18 15l14-14c7-7 18 0 18 9 0 7-6 11-12 17 8 6 14 15 6 23-7 8-17 3-23-5L28 87c-8 6-17-1-17-10 0-8 4-14 9-22Z" />
+        </svg>
+      </div>}
 
-      {/* Paso 3: Orbes de Luz Ambiental para Glassmorphism Avanzado */}
-      <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
-        <div className="bg-[#E1E53F]/40 blur-[100px] w-96 h-96 rounded-full absolute -top-10 -left-10 animate-pulse"></div>
-        <div className="bg-[#204E4A]/15 blur-[120px] w-[28rem] h-[28rem] rounded-full absolute top-1/4 -right-20"></div>
-        <div className="bg-[#E8F3EE]/80 blur-[100px] w-[32rem] h-[32rem] rounded-full absolute bottom-10 left-1/4 animate-pulse" style={{ animationDuration: '7s' }}></div>
-      </div>
+      <header className="sticky top-0 z-30 bg-[#F8F5EC]/95 backdrop-blur-xl">
+        <div className="mx-auto grid h-[70px] w-full max-w-xl grid-cols-[48px_minmax(0,1fr)_48px] items-center gap-3 px-4">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={lang === 'es' ? 'Regresar' : 'Back'}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-[#204E4A] shadow-[0_5px_18px_rgba(32,78,74,0.10)] transition-colors hover:bg-[#E1E53F]/30"
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-center text-[17px] font-extrabold uppercase tracking-[0.17em] text-[#204E4A]">
+            {lang === 'es' ? 'Perfil' : 'Profile'}
+          </h1>
+          {canReport && !ownedPetIds.includes(targetPetId) ? (
+            <div ref={profileMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileMenuOpen((v) => !v)}
+                aria-label={lang === 'es' ? 'Opciones del perfil' : 'Profile options'}
+                aria-haspopup="menu"
+                aria-expanded={profileMenuOpen}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-[#204E4A] shadow-[0_5px_18px_rgba(32,78,74,0.10)] transition-colors hover:bg-[#E1E53F]/30"
+              >
+                <svg viewBox="0 0 24 24" width="23" height="23" fill="currentColor" aria-hidden="true">
+                  <circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" />
+                </svg>
+              </button>
+              {profileMenuOpen && (
+                <div role="menu" aria-label={lang === 'es' ? 'Acciones del perfil' : 'Profile actions'}
+                  className="absolute right-0 top-full z-50 mt-2 w-48 rounded-[20px] bg-white/95 p-1.5 shadow-[0_12px_32px_rgba(32,78,74,0.14)] backdrop-blur-xl">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="w-full rounded-2xl px-3 py-3 text-left text-[13px] font-extrabold text-[#204E4A] hover:bg-[#F8F5EC]"
+                    onClick={() => { setProfileMenuOpen(false); setPostReportId(null); setReportOpen(true) }}
+                  >
+                    {lang === 'es' ? 'Denunciar perfil' : 'Report profile'}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : <div aria-hidden="true" />}
+        </div>
+      </header>
 
-      {/* Cabecera Fija */}
-      <div className="sticky top-0 z-30 bg-[#FDFBF7]/80 backdrop-blur-xl px-4 sm:px-8 py-4 flex items-center justify-between border-b border-[#204E4A]/5">
-        <button
-          onClick={onClose}
-          className="bg-white/80 backdrop-blur-md border border-[#204E4A]/10 text-[#204E4A] font-bold rounded-full px-5 py-2.5 cursor-pointer shadow-sm hover:bg-white transition-all active:scale-95 text-sm flex items-center gap-2"
-        >
-          <span className="text-lg leading-none mb-0.5">←</span>
-          <span>{lang === 'es' ? 'Regresar' : 'Back'}</span>
-        </button>
-        <span className="text-sm font-black tracking-widest uppercase opacity-40 text-[#204E4A]">
-          {lang === 'es' ? 'Perfil' : 'Profile'}
-        </span>
-        <div className="w-24"></div>
-      </div>
+      {reportOpen && (
+        <ReportDialog
+          target={postReportId
+            ? { kind: 'feed_post', id: postReportId, label: describeReportSubject('feed_post', petProfile?.name, petPosts.find((post) => post.id === postReportId)?.text, lang) }
+            : { kind: 'pet_profile', id: targetPetId, label: describeReportSubject('pet_profile', petProfile?.name, null, lang) }}
+          lang={lang}
+          onClose={() => { setReportOpen(false); setPostReportId(null) }}
+        />
+      )}
 
-      {/* Contenedor Principal */}
-      <div className="p-4 sm:p-6 md:p-8 max-w-3xl w-full mx-auto space-y-8 flex-1 relative z-10">
+      <main className="relative z-10 mx-auto w-full max-w-xl flex-1 px-4 pb-12 pt-4">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="w-10 h-10 border-4 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
-            <p className="text-sm font-bold text-[#5C7470] tracking-wider uppercase">
-              {lang === 'es' ? 'Cargando perfil...' : 'Loading profile...'}
+          <div className="flex flex-col items-center justify-center gap-4 py-24" role="status">
+            <div className="h-9 w-9 animate-spin rounded-full bg-[#204E4A]/20" />
+            <p className="text-[14px] font-bold text-[#5C7470]">
+              {lang === 'es' ? 'Cargando perfil…' : 'Loading profile…'}
             </p>
           </div>
         ) : !petProfile ? (
-          <div className="text-center py-16 space-y-4 bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-8 shadow-sm border border-white/60">
-            <p className="text-lg font-bold text-[#204E4A]">
-              {lang === 'es'
-                ? 'No se encontró la información de esta mascota.'
-                : 'Pet profile information could not be found.'}
-            </p>
-            <button
-              onClick={onClose}
-              className="bg-[#204E4A] text-white px-6 py-3 rounded-full text-sm font-bold cursor-pointer hover:bg-[#183d3a] transition-all"
-            >
-              {lang === 'es' ? 'Volver al feed' : 'Back to feed'}
+          <div className="rounded-[32px] bg-white/85 px-6 py-14 text-center shadow-sm">
+            <p className="text-[17px] font-bold">{lang === 'es' ? 'No se encontró el perfil de esta mascota.' : 'Pet profile not found.'}</p>
+            <button type="button" onClick={onClose} className="mt-5 rounded-full bg-[#204E4A] px-6 py-3 text-[14px] font-bold text-white">
+              {lang === 'es' ? 'Regresar' : 'Back'}
             </button>
           </div>
         ) : (
-          <div className="space-y-8 animate-fade-in">
-
-            {/* Paso 3: Tarjeta Principal (Verdadero Glassmorphism Avanzado) */}
-            <div className="bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(32,78,74,0.08)] rounded-[2.5rem] p-6 sm:p-8 text-center space-y-6">
-
-              {/* Avatar */}
-              <div className="relative inline-block">
-                <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full border-4 border-[#E1E53F] shadow-sm overflow-hidden bg-white mx-auto relative z-10">
-                  <img
-                    src={petProfile.photoUrl}
-                    alt={petProfile.name}
-                    className="w-full h-full object-cover"
-                  />
+          <div className="animate-fade-in">
+            {/* A genuine redesign: the identity is ON the canvas, not inside a profile card. */}
+            <section aria-label={lang === 'es' ? 'Identidad de la mascota' : 'Pet identity'} className="relative px-2 pt-4">
+              <div className="relative inline-flex">
+                <div className="flex h-[148px] w-[148px] items-center justify-center overflow-hidden rounded-full bg-[#E9EFE6] shadow-[0_12px_28px_rgba(32,78,74,0.14)] sm:h-[168px] sm:w-[168px]">
+                  {petProfile.photoUrl ? (
+                    <img src={petProfile.photoUrl} alt={petProfile.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <IconPaw size={61} className="text-[#204E4A]/40" />
+                  )}
                 </div>
+                {supporterVisualsEnabled && supporterPerks?.badge && (
+                  <span className="absolute -bottom-3 -left-2 z-20" aria-label={lang === 'es' ? 'Insignia de Amigo de PAZO' : 'PAZO Friend badge'}>
+                    <SupporterBadge active={true} milestone={supporterPerks.milestone} size="large" lang={lang} />
+                  </span>
+                )}
+                {isFounder && (
+                  <div
+                    className="absolute bottom-1 right-0 flex h-[46px] items-center gap-1 rounded-full bg-[#E1E53F] px-3 text-[#204E4A] shadow-[0_5px_12px_rgba(32,78,74,0.14)]"
+                    title={lang === 'es' ? 'Fundador' : 'Founder'}
+                  >
+                    <IconPaw size={23} />
+                    <span className="text-[11px] font-black">{lang === 'es' ? 'Fundador' : 'Founder'}</span>
+                  </div>
+                )}
                 {petProfile.isLost && (
-                  <span className="absolute bottom-1 right-0 bg-[#EC7357] text-white text-xs font-black uppercase px-3 py-1 rounded-full shadow-md border-2 border-white z-20">
+                  <span className="absolute -bottom-2 left-2 rounded-full bg-[#EC7357] px-3 py-1.5 text-[11px] font-extrabold text-white">
                     {lang === 'es' ? 'Perdido' : 'Lost'}
                   </span>
                 )}
               </div>
 
-              {/* Info Central */}
-              <div className="space-y-4">
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <h2 className="text-3xl sm:text-4xl text-[#204E4A] font-black tracking-tight flex items-center flex-wrap justify-center gap-2">
-                    {petProfile.name}
-                    <IconPaw size={24} className="text-[#204E4A]/30" />
-                    {isFounder && (
-                      <span className="bg-gradient-to-r from-[#E1E53F] to-[#d4d82e] text-[#204E4A] font-black text-[10px] px-2.5 py-1 rounded-full shadow-sm border border-[#204E4A]/10 ml-1 tracking-wider uppercase">
-                        Fundador
-                      </span>
-                    )}
-                  </h2>
-                  <span className="bg-white/60 backdrop-blur-sm text-[#204E4A] font-extrabold text-sm px-4 py-1.5 rounded-full uppercase tracking-wide border border-white">
-                    {petProfile.species}
-                  </span>
-                </div>
-
-                {petProfile.breed && (
-                  <p className="text-base text-[#5C7470] font-bold">
-                    {petProfile.breed}
+              <div className="relative mt-5">
+                {!(supporterVisualsEnabled && supporterPerks?.theme) && <svg aria-hidden="true" className="pointer-events-none absolute -right-1 top-1 h-14 w-14 text-[#D8DA7E]" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round">
+                  <path d="m15 26 12-17M22 43l22-10M38 51l12-2" />
+                </svg>}
+                <h2 className={'max-w-[90%] break-words text-[clamp(39px,10vw,56px)] font-black leading-[1.03] tracking-[-0.05em] ' + (supporterPerks?.theme === 'stars' ? 'text-[#FCFAF2]' : 'text-[#204E4A]')}>
+                  {petProfile.name}
+                </h2>
+                {supporterVisualsEnabled && supporterPerks?.badge && (
+                  <p className="mt-2 text-[12px] font-extrabold tracking-tight" aria-label={lang === 'es' ? 'Miembro verificado Amigo de PAZO' : 'Verified PAZO Friend'}>
+                    {lang === 'es' ? 'Amigo de PAZO' : 'PAZO Friend'}
                   </p>
                 )}
-
-                {petProfile.bio && (
-                  <p className="text-base text-[#204E4A]/90 font-medium bg-white/50 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/60 max-w-xl mx-auto leading-relaxed break-words shadow-sm">
-                    "{petProfile.bio}"
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-[#E1E53F]/75 px-4 py-1.5 text-[14px] font-extrabold uppercase text-[#204E4A]">
+                    {petProfile.species}
+                  </span>
+                  {petProfile.breed && <span className={'text-[13px] font-semibold ' + (supporterPerks?.theme === 'stars' ? 'text-[#F0F4EB]' : 'text-[#607B73]')}>{petProfile.breed}</span>}
+                </div>
+                {Boolean(petProfile.bio?.trim()) && (
+                  <p className={'mt-5 max-w-[40ch] whitespace-pre-wrap break-words text-[16px] font-medium leading-relaxed ' + (supporterPerks?.theme === 'stars' ? 'text-[#F0F4EB]' : 'text-[#315B55]')}>
+                    {petProfile.bio}
                   </p>
                 )}
               </div>
 
-              {/* Paso 1: Reparación y Conexión del FollowButton */}
-              <div className="flex justify-center w-full mt-2 relative z-20">
-                <div className="w-full max-w-[260px]">
+              {Boolean(currentPetId) && !ownedPetIds.includes(petProfile.id) && (
+                <div className="mt-6">
                   <FollowButton
                     currentPetId={currentPetId || ''}
                     targetPetId={petProfile.id}
-                    canFollow={!ownedPetIds.includes(petProfile.id)}
+                    canFollow={true}
                     lang={lang}
-                    variant="profile" // Obliga al estilo de perfil sin que se oculte
-                    onFollowChange={(isFollowing) => {
-                      // Actualización instantánea en tiempo real del contador
-                      setFollowersCount((prev) => isFollowing ? prev + 1 : Math.max(0, prev - 1))
-                    }}
+                    variant="profile"
+                    onFollowChange={(following) => setFollowersCount((n) => following ? n + 1 : Math.max(0, n - 1))}
                   />
                 </div>
-              </div>
+              )}
+            </section>
 
-              {/* Métricas Reales */}
-              <div className="flex items-center justify-around gap-2 pt-6 border-t border-[#204E4A]/10">
-                <div className="flex flex-col items-center flex-1">
-                  <span className="font-black text-2xl text-[#204E4A]">{petPosts.length}</span>
-                  <span className="text-xs font-bold text-[#5C7470] uppercase tracking-wider mt-1">{lang === 'es' ? 'Publicaciones' : 'Posts'}</span>
-                </div>
-                <div className="w-px h-12 bg-[#204E4A]/10"></div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="font-black text-2xl text-[#204E4A] transition-all duration-300">{followersCount}</span>
-                  <span className="text-xs font-bold text-[#5C7470] uppercase tracking-wider mt-1">{lang === 'es' ? 'Seguidores' : 'Followers'}</span>
-                </div>
-                <div className="w-px h-12 bg-[#204E4A]/10"></div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="font-black text-2xl text-[#204E4A]">{followingCount}</span>
-                  <span className="text-xs font-bold text-[#5C7470] uppercase tracking-wider mt-1">{lang === 'es' ? 'Siguiendo' : 'Following'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Paso 4: Refinamiento de Pestañas (Totalmente Transparentes) */}
-            <div className="relative flex bg-transparent p-1.5 rounded-full border border-[#204E4A]/10 w-full max-w-md mx-auto">
-              {/* Indicador de fondo oscuro que se desliza */}
-              <div
-                className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-[#204E4A] rounded-full transition-transform duration-300 ease-out shadow-[0_4px_12px_rgba(32,78,74,0.3)]"
-                style={{
-                  transform: activeTab === 'posts' ? 'translateX(0)' : 'translateX(100%)',
-                }}
-              />
-              <button
-                onClick={() => setActiveTab('posts')}
-                className={`flex-1 relative z-10 py-3.5 text-sm sm:text-base font-bold rounded-full transition-colors duration-300 ${activeTab === 'posts' ? 'text-white' : 'text-[#5C7470] hover:text-[#204E4A]'
-                  }`}
-              >
-                {lang === 'es' ? 'Publicaciones' : 'Posts'}
-              </button>
-              <button
-                onClick={() => setActiveTab('info')}
-                className={`flex-1 relative z-10 py-3.5 text-sm sm:text-base font-bold rounded-full transition-colors duration-300 ${activeTab === 'info' ? 'text-white' : 'text-[#5C7470] hover:text-[#204E4A]'
-                  }`}
-              >
-                {lang === 'es' ? 'Información' : 'Info'}
-              </button>
-            </div>
-
-            {/* Contenido (Galería / Información) */}
-            <div className="pt-2">
-              {activeTab === 'posts' ? (
-                <div>
-                  {petPosts.length === 0 ? (
-                    <div className="text-center py-16 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-6 shadow-sm border border-white/50">
-                      <p className="text-base font-bold text-[#5C7470]">
-                        {lang === 'es'
-                          ? 'Esta mascota aún no tiene publicaciones.'
-                          : 'This pet has no posts yet.'}
-                      </p>
+            {/* One lightweight stats capsule, as in mockup, outside the identity composition. */}
+            <section aria-label={lang === 'es' ? 'Estadísticas de la mascota' : 'Pet statistics'} className="mt-6 rounded-full bg-white/90 px-2 py-3 shadow-[0_5px_22px_rgba(32,78,74,0.05)] backdrop-blur-md sm:px-4">
+              <div className="grid grid-cols-3 gap-0">
+                {([
+                  { key: 'posts', count: petPosts.length, label: lang === 'es' ? 'Publicaciones' : 'Posts', Icon: IconDocument },
+                  { key: 'followers', count: followersCount, label: lang === 'es' ? 'Seguidores' : 'Followers', Icon: IconCommunity },
+                  { key: 'following', count: followingCount, label: lang === 'es' ? 'Siguiendo' : 'Following', Icon: IconHeart },
+                ] as const).map(({ key, count, label, Icon }, index) => (
+                  <div key={key} className="relative flex min-w-0 flex-col items-center justify-center gap-1.5 px-0.5">
+                    {index > 0 && <span aria-hidden="true" className="absolute -left-[1px] top-2 h-10 w-[1px] bg-[#204E4A]/12" />}
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span aria-hidden="true" className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full bg-[#E1E53F]/40 text-[#204E4A]">
+                        <Icon size={17} />
+                      </span>
+                      <span className="text-[22px] font-black leading-none text-[#204E4A]">{count}</span>
                     </div>
-                  ) : (
-                    /* Galería Inmersiva */
-                    <div className="grid grid-cols-2 gap-4 sm:gap-5">
-                      {petPosts.map((post) => (
-                        <div
-                          key={post.id}
-                          className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-[0_4px_20px_rgba(32,78,74,0.08)] relative group bg-[#204E4A] cursor-pointer"
-                        >
-                          {post.photoUrl ? (
-                            <>
-                              <img
-                                src={post.photoUrl}
-                                alt={post.text}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                              />
-                              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end p-4 sm:p-5">
-                                <p className="text-white text-sm sm:text-base font-medium z-10 relative line-clamp-3 leading-snug drop-shadow-md">
-                                  {post.text}
-                                </p>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="w-full h-full p-5 sm:p-6 flex items-end bg-gradient-to-br from-[#204E4A] to-[#163B38]">
-                              <p className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-6">
-                                {post.text}
-                              </p>
+                    <span className="max-w-full text-center text-[clamp(9px,2.5vw,11px)] font-extrabold uppercase leading-tight tracking-[-0.025em] text-[#5C7470]">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Approved Liquid Navigation motion applied to existing social profile tabs. */}
+            <PublicProfileTabs activeTab={activeTab} onChange={setActiveTab} lang={lang} />
+
+            <section className="mt-4" aria-label={activeTab === 'posts'
+              ? (lang === 'es' ? 'Publicaciones de la mascota' : 'Pet posts')
+              : (lang === 'es' ? 'Información de la mascota' : 'Pet information')}>
+              {activeTab === 'posts' ? (
+                petPosts.length === 0 ? (
+                  <div className="rounded-[30px] bg-white/85 px-5 py-12 text-center shadow-sm">
+                    <IconPaw size={27} className="mx-auto mb-3 text-[#204E4A]/50" />
+                    <p className="text-[14px] font-semibold text-[#5C7470]">
+                      {lang === 'es' ? 'Esta mascota aún no tiene publicaciones.' : 'This pet has no posts yet.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {petPosts.map((post) => (
+                      <article key={post.id} className="relative rounded-[32px] bg-white/95 pb-1 shadow-[0_8px_28px_rgba(32,78,74,0.06)]">
+                        <div className="flex min-w-0 items-center gap-3 px-4 py-4">
+                          <div className="relative h-11 w-11 shrink-0">
+                            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-[#E9EFE6]">
+                              {petProfile.photoUrl ? (
+                                <img src={petProfile.photoUrl} alt="" className="h-full w-full object-cover"/>
+                              ) : <IconPaw size={21} className="text-[#204E4A]/50"/>}
+                            </div>
+                            {supporterVisualsEnabled && supporterPerks?.badge && (
+                              <span className="pointer-events-none absolute -bottom-1 -right-1 z-10" aria-label={lang === 'es' ? 'Insignia verificada de Amigo de PAZO' : 'Verified PAZO Friend badge'}>
+                                <SupporterBadge active milestone={supporterPerks.milestone} lang={lang} size="mini"/>
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <h3 className="truncate text-[17px] font-black leading-tight text-[#204E4A]">{petProfile.name}</h3>
+                            </div>
+                            <p className="mt-0.5 text-[12px] text-[#71847F]">{post.timeAgo}</p>
+                          </div>
+                          {canReport && !ownedPetIds.includes(targetPetId) && (
+                            <div ref={postMenuId === post.id ? postMenuRef : null} className="relative shrink-0">
+                              <button
+                                type="button"
+                                aria-label={lang === 'es' ? 'Opciones de publicación' : 'Post options'}
+                                aria-haspopup="menu"
+                                aria-expanded={postMenuId === post.id}
+                                onClick={() => setPostMenuId((prev) => prev === post.id ? null : post.id)}
+                                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F8F5EC] text-[#204E4A] hover:bg-[#E1E53F]/25"
+                              >
+                                <svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor" aria-hidden="true">
+                                  <circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>
+                                </svg>
+                              </button>
+                              {postMenuId === post.id && (
+                                <div role="menu" aria-label={lang === 'es' ? 'Acciones de publicación' : 'Post actions'}
+                                  className="absolute right-0 top-full z-40 mt-2 min-w-[188px] rounded-[18px] bg-white/95 p-1.5 shadow-[0_12px_30px_rgba(32,78,74,0.15)] backdrop-blur-xl">
+                                  <button
+                                    type="button"
+                                    role="menuitem"
+                                    onClick={() => { setPostMenuId(null); setPostReportId(post.id); setReportOpen(true) }}
+                                    className="w-full rounded-2xl px-3 py-3 text-left text-[13px] font-bold text-[#204E4A] hover:bg-[#F8F5EC]"
+                                  >
+                                    {lang === 'es' ? 'Denunciar publicación' : 'Report post'}
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        {post.photoUrl && (
+                          <div className="max-h-[490px] w-full overflow-hidden bg-[#EDF1EC]">
+                            <img src={post.photoUrl} alt={post.text || petProfile.name} className="max-h-[490px] w-full object-cover" />
+                          </div>
+                        )}
+                        <div className="space-y-2 px-4 pb-4 pt-3">
+                          <div className="flex items-center gap-2 text-[13px] font-extrabold text-[#5C7470]">
+                            <IconPaw size={17} className="text-[#204E4A]" />
+                            <span>{post.likes} {lang === 'es' ? 'me gusta' : 'likes'}</span>
+                          </div>
+                          {post.text && <p className="whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed text-[#204E4A]">{post.text}</p>}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )
               ) : (
-                /* Paso 4: Cajas de Información con Restricciones de Desbordamiento */
-                <div className="bg-white/40 backdrop-blur-xl p-6 sm:p-8 rounded-[2.5rem] border border-white/60 shadow-[0_8px_32px_rgba(32,78,74,0.05)]">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm sm:text-base">
-                    <div className="flex flex-col p-5 bg-white/60 backdrop-blur-sm rounded-[1.5rem] border border-white/80 space-y-1 shadow-sm overflow-hidden">
-                      <span className="font-bold text-[#5C7470]">
-                        {lang === 'es' ? 'Edad' : 'Age'}
-                      </span>
-                      <span className="font-black text-sm sm:text-base text-[#204E4A] break-words">{petProfile.age}</span>
-                    </div>
-                    <div className="flex flex-col p-5 bg-white/60 backdrop-blur-sm rounded-[1.5rem] border border-white/80 space-y-1 shadow-sm overflow-hidden">
-                      <span className="font-bold text-[#5C7470]">
-                        {lang === 'es' ? 'Género' : 'Gender'}
-                      </span>
-                      <span className="font-black text-sm sm:text-base text-[#204E4A] capitalize break-words">
-                        {petProfile.gender || (lang === 'es' ? 'Sin especificar' : 'Not specified')}
-                      </span>
-                    </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-[26px] bg-white/85 px-5 py-5 shadow-sm">
+                    <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#71847F]">{lang === 'es' ? 'Edad' : 'Age'}</p>
+                    <p className="mt-2 break-words text-[17px] font-black text-[#204E4A]">{petProfile.age}</p>
+                  </div>
+                  <div className="rounded-[26px] bg-white/85 px-5 py-5 shadow-sm">
+                    <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#71847F]">{lang === 'es' ? 'Género' : 'Gender'}</p>
+                    <p className="mt-2 break-words text-[17px] font-black capitalize text-[#204E4A]">
+                      {petProfile.gender || (lang === 'es' ? 'Sin especificar' : 'Not specified')}
+                    </p>
                   </div>
                 </div>
               )}
-            </div>
+            </section>
           </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }

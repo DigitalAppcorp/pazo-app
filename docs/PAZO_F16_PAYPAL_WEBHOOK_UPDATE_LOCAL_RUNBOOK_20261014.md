@@ -1,0 +1,109 @@
+# PAZO F16 — Corrección del webhook PayPal Sandbox EXISTENTE
+
+## ESTADO CANÓNICO FINAL DEL PATCH (2026-10-14): PASS, NO REPETIR
+
+El PO ejecutó la actualización una sola vez y devolvió `updated_and_verified` para el webhook existente, URL F16 y 11 eventos exactos. **No repetir `-Check ApplyWebhook`; no requiere más credenciales PayPal para este gate.** SQL `20261014094349` y Edge v13 siguen PASS. Postflight Supabase read-only: inbox/intent/pagos/reversiones/admissions 0. Ninguna entrega PayPal auténtica firmada probada todavía. **Siguiente gate**: evento Sandbox real desde la misma app, bajo GO distinto antes de crear suscripciones/eventos. No usar simulador mock como validación de firma postback. Ver `docs/PAZO_F16_PAYPAL_WEBHOOK_PATCH_CLOSEOUT_20261014.md`. Las instrucciones y estados debajo son HISTÓRICOS/SUPERADOS, no se ejecutan.
+
+
+## F16 — PAYPAL DESTINO ANTIGUO IDENTIFICADO POR PO: PANEL SUPABASE, NO CALLBACK (2026-10-14)
+
+- **Evidencia nueva reportada directamente por Product Owner desde el campo Webhook URL de la app PayPal Sandbox:** `https://supabase.com/dashboard/project/mrybvqdebbgcayuvgkkr/functions`. Es URL del **dashboard de administración** `supabase.com/dashboard/…`, no URL pública de función `<project>.supabase.co/functions/v1/<function>`. Esta confusión explica `different_host` en la auditoría GET anterior y no representa un receptor funcional del webhook. **No se ha observado prueba de entrega auténtica**, ni una auditoría de los historiales de PayPal. Si la API devuelve un URL distinto, **ABORTAR antes de PATCH**.
+- **NO cambia el GO económico:** se mantiene autorización previa y limitada a corregir **solo** webhook Sandbox existente `6N7889790V1467139`, conservando los 8 eventos configurados y añadiendo 3 `PAYMENT.SALE.*`, destino exacto `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook`. Nada de Live, nuevo webhook, checkout, pago/entitlement, Resend, merge o deploy.
+- **Backend ya PASS y no repetir:** Supabase migration `20261014094349`, Edge Sandbox `f16-paypal-webhook` v13 ACTIVE, tests negativos HTTP 405/400. Auditoría de DB alojada de solo lectura posterior confirmó 0 inbox/pagos/reversiones. Ningún webhook PayPal se actualizó todavía.
+- **Cambio seguro preparado en GitHub:** `buildApprovedF16WebhookPatch` ahora impone **URL antigua exacta del dashboard** en fase 8→11; host anterior diferente, rutas añadidas, query/secret, wildcard, ID incorrecto o evento cambiado ⇒ `webhook_previous_destination_not_verified` y **NO PATCH**. PowerShell `-Check ApplyWebhook` habilitado solo con APLICAR humano; no retira la comparación doble GET antes del PATCH ni el postflight GET. Si hubo PATCH y resultado incierto, no reintentar automáticamente. Tests CI requeridos PASS antes de ejecución local.
+- **Próxima acción (usuario):** `git pull --ff-only` del branch tras CI y ejecutar **una única vez** script local `scripts/f16-paypal-sandbox-plan.ps1 -Check ApplyWebhook` en PowerShell, con Sandbox Client ID/Secret solo en consola oculta y confirmación literal `APLICAR`. Primero verificar que responde el contrato y redacción; sin copiar secretos al chat. Si el usuario prefiere seguir manualmente con UI, revisar primero sin guardar porque la automatización comprueba invariantes que el panel no valida.
+- Fuente oficial: https://developer.paypal.com/api/rest/webhooks/rest/ exige endpoint que reciba HTTPS POST y devuelva 2xx; https://supabase.com/docs/guides/functions/deploy documenta URL pública de Edge Function distinta de Dashboard.
+
+> AVISO: las secciones históricas siguientes que hablan de `ApplyWebhook` bloqueado por Edge v12 o de callback desconocido están **superadas por el nuevo contrato de URL exacta**; no repetir migración ni deploy.
+
+## ESTADO VIGENTE: CHATGPT EJECUTOR ÚNICO, PAYPAL HOST EN AUDITORÍA (2026-10-14)
+
+El PO finalizó el experimento con Codex: **las siguientes instrucciones locales se dirigirán directamente al propietario**, sin agentes intermediarios. Migración F16 de once eventos **`20261014094349`** y Edge F16 Sandbox **v13** están aplicadas y verificadas; **no repetir**. El webhook PayPal existente NO fue modificado; URL anterior categorizada como `different_host` y propiedad, categoría y dependencias continúan `desconocidas`. La sesión Developer requiere login/passkey local del propietario. Tras login, inspeccionar únicamente en modo lectura, sin visitar callback ni usar Resend. Mantener `$F16ElevenEventBackendReady = $false` en `ApplyWebhook` hasta revisión explícita de seguridad sobre el destino anterior. Snapshot corto: `docs/PAZO_ACTIVE_HANDOFF.md`; registro histórico: `docs/archive/PAZO_ACTIVE_HANDOFF_HISTORY_THROUGH_20261014.md`.
+
+## BLOQUEO DE ACCESO ACTUAL — PAYPAL DEVELOPER LOGIN PENDIENTE (2026-10-14)
+
+- **Checkpoint Codex:** `git pull --ff-only` PASS, checkout `C:\Users\osori\PAZO-F13-preview`, rama `f13/section-titles-20261012`, HEAD `f492c5951dcb85ba330d883cbb4a5a5b16e0e9fd`, cambios locales 0. Ningún script ni infraestructura ejecutados.
+- La sesión PayPal Developer **caducó**; abrir la misma app Sandbox en Chrome requiere autenticación mediante passkey/biometría **del usuario**. Esperar acción del propietario en la computadora. Codex no pide ni copia credenciales.
+- Categoría de destino del webhook previo = **DESCONOCIDA**, propiedad = **DESCONOCIDA**, dependencias = **DESCONOCIDAS**; no asumir ausencia. No se visitó ni envió tráfico al callback, no se editó PayPal, no se usó Resend.
+- Gate A de once eventos `20261014094349` y Gate B Edge v13 ya PASS. **No repetir migración ni deploy**. No tocar `$F16ElevenEventBackendReady = $false` y no ejecutar `-Check ApplyWebhook`. El GO previo de PayPal no sustituye comprobación de dependencia del host.
+- Solo cuando el propietario complete login: auditoría en PayPal Sandbox de **lectura** sobre webhook `6N7889790V1467139`, reportar categoría del servicio, propiedad y dependencias confirmadas sin URL, tokens ni payload. Ante falta de evidencia, `desconocido` y mantener PAUSED. Cualquier otra mutación requiere gate PO propio.
+
+## ESTADO OPERATIVO PRIORITARIO — 11 EVENTOS PREPARADOS EN HOST, PATCH PAYPAL AÚN BLOQUEADO (2026-10-14)
+
+- Gate SQL y Gate Edge autorizados por PO se aplicaron y verificaron: Supabase migración `20261014094349`, Edge `f16-paypal-webhook` v13 ACTIVE, permiten 11 tipos y conservan seguridad. Prueba GET 405/unsigned POST 400 PASS. Sin comprobación firmada PayPal auténtica.
+- **NO se cambió PayPal:** el webhook Sandbox `6N7889790V1467139` sigue con ocho eventos existentes, faltan tres `PAYMENT.SALE.*`, URL clasificada `different_host`. Su host anterior no está auditado y podría ser otra integración; desviarlo sin comprobar rompería recepción de eventos previos.
+- **Conservar bloqueo `$F16ElevenEventBackendReady = $false`** en `scripts/f16-paypal-sandbox-plan.ps1`. No ejecutar `-Check ApplyWebhook`, ni modificar manualmente el Dashboard, hasta que la auditoría del destino antiguo establezca propiedad y que no existe integración afectada; después yo prepararé el desbloqueo y tests, con el GO de PayPal original aún limitado al webhook y eventos aprobados.
+- En el código de GitHub la versión CLI de la migración se renombró para coincidir con el historial Supabase: `supabase/migrations/20261014094349_f16_preserve_two_subscription_lifecycle_events.sql`. No ejecutar su SQL de nuevo.
+- Archivo de cierre: `docs/PAZO_F16_ELEVEN_EVENT_HOSTED_CLOSEOUT_20261014.md`. Avisos inferiores de «no aplicado» quedan históricos.
+
+## Actualización prioritaria: conservar ocho eventos antes de aplicar PayPal PATCH (2026-10-14)
+
+La salida local del PO identificó los dos eventos extras como `BILLING.SUBSCRIPTION.CREATED` y `BILLING.SUBSCRIPTION.RE-ACTIVATED`. Son tipos del catálogo PayPal Sandbox; deben conservarse además de los seis originales. El PATCH correcto, una vez autorizado el backend, será **8 eventos existentes + 3 PAYMENT.SALE.* = 11**, sin borrar eventos ni crear webhooks.
+
+El receptor alojado F16 v12 y el RPC de inbox PostgreSQL solo permiten los nueve tipos originalmente previstos. Por lo tanto **NO REDIRIGIR AHORA**: dos eventos firmados quedarían `200 verified_unhandled_event` sin almacenamiento persistente. GitHub prepara `20261014085430_f16_preserve_two_subscription_lifecycle_events.sql` (NO APLICADA) y receptor con 11 tipos para un gate PO independiente. `scripts/f16-paypal-sandbox-plan.ps1` tiene `$F16ElevenEventBackendReady=$false`; `-Check ApplyWebhook` se bloquea sin pedir credenciales. Solo `-Check Resources` permanece permitido.
+
+Después de GO SQL y GO Edge (con pruebas y auditoría read-only, no PayPal), quitar y probar el latch; entonces hacer la modificación **ya autorizada** mediante un único PATCH local 8→11, con GET postflight y sin retry automático ante incertidumbre. Ver `docs/PAZO_F16_ELEVEN_EVENT_BACKEND_GATE_20261014.md`. El destino previo apunta a host ajeno a PAZO; la redirección puede interrumpir una integración anterior, lo que exige revisar si sigue en uso.
+
+## Preflight observado: dos eventos PayPal extra, todavía sin modificar (2026-10-14)
+
+El webhook actual tiene **8 eventos**, no 6: los 6 BILLING.SUBSCRIPTION aprobados y 2 extras no identificados. Los 3 PAYMENT.SALE siguen ausentes. `-Check ApplyWebhook` abortó antes de PATCH, de modo que **no se hizo ninguna modificación a PayPal**.
+
+Para identificar los extras de manera segura, `-Check Resources` ahora obtiene opcionalmente el catálogo oficial de eventos PayPal mediante GET y añade `additionalProviderEvents`, `unresolvedAdditionalEventsCount` y `officialCatalogStatus`. Solo publica nombres de eventos verificados por PayPal, nunca etiquetas arbitrarias ni la URL anterior. Cualquier fallo de catálogo mantiene el diagnóstico en solo lectura.
+
+**No repetir ApplyWebhook:** reenviar dos tipos adicionales a F16 podría hacer que un receptor distinto deje de procesarlos. Primero confirmar cuáles son y decidir si se deben preservar y procesar, no borrarlos silenciosamente.
+
+## BLOQUEO ACTUAL — DIAGNÓSTICO READ-ONLY ANTES DE MODIFICAR (2026-10-14)
+
+El PO ejecutó `-Check ApplyWebhook` y recibió `stage=resource_preflight`, `reason=webhook_events_unexpected`, `outcome=no_mutation_attempted`: no hubo PATCH. La advertencia genérica previa de PowerShell ya fue corregida (código 2 = preflight sin cambio; código 3 = posible PATCH con estado incierto).
+
+La causa exacta aún es desconocida: el contrato exigía exactamente los seis eventos de suscripción previstos, sin extras. **No eliminar otros eventos, no cambiar el ID, no relajar la allowlist ni repetir ApplyWebhook** hasta diagnosticar. Ejecutar solo lectura después de actualizar la rama:
+
+```powershell
+git pull --ff-only origin f13/section-titles-20261012
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\f16-paypal-sandbox-plan.ps1 -Check Resources
+```
+
+El JSON saneado ahora añade `configuredEventsCount`, `recognizedEvents`, `missingSubscriptionEvents`, `unexpectedEventsCount`, `duplicateEventsCount`, `wildcardPresent`; nunca retorna URL real ni nombres arbitrarios de eventos externos. El PO puede pegar únicamente esa salida, sin secretos. Los pasos de escritura a continuación están **SUSPENDIDOS hasta revisión del resultado**.
+
+**Estado actual (2026-10-14): EXECUTOR LOCAL PREPARADO, PAYPAL AÚN SIN MODIFICAR.**
+
+## Permiso y alcance
+
+El Product Owner respondió «sí» al gate de modificar exclusivamente el webhook Sandbox existente `6N7889790V1467139`; no autorizó PayPal Live, otro webhook, nuevos planes, creación de suscripciones, checkout ni membresías. El receptor F16 está activo en Supabase versión 12 y su endpoint es `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/f16-paypal-webhook`. HTTP negativo 405 GET / 400 POST sin firmas: PASS. El receptor de legado `paypal-webhook` v35 está fuera de alcance.
+
+No hay conector directo PayPal disponible aquí y los secretos de PayPal almacenados en Supabase no son recuperables para este gate. **No se ha hecho ninguna petición PATCH a PayPal desde ChatGPT.** El PO ya verificó localmente el plan/webhook existentes con `-Check Resources` (PASS de acceso, configuración incorrecta), sin tener que repetir credenciales por chat. El flujo para escribir se ejecuta solamente con los secretos que el PO introduce **localmente** en PowerShell.
+
+## Ejecución única autorizada en Windows
+
+En una carpeta local `PAZO-F13-preview` limpia, situada en la rama `f13/section-titles-20261012`:
+
+```powershell
+git status --short
+git pull --ff-only origin f13/section-titles-20261012
+
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\f16-paypal-sandbox-plan.ps1 -Check ApplyWebhook
+```
+
+El wrapper solicita escribir `APLICAR` en PowerShell; después pide Client ID y Client Secret **del mismo Sandbox REST app**. El secreto se ingresa oculto y las variables de entorno temporales se limpian en `finally`. **No pegar credenciales, token, webhook payload ni URLs internas en GitHub, chat o capturas.** No ejecutar con credenciales Live ni modificar desde Dashboard al mismo tiempo.
+
+El script `scripts/f16-paypal-update-webhook-once.mjs` hace:
+1. Validación del entorno `APLICAR` y credenciales locales; un único token OAuth Sandbox.
+2. GET al plan `P-14V25407JP6850922NLHMDKI` y GET al webhook `6N7889790V1467139`; valida plan ACTIVE USD 2.99 MONTH/1, webhook ID exacto, los seis tipos originales y que no haya wildcard, tipos adicionales ni modificación parcial.
+3. Relee webhook (GET) para detectar deriva antes de escribir. Si todo coincide, hace **un único PATCH** oficial con `replace /url` y `replace /event_types`: conserva los seis tipos aprobados y añade los tres `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.REFUNDED`, `PAYMENT.SALE.REVERSED`.
+4. Revisa respuesta PATCH y hace GET final, comprueba ID, URL exacta y nueve tipos exactos. Si ya está correcto, termina sin mutación. Nunca crea ni elimina webhook.
+
+Salida exitosa: `status=updated_and_verified`, detalle `same_webhook_nine_events_f16_destination`, o `status=already_configured`.
+
+**En caso de error o conexión interrumpida después del envío PATCH, NO repetir ApplyWebhook automáticamente.** Una mutación pudo tener efecto aun sin respuesta. Ejecutar únicamente el preflight read-only:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\f16-paypal-sandbox-plan.ps1 -Check Resources
+```
+
+Este lee los dos recursos, redirige la salida a campos saneados y no escribe. Enviar solo JSON saneado y código de etapa al chat. Si `destinationMatchesF16=true`, `missingEvents=[]`, `eventConfigurationComplete=true`, se cierra gate de configuración. `safeToActivate=false` en ese reporte es una constante que **no invalida** el destino correcto: recuerda que configuración no prueba entrega ni pago. Un fallo ambiguo requiere revisión manual, no reintento ciego. Si el plan o webhook no pertenecen al app local, abortar sin intentar otras credenciales al azar.
+
+## Condiciones posteriores
+
+Tras PASS local, ChatGPT debe inspeccionar Supabase **solo lectura** para verificar que no hay entradas financieras ni entitlements indebidos, y mantener PR #44 Draft. Un PATCH configurado no equivale a firma entregada, checkout, pago o membresía. Siguiente GO distinto: pruebas con evento **auténtico** de comprador PayPal Sandbox; verificar 202, duplicado firmado 200, reintentos 503 y conciliación mínima. Nunca apuntar a la Edge legado `paypal-webhook`, crear recursos duplicados ni tocar Live.
+
+Documentación oficial: https://developer.paypal.com/api/webhooks/v1/webhooks-update/ y https://developer.paypal.com/api/rest/webhooks/rest/ .

@@ -1,0 +1,6 @@
+# The catalog fixture preserves literal source function bodies, including five
+# existing end-of-line spaces checked by the semantic catalog fingerprints.
+supabase/tests/f14/catalog-baseline.sql whitespace=-blank-at-eol
+
+# SQL literals and catalog body fingerprints must have identical bytes on Windows/CI.
+*.sql text eol=lf

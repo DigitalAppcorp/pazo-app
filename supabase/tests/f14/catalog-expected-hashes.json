@@ -1,0 +1,54 @@
+{
+  "roles": {
+    "count": 15,
+    "sha256": "82bff6abb6040bcaace426499d130874dc984695619b5e425ea2276653e6985f"
+  },
+  "schemas": {
+    "count": 12,
+    "sha256": "ee70818baf7fcf3d001919043bcd4a600192b569ae20ca4d479b7cbe9b7d2d90"
+  },
+  "tables": {
+    "count": 76,
+    "sha256": "155fa628dfa91f108075b50d6af2d0314bb0c328bdcf8ca1d1cd4fe1983071dc"
+  },
+  "columns": {
+    "count": 646,
+    "sha256": "e43e98136f55194e14c9bdfcedf1e069e13fc9dfe42c351a329b26e5fd1044b2"
+  },
+  "enums": {
+    "count": 10,
+    "sha256": "1232292f37bf2a1506c295c4ef5cc894695897b52d453ef03c23d642f845803e"
+  },
+  "constraints": {
+    "count": 345,
+    "sha256": "d3488c54ffe09c2e4940ea72e2c8b61fe338ebcdcc60d58900e1f65f4c797361"
+  },
+  "indexes": {
+    "count": 243,
+    "sha256": "74411d95fdfb71e76a876a04e99c9999d08078bed6a0357fb7d489844117b4bd"
+  },
+  "policies": {
+    "count": 96,
+    "sha256": "cf5a93c57e29aa9b78e40ee4c5cd98f30781d51b576b29b197fecc3bc7d3eca9"
+  },
+  "triggers": {
+    "count": 46,
+    "sha256": "ef45d157d990c545903aa026e4e84eea3c81a11e0c7360991d197db091e270e2"
+  },
+  "sequences": {
+    "count": 2,
+    "sha256": "e3fd4e961a9e1b7b01cab8fe63fe84dcb627e6dc2be01bb999c6ed16b7bec9c6"
+  },
+  "default_acl": {
+    "count": 12,
+    "sha256": "eb11a278b7c7c426f5e3a70385a934dbb63c2bd3915c8487c55ba9882bcd4166"
+  },
+  "memberships": {
+    "count": 25,
+    "sha256": "20c8bff008442e13ca1f760bd832970efa3d0b20536a8d5a538689560a64f2ed"
+  },
+  "functions": {
+    "count": 116,
+    "sha256": "f250d7882dcbcad8eb8a6dd0770857f85a429756a137e11e7714fc2ced8687b0"
+  }
+}

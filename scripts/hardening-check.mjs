@@ -43,7 +43,7 @@ assertExcludes(
   'browser Supabase client'
 )
 assertIncludes(
-  supabaseClient,
+  read('src/lib/publicConfig.ts'),
   'VITE_SUPABASE_PUBLISHABLE_KEY',
   'browser Supabase client'
 )

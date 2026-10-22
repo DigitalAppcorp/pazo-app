@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { FeatureIntentChoice } from '../../features/validation/components/FeatureIntentChoice'
 import {
   hasFeatureExperimentInterest,
   recordFeatureExperimentInterest,
@@ -91,7 +92,7 @@ export const PlaceFeatureExperimentCard = ({
   return (
     <div
       ref={cardRef}
-      className="rounded-[1.5rem] bg-[#FAF8F5] p-3.5 ring-1 ring-[#204E4A]/5"
+      className="rounded-[1.5rem] bg-[#FAF8F5] p-3.5 shadow-[0_4px_14px_rgba(32,78,74,0.035)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -132,6 +133,7 @@ export const PlaceFeatureExperimentCard = ({
                   : "I'm interested"}
         </button>
       </div>
+      {isInterested && <FeatureIntentChoice moduleKey={moduleKey} source={source} lang={lang}/>}
     </div>
   )
 }

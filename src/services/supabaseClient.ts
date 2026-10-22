@@ -1,18 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const fallbackSupabaseUrl = 'https://mrybvqdebbgcayuvgkkr.supabase.co'
-const fallbackPublishableKey = 'sb_publishable_eSU1LzulS94igbbS0oXdDw_OqeaiBeg'
+import { getPublicSupabaseConfig } from '../lib/publicConfig'
 
-const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL?.trim()
-  || fallbackSupabaseUrl
+const config = getPublicSupabaseConfig(import.meta.env)
+if (!config) throw new Error('Supabase public configuration is missing or invalid.')
 
-const supabaseKey =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
-  || fallbackPublishableKey
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase public configuration is missing.')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = createClient(config.url, config.key)

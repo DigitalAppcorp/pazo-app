@@ -1,0 +1,114 @@
+import { createClient } from 'npm:@supabase/supabase-js@2.117.2'
+import { runMediaPurge, PurgeRejected, type PurgeObject, type PurgeKind } from './core.ts'
+import { storageObjectExists } from './storageInfo.ts'
+import { publicUrlInaccessible } from './publicUrl.ts'
+import { trialRequestAllowed, trialTargetAllowed, assertTrialStorageIdentity } from './trialScope.ts'
+
+// Two independent activation gates: published Edge env switch and database RPC.
+// Do not deploy enabled before P0 media gate and authorized E2E verification.
+const cors = {'Access-Control-Allow-Origin':'*',
+  'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info',
+  'Access-Control-Allow-Methods':'POST, OPTIONS', 'Cache-Control':'no-store'}
+const reply=(status:number, body:unknown)=>new Response(JSON.stringify(body),{
+  status,headers:{...cors,'Content-Type':'application/json; charset=utf-8'}
+})
+// Immutable rollout safety latch, independent of hosted environment values.
+// Activation needs a separate reviewed code commit and explicit PO authorization.
+const F14_MEDIA_PURGE_RELEASE_APPROVED = false
+// Separate, single-object test authorization. Keep FALSE until the Product Owner
+// separately approves the executable trial, then revert immediately afterward.
+const F14_TRIAL_PURGE_APPROVED = false
+Deno.serve(async(req:Request)=>{
+ if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors})
+ if(req.method!=='POST') return reply(405,{error:'method_not_allowed'})
+ const releaseEnabled = F14_MEDIA_PURGE_RELEASE_APPROVED && Deno.env.get('F14_MEDIA_PURGE_ENABLED')==='true'
+ const trialEnabled = F14_TRIAL_PURGE_APPROVED && Deno.env.get('F14_TRIAL_PURGE_ENABLED')==='true'
+ if(!releaseEnabled && !trialEnabled) return reply(503,{error:'cleanup_disabled'})
+ const singleTargetTrial = trialEnabled && !releaseEnabled
+ const url=Deno.env.get('SUPABASE_URL'),anon=Deno.env.get('SUPABASE_ANON_KEY'),secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+ if(!url||!anon||!secret) return reply(503,{error:'cleanup_not_configured'})
+ const auth=req.headers.get('Authorization')||''
+ if(!/^Bearer [^. ]+\.[^. ]+\.[^. ]+$/.test(auth)) return reply(401,{error:'unauthorized'})
+ const body=await req.text()
+ if(body.length>512) return reply(413,{error:'request_too_large'})
+ let input:Record<string,unknown>
+ try {input=JSON.parse(body)} catch {return reply(400,{error:'invalid_json'})}
+ if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(k=>!['kind','id'].includes(k))
+  ||typeof input.kind!=='string'||typeof input.id!=='string') return reply(400,{error:'invalid_request'})
+ // The test route refuses all other targets *before* any privileged lookup.
+ if(singleTargetTrial && !trialRequestAllowed(input.kind,input.id)) return reply(409,{error:'trial_target_refused'})
+ try{
+  const token=auth.slice(7)
+  const userClient=createClient(url,anon,{global:{headers:{Authorization:auth}},
+    auth:{persistSession:false,autoRefreshToken:false}})
+  // Isolated service client never receives caller-controlled headers.
+  const admin=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}})
+  const result=await runMediaPurge(url,input.kind,input.id,{
+   authorizeModerator:async()=>{
+    const {data:{user},error:authError}=await userClient.auth.getUser(token)
+    if(authError||!user) return false
+    const {data,error}=await userClient.rpc('f14_is_moderator')
+    if(error) throw error
+    return data===true
+   },
+   fetchRow:async(kind:PurgeKind,id:string)=>{
+    const table=kind==='feed_post'?'posts':'community_posts'
+    const fields=kind==='feed_post'?'photo_url':'photo_url,photo_storage_path'
+    const {data,error}=await admin.from(table).select(fields).eq('id',id).maybeSingle()
+    if(error) throw error
+    return data as {photo_url:string|null;photo_storage_path?:string|null}|null
+   },
+   gate:async(target:PurgeObject,stage:'preflight'|'complete')=>{
+    if(stage==='preflight'){
+      // A held claim stops ordinary-user Storage mutation while the
+      // exact version and owner are revalidated by the existing RPCs.
+      const {data:claim,error:prepareError}=await admin.rpc('f14_prepare_media_claim',{
+        p_kind:target.kind,p_id:target.id
+      })
+      if(prepareError) throw prepareError
+      if(claim?.status!=='candidate_only'||typeof claim.claim_id!=='string') return false
+      const {data:checked,error:checkError}=await admin.rpc('f14_recheck_media_claim',{
+        p_claim:claim.claim_id
+      })
+      if(checkError) throw checkError
+      if(checked!==true) return false
+    }
+    const {data,error}=await admin.rpc('f14_moderation_media_gate',{
+      p_kind:target.kind,p_target:target.id,p_bucket:target.bucket,p_path:target.path,
+      p_url:target.url,p_stage:stage
+    })
+    if(error) throw error
+    return data===true
+   },
+   objectExists:async(target:PurgeObject)=>{
+    if(singleTargetTrial && !trialTargetAllowed(target)) throw new Error('trial_target_refused')
+    const result=await admin.storage.from(target.bucket).info(target.path)
+    const exists=storageObjectExists(result)
+    if(exists && singleTargetTrial) assertTrialStorageIdentity(result)
+    return exists
+   },
+   removeObject:async(target:PurgeObject)=>{
+    if(singleTargetTrial){
+      if(!trialTargetAllowed(target)) throw new Error('trial_target_refused')
+      // Re-read immediately before the irreversible call. Missing/ambiguous ID
+      // fails closed, even when an earlier preflight had already passed.
+      const beforeRemove=await admin.storage.from(target.bucket).info(target.path)
+      if(!storageObjectExists(beforeRemove)) throw new Error('trial_storage_absent_before_remove')
+      assertTrialStorageIdentity(beforeRemove)
+    }
+    // The existing held-claim trigger and service-role gate remain mandatory.
+    const {error}=await admin.storage.from(target.bucket).remove([target.path])
+    if(error) throw error
+   },
+   publicUrlInaccessible:async(target:PurgeObject)=>publicUrlInaccessible(target.url),
+  })
+  return reply(200,result)
+ }catch(error){
+  if(error instanceof PurgeRejected){
+   if(error.code==='verification_pending') return reply(202,{status:'verification_pending'})
+   return reply(error.code==='unauthorized'?403:error.code==='invalid_target'?400:409,{error:error.code})
+  }
+  // Never expose secret credentials, raw SQL, URLs or paths.
+  return reply(503,{error:'cleanup_unavailable'})
+ }
+})

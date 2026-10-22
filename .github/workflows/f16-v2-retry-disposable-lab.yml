@@ -1,0 +1,49 @@
+name: F16 V2 Retry Disposable PostgreSQL Lab
+
+on:
+  push:
+    branches:
+      - f13/section-titles-20261012
+    paths:
+      - 'supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql'
+      - 'scripts/f16-v2-retry-disposable-lab.sql'
+      - '.github/workflows/f16-v2-retry-disposable-lab.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql'
+      - 'scripts/f16-v2-retry-disposable-lab.sql'
+      - '.github/workflows/f16-v2-retry-disposable-lab.yml'
+permissions:
+  contents: read
+jobs:
+  retry-postgres:
+    name: isolated-owner-retry
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-data
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install local PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
+      - name: Execute disposable retry SQL and isolated integrity assertions
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: synthetic-only-no-hosted-data
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/f16-v2-retry-disposable-lab.sql

@@ -1,3 +1,9 @@
+import { CommunityMediaPendingError, COMMUNITY_MEDIA_BUCKET } from '../../features/communities/communityMediaCleanup'
+import { supabase } from '../../services/supabaseClient'
+import { attachVerifiedCommentBadges, preloadVerifiedFeedBadgeArt } from '../../features/supporter/verifiedFeedPostBadges'
+import { supporterBenefitsUiEnabled } from '../../features/supporter/supporterUiRelease'
+import { SupporterBadge } from '../../features/supporter/components/SupporterBadge'
+import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { useCallback, useEffect, useState } from 'react'
 import type {
   CommunityMember,
@@ -24,6 +30,16 @@ import {
   updateCommunity,
 } from '../../services/communityService'
 import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
+import { CommunityLifestyleHero } from '../../features/communities/components/CommunityLifestyleHero'
+import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
+import { ReportDialog } from '../../features/moderation/ReportDialog'
+import type { ReportTarget } from '../../features/moderation/reportingService'
+import { describeReportSubject } from '../../features/moderation/reportSubject'
+import {
+ ownershipUiEnabled,nominateCommunityAdmin,proposeCommunityTransfer,
+ fetchCommunityOwnershipOffer,acceptCommunityTransfer,declineCommunityTransfer,
+} from '../../features/account/communityOwnershipService'
+import type {OwnershipOffer} from '../../features/account/communityOwnershipState'
 import {
   IconCamera,
   IconChat,
@@ -35,6 +51,7 @@ import {
 
 interface CommunityDetailViewProps {
   communityId: string
+  canReport: boolean
   currentPet: Pet | null
   onBack: () => void
   onCommunityChanged?: () => void
@@ -51,13 +68,20 @@ const formatDate = (value: string, lang: 'es' | 'en') =>
 
 export const CommunityDetailView = ({
   communityId,
+  canReport,
   currentPet,
   onBack,
   onCommunityChanged,
   lang,
 }: CommunityDetailViewProps) => {
+  const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
   const [community, setCommunity] = useState<CommunitySummary | null>(null)
   const [members, setMembers] = useState<CommunityMember[]>([])
+  const [ownershipOffer,setOwnershipOffer]=useState<{offer:OwnershipOffer;isCandidate:boolean}|null>(null)
+  const [ownershipBusy,setOwnershipBusy]=useState(false)
+  const [ownershipError,setOwnershipError]=useState('')
+  const [ownershipInfo,setOwnershipInfo]=useState('')
+  const exitUiEnabled=ownershipUiEnabled()
   const [posts, setPosts] = useState<CommunityPost[]>([])
   const [activeTab, setActiveTab] = useState<DetailTab>('posts')
   const [isLoading, setIsLoading] = useState(true)
@@ -67,6 +91,8 @@ export const CommunityDetailView = ({
   const [postImage, setPostImage] = useState<File | null>(null)
   const [postPreview, setPostPreview] = useState('')
   const [isPosting, setIsPosting] = useState(false)
+  const [postMediaReviewPending, setPostMediaReviewPending] = useState(false)
+  const [postMediaReviewPath, setPostMediaReviewPath] = useState<string | null>(null)
 
   const [openCommentsFor, setOpenCommentsFor] = useState<string | null>(null)
   const [commentsByPost, setCommentsByPost] = useState<
@@ -94,15 +120,30 @@ export const CommunityDetailView = ({
         fetchCommunityPosts(communityId, currentPet?.id),
       ])
 
+      let decoratedPosts=nextPosts
+      if(supporterBenefitsUiEnabled){
+        try{
+          decoratedPosts=await attachVerifiedCommentBadges(nextPosts,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(decoratedPosts)
+        }catch(error){
+          console.error('PAZO community post badge verification unavailable:',error)
+          decoratedPosts=nextPosts
+        }
+      }
       setCommunity(nextCommunity)
       setMembers(nextMembers)
-      setPosts(nextPosts)
+      setPosts(decoratedPosts)
+      if (exitUiEnabled) {
+        try { setOwnershipOffer(await fetchCommunityOwnershipOffer(communityId)) }
+        catch { setOwnershipOffer(null) }
+      }
     } catch (error) {
       console.error('Error loading community:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [communityId, currentPet?.id])
+  }, [communityId, currentPet?.id, exitUiEnabled])
 
   useEffect(() => {
     void loadCommunity()
@@ -116,7 +157,18 @@ export const CommunityDetailView = ({
 
   const refreshPosts = async () => {
     const nextPosts = await fetchCommunityPosts(communityId, currentPet?.id)
-    setPosts(nextPosts)
+    let decoratedPosts=nextPosts
+    if(supporterBenefitsUiEnabled){
+      try{
+        decoratedPosts=await attachVerifiedCommentBadges(nextPosts,
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(decoratedPosts)
+      }catch(error){
+        console.error('PAZO community post badge verification unavailable:',error)
+        decoratedPosts=nextPosts
+      }
+    }
+    setPosts(decoratedPosts)
   }
 
   const handleMembership = async () => {
@@ -154,7 +206,7 @@ export const CommunityDetailView = ({
 
   const handleCreatePost = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!community?.isJoined || !currentPet?.id || isPosting) return
+    if (!community?.isJoined || !currentPet?.id || isPosting || postMediaReviewPending) return
     if (!postText.trim() && !postImage) return
 
     setIsPosting(true)
@@ -173,6 +225,14 @@ export const CommunityDetailView = ({
       await refreshPosts()
       onCommunityChanged?.()
     } catch (error: any) {
+      if (error instanceof CommunityMediaPendingError) {
+        setPostMediaReviewPending(true)
+        setPostMediaReviewPath(error.storagePath)
+        alert(lang === 'es'
+          ? `No se pudo confirmar la publicación. No reintentes todavía. La foto requiere revisión: ${COMMUNITY_MEDIA_BUCKET}/${error.storagePath}. Contacta con ${PAZO_PRIVACY_SUPPORT_EMAIL}.`
+          : `Publication could not be confirmed. Do not retry yet. The photo needs review: ${COMMUNITY_MEDIA_BUCKET}/${error.storagePath}. Contact ${PAZO_PRIVACY_SUPPORT_EMAIL}.`)
+        return
+      }
       console.error('Error creating Community post:', error)
       alert(
         lang === 'es'
@@ -215,12 +275,26 @@ export const CommunityDetailView = ({
     }
   }
 
-  const loadComments = async (postId: string) => {
+  const loadComments = async (postId: string):Promise<boolean> => {
     try {
       const comments = await fetchCommunityPostComments(postId)
-      setCommentsByPost((current) => ({ ...current, [postId]: comments }))
+      let decoratedComments=comments
+      if(supporterBenefitsUiEnabled){
+        try{
+          decoratedComments=await attachVerifiedCommentBadges(comments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(decoratedComments)
+        }catch(error){
+          // Membership is optional; a badge lookup cannot block a free thread.
+          console.error('PAZO community comment badge verification unavailable:',error)
+          decoratedComments=comments
+        }
+      }
+      setCommentsByPost((current) => ({ ...current, [postId]: decoratedComments }))
+      return true
     } catch (error) {
       console.error('Error loading Community comments:', error)
+      return false
     }
   }
 
@@ -231,9 +305,9 @@ export const CommunityDetailView = ({
       return
     }
 
-    setOpenCommentsFor(postId)
     setCommentDraft('')
-    await loadComments(postId)
+    // Resolve all membership badges before the first visible comment.
+    if(await loadComments(postId))setOpenCommentsFor(postId)
   }
 
   const handleAddComment = async (postId: string) => {
@@ -279,7 +353,12 @@ export const CommunityDetailView = ({
     }
 
     try {
-      await deleteCommunityPost(post)
+      const result = await deleteCommunityPost(post)
+      if (result.mediaCleanupPending) {
+        alert(lang === 'es'
+          ? `Publicación eliminada. La retirada de la foto no está confirmada: ${COMMUNITY_MEDIA_BUCKET}/${result.storagePath}. Contacta con ${PAZO_PRIVACY_SUPPORT_EMAIL}.`
+          : `Post deleted. Photo removal is not confirmed: ${COMMUNITY_MEDIA_BUCKET}/${result.storagePath}. Contact ${PAZO_PRIVACY_SUPPORT_EMAIL}.`)
+      }
       await refreshPosts()
       onCommunityChanged?.()
     } catch (error: any) {
@@ -311,6 +390,47 @@ export const CommunityDetailView = ({
     } catch (error) {
       console.error('Error removing Community member:', error)
     }
+  }
+
+  const changeOwnership = async (task: () => Promise<boolean>,message:string)=>{
+    if(ownershipBusy || !exitUiEnabled)return
+    setOwnershipBusy(true);setOwnershipError('');setOwnershipInfo('')
+    try {
+      const success=await task()
+      if(!success)throw new Error('ownership_check_failed')
+      setOwnershipInfo(message)
+      await loadCommunity()
+      onCommunityChanged?.()
+    } catch {
+      setOwnershipError(lang==='es'
+        ? 'No se pudo confirmar el cambio. Verifica que exista una solicitud de eliminación pendiente y que la persona sea administradora.'
+        : 'Could not verify the change. Check for a pending deletion request and an eligible administrator.')
+    } finally {setOwnershipBusy(false)}
+  }
+
+  const setAdminFor=(member:CommunityMember)=>{
+    if(!window.confirm(lang==='es'
+      ? '¿Designar a esta persona como administradora candidata? No se transfiere la propiedad todavía.'
+      : 'Nominate this person as an administrator? Ownership is not transferred yet.'))return
+    void changeOwnership(
+      ()=>nominateCommunityAdmin(communityId,member.userId),
+      lang==='es'?'Administrador designado.':'Administrator nominated.')
+  }
+  const offerTo=(member:CommunityMember)=>{
+    if(!window.confirm(lang==='es'
+      ? '¿Ofrecer la propiedad de la comunidad a esta persona? Solo cambiará si acepta.'
+      : 'Offer community ownership? It will only change if this person accepts.'))return
+    void changeOwnership(
+      ()=>proposeCommunityTransfer(communityId,member.userId),
+      lang==='es'?'Oferta enviada; esperando aceptación.':'Offer sent; awaiting acceptance.')
+  }
+  const answerOffer=(accept:boolean)=>{
+    if(accept&&!window.confirm(lang==='es'
+      ? '¿Aceptar la propiedad y responsabilidad de esta comunidad?'
+      : 'Accept ownership and responsibility for this community?'))return
+    void changeOwnership(
+      ()=>accept?acceptCommunityTransfer(communityId):declineCommunityTransfer(communityId),
+      lang==='es'?(accept?'Transferencia aceptada.':'Oferta rechazada.'):(accept?'Transfer accepted.':'Offer declined.'))
   }
 
   const beginEdit = () => {
@@ -394,7 +514,7 @@ export const CommunityDetailView = ({
         <button onClick={onBack} className="text-xs font-bold text-[#204E4A]">
           {lang === 'es' ? 'Volver' : 'Back'}
         </button>
-        <div className="rounded-[2rem] bg-white p-5 text-xs text-[#5C7470] shadow-sm">
+        <div className="rounded-[2rem] pazo-glass-card p-5 text-xs text-[#5C7470] shadow-sm">
           {lang === 'es' ? 'No se pudo cargar la comunidad.' : 'Could not load the community.'}
         </div>
       </div>
@@ -405,137 +525,44 @@ export const CommunityDetailView = ({
   const canParticipate = community.isJoined && community.status === 'active'
 
   return (
-    <div className="space-y-4 animate-slide-up pb-8">
-      <button
-        type="button"
-        onClick={onBack}
-        className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#204E4A] shadow-xs"
-      >
-        {lang === 'es' ? 'Volver a Explorar' : 'Back to Explore'}
-      </button>
+    <div className="relative space-y-4 pb-8 animate-slide-up">
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
+      <CommunityLifestyleHero community={community} isOwner={isOwner}
+        postsCount={posts.length} canJoin={Boolean(currentPet)} isMembershipBusy={isMembershipBusy}
+        onMembership={() => void handleMembership()} onBack={onBack} lang={lang} />
 
-      <section className="overflow-hidden rounded-[2.4rem] bg-white shadow-sm">
-        <div className="relative h-44 bg-[#DDE7E4]">
-          <img
-            src={community.imageUrl}
-            alt={community.name}
-            className="h-full w-full object-cover"
-          />
-          {community.status === 'archived' && (
-            <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[9px] font-extrabold uppercase tracking-wider text-[#204E4A]">
-              {lang === 'es' ? 'Archivada' : 'Archived'}
-            </span>
-          )}
-        </div>
-
-        <div className="space-y-3 p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-xl font-black text-[#204E4A]">
-                  {community.name}
-                </h2>
-                {isOwner && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wide text-[#204E4A]">
-                    <IconShield size={12} />
-                    Admin
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 text-[11px] text-[#5C7470]">
-                {community.membersCount} {lang === 'es' ? 'miembros' : 'members'}
-                {community.zone ? ` · ${community.zone}` : ''}
-              </p>
-            </div>
-
-            {community.status === 'active' && (
-              <button
-                type="button"
-                onClick={() => void handleMembership()}
-                disabled={isMembershipBusy || !currentPet}
-                className={
-                  'shrink-0 rounded-full px-4 py-2 text-xs font-extrabold shadow-xs disabled:opacity-50 ' +
-                  (community.isJoined
-                    ? 'bg-[#FAF8F5] text-[#204E4A]'
-                    : 'bg-[#E1E53F] text-[#204E4A]')
-                }
-              >
-                {isMembershipBusy
-                  ? '...'
-                  : isOwner
-                    ? lang === 'es'
-                      ? 'Administrador'
-                      : 'Admin'
-                    : community.isJoined
-                      ? lang === 'es'
-                        ? 'Salir'
-                        : 'Leave'
-                      : lang === 'es'
-                        ? 'Unirme'
-                        : 'Join'}
-              </button>
-            )}
-          </div>
-
-          <p className="text-xs leading-relaxed text-[#5C7470]">
-            {community.description}
-          </p>
-
-          <div className="flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-wide text-[#5C7470]">
-            <span className="rounded-full bg-[#FAF8F5] px-2.5 py-1">
-              {community.category}
-            </span>
-            {community.species && (
-              <span className="rounded-full bg-[#FAF8F5] px-2.5 py-1">
-                {community.species}
-              </span>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <nav className="flex gap-2">
-        {([
-          ['posts', lang === 'es' ? 'Publicaciones' : 'Posts'],
-          ['info', lang === 'es' ? 'Información' : 'Info'],
-          ['members', lang === 'es' ? 'Miembros' : 'Members'],
-        ] as Array<[DetailTab, string]>).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setActiveTab(key)}
-            className={
-              'rounded-full px-4 py-2 text-xs font-bold shadow-xs ' +
-              (activeTab === key
-                ? 'bg-[#204E4A] text-[#E1E53F]'
-                : 'bg-white text-[#5C7470]')
-            }
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+      <LiquidChoiceTabs
+        variant="community"
+        active={activeTab}
+        onChange={setActiveTab}
+        accessibleLabel={lang === 'es' ? 'Secciones de comunidad' : 'Community sections'}
+        choices={[
+          {id: 'posts', label: lang === 'es' ? 'Publicaciones' : 'Posts'},
+          {id: 'info', label: lang === 'es' ? 'Información' : 'Info'},
+          {id: 'members', label: lang === 'es' ? 'Miembros' : 'Members'},
+        ]}
+      />
 
       {activeTab === 'posts' && (
         <div className="space-y-4">
           {canParticipate && currentPet && (
             <form
               onSubmit={handleCreatePost}
-              className="space-y-3 rounded-[2rem] bg-white p-4 shadow-sm"
+              className="space-y-3 rounded-[2rem] bg-white/85 p-4 shadow-[0_9px_25px_rgba(32,78,74,0.055)] backdrop-blur-xl sm:p-5"
             >
               <div className="flex items-center gap-3">
                 <img
                   src={currentPet.photoUrl}
                   alt={currentPet.name}
-                  className="h-10 w-10 rounded-2xl object-cover"
+                  className="h-12 w-12 rounded-full bg-[#F0F3E9] object-cover shadow-sm"
                 />
                 <div>
-                  <p className="text-xs font-black text-[#204E4A]">
+                  <p className="text-[15px] font-extrabold leading-tight text-[#204E4A]">
                     {lang === 'es'
                       ? `Publicar como ${currentPet.name}`
                       : `Post as ${currentPet.name}`}
                   </p>
-                  <p className="text-[10px] text-[#5C7470]">
+                  <p className="text-[13px] text-[#5C7470]">
                     {lang === 'es'
                       ? 'Visible dentro de esta comunidad'
                       : 'Visible inside this community'}
@@ -548,7 +575,7 @@ export const CommunityDetailView = ({
                 onChange={(event) => setPostText(event.target.value)}
                 rows={3}
                 maxLength={4000}
-                className="w-full rounded-2xl bg-[#FAF8F5] p-3 text-xs text-[#204E4A] outline-none"
+                className="w-full resize-y rounded-[1.4rem] bg-[#F8F7F2] px-4 py-3 text-[14px] leading-relaxed text-[#204E4A] outline-none placeholder:text-[#93A5A0]"
                 placeholder={
                   lang === 'es'
                     ? 'Comparte algo con la comunidad...'
@@ -580,7 +607,7 @@ export const CommunityDetailView = ({
               )}
 
               <div className="flex items-center justify-between gap-3">
-                <label className="flex cursor-pointer items-center gap-2 rounded-full bg-[#FAF8F5] px-3 py-2 text-[10px] font-bold text-[#204E4A]">
+                <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-[#F1F4EA] px-4 py-2 text-[13px] font-extrabold text-[#204E4A]">
                   <IconCamera size={15} />
                   {lang === 'es' ? 'Foto' : 'Photo'}
                   <input
@@ -591,10 +618,16 @@ export const CommunityDetailView = ({
                   />
                 </label>
 
+                {postMediaReviewPath && <p role="status" className="text-xs text-[#5C7470] break-all">
+                  {lang === 'es' ? 'Publicación sin confirmar. Contacta con soporte antes de reenviar. Referencia: '
+                    : 'Publication unconfirmed. Contact support before retrying. Reference: '}
+                  {COMMUNITY_MEDIA_BUCKET}/{postMediaReviewPath}{' '}
+                  <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="font-bold underline">{PAZO_PRIVACY_SUPPORT_EMAIL}</a>
+                </p>}
                 <button
                   type="submit"
-                  disabled={isPosting || (!postText.trim() && !postImage)}
-                  className="rounded-full bg-[#E1E53F] px-5 py-2.5 text-[11px] font-black text-[#204E4A] disabled:opacity-50"
+                  disabled={postMediaReviewPending || isPosting || (!postText.trim() && !postImage)}
+                  className="min-h-11 rounded-full bg-[#204E4A] px-5 py-2.5 text-[14px] font-extrabold text-white shadow-[0_4px_12px_rgba(32,78,74,0.12)] disabled:opacity-50"
                 >
                   {isPosting
                     ? lang === 'es'
@@ -609,13 +642,13 @@ export const CommunityDetailView = ({
           )}
 
           {!community.isJoined && community.status === 'active' && (
-            <div className="rounded-[2rem] bg-white p-4 text-center shadow-sm">
+            <div className="rounded-[2rem] pazo-glass-card p-4 text-center shadow-sm">
               <p className="text-xs font-bold text-[#204E4A]">
                 {lang === 'es'
                   ? 'Puedes leer la comunidad sin unirte.'
                   : 'You can read the community without joining.'}
               </p>
-              <p className="mt-1 text-[10px] text-[#5C7470]">
+              <p className="mt-1 text-[13px] text-[#5C7470]">
                 {lang === 'es'
                   ? 'Únete para publicar, comentar y dar Me gusta.'
                   : 'Join to post, comment, and like.'}
@@ -624,14 +657,14 @@ export const CommunityDetailView = ({
           )}
 
           {posts.length === 0 ? (
-            <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+            <div className="rounded-[2rem] bg-white/80 px-5 py-9 text-center shadow-[0_6px_20px_rgba(32,78,74,0.045)] backdrop-blur-xl">
               <IconPaw size={24} className="mx-auto text-[#204E4A]/50" />
               <p className="mt-2 text-xs font-black text-[#204E4A]">
                 {lang === 'es'
                   ? 'Todavía no hay publicaciones'
                   : 'No posts yet'}
               </p>
-              <p className="mt-1 text-[10px] text-[#5C7470]">
+              <p className="mt-1 text-[13px] text-[#5C7470]">
                 {canParticipate
                   ? lang === 'es'
                     ? 'Puedes ser el primero en compartir algo.'
@@ -642,68 +675,104 @@ export const CommunityDetailView = ({
               </p>
             </div>
           ) : (
-            posts.map((post) => (
+            posts.map((post) => post.isAuthorDeleted ? (
+              <article key={post.id} className="space-y-3 rounded-[2rem] bg-white/85 p-4 shadow-[0_6px_24px_rgba(32,78,74,0.05)] backdrop-blur-xl">
+                <div className="flex items-center gap-3 text-[#204E4A]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FAF8F5]"><IconPaw size={18}/></div>
+                  <p className="text-xs font-extrabold">{lang === 'es' ? 'Autor eliminado' : 'Deleted author'}</p>
+                </div>
+                <p className="text-xs text-[#5C7470]">
+                  {lang === 'es'
+                    ? 'Se retiró el contenido personal del autor. Los comentarios de otras personas permanecen.'
+                    : 'The author’s personal content was removed. Other people’s comments remain.'}
+                </p>
+                <button type="button" onClick={() => void toggleComments(post.id)}
+                  className="rounded-full bg-[#FAF8F5] px-4 py-2 text-xs font-bold text-[#204E4A]">
+                  {lang === 'es' ? 'Ver comentarios' : 'View comments'} ({post.commentsCount})
+                </button>
+                {openCommentsFor === post.id && <div className="space-y-2">
+                  {(commentsByPost[post.id] || []).map(comment => <div key={comment.id} className="flex items-start gap-2 rounded-2xl bg-[#FAF8F5] p-3 text-xs">
+                    <div className="relative h-8 w-8 shrink-0">
+                      <img src={comment.authorAvatar} alt="" className="h-full w-full rounded-full object-cover"/>
+                      {supporterBenefitsUiEnabled&&comment.supporterBadge?.badge&&(
+                        <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                          <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
+                        </span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-[#204E4A]">{comment.authorName}</p>
+                      <p className="mt-1 text-[#5C7470]">{comment.body}</p>
+                    </div>
+                  </div>)}
+                </div>}
+              </article>
+            ) : (
               <article
                 key={post.id}
-                className="space-y-3 rounded-[2rem] bg-white p-4 shadow-sm"
+                className="overflow-hidden rounded-[2rem] bg-white/90 shadow-[0_9px_28px_rgba(32,78,74,0.06)] backdrop-blur-xl"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start justify-between gap-2 px-4 pb-3 pt-4">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={post.authorAvatar}
-                      alt={post.authorName}
-                      className="h-10 w-10 rounded-2xl object-cover"
-                    />
+                    <div className="relative h-11 w-11 shrink-0">
+                      <img src={post.authorAvatar} alt={post.authorName} className="h-full w-full rounded-full bg-[#F0F3E9] object-cover shadow-sm"/>
+                      {supporterBenefitsUiEnabled&&post.supporterBadge?.badge&&(
+                        <span className="pointer-events-none absolute -bottom-1 -right-1 z-10" aria-label={lang==='es'?'Insignia de Amigo de PAZO verificada':'Verified PAZO Friend badge'}>
+                          <SupporterBadge active milestone={post.supporterBadge.milestone} lang={lang} size="mini"/>
+                        </span>
+                      )}
+                    </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-black text-[#204E4A]">
+                        <p className="text-[16px] font-black leading-snug text-[#204E4A]">
                           {post.authorName}
                         </p>
                         {post.authorUserId === community.ownerUserId && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F] px-2 py-0.5 text-[8px] font-extrabold uppercase text-[#204E4A]">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F] px-2 py-0.5 text-[11px] font-extrabold uppercase text-[#204E4A]">
                             <IconShield size={10} />
                             Admin
                           </span>
                         )}
                       </div>
-                      <p className="text-[9px] text-[#5C7470]">
+                      <p className="text-[12px] text-[#5C7470]">
                         {formatDate(post.createdAt, lang)}
                       </p>
                     </div>
                   </div>
 
+                  <div className="flex items-center gap-2">
+                  {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_post',id:post.id,label:describeReportSubject('community_post',post.authorName,post.body,lang)})}
+                    className="rounded-full bg-[#F1F4EA] px-2.5 py-2 text-[12px] font-bold text-[#5C7470]">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
                   {post.canDelete && (
                     <button
                       type="button"
                       onClick={() => void handleDeletePost(post)}
-                      className="rounded-full bg-[#FAF8F5] px-3 py-1.5 text-[9px] font-bold text-[#5C7470]"
+                      className="rounded-full bg-[#F1F4EA] px-2.5 py-2 text-[12px] font-bold text-[#5C7470]"
                     >
                       {lang === 'es' ? 'Eliminar' : 'Delete'}
                     </button>
                   )}
+                  </div>
                 </div>
 
+                {post.photoUrl && (
+                  <div className="max-h-[32rem] w-full overflow-hidden bg-[#ECF0E9]">
+                    <img src={post.photoUrl} alt="" className="max-h-[32rem] w-full object-cover" />
+                  </div>
+                )}
                 {post.body && (
-                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-[#204E4A]">
+                  <p className="whitespace-pre-wrap break-words px-4 pb-2 pt-3 text-[14px] font-medium leading-relaxed text-[#204E4A]">
                     {post.body}
                   </p>
                 )}
 
-                {post.photoUrl && (
-                  <img
-                    src={post.photoUrl}
-                    alt=""
-                    className="max-h-[28rem] w-full rounded-[1.6rem] object-cover"
-                  />
-                )}
-
-                <div className="flex items-center gap-3 border-t border-[#204E4A]/8 pt-3">
+                <div className="flex items-center gap-5 px-4 pb-4 pt-3">
                   <button
                     type="button"
                     onClick={() => void handleLike(post)}
                     disabled={!canParticipate}
                     className={
-                      'flex items-center gap-1.5 text-[10px] font-bold disabled:opacity-45 ' +
+                      'flex items-center gap-1.5 text-[13px] font-bold disabled:opacity-45 ' +
                       (post.isLiked ? 'text-[#204E4A]' : 'text-[#5C7470]')
                     }
                   >
@@ -714,7 +783,7 @@ export const CommunityDetailView = ({
                   <button
                     type="button"
                     onClick={() => void toggleComments(post.id)}
-                    className="flex items-center gap-1.5 text-[10px] font-bold text-[#5C7470]"
+                    className="flex items-center gap-1.5 text-[13px] font-bold text-[#5C7470]"
                   >
                     <IconChat size={16} />
                     {post.commentsCount}
@@ -722,17 +791,20 @@ export const CommunityDetailView = ({
                 </div>
 
                 {openCommentsFor === post.id && (
-                  <div className="space-y-3 rounded-2xl bg-[#FAF8F5] p-3">
+                  <div className="mx-3 mb-3 space-y-3 rounded-[1.4rem] bg-[#F4F5ED] p-4">
                     {(commentsByPost[post.id] || []).map((comment) => (
                       <div key={comment.id} className="flex items-start gap-2.5">
-                        <img
-                          src={comment.authorAvatar}
-                          alt={comment.authorName}
-                          className="h-8 w-8 rounded-xl object-cover"
-                        />
+                        <div className="relative h-9 w-9 shrink-0">
+                          <img src={comment.authorAvatar} alt={comment.authorName} className="h-full w-full rounded-full object-cover"/>
+                          {supporterBenefitsUiEnabled&&comment.supporterBadge?.badge&&(
+                            <span className="pointer-events-none absolute -bottom-1 -right-1 z-10">
+                              <SupporterBadge active milestone={comment.supporterBadge.milestone} lang={lang} size="mini"/>
+                            </span>
+                          )}
+                        </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <p className="text-[10px] font-black text-[#204E4A]">
+                            <p className="text-[13px] font-black text-[#204E4A]">
                               {comment.authorName}
                             </p>
                             {comment.canDelete && (
@@ -741,13 +813,15 @@ export const CommunityDetailView = ({
                                 onClick={() =>
                                   void handleDeleteComment(post.id, comment.id)
                                 }
-                                className="text-[9px] font-bold text-[#5C7470]"
+                                className="text-[12px] font-bold text-[#5C7470]"
                               >
                                 {lang === 'es' ? 'Eliminar' : 'Delete'}
                               </button>
                             )}
                           </div>
-                          <p className="mt-0.5 text-[10px] leading-relaxed text-[#5C7470]">
+                          {canReport && <button type="button" onClick={() => setReportTarget({kind:'community_comment',id:comment.id,label:describeReportSubject('community_comment',comment.authorName,comment.body,lang)})}
+                            className="text-[13px] font-bold text-[#5C7470] underline">{lang === 'es' ? 'Denunciar' : 'Report'}</button>}
+                          <p className="mt-0.5 text-[13px] leading-relaxed text-[#5C7470]">
                             {comment.body}
                           </p>
                         </div>
@@ -755,7 +829,7 @@ export const CommunityDetailView = ({
                     ))}
 
                     {(commentsByPost[post.id] || []).length === 0 && (
-                      <p className="text-[10px] text-[#5C7470]">
+                      <p className="text-[13px] text-[#5C7470]">
                         {lang === 'es'
                           ? 'Aún no hay comentarios.'
                           : 'No comments yet.'}
@@ -768,7 +842,7 @@ export const CommunityDetailView = ({
                           value={commentDraft}
                           onChange={(event) => setCommentDraft(event.target.value)}
                           maxLength={1000}
-                          className="min-w-0 flex-1 rounded-full bg-white px-3 py-2 text-[10px] text-[#204E4A] outline-none"
+                          className="min-w-0 flex-1 rounded-full bg-white px-3 py-2 text-[13px] text-[#204E4A] outline-none"
                           placeholder={
                             lang === 'es'
                               ? 'Escribe un comentario...'
@@ -779,7 +853,7 @@ export const CommunityDetailView = ({
                           type="button"
                           disabled={isCommentBusy || !commentDraft.trim()}
                           onClick={() => void handleAddComment(post.id)}
-                          className="rounded-full bg-[#E1E53F] px-3 py-2 text-[10px] font-black text-[#204E4A] disabled:opacity-50"
+                          className="rounded-full bg-[#E1E53F] px-3 py-2 text-[13px] font-black text-[#204E4A] disabled:opacity-50"
                         >
                           {lang === 'es' ? 'Enviar' : 'Send'}
                         </button>
@@ -794,23 +868,23 @@ export const CommunityDetailView = ({
       )}
 
       {activeTab === 'info' && (
-        <section className="space-y-4 rounded-[2rem] bg-white p-5 shadow-sm">
+        <section className="space-y-5 rounded-[2rem] bg-white/80 p-5 shadow-[0_8px_28px_rgba(32,78,74,0.055)] backdrop-blur-xl sm:p-6">
           {!isEditing ? (
             <>
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
                   {lang === 'es' ? 'Descripción' : 'Description'}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-[#204E4A]">
+                <p className="mt-2 whitespace-pre-wrap break-words text-[14px] font-medium leading-relaxed text-[#204E4A]">
                   {community.description}
                 </p>
               </div>
 
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
                   {lang === 'es' ? 'Reglas' : 'Rules'}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-[#204E4A]">
+                <p className="mt-2 whitespace-pre-wrap break-words text-[14px] leading-relaxed text-[#204E4A]">
                   {community.rules ||
                     (lang === 'es'
                       ? 'Esta comunidad todavía no ha publicado reglas adicionales.'
@@ -819,11 +893,11 @@ export const CommunityDetailView = ({
               </div>
 
               {community.isJoined && community.status === 'active' && (
-                <div className="space-y-3 border-t border-[#204E4A]/8 pt-4">
+                <div className="space-y-3 rounded-[1.6rem] bg-[#F4F5ED] p-4">
                   <div>
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                        <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
                           {lang === 'es'
                             ? 'Funciones en desarrollo'
                             : 'Features in development'}
@@ -834,11 +908,8 @@ export const CommunityDetailView = ({
                             : 'What would you like to use here next?'}
                         </h4>
                       </div>
-                      <span className="rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-[#204E4A]">
-                        {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
-                      </span>
                     </div>
-                    <p className="mt-1 text-[10px] leading-relaxed text-[#5C7470]">
+                    <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
                       {lang === 'es'
                         ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en esta comunidad.'
                         : 'These features are not active yet. Mark only the ones you would actually use in this community.'}
@@ -924,11 +995,11 @@ export const CommunityDetailView = ({
               )}
 
               {isOwner && (
-                <div className="flex flex-wrap gap-2 border-t border-[#204E4A]/8 pt-4">
+                <div className="flex flex-wrap gap-2 rounded-[1.6rem] bg-[#F4F5ED] p-4">
                   <button
                     type="button"
                     onClick={beginEdit}
-                    className="rounded-full bg-[#E1E53F] px-4 py-2 text-[10px] font-black text-[#204E4A]"
+                    className="rounded-full bg-[#E1E53F] px-4 py-2 text-[13px] font-black text-[#204E4A]"
                   >
                     {lang === 'es' ? 'Editar comunidad' : 'Edit community'}
                   </button>
@@ -936,7 +1007,7 @@ export const CommunityDetailView = ({
                     <button
                       type="button"
                       onClick={() => void handleArchive()}
-                      className="rounded-full bg-[#FAF8F5] px-4 py-2 text-[10px] font-bold text-[#5C7470]"
+                      className="rounded-full bg-[#FAF8F5] px-4 py-2 text-[13px] font-bold text-[#5C7470]"
                     >
                       {lang === 'es' ? 'Archivar' : 'Archive'}
                     </button>
@@ -950,7 +1021,7 @@ export const CommunityDetailView = ({
                 <h4 className="text-sm font-black text-[#204E4A]">
                   {lang === 'es' ? 'Editar comunidad' : 'Edit community'}
                 </h4>
-                <p className="mt-1 text-[10px] leading-relaxed text-[#5C7470]">
+                <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
                   {lang === 'es'
                     ? 'Actualiza la información que las personas verán antes de unirse.'
                     : 'Update the information people will see before joining.'}
@@ -960,7 +1031,7 @@ export const CommunityDetailView = ({
               <div className="space-y-1.5">
                 <label
                   htmlFor="community-edit-name"
-                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                  className="block text-[14px] font-extrabold text-[#204E4A]"
                 >
                   {lang === 'es' ? 'Nombre de la comunidad' : 'Community name'}{' '}
                   <span className="text-[#5C7470]">*</span>
@@ -984,7 +1055,7 @@ export const CommunityDetailView = ({
               <div className="space-y-1.5">
                 <label
                   htmlFor="community-edit-description"
-                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                  className="block text-[14px] font-extrabold text-[#204E4A]"
                 >
                   {lang === 'es' ? 'Descripción' : 'Description'}{' '}
                   <span className="text-[#5C7470]">*</span>
@@ -1009,7 +1080,7 @@ export const CommunityDetailView = ({
                 <div className="space-y-1.5">
                   <label
                     htmlFor="community-edit-category"
-                    className="block text-[11px] font-extrabold text-[#204E4A]"
+                    className="block text-[14px] font-extrabold text-[#204E4A]"
                   >
                     {lang === 'es' ? 'Categoría' : 'Category'}{' '}
                     <span className="text-[#5C7470]">*</span>
@@ -1032,7 +1103,7 @@ export const CommunityDetailView = ({
                 <div className="space-y-1.5">
                   <label
                     htmlFor="community-edit-species"
-                    className="block text-[11px] font-extrabold text-[#204E4A]"
+                    className="block text-[14px] font-extrabold text-[#204E4A]"
                   >
                     {lang === 'es' ? 'Especie principal' : 'Main species'}{' '}
                     <span className="font-medium text-[#5C7470]">
@@ -1062,7 +1133,7 @@ export const CommunityDetailView = ({
               <div className="space-y-1.5">
                 <label
                   htmlFor="community-edit-zone"
-                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                  className="block text-[14px] font-extrabold text-[#204E4A]"
                 >
                   {lang === 'es' ? 'Zona o ubicación' : 'Area or location'}{' '}
                   <span className="font-medium text-[#5C7470]">
@@ -1086,7 +1157,7 @@ export const CommunityDetailView = ({
               <div className="space-y-1.5">
                 <label
                   htmlFor="community-edit-rules"
-                  className="block text-[11px] font-extrabold text-[#204E4A]"
+                  className="block text-[14px] font-extrabold text-[#204E4A]"
                 >
                   {lang === 'es' ? 'Reglas de la comunidad' : 'Community rules'}{' '}
                   <span className="font-medium text-[#5C7470]">
@@ -1109,13 +1180,13 @@ export const CommunityDetailView = ({
               </div>
 
               <div className="space-y-1.5">
-                <span className="block text-[11px] font-extrabold text-[#204E4A]">
+                <span className="block text-[14px] font-extrabold text-[#204E4A]">
                   {lang === 'es' ? 'Portada de la comunidad' : 'Community cover'}{' '}
                   <span className="font-medium text-[#5C7470]">
                     {lang === 'es' ? '(opcional)' : '(optional)'}
                   </span>
                 </span>
-                <label className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#FAF8F5] px-4 py-3 text-[10px] font-bold text-[#204E4A] ring-1 ring-transparent transition-all hover:ring-[#204E4A]/15">
+                <label className="flex cursor-pointer items-center gap-2 rounded-2xl bg-[#FAF8F5] px-4 py-3 text-[13px] font-bold text-[#204E4A] ring-1 ring-transparent transition-all hover:ring-[#204E4A]/15">
                   <IconCamera size={15} />
                   {editImage
                     ? editImage.name
@@ -1131,7 +1202,7 @@ export const CommunityDetailView = ({
                     className="hidden"
                   />
                 </label>
-                <p className="text-[9px] text-[#5C7470]">
+                <p className="text-[12px] text-[#5C7470]">
                   {lang === 'es'
                     ? 'JPG, PNG o WEBP · máximo 5 MB.'
                     : 'JPG, PNG or WEBP · maximum 5 MB.'}
@@ -1142,7 +1213,7 @@ export const CommunityDetailView = ({
                 <button
                   type="submit"
                   disabled={isSavingEdit}
-                  className="rounded-full bg-[#E1E53F] px-4 py-2.5 text-[10px] font-black text-[#204E4A] disabled:opacity-50"
+                  className="rounded-full bg-[#E1E53F] px-4 py-2.5 text-[13px] font-black text-[#204E4A] disabled:opacity-50"
                 >
                   {isSavingEdit
                     ? lang === 'es'
@@ -1155,7 +1226,7 @@ export const CommunityDetailView = ({
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="rounded-full bg-[#FAF8F5] px-4 py-2.5 text-[10px] font-bold text-[#5C7470]"
+                  className="rounded-full bg-[#FAF8F5] px-4 py-2.5 text-[13px] font-bold text-[#5C7470]"
                 >
                   {lang === 'es' ? 'Cancelar' : 'Cancel'}
                 </button>
@@ -1167,16 +1238,37 @@ export const CommunityDetailView = ({
 
       {activeTab === 'members' && (
         <section className="space-y-3">
+          {exitUiEnabled && ownershipOffer && (
+            <div className="rounded-[1.8rem] bg-[#E1E53F]/20 p-4">
+              <p className="text-xs font-bold text-[#204E4A]">
+                {lang==='es'?'Transferencia pendiente de aceptación':'Ownership transfer awaiting acceptance'}
+              </p>
+              {ownershipOffer.isCandidate && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" disabled={ownershipBusy} onClick={()=>answerOffer(true)}
+                    className="rounded-full bg-[#204E4A] px-4 py-2 text-xs font-bold text-white disabled:opacity-40">
+                    {lang==='es'?'Aceptar propiedad':'Accept ownership'}
+                  </button>
+                  <button type="button" disabled={ownershipBusy} onClick={()=>answerOffer(false)}
+                    className="rounded-full bg-white px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40">
+                    {lang==='es'?'Rechazar':'Decline'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {exitUiEnabled && ownershipError && <p role="alert" className="rounded-2xl bg-white p-3 text-xs text-[#AF3029]">{ownershipError}</p>}
+          {exitUiEnabled && ownershipInfo && <p role="status" className="rounded-2xl bg-white p-3 text-xs text-[#204E4A]">{ownershipInfo}</p>}
           {members.map((member) => (
             <div
               key={member.userId}
-              className="flex items-center justify-between gap-3 rounded-[1.8rem] bg-white p-4 shadow-sm"
+              className="flex items-center justify-between gap-3 rounded-[1.8rem] bg-white/85 p-4 shadow-[0_7px_20px_rgba(32,78,74,0.05)] backdrop-blur-xl"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <img
                   src={member.pet?.photoUrl}
                   alt={member.pet?.name || ''}
-                  className="h-11 w-11 rounded-2xl bg-[#FAF8F5] object-cover"
+                  className="h-12 w-12 shrink-0 rounded-full bg-[#EAF0E8] object-cover"
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -1184,14 +1276,14 @@ export const CommunityDetailView = ({
                       {member.pet?.name ||
                         (lang === 'es' ? 'Mascota no disponible' : 'Pet unavailable')}
                     </p>
-                    {member.role === 'owner' && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F] px-2 py-0.5 text-[8px] font-extrabold uppercase text-[#204E4A]">
+                    {(member.role === 'owner' || member.role === 'admin') && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#E1E53F] px-2 py-0.5 text-[11px] font-extrabold uppercase text-[#204E4A]">
                         <IconShield size={10} />
-                        Admin
+                        {member.role === 'owner' ? 'Propietario' : 'Admin'}
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-[9px] text-[#5C7470]">
+                  <p className="mt-0.5 text-[12px] text-[#5C7470]">
                     {member.pet?.species || ''}
                     {' · '}
                     {lang === 'es' ? 'desde ' : 'since '}
@@ -1201,19 +1293,32 @@ export const CommunityDetailView = ({
               </div>
 
               {isOwner && member.role !== 'owner' && (
-                <button
-                  type="button"
-                  onClick={() => void handleRemoveMember(member)}
-                  className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[9px] font-bold text-[#5C7470]"
-                >
-                  {lang === 'es' ? 'Retirar' : 'Remove'}
-                </button>
+                <div className="flex flex-wrap justify-end gap-1">
+                  {exitUiEnabled && member.role === 'member' && (
+                    <button type="button" disabled={ownershipBusy}
+                      onClick={()=>setAdminFor(member)}
+                      className="rounded-full bg-[#E1E53F]/50 px-3 py-2 text-[12px] font-bold text-[#204E4A] disabled:opacity-40">
+                      {lang==='es'?'Designar admin':'Nominate admin'}
+                    </button>
+                  )}
+                  {exitUiEnabled && member.role === 'admin' && !ownershipOffer && (
+                    <button type="button" disabled={ownershipBusy}
+                      onClick={()=>offerTo(member)}
+                      className="rounded-full bg-[#204E4A] px-3 py-2 text-[12px] font-bold text-white disabled:opacity-40">
+                      {lang==='es'?'Ofrecer titularidad':'Offer ownership'}
+                    </button>
+                  )}
+                  <button type="button" onClick={() => void handleRemoveMember(member)}
+                    className="rounded-full bg-[#FAF8F5] px-3 py-2 text-[12px] font-bold text-[#5C7470]">
+                    {lang === 'es' ? 'Retirar' : 'Remove'}
+                  </button>
+                </div>
               )}
             </div>
           ))}
 
           {members.length === 0 && (
-            <div className="rounded-[2rem] bg-white p-5 text-xs text-[#5C7470] shadow-sm">
+            <div className="rounded-[2rem] pazo-glass-card p-5 text-xs text-[#5C7470] shadow-sm">
               {lang === 'es' ? 'No hay miembros para mostrar.' : 'No members to show.'}
             </div>
           )}

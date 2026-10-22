@@ -1,0 +1,15 @@
+ACTIVA PAZO + PROJECT BRAIN OS — CONTINUAR, NO REINICIAR (2026-10-20)
+
+Soy el Product Owner. Activa Project Brain OS desde DigitalAppcorp/project-brain-os (v1.4.1, SKILL.md y patterns/VERIFIABLE_HANDOFF.md). Activa PAZO desde DigitalAppcorp/pazo-app, rama f13/section-titles-20261012, PR #44 DRAFT, base release/mvp-beta-fast-track-20261010.
+
+ANTES DE RESPONDER: lee AGENTS.md, docs/PAZO_ACTIVE_HANDOFF.md (CANÓNICO), docs/PAZO_MASTER_ROADMAP.md, docs/PAZO_F16_ADMIN_EDGE_PROVISIONING_GATE_20261020.md, docs/PAZO_F16_BETA_RC_CRITICAL_PATH_20261020.md. Audita rama/HEAD/CI reales y flags alojados. No uses un snapshot histórico sobre el estado actual del proveedor.
+
+PUNTO EXACTO: F16 PayPal Live/Administración para cerrar TODO antes de beta. Sandbox ya probado/aprobado; app PayPal Developer Live y plan mensual US$2.99 creados, plan activado según PO; ID del plan y dominio temporal ya guardados en Supabase. No volver a pedirlos. Webhook Live no creado, merchant generation Live 0, identidad Live aún sin verificación API. Checkout Live y entitlements OFF. No pedir ningún secreto por chat.
+
+YA COMPLETADO (NO REPETIR): migración auditable 20261020200800_pazo_f16_secret_provision_audit_guarded instalada en Supabase con tabla y tres RPC service_role, 0 intentos y roles anon/auth bloqueados; nueve puentes service-only previos instalados. Cuatro insignias PNG originales ya importadas, exactas, SHA-256 probado en adminPaypalSupporterBadgeOriginals.test.mjs. Estado previo a nuevos commits: 1cfcf2be387978b9eb1338de5bc4424ae39dd419, 8/8 GitHub Actions SUCCESS. Nuevo HEAD documental debe ser verificado.
+
+SIGUIENTE IMPLEMENTACIÓN AUTORIZADA: continuar el control-plane privado pazo-admin-paypal-provision con identidad GoTrue+TOTP, verificación merchant PayPal original, token Supabase mínimo y auditoría ya hospedada; resolver generación y URL webhook vinculada; conectar worker pagos/ciclos/refunds/disputas/beneficios y panel Guardar y activar. Seguir validando, NO ACTIVAR ni desplegar funciones financieras ni preview/main sin GO específico. Live se puede activar antes o después de beta, pero TODA su infraestructura, integración y QA deben estar COMPLETOS antes de publicar beta.
+
+OTROS BLOQUEOS: Vercel SSO/HTTPS PWA/callback sin E2E pública, seguridad Auth/protección de contraseñas filtradas, legal/retención, aceptación visual PO de panel y membresía, beta RC SHA único. Main intacto. CERO CONTORNOS (excepto inputs justificados). El usuario quiere avance técnico directo, no repetir preguntas/pruebas ni delegar en Codex/Gemini.
+
+Si el chat anterior se interrumpió, NO inventes que las últimas operaciones terminaron. Consulta GitHub + Supabase alojado primero. Sigue desde el último gate verificado, no desde el texto de una captura.

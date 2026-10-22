@@ -20,6 +20,7 @@ export interface Pet {
 
 export interface PostComment {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   authorPetId?: string
   authorName: string
   authorPet: string
@@ -29,9 +30,15 @@ export interface PostComment {
   createdAt?: string // Soporte nativo para timestamp dinámico en comentarios
 }
 
+// Display-only proof from the existing public, server-calculated entitlement RPC.
+// It is NOT authority to write benefits, charge, cancel, or modify a membership.
+export type SupporterBadgeEvidence={badge:boolean;milestone:0|3|6|12}
+
 export interface Post {
+  supporterBadge?:SupporterBadgeEvidence
   id: string
   petId: string
+  isAuthorDeleted?: boolean
   petName: string
   petSpecies: Species
   petAvatar: string
@@ -50,12 +57,12 @@ export interface Post {
   commentsLoaded?: boolean
 }
 
-export type CommunityRole = 'owner' | 'member'
+export type CommunityRole = 'owner' | 'admin' | 'member'
 export type CommunityStatus = 'active' | 'archived'
 
 export interface CommunitySummary {
   id: string
-  ownerUserId: string
+  ownerUserId: string | null
   name: string
   description: string
   category: string
@@ -87,6 +94,7 @@ export interface CommunityMember {
 
 export interface CommunityPostComment {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   postId: string
   authorPetId: string
   authorName: string
@@ -99,9 +107,11 @@ export interface CommunityPostComment {
 
 export interface CommunityPost {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   communityId: string
   authorUserId: string
   authorPetId: string
+  isAuthorDeleted?: boolean
   authorName: string
   authorSpecies: Species
   authorAvatar: string
@@ -329,5 +339,6 @@ export interface PazoNotification {
   read: boolean
   createdAt?: string
   petId?: string | null
+  sourceType?: string
   sourceId?: string | null
 }

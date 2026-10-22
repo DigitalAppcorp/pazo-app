@@ -1,7 +1,18 @@
+import { canUseAccountFeatures } from './features/auth/accountAccess'
+import { recordAdminActivity } from './features/admin/adminDashboardService'
+import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { useState, useEffect, useRef } from 'react'
+import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { pazoBuildVersion } from './features/release/buildVersion'
+import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
+import { PazoSplash } from './features/splash/PazoSplash'
 import { supabase } from './services/supabaseClient'
 import { fetchOwnedPets } from './services/petService'
+import { selectFeedPage } from './features/feed/selectFeedPage'
+import { advanceFeedCursors } from './features/feed/advanceFeedCursors'
+import {attachVerifiedFeedBadges,attachVerifiedCommentBadges,preloadVerifiedFeedBadgeArt} from './features/supporter/verifiedFeedPostBadges'
+import {supporterBenefitsUiEnabled} from './features/supporter/supporterUiRelease'
 import {
   fetchLatestUnreadSightingNotification,
   fetchNotifications,
@@ -31,6 +42,7 @@ import {
 import type {
   Pet,
   Post,
+  PostComment,
   CareItem,
   CareCompletion,
   CareItemInput,
@@ -51,6 +63,8 @@ import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
+import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
+import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -156,13 +170,21 @@ const EMPTY_FEED_PAGINATION: FeedPaginationState = {
 }
 
 function PazoMain() {
-  const { user, loading, signIn } = useAuth()
+  const {
+    user, loading, signIn, isPasswordRecovery, recoverySessionVerified,
+    requestPasswordReset, changePassword, finishPasswordRecovery,
+  } = useAuth()
   const [lang, setLang] = useState<'es' | 'en'>('es')
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
+  const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(() => {
+    normalizeSupporterPaypalCallback(window.location,window.history)
+    return isSupporterAccountHash(window.location.hash)
+  })
 
   useEffect(() => {
     const syncPublicRoute = () => {
       setPublicRescueRoute(getPublicRescueRoute())
+      setSupporterAccountRoute(isSupporterAccountHash(window.location.hash))
     }
 
     window.addEventListener('hashchange', syncPublicRoute)
@@ -172,9 +194,12 @@ function PazoMain() {
   const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
+    // Keep the previously approved 2.5-second splash lifetime.
+    // Reduced-motion users see the static identity without an unnecessary wait.
+    const duration = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ? 150 : 2500
     const splashTimer = setTimeout(() => {
       setShowSplash(false)
-    }, 2500)
+    }, duration)
 
     return () => clearTimeout(splashTimer)
   }, [])
@@ -182,11 +207,12 @@ function PazoMain() {
   const [isDemoUser, setIsDemoUser] = useState(false)
   const [authMode, setAuthMode] = useState<'onboarding' | 'login'>('onboarding')
   const [isOnboardingActive, setIsOnboardingActive] = useState(true)
-  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04' | 'A05'>('A01')
+  const [initialOnboardingStep, setInitialOnboardingStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>('A01')
 
   const [isFeedLoading, setIsFeedLoading] = useState(true)
   const [isFeedLoadingMore, setIsFeedLoadingMore] = useState(false)
   const [hasMoreFeed, setHasMoreFeed] = useState(true)
+  const [feedError, setFeedError] = useState<'initial' | 'more' | null>(null)
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
@@ -200,6 +226,12 @@ function PazoMain() {
   const feedLoadMoreInFlightRef = useRef(false)
   const feedPaginationRef = useRef<FeedPaginationState>({ ...EMPTY_FEED_PAGINATION })
   const ownedPetIdsRef = useRef<string[]>([])
+  // A transient network failure must not send an existing account to signup.
+  const [petBootstrap, setPetBootstrap] = useState<{
+    userId: string
+    status: 'loading' | 'error' | 'ready'
+  } | null>(null)
+  const [petBootstrapRetry, setPetBootstrapRetry] = useState(0)
   const mainScrollRef = useRef<HTMLElement | null>(null)
   const tabScrollPositionsRef = useRef<Record<NavTab, number>>({
     inicio: 0,
@@ -251,6 +283,19 @@ function PazoMain() {
   const [selectedPublicProfileId, setSelectedPublicProfileId] = useState<string | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
+  useEffect(()=>{
+    if(!user||petBootstrap?.userId!==user.id||petBootstrap.status!=='ready')return
+    const screen=isSearchOpen?'explore':activeTab
+    const day=new Date().toISOString().slice(0,10)
+    const key='pazo_daily_activity_'+user.id+'_'+day+'_'+screen
+    try{if(sessionStorage.getItem(key)==='1')return}catch{/* Browsing without storage still works */}
+    void recordAdminActivity(screen).then(()=>{
+      try{sessionStorage.setItem(key,'1')}catch{/* Optional measurement */}
+    }).catch(()=>{
+      // Analytics is optional; never block opening or navigating PAZO.
+    })
+  },[user?.id,petBootstrap?.userId,petBootstrap?.status,activeTab,isSearchOpen])
+
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false)
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const [communityCreateRequestKey, setCommunityCreateRequestKey] = useState(0)
@@ -268,45 +313,16 @@ function PazoMain() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
-  const blendFeeds = (followed: Post[], recommended: Post[]): Post[] => {
-    if (!followed || followed.length === 0) return recommended
-    if (!recommended || recommended.length === 0) return followed
-
-    // Crear un Set con los IDs de las publicaciones seguidas para evitar duplicados
-    const followedIds = new Set(followed.map(p => p.id))
-
-    // Filtrar recomendaciones que ya existan en el feed de seguidos
-    const filteredRecommended = recommended.filter(p => !followedIds.has(p.id))
-
-    const blended: Post[] = []
-    let recIndex = 0
-
-    // Calcular frecuencia dinámica de inyección basada en el tamaño del feed de seguidos
-    const frequency = followed.length <= 3 ? 2 : 4
-
-    for (let i = 0; i < followed.length; i++) {
-      blended.push(followed[i])
-
-      // Inyectar un post recomendado cada 'frequency' posts de seguidos
-      if ((i + 1) % frequency === 0 && recIndex < filteredRecommended.length) {
-        blended.push({
-          ...filteredRecommended[recIndex],
-          isRecommended: true
-        } as Post)
-        recIndex++
-      }
-    }
-
-    // Si sobraron recomendaciones filtradas y el feed es corto, añadirlas al final
-    while (recIndex < filteredRecommended.length) {
-      blended.push({
-        ...filteredRecommended[recIndex],
-        isRecommended: true
-      } as Post)
-      recIndex++
-    }
-
-    return blended
+  const canUseAccount = canUseAccountFeatures(user?.id, isDemoUser)
+  const requireAccount = () => {
+    setIsCreateMenuOpen(false)
+    setIsDemoUser(false)
+    setIsOnboardingActive(false)
+    setAuthMode('login')
+  }
+  const openAccountAction = (action: () => void) => {
+    if (!canUseAccount) { requireAccount(); return }
+    action()
   }
 
   const enrichPostsWithInteractions = async (postsList: Post[], petId?: string): Promise<Post[]> => {
@@ -360,17 +376,18 @@ function PazoMain() {
 
   const formatPostRow = (post: any, isRecommended: boolean): Post => ({
     id: post.id,
-    petId: post.pet_id,
-    petName: post.pet_name,
-    petSpecies: post.pet_species,
-    petAvatar: post.pet_avatar,
-    location: post.location,
+    petId: wasAuthorDeleted(post) ? '' : (post.pet_id || ''),
+    isAuthorDeleted: wasAuthorDeleted(post),
+    petName: wasAuthorDeleted(post) ? 'Autor eliminado' : post.pet_name,
+    petSpecies: wasAuthorDeleted(post) ? 'otro' : post.pet_species,
+    petAvatar: wasAuthorDeleted(post) ? '' : post.pet_avatar,
+    location: wasAuthorDeleted(post) ? '' : (post.location || ''),
     timeAgo: 'Hace un momento',
     createdAt: post.created_at,
     isRecommended,
-    tags: post.tags || [],
-    text: post.text,
-    photoUrl: post.photo_url,
+    tags: wasAuthorDeleted(post) ? [] : (post.tags || []),
+    text: wasAuthorDeleted(post) ? '' : post.text,
+    photoUrl: wasAuthorDeleted(post) ? null : post.photo_url,
     likes: post.likes || 0,
     isLiked: false,
     isSaved: false,
@@ -387,6 +404,8 @@ function PazoMain() {
     if (reset) {
       setIsFeedLoading(true)
       setHasMoreFeed(true)
+      setFeedError(null)
+      setPosts([])
       feedPaginationRef.current = {
         ...EMPTY_FEED_PAGINATION,
         petId: pet.id,
@@ -394,7 +413,7 @@ function PazoMain() {
     }
 
     try {
-      let pagination = feedPaginationRef.current
+      let pagination = { ...feedPaginationRef.current }
 
       if (reset || pagination.petId !== pet.id) {
         const ownedPetIds =
@@ -407,9 +426,7 @@ function PazoMain() {
           .select('following_id')
           .eq('follower_id', pet.id)
 
-        if (followsError) {
-          console.error('Error fetching follows for feed pagination:', followsError)
-        }
+        if (followsError) throw followsError
 
         const followingIds = follows?.map((follow) => follow.following_id) || []
 
@@ -424,7 +441,7 @@ function PazoMain() {
           recommendationExhausted: false,
         }
 
-        feedPaginationRef.current = pagination
+        if (feedLoadVersionRef.current !== loadVersion) return
       }
 
       let socialRows: any[] = []
@@ -465,46 +482,43 @@ function PazoMain() {
         recommendationRows = data || []
       }
 
-      const socialPosts = socialRows.map((post) => formatPostRow(post, false))
-      const recommendedPosts = recommendationRows.map((post) =>
-        formatPostRow(post, true)
+      // Each query returns up to one page; only the items rendered should
+      // advance that source's cursor. Other candidates stay on later pages.
+      if (feedLoadVersionRef.current !== loadVersion) return
+      const selection = selectFeedPage(
+        socialRows,
+        recommendationRows,
+        FEED_PAGE_SIZE,
+        reset ? new Set<string>() : new Set(posts.map((post) => post.id)),
+        () => true
+      )
+      const page = selection.entries.map(({ item, recommended }) =>
+        formatPostRow(item, recommended)
       )
 
-      const page = blendFeeds(socialPosts, recommendedPosts)
-        .slice(0, FEED_PAGE_SIZE)
+      const nextPagination = advanceFeedCursors(
+        pagination, selection, socialRows.length, recommendationRows.length, FEED_PAGE_SIZE
+      )
 
-      const consumedSocial = page.filter((post) => !post.isRecommended).length
-      const consumedRecommendations = page.filter((post) => post.isRecommended).length
-
-      pagination.socialOffset += consumedSocial
-      pagination.recommendationOffset += consumedRecommendations
-
-      if (
-        socialRows.length === 0
-        || (
-          socialRows.length < FEED_PAGE_SIZE
-          && consumedSocial >= socialRows.length
-        )
-      ) {
-        pagination.socialExhausted = true
-      }
-
-      if (
-        recommendationRows.length === 0
-        || (
-          recommendationRows.length < FEED_PAGE_SIZE
-          && consumedRecommendations >= recommendationRows.length
-        )
-      ) {
-        pagination.recommendationExhausted = true
-      }
-
-      feedPaginationRef.current = pagination
-
-      const enrichedPage = await enrichPostsWithInteractions(page, pet.id)
+      // Resolve membership BEFORE publishing posts. Two backend reads may run
+      // concurrently, but the Feed receives one completed Post+badge payload.
+      // On RPC failure, preserve the cursor and show the existing retry UI.
+      const [interactionsPage,badgedPage]=await Promise.all([
+        enrichPostsWithInteractions(page,pet.id),
+        supporterBenefitsUiEnabled
+          ?attachVerifiedFeedBadges(page,async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          :Promise.resolve(page),
+      ])
+      const enrichedPage=interactionsPage.map((post,index)=>({
+        ...post,supporterBadge:badgedPage[index].supporterBadge,
+      }))
+      if(supporterBenefitsUiEnabled)await preloadVerifiedFeedBadgeArt(enrichedPage)
 
       if (feedLoadVersionRef.current !== loadVersion) return
 
+      // Commit fetched data and corresponding cursors as one successful page.
+      feedPaginationRef.current = nextPagination
+      setFeedError(null)
       if (reset) {
         setPosts(enrichedPage)
       } else {
@@ -516,14 +530,15 @@ function PazoMain() {
       }
 
       setHasMoreFeed(
-        !(pagination.socialExhausted && pagination.recommendationExhausted)
+        !(nextPagination.socialExhausted && nextPagination.recommendationExhausted)
       )
     } catch (error) {
       console.error(`Error loading feed page for pet ${pet.id}:`, error)
 
-      if (reset && feedLoadVersionRef.current === loadVersion) {
-        setPosts([])
-        setHasMoreFeed(false)
+      if (feedLoadVersionRef.current === loadVersion) {
+        // Report transient failure instead of claiming the feed is empty.
+        // Preserve the last committed page cursor so retry cannot skip posts.
+        setFeedError(reset ? 'initial' : 'more')
       }
     } finally {
       if (reset && feedLoadVersionRef.current === loadVersion) {
@@ -535,6 +550,69 @@ function PazoMain() {
   const loadFeedForPet = async (pet: Pet) => {
     await loadFeedPageForPet(pet, true)
   }
+
+  // Verified badge snapshots are presentation-only. Revalidate while the Feed
+  // is in use; never keep a departed member's badge indefinitely. Unlike the
+  // initial page, this rechecks existing cards and changes badges atomically.
+  const badgePetSignature=[...new Set(posts.filter(p=>!p.isAuthorDeleted).map(p=>p.petId))]
+    .sort().join('|')
+  // The interval must inspect newly loaded comments, not a stale page snapshot.
+  const displayedPostsRef=useRef(posts)
+  displayedPostsRef.current=posts
+  useEffect(()=>{
+    if(!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
+    let alive=true
+    let inFlight=false
+    const refresh=async()=>{
+      if(inFlight)return
+      inFlight=true
+      const version=feedLoadVersionRef.current
+      const petId=activePetIdRef.current
+      try{
+        const snapshot=displayedPostsRef.current
+        const visibleComments=snapshot.flatMap(post=>post.comments)
+        const [checked,checkedComments]=await Promise.all([
+          attachVerifiedFeedBadges(snapshot,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids})),
+          attachVerifiedCommentBadges(visibleComments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids})),
+        ])
+        await preloadVerifiedFeedBadgeArt([...checked,...checkedComments])
+        if(!alive||feedLoadVersionRef.current!==version||activePetIdRef.current!==petId)return
+        const badgeByPet=new Map(checked.filter(p=>!p.isAuthorDeleted)
+          .map(p=>[p.petId,p.supporterBadge] as const))
+        const commentBadgesByPet=new Map(checkedComments.map(c=>[c.authorPetId,c.supporterBadge] as const))
+        setPosts(previous=>previous.map(post=>({
+          ...post,
+          supporterBadge:badgeByPet.has(post.petId)?badgeByPet.get(post.petId):post.supporterBadge,
+          comments:post.comments.map(comment=>({
+            ...comment,
+            supporterBadge:comment.authorPetId&&commentBadgesByPet.has(comment.authorPetId)
+              ?commentBadgesByPet.get(comment.authorPetId):undefined,
+          })),
+        })))
+      }catch(error){
+        if(alive&&feedLoadVersionRef.current===version&&activePetIdRef.current===petId){
+          // Never retain a prior paid display claim when rechecking fails.
+          setPosts(previous=>previous.map(post=>({
+            ...post,supporterBadge:undefined,
+            comments:post.comments.map(comment=>({...comment,supporterBadge:undefined})),
+          })))
+          console.error('PAZO Feed badge revalidation unavailable:',error)
+        }
+      }finally{inFlight=false}
+    }
+    const onReturn=()=>{
+      if(document.visibilityState==='visible')void refresh()
+    }
+    document.addEventListener('visibilitychange',onReturn)
+    const interval=setInterval(()=>void refresh(),60000)
+    return ()=>{
+      alive=false
+      document.removeEventListener('visibilitychange',onReturn)
+      clearInterval(interval)
+    }
+  },[badgePetSignature,activeTab,currentPet.id])
 
   const loadMoreFeed = async () => {
     if (
@@ -606,41 +684,54 @@ function PazoMain() {
   }
 
   useEffect(() => {
+    let cancelled = false
+
     if (!loading && user) {
+      const userId = user.id
       const initApp = async () => {
-        if (!user.id) return
+        setPetBootstrap({ userId, status: 'loading' })
         setIsFeedLoading(true)
 
         let ownedPets: Pet[] = []
-
         try {
-          ownedPets = await fetchOwnedPets(user.id)
+          ownedPets = await fetchOwnedPets(userId)
         } catch (petError) {
           console.error('Error fetching pet profiles:', petError)
-          setIsFeedLoading(false)
+          if (!cancelled) {
+            setPetBootstrap({ userId, status: 'error' })
+            setIsFeedLoading(false)
+          }
           return
         }
+
+        if (cancelled) return
 
         if (ownedPets.length > 0) {
           setIsOnboardingActive(false)
           ownedPetIdsRef.current = ownedPets.map((pet) => pet.id)
           setPets(ownedPets)
 
-          const storedActivePetId = localStorage.getItem(`active_pet_${user.id}`)
+          const storedActivePetId = localStorage.getItem(`active_pet_${userId}`)
           const activePet =
             ownedPets.find((pet) => pet.id === storedActivePetId)
             || ownedPets[0]
 
           activePetIdRef.current = activePet.id
           setCurrentPet(activePet)
-          localStorage.setItem(`active_pet_${user.id}`, activePet.id)
+          localStorage.setItem(`active_pet_${userId}`, activePet.id)
 
-          await Promise.all([
-            loadFeedForPet(activePet),
-            loadCareForPet(activePet.id),
-            loadDocumentsForPet(activePet.id),
-            refreshCareReminders(ownedPets),
-          ])
+          try {
+            await Promise.all([
+              loadFeedForPet(activePet),
+              loadCareForPet(activePet.id),
+              loadDocumentsForPet(activePet.id),
+              refreshCareReminders(ownedPets),
+            ])
+          } catch (initialDataError) {
+            // Pet identity is already confirmed. Secondary data failures
+            // should not send the user back to account creation.
+            console.error('Error loading initial pet data:', initialDataError)
+          }
         } else {
           ownedPetIdsRef.current = []
           setPets([])
@@ -649,32 +740,88 @@ function PazoMain() {
           setIsOnboardingActive(true)
           setIsFeedLoading(false)
         }
+
+        if (!cancelled) setPetBootstrap({ userId, status: 'ready' })
       }
 
       void initApp()
     }
-  }, [user, loading])
+
+    return () => { cancelled = true }
+    // Supabase MFA verification refreshes the user object (SIGNED_IN) without
+    // changing the account identity. Rebooting pets on every such refresh
+    // temporarily unmounts PetView/AdminDashboard and loses the pending
+    // security-sensitive operation. Rebootstrap ONLY on a real identity
+    // change, auth loading transition, or explicit retry.
+  }, [user?.id, loading, petBootstrapRetry])
 
   const [emailInput, setEmailInput] = useState('')
   const [passwordInput, setPasswordInput] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loginMessage, setLoginMessage] = useState('')
   const [submittingLogin, setSubmittingLogin] = useState(false)
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [requestingPasswordReset, setRequestingPasswordReset] = useState(false)
+  const [resetRequestMessage, setResetRequestMessage] = useState('')
+  const [resetRequestError, setResetRequestError] = useState(false)
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmittingLogin(true)
     setLoginMessage('')
 
-    const success = await signIn(emailInput, passwordInput)
-
-    if (!success) {
-      setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
+    try {
+      const success = await signIn(emailInput, passwordInput)
+      if (success) {
+        setPasswordInput('')
+      } else {
+        setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
+      }
+    } catch {
+      setLoginMessage(lang === 'es' ? 'No hay conexión. Inténtalo nuevamente.' : 'Connection error. Please try again.')
+    } finally {
+      setSubmittingLogin(false)
     }
-    setSubmittingLogin(false)
+  }
+
+  const handleRequestPasswordReset = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!resetEmail.trim() || requestingPasswordReset) return
+    setRequestingPasswordReset(true)
+    setResetRequestMessage('')
+    setResetRequestError(false)
+    try {
+      const ok = await requestPasswordReset(resetEmail.trim())
+      setResetRequestError(!ok)
+      setResetRequestMessage(ok
+        ? (lang === 'es'
+          ? 'Si existe una cuenta con ese correo, recibirás un enlace de recuperación. Revisa también el spam.'
+          : 'If an account exists for that email, you will receive a recovery link. Check spam too.')
+        : (lang === 'es'
+          ? 'No pudimos enviar el correo. Inténtalo más tarde.'
+          : 'We could not send the email. Please try again later.'))
+    } catch {
+      setResetRequestError(true)
+      setResetRequestMessage(lang === 'es'
+        ? 'Error de conexión. Inténtalo nuevamente.'
+        : 'Connection error. Please try again.')
+    } finally {
+      setRequestingPasswordReset(false)
+    }
+  }
+
+  const handleExitPasswordRecovery = async () => {
+    await finishPasswordRecovery()
+    setIsDemoUser(false)
+    setIsOnboardingActive(false)
+    setAuthMode('login')
+    setForgotPasswordMode(false)
+    setLoginMessage('')
   }
 
   const handleLikePost = async (postId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
     const operationKey = `${actorPetId}:${postId}`
@@ -724,6 +871,7 @@ function PazoMain() {
   }
 
   const handleSavePost = async (postId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
     const operationKey = `${actorPetId}:${postId}`
@@ -795,7 +943,7 @@ function PazoMain() {
 
       if (error) throw error
 
-      const loadedComments = (data || []).map((row: any) => {
+      const rawComments:PostComment[] = (data || []).map((row: any) => {
         const author = Array.isArray(row.author) ? row.author[0] : row.author
 
         return {
@@ -810,9 +958,25 @@ function PazoMain() {
         }
       })
 
+      // Comments and verified membership arrive in one visible payload.
+      // Never show a paid author's comment first without their badge.
+      let loadedComments:PostComment[]=rawComments
+      if(supporterBenefitsUiEnabled){
+        try{
+          loadedComments=await attachVerifiedCommentBadges(rawComments,
+            async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          await preloadVerifiedFeedBadgeArt(loadedComments)
+        }catch(error){
+          // Badge verification may fail, but reading comments must remain free.
+          // A missing proof never produces a synthetic paid badge.
+          console.error('PAZO comments badge evidence unavailable:',error)
+          loadedComments=rawComments
+        }
+      }
+
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
-          post.id === postId
+          post.id === postId && !post.commentsLoaded
             ? {
                 ...post,
                 comments: loadedComments,
@@ -831,6 +995,7 @@ function PazoMain() {
   }
 
   const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    if (!canUseAccount) { requireAccount(); return false }
     const trimmedText = text.trim()
     if (!currentPet?.id || !postId || !trimmedText) return false
     const actorPet = currentPet
@@ -847,7 +1012,30 @@ function PazoMain() {
     const temporaryId = `temp-comment-${crypto.randomUUID()}`
     const createdAt = new Date().toISOString()
 
+    // Verify this pet's badge before showing the optimistic comment.
+    // No membership is inferred from the owner, previous post or login.
+    let authorCommentBadge:Post['supporterBadge']
+    if(supporterBenefitsUiEnabled){
+      try{
+        const verified=await attachVerifiedCommentBadges(
+          [{authorPetId:actorPet.id,supporterBadge:undefined}],
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(verified)
+        authorCommentBadge=verified[0].supporterBadge
+      }catch(error){
+        // The optional badge cannot break a free commenting workflow.
+        // Keep it absent until verification works; never claim paid membership.
+        console.error('PAZO comment badge verification unavailable:',error)
+      }
+      // A pet switch or feed refresh invalidates the pending author identity.
+    }
+    if(activePetIdRef.current!==actorPet.id){
+      commentingPostIdsRef.current.delete(operationKey)
+      return false
+    }
+
     const optimisticComment = {
+      supporterBadge:authorCommentBadge,
       id: temporaryId,
       authorPetId: actorPet.id,
       authorName: actorPet.name,
@@ -928,18 +1116,35 @@ function PazoMain() {
     }
   }
 
-  const handlePostCreated = (newPost: Post) => {
-    if (
-      feedPaginationRef.current.petId === currentPet.id
-      && feedPaginationRef.current.socialPetIds.includes(newPost.petId)
-    ) {
-      feedPaginationRef.current.socialOffset += 1
+  const handlePostCreated = async (newPost:Post) => {
+    const petAtCreation=currentPet.id
+    const versionAtCreation=feedLoadVersionRef.current
+    // Newly created posts also arrive with their verified author badge.
+    // The insert already happened in CreatePostModal; never POST a duplicate.
+    let publishedPost=newPost
+    if(supporterBenefitsUiEnabled){
+      try{
+        const resolved=await attachVerifiedFeedBadges([newPost],
+          async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        await preloadVerifiedFeedBadgeArt(resolved)
+        publishedPost=resolved[0]
+      }catch(error){
+        console.error('PAZO badge verification unavailable for newly created post:',error)
+        setIsCreatePostOpen(false)
+        setActiveTab('inicio')
+        if(activePetIdRef.current===petAtCreation)
+          void loadFeedForPet(currentPet)
+        return
+      }
     }
-
-    setPosts((prevPosts) => [newPost, ...prevPosts])
-    setProfilePosts((prevPosts) =>
-      newPost.petId === currentPet.id ? [newPost, ...prevPosts] : prevPosts
-    )
+    if(feedLoadVersionRef.current!==versionAtCreation ||
+       activePetIdRef.current!==petAtCreation)return
+    if(feedPaginationRef.current.petId===petAtCreation &&
+       feedPaginationRef.current.socialPetIds.includes(publishedPost.petId))
+      feedPaginationRef.current.socialOffset+=1
+    setPosts(previous=>[publishedPost,...previous.filter(post=>post.id!==publishedPost.id)])
+    setProfilePosts(previous=>publishedPost.petId===petAtCreation
+      ?[publishedPost,...previous.filter(post=>post.id!==publishedPost.id)]:previous)
     setIsCreatePostOpen(false)
     setActiveTab('inicio')
   }
@@ -1044,6 +1249,7 @@ function PazoMain() {
   }
 
   const handleCreateCare = async (input: CareItemInput) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await createCareItem(petId, input)
     await refreshCareAfterMutation(petId)
@@ -1053,23 +1259,27 @@ function PazoMain() {
     careItemId: string,
     input: CareItemInput
   ) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await updateCareItem(careItemId, input)
     await refreshCareAfterMutation(petId)
   }
 
   const handleArchiveCare = async (careItemId: string) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await archiveCareItem(careItemId)
     await refreshCareAfterMutation(petId)
   }
 
   const handleCompleteCare = async (item: CareItem) => {
+    if (!canUseAccount) { requireAccount(); return }
     await completeCareItem(item)
     await refreshCareAfterMutation(item.petId)
   }
 
   const handleUndoCareCompletion = async (completion: CareCompletion) => {
+    if (!canUseAccount) { requireAccount(); return }
     await undoCareCompletion(completion.id)
     await refreshCareAfterMutation(completion.petId)
   }
@@ -1189,6 +1399,7 @@ function PazoMain() {
     title: string,
     category: DocumentCategory
   ) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await uploadPetDocument(petId, file, title, category)
     await refreshDocumentsAfterMutation(petId)
@@ -1199,12 +1410,14 @@ function PazoMain() {
     title: string,
     category: DocumentCategory
   ) => {
+    if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await updatePetDocumentMetadata(documentId, title, category)
     await refreshDocumentsAfterMutation(petId)
   }
 
   const handleDeleteDocument = async (document: PetDocument) => {
+    if (!canUseAccount) { requireAccount(); return }
     await deletePetDocument(document)
 
     if (activePetIdRef.current === document.petId) {
@@ -1321,10 +1534,18 @@ function PazoMain() {
   }
 
   const handleOpenNotification = async (notification: PazoNotification) => {
-    if (!notification.sourceId) return
+    const sightingId = getNotificationSightingId(notification)
+    const joinedCommunityId = getNotificationCommunityId(notification)
+    if (!canUseAccount || (!sightingId && !joinedCommunityId)) return
 
     setIsNotificationsOpen(false)
-    setSelectedSightingId(notification.sourceId)
+    if (joinedCommunityId) {
+      setCommunityTargetId(joinedCommunityId)
+      setCommunityTargetKey((value) => value + 1)
+      setActiveTab('comunidades')
+    } else if (sightingId) {
+      setSelectedSightingId(sightingId)
+    }
 
     if (!notification.read) {
       try {
@@ -1358,7 +1579,9 @@ function PazoMain() {
     }
   }, [user?.id, isOnboardingActive, pets.length])
 
-  const unreadMessages = conversations.filter((c) => c.isRequest).length
+  const unreadMessages = isDemoUser && !user
+    ? conversations.filter((c) => c.isRequest).length
+    : 0
   const unreadNotifications = unreadNotificationCount
   const lostPets = pets.filter((pet) => pet.isLost)
 
@@ -1397,33 +1620,76 @@ function PazoMain() {
     )
   }
 
-  if (showSplash || loading) {
-    return (
-      <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center relative overflow-hidden p-5">
-        <style>{`
-          @keyframes flyOutSpin {
-            0%, 15% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-            45% { transform: translate(var(--tx), var(--ty)) rotate(180deg) scale(1.4); opacity: 0.85; }
-            65% { transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(1.4); opacity: 0.85; }
-            90%, 100% { transform: translate(0, 0) rotate(1080deg) scale(1); opacity: 1; }
-          }
-          .letter-epic {
-            display: inline-block;
-            animation: flyOutSpin 4s cubic-bezier(0.68, -0.55, 0.26, 1.55) infinite;
-            transform-origin: center;
-          }
-        `}</style>
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-[#E1E53F]/35 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[#204E4A]/10 rounded-full blur-3xl pointer-events-none"></div>
+  if (showSplash) {
+    return <PazoSplash buildVersion={pazoBuildVersion} lang={lang} />
+  }
 
-        <div className="text-6xl sm:text-7xl font-black text-[#204E4A] tracking-tighter flex items-center relative z-10">
-          <span className="letter-epic" style={{ '--tx': '-70px', '--ty': '-50px' } as React.CSSProperties}>p</span>
-          <span className="letter-epic" style={{ '--tx': '-35px', '--ty': '60px' } as React.CSSProperties}>a</span>
-          <span className="letter-epic" style={{ '--tx': '35px', '--ty': '-60px' } as React.CSSProperties}>z</span>
-          <span className="letter-epic" style={{ '--tx': '70px', '--ty': '50px' } as React.CSSProperties}>o</span>
-          <span className="letter-epic text-[#E1E53F]" style={{ '--tx': '95px', '--ty': '-20px' } as React.CSSProperties}>.</span>
-        </div>
-        <p className="mt-8 text-xs font-extrabold text-[#5C7470] tracking-[0.3em] uppercase animate-pulse relative z-10">Su mundo, más cerca.</p>
+  if (loading) {
+    return (
+      <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-3 px-6">
+        <p className="text-sm font-bold animate-pulse">
+          {lang === 'es' ? 'Verificando tu sesión…' : 'Checking your session…'}
+        </p>
+        <p className="text-xs text-[#5C7470]">
+          {lang === 'es' ? 'Tus datos están protegidos.' : 'Your data is protected.'}
+        </p>
+      </div>
+    )
+  }
+
+  if (isPasswordRecovery) {
+    return (
+      <PasswordRecoveryView
+        lang={lang}
+        sessionReady={Boolean(user) && recoverySessionVerified}
+        onUpdatePassword={changePassword}
+        onExit={handleExitPasswordRecovery}
+      />
+    )
+  }
+
+  // Accessible to the verified account holder even when pet loading fails
+  // or the account has no pets. A subscription must not depend on a pet.
+  if (user && isSupporterAccountRoute) {
+    return <SupporterAccountManagement lang={lang}
+      onClose={() => {
+        leaveSupporterAccountRoute(window.location)
+        setSupporterAccountRoute(false)
+      }} />
+  }
+
+  if (user && (petBootstrap?.userId !== user.id || petBootstrap.status === 'loading')) {
+    return (
+      <div role="status" className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex flex-col items-center justify-center gap-4 px-6">
+        <div aria-hidden="true" className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
+        <p className="text-sm font-bold">
+          {lang === 'es' ? 'Cargando tus mascotas...' : 'Loading your pets...'}
+        </p>
+      </div>
+    )
+  }
+
+  if (user && petBootstrap?.status === 'error') {
+    return (
+      <div className="min-h-screen bg-[#FAF8F5] text-[#204E4A] flex items-center justify-center px-5">
+        <main className="max-w-sm w-full bg-white p-6 rounded-[2rem] shadow-sm space-y-4">
+          <h1 className="text-xl font-black">
+            {lang === 'es' ? 'No pudimos cargar tus mascotas' : 'We could not load your pets'}
+          </h1>
+          <p role="alert" className="text-sm text-[#5C7470]">
+            {lang === 'es'
+              ? 'Tu sesión sigue activa. Comprueba tu conexión e inténtalo de nuevo; no necesitas crear otra cuenta.'
+              : 'You are still signed in. Check your connection and try again; you do not need another account.'}
+          </p>
+          <button type="button" onClick={() => setPetBootstrapRetry((value) => value + 1)}
+            className="w-full rounded-full bg-[#204E4A] text-white py-3 font-extrabold cursor-pointer">
+            {lang === 'es' ? 'Reintentar' : 'Try again'}
+          </button>
+          <a href="#/account/supporter"
+            className="block w-full rounded-full bg-[#E1E53F]/50 py-3 text-center text-sm font-bold text-[#204E4A]">
+            {lang === 'es' ? 'Gestionar suscripción de apoyo' : 'Manage support subscription'}
+          </a>
+        </main>
       </div>
     )
   }
@@ -1432,12 +1698,13 @@ function PazoMain() {
 
   return (
     <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
-      <div className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
+      <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
           <PublicProfileView
             targetPetId={selectedPublicProfileId}
+            canReport={Boolean(user?.id) && !isDemoUser}
             currentPetId={currentPet?.id}
             ownedPetIds={pets.map((pet) => pet.id)}
             onClose={() => setSelectedPublicProfileId(null)}
@@ -1518,19 +1785,49 @@ function PazoMain() {
 
               <div className="my-auto space-y-5">
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-2.5 py-0.5 rounded-full inline-block">
-                    Pazo Acceso
-                  </span>
                   <h2 className="text-3xl font-black text-[#204E4A]">
-                    {lang === 'es' ? 'Iniciar Sesión' : 'Log in to Pazo'}
+                    {forgotPasswordMode
+                      ? (lang === 'es' ? 'Recuperar contraseña' : 'Reset your password')
+                      : (lang === 'es' ? 'Iniciar Sesión' : 'Log in to Pazo')}
                   </h2>
                   <p className="text-xs text-[#5C7470]">
-                    {lang === 'es'
-                      ? 'Ingresa tus datos para entrar directamente a tu cuenta.'
-                      : 'Enter your credentials to access your account.'}
+                    {forgotPasswordMode
+                      ? (lang === 'es'
+                        ? 'Te enviaremos un enlace para crear una contraseña nueva.'
+                        : 'We will send a link so you can set a new password.')
+                      : (lang === 'es'
+                        ? 'Ingresa tus datos para entrar directamente a tu cuenta.'
+                        : 'Enter your credentials to access your account.')}
                   </p>
                 </div>
 
+                {forgotPasswordMode ? (
+                  <form onSubmit={handleRequestPasswordReset} className="space-y-3.5">
+                    <label className="block text-[11px] font-bold text-[#204E4A]">
+                      {lang === 'es' ? 'Correo electrónico' : 'Email address'}
+                      <input type="email" required autoComplete="email"
+                        value={resetEmail} onChange={(event) => setResetEmail(event.target.value)}
+                        placeholder="tu@correo.com"
+                        className="mt-1 w-full bg-white border-2 border-[#204E4A]/15 rounded-2xl px-4 py-3 text-xs text-[#204E4A]" />
+                    </label>
+                    <button type="submit" disabled={requestingPasswordReset}
+                      className="w-full bg-[#204E4A] text-white font-extrabold py-3.5 rounded-full text-xs disabled:opacity-50">
+                      {requestingPasswordReset
+                        ? (lang === 'es' ? 'Enviando...' : 'Sending...')
+                        : (lang === 'es' ? 'Enviar enlace' : 'Send link')}
+                    </button>
+                    {resetRequestMessage && (
+                      <p role={resetRequestError ? 'alert' : 'status'}
+                        className="text-xs text-[#204E4A] leading-relaxed">{resetRequestMessage}</p>
+                    )}
+                    <button type="button" onClick={() => {
+                      setForgotPasswordMode(false)
+                      setResetRequestMessage('')
+                    }} className="w-full text-xs font-bold text-[#5C7470] underline">
+                      {lang === 'es' ? 'Volver a iniciar sesión' : 'Back to log in'}
+                    </button>
+                  </form>
+                ) : (
                 <form onSubmit={handlePasswordLogin} className="space-y-3.5">
                   <div>
                     <label className="block text-[11px] font-bold text-[#204E4A] mb-1">
@@ -1578,9 +1875,17 @@ function PazoMain() {
                       ? (lang === 'es' ? 'Iniciando sesión...' : 'Logging in...')
                       : (lang === 'es' ? 'Iniciar Sesión' : 'Log in')}
                   </button>
+                  <button type="button" onClick={() => {
+                    setResetEmail(emailInput)
+                    setResetRequestMessage('')
+                    setForgotPasswordMode(true)
+                  }} className="w-full text-xs font-bold text-[#204E4A] underline cursor-pointer">
+                    {lang === 'es' ? '¿Olvidaste tu contraseña?' : 'Forgot your password?'}
+                  </button>
                 </form>
+                )}
 
-                {loginMessage && (
+                {!forgotPasswordMode && loginMessage && (
                   <div className="p-3 bg-[#E1E53F]/30 border border-[#204E4A]/20 text-[#204E4A] rounded-2xl text-xs text-center font-semibold">
                     {loginMessage}
                   </div>
@@ -1650,7 +1955,9 @@ function PazoMain() {
 
             <main
               ref={mainScrollRef}
-              className="flex-1 overflow-y-auto p-4 sm:p-5 relative"
+              className={activeTab === 'mapa'
+                ? 'relative min-h-0 flex-1 overflow-hidden p-0'
+                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5'}
               onScroll={(event) => {
                 const element = event.currentTarget
                 tabScrollPositionsRef.current[activeTab] = element.scrollTop
@@ -1660,6 +1967,7 @@ function PazoMain() {
                   && hasMoreFeed
                   && !isFeedLoading
                   && !isFeedLoadingMore
+                  && feedError !== 'more'
                   && element.scrollHeight - element.scrollTop - element.clientHeight < 700
                 ) {
                   void loadMoreFeed()
@@ -1675,8 +1983,25 @@ function PazoMain() {
                 <>
                   {activeTab === 'inicio' && (
                     <>
+                      {feedError === 'initial' ? (
+                        <section role="alert" className="rounded-[2rem] bg-white border border-[#204E4A]/10 p-6 text-center space-y-3">
+                          <h2 className="text-lg font-black text-[#204E4A]">
+                            {lang === 'es' ? 'No pudimos cargar las publicaciones' : 'Could not load posts'}
+                          </h2>
+                          <p className="text-xs text-[#5C7470]">
+                            {lang === 'es'
+                              ? 'Puede ser un problema de conexión. Inténtalo de nuevo; tus publicaciones no se han borrado.'
+                              : 'It might be a connection issue. Try again; your posts were not deleted.'}
+                          </p>
+                          <button type="button" onClick={() => void loadFeedForPet(currentPet)}
+                            className="rounded-full px-5 py-3 bg-[#204E4A] text-white font-extrabold text-xs cursor-pointer">
+                            {lang === 'es' ? 'Reintentar' : 'Try again'}
+                          </button>
+                        </section>
+                      ) : (
                       <HomeView
                         posts={posts}
+                        canReport={Boolean(user?.id) && !isDemoUser}
                         onLikePost={handleLikePost}
                         onSavePost={handleSavePost}
                         onAddComment={handleAddComment}
@@ -1686,6 +2011,18 @@ function PazoMain() {
                         ownedPetIds={pets.map((pet) => pet.id)}
                         onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
                       />
+                      )}
+                      {feedError === 'more' && (
+                        <div role="alert" className="mt-4 rounded-2xl bg-white p-4 text-center space-y-3">
+                          <p className="text-xs text-[#5C7470]">
+                            {lang === 'es' ? 'No pudimos cargar más publicaciones.' : 'Could not load more posts.'}
+                          </p>
+                          <button type="button" onClick={() => void loadMoreFeed()}
+                            className="rounded-full bg-[#204E4A] px-5 py-2.5 text-white font-bold text-xs cursor-pointer">
+                            {lang === 'es' ? 'Reintentar' : 'Try again'}
+                          </button>
+                        </div>
+                      )}
                       {isFeedLoadingMore && (
                         <div className="py-5 flex justify-center">
                           <div className="w-6 h-6 border-2 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin" />
@@ -1719,6 +2056,9 @@ function PazoMain() {
                   {activeTab === 'mascota' && (
                     <PetView
                       currentPet={currentPet}
+                      canManagePet={canUseAccount}
+                      onRequireAccount={requireAccount}
+                      canModerate={Boolean(user?.id) && !isDemoUser}
                       availablePets={pets}
                       onSelectPet={selectActivePet}
                       onPetUpdated={(updatedPet) => {
@@ -1727,15 +2067,15 @@ function PazoMain() {
                           prevPets.map((pet) => pet.id === updatedPet.id ? updatedPet : pet)
                         )
                       }}
-                      onAddPet={() => setIsAddPetOpen(true)}
+                      onAddPet={() => openAccountAction(() => setIsAddPetOpen(true))}
                       careItems={careItems}
                       careReminderItem={currentPetCareReminder}
                       onCompleteCare={handleCompleteCare}
-                      onOpenQRPassport={() => setIsPassportOpen(true)}
-                      onOpenCareAgenda={() => setIsCareOpen(true)}
+                      onOpenQRPassport={() => openAccountAction(() => setIsPassportOpen(true))}
+                      onOpenCareAgenda={() => openAccountAction(() => setIsCareOpen(true))}
                       documentCount={documentCount}
-                      onOpenDocuments={() => setIsDocumentsOpen(true)}
-                      onOpenLostAlert={() => setIsAlertOpen(true)}
+                      onOpenDocuments={() => openAccountAction(() => setIsDocumentsOpen(true))}
+                      onOpenLostAlert={() => openAccountAction(() => setIsAlertOpen(true))}
                       lang={lang}
                       userPosts={profilePosts}
                     />
@@ -1777,7 +2117,12 @@ function PazoMain() {
             <CreateModal
               isOpen={isCreateMenuOpen}
               onClose={() => setIsCreateMenuOpen(false)}
+              activePetName={canUseAccount ? currentPet.name : (lang === 'es' ? 'una mascota de ejemplo' : 'a sample pet')}
+              activePetSpecies={currentPet.species}
+              canCreate={canUseAccount}
+              onRequireAccount={requireAccount}
               onSelectOption={(type) => {
+                if (!canUseAccount) { requireAccount(); return }
                 setIsCreateMenuOpen(false)
                 if (type === 'post') setIsCreatePostOpen(true)
                 if (type === 'alerta') setIsAlertOpen(true)
@@ -1796,7 +2141,7 @@ function PazoMain() {
             />
 
             <CreatePostModal
-              isOpen={isCreatePostOpen}
+              isOpen={canUseAccount && isCreatePostOpen}
               onClose={() => setIsCreatePostOpen(false)}
               currentPet={currentPet}
               onPostCreated={handlePostCreated}
@@ -1804,7 +2149,7 @@ function PazoMain() {
             />
 
             <AddPetModal
-              isOpen={isAddPetOpen}
+              isOpen={canUseAccount && isAddPetOpen}
               onClose={() => setIsAddPetOpen(false)}
               onPetCreated={(newPet) => {
                 ownedPetIdsRef.current = Array.from(
@@ -1828,7 +2173,7 @@ function PazoMain() {
             />
 
             <CareModal
-              isOpen={isCareOpen}
+              isOpen={canUseAccount && isCareOpen}
               onClose={() => setIsCareOpen(false)}
               petName={currentPet.name}
               careItems={careItems}
@@ -1848,7 +2193,7 @@ function PazoMain() {
             />
 
             <DocumentsModal
-              isOpen={isDocumentsOpen}
+              isOpen={canUseAccount && isDocumentsOpen}
               onClose={() => setIsDocumentsOpen(false)}
               petName={currentPet.name}
               documents={documents}
@@ -1867,7 +2212,7 @@ function PazoMain() {
             />
 
             <AlertModal
-              isOpen={isAlertOpen}
+              isOpen={canUseAccount && isAlertOpen}
               onClose={() => setIsAlertOpen(false)}
               pet={currentPet}
               onPetUpdated={(updatedPet) => {
@@ -1883,7 +2228,8 @@ function PazoMain() {
             <MessagesModal
               isOpen={isMessagesOpen}
               onClose={() => setIsMessagesOpen(false)}
-              conversations={conversations}
+              conversations={isDemoUser && !user ? conversations : []}
+              isDemo={isDemoUser && !user}
               onSendMessage={handleSendMessage}
               lang={lang}
             />

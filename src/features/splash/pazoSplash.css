@@ -1,0 +1,129 @@
+/* The PO-approved 2.5s PAZO splash, reconstructed from the approved preview.
+ * Native SVG/CSS: no GIF/video, no extra dependencies, zero outlines/strokes.
+ * The screen is replaced by App after the existing 2500ms splash window.
+ */
+.pazo-splash {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #204e4a;
+  color: #faf8f5;
+}
+
+.pazo-splash__art {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-direction: column;
+  gap: clamp(0.75rem, 3vh, 1.5rem);
+  transform: translateY(-1rem);
+}
+
+.pazo-splash__symbol {
+  display: block;
+  width: min(54vw, 285px);
+  min-width: 160px;
+  height: auto;
+  overflow: visible;
+}
+
+.pazo-splash__word {
+  display: block;
+  width: min(70vw, 380px);
+  min-width: 210px;
+  height: auto;
+  overflow: visible;
+}
+
+.pazo-splash__symbol path,
+.pazo-splash__word path {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.pazo-splash__dog {
+  animation: pazo-dog-join 660ms cubic-bezier(.2,.65,.2,1) 80ms both;
+}
+
+.pazo-splash__cat {
+  animation: pazo-cat-join 650ms cubic-bezier(.2,.65,.2,1) 200ms both;
+}
+
+.pazo-splash__pad {
+  animation: pazo-pad-land 460ms cubic-bezier(.22,1.35,.45,1) both;
+}
+
+.pazo-splash__pad--top { animation-delay: 430ms; }
+.pazo-splash__pad--left { animation-delay: 550ms; }
+.pazo-splash__pad--right { animation-delay: 495ms; }
+
+.pazo-splash__letter {
+  animation: pazo-letter-arrive 360ms cubic-bezier(.2,.65,.2,1) both;
+}
+
+.pazo-splash__letter--p { animation-delay: 760ms; }
+.pazo-splash__letter--a { animation-delay: 860ms; }
+.pazo-splash__letter--z { animation-delay: 960ms; }
+.pazo-splash__letter--o { animation-delay: 1060ms; }
+
+.pazo-splash__version {
+  position: absolute;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  z-index: 1;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  color: rgba(250, 248, 245, .58);
+}
+
+.pazo-splash__exit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-color: #faf8f5;
+  animation: pazo-splash-exit 2500ms linear both;
+}
+
+@keyframes pazo-dog-join {
+  from { opacity: 0; transform: translate(-28px, 15px) scale(.86); }
+  to { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes pazo-cat-join {
+  from { opacity: 0; transform: translate(28px, 15px) scale(.86); }
+  to { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes pazo-pad-land {
+  0% { opacity: 0; transform: translateY(-38px) scale(.7); }
+  76% { opacity: 1; transform: translateY(4px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pazo-letter-arrive {
+  from { opacity: 0; transform: translate(8px, 20px) scale(.96); }
+  to { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+@keyframes pazo-splash-exit {
+  0%, 81% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pazo-splash__symbol path,
+  .pazo-splash__word path {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .pazo-splash__exit { animation: none !important; opacity: 0; }
+}

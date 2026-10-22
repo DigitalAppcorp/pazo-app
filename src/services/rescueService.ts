@@ -1,3 +1,4 @@
+import { mapNotificationRow } from '../features/notifications/notificationSource'
 import { supabase } from './supabaseClient'
 import type { PazoNotification } from '../types/pazo'
 
@@ -186,18 +187,6 @@ export const markNotificationRead = async (notificationId: string): Promise<void
 
   if (error) throw error
 }
-
-const mapNotificationRow = (row: any): PazoNotification => ({
-  id: row.id,
-  title: row.title,
-  subtitle: row.body,
-  category: row.type === 'sighting' ? 'comunidad' : 'todas',
-  timeAgo: 'Reciente',
-  read: Boolean(row.read_at),
-  createdAt: row.created_at,
-  petId: row.pet_id,
-  sourceId: row.source_id,
-})
 
 export const fetchNotifications = async (
   offset = 0,
