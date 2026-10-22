@@ -10,7 +10,7 @@ const isBannerDismissed = () => {
   try { return Number(window.localStorage.getItem(STORAGE_KEY) || 0) > Date.now() }
   catch { return false }
 }
-type Placement = 'banner' | 'settings'
+type Placement = 'banner' | 'settings' | 'welcome'
 
 export function PazoInstallControl({ lang, placement = 'settings' }: {
   lang: 'es' | 'en'; placement?: Placement
@@ -58,6 +58,20 @@ export function PazoInstallControl({ lang, placement = 'settings' }: {
     ? (es ? 'Abriendo…' : 'Opening…')
     : state.pending ? (es ? 'Instalar' : 'Install')
       : (es ? 'Cómo instalar' : 'How to install')
+
+  // A01 sign-in/welcome only: no persistent overlay above the Home navigation.
+  if (placement === 'welcome') return <div data-pazo-install-welcome="true"
+    className="flex min-h-[30px] flex-col items-center justify-center">
+    <button type="button" onClick={() => void action()} disabled={isPrompting}
+      className="min-h-[30px] rounded-full bg-transparent px-3 py-1 text-[11px] font-bold text-[#52756F] transition-colors hover:bg-[#EAF0DF] focus-visible:bg-[#E1E53F]/50 disabled:opacity-50">
+      {state.pending ? (es ? '↓ Instalar PAZO' : '↓ Install PAZO')
+        : (es ? '↓ Añadir PAZO a inicio' : '↓ Add PAZO to Home Screen')}
+    </button>
+    {showInstructions && <p role="status" className="max-w-[300px] px-3 text-center text-[10px] leading-snug text-[#5C7470]">
+      {es ? 'En Safari: Compartir → Añadir a pantalla de inicio.'
+        : 'In Safari: Share → Add to Home Screen.'}
+    </p>}
+  </div>
 
   if (placement === 'banner') return <aside data-pazo-install-banner="true"
     className="mx-3 mb-1 flex shrink-0 items-center gap-2 rounded-2xl bg-[#EFF4E8] px-3 py-2 shadow-sm sm:hidden"
