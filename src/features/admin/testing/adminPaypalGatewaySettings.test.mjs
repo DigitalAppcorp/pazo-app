@@ -17,6 +17,13 @@ test('settings are an actual mobile+desktop admin section, not a fake door',()=>
  assert.ok(!page.includes('localStorage'))
  assert.ok(!page.includes('sessionStorage'))
 })
+test('Live displays only the current secured private setup, not a duplicate plan and webhook draft',()=>{
+ assert.ok(page.includes("{env==='sandbox'&&<div className=\"grid grid-cols-1 gap-4 xl:grid-cols-2\">"))
+ assert.ok(page.includes("LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup"))
+ assert.ok(page.includes("env==='live'&&<AdminLiveReadiness"))
+ assert.ok(page.includes("env==='live'&&<AdminLiveReleaseControl"))
+})
+
 test('Live cannot be enabled by drafting, storing credentials or OAuth testing',()=>{
  assert.match(sql,/active_environment text NOT NULL DEFAULT 'sandbox' CHECK\(active_environment='sandbox'\)/)
  assert.match(sql,/live_checkout_enabled bool NOT NULL DEFAULT false CHECK\(live_checkout_enabled=false\)/)

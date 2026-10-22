@@ -1,4 +1,4 @@
-import { useCallback,useEffect,useState } from 'react'
+import { useCallback,useEffect,useRef,useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AdminPayPalSettings } from './AdminPayPalSettings'
 import {AdminLiveFinanceSummary} from './AdminLiveFinanceSummary'
@@ -66,6 +66,7 @@ function Note({children}:{children:React.ReactNode}){
  return <p className="rounded-[16px] bg-[#EAF1E2] px-4 py-2.5 text-[12px] leading-relaxed text-[#536E64]">{children}</p>
 }
 export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void}){
+ const visibleSections=sections.filter(item=>item.key!=='reports'||Boolean(onOpenReports))
  const [section,setSection]=useState<Section>('summary')
  const [period,setPeriod]=useState<7|30|90>(30)
  const [overview,setOverview]=useState<AdminOverview|null>(null)
@@ -78,6 +79,45 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
  const [voterBusy,setVoterBusy]=useState(false)
  const [loading,setLoading]=useState(true)
  const [error,setError]=useState('')
+ const dialogRef=useRef<HTMLDivElement>(null)
+ useEffect(()=>{
+  const dialog=dialogRef.current
+  if(!dialog)return
+  const previousFocus=document.activeElement instanceof HTMLElement?document.activeElement:null
+  dialog.focus()
+  const handleKeydown=(event:KeyboardEvent)=>{
+   if(event.defaultPrevented)return
+   if(event.key==='Escape'){
+    event.preventDefault()
+    onClose()
+    return
+   }
+   if(event.key!=='Tab')return
+   const focusable=Array.from(dialog.querySelectorAll<HTMLElement>(
+    'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+   )).filter(element=>element.getClientRects().length>0)
+   if(!focusable.length){
+    event.preventDefault()
+    dialog.focus()
+    return
+   }
+   const first=focusable[0]
+   const last=focusable[focusable.length-1]
+   const current=document.activeElement
+   if(event.shiftKey&&(current===first||current===dialog)){
+    event.preventDefault()
+    last.focus()
+   }else if(!event.shiftKey&&(current===last||!dialog.contains(current))){
+    event.preventDefault()
+    first.focus()
+   }
+  }
+  document.addEventListener('keydown',handleKeydown)
+  return ()=>{
+   document.removeEventListener('keydown',handleKeydown)
+   if(previousFocus?.isConnected)previousFocus.focus()
+  }
+ },[onClose])
  const l=(es:string,en:string)=>lang==='es'?es:en
  const refresh=useCallback(async()=>{
   setLoading(true);setError('')
@@ -108,7 +148,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
   <option value="30">{l('Últimos 30 días','Last 30 days')}</option>
   <option value="90">{l('Últimos 90 días','Last 90 days')}</option>
  </select>
- return createPortal(<div role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
+ return createPortal(<div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
     data-pazo-admin-responsive="true"
     className="pazo-admin fixed inset-0 z-[200] flex h-[100dvh] w-full overflow-hidden bg-[#F8F9F6] font-sans text-[#204E4A] lg:grid lg:grid-cols-[265px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
   {/* Portal escapes the 430px mobile app shell on desktop; the rest of PAZO stays mobile-only. */}
@@ -119,7 +159,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
     <div><p className="text-[13px] font-black">{l('Centro de control','Control center')}</p><p className="text-[11px] font-medium text-[#71857F]">{l('Administrador','Administrator')}</p></div>
    </div>
    <nav aria-label={l('Secciones del panel','Dashboard sections')} className="pazo-admin-navigation mt-5 flex flex-1 flex-col gap-1 overflow-y-auto">
-    {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
+    {visibleSections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
      onClick={()=>selectSection(item.key)}
      className={'flex min-h-[47px] w-full items-center gap-4 rounded-[14px] px-4 text-left text-[15px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
       (section===item.key?'bg-[#E5F0D8] text-[#204E4A]':'text-[#506864] hover:bg-[#F1F6E9]')}>
@@ -168,7 +208,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
     </div>
     <nav aria-label={l('Secciones del panel','Dashboard sections')}
       className="mx-auto mt-4 flex max-w-[1600px] gap-2 overflow-x-auto pb-1 lg:hidden">
-     {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
+     {visibleSections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
        onClick={()=>selectSection(item.key)}
        className={'flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[12px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
         (section===item.key?'bg-[#204E4A] text-white':'bg-white text-[#204E4A] hover:bg-[#E5EDCE]')}>

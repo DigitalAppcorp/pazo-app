@@ -42,6 +42,9 @@ export function AdminPayPalSettings({lang}:Props){
  const [env,setEnv]=useState<Env>('sandbox')
  const [recentAdminMfa,setRecentAdminMfa]=useState(false)
  const [advancedLive,setAdvancedLive]=useState(false)
+ const [liveCredentialsStored,setLiveCredentialsStored]=useState<boolean|null>(null)
+ const [liveReadinessRevision,setLiveReadinessRevision]=useState(0)
+ const onLiveCredentialsObserved=useCallback((stored:boolean|null)=>setLiveCredentialsStored(stored),[])
  // A session may have aal2 for hours; PO actions require a fresh TOTP event.
  useEffect(()=>{
   if(!recentAdminMfa)return
@@ -274,9 +277,12 @@ export function AdminPayPalSettings({lang}:Props){
     </details>}
     {env==='live'&&LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup
      lang={lang} mfaRecentlyVerified={recentAdminMfa}
-     credentialsStored={liveConfig?.client_id_stored===true&&liveConfig?.client_secret_stored===true}
-     onStored={()=>{void load(false)}}/>}
-    {env==='live'&&<AdminLiveReadiness lang={lang} revision={liveConfig?.updated_at}/>}
+     credentialsStored={liveCredentialsStored===true} credentialsChecked={liveCredentialsStored!==null}
+     onStored={()=>{setLiveCredentialsStored(true);setLiveReadinessRevision(n=>n+1);void load(false)}}/>}
+    {env==='live'&&<AdminLiveReadiness lang={lang}
+     revision={String(liveConfig?.updated_at??'')+':'+liveReadinessRevision}
+     onCredentialsObserved={onLiveCredentialsObserved}/>}
+
     {env==='live'&&<section className="rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]"
      data-pazo-merchant-balance-check="not-required">
       <h4 className="text-[15px] font-black">{t(
@@ -321,7 +327,7 @@ export function AdminPayPalSettings({lang}:Props){
       </p>
      </div>
     </section>}
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+    {env==='sandbox'&&<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
      <section className={cardClass}>
       <div className="flex items-center gap-3"><span className="rounded-full bg-[#E7F4E2] p-3"><AdminGlyph name="money" size={23}/></span>
        <div><h4 className="text-[17px] font-black">{t('Oferta y dominio','Offer and domain')}</h4>
@@ -377,7 +383,7 @@ export function AdminPayPalSettings({lang}:Props){
          'Use the private form below to store encrypted PayPal Live credentials after fresh MFA. Checkout remains OFF pending financial release.')}
       </div>}
      </section>
-    </div>
+    </div>}
     <section className={cardClass}>
      <h4 className="text-[17px] font-black">{t('Historial de configuración','Configuration history')}</h4>
      <p className="mt-1 text-[12px] text-[#74877D]">{t('Últimos 30 cambios, sin mostrar credenciales ni secretos.','Last 30 changes, without displaying secrets or credentials.')}</p>

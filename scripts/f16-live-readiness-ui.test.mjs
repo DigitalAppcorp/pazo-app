@@ -63,7 +63,7 @@ test('readiness discards the previous admin response and clears stale status on 
 test('stored credentials survive remount and uncertain saves allow only a readback action',async()=>{
  let posts=0,reads=0,ui
  globalThis.__PAZO_READINESS_DB__={invoke:async()=>{posts++;return {data:null,error:Error('uncertain')}}}
- const props={lang:'es',mfaRecentlyVerified:true,credentialsStored:false,onStored:()=>{reads++}}
+ const props={lang:'es',mfaRecentlyVerified:true,credentialsStored:false,credentialsChecked:true,onStored:()=>{reads++}}
  try{
   await act(async()=>{ui=create(React.createElement(AdminPaypalLiveVaultSetup,props))})
   await act(async()=>{
@@ -81,6 +81,19 @@ test('stored credentials survive remount and uncertain saves allow only a readba
   assert.equal(posts,1)
  }finally{if(ui)await act(async()=>ui.unmount())}
 })
+test('Live Vault does not reveal a credential-entry form until readiness has been independently checked',async()=>{
+ let calls=0,ui
+ const props={lang:'es',mfaRecentlyVerified:true,credentialsStored:false,credentialsChecked:false,onStored:()=>{calls++}}
+ try{
+  await act(async()=>{ui=create(React.createElement(AdminPaypalLiveVaultSetup,props))})
+  assert.equal(ui.root.findAllByType('form').length,0)
+  assert.match(text(ui),/No vuelvas a introducirlas/)
+  await act(async()=>ui.update(React.createElement(AdminPaypalLiveVaultSetup,{...props,credentialsChecked:true})))
+  assert.equal(ui.root.findAllByType('form').length,1)
+  assert.equal(calls,0)
+ }finally{if(ui)await act(async()=>ui.unmount())}
+})
+
 test.after(()=>{
  delete globalThis.__PAZO_READINESS_USER__;delete globalThis.__PAZO_READINESS_DB__
  fs.rmSync(root,{recursive:true,force:true})
