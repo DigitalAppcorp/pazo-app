@@ -1,5 +1,10 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+## Actualización publicación — 22-oct-2026 UTC
+
+PR #44 fusionado en release y PR #71 fusionado en main (commit `f7cc359a15e874942f68fc15f55c43e851f7724d`). Vercel Production `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM` **READY**, alias canonical `https://pazo-app-t83r.vercel.app` presente sin error. Supabase release off/rev0, kill ON, Live false, certificados/evidencia financiera 0. **Gate HTTP público 7/7 PASS real** en GitHub Actions run39718690012 / job119626859178 (SPA, callbacks, manifest, SW, iconos). QA autenticada/PWA física sigue pendiente. No canary ni Live real. Detalle `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`.
+
+
 ## Estado de aceptación vigente — 22-oct-2026
 
 | Gate | Estado real | Evidencia |

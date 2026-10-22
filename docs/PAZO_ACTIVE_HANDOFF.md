@@ -1,5 +1,14 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## Publicación en Production — 22-oct-2026 UTC (actualización posterior al handoff anterior)
+
+PR #71 fusionado a `main`: commit `f7cc359a15e874942f68fc15f55c43e851f7724d`, después de 8/8 workflows exitosos en release. Vercel principal `pazo-app-t83r` publicó desde este SHA con target Production: deployment `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM`, estado READY, `aliasError=null`, dominio `https://pazo-app-t83r.vercel.app` asignado. Se preservaron autodeploy, plan y política SSO.
+
+SQL alojado posterior: release `off/revision0`, certificado 0, selector `sandbox/live=false/kill=true/generation=null`, solicitudes/evidencias 0. No hubo PayPal Live ni canary. No es legítimo atribuir el PASS HTTP 7/7 del preview al deployment Production: la lectura directa con este conector estuvo bloqueada, pero **GitHub Actions run39718690012 / job119626859178 ejecutó el gate público HTTPS/PWA con 7/7 rutas PASS** (home, dos callbacks, manifest, SW, iconos192/512) a las03:46 UTC. Siguen pendientes QA autenticada, instalación PWA física y transacción Live real. **Solo HTTP público PASS; no se declara beta funcional con QA autenticada completa ni se habilitan cobros reales**.
+
+Evidencia y gates restantes: `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`. Este estado tiene precedencia sobre las notas históricas inferiores que declaran PR44 abierto, main intacto o Production sin publicar.
+
+
 ## Preview HTTPS verificado — 21-oct-2026, Guatemala (22-oct UTC)
 
 Red del candidato RESUELTA, sin volver a pedir secretos/publicación de entorno.
