@@ -1,5 +1,38 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## Vista final y configuración pública corregida — 22-oct-2026
+
+Código `a3f912ebbb64d1c2365471be04ac2915fc9e1e9e`: **5/5 Actions SUCCESS**.
+Gmail configurado, envío HTTP200 y recepción confirmada por PO. SQL de seguridad
+20261022021500 instalado/verificado; release financiero sigueOFF sin certificado.
+
+Prueba protegida anterior: HTTP7/7 PASS, pero navegador detectó bloqueo real
+`PAZO is unavailable`: la URL pública Supabase estaba tipada sensitive en Vercel
+y el pull/prebuilt la exportaba vacía. No confundir HTTP200 con app utilizable.
+La API no permite cambiar tipo sensitive: se reemplazó SOLO esa URL pública por
+plain con el origin canónico ya fijado en código, mismos targets preview+production.
+No se leyó/reveló un valor sensible ni se cambiaron claves. Mapbox público existente
+conservó valor y se preparó también para Production; QA=false/beneficios=true
+server-gated configurados para ambos targets, sin tocar overrides de ramas.
+Ningún despliegue de producción ni nuevo plan/add-on.
+
+Pull oficial+parser real del cliente PASS para Supabase, Mapbox pk y flags;
+Vercel build local/prebuilt regenerado con esa configuración, fecha legal vacía.
+Navegador sobre bundle compilado390/1440 PASS (registro/legales/móvil/foco).
+Nueva vista protegida **READY** del SHAa3f912eb:
+https://pazo-app-t83r-b6fzt5jwv-digitalapp.vercel.app,
+`dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3`. Proyecto/equipo/SHA exactos verificados por API.
+SSO conservado. Es el candidato vigente; no usar el preview anterior como app
+aceptada. Main y producción conservados.
+
+Este hostname nuevo devuelve403 del túnel del entorno; excepción exacta guardada
+en borrador revisión9, `requires_publish=true`. PO debe revisar/guardar/publicar
+el entorno de esta conversación; la herramienta no puede publicarlo. El hostname
+anterior sí es accesible y responde302 de SSO, no afirmar bloqueo global.
+Falta verificar la vista final HTTPS/PWA bajo autenticación, luego canonical y
+certificado solo tras GO de publicación. No READY_FOR_PO_CREDENTIALS todavía.
+Detalle `docs/PAZO_FINAL_PREVIEW_RUNTIME_20261022.md`.
+
 ## Gmail operativo — 22-oct-2026
 
 PO confirmó que la contraseña de aplicación corresponde al correo de soporte
