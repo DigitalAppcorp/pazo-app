@@ -17,6 +17,7 @@ export function PazoInstallControl({lang}:{lang:'es'|'en'}){
  const [showInstructions,setShowInstructions]=useState(false)
  const [isPrompting,setIsPrompting]=useState(false)
  useEffect(()=>{
+  if(typeof window==='undefined'||typeof navigator==='undefined'||typeof window.matchMedia!=='function')return
   const refresh=()=>{if(inStandaloneMode()){setInstalled(true);setPrompt(null);setShowInstructions(false)}}
   const onPrompt=(e:Event)=>{e.preventDefault();if(!inStandaloneMode())setPrompt(e as InstallPrompt)}
   const onInstalled=()=>{setInstalled(true);setPrompt(null);setShowInstructions(false)}
