@@ -100,6 +100,19 @@ test('preflight exposes no personal data or subscription creation permission',as
  assert.equal(await res.text(),'')
  assert.deepEqual(calls,[])
 })
+test('canonical beta domain preflight is allowed, lookalikes remain forbidden',async()=>{
+ const {handler,calls}=build()
+ const req=(origin)=>new Request(base,{method:'OPTIONS',headers:{
+  origin,'access-control-request-method':'POST'}})
+ const canonical=await handler(req('https://pazo-app.vercel.app'))
+ assert.equal(canonical.status,204)
+ assert.equal(canonical.headers.get('access-control-allow-origin'),'https://pazo-app.vercel.app')
+ assert.equal(canonical.headers.get('access-control-allow-credentials'),null)
+ const lookalike=await handler(req('https://pazo-app.vercel.app.evil.example'))
+ assert.equal(lookalike.status,403)
+ assert.equal(lookalike.headers.get('access-control-allow-origin'),null)
+ assert.deepEqual(calls,[])
+})
 test('Edge uses GoTrue and service-only SQL; browser selects only Live owner actions',()=>{
  const index=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-account/index.ts',import.meta.url),'utf8')
  const view=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.meta.url),'utf8')
