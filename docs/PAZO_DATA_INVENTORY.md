@@ -539,3 +539,7 @@ Se crearon en GitHub, exclusivamente como **migraciones NO aplicadas**, la inbox
 - **Instalación PWA:** la sugerencia se oculta al detectarse modo standalone; su descarte almacena **solo una fecha local** en el navegador durante siete días, sin UUID, email, ubicación, analítica o envío al servidor.
 
 **Puerta de privacidad antes del GO SQL o beta externa:** fijar plazo de retención y eliminación de mensajes/notas de soporte y auditoría de concesiones; actualizar las políticas públicas ES/EN según la implementación real; verificar atención y borrado manual o automatizado bajo el proceso de cuenta. Hasta entonces, las tablas y sus datos son propuestos, no recolectados.
+
+### F17 — Respuestas privadas a solicitudes (borrador, NO desplegado)
+
+La bandeja administrativa propone un campo **respuesta al usuario** (`admin_reply`, máximo 2000 caracteres) separado de `admin_note` (nota estrictamente interna). La RPC autenticada `pazo_my_support_tickets` expone solo las 20 solicitudes más recientes **del propio usuario autenticado** y sus respuestas; no expone notas internas ni contenido de otro usuario. El usuario ve estado, mensaje enviado y respuesta desde Ayuda y soporte. Sin envío de correos ni analítica de contenido, y su plazo de retención sigue PENDIENTE de decisión previa al despliegue.
