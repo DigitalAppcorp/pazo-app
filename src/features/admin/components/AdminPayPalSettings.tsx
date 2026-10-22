@@ -42,6 +42,9 @@ export function AdminPayPalSettings({lang}:Props){
  const [env,setEnv]=useState<Env>('sandbox')
  const [recentAdminMfa,setRecentAdminMfa]=useState(false)
  const [advancedLive,setAdvancedLive]=useState(false)
+ const [liveCredentialsStored,setLiveCredentialsStored]=useState<boolean|null>(null)
+ const [liveReadinessRevision,setLiveReadinessRevision]=useState(0)
+ const onLiveCredentialsObserved=useCallback((stored:boolean|null)=>setLiveCredentialsStored(stored),[])
  // A session may have aal2 for hours; PO actions require a fresh TOTP event.
  useEffect(()=>{
   if(!recentAdminMfa)return
@@ -274,9 +277,12 @@ export function AdminPayPalSettings({lang}:Props){
     </details>}
     {env==='live'&&LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup
      lang={lang} mfaRecentlyVerified={recentAdminMfa}
-     credentialsStored={liveConfig?.client_id_stored===true&&liveConfig?.client_secret_stored===true}
-     onStored={()=>{void load(false)}}/>}
-    {env==='live'&&<AdminLiveReadiness lang={lang} revision={liveConfig?.updated_at}/>}
+     credentialsStored={liveCredentialsStored===true} credentialsChecked={liveCredentialsStored!==null}
+     onStored={()=>{setLiveCredentialsStored(true);setLiveReadinessRevision(n=>n+1);void load(false)}}/>}
+    {env==='live'&&<AdminLiveReadiness lang={lang}
+     revision={String(liveConfig?.updated_at??'')+':'+liveReadinessRevision}
+     onCredentialsObserved={onLiveCredentialsObserved}/>}
+
     {env==='live'&&<section className="rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]"
      data-pazo-merchant-balance-check="not-required">
       <h4 className="text-[15px] font-black">{t(
