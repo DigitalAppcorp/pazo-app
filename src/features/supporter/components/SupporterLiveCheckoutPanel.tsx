@@ -38,7 +38,7 @@ const published=(raw:unknown,locale:Locale):raw is Offer=>{
   typeof o.consentLabel==='string'&&o.consentLabel.length>30&&
   digest.test(o.termsDigest||'')
 }
-export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
+export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Locale;onAvailabilityChange?:(phase:'loading'|'ready'|'blocked')=>void}){
  const [stage,setStage]=useState<Stage>('checking')
  const [offer,setOffer]=useState<Offer|null>(null)
  const [availabilityReason,setAvailabilityReason]=useState<AvailabilityReason>('general')
@@ -47,6 +47,7 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
  const attempted=useRef(false)
  const active=useRef(true)
  const label=(es:string,en:string)=>lang==='es'?es:en
+ useEffect(()=>{onAvailabilityChange?.(stage==='checking'?'loading':stage==='ready'?'ready':'blocked')},[stage,onAvailabilityChange])
  useEffect(()=>{
   active.current=true
   setAccepted(false)
@@ -135,14 +136,14 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
     {label('Comprobar disponibilidad','Check availability')}</button>
   </div>}
   {(stage==='ready'||stage==='submitting')&&published(offer,lang)&&<>
-   <details className="rounded-[17px] bg-[#F0F4E6] p-3" open>
-    <summary className="min-h-10 cursor-pointer py-2 text-[13px] font-bold">
+   <details className="rounded-[15px] bg-[#F4F6EF] px-3 py-1.5">
+    <summary className="min-h-9 cursor-pointer py-2 text-[12px] font-semibold text-[#476862]">
      {label('Condiciones de la suscripción mensual','Monthly subscription terms')}</summary>
-    <div className="max-h-[230px] space-y-3 overflow-y-auto px-1 pb-2 text-[12px] leading-[1.6] text-[#476862]">
+    <div className="max-h-[190px] space-y-2 overflow-y-auto px-1 pb-2 text-[12px] leading-[1.5] text-[#476862]">
      {offer.exactCopy.split('\n\n').map((p,i)=><p key={i}>{p}</p>)}
     </div>
    </details>
-   <label className="flex cursor-pointer items-start gap-3 rounded-[16px] bg-[#F0F4E6] p-3 text-[12px] font-semibold leading-relaxed">
+   <label className="flex cursor-pointer items-start gap-3 rounded-[15px] bg-[#F4F6EF] px-3 py-2.5 text-[12px] font-medium leading-snug">
     <input type="checkbox" checked={accepted} disabled={stage==='submitting'}
      onChange={e=>setAccepted(e.target.checked)}
      className="mt-1 h-5 w-5 shrink-0 accent-[#204E4A]"/>
@@ -150,7 +151,7 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
    </label>
    <button type="button" disabled={!accepted||stage==='submitting'}
     onClick={()=>void begin()}
-    className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-black text-[#204E4A] disabled:opacity-45">
+    className="min-h-12 w-full rounded-full bg-[#204E4A] px-4 py-3 text-[14px] font-bold text-white shadow-[0_5px_15px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#2B615A] focus-visible:bg-[#2B615A] disabled:opacity-45">
     {stage==='submitting'
       ?label('Conectando con PayPal…','Connecting to PayPal…')
       :label('Continuar con PayPal','Continue with PayPal')}
