@@ -1,5 +1,28 @@
 # Beta: correo, Auth, textos públicos y preview — 22-oct-2026
 
+## Gmail operativo — 22-oct-2026
+
+PO confirmó que la contraseña de aplicación corresponde al correo de soporte
+ya designado. SMTP Supabase→Gmail **APLICADO**, smtp.gmail.com:587 con STARTTLS,
+remitente PAZO y correo de soporte. Clave usada solo en memoria hacia API
+Management, nunca frontend/Git/logs. PATCH+GET verificó campos y presencia de
+password sin devolverla; otros ajustes Auth preservados. Límite técnico10
+correos/hora (antes2 del proveedor predeterminado), sin plan/add-on ni coste
+nuevo contratado; límites propios de Google siguen aplicando.
+
+**Entrega PASS:** una sola solicitud de recuperación a la propia cuenta del PO,
+registrada previamente, HTTP200; PO confirmó «Sí, ya llegó». No envíos a terceros,
+reintento, cambio de contraseña ni repetición del E2E Auth aceptado. Se verificó
+transporte real, no una simple respuesta genérica para correo inexistente.
+Privacidad ES/EN ahora describe Google/Gmail, direcciones y contenido de correos
+de cuenta/recuperación/soporte; sin nuevos datos de mascotas/pago o analytics.
+
+Red de preview ya accesible por ruta normal: HTTP302 de autenticación Vercel,
+no403 del túnel. No afirmar fallo de red actual ni pedir volver a generar
+contraseñas. Falta validar HTTPS/PWA autenticado y la vista final actualizada;
+no READY_FOR_PO_CREDENTIALS aún. Las notas inferiores de SMTP ausente/bloqueo403
+son checkpoints anteriores.
+
 Continúa PR67, sin repetir PR62–65 ni el Auth local aceptado. No autoriza main,
 producción, PayPal real ni publicación legal. Cada cambio se documenta y sube
 por orden del PO.

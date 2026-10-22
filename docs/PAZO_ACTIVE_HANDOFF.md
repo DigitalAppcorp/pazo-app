@@ -1,10 +1,44 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## Gmail operativo — 22-oct-2026
+
+PO confirmó que la contraseña de aplicación corresponde al correo de soporte
+ya designado. SMTP Supabase→Gmail **APLICADO**, smtp.gmail.com:587 con STARTTLS,
+remitente PAZO y correo de soporte. Clave usada solo en memoria hacia API
+Management, nunca frontend/Git/logs. PATCH+GET verificó campos y presencia de
+password sin devolverla; otros ajustes Auth preservados. Límite técnico10
+correos/hora (antes2 del proveedor predeterminado), sin plan/add-on ni coste
+nuevo contratado; límites propios de Google siguen aplicando.
+
+**Entrega PASS:** una sola solicitud de recuperación a la propia cuenta del PO,
+registrada previamente, HTTP200; PO confirmó «Sí, ya llegó». No envíos a terceros,
+reintento, cambio de contraseña ni repetición del E2E Auth aceptado. Se verificó
+transporte real, no una simple respuesta genérica para correo inexistente.
+Privacidad ES/EN ahora describe Google/Gmail, direcciones y contenido de correos
+de cuenta/recuperación/soporte; sin nuevos datos de mascotas/pago o analytics.
+
+Red de preview ya accesible por ruta normal: HTTP302 de autenticación Vercel,
+no403 del túnel. No afirmar fallo de red actual ni pedir volver a generar
+contraseñas. Falta validar HTTPS/PWA autenticado y la vista final actualizada;
+no READY_FOR_PO_CREDENTIALS aún. Las notas inferiores de SMTP ausente/bloqueo403
+son checkpoints anteriores.
+
+## Seguridad RPC instalada — 22-oct-2026
+
+Parche de visibilidad pública `20261022021500` APLICADO tras CI73525439
+**5/5 SUCCESS** y ensayo alojado ROLLBACK. Fuente2/2, ACL y tres HTTP públicos
+PASS (lectura neutral, lote válido y matriz rechazada22023). Inspección41 RPC
+completada; no grants nuevos ni datos de clientes consultados. ModoOFF/rev0,
+Live=false/kill=true/gen=null/procesamiento=false, intentos/períodos/certificados0.
+Artefacto Vercel local/prebuilt SHA73525439 PASS, no desplegado; preview sigue
+SHA020e6ce1 y HTTPS continúa pendiente. Detalle:
+`docs/PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
+
 ## Seguridad RPC — 22-oct-2026, parche preparado
 
 Inspección íntegra de41 SECURITY DEFINER públicas ejecutables por authenticated
 (4 también anon), todas search_path vacío. Hallazgo reproducido: muro podía
-exponer mascota retirada por moderación al saltarse RLS. SQL23021500 corrige
+exponer mascota retirada por moderación al saltarse RLS. SQL20261022021500 corrige
 lector público de beneficios usando visibilidad moderada existente; no modifica
 pagos, consentimiento ni grants. Matrices ya se rechazaban (no bypass); límite
 se valida explícitamente. Gateway PG17 completo PASS con fuente anterior

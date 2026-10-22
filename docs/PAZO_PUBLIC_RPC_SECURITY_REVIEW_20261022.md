@@ -1,5 +1,26 @@
 # Auditoría de RPC privilegiadas públicas — 22-oct-2026
 
+## Postflight22-oct — parche de visibilidad APLICADO
+
+Commit `735254391935d75af9d956ebd7639fd1b5a976a2`: **5/5 Actions SUCCESS**.
+Migración `20261022021500` instalada tras BEGIN/ROLLBACK alojado que conservó
+los2 cuerpos originales; instalación e historial en una transacción, con guardas
+MD5 de fuente inspeccionada. SHA256 SQL:
+`97940ddf1bccb3e6793f6b48a193b6d3ad2403708f291f86c506aefca2399002`.
+Postflight **2/2 prosrc exactos**, search_path vacío y EXECUTE anon/authenticated
+conservados. HTTP público real: mascota sintética inexistente200/neutro,
+lote unidimensional200/neutro y matriz49 elementos400/22023. No datos de clientes
+ni entradas financieras creadas. ModoOFF/rev0/Live=false/kill=true/gen=null,
+procesamiento=false, intentos0/períodos0/certificados0, comprobados después.
+
+Nuevo artefacto Vercel local/prebuilt del SHA73525439 compilado con QA=false,
+beneficios=true y fecha legal vacía, PWA estática presente. **No desplegado**;
+la vista protegida READY anterior sigue en SHA020e6ce1. No promover producción
+ni atribuir HTTPS PASS. El lockfile se preservó tras comprobar que npm solo
+normalizó metadata libc, sin cambios de versiones/árbol/integrity.
+
+Las notas inferiores de SQL pendiente describen el checkpoint anterior.
+
 ## Alcance y evidencia
 
 Catálogo alojado de solo lectura: **41 SECURITY DEFINER** en `public` con EXECUTE

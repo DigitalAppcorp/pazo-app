@@ -96,6 +96,7 @@ test('draft statements distinguish ephemeral map location, persisted check-ins a
     assert.match(rescue,lang==='es'?/teléfono/:/phone number/)
     assert.match(providers,/PostHog/)
     assert.match(providers,/Unsplash/)
+    assert.match(providers,/Google \(Gmail\)/)
     assert.match(providers,lang==='es'?/excluido de esta versión/:/excluded from this release/)
     assert.match(changes,/Do Not Track/)
     assert.match(changes,lang==='es'?/no cambia su funcionamiento/:/does not change its behavior/)
