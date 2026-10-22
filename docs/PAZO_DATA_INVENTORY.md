@@ -1,3 +1,11 @@
+> **SMTP ACTIVO, 22-oct-2026:** Google/Gmail recibe direcciones y contenido de correos de autenticación/recuperación enviados por Supabase y gestiona soporte. Credencial de aplicación solo configuración privada Auth (sin frontend/Git/logs), transporte STARTTLS587. Una recuperación al propio PO recibida y confirmada; sin alta, cambio de contraseña ni envíos a terceros. Sin datos de mascotas/pagos/analytics en SMTP. Límite técnico10/h más límites de Google; no promesa de conservación o entrega ilimitada. Este postflight supera el checkpoint inferior de integración pendiente.
+
+> **22-oct-2026, integración de correo pendiente:** PO eligió Gmail para entrega de Auth; aún no existe SMTP propio configurado ni envíos nuevos. Configuración prevista Supabase→Google SMTP usa destinatario y contenido del correo de cuenta para autenticación/recuperación; nunca datos de mascotas/pago/analytics. Contraseña de aplicación solo configuración privada del servidor, fuera de frontend/Git/logs. Confirmar instalación/entrega antes de declararlo activo. Cambios legales de este incremento solo describen categorías PayPal ya inventariadas; sin datos nuevos.
+
+> **F16 P4, 22-oct-2026 — instalado, modo OFF:** `admin_private.pazo_live_release_control` (modo, revisión, generación, UID original, fechas) y `pazo_live_release_requests` (nonce UUID, administrador, acción, revisiones, fecha) son evidencia privada de autorización, sin secretos ni payload financiero. Retención ligada al audit financiero, sin purga nueva ni eliminación en rollback. `pazo_live_release_artifact` contiene solo provenance técnica; clientes y service_role sin permisos de tabla. RPC de estado proyecta únicamente modo/revisión/booleanos/fecha. Singleton técnico OFF; certificados0/autorizaciones0 y sin datos del pagador. Migración aplicada y ACL/RLS verificadas.
+
+> **F16 preparación administrativa, 21-oct-2026:** RPC de solo lectura revalida admin y proyecta únicamente booleanos de esquema, custodia de claves, validación previa del proveedor, salud reciente del worker y códigos cerrados de pendientes. No lee secretos, identidades, plan/webhook IDs ni datos del pagador; no recoge eventos o datos nuevos ni activa pagos. El cliente descarta respuestas al cambiar la cuenta. Esta lectura no sustituye el gate P4 financiero.
+
 > **F16 scheduler, 21-oct-2026 — preparación local:** cron emitirá como máximo una llamada por minuto al worker privado del mismo proyecto, leyendo la capacidad técnica dentro del servidor. pg_net mantiene temporalmente el header interno en su cola privada no registrada hasta consumirlo; no lleva claves PayPal ni datos del pagador. Respuestas contienen solo códigos/contadores y su retención nativa predeterminada es6h; logs técnicos de nuestro job se limitan7d. No se purga historia financiera ni otros jobs. Extensiones nativas aún no instaladas/validadas.
 
 > **F16 control privado, 21-oct-2026 — solo preparación local:** una capacidad técnica aleatoria se generó dentro de PostgreSQL y quedó cifrada en Vault, con hash privado para autenticar el worker; nunca se devuelve a clientes ni registros operativos. Un singleton privado conserva lease de lote, última salud/diagnóstico y contadores agregados; inbox añade espera de reintento y código cerrado. Ningún payload o pagador se registra. La capacidad se conserva mientras opere el worker y se podrá revocar/rotar; el rollback solo elimina la capacidad propia si no fue usada. Control instalado apagado y endpoint privado v1 desplegado sin activar procesamiento. No hay scheduler activo ni datos financieros Live nuevos.
@@ -503,3 +511,19 @@ Prototipo de PostgreSQL descartable `paypal_subscription_intents`: identificador
 ### F16 — Migración financiera preparada, NO desplegada (2026-10-14)
 
 Se crearon en GitHub, exclusivamente como **migraciones NO aplicadas**, la inbox de eventos y las tablas privadas `paypal_subscription_intents`, `paypal_payment_entries` y `paypal_payment_reversals`, con IDs opacos de PayPal, UUID propietario, estado, plan USD 2.99, monto/currency, sellos temporales, y relación privada de evento-pago. Un SQL RPC server-only cierra evento+pago o evento+reverso en una transacción, sin cobertura, sin email PayPal, tarjetas, nombres, ubicación, IP, cuerpo de webhook ni credenciales. Los ensayos usan IDs sintéticos. Alojado: **no se están recolectando estos datos** porque no están instaladas las nuevas tablas. No se hizo ninguna petición real de creación de suscripción. La política de 90 días solo afecta IDs de webhook conciliados con hold levantado; **los plazos de intentos y registros financieros siguen sin aprobar**. Antes de lanzar, integrar F14 account deletion y justificar retención contable. Ver `docs/PAZO_F16_SANDBOX_RELEASE_GATE_20261014.md`.
+
+
+### Live: preferencias cosméticas y recuperación — preparado 21-oct-2026
+
+- Tabla nueva local `supporter_private.pazo_live_pet_themes`: pet UUID, owner UUID
+  al guardar, fondo enum y actualización; FORCE RLS, sin lectura/escritura directa
+  por roles cliente/servicio. RPC de escritura verifica Auth, propiedad y cobertura
+  real. Preferencia retirable después de expiry/hold; FK CASCADE de mascota/cuenta.
+- Recuperación utiliza columnas privadas existentes de request/lease, sin nueva
+  identidad, pagador o cuerpo de webhook. Respuestas públicas: intent PAZO, estados
+  cerrados y URL de aprobación oficial solo cuando corresponde; jamás secrets,
+  request key, owner ID o subscription ID. No analítica financiera nueva.
+- RPC administrativa: agregados de períodos, holds e intentos ya existentes;
+  ninguna tabla adicional de métricas, importación de saldos o datos de pagador.
+- Todo lo anterior está probado con fixtures; migraciones y Edge sin aplicar/
+  desplegar en esta ejecución. Los plazos financieros pendientes no se alteran.

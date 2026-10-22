@@ -25,14 +25,14 @@ const configured=()=>({released:true,environment:'live',webhookId:'WH-1234567890
    ownerIntentVerified:true,planVerified:true,merchantGeneration:1,
    ownerId:owner,intentId:intent,subscriptionId:subscription}),
  inbox:{recordIfAbsent:async()=>true}})
-test('Live ingress fails closed by default and the deployed entrypoint has a hard OFF latch',async()=>{
+test('Live ingress helper defaults closed and the entrypoint selects only the controlled runtime',async()=>{
  let called=false
  const fn=createPazoLiveWebhookIntake({...configured(),released:false,
  verifySignature:async()=>{called=true;return true}})
  const r=await fn(request())
  assert.equal(r.status,503);assert.equal(called,false)
  const source=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-webhook/index.ts',import.meta.url),'utf8')
- assert.match(source,/const LIVE_WEBHOOK_RELEASED=false/)
+ assert.match(source,/const CONTROLLED_WEBHOOK_RUNTIME=true/)
  assert.doesNotMatch(source,/Deno\.env\.get\(.+LIVE_WEBHOOK_RELEASED/)
 })
 test('PayPal Live certificate URL must be fixed official host and cert path',()=>{

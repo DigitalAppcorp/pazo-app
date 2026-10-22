@@ -1,5 +1,86 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+## Estado de aceptación vigente — 22-oct-2026
+
+| Gate | Estado real | Evidencia |
+| --- | --- | --- |
+| CODE_DONE P1–P4 | PASS técnico; cierre global pendiente | 41871d47 +523c0f2c +73525439 +a3f912eb, 5/5CI cada uno; 1,813 pruebas/build/dist; PG17 y Chromium |
+| DB_APPLIED | PASS | migraciones hasta20261022021500; P4 13/13 + seguridad2/2 cuerpos/ACL/RLS |
+| EDGE_DEPLOYED | PASS | release1/webhook2/checkout3/cuenta5/worker4 ACTIVE; 69/69 fuentes |
+| Preview Vercel final | PASS HTTPS | dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3, SHAa3f912eb; HTTP7/7 y Chromium390/1440 |
+| SMTP público | PASS | Gmail configurado; HTTP200 y entrega a cuenta propia confirmada PO; sin cambiar contraseña |
+| Auth origin/redirects | PASS configuración | 7 redirects exactos canonical/previews; anteriores conservados; SMTP verificado por separado |
+| HTTPS_E2E_PASS | PREVIEW PASS; canonical pendiente GO | SW real, offline503/online, callbacks limpios; no instalación física |
+| READY_FOR_PO_CREDENTIALS | NO | faltan gates técnicos/operativos anteriores y certificado |
+| LIVE_CANARY_PASS | NO ejecutado | sin claves/GO/venta real; no simular |
+| BETA_PUBLIC_RELEASE_GO | NO | main y producción conservados; requiere autorización PO |
+
+Último detalle operativo: `PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md`;
+postflight P4: `PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
+Las notas inferiores son checkpoints históricos superados, no estado actual.
+
+## Supabase operativo — 21-oct-2026, 21:47 UTC
+
+PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`
+**APLICADAS** tras autorización explícita y ensayo alojado con ROLLBACK.
+Postflight ACL/RLS y 6/6 fuentes SQL PASS, nueva tabla vacía. Cuenta Live
+**v4 ACTIVE/JWT ON**, 8/8 fuentes exactas y HTTP negativos401 PASS.
+Live=false, kill=true, sandbox, generación activa null; 0 merchants/intents/
+períodos/inbox. Main y producción Vercel intactos.
+
+P4 avanza con readiness administrativo de lectura y recuperación de estado de
+credenciales; nuevo SQL `20261021223000` aún NO aplicado. Verify:prepreview1788
+PASS, PG17 y Chromium390/1440 PASS. Habilitación financiera controlada sigue
+pendiente; NO beta lista ni READY_FOR_PO_CREDENTIALS. No pedir más tokens ni
+claves PayPal por ahora. Evidencia actual en
+`docs/PAZO_SUPABASE_BETA_POSTFLIGHT_20261021.md`; estados inferiores de falta de
+acceso/SQL nuevo sin aplicar/cuenta sin desplegar son historia superada.
+
+
+## Continuidad Codex — 21-oct-2026, implementación local verificada
+
+Base de integración auditada por Git: F13 `669efafdb5678cae40c5137d7bddc9403c2ab8a3`;
+PR #66 `d1d34fa230c0928748141adf1f02adb186a99568` revisado: solo alinea el nombre
+de la migración de cancelación ya aplicada y su prueba, más el handoff. Se usó
+como base de `f16/beta-completion-20261021`, sin modificar `main` ni sobrescribir F13.
+La API estuvo bloqueada durante esa implementación; el postflight de 20:30 UTC
+ya revisó PR/CI por GraphQL y REST. Ver
+`docs/PAZO_CLOUD_ACCESS_AND_HTTPS_POSTFLIGHT_20261021.md`: PR66 tiene 12/12
+Actions SUCCESS, pero Vercel falla por cuota y los callbacks/PWA públicos dan404.
+
+Código adicional implementado: reanudación del CREATE original con lease y el
+mismo cuerpo/PayPal-Request-Id dentro de 48h; GET independiente antes del binding;
+reconciliación de cancelaciones inciertas por GET sin segundo POST; cierre de
+slots solo tras estado terminal verificado, sin eventos/cancelaciones pendientes
+ni cobertura sin vencer (incluidos holds); consentimiento nuevo para otro intento;
+descarga ES/EN de condiciones incluso tras cierre; acceso a gestión desde miembro
+verificado; aislamiento ante cambio de usuario; fondos/muro Live basados en períodos
+verificados; agregados administrativos sin saldo/ingreso neto inventado.
+
+Tres migraciones nuevas SOLO preparadas y probadas en PG17 desechable:
+`20261021210000` recovery finish, `20261021213000` cosméticos Live,
+`20261021220000` resumen financiero administrativo. NO instaladas en Supabase.
+La Edge de cuenta actualizada NO fue desplegada. Checkout/webhook siguen hard-OFF
+en el código. No hay cobros, nuevas credenciales ni publicación por estos cambios.
+
+Validación: suite local de gobernanza/F16, build y dist; PG17 con SQL real y
+rollback/reapply; navegador sintético 390/1440px, doble clic, cancelación explícita,
+fuente financiera no disponible y callbacks reales de la SPA sin tokens en URL.
+Estos resultados NO son PayPal Live, PWA instalada HTTPS ni CI remoto.
+
+**Bloqueo operativo actualizado a 20:30 UTC:** GitHub, Auth Supabase y portada
+HTTPS ya responden; los callbacks y archivos PWA de ese dominio devuelven404.
+Sin autenticación administrativa Supabase/Vercel. El login oficial Vercel sigue
+bloqueado por proxy a vercel.com; se añadieron vercel.com y supabase.com al
+borrador preservando lo anterior. Guardar no aplica: requiere revisión/guardado
+y publicación del entorno de desarrollo, no de PAZO. Postflight enlazado arriba.
+Falta auditar source/versión alojados antes de instalar/desplegar; también falta
+terminar P4 (readiness y habilitación controlada Admin/DB/Edge), publicación HTTPS
+bajo GO y canary real autorizado. NO pedir claves PayPal todavía.
+No hacer push a ramas conectadas sin verificar primero Preview OFF/cuota.
+Ver informe de esta entrega: `docs/PAZO_CODEX_BETA_CONTINUATION_20261021.md`.
+**Estado global: NO-GO; no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY.**
+
 Actualización Codex 21-oct-2026: P1 en ejecución en la rama de recuperación
 `f16/live-signed-sale-reconciler-20261021`. Evidencia mínima firmada, lectura con
 lease y GET del evento de la generación original implementados, SQL local PG17

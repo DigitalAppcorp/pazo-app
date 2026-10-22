@@ -1,3 +1,232 @@
+## Preview HTTPS verificado — 21-oct-2026, Guatemala (22-oct UTC)
+
+Red del candidato RESUELTA, sin volver a pedir secretos/publicación de entorno.
+Fuente a3f912eb, deployment dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3: HTTP7/7 y
+Chromium HTTPS390/1440 PASS, app inicia, legal Gmail/PayPal, mayoría18+ desmarcada,
+callbacks limpian tokens, SW activo/CacheStorage0, offline503 y recuperación online.
+Mapbox estilo+JS/CSS200; no certificación de mapa/instalación física. Gmail
+recibido confirmado previamente, sin envío nuevo. CIa3f912eb y875f3d92:5/5 cada uno.
+
+Postflight readonly: modoOFF/rev0, Live=false/kill=true/procesamiento=false,
+heartbeat reciente, intentos/períodos/certificados0. Main y producción intactos.
+Pendiente GO de integración/despliegue técnico canonical con comprasOFF; después
+verificación/certificado, claves privadas y GO canary. NO pago real ni beta
+pública aprobados, no READY_FOR_PO_CREDENTIALS hasta canonical/certificado.
+Evidencia `docs/PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md` y JSON agregado.
+Las notas inferiores del403 de este hostname quedan superadas.
+
+## Vista final y configuración pública corregida — 22-oct-2026
+
+Código `a3f912ebbb64d1c2365471be04ac2915fc9e1e9e`: **5/5 Actions SUCCESS**.
+Gmail configurado, envío HTTP200 y recepción confirmada por PO. SQL de seguridad
+20261022021500 instalado/verificado; release financiero sigueOFF sin certificado.
+
+Prueba protegida anterior: HTTP7/7 PASS, pero navegador detectó bloqueo real
+`PAZO is unavailable`: la URL pública Supabase estaba tipada sensitive en Vercel
+y el pull/prebuilt la exportaba vacía. No confundir HTTP200 con app utilizable.
+La API no permite cambiar tipo sensitive: se reemplazó SOLO esa URL pública por
+plain con el origin canónico ya fijado en código, mismos targets preview+production.
+No se leyó/reveló un valor sensible ni se cambiaron claves. Mapbox público existente
+conservó valor y se preparó también para Production; QA=false/beneficios=true
+server-gated configurados para ambos targets, sin tocar overrides de ramas.
+Ningún despliegue de producción ni nuevo plan/add-on.
+
+Pull oficial+parser real del cliente PASS para Supabase, Mapbox pk y flags;
+Vercel build local/prebuilt regenerado con esa configuración, fecha legal vacía.
+Navegador sobre bundle compilado390/1440 PASS (registro/legales/móvil/foco).
+Nueva vista protegida **READY** del SHAa3f912eb:
+https://pazo-app-t83r-b6fzt5jwv-digitalapp.vercel.app,
+`dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3`. Proyecto/equipo/SHA exactos verificados por API.
+SSO conservado. Es el candidato vigente; no usar el preview anterior como app
+aceptada. Main y producción conservados.
+
+Este hostname nuevo devuelve403 del túnel del entorno; excepción exacta guardada
+en borrador revisión9, `requires_publish=true`. PO debe revisar/guardar/publicar
+el entorno de esta conversación; la herramienta no puede publicarlo. El hostname
+anterior sí es accesible y responde302 de SSO, no afirmar bloqueo global.
+Falta verificar la vista final HTTPS/PWA bajo autenticación, luego canonical y
+certificado solo tras GO de publicación. No READY_FOR_PO_CREDENTIALS todavía.
+Detalle `docs/PAZO_FINAL_PREVIEW_RUNTIME_20261022.md`.
+
+## Gmail operativo — 22-oct-2026
+
+PO confirmó que la contraseña de aplicación corresponde al correo de soporte
+ya designado. SMTP Supabase→Gmail **APLICADO**, smtp.gmail.com:587 con STARTTLS,
+remitente PAZO y correo de soporte. Clave usada solo en memoria hacia API
+Management, nunca frontend/Git/logs. PATCH+GET verificó campos y presencia de
+password sin devolverla; otros ajustes Auth preservados. Límite técnico10
+correos/hora (antes2 del proveedor predeterminado), sin plan/add-on ni coste
+nuevo contratado; límites propios de Google siguen aplicando.
+
+**Entrega PASS:** una sola solicitud de recuperación a la propia cuenta del PO,
+registrada previamente, HTTP200; PO confirmó «Sí, ya llegó». No envíos a terceros,
+reintento, cambio de contraseña ni repetición del E2E Auth aceptado. Se verificó
+transporte real, no una simple respuesta genérica para correo inexistente.
+Privacidad ES/EN ahora describe Google/Gmail, direcciones y contenido de correos
+de cuenta/recuperación/soporte; sin nuevos datos de mascotas/pago o analytics.
+
+Red de preview ya accesible por ruta normal: HTTP302 de autenticación Vercel,
+no403 del túnel. No afirmar fallo de red actual ni pedir volver a generar
+contraseñas. Falta validar HTTPS/PWA autenticado y la vista final actualizada;
+no READY_FOR_PO_CREDENTIALS aún. Las notas inferiores de SMTP ausente/bloqueo403
+son checkpoints anteriores.
+
+## Seguridad RPC instalada — 22-oct-2026
+
+Parche de visibilidad pública `20261022021500` APLICADO tras CI73525439
+**5/5 SUCCESS** y ensayo alojado ROLLBACK. Fuente2/2, ACL y tres HTTP públicos
+PASS (lectura neutral, lote válido y matriz rechazada22023). Inspección41 RPC
+completada; no grants nuevos ni datos de clientes consultados. ModoOFF/rev0,
+Live=false/kill=true/gen=null/procesamiento=false, intentos/períodos/certificados0.
+Artefacto Vercel local/prebuilt SHA73525439 PASS, no desplegado; preview sigue
+SHA020e6ce1 y HTTPS continúa pendiente. Detalle:
+`docs/PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
+
+## Seguridad RPC — 22-oct-2026, parche preparado
+
+Inspección íntegra de41 SECURITY DEFINER públicas ejecutables por authenticated
+(4 también anon), todas search_path vacío. Hallazgo reproducido: muro podía
+exponer mascota retirada por moderación al saltarse RLS. SQL20261022021500 corrige
+lector público de beneficios usando visibilidad moderada existente; no modifica
+pagos, consentimiento ni grants. Matrices ya se rechazaban (no bypass); límite
+se valida explícitamente. Gateway PG17 completo PASS con fuente anterior
+reproducida, rollback/savepoint y roles anon/authenticated reales. SQL aún
+NO APLICADO en este checkpoint; CI y ensayo/postflight alojado pendientes.
+HIBP requiere Pro según documentación oficial, plan actualFree: riesgo residual
+pendiente de considerar en GO, sin upgrade ni presunción de aceptación.
+Ver `docs/PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
+
+## Correo, Auth, privacidad y preview — 22-oct-2026 (estado vigente)
+
+Vista protegida creada y **READY** por Vercel: deployment
+`dpl_FGiumJgvLvrL3MmxSwk8i1WUC11s`, fuente `020e6ce1`,
+https://pazo-app-t83r-8zbuzaf2x-digitalapp.vercel.app. Build local/prebuilt,
+Sandbox QA UI=false, beneficios=true sujetos a cobertura SQL; sin promoción,
+sin alias público ni cambio de SSO. **No HTTPS_E2E_PASS:** el proxy de este
+entorno rechaza ese hostname con403 antes de Vercel. Excepción exacta guardada
+en borrador; requiere revisión/guardado/publicación por el PO en Codex Cloud.
+No confundir READY del deployment con página comprobada ni beta pública.
+
+Auth alojado: `site_url` corregido de localhost al origin canónico; añadidas
+rutas exactas `/` y `/?auth=recovery` de canonical y este preview. Redirección
+anterior preservada (5 entradas), autoconfirmación/MFA/contraseñas sin cambios,
+PATCH y GET postflight PASS. No altas, resets ni correos enviados; no se reabre
+el QA Auth ya aceptado. Copia operativa anterior privada fuera de Git.
+
+El PO eligió **Gmail**. Auditoría confirma SMTP propio ausente/hook deshabilitado;
+el SMTP predeterminado Supabase no entrega a cuentas ajenas al equipo. Requisito
+`PAZO_GMAIL_APP_PASSWORD` guardado en borrador (solo destino api.supabase.com),
+valor todavía no disponible. Solo el titular puede generar la contraseña de
+aplicación de Google y guardarla en bóveda; jamás chat, repo o variable VITE.
+No se ha configurado Gmail ni declarado entrega PASS.
+
+Privacidad ES/EN reconciliada con PayPal, referencias financieras restringidas,
+consentimiento y muro opcional revocable; términos remiten al checkout y al
+histórico aceptado sin cambiar el contrato inmutable de la oferta Live.
+Fecha legal mediante metadata opcional `VITE_PAZO_LEGAL_EFFECTIVE_DATE`, ISO
+real validado: vacía en previews; fecha real solo al publicar con GO. No activa
+pagos ni sustituye aceptación. `verify:prepreview` **1,813 PASS**, build/dist,
+lint archivos tocados0/0 y Chromium390/1440 (modal real, scroll, Escape/foco,
+sin overflow/errores) PASS LOCAL. Incremento aún no desplegado en ese preview.
+
+P4 permanece instalado/verificado, modoOFF/rev0/certificado0/autorizaciones0;
+producción antigua y main intactos. Pendientes externos: publicación del entorno,
+secreto Gmail; luego HTTPS/PWA/certificación técnica y entrega real de correo.
+No pedir PayPal todavía. **NO READY_FOR_PO_CREDENTIALS ni beta lista**.
+Detalle: `docs/PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
+
+## P4 alojado — 22-oct-2026
+
+`41871d47`5/5CI PASS; migración controlada230000 APLICADA con ensayo y13/13
+fuentes/ACL/RLS verificadas. Cinco Edge actualizadas,69/69 fuentes exactas y
+HTTP negativos PASS. ModoOFF, certificado0/autorizaciones0, Live=false/kill=true,
+procesamiento=false, intentos/períodos0. HTTPS público sigue antiguo/NO-GO;
+preview protegido y cierre operativo en preparación. No READY_FOR_PO_CREDENTIALS,
+no canary/producción/main autorizados. Postflight:
+`docs/PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
+
+## P4 — control de activación y parada (22-oct-2026, código preparado)
+
+PR67 continúa sobre `5972855e`: control Admin+GoTrue+MFA, canary del operador
+original, evidencia firmada/conciliada para abrir público, CAS/nonce/audit y
+parada sin interrumpir histórico. EntryPoints locales usan comprobaciones del
+backend; no cambian al guardar claves. SQL `20261021230000` todavía NO aplicado,
+Edge nueva NO desplegada, certificado AUSENTE y dinero OFF. Local1811/PG17/
+Chromium390/1440 PASS. CI/instalación/deploy/HTTPS y operaciones siguen pendientes;
+no READY_FOR_PO_CREDENTIALS. Evidencia en
+`docs/PAZO_F16_CONTROLLED_RELEASE_20261022.md`.
+
+## Actualización — readiness administrativo instalado
+
+PR67: código `3dcd8e07` publicado con 5/5 Actions SUCCESS. Migración readonly
+`20261021223000` APLICADA tras ensayo ROLLBACK y postflight de cuerpo/ACL;
+Live=false/kill=true/sandbox/generación=null/revision0, intentos/períodos0.
+No operación PayPal ni publicación. P4 control financiero y HTTPS/PWA siguen
+pendientes; no pedir claves PayPal todavía. Cada incremento se sube a GitHub
+con documentación por orden expresa del PO. Evidencia y límites:
+`docs/PAZO_SUPABASE_BETA_POSTFLIGHT_20261021.md`.
+
+## Supabase operativo — 21-oct-2026, 21:47 UTC
+
+PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`
+**APLICADAS** tras autorización explícita y ensayo alojado con ROLLBACK.
+Postflight ACL/RLS y 6/6 fuentes SQL PASS, nueva tabla vacía. Cuenta Live
+**v4 ACTIVE/JWT ON**, 8/8 fuentes exactas y HTTP negativos401 PASS.
+Live=false, kill=true, sandbox, generación activa null; 0 merchants/intents/
+períodos/inbox. Main y producción Vercel intactos.
+
+P4 avanza con readiness administrativo de lectura y recuperación de estado de
+credenciales; nuevo SQL `20261021223000` aún NO aplicado. Verify:prepreview1788
+PASS, PG17 y Chromium390/1440 PASS. Habilitación financiera controlada sigue
+pendiente; NO beta lista ni READY_FOR_PO_CREDENTIALS. No pedir más tokens ni
+claves PayPal por ahora. Evidencia actual en
+`docs/PAZO_SUPABASE_BETA_POSTFLIGHT_20261021.md`; estados inferiores de falta de
+acceso/SQL nuevo sin aplicar/cuenta sin desplegar son historia superada.
+
+## Continuidad Codex — 21-oct-2026, implementación local verificada
+
+Base de integración auditada por Git: F13 `669efafdb5678cae40c5137d7bddc9403c2ab8a3`;
+PR #66 `d1d34fa230c0928748141adf1f02adb186a99568` revisado: solo alinea el nombre
+de la migración de cancelación ya aplicada y su prueba, más el handoff. Se usó
+como base de `f16/beta-completion-20261021`, sin modificar `main` ni sobrescribir F13.
+La API estuvo bloqueada durante esa implementación; el postflight de 20:30 UTC
+ya revisó PR/CI por GraphQL y REST. Ver
+`docs/PAZO_CLOUD_ACCESS_AND_HTTPS_POSTFLIGHT_20261021.md`: PR66 tiene 12/12
+Actions SUCCESS, pero Vercel falla por cuota y los callbacks/PWA públicos dan404.
+
+Código adicional implementado: reanudación del CREATE original con lease y el
+mismo cuerpo/PayPal-Request-Id dentro de 48h; GET independiente antes del binding;
+reconciliación de cancelaciones inciertas por GET sin segundo POST; cierre de
+slots solo tras estado terminal verificado, sin eventos/cancelaciones pendientes
+ni cobertura sin vencer (incluidos holds); consentimiento nuevo para otro intento;
+descarga ES/EN de condiciones incluso tras cierre; acceso a gestión desde miembro
+verificado; aislamiento ante cambio de usuario; fondos/muro Live basados en períodos
+verificados; agregados administrativos sin saldo/ingreso neto inventado.
+
+Tres migraciones nuevas SOLO preparadas y probadas en PG17 desechable:
+`20261021210000` recovery finish, `20261021213000` cosméticos Live,
+`20261021220000` resumen financiero administrativo. NO instaladas en Supabase.
+La Edge de cuenta actualizada NO fue desplegada. Checkout/webhook siguen hard-OFF
+en el código. No hay cobros, nuevas credenciales ni publicación por estos cambios.
+
+Validación: suite local de gobernanza/F16, build y dist; PG17 con SQL real y
+rollback/reapply; navegador sintético 390/1440px, doble clic, cancelación explícita,
+fuente financiera no disponible y callbacks reales de la SPA sin tokens en URL.
+Estos resultados NO son PayPal Live, PWA instalada HTTPS ni CI remoto.
+
+**Bloqueo operativo actualizado a 20:30 UTC:** GitHub, Auth Supabase y portada
+HTTPS ya responden; los callbacks y archivos PWA de ese dominio devuelven404.
+Sin autenticación administrativa Supabase/Vercel. El login oficial Vercel sigue
+bloqueado por proxy a vercel.com; se añadieron vercel.com y supabase.com al
+borrador preservando lo anterior. Guardar no aplica: requiere revisión/guardado
+y publicación del entorno de desarrollo, no de PAZO. Postflight enlazado arriba.
+Falta auditar source/versión alojados antes de instalar/desplegar; también falta
+terminar P4 (readiness y habilitación controlada Admin/DB/Edge), publicación HTTPS
+bajo GO y canary real autorizado. NO pedir claves PayPal todavía.
+No hacer push a ramas conectadas sin verificar primero Preview OFF/cuota.
+Ver informe de esta entrega: `docs/PAZO_CODEX_BETA_CONTINUATION_20261021.md`.
+**Estado global: NO-GO; no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY.**
+
 > **F16 vigente 21-oct:** plan y webhook generación1 YA aprobados; no repetir. PR54 a F13: ocho migraciones aplicadas para firma, venta/refund con ACK atómico, lifecycle, scheduler privado y monitor de disputas. Worker Edgev2,27/27 fuentes verificadas; cron automático200/healthy a16:27UTC con protocolo v2 y0 pagos/eventos/casos. Procesamiento financieroOFF/LiveOFF/killON. pg_net conserva grants de plataforma: net fuera de Data API y capacidad de un uso/120s, sin claves PayPal/servicio en cola. PG24/governance423 yCI3506/gateway423 PASS. Beneficios/checkout/readiness/HTTPS y resto P2–P5 pendientes; no declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY. main intacto, claves solo al terminar ingeniería; cobros/publicación requieren GO.
 
 ## MANDATO EXPRESO DEL PRODUCT OWNER — BETA PAZO / PAYPAL LIVE (21 OCT 2026)

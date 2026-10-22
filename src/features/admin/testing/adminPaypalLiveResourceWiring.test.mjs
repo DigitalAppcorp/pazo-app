@@ -20,6 +20,6 @@ test('Live resource inspector UI is staged off, with no broken button in current
  assert.ok(page.includes("env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED"))
  assert.ok(page.includes("body:{environment:'live',action:'inspect_live_resources'}"))
  assert.ok(page.includes('data?.mayCharge!==false||data?.mayActivate!==false'))
- assert.ok(page.includes('disabled aria-disabled="true"'))
+ assert.ok(page.includes('<AdminLiveReleaseControl'))
  assert.ok(!page.includes('PAZO_F16_PAYPAL_CLIENT_SECRET'))
 })

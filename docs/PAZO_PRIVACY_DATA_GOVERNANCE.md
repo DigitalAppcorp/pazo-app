@@ -1,3 +1,13 @@
+> **SMTP instalado, 22-oct-2026:** Gmail elegido y cuenta confirmada por PO; Supabase entrega correos de Auth/recuperación vía Google SMTP cifrado, con secreto solo en configuración privada Auth. Texto público ES/EN actualizado para Google/Gmail, direcciones y contenido de esos correos; no analytics ni transferencia de datos financieros/mascotas. Un correo de recuperación solo al PO confirmado recibido, sin cambiar contraseña. No se inventa plazo de purga del proveedor. Ver `PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
+
+> **22-oct, moderación pública:** parche preparado del lector de beneficios aplica visibilidad de perfiles retirados antes de exponer badge/tema/hito o nombre/foto en muro. No nuevos datos, retención o consentimiento; no borra pagos/historial. SQL20261022021500 instalado con ensayo/CI/postflight, sin datos nuevos. Ver `PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
+
+> **Reconciliación legal F16, 22-oct-2026:** privacidad y términos ES/EN describen PayPal, referencias financieras privadas/retención sujeta a obligaciones, períodos pagados verificados y permiso separado revocable del muro. No cambian recolección, plazos, política comercial ni términos Live publicados. Fecha legal solo metadata de publicación autorizada, vacía en previews. Gmail elegido para SMTP Auth pero aún SIN configurar ni envío; no afirmar transferencia nueva al proveedor hasta postflight. Detalle `PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
+
+> **F16 P4, 22-oct-2026 — instalado, modo OFF:** controles privados de release conservan UID del administrador original, nonce UUID, acción, revisión y fecha, como evidencia de autorización e idempotencia. Siguen la custodia/retención del audit financiero existente; rollback no borra esa historia. El certificado técnico conserva commit/hash de evidencia/builds/origin, sin claves ni datos del pagador. Solo el servidor verifica MFA y consulta originales; ningún cliente puede escribir certificados, selector o auditoría. El estado administrativo devuelve modo y booleanos, sin identidades. No nuevo analytics ni perfilado.
+
+> **F16 preparación administrativa, 21-oct-2026:** RPC de solo lectura revalida admin y proyecta únicamente booleanos de esquema, custodia de claves, validación previa del proveedor, salud reciente del worker y códigos cerrados de pendientes. No lee secretos, identidades, plan/webhook IDs ni datos del pagador; no recoge eventos o datos nuevos ni activa pagos. El cliente descarta respuestas al cambiar la cuenta. Esta lectura no sustituye el gate P4 financiero.
+
 > **F16 scheduler, 21-oct-2026 — preparación local:** cron emitirá como máximo una llamada por minuto al worker privado del mismo proyecto, leyendo la capacidad técnica dentro del servidor. pg_net mantiene temporalmente el header interno en su cola privada no registrada hasta consumirlo; no lleva claves PayPal ni datos del pagador. Respuestas contienen solo códigos/contadores y su retención nativa predeterminada es6h; logs técnicos de nuestro job se limitan7d. No se purga historia financiera ni otros jobs. Extensiones nativas aún no instaladas/validadas.
 
 > **F16 control privado, 21-oct-2026 — solo preparación local:** una capacidad técnica aleatoria se generó dentro de PostgreSQL y quedó cifrada en Vault, con hash privado para autenticar el worker; nunca se devuelve a clientes ni registros operativos. Un singleton privado conserva lease de lote, última salud/diagnóstico y contadores agregados; inbox añade espera de reintento y código cerrado. Ningún payload o pagador se registra. La capacidad se conserva mientras opere el worker y se podrá revocar/rotar; el rollback solo elimina la capacidad propia si no fue usada. Control instalado apagado y endpoint privado v1 desplegado sin activar procesamiento. No hay scheduler activo ni datos financieros Live nuevos.
@@ -290,3 +300,24 @@ La recepción de un email o una solicitud en la app **no equivale a eliminación
 ## Entidad operadora — decisión PO (2026-10-10)
 
 El Product Owner identifica **Alvarado Solutions LLC** como la empresa registrada bajo la cual opera PAZO. Se permite atribuir públicamente al operador de PAZO este nombre en **borradores** de Privacidad y Términos en español e inglés. El PO confirmó **California** como estado de registro; no consta revisión independiente del registro público ni domicilio registral proporcionado. No inventar dirección, agente registrado ni otros datos de identificación. El canal público autorizado es `appdigital.corp@gmail.com`. **La entidad legal y el buzón son conceptos distintos**, no implican permisos extra para cuentas Auth ni una certificación del proceso de bajas. `LEGAL_RELEASE_READY` permanece falso hasta validar tratamientos, retención y procedimiento real de eliminación para la beta pública.
+
+
+## Preferencias y gestión Live — preparación Codex 21-oct-2026
+
+Tres migraciones locales, no aplicadas: recuperación de vínculos originales,
+preferencias cosméticas y agregados admin. La recuperación usa únicamente la
+misma intención/generación/consentimiento y sus columnas de lease ya existentes;
+no hace inventario de otros compradores, no guarda cuerpo PayPal, no registra
+tokens y no modifica períodos financieros. La constancia descargada contiene
+solo oferta original y fecha de aceptación, sin ID PayPal, owner o request key.
+
+`supporter_private.pazo_live_pet_themes` conserva únicamente mascota, propietario
+al elegir, enum de fondo y fecha de actualización. Se separa de Sandbox, se
+oculta al perder cobertura o cambiar propietario y se elimina al quitar la
+preferencia o borrar mascota/cuenta (FK CASCADE). No cambia la retención del
+ledger. Muro requiere el opt-in separado ya existente y permite revocarlo tras
+expirar o recibir un hold. No habilita telemetría nueva.
+
+El resumen financiero es una RPC autenticada que revalida `pazo_is_admin()` y
+solo devuelve conteos/importes agregados de evidencia PAZO, sin identidad de
+comprador o proveedor. No es saldo, ingresos netos ni estado de cuenta PayPal.

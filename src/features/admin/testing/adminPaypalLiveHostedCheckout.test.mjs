@@ -21,9 +21,9 @@ const env=Object.freeze({
 })
 const response=(status,body)=>new Response(JSON.stringify(body),{status,
  headers:{'content-type':'application/json'}})
-test('compiled Edge entrypoint remains OFF and imports only hosted composition',()=>{
+test('compiled Edge entrypoint selects only the SQL-guarded hosted composition',()=>{
  const edge=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
- assert.match(edge,/const LIVE_CHECKOUT_RELEASED=false/)
+ assert.match(edge,/const CONTROLLED_CHECKOUT_RUNTIME=true/)
  assert.match(edge,/createPazoLiveHostedCheckout/)
  assert.doesNotMatch(edge,/createPazoLiveVerifiedCheckout\(\)/)
 })
@@ -50,8 +50,12 @@ test('missing backend keys blocks before any provider activity; terms require no
 test('active host allows only the official HTTPS origin; no wildcard CORS',async()=>{
  const h=createPazoLiveHostedCheckout({released:true,
   getEnv:name=>env[name],fetchImpl:async(uri)=>{
+   if(uri.endsWith('/functions/v1/pazo-paypal-live-webhook'))return response(200,{source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))return response(200,true)
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_admit'))return response(200,true)
+
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
-    return response(200,{sourceEnvironment:'live',credentialSource:'edge_secrets',
+    return response(200,{releaseMode:'public',sourceEnvironment:'live',credentialSource:'edge_secrets',
       merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN',returnOrigin:origin})
    throw Error('unexpected')
   }})
@@ -67,13 +71,17 @@ test('active host allows only the official HTTPS origin; no wildcard CORS',async
 test('authenticated owner must have completed onboarding before any provider call',async()=>{
  let providerCalls=0
  const fetchImpl=async(uri,opts)=>{
+   if(uri.endsWith('/functions/v1/pazo-paypal-live-webhook'))return response(200,{source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))return response(200,true)
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_admit'))return response(200,true)
+
   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_worker_health_read'))
    return response(200,{source:'private_live_worker_health',
     enabled:true,processingAllowed:true,healthy:true})
   if(uri.endsWith('/auth/v1/user'))return response(200,{id:owner,aud:'authenticated'})
   if(uri.includes('/rest/v1/profiles?'))return response(200,[{id:owner,onboarding_completed:false}])
   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
-   return response(200,{sourceEnvironment:'live',credentialSource:'edge_secrets',
+   return response(200,{releaseMode:'public',sourceEnvironment:'live',credentialSource:'edge_secrets',
     merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN',returnOrigin:origin})
   providerCalls++
   throw Error('provider must not be called')
@@ -92,9 +100,13 @@ test('temporary Vercel beta origin and future custom domain are pinned from admi
   const h=createPazoLiveHostedCheckout({released:true,
    getEnv:name=>env[name],
    fetchImpl:async uri=>{
+   if(uri.endsWith('/functions/v1/pazo-paypal-live-webhook'))return response(200,{source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))return response(200,true)
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_admit'))return response(200,true)
+
     if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
      return response(200,{
-      sourceEnvironment:'live',credentialSource:'edge_secrets',
+      releaseMode:'public',sourceEnvironment:'live',credentialSource:'edge_secrets',
       merchantGeneration:7,planId:'P-ABCDEFGHIJKLMN',
       returnOrigin:activeOrigin
      })
@@ -117,9 +129,13 @@ test('server readiness requires actual Live route and a healthy private financia
  const h=createPazoLiveHostedCheckout({
   released:true,getEnv:name=>env[name],
   fetchImpl:async uri=>{
+   if(uri.endsWith('/functions/v1/pazo-paypal-live-webhook'))return response(200,{source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))return response(200,true)
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_admit'))return response(200,true)
+
    records.push(uri)
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
-    return response(200,{sourceEnvironment:'live',credentialSource:'vault',
+    return response(200,{releaseMode:'public',sourceEnvironment:'live',credentialSource:'vault',
      merchantGeneration:1,planId:'P-ABCDEFGHIJKLMN',returnOrigin:origin})
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_worker_health_read'))
     return response(200,{source:'private_live_worker_health',
@@ -146,9 +162,13 @@ test('no worker heartbeat means GET and POST fail closed before GoTrue and PayPa
  const h=createPazoLiveHostedCheckout({
   released:true,getEnv:name=>env[name],
   fetchImpl:async uri=>{
+   if(uri.endsWith('/functions/v1/pazo-paypal-live-webhook'))return response(200,{source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))return response(200,true)
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_admit'))return response(200,true)
+
    queries++
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
-    return response(200,{sourceEnvironment:'live',credentialSource:'vault',
+    return response(200,{releaseMode:'public',sourceEnvironment:'live',credentialSource:'vault',
      merchantGeneration:1,planId:'P-ABCDEFGHIJKLMN',returnOrigin:origin})
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_worker_health_read'))
     return response(200,{source:'private_live_worker_health',

@@ -31,7 +31,7 @@ test('Account management and provider cancellation remain OFF by default',async(
  assert.equal(x.state,'BLOCKED')
  assert.equal(f.hits.reads,0)
  const source=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
- assert.match(source,/const LIVE_CHECKOUT_RELEASED=false/)
+ assert.match(source,/const CONTROLLED_CHECKOUT_RUNTIME=true/)
 })
 test('Existing owner can read status with no paid period inferred',async()=>{
  const f=fixture()

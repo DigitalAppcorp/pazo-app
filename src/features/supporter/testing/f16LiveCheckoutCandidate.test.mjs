@@ -40,14 +40,14 @@ function mock(overrides={}){
  return {dependencies,metrics:()=>({created,claimed,bound,consented})}
 }
 const request=()=>new Request('https://pazo.example.com/api/checkout',{method:'POST'})
-test('Live checkout OFF by default and server entrypoint carries irreversible hard gate',async()=>{
+test('Live checkout OFF by default and server entrypoint selects only the controlled hosted runtime',async()=>{
  const c=mock()
  const result=await createPazoLiveVerifiedCheckout({...c.dependencies,releaseReady:false})
   .begin({request:request(),consent})
  assert.equal(result.phase,'BLOCKED');assert.equal(result.entitlement,false)
  assert.equal(c.metrics().consented,0)
  const src=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
- assert.match(src,/const LIVE_CHECKOUT_RELEASED=false/)
+ assert.match(src,/const CONTROLLED_CHECKOUT_RUNTIME=true/)
 })
 test('Only one durable consent claim can lead to one pending remote subscription',async()=>{
  const c=mock()

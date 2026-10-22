@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const source=readFileSync(new URL('../../../../supabase/migrations/20261021183000_pazo_f16_live_verified_benefit_projection.sql',import.meta.url),'utf8')
+const source=readFileSync(new URL('../../../../supabase/migrations/20261021174836_pazo_f16_live_verified_benefit_projection.sql',import.meta.url),'utf8')
 
 test('only confirmed Live paid periods activate real membership benefits',()=>{
  assert.match(source,/supporter_private\.pazo_live_project_paid_periods/)

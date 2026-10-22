@@ -6,14 +6,20 @@ const SUPABASE_ORIGIN='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const BEARER=/^Bearer ([A-Za-z0-9_-]{2,2048}\.[A-Za-z0-9_-]{2,2048}\.[A-Za-z0-9_-]{2,2048})$/
 export function createPazoLiveGoTrueOwnerResolver({
- supabaseUrl,anonKey,fetchImpl=fetch
+ supabaseUrl,anonKey,fetchImpl=fetch,allowReadinessGet=false
 }={}){
  if(supabaseUrl!==SUPABASE_ORIGIN||
     typeof anonKey!=='string'||anonKey.length<20||anonKey.length>8192||
     /\s/.test(anonKey)||typeof fetchImpl!=='function')
   throw Error('live_auth_backend_not_configured')
  return async request=>{
-  if(!(request instanceof Request)||request.method!=='POST')return null
+  if(!(request instanceof Request))return null
+  if(request.method!=='POST'){
+   if(allowReadinessGet!==true||request.method!=='GET')return null
+   const url=new URL(request.url)
+   if(!['/functions/v1/pazo-paypal-live-checkout','/pazo-paypal-live-checkout'].includes(url.pathname)||
+    url.searchParams.size!==1||!['es','en'].includes(url.searchParams.get('locale')))return null
+  }
   const auth=request.headers.get('authorization')||''
   if(!BEARER.test(auth))return null
   try{

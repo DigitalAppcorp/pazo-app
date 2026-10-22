@@ -1,3 +1,5 @@
+> **Continuación22-oct:** inspección individual41/41 completada; hallazgo de visibilidad corregido e INSTALADO20261022021500 tras CI5/5, ensayo y postflight2/2 + HTTP. HIBP solo Pro, sin upgrade autorizado. Evidencia vigente: `PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`. Las tareas anteriores pendientes de inspección quedan superadas; no es certificación financiera ni GO.
+
 # PAZO Beta — Auditoría de seguridad alojada | 2026-10-20 UTC
 
 Estado: **PRE-BETA REVIEW / SIN AUTORIZACIÓN DE PUBLICACIÓN**. Consulta de solo lectura contra Supabase `mrybvqdebbgcayuvgkkr` después del checkpoint F16. No se revocaron permisos, no se alteraron tablas, Auth ni credenciales.

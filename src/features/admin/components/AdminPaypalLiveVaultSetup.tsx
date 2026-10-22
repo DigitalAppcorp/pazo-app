@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 
-type Props={lang:'es'|'en';mfaRecentlyVerified:boolean;onStored:()=>void}
+type Props={lang:'es'|'en';mfaRecentlyVerified:boolean;credentialsStored?:boolean;onStored:()=>void}
 type State='idle'|'preparing'|'prepared'|'review'
 const good=/^[A-Za-z0-9_-]{20,512}$/
 const action='min-h-11 w-full rounded-[14px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] disabled:opacity-50'
@@ -18,12 +18,13 @@ async function reason(error:unknown,data:unknown):Promise<string>{
  const code=observed&&typeof observed==='object'&&'code' in observed?observed.code:null
  return typeof code==='string'&&allowed.has(code)?code:'credential_save_outcome_needs_review'
 }
-export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,onStored}:Props){
+export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,credentialsStored=false,onStored}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [id,setId]=useState('')
  const [secret,setSecret]=useState('')
  const [state,setState]=useState<State>('idle')
  const [error,setError]=useState('')
+ const prepared=credentialsStored||state==='prepared'
  const epoch=useRef(0)
  useEffect(()=>{
   ++epoch.current;setId('');setSecret('');setState('idle');setError('')
@@ -31,7 +32,7 @@ export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,onStored}:Pr
  },[mfaRecentlyVerified])
  const prepare=async()=>{
   if(!mfaRecentlyVerified||!good.test(id)||!good.test(secret)||
-   state==='preparing'||state==='prepared')return
+   state==='preparing'||state==='prepared'||state==='review'||credentialsStored)return
   const current=epoch.current
   const payload={action:'prepare_live_vault',
    confirmation:'PREPARAR CREDENCIALES LIVE',clientId:id,clientSecret:secret}
@@ -59,10 +60,10 @@ export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,onStored}:Pr
   <p className="mt-2 text-[12px] leading-relaxed">{t(
    'Las claves se comprueban contra el plan y webhook ya configurados y se guardan cifradas en Supabase Vault. No se crea ninguna suscripción ni cobro durante este paso.',
    'Keys are checked against the existing plan and webhook and stored encrypted in Supabase Vault. No subscription or charge is created by this action.')}</p>
-  {!mfaRecentlyVerified?<p role="status" className="mt-3 text-[12px]">{t(
+  {!mfaRecentlyVerified&&!prepared?<p role="status" className="mt-3 text-[12px]">{t(
    'Comprueba primero un código nuevo del autenticador en la sección superior.',
    'Verify a fresh authenticator code above before proceeding.')}</p>:null}
-  {mfaRecentlyVerified&&state!=='prepared'&&<form autoComplete="off" className="mt-3 space-y-3"
+  {mfaRecentlyVerified&&!prepared&&state!=='review'&&<form autoComplete="off" className="mt-3 space-y-3"
    onSubmit={event=>{event.preventDefault();void prepare()}}>
    <label className="block text-[12px] font-bold">Client ID · Live
     <input type="password" autoComplete="off" spellCheck={false} maxLength={512}
@@ -78,11 +79,13 @@ export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,onStored}:Pr
     {state==='preparing'?t('Comprobando y guardando…','Verifying and storing…'):
      t('Comprobar y guardar credenciales Live','Verify and save Live credentials')}</button>
   </form>}
-  {state==='prepared'&&<p role="status" className="mt-3 text-[12px] font-bold">{t(
-   'Claves comprobadas y guardadas en Vault. El checkout permanece apagado hasta completar la verificación financiera y el lanzamiento.',
-   'Credentials verified and stored in Vault. Checkout stays off until financial verification and release.')}</p>}
-  {state==='review'&&<p role="alert" className="mt-3 text-[12px] font-semibold text-[#9B4236]">{t(
+  {prepared&&<p role="status" className="mt-3 text-[12px] font-bold">{t(
+   'Claves comprobadas y guardadas en Vault. Guardarlas no crea suscripciones ni autoriza cobros.',
+   'Credentials verified and stored in Vault. Storing them does not create subscriptions or authorize payments.')}</p>}
+  {state==='review'&&!prepared&&<><p role="alert" className="mt-3 text-[12px] font-semibold text-[#9B4236]">{t(
    'Resultado pendiente de revisión. No reintentes sin consultar el estado en el panel. Código: ',
-   'Review required. Do not retry before checking the panel status. Code: ')}{error}</p>}
+   'Review required. Do not retry before checking the panel status. Code: ')}{error}</p>
+   <button type="button" className={'mt-3 '+action} onClick={onStored}>{t(
+    'Consultar estado del guardado','Check storage status')}</button></>}
  </section>
 }

@@ -111,10 +111,6 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
    if(active.current)setStage('review')
   }
  }
- if(!published(offer,lang))return <p role="alert" className="py-3 text-[13px] text-[#724927]">
-  {label('La oferta oficial no está disponible. No se inició ningún pago.',
-   'The published offer is unavailable. No payment was started.')}
- </p>
  return <section aria-label={label('Confirmar Amigo de PAZO','Confirm Friend of PAZO')}
   className="space-y-3 text-left" data-pazo-live-checkout="server-gated">
   {stage==='checking'&&<p role="status" className="text-center text-[12px] text-[#476862]">
@@ -128,7 +124,7 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
     className="min-h-11 rounded-full bg-[#EAF0DD] px-4 text-[13px] font-bold">
     {label('Comprobar disponibilidad','Check availability')}</button>
   </div>}
-  {(stage==='ready'||stage==='submitting')&&<>
+  {(stage==='ready'||stage==='submitting')&&published(offer,lang)&&<>
    <details className="rounded-[17px] bg-[#F0F4E6] p-3" open>
     <summary className="min-h-10 cursor-pointer py-2 text-[13px] font-bold">
      {label('Condiciones de la suscripción mensual','Monthly subscription terms')}</summary>

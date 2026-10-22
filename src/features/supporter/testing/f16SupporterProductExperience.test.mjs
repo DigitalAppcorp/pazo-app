@@ -182,7 +182,10 @@ test('F16 option B keeps signed PayPal Sandbox consent and one-shot checkout unc
  const live=readFileSync(new URL('../components/SupporterLiveCheckoutPanel.tsx',import.meta.url),'utf8')
  assert.ok(live.includes('Las suscripciones todavía no están disponibles'),'Live remains unavailable until the backend is released')
  const edge=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
- assert.ok(edge.includes('const LIVE_CHECKOUT_RELEASED=false'),'Live payments are still compile-time disabled')
+ assert.ok(edge.includes('const CONTROLLED_CHECKOUT_RUNTIME=true'),'Only controlled runtime selected')
+ const hosted=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/liveHostedCheckout.mjs',import.meta.url),'utf8')
+ assert.ok(hosted.includes("rpc('releaseRuntime'"),'Live requires deployment certification')
+ assert.ok(hosted.includes("rpc('releaseAdmit'"),'Live requires owner-scoped SQL admission')
 })
 
 test('F16 option B mobile screenshot corrections enforce compact hierarchy without modifying billing',()=>{
@@ -323,7 +326,7 @@ test('F16 member management does not flicker or close during background revalida
  assert.ok(hook.includes("supabase.auth.onAuthStateChange"))
  assert.ok(hook.includes("if(changed){setStatus(noStatus('checking'));refresh()}"))
  assert.ok(hook.includes(".catch(() => {if(!cancelled)setStatus(noStatus('unavailable'))})"))
- assert.ok(page.includes("if (membership.kind === 'verified')"))
+ assert.ok(page.includes("if (membership.kind === 'verified'&&!showLiveManagement)"))
  assert.ok(home.includes("setShowMembership(v=>!v)"))
  assert.ok(!hook.includes('mayGrantBenefits:true'))
 })

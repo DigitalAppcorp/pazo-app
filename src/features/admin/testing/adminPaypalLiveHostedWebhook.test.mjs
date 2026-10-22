@@ -17,9 +17,9 @@ const event={provider:'paypal',sourceEnvironment:'live',
   webhookId:'WH-SYNTHETIC1234',subscriptionId:'I-LIVE12345',subjectId:'SALE-SYNTHETIC',
   providerEventAt:'2026-10-21T06:00:00.000Z',subjectAt:'2026-10-21T06:00:00.000Z',
   activationAt:null,nextBillingAt:null}}
-test('Hosted webhook entrypoint remains compile-time OFF, with no environment reads',async()=>{
+test('Hosted webhook selects the controlled runtime; default helper stays inert without environment reads',async()=>{
  const src=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-webhook/index.ts',import.meta.url),'utf8')
- assert.match(src,/const LIVE_WEBHOOK_RELEASED=false/)
+ assert.match(src,/const CONTROLLED_WEBHOOK_RUNTIME=true/)
  assert.match(src,/createPazoLiveHostedWebhook/)
  let reads=0,requests=0
  const handler=createPazoLiveHostedWebhook({released:false,
