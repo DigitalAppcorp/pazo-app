@@ -1,5 +1,28 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## GO técnico recibido; publicación provisional en curso — 21-oct-2026 Guatemala
+
+El PO autorizó integrar/publicar con cobrosOFF y aclaró que aún no tiene dominio
+oficial. Se conserva https://pazo-app-t83r.vercel.app como dirección provisional
+estable; no comprar dominio ni cambiar orígenes/recursos PayPal aprobados.
+PR67 MERGED→F13 (`716ebcc0`,17/17 jobs PASS); PR44 MERGED→release
+(`a4a61c15`,árbol idéntico al candidato32a89b0c); PR71 abierto→main, no fusionado.
+Configuración Production válida, fecha legal real2026-10-21 y build local PASS;
+no nuevo deploy de producción todavía. No autorización financiera/canary.
+
+El runtime cambió a revisión3 con red restricted y solo api.supabase.com;
+GitHub403 impide leer CI final/merge/push y publicar/verificar Vercel. Borrador
+con dominios necesarios guardado, requires_publish=true: PO debe revisar y
+guardar/publicar ESTE entorno en Codex Cloud. Secretos existentes conservados;
+no pedir nuevos tokens. No eludir proxy/política ni confundir borrador con red
+aplicada. Tras recuperarse, continuar por PR71/CI/deploy/canonical/certificado.
+
+Backend permaneceOFF/rev0, Live=false/kill=true/procesamiento=false, heartbeat
+reciente; certificados/autorizaciones/períodos0. NO READY_FOR_PO_CREDENTIALS
+hasta canonical/certificado; no LIVE_PAYMENT_PASS. Informe y reconciliación:
+`docs/PAZO_PROVISIONAL_RELEASE_20261021_GT.md`. Las notas inferiores de GO
+pendiente y ramas intactas quedan superadas solo en el alcance aquí descrito.
+
 ## Preview HTTPS verificado — 21-oct-2026, Guatemala (22-oct UTC)
 
 Red del candidato RESUELTA, sin volver a pedir secretos/publicación de entorno.

@@ -1,6 +1,6 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
-## Estado de aceptación vigente — 22-oct-2026
+## Estado de aceptación vigente — 21-oct-2026 Guatemala
 
 | Gate | Estado real | Evidencia |
 | --- | --- | --- |
@@ -10,12 +10,14 @@
 | Preview Vercel final | PASS HTTPS | dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3, SHAa3f912eb; HTTP7/7 y Chromium390/1440 |
 | SMTP público | PASS | Gmail configurado; HTTP200 y entrega a cuenta propia confirmada PO; sin cambiar contraseña |
 | Auth origin/redirects | PASS configuración | 7 redirects exactos canonical/previews; anteriores conservados; SMTP verificado por separado |
-| HTTPS_E2E_PASS | PREVIEW PASS; canonical pendiente GO | SW real, offline503/online, callbacks limpios; no instalación física |
+| HTTPS_E2E_PASS | PREVIEW PASS; canonical autorizado pendiente red | SW real, offline503/online, callbacks limpios; no instalación física |
 | READY_FOR_PO_CREDENTIALS | NO | faltan gates técnicos/operativos anteriores y certificado |
 | LIVE_CANARY_PASS | NO ejecutado | sin claves/GO/venta real; no simular |
-| BETA_PUBLIC_RELEASE_GO | NO | main y producción conservados; requiere autorización PO |
+| Publicación técnica con pagosOFF | AUTORIZADA, en curso | PR67/44 merged; PR71→main abierto; build Production local PASS; red bloqueada |
+| BETA_PUBLIC_RELEASE_GO | NO financiero | canary real y apertura financiera todavía no autorizados |
 
-Último detalle operativo: `PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md`;
+Último detalle operativo: `PAZO_PROVISIONAL_RELEASE_20261021_GT.md`;
+preview comprobado: `PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md`;
 postflight P4: `PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
 Las notas inferiores son checkpoints históricos superados, no estado actual.
 
