@@ -1,3 +1,19 @@
+## POSTFLIGHT REAL — 22-oct-2026: DB/Edge/PRODUCTION DEPLOY PASS, HTTPS UX pendiente
+
+La matriz histórica de preparación situada debajo corresponde a un **estado anterior**. La autorización nueva del PO permitió instalar las 3 migraciones del PR #81 y publicar **exactamente en https://pazo-app.vercel.app/**, no en el proyecto t83r.
+
+- `ROLLBACK` hospedado comprobado: las 3 versiones quedaron ausentes y las 3 tablas principales no existían tras la reversión.
+- `COMMIT` hospedado correcto: versiones 20261022103706/07/08, 5 tablas FORCE RLS, retención `pazo_support_retention_daily` activa, mantenimiento OFF rev0 y ningún caso ni regalo concedido todavía.
+- `f16-paypal-supporter-v2-qa`: Edge27 ACTIVE, `verify_jwt=true`, helper F17 añadido sin alterar Vault ni otros Edge Live.
+- Proyecto Vercel `pazo-app` id `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, distinto de `pazo-app-t83r`; ambiente público de compilación migrado (Supabase correcto, publishable key, token público Mapbox, flags beneficios/legales), sin secreto financiero. Preview READY `dpl_54raQqoKCAvQtsZzFLjajgDFJAxm`; PRODUCCIÓN READY `dpl_7rPxM5BzSaz3YJrDDu6NMpY1bfWT` (SHA `a8624a0b1db1e24c0487210e38ec6b62db9b8b6d`).
+- Lectura autoritativa del alias confirmó `pazo-app.vercel.app` asignado al despliegue de producción nuevo, antes apuntaba a `dpl_97SkoC6xzVJcGmCFFKCU8z8gE5xb`.
+- PayPal canary rev1, `live_enabled=true`, `kill_switch=false`, períodos Live0, **sin modificación**. Mantenimiento no se activó; mantener operaciones financieras fuera de la prueba funcional.
+- CI para código `a8624a0b`: GitHub CI SUCCESS y F17 isolated backend security SUCCESS (runs 39771534509/39771534750), además de laboratorio local 1,818+16 y navegador40 documentados.
+
+**LIMITACIÓN:** la herramienta de acceso web protegido de Vercel rechazó la lectura por permisos de API (403 en endpoint de aliases de bypass); no prueba un HTTP403 del sitio. No se obtuvo smoke HTTP directo ni validación de Safari/Android, Mapbox real, cuentas autenticadas o PayPal callback a origen nuevo. Quedan como aceptación operativa pendiente; jamás presentar F17 como E2E público validado solo por READY o CI. PR #81 sigue DRAFT y `main` sin merge.
+
+---
+
 # F17 — código y validación local; publicación pendiente
 
 **22-oct-2026, Guatemala. PR [#81](https://github.com/DigitalAppcorp/pazo-app/pull/81), DRAFT.**
