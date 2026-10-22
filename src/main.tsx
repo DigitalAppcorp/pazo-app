@@ -6,6 +6,8 @@ import { getPublicSupabaseConfig } from './lib/publicConfig.ts'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { initializeObservability } from './services/observability.ts'
 import { registerPazoPwa } from './features/pwa/registerPwa.ts'
+// Capture the native install event before the authenticated application mounts.
+import './features/pwa/installPromptBridge.ts'
 
 const root = createRoot(document.getElementById('root')!)
 if (!getPublicSupabaseConfig(import.meta.env)) {
