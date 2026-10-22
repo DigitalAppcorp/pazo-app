@@ -6,6 +6,7 @@ import {AdminPaypalMerchantBootstrap} from './AdminPaypalMerchantBootstrap'
 import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
 import {AdminPaypalLiveVaultSetup} from './AdminPaypalLiveVaultSetup'
 import {AdminLiveReadiness} from './AdminLiveReadiness'
+import {AdminLiveReleaseControl} from './AdminLiveReleaseControl'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -25,8 +26,8 @@ type Audit={environment:Env;kind:'draft'|'credentials'|'validation';recorded_at:
 type Props={lang:'es'|'en'}
 // The inspected hosted Edge is still v3; do not present an inoperable control.
 const LIVE_RESOURCE_INSPECTION_RELEASED=false
-// Vault's legacy staging is NOT the F16 Edge secrets runtime for new Live checkout.
-// This flag becomes true only after the separate service/PO security gate.
+// Legacy Edge-secret provisioning stays locked. Current Live uses immutable
+// Vault generations and independently verified server release controls.
 const LIVE_EDGE_PROVISIONING_RELEASED=false
 // The secret-staging Edge remains locked until CI + role security review.
 const LIVE_VAULT_SETUP_RELEASED=true
@@ -40,6 +41,7 @@ export function AdminPayPalSettings({lang}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [env,setEnv]=useState<Env>('sandbox')
  const [recentAdminMfa,setRecentAdminMfa]=useState(false)
+ const [advancedLive,setAdvancedLive]=useState(false)
  // A session may have aal2 for hours; PO actions require a fresh TOTP event.
  useEffect(()=>{
   if(!recentAdminMfa)return
@@ -66,9 +68,6 @@ export function AdminPayPalSettings({lang}:Props){
  // Development origin is not a webhook destination or a public PayPal return URL.
  const localDevelopment=import.meta.env.DEV&&typeof window!=='undefined'&&
    ['localhost','127.0.0.1'].includes(window.location.hostname)
- const liveDomainReady=Boolean(liveConfig?.return_origin&&/^https:\/\//.test(liveConfig.return_origin))
- const legacyVaultLiveOAuthReady=liveConfig?.client_id_stored===true&&
-  liveConfig.client_secret_stored===true&&liveConfig.validation_status==='valid'
  // A PayPal OAuth success in Vault is not evidence that per-generation Edge
  // secrets have been provisioned, verified or pinned to the merchant.
  const liveOAuthReady=LIVE_EDGE_PROVISIONING_RELEASED&&liveConfig?.edge_generation_verified===true
@@ -261,10 +260,18 @@ export function AdminPayPalSettings({lang}:Props){
      <AdminPaypalMfaStepUp lang={lang} onVerified={()=>{setRecentAdminMfa(true);setNotice(t(
        'Código MFA comprobado. El servidor validará nuevamente la sesión para autorizar credenciales.',
        'MFA checked. The server will independently validate the session before allowing credentials.'))}}/>}
+    {env==='live'&&<details className={cardClass} onToggle={event=>setAdvancedLive(event.currentTarget.open)}>
+     <summary className="min-h-11 cursor-pointer rounded-[14px] px-2 py-3 text-[13px] font-black outline-none focus-visible:bg-[#EFF5DC]">
+      {t('Configuración inicial y diagnóstico','Initial setup and diagnostics')}</summary>
+     <p className="mt-2 text-[12px] text-[#627970]">{t('Plan, webhook y generación ya preparados no necesitan repetirse para guardar las claves.',
+      'An already prepared plan, webhook and generation do not need to be repeated to store keys.')}</p>
+     {advancedLive&&<div className="mt-3 space-y-3">
     {env==='live'&&LIVE_MERCHANT_BOOTSTRAP_RELEASED&&
      <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={recentAdminMfa}/>}
     {env==='live'&&<AdminPaypalLiveResourceCheck lang={lang}
      mfaRecentlyVerified={recentAdminMfa} onVerified={()=>load(false)}/>}
+     </div>}
+    </details>}
     {env==='live'&&LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup
      lang={lang} mfaRecentlyVerified={recentAdminMfa}
      credentialsStored={liveConfig?.client_id_stored===true&&liveConfig?.client_secret_stored===true}
@@ -275,8 +282,8 @@ export function AdminPayPalSettings({lang}:Props){
       <h4 className="text-[15px] font-black">{t(
        'Identidad comercial y cobros Live','Live merchant identity and payments')}</h4>
       <p className="mt-2 text-[12px] leading-relaxed">{t(
-       'La lectura de saldos de PayPal no es un requisito para cobrar suscripciones. No vuelvas a ingresar las claves para esa prueba. Los siguientes pasos pendientes son la vinculación administrativa segura, el registro de credenciales de pago y la comprobación del webhook firmado. Live permanece apagado.',
-       'PayPal balance read permission is not required to charge subscriptions. Do not re-enter credentials for that check. The remaining steps are secure merchant binding, payment credential storage and signed webhook verification. Live remains off.')}</p>
+       'La lectura de saldos de PayPal no es un requisito para cobrar suscripciones. No vuelvas a ingresar las claves para esa prueba. La preparación y la activación se consultan en los controles seguros de este panel. Guardar claves no autoriza cobros.',
+       'PayPal balance read permission is not required to charge subscriptions. Do not re-enter credentials for that check. Preparation and activation are reported by the secure controls in this panel. Saving keys does not authorize payments.')}</p>
      </section>}
     {env==='live'&&LIVE_RESOURCE_INSPECTION_RELEASED&&<section className={cardClass}>
       <h4 className="text-[17px] font-black">{t('Lectura de recursos PayPal Live','Read Live PayPal resources')}</h4>
@@ -383,42 +390,8 @@ export function AdminPayPalSettings({lang}:Props){
        </div>)}
      </div>
     </section>
-    <section className={cardClass}>
-     <h4 className="text-[17px] font-black">{t('Activación de producción','Production activation')}</h4>
-     <p className="mt-2 text-[12px] leading-relaxed text-[#627970]">
-      {t('El nuevo motor Live utilizará secretos privados de Edge por generación comercial. Las credenciales guardadas antes en Vault son solo preparación heredada: no habilitan ni verifican la conexión del nuevo checkout.',
-         'The new Live engine uses Edge private secrets per merchant generation. Previously stored Vault credentials are legacy staging only and do not enable or verify the new checkout.')}
-     </p>
-     {legacyVaultLiveOAuthReady&&<p className="mt-2 text-[12px] font-semibold text-[#687F73]">
-      {t('OAuth Live de Vault verificado; aprovisionamiento Edge todavía pendiente.',
-         'Legacy Vault Live OAuth verified; Edge provisioning still pending.')}
-     </p>}
-     <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {([
-        [t('Credenciales Live en Edge verificadas','Verified Live credentials in Edge'),liveOAuthReady],
-        [t('Plan Live configurado','Live plan staged'),livePlanStaged],
-        [t('Webhook Live configurado','Live webhook staged'),liveWebhookStaged],
-        [t('Dominio público de la beta','Public beta domain'),liveDomainReady]
-      ] as const).map(([name,ok])=><div key={name} className="flex min-h-11 items-center justify-between gap-3 rounded-[14px] bg-[#F3F7EE] px-4 py-3 text-[12px]">
-        <span className="font-semibold text-[#41665B]">{name}</span>
-        <span className={'font-black '+(ok?'text-[#226B4B]':'text-[#8A8072]')}>
-         {ok?t('Configurado','Configured'):t('Pendiente','Pending')}
-        </span>
-      </div>)}
-     </div>
-     <p className="mt-3 text-[12px] leading-relaxed text-[#677F75]">
-      {t('Estos indicadores solo muestran preparación de datos, no autorización para cobrar. También faltarán verificar la identidad comercial, firmas y entrega de webhook, retorno en navegador y PWA, renovaciones, cancelaciones, conciliación y rollback antes del cambio Live.', 'These indicators show configuration only, not payment authorization. Merchant identity, webhook signatures and delivery, browser/PWA returns, renewals, cancellations, reconciliation and rollback still require verification before Live.')}
-     </p>
-     <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="max-w-[690px] text-[13px] leading-relaxed text-[#667E71]">
-       {t('Live está desactivado. Guardar credenciales o cambiar el precio NO activa cobros reales. Antes se deben verificar el plan Live, webhook, dominio público, cancelación, renovación y conciliación contable.',
-         'Live is disabled. Storing credentials or editing prices DOES NOT enable real charges. The Live plan, webhook, public origin, cancellation, renewal and reconciliation must pass verification first.')}
-      </p>
-      <button type="button" disabled aria-disabled="true" className="min-h-11 shrink-0 rounded-[15px] bg-[#E7ECE4] px-4 text-[13px] font-black text-[#8FA096]">
-       {t('Activar Live · bloqueado','Activate Live · locked')}
-      </button>
-     </div>
-    </section>
+    {env==='live'&&<AdminLiveReleaseControl lang={lang} mfaRecentlyVerified={recentAdminMfa}
+     revision={liveConfig?.updated_at} onChanged={()=>void load(false)}/>}
    </>}
  </div>
 }

@@ -1,5 +1,11 @@
 # PAZO F16 P4 — Financial release candidate code, no release
 
+> **Checkpoint histórico superado en código el 22-oct:** el control P4 ahora
+> existe en PR67 y los entrypoints ordinarios usan guardas obligatorias del
+> backend. Aún no instalados/desplegados en ese checkpoint. Ver estado actual
+> en `PAZO_F16_CONTROLLED_RELEASE_20261022.md`; la autorización financiera sigue
+> siendo una acción explícita del PO, independiente del guardado de claves.
+
 **Release decision: NO-GO; candidate CODE-ONLY.** This increment prepares the two explicitly selectable Edge entrypoints without changing the default entrypoints or any financial switches.
 
 ## Current deployed files remain dormant

@@ -7,13 +7,13 @@ import {createPazoLiveHostedWebhook}
  from '../../../../supabase/functions/pazo-paypal-live-webhook/liveHostedWebhook.mjs'
 
 const read=path=>readFileSync(new URL('../../../../'+path,import.meta.url),'utf8')
-test('default financial entrypoints remain compiled OFF while staged candidates are separate',()=>{
+test('default financial entrypoints select the controlled runtime; alternative files never bypass its SQL guards',()=>{
  const checkout=read('supabase/functions/pazo-paypal-live-checkout/index.ts')
  const webhook=read('supabase/functions/pazo-paypal-live-webhook/index.ts')
  const candidateCheckout=read('supabase/functions/pazo-paypal-live-checkout/index.release-candidate.ts')
  const candidateWebhook=read('supabase/functions/pazo-paypal-live-webhook/index.release-candidate.ts')
- assert.match(checkout,/const LIVE_CHECKOUT_RELEASED=false/)
- assert.match(webhook,/const LIVE_WEBHOOK_RELEASED=false/)
+ assert.match(checkout,/const CONTROLLED_CHECKOUT_RUNTIME=true/)
+ assert.match(webhook,/const CONTROLLED_WEBHOOK_RUNTIME=true/)
  assert.match(candidateCheckout,/createPazoLiveHostedCheckout\(\{\s*released:true/)
  assert.match(candidateWebhook,/createPazoLiveHostedWebhook\(\{\s*released:true/)
  for(const text of [candidateCheckout,candidateWebhook]){
@@ -32,6 +32,7 @@ test('compiled-on checkout cannot start without a merchant route and never conta
   getEnv:name=>env[name],
   fetchImpl:async uri=>{
    calls++
+   if(uri.endsWith('/pazo_f16_live_service_release_runtime'))return new Response('true',{status:200})
    assert.match(uri,/pazo_f16_live_service_active_route$/)
    return new Response('null',{status:200,headers:{'content-type':'application/json'}})
   }
@@ -41,7 +42,7 @@ test('compiled-on checkout cannot start without a merchant route and never conta
  const response=await h(req)
  assert.equal(response.status,503)
  assert.equal((await response.json()).code,'live_route_inactive')
- assert.equal(calls,1,'no GoTrue or provider request if active route is OFF')
+ assert.equal(calls,2,'no GoTrue or provider request if active route is OFF')
 })
 test('compiled-on webhook cannot accept unsigned event without backend secrets',async()=>{
  let called=0

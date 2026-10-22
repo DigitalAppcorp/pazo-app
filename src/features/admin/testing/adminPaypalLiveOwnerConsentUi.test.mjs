@@ -38,7 +38,7 @@ test('readiness is server owned: no client-side flag may bypass worker/merchant 
  assert.match(hosted,/worker\.healthy!==true/)
  assert.match(hosted,/req\.method==='GET'/)
  const edge=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-checkout/index.ts',import.meta.url),'utf8')
- assert.match(edge,/const LIVE_CHECKOUT_RELEASED=false/)
+ assert.match(edge,/const CONTROLLED_CHECKOUT_RUNTIME=true/)
 })
 
 test('one attempt never repeats a PayPal CREATE after an uncertain outcome',()=>{

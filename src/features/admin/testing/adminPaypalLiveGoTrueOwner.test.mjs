@@ -32,6 +32,19 @@ test('invalid authorization never triggers network or accepts client IDs',async(
  }
  assert.equal(calls,0)
 })
+test('canary read-only identity permits only the explicit readiness GET, with default GET still closed',async()=>{
+ let calls=0
+ const config={supabaseUrl:origin,anonKey,fetchImpl:async()=>{calls++;return response(200,{id:userId,aud:'authenticated'})}}
+ const read=url=>new Request(origin+url,{headers:{authorization:'Bearer '+token}})
+ const route='/functions/v1/pazo-paypal-live-checkout?locale=es'
+ assert.equal(await createPazoLiveGoTrueOwnerResolver(config)(read(route)),null)
+ const resolve=createPazoLiveGoTrueOwnerResolver({...config,allowReadinessGet:true})
+ for(const url of ['/functions/v1/pazo-paypal-live-account?locale=es',
+  '/functions/v1/pazo-paypal-live-checkout?locale=es&owner=forged',
+  '/functions/v1/pazo-paypal-live-checkout?locale=bad'])assert.equal(await resolve(read(url)),null)
+ assert.equal(calls,0)
+ assert.equal(await resolve(read(route)),userId);assert.equal(calls,1)
+})
 test('rejected, anonymous or untrusted GoTrue profiles cannot start Live checkout',async()=>{
  for(const payload of [
   {id:userId,is_anonymous:true},{id:userId,aud:'anon'},

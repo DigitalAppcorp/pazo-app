@@ -1,5 +1,33 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## P4 — controles financieros implementados, pendientes de instalación (22-oct-2026)
+
+Continuación desde `5972855e`, incorporando PR68–70 y el triage de Advisors,
+sin repetir PR62–65. Nuevo control Admin/Edge: GoTrue+grant actual+TOTP reciente,
+confirmación explícita, canary solo del operador original, apertura pública
+solo tras recibo firmado/venta/período/cancelación verificados y stop de nuevas
+compras que conserva historia. CAS+nonce+audit atómicos; consulta tras resultado
+incierto y descarte de respuestas de otra cuenta. Intake desplegado se comprueba
+antes de checkout. Configuración inicial queda cerrada por defecto.
+
+`20261021230000` y rollback preparados, NO aplicados en este checkpoint. Los
+entrypoints locales seleccionan runtime controlado con comprobaciones SQL
+obligatorias, sustituyendo hard-OFF de código. Fuente alojada aún anterior y
+OFF; no confundir cambio en Git con despliegue o autorización de dinero. El
+certificado técnico NO se crea por instalar SQL ni por guardar claves.
+
+`verify:prepreview` **1,811 pruebas PASS**, build; PG17 real completo PASS,
+incluidos roles, canary/public sintéticos, hold, kill y rollback/reapply;
+Chromium390/1440 PASS de consentimiento, lectura incierta, móvil y teclado.
+Código nuevo lint0/0. CI del incremento pendiente. Auditoría alojada previa:
+3/3 bridges coinciden por hash, worker reciente/procesamiento=false,
+sandbox/Live=false/kill=true/gen=null/revision0, intentos/períodos0.
+
+Siguiente: CI exacto, ensayo e instalación técnica, deploy/verificación de
+fuentes con certificado AUSENTE, HTTPS/PWA y operaciones. No claves aún;
+NO READY_FOR_PO_CREDENTIALS, no canary real ni publicación autorizados.
+Detalle: `docs/PAZO_F16_CONTROLLED_RELEASE_20261022.md`.
+
 ## F16 — P4 código de entrypoints candidatos revisado, Live OFF (21-oct-2026)
 
 - **PR #70** squash `b51f092bde6ff036b124d603ec3aff67484b5eef` integrado solo a PR67. GitHub SHA de pruebas `a1fa31e86250590ec8a29f0ab35aa348d6804f27`: **CI general y Live Gateway PG17 SUCCESS**.

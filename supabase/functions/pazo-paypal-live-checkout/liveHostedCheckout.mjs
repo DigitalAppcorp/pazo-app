@@ -1,4 +1,4 @@
-// PAZO F16 — Hosted Live checkout composition. RELEASE LATCH remains OFF.
+// PAZO F16 — Controlled hosted checkout. Default closed; SQL admits each owner.
 // All identity, merchant selection, consent and admission come from the server.
 // No browser-supplied environment, plan, price, secret, or owner is trusted.
 import {createPazoLiveCheckoutHttpHandler} from './liveCheckoutHttpHandler.mjs'
@@ -26,7 +26,7 @@ export function createPazoLiveHostedCheckout({
  try{
   rpc=createPazoLiveServiceRpc({projectUrl:api,serviceRoleKey:service,fetchImpl})
   resolveAuthenticatedOwner=createPazoLiveGoTrueOwnerResolver({
-   supabaseUrl:api,anonKey:anon,fetchImpl
+   supabaseUrl:api,anonKey:anon,fetchImpl,allowReadinessGet:true
   })
   readGenerationCredentials=createPazoLiveVaultGenerationSecretReader({
    supabaseUrl:api,serviceRoleKey:service,fetchImpl
@@ -35,8 +35,9 @@ export function createPazoLiveHostedCheckout({
  const readActiveRoute=async()=>rpc('route',{})
  const getSecret=name=>getEnv(name)
  const verifyConsent=async({consent})=>verifyPazoLiveOfferConsent(consent)
- const admit=async({ownerId,action})=>{
+ const admit=async({ownerId,action,merchantGeneration})=>{
   if(action!=='live_checkout'||!UUID.test(ownerId||''))return false
+  if(await rpc('releaseAdmit',{p_owner:ownerId,p_generation:merchantGeneration})!==true)return false
   // Fail-closed profile lookup after GoTrue JWT verification.
   // Account is allowed only after explicit onboarding completion.
   let response
@@ -56,6 +57,10 @@ export function createPazoLiveHostedCheckout({
  }
  return async req=>{
   if(!(req instanceof Request))return forbidden(400,'invalid_request')
+  try{
+   if(await rpc('releaseRuntime',{p_component:'checkout',p_build:'pazo_live_checkout_controlled_v1'})!==true)
+    return forbidden(503,'live_release_unverified')
+  }catch{return forbidden(503,'live_release_unverified')}
   let pinned
   try{pinned=await readActiveRoute()}
   catch{return forbidden(503,'live_route_unavailable')}
@@ -82,7 +87,28 @@ export function createPazoLiveHostedCheckout({
      worker.enabled!==true||worker.processingAllowed!==true||
      worker.healthy!==true)
    return forbidden(503,'live_processing_unavailable')
+  // Do not create a subscription when the DEPLOYED intake is still OFF or
+  // unreachable. This read-only probe does not replace a genuine signature.
+  try{
+   const probe=await fetchImpl(PROJECT+'/functions/v1/pazo-paypal-live-webhook',{
+    method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8000),
+    headers:{apikey:anon,Accept:'application/json'}
+   })
+   if(!probe?.ok||probe.status!==200)throw Error('intake')
+   const status=await probe.json()
+   if(status?.source!=='pazo_live_webhook_readiness_v1'||status.ready!==true||status.mayGrantBenefits!==false)
+    throw Error('intake')
+  }catch{return forbidden(503,'live_ingestion_unavailable')}
   if(req.method==='GET'){
+   if(pinned.releaseMode==='canary'){
+    let ownerId,allowed=false
+    try{
+     ownerId=await resolveAuthenticatedOwner(req)
+     if(!UUID.test(ownerId||''))return forbidden(401,'authentication_required')
+     allowed=await admit({ownerId,action:'live_checkout',merchantGeneration:pinned.merchantGeneration})
+    }catch{return forbidden(503,'checkout_admission_unavailable')}
+    if(!allowed)return forbidden(403,'checkout_admission_denied')
+   }else if(pinned.releaseMode!=='public')return forbidden(503,'live_route_inactive')
    let route
    try{route=new URL(req.url)}catch{return forbidden(400,'invalid_request')}
    const locale=route.searchParams.get('locale')
@@ -98,7 +124,9 @@ export function createPazoLiveHostedCheckout({
   // Origin and merchant are pinned to the same DB revision per request.
   const serve=createPazoLiveCheckoutHttpHandler({
    released:true,resolveAuthenticatedOwner,readActiveRoute:async()=>pinned,
-   getSecret,readGenerationCredentials,rpc,admit,verifyConsent,publicOrigin:origin,fetchImpl
+   getSecret,readGenerationCredentials,rpc,
+   admit:args=>admit({...args,merchantGeneration:pinned.merchantGeneration}),
+   verifyConsent,publicOrigin:origin,fetchImpl
   })
   const response=await serve(req)
   const headers=new Headers(response.headers)

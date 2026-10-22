@@ -1,3 +1,14 @@
+## P4 — control de activación y parada (22-oct-2026, código preparado)
+
+PR67 continúa sobre `5972855e`: control Admin+GoTrue+MFA, canary del operador
+original, evidencia firmada/conciliada para abrir público, CAS/nonce/audit y
+parada sin interrumpir histórico. EntryPoints locales usan comprobaciones del
+backend; no cambian al guardar claves. SQL `20261021230000` todavía NO aplicado,
+Edge nueva NO desplegada, certificado AUSENTE y dinero OFF. Local1811/PG17/
+Chromium390/1440 PASS. CI/instalación/deploy/HTTPS y operaciones siguen pendientes;
+no READY_FOR_PO_CREDENTIALS. Evidencia en
+`docs/PAZO_F16_CONTROLLED_RELEASE_20261022.md`.
+
 ## Actualización — readiness administrativo instalado
 
 PR67: código `3dcd8e07` publicado con 5/5 Actions SUCCESS. Migración readonly
