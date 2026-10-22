@@ -460,3 +460,16 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* F17: mobile Chrome/Safari visual viewport changes while address bar expands.
+ * Use dvh for the fitted SPA shell, including the installed standalone PWA.
+   Unlike 100vh, dvh excludes currently visible browser chrome. */
+@media (max-width: 639px) {
+  [data-pazo-app-shell] {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
