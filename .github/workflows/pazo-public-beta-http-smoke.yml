@@ -1,9 +1,6 @@
 name: PAZO Public Beta HTTPS PWA Smoke
 
 on:
-  push:
-    branches:
-      - docs/beta-production-postflight-20261022
   workflow_dispatch:
 
 permissions:
