@@ -37,7 +37,18 @@ export function AdminGiftBenefits({lang}:{lang:'es'|'en'}){
    if(error||data!==true)throw Error('unverified')
    setMessage(l('Cambio registrado. Los beneficios de cortesía no cuentan como ingresos.',
      'Change recorded. Complimentary benefits do not count as revenue.'))
-   setTarget(null);await search()
+   // Refresh explicitly: search() is guarded by busy and must not silently
+   // skip the post-write readback while this mutation is in progress.
+   setTarget(null)
+   const refreshed=await supabase.rpc('pazo_admin_find_benefit_recipients',{p_query:term.trim()})
+   if(refreshed.error||!Array.isArray(refreshed.data)){
+    setState('error')
+    setMessage(l('Cambio registrado, pero no se pudo actualizar la lista. Pulsa Buscar para verificar.',
+      'Change recorded, but the list could not refresh. Search again to verify.'))
+   }else{
+    setResults(refreshed.data as Recipient[])
+    setState('ready')
+   }
   }catch{setMessage(l('Resultado sin confirmar. Consulta la cuenta antes de volver a guardar.',
    'Result not verified. Search the account before resubmitting.'))}
   finally{setBusy(false)}
