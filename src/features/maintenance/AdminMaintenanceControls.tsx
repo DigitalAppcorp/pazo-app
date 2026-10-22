@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react'
 import {supabase} from '../../services/supabaseClient'
-type Status={enabled:boolean;message_es:string;message_en:string;updated_at:string}
+type Status={revision:number;enabled:boolean;message_es:string;message_en:string;updated_at:string}
 export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
  const [status,setStatus]=useState<Status|null>(null)
  const [loading,setLoading]=useState(true)
@@ -9,14 +9,12 @@ export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
  const [en,setEn]=useState('PAZO is under maintenance. We will be back soon.')
  const [message,setMessage]=useState('')
  const l=(a:string,b:string)=>lang==='es'?a:b
- const reload=async()=>{
-  setLoading(true)
-  const {data,error}=await supabase.rpc('pazo_public_maintenance_status')
-  if(!error&&data&&typeof data==='object'&&typeof data.enabled==='boolean'){
+ const reload=()=>Promise.resolve(supabase.rpc('pazo_public_maintenance_status')).then(({data,error})=>{
+  if(!error&&data&&typeof data==='object'&&typeof data.enabled==='boolean'&&Number.isSafeInteger(data.revision)){
    setStatus(data as Status);setEs((data as Status).message_es);setEn((data as Status).message_en)
   }else setStatus(null)
   setLoading(false)
- }
+ }).catch(()=>{setStatus(null);setLoading(false)})
  useEffect(()=>{void reload()},[])
  const change=async(next:boolean)=>{
   if(working||!status)return
@@ -29,7 +27,8 @@ export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
   setWorking(true);setMessage('')
   try{
    const r=await supabase.rpc('pazo_admin_set_maintenance',{
-    p_enabled:next,p_message_es:es.trim(),p_message_en:en.trim()
+    p_enabled:next,p_message_es:es.trim(),p_message_en:en.trim(),
+    p_expected_revision:status.revision,p_request_id:crypto.randomUUID()
    })
    if(r.error||r.data!==true)throw Error('switch unverified')
    await reload()
@@ -42,6 +41,7 @@ export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
  }
  return <section aria-label={l('Mantenimiento de PAZO','PAZO maintenance')} className="space-y-4 rounded-[22px] bg-white p-5 shadow-sm">
   <h2 className="text-lg font-black">{l('Modo mantenimiento','Maintenance mode')}</h2>
+  <a href="/maintenance-admin.html" className="inline-flex min-h-11 items-center rounded-xl px-3 text-xs font-bold underline focus-visible:bg-[#E1E53F]/40">{l('Acceso administrativo de recuperación','Administrator recovery access')}</a>
   <p className="text-xs leading-relaxed text-[#5C7470]">{l(
    'Bloquea la interfaz de usuarios y la API de datos; el administrador conserva acceso. Se deben detener las nuevas compras PayPal antes de activarlo. Las renovaciones y servicios externos se gestionan por separado.',
    'Blocks the user interface and Data API; admin access remains. Stop new PayPal checkout before enabling. Renewals and external services need separate handling.')}</p>
@@ -58,7 +58,7 @@ export function AdminMaintenanceControls({lang}:{lang:'es'|'en'}){
     className="mt-2 min-h-20 w-full rounded-xl bg-[#F0F4E9] p-3 text-sm"/>
   </label>
   <div className="flex flex-wrap gap-2">
-   <button type="button" onClick={()=>void reload()} disabled={loading||working}
+   <button type="button" onClick={()=>{setLoading(true);void reload()}} disabled={loading||working}
     className="min-h-11 rounded-xl bg-[#EFF4E9] px-4 text-xs font-bold disabled:opacity-50">{l('Consultar estado','Refresh status')}</button>
    {status&&<button type="button" onClick={()=>void change(!status.enabled)}
     disabled={working||es.trim().length<12||en.trim().length<12}

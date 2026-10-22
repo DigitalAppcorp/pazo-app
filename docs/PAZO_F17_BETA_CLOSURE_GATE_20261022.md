@@ -1,53 +1,150 @@
-# PAZO — F17 cierre técnico / QA antes de publicación
-**Fecha:** 22-oct-2026. **Rama:** `f17/beta-final-mobile-support-admin-20261022`. **PR:** #81 DRAFT.
-**Autoridad:** PO autorizó completar código en rama; NO autorizó aplicar migraciones ni publicar/mergear a `main`.
+# F17 — código y validación local; publicación pendiente
 
-## Estado verificado
+**22-oct-2026, Guatemala. PR [#81](https://github.com/DigitalAppcorp/pazo-app/pull/81), DRAFT.**
+Continuación del HEAD `a7b1f2c830e6c16c354b0a4463ed1529c94b154c`, con base
+`main=a99f05d2dab3baf5a4bc26b8fb64d790e7c4be2d`. No se reconstruyeron los
+seis módulos ni los entregables F16/PR62–80 ya completados por ChatGPT.
 
-El PR #81 ya incorporaba UI para F17 (mapa Streets, PWA en configuración, soporte, regalos y mantenimiento) y tres SQL deliberadamente en `supabase/drafts/`. Se continuó **sobre el PR existente**.
+**Autorización heredada de F17:** completar programación en rama; la aplicación
+SQL y merge/publicación quedaron sujetos a GO. Esta continuación no ejecutó
+DDL alojado, despliegues, llamadas PayPal ni envíos de correo. No declarar F17
+COMPLETADA antes de backend, runtime, aceptación y merge a main.
 
-Correcciones de esta continuación:
-- **Mantenimiento:** el enlace de entrada ya no muestra la aplicación a una sesión ordinaria. Solo un login aislado de administrador y verificación `pazo_is_admin` autoriza montar App. Denegar expulsa la sesión introducida; no sustituye la protección backend.
-- **Regalos:** la lista de resultados realiza readback RPC explícito después de cada operación; antes `search()` retornaba temprano con `busy=true`.
-- **Instalación PWA:** `installPromptBridge` captura `beforeinstallprompt` desde bootstrap, incluso si el usuario aún no inició sesión. Aviso compacto solo en Inicio, arriba de la barra de navegación, con cierre recordado siete días localmente; control adicional en ajustes de Mi mascota, estado standalone/iOS y `appinstalled`. No se infiere instalación previa de otra pestaña.
-- **Viewport:** envoltura móvil externa e interna se dimensionan con `100dvh`; safe-area inferior ya la respeta la barra inferior.
-- **Lugares:** Mapbox mantiene Streets v12 y marcadores 3D; degradados superior e inferior reducidos para altura pequeña para no ocultar cartografía. No hay verificación Mapbox en dispositivo real ni mapa de producción nuevo desplegado.
-- **Soporte:** borrador endurecido con `pg_advisory_xact_lock` por usuario para asegurar máximo tres envíos por hora incluso ante solicitudes simultáneas. Las notas del administrador no son legibles por el remitente.
-- **Privacidad:** inventario y gobernanza F17 anotados como propuestas sin afirmar recopilación activa.
+## Resultado del código
 
-## Inspección real de Supabase (solo lectura)
+| Alcance | Estado verificable |
+| --- | --- |
+| Instalación PWA | Conservados listener temprano, aviso Inicio y ajustes, descarte local7 días y detección standalone/iOS. Prueba de evento de instalación de un solo uso; aceptar el prompt no se presenta como instalación física |
+| Mapa | Conservada corrección Streetsv12 y degradados móviles de ChatGPT. Corregida clasificación de401/403 (regex escapada de más), errores de teselas y logs: nunca URL/token/coordenadas crudos. Falta verificar cartografía real por red y teléfono |
+| Altura/navegación | Conservados viewport exterior/interior100dvh y safe areas. Formularios revisados390/1440; no se atribuye Chrome/Safari físico al emulador |
+| Soporte | RPC de envío idempotente, tres casos/hora serializados, dueño confirmado y sin INSERT directo. Respuesta del admin separada de nota privada, consulta propia y guardado en bandeja. Escape/foco y respuestas pendientes protegidas al cambiar cuenta |
+| Cortesías | Duración nula rechazada; permanente solo con0 explícito. Nonce/auditoría evita extender o resucitar una concesión antigua al reintentar. Historial privado, vencimiento/revocación/transferencia/moderación y temas/muro con consentimiento. Nivel1 normalizado al contrato gráfico base0, sin fabricar ciclos/ventas |
+| Mantenimiento | CAS/replay/auditoría, hook REST y políticas restrictivas sobre RLS existente, Storage protegido y `realtime.messages` cuando existe. CREATE/recuperación Live y nuevas admisiones Sandbox se bloquean; cancelaciones, firma, worker e historia permanecen disponibles |
+| Recuperación administrativa | Entrada independiente `/maintenance-admin.html`, compilada sin App/React. Login efímero, rol admin comprobado en servidor y restauración solo con confirmación/revisión vigente. Probada con entradas JS de App bloqueadas; sin guardar sesión de recuperación |
 
-`to_regclass` confirmó que **no existen** estas tablas en Supabase hospedado:
-- `public.pazo_support_tickets`
-- `supporter_private.pazo_admin_gift_access`
-- `admin_private.pazo_app_maintenance`
+El soporte conserva un identificador por envío incierto, consulta el resultado
+y reutiliza el mismo identificador si se reenvía. No crea otro ticket por perder
+la respuesta. Consultas/formularios administrativos descartan respuestas de una
+cuenta anterior; suscripciones Auth se limpian al desmontar.
 
-Las dependencias financieras previas (tablas de temas y controles de release/checkout/worker) sí existen. No se ejecutó DDL, instalación SQL, compra, despliegue Vercel ni escritura a datos de usuarios.
+La cortesía no es evidencia de pago: solo afecta beneficios cosméticos, nunca
+ledger, períodos, Merchant ni recaudación. La UI explica que no genera cobros ni
+renovaciones. No publica automáticamente una mascota en el muro.
 
-## Matriz de cierre
+## Privacidad y retención aprobada
 
-| Requisito | Código | Hosted | QA externo |
-| --- | --- | --- | --- |
-| Viewport móvil y barra de Chrome | Ajustado | N/A | Teléfonos Chrome/Safari pendiente |
-| Mapbox base y 3D | Streets v12, degradados adaptativos | Token existente en producción; no actualizado | Vista con cartografía real pendiente |
-| Banner PWA | Componente + listener temprano + test de contrato | N/A | Android/iPhone/PWA instalada pendiente |
-| Tickets soporte y bandeja Admin | UI y SQL borrador | **NO aplicado** | RLS, envíos reales, admin pendiente |
-| Beneficios sin pago | UI y SQL borrador | **NO aplicado** | Derechos/badge/tema y no-finanzas pendiente |
-| Mantenimiento | UI y SQL borrador | **NO aplicado** | Backend cross-surface pendiente |
+El PO eligió **90 días después de resolver el caso**. SQL prepara limpieza diaria
+con el pg_cron ya existente: elimina mensaje, respuesta y nota juntos. Guardar
+otra nota no reinicia ese plazo; reabrir elimina `resolved_at` y una nueva
+resolución inicia su propio plazo. Pendientes permanecen para atención; baja
+confirmada de Auth elimina las solicitudes por FK. Backups conservan su ciclo,
+sin prometer eliminación instantánea de sus copias.
 
-**No declarar F17 cerrado** mientras falte alguna columna de aceptación. No confundir pruebas CI sobre código con despliegue autenticado/real del teléfono.
+La auditoría de mantenimiento guarda actor/acción/revisión/nonce y huella de los
+mensajes; no duplica anuncios en texto libre. Cortesías e historial quedan
+ligados al destinatario y su baja. Sin telemetría nueva, emails automáticos,
+session replay, GPS ni datos de pago. Privacidad ES/EN e inventario actualizados
+para el incremento; no se cambió la oferta PayPal inmutable.
 
-## Gates restantes
+## SQL versionado y preparación de instalación
 
-1. Confirmar CI del SHA final del PR, TypeScript/build, E2E browser y contratos F17; corregir regresiones antes de pedir aprobación.
-2. Revisar seguridad SQL con ensayo PostgreSQL aislado, políticas/grants e integración con las tablas y funciones alojadas actuales. Exigir aprobación explícita del PO antes de aplicar los tres borradores; convertir entonces a migraciones versionadas según el flujo de Supabase.
-3. Resolver plazo de retención de tickets/notas y borrado antes de habilitar el soporte al público; reconciliar privacidad/Terms publicados.
-4. Seguridad mantenimiento: revisar PostgREST `db-pre-request` + Storage + Realtime + Edge + Auth + PayPal para garantizar que no queda uso ordinario fuera del gate; mantener cancelaciones, reembolsos, webhook y trabajo de servicio. No activar la opción ni calificarla de bloqueo global solo por mostrar pantalla.
-5. Reprobar Chrome con barra visible, Chrome PWA standalone, iOS Safari y mapa Streets/3D real en producción o preview aprobado. PO acepta visualmente antes de merge/publish.
-6. PR #81 permanece DRAFT. F16 Live/canary tiene su gate financiero independiente y no se activa en esta fase.
+Los tres borradores se consolidaron en fuentes únicas, **NO APLICADAS**:
 
-**Sin gastos nuevos, sin claves privilegiadas expuestas, sin merge/deploy.**
+1. `supabase/migrations/20261022103706_pazo_f17_private_support.sql`.
+2. `supabase/migrations/20261022103707_pazo_f17_gift_benefits.sql`.
+3. `supabase/migrations/20261022103708_pazo_f17_maintenance_guard.sql`.
 
-## Continuación: respuestas a soporte (22-oct-2026)
+Auditoría Management API readonly: cinco cuerpos que se reemplazan coinciden
+con fuentes ya versionadas. Guardas MD5 abortan ante cambios no revisados. El
+instalador tampoco reemplaza otro hook `db_pre_request`, incluidas las reglas
+por defecto de base de datos. Las cinco tablas nuevas llevan RLS ENABLE/FORCE.
 
-Se completó en código el ciclo de soporte **enviar → bandeja Admin → respuesta → lectura del titular**: `admin_reply` separado de `admin_note`; RPC `pazo_my_support_tickets()` limita por `auth.uid()` y no proyecta notas internas; bandeja con botón Guardar; pantalla del usuario muestra hasta 20 solicitudes y respuesta, con actualización. Se agregaron contratos de regresión para no filtrar la nota privada. **Todo continúa en PR DRAFT**: ni la tabla ni las RPC están instaladas; antes de su activación faltan ensayo de SQL real, RLS para usuario/admin, política de retención y autorización de migración.
+`scripts/f17-schema-batch.mjs` **solo genera SQL**, no usa credenciales ni ejecuta
+nada. Sin argumentos muestra archivos/digests. `--sql` prepara una transacción
+con `ROLLBACK`; `--sql --commit` prepara COMMIT para el operador autorizado.
+Incluye los tres cambios, historial de migraciones y postflight en la misma
+transacción. El ensayo aislado demostró que ROLLBACK retira también cron,
+configuración de rol e historial, y que COMMIT conserva el estado coherente.
+El lote contiene DDL y metadata de migración; no contiene credenciales ni datos de usuarios.
+
+Mantenimiento se instala **OFF/revisión0**. Activarlo después exige que las nuevas
+compras Live estén detenidas mediante su control existente; no se detienen por
+SQL de F17 ni se cancelan renovaciones automáticamente. Un trigger impide abrir
+compras mientras mantenimiento está activo. El administrador puede restaurar
+acceso por la entrada independiente; restaurar no cambia controles PayPal.
+
+**Límites explícitos:** Auth sigue disponible para recuperación y operaciones
+financieras históricas; objetos ya públicos/cacheados y URLs firmadas ya
+emitidas pueden seguir disponibles hasta su vencimiento. RLS protege los datos
+de PostgresChanges y canales privados aplicables; PAZO no usa canales públicos
+Realtime. No se afirma apagar universalmente el proveedor o revocar contenido
+público distribuido. Las políticas intersectan los permisos existentes, sin
+conceder acceso adicional ni sustituir ownership/moderación.
+
+## Edge que requiere actualización dirigida
+
+`f16-paypal-supporter-v2-qa` observado **v26 ACTIVE/JWT ON**. Descarga original
+antes del cambio:19/20 archivos idénticos a Git; el restante solo difiere en dos
+comentarios explicativos. La continuidad funcional del Sandbox aprobado se
+preserva, sin repetir compras de prueba.
+
+Su única extensión de runtime es un guard server-side para begin/retry/recovery
+que puede crear una suscripción. Usa la RPC service-only
+`pazo_f17_service_new_checkout_allowed`, falla cerrado y no sigue redirects.
+No intercepta cancel/list/status/verificación histórica. Desplegar solo este
+Edge después del SQL, conservando **verify_jwt=true**; no prune ni redeploy
+masivo. No modificar Vaultv2 ni los cinco Edge Live ya aprobados.
+
+## Pruebas ejecutadas
+
+Resumen versionado con huellas de fuentes y migraciones:
+[`evidence/PAZO_F17_LOCAL_VALIDATION_20261022.json`](evidence/PAZO_F17_LOCAL_VALIDATION_20261022.json).
+No contiene identidades reales, tokens ni respuestas de proveedores.
+
+| Verificación | Resultado |
+| --- | --- |
+| `npm run verify:prepreview` | **1,818 PASS**:11+103+5+4+498+1193+4; TypeScript/build/dist PASS |
+| Contratos F17 + errores Mapbox + guard Edge | **16/16 PASS** |
+| PG17 completo + F17 | PASS con roles anon/authenticated/service_role y SQL versionado, ROLLBACK/COMMIT e historial atómicos |
+| Concurrencia real SQL |12 envíos simultáneos:3 aceptados;8 reenvíos mismo ID:1 fila;8 toggles misma revisión:1 aceptado, después restaurado |
+| Chromium local390/1440 | **40 comprobaciones PASS**: roles, recuperación compilada, respuestas sin notas, envío incierto, nonce de cortesía, cambio de cuenta con respuesta pendiente, PWA y ES/EN |
+| Lint módulos nuevos/terminados |0 errores/0 warnings; deuda legacy global conservada |
+
+El navegador intercepta Auth/API con fixtures sintéticas: **0 Auth/PayPal alojados,
+0 cargos, no instalación física**. No confundir con E2E de una sesión admin
+real. CI reproducible preparado en `f17-beta-security.yml` (PG17/concurrencia y
+navegador local); CI del nuevo SHA todavía debe leerse en GitHub.
+
+Hallazgos reproducidos antes de corregir: el SQL anterior aceptaba una
+`admin_reply` insertada por el dueño y una duración NULL se convertía en regalo
+permanente. Las pruebas nuevas rechazan ambas rutas.
+
+## Estado alojado y gates que siguen abiertos
+
+Último postflight readonly: **tres tablas primarias F17 ausentes**, hook REST
+sin configurar; pg_cron e historial estándar disponibles. PayPal está ahora en
+**canary/revisión1**, Live=true/kill=false, credenciales marcadas válidas y
+0 intentos/períodos Live. Es avance externo posterior al handoff antiguo OFF;
+no fue activado, detenido ni modificado por esta continuación. No pedir guardar
+de nuevo claves ya registradas ni declarar una venta real.
+
+1. **Red:** runtime revisión3 solo permite api.supabase.com. Git HTTPS permite
+   push, pero API GitHub/Vercel/Mapbox no están habilitadas. Borrador guardado con
+   destinos y `*.vercel.app` para previews dinámicos, conservando bindings;
+   requiere que el PO revise/guarde/publique el entorno. No pedir otro token ni
+   usar rutas alternas para eludir el bloqueo.
+2. Leer CI del SHA exacto, aplicar el gate de autorización F17 y preparar prueba
+   alojada ROLLBACK antes del COMMIT del lote. Verificar después fuentes, ACL,
+   cinco tablas RLS, cron e historial; no activar mantenimiento ni cambiar canary.
+3. Desplegar Edge dirigido y candidato HTTPS aprobado; probar mapa real,
+   roles/soporte/cortesía/mantenimiento con cuentas autorizadas y PWA física.
+   Las pruebas locales ya hechas no se repiten sin cambio o hallazgo.
+4. Aceptación visual/funcional PO y GO de merge/publicación; luego verificar
+   main/canonical y refrescar evidencia técnica bajo sus controles originales.
+   La URL estable sigue provisional: `https://pazo-app-t83r.vercel.app`.
+5. Canary financiero y apertura pública siguen su autorización/evidencia real
+   independiente. No inferir `LIVE_CANARY_PASS` de canary activo ni del CI.
+
+**Scope Closure:** código y ensayo local PASS; DB_APPLIED_F17=NO,
+EDGE_DEPLOYED_F17=NO, HTTPS_F17/PWA física=NO, MAIN_MERGED_F17=NO.
+No sustituir estos gates por el despliegue anterior de F16.

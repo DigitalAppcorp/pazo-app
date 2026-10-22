@@ -1,3 +1,4 @@
+import {classifyBasemapFailure} from './mapFailure'
 import { useEffect, useRef, useState } from 'react'
 import type { EphemeralLocation, PetPlace } from '../../../types/pazo'
 import { loadMapboxGl } from './mapboxLoader'
@@ -331,25 +332,20 @@ export const MapboxMap = ({
           )
         })
 
-        map.on('error', (event: any) => {
-          const raw = event?.error
-          const message = typeof raw?.message === 'string' ? raw.message : ''
-          const resource = typeof raw?.url === 'string' ? raw.url : ''
-          // Do not treat a missing optional glTF as failed road tiles.
-          const baseMapFailure = !resource.includes('/models/places/') &&
-            (/\\b(401|403)\\b|unauthoriz|forbidden/i.test(message) ||
-             [401,403].includes(Number(raw?.status ?? raw?.statusCode))) &&
-            (/mapbox|tiles|styles|api\\.mapbox|resource/i.test(message+' '+resource))
-          if (baseMapFailure && !cancelled) {
-            setError(langRef.current === 'es'
-              ? 'Mapbox no autorizó las capas del mapa. Revisa que el token público permita este dominio.'
-              : 'Mapbox rejected basemap requests. Check the public token domain restrictions.')
-          }
-          // Preserve non-sensitive developer diagnostics; never print access tokens.
-          if (message) console.error('Mapbox rendering error:', message.replace(/access_token=[^&\\s]+/gi,'access_token=[redacted]'))
+        map.on('error', (event: {error?:unknown}) => {
+          const failure=classifyBasemapFailure(event?.error)
+          if(failure && !cancelled)setError(failure==='map_authorization'
+            ?(langRef.current==='es'
+              ?'Mapbox no autorizó las capas del mapa. Revisa que el token público permita este dominio.'
+              :'Mapbox rejected basemap requests. Check the public token domain restrictions.')
+            :(langRef.current==='es'
+              ?'No pudimos descargar el mapa. La lista de lugares sigue disponible.'
+              :'Map downloads are unavailable. The places list remains available.'))
+          // No provider URL/message, token, coordinates or raw event in logs.
+          if(failure)console.warn('PAZO basemap unavailable:',failure)
         })
-      } catch (mapError: any) {
-        console.error('Error loading Mapbox:', mapError)
+      } catch {
+        console.error('PAZO map initialization unavailable')
         if (!cancelled) {
           setError(
             lang === 'es'

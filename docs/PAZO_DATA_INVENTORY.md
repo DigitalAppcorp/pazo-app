@@ -1,3 +1,22 @@
+## F17 — matriz preparada y retención decidida, 22-oct-2026 (NO alojada)
+
+La elección PO es90 días tras resolución para tickets, respuestas y notas.
+Código/SQL versionados; no confundir con recopilación activa: tablas F17 aún
+no existen en el proyecto. Estado/ensayos en `PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+
+| Dato | Finalidad/acceso | Conservación y baja |
+| --- | --- | --- |
+| Ticket: UUID de operación, dueño, categoría, texto, estado, fechas, respuesta y nota interna | Atender soporte; RPC confirmada3/h; lectura propia excluye nota/IDs ajenos; filas completas solo admin | Limpieza diaria al cumplir90 días resuelto, sin prorrogar por editar; pendientes/reabiertos para atención; FK con baja Auth |
+| Cortesía: destinatario, nivel, expiración/revocación, actor/motivo e historial/nonce | Concesión sin venta; búsqueda e historial solo admin, proyección pública limitada a badge/tema/nivel visible | Mientras corresponda a la cuenta; acceso termina por expiración/revocación; historial y preferencias ligados a baja de destinatario; no ciclos/pagos ficticios |
+| Mantenimiento: estado/mensajes vigentes; auditoría de actor/acción/revisión/nonce y digest | Disponibilidad y trazabilidad privilegiada; status mínimo público y escrituras admin; auditoría privada | Configuración hasta reemplazo; metadata de auditoría conforme revisión operativa de bajas/seguridad; no duplica mensajes ni datos financieros |
+| Descarte de instalación PWA | Solo vencimiento local en dispositivo, sin identidad, envío ni analítica |7 días; no dato servidor |
+| Formularios/respuestas privadas en navegador | UI de cuenta vigente; cancelación y descarte al cambiar cuenta/desmontar | Memoria del componente, sin borradores persistidos por la aplicación; recuperación usa sesión Auth efímera |
+
+No emails automáticos, adjuntos, destinatarios terceros, analytics, replay,
+GPS o payload PayPal nuevos. Copias de respaldo siguen el runbook existente;
+ninguna promesa de borrado inmediato de proveedores/backups. Los apartados
+inferiores de F17 como propuesta sin plazo quedan actualizados por esta matriz.
+
 > **SMTP ACTIVO, 22-oct-2026:** Google/Gmail recibe direcciones y contenido de correos de autenticación/recuperación enviados por Supabase y gestiona soporte. Credencial de aplicación solo configuración privada Auth (sin frontend/Git/logs), transporte STARTTLS587. Una recuperación al propio PO recibida y confirmada; sin alta, cambio de contraseña ni envíos a terceros. Sin datos de mascotas/pagos/analytics en SMTP. Límite técnico10/h más límites de Google; no promesa de conservación o entrega ilimitada. Este postflight supera el checkpoint inferior de integración pendiente.
 
 > **22-oct-2026, integración de correo pendiente:** PO eligió Gmail para entrega de Auth; aún no existe SMTP propio configurado ni envíos nuevos. Configuración prevista Supabase→Google SMTP usa destinatario y contenido del correo de cuenta para autenticación/recuperación; nunca datos de mascotas/pago/analytics. Contraseña de aplicación solo configuración privada del servidor, fuera de frontend/Git/logs. Confirmar instalación/entrega antes de declararlo activo. Cambios legales de este incremento solo describen categorías PayPal ya inventariadas; sin datos nuevos.

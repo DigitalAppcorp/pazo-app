@@ -1,3 +1,4 @@
+import {maintenanceAllowsNewCheckout,requiresMaintenanceCheckoutAdmission} from '../_shared/maintenanceCheckoutGate.mjs'
 // PAZO F16: ISOLATED Sandbox V2-ONLY checkout and account management.
 // This Edge slug is NOT the legacy production or P06 endpoint. Requires
 // authenticated Auth owner; local Sandbox checkout auto-enrols on consent.
@@ -235,6 +236,9 @@ Deno.serve(async(request:Request)=>{
  try{qaOwner=await runtime.resolveAuthenticatedOwner(request)}catch{qaOwner=null}
  if(!qaOwner)
   return addCors(reply(401,'authentication_required'),runtime.origin)
+ if(requiresMaintenanceCheckoutAdmission(data.action)&&!await maintenanceAllowsNewCheckout({
+  projectUrl:BASE,serviceKey:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+ }))return addCors(reply(503,'application_maintenance'),runtime.origin)
  // A buyer may explicitly close the ORIGINAL pending approval; no retry
  // grant is issued and no fresh PayPal create/charge is attempted. The merchant
  // must GET-verify APPROVAL_PENDING before POST and CANCELLED afterwards.

@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -29,6 +30,7 @@ const version = numericBuild
 
 export default defineConfig({
   plugins: [react()],
+  build: {rollupOptions: {input: {app:resolve('index.html'),maintenance:resolve('maintenance-admin.html')}}},
   define: {
     __PAZO_BUILD_VERSION__: JSON.stringify(version),
   },

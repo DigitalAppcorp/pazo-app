@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1" /></head><body><div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {MaintenanceGate} from '/src/features/maintenance/MaintenanceGate.tsx';
+import {SupportRequestDialog} from '/src/features/support/components/SupportRequestDialog.tsx';
+import {AdminGiftBenefits} from '/src/features/support/components/AdminGiftBenefits.tsx';
+import {AdminSupportInbox} from '/src/features/support/components/AdminSupportInbox.tsx';
+import {supabase} from '/src/services/supabaseClient.ts';
+import {PazoInstallControl} from '/src/features/pwa/components/PazoInstallControl.tsx';
+import {readPazoInstallState} from '/src/features/pwa/installPromptBridge.ts';
+import '/src/index.css';
+const mode=new URLSearchParams(location.search).get('case');
+const root=createRoot(document.getElementById('root'));
+window.fixtureSignIn=()=>supabase.auth.signInWithPassword({email:'changed@synthetic.invalid',password:'SYNTHETIC_ONLY_NOT_REAL'});
+if(mode==='install'){
+ window.fixturePromptCalls=0;
+ const event=new Event('beforeinstallprompt',{cancelable:true});
+ event.prompt=async()=>{window.fixturePromptCalls++};event.userChoice=Promise.resolve({outcome:'accepted'});
+ window.dispatchEvent(event);
+ window.fixtureInstallState=readPazoInstallState;
+ root.render(React.createElement(PazoInstallControl,{lang:'es',placement:'banner'}));
+}else if(mode==='inbox')root.render(React.createElement(AdminSupportInbox,{lang:'es'}));
+else if(mode==='support'||mode==='support-delayed')root.render(React.createElement(SupportRequestDialog,{lang:'es',onClose:()=>{root.unmount();document.body.dataset.closed='true'}}));
+else if(mode==='gift')root.render(React.createElement(AdminGiftBenefits,{lang:'es'}));
+else root.render(React.createElement(MaintenanceGate,null,React.createElement('p',{'data-testid':'protected-app'},'Protected app fixture')));
+</script></body></html>

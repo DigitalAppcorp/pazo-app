@@ -1,3 +1,35 @@
+## F17 EN CURSO — continuación Codex sobre PR81, 22-oct-2026 Guatemala
+
+Se recuperó HEADa7b1f2c8 de la rama F17 y se conservó el trabajo de ChatGPT.
+Código/ensayo local completados: soporte RPC idempotente, notas privadas y
+respuesta del titular, retención90 días elegida por PO; cortesías con historial,
+nonce y expiración/revocación; mantenimiento REST/RLS/Storage, admisión Edge y
+recuperación independiente; sesiones privadas protegidas al cambiar cuenta.
+PWA, viewport100dvh y mapa Streets ya programados se conservaron; errores del
+mapa ahora se clasifican sin registrar URLs/tokens.
+
+Tres migraciones versionadas103706/103707/103708, NO APLICADAS. Cinco cuerpos
+alojados auditados contra Git; ensayo PG17 con ROLLBACK/COMMIT/historial y
+roles reales PASS. Concurrencia12→3/8→1/8→1; `verify:prepreview`1818 PASS,
+contratos16 PASS, Chromium local390/1440 **40 verificaciones PASS** (recuperación
+compilada con App bloqueada); no Auth/PayPal real ni instalación física.
+Informe vigente y Scope Closure: `docs/PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+
+Postflight alojado: F17 ausente. F16 **canary/rev1**, Live=true/kill=false,
+credenciales válidas y0 intentos/períodos; avance externo preservado sin tocar
+finanzas ni pedir guardar otra vez las claves. QA Edge26 JWT ON auditado:
+19/20 archivos exactos y1 solo comentarios; despliegue dirigido sigue pendiente.
+
+Bloqueo real: runtime3 permite solo api.supabase.com. Git HTTPS permite push;
+API GitHub/Vercel/Mapbox no. Red preparada en borrador (incluye previews
+*.vercel.app), requiere revisión/guardado/publicación del entorno por PO;
+no otro token. Después verificar CI exacto, gate F17 de SQL/publicación,
+backend/Edge/HTTPS, mapa/PWA física y aceptación antes de merge/main.
+No declarar F17 COMPLETADA ni LIVE_CANARY_PASS. Notas inferiores de F17 en
+borradores y finanzasOFF son checkpoints anteriores.
+
+---
+
 ## Estado beta técnico publicado — 22-oct-2026 UTC (último corte verificado)
 
 **Frontend Production READY:** `dpl_DFkGfivtBoK5CV3jvL4V2yJV2pSW` SHA `b5547243bfaeb6c17b8bd3929f05468273b9576b`; PR78 (labels Auth) y PR79 (Chromium E2E más estricto) integrados. GitHub Actions [run39733214540](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39733214540) **7/7 jobs PASS**, Chromium 390/1440 **29/29 PASS** incluyendo navegación pública de registro/login/recuperación, retorno/cancelación no financiera y worker PWA real; no usuario autenticado ni dispositivo físico. Backend: migración beneficios públicos Live-only aplicada y QA conservado; Vault Edge v2 ACTIVE. Certificado técnico v3 registrado en DB para **el SHA desplegado** con digest `03aeb1b37a465a52f0de6bf1963b46d258c5a9ef1848bb46775809bc30fabf9a`, BEGIN/ROLLBACK y COMMIT PASS, `artifact_ready=true`; versiones antiguas de evidencia preservadas.

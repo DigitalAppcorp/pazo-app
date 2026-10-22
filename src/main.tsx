@@ -29,6 +29,7 @@ if (!getPublicSupabaseConfig(import.meta.env)) {
       <p>{navigator.language.startsWith('en') ? 'PAZO could not load. Reload or contact support.'
         : 'PAZO no pudo cargar. Recarga o contacta con soporte.'}</p>
       <a href={PAZO_PRIVACY_SUPPORT_MAILTO}>{PAZO_PRIVACY_SUPPORT_EMAIL}</a>
+      <a href="/maintenance-admin.html">{navigator.language.startsWith('en')?'Administrator recovery':'Recuperación administrativa'}</a>
     </main>)
   })
 }

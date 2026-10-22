@@ -55,10 +55,10 @@ test('map remains server-map based with 3D places and explicit tile errors',()=>
 })
 
 test('support ticket messages are private, rate-limited and available in admin inbox',()=>{
- const sql=file('supabase/drafts/PAZO_F17_support_tickets_DRAFT.sql')
+ const sql=file('supabase/migrations/20261022103706_pazo_f17_private_support.sql')
  assert.match(sql,/create policy pazo_support_admin_read/)
  assert.doesNotMatch(sql,/pazo_support_own_read/)
- assert.match(sql,/grant select,insert on public\.pazo_support_tickets to authenticated/)
+ assert.match(sql,/grant select on public\.pazo_support_tickets to authenticated/)
  assert.match(sql,/pazo_support_intake_guard/)
  assert.match(sql,/interval '1 hour'/)
  assert.match(sql,/pg_advisory_xact_lock/)
@@ -69,7 +69,7 @@ test('support ticket messages are private, rate-limited and available in admin i
  assert.match(file('src/features/admin/components/AdminDashboard.tsx'),/AdminSupportInbox/)
  assert.match(sql,/create or replace function public\.pazo_my_support_tickets\(\)/i)
  assert.match(sql,/where owner_id=auth\.uid\(\)/)
- const ownerProjection=sql.slice(sql.indexOf('create or replace function public.pazo_my_support_tickets()'),sql.indexOf('-- Abuse control'))
+ const ownerProjection=sql.slice(sql.indexOf('create or replace function public.pazo_my_support_tickets()'),sql.indexOf('-- Daily deletion'))
  assert.doesNotMatch(ownerProjection,/'admin_note'/)
  assert.match(ownerProjection,/'admin_reply'/)
  const inbox=file('src/features/support/components/AdminSupportInbox.tsx')
@@ -83,7 +83,7 @@ test('support ticket messages are private, rate-limited and available in admin i
 })
 
 test('gifted access is not manufactured financial evidence',()=>{
- const sql=file('supabase/drafts/PAZO_F17_admin_gift_entitlements_DRAFT.sql')
+ const sql=file('supabase/migrations/20261022103707_pazo_f17_gift_benefits.sql')
  assert.match(sql,/supporter_private\.pazo_admin_gift_access/)
  assert.match(sql,/supporter_private\.pazo_admin_gift_audit/)
  assert.match(sql,/pazo_admin_set_gift_benefits/)
@@ -95,15 +95,55 @@ test('gifted access is not manufactured financial evidence',()=>{
  assert.match(file('src/features/admin/components/AdminDashboard.tsx'),/AdminGiftBenefits/)
 })
 
-test('maintenance draft refuses Live checkout and cannot accidentally be treated as activated',()=>{
- const s=file('supabase/drafts/PAZO_F17_maintenance_switch_DRAFT.sql')
+test('maintenance draft prepares guarded REST activation without claiming hosted deployment',()=>{
+ const s=file('supabase/migrations/20261022103708_pazo_f17_maintenance_guard.sql')
  assert.match(s,/pazo_app_pre_request_gate/)
  assert.match(s,/pazo_live_control_admits/)
  assert.match(s,/Stop new PayPal purchases/)
- assert.match(s,/-- alter role authenticator/)
+ assert.match(s,/alter role authenticator set pgrst.db_pre_request/);assert.match(s,/Existing pre-request hook requires explicit composition/)
  assert.match(file('src/features/maintenance/MaintenanceGate.tsx'),/pazo_public_maintenance_status/)
  assert.match(file('src/features/admin/components/AdminDashboard.tsx'),/AdminMaintenanceControls/)
- for(const p of ['support_tickets','admin_gift_entitlements','maintenance_switch']){
-  assert.ok(existsSync(new URL('../supabase/drafts/PAZO_F17_'+p+'_DRAFT.sql',import.meta.url)))
+ for(const path of ["supabase/migrations/20261022103706_pazo_f17_private_support.sql", "supabase/migrations/20261022103707_pazo_f17_gift_benefits.sql", "supabase/migrations/20261022103708_pazo_f17_maintenance_guard.sql"]){
+  assert.ok(existsSync(new URL('../'+path,import.meta.url)))
  }
+})
+
+
+test('support intake is idempotent, cannot forge admin replies, and prunes only resolved cases after 90 days',()=>{
+ const sql=file('supabase/migrations/20261022103706_pazo_f17_private_support.sql')
+ assert.match(sql,/new\.admin_reply is not null/)
+ assert.match(sql,/pazo_submit_support_ticket\(p_request_id uuid/)
+ assert.match(sql,/previous\.owner_id is distinct from actor/)
+ assert.match(sql,/interval '90 days'/)
+ assert.match(sql,/pazo_support_retention_daily/)
+ assert.doesNotMatch(sql,/grant [^;]*insert on public\.pazo_support_tickets to authenticated/i)
+ assert.match(file('src/features/support/components/SupportRequestDialog.tsx'),/p_request_id:requestId\.current/)
+})
+test('gift duration is explicit, replay is durable, and gift level 1 preserves the public base-badge contract',()=>{
+ const sql=file('supabase/migrations/20261022103707_pazo_f17_gift_benefits.sql')
+ assert.match(sql,/p_days is null or p_days not in/)
+ assert.match(sql,/p_request_id uuid/)
+ assert.match(sql,/previous\.actor_id is distinct from actor/)
+ assert.match(sql,/CASE WHEN v_months=1 THEN 0 ELSE v_months END/)
+ assert.match(sql,/public\.pazo_admin_gift_history/)
+ assert.match(file('src/features/support/components/AdminGiftBenefits.tsx'),/p_request_id:mutation\.current\.id/)
+})
+test('maintenance intersects existing Storage/Realtime RLS and uses CAS rather than blind toggles',()=>{
+ const sql=file('supabase/migrations/20261022103708_pazo_f17_maintenance_guard.sql')
+ assert.match(sql,/AS RESTRICTIVE FOR ALL TO anon,authenticated/)
+ assert.match(sql,/n\.nspname='storage'/)
+ assert.match(sql,/n\.nspname='realtime'/)
+ assert.match(sql,/revision_now<>p_expected_revision/)
+ assert.match(sql,/previous\.from_revision is distinct from p_expected_revision/)
+ assert.match(sql,/jwt_role='service_role'/)
+ assert.match(sql,/path=any\(array/)
+})
+test('independent administrator recovery has no App/React or persistent session dependency',()=>{
+ const recovery=file('src/features/maintenance/recovery.ts')
+ assert.match(file('vite.config.ts'),/maintenance:resolve\('maintenance-admin.html'\)/)
+ assert.match(recovery,/persistSession:false/)
+ assert.match(recovery,/role\.data!==true/)
+ assert.match(recovery,/p_enabled:false/)
+ assert.doesNotMatch(recovery,/p_enabled:true|from ['"][^'"]*(?:App|react)/)
+ assert.doesNotMatch(recovery,/console\.|localStorage\./)
 })

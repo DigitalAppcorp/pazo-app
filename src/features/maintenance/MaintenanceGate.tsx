@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { supabase } from '../../services/supabaseClient'
 
 type Status = { enabled: boolean; message_es: string; message_en: string; updated_at: string }
@@ -12,6 +12,8 @@ const valid = (value: unknown): value is Status => !!value && typeof value === '
  * The Data API additionally needs its independent server-side gate enabled.
  */
 export function MaintenanceGate({ children }: { children: ReactNode }) {
+  const epoch=useRef(0)
+  const owner=useRef<string|null>(null)
   const [status, setStatus] = useState<Status | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [checked, setChecked] = useState(false)
@@ -21,47 +23,44 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
   const [signingIn, setSigningIn] = useState(false)
   const [loginError, setLoginError] = useState('')
 
-  const refresh = useCallback(async () => {
-    const response = await supabase.rpc('pazo_public_maintenance_status')
-    // The RPC is not deployed until the PO approves F17's SQL. Do not
-    // disable an already-observed maintenance lock on intermittent errors.
-    if (response.error || !valid(response.data)) {
-      setChecked(true)
-      return
+  const mounted=useRef(false)
+  const refresh = useCallback(() => {
+    const requestEpoch=++epoch.current
+    const read=async()=>{
+      const response=await supabase.rpc('pazo_public_maintenance_status')
+      if(response.error||!valid(response.data))throw Error('maintenance_status_unverified')
+      if(!response.data.enabled)return {status:response.data,admin:false,owner:null}
+      const {data,error}=await supabase.auth.getUser()
+      if(error||!data.user)return {status:response.data,admin:false,owner:null}
+      const role=await supabase.rpc('pazo_is_admin')
+      return {status:response.data,admin:!role.error&&role.data===true,owner:data.user.id}
     }
-    setStatus(response.data)
-    if (!response.data.enabled) {
-      setIsAdmin(false)
-      setShowLogin(false)
-      setChecked(true)
-      return
-    }
-    try {
-      const { data, error } = await supabase.auth.getUser()
-      if (error || !data.user) {
-        setIsAdmin(false)
-        return
-      }
-      const role = await supabase.rpc('pazo_is_admin')
-      setIsAdmin(!role.error && role.data === true)
-    } catch {
-      setIsAdmin(false)
-    } finally {
-      setChecked(true)
-    }
+    return read().then(next=>{
+      if(!mounted.current||requestEpoch!==epoch.current)return
+      owner.current=next.owner
+      setStatus(next.status);setIsAdmin(next.admin);setChecked(true)
+      if(!next.status.enabled)setShowLogin(false)
+    }).catch(()=>{
+      if(!mounted.current||requestEpoch!==epoch.current)return
+      // Preserve an observed lock on failure. Missing SQL during staging does
+      // not hide the current app; backend guards still protect every operation.
+      setIsAdmin(false);setChecked(true)
+    })
   }, [])
 
   useEffect(() => {
-    let active = true
+    let active = true;mounted.current=true
     void refresh().catch(() => { if (active) setChecked(true) })
-    const subscription = supabase.auth.onAuthStateChange(() => {
+    const subscription = supabase.auth.onAuthStateChange((_event,session) => {
+      const next= session?.user?.id??null
+      if(next!==owner.current){epoch.current++;owner.current=next;setIsAdmin(false)}
       queueMicrotask(() => { if (active) void refresh().catch(() => {}) })
     })
     const onFocus = () => { if (active) void refresh().catch(() => {}) }
     const timer = window.setInterval(onFocus, 60000)
     window.addEventListener('focus', onFocus)
     return () => {
-      active = false
+      active = false;mounted.current=false
       subscription.data.subscription.unsubscribe()
       window.clearInterval(timer)
       window.removeEventListener('focus', onFocus)
@@ -82,6 +81,8 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
         await supabase.auth.signOut()
         throw new Error('not authorized')
       }
+      const current=await supabase.auth.getUser()
+      if(current.error||current.data.user?.id!==attempt.data.user.id)throw Error('account_changed')
       setIsAdmin(true)
       setShowLogin(false)
       setPassword('')
@@ -107,6 +108,7 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
     <p role="status" className="max-w-sm text-sm leading-relaxed text-[#5C7470]">
       {es ? status.message_es : status.message_en}
     </p>
+    <a href="/maintenance-admin.html" className="inline-flex min-h-11 items-center rounded-xl px-3 text-xs font-bold underline focus-visible:bg-[#E1E53F]/35">{es?'Acceso de recuperación':'Recovery access'}</a>
     {!showLogin ? <button type="button" onClick={() => setShowLogin(true)}
       className="mt-4 min-h-11 rounded-xl px-4 py-2 text-xs font-bold underline hover:bg-[#EFF4E8] focus-visible:bg-[#E1E53F]/35">
       {es ? 'Acceso para administradores' : 'Administrator access'}

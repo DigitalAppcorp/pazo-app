@@ -323,18 +323,33 @@ solo devuelve conteos/importes agregados de evidencia PAZO, sin identidad de
 comprador o proveedor. No es saldo, ingresos netos ni estado de cuenta PayPal.
 
 
-## Gate F17 — privacidad antes de instalación y lanzamiento
+## Gate F17 — retención decidida y controles preparados, no alojados
 
-El trabajo de soporte y cortesías del PR #81 está solo en código/drafts; la auditoría de esquema Supabase de 22-oct-2026 confirmó que **no existen las tres nuevas tablas**. No afirmar en textos legales públicos que esos formularios estén funcionando o que se reciban solicitudes antes de aprobar el despliegue SQL y QA de seguridad.
+PO eligió90 días después de resolver soporte. Migraciones versionadas preparan
+limpieza diaria de mensaje/respuesta/nota, sin reiniciar plazo por edición;
+reabrir retira fecha de resolución y baja confirmada elimina por FK. No afirmar
+instalación: postflight confirmó tablas nuevas ausentes. Privacidad ES/EN está
+reconciliada para este incremento y solo se publicará con su backend aprobado.
 
-Para la recepción de soporte se consideran sensibles los mensajes libres: lectura exclusiva del administrador, notas internas invisibles al autor, sin inserción de payload en consola/telemetría, límite de admisión por usuario y sin enviar mensajes a servicios de terceros. Fijar retención de tickets y notas, y su flujo de borrado, antes de la beta pública; un FK CASCADE no soluciona solicitudes de borrado pendientes ni un plazo de conservación.
+El envío usa RPC con identidad confirmada y nonce; ningún usuario puede insertar
+una nota/respuesta de administrador, leer casos ajenos o recuperar notas por la
+proyección propia. Límite3/h serializado. UI cancela respuestas antiguas y limpia
+campos privados ante cambio de cuenta. Sin emails/analytics/replay nuevos.
 
-Las concesiones administrativas son beneficios sin cobro. No deben mezclarse con venta verificada, ciclos PayPal ni métricas de recaudación. Acceso a búsquedas por email/nombre de mascota solo admin real, con auditoría de actos de grant/revoke.
+Las cortesías solo crean metadata de acceso/auditoría por destinatario; no venta,
+mes pagado, ledger o métrica financiera. El muro conserva opt-in separado,
+visibilidad por moderación y propietario actual. Preferencias e historial se
+sujetan a baja de destinatario; mantenimiento registra metadata privilegiada y
+huellas, sin copiar anuncios como texto libre en auditoría.
 
-El futuro modo mantenimiento requiere demostrar separación completa de superficie: SPA, REST PostgREST, Storage, Realtime, Edge Functions y flujos de cobro (no bloquear cancelaciones, reembolsos ni reconciliación). El SQL preparado **no activa** `pgrst.db_pre_request` y no debe usarse como prueba de bloqueo total sin el gate administrativo explícito. La pantalla por sí sola no es una defensa de datos.
+La migración de mantenimiento prepara hook REST y RLS restrictiva para datos,
+Storage protegido y canales privados aplicables; exige autorización para
+instalación y deja modoOFF. Auth, cancelación/conciliación y objetos públicos ya
+emitidos mantienen las excepciones descritas en el informe F17. No se afirma
+apagar Realtime globalmente ni revocar cachés/URLs firmadas ya entregadas.
+Recuperación administrativa compila aparte de App, valida rol en servidor y no
+persiste su sesión. No usar fuente/CI como prueba de una sesión real alojada.
 
-La sugerencia PWA guarda exclusivamente en almacenamiento local la fecha de expiración del descarte, sin tracking ni identificador de usuario, durante un máximo de siete días; no promete detectar una instalación previa abierta en otra pestaña.
-
-### F17 — Lectura de respuestas de soporte (propuesta NO alojada)
-
-Las respuestas al titular se separan físicamente de las notas internas del administrador. Nunca conceder `SELECT` directo a todas las solicitudes del usuario, porque esto revelaría `admin_note`; utilizar la RPC limitada por `auth.uid()`, que devuelve únicamente la respuesta `admin_reply` y campos mínimos. Verificar con roles de prueba que una cuenta no puede leer tickets ajenos ni notas internas; el código es borrador sin instalación y requiere política de retención aprobada.
+El banner PWA solo guarda localmente la fecha de descarte7 días, sin identidad ni
+tracking. Fuente de verdad actual: `PAZO_F17_BETA_CLOSURE_GATE_20261022.md` y
+matriz F17 al inicio de `PAZO_DATA_INVENTORY.md`.

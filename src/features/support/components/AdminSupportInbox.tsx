@@ -1,5 +1,6 @@
 import {useCallback,useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
+import {useAccountRequestScope} from '../../auth/useAccountRequestScope'
 
 type Ticket={id:string;owner_id:string;category:'problem'|'question'|'feature'|'other';message:string;status:'open'|'reviewing'|'resolved';admin_note:string|null;admin_reply:string|null;created_at:string}
 const names={problem:['Problema','Problem'],question:['Consulta','Question'],feature:['Nueva función','Feature idea'],other:['Otro','Other']} as const
@@ -13,29 +14,34 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
  const [notes,setNotes]=useState<Record<string,string>>({})
  const [replies,setReplies]=useState<Record<string,string>>({})
  const [error,setError]=useState('')
+ const scope=useAccountRequestScope(()=>{setItems([]);setNotes({});setReplies({});setBusyId(null);setState('error')})
  const l=(es:string,en:string)=>lang==='es'?es:en
- const refresh=useCallback(async()=>{
-  setState('loading');setError('')
-  const r=await supabase.from('pazo_support_tickets')
+ const refresh=useCallback(()=>{
+  const request=scope.capture()
+  return Promise.resolve(supabase.from('pazo_support_tickets')
    .select('id,owner_id,category,message,status,admin_note,admin_reply,created_at')
-   .order('created_at',{ascending:false}).limit(100)
-  if(r.error){setState('error');return}
-  setItems((r.data??[]) as Ticket[]);setState('ready')
- },[])
+   .order('created_at',{ascending:false}).limit(100).abortSignal(request.signal)).then(r=>{
+   if(!request.isCurrent())return
+   if(r.error){setItems([]);setState('error');return}
+   setItems((r.data??[]) as Ticket[]);setState('ready')
+  }).catch(()=>{if(request.isCurrent()){setItems([]);setState('error')}})
+ },[scope])
  useEffect(()=>{void refresh()},[refresh])
  const setTicket=async(row:Ticket,status:Ticket['status'])=>{
   if(busyId)return
   setBusyId(row.id);setError('')
+  const request=scope.capture()
   try{
    const {data,error:issue}=await supabase.rpc('pazo_admin_update_support_ticket',{
     p_id:row.id,p_status:status,p_admin_note:notes[row.id]??row.admin_note??null,
     p_admin_reply:replies[row.id]??row.admin_reply??null
-   })
+   }).abortSignal(request.signal)
+   if(!request.isCurrent())return
    if(issue||data!==true)throw Error('update')
    await refresh()
-  }catch{setError(l('No pudimos actualizar el caso; consulta el estado antes de reintentar.',
+  }catch{if(!request.isCurrent())return;setError(l('No pudimos actualizar el caso; consulta el estado antes de reintentar.',
    'Could not update case; check status before retrying.'))}
-  finally{setBusyId(null)}
+  finally{if(request.isCurrent())setBusyId(null)}
  }
  const shown=items.filter(t=>filter==='all'||filter===t.status)
  return <section aria-label={l('Bandeja de soporte','Support inbox')} className="space-y-4">
@@ -43,7 +49,7 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
    <div><h2 className="text-lg font-black">{l('Soporte de usuarios','User support')}</h2>
     <p className="text-xs text-[#5C7470]">{l('Mensajes privados, consultas y nuevas ideas. Últimos 100 casos.',
      'Private messages, questions and feature ideas. Latest 100 tickets.')}</p></div>
-   <button onClick={()=>void refresh()} disabled={state==='loading'} className="min-h-11 rounded-2xl bg-[#E1E53F] px-4 py-2 text-xs font-black disabled:opacity-50">{l('Actualizar','Refresh')}</button>
+   <button onClick={()=>{setState('loading');void refresh()}} disabled={state==='loading'} className="min-h-11 rounded-2xl bg-[#E1E53F] px-4 py-2 text-xs font-black disabled:opacity-50">{l('Actualizar','Refresh')}</button>
   </div>
   <label className="block max-w-xs text-xs font-bold">{l('Estado','Status')}
    <select value={filter} onChange={e=>setFilter(e.target.value)} className="mt-2 min-h-11 w-full rounded-xl bg-white px-3 py-2 text-xs">

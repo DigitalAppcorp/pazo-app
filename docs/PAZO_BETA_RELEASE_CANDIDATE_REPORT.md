@@ -1,3 +1,21 @@
+## Estado vigente F17 — 22-oct-2026, Guatemala
+
+PR [#81](https://github.com/DigitalAppcorp/pazo-app/pull/81) conserva los seis
+ajustes de ChatGPT y completa su seguridad, retención de soporte a 90 días,
+recuperación independiente y pruebas aisladas. Código local: 1,818 pruebas del
+gate general, 16 contratos adicionales, 40 comprobaciones Chromium y PostgreSQL
+17 con concurrencia PASS. Tres migraciones versionadas y Edge dirigido
+**todavía no instalados**; CI/HTTPS del incremento pendientes por red.
+
+El postflight de Supabase confirma claves Live ya válidas y canary/revisión 1
+activo, sin intentos ni períodos Live; no pedir de nuevo credenciales ni asumir
+una venta real. Este estado actualiza las notas históricas inferiores que
+indican finanzas OFF o ausencia de claves. No hubo cambios financieros en esta
+continuación. Detalle y cierre de alcance:
+[PAZO_F17_BETA_CLOSURE_GATE_20261022.md](PAZO_F17_BETA_CLOSURE_GATE_20261022.md).
+
+---
+
 ## F16 — certificado técnico instalado y gate previo a credenciales — 22-oct-2026 UTC
 
 **PASS real de la parte técnica comprobable sin PayPal Live**. GitHub `main` incluye PR71/72; Vercel Production `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM` READY, frontend SHA `f7cc359a15e874942f68fc15f55c43e851f7724d`, canonical `https://pazo-app-t83r.vercel.app`; HTTP público 7/7 PASS en Actions run39718690012/job119626859178. Cinco Edge Live listadas ACTIVE en versiones release1/webhook2/checkout3/cuenta5/worker4 y hashes exactos almacenados en `docs/evidence/PAZO_F16_TECHNICAL_CERTIFICATE_BASIS_20261022.md`; fuente de69/69 verificada por postflight anterior. Worker vivo (heartbeat dentro5min), oferta ES/EN, RPC recuperación, beneficios y finanzas PASS.

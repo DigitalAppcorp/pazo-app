@@ -1,8 +1,32 @@
-## F17 — estabilización de beta en PR #81 (22-oct-2026)
+## F17 EN CURSO — continuación Codex sobre PR81, 22-oct-2026 Guatemala
 
-**Carril activo adicional:** rama `f17/beta-final-mobile-support-admin-20261022`, PR #81 DRAFT. El PO autorizó terminar las seis extensiones sobre el trabajo existente, pero **NO aprobó aplicar SQL ni fusionar/publicar**. Mejoras ya comprometidas: gate de mantenimiento solo admin verificado; readback de regalos; evento de instalación capturado temprano y aviso compacto en Inicio; viewport exterior/interior dinámicos; reducción de degradados móviles de Lugares; cuota de soporte concurrente; documentación de privacidad/inventario. Ver matriz concreta en `docs/PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+Se recuperó HEADa7b1f2c8 de la rama F17 y se conservó el trabajo de ChatGPT.
+Código/ensayo local completados: soporte RPC idempotente, notas privadas y
+respuesta del titular, retención90 días elegida por PO; cortesías con historial,
+nonce y expiración/revocación; mantenimiento REST/RLS/Storage, admisión Edge y
+recuperación independiente; sesiones privadas protegidas al cambiar cuenta.
+PWA, viewport100dvh y mapa Streets ya programados se conservaron; errores del
+mapa ahora se clasifican sin registrar URLs/tokens.
 
-**Estado backend consultado directamente:** tablas de tickets, cortesías y mantenimiento AUSENTES en Supabase; SQL permanece en `supabase/drafts/`. No ejecutar sin GO de migración ni afirmar soporte/bloqueo global operativo. **Pendientes:** revisión RLS/retención, backend de bloqueo Storage/Realtime/Edge, CI último SHA, Mapbox real y validación UX Chrome/Safari/PWA. F16/PayPal sigue su gate independiente, sin activar Live ni crear cobros. No repetir labores F17 ya hechas; recuperar siempre último HEAD de PR #81.
+Tres migraciones versionadas103706/103707/103708, NO APLICADAS. Cinco cuerpos
+alojados auditados contra Git; ensayo PG17 con ROLLBACK/COMMIT/historial y
+roles reales PASS. Concurrencia12→3/8→1/8→1; `verify:prepreview`1818 PASS,
+contratos16 PASS, Chromium local390/1440 **40 verificaciones PASS** (recuperación
+compilada con App bloqueada); no Auth/PayPal real ni instalación física.
+Informe vigente y Scope Closure: `docs/PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+
+Postflight alojado: F17 ausente. F16 **canary/rev1**, Live=true/kill=false,
+credenciales válidas y0 intentos/períodos; avance externo preservado sin tocar
+finanzas ni pedir guardar otra vez las claves. QA Edge26 JWT ON auditado:
+19/20 archivos exactos y1 solo comentarios; despliegue dirigido sigue pendiente.
+
+Bloqueo real: runtime3 permite solo api.supabase.com. Git HTTPS permite push;
+API GitHub/Vercel/Mapbox no. Red preparada en borrador (incluye previews
+*.vercel.app), requiere revisión/guardado/publicación del entorno por PO;
+no otro token. Después verificar CI exacto, gate F17 de SQL/publicación,
+backend/Edge/HTTPS, mapa/PWA física y aceptación antes de merge/main.
+No declarar F17 COMPLETADA ni LIVE_CANARY_PASS. Notas inferiores de F17 en
+borradores y finanzasOFF son checkpoints anteriores.
 
 ---
 

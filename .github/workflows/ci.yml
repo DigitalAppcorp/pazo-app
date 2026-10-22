@@ -39,7 +39,7 @@ jobs:
         run: npm run test:governance
 
       - name: F17 mobile, support, gift and maintenance security contracts (draft only)
-        run: node --test scripts/f17-beta-extension-contract.test.mjs
+        run: node --experimental-strip-types --test scripts/f17-beta-extension-contract.test.mjs src/features/places/map/mapFailure.test.mjs supabase/functions/_shared/maintenanceCheckoutGate.test.mjs
 
       - name: F16 Vault PostgreSQL 2201B credential regex regression
         run: node --test scripts/f16-live-vault-regex-domain.test.mjs
