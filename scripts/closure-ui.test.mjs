@@ -1374,3 +1374,32 @@ test('Feed location comes from an explicit author choice, never a hardcoded city
   assert.ok(!createPost.includes('navigator.geolocation')&&!createPost.includes('getCurrentPosition'),
     'No implicit device GPS collection')
 })
+
+
+test('F17 mobile regression: dynamic viewport, discreet install, street basemap and centered dialogs', () => {
+  const read = path => fs.readFileSync(path,'utf8')
+  const app = read('src/App.tsx')
+  const welcome = read('src/components/views/OnboardingView.tsx')
+  const install = read('src/features/pwa/components/PazoInstallControl.tsx')
+  const map = read('src/features/places/map/MapboxMap.tsx')
+  const basemap = read('src/features/places/map/pazoBasemap.ts')
+  const stage = read('src/features/places/components/ImmersivePlacesStage.tsx')
+  assert.ok(app.includes('h-[100dvh]'))
+  assert.ok(app.includes('data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0'))
+  assert.ok(!app.includes('placement="banner"'),'Do not obscure the home feed with installation')
+  assert.ok(welcome.includes('placement="welcome"'),'Discoverable on the first screen')
+  assert.ok(install.includes("placement === 'welcome'"))
+  assert.ok(install.includes('if (state.installed || (!state.pending && !isIOS())) return null'),
+    'Standalone installations never receive the install suggestion')
+  assert.ok(map.includes('style: PAZO_STREETS_STYLE'),'Render actual streets behind category pins')
+  assert.ok(map.includes("'pazo-place-models'"),'3D models remain')
+  assert.ok(basemap.includes('https://tile.openstreetmap.org/{z}/{x}/{y}.png'))
+  assert.ok(stage.includes('www.openstreetmap.org/copyright'),'License attribution is visible')
+  for(const path of ['CareModal','PassportModal','CreateModal']){
+    const ui=read('src/components/modals/'+path+'.tsx')
+    assert.ok(ui.includes('grid-cols-[32px_minmax(0,1fr)_32px]'),path+' title must be geometrically centered')
+  }
+  assert.ok(!read('src/components/views/CommunitiesView.tsx').includes('Únete, comparte y participa con otras mascotas de PAZO.'))
+  assert.ok(!read('src/components/modals/MessagesModal.tsx').includes("PAZO · {lang === 'es'"))
+  assert.ok(!read('src/components/modals/NotificationsModal.tsx').includes("PAZO · {lang === 'es'"))
+})
