@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 
-type Props={lang:'es'|'en';mfaRecentlyVerified:boolean;credentialsStored?:boolean;onStored:()=>void}
+type Props={lang:'es'|'en';mfaRecentlyVerified:boolean;credentialsStored?:boolean;credentialsChecked:boolean;onStored:()=>void}
 type State='idle'|'preparing'|'prepared'|'review'
 const good=/^[A-Za-z0-9_-]{20,512}$/
 const action='min-h-11 w-full rounded-[14px] bg-[#E1E53F] px-4 py-3 text-[13px] font-black text-[#204E4A] disabled:opacity-50'
@@ -18,7 +18,7 @@ async function reason(error:unknown,data:unknown):Promise<string>{
  const code=observed&&typeof observed==='object'&&'code' in observed?observed.code:null
  return typeof code==='string'&&allowed.has(code)?code:'credential_save_outcome_needs_review'
 }
-export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,credentialsStored=false,onStored}:Props){
+export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,credentialsStored=false,credentialsChecked,onStored}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [id,setId]=useState('')
  const [secret,setSecret]=useState('')
@@ -31,7 +31,7 @@ export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,credentialsS
   return ()=>{++epoch.current}
  },[mfaRecentlyVerified])
  const prepare=async()=>{
-  if(!mfaRecentlyVerified||!good.test(id)||!good.test(secret)||
+  if(!credentialsChecked||!mfaRecentlyVerified||!good.test(id)||!good.test(secret)||
    state==='preparing'||state==='prepared'||state==='review'||credentialsStored)return
   const current=epoch.current
   const payload={action:'prepare_live_vault',
@@ -60,10 +60,13 @@ export function AdminPaypalLiveVaultSetup({lang,mfaRecentlyVerified,credentialsS
   <p className="mt-2 text-[12px] leading-relaxed">{t(
    'Las claves se comprueban contra el plan y webhook ya configurados y se guardan cifradas en Supabase Vault. No se crea ninguna suscripción ni cobro durante este paso.',
    'Keys are checked against the existing plan and webhook and stored encrypted in Supabase Vault. No subscription or charge is created by this action.')}</p>
+  {!credentialsChecked&&!prepared?<p role="status" className="mt-3 text-[12px]">{t(
+   'Consultando estado privado de credenciales. No vuelvas a introducirlas hasta tener una lectura verificada.',
+   'Checking private credential status. Do not re-enter credentials until verification succeeds.')}</p>:null}
   {!mfaRecentlyVerified&&!prepared?<p role="status" className="mt-3 text-[12px]">{t(
    'Comprueba primero un código nuevo del autenticador en la sección superior.',
    'Verify a fresh authenticator code above before proceeding.')}</p>:null}
-  {mfaRecentlyVerified&&!prepared&&state!=='review'&&<form autoComplete="off" className="mt-3 space-y-3"
+  {mfaRecentlyVerified&&credentialsChecked&&!prepared&&state!=='review'&&<form autoComplete="off" className="mt-3 space-y-3"
    onSubmit={event=>{event.preventDefault();void prepare()}}>
    <label className="block text-[12px] font-bold">Client ID · Live
     <input type="password" autoComplete="off" spellCheck={false} maxLength={512}
