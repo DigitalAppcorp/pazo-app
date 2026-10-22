@@ -4,7 +4,8 @@
 import {fileURLToPath} from 'node:url'
 import {resolve} from 'node:path'
 
-export const PAZO_BETA_PUBLIC_ORIGIN='https://pazo-app-t83r.vercel.app'
+// PO-approved canonical production site; do not re-certify the retired preview host.
+export const PAZO_BETA_PUBLIC_ORIGIN='https://pazo-app.vercel.app'
 const FAKE='PAZO_NONPAYMENT_CALLBACK_PROBE'
 const ROUTES=Object.freeze([
   {id:'home',path:'/',type:'html'},
