@@ -141,11 +141,6 @@ export const CommunitiesView = ({
                 ? 'Encuentra tu comunidad.'
                 : 'Find your community.'}
             </h2>
-            <p className="mt-1 text-xs text-[#5C7470]">
-              {lang === 'es'
-                ? 'Únete, comparte y participa con otras mascotas de PAZO.'
-                : 'Join, share and participate with other PAZO pets.'}
-            </p>
           </div>
 
           <button
