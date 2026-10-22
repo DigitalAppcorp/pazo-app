@@ -1,3 +1,11 @@
+## Estado beta técnico publicado — 22-oct-2026 UTC (último corte verificado)
+
+**Frontend Production READY:** `dpl_DFkGfivtBoK5CV3jvL4V2yJV2pSW` SHA `b5547243bfaeb6c17b8bd3929f05468273b9576b`; PR78 (labels Auth) y PR79 (Chromium E2E más estricto) integrados. GitHub Actions [run39733214540](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39733214540) **7/7 jobs PASS**, Chromium 390/1440 **29/29 PASS** incluyendo navegación pública de registro/login/recuperación, retorno/cancelación no financiera y worker PWA real; no usuario autenticado ni dispositivo físico. Backend: migración beneficios públicos Live-only aplicada y QA conservado; Vault Edge v2 ACTIVE. Certificado técnico v3 registrado en DB para **el SHA desplegado** con digest `03aeb1b37a465a52f0de6bf1963b46d258c5a9ef1848bb46775809bc30fabf9a`, BEGIN/ROLLBACK y COMMIT PASS, `artifact_ready=true`; versiones antiguas de evidencia preservadas.
+
+**El PO aún debe completar personalmente:** validar UI Admin autenticada y aspecto visual responsive, instalar PWA en teléfono real, guardar privadamente claves PayPal Live con TOTP fresco, autorizar canary real US$2.99 y validar venta/cancelación/beneficios. Live sigue OFF, kill switch ON y cero pagos. No declarar beta financiera pública lanzada sin lo anterior. Informe detallado en `docs/PAZO_BETA_RELEASE_FINAL_ACCEPTANCE_20261022.md`. Este checkpoint prevalece sobre reportes históricos inferiores que citan frontend `5283bbc9` o versiones anteriores.
+
+---
+
 ## Continuación de beta — corrección de roles, teclado y reconciliación de alcance (22-oct-2026 UTC)
 
 **Orden textual del PO del 21-oct inalterada; beta global aún NO cerrada.** El código de PR74 (DRAFT, sin merge a main ni despliegue) corrige un defecto real: AdminDashboard exigía indirectamente el rol de moderador aunque `pazo_is_admin()` fuera verdadero. Ahora la consola admite admin-only y las colas de moderación solo se muestran a moderadores. Diálogo fullscreen: foco inicial, teclado Tab/Escape, retorno del foco, sin alterar el diseño F13. CI PG17-P12 cambia puerto fijo 55442 por puerto dinámico tras observar colisión de Docker. Evidencia específica y matriz DoD en `docs/PAZO_BETA_SCOPE_CLOSURE_20261022.md`. CI anterior al ajuste del puerto `39723890289`: 4/4 SUCCESS; CI de último HEAD sigue sujeto a comprobación.
