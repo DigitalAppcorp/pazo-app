@@ -9,6 +9,7 @@ import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { GratitudeWallPreview } from '../../features/supporter/components/GratitudeWallPreview'
 import { WelcomeAnimatedCompanion } from '../../features/onboarding/components/WelcomeAnimatedCompanion'
+import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
 import type { LegalKind } from '../../features/legal/legalCopy'
 
 interface OnboardingViewProps {
@@ -164,15 +165,15 @@ export const OnboardingView = ({
   }
 
   return (
-    <div className="flex flex-col h-full justify-between p-6 sm:p-7 bg-[#FAF8F5] relative overflow-hidden">
+    <div className={`flex h-full min-h-0 flex-col justify-between bg-[#FAF8F5] relative overflow-hidden ${step === 'A01' ? 'px-4 pb-2 pt-2 sm:px-5 sm:pb-3 sm:pt-3' : 'p-6 sm:p-7'}`}>
       {/* Fondo orgánico sutil */}
       <div className="absolute -top-24 -right-24 w-72 h-72 bg-[#E1E53F]/35 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute top-1/2 -left-28 w-60 h-60 bg-[#204E4A]/5 rounded-full blur-2xl pointer-events-none"></div>
 
       {step === 'A01' && (
         /* ================= A01 / BIENVENIDA · PO APPROVED ================= */
-        <div className="relative z-10 flex h-full min-h-0 flex-col gap-3">
-          <header className="flex shrink-0 items-center justify-between pb-1 pt-2">
+        <div className="relative z-10 flex h-full min-h-0 flex-col gap-2">
+          <header className="flex shrink-0 items-center justify-between pb-0 pt-0">
             <div className="flex items-center gap-2">
               <span className="text-[29px] font-black tracking-tighter text-[#204E4A]">pazo.</span>
               <span aria-hidden="true" className="h-3 w-3 rounded-full bg-[#E1E53F]"/>
@@ -184,10 +185,10 @@ export const OnboardingView = ({
             </button>
           </header>
 
-          {/* A short phone scrolls only the illustration, never hiding the main actions. */}
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+          {/* A01 fits the actual visual viewport; no nested scrolling/card truncation. */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <section aria-labelledby="pazo-welcome-title"
-              className="relative isolate flex min-h-[420px] w-full flex-1 flex-col overflow-hidden rounded-[34px] bg-[linear-gradient(145deg,#A2BB78_0%,#9BB670_58%,#A5BC72_100%)] text-white shadow-[0_10px_28px_rgba(32,78,74,0.055)]">
+              className="relative isolate flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[32px] bg-[linear-gradient(145deg,#A2BB78_0%,#9BB670_58%,#A5BC72_100%)] text-white shadow-[0_10px_28px_rgba(32,78,74,0.055)]">
               <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full opacity-70"
                 viewBox="0 0 380 510" preserveAspectRatio="none">
                 <path className="pazo-welcome-line" d="M231-22Q212 53 291 85T397 58M290-13Q264 77 340 110T399 144"
@@ -207,14 +208,14 @@ export const OnboardingView = ({
                 </svg>
               </span>
 
-              <div className="relative z-10 shrink-0 px-6 pt-9">
+              <div className="relative z-10 shrink-0 px-5 pt-[clamp(12px,3vh,22px)]">
                 <h1 id="pazo-welcome-title"
-                  className="max-w-[290px] text-[clamp(27px,7.9vw,34px)] font-black leading-[1.06] tracking-tight">
+                  className="max-w-[290px] text-[clamp(24px,7.4vw,32px)] font-black leading-[1.06] tracking-tight">
                   {lang === 'es'
                     ? <>Hecho con amor<br/>para las mascotas</>
                     : <>Made with love<br/>for pets</>}
                 </h1>
-                <p className="mt-4 max-w-[285px] text-[clamp(13px,3.7vw,15px)] font-medium leading-[1.45] text-[#FFFAEB]">
+                <p className="mt-2 max-w-[285px] text-[clamp(12px,3.5vw,14px)] font-medium leading-[1.4] text-[#FFFAEB]">
                   {lang === 'es'
                     ? 'Únete y descubre la mejor app social para mascotas'
                     : 'Join and discover the best social app for pets'}
@@ -223,11 +224,11 @@ export const OnboardingView = ({
 
               {/* Correct reference scale: artwork spans the hero while title stays live DOM. */}
               <div aria-hidden="true"
-                className="pointer-events-none absolute inset-x-[-8%] bottom-[35px] z-[1] flex h-[calc(100%-210px)] max-h-[285px] items-end justify-center">
+                className="pointer-events-none absolute inset-x-[-3%] bottom-[20px] z-[1] flex h-[55%] max-h-[320px] items-end justify-center">
                 <WelcomeAnimatedCompanion/>
               </div>
-              <div className="pointer-events-none min-h-[188px] flex-1" aria-hidden="true"/>
-              <div aria-hidden="true" className="relative z-10 flex shrink-0 items-center justify-center gap-2.5 pb-4 pt-1">
+              <div className="pointer-events-none min-h-0 flex-1" aria-hidden="true"/>
+              <div aria-hidden="true" className="relative z-10 flex shrink-0 items-center justify-center gap-2.5 pb-2 pt-1">
                 <span className="h-2 w-2 rounded-full bg-white"/>
                 <span className="h-2 w-2 rounded-full bg-white/45"/>
                 <span className="h-2 w-2 rounded-full bg-white/45"/>
@@ -238,27 +239,28 @@ export const OnboardingView = ({
           {/* Approved public gratitude-wall entry, separate from registration. */}
           <button ref={gratitudeWelcomeLinkRef} type="button"
             onClick={() => setShowGratitudeWall(true)}
-            className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-full px-2 py-2 text-center text-[12px] font-bold text-[#52756F] hover:bg-[#F0F2E8] focus-visible:bg-[#E1E53F]/35">
+            className="flex min-h-9 w-full shrink-0 items-center justify-center gap-2 rounded-full px-2 py-1 text-center text-[12px] font-bold text-[#52756F] hover:bg-[#F0F2E8] focus-visible:bg-[#E1E53F]/35">
             <IconPaw size={17} className="shrink-0 text-[#759C8D]"/>
             <span>{lang === 'es' ? 'Conoce a los Amigos de PAZO' : 'Meet the PAZO Friends'}</span>
             <span aria-hidden="true" className="text-[18px] leading-none">›</span>
           </button>
 
-          <div className="shrink-0 space-y-2.5 pb-2">
+          <div className="shrink-0 space-y-1.5 pb-0">
             <button type="button" onClick={() => setStep('A02')}
-              className="flex min-h-12 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-3 text-[17px] font-extrabold text-[#204E4A] shadow-[0_7px_20px_rgba(225,229,63,0.28)] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150]">
+              className="flex min-h-11 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-2.5 text-[17px] font-extrabold text-[#204E4A] shadow-[0_7px_20px_rgba(225,229,63,0.28)] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150]">
               {lang === 'es' ? 'Comenzar' : 'Get started'}
             </button>
             <div className="flex gap-2">
               <button type="button" onClick={onSkipToLogin}
-                className="min-h-12 min-w-0 flex-1 rounded-full bg-white px-3 py-3 text-[clamp(12px,3.4vw,15px)] font-extrabold text-[#204E4A] shadow-[0_4px_14px_rgba(32,78,74,0.055)] hover:bg-[#F0F2E8] focus-visible:bg-[#E1E53F]/40">
+                className="min-h-11 min-w-0 flex-1 rounded-full bg-white px-3 py-2.5 text-[clamp(12px,3.4vw,15px)] font-extrabold text-[#204E4A] shadow-[0_4px_14px_rgba(32,78,74,0.055)] hover:bg-[#F0F2E8] focus-visible:bg-[#E1E53F]/40">
                 {lang === 'es' ? 'Ya tengo una cuenta' : 'I already have an account'}
               </button>
               <button type="button" onClick={onQuickDemo}
-                className="min-h-12 shrink-0 rounded-full bg-[#ECEDE8] px-4 py-3 text-[14px] font-bold text-[#204E4A] hover:bg-[#E1E9D5] focus-visible:bg-[#E1E53F]/40">
+                className="min-h-11 shrink-0 rounded-full bg-[#ECEDE8] px-4 py-2.5 text-[14px] font-bold text-[#204E4A] hover:bg-[#E1E9D5] focus-visible:bg-[#E1E53F]/40">
                 Demo
               </button>
             </div>
+            <PazoInstallControl lang={lang} placement="welcome" />
             <p aria-label={lang === 'es' ? 'Versión de PAZO' : 'PAZO version'}
               className="pt-0.5 text-center text-[10px] font-medium tracking-[0.04em] text-[#5C7470]/60">
               {lang === 'es' ? 'Versión' : 'Version'} {pazoBuildVersion}
