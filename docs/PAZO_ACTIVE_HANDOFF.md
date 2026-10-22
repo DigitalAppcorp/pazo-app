@@ -1,3 +1,15 @@
+## Incidente PayPal Live Vault resuelto — 22-oct-2026 07:12+ UTC (actualización posterior)
+
+**Origen confirmado:** único POST `pazo-admin-paypal-vault` v2 a las 06:57:37Z devolvió HTTP503 (2.549s). PostgreSQL registró `SQLSTATE 2201B`; tanto `public.pazo_f16_live_service_vault_prepare` como RPC heredada `pazo_admin_paypal_save_credentials` utilizaban cuantificadores inválidos en PostgreSQL `{20,256}`/`{20,512}`. Por ello el backend rechazó la operación antes de escribir claves. Diagnóstico del panel `credential_save_outcome_needs_review` era genérico y no prueba rechazo de PayPal.
+
+**Corrección aplicada:** migración hospedada `20261022071240_pazo_f16_live_vault_regex_2201b_fix_20261022` (SQL idéntico en `supabase/migrations/20261022071240_pazo_f16_live_vault_regex_2201b_fix_20261022.sql`), [PR80](https://github.com/DigitalAppcorp/pazo-app/pull/80) MERGED, SHA `14b568fab82cf76539336c26cad91379036135a1`. Cambia únicamente la sintaxis de validación a whitelist ASCII `^[A-Za-z0-9_-]+$` más límite `length` de 20–256/20–512; conserva SECURITY DEFINER, Vault, controles Live OFF, MFA y metadatos. CI de draft SQL run39738548996 **7/7 PASS**; último CI del file de migración se verificará aparte (no declararlo PASS mientras esté in_progress).
+
+**Prueba hospedada decisiva:** tras aplicar, ambas definiciones mostraron guards corregidos y cero regexes inválidos; RPC service-role sintética con credenciales ficticias pudo preparar/crear Vault y generación **dentro de BEGIN**, luego **ROLLBACK** y readback: registros de generación0, Vault secrets de prueba0, claves guardadas0, reserva original1, pagos0, Live false y kill true. No se usaron ni se guardaron credenciales reales, no hubo charges, planes/webhooks adicionales ni cambio frontend/Edge.
+
+**Siguiente gate humano:** el PO puede reabrir panel/revalidar MFA, volver a introducir credenciales Live solo allí y pulsar Guardar una vez; si resultado incierto NO segundo POST hasta consulta autoritativa. Después leer con privilegios mínimos los booleanos de Vault/merchant y readiness, sin devolver IDs/secretos. Live canary US$2.99 requiere GO monetario explícito. Si regresión tras nuevo intento, revisar logs sin exponer payload.
+
+---
+
 ## Estado beta técnico publicado — 22-oct-2026 UTC (último corte verificado)
 
 **Frontend Production READY:** `dpl_DFkGfivtBoK5CV3jvL4V2yJV2pSW` SHA `b5547243bfaeb6c17b8bd3929f05468273b9576b`; PR78 (labels Auth) y PR79 (Chromium E2E más estricto) integrados. GitHub Actions [run39733214540](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39733214540) **7/7 jobs PASS**, Chromium 390/1440 **29/29 PASS** incluyendo navegación pública de registro/login/recuperación, retorno/cancelación no financiera y worker PWA real; no usuario autenticado ni dispositivo físico. Backend: migración beneficios públicos Live-only aplicada y QA conservado; Vault Edge v2 ACTIVE. Certificado técnico v3 registrado en DB para **el SHA desplegado** con digest `03aeb1b37a465a52f0de6bf1963b46d258c5a9ef1848bb46775809bc30fabf9a`, BEGIN/ROLLBACK y COMMIT PASS, `artifact_ready=true`; versiones antiguas de evidencia preservadas.
