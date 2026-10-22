@@ -321,7 +321,7 @@ export function AdminPayPalSettings({lang}:Props){
       </p>
      </div>
     </section>}
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+    {env==='sandbox'&&<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
      <section className={cardClass}>
       <div className="flex items-center gap-3"><span className="rounded-full bg-[#E7F4E2] p-3"><AdminGlyph name="money" size={23}/></span>
        <div><h4 className="text-[17px] font-black">{t('Oferta y dominio','Offer and domain')}</h4>
@@ -377,7 +377,7 @@ export function AdminPayPalSettings({lang}:Props){
          'Use the private form below to store encrypted PayPal Live credentials after fresh MFA. Checkout remains OFF pending financial release.')}
       </div>}
      </section>
-    </div>
+    </div>}
     <section className={cardClass}>
      <h4 className="text-[17px] font-black">{t('Historial de configuración','Configuration history')}</h4>
      <p className="mt-1 text-[12px] text-[#74877D]">{t('Últimos 30 cambios, sin mostrar credenciales ni secretos.','Last 30 changes, without displaying secrets or credentials.')}</p>
