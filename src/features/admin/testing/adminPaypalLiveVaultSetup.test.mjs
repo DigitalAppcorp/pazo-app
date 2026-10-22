@@ -27,6 +27,7 @@ function fixture(overrides={}){
   authenticateAdmin:async()=>({id:actor,isAdmin:true,freshSession:true}),
   readSettings:async()=>{calls.push('settings');return settings()},
   readReservation:async()=>{calls.push('reservation');return reservation()},
+  reserveGeneration:async()=>{calls.push('reserve');return {generation:1,planId:plan,environment:'live',mayCharge:false}},
   verifyProvider:async args=>{calls.push('provider');assert.equal(args.environment,'live');
    assert.equal(args.clientId,id);assert.equal(args.clientSecret,secret);
    assert.equal(args.merchantGeneration,1);return verified()},
@@ -53,6 +54,70 @@ test('explicit MFA-staged creds verify PayPal Live before Vault, no charge or ex
   assert.ok(!JSON.stringify(body).includes(secretValue))
  }
 })
+test('single credential submission automatically reserves only the missing original generation',async()=>{
+ let reserved=false,writes=0
+ const f=fixture({
+  readReservation:async()=>{f.calls.push('reservation');return reserved?reservation():null},
+  reserveGeneration:async ({actorId,planId})=>{
+   f.calls.push('reserve')
+   assert.equal(actorId,actor);assert.equal(planId,plan)
+   assert.equal(reserved,false)
+   reserved=true
+   return {generation:1,planId:plan,environment:'live',mayCharge:false}
+  },
+  saveVault:async()=>{writes++;f.calls.push('vault');return true}
+ })
+ const res=await f.handler(req())
+ assert.equal(res.status,200)
+ const body=await res.json()
+ assert.equal(body.code,'live_vault_credentials_prepared')
+ assert.equal(body.generation,1)
+ assert.equal(body.mayCharge,false)
+ assert.equal(writes,1)
+ assert.deepEqual(f.calls,['settings','reservation','reserve','reservation',
+  'provider','reservation','settings','vault','readback'])
+})
+
+test('uncertain generation reservation uses one write and same-owner readback, never guesses',async()=>{
+ for(const committed of [false,true]){
+  let attempted=0;let reserved=false;let writes=0
+  const f=fixture({
+   readReservation:async()=>{f.calls.push('reservation');return reserved?reservation():null},
+   reserveGeneration:async()=>{
+    attempted++;f.calls.push('reserve')
+    if(committed)reserved=true
+    throw Error('SYNTHETIC_UNCERTAIN_WRITE')
+   },
+   saveVault:async()=>{writes++;return true}
+  })
+  const result=await f.handler(req())
+  assert.equal(attempted,1)
+  assert.equal(result.status,committed?200:503)
+  assert.equal(writes,committed?1:0)
+  const response=await result.json()
+  assert.equal(response.mayCharge,false)
+  if(!committed)assert.equal(response.code,'generation_outcome_needs_review')
+ }
+})
+
+test('wrong or absent Live resource proof blocks automatic reservation before any write',async()=>{
+ for(const badSettings of [
+  {...settings(),live_checkout_enabled:true},
+  {...settings(),environments:settings().environments.map(x=>x.environment==='live'?{...x,webhook_id:''}:x)},
+  {...settings(),environments:settings().environments.map(x=>x.environment==='live'?{...x,plan_id:'P-INVALID'}:x)}
+ ]){
+  let reserve=0
+  const f=fixture({
+   readSettings:async()=>badSettings,
+   readReservation:async()=>null,
+   reserveGeneration:async()=>{reserve++;return reservation()}
+  })
+  const result=await f.handler(req())
+  assert.notEqual(result.status,200)
+  assert.equal(reserve,0)
+ }
+})
+
 test('release OFF cannot authenticate, inspect PayPal or touch Vault',async()=>{
  const f=fixture({released:false})
  const r=await f.handler(req())
@@ -128,6 +193,8 @@ test('entrypoint remains hard-off until release security gate and never includes
  assert.match(file,/const RELEASE_APPROVED=true/)
  assert.match(file,/pazo_f16_live_service_vault_prepare/) 
  assert.match(file,/pazo_f16_live_service_vault_status/) 
+ assert.match(file,/createPazoLiveBootstrapSqlStore/)
+ assert.match(file,/readSettings,readReservation,reserveGeneration,saveVault,readbackVault/) 
  assert.doesNotMatch(file,/pazo_admin_paypal_save_credentials/)
  assert.match(file,/pazo_admin_paypal_settings/)
  assert.doesNotMatch(file,/PAZO_F16_SCOPED_MANAGEMENT_TOKEN|api\.supabase\.com\/v1\/projects/)

@@ -9,6 +9,8 @@ import {createPazoAdminLiveDraftReader}
  from '../pazo-admin-paypal-provision/liveAdminDraftReader.mjs'
 import {createLiveResourceStore}
  from '../pazo-admin-paypal-live-inspect/store.mjs'
+import {createPazoLiveBootstrapSqlStore}
+ from '../pazo-admin-paypal-provision/liveBootstrapSqlStore.mjs'
 const RELEASE_APPROVED=true
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const fail=()=>{throw Error('secure_configuration_unavailable')}
@@ -26,6 +28,9 @@ function setup(){
    supabaseUrl:url,publishableKey:anon
   })
   const {readReservation}=createLiveResourceStore({
+   projectUrl:url,serviceRoleKey:service
+  })
+  const {reserveGeneration}=createPazoLiveBootstrapSqlStore({
    projectUrl:url,serviceRoleKey:service
   })
   const userRpc=async(request:Request,name:string,payload:object)=>{
@@ -79,7 +84,7 @@ function setup(){
     live[0].client_id_stored===true&&live[0].client_secret_stored===true
   }
   return createPazoLiveVaultSetup({released:true,authenticateAdmin,
-   readSettings,readReservation,saveVault,readbackVault})
+   readSettings,readReservation,reserveGeneration,saveVault,readbackVault})
  }catch{return createPazoLiveVaultSetup()}
 }
 Deno.serve(setup())
