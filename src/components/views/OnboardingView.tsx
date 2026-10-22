@@ -310,9 +310,11 @@ export const OnboardingView = ({
             ) : (
             <div className="space-y-3 pt-1 text-xs">
               <div>
-                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Correo electrónico" : "Email"}</label>
+                <label htmlFor="pazo-signup-email" className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Correo electrónico" : "Email"}</label>
                 <input
+                  id="pazo-signup-email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={lang === 'es' ? "tu@correo.com" : "you@example.com"}
@@ -321,8 +323,9 @@ export const OnboardingView = ({
               </div>
 
               <div>
-                <label className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Contraseña" : "Password"}</label>
+                <label htmlFor="pazo-signup-password" className="block text-[14px] font-bold text-[#204E4A] mb-1">{lang === 'es' ? "Contraseña" : "Password"}</label>
                 <input
+                  id="pazo-signup-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
