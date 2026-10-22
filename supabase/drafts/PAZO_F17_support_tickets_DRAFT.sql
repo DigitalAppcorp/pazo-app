@@ -18,8 +18,10 @@ create index if not exists pazo_support_tickets_status_created_idx
 alter table public.pazo_support_tickets enable row level security;
 alter table public.pazo_support_tickets force row level security;
 
-create policy pazo_support_own_read on public.pazo_support_tickets
- for select to authenticated using (owner_id=(select auth.uid()) or (select public.pazo_is_admin()));
+-- Internal administrator notes are never readable by the ticket author.
+-- All inbox row reads require the server-confirmed admin role.
+create policy pazo_support_admin_read on public.pazo_support_tickets
+ for select to authenticated using ((select public.pazo_is_admin()));
 create policy pazo_support_new_submission on public.pazo_support_tickets
  for insert to authenticated with check (
    owner_id=(select auth.uid()) and status='open' and admin_note is null);
@@ -57,13 +59,8 @@ returns trigger language plpgsql security definer set search_path=''
 as $function$
 begin
  if auth.uid() is null or new.owner_id is distinct from auth.uid()
-    or new.status<>'open' or new.admin_note is not null
-    or new.created_at is distinct from now() then
-  -- created_at is replaced below rather than trusting clients.
-  if auth.uid() is null or new.owner_id is distinct from auth.uid()
      or new.status<>'open' or new.admin_note is not null then
-   raise exception 'Invalid support submission' using errcode='42501';
-  end if;
+  raise exception 'Invalid support submission' using errcode='42501';
  end if;
  if (select count(*) from public.pazo_support_tickets
      where owner_id=auth.uid() and created_at>statement_timestamp()-interval '1 hour')>=3 then
