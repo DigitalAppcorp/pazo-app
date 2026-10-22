@@ -1,4 +1,5 @@
 import {classifyBasemapFailure} from './mapFailure'
+import { PAZO_STREETS_STYLE } from './pazoBasemap'
 import { useEffect, useRef, useState } from 'react'
 import type { EphemeralLocation, PetPlace } from '../../../types/pazo'
 import { loadMapboxGl } from './mapboxLoader'
@@ -215,9 +216,10 @@ export const MapboxMap = ({
 
         const map = new mapboxgl.Map({
           container: containerRef.current,
-          // PAZO needs reliable streets/parks under its category and 3D pins.
-          // Use stable Streets basemap; Mapbox Standard was blank on real phones.
-          style: 'mapbox://styles/mapbox/streets-v12',
+          // Physical Android showed pins while Mapbox vector streets were blank.
+          // The on-demand attributed beta raster tiles render streets beneath
+          // the existing PAZO pin/model layers.
+          style: PAZO_STREETS_STYLE,
           center: DEFAULT_CENTER,
           zoom: 10.5,
           pitch: 32,
