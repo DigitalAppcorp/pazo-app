@@ -38,6 +38,9 @@ jobs:
       - name: Hardening + architecture + privacy + ops governance checks
         run: npm run test:governance
 
+      - name: F16 Vault PostgreSQL 2201B credential regex regression
+        run: node --test scripts/f16-live-vault-regex-domain.test.mjs
+
       - name: F16 synthetic reconciliation and Sandbox preflight syntax (offline)
         run: |
           node --check scripts/f16-paypal-verify-plan-readonly.mjs
