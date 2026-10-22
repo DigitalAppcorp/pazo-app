@@ -1,63 +1,95 @@
-import {useEffect,useState} from 'react'
+import { useEffect, useState } from 'react'
+import { readPazoInstallState, subscribePazoInstall, takePazoInstallPrompt } from '../installPromptBridge'
 
-// The browser controls install eligibility. In-app mode is reliably detectable;
-// a separately launched browser tab cannot always detect an existing installation.
-type InstallPrompt=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>}
-type IosNavigator=Navigator&{standalone?:boolean}
-const inStandaloneMode=()=>typeof window!=='undefined'&&typeof navigator!=='undefined'&&
-  (window.matchMedia('(display-mode: standalone)').matches||
-   (navigator as IosNavigator).standalone===true)
-const isiOS=()=>typeof navigator!=='undefined'&&
-  (/iPad|iPhone|iPod/i.test(navigator.userAgent)||
-   (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))
+const isIOS = (): boolean => typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+const HIDE_FOR_MS = 7 * 24 * 60 * 60 * 1000
+const STORAGE_KEY = 'pazo-install-banner-dismissed-until'
+const isBannerDismissed = () => {
+  try { return Number(window.localStorage.getItem(STORAGE_KEY) || 0) > Date.now() }
+  catch { return false }
+}
+type Placement = 'banner' | 'settings'
 
-export function PazoInstallControl({lang}:{lang:'es'|'en'}){
- const [installed,setInstalled]=useState(()=>inStandaloneMode())
- const [prompt,setPrompt]=useState<InstallPrompt|null>(null)
- const [showInstructions,setShowInstructions]=useState(false)
- const [isPrompting,setIsPrompting]=useState(false)
- useEffect(()=>{
-  if(typeof window==='undefined'||typeof navigator==='undefined'||typeof window.matchMedia!=='function')return
-  const refresh=()=>{if(inStandaloneMode()){setInstalled(true);setPrompt(null);setShowInstructions(false)}}
-  const onPrompt=(e:Event)=>{e.preventDefault();if(!inStandaloneMode())setPrompt(e as InstallPrompt)}
-  const onInstalled=()=>{setInstalled(true);setPrompt(null);setShowInstructions(false)}
-  const media=window.matchMedia('(display-mode: standalone)')
-  window.addEventListener('beforeinstallprompt',onPrompt)
-  window.addEventListener('appinstalled',onInstalled)
-  media.addEventListener?.('change',refresh)
-  refresh()
-  return ()=>{
-   window.removeEventListener('beforeinstallprompt',onPrompt)
-   window.removeEventListener('appinstalled',onInstalled)
-   media.removeEventListener?.('change',refresh)
+export function PazoInstallControl({ lang, placement = 'settings' }: {
+  lang: 'es' | 'en'; placement?: Placement
+}) {
+  const [state, setState] = useState(readPazoInstallState)
+  const [dismissed, setDismissed] = useState(isBannerDismissed)
+  const [showInstructions, setShowInstructions] = useState(false)
+  const [isPrompting, setIsPrompting] = useState(false)
+  useEffect(() => subscribePazoInstall(() => setState(readPazoInstallState)), [])
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const media = window.matchMedia('(display-mode: standalone)')
+    const refresh = () => setState(readPazoInstallState())
+    media.addEventListener?.('change', refresh)
+    return () => media.removeEventListener?.('change', refresh)
+  }, [])
+
+  const hideBanner = () => {
+    setDismissed(true)
+    try { window.localStorage.setItem(STORAGE_KEY, String(Date.now() + HIDE_FOR_MS)) }
+    catch { /* Private browsing may not permit storage. */ }
   }
- },[])
- if(installed||(!prompt&&!isiOS()))return null
- const es=lang==='es'
- const act=async()=>{
-  if(!prompt){setShowInstructions(s=>!s);return}
-  if(isPrompting)return
-  setIsPrompting(true)
-  try{
-   const current=prompt
-   setPrompt(null)
-   await current.prompt()
-   const choice=await current.userChoice
-   if(choice.outcome==='accepted')setInstalled(true)
-   // Browsers may not issue a new install prompt after dismissal.
-  }catch{/* Never claim installation after a failed native prompt. */}
-  finally{setIsPrompting(false)}
- }
- return <div data-pazo-install-control="true" className="px-1 py-1">
-  <button type="button" onClick={()=>void act()} disabled={isPrompting}
-   className="min-h-11 w-full rounded-2xl bg-[#EFF4E8] px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F]/40 focus-visible:bg-[#E1E53F]/50 disabled:opacity-50">
-   {isPrompting?(es?'Abriendo instalación…':'Opening installation…'):
-    prompt?(es?'Instalar PAZO':'Install PAZO'):
-    (es?'Cómo instalar PAZO':'How to install PAZO')}
-  </button>
-  {showInstructions&&<p role="status" className="px-3 py-2 text-xs leading-relaxed text-[#5C7470]">
-    {es?'En Safari, toca Compartir y elige «Añadir a pantalla de inicio».':
-    'In Safari, tap Share, then Add to Home Screen.'}
-  </p>}
- </div>
+
+  if (state.installed || (!state.pending && !isIOS())) return null
+  if (placement === 'banner' && dismissed) return null
+  const es = lang === 'es'
+  const action = async () => {
+    if (!state.pending) { setShowInstructions(value => !value); return }
+    if (isPrompting) return
+    const nativePrompt = takePazoInstallPrompt()
+    if (!nativePrompt) return
+    setIsPrompting(true)
+    try {
+      await nativePrompt.prompt()
+      const choice = await nativePrompt.userChoice
+      // Only 'appinstalled' or standalone mode proves installation. A browser
+      // prompt acceptance is not, by itself, proof that the app was installed.
+      if (choice.outcome === 'accepted' && placement === 'banner') hideBanner()
+    } catch {
+      // Do not claim an installation after browser rejection.
+    } finally { setIsPrompting(false) }
+  }
+
+  const buttonText = isPrompting
+    ? (es ? 'Abriendo…' : 'Opening…')
+    : state.pending ? (es ? 'Instalar' : 'Install')
+      : (es ? 'Cómo instalar' : 'How to install')
+
+  if (placement === 'banner') return <aside data-pazo-install-banner="true"
+    className="mx-3 mb-1 flex shrink-0 items-center gap-2 rounded-2xl bg-[#EFF4E8] px-3 py-2 shadow-sm sm:hidden"
+    aria-label={es ? 'Instalar PAZO' : 'Install PAZO'}>
+    <div className="min-w-0 flex-1">
+      <p className="text-[11px] font-black text-[#204E4A]">{es ? 'Lleva PAZO contigo' : 'Take PAZO with you'}</p>
+      {showInstructions && <p role="status" className="mt-1 text-[11px] leading-snug text-[#5C7470]">
+        {es ? 'En Safari: Compartir → Añadir a pantalla de inicio.' :
+          'In Safari: Share → Add to Home Screen.'}
+      </p>}
+    </div>
+    <button type="button" onClick={() => void action()} disabled={isPrompting}
+      className="min-h-11 shrink-0 rounded-xl bg-[#204E4A] px-3 text-[11px] font-extrabold text-white disabled:opacity-50">
+      {buttonText}
+    </button>
+    <button type="button" onClick={hideBanner}
+      aria-label={es ? 'Ocultar sugerencia de instalación' : 'Dismiss install suggestion'}
+      className="min-h-11 min-w-11 shrink-0 rounded-xl text-xl text-[#5C7470] hover:bg-[#E1E53F]/40">
+      ×
+    </button>
+  </aside>
+
+  return <div data-pazo-install-control="true" className="px-1 py-1">
+    <button type="button" onClick={() => void action()} disabled={isPrompting}
+      className="min-h-11 w-full rounded-2xl bg-[#EFF4E8] px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F]/40 focus-visible:bg-[#E1E53F]/50 disabled:opacity-50">
+      {isPrompting ? (es ? 'Abriendo instalación…' : 'Opening installation…') :
+        state.pending ? (es ? 'Instalar PAZO' : 'Install PAZO') :
+          (es ? 'Cómo instalar PAZO' : 'How to install PAZO')}
+    </button>
+    {showInstructions && <p role="status" className="px-3 py-2 text-xs leading-relaxed text-[#5C7470]">
+      {es ? 'En Safari, toca Compartir y elige «Añadir a pantalla de inicio».' :
+        'In Safari, tap Share, then Add to Home Screen.'}
+    </p>}
+  </div>
 }
