@@ -29,9 +29,12 @@ export function AdminPaypalLiveConsole({lang,config,loading,error,credentialsSto
  const [refresh,setRefresh]=useState(0)
  useEffect(()=>{
   let mounted=true
-  void supabase.rpc('pazo_admin_live_release_status').then(({data,error})=>{
-   if(mounted)setMode(!error&&['off','canary','public'].includes(data?.mode)?data.mode:'unknown')
-  }).catch(()=>{if(mounted)setMode('unknown')})
+  void (async()=>{
+   try{
+    const {data,error}=await supabase.rpc('pazo_admin_live_release_status')
+    if(mounted)setMode(!error&&['off','canary','public'].includes(data?.mode)?data.mode:'unknown')
+   }catch{if(mounted)setMode('unknown')}
+  })()
   return ()=>{mounted=false}
  },[config?.updated_at,refresh])
  const connected=config?.validation_status==='valid'&&credentialsStored
@@ -150,7 +153,7 @@ export function AdminPaypalLiveConsole({lang,config,loading,error,credentialsSto
      {advanced&&<div className="mt-4 space-y-3">
       <AdminLiveReadiness lang={lang} revision={config?.updated_at} />
       <AdminPaypalLiveResourceCheck lang={lang} mfaRecentlyVerified={mfaRecentlyVerified}
-        onVerified={onChanged}/>
+        onVerified={async()=>{onChanged()}}/>
       <AdminPaypalMerchantBootstrap lang={lang} mfaRecentlyVerified={mfaRecentlyVerified}/>
       <div className="rounded-[18px] bg-[#F2F6EC] p-4">
        <p className="text-[13px] font-black">{t('Historial de configuración','Configuration history')}</p>
