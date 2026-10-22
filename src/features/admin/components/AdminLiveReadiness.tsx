@@ -13,7 +13,9 @@ const messages:Record<string,[string,string]>={
  provider_verification_pending:['La comprobación de PayPal Live está pendiente.','PayPal Live verification is pending.'],
  private_worker_unavailable:['El procesamiento de pagos no está disponible.','Payment processing is unavailable.']
 }
-export function AdminLiveReadiness({lang,revision}:{lang:'es'|'en';revision?:string}){
+export function AdminLiveReadiness({lang,revision,onCredentialsObserved}:{
+ lang:'es'|'en';revision?:string;onCredentialsObserved?:(stored:boolean|null)=>void
+}){
  const {user}=useAuth()
  const ownerId=user?.id??null
  const [refresh,setRefresh]=useState(0)
@@ -24,17 +26,18 @@ export function AdminLiveReadiness({lang,revision}:{lang:'es'|'en';revision?:str
  const t=(es:string,en:string)=>lang==='es'?es:en
  useEffect(()=>{
   let current=true
-  if(!ownerId)return
+  if(!ownerId){onCredentialsObserved?.(null);return}
+  onCredentialsObserved?.(null)
   void (async()=>{
    try{
     const {data,error}=await supabase.rpc('pazo_admin_live_readiness')
     const parsed=parsePazoLiveReadiness(data)
     if(error||!parsed)throw Error('unverified_readiness')
-    if(current)setResult({key,value:parsed,state:'verified'})
-   }catch{if(current)setResult({key,value:null,state:'unavailable'})}
+    if(current){setResult({key,value:parsed,state:'verified'});onCredentialsObserved?.(parsed.checks.credentialsStored)}
+   }catch{if(current){setResult({key,value:null,state:'unavailable'});onCredentialsObserved?.(null)}}
   })()
   return ()=>{current=false}
- },[key,ownerId])
+ },[key,ownerId,onCredentialsObserved])
  return <section data-pazo-live-readiness className="rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]">
   <h4 className="text-[15px] font-black">{t('Estado de preparación de PayPal Live','PayPal Live preparation status')}</h4>
   {state==='loading'&&<p role="status" className="mt-2 text-[13px]">{t('Consultando el estado seguro…','Reading secure status…')}</p>}
