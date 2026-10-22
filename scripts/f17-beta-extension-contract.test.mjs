@@ -48,6 +48,10 @@ test('map remains server-map based with 3D places and explicit tile errors',()=>
  assert.match(s,/type: 'model'/)
  assert.match(s,/type: 'symbol'/)
  assert.match(s,/Mapbox no autorizó las capas/)
+ const stage=file('src/features/places/components/ImmersivePlacesStage.tsx')
+ assert.match(stage,/h-\[165px\] bg-gradient-to-t/)
+ assert.match(stage,/h-24 bg-gradient-to-b/)
+ assert.match(stage,/pointer-events-none absolute/)
 })
 
 test('support ticket messages are private, rate-limited and available in admin inbox',()=>{
