@@ -66,6 +66,7 @@ function Note({children}:{children:React.ReactNode}){
  return <p className="rounded-[16px] bg-[#EAF1E2] px-4 py-2.5 text-[12px] leading-relaxed text-[#536E64]">{children}</p>
 }
 export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onClose:()=>void;onOpenReports?:()=>void}){
+ const visibleSections=sections.filter(item=>item.key!=='reports'||Boolean(onOpenReports))
  const [section,setSection]=useState<Section>('summary')
  const [period,setPeriod]=useState<7|30|90>(30)
  const [overview,setOverview]=useState<AdminOverview|null>(null)
@@ -119,7 +120,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
     <div><p className="text-[13px] font-black">{l('Centro de control','Control center')}</p><p className="text-[11px] font-medium text-[#71857F]">{l('Administrador','Administrator')}</p></div>
    </div>
    <nav aria-label={l('Secciones del panel','Dashboard sections')} className="pazo-admin-navigation mt-5 flex flex-1 flex-col gap-1 overflow-y-auto">
-    {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
+    {visibleSections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
      onClick={()=>selectSection(item.key)}
      className={'flex min-h-[47px] w-full items-center gap-4 rounded-[14px] px-4 text-left text-[15px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
       (section===item.key?'bg-[#E5F0D8] text-[#204E4A]':'text-[#506864] hover:bg-[#F1F6E9]')}>
@@ -168,7 +169,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
     </div>
     <nav aria-label={l('Secciones del panel','Dashboard sections')}
       className="mx-auto mt-4 flex max-w-[1600px] gap-2 overflow-x-auto pb-1 lg:hidden">
-     {sections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
+     {visibleSections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
        onClick={()=>selectSection(item.key)}
        className={'flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[12px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
         (section===item.key?'bg-[#204E4A] text-white':'bg-white text-[#204E4A] hover:bg-[#E5EDCE]')}>
