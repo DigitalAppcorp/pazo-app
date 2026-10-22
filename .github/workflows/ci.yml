@@ -489,3 +489,16 @@ jobs:
             -f supabase/tests/supporter/live-only-public-benefits-lab-setup.sql \
             -f supabase/drafts/pazo_public_benefits_live_only_REQUIRES_PO_GO.sql \
             -f supabase/tests/supporter/live-only-public-benefits-lab-cases.sql
+
+  public-beta-postflight-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout inspected PAZO code
+        uses: actions/checkout@v7
+      - name: Setup Node for outbound HTTPS smoke
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Canonical public beta PWA and PayPal callback HTTP negative probes
+        run: node scripts/f16-public-pwa-http-gate.mjs
