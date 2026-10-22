@@ -519,5 +519,7 @@ jobs:
         run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
       - name: Install matching real Chromium browser
         run: npx --no-install playwright install --with-deps chromium
+      - name: Check associated email and login form labels in proposed code
+        run: node --test scripts/f16-auth-field-label-contract.test.mjs
       - name: Exercise public beta in real Chromium (390/1440/callbacks/PWA)
         run: node scripts/f16-beta-canonical-chromium-e2e.mjs
