@@ -1005,7 +1005,7 @@ test('A01 PO-approved welcome preserves sign-up, login, demo, locale and public 
   assert.ok(!mascot.includes('setInterval')&&!mascot.includes('setTimeout'))
   assert.ok(!mascot.includes('fetch(')&&!mascot.includes('localStorage'),'Illustration never collects data')
   const approvedArt=fs.readFileSync('public/onboarding/welcome-approved-art.svg','utf8')
-  assert.equal((approvedArt.match(/data:image\\/webp;base64,/g)||[]).length,1,
+  assert.equal(approvedArt.split('data:image/webp;base64,').length-1,1,
     'Corgi renders as one image, not three independent animated cutouts')
   assert.ok(!/pazoRefTail|pazoRefHead|id="sceneWithoutTail"|id="onlyTail"/.test(approvedArt),
     'No separated sprite seams or synthetic wag')
