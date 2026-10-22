@@ -1,5 +1,22 @@
 # PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
 
+## P4 instalado y fuentes verificadas — 22-oct-2026
+
+`41871d47`: **5/5 Actions SUCCESS**. SQL `20261021230000` APLICADO tras ensayo
+alojado ROLLBACK y postflight de13/13 cuerpos/ACL/RLS. Release Edgev1,
+webhookv2, checkoutv3, cuentav5, workerv4 ACTIVE:69/69 fuentes descargadas
+exactas; HTTP negativos PASS. Guardas dinámicas desplegadas; no latch de código
+que editar después de las claves. Certificado0/autorizaciones0, modoOFF/rev0,
+sandbox/Live=false/kill=true/gen=null y procesamiento=false; intentos/períodos0.
+No PayPal real, no clave ni identidad Auth/MFA simulada en hosted.
+
+Dominio público aún antiguo: gateHTTPS7 requisitos no PASS. Se prepara preview
+protegido local/prebuilt sin promover producción; aún no creado en este
+checkpoint. Faltan HTTPS/PWA, certificado técnico, cierre operativo y GO del PO.
+No pedir claves todavía, NO beta lista. Evidencia vigente:
+`docs/PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
+Las notas inferiores de P4 sin aplicar/deploy son checkpoints superados.
+
 ## P4 — controles financieros implementados, pendientes de instalación (22-oct-2026)
 
 Continuación desde `5972855e`, incorporando PR68–70 y el triage de Advisors,

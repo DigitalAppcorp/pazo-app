@@ -31,3 +31,4 @@ supabase/.temp/
 supabase/tests/supporter/fixtures/f16-live-worker-scheduler-core.generated.sql
 
 supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
+.vercel/

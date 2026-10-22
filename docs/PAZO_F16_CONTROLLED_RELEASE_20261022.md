@@ -1,8 +1,10 @@
 # F16 P4 — autorización financiera controlada
 
-Implementación en PR67, preparada para revisión e instalación. En este
-checkpoint NO hay migración aplicada, Edge nueva desplegada, certificado
-técnico, credenciales PayPal ni autorización de dinero. No beta lista.
+Implementación en PR67. SQL y cinco Edge ya instalados/verificados; modo OFF,
+sin certificado técnico, credenciales ni autorización de dinero. Estado y
+evidencia vigentes en `PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
+HTTPS/PWA y cierre operativo pendientes; no beta lista. Las instrucciones de
+instalación inferiores describen el procedimiento ya ejecutado, no repetirlo.
 
 ## Comportamiento
 

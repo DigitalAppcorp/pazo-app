@@ -1,3 +1,13 @@
+## P4 alojado — 22-oct-2026
+
+`41871d47`5/5CI PASS; migración controlada230000 APLICADA con ensayo y13/13
+fuentes/ACL/RLS verificadas. Cinco Edge actualizadas,69/69 fuentes exactas y
+HTTP negativos PASS. ModoOFF, certificado0/autorizaciones0, Live=false/kill=true,
+procesamiento=false, intentos/períodos0. HTTPS público sigue antiguo/NO-GO;
+preview protegido y cierre operativo en preparación. No READY_FOR_PO_CREDENTIALS,
+no canary/producción/main autorizados. Postflight:
+`docs/PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
+
 ## P4 — control de activación y parada (22-oct-2026, código preparado)
 
 PR67 continúa sobre `5972855e`: control Admin+GoTrue+MFA, canary del operador
