@@ -502,3 +502,22 @@ jobs:
           node-version: '22'
       - name: Canonical public beta PWA and PayPal callback HTTP negative probes
         run: node scripts/f16-public-pwa-http-gate.mjs
+
+  canonical-chromium-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout auditable tests
+        uses: actions/checkout@v7
+      - name: Setup Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install pinned ephemeral Chromium automation package
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - name: Install matching real Chromium browser
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Exercise public beta in real Chromium (390/1440/callbacks/PWA)
+        run: node scripts/f16-beta-canonical-chromium-e2e.mjs
