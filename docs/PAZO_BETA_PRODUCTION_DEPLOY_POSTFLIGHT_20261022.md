@@ -1,3 +1,13 @@
+## Certificado técnico actualizado a la versión publicada — 22-oct-2026 UTC
+
+**POSTFLIGHT PASS**: evidencia canónica v2 guardada en `docs/evidence/PAZO_F16_TECHNICAL_RELEASE_ATTESTATION_V2_20261022.json` (1833 bytes de JSON UTF-8 sin salto final), SHA256 confirmado **en PostgreSQL alojado**: `d472e6fc2fe1761b9a57bee7bfda90caf91758393afdda7d606a0d94a118244b`. Contiene SHA desplegado en Vercel `5283bbc9...`, seis Edge auditadas (incluido Vault v2), migración, finanzas OFF, y prueba externa HTTPS/PWA 7/7 del run39728858221, junto con limitaciones.
+
+Certificado singleton `admin_private.pazo_live_release_artifact` **actualizado una sola vez**, sin DDL ni efectos financieros. Script versionado `scripts/f16-technical-release-attestation-refresh-v2-20261022.sql` exige match exacto de SHA/digest anteriores, builds/control, kill-switch ON, checkout Live OFF, ninguna generación ni período pagado Live; si falla una precondición aborta. Ensayo alojado `BEGIN/ROLLBACK` **PASS**, conservó SHA/digest v1; aplicación `COMMIT` posterior **PASS**. Readback: `frontend_commit=5283bbc9460c2a991f258983b0051395f1911cea`, `evidence_sha256=d472e6fc2fe1761b9a57bee7bfda90caf91758393afdda7d606a0d94a118244b`, `verified_at=2026-10-22T05:42:05.651624Z`. La evidencia histórica v1 permanece archivada en GitHub; no se borraron archivos.
+
+**Límite:** certificado acredita build/artefactos/pruebas públicas sin credenciales ni dinero, NO prueba PayPal Live real, E2E autenticado, instalación física de PWA ni ausencia de fallos de runtime (Vercel logs API 403). No activa Live ni justifica publicar cobros.
+
+---
+
 ## Postflight HTTPS **PASS** y cierre de integración — 22-oct-2026 UTC
 
 CI [run 39728858221](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39728858221) **6/6 jobs SUCCESS** en PR77, incluido `public-beta-postflight-http` job119658995723. Auditoría HTTPS de la app desplegada `https://pazo-app-t83r.vercel.app` con `ready:true` y **7/7 PASS**: home, PayPal return falso sin reflejo del token, PayPal cancel falso, manifest PWA válido, service worker sin caché de datos, iconos PNG 192/512. No se usó ninguna credencial ni pago.
