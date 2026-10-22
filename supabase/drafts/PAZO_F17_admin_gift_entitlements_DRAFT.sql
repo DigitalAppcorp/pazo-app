@@ -47,9 +47,9 @@ begin
    (g.owner_id is not null and g.revoked_at is null
     and (g.expires_at is null or g.expires_at>now())) as active
   from auth.users u left join supporter_private.pazo_admin_gift_access g on g.owner_id=u.id
-  where u.email ilike '%'||replace(replace(replace(btrim(p_query),'\\','\\\\'),'%','\\%'),'_','\\_')||'%' escape '\\'
-   or exists(select 1 from public.pets p where p.owner_id=u.id and p.name ilike
-    '%'||replace(replace(replace(btrim(p_query),'\\','\\\\'),'%','\\%'),'_','\\_')||'%' escape '\\')
+  where pg_catalog.strpos(pg_catalog.lower(coalesce(u.email,'')),pg_catalog.lower(btrim(p_query)))>0
+    or exists(select 1 from public.pets p where p.owner_id=u.id
+      and pg_catalog.strpos(pg_catalog.lower(p.name),pg_catalog.lower(btrim(p_query)))>0)
   order by u.created_at desc limit 20
  ) x;
  return v_result;
