@@ -49,6 +49,13 @@ test('existing moderator queue remains visible even if new analytics RPC fails',
  assert.ok(access.includes('checkAdmin().then'))
  assert.ok(!access.includes('Promise.all([isModerator(),checkAdmin()])'))
  assert.ok(access.includes('adminAllowed&&'))
+ assert.ok(access.includes('if(!enabled||(!allowed&&!adminAllowed))return null'))
+ assert.ok(!access.includes('if(!enabled||!allowed)return null'))
+ assert.ok(access.includes("{allowed&&screen==='reports'&&<ModeratorQueue"))
+ assert.ok(access.includes("{allowed&&screen==='media'&&<ModerationMediaQueue"))
+ assert.ok(access.includes("onOpenReports={allowed?()=>setScreen('reports'):undefined}"))
+ assert.ok(board.includes("sections.filter(item=>item.key!=='reports'||Boolean(onOpenReports))"))
+ assert.equal((board.match(/visibleSections\.map\(item=>/g)||[]).length,2)
  assert.ok(access.includes('ModeratorQueue'))
  assert.ok(access.includes('ModerationMediaQueue'))
  assert.ok(access.includes('<AdminDashboard'))
@@ -112,7 +119,7 @@ test('responsive admin dashboard escapes mobile shell and exposes functional lay
  assert.ok(board.includes('min-h-11'),'Minimum touch target for mobile controls')
  assert.ok(board.includes("aria-current={section===item.key?'page':undefined}"),'Nav communicates active section to screen readers')
  assert.ok(board.includes('onOpenReports'),'Moderation shortcut is functional')
- assert.ok(access.includes("onOpenReports={()=>setScreen('reports')}"),'No dead Reports action')
+ assert.ok(access.includes("onOpenReports={allowed?()=>setScreen('reports'):undefined}"),'Reports action only for moderators')
 })
 
 test('executive visual reference uses only actual query fields and never represents sandbox as live revenue',()=>{
