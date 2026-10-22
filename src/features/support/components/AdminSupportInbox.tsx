@@ -75,6 +75,10 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
        'The user can read this reply in Help and Support.')}
       className="mt-2 w-full rounded-xl bg-[#EFF4E9] px-3 py-2 text-xs" />
     </label>
+    <button type="button" onClick={()=>void setTicket(t,t.status)} disabled={busyId!==null}
+     className="min-h-11 w-full rounded-xl bg-[#204E4A] px-3 py-2 text-xs font-black text-white disabled:opacity-50">
+     {l('Guardar nota y respuesta','Save note and reply')}
+    </button>
     <div className="flex flex-wrap gap-2">
      {(['open','reviewing','resolved'] as const).map(status=><button key={status} type="button"
       onClick={()=>void setTicket(t,status)} disabled={busyId!==null}
