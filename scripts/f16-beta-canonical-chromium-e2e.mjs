@@ -43,7 +43,12 @@ try{
    await page.getByRole('button',{name:/^(Crear cuenta|Create account)$/}).waitFor({timeout:10000})
    const age=page.getByRole('checkbox',{name:/18 (años|or older)/i})
    check(kind+'_age_consent_unchecked',await age.count()===1&&!(await age.isChecked()))
-   check(kind+'_signup_never_submitted',await page.getByRole('textbox',{name:/Correo electrónico|Email/i}).count()>0)
+   check(kind+'_signup_email_available',await page.locator('input[type="email"]').count()===1)
+   // On PR branches Chromium visits the already-deployed (older) production
+   // build. Enforce the accessible input after that updated build is deployed.
+   if(process.env.PAZO_E2E_AUTH_LABELS_DEPLOYED==='true')
+    check(kind+'_signup_email_accessible_name',
+     await page.getByRole('textbox',{name:/Correo electrónico|Email/i}).count()===1)
    // No form submit, age toggle, login, password or user data.
    const legal=page.getByRole('button',{name:/Política de privacidad|Privacy policy/})
    check(kind+'_legal_discoverable',await legal.count()>=1)
