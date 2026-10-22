@@ -47,3 +47,7 @@ Las dependencias financieras previas (tablas de temas y controles de release/che
 6. PR #81 permanece DRAFT. F16 Live/canary tiene su gate financiero independiente y no se activa en esta fase.
 
 **Sin gastos nuevos, sin claves privilegiadas expuestas, sin merge/deploy.**
+
+## Continuación: respuestas a soporte (22-oct-2026)
+
+Se completó en código el ciclo de soporte **enviar → bandeja Admin → respuesta → lectura del titular**: `admin_reply` separado de `admin_note`; RPC `pazo_my_support_tickets()` limita por `auth.uid()` y no proyecta notas internas; bandeja con botón Guardar; pantalla del usuario muestra hasta 20 solicitudes y respuesta, con actualización. Se agregaron contratos de regresión para no filtrar la nota privada. **Todo continúa en PR DRAFT**: ni la tabla ni las RPC están instaladas; antes de su activación faltan ensayo de SQL real, RLS para usuario/admin, política de retención y autorización de migración.
