@@ -21,7 +21,7 @@ export function PazoInstallControl({ lang, placement = 'settings' }: {
   const [isPrompting, setIsPrompting] = useState(false)
   useEffect(() => subscribePazoInstall(() => setState(readPazoInstallState)), [])
   useEffect(() => {
-    if (typeof window.matchMedia !== 'function') return
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
     const media = window.matchMedia('(display-mode: standalone)')
     const refresh = () => setState(readPazoInstallState())
     media.addEventListener?.('change', refresh)
