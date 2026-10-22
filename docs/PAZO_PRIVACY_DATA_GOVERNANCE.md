@@ -334,3 +334,7 @@ Las concesiones administrativas son beneficios sin cobro. No deben mezclarse con
 El futuro modo mantenimiento requiere demostrar separación completa de superficie: SPA, REST PostgREST, Storage, Realtime, Edge Functions y flujos de cobro (no bloquear cancelaciones, reembolsos ni reconciliación). El SQL preparado **no activa** `pgrst.db_pre_request` y no debe usarse como prueba de bloqueo total sin el gate administrativo explícito. La pantalla por sí sola no es una defensa de datos.
 
 La sugerencia PWA guarda exclusivamente en almacenamiento local la fecha de expiración del descarte, sin tracking ni identificador de usuario, durante un máximo de siete días; no promete detectar una instalación previa abierta en otra pestaña.
+
+### F17 — Lectura de respuestas de soporte (propuesta NO alojada)
+
+Las respuestas al titular se separan físicamente de las notas internas del administrador. Nunca conceder `SELECT` directo a todas las solicitudes del usuario, porque esto revelaría `admin_note`; utilizar la RPC limitada por `auth.uid()`, que devuelve únicamente la respuesta `admin_reply` y campos mínimos. Verificar con roles de prueba que una cuenta no puede leer tickets ajenos ni notas internas; el código es borrador sin instalación y requiere política de retención aprobada.
