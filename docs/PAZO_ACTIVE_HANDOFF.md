@@ -1,3 +1,11 @@
+## F17 — estabilización de beta en PR #81 (22-oct-2026)
+
+**Carril activo adicional:** rama `f17/beta-final-mobile-support-admin-20261022`, PR #81 DRAFT. El PO autorizó terminar las seis extensiones sobre el trabajo existente, pero **NO aprobó aplicar SQL ni fusionar/publicar**. Mejoras ya comprometidas: gate de mantenimiento solo admin verificado; readback de regalos; evento de instalación capturado temprano y aviso compacto en Inicio; viewport exterior/interior dinámicos; reducción de degradados móviles de Lugares; cuota de soporte concurrente; documentación de privacidad/inventario. Ver matriz concreta en `docs/PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+
+**Estado backend consultado directamente:** tablas de tickets, cortesías y mantenimiento AUSENTES en Supabase; SQL permanece en `supabase/drafts/`. No ejecutar sin GO de migración ni afirmar soporte/bloqueo global operativo. **Pendientes:** revisión RLS/retención, backend de bloqueo Storage/Realtime/Edge, CI último SHA, Mapbox real y validación UX Chrome/Safari/PWA. F16/PayPal sigue su gate independiente, sin activar Live ni crear cobros. No repetir labores F17 ya hechas; recuperar siempre último HEAD de PR #81.
+
+---
+
 ## Incidente PayPal Live Vault resuelto — 22-oct-2026 07:12+ UTC (actualización posterior)
 
 **Origen confirmado:** único POST `pazo-admin-paypal-vault` v2 a las 06:57:37Z devolvió HTTP503 (2.549s). PostgreSQL registró `SQLSTATE 2201B`; tanto `public.pazo_f16_live_service_vault_prepare` como RPC heredada `pazo_admin_paypal_save_credentials` utilizaban cuantificadores inválidos en PostgreSQL `{20,256}`/`{20,512}`. Por ello el backend rechazó la operación antes de escribir claves. Diagnóstico del panel `credential_save_outcome_needs_review` era genérico y no prueba rechazo de PayPal.
