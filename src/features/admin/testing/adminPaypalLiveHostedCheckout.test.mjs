@@ -68,6 +68,33 @@ test('active host allows only the official HTTPS origin; no wildcard CORS',async
  assert.equal(denied.status,403)
  assert.equal(denied.headers.get('access-control-allow-origin'),null)
 })
+test('canonical app gets diagnostic CORS without bypassing previously certified origin',async()=>{
+ const canonical='https://pazo-app.vercel.app'
+ let readAttempts=0
+ const h=createPazoLiveHostedCheckout({released:true,
+  getEnv:name=>env[name],
+  fetchImpl:async uri=>{
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))
+    return response(200,true)
+   if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
+    return response(200,{releaseMode:'canary',sourceEnvironment:'live',
+     credentialSource:'vault',merchantGeneration:1,
+     planId:'P-ABCDEFGHIJKLMN',returnOrigin:'https://pazo-app-t83r.vercel.app'})
+   readAttempts++
+   throw Error('no worker, profile or payment calls before origin migration')
+  }})
+ const pre=await h(req('OPTIONS',canonical))
+ assert.equal(pre.status,204)
+ assert.equal(pre.headers.get('access-control-allow-origin'),canonical)
+ const check=await h(req('GET',canonical))
+ assert.equal(check.status,409)
+ assert.equal((await check.json()).code,'live_origin_migration_required')
+ assert.equal(check.headers.get('access-control-allow-origin'),canonical)
+ assert.equal(readAttempts,0)
+ const evil=await h(req('GET','https://pazo-app.vercel.app.evil.invalid'))
+ assert.equal(evil.status,403)
+ assert.equal(evil.headers.get('access-control-allow-origin'),null)
+})
 test('authenticated owner must have completed onboarding before any provider call',async()=>{
  let providerCalls=0
  const fetchImpl=async(uri,opts)=>{
