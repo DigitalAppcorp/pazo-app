@@ -92,9 +92,6 @@ export const NotificationsModal = ({
         {/* Editorial community header, without extra fake notifications. */}
         <header className="relative flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#71847F]">
-              PAZO · {lang === 'es' ? 'Tu comunidad' : 'Your community'}
-            </p>
             <h2 id="pazo-notifications-heading" className="mt-1.5 max-w-[17ch] text-[clamp(23px,6vw,29px)] font-black leading-[1.15] tracking-tight text-[#204E4A]">
               {lang === 'es' ? 'Siempre cerca de tu comunidad.' : 'Always close to your community.'}
             </h2>
