@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 
-type Ticket={id:string;owner_id:string;category:'problem'|'question'|'feature'|'other';message:string;status:'open'|'reviewing'|'resolved';admin_note:string|null;created_at:string}
+type Ticket={id:string;owner_id:string;category:'problem'|'question'|'feature'|'other';message:string;status:'open'|'reviewing'|'resolved';admin_note:string|null;admin_reply:string|null;created_at:string}
 const names={problem:['Problema','Problem'],question:['Consulta','Question'],feature:['Nueva función','Feature idea'],other:['Otro','Other']} as const
 const states={open:['Pendiente','Open'],reviewing:['En revisión','Reviewing'],resolved:['Resuelto','Resolved']} as const
 
@@ -11,12 +11,13 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
  const [filter,setFilter]=useState('all')
  const [busyId,setBusyId]=useState<string|null>(null)
  const [notes,setNotes]=useState<Record<string,string>>({})
+ const [replies,setReplies]=useState<Record<string,string>>({})
  const [error,setError]=useState('')
  const l=(es:string,en:string)=>lang==='es'?es:en
  const refresh=useCallback(async()=>{
   setState('loading');setError('')
   const r=await supabase.from('pazo_support_tickets')
-   .select('id,owner_id,category,message,status,admin_note,created_at')
+   .select('id,owner_id,category,message,status,admin_note,admin_reply,created_at')
    .order('created_at',{ascending:false}).limit(100)
   if(r.error){setState('error');return}
   setItems((r.data??[]) as Ticket[]);setState('ready')
@@ -27,7 +28,8 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
   setBusyId(row.id);setError('')
   try{
    const {data,error:issue}=await supabase.rpc('pazo_admin_update_support_ticket',{
-    p_id:row.id,p_status:status,p_admin_note:notes[row.id]??row.admin_note??null
+    p_id:row.id,p_status:status,p_admin_note:notes[row.id]??row.admin_note??null,
+    p_admin_reply:replies[row.id]??row.admin_reply??null
    })
    if(issue||data!==true)throw Error('update')
    await refresh()
@@ -65,6 +67,13 @@ export function AdminSupportInbox({lang}:{lang:'es'|'en'}){
      <textarea rows={2} maxLength={1000} value={notes[t.id]??t.admin_note??''}
       onChange={e=>setNotes(prev=>({...prev,[t.id]:e.target.value}))}
       className="mt-2 w-full rounded-xl bg-[#F5F8F1] px-3 py-2 text-xs" />
+    </label>
+    <label className="block text-xs font-bold">{l('Respuesta visible para el usuario','Reply visible to the user')}
+     <textarea rows={3} maxLength={2000} value={replies[t.id]??t.admin_reply??''}
+      onChange={e=>setReplies(prev=>({...prev,[t.id]:e.target.value}))}
+      placeholder={l('El usuario podrá leer esta respuesta en Ayuda y soporte.',
+       'The user can read this reply in Help and Support.')}
+      className="mt-2 w-full rounded-xl bg-[#EFF4E9] px-3 py-2 text-xs" />
     </label>
     <div className="flex flex-wrap gap-2">
      {(['open','reviewing','resolved'] as const).map(status=><button key={status} type="button"
