@@ -1,3 +1,11 @@
+## Postflight HTTPS **PASS** y cierre de integración — 22-oct-2026 UTC
+
+CI [run 39728858221](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39728858221) **6/6 jobs SUCCESS** en PR77, incluido `public-beta-postflight-http` job119658995723. Auditoría HTTPS de la app desplegada `https://pazo-app-t83r.vercel.app` con `ready:true` y **7/7 PASS**: home, PayPal return falso sin reflejo del token, PayPal cancel falso, manifest PWA válido, service worker sin caché de datos, iconos PNG 192/512. No se usó ninguna credencial ni pago.
+
+PR77 merge `eddcb0a4370c8d78dd1d8c6be349ed3e9680f9bc`. Añade test HTTP público en CI y documentos de continuidad; la compilación Vercel publicada permanece SHA `5283bbc9460c2a991f258983b0051395f1911cea` porque PR77 no cambia el código de aplicación ni assets de Vite. PayPal sigue OFF y kill switch ON. **Este PASS no certifica el flujo iniciado en sesión Auth ni la instalación física de PWA.**
+
+---
+
 ## Actualización autoritativa de producción — 22-oct-2026, después de GO del PO
 
 **Tres PR incorporados a `main`:** #74 merge `e24d224d92cc80dbce51f4329feef77872335040`; #75 merge `7eaa2f402578b2d7ed7d183d44c54953fb15188d`; #76 merge `4c9ebe7895b887f32809537e0f512630c1a38cbf`. CI previo de sus heads: PR74 4/4 SUCCESS, PR75 5/5 SUCCESS con laboratorio PostgreSQL17, PR76 4/4 SUCCESS.
