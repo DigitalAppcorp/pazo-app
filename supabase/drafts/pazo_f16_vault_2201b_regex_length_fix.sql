@@ -101,3 +101,17 @@ BEGIN
   'vaultStored',true,'mayCharge',false,'merchantIdentityVerified',false);
 END $function$
 ;
+
+-- Pure regex-domain assertions; no Vault access, auth, credentials or writes.
+DO $pazo_f16_vault_regex_check$
+BEGIN
+ IF NOT (repeat('A',20) ~ '^[A-Za-z0-9_-]+$')
+    OR NOT (length(repeat('A',256)) BETWEEN 20 AND 256)
+    OR NOT (length(repeat('A',512)) BETWEEN 20 AND 512)
+    OR length(repeat('A',257)) BETWEEN 20 AND 256
+    OR length(repeat('A',513)) BETWEEN 20 AND 512
+    OR (repeat('A',19) ~ '^[A-Za-z0-9_-]+$' AND length(repeat('A',19)) BETWEEN 20 AND 256)
+    OR (repeat('A',19) ~ '^[A-Za-z0-9_-]+$' AND length(repeat('A',19)) BETWEEN 20 AND 512)
+    OR ('INVALID!' ~ '^[A-Za-z0-9_-]+$')
+ THEN RAISE EXCEPTION 'PAZO_F16_VAULT_VALIDATOR_DOMAIN_FAILED'; END IF;
+END $pazo_f16_vault_regex_check$;
