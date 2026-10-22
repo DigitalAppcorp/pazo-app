@@ -72,6 +72,17 @@ BEGIN
      updated_by=v_control.canary_owner
  WHERE environment='live' AND return_origin=v_old;
  IF NOT FOUND THEN RAISE EXCEPTION 'Live gateway origin write conflict'; END IF;
+ -- Preserve the strict CHECK constraint, but repin it atomically to
+ -- the PO-approved production domain. NOT VALID only avoids rejecting the
+ -- existing old-origin row before the same transaction updates it.
+ IF (SELECT pg_catalog.pg_get_constraintdef(c.oid,true)
+     FROM pg_catalog.pg_constraint c
+     WHERE c.conrelid='admin_private.pazo_live_release_artifact'::regclass
+       AND c.conname='pazo_live_release_artifact_return_origin_check')
+      <> 'CHECK (return_origin = ''https://pazo-app-t83r.vercel.app''::text)'
+ THEN RAISE EXCEPTION 'PAZO origin CHECK constraint differs'; END IF;
+ EXECUTE 'ALTER TABLE admin_private.pazo_live_release_artifact DROP CONSTRAINT pazo_live_release_artifact_return_origin_check';
+ EXECUTE 'ALTER TABLE admin_private.pazo_live_release_artifact ADD CONSTRAINT pazo_live_release_artifact_return_origin_check CHECK (return_origin = ''https://pazo-app.vercel.app'') NOT VALID';
  UPDATE admin_private.pazo_live_release_artifact
  SET return_origin=v_new,
      frontend_commit='1b2340523b80234a41a0a6ffac489bc32f5a2937',
@@ -79,6 +90,7 @@ BEGIN
      verified_at=pg_catalog.statement_timestamp()
  WHERE singleton AND return_origin=v_old;
  IF NOT FOUND THEN RAISE EXCEPTION 'Live artifact write conflict'; END IF;
+ EXECUTE 'ALTER TABLE admin_private.pazo_live_release_artifact VALIDATE CONSTRAINT pazo_live_release_artifact_return_origin_check';
  INSERT INTO admin_private.paypal_gateway_change_log(
    environment,actor_id,kind,details)
  VALUES('live',v_control.canary_owner,'origin_migration',
