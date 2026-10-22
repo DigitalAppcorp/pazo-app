@@ -1,3 +1,11 @@
+## Estado beta técnico publicado — 22-oct-2026 UTC (último corte verificado)
+
+**Frontend Production READY:** `dpl_DFkGfivtBoK5CV3jvL4V2yJV2pSW` SHA `b5547243bfaeb6c17b8bd3929f05468273b9576b`; PR78 (labels Auth) y PR79 (Chromium E2E más estricto) integrados. GitHub Actions [run39733214540](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39733214540) **7/7 jobs PASS**, Chromium 390/1440 **29/29 PASS** incluyendo navegación pública de registro/login/recuperación, retorno/cancelación no financiera y worker PWA real; no usuario autenticado ni dispositivo físico. Backend: migración beneficios públicos Live-only aplicada y QA conservado; Vault Edge v2 ACTIVE. Certificado técnico v3 registrado en DB para **el SHA desplegado** con digest `03aeb1b37a465a52f0de6bf1963b46d258c5a9ef1848bb46775809bc30fabf9a`, BEGIN/ROLLBACK y COMMIT PASS, `artifact_ready=true`; versiones antiguas de evidencia preservadas.
+
+**El PO aún debe completar personalmente:** validar UI Admin autenticada y aspecto visual responsive, instalar PWA en teléfono real, guardar privadamente claves PayPal Live con TOTP fresco, autorizar canary real US$2.99 y validar venta/cancelación/beneficios. Live sigue OFF, kill switch ON y cero pagos. No declarar beta financiera pública lanzada sin lo anterior. Informe detallado en `docs/PAZO_BETA_RELEASE_FINAL_ACCEPTANCE_20261022.md`. Este checkpoint prevalece sobre reportes históricos inferiores que citan frontend `5283bbc9` o versiones anteriores.
+
+---
+
 ## Estado final comprobado de despliegue técnico — 22-oct-2026 UTC
 
 **Técnica publicada y comprobada:** PR74/75/76/77 fusionados. Vercel `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB`, SHA `5283bbc9...`, READY y alias `https://pazo-app-t83r.vercel.app`; CI externo run39728858221 6/6 SUCCESS, smoke HTTPS/PWA **7/7 PASS**. DB migration `20261022052854_pazo_f16_public_benefits_live_only` hospedada + versionada, muro e insignias Sandbox públicos0/0, QA períodos2 y consentimientos2 conservados; Edge Vault v2 ACTIVE JWT ON. Certificado técnico v2 actualizado mediante ROLLBACK+COMMIT protegido y digest verificado: nueva frontend SHA `5283bbc9`, JSON evidence SHA256 `d472e6fc2fe1761b9a57bee7bfda90caf91758393afdda7d606a0d94a118244b`. Documentación autoritativa `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`.
