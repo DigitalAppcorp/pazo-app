@@ -1,3 +1,9 @@
+## Lanzamiento técnico en Production — 22-oct-2026 UTC (estado más reciente)
+
+PR71 F13/F16 integrado a `main` (`f7cc359a15e874942f68fc15f55c43e851f7724d`) tras 8/8 Actions PASS del release; Vercel production `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM` **READY**, alias `https://pazo-app-t83r.vercel.app` sin error. **HTTPS/PWA HTTP7/7 PASS real** en GitHub Actions [run39718690012](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39718690012), job119626859178 (portada, return/cancel, manifest, SW, iconos). No debe reabrirse el bloqueo anterior de404/SSO en la URL canónica sin evidencia nueva. 
+
+Supabase release `off/revision0`, PayPal Live false, kill ON, certificado0, solicitudes/evidencias0; no pago real, canary ni claves. Falta QA autenticada/PWA física, registro de certificado técnico conforme a P4 y entrada privada/GO del PO para canary US$2.99, venta/renovación/cancelación y apertura pública financiera. Monetización sigue NO-GO; la PWA gratuita ya tiene despliegue técnico Production y rutas HTTP válidas. Handoff detallado: `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`. Esta sección supersede las notas históricas inferiores que digan `main` intacto o canonical no publicado.
+
 ## Preview HTTPS verificado — 21-oct-2026, Guatemala (22-oct UTC)
 
 Red del candidato RESUELTA, sin volver a pedir secretos/publicación de entorno.
