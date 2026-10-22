@@ -291,3 +291,4 @@ END $overlap$;
 \i scripts/f16-live-admin-finance-disposable-lab.sql
 \i scripts/f16-live-readiness-disposable-lab.sql
 \i scripts/f16-live-controlled-release-disposable-lab.sql
+\i scripts/f16-public-benefits-visibility-disposable-lab.sql

@@ -1,3 +1,5 @@
+> **Continuación22-oct:** inspección individual41/41 completada; hallazgo de visibilidad de muro corregido en SQL preparado, aún no instalado en este checkpoint. HIBP solo Pro, sin upgrade autorizado. Evidencia vigente: `PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`. Las tareas anteriores pendientes de inspección quedan superadas; no es certificación financiera ni GO.
+
 # PAZO Beta — Supabase Security Advisor triage (2026-10-21)
 
 Source: connected Supabase Advisors on project `mrybvqdebbgcayuvgkkr`, read-only at **2026-10-21 23:48 UTC**. No configuration, permissions, users or database rows were modified by this audit.

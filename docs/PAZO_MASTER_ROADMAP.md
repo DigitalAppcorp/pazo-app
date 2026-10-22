@@ -1,3 +1,17 @@
+## Seguridad RPC — 22-oct-2026, parche preparado
+
+Inspección íntegra de41 SECURITY DEFINER públicas ejecutables por authenticated
+(4 también anon), todas search_path vacío. Hallazgo reproducido: muro podía
+exponer mascota retirada por moderación al saltarse RLS. SQL23021500 corrige
+lector público de beneficios usando visibilidad moderada existente; no modifica
+pagos, consentimiento ni grants. Matrices ya se rechazaban (no bypass); límite
+se valida explícitamente. Gateway PG17 completo PASS con fuente anterior
+reproducida, rollback/savepoint y roles anon/authenticated reales. SQL aún
+NO APLICADO en este checkpoint; CI y ensayo/postflight alojado pendientes.
+HIBP requiere Pro según documentación oficial, plan actualFree: riesgo residual
+pendiente de considerar en GO, sin upgrade ni presunción de aceptación.
+Ver `docs/PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
+
 ## Correo, Auth, privacidad y preview — 22-oct-2026 (estado vigente)
 
 Vista protegida creada y **READY** por Vercel: deployment
