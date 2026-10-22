@@ -1,3 +1,17 @@
+## F17 INSTALADO + CANÓNICO PUBLICADO — 22-oct-2026 (postflight validado)
+
+**Autorización del PO:** instalar las tres migraciones F17 y publicar la aplicación en **https://pazo-app.vercel.app/** (no confundir con `pazo-app-t83r.vercel.app`). El GitHub PR #81 permaneció DRAFT y `main` no se fusionó.
+
+**Supabase** proyecto `mrybvqdebbgcayuvgkkr`: ensayo transaccional con ROLLBACK PASS y lectura posterior mostró cero tablas/versiones remanentes; instalación con COMMIT de las migraciones `20261022103706`, `20261022103707`, `20261022103708` en una transacción. Postflight PASS: 3 entradas historial, 5 tablas nuevas FORCE RLS, 1 tarea de retención pg_cron 90 días, mantenimiento `enabled=false/revision=0`, tickets y regalos0. Los hashes de las 5 dependencias actuales coincidieron con los guards SQL. PayPal se mantuvo canary/rev1, checkout live_enabled=true, kill=false, periodos Live0, sin escrituras financieras. Edge **`f16-paypal-supporter-v2-qa`** desplegado dirigido versión27 ACTIVE con JWT ON (20 archivos existentes conservados, index actualizado y 1 helper adicional); Vaultv2 y Edge Live sin tocar.
+
+**Vercel:** verificado que `pazo-app.vercel.app` pertenece a `pazo-app` (`prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`), proyecto separado de `pazo-app-t83r`. Se copiaron solo variables públicas de compilación indispensables desde el proyecto F16 validado (Supabase URL/publishable, Mapbox public token, beneficio F16, fecha legal, release); no PayPal, service_role ni credenciales. Compilación preview F17 `dpl_54raQqoKCAvQtsZzFLjajgDFJAxm` READY. Despliegue **PRODUCTION** `dpl_7rPxM5BzSaz3YJrDDu6NMpY1bfWT` READY, commit exacto `a8624a0b1db1e24c0487210e38ec6b62db9b8b6d`. La API de aliases verificó `pazo-app.vercel.app` → ese ID en proyecto correcto; el alias anterior quedó sustituido.
+
+**Verificación pendiente:** el control de bypass HTTP de Vercel devolvió 403 *al consultar permisos de API*, no un error demostrado de la aplicación. La herramienta de web público no pudo leer ese sitio; por tanto NO afirmar HTTP200, splash verificada, login real, render Mapbox, PWA física o validación de canary. El PO debe comprobar Chrome/Safari/instalada con cuenta real autorizada. Verificar dominio permitido por Mapbox y callback PayPal para nuevo origen antes de activar públicamente pagos desde esta URL. No cambiar credenciales PayPal.
+
+**Último release de código** = `a8624a0b`. Los commits posteriores de documentación no están necesariamente en el despliegue; evitar confundir HEAD documental con SHA deployado. No repetir migraciones ni reactivar cron. Mantener modo mantenimiento OFF y separar autorización financiera.
+
+---
+
 ## F17 EN CURSO — continuación Codex sobre PR81, 22-oct-2026 Guatemala
 
 Se recuperó HEADa7b1f2c8 de la rama F17 y se conservó el trabajo de ChatGPT.
