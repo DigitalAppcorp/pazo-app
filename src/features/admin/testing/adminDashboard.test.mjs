@@ -99,6 +99,13 @@ test('mobile control center contains comprehensive operator sections and forbids
  assert.ok(board.includes('stored_objects'))
  assert.ok(board.includes('adminOverview(period)'))
  assert.ok(board.includes('role="dialog"'))
+ assert.ok(board.includes('ref={dialogRef} tabIndex={-1} role="dialog"'))
+ assert.ok(board.includes("document.addEventListener('keydown',handleKeydown)"))
+ assert.ok(board.includes("document.removeEventListener('keydown',handleKeydown)"))
+ assert.ok(board.includes("event.key==='Escape'"))
+ assert.ok(board.includes("event.key!=='Tab'"))
+ assert.ok(board.includes('last.focus()')&&board.includes('first.focus()'))
+ assert.ok(board.includes('if(previousFocus?.isConnected)previousFocus.focus()'))
  assert.ok(!board.includes('focus-visible:ring-')&&!board.includes('focus-visible:outline-'))
 })
 
