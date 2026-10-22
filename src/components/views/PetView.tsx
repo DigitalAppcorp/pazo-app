@@ -12,6 +12,7 @@ import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
 import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
+import { SupportRequestDialog } from '../../features/support/components/SupportRequestDialog'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
@@ -82,6 +83,7 @@ export const PetView = ({
   const settingsMenuRef = useRef<HTMLDivElement>(null)
   const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const [showDeletionRequest, setShowDeletionRequest] = useState(false)
+  const [showSupportRequest,setShowSupportRequest]=useState(false)
   // The intake RPCs are installed and QA-tested. Keep production disabled
   // until launch gates close; allow request/status/cancel QA in localhost.
   const requestEnabled = import.meta.env.DEV || import.meta.env.VITE_F14_DELETION_REQUESTS_ENABLED === 'true'
@@ -320,6 +322,10 @@ export const PetView = ({
                     {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
                   </button>
                   <PazoInstallControl lang={lang} />
+                  <button type="button" onClick={() => {setShowSettings(false);canManagePet?setShowSupportRequest(true):onRequireAccount()}}
+                   className="min-h-11 w-full rounded-2xl bg-[#EFF4E8] px-3 py-3 text-left text-xs font-bold text-[#204E4A] hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/45">
+                   {lang==='es'?'Ayuda, consultas y sugerencias':'Help, questions and suggestions'}
+                  </button>
               <div className="mt-2 rounded-2xl bg-[#F0F3ED]/85 p-3">
                 <h4 className="text-sm font-extrabold text-[#204E4A]">
                   {lang==='es'?'Cuenta y datos':'Account and data'}
@@ -825,6 +831,7 @@ export const PetView = ({
         )}
       {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
       {showDeletionRequest && <DeletionRequestDialog lang={lang} onClose={() => setShowDeletionRequest(false)} />}
+      {showSupportRequest && <SupportRequestDialog lang={lang} onClose={() => setShowSupportRequest(false)} />}
     </div>
   )
 }
