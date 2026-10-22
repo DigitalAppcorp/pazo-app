@@ -1,3 +1,20 @@
+## Preview HTTPS verificado — 21-oct-2026, Guatemala (22-oct UTC)
+
+Red del candidato RESUELTA, sin volver a pedir secretos/publicación de entorno.
+Fuente a3f912eb, deployment dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3: HTTP7/7 y
+Chromium HTTPS390/1440 PASS, app inicia, legal Gmail/PayPal, mayoría18+ desmarcada,
+callbacks limpian tokens, SW activo/CacheStorage0, offline503 y recuperación online.
+Mapbox estilo+JS/CSS200; no certificación de mapa/instalación física. Gmail
+recibido confirmado previamente, sin envío nuevo. CIa3f912eb y875f3d92:5/5 cada uno.
+
+Postflight readonly: modoOFF/rev0, Live=false/kill=true/procesamiento=false,
+heartbeat reciente, intentos/períodos/certificados0. Main y producción intactos.
+Pendiente GO de integración/despliegue técnico canonical con comprasOFF; después
+verificación/certificado, claves privadas y GO canary. NO pago real ni beta
+pública aprobados, no READY_FOR_PO_CREDENTIALS hasta canonical/certificado.
+Evidencia `docs/PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md` y JSON agregado.
+Las notas inferiores del403 de este hostname quedan superadas.
+
 ## Vista final y configuración pública corregida — 22-oct-2026
 
 Código `a3f912ebbb64d1c2365471be04ac2915fc9e1e9e`: **5/5 Actions SUCCESS**.

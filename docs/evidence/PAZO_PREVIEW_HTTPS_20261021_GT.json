@@ -1,0 +1,102 @@
+{
+  "observedAtUTC": "2026-10-22T03:11:18.847875+00:00",
+  "userTimezone": "America/Guatemala",
+  "userDate": "2026-10-21",
+  "sourceCommit": "a3f912ebbb64d1c2365471be04ac2915fc9e1e9e",
+  "deployment": "dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3",
+  "http": {
+    "source": "pazo_protected_preview_http_probe_v1",
+    "origin": "https://pazo-app-t83r-b6fzt5jwv-digitalapp.vercel.app",
+    "ready": true,
+    "checks": [
+      {
+        "id": "home",
+        "code": "pass"
+      },
+      {
+        "id": "paypalReturn",
+        "code": "pass"
+      },
+      {
+        "id": "paypalCancel",
+        "code": "pass"
+      },
+      {
+        "id": "manifest",
+        "code": "pass"
+      },
+      {
+        "id": "serviceWorker",
+        "code": "pass"
+      },
+      {
+        "id": "icon192",
+        "code": "pass"
+      },
+      {
+        "id": "icon512",
+        "code": "pass"
+      }
+    ],
+    "deployment": "dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3",
+    "sourceCommit": "a3f912ebbb64d1c2365471be04ac2915fc9e1e9e"
+  },
+  "browser": [
+    {
+      "width": 390,
+      "https_browser": "PASS",
+      "service_worker_active": true,
+      "cache_storage_entries": 0,
+      "offline_fallback_503": true,
+      "online_recovery": true,
+      "callbacks_scrubbed": true,
+      "unselected_age_attestation": true,
+      "provider_calls": 0,
+      "sourceCommit": "a3f912ebbb64d1c2365471be04ac2915fc9e1e9e",
+      "physical_pwa_install": false
+    },
+    {
+      "width": 1440,
+      "https_browser": "PASS",
+      "service_worker_active": true,
+      "cache_storage_entries": 0,
+      "offline_fallback_503": true,
+      "online_recovery": true,
+      "callbacks_scrubbed": true,
+      "unselected_age_attestation": true,
+      "provider_calls": 0,
+      "sourceCommit": "a3f912ebbb64d1c2365471be04ac2915fc9e1e9e",
+      "physical_pwa_install": false
+    }
+  ],
+  "mapboxResources": {
+    "standardStyle": 200,
+    "mapboxGlJs3_30_0": 200,
+    "mapboxGlCss3_30_0": 200,
+    "fullMapRenderCertified": false
+  },
+  "smtp": {
+    "provider": "Gmail",
+    "transportRequestHttp": 200,
+    "ownerReceiptConfirmedInChat": true,
+    "passwordChanged": false,
+    "newEmailSentThisCheckpoint": false
+  },
+  "financialReadonlyPostflight": {
+    "mode": "off",
+    "revision": 0,
+    "live": false,
+    "kill": true,
+    "processing": false,
+    "heartbeatRecent": true,
+    "intents": 0,
+    "periods": 0,
+    "certificates": 0
+  },
+  "limitations": {
+    "canonicalCandidateDeployed": false,
+    "physicalPwaInstalled": false,
+    "livePaymentVerified": false,
+    "poPublicReleaseGo": false
+  }
+}

@@ -1,5 +1,7 @@
 # Preview final: runtime y cierre de correo — 22-oct-2026
 
+> **Actualización Guatemala21-oct/UTC22-oct:** red resuelta, HTTP7/7 y Chromium HTTPS390/1440+offline/online PASS del candidato exacto. No instalación física ni dinero. Evidencia vigente `PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md`; notas de red pendientes inferiores son historia superada. Canonical/certificado requieren GO.
+
 ## Código y servicios
 
 Fuente candidata **a3f912ebbb64d1c2365471be04ac2915fc9e1e9e**,5/5 Actions SUCCESS,
