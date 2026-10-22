@@ -29,6 +29,14 @@ El PO ordenó terminar el software de beta y PayPal Live **antes** de entregar l
 - `src/features/admin/testing/adminDashboard.test.mjs`: añade contratos de roles, enfoque del diálogo, Escape, Tab y restauración del foco.
 - `.github/workflows/ci.yml`: únicamente el job PG17 desechable F16-P12 usa un puerto publicado dinámicamente. CI anterior `39723743142`: prueba estática antigua falló después del cambio de nodo portal; también ocurrió colisión efímera de puerto fijo 55442. Prueba corregida; siguiente CI `39723890289` tuvo 4/4 jobs PASS **antes** del ajuste del puerto. Cualquier CI posterior debe inspeccionarse antes del merge.
 
+## Simplificación Live y sincronización fiable del guardado
+
+- `AdminPayPalSettings.tsx` oculta **solo en Live** el editor heredado de otro plan, webhook y credenciales de gateway; los recursos de generación original no se recrean. Sandbox conserva el editor existente.
+- `AdminPaypalLiveVaultSetup.tsx` requiere que el servidor haya contestado con un estado privado verificable antes de ofrecer campos para ingresar las credenciales Live. Ante lectura ambigua no hay segundo POST ni formulario de reprovisión; el panel de preparación ofrece consulta de estado.
+- `AdminLiveReadiness.tsx` comparte exclusivamente el booleano `credentialsStored`, nunca una clave, ID, merchant ni secreto. Tras un guardado confirmado se fuerza nueva lectura del readiness server-side incluso cuando `pazo_admin_paypal_settings.updated_at` no cambia. La verificación después de recargar evita pedir las mismas claves otra vez.
+- `scripts/f16-live-readiness-ui.test.mjs` ejercita el bloqueo de campos hasta lectura verificada y preserva la prueba de resultado de guardado incierto, sin conexión externa.
+- Sigue siendo indispensable un E2E de cuenta administradora con MFA real y posterior canary financiero bajo GO; CI sintética no es prueba de un cargo.
+
 ## Secuencia restante
 
 1. CI final de PR74 PASS, revisión de diff, actualización de evidencias.
