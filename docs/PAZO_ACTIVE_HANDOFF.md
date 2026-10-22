@@ -1,3 +1,11 @@
+## Estado final comprobado de despliegue técnico — 22-oct-2026 UTC
+
+**Técnica publicada y comprobada:** PR74/75/76/77 fusionados. Vercel `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB`, SHA `5283bbc9...`, READY y alias `https://pazo-app-t83r.vercel.app`; CI externo run39728858221 6/6 SUCCESS, smoke HTTPS/PWA **7/7 PASS**. DB migration `20261022052854_pazo_f16_public_benefits_live_only` hospedada + versionada, muro e insignias Sandbox públicos0/0, QA períodos2 y consentimientos2 conservados; Edge Vault v2 ACTIVE JWT ON. Certificado técnico v2 actualizado mediante ROLLBACK+COMMIT protegido y digest verificado: nueva frontend SHA `5283bbc9`, JSON evidence SHA256 `d472e6fc2fe1761b9a57bee7bfda90caf91758393afdda7d606a0d94a118244b`. Documentación autoritativa `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`.
+
+**Financiero NO ACTIVADO:** release OFF, kill switch ON, live_enabled=false y ningún pago Live. Pendientes solo de validación de usuario/dispositivo y autorización financiera específica: sesión Admin en dominio público, MFA + guardar credenciales reales en formulario privado (nunca chat), instalación física de PWA, canary real de US$2.99 con GO separado y verificación de reconciliación, beneficios, cancelación, renovación y funcionamiento real. No llamar `LIVE_CANARY_PASS` ni `BETA_FINANCIERA_PUBLICA` antes de esos gates. Logs runtime Vercel 403 (sin evidencia de ausencia de errores).
+
+---
+
 ## Estado ACTUAL tras GO técnico del PO — 22-oct-2026 UTC
 
 PR74/75/76 **MERGED** a `main`; commit de merge del último `4c9ebe7895b887f32809537e0f512630c1a38cbf`. SQL público Live-only **APLICADO**, migration `20261022052854` versionada `5283bbc9`. Postflight real: muro y badges públicos 0/0 al no existir Live paid periods; QA rows2 y consentimientos2 preservados. Edge `pazo-admin-paypal-vault` v2 ACTIVE, JWT ON, hash `cccbf1a996470f898011bced29e72d2cf8e5ddd6cfaa276cac5b234e462877c9`. Vercel Production `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB` READY SHA `5283bbc9`, dominio canónico asignado. Rollback ensayo antes de aplicar SQL PASS. Finanzas OFF/kill ON/pagados Live0. Ver `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md` (sección al inicio), que prevalece sobre los checkpoints históricos inferiores.
