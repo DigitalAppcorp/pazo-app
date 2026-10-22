@@ -108,15 +108,6 @@ BEGIN
    AND u.is_anonymous IS DISTINCT FROM true
  ) THEN RAISE EXCEPTION 'Confirmed authentication required'
   USING ERRCODE='42501'; END IF;
- -- Gifted benefits remain separate from paid periods and payment metrics.
- IF EXISTS(SELECT 1 FROM supporter_private.pazo_admin_gift_access a
-  WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
-    AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp())) THEN
-  SELECT milestone INTO v_months FROM supporter_private.pazo_admin_gift_access
-   WHERE owner_id=v_owner AND revoked_at IS NULL
-    AND (expires_at IS NULL OR expires_at>pg_catalog.clock_timestamp());
-  RETURN pg_catalog.jsonb_build_object('active',true,'milestone',v_months);
- END IF;
 
  v_live:=supporter_private.pazo_live_project_paid_periods(
   v_owner,pg_catalog.clock_timestamp());
@@ -131,6 +122,16 @@ BEGIN
   RETURN pg_catalog.jsonb_build_object(
    'active',true,'milestone',CASE WHEN v_months>=12 THEN 12
     WHEN v_months>=6 THEN 6 WHEN v_months>=3 THEN 3 ELSE 0 END);
+ END IF;
+
+ -- Gifted benefits remain separate from paid periods and payment metrics.
+ IF EXISTS(SELECT 1 FROM supporter_private.pazo_admin_gift_access a
+  WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
+    AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp())) THEN
+  SELECT milestone INTO v_months FROM supporter_private.pazo_admin_gift_access
+   WHERE owner_id=v_owner AND revoked_at IS NULL
+    AND (expires_at IS NULL OR expires_at>pg_catalog.clock_timestamp());
+  RETURN pg_catalog.jsonb_build_object('active',true,'milestone',v_months);
  END IF;
 
  -- Existing QA remains a separate, explicitly allowlisted Sandbox source.
@@ -167,17 +168,6 @@ BEGIN
   RETURN pg_catalog.jsonb_build_object('badge',false,'theme',NULL,'milestone',0);
  END IF;
 
- -- Manual administrator-granted access is NOT payment or financial evidence.
- IF EXISTS(SELECT 1 FROM supporter_private.pazo_admin_gift_access a
-     WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
-      AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp())) THEN
-  SELECT a.milestone INTO v_months FROM supporter_private.pazo_admin_gift_access a
-   WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
-     AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp());
-  SELECT t.theme INTO v_theme FROM supporter_private.pazo_live_pet_themes t
-   WHERE t.pet_id=p_pet_id AND t.owner_id_at_set=v_owner;
-  RETURN pg_catalog.jsonb_build_object('badge',true,'theme',v_theme,'milestone',v_months);
- END IF;
 
  v_live:=supporter_private.pazo_live_project_paid_periods(
   v_owner,pg_catalog.clock_timestamp());
@@ -198,6 +188,18 @@ BEGIN
    'badge',true,'theme',v_theme,
    'milestone',CASE WHEN v_months>=12 THEN 12
     WHEN v_months>=6 THEN 6 WHEN v_months>=3 THEN 3 ELSE 0 END);
+ END IF;
+
+ -- Manual administrator-granted access is NOT payment or financial evidence.
+ IF EXISTS(SELECT 1 FROM supporter_private.pazo_admin_gift_access a
+     WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
+      AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp())) THEN
+  SELECT a.milestone INTO v_months FROM supporter_private.pazo_admin_gift_access a
+   WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
+     AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp());
+  SELECT t.theme INTO v_theme FROM supporter_private.pazo_live_pet_themes t
+   WHERE t.pet_id=p_pet_id AND t.owner_id_at_set=v_owner;
+  RETURN pg_catalog.jsonb_build_object('badge',true,'theme',v_theme,'milestone',v_months);
  END IF;
 
  RETURN pg_catalog.jsonb_build_object('badge',false,'theme',NULL,'milestone',0);
@@ -225,6 +227,15 @@ BEGIN
  END IF;
  IF p_theme NOT IN ('classic','nature','hearts','stars','adventure')
  THEN RAISE EXCEPTION 'Unsupported theme' USING ERRCODE='22023'; END IF;
+
+ v_live:=supporter_private.pazo_live_project_paid_periods(v_owner,pg_catalog.clock_timestamp());
+ IF v_live->>'sourceEnvironment'='live' AND v_live->>'active'='true' THEN
+  INSERT INTO supporter_private.pazo_live_pet_themes AS t(pet_id,owner_id_at_set,theme)
+  VALUES(p_pet_id,v_owner,p_theme) ON CONFLICT(pet_id) DO UPDATE
+  SET owner_id_at_set=EXCLUDED.owner_id_at_set,theme=EXCLUDED.theme,
+   updated_at=pg_catalog.clock_timestamp();
+  RETURN true;
+ END IF;
  IF EXISTS(SELECT 1 FROM supporter_private.pazo_admin_gift_access a
   WHERE a.owner_id=v_owner AND a.revoked_at IS NULL
     AND (a.expires_at IS NULL OR a.expires_at>pg_catalog.clock_timestamp())) THEN
@@ -235,14 +246,6 @@ BEGIN
   RETURN true;
  END IF;
 
- v_live:=supporter_private.pazo_live_project_paid_periods(v_owner,pg_catalog.clock_timestamp());
- IF v_live->>'sourceEnvironment'='live' AND v_live->>'active'='true' THEN
-  INSERT INTO supporter_private.pazo_live_pet_themes AS t(pet_id,owner_id_at_set,theme)
-  VALUES(p_pet_id,v_owner,p_theme) ON CONFLICT(pet_id) DO UPDATE
-  SET owner_id_at_set=EXCLUDED.owner_id_at_set,theme=EXCLUDED.theme,
-   updated_at=pg_catalog.clock_timestamp();
-  RETURN true;
- END IF;
  v_qa:=supporter_private.f16_sandbox_qa_projection(v_owner,pg_catalog.clock_timestamp());
  IF v_qa->>'active' IS DISTINCT FROM 'true'
  THEN RAISE EXCEPTION 'Verified paid coverage required' USING ERRCODE='42501'; END IF;
