@@ -93,8 +93,9 @@ BEGIN
  EXECUTE 'ALTER TABLE admin_private.pazo_live_release_artifact VALIDATE CONSTRAINT pazo_live_release_artifact_return_origin_check';
  INSERT INTO admin_private.paypal_gateway_change_log(
    environment,actor_id,kind,details)
- VALUES('live',v_control.canary_owner,'origin_migration',
+ VALUES('live',v_control.canary_owner,'validation',
   pg_catalog.jsonb_build_object(
+   'scope','canonical_return_origin_migration',
    'method','PO-authorized operator SQL under F17 branch',
    'previous_origin',v_old,'return_origin',v_new,
    'public_domain_http_gate','CI 39856221792: seven HTTP/manifest callbacks PASS',
