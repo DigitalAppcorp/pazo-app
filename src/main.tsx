@@ -18,10 +18,10 @@ if (!getPublicSupabaseConfig(import.meta.env)) {
   </main>)
 } else {
   // Do not import modules that initialize database clients before validation.
-  void import('./App.tsx').then(({ default: App }) => {
+  void Promise.all([import('./App.tsx'),import('./features/maintenance/MaintenanceGate.tsx')]).then(([{default:App},{MaintenanceGate}]) => {
     initializeObservability()
     registerPazoPwa()
-    root.render(<StrictMode><ErrorBoundary><App /></ErrorBoundary></StrictMode>)
+    root.render(<StrictMode><ErrorBoundary><MaintenanceGate><App /></MaintenanceGate></ErrorBoundary></StrictMode>)
   }).catch(() => {
     root.render(<main role="alert" className="p-6 text-[#204E4A] bg-[#FAF8F5] min-h-screen">
       <p>{navigator.language.startsWith('en') ? 'PAZO could not load. Reload or contact support.'
