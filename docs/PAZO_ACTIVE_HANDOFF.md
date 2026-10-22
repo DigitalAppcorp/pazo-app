@@ -1,3 +1,11 @@
+## Estado ACTUAL tras GO técnico del PO — 22-oct-2026 UTC
+
+PR74/75/76 **MERGED** a `main`; commit de merge del último `4c9ebe7895b887f32809537e0f512630c1a38cbf`. SQL público Live-only **APLICADO**, migration `20261022052854` versionada `5283bbc9`. Postflight real: muro y badges públicos 0/0 al no existir Live paid periods; QA rows2 y consentimientos2 preservados. Edge `pazo-admin-paypal-vault` v2 ACTIVE, JWT ON, hash `cccbf1a996470f898011bced29e72d2cf8e5ddd6cfaa276cac5b234e462877c9`. Vercel Production `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB` READY SHA `5283bbc9`, dominio canónico asignado. Rollback ensayo antes de aplicar SQL PASS. Finanzas OFF/kill ON/pagados Live0. Ver `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md` (sección al inicio), que prevalece sobre los checkpoints históricos inferiores.
+
+Faltan: smoke HTTP del nuevo despliegue desde corredor externo Actions; experiencia Auth/PWA instalada en dispositivo; nueva evidencia del certificado técnico (fila actual referencia SHA `f7cc359a...` del deploy anterior); credenciales privadas ingresadas solo por PO con MFA y canary real US$2.99 bajo GO financiero separado. No declarar LIVE_CANARY_PASS ni membresía financiera abierta. El GO del PO para descartar reglas previas si bloquean mejora técnica NO es una licencia para ejecutar cargos Live sin nueva autorización financiera explícita.
+
+---
+
 ## Continuación — tres correcciones beta separadas y sometidas a GO (22-oct-2026 UTC)
 
 **PR74 DRAFT:** roles Admin/moderador, accesibilidad de consola, vista Live sin formulario legado, estado seguro de credenciales; CI 4/4 PASS. **PR75 DRAFT:** bug confirmado: 0 períodos Live, 2 filas Sandbox QA, 3 badges públicos y 2 entradas del muro públicas originadas de QA; SQL Live-only en borrador (SIN APLICAR), PostgreSQL 17 y CI 5/5 PASS. **PR76 DRAFT:** Live plan/webhook originales correctos pero reserva de generación ausente, y bootstrap manual bloquea por webhook ya existente. Vault ahora prepara la reserva usando la RPC idempotente service-only durante el único guardado MFA, con readback y sin recrear recursos PayPal, CI 4/4 PASS; Edge NO DESPLEGADA. Ver `docs/PAZO_BETA_SCOPE_CLOSURE_20261022.md` (PR74), `docs/PAZO_PUBLIC_BENEFITS_SANDBOX_ISOLATION_20261022.md` (PR75), `docs/PAZO_BETA_LIVE_ONE_STEP_CREDENTIALS_GATE_20261022.md` (PR76).

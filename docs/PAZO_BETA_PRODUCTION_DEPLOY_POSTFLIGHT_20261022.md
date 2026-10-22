@@ -1,3 +1,19 @@
+## Actualización autoritativa de producción — 22-oct-2026, después de GO del PO
+
+**Tres PR incorporados a `main`:** #74 merge `e24d224d92cc80dbce51f4329feef77872335040`; #75 merge `7eaa2f402578b2d7ed7d183d44c54953fb15188d`; #76 merge `4c9ebe7895b887f32809537e0f512630c1a38cbf`. CI previo de sus heads: PR74 4/4 SUCCESS, PR75 5/5 SUCCESS con laboratorio PostgreSQL17, PR76 4/4 SUCCESS.
+
+**Migración hospedada PASS:** `20261022052854_pazo_f16_public_benefits_live_only` aplicada por `apply_migration` y versionada en `supabase/migrations/20261022052854_pazo_f16_public_benefits_live_only.sql` (commit `5283bbc9460c2a991f258983b0051395f1911cea`). Antes, BEGIN/ROLLBACK con pruebas fail-closed PASS; la fuente original seguía activa tras rollback. Después: `pazo_supporter_public_wall(48)` **0**, badges públicos **0**, Live paid periods **0**, QA períodos **2** conservados, consentimientos muro **2** conservados; función ya no contiene fallback Sandbox. **No se eliminó data QA.**
+
+**Edge ACTIVE v2:** `pazo-admin-paypal-vault`, `ezbr_sha256=cccbf1a996470f898011bced29e72d2cf8e5ddd6cfaa276cac5b234e462877c9`, `verify_jwt=true`; paquete de 9 fuentes comparadas contra GitHub `main`. Sigue exigiendo rol administrador y MFA reciente; auto-reserva **una vez** la generación original de configuración cuando no exista, seguida de readback owner-scoped. Esto NO valida credenciales reales ni crea un cargo.
+
+**Vercel Production READY:** deployment `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB`, SHA `5283bbc9460c2a991f258983b0051395f1911cea`, alias canónico `https://pazo-app-t83r.vercel.app`, sin error de alias; no se alteraron settings SSO. E2E móvil físico y estado Auth real aún requieren pruebas. El job `public-beta-postflight-http` de este PR ejecuta GET en rutas home/return/cancel/manifest/SW/iconos contra el dominio publicado; su resultado debe consultarse en GitHub Actions antes de declarar PASS.
+
+**Finanzas:** release `off`; live_enabled=false, kill_switch=true, Live paid periods 0. El certificado técnico heredado `admin_private.pazo_live_release_artifact` sigue devolviendo ready=true, **pero documenta frontend SHA anterior `f7cc359a...`**. NO atribuir al nuevo deploy una certificación que solo verificó el artefacto anterior. La conciliación de certificado/evidencia con nuevo frontend es gate antes de canary financiero.
+
+**Limitaciones honestas:** no se han confirmado canary PayPal Live real ni instalación PWA en teléfono real; ninguna operación OAuth Live con claves reales. Código, DB y Edge pueden pasar controles técnicos sin que eso equivalga a pruebas autenticadas del usuario.
+
+---
+
 ## F16 — certificado técnico instalado y gate previo a credenciales — 22-oct-2026 UTC
 
 **PASS real de la parte técnica comprobable sin PayPal Live**. GitHub `main` incluye PR71/72; Vercel Production `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM` READY, frontend SHA `f7cc359a15e874942f68fc15f55c43e851f7724d`, canonical `https://pazo-app-t83r.vercel.app`; HTTP público 7/7 PASS en Actions run39718690012/job119626859178. Cinco Edge Live listadas ACTIVE en versiones release1/webhook2/checkout3/cuenta5/worker4 y hashes exactos almacenados en `docs/evidence/PAZO_F16_TECHNICAL_CERTIFICATE_BASIS_20261022.md`; fuente de69/69 verificada por postflight anterior. Worker vivo (heartbeat dentro5min), oferta ES/EN, RPC recuperación, beneficios y finanzas PASS.
