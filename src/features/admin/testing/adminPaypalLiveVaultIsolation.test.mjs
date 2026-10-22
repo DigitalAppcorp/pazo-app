@@ -26,7 +26,7 @@ test('switching Sandbox to Live clears in-memory secret fields',()=>{
 })
 test('Live never invokes legacy Vault connection validation',()=>{
  const start=ui.indexOf(' const validateCredentials=async()=>{')
- const end=ui.indexOf(' return <div',start)
+ const end=ui.indexOf(' const liveContent = <div',start)
  assert.ok(start>=0&&end>start)
  const source=ui.slice(start,end)
  assert.ok(source.indexOf("if(env==='live')")<
