@@ -1830,11 +1830,13 @@ function PazoMain() {
                 ) : (
                 <form onSubmit={handlePasswordLogin} className="space-y-3.5">
                   <div>
-                    <label className="block text-[11px] font-bold text-[#204E4A] mb-1">
+                    <label htmlFor="pazo-login-email" className="block text-[11px] font-bold text-[#204E4A] mb-1">
                       {lang === 'es' ? 'Correo electrónico' : 'Email address'}
                     </label>
                     <input
+                      id="pazo-login-email"
                       type="email"
+                      autoComplete="email"
                       required
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
@@ -1844,12 +1846,14 @@ function PazoMain() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-[#204E4A] mb-1">
+                    <label htmlFor="pazo-login-password" className="block text-[11px] font-bold text-[#204E4A] mb-1">
                       {lang === 'es' ? 'Contraseña' : 'Password'}
                     </label>
                     <div className="relative">
                       <input
+                        id="pazo-login-password"
                         type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
                         required
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
