@@ -63,7 +63,6 @@ import { CommunitiesView } from './components/views/CommunitiesView'
 import { GlobalSearchView } from './components/views/GlobalSearchView'
 import { MapView } from './components/views/MapView'
 import { PetView } from './components/views/PetView'
-import { PazoInstallControl } from './features/pwa/components/PazoInstallControl'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
@@ -2088,9 +2087,6 @@ function PazoMain() {
                 </>
               )}
             </main>
-
-            {/* Visible once on Home, never over the map or navigation bar. */}
-            {activeTab === 'inicio' && <PazoInstallControl lang={lang} placement="banner" />}
 
             <BottomNav
               activeTab={activeTab}
