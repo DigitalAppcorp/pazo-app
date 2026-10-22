@@ -4,18 +4,18 @@
 
 | Gate | Estado real | Evidencia |
 | --- | --- | --- |
-| CODE_DONE P1–P4 | PASS técnico; cierre global pendiente | 41871d47 +523c0f2c +73525439, 5/5CI cada uno; 1,813 pruebas/build/dist; PG17 y Chromium |
+| CODE_DONE P1–P4 | PASS técnico; cierre global pendiente | 41871d47 +523c0f2c +73525439 +a3f912eb, 5/5CI cada uno; 1,813 pruebas/build/dist; PG17 y Chromium |
 | DB_APPLIED | PASS | migraciones hasta20261022021500; P4 13/13 + seguridad2/2 cuerpos/ACL/RLS |
 | EDGE_DEPLOYED | PASS | release1/webhook2/checkout3/cuenta5/worker4 ACTIVE; 69/69 fuentes |
 | Preview Vercel final | READY, HTTP bloqueado | dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3, SHAa3f912eb; nuevo hostname pendiente red |
 | SMTP público | PASS | Gmail configurado; HTTP200 y entrega a cuenta propia confirmada PO; sin cambiar contraseña |
-| Auth origin/redirects | PASS configuración | canonical+preview exactos, anterior conservado; no correo real nuevo |
+| Auth origin/redirects | PASS configuración | 7 redirects exactos canonical/previews; anteriores conservados; SMTP verificado por separado |
 | HTTPS_E2E_PASS | BLOCKED | preview final pendiente red/SSO; canonical aún versión anterior |
 | READY_FOR_PO_CREDENTIALS | NO | faltan gates técnicos/operativos anteriores y certificado |
 | LIVE_CANARY_PASS | NO ejecutado | sin claves/GO/venta real; no simular |
 | BETA_PUBLIC_RELEASE_GO | NO | main y producción conservados; requiere autorización PO |
 
-Último detalle operativo: `PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`;
+Último detalle operativo: `PAZO_FINAL_PREVIEW_RUNTIME_20261022.md`;
 postflight P4: `PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
 Las notas inferiores son checkpoints históricos superados, no estado actual.
 

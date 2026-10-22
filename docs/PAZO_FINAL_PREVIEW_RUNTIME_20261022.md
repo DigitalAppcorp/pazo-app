@@ -48,6 +48,10 @@ https://pazo-app-t83r-b6fzt5jwv-digitalapp.vercel.app.
 Prebuilt sin cloud build nuevo, preview sin promoción, SSO preservado, sin alias.
 Producción sigue `dpl_E6t1jhXeAN49mS4gSCJufc2wFZ93`, SHA5163c187.
 
+Auth del candidato nuevo: añadidas sus rutas exactas `/` y `/?auth=recovery`
+a la allowlist de Supabase, conservando las5 anteriores (total7). PATCH+GET PASS;
+SMTP, site_url, MFA y autoconfirmación preservados. No se envió otro correo.
+
 ## Red y prueba pendiente
 
 GET normal al hostname nuevo: túnel403 antes de Vercel. No intentar IP/ruta
