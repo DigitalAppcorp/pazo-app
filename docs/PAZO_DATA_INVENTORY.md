@@ -527,3 +527,15 @@ Se crearon en GitHub, exclusivamente como **migraciones NO aplicadas**, la inbox
   ninguna tabla adicional de métricas, importación de saldos o datos de pagador.
 - Todo lo anterior está probado con fixtures; migraciones y Edge sin aplicar/
   desplegar en esta ejecución. Los plazos financieros pendientes no se alteran.
+
+
+## F17 — Soporte, cortesías y mantenimiento (borradores NO alojados, 22-oct-2026)
+
+**Verificación Supabase solo lectura:** las tablas `public.pazo_support_tickets`, `supporter_private.pazo_admin_gift_access` y `admin_private.pazo_app_maintenance` **no existen en el servidor**. Los SQL permanecen en `supabase/drafts/` y no capturan datos todavía.
+
+- **Solicitudes de soporte:** UUID del propietario, categoría (problema/consulta/idea/otro), mensaje libre (10–2000 caracteres), estado, nota interna del administrador (hasta 1000 caracteres), fechas. Solo administradores pueden leer los mensajes y notas; el autor autenticado puede insertar su propio caso con límite de tres por hora (bloqueo transaccional frente a inserciones concurrentes). El usuario no obtiene acceso de lectura a notas internas. No incluir contraseñas, tarjetas ni datos de terceros. Sin copia del texto a analytics, email, logs ni GitHub.
+- **Cortesías manuales:** UUID de propietario, UUID de administrador, nivel de insignia, comienzo, vencimiento opcional, revocación y razón administrativa; auditoría separada de acción/actor/fecha. La búsqueda administrativa presenta email y nombres de mascotas únicamente a cuentas autorizadas. Ninguna cortesía crea comprobantes PayPal, importes recaudados ni períodos pagados. No usar en métricas financieras.
+- **Mantenimiento:** indicador público de disponibilidad y mensajes ES/EN; cambio/actor/fecha guardados en tabla privada y auditoría; la API solo expone estado genérico al público, sin identidades administrativas. El modo de mantenimiento requiere control servidor adicional para REST, Storage, Realtime y Edge antes de prometer bloqueo total.
+- **Instalación PWA:** la sugerencia se oculta al detectarse modo standalone; su descarte almacena **solo una fecha local** en el navegador durante siete días, sin UUID, email, ubicación, analítica o envío al servidor.
+
+**Puerta de privacidad antes del GO SQL o beta externa:** fijar plazo de retención y eliminación de mensajes/notas de soporte y auditoría de concesiones; actualizar las políticas públicas ES/EN según la implementación real; verificar atención y borrado manual o automatizado bajo el proceso de cuenta. Hasta entonces, las tablas y sus datos son propuestos, no recolectados.
