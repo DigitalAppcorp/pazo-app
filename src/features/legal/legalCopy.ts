@@ -6,17 +6,22 @@ export interface LegalText {
   alert: string
   sections: ReadonlyArray<{heading: string; text: string}>
 }
-/** Bilingual legal text is ready for the beta. This does NOT authorize public deployment: the Codex account-deletion E2E gate remains independent. */
+/** Bilingual copy readiness does not authorize public deployment or financial activation. */
 export const LEGAL_RELEASE_READY = true as const
-// Set only when the beta is actually published; previews and RC builds are not effective dates.
-export const PAZO_LEGAL_EFFECTIVE_DATE = null
+/** Deployment metadata only: leave unset in previews; set to the actual publication date after PO GO. */
+export function parseLegalEffectiveDate(value: unknown): string | null {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
+  const date = new Date(value + 'T00:00:00.000Z')
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : null
+}
+export const PAZO_LEGAL_EFFECTIVE_DATE = parseLegalEffectiveDate(import.meta.env?.VITE_PAZO_LEGAL_EFFECTIVE_DATE)
 /** Legal operator and state of registration as provided by the Product Owner.
  * No independent registry verification or street address is claimed.
  */
 export const PAZO_LEGAL_OPERATOR_NAME = 'Alvarado Solutions LLC' as const
 export const PAZO_LEGAL_OPERATOR_REGISTRATION_STATE = 'California' as const
 // Policy text adopted for the beta on 2026-10-10, not an acceptance record.
-// The public release remains blocked until the separate manual-deletion QA gate passes.
+// Publication remains subject to the release gates and explicit Product Owner GO.
 export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> = {
   privacy: {
     es: {
@@ -30,6 +35,8 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
         { heading: 'Ubicación y lugares', text: 'El GPS del dispositivo se solicita únicamente al elegir Usar mi ubicación; se utiliza durante la sesión para centrar el mapa y calcular distancias, y no se almacena como coordenada exacta en el historial de lugares. Los check-ins sí guardan lugar, mascota, fecha y visibilidad elegida. Mapbox puede recibir información técnica sobre las zonas mostradas al cargar el mapa.' },
         { heading: 'Rescate y avistamientos', text: 'Las alertas de mascotas perdidas pueden incluir una zona y fecha de último avistamiento. Quien reporta un avistamiento puede proporcionar nombre, teléfono, mensaje y ubicación escrita. Un enlace público de rescate puede mostrar información limitada de la mascota y su alerta; evita escribir datos privados en campos públicos.' },
         { heading: 'Servicios utilizados', text: 'Supabase proporciona autenticación, base de datos y almacenamiento. Mapbox muestra los mapas. PostHog está excluido de esta versión de lanzamiento y no debe recibir eventos durante la beta. La pantalla de bienvenida carga una imagen alojada por Unsplash, cuyo servidor puede recibir información técnica de la solicitud. No se envían coordenadas GPS exactas ni el contenido de documentos a los eventos de producto.' },
+        { heading: 'Membresía y PayPal', text: 'Si eliges una membresía disponible, PayPal procesa la aprobación y los pagos en sus propios servicios. PAZO no recibe tu contraseña de PayPal ni los datos completos de tu tarjeta. PAZO conserva referencias de suscripción, eventos y transacciones, estado, importe, moneda, períodos pagados verificados y la versión y fecha de tu consentimiento. Se usan para gestionar acceso, renovaciones, cancelaciones, devoluciones, disputas y auditoría. Estos registros tienen acceso restringido y pueden conservarse tras la baja cuando sean necesarios para obligaciones financieras o casos pendientes; solicitar la eliminación no borra automáticamente ese historial. No se envían datos de pago a analítica.' },
+        { heading: 'Beneficios y muro', text: 'Las insignias y beneficios de membresía se calculan desde períodos pagados verificados. PAZO guarda tus preferencias de beneficios. Aparecer con tu mascota en el muro requiere un consentimiento separado que puedes retirar desde la cuenta; pagar no publica automáticamente tus datos ni los datos de pago.' },
         { heading: 'Cambios y señales del navegador', text: 'Al publicar la beta, PAZO indicará aquí la fecha efectiva. Si hay cambios materiales, publicaremos el texto actualizado y su nueva fecha en PAZO; actualmente no hay un sistema de avisos individuales. La aplicación no cambia su funcionamiento según la señal Do Not Track del navegador. PAZO no activa PostHog ni seguimiento entre sitios propio en esta beta; Mapbox y Unsplash pueden recibir información técnica y aplicar sus propias prácticas al servir mapas o imágenes.' },
         { heading: 'Moderación y archivos', text: 'Puedes denunciar contenido; las publicaciones retiradas se ocultan de las vistas sociales. La retirada de archivos almacenados y copias cacheadas requiere revisión individual; ocultar una publicación no garantiza eliminar inmediatamente todos sus archivos. Puedes pedir revisión a través del contacto de soporte.' },
         { heading: 'Conservación y solicitudes', text: 'Los datos de cuenta, mascotas y publicaciones siguen almacenados mientras la cuenta está activa o hasta que se modifiquen o retiren mediante un proceso confirmado. No existe una purga automática general por antigüedad. Las denuncias y comunicaciones de soporte requieren revisión particular; las copias de respaldo y cachés pueden permanecer según cada proveedor. Si la opción está habilitada en tu versión, puedes solicitar la eliminación de cuenta desde tu cuenta o escribir al contacto indicado; solicitarla no elimina automáticamente tus datos. Puedes escribir a nuestro correo de privacidad para consultar o solicitar corrección de tus datos; antes de realizar cambios sensibles verificaremos que eres titular de la cuenta. Puedes pedir información o corrección por el correo indicado. No garantizamos una eliminación inmediata de respaldos, archivos cacheados, registros sujetos a obligaciones aplicables ni contenido ajeno.' },
@@ -46,6 +53,8 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
         { heading: 'Location and places', text: 'Device GPS is requested only when you choose Use my location. It is used during the session to center the map and calculate distances, and is not stored as precise coordinates in place history. Check-ins do store the place, pet, date and selected visibility. Mapbox may receive technical information about areas displayed when loading the map.' },
         { heading: 'Rescue and sightings', text: 'Lost-pet alerts may include a last-seen area and time. People reporting sightings may provide a name, phone number, message and written location. A public rescue link may show limited information about the pet and its alert; avoid placing private details in public fields.' },
         { heading: 'Service providers', text: 'Supabase provides authentication, database and storage. Mapbox displays the maps. PostHog is excluded from this release and must not receive events during the beta. The welcome screen loads an image hosted by Unsplash, whose server may receive technical request information. Exact GPS coordinates and document contents are not sent as product events.' },
+        { heading: 'Membership and PayPal', text: 'If you choose an available membership, PayPal processes approval and payments through its own services. PAZO does not receive your PayPal password or full card details. PAZO stores subscription, event and transaction references, status, amount, currency, verified paid periods and the version and date of your consent. These records support access, renewals, cancellations, refunds, disputes and audits. Access is restricted, and records may be retained after account closure when needed for financial obligations or pending cases; requesting deletion does not automatically erase this history. Payment data is not sent to analytics.' },
+        { heading: 'Benefits and wall', text: 'Membership badges and benefits are calculated from verified paid periods. PAZO stores your benefit preferences. Appearing with your pet on the wall requires separate consent that you can withdraw from your account; paying does not automatically publish your information or payment data.' },
         { heading: 'Updates and browser signals', text: 'PAZO will show the effective date when the beta is published. If we make material changes, we will show the updated text and its new effective date in PAZO; there is currently no individual change-notification system. The app does not change its behavior in response to browser Do Not Track signals. PAZO does not enable PostHog or its own cross-site tracking for this beta; Mapbox and Unsplash may receive technical request data and follow their own practices when serving maps and images.' },
         { heading: 'Moderation and files', text: 'You can report content; removed posts are hidden from social views. Removing stored files and cached copies requires individual review; hiding a post does not guarantee immediate removal of every file. You may request a review through the support contact.' },
         { heading: 'Retention and requests', text: 'Account, pet and post data currently remain stored while the account is active or until modified or removed through a verified process. There is no general automatic age-based purge. Moderation reports and support correspondence require individual review; provider backups and caches may persist. If the option is enabled in your version, you can request account deletion from your account or write to the contact below; submitting a request does not automatically erase your data. You can contact our privacy email to ask about or request corrections to your data; we will verify account ownership before sensitive changes. You may request information or corrections using the listed email. We cannot guarantee immediate erasure of backups, cached files, records subject to applicable obligations, or content belonging to others.' },
@@ -63,6 +72,7 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
         { heading: 'Comunidad segura', text: 'No publiques acoso, amenazas, spam, contenido ilegal ni datos privados de terceros sin permiso. Eres responsable de los materiales que compartes.' },
         { heading: 'Moderación', text: 'Otras personas pueden denunciar contenido y un moderador puede restringir su visibilidad. La retirada de archivos requiere revisión individual y puede no ser inmediata. Puedes solicitar la revisión de una decisión escribiendo al soporte; no existe un sistema automático de apelaciones.' },
         { heading: 'Servicios en desarrollo', text: 'Algunas funciones muestran claramente que están en desarrollo. No deben interpretarse como servicios disponibles, garantías de resultados o compras habilitadas.' },
+        { heading: 'Membresía opcional', text: 'Cuando la membresía esté disponible, el checkout mostrará precio, moneda, renovación y condiciones antes de pedir tu consentimiento explícito. Puedes consultar las condiciones aceptadas y gestionar la suscripción desde tu cuenta. Volver de PayPal o ver una suscripción activa no acredita un pago: los beneficios requieren un período pagado verificado. La cancelación de renovaciones requiere confirmación de PayPal y no devuelve automáticamente pagos anteriores; la cobertura pagada ya verificada se conserva hasta su vencimiento, salvo devoluciones, reversos o disputas que requieran revisión según las condiciones aceptadas. Aparecer en el muro es opcional y requiere permiso separado revocable.' },
         { heading: 'Versiones de prueba', text: 'Durante la beta pueden existir interrupciones y cambios en el servicio. Los datos de pruebas internas se gestionan mediante un proceso controlado separado del contenido de usuarios externos.' },
       ],
     },
@@ -76,8 +86,27 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
         { heading: 'Safe community', text: 'Do not post harassment, threats, spam, unlawful material or private information about others without permission. You are responsible for what you share.' },
         { heading: 'Moderation', text: 'Other users can report content and moderators can restrict visibility. Removing stored files requires individual review and may not be immediate. You may request review of a decision by contacting support; there is no automated appeals system.' },
         { heading: 'Features in development', text: 'Some features are explicitly marked as in development. They do not represent available services, promised outcomes or enabled purchases.' },
+        { heading: 'Optional membership', text: 'When membership is available, checkout will show the price, currency, renewal and terms before requesting your explicit consent. You can review the accepted terms and manage your subscription from your account. Returning from PayPal or seeing an active subscription does not prove payment: benefits require a verified paid period. Cancelling renewals requires confirmation from PayPal and does not automatically refund earlier payments; verified paid coverage continues until expiry, subject to refunds, reversals or disputes requiring review under the accepted terms. Appearing on the wall is optional and requires separate, revocable permission.' },
         { heading: 'Testing versions', text: 'During the beta, features may change or become unavailable. Internal test data is handled through a separate controlled process, independently from external user content.' },
       ],
     },
   },
+}
+
+/** Never infer publication from the clock, credentials, or the financial selector. */
+export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effectiveDate: unknown = PAZO_LEGAL_EFFECTIVE_DATE): LegalText {
+  const copy = legalPreview[kind][lang]
+  const date = parseLegalEffectiveDate(effectiveDate)
+  if (!date) return copy
+  const dateNotice = lang === 'es' ? `Fecha de vigencia: ${date}.` : `Effective date: ${date}.`
+  return {
+    ...copy,
+    introduction: dateNotice,
+    alert: copy.alert.replace(/^[^.]+\./, dateNotice),
+    sections: copy.sections.map(section => section.heading === 'Cambios y señales del navegador'
+      ? {...section, text: section.text.replace('Al publicar la beta, PAZO indicará aquí la fecha efectiva.', dateNotice)}
+      : section.heading === 'Updates and browser signals'
+        ? {...section, text: section.text.replace('PAZO will show the effective date when the beta is published.', dateNotice)}
+        : section),
+  }
 }

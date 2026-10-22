@@ -58,11 +58,15 @@ rama preview. Git deployments continúan OFF. Gate público del22-oct devuelve
 `ready=false`: la SPA antigua no cumple metadatos y callbacks/manifest/SW/iconos
 no devuelven los200 requeridos. No usar el PASS local como HTTPS_E2E_PASS.
 
-Se prepara un preview protegido del código probado, con build local para evitar
-otro build cloud y sin promover producción. En este checkpoint aún no se creó
-ese deployment. Configuración SDK/OIDC queda en archivos privados ignorados,
-sin incluir valores en Git, comandos, capturas o informe. `.env.example`
-conserva su excepción de versionado.
+Preview protegido creado después de este postflight: **READY**, deployment
+`dpl_FGiumJgvLvrL3MmxSwk8i1WUC11s`, fuente `020e6ce1`,
+https://pazo-app-t83r-8zbuzaf2x-digitalapp.vercel.app. Build local/prebuilt sin
+cloud build adicional ni promoción de producción. SSO conservado; alias vacío.
+GET por red normal bloqueado403 por el proxy antes de Vercel; excepción exacta
+guardada en borrador de entorno, pendiente publicación manual. No HTTP/PWA PASS.
+SDK/OIDC permanece en archivos privados ignorados; `.env.example` conserva su
+excepción de versionado. Avance Auth/Gmail/legal posterior en
+`PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
 
 Faltan HTTPS/PWA, certificación técnica tras comprobar fuentes/origin, cierre
 operativo y revisión final del PO. **No READY_FOR_PO_CREDENTIALS ni beta lista.**

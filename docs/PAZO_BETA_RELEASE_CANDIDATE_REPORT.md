@@ -1,5 +1,24 @@
 # PAZO Beta Release Candidate — informe de trabajo
 
+## Estado de aceptación vigente — 22-oct-2026
+
+| Gate | Estado real | Evidencia |
+| --- | --- | --- |
+| CODE_DONE P1–P4 | PASS técnico; cierre global pendiente | 41871d47 + incremento legal; 1,813 pruebas locales/build/dist; PG17 y Chromium |
+| DB_APPLIED | PASS | migraciones hasta20261021230000; 13/13 cuerpos/ACL/RLS |
+| EDGE_DEPLOYED | PASS | release1/webhook2/checkout3/cuenta5/worker4 ACTIVE; 69/69 fuentes |
+| Preview Vercel | READY, HTTP bloqueado | dpl_FGiumJgvLvrL3MmxSwk8i1WUC11s, SHA020e6ce1; proxy403 |
+| SMTP público | BLOCKED | Gmail elegido, contraseña de aplicación aún ausente; SMTP predeterminado solo equipo |
+| Auth origin/redirects | PASS configuración | canonical+preview exactos, anterior conservado; no correo real nuevo |
+| HTTPS_E2E_PASS | BLOCKED | preview pendiente red/SSO; canonical aún versión anterior |
+| READY_FOR_PO_CREDENTIALS | NO | faltan gates técnicos/operativos anteriores y certificado |
+| LIVE_CANARY_PASS | NO ejecutado | sin claves/GO/venta real; no simular |
+| BETA_PUBLIC_RELEASE_GO | NO | main y producción conservados; requiere autorización PO |
+
+Último detalle operativo: `PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`;
+postflight P4: `PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
+Las notas inferiores son checkpoints históricos superados, no estado actual.
+
 ## Supabase operativo — 21-oct-2026, 21:47 UTC
 
 PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`

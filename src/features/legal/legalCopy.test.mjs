@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LEGAL_RELEASE_READY, PAZO_LEGAL_EFFECTIVE_DATE, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, legalPreview } from './legalCopy.ts'
+import { LEGAL_RELEASE_READY, PAZO_LEGAL_EFFECTIVE_DATE, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, legalPreview, parseLegalEffectiveDate, resolveLegalCopy } from './legalCopy.ts'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact.ts'
 import { readFileSync } from 'node:fs'
 
@@ -114,4 +114,37 @@ test('draft statements distinguish ephemeral map location, persisted check-ins a
   for (const col of ['place_id','pet_id','visible']) assert.ok(places.includes(col))
   for (const field of ['p_reporter_name','p_reporter_phone','p_message','p_location']) assert.ok(rescue.includes(field))
   assert.equal(LEGAL_RELEASE_READY,true)
+})
+
+test('publication metadata accepts only real ISO dates and cannot mutate the preview', () => {
+  for (const invalid of [undefined, null, '', '2026-2-01', '2026-02-29', '2026-04-31', '2026-13-01', '2026-10-22T00:00:00Z', '<script>']) {
+    assert.equal(parseLegalEffectiveDate(invalid), null)
+    assert.equal(resolveLegalCopy('privacy', 'es', invalid), legalPreview.privacy.es)
+  }
+  assert.equal(parseLegalEffectiveDate('2028-02-29'), '2028-02-29')
+  for (const kind of ['privacy', 'terms']) for (const lang of ['es', 'en']) {
+    const copy = resolveLegalCopy(kind, lang, '2026-10-22')
+    assert.match(copy.introduction, /2026-10-22/)
+    assert.match(copy.alert, /2026-10-22/)
+    assert.doesNotMatch(copy.alert, /se fijará|will be set/)
+    assert.ok(copy.sections.some(s => s.text.includes(PAZO_LEGAL_OPERATOR_NAME)))
+    assert.match(legalPreview[kind][lang].introduction, /se fijará|will be set/)
+  }
+  assert.doesNotMatch(resolveLegalCopy('privacy', 'es', '2026-10-22').sections.map(s => s.text).join(' '), /Al publicar la beta, PAZO indicará/)
+  assert.doesNotMatch(resolveLegalCopy('privacy', 'en', '2026-10-22').sections.map(s => s.text).join(' '), /PAZO will show the effective date when/)
+})
+
+test('both languages disclose restricted PayPal records and separate revocable wall consent', () => {
+  for (const lang of ['es', 'en']) {
+    const privacy = legalPreview.privacy[lang].sections
+    const payment = privacy.find(s => s.heading.includes('PayPal'))?.text
+    const wall = privacy.find(s => s.heading === (lang === 'es' ? 'Beneficios y muro' : 'Benefits and wall'))?.text
+    const membership = legalPreview.terms[lang].sections.find(s => s.heading === (lang === 'es' ? 'Membresía opcional' : 'Optional membership'))?.text
+    assert.ok(payment && wall && membership)
+    assert.match(payment, lang === 'es' ? /no recibe tu contraseña.*ni los datos completos de tu tarjeta/ : /does not receive your PayPal password or full card details/)
+    assert.match(payment, lang === 'es' ? /períodos pagados verificados/ : /verified paid periods/)
+    assert.match(payment, lang === 'es' ? /solicitar la eliminación no borra automáticamente/ : /requesting deletion does not automatically erase/)
+    assert.match(wall, lang === 'es' ? /consentimiento separado que puedes retirar/ : /separate consent that you can withdraw/)
+    assert.match(membership, lang === 'es' ? /no devuelve automáticamente pagos anteriores/ : /does not automatically refund earlier payments/)
+  }
 })

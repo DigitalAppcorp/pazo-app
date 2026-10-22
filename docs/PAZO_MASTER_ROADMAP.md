@@ -1,3 +1,42 @@
+## Correo, Auth, privacidad y preview — 22-oct-2026 (estado vigente)
+
+Vista protegida creada y **READY** por Vercel: deployment
+`dpl_FGiumJgvLvrL3MmxSwk8i1WUC11s`, fuente `020e6ce1`,
+https://pazo-app-t83r-8zbuzaf2x-digitalapp.vercel.app. Build local/prebuilt,
+Sandbox QA UI=false, beneficios=true sujetos a cobertura SQL; sin promoción,
+sin alias público ni cambio de SSO. **No HTTPS_E2E_PASS:** el proxy de este
+entorno rechaza ese hostname con403 antes de Vercel. Excepción exacta guardada
+en borrador; requiere revisión/guardado/publicación por el PO en Codex Cloud.
+No confundir READY del deployment con página comprobada ni beta pública.
+
+Auth alojado: `site_url` corregido de localhost al origin canónico; añadidas
+rutas exactas `/` y `/?auth=recovery` de canonical y este preview. Redirección
+anterior preservada (5 entradas), autoconfirmación/MFA/contraseñas sin cambios,
+PATCH y GET postflight PASS. No altas, resets ni correos enviados; no se reabre
+el QA Auth ya aceptado. Copia operativa anterior privada fuera de Git.
+
+El PO eligió **Gmail**. Auditoría confirma SMTP propio ausente/hook deshabilitado;
+el SMTP predeterminado Supabase no entrega a cuentas ajenas al equipo. Requisito
+`PAZO_GMAIL_APP_PASSWORD` guardado en borrador (solo destino api.supabase.com),
+valor todavía no disponible. Solo el titular puede generar la contraseña de
+aplicación de Google y guardarla en bóveda; jamás chat, repo o variable VITE.
+No se ha configurado Gmail ni declarado entrega PASS.
+
+Privacidad ES/EN reconciliada con PayPal, referencias financieras restringidas,
+consentimiento y muro opcional revocable; términos remiten al checkout y al
+histórico aceptado sin cambiar el contrato inmutable de la oferta Live.
+Fecha legal mediante metadata opcional `VITE_PAZO_LEGAL_EFFECTIVE_DATE`, ISO
+real validado: vacía en previews; fecha real solo al publicar con GO. No activa
+pagos ni sustituye aceptación. `verify:prepreview` **1,813 PASS**, build/dist,
+lint archivos tocados0/0 y Chromium390/1440 (modal real, scroll, Escape/foco,
+sin overflow/errores) PASS LOCAL. Incremento aún no desplegado en ese preview.
+
+P4 permanece instalado/verificado, modoOFF/rev0/certificado0/autorizaciones0;
+producción antigua y main intactos. Pendientes externos: publicación del entorno,
+secreto Gmail; luego HTTPS/PWA/certificación técnica y entrega real de correo.
+No pedir PayPal todavía. **NO READY_FOR_PO_CREDENTIALS ni beta lista**.
+Detalle: `docs/PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
+
 ## P4 alojado — 22-oct-2026
 
 `41871d47`5/5CI PASS; migración controlada230000 APLICADA con ensayo y13/13
