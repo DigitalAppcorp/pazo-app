@@ -103,9 +103,9 @@ export function ModeratorQueue({ lang, onClose }: Props) {
           unsafe: es ? 'Contenido dañino' : 'Harmful content',
           other: es ? 'Otro motivo' : 'Other',
         })[report.reason] ?? report.reason}</p>
-        <p className="mt-1 break-all text-[10px] text-[#5C7470]">{report.target_id}</p>
+        <p className="mt-1 break-all text-[13px] text-[#5C7470]">{report.target_id}</p>
         {report.details && <p className="mt-2 whitespace-pre-wrap text-xs">{report.details}</p>}
-        <p className="mt-2 text-[10px] text-[#5C7470]">{new Date(report.created_at).toLocaleString()}</p>
+        <p className="mt-2 text-[13px] text-[#5C7470]">{new Date(report.created_at).toLocaleString()}</p>
         <div className="mt-3 flex gap-2">
           <button type="button" disabled={busy} onClick={() => void review(report,'dismiss')} className="rounded-full px-3 py-2 text-xs font-bold">{es ? 'Descartar' : 'Dismiss'}</button>
           <button type="button" disabled={busy} onClick={() => void review(report,'remove')} className="rounded-full bg-[#204E4A] px-3 py-2 text-xs font-bold text-white">{es ? 'Despublicar' : 'Depublish'}</button>

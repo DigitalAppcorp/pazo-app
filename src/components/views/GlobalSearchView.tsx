@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { searchGlobal } from '../../features/search/searchService'
 import { recordSearchUsageEvent } from '../../features/search/searchTelemetryService'
+import { LiquidSearchFilters } from '../../features/search/components/LiquidSearchFilters'
 import type {
   GlobalSearchResponse,
   GlobalSearchResult,
@@ -219,12 +220,12 @@ export const GlobalSearchView = ({
           {result.title}
         </p>
         {result.subtitle && (
-          <p className="mt-0.5 line-clamp-1 text-[11px] text-[#5C7470]">
+          <p className="mt-0.5 line-clamp-1 text-[14px] text-[#5C7470]">
             {result.subtitle}
           </p>
         )}
         {result.meta && result.meta.length > 0 && (
-          <p className="mt-1 truncate text-[10px] font-semibold text-[#5C7470]/70">
+          <p className="mt-1 truncate text-[13px] font-semibold text-[#5C7470]/70">
             {result.meta.join(' · ')}
           </p>
         )}
@@ -268,35 +269,12 @@ export const GlobalSearchView = ({
           </div>
         </div>
 
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-          {(
-            [
-              ['all', lang === 'es' ? 'Todos' : 'All'],
-              ['pet', lang === 'es' ? 'Mascotas' : 'Pets'],
-              ['community', lang === 'es' ? 'Comunidades' : 'Communities'],
-              ['place', lang === 'es' ? 'Lugares' : 'Places'],
-            ] as Array<[SearchFilter, string]>
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleFilterChange(key)}
-              className={
-                'shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-all ' +
-                (filter === key
-                  ? 'bg-[#204E4A] text-[#E1E53F]'
-                  : 'bg-[#FAF8F5] text-[#5C7470]')
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <LiquidSearchFilters filter={filter} lang={lang} onChange={handleFilterChange} />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-5">
         {!canSearch ? (
-          <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+          <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
             <p className="text-sm font-black text-[#204E4A]">
               {lang === 'es'
                 ? 'Inicia sesión con una cuenta real para buscar en PAZO.'
@@ -327,7 +305,7 @@ export const GlobalSearchView = ({
             )}
 
             {!isLoading && unexpectedError && (
-              <div className="rounded-2xl bg-white p-5 text-center shadow-sm">
+              <div className="rounded-2xl pazo-glass-card p-5 text-center shadow-sm">
                 <p className="text-xs font-black text-[#204E4A]">
                   {lang === 'es'
                     ? 'No pudimos completar la búsqueda.'
@@ -341,13 +319,13 @@ export const GlobalSearchView = ({
               visibleResultCount === 0 &&
               !activeFilterFailed &&
               (filter !== 'all' || response.failedTypes.length === 0) && (
-                <div className="rounded-[2rem] bg-white p-6 text-center shadow-sm">
+                <div className="rounded-[2rem] pazo-glass-card p-6 text-center shadow-sm">
                   <p className="text-sm font-black text-[#204E4A]">
                     {lang === 'es'
                       ? `No encontramos resultados para “${trimmedQuery}”.`
                       : `No results found for “${trimmedQuery}”.`}
                   </p>
-                  <p className="mt-1 text-[11px] text-[#5C7470]">
+                  <p className="mt-1 text-[14px] text-[#5C7470]">
                     {lang === 'es'
                       ? 'Prueba otra palabra o cambia el tipo de resultado.'
                       : 'Try another word or change the result type.'}
@@ -379,7 +357,7 @@ export const GlobalSearchView = ({
                       <button
                         type="button"
                         onClick={() => handleFilterChange(type)}
-                        className="text-[10px] font-black text-[#204E4A]"
+                        className="text-[13px] font-black text-[#204E4A]"
                       >
                         {lang === 'es' ? 'Ver todos' : 'See all'}
                       </button>
@@ -387,7 +365,7 @@ export const GlobalSearchView = ({
                   </div>
 
                   {failed ? (
-                    <div className="rounded-2xl bg-white p-4 text-[11px] font-semibold text-[#5C7470] shadow-sm">
+                    <div className="rounded-2xl pazo-glass-card p-4 text-[14px] font-semibold text-[#5C7470] shadow-sm">
                       {lang === 'es'
                         ? 'Esta categoría no pudo cargarse. Los demás resultados siguen disponibles.'
                         : 'This category could not load. Other results are still available.'}

@@ -1,0 +1,26 @@
+/* F16: only the supporter preparation illustration, no modal outlines. */
+.pazo-kitten-tail { transform-origin: 155px 129px; animation: pazo-kitten-tail-sway 2.2s ease-in-out infinite; }
+.pazo-kitten-paw { transform-origin: 152px 140px; animation: pazo-kitten-paw-tap 1.5s ease-in-out infinite; }
+.pazo-kitten-yarn { transform-origin: 205px 169px; animation: pazo-kitten-yarn-roll 2.9s ease-in-out infinite; }
+.pazo-kitten-dot { animation: pazo-kitten-loading 1.2s ease-in-out infinite; }
+.pazo-kitten-dot:nth-child(2) { animation-delay: .16s; }
+.pazo-kitten-dot:nth-child(3) { animation-delay: .32s; }
+@keyframes pazo-kitten-tail-sway {
+  0%,100% { transform: rotate(-8deg); }
+  50% { transform: rotate(12deg); }
+}
+@keyframes pazo-kitten-paw-tap {
+  0%,100% { transform: rotate(-7deg) translateY(0); }
+  48% { transform: rotate(10deg) translateY(-5px); }
+}
+@keyframes pazo-kitten-yarn-roll {
+  0%,100% { transform: translateX(-5px) rotate(-12deg); }
+  55% { transform: translateX(7px) rotate(25deg); }
+}
+@keyframes pazo-kitten-loading {
+  0%,75%,100% { opacity: .35; transform: translateY(0); }
+  35% { opacity: 1; transform: translateY(-5px); }
+}
+@media (prefers-reduced-motion: reduce) {
+ .pazo-kitten-tail,.pazo-kitten-paw,.pazo-kitten-yarn,.pazo-kitten-dot { animation: none !important; transform: none !important; }
+}

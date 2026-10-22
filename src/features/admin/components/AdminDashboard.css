@@ -1,0 +1,47 @@
+/* PAZO admin-only fidelity pass. Scoped to the portal: never style the 430px PWA. */
+/* No strokes, outlines, rings or borders. State and keyboard focus use fill. */
+.pazo-admin {
+  background:
+    radial-gradient(ellipse 62% 44% at 55% -12%, rgba(232,238,218,.45), transparent 76%),
+    #f8f9f6;
+  color: #204e4a;
+  font-variant-numeric: tabular-nums;
+}
+.pazo-admin-sidebar { background: rgba(255,255,255,.98); }
+.pazo-admin-wordmark { line-height: 1.06; }
+.pazo-admin-sidebar-message img { transform: scale(1.1); }
+.pazo-admin-panel, .pazo-admin-kpi {
+  background: linear-gradient(150deg,#ffffff 15%,#fefefd 85%);
+  box-shadow: 0 8px 30px rgba(32,78,74,.062);
+}
+.pazo-admin-kpi { position: relative; isolation: isolate; }
+.pazo-admin-kpi > span:first-child { box-shadow: 0 6px 18px rgba(67,131,79,.06); }
+.pazo-admin-kpi p:nth-child(2) { letter-spacing: -.045em; }
+.pazo-admin-kpi p:last-child { line-height: 1.35; }
+.pazo-admin-panel > div:first-child h3 { line-height: 1.22; }
+.pazo-admin-panel button[aria-label] { transition: background-color .16s ease, transform .16s ease; }
+.pazo-admin-panel button[aria-label]:hover { transform: translateX(2px); }
+.pazo-admin-analytics-row > div { min-width: 0; }
+.pazo-admin-finance-breakdown { min-width: 0; }
+@media (min-width: 1024px) {
+  .pazo-admin-header { min-height: 102px; }
+  .pazo-admin-panel { min-height: 100%; }
+  .pazo-admin-kpi { min-height: 140px; }
+  .pazo-admin-panel > div:first-child h3 { font-size: 19px; }
+  .pazo-admin-sidebar .pazo-admin-navigation button { letter-spacing: -.025em; }
+}
+@media (min-width: 1024px) and (max-height: 760px) {
+  .pazo-admin-sidebar-message { display:none; }
+  .pazo-admin-sidebar .pazo-admin-navigation { margin-top:12px; }
+}
+@media (max-width: 767px) {
+  .pazo-admin-kpi { min-height: 157px; flex-direction:column; align-items:flex-start; gap:10px; padding:15px; }
+  .pazo-admin-kpi > span:first-child { width:46px;height:46px; }
+  .pazo-admin-kpi p:nth-child(2) { font-size:25px; overflow-wrap:anywhere; }
+  .pazo-admin-finance-breakdown { grid-template-columns:1fr; }
+  .pazo-admin-panel { padding:17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pazo-admin-panel button[aria-label] { transition:none; }
+  .pazo-admin-panel button[aria-label]:hover { transform:none; }
+}

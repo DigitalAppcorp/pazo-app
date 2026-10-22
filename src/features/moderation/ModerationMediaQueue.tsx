@@ -78,7 +78,7 @@ export function ModerationMediaQueue({ lang, onClose }: Props) {
         <div aria-busy={busy} className="space-y-2">
           {items.map(item => <article key={item.target_kind + item.target_id} className="rounded-xl bg-white p-3">
             <p className="text-xs font-bold">{item.target_kind.replaceAll('_', ' ')}</p>
-            <p className="my-1 break-all text-[10px] text-[#5C7470]">{item.target_id}</p>
+            <p className="my-1 break-all text-[13px] text-[#5C7470]">{item.target_id}</p>
             <p className="text-xs text-[#5C7470]">
               {es ? 'Revisión manual pendiente: no se ha confirmado eliminación de Storage ni CDN.' : 'Manual review pending: Storage or CDN deletion not confirmed.'}
             </p>

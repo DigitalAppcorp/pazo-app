@@ -86,8 +86,13 @@ ROLLBACK;
 '@
   # pg_dump's CREATE EXTENSION does not retain the creator/owner. Recovery needs it.
   Invoke-PazoPg 'psql' @('-X','-A','-t','-q','-w','-v','ON_ERROR_STOP=1','-o',(Join-Path $pazoOutput 'extension-owners.json'),'-c',$pazoExtensionsSql) 'extensions-private.log'
-  # One consistent custom archive includes schema, data, ACL, ownership and large objects.
-  Invoke-PazoPg 'pg_dump' @('-w','--format=custom','--create','--lock-wait-timeout=10s','--file',(Join-Path $pazoOutput 'database.dump')) 'database-private.log'
+  # Preserve all other database data and P42 table schema/ACL/RLS while
+  # permanently excluding P42 signing-key ROWS from any new logical backup.
+  # DO NOT remove the P42 exclusion: that would copy key_bytes into database.dump.
+  # Tested only against disposable PG17; hosted backups are not certified here.
+  Invoke-PazoPg 'pg_dump' @('-w','--format=custom','--create','--lock-wait-timeout=10s',
+    '--exclude-table-data=supporter_private.p42_activation_signing_keys',
+    '--file',(Join-Path $pazoOutput 'database.dump')) 'database-private.log'
   # No database-role passwords; Auth's managed password hashes remain in the private DB archive.
   Invoke-PazoPg 'pg_dumpall' @('-w','--roles-only','--no-role-passwords','--file',(Join-Path $pazoOutput 'roles.sql')) 'roles-private.log'
   Invoke-PazoPg 'pg_restore' @('--list','--create','--file',(Join-Path $pazoOutput 'archive-toc.private.txt'),(Join-Path $pazoOutput 'database.dump')) 'toc-private.log'

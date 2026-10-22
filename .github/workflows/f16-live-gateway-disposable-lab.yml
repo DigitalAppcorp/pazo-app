@@ -1,0 +1,145 @@
+name: F16 Live Gateway Disposable PostgreSQL Lab
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/*pazo_f16_live_private_worker_scheduler.sql'
+      - 'scripts/f16-live-worker-scheduler-core-stage.mjs'
+      - 'scripts/f16-live-private-scheduler-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_scheduler_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_private_worker_control.sql'
+      - 'scripts/f16-live-private-worker-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_lifecycle_and_refund_scope.sql'
+      - 'supabase/rollbacks/f16_live_lifecycle_refund_scope_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
+      - 'supabase/rollbacks/f16_live_financial_context_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_atomic_leased_settlement.sql'
+      - 'scripts/f16-live-atomic-settlement-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_signed_event_evidence.sql'
+      - 'scripts/f16-live-signed-receipt-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_resource_inspection.sql'
+      - 'scripts/f16-live-resource-inspection-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_resource_inspection_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_recorded_sale_reader.sql'
+      - 'scripts/f16-live-recorded-sale-read-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_service_json_claims_guard.sql'
+      - 'supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql'
+      - 'supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql'
+      - 'scripts/f16-live-json-claims-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
+      - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-benefits-prerequisites-stage.mjs'
+      - 'scripts/f16-live-admin-finance-disposable-lab.sql'
+      - 'scripts/f16-live-readiness-disposable-lab.sql'
+      - 'scripts/f16-live-controlled-release-disposable-lab.sql'
+      - 'scripts/f16-public-benefits-visibility-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_public_benefits_visibility.sql'
+      - 'supabase/migrations/*pazo_f16_live_controlled_release.sql'
+      - 'supabase/rollbacks/*pazo_f16_live_controlled_release.sql'
+      - 'supabase/migrations/*pazo_f16_live_admin_readiness.sql'
+      - 'supabase/rollbacks/*pazo_f16_live_admin_readiness.sql'
+      - 'supabase/migrations/*pazo_f16_live_admin_finance_summary.sql'
+      - 'scripts/f16-live-cosmetic-benefits-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_cosmetic_benefits.sql'
+      - 'supabase/rollbacks/f16_live_cosmetic_benefits_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-owner-recovery-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_owner_recovery_finish.sql'
+      - 'supabase/rollbacks/f16_live_owner_recovery_finish_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-secret-provision-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-admin-origin-disposable-lab.sql'
+      - 'supabase/migrations/20261020142448_pazo_f16_admin_owned_live_return_origin.sql'
+      - 'scripts/f16-live-service-rpc-bridge-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_service_rpc_bridge_REVIEW_REQUIRED.sql'
+      - '.github/workflows/f16-live-gateway-disposable-lab.yml'
+  push:
+    branches: [f13/section-titles-20261012]
+    paths:
+      - 'supabase/migrations/*pazo_f16_live_private_worker_scheduler.sql'
+      - 'scripts/f16-live-worker-scheduler-core-stage.mjs'
+      - 'scripts/f16-live-private-scheduler-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_scheduler_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_private_worker_control.sql'
+      - 'scripts/f16-live-private-worker-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_private_worker_control_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_lifecycle_and_refund_scope.sql'
+      - 'supabase/rollbacks/f16_live_lifecycle_refund_scope_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_financial_context.sql'
+      - 'supabase/rollbacks/f16_live_financial_context_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_atomic_leased_settlement.sql'
+      - 'scripts/f16-live-atomic-settlement-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_atomic_leased_settlement_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_signed_event_evidence.sql'
+      - 'scripts/f16-live-signed-receipt-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_signed_event_evidence_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_resource_inspection.sql'
+      - 'scripts/f16-live-resource-inspection-disposable-lab.sql'
+      - 'supabase/rollbacks/f16_live_resource_inspection_REVIEW_REQUIRED.sql'
+      - 'supabase/migrations/*pazo_f16_live_recorded_sale_reader.sql'
+      - 'scripts/f16-live-recorded-sale-read-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_service_json_claims_guard.sql'
+      - 'supabase/rollbacks/f16_live_service_json_claims_guard_REVIEW_REQUIRED.sql'
+      - 'supabase/tests/supporter/fixtures/f16-live-service-hosted-legacy-guards.sql'
+      - 'scripts/f16-live-json-claims-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_gateway_generation_inbox_DISPOSABLE_ONLY.sql'
+      - 'scripts/f16-live-gateway-disposable-lab.sql'
+      - 'scripts/f16-live-benefits-prerequisites-stage.mjs'
+      - 'scripts/f16-live-admin-finance-disposable-lab.sql'
+      - 'scripts/f16-live-readiness-disposable-lab.sql'
+      - 'scripts/f16-live-controlled-release-disposable-lab.sql'
+      - 'scripts/f16-public-benefits-visibility-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_public_benefits_visibility.sql'
+      - 'supabase/migrations/*pazo_f16_live_controlled_release.sql'
+      - 'supabase/rollbacks/*pazo_f16_live_controlled_release.sql'
+      - 'supabase/migrations/*pazo_f16_live_admin_readiness.sql'
+      - 'supabase/rollbacks/*pazo_f16_live_admin_readiness.sql'
+      - 'supabase/migrations/*pazo_f16_live_admin_finance_summary.sql'
+      - 'scripts/f16-live-cosmetic-benefits-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_cosmetic_benefits.sql'
+      - 'supabase/rollbacks/f16_live_cosmetic_benefits_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-owner-recovery-disposable-lab.sql'
+      - 'supabase/migrations/*pazo_f16_live_owner_recovery_finish.sql'
+      - 'supabase/rollbacks/f16_live_owner_recovery_finish_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-secret-provision-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_secret_provision_attempts_REVIEW_REQUIRED.sql'
+      - 'scripts/f16-live-admin-origin-disposable-lab.sql'
+      - 'supabase/migrations/20261020142448_pazo_f16_admin_owned_live_return_origin.sql'
+      - 'scripts/f16-live-service-rpc-bridge-disposable-lab.sql'
+      - 'supabase/drafts/f16_live_service_rpc_bridge_REVIEW_REQUIRED.sql'
+      - '.github/workflows/f16-live-gateway-disposable-lab.yml'
+permissions:
+  contents: read
+jobs:
+  live-gateway-pg17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-data
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install disposable PostgreSQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
+      - name: Test private merchant generations, Live OFF, idempotency and period integrity
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: synthetic-only-no-hosted-data
+        run: |
+          node scripts/f16-live-worker-scheduler-core-stage.mjs
+          node scripts/f16-live-benefits-prerequisites-stage.mjs
+          psql -X -v ON_ERROR_STOP=1 -f scripts/f16-live-gateway-disposable-lab.sql

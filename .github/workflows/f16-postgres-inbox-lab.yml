@@ -1,0 +1,398 @@
+name: F16 Disposable PostgreSQL Lab
+
+on:
+  pull_request:
+    branches:
+      - release/mvp-beta-fast-track-20261010
+
+permissions:
+  contents: read
+
+jobs:
+  f16-inbox-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+          POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US --locale=en_US.UTF-8
+        ports:
+          - 55441:5432
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Prepare existing audited synthetic catalog and F16 consent baseline
+        run: |
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql
+      - name: Execute CLI-generated F16 migration on disposable PostgreSQL and verify security
+        run: |
+          set -euo pipefail
+          migration=$(find supabase/migrations -maxdepth 1 -type f -name '*_f16_private_verified_event_inbox.sql' | sort | tail -n 1)
+          if [[ -z "$migration" || ! -f "$migration" ]]; then
+            echo 'BLOCKED: F16 CLI-generated migration is missing'
+            exit 1
+          fi
+          echo "Testing versioned migration $(basename "$migration") ONLY in disposable PostgreSQL"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f "$migration"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-payment-inbox-metadata.sql \
+            -f supabase/tests/supporter/f16-payment-inbox-synthetic.sql
+          node scripts/f16-postgres-inbox-concurrency.mjs
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-retention-90-day-synthetic.sql
+          echo 'PASS: versioned F16 migration and 32-way concurrency in disposable PostgreSQL only'
+
+      - name: Check F16 operator retention preview stays zero without reconciled ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/queries/f16_paypal_inbox_retention_preview_READ_ONLY.sql)
+          if [[ "$result" != "0|4|4" ]]; then
+            echo "FAIL: F16 retention preview must protect every unresolved event in lab" >&2
+            exit 1
+          fi
+          echo "PASS F16: 0 eligible events, 4 held, 4 nonterminal; no mutation"
+
+      - name: F16 private ledger + reversal order tests in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-financial-ledger-lab-draft.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-financial-ledger-synthetic.sql
+          node scripts/f16-postgres-ledger-concurrency.mjs
+          echo 'PASS F16: ledger remains private, reversible and cannot grant entitlement'
+
+      - name: F16 owner binding and anti-hijack tests in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-subscription-intent-lab-draft.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-subscription-intent-synthetic.sql
+          node scripts/f16-postgres-owner-binding-concurrency.mjs
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-subscription-intent-rpc-synthetic.sql
+          echo 'PASS F16: owner binding rejects forged custom_id, reclaims and concurrent hijacks'
+
+      - name: Test versioned F16 intent and financial migration in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = "true"
+          test "${PGPASSWORD:-}" = "f14_synthetic_ci_only"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-disposable-lab-to-migration-reset.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/migrations/20261014042646_f16_private_intents_financial_ledger.sql
+          sed 's/f16_lab_record/f16_private_record/g' supabase/tests/supporter/f16-financial-ledger-synthetic.sql | \
+            psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1
+          sed 's/f16_lab_bind_subscription/f16_private_bind_subscription/g' supabase/tests/supporter/f16-subscription-intent-synthetic.sql | \
+            psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-subscription-intent-rpc-synthetic.sql
+          PAZO_F16_MIGRATION_QA=true node scripts/f16-postgres-ledger-concurrency.mjs
+          PAZO_F16_MIGRATION_QA=true node scripts/f16-postgres-owner-binding-concurrency.mjs
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-atomic-payment-event-migration-synthetic.sql
+          echo 'PASS F16: versioned private owner/ledger migration, RPC ACLs and concurrency in disposable PostgreSQL'
+
+      - name: F16 shared admission cap — isolated PostgreSQL 17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          echo 'Testing CLI-generated F16 global budget migration ONLY on disposable PostgreSQL'
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/migrations/20261014073658_f16_global_webhook_admission.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-global-webhook-admission-synthetic.sql
+          node scripts/f16-global-budget-concurrency.mjs
+          preflight=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/queries/f16_global_admission_preflight_READ_ONLY.sql)
+          test "$preflight" = 't|t|t|t|f|f|t' || { echo 'FAIL F16: budget preflight privileges/security mismatch' >&2; exit 1; }
+          echo 'PASS F16: versioned migration, security preflight, isolation and global concurrency'
+
+      - name: F16 eleven-event inbox contract — additive migration in disposable DB only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/migrations/20261014094349_f16_preserve_two_subscription_lifecycle_events.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-preserved-lifecycle-events-synthetic.sql
+          echo 'PASS F16: 8 preserved + 3 SALE, no grants, no production change'
+
+      - name: F16 draft private inbox reader RPC - disposable PostgreSQL only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$PGPASSWORD" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          echo 'Installing DRAFT-only RPC into disposable CI PostgreSQL (NOT hosted)'
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/queries/f16_read_verified_inbox_rpc_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-private-inbox-read-rpc-synthetic.sql
+          echo 'PASS F16: service-only inbox RPC with exact minimal data and deny-by-default roles'
+
+      - name: F16 isolated lease claim retry recovery race - disposable PostgreSQL only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/queries/f16_inbox_claim_lease_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-inbox-claim-lease-synthetic.sql
+          node scripts/f16-inbox-lease-concurrency.mjs
+          echo 'PASS F16: ACID claims, token ownership, backoff, expired recovery, no money'
+
+      - name: F16 lease-owned atomic finance and concurrency - PG17 lab only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_lease_bound_finance_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-lease-bound-finance-synthetic.sql
+          node scripts/f16-lease-bound-finance-concurrency.mjs
+          echo 'PASS F16: lease-owned sale/reversal atomicity and concurrent replay; no hosted use'
+
+      - name: F16 service-only owner and conservative reversals - disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_private_proof_reads_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-private-proof-reads-synthetic.sql
+          echo 'PASS F16: private service owner and unresolved reversal denial, LAB only'
+
+      - name: F16 atomic legacy finance cutover rehearsal - disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-finance-cutover-transaction-rehearsal.sql
+          echo 'PASS F16: legacy routes denied and lease financial settlement verified; all changes rolled back'
+
+      - name: F16 private financial account deletion exposure - disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_financial_deletion_exposure_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-financial-deletion-exposure-synthetic.sql
+          echo 'PASS F16: owner finance exposure and deletion blockers, no hosted actions'
+
+      - name: F16 multiple refund ledger limitation - disposable PG17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-multi-refund-schema-limit-synthetic.sql
+          echo 'PASS: second refund held until financial schema policy is approved'
+
+      - name: F16 approved refund multievent architecture - PG17 disposable only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_refund_multievent_ledger_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-multievent-ledger-synthetic.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-cumulative-status-out-of-order-synthetic.sql
+          node scripts/f16-refund-multievent-concurrency.mjs
+          echo 'PASS F16: unique refunds, owner binding, cumulative minor, late sale hold'
+
+      - name: F16 multi-refund private read and deletion audit - disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${DATABASE_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/queries/f16_refund_multievent_readers_lab_DRAFT_DO_NOT_APPLY.sql
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/supporter/f16-refund-multievent-readers-synthetic.sql
+          echo 'PASS F16: refund-before-sale visible to private reviewer; no new public ACL'
+
+      - name: P42 backup data-exclusion and restore - disposable PG17 ONLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${SUPABASE_ACCESS_TOKEN:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          # Client and server are both postgres:17.11; the same existing
+          # disposable PG service handles two NEW isolated lab databases.
+          # Never mount project secrets, user files, or hosted access tokens.
+          docker run --rm --network host -i \
+            -e GITHUB_ACTIONS=true \
+            -e PGPASSWORD=f14_synthetic_ci_only \
+            postgres:17.11 bash -s < scripts/f16-p42-backup-exclusion-pg17-lab.sh
+
+      - name: F16 MVP verified paid-period source — disposable PG17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_mvp_verified_paid_period_source_DISPOSABLE_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/tests/supporter/f16-mvp-private-paid-periods-synthetic.sql)
+          test "$result" = F16_MVP_PRIVATE_PERIODS_PG17_SYNTHETIC_PASS
+          echo 'PASS F16 MVP: private verified cycles, review holds, expires, denies API roles'
+
+      - name: F16 MVP four rewards backend — disposable PG17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_mvp_four_benefits_backend_DISPOSABLE_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-mvp-four-benefits-pg17-synthetic.sql)
+          test "$result" = F16_MVP_FOUR_BENEFITS_PG17_SYNTHETIC_PASS
+          echo 'PASS F16 MVP: profile themes, badges, milestones, opt-in and dispute blocks'
+
+      - name: F16 MVP merchant period writer — disposable PG17 only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_mvp_operator_period_writer_DISPOSABLE_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-mvp-private-period-writer-synthetic.sql)
+          test "$result" = F16_MVP_PRIVATE_PERIOD_WRITER_IDEMPOTENT_PG17_PASS
+          echo 'PASS F16 MVP: private idempotent merchant periods, owner and dispute holds'
+
+      - name: F16 new four-benefit Sandbox offer, historical terms intact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          # P06 store and legacy terms are never modified in PAZO hosted here.
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/drafts/f16_p06_durable_checkout_consent_DO_NOT_APPLY.sql
+          temporary_sql=$(mktemp)
+          trap 'rm -f "$temporary_sql"' EXIT
+          node scripts/f16-sandbox-benefits-v2-disposable-offer-sql.mjs > "$temporary_sql"
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f "$temporary_sql")
+          echo "$result" | grep -qx F16_SANDBOX_V2_OFFER_PG17_REHEARSAL_PASS
+          echo 'PASS F16: new four-benefit QA offer; original no-reward acceptance stays immutable'
+
+      - name: F16 same existing QA owner new V2 consent — synthetic only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' \
+            -f supabase/tests/supporter/f16-qa-v2-owner-fixture-pg17.sql \
+            -f supabase/drafts/f16_qa_v2_same_owner_second_checkout_PG17_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-qa-v2-existing-owner-checkout-synthetic.sql)
+          test "$result" = F16_QA_V2_EXISTING_OWNER_SECOND_CHECKOUT_PG17_PASS
+          echo 'PASS F16: same buyer can start distinct V2 terms without rewriting historical P06'
+
+      - name: F16 V2 owner-scoped subscription receipt read — PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = true
+          test "${PGPASSWORD:-}" = f14_synthetic_ci_only
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          test -z "${PAZO_SUPABASE_PROJECT_ID:-}"
+          psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -c 'SET ROLE postgres;' -f supabase/drafts/f16_qa_v2_owner_scoped_account_READ_ONLY.sql
+          result=$(psql -X -Atq -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supporter/f16-qa-v2-private-account-read-pg17.sql)
+          test "$result" = F16_QA_V2_PRIVATE_ACCOUNT_READ_PG17_PASS
+          echo 'PASS F16: only V2 accepted subscription is readable/cancellable by its owner'

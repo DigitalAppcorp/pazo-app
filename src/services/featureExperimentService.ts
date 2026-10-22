@@ -54,3 +54,21 @@ export const hasFeatureExperimentInterest = async (moduleKey: string) => {
   if (error) throw error
   return Boolean(data)
 }
+
+/** Explicit one-choice feedback, not autocapture. One answer per account+module. */
+export type FeatureIntent='use'|'create'|'explore'
+export const getFeatureExperimentIntent=async(moduleKey:string):Promise<FeatureIntent|null>=>{
+ const {data,error}=await supabase.from('module_validation_intents')
+  .select('intent_key').eq('module_key',moduleKey).maybeSingle()
+ if(error)throw error
+ return data?.intent_key==='use'||data?.intent_key==='create'||data?.intent_key==='explore'
+  ?data.intent_key:null
+}
+export const recordFeatureExperimentIntent=async(
+ moduleKey:string,source:string,intent:FeatureIntent,
+)=>{
+ const {error}=await supabase.from('module_validation_intents').upsert({
+  module_key:moduleKey,source,intent_key:intent,
+ },{onConflict:'user_id,module_key'})
+ if(error)throw error
+}

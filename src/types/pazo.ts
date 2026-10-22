@@ -20,6 +20,7 @@ export interface Pet {
 
 export interface PostComment {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   authorPetId?: string
   authorName: string
   authorPet: string
@@ -29,7 +30,12 @@ export interface PostComment {
   createdAt?: string // Soporte nativo para timestamp dinámico en comentarios
 }
 
+// Display-only proof from the existing public, server-calculated entitlement RPC.
+// It is NOT authority to write benefits, charge, cancel, or modify a membership.
+export type SupporterBadgeEvidence={badge:boolean;milestone:0|3|6|12}
+
 export interface Post {
+  supporterBadge?:SupporterBadgeEvidence
   id: string
   petId: string
   isAuthorDeleted?: boolean
@@ -88,6 +94,7 @@ export interface CommunityMember {
 
 export interface CommunityPostComment {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   postId: string
   authorPetId: string
   authorName: string
@@ -100,6 +107,7 @@ export interface CommunityPostComment {
 
 export interface CommunityPost {
   id: string
+  supporterBadge?:SupporterBadgeEvidence
   communityId: string
   authorUserId: string
   authorPetId: string

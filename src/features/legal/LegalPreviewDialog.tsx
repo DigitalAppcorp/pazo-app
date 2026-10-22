@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { legalPreview, type LegalKind, type LegalLanguage } from './legalCopy'
+import { resolveLegalCopy, type LegalKind, type LegalLanguage } from './legalCopy'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact'
 
 interface Props { kind: LegalKind; lang: LegalLanguage; onClose: () => void }
 
 export function LegalPreviewDialog({ kind, lang, onClose }: Props) {
   const closeButton = useRef<HTMLButtonElement>(null)
-  const copy = legalPreview[kind][lang]
+  const copy = resolveLegalCopy(kind, lang)
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
     closeButton.current?.focus()

@@ -1,9 +1,13 @@
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
+import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
+import { SupporterAccountManagement } from '../../features/supporter/components/SupporterAccountManagement'
+import { useSupporterMembershipStatus } from '../../features/supporter/useSupporterMembershipStatus'
+import { SupporterInvitationPrompt } from '../../features/supporter/components/SupporterInvitationPrompt'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
@@ -62,8 +66,20 @@ export const PetView = ({
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showSupporterAccount, setShowSupporterAccount] = useState(false)
+  const [dismissedInvitationPreview, setDismissedInvitationPreview] = useState(false)
+  const supporterAccountEntryRef = useRef<HTMLButtonElement>(null)
+  const { status: supporterStatus } = useSupporterMembershipStatus(undefined, canManagePet)
+  // Explicit localhost QA visual preview. No automatic targeting, tracking or cooldown writes.
+  const invitationPreviewRequested = import.meta.env.DEV &&
+    import.meta.env.VITE_PAZO_F16_SANDBOX_QA_UI === 'true' &&
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('supporter_preview') === '1'
   const [activeTab, setActiveTab] = useState<'menu' | 'myposts'>('menu')
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const settingsMenuRef = useRef<HTMLDivElement>(null)
+  const settingsButtonRef = useRef<HTMLButtonElement>(null)
   const [showDeletionRequest, setShowDeletionRequest] = useState(false)
   // The intake RPCs are installed and QA-tested. Keep production disabled
   // until launch gates close; allow request/status/cancel QA in localhost.
@@ -96,7 +112,29 @@ export const PetView = ({
 
   const nextPendingCare = careReminderItem
 
+  useEffect(() => {
+    if (!showSettings || typeof document === 'undefined') return
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !settingsMenuRef.current?.contains(event.target)) {
+        setShowSettings(false)
+      }
+    }
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowSettings(false)
+        settingsButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    document.addEventListener('keydown', dismissOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside)
+      document.removeEventListener('keydown', dismissOnEscape)
+    }
+  }, [showSettings])
+
   const handleEditClick = () => {
+    setShowSettings(false)
     if (!canManagePet) { onRequireAccount(); return }
     setEditForm(buildEditForm())
     setEditPhotoFile(null)
@@ -218,11 +256,8 @@ export const PetView = ({
 
   return (
     <div className="space-y-4 animate-slide-up pb-6">
-      <div className="flex justify-between items-center px-1">
+        <div className="flex justify-between items-center px-1">
         <div>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#204E4A] bg-[#E1E53F] px-3 py-1 rounded-full inline-block shadow-xs">
-            {isEditing ? (lang === 'es' ? 'Editando Perfil' : 'Editing Profile') : (lang === 'es' ? 'Ficha Oficial' : 'Official Record')}
-          </span>
           <h2 className="text-2xl font-black text-[#204E4A] tracking-tight mt-1">
             {currentPet.name}
           </h2>
@@ -240,11 +275,73 @@ export const PetView = ({
               className="text-xs font-bold text-[#204E4A] bg-white hover:bg-neutral-50 px-3.5 py-2 rounded-full transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
             >
               <span>{lang === 'es' ? 'Cambiar' : 'Switch'}</span>
-              <span className="text-[10px]">▾</span>
+              <span className="text-[13px]">▾</span>
             </button>
+
+            <div className="relative z-30" ref={settingsMenuRef}>
+              <button
+                ref={settingsButtonRef}
+                type="button"
+                onClick={() => setShowSettings((open) => !open)}
+                aria-label={lang === 'es' ? 'Configuración' : 'Settings'}
+                title={lang === 'es' ? 'Configuración' : 'Settings'}
+                aria-expanded={showSettings}
+                aria-controls="pazo-profile-settings"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-xs transition-colors hover:bg-[#E1E53F]/40 focus-visible:bg-[#E1E53F]"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.3 2.8h3.4l.55 2.12c.48.19.94.46 1.36.78l2.07-.63 1.7 2.94-1.54 1.5a7.5 7.5 0 0 1 0 1.98l1.54 1.5-1.7 2.94-2.07-.63c-.42.32-.88.59-1.36.78l-.55 2.12h-3.4l-.55-2.12a6.8 6.8 0 0 1-1.36-.78l-2.07.63-1.7-2.94 1.54-1.5a7.5 7.5 0 0 1 0-1.98l-1.54-1.5 1.7-2.94 2.07.63c.42-.32.88-.59 1.36-.78z" transform="translate(0 1.5)" />
+                  <circle cx="12" cy="12" r="2.65" />
+                </svg>
+              </button>
+              {showSettings && (
+                <div
+                  id="pazo-profile-settings"
+                  role="group"
+                  aria-label={lang === 'es' ? 'Configuración de cuenta' : 'Account settings'}
+                  className="absolute right-0 top-full z-50 mt-2 max-h-[70dvh] w-[min(19rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-[1.5rem] bg-[#FFFCF6] p-2 shadow-[0_12px_35px_rgba(32,78,74,0.17)] motion-safe:animate-[slideUpFade_220ms_ease-out_both]"
+                >
+                  <p className="px-3 pb-1 pt-2 text-[11px] font-extrabold text-[#5C7470]">
+                    {lang === 'es' ? 'Privacidad y reglas' : 'Privacy and community rules'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setShowSettings(false); setLegalKind('privacy') }}
+                    className="w-full rounded-2xl px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/35"
+                  >
+                    {lang === 'es' ? 'Privacidad' : 'Privacy'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowSettings(false); setLegalKind('terms') }}
+                    className="w-full rounded-2xl px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/35"
+                  >
+                    {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
+                  </button>
+              <div className="mt-2 rounded-2xl bg-[#F0F3ED]/85 p-3">
+                <h4 className="text-sm font-extrabold text-[#204E4A]">
+                  {lang==='es'?'Cuenta y datos':'Account and data'}
+                </h4>
+                <p className="mt-1 text-xs text-[#5C7470]">
+                  {requestEnabled
+                    ?(lang==='es'?'Puedes solicitar revisión para eliminar tu cuenta. El envío no provoca eliminación inmediata.':'You can request account deletion review. Submitting does not immediately delete your account.')
+                    :(lang==='es'?'Las solicitudes de eliminación se habilitarán cuando termine la verificación del servicio.':'Deletion requests will be available after service verification.')}
+                </p>
+                <button type="button" disabled={!requestEnabled}
+                  onClick={() => { setShowSettings(false); canManagePet ? setShowDeletionRequest(true) : onRequireAccount() }}
+                  className="mt-3 w-full rounded-2xl bg-[#204E4A]/10 px-3 py-3 text-left text-xs font-bold text-[#204E4A] transition-colors disabled:opacity-40 focus-visible:bg-[#E1E53F]">
+                  {lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'}
+                </button>
+                <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="mt-3 block break-all rounded-xl py-2 text-xs font-bold text-[#204E4A] underline focus-visible:bg-[#E1E53F]/35">
+                  {lang === 'es' ? 'Soporte y privacidad: ' : 'Support and privacy: '}{PAZO_PRIVACY_SUPPORT_EMAIL}
+                </a>
+              </div>
+                </div>
+              )}
+            </div>
             <button
               onClick={handleLogout}
-              className="w-9 h-9 rounded-full bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+              className="w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 focus-visible:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
               title={lang === 'es' ? 'Cerrar sesión' : 'Log out'}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,14 +360,14 @@ export const PetView = ({
       </div>
 
       {showPetPicker && !isEditing && (
-        <div className="p-3 bg-white rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
+        <div className="p-3 pazo-glass-card rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
           <div className="flex justify-between items-center px-2">
-            <span className="text-[10px] font-extrabold uppercase text-[#5C7470] tracking-wider">
+            <span className="text-[13px] font-extrabold uppercase text-[#5C7470] tracking-wider">
               {lang === 'es' ? 'Tus mascotas registradas' : 'Your registered pets'}
             </span>
             <button
               onClick={onAddPet}
-              className="text-[11px] font-extrabold text-[#204E4A] hover:underline cursor-pointer"
+              className="text-[14px] font-extrabold text-[#204E4A] hover:underline cursor-pointer"
             >
               + {lang === 'es' ? 'Añadir otra' : 'Add another'}
             </button>
@@ -297,7 +394,7 @@ export const PetView = ({
                 <div className="text-left">
                   <span className="font-extrabold text-xs block leading-tight">{p.name}</span>
                   <span
-                    className={`text-[10px] ${currentPet.id === p.id ? 'text-white/70' : 'text-[#5C7470]'
+                    className={`text-[13px] ${currentPet.id === p.id ? 'text-white/70' : 'text-[#5C7470]'
                       }`}
                   >
                     {p.species} • {p.age}
@@ -314,11 +411,11 @@ export const PetView = ({
         </div>
       )}
 
-      <div className="p-5 bg-white rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
+      <div className="p-5 pazo-glass-card rounded-[2.2rem] shadow-[0_4px_20px_rgba(32,78,74,0.05)] overflow-hidden relative">
         {!isEditing && (
           <button
             onClick={handleEditClick}
-            className="absolute top-4 right-4 text-[10px] font-bold text-[#204E4A] bg-[#FAF8F5] hover:bg-[#E1E53F] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+            className="absolute top-4 right-4 text-[13px] font-bold text-[#204E4A] bg-[#FAF8F5] hover:bg-[#E1E53F] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
           >
             {lang === 'es' ? 'Editar' : 'Edit'}
           </button>
@@ -339,7 +436,7 @@ export const PetView = ({
 
             {isEditing && (
               <label className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-[1.8rem] cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-[10px] font-bold text-center leading-tight">
+                <span className="text-white text-[13px] font-bold text-center leading-tight">
                   {lang === 'es' ? 'Cambiar\nFoto' : 'Change\nPhoto'}
                 </span>
                 <input
@@ -357,7 +454,7 @@ export const PetView = ({
             {isEditing ? (
               <div className="space-y-2.5 w-full mt-1">
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Nombre de la mascota</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Nombre de la mascota</label>
                   <input
                     type="text"
                     value={editForm.name}
@@ -367,18 +464,21 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Biografía corta</label>
-                  <input
-                    type="text"
-                    value={editForm.bio}
-                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    className="w-full bg-[#FAF8F5] border border-[#204E4A]/10 rounded-xl px-3 py-1.5 text-xs text-[#204E4A] focus:outline-none focus:border-[#E1E53F]"
-                  />
+                  <label htmlFor="pazo-pet-bio" className="mb-1 block text-[13px] font-bold text-[#5C7470]">
+                    {lang === 'es' ? 'Biografía corta (opcional)' : 'Short bio (optional)'}
+                  </label>
+                  <textarea id="pazo-pet-bio" rows={2} maxLength={240} value={editForm.bio}
+                    onChange={(event) => setEditForm({ ...editForm, bio: event.target.value })}
+                    placeholder={lang === 'es' ? '¿Qué hace especial a tu mascota?' : 'What makes your pet special?'}
+                    className="w-full resize-y rounded-xl bg-[#FAF8F5] px-3 py-2 text-[13px] leading-relaxed text-[#204E4A]" />
+                  <p className="text-[11px] leading-snug text-[#5C7470]">
+                    {lang === 'es' ? 'Aparecerá en el perfil público solo si la completas.' : 'Shown on the public profile only if you fill it in.'}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Raza</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Raza</label>
                     <input
                       type="text"
                       value={editForm.breed}
@@ -388,7 +488,7 @@ export const PetView = ({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Género</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Género</label>
                     <select
                       value={editForm.gender}
                       onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
@@ -403,7 +503,7 @@ export const PetView = ({
 
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Peso · privado</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Peso · privado</label>
                     <input
                       type="text"
                       value={editForm.weight}
@@ -412,7 +512,7 @@ export const PetView = ({
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Edad</label>
+                    <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Edad</label>
                     <input
                       type="text"
                       value={editForm.age}
@@ -423,7 +523,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Dieta / Plan · privado</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Dieta / Plan · privado</label>
                   <input
                     type="text"
                     value={editForm.dietPlan}
@@ -433,7 +533,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-0.5">Zona aproximada · privada</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-0.5">Zona aproximada · privada</label>
                   <input
                     type="text"
                     value={editForm.zone}
@@ -444,7 +544,7 @@ export const PetView = ({
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-[#5C7470] block mb-1">Intereses · privados</label>
+                  <label className="text-[13px] font-bold text-[#5C7470] block mb-1">Intereses · privados</label>
                   <div className="flex flex-wrap gap-1.5">
                     {interestOptions.map((interest) => {
                       const selected = editForm.interests.includes(interest)
@@ -453,7 +553,7 @@ export const PetView = ({
                           key={interest}
                           type="button"
                           onClick={() => toggleEditInterest(interest)}
-                          className={`text-[9px] font-bold px-2.5 py-1.5 rounded-full transition-colors cursor-pointer ${selected
+                          className={`text-[12px] font-bold px-2.5 py-1.5 rounded-full transition-colors cursor-pointer ${selected
                             ? 'bg-[#204E4A] text-[#E1E53F]'
                             : 'bg-[#FAF8F5] text-[#5C7470]'
                             }`}
@@ -477,19 +577,26 @@ export const PetView = ({
               <>
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-lg font-black text-[#204E4A] truncate">{currentPet.name}</h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
+                  <span className="text-[13px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
                     {currentPet.species}
                   </span>
                 </div>
                 <p className="text-xs text-[#5C7470] mt-0.5">{currentPet.bio}</p>
-                <div className="flex flex-wrap gap-2 text-[11px] font-bold text-[#204E4A] mt-2">
-                  <span className="bg-[#FAF8F5] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
-                    <span>{currentPet.weight}</span>
-                  </span>
-                  <span className="bg-[#FAF8F5] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
-                    <IconBowl size={13} />
-                    <span className="truncate max-w-[140px]">{currentPet.dietPlan}</span>
-                  </span>
+                <div className="mt-2 flex flex-wrap gap-2 text-[17px] font-bold text-[#204E4A]">
+                  {currentPet.weight && (
+                    <span className="flex items-center gap-1 rounded-full bg-white/65 px-3 py-1.5 shadow-xs">{currentPet.weight}</span>
+                  )}
+                  {currentPet.dietPlan && (
+                    <span className="flex items-center gap-1 rounded-full bg-white/65 px-3 py-1.5 shadow-xs">
+                      <IconBowl size={16} />
+                      <span className="max-w-[180px] break-words">{currentPet.dietPlan}</span>
+                    </span>
+                  )}
+                  {!currentPet.weight && !currentPet.dietPlan && (
+                    <p className="text-[16px] font-medium text-[#5C7470]">
+                      {lang === 'es' ? 'Datos adicionales sin registrar' : 'Additional details not provided'}
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -498,26 +605,22 @@ export const PetView = ({
       </div>
 
       {!isEditing && (
-        <div className="flex bg-white p-1 rounded-2xl border border-[#204E4A]/10 shadow-xs">
-          <button
-            onClick={() => setActiveTab('menu')}
-            className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'menu' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
-          >
-            {lang === 'es' ? 'Menú y Utilidades' : 'Menu & Utilities'}
-          </button>
-          <button
-            onClick={() => setActiveTab('myposts')}
-            className={`flex-1 py-2 font-extrabold rounded-xl transition-all cursor-pointer text-xs ${activeTab === 'myposts' ? 'bg-[#204E4A] text-[#E1E53F]' : 'text-[#5C7470]'}`}
-          >
-            {lang === 'es' ? `Mis Publicaciones (${userPosts.length})` : `My Posts (${userPosts.length})`}
-          </button>
-        </div>
+        <LiquidChoiceTabs
+          variant="pet"
+          active={activeTab}
+          onChange={setActiveTab}
+          accessibleLabel={lang === 'es' ? 'Secciones de mi mascota' : 'My pet sections'}
+          choices={[
+            {id: 'menu', label: lang === 'es' ? 'Menú y Utilidades' : 'Menu & Utilities'},
+            {id: 'myposts', label: lang === 'es' ? `Mis Publicaciones (${userPosts.length})` : `My Posts (${userPosts.length})`},
+          ]}
+        />
       )}
 
       {!isEditing && activeTab === 'myposts' ? (
         <div className="space-y-3 animate-fade-in">
           {userPosts.length === 0 ? (
-            <div className="bg-white rounded-[2rem] p-8 text-center border border-[#204E4A]/10 shadow-xs">
+            <div className="pazo-glass-card rounded-[2rem] p-8 text-center border border-[#204E4A]/10 shadow-xs">
               <p className="text-xs text-[#5C7470] font-medium">
                 {lang === 'es'
                   ? `Aún no has compartido historias de ${currentPet.name}.`
@@ -526,10 +629,10 @@ export const PetView = ({
             </div>
           ) : (
             userPosts.map((post) => (
-              <div key={post.id} className="bg-white rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
+              <div key={post.id} className="pazo-glass-card rounded-[2rem] p-4 shadow-xs border border-[#204E4A]/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-[#5C7470] font-bold">{post.timeAgo}</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
+                  <span className="text-[13px] text-[#5C7470] font-bold">{post.timeAgo}</span>
+                  <span className="inline-flex items-center gap-1 text-[13px] bg-[#E1E53F]/40 text-[#204E4A] px-2 py-0.5 rounded-full font-bold"><PazoMotifIcon kind="like" size={12} />{post.likes}</span>
                 </div>
                 <p className="text-xs text-[#204E4A] font-medium">
                   {post.text}
@@ -556,6 +659,30 @@ export const PetView = ({
             {lang === 'es' ? `Todo sobre ${currentPet.name}` : `All about ${currentPet.name}`}
           </h3>
           <ModerationAccess enabled={canModerate} lang={lang} />
+
+          {canManagePet && (
+            <button ref={supporterAccountEntryRef} type="button"
+              onClick={() => setShowSupporterAccount(true)}
+              aria-label={supporterStatus.kind==='verified'
+                ? (lang==='es'?'Amigo de PAZO, gestionar mi membresía y beneficios':'PAZO Friend, manage membership and benefits')
+                : (lang==='es'?'Amigo de PAZO, membresía y beneficios':'PAZO Friend, membership and benefits')}
+              className="flex w-full items-center justify-between gap-3 rounded-[2rem] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F5F7EE] focus-visible:bg-[#E1E53F]/45">
+              <span className="flex min-w-0 items-center gap-3">
+                <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/30">
+                  <IconPaw size={22}/>
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[16px] font-extrabold text-[#204E4A]">
+                    {lang === 'es' ? 'Amigo de PAZO' : 'Friend of PAZO'}
+                  </span>
+                  <span className="block text-[12px] font-medium text-[#5C7470]">
+                    {lang==='es'?'Tu membresía y beneficios':'Your membership and benefits'}
+                  </span>
+                </span>
+              </span>
+              <span aria-hidden="true" className="ml-2 text-xl font-extrabold text-[#5C7470]">›</span>
+            </button>
+          )}
 
           <div
             onClick={onOpenQRPassport}
@@ -629,54 +756,18 @@ export const PetView = ({
             </span>
           </div>
 
-          <div className="rounded-[2rem] bg-white px-4 py-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
-            <h4 className="text-sm font-extrabold text-[#204E4A]">
-              {lang === 'es' ? 'Privacidad y reglas' : 'Privacy & community rules'}
-            </h4>
-            <p className="mt-1 text-xs text-[#5C7470]">
-              {lang === 'es' ? 'Información preliminar para la etapa de pruebas.' : 'Preliminary information for the testing stage.'}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setLegalKind('privacy')}
-                className="rounded-full bg-[#E1E53F]/40 px-4 py-2 text-xs font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
-                {lang === 'es' ? 'Privacidad' : 'Privacy'}
-              </button>
-              <button type="button" onClick={() => setLegalKind('terms')}
-                className="rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
-                {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
-              </button>
-            </div>
-          </div>
 
-          <div className="rounded-[2rem] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
-            <h4 className="text-sm font-extrabold text-[#204E4A]">
-              {lang==='es'?'Cuenta y datos':'Account and data'}
-            </h4>
-            <p className="mt-1 text-xs text-[#5C7470]">
-              {requestEnabled
-                ?(lang==='es'?'Puedes solicitar revisión para eliminar tu cuenta. El envío no provoca eliminación inmediata.':'You can request account deletion review. Submitting does not immediately delete your account.')
-                :(lang==='es'?'Las solicitudes de eliminación se habilitarán cuando termine la verificación del servicio.':'Deletion requests will be available after service verification.')}
-            </p>
-            <button type="button" disabled={!requestEnabled}
-              onClick={() => canManagePet ? setShowDeletionRequest(true) : onRequireAccount()}
-              className="mt-3 rounded-full bg-[#204E4A]/10 px-4 py-2 text-xs font-bold text-[#204E4A] disabled:opacity-40 focus-visible:bg-[#E1E53F]">
-              {lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'}
-            </button>
-            <a href={PAZO_PRIVACY_SUPPORT_MAILTO} className="mt-3 block text-xs font-bold text-[#204E4A] underline">
-              {lang === 'es' ? 'Soporte y privacidad: ' : 'Support and privacy: '}{PAZO_PRIVACY_SUPPORT_EMAIL}
-            </a>
-          </div>
 
           {nextPendingCare && (
             <div className="p-4 bg-[#FAF8F5] rounded-[2rem] flex justify-between items-center shadow-xs">
               <div className="space-y-0.5">
-                <span className="text-[10px] font-extrabold uppercase text-[#EC7357] tracking-wider block">
+                <span className="text-[13px] font-extrabold uppercase text-[#EC7357] tracking-wider block">
                   {lang === 'es' ? 'Próximo cuidado' : 'Next upcoming task'}
                 </span>
                 <span className="font-bold text-xs text-[#204E4A] block">
                   {nextPendingCare.title}
                 </span>
-                <span className="text-[11px] text-[#5C7470] block">
+                <span className="text-[14px] text-[#5C7470] block">
                   {nextPendingCare.dueDate}
                   {nextPendingCare.dueTime ? ` • ${nextPendingCare.dueTime}` : ''}
                 </span>
@@ -709,7 +800,7 @@ export const PetView = ({
                   : `Is ${currentPet.name} lost? Trigger Alert`}
               </span>
             </button>
-            <p className="text-[11px] text-center text-[#5C7470] mt-1.5">
+            <p className="text-[14px] text-center text-[#5C7470] mt-1.5">
               {lang === 'es'
                 ? 'Emite una búsqueda comunitaria protegida'
                 : 'Broadcasts a protected community alert'}
@@ -717,6 +808,19 @@ export const PetView = ({
           </div>
         </div>
       )}
+      {showSupporterAccount && (
+        <SupporterAccountManagement pet={currentPet} lang={lang} onClose={() => {
+          setShowSupporterAccount(false)
+          supporterAccountEntryRef.current?.focus()
+        }} />
+      )}
+      {canManagePet && invitationPreviewRequested && !dismissedInvitationPreview &&
+        !showSupporterAccount && supporterStatus.kind === 'inactive' && (
+          <SupporterInvitationPrompt lang={lang} previewOnly
+            onExplore={() => { setDismissedInvitationPreview(true); setShowSupporterAccount(true) }}
+            onDismiss={() => setDismissedInvitationPreview(true)}
+          />
+        )}
       {legalKind && <LegalPreviewDialog kind={legalKind} lang={lang} onClose={() => setLegalKind(null)} />}
       {showDeletionRequest && <DeletionRequestDialog lang={lang} onClose={() => setShowDeletionRequest(false)} />}
     </div>

@@ -1,5 +1,5 @@
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Pet, Post } from '../../types/pazo'
 import { IconClose, IconPaw } from '../icons/PazoIcons'
 import { supabase } from '../../services/supabaseClient'
@@ -24,6 +24,16 @@ export const CreatePostModal = ({
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [photoPreview, setPhotoPreview] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    // Pet.zone is private account information. It becomes a PUBLIC post
+    // location only after the author explicitly chooses to share it.
+    const [shareLocation, setShareLocation] = useState(false)
+    const [postLocation, setPostLocation] = useState('')
+
+    useEffect(() => {
+        if (!isOpen) return
+        setShareLocation(false)
+        setPostLocation(currentPet?.zone?.trim() || '')
+    }, [isOpen, currentPet?.id, currentPet?.zone])
 
     if (!isOpen) return null
 
@@ -89,6 +99,11 @@ export const CreatePostModal = ({
         }
 
         if (!text.trim() && !imageFile) return
+        const selectedLocation=shareLocation?postLocation.trim():null
+        if (shareLocation && !selectedLocation) {
+            alert(lang==='es'?'Escribe una ciudad o zona, o desactiva la ubicación.':'Enter a city or area, or turn location sharing off.')
+            return
+        }
         setIsSubmitting(true)
 
         let uploadedPath: string | null = null
@@ -139,7 +154,9 @@ export const CreatePostModal = ({
             // y fuerza contadores de interacción a cero.
             const postPayload = {
                 pet_id: currentPet.id,
-                location: 'Los Ángeles, CA',
+                // NULL explicitly bypasses the legacy database default.
+                // Never publish the pet's private zone without consent.
+                location: selectedLocation,
                 text: text.trim(),
                 photo_url: finalPhotoUrl,
                 tags: combinedTags,
@@ -159,7 +176,7 @@ export const CreatePostModal = ({
                 petName: newPostData.pet_name,
                 petSpecies: newPostData.pet_species,
                 petAvatar: newPostData.pet_avatar,
-                location: newPostData.location,
+                location: newPostData.location || '',
                 timeAgo: lang === 'es' ? 'justo ahora' : 'just now',
                 createdAt: newPostData.created_at,
                 isRecommended: false,
@@ -183,6 +200,8 @@ export const CreatePostModal = ({
             setText('')
             setImageFile(null)
             setPhotoPreview('')
+            setShareLocation(false)
+            setPostLocation('')
         } catch (err: any) {
             if (uploadedPath) {
                 const { error: cleanupError } = await supabase.storage
@@ -207,7 +226,7 @@ export const CreatePostModal = ({
 
     return (
         <div className="fixed inset-0 bg-[#204E4A]/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-fade-in">
-            <div className="bg-[#FAF8F5] w-full sm:max-w-md rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="pazo-glass-modal w-full sm:max-w-md rounded-t-[2.8rem] sm:rounded-[2.8rem] p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
 
                 <div className="flex justify-between items-center pb-2 border-b border-[#204E4A]/10">
                     <div className="flex items-center gap-2">
@@ -277,6 +296,31 @@ export const CreatePostModal = ({
                             className="w-full bg-white rounded-2xl p-3 text-[#204E4A] border border-[#204E4A]/10 focus:outline-none focus:border-[#204E4A]"
                         />
                     </div>
+
+                    <section aria-label={lang==='es'?'Ubicación de esta publicación':'Location for this post'}
+                        className="space-y-2 rounded-2xl bg-white/70 px-3.5 py-3">
+                        <label className="flex cursor-pointer items-start gap-2.5">
+                            <input type="checkbox" checked={shareLocation}
+                                onChange={(e)=>setShareLocation(e.target.checked)}
+                                className="mt-0.5 h-4 w-4 shrink-0 accent-[#204E4A]"/>
+                            <span className="min-w-0">
+                                <span className="block text-[13px] font-extrabold text-[#204E4A]">
+                                    {lang==='es'?'Mostrar ubicación en esta publicación':'Show location on this post'}
+                                </span>
+                                <span className="mt-0.5 block text-[12px] leading-snug text-[#5C7470]">
+                                    {lang==='es'?'Se mostrará públicamente. Comparte solo ciudad o zona, no tu dirección.':'This is public. Share only a city or area, not your street address.'}
+                                </span>
+                            </span>
+                        </label>
+                        {shareLocation&&<label className="block space-y-1">
+                            <span className="text-[12px] font-bold text-[#204E4A]">{lang==='es'?'Ciudad o zona visible':'Visible city or area'}</span>
+                            <input type="text" value={postLocation}
+                                onChange={(e)=>setPostLocation(e.target.value)}
+                                maxLength={90} required
+                                placeholder={lang==='es'?'Ej.: Pasadena, CA':'E.g. Pasadena, CA'}
+                                className="min-h-11 w-full rounded-xl bg-[#F4F6F0] px-3 py-2 text-[14px] text-[#204E4A] focus:bg-[#EDF2E5]"/>
+                        </label>}
+                    </section>
 
                     <button
                         type="submit"

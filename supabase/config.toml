@@ -436,3 +436,38 @@ entrypoint = "./functions/f14-moderation-purge/index.ts"
 enabled = false
 verify_jwt = true
 entrypoint = "./functions/f14-moderation-reconcile/index.ts"
+
+# F16 new PayPal Sandbox webhook receptor — SOURCE ONLY, DEPLOYMENT BLOCKED.
+# Incoming PayPal notifications do not have PAZO JWTs, so verify_jwt=false;
+# code must verify the PayPal signature and persist before ACK.
+# The independent code-level release latch is also FALSE.
+# Never deploy this function or redirect PayPal without separate PO approval.
+[functions.f16-paypal-webhook]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/f16-paypal-webhook/index.ts"
+
+# Recent-MFA administrative resource inspection. No credential custody or payments.
+[functions.pazo-admin-paypal-live-inspect]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/pazo-admin-paypal-live-inspect/index.ts"
+
+# Internal worker uses a separate random Vault invoker, never a browser JWT.
+# SQL admission + disabled-by-default control are mandatory before one batch.
+[functions.pazo-paypal-live-worker]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/pazo-paypal-live-worker/index.ts"
+
+# Original-owner account management rechecks GoTrue identity inside the handler.
+[functions.pazo-paypal-live-account]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/pazo-paypal-live-account/index.ts"
+
+# P4 explicit operator action only; fresh GoTrue/admin/TOTP rechecked inside.
+[functions.pazo-admin-paypal-release]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/pazo-admin-paypal-release/index.ts"
