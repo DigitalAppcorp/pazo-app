@@ -7,6 +7,7 @@ import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 // No purchase, paid status or retry is inferred from frontend flags/redirects.
 type Locale='es'|'en'
 type Stage='checking'|'unavailable'|'ready'|'submitting'|'review'
+type AvailabilityReason='origin'|'canary'|'general'
 type Offer={version:string;locale:Locale;exactCopy:string;termsDigest:string;
  consentLabel:string;priceMinor:number;currency:string;cadence:string}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
@@ -40,6 +41,7 @@ const published=(raw:unknown,locale:Locale):raw is Offer=>{
 export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
  const [stage,setStage]=useState<Stage>('checking')
  const [offer,setOffer]=useState<Offer|null>(null)
+ const [availabilityReason,setAvailabilityReason]=useState<AvailabilityReason>('general')
  const [accepted,setAccepted]=useState(false)
  const [revision,setRevision]=useState(0)
  const attempted=useRef(false)
@@ -68,9 +70,11 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
       value.ready===true&&value.mayGrantBenefits===false&&
       published(value.offer,lang)
      setOffer(valid?value.offer as Offer:null)
+     setAvailabilityReason(value.code==='live_origin_migration_required'?'origin':
+      value.code==='checkout_admission_denied'?'canary':'general')
      setStage(valid?'ready':'unavailable')
     }
-   }catch{if(active.current&&!controller.signal.aborted)setStage('unavailable')}
+   }catch{if(active.current&&!controller.signal.aborted){setAvailabilityReason('general');setStage('unavailable')}}
   })()
   return ()=>{active.current=false;controller.abort()}
  },[lang,revision])
@@ -118,8 +122,14 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
     'Checking subscription availability…')}</p>}
   {stage==='unavailable'&&<div className="space-y-3 text-center">
    <p role="status" className="text-[12px] leading-relaxed text-[#526F63]">
-    {label('Las suscripciones todavía no están disponibles. PAZO continúa siendo gratis.',
-     'Subscriptions are not available yet. PAZO remains free.')}</p>
+    {availabilityReason==='origin'
+      ?label('Estamos actualizando el dominio de regreso de PayPal. No se iniciará ningún cobro hasta comprobar la configuración.',
+        'We are updating PayPal’s return domain. No payment will start until the configuration is verified.')
+      :availabilityReason==='canary'
+        ?label('Los pagos Live están en prueba controlada, únicamente para cuentas autorizadas. PAZO sigue siendo gratis.',
+          'Live payments are in a controlled test for authorized accounts only. PAZO remains free.')
+        :label('Las suscripciones todavía no están disponibles. PAZO continúa siendo gratis.',
+          'Subscriptions are not available yet. PAZO remains free.')}</p>
    <button type="button" onClick={refresh}
     className="min-h-11 rounded-full bg-[#EAF0DD] px-4 text-[13px] font-bold">
     {label('Comprobar disponibilidad','Check availability')}</button>
