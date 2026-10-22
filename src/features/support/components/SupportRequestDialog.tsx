@@ -1,6 +1,7 @@
-import {useEffect,useRef,useState} from 'react'
+import {useCallback,useEffect,useRef,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 type Category='problem'|'question'|'feature'|'other'
+type PastTicket={id:string;category:Category;message:string;status:'open'|'reviewing'|'resolved';admin_reply:string|null;created_at:string}
 const CATEGORIES:{id:Category;es:string;en:string}[]=[
  {id:'problem',es:'Reportar un problema',en:'Report a problem'},
  {id:'question',es:'Hacer una consulta',en:'Ask a question'},
@@ -13,9 +14,19 @@ export function SupportRequestDialog({lang,onClose}:{lang:'es'|'en';onClose:()=>
  const [busy,setBusy]=useState(false)
  const [sent,setSent]=useState(false)
  const [error,setError]=useState('')
+ const [history,setHistory]=useState<PastTicket[]>([])
+ const [historyLoading,setHistoryLoading]=useState(true)
+ const [historyError,setHistoryError]=useState(false)
  const closeRef=useRef<HTMLButtonElement>(null)
  const l=(es:string,en:string)=>lang==='es'?es:en
- useEffect(()=>{closeRef.current?.focus()},[])
+ const reloadHistory=useCallback(async()=>{
+  setHistoryLoading(true);setHistoryError(false)
+  const result=await supabase.rpc('pazo_my_support_tickets')
+  if(result.error||!Array.isArray(result.data))setHistoryError(true)
+  else setHistory(result.data as PastTicket[])
+  setHistoryLoading(false)
+ },[])
+ useEffect(()=>{closeRef.current?.focus();void reloadHistory()},[reloadHistory])
  const submit=async(e:React.FormEvent)=>{
   e.preventDefault()
   if(busy||sent||message.trim().length<10||message.trim().length>2000)return
@@ -25,6 +36,7 @@ export function SupportRequestDialog({lang,onClose}:{lang:'es'|'en';onClose:()=>
     .insert({category,message:message.trim()})
    if(issue)throw issue
    setMessage('');setSent(true)
+   void reloadHistory()
   }catch{
    setError(l('No pudimos enviar tu mensaje. Comprueba la conexión e inténtalo nuevamente. Máximo tres mensajes por hora.',
      'Could not submit your message. Check your connection and retry. Limit: three messages per hour.'))
@@ -70,6 +82,33 @@ export function SupportRequestDialog({lang,onClose}:{lang:'es'|'en';onClose:()=>
        {busy?l('Enviando…','Sending…'):l('Enviar a soporte','Send to support')}
      </button>
     </form>}
+    <div className="mt-5 space-y-3 rounded-2xl bg-[#EFF4E9] p-3">
+     <div className="flex items-center justify-between gap-2">
+      <h3 className="text-sm font-black text-[#204E4A]">{l('Mis solicitudes','My support requests')}</h3>
+      <button type="button" onClick={()=>void reloadHistory()} disabled={historyLoading}
+       className="min-h-11 rounded-xl px-3 text-xs font-bold text-[#204E4A] hover:bg-[#E1E53F]/35 disabled:opacity-50">
+       {l('Actualizar','Refresh')}
+      </button>
+     </div>
+     {historyLoading&&<p role="status" className="text-xs text-[#5C7470]">{l('Consultando mensajes…','Loading messages…')}</p>}
+     {historyError&&<p role="alert" className="text-xs text-[#A04535]">{l(
+      'Todavía no pudimos consultar el historial. Puedes enviar tu mensaje.',
+      'Could not load your history yet. You can still send a message.')}</p>}
+     {!historyLoading&&!historyError&&history.length===0&&
+      <p className="text-xs text-[#5C7470]">{l('Aún no tienes solicitudes.','No requests yet.')}</p>}
+     {history.map(ticket=><article key={ticket.id} className="space-y-2 rounded-xl bg-white p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+       <span className="text-xs font-black text-[#204E4A]">{CATEGORIES.find(x=>x.id===ticket.category)?.[lang]??ticket.category}</span>
+       <span className="text-[11px] font-bold text-[#5C7470]">{ticket.status==='resolved'
+        ?l('Resuelto','Resolved'):ticket.status==='reviewing'?l('En revisión','Reviewing'):l('Recibido','Received')}</span>
+      </div>
+      <p className="break-words whitespace-pre-wrap text-xs text-[#5C7470]">{ticket.message}</p>
+      {ticket.admin_reply&&<div className="rounded-xl bg-[#F4F8EB] p-3">
+       <p className="text-xs font-black text-[#204E4A]">{l('Respuesta de PAZO','PAZO reply')}</p>
+       <p className="mt-1 break-words whitespace-pre-wrap text-xs text-[#204E4A]">{ticket.admin_reply}</p>
+      </div>}
+     </article>)}
+    </div>
    </section>
  </div>
 }
