@@ -63,9 +63,13 @@ export function PazoInstallControl({ lang, placement = 'settings' }: {
   if (placement === 'welcome') return <div data-pazo-install-welcome="true"
     className="flex min-h-[30px] flex-col items-center justify-center">
     <button type="button" onClick={() => void action()} disabled={isPrompting}
-      className="min-h-[30px] rounded-full bg-transparent px-3 py-1 text-[11px] font-bold text-[#52756F] transition-colors hover:bg-[#EAF0DF] focus-visible:bg-[#E1E53F]/50 disabled:opacity-50">
-      {state.pending ? (es ? '↓ Instalar PAZO' : '↓ Install PAZO')
-        : (es ? '↓ Añadir PAZO a inicio' : '↓ Add PAZO to Home Screen')}
+      className="inline-flex min-h-[30px] items-center justify-center gap-1.5 rounded-full bg-transparent px-3 py-1 text-[11px] font-bold text-[#52756F] transition-colors hover:bg-[#EAF0DF] focus-visible:bg-[#E1E53F]/50 disabled:opacity-50">
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none"
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/>
+      </svg>
+      <span>{state.pending ? (es ? 'Instalar PAZO' : 'Install PAZO')
+        : (es ? 'Añadir PAZO al inicio' : 'Add PAZO to Home Screen')}</span>
     </button>
     {showInstructions && <p role="status" className="max-w-[300px] px-3 text-center text-[10px] leading-snug text-[#5C7470]">
       {es ? 'En Safari: Compartir → Añadir a pantalla de inicio.'
