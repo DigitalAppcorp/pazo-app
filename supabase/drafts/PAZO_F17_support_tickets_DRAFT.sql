@@ -8,6 +8,7 @@ create table if not exists public.pazo_support_tickets (
  message text not null check (char_length(btrim(message)) between 10 and 2000),
  status text not null default 'open' check (status in ('open','reviewing','resolved')),
  admin_note text check (admin_note is null or char_length(admin_note)<=1000),
+ admin_reply text check (admin_reply is null or char_length(admin_reply)<=2000),
  created_at timestamptz not null default now(),
  updated_at timestamptz not null default now()
 );
@@ -34,7 +35,7 @@ grant select,insert on public.pazo_support_tickets to authenticated;
 -- Expose privileged status updates only via a strict admin RPC, not unrestricted table UPDATE.
 
 create or replace function public.pazo_admin_update_support_ticket(
- p_id uuid,p_status text,p_admin_note text default null)
+ p_id uuid,p_status text,p_admin_note text default null,p_admin_reply text default null)
 returns boolean language plpgsql security definer set search_path=''
 as $function$
 begin
@@ -42,16 +43,38 @@ begin
   raise exception 'Admin required' using errcode='42501';
  end if;
  if p_id is null or p_status not in ('open','reviewing','resolved')
-    or char_length(coalesce(p_admin_note,''))>1000 then
+    or char_length(coalesce(p_admin_note,''))>1000
+    or char_length(coalesce(p_admin_reply,''))>2000 then
   raise exception 'Invalid ticket update' using errcode='22023';
  end if;
  update public.pazo_support_tickets
  set status=p_status,admin_note=nullif(btrim(p_admin_note),''),
+     admin_reply=nullif(btrim(p_admin_reply),''),
      updated_at=clock_timestamp() where id=p_id;
  return found;
 end $function$;
-revoke execute on function public.pazo_admin_update_support_ticket(uuid,text,text) from public,anon;
-grant execute on function public.pazo_admin_update_support_ticket(uuid,text,text) to authenticated;
+revoke execute on function public.pazo_admin_update_support_ticket(uuid,text,text,text) from public,anon;
+grant execute on function public.pazo_admin_update_support_ticket(uuid,text,text,text) to authenticated;
+
+
+-- Return only fields owned by the caller. In particular, admin_note is NEVER
+-- included, because PostgreSQL RLS cannot hide a single column of a visible row.
+create or replace function public.pazo_my_support_tickets()
+returns jsonb language sql stable security definer set search_path=''
+as $function$
+ select coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object(
+  'id',t.id,'category',t.category,'message',t.message,
+  'status',t.status,'admin_reply',t.admin_reply,'created_at',t.created_at
+ ) order by t.created_at desc),'[]'::jsonb)
+ from (
+  select id,category,message,status,admin_reply,created_at
+  from public.pazo_support_tickets
+  where owner_id=auth.uid() and auth.uid() is not null
+  order by created_at desc limit 20
+ ) t;
+$function$;
+revoke all on function public.pazo_my_support_tickets() from public,anon;
+grant execute on function public.pazo_my_support_tickets() to authenticated;
 
 -- Abuse control, enforced server-side even against modified browsers.
 create or replace function admin_private.pazo_support_intake_guard()
