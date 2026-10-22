@@ -67,6 +67,19 @@ test('support ticket messages are private, rate-limited and available in admin i
  assert.match(sql,/count\(\*\)[^;]+>=3/s)
  assert.match(file('src/components/views/PetView.tsx'),/SupportRequestDialog/)
  assert.match(file('src/features/admin/components/AdminDashboard.tsx'),/AdminSupportInbox/)
+ assert.match(sql,/create or replace function public\.pazo_my_support_tickets\(\)/i)
+ assert.match(sql,/where owner_id=auth\.uid\(\)/)
+ const ownerProjection=sql.slice(sql.indexOf('create or replace function public.pazo_my_support_tickets()'),sql.indexOf('-- Abuse control'))
+ assert.doesNotMatch(ownerProjection,/'admin_note'/)
+ assert.match(ownerProjection,/'admin_reply'/)
+ const inbox=file('src/features/support/components/AdminSupportInbox.tsx')
+ assert.match(inbox,/p_admin_reply:/)
+ assert.match(inbox,/Guardar nota y respuesta/)
+ const dialog=file('src/features/support/components/SupportRequestDialog.tsx')
+ assert.match(dialog,/pazo_my_support_tickets/)
+ assert.match(dialog,/ticket\.admin_reply/)
+ assert.doesNotMatch(dialog,/ticket\.admin_note/)
+
 })
 
 test('gifted access is not manufactured financial evidence',()=>{
