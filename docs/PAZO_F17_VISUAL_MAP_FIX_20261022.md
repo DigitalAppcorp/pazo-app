@@ -1,3 +1,34 @@
+## Complemento de auditoría y correcciones de cierre
+
+- La vista móvil tenía una segunda fuente de desajuste: el contenedor interior
+  usaba `h-screen` (100vh) dentro de un padre `100dvh`. Se cambió
+  únicamente la caja interior a `h-full min-h-0`; evita que la barra dinámica
+  del navegador genere altura sobrante o recorte la parte inferior.
+- Se añadió el mismo enlace pequeño de instalación también al formulario
+  **Iniciar sesión**, además de A01. No se muestra si PWA instalada/standalone;
+  ni en Home, Feed, Mapa o barra de navegación.
+- La ilustración actual preserva rostro, pose, orejas y collar con UNA sola
+  escena local, sin recortes animados. El origen es rasterizado, no vector
+  verdadero: no afirmar que se logró resolución nativa profesional.
+- La política ES/EN y el inventario de datos se actualizaron para mencionar
+  explícitamente el proveedor temporal de teselas OpenStreetMap Foundation,
+  datos técnicos de conexión/zonas mostradas y que la ilustración de
+  bienvenida es local. Esto NO autoriza analítica, GPS automático ni gastos.
+- La ejecución GitHub inicial de CI tras retirar el scroll falló por dos
+  contratos visuales antiguos que exigían el scroll y la animación por capas;
+  posteriormente se sustituyeron por aserciones del contrato nuevo y se añadió
+  una prueba de regresión de viewport/instalación/mapa/modales.
+  Una revisión posterior detectó y corrigió una expresión regular mal
+  escapada dentro del propio test. **CI final solo PASS si GitHub confirma
+  explícitamente el último SHA**; Vercel READY no suple el gate.
+- El único despliegue permitido para esta iteración visual sigue siendo
+  **Preview**. `https://pazo-app.vercel.app/` mantiene su despliegue F17
+  anterior hasta que el Product Owner apruebe visualmente el resultado
+  y autorice sustituir producción. No fusionar el PR DRAFT a `main` por
+  automatismo.
+
+---
+
 # F17 · Ajustes visuales PO y mapa base · 2026-10-22
 
 ## Contexto y criterio de producto
