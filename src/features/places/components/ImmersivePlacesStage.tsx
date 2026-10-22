@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { EphemeralLocation, PetPlace, PlaceCategory } from '../../../types/pazo'
 import { MapboxMap } from '../map/MapboxMap'
+import { PlaceCardPhoto } from './PlaceCardPhoto'
 import { IconCheck, IconExplore, IconPaw, IconPin, IconPlus } from '../../../components/icons/PazoIcons'
 
 type CategoryFilter = 'all' | PlaceCategory
@@ -74,7 +75,7 @@ export const ImmersivePlacesStage = ({
     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-7 bg-gradient-to-l from-[#FAF8F5]/85 to-transparent" />
 
     <div className="absolute inset-x-3 top-3 z-20 space-y-2 sm:inset-x-5 sm:top-4">
-      <div className="flex items-center gap-2 rounded-full bg-[#FFFCF6]/90 p-1.5 shadow-[0_6px_25px_rgba(32,78,74,0.09)] backdrop-blur-xl">
+      <div className="flex items-center gap-2 rounded-full bg-transparent p-0 shadow-none">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">{lang === 'es' ? 'Buscar lugar, zona o dirección' : 'Search place, area or address'}</span>
           <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#204E4A]">
@@ -104,7 +105,12 @@ export const ImmersivePlacesStage = ({
       <div
         role="group"
         aria-label={lang === 'es' ? 'Categorías de lugares' : 'Place categories'}
-        className="flex gap-1.5 overflow-x-auto rounded-full bg-white/75 p-1.5 shadow-[0_4px_15px_rgba(32,78,74,0.055)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        data-pazo-category-fade="true"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 20px, black calc(100% - 24px), transparent 100%)',
+          maskImage: 'linear-gradient(to right, transparent 0, black 20px, black calc(100% - 24px), transparent 100%)',
+        }}
+        className="flex gap-1.5 overflow-x-auto bg-transparent px-3 py-1.5 shadow-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categoryOptions.map((option) => (
           <button
@@ -215,10 +221,8 @@ export const ImmersivePlacesStage = ({
                   ? 'bg-[#EAF2E4] '
                   : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-visible:bg-[#F1F5EC]'}`}
               >
-                <div className="relative h-[91px] w-full overflow-hidden rounded-[1.3rem] bg-[#E8EDE7]">
-                  {place.photoUrl
-                    ? <img src={place.photoUrl} alt="" className="h-full w-full object-cover"/>
-                    : <span aria-hidden="true" className="flex h-full items-center justify-center"><IconPin size={32} className="text-[#204E4A]/45"/></span>}
+                <div className="relative">
+                  <PlaceCardPhoto place={place} lang={lang} />
                   {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold text-[#204E4A]">{distance}</span>}
                 </div>
                 <div className="flex min-h-[72px] flex-col px-1.5 pb-0.5 pt-2">

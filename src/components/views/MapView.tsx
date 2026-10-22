@@ -22,6 +22,7 @@ import { ImmersivePlacesStage } from '../../features/places/components/Immersive
 import { SuggestPlaceModal } from '../modals/SuggestPlaceModal'
 import { PlaceFeatureExperimentCard } from '../validation/PlaceFeatureExperimentCard'
 import { IconClose } from '../icons/PazoIcons'
+import { buildPlaceDirectionsUrl } from '../../features/places/placeDirections'
 
 interface MapViewProps {
   currentPet: Pet | null
@@ -453,6 +454,25 @@ export const MapView = ({
               </button>
             </div>
 
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <a
+                data-pazo-directions="true"
+                href={buildPlaceDirectionsUrl(selectedPlace,
+                  typeof navigator !== 'undefined' ? navigator.userAgent : '')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#204E4A] px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#2C665B] focus-visible:bg-[#2C665B]"
+                aria-label={lang === 'es' ? `Cómo llegar a ${selectedPlace.name}` : `Directions to ${selectedPlace.name}`}
+              >
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 6.5h8l4.5 4.5-8.5 8.5-8.5-8.5z"/>
+                  <path d="M8.5 11.5h7M13 8.5l3 3-3 3"/>
+                </svg>
+                {lang === 'es' ? 'Cómo llegar' : 'Directions'}
+              </a>
+            </div>
+
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {selectedPlace.hours && (
                 <div className="rounded-2xl bg-[#FAF8F5] p-3">
@@ -498,7 +518,7 @@ export const MapView = ({
               </div>
             )}
 
-            <div className="mt-4 border-t border-[#204E4A]/8 pt-4">
+            <div className="mt-4 pt-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-black text-[#204E4A]">
