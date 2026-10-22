@@ -62,6 +62,10 @@ begin
      or new.status<>'open' or new.admin_note is not null then
   raise exception 'Invalid support submission' using errcode='42501';
  end if;
+ -- Serialize submissions for the same owner. Otherwise concurrent inserts
+ -- can all observe a count below 3 and exceed the hourly limit.
+ perform pg_catalog.pg_advisory_xact_lock(
+   pg_catalog.hashtextextended(auth.uid()::text,1717));
  if (select count(*) from public.pazo_support_tickets
      where owner_id=auth.uid() and created_at>statement_timestamp()-interval '1 hour')>=3 then
   raise exception 'Support submission rate limit' using errcode='22023';
