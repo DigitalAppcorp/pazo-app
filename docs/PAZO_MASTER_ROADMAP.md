@@ -9,8 +9,9 @@ Configuración Production válida, fecha legal real2026-10-21 y build local PASS
 no nuevo deploy de producción todavía. No autorización financiera/canary.
 
 El runtime cambió a revisión3 con red restricted y solo api.supabase.com;
-GitHub403 impide leer CI final/merge/push y publicar/verificar Vercel. Borrador
-con dominios necesarios guardado, requires_publish=true: PO debe revisar y
+La API GitHub403 impide leer CI final/merge; Vercel queda fuera de la lista.
+Git HTTPS sí permite subir documentación: rama ops/beta-provisional-release-20261021.
+Borrador con dominios necesarios guardado, requires_publish=true: PO debe revisar y
 guardar/publicar ESTE entorno en Codex Cloud. Secretos existentes conservados;
 no pedir nuevos tokens. No eludir proxy/política ni confundir borrador con red
 aplicada. Tras recuperarse, continuar por PR71/CI/deploy/canonical/certificado.

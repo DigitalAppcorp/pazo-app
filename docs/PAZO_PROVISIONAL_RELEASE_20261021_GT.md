@@ -54,6 +54,9 @@ revisión3/red restricted, cuya lista efectiva contiene solo
 `api.supabase.com`. La API GitHub respondió403; también falta acceso autorizado a
 Vercel y al canonical. No es falta de otro token ni de credenciales PayPal.
 No se alteraron rutas, proxy, TLS, identidades ni checks para eludirlo.
+Git HTTPS, que tiene un permiso independiente de la API, sí permitió el push
+normal de la documentación en `ops/beta-provisional-release-20261021`. No se
+utilizó Git para saltar el gate de CI o fusionar main sin su resultado.
 
 Se leyó la configuración y se guardó un borrador con los destinos requeridos,
 conservando `api.supabase.com` y los bindings de secretos existentes:
@@ -63,6 +66,9 @@ imágenes Unsplash. El guardado confirmó `status=saved/requires_publish=true`.
 Guardar borrador no aplica red ni publica el entorno. El PO debe revisar y
 guardar los cambios y publicar este entorno desde Codex Cloud. No enviar
 tokens, contraseñas o Client Secret por chat. No se necesita otro GO de deploy.
+También se actualizaron las instrucciones reutilizables de arranque: parser
+público estricto, smoke con Comenzar y distinción de Git/API, conservando
+install_script y bindings. El arranque no ejecuta deploys/migraciones/pagos.
 
 ## Scope Closure Reconciliation
 
