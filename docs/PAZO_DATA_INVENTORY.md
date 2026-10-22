@@ -1,8 +1,21 @@
-## F17 — matriz preparada y retención decidida, 22-oct-2026 (NO alojada)
+## F17 — inventario vigente al 22-oct-2026 (backend instalado, iteración visual pendiente de publicación)
 
-La elección PO es90 días tras resolución para tickets, respuestas y notas.
-Código/SQL versionados; no confundir con recopilación activa: tablas F17 aún
-no existen en el proyecto. Estado/ensayos en `PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+Las migraciones F17 de soporte, cortesías y mantenimiento **ya están aplicadas**
+en Supabase (versiones 20261022103706–08), con RLS y limpieza diaria de casos
+resueltos después de 90 días. La matriz siguiente es vigente; las solicitudes
+concretas solo se crean cuando un usuario las envía.
+
+**Proveedor temporal del mapa en la rama F17 visual:** Mapbox GL JS sigue
+renderizando, mientras `tile.openstreetmap.org` (OpenStreetMap Foundation)
+sirve directamente las teselas raster solicitadas del área mostrada.
+El navegador transmite al proveedor las coordenadas de las teselas y metadatos
+técnicos de conexión (incluida IP/Referer); no se envía analítica nueva ni se
+almacena automáticamente el GPS exacto en PAZO. Esta integración es solo una
+contingencia de beta pequeña, sin SLA y sin habilitar descargas offline o precarga;
+requiere contrato/proveedor escalable y validación visual antes de difusión amplia.
+Las ilustraciones A01 se sirven localmente desde PAZO; algunas imágenes de
+demostración de otras superficies pueden provenir de Unsplash. Ver
+`docs/PAZO_F17_VISUAL_MAP_FIX_20261022.md`.
 
 | Dato | Finalidad/acceso | Conservación y baja |
 | --- | --- | --- |
