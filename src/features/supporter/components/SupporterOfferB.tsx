@@ -49,22 +49,22 @@ export function SupporterOfferB({lang,children}:Props) {
         <span aria-hidden="true" className="pointer-events-none absolute right-[21%] top-6 h-6 w-[5px] rotate-[27deg] rounded-full bg-[#73B38E]"/>
         <span aria-hidden="true" className="pointer-events-none absolute right-[28%] top-2 h-4 w-[5px] rotate-[42deg] rounded-full bg-[#73B38E]"/>
         <section aria-labelledby="supporter-offer-title"
-          className="relative rounded-[30px] bg-white px-5 pb-5 pt-[72px] text-center shadow-[0_12px_34px_rgba(32,78,74,0.065)] sm:px-7">
+          className="relative rounded-[27px] bg-white px-5 pb-4 pt-[66px] text-center shadow-[0_9px_26px_rgba(32,78,74,0.045)] sm:px-7">
           <img src="/supporter/amigo-pazo-inicio.png" alt="" aria-hidden="true"
             width="136" height="136" decoding="async"
             className="pointer-events-none absolute left-1/2 top-[-62px] z-10 h-[134px] w-[134px] -translate-x-1/2 object-contain drop-shadow-[0_8px_8px_rgba(32,78,74,0.13)]"/>
           <h3 id="supporter-offer-title" className="mx-auto max-w-[300px] text-[clamp(21px,5.8vw,24px)] font-black leading-[1.16] tracking-tight text-[#204E4A]">
             {t('Ayuda a que PAZO siga creciendo','Help PAZO keep growing')}
           </h3>
-          <p className="mx-auto mt-3 max-w-[330px] text-[14px] font-medium leading-[1.55] text-[#476862]">
+          <p className="mx-auto mt-2 max-w-[330px] text-[13px] font-normal leading-[1.45] text-[#476862]">
             {t('PAZO está dando sus primeros pasos y aún tenemos mucho por construir. Con tu apoyo podemos seguir cuidando este pequeño mundo, mejorándolo y creando nuevas experiencias para ti, tu mascota y toda nuestra comunidad.',
               'PAZO is taking its first steps, and there is still so much to build. With your support, we can keep caring for this little world, making it better and creating new experiences for you, your pet and our entire community.')}
           </p>
-          <div className="mx-auto mt-4 inline-flex max-w-full items-baseline gap-1.5 rounded-full bg-[#F0F4DE] px-5 py-2 text-[#204E4A]">
+          <div className="mx-auto mt-3 inline-flex max-w-full items-baseline gap-1.5 rounded-full bg-[#F0F4DE] px-5 py-2 text-[#204E4A]">
             <strong className="text-[26px] font-black tracking-tight tabular-nums">US$2.99</strong>
             <span className="text-[12px] font-bold">{t('al mes','per month')}</span>
           </div>
-          <section aria-label={t('Colaboración voluntaria','Voluntary support')} className="mt-4 min-w-0">
+          <section aria-label={t('Colaboración voluntaria','Voluntary support')} className="mt-3 min-w-0">
             {children}
           </section>
         </section>
