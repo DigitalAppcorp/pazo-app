@@ -52,6 +52,17 @@ try{
    // No form submit, age toggle, login, password or user data.
    const legal=page.getByRole('button',{name:/Política de privacidad|Privacy policy/})
    check(kind+'_legal_discoverable',await legal.count()>=1)
+   await page.getByRole('button',{name:/Ya tienes cuenta\? Iniciar sesión|Already have an account\? Sign in/i}).click()
+   await page.getByRole('heading',{name:/Iniciar Sesión|Log in to Pazo/i}).waitFor({state:'visible',timeout:10000})
+   if(process.env.PAZO_E2E_AUTH_LABELS_DEPLOYED==='true'){
+    check(kind+'_login_email_accessible_name',
+     await page.getByRole('textbox',{name:/Correo electrónico|Email address/i}).count()===1)
+    check(kind+'_login_password_accessible_name',
+     await page.getByLabel(/Contraseña|Password/i).count()===1)
+   }
+   await page.getByRole('button',{name:/Olvidaste tu contraseña\?|Forgot your password\?/i}).click()
+   check(kind+'_password_recovery_discoverable',
+    await page.getByRole('heading',{name:/Recuperar contraseña|Reset your password/i}).count()===1)
    check(kind+'_no_js_crashes',pageErrors.length===0)
    check(kind+'_no_paypal_write',unwantedPost.length===0)
   }catch(e){check(kind+'_runtime',false)}

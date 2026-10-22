@@ -521,5 +521,7 @@ jobs:
         run: npx --no-install playwright install --with-deps chromium
       - name: Check associated email and login form labels in proposed code
         run: node --test scripts/f16-auth-field-label-contract.test.mjs
-      - name: Exercise public beta in real Chromium (390/1440/callbacks/PWA)
+      - name: Exercise deployed production Auth and PWA in real Chromium
+        env:
+          PAZO_E2E_AUTH_LABELS_DEPLOYED: 'true'
         run: node scripts/f16-beta-canonical-chromium-e2e.mjs
