@@ -4,10 +4,12 @@ import {useEffect,useState} from 'react'
 // a separately launched browser tab cannot always detect an existing installation.
 type InstallPrompt=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:string}>}
 type IosNavigator=Navigator&{standalone?:boolean}
-const inStandaloneMode=()=>window.matchMedia('(display-mode: standalone)').matches||
-  (navigator as IosNavigator).standalone===true
-const isiOS=()=>/iPad|iPhone|iPod/i.test(navigator.userAgent)||
-  (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)
+const inStandaloneMode=()=>typeof window!=='undefined'&&typeof navigator!=='undefined'&&
+  (window.matchMedia('(display-mode: standalone)').matches||
+   (navigator as IosNavigator).standalone===true)
+const isiOS=()=>typeof navigator!=='undefined'&&
+  (/iPad|iPhone|iPod/i.test(navigator.userAgent)||
+   (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))
 
 export function PazoInstallControl({lang}:{lang:'es'|'en'}){
  const [installed,setInstalled]=useState(()=>inStandaloneMode())
