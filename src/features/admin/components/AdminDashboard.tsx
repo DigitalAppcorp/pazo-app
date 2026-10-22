@@ -1,4 +1,4 @@
-import { useCallback,useEffect,useState } from 'react'
+import { useCallback,useEffect,useRef,useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AdminPayPalSettings } from './AdminPayPalSettings'
 import {AdminLiveFinanceSummary} from './AdminLiveFinanceSummary'
@@ -79,6 +79,45 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
  const [voterBusy,setVoterBusy]=useState(false)
  const [loading,setLoading]=useState(true)
  const [error,setError]=useState('')
+ const dialogRef=useRef<HTMLDivElement>(null)
+ useEffect(()=>{
+  const dialog=dialogRef.current
+  if(!dialog)return
+  const previousFocus=document.activeElement instanceof HTMLElement?document.activeElement:null
+  dialog.focus()
+  const handleKeydown=(event:KeyboardEvent)=>{
+   if(event.defaultPrevented)return
+   if(event.key==='Escape'){
+    event.preventDefault()
+    onClose()
+    return
+   }
+   if(event.key!=='Tab')return
+   const focusable=Array.from(dialog.querySelectorAll<HTMLElement>(
+    'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+   )).filter(element=>element.getClientRects().length>0)
+   if(!focusable.length){
+    event.preventDefault()
+    dialog.focus()
+    return
+   }
+   const first=focusable[0]
+   const last=focusable[focusable.length-1]
+   const current=document.activeElement
+   if(event.shiftKey&&(current===first||current===dialog)){
+    event.preventDefault()
+    last.focus()
+   }else if(!event.shiftKey&&(current===last||!dialog.contains(current))){
+    event.preventDefault()
+    first.focus()
+   }
+  }
+  document.addEventListener('keydown',handleKeydown)
+  return ()=>{
+   document.removeEventListener('keydown',handleKeydown)
+   if(previousFocus?.isConnected)previousFocus.focus()
+  }
+ },[onClose])
  const l=(es:string,en:string)=>lang==='es'?es:en
  const refresh=useCallback(async()=>{
   setLoading(true);setError('')
@@ -109,7 +148,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
   <option value="30">{l('Últimos 30 días','Last 30 days')}</option>
   <option value="90">{l('Últimos 90 días','Last 90 days')}</option>
  </select>
- return createPortal(<div role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
+ return createPortal(<div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={l('Panel de administración','Admin dashboard')}
     data-pazo-admin-responsive="true"
     className="pazo-admin fixed inset-0 z-[200] flex h-[100dvh] w-full overflow-hidden bg-[#F8F9F6] font-sans text-[#204E4A] lg:grid lg:grid-cols-[265px_minmax(0,1fr)] xl:grid-cols-[270px_minmax(0,1fr)]">
   {/* Portal escapes the 430px mobile app shell on desktop; the rest of PAZO stays mobile-only. */}
