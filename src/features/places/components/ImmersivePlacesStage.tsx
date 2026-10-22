@@ -132,7 +132,7 @@ export const ImmersivePlacesStage = ({
     <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer"
       className="absolute bottom-[235px] left-3 z-20 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold text-[#46645D] shadow-sm"
       aria-label={lang === 'es' ? 'Créditos del mapa OpenStreetMap' : 'OpenStreetMap map credits'}>
-      © OpenStreetMap contributors
+      &copy; OpenStreetMap contributors
     </a>
 
     {/* Uses current voluntary-location action. Never calls geolocation on mount. */}
