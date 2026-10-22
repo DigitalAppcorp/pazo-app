@@ -1,6 +1,8 @@
 // Fresh GoTrue/admin/TOTP gate precedes the service-only atomic SQL controller.
 // No PayPal calls, credentials, user-supplied owner or release evidence.
 const ORIGIN='https://pazo-app-t83r.vercel.app'
+const CANONICAL_ORIGIN='https://pazo-app.vercel.app'
+const allowedOrigin=value=>value===ORIGIN||value===CANONICAL_ORIGIN
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const CONFIRMATIONS=Object.freeze({canary:'AUTORIZO PRUEBA LIVE DE 2.99 USD',
  public:'AUTORIZO PUBLICAR CHECKOUT LIVE',stop:'DETENER NUEVAS COMPRAS'})
@@ -12,7 +14,7 @@ const CODES=new Set(['invalid_release_request','release_state_unavailable','rele
 const SUCCESS=new Set(['release_request_already_recorded','new_checkout_already_stopped','release_state_updated'])
 const reply=(req,status,code,extra={})=>new Response(JSON.stringify({code,mayCharge:false,...extra}),{
  status,headers:{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff',
-  vary:'Origin',...(req.headers.get('origin')===ORIGIN?{'access-control-allow-origin':ORIGIN,
+  vary:'Origin',...(allowedOrigin(req.headers.get('origin'))?{'access-control-allow-origin':req.headers.get('origin'),
    'access-control-allow-methods':'POST, OPTIONS',
    'access-control-allow-headers':'authorization,apikey,content-type,x-client-info,x-supabase-api-version,x-region,x-supabase-client-platform,x-supabase-client-platform-version,x-supabase-client-runtime,x-supabase-client-runtime-version'}:{})}
 })
@@ -40,7 +42,7 @@ export function createPazoLiveReleaseHandler({authenticateAdmin,changeRelease}={
   try{url=new URL(req.url)}catch{return reply(req,400,'invalid_release_request')}
   if(!['/functions/v1/pazo-admin-paypal-release','/pazo-admin-paypal-release'].includes(url.pathname)||url.search)
    return reply(req,404,'route_not_found')
-  if(req.headers.get('origin')!==ORIGIN)return reply(req,403,'untrusted_origin')
+  if(!allowedOrigin(req.headers.get('origin')))return reply(req,403,'untrusted_origin')
   if(req.method==='OPTIONS')return reply(req,200,'release_preflight')
   if(req.method!=='POST')return reply(req,405,'post_required')
   if(!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(req.headers.get('content-type')||''))
