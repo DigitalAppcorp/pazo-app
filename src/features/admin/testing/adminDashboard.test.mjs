@@ -112,7 +112,7 @@ test('mobile control center contains comprehensive operator sections and forbids
 
 test('responsive admin dashboard escapes mobile shell and exposes functional layouts at each breakpoint',()=>{
  assert.ok(board.includes("import { createPortal } from 'react-dom'"),'The desktop dashboard must not inherit the mobile 430px shell')
- assert.ok(board.includes('createPortal(<div role="dialog"'))
+ assert.ok(board.includes('createPortal(<div ref={dialogRef} tabIndex={-1} role="dialog"'))
  assert.ok(board.includes('document.body)'))
  assert.ok(board.includes('data-pazo-admin-responsive="true"'))
  assert.ok(board.includes('h-[100dvh] w-full'))
