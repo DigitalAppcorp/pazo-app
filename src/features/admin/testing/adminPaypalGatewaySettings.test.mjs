@@ -19,7 +19,7 @@ test('settings are an actual mobile+desktop admin section, not a fake door',()=>
 })
 test('Live displays only the current secured private setup, not a duplicate plan and webhook draft',()=>{
  assert.ok(page.includes("{env==='sandbox'&&<div className=\"grid grid-cols-1 gap-4 xl:grid-cols-2\">"))
- assert.ok(page.includes("env==='live'&&<AdminPaypalLiveVaultSetup"))
+ assert.ok(page.includes("LIVE_VAULT_SETUP_RELEASED&&<AdminPaypalLiveVaultSetup"))
  assert.ok(page.includes("env==='live'&&<AdminLiveReadiness"))
  assert.ok(page.includes("env==='live'&&<AdminLiveReleaseControl"))
 })
