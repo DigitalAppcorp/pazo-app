@@ -110,7 +110,7 @@ export const ImmersivePlacesStage = ({
           WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 20px, black calc(100% - 24px), transparent 100%)',
           maskImage: 'linear-gradient(to right, transparent 0, black 20px, black calc(100% - 24px), transparent 100%)',
         }}
-        className="flex gap-1.5 overflow-x-auto bg-transparent px-3 py-1.5 shadow-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-1.5 overflow-x-auto bg-transparent px-5 py-1.5 shadow-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categoryOptions.map((option) => (
           <button
