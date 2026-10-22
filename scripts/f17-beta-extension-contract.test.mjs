@@ -11,7 +11,7 @@ test('mobile shell respects dynamic browser viewport and safe areas',()=>{
  assert.match(file('index.html'),/viewport-fit=cover/)
 })
 
-test('install prompt captured before App mounts; banner is dismissible, standalone-safe and nonblocking',()=>{
+test('install prompt captured before App mounts; welcome/login action is discreet and standalone-safe',()=>{
  const component=file('src/features/pwa/components/PazoInstallControl.tsx')
  const bridge=file('src/features/pwa/installPromptBridge.ts')
  const main=file('src/main.tsx')
@@ -23,7 +23,10 @@ test('install prompt captured before App mounts; banner is dismissible, standalo
  assert.match(component,/Compartir/)
  assert.match(component,/pazo-install-banner-dismissed-until/)
  assert.match(component,/placement === 'banner' && dismissed/)
- assert.match(app,/activeTab === 'inicio' && <PazoInstallControl lang=\{lang\} placement="banner"/)
+ assert.doesNotMatch(app,/activeTab === 'inicio' && <PazoInstallControl lang=\{lang\} placement="banner"/)
+ assert.match(app,/PazoInstallControl lang=\{lang\} placement="welcome"/)
+ assert.match(file('src/components/views/OnboardingView.tsx'),/PazoInstallControl lang=\{lang\} placement="welcome"/)
+ assert.match(component,/placement === 'welcome'/)
  assert.match(file('src/components/views/PetView.tsx'),/PazoInstallControl lang=\{lang\}/)
 })
 
@@ -44,7 +47,11 @@ test('gift admin refreshes server results after a write despite busy guard',()=>
 
 test('map remains server-map based with 3D places and explicit tile errors',()=>{
  const s=file('src/features/places/map/MapboxMap.tsx')
- assert.match(s,/mapbox:\/\/styles\/mapbox\/streets-v12/)
+ assert.match(s,/style: PAZO_STREETS_STYLE/)
+ assert.match(s,/from '\.\/pazoBasemap'/)
+ const raster=file('src/features/places/map/pazoBasemap.ts')
+ assert.match(raster,/https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png/)
+ assert.match(raster,/attribution:/)
  assert.match(s,/type: 'model'/)
  assert.match(s,/type: 'symbol'/)
  assert.match(s,/Mapbox no autorizó las capas/)
