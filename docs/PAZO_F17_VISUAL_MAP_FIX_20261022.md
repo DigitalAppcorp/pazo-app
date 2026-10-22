@@ -20,12 +20,14 @@
   una prueba de regresión de viewport/instalación/mapa/modales.
   Una revisión posterior detectó y corrigió una expresión regular mal
   escapada dentro del propio test. **CI final solo PASS si GitHub confirma
-  explícitamente el último SHA**; Vercel READY no suple el gate.
-- El único despliegue permitido para esta iteración visual sigue siendo
-  **Preview**. `https://pazo-app.vercel.app/` mantiene su despliegue F17
-  anterior hasta que el Product Owner apruebe visualmente el resultado
-  y autorice sustituir producción. No fusionar el PR DRAFT a `main` por
-  automatismo.
+  explícitamente el SHA de código**; Vercel READY no suple el gate.
+  **Cierre verificado:** CI 39800270518 SUCCESS y F17 isolated security 39800270447 SUCCESS del SHA `b1cbcd35`.
+- **Estado actualizado:** después de verificar CI y seguridad SUCCESS del
+  SHA `b1cbcd35`, se publicó el ajuste visual en el dominio de beta elegido
+  por el Product Owner, `https://pazo-app.vercel.app/`.
+  Vercel PRODUCTION `dpl_CJ1vpxTdSQ5QBZ8w5GDSNPUnYCtr` READY y alias
+  verificado. **Publicación técnica no equivale a aceptación visual en Android.**
+  El PR #81 permanece DRAFT y `main` sin fusionar. No tocar PayPal.
 
 ---
 
@@ -52,6 +54,6 @@ El Product Owner compartió capturas reales de Android desde `https://pazo-app.v
 3. Botón discreto de instalación aparece solo cuando corresponde y no invade Inicio.
 4. Lugares en Android: **calles realmente visibles**, seis resultados, pines, pan/zoom, acercamiento a tarjeta, indicadores y 3D donde corresponda. La mera existencia de pines NO aprueba el mapa.
 5. Soporte/administración/payments no modificados y F16 canary intacto.
-6. Aprobación visual PO antes de merge o publicación de esta nueva iteración. Conserva deployment estable `https://pazo-app.vercel.app/` tal cual hasta aceptación.
+6. Publicación **beta** de código y dominio confirmada (ver arriba). Sigue pendiente la **aceptación visual real del PO** de calles visibles y calidad del corgi; no fusionar `main` ni declarar lanzamiento final antes de su revisión.
 
 **No atribuir a las pruebas sintéticas ninguna verificación física de renderizado ni calidad de ilustración.**
