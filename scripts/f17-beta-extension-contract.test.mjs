@@ -11,11 +11,35 @@ test('mobile shell respects dynamic browser viewport and safe areas',()=>{
  assert.match(file('index.html'),/viewport-fit=cover/)
 })
 
-test('install action is hidden for standalone PWA and supports native Chrome and iOS instructions',()=>{
- const s=file('src/features/pwa/components/PazoInstallControl.tsx')
- for(const phrase of ['beforeinstallprompt','appinstalled','display-mode: standalone','navigator as IosNavigator','if(installed','userChoice','Compartir'])assert.ok(s.includes(phrase),phrase)
- assert.match(s,/typeof window!=='undefined'/)
+test('install prompt captured before App mounts; banner is dismissible, standalone-safe and nonblocking',()=>{
+ const component=file('src/features/pwa/components/PazoInstallControl.tsx')
+ const bridge=file('src/features/pwa/installPromptBridge.ts')
+ const main=file('src/main.tsx')
+ const app=file('src/App.tsx')
+ for(const phrase of ['beforeinstallprompt','appinstalled','display-mode: standalone','userChoice','event.preventDefault()'])
+  assert.ok(bridge.includes(phrase)||component.includes(phrase),phrase)
+ assert.match(main,/import '\.\/features\/pwa\/installPromptBridge\.ts'/)
+ assert.match(component,/state\.installed/)
+ assert.match(component,/Compartir/)
+ assert.match(component,/pazo-install-banner-dismissed-until/)
+ assert.match(component,/placement === 'banner' && dismissed/)
+ assert.match(app,/activeTab === 'inicio' && <PazoInstallControl lang=\{lang\} placement="banner"/)
  assert.match(file('src/components/views/PetView.tsx'),/PazoInstallControl lang=\{lang\}/)
+})
+
+test('maintenance authentication never renders App from the login-link alone',()=>{
+ const gate=file('src/features/maintenance/MaintenanceGate.tsx')
+ assert.match(gate,/supabase\.auth\.signInWithPassword/)
+ assert.match(gate,/role\.data !== true/)
+ assert.match(gate,/if \(!status\?\.enabled \|\| isAdmin\)/)
+ assert.doesNotMatch(gate,/admin\|\|allowAdminSignIn/)
+ assert.match(gate,/supabase\.auth\.signOut\(\)/)
+})
+
+test('gift admin refreshes server results after a write despite busy guard',()=>{
+ const s=file('src/features/support/components/AdminGiftBenefits.tsx')
+ assert.match(s,/const refreshed=await supabase\.rpc\('pazo_admin_find_benefit_recipients'/)
+ assert.doesNotMatch(s,/setTarget\(null\);await search\(\)/)
 })
 
 test('map remains server-map based with 3D places and explicit tile errors',()=>{
