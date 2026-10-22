@@ -34,8 +34,8 @@ async function parse(req){
  return parsed
 }
 export function createPazoLiveVaultSetup({released=false,authenticateAdmin,
- readSettings,readReservation,verifyProvider=inspectLivePaypalResources,
- saveVault,readbackVault}={}){
+ readSettings,readReservation,reserveGeneration,
+ verifyProvider=inspectLivePaypalResources,saveVault,readbackVault}={}){
  return async req=>{
   if(released!==true)return reply(req,503,'live_vault_setup_not_released')
   if(!(req instanceof Request))return reply(req,400,'invalid_setup_request')
@@ -54,8 +54,8 @@ export function createPazoLiveVaultSetup({released=false,authenticateAdmin,
   if(req.method!=='POST'||!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(
    req.headers.get('content-type')||''))
    return reply(req,400,'invalid_setup_request')
-  if([authenticateAdmin,readSettings,readReservation,verifyProvider,
-   saveVault,readbackVault].some(fn=>typeof fn!=='function'))
+  if([authenticateAdmin,readSettings,readReservation,reserveGeneration,
+   verifyProvider,saveVault,readbackVault].some(fn=>typeof fn!=='function'))
    return reply(req,503,'live_vault_setup_unavailable')
   let actor
   try{actor=await authenticateAdmin(req)}
@@ -82,6 +82,18 @@ export function createPazoLiveVaultSetup({released=false,authenticateAdmin,
     live[0].return_origin!=='https://pazo-app-t83r.vercel.app')
     return reply(req,409,'live_draft_unavailable')
    reservation=await readReservation({actorId:actor.id,planId:live[0].plan_id})
+   if(reservation===null){
+    // A single owner-signed credential submission may create the first
+    // immutable nonfinancial metadata reservation automatically.
+    // Existing SQL makes this one operation idempotent per original plan.
+    // On uncertain outcome, NEVER retry the write: read under same actor/plan
+    // and proceed only if a real existing reservation is returned.
+    try{await reserveGeneration({actorId:actor.id,planId:live[0].plan_id})}
+    catch{/* Recover from the same owner-scoped reservation, never guess. */}
+    try{reservation=await readReservation({actorId:actor.id,planId:live[0].plan_id})}
+    catch{return reply(req,503,'generation_outcome_needs_review')}
+    if(reservation===null)return reply(req,503,'generation_outcome_needs_review')
+   }
    if(reservation?.environment!=='live'||reservation?.state!=='reserved'||
     reservation.planId!==live[0].plan_id||
     reservation.webhookId!==live[0].webhook_id||
