@@ -8,7 +8,11 @@ import {readPazoLiveAcceptedOffer} from '../pazo-paypal-live-checkout/liveOfferR
 // request keys, merchant IDs, owner IDs, raw plan, original origin or signatures.
 const PATHS=new Set(['/pazo-paypal-live-account',
  '/functions/v1/pazo-paypal-live-account'])
-const ORIGINS=new Set(['https://pazo-app-t83r.vercel.app',
+// Two exact reviewed PAZO origins. Preserve the former deployed origin for
+// already-consented subscription management and permit the official beta app.
+// Never accept arbitrary Vercel previews or wildcard Origin headers.
+const ORIGINS=new Set(['https://pazo-app.vercel.app',
+ 'https://pazo-app-t83r.vercel.app',
  'http://localhost:5173','http://127.0.0.1:5173'])
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
