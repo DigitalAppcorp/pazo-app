@@ -214,12 +214,9 @@ export const MapboxMap = ({
 
         const map = new mapboxgl.Map({
           container: containerRef.current,
-          style: 'mapbox://styles/mapbox/standard',
-          config: {
-            basemap: {
-              show3dObjects: false,
-            },
-          },
+          // PAZO needs reliable streets/parks under its category and 3D pins.
+          // Use stable Streets basemap; Mapbox Standard was blank on real phones.
+          style: 'mapbox://styles/mapbox/streets-v12',
           center: DEFAULT_CENTER,
           zoom: 10.5,
           pitch: 32,
@@ -335,8 +332,21 @@ export const MapboxMap = ({
         })
 
         map.on('error', (event: any) => {
-          const message = event?.error?.message
-          if (message) console.error('Mapbox error:', message)
+          const raw = event?.error
+          const message = typeof raw?.message === 'string' ? raw.message : ''
+          const resource = typeof raw?.url === 'string' ? raw.url : ''
+          // Do not treat a missing optional glTF as failed road tiles.
+          const baseMapFailure = !resource.includes('/models/places/') &&
+            (/\\b(401|403)\\b|unauthoriz|forbidden/i.test(message) ||
+             [401,403].includes(Number(raw?.status ?? raw?.statusCode))) &&
+            (/mapbox|tiles|styles|api\\.mapbox|resource/i.test(message+' '+resource))
+          if (baseMapFailure && !cancelled) {
+            setError(langRef.current === 'es'
+              ? 'Mapbox no autorizó las capas del mapa. Revisa que el token público permita este dominio.'
+              : 'Mapbox rejected basemap requests. Check the public token domain restrictions.')
+          }
+          // Preserve non-sensitive developer diagnostics; never print access tokens.
+          if (message) console.error('Mapbox rendering error:', message.replace(/access_token=[^&\\s]+/gi,'access_token=[redacted]'))
         })
       } catch (mapError: any) {
         console.error('Error loading Mapbox:', mapError)
