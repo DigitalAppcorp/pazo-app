@@ -462,18 +462,3 @@ jobs:
       - name: P28 versioned HMAC rotation and revocation in disposable PG17
         run: |
           psql -X -h 127.0.0.1 -p 55443 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -c 'SET ROLE postgres;' -f supabase/drafts/f16_p28_versioned_hmac_pg17_lab_DO_NOT_APPLY.sql -f supabase/tests/supporter/p28-versioned-hmac-postgres-synthetic.sql
-
-  beta-production-public-http-smoke:
-    name: Beta canonical 7-route HTTP/PWA smoke (read-only)
-    if: github.event_name == 'pull_request' && github.head_ref == 'docs/beta-production-postflight-20261022'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout audited application
-        uses: actions/checkout@v7
-      - name: Node 22
-        uses: actions/setup-node@v7
-        with:
-          node-version: 22
-      - name: Inspect public SPA, PayPal callbacks, manifest, SW and icons
-        run: node scripts/f16-public-pwa-http-gate.mjs
