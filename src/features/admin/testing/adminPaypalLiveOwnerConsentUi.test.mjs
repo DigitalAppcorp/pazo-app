@@ -27,8 +27,8 @@ test('both exact immutable Live offers are rendered only with explicit separate 
 })
 
 test('readiness is server owned: no client-side flag may bypass worker/merchant gate',()=>{
- assert.match(screen,/<SupporterLiveCheckoutPanel lang=\\{lang\\} key=\\{offerRefreshRevision\\}/)
- assert.match(screen,/onAvailabilityChange=\\{receiveLiveOfferState\\}/)
+ assert.match(screen,/<SupporterLiveCheckoutPanel lang=\{lang\} key=\{offerRefreshRevision\}/)
+ assert.match(screen,/onAvailabilityChange=\{receiveLiveOfferState\}/)
  assert.match(screen,/liveOfferPhase==='loading'/)
  assert.match(screen,/liveOfferPhase==='blocked'/)
  assert.doesNotMatch(screen,/min-h-12 w-full cursor-not-allowed/)
