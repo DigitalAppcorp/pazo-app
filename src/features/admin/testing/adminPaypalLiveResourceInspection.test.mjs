@@ -15,7 +15,7 @@ const request=(body=payload(),extra={})=>new Request(url,{method:'POST',headers:
 },body:JSON.stringify(body),...extra})
 const settings=()=>({active_environment:'sandbox',live_checkout_enabled:false,environments:[
  {environment:'sandbox'}, {environment:'live',plan_id:planId,price_minor:299,currency:'USD',
-  interval_unit:'MONTH',return_origin:'https://pazo-app-t83r.vercel.app',webhook_id:''}
+  interval_unit:'MONTH',return_origin:'https://pazo-app.vercel.app',webhook_id:''}
 ]})
 const reservation=()=>({generation:1,planId,webhookId:'',state:'reserved',environment:'live',mayCharge:false})
 function fixture(overrides={}){

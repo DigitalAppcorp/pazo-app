@@ -21,7 +21,7 @@ const settings=()=>({
  active_environment:'sandbox',live_checkout_enabled:false,
  environments:[
   {environment:'sandbox'},
-  {environment:'live',plan_id:planId,return_origin:'https://pazo-app-t83r.vercel.app',
+  {environment:'live',plan_id:planId,return_origin:'https://pazo-app.vercel.app',
    price_minor:299,currency:'USD',interval_unit:'MONTH',webhook_id:''}
  ]
 })

@@ -17,10 +17,11 @@ function validEndpoint(request){
  }catch{return false}
 }
 const PLAN=/^P-[A-Z0-9]{12,40}$/
-const ORIGIN='https://pazo-app-t83r.vercel.app'
+const ORIGIN='https://pazo-app.vercel.app'
 const REQUEST_KEYS=['action','confirmation']
 const BROWSER_ORIGINS=new Set(['http://localhost:5173',
- 'http://127.0.0.1:5173','https://pazo-app-t83r.vercel.app'])
+ 'http://127.0.0.1:5173','https://pazo-app.vercel.app',
+ 'https://pazo-app-t83r.vercel.app'])
 function cors(request){
  const origin=request?.headers?.get?.('origin')||''
  if(!BROWSER_ORIGINS.has(origin))return {'vary':'Origin'}
