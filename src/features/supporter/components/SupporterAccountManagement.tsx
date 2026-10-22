@@ -63,7 +63,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         operationInFlight.current=false
         setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
-        setRecoveryMessage(null);setShowLiveManagement(false)
+        setRecoveryMessage(null);setShowLiveManagement(false);setLiveOfferPhase('loading')
         setAccountRevision(n=>n+1)
       }
       lastOwner=nextOwner
@@ -86,6 +86,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     phase:'loading'|'ready'|'blocked';mode:'initial'|'retry'
   }>({phase:'loading',mode:'initial'})
   const [offerRefreshRevision,setOfferRefreshRevision] = useState(0)
+  // Live offer GET must settle under the yarn-kitten preparation overlay.
+  // No PayPal CREATE request is made until the explicit user click.
+  const [liveOfferPhase,setLiveOfferPhase]=useState<'loading'|'ready'|'blocked'>('loading')
+  const receiveLiveOfferState=useCallback((phase:'loading'|'ready'|'blocked')=>{
+    setLiveOfferPhase(previous=>previous===phase?previous:phase)
+  },[])
   const receiveOfferState=useCallback((phase:'loading'|'ready'|'blocked',
     mode:'initial'|'retry')=>{
     setQaOfferState(previous=>previous.phase===phase&&previous.mode===mode
@@ -119,10 +125,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const offerReadyForCurrentMode=qaOfferState.mode===offerMode
   const preparationPending=membership.kind==='checking'||
     (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&!error)||
+    (!qaV2Screen&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='loading')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
     (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
   const preparationUnavailable=membership.kind==='unavailable'||
     (!qaV2Screen&&membership.kind==='inactive'&&error)||
+    (!qaV2Screen&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='blocked')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
     (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
   const preparing=preparationPending||preparationUnavailable
@@ -144,6 +152,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       setQaReviewRevision(n=>n+1)
     }
     if(!qaV2Screen&&error)void refresh()
+    if(!qaV2Screen&&liveOfferPhase==='blocked'&&accounts?.length===0){
+      setLiveOfferPhase('loading')
+      setOfferRefreshRevision(n=>n+1)
+    }
     if(offerRequired){
       // Keep the kitten visible while the same mounted published-offer
       // component retries a READ only. Never start PayPal automatically.
@@ -429,7 +441,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </p>}
                   </div>
             ) : accounts?.length===0 ? (
-              <SupporterLiveCheckoutPanel lang={lang}/>
+              <SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}
+                onAvailabilityChange={receiveLiveOfferState}/>
             ) : (
               <p role="status" className="rounded-[16px] bg-[#F0F4E6] p-4 text-center text-[12px] leading-relaxed text-[#476862]">
                 {label('Hay una solicitud PayPal Live anterior que debe revisarse antes de iniciar otra suscripción. No se iniciará otro cobro.',
