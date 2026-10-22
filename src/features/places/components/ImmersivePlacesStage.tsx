@@ -68,8 +68,8 @@ export const ImmersivePlacesStage = ({
     </div>
 
     {/* Gradual blending at all 4 edges. Gradient layers must not eat map gestures. */}
-    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-32 bg-gradient-to-b from-[#FAF8F5] via-[#FAF8F5]/70 to-transparent" />
-    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[270px] bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/65 to-transparent" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-24 bg-gradient-to-b from-[#FAF8F5] via-[#FAF8F5]/45 to-transparent sm:h-32 sm:via-[#FAF8F5]/70" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[165px] bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/40 to-transparent sm:h-[270px] sm:via-[#FAF8F5]/65" />
     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-7 bg-gradient-to-r from-[#FAF8F5]/85 to-transparent" />
     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-7 bg-gradient-to-l from-[#FAF8F5]/85 to-transparent" />
 
