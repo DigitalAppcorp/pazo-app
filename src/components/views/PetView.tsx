@@ -11,6 +11,7 @@ import { SupporterInvitationPrompt } from '../../features/supporter/components/S
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
 import { DeletionRequestDialog } from '../../features/account/DeletionRequestDialog'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from '../../features/legal/supportContact'
+import { PazoInstallControl } from '../../features/pwa/components/PazoInstallControl'
 import type { LegalKind } from '../../features/legal/legalCopy'
 import type { Pet, CareItem, Post } from '../../types/pazo'
 import {
@@ -318,6 +319,7 @@ export const PetView = ({
                   >
                     {lang === 'es' ? 'Reglas de uso' : 'Community rules'}
                   </button>
+                  <PazoInstallControl lang={lang} />
               <div className="mt-2 rounded-2xl bg-[#F0F3ED]/85 p-3">
                 <h4 className="text-sm font-extrabold text-[#204E4A]">
                   {lang==='es'?'Cuenta y datos':'Account and data'}
