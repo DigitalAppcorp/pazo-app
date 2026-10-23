@@ -1453,7 +1453,7 @@ test('F17 mobile: centered modal, brand typography, floating map nav and image c
   assert.ok(appShell.indexOf('data-pazo-scroll-soft-edge="true"') > appShell.indexOf('</main>') && appShell.indexOf('data-pazo-scroll-soft-edge="true"') < appShell.indexOf('<BottomNav'),'The scroll fade must render below the crisp floating nav')
   assert.ok(css.includes('.pazo-scroll-soft-edge::before') && css.includes('backdrop-filter: blur(20px)') && css.includes('-webkit-mask-image: linear-gradient(to bottom'),'Frosted-glass effect must use real masked 20px backdrop blur')
   assert.ok(!css.includes('.pazo-scroll-soft-edge::after') && !css.includes('background: linear-gradient(to bottom,\n    rgba(250, 248, 245'),'No cream fog layer may cover the actual photograph')
-  assert.ok(css.includes('pointer-events: none;') && css.includes('bottom: 0;') && css.includes('height: calc(5.75rem + clamp(84px, 13dvh, 116px) + env(safe-area-inset-bottom, 0px));'),'Continuous fade must extend under the entire dock area without intercepting touches')
+  assert.ok(css.includes('pointer-events: none;') && css.includes('bottom: 0;') && css.includes('height: calc(5.75rem + clamp(84px, 13dvh, 116px) + 20px + env(safe-area-inset-bottom, 0px));'),'Continuous fade must extend under the entire dock area without intercepting touches')
   assert.ok(!css.includes('bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));'),'Never stop blur above the dock or show the previously visible sharp horizontal seam')
   assert.ok(css.includes('rgba(0, 0, 0, 0.28) 35%') && css.includes('rgba(0, 0, 0, 0.86) 80%'),'Blur mask must build smoothly with no fog or hard edge')
   assert.ok(!css.includes('isolation: isolate;'),'Blur must sample scrolled content rather than an isolated transparent stack')
