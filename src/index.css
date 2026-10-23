@@ -488,7 +488,7 @@
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: calc(5.75rem + clamp(84px, 13dvh, 116px) + env(safe-area-inset-bottom, 0px));
+  height: calc(5.75rem + clamp(84px, 13dvh, 116px) + 20px + env(safe-area-inset-bottom, 0px));
   z-index: 20;
   pointer-events: none;
 }
