@@ -21,6 +21,6 @@ export const PAZO_STREETS_STYLE = {
   },
   layers: [
     { id: 'pazo-streets-background', type: 'background', paint: { 'background-color': '#EDF0E9' } },
-    { id: 'pazo-streets', type: 'raster', source: 'pazo-streets-raster', paint: { 'raster-fade-duration': 150 } },
+    { id: 'pazo-streets', type: 'raster', source: 'pazo-streets-raster', paint: { 'raster-fade-duration': 150, 'raster-saturation': -0.55, 'raster-contrast': -0.15, 'raster-opacity': 0.84 } },
   ],
 } as const
