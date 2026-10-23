@@ -3,7 +3,7 @@
 **Fecha:** 23-oct-2026. **Estado de entrega:** código implementado en rama,
 `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`; **no release**.
 Base auditada en GitHub: F17 `872ff8c37c8332c5412fbbbb79db33d09ae1f003`, PR #81
-DRAFT hacia `main`. Rama: `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT hacia F17](https://github.com/DigitalAppcorp/pazo-app/pull/83). Base de implementación: [`2d734920604d58032bb97c8f6929997cef1a334f`](https://github.com/DigitalAppcorp/pazo-app/commit/2d734920604d58032bb97c8f6929997cef1a334f); el tratamiento del legado verificado, runner CI y evidencia finales están en HEAD del mismo PR.
+DRAFT hacia `main`. Rama: `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT hacia F17](https://github.com/DigitalAppcorp/pazo-app/pull/83). Código verificado: [`8f0869a02e462908dcfc23d11f20d76dc146d433`](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433). [CI PASS, ambos jobs](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101). La actualización posterior de este documento registra esa evidencia; no cambia código de producto. CI también comprueba el HEAD documental del PR.
 No se modificaron producción, credenciales, merchant, plan, scheduler ni `main`.
 No hubo PayPal CREATE, emails, SMS, push ni notificaciones a cuentas reales.
 
@@ -49,63 +49,62 @@ se limita a una vez por diez segundos. Opt-out impide recontacto de campaña.
 - TypeScript/Vite build PASS; aviso de bundle grande ya conocido. ESLint de módulos nuevos PASS. El lint global tiene 142 errores/18 warnings frente a 143/18 en la misma base F17, sin diagnósticos nuevos por archivo/regla/mensaje; no se presenta como gate global PASS.
 
 Commit reproducible: el workflow `f16-gradual-live.yml` hace checkout de
-`github.event.pull_request.head.sha`. Cada fila siguiente refiere al **mismo HEAD
-verificado del PR #83**; el SHA y los logs se consultan en sus checks. El estado CI y
-URL se consultan en [los checks del PR #83](https://github.com/DigitalAppcorp/pazo-app/pull/83/checks), sin convertir los gates alojados en PASS. El lab espera el servidor TCP final de la imagen PG17, evitando confundir el socket temporal de initdb con disponibilidad estable.
+`github.event.pull_request.head.sha`. Cada fila siguiente refiere al **mismo commit de código
+8f0869a0**, probado íntegramente en la ejecución enlazada. Los posteriores cambios documentales se comprueban nuevamente en [los checks del PR #83](https://github.com/DigitalAppcorp/pazo-app/pull/83/checks), sin convertir los gates alojados en PASS. El lab espera el servidor TCP final de la imagen PG17, evitando confundir el socket temporal de initdb con disponibilidad estable.
 
 ## Scope Closure — GR
 
 `PASS` significa código/prueba aislada indicados. `BLOCKED` identifica un gate
 real reservado al PO; no implica que se haya omitido su implementación.
 
-| GR | Estado | Prueba directa | Commit / CI |
-| --- | --- | --- | --- |
-| 01 | PASS | Oferta existente intacta, legal ES/EN y navegador real de cuenta | HEAD PR / gradual-browser |
-| 02 | PASS | Cinco/72h/reemplazo, dos hilos, lease/ACK; copy bilingüe y CTA cuenta | HEAD PR / pg17 + tests |
-| 03 | PASS | Auth FIFO/dedupe, opt-out, onboarding/ban/deletion/operator, 25 cuentas | HEAD PR / pg17 |
-| 04 | PASS | Interés no crea intent; queue GET propio, POST sin cupo denegado | HEAD PR / pg17 + browser |
-| 05 | PASS | 25/60 sesiones concurrentes, 50 reservas/admisiones, cancelación conserva cuota | HEAD PR / pg17 |
-| 06 | PASS | RPC wrappers llaman consentimiento/claim original, expiry rechaza claim, 36 regresiones | HEAD PR / tests + pg17 |
-| 07 | PASS | Recuperación original preservada; cuenta anterior aislada y CTA sin cambios | HEAD PR / governance + tests |
-| 08 | BLOCKED Live real; PASS aislado | Ledger/recibos originales sintéticos, renovación/replay/holds; falta autorización E2E Live | HEAD PR / pg17 + synthetic |
-| 09 | BLOCKED Live real; PASS aislado | Proyección requerida, excepción/expiry/hold sin falsa activación; falta E2E alojado | HEAD PR / pg17 |
-| 10 | PASS | Aviso solo ledger+beneficio, una vez, ACK perdido/renovación sin duplicar | HEAD PR / pg17 + tests |
-| 11 | PASS | Feedback idempotente, un ticket privado, derechos intactos, skip en navegador | HEAD PR / pg17 + browser |
-| 12 | PASS | Pausa por proyección/holds/worker, recuperación segura y cola preservada | HEAD PR / pg17 + tests |
-| 13 | PASS | Gatillos 1/3/10, décima retenida bloquea, nunca auto-public | HEAD PR / pg17 |
-| 14 | PASS | Agregado admin/RLS, métricas separadas, estados vacíos/error/móvil ES/EN | HEAD PR / pg17 + browser |
-| 15 | PASS código; BLOCKED GO real | MFA/origen/nonce/CAS/audit, legacy guard y gate público | HEAD PR / tests + pg17 |
-| 16 | PASS aislado | Pausa no toca worker/switch/ledger, recovery histórico y refund/lifecycle regression | HEAD PR / pg17 + governance |
-| 17 | PASS preparado | Legal/inventario, RLS own/admin/service, limpieza comprobada sin borrar finanzas | HEAD PR / pg17 + governance |
-| 18 | PASS automatizado; BLOCKED QA PO | PG concurrente y 72 comprobaciones UI con screenshots; CI requerido | HEAD PR / ambos jobs |
-| 19 | PASS preparado; BLOCKED despliegue | Runbook y fallback pausa; no SQL/Edge/Vercel alojados ejecutados | HEAD PR / build |
-| 20 | PASS conservación | Diff vacío del mapa/recursos y 20 pruebas F17; QA PO previo conservado | HEAD PR / governance |
-| 21 | PASS preparado | review_v1 intacta y thanks_v2 versionada, cambio futuro no activado | HEAD PR / tests |
-| 22 | PASS rama/PR; BLOCKED main | Base F17 auditada, PR DRAFT, CI mismo SHA; no merge autorizado | HEAD PR / checks |
+| GR | Estado | Prueba directa | Commit | Enlace CI |
+| --- | --- | --- | --- | --- |
+| 01 | PASS | Oferta existente intacta, legal ES/EN y navegador real de cuenta | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [gradual-browser](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 02 | PASS | Cinco/72h/reemplazo, dos hilos, lease/ACK; copy bilingüe y CTA cuenta | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 03 | PASS | Auth FIFO/dedupe, opt-out, onboarding/ban/deletion/operator, 25 cuentas | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 04 | PASS | Interés no crea intent; queue GET propio, POST sin cupo denegado | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + browser](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 05 | PASS | 25/60 sesiones concurrentes, 50 reservas/admisiones, cancelación conserva cuota | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 06 | PASS | RPC wrappers llaman consentimiento/claim original, expiry rechaza claim, 36 regresiones | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [tests + pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 07 | PASS | Recuperación original preservada; cuenta anterior aislada y CTA sin cambios | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [governance + tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 08 | BLOCKED Live real; PASS aislado | Ledger/recibos originales sintéticos, renovación/replay/holds; falta autorización E2E Live | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + synthetic](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 09 | BLOCKED Live real; PASS aislado | Proyección requerida, excepción/expiry/hold sin falsa activación; falta E2E alojado | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 10 | PASS | Aviso solo ledger+beneficio, una vez, ACK perdido/renovación sin duplicar | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 11 | PASS | Feedback idempotente, un ticket privado, derechos intactos, skip en navegador | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + browser](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 12 | PASS | Pausa por proyección/holds/worker, recuperación segura y cola preservada | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 13 | PASS | Gatillos 1/3/10, décima retenida bloquea, nunca auto-public | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 14 | PASS | Agregado admin/RLS, métricas separadas, estados vacíos/error/móvil ES/EN | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + browser](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 15 | PASS código; BLOCKED GO real | MFA/origen/nonce/CAS/audit, legacy guard y gate público | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [tests + pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 16 | PASS aislado | Pausa no toca worker/switch/ledger, recovery histórico y refund/lifecycle regression | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + governance](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 17 | PASS preparado | Legal/inventario, RLS own/admin/service, limpieza comprobada sin borrar finanzas | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + governance](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 18 | PASS automatizado; BLOCKED QA PO | PG concurrente y 72 comprobaciones UI con screenshots; CI requerido | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [ambos jobs](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 19 | PASS preparado; BLOCKED despliegue | Runbook y fallback pausa; no SQL/Edge/Vercel alojados ejecutados | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [build](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 20 | PASS conservación | Diff vacío del mapa/recursos y 20 pruebas F17; QA PO previo conservado | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [governance](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 21 | PASS preparado | review_v1 intacta y thanks_v2 versionada, cambio futuro no activado | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 22 | PASS rama/PR; BLOCKED main | Base F17 auditada, PR DRAFT, CI mismo SHA; no merge autorizado | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [checks](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
 
 ## Scope Closure — EVT
 
-| EVT | Estado técnico | Prueba directa | Commit / CI |
-| --- | --- | --- | --- |
-| 01 | PASS | 25 sesiones PG simultáneas, 1/24 | HEAD PR / pg17 |
-| 02 | PASS | Primera venta/proyección promueve 5 en tick durable | HEAD PR / kernel-pg17 |
-| 03 | PASS | Tercer dueño verificado promueve20 | HEAD PR / kernel-pg17 |
-| 04 | PASS | Expiry sin CREATE; begin sin claim cierra seguro y siguiente cola | HEAD PR / security-pg17 |
-| 05 | PASS | Provider_started retiene cupo vencido; original recovery regresión | HEAD PR / failures-pg17 + tests |
-| 06 | PASS | Event replay + otro ciclo del mismo dueño no cuentan ni avisan de nuevo | HEAD PR / kernel-pg17 |
-| 07 | PASS | Pago sin proyección y excepción pausan, agradecimiento aplazado | HEAD PR / failures + security |
-| 08 | PASS | En L3 conserva 21…25; décimo válido entrega nuevos cupos | HEAD PR / kernel-pg17 |
-| 09 | PASS | 25 GET propios, retries dedupe, online PWA y términos releídos | HEAD PR / pg17 + browser |
-| 10 | PASS | Ledger durable, drain simultáneo y recuperación tras falta de proyección/ACK | HEAD PR / pg17 + tests |
-| 11 | PASS aislado | Pausa solo admisión; recovery/ledger/switch conservados; financieros regresión | HEAD PR / pg17 + governance |
-| 12 | PASS aislado | Ausencia de firma/beneficio no emite; formulario requiere campaña y pago | HEAD PR / pg17 |
-| 13 | PASS | POST sin slot responde controlled_release_admission_denied | HEAD PR / concurrency |
-| 14 | PASS | 60 writers y 15 drains concurrentes, locks reales | HEAD PR / concurrency |
-| 15 | PASS código; BLOCKED legado real | Intent pendiente bloquea inicio; contrato pagado/proyectado se aísla y conserva renovación; alojado intacto | HEAD PR / kernel-pg17 |
-| 16 | PASS | Décimo distinto firmado+proyección promueve50 sin espera | HEAD PR / kernel-pg17 |
-| 17 | PASS | Nueve + décimo en hold no promueven; otra renovación no suma dueño | HEAD PR / kernel-pg17 |
-| 18 | PASS | 50 contratos/admisiones acumulados; 51.º queda en cola, nunca público | HEAD PR / concurrency |
-| 19 | PASS | 25 filas persisten y L4 ofrece siguientes cupos FIFO | HEAD PR / kernel + concurrency |
+| EVT | Estado técnico | Prueba directa | Commit | Enlace CI |
+| --- | --- | --- | --- | --- |
+| 01 | PASS | 25 sesiones PG simultáneas, 1/24 | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 02 | PASS | Primera venta/proyección promueve 5 en tick durable | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 03 | PASS | Tercer dueño verificado promueve20 | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 04 | PASS | Expiry sin CREATE; begin sin claim cierra seguro y siguiente cola | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [security-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 05 | PASS | Provider_started retiene cupo vencido; original recovery regresión | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [failures-pg17 + tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 06 | PASS | Event replay + otro ciclo del mismo dueño no cuentan ni avisan de nuevo | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 07 | PASS | Pago sin proyección y excepción pausan, agradecimiento aplazado | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [failures + security](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 08 | PASS | En L3 conserva 21…25; décimo válido entrega nuevos cupos | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 09 | PASS | 25 GET propios, retries dedupe, online PWA y términos releídos | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + browser](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 10 | PASS | Ledger durable, drain simultáneo y recuperación tras falta de proyección/ACK | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + tests](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 11 | PASS aislado | Pausa solo admisión; recovery/ledger/switch conservados; financieros regresión | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17 + governance](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 12 | PASS aislado | Ausencia de firma/beneficio no emite; formulario requiere campaña y pago | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 13 | PASS | POST sin slot responde controlled_release_admission_denied | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [concurrency](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 14 | PASS | 60 writers y 15 drains concurrentes, locks reales | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [concurrency](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 15 | PASS código; BLOCKED legado real | Intent pendiente bloquea inicio; contrato pagado/proyectado se aísla y conserva renovación; alojado intacto | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 16 | PASS | Décimo distinto firmado+proyección promueve50 sin espera | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 17 | PASS | Nueve + décimo en hold no promueven; otra renovación no suma dueño | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel-pg17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 18 | PASS | 50 contratos/admisiones acumulados; 51.º queda en cola, nunca público | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [concurrency](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
+| 19 | PASS | 25 filas persisten y L4 ofrece siguientes cupos FIFO | [8f0869a0](https://github.com/DigitalAppcorp/pazo-app/commit/8f0869a02e462908dcfc23d11f20d76dc146d433) | [kernel + concurrency](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40031193101) |
 
 ## Estados independientes y siguiente operación
 
