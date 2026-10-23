@@ -66,6 +66,8 @@ DO $$ DECLARE definition text;BEGIN SELECT s.definition INTO definition FROM sav
 UPDATE supporter_private.pazo_paypal_live_paid_periods SET service_start=statement_timestamp()-interval '40 days',service_end=statement_timestamp()-interval '10 days' WHERE sale_id='SALE-GRADUAL-3';
 SELECT public.pazo_f16_gradual_tick(true);
 SELECT gradual_test.assert('GR-09_EXPIRED_COVERAGE',(SELECT state='benefits_ended' FROM supporter_private.gradual_interest WHERE owner_id='82000000-0000-4000-8000-000000000003') AND NOT supporter_private.gradual_verified('82000000-0000-4000-8000-000000000003'));
+SELECT set_config('request.jwt.claim.sub','82000000-0000-4000-8000-000000000003',true);
+SELECT gradual_test.assert('GR-09_AUTHORITATIVE_ACTIONS',public.pazo_gradual_my_status()->>'myState'='benefits_ended' AND public.pazo_gradual_my_status()->'allowedActions'='["manage"]'::jsonb AND public.pazo_gradual_my_status()->>'pendingVerification'='false');
 -- Closed-campaign cleanup removes operational notices/feedback, never ledger/quota.
 UPDATE supporter_private.gradual_campaign SET ended_at=statement_timestamp()-interval '91 days';
 DO $$ DECLARE periods bigint;admissions bigint;BEGIN

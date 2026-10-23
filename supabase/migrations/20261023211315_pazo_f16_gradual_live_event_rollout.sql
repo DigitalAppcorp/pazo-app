@@ -236,17 +236,34 @@ BEGIN
 END $$;
 CREATE FUNCTION public.pazo_gradual_my_status() RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE q supporter_private.gradual_interest%ROWTYPE;c supporter_private.gradual_campaign%ROWTYPE;who uuid:=auth.uid();
+ paid boolean;eligible boolean;can_checkout boolean;public_mode boolean;my_state text;actions jsonb;
 BEGIN
  IF who IS NULL THEN RAISE EXCEPTION 'Authentication required' USING ERRCODE='42501';END IF;
  SELECT * INTO c FROM supporter_private.gradual_campaign WHERE singleton;
  SELECT * INTO q FROM supporter_private.gradual_interest WHERE owner_id=who;
+ paid:=supporter_private.gradual_verified(who);
+ eligible:=supporter_private.gradual_eligible(who) AND (q.owner_id IS NOT NULL OR NOT paid);
+ public_mode:=EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control WHERE singleton AND mode='public');
+ my_state:=coalesce(q.state,'not_joined');
+ IF q.state='benefits_active' AND NOT paid THEN
+  my_state:=CASE WHEN EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_paid_periods p WHERE p.intent_id=q.intent_id AND p.service_end>statement_timestamp()) THEN 'payment_verifying' ELSE 'benefits_ended' END;
+ END IF;
+ IF public_mode AND eligible AND my_state IN('waiting','withdrawn','not_joined') THEN my_state:='slot_granted';END IF;
+ can_checkout:=coalesce(c.lifecycle='active' AND eligible AND supporter_private.gradual_health()
+  AND ((q.state='slot_granted' AND q.slot_expires_at>statement_timestamp()) OR public_mode),false);
+ actions:=CASE
+  WHEN my_state='benefits_active' AND paid THEN jsonb_build_array('feedback','manage')
+  WHEN my_state='benefits_ended' THEN jsonb_build_array('manage')
+  WHEN my_state IN('paying','payment_verifying','issue') THEN jsonb_build_array('resume','manage')
+  WHEN can_checkout THEN jsonb_build_array('checkout','withdraw')
+  WHEN my_state IN('waiting','slot_granted') THEN jsonb_build_array('withdraw')
+  WHEN my_state='declined' OR NOT eligible THEN '[]'::jsonb
+  ELSE jsonb_build_array('interest','decline') END;
  RETURN jsonb_build_object('source','gradual_owner_v1','pilotStage',c.stage,'campaignState',c.lifecycle,'revision',c.revision,
-  'myState',CASE WHEN EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control WHERE singleton AND mode='public') AND coalesce(q.state,'waiting') IN('waiting','withdrawn') AND supporter_private.gradual_eligible(who) THEN 'slot_granted' WHEN q.state='benefits_active' AND NOT supporter_private.gradual_verified(who) THEN CASE WHEN NOT EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_paid_periods p WHERE p.intent_id=q.intent_id AND p.service_end>statement_timestamp()) THEN 'benefits_ended' ELSE 'payment_verifying' END ELSE coalesce(q.state,'not_joined') END,'eligible',supporter_private.gradual_eligible(who) AND (q.owner_id IS NOT NULL OR NOT supporter_private.gradual_verified(who)),
-  'myCanCheckout',coalesce(c.lifecycle='active' AND supporter_private.gradual_health() AND supporter_private.gradual_eligible(who) AND ((q.state='slot_granted' AND q.slot_expires_at>statement_timestamp()) OR EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control WHERE singleton AND mode='public')),false),
-  'pendingVerification',coalesce(q.state IN('paying','payment_verifying','issue'),false),
-  'benefitsActive',q.owner_id IS NOT NULL AND supporter_private.gradual_verified(who),'feedback',q.feedback,
-  'queueStatus',CASE WHEN q.state='waiting' THEN 'waiting_without_charge' ELSE 'none' END,
-  'allowedActions',CASE WHEN q.state IN('paying','payment_verifying','issue') THEN jsonb_build_array('resume') ELSE jsonb_build_array('interest','withdraw','decline') END);
+  'myState',my_state,'eligible',eligible,'myCanCheckout',can_checkout,
+  'pendingVerification',my_state IN('paying','payment_verifying','issue'),
+  'benefitsActive',q.owner_id IS NOT NULL AND paid,'feedback',q.feedback,
+  'queueStatus',CASE WHEN my_state='waiting' THEN 'waiting_without_charge' ELSE 'none' END,'allowedActions',actions);
 END $$;
 CREATE FUNCTION public.pazo_gradual_interest(p_action text) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE who uuid:=auth.uid();q supporter_private.gradual_interest%ROWTYPE;c supporter_private.gradual_campaign%ROWTYPE;
@@ -342,7 +359,7 @@ BEGIN
  ELSIF p_action='public' THEN
   UPDATE admin_private.pazo_live_release_control SET mode='public' WHERE singleton;
  END IF;
- UPDATE supporter_private.gradual_campaign SET ended_at=CASE WHEN p_action='stop' THEN clock_timestamp() WHEN p_action='resume' THEN NULL ELSE ended_at END,
+ UPDATE supporter_private.gradual_campaign SET ended_at=CASE WHEN p_action='stop' THEN clock_timestamp() WHEN p_action IN('start','resume') THEN NULL ELSE ended_at END,
  lifecycle=CASE WHEN p_action IN('pause','stop') THEN 'paused_admin' WHEN p_action='resolve' THEN lifecycle ELSE 'active' END,
   started_at=CASE WHEN p_action='start' THEN clock_timestamp() ELSE started_at END,revision=revision+1 WHERE singleton;
  INSERT INTO supporter_private.gradual_audit(request_id,actor_id,action,from_revision,to_revision) VALUES(p_request,p_actor,p_action,c.revision,c.revision+1);

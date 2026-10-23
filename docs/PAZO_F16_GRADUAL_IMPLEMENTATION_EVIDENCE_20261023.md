@@ -20,7 +20,7 @@ implementadas; los documentos anteriores se conservan como historia superada.
 | Cuota | Un cupo inicial; 1/3/10 dueños distintos con venta firmada+período+proyección promueven 5/20/50. Renovaciones/cortesías/ACTIVE sin venta no promueven. Aprobación real del contrato consume admisión histórica conservadora; incertidumbre retiene reserva. Cancelación no revende plazas históricas |
 | Worker | Triggers solo encolan, evitando invertir locks del escritor financiero. Tras completar el drain privado original se reconcilia campaña y se entregan hasta diez avisos con lease. Un fallo de entrega jamás repite liquidación financiera. Siguiente drain recupera lo durable; health/procesamiento OFF no ejecutan mantenimiento |
 | Salud | Webhook GET original, worker fresco, artifact y switch coherentes, ausencia de holds/inbox retenido/incidentes. Proyección inválida o excepción produce pausa segura. Revisión de incidente no reanuda por sí sola |
-| Usuario | `useGradualStatus`, `GradualCampaignPanel`, integración real en membresía y beneficios. ES/EN, estados de cola/cupo/pago/verificación/beneficio/incidencia y cobertura terminada. GET al entrar/focus/online/retorno/hash; fallback 20s visible, sin Realtime obligatorio. Cambio de cuenta cancela/descarta respuestas anteriores |
+| Usuario | `useGradualStatus`, `GradualCampaignPanel`, integración real en membresía y beneficios. ES/EN, estados de cola/cupo/pago/verificación/beneficio/incidencia y cobertura terminada. Estado/acciones/pending derivados juntos del servidor, incluidos vencimientos. GET al entrar/focus/online/retorno/hash; fallback 20s visible, sin Realtime obligatorio. Cambio de cuenta cancela/descarta respuestas anteriores |
 | Checkout UI | Interés accesible aunque GET PayPal deniegue pagar. Cambio de cupo relee oferta del servidor sin remount ni nuevo CREATE automático; un POST incierto sigue protegido. Se conserva recuperación/abandono aprobados |
 | Notificaciones | `supporter_campaign` y `supporter_verified`, dos identidades por campaña/dueño. Invitación actualiza mismo UUID a espera/cupo; ACK+inbox en transacción, versión/lease rechazan escrituras viejas. Navega a cuenta protegida; no abre PayPal. Copy `review_v1` preservada; `thanks_v2` preparada, sin control que la active automáticamente |
 | Feedback | OK/problema/omitir, un resultado por cuenta; componente enumerado. Problema crea ticket F17 privado idempotente y no cambia pago, entitlement ni cuota. Cuenta pagada ajena a campaña no recibe formulario huérfano |
@@ -112,7 +112,7 @@ real reservado al PO; no implica que se haya omitido su implementación.
 | Estado | Resultado |
 | --- | --- |
 | CODE_DONE | Implementado y probado en rama; no fase COMPLETADA/merged |
-| DB_MIGRATION_PREPARED | PASS; SHA-256 `8ae69ae15b22aa8d2d389124fd24d8f05d2f37ff4e664017315bebbc99c4bbb1` |
+| DB_MIGRATION_PREPARED | PASS; SHA-256 `1962cedd721923cbc1846e51b4037dda2c3fca76a77def03c5391c72a0f99a38` |
 | DB_HOSTED_APPLIED | BLOCKED: no autorizado ni ejecutado |
 | EDGE_DEPLOYED | BLOCKED: funciones nuevas/actualizadas no publicadas |
 | USER_UI_QA | Automatizado local PASS; revisión alojada/visual PO BLOCKED |
