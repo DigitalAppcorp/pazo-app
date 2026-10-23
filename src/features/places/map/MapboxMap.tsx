@@ -325,7 +325,7 @@ export const MapboxMap = ({
           }
         }
         map.on('zoom', syncMarkerEmphasis)
-        map.on('style.load', () => {
+        const attachPlaceLayers = () => {
           if (basemapStage === 'raster') setMapNotice('')
           if (cancelled) return
 
@@ -448,7 +448,12 @@ export const MapboxMap = ({
             Boolean(userLocationRef.current)
           )
           syncMarkerEmphasis()
-        })
+        }
+        // The previously approved raster implementation waits for 'load'.
+        // 'style.load' may fire before raster resources are usable on Android.
+        // Vector scenes still reattach custom layers when their style changes.
+        if (mapAttempt === 'raster') map.on('load', attachPlaceLayers)
+        else map.on('style.load', attachPlaceLayers)
 
         map.on('error', (event: {error?:unknown}) => {
           const failure=classifyBasemapFailure(event?.error)
