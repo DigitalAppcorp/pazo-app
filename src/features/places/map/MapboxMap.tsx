@@ -1,5 +1,5 @@
 import {classifyBasemapFailure} from './mapFailure'
-import { PAZO_STREETS_STYLE } from './pazoBasemap'
+import { PAZO_STANDARD_STYLE, PAZO_STANDARD_CONFIG } from './pazoBasemap'
 import { useEffect, useRef, useState } from 'react'
 import type { EphemeralLocation, PetPlace } from '../../../types/pazo'
 import { loadMapboxGl } from './mapboxLoader'
@@ -140,9 +140,8 @@ export const MapboxMap = ({
   const onSelectPlaceRef = useRef(onSelectPlace)
   const [error, setError] = useState('')
   const [mapNotice, setMapNotice] = useState('')
-  // Re-create the map on vector authorization failure: swapping styles on
-  // the failed WebGL map left the canvas gray on a physical Android device.
-  const [mapAttempt, setMapAttempt] = useState<'vector' | 'raster'>('vector')
+  const [mapAttempt, setMapAttempt] = useState(0)
+  const [mapReady, setMapReady] = useState(false)
 
   useEffect(() => {
     placesRef.current = places
@@ -183,6 +182,8 @@ export const MapboxMap = ({
       })
       const marker = new mapboxgl.Marker({ element, anchor: 'bottom' })
         .setLngLat([place.longitude, place.latitude]).addTo(map)
+      // GL assigns role=img to custom markers; preserve this native button.
+      element.setAttribute('role', 'button')
       placeMarkersRef.current.push({marker, element})
     }
   }
@@ -231,9 +232,12 @@ export const MapboxMap = ({
   useEffect(() => {
     let cancelled = false
 
-    let basemapStage: 'standard' | 'streets' | 'raster' = mapAttempt === 'raster' ? 'raster' : 'standard'
-    let vectorStyleErrors = 0
+    let loadingTimeout: number | undefined
+    let basemapFailed = false
     const start = async () => {
+      setError('')
+      setMapNotice('')
+      setMapReady(false)
       const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
       if (!token) {
         setError(
@@ -245,60 +249,47 @@ export const MapboxMap = ({
       }
 
       try {
-        // The same token can render PAZO's public OSM fallback but be rejected
-        // for the Mapbox Standard style (styles:read / URL restrictions).
-        // Check authorization before creating a Mapbox WebGL canvas: if the
-        // vector map fails first, Android may not recover with setStyle()
-        // or by rebuilding the renderer in the same route.
-        if (mapAttempt === 'vector') {
-          const styleProbe = new AbortController()
-          const timeout = window.setTimeout(() => styleProbe.abort(), 4500)
-          let vectorAuthorized = false
-          try {
-            const reply = await fetch(
-              `https://api.mapbox.com/styles/v1/mapbox/standard?access_token=${encodeURIComponent(token)}`,
-              { method: 'GET', signal: styleProbe.signal, cache: 'no-store' }
-            )
-            vectorAuthorized = reply.ok
-          } catch {
-            // Offline, refused, timed out or blocked by domain restrictions.
-          } finally {
-            window.clearTimeout(timeout)
-          }
-          if (cancelled) return
-          if (!vectorAuthorized) {
-            setMapAttempt('raster')
-            return
-          }
-        }
         const mapboxgl = await loadMapboxGl()
         if (cancelled || !containerRef.current) return
 
+        if (!mapboxgl.supported()) {
+          setError(lang === 'es'
+            ? 'Este navegador no tiene WebGL disponible. Actívalo para ver Mapbox Standard.'
+            : 'WebGL is unavailable in this browser. Enable it to view Mapbox Standard.')
+          return
+        }
         mapboxgl.accessToken = token
 
         const map = new mapboxgl.Map({
           container: containerRef.current,
-          // Normal 3D basemap, with the existing raster fallback for outages.
-          style: mapAttempt === 'raster' ? PAZO_STREETS_STYLE : 'mapbox://styles/mapbox/standard',
-          // Standard-only settings must not be passed to the OSM raster
-          // style, which has no imported basemap/config schema.
-          ...(mapAttempt === 'vector' ? { config: { basemap: {
-            theme: 'faded',
-            lightPreset: 'day',
-            showHdRoads: false,
-            show3dObjects: true,
-            showPointOfInterestLabels: false,
-            showTransitLabels: false,
-          } } } : {}),
+          style: PAZO_STANDARD_STYLE,
+          config: { basemap: PAZO_STANDARD_CONFIG },
           center: DEFAULT_CENTER,
           zoom: 10.5,
-          pitch: mapAttempt === 'raster' ? 32 : 45,
+          pitch: 45,
           bearing: 0,
           antialias: true,
           attributionControl: true,
         })
 
         mapRef.current = map
+        loadingTimeout = window.setTimeout(() => {
+          if (!cancelled && !map.loaded() && !basemapFailed) setMapNotice(langRef.current === 'es'
+            ? 'Mapbox Standard está tardando en cargar. Comprueba tu conexión y reintenta.'
+            : 'Mapbox Standard is taking longer to load. Check your connection and retry.')
+        }, 20000)
+        map.on('load', () => {
+          if (cancelled) return
+          globalThis.clearTimeout(loadingTimeout)
+          // GL can emit load even when every tile returned 403. Keep the error.
+          if (!basemapFailed) setMapReady(true)
+        })
+        const canvas = map.getCanvas()
+        canvas.addEventListener('webglcontextlost', () => {
+          if (!cancelled) setMapNotice(langRef.current === 'es'
+            ? 'Se interrumpió el renderizado del mapa. Reintenta para recuperarlo.'
+            : 'Map rendering was interrupted. Retry to restore it.')
+        })
         // Render PAZO location markers as real map annotations independently of
         // any basemap tiles, 3D layer capability or model request.
         syncPlaceMarkers(map, mapboxgl, placesRef.current)
@@ -317,8 +308,7 @@ export const MapboxMap = ({
           // Tiny map pins identify locations at overview zoom. Up close, the
           // original glTF model is visually prominent, while the accessible
           // DOM annotation remains a tappable last-resort fallback.
-          const modelVisible = basemapStage !== 'raster'
-            && Boolean(map.getLayer?.('pazo-place-models'))
+          const modelVisible = Boolean(map.getLayer?.('pazo-place-models'))
             && (map.getZoom?.() || 0) >= 14
           for (const entry of placeMarkersRef.current) {
             entry.element.style.opacity = modelVisible ? '0.28' : '1'
@@ -326,12 +316,10 @@ export const MapboxMap = ({
         }
         map.on('zoom', syncMarkerEmphasis)
         const attachPlaceLayers = () => {
-          if (basemapStage === 'raster') setMapNotice('')
           if (cancelled) return
 
-          // Terrain is only attempted on authorized vector Mapbox styles.
-          // The emergency OSM raster is never represented as a 3D terrain map.
-          if (basemapStage !== 'raster') {
+          // Elevation is optional; a DEM failure must preserve Standard streets.
+          if (!map.getSource('pazo-terrain-dem')) {
             try {
               map.addSource('pazo-terrain-dem', {
                 type: 'raster-dem',
@@ -345,6 +333,10 @@ export const MapboxMap = ({
             }
           }
 
+          if (map.getSource('pazo-places')) {
+            map.getSource('pazo-places').setData(toGeoJson(placesRef.current))
+            return
+          }
           map.addSource('pazo-places', {
             type: 'geojson',
             data: toGeoJson(placesRef.current),
@@ -449,61 +441,23 @@ export const MapboxMap = ({
           )
           syncMarkerEmphasis()
         }
-        // The previously approved raster implementation waits for 'load'.
-        // 'style.load' may fire before raster resources are usable on Android.
-        // Vector scenes still reattach custom layers when their style changes.
-        if (mapAttempt === 'raster') map.on('load', attachPlaceLayers)
-        else map.on('style.load', attachPlaceLayers)
+        map.on('style.load', attachPlaceLayers)
 
         map.on('error', (event: {error?:unknown}) => {
-          const failure=classifyBasemapFailure(event?.error)
+          const failure = classifyBasemapFailure(event?.error)
           if (!failure || cancelled) return
-          // A single missing tile must not replace the entire authorized 3D
-          // scene with a flat emergency streets raster. Prefer another Mapbox
-          // VECTOR map first; go raster only after the vector options fail.
-          const mapError = event.error as {url?:unknown;message?:unknown} | undefined
-          const detail = String(mapError?.url || '') + ' ' + String(mapError?.message || '')
-          // Elevation is optional: a failed DEM tile must not discard a
-          // perfectly good vector basemap or its PAZO native 3D models.
-          if (/mapbox-terrain-dem-v1|pazo-terrain-dem|terrain-rgb/i.test(detail)) return
-          const isStyleOrAuth = failure === 'map_authorization' || /\/styles\/|style.+(fail|load)/i.test(detail)
-          // A 401/403 on vector styles must restart in a clean canvas rather
-          // than attempting another Mapbox style with the same denied token.
-          if (failure === 'map_authorization' && basemapStage !== 'raster') {
-            setMapNotice(langRef.current === 'es'
-              ? 'Mapbox no autorizó las capas 3D. Recuperando el mapa alternativo.'
-              : 'Mapbox did not authorize 3D layers. Recovering the alternative map.')
-            setMapAttempt('raster')
-            return
-          }
-          if (basemapStage === 'standard' && (isStyleOrAuth || ++vectorStyleErrors >= 3)) {
-            basemapStage = 'streets'
-            map.setStyle('mapbox://styles/mapbox/streets-v12')
-            return
-          }
-          if (basemapStage === 'streets' && (isStyleOrAuth || ++vectorStyleErrors >= 6)) {
-            basemapStage = 'raster'
-            setMapNotice(failure === 'map_authorization'
-              ? (langRef.current === 'es'
-                ? 'Mapbox no autorizó las capas 3D en este dominio. Mostrando el mapa de emergencia.'
-                : 'Mapbox did not authorize 3D layers on this domain. Showing the emergency map.')
-              : (langRef.current === 'es'
-                ? 'No se cargó la cartografía 3D. Mostrando mapa de emergencia.'
-                : '3D basemap could not load. Showing the emergency map.'))
-            // Cold-restart with the already proven OSM raster constructor.
-            setMapAttempt('raster')
-            return
-          }
-          if (basemapStage === 'raster') {
-            // Individual community tile errors should never hide the whole map,
-            // Places or the locally rendered PAZO markers.
-            return
-          }
-          // Do not unmount the Mapbox canvas on a single recoverable tile
-          // failure. The current camera, DOM place markers and previous tiles
-          // must remain interactive during retry/fallback.
-          // No raw provider URL, request, token or coordinates in logs.
-          if(failure)console.warn('PAZO basemap resource error:',failure)
+          basemapFailed = true
+          setMapReady(false)
+          globalThis.clearTimeout(loadingTimeout)
+          // Never replace Standard or report a tile denial as a 3D permission.
+          // A readable style alone does not establish access to its tiles.
+          setMapNotice(failure === 'map_authorization'
+            ? (langRef.current === 'es'
+              ? 'Mapbox no autorizó la cartografía (HTTP 401/403). Revisa el token y los dominios permitidos.'
+              : 'Mapbox did not authorize the map (HTTP 401/403). Check the token and allowed domains.')
+            : (langRef.current === 'es'
+              ? 'No se pudieron cargar recursos de Mapbox Standard. Comprueba tu conexión y reintenta.'
+              : 'Mapbox Standard resources could not load. Check your connection and retry.'))
         })
       } catch {
         console.error('PAZO map initialization unavailable')
@@ -521,6 +475,7 @@ export const MapboxMap = ({
 
     return () => {
       cancelled = true
+      globalThis.clearTimeout(loadingTimeout)
       userMarkerRef.current?.remove?.()
       userMarkerRef.current = null
       for (const entry of placeMarkersRef.current) entry.marker.remove()
@@ -528,7 +483,7 @@ export const MapboxMap = ({
       mapRef.current?.remove?.()
       mapRef.current = null
     }
-  }, [lang, mapAttempt])
+  }, [lang, immersive, mapAttempt])
 
   useEffect(() => {
     const map = mapRef.current
@@ -536,7 +491,6 @@ export const MapboxMap = ({
     // The current places list can arrive before the remote map style finishes.
     // HTML annotations do not depend on remote Mapbox styles or tile status.
     if (window.mapboxgl) syncPlaceMarkers(map, window.mapboxgl, places)
-    if (!map.isStyleLoaded?.()) return
     const source = map.getSource('pazo-places')
     source?.setData?.(toGeoJson(places))
   }, [places])
@@ -554,7 +508,7 @@ export const MapboxMap = ({
       pitch: 58,
       duration: 700,
     })
-  }, [places, focusPlaceRequest])
+  }, [places, focusPlaceRequest, mapReady])
 
   useEffect(() => {
     const map = mapRef.current
@@ -570,34 +524,25 @@ export const MapboxMap = ({
     return () => observer.disconnect()
   }, [])
 
-  if (error) {
-    return (
-      <div className={immersive
-        ? "flex h-full w-full items-center justify-center bg-[#E7ECEA] p-5 text-center"
-        : "flex h-full min-h-64 items-center justify-center rounded-[2rem] bg-[#E7ECEA] p-5 text-center"
-      }>
-        <div>
-          <p className="text-xs font-black text-[#204E4A]">
-            {lang === 'es' ? 'Mapa no disponible' : 'Map unavailable'}
-          </p>
-          <p className="mt-1 max-w-xs text-[10px] leading-relaxed text-[#5C7470]">
-            {error}
-          </p>
-        </div>
-      </div>
-    )
-  }
 
   return (
-    <div className={immersive
+    <div data-pazo-map-state={error || mapNotice ? 'error' : mapReady ? 'ready' : 'loading'}
+      data-pazo-map-style={PAZO_STANDARD_STYLE}
+      className={immersive
       ? 'relative h-full w-full bg-[#E7ECEA]'
       : 'relative h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]'}>
-      <div ref={containerRef} className="absolute inset-0"
+      {/* Mapbox's unlayered .mapboxgl-map position:relative overrides Tailwind
+          utilities. Inline sizing keeps the initially empty container full height. */}
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'} />
-      {mapNotice && (
-        <p role="status" className="pointer-events-none absolute left-3 right-3 top-[38%] z-10 rounded-2xl bg-[#FFFCF6]/95 px-3 py-2 text-center text-[12px] font-semibold leading-snug text-[#204E4A] shadow-sm">
-          {mapNotice}
-        </p>
+      {(error || mapNotice) && (
+        <div role="status" className="pointer-events-auto absolute left-3 right-3 top-[38%] z-10 rounded-2xl bg-[#FFFCF6]/95 px-3 py-2 text-center text-[12px] font-semibold leading-snug text-[#204E4A] shadow-sm">
+          <p>{error || mapNotice}</p>
+          <button type="button" onClick={() => setMapAttempt(attempt => attempt + 1)}
+            className="mt-2 rounded-full bg-[#204E4A] px-4 py-2 text-white focus-visible:bg-[#386963]">
+            {lang === 'es' ? 'Reintentar mapa' : 'Retry map'}
+          </button>
+        </div>
       )}
     </div>
   )

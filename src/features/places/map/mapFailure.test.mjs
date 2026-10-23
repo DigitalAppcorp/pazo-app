@@ -11,6 +11,8 @@ test('Mapbox authorization errors recognize actual HTTP words without exposing U
 test('optional models never hide a usable basemap; genuine tile outages get a fixed category',()=>{
  assert.equal(classifyBasemapFailure({status:403,url:'/models/places/synthetic.gltf'}),null)
  assert.equal(classifyBasemapFailure({status:503,url:'https://api.mapbox.com/tiles/synthetic'}),'map_unavailable')
+ assert.equal(classifyBasemapFailure({status:403,url:'https://api.mapbox.com/v4/mapbox.mapbox-terrain-dem-v1/12/1/1.webp'}),null)
+ assert.equal(classifyBasemapFailure({status:404,url:'https://api.mapbox.com/styles/v1/mapbox/missing'}),'map_unavailable')
  assert.equal(classifyBasemapFailure({message:'WebGL synthetic error'}),null)
  assert.equal(classifyBasemapFailure(null),null)
 })
