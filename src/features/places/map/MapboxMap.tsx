@@ -276,6 +276,18 @@ export const MapboxMap = ({
           'top-right'
         )
 
+        const syncMarkerEmphasis = () => {
+          // Tiny map pins identify locations at overview zoom. Up close, the
+          // original glTF model is visually prominent, while the accessible
+          // DOM annotation remains a tappable last-resort fallback.
+          const modelVisible = basemapStage !== 'raster'
+            && Boolean(map.getLayer?.('pazo-place-models'))
+            && (map.getZoom?.() || 0) >= 14
+          for (const entry of placeMarkersRef.current) {
+            entry.element.style.opacity = modelVisible ? '0.28' : '1'
+          }
+        }
+        map.on('zoom', syncMarkerEmphasis)
         map.on('style.load', () => {
           if (cancelled) return
 
@@ -397,6 +409,7 @@ export const MapboxMap = ({
             langRef.current,
             Boolean(userLocationRef.current)
           )
+          syncMarkerEmphasis()
         })
 
         map.on('error', (event: {error?:unknown}) => {
