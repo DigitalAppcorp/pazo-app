@@ -1,3 +1,4 @@
+import {isSupporterNotification,supporterNotificationCopy} from '../../features/notifications/supporterNotification'
 import { getNotificationCommunityId, getNotificationSightingId } from '../../features/notifications/notificationSource'
 import { useState } from 'react'
 import type { PazoNotification } from '../../types/pazo'
@@ -160,7 +161,8 @@ export const NotificationsModal = ({
               {filtered.map((item) => {
                 const isSighting = Boolean(getNotificationSightingId(item))
                 const isCommunityJoin = Boolean(getNotificationCommunityId(item))
-                const canOpen = isSighting || isCommunityJoin
+                const canOpen = isSighting || isCommunityJoin || isSupporterNotification(item)
+                const localized = supporterNotificationCopy(item,lang)
                 const isCare = item.category === 'cuidados'
 
                 return (
@@ -183,10 +185,11 @@ export const NotificationsModal = ({
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start gap-2">
-                        <span className="min-w-0 flex-1 break-words text-[14px] font-extrabold leading-snug text-[#204E4A]">{item.title}</span>
+                        <span className="min-w-0 flex-1 break-words text-[14px] font-extrabold leading-snug text-[#204E4A]">{localized.title}</span>
                         {!item.read && <span aria-label={lang === 'es' ? 'Nuevo' : 'New'} className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#EC7357]" />}
                       </span>
-                      <span className="mt-1 block break-words text-[13px] leading-relaxed text-[#5C7470]">{item.subtitle}</span>
+                      <span className="mt-1 block break-words text-[13px] leading-relaxed text-[#5C7470]">{localized.subtitle}</span>
+                      {isSupporterNotification(item)&&<span className="mt-2 block text-[12px] font-bold text-[#204E4A]">{item.sourceType==='supporter_verified'?(lang==='es'?'Revisar mis beneficios':'Review my benefits'):(lang==='es'?'Ver mi participación':'View my participation')}</span>}
                       <span className="mt-2 block text-[11px] font-semibold text-[#71847F]">{item.timeAgo}</span>
                     </span>
                     {canOpen && (

@@ -1,6 +1,8 @@
 import type { PazoNotification } from '../../types/pazo'
 
 interface NotificationRow {
+  supporter_copy_version?: string | null
+  supporter_state?: string | null
   id: string
   type: string
   title: string
@@ -13,6 +15,8 @@ interface NotificationRow {
 
 export const mapNotificationRow = (row: NotificationRow): PazoNotification => ({
   id: row.id,
+  supporterState: row.supporter_state,
+  supporterCopyVersion: row.supporter_copy_version,
   title: row.title,
   subtitle: row.body,
   category: row.type === 'sighting' ? 'comunidad' : 'todas',

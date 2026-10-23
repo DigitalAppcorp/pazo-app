@@ -1,3 +1,4 @@
+import {GradualCampaignPanel} from '../gradual/GradualCampaignPanel'
 import {useEffect, useRef, useState} from 'react'
 import type {Pet} from '../../../types/pazo'
 import {SupporterBadge, type SupporterMilestone} from './SupporterBadge'
@@ -97,6 +98,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSub
      {t('Las cortesías no generan cobros ni renovaciones. Si tienes una suscripción, puedes gestionarla en Mi membresía.', 'Complimentary access creates no charges or renewals. Manage any subscription under My membership.')}
     </p>
    </section>
+   {!qa&&<GradualCampaignPanel lang={lang} reviewOnly/>}
    <h3 className="px-1 pt-1 text-[19px] font-black">{t('Tus beneficios','Your benefits')}</h3>
    <section aria-label={t('Beneficios de Amigo de PAZO','PAZO Friend benefits')}
     className="rounded-[28px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">

@@ -1,3 +1,11 @@
+## F16 issue #82 — código gradual implementado en rama (23-oct-2026)
+
+**Estado vigente sobre notas históricas:** `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`, sin declarar F16 COMPLETADA ni beta lanzable. Rama `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT](https://github.com/DigitalAppcorp/pazo-app/pull/83), derivada de F17 `872ff8c3` / PR #81. Motor 1→5→20→50 por 1/3/10 compradores verificados, FIFO, reservas, outbox, revisión voluntaria, Administración MFA/CAS y pruebas PostgreSQL17/UI implementados. **No** SQL/Edge/Vercel producción, cargos/notificaciones reales ni merge a main.
+
+Evidencia por `GR-01…22 / EVT-01…19`, cambios, comandos, commit/CI y estados independientes: [PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md](PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md). [Gate alojado y rollback](PAZO_F16_GRADUAL_HOSTED_GATE_RUNBOOK_20261023.md) preparado; siguiente permiso acotado es instalar/publicar en entorno controlado con campaña **inactiva**, separado del GO financiero. La auditoría inicial solo lectura encontró un intent Live previo abierto: se conserva, inicio bloqueado hasta su conciliación original. QA Sandbox y mapa aprobados no se reabren. Historial inferior conservado; sus etiquetas `NOT_IMPLEMENTED/EXECUTION_NOT_CONFIRMED` quedan superadas para esta rama, no para producción.
+
+---
+
 ## CODEX — Tarea F16 de implementación abierta (23-oct-2026)
 
 **ORDEN DIRECTA PO:** «Excelente, que lo haga Codex». Orden de implementación (no plan) guardada en [`CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md`](CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md). **Issue de GitHub [#82](https://github.com/DigitalAppcorp/pazo-app/issues/82)** registra el encargo. Codex debe retomar desde HEAD actual F17/PR #81, crear rama de desarrollo separada si hay concurrencia, construir sistema completo front/backend/migraciones locales/worker/notificaciones/admin, probar con **GR-01…GR-22 + EVT-01…EVT-19**, documentar evidencia y PR hacia F17. El link de issue **NO significa ejecución de Codex iniciada ni que esté asignado automáticamente**; el usuario debe abrir la tarea en su entorno Codex, ya que no existe acción de ejecución Codex en el conector.
