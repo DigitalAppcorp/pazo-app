@@ -7,9 +7,11 @@ export function classifyBasemapFailure(value:unknown):BasemapFailure|null {
  const resource=typeof error.url==='string'?error.url:''
  if(resource.includes('/models/places/'))return null
  const context=message+' '+resource
- if(!/mapbox|tiles|styles|resource|openstreetmap/i.test(context))return null
  const status=Number(error.status??error.statusCode)
+ // Some Mapbox errors have an HTTP code without the URL. A tile authorization
+ // rejection is not a normal blank basemap, even when the URL was omitted.
  if([401,403].includes(status)||/\b(401|403)\b|unauthoriz|forbidden/i.test(message))return 'map_authorization'
+ if(!/mapbox|tiles|styles|resource|openstreetmap/i.test(context))return null
  if(status>=500||/failed to fetch|networkerror|network error|loading tile/i.test(message))return 'map_unavailable'
  return null
 }
