@@ -161,9 +161,9 @@ export const ImmersivePlacesStage = ({
     {/* One compact horizontal carousel. Clearance lives INSIDE the scroll
         content, never in the rail height: the headings and cards remain visible. */}
     <div data-pazo-places-bottom-rail="true"
-      className="absolute inset-x-0 bottom-0 z-20 max-h-[min(50dvh,390px)] overflow-y-auto overscroll-contain bg-transparent [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="mb-2 flex items-end justify-between gap-3 px-4 sm:px-6">
-        <div>
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-[min(43dvh,340px)] flex-col bg-transparent">
+      <div data-pazo-places-fixed-heading="true" className="pointer-events-none relative z-20 mb-2 flex shrink-0 items-end justify-between gap-3 px-4 sm:px-6">
+        <div className="rounded-full bg-[#FFFCF6]/90 px-3 py-1 shadow-[0_3px_10px_rgba(32,78,74,0.04)]">
           <h2 className="text-lg font-black leading-tight text-[#204E4A]">
             {lang === 'es' ? 'Lugares disponibles' : 'Available places'}
           </h2>
@@ -177,6 +177,7 @@ export const ImmersivePlacesStage = ({
             : 'Location is only used with permission; never stored.'}
         </span>
       </div>
+      <div data-pazo-places-card-scroll="true" className="pointer-events-auto min-h-0 flex-1 overflow-y-auto overscroll-contain bg-transparent [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
       {isLoading ? (
         <div role="status" className="mx-4 flex min-h-[170px] items-center justify-center rounded-[1.8rem] bg-white/90 px-5 text-[13px] font-bold text-[#204E4A] shadow-sm">
@@ -259,7 +260,8 @@ export const ImmersivePlacesStage = ({
         </div>
       )}
       <div data-pazo-places-dock-clearance="true" aria-hidden="true"
-        className="pointer-events-none h-[calc(6.25rem+env(safe-area-inset-bottom))]" />
+        className="pointer-events-none h-[calc(9rem+env(safe-area-inset-bottom))]" />
+      </div>
     </div>
     {children}
   </section>
