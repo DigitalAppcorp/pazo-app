@@ -478,7 +478,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       'I confirm that I want to close this pending approval.')}</span>
                   </label>
                   <button type="button" disabled={busy||!confirmLiveAbandon||!accounts?.[0]}
-                    onClick={()=>{const original=accounts?.[0];if(original)void recover(original.intentId,'abandon_pending')}}
+                    onClick={()=>{const original=accounts?.[0];if(original)void recover(original.intentId,
+                      original.state==='pending'&&!original.needsReconciliation?'abandon':'abandon_pending')}}
                     className="mt-3 min-h-11 w-full rounded-full bg-[#EAF0DD] px-3 py-2.5 text-[13px] font-bold text-[#204E4A] disabled:opacity-45">
                     {label('Comprobar cierre e intentar de nuevo','Verify closure and retry')}
                   </button>
