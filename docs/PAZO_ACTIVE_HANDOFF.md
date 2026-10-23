@@ -1,3 +1,15 @@
+## F16 — Propuesta guardada: piloto automático primer Amigo de PAZO (23-oct-2026)
+
+**Petición actual del PO:** conservar propuesta completa en archivos de PAZO, **sin implementar**. Documento canónico: [`docs/PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md`](PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md). Estado **PROPUESTA / DECISIÓN PENDIENTE**; esta escritura NO concede permiso para notificar usuarios, habilitar compradores canary adicionales, efectuar cobros, crear tablas, lanzar el piloto ni desplegar código.
+
+- **Solicitado:** dos notificaciones en la bandeja existente: invitación voluntaria para apoyar PAZO por **$2.99/mes** (aceptar/no); tras venta Live y beneficios **ambos verificados**, mensaje de excelencia y revisión opcional de insignia/beneficios, confirmación o ticket privado.
+- **Automatización deseada:** selección, invitación, consentimiento PayPal, recuperación segura, conciliación, activación, segunda notificación, evaluación y panel; sin contacto manual del PO. Conservar modo `canary` y **prohibir promoción automática a `public`**.
+- **No decidido:** invitación de uno en uno (A, recomendada) versus invitaciones múltiples/lista de espera con un solo comprador (B); elegibilidad, plazo (72h fue solo ejemplo), reintentos, límites y texto definitivo. No asumir aprobaciones futuras.
+- **Confirmación PO previa a guardar:** probó personalmente múltiples abandonos y reintentos de PayPal Live en la web oficial y reportó que **funcionaron correctamente**. Eso valida recuperación/UX, **no** demuestra venta COMPLETED, periodo pagado ni beneficios Live. Mantener pendiente ese único E2E real.
+- **Repositorio:** PR #81 DRAFT. Documento únicamente; no `main`, SQL, Edge, PayPal, Vercel, notificaciones, tablas ni datos de usuarios modificados.
+
+---
+
 ## F16/F17 — Publicación oficial de recuperación Live verificada (23-oct-2026)
 
 **PO autorizó publicar la corrección después de CI verde, sin pagos/cancelaciones y preservando el mapa.**
