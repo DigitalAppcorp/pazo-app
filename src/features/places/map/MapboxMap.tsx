@@ -131,6 +131,9 @@ export const MapboxMap = ({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<any>(null)
   const userMarkerRef = useRef<any>(null)
+  // DOM map markers are the permanent overview/accessibility fallback: never
+  // disappear merely because the vector style or a local glTF fails to load.
+  const placeMarkersRef = useRef<Array<{ marker: any; element: HTMLElement }>>([])
   const placesRef = useRef(places)
   const userLocationRef = useRef(userLocation)
   const langRef = useRef(lang)
@@ -152,6 +155,33 @@ export const MapboxMap = ({
   useEffect(() => {
     onSelectPlaceRef.current = onSelectPlace
   }, [onSelectPlace])
+
+  const syncPlaceMarkers = (map: any, mapboxgl: any, source: PetPlace[]) => {
+    for (const entry of placeMarkersRef.current) entry.marker.remove()
+    placeMarkersRef.current = []
+    for (const place of source) {
+      if (!Number.isFinite(place.latitude) || !Number.isFinite(place.longitude)) continue
+      const element = document.createElement('button')
+      element.type = 'button'
+      element.setAttribute('aria-label', (langRef.current === 'es' ? 'Abrir lugar: ' : 'Open place: ') + place.name)
+      element.title = place.name
+      element.style.cssText = 'width:38px;height:46px;border:0;outline:0;background:transparent;padding:0;cursor:pointer;filter:drop-shadow(0 3px 4px rgba(24,61,54,.25));'
+      const icon = document.createElement('canvas')
+      icon.width = 72
+      icon.height = 88
+      icon.style.cssText = 'width:38px;height:46px;display:block;'
+      const ctx = icon.getContext('2d')
+      if (ctx) ctx.putImageData(drawPazoCategoryPin(place.category), 0, 0)
+      element.appendChild(icon)
+      element.addEventListener('click', (event) => {
+        event.stopPropagation()
+        onSelectPlaceRef.current(place.id)
+      })
+      const marker = new mapboxgl.Marker({ element, anchor: 'bottom' })
+        .setLngLat([place.longitude, place.latitude]).addTo(map)
+      placeMarkersRef.current.push({marker, element})
+    }
+  }
 
   const syncUserMarker = (
     map: any,
@@ -197,7 +227,8 @@ export const MapboxMap = ({
   useEffect(() => {
     let cancelled = false
 
-    let usingRasterFallback = false
+    let basemapStage: 'standard' | 'streets' | 'raster' = 'standard'
+    let vectorStyleErrors = 0
     const start = async () => {
       const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
       if (!token) {
@@ -236,6 +267,9 @@ export const MapboxMap = ({
         })
 
         mapRef.current = map
+        // Render PAZO location markers as real map annotations independently of
+        // any basemap tiles, 3D layer capability or model request.
+        syncPlaceMarkers(map, mapboxgl, placesRef.current)
 
         map.addControl(
           new mapboxgl.NavigationControl({ showCompass: false }),
@@ -244,6 +278,22 @@ export const MapboxMap = ({
 
         map.on('style.load', () => {
           if (cancelled) return
+
+          // Terrain is only attempted on authorized vector Mapbox styles.
+          // The emergency OSM raster is never represented as a 3D terrain map.
+          if (basemapStage !== 'raster') {
+            try {
+              map.addSource('pazo-terrain-dem', {
+                type: 'raster-dem',
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                tileSize: 512,
+                maxzoom: 14,
+              })
+              map.setTerrain({ source: 'pazo-terrain-dem', exaggeration: 1.15 })
+            } catch {
+              // Mapbox may restrict terrain separately from basemap and places.
+            }
+          }
 
           map.addSource('pazo-places', {
             type: 'geojson',
@@ -262,33 +312,13 @@ export const MapboxMap = ({
             id: 'pazo-place-pins',
             type: 'symbol',
             source: 'pazo-places',
-            maxzoom: 13.25,
+            // Symbols stay visible as a redundant fallback for glTF load failures.
             layout: {
               'icon-image': ['concat', 'pazo-pin-', ['get', 'category']],
               'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.75, 12.5, 1],
               'icon-anchor': 'bottom',
               'icon-allow-overlap': false,
               'icon-padding': 3,
-            },
-          })
-
-          map.addLayer({
-            id: 'pazo-place-models',
-            type: 'model',
-            source: 'pazo-places',
-            slot: 'top',
-            minzoom: 13.25,
-            layout: {
-              'model-id': placeModelExpression(),
-              'model-allow-density-reduction': false,
-            },
-            paint: {
-              'model-scale': [12, 12, 12],
-              'model-rotation': [0, 0, 0],
-              'model-translation': [0, 0, 1],
-              'model-opacity': 1,
-              'model-type': 'location-indicator',
-              'model-emissive-strength': 0.12,
             },
           })
 
@@ -310,6 +340,32 @@ export const MapboxMap = ({
               'text-halo-width': 1.5,
             },
           })
+
+          // Original six local PAZO glTF models; a failure here must never
+          // prevent pin selection, zooming or labels.
+          try {
+            map.addLayer({
+              id: 'pazo-place-models',
+              type: 'model',
+              source: 'pazo-places',
+              slot: 'top',
+              minzoom: 12.5,
+              layout: {
+                'model-id': placeModelExpression(),
+                'model-allow-density-reduction': false,
+              },
+              paint: {
+                'model-scale': [12, 12, 12],
+                'model-rotation': [0, 0, 0],
+                'model-translation': [0, 0, 1],
+                'model-opacity': 1,
+                'model-type': 'location-indicator',
+                'model-emissive-strength': 0.12,
+              },
+            })
+          } catch {
+            // Browser cannot render native glTF: overview DOM markers remain.
+          }
 
           const handlePlaceClick = (event: any) => {
             const placeId = event.features?.[0]?.properties?.id
@@ -343,8 +399,20 @@ export const MapboxMap = ({
 
         map.on('error', (event: {error?:unknown}) => {
           const failure=classifyBasemapFailure(event?.error)
-          if (failure && !cancelled && !usingRasterFallback) {
-            usingRasterFallback = true
+          if (!failure || cancelled) return
+          // A single missing tile must not replace the entire authorized 3D
+          // scene with a flat emergency streets raster. Prefer another Mapbox
+          // VECTOR map first; go raster only after the vector options fail.
+          const mapError = event.error as {url?:unknown;message?:unknown} | undefined
+          const detail = String(mapError?.url || '') + ' ' + String(mapError?.message || '')
+          const isStyleOrAuth = failure === 'map_authorization' || /\/styles\/|style.+(fail|load)/i.test(detail)
+          if (basemapStage === 'standard' && (isStyleOrAuth || ++vectorStyleErrors >= 3)) {
+            basemapStage = 'streets'
+            map.setStyle('mapbox://styles/mapbox/streets-v12')
+            return
+          }
+          if (basemapStage === 'streets' && (isStyleOrAuth || ++vectorStyleErrors >= 6)) {
+            basemapStage = 'raster'
             map.setStyle(PAZO_STREETS_STYLE)
             return
           }
@@ -376,6 +444,8 @@ export const MapboxMap = ({
       cancelled = true
       userMarkerRef.current?.remove?.()
       userMarkerRef.current = null
+      for (const entry of placeMarkersRef.current) entry.marker.remove()
+      placeMarkersRef.current = []
       mapRef.current?.remove?.()
       mapRef.current = null
     }
@@ -387,6 +457,7 @@ export const MapboxMap = ({
 
     const source = map.getSource('pazo-places')
     source?.setData?.(toGeoJson(places))
+    if (window.mapboxgl) syncPlaceMarkers(map, window.mapboxgl, places)
   }, [places])
 
   useEffect(() => {
