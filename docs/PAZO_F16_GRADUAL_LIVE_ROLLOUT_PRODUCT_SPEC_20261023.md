@@ -266,3 +266,52 @@ Todas las transiciones financieras requieren evidencia privada servidor con CAS/
 **Release actual observado al redactar (solo lectura):** Supabase modo `canary`, rev1; 1 intent Live abierto; 0 períodos Live pagados. No confundir esto con un piloto limitado operativo: **el modo `LIMITED` todavía no existe ni está instalado**.
 
 **Estados finales después de GUARDAR DOCUMENTACIÓN:** `STRATEGY_B_SELECTED`, `SPEC_RECORDED`, `PRODUCT_GATES_OPEN`, `CODE_UNCHANGED`, `SQL_UNCHANGED`, `EDGE_UNCHANGED`, `PAYPAL_UNCHANGED`, `PRODUCTION_UNCHANGED`, `MAIN_NOT_MERGED`.
+
+
+## 15. Paquete ejecutivo de parámetros listo para aprobación (23-oct-2026)
+
+**ESTADO:** `RECOMMENDED_FOR_PO_REVIEW` — no aprobado por el PO y no constituye autorización de programación o despliegue. Este paquete precisa la estrategia B seleccionada, sin sustituir decisiones anteriores de producto ni cambiar las dos notificaciones. El PO puede aprobarlo en conjunto o ajustar valores.
+
+### 15.1 Selección e invitación, recomendación
+
+- **Distribución:** enviar notificación 1 a **cinco cuentas elegibles** en la primera tanda. Quienes acepten entran en **cola FIFO** por aceptación servidor, sin discriminación por mascota; solo el primer interesado obtiene inicialmente permiso temporal de checkout Live. En ausencia de interesados, invitar al siguiente lote de cinco elegibles **no invitados previamente** (sin re-notificar a rechazados). Ningún usuario recibe más de una invitación en esta campaña.
+- **Vigencia de invitación:** propuesta **72 horas** desde envío para tomar decisión de interés; el enlace caducado no da acceso a pago pero PAZO no bloquea la oferta gratuita ni borra respuestas. **No** eliminar un intento PayPal ya iniciado por el vencimiento de la invitación.
+- **Consentimiento:** el primer «Quiero participar» significa *interés*, no consentimiento de cargo. La oferta PayPal real requiere un nuevo consentimiento expreso con $2.99/mes y renovación; la aprobación final la ejecuta el comprador.
+- **Cola/cupos:** enviar invitaciones nunca reserva dinero ni incrementa ventas. La lista de espera informa «Te avisaremos dentro de PAZO cuando haya un cupo» sin prometer fecha. Se puede salir de la espera sin repercusión. No abrir checkout en `public` para usuarios sin permiso.
+- **Cuentas excluidas:** solo cuentas válidas con onboarding terminado; no borradas, suspendidas, duplicadas o ya suscritas a este plan; excluir cuentas internas/QA **solo por controles existentes verificables**, sin inventar identidad PayPal a partir de email, IP o datos sensibles.
+
+### 15.2 Límite y escalamiento automático, recomendación
+
+- **L1: 1 comprador acumulado**, máximo **una solicitud PayPal sin resolver**; se bloquean nuevas solicitudes mientras existe una original cuyo estado remoto no se haya resuelto.
+- **L1 → L2 (5 compradores acumulados):** primera venta Live de $2.99 completada, firmada y conciliada, cobertura pagada vigente, beneficios proyectados en cuenta/mascota real y **24 horas** de observación del procesamiento sin incidente financiero crítico. No exigir feedback humano, cancelación de la renovación ni reembolso para ampliar.
+- **L2 → L3 (20 compradores acumulados):** al menos **tres compradores distintos** con pago+beneficios acreditados, periodo de **24 horas** sin incidencia financiera crítica y todas las compras/reembolsos/holds de la cohorte conciliadas o sin bloqueos relevantes. Si los tres no aparecen, conservar etapa L2 sin límite de tiempo de campaña.
+- **L3 → público ilimitado:** **nunca automático**; entregar informe administrativo con evidencia y solicitar GO del PO con MFA reciente. Hasta entonces el tope acumulado de la campaña sigue en 20.
+- **Cómo se cuentan:** una cuenta con varias mascotas = 1; compradores admitidos acumulados no disminuyen al cancelar; reservas temporales e intentos de CREATE inciertos retienen capacidad. Liberar reserva solo tras certeza de que no existe suscripción PayPal pendiente ni cobro sin conciliar. No permitir que pagos recurrentes consuman cupos nuevos.
+- **Concurrencia:** un intento nuevo sin resolver a la vez en L1; en L2/L3, límite interno propuesto de **2 nuevos intentos remotos sin resolver**; no confundir este máximo simultáneo con cupo acumulado.
+- **Tiempo 24h:** ventana operacional sugerida; no equivale a garantía de ausencia de disputas futuras ni a vencimiento de la suscripción.
+
+### 15.3 Pausas y recuperación, recomendación
+
+- **Pausa inmediata** de nuevas invitaciones y checkout si se detecta firma inválida, proveedor/merchant incongruente, webhook o worker inaccesible, lease/ledger no confiable, cobro confirmado sin beneficios tras reintentos idempotentes, hold/disputa relevante sin reconciliar o límite alcanzado (en este último caso solo detener cupos, no etiquetar como fraude).
+- En anomalías de confirmación tardía, PAZO muestra **«Estamos verificando tu pago»**, continúa reconciliación y ofrece soporte; no promete acceso ni borra historia. La detección basada en latencia debe usar umbral de alerta configurable y aprobado tras caracterizar tiempos de PayPal, **no inventar 10/15 minutos como verdad**.
+- Un reporte «Encontré un problema» no prueba por sí solo fallo financiero; generar ticket y evaluar severidad antes de una pausa global. Una respuesta «Todo funciona» no acredita dinero.
+- Autoavance posterior requiere evidencia real. Tras `PAUSED_AUTOMATIC`, la vuelta a nuevas compras necesita revalidar salud/estado, y para fallos financieros graves **reanudación administrativa con MFA**; nunca reabrir solo por el transcurso del tiempo.
+- Pausar nuevas compras **no** puede pausar renovación consentida de suscripciones existentes, procesamiento de webhook/ledger, consulta de status, cancelación de renovaciones, disputas ni devoluciones; distinguir de mantenimiento general.
+
+### 15.4 Segundo mensaje, administración y revisión
+
+- **Notificación 1** al ser invitado, una sola vez; destinatario en su bandeja: invitación a apoyar PAZO por $2.99 mensuales (sin inducir aprobación de pago).
+- **Notificación 2** tras pago firmado y beneficios existentes **ambos** confirmados: agradecimiento + «Buscamos ofrecer una experiencia excelente. ¿Podrías revisar tus beneficios y confirmar si todo funciona?». No repetir por renovación. No enviar cuando solo esté `ACTIVE` o al volver del login PayPal.
+- **Feedback UX** voluntario: insignia, perfil/publicaciones, acceso a beneficios, autogestión; confirmar o abrir ticket. Ausencia de respuesta no afecta elegibilidad, beneficios o cancelación.
+- **Administración** recibe métricas separadas: interesados, en cola, reservas, aprobaciones no pagadas, ventas Live verificadas, beneficio otorgado, notificación 2, confirmación humana e incidencias; controles pausar/reanudar, historial de fases, límites, log de motivo sin PII; botón `Abrir al público` exclusivamente con MFA y decisión PO.
+- **Transición futura propuesta** a mensaje solamente de agradecimiento: tras revisión del PO de métricas UX, no automática ni destructiva del copy inicial.
+
+### 15.5 Gate de firma de producto: alcance de la aprobación futura
+
+Para proceder a implementación sin malentendidos, una autorización debe cubrir expresamente los **valores 5 invitaciones iniciales, 72h, L1/L2/L3 de 1→5→20 compradores acumulados, 24h de observación, 3 compradores para L3, máximo 1/2 checkout inciertos y pausa/reanudación**, más los dos textos de notificación y su revisión voluntaria. Si el PO aprueba «este paquete de parámetros», esas serían las decisiones de producto. **Ese GO no incluye instalar SQL en producción ni activar pagos reales; cada despliegue de datos/Edge y el encendido limitado mantienen controles separados conforme AGENTS.md.**
+
+### 15.6 Registro de aceptación
+- Estrategia B de lanzamiento gradual: **APROBADA** previamente.
+- Parámetros concretos de este apéndice: **PROPUESTOS PARA REVISIÓN**, todavía sin voto del PO.
+- Flujos de usuario/PAZO/admin y GR-01…GR-22: documentados, aún sin implementación nueva.
+- F16 Sandbox y recuperación Live sin pago: no repetir QA humana ya aprobada.
