@@ -158,10 +158,10 @@ export const ImmersivePlacesStage = ({
       </span>
     </div>
 
-    {/* One compact horizontal carousel. Clearance lives INSIDE the scroll
-        content, never in the rail height: the headings and cards remain visible. */}
+    {/* The cards and title sit above the floating dock. Map and cards never
+        get an extra vertical scrollbar; only the cards scroll horizontally. */}
     <div data-pazo-places-bottom-rail="true"
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-[min(43dvh,340px)] flex-col bg-transparent">
+      className="pointer-events-none absolute inset-x-0 bottom-[calc(6.75rem+env(safe-area-inset-bottom))] z-20 flex max-h-[min(44dvh,345px)] flex-col bg-transparent">
       <div data-pazo-places-fixed-heading="true" className="pointer-events-none relative z-20 mb-2 flex shrink-0 items-end justify-between gap-3 px-4 sm:px-6">
         <div className="min-w-0 max-w-full">
           <h2 className="text-[15px] font-black leading-tight text-[#204E4A]">
@@ -177,7 +177,7 @@ export const ImmersivePlacesStage = ({
             : 'Location is only used with permission; never stored.'}
         </span>
       </div>
-      <div data-pazo-places-card-scroll="true" className="pointer-events-auto min-h-0 flex-1 overflow-y-auto overscroll-contain bg-transparent [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div data-pazo-places-card-scroll="true" className="pointer-events-auto min-h-0 overflow-visible bg-transparent">
 
       {isLoading ? (
         <div role="status" className="mx-4 flex min-h-[170px] items-center justify-center rounded-[1.8rem] bg-white/90 px-5 text-[13px] font-bold text-[#204E4A] shadow-sm">
@@ -259,9 +259,7 @@ export const ImmersivePlacesStage = ({
           })}
         </div>
       )}
-      <div data-pazo-places-dock-clearance="true" aria-hidden="true"
-        className="pointer-events-none h-[calc(9rem+env(safe-area-inset-bottom))]" />
-      </div>
+       </div>
     </div>
     {children}
   </section>
