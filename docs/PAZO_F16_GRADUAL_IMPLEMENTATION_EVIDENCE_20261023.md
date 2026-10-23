@@ -3,7 +3,7 @@
 **Fecha:** 23-oct-2026. **Estado de entrega:** código implementado en rama,
 `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`; **no release**.
 Base auditada en GitHub: F17 `872ff8c37c8332c5412fbbbb79db33d09ae1f003`, PR #81
-DRAFT hacia `main`. Rama: `f16/gradual-live-event-rollout-20261023`, PR hacia F17.
+DRAFT hacia `main`. Rama: `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT hacia F17](https://github.com/DigitalAppcorp/pazo-app/pull/83). Código de producto: [`2d734920604d58032bb97c8f6929997cef1a334f`](https://github.com/DigitalAppcorp/pazo-app/commit/2d734920604d58032bb97c8f6929997cef1a334f); el runner CI y esta evidencia se completan en HEAD del mismo PR.
 No se modificaron producción, credenciales, merchant, plan, scheduler ni `main`.
 No hubo PayPal CREATE, emails, SMS, push ni notificaciones a cuentas reales.
 
@@ -50,8 +50,8 @@ se limita a una vez por diez segundos. Opt-out impide recontacto de campaña.
 
 Commit reproducible: el workflow `f16-gradual-live.yml` hace checkout de
 `github.event.pull_request.head.sha`. Cada fila siguiente refiere al **mismo HEAD
-verificado del PR**; el SHA y los logs se consultan en sus checks. El estado CI y
-URL definitivos se agregan al abrir el PR, sin convertir los gates alojados en PASS.
+verificado del PR #83**; el SHA y los logs se consultan en sus checks. El estado CI y
+URL se consultan en [los checks del PR #83](https://github.com/DigitalAppcorp/pazo-app/pull/83/checks), sin convertir los gates alojados en PASS. El lab espera el servidor TCP final de la imagen PG17, evitando confundir el socket temporal de initdb con disponibilidad estable.
 
 ## Scope Closure — GR
 

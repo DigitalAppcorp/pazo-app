@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: gradual-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   gradual-pg17-and-regressions:
     runs-on: ubuntu-latest
@@ -22,6 +25,8 @@ jobs:
         run: npm run test:gradual:pg17
       - run: npm run test:gradual
       - run: npm run test:governance
+      - name: F17 map and maintenance regression
+        run: node --experimental-strip-types --test scripts/f17-beta-extension-contract.test.mjs src/features/places/map/mapFailure.test.mjs src/features/places/map/mapboxLoader.test.mjs supabase/functions/_shared/maintenanceCheckoutGate.test.mjs
       - run: npm run test:release:guard
       - run: npm run test:f16:synthetic
       - run: npm run build
