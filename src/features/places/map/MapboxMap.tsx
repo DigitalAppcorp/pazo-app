@@ -245,6 +245,32 @@ export const MapboxMap = ({
       }
 
       try {
+        // The same token can render PAZO's public OSM fallback but be rejected
+        // for the Mapbox Standard style (styles:read / URL restrictions).
+        // Check authorization before creating a Mapbox WebGL canvas: if the
+        // vector map fails first, Android may not recover with setStyle()
+        // or by rebuilding the renderer in the same route.
+        if (mapAttempt === 'vector') {
+          const styleProbe = new AbortController()
+          const timeout = window.setTimeout(() => styleProbe.abort(), 4500)
+          let vectorAuthorized = false
+          try {
+            const reply = await fetch(
+              `https://api.mapbox.com/styles/v1/mapbox/standard?access_token=${encodeURIComponent(token)}`,
+              { method: 'GET', signal: styleProbe.signal, cache: 'no-store' }
+            )
+            vectorAuthorized = reply.ok
+          } catch {
+            // Offline, refused, timed out or blocked by domain restrictions.
+          } finally {
+            window.clearTimeout(timeout)
+          }
+          if (cancelled) return
+          if (!vectorAuthorized) {
+            setMapAttempt('raster')
+            return
+          }
+        }
         const mapboxgl = await loadMapboxGl()
         if (cancelled || !containerRef.current) return
 
