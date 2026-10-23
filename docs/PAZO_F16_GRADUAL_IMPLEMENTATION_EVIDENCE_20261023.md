@@ -1,3 +1,5 @@
+> **Actualización #84 (23-oct):** #83 ya está integrado en F17; SQL/3 Edge y beta oficial están instalados inactivos, desde d9fd7506. Checksum corregido antes del primer apply y matriz alojada/Live en [reporte #84](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). Las etiquetas «no autorizado/no instalado» y el hash inferior describen #82 antes de esa autorización y quedan superados por ese registro; la matriz de pruebas aisladas se conserva. No hay GO financiero ni revisión visual PO nueva.
+
 # F16 — implementación gradual Live, issue #82
 
 **Fecha:** 23-oct-2026. **Estado de entrega:** código implementado en rama,

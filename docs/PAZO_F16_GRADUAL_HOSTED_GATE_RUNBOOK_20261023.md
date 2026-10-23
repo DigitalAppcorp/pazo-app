@@ -1,3 +1,5 @@
+> **Gate #84 ejecutado:** autorizado por issue84; SQL, admin/checkout/worker y beta oficial publicados inactivos. No volver a pedir permiso para la instalación ya ejecutada ni reaplicar esta migración. Ver [versiones, checksum, postflight y rollback real](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). El paso hosted_gate_verified=true y el GO financiero siguen pendientes; este texto inferior conserva el procedimiento histórico de #82.
+
 # Issue #82 — siguiente gate hospedado, preparado y NO ejecutado
 
 Este instructivo no autoriza instalaciones ni cobros. La implementación se

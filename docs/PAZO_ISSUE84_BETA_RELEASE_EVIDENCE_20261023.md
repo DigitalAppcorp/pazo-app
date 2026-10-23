@@ -24,12 +24,66 @@ Rollback financiero seguro: conservar la infraestructura y `inactive`/gate false
 | Paso | Estado | Evidencia | Commit/URL |
 | --- | --- | --- | --- |
 | PR83_MERGED | PASS | Merge conservando historia, destino F17 | 57e8511f / PR83 |
-| F17_CI_PASS | PENDIENTE SHA corregido | PG17, UI, governance y regresión sobre integración | PR81/checks |
-| DB_HOSTED_APPLIED | PENDIENTE | Requiere CI exacto y preflight final | mrybvqdebbgcayuvgkkr |
-| EDGE_HOSTED_DEPLOYED | PENDIENTE | Tres funciones, JWT y firma conservados | mismo código integrado |
-| HOSTED_TECHNICAL_QA | PENDIENTE | Lecturas, auth, denegaciones, RLS, PWA/Mapbox | sin CREATE ni invitaciones |
-| OFFICIAL_BETA_DEPLOYED | PENDIENTE | Solo después de los gates anteriores | pazo-app.vercel.app |
+| F17_CI_PASS | PASS | 12 jobs de cuatro workflows sobre SHA exacto | d9fd7506 / CI40036514521 |
+| DB_HOSTED_APPLIED | PASS | Migración exacta corregida; 8 tablas FORCE RLS, ACL verificadas | versión alojada 20261023224519 |
+| EDGE_HOSTED_DEPLOYED | PASS | admin v1, checkout v5, worker v5; 44 archivos iguales al SHA publicado | d9fd7506 / edge-manifest.json |
+| HOSTED_TECHNICAL_QA | PASS alcance técnico inactivo | SQL/roles, 11 HTTP, 7 PWA, 22 mapa; escenarios financieros solo laboratorio | evidencia enlazada abajo |
+| OFFICIAL_BETA_DEPLOYED | PASS | production READY, alias oficial, SHA integrado y legal actual | dpl_HCcdWk8Uo79LxrfCUXgqDzMdHa5J |
 | USER_VISUAL_APPROVAL | PENDIENTE PO | No confundir automatización con aprobación humana | candidato final |
 | LIVE_LIMITED_START_NOT_AUTHORIZED | CONFIRMADO | Campaña inactive y hosted_gate_verified=false | GO financiero separado |
 
 GR/EVT del código conservados en `PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md`. La tabla final separará laboratorio, hosted y Live real: los casos de venta Live siguen sin ejecutarse por falta de GO financiero, no por un supuesto problema de credenciales. No repetir QA Sandbox real aprobado.
+
+## Instalación efectivamente ejecutada
+
+- **Fuente de release:** `d9fd7506bed051bbeee4f6f16fb4d0c7df647f57`, F17. La corrección funcional está en `703c1312811574d96e7229ef6a41f270b49bceb2`, cuyos 12 checks también pasaron antes del apply. d9fd7506 cambia únicamente el smoke del dominio oficial y su nota; la migración y todos los archivos Edge son idénticos. Se descargaron las tres funciones instaladas y se compararon **todos sus contenidos** contra `git show d9fd7506:<archivo>`: 6+9+29 archivos idénticos, sin redeploy innecesario.
+- **Migración:** fuente `20261023211315_pazo_f16_gradual_live_event_rollout.sql`, SHA256 `9130baee7e02f81a8bfacc25e56e23b0c56deff2cf7c6f1db1c41c589b59bf4d`. La API apply_migration registró la versión alojada **`20261023224519`**, nombre `pazo_f16_gradual_live_event_rollout`. Ésta es la correspondencia fuente→historial real; no se renombró ni editó retroactivamente el historial. Backup previo de siete definiciones precursoras y bundles checkout/worker v4 preservado fuera del repositorio, sin valores de Vault ni filas financieras exportadas.
+- **Edge:** [manifiesto comprobado](evidence/issue84/edge-manifest.json). `pazo-admin-gradual-live` v1 ACTIVE / JWT true; checkout v5 ACTIVE / JWT true; worker v5 ACTIVE / JWT false, conservando exactamente la capacidad privada anterior. No se reemplazaron webhook v2, account v7, release v2, scheduler, merchant, plan, secrets ni generación.
+- **Vercel:** production **READY** `dpl_HCcdWk8Uo79LxrfCUXgqDzMdHa5J`, URL inmutable `https://pazo-qqny2al1q-digitalapp.vercel.app`, alias oficial **https://pazo-app.vercel.app/**; `aliasError=null`, framework Vite, región iad1. Build 26.8s, **22:59:03→22:59:30 UTC del 23-oct**. Fuente d9fd7506 y destino production confirmados tanto por ID como resolviendo el alias. Preview previo READY `dpl_4Cva44GwrjovTCMuQZW4cVGGPA4A` / `https://pazo-3u9cakq19-digitalapp.vercel.app` desde 703c1312. No se promovió un build Preview con variables distintas: se construyó para production.
+- **Configuración:** única variable cambiada `VITE_PAZO_LEGAL_EFFECTIVE_DATE`, production `2026-10-21→2026-10-23`, por actualización real de textos de privacidad/condiciones del rollout. No cambió ninguna bandera financiera ni secreto. [Lectura del JS público](evidence/issue84/compiled-runtime.json) confirma RPC gradual/admin integradas, fecha correcta y número de build derivado de d9fd7506. Índice `max-age=0, must-revalidate`; SW network-only sin cachear APIs/navegaciones.
+- **Main:** no fue necesario integrar PR81 para publicar manualmente F17 en el proyecto oficial ya vinculado. PR81 sigue draft y main intacto. No se declara F16/F17 fase COMPLETADA bajo AGENTS §7: falta main y el alcance financiero/QA humano conserva sus gates propios.
+
+## Postflight: evidencia agregada sin PII
+
+[Resultado SQL final](evidence/issue84/hosted-postflight.json), UTC 23:01:38: canary revisión1/generación1; campaña inactive, L1/cap1, started=false, hosted_gate_verified=false. Cero intereses, invitaciones, outbox y admisiones. Un intent abierto, cero períodos pagados y una notificación preexistente. Fingerprint del intent antes/después **`a3e08eed1526f073fb8a5e29a8e17199`**, ledger **`d751713988987e9331980363e24189ce`**, sin cambios. No se imprimen identidades ni datos del pagador.
+
+`new_create_admitted=false`, `legacy_recovery_allowed=true`; worker enabled/processing, build `pazo_live_worker_v2`, heartbeat y probe webhook frescos, outcome idle. El scheduler existente ejecutó mantenimiento sin iniciar campaña ni generar avisos. Ocho tablas nuevas RLS+FORCE, anon SELECT=false y authenticated INSERT=false. Tick service_role EXECUTE=true / authenticated=false. La lectura de `pazo_gradual_my_status` bajo rol authenticated y dueño canary original devuelve proyección sanitizada, no inscrito/no elegible/no checkout/sin acciones ni beneficio; fue una transacción read-only sin crear cuentas ni filas. Ninguna prueba reclama o cancela el intent real.
+
+Advisors postflight: **0 ERROR**; INFO RLS sin policies 61 (53 previas + 8 tablas privadas deliberadamente sin acceso directo); WARN RPC anon 7 sin cambio, RPC authenticated 55 (51 previas + 4 RPC own/admin con comprobaciones internas), leaked-password protection deshabilitada 1 preexistente. Son hallazgos revisados; no revocar los contratos públicos legítimos ni comprar un plan para silenciarlos.
+
+## Verificación reproducible y límites
+
+- CI del SHA d9fd7506: [CI 40036514521](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40036514521), [gradual 40036514503](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40036514503), [F17 security 40036514304](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40036514304), [bootstrap 40036514538](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40036514538). Los 12 jobs iniciales PASS antes de publicar. PG17 ejecuta migración exacta, concurrencia, seguridad y fallos; UI interceptada 72 estados ES/EN móvil/escritorio; regresión financiera offline y governance/build. No se repitió QA Sandbox real aprobado.
+- Corrección #84 verificada en PostgreSQL17 real: `ISSUE84_INACTIVE_CANARY_CLOSED`, begin denegado, provider_claim denegado y recuperación legacy preservada. La salud/gate false no se fuerza para probar una venta alojada.
+- Post-release: [7 probes HTTP/PWA](evidence/issue84/official-pwa-http.json), callbacks con sentinel no financiero eliminado, manifest/SW/iconos. [11 probes alojados](evidence/issue84/hosted-http.json): index/webhook/maintenance 200; checkout GET401/empty POST400; admin GET405/POST403; worker GET405/invalid capability POST403; RPC own/service anon401. Son denegaciones esperadas sin payload válido de venta, sin cuenta creada y sin dispatch autorizado.
+- Mapbox Standard y assets sin diff contra F17 `872ff8c3`; [22 comprobaciones reales del proveedor](evidence/issue84/mapbox-regression.json) PASS: calles, glTF PAZO, marcadores, móvil, cámara, selección, 403 visible y recuperación. Componente integrado servido localmente con proveedor real, no una cuenta autenticada ni Android físico/PWA instalada. No se altera el diseño aceptado ni se exige al PO repetir su revisión anterior.
+- Chromium remoto de GitHub valida el dominio oficial con TLS normal, móvil/escritorio ES/EN, bienvenida/Auth/recuperación sin enviar formularios, callbacks y registro SW. Se volvió a ejecutar después del deploy; resultado final se registra abajo.
+- **Límites explícitos:** estados de compra/cola/feedback y controles admin positivos/MFA se verifican en laboratorio y por SQL/denegaciones alojadas; no se ejecuta start, invitación o venta en producción para completar screenshots. No hay sesión de navegador local conectada disponible; visual PO de pantallas nuevas y PWA instalada en teléfono siguen pendientes, como permite issue84. Instructivo: abrir el dominio oficial con la sesión habitual, revisar oferta y Administración ES/EN/móvil sin pulsar Iniciar Live limitado ni enviar invitaciones; registrar observaciones o aprobación visual. No compartir credenciales ni ejecutar SQL de laboratorio.
+- La lectura de logs build/runtime de Vercel devolvió **403 de permisos del equipo digitalapp**; no hay CLI autenticada ni herramienta de autorización de equipo disponible. READY/alias/commit y smoke públicos sí se verificaron; no se afirma ausencia de errores en logs que no se pudieron leer. Ningún add-on, plan o infraestructura pagada nuevo.
+- Dos rechazos automáticos se resolvieron sin pedir permisos adicionales: no crear un enlace temporal que alteraría protección; la edición legal inicialmente opaca fue verificada por ID/clave y aprobada al explicitar su alcance. Un tercer rechazo impidió añadir una CA al NSS compartido del entorno (confianza TLS persistente); no se modificó ese almacén ni se deshabilitó TLS. El navegador local informó ERR_CERT_AUTHORITY_INVALID del proxy; la alternativa de CI usa TLS normal y no cambia seguridad de PAZO.
+
+Comandos de readback: `node --use-env-proxy scripts/f16-public-pwa-http-gate.mjs`; `VITE_SUPABASE_PUBLISHABLE_KEY=<clave pública existente> node --use-env-proxy scripts/f16-issue84-hosted-readonly-postflight.mjs`; consulta [solo lectura](../supabase/queries/f16_issue84_inactive_release_postflight_READ_ONLY.sql) por conexión administrativa autorizada. El script rechaza claves secret/service-role y nunca pide credenciales privadas. Chromium reproducible en el job canonical-chromium-e2e de CI, sobre el mismo SHA fuente.
+
+## Scope Closure Reconciliation GR/EVT — superposición #84
+
+La matriz original completa de [issue82](PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md) conserva cada GR01…22/EVT01…19 y sus pruebas directas; se reejecutó en d9fd7506. Esta superposición distingue instalar infraestructura de ejecutar producto financiero:
+
+| Alcance | Laboratorio d9fd7506 | Alojado inactivo / Live real |
+| --- | --- | --- |
+| GR01,03,18,20 | PASS UI/contratos/mapa | Front publicado, Auth público/PWA y Mapbox verificados en alcance descrito; visual PO/Android instalado pendiente |
+| GR02,04,05,06,07,08,09,10,11,13,21 | PASS lógica/UI/PG17 | SQL+Edge+frontend instalados; cero invitaciones/ventas. Activación, agradecimiento y feedback de compra real NO ejecutados |
+| GR12,15,16 | PASS salud/MFA/CAS/pausa/recovery | Campaña inactive, guard CREATE cerrado y recovery legacy permitido; MFA positivo/start/pausa real no ejecutados |
+| GR14,17 | PASS admin/privacidad/retención | Admin Edge instalado, denegaciones y ACL reales verificadas; datos de métricas sin ventas y sin sesión admin visual |
+| GR19 | PASS rollback preparado | Instalación y lectura de versiones PASS, rollback frontend/Edge identificado; restauración no ensayada sobre producción |
+| GR22 | PASS PR83→F17 y CI exacto | Beta oficial publicada desde F17; main no requerido ni fusionado, fase COMPLETADA no declarada |
+| EVT01,04,06,08,09,10,12,13,14,18,19 | PASS PG concurrente/UI/outbox | Infraestructura instalada, aislamiento de roles verificado; no generar colas/avisos sintéticos alojados |
+| EVT02,03,07,16,17 | PASS evidencia firmada sintética y umbrales | Ventas/beneficios y promoción 1→5→20→50 reales **NO AUTORIZADOS / NO EJECUTADOS** |
+| EVT05,11,15 | PASS recuperación/legado/pausa | Un intent real preservado con fingerprint idéntico; iniciar campaña bloqueado hasta conciliación por flujo original y GO separado |
+
+**LIVE_LIMITED_START_NOT_AUTHORIZED** sigue confirmado. `hosted_gate_verified=false` es intencional y no un error a sortear. Ningún GET READY, captura, cortesía ni retorno PayPal acredita venta real.
+
+## Ajuste del runner de verificación posterior
+
+La repetición de Chromium tras publicar (CI40036514521, job120699087722) quedó varios minutos en `Install matching real Chromium browser`, antes de ejecutar PAZO. Se ajustó únicamente el workflow: usar Chrome/Chromium preinstalado del runner Ubuntu cuando existe y conservar instalación Playwright como fallback. Sin TLS relajado, sin cambio de paquete/runtime de PAZO ni secretos. El smoke se ejecutará de nuevo con el mismo archivo de prueba y sobre la misma beta d9fd7506; el commit de evidencia/runner posterior no contiene frontend, SQL ni Edge distintos. Governance final 511 y los once probes del nuevo script versionado PASS.
+
+El JS del alias oficial contiene exactamente el mismo token público Mapbox que el usado en las 22 pruebas reales, y Standard devuelve200. No se imprimió el token ni se cambió su variable Production.

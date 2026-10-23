@@ -4,6 +4,8 @@
 
 #83 integrado en F17 mediante `57e8511f`; se cierra además la admisión legacy canary durante inactive antes del primer apply. Registro de auditoría, checksum, backup/rollback y resultados por gate: [PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). Vercel correcto es `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, dominio `pazo-app.vercel.app`; no desplegar al proyecto anterior t83r por su nombre histórico.
 
+**Resultado #84 al 23-oct-2026:** PR83_MERGED / F17_CI_PASS / DB_HOSTED_APPLIED / EDGE_HOSTED_DEPLOYED / OFFICIAL_BETA_DEPLOYED = **PASS**. Beta oficial https://pazo-app.vercel.app/ publicada desde `d9fd7506` (deployment `dpl_HCcdWk8Uo79LxrfCUXgqDzMdHa5J`). SQL fuente 20261023211315 aplicado con historial API 20261023224519; admin v1 / checkout v5 / worker v5, contenidos verificados contra el mismo SHA. Campaña **inactive**, hosted_gate_verified=false, canary rev1/generación1; 1 intent anterior intacto, 0 períodos pagados, 0 invitaciones/outbox. **LIVE_LIMITED_START_NOT_AUTHORIZED**. No se necesitó main; PR81 sigue draft. Visual PO de cambios nuevos/PWA física pendiente, no se declara fase COMPLETADA. Evidencia, límites de observabilidad, pruebas y rollback en el reporte #84. Las secciones inferiores de #82 y anteriores se conservan como historia superada en lo relativo a permisos/instalación.
+
 ---
 
 ## F16 issue #82 — código gradual implementado en rama (23-oct-2026)

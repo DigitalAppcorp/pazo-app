@@ -523,8 +523,17 @@ jobs:
           node-version: '22'
       - name: Install pinned ephemeral Chromium automation package
         run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
-      - name: Install matching real Chromium browser
-        run: npx --no-install playwright install --with-deps chromium
+      - name: Use runner Chrome or install matching Chromium
+        run: |
+          # GitHub's Ubuntu image already includes Chrome and its libraries.
+          # Avoid an unrelated apt mirror stall during read-only release QA.
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            "$browser_path" --version
+            printf 'PAZO_CHROMIUM_PATH=%s\n' "$browser_path" >> "$GITHUB_ENV"
+          else
+            npx --no-install playwright install --with-deps chromium
+          fi
       - name: Check associated email and login form labels in proposed code
         run: node --test scripts/f16-auth-field-label-contract.test.mjs
       - name: Exercise deployed production Auth and PWA in real Chromium
