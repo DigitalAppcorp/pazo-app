@@ -1447,8 +1447,9 @@ test('F17 mobile: centered modal, brand typography, floating map nav and image c
   assert.ok(!map.includes('top-[102px] z-40 overflow-y-auto'))
   assert.ok(nav.includes('data-pazo-floating-nav="true"') && nav.includes('absolute inset-x-0 bottom-0 z-30 bg-transparent'))
   assert.ok(fs.readFileSync('src/App.tsx','utf8').includes('pb-[calc(7rem+env(safe-area-inset-bottom))]'),'Every scrollable module must clear the dock at the bottom')
-  assert.ok(stage.includes('data-pazo-places-bottom-rail="true"') && stage.includes('overflow-y-auto overscroll-contain'),'Places rail remains scrollable')
-  assert.ok(stage.includes('data-pazo-places-dock-clearance="true"') && stage.includes('h-[calc(9rem+env(safe-area-inset-bottom))]'),'Clearance belongs inside scrolling cards, never fixed rail height')
+  assert.ok(stage.includes('data-pazo-places-bottom-rail="true"') && stage.includes('bottom-[calc(6.75rem+env(safe-area-inset-bottom))]'),'Places cards remain above the floating dock')
+  assert.ok(stage.includes('data-pazo-places-card-scroll="true"') && stage.includes('overflow-visible bg-transparent'),'Places rail has no vertical scroll area')
+  assert.ok(!stage.includes('data-pazo-places-dock-clearance="true"'),'Places cards do not contain artificial bottom clearance')
   assert.ok(stage.includes('data-pazo-places-fixed-heading="true"') && stage.includes('data-pazo-places-card-scroll="true"'),'Places heading stays visible while cards scroll independently')
   // PO before/after Android comparison: only details should have been upscaled.
   // Canvas filters, heading, result count and card metadata retain F13 scale.
