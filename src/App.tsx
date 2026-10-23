@@ -1963,7 +1963,7 @@ function PazoMain() {
               ref={mainScrollRef}
               className={activeTab === 'mapa'
                 ? 'relative min-h-0 flex-1 overflow-hidden p-0'
-                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pb-[calc(7rem+env(safe-area-inset-bottom))]'}
+                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5 pb-[calc(13rem+env(safe-area-inset-bottom))] sm:pb-[calc(13rem+env(safe-area-inset-bottom))]'}
               onScroll={(event) => {
                 const element = event.currentTarget
                 tabScrollPositionsRef.current[activeTab] = element.scrollTop
@@ -2089,6 +2089,14 @@ function PazoMain() {
                 </>
               )}
             </main>
+
+            {(activeTab === 'inicio' || activeTab === 'comunidades' || activeTab === 'mascota') && (
+              <div
+                data-pazo-scroll-soft-edge="true"
+                aria-hidden="true"
+                className="pazo-scroll-soft-edge"
+              />
+            )}
 
             <BottomNav
               activeTab={activeTab}
