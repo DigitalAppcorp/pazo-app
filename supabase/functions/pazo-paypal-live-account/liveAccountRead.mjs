@@ -185,7 +185,7 @@ export function createPazoLiveOwnerAccountRead({released=false,
     // Final owner-bound SQL closes only terminal attempts after pending signed
     // events, cancellation claims and paid periods have all been reconciled.
     if(typeof retireTerminal!=='function')return reply(request,503,'live_approval_retirement_unavailable')
-    const released=await retireTerminal({ownerId,intentId:selected.intentId,
+    const released=await retireTerminal({ownerId:owner,intentId:selected.intentId,
      merchantGeneration:original.merchantGeneration,subscriptionId:original.subscriptionId,
      providerStatus:'CANCELLED'})
     return reply(request,released===true?200:409,released===true
