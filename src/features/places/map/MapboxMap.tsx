@@ -439,15 +439,11 @@ export const MapboxMap = ({
             // Places or the locally rendered PAZO markers.
             return
           }
-          if(failure && !cancelled)setError(failure==='map_authorization'
-            ?(langRef.current==='es'
-              ?'Mapbox no autorizó las capas del mapa. Revisa que el token público permita este dominio.'
-              :'Mapbox rejected basemap requests. Check the public token domain restrictions.')
-            :(langRef.current==='es'
-              ?'No pudimos descargar el mapa. La lista de lugares sigue disponible.'
-              :'Map downloads are unavailable. The places list remains available.'))
-          // No provider URL/message, token, coordinates or raw event in logs.
-          if(failure)console.warn('PAZO basemap unavailable:',failure)
+          // Do not unmount the Mapbox canvas on a single recoverable tile
+          // failure. The current camera, DOM place markers and previous tiles
+          // must remain interactive during retry/fallback.
+          // No raw provider URL, request, token or coordinates in logs.
+          if(failure)console.warn('PAZO basemap resource error:',failure)
         })
       } catch {
         console.error('PAZO map initialization unavailable')
