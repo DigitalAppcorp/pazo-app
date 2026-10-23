@@ -30,7 +30,7 @@ test('F17 author credit, illustrative disclosure, no referrer, photo precedence'
   assert.ok(ui.includes("curated&&!curated.exactVenue&&showPhoto"))
   assert.ok(ui.includes("Ilustrativa"))
   assert.ok(ui.includes('referrerPolicy="no-referrer"'))
-  assert.ok(ui.includes('onError={()=>setFailed(true)}'))
+  assert.ok(ui.includes('setFallbackAttempt(true)') && ui.includes('setFailed(true)'))
   assert.ok(stage.includes('photoCredit.sourceUrl'))
   assert.ok(stage.includes('photoCredit.licenseUrl'))
   assert.ok(stage.includes('onClick={() => onFocusPlace(place.id)}'))
