@@ -139,6 +139,7 @@ export const MapboxMap = ({
   const langRef = useRef(lang)
   const onSelectPlaceRef = useRef(onSelectPlace)
   const [error, setError] = useState('')
+  const [mapNotice, setMapNotice] = useState('')
 
   useEffect(() => {
     placesRef.current = places
@@ -431,6 +432,13 @@ export const MapboxMap = ({
           }
           if (basemapStage === 'streets' && (isStyleOrAuth || ++vectorStyleErrors >= 6)) {
             basemapStage = 'raster'
+            setMapNotice(failure === 'map_authorization'
+              ? (langRef.current === 'es'
+                ? 'Mapbox no autorizó las capas 3D en este dominio. Mostrando el mapa de emergencia.'
+                : 'Mapbox did not authorize 3D layers on this domain. Showing the emergency map.')
+              : (langRef.current === 'es'
+                ? 'No se cargó la cartografía 3D. Mostrando mapa de emergencia.'
+                : '3D basemap could not load. Showing the emergency map.'))
             map.setStyle(PAZO_STREETS_STYLE)
             return
           }
@@ -529,13 +537,16 @@ export const MapboxMap = ({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={immersive
-        ? "h-full w-full bg-[#E7ECEA]"
-        : "h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]"
-      }
-      aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'}
-    />
+    <div className={immersive
+      ? 'relative h-full w-full bg-[#E7ECEA]'
+      : 'relative h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]'}>
+      <div ref={containerRef} className="absolute inset-0"
+        aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'} />
+      {mapNotice && (
+        <p role="status" className="pointer-events-none absolute left-3 right-3 top-[38%] z-10 rounded-2xl bg-[#FFFCF6]/95 px-3 py-2 text-center text-[12px] font-semibold leading-snug text-[#204E4A] shadow-sm">
+          {mapNotice}
+        </p>
+      )}
+    </div>
   )
 }
