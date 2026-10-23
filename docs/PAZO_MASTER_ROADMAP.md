@@ -1,3 +1,9 @@
+## F17 UI — ajustes Lugares / feed pendientes de aceptación, 22-oct-2026
+
+PR #81 DRAFT, solo código. Contenedores de filtros transparentes; scroll categorías con bordes degradados; rutas externas nativas con CTA Cómo llegar; reacciones/comentarios redondos y mayores, sin romper acciones. Se retiró el *fallback* de carretera repetida: no existen fotos particulares registradas para los 6 lugares. Integración de Google Place Photos BLOQUEADA a la espera de autorización de API con facturación y revisión de licencias; no fingirla terminada. **NO desplegar en producción**. CI, prueba de teléfono y aprobación PO pendientes. Véase `docs/PAZO_F17_PLACES_FEED_POLISH_20261022.md`.
+
+---
+
 ## F17 EN CURSO — continuación Codex sobre PR81, 22-oct-2026 Guatemala
 
 Se recuperó HEADa7b1f2c8 de la rama F17 y se conservó el trabajo de ChatGPT.

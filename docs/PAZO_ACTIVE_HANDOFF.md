@@ -1,3 +1,13 @@
+## ACTUALIZACIÓN F17 — Lugares y Feed, 22-oct-2026 (RAMA, NO PRODUCCIÓN)
+
+**Scope aprobado por PO y versionado en PR #81**, revisión de código anterior `a12579c1fd59`: contenedor exterior de búsqueda/filtros transparente, fade lateral en scroll de categorías, botón **Cómo llegar** desde detalle de lugar (iOS Apple Maps; Android/enlace web Google Maps), iconos circulares mayores para like/comentarios/guardado en Feed. Los handlers y métricas existentes se preservan. Foto genérica de carretera eliminada: cada tarjeta solo muestra `pet_places.photo_url` real o indica que todavía no hay foto. **Los 6 lugares alojados tienen `photo_url` vacío**: no declarar fotos de establecimientos ya resueltas.
+
+**Google Places Photos NO activo:** Google Places API/Place IDs de esos establecimientos no están configurados en PAZO; requiere servicio con facturación y atribución/uso compatibles. Prohibido generar cargos, añadir claves cliente, copiar imágenes de Google Maps manualmente o fingir fotos sin autorización adicional del PO. Alternativa con costo fijo controlable: fotos autorizadas por negocio y Storage existente. Regla cero contornos respetada; ningún SQL/Edge/Vercel modificado. La versión publicada en `https://pazo-app.vercel.app/` **no incluye todavía estos cambios**. Validación requerida: CI exacto del último SHA, prueba móvil/Preview aprobada por PO, decisión sobre fotos; NO despliegue ni merge a `main` sin GO.
+
+**Implementación y detalles:** `docs/PAZO_F17_PLACES_FEED_POLISH_20261022.md`. Mantener estado financiero previo en el historial inferior (sin alteraciones de PayPal).
+
+---
+
 # PAZO · PAYPAL LIVE — ESTADO HOSPEDADO AL 22-OCT-2026 (ACTUAL)
 
 > Fuente de verdad vigente. El historial F17 visual debajo es anterior a la reparación de pagos y **no debe usarse** para decidir nuevos cambios financieros.
