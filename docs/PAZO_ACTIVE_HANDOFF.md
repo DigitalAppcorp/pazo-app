@@ -1,3 +1,13 @@
+## F17 — Aceptación visual PO: cartografía y figuras 3D en sitio oficial (23-oct-2026)
+
+**PASS visual confirmado en Android por el Product Owner:** `https://pazo-app.vercel.app/` muestra las **calles** y, al seleccionar/acercar un establecimiento, **las figuras 3D de PAZO**. Ambas observaciones del dominio oficial quedan aprobadas; no volver a pedir esta misma prueba ni afirmar que el mapa oficial está roto. Aprobación basada en prueba física reportada por PO, no en E2E automatizado. La prueba no distingue por sí sola la tecnología exacta de los objetos (modelo nativo vs representación 3D estilizada) ni certifica relieve DEM del terreno.
+
+**Alcance separado:** el F17 Preview sigue reportado **en blanco**, por lo que NO se declara PASS su mapa. Producción usa un estilo raster de emergencia desde inicio, mientras la rama F17 prefiere primero Mapbox Standard 3D y luego Streets vector; conservar sin cambios el mapa **que ya funciona** en producción, diagnosticar/resolver solamente la regresión del Preview antes de integrarlo en el sitio oficial. No cambiar token/proveedor por hipótesis, ni tocar `main`/producción sin GO; sin nuevos cobros ni cambios PayPal.
+
+**Próximo gate:** cerrar discrepancia del Preview sin regresión de calles/figuras 3D aprobadas. Después, canary PayPal Live de US$2.99 solo tras consentimiento financiero explícito y personal del PO, conciliación y cancelación.
+
+---
+
 ## F17 — Prueba real Android: calles visibles en dominio oficial (23-oct-2026)
 
 **Resultado comunicado por el PO:** al abrir **Mapa** en `https://pazo-app.vercel.app/`, **las calles sí aparecen**. Clasificación: **PASS solo para visualización de cartografía base del dominio oficial** (producción SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`, estilo de emergencia `PAZO_STREETS_STYLE` basado en teselas OSM). No volver a solicitar esta misma verificación de calles en el sitio oficial.
