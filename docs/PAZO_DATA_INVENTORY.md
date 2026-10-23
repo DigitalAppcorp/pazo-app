@@ -593,3 +593,24 @@ Se crearon en GitHub, exclusivamente como **migraciones NO aplicadas**, la inbox
 ### F17 — Respuestas privadas a solicitudes (borrador, NO desplegado)
 
 La bandeja administrativa propone un campo **respuesta al usuario** (`admin_reply`, máximo 2000 caracteres) separado de `admin_note` (nota estrictamente interna). La RPC autenticada `pazo_my_support_tickets` expone solo las 20 solicitudes más recientes **del propio usuario autenticado** y sus respuestas; no expone notas internas ni contenido de otro usuario. El usuario ve estado, mensaje enviado y respuesta desde Ayuda y soporte. Sin envío de correos ni analítica de contenido, y su plazo de retención sigue PENDIENTE de decisión previa al despliegue.
+
+## F16 — campaña gradual issue #82 (23-oct-2026, código preparado, NO instalado)
+
+Migración `20261023211315_pazo_f16_gradual_live_event_rollout.sql`. Esta sección
+registra el tratamiento preparado en la rama; **no afirma recolección alojada**.
+
+| Dato nuevo | Finalidad / acceso | Conservación y baja implementadas |
+| --- | --- | --- |
+| Interés por Auth UUID, campaña, secuencia FIFO, fechas, estado, revisión, token/lease de cupo y referencia del intento original | Cola y autorización atómica; tablas privadas FORCE RLS/ACL; RPC de estado propio sin IDs financieros/ajenos | FK Auth CASCADE. Interés sin intento en espera/retirado/declinado: 90 días después de STOP; reanudar suspende esa limpieza. Referencias con intento siguen el historial financiero restringido |
+| Invitación, vencimiento 72h y declinación | Cinco invitaciones iniciales; reemplazar solo expiraciones sin volver a contactar al mismo dueño | FK Auth CASCADE; limpieza 90 días tras cierre. Opt-out persistente durante campaña |
+| Outbox: dueño/campaña/tipo, estado/versión, identidad del aviso, claim/lease, intentos/fecha | Dos hilos lógicos, entrega inbox y ACK atómicos; sin push/email/SMS | FK Auth CASCADE; outbox y avisos inbox vinculados: 90 días tras cierre. Eventos procesados: 90 días; eventos pendientes se conservan para recuperación |
+| Feedback `ok/issue/skipped`, componente enumerado y fecha | Comprobación opcional separada de derechos/ledger; `issue` crea un único ticket privado F17, sin texto libre nuevo ni datos del pagador | FK Auth CASCADE; campos de feedback se limpian 90 días tras cierre incluso si se conserva referencia financiera; ticket sigue retención F17 |
+| Admisión histórica por dueño/campaña y fecha | Conservar cuota acumulada después de cancelación/baja, sin reventa de la plaza | Sin FK CASCADE deliberadamente; mismo historial financiero/obligaciones/holds que ledger original; no nueva promesa de plazo financiero automático |
+| Revisión/nonce/actor/acción/fecha, incidencias enumeradas, salud webhook | Trazabilidad y control admin con MFA reciente; RPC admin agregada omite dueños de compradores y secretos | Historial operativo privilegiado vinculado a control financiero; revisión bajo política financiera existente. Sin payload PayPal, nombre, email, IP, GPS ni tokens Auth |
+
+El worker privado existente realiza recuperación y limpieza; no se crea cron ni
+proveedor nuevo. La instalación queda inerte (`inactive`, gate hospedado falso).
+Los textos de privacidad/términos ES/EN explican interés sin cobro, revisión
+voluntaria y retención. No cambia consentimiento financiero inmutable, inventario
+PayPal existente ni proveedores. Evidencia y gates:
+`docs/PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md`.

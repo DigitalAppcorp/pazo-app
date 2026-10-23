@@ -38,7 +38,7 @@ const published=(raw:unknown,locale:Locale):raw is Offer=>{
   typeof o.consentLabel==='string'&&o.consentLabel.length>30&&
   digest.test(o.termsDigest||'')
 }
-export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Locale;onAvailabilityChange?:(phase:'loading'|'ready'|'blocked')=>void}){
+export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange,availabilityRevision}:{lang:Locale;availabilityRevision?:string;onAvailabilityChange?:(phase:'loading'|'ready'|'blocked')=>void}){
  const [stage,setStage]=useState<Stage>('checking')
  const [offer,setOffer]=useState<Offer|null>(null)
  const [availabilityReason,setAvailabilityReason]=useState<AvailabilityReason>('general')
@@ -50,6 +50,7 @@ export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Loc
  useEffect(()=>{onAvailabilityChange?.(stage==='checking'?'loading':stage==='unavailable'?'blocked':'ready')},[stage,onAvailabilityChange])
  useEffect(()=>{
   active.current=true
+  if(attempted.current)return()=>{active.current=false}
   setAccepted(false)
   setOffer(null)
   setStage('checking')
@@ -78,7 +79,7 @@ export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Loc
    }catch{if(active.current&&!controller.signal.aborted){setAvailabilityReason('general');setStage('unavailable')}}
   })()
   return ()=>{active.current=false;controller.abort()}
- },[lang,revision])
+ },[lang,revision,availabilityRevision])
  const refresh=useCallback(()=>{
   if(attempted.current)return
   setRevision(x=>x+1)
@@ -127,8 +128,8 @@ export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Loc
       ?label('Estamos actualizando el dominio de regreso de PayPal. No se iniciará ningún cobro hasta comprobar la configuración.',
         'We are updating PayPal’s return domain. No payment will start until the configuration is verified.')
       :availabilityReason==='canary'
-        ?label('Los pagos Live están en prueba controlada, únicamente para cuentas autorizadas. PAZO sigue siendo gratis.',
-          'Live payments are in a controlled test for authorized accounts only. PAZO remains free.')
+        ?label('Tu cuenta aún no tiene un cupo de pago disponible. PAZO sigue siendo gratis.',
+          'Your account does not yet have a checkout slot. PAZO remains free.')
         :label('Las suscripciones todavía no están disponibles. PAZO continúa siendo gratis.',
           'Subscriptions are not available yet. PAZO remains free.')}</p>
    <button type="button" onClick={refresh}

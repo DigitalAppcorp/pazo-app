@@ -1,3 +1,4 @@
+import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
@@ -1537,10 +1538,13 @@ function PazoMain() {
   const handleOpenNotification = async (notification: PazoNotification) => {
     const sightingId = getNotificationSightingId(notification)
     const joinedCommunityId = getNotificationCommunityId(notification)
-    if (!canUseAccount || (!sightingId && !joinedCommunityId)) return
+    const supporterNotice = isSupporterNotification(notification)
+    if (!canUseAccount || (!sightingId && !joinedCommunityId && !supporterNotice)) return
 
     setIsNotificationsOpen(false)
-    if (joinedCommunityId) {
+    if (supporterNotice) {
+      window.location.hash = '#/account/supporter'
+    } else if (joinedCommunityId) {
       setCommunityTargetId(joinedCommunityId)
       setCommunityTargetKey((value) => value + 1)
       setActiveTab('comunidades')

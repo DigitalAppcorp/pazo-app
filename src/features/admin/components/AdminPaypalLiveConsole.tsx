@@ -1,3 +1,4 @@
+import {AdminGradualLive} from './AdminGradualLive'
 import {useEffect,useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {AdminPaypalMfaStepUp} from './AdminPaypalMfaStepUp'
@@ -11,7 +12,7 @@ type Locale='es'|'en'
 type Config={price_minor:number;return_origin:string;validation_status:string;
  client_id_stored:boolean;client_secret_stored:boolean;webhook_id:string;
  plan_id:string;updated_at:string}
-type Mode='off'|'canary'|'public'|'unknown'
+type Mode='off'|'canary'|'limited'|'public'|'unknown'
 const PUBLIC_ORIGIN='https://pazo-app.vercel.app'
 const WEBHOOK='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook'
 const surface='rounded-[26px] bg-white p-5 shadow-[0_8px_24px_rgba(32,78,74,0.045)]'
@@ -32,7 +33,7 @@ export function AdminPaypalLiveConsole({lang,config,loading,error,credentialsSto
   void (async()=>{
    try{
     const {data,error}=await supabase.rpc('pazo_admin_live_release_status')
-    if(mounted)setMode(!error&&['off','canary','public'].includes(data?.mode)?data.mode:'unknown')
+    if(mounted)setMode(!error&&['off','canary','limited','public'].includes(data?.mode)?data.mode:'unknown')
    }catch{if(mounted)setMode('unknown')}
   })()
   return ()=>{mounted=false}
@@ -41,6 +42,7 @@ export function AdminPaypalLiveConsole({lang,config,loading,error,credentialsSto
  const originMatches=config?.return_origin===PUBLIC_ORIGIN
  const liveCanary=mode==='canary'
  return <div data-pazo-live-console="focused" className="space-y-4 pb-8 text-[#204E4A]">
+  <AdminGradualLive lang={lang} mfaRecentlyVerified={mfaRecentlyVerified} onChanged={()=>{setRefresh(v=>v+1);onChanged()}}/>
   <header className={surface}>
    <div className="flex flex-wrap items-start justify-between gap-3">
     <div>
@@ -50,6 +52,7 @@ export function AdminPaypalLiveConsole({lang,config,loading,error,credentialsSto
     </div>
     <span role="status" className="rounded-full bg-[#F0F4E8] px-4 py-2 text-[12px] font-extrabold">
      {mode==='canary'?t('Prueba controlada','Controlled test'):
+      mode==='limited'?t('Apertura gradual limitada','Limited gradual rollout'):
       mode==='public'?t('Abierto al público','Open to public'):
       mode==='off'?t('Cobros detenidos','Payments paused'):
        t('Estado sin verificar','Status unavailable')}
@@ -133,8 +136,8 @@ export function AdminPaypalLiveConsole({lang,config,loading,error,credentialsSto
      <div className="mt-4">
       <AdminPaypalMfaStepUp lang={lang} onVerified={onVerifyMfa}/>
       <div className="mt-4">
-       <AdminLiveReleaseControl lang={lang} mfaRecentlyVerified={mfaRecentlyVerified}
-         revision={String(config?.updated_at||'')+':'+refresh} onChanged={()=>{setRefresh(x=>x+1);onChanged()}}/>
+       {mode!=='limited'&&<AdminLiveReleaseControl lang={lang} mfaRecentlyVerified={mfaRecentlyVerified}
+         revision={String(config?.updated_at||'')+':'+refresh} onChanged={()=>{setRefresh(x=>x+1);onChanged()}}/>}
       </div>
      </div>
     </section>

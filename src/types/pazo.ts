@@ -331,6 +331,8 @@ export interface Conversation {
 }
 
 export interface PazoNotification {
+  supporterCopyVersion?: string | null
+  supporterState?: string | null
   id: string
   title: string
   subtitle: string

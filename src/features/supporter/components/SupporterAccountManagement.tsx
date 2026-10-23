@@ -1,3 +1,5 @@
+import {useGradualStatus} from '../gradual/useGradualStatus'
+import {GradualCampaignPanelView} from '../gradual/GradualCampaignPanel'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
@@ -113,6 +115,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   }
   const closeRef = useRef<HTMLButtonElement>(null)
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
+  const gradual=useGradualStatus(!qaV2Screen)
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
   // One coherent first paint: server-owned membership, private Sandbox
@@ -126,12 +129,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const offerReadyForCurrentMode=qaOfferState.mode===offerMode
   const preparationPending=membership.kind==='checking'||
     (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&!error)||
-    (!qaV2Screen&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='loading')||
+    (!qaV2Screen&&!gradual.value&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='loading')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
     (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
   const preparationUnavailable=membership.kind==='unavailable'||
     (!qaV2Screen&&membership.kind==='inactive'&&error)||
-    (!qaV2Screen&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='blocked')||
+    (!qaV2Screen&&!gradual.value&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='blocked')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
     (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
   const preparing=preparationPending||preparationUnavailable
@@ -380,6 +383,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Intentar de nuevo','Try again')}
           </button>
         </div>}
+        {!qaV2Screen&&membership.kind!=='checking'&&membership.kind!=='unavailable'&&<GradualCampaignPanelView lang={lang} status={gradual}/>}
         {membership.kind === 'inactive' && <>
           {paypalReturnKind&&<p role="status" className="mx-auto mb-3 max-w-[420px] rounded-[16px] bg-[#EBF1E5] px-4 py-3 text-center text-[13px] font-medium leading-relaxed text-[#204E4A]">
             {paypalReturnKind==='cancel'
@@ -445,6 +449,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   </div>
             ) : accounts?.length===0 ? (
               <SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}
+                availabilityRevision={String(gradual.value?.myCanCheckout)}
                 onAvailabilityChange={receiveLiveOfferState}/>
             ) : (
               <div data-pazo-live-existing-checkout="recover-original"

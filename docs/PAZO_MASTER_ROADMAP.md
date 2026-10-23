@@ -1,3 +1,11 @@
+## F16 issue #82 — código gradual implementado en rama (23-oct-2026)
+
+**Estado vigente sobre notas históricas:** `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`, sin declarar F16 COMPLETADA ni beta lanzable. Rama `f16/gradual-live-event-rollout-20261023`, derivada de F17 `872ff8c3` / PR #81. Motor 1→5→20→50 por 1/3/10 compradores verificados, FIFO, reservas, outbox, revisión voluntaria, Administración MFA/CAS y pruebas PostgreSQL17/UI implementados. **No** SQL/Edge/Vercel producción, cargos/notificaciones reales ni merge a main.
+
+Evidencia por `GR-01…22 / EVT-01…19`, cambios, comandos, commit/CI y estados independientes: [PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md](PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md). [Gate alojado y rollback](PAZO_F16_GRADUAL_HOSTED_GATE_RUNBOOK_20261023.md) preparado; siguiente permiso acotado es instalar/publicar en entorno controlado con campaña **inactiva**, separado del GO financiero. La auditoría inicial solo lectura encontró un intent Live previo abierto: se conserva, inicio bloqueado hasta su conciliación original. QA Sandbox y mapa aprobados no se reabren. Historial inferior conservado; sus etiquetas `NOT_IMPLEMENTED/EXECUTION_NOT_CONFIRMED` quedan superadas para esta rama, no para producción.
+
+---
+
 ## F16 — Ejecución encargada a Codex, código completo de apertura gradual (23-oct-2026)
 
 El PO delegó explícitamente **a Codex** el desarrollo de la fase ya decidida. **Orden formal:** [`CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md`](CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md). **Tracking:** [issue #82](https://github.com/DigitalAppcorp/pazo-app/issues/82). Leer AGENTS.md y fuentes GR/EVT sin recortar funcionalidades. Construir en rama aislada derivada de F17 HEAD y PR hacia F17: cola FIFO para interesados, cinco invitaciones/72h, cuotas 1→5→20→50 promocionadas al verificar 1/3/10 compradores reales, cancelación/reanudación Live existente, outbox/idempotencia y STOP, dos notificaciones con revisión de beneficios, Administración y pruebas. No limitarse a plan: entregar software verificable y documentos de cierre.

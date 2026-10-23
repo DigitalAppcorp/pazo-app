@@ -77,7 +77,7 @@ export function createPazoLivePrivateWorkerHttp({released=false,admit,complete,w
    }else{outcome='review';code='worker_event_requires_review'}
   }
   let completed=false
-  try{completed=await complete({leaseToken:admitted.leaseToken,outcome,code,build:PAZO_LIVE_WORKER_BUILD})===true}
+  try{completed=await complete({leaseToken:admitted.leaseToken,outcome,code,build:PAZO_LIVE_WORKER_BUILD,maintenanceAllowed:input.action==='drain'&&admitted.processingAllowed===true})===true}
   catch{/* The durable batch lease expires; never repeat the event here. */}
   if(!completed)return reply(503,'worker_completion_uncertain')
   return reply(200,code,{outcome,processed:outcome==='processed'?1:0})
