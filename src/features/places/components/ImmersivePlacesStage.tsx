@@ -119,7 +119,7 @@ export const ImmersivePlacesStage = ({
             type="button"
             aria-pressed={category === option.value}
             onClick={() => onCategory(option.value)}
-            className={`min-h-9 shrink-0 rounded-full px-3.5 py-2 text-xs font-extrabold transition-colors ${category === option.value
+            className={`min-h-9 shrink-0 rounded-full px-3.5 py-2 text-[11px] font-extrabold transition-colors ${category === option.value
               ? 'bg-[#204E4A] text-[#E1E53F] shadow-[0_3px_9px_rgba(32,78,74,0.11)]'
               : 'bg-white/90 text-[#204E4A] hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/35'}`}
           >
@@ -128,7 +128,7 @@ export const ImmersivePlacesStage = ({
         ))}
       </div>
       {(locationMessage || activeCheckin) && (
-        <div role="status" className="flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl bg-white/85 px-3 py-2 text-xs font-semibold text-[#204E4A] shadow-sm backdrop-blur-lg">
+        <div role="status" className="flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl bg-white/85 px-3 py-2 text-[11px] font-semibold text-[#204E4A] shadow-sm backdrop-blur-lg">
           {activeCheckin && <><IconCheck size={13}/>{lang === 'es' ? 'Check-in activo' : 'Active check-in'}</>}
           {locationMessage && <span>{locationMessage}</span>}
         </div>
@@ -163,11 +163,11 @@ export const ImmersivePlacesStage = ({
     <div data-pazo-places-bottom-rail="true"
       className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-[min(43dvh,340px)] flex-col bg-transparent">
       <div data-pazo-places-fixed-heading="true" className="pointer-events-none relative z-20 mb-2 flex shrink-0 items-end justify-between gap-3 px-4 sm:px-6">
-        <div className="rounded-full bg-[#FFFCF6]/90 px-3 py-1 shadow-[0_3px_10px_rgba(32,78,74,0.04)]">
-          <h2 className="text-lg font-black leading-tight text-[#204E4A]">
+        <div className="min-w-0 max-w-full">
+          <h2 className="text-[15px] font-black leading-tight text-[#204E4A]">
             {lang === 'es' ? 'Lugares disponibles' : 'Available places'}
           </h2>
-          <p aria-live="polite" className="text-xs font-semibold text-[#5C7470]">
+          <p aria-live="polite" className="text-[11px] font-semibold text-[#5C7470]">
             {places.length} {lang === 'es' ? 'resultados' : 'results'}
           </p>
         </div>
@@ -226,14 +226,14 @@ export const ImmersivePlacesStage = ({
                 >
                 <div className="relative">
                   <PlaceCardPhoto place={place} lang={lang} />
-                  {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-[#204E4A]">{distance}</span>}
+                  {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold text-[#204E4A]">{distance}</span>}
                 </div>
                 <div className="flex min-h-[64px] flex-col px-1.5 pb-0.5 pt-2">
                   <span className="line-clamp-2 text-[14px] font-black leading-tight text-[#204E4A]">{place.name}</span>
-                  <span className="mt-1 truncate text-xs font-extrabold uppercase tracking-[0.025em] text-[#68817B]">
+                  <span className="mt-1 truncate text-[10px] font-extrabold uppercase tracking-[0.025em] text-[#68817B]">
                     {categoryName ? (lang === 'es' ? categoryName.es : categoryName.en) : place.category}{place.zone ? ` · ${place.zone}` : ''}
                   </span>
-                  <span className="mt-auto flex items-center gap-1 pt-1.5 text-xs font-bold text-[#204E4A]">
+                  <span className="mt-auto flex items-center gap-1 pt-1.5 text-[10px] font-bold text-[#204E4A]">
                     <IconPaw size={13}/>
                     {place.activePresenceCount || 0} {lang === 'es' ? 'mascotas presentes' : 'pets present'}
                   </span>
