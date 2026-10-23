@@ -240,7 +240,7 @@ export const ImmersivePlacesStage = ({
                 </div>
                 </button>
                 {photoCredit&&(
-                  <div className="pazo-photo-credit absolute left-4 top-[92px] z-[2] hidden max-w-[calc(100%-32px)] items-center gap-1 truncate rounded-full bg-[#204E4A]/85 px-1.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+                  <div className="pazo-photo-credit absolute left-3 top-[96px] z-[2] hidden max-w-[calc(100%-24px)] items-center gap-1 truncate rounded-full bg-[#204E4A]/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
                     <a className="truncate hover:underline focus-visible:underline"
                       href={photoCredit.sourceUrl} target="_blank" rel="noopener noreferrer"
                       title={lang==='es'?`Foto: ${photoCredit.author}. Wikimedia Commons`:`Photo: ${photoCredit.author}. Wikimedia Commons`}>
