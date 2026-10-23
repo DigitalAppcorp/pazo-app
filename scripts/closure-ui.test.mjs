@@ -1450,6 +1450,16 @@ test('F17 mobile: centered modal, brand typography, floating map nav and image c
   assert.ok(stage.includes('data-pazo-places-bottom-rail="true"') && stage.includes('overflow-y-auto overscroll-contain'),'Places rail remains scrollable')
   assert.ok(stage.includes('data-pazo-places-dock-clearance="true"') && stage.includes('h-[calc(9rem+env(safe-area-inset-bottom))]'),'Clearance belongs inside scrolling cards, never fixed rail height')
   assert.ok(stage.includes('data-pazo-places-fixed-heading="true"') && stage.includes('data-pazo-places-card-scroll="true"'),'Places heading stays visible while cards scroll independently')
+  // PO before/after Android comparison: only details should have been upscaled.
+  // Canvas filters, heading, result count and card metadata retain F13 scale.
+  assert.ok(stage.includes('px-3.5 py-2 text-[11px] font-extrabold'),'Places filter chips retain original compact size')
+  assert.ok(stage.includes('<h2 className="text-[15px] font-black leading-tight'),'Places heading returns to its original 15px')
+  assert.ok(stage.includes('aria-live="polite" className="text-[11px] font-semibold'),'Results counter returns to 11px')
+  assert.ok(stage.includes('line-clamp-2 text-[14px] font-black'),'Place titles stay at 14px')
+  assert.ok(stage.includes('mt-1 truncate text-[10px] font-extrabold'),'Card category/zone returns to 10px')
+  assert.ok(stage.includes('pt-1.5 text-[10px] font-bold'),'Card presence returns to 10px')
+  assert.ok(!stage.includes('rounded-full bg-[#FFFCF6]/90 px-3 py-1 shadow-'),'No new large white capsule behind the heading')
+  assert.ok(map.includes('data-pazo-place-detail-scroll="true"') && map.includes('text-[22px]'),'Details keep their separately approved accessible scale')
   assert.ok(map.includes('data-pazo-place-fixed-header="true"') && map.includes('data-pazo-place-detail-scroll="true"'),'Place details title/close remain visible while voting and check-in scroll')
   assert.ok(mapbox.includes('const [mapNotice, setMapNotice]') && mapbox.includes('Mapbox no autorizó las capas'),'Provider denial is disclosed without removing map markers')
   assert.ok(!stage.includes('h-[min(48dvh,300px)]'),'Do not crop cards by subtracting padding from a fixed-height rail')
