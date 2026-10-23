@@ -1,3 +1,11 @@
+## F17 — Prueba real Android: calles visibles en dominio oficial (23-oct-2026)
+
+**Resultado comunicado por el PO:** al abrir **Mapa** en `https://pazo-app.vercel.app/`, **las calles sí aparecen**. Clasificación: **PASS solo para visualización de cartografía base del dominio oficial** (producción SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`, estilo de emergencia `PAZO_STREETS_STYLE` basado en teselas OSM). No volver a solicitar esta misma verificación de calles en el sitio oficial.
+
+**Límites:** esta observación no demuestra edificios/relieve 3D ni modelos glTF; no valida F17 Preview, donde el PO reportó mapa blanco con la cadena distinta `Mapbox Standard → Streets v12 → raster`. La hipótesis de restricciones por dominio sigue sin confirmar; no alterar token/proveedor de mapas ni declarar mapa 3D PASS. Siguiente prueba focalizada: comprobar en el teléfono si aparecen figuras/marcadores 3D al seleccionar y acercar un lugar en la versión oficial y abordar por separado el Preview. Sin desplegar, fusionar, cobrar ni cambiar producción.
+
+---
+
 ## F17 — Auditoría de gates beta 23-oct-2026: Mapbox vs producción y PayPal Live (SOLO RAMA)
 
 **Mandato:** continuar únicamente bloqueos imprescindibles de beta; Soporte E2E queda expresamente POST-BETA. No crear compras, activar mantenimiento, tocar main ni publicar código visual sin GO.
