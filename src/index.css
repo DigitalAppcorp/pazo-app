@@ -504,18 +504,22 @@
   background: transparent;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  -webkit-mask-image: linear-gradient(to bottom,
-    transparent 0%,
-    transparent 45%,
-    rgba(0, 0, 0, 0.08) 56%,
-    rgba(0, 0, 0, 0.32) 70%,
-    rgba(0, 0, 0, 0.73) 86%,
-    #000 100%);
-  mask-image: linear-gradient(to bottom,
-    transparent 0%,
-    transparent 45%,
-    rgba(0, 0, 0, 0.08) 56%,
-    rgba(0, 0, 0, 0.32) 70%,
-    rgba(0, 0, 0, 0.73) 86%,
-    #000 100%);
+  /* The moving PAZO orb begins around 6.4rem above the bottom
+   * (plus device safe area). Defocus is already apparent at that height,
+   * and fades gently toward fully sharp content a little above it.
+   * Pixel-anchored stops track the orb on short and tall screens. */
+  -webkit-mask-image: linear-gradient(to top,
+    #000 0%,
+    #000 calc(4.5rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.80) calc(5.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.48) calc(6.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.14) calc(7.35rem + env(safe-area-inset-bottom, 0px)),
+    transparent calc(8.25rem + env(safe-area-inset-bottom, 0px)));
+  mask-image: linear-gradient(to top,
+    #000 0%,
+    #000 calc(4.5rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.80) calc(5.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.48) calc(6.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.14) calc(7.35rem + env(safe-area-inset-bottom, 0px)),
+    transparent calc(8.25rem + env(safe-area-inset-bottom, 0px)));
 }
