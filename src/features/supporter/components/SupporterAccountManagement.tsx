@@ -51,6 +51,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [cancelReview, setCancelReview] = useState<string | null>(null)
   const [showLiveManagement,setShowLiveManagement] = useState(false)
   const [recoveryMessage,setRecoveryMessage] = useState<string|null>(null)
+  const [confirmLiveAbandon,setConfirmLiveAbandon] = useState(false)
   const operationInFlight=useRef(false)
   const accountEpoch=useRef(0)
   const [accountRevision,setAccountRevision]=useState(0)
@@ -63,7 +64,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         operationInFlight.current=false
         setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
-        setRecoveryMessage(null);setShowLiveManagement(false);setLiveOfferPhase('loading')
+        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setLiveOfferPhase('loading')
         setAccountRevision(n=>n+1)
       }
       lastOwner=nextOwner
@@ -186,7 +187,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     // getSession here is ONLY for obtaining bearer; backend verifies getUser().
     if (sessionError || !session?.access_token) throw Error('authentication_required')
     if(epoch!==accountEpoch.current)throw Error('account_changed')
-    if(!qaV2Screen && !['list','status','cancel','resume','reconcile','abandon','acknowledgement'].includes(String(body.action)))
+    if(!qaV2Screen && !['list','status','cancel','resume','reconcile','abandon','abandon_pending','acknowledgement'].includes(String(body.action)))
       throw Error('live_management_not_released')
     const endpoint=qaV2Screen?'f16-paypal-supporter-account':'pazo-paypal-live-account'
     const response = await fetch(config.url + '/functions/v1/' + endpoint, {
@@ -270,14 +271,15 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     }
   }
 
-  const recover = async (intentId:string,action:'resume'|'reconcile'|'abandon') => {
+  const recover = async (intentId:string,action:'resume'|'reconcile'|'abandon'|'abandon_pending') => {
     const epoch=accountEpoch.current
     if(operationInFlight.current)return
     operationInFlight.current=true
     setBusy(true);setError(false);setRecoveryMessage(null)
     let released=false
     try{
-      const data=await call({action,intentId}) as AccountResult
+      const data=await call(action==='abandon_pending'
+        ?{action,intentId,confirmAbandon:true}:{action,intentId}) as AccountResult
       if(epoch!==accountEpoch.current)return
       if(data.code==='live_original_approval_ready'){
         const target=new URL(data.approvalUrl||'')
@@ -289,6 +291,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         window.location.assign(target.toString())
       }else if(data.code==='live_checkout_slot_released'){
         released=true
+        setConfirmLiveAbandon(false)
         setRecoveryMessage(label('El intento anterior terminó. Para iniciar otro, acepta nuevamente las condiciones.',
           'The earlier request has ended. Accept the terms again to start another.'))
       }else if(data.code==='live_original_subscription_verified'&&
@@ -460,6 +463,26 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   {label('Si PayPal ya no permite recuperar la aprobación, consulta el estado en «Administrar mi suscripción». No se intentará otro cobro automáticamente.',
                     'If PayPal can no longer recover the approval, check its status under Manage my subscription. No other charge will be attempted automatically.')}
                 </p>
+                <details className="rounded-[14px] bg-white/70 px-3 py-2 text-left">
+                  <summary className="min-h-9 cursor-pointer py-2 text-[12px] font-bold text-[#204E4A]">
+                    {label('¿Prefieres comenzar de nuevo?','Would you rather start over?')}
+                  </summary>
+                  <p className="mb-2 text-[12px] leading-relaxed text-[#526F63]">
+                    {label('Solo cerraremos el intento sin pagar si PayPal confirma que seguía pendiente y después de verificar que no quedan cobros o eventos por conciliar. Si no podemos comprobarlo, conservaremos tu solicitud.',
+                      'We will close the unpaid request only if PayPal confirms it was still pending and no paid periods or events remain unresolved. Otherwise your request stays protected.')}
+                  </p>
+                  <label className="flex items-start gap-2 text-[12px] font-medium">
+                    <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#204E4A]"
+                      checked={confirmLiveAbandon} onChange={e=>setConfirmLiveAbandon(e.target.checked)}/>
+                    <span>{label('Confirmo que quiero cerrar esta aprobación pendiente.',
+                      'I confirm that I want to close this pending approval.')}</span>
+                  </label>
+                  <button type="button" disabled={busy||!confirmLiveAbandon||!accounts?.[0]}
+                    onClick={()=>{const original=accounts?.[0];if(original)void recover(original.intentId,'abandon_pending')}}
+                    className="mt-3 min-h-11 w-full rounded-full bg-[#EAF0DD] px-3 py-2.5 text-[13px] font-bold text-[#204E4A] disabled:opacity-45">
+                    {label('Comprobar cierre e intentar de nuevo','Verify closure and retry')}
+                  </button>
+                </details>
                 {recoveryMessage&&<p role="alert" className="rounded-[14px] bg-white p-3 text-[12px] leading-relaxed text-[#724927]">{recoveryMessage}</p>}
               </div>
             )}
