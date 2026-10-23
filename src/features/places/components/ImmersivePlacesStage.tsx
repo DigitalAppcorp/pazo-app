@@ -137,13 +137,13 @@ export const ImmersivePlacesStage = ({
 
     {/* Always-visible attribution for the beta street tiles, kept above the card rail. */}
     <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer"
-      className="absolute bottom-[235px] left-3 z-20 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#46645D] shadow-sm"
+      className="absolute left-3 top-[155px] z-20 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#46645D] shadow-sm"
       aria-label={lang === 'es' ? 'Créditos del mapa OpenStreetMap' : 'OpenStreetMap map credits'}>
       &copy; OpenStreetMap contributors
     </a>
 
     {/* Uses current voluntary-location action. Never calls geolocation on mount. */}
-    <div className="absolute bottom-[242px] right-4 z-20 flex flex-col items-end gap-1.5">
+    <div className="absolute right-4 top-[155px] z-20 flex flex-col items-end gap-1.5">
       <button
         type="button"
         onClick={onUseLocation}
@@ -164,7 +164,8 @@ export const ImmersivePlacesStage = ({
     </div>
 
     {/* Bottom rail intentionally shows the neighboring card; no vertical list. */}
-    <div className="absolute inset-x-0 bottom-2 z-20">
+    <div data-pazo-places-bottom-rail="true"
+      className="absolute inset-x-0 bottom-0 z-20 h-[min(48dvh,300px)] overflow-y-auto overscroll-contain bg-transparent pb-[calc(7rem+env(safe-area-inset-bottom))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="mb-2 flex items-end justify-between gap-3 px-4 sm:px-6">
         <div>
           <h2 className="text-lg font-black leading-tight text-[#204E4A]">
