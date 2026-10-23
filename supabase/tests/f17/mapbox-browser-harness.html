@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head><meta name="viewport" content="width=device-width,initial-scale=1" /><style>html,body,#root{height:100%;width:100%;margin:0}</style></head>
+<body style="margin:0"><div id="root" style="height:100dvh"></div>
+<script type="module">
+// Local verification only: approved public catalogue, actual Places components,
+// actual Mapbox GL and remote cartography. No Auth, database or user location.
+import React, {useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import {ImmersivePlacesStage} from '/src/features/places/components/ImmersivePlacesStage.tsx';
+import {loadMapboxGl} from '/src/features/places/map/mapboxLoader.ts';
+import '/src/index.css';
+
+// Coordinates/names copied from supabase/seed/t05_verified_la_places_20261012.sql.
+const catalogue = [
+ ['Silver Lake Dog Park','park','Silver Lake',34.09226,-118.26455],
+ ['Runyon Canyon Park','trail','Hollywood Hills',34.10519,-118.348955],
+ ['The Morrison','food','Atwater Village',34.1237698,-118.268719],
+ ['VCA Miller-Robertson Animal Hospital','veterinary','West Hollywood',34.08105,-118.38578],
+ ['Groomickey Salon & Store','grooming','Venice',33.99661,-118.45843],
+ ['Petco Los Angeles - DTLA','pet_store','Downtown Los Angeles',34.04547,-118.25979],
+].map(([name,category,zone,latitude,longitude],index)=>({
+ id:`public-catalogue-${index}`,name,category,zone,latitude,longitude,
+ address:zone,status:'active',source:'pazo_curated',
+}));
+const categoryOptions=[
+ {value:'all',es:'Todos',en:'All'},
+ {value:'park',es:'Parques',en:'Parks'},
+ {value:'trail',es:'Senderos',en:'Trails'},
+ {value:'food',es:'Comida',en:'Food'},
+ {value:'veterinary',es:'Veterinarias',en:'Veterinary'},
+ {value:'grooming',es:'Grooming',en:'Grooming'},
+ {value:'pet_store',es:'Tiendas',en:'Shops'},
+];
+const mapboxgl=await loadMapboxGl();
+const NativeMap=mapboxgl.Map;
+window.fixtureMapCount=0;
+window.fixtureMapErrors=[];
+// Observe the real instance without changing production components or renderer.
+mapboxgl.Map=class extends NativeMap {
+ constructor(options){
+  super(options);
+  window.fixtureMap=this;
+  window.fixtureMapCount++;
+  this.on('error',event=>window.fixtureMapErrors.push({
+   status:Number(event.error?.status)||null,
+   resource:event.error?.url?new URL(event.error.url,location.origin).pathname:null,
+  }));
+ }
+};
+function Fixture(){
+ const [selectedPlaceId,setSelectedPlaceId]=useState(null);
+ const [focusPlaceRequest,setFocusPlaceRequest]=useState(null);
+ window.fixtureClearSelection=()=>setSelectedPlaceId(null);
+ const [category,setCategory]=useState('all');
+ const [searchQuery,setSearchQuery]=useState('');
+ const places=catalogue.filter(place=>(category==='all'||place.category===category)
+  &&place.name.toLowerCase().includes(searchQuery.toLowerCase()));
+ return React.createElement(ImmersivePlacesStage,{
+  lang:'es',places,categoryOptions,category,onCategory:setCategory,
+  searchQuery,onSearchChange:setSearchQuery,onSearchCommit:()=>{},
+  selectedPlaceId,focusPlaceRequest,
+  onFocusPlace:placeId=>{setSelectedPlaceId(placeId);setFocusPlaceRequest({placeId})},
+  onSelectPlace:setSelectedPlaceId,
+  userLocation:null,locationMessage:'',isLocating:false,onUseLocation:()=>{},
+  canSuggest:false,onSuggest:()=>{},activeCheckin:false,isLoading:false,
+  loadError:'',onRetry:()=>{},
+ },React.createElement('output',{
+  'data-testid':'map-selection','data-place-id':selectedPlaceId||'',
+  className:'sr-only','aria-live':'polite',
+ },selectedPlaceId||''));
+}
+createRoot(document.getElementById('root')).render(React.createElement(Fixture));
+</script></body></html>
