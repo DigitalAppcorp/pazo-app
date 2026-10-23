@@ -1,3 +1,13 @@
+## Publicación F17 al dominio oficial — 23-oct-2026
+
+**GO del PO:** publicación explícita de la versión F17 con reparación de Mapbox Standard al dominio oficial `https://pazo-app.vercel.app/`. **PRODUCCIÓN ACTUAL:** Vercel deployment `dpl_AGNfzTjyjy2BNMMh8rxQTrmACDgL`, `READY`, Git SHA `3d649093b5e15a6842622ba326f800f1c0618060`; Vercel alias `pazo-app.vercel.app` **verificado** apuntando exactamente a ese deployment. Producción previa recuperada para rollback: `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`.
+
+**Mapbox Production:** antes del deploy se actualizó en Vercel `VITE_MAPBOX_ACCESS_TOKEN` (ID `kBHdGC8O32Uix5f5`, destinos Production/Preview) al valor del **token público ya existente** y probado en el override Preview F17 `AzBEYyCFGy2giJkN`. El token anterior rechazaba teselas/modelos con403; el valor nuevo había superado la prueba de Standard real y glTF del commit F17. No exponer ni almacenar tokens en Docs/Chat/GitHub. El override Preview de rama no fue alterado. No se crearon cuentas Mapbox, servicios facturables ni un plan nuevo. **Importante:** despliegue Vercel READY y alias verificado, pero no constituye una nueva captura de Android en el dominio oficial; el usuario debe confirmar físicamente el mapa.
+
+**Gates:** CI `39997193835` SUCCESS, F16 bootstrap `39997193855` SUCCESS, F17 security `39997193940` SUCCESS para `3d649093`; PR #81 continúa DRAFT y `main` sin merge. Ningún cambio PayPal Live, Supabase/DDL, Edge, mantenimiento o entorno financiero. El código ya publicado coincide con el de la rama antes de esta nota documental. Ver historial anterior para corrección CSS `mapboxgl-map` y token. Prueba HTTP externa desde esta sesión no disponible, aunque Vercel dio READY. **Próximo único gate visual:** confirmar que se ven las calles Standard y las figuras 3D desde el sitio oficial; no pedir repetir QA sintética.
+
+---
+
 ## F17 — Mapbox Standard: dos causas reales corregidas; Preview para validación PO (23-oct-2026)
 
 **Código corregido:** `e6bf328d6bc474d0a621be428a157abbeea64f7d`; QA/evidencias `f839c933bdd0694480b7fb93a9211372fa4ef89d`, rama `f17/beta-final-mobile-support-admin-20261022`, PR #81 DRAFT sin merge. **Preview READY:** https://pazo-nu9vxf8rj-digitalapp.vercel.app/ — `dpl_Ayw4ZD7ZTFf2sz4Zt21VoYxirvzD`, SHA exacto `e6bf328d`, target Preview (`null` en API), proyecto `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`. Este checkpoint prevalece sobre los intentos históricos inferiores de preflight/reinicio/raster, que no solucionaron el lienzo gris.
