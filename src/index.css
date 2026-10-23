@@ -506,16 +506,16 @@
   backdrop-filter: blur(20px);
   -webkit-mask-image: linear-gradient(to bottom,
     transparent 0%,
-    transparent 30%,
-    rgba(0, 0, 0, 0.08) 42%,
-    rgba(0, 0, 0, 0.36) 60%,
-    rgba(0, 0, 0, 0.76) 79%,
+    transparent 45%,
+    rgba(0, 0, 0, 0.08) 56%,
+    rgba(0, 0, 0, 0.32) 70%,
+    rgba(0, 0, 0, 0.73) 86%,
     #000 100%);
   mask-image: linear-gradient(to bottom,
     transparent 0%,
-    transparent 30%,
-    rgba(0, 0, 0, 0.08) 42%,
-    rgba(0, 0, 0, 0.36) 60%,
-    rgba(0, 0, 0, 0.76) 79%,
+    transparent 45%,
+    rgba(0, 0, 0, 0.08) 56%,
+    rgba(0, 0, 0, 0.32) 70%,
+    rgba(0, 0, 0, 0.73) 86%,
     #000 100%);
 }
