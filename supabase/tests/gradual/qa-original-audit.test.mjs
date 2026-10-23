@@ -49,3 +49,8 @@ test('audit failures expose only closed stages, never arbitrary exception/provid
  const r=await createOriginalQaAudit({rpc:async()=>{throw Error('secret-and-payer@example.invalid')}})()
  assert.equal(r.complete,false);assert.equal(r.code,'qa_scope_read_unavailable');assert.equal(JSON.stringify(r).includes('secret-and-payer'),false)
 })
+
+test('read failure preserves only HTTP category/status and never PayPal error bodies',async()=>{
+ const r=createPaypalLiveMerchantEvidenceReader({merchantGeneration:1,planId:plan,clientId:'synthetic_client_id',clientSecret:'synthetic_client_secret',fetchImpl:async url=>url.endsWith('/token')?new Response(JSON.stringify({token_type:'Bearer',access_token:'synthetic_private_token'}),{headers:{'content-type':'application/json'}}):new Response('{"payer":"never expose","id":"private-provider-id"}',{status:404,headers:{'content-type':'application/json'}})})
+ await assert.rejects(()=>r.readOriginalQaAudit(args),e=>e.qaStage==='subscription_get'&&e.providerHttpStatus===404&&e.providerFailure==='http'&&!e.message.includes('private-provider'))
+})

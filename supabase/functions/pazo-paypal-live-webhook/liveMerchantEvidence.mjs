@@ -21,20 +21,20 @@ const date=d=>{
  const normalized=d.replace(/(?:\.(\d{1,3}))?Z$/,(_match,frac)=>'.'+(frac||'').padEnd(3,'0')+'Z')
  return new Date(t).toISOString()===normalized
 }
-function fail(){throw Error(NO)}
+function fail(providerFailure,providerHttpStatus){throw Object.assign(Error(NO),{providerFailure,providerHttpStatus})}
 async function json(fetchImpl,url,options){
  let response
  try{response=await fetchImpl(url,{...options,redirect:'error',cache:'no-store',
-  signal:AbortSignal.timeout(12000)})}catch{fail()}
- if(!response?.ok||response.status!==200)fail()
+  signal:AbortSignal.timeout(12000)})}catch{fail('network')}
+ if(!response?.ok||response.status!==200)fail('http',response?.status)
  const ct=response.headers?.get?.('content-type')
- if(typeof ct!=='string'||!/^application\/json(?:\s*;|$)/i.test(ct))fail()
+ if(typeof ct!=='string'||!/^application\/json(?:\s*;|$)/i.test(ct))fail('content_type',response.status)
  let body
- try{body=await response.text()}catch{fail()}
- if(typeof body!=='string'||body.length>MAX_RESPONSE)fail()
+ try{body=await response.text()}catch{fail('body',response.status)}
+ if(typeof body!=='string'||body.length>MAX_RESPONSE)fail('body',response.status)
  let d
- try{d=JSON.parse(body)}catch{fail()}
- if(!d||Array.isArray(d)||typeof d!=='object')fail()
+ try{d=JSON.parse(body)}catch{fail('json',response.status)}
+ if(!d||Array.isArray(d)||typeof d!=='object')fail('object',response.status)
  return d
 }
 export function createPaypalLiveMerchantEvidenceReader({
@@ -176,7 +176,7 @@ export function createPaypalLiveMerchantEvidenceReader({
     lastPaymentPresent:d.billing_info?.last_payment!=null,nextBillingPresent:d.billing_info?.next_billing_time!=null,
     cycleExecutionsPresent:Array.isArray(d.billing_info?.cycle_executions),
     mayCreate:false,mayCancel:false,mayGrantBenefits:false})
-   }catch{throw Object.assign(Error('qa_original_provider_audit_unavailable'),{qaStage})}
+   }catch(error){throw Object.assign(Error('qa_original_provider_audit_unavailable'),{qaStage,providerFailure:error?.providerFailure,providerHttpStatus:error?.providerHttpStatus})}
   },
   async readSaleDisputes(args={}){
    // Corroborate the exact original subscription and transaction before the

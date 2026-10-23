@@ -29,7 +29,10 @@ export function createOriginalQaAudit({rpc,historical}={}){
   }catch(error){
    const phases=new Set(['input','oauth','subscription_get','binding','create_time','plan_get','plan_terms','transactions_get','transactions_shape','pagination','transaction_coverage'])
    const detail=stage==='provider_read'&&phases.has(error?.qaStage)?'_'+error.qaStage:''
-   return {source:'original_qa_provider_audit_v1',complete:false,code:'qa_'+stage+detail+'_unavailable',mayCreate:false,mayCancel:false,mayGrantBenefits:false}
+   return {source:'original_qa_provider_audit_v1',complete:false,code:'qa_'+stage+detail+'_unavailable',
+    providerHttpStatus:Number.isInteger(error?.providerHttpStatus)&&error.providerHttpStatus>=100&&error.providerHttpStatus<=599?error.providerHttpStatus:null,
+    providerFailure:new Set(['network','http','content_type','body','json','object']).has(error?.providerFailure)?error.providerFailure:null,
+    mayCreate:false,mayCancel:false,mayGrantBenefits:false}
   }
  }
 }
