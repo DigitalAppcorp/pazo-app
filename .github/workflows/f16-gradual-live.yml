@@ -45,7 +45,13 @@ jobs:
       - name: Ephemeral pinned browser, no production dependency
         run: |
           npm install --prefix /tmp/gradual-playwright --no-package-lock --ignore-scripts playwright@1.56.1
-          node /tmp/gradual-playwright/node_modules/playwright/cli.js install --with-deps chromium
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            "$browser_path" --version
+            printf 'PAZO_CHROMIUM_PATH=%s\n' "$browser_path" >> "$GITHUB_ENV"
+          else
+            node /tmp/gradual-playwright/node_modules/playwright/cli.js install --with-deps chromium
+          fi
       - name: Mobile/desktop ES/EN and account/admin server recovery, all external requests intercepted
         env:
           VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
