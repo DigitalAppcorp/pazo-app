@@ -384,9 +384,11 @@ export const MapboxMap = ({
           map.on('mouseenter', 'pazo-place-pins', showPointer)
           map.on('mouseleave', 'pazo-place-pins', clearPointer)
 
-          map.on('click', 'pazo-place-models', handlePlaceClick)
-          map.on('mouseenter', 'pazo-place-models', showPointer)
-          map.on('mouseleave', 'pazo-place-models', clearPointer)
+          if (map.getLayer('pazo-place-models')) {
+            map.on('click', 'pazo-place-models', handlePlaceClick)
+            map.on('mouseenter', 'pazo-place-models', showPointer)
+            map.on('mouseleave', 'pazo-place-models', clearPointer)
+          }
 
           syncUserMarker(
             map,
@@ -414,6 +416,11 @@ export const MapboxMap = ({
           if (basemapStage === 'streets' && (isStyleOrAuth || ++vectorStyleErrors >= 6)) {
             basemapStage = 'raster'
             map.setStyle(PAZO_STREETS_STYLE)
+            return
+          }
+          if (basemapStage === 'raster') {
+            // Individual community tile errors should never hide the whole map,
+            // Places or the locally rendered PAZO markers.
             return
           }
           if(failure && !cancelled)setError(failure==='map_authorization'
@@ -453,11 +460,13 @@ export const MapboxMap = ({
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map?.isStyleLoaded?.()) return
-
+    if (!map) return
+    // The current places list can arrive before the remote map style finishes.
+    // HTML annotations do not depend on remote Mapbox styles or tile status.
+    if (window.mapboxgl) syncPlaceMarkers(map, window.mapboxgl, places)
+    if (!map.isStyleLoaded?.()) return
     const source = map.getSource('pazo-places')
     source?.setData?.(toGeoJson(places))
-    if (window.mapboxgl) syncPlaceMarkers(map, window.mapboxgl, places)
   }, [places])
 
   useEffect(() => {
