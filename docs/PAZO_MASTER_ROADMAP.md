@@ -1,3 +1,13 @@
+## F16 — Backlog de diseño: piloto automático primer Amigo de PAZO (23-oct-2026)
+
+**PROPUESTA GUARDADA, SIN GO DE IMPLEMENTACIÓN.** Producto propuesto: invitación a apoyar PAZO por **$2.99/mes** mediante **notificación 1** en bandeja y, después de pago real + periodo/beneficios verificados, **notificación 2** que invita voluntariamente a revisar insignia, beneficios y reportar errores. PAZO automatizaría selección de participante, consentimiento y checkout PayPal ya existente, reconciliación, respuestas y dashboard sin contacto manual del administrador. No se activan cobros ni se promete abrir membresías públicamente. Continuidad/DoD, textos ES y estado exacto en [`docs/PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md`](PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md).
+
+**GATE de producto pendiente:** el PO aún no ha escogido **A (invitación uno a uno; recomendada)** o **B (varios interesados, único comprador canary)**; caducidad 72h fue únicamente ejemplo, elegibilidad/retención/texto definitivo pendientes. Un usuario nunca recibe membresía pagada sin PayPal real verificado; un reporte de prueba no cancela ni altera sus derechos. `canary` no puede promoverse automáticamente a `public`; requiere GO del PO. La experiencia de recuperación de checkout ya fue aceptada por el PO con múltiples intentos Live sin pagar; primer cobro real sigue pendiente.
+
+**Estado:** `DOCUMENTED_PROPOSAL_ONLY`. No modifica fase F16/F17 en ejecución, PR #81 DRAFT, main, datos, pagos, Supabase, Vercel o mapa.
+
+---
+
 ## F16/F17 — Cierre de regresión de checkout abandonado (23-oct-2026; rama, sin producción)
 
 **DECISIÓN PO:** la recuperación ya validada en Sandbox debe mantenerse en Live. Estado código: `ff954b86` con CI general SUCCESS (`40006044745`), seguridad F17 SUCCESS (`40006044654`) y F16 bootstrap SUCCESS (`40006044657`). La invitación Live conserva el CTA con intent abierto, `resume` reutiliza el original y resuelve terminales con conciliación SQL; `abandon_pending` permite pedir cierre de aprobación sin pago con confirmación del titular, cancelación única en proveedor, GET independiente y liberación solo sin pagos ni eventos pendientes. Los pagos/beneficios siguen protegidos; `ACTIVE/APPROVED/SUSPENDED` no se liberan. Sin modificaciones de Supabase, PayPal ni producción.
