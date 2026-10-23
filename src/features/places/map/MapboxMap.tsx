@@ -272,10 +272,15 @@ export const MapboxMap = ({
         // any basemap tiles, 3D layer capability or model request.
         syncPlaceMarkers(map, mapboxgl, placesRef.current)
 
-        map.addControl(
-          new mapboxgl.NavigationControl({ showCompass: false }),
-          'top-right'
-        )
+        // Immersive mobile Places already has its own location control,
+        // and users can pinch to zoom. Avoid a second white Mapbox toolbar
+        // sitting behind the PAZO yellow button.
+        if (!immersive) {
+          map.addControl(
+            new mapboxgl.NavigationControl({ showCompass: false }),
+            'top-right'
+          )
+        }
 
         const syncMarkerEmphasis = () => {
           // Tiny map pins identify locations at overview zoom. Up close, the
