@@ -1,3 +1,11 @@
+## F16 — Ejecución encargada a Codex, código completo de apertura gradual (23-oct-2026)
+
+El PO delegó explícitamente **a Codex** el desarrollo de la fase ya decidida. **Orden formal:** [`CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md`](CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md). **Tracking:** [issue #82](https://github.com/DigitalAppcorp/pazo-app/issues/82). Leer AGENTS.md y fuentes GR/EVT sin recortar funcionalidades. Construir en rama aislada derivada de F17 HEAD y PR hacia F17: cola FIFO para interesados, cinco invitaciones/72h, cuotas 1→5→20→50 promocionadas al verificar 1/3/10 compradores reales, cancelación/reanudación Live existente, outbox/idempotencia y STOP, dos notificaciones con revisión de beneficios, Administración y pruebas. No limitarse a plan: entregar software verificable y documentos de cierre.
+
+**Estado REAL AL ASENTAR LA ORDEN:** issue creado pero **no hay prueba de que la ejecución de Codex se haya iniciado**; no confundir encargo con código completado. Producción sigue protegida: sin cambios alojados/activación de cobros/`main`. El PO ya autorizó programación en rama, no aplicar SQL Supabase ni Edge/Vercel producción. **Criterios de cierre:** GR-01..22 y EVT-01..19, CI/PG17 y evidencia/PR; pedir GO específicamente para cualquier mutación hospedada.
+
+---
+
 ## F16 — DECISIÓN APROBADA: L4=50 al décimo comprador Live verificado (23-oct-2026)
 
 **PRECEDENCIA SOBRE GATES HISTÓRICOS:** El PO aprobó explícitamente la escalera acumulada **1 → 5 → 20 → 50**. L1→L2: primer comprador con venta Live firmada/conciliada, cobertura y beneficios activos. L2→L3: **tercer** comprador distinto con las mismas pruebas y sin anomalía financiera crítica. **L3→L4: DÉCIMO comprador distinto**, igualmente con pago real y beneficios activos, sin incidencias financieras críticas. PAZO amplía al momento de verificar cada umbral, mediante backend + Supabase y asigna cupos a la cola FIFO; **NO esperar 24 horas/días** ni pedir al administrador que pulse en cada promoción.
