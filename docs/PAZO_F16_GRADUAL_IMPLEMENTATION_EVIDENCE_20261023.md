@@ -3,7 +3,7 @@
 **Fecha:** 23-oct-2026. **Estado de entrega:** código implementado en rama,
 `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`; **no release**.
 Base auditada en GitHub: F17 `872ff8c37c8332c5412fbbbb79db33d09ae1f003`, PR #81
-DRAFT hacia `main`. Rama: `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT hacia F17](https://github.com/DigitalAppcorp/pazo-app/pull/83). Código de producto: [`2d734920604d58032bb97c8f6929997cef1a334f`](https://github.com/DigitalAppcorp/pazo-app/commit/2d734920604d58032bb97c8f6929997cef1a334f); el runner CI y esta evidencia se completan en HEAD del mismo PR.
+DRAFT hacia `main`. Rama: `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT hacia F17](https://github.com/DigitalAppcorp/pazo-app/pull/83). Base de implementación: [`2d734920604d58032bb97c8f6929997cef1a334f`](https://github.com/DigitalAppcorp/pazo-app/commit/2d734920604d58032bb97c8f6929997cef1a334f); el tratamiento del legado verificado, runner CI y evidencia finales están en HEAD del mismo PR.
 No se modificaron producción, credenciales, merchant, plan, scheduler ni `main`.
 No hubo PayPal CREATE, emails, SMS, push ni notificaciones a cuentas reales.
 
@@ -25,7 +25,7 @@ implementadas; los documentos anteriores se conservan como historia superada.
 | Notificaciones | `supporter_campaign` y `supporter_verified`, dos identidades por campaña/dueño. Invitación actualiza mismo UUID a espera/cupo; ACK+inbox en transacción, versión/lease rechazan escrituras viejas. Navega a cuenta protegida; no abre PayPal. Copy `review_v1` preservada; `thanks_v2` preparada, sin control que la active automáticamente |
 | Feedback | OK/problema/omitir, un resultado por cuenta; componente enumerado. Problema crea ticket F17 privado idempotente y no cambia pago, entitlement ni cuota. Cuenta pagada ajena a campaña no recibe formulario huérfano |
 | Administración | Métricas agregadas, ingresos ledger sin períodos retenidos separados de cortesías, reservas/admitidos/cola/pago/feedback/avisos, incidentes, worker y auditoría. Nuevo Edge valida GoTrue/admin/TOTP reciente, origen oficial, JSON acotado, confirmación exacta, nonce y CAS; respuestas sin secretos |
-| Controles | Inicio, pausa, STOP, revisión, reanudación y GO público separado tras 50. Inicio bloqueado por legado abierto/gate pendiente. El control antiguo no puede pasar a canary/public después del inicio gradual. Pausa no cambia worker/webhook ni gestión histórica |
+| Controles | Inicio, pausa, STOP, revisión, reanudación y GO público separado tras 50. Inicio bloqueado por legado incierto/gate pendiente; contrato anterior pagado/proyectado se aísla sin exigir cancelación. El control antiguo no puede pasar a canary/public después del inicio gradual. Pausa no cambia worker/webhook ni gestión histórica |
 | Privacidad | Inventario y textos legales ES/EN actualizados. Limpieza operativa real en worker: eventos procesados 90d, avisos/intereses sin intento/feedback 90d tras STOP; Auth CASCADE. Admisión y auditoría financiera conservan política restringida existente |
 | Integración | Sin cambio de dependencias de producción. Mapbox y recursos del mapa sin diff contra F17. Nuevo workflow comprueba el SHA exacto de la rama, no solo el merge sintético |
 
@@ -101,7 +101,7 @@ real reservado al PO; no implica que se haya omitido su implementación.
 | 12 | PASS aislado | Ausencia de firma/beneficio no emite; formulario requiere campaña y pago | HEAD PR / pg17 |
 | 13 | PASS | POST sin slot responde controlled_release_admission_denied | HEAD PR / concurrency |
 | 14 | PASS | 60 writers y 15 drains concurrentes, locks reales | HEAD PR / concurrency |
-| 15 | PASS código; BLOCKED legado real | Intent inicial synthetic preservado; inicio exige conciliación; alojado sigue intacto | HEAD PR / kernel-pg17 |
+| 15 | PASS código; BLOCKED legado real | Intent pendiente bloquea inicio; contrato pagado/proyectado se aísla y conserva renovación; alojado intacto | HEAD PR / kernel-pg17 |
 | 16 | PASS | Décimo distinto firmado+proyección promueve50 sin espera | HEAD PR / kernel-pg17 |
 | 17 | PASS | Nueve + décimo en hold no promueven; otra renovación no suma dueño | HEAD PR / kernel-pg17 |
 | 18 | PASS | 50 contratos/admisiones acumulados; 51.º queda en cola, nunca público | HEAD PR / concurrency |
@@ -112,7 +112,7 @@ real reservado al PO; no implica que se haya omitido su implementación.
 | Estado | Resultado |
 | --- | --- |
 | CODE_DONE | Implementado y probado en rama; no fase COMPLETADA/merged |
-| DB_MIGRATION_PREPARED | PASS; SHA-256 `ec0f2ee733529074eba6ca9d483906c4b9f4800efbc5733f34667bea407e3953` |
+| DB_MIGRATION_PREPARED | PASS; SHA-256 `8ae69ae15b22aa8d2d389124fd24d8f05d2f37ff4e664017315bebbc99c4bbb1` |
 | DB_HOSTED_APPLIED | BLOCKED: no autorizado ni ejecutado |
 | EDGE_DEPLOYED | BLOCKED: funciones nuevas/actualizadas no publicadas |
 | USER_UI_QA | Automatizado local PASS; revisión alojada/visual PO BLOCKED |

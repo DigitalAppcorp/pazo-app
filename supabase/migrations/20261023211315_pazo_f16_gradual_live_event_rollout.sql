@@ -131,6 +131,13 @@ BEGIN
  RETURN supporter_private.gradual_verified_core(p_owner);
 EXCEPTION WHEN OTHERS THEN RETURN false;
 END $$;
+-- An already paid/projected original contract is reconciled and isolated from
+-- this campaign. It must not require cancellation of its valid renewal.
+CREATE FUNCTION supporter_private.gradual_legacy_open() RETURNS bigint LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+ SELECT count(*) FROM supporter_private.pazo_paypal_live_checkout_intents i WHERE i.closed_at IS NULL
+ AND NOT EXISTS(SELECT 1 FROM supporter_private.gradual_interest q WHERE q.intent_id=i.intent_id)
+ AND NOT (supporter_private.gradual_verified(i.owner_id) AND EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_paid_periods p WHERE p.intent_id=i.intent_id AND p.service_start<=statement_timestamp() AND p.service_end>statement_timestamp()));
+$$;
 CREATE FUNCTION supporter_private.gradual_notice(p_owner uuid,p_kind text,p_state text) RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$
  INSERT INTO supporter_private.gradual_outbox(campaign_id,owner_id,kind,desired_state)
  SELECT id,p_owner,p_kind,p_state FROM supporter_private.gradual_campaign WHERE singleton
@@ -293,7 +300,7 @@ BEGIN
  'feedbackIssues',(SELECT count(*) FROM supporter_private.gradual_interest WHERE feedback='issue'),
  'notificationsPending',(SELECT count(*) FROM supporter_private.gradual_outbox WHERE delivered_version<version),
  'notificationsDelivered',(SELECT count(*) FROM supporter_private.gradual_outbox WHERE delivered_version>0),
- 'legacyOpen',(SELECT count(*) FROM supporter_private.pazo_paypal_live_checkout_intents i WHERE i.closed_at IS NULL AND NOT EXISTS(SELECT 1 FROM supporter_private.gradual_interest q WHERE q.intent_id=i.intent_id)),
+ 'legacyOpen',supporter_private.gradual_legacy_open(),
  'incidents',(SELECT coalesce(jsonb_agg(code ORDER BY code),'[]'::jsonb) FROM supporter_private.gradual_incident WHERE resolved_at IS NULL),
  'realRevenueMinor',(SELECT coalesce(sum(p.amount_minor),0) FROM supporter_private.pazo_paypal_live_paid_periods p WHERE NOT EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_period_holds h WHERE h.sale_id=p.sale_id AND h.released_at IS NULL)),
  'courtesyIsRevenue',false,'workerHealthy',EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_worker_control WHERE singleton AND last_heartbeat_at>statement_timestamp()-interval '5 minutes'),
@@ -311,7 +318,7 @@ BEGIN
  IF c.revision<>p_revision THEN RETURN jsonb_build_object('code','revision_changed');END IF;
  IF p_action IN('start','resume','public') THEN
   IF NOT c.hosted_gate_verified THEN RETURN jsonb_build_object('code','hosted_gate_required');END IF;
-  IF EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_checkout_intents i WHERE i.closed_at IS NULL AND NOT EXISTS(SELECT 1 FROM supporter_private.gradual_interest q WHERE q.intent_id=i.intent_id)) THEN RETURN jsonb_build_object('code','legacy_intent_requires_reconciliation');END IF;
+  IF supporter_private.gradual_legacy_open()>0 THEN RETURN jsonb_build_object('code','legacy_intent_requires_reconciliation');END IF;
   IF NOT supporter_private.gradual_health() THEN RETURN jsonb_build_object('code','health_requires_review');END IF;
  END IF;
  IF p_action='start' AND c.started_at IS NOT NULL THEN RETURN jsonb_build_object('code','campaign_already_started');END IF;

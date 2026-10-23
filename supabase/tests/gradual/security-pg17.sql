@@ -17,6 +17,13 @@ UPDATE public.profiles SET onboarding_completed=true WHERE id='82000000-0000-400
 INSERT INTO account_requests_private.deletion_requests VALUES('82000000-0000-4000-8000-00000000003c','requested');
 SELECT gradual_test.assert('GR-03_DELETION',NOT supporter_private.gradual_eligible('82000000-0000-4000-8000-00000000003c'));
 SELECT gradual_test.assert('GR-03_OPERATOR_EXCLUDED',NOT supporter_private.gradual_eligible('82000000-0000-4000-8000-00000000ffff'));
+-- A verified original subscription may keep its renewal outside the campaign.
+DO $$ DECLARE saved supporter_private.gradual_interest%ROWTYPE;BEGIN
+ SELECT * INTO saved FROM supporter_private.gradual_interest WHERE owner_id='82000000-0000-4000-8000-000000000002';
+ DELETE FROM supporter_private.gradual_interest WHERE owner_id=saved.owner_id;
+ PERFORM gradual_test.assert('EVT-15_PAID_LEGACY_ISOLATED',supporter_private.gradual_legacy_open()=0 AND (SELECT provider_status='ACTIVE' AND closed_at IS NULL FROM supporter_private.pazo_paypal_live_checkout_intents WHERE intent_id=saved.intent_id));
+ INSERT INTO supporter_private.gradual_interest SELECT saved.*;
+END $$;
 -- Original consent/intent and provider claim guards remain authoritative.
 DO $$ DECLARE result jsonb;intent text;request uuid:=gen_random_uuid();who uuid:='82000000-0000-4000-8000-00000000000f'; BEGIN
  UPDATE supporter_private.gradual_interest SET slot_expires_at=statement_timestamp()+interval '15 minutes' WHERE owner_id=who;
