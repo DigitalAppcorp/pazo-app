@@ -624,6 +624,8 @@ test('F16 Live abandoned login keeps original approval action visible without cr
   'No original request may be acted on while the list is unavailable')
  assert.ok(surface.includes('recoveryMessage&&<p role="alert"'),
   'Provider failures must be visible at the original payment surface')
+ assert.ok(surface.includes("original.state==='pending'&&!original.needsReconciliation?'abandon':'abandon_pending'"),
+  'An unclaimed request is released without PayPal while a bound request requires provider confirmation')
  assert.ok(!surface.includes("action:'subscribe'")&&!surface.includes('crypto.randomUUID()'),
   'Recovery must never create a new paid request or consent')
  assert.ok(recovery.includes("if(remote.status==='APPROVAL_PENDING')"))
