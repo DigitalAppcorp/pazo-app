@@ -219,7 +219,8 @@ test('Live retry never cancels an ACTIVE, APPROVED, wrong-owner or mismatched ch
    readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
     custom_id:bound.intentId,status}),
    claimCancel:async()=>{claims++;return true},
-   postCancel:async()=>{posts++;return {postAccepted:true}}
+   postCancel:async()=>{posts++;return {postAccepted:true}},
+   finishCancel:async()=>true
   })
   const res=await handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
   assert.equal(res.status,409,status)
@@ -231,7 +232,8 @@ test('Live retry never cancels an ACTIVE, APPROVED, wrong-owner or mismatched ch
  const {handler}=build({readPrivateOwner:async()=>slots([bound]),
   readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
    custom_id:'intent-23456789-1234-4234-8234-000000000000',status:'APPROVAL_PENDING'}),
-  claimCancel:async()=>{claimed=true;return true}})
+  claimCancel:async()=>{claimed=true;return true},
+  postCancel:async()=>true,finishCancel:async()=>true})
  const mismatch=await handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
  assert.equal(mismatch.status,409)
  assert.equal(claimed,false)
