@@ -1,3 +1,11 @@
+## CODEX — Tarea F16 de implementación abierta (23-oct-2026)
+
+**ORDEN DIRECTA PO:** «Excelente, que lo haga Codex». Orden de implementación (no plan) guardada en [`CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md`](CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md). **Issue de GitHub [#82](https://github.com/DigitalAppcorp/pazo-app/issues/82)** registra el encargo. Codex debe retomar desde HEAD actual F17/PR #81, crear rama de desarrollo separada si hay concurrencia, construir sistema completo front/backend/migraciones locales/worker/notificaciones/admin, probar con **GR-01…GR-22 + EVT-01…EVT-19**, documentar evidencia y PR hacia F17. El link de issue **NO significa ejecución de Codex iniciada ni que esté asignado automáticamente**; el usuario debe abrir la tarea en su entorno Codex, ya que no existe acción de ejecución Codex en el conector.
+
+**Permiso PO:** implementar y probar en rama; **NO** instalar Supabase alojado, desplegar Edge/Vercel producción, mandar notificaciones reales, activar cobros PayPal ni fusionar `main`. La orden específica prevalece sobre instrucciones históricas incompatibles del 21-oct. Reusar generación/payments verificados existentes, recovery Live aprobada y diseño Mapbox sin alteración. Estado: `CODEX_ORDER_DOCUMENTED / ISSUE_OPEN / EXECUTION_NOT_CONFIRMED / PROD_UNCHANGED`.
+
+---
+
 ## F16 — Cuarta etapa L4=50 APROBADA, promoción automática por décimo pago (23-oct-2026)
 
 **ÚLTIMA DECISIÓN PO (PREVALECE SOBRE GATES HISTÓRICOS DE ESTE ARCHIVO):** el PO dijo **«sí»** a añadir `L4_EXTENDED=50 compradores acumulados`; el orquestador debe pasar de **L3=20 a L4=50** de manera **AUTOMÁTICA AL DÉCIMO COMPRADOR DISTINTO** con venta PayPal Live `COMPLETED` firmada y conciliada, período vigente y beneficios pagados `ACTIVE_VERIFIED`, siempre que no existan incidentes financieros críticos. La progresión completa acordada es **L1=1 (primer comprador validado) → L2=5 (1 venta/beneficio confirmado) → L3=20 (3 compradores distintos) → L4=50 (10 compradores distintos)**, sin esperas de 24h ni entrada administrativa entre fases. **El primer inicio de campaña Live sí requiere GO explícito del PO, y pasar de 50 a `public` también requiere nuevo GO/MFA.**
