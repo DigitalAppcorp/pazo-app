@@ -280,14 +280,16 @@ export const MapboxMap = ({
           container: containerRef.current,
           // Normal 3D basemap, with the existing raster fallback for outages.
           style: mapAttempt === 'raster' ? PAZO_STREETS_STYLE : 'mapbox://styles/mapbox/standard',
-          config: { basemap: {
+          // Standard-only settings must not be passed to the OSM raster
+          // style, which has no imported basemap/config schema.
+          ...(mapAttempt === 'vector' ? { config: { basemap: {
             theme: 'faded',
             lightPreset: 'day',
             showHdRoads: false,
             show3dObjects: true,
             showPointOfInterestLabels: false,
             showTransitLabels: false,
-          } },
+          } } } : {}),
           center: DEFAULT_CENTER,
           zoom: 10.5,
           pitch: mapAttempt === 'raster' ? 32 : 45,
