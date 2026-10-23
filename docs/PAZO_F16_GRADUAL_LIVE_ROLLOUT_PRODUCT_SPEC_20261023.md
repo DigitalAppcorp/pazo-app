@@ -12,13 +12,14 @@
 
 ## Actualización de aprobación y precedencia: reglas POR ACCIÓN (23-oct-2026)
 
-**GO de producto confirmado por el PO:** aprobó el paquete del apartado 15 para **5 invitaciones iniciales, 72h para responder, FIFO y cuotas acumuladas 1→5→20**, autorizando pasar a programación en la rama F17. Acto seguido **corrigió expresamente la lógica de tiempo**: NO esperar 24 horas o días entre etapas; las promociones deben activarse **por transacción real verificada y proyección de beneficios**, comunicando al frontend, backend y Supabase sin intervención administrativa por cada fase. La intención de 25 o más interesados debe preservarse en cola sin descartar personas ni generar pagos fuera de cupo.
+**GO de producto confirmado por el PO:** aprobó el paquete del apartado 15 para **5 invitaciones iniciales, 72h para responder, FIFO y cuotas acumuladas 1→5→20→50**, autorizando pasar a programación en la rama F17. Acto seguido **corrigió expresamente la lógica de tiempo**: NO esperar 24 horas o días entre etapas; las promociones deben activarse **por transacción real verificada y proyección de beneficios**, comunicando al frontend, backend y Supabase sin intervención administrativa por cada fase. La intención de 25 o más interesados debe preservarse en cola sin descartar personas ni generar pagos fuera de cupo.
 
-**FUENTE RECTORa DE REGLAS NUEVAS:** [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md). Sus reglas `EV-01..EV-13` y `EVT-01..EVT-15` **prevalecen sobre toda mención anterior de 24h en los apartados 5, 13 y 15** de esta especificación; tales menciones se preservan solo como historial de la propuesta anterior, **NO como requisitos efectivos**.
+**FUENTE RECTORA DE REGLAS VIGENTES:** [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md). Sus reglas `EV-01..EV-15` y `EVT-01..EVT-19` **prevalecen sobre toda mención anterior de 24h en los apartados 5, 13 y 15** de esta especificación; tales menciones se preservan solo como historial de la propuesta anterior, **NO como requisitos efectivos**.
 
 - **L1→L2:** primera transacción Live COMPLETED/firmada/conciliada y beneficios activos server-side -> promover automáticamente a **5**, sin demoras por calendario.
 - **L2→L3:** tercer comprador distinto con venta/beneficios auténticos -> promover automáticamente a **20** si salud e integridad cumplen gates.
-- **L3 en 20:** no seguir hasta 25 por accidente; los cinco siguientes esperan mientras el PO elige un techo superior (p. ej. 50, todavía **NO aprobado**) o GO final para `public`. No prometer «cero ventas perdidas» cuando haya límite autorizado; sí conservar cada interés.
+- **L3→L4:** al acreditar el **décimo comprador distinto** con pago Live firmado, conciliado y beneficios efectivos —y sin incidencias financieras críticas abiertas— promover automáticamente a **50 compradores acumulados**, conservando cola FIFO. Ninguna aprobación manual ni espera de 24h entre etapas.
+- **L4 en 50:** al alcanzar 50, conservar la cola e informar al PO; la apertura sin techo `public` sí requiere autorización administrativa y MFA, no se produce automáticamente.
 - **Dos notificaciones** en bandeja: la primera puede actualizar su mismo hilo a «Tu cupo disponible»; la segunda, solo tras pago acreditado y beneficios confirmados, solicita revisión voluntaria. No push/email por defecto.
 - **Diferencia autorización:** la programación en rama F17 está autorizada por el «sí listo» del PO; esta aprobación **NO** autoriza instalar migraciones alojadas, modificar Edge/producción, mover `canary`, enviar notificaciones reales o realizar un pago Live sin GO posterior expreso.
 - **No alterar** la recuperación de checkout Live y Sandbox ya comprobadas por el PO; no borrar las ideas, textos ni DoD de documentos originales.
@@ -107,19 +108,20 @@
 
 ## 5. Modelo de lanzamiento gradual — protección financiera
 
-La opción B aprobada es crecer automáticamente **dentro de una capacidad máxima explícita**. Valores abajo son **recomendación para revisión**, no parámetros ya aprobados:
+La opción B y los parámetros **1→5→20→50** están aprobados por el PO. Esta tabla es el **contrato de producto vigente**, subordinado a los requisitos de seguridad y evidencia descritos en el anexo de reglas por evento:
 
 | Etapa propuesta | Compradores Live distintos admitidos desde inicio | Condición antes de ampliar | Público |
 | --- | --- | --- | --- |
 | `L1_FIRST_REAL` | **1 acumulado** | Una venta original firmada, conciliación escrita, beneficio visible, salud worker/webhook normal y cero alertas críticas; revisión opcional | Solo invitados autorizados |
-| `L2_SMALL` | Hasta **5 acumulados** | Primera compra `L1` acreditada y procesamiento estable durante ventana observacional propuesta de 24 h | Solo interesados seleccionados |
-| `L3_BETA` | Hasta **20 acumulados** | Al menos 3 compras distintas confirmadas sin incidentes abiertos que comprometan dinero/beneficios; ventana saludable propuesta de 24 h | Solo interesados seleccionados |
-| `LIMITED_COMPLETE` | Máximo **20**, sin crecimiento adicional | Reporte financiero + UX + soporte disponible a admin | Continúa restringido |
+| `L2_SMALL` | Hasta **5 acumulados** | Primera compra Live pagada y beneficio verificados; sin incidentes críticos; promoción automática por evento | Solo interesados seleccionados |
+| `L3_BETA` | Hasta **20 acumulados** | Tres compradores distintos con pago Live firmado, período y beneficios confirmados, sin incidentes críticos; promoción automática por evento | Solo interesados seleccionados |
+| `L4_EXTENDED` | Hasta **50 acumulados** | Diez compradores distintos con pago Live y beneficios verificados y cero incidentes críticos abiertos; promoción automática por evento | Solo interesados seleccionados |
+| `LIMITED_COMPLETE` | Máximo **50**, sin crecimiento adicional | Reporte financiero + UX + soporte disponible a admin | Continúa restringido |
 | `PUBLIC` | Sin cupo piloto | **Autorización expresa del PO en Administración con MFA reciente** y revisión real de resultados/retención/cancelación | Todos los usuarios elegibles |
 
 **Interpretación esencial de la cuota:** cuenta **número acumulado de suscripciones Live admitidas para este piloto** (incluidas las que luego cancelen), no solamente número de checkouts ejecutándose ni número de suscriptores activos. Un pedido reservado y todavía incierto consume capacidad; cuando queda probado que nunca creó suscripción o fue terminal sin pago y sin pendientes, se puede liberar esa reserva bajo reglas verificadas. No liberar una suscripción real ya admitida porque pagó rápido o después canceló; evitar crecimiento ilimitado por rotación.
 
-**Concurrencia:** adicionalmente proponer techo de **1 intento nuevo en transición sin resolver** en L1 y techo bajo configurable en L2/L3. Una reserva no es un cobro, expira solo si no se inició CREATE ni existe estado pendiente remoto. Bajo timeout se consulta registro idempotente antes de decidir; nunca duplicar.
+**Concurrencia:** adicionalmente proponer techo de **1 intento nuevo en transición sin resolver** en L1 y techo bajo configurable en L2/L3/L4. Una reserva no es un cobro, expira solo si no se inició CREATE ni existe estado pendiente remoto. Bajo timeout se consulta registro idempotente antes de decidir; nunca duplicar.
 
 **Autoavance condicionado:** comprobar salud de la fuente financiera y del plano de control en cada ampliación (worker heartbeat, webhook listo, generación/origen fijados, términos, ledger, atribución y proyección de beneficios, ausencia de disputas/holds o eventos estancados relevantes). La respuesta voluntaria del usuario **aporta señal UX**, pero no sustituye evidencia financiera ni debe ser obligatoria para que el comprador conserve sus beneficios.
 
@@ -266,8 +268,8 @@ Todas las transiciones financieras requieren evidencia privada servidor con CAS/
 | Estrategia de lanzamiento | **APROBADA** | Opción B: gradual automática |
 | Dos notificaciones en bandeja | **APROBADO COMO DIRECCIÓN** | Invitación antes / excelencia+revisión tras beneficios |
 | ¿Una invitación a la vez o varias + cola? | **PENDIENTE** | Varias expresiones de interés, 1 checkout inicial |
-| Escalera de compras acumuladas | **PENDIENTE** | 1→5→20 |
-| Ventanas/umbral de avance | **PENDIENTE** | Observación 24h, cero incidentes críticos |
+| Escalera de compras acumuladas | **APROBADA** | 1→5→20→50 |
+| Ventanas/umbral de avance | **APROBADO POR EVENTO** | 1, 3 y 10 compradores distintos con pagos y beneficios verificados; sin espera comercial de 24h ni incidentes financieros críticos |
 | Texto final ES/EN y no insistencia | **PENDIENTE** | Copia U01/U05; sin push/email |
 | Tratamiento tras pago incierto / reembolso | **SEGURIDAD NO NEGOCIABLE**, operación por definir | Pause new; preservar derechos; revisión humana de anomalías |
 | Modificar segunda notificación a solo gracias | **PENDIENTE** | Tras evidencia suficiente y decisión PO |
@@ -283,9 +285,9 @@ Todas las transiciones financieras requieren evidencia privada servidor con CAS/
 **Estados finales después de GUARDAR DOCUMENTACIÓN:** `STRATEGY_B_SELECTED`, `SPEC_RECORDED`, `PRODUCT_GATES_OPEN`, `CODE_UNCHANGED`, `SQL_UNCHANGED`, `EDGE_UNCHANGED`, `PAYPAL_UNCHANGED`, `PRODUCTION_UNCHANGED`, `MAIN_NOT_MERGED`.
 
 
-## 15. Paquete ejecutivo de parámetros listo para aprobación (23-oct-2026)
+## 15. Paquete de parámetros aprobado por el PO (23-oct-2026)
 
-**ESTADO:** `RECOMMENDED_FOR_PO_REVIEW` — no aprobado por el PO y no constituye autorización de programación o despliegue. Este paquete precisa la estrategia B seleccionada, sin sustituir decisiones anteriores de producto ni cambiar las dos notificaciones. El PO puede aprobarlo en conjunto o ajustar valores.
+**ESTADO:** `PRODUCT_PARAMETERS_APPROVED / BRANCH_PROGRAMMING_AUTHORIZED / HOSTED_NOT_AUTHORIZED`. El PO aprobó los parámetros de invitación, FIFO, 72h y 1→5→20→50. Las **antiguas referencias a 24h** de este apéndice han sido sustituidas por promociones **inmediatas por evento financiero verificado**, detalladas en `PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`. Se conservan historial e ideas no contradictorias; el GO de programación no equivale a autorización para producir cargos reales.
 
 ### 15.1 Selección e invitación, recomendación
 
@@ -295,15 +297,16 @@ Todas las transiciones financieras requieren evidencia privada servidor con CAS/
 - **Cola/cupos:** enviar invitaciones nunca reserva dinero ni incrementa ventas. La lista de espera informa «Te avisaremos dentro de PAZO cuando haya un cupo» sin prometer fecha. Se puede salir de la espera sin repercusión. No abrir checkout en `public` para usuarios sin permiso.
 - **Cuentas excluidas:** solo cuentas válidas con onboarding terminado; no borradas, suspendidas, duplicadas o ya suscritas a este plan; excluir cuentas internas/QA **solo por controles existentes verificables**, sin inventar identidad PayPal a partir de email, IP o datos sensibles.
 
-### 15.2 Límite y escalamiento automático, recomendación
+### 15.2 Límite y escalamiento automático, aprobado en los puntos descritos
 
 - **L1: 1 comprador acumulado**, máximo **una solicitud PayPal sin resolver**; se bloquean nuevas solicitudes mientras existe una original cuyo estado remoto no se haya resuelto.
-- **L1 → L2 (5 compradores acumulados):** primera venta Live de $2.99 completada, firmada y conciliada, cobertura pagada vigente, beneficios proyectados en cuenta/mascota real y **24 horas** de observación del procesamiento sin incidente financiero crítico. No exigir feedback humano, cancelación de la renovación ni reembolso para ampliar.
-- **L2 → L3 (20 compradores acumulados):** al menos **tres compradores distintos** con pago+beneficios acreditados, periodo de **24 horas** sin incidencia financiera crítica y todas las compras/reembolsos/holds de la cohorte conciliadas o sin bloqueos relevantes. Si los tres no aparecen, conservar etapa L2 sin límite de tiempo de campaña.
-- **L3 → público ilimitado:** **nunca automático**; entregar informe administrativo con evidencia y solicitar GO del PO con MFA reciente. Hasta entonces el tope acumulado de la campaña sigue en 20.
+- **L1 → L2 (5 compradores acumulados):** primera venta Live de $2.99 completada, firmada, conciliada, cobertura pagada y beneficios proyectados en cuenta/mascota real, **sin esperar 24h** y sin incidencia crítica. No exigir feedback humano, cancelación ni reembolso para ampliar.
+- **L2 → L3 (20 compradores acumulados):** **tres compradores distintos** con pago Live y beneficios acreditados, sin incidencia financiera crítica abierta ni conciliaciones bloqueantes. Promover en el evento válido; si faltan pruebas, conservar L2 sin límite de tiempo comercial.
+- **L3 → L4 (50 compradores acumulados):** **diez compradores distintos** con venta Live COMPLETED firmada/conciliada, período pagado y beneficios verificables, sin incidencia crítica abierta. Promoción automática, sin espera por días.
+- **L4 → público ilimitado:** **nunca automático**; entregar informe administrativo y solicitar GO del PO con MFA reciente. Hasta entonces el tope acumulado de la campaña sigue en **50**.
 - **Cómo se cuentan:** una cuenta con varias mascotas = 1; compradores admitidos acumulados no disminuyen al cancelar; reservas temporales e intentos de CREATE inciertos retienen capacidad. Liberar reserva solo tras certeza de que no existe suscripción PayPal pendiente ni cobro sin conciliar. No permitir que pagos recurrentes consuman cupos nuevos.
-- **Concurrencia:** un intento nuevo sin resolver a la vez en L1; en L2/L3, límite interno propuesto de **2 nuevos intentos remotos sin resolver**; no confundir este máximo simultáneo con cupo acumulado.
-- **Tiempo 24h:** ventana operacional sugerida; no equivale a garantía de ausencia de disputas futuras ni a vencimiento de la suscripción.
+- **Concurrencia:** un intento nuevo sin resolver a la vez en L1; en L2/L3/L4, límite interno propuesto de **2 nuevos intentos remotos sin resolver**; no confundir este máximo simultáneo con cupo acumulado.
+- **Tiempo de avance:** por evento transaccional verificado, **nunca por una ventana fija de 24h**. Reintentos técnicos/leases y latencia de PayPal conservan temporizadores operativos independientes; no implican espera comercial.
 
 ### 15.3 Pausas y recuperación, recomendación
 
@@ -321,12 +324,12 @@ Todas las transiciones financieras requieren evidencia privada servidor con CAS/
 - **Administración** recibe métricas separadas: interesados, en cola, reservas, aprobaciones no pagadas, ventas Live verificadas, beneficio otorgado, notificación 2, confirmación humana e incidencias; controles pausar/reanudar, historial de fases, límites, log de motivo sin PII; botón `Abrir al público` exclusivamente con MFA y decisión PO.
 - **Transición futura propuesta** a mensaje solamente de agradecimiento: tras revisión del PO de métricas UX, no automática ni destructiva del copy inicial.
 
-### 15.5 Gate de firma de producto: alcance de la aprobación futura
+### 15.5 Gate de firma de producto: alcance de la aprobación vigente
 
-Para proceder a implementación sin malentendidos, una autorización debe cubrir expresamente los **valores 5 invitaciones iniciales, 72h, L1/L2/L3 de 1→5→20 compradores acumulados, 24h de observación, 3 compradores para L3, máximo 1/2 checkout inciertos y pausa/reanudación**, más los dos textos de notificación y su revisión voluntaria. Si el PO aprueba «este paquete de parámetros», esas serían las decisiones de producto. **Ese GO no incluye instalar SQL en producción ni activar pagos reales; cada despliegue de datos/Edge y el encendido limitado mantienen controles separados conforme AGENTS.md.**
+El PO **ya aprobó**: 5 invitaciones iniciales, 72h solo para responder, cola FIFO, capacidades acumuladas **L1/L2/L3/L4 = 1→5→20→50**, promociones automáticas **cuando se acrediten 1, 3 y 10 compradores distintos** con pagos y beneficios reales y sin incidencias financieras críticas. Confirmó eliminación de espera 24h. Las dos notificaciones y revisión voluntaria siguen incorporadas. **El GO de producto y programación en rama NO incluye instalar SQL en producción ni activar cargos reales; cada despliegue de datos/Edge y el encendido limitado mantienen autorización separada conforme AGENTS.md.**
 
 ### 15.6 Registro de aceptación
 - Estrategia B de lanzamiento gradual: **APROBADA** previamente.
-- Parámetros concretos de este apéndice: **PROPUESTOS PARA REVISIÓN**, todavía sin voto del PO.
+- Parámetros concretos de este apéndice: **APROBADOS** en los extremos 5 invitaciones, 72h, FIFO, umbrales 1/3/10 y topes 1/5/20/50 sin espera por días; seguir monitoreando seguridad y revisar copy/retención/umbrales técnicos pendientes.
 - Flujos de usuario/PAZO/admin y GR-01…GR-22: documentados, aún sin implementación nueva.
 - F16 Sandbox y recuperación Live sin pago: no repetir QA humana ya aprobada.
