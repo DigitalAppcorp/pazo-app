@@ -1,3 +1,11 @@
+## F16/F17 — Cierre de regresión de checkout abandonado (23-oct-2026; rama, sin producción)
+
+**DECISIÓN PO:** la recuperación ya validada en Sandbox debe mantenerse en Live. Estado código: `ff954b86` con CI general SUCCESS (`40006044745`), seguridad F17 SUCCESS (`40006044654`) y F16 bootstrap SUCCESS (`40006044657`). La invitación Live conserva el CTA con intent abierto, `resume` reutiliza el original y resuelve terminales con conciliación SQL; `abandon_pending` permite pedir cierre de aprobación sin pago con confirmación del titular, cancelación única en proveedor, GET independiente y liberación solo sin pagos ni eventos pendientes. Los pagos/beneficios siguen protegidos; `ACTIVE/APPROVED/SUSPENDED` no se liberan. Sin modificaciones de Supabase, PayPal ni producción.
+
+**SIGUIENTE GATE:** desplegar el endpoint y frontend solo con GO del PO y verificación previa; probar con sesión autorizada sin completar pago que volver del login no oculta el CTA, que se retoma el original o se cierra de manera segura, y que no hay dos intentos. PR #81 DRAFT, sin merge a `main`; PayPal Live E2E cobro real no verificado. El mapa Standard oficial fue aprobado, no repetir. Soporte E2E posbeta según decisión PO.
+
+---
+
 ## F17 — Zona segura compacta y cristal localizado cerca del dock (22-oct-2026 · SOLO RAMA)
 
 **Evidencia del PO:** después del ajuste `bd24213c` sigue habiendo excesivo espacio vacío al final del Feed y Mi mascota. Auditoría de código identificó **dos reservas inferiores acumuladas**: `App.tsx` añade `padding-bottom:9rem+safe-area` (144px base) en el contenedor principal y cada vista social (`HomeView`, `CommunitiesView`, `PetView`) incluye `pb-6` (24px). Total previo: 168px + safe-area sin contar geometría de otros elementos. El dock real tiene una rejilla de 76px más padding vertical (aprox. 92px+safe-area). Una reserva mayor separaba visualmente las últimas tarjetas y herramientas del menú.
