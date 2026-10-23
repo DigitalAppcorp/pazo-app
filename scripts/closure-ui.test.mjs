@@ -439,7 +439,7 @@ test('F13 Places carousel only centers map; pins retain details with brief entra
   assert.ok(stage.includes('onSelectPlace={onSelectPlace}'),'Pins still use the detail handler')
   assert.ok(mapbox.includes("map.on('click', 'pazo-place-models', handlePlaceClick)"))
   assert.ok(mapbox.includes('focusPlaceRequest.placeId'))
-  assert.ok(mapView.includes('motion-safe:animate-[slideUpFade_320ms_ease-out_both]'))
+  assert.ok(mapView.includes('motion-safe:animate-[slideUpFade_250ms_ease-out_both]'))
   assert.ok(fs.readFileSync('src/index.css','utf8').includes('@keyframes slideUpFade'))
 })
 
