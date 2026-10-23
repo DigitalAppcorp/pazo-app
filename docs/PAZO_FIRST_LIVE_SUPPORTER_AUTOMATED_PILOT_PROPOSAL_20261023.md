@@ -1,3 +1,5 @@
+> **ACTUALIZACIÓN DE ESTRATEGIA — 23-oct-2026.** El PO eligió la **opción B de APERTURA GRADUAL AUTOMÁTICA** (no la «opción B de selección de invitados» descrita en el apartado 7 de este archivo). La nueva especificación rectora se conserva en [`PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md). **Este archivo es historial de diseño que NO debe eliminarse**: la propuesta original de primer comprador, las dos notificaciones y sus ideas de verificación siguen vigentes como referencias. La elección de cuántas invitaciones enviar a la vez sigue **PENDIENTE**. Ningún código ni pago se autorizó por esta actualización documental.
+
 # PAZO — Propuesta: piloto automático del primer Amigo de PAZO en PayPal Live
 
 **Fecha:** 23-oct-2026
