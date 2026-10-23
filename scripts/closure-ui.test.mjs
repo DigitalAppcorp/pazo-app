@@ -1391,7 +1391,9 @@ test('F17 mobile regression: dynamic viewport, discreet install, street basemap 
   assert.ok(install.includes("placement === 'welcome'"))
   assert.ok(install.includes('if (state.installed || (!state.pending && !isIOS())) return null'),
     'Standalone installations never receive the install suggestion')
-  assert.ok(map.includes('style: PAZO_STREETS_STYLE'),'Render actual streets behind category pins')
+  assert.ok(map.includes("style: 'mapbox://styles/mapbox/standard'"),'Prefer the 3D basemap')
+  assert.ok(map.includes('map.setStyle(PAZO_STREETS_STYLE)'),'Keep emergency fallback')
+  assert.ok(map.includes("map.on('style.load'"),'Restore overlays after fallback')
   assert.ok(map.includes("'pazo-place-models'"),'3D models remain')
   assert.ok(basemap.includes('https://tile.openstreetmap.org/{z}/{x}/{y}.png'))
   assert.ok(stage.includes('www.openstreetmap.org/copyright'),'License attribution is visible')
@@ -1431,4 +1433,18 @@ test('F17 Places polish: transparent filter rail, feathered carousel edges, real
   assert.match(buildPlaceDirectionsUrl(place, 'Mozilla/5.0 (Linux; Android 14)'), /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1/)
   assert.ok(buildPlaceDirectionsUrl(place,'iPhone').startsWith('https://maps.apple.com/?daddr='))
   assert.match(buildPlaceDirectionsUrl({...place,latitude:NaN,longitude:NaN},'Android'), /Runyon%20Canyon%20Park/)
+})
+
+
+test('F17 mobile: centered modal, brand typography, floating map nav and image credit gate',()=>{
+  const map=fs.readFileSync('src/components/views/MapView.tsx','utf8')
+  const nav=fs.readFileSync('src/components/BottomNav.tsx','utf8')
+  const css=fs.readFileSync('src/index.css','utf8')
+  const stage=fs.readFileSync('src/features/places/components/ImmersivePlacesStage.tsx','utf8')
+  assert.ok(map.includes('createPortal(') && map.includes('document.body'))
+  assert.ok(map.includes('data-pazo-place-backdrop="true"') && map.includes('aria-modal="true"'))
+  assert.ok(!map.includes('top-[102px] z-40 overflow-y-auto'))
+  assert.ok(nav.includes("activeTab === 'mapa'") && nav.includes('absolute inset-x-0 bottom-0 z-30 bg-transparent'))
+  assert.ok(css.includes('.pazo-place-card:has(img[data-pazo-place-photo="true"])'))
+  assert.ok(stage.includes('pazo-photo-credit'))
 })

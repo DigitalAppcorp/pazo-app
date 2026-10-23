@@ -14,6 +14,8 @@ test('F17 six vetted unique photographic sources and licenses',()=>{
   assert.equal(getCuratedPlacePhoto('Runyon Canyon Park')?.exactVenue,true)
   assert.equal(getCuratedPlacePhoto('Unverified third party'),null)
   for(const x of photos){
+    assert.match(x?.imageUrl,/\/500px-/)
+    assert.doesNotMatch(x?.imageUrl,/\/640px-/)
     assert.ok(x?.imageUrl.startsWith('https://upload.wikimedia.org/wikipedia/commons/thumb/'))
     assert.ok(x?.sourceUrl.startsWith('https://commons.wikimedia.org/wiki/File:'))
     assert.ok(x?.licenseUrl.startsWith('https://creativecommons.org/licenses/'))
