@@ -444,10 +444,23 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
               <SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}
                 onAvailabilityChange={receiveLiveOfferState}/>
             ) : (
-              <p role="status" className="rounded-[16px] bg-[#F0F4E6] p-4 text-center text-[12px] leading-relaxed text-[#476862]">
-                {label('Hay una solicitud PayPal Live anterior que debe revisarse antes de iniciar otra suscripción. No se iniciará otro cobro.',
-                  'A previous PayPal Live request must be reviewed before starting another subscription. No new charge will be started.')}
-              </p>
+              <div data-pazo-live-existing-checkout="recover-original"
+                className="space-y-3 rounded-[18px] bg-[#F0F4E6] p-4 text-center">
+                <p role="status" className="text-[13px] leading-relaxed text-[#476862]">
+                  {label('Ya tienes una solicitud de PayPal. Puedes continuar ese mismo intento; PAZO comprobará primero su estado sin crear otra suscripción.',
+                    'You already have a PayPal request. You can continue that same attempt; PAZO checks its status first without creating another subscription.')}
+                </p>
+                <button type="button" disabled={busy} onClick={()=>void recover(accounts[0].intentId,'resume')}
+                  className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[15px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:opacity-65">
+                  {busy?label('Comprobando con PayPal…','Checking with PayPal…')
+                    :label('Continuar con PayPal','Continue with PayPal')}
+                </button>
+                <p className="text-[12px] leading-relaxed text-[#526F63]">
+                  {label('Si PayPal ya no permite recuperar la aprobación, consulta el estado en «Administrar mi suscripción». No se intentará otro cobro automáticamente.',
+                    'If PayPal can no longer recover the approval, check its status under Manage my subscription. No other charge will be attempted automatically.')}
+                </p>
+                {recoveryMessage&&<p role="alert" className="rounded-[14px] bg-white p-3 text-[12px] leading-relaxed text-[#724927]">{recoveryMessage}</p>}
+              </div>
             )}
           </SupporterOfferB>
           <p className="mx-auto max-w-[420px] px-1 pt-1 text-center text-[12px] leading-relaxed text-[#5C7470]">
@@ -458,7 +471,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
           </button>
         </>}
-        {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#F0F4E6] p-4 text-sm">{recoveryMessage}</p>}
+        {recoveryMessage&&(qaV2Screen||!accounts?.length)&&<p role="status" className="rounded-2xl bg-[#F0F4E6] p-4 text-sm">{recoveryMessage}</p>}
         {(showLiveManagement || acceptances.length>0 || qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
           <details open={qaManagementOpen} onToggle={e=>setQaManagementOpen(e.currentTarget.open)}
