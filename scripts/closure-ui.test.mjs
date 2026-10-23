@@ -1417,7 +1417,7 @@ test('F17 Places polish: transparent filter rail, feathered carousel edges, real
   assert.ok(!svc.includes('photoUrl: row.photo_url || DEFAULT_PLACE_PHOTO'),
     'A generic stock road must never masquerade as a verified venue photo')
   assert.ok(photo.includes('Foto no disponible'))
-  assert.ok(photo.includes('onError={() => setFailed(true)}'))
+  assert.match(photo,/onError=\{\(\)\s*=>\s*setFailed\(true\)\}/)
   assert.ok(map.includes('data-pazo-directions="true"'))
   assert.ok(map.includes('buildPlaceDirectionsUrl(selectedPlace'))
   assert.ok(feed.includes('aria-pressed={post.isLiked}'))
