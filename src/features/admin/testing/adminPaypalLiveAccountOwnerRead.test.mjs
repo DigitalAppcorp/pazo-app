@@ -178,7 +178,7 @@ test('Live account reader can read and cancel through original generation withou
 })
 
 test('Live abandoned PayPal login can close a verified pending approval and safely reopen the offer',async()=>{
- const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+ const bound={...row(),state:'bound',cancelState:null,subscriptionId:'I-ORIGINAL123456789',
   providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
  let reads=0,claims=0,posts=0,finishes=0,retirements=0
  const {handler}=build({
@@ -210,7 +210,7 @@ test('Live abandoned PayPal login can close a verified pending approval and safe
  assert.ok(!JSON.stringify(response).includes(bound.subscriptionId))
 })
 test('Live retry never cancels an ACTIVE, APPROVED, wrong-owner or mismatched checkout',async()=>{
- const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+ const bound={...row(),state:'bound',cancelState:null,subscriptionId:'I-ORIGINAL123456789',
   providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
  for(const status of ['ACTIVE','APPROVED','SUSPENDED','EXPIRED']){
   let posts=0,claims=0
@@ -237,7 +237,7 @@ test('Live retry never cancels an ACTIVE, APPROVED, wrong-owner or mismatched ch
  assert.equal(claimed,false)
 })
 test('PayPal cancellation timeout fails closed; same intent can finish only after independent GET',async()=>{
- const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+ const bound={...row(),state:'bound',cancelState:null,subscriptionId:'I-ORIGINAL123456789',
   providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
  let posted=0,release=0,claimed=0
  const first=build({readPrivateOwner:async()=>slots([bound]),
