@@ -140,6 +140,9 @@ export const MapboxMap = ({
   const onSelectPlaceRef = useRef(onSelectPlace)
   const [error, setError] = useState('')
   const [mapNotice, setMapNotice] = useState('')
+  // Re-create the map on vector authorization failure: swapping styles on
+  // the failed WebGL map left the canvas gray on a physical Android device.
+  const [mapAttempt, setMapAttempt] = useState<'vector' | 'raster'>('vector')
 
   useEffect(() => {
     placesRef.current = places
@@ -228,7 +231,7 @@ export const MapboxMap = ({
   useEffect(() => {
     let cancelled = false
 
-    let basemapStage: 'standard' | 'streets' | 'raster' = 'standard'
+    let basemapStage: 'standard' | 'streets' | 'raster' = mapAttempt === 'raster' ? 'raster' : 'standard'
     let vectorStyleErrors = 0
     const start = async () => {
       const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
@@ -250,7 +253,7 @@ export const MapboxMap = ({
         const map = new mapboxgl.Map({
           container: containerRef.current,
           // Normal 3D basemap, with the existing raster fallback for outages.
-          style: 'mapbox://styles/mapbox/standard',
+          style: mapAttempt === 'raster' ? PAZO_STREETS_STYLE : 'mapbox://styles/mapbox/standard',
           config: { basemap: {
             theme: 'faded',
             lightPreset: 'day',
@@ -261,7 +264,7 @@ export const MapboxMap = ({
           } },
           center: DEFAULT_CENTER,
           zoom: 10.5,
-          pitch: 45,
+          pitch: mapAttempt === 'raster' ? 32 : 45,
           bearing: 0,
           antialias: true,
           attributionControl: true,
@@ -295,6 +298,7 @@ export const MapboxMap = ({
         }
         map.on('zoom', syncMarkerEmphasis)
         map.on('style.load', () => {
+          if (basemapStage === 'raster') setMapNotice('')
           if (cancelled) return
 
           // Terrain is only attempted on authorized vector Mapbox styles.
@@ -430,6 +434,15 @@ export const MapboxMap = ({
           // perfectly good vector basemap or its PAZO native 3D models.
           if (/mapbox-terrain-dem-v1|pazo-terrain-dem|terrain-rgb/i.test(detail)) return
           const isStyleOrAuth = failure === 'map_authorization' || /\/styles\/|style.+(fail|load)/i.test(detail)
+          // A 401/403 on vector styles must restart in a clean canvas rather
+          // than attempting another Mapbox style with the same denied token.
+          if (failure === 'map_authorization' && basemapStage !== 'raster') {
+            setMapNotice(langRef.current === 'es'
+              ? 'Mapbox no autorizó las capas 3D. Recuperando el mapa alternativo.'
+              : 'Mapbox did not authorize 3D layers. Recovering the alternative map.')
+            setMapAttempt('raster')
+            return
+          }
           if (basemapStage === 'standard' && (isStyleOrAuth || ++vectorStyleErrors >= 3)) {
             basemapStage = 'streets'
             map.setStyle('mapbox://styles/mapbox/streets-v12')
@@ -444,7 +457,8 @@ export const MapboxMap = ({
               : (langRef.current === 'es'
                 ? 'No se cargó la cartografía 3D. Mostrando mapa de emergencia.'
                 : '3D basemap could not load. Showing the emergency map.'))
-            map.setStyle(PAZO_STREETS_STYLE)
+            // Cold-restart with the already proven OSM raster constructor.
+            setMapAttempt('raster')
             return
           }
           if (basemapStage === 'raster') {
@@ -481,7 +495,7 @@ export const MapboxMap = ({
       mapRef.current?.remove?.()
       mapRef.current = null
     }
-  }, [lang])
+  }, [lang, mapAttempt])
 
   useEffect(() => {
     const map = mapRef.current
