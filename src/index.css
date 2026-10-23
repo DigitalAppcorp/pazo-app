@@ -479,11 +479,11 @@
   display: inline-flex;
 }
 
-/* F17: continuous content-only soft fade for Feed, Communities and My Pet.
- * The earlier layer stopped above the dock and left a sharp, unblurred strip
- * between two blurred areas. The fade MUST continue behind the dock instead.
- * The dock itself is rendered later at z-30 and remains fully sharp.
- * No map styles or interactions are affected. */
+/* F17 — gradient frosted-glass blur (Feed, Communities, My Pet only).
+ * Real backdrop blur, never a white/cream overlay or glow. The mask fades
+ * the intensity of the BLUR itself over scrolling content. This layer extends
+ * under the floating dock, but is below the unchanged sharp dock (z-30).
+ * Map/Places do not mount this overlay. */
 .pazo-scroll-soft-edge {
   position: absolute;
   inset-inline: 0;
@@ -491,42 +491,31 @@
   height: calc(5.75rem + clamp(84px, 13dvh, 116px) + env(safe-area-inset-bottom, 0px));
   z-index: 20;
   pointer-events: none;
-  isolation: isolate;
 }
 
-/* Blur builds gradually toward the bottom, with no hard stop before the dock. */
+/* Leave the underlying image/text visible in its original colors and
+ * progressively defocus it like frosted glass. No pseudo-element color wash.
+ * Avoid isolation:isolate: the filter must sample the actual scroll canvas. */
 .pazo-scroll-soft-edge::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(11px);
-  backdrop-filter: blur(11px);
+  background: transparent;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   -webkit-mask-image: linear-gradient(to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.10) 22%,
-    rgba(0, 0, 0, 0.48) 54%,
-    rgba(0, 0, 0, 0.88) 81%,
+    rgba(0, 0, 0, 0.08) 16%,
+    rgba(0, 0, 0, 0.28) 35%,
+    rgba(0, 0, 0, 0.57) 58%,
+    rgba(0, 0, 0, 0.86) 80%,
     #000 100%);
   mask-image: linear-gradient(to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.10) 22%,
-    rgba(0, 0, 0, 0.48) 54%,
-    rgba(0, 0, 0, 0.88) 81%,
+    rgba(0, 0, 0, 0.08) 16%,
+    rgba(0, 0, 0, 0.28) 35%,
+    rgba(0, 0, 0, 0.57) 58%,
+    rgba(0, 0, 0, 0.86) 80%,
     #000 100%);
-}
-
-/* The cream dissolve continues below the dock and is never cut off mid-card.
- * This fallback also works when backdrop-filter is unsupported. */
-.pazo-scroll-soft-edge::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to bottom,
-    rgba(250, 248, 245, 0) 0%,
-    rgba(250, 248, 245, 0.08) 22%,
-    rgba(250, 248, 245, 0.34) 51%,
-    rgba(250, 248, 245, 0.72) 78%,
-    rgba(250, 248, 245, 0.94) 100%);
 }
