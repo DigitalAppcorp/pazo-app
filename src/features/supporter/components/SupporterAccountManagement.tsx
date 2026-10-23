@@ -450,7 +450,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   {label('Ya tienes una solicitud de PayPal. Puedes continuar ese mismo intento; PAZO comprobará primero su estado sin crear otra suscripción.',
                     'You already have a PayPal request. You can continue that same attempt; PAZO checks its status first without creating another subscription.')}
                 </p>
-                <button type="button" disabled={busy} onClick={()=>void recover(accounts[0].intentId,'resume')}
+                <button type="button" disabled={busy||!accounts?.[0]}
+                  onClick={()=>{const original=accounts?.[0];if(original)void recover(original.intentId,'resume')}}
                   className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[15px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:opacity-65">
                   {busy?label('Comprobando con PayPal…','Checking with PayPal…')
                     :label('Continuar con PayPal','Continue with PayPal')}
