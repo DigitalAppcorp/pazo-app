@@ -608,3 +608,26 @@ test('F16 abandoned checkout has one clear payment action, visible failure, and 
  assert.ok(state.includes('mayStartNewCheckout:false'),'A 404 cannot become a duplicate subscription')
  assert.ok(!page.includes('setQaV2AccountState(\'none\')'),'No synthetic new-buyer admission')
 })
+
+test('F16 Live abandoned login keeps original approval action visible without creating a duplicate subscription',()=>{
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const recovery=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-account/liveOwnerRecovery.mjs',import.meta.url),'utf8')
+ const liveStart=page.indexOf('data-pazo-live-existing-checkout="recover-original"')
+ const liveEnd=page.indexOf('</SupporterOfferB>',liveStart)
+ assert.ok(liveStart>0&&liveEnd>liveStart,'Existing Live request must keep an in-card recovery surface')
+ const surface=page.slice(liveStart,liveEnd)
+ assert.ok(surface.includes("label('Continuar con PayPal','Continue with PayPal')"),
+  'Live checkout does not replace its CTA with a warning after an abandoned login')
+ assert.ok(surface.includes("recover(original.intentId,'resume')"),
+  'A second click resumes only the original server-owned PayPal request')
+ assert.ok(surface.includes('disabled={busy||!accounts?.[0]}'),
+  'No original request may be acted on while the list is unavailable')
+ assert.ok(surface.includes('recoveryMessage&&<p role="alert"'),
+  'Provider failures must be visible at the original payment surface')
+ assert.ok(!surface.includes("action:'subscribe'")&&!surface.includes('crypto.randomUUID()'),
+  'Recovery must never create a new paid request or consent')
+ assert.ok(recovery.includes("if(remote.status==='APPROVAL_PENDING')"))
+ assert.ok(recovery.includes("code:'live_original_approval_ready'"))
+ assert.ok(recovery.includes("if(action==='reconcile')"),
+  'Terminal or unverified provider states retain the guarded reconciliation flow')
+})
