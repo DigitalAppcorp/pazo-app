@@ -1,4 +1,5 @@
 import {createGradualMaintenance} from './gradualMaintenance.mjs'
+import {createOriginalQaAudit} from './qaOriginalAudit.mjs'
 import {createPazoLivePrivateWorkerHttp} from './privateWorkerHttp.mjs'
 import {createPazoLiveServiceRpc} from '../pazo-paypal-live-checkout/liveSqlServiceAdapters.mjs'
 import {createPazoLiveInboxLease} from '../pazo-paypal-live-webhook/liveInboxLease.mjs'
@@ -26,6 +27,7 @@ export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>und
    return status?.source==='pazo_live_webhook_readiness_v1'&&status.ready===true&&status.mayGrantBenefits===false
   }})
   return createPazoLivePrivateWorkerHttp({released:true,
+   auditOriginalQa:createOriginalQaAudit({rpc,historical}),
    admit:({invoker})=>rpc('workerAdmit',{p_invoker:invoker}),
    complete:async({leaseToken,outcome,code,build,maintenanceAllowed=false})=>{
     const done=await rpc('workerComplete',{p_lease:leaseToken,p_outcome:outcome,p_code:code,p_build:build})

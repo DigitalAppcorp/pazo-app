@@ -1,3 +1,7 @@
+## Issue85 — auditoría privada del contrato QA original (23-oct-2026)
+
+GO PO para conciliar antes de L1. Worker interno puede leer únicamente el contrato bound del canary prebeta original mediante generación/plan inmutables, GET de suscripción/plan/transacciones completas/evento firmado. Respuesta mínima: estado, fechas proveedor, contadores y coincidencias; sin pagador, IDs, URLs ni credenciales. No CREATE/CANCEL/grants en esta auditoría. Capacidad de dispatch aleatoria de un uso (120s), no clave permanente en pg_net. RPC de scope solo service_role; dispatcher solo postgres; sin acceso directo cliente. No retención nueva de payload ni analytics. Evidencia financiera original se conserva sin mutarla; el resultado agregado sirve para decidir conciliación/STOP, no equivale a permiso financiero.
+
 ## F17 — fotografías curadas sin Google Places (22-oct-2026)
 
 Las tarjetas T05 solicitan seis archivos distintos de Wikimedia Commons: uno

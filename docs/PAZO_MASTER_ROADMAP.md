@@ -1,3 +1,7 @@
+## Issue #85 — GO L1 autorizado, ejecutar tras conciliación (23-oct-2026)
+
+El PO autorizó activar solamente Live limitado L1, con crecimiento 1→5→20→50 por evidencia 1/3/10 y MFA reciente en PAZO. [Issue85](https://github.com/DigitalAppcorp/pazo-app/issues/85) prevalece sobre el NO-GO financiero histórico de #84. Primero resolver suscripción prebeta y CREATED firmado HELD sin borrar evidencias, excluir las ocho cuentas QA y conservar admin/MFA. No iniciar si hay legado incierto/held; no public ilimitado ni pagos sin consentimiento individual. Trabajo técnico en `f16/issue85-live-l1-activation-20261023`, base F17 `67fbf675`. Reporte: `docs/PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md`. No llamar SQL start para evitar GoTrue/MFA.
+
 ## Issue #84 — release beta autorizado, campaña inactiva (23-oct-2026)
 
 **Prevalece sobre los NO-GO hospedados históricos de #82:** el PO autorizó expresamente integrar #83→F17, instalar Supabase/Edge con campaña inactiva, verificar y publicar beta oficial. PR81→main está autorizado únicamente tras los gates técnicos de este release. **No** iniciar campaña, mover canary a limited/public, hacer CREATE PayPal, enviar invitaciones ni modificar el intent previo. [Orden #84](https://github.com/DigitalAppcorp/pazo-app/issues/84).

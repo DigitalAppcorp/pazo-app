@@ -4,6 +4,7 @@
 // GET provider facts; NEVER derives paidThrough, grants benefits, or writes DB.
 import {normalizePazoLiveBillingSnapshot,canonicalPaypalInstant} from './liveBillingSnapshot.mjs'
 import {createPazoLiveDisputeEvidenceReader} from './liveDisputeEvidence.mjs'
+import {validatePazoPaypalLiveMonthlyPlan} from '../f16-paypal-webhook/pazoPaypalLivePlanContract.mjs'
 const HOST='https://api-m.paypal.com'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
@@ -120,6 +121,50 @@ export function createPaypalLiveMerchantEvidenceReader({
    return x // Never return unfiltered transaction outside this module.
  }
  return Object.freeze({
+  // Private original-QA audit. A complete transaction read is required even
+  // when PAZO has no paid periods. Never returns raw provider/customer data.
+  async readOriginalQaAudit({subscriptionId,intentId,expectedGeneration,createdAt,now=new Date().toISOString()}={}){
+   if(expectedGeneration!==merchantGeneration||!SUB.test(subscriptionId||'')||!INTENT.test(intentId||'')||
+    !canonicalPaypalInstant(createdAt)||!canonicalPaypalInstant(now))fail()
+   const start=new Date(Date.parse(createdAt)-86400000).toISOString()
+   if(Date.parse(now)<=Date.parse(start)||Date.parse(now)-Date.parse(start)>31*86400000)fail()
+   const t=await token(),base='/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)
+   const d=await json(fetchImpl,HOST+base,{method:'GET',headers:auth(t)})
+   if(d.id!==subscriptionId||d.plan_id!==planId||d.custom_id!==intentId||
+    !['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(d.status))fail()
+   const created=canonicalPaypalInstant(d.create_time)
+   if(!created||Date.parse(created)<Date.parse(start)||Date.parse(created)>Date.parse(now))fail()
+   const plan=await json(fetchImpl,HOST+'/v1/billing/plans/'+encodeURIComponent(planId),{method:'GET',headers:auth(t)})
+   if(!validatePazoPaypalLiveMonthlyPlan(plan,planId).ready)fail()
+   let url=HOST+base+'/transactions?start_time='+encodeURIComponent(start)+'&end_time='+encodeURIComponent(now)
+   let pages=0,totalPages=null,totalItems=null,count=0,completed=0
+   const seen=new Set(),ids=new Set()
+   while(url){
+    if(seen.has(url)||pages>=10)fail();seen.add(url);pages++
+    const body=await json(fetchImpl,url,{method:'GET',headers:auth(t)})
+    if(!Array.isArray(body.transactions)||!Number.isSafeInteger(body.total_items)||body.total_items<0||body.total_items>500||
+     !Number.isSafeInteger(body.total_pages)||body.total_pages<0||body.total_pages>10)fail()
+    if(totalPages===null){totalPages=body.total_pages;totalItems=body.total_items}
+    if(totalPages!==body.total_pages||totalItems!==body.total_items)fail()
+    for(const row of body.transactions){if(!SALE.test(row?.id||'')||ids.has(row.id))fail();ids.add(row.id);count++;if(row.status==='COMPLETED')completed++}
+    if(body.links!==undefined&&!Array.isArray(body.links))fail()
+    const next=(body.links||[]).filter(x=>x?.rel==='next');if(next.length>1)fail();url=null
+    if(next.length){
+     let parsed;try{parsed=new URL(next[0].href)}catch{fail()}
+     if(next[0].method!=='GET'||parsed.origin!==HOST||parsed.pathname!==base+'/transactions'||parsed.username||parsed.password||parsed.hash||
+      parsed.searchParams.get('start_time')!==start||parsed.searchParams.get('end_time')!==now||
+      [...parsed.searchParams.keys()].some(k=>!['start_time','end_time','page','page_size'].includes(k)||parsed.searchParams.getAll(k).length!==1))fail()
+     url=parsed.href
+    }
+   }
+   if(count!==totalItems||pages!==Math.max(1,totalPages)||(totalPages===0&&count!==0))fail()
+   return Object.freeze({source:'original_qa_provider_audit_v1',bindingVerified:true,planVerified:true,
+    originalGenerationVerified:true,status:d.status,statusUpdatedAt:canonicalPaypalInstant(d.status_update_time),
+    createTime:canonicalPaypalInstant(d.create_time),transactionsComplete:true,transactionCount:count,completedPayments:completed,
+    lastPaymentPresent:d.billing_info?.last_payment!=null,nextBillingPresent:d.billing_info?.next_billing_time!=null,
+    cycleExecutionsPresent:Array.isArray(d.billing_info?.cycle_executions),
+    mayCreate:false,mayCancel:false,mayGrantBenefits:false})
+  },
   async readSaleDisputes(args={}){
    // Corroborate the exact original subscription and transaction before the
    // dispute API. Never inspect unrelated merchant or customer transactions.
