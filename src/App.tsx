@@ -1963,7 +1963,7 @@ function PazoMain() {
               ref={mainScrollRef}
               className={activeTab === 'mapa'
                 ? 'relative min-h-0 flex-1 overflow-hidden p-0'
-                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5'}
+                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5 pb-[calc(7rem+env(safe-area-inset-bottom))]'}
               onScroll={(event) => {
                 const element = event.currentTarget
                 tabScrollPositionsRef.current[activeTab] = element.scrollTop
