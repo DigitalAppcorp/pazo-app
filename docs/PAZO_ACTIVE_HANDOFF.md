@@ -1,3 +1,11 @@
+## F16 — Complemento final: solicitud no enviada (23-oct-2026)
+
+La continuidad de recuperación incluye también la ruta `pending` no reclamada: en la tarjeta Live, tras confirmación del usuario, `original.state==='pending'&&!original.needsReconciliation` invoca `abandon` (SQL solo si no hubo provider CREATE), mientras una solicitud `bound` usa `abandon_pending` con GET y cancelación PayPal verificados. Una solicitud `pending` reclamada no puede descartarse sin conciliar. Código `c9e35e40`; cobertura anti-regresión `37978965`. Este complemento no instala nueva Edge ni modifica el registro PayPal existente.
+
+Última CI de código disponible al documentar: `ff954b86` CI `40006044745` SUCCESS, seguridad `40006044654` SUCCESS, F16 bootstrap `40006044657` SUCCESS. Los checks del HEAD más reciente `37978965` estaban en ejecución al consultar; revalidar antes de Gate de publicación. Release/merge siguen BLOQUEADOS sin GO del PO. Código no desplegado, producción original conservada.
+
+---
+
 ## F16 — Paridad de recuperación Sandbox→Live, código listo; NO desplegado (23-oct-2026)
 
 **Prevalece sobre el checkpoint anterior de CTA solamente.** El PO denunció que en Live, después de abandonar el login de PayPal, la invitación ocultaba el botón pese a haber validado la recuperación en Sandbox. Se auditó código y backend real antes de actuar.
