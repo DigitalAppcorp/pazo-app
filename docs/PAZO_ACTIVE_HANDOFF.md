@@ -1,3 +1,22 @@
+## F17 — Incidente del mapa y reversión segura (23-oct-2026)
+
+**Evidencia del PO:** tras desplegar F17 a producción `dpl_9MzRnL1YzZ9GNWB5ttS4JS3tVcSi` (SHA `84251c5ecadbc04c061eb777f76cd0c748a5bc7b`), captura Android muestra **lienzo gris sin calles** y aviso «Mapbox no autorizó las capas 3D en este dominio. Mostrando el mapa de emergencia.» Este release visual es **FAIL** para Lugares; no inferir aprobación del mapa nuevo. El PO había confirmado que **el despliegue anterior sí mostraba calles y figuras 3D**, pero no aprobó su estilo de calles demasiado marcadas.
+
+**Incidente mitigado:** se ejecutó `request_promote` del despliegue anterior `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`, target producción READY. Verificación Vercel alias `pazo-app.vercel.app` = `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT` (no inferir verificación visual nueva sin PO). Rollback temporal recupera estilo de emergencia **no aceptado visualmente** y no resuelve requisito de mapa moderno 3D. No cambiar PayPal, DB, secrets, modo Live ni merge a main.
+
+**Corrección preparada exclusivamente en rama F17:**
+- `src/features/places/map/MapboxMap.tsx`: ante autorización vector denegada 401/403, `setMapAttempt('raster')` hace que React limpie el WebGL viejo y cree un nuevo `mapboxgl.Map` directamente con estilo OSM comprobado. Mantiene `Mapbox Standard` como primera opción **3D** cuando el token lo autorice; Streets v12 como intento ante fallo no autorizado; al fallar vuelve a raster mediante *cold restart*, ya no `map.setStyle(PAZO_STREETS_STYLE)` sobre instancia fallida. Conserva markers/modelos, UI y fallback de accesibilidad.
+- `src/features/places/map/pazoBasemap.ts`: reduce contraste/saturación y opacidad de las calles en el fallback existente sin añadir terceros ni costos.
+- Contratos F17 y closure-ui actualizados para verificar nueva recuperación y preservar preferencia 3D.
+- Commit funcional `9404d7f497809363ade4c798325e5254560838ea`, CI [39989066619](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39989066619) SUCCESS, F17 security [39989066691](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39989066691) SUCCESS, preflight [39989066638](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39989066638) SUCCESS.
+- Preview aislado `dpl_GQnM97tfLCB98sZD1LFGT9ccu9QD` READY, URL `https://pazo-k9qvbfm54-digitalapp.vercel.app/`, target null. **No evidencia todavía de Android real**; no publicarlo como PASS real ni subir F17 a producción de nuevo hasta que se vean las calles y el comportamiento sea aprobado.
+
+**Limitación externa:** Vercel confirma `VITE_MAPBOX_ACCESS_TOKEN` en producción y Preview, token formato público `pk.`; esto NO prueba `styles:read`, `fonts:read` ni restricciones URL. Documentación Mapbox sobre token 403: `https://docs.mapbox.com/accounts/guides/tokens/` y Styles API `https://docs.mapbox.com/api/maps/styles/`. Un token limitado necesita permiso o allowlist desde la cuenta Mapbox original; no pedir ni publicar token por chat y no comprar nuevos servicios. Sin ese acceso, fallback raster suavizado NO equivale a Mapbox Standard 3D nativo.
+
+**Próximo gate:** PO comprueba Preview corregido desde Android: calles, figuras 3D, zoom y que no haya lienzo gris; si funciona, validar calidad del estilo y obtener GO para publicación. Si se desea Standard 3D completo, corregir autorización del token Mapbox en cuenta legítima antes del GO. No bloquear beta por Soporte E2E pospuesto expresamente.
+
+---
+
 ## F17 — Aceptación visual PO: cartografía y figuras 3D en sitio oficial (23-oct-2026)
 
 **PASS visual confirmado en Android por el Product Owner:** `https://pazo-app.vercel.app/` muestra las **calles** y, al seleccionar/acercar un establecimiento, **las figuras 3D de PAZO**. Ambas observaciones del dominio oficial quedan aprobadas; no volver a pedir esta misma prueba ni afirmar que el mapa oficial está roto. Aprobación basada en prueba física reportada por PO, no en E2E automatizado. La prueba no distingue por sí sola la tecnología exacta de los objetos (modelo nativo vs representación 3D estilizada) ni certifica relieve DEM del terreno.
