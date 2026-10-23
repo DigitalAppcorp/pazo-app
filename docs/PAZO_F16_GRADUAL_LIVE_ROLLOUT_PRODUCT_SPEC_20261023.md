@@ -2,13 +2,28 @@
 
 **Fecha:** 23 de octubre de 2026  
 **Documento rector:** especificación funcional + seguridad + matriz de aceptación del lanzamiento financiero  
-**Estado:** `PRODUCT_DIRECTION_APPROVED / FLOW_PROPOSED / CODE_NOT_AUTHORIZED / PAYMENTS_NOT_EXPANDED`  
+**Estado:** `PRODUCT_CONFIG_APPROVED / EVENT_RULES_DOCUMENTED / BRANCH_IMPLEMENTATION_AUTHORIZED / HOSTED_NOT_AUTHORIZED / PAYMENTS_NOT_EXPANDED`  
 **Product Owner:** PAZO  
 **Ámbito:** membresía voluntaria Amigo de PAZO, **USD 2.99/mes**, suscripción real renovable PayPal Live  
 **Rama:** `f17/beta-final-mobile-support-admin-20261022`; PR #81 DRAFT  
 **Referencias:** `PAZO_ACTIVE_HANDOFF.md`, `PAZO_MASTER_ROADMAP.md`, `PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md`, `PAZO_MODULE_LIFECYCLE.md`, `PAZO_PRIVACY_DATA_GOVERNANCE.md`, `PAZO_DATA_INVENTORY.md`, `PAZO_ARCHITECTURE_CONTRACT.md`.
 
 > **Precedencia y preservación de ideas:** este documento desarrolla la **opción B de LANZAMIENTO GRADUAL AUTOMÁTICO**, expresamente elegida por el PO el 23-oct-2026. **No significa que eligió la antigua opción B de SELECCIÓN DE INVITADOS** (varias invitaciones vs. una por vez), distinción que sigue abierta. Conserva la antigua propuesta y todos sus textos como fuente histórica; no borrar ni reescribir silenciosamente sus ideas. La decisión de estrategia no autoriza por sí misma nueva DDL, SQL, deploy, pagos reales ni cambio de control de release.
+
+## Actualización de aprobación y precedencia: reglas POR ACCIÓN (23-oct-2026)
+
+**GO de producto confirmado por el PO:** aprobó el paquete del apartado 15 para **5 invitaciones iniciales, 72h para responder, FIFO y cuotas acumuladas 1→5→20**, autorizando pasar a programación en la rama F17. Acto seguido **corrigió expresamente la lógica de tiempo**: NO esperar 24 horas o días entre etapas; las promociones deben activarse **por transacción real verificada y proyección de beneficios**, comunicando al frontend, backend y Supabase sin intervención administrativa por cada fase. La intención de 25 o más interesados debe preservarse en cola sin descartar personas ni generar pagos fuera de cupo.
+
+**FUENTE RECTORa DE REGLAS NUEVAS:** [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md). Sus reglas `EV-01..EV-13` y `EVT-01..EVT-15` **prevalecen sobre toda mención anterior de 24h en los apartados 5, 13 y 15** de esta especificación; tales menciones se preservan solo como historial de la propuesta anterior, **NO como requisitos efectivos**.
+
+- **L1→L2:** primera transacción Live COMPLETED/firmada/conciliada y beneficios activos server-side -> promover automáticamente a **5**, sin demoras por calendario.
+- **L2→L3:** tercer comprador distinto con venta/beneficios auténticos -> promover automáticamente a **20** si salud e integridad cumplen gates.
+- **L3 en 20:** no seguir hasta 25 por accidente; los cinco siguientes esperan mientras el PO elige un techo superior (p. ej. 50, todavía **NO aprobado**) o GO final para `public`. No prometer «cero ventas perdidas» cuando haya límite autorizado; sí conservar cada interés.
+- **Dos notificaciones** en bandeja: la primera puede actualizar su mismo hilo a «Tu cupo disponible»; la segunda, solo tras pago acreditado y beneficios confirmados, solicita revisión voluntaria. No push/email por defecto.
+- **Diferencia autorización:** la programación en rama F17 está autorizada por el «sí listo» del PO; esta aprobación **NO** autoriza instalar migraciones alojadas, modificar Edge/producción, mover `canary`, enviar notificaciones reales o realizar un pago Live sin GO posterior expreso.
+- **No alterar** la recuperación de checkout Live y Sandbox ya comprobadas por el PO; no borrar las ideas, textos ni DoD de documentos originales.
+
+---
 
 ## 1. Decisión aprobada vs. decisiones en estudio
 
