@@ -426,7 +426,9 @@ DO $$ DECLARE sig text;definition text;needle text:='IN(''canary'',''public'')';
 END $$;
 ALTER FUNCTION admin_private.pazo_live_control_admits(uuid,bigint) RENAME TO pazo_live_pre_gradual_control_admits;
 CREATE FUNCTION admin_private.pazo_live_control_admits(p_owner uuid,p_generation bigint) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
- SELECT CASE WHEN EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control WHERE singleton AND mode='limited') THEN
+ -- Issue84: installing inactive infrastructure must also close the legacy canary/public CREATE path.
+ SELECT CASE WHEN NOT EXISTS(SELECT 1 FROM supporter_private.gradual_campaign WHERE singleton AND lifecycle='active' AND supporter_private.gradual_health()) THEN false
+ WHEN EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control WHERE singleton AND mode='limited') THEN
  supporter_private.gradual_eligible(p_owner) AND supporter_private.gradual_health()
  AND EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control r
  JOIN admin_private.pazo_paypal_new_checkout_switch s ON s.singleton AND s.revision=r.revision
@@ -479,7 +481,6 @@ END $$;
 CREATE FUNCTION supporter_private.gradual_recovery_admits(p_owner uuid,p_generation bigint) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
  SELECT admin_private.pazo_live_control_admits(p_owner,p_generation) OR EXISTS(
  SELECT 1 FROM supporter_private.pazo_paypal_live_checkout_intents i
- JOIN supporter_private.gradual_interest q ON q.intent_id=i.intent_id AND q.owner_id=i.owner_id
  WHERE i.owner_id=p_owner AND i.merchant_generation=p_generation AND i.closed_at IS NULL AND i.provider_create_claimed_at IS NOT NULL);
 $$;
 DO $$ DECLARE definition text; BEGIN

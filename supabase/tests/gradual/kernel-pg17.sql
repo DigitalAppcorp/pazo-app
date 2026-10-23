@@ -21,12 +21,20 @@ UPDATE admin_private.pazo_live_release_control SET mode='canary',revision=1,merc
 UPDATE admin_private.pazo_paypal_new_checkout_switch SET revision=1,environment='live',live_enabled=true,kill_switch=false,active_generation=1;
 UPDATE supporter_private.pazo_paypal_live_worker_control SET enabled=true,processing_enabled=true,last_heartbeat_at=clock_timestamp(),last_outcome='idle';
 SELECT set_config('request.jwt.claims','{"role":"service_role"}',false);
+SELECT gradual_test.assert('ISSUE84_INACTIVE_CANARY_CLOSED',NOT admin_private.pazo_live_control_admits('82000000-0000-4000-8000-00000000ffff',1));
+SELECT gradual_test.assert('ISSUE84_INACTIVE_BEGIN_DENIED',(SELECT public.pazo_f16_live_service_checkout_begin('82000000-0000-4000-8000-00000000ffff',gen_random_uuid(),1,'es',terms_version,terms_digest)->>'code'='controlled_release_admission_denied' FROM supporter_private.pazo_live_offer_versions WHERE locale='es'));
 SELECT gradual_test.assert('HOSTED_GATE_REQUIRED',public.pazo_f16_gradual_admin_action('82000000-0000-4000-8000-00000000ffff','start',0,gen_random_uuid())->>'code'='hosted_gate_required');
 UPDATE supporter_private.gradual_campaign SET hosted_gate_verified=true,webhook_ok_at=clock_timestamp();
 -- Synthetic operator proof of the open legacy intent barrier; never executed hosted.
 INSERT INTO supporter_private.pazo_paypal_live_checkout_intents(intent_id,owner_id,request_key,merchant_generation,plan_id,locale,terms_version,terms_digest,affirmative_consent)
 SELECT 'intent-82000000-0000-4000-8000-00000000ffff','82000000-0000-4000-8000-00000000ffff',gen_random_uuid(),1,'P-ABCDEFGHIJKLMN','es',terms_version,terms_digest,true FROM supporter_private.pazo_live_offer_versions WHERE locale='es';
 SELECT gradual_test.assert('EVT-15_LEGACY_BARRIER',public.pazo_f16_gradual_admin_action('82000000-0000-4000-8000-00000000ffff','start',0,gen_random_uuid())->>'code'='legacy_intent_requires_reconciliation');
+-- The already-claimed legacy intent remains recoverable, but no new claim can start.
+SELECT gradual_test.assert('ISSUE84_INACTIVE_PROVIDER_CLAIM_DENIED',NOT public.pazo_f16_live_service_provider_claim_with_origin('82000000-0000-4000-8000-00000000ffff','intent-82000000-0000-4000-8000-00000000ffff',(SELECT request_key FROM supporter_private.pazo_paypal_live_checkout_intents WHERE intent_id='intent-82000000-0000-4000-8000-00000000ffff'),1,'https://pazo-app-t83r.vercel.app'));
+BEGIN;
+UPDATE supporter_private.pazo_paypal_live_checkout_intents SET provider_create_claimed_at=clock_timestamp() WHERE intent_id='intent-82000000-0000-4000-8000-00000000ffff';
+SELECT gradual_test.assert('ISSUE84_LEGACY_RECOVERY_PRESERVED',supporter_private.gradual_recovery_admits('82000000-0000-4000-8000-00000000ffff',1));
+ROLLBACK;
 SELECT public.pazo_f16_live_service_abandon_unclaimed('82000000-0000-4000-8000-00000000ffff','intent-82000000-0000-4000-8000-00000000ffff');
 SELECT gradual_test.assert('START',public.pazo_f16_gradual_admin_action('82000000-0000-4000-8000-00000000ffff','start',0,gen_random_uuid())->>'code'='updated');
 SELECT gradual_test.assert('GR-02_FIVE_INVITATIONS',(SELECT count(*)=5 AND min(expires_at)>statement_timestamp()+interval '71 hours' FROM supporter_private.gradual_invitation));

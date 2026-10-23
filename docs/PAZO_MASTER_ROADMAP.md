@@ -1,3 +1,11 @@
+## Issue #84 — release beta autorizado, campaña inactiva (23-oct-2026)
+
+**Prevalece sobre los NO-GO hospedados históricos de #82:** el PO autorizó expresamente integrar #83→F17, instalar Supabase/Edge con campaña inactiva, verificar y publicar beta oficial. PR81→main está autorizado únicamente tras los gates técnicos de este release. **No** iniciar campaña, mover canary a limited/public, hacer CREATE PayPal, enviar invitaciones ni modificar el intent previo. [Orden #84](https://github.com/DigitalAppcorp/pazo-app/issues/84).
+
+#83 integrado en F17 mediante `57e8511f`; se cierra además la admisión legacy canary durante inactive antes del primer apply. Registro de auditoría, checksum, backup/rollback y resultados por gate: [PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). Vercel correcto es `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, dominio `pazo-app.vercel.app`; no desplegar al proyecto anterior t83r por su nombre histórico.
+
+---
+
 ## F16 issue #82 — código gradual implementado en rama (23-oct-2026)
 
 **Estado vigente sobre notas históricas:** `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`, sin declarar F16 COMPLETADA ni beta lanzable. Rama `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT](https://github.com/DigitalAppcorp/pazo-app/pull/83), derivada de F17 `872ff8c3` / PR #81. Motor 1→5→20→50 por 1/3/10 compradores verificados, FIFO, reservas, outbox, revisión voluntaria, Administración MFA/CAS y pruebas PostgreSQL17/UI implementados. **No** SQL/Edge/Vercel producción, cargos/notificaciones reales ni merge a main.
