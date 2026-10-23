@@ -135,15 +135,10 @@ export const ImmersivePlacesStage = ({
       )}
     </div>
 
-    {/* Always-visible attribution for the beta street tiles, kept above the card rail. */}
-    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer"
-      className="absolute left-3 top-[155px] z-20 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#46645D] shadow-sm"
-      aria-label={lang === 'es' ? 'Créditos del mapa OpenStreetMap' : 'OpenStreetMap map credits'}>
-      &copy; OpenStreetMap contributors
-    </a>
+    {/* Mapbox renders legally required provider attribution in its own control. */}
 
     {/* Uses current voluntary-location action. Never calls geolocation on mount. */}
-    <div className="absolute right-4 top-[155px] z-20 flex flex-col items-end gap-1.5">
+    <div className="absolute right-3 top-[145px] z-20 flex flex-col items-end gap-1">
       <button
         type="button"
         onClick={onUseLocation}
@@ -154,7 +149,7 @@ export const ImmersivePlacesStage = ({
       >
         <IconPin size={20} />
       </button>
-      <span className="max-w-[142px] rounded-full bg-white/85 px-2 py-1 text-right text-xs font-bold text-[#204E4A] backdrop-blur-lg">
+      <span className="max-w-[115px] rounded-full bg-white/90 px-2 py-1 text-center text-[11px] font-semibold leading-tight text-[#204E4A]">
         {isLocating
           ? (lang === 'es' ? 'Buscando…' : 'Locating…')
           : userLocation
@@ -163,9 +158,10 @@ export const ImmersivePlacesStage = ({
       </span>
     </div>
 
-    {/* Bottom rail intentionally shows the neighboring card; no vertical list. */}
+    {/* One compact horizontal carousel. Clearance lives INSIDE the scroll
+        content, never in the rail height: the headings and cards remain visible. */}
     <div data-pazo-places-bottom-rail="true"
-      className="absolute inset-x-0 bottom-0 z-20 h-[min(48dvh,300px)] overflow-y-auto overscroll-contain bg-transparent pb-[calc(7rem+env(safe-area-inset-bottom))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      className="absolute inset-x-0 bottom-0 z-20 max-h-[min(50dvh,390px)] overflow-y-auto overscroll-contain bg-transparent [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="mb-2 flex items-end justify-between gap-3 px-4 sm:px-6">
         <div>
           <h2 className="text-lg font-black leading-tight text-[#204E4A]">
@@ -208,7 +204,7 @@ export const ImmersivePlacesStage = ({
           role="region"
           aria-label={lang === 'es' ? 'Carrusel horizontal de lugares' : 'Horizontal places carousel'}
           tabIndex={0}
-          className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 pr-12 scroll-smooth overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6"
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 pr-12 scroll-smooth overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6"
         >
           {places.map((place) => {
             const distance = showDistance(place.distanceKm)
@@ -225,13 +221,13 @@ export const ImmersivePlacesStage = ({
                   type="button"
                   onClick={() => onFocusPlace(place.id)}
                   aria-label={lang === 'es' ? `Centrar mapa en ${place.name}` : `Center map on ${place.name}`}
-                  className="flex min-h-[175px] w-full flex-1 flex-col rounded-[1.8rem] p-2 text-left"
+                  className="flex w-full flex-1 flex-col rounded-[1.8rem] p-2 text-left"
                 >
                 <div className="relative">
                   <PlaceCardPhoto place={place} lang={lang} />
                   {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-[#204E4A]">{distance}</span>}
                 </div>
-                <div className="flex min-h-[72px] flex-col px-1.5 pb-0.5 pt-2">
+                <div className="flex min-h-[64px] flex-col px-1.5 pb-0.5 pt-2">
                   <span className="line-clamp-2 text-[14px] font-black leading-tight text-[#204E4A]">{place.name}</span>
                   <span className="mt-1 truncate text-xs font-extrabold uppercase tracking-[0.025em] text-[#68817B]">
                     {categoryName ? (lang === 'es' ? categoryName.es : categoryName.en) : place.category}{place.zone ? ` · ${place.zone}` : ''}
@@ -262,6 +258,8 @@ export const ImmersivePlacesStage = ({
           })}
         </div>
       )}
+      <div data-pazo-places-dock-clearance="true" aria-hidden="true"
+        className="pointer-events-none h-[calc(6.25rem+env(safe-area-inset-bottom))]" />
     </div>
     {children}
   </section>
