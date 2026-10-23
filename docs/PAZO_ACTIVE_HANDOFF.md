@@ -1,3 +1,17 @@
+## F16/F17 — Publicación oficial de recuperación Live verificada (23-oct-2026)
+
+**PO autorizó publicar la corrección después de CI verde, sin pagos/cancelaciones y preservando el mapa.**
+
+- **Código aprobado:** `37978965f250d34210f649e582c592a0c5f80961`: GitHub CI `40006602491` SUCCESS, F17 seguridad `40006602282` SUCCESS, F16 preflight `40006602290` SUCCESS. HEAD `3709ffcbad8a129aa58240ea34f0f1728006e954` tiene solamente cambios documentales respecto al código aprobado y GitHub CI `40006733564` SUCCESS.
+- **Backend publicado:** Supabase proyecto `mrybvqdebbgcayuvgkkr`, Edge Function `pazo-paypal-live-account` **versión 7 ACTIVE / verify_jwt=true**. Se sustituyeron exactamente los 3 archivos de recuperación sobre la versión 6; entrypoint, secretos, proveedor PayPal y demás cinco dependencias no se alteraron. No DDL, DML, pagos, refunds, cancelaciones ni cambios de privilegios.
+- **Frontend publicado:** Vercel proyecto `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, deployment **`dpl_EXSgFZSQquSgvzk6qYMViu8GmEQV`** `READY`, `production`, SHA exacto **`3709ffcbad8a129aa58240ea34f0f1728006e954`**, alias **`pazo-app.vercel.app`** confirmado mediante `get_deployment` sobre dominio oficial.
+- **Integridad:** comparación SHA previo de producción `3d649093b5e15a6842622ba326f800f1c0618060` vs publicación: 9 archivos afectados exclusivamente flujo PayPal Live, tests y docs. No se tocó mapa ni módulos ajenos.
+- **Postflight read-only:** solicitud Live 1 total, 1 abierta, períodos pagados Live 0; fuente privada en Supabase. No se activaron beneficios ni checkout público.
+- **Gate de aceptación de dispositivo:** el PO aún debe verificar en el PWA móvil que «Continuar con PayPal» aparece tras abandonar el login. No se afirma haber completado un nuevo E2E real PayPal ni pago. El usuario puede confirmar UX sin efectuar compra. Si el PWA cachea versión anterior, cerrar y volver a abrir o actualizar; no manipular la solicitud en base de datos.
+- **GitHub:** PR #81 sigue DRAFT, `main` no se fusionó. La publicación fue despliegue directo de commit revisado; una actualización documental posterior del handoff no requiere redeploy.
+
+---
+
 ## F16 — Complemento final: solicitud no enviada (23-oct-2026)
 
 La continuidad de recuperación incluye también la ruta `pending` no reclamada: en la tarjeta Live, tras confirmación del usuario, `original.state==='pending'&&!original.needsReconciliation` invoca `abandon` (SQL solo si no hubo provider CREATE), mientras una solicitud `bound` usa `abandon_pending` con GET y cancelación PayPal verificados. Una solicitud `pending` reclamada no puede descartarse sin conciliar. Código `c9e35e40`; cobertura anti-regresión `37978965`. Este complemento no instala nueva Edge ni modifica el registro PayPal existente.
