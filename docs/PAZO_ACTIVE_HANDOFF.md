@@ -1,3 +1,11 @@
+## Decisión del Product Owner — Soporte E2E pospuesto hasta después de beta (23-oct-2026)
+
+**Prioridad:** POST-BETA; el PO decidió explícitamente que la prueba/corrección del envío real y la respuesta de Soporte no bloqueen el lanzamiento beta. En la comprobación alojada de hoy no se pudo confirmar la creación del mensaje de prueba: `public.pazo_support_tickets` mantenía 1 registro, del 22-oct; 0 solicitudes creadas el 23-oct y 0 coincidencias con «Prueba F17 de soporte». No declarar Soporte E2E PASS ni asumir que una pulsación creó la solicitud. La inspección visual de las secciones administrativas de Soporte, Beneficios y Mantenimiento sí fue aceptada por el PO; la prueba real del circuito usuario → admin → respuesta sigue pendiente.
+
+**Guardarraíl de beta:** evitar depender del formulario de soporte como único canal de ayuda mientras la entrega siga sin confirmar; ya existe contacto por correo en ajustes. El aplazamiento NO autoriza cambios de backend, ocultar funciones unilateralmente ni publicar el PR F17. Priorizar los gates críticos: Mapbox/Lugares bajo origen autorizado y QA de navegación/instalación; PayPal Live canary solo si se abrirán cobros, con venta y cancelación firmadas antes de hacerlo público; aprobación de release/merge separada.
+
+---
+
 ## F17 — Desenfoque alineado con la burbuja activa del dock (22-oct-2026; SOLO RAMA)
 
 **Nueva captura y decisión PO:** el efecto cristal tipo blur y el espacio inferior compacto son satisfactorios, pero el desenfoque visible debe subir hasta la altura donde **termina por arriba la burbuja verde que se mueve** entre pestañas. No agrandar la zona segura, no pintar de blanco y no difuminar el menú. El diseño de la barra y el comportamiento de Lugares no cambian.
