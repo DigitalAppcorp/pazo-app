@@ -43,3 +43,9 @@ test('private audit requires capability and never invokes financial workers or m
  assert.equal((await handler(req(false))).status,403);assert.equal(admitted,0)
  const result=await(await handler(req(true))).json();assert.equal(result.audit.mayCreate,false);assert.equal(audited,1);assert.equal(completed.maintenanceAllowed,false)
 })
+
+test('audit failures expose only closed stages, never arbitrary exception/provider data',async()=>{
+ const {createOriginalQaAudit}=await import('../../functions/pazo-paypal-live-worker/qaOriginalAudit.mjs')
+ const r=await createOriginalQaAudit({rpc:async()=>{throw Error('secret-and-payer@example.invalid')}})()
+ assert.equal(r.complete,false);assert.equal(r.code,'qa_scope_read_unavailable');assert.equal(JSON.stringify(r).includes('secret-and-payer'),false)
+})
