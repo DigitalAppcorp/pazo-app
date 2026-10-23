@@ -92,17 +92,17 @@ export const PlaceFeatureExperimentCard = ({
   return (
     <div
       ref={cardRef}
-      className="rounded-[1.5rem] bg-[#FAF8F5] p-3.5 shadow-[0_4px_14px_rgba(32,78,74,0.035)]"
+      className="rounded-[1.5rem] bg-[#FAF8F5] p-3 shadow-[0_4px_14px_rgba(32,78,74,0.035)]"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="inline-block rounded-full bg-white px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-[#5C7470] shadow-xs">
+          <span className="inline-block rounded-full bg-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#5C7470] shadow-xs">
             {lang === 'es' ? 'En desarrollo' : 'In development'}
           </span>
-          <h5 className="mt-2 text-[11px] font-black text-[#204E4A]">
+          <h5 className="mt-2 text-[13px] font-black leading-snug text-[#204E4A]">
             {title}
           </h5>
-          <p className="mt-1 text-[9px] leading-relaxed text-[#5C7470]">
+          <p className="mt-1 text-[12px] leading-relaxed text-[#5C7470]">
             {description}
           </p>
         </div>
@@ -112,7 +112,7 @@ export const PlaceFeatureExperimentCard = ({
           onClick={() => void handleInterest()}
           disabled={isInterested || isSubmitting || isLoadingState}
           className={
-            'shrink-0 rounded-full px-3 py-2 text-[9px] font-extrabold transition-all disabled:cursor-default ' +
+            'shrink-0 rounded-full px-3 py-2 text-[12px] font-extrabold transition-all disabled:cursor-default ' +
             (isInterested
               ? 'bg-[#204E4A] text-[#E1E53F]'
               : 'bg-[#E1E53F] text-[#204E4A] hover:bg-[#d8dc35] disabled:opacity-60')
