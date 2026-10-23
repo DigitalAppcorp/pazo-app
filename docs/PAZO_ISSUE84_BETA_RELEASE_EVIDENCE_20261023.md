@@ -11,6 +11,8 @@ Autorización vigente: [issue #84](https://github.com/DigitalAppcorp/pazo-app/is
 - **Vercel real confirmado:** `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, equipo `team_02Ax5UcD1OlLzpDBYyNMi6KO` (`digitalapp`), dominio verificado `https://pazo-app.vercel.app/`. `pazo-app-t83r` es proyecto anterior y no es destino. Alias previo apunta a **`dpl_EXSgFZSQquSgvzk6qYMViu8GmEQV`**, producción READY, código `3709ffcbad8a129aa58240ea34f0f1728006e954`; éste es rollback frontend. Git deploymentEnabled=false evita publicación por merge accidental.
 - Protección de Vercel intacta. Una lectura mediante herramienta que podía crear enlace temporal fue rechazada automáticamente; no se creó bypass ni se desactivó SSO. Usar solo lecturas normales/autorizadas y registrar la revisión PO que siga pendiente.
 
+- Se corrigió además el smoke llamado canonical: todavía visitaba el host anterior t83r. Ahora comprueba exclusivamente `pazo-app.vercel.app`, móvil/escritorio ES/EN, callbacks y SW, sin formularios enviados. El cambio afecta pruebas, no frontend/SQL/Edge; se vuelve a validar el SHA F17 final. No se acepta como evidencia del alias oficial una prueba del proyecto anterior.
+
 ## Backup y rollback operativo
 
 Antes de apply: conservar commit fuente y definiciones SQL precursoras sin datos de usuarios/secrets, checksums de funciones, historial de migraciones, versiones/bundle hashes Edge y fingerprint agregado de intents/ledger/avisos. La migración no borra registros financieros y es transaccional; cualquier drift revierte la operación. El backup lógico de definición es operativo, **no una copia completa de datos ni una prueba de restauración/PITR**. No exportar auth/users, Vault ni pagadores a GitHub.
