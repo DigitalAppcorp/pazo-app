@@ -1,3 +1,15 @@
+## F16 Live — CTA de recuperación de aprobación y QA mapa aprobado (23-oct-2026)
+
+- **Aceptación PO:** Mapbox Standard del dominio oficial se ve y funciona en el teléfono. Gate visual del mapa cerrado por confirmación expresa del PO en este chat; no repetir el QA de cartografía.
+- **Regresión identificada por screenshot:** al regresar del login de PayPal Live sin aprobar, `SupporterAccountManagement.tsx` escondía el CTA detrás de `accounts?.length===0`, sustituyéndolo por un aviso cuando había intento anterior. Sandbox tenía CTA de continuación y ruta `recover_retry` independiente; no era paridad de Live.
+- **Supabase solo lectura, sin datos personales:** 1 Live intent `bound`, abierto, vinculado a PayPal; estado remoto aún no registrado en DB; 0 períodos pagados Live. No inferir cobro ni aprobación PayPal.
+- **Corrección solo en rama PR #81:** `SupporterAccountManagement.tsx` muestra «Continuar con PayPal» directamente en tarjeta al encontrar intento Live anterior y llama al servidor mediante `recover(original.intentId,'resume')`. El backend consulta el registro original y, si existe aprobación válida, reabre esa misma sesión; no ejecuta una segunda creación de suscripción. El error de recuperación aparece junto al botón. Commits de código `da16b9fd`, guard de cuentas `922d4bdb`; prueba anti-regresión `fe492f92`.
+- **Límite:** si PayPal mantiene `APPROVAL_PENDING` pero deja de devolver enlace válido, la recuperación Live continúa fail-closed y requiere conciliación/corrección acotada; no declararla E2E PASS por haber restaurado el botón. Ningún usuario normal ni el administrador tiene nueva autorización financiera.
+- **Evidencia:** GitHub CI del commit `fe492f92` SUCCESS y F16 bootstrap SUCCESS; F17 seguridad seguía en progreso al consultar. Producción conserva `dpl_AGNfzTjyjy2BNMMh8rxQTrmACDgL`/SHA `3d649093`, sin esta corrección. No hubo deploy/merge, PayPal POST, activación de cobros, SQL DDL/DML ni cambios de secretos.
+- **Siguiente gate:** CI/seguridad del HEAD documental, validar CTA y comportamiento de `resume` con sesión autorizada sin aprobar ni pagar, comprobar el caso sin enlace, y obtener GO explícito antes de publicación oficial. PR #81 sigue DRAFT.
+
+---
+
 ## Publicación F17 al dominio oficial — 23-oct-2026
 
 **GO del PO:** publicación explícita de la versión F17 con reparación de Mapbox Standard al dominio oficial `https://pazo-app.vercel.app/`. **PRODUCCIÓN ACTUAL:** Vercel deployment `dpl_AGNfzTjyjy2BNMMh8rxQTrmACDgL`, `READY`, Git SHA `3d649093b5e15a6842622ba326f800f1c0618060`; Vercel alias `pazo-app.vercel.app` **verificado** apuntando exactamente a ese deployment. Producción previa recuperada para rollback: `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`.
