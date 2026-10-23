@@ -1,3 +1,19 @@
+## F17 — FOTO REAL SIN GOOGLE API, SOLO RAMA, 22-oct-2026
+
+PO descartó Google Places Photos como requisito. Se prepararon seis fotos
+fotográficas diferentes con Wikimedia Commons sin costo: Runyon Canyon
+corresponde al parque real; las otras cinco son ilustrativas por categoría
+y tienen etiqueta “Ilustrativa”. Los créditos de fotógrafo y licencia
+son enlaces accesibles en tarjeta, y el campo de backend `photo_url`
+prevalece siempre. Nuevo tercero externo Wikimedia declarado en la
+política de privacidad ES/EN y el inventario de datos. Se añadió test
+`scripts/f17-curated-place-photos.test.mjs`, y documentación
+`docs/PAZO_F17_PLACES_PHOTO_SOURCES_20261022.md`.
+Sin API pagada, credenciales, migraciones ni cambio PayPal. CI y aceptación
+visual en móvil pendientes. **No publicar en Vercel ni merge a main sin GO.**
+
+---
+
 ## ACTUALIZACIÓN F17 — Lugares y Feed, 22-oct-2026 (RAMA, NO PRODUCCIÓN)
 
 **Scope aprobado por PO y versionado en PR #81**, revisión de código anterior `a12579c1fd59`: contenedor exterior de búsqueda/filtros transparente, fade lateral en scroll de categorías, botón **Cómo llegar** desde detalle de lugar (iOS Apple Maps; Android/enlace web Google Maps), iconos circulares mayores para like/comentarios/guardado en Feed. Los handlers y métricas existentes se preservan. Foto genérica de carretera eliminada: cada tarjeta solo muestra `pet_places.photo_url` real o indica que todavía no hay foto. **Los 6 lugares alojados tienen `photo_url` vacío**: no declarar fotos de establecimientos ya resueltas.

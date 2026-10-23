@@ -1,3 +1,21 @@
+## F17 — fotografías curadas sin Google Places (22-oct-2026)
+
+Las tarjetas T05 solicitan seis archivos distintos de Wikimedia Commons: uno
+fotografiado en Runyon Canyon Park y cinco **fotografías ilustrativas por
+categoría**, etiquetadas como tales. Cada foto muestra autor y licencia
+enlaces externos desde la propia tarjeta. La foto auténtica del negocio
+registrada en `pet_places.photo_url` siempre prevalece.
+
+El navegador contacta a Wikimedia al cargar estas fotos diferidas
+(`loading=lazy`; `referrerPolicy=no-referrer`); Wikimedia puede recibir IP
+y metadatos técnicos. PAZO no transmite GPS, identidad ni analytics nuevo a
+Wikimedia. No se guardan ni importan copias del archivo en Storage. Las
+fotos no disponibles fallan a un degradado neutro. Sin Google Places,
+secretos, servicio pagado, migración o cambios de PayPal.
+Fuentes y atribuciones: `docs/PAZO_F17_PLACES_PHOTO_SOURCES_20261022.md`.
+
+---
+
 ## F17 — inventario vigente al 22-oct-2026 (backend instalado, iteración visual pendiente de publicación)
 
 Las migraciones F17 de soporte, cortesías y mantenimiento **ya están aplicadas**

@@ -13,3 +13,16 @@ El PO solicitó fotos reales del establecimiento desde Google Maps. **No está h
 
 ## Próximo gate
 CI GitHub del SHA exacto, revisión del PO en preview/local para fade y botón de mapa, decisión de fotos/restricciones de Google; autorización adicional antes de modificar facturación, datos del catálogo o publicar la versión.
+
+
+## Fotos reales sin Google Places — corrección aprobada por Product Owner
+
+PO aclaró que no requiere Google Maps como origen, solo fotos reales
+en vez de la carretera genérica de Unsplash. La rama usa seis archivos
+fotográficos licenciados desde Wikimedia Commons (uno del sitio exacto
+Runyon Canyon y cinco imágenes ilustrativas claramente identificadas).
+Las imágenes propias verificadas que se agreguen al catálogo en el
+futuro tienen prioridad sobre las ilustrativas. Créditos y licencias
+visibles; no se permite afirmar que una foto de otra tienda represente
+al negocio. Sin nuevos proveedores facturables ni despliegue.
+Véase `docs/PAZO_F17_PLACES_PHOTO_SOURCES_20261022.md`.

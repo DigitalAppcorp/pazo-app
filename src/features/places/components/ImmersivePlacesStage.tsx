@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { EphemeralLocation, PetPlace, PlaceCategory } from '../../../types/pazo'
 import { MapboxMap } from '../map/MapboxMap'
 import { PlaceCardPhoto } from './PlaceCardPhoto'
+import { getCuratedPlacePhoto } from '../curatedPlacePhotography'
 import { IconCheck, IconExplore, IconPaw, IconPin, IconPlus } from '../../../components/icons/PazoIcons'
 
 type CategoryFilter = 'all' | PlaceCategory
@@ -211,16 +212,20 @@ export const ImmersivePlacesStage = ({
           {places.map((place) => {
             const distance = showDistance(place.distanceKm)
             const categoryName = categoryOptions.find((option) => option.value === place.category)
+            const photoCredit = !place.photoUrl?.trim() ? getCuratedPlacePhoto(place.name) : null
             return (
-              <button
-                type="button"
+              <article
                 key={place.id}
-                onClick={() => onFocusPlace(place.id)}
-                aria-label={lang === 'es' ? `Centrar mapa en ${place.name}` : `Center map on ${place.name}`}
-                className={`group flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] p-2 text-left shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
-                  ? 'bg-[#EAF2E4] '
-                  : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-visible:bg-[#F1F5EC]'}`}
+                className={`group relative flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
+                  ? 'bg-[#EAF2E4]'
+                  : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-within:bg-[#F1F5EC]'}`}
               >
+                <button
+                  type="button"
+                  onClick={() => onFocusPlace(place.id)}
+                  aria-label={lang === 'es' ? `Centrar mapa en ${place.name}` : `Center map on ${place.name}`}
+                  className="flex min-h-[175px] w-full flex-1 flex-col rounded-[1.8rem] p-2 text-left"
+                >
                 <div className="relative">
                   <PlaceCardPhoto place={place} lang={lang} />
                   {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold text-[#204E4A]">{distance}</span>}
@@ -235,7 +240,23 @@ export const ImmersivePlacesStage = ({
                     {place.activePresenceCount || 0} {lang === 'es' ? 'mascotas presentes' : 'pets present'}
                   </span>
                 </div>
-              </button>
+                </button>
+                {photoCredit&&(
+                  <div className="absolute left-4 top-[76px] z-[2] inline-flex max-w-[calc(100%-32px)] items-center gap-1 truncate rounded-full bg-[#204E4A]/85 px-1.5 py-0.5 text-[8px] font-semibold text-white backdrop-blur-sm">
+                    <a className="truncate hover:underline focus-visible:underline"
+                      href={photoCredit.sourceUrl} target="_blank" rel="noopener noreferrer"
+                      title={lang==='es'?`Foto: ${photoCredit.author}. Wikimedia Commons`:`Photo: ${photoCredit.author}. Wikimedia Commons`}>
+                      {photoCredit.author}
+                    </a>
+                    <span aria-hidden="true">·</span>
+                    <a className="shrink-0 hover:underline focus-visible:underline"
+                      href={photoCredit.licenseUrl} target="_blank" rel="noopener noreferrer"
+                      title={lang==='es'?'Licencia de la fotografía':'Photo license'}>
+                      {photoCredit.license}
+                    </a>
+                  </div>
+                )}
+              </article>
             )
           })}
         </div>
