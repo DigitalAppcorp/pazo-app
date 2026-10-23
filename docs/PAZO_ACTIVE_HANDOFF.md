@@ -1,3 +1,13 @@
+## F17 — Desenfoque alineado con la burbuja activa del dock (22-oct-2026; SOLO RAMA)
+
+**Nueva captura y decisión PO:** el efecto cristal tipo blur y el espacio inferior compacto son satisfactorios, pero el desenfoque visible debe subir hasta la altura donde **termina por arriba la burbuja verde que se mueve** entre pestañas. No agrandar la zona segura, no pintar de blanco y no difuminar el menú. El diseño de la barra y el comportamiento de Lugares no cambian.
+
+**Implementación:** `src/index.css` mantiene `blur(20px)`, altura física de `.pazo-scroll-soft-edge`, `bottom:0`, `pointer-events:none` y `z-20` bajo el dock `z-30`. Se reemplaza únicamente la máscara porcentual por `linear-gradient(to top)` anclada a distancias reales del borde inferior **+ safe-area**: cristal perceptible (alfa 0.48) a `6.4rem`, donde asoma la burbuja activa; suave hasta `7.35rem` y completamente transparente en `8.25rem`. Así la altura visual acompaña a la bolita en distintos teléfonos sin una franja abrupta ni desenfoque excesivo de controles distantes. El CSS se aplica solo a Feed, Comunidades y Mi mascota, no Mapa. La reserva de scroll de `6rem+safe-area` se conserva sin cambios.
+
+**Gates pendientes:** CI exacto del HEAD y validación Android para verificar inicio alineado, dock nítido y último botón accesible. No main, producción, Supabase, PayPal, proveedores ni nuevos permisos. No declarar aprobado por CI solamente.
+
+---
+
 ## F17 — Zona segura compacta y cristal localizado cerca del dock (22-oct-2026 · SOLO RAMA)
 
 **Evidencia del PO:** después del ajuste `bd24213c` sigue habiendo excesivo espacio vacío al final del Feed y Mi mascota. Auditoría de código identificó **dos reservas inferiores acumuladas**: `App.tsx` añade `padding-bottom:9rem+safe-area` (144px base) en el contenedor principal y cada vista social (`HomeView`, `CommunitiesView`, `PetView`) incluye `pb-6` (24px). Total previo: 168px + safe-area sin contar geometría de otros elementos. El dock real tiene una rejilla de 76px más padding vertical (aprox. 92px+safe-area). Una reserva mayor separaba visualmente las últimas tarjetas y herramientas del menú.
