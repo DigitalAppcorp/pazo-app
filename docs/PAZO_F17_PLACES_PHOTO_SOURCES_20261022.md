@@ -19,7 +19,7 @@ Los autores y enlaces directos a la ficha original y a la licencia se
 presentan en cada tarjeta. CSS aplica un recorte visual (object-cover)
 sin modificar los binarios. El contenido original permanece en Wikimedia
 Commons; PAZO no copia fotografías en Storage. Los archivos se muestran
-mediante miniaturas (640 px) solo al necesitarse (lazy), con referrer
+mediante miniaturas (500 px, ancho compatible con el servicio de miniaturas) solo al necesitarse (lazy), con referrer
 suprimido. La disponibilidad de las URLs depende de Wikimedia;
 si fallan, se muestra una superficie sin foto.
 
