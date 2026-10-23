@@ -19,9 +19,9 @@ export const PlaceCardPhoto=({place,lang}:{
     : place.category==='trail'||place.category==='park'
       ? 'from-[#D3E4D4] via-[#E9EEDF] to-[#C8D8CA]'
       : 'from-[#E5EBE4] via-[#F2F3E8] to-[#CCDCD5]'
-  return <div className={`relative h-[91px] w-full overflow-hidden rounded-[1.3rem] bg-gradient-to-br ${accent}`}>
+  return <div className={`relative h-[108px] w-full overflow-hidden rounded-[1.3rem] bg-gradient-to-br ${accent}`}>
     {showPhoto?
-      <img src={photoUrl}
+      <img data-pazo-place-photo="true" src={photoUrl}
         alt={illustrative?
           (lang==='es'?'Imagen ilustrativa de la categoría, no del establecimiento':
             'Illustrative category photo, not this establishment'):

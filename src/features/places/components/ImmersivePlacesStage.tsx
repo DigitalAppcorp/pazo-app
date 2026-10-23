@@ -119,7 +119,7 @@ export const ImmersivePlacesStage = ({
             type="button"
             aria-pressed={category === option.value}
             onClick={() => onCategory(option.value)}
-            className={`min-h-9 shrink-0 rounded-full px-3.5 py-2 text-[11px] font-extrabold transition-colors ${category === option.value
+            className={`min-h-9 shrink-0 rounded-full px-3.5 py-2 text-xs font-extrabold transition-colors ${category === option.value
               ? 'bg-[#204E4A] text-[#E1E53F] shadow-[0_3px_9px_rgba(32,78,74,0.11)]'
               : 'bg-white/90 text-[#204E4A] hover:bg-[#E1E53F]/35 focus-visible:bg-[#E1E53F]/35'}`}
           >
@@ -128,7 +128,7 @@ export const ImmersivePlacesStage = ({
         ))}
       </div>
       {(locationMessage || activeCheckin) && (
-        <div role="status" className="flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl bg-white/85 px-3 py-2 text-[11px] font-semibold text-[#204E4A] shadow-sm backdrop-blur-lg">
+        <div role="status" className="flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl bg-white/85 px-3 py-2 text-xs font-semibold text-[#204E4A] shadow-sm backdrop-blur-lg">
           {activeCheckin && <><IconCheck size={13}/>{lang === 'es' ? 'Check-in activo' : 'Active check-in'}</>}
           {locationMessage && <span>{locationMessage}</span>}
         </div>
@@ -137,7 +137,7 @@ export const ImmersivePlacesStage = ({
 
     {/* Always-visible attribution for the beta street tiles, kept above the card rail. */}
     <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer"
-      className="absolute bottom-[235px] left-3 z-20 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold text-[#46645D] shadow-sm"
+      className="absolute bottom-[235px] left-3 z-20 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold text-[#46645D] shadow-sm"
       aria-label={lang === 'es' ? 'Créditos del mapa OpenStreetMap' : 'OpenStreetMap map credits'}>
       &copy; OpenStreetMap contributors
     </a>
@@ -154,7 +154,7 @@ export const ImmersivePlacesStage = ({
       >
         <IconPin size={20} />
       </button>
-      <span className="max-w-[142px] rounded-full bg-white/85 px-2 py-1 text-right text-[10px] font-bold text-[#204E4A] backdrop-blur-lg">
+      <span className="max-w-[142px] rounded-full bg-white/85 px-2 py-1 text-right text-xs font-bold text-[#204E4A] backdrop-blur-lg">
         {isLocating
           ? (lang === 'es' ? 'Buscando…' : 'Locating…')
           : userLocation
@@ -167,14 +167,14 @@ export const ImmersivePlacesStage = ({
     <div className="absolute inset-x-0 bottom-2 z-20">
       <div className="mb-2 flex items-end justify-between gap-3 px-4 sm:px-6">
         <div>
-          <h2 className="text-[15px] font-black leading-tight text-[#204E4A]">
+          <h2 className="text-lg font-black leading-tight text-[#204E4A]">
             {lang === 'es' ? 'Lugares disponibles' : 'Available places'}
           </h2>
-          <p aria-live="polite" className="text-[11px] font-semibold text-[#5C7470]">
+          <p aria-live="polite" className="text-xs font-semibold text-[#5C7470]">
             {places.length} {lang === 'es' ? 'resultados' : 'results'}
           </p>
         </div>
-        <span className="max-w-[132px] text-right text-[9px] leading-tight text-[#5C7470]">
+        <span className="sr-only">
           {lang === 'es'
             ? 'Tu ubicación se usa solo si la activas; no se guarda.'
             : 'Location is only used with permission; never stored.'}
@@ -198,7 +198,7 @@ export const ImmersivePlacesStage = ({
           <p className="mt-2 text-[13px] font-extrabold text-[#204E4A]">
             {lang === 'es' ? 'No encontramos lugares con esos filtros.' : 'No places match those filters.'}
           </p>
-          <p className="mt-1 text-[11px] text-[#5C7470]">
+          <p className="mt-1 text-xs text-[#5C7470]">
             {lang === 'es' ? 'Cambia tu búsqueda o sugiere un lugar para revisión.' : 'Change your search or suggest a place for review.'}
           </p>
         </div>
@@ -216,7 +216,7 @@ export const ImmersivePlacesStage = ({
             return (
               <article
                 key={place.id}
-                className={`group relative flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
+                className={`pazo-place-card group relative flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
                   ? 'bg-[#EAF2E4]'
                   : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-within:bg-[#F1F5EC]'}`}
               >
@@ -228,21 +228,21 @@ export const ImmersivePlacesStage = ({
                 >
                 <div className="relative">
                   <PlaceCardPhoto place={place} lang={lang} />
-                  {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold text-[#204E4A]">{distance}</span>}
+                  {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-[#204E4A]">{distance}</span>}
                 </div>
                 <div className="flex min-h-[72px] flex-col px-1.5 pb-0.5 pt-2">
                   <span className="line-clamp-2 text-[14px] font-black leading-tight text-[#204E4A]">{place.name}</span>
-                  <span className="mt-1 truncate text-[10px] font-extrabold uppercase tracking-[0.025em] text-[#68817B]">
+                  <span className="mt-1 truncate text-xs font-extrabold uppercase tracking-[0.025em] text-[#68817B]">
                     {categoryName ? (lang === 'es' ? categoryName.es : categoryName.en) : place.category}{place.zone ? ` · ${place.zone}` : ''}
                   </span>
-                  <span className="mt-auto flex items-center gap-1 pt-1.5 text-[10px] font-bold text-[#204E4A]">
+                  <span className="mt-auto flex items-center gap-1 pt-1.5 text-xs font-bold text-[#204E4A]">
                     <IconPaw size={13}/>
                     {place.activePresenceCount || 0} {lang === 'es' ? 'mascotas presentes' : 'pets present'}
                   </span>
                 </div>
                 </button>
                 {photoCredit&&(
-                  <div className="absolute left-4 top-[76px] z-[2] inline-flex max-w-[calc(100%-32px)] items-center gap-1 truncate rounded-full bg-[#204E4A]/85 px-1.5 py-0.5 text-[8px] font-semibold text-white backdrop-blur-sm">
+                  <div className="pazo-photo-credit absolute left-4 top-[92px] z-[2] hidden max-w-[calc(100%-32px)] items-center gap-1 truncate rounded-full bg-[#204E4A]/85 px-1.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
                     <a className="truncate hover:underline focus-visible:underline"
                       href={photoCredit.sourceUrl} target="_blank" rel="noopener noreferrer"
                       title={lang==='es'?`Foto: ${photoCredit.author}. Wikimedia Commons`:`Photo: ${photoCredit.author}. Wikimedia Commons`}>

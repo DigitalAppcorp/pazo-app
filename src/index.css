@@ -473,3 +473,8 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 }
+
+/* Show credits only while an image exists; the map bar floats over cards. */
+.pazo-place-card:has(img[data-pazo-place-photo="true"]) .pazo-photo-credit {
+  display: inline-flex;
+}

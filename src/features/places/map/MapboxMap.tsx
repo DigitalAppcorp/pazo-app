@@ -197,6 +197,7 @@ export const MapboxMap = ({
   useEffect(() => {
     let cancelled = false
 
+    let usingRasterFallback = false
     const start = async () => {
       const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
       if (!token) {
@@ -216,13 +217,19 @@ export const MapboxMap = ({
 
         const map = new mapboxgl.Map({
           container: containerRef.current,
-          // Physical Android showed pins while Mapbox vector streets were blank.
-          // The on-demand attributed beta raster tiles render streets beneath
-          // the existing PAZO pin/model layers.
-          style: PAZO_STREETS_STYLE,
+          // Normal 3D basemap, with the existing raster fallback for outages.
+          style: 'mapbox://styles/mapbox/standard',
+          config: { basemap: {
+            theme: 'faded',
+            lightPreset: 'day',
+            showHdRoads: false,
+            show3dObjects: true,
+            showPointOfInterestLabels: false,
+            showTransitLabels: false,
+          } },
           center: DEFAULT_CENTER,
           zoom: 10.5,
-          pitch: 32,
+          pitch: 45,
           bearing: 0,
           antialias: true,
           attributionControl: true,
@@ -235,7 +242,7 @@ export const MapboxMap = ({
           'top-right'
         )
 
-        map.on('load', () => {
+        map.on('style.load', () => {
           if (cancelled) return
 
           map.addSource('pazo-places', {
@@ -336,6 +343,11 @@ export const MapboxMap = ({
 
         map.on('error', (event: {error?:unknown}) => {
           const failure=classifyBasemapFailure(event?.error)
+          if (failure && !cancelled && !usingRasterFallback) {
+            usingRasterFallback = true
+            map.setStyle(PAZO_STREETS_STYLE)
+            return
+          }
           if(failure && !cancelled)setError(failure==='map_authorization'
             ?(langRef.current==='es'
               ?'Mapbox no autorizó las capas del mapa. Revisa que el token público permita este dominio.'
