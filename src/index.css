@@ -478,3 +478,50 @@
 .pazo-place-card:has(img[data-pazo-place-photo="true"]) .pazo-photo-credit {
   display: inline-flex;
 }
+
+/* F17: content-only soft bottom fade, scoped by App.tsx to Feed, Communities,
+ * and My Pet. This layer is a noninteractive sibling ABOVE the scroll canvas
+ * but BELOW the unchanged floating navigation (z-30).
+ * It ends at the dock's top edge, so the dock and moving notch stay sharp. */
+.pazo-scroll-soft-edge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+  height: clamp(72px, 14dvh, 116px);
+  z-index: 20;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+/* On supported browsers, blur intensifies gradually near the dock.
+ * The mask applies to the BLUR, not the actual scrollable content. */
+.pazo-scroll-soft-edge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(11px);
+  backdrop-filter: blur(11px);
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.14) 25%,
+    rgba(0, 0, 0, 0.58) 65%,
+    #000 100%);
+  mask-image: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.14) 25%,
+    rgba(0, 0, 0, 0.58) 65%,
+    #000 100%);
+}
+
+/* Color fade remains even where backdrop-filter is unavailable. */
+.pazo-scroll-soft-edge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    rgba(250, 248, 245, 0) 0%,
+    rgba(250, 248, 245, 0.17) 45%,
+    rgba(250, 248, 245, 0.74) 100%);
+}
