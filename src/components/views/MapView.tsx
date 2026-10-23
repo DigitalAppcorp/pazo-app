@@ -443,11 +443,11 @@ export const MapView = ({
             aria-modal="true"
             aria-label={lang === 'es' ? 'Detalle del lugar' : 'Place details'}
             data-pazo-place-details="true"
-            className="w-full max-w-[430px] max-h-[min(78dvh,740px)] overflow-y-auto overscroll-contain rounded-[2.15rem] bg-[#FFFCF6] p-5 shadow-[0_18px_55px_rgba(15,50,42,0.22)] sm:p-6 motion-safe:animate-[slideUpFade_250ms_ease-out_both]"
+            className="flex w-full max-w-[430px] max-h-[min(88dvh,790px)] min-h-0 flex-col overflow-hidden rounded-[2.15rem] bg-[#FFFCF6] p-3 shadow-[0_18px_55px_rgba(15,50,42,0.22)] sm:p-4 motion-safe:animate-[slideUpFade_250ms_ease-out_both]"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-extrabold uppercase tracking-wider text-[#5C7470]">
+            <div data-pazo-place-fixed-header="true" className="relative z-10 flex shrink-0 items-start justify-between gap-3 rounded-2xl bg-[#FFFCF6] px-2 pb-3 pt-2">
+              <div className="min-w-0">
+                <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#5C7470]">
                   {categoryLabel(selectedPlace.category, lang)}
                 </p>
                 <h3 className="mt-1 text-[22px] font-black text-[#204E4A]">
@@ -469,7 +469,8 @@ export const MapView = ({
               </button>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div data-pazo-place-detail-scroll="true" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-[calc(1rem+env(safe-area-inset-bottom))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <a
                 data-pazo-directions="true"
                 href={buildPlaceDirectionsUrl(selectedPlace,
@@ -692,24 +693,24 @@ export const MapView = ({
             {canUsePlaces && (
               <div className="mt-5 border-t border-[#204E4A]/8 pt-4">
                 <div className="mb-3">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-sm font-extrabold uppercase tracking-wider text-[#5C7470]">
+                      <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#5C7470]">
                         {lang === 'es'
                           ? 'Funciones en desarrollo'
                           : 'Features in development'}
                       </p>
-                      <h4 className="mt-1 text-[15px] font-black text-[#204E4A]">
+                      <h4 className="mt-1 text-[15px] font-black leading-snug text-[#204E4A]">
                         {lang === 'es'
                           ? '¿Qué te gustaría hacer aquí después?'
                           : 'What would you like to do here next?'}
                       </h4>
                     </div>
-                    <span className="rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-sm font-extrabold uppercase tracking-wider text-[#204E4A]">
+                    <span className="w-fit shrink-0 rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-[#204E4A]">
                       {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm leading-relaxed text-[#5C7470]">
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
                     {lang === 'es'
                       ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en este tipo de lugar.'
                       : 'These features are not active yet. Mark only the ones you would actually use for this type of place.'}
@@ -799,6 +800,7 @@ export const MapView = ({
                 </div>
               </div>
             )}
+            </div>
           </section>
           </div>, document.body
         )}
