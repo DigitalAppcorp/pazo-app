@@ -628,6 +628,8 @@ test('F16 Live abandoned login keeps original approval action visible without cr
   'Recovery must never create a new paid request or consent')
  assert.ok(recovery.includes("if(remote.status==='APPROVAL_PENDING')"))
  assert.ok(recovery.includes("code:'live_original_approval_ready'"))
- assert.ok(recovery.includes("if(action==='reconcile')"),
-  'Terminal or unverified provider states retain the guarded reconciliation flow')
+ assert.ok(recovery.includes("if(action==='reconcile'||(action==='resume'&&"),
+  'Continue may retire only a terminal original as Sandbox recover_retry does')
+ assert.ok(recovery.includes("['CANCELLED','EXPIRED'].includes(remote.status)"),
+  'Pending, active and unverified provider statuses must never free the checkout slot')
 })
