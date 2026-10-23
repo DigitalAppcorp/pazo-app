@@ -5404,7 +5404,12 @@
         "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2804/6538.glb",
         "reason": "net::ERR_ABORTED"
       }
-    ]
+    ],
+    "visualLimitations": {
+      "parkAndTrail": "clearly visible",
+      "foodVeterinaryGrooming": "partly behind preserved carousel rail",
+      "petStoreDTLA": "mostly occluded by tall Standard buildings at bearing0/pitch62; do not claim unobstructed visibility"
+    }
   },
   "verifiedCi": {
     "commit": "f839c933bdd0694480b7fb93a9211372fa4ef89d",
