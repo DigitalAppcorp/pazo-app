@@ -420,6 +420,9 @@ export const MapboxMap = ({
           // VECTOR map first; go raster only after the vector options fail.
           const mapError = event.error as {url?:unknown;message?:unknown} | undefined
           const detail = String(mapError?.url || '') + ' ' + String(mapError?.message || '')
+          // Elevation is optional: a failed DEM tile must not discard a
+          // perfectly good vector basemap or its PAZO native 3D models.
+          if (/mapbox-terrain-dem-v1|pazo-terrain-dem|terrain-rgb/i.test(detail)) return
           const isStyleOrAuth = failure === 'map_authorization' || /\/styles\/|style.+(fail|load)/i.test(detail)
           if (basemapStage === 'standard' && (isStyleOrAuth || ++vectorStyleErrors >= 3)) {
             basemapStage = 'streets'
