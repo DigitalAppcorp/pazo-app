@@ -47,8 +47,10 @@ test('gift admin refreshes server results after a write despite busy guard',()=>
 
 test('map remains server-map based with 3D places and explicit tile errors',()=>{
  const s=file('src/features/places/map/MapboxMap.tsx')
- assert.match(s,/style: 'mapbox:\/\/styles\/mapbox\/standard'/)
- assert.match(s,/map\.setStyle\(PAZO_STREETS_STYLE\)/)
+ assert.match(s,/style: mapAttempt === 'raster' \? PAZO_STREETS_STYLE : 'mapbox:\/\/styles\/mapbox\/standard'/)
+ assert.match(s,/setMapAttempt\('raster'\)/)
+ assert.match(s,/\[lang, mapAttempt\]/)
+ assert.doesNotMatch(s,/map\.setStyle\(PAZO_STREETS_STYLE\)/)
  assert.match(s,/from '\.\/pazoBasemap'/)
  const raster=file('src/features/places/map/pazoBasemap.ts')
  assert.match(raster,/https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png/)
