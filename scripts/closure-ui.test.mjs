@@ -1453,7 +1453,7 @@ test('F17 mobile: centered modal, brand typography, floating map nav and image c
   assert.ok(!stage.includes('&copy; OpenStreetMap contributors'),'Do not place a huge duplicate attribution over the map')
   assert.ok(mapbox.includes('syncPlaceMarkers(map, mapboxgl, placesRef.current)'),'Always render real PAZO place annotations independent of tile success')
   assert.ok(mapbox.includes("map.setStyle('mapbox://styles/mapbox/streets-v12')"),'Try normal vector streets before emergency raster')
-  assert.ok(mapbox.includes('pazo-terrain-dem') && map.includes('map.setTerrain('),'Authorized map style exposes actual elevation terrain')
+  assert.ok(mapbox.includes('pazo-terrain-dem') && mapbox.includes('map.setTerrain('),'Authorized map style exposes actual elevation terrain')
   assert.ok(map.includes('data-pazo-place-details="true"') && map.includes('text-[22px]'),'Only the place detail dialog gets larger type')
   assert.ok(css.includes('.pazo-place-card:has(img[data-pazo-place-photo="true"])'))
   assert.ok(stage.includes('pazo-photo-credit'))
