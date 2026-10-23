@@ -123,7 +123,7 @@ test('Edge uses GoTrue and service-only SQL; browser selects only Live owner act
  assert.doesNotMatch(index,/PAYPAL_CLIENT_SECRET|createSubscription/)
  assert.match(account,/pazo-paypal-live-account/)
  assert.match(account,/accounts\?\.length===0/)
- assert.match(account,/!\['list','status','cancel','resume','reconcile','abandon','acknowledgement'\]\.includes/)
+ assert.match(account,/!\['list','status','cancel','resume','reconcile','abandon','abandon_pending','acknowledgement'\]\.includes/)
  assert.match(account,/onClick=\{\(\) => void checkStatus\(account\.intentId\)\}/)
  assert.match(view,/LIVE_VAULT_SETUP_RELEASED=true/)
 })
@@ -175,4 +175,114 @@ test('Live account reader can read and cancel through original generation withou
  assert.match(edge,/\.readSubscription\(subscriptionId\)/)
  assert.match(edge,/\.cancelSubscription\(subscriptionId\)/)
  assert.doesNotMatch(edge,/createSubscription\(|REFUND/)
+})
+
+test('Live abandoned PayPal login can close a verified pending approval and safely reopen the offer',async()=>{
+ const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+  providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
+ let reads=0,claims=0,posts=0,finishes=0,retirements=0
+ const {handler}=build({
+  readPrivateOwner:async()=>slots([bound]),
+  readProviderStatus:async()=>({
+   id:bound.subscriptionId,plan_id:bound.planId,custom_id:bound.intentId,
+   status:++reads===1?'APPROVAL_PENDING':'CANCELLED'
+  }),
+  claimCancel:async()=>{claims++;return true},
+  postCancel:async()=>{posts++;return {postAccepted:true}},
+  finishCancel:async()=>{finishes++;return true},
+  retireTerminal:async({intentId,providerStatus})=>{
+   assert.equal(intentId,intent)
+   assert.equal(providerStatus,'CANCELLED')
+   retirements++;return true
+  }
+ })
+ const denied=await handler(req({action:'abandon_pending',intentId:intent}))
+ assert.equal(denied.status,400,'A click without the dedicated consent is rejected')
+ const approved=await handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
+ assert.equal(approved.status,200)
+ const response=await approved.json()
+ assert.equal(response.code,'live_checkout_slot_released')
+ assert.equal(response.paidThrough,null)
+ assert.equal(response.mayCharge,false)
+ assert.equal(response.mayGrantBenefits,false)
+ assert.deepEqual({reads,claims,posts,finishes,retirements},
+  {reads:2,claims:1,posts:1,finishes:1,retirements:1})
+ assert.ok(!JSON.stringify(response).includes(bound.subscriptionId))
+})
+test('Live retry never cancels an ACTIVE, APPROVED, wrong-owner or mismatched checkout',async()=>{
+ const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+  providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
+ for(const status of ['ACTIVE','APPROVED','SUSPENDED','EXPIRED']){
+  let posts=0,claims=0
+  const {handler}=build({
+   readPrivateOwner:async()=>slots([bound]),
+   readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
+    custom_id:bound.intentId,status}),
+   claimCancel:async()=>{claims++;return true},
+   postCancel:async()=>{posts++;return {postAccepted:true}}
+  })
+  const res=await handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
+  assert.equal(res.status,409,status)
+  assert.equal((await res.json()).code,'live_cancel_not_available')
+  assert.equal(claims,0)
+  assert.equal(posts,0)
+ }
+ let claimed=false
+ const {handler}=build({readPrivateOwner:async()=>slots([bound]),
+  readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
+   custom_id:'intent-23456789-1234-4234-8234-000000000000',status:'APPROVAL_PENDING'}),
+  claimCancel:async()=>{claimed=true;return true}})
+ const mismatch=await handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
+ assert.equal(mismatch.status,409)
+ assert.equal(claimed,false)
+})
+test('PayPal cancellation timeout fails closed; same intent can finish only after independent GET',async()=>{
+ const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+  providerCreateClaimedAt:'2026-10-21T12:00:30Z'}
+ let posted=0,release=0,claimed=0
+ const first=build({readPrivateOwner:async()=>slots([bound]),
+  readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
+   custom_id:bound.intentId,status:'APPROVAL_PENDING'}),
+  claimCancel:async()=>{claimed++;return true},
+  postCancel:async()=>{posted++;throw Error('network_timeout')},
+  finishCancel:async()=>true,
+  retireTerminal:async()=>{release++;return true}
+ })
+ const blocked=await first.handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
+ assert.equal(blocked.status,409)
+ assert.equal(posted,1)
+ assert.equal(release,0)
+ assert.equal(claimed,1)
+ // After the durable claim, a later owner action only GETs the original
+ // subscription; there must be no second cancellation POST.
+ const claimedBound={...bound,cancelState:'review_required'}
+ const second=build({readPrivateOwner:async()=>slots([claimedBound]),
+  readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
+   custom_id:bound.intentId,status:'CANCELLED'}),
+  claimCancel:async()=>{throw Error('duplicate claim')},
+  postCancel:async()=>{throw Error('duplicate cancellation')},
+  finishCancel:async()=>true,
+  retireTerminal:async()=>{release++;return true}
+ })
+ const reconciled=await second.handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
+ assert.equal(reconciled.status,200)
+ assert.equal((await reconciled.json()).code,'live_checkout_slot_released')
+ assert.equal(release,1)
+})
+test('Live cancelled pending approval remains blocked when financial and event reconciliation is not complete',async()=>{
+ const bound={...row(),state:'bound',subscriptionId:'I-ORIGINAL123456789',
+  providerCreateClaimedAt:'2026-10-21T12:00:30Z',cancelState:'confirmed'}
+ const {handler}=build({readPrivateOwner:async()=>slots([bound]),
+  readProviderStatus:async()=>({id:bound.subscriptionId,plan_id:bound.planId,
+   custom_id:bound.intentId,status:'CANCELLED'}),
+  claimCancel:async()=>{throw Error('should not be called')},
+  postCancel:async()=>{throw Error('should not be called')},
+  finishCancel:async()=>{throw Error('should not be called')},
+  retireTerminal:async()=>false
+ })
+ const r=await handler(req({action:'abandon_pending',intentId:intent,confirmAbandon:true}))
+ assert.equal(r.status,409)
+ const response=await r.json()
+ assert.equal(response.code,'live_coverage_or_events_pending')
+ assert.equal(response.mayCharge,false)
 })
