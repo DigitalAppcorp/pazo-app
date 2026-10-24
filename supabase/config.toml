@@ -475,3 +475,9 @@ entrypoint = "./functions/pazo-admin-paypal-release/index.ts"
 # Issue82: prepared only; no hosted deployment or financial activation.
 [functions.pazo-admin-gradual-live]
 verify_jwt = true
+
+# Preparation only — code runtime is MARKETING_LANDING_RELEASED=false.
+# Unauthenticated aggregate signals are otherwise rejected by the runtime gate.
+# This is not a deployment approval; any later opening requires abuse review.
+[functions.pazo-marketing-landing]
+verify_jwt = false
