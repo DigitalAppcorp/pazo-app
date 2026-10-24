@@ -11,7 +11,7 @@
 - **Siguiente gate técnico/financiero**: esperar un comprador **real y voluntario**, con aceptación personal PayPal; verificar webhook firmado, reconciliación del proveedor, período en ledger y beneficios de la cuenta. El estado 0 ventas no se resuelve con cuentas de pruebas. Marketing/creativos están a cargo de otro agente. PR #91 instrumentación promocional permanece sin activar.
 - **Gobernanza**: cambios nuevos en `main`, Vercel o Supabase siempre requieren autorización por su alcance. Este corte no permite modificar credenciales, crear compras, abrir capacidad pública ni escribir SQL alojado.
 
-Ver [reconciliación F17 actualizada](docs/PAZO_F17_RELEASE_GATES_RECONCILED_20261024.md) y [PR #102](https://github.com/DigitalAppcorp/pazo-app/pull/102).
+Ver [reconciliación F17 actualizada](PAZO_F17_RELEASE_GATES_RECONCILED_20261024.md) y [PR #102](https://github.com/DigitalAppcorp/pazo-app/pull/102).
 
 ---
 
