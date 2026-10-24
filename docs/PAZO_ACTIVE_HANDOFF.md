@@ -1,3 +1,13 @@
+## ACTUALIZACIÓN DE INGENIERÍA — Historial de migraciones y cierre F17 (23-oct-2026 PDT)
+
+**F17 está fusionada en `main`:** PR #81, commit `5d4464f63a996bb8f58c1f41fe943a8be9eda3c6`, CI posterior 7/7 PASS; sitio oficial conserva la versión PAZO ya aprobada por el PO, PayPal Live L1 limitado activo. Las entradas históricas inferiores que dicen `PR81 DRAFT`, `main sin merge` o `L1 BLOCKED` están superadas.
+
+**Migraciones — BLOQUEO ACTIVO de CLI contra producción:** auditoría read-only cruzada de `supabase_migrations.schema_migrations.statements` y las fuentes de GitHub: 110 locales, 122 remotas; 28 parejas por nombre con versiones diferentes. **23 fuentes SQL byte-idénticas se renombraron solo en rama aislada**, 5 fuentes requieren revisión adicional, 8 son exclusivamente locales y 20 exclusivamente remotas. La diferencia de versiones NO está totalmente resuelta. No ejecutar `supabase db push`, `migration repair` ni DDL sobre producción. No automatizar migraciones por el mero hecho de integrar GitHub. [Auditoría detallada](PAZO_HISTORICAL_MIGRATION_DRIFT_AUDIT_20261023.md). Los cambios de rama aún no están autorizados a `main`.
+
+**Pagos:** no fabricar una compra para cubrir el primer E2E Live; la conciliación de una venta real exige firma, evidencia de proveedor, ledger/período y beneficio. Marketing lo gestiona otro agente.
+
+---
+
 ## F17 — pre-merge de main: reconciliación de migraciones (23-oct-2026 PDT)
 
 **PRECAUCIÓN DE BASE DE DATOS:** [PR #94](https://github.com/DigitalAppcorp/pazo-app/pull/94) alinea los nombres de **cuatro archivos L1** con las versiones instaladas en Supabase, preservando exactamente los SQL y agregando guard CI. La auditoría global halló otros prefijos históricos sin correspondencia exacta: **no ejecutar `supabase db push`, migration repair, reapply ni merge de Supabase a producción desde esta rama**, incluso después de fusionar `main`, sin reconciliación integral y GO explícito. El PO aprobó visualmente el frontend oficial `bf78b85`; L1 permanece limitado a un comprador y no hay primera venta real. El cierre F17 debe usar [la matriz canónica](PAZO_F17_SCOPE_CLOSURE_RECONCILIATION_20261023.md). El PR #81 sigue DRAFT: **NO merge a main sin GO nuevo del PO**.
