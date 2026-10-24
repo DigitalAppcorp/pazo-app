@@ -39,3 +39,15 @@ La navegación existente de `AdminDashboard` ahora incluye **Campañas / Campaig
 - Accesos denegados, estado no configurado, rechazo de períodos arbitrarios, datos agregados y ausencia de identificadores se comprueban en PG17 sintético; contratos de pantalla y cliente se prueban en Node. No se alteró la protección general de la cuenta administradora.
 
 **Próximos gates:** verificación de carga responsive y compilación CI; decidir retención, implementar borrado programado y controles antiabuso reales, actualizar Política de Privacidad, instalar con autorización separada y recopilar solo tras un GO adicional. No publicar PR #91 ni activar publicidad por aprobar estas pruebas.
+
+## F17 — Control de abuso y plan de borrado por calendario (código, aún OFF)
+
+La ruta pública de señales de llegada incorpora ahora topes **atómicos en PostgreSQL**: hasta **30 señales por minuto y 3,000 señales por día por creatividad**. La escritura en la tabla diaria y el cupo del minuto se confirman o revierten juntos; el exceso devuelve rechazo sin incrementar el contador. Las tablas no contienen IP, UUID, identificador de visita, cookie ni user-agent. El cupo de minuto se depura después de 48 horas.
+
+**Limitación crítica:** estos topes no autentican una visita genuina. Un bot puede falsificar Origin y UTM, inflar señales hasta el límite e impedir el conteo de tráfico legítimo al consumir el cupo. Son un *circuit breaker* de almacenamiento/costos, NO una defensa antibot suficiente ni una medición de personas únicas. La activación del endpoint anónimo exige revisar protección adicional en el borde confiable (WAF/rate limits adecuados) y su tratamiento de IP por el proveedor.
+
+`public.pazo_marketing_prune_all_v1()` (solo `service_role`) unifica depuración de atribuciones por plazo aprobado, agregados diarios y ventanas de límite de 48h. La migración por sí sola **NO instala un cron**, mantiene recopilación y purga programada inactivas. El archivo de operación separado `supabase/operations/marketing-retention-cron-activation.sql` propone Supabase Cron **cada 6 horas** (minuto 17 UTC), con precondiciones explícitas: extensión `pg_cron` ya habilitada, periodo mayor que 0, versión publicada del aviso. No se ejecuta con db push ni con CI y requiere GO específico de operador.
+
+**Secuencia de activación futura:** revisar el aviso de privacidad ES/EN y obligaciones regulatorias; aprobar el plazo de datos (30 días es solo una propuesta); configurar `retention_days` y `policy_version` todavía con recopilación OFF; instalar y verificar cron y ejecuciones; comprobar backups/PITR; revisar WAF y cuotas del endpoint; validar pruebas end-to-end; habilitar recopilación en un GO independiente. No se debe activar la recopilación con el programador de borrado sin verificar. Los respaldos no se eliminan instantáneamente por una purga de la tabla viva.
+
+Los tests SQL/Node son sintéticos y sin datos reales. Los anuncios y gastos siguen detenidos, y el PR #91 continúa DRAFT.
