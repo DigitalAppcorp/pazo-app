@@ -23,7 +23,7 @@ CREATE TABLE marketing_private.collection_gate (
    (NOT enabled AND enabled_at IS NULL)
    OR (enabled AND enabled_at IS NOT NULL
       AND retention_days > 0
-      AND policy_version='pazo-marketing-optin-v1')
+      AND policy_version='pazo-marketing-attribution-notice-v1')
  )
 );
 INSERT INTO marketing_private.collection_gate(singleton,enabled) VALUES(true,false);
@@ -43,14 +43,12 @@ CREATE TABLE marketing_private.acquisition (
  )),
  first_touch_at timestamptz NOT NULL,
  signup_verified_at timestamptz NOT NULL,
- consent_recorded_at timestamptz NOT NULL,
- consent_version text NOT NULL CHECK(consent_version='pazo-marketing-optin-v1'),
+ notice_version text NOT NULL CHECK(notice_version='pazo-marketing-attribution-notice-v1'),
  recorded_at timestamptz NOT NULL DEFAULT clock_timestamp(),
  CONSTRAINT attribution_window CHECK (
    first_touch_at <= signup_verified_at + interval '5 minutes'
    AND signup_verified_at <= first_touch_at + interval '72 hours'
-   AND consent_recorded_at BETWEEN signup_verified_at - interval '5 minutes'
-     AND first_touch_at + interval '72 hours'
+   AND signup_verified_at <= recorded_at + interval '5 minutes'
  )
 );
 CREATE INDEX acquisition_signup_cohort_idx ON marketing_private.acquisition (signup_verified_at, campaign, creative);
@@ -79,15 +77,12 @@ $$;
 REVOKE ALL ON FUNCTION marketing_private.is_eligible_owner(uuid)
  FROM PUBLIC, anon, authenticated, service_role;
 
--- Privileged INTERNAL staging function ONLY. Consent timestamp is SERVER CLOCK,
--- NEVER provided by the browser. Only a separately reviewed, explicitly opted-in
--- authenticated Edge caller may eventually invoke a protected bridge.
--- No client/service grants or API
--- exposure; this is not an operative endpoint. Consent proof verification and
--- trusted sender binding still require implementation before any future GO.
+-- Private staging function. Server stores only the approved notice version;
+-- no browser consent timestamp, ID or freely chosen version is accepted.
+-- Release requires an accurate published collection notice and retention GO.
+-- This is not an operative endpoint while collection is OFF.
 CREATE FUNCTION marketing_private.record_verified_acquisition(
- p_owner uuid, p_creative text, p_first_touch_at timestamptz,
- p_consent_version text
+ p_owner uuid, p_creative text, p_first_touch_at timestamptz
 ) RETURNS boolean
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = ''
 AS $$
@@ -100,9 +95,7 @@ BEGIN
   WHERE g.singleton AND g.enabled
  ) THEN RETURN FALSE; END IF;
  IF p_owner IS NULL OR p_creative IS NULL OR p_first_touch_at IS NULL
-    OR p_consent_version IS NULL
     OR p_creative NOT IN('perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en')
-    OR p_consent_version <> 'pazo-marketing-optin-v1'
     OR NOT marketing_private.is_eligible_owner(p_owner) THEN
    RETURN FALSE;
  END IF;
@@ -120,16 +113,16 @@ BEGIN
  THEN RETURN FALSE; END IF;
  INSERT INTO marketing_private.acquisition(
    owner_id,campaign,creative,first_touch_at,signup_verified_at,
-   consent_recorded_at,consent_version
+   notice_version
  ) VALUES (
    p_owner,'pazo_beta_local_202610',p_creative,p_first_touch_at,v_verified,
-   statement_timestamp(),p_consent_version
+   'pazo-marketing-attribution-notice-v1'
  )
  ON CONFLICT (owner_id) DO NOTHING;
  RETURN FOUND;
 END
 $$;
-REVOKE ALL ON FUNCTION marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)
+REVOKE ALL ON FUNCTION marketing_private.record_verified_acquisition(uuid,text,timestamptz)
  FROM PUBLIC, anon, authenticated, service_role;
 
 -- SERVICE-ONLY PostgREST bridge, uninstalled and gated OFF. Explicit
@@ -138,18 +131,17 @@ REVOKE ALL ON FUNCTION marketing_private.record_verified_acquisition(uuid,text,t
 -- enables the gate, derives verification from auth.users, and cannot be
 -- called by anon/authenticated roles.
 CREATE FUNCTION public.pazo_marketing_record_verified_v1(
- p_owner uuid, p_creative text, p_first_touch_at timestamptz,
- p_consent_version text
+ p_owner uuid, p_creative text, p_first_touch_at timestamptz
 ) RETURNS boolean
 LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = ''
 AS $$
  SELECT marketing_private.record_verified_acquisition(
-   p_owner,p_creative,p_first_touch_at,p_consent_version
+   p_owner,p_creative,p_first_touch_at
  );
 $$;
-REVOKE ALL ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)
+REVOKE ALL ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz)
  FROM PUBLIC,anon,authenticated,service_role;
-GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz)
  TO service_role;
 
 -- Private cohort reader. First pet is derived from public.pets; the D7 column
