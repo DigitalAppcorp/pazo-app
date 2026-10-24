@@ -73,7 +73,7 @@ END $$;
 RESET ROLE;
 
 -- Aggregated landing RPC is service-only; no browser grants or raw visitor IDs.
-DO $
+DO $landing_test_1$
 BEGIN
  IF has_table_privilege('anon','marketing_private.landing_daily','SELECT')
   OR has_table_privilege('authenticated','marketing_private.landing_daily','INSERT')
@@ -88,19 +88,19 @@ BEGIN
    WHERE table_schema='marketing_private' AND table_name='landing_daily'
     AND column_name IN ('ip','email','owner_id','user_id','session_id','visitor_id','user_agent','fbclid'))
  THEN RAISE EXCEPTION 'Landing aggregate persisted identifiers'; END IF;
-END $;
+END $landing_test_1$;
 SET LOCAL ROLE service_role;
-DO $
+DO $landing_test_2$
 BEGIN
  IF public.pazo_marketing_record_landing_v1('perfil_es') IS DISTINCT FROM false
  THEN RAISE EXCEPTION 'Landing signal accepted with gate OFF'; END IF;
-END $;
+END $landing_test_2$;
 RESET ROLE;
-DO $
+DO $landing_test_3$
 BEGIN
  IF EXISTS(SELECT 1 FROM marketing_private.landing_daily)
  THEN RAISE EXCEPTION 'OFF gate wrote landing signals'; END IF;
-END $;
+END $landing_test_3$;
 
 -- Gate OFF rejects even fully valid events.
 DO $$
@@ -118,11 +118,11 @@ END $$;
 -- Rollback-only landing counter verifies same-day aggregation and allowlist.
 -- No attempt to count unique humans; no IP fingerprint.
 SET LOCAL ROLE service_role;
-DO $
+DO $landing_test_4$
 BEGIN
  IF public.pazo_marketing_record_landing_v1('perfil_es') IS DISTINCT FROM false
  THEN RAISE EXCEPTION 'OFF gate bypass on landing'; END IF;
-END $;
+END $landing_test_4$;
 RESET ROLE;
 
 -- Enable ONLY in synthetic transaction to check guarded paths.
@@ -145,7 +145,7 @@ UPDATE marketing_private.collection_gate
      policy_version='pazo-marketing-attribution-notice-v1' WHERE singleton=true;
 
 SET LOCAL ROLE service_role;
-DO $
+DO $landing_test_5$
 BEGIN
  IF NOT public.pazo_marketing_record_landing_v1('perfil_es')
     OR NOT public.pazo_marketing_record_landing_v1('perfil_es')
@@ -153,18 +153,18 @@ BEGIN
  THEN RAISE EXCEPTION 'Landing aggregation rejected eligible signal'; END IF;
  IF public.pazo_marketing_record_landing_v1('arbitrary_creative') IS DISTINCT FROM false
  THEN RAISE EXCEPTION 'Landing aggregation accepted unknown creative'; END IF;
-END $;
+END $landing_test_5$;
 RESET ROLE;
-DO $
+DO $landing_test_6$
 BEGIN
  IF (SELECT signals FROM marketing_private.landing_daily
    WHERE creative='perfil_es' AND landing_day =
      (now() AT TIME ZONE 'America/Los_Angeles')::date) <> 2
    OR (SELECT sum(signals) FROM marketing_private.landing_daily) <> 3
  THEN RAISE EXCEPTION 'Landing aggregation or day partition incorrect'; END IF;
-END $;
+END $landing_test_6$;
 
-DO $
+DO $landing_test_7$
 DECLARE accepted boolean;
 BEGIN
  SELECT marketing_private.record_verified_acquisition(
@@ -195,7 +195,7 @@ BEGIN
  IF (SELECT count(*) FROM marketing_private.acquisition) <> 1 THEN
   RAISE EXCEPTION 'Unexpected acquisitions after QA and dedup checks';
  END IF;
-END $$;
+END $landing_test_7$;
 
 INSERT INTO public.pets(id,owner_id,created_at) VALUES
  ('10000000-0000-0000-0000-000000000101','00000000-0000-0000-0000-000000000101',now()-interval '22 hours');
@@ -303,17 +303,17 @@ VALUES (
  'pazo_beta_local_202610','perfil_en',100
 );
 SET LOCAL ROLE service_role;
-DO $
+DO $landing_test_8$
 BEGIN
  IF public.pazo_marketing_prune_landing_v1() <> 1 THEN
   RAISE EXCEPTION 'Expired aggregate day not purged'; END IF;
-END $;
+END $landing_test_8$;
 RESET ROLE;
-DO $
+DO $landing_test_9$
 BEGIN
  IF (SELECT sum(signals) FROM marketing_private.landing_daily)<>3
  THEN RAISE EXCEPTION 'Pruning harmed current aggregate'; END IF;
-END $;
+END $landing_test_9$;
 
 ROLLBACK;
 SELECT 'PAZO_MARKETING_PG17_SYNTHETIC_ROLLBACK_PASS' AS result;
