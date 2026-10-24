@@ -54,7 +54,7 @@ BEGIN
     OR has_function_privilege('authenticated','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
     OR NOT has_function_privilege('service_role','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
  THEN RAISE EXCEPTION 'Public marketing bridge ACL mismatch'; END IF;
-END $;
+END $$;
 SET LOCAL ROLE service_role;
 DO $$
 DECLARE accepted boolean;
@@ -64,7 +64,7 @@ BEGIN
   'perfil_es',now()-interval '25 hours','pazo-marketing-optin-v1')
  INTO accepted;
  IF accepted IS DISTINCT FROM FALSE THEN RAISE EXCEPTION 'Service bridge must reject OFF gate'; END IF;
-END $;
+END $$;
 RESET ROLE;
 
 -- Gate OFF rejects even fully valid events.
