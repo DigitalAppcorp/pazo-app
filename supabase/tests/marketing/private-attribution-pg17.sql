@@ -125,7 +125,7 @@ INSERT INTO marketing_private.acquisition(
  '00000000-0000-0000-0000-000000000104',
  'pazo_beta_local_202610','qr_en',
  now()-interval '10 days 2 hours',now()-interval '10 days',
- now()-interval '10 days 1 hour 30 minutes','pazo-marketing-optin-v1'
+ now()-interval '10 days' + interval '1 minute','pazo-marketing-optin-v1'
 );
 INSERT INTO admin_private.app_activity_daily(user_id,activity_day,module_key)
 VALUES (
