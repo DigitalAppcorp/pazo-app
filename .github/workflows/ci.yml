@@ -202,7 +202,7 @@ jobs:
               -c 'SET ROLE postgres;' \
               -f supabase/migrations/20261010222006_f14_media_purge_retry_reconciliation.sql \
               -f supabase/migrations/20261011022000_f14_media_url_alias_guard.sql \
-              -f supabase/migrations/20261012063205_f14_one_object_admin_reconcile.sql
+              -f supabase/migrations/20261012071140_f14_one_object_admin_reconcile.sql
           done
           node scripts/f14-postgres-catalog.mjs
           psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/metadata.sql -f supabase/tests/f14/synthetic-cases.sql
