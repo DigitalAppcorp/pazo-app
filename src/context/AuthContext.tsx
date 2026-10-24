@@ -89,7 +89,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         captureEvent('auth_session_signed_in')
         if (session?.user) {
           stageMarketingSignupVerified(session.user.created_at, session.user.email_confirmed_at)
-          void submitAutomaticMarketingAttribution()
+          // Auth callback must return before invoking another Supabase method.
+          // Avoid a client session-lock deadlock; marketing remains fire-and-forget.
+          window.setTimeout(() => { void submitAutomaticMarketingAttribution() }, 0)
         }
       }
     })
