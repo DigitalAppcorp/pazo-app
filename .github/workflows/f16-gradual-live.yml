@@ -56,7 +56,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_ONLY_BROWSER_FIXTURE
-          VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED: 'true'
+          # Exercise real release default: Vercel may omit the optional presentation flag.
           VITE_PAZO_F16_SANDBOX_QA_UI: 'false'
           PAZO_PLAYWRIGHT_MODULE: /tmp/gradual-playwright/node_modules/playwright
         run: |
