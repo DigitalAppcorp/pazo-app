@@ -37,14 +37,13 @@ test('service-only bridge receives allowlisted verified fields, not user JWT',as
     ownerId:'00000000-0000-0000-0000-000000000101',
     creative:'perfil_es',
     firstTouchAt:'2026-10-23T23:59:00Z',
-    consentVersion:'pazo-marketing-optin-v1',
   })
   assert.equal(ok,true)
   assert.equal(calls[0].url,URL+'/rest/v1/rpc/pazo_marketing_record_verified_v1')
   assert.equal(calls[0].headers.apikey,serviceKey)
   assert.equal(calls[0].headers.authorization,'Bearer '+serviceKey)
   const body=JSON.parse(calls[0].body)
-  assert.equal(Object.keys(body).length,4)
+  assert.equal(Object.keys(body).length,3)
   assert.ok(!calls[0].body.includes('email'))
   assert.ok(!calls[0].body.includes('jwt'))
 })
