@@ -1,3 +1,5 @@
+> VIGENTE: decisión del Product Owner, atribución interna AUTOMÁTICA sin casilla en registro. Cualquier propuesta de opt-in UI o cadena `pazo-marketing-optin-v1` más abajo es histórica y queda reemplazada por `docs/PAZO_MARKETING_AUTOMATIC_INTERNAL_ATTRIBUTION_20261023.md`. Privacidad/retención y activación siguen pendientes.
+
 # PAZO — Instrumentación inicial de campañas (código inerte / no lanzamiento)
 
 Fecha: 2026-10-23. **Estado:** `CODE_PREPARED_OFF`. Rama específica de medición basada en F17 HEAD 860c036d82b5fdfe0712b738f6528f7e31505d84; el PR #90 sobre main quedó superado y no debe integrarse. Complementa PR #89 (estrategia de $350), no modifica sus decisiones ni cambia main/producción.
