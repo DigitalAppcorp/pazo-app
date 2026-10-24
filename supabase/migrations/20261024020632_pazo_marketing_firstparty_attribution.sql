@@ -73,13 +73,30 @@ ALTER TABLE marketing_private.landing_daily ENABLE ROW LEVEL SECURITY;
 ALTER TABLE marketing_private.landing_daily FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON marketing_private.landing_daily FROM PUBLIC,anon,authenticated,service_role;
 
+-- Ephemeral, anonymous global per-creative burst budget. NO IP, identity,
+-- token or visitor pseudonym. The counter is not evidence of a real human.
+-- It only caps server-side writes; a hostile script can exhaust the budget.
+CREATE TABLE marketing_private.landing_minute_budget (
+ minute_utc timestamptz NOT NULL,
+ creative text NOT NULL CHECK(creative IN(
+  'perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'
+ )),
+ accepted integer NOT NULL DEFAULT 0 CHECK(accepted BETWEEN 0 AND 30),
+ PRIMARY KEY(minute_utc,creative)
+);
+ALTER TABLE marketing_private.landing_minute_budget ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marketing_private.landing_minute_budget FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON marketing_private.landing_minute_budget
+ FROM PUBLIC,anon,authenticated,service_role;
+
 -- RPC callable ONLY with service_role server secret. The bridge's definer
 -- cannot be a browser role. Gate OFF -> zero writes; date is SQL clock.
 -- No unique-visitor claim and no external traffic-source verification.
 CREATE FUNCTION public.pazo_marketing_record_landing_v1(p_creative text)
 RETURNS boolean
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
-AS $mkt_block_1$
+AS $mkt_landing_bounded$
+DECLARE v_accepted integer; v_total bigint;
 BEGIN
  IF p_creative IS NULL OR p_creative NOT IN(
    'perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'
@@ -87,16 +104,36 @@ BEGIN
   SELECT 1 FROM marketing_private.collection_gate
   WHERE singleton AND enabled AND retention_days > 0
  ) THEN RETURN FALSE; END IF;
- INSERT INTO marketing_private.landing_daily(landing_day,campaign,creative,signals)
- VALUES (
-  (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date,
-  'pazo_beta_local_202610',p_creative,1
- )
- ON CONFLICT (landing_day,campaign,creative)
- DO UPDATE SET signals=marketing_private.landing_daily.signals+1;
+
+ -- Both counters live in ONE subtransaction. Exceeding either ceiling must
+ -- roll back BOTH writes, including concurrent ON CONFLICT updates.
+ BEGIN
+  INSERT INTO marketing_private.landing_minute_budget(minute_utc,creative,accepted)
+  VALUES(date_trunc('minute',statement_timestamp()),p_creative,1)
+  ON CONFLICT(minute_utc,creative) DO UPDATE
+    SET accepted=marketing_private.landing_minute_budget.accepted+1
+    WHERE marketing_private.landing_minute_budget.accepted < 30
+  RETURNING accepted INTO v_accepted;
+  IF NOT FOUND THEN RAISE EXCEPTION 'rate_capacity'
+     USING ERRCODE='PZ001'; END IF;
+
+  INSERT INTO marketing_private.landing_daily(landing_day,campaign,creative,signals)
+  VALUES(
+   (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date,
+   'pazo_beta_local_202610',p_creative,1
+  )
+  ON CONFLICT(landing_day,campaign,creative) DO UPDATE
+    SET signals=marketing_private.landing_daily.signals+1
+    WHERE marketing_private.landing_daily.signals < 3000
+  RETURNING signals INTO v_total;
+  IF NOT FOUND THEN RAISE EXCEPTION 'daily_capacity'
+     USING ERRCODE='PZ001'; END IF;
+ EXCEPTION WHEN SQLSTATE 'PZ001' THEN
+  RETURN FALSE;
+ END;
  RETURN TRUE;
 END
-$mkt_block_1$;
+$mkt_landing_bounded$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_record_landing_v1(text)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_landing_v1(text)
@@ -108,7 +145,7 @@ CREATE FUNCTION public.pazo_marketing_prune_landing_v1()
 RETURNS integer
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
 AS $mkt_block_2$
-DECLARE v_days smallint; v_count integer;
+DECLARE v_days smallint; v_count integer; v_window_count integer;
 BEGIN
  SELECT retention_days INTO v_days
  FROM marketing_private.collection_gate WHERE singleton;
@@ -118,7 +155,12 @@ BEGIN
   (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date-v_days
  );
  GET DIAGNOSTICS v_count=ROW_COUNT;
- RETURN v_count;
+ -- Minute buckets have a fixed 48-hour safety lifecycle irrespective of
+ -- the approved attribution retention period, and are never user-linked.
+ DELETE FROM marketing_private.landing_minute_budget
+ WHERE minute_utc < statement_timestamp()-interval '48 hours';
+ GET DIAGNOSTICS v_window_count=ROW_COUNT;
+ RETURN v_count+v_window_count;
 END
 $mkt_block_2$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_prune_landing_v1()
