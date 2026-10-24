@@ -395,5 +395,98 @@ END $marketing_admin_aggregates$;
 RESET ROLE;
 SELECT set_config('request.jwt.claim.sub','',true);
 
+-- Untrusted public endpoint cannot bypass DB budget via direct RPC. Both
+-- minute and daily ceilings must remain atomic, without visitor identifiers.
+DO $marketing_budget_acl$
+BEGIN
+ IF has_table_privilege('anon','marketing_private.landing_minute_budget','SELECT')
+ OR has_table_privilege('authenticated','marketing_private.landing_minute_budget','INSERT')
+ OR has_table_privilege('service_role','marketing_private.landing_minute_budget','SELECT')
+ OR has_function_privilege('anon','public.pazo_marketing_prune_all_v1()','EXECUTE')
+ OR has_function_privilege('authenticated','public.pazo_marketing_prune_all_v1()','EXECUTE')
+ OR NOT has_function_privilege('service_role','public.pazo_marketing_prune_all_v1()','EXECUTE')
+ THEN RAISE EXCEPTION 'Budget/retention private ACL compromised'; END IF;
+ IF EXISTS (
+  SELECT 1 FROM information_schema.columns
+  WHERE table_schema='marketing_private'
+    AND table_name='landing_minute_budget'
+    AND column_name IN ('owner_id','user_id','visitor_id','ip','user_agent','click_id')
+ ) THEN RAISE EXCEPTION 'Minute budget persists personal identifiers'; END IF;
+END $marketing_budget_acl$;
+
+SET LOCAL ROLE service_role;
+DO $marketing_budget_burst$
+DECLARE n integer; ok boolean;
+BEGIN
+ FOR n IN 1..31 LOOP
+  SELECT public.pazo_marketing_record_landing_v1('comunidad_en') INTO ok;
+  IF n<=30 AND ok IS DISTINCT FROM true THEN
+   RAISE EXCEPTION 'Burst limiter prematurely rejected valid signal %',n;
+  END IF;
+  IF n=31 AND ok IS DISTINCT FROM false THEN
+   RAISE EXCEPTION 'Burst limiter exceeded 30 signals';
+  END IF;
+ END LOOP;
+END $marketing_budget_burst$;
+RESET ROLE;
+DO $marketing_budget_assert$
+BEGIN
+ IF (SELECT signals FROM marketing_private.landing_daily
+  WHERE creative='comunidad_en')<>30
+ OR (SELECT accepted FROM marketing_private.landing_minute_budget
+  WHERE creative='comunidad_en')<>30 THEN
+  RAISE EXCEPTION 'Atomic burst budget diverged from landing signals';
+ END IF;
+END $marketing_budget_assert$;
+
+INSERT INTO marketing_private.landing_daily(landing_day,campaign,creative,signals)
+VALUES((now() AT TIME ZONE 'America/Los_Angeles')::date,
+ 'pazo_beta_local_202610','comunidad_es',3000);
+SET LOCAL ROLE service_role;
+DO $marketing_budget_day$
+BEGIN
+ IF public.pazo_marketing_record_landing_v1('comunidad_es') IS DISTINCT FROM false THEN
+  RAISE EXCEPTION 'Daily ceiling admitted signal over 3000'; END IF;
+END $marketing_budget_day$;
+RESET ROLE;
+DO $marketing_budget_rollback$
+BEGIN
+ IF EXISTS(SELECT 1 FROM marketing_private.landing_minute_budget
+   WHERE creative='comunidad_es') THEN
+  RAISE EXCEPTION 'Daily rejection failed to roll back minute counter';
+ END IF;
+ IF (SELECT signals FROM marketing_private.landing_daily
+    WHERE creative='comunidad_es')<>3000 THEN
+  RAISE EXCEPTION 'Daily rejection incremented signal'; END IF;
+END $marketing_budget_rollback$;
+
+-- Unified cleanup is service-only and also expires a 48-hour budget when
+-- the collection gate is OFF. Job scheduling is a separate operation.
+INSERT INTO marketing_private.landing_minute_budget(minute_utc,creative,accepted)
+VALUES(date_trunc('minute',now()-interval '49 hours'),'perfil_en',2);
+UPDATE marketing_private.collection_gate
+SET enabled=false,enabled_at=null,retention_days=0,policy_version=null
+WHERE singleton;
+SET LOCAL ROLE service_role;
+DO $marketing_budget_purge$
+DECLARE result jsonb;
+BEGIN
+ result:=public.pazo_marketing_prune_all_v1();
+ IF (result->>'acquisition_removed')::integer<>0 OR
+    (result->>'aggregate_or_window_rows_removed')::integer<>1 THEN
+  RAISE EXCEPTION 'Unexpected unified cleanup counters %',result;
+ END IF;
+END $marketing_budget_purge$;
+RESET ROLE;
+DO $marketing_budget_closed$
+BEGIN
+ IF EXISTS(SELECT 1 FROM marketing_private.landing_minute_budget
+   WHERE creative='perfil_en') THEN
+  RAISE EXCEPTION 'Old burst-budget record persisted with collection OFF';
+ END IF;
+ IF public.pazo_marketing_record_landing_v1('perfil_es') IS DISTINCT FROM false
+ THEN RAISE EXCEPTION 'Closed collection gate admitted signal'; END IF;
+END $marketing_budget_closed$;
+
 ROLLBACK;
 SELECT 'PAZO_MARKETING_PG17_SYNTHETIC_ROLLBACK_PASS' AS result;
