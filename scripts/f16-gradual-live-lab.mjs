@@ -19,3 +19,5 @@ run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_s
 run(process.execPath,['scripts/f16-gradual-live-concurrency.mjs'])
 
 run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/tests/gradual/real-cohort-pg17.sql'])
+
+run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/tests/gradual/qa-recheck-gate-pg17.sql'])

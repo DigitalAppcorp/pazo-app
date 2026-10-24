@@ -51,6 +51,19 @@ test('audit failures expose only closed stages, never arbitrary exception/provid
 })
 
 test('read failure preserves only HTTP category/status and never PayPal error bodies',async()=>{
- const r=createPaypalLiveMerchantEvidenceReader({merchantGeneration:1,planId:plan,clientId:'synthetic_client_id',clientSecret:'synthetic_client_secret',fetchImpl:async url=>url.endsWith('/token')?new Response(JSON.stringify({token_type:'Bearer',access_token:'synthetic_private_token'}),{headers:{'content-type':'application/json'}}):new Response('{"payer":"never expose","id":"private-provider-id"}',{status:404,headers:{'content-type':'application/json'}})})
+ const r=createPaypalLiveMerchantEvidenceReader({merchantGeneration:1,planId:plan,clientId:'synthetic_client_id',clientSecret:'synthetic_client_secret',fetchImpl:async url=>url.includes('/plans/')?Response.json(approvedPlan):url.endsWith('/token')?new Response(JSON.stringify({token_type:'Bearer',access_token:'synthetic_private_token'}),{headers:{'content-type':'application/json'}}):new Response('{"payer":"never expose","id":"private-provider-id"}',{status:404,headers:{'content-type':'application/json'}})})
  await assert.rejects(()=>r.readOriginalQaAudit(args),e=>e.qaStage==='subscription_get'&&e.providerHttpStatus===404&&e.providerFailure==='http'&&!e.message.includes('private-provider'))
+})
+
+test('independent signed event can be corroborated even when current subscription GET is 404',async()=>{
+ const {createOriginalQaAudit}=await import('../../functions/pazo-paypal-live-worker/qaOriginalAudit.mjs')
+ const scope={source:'original_prebeta_qa_scope_v1',sourceEnvironment:'live',ownerId:'owner',subscriptionId:sub,intentId:intent,planId:plan,merchantGeneration:1,event:{eventId:'WH-ORIGINAL',type:'BILLING.SUBSCRIPTION.CREATED',subjectId:sub,providerEventAt:'2026-10-23T18:00:00.000Z',subjectAt:'2026-10-23T18:00:00.000Z'}}
+ const r=await createOriginalQaAudit({rpc:async()=>scope,historical:{findBoundSubscription:async()=>({...scope,consentVerified:true}),readerForGeneration:async()=>({readOriginalQaAudit:async()=>{throw Object.assign(Error('PRIVATE'),{qaStage:'subscription_get',providerHttpStatus:404,providerFailure:'http',originalPlanVerified:true})}}),eventReaderForGeneration:async()=>async()=>({verifiedProviderRead:true,subscriptionId:sub,subjectId:sub,providerEventAt:'2026-10-23T18:00:00Z',subjectAt:'2026-10-23T18:00:00Z'})}})()
+ assert.equal(r.complete,false);assert.equal(r.providerHttpStatus,404);assert.equal(r.signedEventMatches,true);assert.equal(r.originalPlanVerified,true);assert.equal(JSON.stringify(r).includes('PRIVATE'),false)
+})
+
+test('processing OFF cannot run the original QA reconciliation',async()=>{
+ const handler=createPazoLivePrivateWorkerHttp({released:true,admit:async()=>({authenticated:true,enabled:true,busy:false,leaseToken:'00000000-0000-4000-8000-000000000001',expectedBuild:'pazo_live_worker_v2',processingAllowed:false,event:null}),complete:async p=>{assert.equal(p.maintenanceAllowed,false);return true},workers:{sale:()=>assert.fail(),refund:()=>assert.fail(),lifecycle:()=>assert.fail()},reconcileOriginalQa:()=>assert.fail()})
+ const r=await handler(new Request('https://edge.invalid/functions/v1/pazo-paypal-live-worker',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+'a'.repeat(64)},body:'{"action":"qa_reconcile"}'}))
+ assert.equal((await r.json()).code,'worker_qa_processing_off')
 })

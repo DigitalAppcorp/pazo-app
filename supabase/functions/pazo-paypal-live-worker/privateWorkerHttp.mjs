@@ -20,10 +20,10 @@ async function body(req){
  for(const part of parts){all.set(part,at);at+=part.length}
  const parsed=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(all))
  if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)||Object.keys(parsed).join(',')!=='action'||
-  !['health','drain','qa_audit'].includes(parsed.action))throw Error('body')
+  !['health','drain','qa_audit','qa_reconcile'].includes(parsed.action))throw Error('body')
  return parsed
 }
-export function createPazoLivePrivateWorkerHttp({released=false,admit,complete,workers,auditOriginalQa}={}){
+export function createPazoLivePrivateWorkerHttp({released=false,admit,complete,workers,auditOriginalQa,reconcileOriginalQa}={}){
  return async req=>{
   if(released!==true)return reply(503,'private_worker_not_released')
   if(!(req instanceof Request))return reply(400,'invalid_worker_request')
@@ -46,9 +46,13 @@ export function createPazoLivePrivateWorkerHttp({released=false,admit,complete,w
    typeof admitted.processingAllowed!=='boolean')return reply(503,'worker_build_or_lease_mismatch')
   let outcome='idle',code=input.action==='health'?'worker_health_only':'worker_idle'
   let audit
-  if(input.action==='qa_audit'){
-   try{if(typeof auditOriginalQa!=='function')throw Error('audit_unavailable');audit=await auditOriginalQa();code='worker_qa_audit_read'}
-   catch{code='worker_qa_audit_unavailable'}
+  if(input.action==='qa_reconcile'&&!admitted.processingAllowed){
+   code='worker_qa_processing_off'
+  }else if(['qa_audit','qa_reconcile'].includes(input.action)){
+   try{const read=input.action==='qa_audit'?auditOriginalQa:reconcileOriginalQa;if(typeof read!=='function')throw Error('audit_unavailable');audit=await read();code=input.action==='qa_audit'?'worker_qa_audit_read':'worker_qa_reconciliation_read';
+    if(audit?.reconciliationCode==='qa_lifecycle_outcome_unknown')outcome='unknown';
+    else if(audit?.reconciliationCode==='qa_lifecycle_review_required')outcome='review'}
+   catch{code='worker_qa_audit_unavailable';if(input.action==='qa_reconcile')outcome='unknown'}
   }
   const event=admitted.event
   if(admitted.monitorDue!==undefined&&typeof admitted.monitorDue!=='boolean')return reply(503,'worker_queue_shape_unverified')

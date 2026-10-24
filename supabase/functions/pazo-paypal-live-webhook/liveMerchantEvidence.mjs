@@ -26,7 +26,16 @@ async function json(fetchImpl,url,options){
  let response
  try{response=await fetchImpl(url,{...options,redirect:'error',cache:'no-store',
   signal:AbortSignal.timeout(12000)})}catch{fail('network')}
- if(!response?.ok||response.status!==200)fail('http',response?.status)
+ if(!response?.ok||response.status!==200){
+  // A bounded PayPal error enum/correlation reference can help the operator
+  // resolve a real 404. Never retain message/details/payer/URLs or raw body.
+  let providerErrorName=null,providerDebugId=null
+  try{const raw=await response?.text();if(typeof raw==='string'&&raw.length<=MAX_RESPONSE){const e=JSON.parse(raw)
+   if(new Set(['RESOURCE_NOT_FOUND','NOT_AUTHORIZED','PERMISSION_DENIED','INVALID_RESOURCE_ID','AUTHENTICATION_FAILURE','INTERNAL_SERVER_ERROR','UNPROCESSABLE_ENTITY','INVALID_REQUEST']).has(e?.name))providerErrorName=e.name
+   if(typeof e?.debug_id==='string'&&/^[a-f0-9]{8,32}$/.test(e.debug_id))providerDebugId=e.debug_id
+  }}catch{/* Do not expose an error body. */}
+  throw Object.assign(Error(NO),{providerFailure:'http',providerHttpStatus:response?.status,providerErrorName,providerDebugId})
+ }
  const ct=response.headers?.get?.('content-type')
  if(typeof ct!=='string'||!/^application\/json(?:\s*;|$)/i.test(ct))fail('content_type',response.status)
  let body
@@ -124,7 +133,7 @@ export function createPaypalLiveMerchantEvidenceReader({
   // Private original-QA audit. A complete transaction read is required even
   // when PAZO has no paid periods. Never returns raw provider/customer data.
   async readOriginalQaAudit({subscriptionId,intentId,expectedGeneration,createdAt,now=new Date().toISOString()}={}){
-   let qaStage='input'
+   let qaStage='input',originalPlanVerified=false
    try{
    if(expectedGeneration!==merchantGeneration||!SUB.test(subscriptionId||'')||!INTENT.test(intentId||'')||
     !canonicalPaypalInstant(createdAt)||!canonicalPaypalInstant(now))fail()
@@ -132,6 +141,11 @@ export function createPaypalLiveMerchantEvidenceReader({
    if(Date.parse(now)<=Date.parse(start)||Date.parse(now)-Date.parse(start)>31*86400000)fail()
    qaStage='oauth'
    const t=await token(),base='/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)
+   qaStage='plan_get'
+   const plan=await json(fetchImpl,HOST+'/v1/billing/plans/'+encodeURIComponent(planId),{method:'GET',headers:auth(t)})
+   qaStage='plan_terms'
+   if(!validatePazoPaypalLiveMonthlyPlan(plan,planId).ready)fail()
+   originalPlanVerified=true
    qaStage='subscription_get'
    const d=await json(fetchImpl,HOST+base,{method:'GET',headers:auth(t)})
    qaStage='binding'
@@ -140,10 +154,6 @@ export function createPaypalLiveMerchantEvidenceReader({
    qaStage='create_time'
    const created=canonicalPaypalInstant(d.create_time)
    if(!created||Date.parse(created)<Date.parse(start)||Date.parse(created)>Date.parse(now))fail()
-   qaStage='plan_get'
-   const plan=await json(fetchImpl,HOST+'/v1/billing/plans/'+encodeURIComponent(planId),{method:'GET',headers:auth(t)})
-   qaStage='plan_terms'
-   if(!validatePazoPaypalLiveMonthlyPlan(plan,planId).ready)fail()
    let url=HOST+base+'/transactions?start_time='+encodeURIComponent(start)+'&end_time='+encodeURIComponent(now)
    let pages=0,totalPages=null,totalItems=null,count=0,completed=0
    const seen=new Set(),ids=new Set()
@@ -172,11 +182,11 @@ export function createPaypalLiveMerchantEvidenceReader({
    if(count!==totalItems||pages!==Math.max(1,totalPages)||(totalPages===0&&count!==0))fail()
    return Object.freeze({source:'original_qa_provider_audit_v1',bindingVerified:true,planVerified:true,
     originalGenerationVerified:true,status:d.status,statusUpdatedAt:canonicalPaypalInstant(d.status_update_time),
-    createTime:canonicalPaypalInstant(d.create_time),transactionsComplete:true,transactionCount:count,completedPayments:completed,
+    createTime:canonicalPaypalInstant(d.create_time),observedAt:canonicalPaypalInstant(now),transactionsComplete:true,transactionCount:count,completedPayments:completed,
     lastPaymentPresent:d.billing_info?.last_payment!=null,nextBillingPresent:d.billing_info?.next_billing_time!=null,
     cycleExecutionsPresent:Array.isArray(d.billing_info?.cycle_executions),
     mayCreate:false,mayCancel:false,mayGrantBenefits:false})
-   }catch(error){throw Object.assign(Error('qa_original_provider_audit_unavailable'),{qaStage,providerFailure:error?.providerFailure,providerHttpStatus:error?.providerHttpStatus})}
+   }catch(error){throw Object.assign(Error('qa_original_provider_audit_unavailable'),{qaStage,originalPlanVerified,providerFailure:error?.providerFailure,providerHttpStatus:error?.providerHttpStatus,providerErrorName:error?.providerErrorName,providerDebugId:error?.providerDebugId})}
   },
   async readSaleDisputes(args={}){
    // Corroborate the exact original subscription and transaction before the

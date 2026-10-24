@@ -18,9 +18,9 @@ try{
  for(const width of [390,1440])for(const lang of ['es','en']){
   const context=await browser.newContext({viewport:{width,height:844},serviceWorkers:'block'})
   let current=owner,state='not_joined',feedback=null,statusReads=0,mutations=0,creates=0,unexpected=0,adminWrites=0
-  let hostedGate=false,revision=0,adminState='inactive'
+  let hostedGate=false,revision=0,adminState='inactive',legacyOpen=1
   const status=()=>({source:'gradual_owner_v1',pilotStage:'L1_FIRST_REAL',campaignState:'active',revision:1,myState:state,eligible:true,myCanCheckout:state==='slot_granted',benefitsActive:state==='benefits_active',pendingVerification:['paying','payment_verifying','issue'].includes(state),feedback})
-  const admin=()=>({source:'gradual_admin_v1',stage:'L1_FIRST_REAL',state:adminState,revision,capacity:1,hostedGateVerified:hostedGate,healthy:true,admitted:0,reserved:0,waiting:25,paying:0,verified:0,abandoned:0,feedbackOk:0,feedbackIssues:0,notificationsPending:5,notificationsDelivered:0,legacyOpen:0,realRevenueMinor:0,courtesyIsRevenue:false,workerHealthy:true,incidents:[],audit:[]})
+  const admin=()=>({source:'gradual_admin_v1',stage:'L1_FIRST_REAL',state:adminState,revision,capacity:1,hostedGateVerified:hostedGate,healthy:true,admitted:0,reserved:0,waiting:0,paying:0,verified:0,abandoned:0,feedbackOk:0,feedbackIssues:0,notificationsPending:0,notificationsDelivered:0,qaExcludedAccounts:8,realEligibleAccounts:0,legacyOpen,realRevenueMinor:0,courtesyIsRevenue:false,workerHealthy:true,incidents:[],audit:[]})
   await context.route('**/*',async route=>{
    const r=route.request(),url=new URL(r.url())
    if(url.origin===origin)return route.fulfill(await local(url.href))
@@ -64,9 +64,15 @@ try{
   check(await page.getByText(lang==='es'?'Tu pago y tus beneficios están verificados.':'Your payment and benefits are verified.',{exact:true}).count()===0,'account switch clears prior owner benefits')
   await page.goto(origin+`/supabase/tests/gradual/browser-harness.html?case=admin&lang=${lang}`)
   const confirm=page.getByRole('button',{name:lang==='es'?'Confirmar operación':'Confirm operation'})
-  await confirm.waitFor();check(await confirm.isDisabled(),'admin gate and fresh MFA required')
+  await confirm.waitFor();
+  for(const [label,count] of [[lang==='es'?'Cuentas QA excluidas':'Excluded QA accounts',8],[lang==='es'?'Cuentas reales elegibles':'Eligible real accounts',0]]){
+   const value=await page.locator('dl > div').filter({has:page.getByText(label,{exact:true})}).locator('dd').textContent();check(Number(value)===count,'QA and real counts remain distinct')
+  }
+  check(await confirm.isDisabled(),'admin gate and fresh MFA required')
   await page.getByRole('button',{name:'Fixture MFA'}).click();check(await confirm.isDisabled(),'MFA alone cannot bypass hosted gate')
   hostedGate=true;await page.getByRole('button',{name:lang==='es'?'Consultar estado autoritativo':'Read authoritative state'}).click()
+  check(await confirm.isDisabled(),'hosted gate and MFA cannot bypass unresolved original contract')
+  legacyOpen=0;await page.getByRole('button',{name:lang==='es'?'Consultar estado autoritativo':'Read authoritative state'}).click()
   await page.getByRole('checkbox').check();await confirm.click()
   await page.getByText('L1_FIRST_REAL · active',{exact:true}).waitFor();check(adminWrites===1,'one nonce mutation after explicit confirmation')
   check(await page.getByRole('option',{name:/pública|public release/}).count()===0,'public GO hidden before completion')
