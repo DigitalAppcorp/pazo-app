@@ -149,12 +149,14 @@ DECLARE v_days smallint; v_count integer; v_window_count integer;
 BEGIN
  SELECT retention_days INTO v_days
  FROM marketing_private.collection_gate WHERE singleton;
- IF v_days IS NULL OR v_days < 1 THEN RETURN 0; END IF;
- DELETE FROM marketing_private.landing_daily
- WHERE landing_day < (
-  (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date-v_days
- );
- GET DIAGNOSTICS v_count=ROW_COUNT;
+ v_count:=0;
+ IF v_days IS NOT NULL AND v_days > 0 THEN
+  DELETE FROM marketing_private.landing_daily
+  WHERE landing_day < (
+   (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date-v_days
+  );
+  GET DIAGNOSTICS v_count=ROW_COUNT;
+ END IF;
  -- Minute buckets have a fixed 48-hour safety lifecycle irrespective of
  -- the approved attribution retention period, and are never user-linked.
  DELETE FROM marketing_private.landing_minute_budget
@@ -471,6 +473,28 @@ $$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_prune_v1()
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_prune_v1()
+ TO service_role;
+
+-- Single cron-friendly purge operation; both private datasets, service-only.
+-- Not scheduled by migration. Operator must separately activate pg_cron
+-- after approving retention, provider backup/PITR policy, and collection.
+CREATE FUNCTION public.pazo_marketing_prune_all_v1()
+RETURNS jsonb
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $mkt_prune_all$
+DECLARE v_acquisition integer; v_signals integer;
+BEGIN
+ v_acquisition := marketing_private.prune_expired();
+ v_signals := public.pazo_marketing_prune_landing_v1();
+ RETURN jsonb_build_object(
+  'acquisition_removed',v_acquisition,
+  'aggregate_or_window_rows_removed',v_signals
+ );
+END
+$mkt_prune_all$;
+REVOKE ALL ON FUNCTION public.pazo_marketing_prune_all_v1()
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_prune_all_v1()
  TO service_role;
 
 -- New objects inherit defaults in some hosts; explicitly revoke.
