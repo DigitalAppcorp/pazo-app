@@ -4,6 +4,7 @@
 // GET provider facts; NEVER derives paidThrough, grants benefits, or writes DB.
 import {normalizePazoLiveBillingSnapshot,canonicalPaypalInstant} from './liveBillingSnapshot.mjs'
 import {createPazoLiveDisputeEvidenceReader} from './liveDisputeEvidence.mjs'
+import {validatePazoPaypalLiveMonthlyPlan} from '../f16-paypal-webhook/pazoPaypalLivePlanContract.mjs'
 const HOST='https://api-m.paypal.com'
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
@@ -20,20 +21,29 @@ const date=d=>{
  const normalized=d.replace(/(?:\.(\d{1,3}))?Z$/,(_match,frac)=>'.'+(frac||'').padEnd(3,'0')+'Z')
  return new Date(t).toISOString()===normalized
 }
-function fail(){throw Error(NO)}
+function fail(providerFailure,providerHttpStatus){throw Object.assign(Error(NO),{providerFailure,providerHttpStatus})}
 async function json(fetchImpl,url,options){
  let response
  try{response=await fetchImpl(url,{...options,redirect:'error',cache:'no-store',
-  signal:AbortSignal.timeout(12000)})}catch{fail()}
- if(!response?.ok||response.status!==200)fail()
+  signal:AbortSignal.timeout(12000)})}catch{fail('network')}
+ if(!response?.ok||response.status!==200){
+  // A bounded PayPal error enum/correlation reference can help the operator
+  // resolve a real 404. Never retain message/details/payer/URLs or raw body.
+  let providerErrorName=null,providerDebugId=null
+  try{const raw=await response?.text();if(typeof raw==='string'&&raw.length<=MAX_RESPONSE){const e=JSON.parse(raw)
+   if(new Set(['RESOURCE_NOT_FOUND','NOT_AUTHORIZED','PERMISSION_DENIED','INVALID_RESOURCE_ID','AUTHENTICATION_FAILURE','INTERNAL_SERVER_ERROR','UNPROCESSABLE_ENTITY','INVALID_REQUEST']).has(e?.name))providerErrorName=e.name
+   if(typeof e?.debug_id==='string'&&/^[a-f0-9]{8,32}$/.test(e.debug_id))providerDebugId=e.debug_id
+  }}catch{/* Do not expose an error body. */}
+  throw Object.assign(Error(NO),{providerFailure:'http',providerHttpStatus:response?.status,providerErrorName,providerDebugId})
+ }
  const ct=response.headers?.get?.('content-type')
- if(typeof ct!=='string'||!/^application\/json(?:\s*;|$)/i.test(ct))fail()
+ if(typeof ct!=='string'||!/^application\/json(?:\s*;|$)/i.test(ct))fail('content_type',response.status)
  let body
- try{body=await response.text()}catch{fail()}
- if(typeof body!=='string'||body.length>MAX_RESPONSE)fail()
+ try{body=await response.text()}catch{fail('body',response.status)}
+ if(typeof body!=='string'||body.length>MAX_RESPONSE)fail('body',response.status)
  let d
- try{d=JSON.parse(body)}catch{fail()}
- if(!d||Array.isArray(d)||typeof d!=='object')fail()
+ try{d=JSON.parse(body)}catch{fail('json',response.status)}
+ if(!d||Array.isArray(d)||typeof d!=='object')fail('object',response.status)
  return d
 }
 export function createPaypalLiveMerchantEvidenceReader({
@@ -120,6 +130,64 @@ export function createPaypalLiveMerchantEvidenceReader({
    return x // Never return unfiltered transaction outside this module.
  }
  return Object.freeze({
+  // Private original-QA audit. A complete transaction read is required even
+  // when PAZO has no paid periods. Never returns raw provider/customer data.
+  async readOriginalQaAudit({subscriptionId,intentId,expectedGeneration,createdAt,now=new Date().toISOString()}={}){
+   let qaStage='input',originalPlanVerified=false
+   try{
+   if(expectedGeneration!==merchantGeneration||!SUB.test(subscriptionId||'')||!INTENT.test(intentId||'')||
+    !canonicalPaypalInstant(createdAt)||!canonicalPaypalInstant(now))fail()
+   const start=new Date(Date.parse(createdAt)-86400000).toISOString()
+   if(Date.parse(now)<=Date.parse(start)||Date.parse(now)-Date.parse(start)>31*86400000)fail()
+   qaStage='oauth'
+   const t=await token(),base='/v1/billing/subscriptions/'+encodeURIComponent(subscriptionId)
+   qaStage='plan_get'
+   const plan=await json(fetchImpl,HOST+'/v1/billing/plans/'+encodeURIComponent(planId),{method:'GET',headers:auth(t)})
+   qaStage='plan_terms'
+   if(!validatePazoPaypalLiveMonthlyPlan(plan,planId).ready)fail()
+   originalPlanVerified=true
+   qaStage='subscription_get'
+   const d=await json(fetchImpl,HOST+base,{method:'GET',headers:auth(t)})
+   qaStage='binding'
+   if(d.id!==subscriptionId||d.plan_id!==planId||d.custom_id!==intentId||
+    !['APPROVAL_PENDING','APPROVED','ACTIVE','SUSPENDED','CANCELLED','EXPIRED'].includes(d.status))fail()
+   qaStage='create_time'
+   const created=canonicalPaypalInstant(d.create_time)
+   if(!created||Date.parse(created)<Date.parse(start)||Date.parse(created)>Date.parse(now))fail()
+   let url=HOST+base+'/transactions?start_time='+encodeURIComponent(start)+'&end_time='+encodeURIComponent(now)
+   let pages=0,totalPages=null,totalItems=null,count=0,completed=0
+   const seen=new Set(),ids=new Set()
+   while(url){
+    if(seen.has(url)||pages>=10)fail();seen.add(url);pages++
+    qaStage='transactions_get'
+    const body=await json(fetchImpl,url,{method:'GET',headers:auth(t)})
+    qaStage='transactions_shape'
+    if(!Array.isArray(body.transactions)||!Number.isSafeInteger(body.total_items)||body.total_items<0||body.total_items>500||
+     !Number.isSafeInteger(body.total_pages)||body.total_pages<0||body.total_pages>10)fail()
+    if(totalPages===null){totalPages=body.total_pages;totalItems=body.total_items}
+    if(totalPages!==body.total_pages||totalItems!==body.total_items)fail()
+    for(const row of body.transactions){if(!SALE.test(row?.id||'')||ids.has(row.id))fail();ids.add(row.id);count++;if(row.status==='COMPLETED')completed++}
+    if(body.links!==undefined&&!Array.isArray(body.links))fail()
+    const next=(body.links||[]).filter(x=>x?.rel==='next');if(next.length>1)fail();url=null
+    qaStage='pagination'
+    if(next.length){
+     let parsed;try{parsed=new URL(next[0].href)}catch{fail()}
+     if(next[0].method!=='GET'||parsed.origin!==HOST||parsed.pathname!==base+'/transactions'||parsed.username||parsed.password||parsed.hash||
+      parsed.searchParams.get('start_time')!==start||parsed.searchParams.get('end_time')!==now||
+      [...parsed.searchParams.keys()].some(k=>!['start_time','end_time','page','page_size'].includes(k)||parsed.searchParams.getAll(k).length!==1))fail()
+     url=parsed.href
+    }
+   }
+   qaStage='transaction_coverage'
+   if(count!==totalItems||pages!==Math.max(1,totalPages)||(totalPages===0&&count!==0))fail()
+   return Object.freeze({source:'original_qa_provider_audit_v1',bindingVerified:true,planVerified:true,
+    originalGenerationVerified:true,status:d.status,statusUpdatedAt:canonicalPaypalInstant(d.status_update_time),
+    createTime:canonicalPaypalInstant(d.create_time),observedAt:canonicalPaypalInstant(now),transactionsComplete:true,transactionCount:count,completedPayments:completed,
+    lastPaymentPresent:d.billing_info?.last_payment!=null,nextBillingPresent:d.billing_info?.next_billing_time!=null,
+    cycleExecutionsPresent:Array.isArray(d.billing_info?.cycle_executions),
+    mayCreate:false,mayCancel:false,mayGrantBenefits:false})
+   }catch(error){throw Object.assign(Error('qa_original_provider_audit_unavailable'),{qaStage,originalPlanVerified,providerFailure:error?.providerFailure,providerHttpStatus:error?.providerHttpStatus,providerErrorName:error?.providerErrorName,providerDebugId:error?.providerDebugId})}
+  },
   async readSaleDisputes(args={}){
    // Corroborate the exact original subscription and transaction before the
    // dispute API. Never inspect unrelated merchant or customer transactions.

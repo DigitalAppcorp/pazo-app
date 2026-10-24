@@ -1,3 +1,15 @@
+## Issue85 — relectura QA y certificado técnico (24-oct-2026, preparado)
+
+Una revisión autorizada puede conservar UUID de petición, generación/evento originales, diagnóstico/estado/attempts anteriores, status/timestamp reales del proveedor y digest de evidencia mínima. Sigue la retención/hold de su inbox financiero (FK que acompaña la purga lícita del padre), sin payload ni pagador. Ningún recheck borra firma o marca processed: solo retorna a pending con historial y tope original de intentos, tras GET auténtico y cero transacciones. El certificado técnico privado conserva commits/bundles/digest/origen/revisiones/fecha conforme al control financiero existente; solo postgres puede certificar, y no concede MFA ni inicia campaña. No nuevas categorías de terceros, secretos, publicidad o analytics.
+
+## Issue85 — cohorte de QA prebeta excluida (24-oct-2026, preparada)
+
+Clasificación privada durable por UUID Auth, motivo fijo prebeta_20261023 y fecha de clasificación; incluye todas las cuentas anteriores al primer deploy oficial 2026-10-23 22:59 UTC. La elegibilidad exige además created_at posterior/al cutoff inmutable y ausencia de allowlist Sandbox. Sirve para excluir tests de invitaciones, CREATE, métricas, ingresos y promociones sin borrar ledger/recibos ni la cuenta admin/MFA. Tabla FORCE RLS sin grants a clientes/servicio; campos solo agregados en Administración. La etiqueta QA usa FK Auth ON DELETE CASCADE; la admisión financiera guarda además el booleano inmutable real_account_at_admission con la retención de su historial original, para que borrar Auth no libere cupos reales ni convierta QA en real; no añade PII ni analytics. No se borran obligaciones reales por clasificarlas QA. La auditoría original sigue disponible al operador hasta conciliar el contrato.
+
+## Issue85 — auditoría privada del contrato QA original (23-oct-2026)
+
+GO PO para conciliar antes de L1. Worker interno puede leer únicamente el contrato bound del canary prebeta original mediante generación/plan inmutables, GET de suscripción/plan/transacciones completas/evento firmado. Respuesta mínima: estado, fechas proveedor, contadores y coincidencias; sin pagador, IDs, URLs ni credenciales. No CREATE/CANCEL/grants en esta auditoría. Capacidad de dispatch aleatoria de un uso (120s), no clave permanente en pg_net. RPC de scope solo service_role; dispatcher solo postgres; sin acceso directo cliente. No retención nueva de payload ni analytics. Evidencia financiera original se conserva sin mutarla; el resultado agregado sirve para decidir conciliación/STOP, no equivale a permiso financiero.
+
 ## F17 — fotografías curadas sin Google Places (22-oct-2026)
 
 Las tarjetas T05 solicitan seis archivos distintos de Wikimedia Commons: uno
