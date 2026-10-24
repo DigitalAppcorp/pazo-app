@@ -41,7 +41,7 @@ for(const name of names){
   assert.doesNotMatch(source,/\b(?:dblink|http_get|http_post|net\.http_|cron\.schedule|copy\s+.*\bprogram)\b/i,
     'network/host side-effect pattern in '+name)
   try{
-    psql(['-c','SET ROLE postgres;','-f',new URL(file).pathname])
+    // The synthetic catalog fixture assigns storage.objects to supabase_storage_admin.\n    // Its local 'postgres' is deliberately NOSUPERUSER, unlike the managed hosted\n    // migration operator. Use synthetic supabase_admin (SUPERUSER) only inside\n    // f14_synthetic to exercise policy DDL; this is NOT a hosted permission test.\n    psql(['-c','SET ROLE supabase_admin;','-f',new URL(file).pathname])
     console.log('F17_LEGACY_LOCAL_SQL_ISOLATED_REPLAY_PASS '+name)
   }catch(error){
     console.error('F17_LEGACY_LOCAL_SQL_ISOLATED_REPLAY_BLOCKED '+name)
