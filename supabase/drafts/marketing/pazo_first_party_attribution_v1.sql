@@ -132,11 +132,11 @@ CREATE FUNCTION public.pazo_marketing_record_verified_v1(
  p_consent_version text
 ) RETURNS boolean
 LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = ''
-AS $
+AS $$
  SELECT marketing_private.record_verified_acquisition(
    p_owner,p_creative,p_first_touch_at,p_consent_version
  );
-$;
+$$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)
