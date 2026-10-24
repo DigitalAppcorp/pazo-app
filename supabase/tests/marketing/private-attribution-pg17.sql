@@ -48,7 +48,7 @@ INSERT INTO admin_private.admin_grants(user_id)
 
 -- Browser callers cannot call the public bridge. The service role can
 -- execute the explicit bridge only; it cannot SELECT private attribution.
-DO $
+DO $$
 BEGIN
  IF has_function_privilege('anon','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
     OR has_function_privilege('authenticated','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
@@ -56,7 +56,7 @@ BEGIN
  THEN RAISE EXCEPTION 'Public marketing bridge ACL mismatch'; END IF;
 END $;
 SET LOCAL ROLE service_role;
-DO $
+DO $$
 DECLARE accepted boolean;
 BEGIN
  SELECT public.pazo_marketing_record_verified_v1(
