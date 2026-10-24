@@ -1,5 +1,12 @@
 name: PAZO Marketing private attribution draft (isolated)
 on:
+  push:
+    branches: ['feat/f17-marketing-*']
+    paths:
+      - 'supabase/drafts/marketing/**'
+      - 'supabase/tests/marketing/**'
+      - 'src/features/marketing/**'
+      - '.github/workflows/marketing-attribution-pg17.yml'
   pull_request:
     branches: [f17/beta-final-mobile-support-admin-20261022]
     paths:
