@@ -46,6 +46,27 @@ INSERT INTO supporter_private.gradual_qa_accounts(owner_id,reason)
 INSERT INTO admin_private.admin_grants(user_id)
  VALUES('00000000-0000-0000-0000-000000000103');
 
+-- Browser callers cannot call the public bridge. The service role can
+-- execute the explicit bridge only; it cannot SELECT private attribution.
+DO $
+BEGIN
+ IF has_function_privilege('anon','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
+    OR has_function_privilege('authenticated','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
+    OR NOT has_function_privilege('service_role','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
+ THEN RAISE EXCEPTION 'Public marketing bridge ACL mismatch'; END IF;
+END $;
+SET LOCAL ROLE service_role;
+DO $
+DECLARE accepted boolean;
+BEGIN
+ SELECT public.pazo_marketing_record_verified_v1(
+  '00000000-0000-0000-0000-000000000101',
+  'perfil_es',now()-interval '25 hours','pazo-marketing-optin-v1')
+ INTO accepted;
+ IF accepted IS DISTINCT FROM FALSE THEN RAISE EXCEPTION 'Service bridge must reject OFF gate'; END IF;
+END $;
+RESET ROLE;
+
 -- Gate OFF rejects even fully valid events.
 DO $$
 DECLARE admitted boolean;
