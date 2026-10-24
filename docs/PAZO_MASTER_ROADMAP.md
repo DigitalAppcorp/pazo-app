@@ -1,6 +1,6 @@
-## F17 — Issue96, cierre de programación EN CURSO (PR91, sin producción)
+## F17 — Issue96, programación terminada en PR91 (gates de release abiertos)
 
-**Issue96 — avance técnico autorizado (23-oct-2026 Guatemala):** F17 `19c0b659` conciliado en PR91 sin cambiar bytes financieros. Código antiabuso servidor, purga/calendario separado, E2E PG17/Chromium y validación del panel implementados; CI final en verificación. Todos los gates de marketing OFF, retención0 y sin instalación/activación alojada. [Matriz y evidencia](PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md), [runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). La configuración/GO de proveedor, aviso, retención y despliegue son gates futuros, no autorización implícita en este cierre de programación.
+**Issue96 — cierre técnico autorizado (23-oct-2026 Guatemala):** F17 `19c0b659` conciliado en PR91 sin cambiar bytes financieros. Código antiabuso servidor, purga/calendario separado, E2E PG17/Chromium y validación del panel implementados; CI del código5cb0056f:13/13 jobs PASS;37 Node,26 PG17 y54 E2E. Cierre técnico documentado, sin fallos pendientes de programación. Todos los gates de marketing OFF, retención0 y sin instalación/activación alojada. [Matriz y evidencia](PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md), [runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). La configuración/GO de proveedor, aviso, retención y despliegue son gates futuros, no autorización implícita en este cierre de programación.
 
 # ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
 

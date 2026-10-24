@@ -14,10 +14,21 @@ Alcance: programación, pruebas y procedimientos; instalación, activación y pu
 | 3. Retención automática | Migración nueva separada; NULL-safe policy, purga atómica/mutex, heartbeat mínimo, última ejecución Cron exitosa obligatoria, bloqueo ante fallo/ausencia/vencimiento. Instalación/remoción idempotentes y separadas de db push | PASS local PG17; Cron es un doble de proveedor explícito |
 | 4. E2E / semántica | UTM→señal protegida→solicitud Auth→confirmación sintética→mascota real en SQL→panel agregado. Auth no confirma por solicitar. QA/admin/fundador retroactivos, TTL72h, primera mascota literal <7d, D7, roles, concurrencia, borrado y LA/DST | PASS local |
 | 5. Administración | OFF sin llamadas/números ficticios; JSON estricto, carga/error/reintento, teclado, tabla responsive ES/EN, error independiente del resumen y solo agregados. No visitas únicas/ROAS/tasa falsa | PASS local Chromium |
-| 6. CI y seguridad | Marketing Node, PG17 real, E2E local; governance/build, F16/PG17 y checksums financieros. CI exacto se registra al finalizar el PR | VALIDACIÓN CI EN CURSO |
+| 6. CI y seguridad | 5 runs /13 jobs PASS sobre código5cb0056f: marketing37 Node/26 PG/54 navegador; governance/build, F16/PG17 y checksums financieros | PASS |
 | 7. Preparación y evidencia | [Runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md), operaciones/póstflight separados, privacidad/inventario y handoff actualizados. Cero operaciones alojadas | PASS código/documentación |
 
 No declarar F17 fase COMPLETADA: no merge main, backend alojado ni activación en esta tarea.
+
+**TECHNICAL_CODE_DONE / COLLECTION_OFF / NOT_DEPLOYED.** No quedan fallos técnicos conocidos dentro del alcance de programación autorizado. El GO de instalación/privacidad/proveedor/activación es una decisión futura, no se solicita para terminar este código. [Evidencia CI estructurada](evidence/issue96/ci-code.json). Código fuente verificado: `5cb0056fcdb56abd144d5b8dce372becc6ad5953`; cambios posteriores de cierre son documentación únicamente.
+
+| Workflow del código final | Run | Resultado |
+| --- | --- | --- |
+| Marketing PR / push | [40061797087](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40061797087), [40061793986](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40061793986) | 1+1 jobs PASS;37/26/54 |
+| CI general | [40061797088](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40061797088) | 7/7 PASS, sin quitar gates |
+| F16 gradual | [40061797116](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40061797116) | 2/2 PASS |
+| F17 seguridad PG/navegador | [40061816438](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40061816438) | 2/2 PASS, dispatch en la misma rama |
+
+Checksums fuente SQL: primera migración `3259767f49e9b3be7dbe2dbe0a979c2a36a25ac21bcd74e3b8eaa5ec8ba85bee`; nueva retención `72e5edda023a49c44a81d742092c026359815765afc9ce8c8067372847c40a3e`. Ninguna instalada en hosted. Build PASS con advertencia preexistente de chunks grandes.
 
 ## Cambios concretos
 
