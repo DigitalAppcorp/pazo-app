@@ -19,7 +19,7 @@ Alcance: programación, pruebas y procedimientos; instalación, activación y pu
 
 No declarar F17 fase COMPLETADA: no merge main, backend alojado ni activación en esta tarea.
 
-**TECHNICAL_CODE_DONE / COLLECTION_OFF / NOT_DEPLOYED.** No quedan fallos técnicos conocidos dentro del alcance de programación autorizado. El GO de instalación/privacidad/proveedor/activación es una decisión futura, no se solicita para terminar este código. [Evidencia CI estructurada](evidence/issue96/ci-code.json). Código fuente verificado: `5cb0056fcdb56abd144d5b8dce372becc6ad5953`; cambios posteriores de cierre son documentación únicamente.
+**TECHNICAL_CODE_DONE / COLLECTION_OFF / NOT_DEPLOYED.** No quedan fallos técnicos conocidos dentro del alcance de programación autorizado. El GO de instalación/privacidad/proveedor/activación es una decisión futura, no se solicita para terminar este código. [Evidencia CI estructurada](evidence/issue96/ci-code.json). Código runtime verificado: `5cb0056fcdb56abd144d5b8dce372becc6ad5953`; el cierre posterior añade documentación y dos comprobaciones PG de roles/estado paused del wrapper final, sin cambios runtime. La suite PG final cuenta28 comprobaciones adicionales más SQL legado; las26 del primer manifiesto conservan su evidencia histórica.
 
 | Workflow del código final | Run | Resultado |
 | --- | --- | --- |
