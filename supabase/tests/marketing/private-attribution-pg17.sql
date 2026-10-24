@@ -202,7 +202,7 @@ END $$;
 INSERT INTO auth.users(id,created_at,email_confirmed_at)
 VALUES
  ('00000000-0000-0000-0000-000000000105',now()-interval '2 days',now()-interval '2 days'),
- ('00000000-0000-0000-0000-000000000106',now()-interval '2 days',now()-interval '2 days');
+ ('00000000-0000-0000-0000-000000000106',now()-interval '31 days',now()-interval '31 days');
 INSERT INTO public.profiles(id,is_founder) VALUES
  ('00000000-0000-0000-0000-000000000105',false),
  ('00000000-0000-0000-0000-000000000106',false);
@@ -214,7 +214,7 @@ INSERT INTO marketing_private.acquisition(
  now()-interval '2 days 1 hour',now()-interval '2 days',
  'pazo-marketing-attribution-notice-v1',now()),
  ('00000000-0000-0000-0000-000000000106','pazo_beta_local_202610','qr_es',
- now()-interval '2 days 1 hour',now()-interval '2 days',
+ now()-interval '31 days 1 hour',now()-interval '31 days',
  'pazo-marketing-attribution-notice-v1',now()-interval '31 days');
 SET LOCAL ROLE service_role;
 DO $$
