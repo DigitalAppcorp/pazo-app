@@ -34,3 +34,10 @@ Fecha: 2026-10-23. **Estado:** `CODE_PREPARED_OFF`. Rama específica de medició
 
 ## Prohibiciones preservadas
 No modificar `main`, Vercel, Supabase alojado, Auth provider, anuncios, PayPal, settings ni credenciales. Cero gasto. Mantener PostHog OFF y sin autocapture.
+
+## Evolución del PR #91: Backend preparado para revisión
+La migración privada está versionada como `supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql`, generada con nombre oficial de Supabase CLI en CI aislado (run 40052740127). **Sin instalación Supabase ni permiso de habilitar captura**. Incluye un puente REST accesible solo a `service_role`, sin acceso de clientes al schema privado.
+
+`supabase/functions/pazo-marketing-attribution` tiene handler y adaptador Auth, pero `MARKETING_INTAKE_RELEASED=false`. Además `PAZO_MARKETING_COLLECTION_ENABLED=false` bloquea la UI. `consent_recorded_at` usa reloj SQL; la afirmación de opt-in no sustituye revisión real de UX/consentimiento y retención. La suite `npm run test:marketing` cubre UTM, validación de llamada, Auth y adaptador server-only. La tabla nueva está vacía hasta instalación aprobada y el gate está OFF incluso en el esquema.
+
+El texto anterior que describe la migración como `no creada` fue una limitación histórica: después de la CLI de CI el archivo se añadió al PR, pero sigue **NO APLICADA** y la fase no está completa.
