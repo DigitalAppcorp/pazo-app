@@ -24,7 +24,7 @@ test('marketing admin reader is gated off without sample data',()=>{
  assert.ok(panel.includes('PAZO_MARKETING_ADMIN_REPORT_ENABLED=false'))
  assert.ok(panel.includes('if(!PAZO_MARKETING_ADMIN_REPORT_ENABLED)return'))
  assert.ok(panel.includes('No se muestran cifras ficticias'))
- assert.ok(panel.includes('not unique'))
+ assert.ok(panel.includes('Not unique visitors'))
  assert.ok(!panel.includes('MOCK_MARKETING'))
 })
 test('only admin-authenticated RPC returns aggregate projection',()=>{
