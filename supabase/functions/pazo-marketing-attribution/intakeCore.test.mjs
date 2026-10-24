@@ -9,7 +9,6 @@ const TARGET='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-marketi
 const payload=()=>({
   utm_source:'meta',utm_medium:'paid_social',utm_campaign:'pazo_beta_local_202610',
   utm_content:'perfil_es',first_touch_at:'2026-10-23T23:59:00Z',
-  consent:{granted:true,version:'pazo-marketing-optin-v1'},
 })
 const req=(body=payload(),overrides={})=>new Request(TARGET,{method:'POST',
   headers:{origin:'https://pazo-app.vercel.app','content-type':'application/json',
@@ -35,18 +34,18 @@ test('verified owner is derived from server identity, not an untrusted owner_id'
   const r=await h(req())
   assert.equal(r.status,202)
   assert.deepEqual(entry,{ownerId:USER.id,creative:'perfil_es',
-    firstTouchAt:'2026-10-23T23:59:00.000Z',consentVersion:'pazo-marketing-optin-v1'})
+    firstTouchAt:'2026-10-23T23:59:00.000Z'})
   const invalid=await h(req({...payload(),owner_id:'00000000-0000-0000-0000-000000000102'}))
   assert.equal(invalid.status,400)
 })
-test('rejects absent consent and extra fields without touching Auth or DB',async()=>{
+test('automatic UTM intake rejects unsolicited personal or consent fields',async()=>{
   let auth=0,write=0
   const h=createMarketingIntakeHandler(deps({authenticate:async()=>{auth++;return USER},
     submit:async()=>{write++;return true}}))
   const candidates=[
-    {...payload(),consent:{granted:false,version:'pazo-marketing-optin-v1'}},
-    {...payload(),consent:{granted:true,version:'old'}},
-    {...payload(),consent:{granted:true,version:'pazo-marketing-optin-v1',extra:'yes'}},
+    {...payload(),consent:{granted:true,version:'pazo-marketing-optin-v1'}},
+    {...payload(),consent_recorded_at:'2026-10-24T00:00:00Z'},
+    {...payload(),notice_version:'fake-version'},
     {...payload(),utm_content:'em%40example.com'},
     {...payload(),utm_source:'other'},
     {...payload(),email:'test@example.com'},
