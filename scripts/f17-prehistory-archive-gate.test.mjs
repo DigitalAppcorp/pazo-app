@@ -35,3 +35,17 @@ test('archive is deliberately non-deployable and remains fenced',()=>{
  assert.match(README,/DO_NOT_EXECUTE_ARCHIVED_SQL/)
  assert.match(README,/SOURCE_BASELINE_PRE_20261005_UNAVAILABLE/)
 })
+
+
+test('GitHub workflows never automatically push or repair hosted migration history',()=>{
+ const dir=new URL('.github/workflows/',root)
+ const names=readdirSync(dir).filter(n=>/\.ya?ml$/.test(n))
+ assert.ok(names.length>=10,'workflow coverage unexpectedly shrank')
+ for(const name of names){
+  const workflow=readFileSync(new URL(name,dir),'utf8')
+  // Scope: direct Supabase CLI commands in GitHub Actions. Indirect deployments,
+  // local operators and external host Git integrations need separate controls.
+  assert.doesNotMatch(workflow,/\bsupabase\s+db\s+(?:push|reset)\b/i,'unsafe automatic database command in '+name)
+  assert.doesNotMatch(workflow,/\bsupabase\s+migration\s+(?:repair|up)\b/i,'unsafe automatic migration command in '+name)
+ }
+})
