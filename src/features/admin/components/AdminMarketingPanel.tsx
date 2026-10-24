@@ -51,7 +51,7 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
   return ()=>{cancelled=true}
  },[period,revision,lang])
 
- return <section aria-label={l('Medición publicitaria','Campaign measurement')} className="min-w-0 space-y-4">
+ return <section aria-busy={loading} aria-label={l('Medición publicitaria','Campaign measurement')} className="min-w-0 space-y-4">
   <div className="rounded-[21px] bg-[#E8F2E6] px-5 py-4">
    <div className="flex items-start gap-3">
     <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#166D54]"><AdminGlyph name="chart" size={21}/></span>
@@ -91,6 +91,7 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
        ?l('Recopilación pausada','Collection paused')
        :l('Recopilación activa','Collection active')}
      {' · '}{l('Actualizado','Updated')} {new Date(data.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}
+     {' · '}{l('Días calendario de Los Ángeles','Los Angeles calendar days')}
     </p>
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
      <SummaryStat label={l('Señales de llegada','Landing signals')} value={format(data.totals.landing_signals)}
@@ -110,11 +111,11 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
       <div className="mt-4 w-full overflow-x-auto">
        <table className="w-full min-w-[560px] text-left text-[12px]">
         <thead><tr className="bg-[#F3F7EF] text-[#4B6B61]">
-         <th className="rounded-l-xl px-3 py-3 font-bold">{l('Fecha','Date')}</th>
-         <th className="px-3 py-3 font-bold">{l('Anuncio','Ad')}</th>
-         <th className="px-3 py-3 text-right font-bold">{l('Señales','Signals')}</th>
-         <th className="px-3 py-3 text-right font-bold">{l('Registros','Signups')}</th>
-         <th className="rounded-r-xl px-3 py-3 text-right font-bold">{l('Mascotas','Pets')}</th>
+         <th scope="col" className="rounded-l-xl px-3 py-3 font-bold">{l('Fecha','Date')}</th>
+         <th scope="col" className="px-3 py-3 font-bold">{l('Anuncio','Ad')}</th>
+         <th scope="col" className="px-3 py-3 text-right font-bold">{l('Señales','Signals')}</th>
+         <th scope="col" className="px-3 py-3 text-right font-bold">{l('Registros','Signups')}</th>
+         <th scope="col" className="rounded-r-xl px-3 py-3 text-right font-bold">{l('Mascotas','Pets')}</th>
         </tr></thead>
         <tbody>{data.daily.map((entry,i)=><tr key={entry.day+'-'+entry.creative+'-'+i} className="text-[#35574C]">
          <td className="whitespace-nowrap px-3 py-3">{entry.day}</td>

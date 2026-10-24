@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {createMarketingLandingHandler} from './landingCore.mjs'
 import {createMarketingLandingSubmit} from './landingAdapter.mjs'
+const verified=async()=>true // Synthetic provider boundary, never Origin proof.
 const TARGET='https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-marketing-landing'
 const ORIGIN='https://pazo-app.vercel.app'
 const payload=()=>({utm_source:'meta',utm_medium:'paid_social',
@@ -18,7 +19,7 @@ test('disabled public intake never parses body or invokes privileged RPC',async(
 })
 test('allowlisted aggregate keeps no user fields and counts only a creative',async()=>{
   let value
-  const h=createMarketingLandingHandler({released:true,submit:async v=>(value=v,true)})
+  const h=createMarketingLandingHandler({released:true,verifyChallenge:verified,submit:async v=>(value=v,true)})
   const r=await h(req())
   assert.equal(r.status,202)
   assert.equal((await r.json()).status,'aggregated')
@@ -26,7 +27,7 @@ test('allowlisted aggregate keeps no user fields and counts only a creative',asy
 })
 test('rejects arbitrary parameters and PII before touching adapter',async()=>{
   let calls=0
-  const h=createMarketingLandingHandler({released:true,submit:()=>{calls++}})
+  const h=createMarketingLandingHandler({released:true,verifyChallenge:verified,submit:()=>{calls++}})
   const invalid=[
     {...payload(),owner_id:'00000000-0000-0000-0000-000000000101'},
     {...payload(),ip:'127.0.0.1'},
@@ -43,7 +44,7 @@ test('rejects arbitrary parameters and PII before touching adapter',async()=>{
   assert.equal(calls,0)
 })
 test('no false success when DB rejects aggregate; no provider info leaked',async()=>{
-  const h=createMarketingLandingHandler({released:true,submit:async()=>false})
+  const h=createMarketingLandingHandler({released:true,verifyChallenge:verified,submit:async()=>false})
   const r=await h(req())
   assert.equal(r.status,409)
   assert.deepEqual(await r.json(),{status:'not_accepted'})

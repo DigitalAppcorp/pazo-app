@@ -1,4 +1,5 @@
 import { supabase } from '../../services/supabaseClient'
+import { parseMarketingSummary } from '../marketing/index'
 
 export interface AdminOverview {
   environment:'sandbox'
@@ -59,7 +60,7 @@ export interface AdminMarketingSummary {
 }
 export const adminMarketingSummary=(days:7|30|90)=>call<AdminMarketingSummary>(
  'pazo_admin_marketing_summary',{p_days:days}
-)
+).then(parseMarketingSummary)
 
 export const checkAdmin=()=>call<boolean>('pazo_is_admin')
 export const adminOverview=(days:7|30|90)=>call<AdminOverview>('pazo_admin_overview',{p_days:days})

@@ -196,18 +196,18 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       <p className="mt-1 text-[13px] text-[#647C75] lg:text-[15px]">
        {section==='summary'?l('Así va PAZO, con los datos disponibles','PAZO at a glance, using available data'):l('Centro de administración de PAZO','PAZO administration center')}
       </p>
-      {overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
+      {section!=='marketing'&&overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
      </div>
      <div className="flex shrink-0 items-center gap-2">
       <div className="hidden items-center gap-2 lg:flex">
        {periodSelector}
-       <button type="button" onClick={()=>void refresh()} disabled={loading}
+       {section!=='marketing'&&<><button type="button" onClick={()=>void refresh()} disabled={loading}
         className="flex min-h-11 items-center gap-2 rounded-[15px] bg-white px-4 text-[13px] font-extrabold text-[#204E4A] shadow-sm hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-60">
         <AdminGlyph name="activity" size={17}/>{l('Actualizar','Refresh')}
        </button>
        <span className="flex min-h-11 items-center gap-2 rounded-[15px] bg-white px-4 text-[12px] font-bold text-[#476862] shadow-sm">
         <span className="h-2.5 w-2.5 rounded-full bg-[#26B957]"/>{l('Datos de prueba','Test data')}
-       </span>
+       </span></>}
       </div>
       <button type="button" onClick={onClose} className="min-h-11 rounded-full bg-white px-4 py-2 text-[12px] font-extrabold hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] lg:hidden">
        {l('Volver','Back')}
@@ -227,14 +227,14 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 lg:px-7 lg:pt-1">
     <div className="mx-auto max-w-[1600px] space-y-4 lg:space-y-4">
      <div className="flex flex-wrap items-center justify-between gap-3 lg:hidden">
-      <p className="text-[12px] font-semibold text-[#6A8079]">
+      {section!=='marketing'&&<p className="text-[12px] font-semibold text-[#6A8079]">
        {overview?l('Actualizado: ','Updated: ')+new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US'):'—'}
-      </p>
+      </p>}
       <div className="flex items-center gap-2">{periodSelector}
-       <button type="button" onClick={()=>void refresh()} disabled={loading}
+       {section!=='marketing'&&<button type="button" onClick={()=>void refresh()} disabled={loading}
         className="min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-2 text-[12px] font-extrabold disabled:opacity-50 hover:bg-[#EAF079] focus-visible:bg-[#EAF079]">
         {l('Actualizar','Refresh')}
-       </button>
+       </button>}
       </div>
      </div>
      {section==='paypal'&&<AdminPayPalSettings lang={lang}/>}

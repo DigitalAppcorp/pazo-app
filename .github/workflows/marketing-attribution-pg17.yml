@@ -3,9 +3,10 @@ on:
   push:
     branches: ['feat/f17-marketing-*']
     paths:
-      - 'supabase/migrations/*pazo_marketing_firstparty_attribution.sql'
+      - 'supabase/migrations/*pazo_marketing*.sql'
       - 'supabase/tests/marketing/**'
-      - 'supabase/operations/marketing-retention-cron-activation.sql'
+      - 'supabase/operations/marketing-*.sql'
+      - 'scripts/marketing-*.mjs'
       - 'src/features/marketing/**'
       - 'src/features/admin/components/AdminMarketingPanel.tsx'
       - 'src/features/admin/components/AdminDashboard.tsx'
@@ -22,9 +23,10 @@ on:
   pull_request:
     branches: [f17/beta-final-mobile-support-admin-20261022]
     paths:
-      - 'supabase/migrations/*pazo_marketing_firstparty_attribution.sql'
+      - 'supabase/migrations/*pazo_marketing*.sql'
       - 'supabase/tests/marketing/**'
-      - 'supabase/operations/marketing-retention-cron-activation.sql'
+      - 'supabase/operations/marketing-*.sql'
+      - 'scripts/marketing-*.mjs'
       - 'src/features/marketing/**'
       - 'src/features/admin/components/AdminMarketingPanel.tsx'
       - 'src/features/admin/components/AdminDashboard.tsx'
@@ -62,6 +64,7 @@ jobs:
       PGUSER: postgres
       PGDATABASE: postgres
       PGPASSWORD: synthetic-marketing-only
+      PAZO_MARKETING_PG_MODE: ci
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -77,12 +80,8 @@ jobs:
           grep -Fq 'retention_days smallint NOT NULL DEFAULT 0' supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql
       - name: Install PostgreSQL client
         run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
-      - name: Prepare disposable roles and database fixture
-        run: psql -X -v ON_ERROR_STOP=1 -f supabase/tests/marketing/fixtures-pg17.sql
-      - name: Rehearse CLI-named migration on disposable PostgreSQL 17
-        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql
-      - name: Check private ACL, QA exclusions, deduplication, cohorts and rollback
-        run: psql -X -v ON_ERROR_STOP=1 -f supabase/tests/marketing/private-attribution-pg17.sql
+      - name: Actual migrations, privacy/roles, concurrent ingest and atomic retention with Cron provider double
+        run: npm run test:marketing:pg17
       - name: CLI migration stub — synthetic workspace, no remote connection
         run: |
           tmpdir="$RUNNER_TEMP/pazo-marketing-cli"
@@ -96,3 +95,31 @@ jobs:
           echo 'No SQL staged in production or linked Supabase project'
       - name: Run local front-end attribution unit contract
         run: npm run test:marketing
+      - run: npm ci --no-audit --no-fund
+      - name: Ephemeral browser, no application dependency
+        run: |
+          npm install --prefix /tmp/marketing-playwright --no-package-lock --ignore-scripts playwright@1.56.1
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            printf 'PAZO_CHROMIUM_PATH=%s\n' "$browser_path" >> "$GITHUB_ENV"
+          else
+            node /tmp/marketing-playwright/node_modules/playwright/cli.js install --with-deps chromium
+          fi
+      - name: Actual Auth/onboarding/Edge/PG17/admin E2E, synthetic email/challenge, no hosted traffic
+        env:
+          VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_ONLY_BROWSER_FIXTURE
+          VITE_PAZO_MARKETING_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+          PAZO_PLAYWRIGHT_MODULE: /tmp/marketing-playwright/node_modules/playwright
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5185 --strictPort >/tmp/marketing-vite.log 2>&1 &
+          marketing_vite_pid=$!
+          trap 'kill "$marketing_vite_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5185/ >/dev/null
+          npm run test:marketing:e2e
+      - run: npm run build
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: marketing-synthetic-browser
+          path: /tmp/pazo-marketing-ui

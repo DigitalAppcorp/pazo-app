@@ -1,6 +1,7 @@
 // PAZO Marketing: isolated HTTP contract. NOT DEPLOYED / NOT RELEASED.
 // No user ID, email, JWT, GPS, click ID, raw URL, IP or form data is logged.
 // All dependencies are injected to keep provider calls off in synthetic tests.
+import {readMarketingBody} from './requestBody.mjs'
 const CAMPAIGN = 'pazo_beta_local_202610'
 const CREATIVE = new Set([
   'perfil_es', 'perfil_en', 'qr_es', 'qr_en', 'comunidad_es', 'comunidad_en',
@@ -43,7 +44,7 @@ export function createMarketingIntakeHandler({
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status:204, headers:{...cors,'access-control-allow-methods':'POST, OPTIONS',
-          'access-control-allow-headers':'authorization, content-type','access-control-max-age':'300'},
+          'access-control-allow-headers':'authorization, content-type, apikey, x-client-info','access-control-max-age':'300'},
       })
     }
     if (request.method !== 'POST') return response(FAILURE, 405, cors)
@@ -56,22 +57,8 @@ export function createMarketingIntakeHandler({
     if (!/^Bearer [A-Za-z0-9._~+/=-]{12,4096}$/.test(authorization)) return response(FAILURE, 401, cors)
     let raw = ''
     try {
-      if (!request.body) return response(FAILURE, 400, cors)
-      const reader = request.body.getReader()
-      const decoder = new TextDecoder('utf-8', { fatal:true })
-      let byteCount = 0
-      while (true) {
-        const {done,value} = await reader.read()
-        if (done) break
-        byteCount += value.byteLength
-        if (byteCount > MAX_BYTES) {
-          await reader.cancel().catch(()=>{})
-          return response(FAILURE, 413, cors)
-        }
-        raw += decoder.decode(value, {stream:true})
-      }
-      raw += decoder.decode()
-    } catch { return response(FAILURE, 400, cors) }
+      raw=await readMarketingBody(request,MAX_BYTES)
+    } catch(error) { return response(FAILURE,[408,413].includes(error?.status)?error.status:400,cors) }
     let body
     try { body = JSON.parse(raw) } catch { return response(FAILURE, 400, cors) }
     if (!body || Array.isArray(body) || typeof body !== 'object') return response(FAILURE, 400, cors)

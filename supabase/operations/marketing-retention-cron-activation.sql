@@ -20,11 +20,10 @@ BEGIN
  END IF;
  -- Runs every 6 hours UTC. The DB service role/secret is never used by Cron.
  -- Named pg_cron schedule is replaceable/reviewable by the DB operator.
- PERFORM cron.schedule(
-  'pazo-marketing-retention-v1',
-  '17 */6 * * *',
-  'SELECT public.pazo_marketing_prune_all_v1();'
- );
+ -- The private helper calls cron.schedule(...) after checking named-job
+ -- ownership, database and command. An identical installation is idempotent;
+ -- a conflicting/inactive job requires operator review, never a blind reset.
+ PERFORM marketing_private.install_retention_schedule();
 END
 $marketing_retention_schedule$;
 COMMIT;

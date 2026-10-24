@@ -3,6 +3,7 @@ name: CI
 on:
   pull_request:
     branches:
+      - f17/beta-final-mobile-support-admin-20261022
       - f13/section-titles-20261012
       - main
       - release/mvp-beta-fast-track-20261010

@@ -1,3 +1,7 @@
+## Issue96 — programación de medición interna preparada, OFF (23-oct-2026)
+
+Trabajo en PR91 sin instalación ni activación. Auditoría técnica, pruebas y gates externos: [cierre técnico](PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md) y [runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). Estas notas prevalecen sobre propuestas históricas del módulo que aún indican cron/antiabuso sin programar.
+
 > VIGENTE: decisión del Product Owner, atribución interna AUTOMÁTICA sin casilla en registro. Cualquier propuesta de opt-in UI o cadena `pazo-marketing-optin-v1` más abajo es histórica y queda reemplazada por `docs/PAZO_MARKETING_AUTOMATIC_INTERNAL_ATTRIBUTION_20261023.md`. Privacidad/retención y activación siguen pendientes.
 
 # PAZO — Instrumentación inicial de campañas (código inerte / no lanzamiento)

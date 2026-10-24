@@ -1,8 +1,10 @@
 -- Isolated PostgreSQL 17 ONLY. No remote users, sessions or credentials.
 BEGIN;
-CREATE ROLE anon NOLOGIN;
-CREATE ROLE authenticated NOLOGIN;
-CREATE ROLE service_role NOLOGIN;
+DO $$BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='anon') THEN CREATE ROLE anon NOLOGIN;END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN CREATE ROLE authenticated NOLOGIN;END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN CREATE ROLE service_role NOLOGIN;END IF;
+END $$;
 CREATE SCHEMA auth;
 CREATE SCHEMA supporter_private;
 CREATE SCHEMA admin_private;

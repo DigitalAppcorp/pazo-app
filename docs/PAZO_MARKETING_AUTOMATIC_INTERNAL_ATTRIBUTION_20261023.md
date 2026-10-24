@@ -1,3 +1,7 @@
+## Issue96 — programación de medición interna preparada, OFF (23-oct-2026)
+
+Trabajo en PR91 sin instalación ni activación. Auditoría técnica, pruebas y gates externos: [cierre técnico](PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md) y [runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). Estas notas prevalecen sobre propuestas históricas del módulo que aún indican cron/antiabuso sin programar.
+
 # PAZO F17 — Automatic first-party campaign attribution (PO decision)
 Decision: UTM attribution is automatic without any new signup consent checkbox. This is first-party internal measurement only, not Meta Pixel/CAPI or individual conversion sharing. This document supersedes the checkbox proposal in earlier PR #91 privacy drafts.
 

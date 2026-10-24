@@ -1,5 +1,6 @@
 import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake, parsePazoCampaign } from './attribution'
 import { shouldSendLandingSignal } from './landingSignal'
+import { requestLandingChallenge } from './landingChallenge'
 import { supabase } from '../../services/supabaseClient'
 
 /**
@@ -34,14 +35,15 @@ export function stageMarketingLanding(search?: string): void {
     if (!shouldSendLandingSignal(last, attr.creative, Date.now())) return
     // Mark first, so reloads/React re-renders do not cause duplicate requests.
     window.sessionStorage.setItem(key, JSON.stringify({creative:attr.creative, sentAt:Date.now()}))
-    void supabase.functions.invoke('pazo-marketing-landing', {
+    void requestLandingChallenge().then(token=>token?supabase.functions.invoke('pazo-marketing-landing', {
+      headers:{'x-pazo-challenge':token},
       body:{
         utm_source:attr.source,
         utm_medium:attr.medium,
         utm_campaign:attr.campaign,
         utm_content:attr.creative,
       },
-    }).catch(()=>{})
+    }):undefined).catch(()=>{})
   } catch {
     // Storage disabled or browser isolation: do not collect or break navigation.
   }
@@ -71,18 +73,21 @@ export function stageMarketingFirstPetCreated(): void {
  * Supabase sends the signed-in user's session authorization to Edge. The
  * browser body contains only vetted UTM identifiers and first-touch timestamp.
  */
+let submitting=false
 export async function submitAutomaticMarketingAttribution(): Promise<void> {
   if (!PAZO_MARKETING_COLLECTION_ENABLED) return
+  if (submitting) return
   const instance = recorder()
   if (!instance) return
   const payload = prepareAutomaticCampaignIntake(instance.read())
   if (!payload) return
+  submitting=true
   try {
     const {data,error} = await supabase.functions.invoke('pazo-marketing-attribution', {body:payload})
-    if (!error && data?.status === 'accepted') instance.clear()
+    if (!error && data?.status === 'accepted'&&JSON.stringify(prepareAutomaticCampaignIntake(instance.read()))===JSON.stringify(payload)) instance.clear()
   } catch {
     // A marketing failure never interrupts Auth or signup UX.
-  }
+  } finally {submitting=false}
 }
 
 /** Remove only local campaign staging for logout/withdrawal; no remote writes. */
