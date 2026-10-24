@@ -1,3 +1,5 @@
+> VIGENTE: decisión del Product Owner, atribución interna AUTOMÁTICA sin casilla en registro. Cualquier propuesta de opt-in UI o cadena `pazo-marketing-optin-v1` más abajo es histórica y queda reemplazada por `docs/PAZO_MARKETING_AUTOMATIC_INTERNAL_ATTRIBUTION_20261023.md`. Privacidad/retención y activación siguen pendientes.
+
 # PAZO F17 — Revisión de privacidad y retención para atribución Meta (NO PUBLICAR)
 
 **Estado:** PROPUESTA PARA APROBACIÓN DEL PRODUCT OWNER · 2026-10-23 PDT  
