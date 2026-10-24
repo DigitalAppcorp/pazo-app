@@ -1,6 +1,6 @@
 \connect f14_synthetic
 DO $$ BEGIN IF current_database()<>'f14_synthetic' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
-\i supabase/migrations/20261024000800_pazo_f16_original_qa_recheck_and_hosted_gate_certificate.sql
+\i supabase/migrations/20261024003716_pazo_f16_original_qa_recheck_and_hosted_gate_certificate.sql
 BEGIN;
 SELECT gradual_test.assert('ISSUE85_RECHECK_SERVICE_ONLY',NOT has_function_privilege('authenticated','public.pazo_f16_live_service_qa_original_retry(uuid,bigint,text,text,text,text,timestamptz,timestamptz,text)','EXECUTE') AND has_function_privilege('service_role','public.pazo_f16_live_service_qa_original_retry(uuid,bigint,text,text,text,text,timestamptz,timestamptz,text)','EXECUTE'));
 SELECT gradual_test.assert('ISSUE85_CERTIFICATE_NOT_CLIENT_OR_SERVICE',NOT has_function_privilege('authenticated','supporter_private.pazo_gradual_certify_hosted_gate(uuid,bigint,text,text,text,text,text,text)','EXECUTE') AND NOT has_function_privilege('service_role','supporter_private.pazo_gradual_certify_hosted_gate(uuid,bigint,text,text,text,text,text,text)','EXECUTE'));
