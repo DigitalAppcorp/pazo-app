@@ -4,7 +4,7 @@ BEGIN
  IF current_database()<>'f14_synthetic' OR current_user<>'postgres'
  THEN RAISE EXCEPTION 'DISPOSABLE ONLY' USING ERRCODE='42501'; END IF;
 END $guard$;
-\i supabase/migrations/20261020200800_pazo_f16_secret_provision_audit_guarded.sql
+\i supabase/migrations/20261020200238_pazo_f16_secret_provision_audit_guarded.sql
 INSERT INTO admin_private.admin_grants(user_id)
  VALUES ('12345678-1234-4234-8234-123456789abc') ON CONFLICT DO NOTHING;
 INSERT INTO admin_private.pazo_paypal_merchant_generations(
