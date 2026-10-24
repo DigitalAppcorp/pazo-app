@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify reconciled historical migration Git blobs
+        run: node --test scripts/f17-historical-migration-alignment.test.mjs
+
       - name: Hardening + architecture + privacy + ops governance checks
         run: npm run test:governance
 
