@@ -50,3 +50,10 @@ $350 total solo plan presupuestario; presupuesto Meta **sin gastar**. No incorpo
 - Marketing `intakeCore.mjs` e `intakeAdapter.mjs` con suites de rechazo (no consentimiento, cuenta antigua, origen ajeno, tamaño de body, fraude de UID), además de UTM/embudo local.
 - Gate HTTP `MARKETING_INTAKE_RELEASED=false`; gate cliente `PAZO_MARKETING_COLLECTION_ENABLED=false`; gate DB `collection_gate.enabled=false`.
 - El paso final será crear prueba E2E consentida y revisar política/retención antes de cualquier ingestión alojada. Nada de Pixel o gasto de campaña.
+
+## Retención y revocación — gate preparado (23-oct-2026, sin activar)
+- Revisión formal propuesta en `docs/PAZO_MARKETING_PRIVACY_RETENTION_REVIEW_20261023.md`. `30 días` es **recomendación**, no decisión del PO ni plazo operativo. El límite duro del esquema es 90 días; `retention_days=0` al instalar, `policy_version=NULL` y `collection_gate.enabled=false`. La base rechaza activar la captura sin retención positiva y versión de política.
+- El lector de cohortes oculta filas fuera de la ventana configurada. Para eliminación física, `marketing_private.prune_expired()` y puente `public.pazo_marketing_prune_v1()` (service_role únicamente) eliminan filas caducadas cuando **alguien los ejecute**. **Ningún scheduler instalado**: no afirmar purga periódica todavía.
+- `public.pazo_marketing_withdraw_v1(p_owner)`, `service_role` únicamente, elimina la atribución de una cuenta; la futura UI de Ajustes y su endpoint deben obtener el owner desde Auth verificado. Una solicitud de baja no es un Auth DELETE consumado.
+- Cuando `auth.users` se elimina efectivamente, `ON DELETE CASCADE` retira la atribución de esa cuenta; backups/PITR y copias externas conservan su propio ciclo y deben revisarse antes de declarar eliminación completa.
+- Suites de PostgreSQL 17 agregan denegaciones a roles cliente, imposibilidad de activar retención cero, revocación idempotente y purga sintética. Sin efecto alojado.
