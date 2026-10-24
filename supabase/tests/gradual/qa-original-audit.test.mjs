@@ -67,3 +67,10 @@ test('processing OFF cannot run the original QA reconciliation',async()=>{
  const r=await handler(new Request('https://edge.invalid/functions/v1/pazo-paypal-live-worker',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+'a'.repeat(64)},body:'{"action":"qa_reconcile"}'}))
  assert.equal((await r.json()).code,'worker_qa_processing_off')
 })
+
+test('an unresolved original provider read reports review rather than a healthy reconciliation',async()=>{
+ let completion
+ const handler=createPazoLivePrivateWorkerHttp({released:true,admit:async()=>({authenticated:true,enabled:true,busy:false,leaseToken:'00000000-0000-4000-8000-000000000001',expectedBuild:'pazo_live_worker_v2',processingAllowed:true,event:null}),complete:async p=>{completion=p;return true},workers:{sale:()=>assert.fail(),refund:()=>assert.fail(),lifecycle:()=>assert.fail()},reconcileOriginalQa:async()=>({complete:false,providerHttpStatus:404,reconciliationCode:'qa_provider_review_required'})})
+ const r=await handler(new Request('https://edge.invalid/functions/v1/pazo-paypal-live-worker',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+'a'.repeat(64)},body:'{"action":"qa_reconcile"}'}))
+ assert.equal((await r.json()).outcome,'review');assert.equal(completion.outcome,'review');assert.equal(completion.maintenanceAllowed,false)
+})

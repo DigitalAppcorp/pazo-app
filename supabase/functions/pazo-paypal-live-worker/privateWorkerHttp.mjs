@@ -51,7 +51,7 @@ export function createPazoLivePrivateWorkerHttp({released=false,admit,complete,w
   }else if(['qa_audit','qa_reconcile'].includes(input.action)){
    try{const read=input.action==='qa_audit'?auditOriginalQa:reconcileOriginalQa;if(typeof read!=='function')throw Error('audit_unavailable');audit=await read();code=input.action==='qa_audit'?'worker_qa_audit_read':'worker_qa_reconciliation_read';
     if(audit?.reconciliationCode==='qa_lifecycle_outcome_unknown')outcome='unknown';
-    else if(audit?.reconciliationCode==='qa_lifecycle_review_required')outcome='review'}
+    else if(input.action==='qa_reconcile'&&(!audit?.complete||!['qa_original_terminal_closed','qa_event_reconciled_contract_not_terminal'].includes(audit.reconciliationCode)))outcome='review'}
    catch{code='worker_qa_audit_unavailable';if(input.action==='qa_reconcile')outcome='unknown'}
   }
   const event=admitted.event
