@@ -45,7 +45,7 @@ CREATE FUNCTION public.f16_qa_v2_begin_checkout(
  RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
  AS $fn$ BEGIN RETURN NULL; END $fn$;
 COMMIT;
-\i supabase/migrations/20261018201000_f16_local_sandbox_automatic_qa_admission.sql
+\i supabase/migrations/20261018170858_f16_local_sandbox_automatic_qa_admission.sql
 
 DO $assert$
 DECLARE x boolean;
