@@ -50,7 +50,7 @@ SELECT 'pazo-supporter-sandbox.benefits-v2',lang,repeat('f',64),
 FROM (VALUES ('es'),('en')) AS l(lang);
 COMMIT;
 
-\i supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql
+\i supabase/migrations/20261018132808_f16_sandbox_v2_append_only_checkout_retries.sql
 
 -- The first V2 owner exists, but NO reviewed grant exists: retry must fail.
 DO $test$
