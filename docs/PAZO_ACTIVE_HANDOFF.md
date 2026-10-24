@@ -1,3 +1,8 @@
+## PAZO F17 — Restauración desde respaldo vigente: preflight local sin producción (PR DRAFT)
+
+PR #99 ya está fusionado a main (`7ce277bf`), con CI de push SUCCESS. Supabase conserva 122 versiones; el respaldo restaurado offline el 11-oct es anterior al estado actual. Se preparó una prueba **offline** de cinco archivos Database, Storage y hashes, que expresamente NO certifica restore, offsite, actualidad ni replay histórico. No se accedió a backups privados ni a producción. `db push` y `migration repair` siguen bloqueados. Referencia: [recovery preflight](docs/PAZO_F17_CURRENT_BACKUP_PREFLIGHT_20261023.md).
+
+---
 ## F17 PR #99 — F14 one-time SQL protected in active migrations (23-oct-2026 PDT)
 
 Code-only proposal: `supabase/migrations/20261010043307_f14_media_jwt_claim_compat_single_test.sql` now uses the previously-reviewed structural-only/redacted F14 source. Original hosted SQL checksums remain in audit manifests and Git history, **no target-specific DO mutation is executable** through the active migration folder. GitHub guard test requires exact safe source. **Still NO_GO_DB_PUSH** due unavailable initial schema/replay and no PO production authorization; PR #99 remains DRAFT and can cause host auto-deploy if merged. [Evidence](docs/PAZO_F17_F14_ONE_TIME_SAFETY_REVIEW_20261023.md).
