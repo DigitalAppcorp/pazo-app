@@ -56,6 +56,76 @@ ALTER TABLE marketing_private.acquisition ENABLE ROW LEVEL SECURITY;
 ALTER TABLE marketing_private.acquisition FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON marketing_private.acquisition FROM PUBLIC, anon, authenticated, service_role;
 
+-- Non-identifying daily landing SIGNALS, not unique people.
+-- No IP, cookie ID, device ID, user ID, querystring or event rows.
+-- Browser limits repeat pings locally; hostile scripted pings can still inflate.
+CREATE TABLE marketing_private.landing_daily (
+ landing_day date NOT NULL,
+ campaign text NOT NULL DEFAULT 'pazo_beta_local_202610'
+  CHECK(campaign='pazo_beta_local_202610'),
+ creative text NOT NULL CHECK(creative IN(
+   'perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'
+ )),
+ signals bigint NOT NULL DEFAULT 0 CHECK(signals >= 0),
+ PRIMARY KEY (landing_day, campaign, creative)
+);
+ALTER TABLE marketing_private.landing_daily ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marketing_private.landing_daily FORCE ROW LEVEL SECURITY;
+REVOKE ALL ON marketing_private.landing_daily FROM PUBLIC,anon,authenticated,service_role;
+
+-- RPC callable ONLY with service_role server secret. The bridge's definer
+-- cannot be a browser role. Gate OFF -> zero writes; date is SQL clock.
+-- No unique-visitor claim and no external traffic-source verification.
+CREATE FUNCTION public.pazo_marketing_record_landing_v1(p_creative text)
+RETURNS boolean
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $
+BEGIN
+ IF p_creative IS NULL OR p_creative NOT IN(
+   'perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'
+ ) OR NOT EXISTS(
+  SELECT 1 FROM marketing_private.collection_gate
+  WHERE singleton AND enabled AND retention_days > 0
+ ) THEN RETURN FALSE; END IF;
+ INSERT INTO marketing_private.landing_daily(landing_day,campaign,creative,signals)
+ VALUES (
+  (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date,
+  'pazo_beta_local_202610',p_creative,1
+ )
+ ON CONFLICT (landing_day,campaign,creative)
+ DO UPDATE SET signals=marketing_private.landing_daily.signals+1;
+ RETURN TRUE;
+END
+$;
+REVOKE ALL ON FUNCTION public.pazo_marketing_record_landing_v1(text)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_landing_v1(text)
+ TO service_role;
+
+-- Landing counters are aggregate; only granular daily rows older than an
+-- APPROVED retention window are deleted. OFF (0) -> no purge.
+CREATE FUNCTION public.pazo_marketing_prune_landing_v1()
+RETURNS integer
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $
+DECLARE v_days smallint; v_count integer;
+BEGIN
+ SELECT retention_days INTO v_days
+ FROM marketing_private.collection_gate WHERE singleton;
+ IF v_days IS NULL OR v_days < 1 THEN RETURN 0; END IF;
+ DELETE FROM marketing_private.landing_daily
+ WHERE landing_day < (
+  (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date-v_days
+ );
+ GET DIAGNOSTICS v_count=ROW_COUNT;
+ RETURN v_count;
+END
+$;
+REVOKE ALL ON FUNCTION public.pazo_marketing_prune_landing_v1()
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_prune_landing_v1()
+ TO service_role;
+
 -- Eligibility uses LIVE, EXISTING QA lists; never take the browser's QA flag.
 -- No historic account is retroactively classified real. Existing admins,
 -- prebeta QA, Sandbox QA and founders are never included in paid acquisition.
