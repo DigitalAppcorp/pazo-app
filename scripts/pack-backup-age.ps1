@@ -31,12 +31,18 @@ foreach ($pazoFile in $pazoManifest.files) {
 }
 & node (Join-Path $PSScriptRoot 'verify-storage-export.mjs') (Join-Path $pazoSource 'storage')
 if ($LASTEXITCODE -ne 0) { throw 'Storage integrity is not verified.' }
+$pazoRecovery=Join-Path $pazoSource 'recovery-final'
+if(Test-Path -LiteralPath $pazoRecovery){
+  & node (Join-Path $PSScriptRoot 'verify-recovery-supplement.mjs') $pazoRecovery
+  if($LASTEXITCODE -ne 0){throw 'Recovery supplement integrity is not verified.'}
+}
 $pazoZip=Join-Path $pazoSource '.private-package.zip'
 if (Test-Path -LiteralPath $pazoZip) { throw 'Existing private package must be preserved.' }
 # Compress-Archive has a 2 GiB file limit; current tiny project must remain below it.
 if (@(Get-ChildItem -LiteralPath $pazoSource -Recurse -File | Where-Object Length -ge 2GB).Count) { throw 'Archive size limit exceeded.' }
 $pazoPayload=@('database.dump','roles.sql','storage-inventory.json','archive-toc.private.txt','extension-owners.json','database-manifest.json','storage') |
   ForEach-Object { Join-Path $pazoSource $_ }
+if(Test-Path -LiteralPath $pazoRecovery){$pazoPayload+=$pazoRecovery}
 Compress-Archive -LiteralPath $pazoPayload -DestinationPath $pazoZip -CompressionLevel Optimal
 & $AgeExecutable -r $Recipient -o $pazoOutput $pazoZip
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $pazoOutput) -or (Get-Item -LiteralPath $pazoOutput).Length -le 0) {

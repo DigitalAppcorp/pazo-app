@@ -1,3 +1,28 @@
+## F17 backup privado y restore — PASS LOCAL REAL, 24-oct-2026
+
+Respaldo nuevo privado, cinco piezas DB/roles, Storage: 9 objetos, 9,276,771 bytes,
+complemento coherente147 tablas / 13 secuencias, SHA-256, age roundtrip/extracción y
+restore NUEVO Supabase PG17 sin red/puertos: PASS. Comparación completa sin
+diferencias:401 funciones / 133 policies / 735 constraints / 70 triggers / 7 extensiones,
+roles/GRANTED BY/owners/ACL/RLS/columnas/índices/settings incluidos. P42 filas
+excluidas con estructura preservada; fuente 0 / restore 0. Paquete final: 10,219,547 bytes,
+SHA-256: 49585f612c5a600d1085c1ffcdc539d0c714193f816a12093832a56f58486f29.
+ACL operador/SYSTEM; contenedores propios eliminados y tmpfs liberado.
+
+PR100 DRAFT, sin merge/main/deploy/hosted writes/PayPal. Off-site diferido;
+servicios HTTP Auth/Storage y descifrado operativo Vault no certificados. No cierre
+global F17/T11 ni replay histórico. Ver [evidencia real](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md)
+y [complemento](PAZO_F17_RECOVERY_SUPPLEMENT_20261024.md).
+Las entradas inferiores son historial superado para este subgate.
+
+---
+
+
+## PAZO F17 — Restauración desde respaldo vigente: preflight local sin producción (PR DRAFT)
+
+PR #99 ya está fusionado a main (`7ce277bf`), con CI de push SUCCESS. Supabase conserva 122 versiones; el respaldo restaurado offline el 11-oct es anterior al estado actual. Se preparó una prueba **offline** de cinco archivos Database, Storage y hashes, que expresamente NO certifica restore, offsite, actualidad ni replay histórico. No se accedió a backups privados ni a producción. `db push` y `migration repair` siguen bloqueados. Referencia: [recovery preflight](PAZO_F17_CURRENT_BACKUP_PREFLIGHT_20261023.md).
+
+---
 # ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
 
 **Esta sección tiene prioridad temporal sobre las entradas históricas más abajo que aún dicen “L1 BLOCKED”, “canary/inactive” o exigen conciliar el checkout QA que ya fue eliminado.** Los límites permanentes de seguridad, privacidad, aprobaciones y no modificar main sin GO siguen vigentes.
