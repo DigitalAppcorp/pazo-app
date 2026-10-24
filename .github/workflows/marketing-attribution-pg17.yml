@@ -5,6 +5,7 @@ on:
     paths:
       - 'supabase/migrations/*pazo_marketing_firstparty_attribution.sql'
       - 'supabase/tests/marketing/**'
+      - 'supabase/operations/marketing-retention-cron-activation.sql'
       - 'src/features/marketing/**'
       - 'src/features/admin/components/AdminMarketingPanel.tsx'
       - 'src/features/admin/components/AdminDashboard.tsx'
@@ -23,6 +24,7 @@ on:
     paths:
       - 'supabase/migrations/*pazo_marketing_firstparty_attribution.sql'
       - 'supabase/tests/marketing/**'
+      - 'supabase/operations/marketing-retention-cron-activation.sql'
       - 'src/features/marketing/**'
       - 'src/features/admin/components/AdminMarketingPanel.tsx'
       - 'src/features/admin/components/AdminDashboard.tsx'
