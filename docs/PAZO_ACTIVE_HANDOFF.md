@@ -1,3 +1,9 @@
+## HANDOFF F17 — Segunda reconciliación de migraciones (23-oct-2026 PDT)
+
+**PR #97 DRAFT (apila y depende de PR #95; NO fusionar):** recuperación Git, exclusivamente documental, de 20 migraciones remotas y corrección a texto SQL alojado idéntico de 5 variantes adicionales. Comparación de nombres de versiones **130 archivos Git / 122 registros Supabase: 122 parejas por versión; 0 remotas sin archivo; 8 locales sin versión remota**. Pruebas del commit `b2da806c9fdcaf5cf960fc0d4dd9e4cdf8b6f97f`: **9/9 workflows SUCCESS**, incluida la nueva prueba SHA-256. Auditado el catálogo de objetos que aparecen en las 8 migraciones históricas locales: **83/83 objetos únicos existen** (6 tablas, 15 índices, 22 funciones, 9 triggers, 31 policies); las 6 tablas RLS=true. No demuestra el replay histórico ni la equivalencia de definiciones. **Se mantiene bloqueo ABSOLUTO de `supabase db push`, `supabase migration repair` y SQL alojado; producción, PayPal y Vercel intactos**. Documento: `docs/PAZO_HISTORICAL_MIGRATION_PHASE2_AUDIT_20261023.md`.
+
+---
+
 ## ACTUALIZACIÓN DE INGENIERÍA — Historial de migraciones y cierre F17 (23-oct-2026 PDT)
 
 **F17 está fusionada en `main`:** PR #81, commit `5d4464f63a996bb8f58c1f41fe943a8be9eda3c6`, CI posterior 7/7 PASS; sitio oficial conserva la versión PAZO ya aprobada por el PO, PayPal Live L1 limitado activo. Las entradas históricas inferiores que dicen `PR81 DRAFT`, `main sin merge` o `L1 BLOCKED` están superadas.

@@ -19,3 +19,13 @@
 
 ## Próximo gate
 Auditar las 8 originales sin registro alojado, recuperar evidencia del proceso de instalación y validar un replay reproducible en PostgreSQL aislado; entonces evaluar si es admisible eliminar el bloqueo de producción.
+
+## Verificaciones posteriores al commit inicial
+
+- GitHub Actions en commit `b2da806c9fdcaf5cf960fc0d4dd9e4cdf8b6f97f`: nueve workflows CI/sintéticos **SUCCESS**, incluidos CI, F17 seguridad y siete laboratorios F16.
+- Comparación GitHub `supabase/migrations` vs `list_migrations` en Supabase de solo lectura: **130 archivos locales únicos, 122 versiones alojadas únicas, 122 coincidencias exactas de versión, 0 faltantes remotas y 8 faltantes locales en la base**.
+- Inspección de objetos mediante `pg_catalog` (solo SELECT), extraídos de las 8 migraciones exclusivamente locales: **83 referencias únicas de creación**, todas presentes: 6 tablas, 15 índices, 22 funciones, 9 triggers, 31 políticas. La existencia no prueba integridad de definición ni secuencia de aplicación.
+- Las 6 tablas verificadas tienen `relrowsecurity=true`, sin `FORCE RLS`; de las 22 funciones inspeccionadas, ninguna pública `SECURITY DEFINER` tenía privilegio EXECUTE de `anon`. Hay definers en esquemas privados que requieren revisión por firmas, `search_path` y políticas actuales.
+- **La prueba de restauración integral de 130 migraciones en Supabase/PostgreSQL aislado sigue PENDIENTE**: los laboratorios CI validados no constituyen ese replay histórico.
+- Estado del commit inicial: PR #97 DRAFT sin merge, basado en #95; ningún cambio en producción. CI del commit documental posterior debe verificarse por separado.
+
