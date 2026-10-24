@@ -14,7 +14,7 @@ BEGIN
  SELECT retention_days,enabled,policy_version INTO v_days,v_enabled,v_version
  FROM marketing_private.collection_gate WHERE singleton;
  IF NOT coalesce(v_enabled,false) OR v_days IS NULL OR v_days<1
-  OR v_days>90 OR v_version<>'pazo-marketing-attribution-notice-v1' THEN
+  OR v_days>90 OR v_version IS DISTINCT FROM 'pazo-marketing-attribution-notice-v1' THEN
   RAISE EXCEPTION 'Retention and published policy must be approved first';
  END IF;
  -- Runs every 6 hours UTC. The DB service role/secret is never used by Cron.
