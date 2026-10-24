@@ -17,3 +17,5 @@ run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f16_l
 run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f16_lab','-v','ON_ERROR_STOP=1','-f','scripts/f16-live-gateway-disposable-lab.sql','-f','scripts/f16-gradual-live-lab-setup.sql','-f','supabase/tests/gradual/kernel-pg17.sql','-f','supabase/tests/gradual/failures-pg17.sql','-f','supabase/tests/gradual/security-pg17.sql'])
 run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/migrations/20261023234845_pazo_f16_qa_original_read_audit.sql','-f','supabase/tests/gradual/qa-original-scope-pg17.sql'])
 run(process.execPath,['scripts/f16-gradual-live-concurrency.mjs'])
+
+run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/tests/gradual/real-cohort-pg17.sql'])
