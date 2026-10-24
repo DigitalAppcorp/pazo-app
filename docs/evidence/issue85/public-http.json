@@ -1,0 +1,35 @@
+{
+  "source": "pazo_public_https_pwa_gate_v1",
+  "origin": "https://pazo-app.vercel.app",
+  "ready": true,
+  "checks": [
+    {
+      "id": "home",
+      "code": "pass"
+    },
+    {
+      "id": "paypalReturn",
+      "code": "pass"
+    },
+    {
+      "id": "paypalCancel",
+      "code": "pass"
+    },
+    {
+      "id": "manifest",
+      "code": "pass"
+    },
+    {
+      "id": "serviceWorker",
+      "code": "pass"
+    },
+    {
+      "id": "icon192",
+      "code": "pass"
+    },
+    {
+      "id": "icon512",
+      "code": "pass"
+    }
+  ]
+}

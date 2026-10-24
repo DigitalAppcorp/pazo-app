@@ -1,0 +1,49 @@
+{
+  "scope": "hosted read-only and unauthenticated denials; zero valid financial requests",
+  "results": [
+    {
+      "name": "official HTTPS current index",
+      "status": 200
+    },
+    {
+      "name": "webhook existing read-only ready",
+      "status": 200
+    },
+    {
+      "name": "pazo-paypal-live-checkout unauth GET denied",
+      "status": 401
+    },
+    {
+      "name": "pazo-paypal-live-checkout unauth empty POST denied",
+      "status": 400
+    },
+    {
+      "name": "pazo-admin-gradual-live unauth GET denied",
+      "status": 405
+    },
+    {
+      "name": "pazo-admin-gradual-live unauth empty POST denied",
+      "status": 403
+    },
+    {
+      "name": "private worker GET cannot dispatch",
+      "status": 405
+    },
+    {
+      "name": "private worker invalid capability cannot dispatch",
+      "status": 403
+    },
+    {
+      "name": "anon cannot call service-only rollout RPC",
+      "status": 401
+    },
+    {
+      "name": "anon cannot read owner campaign status",
+      "status": 401
+    },
+    {
+      "name": "maintenance remains readable",
+      "status": 200
+    }
+  ]
+}

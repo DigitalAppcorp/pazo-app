@@ -1,0 +1,149 @@
+{
+  "inbox": [
+    {
+      "code": "worker_review_required",
+      "state": "held",
+      "attempts": 1
+    }
+  ],
+  "outbox": 0,
+  "worker": {
+    "build": "pazo_live_worker_v2",
+    "enabled": true,
+    "last_outcome": "review",
+    "heartbeat_fresh": true,
+    "processing_enabled": true
+  },
+  "release": {
+    "mode": "canary",
+    "revision": 1,
+    "generation": 1
+  },
+  "campaign": {
+    "stage": "L1_FIRST_REAL",
+    "state": "inactive",
+    "started": false,
+    "capacity": 1,
+    "revision": 0,
+    "webhook_probe_fresh": true,
+    "hosted_gate_verified": false
+  },
+  "rechecks": 0,
+  "interests": 0,
+  "admissions": 0,
+  "checked_at": "2026-10-24T00:44:24.283363+00:00",
+  "migrations": [
+    {
+      "name": "pazo_f16_qa_original_read_audit",
+      "version": "20261023235424"
+    },
+    {
+      "name": "pazo_f16_real_cohort_initial_invitation_budget",
+      "version": "20261024001615"
+    },
+    {
+      "name": "pazo_f16_original_qa_recheck_and_hosted_gate_certificate",
+      "version": "20261024003716"
+    }
+  ],
+  "invitations": 0,
+  "legacy_open": 1,
+  "qa_accounts": 8,
+  "admin_grants": 1,
+  "open_intents": 1,
+  "auth_accounts": 8,
+  "real_accounts": 0,
+  "private_tables": [
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_admission",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_audit",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_campaign",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_event",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_hosted_gate_certificates",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_incident",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_interest",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_invitation",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_outbox",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_qa_accounts",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_qa_rechecks",
+      "anon_select": false,
+      "authenticated_insert": false
+    }
+  ],
+  "prebeta_eligible": 0,
+  "prebeta_verified": 0,
+  "gate_certificates": 0,
+  "intent_fingerprint": "a3e08eed1526f073fb8a5e29a8e17199",
+  "local_paid_periods": 0,
+  "new_create_admitted": false,
+  "receipt_fingerprint": "b03b36d90332b579e8ce3829cfd417d6",
+  "verified_mfa_factors": 1,
+  "retry_service_execute": true,
+  "legacy_recovery_allowed": true,
+  "certificate_service_execute": false,
+  "retry_authenticated_execute": false,
+  "certificate_authenticated_execute": false
+}
+

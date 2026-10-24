@@ -1,6 +1,8 @@
 > **Gate #84 ejecutado:** autorizado por issue84; SQL, admin/checkout/worker y beta oficial publicados inactivos. No volver a pedir permiso para la instalación ya ejecutada ni reaplicar esta migración. Ver [versiones, checksum, postflight y rollback real](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). El paso hosted_gate_verified=true y el GO financiero siguen pendientes; este texto inferior conserva el procedimiento histórico de #82.
 
-# Issue #82 — siguiente gate hospedado, preparado y NO ejecutado
+> **Actualización #85 (24-oct):** GO L1 ya autorizado. PR86/87, SQL y Edge instalados y beta oficial actualizada. El gate sigue cerrado: GET original PayPal404, legacy1/HELD1. No certificar ni llamar start mientras ese estado sea desconocido. La función privada `pazo_gradual_certify_hosted_gate` sustituye el cambio directo del booleano: exige evidencia real y controles nativos, y nunca inicia campaña. El inicio posterior conserva GoTrue/TOTP/CAS en Administración; no pedir autorización de producto otra vez ni saltarse MFA. [Versiones, evidencia, acción humana y rollback #85](PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md). Los pasos inferiores son históricos, no órdenes de reinstalar ni repetir QA aprobado.
+
+# Issue #82 — procedimiento histórico del gate hospedado
 
 Este instructivo no autoriza instalaciones ni cobros. La implementación se
 integra hacia F17; `main` y producción permanecen separados. No hacen falta
