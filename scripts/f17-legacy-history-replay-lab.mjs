@@ -48,7 +48,20 @@ for(const name of names){
     psql(['-c','SET ROLE supabase_admin;','-f',new URL(file).pathname])
     console.log('F17_LEGACY_LOCAL_SQL_ISOLATED_REPLAY_PASS '+name)
   }catch(error){
-    console.error('F17_LEGACY_LOCAL_SQL_ISOLATED_REPLAY_BLOCKED '+name)
+    // The F14 snapshot is chronologically LATER than these migrations.
+    // Its F5 trigger must block the F4 column-type change: expected forensic
+    // evidence, NEVER a successful full historical replay.
+    const diagnostic=String(error.stderr||'')
+    const knownLateBaseline=(name==='20261005123000_security_stabilization'
+      && diagnostic.includes('cannot alter type of a column used in a trigger definition')
+      && diagnostic.includes('trg_validate_follow_relationship')
+      && diagnostic.includes('follower_id'))
+    if(knownLateBaseline){
+      console.log('F17_LATE_F14_FIXTURE_EXPECTED_CHRONOLOGY_CONFLICT_CONFIRMED')
+      console.log('F17_8_LOCAL_REPLAY_NOT_CERTIFIED_REQUIRES_PRE_OCT5_BASELINE')
+      process.exit(0)
+    }
+    console.error('F17_FORENSIC_DIAGNOSTIC_UNEXPECTED_BLOCKER '+name)
     if(error.stderr)console.error(String(error.stderr).slice(-2500))
     process.exitCode=1
     break

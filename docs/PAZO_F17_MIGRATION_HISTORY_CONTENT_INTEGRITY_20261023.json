@@ -1,0 +1,1283 @@
+{
+  "description": "Read-only hosted migration SQL Git-blob digest comparison vs PR #97, latest on 2026-10-23 PDT",
+  "snapshot_git_head": "18a6530afcd5f695c96820a572ea95aa8cbe36d2",
+  "supabase_project": "mrybvqdebbgcayuvgkkr",
+  "provenance": "PostgreSQL supabase_migrations.schema_migrations.statements SELECT read only, digests only; GitHub full tree blob SHA",
+  "counts": {
+    "local": 130,
+    "hosted": 122,
+    "byte_exact": 96,
+    "lexical_equivalent_not_byte_exact": 24,
+    "metadata_only_hosted_statement": 2,
+    "local_unrecorded": 8
+  },
+  "classifications": {
+    "byte_exact": "Hosted historical SQL has Git blob identity with repo source",
+    "lexical_equivalent_not_byte_exact": "Compared lexically, ignoring SQL comments/formatting and external BEGIN/COMMIT; do not claim byte identity or replay",
+    "metadata_only_hosted_statement": "Hosted statements field contains only a descriptive record, not the executable Git SQL; never replace executable SQL by descriptor"
+  },
+  "hosted_entries": [
+    {
+      "version": "20261006054510",
+      "name": "care_agenda",
+      "path": "supabase/migrations/20261006054510_care_agenda.sql",
+      "git_blob_sha": "b7977deb06cb185856819d12f307595c2f32420c",
+      "hosted_record_blob_sha": "b7977deb06cb185856819d12f307595c2f32420c",
+      "git_bytes": 13293,
+      "hosted_record_bytes": 13293,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261006090551",
+      "name": "private_pet_documents",
+      "path": "supabase/migrations/20261006090551_private_pet_documents.sql",
+      "git_blob_sha": "c830cf9d06cd736587c8b5f19047526d792e49bd",
+      "hosted_record_blob_sha": "c830cf9d06cd736587c8b5f19047526d792e49bd",
+      "git_bytes": 17662,
+      "hosted_record_bytes": 17662,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261006090654",
+      "name": "fix_private_document_storage_policies",
+      "path": "supabase/migrations/20261006090654_fix_private_document_storage_policies.sql",
+      "git_blob_sha": "59eeece363d10a90e81d43ff8cd6e5b4db49bbbd",
+      "hosted_record_blob_sha": "59eeece363d10a90e81d43ff8cd6e5b4db49bbbd",
+      "git_bytes": 1780,
+      "hosted_record_bytes": 1780,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261006133534",
+      "name": "communities_validation_instrumentation",
+      "path": "supabase/migrations/20261006133534_communities_validation_instrumentation.sql",
+      "git_blob_sha": "e7780368fef3feb22cf6c4fc43753b8a5696ffac",
+      "hosted_record_blob_sha": "e7780368fef3feb22cf6c4fc43753b8a5696ffac",
+      "git_bytes": 7120,
+      "hosted_record_bytes": 7120,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261006133945",
+      "name": "trim_validation_indexes",
+      "path": "supabase/migrations/20261006133945_trim_validation_indexes.sql",
+      "git_blob_sha": "6253a25110264802ef953f170df930f199f2ccda",
+      "hosted_record_blob_sha": "6253a25110264802ef953f170df930f199f2ccda",
+      "git_bytes": 161,
+      "hosted_record_bytes": 161,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261006134050",
+      "name": "restore_validation_fk_indexes",
+      "path": "supabase/migrations/20261006134050_restore_validation_fk_indexes.sql",
+      "git_blob_sha": "5db7119cd7ea011c36b7be1cb90cf5b43b2ae59f",
+      "hosted_record_blob_sha": "5db7119cd7ea011c36b7be1cb90cf5b43b2ae59f",
+      "git_bytes": 289,
+      "hosted_record_bytes": 289,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007014214",
+      "name": "communities_mvp_core",
+      "path": "supabase/migrations/20261007014214_communities_mvp_core.sql",
+      "git_blob_sha": "a1975648ec6fc09f4bfe1ff13f36a0888a8cd17a",
+      "hosted_record_blob_sha": "a1975648ec6fc09f4bfe1ff13f36a0888a8cd17a",
+      "git_bytes": 21421,
+      "hosted_record_bytes": 21421,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007014624",
+      "name": "fix_community_storage_policies",
+      "path": "supabase/migrations/20261007014624_fix_community_storage_policies.sql",
+      "git_blob_sha": "2e84d9cd8178298e9103312f1950b0dad81066c4",
+      "hosted_record_blob_sha": "2e84d9cd8178298e9103312f1950b0dad81066c4",
+      "git_bytes": 2094,
+      "hosted_record_bytes": 2094,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007023800",
+      "name": "community_extension_experiments",
+      "path": "supabase/migrations/20261007023800_community_extension_experiments.sql",
+      "git_blob_sha": "b0cc319a690006f4f6496463742d6f0a62eacbf6",
+      "hosted_record_blob_sha": "b0cc319a690006f4f6496463742d6f0a62eacbf6",
+      "git_bytes": 229,
+      "hosted_record_bytes": 229,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007023927",
+      "name": "harden_community_extension_experiment_eligibility",
+      "path": "supabase/migrations/20261007023927_harden_community_extension_experiment_eligibility.sql",
+      "git_blob_sha": "954eac71e43f1fa43d690cb193d48651bd46623c",
+      "hosted_record_blob_sha": "954eac71e43f1fa43d690cb193d48651bd46623c",
+      "git_bytes": 3193,
+      "hosted_record_bytes": 3193,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007052747",
+      "name": "phase_8_places_map_core",
+      "path": "supabase/migrations/20261007052747_phase_8_places_map_core.sql",
+      "git_blob_sha": "8819f6b615867cd420a9ad7d89dcc119c5cfb5d3",
+      "hosted_record_blob_sha": "8819f6b615867cd420a9ad7d89dcc119c5cfb5d3",
+      "git_bytes": 14966,
+      "hosted_record_bytes": 14966,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007052749",
+      "name": "phase_8_places_initial_catalog",
+      "path": "supabase/migrations/20261007052749_phase_8_places_initial_catalog.sql",
+      "git_blob_sha": "a0073156052765cc6e866b4ae0a0dccb46e519e7",
+      "hosted_record_blob_sha": "a0073156052765cc6e866b4ae0a0dccb46e519e7",
+      "git_bytes": 2336,
+      "hosted_record_bytes": 2336,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007053859",
+      "name": "fix_place_checkin_checkout_rls",
+      "path": "supabase/migrations/20261007053859_fix_place_checkin_checkout_rls.sql",
+      "git_blob_sha": "08721fcb874a7367279281647a82da004f4f6b93",
+      "hosted_record_blob_sha": "08721fcb874a7367279281647a82da004f4f6b93",
+      "git_bytes": 739,
+      "hosted_record_bytes": 739,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007072355",
+      "name": "place_extension_experiments",
+      "path": "supabase/migrations/20261007072355_place_extension_experiments.sql",
+      "git_blob_sha": "4141ae8205ea6513ec53870b937e0357739f6634",
+      "hosted_record_blob_sha": "4141ae8205ea6513ec53870b937e0357739f6634",
+      "git_bytes": 239,
+      "hosted_record_bytes": 239,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261007102632",
+      "name": "phase_12_search_telemetry",
+      "path": "supabase/migrations/20261007102632_phase_12_search_telemetry.sql",
+      "git_blob_sha": "baae27023009744e864bd1b11064d780416009f2",
+      "hosted_record_blob_sha": "292a75e330235ea420a128997032c2b476b77872",
+      "git_bytes": 2080,
+      "hosted_record_bytes": 2081,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261007102748",
+      "name": "index_search_usage_events_user",
+      "path": "supabase/migrations/20261007102748_index_search_usage_events_user.sql",
+      "git_blob_sha": "91e85cdd24f3135407d7ecfab8d80f8fca8e4760",
+      "hosted_record_blob_sha": "44f3e83e589e4bb229f53faab4f4bbf31dc3278e",
+      "git_bytes": 110,
+      "hosted_record_bytes": 121,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261007123638",
+      "name": "production_hardening_social_write_rate_limits",
+      "path": "supabase/migrations/20261007123638_production_hardening_social_write_rate_limits.sql",
+      "git_blob_sha": "a7caaa36c7ade4c1ea653f732248fb03322b2a61",
+      "hosted_record_blob_sha": "1d95ee2a53d23f7e676f4a081149b4cc542561da",
+      "git_bytes": 4445,
+      "hosted_record_bytes": 4446,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261007124041",
+      "name": "idempotent_pet_document_delete_finalize",
+      "path": "supabase/migrations/20261007124041_idempotent_pet_document_delete_finalize.sql",
+      "git_blob_sha": "2d28887e3514ce82b3d45a094b4b574b4a54311d",
+      "hosted_record_blob_sha": "5278d1aad633ba078737df188ba223f7b20f958a",
+      "git_bytes": 1796,
+      "hosted_record_bytes": 1797,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261007124633",
+      "name": "move_rescue_security_definers_private",
+      "path": "supabase/migrations/20261007124633_move_rescue_security_definers_private.sql",
+      "git_blob_sha": "ab50343b56032a7a2210e5cc8e559b64667b3d44",
+      "hosted_record_blob_sha": "22de15f6f48eb357ef3732161c14b1453b84c11a",
+      "git_bytes": 11704,
+      "hosted_record_bytes": 11705,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261008010424",
+      "name": "fix_pet_document_delete_storage_visibility",
+      "path": "supabase/migrations/20261008010424_fix_pet_document_delete_storage_visibility.sql",
+      "git_blob_sha": "a2dd628a0aebe14ea3b0638e67d77d987d96d9a3",
+      "hosted_record_blob_sha": "a2dd628a0aebe14ea3b0638e67d77d987d96d9a3",
+      "git_bytes": 515,
+      "hosted_record_bytes": 515,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261008015255",
+      "name": "register_places_map_validation",
+      "path": "supabase/migrations/20261008015255_register_places_map_validation.sql",
+      "git_blob_sha": "8c527931109a9a3c7199731c5104f094134461a0",
+      "hosted_record_blob_sha": "8c527931109a9a3c7199731c5104f094134461a0",
+      "git_bytes": 110,
+      "hosted_record_bytes": 110,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261008015603",
+      "name": "grant_module_validation_inserts",
+      "path": "supabase/migrations/20261008015603_grant_module_validation_inserts.sql",
+      "git_blob_sha": "b2b887ba69e103308f3b6b7098d26873ded55129",
+      "hosted_record_blob_sha": "b2b887ba69e103308f3b6b7098d26873ded55129",
+      "git_bytes": 133,
+      "hosted_record_bytes": 133,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261008112333",
+      "name": "f14_account_blocks_hidden_posts",
+      "path": "supabase/migrations/20261008112333_f14_account_blocks_hidden_posts.sql",
+      "git_blob_sha": "ccc5787b071d89889506de50e90baccaf2e73d47",
+      "hosted_record_blob_sha": "ccc5787b071d89889506de50e90baccaf2e73d47",
+      "git_bytes": 13027,
+      "hosted_record_bytes": 13027,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261008120333",
+      "name": "f14_reports_moderation",
+      "path": "supabase/migrations/20261008120333_f14_reports_moderation.sql",
+      "git_blob_sha": "b853f00ad222079021d49dece92e42282e135864",
+      "hosted_record_blob_sha": "b853f00ad222079021d49dece92e42282e135864",
+      "git_bytes": 16531,
+      "hosted_record_bytes": 16531,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261008122907",
+      "name": "f14_comment_parent_guard",
+      "path": "supabase/migrations/20261008122907_f14_comment_parent_guard.sql",
+      "git_blob_sha": "ec26b60c528372d11d7ce0c7b0432e3bdb452a09",
+      "hosted_record_blob_sha": "ec26b60c528372d11d7ce0c7b0432e3bdb452a09",
+      "git_bytes": 1009,
+      "hosted_record_bytes": 1009,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009010551",
+      "name": "f14_media_status_presence_guard",
+      "path": "supabase/migrations/20261009010551_f14_media_status_presence_guard.sql",
+      "git_blob_sha": "fb8779c7540f546b669404db96d19af7e72623a1",
+      "hosted_record_blob_sha": "fb8779c7540f546b669404db96d19af7e72623a1",
+      "git_bytes": 4462,
+      "hosted_record_bytes": 4462,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009014616",
+      "name": "f14_media_claim_preflight",
+      "path": "supabase/migrations/20261009014616_f14_media_claim_preflight.sql",
+      "git_blob_sha": "b063dfc09a210553ef29b8763d2cdde9c50307c3",
+      "hosted_record_blob_sha": "b063dfc09a210553ef29b8763d2cdde9c50307c3",
+      "git_bytes": 10503,
+      "hosted_record_bytes": 10503,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009040957",
+      "name": "f14_storage_held_media_guard",
+      "path": "supabase/migrations/20261009040957_f14_storage_held_media_guard.sql",
+      "git_blob_sha": "04cad2ea05b211149a85fcb5a17f2ef31f7db8f8",
+      "hosted_record_blob_sha": "04cad2ea05b211149a85fcb5a17f2ef31f7db8f8",
+      "git_bytes": 1664,
+      "hosted_record_bytes": 1664,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009054411",
+      "name": "f14_held_media_fail_closed_recheck_update_guard",
+      "path": "supabase/migrations/20261009054411_f14_held_media_fail_closed_recheck_update_guard.sql",
+      "git_blob_sha": "c020d20373569f9b148cf5b2dc153882965936e1",
+      "hosted_record_blob_sha": "c020d20373569f9b148cf5b2dc153882965936e1",
+      "git_bytes": 3249,
+      "hosted_record_bytes": 3249,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009055801",
+      "name": "f14_held_media_copy_source_operation_guard",
+      "path": "supabase/migrations/20261009055801_f14_held_media_copy_source_operation_guard.sql",
+      "git_blob_sha": "97e9baed00e8e1dce27c3f712af5e2e0b60df6cc",
+      "hosted_record_blob_sha": "97e9baed00e8e1dce27c3f712af5e2e0b60df6cc",
+      "git_bytes": 844,
+      "hosted_record_bytes": 844,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009055955",
+      "name": "f14_disable_unverified_media_purge_confirmation",
+      "path": "supabase/migrations/20261009055955_f14_disable_unverified_media_purge_confirmation.sql",
+      "git_blob_sha": "4bb62859fe59680cc742886cc2726501f6c9982a",
+      "hosted_record_blob_sha": "4bb62859fe59680cc742886cc2726501f6c9982a",
+      "git_bytes": 884,
+      "hosted_record_bytes": 884,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009061213",
+      "name": "f14_reject_unverified_purged_status",
+      "path": "supabase/migrations/20261009061213_f14_reject_unverified_purged_status.sql",
+      "git_blob_sha": "1e8bbac7a8d2be51c2eec1d2b54d127746493f48",
+      "hosted_record_blob_sha": "1e8bbac7a8d2be51c2eec1d2b54d127746493f48",
+      "git_bytes": 952,
+      "hosted_record_bytes": 952,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261009095635",
+      "name": "f14_service_only_media_evidence_reader",
+      "path": "supabase/migrations/20261009095635_f14_service_only_media_evidence_reader.sql",
+      "git_blob_sha": "3cbc363455d780e0295ee11e4d9127a56a1ef41a",
+      "hosted_record_blob_sha": "3cbc363455d780e0295ee11e4d9127a56a1ef41a",
+      "git_bytes": 3799,
+      "hosted_record_bytes": 3799,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261010033538",
+      "name": "f14_moderation_media_preflight_locked",
+      "path": "supabase/migrations/20261010033538_f14_moderation_media_preflight_locked.sql",
+      "git_blob_sha": "4636ed3a3c9e39e2fb0f3f2cb3929a19a63c9dd5",
+      "hosted_record_blob_sha": "4636ed3a3c9e39e2fb0f3f2cb3929a19a63c9dd5",
+      "git_bytes": 4571,
+      "hosted_record_bytes": 4571,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261010034610",
+      "name": "f14_finalize_media_after_verified_claim",
+      "path": "supabase/migrations/20261010034610_f14_finalize_media_after_verified_claim.sql",
+      "git_blob_sha": "1f2d287a90d4aa31660d940e91bad6429e94995e",
+      "hosted_record_blob_sha": "1f2d287a90d4aa31660d940e91bad6429e94995e",
+      "git_bytes": 6639,
+      "hosted_record_bytes": 6639,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261010043307",
+      "name": "f14_media_jwt_claim_compat_single_test",
+      "path": "supabase/migrations/20261010043307_f14_media_jwt_claim_compat_single_test.sql",
+      "git_blob_sha": "0ea04fb492e2036753ac545ab7517e22650bf996",
+      "hosted_record_blob_sha": "0ea04fb492e2036753ac545ab7517e22650bf996",
+      "git_bytes": 8180,
+      "hosted_record_bytes": 8180,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261010045708",
+      "name": "f14_account_request_intake",
+      "path": "supabase/migrations/20261010045708_f14_account_request_intake.sql",
+      "git_blob_sha": "7ba298131518944e7a29fa93e0021a897ebb86f4",
+      "hosted_record_blob_sha": "7ba298131518944e7a29fa93e0021a897ebb86f4",
+      "git_bytes": 4029,
+      "hosted_record_bytes": 4029,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261010053708",
+      "name": "f14_community_ownership_continuity",
+      "path": "supabase/migrations/20261010053708_f14_community_ownership_continuity.sql",
+      "git_blob_sha": "e3c69697bfe68f15e0c54e1120b4bc8532b21931",
+      "hosted_record_blob_sha": "e3c69697bfe68f15e0c54e1120b4bc8532b21931",
+      "git_bytes": 13322,
+      "hosted_record_bytes": 13322,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261010072555",
+      "name": "f14_recover_missing_profile",
+      "path": "supabase/migrations/20261010072555_f14_recover_missing_profile.sql",
+      "git_blob_sha": "f53bac48fc0fe598217f418ddad85d1623d4f753",
+      "hosted_record_blob_sha": "3c605862ab0d7c4ec95859f3f67844247562b9de",
+      "git_bytes": 1335,
+      "hosted_record_bytes": 1236,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261010222006",
+      "name": "f14_media_purge_retry_reconciliation",
+      "path": "supabase/migrations/20261010222006_f14_media_purge_retry_reconciliation.sql",
+      "git_blob_sha": "5d879dfbcede5b1b710c018063e17c2cf22326a8",
+      "hosted_record_blob_sha": "1800cf4912efa7896cddaf4412fb8d75706d6455",
+      "git_bytes": 6510,
+      "hosted_record_bytes": 6694,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261011022000",
+      "name": "f14_media_url_alias_guard",
+      "path": "supabase/migrations/20261011022000_f14_media_url_alias_guard.sql",
+      "git_blob_sha": "595b9a88c69d5b52cb3586164b8702f81eaf7990",
+      "hosted_record_blob_sha": "595b9a88c69d5b52cb3586164b8702f81eaf7990",
+      "git_bytes": 22515,
+      "hosted_record_bytes": 22515,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261012071140",
+      "name": "f14_one_object_admin_reconcile",
+      "path": "supabase/migrations/20261012071140_f14_one_object_admin_reconcile.sql",
+      "git_blob_sha": "064cfb8d9b51c6603bfddf3d61001138e8f4820e",
+      "hosted_record_blob_sha": "064cfb8d9b51c6603bfddf3d61001138e8f4820e",
+      "git_bytes": 4328,
+      "hosted_record_bytes": 4328,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261013025451",
+      "name": "community_join_owner_notifications",
+      "path": "supabase/migrations/20261013025451_community_join_owner_notifications.sql",
+      "git_blob_sha": "a2aa29bf4d7f3698e1cc05b64510944378b59a4d",
+      "hosted_record_blob_sha": "a2aa29bf4d7f3698e1cc05b64510944378b59a4d",
+      "git_bytes": 2358,
+      "hosted_record_bytes": 2358,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261013215221",
+      "name": "f16_supporter_wall_consents_foundation",
+      "path": "supabase/migrations/20261013215221_f16_supporter_wall_consents_foundation.sql",
+      "git_blob_sha": "f3869a24f24e8290ac48c2fb7da9761eb0f39595",
+      "hosted_record_blob_sha": "f3869a24f24e8290ac48c2fb7da9761eb0f39595",
+      "git_bytes": 6865,
+      "hosted_record_bytes": 6865,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261014042616",
+      "name": "f16_private_verified_event_inbox",
+      "path": "supabase/migrations/20261014042616_f16_private_verified_event_inbox.sql",
+      "git_blob_sha": "1574dc860d8c6388aee356128046b380f4a9e55b",
+      "hosted_record_blob_sha": "066fe6468c93a044652494ba984337ba052cc28a",
+      "git_bytes": 5273,
+      "hosted_record_bytes": 5258,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261014042646",
+      "name": "f16_private_intents_financial_ledger",
+      "path": "supabase/migrations/20261014042646_f16_private_intents_financial_ledger.sql",
+      "git_blob_sha": "b4349636974ccfc00df82ec67c0825e831c5d667",
+      "hosted_record_blob_sha": "aa94266c9506c7c4533585a82126b3336fe90eec",
+      "git_bytes": 19051,
+      "hosted_record_bytes": 18982,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261014073658",
+      "name": "f16_global_webhook_admission",
+      "path": "supabase/migrations/20261014073658_f16_global_webhook_admission.sql",
+      "git_blob_sha": "e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8",
+      "hosted_record_blob_sha": "e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8",
+      "git_bytes": 3245,
+      "hosted_record_bytes": 3245,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261014094349",
+      "name": "f16_preserve_two_subscription_lifecycle_events",
+      "path": "supabase/migrations/20261014094349_f16_preserve_two_subscription_lifecycle_events.sql",
+      "git_blob_sha": "4ca50dbeb751500f1009978f8c06c6fd4f74de9a",
+      "hosted_record_blob_sha": "4ca50dbeb751500f1009978f8c06c6fd4f74de9a",
+      "git_bytes": 3633,
+      "hosted_record_bytes": 3633,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261015170222",
+      "name": "f16_p12_private_checkout_schema_sandbox_no_offers",
+      "path": "supabase/migrations/20261015170222_f16_p12_private_checkout_schema_sandbox_no_offers.sql",
+      "git_blob_sha": "0c3d4936e873a165b7488eba3d2fbd3ce837295f",
+      "hosted_record_blob_sha": "0c3d4936e873a165b7488eba3d2fbd3ce837295f",
+      "git_bytes": 20160,
+      "hosted_record_bytes": 20160,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261015170258",
+      "name": "f16_p14_owner_acceptance_read_only_rpc",
+      "path": "supabase/migrations/20261015170258_f16_p14_owner_acceptance_read_only_rpc.sql",
+      "git_blob_sha": "c0f0492d8aac34772c2fafdd60246322818d51d7",
+      "hosted_record_blob_sha": "c0f0492d8aac34772c2fafdd60246322818d51d7",
+      "git_bytes": 1701,
+      "hosted_record_bytes": 1701,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261015170428",
+      "name": "f16_p15_owner_supporter_account_list_readonly",
+      "path": "supabase/migrations/20261015170428_f16_p15_owner_supporter_account_list_readonly.sql",
+      "git_blob_sha": "e4029747778ce9b4d6c3b98646ea3a2195323506",
+      "hosted_record_blob_sha": "e4029747778ce9b4d6c3b98646ea3a2195323506",
+      "git_bytes": 1223,
+      "hosted_record_bytes": 1223,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261015190239",
+      "name": "f16_p21_private_inbox_worker_schema_off",
+      "path": "supabase/migrations/20261015190239_f16_p21_private_inbox_worker_schema_off.sql",
+      "git_blob_sha": "40277ae4d7487c809799f2389195fea1dff12eca",
+      "hosted_record_blob_sha": "40277ae4d7487c809799f2389195fea1dff12eca",
+      "git_bytes": 9555,
+      "hosted_record_bytes": 9555,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261016031846",
+      "name": "f16_p22_claim_scoped_bound_intent_read_only",
+      "path": "supabase/migrations/20261016031846_f16_p22_claim_scoped_bound_intent_read_only.sql",
+      "git_blob_sha": "49c83a6cdb1c10854488af203838391168afcefd",
+      "hosted_record_blob_sha": "49c83a6cdb1c10854488af203838391168afcefd",
+      "git_bytes": 1465,
+      "hosted_record_bytes": 1465,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261016035851",
+      "name": "f16_p28_minimal_hmac_historical_admin_audit",
+      "path": "supabase/migrations/20261016035851_f16_p28_minimal_hmac_historical_admin_audit.sql",
+      "git_blob_sha": "b645aff339164efcf0b77b6dca2836861f8c30f2",
+      "hosted_record_blob_sha": "b645aff339164efcf0b77b6dca2836861f8c30f2",
+      "git_bytes": 1748,
+      "hosted_record_bytes": 1748,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261016055145",
+      "name": "f16_p40_empty_private_activation_bindings",
+      "path": "supabase/migrations/20261016055145_f16_p40_empty_private_activation_bindings.sql",
+      "git_blob_sha": "b4eff53a64a4a8f24c644eb284c17a265dc8fc1f",
+      "hosted_record_blob_sha": "b4eff53a64a4a8f24c644eb284c17a265dc8fc1f",
+      "git_bytes": 5170,
+      "hosted_record_bytes": 5170,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261016062849",
+      "name": "f16_p42_keys_and_writer_inert",
+      "path": "supabase/migrations/20261016062849_f16_p42_keys_and_writer_inert.sql",
+      "git_blob_sha": "ceb24e4b38fb00f27f97d81b4aeb24d5b7d78ac4",
+      "hosted_record_blob_sha": "ceb24e4b38fb00f27f97d81b4aeb24d5b7d78ac4",
+      "git_bytes": 8204,
+      "hosted_record_bytes": 8204,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261016234350",
+      "name": "f16_p37_service_only_claimed_activation_read",
+      "path": "supabase/migrations/20261016234350_f16_p37_service_only_claimed_activation_read.sql",
+      "git_blob_sha": "4015237eab967a3a47d5615b2e40f21402d93373",
+      "hosted_record_blob_sha": "c9e08abf1f2a911e245824d190145dabe188376a",
+      "git_bytes": 5003,
+      "hosted_record_bytes": 4979,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261017160619",
+      "name": "f16_sandbox_benefits_v2_private_qa_staging",
+      "path": "supabase/migrations/20261017160619_f16_sandbox_benefits_v2_private_qa_staging.sql",
+      "git_blob_sha": "22ad344b8bddac310724c95ba61a86091fefd58c",
+      "hosted_record_blob_sha": "22ad344b8bddac310724c95ba61a86091fefd58c",
+      "git_bytes": 10576,
+      "hosted_record_bytes": 10576,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261017161221",
+      "name": "f16_sandbox_qa_verified_benefits_reads",
+      "path": "supabase/migrations/20261017161221_f16_sandbox_qa_verified_benefits_reads.sql",
+      "git_blob_sha": "b227bf8cf3f7370cca10e9f4e91536581df92ad5",
+      "hosted_record_blob_sha": "b227bf8cf3f7370cca10e9f4e91536581df92ad5",
+      "git_bytes": 10552,
+      "hosted_record_bytes": 10552,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261017162650",
+      "name": "f16_sandbox_qa_v2_second_checkout_same_owner",
+      "path": "supabase/migrations/20261017162650_f16_sandbox_qa_v2_second_checkout_same_owner.sql",
+      "git_blob_sha": "ec5f8875547bb1db4e572ead743c32770a7abeb5",
+      "hosted_record_blob_sha": "ec5f8875547bb1db4e572ead743c32770a7abeb5",
+      "git_bytes": 9936,
+      "hosted_record_bytes": 9936,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261017165014",
+      "name": "f16_sandbox_qa_v2_owner_account_read_only",
+      "path": "supabase/migrations/20261017165014_f16_sandbox_qa_v2_owner_account_read_only.sql",
+      "git_blob_sha": "62d565c71f847b60595a871c65d0da1eee5beb89",
+      "hosted_record_blob_sha": "62d565c71f847b60595a871c65d0da1eee5beb89",
+      "git_bytes": 3183,
+      "hosted_record_bytes": 3183,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261017170437",
+      "name": "f16_qa_v2_merchant_verified_first_cycle",
+      "path": "supabase/migrations/20261017170437_f16_qa_v2_merchant_verified_first_cycle.sql",
+      "git_blob_sha": "ecda0fb2c1ae44ceff38aa12ebcdfe56602dc34a",
+      "hosted_record_blob_sha": "ecda0fb2c1ae44ceff38aa12ebcdfe56602dc34a",
+      "git_bytes": 7608,
+      "hosted_record_bytes": 7608,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261017171146",
+      "name": "f16_qa_v2_checkout_owner_service_gate",
+      "path": "supabase/migrations/20261017171146_f16_qa_v2_checkout_owner_service_gate.sql",
+      "git_blob_sha": "3458b99de1fa25e9eebb60b9ff54430a406e72a8",
+      "hosted_record_blob_sha": "3458b99de1fa25e9eebb60b9ff54430a406e72a8",
+      "git_bytes": 1640,
+      "hosted_record_bytes": 1640,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261017172411",
+      "name": "f16_sandbox_qa_v2_bilingual_offer_publication",
+      "path": "supabase/migrations/20261017172411_f16_sandbox_qa_v2_bilingual_offer_publication.sql",
+      "git_blob_sha": "5b2fd2fc2e143427061639c4a16e3b2ac25e001a",
+      "hosted_record_blob_sha": "5b2fd2fc2e143427061639c4a16e3b2ac25e001a",
+      "git_bytes": 2127,
+      "hosted_record_bytes": 2127,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018132808",
+      "name": "f16_sandbox_v2_append_only_checkout_retries",
+      "path": "supabase/migrations/20261018132808_f16_sandbox_v2_append_only_checkout_retries.sql",
+      "git_blob_sha": "98d79af354878fde25cee58521f271084290568e",
+      "hosted_record_blob_sha": "98d79af354878fde25cee58521f271084290568e",
+      "git_bytes": 15773,
+      "hosted_record_bytes": 15773,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018132828",
+      "name": "f16_sandbox_v2_multiattempt_account_read_and_finance",
+      "path": "supabase/migrations/20261018132828_f16_sandbox_v2_multiattempt_account_read_and_finance.sql",
+      "git_blob_sha": "578169cc6964c8f40b27ee0aa284275c9dc3dbd9",
+      "hosted_record_blob_sha": "578169cc6964c8f40b27ee0aa284275c9dc3dbd9",
+      "git_bytes": 9225,
+      "hosted_record_bytes": 9225,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018154128",
+      "name": "f16_v2_created_webhook_candidate_readonly",
+      "path": "supabase/migrations/20261018154128_f16_v2_created_webhook_candidate_readonly.sql",
+      "git_blob_sha": "e7faf832cbf4bd085e20e6a7acb442533a1db659",
+      "hosted_record_blob_sha": "e7faf832cbf4bd085e20e6a7acb442533a1db659",
+      "git_bytes": 2610,
+      "hosted_record_bytes": 2610,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018163723",
+      "name": "f16_sandbox_fresh_owner_qa_admission",
+      "path": "supabase/migrations/20261018163723_f16_sandbox_fresh_owner_qa_admission.sql",
+      "git_blob_sha": "2c08471a25fd50fa0f1693891ab56023f463cb85",
+      "hosted_record_blob_sha": "2c08471a25fd50fa0f1693891ab56023f463cb85",
+      "git_bytes": 6967,
+      "hosted_record_bytes": 6967,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018170858",
+      "name": "f16_local_sandbox_automatic_qa_admission",
+      "path": "supabase/migrations/20261018170858_f16_local_sandbox_automatic_qa_admission.sql",
+      "git_blob_sha": "1501ba6853adf797a031f156891a7725265d4cc9",
+      "hosted_record_blob_sha": "1501ba6853adf797a031f156891a7725265d4cc9",
+      "git_bytes": 2971,
+      "hosted_record_bytes": 2971,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018184603",
+      "name": "f16_sandbox_qa_owner_membership_read",
+      "path": "supabase/migrations/20261018184603_f16_sandbox_qa_owner_membership_read.sql",
+      "git_blob_sha": "85b4bc8f1753eb8b9ef227e155e67247909fcb32",
+      "hosted_record_blob_sha": "85b4bc8f1753eb8b9ef227e155e67247909fcb32",
+      "git_bytes": 2698,
+      "hosted_record_bytes": 2698,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261018234721",
+      "name": "pazo_admin_observability_dashboard_20261018",
+      "path": "supabase/migrations/20261018234721_pazo_admin_observability_dashboard_20261018.sql",
+      "git_blob_sha": "4e9918202f28a2891c09ce4d429b32214aa66089",
+      "hosted_record_blob_sha": "4e9918202f28a2891c09ce4d429b32214aa66089",
+      "git_bytes": 16418,
+      "hosted_record_bytes": 16418,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019042653",
+      "name": "f16_sandbox_v2_pending_abandonment_preflight",
+      "path": "supabase/migrations/20261019042653_f16_sandbox_v2_pending_abandonment_preflight.sql",
+      "git_blob_sha": "71e19348db6df34061ebe69a4dd2a87dac340a8e",
+      "hosted_record_blob_sha": "71e19348db6df34061ebe69a4dd2a87dac340a8e",
+      "git_bytes": 3769,
+      "hosted_record_bytes": 3769,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019134346",
+      "name": "f16_sandbox_v2_automatic_reconciled_retry",
+      "path": "supabase/migrations/20261019134346_f16_sandbox_v2_automatic_reconciled_retry.sql",
+      "git_blob_sha": "61f7e975220033bee0d18594685fcbf75287aa45",
+      "hosted_record_blob_sha": "61f7e975220033bee0d18594685fcbf75287aa45",
+      "git_bytes": 7979,
+      "hosted_record_bytes": 7979,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019150118",
+      "name": "f16_sandbox_qa_two_abandoned_v2_reset",
+      "path": "supabase/migrations/20261019150118_f16_sandbox_qa_two_abandoned_v2_reset.sql",
+      "git_blob_sha": "485eabd4d394d15f361bf503351679528212e822",
+      "hosted_record_blob_sha": "485eabd4d394d15f361bf503351679528212e822",
+      "git_bytes": 7724,
+      "hosted_record_bytes": 7724,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019173620",
+      "name": "f16_qa_pending_approval_restart",
+      "path": "supabase/migrations/20261019173620_f16_qa_pending_approval_restart.sql",
+      "git_blob_sha": "71682aee35ef27b8c3a1ca1fd0b3a59dbcf9eaa8",
+      "hosted_record_blob_sha": "71682aee35ef27b8c3a1ca1fd0b3a59dbcf9eaa8",
+      "git_bytes": 5524,
+      "hosted_record_bytes": 5524,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019175722",
+      "name": "f16_qa_repeat_abandonment_restart",
+      "path": "supabase/migrations/20261019175722_f16_qa_repeat_abandonment_restart.sql",
+      "git_blob_sha": "3457b012cb74f1c2281d1ed3038cd8d0f17b5292",
+      "hosted_record_blob_sha": "3457b012cb74f1c2281d1ed3038cd8d0f17b5292",
+      "git_bytes": 5671,
+      "hosted_record_bytes": 5671,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019183232",
+      "name": "pazo_admin_paypal_gateway_settings",
+      "path": "supabase/migrations/20261019183232_pazo_admin_paypal_gateway_settings.sql",
+      "git_blob_sha": "dac501dabb42b22196bdc6e1984e4537d7cb0024",
+      "hosted_record_blob_sha": "dac501dabb42b22196bdc6e1984e4537d7cb0024",
+      "git_bytes": 11478,
+      "hosted_record_bytes": 11478,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019235351",
+      "name": "pazo_f16_live_gateway_inert_private_staging",
+      "path": "supabase/migrations/20261019235351_pazo_f16_live_gateway_inert_private_staging.sql",
+      "git_blob_sha": "b2ed5aeec5a9c15a2f9455d1c81e9cdfd8a79bb4",
+      "hosted_record_blob_sha": "b2ed5aeec5a9c15a2f9455d1c81e9cdfd8a79bb4",
+      "git_bytes": 21603,
+      "hosted_record_bytes": 21603,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019235426",
+      "name": "pazo_f16_live_intent_private_staging",
+      "path": "supabase/migrations/20261019235426_pazo_f16_live_intent_private_staging.sql",
+      "git_blob_sha": "87b547d256673fcf7783d814764d3b94b79211d6",
+      "hosted_record_blob_sha": "87b547d256673fcf7783d814764d3b94b79211d6",
+      "git_bytes": 4532,
+      "hosted_record_bytes": 4532,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019235455",
+      "name": "pazo_f16_live_verified_binding_and_receipts_private_staging",
+      "path": "supabase/migrations/20261019235455_pazo_f16_live_verified_binding_and_receipts_private_staging.sql",
+      "git_blob_sha": "a6c6f0801eec85b74d8f5f89c2c7c75e20a07f96",
+      "hosted_record_blob_sha": "a6c6f0801eec85b74d8f5f89c2c7c75e20a07f96",
+      "git_bytes": 9921,
+      "hosted_record_bytes": 9921,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019235525",
+      "name": "pazo_f16_live_verified_refund_private_staging",
+      "path": "supabase/migrations/20261019235525_pazo_f16_live_verified_refund_private_staging.sql",
+      "git_blob_sha": "3ee8c30073a801cf73bb9b8716d4fdb7c6de591d",
+      "hosted_record_blob_sha": "3ee8c30073a801cf73bb9b8716d4fdb7c6de591d",
+      "git_bytes": 4588,
+      "hosted_record_bytes": 4588,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261019235552",
+      "name": "pazo_f16_live_service_binding_readonly_bridge",
+      "path": "supabase/migrations/20261019235552_pazo_f16_live_service_binding_readonly_bridge.sql",
+      "git_blob_sha": "e93ab695a99f82e50e157fd038c49512faaa6fcb",
+      "hosted_record_blob_sha": "e93ab695a99f82e50e157fd038c49512faaa6fcb",
+      "git_bytes": 2293,
+      "hosted_record_bytes": 2293,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020014049",
+      "name": "pazo_f16_live_edge_credential_source_metadata",
+      "path": "supabase/migrations/20261020014049_pazo_f16_live_edge_credential_source_metadata.sql",
+      "git_blob_sha": "9fc328b6f1b6605395b840d4dd765045e5929ebb",
+      "hosted_record_blob_sha": "9fc328b6f1b6605395b840d4dd765045e5929ebb",
+      "git_bytes": 3360,
+      "hosted_record_bytes": 3360,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020134900",
+      "name": "pazo_f16_live_service_role_rpc_bridges",
+      "path": "supabase/migrations/20261020134900_pazo_f16_live_service_role_rpc_bridges.sql",
+      "git_blob_sha": "1c55da4466051d52659e5902503c867d8169bb50",
+      "hosted_record_blob_sha": "1c55da4466051d52659e5902503c867d8169bb50",
+      "git_bytes": 11724,
+      "hosted_record_bytes": 11724,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020142448",
+      "name": "pazo_f16_admin_owned_live_return_origin",
+      "path": "supabase/migrations/20261020142448_pazo_f16_admin_owned_live_return_origin.sql",
+      "git_blob_sha": "b7d0503ec4d08847771f08e5cff516ee5b85385d",
+      "hosted_record_blob_sha": "b7d0503ec4d08847771f08e5cff516ee5b85385d",
+      "git_bytes": 2806,
+      "hosted_record_bytes": 2806,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020200238",
+      "name": "pazo_f16_secret_provision_audit_guarded",
+      "path": "supabase/migrations/20261020200238_pazo_f16_secret_provision_audit_guarded.sql",
+      "git_blob_sha": "17ffb4a11bdc0c446e4f7dad965a9e87c0925859",
+      "hosted_record_blob_sha": "17ffb4a11bdc0c446e4f7dad965a9e87c0925859",
+      "git_bytes": 11144,
+      "hosted_record_bytes": 11144,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020214807",
+      "name": "pazo_f16_live_bootstrap_generation_guarded",
+      "path": "supabase/migrations/20261020214807_pazo_f16_live_bootstrap_generation_guarded.sql",
+      "git_blob_sha": "f8959be865b72442d0fbb2cad3ffd3668473ff0a",
+      "hosted_record_blob_sha": "f8959be865b72442d0fbb2cad3ffd3668473ff0a",
+      "git_bytes": 7336,
+      "hosted_record_bytes": 7336,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020214838",
+      "name": "pazo_f16_live_durable_inbox_lease_guarded",
+      "path": "supabase/migrations/20261020214838_pazo_f16_live_durable_inbox_lease_guarded.sql",
+      "git_blob_sha": "bd8d0aca8cb7085d021597754538466e01bb0dbb",
+      "hosted_record_blob_sha": "bd8d0aca8cb7085d021597754538466e01bb0dbb",
+      "git_bytes": 6377,
+      "hosted_record_bytes": 6377,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261020234721",
+      "name": "pazo_f16_live_bootstrap_idempotent_retry_guarded",
+      "path": "supabase/migrations/20261020234721_pazo_f16_live_bootstrap_idempotent_retry_guarded.sql",
+      "git_blob_sha": "e15237d74fd54544092f5e8bfed851076b2a48cf",
+      "hosted_record_blob_sha": "5acd13e25eca9637c2c631b66ed71f512553e505",
+      "git_bytes": 3600,
+      "hosted_record_bytes": 3585,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021012636",
+      "name": "pazo_f16_live_service_json_claims_guard",
+      "path": "supabase/migrations/20261021012636_pazo_f16_live_service_json_claims_guard.sql",
+      "git_blob_sha": "508e2e62f5c338b83619bef8e9f3e024f964240b",
+      "hosted_record_blob_sha": "508e2e62f5c338b83619bef8e9f3e024f964240b",
+      "git_bytes": 27340,
+      "hosted_record_bytes": 27340,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021014400",
+      "name": "pazo_f16_live_recorded_sale_reader",
+      "path": "supabase/migrations/20261021014400_pazo_f16_live_recorded_sale_reader.sql",
+      "git_blob_sha": "1a3874813250283a0d04f28653be3905491ba832",
+      "hosted_record_blob_sha": "1a3874813250283a0d04f28653be3905491ba832",
+      "git_bytes": 4307,
+      "hosted_record_bytes": 4307,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021021050",
+      "name": "pazo_f16_live_resource_inspection",
+      "path": "supabase/migrations/20261021021050_pazo_f16_live_resource_inspection.sql",
+      "git_blob_sha": "f251a10288102329e7ec2be44abc5915f694df9b",
+      "hosted_record_blob_sha": "f251a10288102329e7ec2be44abc5915f694df9b",
+      "git_bytes": 5580,
+      "hosted_record_bytes": 5580,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021060506",
+      "name": "pazo_f16_live_vault_generation_backend",
+      "path": "supabase/migrations/20261021060506_pazo_f16_live_vault_generation_backend.sql",
+      "git_blob_sha": "d9bb0713ce5569692472fada023213e1ec344c20",
+      "hosted_record_blob_sha": "c7038876ebc1a596475ba8819ff007fed1661a54",
+      "git_bytes": 10166,
+      "hosted_record_bytes": 10141,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021074014",
+      "name": "pazo_f16_live_signed_event_evidence",
+      "path": "supabase/migrations/20261021074014_pazo_f16_live_signed_event_evidence.sql",
+      "git_blob_sha": "a01133376a8e07f6dd43216613ba8eaa3ac710d3",
+      "hosted_record_blob_sha": "f3890ad13f23ce08b2afa7530c11b144c6686203",
+      "git_bytes": 11094,
+      "hosted_record_bytes": 11093,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021074024",
+      "name": "pazo_f16_live_atomic_leased_settlement",
+      "path": "supabase/migrations/20261021074024_pazo_f16_live_atomic_leased_settlement.sql",
+      "git_blob_sha": "35c39bb9372430e57d5436cea23ce8469fc38362",
+      "hosted_record_blob_sha": "e41a777a2396939d084c1e18c78f7dced0be4256",
+      "git_bytes": 9568,
+      "hosted_record_bytes": 9567,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021074032",
+      "name": "pazo_f16_live_financial_context",
+      "path": "supabase/migrations/20261021074032_pazo_f16_live_financial_context.sql",
+      "git_blob_sha": "0698e06a69b54b6c6cf1a4fd77c234aff64592a5",
+      "hosted_record_blob_sha": "52b5e54737a625b60ffa1877f671c0f8eafcfca0",
+      "git_bytes": 4784,
+      "hosted_record_bytes": 4783,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021142517",
+      "name": "pazo_f16_live_lifecycle_and_refund_scope",
+      "path": "supabase/migrations/20261021142517_pazo_f16_live_lifecycle_and_refund_scope.sql",
+      "git_blob_sha": "2cb9d120c16ad39bed532fcdfdb3b2336bac6c55",
+      "hosted_record_blob_sha": "d1289d7ae473c4af7f187b467a663d0f3234413b",
+      "git_bytes": 6974,
+      "hosted_record_bytes": 6973,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021144809",
+      "name": "pazo_f16_live_private_worker_control",
+      "path": "supabase/migrations/20261021144809_pazo_f16_live_private_worker_control.sql",
+      "git_blob_sha": "d3aa67e0e2f5f14ea6e745915c87ecc477131ba3",
+      "hosted_record_blob_sha": "ff2a7c782797e4d457a355d2f4ce4aa791b3abc8",
+      "git_bytes": 13060,
+      "hosted_record_bytes": 13059,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021145500",
+      "name": "pazo_f16_live_private_worker_scheduler",
+      "path": "supabase/migrations/20261021145500_pazo_f16_live_private_worker_scheduler.sql",
+      "git_blob_sha": "e134511d0a63e08aa7a9464813191007df76a8b5",
+      "hosted_record_blob_sha": "f86224704614b420dcf91ce2d2b29d1efa4bd319",
+      "git_bytes": 3941,
+      "hosted_record_bytes": 3940,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021155429",
+      "name": "pazo_f16_live_worker_single_use_dispatch",
+      "path": "supabase/migrations/20261021155429_pazo_f16_live_worker_single_use_dispatch.sql",
+      "git_blob_sha": "1ea490fca6f7cf41017f6ec8b426e3b3b03dd32b",
+      "hosted_record_blob_sha": "215852b4a41815fd3821881662e96fd332692ae7",
+      "git_bytes": 7230,
+      "hosted_record_bytes": 7229,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021162301",
+      "name": "pazo_f16_live_dispute_monitor",
+      "path": "supabase/migrations/20261021162301_pazo_f16_live_dispute_monitor.sql",
+      "git_blob_sha": "213da9ea5ecf9f1ffb8560d677e1521d7c7abaab",
+      "hosted_record_blob_sha": "ea082d3ef175f867627b1eb73ccc7d77f2d15809",
+      "git_bytes": 20067,
+      "hosted_record_bytes": 20066,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021165838",
+      "name": "pazo_f16_live_immutable_bilingual_offer",
+      "path": "supabase/migrations/20261021165838_pazo_f16_live_immutable_bilingual_offer.sql",
+      "git_blob_sha": "f4ae134741ba5e3b63ea56ee307e7c6b78462420",
+      "hosted_record_blob_sha": "61b3c8020c9000377e7ba52611b8334195d8ab3c",
+      "git_bytes": 12522,
+      "hosted_record_bytes": 12521,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021174836",
+      "name": "pazo_f16_live_verified_benefit_projection",
+      "path": "supabase/migrations/20261021174836_pazo_f16_live_verified_benefit_projection.sql",
+      "git_blob_sha": "380410403c5fb1273e8c6d98e9b7d303289ce445",
+      "hosted_record_blob_sha": "a418e72ee1efdf437acba80d065ee772b2d1dc92",
+      "git_bytes": 4021,
+      "hosted_record_bytes": 4006,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021181431",
+      "name": "pazo_f16_live_owner_checkout_slot",
+      "path": "supabase/migrations/20261021181431_pazo_f16_live_owner_checkout_slot.sql",
+      "git_blob_sha": "722adbbade71c6aba39cbfa0750d0b180b5772b6",
+      "hosted_record_blob_sha": "f96c3d2c6a7b7eee239d529328a3458d3c5b6b5a",
+      "git_bytes": 18580,
+      "hosted_record_bytes": 18565,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021192951",
+      "name": "pazo_f16_live_cancel_finish",
+      "path": "supabase/migrations/20261021192951_pazo_f16_live_cancel_finish.sql",
+      "git_blob_sha": "9550d1e1ca1be5a599e087e91a617e2ffeee5381",
+      "hosted_record_blob_sha": "c64ce5ba21e360c294e9c48136b7d616f6de410f",
+      "git_bytes": 2420,
+      "hosted_record_bytes": 2405,
+      "classification": "lexical_equivalent_not_byte_exact"
+    },
+    {
+      "version": "20261021210000",
+      "name": "pazo_f16_live_owner_recovery_finish",
+      "path": "supabase/migrations/20261021210000_pazo_f16_live_owner_recovery_finish.sql",
+      "git_blob_sha": "b3fdcb73e4a3ea3dc1de07dc4ec7708f82c1676b",
+      "hosted_record_blob_sha": "b3fdcb73e4a3ea3dc1de07dc4ec7708f82c1676b",
+      "git_bytes": 4621,
+      "hosted_record_bytes": 4621,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021213000",
+      "name": "pazo_f16_live_cosmetic_benefits",
+      "path": "supabase/migrations/20261021213000_pazo_f16_live_cosmetic_benefits.sql",
+      "git_blob_sha": "e181c4660a66b8320457ff9069c88a0942f47623",
+      "hosted_record_blob_sha": "e181c4660a66b8320457ff9069c88a0942f47623",
+      "git_bytes": 5551,
+      "hosted_record_bytes": 5551,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021220000",
+      "name": "pazo_f16_live_admin_finance_summary",
+      "path": "supabase/migrations/20261021220000_pazo_f16_live_admin_finance_summary.sql",
+      "git_blob_sha": "59c7b86752a3a56c226ad1ceac9489c08e826be7",
+      "hosted_record_blob_sha": "59c7b86752a3a56c226ad1ceac9489c08e826be7",
+      "git_bytes": 2306,
+      "hosted_record_bytes": 2306,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021223000",
+      "name": "pazo_f16_live_admin_readiness",
+      "path": "supabase/migrations/20261021223000_pazo_f16_live_admin_readiness.sql",
+      "git_blob_sha": "2d40ccc6623dd32a5c13485a9c00f5867a103db3",
+      "hosted_record_blob_sha": "2d40ccc6623dd32a5c13485a9c00f5867a103db3",
+      "git_bytes": 4176,
+      "hosted_record_bytes": 4176,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261021230000",
+      "name": "pazo_f16_live_controlled_release",
+      "path": "supabase/migrations/20261021230000_pazo_f16_live_controlled_release.sql",
+      "git_blob_sha": "77a8424798a69d15598ff387ba264a65dd4cd210",
+      "hosted_record_blob_sha": "77a8424798a69d15598ff387ba264a65dd4cd210",
+      "git_bytes": 34450,
+      "hosted_record_bytes": 34450,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022021500",
+      "name": "pazo_f16_public_benefits_visibility",
+      "path": "supabase/migrations/20261022021500_pazo_f16_public_benefits_visibility.sql",
+      "git_blob_sha": "192beca6f5d0d58126ef4d686ba8e4d6b53e9feb",
+      "hosted_record_blob_sha": "192beca6f5d0d58126ef4d686ba8e4d6b53e9feb",
+      "git_bytes": 3249,
+      "hosted_record_bytes": 3249,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022052854",
+      "name": "pazo_f16_public_benefits_live_only",
+      "path": "supabase/migrations/20261022052854_pazo_f16_public_benefits_live_only.sql",
+      "git_blob_sha": "6eadf67ec4c8dce831212efb41a0f83a6db2f5d6",
+      "hosted_record_blob_sha": "6eadf67ec4c8dce831212efb41a0f83a6db2f5d6",
+      "git_bytes": 2260,
+      "hosted_record_bytes": 2260,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022071240",
+      "name": "pazo_f16_live_vault_regex_2201b_fix_20261022",
+      "path": "supabase/migrations/20261022071240_pazo_f16_live_vault_regex_2201b_fix_20261022.sql",
+      "git_blob_sha": "2598f6b9864bcbd465042128962b14c52e979079",
+      "hosted_record_blob_sha": "2598f6b9864bcbd465042128962b14c52e979079",
+      "git_bytes": 6763,
+      "hosted_record_bytes": 6763,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022103706",
+      "name": "pazo_f17_private_support",
+      "path": "supabase/migrations/20261022103706_pazo_f17_private_support.sql",
+      "git_blob_sha": "57984f50763c40ba7d8b567c28fcd09bc3b62226",
+      "hosted_record_blob_sha": "57984f50763c40ba7d8b567c28fcd09bc3b62226",
+      "git_bytes": 7625,
+      "hosted_record_bytes": 7625,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022103707",
+      "name": "pazo_f17_gift_benefits",
+      "path": "supabase/migrations/20261022103707_pazo_f17_gift_benefits.sql",
+      "git_blob_sha": "2d21dca8704fc8526afd4ebd3fb1eb34b444237a",
+      "hosted_record_blob_sha": "2d21dca8704fc8526afd4ebd3fb1eb34b444237a",
+      "git_bytes": 16752,
+      "hosted_record_bytes": 16752,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022103708",
+      "name": "pazo_f17_maintenance_guard",
+      "path": "supabase/migrations/20261022103708_pazo_f17_maintenance_guard.sql",
+      "git_blob_sha": "c5a5c7350e8705289dcf1c5e59d76fa82d801e25",
+      "hosted_record_blob_sha": "c5a5c7350e8705289dcf1c5e59d76fa82d801e25",
+      "git_bytes": 11955,
+      "hosted_record_bytes": 11955,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261022220000",
+      "name": "pazo_live_canonical_origin_guarded",
+      "path": "supabase/migrations/20261022220000_pazo_live_canonical_origin_guarded.sql",
+      "git_blob_sha": "0a3fcbd6f93f61100f6108ff55346012bb1baf48",
+      "hosted_record_blob_sha": "105666aad1736d77fc53a7241263366200188fbb",
+      "git_bytes": 7713,
+      "hosted_record_bytes": 62,
+      "classification": "metadata_only_hosted_statement"
+    },
+    {
+      "version": "20261022222000",
+      "name": "pazo_f17_pet_onboarding_integrity",
+      "path": "supabase/migrations/20261022222000_pazo_f17_pet_onboarding_integrity.sql",
+      "git_blob_sha": "463049ba76cbbce9a28195d8be75a6c14e620bb7",
+      "hosted_record_blob_sha": "8e7773891d43cc631ce5be511931d73a2ba1fbbd",
+      "git_bytes": 3526,
+      "hosted_record_bytes": 87,
+      "classification": "metadata_only_hosted_statement"
+    },
+    {
+      "version": "20261023224519",
+      "name": "pazo_f16_gradual_live_event_rollout",
+      "path": "supabase/migrations/20261023224519_pazo_f16_gradual_live_event_rollout.sql",
+      "git_blob_sha": "8e634ad3b228573d233df1c552b84169104f9acf",
+      "hosted_record_blob_sha": "8e634ad3b228573d233df1c552b84169104f9acf",
+      "git_bytes": 49523,
+      "hosted_record_bytes": 49523,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261023235424",
+      "name": "pazo_f16_qa_original_read_audit",
+      "path": "supabase/migrations/20261023235424_pazo_f16_qa_original_read_audit.sql",
+      "git_blob_sha": "a7bcd72d449dadc360909c7d151c692d09fd9ec7",
+      "hosted_record_blob_sha": "a7bcd72d449dadc360909c7d151c692d09fd9ec7",
+      "git_bytes": 4398,
+      "hosted_record_bytes": 4398,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261024001615",
+      "name": "pazo_f16_real_cohort_initial_invitation_budget",
+      "path": "supabase/migrations/20261024001615_pazo_f16_real_cohort_initial_invitation_budget.sql",
+      "git_blob_sha": "d50dafe9f058086f5b4070612de8c08497ee5e93",
+      "hosted_record_blob_sha": "d50dafe9f058086f5b4070612de8c08497ee5e93",
+      "git_bytes": 23206,
+      "hosted_record_bytes": 23206,
+      "classification": "byte_exact"
+    },
+    {
+      "version": "20261024003716",
+      "name": "pazo_f16_original_qa_recheck_and_hosted_gate_certificate",
+      "path": "supabase/migrations/20261024003716_pazo_f16_original_qa_recheck_and_hosted_gate_certificate.sql",
+      "git_blob_sha": "a6907374d79ed96351831a5a2c4b71060771abc5",
+      "hosted_record_blob_sha": "a6907374d79ed96351831a5a2c4b71060771abc5",
+      "git_bytes": 15759,
+      "hosted_record_bytes": 15759,
+      "classification": "byte_exact"
+    }
+  ],
+  "local_unrecorded": [
+    {
+      "path": "supabase/migrations/20261005101300_feed_like_save_integrity.sql",
+      "git_blob_sha": "b7cdd614f3104692d91f160b8c07989a3660142e",
+      "bytes": 13369
+    },
+    {
+      "path": "supabase/migrations/20261005110000_post_comments_source_of_truth.sql",
+      "git_blob_sha": "369bfe65925fd347d8934e9e324fec5a028320b3",
+      "bytes": 6606
+    },
+    {
+      "path": "supabase/migrations/20261005114500_pet_registration_editing.sql",
+      "git_blob_sha": "2508e44a5c843549d07c3fb917ea509e8249f724",
+      "bytes": 10293
+    },
+    {
+      "path": "supabase/migrations/20261005123000_security_stabilization.sql",
+      "git_blob_sha": "e8a44350377996888039b87bc77f17cdac4f07c9",
+      "bytes": 14945
+    },
+    {
+      "path": "supabase/migrations/20261005134000_prevent_same_owner_follows.sql",
+      "git_blob_sha": "ea73787fbe06afd650a698530c99859acd38d10b",
+      "bytes": 2123
+    },
+    {
+      "path": "supabase/migrations/20261005150000_rescue_passport_alerts.sql",
+      "git_blob_sha": "eeefb3e6b0eb144a6351277392cb7c2a747e7b82",
+      "bytes": 16709
+    },
+    {
+      "path": "supabase/migrations/20261005154500_sighting_contact_details.sql",
+      "git_blob_sha": "c08a7ba92b3c3d7dffb030c0c00b099a13935fb2",
+      "bytes": 4523
+    },
+    {
+      "path": "supabase/migrations/20261005165500_feed_scroll_pagination.sql",
+      "git_blob_sha": "aa9be8e664a696dfadf097997a0dc45ec7eb0816",
+      "bytes": 3217
+    }
+  ]
+}
