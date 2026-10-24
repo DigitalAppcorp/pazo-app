@@ -311,6 +311,71 @@ $mkt_block_3$;
 REVOKE ALL ON FUNCTION marketing_private.daily_campaign_summary()
  FROM PUBLIC,anon,authenticated,service_role;
 
+-- Read-only ADMIN interface. This is the only browser-facing reporting
+-- function. It returns strictly aggregate daily rows, never owner IDs.
+-- Authentication comes from the verified database JWT (auth.uid), never
+-- user-editable metadata, query parameters, or the caller's browser role.
+CREATE FUNCTION public.pazo_admin_marketing_summary(p_days integer DEFAULT 30)
+RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = ''
+AS $pazo_admin_marketing$
+DECLARE
+ v_retention smallint;
+ v_enabled boolean;
+ v_data jsonb;
+BEGIN
+ IF auth.uid() IS NULL OR NOT public.pazo_is_admin() THEN
+  RAISE EXCEPTION 'Admin marketing access denied' USING ERRCODE = '42501';
+ END IF;
+ IF p_days IS NULL OR p_days NOT IN(7,30,90) THEN
+  RAISE EXCEPTION 'Unsupported marketing reporting window'
+   USING ERRCODE = '22023';
+ END IF;
+ SELECT g.retention_days,g.enabled INTO v_retention,v_enabled
+ FROM marketing_private.collection_gate g WHERE g.singleton;
+ WITH reporting_rows AS (
+  SELECT s.*
+  FROM marketing_private.daily_campaign_summary() s
+  WHERE s.metric_day BETWEEN
+   ((statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date-(p_days-1))
+   AND (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date
+ ), summed AS (
+  SELECT coalesce(sum(landing_signals),0)::bigint AS landing_signals,
+   coalesce(sum(verified_signups),0)::bigint AS verified_signups,
+   coalesce(sum(first_pet_within_7d),0)::bigint AS first_pet_within_7d,
+   coalesce(sum(d7_matured_owners),0)::bigint AS d7_matured_owners,
+   coalesce(sum(d7_screen_activity_proxy),0)::bigint AS d7_screen_activity_proxy
+  FROM reporting_rows
+ )
+ SELECT jsonb_build_object(
+  'status',CASE WHEN coalesce(v_retention,0)=0 THEN 'not_configured'
+    WHEN v_enabled THEN 'collecting' ELSE 'paused' END,
+  'period_days',p_days,
+  'as_of',statement_timestamp(),
+  'time_zone','America/Los_Angeles',
+  'totals',to_jsonb(summed),
+  'daily',coalesce((
+    SELECT jsonb_agg(jsonb_build_object(
+     'day',r.metric_day,
+     'campaign',r.campaign,
+     'creative',r.creative,
+     'landing_signals',r.landing_signals,
+     'verified_signups',r.verified_signups,
+     'first_pet_within_7d',r.first_pet_within_7d,
+     'd7_matured_owners',r.d7_matured_owners,
+     'd7_screen_activity_proxy',r.d7_screen_activity_proxy
+    ) ORDER BY r.metric_day DESC,r.creative)
+    FROM reporting_rows r
+  ),'[]'::jsonb)
+ ) INTO v_data FROM summed;
+ RETURN v_data;
+END
+$pazo_admin_marketing$;
+REVOKE ALL ON FUNCTION public.pazo_admin_marketing_summary(integer)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_admin_marketing_summary(integer)
+ TO authenticated;
+
 -- Privileged, manual lifecycle operations. There is NO scheduler or
 -- external endpoint wired in this PR. Do not imply automatic purging.
 -- A retention policy must be approved separately before configuring days.
