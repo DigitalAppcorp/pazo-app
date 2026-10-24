@@ -109,6 +109,18 @@ test('terminal retirement requires original GET CANCELLED/EXPIRED and positive p
  const f=fixture({retireTerminal:async()=>false});f.remote.status='CANCELLED'
  assert.equal((await f.run({ownerId:owner,original:{...row(),state:'bound',subscriptionId:sub},action:'reconcile'})).code,'live_coverage_or_events_pending')
 })
+test('Sandbox-parity Live Continue automatically releases terminal original only after reconciliation',async()=>{
+ for(const status of ['CANCELLED','EXPIRED']){
+  const f=fixture();f.remote.status=status
+  const out=await f.run({ownerId:owner,original:{...row(),state:'bound',subscriptionId:sub},action:'resume'})
+  assert.deepEqual(out,{ok:true,code:'live_checkout_slot_released'})
+  assert.deepEqual(f.calls,['vault','get','close'])
+ }
+ const unsafe=fixture({retireTerminal:async()=>false})
+ unsafe.remote.status='CANCELLED'
+ const notReady=await unsafe.run({ownerId:owner,original:{...row(),state:'bound',subscriptionId:sub},action:'resume'})
+ assert.deepEqual(notReady,{ok:false,code:'live_coverage_or_events_pending'})
+})
 test('PayPal original recovery POST uses byte-identical payload and idempotency key; GET strips payer data',async()=>{
  const posts=[]
  const provider=createPaypalLiveSubscriptionProvider({clientId:'SYNTHETIC_CLIENT_123456',clientSecret:'SYNTHETIC_SECRET_123456',

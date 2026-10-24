@@ -1,0 +1,19 @@
+{
+  "source": "public production bundle token; values omitted",
+  "origin": "https://pazo-app.vercel.app",
+  "tokenMatchesPreviouslyValidatedRuntime": true,
+  "results": [
+    {
+      "path": "/styles/v1/mapbox/standard",
+      "status": 200
+    },
+    {
+      "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/407.vector.pbf",
+      "status": 200
+    },
+    {
+      "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6538.glb",
+      "status": 200
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import {GradualCampaignPanel} from '../gradual/GradualCampaignPanel'
 import {useEffect, useRef, useState} from 'react'
 import type {Pet} from '../../../types/pazo'
 import {SupporterBadge, type SupporterMilestone} from './SupporterBadge'
@@ -83,7 +84,7 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSub
   </header>
   <main className="mx-auto w-full min-w-0 max-w-xl space-y-4 px-4 pb-10 pt-3">
   {showWall ? <SupporterWallConsentSettings lang={lang}/> : <>
-   <section aria-label={t('Membresía activa','Active membership')}
+   <section aria-label={t('Acceso a beneficios','Benefit access')}
     className="flex flex-col items-center gap-2 rounded-[32px] bg-[#E8EEDD] px-6 py-7 text-center">
     <SupporterBadge active milestone={milestone} lang={lang} size="large"/>
     <h3 className="mt-2 text-[22px] font-black leading-tight">{t('Ya eres Amigo de PAZO','You are a PAZO Friend')}</h3>
@@ -91,12 +92,13 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSub
      {t('Gracias por ayudar a que PAZO siga siendo gratis para todos.','Thanks for helping keep PAZO free for everyone.')}
     </p>
     <p role="status" className="mt-2 rounded-full bg-white/80 px-4 py-2 text-[14px] font-black text-[#204E4A]">
-     {t('Membresía activa y verificada','Verified active membership')}
+     {t('Beneficios activos y verificados','Verified active benefits')}
     </p>
     <p className="text-[13px] text-[#5C7470]">
-     {t('Consulta la vigencia y renovación en Mi membresía.','Review paid-through date and renewal under My membership.')}
+     {t('Las cortesías no generan cobros ni renovaciones. Si tienes una suscripción, puedes gestionarla en Mi membresía.', 'Complimentary access creates no charges or renewals. Manage any subscription under My membership.')}
     </p>
    </section>
+   {!qa&&<GradualCampaignPanel lang={lang} reviewOnly/>}
    <h3 className="px-1 pt-1 text-[19px] font-black">{t('Tus beneficios','Your benefits')}</h3>
    <section aria-label={t('Beneficios de Amigo de PAZO','PAZO Friend benefits')}
     className="rounded-[28px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">

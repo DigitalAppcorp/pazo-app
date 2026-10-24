@@ -7,6 +7,7 @@ import {getPublicSupabaseConfig} from '../../../lib/publicConfig'
 // No purchase, paid status or retry is inferred from frontend flags/redirects.
 type Locale='es'|'en'
 type Stage='checking'|'unavailable'|'ready'|'submitting'|'review'
+type AvailabilityReason='origin'|'canary'|'general'
 type Offer={version:string;locale:Locale;exactCopy:string;termsDigest:string;
  consentLabel:string;priceMinor:number;currency:string;cadence:string}
 const HOST='https://mrybvqdebbgcayuvgkkr.supabase.co'
@@ -37,16 +38,19 @@ const published=(raw:unknown,locale:Locale):raw is Offer=>{
   typeof o.consentLabel==='string'&&o.consentLabel.length>30&&
   digest.test(o.termsDigest||'')
 }
-export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
+export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange,availabilityRevision}:{lang:Locale;availabilityRevision?:string;onAvailabilityChange?:(phase:'loading'|'ready'|'blocked')=>void}){
  const [stage,setStage]=useState<Stage>('checking')
  const [offer,setOffer]=useState<Offer|null>(null)
+ const [availabilityReason,setAvailabilityReason]=useState<AvailabilityReason>('general')
  const [accepted,setAccepted]=useState(false)
  const [revision,setRevision]=useState(0)
  const attempted=useRef(false)
  const active=useRef(true)
  const label=(es:string,en:string)=>lang==='es'?es:en
+ useEffect(()=>{onAvailabilityChange?.(stage==='checking'?'loading':stage==='unavailable'?'blocked':'ready')},[stage,onAvailabilityChange])
  useEffect(()=>{
   active.current=true
+  if(attempted.current)return()=>{active.current=false}
   setAccepted(false)
   setOffer(null)
   setStage('checking')
@@ -68,12 +72,14 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
       value.ready===true&&value.mayGrantBenefits===false&&
       published(value.offer,lang)
      setOffer(valid?value.offer as Offer:null)
+     setAvailabilityReason(value.code==='live_origin_migration_required'?'origin':
+      value.code==='checkout_admission_denied'?'canary':'general')
      setStage(valid?'ready':'unavailable')
     }
-   }catch{if(active.current&&!controller.signal.aborted)setStage('unavailable')}
+   }catch{if(active.current&&!controller.signal.aborted){setAvailabilityReason('general');setStage('unavailable')}}
   })()
   return ()=>{active.current=false;controller.abort()}
- },[lang,revision])
+ },[lang,revision,availabilityRevision])
  const refresh=useCallback(()=>{
   if(attempted.current)return
   setRevision(x=>x+1)
@@ -118,21 +124,27 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
     'Checking subscription availability…')}</p>}
   {stage==='unavailable'&&<div className="space-y-3 text-center">
    <p role="status" className="text-[12px] leading-relaxed text-[#526F63]">
-    {label('Las suscripciones todavía no están disponibles. PAZO continúa siendo gratis.',
-     'Subscriptions are not available yet. PAZO remains free.')}</p>
+    {availabilityReason==='origin'
+      ?label('Estamos actualizando el dominio de regreso de PayPal. No se iniciará ningún cobro hasta comprobar la configuración.',
+        'We are updating PayPal’s return domain. No payment will start until the configuration is verified.')
+      :availabilityReason==='canary'
+        ?label('Tu cuenta aún no tiene un cupo de pago disponible. PAZO sigue siendo gratis.',
+          'Your account does not yet have a checkout slot. PAZO remains free.')
+        :label('Las suscripciones todavía no están disponibles. PAZO continúa siendo gratis.',
+          'Subscriptions are not available yet. PAZO remains free.')}</p>
    <button type="button" onClick={refresh}
     className="min-h-11 rounded-full bg-[#EAF0DD] px-4 text-[13px] font-bold">
     {label('Comprobar disponibilidad','Check availability')}</button>
   </div>}
   {(stage==='ready'||stage==='submitting')&&published(offer,lang)&&<>
-   <details className="rounded-[17px] bg-[#F0F4E6] p-3" open>
-    <summary className="min-h-10 cursor-pointer py-2 text-[13px] font-bold">
+   <details className="rounded-[15px] bg-[#F4F6EF] px-3 py-1.5">
+    <summary className="min-h-9 cursor-pointer py-2 text-[12px] font-semibold text-[#476862]">
      {label('Condiciones de la suscripción mensual','Monthly subscription terms')}</summary>
-    <div className="max-h-[230px] space-y-3 overflow-y-auto px-1 pb-2 text-[12px] leading-[1.6] text-[#476862]">
+    <div className="max-h-[190px] space-y-2 overflow-y-auto px-1 pb-2 text-[12px] leading-[1.5] text-[#476862]">
      {offer.exactCopy.split('\n\n').map((p,i)=><p key={i}>{p}</p>)}
     </div>
    </details>
-   <label className="flex cursor-pointer items-start gap-3 rounded-[16px] bg-[#F0F4E6] p-3 text-[12px] font-semibold leading-relaxed">
+   <label className="flex cursor-pointer items-start gap-3 rounded-[15px] bg-[#F4F6EF] px-3 py-2.5 text-[12px] font-medium leading-snug">
     <input type="checkbox" checked={accepted} disabled={stage==='submitting'}
      onChange={e=>setAccepted(e.target.checked)}
      className="mt-1 h-5 w-5 shrink-0 accent-[#204E4A]"/>
@@ -140,7 +152,7 @@ export function SupporterLiveCheckoutPanel({lang}:{lang:Locale}){
    </label>
    <button type="button" disabled={!accepted||stage==='submitting'}
     onClick={()=>void begin()}
-    className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[14px] font-black text-[#204E4A] disabled:opacity-45">
+    className="min-h-12 w-full rounded-full bg-[#204E4A] px-4 py-3 text-[14px] font-bold text-white shadow-[0_5px_15px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#2B615A] focus-visible:bg-[#2B615A] disabled:opacity-45">
     {stage==='submitting'
       ?label('Conectando con PayPal…','Connecting to PayPal…')
       :label('Continuar con PayPal','Continue with PayPal')}

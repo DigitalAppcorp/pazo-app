@@ -15,7 +15,7 @@ const req=(data=form(),path=url)=>new Request(path,{method:'POST',
   origin:'http://localhost:5173'},body:JSON.stringify(data)})
 const settings=()=>({active_environment:'sandbox',live_checkout_enabled:false,
  environments:[{environment:'sandbox'},{environment:'live',plan_id:plan,
-  webhook_id:hook,return_origin:'https://pazo-app-t83r.vercel.app',
+  webhook_id:hook,return_origin:'https://pazo-app.vercel.app',
   price_minor:299,currency:'USD',interval_unit:'MONTH'}]})
 const reservation=()=>({environment:'live',state:'reserved',generation:1,
  planId:plan,webhookId:hook,mayCharge:false})
@@ -174,7 +174,7 @@ test('reject injections, forged origins, routes and unverified content',async()=
  assert.equal((await f.handler(req(form(),url+'?environment=sandbox'))).status,400)
  assert.deepEqual(f.calls,[])
  const forged=new Request(url,{method:'POST',
-  headers:{origin:'https://pazo-app-t83r.vercel.app.evil.invalid',
+  headers:{origin:'https://pazo-app.vercel.app.evil.invalid',
    'content-type':'application/json'},body:JSON.stringify(form())})
  assert.equal((await f.handler(forged)).status,403)
  assert.deepEqual(f.calls,[])

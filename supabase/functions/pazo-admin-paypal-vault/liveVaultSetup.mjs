@@ -5,7 +5,7 @@
 import {inspectLivePaypalResources} from '../pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
 const PATHS=new Set(['/pazo-admin-paypal-vault','/functions/v1/pazo-admin-paypal-vault'])
 const ORIGINS=new Set(['http://localhost:5173','http://127.0.0.1:5173',
- 'https://pazo-app-t83r.vercel.app'])
+ 'https://pazo-app.vercel.app','https://pazo-app-t83r.vercel.app'])
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const HOOK=/^[A-Za-z0-9_-]{8,100}$/
 const KEYID=/^[A-Za-z0-9_-]{20,256}$/
@@ -79,7 +79,7 @@ export function createPazoLiveVaultSetup({released=false,authenticateAdmin,
     !PLAN.test(live[0].plan_id||'')||!HOOK.test(live[0].webhook_id||'')||
     live[0].price_minor!==299||live[0].currency!=='USD'||
     live[0].interval_unit!=='MONTH'||
-    live[0].return_origin!=='https://pazo-app-t83r.vercel.app')
+    live[0].return_origin!=='https://pazo-app.vercel.app')
     return reply(req,409,'live_draft_unavailable')
    reservation=await readReservation({actorId:actor.id,planId:live[0].plan_id})
    if(reservation===null){

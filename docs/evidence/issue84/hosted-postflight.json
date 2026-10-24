@@ -1,0 +1,101 @@
+{
+  "outbox": 0,
+  "worker": {
+    "build": "pazo_live_worker_v2",
+    "enabled": true,
+    "last_outcome": "idle",
+    "heartbeat_fresh": true,
+    "processing_enabled": true
+  },
+  "release": {
+    "mode": "canary",
+    "revision": 1,
+    "generation": 1
+  },
+  "campaign": {
+    "stage": "L1_FIRST_REAL",
+    "state": "inactive",
+    "started": false,
+    "capacity": 1,
+    "webhook_probe_fresh": true,
+    "hosted_gate_verified": false
+  },
+  "interest": 0,
+  "migration": [
+    {
+      "name": "pazo_f16_gradual_live_event_rollout",
+      "version": "20261023224519"
+    }
+  ],
+  "admissions": 0,
+  "checked_at": "2026-10-23T23:08:55.811157+00:00",
+  "invitations": 0,
+  "intent_count": 1,
+  "open_intents": 1,
+  "paid_periods": 0,
+  "notifications": 1,
+  "private_tables": [
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_admission",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_audit",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_campaign",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_event",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_incident",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_interest",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_invitation",
+      "anon_select": false,
+      "authenticated_insert": false
+    },
+    {
+      "rls": true,
+      "force": true,
+      "table": "gradual_outbox",
+      "anon_select": false,
+      "authenticated_insert": false
+    }
+  ],
+  "intent_fingerprint": "a3e08eed1526f073fb8a5e29a8e17199",
+  "ledger_fingerprint": "d751713988987e9331980363e24189ce",
+  "new_create_admitted": false,
+  "legacy_recovery_allowed": true,
+  "service_rpc_service_execute": true,
+  "service_rpc_authenticated_execute": false
+}

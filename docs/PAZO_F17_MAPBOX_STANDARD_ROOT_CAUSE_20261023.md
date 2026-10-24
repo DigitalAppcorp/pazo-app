@@ -1,0 +1,37 @@
+# F17 — Mapbox Standard: causas comprobadas y reparación (23-oct-2026)
+
+Estado: corrección en rama F17 / PR #81; pendiente aceptación visual del PO. No cierre de fase, merge ni publicación en producción.
+
+## Causas reproducidas antes de la reparación
+
+1. **Contenedor colapsado por la cascada CSS.** El CSS oficial de Mapbox GL JS 3.30.0 declara `.mapboxgl-map { position: relative }` fuera de una cascade layer. Sobrescribía la utilidad `absolute` de Tailwind, que vive dentro de una layer. En el componente real, todos los padres medían 844 px, pero el div que Mapbox convierte en `.mapboxgl-map` medía **0 px**; el canvas interno usaba su altura de reserva **300 px**. Esto deja invisible la cartografía incluso con teselas HTTP 200. Se midió en Chromium a 390×844 y se capturó antes de cambiar la geometría; no era una hipótesis de Android ni de Service Worker.
+2. **Token desplegado sin acceso efectivo a teselas.** El token público del bundle oficial anterior era distinto del token público existente en este entorno; ambos identifican la misma cuenta Mapbox. Con el primero, estilo Standard, sprites y fuentes responden HTTP 200, pero teselas vectoriales/DEM/modelos del proveedor responden **403 `Forbidden`**. Una instancia real de GL JS, con sus parámetros SKU oficiales, reprodujo 31 rechazos y lienzo vacío, sin cartografía renderizada. Los mismos recursos y orígenes con el token ya disponible responden 200 y muestran calles. No se creó token ni cuenta ni se modificó el plan del proveedor. La razón administrativa interna del rechazo del token anterior no se puede inferir del cuerpo `Forbidden`; no atribuirlo sin evidencia a una allowlist o un scope específico.
+
+El preflight anterior comprobaba únicamente el estilo y no detectaba la denegación de teselas. Además, `loaded()`, `isStyleLoaded()` y `areTilesLoaded()` llegaron a devolver true con todas las teselas rechazadas. **Ninguno de esos indicadores, ni seis tarjetas visibles, constituye aceptación del mapa.**
+
+## Reparación
+
+- `MapboxMap.tsx`: posición absoluta y dimensiones completas explícitas en el contenedor mediante estilo inline, resistente al CSS externo del proveedor. `ResizeObserver` sigue ajustando el canvas.
+- Única cartografía: `mapbox://styles/mapbox/standard`; configuración oficial de GL JS 3.30.0: `theme: faded`, luz de día, `showHdRoads: false`, `show3dObjects: true`, etiquetas POI/transporte reducidas. Se conserva DEM con `setTerrain`, los seis glTF locales, selección, ubicación voluntaria, controles, fotografías y carrusel F17.
+- Eliminados preflight y sustitución automática por Streets/OSM. Denegaciones reales muestran categoría HTTP 401/403 sin URL/token; otros errores muestran estado de red y reintento. `load` no borra una denegación previa. Los fallos opcionales de glTF/DEM no sustituyen Standard. Reintentar recrea el renderer y vuelve a aplicar el lugar seleccionado. Mapbox asignaba `role=img` al botón de marcador suministrado por PAZO; se restablece su rol de botón después de crear el marcador para conservar selección y acceso por teclado.
+- `mapboxLoader.ts`: una promesa compartida para JS/CSS, espera de ambos recursos, timeout de 15 s, eliminación de tags fallidos y reintento efectivo. Cuatro pruebas de comportamiento cubren concurrencia, error de script, timeout y error de CSS.
+- Vercel: override **solo Preview y solo la rama `f17/beta-final-mobile-support-admin-20261022`** de `VITE_MAPBOX_ACCESS_TOKEN`, con el token público existente que pasó la prueba real. Proyecto `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`. La variable global Production/Preview anterior y el deployment de producción restaurado se conservan; un futuro GO de producción debe reconciliar la configuración de teselas antes de cualquier release. No registrar valores de tokens en este documento ni en evidencias.
+
+## Verificación y alcance
+
+- Build TypeScript/Vite PASS; advertencia de tamaño de chunks ya existente.
+- Gobernanza PASS (hardening, arquitectura, privacidad, operaciones, MVP, PWA, cierre y ausencia de emojis). Cierre/regresiones de UI y administración: 506/506 PASS en la última ejecución.
+- Contratos F17, fotos, errores de cartografía, carga de SDK y guard de mantenimiento: 22/22 PASS.
+- Regresión de navegador F17: 40 comprobaciones PASS a 390/1440 px (roles, soporte privado, cortesías, mantenimiento/recuperación compilada y controles PWA), con Auth/API sintéticos y sin operaciones alojadas.
+- Regresión sintética F16: 1193/1193 PASS. Guard de release PASS; gate del bundle previo al Preview: 4/4 PASS.
+- Verificación real de Mapbox: estilos, teselas vectoriales, fuentes, recursos 3D y DEM con el token existente. La fixture de navegador usa los componentes reales de Lugares y el catálogo público ya aprobado; las peticiones cartográficas y glTF son reales. No usa cuentas de cliente ni escribe Auth/DB/PayPal. Capturas antes/después y resultados saneados quedan en la evidencia de esta tarea.
+
+Verificación real del componente: **22/22 PASS** con calles visibles, tamaño390×844, los seis glTF PAZO200 con feature nativa correcta por selección (ensayo adicional14/14 PASS), recursos3D/DEM del proveedor200, gestos, selección de tarjetas/marcadores, scroll y denegación403/reintento. Fuente reproducible: `scripts/f17-mapbox-browser.mjs`; fixture de componentes: `supabase/tests/f17/mapbox-browser-harness.html`. Evidencia: `docs/evidence/PAZO_F17_MAPBOX_STANDARD_VALIDATION_20261023.json` y capturas en `docs/evidence/f17-mapbox-standard-20261023/`.
+
+**Commit funcional:** `e6bf328d6bc474d0a621be428a157abbeea64f7d`; **QA/evidencia:** `f839c933bdd0694480b7fb93a9211372fa4ef89d`, con CI remoto **10/10 SUCCESS** (runs39996593794/39996593733/39996593715). **Preview READY:** https://pazo-nu9vxf8rj-digitalapp.vercel.app/ (`dpl_Ayw4ZD7ZTFf2sz4Zt21VoYxirvzD`, SHA exacto, target Preview). El fetch protegido del conector devuelve403 de alcance al leer sus bypasses; la revisión automática rechazó crear acceso temporal1h por alterar la protección. No se aplicó ese acceso ni se quitó SSO. READY y el ensayo real local no equivalen a navegador remoto autenticado; el PO eligió abrirlo con su sesión autorizada para validar visualmente, sin cambiar el acceso. No se inició login de CLI ni se obtuvieron credenciales nuevas. Chromium con viewport móvil no equivale a Android físico ni a PWA instalada; esos dos contextos y la aceptación visual final de Standard corresponden al PO en el candidato corregido. GPS real no se solicita de forma automática. No se repiten operaciones financieras, migraciones, altas de recursos ni pruebas de soporte pospuestas por el PO.
+
+**Límite visual del ensayo de seis categorías:** todos los glTF respondieron200 y sus features nativas se renderizaron al seleccionar cada tarjeta. El parque/sendero se ven claramente; restaurante, veterinaria y grooming quedan parcialmente detrás del carrusel conservado, y Petco DTLA está mayormente ocluido por edificios altos de Standard desde bearing0/pitch62. No se afirma que los seis estén completamente despejados desde todos los ángulos; la inspección PO con gestos y el diseño F17 vigente sigue pendiente. No se rediseñó el carrusel para esta corrección.
+
+## Producción y cierre
+
+Producción permanece en `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`. `main` permanece sin modificar; PR #81 sigue DRAFT y sin merge. No declarar F17 COMPLETADA ni el mapa visualmente aprobado hasta que el PO lo valide.

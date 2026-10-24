@@ -8,7 +8,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import ts from 'typescript'
 
-// Component tests only: synthetic Auth and no browser, database or Storage calls.
+// Component tests only: synthetic Auth, public RPC and storage; no network or real DB calls.
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 let dbResult={data:[],error:null}
 let insertResult={error:null}
@@ -19,6 +19,13 @@ globalThis.__PAZO_CLOSURE_TEST_PET_INPUTS__=petInputs
 globalThis.__PAZO_CLOSURE_TEST_DB__={
   auth:{getUser:async()=>({data:{user:hasUser?{id:'synthetic-uploader'}:null},error:null}),
     onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},
+  // L1 displays the real public wall by default, even without a build flag.
+  // Return an empty, consent-safe synthetic result; never query hosted Supabase.
+  rpc:async(name,args)=>{
+    calls.push(['rpc',name])
+    if(name==='pazo_supporter_public_wall'&&args?.p_limit===48)return {data:[],error:null}
+    return {data:null,error:{message:'unmocked_rpc'}}
+  },
   from(table){
     calls.push(['from',table])
     return {insert:async payload=>{calls.push(['insert',payload]);return insertResult},
@@ -261,12 +268,12 @@ test('F13 Liquid Navigation animates actual tabs without changing the center Cre
   assert.ok(css.includes('exposes 7px of the real app background'),'Notch gap must remain narrow')
   const navSource=fs.readFileSync('src/components/BottomNav.tsx','utf8')
   const appSource=fs.readFileSync('src/App.tsx','utf8')
-  assert.ok(navSource.includes('bg-[#FAF8F5]'),'Cutout must expose the exact PAZO app background')
+  assert.ok(navSource.includes('data-pazo-floating-nav="true"') && navSource.includes('bg-transparent'),'The floating dock must expose content through its carved notch')
   assert.ok(appSource.includes('flex flex-col h-full bg-[#FAF8F5] relative overflow-hidden'),'App canvas contract stays unchanged')
   assert.ok(navSource.includes('h-[76px]'),'Nav track must allow readable labels on mobile')
   assert.ok(navSource.includes('pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))]'),'Bar must clear mobile safe area and have comfortable bottom spacing')
   assert.ok(navSource.includes("pazo-liquid-icon--active text-[#E1E53F]"),'Active icon must contrast with official dark green orb')
-  assert.ok(fs.readFileSync('src/components/BottomNav.tsx','utf8').includes('bg-[#FAF8F5]'),'Notch must reveal the same background as PAZO, not a darker cream')
+  assert.ok(navSource.includes('pointer-events-none absolute inset-x-0 bottom-0') && navSource.includes('pointer-events-auto group'),'Only floating dock controls must capture touches')
   const app=fs.readFileSync('src/App.tsx','utf8')
   assert.ok(app.includes('onOpenCreate={() => setIsCreateMenuOpen(true)}'))
   assert.ok(app.includes('if (tab !== activeTab)'))
@@ -439,7 +446,7 @@ test('F13 Places carousel only centers map; pins retain details with brief entra
   assert.ok(stage.includes('onSelectPlace={onSelectPlace}'),'Pins still use the detail handler')
   assert.ok(mapbox.includes("map.on('click', 'pazo-place-models', handlePlaceClick)"))
   assert.ok(mapbox.includes('focusPlaceRequest.placeId'))
-  assert.ok(mapView.includes('motion-safe:animate-[slideUpFade_320ms_ease-out_both]'))
+  assert.ok(mapView.includes('motion-safe:animate-[slideUpFade_250ms_ease-out_both]'))
   assert.ok(fs.readFileSync('src/index.css','utf8').includes('@keyframes slideUpFade'))
 })
 
@@ -814,10 +821,10 @@ test('F13 profile settings groups privacy, terms, deletion and support by logout
     assert.equal(gearButton().props['aria-expanded'],true)
     const menu=ui.root.findByProps({id:'pazo-profile-settings'})
     const menuButtons=menu.findAllByType('button')
-    assert.equal(menuButtons.length,3)
-    assert.deepEqual(menuButtons.map(buttonText),[privacy,terms,lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'])
+    assert.equal(menuButtons.length,4)
+    assert.deepEqual(menuButtons.map(buttonText),[privacy,terms,lang==='es'?'Ayuda, consultas y sugerencias':'Help, questions and suggestions',lang==='es'?'Solicitar eliminación de cuenta':'Request account deletion'])
     assert.ok(JSON.stringify(ui.toJSON()).includes(section),'Account section must live inside settings')
-    assert.equal(menuButtons[2].props.disabled,true,'Existing production request gate must remain disabled')
+    assert.equal(menuButtons[3].props.disabled,true,'Existing production request gate must remain disabled')
     assert.ok(menu.findAllByType('a').some(a=>a.props.href==='mailto:appdigital.corp@gmail.com'),'Support mailto must live inside settings')
     assert.ok(ui.root.findAllByType('button').some(b=>b.props.title===(lang==='es'?'Cerrar sesión':'Log out')))
     assert.ok(JSON.stringify(ui.toJSON()).includes(section),'Deletion section visible only while settings is expanded')
@@ -997,28 +1004,20 @@ test('A01 PO-approved welcome preserves sign-up, login, demo, locale and public 
   const source=fs.readFileSync('src/components/views/OnboardingView.tsx','utf8')
   const mascot=fs.readFileSync('src/features/onboarding/components/WelcomeAnimatedCompanion.tsx','utf8')
   const css=fs.readFileSync('src/index.css','utf8')
-  assert.ok(source.includes('overflow-y-auto overscroll-contain'),'Short-phone center scroll retained')
-  assert.ok(source.includes('shrink-0 space-y-2.5 pb-2'),'Primary actions stay pinned')
-  assert.ok(!source.includes('photo-1543466835-00a7907e9de1'),'No prior remote stock hero image')
+  assert.ok(source.includes('flex min-h-0 flex-1 flex-col overflow-hidden'),'Hero has no nested scroll')
+  assert.ok(!source.includes('overflow-y-auto overscroll-contain'),'Welcome must not clip card with a scroller')
+  assert.ok(source.includes('shrink-0 space-y-1.5 pb-0'),'Primary actions stay in compact footer')
+  assert.ok(source.includes('<PazoInstallControl lang={lang} placement="welcome" />'),'Installation lives in login, not Home')
+  assert.ok(!source.includes('photo-1543466835-00a7907e9de1'),'No remote stock hero image')
   assert.ok(!mascot.includes('setInterval')&&!mascot.includes('setTimeout'))
-  assert.ok(!mascot.includes('fetch(')&&!mascot.includes('localStorage'),'Decorative layer does not collect anything')
+  assert.ok(!mascot.includes('fetch(')&&!mascot.includes('localStorage'),'Illustration never collects data')
   const approvedArt=fs.readFileSync('public/onboarding/welcome-approved-art.svg','utf8')
-  assert.ok(approvedArt.includes('data:image/webp;base64,UklGR'),'Approved local hero artwork is self-contained')
-  assert.ok(approvedArt.includes('id="scene"'),'Image must be reused for real illustration layers')
-  for(const layer of ['class="body"','class="head"','class="tail"'])assert.ok(approvedArt.includes(layer),layer)
-  for(const motion of ['pazoRefTail','pazoRefHead'])assert.ok(approvedArt.includes('@keyframes '+motion),motion)
-  assert.ok(approvedArt.includes('id="sceneWithoutTail"'),'Tail-free background is a separate reference frame')
-  assert.ok(approvedArt.includes('id="onlyTail"'),'Tail is isolated as its own transparent sprite')
-  assert.ok(approvedArt.includes('<g class="tail"><use href="#onlyTail"/></g>'),'Animated layer contains only tail pixels')
-  assert.ok(approvedArt.includes('<g class="body"><use href="#sceneWithoutTail"'),'Grass comes from static background')
-  assert.ok(approvedArt.includes('.body { transform:none; }'),'Entire background must never breathe or translate')
-  assert.ok(!approvedArt.includes('clip-path="url(#tailClip)"'),'No rotating full-scene circular crops')
-  assert.ok(!approvedArt.includes('id="tailClip"'),'Old rotating grass mask must be removed')
-  assert.ok(!approvedArt.includes('id="tailShape"'),'Old tail-shaped full-scene crop must be removed')
-  assert.ok(approvedArt.includes('transform-origin:121px 177px'),'Wag pivots at body-tail attachment')
-  assert.ok(approvedArt.includes('rotate(-1.5deg)') && approvedArt.includes('rotate(1.5deg)'),'Short symmetric gentle wag only')
-  assert.equal((approvedArt.match(/data:image\/webp;base64,/g)||[]).length,3,'Original, background and tail must be distinct local assets')
-  assert.ok(approvedArt.includes('@media (prefers-reduced-motion:reduce)'))
+  assert.equal(approvedArt.split('data:image/webp;base64,').length-1,1,
+    'Corgi renders as one image, not three independent animated cutouts')
+  assert.ok(!/pazoRefTail|pazoRefHead|id="sceneWithoutTail"|id="onlyTail"/.test(approvedArt),
+    'No separated sprite seams or synthetic wag')
+  assert.ok(approvedArt.includes('viewBox="0 0 295 310"'),'Keep approved upright corgi aspect')
+  assert.ok(!approvedArt.includes('Hecho con amor')&&!approvedArt.includes('Comenzar'),'UI copy remains DOM')
   assert.ok(!approvedArt.includes('Hecho con amor')&&!approvedArt.includes('Comenzar'),'UI words stay editable live text')
   for(const name of ['pazoWelcomeDogEnter','pazoWelcomeHeart','pazoWelcomeLine'])
     assert.ok(css.includes('@keyframes '+name),name)
@@ -1032,8 +1031,8 @@ test('F16 gratitude wall is accessible from welcome A01 without login, not in Ex
   const welcome=fs.readFileSync('src/components/views/OnboardingView.tsx','utf8')
   assert.ok(welcome.includes("step === 'A01' && showGratitudeWall"),'Public wall only exposed on the welcome step')
   assert.ok(welcome.includes('gratitudeWelcomeLinkRef.current?.focus()'),'Close returns focus to the welcome link')
-  assert.ok(welcome.includes('min-h-0 flex-1 flex-col overflow-y-auto'),'Center content scrolls if phone is short')
-  assert.ok(welcome.includes('shrink-0 space-y-2.5 pb-2'),'Main account actions stay visible in anchored footer')
+  assert.ok(welcome.includes('flex min-h-0 flex-1 flex-col overflow-hidden'),'Welcome never scrolls artwork independently')
+  assert.ok(welcome.includes('shrink-0 space-y-1.5 pb-0'),'Main account actions have compact footer')
   for(const [lang,entry,primary,login,back] of [
     ['es','Conoce a los Amigos de PAZO','Comenzar','Ya tengo una cuenta','Volver a bienvenida'],
     ['en','Meet the PAZO Friends','Get started','I already have an account','Back to welcome'],
@@ -1381,4 +1380,119 @@ test('Feed location comes from an explicit author choice, never a hardcoded city
   assert.ok(postService.includes("(p.location || '')"))
   assert.ok(!createPost.includes('navigator.geolocation')&&!createPost.includes('getCurrentPosition'),
     'No implicit device GPS collection')
+})
+
+
+test('F17 mobile regression: dynamic viewport, discreet install, street basemap and centered dialogs', () => {
+  const read = path => fs.readFileSync(path,'utf8')
+  const app = read('src/App.tsx')
+  const welcome = read('src/components/views/OnboardingView.tsx')
+  const install = read('src/features/pwa/components/PazoInstallControl.tsx')
+  const map = read('src/features/places/map/MapboxMap.tsx')
+  const basemap = read('src/features/places/map/pazoBasemap.ts')
+  const stage = read('src/features/places/components/ImmersivePlacesStage.tsx')
+  assert.ok(app.includes('h-[100dvh]'))
+  assert.ok(app.includes('data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0'))
+  assert.ok(!app.includes('placement="banner"'),'Do not obscure the home feed with installation')
+  assert.ok(welcome.includes('placement="welcome"'),'Discoverable on the first screen')
+  assert.ok(install.includes("placement === 'welcome'"))
+  assert.ok(install.includes('if (state.installed || (!state.pending && !isIOS())) return null'),
+    'Standalone installations never receive the install suggestion')
+  assert.ok(map.includes('style: PAZO_STANDARD_STYLE'),'Use official Standard only')
+  assert.ok(map.includes('setMapAttempt(attempt => attempt + 1)'),'Provider failures offer an explicit retry')
+  assert.ok(map.includes("map.on('style.load'"),'Restore overlays after style loads')
+  assert.ok(map.includes("'pazo-place-models'"),'3D models remain')
+  assert.ok(basemap.includes('mapbox://styles/mapbox/standard'))
+  assert.ok(!basemap.includes('openstreetmap'),'No silent raster substitution')
+  assert.ok(map.includes('attributionControl: true'),'Mapbox must render provider attribution')
+  for(const path of ['CareModal','PassportModal','CreateModal']){
+    const ui=read('src/components/modals/'+path+'.tsx')
+    assert.ok(ui.includes('grid-cols-[32px_minmax(0,1fr)_32px]'),path+' title must be geometrically centered')
+  }
+  assert.ok(!read('src/components/views/CommunitiesView.tsx').includes('Únete, comparte y participa con otras mascotas de PAZO.'))
+  assert.ok(!read('src/components/modals/MessagesModal.tsx').includes("PAZO · {lang === 'es'"))
+  assert.ok(!read('src/components/modals/NotificationsModal.tsx').includes("PAZO · {lang === 'es'"))
+})
+
+test('F17 Places polish: transparent filter rail, feathered carousel edges, real photos only, external directions and rounded feed metrics', async () => {
+  const stage = fs.readFileSync('src/features/places/components/ImmersivePlacesStage.tsx','utf8')
+  const svc = fs.readFileSync('src/services/placeService.ts','utf8')
+  const map = fs.readFileSync('src/components/views/MapView.tsx','utf8')
+  const feed = fs.readFileSync('src/components/views/HomeView.tsx','utf8')
+  const photo = fs.readFileSync('src/features/places/components/PlaceCardPhoto.tsx','utf8')
+  assert.ok(stage.includes('data-pazo-category-fade="true"'))
+  assert.ok(stage.includes('WebkitMaskImage:'))
+  assert.ok(stage.includes('bg-transparent p-0 shadow-none'))
+  assert.ok(stage.includes('<PlaceCardPhoto place={place} lang={lang} />'))
+  assert.ok(!svc.includes('photoUrl: row.photo_url || DEFAULT_PLACE_PHOTO'),
+    'A generic stock road must never masquerade as a verified venue photo')
+  assert.ok(photo.includes('Foto no disponible'))
+  assert.ok(photo.includes('setFallbackAttempt(true)') && photo.includes('setFailed(true)'),'Fallback retries the original credited Wikimedia file only')
+  assert.ok(map.includes('data-pazo-directions="true"'))
+  assert.ok(map.includes('buildPlaceDirectionsUrl(selectedPlace'))
+  assert.ok(feed.includes('aria-pressed={post.isLiked}'))
+  assert.ok(feed.includes('Comentarios:'))
+  assert.ok(feed.includes('rounded-full bg-[#EEF4E7]'))
+  assert.ok(feed.includes('onLikePost(post.id)'))
+  assert.ok(feed.includes('onToggleComments(post.id)'))
+  assert.ok(feed.includes('onSavePost(post.id)'))
+  const {buildPlaceDirectionsUrl} = await import('../src/features/places/placeDirections.ts')
+  const place={name:'Runyon Canyon Park',latitude:34.10519,longitude:-118.348955,address:'2000 N Fuller Ave'}
+  assert.match(buildPlaceDirectionsUrl(place, 'Mozilla/5.0 (Linux; Android 14)'), /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1/)
+  assert.ok(buildPlaceDirectionsUrl(place,'iPhone').startsWith('https://maps.apple.com/?daddr='))
+  assert.match(buildPlaceDirectionsUrl({...place,latitude:NaN,longitude:NaN},'Android'), /Runyon%20Canyon%20Park/)
+})
+
+
+test('F17 mobile: centered modal, brand typography, floating map nav and image credit gate',()=>{
+  const map=fs.readFileSync('src/components/views/MapView.tsx','utf8')
+  const mapbox=fs.readFileSync('src/features/places/map/MapboxMap.tsx','utf8')
+  const nav=fs.readFileSync('src/components/BottomNav.tsx','utf8')
+  const css=fs.readFileSync('src/index.css','utf8')
+  const stage=fs.readFileSync('src/features/places/components/ImmersivePlacesStage.tsx','utf8')
+  assert.ok(map.includes('createPortal(') && map.includes('document.body'))
+  assert.ok(map.includes('data-pazo-place-backdrop="true"') && map.includes('aria-modal="true"'))
+  assert.ok(!map.includes('top-[102px] z-40 overflow-y-auto'))
+  assert.ok(nav.includes('data-pazo-floating-nav="true"') && nav.includes('absolute inset-x-0 bottom-0 z-30 bg-transparent'))
+  const appShell=fs.readFileSync('src/App.tsx','utf8')
+  assert.ok(appShell.includes('pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]'),'Main reserves only 6rem plus safe-area because social views already have pb-6')
+  assert.ok(['src/components/views/HomeView.tsx','src/components/views/CommunitiesView.tsx','src/components/views/PetView.tsx'].every(path=>fs.readFileSync(path,'utf8').includes('animate-slide-up pb-6')),'Every social view already supplies its own 1.5rem bottom padding; do not duplicate it')
+  assert.ok(!appShell.includes('pb-[calc(9rem+env(safe-area-inset-bottom))]') && !appShell.includes('pb-[calc(13rem+env(safe-area-inset-bottom))]'),'Overlong bottom spacers must not return')
+  assert.ok(appShell.includes("activeTab === 'inicio' || activeTab === 'comunidades' || activeTab === 'mascota'"),'Fade must only cover Feed, Communities and My Pet')
+  assert.ok(appShell.includes('data-pazo-scroll-soft-edge="true"') && appShell.includes('className="pazo-scroll-soft-edge"'),'The fade is a separate noninteractive sibling above scrolling content')
+  assert.ok(appShell.indexOf('data-pazo-scroll-soft-edge="true"') > appShell.indexOf('</main>') && appShell.indexOf('data-pazo-scroll-soft-edge="true"') < appShell.indexOf('<BottomNav'),'The scroll fade must render below the crisp floating nav')
+  assert.ok(css.includes('.pazo-scroll-soft-edge::before') && css.includes('backdrop-filter: blur(20px)') && css.includes('-webkit-mask-image: linear-gradient(to top'),'Frosted-glass effect must keep 20px real blur and mask aligned to the dock orb')
+  assert.ok(!css.includes('.pazo-scroll-soft-edge::after') && !css.includes('background: linear-gradient(to bottom,\n    rgba(250, 248, 245'),'No cream fog layer may cover the actual photograph')
+  assert.ok(css.includes('pointer-events: none;') && css.includes('bottom: 0;') && css.includes('height: calc(5.75rem + clamp(84px, 13dvh, 116px) + 20px + env(safe-area-inset-bottom, 0px));'),'Continuous fade must extend under the entire dock area without intercepting touches')
+  assert.ok(!css.includes('bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));'),'Never stop blur above the dock or show the previously visible sharp horizontal seam')
+  assert.ok(css.includes('rgba(0, 0, 0, 0.48) calc(6.4rem + env(safe-area-inset-bottom, 0px))') && css.includes('transparent calc(8.25rem + env(safe-area-inset-bottom, 0px))'),'Blur reaches the top of moving orb and fades before distant social controls')
+  assert.ok(css.includes('rgba(0, 0, 0, 0.14) calc(7.35rem + env(safe-area-inset-bottom, 0px))') && css.includes('#000 calc(4.5rem + env(safe-area-inset-bottom, 0px))'),'Mask progresses gradually without a sharp band')
+  assert.ok(!css.includes('transparent 45%'),'Orb-aligned blur must not regress to a viewport-dependent percentage mask')
+  assert.ok(!css.includes('rgba(0, 0, 0, 0.28) 35%'),'Do not blur mid-distance feed controls')
+  assert.ok(!css.includes('isolation: isolate;'),'Blur must sample scrolled content rather than an isolated transparent stack')
+  assert.ok(css.includes('background: transparent;'),'Blur glass layer must have no tinted overlay')
+  assert.ok(stage.includes('data-pazo-places-bottom-rail="true"') && stage.includes('bottom-[calc(6.75rem+env(safe-area-inset-bottom))]'),'Places cards remain above the floating dock')
+  assert.ok(stage.includes('data-pazo-places-card-scroll="true"') && stage.includes('overflow-visible bg-transparent'),'Places rail has no vertical scroll area')
+  assert.ok(!stage.includes('data-pazo-places-dock-clearance="true"'),'Places cards do not contain artificial bottom clearance')
+  assert.ok(stage.includes('data-pazo-places-fixed-heading="true"') && stage.includes('data-pazo-places-card-scroll="true"'),'Places heading stays visible while cards scroll independently')
+  // PO before/after Android comparison: only details should have been upscaled.
+  // Canvas filters, heading, result count and card metadata retain F13 scale.
+  assert.ok(stage.includes('px-3.5 py-2 text-[11px] font-extrabold'),'Places filter chips retain original compact size')
+  assert.ok(stage.includes('<h2 className="text-[15px] font-black leading-tight'),'Places heading returns to its original 15px')
+  assert.ok(stage.includes('aria-live="polite" className="text-[11px] font-semibold'),'Results counter returns to 11px')
+  assert.ok(stage.includes('line-clamp-2 text-[14px] font-black'),'Place titles stay at 14px')
+  assert.ok(stage.includes('mt-1 truncate text-[10px] font-extrabold'),'Card category/zone returns to 10px')
+  assert.ok(stage.includes('pt-1.5 text-[10px] font-bold'),'Card presence returns to 10px')
+  assert.ok(!stage.includes('rounded-full bg-[#FFFCF6]/90 px-3 py-1 shadow-'),'No new large white capsule behind the heading')
+  assert.ok(map.includes('data-pazo-place-detail-scroll="true"') && map.includes('text-[22px]'),'Details keep their separately approved accessible scale')
+  assert.ok(map.includes('data-pazo-place-fixed-header="true"') && map.includes('data-pazo-place-detail-scroll="true"'),'Place details title/close remain visible while voting and check-in scroll')
+  assert.ok(mapbox.includes('const [mapNotice, setMapNotice]') && mapbox.includes('Mapbox no autorizó la cartografía'),'Provider denial still disclosed without raw token')
+  assert.ok(!stage.includes('h-[min(48dvh,300px)]'),'Do not crop cards by subtracting padding from a fixed-height rail')
+  assert.ok(!stage.includes('&copy; OpenStreetMap contributors'),'Do not place a huge duplicate attribution over the map')
+  assert.ok(mapbox.includes('syncPlaceMarkers(map, mapboxgl, placesRef.current)'),'Always render real PAZO place annotations independent of tile success')
+  assert.ok(!mapbox.includes('map.setStyle('),'Never replace the approved Standard style on resource errors')
+  assert.ok(mapbox.includes('pazo-terrain-dem') && mapbox.includes('map.setTerrain('),'Authorized map style exposes actual elevation terrain')
+  assert.ok(map.includes('data-pazo-place-details="true"') && map.includes('text-[22px]'),'Only the place detail dialog gets larger type')
+  assert.ok(css.includes('.pazo-place-card:has(img[data-pazo-place-photo="true"])'))
+  assert.ok(stage.includes('pazo-photo-credit'))
 })

@@ -1,0 +1,101 @@
+name: F17 beta isolated backend security
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/*pazo_f17*'
+      - 'supabase/tests/f17/**'
+      - 'scripts/f17-*'
+      - 'src/features/maintenance/**'
+      - 'src/features/auth/useAccountRequestScope.ts'
+      - 'src/features/places/map/**'
+      - 'src/features/pwa/**'
+      - 'src/features/legal/legalCopy.ts'
+      - 'src/features/supporter/components/SupporterBenefitsHome.tsx'
+      - 'src/main.tsx'
+      - 'maintenance-admin.html'
+      - 'vite.config.ts'
+      - 'package*.json'
+      - 'supabase/functions/_shared/maintenanceCheckoutGate*'
+      - 'supabase/functions/f16-paypal-supporter-v2-qa/index.ts'
+      - 'src/features/support/**'
+      - '.github/workflows/f17-beta-security.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  f17-pg17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-data
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: synthetic-only-no-hosted-data
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Install disposable SQL client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client >/dev/null
+      - name: Stage exact existing definitions and run finance baseline
+        run: |
+          node scripts/f16-live-worker-scheduler-core-stage.mjs
+          node scripts/f16-live-benefits-prerequisites-stage.mjs
+          node scripts/f17-baseline-stage.mjs
+          node scripts/f17-schema-batch.mjs --sql > supabase/tests/supporter/fixtures/f17-rollback.generated.sql
+          node scripts/f17-schema-batch.mjs --sql --commit > supabase/tests/supporter/fixtures/f17-commit.generated.sql
+          psql -X -v ON_ERROR_STOP=1 -f scripts/f16-live-gateway-disposable-lab.sql
+      - name: Exercise reviewed F17 SQL with real roles and privacy/retention/CAS assertions
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/tests/f17/extensions-pg17.sql
+      - name: Concurrent intake, replay and maintenance switches
+        run: node scripts/f17-concurrency.mjs
+  f17-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Install pinned ephemeral browser automation
+        run: |
+          npm install --prefix /tmp/f17-playwright --no-package-lock --ignore-scripts playwright@1.56.1
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            "$browser_path" --version
+            printf 'PAZO_CHROMIUM_PATH=%s\n' "$browser_path" >> "$GITHUB_ENV"
+          else
+            node /tmp/f17-playwright/node_modules/playwright/cli.js install --with-deps chromium
+          fi
+      - name: Exercise local UI with intercepted synthetic Auth and no hosted writes
+        env:
+          VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_ONLY_BROWSER_FIXTURE
+          VITE_PAZO_F16_SANDBOX_QA_UI: 'false'
+          PAZO_F17_RECOVERY_ORIGIN: http://127.0.0.1:5174
+          PAZO_PLAYWRIGHT_MODULE: /tmp/f17-playwright/node_modules/playwright
+        run: |
+          npm run build
+          npm run dev -- --host 127.0.0.1 --port 5173 --strictPort >/tmp/f17-vite.log 2>&1 &
+          f17_vite_pid=$!
+          npm run preview -- --host 127.0.0.1 --port 5174 --strictPort >/tmp/f17-preview.log 2>&1 &
+          f17_preview_pid=$!
+          trap 'kill "$f17_vite_pid" "$f17_preview_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5173/ >/dev/null
+          curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5174/maintenance-admin.html >/dev/null
+          node scripts/f17-browser.mjs

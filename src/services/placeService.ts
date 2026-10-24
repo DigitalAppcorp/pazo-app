@@ -22,7 +22,8 @@ const mapPlace = (row: any): PetPlace => ({
   speciesAllowed: row.species_allowed || undefined,
   petRules: row.pet_rules || undefined,
   description: row.description || undefined,
-  photoUrl: row.photo_url || DEFAULT_PLACE_PHOTO,
+  // Never label a generic landscape stock photo as the actual venue.
+  photoUrl: typeof row.photo_url === 'string' && row.photo_url.trim() ? row.photo_url.trim() : undefined,
   status: row.status,
   source: row.source,
   createdAt: row.created_at || undefined,

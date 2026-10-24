@@ -460,3 +460,66 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* F17: mobile Chrome/Safari visual viewport changes while address bar expands.
+ * Use dvh for the fitted SPA shell, including the installed standalone PWA.
+   Unlike 100vh, dvh excludes currently visible browser chrome. */
+@media (max-width: 639px) {
+  [data-pazo-app-shell] {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Show credits only while an image exists; the map bar floats over cards. */
+.pazo-place-card:has(img[data-pazo-place-photo="true"]) .pazo-photo-credit {
+  display: inline-flex;
+}
+
+/* F17 — gradient frosted-glass blur (Feed, Communities, My Pet only).
+ * Real backdrop blur, never a white/cream overlay or glow. The mask fades
+ * the intensity of the BLUR itself over scrolling content. This layer extends
+ * under the floating dock, but is below the unchanged sharp dock (z-30).
+ * Map/Places do not mount this overlay. */
+.pazo-scroll-soft-edge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: calc(5.75rem + clamp(84px, 13dvh, 116px) + 20px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Leave the underlying image/text visible in its original colors and
+ * progressively defocus it like frosted glass. No pseudo-element color wash.
+ * Avoid isolation:isolate: the filter must sample the actual scroll canvas. */
+.pazo-scroll-soft-edge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: transparent;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  /* The moving PAZO orb begins around 6.4rem above the bottom
+   * (plus device safe area). Defocus is already apparent at that height,
+   * and fades gently toward fully sharp content a little above it.
+   * Pixel-anchored stops track the orb on short and tall screens. */
+  -webkit-mask-image: linear-gradient(to top,
+    #000 0%,
+    #000 calc(4.5rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.80) calc(5.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.48) calc(6.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.14) calc(7.35rem + env(safe-area-inset-bottom, 0px)),
+    transparent calc(8.25rem + env(safe-area-inset-bottom, 0px)));
+  mask-image: linear-gradient(to top,
+    #000 0%,
+    #000 calc(4.5rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.80) calc(5.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.48) calc(6.4rem + env(safe-area-inset-bottom, 0px)),
+    rgba(0, 0, 0, 0.14) calc(7.35rem + env(safe-area-inset-bottom, 0px)),
+    transparent calc(8.25rem + env(safe-area-inset-bottom, 0px)));
+}

@@ -76,9 +76,10 @@ export const CreateModal = ({
         {mode === 'menu' ? (
           <>
             {/* Header del menú de acciones */}
-            <div className="flex justify-between items-center pb-2">
-              <div>
-                <h3 className="text-xl font-black text-[#204E4A] mt-1">
+            <div className="grid grid-cols-[32px_minmax(0,1fr)_32px] items-center gap-2 pb-2">
+              <span aria-hidden="true" className="h-8 w-8" />
+              <div className="min-w-0 text-center">
+                <h3 className="mt-1 text-center text-xl font-black leading-snug text-[#204E4A]">
                   {lang === 'es' ? 'Crear y Compartir' : 'Create & Share'}
                 </h3>
               </div>

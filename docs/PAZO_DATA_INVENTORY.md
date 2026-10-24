@@ -1,3 +1,67 @@
+## Issue85 — relectura QA y certificado técnico (24-oct-2026, instalado; gate cerrado)
+
+Una revisión autorizada puede conservar UUID de petición, generación/evento originales, diagnóstico/estado/attempts anteriores, status/timestamp reales del proveedor y digest de evidencia mínima. Sigue la retención/hold de su inbox financiero (FK que acompaña la purga lícita del padre), sin payload ni pagador. Ningún recheck borra firma o marca processed: solo retorna a pending con historial y tope original de intentos, tras GET auténtico y cero transacciones. El certificado técnico privado conserva commits/bundles/digest/origen/revisiones/fecha conforme al control financiero existente; solo postgres puede certificar, y no concede MFA ni inicia campaña. No nuevas categorías de terceros, secretos, publicidad o analytics.
+
+## Issue85 — cohorte de QA prebeta excluida (24-oct-2026, aplicada: QA8/reales0)
+
+Clasificación privada durable por UUID Auth, motivo fijo prebeta_20261023 y fecha de clasificación; incluye todas las cuentas anteriores al primer deploy oficial 2026-10-23 22:59 UTC. La elegibilidad exige además created_at posterior/al cutoff inmutable y ausencia de allowlist Sandbox. Sirve para excluir tests de invitaciones, CREATE, métricas, ingresos y promociones sin borrar ledger/recibos ni la cuenta admin/MFA. Tabla FORCE RLS sin grants a clientes/servicio; campos solo agregados en Administración. La etiqueta QA usa FK Auth ON DELETE CASCADE; la admisión financiera guarda además el booleano inmutable real_account_at_admission con la retención de su historial original, para que borrar Auth no libere cupos reales ni convierta QA en real; no añade PII ni analytics. No se borran obligaciones reales por clasificarlas QA. La auditoría original sigue disponible al operador hasta conciliar el contrato.
+
+## Issue85 — auditoría privada del contrato QA original (23-oct-2026)
+
+El diagnóstico admite únicamente nombre de error PayPal enumerado y debug_id hexadecimal acotado, sin texto arbitrario. Esa correlación se conserva solo en soporte privado; la evidencia Git elimina debug_id. Una referencia operacional privada puede incluir los IDs originales mínimos para que el titular consulte su propia cuenta PayPal; sin credenciales ni pagador, sin analytics ni publicación. Con 404 se conserva STOP, sin usar ausencia de recurso como cancelación o ausencia de pagos.
+
+GO PO para conciliar antes de L1. Worker interno puede leer únicamente el contrato bound del canary prebeta original mediante generación/plan inmutables, GET de suscripción/plan/transacciones completas/evento firmado. Respuesta mínima: estado, fechas proveedor, contadores y coincidencias; sin pagador, IDs, URLs ni credenciales. No CREATE/CANCEL/grants en esta auditoría. Capacidad de dispatch aleatoria de un uso (120s), no clave permanente en pg_net. RPC de scope solo service_role; dispatcher solo postgres; sin acceso directo cliente. No retención nueva de payload ni analytics. Evidencia financiera original se conserva sin mutarla; el resultado agregado sirve para decidir conciliación/STOP, no equivale a permiso financiero.
+
+## F17 — fotografías curadas sin Google Places (22-oct-2026)
+
+Las tarjetas T05 solicitan seis archivos distintos de Wikimedia Commons: uno
+fotografiado en Runyon Canyon Park y cinco **fotografías ilustrativas por
+categoría**, etiquetadas como tales. Cada foto muestra autor y licencia
+enlaces externos desde la propia tarjeta. La foto auténtica del negocio
+registrada en `pet_places.photo_url` siempre prevalece.
+
+El navegador contacta a Wikimedia al cargar estas fotos diferidas
+(`loading=lazy`; `referrerPolicy=no-referrer`); Wikimedia puede recibir IP
+y metadatos técnicos. PAZO no transmite GPS, identidad ni analytics nuevo a
+Wikimedia. No se guardan ni importan copias del archivo en Storage. Las
+fotos no disponibles fallan a un degradado neutro. Sin Google Places,
+secretos, servicio pagado, migración o cambios de PayPal.
+Fuentes y atribuciones: `docs/PAZO_F17_PLACES_PHOTO_SOURCES_20261022.md`.
+
+---
+
+## F17 — inventario vigente al 22-oct-2026 (backend instalado, iteración visual pendiente de publicación)
+
+Las migraciones F17 de soporte, cortesías y mantenimiento **ya están aplicadas**
+en Supabase (versiones 20261022103706–08), con RLS y limpieza diaria de casos
+resueltos después de 90 días. La matriz siguiente es vigente; las solicitudes
+concretas solo se crean cuando un usuario las envía.
+
+**Proveedor temporal del mapa en la rama F17 visual:** Mapbox GL JS sigue
+renderizando, mientras `tile.openstreetmap.org` (OpenStreetMap Foundation)
+sirve directamente las teselas raster solicitadas del área mostrada.
+El navegador transmite al proveedor las coordenadas de las teselas y metadatos
+técnicos de conexión (incluida IP/Referer); no se envía analítica nueva ni se
+almacena automáticamente el GPS exacto en PAZO. Esta integración es solo una
+contingencia de beta pequeña, sin SLA y sin habilitar descargas offline o precarga;
+requiere contrato/proveedor escalable y validación visual antes de difusión amplia.
+Las ilustraciones A01 se sirven localmente desde PAZO; algunas imágenes de
+demostración de otras superficies pueden provenir de Unsplash. Ver
+`docs/PAZO_F17_VISUAL_MAP_FIX_20261022.md`.
+
+| Dato | Finalidad/acceso | Conservación y baja |
+| --- | --- | --- |
+| Ticket: UUID de operación, dueño, categoría, texto, estado, fechas, respuesta y nota interna | Atender soporte; RPC confirmada3/h; lectura propia excluye nota/IDs ajenos; filas completas solo admin | Limpieza diaria al cumplir90 días resuelto, sin prorrogar por editar; pendientes/reabiertos para atención; FK con baja Auth |
+| Cortesía: destinatario, nivel, expiración/revocación, actor/motivo e historial/nonce | Concesión sin venta; búsqueda e historial solo admin, proyección pública limitada a badge/tema/nivel visible | Mientras corresponda a la cuenta; acceso termina por expiración/revocación; historial y preferencias ligados a baja de destinatario; no ciclos/pagos ficticios |
+| Mantenimiento: estado/mensajes vigentes; auditoría de actor/acción/revisión/nonce y digest | Disponibilidad y trazabilidad privilegiada; status mínimo público y escrituras admin; auditoría privada | Configuración hasta reemplazo; metadata de auditoría conforme revisión operativa de bajas/seguridad; no duplica mensajes ni datos financieros |
+| Descarte de instalación PWA | Solo vencimiento local en dispositivo, sin identidad, envío ni analítica |7 días; no dato servidor |
+| Formularios/respuestas privadas en navegador | UI de cuenta vigente; cancelación y descarte al cambiar cuenta/desmontar | Memoria del componente, sin borradores persistidos por la aplicación; recuperación usa sesión Auth efímera |
+
+No emails automáticos, adjuntos, destinatarios terceros, analytics, replay,
+GPS o payload PayPal nuevos. Copias de respaldo siguen el runbook existente;
+ninguna promesa de borrado inmediato de proveedores/backups. Los apartados
+inferiores de F17 como propuesta sin plazo quedan actualizados por esta matriz.
+
 > **SMTP ACTIVO, 22-oct-2026:** Google/Gmail recibe direcciones y contenido de correos de autenticación/recuperación enviados por Supabase y gestiona soporte. Credencial de aplicación solo configuración privada Auth (sin frontend/Git/logs), transporte STARTTLS587. Una recuperación al propio PO recibida y confirmada; sin alta, cambio de contraseña ni envíos a terceros. Sin datos de mascotas/pagos/analytics en SMTP. Límite técnico10/h más límites de Google; no promesa de conservación o entrega ilimitada. Este postflight supera el checkpoint inferior de integración pendiente.
 
 > **22-oct-2026, integración de correo pendiente:** PO eligió Gmail para entrega de Auth; aún no existe SMTP propio configurado ni envíos nuevos. Configuración prevista Supabase→Google SMTP usa destinatario y contenido del correo de cuenta para autenticación/recuperación; nunca datos de mascotas/pago/analytics. Contraseña de aplicación solo configuración privada del servidor, fuera de frontend/Git/logs. Confirmar instalación/entrega antes de declararlo activo. Cambios legales de este incremento solo describen categorías PayPal ya inventariadas; sin datos nuevos.
@@ -527,3 +591,40 @@ Se crearon en GitHub, exclusivamente como **migraciones NO aplicadas**, la inbox
   ninguna tabla adicional de métricas, importación de saldos o datos de pagador.
 - Todo lo anterior está probado con fixtures; migraciones y Edge sin aplicar/
   desplegar en esta ejecución. Los plazos financieros pendientes no se alteran.
+
+
+## F17 — Soporte, cortesías y mantenimiento (borradores NO alojados, 22-oct-2026)
+
+**Verificación Supabase solo lectura:** las tablas `public.pazo_support_tickets`, `supporter_private.pazo_admin_gift_access` y `admin_private.pazo_app_maintenance` **no existen en el servidor**. Los SQL permanecen en `supabase/drafts/` y no capturan datos todavía.
+
+- **Solicitudes de soporte:** UUID del propietario, categoría (problema/consulta/idea/otro), mensaje libre (10–2000 caracteres), estado, nota interna del administrador (hasta 1000 caracteres), fechas. Solo administradores pueden leer los mensajes y notas; el autor autenticado puede insertar su propio caso con límite de tres por hora (bloqueo transaccional frente a inserciones concurrentes). El usuario no obtiene acceso de lectura a notas internas. No incluir contraseñas, tarjetas ni datos de terceros. Sin copia del texto a analytics, email, logs ni GitHub.
+- **Cortesías manuales:** UUID de propietario, UUID de administrador, nivel de insignia, comienzo, vencimiento opcional, revocación y razón administrativa; auditoría separada de acción/actor/fecha. La búsqueda administrativa presenta email y nombres de mascotas únicamente a cuentas autorizadas. Ninguna cortesía crea comprobantes PayPal, importes recaudados ni períodos pagados. No usar en métricas financieras.
+- **Mantenimiento:** indicador público de disponibilidad y mensajes ES/EN; cambio/actor/fecha guardados en tabla privada y auditoría; la API solo expone estado genérico al público, sin identidades administrativas. El modo de mantenimiento requiere control servidor adicional para REST, Storage, Realtime y Edge antes de prometer bloqueo total.
+- **Instalación PWA:** la sugerencia se oculta al detectarse modo standalone; su descarte almacena **solo una fecha local** en el navegador durante siete días, sin UUID, email, ubicación, analítica o envío al servidor.
+
+**Puerta de privacidad antes del GO SQL o beta externa:** fijar plazo de retención y eliminación de mensajes/notas de soporte y auditoría de concesiones; actualizar las políticas públicas ES/EN según la implementación real; verificar atención y borrado manual o automatizado bajo el proceso de cuenta. Hasta entonces, las tablas y sus datos son propuestos, no recolectados.
+
+### F17 — Respuestas privadas a solicitudes (borrador, NO desplegado)
+
+La bandeja administrativa propone un campo **respuesta al usuario** (`admin_reply`, máximo 2000 caracteres) separado de `admin_note` (nota estrictamente interna). La RPC autenticada `pazo_my_support_tickets` expone solo las 20 solicitudes más recientes **del propio usuario autenticado** y sus respuestas; no expone notas internas ni contenido de otro usuario. El usuario ve estado, mensaje enviado y respuesta desde Ayuda y soporte. Sin envío de correos ni analítica de contenido, y su plazo de retención sigue PENDIENTE de decisión previa al despliegue.
+
+## F16 — campaña gradual issue #82 (23-oct-2026, código preparado, NO instalado)
+
+Migración `20261023211315_pazo_f16_gradual_live_event_rollout.sql`. Esta sección
+registra el tratamiento preparado en la rama; **no afirma recolección alojada**.
+
+| Dato nuevo | Finalidad / acceso | Conservación y baja implementadas |
+| --- | --- | --- |
+| Interés por Auth UUID, campaña, secuencia FIFO, fechas, estado, revisión, token/lease de cupo y referencia del intento original | Cola y autorización atómica; tablas privadas FORCE RLS/ACL; RPC de estado propio sin IDs financieros/ajenos | FK Auth CASCADE. Interés sin intento en espera/retirado/declinado: 90 días después de STOP; reanudar suspende esa limpieza. Referencias con intento siguen el historial financiero restringido |
+| Invitación, vencimiento 72h y declinación | Cinco invitaciones iniciales; reemplazar solo expiraciones sin volver a contactar al mismo dueño | FK Auth CASCADE; limpieza 90 días tras cierre. Opt-out persistente durante campaña |
+| Outbox: dueño/campaña/tipo, estado/versión, identidad del aviso, claim/lease, intentos/fecha | Dos hilos lógicos, entrega inbox y ACK atómicos; sin push/email/SMS | FK Auth CASCADE; outbox y avisos inbox vinculados: 90 días tras cierre. Eventos procesados: 90 días; eventos pendientes se conservan para recuperación |
+| Feedback `ok/issue/skipped`, componente enumerado y fecha | Comprobación opcional separada de derechos/ledger; `issue` crea un único ticket privado F17, sin texto libre nuevo ni datos del pagador | FK Auth CASCADE; campos de feedback se limpian 90 días tras cierre incluso si se conserva referencia financiera; ticket sigue retención F17 |
+| Admisión histórica por dueño/campaña y fecha | Conservar cuota acumulada después de cancelación/baja, sin reventa de la plaza | Sin FK CASCADE deliberadamente; mismo historial financiero/obligaciones/holds que ledger original; no nueva promesa de plazo financiero automático |
+| Revisión/nonce/actor/acción/fecha, incidencias enumeradas, salud webhook | Trazabilidad y control admin con MFA reciente; RPC admin agregada omite dueños de compradores y secretos | Historial operativo privilegiado vinculado a control financiero; revisión bajo política financiera existente. Sin payload PayPal, nombre, email, IP, GPS ni tokens Auth |
+
+El worker privado existente realiza recuperación y limpieza; no se crea cron ni
+proveedor nuevo. La instalación queda inerte (`inactive`, gate hospedado falso).
+Los textos de privacidad/términos ES/EN explican interés sin cobro, revisión
+voluntaria y retención. No cambia consentimiento financiero inmutable, inventario
+PayPal existente ni proveedores. Evidencia y gates:
+`docs/PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md`.

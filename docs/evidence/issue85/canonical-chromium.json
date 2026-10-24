@@ -1,0 +1,214 @@
+{
+  "source": "pazo_beta_canonical_chromium_e2e_v1",
+  "origin": "https://pazo-app.vercel.app",
+  "ready": true,
+  "checks": [
+    {
+      "id": "mobile_es_react_welcome",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_no_horizontal_overflow",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_age_consent_unchecked",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_signup_email_available",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_signup_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_legal_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_login_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_login_password_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_password_recovery_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_no_js_crashes",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_es_no_paypal_write",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_react_welcome",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_no_horizontal_overflow",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_age_consent_unchecked",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_signup_email_available",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_signup_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_legal_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_login_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_login_password_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_password_recovery_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_no_js_crashes",
+      "code": "pass"
+    },
+    {
+      "id": "mobile_en_no_paypal_write",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_react_welcome",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_no_horizontal_overflow",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_age_consent_unchecked",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_signup_email_available",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_signup_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_legal_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_login_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_login_password_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_password_recovery_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_no_js_crashes",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_es_no_paypal_write",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_react_welcome",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_no_horizontal_overflow",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_age_consent_unchecked",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_signup_email_available",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_signup_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_legal_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_login_email_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_login_password_accessible_name",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_password_recovery_discoverable",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_no_js_crashes",
+      "code": "pass"
+    },
+    {
+      "id": "desktop_en_no_paypal_write",
+      "code": "pass"
+    },
+    {
+      "id": "callback_return_sanitizes_url",
+      "code": "pass"
+    },
+    {
+      "id": "callback_return_spa_hydrates",
+      "code": "pass"
+    },
+    {
+      "id": "callback_return_no_js_crashes",
+      "code": "pass"
+    },
+    {
+      "id": "callback_cancel_sanitizes_url",
+      "code": "pass"
+    },
+    {
+      "id": "callback_cancel_spa_hydrates",
+      "code": "pass"
+    },
+    {
+      "id": "callback_cancel_no_js_crashes",
+      "code": "pass"
+    },
+    {
+      "id": "real_chromium_network_only_sw_registered",
+      "code": "pass"
+    }
+  ],
+  "failed": [],
+  "ciRun": 40046309216,
+  "ciJob": 120728721671
+}

@@ -59,7 +59,11 @@ export function createPazoLiveOwnerRecovery({getOriginalProvider,claimRecovery,
     remote.custom_id!==original.intentId||!STATES.has(remote.status))return review()
    if(lease&&await finishRecovery({...args,leaseToken:lease.leaseToken,
     subscriptionId,planId:original.planId,requestKey:original.requestKey})!==true)return review()
-   if(action==='reconcile'){
+   // "Continue" also finishes a previously cancelled or expired original
+   // request. This matches Sandbox recover_retry: no extra hidden management
+   // step, and no new CREATE until the private financial/event gate passes.
+   if(action==='reconcile'||(action==='resume'&&
+      ['CANCELLED','EXPIRED'].includes(remote.status))){
     if(!['CANCELLED','EXPIRED'].includes(remote.status)||typeof retireTerminal!=='function')
      return review('live_subscription_not_terminal')
     return await retireTerminal({...args,subscriptionId,providerStatus:remote.status})===true

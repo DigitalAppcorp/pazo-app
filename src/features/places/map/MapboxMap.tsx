@@ -1,3 +1,5 @@
+import {classifyBasemapFailure} from './mapFailure'
+import { PAZO_STANDARD_STYLE, PAZO_STANDARD_CONFIG } from './pazoBasemap'
 import { useEffect, useRef, useState } from 'react'
 import type { EphemeralLocation, PetPlace } from '../../../types/pazo'
 import { loadMapboxGl } from './mapboxLoader'
@@ -129,11 +131,17 @@ export const MapboxMap = ({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<any>(null)
   const userMarkerRef = useRef<any>(null)
+  // DOM map markers are the permanent overview/accessibility fallback: never
+  // disappear merely because the vector style or a local glTF fails to load.
+  const placeMarkersRef = useRef<Array<{ marker: any; element: HTMLElement }>>([])
   const placesRef = useRef(places)
   const userLocationRef = useRef(userLocation)
   const langRef = useRef(lang)
   const onSelectPlaceRef = useRef(onSelectPlace)
   const [error, setError] = useState('')
+  const [mapNotice, setMapNotice] = useState('')
+  const [mapAttempt, setMapAttempt] = useState(0)
+  const [mapReady, setMapReady] = useState(false)
 
   useEffect(() => {
     placesRef.current = places
@@ -150,6 +158,35 @@ export const MapboxMap = ({
   useEffect(() => {
     onSelectPlaceRef.current = onSelectPlace
   }, [onSelectPlace])
+
+  const syncPlaceMarkers = (map: any, mapboxgl: any, source: PetPlace[]) => {
+    for (const entry of placeMarkersRef.current) entry.marker.remove()
+    placeMarkersRef.current = []
+    for (const place of source) {
+      if (!Number.isFinite(place.latitude) || !Number.isFinite(place.longitude)) continue
+      const element = document.createElement('button')
+      element.type = 'button'
+      element.setAttribute('aria-label', (langRef.current === 'es' ? 'Abrir lugar: ' : 'Open place: ') + place.name)
+      element.title = place.name
+      element.style.cssText = 'width:38px;height:46px;border:0;outline:0;background:transparent;padding:0;cursor:pointer;filter:drop-shadow(0 3px 4px rgba(24,61,54,.25));'
+      const icon = document.createElement('canvas')
+      icon.width = 72
+      icon.height = 88
+      icon.style.cssText = 'width:38px;height:46px;display:block;'
+      const ctx = icon.getContext('2d')
+      if (ctx) ctx.putImageData(drawPazoCategoryPin(place.category), 0, 0)
+      element.appendChild(icon)
+      element.addEventListener('click', (event) => {
+        event.stopPropagation()
+        onSelectPlaceRef.current(place.id)
+      })
+      const marker = new mapboxgl.Marker({ element, anchor: 'bottom' })
+        .setLngLat([place.longitude, place.latitude]).addTo(map)
+      // GL assigns role=img to custom markers; preserve this native button.
+      element.setAttribute('role', 'button')
+      placeMarkersRef.current.push({marker, element})
+    }
+  }
 
   const syncUserMarker = (
     map: any,
@@ -195,7 +232,12 @@ export const MapboxMap = ({
   useEffect(() => {
     let cancelled = false
 
+    let loadingTimeout: number | undefined
+    let basemapFailed = false
     const start = async () => {
+      setError('')
+      setMapNotice('')
+      setMapReady(false)
       const token = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
       if (!token) {
         setError(
@@ -210,34 +252,91 @@ export const MapboxMap = ({
         const mapboxgl = await loadMapboxGl()
         if (cancelled || !containerRef.current) return
 
+        if (!mapboxgl.supported()) {
+          setError(lang === 'es'
+            ? 'Este navegador no tiene WebGL disponible. Actívalo para ver Mapbox Standard.'
+            : 'WebGL is unavailable in this browser. Enable it to view Mapbox Standard.')
+          return
+        }
         mapboxgl.accessToken = token
 
         const map = new mapboxgl.Map({
           container: containerRef.current,
-          style: 'mapbox://styles/mapbox/standard',
-          config: {
-            basemap: {
-              show3dObjects: false,
-            },
-          },
+          style: PAZO_STANDARD_STYLE,
+          config: { basemap: PAZO_STANDARD_CONFIG },
           center: DEFAULT_CENTER,
           zoom: 10.5,
-          pitch: 32,
+          pitch: 45,
           bearing: 0,
           antialias: true,
           attributionControl: true,
         })
 
         mapRef.current = map
-
-        map.addControl(
-          new mapboxgl.NavigationControl({ showCompass: false }),
-          'top-right'
-        )
-
+        loadingTimeout = window.setTimeout(() => {
+          if (!cancelled && !map.loaded() && !basemapFailed) setMapNotice(langRef.current === 'es'
+            ? 'Mapbox Standard está tardando en cargar. Comprueba tu conexión y reintenta.'
+            : 'Mapbox Standard is taking longer to load. Check your connection and retry.')
+        }, 20000)
         map.on('load', () => {
           if (cancelled) return
+          globalThis.clearTimeout(loadingTimeout)
+          // GL can emit load even when every tile returned 403. Keep the error.
+          if (!basemapFailed) setMapReady(true)
+        })
+        const canvas = map.getCanvas()
+        canvas.addEventListener('webglcontextlost', () => {
+          if (!cancelled) setMapNotice(langRef.current === 'es'
+            ? 'Se interrumpió el renderizado del mapa. Reintenta para recuperarlo.'
+            : 'Map rendering was interrupted. Retry to restore it.')
+        })
+        // Render PAZO location markers as real map annotations independently of
+        // any basemap tiles, 3D layer capability or model request.
+        syncPlaceMarkers(map, mapboxgl, placesRef.current)
 
+        // Immersive mobile Places already has its own location control,
+        // and users can pinch to zoom. Avoid a second white Mapbox toolbar
+        // sitting behind the PAZO yellow button.
+        if (!immersive) {
+          map.addControl(
+            new mapboxgl.NavigationControl({ showCompass: false }),
+            'top-right'
+          )
+        }
+
+        const syncMarkerEmphasis = () => {
+          // Tiny map pins identify locations at overview zoom. Up close, the
+          // original glTF model is visually prominent, while the accessible
+          // DOM annotation remains a tappable last-resort fallback.
+          const modelVisible = Boolean(map.getLayer?.('pazo-place-models'))
+            && (map.getZoom?.() || 0) >= 14
+          for (const entry of placeMarkersRef.current) {
+            entry.element.style.opacity = modelVisible ? '0.28' : '1'
+          }
+        }
+        map.on('zoom', syncMarkerEmphasis)
+        const attachPlaceLayers = () => {
+          if (cancelled) return
+
+          // Elevation is optional; a DEM failure must preserve Standard streets.
+          if (!map.getSource('pazo-terrain-dem')) {
+            try {
+              map.addSource('pazo-terrain-dem', {
+                type: 'raster-dem',
+                url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                tileSize: 512,
+                maxzoom: 14,
+              })
+              map.setTerrain({ source: 'pazo-terrain-dem', exaggeration: 1.15 })
+            } catch {
+              // Mapbox may restrict terrain separately from basemap and places.
+            }
+          }
+
+          if (map.getSource('pazo-places')) {
+            map.getSource('pazo-places').setData(toGeoJson(placesRef.current))
+            return
+          }
           map.addSource('pazo-places', {
             type: 'geojson',
             data: toGeoJson(placesRef.current),
@@ -255,33 +354,13 @@ export const MapboxMap = ({
             id: 'pazo-place-pins',
             type: 'symbol',
             source: 'pazo-places',
-            maxzoom: 13.25,
+            // Symbols stay visible as a redundant fallback for glTF load failures.
             layout: {
               'icon-image': ['concat', 'pazo-pin-', ['get', 'category']],
               'icon-size': ['interpolate', ['linear'], ['zoom'], 8, 0.75, 12.5, 1],
               'icon-anchor': 'bottom',
               'icon-allow-overlap': false,
               'icon-padding': 3,
-            },
-          })
-
-          map.addLayer({
-            id: 'pazo-place-models',
-            type: 'model',
-            source: 'pazo-places',
-            slot: 'top',
-            minzoom: 13.25,
-            layout: {
-              'model-id': placeModelExpression(),
-              'model-allow-density-reduction': false,
-            },
-            paint: {
-              'model-scale': [12, 12, 12],
-              'model-rotation': [0, 0, 0],
-              'model-translation': [0, 0, 1],
-              'model-opacity': 1,
-              'model-type': 'location-indicator',
-              'model-emissive-strength': 0.12,
             },
           })
 
@@ -304,6 +383,32 @@ export const MapboxMap = ({
             },
           })
 
+          // Original six local PAZO glTF models; a failure here must never
+          // prevent pin selection, zooming or labels.
+          try {
+            map.addLayer({
+              id: 'pazo-place-models',
+              type: 'model',
+              source: 'pazo-places',
+              slot: 'top',
+              minzoom: 12.5,
+              layout: {
+                'model-id': placeModelExpression(),
+                'model-allow-density-reduction': false,
+              },
+              paint: {
+                'model-scale': [12, 12, 12],
+                'model-rotation': [0, 0, 0],
+                'model-translation': [0, 0, 1],
+                'model-opacity': 1,
+                'model-type': 'location-indicator',
+                'model-emissive-strength': 0.12,
+              },
+            })
+          } catch {
+            // Browser cannot render native glTF: overview DOM markers remain.
+          }
+
           const handlePlaceClick = (event: any) => {
             const placeId = event.features?.[0]?.properties?.id
             if (placeId) onSelectPlaceRef.current(placeId)
@@ -321,9 +426,11 @@ export const MapboxMap = ({
           map.on('mouseenter', 'pazo-place-pins', showPointer)
           map.on('mouseleave', 'pazo-place-pins', clearPointer)
 
-          map.on('click', 'pazo-place-models', handlePlaceClick)
-          map.on('mouseenter', 'pazo-place-models', showPointer)
-          map.on('mouseleave', 'pazo-place-models', clearPointer)
+          if (map.getLayer('pazo-place-models')) {
+            map.on('click', 'pazo-place-models', handlePlaceClick)
+            map.on('mouseenter', 'pazo-place-models', showPointer)
+            map.on('mouseleave', 'pazo-place-models', clearPointer)
+          }
 
           syncUserMarker(
             map,
@@ -332,14 +439,28 @@ export const MapboxMap = ({
             langRef.current,
             Boolean(userLocationRef.current)
           )
-        })
+          syncMarkerEmphasis()
+        }
+        map.on('style.load', attachPlaceLayers)
 
-        map.on('error', (event: any) => {
-          const message = event?.error?.message
-          if (message) console.error('Mapbox error:', message)
+        map.on('error', (event: {error?:unknown}) => {
+          const failure = classifyBasemapFailure(event?.error)
+          if (!failure || cancelled) return
+          basemapFailed = true
+          setMapReady(false)
+          globalThis.clearTimeout(loadingTimeout)
+          // Never replace Standard or report a tile denial as a 3D permission.
+          // A readable style alone does not establish access to its tiles.
+          setMapNotice(failure === 'map_authorization'
+            ? (langRef.current === 'es'
+              ? 'Mapbox no autorizó la cartografía (HTTP 401/403). Revisa el token y los dominios permitidos.'
+              : 'Mapbox did not authorize the map (HTTP 401/403). Check the token and allowed domains.')
+            : (langRef.current === 'es'
+              ? 'No se pudieron cargar recursos de Mapbox Standard. Comprueba tu conexión y reintenta.'
+              : 'Mapbox Standard resources could not load. Check your connection and retry.'))
         })
-      } catch (mapError: any) {
-        console.error('Error loading Mapbox:', mapError)
+      } catch {
+        console.error('PAZO map initialization unavailable')
         if (!cancelled) {
           setError(
             lang === 'es'
@@ -354,17 +475,22 @@ export const MapboxMap = ({
 
     return () => {
       cancelled = true
+      globalThis.clearTimeout(loadingTimeout)
       userMarkerRef.current?.remove?.()
       userMarkerRef.current = null
+      for (const entry of placeMarkersRef.current) entry.marker.remove()
+      placeMarkersRef.current = []
       mapRef.current?.remove?.()
       mapRef.current = null
     }
-  }, [lang])
+  }, [lang, immersive, mapAttempt])
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map?.isStyleLoaded?.()) return
-
+    if (!map) return
+    // The current places list can arrive before the remote map style finishes.
+    // HTML annotations do not depend on remote Mapbox styles or tile status.
+    if (window.mapboxgl) syncPlaceMarkers(map, window.mapboxgl, places)
     const source = map.getSource('pazo-places')
     source?.setData?.(toGeoJson(places))
   }, [places])
@@ -382,7 +508,7 @@ export const MapboxMap = ({
       pitch: 58,
       duration: 700,
     })
-  }, [places, focusPlaceRequest])
+  }, [places, focusPlaceRequest, mapReady])
 
   useEffect(() => {
     const map = mapRef.current
@@ -398,32 +524,26 @@ export const MapboxMap = ({
     return () => observer.disconnect()
   }, [])
 
-  if (error) {
-    return (
-      <div className={immersive
-        ? "flex h-full w-full items-center justify-center bg-[#E7ECEA] p-5 text-center"
-        : "flex h-full min-h-64 items-center justify-center rounded-[2rem] bg-[#E7ECEA] p-5 text-center"
-      }>
-        <div>
-          <p className="text-xs font-black text-[#204E4A]">
-            {lang === 'es' ? 'Mapa no disponible' : 'Map unavailable'}
-          </p>
-          <p className="mt-1 max-w-xs text-[10px] leading-relaxed text-[#5C7470]">
-            {error}
-          </p>
-        </div>
-      </div>
-    )
-  }
 
   return (
-    <div
-      ref={containerRef}
+    <div data-pazo-map-state={error || mapNotice ? 'error' : mapReady ? 'ready' : 'loading'}
+      data-pazo-map-style={PAZO_STANDARD_STYLE}
       className={immersive
-        ? "h-full w-full bg-[#E7ECEA]"
-        : "h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]"
-      }
-      aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'}
-    />
+      ? 'relative h-full w-full bg-[#E7ECEA]'
+      : 'relative h-full min-h-64 w-full overflow-hidden rounded-[2rem] bg-[#E7ECEA]'}>
+      {/* Mapbox's unlayered .mapboxgl-map position:relative overrides Tailwind
+          utilities. Inline sizing keeps the initially empty container full height. */}
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        aria-label={lang === 'es' ? 'Mapa de lugares PAZO' : 'PAZO places map'} />
+      {(error || mapNotice) && (
+        <div role="status" className="pointer-events-auto absolute left-3 right-3 top-[38%] z-10 rounded-2xl bg-[#FFFCF6]/95 px-3 py-2 text-center text-[12px] font-semibold leading-snug text-[#204E4A] shadow-sm">
+          <p>{error || mapNotice}</p>
+          <button type="button" onClick={() => setMapAttempt(attempt => attempt + 1)}
+            className="mt-2 rounded-full bg-[#204E4A] px-4 py-2 text-white focus-visible:bg-[#386963]">
+            {lang === 'es' ? 'Reintentar mapa' : 'Retry map'}
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

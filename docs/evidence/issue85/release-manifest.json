@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "2b63907bad17c4c8bc9581a3f3e91a15b1ae3800",
+  "frontendCommit": "fbe6c7515ee8930f7841dc8a25b3aaa912e836da",
+  "frontendDeployment": "dpl_4Jrf1ngDemBdCKoDTXmXwnb9ekCx",
+  "origin": "https://pazo-app.vercel.app",
+  "edge": {
+    "pazo-paypal-live-worker": {
+      "version": 10,
+      "hash": "97850c30407dcf2c3de5b874f29b558ea06a7b6944fffdd5de729b6655514aa1",
+      "files": 31,
+      "source": "2b63907bad17c4c8bc9581a3f3e91a15b1ae3800"
+    },
+    "pazo-paypal-live-checkout": {
+      "version": 6,
+      "hash": "75a4935b2e04f31c84666873d364ca6811a41df7b989844ceba2ff3a4711fa33",
+      "files": 9,
+      "source": "2b63907bad17c4c8bc9581a3f3e91a15b1ae3800"
+    },
+    "pazo-admin-gradual-live": {
+      "version": 2,
+      "hash": "f40b6ba350b183fddd506c0761c82078bf3b88b6773a6ad9126b4bc1e7e8eb5a",
+      "files": 6,
+      "source": "2b63907bad17c4c8bc9581a3f3e91a15b1ae3800"
+    }
+  },
+  "certificateExecuted": false,
+  "startExecuted": false,
+  "financialStatus": "BLOCKED_ORIGINAL_PAYPAL_404"
+}
+

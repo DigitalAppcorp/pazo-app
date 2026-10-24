@@ -109,10 +109,6 @@ export const MessagesModal = ({
             </svg>
           </button>
 
-          <p className="pr-12 text-[12px] font-extrabold uppercase tracking-[0.17em] text-[#5C7470]">
-            PAZO · {lang === 'es' ? 'Comunidad' : 'Community'}
-          </p>
-
           <div aria-hidden="true" className="mt-5 overflow-hidden rounded-[30px] bg-gradient-to-br from-[#F0F3DE] via-[#F7F3E8] to-[#E7F1E9]">
             <MessagingCommunityIllustration />
           </div>

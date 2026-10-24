@@ -1,3 +1,4 @@
+import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
@@ -66,6 +67,7 @@ import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
+import { PazoInstallControl } from './features/pwa/components/PazoInstallControl'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
 
@@ -1536,10 +1538,13 @@ function PazoMain() {
   const handleOpenNotification = async (notification: PazoNotification) => {
     const sightingId = getNotificationSightingId(notification)
     const joinedCommunityId = getNotificationCommunityId(notification)
-    if (!canUseAccount || (!sightingId && !joinedCommunityId)) return
+    const supporterNotice = isSupporterNotification(notification)
+    if (!canUseAccount || (!sightingId && !joinedCommunityId && !supporterNotice)) return
 
     setIsNotificationsOpen(false)
-    if (joinedCommunityId) {
+    if (supporterNotice) {
+      window.location.hash = '#/account/supporter'
+    } else if (joinedCommunityId) {
       setCommunityTargetId(joinedCommunityId)
       setCommunityTargetKey((value) => value + 1)
       setActiveTab('comunidades')
@@ -1697,8 +1702,8 @@ function PazoMain() {
   const isAuthenticated = (!!user && !isOnboardingActive) || isDemoUser
 
   return (
-    <div className="min-h-screen bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
-      <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-screen sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
+    <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
+      <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0 sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
@@ -1906,7 +1911,8 @@ function PazoMain() {
                 </div>
               </div>
 
-              <div className="text-center pb-2">
+              <div className="flex shrink-0 flex-col items-center pb-1 text-center">
+                {!forgotPasswordMode && <PazoInstallControl lang={lang} placement="welcome" />}
                 <p className="text-[11px] text-[#5C7470]">Pazo MVP • Los Ángeles • 2026</p>
               </div>
             </div>
@@ -1961,7 +1967,7 @@ function PazoMain() {
               ref={mainScrollRef}
               className={activeTab === 'mapa'
                 ? 'relative min-h-0 flex-1 overflow-hidden p-0'
-                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5'}
+                : 'relative min-h-0 flex-1 overflow-y-auto p-4 sm:p-5 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]'}
               onScroll={(event) => {
                 const element = event.currentTarget
                 tabScrollPositionsRef.current[activeTab] = element.scrollTop
@@ -2087,6 +2093,14 @@ function PazoMain() {
                 </>
               )}
             </main>
+
+            {(activeTab === 'inicio' || activeTab === 'comunidades' || activeTab === 'mascota') && (
+              <div
+                data-pazo-scroll-soft-edge="true"
+                aria-hidden="true"
+                className="pazo-scroll-soft-edge"
+              />
+            )}
 
             <BottomNav
               activeTab={activeTab}

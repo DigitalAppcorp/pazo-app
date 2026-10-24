@@ -250,9 +250,10 @@ export const CareModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
       <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center pb-2">
-          <div>
-            <h3 className="text-xl font-black text-[#204E4A] mt-1">
+        <div className="grid grid-cols-[32px_minmax(0,1fr)_32px] items-center gap-2 pb-2">
+          <span aria-hidden="true" className="h-8 w-8" />
+          <div className="min-w-0 text-center">
+            <h3 className="mt-1 text-center text-xl font-black leading-snug text-[#204E4A]">
               {lang === 'es' ? `Cuidados de ${petName}` : `${petName}'s care`}
             </h3>
           </div>

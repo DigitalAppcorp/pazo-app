@@ -1,0 +1,5424 @@
+{
+  "codeCommit": "e6bf328d6bc474d0a621be428a157abbeea64f7d",
+  "preview": {
+    "id": "dpl_Ayw4ZD7ZTFf2sz4Zt21VoYxirvzD",
+    "url": "https://pazo-nu9vxf8rj-digitalapp.vercel.app/",
+    "state": "READY",
+    "production": false,
+    "remoteBrowserVerified": false,
+    "accessLimitation": "Vercel protected fetch connector403; no protection changes applied",
+    "accessDecision": "PO will validate using existing Vercel session; no access/protection changes"
+  },
+  "resourceComparison": {
+    "checkedAtUtc": "2026-10-23T17:18:10.084240+00:00",
+    "note": "No token values or credential query values retained. HTTP resource probes are not visual map certification. Compare identical provider resource paths and origins using deployed and preexisting cloud runtime public tokens.",
+    "deployedBundle": "/assets/app-DK3-EWtr.js",
+    "deployedAndRuntimeTokensDiffer": true,
+    "results": [
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/styles/v1/mapbox/standard",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 332176,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 ec5d07fafdf4be3cfc35223233edd0b2.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "269",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/styles/v1/mapbox/standard",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 332176,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 313e1f500ddb4ef72e89d0ae9eb17a5e.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "334",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/sprite.json",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 69544,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 30ca91fd1605c93fd151c3d8162d0af8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "335",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/sprite.json",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 69544,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 d67522dcdb3943db708d15811e9bef28.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "207",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/fonts/v1/mapbox/Open%20Sans%20Regular/0-255.pbf",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 74696,
+        "headers": {
+          "content-type": "application/x-protobuf",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 7c3b0cfb69ad8eb122e5fb09c0b23aa0.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "297",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/fonts/v1/mapbox/Open%20Sans%20Regular/0-255.pbf",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 74696,
+        "headers": {
+          "content-type": "application/x-protobuf",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 30ca91fd1605c93fd151c3d8162d0af8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "301",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8.json?secure",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 3db8406ac72480de2e8b05f405b4e1e8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "308",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8.json?secure",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 7a851297d5e102915e85f0734993e868.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "350",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8-lite.json?secure",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 c703222165a12466687c41efdc6804e2.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "247",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8-lite.json?secure",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 3db8406ac72480de2e8b05f405b4e1e8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "329",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json?secure",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 b84ba0ac8d862168850b6b1eb5c526dc.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "276",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json?secure",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 6dbe77a9d2cb4c3a79868b96a8f6aac8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "353",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8/14/3772/7521.vector.pbf",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 3db8406ac72480de2e8b05f405b4e1e8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "67",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "officialDeployedPublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8/14/3772/7521.vector.pbf",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 403,
+        "body": "{\"message\":\"Forbidden\"}",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Error from cloudfront",
+          "via": "1.1 313e1f500ddb4ef72e89d0ae9eb17a5e.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "157",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/styles/v1/mapbox/standard",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 332176,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 30ca91fd1605c93fd151c3d8162d0af8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "221",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/styles/v1/mapbox/standard",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 332176,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 d5244ada6168b20a1072096ba74c086e.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "221",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/sprite.json",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 69544,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Miss from cloudfront",
+          "via": "1.1 0eb1da6d1390838d44c95a4572b48b6c.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "516",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/sprite.json",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 69544,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-content-type-options": "nosniff",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 a2951e657dfe04a3c2bb955d18d49152.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "454",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/fonts/v1/mapbox/Open%20Sans%20Regular/0-255.pbf",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 74696,
+        "headers": {
+          "content-type": "application/x-protobuf",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 3db8406ac72480de2e8b05f405b4e1e8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "132",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/fonts/v1/mapbox/Open%20Sans%20Regular/0-255.pbf",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 74696,
+        "headers": {
+          "content-type": "application/x-protobuf",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 3db8406ac72480de2e8b05f405b4e1e8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "159",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8.json?secure",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 19390,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 3db8406ac72480de2e8b05f405b4e1e8.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "100",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8.json?secure",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 19390,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-cache": "Miss from cloudfront",
+          "via": "1.1 7d051b7995f284f4f56612c4fd60b94e.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "312",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8-lite.json?secure",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 16458,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 ec5d07fafdf4be3cfc35223233edd0b2.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "281",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8-lite.json?secure",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 16458,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-cache": "Miss from cloudfront",
+          "via": "1.1 0eb1da6d1390838d44c95a4572b48b6c.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "131",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json?secure",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 1274,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 d5244ada6168b20a1072096ba74c086e.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "247",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json?secure",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 1274,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 ec5d07fafdf4be3cfc35223233edd0b2.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "89",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8/14/3772/7521.vector.pbf",
+        "origin": "https://pazo-app.vercel.app",
+        "status": 200,
+        "bytes": 60,
+        "headers": {
+          "content-type": "application/x-protobuf",
+          "access-control-allow-origin": "*",
+          "x-cache": "Hit from cloudfront",
+          "via": "1.1 4cb743108fdda0a6f93235ad094cf30e.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "360",
+          "server": "envoy"
+        }
+      },
+      {
+        "tokenSource": "existingCloudRuntimePublicToken",
+        "path": "/v4/mapbox.mapbox-streets-v8/14/3772/7521.vector.pbf",
+        "origin": "https://pazo-fcpvlaea5-digitalapp.vercel.app",
+        "status": 200,
+        "bytes": 60,
+        "headers": {
+          "content-type": "application/x-protobuf",
+          "access-control-allow-origin": "*",
+          "x-cache": "Miss from cloudfront",
+          "via": "1.1 982e409bbddc0ecf3e1a17b6ffb8b102.cloudfront.net (CloudFront)",
+          "x-envoy-upstream-service-time": "334",
+          "server": "envoy"
+        }
+      }
+    ]
+  },
+  "deployedTokenRealGl": {
+    "state": {
+      "supported": true,
+      "version": "3.30.0",
+      "loaded": true,
+      "styleLoaded": true,
+      "tilesLoaded": true,
+      "features": 0,
+      "size": [
+        390,
+        844
+      ],
+      "errors": [
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        },
+        {
+          "message": "",
+          "status": 403
+        }
+      ]
+    },
+    "responses": [
+      {
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.css",
+        "status": 200,
+        "queryKeys": []
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.js",
+        "status": 200,
+        "queryKeys": []
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard",
+        "status": 200,
+        "queryKeys": [
+          "sdk",
+          "access_token"
+        ]
+      },
+      {
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "queryKeys": [
+          "access_token"
+        ]
+      },
+      {
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "queryKeys": [
+          "access_token"
+        ]
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6541.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/iconset.pbf",
+        "status": 200,
+        "queryKeys": [
+          "access_token"
+        ]
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2810/6541.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6540.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6540.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6540.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6542.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2811/6542.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2810/6540.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2811/6540.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2810/6543.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6540.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6543.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2811/6540.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2811/6543.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6541.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2811/6541.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6543.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6543.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6542.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2811/6543.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2811/6542.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6541.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2811/6541.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2811/6540.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6542.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1405/3270.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6543.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6541.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6542.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2811/6541.glb",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      },
+      {
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2810/6542.vector.pbf",
+        "status": 403,
+        "queryKeys": [
+          "sku",
+          "access_token"
+        ],
+        "body": "{\"message\":\"Forbidden\"}"
+      }
+    ],
+    "failures": []
+  },
+  "collapsedContainer": {
+    "state": {
+      "styleImports": [
+        ""
+      ],
+      "configuredStyle": "mapbox://styles/mapbox/standard",
+      "uiState": "ready",
+      "zoom": 10.5,
+      "pitch": 45,
+      "bearing": 0,
+      "center": [
+        -118.2437,
+        34.0522
+      ],
+      "canvas": [
+        390,
+        300
+      ],
+      "basemapFeatures": 8,
+      "roadFeatures": 0,
+      "basemapLayers": [
+        null
+      ],
+      "basemapSamples": [
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Pasadena",
+            "class": "settlement"
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Glendale",
+            "class": "settlement"
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Burbank",
+            "class": "settlement"
+          }
+        }
+      ],
+      "elementSizes": [
+        {
+          "tag": "HTML",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "BODY",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 0
+        },
+        {
+          "tag": "CANVAS",
+          "width": 390,
+          "height": 300
+        }
+      ],
+      "pazoModelLayer": true,
+      "pazoModelFeatures": 0,
+      "terrain": {
+        "source": "pazo-terrain-dem",
+        "exaggeration": 1.15
+      },
+      "mapCount": 1
+    },
+    "result": "FAIL",
+    "requests": [
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.css",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.js",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/iconset.pbf",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/409.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Medium/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/map-sessions/v1",
+        "status": 200,
+        "resource": "library-or-events"
+      }
+    ]
+  },
+  "correctedRealComponents": {
+    "source": "f17_live_mapbox_source_components",
+    "case": "all",
+    "physicalAndroid": false,
+    "installedPwa": false,
+    "result": "PASS",
+    "checks": [
+      "official Standard style retained",
+      "Mapbox container and canvas occupy mobile viewport",
+      "actual imported Standard basemap features rendered",
+      "Mapbox custom markers retain accessible button roles",
+      "six public catalogue cards retained",
+      "actual provider tiles HTTP200",
+      "normal Mapbox requests authorized",
+      "existing place photography retained",
+      "map canvas drag moves camera",
+      "map wheel zoom increases camera zoom",
+      "map right drag adjusts pitch",
+      "native PAZO glTF layer renders place features up close",
+      "original PAZO glTF loaded HTTP200",
+      "carousel card selects and focuses real map",
+      "accessible map marker selects place",
+      "horizontal place carousel scrolls",
+      "tile403 remains a truthful visible error",
+      "tile403 never switches to a fallback basemap",
+      "cards remain available during tile denial",
+      "retry restores Standard streets and clears error",
+      "no browser JavaScript exceptions",
+      "no unexpected remote services or database requests"
+    ],
+    "overview": {
+      "styleImports": [
+        ""
+      ],
+      "configuredStyle": "mapbox://styles/mapbox/standard",
+      "uiState": "ready",
+      "zoom": 10.5,
+      "pitch": 45,
+      "bearing": 0,
+      "center": [
+        -118.2437,
+        34.0522
+      ],
+      "canvas": [
+        390,
+        844
+      ],
+      "basemapFeatures": 19,
+      "roadFeatures": 0,
+      "basemapLayers": [
+        null
+      ],
+      "basemapSamples": [
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Pasadena",
+            "class": "settlement"
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Burbank",
+            "class": "settlement"
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Monterey Park",
+            "class": "settlement"
+          }
+        }
+      ],
+      "elementSizes": [
+        {
+          "tag": "HTML",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "BODY",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "CANVAS",
+          "width": 390,
+          "height": 844
+        }
+      ],
+      "markers": [
+        {
+          "role": "button",
+          "label": "Abrir lugar: Silver Lake Dog Park",
+          "title": "Silver Lake Dog Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Runyon Canyon Park",
+          "title": "Runyon Canyon Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: The Morrison",
+          "title": "The Morrison"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+          "title": "VCA Miller-Robertson Animal Hospital"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Groomickey Salon & Store",
+          "title": "Groomickey Salon & Store"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Petco Los Angeles - DTLA",
+          "title": "Petco Los Angeles - DTLA"
+        }
+      ],
+      "pazoModelLayer": true,
+      "pazoModelFeatures": 0,
+      "terrain": {
+        "source": "pazo-terrain-dem",
+        "exaggeration": 1.15
+      },
+      "mapCount": 1
+    },
+    "close": {
+      "styleImports": [
+        ""
+      ],
+      "configuredStyle": "mapbox://styles/mapbox/standard",
+      "uiState": "ready",
+      "zoom": 16.201982181006667,
+      "pitch": 58.00000000000001,
+      "bearing": 24,
+      "center": [
+        -118.26454999999999,
+        34.092259999999996
+      ],
+      "canvas": [
+        390,
+        844
+      ],
+      "basemapFeatures": 783,
+      "roadFeatures": 0,
+      "basemapLayers": [
+        null
+      ],
+      "basemapSamples": [
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "group": "building-3d",
+            "height": 5.4,
+            "min_height": 0
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "group": "building-3d",
+            "height": 9.1,
+            "min_height": 0
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "group": "building-3d",
+            "height": 8,
+            "min_height": 0
+          }
+        }
+      ],
+      "elementSizes": [
+        {
+          "tag": "HTML",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "BODY",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "CANVAS",
+          "width": 390,
+          "height": 844
+        }
+      ],
+      "markers": [
+        {
+          "role": "button",
+          "label": "Abrir lugar: Silver Lake Dog Park",
+          "title": "Silver Lake Dog Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Runyon Canyon Park",
+          "title": "Runyon Canyon Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: The Morrison",
+          "title": "The Morrison"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+          "title": "VCA Miller-Robertson Animal Hospital"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Groomickey Salon & Store",
+          "title": "Groomickey Salon & Store"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Petco Los Angeles - DTLA",
+          "title": "Petco Los Angeles - DTLA"
+        }
+      ],
+      "pazoModelLayer": true,
+      "pazoModelFeatures": 1,
+      "terrain": {
+        "source": "pazo-terrain-dem",
+        "exaggeration": 1.15
+      },
+      "mapCount": 1
+    },
+    "denied": {
+      "styleImports": [
+        ""
+      ],
+      "configuredStyle": "mapbox://styles/mapbox/standard",
+      "uiState": "error",
+      "zoom": 10.5,
+      "pitch": 45,
+      "bearing": 0,
+      "center": [
+        -118.2437,
+        34.0522
+      ],
+      "canvas": [
+        390,
+        844
+      ],
+      "basemapFeatures": 0,
+      "roadFeatures": 0,
+      "basemapLayers": [],
+      "basemapSamples": [],
+      "elementSizes": [
+        {
+          "tag": "HTML",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "BODY",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "CANVAS",
+          "width": 390,
+          "height": 844
+        }
+      ],
+      "markers": [
+        {
+          "role": "button",
+          "label": "Abrir lugar: Silver Lake Dog Park",
+          "title": "Silver Lake Dog Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Runyon Canyon Park",
+          "title": "Runyon Canyon Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: The Morrison",
+          "title": "The Morrison"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+          "title": "VCA Miller-Robertson Animal Hospital"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Groomickey Salon & Store",
+          "title": "Groomickey Salon & Store"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Petco Los Angeles - DTLA",
+          "title": "Petco Los Angeles - DTLA"
+        }
+      ],
+      "pazoModelLayer": true,
+      "pazoModelFeatures": 0,
+      "terrain": {
+        "source": "pazo-terrain-dem",
+        "exaggeration": 1.15
+      },
+      "mapCount": 1
+    },
+    "recovered": {
+      "styleImports": [
+        ""
+      ],
+      "configuredStyle": "mapbox://styles/mapbox/standard",
+      "uiState": "ready",
+      "zoom": 10.5,
+      "pitch": 45,
+      "bearing": 0,
+      "center": [
+        -118.2437,
+        34.0522
+      ],
+      "canvas": [
+        390,
+        844
+      ],
+      "basemapFeatures": 19,
+      "roadFeatures": 0,
+      "basemapLayers": [
+        null
+      ],
+      "basemapSamples": [
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Pasadena",
+            "class": "settlement"
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Burbank",
+            "class": "settlement"
+          }
+        },
+        {
+          "keys": [
+            "type",
+            "_vectorTileFeature",
+            "_z",
+            "_x",
+            "_y",
+            "properties",
+            "id",
+            "state",
+            "target",
+            "namespace"
+          ],
+          "properties": {
+            "name": "Monterey Park",
+            "class": "settlement"
+          }
+        }
+      ],
+      "elementSizes": [
+        {
+          "tag": "HTML",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "BODY",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "DIV",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "tag": "CANVAS",
+          "width": 390,
+          "height": 844
+        }
+      ],
+      "markers": [
+        {
+          "role": "button",
+          "label": "Abrir lugar: Silver Lake Dog Park",
+          "title": "Silver Lake Dog Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Runyon Canyon Park",
+          "title": "Runyon Canyon Park"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: The Morrison",
+          "title": "The Morrison"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+          "title": "VCA Miller-Robertson Animal Hospital"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Groomickey Salon & Store",
+          "title": "Groomickey Salon & Store"
+        },
+        {
+          "role": "button",
+          "label": "Abrir lugar: Petco Los Angeles - DTLA",
+          "title": "Petco Los Angeles - DTLA"
+        }
+      ],
+      "pazoModelLayer": true,
+      "pazoModelFeatures": 0,
+      "terrain": {
+        "source": "pazo-terrain-dem",
+        "exaggeration": 1.15
+      },
+      "mapCount": 2
+    },
+    "requests": [
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.css",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.js",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/iconset.pbf",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/409.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/410.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/407.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/407.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/101.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/101.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Medium/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/map-sessions/v1",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/11/350/816.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/11/350/817.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/9/87/204.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/11/351/816.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/11/351/817.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/9/87/203.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/11/351/818.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/11/350/818.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Open%20Sans%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3269.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/11/351/817.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3270.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1405/3270.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1405/3269.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3268.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Italic/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2810/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26159.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26160.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2810/6540.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2810/6538.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6538.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26159.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5620/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6540.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26158.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26158.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26160.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6540.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5619/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6540.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6539.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2808/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2808/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/meshopt_simd_v1.2.wasm",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/park.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.css",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.js",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/iconset.pbf",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/408.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/409.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/408.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/407.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/407.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/410.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/9/87/204.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/9/87/203.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/9/87/205.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/9/88/204.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/9/88/203.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/8/44/102.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/8/43/102.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/8/43/101.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/8/44/101.vector.pbf",
+        "status": 403,
+        "resource": "tile"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "api.mapbox.com",
+        "path": "/map-sessions/v1",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "forced-tile-denial",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/iconset.pbf",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/409.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/410.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/407.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/407.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Medium/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/101.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/101.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "api.mapbox.com",
+        "path": "/map-sessions/v1",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "retry-recovery",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      }
+    ],
+    "errors": [],
+    "failures": []
+  },
+  "otherChecks": {
+    "typescriptVite": "PASS",
+    "governance": "PASS",
+    "closure": {
+      "passed": 506,
+      "failed": 0
+    },
+    "mapAndF17Regression": {
+      "passed": 22,
+      "failed": 0
+    },
+    "f16Synthetic": {
+      "passed": 1193,
+      "failed": 0
+    },
+    "f17BrowserMocked": {
+      "passed": 40,
+      "viewports": [
+        390,
+        1440
+      ]
+    },
+    "releaseStaticGuard": "PASS",
+    "prepreviewDist": {
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "acceptance": {
+    "physicalAndroid": false,
+    "installedPwa": false,
+    "poVisualApproval": false,
+    "productionChanged": false,
+    "mainChanged": false
+  },
+  "allSixNativeModels": {
+    "source": "f17_live_mapbox_all_six_categories",
+    "case": "all",
+    "physicalAndroid": false,
+    "installedPwa": false,
+    "result": "PASS",
+    "checks": [
+      "park.gltf HTTP200",
+      "Silver Lake Dog Park card selection",
+      "trail.gltf HTTP200",
+      "Runyon Canyon Park card selection",
+      "restaurant.gltf HTTP200",
+      "The Morrison card selection",
+      "veterinarian.gltf HTTP200",
+      "VCA Miller-Robertson Animal Hospital card selection",
+      "grooming.gltf HTTP200",
+      "Groomickey Salon & Store card selection",
+      "pet-store.gltf HTTP200",
+      "Petco Los Angeles - DTLA card selection",
+      "no browser JavaScript exceptions",
+      "no unexpected services"
+    ],
+    "observations": [
+      {
+        "model": "park.gltf",
+        "name": "Silver Lake Dog Park",
+        "state": {
+          "styleImports": [
+            ""
+          ],
+          "configuredStyle": "mapbox://styles/mapbox/standard",
+          "uiState": "ready",
+          "zoom": 17.2,
+          "pitch": 62,
+          "bearing": 0,
+          "center": [
+            -118.26454999999999,
+            34.092259999999996
+          ],
+          "canvas": [
+            390,
+            844
+          ],
+          "basemapFeatures": 62,
+          "roadFeatures": 0,
+          "basemapLayers": [
+            null
+          ],
+          "basemapSamples": [
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 7.4,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 7.2,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 8,
+                "min_height": 0
+              }
+            }
+          ],
+          "elementSizes": [
+            {
+              "tag": "HTML",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "BODY",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "CANVAS",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "markers": [
+            {
+              "role": "button",
+              "label": "Abrir lugar: Silver Lake Dog Park",
+              "title": "Silver Lake Dog Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Runyon Canyon Park",
+              "title": "Runyon Canyon Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: The Morrison",
+              "title": "The Morrison"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+              "title": "VCA Miller-Robertson Animal Hospital"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Groomickey Salon & Store",
+              "title": "Groomickey Salon & Store"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Petco Los Angeles - DTLA",
+              "title": "Petco Los Angeles - DTLA"
+            }
+          ],
+          "pazoModelLayer": true,
+          "pazoModelFeatures": 1,
+          "terrain": {
+            "source": "pazo-terrain-dem",
+            "exaggeration": 1.15
+          },
+          "mapCount": 1
+        }
+      },
+      {
+        "model": "trail.gltf",
+        "name": "Runyon Canyon Park",
+        "state": {
+          "styleImports": [
+            ""
+          ],
+          "configuredStyle": "mapbox://styles/mapbox/standard",
+          "uiState": "ready",
+          "zoom": 17.2,
+          "pitch": 62,
+          "bearing": 0,
+          "center": [
+            -118.34895499999999,
+            34.10519000000001
+          ],
+          "canvas": [
+            390,
+            844
+          ],
+          "basemapFeatures": 28,
+          "roadFeatures": 0,
+          "basemapLayers": [
+            null
+          ],
+          "basemapSamples": [
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 17.2,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 13.1,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 21.7,
+                "min_height": 0
+              }
+            }
+          ],
+          "elementSizes": [
+            {
+              "tag": "HTML",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "BODY",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "CANVAS",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "markers": [
+            {
+              "role": "button",
+              "label": "Abrir lugar: Silver Lake Dog Park",
+              "title": "Silver Lake Dog Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Runyon Canyon Park",
+              "title": "Runyon Canyon Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: The Morrison",
+              "title": "The Morrison"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+              "title": "VCA Miller-Robertson Animal Hospital"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Groomickey Salon & Store",
+              "title": "Groomickey Salon & Store"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Petco Los Angeles - DTLA",
+              "title": "Petco Los Angeles - DTLA"
+            }
+          ],
+          "pazoModelLayer": true,
+          "pazoModelFeatures": 1,
+          "terrain": {
+            "source": "pazo-terrain-dem",
+            "exaggeration": 1.15
+          },
+          "mapCount": 1
+        }
+      },
+      {
+        "model": "restaurant.gltf",
+        "name": "The Morrison",
+        "state": {
+          "styleImports": [
+            ""
+          ],
+          "configuredStyle": "mapbox://styles/mapbox/standard",
+          "uiState": "ready",
+          "zoom": 17.2,
+          "pitch": 62,
+          "bearing": 0,
+          "center": [
+            -118.26871900000003,
+            34.12376980000002
+          ],
+          "canvas": [
+            390,
+            844
+          ],
+          "basemapFeatures": 770,
+          "roadFeatures": 0,
+          "basemapLayers": [
+            null
+          ],
+          "basemapSamples": [
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 6.2,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 6,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 5.6,
+                "min_height": 0
+              }
+            }
+          ],
+          "elementSizes": [
+            {
+              "tag": "HTML",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "BODY",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "CANVAS",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "markers": [
+            {
+              "role": "button",
+              "label": "Abrir lugar: Silver Lake Dog Park",
+              "title": "Silver Lake Dog Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Runyon Canyon Park",
+              "title": "Runyon Canyon Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: The Morrison",
+              "title": "The Morrison"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+              "title": "VCA Miller-Robertson Animal Hospital"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Groomickey Salon & Store",
+              "title": "Groomickey Salon & Store"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Petco Los Angeles - DTLA",
+              "title": "Petco Los Angeles - DTLA"
+            }
+          ],
+          "pazoModelLayer": true,
+          "pazoModelFeatures": 1,
+          "terrain": {
+            "source": "pazo-terrain-dem",
+            "exaggeration": 1.15
+          },
+          "mapCount": 1
+        }
+      },
+      {
+        "model": "veterinarian.gltf",
+        "name": "VCA Miller-Robertson Animal Hospital",
+        "state": {
+          "styleImports": [
+            ""
+          ],
+          "configuredStyle": "mapbox://styles/mapbox/standard",
+          "uiState": "ready",
+          "zoom": 17.2,
+          "pitch": 62,
+          "bearing": 0,
+          "center": [
+            -118.38578000000001,
+            34.08104999999999
+          ],
+          "canvas": [
+            390,
+            844
+          ],
+          "basemapFeatures": 489,
+          "roadFeatures": 0,
+          "basemapLayers": [
+            null
+          ],
+          "basemapSamples": [
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 6.7,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 6.7,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 7.3,
+                "min_height": 0
+              }
+            }
+          ],
+          "elementSizes": [
+            {
+              "tag": "HTML",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "BODY",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "CANVAS",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "markers": [
+            {
+              "role": "button",
+              "label": "Abrir lugar: Silver Lake Dog Park",
+              "title": "Silver Lake Dog Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Runyon Canyon Park",
+              "title": "Runyon Canyon Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: The Morrison",
+              "title": "The Morrison"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+              "title": "VCA Miller-Robertson Animal Hospital"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Groomickey Salon & Store",
+              "title": "Groomickey Salon & Store"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Petco Los Angeles - DTLA",
+              "title": "Petco Los Angeles - DTLA"
+            }
+          ],
+          "pazoModelLayer": true,
+          "pazoModelFeatures": 1,
+          "terrain": {
+            "source": "pazo-terrain-dem",
+            "exaggeration": 1.15
+          },
+          "mapCount": 1
+        }
+      },
+      {
+        "model": "grooming.gltf",
+        "name": "Groomickey Salon & Store",
+        "state": {
+          "styleImports": [
+            ""
+          ],
+          "configuredStyle": "mapbox://styles/mapbox/standard",
+          "uiState": "ready",
+          "zoom": 17.2,
+          "pitch": 62,
+          "bearing": 0,
+          "center": [
+            -118.45843000000002,
+            33.996610000000004
+          ],
+          "canvas": [
+            390,
+            844
+          ],
+          "basemapFeatures": 648,
+          "roadFeatures": 0,
+          "basemapLayers": [
+            null
+          ],
+          "basemapSamples": [
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 4,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 8.3,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 7.6,
+                "min_height": 0
+              }
+            }
+          ],
+          "elementSizes": [
+            {
+              "tag": "HTML",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "BODY",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "CANVAS",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "markers": [
+            {
+              "role": "button",
+              "label": "Abrir lugar: Silver Lake Dog Park",
+              "title": "Silver Lake Dog Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Runyon Canyon Park",
+              "title": "Runyon Canyon Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: The Morrison",
+              "title": "The Morrison"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+              "title": "VCA Miller-Robertson Animal Hospital"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Groomickey Salon & Store",
+              "title": "Groomickey Salon & Store"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Petco Los Angeles - DTLA",
+              "title": "Petco Los Angeles - DTLA"
+            }
+          ],
+          "pazoModelLayer": true,
+          "pazoModelFeatures": 1,
+          "terrain": {
+            "source": "pazo-terrain-dem",
+            "exaggeration": 1.15
+          },
+          "mapCount": 1
+        }
+      },
+      {
+        "model": "pet-store.gltf",
+        "name": "Petco Los Angeles - DTLA",
+        "state": {
+          "styleImports": [
+            ""
+          ],
+          "configuredStyle": "mapbox://styles/mapbox/standard",
+          "uiState": "ready",
+          "zoom": 17.2,
+          "pitch": 62,
+          "bearing": 0,
+          "center": [
+            -118.25979000000001,
+            34.045469999999995
+          ],
+          "canvas": [
+            390,
+            844
+          ],
+          "basemapFeatures": 49,
+          "roadFeatures": 0,
+          "basemapLayers": [
+            null
+          ],
+          "basemapSamples": [
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 37.7,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 33.3,
+                "min_height": 0
+              }
+            },
+            {
+              "keys": [
+                "type",
+                "_vectorTileFeature",
+                "_z",
+                "_x",
+                "_y",
+                "properties",
+                "id",
+                "state",
+                "target",
+                "namespace"
+              ],
+              "properties": {
+                "group": "building-3d",
+                "height": 12.4,
+                "min_height": 0
+              }
+            }
+          ],
+          "elementSizes": [
+            {
+              "tag": "HTML",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "BODY",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "DIV",
+              "width": 390,
+              "height": 844
+            },
+            {
+              "tag": "CANVAS",
+              "width": 390,
+              "height": 844
+            }
+          ],
+          "markers": [
+            {
+              "role": "button",
+              "label": "Abrir lugar: Silver Lake Dog Park",
+              "title": "Silver Lake Dog Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Runyon Canyon Park",
+              "title": "Runyon Canyon Park"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: The Morrison",
+              "title": "The Morrison"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: VCA Miller-Robertson Animal Hospital",
+              "title": "VCA Miller-Robertson Animal Hospital"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Groomickey Salon & Store",
+              "title": "Groomickey Salon & Store"
+            },
+            {
+              "role": "button",
+              "label": "Abrir lugar: Petco Los Angeles - DTLA",
+              "title": "Petco Los Angeles - DTLA"
+            }
+          ],
+          "pazoModelLayer": true,
+          "pazoModelFeatures": 1,
+          "terrain": {
+            "source": "pazo-terrain-dem",
+            "exaggeration": 1.15
+          },
+          "mapCount": 1
+        }
+      }
+    ],
+    "requests": [
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.css",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/v3.30.0/mapbox-gl.js",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/409.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/407.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/408.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/styles/v1/mapbox/standard/32wwqtroth2ib2rg0kqzvdrpp/iconset.pbf",
+        "status": 200,
+        "resource": "style-or-sprite"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/176/407.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-terrain-dem-v1.json",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/10/175/410.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Medium/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Bold/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Arial%20Unicode%20MS%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/102.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/44/101.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/8/43/101.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "events.mapbox.com",
+        "path": "/events/v2",
+        "status": 204,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/map-sessions/v1",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/Open%20Sans%20Regular/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1405/3269.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/11/351/817.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1405/3268.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1405/3270.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3268.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3269.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3271.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/13/1404/3270.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/fonts/v1/mapbox/DIN%20Pro%20Italic/0-255.pbf",
+        "status": 200,
+        "resource": "font"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6540.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26159.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26158.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26160.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26158.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26159.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6538.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5618/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5619/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26158.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26161.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26158.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5619/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6540.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6540.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26160.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5618/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2808/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2808/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6538.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6539.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26161.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/meshopt_simd_v1.2.wasm",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/mapbox-gl-js/meshopt_simd_v1.2.wasm",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/park.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26156.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26157.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26157.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2806/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2806/6539.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5611/13077.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5611/13079.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2805/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5611/13076.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2805/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5612/13076.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5612/13077.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2805/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2806/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5611/13078.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2805/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2805/6537.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2806/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2806/6538.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2805/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/13/1402/3269.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/13/1403/3269.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/13/1403/3268.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/13/1402/3268.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2806/6538.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/trail.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11222/26156.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26157.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26155.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26154.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26156.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26156.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26155.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11222/26156.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11222/26155.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11222/26155.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26154.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2805/6538.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11223/26157.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2805/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/pine2-v4-lod3.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/pine2-v4-lod1.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2806/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2806/6538.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/pine2-v4-lod2.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2805/6537.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/13/1402/3268.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple2-v4-lod4.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/restaurant.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak1-v4-lod4.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak2-v4-lod4.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple1-v4-lod4.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/pine2-v4-lod4.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26152.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26152.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26151.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26151.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26151.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26150.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26150.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26150.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26152.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26152.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26153.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2808/6537.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26150.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11237/26153.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6537.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6537.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11238/26151.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6536.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6536.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2808/6536.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5618/13074.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5618/13074.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2808/6536.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6536.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6536.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak2-v4-lod3.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5619/13074.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak2-v4-lod2.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6536.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/veterinarian.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2803/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2804/6540.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2804/6541.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11216/26161.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11216/26162.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2804/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11216/26160.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2803/6540.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2804/6540.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2804/6541.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2804/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2804/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2803/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2803/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2804/6539.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2803/6541.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2803/6540.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5608/13079.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2803/6541.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2803/6539.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple2-v4-lod3.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/13/1401/3269.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/grooming.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2800/6544.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2800/6544.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11203/26181.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11203/26180.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11202/26178.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11202/26179.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11203/26178.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11203/26179.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2801/6545.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2800/6545.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2801/6544.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2801/6544.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2800/6545.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2801/6545.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2800/6545.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2800/6544.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2800/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2800/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2801/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5601/13088.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5601/13088.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2801/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5602/13088.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11202/26180.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2801/6545.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2801/6544.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6541.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6541.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26168.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26170.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26170.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6542.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6542.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2810/6542.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6541.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6542.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6542.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2809/6541.glb",
+        "status": 200,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26168.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2809/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26169.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11239/26169.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2810/6543.glb",
+        "status": 204,
+        "resource": "provider-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "127.0.0.1:5173",
+        "path": "/models/places/pet-store.gltf",
+        "status": 200,
+        "resource": "pazo-model"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple2-v4-lod2.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple1-v4-lod2.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple1-v4-lod1.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak1-v4-lod2.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak1-v4-lod1.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/oak2-v4-lod1.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/models/v1/mapbox/maple2-v4-lod1.glb",
+        "status": 200,
+        "resource": "library-or-events"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5619/13083.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/15/5619/13083.vector.pbf",
+        "status": 200,
+        "resource": "tile"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/raster/v1/mapbox.mapbox-terrain-dem-v1/14/2809/6541.webp",
+        "status": 200,
+        "resource": "library-or-events"
+      }
+    ],
+    "errors": [],
+    "failures": [
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11222/26154.vector.pbf",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/16/11222/26154.vector.pbf",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2805/6537.vector.pbf",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2806/6537.vector.pbf",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2806/6537.vector.pbf",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/v4/mapbox.mapbox-bathymetry-v2,mapbox.mapbox-streets-v8-lite,mapbox.mapbox-terrain-v3,mapbox.mapbox-models-v1/14/2805/6537.vector.pbf",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2805/6540.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2804/6537.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2805/6540.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2804/6537.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2806/6540.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3dbuildings-v1-meshopt-v2-lod/14/2804/6538.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2806/6540.glb",
+        "reason": "net::ERR_ABORTED"
+      },
+      {
+        "scenario": "normal",
+        "host": "api.mapbox.com",
+        "path": "/3dtiles/v1/mapbox.mapbox-3d-events/14/2804/6538.glb",
+        "reason": "net::ERR_ABORTED"
+      }
+    ],
+    "visualLimitations": {
+      "parkAndTrail": "clearly visible",
+      "foodVeterinaryGrooming": "partly behind preserved carousel rail",
+      "petStoreDTLA": "mostly occluded by tall Standard buildings at bearing0/pitch62; do not claim unobstructed visibility"
+    }
+  },
+  "verifiedCi": {
+    "commit": "f839c933bdd0694480b7fb93a9211372fa4ef89d",
+    "checksPassed": 10,
+    "checksFailed": 0,
+    "runs": [
+      "https://github.com/DigitalAppcorp/pazo-app/actions/runs/39996593794",
+      "https://github.com/DigitalAppcorp/pazo-app/actions/runs/39996593733",
+      "https://github.com/DigitalAppcorp/pazo-app/actions/runs/39996593715"
+    ]
+  }
+}

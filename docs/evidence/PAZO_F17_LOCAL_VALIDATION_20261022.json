@@ -1,0 +1,256 @@
+{
+  "schema": "pazo_f17_local_validation_v1",
+  "recorded_at": "2026-10-22T11:33:19.738Z",
+  "base_commit": "a7b1f2c830e6c16c354b0a4463ed1529c94b154c",
+  "pull_request": "https://github.com/DigitalAppcorp/pazo-app/pull/81",
+  "scope": "Local and read-only hosted validation; no hosted F17 installation, release or financial acceptance",
+  "source_set_sha256": "5b3db9531c4bda5c3da3256a5896555384303796a9dc3f559c900f0ada19746a",
+  "sources": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "3849efe7608a0a797202dfa6054a37c3d4285107e25a735b523565e9253cafbf"
+    },
+    {
+      "path": ".github/workflows/f17-beta-security.yml",
+      "sha256": "fe6d6530c49ec4bdc5f32357df5cadc8a36464026b709a2123be1b0c5cc4987d"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "9e7c6bf13d0b007835b395dd1488f9e3ef69aa8c80edef42d2e4a960faee8a12"
+    },
+    {
+      "path": "maintenance-admin.html",
+      "sha256": "272f165bb9c55acf20f6e0811e0ed2e99bafaea3c193519e41a855e38466d7ae"
+    },
+    {
+      "path": "scripts/f17-baseline-stage.mjs",
+      "sha256": "fde95d66d77b41ded3adddd86e89e469e06752cb81c60a6ab438900c33f73ebf"
+    },
+    {
+      "path": "scripts/f17-beta-extension-contract.test.mjs",
+      "sha256": "34dd6b3ba270d1cd070d49970604bc7ef6705a4ff55179ea142b33dd7d745cd6"
+    },
+    {
+      "path": "scripts/f17-browser.mjs",
+      "sha256": "91a6e672f829f5247284b93af850169274ba3f07220a3146fee0d9ac5ce4e6a0"
+    },
+    {
+      "path": "scripts/f17-concurrency.mjs",
+      "sha256": "06033bd80fead9aa4a0cde5485d5252b9c4ce0fdb7f57c8198057d5f7723931e"
+    },
+    {
+      "path": "scripts/f17-schema-batch.mjs",
+      "sha256": "4f8d8e009695b6fe31ad75ad875399bbad32a6b0bdd9bf7282b0dc3a01528c3d"
+    },
+    {
+      "path": "src/features/auth/useAccountRequestScope.ts",
+      "sha256": "fc1cb6e00db0a3ccc0a4c144043cef3c985595488dcdfbb76f2c254c22de46e2"
+    },
+    {
+      "path": "src/features/legal/legalCopy.ts",
+      "sha256": "83d5bb38c1f4e1362b1850fac0c6666c6cd069ee0f88ff7d0aba10c213bfe279"
+    },
+    {
+      "path": "src/features/maintenance/AdminMaintenanceControls.tsx",
+      "sha256": "b06467c650fb401bdb28fef80b883f1f16a69073c2ccbbc60621b22181fb6314"
+    },
+    {
+      "path": "src/features/maintenance/MaintenanceGate.tsx",
+      "sha256": "d3e64adb92c7bceacd0297e282d27fca85baeeb84e16e0b4e7108dec66d55e40"
+    },
+    {
+      "path": "src/features/maintenance/recovery.ts",
+      "sha256": "d340ada63ebb694cc55d4a064e9cd64463ff71c159b421bc93d8c2985a3b6a64"
+    },
+    {
+      "path": "src/features/places/map/MapboxMap.tsx",
+      "sha256": "d8214b064d68b5311857bb741f3d60d5208aae137e4c74ab0bc9623772910bb2"
+    },
+    {
+      "path": "src/features/places/map/mapFailure.test.mjs",
+      "sha256": "5ad7dbf53f6eb7e4cce07e5eef71b340968029a39366ef342a480fce8ffeb258"
+    },
+    {
+      "path": "src/features/places/map/mapFailure.ts",
+      "sha256": "c23daa10cd8e5d71f5daab9e46413803f428ebc47eeffbb630aef6d14e86a894"
+    },
+    {
+      "path": "src/features/support/components/AdminGiftBenefits.tsx",
+      "sha256": "91f5698f8dd4791b8791f6102386f1e5c3172c23f5008c18b48900a254aec491"
+    },
+    {
+      "path": "src/features/support/components/AdminSupportInbox.tsx",
+      "sha256": "7323a195bef2786a098b66550da40039cdce8731b9a66693f39905d7ffab6c49"
+    },
+    {
+      "path": "src/features/support/components/SupportRequestDialog.tsx",
+      "sha256": "95115b1b87460d7dceeeb25dab1e6a3fca48cea95fbe7dd04f0017699d734e21"
+    },
+    {
+      "path": "src/features/supporter/components/SupporterBenefitsHome.tsx",
+      "sha256": "79acc7a97c4c931bcd50b49afe7ed4fe3db28fc2f19d5b814d5e27969ce5d14f"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "75cba704f5f5285d4bfd5614efbe6945178941b0e949662149ef0f75cc570711"
+    },
+    {
+      "path": "supabase/drafts/PAZO_F17_admin_gift_entitlements_DRAFT.sql",
+      "sha256": null
+    },
+    {
+      "path": "supabase/drafts/PAZO_F17_maintenance_switch_DRAFT.sql",
+      "sha256": null
+    },
+    {
+      "path": "supabase/drafts/PAZO_F17_support_tickets_DRAFT.sql",
+      "sha256": null
+    },
+    {
+      "path": "supabase/functions/_shared/maintenanceCheckoutGate.mjs",
+      "sha256": "d9aa6e846382710c12b49e7a341a78e4d271450379c97cdf22f80397d782a5f3"
+    },
+    {
+      "path": "supabase/functions/_shared/maintenanceCheckoutGate.test.mjs",
+      "sha256": "600a75b9bf30e010490640d168cdd8953c8ca7c092c4cd0b4896afacaaf3b4b0"
+    },
+    {
+      "path": "supabase/functions/f16-paypal-supporter-v2-qa/index.ts",
+      "sha256": "1ec4b7d77dbdc6f5dcbeafbba04321632df11e9405c5c233acc7c6bd1494eda5"
+    },
+    {
+      "path": "supabase/migrations/20261022103706_pazo_f17_private_support.sql",
+      "sha256": "7c3eee8ccce97a2b0f44459083e63870d897aefd89f28db3d7a9a8b227afa98b"
+    },
+    {
+      "path": "supabase/migrations/20261022103707_pazo_f17_gift_benefits.sql",
+      "sha256": "4ad9751e7c50a758aea6f072e6d580f95ab69551183e20a0683c0ed1af7fd088"
+    },
+    {
+      "path": "supabase/migrations/20261022103708_pazo_f17_maintenance_guard.sql",
+      "sha256": "386b92deb44d93beec3c73fa95bc700a151e6a73d456dced412ab64a7fc15f78"
+    },
+    {
+      "path": "supabase/tests/f17/browser-harness.html",
+      "sha256": "de49b44eecc3b0aa46ef2e298045b7d4a9b7d4598582575115746baa93fa2b4a"
+    },
+    {
+      "path": "supabase/tests/f17/extensions-pg17.sql",
+      "sha256": "b4cf58bd3c33f0ff9981bc12338c3bfa1a74852681efc0115f390aff5233c7c8"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "c103856a3514b4831138a210bef51795ce2ab7949b29444032e9f119e4fac479"
+    }
+  ],
+  "migrations": [
+    {
+      "filename": "20261022103706_pazo_f17_private_support.sql",
+      "version": "20261022103706",
+      "sha256": "7c3eee8ccce97a2b0f44459083e63870d897aefd89f28db3d7a9a8b227afa98b",
+      "hosted_applied": false
+    },
+    {
+      "filename": "20261022103707_pazo_f17_gift_benefits.sql",
+      "version": "20261022103707",
+      "sha256": "4ad9751e7c50a758aea6f072e6d580f95ab69551183e20a0683c0ed1af7fd088",
+      "hosted_applied": false
+    },
+    {
+      "filename": "20261022103708_pazo_f17_maintenance_guard.sql",
+      "version": "20261022103708",
+      "sha256": "386b92deb44d93beec3c73fa95bc700a151e6a73d456dced412ab64a7fc15f78",
+      "hosted_applied": false
+    }
+  ],
+  "checks": {
+    "prepreview": {
+      "passed": 1818,
+      "failed": 0,
+      "typecheck": true,
+      "build": true,
+      "dist": true
+    },
+    "additional_contracts": {
+      "passed": 16,
+      "failed": 0
+    },
+    "chromium": {
+      "source": "f17_local_mocked_chromium",
+      "viewports": [
+        390,
+        1440
+      ],
+      "compiled_recovery": true,
+      "assertions": 40,
+      "result": "PASS",
+      "hosted_auth_or_provider_calls": 0,
+      "physical_install": false
+    },
+    "postgres17": {
+      "result": "PASS",
+      "real_roles": [
+        "anon",
+        "authenticated",
+        "service_role"
+      ],
+      "migration_batch_rollback": true,
+      "migration_batch_commit": true,
+      "migration_history": true,
+      "hosted_data": false
+    },
+    "concurrency": {
+      "source": "f17_synthetic_pg17_concurrency",
+      "support_parallel": 12,
+      "accepted": 3,
+      "duplicate_parallel": 8,
+      "persisted_duplicate": 1,
+      "maintenance_parallel": 8,
+      "accepted_switches": 1,
+      "maintenance_restored": true,
+      "hosted_or_provider_calls": 0,
+      "result": "PASS"
+    },
+    "module_lint": {
+      "errors": 0,
+      "warnings": 0,
+      "global_legacy_lint_not_asserted": true
+    }
+  },
+  "hosted_readonly": {
+    "financial_mode": "canary",
+    "financial_revision": 1,
+    "live_enabled": true,
+    "kill_switch": false,
+    "credentials_metadata_ready": true,
+    "live_intents": 0,
+    "live_periods": 0,
+    "support_installed": false,
+    "gifts_installed": false,
+    "maintenance_installed": false,
+    "pre_request": null,
+    "edge_snapshot": [
+      {
+        "slug": "f16-paypal-supporter-v2-qa",
+        "version": 26,
+        "verify_jwt": true,
+        "status": "ACTIVE"
+      },
+      {
+        "slug": "pazo-admin-paypal-vault",
+        "version": 2,
+        "verify_jwt": true,
+        "status": "ACTIVE"
+      }
+    ]
+  },
+  "acceptance": {
+    "hosted_f17_applied": false,
+    "edge_f17_deployed": false,
+    "ci_for_new_commit": "NOT_READ_NETWORK_BLOCKED",
+    "https_f17_verified": false,
+    "physical_pwa_installed": false,
+    "live_payment_verified": false,
+    "main_merged": false
+  }
+}

@@ -52,6 +52,23 @@ test('stale or already recorded requests return the server current state and nev
  const result=await h(request());assert.equal(result.status,200)
  assert.deepEqual(await result.json(),{code:'release_request_already_recorded',mode:'off',revision:4,mayCharge:false})
 })
+test('new canonical admin origin receives CORS but still requires fresh MFA',async()=>{
+ const canonical='https://pazo-app.vercel.app'
+ const h=createPazoLiveReleaseHandler({authenticateAdmin:async()=>null,changeRelease:async()=>{throw Error('must never call')}})
+ const pre=await h(new Request(project+'/functions/v1/pazo-admin-paypal-release',{
+  method:'OPTIONS',headers:{origin:canonical,'access-control-request-method':'POST'}}))
+ assert.equal(pre.status,200)
+ assert.equal(pre.headers.get('access-control-allow-origin'),canonical)
+ const denied=await h(new Request(project+'/functions/v1/pazo-admin-paypal-release',{
+  method:'POST',headers:{origin:canonical,'content-type':'application/json'},
+  body:JSON.stringify(body)}))
+ assert.equal(denied.status,403)
+ assert.equal((await denied.json()).code,'fresh_admin_mfa_required')
+ const attacker=await h(new Request(project+'/functions/v1/pazo-admin-paypal-release',{
+  method:'OPTIONS',headers:{origin:'https://pazo-app.vercel.app.evil.test'}}))
+ assert.equal(attacker.status,403)
+ assert.equal(attacker.headers.get('access-control-allow-origin'),null)
+})
 test('origin, path, MIME and streaming size boundaries cannot call privileged SQL',async()=>{
  let writes=0
  const h=createPazoLiveReleaseHandler({authenticateAdmin:async()=>actor,changeRelease:async()=>{writes++}})

@@ -7,6 +7,7 @@ import {AdminPaypalLiveResourceCheck} from './AdminPaypalLiveResourceCheck'
 import {AdminPaypalLiveVaultSetup} from './AdminPaypalLiveVaultSetup'
 import {AdminLiveReadiness} from './AdminLiveReadiness'
 import {AdminLiveReleaseControl} from './AdminLiveReleaseControl'
+import {AdminPaypalLiveConsole} from './AdminPaypalLiveConsole'
 import {normalizePazoDraft,savePazoAdminDraftWithReadback} from '../paypalDraftSave.mjs'
 
 type Env='sandbox'|'live'
@@ -76,6 +77,23 @@ export function AdminPayPalSettings({lang}:Props){
  const liveOAuthReady=LIVE_EDGE_PROVISIONING_RELEASED&&liveConfig?.edge_generation_verified===true
  const livePlanStaged=Boolean(liveConfig?.plan_id&&/^P-[A-Za-z0-9]{10,75}$/.test(liveConfig.plan_id))
  const liveWebhookStaged=Boolean(liveConfig?.webhook_id)
+ // Live credential status comes from the server, not stale draft/Edge flags.
+ useEffect(()=>{
+  if(env!=='live')return
+  let active=true
+  setLiveCredentialsStored(null)
+  void (async()=>{
+   try{
+    const {data,error}=await supabase.rpc('pazo_admin_live_readiness')
+    if(!active)return
+    const v=data as {source?:unknown;checks?:{credentialsStored?:unknown}}|null
+    setLiveCredentialsStored(!error&&v?.source==='pazo_live_admin_readiness_v1'&&
+     typeof v.checks?.credentialsStored==='boolean'?v.checks.credentialsStored:null)
+   }catch{if(active)setLiveCredentialsStored(null)}
+  })()
+  return ()=>{active=false}
+ },[env,liveConfig?.updated_at,liveReadinessRevision])
+
 
  const load=useCallback(async(showLoading=true)=>{
   if(showLoading)setLoading(true)
@@ -212,7 +230,24 @@ export function AdminPayPalSettings({lang}:Props){
   }catch{setError(t('No fue posible verificar las credenciales. Comprueba el entorno y las claves.','Could not verify credentials. Check the environment and keys.'))}
   finally{setBusy(false)}
  }
- return <div className="space-y-4 pb-8" data-pazo-paypal-admin="true">
+ const liveContent = <div data-pazo-paypal-admin="true" className="mx-auto max-w-[780px] space-y-3 pb-8">
+  <nav aria-label={t('Entorno PayPal','PayPal environment')}
+   className="flex gap-1 rounded-[18px] bg-[#F2F6EE] p-1">
+   <button type="button" onClick={()=>{setEnv('sandbox');setRecentAdminMfa(false)}}
+    className="min-h-11 flex-1 rounded-[14px] px-4 text-[13px] font-bold text-[#6F8479]">Sandbox</button>
+   <button type="button" aria-current="page"
+    className="min-h-11 flex-1 rounded-[14px] bg-white px-4 text-[13px] font-black text-[#204E4A] shadow-sm">
+    PayPal Live</button>
+  </nav>
+  <AdminPaypalLiveConsole lang={lang} config={liveConfig??null} loading={loading}
+   error={error} credentialsStored={liveCredentialsStored===true}
+   credentialsChecked={liveCredentialsStored!==null} mfaRecentlyVerified={recentAdminMfa}
+   onVerifyMfa={()=>setRecentAdminMfa(true)}
+   onStored={()=>{setLiveCredentialsStored(true);setLiveReadinessRevision(n=>n+1);void load(false)}}
+   onChanged={()=>{setLiveReadinessRevision(n=>n+1);void load(false)}}
+   history={history.filter(a=>a.environment==='live')}/>
+ </div>
+ const sandboxContent = <div className="space-y-4 pb-8" data-pazo-paypal-admin="true">
   <div className={cardClass}>
    <div className="flex flex-wrap items-center justify-between gap-3">
     <div><h3 className="text-[20px] font-black tracking-tight">{t('Pasarela PayPal','PayPal gateway')}</h3>
@@ -400,4 +435,5 @@ export function AdminPayPalSettings({lang}:Props){
      revision={liveConfig?.updated_at} onChanged={()=>void load(false)}/>}
    </>}
  </div>
+ return env==='live'?liveContent:sandboxContent
 }

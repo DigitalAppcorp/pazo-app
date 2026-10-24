@@ -47,7 +47,7 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
         aria-label={labels[tab]}
         aria-current={isActive ? 'page' : undefined}
         onClick={() => onSelectTab(tab)}
-        className="group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 text-[#5C7470] transition-colors duration-200 hover:text-[#204E4A] focus-visible:bg-[#E1E53F]"
+        className="pointer-events-auto group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 text-[#5C7470] transition-colors duration-200 hover:text-[#204E4A] focus-visible:bg-[#E1E53F]"
       >
         <span
           aria-hidden="true"
@@ -67,7 +67,8 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
   return (
     <nav
       aria-label="Navegación de PAZO"
-      className="relative z-30 shrink-0 bg-[#FAF8F5] px-4 pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
+      data-pazo-floating-nav="true"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-30 bg-transparent px-4 pt-1 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
     >
       <div className="relative grid h-[76px] grid-cols-5 items-center">
         {/* Cream surface cut out against the actual PAZO app background; center Create remains independent. */}
@@ -90,7 +91,7 @@ export const BottomNav = ({ activeTab, onSelectTab, onOpenCreate, labels }: Bott
           onClick={onOpenCreate}
           title={labels.crear}
           aria-label={labels.crear}
-          className="group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 focus-visible:bg-[#E1E53F]"
+          className="pointer-events-auto group relative z-10 flex h-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 pt-1 focus-visible:bg-[#E1E53F]"
         >
           <span
             aria-hidden="true"

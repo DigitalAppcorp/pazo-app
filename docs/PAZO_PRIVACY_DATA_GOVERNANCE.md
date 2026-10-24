@@ -1,3 +1,17 @@
+## Issue85 — relectura QA y certificado técnico (24-oct-2026, instalado; gate cerrado)
+
+Una revisión autorizada puede conservar UUID de petición, generación/evento originales, diagnóstico/estado/attempts anteriores, status/timestamp reales del proveedor y digest de evidencia mínima. Sigue la retención/hold de su inbox financiero (FK que acompaña la purga lícita del padre), sin payload ni pagador. Ningún recheck borra firma o marca processed: solo retorna a pending con historial y tope original de intentos, tras GET auténtico y cero transacciones. El certificado técnico privado conserva commits/bundles/digest/origen/revisiones/fecha conforme al control financiero existente; solo postgres puede certificar, y no concede MFA ni inicia campaña. No nuevas categorías de terceros, secretos, publicidad o analytics.
+
+## Issue85 — cohorte de QA prebeta excluida (24-oct-2026, aplicada: QA8/reales0)
+
+Clasificación privada durable por UUID Auth, motivo fijo prebeta_20261023 y fecha de clasificación; incluye todas las cuentas anteriores al primer deploy oficial 2026-10-23 22:59 UTC. La elegibilidad exige además created_at posterior/al cutoff inmutable y ausencia de allowlist Sandbox. Sirve para excluir tests de invitaciones, CREATE, métricas, ingresos y promociones sin borrar ledger/recibos ni la cuenta admin/MFA. Tabla FORCE RLS sin grants a clientes/servicio; campos solo agregados en Administración. La etiqueta QA usa FK Auth ON DELETE CASCADE; la admisión financiera guarda además el booleano inmutable real_account_at_admission con la retención de su historial original, para que borrar Auth no libere cupos reales ni convierta QA en real; no añade PII ni analytics. No se borran obligaciones reales por clasificarlas QA. La auditoría original sigue disponible al operador hasta conciliar el contrato.
+
+## Issue85 — auditoría privada del contrato QA original (23-oct-2026)
+
+El diagnóstico admite únicamente nombre de error PayPal enumerado y debug_id hexadecimal acotado, sin texto arbitrario. Esa correlación se conserva solo en soporte privado; la evidencia Git elimina debug_id. Una referencia operacional privada puede incluir los IDs originales mínimos para que el titular consulte su propia cuenta PayPal; sin credenciales ni pagador, sin analytics ni publicación. Con 404 se conserva STOP, sin usar ausencia de recurso como cancelación o ausencia de pagos.
+
+GO PO para conciliar antes de L1. Worker interno puede leer únicamente el contrato bound del canary prebeta original mediante generación/plan inmutables, GET de suscripción/plan/transacciones completas/evento firmado. Respuesta mínima: estado, fechas proveedor, contadores y coincidencias; sin pagador, IDs, URLs ni credenciales. No CREATE/CANCEL/grants en esta auditoría. Capacidad de dispatch aleatoria de un uso (120s), no clave permanente en pg_net. RPC de scope solo service_role; dispatcher solo postgres; sin acceso directo cliente. No retención nueva de payload ni analytics. Evidencia financiera original se conserva sin mutarla; el resultado agregado sirve para decidir conciliación/STOP, no equivale a permiso financiero.
+
 > **SMTP instalado, 22-oct-2026:** Gmail elegido y cuenta confirmada por PO; Supabase entrega correos de Auth/recuperación vía Google SMTP cifrado, con secreto solo en configuración privada Auth. Texto público ES/EN actualizado para Google/Gmail, direcciones y contenido de esos correos; no analytics ni transferencia de datos financieros/mascotas. Un correo de recuperación solo al PO confirmado recibido, sin cambiar contraseña. No se inventa plazo de purga del proveedor. Ver `PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
 
 > **22-oct, moderación pública:** parche preparado del lector de beneficios aplica visibilidad de perfiles retirados antes de exponer badge/tema/hito o nombre/foto en muro. No nuevos datos, retención o consentimiento; no borra pagos/historial. SQL20261022021500 instalado con ensayo/CI/postflight, sin datos nuevos. Ver `PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
@@ -321,3 +335,35 @@ expirar o recibir un hold. No habilita telemetría nueva.
 El resumen financiero es una RPC autenticada que revalida `pazo_is_admin()` y
 solo devuelve conteos/importes agregados de evidencia PAZO, sin identidad de
 comprador o proveedor. No es saldo, ingresos netos ni estado de cuenta PayPal.
+
+
+## Gate F17 — retención decidida y controles preparados, no alojados
+
+PO eligió90 días después de resolver soporte. Migraciones versionadas preparan
+limpieza diaria de mensaje/respuesta/nota, sin reiniciar plazo por edición;
+reabrir retira fecha de resolución y baja confirmada elimina por FK. No afirmar
+instalación: postflight confirmó tablas nuevas ausentes. Privacidad ES/EN está
+reconciliada para este incremento y solo se publicará con su backend aprobado.
+
+El envío usa RPC con identidad confirmada y nonce; ningún usuario puede insertar
+una nota/respuesta de administrador, leer casos ajenos o recuperar notas por la
+proyección propia. Límite3/h serializado. UI cancela respuestas antiguas y limpia
+campos privados ante cambio de cuenta. Sin emails/analytics/replay nuevos.
+
+Las cortesías solo crean metadata de acceso/auditoría por destinatario; no venta,
+mes pagado, ledger o métrica financiera. El muro conserva opt-in separado,
+visibilidad por moderación y propietario actual. Preferencias e historial se
+sujetan a baja de destinatario; mantenimiento registra metadata privilegiada y
+huellas, sin copiar anuncios como texto libre en auditoría.
+
+La migración de mantenimiento prepara hook REST y RLS restrictiva para datos,
+Storage protegido y canales privados aplicables; exige autorización para
+instalación y deja modoOFF. Auth, cancelación/conciliación y objetos públicos ya
+emitidos mantienen las excepciones descritas en el informe F17. No se afirma
+apagar Realtime globalmente ni revocar cachés/URLs firmadas ya entregadas.
+Recuperación administrativa compila aparte de App, valida rol en servidor y no
+persiste su sesión. No usar fuente/CI como prueba de una sesión real alojada.
+
+El banner PWA solo guarda localmente la fecha de descarte7 días, sin identidad ni
+tracking. Fuente de verdad actual: `PAZO_F17_BETA_CLOSURE_GATE_20261022.md` y
+matriz F17 al inicio de `PAZO_DATA_INVENTORY.md`.

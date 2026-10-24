@@ -14,7 +14,7 @@ const form=()=>({action:'verify_merchant_id',confirmation:'COMPROBAR COMERCIO LI
  merchantId,...secrets})
 const settings=()=>({active_environment:'sandbox',live_checkout_enabled:false,
  environments:[{environment:'live',plan_id:planId,price_minor:299,
- currency:'USD',interval_unit:'MONTH',return_origin:'https://pazo-app-t83r.vercel.app',
+ currency:'USD',interval_unit:'MONTH',return_origin:'https://pazo-app.vercel.app',
  webhook_id:webhookId},{environment:'sandbox'}]})
 const reservation=()=>({generation:1,planId,state:'reserved',environment:'live',
  webhookId,mayCharge:false})

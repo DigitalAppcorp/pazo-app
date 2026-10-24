@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { EphemeralLocation, PetPlace, PlaceCategory } from '../../../types/pazo'
 import { MapboxMap } from '../map/MapboxMap'
+import { PlaceCardPhoto } from './PlaceCardPhoto'
+import { getCuratedPlacePhoto } from '../curatedPlacePhotography'
 import { IconCheck, IconExplore, IconPaw, IconPin, IconPlus } from '../../../components/icons/PazoIcons'
 
 type CategoryFilter = 'all' | PlaceCategory
@@ -68,13 +70,13 @@ export const ImmersivePlacesStage = ({
     </div>
 
     {/* Gradual blending at all 4 edges. Gradient layers must not eat map gestures. */}
-    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-32 bg-gradient-to-b from-[#FAF8F5] via-[#FAF8F5]/70 to-transparent" />
-    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[270px] bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/65 to-transparent" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-24 bg-gradient-to-b from-[#FAF8F5] via-[#FAF8F5]/45 to-transparent sm:h-32 sm:via-[#FAF8F5]/70" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[165px] bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/40 to-transparent sm:h-[270px] sm:via-[#FAF8F5]/65" />
     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-7 bg-gradient-to-r from-[#FAF8F5]/85 to-transparent" />
     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-7 bg-gradient-to-l from-[#FAF8F5]/85 to-transparent" />
 
     <div className="absolute inset-x-3 top-3 z-20 space-y-2 sm:inset-x-5 sm:top-4">
-      <div className="flex items-center gap-2 rounded-full bg-[#FFFCF6]/90 p-1.5 shadow-[0_6px_25px_rgba(32,78,74,0.09)] backdrop-blur-xl">
+      <div className="flex items-center gap-2 rounded-full bg-transparent p-0 shadow-none">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">{lang === 'es' ? 'Buscar lugar, zona o dirección' : 'Search place, area or address'}</span>
           <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#204E4A]">
@@ -104,7 +106,12 @@ export const ImmersivePlacesStage = ({
       <div
         role="group"
         aria-label={lang === 'es' ? 'Categorías de lugares' : 'Place categories'}
-        className="flex gap-1.5 overflow-x-auto rounded-full bg-white/75 p-1.5 shadow-[0_4px_15px_rgba(32,78,74,0.055)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        data-pazo-category-fade="true"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 20px, black calc(100% - 24px), transparent 100%)',
+          maskImage: 'linear-gradient(to right, transparent 0, black 20px, black calc(100% - 24px), transparent 100%)',
+        }}
+        className="flex gap-1.5 overflow-x-auto bg-transparent px-5 py-1.5 shadow-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categoryOptions.map((option) => (
           <button
@@ -128,8 +135,10 @@ export const ImmersivePlacesStage = ({
       )}
     </div>
 
+    {/* Mapbox renders legally required provider attribution in its own control. */}
+
     {/* Uses current voluntary-location action. Never calls geolocation on mount. */}
-    <div className="absolute bottom-[242px] right-4 z-20 flex flex-col items-end gap-1.5">
+    <div className="absolute right-3 top-[145px] z-20 flex flex-col items-end gap-1">
       <button
         type="button"
         onClick={onUseLocation}
@@ -140,7 +149,7 @@ export const ImmersivePlacesStage = ({
       >
         <IconPin size={20} />
       </button>
-      <span className="max-w-[142px] rounded-full bg-white/85 px-2 py-1 text-right text-[10px] font-bold text-[#204E4A] backdrop-blur-lg">
+      <span className="max-w-[115px] rounded-full bg-white/90 px-2 py-1 text-center text-[11px] font-semibold leading-tight text-[#204E4A]">
         {isLocating
           ? (lang === 'es' ? 'Buscando…' : 'Locating…')
           : userLocation
@@ -149,10 +158,12 @@ export const ImmersivePlacesStage = ({
       </span>
     </div>
 
-    {/* Bottom rail intentionally shows the neighboring card; no vertical list. */}
-    <div className="absolute inset-x-0 bottom-2 z-20">
-      <div className="mb-2 flex items-end justify-between gap-3 px-4 sm:px-6">
-        <div>
+    {/* The cards and title sit above the floating dock. Map and cards never
+        get an extra vertical scrollbar; only the cards scroll horizontally. */}
+    <div data-pazo-places-bottom-rail="true"
+      className="pointer-events-none absolute inset-x-0 bottom-[calc(6.75rem+env(safe-area-inset-bottom))] z-20 flex max-h-[min(44dvh,345px)] flex-col bg-transparent">
+      <div data-pazo-places-fixed-heading="true" className="pointer-events-none relative z-20 mb-2 flex shrink-0 items-end justify-between gap-3 px-4 sm:px-6">
+        <div className="min-w-0 max-w-full">
           <h2 className="text-[15px] font-black leading-tight text-[#204E4A]">
             {lang === 'es' ? 'Lugares disponibles' : 'Available places'}
           </h2>
@@ -160,12 +171,13 @@ export const ImmersivePlacesStage = ({
             {places.length} {lang === 'es' ? 'resultados' : 'results'}
           </p>
         </div>
-        <span className="max-w-[132px] text-right text-[9px] leading-tight text-[#5C7470]">
+        <span className="sr-only">
           {lang === 'es'
             ? 'Tu ubicación se usa solo si la activas; no se guarda.'
             : 'Location is only used with permission; never stored.'}
         </span>
       </div>
+      <div data-pazo-places-card-scroll="true" className="pointer-events-auto min-h-0 overflow-visible bg-transparent">
 
       {isLoading ? (
         <div role="status" className="mx-4 flex min-h-[170px] items-center justify-center rounded-[1.8rem] bg-white/90 px-5 text-[13px] font-bold text-[#204E4A] shadow-sm">
@@ -184,7 +196,7 @@ export const ImmersivePlacesStage = ({
           <p className="mt-2 text-[13px] font-extrabold text-[#204E4A]">
             {lang === 'es' ? 'No encontramos lugares con esos filtros.' : 'No places match those filters.'}
           </p>
-          <p className="mt-1 text-[11px] text-[#5C7470]">
+          <p className="mt-1 text-xs text-[#5C7470]">
             {lang === 'es' ? 'Cambia tu búsqueda o sugiere un lugar para revisión.' : 'Change your search or suggest a place for review.'}
           </p>
         </div>
@@ -193,28 +205,30 @@ export const ImmersivePlacesStage = ({
           role="region"
           aria-label={lang === 'es' ? 'Carrusel horizontal de lugares' : 'Horizontal places carousel'}
           tabIndex={0}
-          className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 pr-12 scroll-smooth overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6"
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 pr-12 scroll-smooth overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-6"
         >
           {places.map((place) => {
             const distance = showDistance(place.distanceKm)
             const categoryName = categoryOptions.find((option) => option.value === place.category)
+            const photoCredit = !place.photoUrl?.trim() ? getCuratedPlacePhoto(place.name) : null
             return (
-              <button
-                type="button"
+              <article
                 key={place.id}
-                onClick={() => onFocusPlace(place.id)}
-                aria-label={lang === 'es' ? `Centrar mapa en ${place.name}` : `Center map on ${place.name}`}
-                className={`group flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] p-2 text-left shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
-                  ? 'bg-[#EAF2E4] '
-                  : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-visible:bg-[#F1F5EC]'}`}
+                className={`pazo-place-card group relative flex w-[215px] max-w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[1.8rem] shadow-[0_10px_27px_rgba(32,78,74,0.11)] transition-colors sm:w-[242px] ${selectedPlaceId === place.id
+                  ? 'bg-[#EAF2E4]'
+                  : 'bg-[#FFFCF6]/95 hover:bg-[#F1F5EC] focus-within:bg-[#F1F5EC]'}`}
               >
-                <div className="relative h-[91px] w-full overflow-hidden rounded-[1.3rem] bg-[#E8EDE7]">
-                  {place.photoUrl
-                    ? <img src={place.photoUrl} alt="" className="h-full w-full object-cover"/>
-                    : <span aria-hidden="true" className="flex h-full items-center justify-center"><IconPin size={32} className="text-[#204E4A]/45"/></span>}
+                <button
+                  type="button"
+                  onClick={() => onFocusPlace(place.id)}
+                  aria-label={lang === 'es' ? `Centrar mapa en ${place.name}` : `Center map on ${place.name}`}
+                  className="flex w-full flex-1 flex-col rounded-[1.8rem] p-2 text-left"
+                >
+                <div className="relative">
+                  <PlaceCardPhoto place={place} lang={lang} />
                   {distance && <span className="absolute bottom-2 right-2 rounded-full bg-white/95 px-2 py-1 text-[10px] font-bold text-[#204E4A]">{distance}</span>}
                 </div>
-                <div className="flex min-h-[72px] flex-col px-1.5 pb-0.5 pt-2">
+                <div className="flex min-h-[64px] flex-col px-1.5 pb-0.5 pt-2">
                   <span className="line-clamp-2 text-[14px] font-black leading-tight text-[#204E4A]">{place.name}</span>
                   <span className="mt-1 truncate text-[10px] font-extrabold uppercase tracking-[0.025em] text-[#68817B]">
                     {categoryName ? (lang === 'es' ? categoryName.es : categoryName.en) : place.category}{place.zone ? ` · ${place.zone}` : ''}
@@ -224,11 +238,28 @@ export const ImmersivePlacesStage = ({
                     {place.activePresenceCount || 0} {lang === 'es' ? 'mascotas presentes' : 'pets present'}
                   </span>
                 </div>
-              </button>
+                </button>
+                {photoCredit&&(
+                  <div className="pazo-photo-credit absolute left-3 top-[96px] z-[2] hidden max-w-[calc(100%-24px)] items-center gap-1 truncate rounded-full bg-[#204E4A]/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-sm">
+                    <a className="truncate hover:underline focus-visible:underline"
+                      href={photoCredit.sourceUrl} target="_blank" rel="noopener noreferrer"
+                      title={lang==='es'?`Foto: ${photoCredit.author}. Wikimedia Commons`:`Photo: ${photoCredit.author}. Wikimedia Commons`}>
+                      {photoCredit.author}
+                    </a>
+                    <span aria-hidden="true">·</span>
+                    <a className="shrink-0 hover:underline focus-visible:underline"
+                      href={photoCredit.licenseUrl} target="_blank" rel="noopener noreferrer"
+                      title={lang==='es'?'Licencia de la fotografía':'Photo license'}>
+                      {photoCredit.license}
+                    </a>
+                  </div>
+                )}
+              </article>
             )
           })}
         </div>
       )}
+       </div>
     </div>
     {children}
   </section>

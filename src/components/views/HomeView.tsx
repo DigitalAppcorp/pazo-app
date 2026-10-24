@@ -547,26 +547,36 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
       <div className="p-4 pt-3 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => onLikePost(post.id)} className={`flex items-center gap-1.5 text-xs font-bold transition-colors cursor-pointer ${post.isLiked ? 'text-[#EC7357]' : 'text-[#5C7470] hover:text-[#204E4A]'}`}>
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 11.5c-2.4 0-4.2 1.6-4.2 3.8 0 2.2 1.8 3.7 4.2 3.7s4.2-1.5 4.2-3.7c0-2.2-1.8-3.8-4.2-3.8z" />
-                <circle cx="7.5" cy="8.5" r="2" /><circle cx="10.5" cy="6" r="1.8" /><circle cx="13.5" cy="6" r="1.8" /><circle cx="16.5" cy="8.5" r="2" />
-              </svg>
+            <button type="button" onClick={() => onLikePost(post.id)}
+              aria-pressed={post.isLiked}
+              aria-label={lang === 'es' ? `Me gusta: ${post.likes}` : `Like: ${post.likes}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-full pr-2 text-[13px] font-extrabold transition-colors ${post.isLiked ? 'text-[#D56554]' : 'text-[#204E4A]'}`}>
+              <span className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${post.isLiked ? 'bg-[#FCE6E2]' : 'bg-[#EEF4E7] hover:bg-[#E2EDD8]'}`}>
+                <IconPaw size={20}/>
+              </span>
               <span>{post.likes}</span>
             </button>
-            <button onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading} className="flex items-center gap-1.5 text-xs font-bold text-[#5C7470] hover:text-[#204E4A] disabled:opacity-50 transition-colors cursor-pointer">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M5 9c0-1.7 1.3-3 3-3 1.1 0 2 .6 2.5 1.5C9.5 8.2 8.5 9.8 8.5 12v1C6.5 13 5 11.3 5 9z" />
-                <path d="M19 9c0-1.7-1.3-3-3-3-1.1 0-2 .6-2.5 1.5 1 0.7 2 2.3 2 4.5v1c2 0 3.5-1.7 3.5-3.5z" />
-                <path d="M8 10c0-2.5 1.8-4.5 4-4.5s4 2 4 4.5v3c0 3-1.8 5.5-4 5.5s-4-2.5-4-5.5v-3z" />
-                <circle cx="12" cy="13" r="1.8" fill="white" /><circle cx="12" cy="12.2" r="0.6" fill="currentColor" />
-                <path d="M21 10l2-.5m-.5 3l2 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-              </svg>
+            <button type="button" onClick={() => onToggleComments(post.id)} disabled={isCommentsLoading}
+              aria-label={lang === 'es' ? `Comentarios: ${displayCommentsCount}` : `Comments: ${displayCommentsCount}`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full pr-2 text-[13px] font-extrabold text-[#204E4A] transition-colors disabled:opacity-50">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF4E7] transition-colors hover:bg-[#E2EDD8]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20.3 11.4a8.3 8.3 0 0 1-8.3 8.3c-1.4 0-2.7-.3-3.9-.9l-4.4 1.4 1.2-4.4A8.3 8.3 0 1 1 20.3 11.4Z"/>
+                  <path d="M8.2 11.6h.1m3.6 0h.1m3.6 0h.1" strokeWidth="2.8"/>
+                </svg>
+              </span>
               <span>{isCommentsLoading ? '...' : displayCommentsCount}</span>
             </button>
           </div>
-          <button onClick={() => onSavePost(post.id)} className="text-[#5C7470] hover:text-[#204E4A] transition-colors cursor-pointer" title={post.isSaved ? 'Guardado' : 'Guardar publicacion'}>
-            <IconBookmark filled={post.isSaved} size={18} />
+          <button type="button" onClick={() => onSavePost(post.id)}
+            aria-pressed={post.isSaved}
+            aria-label={post.isSaved ? (lang === 'es' ? 'Quitar de guardados' : 'Remove saved post') : (lang === 'es' ? 'Guardar publicación' : 'Save post')}
+            className="flex h-11 w-11 items-center justify-center rounded-full text-[#204E4A] transition-colors hover:bg-[#E8EFD9] focus-visible:bg-[#E8EFD9]"
+            title={post.isSaved ? 'Guardado' : 'Guardar publicación'}>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF4E7]">
+              <IconBookmark filled={post.isSaved} size={19} />
+            </span>
           </button>
         </div>
         <p className="text-xs text-[#204E4A] leading-relaxed font-normal">

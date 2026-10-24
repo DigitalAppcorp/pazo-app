@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+ <meta name="robots" content="noindex,nofollow" />
+ <meta name="referrer" content="no-referrer" />
+ <title>PAZO · Recuperación administrativa</title>
+ <style>
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#faf8f5;color:#204e4a;font:16px system-ui,sans-serif}main{max-width:460px;margin:5dvh auto}h1{font-weight:900}label{display:block;margin:18px 0 8px}input,button,a{font:inherit}input:not([type=checkbox]),button{width:100%;min-height:48px;border:0;border-radius:16px;padding:12px;background:#eef3e7;color:#204e4a}button{margin-top:16px;background:#e1e53f;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:default}input[type=checkbox]{appearance:none;flex:0 0 22px;border:0;border-radius:6px;width:22px;height:22px;vertical-align:middle;background:#e9eee1}input[type=checkbox]:checked{background-color:#204e4a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M6 12 2 8l2-2 2 2 6-6 2 2z'/%3E%3C/svg%3E");background-size:16px;background-position:center;background-repeat:no-repeat}label:has(input[type=checkbox]){display:flex;align-items:center;gap:10px;min-height:44px}label:has(input[type=checkbox]:focus-visible){text-decoration:underline}a{display:inline-flex;min-height:44px;align-items:center;color:inherit;border-radius:12px;padding:8px}p{line-height:1.6;overflow-wrap:anywhere}[hidden]{display:none!important}:focus-visible{outline:0;background:#e1e53f;color:#204e4a}button:focus-visible{background:#204e4a;color:white}
+ </style>
+</head>
+<body><main>
+ <h1 id="recovery-title">PAZO · Recuperación</h1>
+ <p id="recovery-intro">Acceso exclusivo de administración para consultar el mantenimiento y restaurar la aplicación. Restaurar el acceso no activa PayPal.</p>
+ <form id="sign-in">
+  <label id="email-label" for="admin-email">Correo de administrador</label><input id="admin-email" type="email" autocomplete="username" required maxlength="254" />
+  <label id="password-label" for="admin-password">Contraseña</label><input id="admin-password" type="password" autocomplete="current-password" required />
+  <button id="login" type="submit">Verificar acceso</button>
+ </form>
+ <section id="controls" hidden aria-label="Restaurar aplicación">
+  <button id="refresh" type="button">Consultar estado</button>
+  <label><input id="confirmation" type="checkbox" /> <span id="confirmation-label">Confirmo que deseo restaurar el acceso a PAZO.</span></label>
+  <button id="restore" type="button" disabled>Restaurar acceso</button>
+  <button id="logout" type="button">Cerrar sesión de recuperación</button>
+ </section>
+ <p id="result" role="status" aria-live="polite"></p>
+ <a id="back" href="/">Volver a PAZO</a>
+</main><script type="module" src="/src/features/maintenance/recovery.ts"></script></body>
+</html>

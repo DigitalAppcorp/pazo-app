@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "pazo-admin-gradual-live",
+    "version": 1,
+    "status": "ACTIVE",
+    "verify_jwt": true,
+    "files": 6,
+    "ezbr_sha256": "b782454b7af16a2b30914182210dea81a9c5b52483d4e2204e655baff4bd74d8",
+    "source": "d9fd7506bed051bbeee4f6f16fb4d0c7df647f57",
+    "exactFileContentsVerified": true
+  },
+  {
+    "slug": "pazo-paypal-live-checkout",
+    "version": 5,
+    "status": "ACTIVE",
+    "verify_jwt": true,
+    "files": 9,
+    "ezbr_sha256": "88067b552851f64812537cddaf955986db97ab7b4529f31ed55dad3c1f98bdb6",
+    "source": "d9fd7506bed051bbeee4f6f16fb4d0c7df647f57",
+    "exactFileContentsVerified": true
+  },
+  {
+    "slug": "pazo-paypal-live-worker",
+    "version": 5,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "files": 29,
+    "ezbr_sha256": "3748b4528b4a1e9a3fc535a913a9c3ee6765ab8ea0c4bd0875fe10e7e7589fc5",
+    "source": "d9fd7506bed051bbeee4f6f16fb4d0c7df647f57",
+    "exactFileContentsVerified": true
+  }
+]

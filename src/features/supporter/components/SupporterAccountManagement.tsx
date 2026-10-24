@@ -1,3 +1,5 @@
+import {useGradualStatus} from '../gradual/useGradualStatus'
+import {GradualCampaignPanelView} from '../gradual/GradualCampaignPanel'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
@@ -51,6 +53,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [cancelReview, setCancelReview] = useState<string | null>(null)
   const [showLiveManagement,setShowLiveManagement] = useState(false)
   const [recoveryMessage,setRecoveryMessage] = useState<string|null>(null)
+  const [confirmLiveAbandon,setConfirmLiveAbandon] = useState(false)
   const operationInFlight=useRef(false)
   const accountEpoch=useRef(0)
   const [accountRevision,setAccountRevision]=useState(0)
@@ -63,7 +66,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         operationInFlight.current=false
         setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
-        setRecoveryMessage(null);setShowLiveManagement(false)
+        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setLiveOfferPhase('loading')
         setAccountRevision(n=>n+1)
       }
       lastOwner=nextOwner
@@ -86,6 +89,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     phase:'loading'|'ready'|'blocked';mode:'initial'|'retry'
   }>({phase:'loading',mode:'initial'})
   const [offerRefreshRevision,setOfferRefreshRevision] = useState(0)
+  // Live offer GET must settle under the yarn-kitten preparation overlay.
+  // No PayPal CREATE request is made until the explicit user click.
+  const [liveOfferPhase,setLiveOfferPhase]=useState<'loading'|'ready'|'blocked'>('loading')
+  const receiveLiveOfferState=useCallback((phase:'loading'|'ready'|'blocked')=>{
+    setLiveOfferPhase(previous=>previous===phase?previous:phase)
+  },[])
   const receiveOfferState=useCallback((phase:'loading'|'ready'|'blocked',
     mode:'initial'|'retry')=>{
     setQaOfferState(previous=>previous.phase===phase&&previous.mode===mode
@@ -106,6 +115,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   }
   const closeRef = useRef<HTMLButtonElement>(null)
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
+  const gradual=useGradualStatus(!qaV2Screen)
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
   // One coherent first paint: server-owned membership, private Sandbox
@@ -119,10 +129,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const offerReadyForCurrentMode=qaOfferState.mode===offerMode
   const preparationPending=membership.kind==='checking'||
     (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&!error)||
+    (!qaV2Screen&&!gradual.value&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='loading')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
     (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
   const preparationUnavailable=membership.kind==='unavailable'||
     (!qaV2Screen&&membership.kind==='inactive'&&error)||
+    (!qaV2Screen&&!gradual.value&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='blocked')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
     (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
   const preparing=preparationPending||preparationUnavailable
@@ -144,6 +156,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       setQaReviewRevision(n=>n+1)
     }
     if(!qaV2Screen&&error)void refresh()
+    if(!qaV2Screen&&liveOfferPhase==='blocked'&&accounts?.length===0){
+      setLiveOfferPhase('loading')
+      setOfferRefreshRevision(n=>n+1)
+    }
     if(offerRequired){
       // Keep the kitten visible while the same mounted published-offer
       // component retries a READ only. Never start PayPal automatically.
@@ -174,7 +190,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     // getSession here is ONLY for obtaining bearer; backend verifies getUser().
     if (sessionError || !session?.access_token) throw Error('authentication_required')
     if(epoch!==accountEpoch.current)throw Error('account_changed')
-    if(!qaV2Screen && !['list','status','cancel','resume','reconcile','abandon','acknowledgement'].includes(String(body.action)))
+    if(!qaV2Screen && !['list','status','cancel','resume','reconcile','abandon','abandon_pending','acknowledgement'].includes(String(body.action)))
       throw Error('live_management_not_released')
     const endpoint=qaV2Screen?'f16-paypal-supporter-account':'pazo-paypal-live-account'
     const response = await fetch(config.url + '/functions/v1/' + endpoint, {
@@ -258,14 +274,15 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     }
   }
 
-  const recover = async (intentId:string,action:'resume'|'reconcile'|'abandon') => {
+  const recover = async (intentId:string,action:'resume'|'reconcile'|'abandon'|'abandon_pending') => {
     const epoch=accountEpoch.current
     if(operationInFlight.current)return
     operationInFlight.current=true
     setBusy(true);setError(false);setRecoveryMessage(null)
     let released=false
     try{
-      const data=await call({action,intentId}) as AccountResult
+      const data=await call(action==='abandon_pending'
+        ?{action,intentId,confirmAbandon:true}:{action,intentId}) as AccountResult
       if(epoch!==accountEpoch.current)return
       if(data.code==='live_original_approval_ready'){
         const target=new URL(data.approvalUrl||'')
@@ -277,6 +294,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         window.location.assign(target.toString())
       }else if(data.code==='live_checkout_slot_released'){
         released=true
+        setConfirmLiveAbandon(false)
         setRecoveryMessage(label('El intento anterior terminó. Para iniciar otro, acepta nuevamente las condiciones.',
           'The earlier request has ended. Accept the terms again to start another.'))
       }else if(data.code==='live_original_subscription_verified'&&
@@ -365,6 +383,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Intentar de nuevo','Try again')}
           </button>
         </div>}
+        {!qaV2Screen&&membership.kind!=='checking'&&membership.kind!=='unavailable'&&<GradualCampaignPanelView lang={lang} status={gradual}/>}
         {membership.kind === 'inactive' && <>
           {paypalReturnKind&&<p role="status" className="mx-auto mb-3 max-w-[420px] rounded-[16px] bg-[#EBF1E5] px-4 py-3 text-center text-[13px] font-medium leading-relaxed text-[#204E4A]">
             {paypalReturnKind==='cancel'
@@ -429,12 +448,49 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </p>}
                   </div>
             ) : accounts?.length===0 ? (
-              <SupporterLiveCheckoutPanel lang={lang}/>
+              <SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}
+                availabilityRevision={String(gradual.value?.myCanCheckout)}
+                onAvailabilityChange={receiveLiveOfferState}/>
             ) : (
-              <p role="status" className="rounded-[16px] bg-[#F0F4E6] p-4 text-center text-[12px] leading-relaxed text-[#476862]">
-                {label('Hay una solicitud PayPal Live anterior que debe revisarse antes de iniciar otra suscripción. No se iniciará otro cobro.',
-                  'A previous PayPal Live request must be reviewed before starting another subscription. No new charge will be started.')}
-              </p>
+              <div data-pazo-live-existing-checkout="recover-original"
+                className="space-y-3 rounded-[18px] bg-[#F0F4E6] p-4 text-center">
+                <p role="status" className="text-[13px] leading-relaxed text-[#476862]">
+                  {label('Ya tienes una solicitud de PayPal. Puedes continuar ese mismo intento; PAZO comprobará primero su estado sin crear otra suscripción.',
+                    'You already have a PayPal request. You can continue that same attempt; PAZO checks its status first without creating another subscription.')}
+                </p>
+                <button type="button" disabled={busy||!accounts?.[0]}
+                  onClick={()=>{const original=accounts?.[0];if(original)void recover(original.intentId,'resume')}}
+                  className="min-h-12 w-full rounded-full bg-[#E1E53F] px-4 py-3 text-[15px] font-black text-[#204E4A] hover:bg-[#EBEF67] focus-visible:bg-[#EBEF67] disabled:opacity-65">
+                  {busy?label('Comprobando con PayPal…','Checking with PayPal…')
+                    :label('Continuar con PayPal','Continue with PayPal')}
+                </button>
+                <p className="text-[12px] leading-relaxed text-[#526F63]">
+                  {label('Si PayPal ya no permite recuperar la aprobación, consulta el estado en «Administrar mi suscripción». No se intentará otro cobro automáticamente.',
+                    'If PayPal can no longer recover the approval, check its status under Manage my subscription. No other charge will be attempted automatically.')}
+                </p>
+                <details className="rounded-[14px] bg-white/70 px-3 py-2 text-left">
+                  <summary className="min-h-9 cursor-pointer py-2 text-[12px] font-bold text-[#204E4A]">
+                    {label('¿Prefieres comenzar de nuevo?','Would you rather start over?')}
+                  </summary>
+                  <p className="mb-2 text-[12px] leading-relaxed text-[#526F63]">
+                    {label('Solo cerraremos el intento sin pagar si PayPal confirma que seguía pendiente y después de verificar que no quedan cobros o eventos por conciliar. Si no podemos comprobarlo, conservaremos tu solicitud.',
+                      'We will close the unpaid request only if PayPal confirms it was still pending and no paid periods or events remain unresolved. Otherwise your request stays protected.')}
+                  </p>
+                  <label className="flex items-start gap-2 text-[12px] font-medium">
+                    <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#204E4A]"
+                      checked={confirmLiveAbandon} onChange={e=>setConfirmLiveAbandon(e.target.checked)}/>
+                    <span>{label('Confirmo que quiero cerrar esta aprobación pendiente.',
+                      'I confirm that I want to close this pending approval.')}</span>
+                  </label>
+                  <button type="button" disabled={busy||!confirmLiveAbandon||!accounts?.[0]}
+                    onClick={()=>{const original=accounts?.[0];if(original)void recover(original.intentId,
+                      original.state==='pending'&&!original.needsReconciliation?'abandon':'abandon_pending')}}
+                    className="mt-3 min-h-11 w-full rounded-full bg-[#EAF0DD] px-3 py-2.5 text-[13px] font-bold text-[#204E4A] disabled:opacity-45">
+                    {label('Comprobar cierre e intentar de nuevo','Verify closure and retry')}
+                  </button>
+                </details>
+                {recoveryMessage&&<p role="alert" className="rounded-[14px] bg-white p-3 text-[12px] leading-relaxed text-[#724927]">{recoveryMessage}</p>}
+              </div>
             )}
           </SupporterOfferB>
           <p className="mx-auto max-w-[420px] px-1 pt-1 text-center text-[12px] leading-relaxed text-[#5C7470]">
@@ -445,7 +501,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
           </button>
         </>}
-        {recoveryMessage&&<p role="status" className="rounded-2xl bg-[#F0F4E6] p-4 text-sm">{recoveryMessage}</p>}
+        {recoveryMessage&&(qaV2Screen||!accounts?.length)&&<p role="status" className="rounded-2xl bg-[#F0F4E6] p-4 text-sm">{recoveryMessage}</p>}
         {(showLiveManagement || acceptances.length>0 || qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
           <details open={qaManagementOpen} onToggle={e=>setQaManagementOpen(e.currentTarget.open)}

@@ -1,3 +1,273 @@
+# ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
+
+**Esta sección tiene prioridad temporal sobre las entradas históricas más abajo que aún dicen “L1 BLOCKED”, “canary/inactive” o exigen conciliar el checkout QA que ya fue eliminado.** Los límites permanentes de seguridad, privacidad, aprobaciones y no modificar main sin GO siguen vigentes.
+
+- **L1 ACTIVADO POR EL PRODUCT OWNER (MFA):** registro alojado auditado en Supabase: release mode=limited, gradual_campaign.lifecycle=active, stage=L1_FIRST_REAL, capacity=1, campaign revision=2, hosted_gate_verified=true, gradual_health()=true y 1 certificado, desde 2026-10-24 01:45:25 UTC. No se activó modo public.
+- **Limpieza QA #88:** 0 legacy checkout intents, 0 webhooks retenidos, 0 recibos Live operativos de esa prueba, 0 períodos pagados. Las 8 cuentas Auth anteriores conservan su clasificación QA y no pueden recibir invitación o figurar como comprador; administrador y MFA intactos. La purga DB no cancela por sí sola una obligación en PayPal externo (su referencia remota histórica devolvió 404).
+- **Tecnología desplegada:** Edge checkout v6, worker v10, admin gradual v2 y webhook existente; sus bundles coinciden con el manifiesto #85. CI 12/12 PASS, flujo HTTPS/PWA sintético validado. La beta oficial publicada es https://pazo-app.vercel.app/.
+- **Ausencia de transacción real:** aún 0 usuarios reales elegibles/admitidos, 0 invitaciones, 0 nuevos intents, 0 eventos de venta y 0 períodos pagados. El sistema está habilitado para admitir al primer comprador **siempre que esa persona consienta en PayPal**, pero no hay un E2E de venta real para dar por PASS. Worker sale/refund/cancel y concesión de beneficios están implementados y probados sintéticamente; cualquier anomalía real requiere revisión.
+- **Código y cierre:** PR #81 permanece DRAFT sin merge en main. Mantener F17 como rama técnica activa; no declarar F16/F17 COMPLETADA hasta reconciliar el DoD y los gates de release aplicables. Marketing está fuera de este brazo técnico.
+- **Evidencia y siguiente gate:** [auditoría técnica L1](PAZO_L1_TECHNICAL_POST_ACTIVATION_20261023.md) y [issue #85](https://github.com/DigitalAppcorp/pazo-app/issues/85). Siguiente control: seguimiento del primer pago **real voluntario** y proyección de ledger/beneficios sin generar compras de prueba, más Scope Closure Review de PR #81.
+
+---
+
+## Issue #85 — GO L1 autorizado, ejecutar tras conciliación (23-oct-2026)
+
+El PO autorizó activar solamente Live limitado L1, con crecimiento 1→5→20→50 por evidencia 1/3/10 y MFA reciente en PAZO. [Issue85](https://github.com/DigitalAppcorp/pazo-app/issues/85) prevalece sobre el NO-GO financiero histórico de #84. Primero resolver suscripción prebeta y CREATED firmado HELD sin borrar evidencias, excluir las ocho cuentas QA y conservar admin/MFA. No iniciar si hay legado incierto/held; no public ilimitado ni pagos sin consentimiento individual. Trabajo técnico en `f16/issue85-live-l1-activation-20261023`, base F17 `67fbf675`. Reporte: `docs/PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md`. No llamar SQL start para evitar GoTrue/MFA.
+
+**Resultado técnico #85 (24-oct-2026):** PR86 y PR87 integrados en F17 `2b63907b`; tres migraciones y Edge worker10/checkout6/admin2 instalados, frontend oficial `fbe6c751` READY. CI final 4 workflows/12 jobs PASS, Chromium51, QA8 excluidos/reales0/admin1/MFA1 conservados. **L1_ACTIVATED BLOCKED** por GET original PayPal404 RESOURCE_NOT_FOUND, aunque plan/evento originales sí corroborados. Inactive/canary/gatefalse/legacy1/HELD1, sin invitaciones ni nuevas compras. Única intervención pendiente: consultar el ID original en PayPal Business Live; después conciliación auténtica, certificado y MFA dentro de PAZO. No llamar SQL start ni borrar evidencia. [Registro](PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md).
+
+## Issue #84 — release beta autorizado, campaña inactiva (23-oct-2026)
+
+**Prevalece sobre los NO-GO hospedados históricos de #82:** el PO autorizó expresamente integrar #83→F17, instalar Supabase/Edge con campaña inactiva, verificar y publicar beta oficial. PR81→main está autorizado únicamente tras los gates técnicos de este release. **No** iniciar campaña, mover canary a limited/public, hacer CREATE PayPal, enviar invitaciones ni modificar el intent previo. [Orden #84](https://github.com/DigitalAppcorp/pazo-app/issues/84).
+
+#83 integrado en F17 mediante `57e8511f`; se cierra además la admisión legacy canary durante inactive antes del primer apply. Registro de auditoría, checksum, backup/rollback y resultados por gate: [PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). Vercel correcto es `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, dominio `pazo-app.vercel.app`; no desplegar al proyecto anterior t83r por su nombre histórico.
+
+**Resultado #84 al 23-oct-2026:** PR83_MERGED / F17_CI_PASS / DB_HOSTED_APPLIED / EDGE_HOSTED_DEPLOYED / OFFICIAL_BETA_DEPLOYED = **PASS**. Beta oficial https://pazo-app.vercel.app/ publicada desde `d9fd7506` (deployment `dpl_HCcdWk8Uo79LxrfCUXgqDzMdHa5J`). SQL fuente 20261023211315 aplicado con historial API 20261023224519; admin v1 / checkout v5 / worker v5, contenidos verificados contra el mismo SHA. Campaña **inactive**, hosted_gate_verified=false, canary rev1/generación1; 1 intent anterior intacto, 0 períodos pagados, 0 invitaciones/outbox. **LIVE_LIMITED_START_NOT_AUTHORIZED**. No se necesitó main; PR81 sigue draft. Postflight público Chromium **51/51 PASS**, CI posterior de `609a91f5` **12/12 PASS** (run40037663360). Visual PO de cambios nuevos/PWA física pendiente, no se declara fase COMPLETADA. Evidencia, límites de observabilidad, pruebas y rollback en el reporte #84. Las secciones inferiores de #82 y anteriores se conservan como historia superada en lo relativo a permisos/instalación.
+
+---
+
+## F16 issue #82 — código gradual implementado en rama (23-oct-2026)
+
+**Estado vigente sobre notas históricas:** `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`, sin declarar F16 COMPLETADA ni beta lanzable. Rama `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT](https://github.com/DigitalAppcorp/pazo-app/pull/83), derivada de F17 `872ff8c3` / PR #81. Motor 1→5→20→50 por 1/3/10 compradores verificados, FIFO, reservas, outbox, revisión voluntaria, Administración MFA/CAS y pruebas PostgreSQL17/UI implementados. **No** SQL/Edge/Vercel producción, cargos/notificaciones reales ni merge a main.
+
+Evidencia por `GR-01…22 / EVT-01…19`, cambios, comandos, commit/CI y estados independientes: [PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md](PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md). [Gate alojado y rollback](PAZO_F16_GRADUAL_HOSTED_GATE_RUNBOOK_20261023.md) preparado; siguiente permiso acotado es instalar/publicar en entorno controlado con campaña **inactiva**, separado del GO financiero. La auditoría inicial solo lectura encontró un intent Live previo abierto: se conserva, inicio bloqueado hasta su conciliación original. QA Sandbox y mapa aprobados no se reabren. Historial inferior conservado; sus etiquetas `NOT_IMPLEMENTED/EXECUTION_NOT_CONFIRMED` quedan superadas para esta rama, no para producción.
+
+---
+
+## F16 — Ejecución encargada a Codex, código completo de apertura gradual (23-oct-2026)
+
+El PO delegó explícitamente **a Codex** el desarrollo de la fase ya decidida. **Orden formal:** [`CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md`](CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md). **Tracking:** [issue #82](https://github.com/DigitalAppcorp/pazo-app/issues/82). Leer AGENTS.md y fuentes GR/EVT sin recortar funcionalidades. Construir en rama aislada derivada de F17 HEAD y PR hacia F17: cola FIFO para interesados, cinco invitaciones/72h, cuotas 1→5→20→50 promocionadas al verificar 1/3/10 compradores reales, cancelación/reanudación Live existente, outbox/idempotencia y STOP, dos notificaciones con revisión de beneficios, Administración y pruebas. No limitarse a plan: entregar software verificable y documentos de cierre.
+
+**Estado REAL AL ASENTAR LA ORDEN:** issue creado pero **no hay prueba de que la ejecución de Codex se haya iniciado**; no confundir encargo con código completado. Producción sigue protegida: sin cambios alojados/activación de cobros/`main`. El PO ya autorizó programación en rama, no aplicar SQL Supabase ni Edge/Vercel producción. **Criterios de cierre:** GR-01..22 y EVT-01..19, CI/PG17 y evidencia/PR; pedir GO específicamente para cualquier mutación hospedada.
+
+---
+
+## F16 — DECISIÓN APROBADA: L4=50 al décimo comprador Live verificado (23-oct-2026)
+
+**PRECEDENCIA SOBRE GATES HISTÓRICOS:** El PO aprobó explícitamente la escalera acumulada **1 → 5 → 20 → 50**. L1→L2: primer comprador con venta Live firmada/conciliada, cobertura y beneficios activos. L2→L3: **tercer** comprador distinto con las mismas pruebas y sin anomalía financiera crítica. **L3→L4: DÉCIMO comprador distinto**, igualmente con pago real y beneficios activos, sin incidencias financieras críticas. PAZO amplía al momento de verificar cada umbral, mediante backend + Supabase y asigna cupos a la cola FIFO; **NO esperar 24 horas/días** ni pedir al administrador que pulse en cada promoción.
+
+**PRESERVACIÓN DE DEMANDA:** cinco invitaciones iniciales, 72h para declarar interés (no timeout de PayPal), entrada espontánea a cola desde la oferta y lista FIFO persistente sin límites de interesados. Estado visible por frontend y dos notificaciones: (1) invitación de apoyo / mismo hilo actualiza «Cupo disponible»; (2) agradecimiento+verificación voluntaria solo tras pago acreditado y beneficios reales. A 25 interesados, algunos esperan hasta que se cumplan 10 transacciones válidas; L4 admite hasta 50. Una solicitud dudosa no libera un cupo sin conciliación. Ninguna garantía de convertir interés en ventas.
+
+**NUEVO GATE DE LANZAMIENTO:** no superar **50 compradores distintos acumulados** sin autorización posterior del PO; apertura `public` ilimitada requiere GO separado con MFA. Tampoco se autoriza instalar SQL/Edge alojado, desplegar producción ni activar compras reales por la mera aprobación del producto. Estado `PRODUCT_L4_APPROVED / EVENT_SPEC_SAVED / F17_BRANCH_IMPLEMENTATION_AUTHORIZED / NO_HOSTED_CHANGE / NO_CHARGE`. Mantener 1 intento Live previo, mapbox Standard, QA Sandbox y recuperación Live ya validada sin cambios.
+
+**CONTRATO DE INGENIERÍA VIGENTE:** [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md) (`EV-01…EV-15`, `EVT-01…EVT-19`) + [`PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md) (`GR-01…GR-22`). Las frases previas **«L4 pendiente»**, **«20 techo final»**, **«24h entre fases»** y «paquete aún no aprobado» son historia SUPERADA. No borrar ideas/scope anteriores ni confundir aprobar estrategia con checkout real listo. PR #81 DRAFT y `main` sin merge.
+
+---
+
+## F16 — PUERTA DE PRODUCTO CERRADA: avance por acción, no por 24h (23-oct-2026)
+
+**DECISIÓN EXPRESA PO:** aprobado el paquete inicial de **5 invitaciones, 72h para responder, FIFO, cuotas acumuladas L1=1→L2=5→L3=20**. Después el PO corrigió el criterio de transición: **NO esperar 24 horas ni días**; cuando backend+Supabase prueben **1 pago Live auténtico y beneficio activo**, L1→L2 sucede automáticamente; cuando se prueben **3 compradores distintos con venta+beneficios**, L2→L3 sucede automáticamente. Ni botón de Administración ni feedback humano debe retrasar cada etapa. Fuente de verdad con contratos de front/Edge/Postgres, durable waitlist, incidentes, valores aprobados y 15 pruebas obligatorias: [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md). Reemplaza menciones previas de 24h en el [documento rector](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md), ahora enlazadas como historia y sin efecto normativo.
+
+**Ventas no descartadas:** la pantalla Amigo de PAZO acepta expresiones de interés incluso sin invitación y conserva cola durable; las cinco notificaciones iniciales no significan techo de interesados. Un slot checkout se reserva atómicamente y no se libera ante estado remoto ambiguo; PayPal abandonado recupera el mismo intent (QA PO ya aprobado). Notificación 1 se actualiza a «Cupo disponible» al turno; notificación 2 únicamente tras pago y beneficio confirmados. **HISTÓRICO SUPERADO:** el límite final vigente ya no es 20: **L4=50 está APROBADO por el PO**, con ampliación automática desde L3 en cuanto se verifique el décimo comprador distinto. `public` sigue sujeto a GO separado. El usuario puede abandonar la cola; su interés no obliga compra. Nunca asegurar conversiones futuras ni promocionar `public` sin GO.
+
+**Gate de desarrollo:** estrategia y parámetros aprobados, implementar en rama F17 conforme AGENTS.md, SEC/RLS/SQL versionado y pruebas; estado actual **SOLO DOCUMENTACIÓN**. SQL/Edge/Vercel producción y autorización de cobros siguen separados. No sustituir documentación histórica ni eliminar los tests existentes. Alcance de cierre: GR-01…GR-22 + EVT-01…EVT-15.
+
+---
+
+## F16 — Paquete de parámetros de apertura gradual, listo para decisión PO (23-oct-2026)
+
+La estrategia B gradual sí está aprobada, **pero no se infieren aprobaciones automáticas de sus parámetros**. Apéndice §15 del documento rector [`PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md) consolida una propuesta concreta revisable: **5 notificaciones iniciales, 72h para declarar interés, FIFO, un solo checkout Live remoto abierto en L1, cupos acumulados 1→5→20, observación 24h, tres compradores distintos pagados/verificados antes de L3, dos CREATE remotos sin resolver como máximo en L2/L3**, pausa automática por anomalías y no promoción a `public` sin GO PO/MFA. Los dos mensajes en bandeja y reporte voluntario permanecen. **ESTADO `RECOMMENDED_FOR_PO_REVIEW`**, no implementado ni habilitado; solicitar aprobación explícita o correcciones de paquete antes de código/SQL. Reutilizar GR-01…GR-22 para cierre sin pérdida de alcance. No solicitar repetición de QA Sandbox ni alterar Mapbox.
+
+---
+
+## F16 — Estrategia aprobada: apertura GRADUAL AUTOMÁTICA PayPal Live (23-oct-2026)
+
+**DECISIÓN DE PRODUCTO (PO):** reemplazar como plan principal la prueba individual anterior por una **apertura de pagos Live por etapas con cupos acumulados, avance automático condicionado a evidencia financiera y pausas automáticas**. El PO no eligió apertura ilimitada ni aprobó modificar producción en esta conversación. Amigo de PAZO mantiene **USD 2.99/mes**, consentimiento voluntario y app gratuita. **Las dos notificaciones de bandeja se conservan**: invitación a apoyar y, tras pago+beneficios verificados, agradecimiento y revisión voluntaria; en una fase posterior podría simplificarse a solo gracias, sin borrar esta idea. Especificación canónica (flujos usuario/PAZO/admin, estados, 22 requisitos rastreables GR-01…GR-22 y gates): [`PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md).
+
+**DECISIONES NO TOMADAS:** escalera propuesta 1→5→20 compradores acumulados y ventanas 24h son **SOLO RECOMENDACIONES**, no configuración aprobada; número simultáneo de invitaciones/lista de espera, fechas, mensajes finales y retención requieren aprobación del PO. La antigua «opción B de selección de invitados» es distinta de la **opción B aprobada de apertura gradual**. Fuente histórica conservada sin borrar: [`PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md`](PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md).
+
+**Gate técnico pendiente:** hoy el SQL únicamente admite `canary` para dueño original o `public` ilimitado, y el paso a `public` exige venta/cancelación canary. Necesita diseño de modo limitado con cuota servidor atómica, no bypass; notificaciones solo soportan `sighting/system/community_join`; conciliación del intento Live abierto y retención antes de instalar. Supabase alojado leído: `canary` rev1, **1 intento Live abierto y 0 períodos Live pagados**. No reusar una concesión admin como evidencia financiera. **Estado:** `PRODUCT_DIRECTION_APPROVED / SPEC_SAVED / NO_CODE / NO_SQL / NO_DEPLOY / NO_PAYPAL_CHANGES`; PR #81 permanece DRAFT y `main` sin merge. No reabrir pruebas Sandbox ni mapa Standard ya aceptado por PO.
+
+**SIGUIENTE:** revisión/aceptación de parámetros concretos y seguridad → autorización independiente de implementar → CI/sandbox aislado sin repetir pruebas de usuario aprobadas → gate SQL/Edge/producción → GO PO explícito para campaña y primer cliente real. La ampliación dentro del techo aprobado será automática; quitar el último techo para `public` requiere GO explícito con MFA. No borrar el documento anterior ni alterar promesas originales sin reconciliar todos los GR.
+
+---
+
+## F16 — Backlog de diseño: piloto automático primer Amigo de PAZO (23-oct-2026)
+
+**PROPUESTA GUARDADA, SIN GO DE IMPLEMENTACIÓN.** Producto propuesto: invitación a apoyar PAZO por **$2.99/mes** mediante **notificación 1** en bandeja y, después de pago real + periodo/beneficios verificados, **notificación 2** que invita voluntariamente a revisar insignia, beneficios y reportar errores. PAZO automatizaría selección de participante, consentimiento y checkout PayPal ya existente, reconciliación, respuestas y dashboard sin contacto manual del administrador. No se activan cobros ni se promete abrir membresías públicamente. Continuidad/DoD, textos ES y estado exacto en [`docs/PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md`](PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md).
+
+**GATE de producto pendiente:** el PO aún no ha escogido **A (invitación uno a uno; recomendada)** o **B (varios interesados, único comprador canary)**; caducidad 72h fue únicamente ejemplo, elegibilidad/retención/texto definitivo pendientes. Un usuario nunca recibe membresía pagada sin PayPal real verificado; un reporte de prueba no cancela ni altera sus derechos. `canary` no puede promoverse automáticamente a `public`; requiere GO del PO. La experiencia de recuperación de checkout ya fue aceptada por el PO con múltiples intentos Live sin pagar; primer cobro real sigue pendiente.
+
+**Estado:** `DOCUMENTED_PROPOSAL_ONLY`. No modifica fase F16/F17 en ejecución, PR #81 DRAFT, main, datos, pagos, Supabase, Vercel o mapa.
+
+---
+
+## F16/F17 — Cierre de regresión de checkout abandonado (23-oct-2026; rama, sin producción)
+
+**DECISIÓN PO:** la recuperación ya validada en Sandbox debe mantenerse en Live. Estado código: `ff954b86` con CI general SUCCESS (`40006044745`), seguridad F17 SUCCESS (`40006044654`) y F16 bootstrap SUCCESS (`40006044657`). La invitación Live conserva el CTA con intent abierto, `resume` reutiliza el original y resuelve terminales con conciliación SQL; `abandon_pending` permite pedir cierre de aprobación sin pago con confirmación del titular, cancelación única en proveedor, GET independiente y liberación solo sin pagos ni eventos pendientes. Los pagos/beneficios siguen protegidos; `ACTIVE/APPROVED/SUSPENDED` no se liberan. Sin modificaciones de Supabase, PayPal ni producción.
+
+**SIGUIENTE GATE:** desplegar el endpoint y frontend solo con GO del PO y verificación previa; probar con sesión autorizada sin completar pago que volver del login no oculta el CTA, que se retoma el original o se cierra de manera segura, y que no hay dos intentos. PR #81 DRAFT, sin merge a `main`; PayPal Live E2E cobro real no verificado. El mapa Standard oficial fue aprobado, no repetir. Soporte E2E posbeta según decisión PO.
+
+---
+
+## F17 — Zona segura compacta y cristal localizado cerca del dock (22-oct-2026 · SOLO RAMA)
+
+**Evidencia del PO:** después del ajuste `bd24213c` sigue habiendo excesivo espacio vacío al final del Feed y Mi mascota. Auditoría de código identificó **dos reservas inferiores acumuladas**: `App.tsx` añade `padding-bottom:9rem+safe-area` (144px base) en el contenedor principal y cada vista social (`HomeView`, `CommunitiesView`, `PetView`) incluye `pb-6` (24px). Total previo: 168px + safe-area sin contar geometría de otros elementos. El dock real tiene una rejilla de 76px más padding vertical (aprox. 92px+safe-area). Una reserva mayor separaba visualmente las últimas tarjetas y herramientas del menú.
+
+**Corrección en PR #81:** reducir únicamente la reserva de `<main>` a **6rem+safe-area** (96px), conservando el `pb-6` propio de los tres módulos (total ≈120px+safe-area, clearance sobre el menú sin hueco excesivo). Mantener intactos el tamaño físico del efecto de cristal, su `blur(20px)`, la barra, `z-index`, `pointer-events`, mapa y módulos financieros. Solo concentrar máscara de desenfoque en el **55% inferior de la misma capa**: transparente al 45%, débil al 56%, progresiva al 70/86% y completa en el borde inferior. Los controles de distancia moderada dejan de quedar borrosos; las últimas acciones deben poder quedar visibles por encima del dock. Sin capas de color, neblina ni corte horizontal.
+
+**Regresión:** `scripts/closure-ui.test.mjs` comprueba ausencia de antiguas reservas 9/13rem, presencia de `pb-6` interno en las tres vistas sociales, máscara localizada, altura y blur anteriores. **Gate pendiente:** CI exacto y aceptación Android de fin de scroll y controles accesibles. No publicación en producción, merge a main, pagos, datos ni infraestructura.
+
+---
+
+## F17 — Menos espacio vacío sin achicar la capa de cristal (22-oct-2026; solo rama)
+
+**Evidencia PO:** en el Preview `83fefec2` las últimas publicaciones del Feed y los controles finales de Mi mascota quedan demasiado separados del dock flotante porque `main` añade `13rem` al final del scroll. El estilo de cristal (20px blur, altura total y extensión 20px hacia arriba) fue aprobado; no hay autorización para reducirlo ni convertirlo en una capa blanca.
+
+**Corrección autorizada:** `src/App.tsx`: bajar solo `padding-bottom` del contenido desplazable de `13rem+safe-area` a `9rem+safe-area` (64px menos de espacio vacío con rem base 16px) y mantener la barra flotante en su capa actual. `src/index.css`: conservar exactamente `height: calc(5.75rem + clamp(84px, 13dvh, 116px) + 20px + env(safe-area-inset-bottom, 0px))` y `backdrop-filter: blur(20px)`; concentrar únicamente la máscara alfa: transparente hasta 30%, difuminado tenue desde 42%, más fuerte progresivamente hasta 100% en el fondo. Así contenido de distancia moderada mantiene nitidez y el último botón puede subir por encima del dock sin neblina ni franja dura. Se aplica solo a Feed, Comunidades y Mi mascota; Mapa/Lugares, paneles y acciones sin cambios.
+
+**Gate:** regresiones de `scripts/closure-ui.test.mjs`, CI exacto, Preview aislado y aceptación visual Android de último botón visible y ausencia de espacio desproporcionado. **No main, producción, PayPal, Supabase ni gastos.**
+
+---
+
+## F17 — Microajuste aprobado: desenfoque 20 px más alto (22-oct-2026; solo rama)
+
+**Aceptación parcial PO:** el nuevo efecto tipo cristal en Feed se ve correcto; pide únicamente iniciar el desenfoque ligeramente más arriba del menú flotante, sin exagerar altura ni alterar estilo, transparencia o nitidez del dock. Se corrigió la afirmación equivocada de falta de acceso: el repositorio sigue conectado y los cambios se ejecutan por GitHub.
+
+**Cambio limitado:** `src/index.css`, `.pazo-scroll-soft-edge`: añadir **20 px** a la altura de la capa desde `bottom:0`, sin cambiar `blur(20px)`, máscara, stops, colores (ninguno), `z-index`, `pointer-events` ni lógica. El inicio visual del desenfoque sube levemente; la zona inferior continúa bajo el menú sin un corte horizontal. La capa sigue condicionada en `src/App.tsx` exclusivamente a `inicio`/Feed, `comunidades` y `mascota`; Mapa excluido. Prueba estática actualizada para fijar este valor.
+
+**Gate:** CI exacto del nuevo commit, Preview independiente y aprobación visual Android. No `main`, no producción, sin cambios en datos, PayPal, Supabase, assets ni navegación.
+
+---
+
+## F17 — Cristal esmerilado, sin neblina ni resplandor blanco (22-oct-2026 · SOLO RAMA)
+
+**Nueva evidencia PO:** el Preview `d90e5040` ya no presenta corte horizontal, pero el área inferior de Feed se ve cubierta por neblina/sombra blanca, no borrosa como cristal. Auditoría CSS confirmó `.pazo-scroll-soft-edge::after` con capa crema hasta `rgba(250,248,245,0.94)`: ocultaba los colores y detalles originales de la foto. El filtro real de 11px resultaba secundario.
+
+**Cambio:** eliminado totalmente `::after`, sus tintes blancos y `isolation:isolate`. Único `::before` transparente con `backdrop-filter: blur(20px)` y `-webkit-backdrop-filter`, máscara `mask-image/-webkit-mask-image` con varios stops crecientes para que el **desenfoque** progrese hacia el borde inferior sin pintar encima. La capa mantiene `pointer-events:none` y `z-20`, continúa tras el dock flotante `z-30` que nunca se difumina. Se monta solo en Feed, Comunidades, Mi mascota, no Mapa. Se conserva el clearance de scroll de 13rem+safe-area para que los botones sigan accesibles. No se tocaron lógica, navegación, modelos, pagos ni backend.
+
+**Regresión:** `scripts/closure-ui.test.mjs` prohíbe la capa crema, exige backdrop blur real, stops progresivos y muestreo no aislado. **GATE**: aprobar CI SHA exacto y validación visual Android de borrosidad real sin neblina; no aceptar UX automáticamente por CI. Sin merge, sin producción, sin cambios Supabase/PayPal.
+
+---
+
+## F17 — Corrección del corte duro en el degradado social (22-oct-2026; SOLO RAMA)
+
+**Evidencia PO:** captura Android del Feed del Preview `17916b0c`: banda difusa rectangular interrumpida abruptamente por una línea horizontal, seguida de imagen completamente nítida antes del dock flotante. **Causa exacta:** la capa CSS `.pazo-scroll-soft-edge` tenía `bottom:calc(5.75rem + safe-area)` y se acababa antes del menú, dejando una segunda franja sin ningún efecto.
+
+**Corrección:** el overlay social `z-20` ahora continúa **hasta `bottom:0`** por detrás del menú `z-30` (que sigue nítido y con cavidad intacta). La altura incluye la zona del dock + una franja superior de difuminado. Máscara del `backdrop-filter` de 11px y color crema con varias paradas alfa progresivas, sin terminación visible entre la foto y el menú. `pointer-events:none` impide bloquear interacciones. Se mantienen únicamente `inicio|comunidades|mascota`, excluyendo mapa, y la reserva inferior de scroll de 13rem para que los últimos botones de Mi mascota sean accesibles.
+
+**Gates:** `scripts/closure-ui.test.mjs` prohíbe volver a posicionar el overlay encima del dock, valida `bottom:0`, máscara, progresividad, orden DOM, tabs y toques. CI SHA exacto + comprobación visual Android pendientes; no aprobar UX por solo CI. Sin merge, producción, cambios financieros ni Supabase.
+
+---
+
+## F17 — Desenfoque inferior progresivo del contenido social (22-oct-2026; SOLO RAMA)
+
+**Decisión PO:** Feed, Comunidades y Mi mascota desvanecen progresivamente publicaciones, tarjetas y controles al acercarse a la zona superior del menú flotante. La capa difumina el contenido con `backdrop-filter` + máscara alfa vertical y añade un degradado crema suave como respaldo. **El dock flotante permanece completamente nítido, su cavidad conserva transparencia y sus botones funcionan igual.** El módulo Lugares/Mapa queda expresamente excluido.
+
+**Implementación:** una única capa `data-pazo-scroll-soft-edge` como hermana de `<main>`, entre el scroll y `<BottomNav>`, renderizada solo para `inicio|comunidades|mascota`; CSS `z-index:20`, menú `z-30`, `pointer-events:none`, altura sensible al viewport y borde inferior por encima del dock. `main` mantiene su scroll, pero extiende el espacio final a `13rem+safe-area` para que botones importantes puedan subir por encima del difuminado al llegar al final. Sin cambio de lógica de Feed/comunidades/perfil, ni de datos, ni de navegación.
+
+**Regresión:** `scripts/closure-ui.test.mjs` comprueba tres módulos, exclusión de Mapa, orden DOM/z-index, máscara, difuminado, pointer-events y clearance. Pendiente prueba CI del SHA exacto y aceptación visual Android; no merge ni producción sin GO, sin cambios de Supabase/PayPal ni proveedores.
+
+---
+
+## F17 — Corrección visual del carrusel de Lugares (22-oct-2026; solo rama)
+
+PO observó solapamiento de las tarjetas con el dock flotante al desplazarlas verticalmente. Causa: scroll vertical artificial dentro del rail y espaciador inferior de 9rem. Corregido en `ImmersivePlacesStage.tsx`: banda horizontal única, sin scroll vertical ni espaciador, posicionada por encima del dock según safe-area; se conservan fotografía, selección, títulos compactos y dock global. Contrato actualizado en `scripts/closure-ui.test.mjs`. **Pendiente:** CI SHA exacto y aceptación visual Android. No fusionar ni publicar en producción sin GO.
+
+---
+
+## F17 — Restitución tipográfica precisa de Lugares a partir de comparativa Android (22-oct-2026 · SOLO RAMA)
+
+El PO comparó captura actual vs aspecto original y aclaró que la orden de ampliar textos correspondía **únicamente** al modal de detalles (Cómo llegar, check-in, reglas), NO al lienzo exterior de Lugares. Diagnóstico con GitHub: en el commit histórico `3e74e102` el título del rail era `text-[15px]`, el contador `text-[11px]`, los filtros `text-[11px]`, los nombres de tarjeta `text-[14px]` y la categoría/presencia `text-[10px]`. En la versión reciente se habían sustituido varios por `text-lg` / `text-xs`, que PAZO redefinió globalmente en `src/index.css` a tamaños superiores, agrandándolos sin intención del PO.
+
+**Corrección aplicada** exclusivamente en `ImmersivePlacesStage.tsx`: restituir exactamente los tamaños numéricos anteriores para título, resultados, filtros y metadatos de tarjetas; títulos de establecimiento permanecen en 14px. Quitar cápsula blanca grande del título conservando separación y encabezado fijo, scroll de tarjetas y safe-area del dock. `MapView.tsx` y la tipografía incrementada del diálogo de detalles permanecen intactos. Nueva prueba `closure-ui.test.mjs` fija estos tamaños y evita que vuelvan a heredar `@theme --text-xs/--text-lg`.
+
+**Estado:** solo código/CI de rama F17 PR #81. El fondo del mapa Mapbox vectorial/3D y las seis ilustraciones locales siguen como gate visual independiente; no confundir con esta corrección de tipografía. Nada de `main`, producción, PayPal, Supabase, nuevas APIs, gastos ni alteraciones de permisos. Próximo gate: CI SHA exacto, Preview independiente y aceptación en Android.
+
+---
+
+## F17 — Android QA: modal de experimentos y mapa sin base (22-oct-2026, PR #81; SOLO RAMA)
+
+**Evidencia PO:** fotografías correctas y glTF de uno de los seis lugares visibles, pero cartografía de fondo completamente gris en Preview SHA `85c28e40`; el título «Lugares disponibles» queda cortado tras desplazar el carrusel; control blanco Mapbox se solapa con botón amarillo de ubicación; créditos Wikimedia demasiado grandes. Al desplazarse al final del detalle, «Funciones en desarrollo» aparece a escala desequilibrada y desaparece la cabecera/cierre del modal. **El usuario NO aprobó esta experiencia.**
+
+**Código nuevo:** modal detalle dividido en header/close fijo y scroll exclusivo de cuerpo, manteniendo check-in y fake doors con idénticas acciones/tracking; jerarquía de tipografía del bloque de experimentos reducida y tarjetas ajustadas a 10–13px explícitos. Rail de Lugares ahora separa su encabezado fijo del scroll vertical de tarjetas, con espaciador de 9rem + safe-area al final del contenido para que el dock no cubra la última tarjeta. Créditos visibles sobre las fotos reducidos a 9px; barra de zoom nativa Mapbox retirada únicamente de la vista inmersiva para no superponerse al control de ubicación. El fondo de Mapbox se conserva; un error recuperable de tesela NO desmonta el canvas. `mapFailure` reconoce HTTP 401/403 incluso cuando la librería no expone URL. Tras fallos de los dos estilos vectoriales, mapa OSM de emergencia se identifica con un mensaje claro; esto **NO representa relieve 3D**.
+
+**Estado/mapa:** se han visto imágenes/3D locales sobre un fondo gris; falta distinguir si la causa es restricción URL del token, permiso de estilo o descarga de tiles en el navegador Android. El token público existe en Vercel para Preview y producción; su autorización efectiva por origen NO se confirmó. La solución final requiere respuesta 200 de estilo + mosaicos + DEM y aceptación del PO; un CI verde no prueba el render visual. Ninguna clave rota, proveedor nuevo, gasto, DB, Edge o pago modificado. Revisar restricciones de referer/domain de Mapbox en el panel sin compartir token.
+
+**Gate:** validar SHA final en CI, luego Preview separado (sin tocar producción) y Android real: cartografía 3D, seis modelos por categoría, cabecera y botón de cierre siempre visibles, todas las tarjetas accesibles, créditos legibles y barra flotante sin tapar. No merge ni producción hasta aprobación expresa.
+
+---
+
+## F17 — Captura Android: raster sin relieve, marcadores ausentes y carrusel recortado (22-oct-2026, SOLO RAMA)
+
+Evidencia del PO: Preview SHA `3707e485`, calles exageradas/relieve 3D ausente, modelos originales no visibles, crédito OSM gigante, área de tarjetas excesiva y recortada. Diagnóstico de código: el error de una sola tesela degradaba directamente Mapbox Standard a raster OSM; el fondo de OSM NO es 3D y la capa nativa glTF solo arrancaba desde zoom 13.25, sin anotaciones DOM independientes. Además, el rail de Lugares tenía altura limitada 300px *incluyendo* padding inferior de 7rem, que recortaba títulos y fotos de sus tarjetas.
+
+**Corrección en PR #81:** secuencia Mapbox Standard 3D → segundo estilo vectorial Streets v12 → raster SOLO como emergencia después de problemas del vector; altura de terreno desde la fuente DEM del proveedor existente en estilos vectoriales con `setTerrain`. Se preservan los seis archivos `public/models/places/*.gltf`, su `model-id` por categoría y selección real; capa 3D desde zoom 12.5. Marcadores de categoría locales ligados a los seis lugares son accesibles, pulsables e independientes de `style.load`, para que no desaparezcan cuando fallan las capas o el token de Mapbox. Errores individuales en raster no eliminan todo el mapa. Los modelos nativos tienen precedencia visual a zoom cercano. Se elimina crédito OSM duplicado de tamaño excesivo: la atribución del motor Mapbox continúa activa. Carrusel horizontal compactado, rail de alto natural limitado y margen de dock como espaciador DENTRO del scroll, no restado de su altura visible. Se conserva dock flotante, fotos reales/ilustrativas licenciadas, check-in, foco, ubicación opcional y navegación.
+
+**GATE SIN CERRAR:** Mapbox Standard y Streets dependen de que el token actual permita el dominio del Preview (posible 403 por restricción de referer); no asumir que la corrección visual de código resuelve la autorización de un tercero. Si ambos estilos vectoriales son denegados, no se puede ofrecer relieve 3D con el raster OSM; corregir scopes/restricciones del token desde Mapbox con el PO, sin revelar ni sustituir credenciales ni contratar otro servicio. CI exacto del SHA final, revisión en Android (modelo glTF visible tras tocar lugar + acercar; cartografía realmente 3D; tarjeta completa + scroll final) y GO explícito requeridos. Sin cambios en producción, SQL/Edge, PayPal, `main` ni nuevo presupuesto.
+
+---
+
+## F17 — Dock flotante global, scroll seguro y detalle legible (22-oct-2026, SOLO RAMA)
+
+Aprobado por PO: escalar tipografía exclusivamente dentro del modal de detalles de Lugares (dirección, especies, reglas, check-in y Cómo llegar), sin alterar la escala de títulos/filtros fuera de él. Se conserva portal a document.body para centrado real. El menú inferior es una capa flotante con fondo exterior transparente en TODOS los módulos y cavidad real sobre la burbuja móvil; solo los controles de la barra interceptan toques. App.tsx reserva 7rem + env(safe-area-inset-bottom) al final del scroll no-mapa para que Mi mascota, Comunidades y Feed no oculten acciones. Lugares tiene ahora rail inferior vertical desplazable (además del carrusel horizontal), con la misma reserva al final; la última tarjeta puede subir totalmente sobre el dock y las tarjetas siguen viéndose por detrás durante el desplazamiento. La atribución del mapa y el botón voluntario de ubicación se desplazan bajo los filtros, fuera del carrusel.
+
+Se conserva Mapbox Standard 3D como estilo primario y los modelos PAZO; solamente se suaviza saturación/contraste del respaldo raster OSM cuando Mapbox falla (ese respaldo no es 3D). Para las seis fotos Commons ya licenciadas, el componente prueba la miniatura directa y, si falla, un único enlace Special:FilePath de ESA MISMA foto antes de mostrar el fondo sin imagen; fotos propias reales siempre prevalecen y cinco siguen claramente identificadas como ilustrativas. Sin proveedores pagados, SQL, credenciales, migraciones ni cambios financieros.
+
+**Evidencia:** código y regresiones versionados en PR #81. **PENDIENTE:** CI exacto del último SHA y validación real en Android de scroll final, cavidad, legibilidad, carga de las seis fotos y mapa 3D. No se autoriza despliegue Preview adicional, merge ni producción hasta GO específico del Product Owner.
+
+---
+
+## F17 — Correcciones tras capturas reales del PO, 22-oct-2026 (rama solamente)
+
+Capturas Android mostraron detalle de Lugares limitado al mapa y texto fijo demasiado pequeño; raster OpenStreetMap con carreteras demasiado contrastadas; fotografías de Wikimedia Commons no visibles por miniaturas /640px; y barra inferior con franja sólida entre las tarjetas. Código corregido: portal al body para modal centrado a escala PAZO con cierre Escape; Mapbox Standard 3D suave y fallback raster solo ante fallos; rutas de miniatura Commons /500px con créditos condicionados a que haya imagen; navegación flotante y transparente sobre tarjetas cuando Mapa está activo, preservando la máscara de la burbuja. Sin alterar PayPal ni Supabase.
+
+**GATE:** código y tests en rama F17; CI, carga fotográfica real, estilo 3D en Android y aceptación PO por verificar. No publicado en producción, no nuevo Preview, no merge a main. No certificar funcionalidad visual solo con pruebas estáticas.
+
+---
+
+## F17 — fotos reales de Lugares sin Google Places, rama PR81, 22-oct-2026
+
+Decisión PO: fotografías reales distintas sustituyen la imagen genérica
+de Unsplash; Google Maps/Places API no requerido. Catálogo curado de seis
+fotografías licenciadas (una exacta Runyon Canyon, cinco ilustrativas
+con etiqueta) con autor, licencia y fuente; las imágenes
+propias de negocio que se publiquen en `photo_url` prevalecerán.
+Sin Google, facturación, SQL, despliegues ni efectos financieros.
+Falta QA CI SHA final y aceptación PO Android, no fusionar ni publicar.
+Véase `docs/PAZO_F17_PLACES_PHOTO_SOURCES_20261022.md`.
+
+---
+
+## F17 UI — ajustes Lugares / feed pendientes de aceptación, 22-oct-2026
+
+PR #81 DRAFT, solo código. Contenedores de filtros transparentes; scroll categorías con bordes degradados; rutas externas nativas con CTA Cómo llegar; reacciones/comentarios redondos y mayores, sin romper acciones. Se retiró el *fallback* de carretera repetida: no existen fotos particulares registradas para los 6 lugares. Integración de Google Place Photos BLOQUEADA a la espera de autorización de API con facturación y revisión de licencias; no fingirla terminada. **NO desplegar en producción**. CI, prueba de teléfono y aprobación PO pendientes. Véase `docs/PAZO_F17_PLACES_FEED_POLISH_20261022.md`.
+
+---
+
+## F17 EN CURSO — continuación Codex sobre PR81, 22-oct-2026 Guatemala
+
+Se recuperó HEADa7b1f2c8 de la rama F17 y se conservó el trabajo de ChatGPT.
+Código/ensayo local completados: soporte RPC idempotente, notas privadas y
+respuesta del titular, retención90 días elegida por PO; cortesías con historial,
+nonce y expiración/revocación; mantenimiento REST/RLS/Storage, admisión Edge y
+recuperación independiente; sesiones privadas protegidas al cambiar cuenta.
+PWA, viewport100dvh y mapa Streets ya programados se conservaron; errores del
+mapa ahora se clasifican sin registrar URLs/tokens.
+
+Tres migraciones versionadas103706/103707/103708, NO APLICADAS. Cinco cuerpos
+alojados auditados contra Git; ensayo PG17 con ROLLBACK/COMMIT/historial y
+roles reales PASS. Concurrencia12→3/8→1/8→1; `verify:prepreview`1818 PASS,
+contratos16 PASS, Chromium local390/1440 **40 verificaciones PASS** (recuperación
+compilada con App bloqueada); no Auth/PayPal real ni instalación física.
+Informe vigente y Scope Closure: `docs/PAZO_F17_BETA_CLOSURE_GATE_20261022.md`.
+
+Postflight alojado: F17 ausente. F16 **canary/rev1**, Live=true/kill=false,
+credenciales válidas y0 intentos/períodos; avance externo preservado sin tocar
+finanzas ni pedir guardar otra vez las claves. QA Edge26 JWT ON auditado:
+19/20 archivos exactos y1 solo comentarios; despliegue dirigido sigue pendiente.
+
+Bloqueo real: runtime3 permite solo api.supabase.com. Git HTTPS permite push;
+API GitHub/Vercel/Mapbox no. Red preparada en borrador (incluye previews
+*.vercel.app), requiere revisión/guardado/publicación del entorno por PO;
+no otro token. Después verificar CI exacto, gate F17 de SQL/publicación,
+backend/Edge/HTTPS, mapa/PWA física y aceptación antes de merge/main.
+No declarar F17 COMPLETADA ni LIVE_CANARY_PASS. Notas inferiores de F17 en
+borradores y finanzasOFF son checkpoints anteriores.
+
+---
+
 ## Estado beta técnico publicado — 22-oct-2026 UTC (último corte verificado)
 
 **Frontend Production READY:** `dpl_DFkGfivtBoK5CV3jvL4V2yJV2pSW` SHA `b5547243bfaeb6c17b8bd3929f05468273b9576b`; PR78 (labels Auth) y PR79 (Chromium E2E más estricto) integrados. GitHub Actions [run39733214540](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39733214540) **7/7 jobs PASS**, Chromium 390/1440 **29/29 PASS** incluyendo navegación pública de registro/login/recuperación, retorno/cancelación no financiera y worker PWA real; no usuario autenticado ni dispositivo físico. Backend: migración beneficios públicos Live-only aplicada y QA conservado; Vault Edge v2 ACTIVE. Certificado técnico v3 registrado en DB para **el SHA desplegado** con digest `03aeb1b37a465a52f0de6bf1963b46d258c5a9ef1848bb46775809bc30fabf9a`, BEGIN/ROLLBACK y COMMIT PASS, `artifact_ready=true`; versiones antiguas de evidencia preservadas.

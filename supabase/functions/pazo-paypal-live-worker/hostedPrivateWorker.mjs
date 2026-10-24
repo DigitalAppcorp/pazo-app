@@ -1,3 +1,6 @@
+import {createGradualMaintenance} from './gradualMaintenance.mjs'
+import {createOriginalQaReconcile} from './qaOriginalReconcile.mjs'
+import {createOriginalQaAudit} from './qaOriginalAudit.mjs'
 import {createPazoLivePrivateWorkerHttp} from './privateWorkerHttp.mjs'
 import {createPazoLiveServiceRpc} from '../pazo-paypal-live-checkout/liveSqlServiceAdapters.mjs'
 import {createPazoLiveInboxLease} from '../pazo-paypal-live-webhook/liveInboxLease.mjs'
@@ -16,12 +19,24 @@ export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>und
   const historical=createPazoLiveVaultHistoricalVerification({supabaseUrl:projectUrl,serviceRoleKey,fetchImpl,released:true})
   const verifyAcceptedConsent=async c=>c?.affirmativeConsent===true&&readPazoLiveAcceptedOffer(c)!==null
   const options={released:true,lease,rpc,historical}
+  const maintain=createGradualMaintenance({rpc,readWebhookReady:async()=>{
+   const response=await fetchImpl(projectUrl+'/functions/v1/pazo-paypal-live-webhook',{
+    method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8000),
+    headers:{apikey:getEnv('SUPABASE_ANON_KEY'),Accept:'application/json'}})
+   if(!response.ok||response.status!==200)return false
+   const status=await response.json()
+   return status?.source==='pazo_live_webhook_readiness_v1'&&status.ready===true&&status.mayGrantBenefits===false
+  }})
+  const workers={sale:createPazoLiveDurableSaleWorker({...options,verifyAcceptedConsent}),refund:createPazoLiveDurableRefundWorker(options),lifecycle:createPazoLiveDurableLifecycleWorker(options),dispute:createPazoLiveDurableDisputeWorker(options)}
+  const auditOriginalQa=createOriginalQaAudit({rpc,historical})
   return createPazoLivePrivateWorkerHttp({released:true,
+   auditOriginalQa,reconcileOriginalQa:createOriginalQaReconcile({rpc,historical,auditOriginal:auditOriginalQa,lifecycle:workers.lifecycle}),
    admit:({invoker})=>rpc('workerAdmit',{p_invoker:invoker}),
-   complete:({leaseToken,outcome,code,build})=>rpc('workerComplete',{
-    p_lease:leaseToken,p_outcome:outcome,p_code:code,p_build:build}),
-   workers:{sale:createPazoLiveDurableSaleWorker({...options,verifyAcceptedConsent}),
-    refund:createPazoLiveDurableRefundWorker(options),lifecycle:createPazoLiveDurableLifecycleWorker(options),
-    dispute:createPazoLiveDurableDisputeWorker(options)}})
+   complete:async({leaseToken,outcome,code,build,maintenanceAllowed=false})=>{
+    const done=await rpc('workerComplete',{p_lease:leaseToken,p_outcome:outcome,p_code:code,p_build:build})
+    if(done===true&&maintenanceAllowed){try{await maintain({outcome})}catch{/* Durable rollout events retry next authenticated batch; never repeat payment. */}}
+    return done
+   },
+   workers})
  }catch{return createPazoLivePrivateWorkerHttp()}
 }

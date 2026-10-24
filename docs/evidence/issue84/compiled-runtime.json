@@ -1,0 +1,17 @@
+{
+  "origin": "https://pazo-app.vercel.app",
+  "source": "d9fd7506bed051bbeee4f6f16fb4d0c7df647f57",
+  "assets": [
+    "/assets/app-BmMB9Bt5.js",
+    "/assets/App-BgAlUGyo.js",
+    "/assets/publicConfig-BuC15E42.js"
+  ],
+  "checks": {
+    "index200": true,
+    "integratedGradualRPC": true,
+    "integratedAdminRPC": true,
+    "legalDateUpdated": true,
+    "numericBuild": true
+  },
+  "cacheControl": "public, max-age=0, must-revalidate"
+}

@@ -51,7 +51,9 @@ test('F16 product page retains no-purchase path and real server-verified checkou
  assert.match(page,/Ahora no, seguir usando PAZO/)
  assert.match(page,/onClick=\{onClose\}/)
  const live=readFileSync(new URL('../components/SupporterLiveCheckoutPanel.tsx',import.meta.url),'utf8')
- assert.match(page,/<SupporterLiveCheckoutPanel lang=\{lang\}\/>/)
+ assert.match(page,/<SupporterLiveCheckoutPanel lang=\{lang\} key=\{offerRefreshRevision\}/)
+ assert.match(page,/onAvailabilityChange=\{receiveLiveOfferState\}/)
+ assert.match(page,/liveOfferPhase==='loading'/)
  assert.match(live,/Las suscripciones todavía no están disponibles/)
  assert.match(page,/qaV2Screen \?/)
  assert.match(page,/SandboxCheckoutQaPanel/)
@@ -242,7 +244,8 @@ test('F16 QA V2 one-attempt owner cannot be offered a second Sandbox subscriptio
  assert.ok(page.includes('Tu pago quedó pendiente'))
  const live=readFileSync(new URL('../components/SupporterLiveCheckoutPanel.tsx',import.meta.url),'utf8')
  assert.ok(live.includes('Continuar con PayPal'),'Live has a separate backend-gated PayPal CTA')
- assert.ok(page.includes('<SupporterLiveCheckoutPanel lang={lang}/>'),'Live and Sandbox checkout remain separate')
+ assert.ok(page.includes('<SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}'),'Live and Sandbox checkout remain separate')
+ assert.ok(page.includes('onAvailabilityChange={receiveLiveOfferState}'),'Live offer readiness finishes under the preparing screen')
  assert.ok(page.includes("qaPayAction==='checking'"))
  assert.ok(page.includes('onClick={continueExistingQaRequest}'))
  assert.ok(management.includes("action:'resume_approval'"))
@@ -275,7 +278,7 @@ test('F16 checkout 409 cannot trap buyer in a disabled PayPal CTA',()=>{
 })
 
 
-test('F16 localhost Sandbox enables presentation but never synthesizes paid rights',()=>{
+test('F16 Live L1 defaults to server-verified presentation; Sandbox only expands local QA UI',()=>{
  const policy=readFileSync(new URL('../supporterUiRelease.ts',import.meta.url),'utf8')
  const hook=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
  const account=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
@@ -283,7 +286,7 @@ test('F16 localhost Sandbox enables presentation but never synthesizes paid righ
  assert.ok(policy.includes('import.meta.env.DEV'))
  assert.ok(policy.includes("VITE_PAZO_F16_SANDBOX_QA_UI === 'true'"))
  assert.ok(policy.includes("['localhost','127.0.0.1']"))
- assert.ok(policy.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'"))
+ assert.ok(policy.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED !== 'false'"))
  assert.ok(!policy.includes('localStorage')&&!policy.includes('mayGrantBenefits:true'))
  assert.ok(hook.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"))
  assert.ok(hook.includes('SUPPORTER_PAYMENT_VERIFIED_EVENT'))
@@ -490,9 +493,9 @@ test('F16 Card Central PO image layout replaces the sales-first offer in mobile 
  const shell=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
  const checkout=readFileSync(new URL('../components/SandboxCheckoutQaPanel.tsx',import.meta.url),'utf8')
  assert.ok(design.includes('data-pazo-supporter-layout="card-central"'))
- assert.ok(design.includes('relative pt-[57px]')&&design.includes('rounded-[30px] bg-white'))
+ assert.ok(design.includes('relative pt-[57px]')&&design.includes('rounded-[27px] bg-white'))
  assert.ok(design.includes('left-1/2 top-[-62px]')&&design.includes('amigo-pazo-inicio.png'))
- assert.ok(design.includes('text-center shadow-[0_12px_34px'),'Main invitation is centered, not split hero')
+ assert.ok(design.includes('text-center shadow-[0_9px_26px'),'Main invitation is centered, not split hero')
  assert.ok(design.includes('grid-cols-4 gap-1.5'),'Gratitude is exactly four side-by-side icons')
  assert.ok(!design.includes('grid-cols-1 gap-1.5'),'No former list of sales benefit cards')
  assert.ok(design.includes('Ayuda a que PAZO siga creciendo'))
@@ -604,4 +607,31 @@ test('F16 abandoned checkout has one clear payment action, visible failure, and 
  assert.ok(account.includes('lastHandledResumeRequest.current=resumeRevision'),'One user press is processed once')
  assert.ok(state.includes('mayStartNewCheckout:false'),'A 404 cannot become a duplicate subscription')
  assert.ok(!page.includes('setQaV2AccountState(\'none\')'),'No synthetic new-buyer admission')
+})
+
+test('F16 Live abandoned login keeps original approval action visible without creating a duplicate subscription',()=>{
+ const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
+ const recovery=readFileSync(new URL('../../../../supabase/functions/pazo-paypal-live-account/liveOwnerRecovery.mjs',import.meta.url),'utf8')
+ const liveStart=page.indexOf('data-pazo-live-existing-checkout="recover-original"')
+ const liveEnd=page.indexOf('</SupporterOfferB>',liveStart)
+ assert.ok(liveStart>0&&liveEnd>liveStart,'Existing Live request must keep an in-card recovery surface')
+ const surface=page.slice(liveStart,liveEnd)
+ assert.ok(surface.includes("label('Continuar con PayPal','Continue with PayPal')"),
+  'Live checkout does not replace its CTA with a warning after an abandoned login')
+ assert.ok(surface.includes("recover(original.intentId,'resume')"),
+  'A second click resumes only the original server-owned PayPal request')
+ assert.ok(surface.includes('disabled={busy||!accounts?.[0]}'),
+  'No original request may be acted on while the list is unavailable')
+ assert.ok(surface.includes('recoveryMessage&&<p role="alert"'),
+  'Provider failures must be visible at the original payment surface')
+ assert.ok(surface.includes("original.state==='pending'&&!original.needsReconciliation?'abandon':'abandon_pending'"),
+  'An unclaimed request is released without PayPal while a bound request requires provider confirmation')
+ assert.ok(!surface.includes("action:'subscribe'")&&!surface.includes('crypto.randomUUID()'),
+  'Recovery must never create a new paid request or consent')
+ assert.ok(recovery.includes("if(remote.status==='APPROVAL_PENDING')"))
+ assert.ok(recovery.includes("code:'live_original_approval_ready'"))
+ assert.ok(recovery.includes("if(action==='reconcile'||(action==='resume'&&"),
+  'Continue may retire only a terminal original as Sandbox recover_retry does')
+ assert.ok(recovery.includes("['CANCELLED','EXPIRED'].includes(remote.status)"),
+  'Pending, active and unverified provider statuses must never free the checkout slot')
 })

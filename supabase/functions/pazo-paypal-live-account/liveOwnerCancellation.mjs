@@ -17,7 +17,8 @@ const verified=(remote,original)=>{
  return remote.status
 }
 export function createPazoLiveOwnerCancellation({
- readProviderStatus,claimCancel,finishCancel,postCancel
+ readProviderStatus,claimCancel,finishCancel,postCancel,
+ allowPendingApproval=false
 }={}){
  return async function cancel({ownerId,original}={}){
   if(typeof ownerId!=='string'||!original||
@@ -50,7 +51,10 @@ export function createPazoLiveOwnerCancellation({
    return {confirmed:true,code:'future_renewals_cancelled',
     providerStatus:'CANCELLED'}
   }
-  if(status!=='ACTIVE'&&status!=='SUSPENDED')
+  // A buyer may close an unapproved request only through an explicit,
+  // isolated owner confirmation. Ordinary cancellation stays ACTIVE/SUSPENDED.
+  if(allowPendingApproval===true ? status!=='APPROVAL_PENDING' :
+     status!=='ACTIVE'&&status!=='SUSPENDED')
    return review('live_cancel_not_available')
   // A previous cancellation can have reached PayPal even if PAZO timed out.
   // Never issue another POST after claimed, review_required or confirmed.

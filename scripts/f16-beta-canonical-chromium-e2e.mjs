@@ -1,9 +1,12 @@
 // PAZO beta: real, read-only Chromium smoke against deployed canonical HTTPS.
 // Public signup is inspected without submission. Synthetic PayPal return tokens
 // never hit a provider API, no account/payment/secret is created or logged.
-import {chromium} from 'playwright'
+import {createRequire} from 'node:module'
+import {mkdir} from 'node:fs/promises'
+const require=createRequire(import.meta.url)
+const {chromium}=require(process.env.PAZO_PLAYWRIGHT_MODULE||'playwright')
 
-const ORIGIN='https://pazo-app-t83r.vercel.app'
+const ORIGIN='https://pazo-app.vercel.app'
 const SENTINEL='PAZO_NONPAYMENT_CALLBACK_PROBE'
 const checks=[]
 const failures=[]
@@ -18,11 +21,16 @@ async function waitForWelcome(page){
  await page.getByRole('button',{name:/^(Comenzar|Get started)$/}).waitFor({state:'visible',timeout:30000})
  await page.waitForLoadState('networkidle',{timeout:12000}).catch(()=>{})
 }
-const browser=await chromium.launch({headless:true})
+const output=process.env.PAZO_CANONICAL_SCREENSHOTS
+if(output)await mkdir(output,{recursive:true})
+const browser=await chromium.launch({headless:true,args:['--no-sandbox'],
+ ...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{}),
+ ...(process.env.HTTPS_PROXY?{proxy:{server:process.env.HTTPS_PROXY}}:{})})
 try{
- for(const [kind,size] of Object.entries({mobile:{width:390,height:844},desktop:{width:1440,height:900}})){
-  const context=await browser.newContext({viewport:size,deviceScaleFactor:kind==='mobile'?2:1,
-   isMobile:kind==='mobile',hasTouch:kind==='mobile',locale:'es-US',
+ for(const [sizeName,size] of Object.entries({mobile:{width:390,height:844},desktop:{width:1440,height:900}}))for(const lang of ['es','en']){
+  const kind=sizeName+'_'+lang
+  const context=await browser.newContext({viewport:size,deviceScaleFactor:sizeName==='mobile'?2:1,
+   isMobile:sizeName==='mobile',hasTouch:sizeName==='mobile',locale:'es-US',
    serviceWorkers:'allow'})
   const page=await context.newPage()
   const pageErrors=[]
@@ -34,6 +42,8 @@ try{
   })
   try{
    await waitForWelcome(page)
+   if(lang==='en'){await page.getByRole('button',{name:'Cambiar a inglés',exact:true}).click();await page.getByRole('button',{name:'Get started',exact:true}).waitFor()}
+   if(output)await page.screenshot({path:output+'/'+kind+'-welcome.png',fullPage:true})
    check(kind+'_react_welcome',Boolean(await page.locator('#root').textContent())&&
     await page.getByRole('button',{name:/^(Comenzar|Get started)$/}).count()===1)
    const layout=await page.evaluate(()=>({document:document.documentElement.scrollWidth,

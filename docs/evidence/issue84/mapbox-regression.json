@@ -1,0 +1,30 @@
+{
+  "source": "f17_live_mapbox_source_components",
+  "physicalAndroid": false,
+  "installedPwa": false,
+  "result": "PASS",
+  "checks": [
+    "official Standard style retained",
+    "Mapbox container and canvas occupy mobile viewport",
+    "actual imported Standard basemap features rendered",
+    "Mapbox custom markers retain accessible button roles",
+    "six public catalogue cards retained",
+    "actual provider tiles HTTP200",
+    "normal Mapbox requests authorized",
+    "existing place photography retained",
+    "map canvas drag moves camera",
+    "map wheel zoom increases camera zoom",
+    "map right drag adjusts pitch",
+    "native PAZO glTF layer renders place features up close",
+    "original PAZO glTF loaded HTTP200",
+    "carousel card selects and focuses real map",
+    "accessible map marker selects place",
+    "horizontal place carousel scrolls",
+    "tile403 remains a truthful visible error",
+    "tile403 never switches to a fallback basemap",
+    "cards remain available during tile denial",
+    "retry restores Standard streets and clears error",
+    "no browser JavaScript exceptions",
+    "no unexpected remote services or database requests"
+  ]
+}

@@ -3,7 +3,7 @@ import {inspectLivePaypalResources,liveWebhookUrlForGeneration}
  from '../pazo-admin-paypal-validate/liveProviderReadOnly.mjs'
 import {readLivePaypalMerchantIdentity} from '../pazo-admin-paypal-validate/liveMerchantIdentityReadOnly.mjs'
 const PATHS=new Set(['/functions/v1/pazo-admin-paypal-live-inspect','/pazo-admin-paypal-live-inspect'])
-const ORIGINS=new Set(['http://localhost:5173','http://127.0.0.1:5173','https://pazo-app-t83r.vercel.app'])
+const ORIGINS=new Set(['http://localhost:5173','http://127.0.0.1:5173','https://pazo-app.vercel.app','https://pazo-app-t83r.vercel.app'])
 const PLAN=/^P-[A-Z0-9]{12,40}$/
 const HOOK=/^[A-Za-z0-9_-]{8,100}$/
 const KEY=/^[A-Za-z0-9_-]{20,512}$/
@@ -86,7 +86,7 @@ export function createLiveResourceInspection({released=false,authenticateAdmin,
    if(settings?.active_environment!=='sandbox'||settings.live_checkout_enabled!==false||
     live?.length!==1||!PLAN.test(live[0].plan_id||'')||live[0].price_minor!==299||
     live[0].currency!=='USD'||live[0].interval_unit!=='MONTH'||
-    live[0].return_origin!=='https://pazo-app-t83r.vercel.app')return null
+    live[0].return_origin!=='https://pazo-app.vercel.app')return null
    const reservation=await readReservation({actorId:actor.id,planId:live[0].plan_id})
    if(reservation?.planId!==live[0].plan_id||reservation.state!=='reserved'||
     reservation.environment!=='live'||reservation.mayCharge!==false||

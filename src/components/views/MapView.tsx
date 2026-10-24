@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type {
   ActivePlaceCheckin,
   EphemeralLocation,
@@ -22,6 +23,7 @@ import { ImmersivePlacesStage } from '../../features/places/components/Immersive
 import { SuggestPlaceModal } from '../modals/SuggestPlaceModal'
 import { PlaceFeatureExperimentCard } from '../validation/PlaceFeatureExperimentCard'
 import { IconClose } from '../icons/PazoIcons'
+import { buildPlaceDirectionsUrl } from '../../features/places/placeDirections'
 
 interface MapViewProps {
   currentPet: Pet | null
@@ -76,6 +78,15 @@ export const MapView = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
+  useEffect(() => {
+    if (!selectedPlaceId) return
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedPlaceId(null)
+    }
+    window.addEventListener('keydown', onEscape)
+    return () => window.removeEventListener('keydown', onEscape)
+  }, [selectedPlaceId])
+
   // A new request also re-centers repeated taps on the same carousel card.
   const [mapFocusRequest, setMapFocusRequest] = useState<{ placeId: string } | null>(null)
   const [activeCheckin, setActiveCheckin] =
@@ -422,23 +433,27 @@ export const MapView = ({
           loadError={loadError}
           onRetry={() => void loadPlaces()}
         >
-        {selectedPlace && (
+        {selectedPlace && createPortal(
+          <div data-pazo-place-backdrop="true"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-[#163A34]/50 px-4 py-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))] backdrop-blur-[2px]"
+            onClick={(event) => { if (event.target === event.currentTarget) setSelectedPlaceId(null) }}>
           <section
             key={selectedPlace.id}
             role="dialog"
-            aria-modal="false"
+            aria-modal="true"
             aria-label={lang === 'es' ? 'Detalle del lugar' : 'Place details'}
-            className="absolute inset-x-3 bottom-3 top-[102px] z-40 overflow-y-auto overscroll-contain rounded-[2.15rem] bg-[#FFFCF6]/98 p-5 shadow-[0_12px_44px_rgba(32,78,74,0.2)] backdrop-blur-xl motion-safe:animate-[slideUpFade_320ms_ease-out_both]"
+            data-pazo-place-details="true"
+            className="flex w-full max-w-[430px] max-h-[min(88dvh,790px)] min-h-0 flex-col overflow-hidden rounded-[2.15rem] bg-[#FFFCF6] p-3 shadow-[0_18px_55px_rgba(15,50,42,0.22)] sm:p-4 motion-safe:animate-[slideUpFade_250ms_ease-out_both]"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+            <div data-pazo-place-fixed-header="true" className="relative z-10 flex shrink-0 items-start justify-between gap-3 rounded-2xl bg-[#FFFCF6] px-2 pb-3 pt-2">
+              <div className="min-w-0">
+                <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#5C7470]">
                   {categoryLabel(selectedPlace.category, lang)}
                 </p>
-                <h3 className="mt-1 text-lg font-black text-[#204E4A]">
+                <h3 className="mt-1 text-[22px] font-black text-[#204E4A]">
                   {selectedPlace.name}
                 </h3>
-                <p className="mt-1 text-[10px] text-[#5C7470]">
+                <p className="mt-1 text-sm text-[#5C7470]">
                   {selectedPlace.address}
                 </p>
               </div>
@@ -446,6 +461,7 @@ export const MapView = ({
               <button
                 type="button"
                 onClick={() => setSelectedPlaceId(null)}
+                autoFocus
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F5] text-[#204E4A]"
                 aria-label={lang === 'es' ? 'Cerrar detalle' : 'Close details'}
               >
@@ -453,13 +469,33 @@ export const MapView = ({
               </button>
             </div>
 
+            <div data-pazo-place-detail-scroll="true" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-[calc(1rem+env(safe-area-inset-bottom))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <a
+                data-pazo-directions="true"
+                href={buildPlaceDirectionsUrl(selectedPlace,
+                  typeof navigator !== 'undefined' ? navigator.userAgent : '')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-[#204E4A] px-4 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_14px_rgba(32,78,74,0.12)] transition-colors hover:bg-[#2C665B] focus-visible:bg-[#2C665B]"
+                aria-label={lang === 'es' ? `Cómo llegar a ${selectedPlace.name}` : `Directions to ${selectedPlace.name}`}
+              >
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 6.5h8l4.5 4.5-8.5 8.5-8.5-8.5z"/>
+                  <path d="M8.5 11.5h7M13 8.5l3 3-3 3"/>
+                </svg>
+                {lang === 'es' ? 'Cómo llegar' : 'Directions'}
+              </a>
+            </div>
+
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {selectedPlace.hours && (
                 <div className="rounded-2xl bg-[#FAF8F5] p-3">
-                  <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                  <p className="text-sm font-extrabold uppercase tracking-wider text-[#5C7470]">
                     {lang === 'es' ? 'Horario' : 'Hours'}
                   </p>
-                  <p className="mt-1 text-[10px] font-bold text-[#204E4A]">
+                  <p className="mt-1 text-sm font-bold text-[#204E4A]">
                     {selectedPlace.hours}
                   </p>
                 </div>
@@ -467,12 +503,12 @@ export const MapView = ({
 
               {selectedPlace.speciesAllowed && (
                 <div className="rounded-2xl bg-[#FAF8F5] p-3">
-                  <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                  <p className="text-sm font-extrabold uppercase tracking-wider text-[#5C7470]">
                     {lang === 'es'
                       ? 'Mascotas permitidas'
                       : 'Pets allowed'}
                   </p>
-                  <p className="mt-1 text-[10px] font-bold text-[#204E4A]">
+                  <p className="mt-1 text-sm font-bold text-[#204E4A]">
                     {selectedPlace.speciesAllowed}
                   </p>
                 </div>
@@ -480,34 +516,34 @@ export const MapView = ({
             </div>
 
             {selectedPlace.description && (
-              <p className="mt-4 text-xs leading-relaxed text-[#5C7470]">
+              <p className="mt-4 text-[15px] leading-relaxed text-[#5C7470]">
                 {selectedPlace.description}
               </p>
             )}
 
             {selectedPlace.petRules && (
               <div className="mt-4 rounded-2xl bg-[#FAF8F5] p-3">
-                <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                <p className="text-sm font-extrabold uppercase tracking-wider text-[#5C7470]">
                   {lang === 'es'
                     ? 'Reglas pet-friendly'
                     : 'Pet-friendly rules'}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap text-[10px] leading-relaxed text-[#204E4A]">
+                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[#204E4A]">
                   {selectedPlace.petRules}
                 </p>
               </div>
             )}
 
-            <div className="mt-4 border-t border-[#204E4A]/8 pt-4">
+            <div className="mt-4 pt-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-black text-[#204E4A]">
+                  <p className="text-sm font-black text-[#204E4A]">
                     {selectedPlace.activePresenceCount || 0}{' '}
                     {lang === 'es'
                       ? 'mascotas presentes'
                       : 'pets present'}
                   </p>
-                  <p className="mt-0.5 text-[9px] text-[#5C7470]">
+                  <p className="mt-0.5 text-sm text-[#5C7470]">
                     {lang === 'es'
                       ? 'El contador incluye check-ins privados. Solo se muestran mascotas con permiso.'
                       : 'The count includes private check-ins. Only opted-in pets are shown.'}
@@ -528,10 +564,10 @@ export const MapView = ({
                         className="h-7 w-7 rounded-full object-cover"
                       />
                       <div>
-                        <p className="text-[9px] font-black text-[#204E4A]">
+                        <p className="text-sm font-black text-[#204E4A]">
                           {pet.name}
                         </p>
-                        <p className="text-[8px] text-[#5C7470]">
+                        <p className="text-sm text-[#5C7470]">
                           {pet.species}
                         </p>
                       </div>
@@ -543,7 +579,7 @@ export const MapView = ({
 
             <div className="mt-4 rounded-[1.8rem] bg-[#204E4A] p-4 text-white">
               {!canUsePlaces || !currentPet ? (
-                <p className="text-[10px] leading-relaxed text-white/80">
+                <p className="text-sm leading-relaxed text-white/80">
                   {lang === 'es'
                     ? 'Inicia sesión con una mascota real para hacer check-in.'
                     : 'Sign in with a real pet to check in.'}
@@ -551,12 +587,12 @@ export const MapView = ({
               ) : isCheckedIntoSelected && activeCheckin ? (
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs font-black text-[#E1E53F]">
+                    <p className="text-sm font-black text-[#E1E53F]">
                       {lang === 'es'
                         ? `${currentPet.name} está aquí`
                         : `${currentPet.name} is here`}
                     </p>
-                    <p className="mt-0.5 text-[9px] text-white/70">
+                    <p className="mt-0.5 text-sm text-white/70">
                       {lang === 'es' ? 'Expira a las ' : 'Expires at '}
                       {formatExpiry(activeCheckin.expiresAt, lang)}
                     </p>
@@ -564,12 +600,12 @@ export const MapView = ({
 
                   <label className="flex items-center justify-between gap-3 rounded-2xl bg-white/8 p-3">
                     <div>
-                      <p className="text-[10px] font-bold text-white">
+                      <p className="text-sm font-bold text-white">
                         {lang === 'es'
                           ? `Mostrar a ${currentPet.name} aquí`
                           : `Show ${currentPet.name} here`}
                       </p>
-                      <p className="mt-0.5 text-[8px] leading-relaxed text-white/60">
+                      <p className="mt-0.5 text-sm leading-relaxed text-white/60">
                         {lang === 'es'
                           ? 'Si está apagado, solo cuenta como una mascota presente.'
                           : 'When off, the check-in only contributes to the presence count.'}
@@ -591,7 +627,7 @@ export const MapView = ({
                     type="button"
                     onClick={() => void handleEndCheckin()}
                     disabled={isCheckinBusy}
-                    className="w-full rounded-full bg-white py-2.5 text-[10px] font-black text-[#204E4A] disabled:opacity-50"
+                    className="w-full rounded-full bg-white py-2.5 text-sm font-black text-[#204E4A] disabled:opacity-50"
                   >
                     {isCheckinBusy
                       ? lang === 'es'
@@ -605,7 +641,7 @@ export const MapView = ({
               ) : (
                 <div className="space-y-3">
                   {activeCheckin && (
-                    <p className="rounded-2xl bg-white/8 p-3 text-[9px] leading-relaxed text-white/75">
+                    <p className="rounded-2xl bg-white/8 p-3 text-sm leading-relaxed text-white/75">
                       {lang === 'es'
                         ? 'Tu mascota ya tiene otro check-in activo. Al entrar aquí, PAZO cerrará el anterior automáticamente.'
                         : 'Your pet already has another active check-in. Checking in here will close the previous one automatically.'}
@@ -614,12 +650,12 @@ export const MapView = ({
 
                   <label className="flex items-center justify-between gap-3 rounded-2xl bg-white/8 p-3">
                     <div>
-                      <p className="text-[10px] font-bold text-white">
+                      <p className="text-sm font-bold text-white">
                         {lang === 'es'
                           ? `Mostrar a ${currentPet.name} como presente`
                           : `Show ${currentPet.name} as present`}
                       </p>
-                      <p className="mt-0.5 text-[8px] leading-relaxed text-white/60">
+                      <p className="mt-0.5 text-sm leading-relaxed text-white/60">
                         {lang === 'es'
                           ? 'Apagado por defecto. El contador seguirá aumentando sin mostrar su identidad.'
                           : 'Off by default. The count still increases without showing their identity.'}
@@ -640,7 +676,7 @@ export const MapView = ({
                     type="button"
                     onClick={() => void handleStartCheckin()}
                     disabled={isCheckinBusy}
-                    className="w-full rounded-full bg-[#E1E53F] py-3 text-[10px] font-black text-[#204E4A] disabled:opacity-50"
+                    className="w-full rounded-full bg-[#E1E53F] py-3 text-sm font-black text-[#204E4A] disabled:opacity-50"
                   >
                     {isCheckinBusy
                       ? lang === 'es'
@@ -657,24 +693,24 @@ export const MapView = ({
             {canUsePlaces && (
               <div className="mt-5 border-t border-[#204E4A]/8 pt-4">
                 <div className="mb-3">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#5C7470]">
+                      <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#5C7470]">
                         {lang === 'es'
                           ? 'Funciones en desarrollo'
                           : 'Features in development'}
                       </p>
-                      <h4 className="mt-1 text-sm font-black text-[#204E4A]">
+                      <h4 className="mt-1 text-[15px] font-black leading-snug text-[#204E4A]">
                         {lang === 'es'
                           ? '¿Qué te gustaría hacer aquí después?'
                           : 'What would you like to do here next?'}
                       </h4>
                     </div>
-                    <span className="rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-[#204E4A]">
+                    <span className="w-fit shrink-0 rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-[#204E4A]">
                       {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
                     </span>
                   </div>
-                  <p className="mt-1 text-[9px] leading-relaxed text-[#5C7470]">
+                  <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
                     {lang === 'es'
                       ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en este tipo de lugar.'
                       : 'These features are not active yet. Mark only the ones you would actually use for this type of place.'}
@@ -764,7 +800,9 @@ export const MapView = ({
                 </div>
               </div>
             )}
+            </div>
           </section>
+          </div>, document.body
         )}
         </ImmersivePlacesStage>
       </div>

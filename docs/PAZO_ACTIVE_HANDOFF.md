@@ -1,980 +1,456 @@
-## Incidente PayPal Live Vault resuelto — 22-oct-2026 07:12+ UTC (actualización posterior)
+## F17 — pre-merge de main: reconciliación de migraciones (23-oct-2026 PDT)
 
-**Origen confirmado:** único POST `pazo-admin-paypal-vault` v2 a las 06:57:37Z devolvió HTTP503 (2.549s). PostgreSQL registró `SQLSTATE 2201B`; tanto `public.pazo_f16_live_service_vault_prepare` como RPC heredada `pazo_admin_paypal_save_credentials` utilizaban cuantificadores inválidos en PostgreSQL `{20,256}`/`{20,512}`. Por ello el backend rechazó la operación antes de escribir claves. Diagnóstico del panel `credential_save_outcome_needs_review` era genérico y no prueba rechazo de PayPal.
-
-**Corrección aplicada:** migración hospedada `20261022071240_pazo_f16_live_vault_regex_2201b_fix_20261022` (SQL idéntico en `supabase/migrations/20261022071240_pazo_f16_live_vault_regex_2201b_fix_20261022.sql`), [PR80](https://github.com/DigitalAppcorp/pazo-app/pull/80) MERGED, SHA `14b568fab82cf76539336c26cad91379036135a1`. Cambia únicamente la sintaxis de validación a whitelist ASCII `^[A-Za-z0-9_-]+$` más límite `length` de 20–256/20–512; conserva SECURITY DEFINER, Vault, controles Live OFF, MFA y metadatos. CI de draft SQL run39738548996 **7/7 PASS**; último CI del file de migración se verificará aparte (no declararlo PASS mientras esté in_progress).
-
-**Prueba hospedada decisiva:** tras aplicar, ambas definiciones mostraron guards corregidos y cero regexes inválidos; RPC service-role sintética con credenciales ficticias pudo preparar/crear Vault y generación **dentro de BEGIN**, luego **ROLLBACK** y readback: registros de generación0, Vault secrets de prueba0, claves guardadas0, reserva original1, pagos0, Live false y kill true. No se usaron ni se guardaron credenciales reales, no hubo charges, planes/webhooks adicionales ni cambio frontend/Edge.
-
-**Siguiente gate humano:** el PO puede reabrir panel/revalidar MFA, volver a introducir credenciales Live solo allí y pulsar Guardar una vez; si resultado incierto NO segundo POST hasta consulta autoritativa. Después leer con privilegios mínimos los booleanos de Vault/merchant y readiness, sin devolver IDs/secretos. Live canary US$2.99 requiere GO monetario explícito. Si regresión tras nuevo intento, revisar logs sin exponer payload.
+**PRECAUCIÓN DE BASE DE DATOS:** [PR #94](https://github.com/DigitalAppcorp/pazo-app/pull/94) alinea los nombres de **cuatro archivos L1** con las versiones instaladas en Supabase, preservando exactamente los SQL y agregando guard CI. La auditoría global halló otros prefijos históricos sin correspondencia exacta: **no ejecutar `supabase db push`, migration repair, reapply ni merge de Supabase a producción desde esta rama**, incluso después de fusionar `main`, sin reconciliación integral y GO explícito. El PO aprobó visualmente el frontend oficial `bf78b85`; L1 permanece limitado a un comprador y no hay primera venta real. El cierre F17 debe usar [la matriz canónica](PAZO_F17_SCOPE_CLOSURE_RECONCILIATION_20261023.md). El PR #81 sigue DRAFT: **NO merge a main sin GO nuevo del PO**.
 
 ---
 
-## Estado beta técnico publicado — 22-oct-2026 UTC (último corte verificado)
+# ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
 
-**Frontend Production READY:** `dpl_DFkGfivtBoK5CV3jvL4V2yJV2pSW` SHA `b5547243bfaeb6c17b8bd3929f05468273b9576b`; PR78 (labels Auth) y PR79 (Chromium E2E más estricto) integrados. GitHub Actions [run39733214540](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39733214540) **7/7 jobs PASS**, Chromium 390/1440 **29/29 PASS** incluyendo navegación pública de registro/login/recuperación, retorno/cancelación no financiera y worker PWA real; no usuario autenticado ni dispositivo físico. Backend: migración beneficios públicos Live-only aplicada y QA conservado; Vault Edge v2 ACTIVE. Certificado técnico v3 registrado en DB para **el SHA desplegado** con digest `03aeb1b37a465a52f0de6bf1963b46d258c5a9ef1848bb46775809bc30fabf9a`, BEGIN/ROLLBACK y COMMIT PASS, `artifact_ready=true`; versiones antiguas de evidencia preservadas.
+**Esta sección tiene prioridad temporal sobre las entradas históricas más abajo que aún dicen “L1 BLOCKED”, “canary/inactive” o exigen conciliar el checkout QA que ya fue eliminado.** Los límites permanentes de seguridad, privacidad, aprobaciones y no modificar main sin GO siguen vigentes.
 
-**El PO aún debe completar personalmente:** validar UI Admin autenticada y aspecto visual responsive, instalar PWA en teléfono real, guardar privadamente claves PayPal Live con TOTP fresco, autorizar canary real US$2.99 y validar venta/cancelación/beneficios. Live sigue OFF, kill switch ON y cero pagos. No declarar beta financiera pública lanzada sin lo anterior. Informe detallado en `docs/PAZO_BETA_RELEASE_FINAL_ACCEPTANCE_20261022.md`. Este checkpoint prevalece sobre reportes históricos inferiores que citan frontend `5283bbc9` o versiones anteriores.
-
----
-
-## Estado final comprobado de despliegue técnico — 22-oct-2026 UTC
-
-**Técnica publicada y comprobada:** PR74/75/76/77 fusionados. Vercel `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB`, SHA `5283bbc9...`, READY y alias `https://pazo-app-t83r.vercel.app`; CI externo run39728858221 6/6 SUCCESS, smoke HTTPS/PWA **7/7 PASS**. DB migration `20261022052854_pazo_f16_public_benefits_live_only` hospedada + versionada, muro e insignias Sandbox públicos0/0, QA períodos2 y consentimientos2 conservados; Edge Vault v2 ACTIVE JWT ON. Certificado técnico v2 actualizado mediante ROLLBACK+COMMIT protegido y digest verificado: nueva frontend SHA `5283bbc9`, JSON evidence SHA256 `d472e6fc2fe1761b9a57bee7bfda90caf91758393afdda7d606a0d94a118244b`. Documentación autoritativa `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`.
-
-**Financiero NO ACTIVADO:** release OFF, kill switch ON, live_enabled=false y ningún pago Live. Pendientes solo de validación de usuario/dispositivo y autorización financiera específica: sesión Admin en dominio público, MFA + guardar credenciales reales en formulario privado (nunca chat), instalación física de PWA, canary real de US$2.99 con GO separado y verificación de reconciliación, beneficios, cancelación, renovación y funcionamiento real. No llamar `LIVE_CANARY_PASS` ni `BETA_FINANCIERA_PUBLICA` antes de esos gates. Logs runtime Vercel 403 (sin evidencia de ausencia de errores).
+- **L1 ACTIVADO POR EL PRODUCT OWNER (MFA):** registro alojado auditado en Supabase: release mode=limited, gradual_campaign.lifecycle=active, stage=L1_FIRST_REAL, capacity=1, campaign revision=2, hosted_gate_verified=true, gradual_health()=true y 1 certificado, desde 2026-10-24 01:45:25 UTC. No se activó modo public.
+- **Limpieza QA #88:** 0 legacy checkout intents, 0 webhooks retenidos, 0 recibos Live operativos de esa prueba, 0 períodos pagados. Las 8 cuentas Auth anteriores conservan su clasificación QA y no pueden recibir invitación o figurar como comprador; administrador y MFA intactos. La purga DB no cancela por sí sola una obligación en PayPal externo (su referencia remota histórica devolvió 404).
+- **Tecnología desplegada:** Edge checkout v6, worker v10, admin gradual v2 y webhook existente; sus bundles coinciden con el manifiesto #85. CI 12/12 PASS, flujo HTTPS/PWA sintético validado. La beta oficial publicada es https://pazo-app.vercel.app/.
+- **Ausencia de transacción real:** aún 0 usuarios reales elegibles/admitidos, 0 invitaciones, 0 nuevos intents, 0 eventos de venta y 0 períodos pagados. El sistema está habilitado para admitir al primer comprador **siempre que esa persona consienta en PayPal**, pero no hay un E2E de venta real para dar por PASS. Worker sale/refund/cancel y concesión de beneficios están implementados y probados sintéticamente; cualquier anomalía real requiere revisión.
+- **Código y cierre:** PR #81 permanece DRAFT sin merge en main. Mantener F17 como rama técnica activa; no declarar F16/F17 COMPLETADA hasta reconciliar el DoD y los gates de release aplicables. Marketing está fuera de este brazo técnico.
+- **Evidencia y siguiente gate:** [auditoría técnica L1](PAZO_L1_TECHNICAL_POST_ACTIVATION_20261023.md) y [issue #85](https://github.com/DigitalAppcorp/pazo-app/issues/85). Siguiente control: seguimiento del primer pago **real voluntario** y proyección de ledger/beneficios sin generar compras de prueba, más Scope Closure Review de PR #81.
 
 ---
 
-## Estado ACTUAL tras GO técnico del PO — 22-oct-2026 UTC
+## Issue #85 — GO L1 autorizado, ejecutar tras conciliación (23-oct-2026)
 
-PR74/75/76 **MERGED** a `main`; commit de merge del último `4c9ebe7895b887f32809537e0f512630c1a38cbf`. SQL público Live-only **APLICADO**, migration `20261022052854` versionada `5283bbc9`. Postflight real: muro y badges públicos 0/0 al no existir Live paid periods; QA rows2 y consentimientos2 preservados. Edge `pazo-admin-paypal-vault` v2 ACTIVE, JWT ON, hash `cccbf1a996470f898011bced29e72d2cf8e5ddd6cfaa276cac5b234e462877c9`. Vercel Production `dpl_9UhAPHHd99rcpamfkQHn9LVM1RAB` READY SHA `5283bbc9`, dominio canónico asignado. Rollback ensayo antes de aplicar SQL PASS. Finanzas OFF/kill ON/pagados Live0. Ver `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md` (sección al inicio), que prevalece sobre los checkpoints históricos inferiores.
+El PO autorizó activar solamente Live limitado L1, con crecimiento 1→5→20→50 por evidencia 1/3/10 y MFA reciente en PAZO. [Issue85](https://github.com/DigitalAppcorp/pazo-app/issues/85) prevalece sobre el NO-GO financiero histórico de #84. Primero resolver suscripción prebeta y CREATED firmado HELD sin borrar evidencias, excluir las ocho cuentas QA y conservar admin/MFA. No iniciar si hay legado incierto/held; no public ilimitado ni pagos sin consentimiento individual. Trabajo técnico en `f16/issue85-live-l1-activation-20261023`, base F17 `67fbf675`. Reporte: `docs/PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md`. No llamar SQL start para evitar GoTrue/MFA.
 
-Faltan: smoke HTTP del nuevo despliegue desde corredor externo Actions; experiencia Auth/PWA instalada en dispositivo; nueva evidencia del certificado técnico (fila actual referencia SHA `f7cc359a...` del deploy anterior); credenciales privadas ingresadas solo por PO con MFA y canary real US$2.99 bajo GO financiero separado. No declarar LIVE_CANARY_PASS ni membresía financiera abierta. El GO del PO para descartar reglas previas si bloquean mejora técnica NO es una licencia para ejecutar cargos Live sin nueva autorización financiera explícita.
+**Resultado técnico #85 (24-oct-2026):** PR86 y PR87 integrados en F17 `2b63907b`; tres migraciones y Edge worker10/checkout6/admin2 instalados, frontend oficial `fbe6c751` READY. CI final 4 workflows/12 jobs PASS, Chromium51, QA8 excluidos/reales0/admin1/MFA1 conservados. **L1_ACTIVATED BLOCKED** por GET original PayPal404 RESOURCE_NOT_FOUND, aunque plan/evento originales sí corroborados. Inactive/canary/gatefalse/legacy1/HELD1, sin invitaciones ni nuevas compras. Única intervención pendiente: consultar el ID original en PayPal Business Live; después conciliación auténtica, certificado y MFA dentro de PAZO. No llamar SQL start ni borrar evidencia. [Registro](PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md).
+
+## Issue #84 — release beta autorizado, campaña inactiva (23-oct-2026)
+
+**Prevalece sobre los NO-GO hospedados históricos de #82:** el PO autorizó expresamente integrar #83→F17, instalar Supabase/Edge con campaña inactiva, verificar y publicar beta oficial. PR81→main está autorizado únicamente tras los gates técnicos de este release. **No** iniciar campaña, mover canary a limited/public, hacer CREATE PayPal, enviar invitaciones ni modificar el intent previo. [Orden #84](https://github.com/DigitalAppcorp/pazo-app/issues/84).
+
+#83 integrado en F17 mediante `57e8511f`; se cierra además la admisión legacy canary durante inactive antes del primer apply. Registro de auditoría, checksum, backup/rollback y resultados por gate: [PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md](PAZO_ISSUE84_BETA_RELEASE_EVIDENCE_20261023.md). Vercel correcto es `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, dominio `pazo-app.vercel.app`; no desplegar al proyecto anterior t83r por su nombre histórico.
+
+**Resultado #84 al 23-oct-2026:** PR83_MERGED / F17_CI_PASS / DB_HOSTED_APPLIED / EDGE_HOSTED_DEPLOYED / OFFICIAL_BETA_DEPLOYED = **PASS**. Beta oficial https://pazo-app.vercel.app/ publicada desde `d9fd7506` (deployment `dpl_HCcdWk8Uo79LxrfCUXgqDzMdHa5J`). SQL fuente 20261023211315 aplicado con historial API 20261023224519; admin v1 / checkout v5 / worker v5, contenidos verificados contra el mismo SHA. Campaña **inactive**, hosted_gate_verified=false, canary rev1/generación1; 1 intent anterior intacto, 0 períodos pagados, 0 invitaciones/outbox. **LIVE_LIMITED_START_NOT_AUTHORIZED**. No se necesitó main; PR81 sigue draft. Postflight público Chromium **51/51 PASS**, CI posterior de `609a91f5` **12/12 PASS** (run40037663360). Visual PO de cambios nuevos/PWA física pendiente, no se declara fase COMPLETADA. Evidencia, límites de observabilidad, pruebas y rollback en el reporte #84. Las secciones inferiores de #82 y anteriores se conservan como historia superada en lo relativo a permisos/instalación.
 
 ---
 
-## Continuación — tres correcciones beta separadas y sometidas a GO (22-oct-2026 UTC)
+## F16 issue #82 — código gradual implementado en rama (23-oct-2026)
 
-**PR74 DRAFT:** roles Admin/moderador, accesibilidad de consola, vista Live sin formulario legado, estado seguro de credenciales; CI 4/4 PASS. **PR75 DRAFT:** bug confirmado: 0 períodos Live, 2 filas Sandbox QA, 3 badges públicos y 2 entradas del muro públicas originadas de QA; SQL Live-only en borrador (SIN APLICAR), PostgreSQL 17 y CI 5/5 PASS. **PR76 DRAFT:** Live plan/webhook originales correctos pero reserva de generación ausente, y bootstrap manual bloquea por webhook ya existente. Vault ahora prepara la reserva usando la RPC idempotente service-only durante el único guardado MFA, con readback y sin recrear recursos PayPal, CI 4/4 PASS; Edge NO DESPLEGADA. Ver `docs/PAZO_BETA_SCOPE_CLOSURE_20261022.md` (PR74), `docs/PAZO_PUBLIC_BENEFITS_SANDBOX_ISOLATION_20261022.md` (PR75), `docs/PAZO_BETA_LIVE_ONE_STEP_CREDENTIALS_GATE_20261022.md` (PR76).
+**Estado vigente sobre notas históricas:** `CODE_DONE / DB_MIGRATION_PREPARED / READY_FOR_HOSTED_GATE`, sin declarar F16 COMPLETADA ni beta lanzable. Rama `f16/gradual-live-event-rollout-20261023`, [PR #83 DRAFT](https://github.com/DigitalAppcorp/pazo-app/pull/83), derivada de F17 `872ff8c3` / PR #81. Motor 1→5→20→50 por 1/3/10 compradores verificados, FIFO, reservas, outbox, revisión voluntaria, Administración MFA/CAS y pruebas PostgreSQL17/UI implementados. **No** SQL/Edge/Vercel producción, cargos/notificaciones reales ni merge a main.
 
-**NINGÚN PR MERGED, SIN DDL/EDGE/VERCEL nuevos en producción; release Live OFF y kill-switch ON.** Se requiere GO explícito del PO para merge/deploy/migración no financiera, validación de consola y PWA física, y un GO separado para canary real US$2.99. No dar credenciales por listas todavía; no hacer más programación al PO después de guardarlas si los gates restantes están cerrados.
+Evidencia por `GR-01…22 / EVT-01…19`, cambios, comandos, commit/CI y estados independientes: [PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md](PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md). [Gate alojado y rollback](PAZO_F16_GRADUAL_HOSTED_GATE_RUNBOOK_20261023.md) preparado; siguiente permiso acotado es instalar/publicar en entorno controlado con campaña **inactiva**, separado del GO financiero. La auditoría inicial solo lectura encontró un intent Live previo abierto: se conserva, inicio bloqueado hasta su conciliación original. QA Sandbox y mapa aprobados no se reabren. Historial inferior conservado; sus etiquetas `NOT_IMPLEMENTED/EXECUTION_NOT_CONFIRMED` quedan superadas para esta rama, no para producción.
 
-## Continuación de beta — corrección de roles, teclado y reconciliación de alcance (22-oct-2026 UTC)
+---
 
-**Orden textual del PO del 21-oct inalterada; beta global aún NO cerrada.** El código de PR74 (DRAFT, sin merge a main ni despliegue) corrige un defecto real: AdminDashboard exigía indirectamente el rol de moderador aunque `pazo_is_admin()` fuera verdadero. Ahora la consola admite admin-only y las colas de moderación solo se muestran a moderadores. Diálogo fullscreen: foco inicial, teclado Tab/Escape, retorno del foco, sin alterar el diseño F13. CI PG17-P12 cambia puerto fijo 55442 por puerto dinámico tras observar colisión de Docker. Evidencia específica y matriz DoD en `docs/PAZO_BETA_SCOPE_CLOSURE_20261022.md`. CI anterior al ajuste del puerto `39723890289`: 4/4 SUCCESS; CI de último HEAD sigue sujeto a comprobación.
+## CODEX — Tarea F16 de implementación abierta (23-oct-2026)
 
-**Pendientes que no pueden declararse PASS por CI:** aceptación visual final del Centro de control frente al diseño ya elegido; instalación PWA en dispositivo real y E2E autenticado; seguridad Auth advisor; operación PayPal Live real bajo credenciales privadas + GO. Release financiero permanece OFF y kill-switch ON. Código de producción Vercel sigue SHA `f7cc359a...`. No pedir credenciales por inercia ni declarar beta Live pública.
+**ORDEN DIRECTA PO:** «Excelente, que lo haga Codex». Orden de implementación (no plan) guardada en [`CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md`](CODEX_F16_EVENT_DRIVEN_GRADUAL_LIVE_IMPLEMENTATION_ORDER_20261023.md). **Issue de GitHub [#82](https://github.com/DigitalAppcorp/pazo-app/issues/82)** registra el encargo. Codex debe retomar desde HEAD actual F17/PR #81, crear rama de desarrollo separada si hay concurrencia, construir sistema completo front/backend/migraciones locales/worker/notificaciones/admin, probar con **GR-01…GR-22 + EVT-01…EVT-19**, documentar evidencia y PR hacia F17. El link de issue **NO significa ejecución de Codex iniciada ni que esté asignado automáticamente**; el usuario debe abrir la tarea en su entorno Codex, ya que no existe acción de ejecución Codex en el conector.
 
-## F16 — certificado técnico instalado y gate previo a credenciales — 22-oct-2026 UTC
+**Permiso PO:** implementar y probar en rama; **NO** instalar Supabase alojado, desplegar Edge/Vercel producción, mandar notificaciones reales, activar cobros PayPal ni fusionar `main`. La orden específica prevalece sobre instrucciones históricas incompatibles del 21-oct. Reusar generación/payments verificados existentes, recovery Live aprobada y diseño Mapbox sin alteración. Estado: `CODEX_ORDER_DOCUMENTED / ISSUE_OPEN / EXECUTION_NOT_CONFIRMED / PROD_UNCHANGED`.
 
-**PASS real de la parte técnica comprobable sin PayPal Live**. GitHub `main` incluye PR71/72; Vercel Production `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM` READY, frontend SHA `f7cc359a15e874942f68fc15f55c43e851f7724d`, canonical `https://pazo-app-t83r.vercel.app`; HTTP público 7/7 PASS en Actions run39718690012/job119626859178. Cinco Edge Live listadas ACTIVE en versiones release1/webhook2/checkout3/cuenta5/worker4 y hashes exactos almacenados en `docs/evidence/PAZO_F16_TECHNICAL_CERTIFICATE_BASIS_20261022.md`; fuente de69/69 verificada por postflight anterior. Worker vivo (heartbeat dentro5min), oferta ES/EN, RPC recuperación, beneficios y finanzas PASS.
+---
 
-Se ejecutó `scripts/f16-technical-release-certificate-operator-20261022.sql` contra Supabase: **primero BEGIN/ROLLBACK PASS con 0 certificados después; después CI SUCCESS y ejecución COMMIT exactamente una vez**. Postflight alojado confirmó fila única `admin_private.pazo_live_release_artifact` con `verified_at=2026-10-22T03:58:00.946349+00:00`, `frontend_commit=f7cc359a...`, `return_origin` canónico, `evidence_sha256=ad9a35ae6b268c5eb9fbe5f26aeeaadb65de8f769eb693c5363cf2a22dd37c29`, `admin_private.pazo_live_artifact_ready()=true`. Fuentes SQL de readiness: terms, recuperación, beneficios, finanzas, certificado y worker **6/6 true**. No hubo merchant configurado.
+## F16 — Cuarta etapa L4=50 APROBADA, promoción automática por décimo pago (23-oct-2026)
 
-**SEGURIDAD:** release `off/rev0`; sandbox/live=false/kill=true/active_generation=null; Live intentos0/períodos0. No uso de PayPal Live, claves, pagos, autorización canary ni acceso público financiero. Queda **READY_FOR_PO_PRIVATE_LIVE_CREDENTIAL_ENTRY** por cobertura técnica, pero **NOT LIVE_CANARY_PASS ni BETA_FINANCIAL_PUBLIC_GO**. El PO ingresa Client ID/Secret solo en PAZO Admin→PayPal→Live autenticado con MFA y aprueba expresamente canary US$2.99; tras canary se deben verificar venta firmada, período, beneficios, cancelación y condiciones de apertura pública. QA de usuario autenticado e instalación física PWA no se afirman. Este estado prevalece sobre notas históricas de certificado0.
+**ÚLTIMA DECISIÓN PO (PREVALECE SOBRE GATES HISTÓRICOS DE ESTE ARCHIVO):** el PO dijo **«sí»** a añadir `L4_EXTENDED=50 compradores acumulados`; el orquestador debe pasar de **L3=20 a L4=50** de manera **AUTOMÁTICA AL DÉCIMO COMPRADOR DISTINTO** con venta PayPal Live `COMPLETED` firmada y conciliada, período vigente y beneficios pagados `ACTIVE_VERIFIED`, siempre que no existan incidentes financieros críticos. La progresión completa acordada es **L1=1 (primer comprador validado) → L2=5 (1 venta/beneficio confirmado) → L3=20 (3 compradores distintos) → L4=50 (10 compradores distintos)**, sin esperas de 24h ni entrada administrativa entre fases. **El primer inicio de campaña Live sí requiere GO explícito del PO, y pasar de 50 a `public` también requiere nuevo GO/MFA.**
 
-# PAZO — ACTIVE HANDOFF (canónico) | 2026-10-21 Guatemala
+**EVIDENCIA Y PRESERVACIÓN:** ver [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md), reglas `EV-01…EV-15`, pruebas `EVT-01…EVT-19`, y [`PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md), `GR-01…GR-22`. Las menciones históricas de **«L4 pendiente»**, techo **20 final**, **«24h entre fases»** y **«1→5→20 propuesto»** en registros anteriores están SUPERADAS. No borrarlas ni interpretarlas como la versión vigente.
 
-## Publicación en Production — 22-oct-2026 UTC (actualización posterior al handoff anterior)
+**OPERACIÓN:** cola FIFO duradera registra interesados sin límites de plazas; 5 invitaciones iniciales y 72h para contestar continúan aprobadas. El frontend refleja permisos de cupo, el backend verifica pago/beneficio y Supabase promociona/asigna bajo transacciones atómicas; actualizar la primera notificación a cupo disponible en su mismo hilo; enviar segunda notificación de agradecimiento + revisión solo tras venta+beneficios confirmados. Detener nuevas ventas ante evidencia de riesgo sin interrumpir renovaciones/cancelaciones de compradores previos. Al llegar a 50, conservar la cola sin cobros nuevos; no prometer conversión.
 
-PR #71 fusionado a `main`: commit `f7cc359a15e874942f68fc15f55c43e851f7724d`, después de 8/8 workflows exitosos en release. Vercel principal `pazo-app-t83r` publicó desde este SHA con target Production: deployment `dpl_J548ManBu2xMJCUwV6L7QwiNfNzM`, estado READY, `aliasError=null`, dominio `https://pazo-app-t83r.vercel.app` asignado. Se preservaron autodeploy, plan y política SSO.
-
-SQL alojado posterior: release `off/revision0`, certificado 0, selector `sandbox/live=false/kill=true/generation=null`, solicitudes/evidencias 0. No hubo PayPal Live ni canary. No es legítimo atribuir el PASS HTTP 7/7 del preview al deployment Production: la lectura directa con este conector estuvo bloqueada, pero **GitHub Actions run39718690012 / job119626859178 ejecutó el gate público HTTPS/PWA con 7/7 rutas PASS** (home, dos callbacks, manifest, SW, iconos192/512) a las03:46 UTC. Siguen pendientes QA autenticada, instalación PWA física y transacción Live real. **Solo HTTP público PASS; no se declara beta funcional con QA autenticada completa ni se habilitan cobros reales**.
-
-Evidencia y gates restantes: `docs/PAZO_BETA_PRODUCTION_DEPLOY_POSTFLIGHT_20261022.md`. Este estado tiene precedencia sobre las notas históricas inferiores que declaran PR44 abierto, main intacto o Production sin publicar.
-
-
-## Preview HTTPS verificado — 21-oct-2026, Guatemala (22-oct UTC)
+**ESTADO:** `PRODUCT_L4_APPROVED / F17_BRANCH_IMPLEMENTATION_AUTHORIZED / NOT_IMPLEMENTED / SUPABASE_HOSTED_UNCHANGED / PAYPAL_UNCHANGED / PRODUCTION_UNCHANGED`. **La aprobación de L4 no autoriza activar checkout Live, instalar SQL alojado, ni publicar código.** Continuar trabajo técnico en rama F17 solo dentro de las autorizaciones ya concedidas, sin reabrir QA Sandbox ni mapa aprobado. PR #81 DRAFT y `main` sin merge al redactar.
 
-Red del candidato RESUELTA, sin volver a pedir secretos/publicación de entorno.
-Fuente a3f912eb, deployment dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3: HTTP7/7 y
-Chromium HTTPS390/1440 PASS, app inicia, legal Gmail/PayPal, mayoría18+ desmarcada,
-callbacks limpian tokens, SW activo/CacheStorage0, offline503 y recuperación online.
-Mapbox estilo+JS/CSS200; no certificación de mapa/instalación física. Gmail
-recibido confirmado previamente, sin envío nuevo. CIa3f912eb y875f3d92:5/5 cada uno.
-
-Postflight readonly: modoOFF/rev0, Live=false/kill=true/procesamiento=false,
-heartbeat reciente, intentos/períodos/certificados0. Main y producción intactos.
-Pendiente GO de integración/despliegue técnico canonical con comprasOFF; después
-verificación/certificado, claves privadas y GO canary. NO pago real ni beta
-pública aprobados, no READY_FOR_PO_CREDENTIALS hasta canonical/certificado.
-Evidencia `docs/PAZO_PREVIEW_HTTPS_VALIDATION_20261021_GT.md` y JSON agregado.
-Las notas inferiores del403 de este hostname quedan superadas.
-
-## Vista final y configuración pública corregida — 22-oct-2026
-
-Código `a3f912ebbb64d1c2365471be04ac2915fc9e1e9e`: **5/5 Actions SUCCESS**.
-Gmail configurado, envío HTTP200 y recepción confirmada por PO. SQL de seguridad
-20261022021500 instalado/verificado; release financiero sigueOFF sin certificado.
-
-Prueba protegida anterior: HTTP7/7 PASS, pero navegador detectó bloqueo real
-`PAZO is unavailable`: la URL pública Supabase estaba tipada sensitive en Vercel
-y el pull/prebuilt la exportaba vacía. No confundir HTTP200 con app utilizable.
-La API no permite cambiar tipo sensitive: se reemplazó SOLO esa URL pública por
-plain con el origin canónico ya fijado en código, mismos targets preview+production.
-No se leyó/reveló un valor sensible ni se cambiaron claves. Mapbox público existente
-conservó valor y se preparó también para Production; QA=false/beneficios=true
-server-gated configurados para ambos targets, sin tocar overrides de ramas.
-Ningún despliegue de producción ni nuevo plan/add-on.
-
-Pull oficial+parser real del cliente PASS para Supabase, Mapbox pk y flags;
-Vercel build local/prebuilt regenerado con esa configuración, fecha legal vacía.
-Navegador sobre bundle compilado390/1440 PASS (registro/legales/móvil/foco).
-Nueva vista protegida **READY** del SHAa3f912eb:
-https://pazo-app-t83r-b6fzt5jwv-digitalapp.vercel.app,
-`dpl_8wYorPT2TVTFvbyBT9hufbTKNzA3`. Proyecto/equipo/SHA exactos verificados por API.
-SSO conservado. Es el candidato vigente; no usar el preview anterior como app
-aceptada. Main y producción conservados.
-
-Este hostname nuevo devuelve403 del túnel del entorno; excepción exacta guardada
-en borrador revisión9, `requires_publish=true`. PO debe revisar/guardar/publicar
-el entorno de esta conversación; la herramienta no puede publicarlo. El hostname
-anterior sí es accesible y responde302 de SSO, no afirmar bloqueo global.
-Falta verificar la vista final HTTPS/PWA bajo autenticación, luego canonical y
-certificado solo tras GO de publicación. No READY_FOR_PO_CREDENTIALS todavía.
-Detalle `docs/PAZO_FINAL_PREVIEW_RUNTIME_20261022.md`.
-
-## Gmail operativo — 22-oct-2026
-
-PO confirmó que la contraseña de aplicación corresponde al correo de soporte
-ya designado. SMTP Supabase→Gmail **APLICADO**, smtp.gmail.com:587 con STARTTLS,
-remitente PAZO y correo de soporte. Clave usada solo en memoria hacia API
-Management, nunca frontend/Git/logs. PATCH+GET verificó campos y presencia de
-password sin devolverla; otros ajustes Auth preservados. Límite técnico10
-correos/hora (antes2 del proveedor predeterminado), sin plan/add-on ni coste
-nuevo contratado; límites propios de Google siguen aplicando.
-
-**Entrega PASS:** una sola solicitud de recuperación a la propia cuenta del PO,
-registrada previamente, HTTP200; PO confirmó «Sí, ya llegó». No envíos a terceros,
-reintento, cambio de contraseña ni repetición del E2E Auth aceptado. Se verificó
-transporte real, no una simple respuesta genérica para correo inexistente.
-Privacidad ES/EN ahora describe Google/Gmail, direcciones y contenido de correos
-de cuenta/recuperación/soporte; sin nuevos datos de mascotas/pago o analytics.
-
-Red de preview ya accesible por ruta normal: HTTP302 de autenticación Vercel,
-no403 del túnel. No afirmar fallo de red actual ni pedir volver a generar
-contraseñas. Falta validar HTTPS/PWA autenticado y la vista final actualizada;
-no READY_FOR_PO_CREDENTIALS aún. Las notas inferiores de SMTP ausente/bloqueo403
-son checkpoints anteriores.
-
-## Seguridad RPC instalada — 22-oct-2026
-
-Parche de visibilidad pública `20261022021500` APLICADO tras CI73525439
-**5/5 SUCCESS** y ensayo alojado ROLLBACK. Fuente2/2, ACL y tres HTTP públicos
-PASS (lectura neutral, lote válido y matriz rechazada22023). Inspección41 RPC
-completada; no grants nuevos ni datos de clientes consultados. ModoOFF/rev0,
-Live=false/kill=true/gen=null/procesamiento=false, intentos/períodos/certificados0.
-Artefacto Vercel local/prebuilt SHA73525439 PASS, no desplegado; preview sigue
-SHA020e6ce1 y HTTPS continúa pendiente. Detalle:
-`docs/PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
-
-## Seguridad RPC — 22-oct-2026, parche preparado
-
-Inspección íntegra de41 SECURITY DEFINER públicas ejecutables por authenticated
-(4 también anon), todas search_path vacío. Hallazgo reproducido: muro podía
-exponer mascota retirada por moderación al saltarse RLS. SQL20261022021500 corrige
-lector público de beneficios usando visibilidad moderada existente; no modifica
-pagos, consentimiento ni grants. Matrices ya se rechazaban (no bypass); límite
-se valida explícitamente. Gateway PG17 completo PASS con fuente anterior
-reproducida, rollback/savepoint y roles anon/authenticated reales. SQL aún
-NO APLICADO en este checkpoint; CI y ensayo/postflight alojado pendientes.
-HIBP requiere Pro según documentación oficial, plan actualFree: riesgo residual
-pendiente de considerar en GO, sin upgrade ni presunción de aceptación.
-Ver `docs/PAZO_PUBLIC_RPC_SECURITY_REVIEW_20261022.md`.
-
-## Correo, Auth, privacidad y preview — 22-oct-2026 (estado vigente)
-
-Vista protegida creada y **READY** por Vercel: deployment
-`dpl_FGiumJgvLvrL3MmxSwk8i1WUC11s`, fuente `020e6ce1`,
-https://pazo-app-t83r-8zbuzaf2x-digitalapp.vercel.app. Build local/prebuilt,
-Sandbox QA UI=false, beneficios=true sujetos a cobertura SQL; sin promoción,
-sin alias público ni cambio de SSO. **No HTTPS_E2E_PASS:** el proxy de este
-entorno rechaza ese hostname con403 antes de Vercel. Excepción exacta guardada
-en borrador; requiere revisión/guardado/publicación por el PO en Codex Cloud.
-No confundir READY del deployment con página comprobada ni beta pública.
-
-Auth alojado: `site_url` corregido de localhost al origin canónico; añadidas
-rutas exactas `/` y `/?auth=recovery` de canonical y este preview. Redirección
-anterior preservada (5 entradas), autoconfirmación/MFA/contraseñas sin cambios,
-PATCH y GET postflight PASS. No altas, resets ni correos enviados; no se reabre
-el QA Auth ya aceptado. Copia operativa anterior privada fuera de Git.
-
-El PO eligió **Gmail**. Auditoría confirma SMTP propio ausente/hook deshabilitado;
-el SMTP predeterminado Supabase no entrega a cuentas ajenas al equipo. Requisito
-`PAZO_GMAIL_APP_PASSWORD` guardado en borrador (solo destino api.supabase.com),
-valor todavía no disponible. Solo el titular puede generar la contraseña de
-aplicación de Google y guardarla en bóveda; jamás chat, repo o variable VITE.
-No se ha configurado Gmail ni declarado entrega PASS.
-
-Privacidad ES/EN reconciliada con PayPal, referencias financieras restringidas,
-consentimiento y muro opcional revocable; términos remiten al checkout y al
-histórico aceptado sin cambiar el contrato inmutable de la oferta Live.
-Fecha legal mediante metadata opcional `VITE_PAZO_LEGAL_EFFECTIVE_DATE`, ISO
-real validado: vacía en previews; fecha real solo al publicar con GO. No activa
-pagos ni sustituye aceptación. `verify:prepreview` **1,813 PASS**, build/dist,
-lint archivos tocados0/0 y Chromium390/1440 (modal real, scroll, Escape/foco,
-sin overflow/errores) PASS LOCAL. Incremento aún no desplegado en ese preview.
-
-P4 permanece instalado/verificado, modoOFF/rev0/certificado0/autorizaciones0;
-producción antigua y main intactos. Pendientes externos: publicación del entorno,
-secreto Gmail; luego HTTPS/PWA/certificación técnica y entrega real de correo.
-No pedir PayPal todavía. **NO READY_FOR_PO_CREDENTIALS ni beta lista**.
-Detalle: `docs/PAZO_BETA_MAIL_AUTH_PREVIEW_20261022.md`.
-
-## P4 instalado y fuentes verificadas — 22-oct-2026
-
-`41871d47`: **5/5 Actions SUCCESS**. SQL `20261021230000` APLICADO tras ensayo
-alojado ROLLBACK y postflight de13/13 cuerpos/ACL/RLS. Release Edgev1,
-webhookv2, checkoutv3, cuentav5, workerv4 ACTIVE:69/69 fuentes descargadas
-exactas; HTTP negativos PASS. Guardas dinámicas desplegadas; no latch de código
-que editar después de las claves. Certificado0/autorizaciones0, modoOFF/rev0,
-sandbox/Live=false/kill=true/gen=null y procesamiento=false; intentos/períodos0.
-No PayPal real, no clave ni identidad Auth/MFA simulada en hosted.
-
-Dominio público aún antiguo: gateHTTPS7 requisitos no PASS. Se prepara preview
-protegido local/prebuilt sin promover producción; aún no creado en este
-checkpoint. Faltan HTTPS/PWA, certificado técnico, cierre operativo y GO del PO.
-No pedir claves todavía, NO beta lista. Evidencia vigente:
-`docs/PAZO_F16_CONTROLLED_RELEASE_POSTFLIGHT_20261022.md`.
-Las notas inferiores de P4 sin aplicar/deploy son checkpoints superados.
-
-## P4 — controles financieros implementados, pendientes de instalación (22-oct-2026)
-
-Continuación desde `5972855e`, incorporando PR68–70 y el triage de Advisors,
-sin repetir PR62–65. Nuevo control Admin/Edge: GoTrue+grant actual+TOTP reciente,
-confirmación explícita, canary solo del operador original, apertura pública
-solo tras recibo firmado/venta/período/cancelación verificados y stop de nuevas
-compras que conserva historia. CAS+nonce+audit atómicos; consulta tras resultado
-incierto y descarte de respuestas de otra cuenta. Intake desplegado se comprueba
-antes de checkout. Configuración inicial queda cerrada por defecto.
-
-`20261021230000` y rollback preparados, NO aplicados en este checkpoint. Los
-entrypoints locales seleccionan runtime controlado con comprobaciones SQL
-obligatorias, sustituyendo hard-OFF de código. Fuente alojada aún anterior y
-OFF; no confundir cambio en Git con despliegue o autorización de dinero. El
-certificado técnico NO se crea por instalar SQL ni por guardar claves.
-
-`verify:prepreview` **1,811 pruebas PASS**, build; PG17 real completo PASS,
-incluidos roles, canary/public sintéticos, hold, kill y rollback/reapply;
-Chromium390/1440 PASS de consentimiento, lectura incierta, móvil y teclado.
-Código nuevo lint0/0. CI del incremento pendiente. Auditoría alojada previa:
-3/3 bridges coinciden por hash, worker reciente/procesamiento=false,
-sandbox/Live=false/kill=true/gen=null/revision0, intentos/períodos0.
-
-Siguiente: CI exacto, ensayo e instalación técnica, deploy/verificación de
-fuentes con certificado AUSENTE, HTTPS/PWA y operaciones. No claves aún;
-NO READY_FOR_PO_CREDENTIALS, no canary real ni publicación autorizados.
-Detalle: `docs/PAZO_F16_CONTROLLED_RELEASE_20261022.md`.
-
-## F16 — P4 código de entrypoints candidatos revisado, Live OFF (21-oct-2026)
-
-- **PR #70** squash `b51f092bde6ff036b124d603ec3aff67484b5eef` integrado solo a PR67. GitHub SHA de pruebas `a1fa31e86250590ec8a29f0ab35aa348d6804f27`: **CI general y Live Gateway PG17 SUCCESS**.
-- Nuevos entrypoints **alternativos, NO seleccionados ni desplegados**: `supabase/functions/pazo-paypal-live-checkout/index.release-candidate.ts` y `supabase/functions/pazo-paypal-live-webhook/index.release-candidate.ts`. Permiten ensamblar el runtime financiero **solo tras GO específico**, conservando el default `index.ts` RELEASED=false y `supabase/config.toml` sin ruta alternativa. Tests de runtime comprueban que aun con código candidato armado no hay checkout sin generación activa en SQL y no hay webhook si faltan secretos confiables.
-- `docs/PAZO_F16_RELEASE_CANDIDATE_ENTRYPOINTS_20261021.md` contiene orden de despliegue seguro. **Esto no sustituye P4:** DBA tiene CHECK sandbox/live=false/kill=true/generation=null; antes de cualquier canary requieren migración de cutover revisada + MFA GO admin real + verificación de ambas Edge desplegadas, firmas y worker. No enviar PayPal real, no publicar Vercel, main intacto.
-
-
-
-## F16 — Gate HTTPS/PWA público automatizado sin credenciales (21-oct-2026)
-
-- **PR #69** fusionado SOLO a rama `f16/beta-completion-20261021`, commit `bad4202d5b224026fc0dade112a882701cba011d`. GitHub SHA `dcecec529d2b7f0ab80fd5565905bac1afa65137`: **CI SUCCESS y F16 Live PG17 SUCCESS**.
-- CLI reproducible `node scripts/f16-public-pwa-http-gate.mjs` exige **7/7 HTTP200 correctos** del origin público `https://pazo-app-t83r.vercel.app`: SPA, callbacks PayPal /return + /cancel sin reflejo de tokens, manifest installable, SW network-only y PNGs 192/512. Rechaza SSO redirección, 404, MIME equivocado y artefactos inconsistentes; imprime únicamente códigos sin datos privados, no contacta PayPal.
-- QA local: cuatro pruebas de GET inyectados (7/7 PASS, callbacks404, SSO, token sintético reflejado, origin no autorizado) dentro de `npm run test:pwa`/CI. Documentación detallada `docs/PAZO_PUBLIC_BETA_HTTP_GATE_20261021.md`.
-- **No declarar HTTP alojado PASS:** la Vercel principal sigue sirviendo un commit F13 anterior, según Vercel metadata; el reporte anterior de Codex encontró 404 en los callbacks y PWA. El gate solo debe ejecutarse sobre nuevo deploy con permiso Preview/producción del PO. `vercel.json` mantiene `git.deploymentEnabled=false`.
-- Flags financieros Live OFF; sin merchant, intentos ni períodos pagados; no se publica `main`, no Preview nuevo, no cobro ni alteración de Supabase. Siguen P4 release/canary y E2E real.
-
-
-
-## F16 — PWA retorno móvil: arreglo integrado sin despliegue (21-oct-2026, continuidad ChatGPT)
-
-- **PR #68** fusionado **únicamente** en rama PR67 `f16/beta-completion-20261021`, squash `266477a2379b3d33383da7fdd73c3b6d28024554`. CI de la rama de prueba exacta `e38e15255ee5f9fc521b9dd65f3338a9e2de104a`: GitHub CI **SUCCESS** y F16 PG17 Live Gateway **SUCCESS**. No main, no despliegue, no dinero.
-- Corrigió registro de service worker que antes escuchaba `window.load` después de un `import('./App.tsx')` asíncrono; si `load` ya había sucedido, el SW nunca se registraba. Ahora observa `document.readyState` y registra inmediatamente si la página ya cargó, o una sola vez con `load`; conserva network-only.
-- Pruebas ejecutables `scripts/pwa-check.mjs` comprueban ambos órdenes en VM y que los callbacks PayPal /return y /cancel **eliminan tokens de query/fragmento** y navegan al estado de la cuenta sin atribuir pago.
-- Informe detallado `docs/PAZO_PWA_LATE_LOAD_CALLBACK_20261021.md`. **E2E público NO-GO** hasta deploy Vercel autorizado y HTTP200 real para callback/PWA; deployment actual principal sigue con commit antiguo según metadata, sin build nuevo por `git.deploymentEnabled=false`.
-
-
-
-## Orden permanente del PO — cambios y documentación en GitHub
-
-El PO ordenó subir cada cambio a GitHub con su documentación correspondiente.
-Cada incremento debe incluir código/SQL cuando corresponda, motivo, validación
-y estado real de instalación o despliegue; hacer commit y push a la rama de
-continuación y mantener actualizado el PR67. Documentar también los bloqueos
-y las comprobaciones pendientes, sin presentar pruebas locales como CI o E2E
-alojado. Esta orden no autoriza merge a main, publicación ni cobros Live.
-
-Incremento `3dcd8e07` subido y HEAD remoto confirmado: readiness administrativo,
-recuperación de guardado de credenciales y documentación de pruebas incluidas.
-CI de ese SHA exacto: 5/5 Actions SUCCESS. Migración readonly administrativa
-`20261021223000` APLICADA con ensayo ROLLBACK, cuerpo exacto y ACL verificadas.
-No identidad administrativa real simulada ni operación financiera; selector
-sandbox/Live=false/kill=true/generación=null/revision0, intentos/períodos0.
-Este estado supera la nota inferior que aún decía «NO aplicado».
-
-## Supabase operativo — 21-oct-2026, 21:47 UTC
-
-PR67: migraciones `20261021210000`, `20261021213000`, `20261021220000`
-**APLICADAS** tras autorización explícita y ensayo alojado con ROLLBACK.
-Postflight ACL/RLS y 6/6 fuentes SQL PASS, nueva tabla vacía. Cuenta Live
-**v4 ACTIVE/JWT ON**, 8/8 fuentes exactas y HTTP negativos401 PASS.
-Live=false, kill=true, sandbox, generación activa null; 0 merchants/intents/
-períodos/inbox. Main y producción Vercel intactos.
-
-P4 avanza con readiness administrativo de lectura y recuperación de estado de
-credenciales; nuevo SQL `20261021223000` aún NO aplicado. Verify:prepreview1788
-PASS, PG17 y Chromium390/1440 PASS. Habilitación financiera controlada sigue
-pendiente; NO beta lista ni READY_FOR_PO_CREDENTIALS. No pedir más tokens ni
-claves PayPal por ahora. Evidencia actual en
-`docs/PAZO_SUPABASE_BETA_POSTFLIGHT_20261021.md`; estados inferiores de falta de
-acceso/SQL nuevo sin aplicar/cuenta sin desplegar son historia superada.
-
-
-## Acceso Vercel restablecido — 21-oct-2026, continuación móvil
-
-**Postflight corregido 20:48 UTC:** PR67 DRAFT hacia F13; código
-`8ad55b04` con 5/5 Actions SUCCESS. La corrección `git.deploymentEnabled=false`
-evita nuevos builds observados; el preview involuntario de11d4ee34 se retiró con
-DELETE200/GET404. Producción principal sigue SHA5163c187 y preview antiguo
-a218ab3c. No confundir esos deploys con esta entrega. Requisito privado
-`SUPABASE_ACCESS_TOKEN` guardado, valor aún ausente; faltan auditoría alojada,
-las tres migraciones, Edge de cuenta y P4. No pedir claves PayPal todavía.
-
-
-PO autorizó el login oficial por dispositivo; CLI Vercel65 confirmó sesión.
-Auditoría REST: ambos proyectos `pazo-app-t83r` y `pazo-app` están conectados a
-DigitalAppcorp/pazo-app y tenían `gitProviderOptions.createDeployments=enabled`.
-Se intentó bloquear automatismos cambiando ese campo a `disabled`; GET confirmó
-el campo pero el push sí generó un preview en el proyecto secundario. Fue un
-error de interpretación: ese campo no impide los builds de Git. No tratar su
-lectura como Preview OFF. Se corrige con `git.deploymentEnabled=false` en
-`vercel.json`, opción oficial que bloquea deployments por commits; los dos
-campos de API se restauran al valor inicial `enabled`. El preview involuntario
-`dpl_CddaWi3Tm1tzkRWW4KnfM8dkgtsa` del SHA `11d4ee34` no es beta aceptada ni
-GO público. Producción, main y controles financieros no cambiaron.
-
-Proyecto principal `prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`: producción READY
-`dpl_E6t1jhXeAN49mS4gSCJufc2wFZ93`, preview READY
-`dpl_A1oJg62DpV54kEEN7itgQfQTHwhz`; la portada pública sigue antigua y callbacks/PWA
-404 según postflight anterior. SSO protection `all_except_custom_domains`.
-Las APIs y descubrimiento OAuth Vercel ya responden: no volver a pedir publicar
-el entorno por ese bloqueo antiguo. Las credenciales CLI están fuera del repo;
-no se incluyen en bundle ni documentación.
-
-Supabase CLI oficial2.121 requiere código de verificación del navegador; no
-hay sesión administrativa Supabase todavía. No pedir OTP ni tokens por chat.
-Antes de aplicar SQL o desplegar Edge, resolver autenticación segura y auditar
-source/ACL/versiones alojadas. P4 y gates financieros continúan NO-GO.
-
-
-## Continuidad Codex — 21-oct-2026, implementación local verificada
-
-Base de integración auditada por Git: F13 `669efafdb5678cae40c5137d7bddc9403c2ab8a3`;
-PR #66 `d1d34fa230c0928748141adf1f02adb186a99568` revisado: solo alinea el nombre
-de la migración de cancelación ya aplicada y su prueba, más el handoff. Se usó
-como base de `f16/beta-completion-20261021`, sin modificar `main` ni sobrescribir F13.
-La API estuvo bloqueada durante esa implementación; el postflight de 20:30 UTC
-ya revisó PR/CI por GraphQL y REST. Ver
-`docs/PAZO_CLOUD_ACCESS_AND_HTTPS_POSTFLIGHT_20261021.md`: PR66 tiene 12/12
-Actions SUCCESS, pero Vercel falla por cuota y los callbacks/PWA públicos dan404.
-
-Código adicional implementado: reanudación del CREATE original con lease y el
-mismo cuerpo/PayPal-Request-Id dentro de 48h; GET independiente antes del binding;
-reconciliación de cancelaciones inciertas por GET sin segundo POST; cierre de
-slots solo tras estado terminal verificado, sin eventos/cancelaciones pendientes
-ni cobertura sin vencer (incluidos holds); consentimiento nuevo para otro intento;
-descarga ES/EN de condiciones incluso tras cierre; acceso a gestión desde miembro
-verificado; aislamiento ante cambio de usuario; fondos/muro Live basados en períodos
-verificados; agregados administrativos sin saldo/ingreso neto inventado.
-
-Tres migraciones nuevas SOLO preparadas y probadas en PG17 desechable:
-`20261021210000` recovery finish, `20261021213000` cosméticos Live,
-`20261021220000` resumen financiero administrativo. NO instaladas en Supabase.
-La Edge de cuenta actualizada NO fue desplegada. Checkout/webhook siguen hard-OFF
-en el código. No hay cobros, nuevas credenciales ni publicación por estos cambios.
-
-Validación: suite local de gobernanza/F16, build y dist; PG17 con SQL real y
-rollback/reapply; navegador sintético 390/1440px, doble clic, cancelación explícita,
-fuente financiera no disponible y callbacks reales de la SPA sin tokens en URL.
-Estos resultados NO son PayPal Live, PWA instalada HTTPS ni CI remoto.
-
-**Bloqueo operativo actualizado a 20:30 UTC:** GitHub, Auth Supabase y portada
-HTTPS ya responden; los callbacks y archivos PWA de ese dominio devuelven404.
-Sin autenticación administrativa Supabase/Vercel. El login oficial Vercel sigue
-bloqueado por proxy a vercel.com; se añadieron vercel.com y supabase.com al
-borrador preservando lo anterior. Guardar no aplica: requiere revisión/guardado
-y publicación del entorno de desarrollo, no de PAZO. Postflight enlazado arriba.
-Falta auditar source/versión alojados antes de instalar/desplegar; también falta
-terminar P4 (readiness y habilitación controlada Admin/DB/Edge), publicación HTTPS
-bajo GO y canary real autorizado. NO pedir claves PayPal todavía.
-No hacer push a ramas conectadas sin verificar primero Preview OFF/cuota.
-Ver informe de esta entrega: `docs/PAZO_CODEX_BETA_CONTINUATION_20261021.md`.
-**Estado global: NO-GO; no READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY.**
-
-## F16 — Cancelación PayPal Live por propietario completada en código (21-oct-2026)
-
-- **PR #65** fusionado SOLO a F13: SHA `669efafdb5678cae40c5137d7bddc9403c2ab8a3`, **9/9 GitHub Actions SUCCESS**. Implementa consentimiento explícito del titular para cancelar renovaciones Live, gestión del mismo intent del propietario y credenciales de la generación original en Vault. SQL privado reclama antes de POST PayPal y prohíbe repetir. Solo un GET PayPal independiente `CANCELLED` con `subscriptionId+planId+custom_id` coincidentes permite el éxito y el registro confirmado; respuesta HTTP 204 o timeout no prueban cancelación.
-- SQL `pazo_f16_live_service_cancel_finish` **APLICADA** en Supabase, historial versión `20261021192951`. Archivo GitHub renombrado a `supabase/migrations/20261021192951_pazo_f16_live_cancel_finish.sql`. Ejecuta únicamente service_role (anon y authenticated DENIED), nadie puede conceder pagos o beneficios por esta función. DDL validado BEGIN/ROLLBACK antes de aplicar. No existe venta, claim ni suscripción Live real registrada.
-- Edge `pazo-paypal-live-account` **versión 3 ACTIVE, verify_jwt=true**, incluye list/status/cancel por titular. Despliegue y postflight verificados. Interfaz ofrece cancelar únicamente tras lectura original PayPal ACTIVE/SUSPENDED y confirmación adicional, con aviso de conciliación si PayPal no responde; nunca marca cancelado ante ambigüedad. Estado backend pago sigue sandbox/kill true/live false; 0 merchants, 0 intents, 0 cancel_claims, 0 paid_periods.
-- Las pruebas PayPal y PostgreSQL solo han sido sintéticas/estructurales: **NO EXISTE CANCELACIÓN LIVE E2E REAL** sin cuenta/credenciales PayPal Live. NO declarar beta lista. El laboratorio histórico de nueve RPCs se dejó intacto; el SQL nuevo se comprobó en Supabase con rollback y con tests de flujo sin proveedor real.
-- **PENDIENTES prioritarios:** recuperar PayPal CREATE incierto sin segunda suscripción, reconciliación que permita intentar de nuevo tras abandono verificado; definir release seguro de latches de checkout/webhook/worker desde Admin MFA y evidencias sin cambios de código posteriores, desplegar F13 en Vercel sin bloqueo SSO para público, validar retorno PWA HTTPS, pruebas reales autorizadas por PO y examen previo al lanzamiento. Única acción final PO deseada: introducir PayPal Live Client ID/Secret desde Admin y dar GO explícito a cobro.
-- No modificar `main`. No repetir validación de plan/webhook ya aprobada; no requerir permisos de balances PayPal.
-
-
-
-## F16 — Cuenta Live del comprador y checkout server-gated (21-oct-2026, avance más reciente)
-
-**Orden PO vigente:** entregar toda la beta con PayPal Live técnicamente listo antes de solicitar claves; único paso final PO introducir Client ID/Secret en Admin y aprobar canary real. NO declarar listo hasta completar release financiero y E2E.
-
-**Tres incrementos cerrados en F13 (NUNCA en main):**
-- **PR #62** squash `b8e8eb3accc75f102b0fe16697aad442531d44fa`, CI **9/9 PASS**: `SupporterLiveCheckoutPanel.tsx` reemplaza el botón Live inerte. Consulta GET de offer ES/EN íntegro `pazo-paypal-live-checkout?locale=...`, obteniendo `live_checkout_ready` exclusivamente si route Live+worker privado `enabled,processingAllowed,healthy` están validados backend. Consentimiento explícito y desmarcado, un solo POST y request UUID; acepta solo URL PayPal oficial, nunca concede beneficios por retorno/ACTIVE. Sandbox QA restringido a DEV localhost. **Checkout Edge sigue compilado OFF y no desplegado para cobrar.**
-- **PR #63** squash `02ee1f3116095661b988b7984a1e6cdea0970797`, CI **9/9 PASS**: nueva Edge `pazo-paypal-live-account` consulta dueño autenticado GoTrue + RPC privada `pazo_f16_live_service_owner_checkouts_read`, respuesta sanitizada (máximo 1 slot abierto, sin subscription ID, merchant, requestKey ni plan). UI no ofrece checkout Live si existen intentos originales o no pudo consultar estado. Edge **v1 ACTIVE, verify_jwt=true** registrada.
-- **PR #64** squash `8d018f7caf4527e6f7408ee8707647601a4241f7`, CI **9/9 PASS**: `action:status` de la misma Edge, obtiene PayPal GET usando generación original de Vault, valida ID, plan_id y custom_id contra intent owner-scoped, devuelve solo `providerStatus`, jamás `paidThrough` o badge. Edge `pazo-paypal-live-account` **v2 ACTIVE, verify_jwt=true** confirmada por postflight hosted. Sin credentials reales aún, este paso solo pudo probarse sintéticamente.
-
-**Supabase postflight:** `merchants=0`, `checkout_intents=0`, `paid_periods=0`; switch `environment=sandbox/live_enabled=false/kill_switch=true/active_generation=null`. No pago ni suscripción real creada. Rutas checkout/webhook Live hard OFF y reversión disponible.
-
-**Próximos gates críticos ANTES de pedir credenciales al PO:** cancelación/autogestión Live real segura con original merchant, recuperación de PayPal CREATE incierto sin duplicado, callback HTTPS/PWA y conciliación, readiness/activación de los latches Edge/DB sin modificación de código posterior (con MFA/GO explícito), despliegue Vercel de F13 a dominio HTTPS accesible sin SSO y smoke móvil, visibilidad del admin y pruebas completas. NO confundir CI verde ni Edge solo lectura con cobertura de dinero. Plan/webhook Live y Sandbox previamente verificados; no repetir, no pedir balances scope.
-
-
-
-## F16 — Postflight de Codex/owner-slot y comprobación Vercel (21-oct-2026, última actualización)
-
-- PR #60 squash `5fc001de698b99f80b68b24b7cc4ae0405192f69`: recuperación completa Codex y claim HTTPS original. GitHub CI 9/9 PASS.
-- RPC protegidas del slot de checkout Codex **instaladas en Supabase** (historial versión `20261021181431`); PR #61 squash `efbf20d44740244370f844ac90158c62518d3f04` alinea migración GitHub y lab PG17 con esa versión; CI 9/9 PASS.
-- Postflight real: `pazo_f16_live_service_provider_claim_with_origin` instalada, antiguo claim sin EXECUTE service, lectura owner solo service_role (anon/authenticated DENIED). Merchant generaciones 0, Live paid periods 0, checkout intents 0, selector `environment=sandbox/live_enabled=false/kill_switch=true/active_generation=null`. NO hubo cobros Live.
-- **Vercel por fin inspeccionable con plugin**: buscar proyectos sin forzar parámetro `teamId`, luego `get_project({idOrName:'prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH'})`. Proyecto `pazo-app-t83r` Vite, dominios `pazo-app-t83r.vercel.app`, `pazo-app-t83r-digitalapp.vercel.app` y alias de git-main. Último deployment READY reportado `dpl_A1oJg62DpV54kEEN7itgQfQTHwhz` sobre SHA F13 **antiguo** `a218ab3cbc1ac01b7932da3ce5c3c87ee2c86770`, target preview (`null`), NO contiene el checkout actual de F13. `passwordProtection=false`, `ssoProtection.enabled=true`, `deploymentType=all_except_custom_domains`; no consta dominio personalizado en los dominios del proyecto. Antes de GO público verificar accesibilidad anónima real de HTTPS y PWA, seguridad de redirección PayPal, despliegue F13 actual, protección de acceso y que producción no se active sin PO GO.
-- **Gates NO resueltos:** frontend compra Live completo en navegación/PWA, uso del RPC de recuperación y lease desde UI/callback, liberación segura de latches Edge checkout/webhook/worker y DB switch, conciliación de pagos con evidencia COMPLETED (sin permisos de saldos), prueba con credenciales reales en Admin y canary con autorización PO. **Nunca declarar BETA LISTA/LIVE PASS por 9/9 CI.**
-- PR #55/56/58/59 NO FUSIONAR: integraciones superadas por PR60. `main` intacto.
-
-
-
-## F16 — Codex recuperado e integrado / Checkout owner-slot privado (21-oct-2026, después del PR60)
-
-- PO publicó desde `C:\Users\osori\Downloads\Nuevo pazo app\pazo-live-reconciler` el commit `e27d9fae` con trabajo local Codex recuperado. NO se perdieron fuentes. ZIP revisado. No ejecutar reset/clean en worktree local.
-- El código Codex de oferta Live inmutable, consentimientos y checkout, recuperación owner-slot, lab PG17 y el adaptador de origen HTTPS `pazo_f16_live_service_provider_claim_with_origin` fueron **fusionados solo en F13** por [PR60](https://github.com/DigitalAppcorp/pazo-app/pull/60), squash `5fc001de698b99f80b68b24b7cc4ae0405192f69`. PR60 corrió CI **9/9 SUCCESS**, incluido laboratorio owner-slot y pruebas de privacidad; fixture sintético desechable actualizado para generación retirada, sin datos reales.
-- Supabase proyecto `mrybvqdebbgcayuvgkkr`: SQL migración `pazo_f16_live_owner_checkout_slot` **APLICADA**, historial **20261021181431**; archivo GitHub renombrado a `supabase/migrations/20261021181431_pazo_f16_live_owner_checkout_slot.sql` para coincidir. `20261021165838_pazo_f16_live_immutable_bilingual_offer.sql` ya estaba instalada antes, NO volver a aplicar.
-- Postflight SQL alojado PASS: `service_role` EXECUTE exclusivo de lectura owner, anon/authenticated sin permiso, claim antiguo sin EXECUTE, nuevo claim con origen instalado, 0 intents, 0 paid periods, 0 merchants, `environment=sandbox`, `live_enabled=false`, `kill_switch=true`, `active_generation=NULL`. **No hubo cargo Live.**
-- PR55 (Codex), PR56 (anti-duplicado alternativo), PR58 (wiring de origen) y PR59 (rama divergente) están **superados / NO FUSIONAR**. PR60 es la integración canónica de esos cambios.
-- Aún **NO BETA LISTA**: habilitación controlada checkout/webhook/worker, recuperación provider sin doble CREATE, cierre frontend Live y PWA/callback, pruebas económicas Live canary con credenciales en Admin y GO del PO, métricas y validación dominio/despliegue. Latches de código y BD siguen OFF. Seguir mandato obligatorio en `AGENTS.md` y `docs/CODEX_F16_BETA_LAUNCH_COMPLETION_ORDER_20261021.md`.
-
-
-
-## Recuperación Codex 21-oct — P1 en ejecución
-
-Área aislada `pazo-live-reconciler`, rama `f16/live-signed-sale-reconciler-20261021`,
-base F13 `4e434b2fb17e981491b13de96a86befdcf7c9fff`. WIP anterior preservado en
-`f16/codex-merchant-identity-handoff-20261020`; lockfile original intacto.
-Orden completa leída; no scope de saldos, nuevas claves ni pruebas Sandbox/recursos.
-Auditoría alojada confirma reserva1, merchant0, inbox Live0, períodos0 y selector OFF.
-
-PR #54 DRAFT hacia F13: entrada firmada, lectura bajo lease y corroboración GET
-desde Vault de la generación original. Ahora añade venta con paginación completa,
-origen OAuth/suscripción/transacción, período contractual observado, renovación
-ordinaria correlacionada y escritura financiera/cierre de lease atómicos.
-No se confunde el hash de Client ID con identidad del beneficiario.
-Gates locales PASS: closure397/397, F16 sintético1193/1193, build y dist4/4.
-PG17 verifica pago/refund, fallos entre escritura y ACK, recuperación y rollback.
-Migraciones `20261021074014`, `20261021074024`, `20261021074032` APLICADAS tras
-CI3501 (cuatro jobs) y gateway418 PASS del commit `2f1403f6`. Cinco RPC nuevas
-service-only, RLS FORCE y revocación de bridges antiguos verificadas. Archivos
-alineados con versiones MCP reales, SQL idéntico al revisado. Reserva1,
-merchant0/inbox0/recibos0/períodos0 y selector sandbox/LiveOFF/killON.
-Tercer bloque: lifecycle/refund durable, estados merchant monotónicos y lectura
-original de venta/fecha para devoluciones tardías; PG14, closure406 y CI3502 /
-gateway419 PASS. Migración `20261021142517` APLICADA tras CI de `75dfd4e6`,
-dos RPC service-only y cuatro columnas verificadas, sin datos/cobros Live.
-Cuarto bloque instalado: transporte HTTP privado, control OFF, admisión por
-clave interna Vault, wrappers con backoff y salud. PG15/HTTP11/governance413,
-CI3503/gateway420 PASS; DDL `20261021144809` APLICADA, cinco RPC nuevas
-service-only y claim/finish antiguos revocados. Edge worker v1 ACTIVE con
-autenticación propia: cuatro rechazos HTTP reales PASS; control/processing OFF.
-Scheduler `20261021145500` APLICADO por SQL Editor, con historial registrado,
-después de dos fallos MCP sin ejecución. Extensiones nativas y cron OFF PASS.
-Postflight detectó grants PUBLIC de pg_net administrados por Supabase, no
-revocables por postgres; no se emitieron headers. API expone public/graphql_public.
-Corrección `20261021155429` APLICADA tras CI3505/gateway422 de `114756e1`:
-token de una admisión/120s, sin bearer Vault permanente en cola. HTTP autenticado
-real200 worker_idle, nonce consumido y batch cerrado. Cron automático repitió PASS.
-Control enabled solo salud, processing false, LiveOFF y cero pagos/eventos.
-Monitor de disputas `20261021162301` APLICADO tras CI3506/gateway423 de `739edcee`:
-GET paginado de venta original,
-casos mínimos, lease/batch exclusivo, full hold/resolución favorable/partial review,
-transacción con ACK y protocolo worker v2. PG24 (incluido NULL) y governance423/423
-PASS. Dos tablas FORCE RLS/service sin lectura directa, claim/finish service-only
-y trigger privado verificados. Edge worker v2 ACTIVE,27/27 fuentes Git739 idénticas;
-cuatro rechazos HTTP sin auth PASS. Cron automático16:27UTC200/healthy/buildv2,
-nonce consumido y lote cerrado; procesamiento OFF/0 eventos/pagos/casos/monitores.
-Faltan beneficios, checkout,
-readiness y el resto P1–P5. Ver `PAZO_F16_SIGNED_SALE_RECONCILER_20261021.md`.
-No declarar READY_FOR_LIVE_CREDENTIALS_AND_PO_CANARY ni beta lista todavía.
-
-**CODEX — ORDEN ACTIVA F16/BETA:** Antes de implementar o declarar finalizado cualquier cambio de monetización o lanzamiento, leer y ejecutar integralmente `docs/CODEX_F16_BETA_LAUNCH_COMPLETION_ORDER_20261021.md`. Esa orden concreta el mandato obligatorio del PO: terminar software, backend, QA y preparación antes de pedir claves Live en Administración; únicamente se reserva para el PO el ingreso privado de credenciales y autorización de la prueba/cobro real. No confundir CI PASS con beta lanzable ni posponer F16. 
-
-
-## MANDATO EXPRESO DEL PRODUCT OWNER — BETA PAZO / PAYPAL LIVE (21 OCT 2026)
-**PRIORIDAD MÁXIMA. VIGENTE. NO OPCIONAL. NO REINTERPRETAR.**
-
-**Orden textual del Product Owner:** «termina todo lo que tengas que terminar para que yo solamente coloque las credenciales de paypal ya este funcionando, sigue mi orden, no quiero que te desvies, mi orden es que termines ya la beta para sacarla y que dejes todo terminado para que yo solamente guarde las credenciales en el apartado de administracion y ya pueda cobrar, esa es mi orden explicita y quiero que lo anotes en mi pazo de hithub como orden que se tiene que hacer. terminar lo que falta para que al terminar la beta que ya este todo listo para que yo solo tenga que colocar las credenciales para que todo este listo para cobrar y lanzar».
-
-**Definición de terminado (DoD obligatoria y medible):**
-1. La app beta pública (módulos sociales aprobados, panel administrativo responsive, registro/login, moderación, términos, PWA instalada/no instalada) queda compilada, probada, desplegable y validada en HTTPS oficial; no reabrir sin regresión lo ya aceptado por el PO.
-2. Admin → Configuración → PayPal → Live permite a un administrador auténtico con MFA reciente introducir Client ID y Client Secret **dentro de PAZO una sola vez**, con guardado cifrado server-only, confirmación inequívoca y recuperación segura tras refresh. Se usa **el plan US$2.99 mensual, webhook y generación1 YA EXISTENTES**; no exigir permiso PayPal `reporting/balances/read`, pruebas Sandbox adicionales, creación de recursos duplicados, enlaces manuales ni pegar secretos en GitHub/chat/CLI.
-3. Ese flujo privado valida OAuth Live, plan de US$2.99, webhook por generación y evidencia del comercio, vincula de forma auditable la generación original, coloca secretos en el backend y prepara los controles de release. Una simple coincidencia introducida por usuario no se debe confundir con evidencia independiente; los cobros solo se habilitan si todos los checks de transacción y seguridad están satisfechos.
-4. Checkout real dentro de PAZO → consentimiento expreso versionado → creación PayPal con idempotencia → aprobación/retorno HTTPS en navegador y PWA → lectura de PayPal + webhook firmado → inbox durable → ventas/completados/renovaciones → períodos pagados reales → insignias Amigo de PAZO (1/3/6/12 meses) y demás beneficios sin falso grant, con proyección verificada.
-5. Gestión autónoma de cancelaciones, errores/abandono de checkout, reintentos controlados, reembolsos, reversos, disputas, caducidad; conciliación y observabilidad/admin (usuarios, suscripciones, recaudación, abandonos, actividad, fake doors). Kill-switch y rollback probados.
-6. QA end-to-end sintética y en HTTPS, base y RLS, trazabilidad y pruebas del gate financiero, seguridad, accesibilidad/móvil, callback PWA, firma de webhooks y humo real supervisado. Sin release silencioso de `main` ni cobro real no autorizado.
-
-**Experiencia final prevista:** tras la entrega técnica completa, la única configuración rutinaria pendiente del PO debe ser ingresar las credenciales Live en Administración y aprobar personalmente la activación/prueba real que implique dinero. Ningún trámite técnico repetitivo, replanteo del producto o cambio de proveedor como sustituto. Cualquier obstáculo externo verdadero se documenta por nombre con alternativa concreta y mínima ayuda solicitada.
-
-**Flujo de ejecución:** ejecutar sin pausas arbitrarias cambios de código, migraciones técnicas ya autorizadas, pruebas y preparación; usar F13/PR44 como integración y preservar `main` y cualquier dato real hasta GO del PO. Los controles de seguridad del cobro, verificación de pagos y permisos de terceros NO se omiten por urgencia; **nunca marcar «beta lista» ni «Live cobra» sin pruebas reales completas**. Si una dependencia requiere consentimiento/secretos o autorización externa, continuar el resto mientras se espera y preguntar únicamente la intervención imprescindible.
-
-**PRECEDENCIA:** Este mandato reemplaza propuestas previas que aplazaban F16 a después de beta, exigían el scope PayPal de balances, sugerían links PayPal manuales o aceptaban beta incompleta. Se incorpora en handoff y hoja maestra para todo agente, incluyendo Codex.
-
-
-
-## F16 — Auditoría de beta y bloqueo operativo real | 21-oct-2026 (actualizado)
-
-**PO exige terminar beta con PayPal Live automático**; no se acepta enlace
-manual PayPal ni activar solo la UI de cobro. Conservar lo probado en Sandbox
-y la auditoría Live de plan/webhook (generación 1), sin volver a pedir scopes
-`reporting/balances/read`.
-
-**Código verificado 21-oct:** PR #50 a F13, commit `fb205063e223c5598a791dd4b2fb14f87a0673b3`,
-GitHub Actions 9/9 SUCCESS, corrige `liveGenerationPinnedWebhook.mjs` para
-aceptar exactamente ambas rutas de Supabase Edge (`/functions/v1/...` y
-`/pazo-paypal-live-webhook`), sin ampliar rutas arbitrarias ni suprimir
-firma, propiedad, generación, idempotencia o kill-switch. No deployed Live.
-
-**Estado hosted SELECT-only:** bootstrap reservation=1,
-merchant_generations=0, secret_provision_attempts=0, inbox Live=0, paid
-periods Live=0; selector sandbox, live_enabled=false,
-kill_switch=true, active_generation=NULL. Checkout Live, receptor webhook
-Live y provisioner tienen hard latches OFF en sus index.ts; el botón de
-pago real NO está certificado. La función admin de prueba de saldos ya no
-es requisito de preparación.
-
-**Bloqueo externo para release/PWA:** conector Vercel para equipo
-`digitalapp` responde `403 forbidden` en get_project,
-list_deployments y list_project_domains (proyecto `pazo-app-t83r`);
-el PO debe reautorizar Vercel para ese equipo o usar CLI local con su
-propio login. NO inferir que el dominio HTTPS público y callbacks estén
-bien por el build/CI local. Tampoco mover a main, desplegar producción ni
-autorizar cobros hasta aprobación final y E2E supervisado.
-
-**Próximos hitos imprescindibles:** finalizar generación comercial
-vinculada a un merchant administrativamente autenticado, provisionar
-credenciales Live server-only con límites mínimos, conectar gateway
-checkout/webhook/worker y cancelaciones/holds, demostrar venta COMPLETED
-con período y reversión idempotentes, QA en HTTPS y PWA instalada,
-security advisor (password leak protection OFF), visual PO, rollback y GO.
-La verificación Merchant vía saldos es descartada; nunca fingir merchant
-verificado sin fuente confiable ni dar beneficios al volver de PayPal.
-
-
-
-## Corrección prioritaria: permitir cobros sin permiso de saldos — 21-oct-2026 (vigente)
-
-**Decisión operativa PO:** prioridad que la membresía US$2.99 pueda recibir
-pagos reales correctamente, sin nuevas pruebas innecesarias de identidad.
-La llamada `reporting/balances` provocó
-`live_merchant_read_permission_required`; **ese permiso NO es requisito
-de PayPal para crear suscripciones, configurar webhook o consultar plan**.
-No pedir al PO activar reporting/Transaction Search ni repetir el formulario.
-La coincidencia Merchant ID vía saldos fue un gate artificial introducido
-durante desarrollo. No usarla para bloquear integración financiera.
-
-**Código ya integrado:** PR #49 (squash `5fb025b6`, 9/9 GitHub CI SUCCESS)
-retiró el formulario `AdminPaypalLiveMerchantMatch` del flujo normal de
-Admin→PayPal→Live, sustituyéndolo por un mensaje claro de preparación pendiente.
-Tests de regresión en `adminPaypalLiveMerchantMatch.test.mjs`.
-El lector histórico puede permanecer en repositorio como laboratorio privado,
-pero NO forma parte del criterio de go-live ni debe ser invocado por usuario.
-No hubo migración ni despliegue de frontend/Edge financiero en PR49.
-
-**Estado real de cobros no se sobrestima:** plan y webhook generación1
-comprobados y registrados; Live sin credenciales generacionales, sin generación
-comercial persistente, webhook Live y checkout Live con latches de código OFF,
-rutas de reconciliación/beneficios no activas. Antes de ofrecer pagos en PAZO
-hay que cerrar almacenado seguro de secretos, originales de comerciante con
-MFA y proveedor OAuth/plan ya verificados, ingreso de webhook firmado,
-ventas completadas y cancelación/refund/entitlements, callback HTTPS y GO de
-operación real. No es seguro habilitar solo un botón de PayPal.
-
-**Alternativa inmediata de ingresos, separada de integración en PAZO:**
-PayPal Business permite `Sales → Subscriptions → Create/Manage plan →
-Generate Link` (PayPal ayuda oficial). Puede cobrar recurrencias mediante
-enlace de PayPal sin servidor PAZO, pero **no asigna automáticamente membresía
-ni beneficios en la app**. No publicarlo como Amigo de PAZO integrado sin
-reconcilación explícita con el usuario. Si se usa como transición, informar
-claramente el carácter manual. No inventar ni sintetizar URL de plan.
-
-**Próxima implementación:** dejar de optimizar la consulta de saldos;
-priorizar un recorrido administrativo de una única entrada de credenciales
-con verificación de OAuth/plan/webhook desde Edge, custodia segura por generación,
-ingestión firmada e idempotente, reconciliación y flujo de cobro/cancelación
-end-to-end con pruebas negativas. Mantener main/checkout Live OFF hasta GO
-expreso y prueba financiera supervisada.
-
-
-## Comprobación privada del ID de comercio Live — 21-oct-2026 UTC
-
-**Estado CODE + CI + HOSTED, no vinculante:** tras confirmar el PO que tiene a la
-vista el Merchant ID en PayPal Business real, se implementó el formulario
-`AdminPaypalLiveMerchantMatch.tsx` dentro de Admin→Configuración→PayPal→Live,
-separado de la comprobación de plan/webhook **ya terminada**. Pide ID de comercio
-(13 caracteres), Live Client ID y Live Client Secret **solamente dentro de PAZO**,
-con Supabase TOTP reciente exigido por el servidor. Ninguna clave ni merchant ID se
-introduce en chat o GitHub. El formulario limpia los inputs al enviarlos.
-
-**Seguridad real:** nueva acción `verify_merchant_id` en
-`pazo-admin-paypal-live-inspect/handler.mjs`, no en checkout. Bajo el mismo
-contexto admin, reserva generación1 y Live switch OFF, reutiliza el lector
-solo servidor `readLivePaypalMerchantIdentity` que comprueba plan y webhook y
-consulta temporalmente el ID de la API PayPal Live
-`GET /v1/reporting/balances?currency_code=USD` (requiere permiso
-`reporting/balances/read`). La respuesta de saldos nunca sale del proceso ni
-se persiste. El servidor compara `SHA-256(paypal:live:<merchant_id_del_PO>)`
-con la huella del account_id devuelto por PayPal, descarta ambas referencias
-brutas y las claves, vuelve a comprobar la generación y devuelve solo
-`live_merchant_id_read_match` o código fijo de rechazo. En éxito devuelve
-EXPLÍCITAMENTE `merchantIdentityVerified=false`,
-`merchantBindingStored=false`, `credentialsStored=false`,
-`webhookDeliveryVerified=false`, `mayCharge=false`. Un simple match transitorio
-no es registro de identidad original inmutable ni prueba de firma webhook.
-No se cambia `pazo_paypal_merchant_generations` ni se provisionan secretos.
-
-**Integración:** PR #48 fusionado EXCLUSIVAMENTE a F13, squash
-`3deca88144f0f8f99824f3d3addb832ed6ba0e0e`; CI antes de integrar
-9/9 SUCCESS, incluido Node, TypeScript, PWA y laboratorios PG17.
-Supabase `pazo-admin-paypal-live-inspect` **v4 ACTIVE**, `verify_jwt=true`;
-nueve fuentes alojadas idénticas a F13. No se desplegó frontend público.
-Postflight SQL read-only: reserva1, merchant0, intentos secretos0,
-release_evidence0, períodos Live0, selector sandbox/live=false/kill=true.
-`main` y PR44 DRAFT intactos.
-
-**Siguiente acción PO:** en `PAZO-F13-preview` actualizar la rama F13 local
-SIN descartar `package-lock.json` modificado; refrescar localhost:5173,
-Admin→Configuración→PayPal→Live; verificar TOTP reciente en PAZO;
-nueva sección `Comprobar identidad del comercio Live`: introducir ID visible de
-PayPal Business real + Live Client ID/Secret solo en formulario privado;
-pulsar una vez `Comprobar comercio sin guardar datos`. Reportar solo mensaje
-de estado/código (`live_merchant_id_read_match` o
-`live_merchant_read_permission_required`, etc.), nunca ID/keys/saldos.
-No hay que repetir el botón `Comprobar plan y webhook Live`, ni reservar
-generación/webhook nuevamente.
-
-**Gate pendiente después de un match real:** establecer la huella original
-solo con consentimiento administrativo explícito y registro fiable inmutable,
-provisionar secretos con scope mínimo, probar entrega firmada, conciliación,
-reversiones, checkout/retornos HTTPS/PWA, beneficios y rollback. No dar GO Live
-por el match transitorio.
-
-
-
-## Continuidad Codex recuperada — 21-oct-2026 (vigente)
-
-El PO publicó los dos archivos WIP de Codex desde `pazo-beta-rc` en
-`f16/codex-merchant-identity-handoff-20261020` (respaldo preservado).
-El clon local `PAZO-F13-preview` seguía en `9c034c03` con cambio
-exclusivo en `package-lock.json`; no se alteró esa modificación.
-
-**PR #47 integrado SOLO a F13 (squash `b28e455`), CI 9/9 PASS:**
-lector server-only `liveMerchantIdentityReadOnly.mjs` obtenido de Codex,
-que verifica OAuth/plan/webhook y consulta la API PayPal Live
-`GET /v1/reporting/balances?currency_code=USD` con permiso
-`reporting/balances/read`. Descarta respuesta de saldos, ID bruto y tokens;
-deriva `SHA-256(paypal:live:<account_id>)`. Sin fingerprint comercial
-original fijado por metadatos inmutables del servidor, solo devuelve candidato
-`ok=false / merchantIdentityVerified=false`. El verificador conectado al
-provisioner exige comparar huella original y rechaza mismatches antes de
-cualquier escritura de secretos. El hosted entrypoint permanece OFF.
-
-**PR #46 integrado SOLO a F13 (squash `1e2661f`), CI 9/9 PASS:**
-`pazo-admin-paypal-provision/intake.mjs` admite rutas Edge interna/pública,
-responde preflight CORS solo a Origin y método aprobados, rechaza prefijos,
-sufijos, query y métodos indebidos; OPTIONS nunca llama al backend.
-Se ajustó la release guard para exigir la liberación bloqueada.
-Sin despliegue ni provisión de claves ni activación financiera.
-
-**Postflight alojado solo lectura:** `merchant_generations=0`,
-`secret_provision_attempts=0`, `release_evidence=0`,
-`live_paid_periods=0`. `environment=sandbox`,
-`live_enabled=false`, `kill_switch=true`, `active_generation=null`.
-La generación 1 YA tiene registro real
-`plan_read_verified=true/webhook_read_verified=true` (no repetir).
-`validation_status=not_verified` es intencional hasta validar el comercio,
-entrega de webhook y circuito financiero.
-
-**SIGUIENTE gate real:** verificar por fuente independiente el ID del comercio
-original autorizado y fijar su huella en generación 1 tras MFA reciente y
-aprobación explícita PO; completar registro/secretos con scope mínimo, webhook
-firmado, conciliación, checkout/retornos HTTPS, beneficios y rollback.
-No inventar la huella ni confundir el candidato con identidad original.
-Ningún GO de cobro/producción, ninguna migración alojada en estos dos PR,
-`main` intacto y PR #44 todavía DRAFT.
-
-
-## Cierre verificado del gate de configuración del plan y webhook Live — 21-oct-2026
-
-**Este estado supersede el diagnóstico histórico `live_webhook_events_unexpected` de abajo.** El Product Owner presentó captura de PAZO con mensaje
-`Plan y webhook comprobados y registrados. Claves no guardadas. Live sigue apagado.`
-No repetir comprobación de recursos, ni crear otro webhook o generación.
-
-Lectura SQL alojada **READ ONLY** confirmó exactamente una fila en
-`admin_private.paypal_gateway_change_log`: `kind=validation`,
-`details.scope=live_resource_configuration`, `generation=1`,
-`plan_read_verified=true`, `webhook_read_verified=true`,
-`credentials_stored=false`, `recorded_at=2026-10-21 03:00:48.612283+00`.
-`admin_private.paypal_gateway_settings` tiene `webhook_id=6UA43660E66988355`,
-pero `validation_status=not_verified` y `validated_at=NULL` por contrato:
-es evidencia de lectura de recursos, **no** evidencia de identidad merchant,
-entrega firmada, custodia generacional ni validación financiera.
-Selector alojado `environment=sandbox`, `live_enabled=false`,
-`kill_switch=true`, `active_generation=NULL`. No conceder beneficios.
-Esta prueba se hizo en el código local del PO basado en el commit
-`9c034c03`; el repositorio remoto F13 tiene commits posteriores.
-El `origin/f13` mostrado por `git log` local es una referencia local que
-solo se actualiza con fetch/pull, **no es lectura en tiempo real de GitHub**.
-
-**Próximo trabajo técnico real:** identidad comercial PayPal original,
-fuente y provisión segura de secretos generacionales (sin activar Live),
-webhook firmado y conciliación, checkout/retornos, worker/ledger/entitlements
-y gates de release/PO. El PR #46 es trabajo aislado de CORS del endpoint de
-provisión **no publicado ni fusionado**; revisar QA antes de integrar. No
-mezclarlo con la prueba de recursos ya cerrada. No despliegue público ni cargo
-real sin autorización separada.
-
-
-## Checkpoint posterior a Codex — 21-oct-2026 UTC
-
-**Trabajo ejecutado por ChatGPT tras agotarse créditos de Codex; F16 aún NO-GO.**
-La rama `f13/section-titles-20261012` y el PR #44 permanecen abiertos; no se
-fusionó ni desplegó frontend, no se modificó main ni se activaron cobros.
-Código del cambio `01d937b218c75921bbae9d447fc369dcbc01207f`; 9/9 GitHub
-Actions SUCCESS (CI `39538281763`, Live Gateway PG17 `39538281580`).
-
-La pestaña PayPal Developer **Live** del PO muestra webhook existente
-`6UA43660E66988355`, URL `...?generation=1` y precisamente diez eventos
-visibles (las siete notificaciones BILLING.SUBSCRIPTION.* y tres
-PAYMENT.SALE.* exigidas). Esto NO invalida el diagnóstico anterior
-`live_webhook_events_unexpected`: el resultado del GET API tuvo conjunto o
-longitud distinto de diez. No eliminar ni recrear webhook a ciegas.
-
-Corrección disponible: `liveProviderReadOnly.mjs` conserva la comparación
-estricta y ahora calcula **solo** cantidad recibida, extras, duplicados,
-entradas malformadas y nombres adicionales en sintaxis permitida. La Edge
-privada propaga exclusivamente esos datos inocuos; la pantalla administrativa
-los muestra junto al código seguro. No guarda ni refleja credenciales.
-Regresiones para extras, duplicados y comodín incluidas. **Supabase
-`pazo-admin-paypal-live-inspect` v3 ACTIVE**, `verify_jwt=true`,
-8/8 fuentes alojadas idénticas al commit de código. Sin migraciones nuevas.
-
-Postflight alojado de solo lectura tras v3: 1 reserva, generation1 reserved,
-0 merchant generations, 0 provision attempts, 0 resource audits,
-0 Live inbox events, 0 paid periods. `paypal_gateway_runtime`: sandbox/
-live_checkout_enabled=false; `pazo_paypal_new_checkout_switch`:
-sandbox/live_enabled=false/kill_switch=true/active_generation=null/revision0.
-
-**Acción manual mínima del PO:** actualizar su rama local F13 (no borrar su
-`package-lock.json` preexistente), recargar localhost:5173, realizar MFA
-reciente en Admin y repetir UNA comprobación `Comprobar sin guardar claves`
-con Webhook ID y claves Live **solo dentro de PAZO**, nunca en chat. Compartir
-solo el diagnóstico mostrado (ahora incluirá conteos/nombres adicionales
-permitidos). No volver a reservar generación, no crear webhook nuevo ni
-modificar eventos sin identificar contradicción API/UI. Si devuelve éxito,
-continuar con identidad merchant, custodia, webhook firmado, worker,
-conciliación y prueba E2E, con selectores financieros OFF hasta GO separado.
-
-
-## Diagnóstico vigente — eventos del webhook Live
-
-**Estado vigente:** comprobador `pazo-admin-paypal-live-inspect` ACTIVE **v2**, JWT
-obligatorio, ocho fuentes idénticas a `9525ece11eb9e87f49b01a13d283de0958a28ec7`,
-CI9/9 SUCCESS (CI39533646911/LiveGateway39533647024). HTTPS OPTIONS204/sinJWT401.
-Además de cero decimal, exige `auto_bill_outstanding === false` explícito; el
-esquema PayPal indica true por defecto y no se infiere false de un campo ausente.
-23 pruebas dirigidas PASS. SQL sin cambios/reinstalaciones.
-
-Tras corregir el ID a `6UA43660E66988355`, el PO informa ahora
-`live_webhook_events_unexpected`. Según la ruta de la fuente alojada verificada,
-el plan, GET del webhook, ID y URL ya pasaron; también están los diez nombres
-requeridos. El conjunto o la longitud de la lista difiere de diez: existe alguna
-entrada adicional o repetida. No inferir «All events» sin leer la selección real.
-Se pidió copiar solo los nombres seleccionados del registro existente, sin
-guardar cambios ni volver a introducir claves hasta aislar la diferencia.
-Postflight independiente después de este diagnóstico: reserva1/generación1
-reserved, 0 auditorías de recursos, 0 merchant Live, 0 intentos de secretos,
-selector sandbox/Live OFF/kill ON/active_generation null. No hay configuración
-del webhook aceptada ni metadata persistida; identidad y entrega siguen pendientes.
-
-La consulta anterior devolvió `live_webhook_unverified`. El PO volvió a copiar
-exclusivamente ID+URL: el ID inicial tenía una `u` minúscula adicional al principio,
-y la URL coincide exactamente con generación 1. Solo corrigió el campo de PAZO;
-no se modificó el webhook ni se creó otro. Las claves se descartan al enviar.
-
-Primera comprobación real del PO devolvió `live_plan_terms_unverified`: se pasó
-Auth/MFA/reserva/OAuth y se leyó plan ACTIVE, pero NO se validó webhook ni guardó
-metadata. Postflight: reserva1, resourceaudits0, merchant0, secretattempts0 y OFF.
-Lectura directa del plan en PayPal confirmó US$2.99/cada1mes/ilimitado/setup0 y sin
-impuestos, con facturación automática de saldos pendientes ACTIVADA. PO la desmarcó
-y guardó personalmente; readback independiente confirma DESACTIVADA, demás valores
-conservados. Codex solo abrió el editor y leyó, no guardó cambios financieros.
-
-El editor muestra comisión cero como `0.0`. Corregida comparación textual de cero:
-acepta exclusivamente strings USD `0`, `0.0`, `0.00`, sin redondeo, manteniendo
-rechazo de centavos/signos/exponentes/otra moneda y cobros automáticos de atrasos.
-La regresión reproduce el fallo original; código y despliegue actuales se detallan
-arriba. No crear otra reserva/plan/webhook ni debilitar controles para pasar el test.
-
-## Hito inicial — comprobación privada instalada en v1 (histórico)
-
-El PO entregó Webhook ID; conservado exactamente como candidato local de generación
-1, **sin validación API todavía**. No crear webhook, plan o reserva otra vez.
-Consulta actual: reserva 1 única reserved, merchant Live0, sandbox/Live OFF/kill ON.
-HEAD anterior cd9d56cc9a05165bb8fa2f2c4f74dc528a679e64 confirmado 9/9 workflows SUCCESS;
-PR44 OPEN/DRAFT y previews automáticas OFF.
-
-Instalado `pazo-admin-paypal-live-inspect` ACTIVE v1/JWT obligatorio: GoTrue+admin+MFA reciente, claves
-efímeras introducidas solo en Admin, GET de recursos y registro de metadata tras
-verificar plan y URL/eventos exactos. No guarda/devuelve claves, finaliza merchant
-ni activa cobros. 20 pruebas dirigidas PASS, PG17 roles/rollback PASS,
-verify:prepreview PASS. Código bdf316495c08045b845b79d3b31f2c419c2f426e: CI9/9 SUCCESS
-(CI39531396500/LiveGateway39531396475). Migración aplicada UNA vez con ID real
-20261021021050, SQL SHA392f887b3f457a14f2cafa3fb27955fc38ca0d7492c9299d07cc3d0a526c7da7;
-dos RPC service-only, ACL/owner/search_path verificados. Lectura alojada READ ONLY
-con rol service_role confirma reserva1; 0 nuevos resource audits/secret attempts/
-merchant Live. Ocho fuentes Edge idénticas al commit. HTTPS OPTIONSlocalhost204,
-origen ajeno403, POST sin JWT401. Clon PO actualizado a bdf31649 preservando lockfile
-previo y Vite sirve formulario HTTP200. Ajuste posterior de recarga silenciosa
-preserva confirmación visible tras éxito; no cambia backend. Ver procedimiento.
-
-Petición inicial al PO: recargar localhost5173, Admin→Configuración→PayPal→Live, TOTP reciente
-solo dentro de PAZO, nueva sección Comprobar plan y webhook Live. Debe mostrar
-generación1; introducir Webhook ID comunicado y claves de app Pazo Live solo en
-el formulario privado, pulsar Comprobar sin guardar claves y devolver texto/código.
-No reservar otra vez ni generar pagos/eventos. No pedir credenciales en chat.
-La ejecución posterior y el diagnóstico vigente figuran al inicio de este documento.
-Identidad merchant y firma/custodia/worker siguen pendientes.
-
-## Último checkpoint — lector de ventas originales HOSTED PASS
-
-InstaladoUNAvez `20261021014400_pazo_f16_live_recorded_sale_reader`, SQLSHA25643450d0d55b26dcd9e6336c4c7faf4579e4626d7f084afa189c5292050bdf817; archivo alineado al ID real sin cambiar bytes. Postflight: STABLE/SECURITYDEFINER/search_pathvacío, ACLexactopostgres+service_role; anon/authenticatedfalse, claimsJSON. LecturaalojadaREADONLYconroleDBservice_role yreferenciassintéticasausentes devolvióNULLsinfilas/beneficios. Reserva1 única intacta, generacionesLive0,selectorOFF. Código080b809943d1b11439d85405ebc722d8e888ab4a9/9CI SUCCESS (CI39528718580/LiveGateway39528718397), PG17roles/owner/generaciónPASS; cambio posterior soloalineaIDsydocumenta.
-
-AÚNPENDIENTE: POestáregistrandowebhookPazoLive conURLgeneration1y10eventos; pasosnumerados yaentregados. EsperarWebhookID,nopedirsecretos. Worker/custodia/identidadmerchant/E2Efinanciero no completos. ScopedPATSupabaseenpublicalpha condesplieguegradual: noasumircapacidadcuenta niusarclassicPATatajo; orgfreeconfirmada. Auditoríacatálogo adicional:0tablaspublicexpuestassinRLS,0viewsaccesibles,0definerspublicqueusenuser_metadata,0funcionesrestantesconsoloGUCroleheredada. Advisorconpendientesconocidos; sinupgradegastos.
-## Actualización vigente — generación1 real reservada y comprobada
-
-check_readiness del PO confirmó configuración y logs alojados POST200 a01:31:25UTC. PO ejecutó después UNAreserva; lecturaDB confirma exactamente1fila,state=reserved,generation=1,planLiveesperado. URLreal `https://mrybvqdebbgcayuvgkkr.supabase.co/functions/v1/pazo-paypal-live-webhook?generation=1`. GeneracionesmerchantLive0/secretattempts0; sandbox/LiveOFF/killON/genactivaNULL. **NOreservarotra vez ni repetirMFAalta.** Falta crearwebhook: Chrome no permite controlar pestaña; instrucciones exactas10eventos enviadas y PO pidió lista numerada, ya entregada. Esperar WebhookID sinsecretos. Lectorventasoriginales enpreparaciónconrolesJSON/propietario/generaciónPG17. Migraciones técnicas autorizadas globalmente. Bloques anteriores/posteriores conreservas0sonhistóricos.
-## ESTADO VIGENTE: 503 corregido HOSTED; comprobación administrativa PO pendiente
-
-La orden maestra directa del PO autoriza programación integral de beta por Codex. **El PO también autorizó todas las migraciones necesarias sin pedir GO individual.** Mantener auditoría, versionado, postflight y rollback. Esto no ejecuta una compra Live ni sustituye aceptación visual/publicación final. F13/PR44DRAFT, main intacto.
-
-- CODE/CI: `ba9605637c035f873a0e5793937e04aa76e7a551`, 9/9 workflows SUCCESS; CI39527117678 y LiveGatewayPG17 39527117638. Local verify:prepreviewPASS (closure294/F16synthetic1193/build/dist). PG17 reproduce42501original, reparaJSONclaims y ensaya rollback. QAWindows CRLF/SQLLF/USERPROFILE aislado corregidos sin cambios de producto.
-- CAUSA: logs00:34:32UTC Auth200/admin200/settings200/reserve403; las17RPC comprobaban GUC antigua en vez de `request.jwt.claims` JSON. Fuente SQL alojada exacta reproduce el defecto. No pedir configurar MFA otra vez.
-- HOSTED: instaladaUNAvez `20261021012636_pazo_f16_live_service_json_claims_guard`, SHA256 `c523e2c044a4c1c04fcb2b864b079181b50f5672e0f42d9ed6d0907a9f5a794a`. Fichero alineado al ID real. Postflight17corregidas/17protegidas/0originales; reservas0/generacionesLive0/secretattempts0; sandbox/liveOFF/killON/genNULL/rev0. **NO reinstalar.** Bootstrapv6 intacto; provisionv2/checkoutv2/webhookv1 inertes según fuente leída.
-- LOCAL: clonPO `C:\Users\osori\PAZO-F13-preview` actualizadoff a ba960563; package-lock modificado preexistente preservado byteidénticoSHA20992e0a6f4c6817f31bab124a9f613d0b6dee72eb4220736d541e0a4861e887 y respaldado. Checkout técnico `C:\Users\osori\Downloads\Nuevo pazo app\pazo-beta-rc`. Servidorlocalhost5173 previo sirve UI actual; duplicado127 de Codex cerrado.
-- SIGUIENTEPO, ya solicitado: localhost5173, Ctrl+Shift+R, Admin→Configuración→PayPal→Live, TOTP reciente dentro de PAZO y SOLO **Comprobar configuración (sin reservar)**; devolver confirmación/código saneado. No pulsar reserva antes de evaluar respuesta, no compartir TOTP/QR/tokens. Reserva real única desde cuentaPO sigue pendiente.
-- TRABAJO INDEPENDIENTE: lector service-only de ventas originales para refunds, corregir JSON del draft antes de instalar. Merchant/webhook/custodia/worker/checkout/beneficiosLive incompletos; betaNO-GO.
-- VERCEL: CLIautenticado verifica previewDeploymentsDisabled=true/producciónmain. HTTPSanónimo `/`200appShell, pero `/paypal/return`, `/paypal/cancel`, `/manifest.webmanifest`, `/sw.js`404. Buildlocal correcto no equivale a publicación actual. No deploy web.
-- SEGURIDAD: Advisor40INFO/4anonWARN/38authWARN/contraseñasfiltradasOFF. Cuatrodefinersanónimas revisadas exponen booleano/beneficiospúblicos/muroopt-in; revisión completa abierta. Drift histórico: auditoríasecretos alojada20261020200238, archivo/docs20261020200800; reconciliar nombre, NOreinstalar.
-
-Matriz/gates: `docs/PAZO_BETA_RELEASE_CANDIDATE_REPORT.md`. **No declarar RC final ni cierreF16.** Los bloques siguientes son historia; este checkpoint y catálogo actual prevalecen.
-
-## Historial anterior al diagnóstico corregido
-
-## F16 — SEGUNDO FALLO 503 / DIAGNOSTICO READ-ONLY (21-oct-2026)
-- PO intentó reservar generación comercial nuevamente. Supabase function_edge_logs `2026-10-21T00:34:31.685` OPTIONS 204 y `00:34:32.928` POST **503**; SQL postflight 0 reservations, 0 merchant generations, LIVE OFF, kill_switch ON. Problema CORS solucionado, segundo bloqueo backend interno.
-- Supabase Edge función `pazo-admin-paypal-bootstrap` v4 `function_logs` confirmó `PAZO_F16_BOOTSTRAP_INIT:DEPENDENCIES_READY`: las variables/configuración necesarias para crear factories estaban presentes; NO confundir con éxito de lectura RPC o inserción SQL. Puede fallar en `readAdminSettings` o `reserveGeneration`, o un error previo marcado 503.
-- Instrumentación sanitizada: `liveMerchantBootstrapControl.mjs` logs solo una de tres etiquetas 503 (`bootstrap_backend_unavailable`, `live_configuration_unavailable`, `generation_outcome_needs_review`). Componente `AdminPaypalMerchantBootstrap.tsx` muestra solo códigos permitidos del JSON, nunca secretos; no reintenta automáticamente.
-- Incorporado `check_readiness` con confirmación `VERIFICAR CONFIGURACION LIVE`, *solo lectura*, exige admin y MFA reciente igual a reserva, verifica borrador y retorna `live_configuration_readonly_verified` con `generationReserved=false`, `mayCharge=false`; jamás llama RPC de reserva ni PayPal. UI muestra nuevo botón **Comprobar configuración (sin reservar)**; botón de reserva exige `readiness==='verified'`. Tests incluyen bloqueo por MFA, garantía 0 writes y error-code allowlist. Commit `389f3f13e7f443d2ea7be12344a16e22ef2318a7` 9/9 Actions PASS.
-- **HOSTED** `pazo-admin-paypal-bootstrap` versión **6**, `verify_jwt=true`, digest `4b1dc8c6bf1a7781391ab82121b9e47de200cde6063c37e04367329e89f7dbe1`. Se comparó código alojado y contiene `check_readiness`. Postflight Supabase: 0 reservadas, 0 generaciones Live, 0 secret attempts, switch Live OFF, kill ON.
-- NEXT OWNER MANUAL: NO presionar Reservar generación Live. Primero actualizar clon Vite limpio rama `f13/section-titles-20261012` con git pull --ff-only, recargar app, ir Admin → PayPal Live, TOTP reciente, pulsar **únicamente Comprobar configuración (sin reservar)**. Devolver solo el texto/`Diagnóstico:` o confirmación. El paso no crea generación. Con resultado se determina si problema en lectura JWT/RPC o función SQL; después corregir/autorizar según causa. No pedir QR/JWT/clave/código TOTP en chat. No activar pagos ni webinar/live checkout.
-
-
-## F16 — BOOTSTRAP PREFLIGHT CORS 204 / NEXT OWNER GATE (21-oct-2026)
-- Owner clicked Reservar generación Live ONCE; UI showed `No se pudo confirmar la respuesta`. Critical READ-ONLY SQL verified **0 reservations**, **0 Live merchant generations**, `live_enabled=false`, `kill_switch=true`. Supabase function_edge_logs at 2026-10-21 00:22:53 UTC showed OPTIONS 400 at bootstrap; no POST event in selected logs. No payment or mutation occurred.
-- Root cause likely handler's `request.url===TARGET` exact full-URL comparison rejected Supabase Edge routed/internal Request URL in preflight, resulting in OPTIONS 400. Updated `liveMerchantBootstrapControl.mjs` to accept only explicit endpoint pathnames (both /functions/v1/pazo-admin-paypal-bootstrap and /pazo-admin-paypal-bootstrap), still require explicit Origin allowlist and POST preflight; JWT gateway stays ON and server still checks GoTrue admin + fresh TOTP. Added tests for routed URL, malicious path, Origin and unauthorized POST; GH commit d585ba97ced6f6e51c3927a1599c5d816473cc5f = 8/8 PASS.
-- Deployed `pazo-admin-paypal-bootstrap` Supabase **ACTIVE v3**, `verify_jwt=true`, digest `1dcd389ebc40729bbbd157614eef3db65bd249290e61437fa8f472dfe519a0b9`. Production source verified after deployment.
-- External GitHub Actions workflow `.github/workflows/f16-bootstrap-cors-smoke.yml` on PR executed actual public HTTPS OPTIONS unauthenticated with Origin http://localhost:5173 and requested POST/authorization headers, no credentials or reservation. **PASS** run 39521732235, status 204 and allow-origin/allow-headers correct. Source commit 5ec5817d29aa0b1be0f300f11f32fdc39c90591b. Subsequent repo CI still pending at time note written.
-- Stored Live merchant draft read-only exact: P-9BR88240215654528NLL3I4I, USD 299 cents, MONTH, return_origin https://pazo-app-t83r.vercel.app, webhook_id blank. Reservation still NOT DONE. Before asking another owner test, confirm CI; then owner may use existing local Vite without a git pull, refresh Live panel, new TOTP, click reserve ONCE. If error, read SQL reservations/logs BEFORE any retry. Keep Live OFF; no webhook, credentials, worker or beta GO.
-
-
-## F16 — MFA REDIRECT BUG FIX / OWNER RETEST REQUIRED (20-oct-2026)
-- PO reportó: tras verificar código TOTP en Administración → PayPal Live, app regresa a Mi mascota y desmonta dashboard. No repetir pruebas hasta actualizar.
-- Root cause App.tsx: el useEffect de initApp dependía del objeto user completo. Supabase challengeAndVerify refresca objeto User/JWT en AuthContext; se reiniciaba petBootstrap=loading y desaparecía PetView/ModerationAccess/AdminDashboard. Se sustituyó dependencia [user, loading, petBootstrapRetry] por [user?.id, loading, petBootstrapRetry]. Identidad nueva y retry todavía recomputan, cambios en sesión de la misma cuenta no. Commit 8ae998eaa253bc395bf0c2d9e6ab5529a536136f.
-- Prueba de regresión src/features/admin/testing/adminPaypalLiveMfaUi.test.mjs agregada en 5385e904ae793c1fe6b8c0fde0f30f40cb73b99f; esperar 8/8 CI PASS antes de declarar completada. Verificación UX real pendiente.
-- Siguiente acción PO: comprobar rama F13 y árbol limpio, git pull --ff-only origin f13/section-titles-20261012, Vite, Ctrl+Shift+R. Una verificación TOTP en Admin PayPal Live; la página debe quedar allí y permitir reservar generación UNA sola vez. No enviar QR/códigos MFA.
-- Bootstrap hosted permanece activo pero sin reservas (última lectura), PayPal Live OFF, kill switch ON; webhook y worker faltan.
-
-
-## F16 — GO PO: GENERATION RESERVE OPERATIVE, WAITING FOR ADMIN (20-oct-2026)
-- User authorized **enable generation reserve only and create first actual generation via their own administrator session**. Code updated in branch `f13/section-titles-20261012`: `supabase/functions/pazo-admin-paypal-bootstrap/index.ts` `RELEASE_APPROVED=true`, imports verified GoTrue admin+same-JWT `pazo_is_admin`, fresh TOTP proof, signed-JWT admin draft reader, service_role bootstrap RPC. The merchant bootstrap control refuses malformed body, wrong settings/plan and unsigned/out-of-window TOTP. Only returns DB-assigned generation & exact `?generation=N`; no PayPal provider call, credentials, subscription, entitlements or checkout writes. UI `AdminPayPalSettings.tsx` `LIVE_MERCHANT_BOOTSTRAP_RELEASED=true`, button rendered following fresh TOTP (4-min UI expiry). Existing `LIVE_EDGE_PROVISIONING_RELEASED=false` and `LIVE_RESOURCE_INSPECTION_RELEASED=false` UNCHANGED.
-- **HOSTED** Supabase project `mrybvqdebbgcayuvgkkr` function `pazo-admin-paypal-bootstrap` **ACTIVE v2, verify_jwt=true**, 8 source graph files deployed from GitHub, digest `8b7b1d6c901e141248828a22d124c2e125394f3a6bce2b038b9fe2763a74a7db`. `get_edge_function` confirmed source entrypoint `RELEASE_APPROVED=true` and all eight deployed modules. Code commit `8ad5b6554c9c2488e2b669f3d1ee7e24d6a13160` **8/8 GitHub Actions SUCCESS**. Other functions: `pazo-admin-paypal-provision` v2 remains INERT; `pazo-paypal-live-checkout` v2 LIVE OFF; `pazo-paypal-live-webhook` v1 LIVE OFF.
-- **Postflight database read-only:** `0` reserved generations, `0` merchant generations, `0` secret attempts, `0` Live inbox events; selector `environment=sandbox`, `live_enabled=false`, `kill_switch=true`, `active_generation=NULL`, `revision=0`. No financial/PayPal merchant mutations performed. PR #44 still DRAFT, main and public beta not updated. No authenticated HTTP request yet run through new endpoint; requires owner's user session.
-- **IMMEDIATE NEXT:** PO updates local clone `C:\Users\osori\PAZO-F13-preview` (check clean working tree, branch, `git pull --ff-only origin f13/section-titles-20261012`), runs Vite, logs into administrator, Administration → Settings → PayPal → Live, completes fresh six-digit TOTP in PAZO, presses **Reservar generación Live** ONCE. No sharing QR, TOTP or secrets. If UI reports uncertain, do NOT click again: check private reservation SQL by admin actor and recover same generation. After reservation assistant checks SQL exactly once and gives PO exact PayPal webhook registration steps with source URL; never invent N. Follow-up provider webhook/credentials and worker still NOT done. Beta NO-GO.
-
-
-## F16 — Preparación siguiente GO comercial (20-oct-2026)
-- El usuario pidió completar beta F16 antes de lanzar y autorizó instalar SOLO migración idempotente y endpoint en modo INERTE. Ambos ejecutados; ver bloque hosted. En rama F13 se agregó adicionalmente CÓDIGO NO HOSTED: `liveMerchantBootstrapControl.mjs` con CORS allowlist a localhost y dominio temporal, PR #44. Pantalla `AdminPaypalMerchantBootstrap.tsx` reutiliza MFA verificado, reserva generación solo después de un GO explícito futuro y muestra URL fija `?generation=N` sin pagos; la bandera `LIVE_MERCHANT_BOOTSTRAP_RELEASED=false` en `AdminPayPalSettings.tsx` mantiene el botón oculto. No falsear despliegue: `pazo-admin-paypal-bootstrap` hospedado v1 sigue `RELEASE_APPROVED=false`.
-- QA detectó test preexistente de borrado de secretos al conmutar Sandbox/Live; se conservó el contrato estricto `setEnv(value);setClientId('');setClientSecret('')` y se agregó borrado de MFA fresco + caducidad visual a los 4 minutos. Bloqueo corregido en commit `45feb0073eb2ad3c8e1f6827a37752a92f1fa415`. CI de última modificación: consultar GitHub Actions antes de declarar PASS. SQL de reserva validado PG17 8/8 antes.
-- **Siguiente GO PO no incluido en autorización previa:** alojar una edición funcional con JWT/admin+TOTP reciente habilitando EXCLUSIVAMENTE reserva de una generación real no monetaria y exponer botón una vez; después el PO tendrá que registrar su webhook en PayPal Developer Live con URL exacta. No crear plan repetido ni pagos. No usar secrets en chat ni suponer merchant identity sólo por OAuth. La beta permanece NO-GO hasta webhooks firmados, worker, beneficios y QA end-to-end.
-
-
-## F16 — GO PO cumplido: retry SQL + Edge bootstrap inerte HOSTED (20-oct-2026)
-- Usuario autorizó explícitamente instalar corrección idempotente y desplegar endpoint administrativo nuevo **solo inerte**. Instalado en Supabase `mrybvqdebbgcayuvgkkr`: migración `20261020234721_pazo_f16_live_bootstrap_idempotent_retry_guarded` SUCCESS, bajo `public.pazo_f16_live_service_bootstrap_reserve(uuid,text)`, ACL `anon=false,authenticated=false,service_role=true`, retorno del mismo `generation` para misma reserva/admin. Archivo GitHub versionado `supabase/migrations/20261020234721_pazo_f16_live_bootstrap_idempotent_retry_guarded.sql`. Ya NO volver a aplicar borrador de retry.
-- Edge `pazo-admin-paypal-bootstrap` **ACTIVE v1, verify_jwt=true**, hosted SHA256 `ec4db5b4463ffd19401f0358ca0cc1ca061e31be0894124030ea229e0d49f79f`. Código exacto desplegado `index.ts` es shell standalone sin imports de secretos: `RELEASE_APPROVED=false`, responde 503 sin crear generaciones ni llamar PayPal. No confundir ACTIVE con función de negocio habilitada.
-- Postflight Supabase: `reservations=0, generations=0, secret_attempts=0, live_inbox=0`; selector `sandbox/live_enabled=false/kill_switch=true/active_generation=NULL/revision=0`. `main` y beta intactos, PR #44 DRAFT.
-- **LO QUE FALTA:** liberar de manera controlada flujo `createPazoLiveMerchantBootstrapControl` con usuario JWT + admin RPC + TOTP reciente, reservar primera generación real (GO acotado), validar aplicación y recursos de PayPal Live desde canal privado, registrar webhook con `?generation=N` (evento/firma), instalar worker financiero y probar conciliación, entitlements, refunds, cancelación, retornos PWA y seguridad de beta. No permitir que OAuth de app sea sustituto de merchant identity. No recopilar secrets, PAT ni QR en chat. Para operaciones del comercio o cobros pedir GO específico.
-
-
-## F16 — Generación comercial backend CODE/CI + retry staging (20-oct-2026)
-- **8/8 GitHub Actions SUCCESS** en commit `7d2482a9e3ab8dcd9bed39a8ef81817563866668`. PR #44 DRAFT en `f13/section-titles-20261012`. No main/Preview/Live cobrando.
-- Código staged **NO desplegado**: `supabase/functions/pazo-admin-paypal-provision/liveMerchantBootstrapControl.mjs` (autenticación admin + MFA reciente, plan Live leído del draft; no acepta plan/secret en request, no concede cobros); `liveAdminDraftReader.mjs` usa misma sesión JWT, filtra credenciales; `supabase/functions/pazo-admin-paypal-bootstrap/index.ts` sigue `RELEASE_APPROVED=false`. Pruebas nuevas `adminPaypalLiveBootstrapControl.test.mjs` incluidas en CI.
-- Nuevo borrador SQL **NO instalado** `supabase/drafts/f16_live_bootstrap_idempotent_retry_REVIEW_REQUIRED.sql`: `CREATE OR REPLACE FUNCTION public.pazo_f16_live_service_bootstrap_reserve` devuelve la MISMA reserva sin consumir otro número tras pérdida de respuesta, solo al mismo admin y antes de finalizar. Laboratorio desechable PG17 confirma no duplicado ni replay por actor no autorizado.
-- Hosted todavía: 0 merchant generations, 0 reservas, 0 secret writes, Live OFF y kill switch ON. MFA TOTP admin verificado. **No confundir CODE/CI con funcionamiento HOSTED.** Próximo gate requiere autorización PO para revisión y aplicación de migración idempotente, y autorización separada de liberar transacción de RESERVA de generación / crear webhook Live. No pedir secretos en chat. PayPal OAuth de client_credentials prueba app, NO identidad/payer merchant ni entrega de webhook.
-
-## F16 MFA ADMIN — VERIFICADO HOSTED (20-oct-2026)
-- PO completó el vínculo Google Authenticator desde PAZO Vite local. SQL de Supabase/Auth confirma **1 factor TOTP `verified`** y ningún registro `unverified` en cuenta administradora; los logs de GoTrue confirman POST de `challenge` y `verify` con status 200. No volver a pedir QR ni alta TOTP. La UI ahora muestra campo para nuevos códigos, **normal para step-up posterior**, no significa fallo.
-- El enrolamiento verificado es solo el factor de identidad; **cada cambio de secretos Live debe exigir prueba TOTP reciente y autorización de administrador en servidor**. No afirmar que se haya aprovisionado un comercio o webhook por MFA; Live sigue OFF. El PR #44 continúa DRAFT, sin merge ni beta publicada.
-- Se corrigió el diagnóstico del QR en la rama F13 y quedó documentado; no repetir ciclos de intento al mismo error. Siguiente fase: identidad PayPal Live, configuración de generación comercial, secretos privados y webhook firmado mediante gates separados.
-
-## F16 — Diagnóstico y reparación TOTP MFA (20-oct-2026)
-- El intento real del PO al pulsar «Configurar autenticador» devolvió error de UI. Auth logs alojados confirman `POST /factors` **200** con evento `factor_in_progress`; SQL agregado para la cuenta administradora mostró `1` factor TOTP `unverified`, `0` verified. Por lo tanto NO repetir alta a ciegas.
-- El componente `AdminPaypalMfaStepUp.tsx` rechazaba un formato Supabase válido `data:image/svg+xml;utf-8,...`. Corregido en rama F13 commit `6a142f5`; añadido reconocimiento de `data.all` para factor `unverified` y botón de recuperación con comprobación exacta antes de `mfa.unenroll` **solo del factor pendiente**. Pruebas ampliadas en commit `6e48a3dc45c0d4e0d4c7f847a3fe97823fc442e5` y **8/8 CI PASS**.
-- Acción PO: en clon `C:\Users\osori\PAZO-F13-preview`, verificar `git status --short` limpio y rama correcta, ejecutar `git pull --ff-only origin f13/section-titles-20261012`, recargar Vite. En Admin → Configuración → PayPal → Live pulsar «Reiniciar registro pendiente» y luego «Configurar autenticador», escanear QR y verificar código EN PAZO, jamás en chat. Después comprobar `auth.mfa_factors` solo por conteos. Live sigue OFF y el admin Edge está INERTE.
-
-## F16 — MFA TOTP para administrador (20-oct-2026)
-- PO confirmó disponer de Google Authenticator. En rama F13, commit `43f8a3106e929316e8e154c9acdb27654cf6da92`: `AdminPayPalSettings.tsx` ahora monta `AdminPaypalMfaStepUp` en pestaña Live SIN exigir `LIVE_EDGE_PROVISIONING_RELEASED`. Esta bandera SIGUE FALSE y el endpoint alojado `pazo-admin-paypal-provision` v2 SIGUE INERTE (`RELEASE_APPROVED=false`, JWT true). Prueba `adminPaypalLiveMfaUi.test.mjs` actualizada.
-- Estado previo Supabase: un administrador, cero factores TOTP verificados. Cambio de UI SOLO en GitHub; requiere que PO actualice clon Vite local y escanee QR desde su teléfono, sin pegar QR ni códigos en chat. Verificar posteriormente factor TOTP real mediante consulta agregada a `auth.mfa_factors` y exigir paso TOTP reciente para cualquier provisioning.
-- NO desplegar Preview/publicación ni activar PayPal Live por mero enrolamiento MFA. Más adelante completar backend de merchant identity, secretos de gestión con alcance mínimo y worker financiero con GO apropiado.
-
-
-## F16 — ADMIN EDGE HOSTED INERTE — 20 OCT 2026
-- Función `pazo-admin-paypal-provision` ACTIVE v2, JWT obligatorio, RELEASE_APPROVED=false. Sin operaciones financieras. Ver `docs/PAZO_F16_ADMIN_EDGE_INERT_HOSTED_20261020.md`.
-
-## F16 — SQL HOSTED INSTALADO CON GO PO — 20 OCT 2026
-- Supabase proyecto `mrybvqdebbgcayuvgkkr`: usuario aprobó expresamente instalar **dos migraciones** sin activar Live. Aplicadas mediante Supabase con `success:true`. Versiones **`20261020214807_pazo_f16_live_bootstrap_generation_guarded`** y **`20261020214838_pazo_f16_live_durable_inbox_lease_guarded`**; ficheros versionados renombrados en GitHub a esos IDs.
-- Postflight HOSTED: tablas y RPCs presentes; tabla reserva y originales FORCE RLS; anon/auth no EXECUTE bootstrap ni inbox claim/finish; service_role sí; `0` reservas, `0` merchant generations, `0` intentos secretos y `0` inbox. Switch `environment=sandbox,live_enabled=false,kill_switch=true,active_generation=null,revision=0`.
-- **No asumir que 4 bloqueos están terminados**: no existe generación comercial creada, no hay credenciales conectadas, no hay webhook Live registrado y su entrega/firma sin probar; worker financiero no alojado. Queda por implementar auténtico MFA/admin control plane, provider identity binding y worker e2e, y obtener GO acotado para operaciones de comercio/secretos/despliegue. No reiniciar las dos migraciones.
-- Supabase Security Advisor después de DDL muestra `rls_enabled_no_policy` info 40 (tablas privadas intencionalmente inaccesibles requieren revisión contextual), `anon_security_definer_function_executable` WARN 4, `authenticated_security_definer_function_executable` WARN 38 y leaked password protection WARN 1. No declarar resueltos los WARN preexistentes. Referencia: https://supabase.com/docs/guides/database/database-linter
-
-## Actualizacion F16 20-oct-2026 — 4 bloqueos, sin despliegues financieros
-- CI verificable: commit [`7b1420bf50b529b310c8feadcc4de605fefbfce0`](https://github.com/DigitalAppcorp/pazo-app/commit/7b1420bf50b529b310c8feadcc4de605fefbfce0), **8/8 workflows SUCCESS**, incluido PostgreSQL 17 desechable probando SQL REAL, bloqueo anon/auth, secuencia original, idempotencia, bloqueo de doble finalize, lease y reintento de webhook. PR #44 sigue DRAFT, main y beta intactos.
-- Código nuevo: `liveBootstrapSqlStore.mjs`, `liveInboxLease.mjs`, `liveWebhookEventEvidence.mjs` más 3 pruebas Node. Dos archivos SQL en `supabase/drafts/f16_live_bootstrap_generation_REVIEW_REQUIRED.sql` y `supabase/drafts/f16_live_durable_inbox_lease_REVIEW_REQUIRED.sql`; integrados en `scripts/f16-live-bootstrap-lease-disposable-lab.sql`. **No son HOSTED**. Creación de generación, provisioning, webhook entregado y worker financiero real siguen **NO-GO**.
-- PO verificó con navegador en incógnito acceso sin SSO al host provisional. En PayPal plan Live Amigo de PAZO `P-9BR88240215654528NLL3I4I` sigue ACTIVADO a $2.99/mes; PayPal autenticado mostró `Pagos pendientes de recibo automático: Desactivado` tras cambio PO. Recurso todavía no validado con GET API server.
-- **Siguiente gate condicionado (sin asumir GO implícito):** pedir autorización acotada para **versionar/instalar solamente** dos migraciones de bootstrap/lease en Supabase, revisar diff RLS/ACL y postflight. No toca 0 merchant generations ni pone live_enabled=true, ni cambia kill_switch, secretos, cobros o beneficios. Solo después preparar canal privado MFA, evidencia de comercio vía API Live, reserva real generacional, registro de webhook firmado y worker reconciliador. Requiere otra autorización acotada para cualquier operación comercial o primer pago Live.
-- Instrucciones de no repetir: no volver a crear el plan, a cambiar cobro automático, a reinstalar auditoria SQL anterior, a importar insignias ni a reejecutar Sandbox E2E aprobado.
-
-**LEER PRIMERO EN EL SIGUIENTE CHAT.** Documento operativo actual; reemplaza las 60 KB de checkpoints cronológicos anteriores. Historial íntegro recuperable en Git a partir del commit **`1cfcf2be387978b9eb1338de5bc4424ae39dd419`** y en `docs/archive/`. El servidor alojado y el HEAD remoto comprobados prevalecen sobre este resumen si algo cambia. No reanudar tareas desde una captura de chat truncada.
-
-## Inicio / responsabilidades
-- Producto: **PAZO**, PWA social para mascotas, 18+, Los Ángeles. App/QR gratis; **Amigo de PAZO** contribución voluntaria **US$2.99/mes**, con cuatro niveles visuales 1/3/6/12 meses. Product Owner = usuario; ChatGPT = ejecutor técnico principal. Español; respuesta precisa y ahorro de tokens. No pasar ejecución a Codex/Gemini salvo nueva petición explícita.
-- Brain OS canónico separado: `DigitalAppcorp/project-brain-os` v1.4.1: leer `SKILL.md` y `patterns/VERIFIABLE_HANDOFF.md`. Leer PAZO `AGENTS.md`, `docs/PAZO_MASTER_ROADMAP.md`, `docs/PAZO_F16_ADMIN_EDGE_PROVISIONING_GATE_20261020.md`, `docs/PAZO_F16_BETA_RC_CRITICAL_PATH_20261020.md` y `docs/PAZO_MVP_TO_LIVE_EXECUTION_ROUTE_20261019.md`.
-- Repositorio `DigitalAppcorp/pazo-app`; trabajo SOLO en `f13/section-titles-20261012`, PR **#44 DRAFT**, base `release/mvp-beta-fast-track-20261010`; `main` no fusionado. HEAD remoto al iniciar esta recuperación: **`1cfcf2be387978b9eb1338de5bc4424ae39dd419`**, **8/8 Actions SUCCESS** (CI + 7 laboratorios PostgreSQL). `main=ae7e63f46bd0150457df9ebb5c73da0aa2edbf90`; base `f5f47b8ef10b38d89b4c4abb97320b24df0840a9`. Tras actualizar handoff/otras docs volver a consultar CI del **nuevo** HEAD.
-- Ruta Vite local reportada por PO: `C:\Users\osori\PAZO-F13-preview`. El estado local no se puede verificar remotamente; antes de pedir pull comprobar `git status --short`. **No nuevos previews Vercel**, ni merge/main, ni beta pública hasta GO de publicación.
-
-## Decisiones permanentes del Product Owner (no volver a preguntar)
-- **La beta NO se publica hasta tener toda la integración PayPal Sandbox/Live implementada, alojada y probada**, con Administración → Configuración → PayPal → **Guardar y activar** sin programar ni editar secretos/env/SQL después. El PO podrá activar dinero Live **antes o después de publicar la beta**, sujeto a HTTPS público, merchant validado y GO operativo separado. Sandbox ya se probó (compra, cancelación, callbacks) y fue aprobado: no repetir pruebas manuales innecesarias.
-- **Live no se activa automáticamente** por haber creado app/plan, aprobado código, guardado draft o instalado migración. Checkout/entitlements solo tras venta liquidada y período contractualmente verificado; no por redirección ni estado `ACTIVE`. Mantener generaciones originales de merchant, historial Sandbox y cobros anteriores.
-- PAZO/UI: **CERO CONTORNOS** salvo inputs concretos justificados; verde `#204E4A`, lima `#E1E53F`, marfil `#FAF8F5`. Preservar diseños aprobados (Mapa Opción 3, barra inferior, insignias, etc.). QA visual del panel responsive y membresías todavía requiere aceptación PO; CI no equivale a fidelidad visual.
-- Dominio temporal **`https://pazo-app-t83r.vercel.app` aprobado y YA guardado en Admin**; no pedir de nuevo. El cambio futuro a dominio propio debe hacerse desde el panel sin reprogramar. Vercel proyecto `prj_K40UBOjEcIpvUMYy1A2SdRHlG0IH`: **decisión PO 2026-10-20** opción B temporal; desactivó `Require Log In` y comprobó acceso sin sesión Vercel en incógnito a `https://pazo-app-t83r.vercel.app`. La lectura del tab Vercel mostró checkbox desmarcado. **No equivale a certificar SHA nuevo, callback PayPal, PWA instalada, ni acceso administrativo del conector (Vercel API aún devuelve 403 por scope)**. Antes de beta revisar previews expuestos; al usar dominio custom restaurar `Standard Protection` para proteger previews.
-- Nunca pedir Client Secret, PAT, JWT ni QR de MFA por chat/GitHub; secretos solo en un canal de entrada privado/autenticado, cuando esté verificado. No aumentar gastos ni recursos facturables sin autorización.
-
-## Estado REAL alojado (consultado 20-oct-2026, solo lectura)
-- Supabase `mrybvqdebbgcayuvgkkr`: selector financiero `environment=sandbox`, `live_enabled=false`, `kill_switch=true`, `active_generation=NULL`, `revision=0`. **0 generaciones de merchant Live**. Datos históricos de Sandbox preservados; no mutarlos.
-- Borrador de Administración PayPal Live: `plan_id=P-9BR88240215654528NLL3I4I`, `return_origin=https://pazo-app-t83r.vercel.app`, `webhook_id=''`, `validation_status=not_verified`. La página PayPal autenticada del PO mostró plan **Amigo de PAZO** `Activado`, $2.99/mes, ciclos ilimitados, sin impuestos y **`Pagos pendientes de recibo automático: Activado`**. El preflight `liveProviderReadOnly.mjs` exige `auto_bill_outstanding!==true`; **mismatch operativo**: el plan debe quedar en `false` mediante actualización PayPal autorizada y luego pasar GET autenticado. No crear duplicados ni inventar generación; identidad merchant aún sin API proof.
-- **AUDITORÍA SQL F16 INSTALADA, NO REINSTALAR:** migración canónica `supabase/migrations/20261020200800_pazo_f16_secret_provision_audit_guarded.sql`, instalada tras autorización previa del PO. Tabla `admin_private.pazo_paypal_secret_provision_attempts` **existe, 0 filas**, FORCE RLS, tabla inaccesible directamente por roles de cliente. RPCs `public.pazo_f16_live_service_provision_{generation_read,reserve,finish}`: EXECUTE `service_role=true`, `anon=false`, `authenticated=false` (postflight de solo lectura). `actor_id` histórico sin FK revocable; reserva bloquea fila de switch y generación, única por merchant. La referencia obsoleta al SQL pendiente en borradores/checkpoints previos **no rige**.
-- Nueve puentes F16 service-role previos instalados `20261020134900_pazo_f16_live_service_role_rpc_bridges`; return origin RPC `20261020142448_pazo_f16_admin_owned_live_return_origin`; NO reinstalar. Checkout Edge `pazo-paypal-live-checkout` v2 (`verify_jwt=true`) y webhook `pazo-paypal-live-webhook` v1 (`verify_jwt=false`) alojados **INERTES** con `LIVE_CHECKOUT_RELEASED=false` y `LIVE_WEBHOOK_RELEASED=false`. `pazo-admin-paypal-provision` no alojado, `RELEASE_APPROVED=false`.
-- Insignias aprobadas extraídas del laboratorio visual original: los **cuatro PNG idénticos** ya están en `public/supporter/amigo-pazo-{inicio,3-meses,6-meses,12-meses}.png` con SHA256 fijado y probado por `src/features/admin/testing/adminPaypalSupporterBadgeOriginals.test.mjs`. **NO volver a importarlas ni redibujarlas.** Que existan assets no prueba integración visible o derechos de membresía.
-- **Vercel — usuario confirmó acceso público sin login (20-oct-2026)**, después de apagar temporalmente `Require Log In`; los despliegues que se habían observado eran de SHA antiguo `a218ab3...`, no el nuevo código del PR #44. No se certificó nuevo deploy/retorno/PWA. Conector Vercel sigue con error 403 de autorización de scope `digitalapp`; es otro problema, independiente de SSO. La relajación de protección puede exponer previews; registrar para reversión antes de lanzamiento final.
-
-## Código listo vs. lo que todavía FALTA
-- **CODE + CI:** GoTrue admin y prueba TOTP reciente (no `token_refresh`), `liveHostedProvisioning.mjs` OFF, aislamiento de Vault legacy en Live, ingreso Edge privado fail-closed, SQL store reserva, secrets scoped, verificador de merchant/plan/webhook en borrador, checkout/webhook Live INERTES, payloads firmados, lector original de ventas, coordinadores de ventas/refunds y sus tests. Plan mensual USD2.99, cancelaciones y Sandbox tienen pruebas positivas previas. **No atribuir HOSTED/PROVIDER/E2E a un mock o un CI PASS.**
-- **Pendiente priorizado F16:** verificar y conectar en servidor la identidad comercial PayPal Live (app, plan ACTIVE, webhook y generación inmutable), flujo privado autenticado MFA y PAT mínimo; aprobación precisa e instalación de control plane administrativo, reservar y registrar secretos con auditoría sin reintentos ambiguos; obtener generación real en DB y URL `?generation=N` antes de que PO pulse Add Webhook; verificar eventos firmados 10/10; worker de claim duradero, correlación `paidAt`/ciclo original, renovaciones, cancelaciones, reembolsos parciales/reversos/disputas y proyección de beneficios; corte atómico, historial, rollback, y UI "Guardar y activar" funcional sin retoques post-beta. **Live OFF mientras se integra**, GO especial para operaciones de proveedor, despliegues financieros y cobro real.
-- **Beta transversal NO-GO:** Vercel acceso sin SSO **confirmado solo por PO**; siguen pendientes retorno PayPal con PWA instalada/no instalada, revisión de previews expuestos, Supabase Security Advisor (incluida protección de contraseñas filtradas), privacidad/legal/retención, backup/restore, visual PO de panel desktop/móvil y pantallas de membresía, QA de cuatro insignias, RC SHA único + autorización Preview/merge/publicación. No declarar beta lanzable por tener backend sintético en verde.
-
-## Acción exacta para el siguiente chat
-1. Activar Brain OS, **leer estas rutas y auditar HEAD/CI/flags alojados**. No copiar esta conversación, no reabrir decisiones cerradas; priorizar providers sobre snapshots.
-2. **NO reinstalar migración de auditoría ni reextraer badges.** Continuar revisión del control plane `supabase/functions/pazo-admin-paypal-provision/{index.ts,intake.mjs,liveHostedProvisioning.mjs,liveAuthenticatedAdminFactory.mjs}`, `supabase/functions/pazo-admin-paypal-validate/liveEdgeProvisioning.mjs` y `liveProviderReadOnly.mjs`; terminar el adaptador real de identidad merchant/plan/webhook y el gate privado, con pruebas/code review, sin liberar.
-3. **Intervención mínima PO siguiente:** en detalles del plan Live existente, actualizar `Pagos pendientes de recibo automático` a desactivado (si la interfaz lo permite; PayPal soporta PATCH `payment_preferences.auto_bill_outstanding` para planes ACTIVE), confirmar sin mostrar secretos. Verificar con GET autenticado antes de declarar validado. Continuar reconciliación alojada y beta gates de `docs/PAZO_F16_BETA_RC_CRITICAL_PATH_20261020.md`; GO acotado obligatorio para escrituras de proveedor, deploy financiero, primer cobro o Preview.
-4. Entregar un resumen breve de estado real, commit de código/CI y siguiente dependencia. **No prometer trabajo en segundo plano** si termina el turno.
-
-**Punto de corte tras interrupción:** usuario reportó «Conexión interrumpida» y pidió handoff a otro chat. En esta recuperación NO se instala SQL, no se activa Live, no se despliega, no se hace merge; solamente se limpia y versiona continuidad. **Fuente histórica:** `docs/PAZO_ACTIVE_HANDOFF.md` antes de sustituir = commit `1cfcf2be387978b9eb1338de5bc4424ae39dd419`, más `docs/archive/`.
+---
+
+## F16 — Regla decisiva: promociones Live POR EVENTO, sin esperar días (23-oct-2026)
+
+**NUEVA ORDEN PO, PREVALECE SOBRE PAQUETE PREVIO DE 24H.** El PO aprobó explícitamente 5 invitaciones, 72h de vigencia para responder, cola FIFO y cuotas acumuladas **1→5→20**; acto seguido rechazó esperar días o 24h entre fases. En cuanto se acredita **primer pago COMPLETED firmado + ledger/periodo + beneficio real**, el worker/orquestador promoverá L1→L2 (5); en cuanto se acredita el **tercer comprador distinto** igualmente verificado, promoverá L2→L3 (20), sin intervención PO por etapa. Leer especificación de eventos [`PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md`](PAZO_F16_EVENT_DRIVEN_LIVE_ROLLOUT_20261023.md) **ANTES DE PROGRAMAR**; prevalece sobre los relojes de 24h en §5/§13/§15 del [documento de lanzamiento](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md). El plazo **72h es únicamente para responder a la primera invitación sin checkout**, no para cambiar etapa.
+
+**Problema planteado por PO:** 25 personas quieren apoyar y solo 1 puede comprar al inicio. Solución: **interés abierto a usuarios elegibles desde la propia pantalla de membresía**, además de las 5 invitaciones iniciales; 25 solicitudes se guardan en cola durable, cada slot liberado/siguiente fase se asigna automáticamente bajo RPC atómica. Usuario en cola NO paga, al habilitar cupo su **misma primera notificación** pasa a «Tu cupo está disponible» y el frontend se sincroniza por eventos + GET al volver a abrir PWA. **Segunda notificación** solo tras pago y beneficios verificados. Sin 24h ni clic administrativo, pero no es instantáneo cuando PayPal aún no envía/permite conciliar evidencia.
+
+**SUPERADO POR DECISIÓN POSTERIOR PO (ver primera sección):** L4=50 y disparador de diez compradores distintos están APROBADOS. El techo final ahora es **50**, no 20. La cola sigue abierta; `public` y cantidades superiores a 50 mantienen GO PO/MFA. Pausas automáticas por salud/beneficios permiten seguir cobrando renovaciones y cancelar membresías existentes; las anomalías graves exigen intervención administrativa para reanudar. Ninguna etapa cancela la renovación de un comprador.
+
+**Implementación:** el «sí listo» autorizó planear/programar en rama F17; **no** autorizó ejecutar migraciones en Supabase alojado, cambios PayPal/Edge/Vercel, ni cobros reales. Vigente en producción `canary`, 1 intent Live abierto/0 períodos pagados al último postflight. Mapa Standard y validaciones Sandbox/recovery ya aceptadas, no reabrir. Duplicados/colas/30+ simultáneos validados por EVT-01…EVT-15, conservar GR-01…GR-22. **Estado actual: `EVENT_SPEC_SAVED / NOT_INSTALLED / PROD_UNCHANGED / MAIN_UNMERGED`.**
+
+---
+
+## F16 — Paquete de parámetros de apertura gradual, listo para decisión PO (23-oct-2026)
+
+La estrategia B gradual sí está aprobada, **pero no se infieren aprobaciones automáticas de sus parámetros**. Apéndice §15 del documento rector [`PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md) consolida una propuesta concreta revisable: **5 notificaciones iniciales, 72h para declarar interés, FIFO, un solo checkout Live remoto abierto en L1, cupos acumulados 1→5→20, observación 24h, tres compradores distintos pagados/verificados antes de L3, dos CREATE remotos sin resolver como máximo en L2/L3**, pausa automática por anomalías y no promoción a `public` sin GO PO/MFA. Los dos mensajes en bandeja y reporte voluntario permanecen. **ESTADO `RECOMMENDED_FOR_PO_REVIEW`**, no implementado ni habilitado; solicitar aprobación explícita o correcciones de paquete antes de código/SQL. Reutilizar GR-01…GR-22 para cierre sin pérdida de alcance. No solicitar repetición de QA Sandbox ni alterar Mapbox.
+
+---
+
+## F16 — Nuevo diseño rector: apertura gradual automática Live, documentada (23-oct-2026)
+
+**Última elección explícita PO:** **opción B = APERTURA GRADUAL Y AUTOMÁTICA** de Amigo de PAZO USD 2.99/mes. No implica «opción B» (múltiples invitados) de una propuesta anterior, que continúa pendiente. Fuente de verdad para retomar sin perder funcionalidades: [`docs/PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md`](PAZO_F16_GRADUAL_LIVE_ROLLOUT_PRODUCT_SPEC_20261023.md). Incluye flujos completos de **usuario / sistema / Administración**, estados ortogonales, errores/reintentos, consentimientos, **dos notificaciones bandeja**, revisión de beneficios, cuotas/autoavance, controles MFA/stop y **matriz GR-01…GR-22 para Scope Closure Reconciliation**. Se preserva la [propuesta anterior](PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md) como histórico íntegro, con enlace de prevalencia; **no borrar ni degradar funciones al implementar**.
+
+**Dirección ya aceptada:** campaña voluntaria, cobros reales (no autocobros ni Sandbox fingido), cohortes restringidas, avance condicionado a venta/ledger/entitlement reales y salud del worker, feedback opcional y panel sin contacto manual. La segunda notificación solo se entrega tras beneficio acreditado. Si hay error financiero, pausa NUEVAS compras; continúa renovación/conciliación/cancelación/historial de miembros existentes. El modo público sin último límite conserva autorización PO/MFA. PAZO básico gratis y mapa Standard/UX previamente aprobados invariables.
+
+**SIN decisión ni GO todavía:** límites numéricos propuestos **1→5→20**, ventanas 24h, forma de invitar (una persona vs lote+cola), criterios de selección/frecuencia, copy ES/EN final, retención y momento de mensaje «solo gracias». Esos números se guardan como **recomendaciones**, nunca como parámetros ya autorizados. No implementar ni habilitar cobros públicos a partir de una propuesta documental.
+
+**Auditado en Supabase READ-ONLY al diseñar:** release alojado `canary` revision1, original canary_owner, 1 intent Live abierto, cero períodos pagados. El SQL `admin_private.pazo_live_control_admits` solo conoce `canary/public`; `pazo_f16_live_service_release_change` exige prueba/cancelación de primer canary antes de `public`; `public.notifications` restringe `type` a `sighting,system,community_join`. Requiere migración/versionado y autorización de datos/RLS, **NO** forzar `public` ni cancelar cliente para satisfacer gate de pruebas. Ninguna mutación SQL o llamada al proveedor en esta iteración.
+
+**Validaciones previas conservadas:** PO confirmó múltiples reintentos exitosos de checkout Live abandonado en la aplicación oficial (NO venta real). Sandbox y cortesía admin estaban validados antes, no cuentan como prueba de webhook/beneficio de un cobro Live real. La app oficial ya aloja recuperación PayPal Live Edge v7/deploy `dpl_EXSgFZSQquSgvzk6qYMViu8GmEQV`; la nueva apertura gradual **aún no existe** en runtime.
+
+**ESTADO DE ENTREGA ACTUAL:** `STRATEGY_APPROVED / SPEC_SAVED / IMPLEMENTATION_NOT_AUTHORIZED / PROD_UNCHANGED / FINANCE_UNCHANGED / PR81_DRAFT / MAIN_UNMERGED`. Siguiente conversación debe leer primero documento rector, solicitar solo decisiones de parámetros pendientes, después solicitar GO de código; no reiniciar el diseño de cero. Documentación se guarda en rama F17; no tocar Project Brain OS externo ni producción por la mera escritura.
+
+---
+
+## F16 — Propuesta guardada: piloto automático primer Amigo de PAZO (23-oct-2026)
+
+**Petición actual del PO:** conservar propuesta completa en archivos de PAZO, **sin implementar**. Documento canónico: [`docs/PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md`](PAZO_FIRST_LIVE_SUPPORTER_AUTOMATED_PILOT_PROPOSAL_20261023.md). Estado **PROPUESTA / DECISIÓN PENDIENTE**; esta escritura NO concede permiso para notificar usuarios, habilitar compradores canary adicionales, efectuar cobros, crear tablas, lanzar el piloto ni desplegar código.
+
+- **Solicitado:** dos notificaciones en la bandeja existente: invitación voluntaria para apoyar PAZO por **$2.99/mes** (aceptar/no); tras venta Live y beneficios **ambos verificados**, mensaje de excelencia y revisión opcional de insignia/beneficios, confirmación o ticket privado.
+- **Automatización deseada:** selección, invitación, consentimiento PayPal, recuperación segura, conciliación, activación, segunda notificación, evaluación y panel; sin contacto manual del PO. Conservar modo `canary` y **prohibir promoción automática a `public`**.
+- **No decidido:** invitación de uno en uno (A, recomendada) versus invitaciones múltiples/lista de espera con un solo comprador (B); elegibilidad, plazo (72h fue solo ejemplo), reintentos, límites y texto definitivo. No asumir aprobaciones futuras.
+- **Confirmación PO previa a guardar:** probó personalmente múltiples abandonos y reintentos de PayPal Live en la web oficial y reportó que **funcionaron correctamente**. Eso valida recuperación/UX, **no** demuestra venta COMPLETED, periodo pagado ni beneficios Live. Mantener pendiente ese único E2E real.
+- **Repositorio:** PR #81 DRAFT. Documento únicamente; no `main`, SQL, Edge, PayPal, Vercel, notificaciones, tablas ni datos de usuarios modificados.
+
+---
+
+## F16/F17 — Publicación oficial de recuperación Live verificada (23-oct-2026)
+
+**PO autorizó publicar la corrección después de CI verde, sin pagos/cancelaciones y preservando el mapa.**
+
+- **Código aprobado:** `37978965f250d34210f649e582c592a0c5f80961`: GitHub CI `40006602491` SUCCESS, F17 seguridad `40006602282` SUCCESS, F16 preflight `40006602290` SUCCESS. HEAD `3709ffcbad8a129aa58240ea34f0f1728006e954` tiene solamente cambios documentales respecto al código aprobado y GitHub CI `40006733564` SUCCESS.
+- **Backend publicado:** Supabase proyecto `mrybvqdebbgcayuvgkkr`, Edge Function `pazo-paypal-live-account` **versión 7 ACTIVE / verify_jwt=true**. Se sustituyeron exactamente los 3 archivos de recuperación sobre la versión 6; entrypoint, secretos, proveedor PayPal y demás cinco dependencias no se alteraron. No DDL, DML, pagos, refunds, cancelaciones ni cambios de privilegios.
+- **Frontend publicado:** Vercel proyecto `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, deployment **`dpl_EXSgFZSQquSgvzk6qYMViu8GmEQV`** `READY`, `production`, SHA exacto **`3709ffcbad8a129aa58240ea34f0f1728006e954`**, alias **`pazo-app.vercel.app`** confirmado mediante `get_deployment` sobre dominio oficial.
+- **Integridad:** comparación SHA previo de producción `3d649093b5e15a6842622ba326f800f1c0618060` vs publicación: 9 archivos afectados exclusivamente flujo PayPal Live, tests y docs. No se tocó mapa ni módulos ajenos.
+- **Postflight read-only:** solicitud Live 1 total, 1 abierta, períodos pagados Live 0; fuente privada en Supabase. No se activaron beneficios ni checkout público.
+- **Gate de aceptación de dispositivo:** el PO aún debe verificar en el PWA móvil que «Continuar con PayPal» aparece tras abandonar el login. No se afirma haber completado un nuevo E2E real PayPal ni pago. El usuario puede confirmar UX sin efectuar compra. Si el PWA cachea versión anterior, cerrar y volver a abrir o actualizar; no manipular la solicitud en base de datos.
+- **GitHub:** PR #81 sigue DRAFT, `main` no se fusionó. La publicación fue despliegue directo de commit revisado; una actualización documental posterior del handoff no requiere redeploy.
+
+---
+
+## F16 — Complemento final: solicitud no enviada (23-oct-2026)
+
+La continuidad de recuperación incluye también la ruta `pending` no reclamada: en la tarjeta Live, tras confirmación del usuario, `original.state==='pending'&&!original.needsReconciliation` invoca `abandon` (SQL solo si no hubo provider CREATE), mientras una solicitud `bound` usa `abandon_pending` con GET y cancelación PayPal verificados. Una solicitud `pending` reclamada no puede descartarse sin conciliar. Código `c9e35e40`; cobertura anti-regresión `37978965`. Este complemento no instala nueva Edge ni modifica el registro PayPal existente.
+
+Última CI de código disponible al documentar: `ff954b86` CI `40006044745` SUCCESS, seguridad `40006044654` SUCCESS, F16 bootstrap `40006044657` SUCCESS. Los checks del HEAD más reciente `37978965` estaban en ejecución al consultar; revalidar antes de Gate de publicación. Release/merge siguen BLOQUEADOS sin GO del PO. Código no desplegado, producción original conservada.
+
+---
+
+## F16 — Paridad de recuperación Sandbox→Live, código listo; NO desplegado (23-oct-2026)
+
+**Prevalece sobre el checkpoint anterior de CTA solamente.** El PO denunció que en Live, después de abandonar el login de PayPal, la invitación ocultaba el botón pese a haber validado la recuperación en Sandbox. Se auditó código y backend real antes de actuar.
+
+- **Implementación PR #81 (código HEAD `ff954b865e51d5f0445920eb5fe3cf72b4a025e2`):** la tarjeta mantiene «Continuar con PayPal» cuando hay solicitud abierta; usa `resume` sobre el intento original, sin segundo CREATE. `liveOwnerRecovery.mjs` puede liberar en la misma acción estados originales `CANCELLED/EXPIRED` solo tras GET original y cierre SQL verificado. Si `APPROVAL_PENDING` persiste, el usuario puede elegir explícitamente cerrar ese intento, con confirmación separada `abandon_pending`; solo un PayPal POST de cancelación después de un claim SQL idempotente, GET independiente `CANCELLED`, finish de claim y `pazo_f16_live_service_terminal_checkout_close` que exige cero eventos pendientes y cero períodos pagados no vencidos. Errores de red y cambios de estado conservan el intento y no repiten acciones. `ACTIVE/APPROVED/SUSPENDED` no pueden pasar por esta ruta. No hay bypass del canary ni beneficios sin pago.
+- **No se modificó Supabase alojado ni las Edge Live:** nuevo contrato del endpoint es código **NO DESPLEGADO**; el endpoint alojado anterior no reconoce todavía `abandon_pending`. No ejecutar en producción ni inferir E2E real de las pruebas sintéticas. Ninguna cancelación real, venta, cambio de credenciales, webhook, pricing, acceso público ni mutación de registros durante este trabajo.
+- **Backend previo válido:** SQL `pazo_f16_live_service_cancel_claim`, `pazo_f16_live_service_cancel_finish` y `pazo_f16_live_service_terminal_checkout_close` ya instalado y auditado mediante `pg_get_functiondef` en modo solo lectura. 1 intent Live `bound` abierto, no había períodos pagados Live cuando se consultó; **estado remoto PayPal de ese intento desconocido**, no tratarlo como confirmado pendiente/cancelado sin GET.
+- **Pruebas:** CI `40006044745` SUCCESS, seguridad F17 `40006044654` SUCCESS, F16 bootstrap `40006044657` SUCCESS para `ff954b86`. Contratos nuevos cubren CTA visible, confirmación explícita, original owner, estados prohibidos, cancelación una sola vez, timeout ambiguo, relectura `CANCELLED`, eventos/períodos pendientes y no duplicar la suscripción.
+- **Gate abierto:** aceptación real de UX y recuperación en dominio oficial Android, después de deploy autorizado; NO crear ni cancelar la solicitud ya vinculada sin decisión explícita del usuario. Antes de publicar el endpoint, verificar código SHA, CI, contenido Edge existente y gates de producción. PR #81 DRAFT, `main` no fusionada. El mapa Standard ya está aprobado por el PO; no reabrir esa QA. PayPal Live primer ciclo pagado sigue pendiente de autorización y comprador externo elegible.
+
+---
+
+## F16 Live — CTA de recuperación de aprobación y QA mapa aprobado (23-oct-2026)
+
+- **Aceptación PO:** Mapbox Standard del dominio oficial se ve y funciona en el teléfono. Gate visual del mapa cerrado por confirmación expresa del PO en este chat; no repetir el QA de cartografía.
+- **Regresión identificada por screenshot:** al regresar del login de PayPal Live sin aprobar, `SupporterAccountManagement.tsx` escondía el CTA detrás de `accounts?.length===0`, sustituyéndolo por un aviso cuando había intento anterior. Sandbox tenía CTA de continuación y ruta `recover_retry` independiente; no era paridad de Live.
+- **Supabase solo lectura, sin datos personales:** 1 Live intent `bound`, abierto, vinculado a PayPal; estado remoto aún no registrado en DB; 0 períodos pagados Live. No inferir cobro ni aprobación PayPal.
+- **Corrección solo en rama PR #81:** `SupporterAccountManagement.tsx` muestra «Continuar con PayPal» directamente en tarjeta al encontrar intento Live anterior y llama al servidor mediante `recover(original.intentId,'resume')`. El backend consulta el registro original y, si existe aprobación válida, reabre esa misma sesión; no ejecuta una segunda creación de suscripción. El error de recuperación aparece junto al botón. Commits de código `da16b9fd`, guard de cuentas `922d4bdb`; prueba anti-regresión `fe492f92`.
+- **Límite:** si PayPal mantiene `APPROVAL_PENDING` pero deja de devolver enlace válido, la recuperación Live continúa fail-closed y requiere conciliación/corrección acotada; no declararla E2E PASS por haber restaurado el botón. Ningún usuario normal ni el administrador tiene nueva autorización financiera.
+- **Evidencia:** GitHub CI del commit `fe492f92` SUCCESS y F16 bootstrap SUCCESS; F17 seguridad seguía en progreso al consultar. Producción conserva `dpl_AGNfzTjyjy2BNMMh8rxQTrmACDgL`/SHA `3d649093`, sin esta corrección. No hubo deploy/merge, PayPal POST, activación de cobros, SQL DDL/DML ni cambios de secretos.
+- **Siguiente gate:** CI/seguridad del HEAD documental, validar CTA y comportamiento de `resume` con sesión autorizada sin aprobar ni pagar, comprobar el caso sin enlace, y obtener GO explícito antes de publicación oficial. PR #81 sigue DRAFT.
+
+---
+
+## Publicación F17 al dominio oficial — 23-oct-2026
+
+**GO del PO:** publicación explícita de la versión F17 con reparación de Mapbox Standard al dominio oficial `https://pazo-app.vercel.app/`. **PRODUCCIÓN ACTUAL:** Vercel deployment `dpl_AGNfzTjyjy2BNMMh8rxQTrmACDgL`, `READY`, Git SHA `3d649093b5e15a6842622ba326f800f1c0618060`; Vercel alias `pazo-app.vercel.app` **verificado** apuntando exactamente a ese deployment. Producción previa recuperada para rollback: `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`.
+
+**Mapbox Production:** antes del deploy se actualizó en Vercel `VITE_MAPBOX_ACCESS_TOKEN` (ID `kBHdGC8O32Uix5f5`, destinos Production/Preview) al valor del **token público ya existente** y probado en el override Preview F17 `AzBEYyCFGy2giJkN`. El token anterior rechazaba teselas/modelos con403; el valor nuevo había superado la prueba de Standard real y glTF del commit F17. No exponer ni almacenar tokens en Docs/Chat/GitHub. El override Preview de rama no fue alterado. No se crearon cuentas Mapbox, servicios facturables ni un plan nuevo. **Importante:** despliegue Vercel READY y alias verificado, pero no constituye una nueva captura de Android en el dominio oficial; el usuario debe confirmar físicamente el mapa.
+
+**Gates:** CI `39997193835` SUCCESS, F16 bootstrap `39997193855` SUCCESS, F17 security `39997193940` SUCCESS para `3d649093`; PR #81 continúa DRAFT y `main` sin merge. Ningún cambio PayPal Live, Supabase/DDL, Edge, mantenimiento o entorno financiero. El código ya publicado coincide con el de la rama antes de esta nota documental. Ver historial anterior para corrección CSS `mapboxgl-map` y token. Prueba HTTP externa desde esta sesión no disponible, aunque Vercel dio READY. **Próximo único gate visual:** confirmar que se ven las calles Standard y las figuras 3D desde el sitio oficial; no pedir repetir QA sintética.
+
+---
+
+## F17 — Mapbox Standard: dos causas reales corregidas; Preview para validación PO (23-oct-2026)
+
+**Código corregido:** `e6bf328d6bc474d0a621be428a157abbeea64f7d`; QA/evidencias `f839c933bdd0694480b7fb93a9211372fa4ef89d`, rama `f17/beta-final-mobile-support-admin-20261022`, PR #81 DRAFT sin merge. **Preview READY:** https://pazo-nu9vxf8rj-digitalapp.vercel.app/ — `dpl_Ayw4ZD7ZTFf2sz4Zt21VoYxirvzD`, SHA exacto `e6bf328d`, target Preview (`null` en API), proyecto `pazo-app` / `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`. Este checkpoint prevalece sobre los intentos históricos inferiores de preflight/reinicio/raster, que no solucionaron el lienzo gris.
+
+**Causas demostradas antes de editar:** (1) el CSS externo de GL `.mapboxgl-map {position:relative}` fuera de layers sobrescribía `absolute` de Tailwind: padres844px, contenedor real **0px** y canvas de reserva300px, invisible incluso con teselas200; (2) el token público del bundle desplegado permitía estilo/fuentes/sprites200, pero teselas/modelos/DEM403. Una instancia GL real reprodujo lienzo vacío y31 rechazos; `loaded/isStyleLoaded/areTilesLoaded=true` eran falsos indicadores de éxito. El token público ya existente en este entorno, de la misma cuenta Mapbox, responde200 a los mismos recursos y renderiza Standard. No se generó token, cuenta, plan, servicio ni recurso facturable nuevo; no atribuir el motivo interno del403 a scopes/allowlist sin acceso a la cuenta.
+
+**Solución efectiva:** contenedor absoluto y dimensiones100% explícitas resistentes a la cascada; único estilo oficial Standard con `theme:faded`, edificios/objetos3D, DEM y los seis glTF PAZO conservados. Eliminados preflight y sustitución silenciosa por Streets/OSM. Error real401/403 persistente más reintento; `load` no oculta denegaciones. Loader JS+CSS compartido, timeout15s y reintento tras tags fallidos. Datos GeoJSON tardíos, foco seleccionado tras reintentar y rol de botón de marcadores conservados. **Vercel cambió únicamente el override de Mapbox Preview de esta rama** al token público existente que pasó teselas; variable global Production/Preview anterior intacta. Carrusel, fotografías, controles, GPS voluntario y demás diseño F17 sin rediseñar.
+
+**PASS comprobado:** TypeScript/Vite; gobernanza completa; cierre/UI/admin506/506; contratos F17+fotos+mapa+loader+mantenimiento22/22; F16 sintético1193/1193; guard release; dist4/4; Chromium390/1440 F17 sintético40 comprobaciones sin Auth/API alojados. **Mapa real22/22**: componentes reales `ImmersivePlacesStage`+`MapboxMap`, Standard importado, vector/DEM/fuentes/modelos del proveedor200, canvas390×844, calles visibles en captura, zoom/movimiento/inclinación, los seis glTF originales (`park`, `trail`, `restaurant`, `veterinarian`, `grooming`, `pet-store`)200 y features nativas correctas renderizadas al seleccionar cada tarjeta; ensayo adicional14/14 PASS, selección desde tarjeta/marcador y scroll de carrusel. Denegación vectorial403 inyectada conserva Standard y aviso, y reintento vuelve a calles reales; sin excepciones JS. Solo el catálogo de lugares es una fixture pública ya aprobada, la cartografía NO está simulada. Fuente reproducible: `scripts/f17-mapbox-browser.mjs` + `supabase/tests/f17/mapbox-browser-harness.html`. CI remoto del commit QA `f839c933`: **10/10 checks SUCCESS**, incluyendo verify/build/gobernanza, PG17 F14/F16/F17, navegador F17, bootstrap y smoke HTTPS/PWA. Runs `39996593794`, `39996593733`, `39996593715`. El código de aplicación es idéntico al Preview `e6bf328d`.
+
+**Límite de acceso al Preview:** Vercel autenticado permite crear/consultar el deployment, pero el fetch protegido responde403 en `read_protection_bypass` por el alcance de la conexión. La revisión automática rechazó crear un acceso temporal de1h por cambiar la protección. **No se aplicó ese cambio ni se deshabilitó SSO**; no tratar READY o el PASS local de componentes como prueba de navegador remoto autenticado. **Decisión posterior del PO en esta conversación:** abrirá el Preview con su sesión Vercel, sin cambiar el acceso; no volver a solicitar autorización del enlace temporal. La CLI no tenía credenciales existentes y no se inició login.  Android Chrome/PWA instalada y aceptación visual final de este candidato siguen pendientes. No pedir secretos por chat. Si se necesita automatizar el Preview protegido, usar una sesión autorizada existente o pedir aprobación explícita del acceso temporal, sin eludir el rechazo.
+
+**Producción/main:** oficial sigue restaurado en `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`; no merge, promoción ni cambio de configuración Production. Antes de cualquier GO futuro de producción debe reconciliarse allí el token con acceso a teselas; el override es solo Preview. Ningún cambio SQL/Edge/PayPal ni cargo. **F17 NO COMPLETADA:** falta validación visual PO del candidato y autorización independiente de merge/publicación.
+
+Detalle: `docs/PAZO_F17_MAPBOX_STANDARD_ROOT_CAUSE_20261023.md`. Evidencia saneada: `docs/evidence/PAZO_F17_MAPBOX_STANDARD_VALIDATION_20261023.json`; capturas antes/después/modelo en `docs/evidence/f17-mapbox-standard-20261023/`.
+
+---
+
+## F17 — Segunda captura Android gris + preflight Mapbox 23-oct-2026
+
+**Incidencia confirmada por el PO:** el Preview post-cold-restart `https://pazo-k9qvbfm54-digitalapp.vercel.app/` (code `9404d7f497809363ade4c798325e5254560838ea`) sigue mostrando un lienzo gris de tono uniforme y 6 tarjetas, sin calles; el hecho de que ya no aparezca aviso no es PASS. No presentar como mapa resuelto ni atribuir la causa a imágenes o fotos.
+
+**Nueva reparación experimental, sin producción:** `src/features/places/map/MapboxMap.tsx` comprueba por GET desde navegador `https://api.mapbox.com/styles/v1/mapbox/standard?access_token=<public_token>` antes de crear Mapbox GL. En respuesta sin 2xx, CORS, red o timeout4.5s se selecciona primero el estilo de emergencia raster en nuevo renderer, evitando contaminar la instancia GL con una denegación del estilo vectorial; en respuesta2xx se intenta Standard con `theme:faded,show3dObjects:true`. El `config.basemap` Standard no se envía al constructor raster; el raster espera `map.on('load')` para adjuntar los overlays, al igual que el sitio antiguo funcional, y el vector sigue usando `style.load`. Si la carga vectorial falla después del preflight conserva lógica de reinicio raster. **No declarar corrección visual verificada** antes de evidencia Android. Token público solo se envía a api.mapbox.com, no a GitHub/chat/logs, los tests no imprimen URL con token. No se cambiaron secretos ni permisos ni se adquirió servicio.
+
+**Evidencia técnica provisional:** commit de código y pruebas `0b589d3f2b9751cbd36f1c8a84d0a813a05ad4fb`; CI run39991477883 y preflight39991477723 SUCCESS, F17 security run39991477772 debe corroborarse una vez termine. Nuevo Preview `dpl_aEctLcidVqfN8TL5JWQbW3JCMmMf` READY `https://pazo-fcpvlaea5-digitalapp.vercel.app/`. **Sitio oficial permanece restaurado** en deployment `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`. El PO no aceptó el contraste de carreteras del mapa antiguo, pero éste permanece como salida funcional temporal. Nueva revisión debe distinguir calles raster atenuadas de Standard3D realmente autorizado y decidir si es necesario ajustar Mapbox `styles:read`/allowlist en la cuenta del proveedor (externo).
+
+**Gate:** probar Preview nuevo en dispositivo. Si cartografía sigue ausente, no seguir haciendo releases de producción por CI: obtener HTTP status real de Styles API y del proveedor de teselas desde navegador autorizado, o autorización de Mapbox por operador; de no ser posible, mantener el mapa antiguo como recuperación temporal. Sin nuevo GO no fusionar `main`, no volver a publicar F17 ni activar cobros.
+
+---
+
+## F17 — Incidente del mapa y reversión segura (23-oct-2026)
+
+**Evidencia del PO:** tras desplegar F17 a producción `dpl_9MzRnL1YzZ9GNWB5ttS4JS3tVcSi` (SHA `84251c5ecadbc04c061eb777f76cd0c748a5bc7b`), captura Android muestra **lienzo gris sin calles** y aviso «Mapbox no autorizó las capas 3D en este dominio. Mostrando el mapa de emergencia.» Este release visual es **FAIL** para Lugares; no inferir aprobación del mapa nuevo. El PO había confirmado que **el despliegue anterior sí mostraba calles y figuras 3D**, pero no aprobó su estilo de calles demasiado marcadas.
+
+**Incidente mitigado:** se ejecutó `request_promote` del despliegue anterior `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`, target producción READY. Verificación Vercel alias `pazo-app.vercel.app` = `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT` (no inferir verificación visual nueva sin PO). Rollback temporal recupera estilo de emergencia **no aceptado visualmente** y no resuelve requisito de mapa moderno 3D. No cambiar PayPal, DB, secrets, modo Live ni merge a main.
+
+**Corrección preparada exclusivamente en rama F17:**
+- `src/features/places/map/MapboxMap.tsx`: ante autorización vector denegada 401/403, `setMapAttempt('raster')` hace que React limpie el WebGL viejo y cree un nuevo `mapboxgl.Map` directamente con estilo OSM comprobado. Mantiene `Mapbox Standard` como primera opción **3D** cuando el token lo autorice; Streets v12 como intento ante fallo no autorizado; al fallar vuelve a raster mediante *cold restart*, ya no `map.setStyle(PAZO_STREETS_STYLE)` sobre instancia fallida. Conserva markers/modelos, UI y fallback de accesibilidad.
+- `src/features/places/map/pazoBasemap.ts`: reduce contraste/saturación y opacidad de las calles en el fallback existente sin añadir terceros ni costos.
+- Contratos F17 y closure-ui actualizados para verificar nueva recuperación y preservar preferencia 3D.
+- Commit funcional `9404d7f497809363ade4c798325e5254560838ea`, CI [39989066619](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39989066619) SUCCESS, F17 security [39989066691](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39989066691) SUCCESS, preflight [39989066638](https://github.com/DigitalAppcorp/pazo-app/actions/runs/39989066638) SUCCESS.
+- Preview aislado `dpl_GQnM97tfLCB98sZD1LFGT9ccu9QD` READY, URL `https://pazo-k9qvbfm54-digitalapp.vercel.app/`, target null. **No evidencia todavía de Android real**; no publicarlo como PASS real ni subir F17 a producción de nuevo hasta que se vean las calles y el comportamiento sea aprobado.
+
+**Limitación externa:** Vercel confirma `VITE_MAPBOX_ACCESS_TOKEN` en producción y Preview, token formato público `pk.`; esto NO prueba `styles:read`, `fonts:read` ni restricciones URL. Documentación Mapbox sobre token 403: `https://docs.mapbox.com/accounts/guides/tokens/` y Styles API `https://docs.mapbox.com/api/maps/styles/`. Un token limitado necesita permiso o allowlist desde la cuenta Mapbox original; no pedir ni publicar token por chat y no comprar nuevos servicios. Sin ese acceso, fallback raster suavizado NO equivale a Mapbox Standard 3D nativo.
+
+**Próximo gate:** PO comprueba Preview corregido desde Android: calles, figuras 3D, zoom y que no haya lienzo gris; si funciona, validar calidad del estilo y obtener GO para publicación. Si se desea Standard 3D completo, corregir autorización del token Mapbox en cuenta legítima antes del GO. No bloquear beta por Soporte E2E pospuesto expresamente.
+
+---
+
+## F17 — Aceptación visual PO: cartografía y figuras 3D en sitio oficial (23-oct-2026)
+
+**PASS visual confirmado en Android por el Product Owner:** `https://pazo-app.vercel.app/` muestra las **calles** y, al seleccionar/acercar un establecimiento, **las figuras 3D de PAZO**. Ambas observaciones del dominio oficial quedan aprobadas; no volver a pedir esta misma prueba ni afirmar que el mapa oficial está roto. Aprobación basada en prueba física reportada por PO, no en E2E automatizado. La prueba no distingue por sí sola la tecnología exacta de los objetos (modelo nativo vs representación 3D estilizada) ni certifica relieve DEM del terreno.
+
+**Alcance separado:** el F17 Preview sigue reportado **en blanco**, por lo que NO se declara PASS su mapa. Producción usa un estilo raster de emergencia desde inicio, mientras la rama F17 prefiere primero Mapbox Standard 3D y luego Streets vector; conservar sin cambios el mapa **que ya funciona** en producción, diagnosticar/resolver solamente la regresión del Preview antes de integrarlo en el sitio oficial. No cambiar token/proveedor por hipótesis, ni tocar `main`/producción sin GO; sin nuevos cobros ni cambios PayPal.
+
+**Próximo gate:** cerrar discrepancia del Preview sin regresión de calles/figuras 3D aprobadas. Después, canary PayPal Live de US$2.99 solo tras consentimiento financiero explícito y personal del PO, conciliación y cancelación.
+
+---
+
+## F17 — Prueba real Android: calles visibles en dominio oficial (23-oct-2026)
+
+**Resultado comunicado por el PO:** al abrir **Mapa** en `https://pazo-app.vercel.app/`, **las calles sí aparecen**. Clasificación: **PASS solo para visualización de cartografía base del dominio oficial** (producción SHA `1b2340523b80234a41a0a6ffac489bc32f5a2937`, estilo de emergencia `PAZO_STREETS_STYLE` basado en teselas OSM). No volver a solicitar esta misma verificación de calles en el sitio oficial.
+
+**Límites:** esta observación no demuestra edificios/relieve 3D ni modelos glTF; no valida F17 Preview, donde el PO reportó mapa blanco con la cadena distinta `Mapbox Standard → Streets v12 → raster`. La hipótesis de restricciones por dominio sigue sin confirmar; no alterar token/proveedor de mapas ni declarar mapa 3D PASS. Siguiente prueba focalizada: comprobar en el teléfono si aparecen figuras/marcadores 3D al seleccionar y acercar un lugar en la versión oficial y abordar por separado el Preview. Sin desplegar, fusionar, cobrar ni cambiar producción.
+
+---
+
+## F17 — Auditoría de gates beta 23-oct-2026: Mapbox vs producción y PayPal Live (SOLO RAMA)
+
+**Mandato:** continuar únicamente bloqueos imprescindibles de beta; Soporte E2E queda expresamente POST-BETA. No crear compras, activar mantenimiento, tocar main ni publicar código visual sin GO.
+
+**Mapbox, diagnóstico no conclusivo:** usuario confirmó que el mapa del Preview F17 se ve blanco, sin aprobarlo, e indicó posible diferencia por dominio. La comprobación de Vercel `pazo-app` confirma variable pública `VITE_MAPBOX_ACCESS_TOKEN` vinculada tanto a `preview` como a `production`, sin revelar valor. **Diferencia real de código:** producción exacta `1b2340523b80234a41a0a6ffac489bc32f5a2937` inicia `MapboxMap.tsx` con `style: PAZO_STREETS_STYLE` (raster OSM), mientras F17 PR #81 inicia `mapbox://styles/mapbox/standard`, luego intenta `streets-v12` y solo entonces `PAZO_STREETS_STYLE`. No inferir que las capas 3D funcionan en dominio oficial ni que el Preview falla específicamente por referer: faltan HTTP 401/403 y frames/tiles reales. Confirmar con captura Android del sitio oficial y/o diagnóstico verificable de token Mapbox (URL restrictions, `styles:read`, tile HTTP). No sustituir 3D por raster como solución definitiva, no crear API pagada ni credenciales adicionales sin decisión PO. Provider docs: `https://docs.mapbox.com/help/troubleshooting/token-errors/` y `https://docs.mapbox.com/help/troubleshooting/blank-tiles/`.
+
+**PayPal canary hosted READ ONLY:** `admin_private.pazo_live_release_control.mode='canary'`, `revision=1`; `admin_private.pazo_paypal_new_checkout_switch.environment='live', live_enabled=true, kill_switch=false`; `admin_private.pazo_live_release_artifact.return_origin='https://pazo-app.vercel.app'`, certificado frontend `1b2340523b80234a41a0a6ffac489bc32f5a2937`; `supporter_private.pazo_paypal_live_checkout_intents=0`, `pazo_paypal_live_paid_periods=0`. No ventas/beneficios por pago todavía. **No repetir credenciales o recursos ya validados**. Primer cobro real de 2.99 USD requiere consentimiento específico del PO y aprobación PayPal personal desde **cuenta canary original**, no una cuenta normal; luego verificar webhook firmado, período, beneficios y cancelación, antes de modo público.
+
+**Estado operativo:** proyecto Vercel `pazo-app`, dominio canónico `pazo-app.vercel.app` READY, producción SHA `1b234052...` intacta; GitHub F17 PR #81 draft sin merge, `mergeable=true`, CI + F17 security + F16 bootstrap preflight SUCCESS HEAD previo a esta nota `ecc74875f459b5ffdceb1668a8d977046f141111`. Cinco migraciones F17/canonical/onboarding instaladas, mantenimiento OFF, no modificaciones alojadas. Efecto cristal y geometría dock aprobados por PO en Android; PWA instalable según prueba real previa PO; inspección visual Admin Soporte/cortesías/mantenimiento aprobada, Soporte mensaje real pendiente POST-BETA. **Beta financiera pública no aprobada** y validación cartografía original/3D pendiente. No repetir gates ya aprobados ni interpretar documentación histórica anterior como estado vigente.
+
+**Próximo paso real:** validar cartografía del sitio oficial en dispositivo; si está raster correcto pero no hay 3D, resolver Mapbox token/estilos para F17 antes de GO. Canary de 2.99 USD bajo autorización explícita independiente. Posteriormente Scope Closure/Reconciliation, aprobación PO de merge a `main` y despliegue visual final.
+
+---
+
+## Decisión del Product Owner — Soporte E2E pospuesto hasta después de beta (23-oct-2026)
+
+**Prioridad:** POST-BETA; el PO decidió explícitamente que la prueba/corrección del envío real y la respuesta de Soporte no bloqueen el lanzamiento beta. En la comprobación alojada de hoy no se pudo confirmar la creación del mensaje de prueba: `public.pazo_support_tickets` mantenía 1 registro, del 22-oct; 0 solicitudes creadas el 23-oct y 0 coincidencias con «Prueba F17 de soporte». No declarar Soporte E2E PASS ni asumir que una pulsación creó la solicitud. La inspección visual de las secciones administrativas de Soporte, Beneficios y Mantenimiento sí fue aceptada por el PO; la prueba real del circuito usuario → admin → respuesta sigue pendiente.
+
+**Guardarraíl de beta:** evitar depender del formulario de soporte como único canal de ayuda mientras la entrega siga sin confirmar; ya existe contacto por correo en ajustes. El aplazamiento NO autoriza cambios de backend, ocultar funciones unilateralmente ni publicar el PR F17. Priorizar los gates críticos: Mapbox/Lugares bajo origen autorizado y QA de navegación/instalación; PayPal Live canary solo si se abrirán cobros, con venta y cancelación firmadas antes de hacerlo público; aprobación de release/merge separada.
+
+---
+
+## F17 — Desenfoque alineado con la burbuja activa del dock (22-oct-2026; SOLO RAMA)
+
+**Nueva captura y decisión PO:** el efecto cristal tipo blur y el espacio inferior compacto son satisfactorios, pero el desenfoque visible debe subir hasta la altura donde **termina por arriba la burbuja verde que se mueve** entre pestañas. No agrandar la zona segura, no pintar de blanco y no difuminar el menú. El diseño de la barra y el comportamiento de Lugares no cambian.
+
+**Implementación:** `src/index.css` mantiene `blur(20px)`, altura física de `.pazo-scroll-soft-edge`, `bottom:0`, `pointer-events:none` y `z-20` bajo el dock `z-30`. Se reemplaza únicamente la máscara porcentual por `linear-gradient(to top)` anclada a distancias reales del borde inferior **+ safe-area**: cristal perceptible (alfa 0.48) a `6.4rem`, donde asoma la burbuja activa; suave hasta `7.35rem` y completamente transparente en `8.25rem`. Así la altura visual acompaña a la bolita en distintos teléfonos sin una franja abrupta ni desenfoque excesivo de controles distantes. El CSS se aplica solo a Feed, Comunidades y Mi mascota, no Mapa. La reserva de scroll de `6rem+safe-area` se conserva sin cambios.
+
+**Gates pendientes:** CI exacto del HEAD y validación Android para verificar inicio alineado, dock nítido y último botón accesible. No main, producción, Supabase, PayPal, proveedores ni nuevos permisos. No declarar aprobado por CI solamente.
+
+---
+
+## F17 — Zona segura compacta y cristal localizado cerca del dock (22-oct-2026 · SOLO RAMA)
+
+**Evidencia del PO:** después del ajuste `bd24213c` sigue habiendo excesivo espacio vacío al final del Feed y Mi mascota. Auditoría de código identificó **dos reservas inferiores acumuladas**: `App.tsx` añade `padding-bottom:9rem+safe-area` (144px base) en el contenedor principal y cada vista social (`HomeView`, `CommunitiesView`, `PetView`) incluye `pb-6` (24px). Total previo: 168px + safe-area sin contar geometría de otros elementos. El dock real tiene una rejilla de 76px más padding vertical (aprox. 92px+safe-area). Una reserva mayor separaba visualmente las últimas tarjetas y herramientas del menú.
+
+**Corrección en PR #81:** reducir únicamente la reserva de `<main>` a **6rem+safe-area** (96px), conservando el `pb-6` propio de los tres módulos (total ≈120px+safe-area, clearance sobre el menú sin hueco excesivo). Mantener intactos el tamaño físico del efecto de cristal, su `blur(20px)`, la barra, `z-index`, `pointer-events`, mapa y módulos financieros. Solo concentrar máscara de desenfoque en el **55% inferior de la misma capa**: transparente al 45%, débil al 56%, progresiva al 70/86% y completa en el borde inferior. Los controles de distancia moderada dejan de quedar borrosos; las últimas acciones deben poder quedar visibles por encima del dock. Sin capas de color, neblina ni corte horizontal.
+
+**Regresión:** `scripts/closure-ui.test.mjs` comprueba ausencia de antiguas reservas 9/13rem, presencia de `pb-6` interno en las tres vistas sociales, máscara localizada, altura y blur anteriores. **Gate pendiente:** CI exacto y aceptación Android de fin de scroll y controles accesibles. No publicación en producción, merge a main, pagos, datos ni infraestructura.
+
+---
+
+## F17 — Menos espacio vacío sin achicar la capa de cristal (22-oct-2026; solo rama)
+
+**Evidencia PO:** en el Preview `83fefec2` las últimas publicaciones del Feed y los controles finales de Mi mascota quedan demasiado separados del dock flotante porque `main` añade `13rem` al final del scroll. El estilo de cristal (20px blur, altura total y extensión 20px hacia arriba) fue aprobado; no hay autorización para reducirlo ni convertirlo en una capa blanca.
+
+**Corrección autorizada:** `src/App.tsx`: bajar solo `padding-bottom` del contenido desplazable de `13rem+safe-area` a `9rem+safe-area` (64px menos de espacio vacío con rem base 16px) y mantener la barra flotante en su capa actual. `src/index.css`: conservar exactamente `height: calc(5.75rem + clamp(84px, 13dvh, 116px) + 20px + env(safe-area-inset-bottom, 0px))` y `backdrop-filter: blur(20px)`; concentrar únicamente la máscara alfa: transparente hasta 30%, difuminado tenue desde 42%, más fuerte progresivamente hasta 100% en el fondo. Así contenido de distancia moderada mantiene nitidez y el último botón puede subir por encima del dock sin neblina ni franja dura. Se aplica solo a Feed, Comunidades y Mi mascota; Mapa/Lugares, paneles y acciones sin cambios.
+
+**Gate:** regresiones de `scripts/closure-ui.test.mjs`, CI exacto, Preview aislado y aceptación visual Android de último botón visible y ausencia de espacio desproporcionado. **No main, producción, PayPal, Supabase ni gastos.**
+
+---
+
+## F17 — Microajuste aprobado: desenfoque 20 px más alto (22-oct-2026; solo rama)
+
+**Aceptación parcial PO:** el nuevo efecto tipo cristal en Feed se ve correcto; pide únicamente iniciar el desenfoque ligeramente más arriba del menú flotante, sin exagerar altura ni alterar estilo, transparencia o nitidez del dock. Se corrigió la afirmación equivocada de falta de acceso: el repositorio sigue conectado y los cambios se ejecutan por GitHub.
+
+**Cambio limitado:** `src/index.css`, `.pazo-scroll-soft-edge`: añadir **20 px** a la altura de la capa desde `bottom:0`, sin cambiar `blur(20px)`, máscara, stops, colores (ninguno), `z-index`, `pointer-events` ni lógica. El inicio visual del desenfoque sube levemente; la zona inferior continúa bajo el menú sin un corte horizontal. La capa sigue condicionada en `src/App.tsx` exclusivamente a `inicio`/Feed, `comunidades` y `mascota`; Mapa excluido. Prueba estática actualizada para fijar este valor.
+
+**Gate:** CI exacto del nuevo commit, Preview independiente y aprobación visual Android. No `main`, no producción, sin cambios en datos, PayPal, Supabase, assets ni navegación.
+
+---
+
+## F17 — Cristal esmerilado, sin neblina ni resplandor blanco (22-oct-2026 · SOLO RAMA)
+
+**Nueva evidencia PO:** el Preview `d90e5040` ya no presenta corte horizontal, pero el área inferior de Feed se ve cubierta por neblina/sombra blanca, no borrosa como cristal. Auditoría CSS confirmó `.pazo-scroll-soft-edge::after` con capa crema hasta `rgba(250,248,245,0.94)`: ocultaba los colores y detalles originales de la foto. El filtro real de 11px resultaba secundario.
+
+**Cambio:** eliminado totalmente `::after`, sus tintes blancos y `isolation:isolate`. Único `::before` transparente con `backdrop-filter: blur(20px)` y `-webkit-backdrop-filter`, máscara `mask-image/-webkit-mask-image` con varios stops crecientes para que el **desenfoque** progrese hacia el borde inferior sin pintar encima. La capa mantiene `pointer-events:none` y `z-20`, continúa tras el dock flotante `z-30` que nunca se difumina. Se monta solo en Feed, Comunidades, Mi mascota, no Mapa. Se conserva el clearance de scroll de 13rem+safe-area para que los botones sigan accesibles. No se tocaron lógica, navegación, modelos, pagos ni backend.
+
+**Regresión:** `scripts/closure-ui.test.mjs` prohíbe la capa crema, exige backdrop blur real, stops progresivos y muestreo no aislado. **GATE**: aprobar CI SHA exacto y validación visual Android de borrosidad real sin neblina; no aceptar UX automáticamente por CI. Sin merge, sin producción, sin cambios Supabase/PayPal.
+
+---
+
+## F17 — Corrección del corte duro en el degradado social (22-oct-2026; SOLO RAMA)
+
+**Evidencia PO:** captura Android del Feed del Preview `17916b0c`: banda difusa rectangular interrumpida abruptamente por una línea horizontal, seguida de imagen completamente nítida antes del dock flotante. **Causa exacta:** la capa CSS `.pazo-scroll-soft-edge` tenía `bottom:calc(5.75rem + safe-area)` y se acababa antes del menú, dejando una segunda franja sin ningún efecto.
+
+**Corrección:** el overlay social `z-20` ahora continúa **hasta `bottom:0`** por detrás del menú `z-30` (que sigue nítido y con cavidad intacta). La altura incluye la zona del dock + una franja superior de difuminado. Máscara del `backdrop-filter` de 11px y color crema con varias paradas alfa progresivas, sin terminación visible entre la foto y el menú. `pointer-events:none` impide bloquear interacciones. Se mantienen únicamente `inicio|comunidades|mascota`, excluyendo mapa, y la reserva inferior de scroll de 13rem para que los últimos botones de Mi mascota sean accesibles.
+
+**Gates:** `scripts/closure-ui.test.mjs` prohíbe volver a posicionar el overlay encima del dock, valida `bottom:0`, máscara, progresividad, orden DOM, tabs y toques. CI SHA exacto + comprobación visual Android pendientes; no aprobar UX por solo CI. Sin merge, producción, cambios financieros ni Supabase.
+
+---
+
+## F17 — Desenfoque inferior progresivo del contenido social (22-oct-2026; SOLO RAMA)
+
+**Decisión PO:** Feed, Comunidades y Mi mascota desvanecen progresivamente publicaciones, tarjetas y controles al acercarse a la zona superior del menú flotante. La capa difumina el contenido con `backdrop-filter` + máscara alfa vertical y añade un degradado crema suave como respaldo. **El dock flotante permanece completamente nítido, su cavidad conserva transparencia y sus botones funcionan igual.** El módulo Lugares/Mapa queda expresamente excluido.
+
+**Implementación:** una única capa `data-pazo-scroll-soft-edge` como hermana de `<main>`, entre el scroll y `<BottomNav>`, renderizada solo para `inicio|comunidades|mascota`; CSS `z-index:20`, menú `z-30`, `pointer-events:none`, altura sensible al viewport y borde inferior por encima del dock. `main` mantiene su scroll, pero extiende el espacio final a `13rem+safe-area` para que botones importantes puedan subir por encima del difuminado al llegar al final. Sin cambio de lógica de Feed/comunidades/perfil, ni de datos, ni de navegación.
+
+**Regresión:** `scripts/closure-ui.test.mjs` comprueba tres módulos, exclusión de Mapa, orden DOM/z-index, máscara, difuminado, pointer-events y clearance. Pendiente prueba CI del SHA exacto y aceptación visual Android; no merge ni producción sin GO, sin cambios de Supabase/PayPal ni proveedores.
+
+---
+
+## F17 — Corrección visual del carrusel de Lugares (22-oct-2026; solo rama)
+
+PO observó solapamiento de las tarjetas con el dock flotante al desplazarlas verticalmente. Causa: scroll vertical artificial dentro del rail y espaciador inferior de 9rem. Corregido en `ImmersivePlacesStage.tsx`: banda horizontal única, sin scroll vertical ni espaciador, posicionada por encima del dock según safe-area; se conservan fotografía, selección, títulos compactos y dock global. Contrato actualizado en `scripts/closure-ui.test.mjs`. **Pendiente:** CI SHA exacto y aceptación visual Android. No fusionar ni publicar en producción sin GO.
+
+---
+
+## F17 — Restitución tipográfica precisa de Lugares a partir de comparativa Android (22-oct-2026 · SOLO RAMA)
+
+El PO comparó captura actual vs aspecto original y aclaró que la orden de ampliar textos correspondía **únicamente** al modal de detalles (Cómo llegar, check-in, reglas), NO al lienzo exterior de Lugares. Diagnóstico con GitHub: en el commit histórico `3e74e102` el título del rail era `text-[15px]`, el contador `text-[11px]`, los filtros `text-[11px]`, los nombres de tarjeta `text-[14px]` y la categoría/presencia `text-[10px]`. En la versión reciente se habían sustituido varios por `text-lg` / `text-xs`, que PAZO redefinió globalmente en `src/index.css` a tamaños superiores, agrandándolos sin intención del PO.
+
+**Corrección aplicada** exclusivamente en `ImmersivePlacesStage.tsx`: restituir exactamente los tamaños numéricos anteriores para título, resultados, filtros y metadatos de tarjetas; títulos de establecimiento permanecen en 14px. Quitar cápsula blanca grande del título conservando separación y encabezado fijo, scroll de tarjetas y safe-area del dock. `MapView.tsx` y la tipografía incrementada del diálogo de detalles permanecen intactos. Nueva prueba `closure-ui.test.mjs` fija estos tamaños y evita que vuelvan a heredar `@theme --text-xs/--text-lg`.
+
+**Estado:** solo código/CI de rama F17 PR #81. El fondo del mapa Mapbox vectorial/3D y las seis ilustraciones locales siguen como gate visual independiente; no confundir con esta corrección de tipografía. Nada de `main`, producción, PayPal, Supabase, nuevas APIs, gastos ni alteraciones de permisos. Próximo gate: CI SHA exacto, Preview independiente y aceptación en Android.
+
+---
+
+## F17 — Android QA: modal de experimentos y mapa sin base (22-oct-2026, PR #81; SOLO RAMA)
+
+**Evidencia PO:** fotografías correctas y glTF de uno de los seis lugares visibles, pero cartografía de fondo completamente gris en Preview SHA `85c28e40`; el título «Lugares disponibles» queda cortado tras desplazar el carrusel; control blanco Mapbox se solapa con botón amarillo de ubicación; créditos Wikimedia demasiado grandes. Al desplazarse al final del detalle, «Funciones en desarrollo» aparece a escala desequilibrada y desaparece la cabecera/cierre del modal. **El usuario NO aprobó esta experiencia.**
+
+**Código nuevo:** modal detalle dividido en header/close fijo y scroll exclusivo de cuerpo, manteniendo check-in y fake doors con idénticas acciones/tracking; jerarquía de tipografía del bloque de experimentos reducida y tarjetas ajustadas a 10–13px explícitos. Rail de Lugares ahora separa su encabezado fijo del scroll vertical de tarjetas, con espaciador de 9rem + safe-area al final del contenido para que el dock no cubra la última tarjeta. Créditos visibles sobre las fotos reducidos a 9px; barra de zoom nativa Mapbox retirada únicamente de la vista inmersiva para no superponerse al control de ubicación. El fondo de Mapbox se conserva; un error recuperable de tesela NO desmonta el canvas. `mapFailure` reconoce HTTP 401/403 incluso cuando la librería no expone URL. Tras fallos de los dos estilos vectoriales, mapa OSM de emergencia se identifica con un mensaje claro; esto **NO representa relieve 3D**.
+
+**Estado/mapa:** se han visto imágenes/3D locales sobre un fondo gris; falta distinguir si la causa es restricción URL del token, permiso de estilo o descarga de tiles en el navegador Android. El token público existe en Vercel para Preview y producción; su autorización efectiva por origen NO se confirmó. La solución final requiere respuesta 200 de estilo + mosaicos + DEM y aceptación del PO; un CI verde no prueba el render visual. Ninguna clave rota, proveedor nuevo, gasto, DB, Edge o pago modificado. Revisar restricciones de referer/domain de Mapbox en el panel sin compartir token.
+
+**Gate:** validar SHA final en CI, luego Preview separado (sin tocar producción) y Android real: cartografía 3D, seis modelos por categoría, cabecera y botón de cierre siempre visibles, todas las tarjetas accesibles, créditos legibles y barra flotante sin tapar. No merge ni producción hasta aprobación expresa.
+
+---
+
+## F17 — Captura Android: raster sin relieve, marcadores ausentes y carrusel recortado (22-oct-2026, SOLO RAMA)
+
+Evidencia del PO: Preview SHA `3707e485`, calles exageradas/relieve 3D ausente, modelos originales no visibles, crédito OSM gigante, área de tarjetas excesiva y recortada. Diagnóstico de código: el error de una sola tesela degradaba directamente Mapbox Standard a raster OSM; el fondo de OSM NO es 3D y la capa nativa glTF solo arrancaba desde zoom 13.25, sin anotaciones DOM independientes. Además, el rail de Lugares tenía altura limitada 300px *incluyendo* padding inferior de 7rem, que recortaba títulos y fotos de sus tarjetas.
+
+**Corrección en PR #81:** secuencia Mapbox Standard 3D → segundo estilo vectorial Streets v12 → raster SOLO como emergencia después de problemas del vector; altura de terreno desde la fuente DEM del proveedor existente en estilos vectoriales con `setTerrain`. Se preservan los seis archivos `public/models/places/*.gltf`, su `model-id` por categoría y selección real; capa 3D desde zoom 12.5. Marcadores de categoría locales ligados a los seis lugares son accesibles, pulsables e independientes de `style.load`, para que no desaparezcan cuando fallan las capas o el token de Mapbox. Errores individuales en raster no eliminan todo el mapa. Los modelos nativos tienen precedencia visual a zoom cercano. Se elimina crédito OSM duplicado de tamaño excesivo: la atribución del motor Mapbox continúa activa. Carrusel horizontal compactado, rail de alto natural limitado y margen de dock como espaciador DENTRO del scroll, no restado de su altura visible. Se conserva dock flotante, fotos reales/ilustrativas licenciadas, check-in, foco, ubicación opcional y navegación.
+
+**GATE SIN CERRAR:** Mapbox Standard y Streets dependen de que el token actual permita el dominio del Preview (posible 403 por restricción de referer); no asumir que la corrección visual de código resuelve la autorización de un tercero. Si ambos estilos vectoriales son denegados, no se puede ofrecer relieve 3D con el raster OSM; corregir scopes/restricciones del token desde Mapbox con el PO, sin revelar ni sustituir credenciales ni contratar otro servicio. CI exacto del SHA final, revisión en Android (modelo glTF visible tras tocar lugar + acercar; cartografía realmente 3D; tarjeta completa + scroll final) y GO explícito requeridos. Sin cambios en producción, SQL/Edge, PayPal, `main` ni nuevo presupuesto.
+
+---
+
+## F17 — Dock flotante global, scroll seguro y detalle legible (22-oct-2026, SOLO RAMA)
+
+Aprobado por PO: escalar tipografía exclusivamente dentro del modal de detalles de Lugares (dirección, especies, reglas, check-in y Cómo llegar), sin alterar la escala de títulos/filtros fuera de él. Se conserva portal a document.body para centrado real. El menú inferior es una capa flotante con fondo exterior transparente en TODOS los módulos y cavidad real sobre la burbuja móvil; solo los controles de la barra interceptan toques. App.tsx reserva 7rem + env(safe-area-inset-bottom) al final del scroll no-mapa para que Mi mascota, Comunidades y Feed no oculten acciones. Lugares tiene ahora rail inferior vertical desplazable (además del carrusel horizontal), con la misma reserva al final; la última tarjeta puede subir totalmente sobre el dock y las tarjetas siguen viéndose por detrás durante el desplazamiento. La atribución del mapa y el botón voluntario de ubicación se desplazan bajo los filtros, fuera del carrusel.
+
+Se conserva Mapbox Standard 3D como estilo primario y los modelos PAZO; solamente se suaviza saturación/contraste del respaldo raster OSM cuando Mapbox falla (ese respaldo no es 3D). Para las seis fotos Commons ya licenciadas, el componente prueba la miniatura directa y, si falla, un único enlace Special:FilePath de ESA MISMA foto antes de mostrar el fondo sin imagen; fotos propias reales siempre prevalecen y cinco siguen claramente identificadas como ilustrativas. Sin proveedores pagados, SQL, credenciales, migraciones ni cambios financieros.
+
+**Evidencia:** código y regresiones versionados en PR #81. **PENDIENTE:** CI exacto del último SHA y validación real en Android de scroll final, cavidad, legibilidad, carga de las seis fotos y mapa 3D. No se autoriza despliegue Preview adicional, merge ni producción hasta GO específico del Product Owner.
+
+---
+
+## F17 — Correcciones tras capturas reales del PO, 22-oct-2026 (rama solamente)
+
+Capturas Android mostraron detalle de Lugares limitado al mapa y texto fijo demasiado pequeño; raster OpenStreetMap con carreteras demasiado contrastadas; fotografías de Wikimedia Commons no visibles por miniaturas /640px; y barra inferior con franja sólida entre las tarjetas. Código corregido: portal al body para modal centrado a escala PAZO con cierre Escape; Mapbox Standard 3D suave y fallback raster solo ante fallos; rutas de miniatura Commons /500px con créditos condicionados a que haya imagen; navegación flotante y transparente sobre tarjetas cuando Mapa está activo, preservando la máscara de la burbuja. Sin alterar PayPal ni Supabase.
+
+**GATE:** código y tests en rama F17; CI, carga fotográfica real, estilo 3D en Android y aceptación PO por verificar. No publicado en producción, no nuevo Preview, no merge a main. No certificar funcionalidad visual solo con pruebas estáticas.
+
+---
+
+## F17 — FOTO REAL SIN GOOGLE API, SOLO RAMA, 22-oct-2026
+
+PO descartó Google Places Photos como requisito. Se prepararon seis fotos
+fotográficas diferentes con Wikimedia Commons sin costo: Runyon Canyon
+corresponde al parque real; las otras cinco son ilustrativas por categoría
+y tienen etiqueta “Ilustrativa”. Los créditos de fotógrafo y licencia
+son enlaces accesibles en tarjeta, y el campo de backend `photo_url`
+prevalece siempre. Nuevo tercero externo Wikimedia declarado en la
+política de privacidad ES/EN y el inventario de datos. Se añadió test
+`scripts/f17-curated-place-photos.test.mjs`, y documentación
+`docs/PAZO_F17_PLACES_PHOTO_SOURCES_20261022.md`.
+Sin API pagada, credenciales, migraciones ni cambio PayPal. CI y aceptación
+visual en móvil pendientes. **No publicar en Vercel ni merge a main sin GO.**
+
+---
+
+## ACTUALIZACIÓN F17 — Lugares y Feed, 22-oct-2026 (RAMA, NO PRODUCCIÓN)
+
+**Scope aprobado por PO y versionado en PR #81**, revisión de código anterior `a12579c1fd59`: contenedor exterior de búsqueda/filtros transparente, fade lateral en scroll de categorías, botón **Cómo llegar** desde detalle de lugar (iOS Apple Maps; Android/enlace web Google Maps), iconos circulares mayores para like/comentarios/guardado en Feed. Los handlers y métricas existentes se preservan. Foto genérica de carretera eliminada: cada tarjeta solo muestra `pet_places.photo_url` real o indica que todavía no hay foto. **Los 6 lugares alojados tienen `photo_url` vacío**: no declarar fotos de establecimientos ya resueltas.
+
+**Google Places Photos NO activo:** Google Places API/Place IDs de esos establecimientos no están configurados en PAZO; requiere servicio con facturación y atribución/uso compatibles. Prohibido generar cargos, añadir claves cliente, copiar imágenes de Google Maps manualmente o fingir fotos sin autorización adicional del PO. Alternativa con costo fijo controlable: fotos autorizadas por negocio y Storage existente. Regla cero contornos respetada; ningún SQL/Edge/Vercel modificado. La versión publicada en `https://pazo-app.vercel.app/` **no incluye todavía estos cambios**. Validación requerida: CI exacto del último SHA, prueba móvil/Preview aprobada por PO, decisión sobre fotos; NO despliegue ni merge a `main` sin GO.
+
+**Implementación y detalles:** `docs/PAZO_F17_PLACES_FEED_POLISH_20261022.md`. Mantener estado financiero previo en el historial inferior (sin alteraciones de PayPal).
+
+---
+
+# PAZO · PAYPAL LIVE — ESTADO HOSPEDADO AL 22-OCT-2026 (ACTUAL)
+
+> Fuente de verdad vigente. El historial F17 visual debajo es anterior a la reparación de pagos y **no debe usarse** para decidir nuevos cambios financieros.
+
+- **Producto:** https://pazo-app.vercel.app/ , proyecto Vercel `pazo-app` `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI`, producción **READY** `dpl_8uDfwTYrqYqGDfjeFwWg3W4KXTxT`, SHA real frontend `1b2340523b80234a41a0a6ffac489bc32f5a2937`. PR #81 **DRAFT**, rama `f17/beta-final-mobile-support-admin-20261022`, main sin merge.
+- **Supabase:** `mrybvqdebbgcayuvgkkr`. Instaladas migraciones **`20261022220000`** (origin canónico transaccional) y **`20261022222000`** (A03 onboarding completado tras mascota realmente creada). Ambas pasaron ensayos ROLLBACK y COMMIT, con postflight alojado. No reinstalar.
+- **PayPal Live:** la configuración certificada y la única dirección de regreso válida ahora es `https://pazo-app.vercel.app`. El antiguo `pazo-app-t83r.vercel.app` ya no figura en las cinco funciones financieras en PostgreSQL. Artefacto con CHECK estricta y validación actual `true`; precio `299` centavos USD mensual, credenciales Vault válidas e INALTERADAS, webhook sin cambios, control `mode=canary` revisión 1, switch Live TRUE / kill FALSE, **0 intents/0 períodos pagados**. No activar público sin primera venta firmada, confirmación de cancelación y GO del PO.
+- **Edge desplegado:** `pazo-paypal-live-account` v6 (JWT), `pazo-paypal-live-checkout` v4 (JWT), `pazo-admin-paypal-release` v2 (JWT); `pazo-admin-paypal-bootstrap` v7 (JWT), `pazo-admin-paypal-live-inspect` v5 (JWT), `pazo-admin-paypal-vault` v3 (JWT). Ajustadas CORS/guards de origen exacto sin wildcard, MFA permanece obligatorio, sin rotar credenciales. Webhook y worker financieros NO redeplegados.
+- **Comprobaciones:** HTTP público real de 7 rutas oficiales incluidas `/paypal/return` y `/paypal/cancel` PASS en GitHub run **39856221792**. CI + F17 security PASS para la última implementación de onboarding `5fe2ea56e04be0f7cc8d2b9f6df07e4f4be3c3d3` (runs **39859246850**, **39859246887**); bootstrap preflight **39859246846** PASS. Artefacto certificado + worker activo/heartbeat reciente + canary original operator permitido = TRUE al último check SQL, pero **NO** hubo pago Live real.
+- **Onboarding:** antes todos los 5 perfiles tenían `onboarding_completed=false` pese a existir mascotas; 4 perfiles con mascotas reales se reconciliaron a TRUE, el perfil sin mascota quedó FALSE; `public.create_pet_profile` ahora actualiza el propio perfil tras la creación satisfactoria sin modificar RLS/privilegios.
+- **Panel Live:** frontend publicado ofrece pantalla limpia de estado/precio/retorno/webhook/MFA/control y herramientas avanzadas separadas. Esta iteración corrigió conexión y visibilidad, no implementó una **rotación completa** de plan/credenciales ni hizo editable un precio de una suscripción existente. PayPal requiere plan nuevo para otro importe; proteger generaciones históricas. No volver a pedir credenciales ya válidas.
+- **Siguiente gate REAL:** la cuenta original del operador canary (no cuenta normal) debe iniciar desde la app, aprobar personalmente **una suscripción Live de $2.99** y regresar; el asistente verifica webhook firmado, período pagado, beneficios, conciliación y cancelación. NO fabricar transacciones ni poner `mode=public` hasta cumplir toda la evidencia y GO específico del PO. Una cuenta normal seguirá bloqueada correctamente en canary. No prometer que el flujo PayPal extremo-a-extremo está PASS solo por las pruebas HTTP.
+- **Módulos no financieros:** F17 Soporte/cortesías/mantenimiento instalados con RLS; mantenimiento OFF. Mapa y corgi pendientes de aceptación visual final del PO en Android. No modificar main sin aprobación.
+
+---
+
+# PAZO · ACTIVE HANDOFF — 22-oct-2026 · visual F17
+
+> **Source of truth:** remote GitHub branch + actual provider state. This concise live snapshot replaces the former 113 KB chronological handoff, recoverable **verbatim through Git history at commit `b1cbcd355ed33ce25602f2cb8531729afc13ed2c`**. Earlier statements about pending SQL or old production domain are historical.
+
+## Identity, authority and controls
+- **PO:** user; ChatGPT is primary implementer, per `DigitalAppcorp/project-brain-os` SKILL v1.4.1 and `AGENTS.md`. No Codex or other AI needed.
+- **Repo:** `DigitalAppcorp/pazo-app`, base `main` `a99f05d2dab3baf5a4bc26b8fb64d790e7c4be2d`. Active F17 branch `f17/beta-final-mobile-support-admin-20261022`, PR **#81 DRAFT**. Code snapshot preceding this doc: `b1cbcd355ed33ce25602f2cb8531729afc13ed2c`. Do not merge to main without PO approval.
+- **Canonical app URL:** `https://pazo-app.vercel.app/`, Vercel project **`pazo-app`** `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI` (distinct from `pazo-app-t83r`). User-approved F17 beta UI fixes are **published technically**: production `dpl_CJ1vpxTdSQ5QBZ8w5GDSNPUnYCtr` READY, exact code `b1cbcd355ed33ce25602f2cb8531729afc13ed2c`. Domain alias was verified to point to that deployment. Prior production `dpl_7rPxM5BzSaz3YJrDDu6NMpY1bfWT` is rollback reference. **Physical Android/Mapbox visual acceptance is still NOT confirmed**.
+- **Preview of visual corrections:** `dpl_ByL8WxEEQYkmrxMsNdPo1U95Gq93` READY, code `b1cbcd355ed33ce25602f2cb8531729afc13ed2c`, `https://pazo-52wyg1fcj-digitalapp.vercel.app/` (may require Vercel-authenticated browser; MCP bypass permission denied).
+- **GitHub CI:** **PASS for production code SHA `b1cbcd355ed33ce25602f2cb8531729afc13ed2c`**: `CI` SUCCESS run 39800270518 and `F17 beta isolated backend security` SUCCESS run 39800270447. Prior CI failures were stale tests still demanding intrusive banner/Mapbox vector style; corrected without disabling protections. Newer commits modify only documentation and should not be mistaken for distinct published code. Do not claim physical browser validation from CI.
+
+## Backend F17 hosted — ALREADY INSTALLED, not part of current visual patch
+- Supabase `mrybvqdebbgcayuvgkkr`. Migrated with approved reversible preflight + one transactional COMMIT: `20261022103706` private support, `20261022103707` gifted benefits, `20261022103708` maintenance guards. 3 registered migrations, 5 FORCE RLS tables, daily `pazo_support_retention_daily` deletes resolved cases after 90 days. DO NOT reinstall.
+- Edge `f16-paypal-supporter-v2-qa` v27 active with JWT verification. No further Edge changes needed for UI-only iteration. Mantenimiento OFF revision 0 last inspected; do not enable. PayPal Live **canary**, revision1, `live_enabled=true`, `kill_switch=false`, 0 Live paid periods last read. Credentials already valid in metadata. Do not request secrets or run a real sale. No changes to financial switch or main.
+- Support, gifting and maintenance were code/runtime installed in previous release; do not accidentally invalidate them. Their operational physical QA remains independent from this visual ticket.
+
+## PO screenshots / F17 visual task
+Exact requested repairs after physical Android screenshots:
+1. Welcome A01 excessive top/bottom gaps and internal scroll clipped corgi card: reduced paddings, hero flexible `min-h-0`, static footer actions; outer app shell now `h-full min-h-0` nested under `100dvh` rather than `h-screen`.
+2. Preserve **same** smiling orange-white seated corgi, closed eyes, tongue out, green collar/yellow tag; SVG holds **one complete local WebP scene** (no separately animated head, tail, mouth). **IMPORTANT:** still raster 295×310; not a genuine hi-res redraw/vector; PO quality acceptance remains open. Do not silently replace with generic dog.
+3. Removed intrusive Home install banner. Discreet opt-in `PazoInstallControl placement="welcome"` on A01 AND login; device display-mode installation detection; settings control persists.
+4. Broken/blank real Mapbox streets: temporary Mapbox GL style using visible OSM raster tiles `https://tile.openstreetmap.org/{z}/{x}/{y}.png`, existing PAZO places/3D-models and camera retained; attribution visible above place cards. **OSMF community tile endpoint only for very small beta**, best-effort/no SLA; must switch provider or resolve Mapbox API token/styles before scale/public ad campaign. Cannot claim real tile visibility on Android until PO screenshot.
+5. Removed Comunidades intro subtitle and the overlines `PAZO · COMUNIDAD` / `PAZO · TU COMUNIDAD` from Messages/Notifications.
+6. Geometrically centered titles Cuidados de mascota, Pasaporte de mascota, Crear y Compartir with matched 32px spacer/close grid. New regression tests in `scripts/closure-ui.test.mjs` plus aligned `scripts/f17-beta-extension-contract.test.mjs`.
+
+## Evidence and next gate
+- Vercel PREVIEW `dpl_ByL8WxEEQYkmrxMsNdPo1U95Gq93` and PRODUCTION `dpl_CJ1vpxTdSQ5QBZ8w5GDSNPUnYCtr` were READY for production code SHA `b1cbcd35`. Both are build/runtime deployment evidence, not physical device proof.
+- GitHub synthetic/local past: 1,818 general, 16 extra, 40 mocked-browser checks for previous F17 baseline; not proof for this latest visual SHA.
+- Policies updated ES/EN and `docs/PAZO_DATA_INVENTORY.md` to disclose OSMF direct tile requests/location-area technical metadata. See `docs/PAZO_F17_VISUAL_MAP_FIX_20261022.md`.
+- **NEXT STEP:** user tests the already-published F17 beta at `https://pazo-app.vercel.app/` on the **actual Android phone**: A01 no scroll/clipping at 640–850px CSS, corgi quality/likeness, discreet PWA install on Welcome/Login and hidden in standalone, **real visible street tiles under pins in Lugares**, center-aligned modal titles and removed text. Evidence is a screenshot or a bug report; PO decides visual acceptance. If streets still gray, inspect real tile requests/token/network, do not invent a PASS. Before **formal beta sign-off or merging main**, obtain PO visual GO; public scale requires a paid/tile provider or Mapbox root-cause repair. Keep PayPal/DB unchanged.
+- Local Antigravity working tree/unpushed commits: **unknown**; do not infer clean local state. Avoid duplicate tests and backend changes.
+
+## Activation for new chat
+"Activa Project Brain OS v1.4.1; lee `DigitalAppcorp/pazo-app/AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, `docs/PAZO_F17_VISUAL_MAP_FIX_20261022.md`; revalida PR #81 HEAD/CI, Vercel preview/production alias. Continúa aceptación visual del F17 publicado; no reimplementes SQL ni PayPal ni hagas más despliegues/merge a main sin el siguiente GO."

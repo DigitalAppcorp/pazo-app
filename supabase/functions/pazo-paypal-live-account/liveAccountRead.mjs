@@ -8,7 +8,11 @@ import {readPazoLiveAcceptedOffer} from '../pazo-paypal-live-checkout/liveOfferR
 // request keys, merchant IDs, owner IDs, raw plan, original origin or signatures.
 const PATHS=new Set(['/pazo-paypal-live-account',
  '/functions/v1/pazo-paypal-live-account'])
-const ORIGINS=new Set(['https://pazo-app-t83r.vercel.app',
+// Two exact reviewed PAZO origins. Preserve the former deployed origin for
+// already-consented subscription management and permit the official beta app.
+// Never accept arbitrary Vercel previews or wildcard Origin headers.
+const ORIGINS=new Set(['https://pazo-app.vercel.app',
+ 'https://pazo-app-t83r.vercel.app',
  'http://localhost:5173','http://127.0.0.1:5173'])
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const SUB=/^I-[A-Za-z0-9_-]{3,70}$/
@@ -109,7 +113,9 @@ export function createPazoLiveOwnerAccountRead({released=false,
    (['status','resume','reconcile','abandon','acknowledgement'].includes(data.action)&&keys==='action,intentId'&&
     INTENT.test(data.intentId||''))||
    (data.action==='cancel'&&keys==='action,confirmCancellation,intentId'&&
-    INTENT.test(data.intentId||'')&&data.confirmCancellation===true)))
+    INTENT.test(data.intentId||'')&&data.confirmCancellation===true)||
+   (data.action==='abandon_pending'&&keys==='action,confirmAbandon,intentId'&&
+    INTENT.test(data.intentId||'')&&data.confirmAbandon===true)))
    return reply(request,400,'invalid_request')
   let owner
   try{owner=await resolveAuthenticatedOwner(request)}
@@ -161,6 +167,30 @@ export function createPazoLiveOwnerAccountRead({released=false,
      !PLAN.test(original.planId||'')||
      !Number.isSafeInteger(original.merchantGeneration)||original.merchantGeneration<1)
     return reply(request,409,'live_status_not_available')
+   if(data.action==='abandon_pending'){
+    // Abandoning a buyer's unfinished PayPal approval is NOT cancellation
+    // of an ACTIVE member. Require explicit confirmation and an unchanged
+    // original Live owner+merchant binding; no second CREATE.
+    if(original.state!=='bound'||original.closedAt!==null)
+     return reply(request,409,'live_approval_not_pending')
+    const abandon=createPazoLiveOwnerCancellation({
+     readProviderStatus,claimCancel,finishCancel,postCancel,
+     allowPendingApproval:true
+    })
+    const outcome=await abandon({ownerId:owner,original:{
+     ...original,intentId:selected.intentId
+    }})
+    if(outcome.confirmed!==true||outcome.providerStatus!=='CANCELLED')
+     return reply(request,409,outcome.code||'live_approval_requires_reconciliation')
+    // Final owner-bound SQL closes only terminal attempts after pending signed
+    // events, cancellation claims and paid periods have all been reconciled.
+    if(typeof retireTerminal!=='function')return reply(request,503,'live_approval_retirement_unavailable')
+    const released=await retireTerminal({ownerId:owner,intentId:selected.intentId,
+     merchantGeneration:original.merchantGeneration,subscriptionId:original.subscriptionId,
+     providerStatus:'CANCELLED'})
+    return reply(request,released===true?200:409,released===true
+     ?'live_checkout_slot_released':'live_coverage_or_events_pending')
+   }
    if(data.action==='cancel'){
     // Never trust a browser-provided subscription, plan or merchant. The
     // owner must request cancellation explicitly; the original DB binding

@@ -32,3 +32,8 @@ supabase/tests/supporter/fixtures/f16-live-worker-scheduler-core.generated.sql
 
 supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
 .vercel/
+/supabase/tests/supporter/fixtures/f17-public-baseline.generated.sql
+/supabase/tests/supporter/fixtures/f17-rollback.generated.sql
+/supabase/tests/supporter/fixtures/f17-commit.generated.sql
+
+/supabase/tests/supporter/fixtures/f16-gradual-rollback.generated.sql

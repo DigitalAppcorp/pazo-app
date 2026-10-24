@@ -68,14 +68,23 @@ export function createPazoLiveHostedCheckout({
    return forbidden(503,'live_route_inactive')
   const origin=pinned.returnOrigin
   const caller=req.headers.get('origin')||''
-  const cors=caller===origin?{
-   'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, OPTIONS',
+  // Trust only the two real PAZO origins; never an arbitrary .vercel.app
+  // preview. A CORS preflight merely allows the browser to READ our reason:
+  // it never admits a checkout when the certified merchant origin differs.
+  const canonical='https://pazo-app.vercel.app'
+  const known=caller===origin||caller===canonical
+  const cors=known?{
+   'access-control-allow-origin':caller,'access-control-allow-methods':'GET, POST, OPTIONS',
    'access-control-allow-headers':'authorization,apikey,content-type,x-client-info',
    vary:'Origin'}:{}
-  if(req.method==='OPTIONS')return caller===origin?
+  if(req.method==='OPTIONS')return known?
    new Response(null,{status:204,headers:cors}):
    forbidden(403,'untrusted_origin')
-  if(caller!==origin)return forbidden(403,'untrusted_origin')
+  if(!known)return forbidden(403,'untrusted_origin')
+  if(caller!==origin)return new Response(JSON.stringify({
+   code:'live_origin_migration_required',ready:false,mayCharge:false
+  }),{status:409,headers:{...cors,'content-type':'application/json',
+   'cache-control':'no-store','x-content-type-options':'nosniff'}})
   // A valid merchant is not sufficient if the signed-event reconciler is
   // stopped. A new subscription must not begin without fresh worker health.
   // This is also the only public read-only readiness signal for the UI:
@@ -100,7 +109,7 @@ export function createPazoLiveHostedCheckout({
     throw Error('intake')
   }catch{return forbidden(503,'live_ingestion_unavailable')}
   if(req.method==='GET'){
-   if(pinned.releaseMode==='canary'){
+   if(pinned.releaseMode==='canary'||pinned.releaseMode==='limited'){
     let ownerId,allowed=false
     try{
      ownerId=await resolveAuthenticatedOwner(req)

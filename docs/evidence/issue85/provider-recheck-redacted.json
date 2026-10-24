@@ -1,0 +1,27 @@
+{
+  "id": 3404,
+  "status_code": 200,
+  "timed_out": false,
+  "content": {
+    "ok": true,
+    "code": "worker_qa_reconciliation_read",
+    "audit": {
+      "code": "qa_provider_read_subscription_get_unavailable",
+      "source": "original_qa_provider_audit_v1",
+      "complete": false,
+      "mayCancel": false,
+      "mayCreate": false,
+      "eventReadable": true,
+      "providerFailure": "http",
+      "mayGrantBenefits": false,
+      "providerErrorName": "RESOURCE_NOT_FOUND",
+      "providerHttpStatus": 404,
+      "reconciliationCode": "qa_provider_review_required",
+      "signedEventMatches": true,
+      "originalPlanVerified": true
+    },
+    "outcome": "review",
+    "processed": 0
+  }
+}
+
