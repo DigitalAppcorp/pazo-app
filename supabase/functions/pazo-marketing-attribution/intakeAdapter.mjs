@@ -26,9 +26,9 @@ export function createMarketingProvider({
       const data = await result.json()
       return data && typeof data === 'object' ? data : null
     },
-    submit: async ({ownerId,creative,firstTouchAt,consentVersion}) => {
-      // The next gate must approve consent capture and secure service-RPC
-      // bridge prior to enabling this submitter. No secret in frontend.
+    submit: async ({ownerId,creative,firstTouchAt}) => {
+      // The next gate must approve the collection notice, retention,
+      // and a secure service-RPC bridge. No secrets in frontend.
       const result = await fetchImpl(expected + '/rest/v1/rpc/pazo_marketing_record_verified_v1', {
         method:'POST', redirect:'error', cache:'no-store',
         signal:AbortSignal.timeout(8000),
@@ -40,7 +40,6 @@ export function createMarketingProvider({
           p_owner:ownerId,
           p_creative:creative,
           p_first_touch_at:firstTouchAt,
-          p_consent_version:consentVersion,
         }),
       })
       if (result.status !== 200) return false
