@@ -92,7 +92,8 @@ export function createMarketingIntakeHandler({
     let user
     try { user = await authenticate(authorization.slice(7)) }
     catch { return response(FAILURE, 401, cors) }
-    if (!user || !validUuid(user.id) || !validDate(user.created_at) ||
+    if (!user) return response(FAILURE, 401, cors)
+    if (!validUuid(user.id) || !validDate(user.created_at) ||
       !validDate(user.email_confirmed_at) || user.is_anonymous === true)
       return response(FAILURE, 403, cors)
     const created = Date.parse(user.created_at), confirmed = Date.parse(user.email_confirmed_at)
