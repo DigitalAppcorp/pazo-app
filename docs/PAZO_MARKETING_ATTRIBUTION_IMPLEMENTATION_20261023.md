@@ -1,0 +1,36 @@
+# PAZO — Instrumentación inicial de campañas (código inerte / no lanzamiento)
+
+Fecha: 2026-10-23. **Estado:** `CODE_PREPARED_OFF`. Rama específica de medición. Complementa PR #89 (estrategia de $350), no modifica sus decisiones ni cambia main/producción.
+
+## Alcance realizado
+- `src/features/marketing/attribution.ts`: parsers de UTM allowlist para `utm_source=meta`, `utm_medium=paid_social`, `utm_campaign=pazo_beta_local_202610`, seis `utm_content` de creatividad. Rechaza fuente arbitraria, duplicados, fechas inválidas y creative no reconocido. Nunca almacena la URL completa, click ids, emails, GPS ni valores libres.
+- Máquina de embudo local en `sessionStorage` de una sola pestaña, TTL de 72 horas y idempotencia: `landing → signup_requested → signup_verified → first_pet_created`. Se distingue solicitud de signup vs cuenta verificada. La segunda mascota no infla la conversión.
+- Hook de entrada de URL y hooks de Auth/Onboarding: después de `signUp` exitoso, después de sesión con correo verificado+alta reciente y después de `createPetProfile` confirmado.
+- Pruebas de validación, duplicados, no-op, fechas y almacenamiento bloqueado.
+- Sin dependencias, sin Pixel/CAPI/GA4, sin conexión de Ads Manager, sin SQL ni servicios de terceros.
+
+## Seguridad y estado real
+**`PAZO_MARKETING_COLLECTION_ENABLED = false`** está fijado expresamente en código. Ni siquiera se lee `sessionStorage` en la app real. No hay escrituras a Supabase, red, cookies o proveedores externos; tampoco cambios de políticas. Una PR o branch no habilita nada en la aplicación oficial.
+
+## Límites intencionales — no declarar campaña medible todavía
+1. **No existe atribución autoritativa server-side ni dashboards**. Este prototipo solo prueba contrato/flujo local y no guarda conversiones en Supabase.
+2. **Confirmación de email en otra pestaña/dispositivo** puede perder `sessionStorage`; no afirmar cobertura de campañas hasta diseñar persistencia lícita con política de retención y consentimiento apropiados.
+3. `SIGNED_IN` no demuestra adquisición por sí mismo; el filtro client-side de fecha evita algunos falsos positivos, pero el backend deberá derivar creación/verificación desde Auth confiable y excluir cuentas QA.
+4. No se implementaron `first_value` ni `D7_return`: deben definirse con acción útil concreta y base de cohortes autoritativa. No confundir creación de mascota con retención.
+5. La fecha de campaña es nominal para el primer piloto: revisarla cuando el PO autorice fecha de anuncio.
+6. Necesita prueba E2E real tras configuración/compilación en preview local, sin despliegue automático a producción.
+
+## Siguiente Gate técnico (requiere autorización propia antes de escribir al backend)
+- Aprobar finalidad/consentimiento, tipos de datos, retención, supresión por borrado de cuenta, exclusión QA y esquema privado por usuario único.
+- Diseñar endpoint/RPC de almacenamiento con auth ownership y límites de idempotencia, sin acceso indiscriminado.
+- Crear migración versionada usando CLI y realizar ensayo/revisión SQL, sin aplicar a Supabase hasta GO de migración explícito.
+- Añadir pruebas backend y funnel E2E (email confirmada con app abierta y enlace externo), y política de cookies/storage si corresponde.
+- Activación del gate de captura y cualquier Pixel/CAPI requiere GO independiente, nunca se deduce de esta implementación.
+
+## Comando de verificación local
+`node --experimental-strip-types --test src/features/marketing/attribution.test.mjs`
+`npm run test:privacy`
+`npm run build`
+
+## Prohibiciones preservadas
+No modificar `main`, Vercel, Supabase alojado, Auth provider, anuncios, PayPal, settings ni credenciales. Cero gasto. Mantener PostHog OFF y sin autocapture.
