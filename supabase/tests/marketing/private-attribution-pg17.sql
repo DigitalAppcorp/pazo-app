@@ -89,7 +89,7 @@ END $$;
 
 -- Enable ONLY in synthetic transaction to check guarded paths.
 -- Approval cannot be simulated without an explicit retention policy/version.
-DO $
+DO $$
 BEGIN
  BEGIN
    UPDATE marketing_private.collection_gate
@@ -100,7 +100,7 @@ BEGIN
  IF EXISTS(SELECT 1 FROM marketing_private.collection_gate WHERE enabled) THEN
   RAISE EXCEPTION 'Gate leaked enabled state';
  END IF;
-END $;
+END $$;
 -- ONLY the disposable fixture simulates a configured policy (not an approval).
 UPDATE marketing_private.collection_gate
  SET enabled=true,enabled_at=now(),retention_days=30,
@@ -224,7 +224,7 @@ INSERT INTO marketing_private.acquisition(
  now()-interval '2 days 1 hour',now()-interval '2 days',now()-interval '2 days' + interval '1 minute',
  'pazo-marketing-optin-v1',now()-interval '31 days');
 SET LOCAL ROLE service_role;
-DO $
+DO $$
 BEGIN
  IF public.pazo_marketing_withdraw_v1('00000000-0000-0000-0000-000000000105') IS DISTINCT FROM true
  THEN RAISE EXCEPTION 'Withdrawal failed';END IF;
@@ -232,9 +232,9 @@ BEGIN
  THEN RAISE EXCEPTION 'Idempotent withdrawal failed';END IF;
  IF public.pazo_marketing_prune_v1() <> 1 THEN
   RAISE EXCEPTION 'Expired record not deleted by manual prune';END IF;
-END $;
+END $$;
 RESET ROLE;
-DO $
+DO $$
 BEGIN
  IF EXISTS(SELECT 1 FROM marketing_private.acquisition
   WHERE owner_id IN (
@@ -242,7 +242,7 @@ BEGIN
     '00000000-0000-0000-0000-000000000106')) THEN
   RAISE EXCEPTION 'Attribution persisted after withdrawal/prune';
  END IF;
-END $;
+END $$;
 
 ROLLBACK;
 SELECT 'PAZO_MARKETING_PG17_SYNTHETIC_ROLLBACK_PASS' AS result;
