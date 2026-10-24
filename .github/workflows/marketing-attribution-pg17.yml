@@ -55,5 +55,16 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f supabase/drafts/marketing/pazo_first_party_attribution_v1.sql
       - name: Check private ACL, QA exclusions, deduplication, cohorts and rollback
         run: psql -X -v ON_ERROR_STOP=1 -f supabase/tests/marketing/private-attribution-pg17.sql
+      - name: CLI migration stub — synthetic workspace, no remote connection
+        run: |
+          tmpdir="$RUNNER_TEMP/pazo-marketing-cli"
+          mkdir -p "$tmpdir/supabase/migrations"
+          cd "$tmpdir"
+          npx --yes supabase@2.121.0 migration new pazo_marketing_firstparty_attribution
+          generated="$(find supabase/migrations -maxdepth 1 -type f -name '*_pazo_marketing_firstparty_attribution.sql' -printf '%f\n')"
+          test -n "$generated"
+          test "$(printf '%s\n' "$generated" | wc -l)" -eq 1
+          echo "PAZO_SUPABASE_CLI_GENERATED_FILENAME=$generated"
+          echo 'No SQL staged in production or linked Supabase project'
       - name: Run local front-end attribution unit contract
         run: npm run test:marketing
