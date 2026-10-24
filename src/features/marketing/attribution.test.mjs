@@ -5,6 +5,7 @@ import {
   MARKETING_ATTRIBUTION_TTL_MS,
   createPazoMarketingRecorder,
   parsePazoCampaign,
+  prepareAutomaticCampaignIntake,
 } from './attribution.ts'
 
 const valid = '?utm_source=meta&utm_medium=paid_social&utm_campaign='
@@ -97,4 +98,25 @@ test('first touch is immutable within one session', () => {
   r.captureLanding(valid)
   r.captureLanding(valid.replace('perfil_es', 'qr_en'))
   assert.equal(r.read()?.attribution.creative, 'perfil_es')
+})
+
+test('verified registration produces automatic allowlisted UTM without opt-in field or PII',()=>{
+  const store=makeStore()
+  let now=Date.parse('2026-10-24T01:00:00Z')
+  const r=createPazoMarketingRecorder(store,{enabled:true,now:()=>now})
+  r.captureLanding(valid)
+  assert.equal(prepareAutomaticCampaignIntake(r.read()),null)
+  r.signupRequested()
+  now+=1000
+  const created=new Date(now).toISOString()
+  r.signupVerified(created,created)
+  assert.deepEqual(prepareAutomaticCampaignIntake(r.read()),{
+    utm_source:'meta',utm_medium:'paid_social',
+    utm_campaign:PAZO_CAMPAIGN,utm_content:'perfil_es',
+    first_touch_at:'2026-10-24T01:00:00.000Z',
+  })
+  const raw=JSON.stringify(prepareAutomaticCampaignIntake(r.read()))
+  for(const key of ['owner_id','email','consent','jwt','url','fbclid'])assert.ok(!raw.includes(key))
+  r.clear()
+  assert.equal(prepareAutomaticCampaignIntake(r.read()),null)
 })
