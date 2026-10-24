@@ -3,17 +3,18 @@
 -- Requires distinct Product Owner GO for privacy notice, retention policy,
 -- installed private schema and cron; never enables marketing intake itself.
 -- Run with privileged trusted SQL operator only AFTER preflight approval.
+-- Retention Cron should be verified while collection is OFF, BEFORE enabling intake.
 BEGIN;
 SET LOCAL lock_timeout='5s';
 DO $marketing_retention_schedule$
-DECLARE v_days integer; v_enabled boolean; v_version text;
+DECLARE v_days integer; v_version text;
 BEGIN
  IF NOT EXISTS(SELECT 1 FROM pg_extension WHERE extname='pg_cron') THEN
   RAISE EXCEPTION 'Supabase Cron extension not installed';
  END IF;
- SELECT retention_days,enabled,policy_version INTO v_days,v_enabled,v_version
+ SELECT retention_days,policy_version INTO v_days,v_version
  FROM marketing_private.collection_gate WHERE singleton;
- IF NOT coalesce(v_enabled,false) OR v_days IS NULL OR v_days<1
+ IF v_days IS NULL OR v_days<1
   OR v_days>90 OR v_version IS DISTINCT FROM 'pazo-marketing-attribution-notice-v1' THEN
   RAISE EXCEPTION 'Retention and published policy must be approved first';
  END IF;
