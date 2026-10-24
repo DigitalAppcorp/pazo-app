@@ -14,7 +14,7 @@ const FAILURE = { status: 'not_accepted' }
 const response = (body, status, headers={}) => new Response(
   JSON.stringify(body), { status, headers: { 'content-type':'application/json; charset=utf-8', 'cache-control':'no-store', ...headers } },
 )
-const validDate = (value) => typeof value === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(value)
+const validDate = (value) => typeof value === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|[+-]\d\d:\d\d)$/.test(value)
   && Number.isFinite(Date.parse(value))
 const validUuid = (value) => typeof value === 'string'
   && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
@@ -54,10 +54,23 @@ export function createMarketingIntakeHandler({
       return response(FAILURE, 413, cors)
     const authorization = request.headers.get('authorization') || ''
     if (!/^Bearer [A-Za-z0-9._~+/=-]{12,4096}$/.test(authorization)) return response(FAILURE, 401, cors)
-    let raw
+    let raw = ''
     try {
-      raw = await request.text()
-      if (new TextEncoder().encode(raw).byteLength > MAX_BYTES) return response(FAILURE, 413, cors)
+      if (!request.body) return response(FAILURE, 400, cors)
+      const reader = request.body.getReader()
+      const decoder = new TextDecoder('utf-8', { fatal:true })
+      let byteCount = 0
+      while (true) {
+        const {done,value} = await reader.read()
+        if (done) break
+        byteCount += value.byteLength
+        if (byteCount > MAX_BYTES) {
+          await reader.cancel().catch(()=>{})
+          return response(FAILURE, 413, cors)
+        }
+        raw += decoder.decode(value, {stream:true})
+      }
+      raw += decoder.decode()
     } catch { return response(FAILURE, 400, cors) }
     let body
     try { body = JSON.parse(raw) } catch { return response(FAILURE, 400, cors) }
