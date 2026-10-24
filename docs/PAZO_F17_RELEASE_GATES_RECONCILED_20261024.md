@@ -1,3 +1,27 @@
+## ACTUALIZACIÓN POSTERIOR — 24-oct-2026, 20:14 UTC
+
+**Este corte posterior prevalece sobre el diagnóstico inicial de este documento fechado 18:10–18:11 UTC.** El incidente y estado `paused_automatic/revision 3` descritos más abajo son históricos, no actuales.
+
+| Gate / evidencia posterior | Estado |
+| --- | --- |
+| PR #102: ajuste de timeout en `main` | **MERGED**, squash `37e5e7c423148ff34aadc7990affeaf268b30a43` |
+| CI PR #102 | **2 workflows SUCCESS**: CI y F16 Gradual Live |
+| Supabase worker | **v11 ACTIVE**; binario hospedado/archivos iguales al código aprobado; POST worker **HTTP 200** registrado a las 19:39:00 UTC |
+| Causa inmediata incidente 16:01 | Fallo de transporte/timeout en GET de disponibilidad interna; GET 16:00 y 16:02 HTTP 200. Causa de red de fondo no confirmada |
+| Mitigación | Un reintento adicional acotado en excepción de transporte (8 s + máximo 2.5 s); **HTTP 503 o ready=false y dos fallos siguen bloqueando nuevas compras**. No auto-reanuda |
+| Reanudación L1 | El PO hizo `resume` vía panel/MFA a las 19:24:39 UTC, revisión de campaña 3→4 |
+| Estado financiero a las 20:14:50 UTC | `active/L1_FIRST_REAL/capacity=1/revision=4`, `gradual_health=true`, **0** incidentes abiertos, **0** HELD, **0** interés/invitaciones/admisiones, **0** períodos pagados |
+| Sitio oficial Vercel | Proyecto correcto `pazo-app`; deployment F17 `dpl_ESNkTmyXqtaybJYyUXakNjnqw8qx` consultado como **READY**; no inferir una publicación web automática por el merge #102 |
+| PR #100 backup/restore | PASS local real documentado, **DRAFT/no merged** y actualmente `mergeable=false`; recuperación Auth/Storage HTTP y Vault no certificada; off-site diferido |
+| Historial SQL | **NO_GO_DB_PUSH / NO_MIGRATION_REPAIR** hasta baseline y replay completo verificados |
+| PR #91 tracking | En borrador/OFF; otra línea de trabajo, no activar por esta reconciliación |
+
+**Siguiente paso prioritario:** primera venta Live real voluntaria y conciliación postpago, cuando exista un comprador real. No simular un pago ni contabilizar cortesías como ingresos. Verificar recibo firmado, proveedor, período ledger y beneficio. En paralelo, PR100 requiere conciliación de su base si se considera integración; no repetir restores PASS ni subir backups a terceros sin GO.
+
+Los registros antiguos de este documento se conservan como evidencia cronológica; ninguna autorización futura de producción se infiere de esta actualización.
+
+---
+
 # PAZO — reconciliación de gates F17 / MVP (24-oct-2026)
 
 **Alcance:** auditoría de solo lectura de GitHub y Supabase; documento propuesto en rama separada. No se fusionó ninguna rama, no se ejecutó DDL/DML ni se cambió PayPal, Vercel, Auth, Storage o la campaña. **No constituye autorización de lanzamiento.**
