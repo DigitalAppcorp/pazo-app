@@ -25,9 +25,9 @@ BEGIN
     OR has_table_privilege('service_role','marketing_private.acquisition','SELECT')
     OR has_table_privilege('service_role','marketing_private.collection_gate','UPDATE')
     OR has_function_privilege('authenticated',
-      'marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)','EXECUTE')
+      'marketing_private.record_verified_acquisition(uuid,text,timestamptz)','EXECUTE')
     OR has_function_privilege('service_role',
-      'marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)','EXECUTE')
+      'marketing_private.record_verified_acquisition(uuid,text,timestamptz)','EXECUTE')
     OR has_function_privilege('anon','marketing_private.cohort_snapshot()','EXECUTE') THEN
    RAISE EXCEPTION 'Marketing private grants leak into an API role';
  END IF;
@@ -50,9 +50,9 @@ INSERT INTO admin_private.admin_grants(user_id)
 -- execute the explicit bridge only; it cannot SELECT private attribution.
 DO $$
 BEGIN
- IF has_function_privilege('anon','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
-    OR has_function_privilege('authenticated','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
-    OR NOT has_function_privilege('service_role','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
+ IF has_function_privilege('anon','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz)','EXECUTE')
+    OR has_function_privilege('authenticated','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz)','EXECUTE')
+    OR NOT has_function_privilege('service_role','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz)','EXECUTE')
     OR has_function_privilege('anon','public.pazo_marketing_withdraw_v1(uuid)','EXECUTE')
     OR has_function_privilege('authenticated','public.pazo_marketing_withdraw_v1(uuid)','EXECUTE')
     OR NOT has_function_privilege('service_role','public.pazo_marketing_withdraw_v1(uuid)','EXECUTE')
@@ -67,8 +67,7 @@ DECLARE accepted boolean;
 BEGIN
  SELECT public.pazo_marketing_record_verified_v1(
   '00000000-0000-0000-0000-000000000101',
-  'perfil_es',now()-interval '25 hours','pazo-marketing-optin-v1')
- INTO accepted;
+  'perfil_es',now()-interval '25 hours') INTO accepted;
  IF accepted IS DISTINCT FROM FALSE THEN RAISE EXCEPTION 'Service bridge must reject OFF gate'; END IF;
 END $$;
 RESET ROLE;
@@ -79,8 +78,7 @@ DECLARE admitted boolean;
 BEGIN
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
-  'perfil_es', now()-interval '25 hours',
-  'pazo-marketing-optin-v1') INTO admitted;
+  'perfil_es', now()-interval '25 hours') INTO admitted;
  IF admitted THEN RAISE EXCEPTION 'OFF gate admitted campaign event'; END IF;
  IF (SELECT count(*) FROM marketing_private.acquisition) <> 0 THEN
   RAISE EXCEPTION 'OFF gate persisted attribution';
@@ -104,39 +102,34 @@ END $$;
 -- ONLY the disposable fixture simulates a configured policy (not an approval).
 UPDATE marketing_private.collection_gate
  SET enabled=true,enabled_at=now(),retention_days=30,
-     policy_version='pazo-marketing-optin-v1' WHERE singleton=true;
+     policy_version='pazo-marketing-attribution-notice-v1' WHERE singleton=true;
 
 DO $$
 DECLARE accepted boolean;
 BEGIN
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
-  'perfil_es', now()-interval '25 hours',
-  'pazo-marketing-optin-v1') INTO accepted;
+  'perfil_es', now()-interval '25 hours') INTO accepted;
  IF accepted IS DISTINCT FROM true THEN RAISE EXCEPTION 'Verified eligible signup failed';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
-  'perfil_es', now()-interval '25 hours',
-  'pazo-marketing-optin-v1') INTO accepted;
+  'perfil_es', now()-interval '25 hours') INTO accepted;
  IF accepted IS DISTINCT FROM false THEN RAISE EXCEPTION 'Duplicate acquisition credited';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000102',
-  'qr_es', now()-interval '25 hours',
-  'pazo-marketing-optin-v1') INTO accepted;
+  'qr_es', now()-interval '25 hours') INTO accepted;
  IF accepted THEN RAISE EXCEPTION 'Known QA user admitted';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000103',
-  'comunidad_es', now()-interval '25 hours',
-  'pazo-marketing-optin-v1') INTO accepted;
+  'comunidad_es', now()-interval '25 hours') INTO accepted;
  IF accepted THEN RAISE EXCEPTION 'Admin admitted';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
-  'malicious_creative', now()-interval '25 hours',
-  'pazo-marketing-optin-v1') INTO accepted;
+  'malicious_creative', now()-interval '25 hours') INTO accepted;
  IF accepted THEN RAISE EXCEPTION 'Invalid campaign creative admitted';END IF;
 
  IF (SELECT count(*) FROM marketing_private.acquisition) <> 1 THEN
@@ -162,12 +155,12 @@ END $$;
 -- Synthetic historical record to validate D7 and preserve timestamps.
 INSERT INTO marketing_private.acquisition(
  owner_id,campaign,creative,first_touch_at,signup_verified_at,
- consent_recorded_at,consent_version
+ notice_version
 ) VALUES(
  '00000000-0000-0000-0000-000000000104',
  'pazo_beta_local_202610','qr_en',
  now()-interval '10 days 2 hours',now()-interval '10 days',
- now()-interval '10 days' + interval '1 minute','pazo-marketing-optin-v1'
+ 'pazo-marketing-attribution-notice-v1'
 );
 INSERT INTO admin_private.app_activity_daily(user_id,activity_day,module_key)
 VALUES (
@@ -215,14 +208,14 @@ INSERT INTO public.profiles(id,is_founder) VALUES
  ('00000000-0000-0000-0000-000000000106',false);
 INSERT INTO marketing_private.acquisition(
  owner_id,campaign,creative,first_touch_at,signup_verified_at,
- consent_recorded_at,consent_version,recorded_at
+ notice_version,recorded_at
 ) VALUES
  ('00000000-0000-0000-0000-000000000105','pazo_beta_local_202610','perfil_es',
- now()-interval '2 days 1 hour',now()-interval '2 days',now()-interval '2 days' + interval '1 minute',
- 'pazo-marketing-optin-v1',now()),
+ now()-interval '2 days 1 hour',now()-interval '2 days',
+ 'pazo-marketing-attribution-notice-v1',now()),
  ('00000000-0000-0000-0000-000000000106','pazo_beta_local_202610','qr_es',
- now()-interval '2 days 1 hour',now()-interval '2 days',now()-interval '2 days' + interval '1 minute',
- 'pazo-marketing-optin-v1',now()-interval '31 days');
+ now()-interval '2 days 1 hour',now()-interval '2 days',
+ 'pazo-marketing-attribution-notice-v1',now()-interval '31 days');
 SET LOCAL ROLE service_role;
 DO $$
 BEGIN
