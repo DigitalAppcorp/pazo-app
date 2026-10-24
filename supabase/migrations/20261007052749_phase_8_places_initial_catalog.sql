@@ -1,7 +1,3 @@
--- Initial curated Phase 8 catalog.
--- Coordinates were independently reviewed from public place/location sources.
--- Keep seed data separate from schema so catalog changes do not rewrite core history.
-
 INSERT INTO public.pet_places (
   id,
   name,
