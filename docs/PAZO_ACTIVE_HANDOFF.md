@@ -1,3 +1,20 @@
+## ACTUALIZACIÓN OPERATIVA VIGENTE — 24-oct-2026, 20:14 UTC (F17/L1)
+
+**Esta sección prevalece sobre notas históricas inferiores** que indiquen `PR #81/95/97/98/99 DRAFT`, `worker v10`, `L1 paused_automatic`, `L1 BLOCKED`, `PR #102 DRAFT` o que repitan gates QA ya aprobados. Es un corte documentado, no un permiso nuevo de escritura.
+
+- **Código**: PR #81, #95, #97, #98, #99 y **#102 integrados en `main`**. El merge squash de #102 es `37e5e7c423148ff34aadc7990affeaf268b30a43`; `main` incluye `webhookReadinessProbe.mjs`, pruebas de regresión y el sondeo recuperable ante timeout aislado. Dos workflows del PR #102: **SUCCESS**. El sondeo conserva `fail-closed` ante dos fallos de transporte o webhook realmente insalubre.
+- **Producción Supabase**: `pazo-paypal-live-worker` **v11 ACTIVE**; lectura del bundle confirmada contra el HEAD del PR #102, runtime POST HTTP 200 comprobado. El PO autorizó expresamente el deploy aislado y posteriormente el merge de #102. No volver a desplegar el worker desde un commit antiguo.
+- **Finanzas**: SELECT alojado a las **2026-10-24 20:14:50 UTC**: `gradual_campaign.lifecycle=active`, `stage=L1_FIRST_REAL`, `capacity=1`, `revision=4`, `hosted_gate_verified=true`, `gradual_health()=true`, **0 incidentes abiertos, 0 inbox HELD, 0 intereses/invitaciones/admisiones y 0 períodos pagados Live**. `release_mode=limited` confirmado en postflight anterior. El incidente `webhook_unhealthy` (16:01–16:02 UTC) está resuelto. El PO realizó reanudación MFA; auditoría `resume` registrada a las 19:24:39 UTC. No abrir PayPal `public` ni crear pagos sintéticos.
+- **Beta web**: PAZO oficial está publicada en `https://pazo-app.vercel.app/`; el proyecto Vercel `prj_nk61nr5ZVpxlp8qbIvRCsua36iXI` reportó último deployment F17 `dpl_ESNkTmyXqtaybJYyUXakNjnqw8qx` **READY**; no se atribuye a un nuevo despliegue web del PR #102. El worker es una función Edge de Supabase, no una modificación del frontend.
+- **Backups**: [PR #100](https://github.com/DigitalAppcorp/pazo-app/pull/100) sigue **DRAFT/no merged**. Respaldos reales privados y dos restores aislados **PASS local** según su evidencia; Auth/Storage HTTP, Vault operativo y copia off-site **no certificados**; no repetir el ensayo ya aprobado. Al revisar este corte, PR #100 reportó `mergeable=false`; reconciliar diff/base antes de intentar integrar, nunca forzar.
+- **Migraciones**: el replay íntegro desde cero carece de baseline pre-5-oct; continúa `NO_GO_DB_PUSH` y `NO_MIGRATION_REPAIR`. No confundir restore de un snapshot actual con replay histórico.
+- **Siguiente gate técnico/financiero**: esperar un comprador **real y voluntario**, con aceptación personal PayPal; verificar webhook firmado, reconciliación del proveedor, período en ledger y beneficios de la cuenta. El estado 0 ventas no se resuelve con cuentas de pruebas. Marketing/creativos están a cargo de otro agente. PR #91 instrumentación promocional permanece sin activar.
+- **Gobernanza**: cambios nuevos en `main`, Vercel o Supabase siempre requieren autorización por su alcance. Este corte no permite modificar credenciales, crear compras, abrir capacidad pública ni escribir SQL alojado.
+
+Ver [reconciliación F17 actualizada](docs/PAZO_F17_RELEASE_GATES_RECONCILED_20261024.md) y [PR #102](https://github.com/DigitalAppcorp/pazo-app/pull/102).
+
+---
+
 ## F17 PR #99 — F14 one-time SQL protected in active migrations (23-oct-2026 PDT)
 
 Code-only proposal: `supabase/migrations/20261010043307_f14_media_jwt_claim_compat_single_test.sql` now uses the previously-reviewed structural-only/redacted F14 source. Original hosted SQL checksums remain in audit manifests and Git history, **no target-specific DO mutation is executable** through the active migration folder. GitHub guard test requires exact safe source. **Still NO_GO_DB_PUSH** due unavailable initial schema/replay and no PO production authorization; PR #99 remains DRAFT and can cause host auto-deploy if merged. [Evidence](docs/PAZO_F17_F14_ONE_TIME_SAFETY_REVIEW_20261023.md).
