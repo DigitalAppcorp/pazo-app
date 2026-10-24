@@ -2,7 +2,7 @@
 -- Local fixtures only. Simulate launch before any real account has joined.
 UPDATE supporter_private.gradual_campaign SET lifecycle='inactive',started_at=NULL,ended_at=NULL,stage='L1_FIRST_REAL',capacity=1,hosted_gate_verified=false;
 UPDATE auth.users SET created_at='2026-10-23 22:58:00+00';
-\i supabase/migrations/20261023235247_pazo_f16_real_cohort_initial_invitation_budget.sql
+\i supabase/migrations/20261024001615_pazo_f16_real_cohort_initial_invitation_budget.sql
 SELECT gradual_test.assert('ISSUE85_QA_ALL_EXCLUDED',NOT EXISTS(SELECT 1 FROM auth.users WHERE supporter_private.gradual_eligible(id) OR supporter_private.gradual_verified(id)));
 SELECT gradual_test.assert('ISSUE85_QA_FORCE_RLS',(SELECT relrowsecurity AND relforcerowsecurity FROM pg_class WHERE oid='supporter_private.gradual_qa_accounts'::regclass) AND NOT has_table_privilege('authenticated','supporter_private.gradual_qa_accounts','INSERT'));
 SELECT gradual_test.assert('ISSUE85_QA_HELPER_PRIVATE',NOT has_function_privilege('authenticated','supporter_private.gradual_is_real_account(uuid)','EXECUTE'));

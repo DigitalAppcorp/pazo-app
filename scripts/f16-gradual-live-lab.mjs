@@ -15,7 +15,7 @@ if(exists.status!==0){
 }else if(exists.stdout.trim()!=='true')throw Error('Start the existing disposable lab container first')
 run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f16_lab','-v','ON_ERROR_STOP=1','-c',"DO $$ BEGIN IF current_database()<>'f16_lab' THEN RAISE EXCEPTION 'Disposable database required';END IF;END $$;",'-c','DROP DATABASE IF EXISTS f14_synthetic WITH (FORCE);'])
 run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f16_lab','-v','ON_ERROR_STOP=1','-f','scripts/f16-live-gateway-disposable-lab.sql','-f','scripts/f16-gradual-live-lab-setup.sql','-f','supabase/tests/gradual/kernel-pg17.sql','-f','supabase/tests/gradual/failures-pg17.sql','-f','supabase/tests/gradual/security-pg17.sql'])
-run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/migrations/20261023234845_pazo_f16_qa_original_read_audit.sql','-f','supabase/tests/gradual/qa-original-scope-pg17.sql'])
+run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/migrations/20261023235424_pazo_f16_qa_original_read_audit.sql','-f','supabase/tests/gradual/qa-original-scope-pg17.sql'])
 run(process.execPath,['scripts/f16-gradual-live-concurrency.mjs'])
 
 run('docker',[...docker,'exec',container,'psql','-X','-U','postgres','-d','f14_synthetic','-v','ON_ERROR_STOP=1','-f','supabase/tests/gradual/real-cohort-pg17.sql'])
