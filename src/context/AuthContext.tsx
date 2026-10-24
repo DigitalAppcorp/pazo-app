@@ -14,6 +14,7 @@ import {
   captureEvent,
   setObservabilityUser,
 } from '../services/observability'
+import { stageMarketingSignupRequested, stageMarketingSignupVerified } from '../features/marketing/marketingRuntime'
 
 interface AuthContextValue {
   user: User | null
@@ -83,7 +84,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setRecoverySessionVerified(false)
         captureEvent('auth_session_signed_out')
       }
-      if (event === 'SIGNED_IN') captureEvent('auth_session_signed_in')
+      if (event === 'SIGNED_IN') {
+        captureEvent('auth_session_signed_in')
+        if (session?.user) {
+          stageMarketingSignupVerified(session.user.created_at, session.user.email_confirmed_at)
+        }
+      }
     })
 
     // INITIAL_SESSION usually arrives through onAuthStateChange; getSession
@@ -155,6 +161,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return 'failed'
     }
 
+    // A request accepted by Auth is not necessarily an email-confirmed account.
+    stageMarketingSignupRequested()
+    if (outcome === 'authenticated') {
+      stageMarketingSignupVerified(data.user?.created_at, data.user?.email_confirmed_at)
+    }
     captureEvent('auth_signup_succeeded')
     return outcome
   }
