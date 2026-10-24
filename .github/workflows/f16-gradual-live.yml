@@ -23,6 +23,8 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Actual versioned migration, rollback rehearsal, security, failure recovery and concurrency
         run: npm run test:gradual:pg17
+      - name: Verify hosted migration version and exact SQL bytes
+        run: node --test scripts/f17-hosted-migration-versions.test.mjs
       - run: npm run test:gradual
       - run: npm run test:governance
       - name: F17 map and maintenance regression
@@ -56,7 +58,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_ONLY_BROWSER_FIXTURE
-          VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED: 'true'
+          # Exercise real release default: Vercel may omit the optional presentation flag.
           VITE_PAZO_F16_SANDBOX_QA_UI: 'false'
           PAZO_PLAYWRIGHT_MODULE: /tmp/gradual-playwright/node_modules/playwright
         run: |

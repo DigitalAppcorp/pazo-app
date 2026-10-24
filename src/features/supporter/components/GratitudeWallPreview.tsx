@@ -13,7 +13,7 @@ type Props={lang:'es'|'en';onClose:()=>void}
 export const GratitudeWallPreview=({lang,onClose}:Props)=>{
   const [order,setOrder]=useState<WallTab>('all')
   if(supporterBenefitsUiEnabled)
-    return <GratitudeWallLive lang={lang} onClose={onClose}/>
+    return <GratitudeWallLive lang={lang} onClose={onClose} backToWelcome/>
   return <GratitudeWallScene lang={lang} onClose={onClose}
     rows={[]} tab={order} onTabChange={setOrder} previewOnly/>
 }

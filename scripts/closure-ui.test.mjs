@@ -8,7 +8,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import ts from 'typescript'
 
-// Component tests only: synthetic Auth and no browser, database or Storage calls.
+// Component tests only: synthetic Auth, public RPC and storage; no network or real DB calls.
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 let dbResult={data:[],error:null}
 let insertResult={error:null}
@@ -19,6 +19,13 @@ globalThis.__PAZO_CLOSURE_TEST_PET_INPUTS__=petInputs
 globalThis.__PAZO_CLOSURE_TEST_DB__={
   auth:{getUser:async()=>({data:{user:hasUser?{id:'synthetic-uploader'}:null},error:null}),
     onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},
+  // L1 displays the real public wall by default, even without a build flag.
+  // Return an empty, consent-safe synthetic result; never query hosted Supabase.
+  rpc:async(name,args)=>{
+    calls.push(['rpc',name])
+    if(name==='pazo_supporter_public_wall'&&args?.p_limit===48)return {data:[],error:null}
+    return {data:null,error:{message:'unmocked_rpc'}}
+  },
   from(table){
     calls.push(['from',table])
     return {insert:async payload=>{calls.push(['insert',payload]);return insertResult},

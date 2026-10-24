@@ -2,6 +2,25 @@
 
 El Product Owner delegó a **Codex** toda la programación restante del módulo de medición de campañas de PAZO; **no** delegó creativos ni compra de anuncios. Ejecutar de principio a fin **`docs/CODEX_F17_MARKETING_PROGRAMMING_FINISH_ORDER_20261023.md`** en la rama aislada `feat/f17-marketing-firstparty-20261023` / PR #91: antiabuso confiable, retención/cron preparado, E2E, panel admin, reconciliación F17 y CI verde. Comunicar al PO solamente «Listo» al finalizar de verdad y guardar evidencia en GitHub; si existe bloqueo de autorización humana, pedir exclusivamente esa autorización sin afirmar instalación. Los anteriores mandatos F16/PayPal siguen rigiendo como precauciones de seguridad, **no** son una orden de abrir compras, desplegar o alterar finanzas con esta delegación. **Sin GO independiente no tocar main, Supabase alojado, Vercel oficial, Cron alojado, secretos, medición activa ni anuncios.**
 
+## F17 — pre-merge de main: reconciliación de migraciones (23-oct-2026 PDT)
+
+**PRECAUCIÓN DE BASE DE DATOS:** [PR #94](https://github.com/DigitalAppcorp/pazo-app/pull/94) alinea los nombres de **cuatro archivos L1** con las versiones instaladas en Supabase, preservando exactamente los SQL y agregando guard CI. La auditoría global halló otros prefijos históricos sin correspondencia exacta: **no ejecutar `supabase db push`, migration repair, reapply ni merge de Supabase a producción desde esta rama**, incluso después de fusionar `main`, sin reconciliación integral y GO explícito. El PO aprobó visualmente el frontend oficial `bf78b85`; L1 permanece limitado a un comprador y no hay primera venta real. El cierre F17 debe usar [la matriz canónica](PAZO_F17_SCOPE_CLOSURE_RECONCILIATION_20261023.md). El PR #81 sigue DRAFT: **NO merge a main sin GO nuevo del PO**.
+
+---
+
+# ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
+
+**Esta sección tiene prioridad temporal sobre las entradas históricas más abajo que aún dicen “L1 BLOCKED”, “canary/inactive” o exigen conciliar el checkout QA que ya fue eliminado.** Los límites permanentes de seguridad, privacidad, aprobaciones y no modificar main sin GO siguen vigentes.
+
+- **L1 ACTIVADO POR EL PRODUCT OWNER (MFA):** registro alojado auditado en Supabase: release mode=limited, gradual_campaign.lifecycle=active, stage=L1_FIRST_REAL, capacity=1, campaign revision=2, hosted_gate_verified=true, gradual_health()=true y 1 certificado, desde 2026-10-24 01:45:25 UTC. No se activó modo public.
+- **Limpieza QA #88:** 0 legacy checkout intents, 0 webhooks retenidos, 0 recibos Live operativos de esa prueba, 0 períodos pagados. Las 8 cuentas Auth anteriores conservan su clasificación QA y no pueden recibir invitación o figurar como comprador; administrador y MFA intactos. La purga DB no cancela por sí sola una obligación en PayPal externo (su referencia remota histórica devolvió 404).
+- **Tecnología desplegada:** Edge checkout v6, worker v10, admin gradual v2 y webhook existente; sus bundles coinciden con el manifiesto #85. CI 12/12 PASS, flujo HTTPS/PWA sintético validado. La beta oficial publicada es https://pazo-app.vercel.app/.
+- **Ausencia de transacción real:** aún 0 usuarios reales elegibles/admitidos, 0 invitaciones, 0 nuevos intents, 0 eventos de venta y 0 períodos pagados. El sistema está habilitado para admitir al primer comprador **siempre que esa persona consienta en PayPal**, pero no hay un E2E de venta real para dar por PASS. Worker sale/refund/cancel y concesión de beneficios están implementados y probados sintéticamente; cualquier anomalía real requiere revisión.
+- **Código y cierre:** PR #81 permanece DRAFT sin merge en main. Mantener F17 como rama técnica activa; no declarar F16/F17 COMPLETADA hasta reconciliar el DoD y los gates de release aplicables. Marketing está fuera de este brazo técnico.
+- **Evidencia y siguiente gate:** [auditoría técnica L1](PAZO_L1_TECHNICAL_POST_ACTIVATION_20261023.md) y [issue #85](https://github.com/DigitalAppcorp/pazo-app/issues/85). Siguiente control: seguimiento del primer pago **real voluntario** y proyección de ledger/beneficios sin generar compras de prueba, más Scope Closure Review de PR #81.
+
+---
+
 ## Issue #85 — GO L1 autorizado, ejecutar tras conciliación (23-oct-2026)
 
 El PO autorizó activar solamente Live limitado L1, con crecimiento 1→5→20→50 por evidencia 1/3/10 y MFA reciente en PAZO. [Issue85](https://github.com/DigitalAppcorp/pazo-app/issues/85) prevalece sobre el NO-GO financiero histórico de #84. Primero resolver suscripción prebeta y CREATED firmado HELD sin borrar evidencias, excluir las ocho cuentas QA y conservar admin/MFA. No iniciar si hay legado incierto/held; no public ilimitado ni pagos sin consentimiento individual. Trabajo técnico en `f16/issue85-live-l1-activation-20261023`, base F17 `67fbf675`. Reporte: `docs/PAZO_ISSUE85_L1_ACTIVATION_EVIDENCE_20261023.md`. No llamar SQL start para evitar GoTrue/MFA.

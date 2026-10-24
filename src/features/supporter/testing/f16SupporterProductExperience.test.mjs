@@ -278,7 +278,7 @@ test('F16 checkout 409 cannot trap buyer in a disabled PayPal CTA',()=>{
 })
 
 
-test('F16 localhost Sandbox enables presentation but never synthesizes paid rights',()=>{
+test('F16 Live L1 defaults to server-verified presentation; Sandbox only expands local QA UI',()=>{
  const policy=readFileSync(new URL('../supporterUiRelease.ts',import.meta.url),'utf8')
  const hook=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
  const account=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
@@ -286,7 +286,7 @@ test('F16 localhost Sandbox enables presentation but never synthesizes paid righ
  assert.ok(policy.includes('import.meta.env.DEV'))
  assert.ok(policy.includes("VITE_PAZO_F16_SANDBOX_QA_UI === 'true'"))
  assert.ok(policy.includes("['localhost','127.0.0.1']"))
- assert.ok(policy.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true'"))
+ assert.ok(policy.includes("VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED !== 'false'"))
  assert.ok(!policy.includes('localStorage')&&!policy.includes('mayGrantBenefits:true'))
  assert.ok(hook.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"))
  assert.ok(hook.includes('SUPPORTER_PAYMENT_VERIFIED_EVENT'))

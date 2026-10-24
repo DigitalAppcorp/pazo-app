@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react'
 import {supabase} from '../../../services/supabaseClient'
 import {GratitudeWallScene, type WallEntry, type WallTab} from './GratitudeWallScene'
 
-type Props = {lang:'es'|'en';onClose:()=>void}
+type Props = {lang:'es'|'en';onClose:()=>void;backToWelcome?:boolean}
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 function validWallRows(data:unknown):data is WallEntry[] {
@@ -29,7 +29,7 @@ function validWallRows(data:unknown):data is WallEntry[] {
  * order; "Longest supporting" sorts by VERIFIED milestone, not an invented
  * continuous tenure or a synthetic first-payment date.
  */
-export function GratitudeWallLive({lang,onClose}:Props) {
+export function GratitudeWallLive({lang,onClose,backToWelcome=false}:Props) {
   const [rows,setRows]=useState<WallEntry[]>([])
   const [loading,setLoading]=useState(true)
   const [error,setError]=useState(false)
@@ -54,5 +54,5 @@ export function GratitudeWallLive({lang,onClose}:Props) {
 
   return <GratitudeWallScene lang={lang} onClose={onClose}
     rows={rows} tab={tab} onTabChange={setTab}
-    loading={loading} error={error} onRetry={()=>setRevision(n=>n+1)}/>
+    loading={loading} error={error} onRetry={()=>setRevision(n=>n+1)} backToWelcome={backToWelcome}/>
 }
