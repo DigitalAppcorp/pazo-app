@@ -15,7 +15,16 @@ CREATE TABLE marketing_private.collection_gate (
  singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
  enabled boolean NOT NULL DEFAULT false,
  enabled_at timestamptz,
- CONSTRAINT gate_consistency CHECK ((NOT enabled AND enabled_at IS NULL) OR (enabled AND enabled_at IS NOT NULL))
+ -- Zero means no retention policy has been approved. Upper bound is a
+ -- defensive technical ceiling, not a Product Owner-approved duration.
+ retention_days smallint NOT NULL DEFAULT 0 CHECK(retention_days BETWEEN 0 AND 90),
+ policy_version text,
+ CONSTRAINT gate_consistency CHECK (
+   (NOT enabled AND enabled_at IS NULL)
+   OR (enabled AND enabled_at IS NOT NULL
+      AND retention_days > 0
+      AND policy_version='pazo-marketing-optin-v1')
+ )
 );
 INSERT INTO marketing_private.collection_gate(singleton,enabled) VALUES(true,false);
 ALTER TABLE marketing_private.collection_gate ENABLE ROW LEVEL SECURITY;
@@ -163,6 +172,15 @@ AS $$
          (a.signup_verified_at AT TIME ZONE 'America/Los_Angeles')::date AS cd
   FROM marketing_private.acquisition a
   WHERE marketing_private.is_eligible_owner(a.owner_id)
+   AND a.recorded_at >= statement_timestamp()
+     - make_interval(days => coalesce((
+       SELECT NULLIF(g.retention_days, 0)
+       FROM marketing_private.collection_gate g WHERE g.singleton
+     ), 0))
+   AND EXISTS (
+     SELECT 1 FROM marketing_private.collection_gate g
+     WHERE g.singleton AND g.retention_days > 0
+   )
  ), per_owner AS (
   SELECT e.*,
    EXISTS (
@@ -189,6 +207,61 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION marketing_private.cohort_snapshot()
  FROM PUBLIC, anon, authenticated, service_role;
+
+-- Privileged, manual lifecycle operations. There is NO scheduler or
+-- external endpoint wired in this PR. Do not imply automatic purging.
+-- A retention policy must be approved separately before configuring days.
+CREATE FUNCTION marketing_private.prune_expired() RETURNS integer
+LANGUAGE plpgsql SECURITY INVOKER SET search_path = ''
+AS $
+DECLARE
+ v_days smallint;
+ v_deleted integer;
+BEGIN
+ SELECT g.retention_days INTO v_days
+ FROM marketing_private.collection_gate g WHERE g.singleton;
+ IF v_days IS NULL OR v_days <= 0 THEN RETURN 0; END IF;
+ DELETE FROM marketing_private.acquisition a
+ WHERE a.recorded_at < statement_timestamp() - make_interval(days => v_days);
+ GET DIAGNOSTICS v_deleted = ROW_COUNT;
+ RETURN v_deleted;
+END
+$;
+REVOKE ALL ON FUNCTION marketing_private.prune_expired()
+ FROM PUBLIC,anon,authenticated,service_role;
+
+-- Withdraw removes marketing attribution only; no PayPal, post, pet or
+-- account deletion. Never guess owner from an untrusted user-supplied ID.
+-- Service invocation MUST be tied to verified Auth identity server-side
+-- before a future revocation API/UI is enabled.
+CREATE FUNCTION public.pazo_marketing_withdraw_v1(p_owner uuid)
+RETURNS boolean
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $
+BEGIN
+ IF p_owner IS NULL THEN RETURN FALSE; END IF;
+ DELETE FROM marketing_private.acquisition WHERE owner_id = p_owner;
+ RETURN TRUE;
+END
+$;
+REVOKE ALL ON FUNCTION public.pazo_marketing_withdraw_v1(uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_withdraw_v1(uuid)
+ TO service_role;
+
+-- Expiration is not a read-side substitute for physical deletion.
+-- The future operator job must invoke this function after retention is
+-- approved, and account for off-site logical backups and PITR restoration.
+CREATE FUNCTION public.pazo_marketing_prune_v1()
+RETURNS integer
+LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $
+ SELECT marketing_private.prune_expired();
+$;
+REVOKE ALL ON FUNCTION public.pazo_marketing_prune_v1()
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_prune_v1()
+ TO service_role;
 
 -- New objects inherit defaults in some hosts; explicitly revoke.
 REVOKE ALL ON ALL TABLES IN SCHEMA marketing_private FROM PUBLIC,anon,authenticated,service_role;
