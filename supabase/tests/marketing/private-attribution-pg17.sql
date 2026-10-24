@@ -164,6 +164,20 @@ BEGIN
  THEN RAISE EXCEPTION 'Landing aggregation or day partition incorrect'; END IF;
 END $landing_test_6$;
 
+-- This is a raw signal count, NOT unique visitors or a conversion rate.
+DO $daily_report_check$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM marketing_private.daily_campaign_summary()
+   WHERE creative='perfil_es' AND landing_signals=2
+     AND verified_signups=0) THEN
+  RAISE EXCEPTION 'Daily campaign summary lost landing signals';
+ END IF;
+ IF has_function_privilege('authenticated','marketing_private.daily_campaign_summary()','EXECUTE')
+  OR has_function_privilege('service_role','marketing_private.daily_campaign_summary()','EXECUTE') THEN
+  RAISE EXCEPTION 'Private campaign report was granted to public roles';
+ END IF;
+END $daily_report_check$;
+
 DO $landing_test_7$
 DECLARE accepted boolean;
 BEGIN
