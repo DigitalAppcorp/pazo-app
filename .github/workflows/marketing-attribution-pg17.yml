@@ -10,6 +10,8 @@ on:
       - 'src/App.tsx'
       - 'src/components/views/OnboardingView.tsx'
       - 'supabase/functions/pazo-marketing-attribution/**'
+      - 'supabase/functions/pazo-marketing-landing/**'
+      - 'supabase/config.toml'
       - 'package.json'
       - '.github/workflows/marketing-attribution-pg17.yml'
   pull_request:
@@ -22,6 +24,8 @@ on:
       - 'src/App.tsx'
       - 'src/components/views/OnboardingView.tsx'
       - 'supabase/functions/pazo-marketing-attribution/**'
+      - 'supabase/functions/pazo-marketing-landing/**'
+      - 'supabase/config.toml'
       - 'package.json'
       - '.github/workflows/marketing-attribution-pg17.yml'
   workflow_dispatch:
