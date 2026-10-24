@@ -1,11 +1,11 @@
 # PAZO F17 — Diseño de atribución y cohortes privado, inerte y sin instalación
 
-**Estado:** `LOCAL_DDL_DRAFT_ONLY / COLLECTION_OFF / NO_MIGRATION_APPLIED`  
+**Estado:** `CLI_NAMED_MIGRATION_IN_DRAFT_PR / COLLECTION_OFF / NO_MIGRATION_APPLIED`  
 **Autorización:** «ok go» para preparar backend, migración y pruebas. **NO** autoriza instalar DDL, habilitar tracking, modificar producción, recolectar datos ni gastar en Meta.  
 **Base:** PR #91, `feat/f17-marketing-firstparty-20261023`, campaña #89 tope $350.
 
 ## Entregado en este incremento
-- Fuente SQL **preparada**: `supabase/drafts/marketing/pazo_first_party_attribution_v1.sql`; se mantiene fuera de `supabase/migrations` deliberadamente para que despliegues automáticos nunca la recojan.
+- Fuente SQL **preparada**: `supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql`; se conserva en rama separada y PR DRAFT, sin merge ni deploy.
 - `marketing_private`: esquema NO incluido en `supabase/config.toml [api].schemas` (solo public/graphql_public). Tabla de compuerta `enabled=false`, una atribución por owner (`auth.users` CASCADE), seis creatividades allowlist y timestamps de consentimiento/confirmación. Índice por fecha.
 - **Tablas privadas cerradas** a `PUBLIC`, `anon`, `authenticated` y `service_role`, con `ENABLE + FORCE RLS`. Funciones internas cerradas; el único puente explícito `public.pazo_marketing_record_verified_v1` es `SECURITY DEFINER` con **EXECUTE exclusivamente a `service_role`**, y gate de escritura OFF. Esta excepción se limita al puente API desde un servidor que compruebe Auth; nadie en el navegador recibe la clave.
 - Excluir automáticamente usuarios en `supporter_private.gradual_qa_accounts`, `supporter_private.f16_sandbox_qa_owners`, `admin_private.admin_grants` y perfiles founder de todos los informes; no duplicar/cargar el padrón QA.
@@ -13,8 +13,11 @@
 - FK con `ON DELETE CASCADE` elimina la atribución cuando Auth elimina la cuenta. Definir retención para cuentas supervivientes y backups antes de activar.
 - Prueba sintética de seguridad y cohortes: `supabase/tests/marketing/private-attribution-pg17.sql` y workflow dedicado PostgreSQL17/Node (ninguna conexión hosted); pruebas también comprueban gate OFF y ausencia de API. No se procesan datos reales ni pagos.
 
-## Importante: límite de CLI local
-Esta sesión no tiene binario de Supabase CLI ni acceso a la red npm para instalarlo. Su regla exige **crear un archivo de migración mediante `supabase migration new pazo_marketing_firstparty_attribution` antes de copiar el DDL al nombre generado**. Por eso este SQL es un borrador versionado por Git, **no** una migración nombrada/incluida en la carpeta ejecutable. No se inventa un timestamp oficial ni se marca la migración como creada.
+## Migración versionada — solo GitHub, sin aplicación hospedada
+
+La sesión de agente carece de Supabase CLI en su contenedor, pero el job aislado de GitHub Actions ejecutó la CLI oficial **v2.121.0** y generó el nombre `20261024020632_pazo_marketing_firstparty_attribution.sql` (run `40052740127`). Copiamos el SQL ya probado al archivo versionado con ese nombre en el PR #91; el borrador duplicado fue retirado. Esta operación fue **GitHub-only** y no se ejecutó `supabase db push`, `apply_migration`, ni SQL sobre Supabase alojado.
+
+La migración puede contener DDL ejecutable, pero el **PR permanece DRAFT y sin fusionar**. Su contenido y política de retención requieren revisión/GO separados antes de instalación. Las pruebas PostgreSQL 17 verifican solo una instancia desechable.
 
 ## Problemas y decisiones antes de habilitar
 1. Aprobar política de captura/conservación (p.ej. 90 días) de campaña/creatividad vinculadas a UID, borrado de cuenta y backups. La redacción de Privacy Policy debe reflejar el procesamiento real.
@@ -27,7 +30,7 @@ Esta sesión no tiene binario de Supabase CLI ni acceso a la red npm para instal
 8. Aun tras aplicar el DDL con gate OFF, ningún sistema escribirá hasta instalar y autorizar expresamente el puente privado de ingesta. No enviar Pixel/CAPI/GA4/PostHog.
 
 ## Gates siguientes
-**Gate T — técnico:** herramienta CLI en entorno con acceso autorizado; crear migration new, copiar SQL draft con verificación de checksum, ejecutar PG17 synthetic y CI global, validar orden de migraciones. No aplicar a Supabase alojado sin GO del PO.
+**Gate T — técnico:** CLI de nombre generado y archivo agregado a PR, pendiente revisión final de checksum/orden y CI exacto de HEAD antes de cualquier GO de instalación; no aplicar a Supabase alojado sin GO del PO.
 **Gate P — privacidad:** retención, consent/versioning, exclusiones, eliminación y Privacy Policy aprobados.
 **Gate L — lanzamiento:** aprobar acceso controlado, instalar versión inerte, verificar hosted readbacks RLS/ACL/0 rows/off, después autorización independiente para cualquier writer o anuncio.
 
@@ -41,3 +44,9 @@ $350 total solo plan presupuestario; presupuesto Meta **sin gastar**. No incorpo
 - `marketing_private.record_verified_acquisition` **registra `consent_recorded_at` con hora del servidor**, no recibe fecha de consentimiento del navegador. El RPC público está restringido a `service_role`; PostgreSQL17 prueba permisos, apagado, QA, idempotencia, cohortes y borrado de cuenta.
 - **Limitación real**: `consent.granted=true` es una afirmación explícita del cliente autenticado, no un comprobante independiente de clic/UI. Se necesita decisión y revisión de UX/Privacy Policy, consentimiento revocable y validación legal antes de activar; también se requiere cierre de retención y tratamiento de backups.
 - **No declarar medición Live, activación, D7 real ni instalación**. Los resultados de suites en GitHub dependen del HEAD del PR; retener CI final verificable.
+
+## Verificación de esta etapa
+- Auth server `GET /auth/v1/user`, validación de JWT no basada en decodificación local; puente service-only validado por PG17.
+- Marketing `intakeCore.mjs` e `intakeAdapter.mjs` con suites de rechazo (no consentimiento, cuenta antigua, origen ajeno, tamaño de body, fraude de UID), además de UTM/embudo local.
+- Gate HTTP `MARKETING_INTAKE_RELEASED=false`; gate cliente `PAZO_MARKETING_COLLECTION_ENABLED=false`; gate DB `collection_gate.enabled=false`.
+- El paso final será crear prueba E2E consentida y revisar política/retención antes de cualquier ingestión alojada. Nada de Pixel o gasto de campaña.
