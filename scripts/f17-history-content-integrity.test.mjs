@@ -16,11 +16,11 @@ test('historical migration SQL catalog has 96 exact, 24 lexical and 2 metadata-o
  assert.equal(evidence.hosted_entries.filter(x=>x.classification==='lexical_equivalent_not_byte_exact').length,24)
  assert.deepEqual(evidence.hosted_entries.filter(x=>x.classification==='metadata_only_hosted_statement').map(x=>x.version).sort(),['20261022220000','20261022222000'])
 })
-test('all 130 original SQL blobs remain unchanged in forensic branch; not authority to db push',()=>{
+test('all 130 historical SQL blobs remain unchanged, with 8 archived non-executable; not authority to db push',()=>{
  const all=[...evidence.hosted_entries,...evidence.local_unrecorded]
  assert.equal(all.length,130)
  for(const file of all){
-  const p=new URL(file.path,root)
+  const p=new URL(evidence.local_unrecorded.some(x=>x.path===file.path) ? file.path.replace('supabase/migrations/','supabase/history/pre_migration_untracked/') : file.path,root)
   assert.ok(existsSync(p),'missing SQL source: '+file.path)
   const src=readFileSync(p)
   assert.equal(gitBlobSha(src),file.git_blob_sha,'unreviewed historical SQL change: '+file.path)

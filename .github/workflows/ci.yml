@@ -40,6 +40,7 @@ jobs:
           node --test scripts/f17-historical-migration-alignment.test.mjs
           node --test scripts/f17-historical-migration-phase2.test.mjs
           node --test scripts/f17-history-content-integrity.test.mjs
+          node --test scripts/f17-prehistory-archive-gate.test.mjs
 
       - name: Hardening + architecture + privacy + ops governance checks
         run: npm run test:governance

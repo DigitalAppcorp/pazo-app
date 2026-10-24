@@ -24,10 +24,14 @@ test('original five local-only names no longer conflict with hosted versions',()
     assert.match(pair.originalBlob,/^[a-f0-9]{40}$/)
   }
 })
-test('eight unmatched old local migrations stay untouched; db push remains blocked',()=>{
+test('eight prehistory SQL sources preserved in non-executable archive only (production push still BLOCKED)',()=>{
   assert.deepEqual(info.unresolved_local_versions,unpaired)
   const all=readdirSync(folder).filter(n=>/^20[0-9]{12}_.+[.]sql$/.test(n))
+  const archived=new URL('../supabase/history/pre_migration_untracked/',import.meta.url)
   assert.equal(new Set(all.map(n=>n.slice(0,14))).size,all.length)
-  assert.equal(all.length,130)
-  for(const version of unpaired)assert.ok(all.some(n=>n.startsWith(version+'_')))
+  assert.equal(all.length,122)
+  for(const version of unpaired){
+    assert.ok(!all.some(n=>n.startsWith(version+'_')),'old SQL remains deployable: '+version)
+    assert.ok(readdirSync(archived).some(n=>n.startsWith(version+'_')),'missing preserved historical SQL: '+version)
+  }
 })

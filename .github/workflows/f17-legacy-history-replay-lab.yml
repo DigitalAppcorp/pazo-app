@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'supabase/migrations/**'
+      - 'supabase/history/pre_migration_untracked/**'
       - 'scripts/f17-legacy-history-replay-lab.mjs'
       - '.github/workflows/f17-legacy-history-replay-lab.yml'
   workflow_dispatch:

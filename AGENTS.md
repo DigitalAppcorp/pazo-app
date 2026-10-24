@@ -1,3 +1,8 @@
+## F17 — ARCHIVO DE PREHISTORIA PROPUESTO, NO REPRODUCCIÓN (23-oct-2026 PDT)
+**Rama derivada de PR #98, SIN merge:** las ocho fuentes SQL anteriores al historial remoto (`20261005*`) se mueven con **Git blob SHA idéntico** a `supabase/history/pre_migration_untracked/` (fuera de migraciones ejecutables). En la rama, solo **122/122 versiones** aparecen bajo `supabase/migrations/`; las ocho siguen preservadas y controladas por pruebas. **Esta acción es archivado de fuente, NO prueba de que todas las instrucciones se aplicaron, NO reconstrucción desde cero ni autorización para `db push`**. Aún no existe baseline pre-Oct5. Quedan 24 diferencias editoriales con secuencia SQL equivalente y 2 descriptores intencionales. **NO_GO_DB_PUSH / NO_MIGRATION_REPAIR / NO_MAIN_MERGE / NO_HOSTED_WRITE**. Ver `docs/PAZO_F17_PREHISTORY_ARCHIVE_PROPOSAL_20261023.md`.
+
+---
+
 ## ALERTA DE MIGRACIONES — F17 integridad histórica fase 3 (23-oct-2026 PDT)
 
 Auditoría SELECT y Git blob SHA1 sobre **122/122** versiones alojadas: **96 SQL idénticos**, **24 SQL equivalentes léxicamente pero con diferencias editoriales/transaccionales**, **2 entradas intencionalmente descriptivas insertadas así por sus propios scripts Git** (ambos marcadores y postflight funcional alojado verificados). **8 SQL locales pre-5-oct sin versión remota**. Commit raíz 3-oct no contiene esquema base. El laboratorio de F14 posterior detecta el bloqueo F4/F5 esperado: **diagnóstico PASS, replay completo NO certificado**. PR #98 DRAFT apilado sobre #97/#95. **NO `db push`, NO `migration repair`, NO merge a `main`, NO SQL alojado.** Ver [auditoría fase 3](docs/PAZO_F17_MIGRATION_HISTORY_CONTENT_AUDIT_20261023.md).

@@ -1,4 +1,4 @@
-// PAZO F17 - isolated, throwaway PostgreSQL 17 forensic replay of eight historical local-only migrations.
+// PAZO F17 - isolated, throwaway PostgreSQL 17 forensic replay of eight archived local-only migrations.
 // This intentionally DOES NOT contact Supabase and DOES NOT certify 130-migration full restoration.
 import assert from 'node:assert/strict'
 import {execFileSync} from 'node:child_process'
@@ -33,7 +33,7 @@ const psql=(args)=>execFileSync('psql',[
 const meta=psql(['-Atq','-c',"select current_database()||'|'||session_user||'|'||(current_setting('server_version_num')::int between 170000 and 179999)"])
 assert.equal(meta.trim(),'f14_synthetic|f14_admin|true','FAIL CLOSED: server identity mismatch')
 for(const name of names){
-  const file=new URL('../supabase/migrations/'+name+'.sql',import.meta.url)
+  const file=new URL('../supabase/history/pre_migration_untracked/'+name+'.sql',import.meta.url)
   const source=readFileSync(file,'utf8')
   assert.match(source,/^BEGIN;\s/,'historical source transaction required: '+name)
   assert.match(source,/\bCOMMIT;\s*$/,'historical source commit required: '+name)
