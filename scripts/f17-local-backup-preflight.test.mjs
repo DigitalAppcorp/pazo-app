@@ -99,3 +99,31 @@ test('future timestamp and absent Storage each block',async t=>{
  await fs.rm(path.join(root,'storage'),{recursive:true})
  await assert.rejects(()=>verifyPazoRecoveryPackage(root))
 })
+
+test('non-empty synthetic Storage object matches administrative inventory and hash',async t=>{
+ const {root,manifest}=await fixture(t)
+ const bucket='pet-documents',objectPath='nested/synthetic.txt',id='synthetic-object-id'
+ const binary=Buffer.from('fixture-private-bytes')
+ const filename=sha(Buffer.from(JSON.stringify([bucket,objectPath])))+'.bin'
+ await fs.mkdir(path.join(root,'storage','objects'))
+ await fs.writeFile(path.join(root,'storage','objects',filename),binary)
+ const obj={bucket,path:objectPath,id,size:binary.length,
+  file:'objects/'+filename,sha256:sha(binary)}
+ const stored={version:1,result:'VERIFIED_EXPORT',
+  buckets:[{id:bucket,public:false}],objects:[obj],
+  totals:{objects:1,bytes:binary.length}}
+ await fs.writeFile(path.join(root,'storage','storage-manifest.json'),JSON.stringify(stored))
+ const inv=Buffer.from(JSON.stringify({project:'mrybvqdebbgcayuvgkkr',
+  buckets:[{id:bucket,public:false}],
+  objects:[{bucket,path:objectPath,id,size:String(binary.length)}]}))
+ await fs.writeFile(path.join(root,'storage-inventory.json'),inv)
+ const entry=manifest.files.find(x=>x.file==='storage-inventory.json')
+ entry.bytes=inv.length;entry.sha256=sha(inv)
+ await fs.writeFile(path.join(root,'database-manifest.json'),JSON.stringify(manifest))
+ const pass=await verifyPazoRecoveryPackage(root)
+ assert.equal(pass.storageObjectsChecked,1)
+ assert.equal(pass.storageBytesChecked,binary.length)
+ assert.equal(pass.restoreVerified,false)
+ await fs.writeFile(path.join(root,'storage','objects',filename),'tampered')
+ await assert.rejects(()=>verifyPazoRecoveryPackage(root))
+})
