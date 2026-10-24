@@ -39,8 +39,8 @@ CREATE TABLE marketing_private.acquisition (
  CONSTRAINT attribution_window CHECK (
    first_touch_at <= signup_verified_at + interval '5 minutes'
    AND signup_verified_at <= first_touch_at + interval '72 hours'
-   AND consent_recorded_at BETWEEN first_touch_at - interval '5 minutes'
-     AND signup_verified_at + interval '5 minutes'
+   AND consent_recorded_at BETWEEN signup_verified_at - interval '5 minutes'
+     AND first_touch_at + interval '72 hours'
  )
 );
 CREATE INDEX acquisition_signup_cohort_idx ON marketing_private.acquisition (signup_verified_at, campaign, creative);
@@ -69,12 +69,15 @@ $$;
 REVOKE ALL ON FUNCTION marketing_private.is_eligible_owner(uuid)
  FROM PUBLIC, anon, authenticated, service_role;
 
--- Privileged INTERNAL staging function ONLY. No client/service grants or API
+-- Privileged INTERNAL staging function ONLY. Consent timestamp is SERVER CLOCK,
+-- NEVER provided by the browser. Only a separately reviewed, explicitly opted-in
+-- authenticated Edge caller may eventually invoke a protected bridge.
+-- No client/service grants or API
 -- exposure; this is not an operative endpoint. Consent proof verification and
 -- trusted sender binding still require implementation before any future GO.
 CREATE FUNCTION marketing_private.record_verified_acquisition(
  p_owner uuid, p_creative text, p_first_touch_at timestamptz,
- p_consent_recorded_at timestamptz, p_consent_version text
+ p_consent_version text
 ) RETURNS boolean
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = ''
 AS $$
@@ -87,7 +90,7 @@ BEGIN
   WHERE g.singleton AND g.enabled
  ) THEN RETURN FALSE; END IF;
  IF p_owner IS NULL OR p_creative IS NULL OR p_first_touch_at IS NULL
-    OR p_consent_recorded_at IS NULL OR p_consent_version IS NULL
+    OR p_consent_version IS NULL
     OR p_creative NOT IN('perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en')
     OR p_consent_version <> 'pazo-marketing-optin-v1'
     OR NOT marketing_private.is_eligible_owner(p_owner) THEN
@@ -102,21 +105,21 @@ BEGIN
     v_verified > statement_timestamp() + interval '5 minutes' OR
     p_first_touch_at > statement_timestamp() + interval '5 minutes' OR
     p_first_touch_at < statement_timestamp() - interval '72 hours' OR
-    p_consent_recorded_at < p_first_touch_at - interval '5 minutes' OR
-    p_consent_recorded_at > v_verified + interval '5 minutes'
+    statement_timestamp() < v_verified OR
+    statement_timestamp() > p_first_touch_at + interval '72 hours'
  THEN RETURN FALSE; END IF;
  INSERT INTO marketing_private.acquisition(
    owner_id,campaign,creative,first_touch_at,signup_verified_at,
    consent_recorded_at,consent_version
  ) VALUES (
    p_owner,'pazo_beta_local_202610',p_creative,p_first_touch_at,v_verified,
-   p_consent_recorded_at,p_consent_version
+   statement_timestamp(),p_consent_version
  )
  ON CONFLICT (owner_id) DO NOTHING;
  RETURN FOUND;
 END
 $$;
-REVOKE ALL ON FUNCTION marketing_private.record_verified_acquisition(uuid,text,timestamptz,timestamptz,text)
+REVOKE ALL ON FUNCTION marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)
  FROM PUBLIC, anon, authenticated, service_role;
 
 -- Private cohort reader. First pet is derived from public.pets; the D7 column
