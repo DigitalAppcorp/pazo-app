@@ -72,6 +72,36 @@ BEGIN
 END $$;
 RESET ROLE;
 
+-- Aggregated landing RPC is service-only; no browser grants or raw visitor IDs.
+DO $
+BEGIN
+ IF has_table_privilege('anon','marketing_private.landing_daily','SELECT')
+  OR has_table_privilege('authenticated','marketing_private.landing_daily','INSERT')
+  OR has_table_privilege('service_role','marketing_private.landing_daily','SELECT')
+  OR has_function_privilege('anon','public.pazo_marketing_record_landing_v1(text)','EXECUTE')
+  OR has_function_privilege('authenticated','public.pazo_marketing_record_landing_v1(text)','EXECUTE')
+  OR NOT has_function_privilege('service_role','public.pazo_marketing_record_landing_v1(text)','EXECUTE')
+  OR has_function_privilege('anon','public.pazo_marketing_prune_landing_v1()','EXECUTE')
+  OR NOT has_function_privilege('service_role','public.pazo_marketing_prune_landing_v1()','EXECUTE')
+ THEN RAISE EXCEPTION 'Landing aggregate ACL leak'; END IF;
+ IF EXISTS(SELECT 1 FROM information_schema.columns
+   WHERE table_schema='marketing_private' AND table_name='landing_daily'
+    AND column_name IN ('ip','email','owner_id','user_id','session_id','visitor_id','user_agent','fbclid'))
+ THEN RAISE EXCEPTION 'Landing aggregate persisted identifiers'; END IF;
+END $;
+SET LOCAL ROLE service_role;
+DO $
+BEGIN
+ IF public.pazo_marketing_record_landing_v1('perfil_es') IS DISTINCT FROM false
+ THEN RAISE EXCEPTION 'Landing signal accepted with gate OFF'; END IF;
+END $;
+RESET ROLE;
+DO $
+BEGIN
+ IF EXISTS(SELECT 1 FROM marketing_private.landing_daily)
+ THEN RAISE EXCEPTION 'OFF gate wrote landing signals'; END IF;
+END $;
+
 -- Gate OFF rejects even fully valid events.
 DO $$
 DECLARE admitted boolean;
@@ -84,6 +114,16 @@ BEGIN
   RAISE EXCEPTION 'OFF gate persisted attribution';
  END IF;
 END $$;
+
+-- Rollback-only landing counter verifies same-day aggregation and allowlist.
+-- No attempt to count unique humans; no IP fingerprint.
+SET LOCAL ROLE service_role;
+DO $
+BEGIN
+ IF public.pazo_marketing_record_landing_v1('perfil_es') IS DISTINCT FROM false
+ THEN RAISE EXCEPTION 'OFF gate bypass on landing'; END IF;
+END $;
+RESET ROLE;
 
 -- Enable ONLY in synthetic transaction to check guarded paths.
 -- Approval cannot be simulated without an explicit retention policy/version.
@@ -104,7 +144,27 @@ UPDATE marketing_private.collection_gate
  SET enabled=true,enabled_at=now(),retention_days=30,
      policy_version='pazo-marketing-attribution-notice-v1' WHERE singleton=true;
 
-DO $$
+SET LOCAL ROLE service_role;
+DO $
+BEGIN
+ IF NOT public.pazo_marketing_record_landing_v1('perfil_es')
+    OR NOT public.pazo_marketing_record_landing_v1('perfil_es')
+    OR NOT public.pazo_marketing_record_landing_v1('qr_en')
+ THEN RAISE EXCEPTION 'Landing aggregation rejected eligible signal'; END IF;
+ IF public.pazo_marketing_record_landing_v1('arbitrary_creative') IS DISTINCT FROM false
+ THEN RAISE EXCEPTION 'Landing aggregation accepted unknown creative'; END IF;
+END $;
+RESET ROLE;
+DO $
+BEGIN
+ IF (SELECT signals FROM marketing_private.landing_daily
+   WHERE creative='perfil_es' AND landing_day =
+     (now() AT TIME ZONE 'America/Los_Angeles')::date) <> 2
+   OR (SELECT sum(signals) FROM marketing_private.landing_daily) <> 3
+ THEN RAISE EXCEPTION 'Landing aggregation or day partition incorrect'; END IF;
+END $;
+
+DO $
 DECLARE accepted boolean;
 BEGIN
  SELECT marketing_private.record_verified_acquisition(
@@ -236,6 +296,24 @@ BEGIN
   RAISE EXCEPTION 'Attribution persisted after withdrawal/prune';
  END IF;
 END $$;
+
+INSERT INTO marketing_private.landing_daily(landing_day,campaign,creative,signals)
+VALUES (
+ (now() AT TIME ZONE 'America/Los_Angeles')::date-32,
+ 'pazo_beta_local_202610','perfil_en',100
+);
+SET LOCAL ROLE service_role;
+DO $
+BEGIN
+ IF public.pazo_marketing_prune_landing_v1() <> 1 THEN
+  RAISE EXCEPTION 'Expired aggregate day not purged'; END IF;
+END $;
+RESET ROLE;
+DO $
+BEGIN
+ IF (SELECT sum(signals) FROM marketing_private.landing_daily)<>3
+ THEN RAISE EXCEPTION 'Pruning harmed current aggregate'; END IF;
+END $;
 
 ROLLBACK;
 SELECT 'PAZO_MARKETING_PG17_SYNTHETIC_ROLLBACK_PASS' AS result;
