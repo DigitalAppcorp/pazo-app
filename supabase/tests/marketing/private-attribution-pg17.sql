@@ -25,9 +25,9 @@ BEGIN
     OR has_table_privilege('service_role','marketing_private.acquisition','SELECT')
     OR has_table_privilege('service_role','marketing_private.collection_gate','UPDATE')
     OR has_function_privilege('authenticated',
-      'marketing_private.record_verified_acquisition(uuid,text,timestamptz,timestamptz,text)','EXECUTE')
+      'marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)','EXECUTE')
     OR has_function_privilege('service_role',
-      'marketing_private.record_verified_acquisition(uuid,text,timestamptz,timestamptz,text)','EXECUTE')
+      'marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)','EXECUTE')
     OR has_function_privilege('anon','marketing_private.cohort_snapshot()','EXECUTE') THEN
    RAISE EXCEPTION 'Marketing private grants leak into an API role';
  END IF;
@@ -53,7 +53,7 @@ BEGIN
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
   'perfil_es', now()-interval '25 hours',
-  now()-interval '24 hours 30 minutes','pazo-marketing-optin-v1') INTO admitted;
+  'pazo-marketing-optin-v1') INTO admitted;
  IF admitted THEN RAISE EXCEPTION 'OFF gate admitted campaign event'; END IF;
  IF (SELECT count(*) FROM marketing_private.acquisition) <> 0 THEN
   RAISE EXCEPTION 'OFF gate persisted attribution';
@@ -70,31 +70,31 @@ BEGIN
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
   'perfil_es', now()-interval '25 hours',
-  now()-interval '24 hours 30 minutes','pazo-marketing-optin-v1') INTO accepted;
+  'pazo-marketing-optin-v1') INTO accepted;
  IF accepted IS DISTINCT FROM true THEN RAISE EXCEPTION 'Verified eligible signup failed';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
   'perfil_es', now()-interval '25 hours',
-  now()-interval '24 hours 30 minutes','pazo-marketing-optin-v1') INTO accepted;
+  'pazo-marketing-optin-v1') INTO accepted;
  IF accepted IS DISTINCT FROM false THEN RAISE EXCEPTION 'Duplicate acquisition credited';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000102',
   'qr_es', now()-interval '25 hours',
-  now()-interval '24 hours 30 minutes','pazo-marketing-optin-v1') INTO accepted;
+  'pazo-marketing-optin-v1') INTO accepted;
  IF accepted THEN RAISE EXCEPTION 'Known QA user admitted';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000103',
   'comunidad_es', now()-interval '25 hours',
-  now()-interval '24 hours 30 minutes','pazo-marketing-optin-v1') INTO accepted;
+  'pazo-marketing-optin-v1') INTO accepted;
  IF accepted THEN RAISE EXCEPTION 'Admin admitted';END IF;
 
  SELECT marketing_private.record_verified_acquisition(
   '00000000-0000-0000-0000-000000000101',
   'malicious_creative', now()-interval '25 hours',
-  now()-interval '24 hours 30 minutes','pazo-marketing-optin-v1') INTO accepted;
+  'pazo-marketing-optin-v1') INTO accepted;
  IF accepted THEN RAISE EXCEPTION 'Invalid campaign creative admitted';END IF;
 
  IF (SELECT count(*) FROM marketing_private.acquisition) <> 1 THEN
