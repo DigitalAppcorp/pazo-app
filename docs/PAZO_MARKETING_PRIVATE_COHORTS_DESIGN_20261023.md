@@ -1,3 +1,5 @@
+> VIGENTE: decisión del Product Owner, atribución interna AUTOMÁTICA sin casilla en registro. Cualquier propuesta de opt-in UI o cadena `pazo-marketing-optin-v1` más abajo es histórica y queda reemplazada por `docs/PAZO_MARKETING_AUTOMATIC_INTERNAL_ATTRIBUTION_20261023.md`. Privacidad/retención y activación siguen pendientes.
+
 # PAZO F17 — Diseño de atribución y cohortes privado, inerte y sin instalación
 
 **Estado:** `CLI_NAMED_MIGRATION_IN_DRAFT_PR / COLLECTION_OFF / NO_MIGRATION_APPLIED`  
