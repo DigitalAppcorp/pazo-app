@@ -4,7 +4,7 @@ DO $$ BEGIN IF current_database()<>'f14_synthetic' OR current_user<>'postgres' T
 DO $$ BEGIN
  IF to_regclass('supporter_private.gradual_campaign') IS NOT NULL OR EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='notifications' AND column_name='supporter_state') THEN RAISE EXCEPTION 'Rollback left changes';END IF;
 END $$;
-\i supabase/migrations/20261023211315_pazo_f16_gradual_live_event_rollout.sql
+\i supabase/migrations/20261023224519_pazo_f16_gradual_live_event_rollout.sql
 CREATE SCHEMA gradual_test;
 CREATE FUNCTION gradual_test.assert(p_id text,p_true boolean) RETURNS void LANGUAGE plpgsql AS $$ BEGIN IF p_true IS DISTINCT FROM true THEN RAISE EXCEPTION 'FAIL %',p_id;END IF;RAISE NOTICE 'PASS %',p_id;END $$;
 SELECT gradual_test.assert('INSTALL_INERT',(SELECT lifecycle='inactive' AND NOT hosted_gate_verified FROM supporter_private.gradual_campaign));
