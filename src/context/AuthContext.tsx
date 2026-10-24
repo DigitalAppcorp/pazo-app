@@ -14,7 +14,7 @@ import {
   captureEvent,
   setObservabilityUser,
 } from '../services/observability'
-import { stageMarketingSignupRequested, stageMarketingSignupVerified } from '../features/marketing/marketingRuntime'
+import { stageMarketingSignupRequested, stageMarketingSignupVerified, submitAutomaticMarketingAttribution, clearLocalMarketingAttribution } from '../features/marketing/marketingRuntime'
 
 interface AuthContextValue {
   user: User | null
@@ -81,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (event === 'SIGNED_OUT') {
+        clearLocalMarketingAttribution()
         setRecoverySessionVerified(false)
         captureEvent('auth_session_signed_out')
       }
@@ -88,6 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         captureEvent('auth_session_signed_in')
         if (session?.user) {
           stageMarketingSignupVerified(session.user.created_at, session.user.email_confirmed_at)
+          void submitAutomaticMarketingAttribution()
         }
       }
     })
@@ -165,6 +167,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     stageMarketingSignupRequested()
     if (outcome === 'authenticated') {
       stageMarketingSignupVerified(data.user?.created_at, data.user?.email_confirmed_at)
+      void submitAutomaticMarketingAttribution()
     }
     captureEvent('auth_signup_succeeded')
     return outcome
