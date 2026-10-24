@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import * as fs from 'node:fs'
 import {readFileSync, existsSync, readdirSync} from 'node:fs'
+import {fileURLToPath} from 'node:url'
+import {join} from 'node:path'
 import {createHash} from 'node:crypto'
 
 /** Hosted rows queried read-only from supabase_migrations.schema_migrations.
@@ -149,6 +152,7 @@ const verifiedPairs=[
   }
 ]
 const base=new URL('../supabase/migrations/',import.meta.url)
+const repoRoot=fileURLToPath(new URL('../',import.meta.url))
 function gitBlobHash(buffer){
   const prefix=Buffer.from('blob '+buffer.length+'\0')
   return createHash('sha1').update(Buffer.concat([prefix,buffer])).digest('hex')
@@ -172,3 +176,22 @@ test('migration versions remain unique after safe historical reconciliation',()=
 
 // NOTE: Additional mismatches and unmatched historic migrations remain.
 // Successful execution is NOT authorization for a production db push.
+
+test('no executable code or CI file refers to a removed migration path',()=>{
+  const {readdirSync,readFileSync}=fs
+  const roots=['scripts','src','supabase/tests','.github/workflows']
+  const staleNames=verifiedPairs.map(p=>p.old+'_'+p.name+'.sql')
+  const stale=[]
+  function scan(path){
+    for(const entry of readdirSync(path,{withFileTypes:true})){
+      const full=join(path,entry.name)
+      if(entry.isDirectory()){scan(full);continue}
+      if(!entry.isFile()||!/\.(mjs|js|ts|tsx|sql|yml|yaml|json)$/.test(entry.name))continue
+      if(entry.name==='f17-historical-migration-alignment.test.mjs')continue
+      const source=readFileSync(full,'utf8')
+      for(const name of staleNames)if(source.includes(name))stale.push(full+' -> '+name)
+    }
+  }
+  for(const root of roots)scan(join(repoRoot,root))
+  assert.deepEqual(stale,[],'Executable code or CI still refers to a historical migration filename')
+})
