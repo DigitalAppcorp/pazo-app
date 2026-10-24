@@ -30,7 +30,7 @@ test('retention cleanup is service-only and no automatic cron is installed by mi
  assert.ok(schedule.includes('pg_cron'))
  assert.ok(schedule.includes('pazo-marketing-retention-v1'))
  assert.ok(schedule.includes('pazo_marketing_prune_all_v1()'))
- assert.ok(schedule.includes("policy_version IS DISTINCT FROM 'pazo-marketing-attribution-notice-v1'"))
+ assert.ok(schedule.includes("v_version IS DISTINCT FROM 'pazo-marketing-attribution-notice-v1'"))
  assert.ok(tests.includes('Old burst-budget record persisted with collection OFF'))
 })
 
