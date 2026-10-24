@@ -7,7 +7,7 @@
 ## Entregado en este incremento
 - Fuente SQL **preparada**: `supabase/drafts/marketing/pazo_first_party_attribution_v1.sql`; se mantiene fuera de `supabase/migrations` deliberadamente para que despliegues automáticos nunca la recojan.
 - `marketing_private`: esquema NO incluido en `supabase/config.toml [api].schemas` (solo public/graphql_public). Tabla de compuerta `enabled=false`, una atribución por owner (`auth.users` CASCADE), seis creatividades allowlist y timestamps de consentimiento/confirmación. Índice por fecha.
-- **Sin SELECT, INSERT, UPDATE, DELETE ni EXECUTE** para `PUBLIC`, `anon`, `authenticated` ni `service_role`. Tablas `ENABLE + FORCE RLS` sin policies. Writer `SECURITY INVOKER`, de uso únicamente interno privilegiado, que en OFF no escribe, sin API activa.
+- **Tablas privadas cerradas** a `PUBLIC`, `anon`, `authenticated` y `service_role`, con `ENABLE + FORCE RLS`. Funciones internas cerradas; el único puente explícito `public.pazo_marketing_record_verified_v1` es `SECURITY DEFINER` con **EXECUTE exclusivamente a `service_role`**, y gate de escritura OFF. Esta excepción se limita al puente API desde un servidor que compruebe Auth; nadie en el navegador recibe la clave.
 - Excluir automáticamente usuarios en `supporter_private.gradual_qa_accounts`, `supporter_private.f16_sandbox_qa_owners`, `admin_private.admin_grants` y perfiles founder de todos los informes; no duplicar/cargar el padrón QA.
 - Derivar primera mascota 7 días después del registro desde `public.pets`; D7 solo como **proxy de apertura de pantalla** desde `admin_private.app_activity_daily`, NO retención significativa. Excluir cohortes D7 inmaduras.
 - FK con `ON DELETE CASCADE` elimina la atribución cuando Auth elimina la cuenta. Definir retención para cuentas supervivientes y backups antes de activar.
@@ -33,3 +33,11 @@ Esta sesión no tiene binario de Supabase CLI ni acceso a la red npm para instal
 
 ## Seguridad comercial
 $350 total solo plan presupuestario; presupuesto Meta **sin gastar**. No incorporar clientes QA, no campañas, sin modificación del sitio oficial ni de PayPal.
+
+## Incremento: contrato de ingesta privada, sin despliegue
+- `supabase/functions/pazo-marketing-attribution/index.ts`: `MARKETING_INTAKE_RELEASED=false`, sin rutas operativas ni acceso a proveedores; la aplicación conserva `PAZO_MARKETING_COLLECTION_ENABLED=false`.
+- `intakeCore.mjs`: mismo-origin estricto, bearer obligatorio, JSON de tamaño limitado por lectura en streaming (768 bytes), campos UTM/consent con lista cerrada, fecha válida/TTL, Auth confirmado, cuenta creada después del contacto y UUID tomado **solo** del resultado Auth de servidor. No lee ni registra PII. Solicitudes sin opt-in se rechazan.
+- `intakeAdapter.mjs`: acceso server-side a Supabase Auth `GET /auth/v1/user` con token de usuario; posterior RPC service-only. La ruta y clave de proyecto se validan contra el proyecto canónico. No se suministran secretos al cliente. Esta integración no funciona ni toca Supabase mientras el handler esté OFF.
+- `marketing_private.record_verified_acquisition` **registra `consent_recorded_at` con hora del servidor**, no recibe fecha de consentimiento del navegador. El RPC público está restringido a `service_role`; PostgreSQL17 prueba permisos, apagado, QA, idempotencia, cohortes y borrado de cuenta.
+- **Limitación real**: `consent.granted=true` es una afirmación explícita del cliente autenticado, no un comprobante independiente de clic/UI. Se necesita decisión y revisión de UX/Privacy Policy, consentimiento revocable y validación legal antes de activar; también se requiere cierre de retención y tratamiento de backups.
+- **No declarar medición Live, activación, D7 real ni instalación**. Los resultados de suites en GitHub dependen del HEAD del PR; retener CI final verificable.
