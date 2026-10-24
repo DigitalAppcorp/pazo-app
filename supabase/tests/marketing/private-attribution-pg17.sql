@@ -53,6 +53,12 @@ BEGIN
  IF has_function_privilege('anon','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
     OR has_function_privilege('authenticated','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
     OR NOT has_function_privilege('service_role','public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)','EXECUTE')
+    OR has_function_privilege('anon','public.pazo_marketing_withdraw_v1(uuid)','EXECUTE')
+    OR has_function_privilege('authenticated','public.pazo_marketing_withdraw_v1(uuid)','EXECUTE')
+    OR NOT has_function_privilege('service_role','public.pazo_marketing_withdraw_v1(uuid)','EXECUTE')
+    OR has_function_privilege('anon','public.pazo_marketing_prune_v1()','EXECUTE')
+    OR has_function_privilege('authenticated','public.pazo_marketing_prune_v1()','EXECUTE')
+    OR NOT has_function_privilege('service_role','public.pazo_marketing_prune_v1()','EXECUTE')
  THEN RAISE EXCEPTION 'Public marketing bridge ACL mismatch'; END IF;
 END $$;
 SET LOCAL ROLE service_role;
@@ -82,8 +88,23 @@ BEGIN
 END $$;
 
 -- Enable ONLY in synthetic transaction to check guarded paths.
+-- Approval cannot be simulated without an explicit retention policy/version.
+DO $
+BEGIN
+ BEGIN
+   UPDATE marketing_private.collection_gate
+    SET enabled=true,enabled_at=now() WHERE singleton=true;
+   RAISE EXCEPTION 'Gate opened without approved retention';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+ IF EXISTS(SELECT 1 FROM marketing_private.collection_gate WHERE enabled) THEN
+  RAISE EXCEPTION 'Gate leaked enabled state';
+ END IF;
+END $;
+-- ONLY the disposable fixture simulates a configured policy (not an approval).
 UPDATE marketing_private.collection_gate
- SET enabled=true,enabled_at=now() WHERE singleton=true;
+ SET enabled=true,enabled_at=now(),retention_days=30,
+     policy_version='pazo-marketing-optin-v1' WHERE singleton=true;
 
 DO $$
 DECLARE accepted boolean;
@@ -182,6 +203,46 @@ BEGIN
   RAISE EXCEPTION 'Deletion did not cascade to campaign identity';
  END IF;
 END $$;
+
+-- A privacy withdrawal is idempotent, only removes attribution and
+-- is impossible from authenticated/anonymous roles. Use service role only.
+INSERT INTO auth.users(id,created_at,email_confirmed_at)
+VALUES
+ ('00000000-0000-0000-0000-000000000105',now()-interval '2 days',now()-interval '2 days'),
+ ('00000000-0000-0000-0000-000000000106',now()-interval '2 days',now()-interval '2 days');
+INSERT INTO public.profiles(id,is_founder) VALUES
+ ('00000000-0000-0000-0000-000000000105',false),
+ ('00000000-0000-0000-0000-000000000106',false);
+INSERT INTO marketing_private.acquisition(
+ owner_id,campaign,creative,first_touch_at,signup_verified_at,
+ consent_recorded_at,consent_version,recorded_at
+) VALUES
+ ('00000000-0000-0000-0000-000000000105','pazo_beta_local_202610','perfil_es',
+ now()-interval '2 days 1 hour',now()-interval '2 days',now()-interval '2 days' + interval '1 minute',
+ 'pazo-marketing-optin-v1',now()),
+ ('00000000-0000-0000-0000-000000000106','pazo_beta_local_202610','qr_es',
+ now()-interval '2 days 1 hour',now()-interval '2 days',now()-interval '2 days' + interval '1 minute',
+ 'pazo-marketing-optin-v1',now()-interval '31 days');
+SET LOCAL ROLE service_role;
+DO $
+BEGIN
+ IF public.pazo_marketing_withdraw_v1('00000000-0000-0000-0000-000000000105') IS DISTINCT FROM true
+ THEN RAISE EXCEPTION 'Withdrawal failed';END IF;
+ IF public.pazo_marketing_withdraw_v1('00000000-0000-0000-0000-000000000105') IS DISTINCT FROM true
+ THEN RAISE EXCEPTION 'Idempotent withdrawal failed';END IF;
+ IF public.pazo_marketing_prune_v1() <> 1 THEN
+  RAISE EXCEPTION 'Expired record not deleted by manual prune';END IF;
+END $;
+RESET ROLE;
+DO $
+BEGIN
+ IF EXISTS(SELECT 1 FROM marketing_private.acquisition
+  WHERE owner_id IN (
+    '00000000-0000-0000-0000-000000000105',
+    '00000000-0000-0000-0000-000000000106')) THEN
+  RAISE EXCEPTION 'Attribution persisted after withdrawal/prune';
+ END IF;
+END $;
 
 ROLLBACK;
 SELECT 'PAZO_MARKETING_PG17_SYNTHETIC_ROLLBACK_PASS' AS result;
