@@ -42,3 +42,17 @@ La prueba GitHub Actions a partir de ahora debe verificar la **detección del co
 5. Reproducción en PostgreSQL aislado con baseline probado, comprobación de catálogo/RLS/ACL y aprobación Product Owner antes de cualquier cambio hospedado.
 
 **Estado final de esta auditoría: `NO_GO_DB_PUSH / NO_MIGRATION_REPAIR / NO_PRODUCTION_WRITE / NO_MAIN_MERGE`.**
+
+## Verificación posterior — dos marcadores alojados deliberados
+
+Al leer los SQL originales que permanecen en Git se comprobó que **ambas fuentes incluyen su propio `INSERT INTO supabase_migrations.schema_migrations`** con el texto descriptivo que está almacenado exactamente en `statements`. Por ello **las dos divergencias son deliberadas según el SQL fuente**, y no se deben sustituir por el texto breve de `statements`.
+
+Postflight hospedado de solo lectura (sin consultar ni modificar transacciones, usuarios, secretos ni pagos):
+- Los dos marcadores `version/name/statements` coinciden exactamente con sus fuentes: **PASS/PASS**.
+- Columna `profiles.onboarding_completed` y lógica de `create_pet_profile(...)` para actualizarla: **PASS/PASS**.
+- `paypal_gateway_settings` Live conserva el origen canónico `https://pazo-app.vercel.app`: **PASS**.
+
+Estas pruebas acreditan que los marcadores alojados son intencionales y verifican invariantes actuales, **no** un replay de todo el SQL con su estado histórico exacto ni un derecho a reparar el historial. El caso debe etiquetarse `DESCRIPTOR_INTENTIONAL_SOURCE_MATCHED`, nunca `MISSING_SQL_REPLACE_NOW`.
+
+**GitHub Actions**: el ensayo de conflicto cronológico controlado sobre F14 posterior se considera un PASS **del diagnóstico**, no un PASS de ocho migraciones desde cero. Los scripts originales bajo `supabase/migrations` no fueron modificados.
+

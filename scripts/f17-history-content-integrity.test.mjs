@@ -28,3 +28,18 @@ test('all 130 original SQL blobs remain unchanged in forensic branch; not author
  assert.ok(evidence.hosted_entries.every(x=>x.classification!=='byte_exact'||x.git_blob_sha===x.hosted_record_blob_sha))
  assert.ok(evidence.hosted_entries.filter(x=>x.classification!=='byte_exact').every(x=>x.git_blob_sha!==x.hosted_record_blob_sha))
 })
+
+test('two historical descriptors were deliberately inserted by executable Git SQL',()=>{
+ const expected=[
+  ['20261022220000','F17 PO GO: guarded canonical origin cutover; see versioned SQL'],
+  ['20261022222000','Authenticated pet creation now marks onboarding; historical verified owners reconciled.']
+ ]
+ for(const [version,marker] of expected){
+  const entry=evidence.hosted_entries.find(x=>x.version===version)
+  assert.equal(entry.classification,'metadata_only_hosted_statement')
+  const source=readFileSync(new URL(entry.path,root),'utf8')
+  assert.ok(source.includes('INSERT INTO supabase_migrations.schema_migrations'),'missing marker INSERT: '+version)
+  assert.ok(source.includes(marker),'hosted descriptor was not deliberately recorded: '+version)
+  assert.ok(source.length>2000,'executable SQL unexpectedly replaced by descriptor: '+version)
+ }
+})

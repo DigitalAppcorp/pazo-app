@@ -1,3 +1,9 @@
+## ALERTA DE MIGRACIONES — F17 integridad histórica fase 3 (23-oct-2026 PDT)
+
+Auditoría SELECT y Git blob SHA1 sobre **122/122** versiones alojadas: **96 SQL idénticos**, **24 SQL equivalentes léxicamente pero con diferencias editoriales/transaccionales**, **2 entradas intencionalmente descriptivas insertadas así por sus propios scripts Git** (ambos marcadores y postflight funcional alojado verificados). **8 SQL locales pre-5-oct sin versión remota**. Commit raíz 3-oct no contiene esquema base. El laboratorio de F14 posterior detecta el bloqueo F4/F5 esperado: **diagnóstico PASS, replay completo NO certificado**. PR #98 DRAFT apilado sobre #97/#95. **NO `db push`, NO `migration repair`, NO merge a `main`, NO SQL alojado.** Ver [auditoría fase 3](PAZO_F17_MIGRATION_HISTORY_CONTENT_AUDIT_20261023.md).
+
+---
+
 ## ALERTA DE MIGRACIONES — F17 Replay histórico NO GO (23-oct-2026 PDT)
 
 El PR #97 (DRAFT) recuperó todas las 122 versiones remotas. Aún hay **8 migraciones locales anteriores a la primera versión hospedada**. Auditoría read-only: 83/83 objetos presentes, 9 SECURITY DEFINER con search_path controlado y sin EXECUTE de anon/authenticated. **El replay de las ocho contra catálogo posterior F14 falló**, run #40060715328: F4 `security_stabilization` intenta alterar `follows.follower_id` pero el fixture posterior ya tiene trigger F5 `trg_validate_follow_relationship`; las tres primeras migraciones corrieron sobre PG17 desechable y las demás quedaron sin ejecutar. El origen pre-Oct5 no está en las migraciones Git: **no se puede certificar restauración 130/130** ni `db push`. Requiere baseline previo verificable, replay completo aislado y revisión/GO nuevo. No tocar producción, `main` ni registros de `schema_migrations`. Detalle en [fase 2](PAZO_HISTORICAL_MIGRATION_PHASE2_AUDIT_20261023.md).

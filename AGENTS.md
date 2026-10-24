@@ -1,3 +1,9 @@
+## ALERTA DE MIGRACIONES — F17 integridad histórica fase 3 (23-oct-2026 PDT)
+
+Auditoría SELECT y Git blob SHA1 sobre **122/122** versiones alojadas: **96 SQL idénticos**, **24 SQL equivalentes léxicamente pero con diferencias editoriales/transaccionales**, **2 entradas intencionalmente descriptivas insertadas así por sus propios scripts Git** (ambos marcadores y postflight funcional alojado verificados). **8 SQL locales pre-5-oct sin versión remota**. Commit raíz 3-oct no contiene esquema base. El laboratorio de F14 posterior detecta el bloqueo F4/F5 esperado: **diagnóstico PASS, replay completo NO certificado**. PR #98 DRAFT apilado sobre #97/#95. **NO `db push`, NO `migration repair`, NO merge a `main`, NO SQL alojado.** Ver [auditoría fase 3](docs/PAZO_F17_MIGRATION_HISTORY_CONTENT_AUDIT_20261023.md).
+
+---
+
 ## ACTUALIZACIÓN F17 — Segunda reconciliación de migraciones (23-oct-2026 PDT)
 
 **PR #97 DRAFT (apila y depende de PR #95; NO fusionar):** recuperación Git, exclusivamente documental, de 20 migraciones remotas y corrección a texto SQL alojado idéntico de 5 variantes adicionales. Comparación de nombres de versiones **130 archivos Git / 122 registros Supabase: 122 parejas por versión; 0 remotas sin archivo; 8 locales sin versión remota**. Pruebas del commit `b2da806c9fdcaf5cf960fc0d4dd9e4cdf8b6f97f`: **9/9 workflows SUCCESS**, incluida la nueva prueba SHA-256. Auditado el catálogo de objetos que aparecen en las 8 migraciones históricas locales: **83/83 objetos únicos existen** (6 tablas, 15 índices, 22 funciones, 9 triggers, 31 policies); las 6 tablas RLS=true. No demuestra el replay histórico ni la equivalencia de definiciones. **Se mantiene bloqueo ABSOLUTO de `supabase db push`, `supabase migration repair` y SQL alojado; producción, PayPal y Vercel intactos**. Documento: `docs/PAZO_HISTORICAL_MIGRATION_PHASE2_AUDIT_20261023.md`.
