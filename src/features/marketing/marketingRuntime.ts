@@ -1,4 +1,5 @@
-import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake } from './attribution'
+import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake, parsePazoCampaign } from './attribution'
+import { shouldSendLandingSignal } from './landingSignal'
 import { supabase } from '../../services/supabaseClient'
 
 /**
@@ -7,6 +8,8 @@ import { supabase } from '../../services/supabaseClient'
  * privacy notice review, backend contract and Product Owner GO are required.
  */
 export const PAZO_MARKETING_COLLECTION_ENABLED = false
+/** Independent release control; landing signals never start implicitly. */
+export const PAZO_MARKETING_LANDING_ENABLED = false
 
 const recorder = () => {
   if (!PAZO_MARKETING_COLLECTION_ENABLED || typeof window === 'undefined') return null
@@ -20,6 +23,28 @@ const recorder = () => {
 /** Record only a tightly validated paid-social UTM; never store a full URL. */
 export function stageMarketingLanding(search?: string): void {
   recorder()?.captureLanding(search ?? window.location.search)
+  // A hit is a browser signal, not a unique person. No UUID, IP, fbclid or URL.
+  if (!PAZO_MARKETING_LANDING_ENABLED || typeof window === 'undefined') return
+  const attr = parsePazoCampaign(search ?? window.location.search, Date.now())
+  if (!attr) return
+  try {
+    const key = 'pazo_marketing_landing_daily_v1'
+    const raw = window.sessionStorage.getItem(key)
+    const last: unknown = raw ? JSON.parse(raw) : null
+    if (!shouldSendLandingSignal(last, attr.creative, Date.now())) return
+    // Mark first, so reloads/React re-renders do not cause duplicate requests.
+    window.sessionStorage.setItem(key, JSON.stringify({creative:attr.creative, sentAt:Date.now()}))
+    void supabase.functions.invoke('pazo-marketing-landing', {
+      body:{
+        utm_source:attr.source,
+        utm_medium:attr.medium,
+        utm_campaign:attr.campaign,
+        utm_content:attr.creative,
+      },
+    }).catch(()=>{})
+  } catch {
+    // Storage disabled or browser isolation: do not collect or break navigation.
+  }
 }
 
 /** A successful signUp request is NOT a verified registration. */
