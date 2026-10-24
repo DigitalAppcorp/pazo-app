@@ -6,6 +6,8 @@ on:
       - 'supabase/drafts/marketing/**'
       - 'supabase/tests/marketing/**'
       - 'src/features/marketing/**'
+      - 'supabase/functions/pazo-marketing-attribution/**'
+      - 'package.json'
       - '.github/workflows/marketing-attribution-pg17.yml'
   pull_request:
     branches: [f17/beta-final-mobile-support-admin-20261022]
@@ -13,6 +15,8 @@ on:
       - 'supabase/drafts/marketing/**'
       - 'supabase/tests/marketing/**'
       - 'src/features/marketing/**'
+      - 'supabase/functions/pazo-marketing-attribution/**'
+      - 'package.json'
       - '.github/workflows/marketing-attribution-pg17.yml'
   workflow_dispatch:
 permissions:
