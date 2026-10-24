@@ -5,7 +5,7 @@ const CAMPAIGN = 'pazo_beta_local_202610'
 const CREATIVE = new Set([
   'perfil_es', 'perfil_en', 'qr_es', 'qr_en', 'comunidad_es', 'comunidad_en',
 ])
-const KEYS = new Set(['utm_source','utm_medium','utm_campaign','utm_content','first_touch_at','consent'])
+const KEYS = new Set(['utm_source','utm_medium','utm_campaign','utm_content','first_touch_at'])
 const MAX_BYTES = 768
 const MAX_AGE_MS = 72 * 60 * 60 * 1000
 const CLOCK_SKEW = 5 * 60 * 1000
@@ -21,7 +21,7 @@ const validUuid = (value) => typeof value === 'string'
 
 /**
  * Future-only intake adapter. 'released' must stay false until Privacy + PO
- * authorize consent, retention, a protected RPC bridge and hosted deployment.
+ * authorize privacy notice, retention, a protected RPC bridge and hosted deployment.
  * Authentication MUST query Supabase Auth via trusted server authentication.
  * submit MUST bind payload to ctx.ownerId on server, never to a userId field
  * from the client. This contract is NOT yet a working production service.
@@ -80,10 +80,6 @@ export function createMarketingIntakeHandler({
     if (body.utm_source !== 'meta' || body.utm_medium !== 'paid_social' ||
       body.utm_campaign !== CAMPAIGN || !CREATIVE.has(body.utm_content))
       return response(FAILURE, 400, cors)
-    if (!body.consent || Array.isArray(body.consent) || typeof body.consent !== 'object' ||
-      Object.keys(body.consent).length !== 2 || body.consent.granted !== true ||
-      body.consent.version !== 'pazo-marketing-optin-v1')
-      return response(FAILURE, 403, cors)
     if (!validDate(body.first_touch_at)) return response(FAILURE, 400, cors)
     const timestamp = Date.parse(body.first_touch_at)
     const now = clock()
@@ -103,13 +99,12 @@ export function createMarketingIntakeHandler({
       return response(FAILURE, 403, cors)
 
     // All data below is allowlisted. Owner is from trusted verified Auth only.
-    // The consent version is an ASSERTION from an explicit user action; the
-    // server must still verify the approved UI/policy/version before enabling.
+    // Automatic first-party UTM attribution, not a browser consent assertion.
+    // Privacy notice must be published before the independent release gate.
     try {
       const inserted = await submit({
         ownerId:user.id, creative:body.utm_content,
         firstTouchAt:new Date(timestamp).toISOString(),
-        consentVersion:'pazo-marketing-optin-v1',
       })
       return response({status:inserted===true?'accepted':'not_accepted'}, inserted===true?202:409, cors)
     } catch { return response(FAILURE, 503, cors) }
