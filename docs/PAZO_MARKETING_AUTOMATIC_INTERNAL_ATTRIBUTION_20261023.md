@@ -27,3 +27,15 @@ La medición de **llegadas** no puede identificarse como visitantes únicos si e
 - Purga manual `public.pazo_marketing_prune_landing_v1()`, servicio exclusivamente, para filas diarias fuera de retención aprobada. No se programó cron. Todos los accesos anónimos y autenticados a tablas/RPC privadas siguen denegados.
 
 **Bloqueadores de activación adicionales:** protección antibots/rate limiting en borde confiable, presupuesto de volumen y pruebas de carga, transparencia/retención para las señales de llegada, verificación de que la infraestructura/proveedor procesa metadatos técnicos de red conforme a su política, además de autorización separada para activar el endpoint público. Ningún anuncio o proveedor de medición externo se habilitó.
+
+## Panel de administración — preparado, lectura OFF
+
+La navegación existente de `AdminDashboard` ahora incluye **Campañas / Campaigns** en móvil y escritorio, manteniendo la disposición y estilo de PAZO. `AdminMarketingPanel` es una vista independiente del resumen general, soporte, mantenimiento y PayPal, para que su error eventual no bloquee las otras secciones.
+
+- Contrato tipado: `adminMarketingSummary(days)` usa `supabase.rpc('pazo_admin_marketing_summary', {p_days: 7|30|90})`. La función se define en la migración pendiente del PR, **no está instalada**.
+- Consulta SQL `SECURITY DEFINER` restringida por `auth.uid() IS NOT NULL` y `public.pazo_is_admin()` de PAZO; acceso `EXECUTE` concedido a `authenticated` solamente, denegado a `anon`, `PUBLIC` y `service_role`. Solo retorna JSON de totales y filas diarias, sin `owner_id` ni correos; ventana acotada 7/30/90 días.
+- Estado `PAZO_MARKETING_ADMIN_REPORT_ENABLED=false` independiente de los interruptores de ingreso. Mientras siga OFF el panel muestra **en preparación**, sin llamar RPC, sin inventar cero ventas, cero visitantes o resultados de Meta.
+- Cuando se autorice una activación posterior, mostrará señales de llegada, cuentas confirmadas, primera mascota creada en siete días y proxy D7, más filas por creatividad y fecha. Sin ROAS, presupuesto gastado ni tasa de conversión basada en los conteos de señales.
+- Accesos denegados, estado no configurado, rechazo de períodos arbitrarios, datos agregados y ausencia de identificadores se comprueban en PG17 sintético; contratos de pantalla y cliente se prueban en Node. No se alteró la protección general de la cuenta administradora.
+
+**Próximos gates:** verificación de carga responsive y compilación CI; decidir retención, implementar borrado programado y controles antiabuso reales, actualizar Política de Privacidad, instalar con autorización separada y recopilar solo tras un GO adicional. No publicar PR #91 ni activar publicidad por aprobar estas pruebas.
