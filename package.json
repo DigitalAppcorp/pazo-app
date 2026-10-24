@@ -28,7 +28,7 @@
     "test:gradual": "node --experimental-strip-types --test supabase/tests/gradual/*.test.mjs src/features/admin/testing/adminPaypalLiveHostedCheckout.test.mjs src/features/admin/testing/adminPaypalLivePrivateWorkerHttp.test.mjs src/features/admin/testing/adminPaypalLiveRecovery.test.mjs src/features/admin/testing/adminPaypalLiveSqlServiceAdapters.test.mjs",
     "test:gradual:pg17": "node scripts/f16-gradual-live-lab.mjs",
     "test:gradual:browser": "node scripts/f16-gradual-live-browser.mjs",
-    "test:marketing": "node --experimental-strip-types --test src/features/marketing/attribution.test.mjs supabase/functions/pazo-marketing-attribution/intakeCore.test.mjs supabase/functions/pazo-marketing-attribution/intakeAdapter.test.mjs supabase/functions/pazo-marketing-landing/landingCore.test.mjs"
+    "test:marketing": "node --experimental-strip-types --test src/features/marketing/attribution.test.mjs supabase/functions/pazo-marketing-attribution/intakeCore.test.mjs supabase/functions/pazo-marketing-attribution/intakeAdapter.test.mjs supabase/functions/pazo-marketing-landing/landingCore.test.mjs src/features/marketing/landingSignal.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
