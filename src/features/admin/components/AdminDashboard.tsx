@@ -1,6 +1,7 @@
 import { useCallback,useEffect,useRef,useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AdminPayPalSettings } from './AdminPayPalSettings'
+import { AdminMarketingPanel } from './AdminMarketingPanel'
 import {AdminSupportInbox} from '../../support/components/AdminSupportInbox'
 import {AdminGiftBenefits} from '../../support/components/AdminGiftBenefits'
 import {AdminMaintenanceControls} from '../../maintenance/AdminMaintenanceControls'
@@ -11,13 +12,14 @@ import {
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
 } from '../adminDashboardService'
 
-type Section='summary'|'users'|'pets'|'finance'|'activity'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'|'support'|'gifts'|'maintenance'
+type Section='summary'|'users'|'pets'|'finance'|'activity'|'marketing'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'|'support'|'gifts'|'maintenance'
 const sections:{key:Section;es:string;en:string;icon:AdminGlyphName}[]=[
  {key:'summary',es:'Resumen',en:'Overview',icon:'chart'},
  {key:'users',es:'Usuarios',en:'Users',icon:'users'},
  {key:'pets',es:'Mascotas',en:'Pets',icon:'paw'},
  {key:'finance',es:'Membresías',en:'Memberships',icon:'crown'},
  {key:'activity',es:'Actividad',en:'Activity',icon:'activity'},
+ {key:'marketing',es:'Campañas',en:'Campaigns',icon:'chart'},
  {key:'content',es:'Contenido',en:'Content',icon:'layers'},
  {key:'ideas',es:'Fake Doors',en:'Fake Doors',icon:'compass'},
  {key:'places',es:'Lugares',en:'Places',icon:'pin'},
@@ -239,11 +241,12 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      {section==='support'&&<AdminSupportInbox lang={lang}/>}
      {section==='gifts'&&<AdminGiftBenefits lang={lang}/>}
      {section==='maintenance'&&<AdminMaintenanceControls lang={lang}/>}
-     {section!=='paypal'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
-     {section!=='paypal'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
+     {section==='marketing'&&<AdminMarketingPanel lang={lang} period={period}/>}
+     {section!=='paypal'&&section!=='marketing'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
+     {section!=='paypal'&&section!=='marketing'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
        {l('No fue posible actualizar todos los datos.','Could not refresh all metrics.')} {error}
       </div>}
-    {overview&&section!=='paypal'&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
+    {overview&&section!=='paypal'&&section!=='marketing'&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
 
 
      {section==='summary'&&<>
