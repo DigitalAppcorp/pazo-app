@@ -79,7 +79,7 @@ REVOKE ALL ON marketing_private.landing_daily FROM PUBLIC,anon,authenticated,ser
 CREATE FUNCTION public.pazo_marketing_record_landing_v1(p_creative text)
 RETURNS boolean
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
-AS $
+AS $mkt_block_1$
 BEGIN
  IF p_creative IS NULL OR p_creative NOT IN(
    'perfil_es','perfil_en','qr_es','qr_en','comunidad_es','comunidad_en'
@@ -96,7 +96,7 @@ BEGIN
  DO UPDATE SET signals=marketing_private.landing_daily.signals+1;
  RETURN TRUE;
 END
-$;
+$mkt_block_1$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_record_landing_v1(text)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_landing_v1(text)
@@ -107,7 +107,7 @@ GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_landing_v1(text)
 CREATE FUNCTION public.pazo_marketing_prune_landing_v1()
 RETURNS integer
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
-AS $
+AS $mkt_block_2$
 DECLARE v_days smallint; v_count integer;
 BEGIN
  SELECT retention_days INTO v_days
@@ -120,7 +120,7 @@ BEGIN
  GET DIAGNOSTICS v_count=ROW_COUNT;
  RETURN v_count;
 END
-$;
+$mkt_block_2$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_prune_landing_v1()
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_prune_landing_v1()
@@ -281,7 +281,7 @@ RETURNS TABLE(
  d7_screen_activity_proxy bigint
 )
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = ''
-AS $
+AS $mkt_block_3$
  WITH arrivals AS (
   SELECT l.landing_day AS d,l.campaign,l.creative,l.signals
   FROM marketing_private.landing_daily l
@@ -307,7 +307,7 @@ AS $
         coalesce(co.d7_screen_activity_proxy,0)::bigint
  FROM arrivals a FULL OUTER JOIN cohorts co
   ON a.d=co.cohort_day AND a.campaign=co.campaign AND a.creative=co.creative;
-$;
+$mkt_block_3$;
 REVOKE ALL ON FUNCTION marketing_private.daily_campaign_summary()
  FROM PUBLIC,anon,authenticated,service_role;
 
