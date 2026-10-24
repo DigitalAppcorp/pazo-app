@@ -5,6 +5,7 @@ import path from 'node:path'
 import {createHash} from 'node:crypto'
 import {fileURLToPath,pathToFileURL} from 'node:url'
 import {verifyStorageExport} from './storage-backup-core.mjs'
+import {verifyRecoverySupplement} from './verify-recovery-supplement.mjs'
 const REQUIRED=['database.dump','roles.sql','storage-inventory.json','archive-toc.private.txt','extension-owners.json']
 const PROJECT='mrybvqdebbgcayuvgkkr'
 const fail=()=>{throw Error('BACKUP_INTEGRITY_BLOCKED')}
@@ -39,10 +40,13 @@ async function checkedRoot(dir){
   const parent=path.dirname(pos);if(parent===pos)break;pos=parent
  }
  if(!(await fs.lstat(root)).isDirectory())fail()
- const repo=path.resolve(fileURLToPath(new URL('../',import.meta.url)))
- const rel=path.relative(repo,root)
+ // Windows app virtualization and casing can map a real directory to another spelling.
+ // Reject links above first, then validate files against the canonical root.
+ const canonical=await fs.realpath(root)
+ const repo=await fs.realpath(path.resolve(fileURLToPath(new URL('../',import.meta.url))))
+ const rel=path.relative(repo,canonical)
  if(rel===''||(!rel.startsWith('..'+path.sep)&&rel!=='..'&&!path.isAbsolute(rel)))fail()
- return root
+ return canonical
 }
 export async function verifyPazoRecoveryPackage(directory){
  const root=await checkedRoot(directory)
@@ -78,7 +82,11 @@ export async function verifyPazoRecoveryPackage(directory){
  const shape=x=>({bucket:x.bucket,path:x.path,id:x.id,size:size(x.size)})
  if(JSON.stringify(canon(inv.objects.map(shape)))!==JSON.stringify(canon(storageManifest.objects.map(shape))))fail()
  if(verified.objects!==inv.objects.length)fail()
- return {status:'PAZO_LOCAL_BACKUP_INTEGRITY_PASS_ONLY',
+ let recoverySupplement
+ if(await fs.lstat(path.join(root,'recovery-final')).then(()=>true,error=>{if(error.code==='ENOENT')return false;throw error})) {
+  recoverySupplement=await verifyRecoverySupplement(path.join(root,'recovery-final'))
+ }
+ return {status:'PAZO_LOCAL_BACKUP_INTEGRITY_PASS_ONLY',recoverySupplement,
   databaseFilesChecked:5,storageObjectsChecked:verified.objects,storageBytesChecked:verified.bytes,
   backupRecordedAtUtc:new Date(recorded).toISOString(),
   restoreVerified:false,offsiteVerified:false,currentHostedStateVerified:false,

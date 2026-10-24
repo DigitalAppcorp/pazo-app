@@ -1,3 +1,13 @@
+> **24-oct-2026 — BACKUP/RESTORE PRIVADO ACTUAL PASS REAL:** cinco piezas DB,
+> roles sin passwords, nueve objetos Storage, complemento de todas las filas
+> (147 tablas / 13 secuencias), age roundtrip y restore PG17 aislado con comparación
+> completa sin diferencias. Paquete final: 10,219,547 bytes,
+> SHA-256: 49585f612c5a600d1085c1ffcdc539d0c714193f816a12093832a56f58486f29.
+> Contenedores propios eliminados. PR100 DRAFT, sin hosted writes/PayPal/merge/deploy.
+> Off-site diferido, servicios HTTP/Vault operativo no certificados.
+> [Ejecución](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md) y
+> [complemento necesario](PAZO_F17_RECOVERY_SUPPLEMENT_20261024.md).
+> Los avisos inferiores de bloqueo cloud/no export actual son históricos.
 # F17 — Preflight local para respaldo actual (no significa restore completo)
 
 Actualización 24-oct: el PO ya autorizó export y restore privados. Ejecución

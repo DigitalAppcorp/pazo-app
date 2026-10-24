@@ -1,3 +1,13 @@
+> **24-oct-2026 — BACKUP/RESTORE PRIVADO ACTUAL PASS REAL:** cinco piezas DB,
+> roles sin passwords, nueve objetos Storage, complemento de todas las filas
+> (147 tablas / 13 secuencias), age roundtrip y restore PG17 aislado con comparación
+> completa sin diferencias. Paquete final: 10,219,547 bytes,
+> SHA-256: 49585f612c5a600d1085c1ffcdc539d0c714193f816a12093832a56f58486f29.
+> Contenedores propios eliminados. PR100 DRAFT, sin hosted writes/PayPal/merge/deploy.
+> Off-site diferido, servicios HTTP/Vault operativo no certificados.
+> [Ejecución](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md) y
+> [complemento necesario](PAZO_F17_RECOVERY_SUPPLEMENT_20261024.md).
+> Los avisos inferiores de bloqueo cloud/no export actual son históricos.
 > **F17 ejecución 24-oct-2026 — BLOCKED_PRIVATE_OPERATOR_ENVIRONMENT:** PO ya autoriza export READ ONLY, cifrado y restore aislado; esta sesión cloud no tiene terminal en el Windows privado ni DPAPI/custodia age. Backup actual y restore real NO EJECUTADOS. No exportar datos a cloud ni pedir secretos al chat. Única intervención: abrir esta tarea con terminal local en el worktree Windows. Supabase CLI2.120.0 y herramientas PG17.11 probadas aquí; no prueba su estado en Windows. Corregido BOM del preflight; 22/22 tests sintéticos PASS. [Evidencia y continuación](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md).
 
 > **F17 posterior al merge #99:** existe un verificador local de integridad del respaldo actual (solo hashes/contenido, no restore ni hospedado). El backup con restore PASS del 11-oct NO es un snapshot actualizado al 23-oct. [Detalle](PAZO_F17_CURRENT_BACKUP_PREFLIGHT_20261023.md).

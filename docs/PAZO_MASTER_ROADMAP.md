@@ -1,8 +1,22 @@
-## F17 respaldo/restore — EN CURSO / bloqueo de entorno privado, 24-oct-2026
+## F17 backup privado y restore — PASS LOCAL REAL, 24-oct-2026
 
-PO autoriza terminar export READ ONLY, cifrado y restore aislado, sin off-site, producción, pagos, merge ni deploy. Auditoría PR100 `ef4ae301`; corrección BOM y **22/22 pruebas sintéticas PASS** en `f17/backup-restore-validation-20261024`. El ejecutor es Linux cloud, no el Windows privado. **Backup nuevo y restauración actual NO EJECUTADOS.** Siguiente gate: abrir esta tarea con terminal local en el worktree Windows; conservar GO y credenciales locales existentes, sin transferir secretos/backups al chat o cloud. No cerrar por CI ni por restore histórico del 11-oct. [Evidencia](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md).
+Respaldo nuevo privado, cinco piezas DB/roles, Storage: 9 objetos, 9,276,771 bytes,
+complemento coherente147 tablas / 13 secuencias, SHA-256, age roundtrip/extracción y
+restore NUEVO Supabase PG17 sin red/puertos: PASS. Comparación completa sin
+diferencias:401 funciones / 133 policies / 735 constraints / 70 triggers / 7 extensiones,
+roles/GRANTED BY/owners/ACL/RLS/columnas/índices/settings incluidos. P42 filas
+excluidas con estructura preservada; fuente 0 / restore 0. Paquete final: 10,219,547 bytes,
+SHA-256: 49585f612c5a600d1085c1ffcdc539d0c714193f816a12093832a56f58486f29.
+ACL operador/SYSTEM; contenedores propios eliminados y tmpfs liberado.
+
+PR100 DRAFT, sin merge/main/deploy/hosted writes/PayPal. Off-site diferido;
+servicios HTTP Auth/Storage y descifrado operativo Vault no certificados. No cierre
+global F17/T11 ni replay histórico. Ver [evidencia real](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md)
+y [complemento](PAZO_F17_RECOVERY_SUPPLEMENT_20261024.md).
+Las entradas inferiores son historial superado para este subgate.
 
 ---
+
 
 ## PAZO F17 — Restauración desde respaldo vigente: preflight local sin producción (PR DRAFT)
 

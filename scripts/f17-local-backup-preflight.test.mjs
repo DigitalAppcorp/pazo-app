@@ -76,7 +76,12 @@ test('missing required DB piece blocks',async t=>{
 test('symlinked DB piece blocks',async t=>{
  const {root}=await fixture(t)
  await fs.rename(path.join(root,'roles.sql'),path.join(root,'original.sql'))
- await fs.symlink(path.join(root,'original.sql'),path.join(root,'roles.sql'))
+ try { await fs.symlink(path.join(root,'original.sql'),path.join(root,'roles.sql')) }
+ catch(error) {
+  if(process.platform!=='win32'||error.code!=='EPERM')throw error
+  t.skip('Windows account cannot create file symlinks; directory junction rejection is tested separately')
+  return
+ }
  await assert.rejects(()=>verifyPazoRecoveryPackage(root))
 })
 test('storage inventory must match Storage export, even after rehash',async t=>{
@@ -135,4 +140,20 @@ test('non-empty synthetic Storage object matches administrative inventory and ha
  assert.equal(pass.restoreVerified,false)
  await fs.writeFile(path.join(root,'storage','objects',filename),'tampered')
  await assert.rejects(()=>verifyPazoRecoveryPackage(root))
+})
+
+test('Windows canonical casing accepts the same real directory', {skip:process.platform!=='win32'},async t=>{
+ const {root}=await fixture(t)
+ const alias=root.replace(/^[A-Z]:/,drive=>drive.toLowerCase())
+ assert.notEqual(alias,await fs.realpath(alias))
+ const result=await verifyPazoRecoveryPackage(alias)
+ assert.equal(result.databaseFilesChecked,5)
+})
+
+test('linked backup root is rejected before canonicalization',async t=>{
+ const {root}=await fixture(t)
+ const alias=root+'-linked'
+ await fs.symlink(root,alias,process.platform==='win32'?'junction':'dir')
+ t.after(()=>fs.rm(alias,{recursive:true,force:true}))
+ await assert.rejects(()=>verifyPazoRecoveryPackage(alias))
 })
