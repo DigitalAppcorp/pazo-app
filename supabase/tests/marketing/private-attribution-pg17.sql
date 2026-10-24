@@ -46,6 +46,47 @@ INSERT INTO supporter_private.gradual_qa_accounts(owner_id,reason)
 INSERT INTO admin_private.admin_grants(user_id)
  VALUES('00000000-0000-0000-0000-000000000103');
 
+-- Admin aggregate RPC must not be public, service-readable or owner-spoofed.
+DO $marketing_admin_acl$
+BEGIN
+ IF has_function_privilege('anon',
+      'public.pazo_admin_marketing_summary(integer)','EXECUTE')
+   OR has_function_privilege('service_role',
+      'public.pazo_admin_marketing_summary(integer)','EXECUTE')
+   OR NOT has_function_privilege('authenticated',
+      'public.pazo_admin_marketing_summary(integer)','EXECUTE')
+ THEN RAISE EXCEPTION 'Marketing reporting RPC authorization grant mismatch'; END IF;
+END $marketing_admin_acl$;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000101',true);
+DO $marketing_admin_denied$
+BEGIN
+ BEGIN
+  PERFORM public.pazo_admin_marketing_summary(30);
+  RAISE EXCEPTION 'Ordinary account accessed marketing report';
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
+ END;
+END $marketing_admin_denied$;
+SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000103',true);
+DO $marketing_admin_disabled$
+DECLARE v jsonb;
+BEGIN
+ v:=public.pazo_admin_marketing_summary(30);
+ IF v->>'status'<>'not_configured' OR (v->'totals'->>'landing_signals')::bigint<>0
+    OR jsonb_array_length(v->'daily')<>0
+ THEN RAISE EXCEPTION 'Marketing admin initial disabled state wrong';END IF;
+ IF v ? 'owner_id' OR v ? 'email' OR v ? 'user_id'
+ THEN RAISE EXCEPTION 'Marketing admin response contains identity'; END IF;
+ BEGIN
+  PERFORM public.pazo_admin_marketing_summary(365);
+  RAISE EXCEPTION 'Unbounded admin report permitted';
+ EXCEPTION WHEN invalid_parameter_value THEN NULL;
+ END;
+END $marketing_admin_disabled$;
+RESET ROLE;
+-- PG transaction-local Auth claims are temporary test data, never persisted.
+SELECT set_config('request.jwt.claim.sub','',true);
+
 -- Browser callers cannot call the public bridge. The service role can
 -- execute the explicit bridge only; it cannot SELECT private attribution.
 DO $$
@@ -328,6 +369,31 @@ BEGIN
  IF (SELECT sum(signals) FROM marketing_private.landing_daily)<>3
  THEN RAISE EXCEPTION 'Pruning harmed current aggregate'; END IF;
 END $landing_test_9$;
+
+-- Aggregated report is browser-readable only by a genuine admin grant.
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000103',true);
+DO $marketing_admin_aggregates$
+DECLARE v jsonb;
+BEGIN
+ v:=public.pazo_admin_marketing_summary(30);
+ IF v->>'status'<>'collecting' OR (v->'totals'->>'landing_signals')::bigint<>3 THEN
+  RAISE EXCEPTION 'Admin marketing totals not projected from private aggregation';
+ END IF;
+ IF (v->'totals'->>'verified_signups')::bigint < 0 THEN
+  RAISE EXCEPTION 'Admin marketing returned invalid signup count';
+ END IF;
+ IF v::text LIKE '%00000000-0000-0000%' OR
+    v::text LIKE '%@example%' OR
+    v::text LIKE '%fbclid%' THEN
+  RAISE EXCEPTION 'Admin marketing JSON leaks identity or click IDs';
+ END IF;
+ IF jsonb_array_length(v->'daily')<1 THEN
+  RAISE EXCEPTION 'Admin marketing daily rows missing';
+ END IF;
+END $marketing_admin_aggregates$;
+RESET ROLE;
+SELECT set_config('request.jwt.claim.sub','',true);
 
 ROLLBACK;
 SELECT 'PAZO_MARKETING_PG17_SYNTHETIC_ROLLBACK_PASS' AS result;
