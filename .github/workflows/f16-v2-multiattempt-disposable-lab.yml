@@ -4,12 +4,12 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
-      - 'supabase/migrations/20261018170000_f16_sandbox_v2_multiattempt_account_read_and_finance.sql'
+      - 'supabase/migrations/20261018132828_f16_sandbox_v2_multiattempt_account_read_and_finance.sql'
       - 'scripts/f16-v2-multiattempt-disposable-lab.sql'
       - '.github/workflows/f16-v2-multiattempt-disposable-lab.yml'
   pull_request:
     paths:
-      - 'supabase/migrations/20261018170000_f16_sandbox_v2_multiattempt_account_read_and_finance.sql'
+      - 'supabase/migrations/20261018132828_f16_sandbox_v2_multiattempt_account_read_and_finance.sql'
       - 'scripts/f16-v2-multiattempt-disposable-lab.sql'
       - '.github/workflows/f16-v2-multiattempt-disposable-lab.yml'
 permissions:

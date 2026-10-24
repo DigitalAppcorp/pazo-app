@@ -5,12 +5,12 @@ on:
     branches:
       - f13/section-titles-20261012
     paths:
-      - 'supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql'
+      - 'supabase/migrations/20261018132808_f16_sandbox_v2_append_only_checkout_retries.sql'
       - 'scripts/f16-v2-retry-disposable-lab.sql'
       - '.github/workflows/f16-v2-retry-disposable-lab.yml'
   pull_request:
     paths:
-      - 'supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql'
+      - 'supabase/migrations/20261018132808_f16_sandbox_v2_append_only_checkout_retries.sql'
       - 'scripts/f16-v2-retry-disposable-lab.sql'
       - '.github/workflows/f16-v2-retry-disposable-lab.yml'
 permissions:

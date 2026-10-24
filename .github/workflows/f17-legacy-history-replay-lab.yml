@@ -1,0 +1,50 @@
+name: F17 historical late-baseline conflict detector (disposable PG17)
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/history/pre_migration_untracked/**'
+      - 'scripts/f17-legacy-history-replay-lab.mjs'
+      - '.github/workflows/f17-legacy-history-replay-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eight-legacy-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: f14_admin
+          POSTGRES_DB: f14_synthetic
+          POSTGRES_PASSWORD: f14_synthetic_ci_only
+          POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US --locale=en_US.UTF-8
+        ports:
+          - 55441:5432
+        options: >-
+          --health-cmd "pg_isready -U f14_admin -d f14_synthetic"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CI: 'true'
+      PAZO_F17_SYNTHETIC_REPLAY: 'yes'
+      PGHOST: 127.0.0.1
+      PGPORT: '55441'
+      PGDATABASE: f14_synthetic
+      PGUSER: f14_admin
+      PGPASSWORD: f14_synthetic_ci_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Restore synthetic catalog fixture (guarded database and user)
+        run: psql -X -h 127.0.0.1 -p 55441 -U f14_admin -d f14_synthetic -v ON_ERROR_STOP=1 -f supabase/tests/f14/catalog-baseline.sql > /dev/null
+      - name: Confirm expected F4/F5 chronology blocker in disposable PG17
+        run: node scripts/f17-legacy-history-replay-lab.mjs

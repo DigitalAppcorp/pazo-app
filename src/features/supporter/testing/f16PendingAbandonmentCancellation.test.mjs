@@ -8,7 +8,7 @@ const INTENT='intent-77777777-7777-4777-8777-777777777777'
 const SUB='I-SANDBOX-PENDING555'
 const PLAN='P-14V25407JP6850922NLHMDKI'
 const HOST='https://api-m.sandbox.paypal.com'
-const sql=readFileSync(new URL('../../../../supabase/migrations/20261019044000_f16_sandbox_v2_pending_abandonment_preflight.sql',import.meta.url),'utf8')
+const sql=readFileSync(new URL('../../../../supabase/migrations/20261019042653_f16_sandbox_v2_pending_abandonment_preflight.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
 const ui=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
 

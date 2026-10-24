@@ -1,3 +1,36 @@
+## F17 PR #99 — F14 one-time SQL protected in active migrations (23-oct-2026 PDT)
+
+Code-only proposal: `supabase/migrations/20261010043307_f14_media_jwt_claim_compat_single_test.sql` now uses the previously-reviewed structural-only/redacted F14 source. Original hosted SQL checksums remain in audit manifests and Git history, **no target-specific DO mutation is executable** through the active migration folder. GitHub guard test requires exact safe source. **Still NO_GO_DB_PUSH** due unavailable initial schema/replay and no PO production authorization; PR #99 remains DRAFT and can cause host auto-deploy if merged. [Evidence](docs/PAZO_F17_F14_ONE_TIME_SAFETY_REVIEW_20261023.md).
+
+---
+
+## F17 — ARCHIVO DE PREHISTORIA PROPUESTO, NO REPRODUCCIÓN (23-oct-2026 PDT)
+**Rama derivada de PR #98, SIN merge:** las ocho fuentes SQL anteriores al historial remoto (`20261005*`) se mueven con **Git blob SHA idéntico** a `supabase/history/pre_migration_untracked/` (fuera de migraciones ejecutables). En la rama, solo **122/122 versiones** aparecen bajo `supabase/migrations/`; las ocho siguen preservadas y controladas por pruebas. **Esta acción es archivado de fuente, NO prueba de que todas las instrucciones se aplicaron, NO reconstrucción desde cero ni autorización para `db push`**. Aún no existe baseline pre-Oct5. Quedan 24 diferencias editoriales con secuencia SQL equivalente y 2 descriptores intencionales. **NO_GO_DB_PUSH / NO_MIGRATION_REPAIR / NO_MAIN_MERGE / NO_HOSTED_WRITE**. Ver `docs/PAZO_F17_PREHISTORY_ARCHIVE_PROPOSAL_20261023.md`.
+
+---
+
+## ALERTA DE MIGRACIONES — F17 integridad histórica fase 3 (23-oct-2026 PDT)
+
+Auditoría SELECT y Git blob SHA1 sobre **122/122** versiones alojadas: **96 SQL idénticos**, **24 SQL equivalentes léxicamente pero con diferencias editoriales/transaccionales**, **2 entradas intencionalmente descriptivas insertadas así por sus propios scripts Git** (ambos marcadores y postflight funcional alojado verificados). **8 SQL locales pre-5-oct sin versión remota**. Commit raíz 3-oct no contiene esquema base. El laboratorio de F14 posterior detecta el bloqueo F4/F5 esperado: **diagnóstico PASS, replay completo NO certificado**. PR #98 DRAFT apilado sobre #97/#95. **NO `db push`, NO `migration repair`, NO merge a `main`, NO SQL alojado.** Ver [auditoría fase 3](docs/PAZO_F17_MIGRATION_HISTORY_CONTENT_AUDIT_20261023.md).
+
+---
+
+## ACTUALIZACIÓN F17 — Segunda reconciliación de migraciones (23-oct-2026 PDT)
+
+**PR #97 DRAFT (apila y depende de PR #95; NO fusionar):** recuperación Git, exclusivamente documental, de 20 migraciones remotas y corrección a texto SQL alojado idéntico de 5 variantes adicionales. Comparación de nombres de versiones **130 archivos Git / 122 registros Supabase: 122 parejas por versión; 0 remotas sin archivo; 8 locales sin versión remota**. Pruebas del commit `b2da806c9fdcaf5cf960fc0d4dd9e4cdf8b6f97f`: **9/9 workflows SUCCESS**, incluida la nueva prueba SHA-256. Auditado el catálogo de objetos que aparecen en las 8 migraciones históricas locales: **83/83 objetos únicos existen** (6 tablas, 15 índices, 22 funciones, 9 triggers, 31 policies); las 6 tablas RLS=true. No demuestra el replay histórico ni la equivalencia de definiciones. **Se mantiene bloqueo ABSOLUTO de `supabase db push`, `supabase migration repair` y SQL alojado; producción, PayPal y Vercel intactos**. Documento: `docs/PAZO_HISTORICAL_MIGRATION_PHASE2_AUDIT_20261023.md`.
+
+---
+
+## ACTUALIZACIÓN DE INGENIERÍA — Historial de migraciones y cierre F17 (23-oct-2026 PDT)
+
+**F17 está fusionada en `main`:** PR #81, commit `5d4464f63a996bb8f58c1f41fe943a8be9eda3c6`, CI posterior 7/7 PASS; sitio oficial conserva la versión PAZO ya aprobada por el PO, PayPal Live L1 limitado activo. Las entradas históricas inferiores que dicen `PR81 DRAFT`, `main sin merge` o `L1 BLOCKED` están superadas.
+
+**Migraciones — BLOQUEO ACTIVO de CLI contra producción:** auditoría read-only cruzada de `supabase_migrations.schema_migrations.statements` y las fuentes de GitHub: 110 locales, 122 remotas; 28 parejas por nombre con versiones diferentes. **23 fuentes SQL byte-idénticas se renombraron solo en rama aislada**, 5 fuentes requieren revisión adicional, 8 son exclusivamente locales y 20 exclusivamente remotas. La diferencia de versiones NO está totalmente resuelta. No ejecutar `supabase db push`, `migration repair` ni DDL sobre producción. No automatizar migraciones por el mero hecho de integrar GitHub. [Auditoría detallada](docs/PAZO_HISTORICAL_MIGRATION_DRIFT_AUDIT_20261023.md). Los cambios de rama aún no están autorizados a `main`.
+
+**Pagos:** no fabricar una compra para cubrir el primer E2E Live; la conciliación de una venta real exige firma, evidencia de proveedor, ledger/período y beneficio. Marketing lo gestiona otro agente.
+
+---
+
 ## F17 — pre-merge de main: reconciliación de migraciones (23-oct-2026 PDT)
 
 **PRECAUCIÓN DE BASE DE DATOS:** [PR #94](https://github.com/DigitalAppcorp/pazo-app/pull/94) alinea los nombres de **cuatro archivos L1** con las versiones instaladas en Supabase, preservando exactamente los SQL y agregando guard CI. La auditoría global halló otros prefijos históricos sin correspondencia exacta: **no ejecutar `supabase db push`, migration repair, reapply ni merge de Supabase a producción desde esta rama**, incluso después de fusionar `main`, sin reconciliación integral y GO explícito. El PO aprobó visualmente el frontend oficial `bf78b85`; L1 permanece limitado a un comprador y no hay primera venta real. El cierre F17 debe usar [la matriz canónica](docs/PAZO_F17_SCOPE_CLOSURE_RECONCILIATION_20261023.md). El PR #81 sigue DRAFT: **NO merge a main sin GO nuevo del PO**.

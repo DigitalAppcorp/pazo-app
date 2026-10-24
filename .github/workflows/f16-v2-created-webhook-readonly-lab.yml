@@ -4,12 +4,12 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
-      - 'supabase/migrations/20261018190000_f16_v2_created_webhook_candidate_readonly.sql'
+      - 'supabase/migrations/20261018154128_f16_v2_created_webhook_candidate_readonly.sql'
       - 'scripts/f16-v2-created-webhook-candidate-lab.sql'
       - '.github/workflows/f16-v2-created-webhook-readonly-lab.yml'
   pull_request:
     paths:
-      - 'supabase/migrations/20261018190000_f16_v2_created_webhook_candidate_readonly.sql'
+      - 'supabase/migrations/20261018154128_f16_v2_created_webhook_candidate_readonly.sql'
       - 'scripts/f16-v2-created-webhook-candidate-lab.sql'
       - '.github/workflows/f16-v2-created-webhook-readonly-lab.yml'
 permissions:

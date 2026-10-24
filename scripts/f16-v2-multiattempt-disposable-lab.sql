@@ -49,7 +49,7 @@ AS $fn$
 $fn$;
 COMMIT;
 
-\i supabase/migrations/20261018170000_f16_sandbox_v2_multiattempt_account_read_and_finance.sql
+\i supabase/migrations/20261018132828_f16_sandbox_v2_multiattempt_account_read_and_finance.sql
 
 DO $assert$
 DECLARE

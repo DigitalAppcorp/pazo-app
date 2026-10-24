@@ -1,10 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS place_private;
 REVOKE ALL ON SCHEMA place_private FROM PUBLIC, anon, authenticated;
 
--- ---------------------------------------------------------------------------
--- Curated place catalog
--- ---------------------------------------------------------------------------
-
 ALTER TABLE public.pet_places
   RENAME COLUMN type TO category;
 
@@ -16,7 +12,6 @@ ALTER TABLE public.pet_places
   ADD COLUMN source text NOT NULL DEFAULT 'pazo_curated',
   ADD COLUMN updated_at timestamptz NOT NULL DEFAULT now();
 
--- Existing rows are demo data with non-verifiable addresses/counts.
 UPDATE public.pet_places
 SET
   category = CASE category
@@ -117,10 +112,6 @@ REVOKE ALL ON TABLE public.pet_places FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON TABLE public.pet_places TO anon, authenticated;
 GRANT ALL ON TABLE public.pet_places TO service_role;
 
--- ---------------------------------------------------------------------------
--- Private check-in source of truth
--- ---------------------------------------------------------------------------
-
 CREATE TABLE public.pet_place_checkins (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   place_id uuid NOT NULL
@@ -151,10 +142,6 @@ CREATE INDEX pet_place_checkins_place_idx
 
 CREATE INDEX pet_place_checkins_user_idx
   ON public.pet_place_checkins (user_id, checked_in_at DESC);
-
--- ---------------------------------------------------------------------------
--- Privacy-safe public presence projection
--- ---------------------------------------------------------------------------
 
 CREATE TABLE public.pet_place_presence (
   checkin_id uuid PRIMARY KEY
@@ -187,7 +174,6 @@ BEGIN
     RAISE EXCEPTION 'Authentication required.';
   END IF;
 
-  -- Lock the pet row so two concurrent check-ins for the same pet serialize.
   PERFORM 1
   FROM public.pets p
   WHERE p.id = NEW.pet_id
@@ -207,7 +193,6 @@ BEGIN
     RAISE EXCEPTION 'El lugar no está disponible.';
   END IF;
 
-  -- Any previous open row (even naturally expired) becomes closed.
   UPDATE public.pet_place_checkins
   SET ended_at = now()
   WHERE pet_id = NEW.pet_id
@@ -229,12 +214,10 @@ LANGUAGE plpgsql
 SET search_path = ''
 AS $function$
 BEGIN
-  -- If the client requests checkout, the server owns the actual timestamp.
   IF OLD.ended_at IS NULL AND NEW.ended_at IS NOT NULL THEN
     NEW.ended_at := now();
   END IF;
 
-  -- An ended check-in cannot be reopened through UPDATE.
   IF OLD.ended_at IS NOT NULL THEN
     NEW.ended_at := OLD.ended_at;
   END IF;
@@ -401,10 +384,6 @@ GRANT SELECT (
 GRANT ALL ON TABLE public.pet_place_checkins TO service_role;
 GRANT ALL ON TABLE public.pet_place_presence TO service_role;
 
--- ---------------------------------------------------------------------------
--- User-submitted place suggestions
--- ---------------------------------------------------------------------------
-
 CREATE TABLE public.place_suggestions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   submitter_user_id uuid NOT NULL DEFAULT auth.uid()
@@ -489,10 +468,6 @@ GRANT INSERT (name, category, address, zone, note)
   ON TABLE public.place_suggestions TO authenticated;
 
 GRANT ALL ON TABLE public.place_suggestions TO service_role;
-
--- ---------------------------------------------------------------------------
--- Minimal privacy-safe product telemetry
--- ---------------------------------------------------------------------------
 
 CREATE TABLE public.place_usage_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

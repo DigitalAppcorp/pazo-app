@@ -103,7 +103,7 @@ test('candidate store accepts at most one server-verified, owner-scoped CREATED 
  assert.equal(calls.length,1)
 })
 test('SQL inbox candidate is read-only, one-at-a-time and not a retry grant',()=>{
- const sql=readFileSync(new URL('../../../../supabase/migrations/20261018190000_f16_v2_created_webhook_candidate_readonly.sql',import.meta.url),'utf8')
+ const sql=readFileSync(new URL('../../../../supabase/migrations/20261018154128_f16_v2_created_webhook_candidate_readonly.sql',import.meta.url),'utf8')
  for(const x of ['BILLING.SUBSCRIPTION.CREATED',"e.processing_state='pending'",'count_candidate=1',
  'p_owner_id','p_intent_id','service_role','SECURITY DEFINER'])assert.ok(sql.includes(x),x)
  for(const forbidden of [/DELETE\s+FROM\b/i,/UPDATE\s+supporter_private\./i,

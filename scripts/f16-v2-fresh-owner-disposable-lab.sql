@@ -74,7 +74,7 @@ CREATE FUNCTION public.f16_qa_v2_begin_checkout(
  RAISE EXCEPTION 'Existing-owner v2 requires an intact historical v1 record';
  END $fn$;
 COMMIT;
-\i supabase/migrations/20261018193000_f16_sandbox_fresh_owner_qa_admission.sql
+\i supabase/migrations/20261018163723_f16_sandbox_fresh_owner_qa_admission.sql
 
 DO $test$
 DECLARE first jsonb; second jsonb; original text; rejected boolean:=false;

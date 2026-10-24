@@ -13,7 +13,7 @@ test('PayPal return and cancel resolve to PWA shell instead of Vercel 404',()=>{
  assert.ok(app.includes('normalizeSupporterPaypalCallback(window.location,window.history)'))
 })
 test('public checkout host is staged separately from platform preview',()=>{
- const sql=readFileSync(new URL('../../../../supabase/migrations/20261019195500_pazo_admin_paypal_gateway_settings.sql',import.meta.url),'utf8')
+ const sql=readFileSync(new URL('../../../../supabase/migrations/20261019183232_pazo_admin_paypal_gateway_settings.sql',import.meta.url),'utf8')
  assert.ok(sql.includes('return_origin text NOT NULL'))
  assert.ok(sql.includes("p_return_origin !~ '^https://"))
  assert.ok(sql.includes("live_checkout_enabled=false"))

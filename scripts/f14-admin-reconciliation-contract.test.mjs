@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 
-const migration=readFileSync(new URL('../supabase/migrations/20261012063205_f14_one_object_admin_reconcile.sql',import.meta.url),'utf8')
+const migration=readFileSync(new URL('../supabase/migrations/20261012071140_f14_one_object_admin_reconcile.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../supabase/functions/f14-moderation-reconcile/index.ts',import.meta.url),'utf8')
 const config=readFileSync(new URL('../supabase/config.toml',import.meta.url),'utf8')
 const purge=readFileSync(new URL('../supabase/functions/f14-moderation-purge/index.ts',import.meta.url),'utf8')

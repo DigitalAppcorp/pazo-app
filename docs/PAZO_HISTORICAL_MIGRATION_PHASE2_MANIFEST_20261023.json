@@ -1,0 +1,230 @@
+{
+  "source": "supabase_migrations.schema_migrations.statements SELECT read only",
+  "project": "mrybvqdebbgcayuvgkkr",
+  "snapshot_date": "2026-10-23",
+  "base_commit": "2a754923654d87241c746e334b60b7bb5a6d57f7",
+  "records": [
+    {
+      "version": "20261006090551",
+      "name": "private_pet_documents",
+      "path": "20261006090551_private_pet_documents.sql",
+      "sha256": "cd9fd0de6e69f7daba7b76edf6e8b78fc6f5fa64239a09a9ae2b581be27ecd83",
+      "kind": "token_equivalent_replacement"
+    },
+    {
+      "version": "20261006133534",
+      "name": "communities_validation_instrumentation",
+      "path": "20261006133534_communities_validation_instrumentation.sql",
+      "sha256": "a8d17f8ee27dfa36ca58dc955116420ea0443dccf1c7c21305b0d0919329d9d1",
+      "kind": "token_equivalent_replacement"
+    },
+    {
+      "version": "20261007023800",
+      "name": "community_extension_experiments",
+      "path": "20261007023800_community_extension_experiments.sql",
+      "sha256": "e98be7f3f458960d886b6232a804f7e1d784fc7e66ce870734813acbf08db8c2",
+      "kind": "token_equivalent_replacement"
+    },
+    {
+      "version": "20261007052747",
+      "name": "phase_8_places_map_core",
+      "path": "20261007052747_phase_8_places_map_core.sql",
+      "sha256": "4317faac483a3ff4cf7dc0d45c4b6e451df397e68a6aa56090385fcf48f560a3",
+      "kind": "token_equivalent_replacement"
+    },
+    {
+      "version": "20261007052749",
+      "name": "phase_8_places_initial_catalog",
+      "path": "20261007052749_phase_8_places_initial_catalog.sql",
+      "sha256": "25f0da92727b879cdd1d84dc506fead50deef4aa23939abcf55905771035126b",
+      "kind": "token_equivalent_replacement"
+    },
+    {
+      "version": "20261008015255",
+      "name": "register_places_map_validation",
+      "path": "20261008015255_register_places_map_validation.sql",
+      "sha256": "3ca0edc09e80eb845cf1e0a44b5f2c9c9d897857905dd55dc928414dcded16de",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261008015603",
+      "name": "grant_module_validation_inserts",
+      "path": "20261008015603_grant_module_validation_inserts.sql",
+      "sha256": "905067c5c413da890f435099183a017867a5e43df23d2f3c364aef81586f55cf",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261008112333",
+      "name": "f14_account_blocks_hidden_posts",
+      "path": "20261008112333_f14_account_blocks_hidden_posts.sql",
+      "sha256": "d99fdbddc965c59d10b7ec78b7308928c2e956c3e7945f9254a60322d72043fc",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261008120333",
+      "name": "f14_reports_moderation",
+      "path": "20261008120333_f14_reports_moderation.sql",
+      "sha256": "d4b33f42bd5ea32ddc2897b968eb17eb181f15aef54b0b337834d897465cefec",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261008122907",
+      "name": "f14_comment_parent_guard",
+      "path": "20261008122907_f14_comment_parent_guard.sql",
+      "sha256": "9a45b067de44383bfaaed7656094fd4fbefc916024316a76a3c459bb4554f1e7",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009010551",
+      "name": "f14_media_status_presence_guard",
+      "path": "20261009010551_f14_media_status_presence_guard.sql",
+      "sha256": "8afd46356e57a6270f2c483537d1bf9a85dd83619ae5302570b38a4874196533",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009014616",
+      "name": "f14_media_claim_preflight",
+      "path": "20261009014616_f14_media_claim_preflight.sql",
+      "sha256": "43d8a145acf2b51012408cbe5915b3c85e351793db0fd525fb5e266e4f931d47",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009040957",
+      "name": "f14_storage_held_media_guard",
+      "path": "20261009040957_f14_storage_held_media_guard.sql",
+      "sha256": "21b610b6a3b9ad30d34a83ec9666f4371b8a11a41a7bff6e42cb9b5e6254a974",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009054411",
+      "name": "f14_held_media_fail_closed_recheck_update_guard",
+      "path": "20261009054411_f14_held_media_fail_closed_recheck_update_guard.sql",
+      "sha256": "55caf423d301348bbe9656811cb6bcb2df0ae56baf86961108bfd51986c79aee",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009055801",
+      "name": "f14_held_media_copy_source_operation_guard",
+      "path": "20261009055801_f14_held_media_copy_source_operation_guard.sql",
+      "sha256": "282c4be1f49718d695e1d65af2d3b866a361db07049faa9787aeee56b6e8566e",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009055955",
+      "name": "f14_disable_unverified_media_purge_confirmation",
+      "path": "20261009055955_f14_disable_unverified_media_purge_confirmation.sql",
+      "sha256": "97597dd3e45823aca63d9a2cf02f60b999d69e24d98121c2936207000dda0abb",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009061213",
+      "name": "f14_reject_unverified_purged_status",
+      "path": "20261009061213_f14_reject_unverified_purged_status.sql",
+      "sha256": "9865c43085a37d039cd829b655766acda43e39e243c19841fa794161947866fd",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261009095635",
+      "name": "f14_service_only_media_evidence_reader",
+      "path": "20261009095635_f14_service_only_media_evidence_reader.sql",
+      "sha256": "d75cb0b714ebd000c965c657963c23ca14fdbdfd5c5492e27b1a764a57fbc475",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261010033538",
+      "name": "f14_moderation_media_preflight_locked",
+      "path": "20261010033538_f14_moderation_media_preflight_locked.sql",
+      "sha256": "87ea39839778f6e129d9ba78eb7496a9b53197cf6da114f2e3f1013057f52496",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261010034610",
+      "name": "f14_finalize_media_after_verified_claim",
+      "path": "20261010034610_f14_finalize_media_after_verified_claim.sql",
+      "sha256": "9ffb539f513f3b7034de4598ffb3f502937b4f088a3e9cea890c351350fc75d5",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261010043307",
+      "name": "f14_media_jwt_claim_compat_single_test",
+      "path": "20261010043307_f14_media_jwt_claim_compat_single_test.sql",
+      "sha256": "9fead53510c8d5d41376c4157396a6f6ddadc6a4635620d57e5c0812f1837b44",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261010045708",
+      "name": "f14_account_request_intake",
+      "path": "20261010045708_f14_account_request_intake.sql",
+      "sha256": "72c575759b89b16d90b1ab628bd9d44b0a0009d09b143afb1fed998513ba0bf6",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261010053708",
+      "name": "f14_community_ownership_continuity",
+      "path": "20261010053708_f14_community_ownership_continuity.sql",
+      "sha256": "aa42c64f4976247c8a0037e283deeafdab5ebb87dbd49cf437aa9859e9b67b54",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261016031846",
+      "name": "f16_p22_claim_scoped_bound_intent_read_only",
+      "path": "20261016031846_f16_p22_claim_scoped_bound_intent_read_only.sql",
+      "sha256": "de75358614d9958558e4c631efca579c03b6c5c5c4463164e2d5b914ea1c354e",
+      "kind": "hosted_only_reconstructed"
+    },
+    {
+      "version": "20261016035851",
+      "name": "f16_p28_minimal_hmac_historical_admin_audit",
+      "path": "20261016035851_f16_p28_minimal_hmac_historical_admin_audit.sql",
+      "sha256": "16aeba23e0963ad0a134e042041cb25a7633389158030ba4ad4697cff2a57a97",
+      "kind": "hosted_only_reconstructed"
+    }
+  ],
+  "comparisons": [
+    {
+      "old": "20261006090000_private_pet_documents.sql",
+      "target": "20261006090551_private_pet_documents.sql",
+      "originalBlob": "dfffeb32189279ee152001298a89f6aa413bda30",
+      "originalChars": 19567,
+      "canonicalChars": 17662
+    },
+    {
+      "old": "20261006124500_communities_validation_instrumentation.sql",
+      "target": "20261006133534_communities_validation_instrumentation.sql",
+      "originalBlob": "8fe92a3514a60487f0c29eb9129c60c10c1cbf1a",
+      "originalChars": 7119,
+      "canonicalChars": 7118
+    },
+    {
+      "old": "20261007021500_community_extension_experiments.sql",
+      "target": "20261007023800_community_extension_experiments.sql",
+      "originalBlob": "62d7d33c25055b50a7eb7da386635029df6aa187",
+      "originalChars": 230,
+      "canonicalChars": 229
+    },
+    {
+      "old": "20261007052000_phase_8_places_map_core.sql",
+      "target": "20261007052747_phase_8_places_map_core.sql",
+      "originalBlob": "6391c811fff6a11ccaa1063ed303f1cede71f4cd",
+      "originalChars": 16292,
+      "canonicalChars": 14965
+    },
+    {
+      "old": "20261007053000_phase_8_places_initial_catalog.sql",
+      "target": "20261007052749_phase_8_places_initial_catalog.sql",
+      "originalBlob": "831925b35f928223f972868bbcc2fed1ab3173c4",
+      "originalChars": 2528,
+      "canonicalChars": 2324
+    }
+  ],
+  "unresolved_local_versions": [
+    "20261005101300",
+    "20261005110000",
+    "20261005114500",
+    "20261005123000",
+    "20261005134000",
+    "20261005150000",
+    "20261005154500",
+    "20261005165500"
+  ]
+}

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const sql=readFileSync(new URL('../../../../supabase/migrations/20261019195500_pazo_admin_paypal_gateway_settings.sql',import.meta.url),'utf8')
+const sql=readFileSync(new URL('../../../../supabase/migrations/20261019183232_pazo_admin_paypal_gateway_settings.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../../../../supabase/functions/pazo-admin-paypal-validate/index.ts',import.meta.url),'utf8')
 const page=readFileSync(new URL('../components/AdminPayPalSettings.tsx',import.meta.url),'utf8')
 const admin=readFileSync(new URL('../components/AdminDashboard.tsx',import.meta.url),'utf8')

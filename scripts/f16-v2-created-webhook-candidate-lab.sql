@@ -44,7 +44,7 @@ INSERT INTO supporter_private.paypal_verified_event_inbox VALUES
  ('WH-PAYMENT-TEST','PAYMENT.SALE.COMPLETED',
   '2026-10-17T19:41:48+00:00','pending',true);
 COMMIT;
-\i supabase/migrations/20261018190000_f16_v2_created_webhook_candidate_readonly.sql
+\i supabase/migrations/20261018154128_f16_v2_created_webhook_candidate_readonly.sql
 
 -- Exactly ONE signed-created candidate, not a proof of ownership until GET.
 DO $check$

@@ -1,0 +1,66 @@
+{
+  "title": "PAZO F17 early unrecorded migrations — immutable archival proposal (never execute)",
+  "snapshot_commit": "a5e534996775e271aef1f48eab2a339830876a76",
+  "source": "Git blob SHA of eight original pre-remote unrecorded migrations",
+  "status": "ARCHIVE_DRAFT_PENDING_PO_GO_NOT_PRODUCTION_CERTIFIED",
+  "remote_versions_at_audit": 122,
+  "remote_version_inventory": "docs/PAZO_F17_MIGRATION_HISTORY_CONTENT_INTEGRITY_20261023.json",
+  "records": [
+    {
+      "version": "20261005101300",
+      "original_path": "supabase/migrations/20261005101300_feed_like_save_integrity.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005101300_feed_like_save_integrity.sql",
+      "original_git_blob_sha": "b7cdd614f3104692d91f160b8c07989a3660142e",
+      "bytes": 13369
+    },
+    {
+      "version": "20261005110000",
+      "original_path": "supabase/migrations/20261005110000_post_comments_source_of_truth.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005110000_post_comments_source_of_truth.sql",
+      "original_git_blob_sha": "369bfe65925fd347d8934e9e324fec5a028320b3",
+      "bytes": 6606
+    },
+    {
+      "version": "20261005114500",
+      "original_path": "supabase/migrations/20261005114500_pet_registration_editing.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005114500_pet_registration_editing.sql",
+      "original_git_blob_sha": "2508e44a5c843549d07c3fb917ea509e8249f724",
+      "bytes": 10293
+    },
+    {
+      "version": "20261005123000",
+      "original_path": "supabase/migrations/20261005123000_security_stabilization.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005123000_security_stabilization.sql",
+      "original_git_blob_sha": "e8a44350377996888039b87bc77f17cdac4f07c9",
+      "bytes": 14945
+    },
+    {
+      "version": "20261005134000",
+      "original_path": "supabase/migrations/20261005134000_prevent_same_owner_follows.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005134000_prevent_same_owner_follows.sql",
+      "original_git_blob_sha": "ea73787fbe06afd650a698530c99859acd38d10b",
+      "bytes": 2123
+    },
+    {
+      "version": "20261005150000",
+      "original_path": "supabase/migrations/20261005150000_rescue_passport_alerts.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005150000_rescue_passport_alerts.sql",
+      "original_git_blob_sha": "eeefb3e6b0eb144a6351277392cb7c2a747e7b82",
+      "bytes": 16709
+    },
+    {
+      "version": "20261005154500",
+      "original_path": "supabase/migrations/20261005154500_sighting_contact_details.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005154500_sighting_contact_details.sql",
+      "original_git_blob_sha": "c08a7ba92b3c3d7dffb030c0c00b099a13935fb2",
+      "bytes": 4523
+    },
+    {
+      "version": "20261005165500",
+      "original_path": "supabase/migrations/20261005165500_feed_scroll_pagination.sql",
+      "archived_path": "supabase/history/pre_migration_untracked/20261005165500_feed_scroll_pagination.sql",
+      "original_git_blob_sha": "aa9be8e664a696dfadf097997a0dc45ec7eb0816",
+      "bytes": 3217
+    }
+  ]
+}
