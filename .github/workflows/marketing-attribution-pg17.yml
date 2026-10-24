@@ -61,7 +61,7 @@ jobs:
         run: |
           grep -Fq 'export const PAZO_MARKETING_COLLECTION_ENABLED = false' src/features/marketing/marketingRuntime.ts
           grep -Fq 'export const PAZO_MARKETING_LANDING_ENABLED = false' src/features/marketing/marketingRuntime.ts
-          grep -Fq 'const MARKETING_INTAKE_RELEASED=false' supabase/functions/pazo-marketing-attribution/index.ts
+          grep -Fq 'const MARKETING_INTAKE_RELEASED = false' supabase/functions/pazo-marketing-attribution/index.ts
           grep -Fq 'const MARKETING_LANDING_RELEASED=false' supabase/functions/pazo-marketing-landing/index.ts
           grep -Fq 'enabled boolean NOT NULL DEFAULT false' supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql
           grep -Fq 'retention_days smallint NOT NULL DEFAULT 0' supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql
