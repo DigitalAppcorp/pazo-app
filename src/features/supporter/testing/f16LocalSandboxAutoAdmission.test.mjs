@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
-const sql=readFileSync(new URL('../../../../supabase/migrations/20261018201000_f16_local_sandbox_automatic_qa_admission.sql',import.meta.url),'utf8')
+const sql=readFileSync(new URL('../../../../supabase/migrations/20261018170858_f16_local_sandbox_automatic_qa_admission.sql',import.meta.url),'utf8')
 test('new Auth owner sees published offer locally without manual QA allowlist',()=>{
  assert.ok(edge.includes("const localSandbox=QA_LOCAL_ORIGINS.has(runtime.origin)"))
  assert.ok(edge.includes("data.action==='begin' && localSandbox"))

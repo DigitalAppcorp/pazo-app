@@ -89,7 +89,7 @@ test('F16 retry adapter fails closed on changed owner, missing new consent and p
 })
 test('F16 retry is owner-scoped and requires a private merchant grant, original P06 and V2 remain intact',()=>{
  const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
- const sql=readFileSync(new URL('../../../../supabase/migrations/20261018165000_f16_sandbox_v2_append_only_checkout_retries.sql',import.meta.url),'utf8')
+ const sql=readFileSync(new URL('../../../../supabase/migrations/20261018132808_f16_sandbox_v2_append_only_checkout_retries.sql',import.meta.url),'utf8')
  const migrationNames=[
   'f16_sandbox_qa_v2_retry_grants','f16_sandbox_qa_v2_retry_attempts',
   'f16_qa_v2_retry_eligibility','f16_qa_v2_retry_begin_checkout',

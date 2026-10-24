@@ -4,12 +4,12 @@ on:
   push:
     branches: [f13/section-titles-20261012]
     paths:
-      - 'supabase/migrations/20261018201000_f16_local_sandbox_automatic_qa_admission.sql'
+      - 'supabase/migrations/20261018170858_f16_local_sandbox_automatic_qa_admission.sql'
       - 'scripts/f16-local-sandbox-auto-qa-admission-lab.sql'
       - '.github/workflows/f16-local-sandbox-auto-qa-admission-lab.yml'
   pull_request:
     paths:
-      - 'supabase/migrations/20261018201000_f16_local_sandbox_automatic_qa_admission.sql'
+      - 'supabase/migrations/20261018170858_f16_local_sandbox_automatic_qa_admission.sql'
       - 'scripts/f16-local-sandbox-auto-qa-admission-lab.sql'
       - '.github/workflows/f16-local-sandbox-auto-qa-admission-lab.yml'
 permissions:

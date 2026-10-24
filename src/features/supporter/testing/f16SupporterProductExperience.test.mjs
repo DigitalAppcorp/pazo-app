@@ -304,7 +304,7 @@ test('F16 Live L1 defaults to server-verified presentation; Sandbox only expands
 })
 test('F16 no-pet membership is owner-only read-only; no synthetic pets or billing access',()=>{
  const hook=readFileSync(new URL('../useSupporterMembershipStatus.ts',import.meta.url),'utf8')
- const migration=readFileSync(new URL('../../../../supabase/migrations/20261018213000_f16_sandbox_qa_owner_membership_read.sql',import.meta.url),'utf8')
+ const migration=readFileSync(new URL('../../../../supabase/migrations/20261018184603_f16_sandbox_qa_owner_membership_read.sql',import.meta.url),'utf8')
  assert.ok(hook.includes('if(pets.length===0)'))
  assert.ok(hook.includes("supabase.rpc('pazo_supporter_my_account_status')"))
  assert.ok(hook.includes("if(petId)throw Error('PETS_UNVERIFIED')"))

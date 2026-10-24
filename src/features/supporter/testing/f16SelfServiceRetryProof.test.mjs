@@ -96,7 +96,7 @@ test('no incomplete timeframe, unsafe identity, or missing provider event detail
  await assert.rejects(fixture({events:[{id:candidate.eventId,event_type:'BILLING.SUBSCRIPTION.CREATED',resource:{id:SUB,custom_id:'wrong'}}]}).proof.verify(args))
 })
 test('automatic retry grant is service-only and never rewrites historical subscriptions',()=>{
- const sql=readFileSync(new URL('../../../../supabase/migrations/20261019092000_f16_sandbox_v2_automatic_reconciled_retry.sql',import.meta.url),'utf8')
+ const sql=readFileSync(new URL('../../../../supabase/migrations/20261019134346_f16_sandbox_v2_automatic_reconciled_retry.sql',import.meta.url),'utf8')
  const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
  const parent=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
  const child=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')

@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-const sql=readFileSync(new URL('../../../../supabase/migrations/20261019180000_f16_qa_pending_approval_restart.sql',import.meta.url),'utf8')
+const sql=readFileSync(new URL('../../../../supabase/migrations/20261019173620_f16_qa_pending_approval_restart.sql',import.meta.url),'utf8')
 const edge=readFileSync(new URL('../../../../supabase/functions/f16-paypal-supporter-v2-qa/index.ts',import.meta.url),'utf8')
 const child=readFileSync(new URL('../components/SandboxV2AccountPanel.tsx',import.meta.url),'utf8')
 const parent=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
@@ -66,7 +66,7 @@ test('after archive, show fresh terms with explicit acknowledgement and never ma
 })
 
 test('repeatable Sandbox abandonment: no artificial 90-second or five-attempt block',()=>{
- const repeat=readFileSync(new URL('../../../../supabase/migrations/20261019193000_f16_qa_repeat_abandonment_restart.sql',import.meta.url),'utf8')
+ const repeat=readFileSync(new URL('../../../../supabase/migrations/20261019175722_f16_qa_repeat_abandonment_restart.sql',import.meta.url),'utf8')
  const latest=repeat.slice(repeat.indexOf('CREATE OR REPLACE FUNCTION public.f16_qa_v2_archive_pending_approval_qa('))
  assert.ok(latest.includes("a.created_at>now_at+interval '5 seconds'"),'Immediate return from PayPal login must remain eligible')
  assert.ok(!latest.includes("a.created_at>now_at-interval '90 seconds'"))

@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs'
 import assert from 'node:assert/strict'
 const read=(p)=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
 const ui=read('src/features/admin/components/AdminPayPalSettings.tsx')
-const sql=read('supabase/migrations/20261019195500_pazo_admin_paypal_gateway_settings.sql')
+const sql=read('supabase/migrations/20261019183232_pazo_admin_paypal_gateway_settings.sql')
 const qa=read('supabase/functions/f16-paypal-supporter-v2-qa/index.ts')
 const admin=read('supabase/functions/pazo-admin-paypal-validate/index.ts')
 const live=read('supabase/functions/pazo-admin-paypal-validate/liveBetaReleasePolicy.mjs')
