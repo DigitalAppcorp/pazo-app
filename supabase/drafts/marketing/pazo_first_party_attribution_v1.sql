@@ -122,6 +122,26 @@ $$;
 REVOKE ALL ON FUNCTION marketing_private.record_verified_acquisition(uuid,text,timestamptz,text)
  FROM PUBLIC, anon, authenticated, service_role;
 
+-- SERVICE-ONLY PostgREST bridge, uninstalled and gated OFF. Explicit
+-- SECURITY DEFINER is required here because service_role has NO access to
+-- marketing_private or the other private QA tables. This function never
+-- enables the gate, derives verification from auth.users, and cannot be
+-- called by anon/authenticated roles.
+CREATE FUNCTION public.pazo_marketing_record_verified_v1(
+ p_owner uuid, p_creative text, p_first_touch_at timestamptz,
+ p_consent_version text
+) RETURNS boolean
+LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = ''
+AS $
+ SELECT marketing_private.record_verified_acquisition(
+   p_owner,p_creative,p_first_touch_at,p_consent_version
+ );
+$;
+REVOKE ALL ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT EXECUTE ON FUNCTION public.pazo_marketing_record_verified_v1(uuid,text,timestamptz,text)
+ TO service_role;
+
 -- Private cohort reader. First pet is derived from public.pets; the D7 column
 -- is ONLY a screen-activity proxy, not verified meaningful retention.
 -- Suppression of QA takes effect retroactively on reports.
