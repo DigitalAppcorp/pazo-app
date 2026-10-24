@@ -1,0 +1,96 @@
+import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake, parsePazoCampaign } from './attribution'
+import { shouldSendLandingSignal } from './landingSignal'
+import { requestLandingChallenge } from './landingChallenge'
+import { supabase } from '../../services/supabaseClient'
+
+/**
+ * Explicit launch gate: OFF in this implementation. No provider SDK, Pixel,
+ * external transport, cookie or database writer is active. A separate
+ * privacy notice review, backend contract and Product Owner GO are required.
+ */
+export const PAZO_MARKETING_COLLECTION_ENABLED = false
+/** Independent release control; landing signals never start implicitly. */
+export const PAZO_MARKETING_LANDING_ENABLED = false
+
+const recorder = () => {
+  if (!PAZO_MARKETING_COLLECTION_ENABLED || typeof window === 'undefined') return null
+  try {
+    return createPazoMarketingRecorder(window.localStorage, { enabled: true })
+  } catch {
+    return null
+  }
+}
+
+/** Record only a tightly validated paid-social UTM; never store a full URL. */
+export function stageMarketingLanding(search?: string): void {
+  recorder()?.captureLanding(search ?? window.location.search)
+  // A hit is a browser signal, not a unique person. No UUID, IP, fbclid or URL.
+  if (!PAZO_MARKETING_LANDING_ENABLED || typeof window === 'undefined') return
+  const attr = parsePazoCampaign(search ?? window.location.search, Date.now())
+  if (!attr) return
+  try {
+    const key = 'pazo_marketing_landing_daily_v1'
+    const raw = window.sessionStorage.getItem(key)
+    const last: unknown = raw ? JSON.parse(raw) : null
+    if (!shouldSendLandingSignal(last, attr.creative, Date.now())) return
+    // Mark first, so reloads/React re-renders do not cause duplicate requests.
+    window.sessionStorage.setItem(key, JSON.stringify({creative:attr.creative, sentAt:Date.now()}))
+    void requestLandingChallenge().then(token=>token?supabase.functions.invoke('pazo-marketing-landing', {
+      headers:{'x-pazo-challenge':token},
+      body:{
+        utm_source:attr.source,
+        utm_medium:attr.medium,
+        utm_campaign:attr.campaign,
+        utm_content:attr.creative,
+      },
+    }):undefined).catch(()=>{})
+  } catch {
+    // Storage disabled or browser isolation: do not collect or break navigation.
+  }
+}
+
+/** A successful signUp request is NOT a verified registration. */
+export function stageMarketingSignupRequested(): void {
+  recorder()?.signupRequested()
+}
+
+/** Only a recently created, email-confirmed user can advance a local funnel. */
+export function stageMarketingSignupVerified(
+  createdAt: string | null | undefined,
+  confirmedAt: string | null | undefined,
+): void {
+  recorder()?.signupVerified(createdAt, confirmedAt)
+}
+
+/** Only after a successful createPetProfile call; once per funnel. */
+export function stageMarketingFirstPetCreated(): void {
+  recorder()?.firstPetCreated()
+}
+
+
+/** Automatic, first-party-only conversion after verified Auth.
+ * A signup UI checkbox is never required; activation is separately gated OFF.
+ * Supabase sends the signed-in user's session authorization to Edge. The
+ * browser body contains only vetted UTM identifiers and first-touch timestamp.
+ */
+let submitting=false
+export async function submitAutomaticMarketingAttribution(): Promise<void> {
+  if (!PAZO_MARKETING_COLLECTION_ENABLED) return
+  if (submitting) return
+  const instance = recorder()
+  if (!instance) return
+  const payload = prepareAutomaticCampaignIntake(instance.read())
+  if (!payload) return
+  submitting=true
+  try {
+    const {data,error} = await supabase.functions.invoke('pazo-marketing-attribution', {body:payload})
+    if (!error && data?.status === 'accepted'&&JSON.stringify(prepareAutomaticCampaignIntake(instance.read()))===JSON.stringify(payload)) instance.clear()
+  } catch {
+    // A marketing failure never interrupts Auth or signup UX.
+  } finally {submitting=false}
+}
+
+/** Remove only local campaign staging for logout/withdrawal; no remote writes. */
+export function clearLocalMarketingAttribution(): void {
+  recorder()?.clear()
+}
