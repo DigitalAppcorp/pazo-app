@@ -270,6 +270,47 @@ $$;
 REVOKE ALL ON FUNCTION marketing_private.cohort_snapshot()
  FROM PUBLIC, anon, authenticated, service_role;
 
+-- Private admin report. Landing *signals* are NOT unique people and are
+-- independent from verified signups; no person-level conversion rate implied.
+-- Existing account cohorts use their signup date and may fall on later days.
+CREATE FUNCTION marketing_private.daily_campaign_summary()
+RETURNS TABLE(
+ metric_day date, campaign text, creative text,
+ landing_signals bigint, verified_signups bigint,
+ first_pet_within_7d bigint, d7_matured_owners bigint,
+ d7_screen_activity_proxy bigint
+)
+LANGUAGE sql STABLE SECURITY INVOKER SET search_path = ''
+AS $
+ WITH arrivals AS (
+  SELECT l.landing_day AS d,l.campaign,l.creative,l.signals
+  FROM marketing_private.landing_daily l
+  WHERE EXISTS(
+   SELECT 1 FROM marketing_private.collection_gate g
+   WHERE g.singleton AND g.retention_days>0
+     AND l.landing_day >=
+        (statement_timestamp() AT TIME ZONE 'America/Los_Angeles')::date-g.retention_days
+  )
+ ), cohorts AS (
+  SELECT c.cohort_day,c.campaign,c.creative,
+         c.verified_owners,c.first_pet_within_7d,
+         c.d7_matured_owners,c.d7_screen_activity_proxy
+  FROM marketing_private.cohort_snapshot() c
+ )
+ SELECT coalesce(a.d,co.cohort_day),
+        coalesce(a.campaign,co.campaign),
+        coalesce(a.creative,co.creative),
+        coalesce(a.signals,0)::bigint,
+        coalesce(co.verified_owners,0)::bigint,
+        coalesce(co.first_pet_within_7d,0)::bigint,
+        coalesce(co.d7_matured_owners,0)::bigint,
+        coalesce(co.d7_screen_activity_proxy,0)::bigint
+ FROM arrivals a FULL OUTER JOIN cohorts co
+  ON a.d=co.cohort_day AND a.campaign=co.campaign AND a.creative=co.creative;
+$;
+REVOKE ALL ON FUNCTION marketing_private.daily_campaign_summary()
+ FROM PUBLIC,anon,authenticated,service_role;
+
 -- Privileged, manual lifecycle operations. There is NO scheduler or
 -- external endpoint wired in this PR. Do not imply automatic purging.
 -- A retention policy must be approved separately before configuring days.
