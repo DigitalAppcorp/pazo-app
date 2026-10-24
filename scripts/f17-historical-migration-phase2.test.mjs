@@ -13,7 +13,16 @@ test('25 canonical hosted SQL files match SHA-256 snapshot digests',()=>{
     assert.match(r.path,/^20[0-9]{12}_[a-z0-9_]+[.]sql$/)
     const p=new URL(r.path,folder)
     assert.ok(existsSync(p),'missing hosted migration: '+r.path)
-    assert.equal(createHash('sha256').update(readFileSync(p)).digest('hex'),r.sha256,'unexpected SQL edit: '+r.path)
+    if(r.version==='20261010043307'){
+      // Hosted SQL included a one-time row-specific trial; executable source is the
+      // pre-reviewed structural redaction. Original remote digest is kept in the
+      // immutable evidence manifest and must NOT be treated as executable replay.
+      const safe=new URL('../supabase/history/f14_applied/20261010043307_f14_media_jwt_claim_compat_single_test.REDACTED.sql',import.meta.url)
+      assert.deepEqual(readFileSync(p),readFileSync(safe),'one-time historical DML has reappeared in executable migration')
+      assert.notEqual(createHash('sha256').update(readFileSync(p)).digest('hex'),r.sha256,'one-time hosted SQL must not be replayed in active directory')
+    }else{
+      assert.equal(createHash('sha256').update(readFileSync(p)).digest('hex'),r.sha256,'unexpected SQL edit: '+r.path)
+    }
   }
 })
 test('original five local-only names no longer conflict with hosted versions',()=>{

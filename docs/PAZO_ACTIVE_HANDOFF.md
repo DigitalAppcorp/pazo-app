@@ -1,3 +1,9 @@
+## F17 PR #99 — F14 one-time SQL protected in active migrations (23-oct-2026 PDT)
+
+Code-only proposal: `supabase/migrations/20261010043307_f14_media_jwt_claim_compat_single_test.sql` now uses the previously-reviewed structural-only/redacted F14 source. Original hosted SQL checksums remain in audit manifests and Git history, **no target-specific DO mutation is executable** through the active migration folder. GitHub guard test requires exact safe source. **Still NO_GO_DB_PUSH** due unavailable initial schema/replay and no PO production authorization; PR #99 remains DRAFT and can cause host auto-deploy if merged. [Evidence](docs/PAZO_F17_F14_ONE_TIME_SAFETY_REVIEW_20261023.md).
+
+---
+
 ## F17 — ARCHIVO DE PREHISTORIA PROPUESTO, NO REPRODUCCIÓN (23-oct-2026 PDT)
 **Rama derivada de PR #98, SIN merge:** las ocho fuentes SQL anteriores al historial remoto (`20261005*`) se mueven con **Git blob SHA idéntico** a `supabase/history/pre_migration_untracked/` (fuera de migraciones ejecutables). En la rama, solo **122/122 versiones** aparecen bajo `supabase/migrations/`; las ocho siguen preservadas y controladas por pruebas. **Esta acción es archivado de fuente, NO prueba de que todas las instrucciones se aplicaron, NO reconstrucción desde cero ni autorización para `db push`**. Aún no existe baseline pre-Oct5. Quedan 24 diferencias editoriales con secuencia SQL equivalente y 2 descriptores intencionales. **NO_GO_DB_PUSH / NO_MIGRATION_REPAIR / NO_MAIN_MERGE / NO_HOSTED_WRITE**. Ver `docs/PAZO_F17_PREHISTORY_ARCHIVE_PROPOSAL_20261023.md`.
 

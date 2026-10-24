@@ -1,3 +1,9 @@
+-- HISTORICAL STRUCTURAL EXCERPT; NOT BYTE-IDENTICAL TO THE APPLIED SQL.
+-- The applied statement included a one-time claim extension with a literal
+-- disposable target UUID. That entire DO block is omitted deliberately.
+-- Source version: 20261010043307; original source MD5: a6bb99575e9c906bf5f3e7a4c6df1ed5.
+-- Never replay this file as a migration.
+
 -- F14 D3-A hotfix: Supabase PostgREST may provide claims as the
 -- 'request.jwt.claims' JSON rather than legacy 'request.jwt.claim.role'.
 -- auth.role() resolves both formats; EXECUTE remains service_role-only.
@@ -138,33 +144,4 @@ BEGIN
 END;
 $f14_verified_purged$;
 
--- Restrict the disposable trial extension to the already identified test
--- object. The original 5-minute claim was created/rechecked successfully,
--- but preflight rejected a valid service JWT because of legacy claim layout.
--- One-time evidence-preserving extension; NO file deletion; do not touch
--- any of the pre-existing 13 images or their claims.
-DO $f14_single_test_claim_extension$
-DECLARE
- v_claim moderation_private.media_claims%ROWTYPE;
- v_id uuid := 'aa00d5b6-9626-4e16-90a1-3b6e7bf4076e'::uuid;
-BEGIN
- SELECT * INTO v_claim FROM moderation_private.media_claims c
- WHERE c.target_kind='feed_post' AND c.target_id=v_id
- FOR UPDATE;
- IF FOUND AND v_claim.status='held'
-    AND v_claim.checked_at IS NOT NULL
-    AND v_claim.snapshot = moderation_private.f14_media_probe('feed_post',v_id)
-    AND EXISTS(
-      SELECT 1 FROM moderation_private.content_restrictions r
-      JOIN moderation_private.reports rep ON rep.id=r.report_id
-      WHERE r.target_kind='feed_post' AND r.target_id=v_id
-        AND r.media_status='pending_review' AND rep.status='removed'
-        AND v_claim.report_id=rep.id
-    )
- THEN
-  UPDATE moderation_private.media_claims
-  SET expires_at=GREATEST(expires_at,pg_catalog.clock_timestamp()+interval '60 minutes')
-  WHERE claim_id=v_claim.claim_id AND status='held';
- END IF;
-END
-$f14_single_test_claim_extension$;
+-- REDACTED: the original one-time claim extension is withheld from this archive.

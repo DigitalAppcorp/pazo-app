@@ -56,3 +56,7 @@ Estas pruebas acreditan que los marcadores alojados son intencionales y verifica
 
 **GitHub Actions**: el ensayo de conflicto cronológico controlado sobre F14 posterior se considera un PASS **del diagnóstico**, no un PASS de ocho migraciones desde cero. Los scripts originales bajo `supabase/migrations` no fueron modificados.
 
+
+
+## Post-audit safety exception (PR #99 review)
+The original content inventory is an immutable snapshot (96 byte-exact at that revision). The active executable `20261010043307` source has since been changed to the previously-reviewed structural-only F14 archive to remove one-time row DML. The original SHA remains in the historical manifest and earlier commits; current active Git is **95 exact vs historical hosted records plus 1 intentional structural-only safety substitution**. All other 24 lexical and 2 descriptor classifications are unchanged. This does not authorize historical reset, db push or merge. See `docs/PAZO_F17_F14_ONE_TIME_SAFETY_REVIEW_20261023.md`.
