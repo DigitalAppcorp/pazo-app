@@ -7,8 +7,11 @@ export const supporterSandboxUi = import.meta.env.DEV &&
   typeof window !== 'undefined' &&
   ['localhost','127.0.0.1'].includes(window.location.hostname)
 
+// L1 is active: an absent Vercel build flag must not hide already verified
+// paid or admin-granted benefits. An explicit 'false' remains an emergency
+// presentation-only override; RPC checks remain the exclusive authority.
 export const supporterBenefitsUiEnabled =
-  import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED === 'true' ||
+  import.meta.env.VITE_PAZO_F16_SUPPORTER_BENEFITS_ENABLED !== 'false' ||
   supporterSandboxUi
 
 // No owner, payment reference, personal data or entitlement is sent in the event.
