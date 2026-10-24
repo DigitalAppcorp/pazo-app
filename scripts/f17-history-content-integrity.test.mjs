@@ -5,7 +5,7 @@ import {readFileSync,existsSync} from 'node:fs'
 const root=new URL('../',import.meta.url)
 const evidence=JSON.parse(readFileSync(new URL('docs/PAZO_F17_MIGRATION_HISTORY_CONTENT_INTEGRITY_20261023.json',root),'utf8'))
 function gitBlobSha(contents){
- const head=Buffer.from('blob '+contents.length+'\\0')
+ const head=Buffer.concat([Buffer.from('blob '+contents.length),Buffer.from([0])])
  return createHash('sha1').update(Buffer.concat([head,contents])).digest('hex')
 }
 test('historical migration SQL catalog has 96 exact, 24 lexical and 2 metadata-only, all 122 versions identified',()=>{
