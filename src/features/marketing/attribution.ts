@@ -2,9 +2,31 @@
  * PAZO marketing attribution: first-party, allowlisted campaign metadata only.
  * No IP, GPS, email, account IDs, external IDs or full URLs.
  *
- * Prepared behind a CLOSED release gate; never sends network requests.
+ * Prepared behind a CLOSED release gate; client only stages sanitized UTM.
  * This state is NOT a source of truth for paid conversions.
  */
+/**
+ * Minimal first-party payload for internal verified registration only.
+ * No checkbox or externally shared conversion, no email/UID/JWT/URL/click ID.
+ * Server uses independently verified Auth to bind the account.
+ */
+export function prepareAutomaticCampaignIntake(state: AttributionState | null): {
+  utm_source: 'meta'
+  utm_medium: 'paid_social'
+  utm_campaign: typeof PAZO_CAMPAIGN
+  utm_content: string
+  first_touch_at: string
+} | null {
+  if (!state || !state.steps.includes('signup_verified')) return null
+  return {
+    utm_source: state.attribution.source,
+    utm_medium: state.attribution.medium,
+    utm_campaign: PAZO_CAMPAIGN,
+    utm_content: state.attribution.creative,
+    first_touch_at: new Date(state.attribution.firstTouchAt).toISOString(),
+  }
+}
+
 export const MARKETING_ATTRIBUTION_TTL_MS = 72 * 60 * 60 * 1000
 const MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000
 
@@ -86,7 +108,7 @@ function validState(value: unknown, now: number): value is AttributionState {
   return true
 }
 
-/** Storage is injected for unit tests; production uses sessionStorage (one tab only). */
+/** Storage is injected for unit tests; production may use same-origin localStorage (TTL 72h, across tabs). */
 export function createPazoMarketingRecorder(
   storage: MarketingStorage,
   options: { enabled: boolean; now?: () => number; key?: string },
