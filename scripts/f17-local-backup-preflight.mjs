@@ -8,7 +8,9 @@ import {verifyStorageExport} from './storage-backup-core.mjs'
 const REQUIRED=['database.dump','roles.sql','storage-inventory.json','archive-toc.private.txt','extension-owners.json']
 const PROJECT='mrybvqdebbgcayuvgkkr'
 const fail=()=>{throw Error('BACKUP_INTEGRITY_BLOCKED')}
-const load=async file=>{try{return JSON.parse(await fs.readFile(file,'utf8'))}catch{fail()}}
+// Windows PowerShell 5.1 Set-Content -Encoding utf8 emits a leading BOM.
+// Strip it only for JSON parsing; hashes still cover the original file bytes.
+const load=async file=>{try{return JSON.parse((await fs.readFile(file,'utf8')).replace(/^\uFEFF/,''))}catch{fail()}}
 async function safeFile(root,name){
  if(![...REQUIRED,'database-manifest.json'].includes(name))fail()
  const filename=path.join(root,name),st=await fs.lstat(filename)

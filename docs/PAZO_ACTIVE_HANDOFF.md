@@ -1,3 +1,9 @@
+## F17 backup/restore — snapshot 24-oct-2026
+
+**BLOCKED_PRIVATE_OPERATOR_ENVIRONMENT.** GO PO vigente para respaldo privado y restore aislado, sin hosted writes/PayPal/merge/deploy/off-site. `main=7ce277bf`; PR100 DRAFT HEAD `ef4ae301`, continuación `f17/backup-restore-validation-20261024`. Corregido rechazo de manifiesto BOM de PowerShell con regresión roja/verde; **22/22 pruebas sintéticas PASS**. Docker y PG17.11 comprobados; Supabase CLI2.120.0 instalada/probada en cloud. **Backup nuevo, hashes reales, age y restore actual NO EJECUTADOS**: Linux no tiene terminal en el Windows privado ni DPAPI/custodia age. Única acción PO: abrir esta tarea en Codex local sobre `C:\Users\osori\PAZO-F17-backup-review`. Retomar export→integridad→cifrado/roundtrip→restore PG17 compatible→comparación completa, sin repetir QA previa válida. [Evidencia y límites](PAZO_F17_BACKUP_RESTORE_EXECUTION_20261024.md). Las entradas inferiores son históricas respecto a este subgate.
+
+---
+
 ## PAZO F17 — Restauración desde respaldo vigente: preflight local sin producción (PR DRAFT)
 
 PR #99 ya está fusionado a main (`7ce277bf`), con CI de push SUCCESS. Supabase conserva 122 versiones; el respaldo restaurado offline el 11-oct es anterior al estado actual. Se preparó una prueba **offline** de cinco archivos Database, Storage y hashes, que expresamente NO certifica restore, offsite, actualidad ni replay histórico. No se accedió a backups privados ni a producción. `db push` y `migration repair` siguen bloqueados. Referencia: [recovery preflight](docs/PAZO_F17_CURRENT_BACKUP_PREFLIGHT_20261023.md).

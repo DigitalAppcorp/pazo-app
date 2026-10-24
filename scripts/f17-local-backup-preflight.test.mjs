@@ -39,6 +39,15 @@ test('valid five-part manifest + empty synthetic Storage passes content integrit
  for(const field of ['restoreVerified','offsiteVerified','currentHostedStateVerified',
   'authServiceVerified','fullMigrationReplayVerified','productionReady'])assert.equal(result[field],false)
 })
+test('Windows PowerShell UTF-8 BOM manifest is accepted without changing hashed files',async t=>{
+ const {root}=await fixture(t)
+ const filename=path.join(root,'database-manifest.json')
+ const data=await fs.readFile(filename)
+ await fs.writeFile(filename,Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),data]))
+ const result=await verifyPazoRecoveryPackage(root)
+ assert.equal(result.status,'PAZO_LOCAL_BACKUP_INTEGRITY_PASS_ONLY')
+ assert.equal(result.restoreVerified,false)
+})
 test('mismatched SHA/bytes blocks package',async t=>{
  const {root}=await fixture(t)
  await fs.appendFile(path.join(root,'roles.sql'),'tampered')
