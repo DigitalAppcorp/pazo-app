@@ -150,7 +150,7 @@ const verifiedPairs=[
 ]
 const base=new URL('../supabase/migrations/',import.meta.url)
 function gitBlobHash(buffer){
-  const prefix=Buffer.from('blob '+buffer.length+'\\0')
+  const prefix=Buffer.from('blob '+buffer.length+'\0')
   return createHash('sha1').update(Buffer.concat([prefix,buffer])).digest('hex')
 }
 
@@ -165,7 +165,7 @@ test('23 hosted-identical migrations have recorded versions without SQL modifica
 })
 
 test('migration versions remain unique after safe historical reconciliation',()=>{
-  const names=readdirSync(base).filter(n=>/^\\d{14}_.+\\.sql$/.test(n))
+  const names=readdirSync(base).filter(n=>/^\d{14}_.+\.sql$/.test(n))
   assert.equal(new Set(names.map(n=>n.slice(0,14))).size,names.length)
   assert.equal(verifiedPairs.length,23)
 })
