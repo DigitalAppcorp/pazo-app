@@ -213,7 +213,7 @@ REVOKE ALL ON FUNCTION marketing_private.cohort_snapshot()
 -- A retention policy must be approved separately before configuring days.
 CREATE FUNCTION marketing_private.prune_expired() RETURNS integer
 LANGUAGE plpgsql SECURITY INVOKER SET search_path = ''
-AS $
+AS $$
 DECLARE
  v_days smallint;
  v_deleted integer;
@@ -226,7 +226,7 @@ BEGIN
  GET DIAGNOSTICS v_deleted = ROW_COUNT;
  RETURN v_deleted;
 END
-$;
+$$;
 REVOKE ALL ON FUNCTION marketing_private.prune_expired()
  FROM PUBLIC,anon,authenticated,service_role;
 
@@ -237,13 +237,13 @@ REVOKE ALL ON FUNCTION marketing_private.prune_expired()
 CREATE FUNCTION public.pazo_marketing_withdraw_v1(p_owner uuid)
 RETURNS boolean
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = ''
-AS $
+AS $$
 BEGIN
  IF p_owner IS NULL THEN RETURN FALSE; END IF;
  DELETE FROM marketing_private.acquisition WHERE owner_id = p_owner;
  RETURN TRUE;
 END
-$;
+$$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_withdraw_v1(uuid)
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_withdraw_v1(uuid)
@@ -255,9 +255,9 @@ GRANT EXECUTE ON FUNCTION public.pazo_marketing_withdraw_v1(uuid)
 CREATE FUNCTION public.pazo_marketing_prune_v1()
 RETURNS integer
 LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = ''
-AS $
+AS $$
  SELECT marketing_private.prune_expired();
-$;
+$$;
 REVOKE ALL ON FUNCTION public.pazo_marketing_prune_v1()
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.pazo_marketing_prune_v1()
