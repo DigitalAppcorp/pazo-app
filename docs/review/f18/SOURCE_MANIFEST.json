@@ -1,8 +1,8 @@
 {
-  "status": "PREPARED_NOT_DEPLOYED",
+  "status": "SQL_APPLIED_EDGES_PENDING",
   "lineEndings": "git-lf",
   "sql": {
-    "path": "supabase/migrations/20261025054548_pazo_f18_public_supporter_invitations.sql",
+    "path": "supabase/migrations/20261025073311_pazo_f18_public_supporter_invitations.sql",
     "sha256": "3dd5fc629bcecb1cfe8bf9ec075576ff5a44fafd984a9566cba87ff5369e9796"
   },
   "entries": [
