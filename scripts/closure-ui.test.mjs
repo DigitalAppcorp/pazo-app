@@ -58,6 +58,7 @@ const compileDirectory = directory => {
       : normalized==='services/petService.ts' ? 'export const createPetProfile = async input => { globalThis.__PAZO_CLOSURE_TEST_PET_INPUTS__.push(input); return { ...input, id: "synthetic-pet" } }; export const updatePetProfile = createPetProfile'
       : fs.readFileSync(source,'utf8')
     code=ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2023,module:ts.ModuleKind.ESNext,jsx:ts.JsxEmit.ReactJSX}}).outputText
+    code=code.replace(/import\s+['"][^'"]+\.css['"];?/g,'')
     code=code.replace(/(from\s+|import\s*)(['"])(\.[^'"]+)\2/g,(_all,prefix,quote,specifier)=>{
       const js=specifier.replace(/\.tsx?$/,'.js')
       return prefix+quote+(/\.(?:js|mjs)$/.test(js)?js:js+'.js')+quote

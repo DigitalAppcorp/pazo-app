@@ -5,7 +5,7 @@ type Recipient={owner_id:string;email:string|null;pets:string[];gift_level:numbe
 const LEVELS=[0,1,3,6,12] as const
 const DURATIONS=[30,90,365,0] as const
 
-export function AdminGiftBenefits({lang}:{lang:'es'|'en'}){
+export function AdminGiftBenefits({lang,onSelect}:{lang:'es'|'en';onSelect?:(owner:string|null)=>void}){
  const [term,setTerm]=useState('')
  const [results,setResults]=useState<Recipient[]>([])
  const [loading,setLoading]=useState(false)
@@ -36,6 +36,7 @@ export function AdminGiftBenefits({lang}:{lang:'es'|'en'}){
  const l=(es:string,en:string)=>lang==='es'?es:en
  const search=async()=>{
   if(term.trim().length<3||loading||busy)return
+  onSelect?.(null)
   setLoading(true);setMessage('')
   const request=scope.capture()
   try{
@@ -100,7 +101,7 @@ export function AdminGiftBenefits({lang}:{lang:'es'|'en'}){
   <div className="grid gap-2 sm:grid-cols-2">
    {results.map(user=><button type="button" key={user.owner_id}
     disabled={busy} aria-pressed={target?.owner_id===user.owner_id}
-    onClick={()=>{setTarget(user);setLevel(user.gift_level??0);setMessage('');setHistory([]);setHistoryState('loading')}}
+    onClick={()=>{setTarget(user);onSelect?.(user.owner_id);setLevel(user.gift_level??0);setMessage('');setHistory([]);setHistoryState('loading')}}
     className={'min-h-16 min-w-0 rounded-2xl p-3 text-left hover:bg-[#E1E53F]/30 focus-visible:bg-[#E1E53F]/50 '+(target?.owner_id===user.owner_id?'bg-[#E1E53F]/40':'bg-[#F0F4E9]')}>
     <strong className="block break-all text-xs">{user.email||user.owner_id}</strong>
     <span className="block text-[11px] text-[#5C7470]">{user.pets?.join(', ')||l('Sin mascotas','No pets')}</span>

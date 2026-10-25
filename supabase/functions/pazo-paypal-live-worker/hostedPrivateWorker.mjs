@@ -1,4 +1,4 @@
-import {createGradualMaintenance} from './gradualMaintenance.mjs'
+import {createPublicSupporterMaintenance} from './publicSupporterMaintenance.mjs'
 import {probePazoWebhookReadiness} from './webhookReadinessProbe.mjs'
 import {createOriginalQaReconcile} from './qaOriginalReconcile.mjs'
 import {createOriginalQaAudit} from './qaOriginalAudit.mjs'
@@ -20,7 +20,7 @@ export function createPazoLiveHostedPrivateWorker({released=false,getEnv=()=>und
   const historical=createPazoLiveVaultHistoricalVerification({supabaseUrl:projectUrl,serviceRoleKey,fetchImpl,released:true})
   const verifyAcceptedConsent=async c=>c?.affirmativeConsent===true&&readPazoLiveAcceptedOffer(c)!==null
   const options={released:true,lease,rpc,historical}
-  const maintain=createGradualMaintenance({rpc,readWebhookReady:()=>probePazoWebhookReadiness({
+  const maintain=createPublicSupporterMaintenance({rpc,readWebhookReady:()=>probePazoWebhookReadiness({
    projectUrl,apiKey:getEnv('SUPABASE_ANON_KEY'),fetchImpl
   })})
   const workers={sale:createPazoLiveDurableSaleWorker({...options,verifyAcceptedConsent}),refund:createPazoLiveDurableRefundWorker(options),lifecycle:createPazoLiveDurableLifecycleWorker(options),dispute:createPazoLiveDurableDisputeWorker(options)}

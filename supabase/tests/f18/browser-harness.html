@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1" /></head><body style="margin:0"><div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {AuthProvider} from '/src/context/AuthContext.tsx';
+import {supabase} from '/src/services/supabaseClient.ts';
+import {SupporterInvitationPrompt} from '/src/features/supporter/components/SupporterInvitationPrompt.tsx';
+import {SupporterInvitationCoordinator} from '/src/features/supporter/public/SupporterInvitationCoordinator.tsx';
+import {SupporterAccountManagement} from '/src/features/supporter/components/SupporterAccountManagement.tsx';
+import {SupporterBenefitReview} from '/src/features/supporter/public/SupporterBenefitReview.tsx';
+import {AdminPaypalLiveConsole} from '/src/features/admin/components/AdminPaypalLiveConsole.tsx';
+import '/src/index.css';
+const p=new URLSearchParams(location.search),lang=p.get('lang')==='en'?'en':'es';
+await supabase.auth.signInWithPassword({email:'initial@synthetic.invalid',password:'SYNTHETIC_ONLY_NOT_REAL'});
+window.fixtureSignIn=()=>supabase.auth.signInWithPassword({email:'switched@synthetic.invalid',password:'SYNTHETIC_ONLY_NOT_REAL'});
+function Fixture(){
+ const [safe,setSafe]=React.useState(p.get('unsafe')!=='1'),[open,setOpen]=React.useState(true),[mfa,setMfa]=React.useState(false);
+ const close=React.useCallback(()=>setOpen(false),[]),shown=React.useCallback(()=>{window.fixtureShown=(window.fixtureShown||0)+1},[]);
+ const mode=p.get('case');
+ if(mode==='admin')return React.createElement(React.Fragment,null,React.createElement('button',{onClick:()=>setMfa(true)},'Fixture MFA'),React.createElement(AdminPaypalLiveConsole,{lang,config:{price_minor:299,return_origin:'https://pazo-app.vercel.app',validation_status:'valid',plan_id:'P-SYNTHETICPLAN',client_id_stored:true,client_secret_stored:true,webhook_id:'WH-SYNTHETIC',updated_at:'2026-10-25'},loading:false,error:'',credentialsStored:true,credentialsChecked:true,mfaRecentlyVerified:mfa,onVerifyMfa:()=>setMfa(true),onStored:()=>{},onChanged:()=>{},history:[]}));
+ if(mode==='account')return React.createElement(SupporterAccountManagement,{lang,onClose:close});
+ if(mode==='review')return React.createElement(SupporterBenefitReview,{lang});
+ if(mode==='coordinator')return React.createElement(React.Fragment,null,React.createElement('button',{onClick:()=>setSafe(v=>!v)},'Fixture safe task'),React.createElement(SupporterInvitationCoordinator,{safe,lang}));
+ return open?React.createElement(SupporterInvitationPrompt,{lang,onExplore:()=>{location.hash='#/account/supporter?from=invitation'},onDismiss:close,onOptOut:close,onShown:shown}):React.createElement('button',null,'PAZO');
+}
+createRoot(document.getElementById('root')).render(React.createElement(AuthProvider,null,React.createElement(Fixture)));
+</script></body></html>

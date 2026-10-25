@@ -27,7 +27,9 @@
     "verify:f16:paypal:sandbox:webhooks": "node scripts/f16-paypal-verify-webhooks-readonly.mjs",
     "test:gradual": "node --experimental-strip-types --test supabase/tests/gradual/*.test.mjs src/features/admin/testing/adminPaypalLiveHostedCheckout.test.mjs src/features/admin/testing/adminPaypalLivePrivateWorkerHttp.test.mjs src/features/admin/testing/adminPaypalLiveRecovery.test.mjs src/features/admin/testing/adminPaypalLiveSqlServiceAdapters.test.mjs",
     "test:gradual:pg17": "node scripts/f16-gradual-live-lab.mjs",
-    "test:gradual:browser": "node scripts/f16-gradual-live-browser.mjs"
+    "test:f18": "node --experimental-strip-types --test supabase/tests/f18/*.test.mjs",
+    "test:f18:pg17": "node scripts/f18-public-supporter-lab.mjs",
+    "test:f18:browser": "node scripts/f18-public-supporter-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

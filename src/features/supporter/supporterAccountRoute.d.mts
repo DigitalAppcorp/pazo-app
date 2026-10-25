@@ -6,3 +6,4 @@ export declare function normalizeSupporterPaypalCallback(
  location:{pathname:string}|null|undefined,
  history:{state:unknown;replaceState:(state:unknown,title:string,url:string)=>void}|null|undefined
 ):boolean
+export function supporterEntrySource(hash:string):'manual'|'invitation'|'notification'|'paypal'

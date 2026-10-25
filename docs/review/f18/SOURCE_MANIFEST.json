@@ -1,0 +1,215 @@
+{
+  "status": "PREPARED_NOT_DEPLOYED",
+  "sql": {
+    "path": "supabase/migrations/20261025054548_pazo_f18_public_supporter_invitations.sql",
+    "sha256": "8acf95130be3d44d4ebeec952ddbce9c1d4b77bc30e4cb25cc41efc321b47443"
+  },
+  "entries": [
+    {
+      "entrypoint": "supabase/functions/pazo-paypal-live-checkout/index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/index.ts",
+          "sha256": "882dcf82b8137dbc021b76072e5c84461a0fc4328f443d18b73d1228cc77a9a9"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveCheckoutCandidate.mjs",
+          "sha256": "f07e7e64e207f864d6d2ab0dd78cc780ffb6939be47a0d12f6c3c1a72b8acc68"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveCheckoutHttpHandler.mjs",
+          "sha256": "d9cf5d883e56ec918c5a66a2afe1f36c2ab40e9bd29368265a1d2099f55bc08c"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveGoTrueOwner.mjs",
+          "sha256": "8c5b23c883840f347eec34bd30d43e576f1ea0f0ade62a4ee3ea1fe5ed6ecaf9"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveHostedCheckout.mjs",
+          "sha256": "0ec4f6619f93fa6a022e7771a9bcad90179a02344eebd757d0dceaf845669c0c"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveOfferRegistry.mjs",
+          "sha256": "d30a23a26e7e314a4397dd0e744981f564fd1d45e4be4cda3aa0a317f86fc006"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveSqlServiceAdapters.mjs",
+          "sha256": "a2a9404d2ff898b797f7f83881b39bc713c3eedbf04a3c42ccb749df9eb3ceaf"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveSubscriptionProvider.mjs",
+          "sha256": "a4ab10fd75751e5264745c882ef15cb64a98f1af45a07e1fb959565f00449aa2"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs",
+          "sha256": "4ecca1035868b18bfc0b40c42e303485a8a0f56fe5c52c011d21a7d1fbd34f3d"
+        }
+      ],
+      "sourceTreeSha256": "166efa9a99f87808eb6d29fc3eb74103ffb059e16bb911406c752105c9537375"
+    },
+    {
+      "entrypoint": "supabase/functions/pazo-paypal-live-worker/index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/f16-paypal-webhook/pazoPaypalLivePlanContract.mjs",
+          "sha256": "c95fed77bac484ba5d7ee6e0f5ffb9ebdca6ab84af626f306354e2fe78ec6b20"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveOfferRegistry.mjs",
+          "sha256": "d30a23a26e7e314a4397dd0e744981f564fd1d45e4be4cda3aa0a317f86fc006"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveSqlServiceAdapters.mjs",
+          "sha256": "a2a9404d2ff898b797f7f83881b39bc713c3eedbf04a3c42ccb749df9eb3ceaf"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveBillingSnapshot.mjs",
+          "sha256": "164c03f9252b828c327744cae76941bb82c06bb917ffd54345728d1865525cc5"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveDisputeEvidence.mjs",
+          "sha256": "3732b920b902ed14aacba0755ba0843dd1329e3121a80c5cf577d69fe0535339"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveDurableDisputeWorker.mjs",
+          "sha256": "982a19a17b2282658aba969d23ad00c50172ec47192e9a0710ff2f6a5649532a"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveDurableLifecycleWorker.mjs",
+          "sha256": "dfc2e9f035b56e848c7621c0d708f8ecc949833166e711852c2c26d24294337d"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveDurableRefundWorker.mjs",
+          "sha256": "5d40916a46c0d3545b95ed99b7d95228b8c733bd72333c5608bedb05e62ac4f0"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveDurableSaleWorker.mjs",
+          "sha256": "e5a6c4859a4e6c03bec51e82520fff477517057e069f8238c03971fcf2c81a25"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveEdgeGenerationSecrets.mjs",
+          "sha256": "63fcb413c57605b525f23ab4de533740087828918478e97d69d42dec53f0ef0f"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveHistoricalReadPipeline.mjs",
+          "sha256": "bdf2b3b596a36ed7f7e2eada739b8bbb180ac1d6c8ca4b548855bacd4e60fe71"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveHostedBindingRead.mjs",
+          "sha256": "24019cba5977bb9b3e562edf7da17480c487568a59015df85ec0be3725988a2c"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveInboxLease.mjs",
+          "sha256": "722492ae9a18e31cce679fd93e032bb4ab65ededa57d03db218d0fdd14201797"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveMerchantEvidence.mjs",
+          "sha256": "8b325a77f3188b50abdfc7f2033a6781b1ed71cc4710acdc7608ba25f07aed4f"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveObservedPeriodProof.mjs",
+          "sha256": "dc7bc5ec5057af567edf1bb454fc73f2acf9d8bf9ee433a7de1d47cce7d9ec24"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveOriginalRefundSale.mjs",
+          "sha256": "1405595905fe2fbc18d52b547ba0598fb52162ff7b2e8ae103c985d9939736e3"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveOwnerScope.mjs",
+          "sha256": "ad21b7f0e053525e6251811cd766062d5d90166115b3244c9842e5635e0a4280"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/livePostback.mjs",
+          "sha256": "69081951326ba291a66daf6ee947e4d09b3e7cd874ff451735959ae4c6b61106"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveRefundReconciliationGate.mjs",
+          "sha256": "26cf9377574f686baaf119494788e8c51b36dd0358c26b489c9b2def8b12ac70"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveSettlementReconciliationGate.mjs",
+          "sha256": "574892f6f8f8faadb8683ae0edd13b9184add8940d4748721df71e7dc997849e"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveSignedSaleClaim.mjs",
+          "sha256": "4575e1dc8f707cfe78a16ba74a13e39ff8dce4765a48a1814e5e1a1691f15320"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs",
+          "sha256": "4ecca1035868b18bfc0b40c42e303485a8a0f56fe5c52c011d21a7d1fbd34f3d"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveVerifiedSettlement.mjs",
+          "sha256": "21713d137aab383074de77e19633bd92a81e4ecb55ebfdcbeab22a776b01eda7"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveVerifiedSettlementWriter.mjs",
+          "sha256": "135eb772d45517b6dc9a79123a6f2968fe1cb724602d933b5e676ca6cc44ee81"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-webhook/liveWebhookEventEvidence.mjs",
+          "sha256": "e6d959ebd338ccc28b9207d6b3107fad35b73bf9208ff75d5ab993aa9c3f5c8d"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/hostedPrivateWorker.mjs",
+          "sha256": "bddc0dbf6b756f5f29292ac4ca7468310a68d0a541be33c0398c94b7dccdc050"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/index.ts",
+          "sha256": "438e39962dcf9b125b284984351f73097a12e4a7be03e40ba3096dd369179b20"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/privateWorkerHttp.mjs",
+          "sha256": "eb6447f7c6c93a887f1e9eeef83f2f2cc25311fc4b3e6005b039e5d72f96f754"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/publicSupporterMaintenance.mjs",
+          "sha256": "898f2a8f216d423b489f3afc160bcb8ef1e9f34dbb3638fb392158ffbee83a2c"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/qaOriginalAudit.mjs",
+          "sha256": "c4122aaf0036986f836c283baac4b042ff6a0a1c69c70c2889e214448d80894d"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/qaOriginalReconcile.mjs",
+          "sha256": "a96d7b1f3a4865824c2ffabe4f7e3485a3765b1485ebed21e0430fcf2b7b87f8"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-worker/webhookReadinessProbe.mjs",
+          "sha256": "eda389da709e785c13708b3eeebba4765dda37f0f922fd26a3875ac1cee563f6"
+        }
+      ],
+      "sourceTreeSha256": "e2717dea7cca8a04a0f89f1ded34a2ca1c8f4096296fc423a136dd6518c98acd"
+    },
+    {
+      "entrypoint": "supabase/functions/pazo-admin-public-supporter/index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/pazo-admin-paypal-provision/liveAuthenticatedAdminFactory.mjs",
+          "sha256": "146a8bbd5cfb21f62ef5a2a4b4bd21d5a42d9202eb3f9200652e1e4a313da7f6"
+        },
+        {
+          "path": "supabase/functions/pazo-admin-paypal-provision/liveFreshMfaProof.mjs",
+          "sha256": "6efec42b2664154007f2dbd20734883f3c49c7d361ae1d48399cb0ec1930d617"
+        },
+        {
+          "path": "supabase/functions/pazo-admin-paypal-provision/liveVerifiedAdmin.mjs",
+          "sha256": "1bbb47387660a79f1482314e12c7d5b6873a0e3b08f75d1172334a0ba7c57e96"
+        },
+        {
+          "path": "supabase/functions/pazo-admin-public-supporter/handler.mjs",
+          "sha256": "891410abfa346997d07d3be570fc153589cc83d6bf18a1da5e397631cf645962"
+        },
+        {
+          "path": "supabase/functions/pazo-admin-public-supporter/index.ts",
+          "sha256": "4392c95aedbafa47ec733550f64ac0ad0bd67fba867f31017d23ab15f247c481"
+        },
+        {
+          "path": "supabase/functions/pazo-paypal-live-checkout/liveSqlServiceAdapters.mjs",
+          "sha256": "a2a9404d2ff898b797f7f83881b39bc713c3eedbf04a3c42ccb749df9eb3ceaf"
+        }
+      ],
+      "sourceTreeSha256": "2c1b57e921eb0492716ae9771f614e9f5a965400eabeab0fd9e304fd759dcd9c"
+    }
+  ]
+}

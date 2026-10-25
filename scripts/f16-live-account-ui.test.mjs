@@ -15,7 +15,7 @@ const events=[]
 let session='owner-a'
 globalThis.window={location:{hash:'',hostname:'localhost'},
  addEventListener(){},removeEventListener(){},setTimeout,clearTimeout}
-globalThis.__PAZO_ACCOUNT_UI_DB__={auth:{
+globalThis.__PAZO_ACCOUNT_UI_DB__={rpc:async()=>({data:null,error:null}),auth:{
  getSession:async()=>({data:{session:{access_token:session}},error:null}),
  onAuthStateChange:fn=>{events.push(fn);fn('INITIAL_SESSION',{user:{id:session}});
   return {data:{subscription:{unsubscribe(){}}}}}
@@ -29,9 +29,9 @@ code=code.replace(/import \{([^}]+)\} from ['"]([^'"]+)['"];?/g,(all,names,speci
  if(specifier.endsWith('supabaseClient'))return 'const supabase=globalThis.__PAZO_ACCOUNT_UI_DB__;'
  if(specifier.endsWith('publicConfig'))return "const getPublicSupabaseConfig=()=>({url:'https://mrybvqdebbgcayuvgkkr.supabase.co',key:'sb_publishable_synthetic'});"
  if(specifier.endsWith('useSupporterMembershipStatus'))return "const useSupporterMembershipStatus=()=>({status:{kind:'inactive',milestone:0},refresh(){}});"
- if(specifier.endsWith('useGradualStatus'))return "const useGradualStatus=()=>({value:null,busy:false,loading:false,error:false,refresh(){},act:async()=>false});"
+ if(specifier.endsWith('usePublicSupporterStatus'))return "const usePublicSupporterStatus=()=>({value:null,refresh(){}});"
  if(specifier.endsWith('supporterUiRelease'))return 'const supporterBenefitsUiEnabled=true;'
- if(specifier.endsWith('supporterAccountRoute.mjs'))return 'const supporterPaypalReturnKind=()=>null;'
+ if(specifier.endsWith('supporterAccountRoute.mjs'))return "const supporterPaypalReturnKind=()=>null;const supporterEntrySource=()=> 'manual';"
  if(specifier.endsWith('SupporterScreenPortal'))return 'const SupporterScreenPortal=({children})=>children;'
  return names.split(',').map(n=>'const '+n.trim()+'=()=>null;').join('\n')
 }).replaceAll('import.meta.env','({DEV:false})')

@@ -3,12 +3,12 @@ import assert from 'node:assert/strict'
 import {supporterNotificationCopy,isSupporterNotification} from '../../../src/features/notifications/supporterNotification.ts'
 import {mapNotificationRow} from '../../../src/features/notifications/notificationSource.ts'
 const base={id:'82000000-0000-4000-8000-000000000002',sourceId:'82000000-0000-4000-8000-000000000003',sourceType:'supporter_campaign',title:'Stored title',subtitle:'Stored body',category:'todas',read:false,timeAgo:'Reciente'}
-test('one typed invitation thread updates waiting/slot/expired and localizes without trusting stored HTML',()=>{
+test('historical invitation thread and public reminder use current voluntary copy without commercial restrictions',()=>{
  for(const supporterState of ['invited','waiting','slot_granted','expired','declined']){
   const es=supporterNotificationCopy({...base,supporterState},'es'),en=supporterNotificationCopy({...base,supporterState},'en')
-  assert.notEqual(es.title,en.title);assert.match(es.subtitle,/no genera cobros/);assert.match(en.subtitle,/no charges/)
+  assert.notEqual(es.title,en.title);assert.match(es.subtitle,/sigue siendo gratis/);assert.match(en.subtitle,/stays free/)
  }
- assert.match(supporterNotificationCopy({...base,supporterState:'slot_granted'},'es').title,/cupo/)
+ assert.doesNotMatch(supporterNotificationCopy({...base,supporterState:'slot_granted'},'es').title,/cupo/)
 })
 test('original review_v1 remains available; future thanks_v2 never rewrites its copy',()=>{
  const original=supporterNotificationCopy({...base,sourceType:'supporter_verified',supporterCopyVersion:'review_v1'},'es')

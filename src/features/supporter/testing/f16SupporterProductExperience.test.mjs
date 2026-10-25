@@ -1,42 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-import {evaluateSupporterPitchEligibility as eligible, SUPPORTER_PITCH_POLICY as policy} from '../supporterPitchEligibility.mjs'
-
-const now = Date.UTC(2026, 9, 17)
-const DAY = 24 * 60 * 60 * 1000
-const valid = () => ({
-  isSupporter:false, isFirstSession:false, inOnboarding:false,
-  inRescueFlow:false, isBusy:false,
-  accountCreatedAtMs: now - 8*DAY, activeDaysInLast14:3,
-  meaningfulActions:5, distinctActionSurfaces:2, lastDismissedAtMs:null,
-})
-
-test('F16 invitation requires established value and never interrupts rescue/onboarding',()=>{
- assert.equal(policy.minimumAccountDays,7)
- assert.equal(policy.dismissalCooldownDays,30)
- assert.deepEqual(eligible(valid(),now),{eligible:true,reason:'eligible'})
- for(const input of [
-   {...valid(),accountCreatedAtMs:now-6*DAY},
-   {...valid(),activeDaysInLast14:2},
-   {...valid(),meaningfulActions:4},
-   {...valid(),distinctActionSurfaces:1},
-   {...valid(),isFirstSession:true},
-   {...valid(),inOnboarding:true},
-   {...valid(),inRescueFlow:true},
-   {...valid(),isBusy:true},
-   {...valid(),isSupporter:true},
-   {...valid(),isSupporter:undefined},
-   {...valid(),lastDismissedAtMs:now-29*DAY},
-   {...valid(),lastDismissedAtMs:now+DAY},
-   {...valid(),activeDaysInLast14:15},
-   {...valid(),meaningfulActions:undefined},
-   {},
-   null,
- ])assert.equal(eligible(input,now).eligible,false,JSON.stringify(input))
- assert.equal(eligible({...valid(),lastDismissedAtMs:now-30*DAY},now).eligible,true)
- assert.equal(eligible(valid(),NaN).eligible,false)
-})
 
 test('F16 product page retains no-purchase path and real server-verified checkout',()=>{
  const page=readFileSync(new URL('../components/SupporterAccountManagement.tsx',import.meta.url),'utf8')
@@ -53,7 +17,7 @@ test('F16 product page retains no-purchase path and real server-verified checkou
  const live=readFileSync(new URL('../components/SupporterLiveCheckoutPanel.tsx',import.meta.url),'utf8')
  assert.match(page,/<SupporterLiveCheckoutPanel lang=\{lang\} key=\{offerRefreshRevision\}/)
  assert.match(page,/onAvailabilityChange=\{receiveLiveOfferState\}/)
- assert.match(page,/liveOfferPhase==='loading'/)
+ assert.doesNotMatch(page,/accounts\?\.length===0&&liveOfferPhase==='loading'/)
  assert.match(live,/Las suscripciones todavía no están disponibles/)
  assert.match(page,/qaV2Screen \?/)
  assert.match(page,/SandboxCheckoutQaPanel/)
@@ -72,13 +36,6 @@ test('F16 product page retains no-purchase path and real server-verified checkou
  assert.match(account,/result\.cycleVerified!==true/)
  assert.match(account,/action:'cancel'/)
  assert.match(account,/confirmCancellation:true/)
-})
-
-test('F16 eligibility policy does not collect or write activity and does not auto-trigger without reviewed signals',()=>{
- const evaluator=readFileSync(new URL('../supporterPitchEligibility.mjs',import.meta.url),'utf8')
- assert.doesNotMatch(evaluator,/localStorage|sessionStorage|\.insert\(|\.upsert\(|\.rpc\(|fetch\(|navigator\./)
- assert.match(evaluator,/supporter_state_unverified/)
- assert.match(evaluator,/dismissal_cooldown/)
 })
 
 test('F16 verified owner gets a decorated member-only entry and real benefit controls',()=>{
@@ -102,14 +59,15 @@ test('F16 verified owner gets a decorated member-only entry and real benefit con
  assert.ok(!proof.includes('sessionStorage'))
 })
 
-test('F16 prompt is available as a non-blocking component, but automatic delivery is not live',()=>{
+test('F18 G prompt offers a free exit and is composed through a safe server coordinator',()=>{
  const prompt=readFileSync(new URL('../components/SupporterInvitationPrompt.tsx',import.meta.url),'utf8')
  const page=readFileSync(new URL('../../../App.tsx',import.meta.url),'utf8')
  const pet=readFileSync(new URL('../../../components/views/PetView.tsx',import.meta.url),'utf8')
  assert.ok(prompt.includes('onExplore'))
  assert.ok(prompt.includes('onDismiss'))
  assert.ok(prompt.includes('Ahora no'))
- assert.ok(prompt.includes('PAZO seguirá siendo gratis'))
+ assert.ok(prompt.includes('PAZO sigue siendo gratis'))
+ assert.ok(page.includes('<SupporterInvitationCoordinator'))
  assert.ok(!page.includes('<SupporterInvitationPrompt'))
  assert.ok(pet.includes('<SupporterInvitationPrompt'))
  assert.ok(pet.includes('invitationPreviewRequested'))

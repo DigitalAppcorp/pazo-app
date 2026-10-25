@@ -475,3 +475,7 @@ entrypoint = "./functions/pazo-admin-paypal-release/index.ts"
 # Issue82: prepared only; no hosted deployment or financial activation.
 [functions.pazo-admin-gradual-live]
 verify_jwt = true
+
+# F18 prepared only; deployment and activation require explicit PO gate.
+[functions.pazo-admin-public-supporter]
+verify_jwt = true

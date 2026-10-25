@@ -128,8 +128,8 @@ export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange,availabili
       ?label('Estamos actualizando el dominio de regreso de PayPal. No se iniciará ningún cobro hasta comprobar la configuración.',
         'We are updating PayPal’s return domain. No payment will start until the configuration is verified.')
       :availabilityReason==='canary'
-        ?label('Tu cuenta aún no tiene un cupo de pago disponible. PAZO sigue siendo gratis.',
-          'Your account does not yet have a checkout slot. PAZO remains free.')
+        ?label('No pudimos habilitar la compra para esta cuenta. Revisa tu sesión o contacta con soporte. PAZO sigue siendo gratis.',
+          'Checkout is unavailable for this account. Check your session or contact support. PAZO remains free.')
         :label('Las suscripciones todavía no están disponibles. PAZO continúa siendo gratis.',
           'Subscriptions are not available yet. PAZO remains free.')}</p>
    <button type="button" onClick={refresh}

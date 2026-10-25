@@ -1,4 +1,4 @@
-import {GradualCampaignPanel} from '../gradual/GradualCampaignPanel'
+import {SupporterBenefitReview} from '../public/SupporterBenefitReview'
 import {useEffect, useRef, useState} from 'react'
 import type {Pet} from '../../../types/pazo'
 import {SupporterBadge, type SupporterMilestone} from './SupporterBadge'
@@ -15,6 +15,7 @@ type Props = {
  milestone:SupporterMilestone
  qa:boolean
  onManageSubscription?:()=>void
+ onSupport?:()=>void
 }
 type IconName='paw'|'palette'|'heart'|'medal'|'card'
 const BenefitIcon=({name}: {name:IconName})=>{
@@ -29,7 +30,7 @@ const BenefitIcon=({name}: {name:IconName})=>{
   <path d={paths[name]}/>
  </svg>
 }
-export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSubscription}:Props) {
+export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSubscription,onSupport}:Props) {
  const [showThemes,setShowThemes]=useState(false)
  const [showWall,setShowWall]=useState(false)
  const [showMembership,setShowMembership]=useState(false)
@@ -98,7 +99,8 @@ export function SupporterBenefitsHome({lang,onClose,pet,milestone,qa,onManageSub
      {t('Las cortesías no generan cobros ni renovaciones. Si tienes una suscripción, puedes gestionarla en Mi membresía.', 'Complimentary access creates no charges or renewals. Manage any subscription under My membership.')}
     </p>
    </section>
-   {!qa&&<GradualCampaignPanel lang={lang} reviewOnly/>}
+   {!qa&&<SupporterBenefitReview lang={lang}/>}
+   {onSupport&&<button type="button" className="min-h-12 w-full rounded-2xl bg-[#E1E53F] px-5 py-3 font-bold" onClick={onSupport}>{t('Quiero apoyar voluntariamente a PAZO','I want to support PAZO voluntarily')}</button>}
    <h3 className="px-1 pt-1 text-[19px] font-black">{t('Tus beneficios','Your benefits')}</h3>
    <section aria-label={t('Beneficios de Amigo de PAZO','PAZO Friend benefits')}
     className="rounded-[28px] bg-white p-2 shadow-[0_6px_23px_rgba(32,78,74,0.035)]">

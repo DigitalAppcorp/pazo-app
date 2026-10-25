@@ -1,3 +1,13 @@
+## F18 — metadatos de invitaciones y apoyo público (preparado, NO alojado)
+
+Nuevas tablas privadas FORCE RLS, sin acceso directo cliente/servicio: fechas de primera utilización, retorno en otro día UTC y primera acción significativa validada por escrituras de posts/cuidados o QR propio habilitado; sin contenido de publicaciones, notas, QR, tokens QR, fotos, ubicación ni datos del pagador. Solo se envían UUID de mascota al verificar uso de un QR ya leído, y enums de acción/origen; SQL revalida propietario y artefacto.
+
+Por cuenta/campaña: cualificación, lease opaco de presentación, compromiso de pantalla única, impresión confirmada tras render, cierre/CTA, apertura/origen de oferta, opt-out, supresión y entrega interna final. El opt-out se respeta también al cambiar de campaña. Preferencias y metadatos mínimos de frecuencia persisten durante campaña y hasta baja de cuenta (FK CASCADE), sin reiniciar por mascota, sesión o dispositivo; no se inventa purga que permita recontactar. Sin push/email/SMS ni proveedor nuevo.
+
+Aviso transaccional por cuenta y respuesta enum ok/issue/skipped; un problema enlaza un único ticket privado mediante nonce estable y sigue la retención de soporte ya aprobada. Sin condicionar derechos, ni nuevas ventas por una cortesía. Certificación de despliegue conserva commit y hashes SQL/bundles/generación en registro privado, sin secretos. Auditoría CAS conserva actor, acción y revisión bajo retención financiera existente. Ledger, consentimientos financieros inmutables e historia gradual intactos. Reconciliación legal ES/EN en esta rama; no se afirma que esté publicada.
+
+---
+
 ## Issue85 — relectura QA y certificado técnico (24-oct-2026, instalado; gate cerrado)
 
 Una revisión autorizada puede conservar UUID de petición, generación/evento originales, diagnóstico/estado/attempts anteriores, status/timestamp reales del proveedor y digest de evidencia mínima. Sigue la retención/hold de su inbox financiero (FK que acompaña la purga lícita del padre), sin payload ni pagador. Ningún recheck borra firma o marca processed: solo retorna a pending con historial y tope original de intentos, tras GET auténtico y cero transacciones. El certificado técnico privado conserva commits/bundles/digest/origen/revisiones/fecha conforme al control financiero existente; solo postgres puede certificar, y no concede MFA ni inicia campaña. No nuevas categorías de terceros, secretos, publicidad o analytics.

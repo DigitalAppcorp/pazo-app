@@ -159,6 +159,8 @@ test('server readiness requires actual Live route and a healthy private financia
    if(uri.endsWith('/functions/v1/pazo-paypal-live-webhook'))return response(200,{source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_runtime'))return response(200,true)
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_release_admit'))return response(200,true)
+   if(uri.endsWith('/auth/v1/user'))return response(200,{id:owner,aud:'authenticated'})
+   if(uri.includes('/rest/v1/profiles?'))return response(200,[{id:owner,onboarding_completed:true}])
 
    records.push(uri)
    if(uri.endsWith('/rest/v1/rpc/pazo_f16_live_service_active_route'))
