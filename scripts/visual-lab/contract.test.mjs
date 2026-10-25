@@ -45,6 +45,7 @@ test('capture sandbox intercepts all requests and never follows external origins
   assert.match(runner,/route\.abort\('blockedbyclient'\)/)
   assert.match(runner,/assert\.equal\(u\.protocol,'http:'/)
   assert.match(runner,/127\.0\.0\.1/)
+  assert.ok(runner.includes("ORIGIN+'/supabase/tests/visual/browser-harness.html?case='"),'fixture navigation must include the URL path separator')
   assert.doesNotMatch(runner,/request\.continue\(\)/)
   assert.doesNotMatch(runner,/page\.goto\('https:\/\//)
 })
