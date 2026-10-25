@@ -28,8 +28,14 @@ concurrency:
 
 jobs:
   synthetic-browser-gallery:
+    name: Visual QA — ${{ matrix.viewport }}px
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        viewport: ${{ fromJSON(((github.event_name == 'workflow_dispatch' && inputs.scope == 'full') || (github.event_name == 'pull_request' && github.head_ref == 'audit/pazo-visual-lab-20261025')) && '[320,390,430,768,1440]' || '[390]') }}
     env:
       PAZO_VISUAL_LAB_ORIGIN: http://127.0.0.1:5189
       PAZO_VISUAL_LAB_DIR: artifacts/visual-lab
@@ -76,7 +82,7 @@ jobs:
         env:
           VISUAL_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.scope || (github.head_ref == 'audit/pazo-visual-lab-20261025' && 'full' || 'pilot') }}
         run: |
-          node scripts/visual-lab/capture.mjs --scope="$VISUAL_SCOPE"
+          node scripts/visual-lab/capture.mjs --scope="$VISUAL_SCOPE" --viewport=${{ matrix.viewport }}
       - name: Store Vite logs when needed
         if: failure()
         run: |
@@ -86,7 +92,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: pazo-visual-lab-${{ github.run_id }}-${{ github.run_attempt }}
+          name: pazo-visual-lab-${{ github.run_id }}-${{ matrix.viewport }}-${{ github.run_attempt }}
           path: artifacts/visual-lab/
           retention-days: 14
           if-no-files-found: warn
