@@ -90,7 +90,7 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
       'admin-paypal':['Configuración · PayPal','Settings · PayPal'],
     }
     if(safeClicks[spec.id]){
-      const exact=['feed-nearby','care-create'].includes(spec.id)?false:true
+      const exact=['feed-nearby','care-create','pet-picker'].includes(spec.id)?false:true
       const title=safeClicks[spec.id][lang==='es'?0:1]
       await page.getByRole('button',{name:title,exact}).first().click({timeout:6500})
       out.interaction='CLICKED_READ_ONLY:'+title
