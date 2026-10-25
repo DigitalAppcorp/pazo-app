@@ -1,6 +1,7 @@
 name: PAZO Visual Lab (synthetic screenshots)
 
-# Pull-request pilot proves the harness without exposing production or credentials.
+# This approved audit branch runs FULL on PR; other branches default to pilot.
+# All scenes synthetic, local-only, with no external writes.
 # After the workflow exists on main, operators can manually run the full matrix.
 on:
   pull_request:
@@ -12,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: 'pilot (9 scenes × 390 ES/EN) or full (18 scenes × 5 sizes × ES/EN)'
+        description: 'pilot (9 scenes × 390 ES/EN) or full (all registered synthetic scenes × 5 sizes × ES/EN)'
         type: choice
         required: true
         default: pilot
@@ -73,7 +74,7 @@ jobs:
       - name: Capture real components with external network blocked
         shell: bash
         env:
-          VISUAL_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.scope || 'pilot' }}
+          VISUAL_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.scope || (github.head_ref == 'audit/pazo-visual-lab-20261025' && 'full' || 'pilot') }}
         run: |
           node scripts/visual-lab/capture.mjs --scope="$VISUAL_SCOPE"
       - name: Store Vite logs when needed
