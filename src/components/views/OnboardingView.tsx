@@ -210,12 +210,12 @@ export const OnboardingView = ({
 
               <div className="relative z-10 shrink-0 px-5 pt-[clamp(12px,3vh,22px)]">
                 <h1 id="pazo-welcome-title"
-                  className="max-w-[290px] text-[clamp(24px,7.4vw,32px)] font-black leading-[1.06] tracking-tight">
+                  className="max-w-[290px] text-[clamp(24px,7.4vw,32px)] font-black leading-[1.06] tracking-tight text-[#183D3A]">
                   {lang === 'es'
                     ? <>Hecho con amor<br/>para las mascotas</>
                     : <>Made with love<br/>for pets</>}
                 </h1>
-                <p className="mt-2 max-w-[285px] text-[clamp(12px,3.5vw,14px)] font-medium leading-[1.4] text-[#FFFAEB]">
+                <p className="mt-2 max-w-[285px] text-[clamp(12px,3.5vw,14px)] font-medium leading-[1.4] text-[#183D3A]">
                   {lang === 'es'
                     ? 'Únete y descubre la mejor app social para mascotas'
                     : 'Join and discover the best social app for pets'}
