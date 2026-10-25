@@ -18,8 +18,8 @@ export function buildF18Manifest(){
   const files=[...seen.values()].sort((a,b)=>a.path.localeCompare(b.path))
   return {entrypoint,files,sourceTreeSha256:hash(JSON.stringify(files))}
  })
- const sql='supabase/migrations/20261025054548_pazo_f18_public_supporter_invitations.sql'
- return {status:'PREPARED_NOT_DEPLOYED',lineEndings:'git-lf',sql:{path:sql,sha256:hash(gitText(sql))},entries}
+ const sql='supabase/migrations/20261025073311_pazo_f18_public_supporter_invitations.sql'
+ return {status:'SQL_APPLIED_EDGES_PENDING',lineEndings:'git-lf',sql:{path:sql,sha256:hash(gitText(sql))},entries}
 }
 if(process.argv[1]?.replaceAll('\\','/').endsWith('/f18-release-manifest.mjs')){
  writeFileSync('docs/review/f18/SOURCE_MANIFEST.json',JSON.stringify(buildF18Manifest(),null,2)+'\n')
