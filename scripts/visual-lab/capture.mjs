@@ -61,7 +61,7 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
     return route.abort('blockedbyclient')
   })
   try{
-    const res=await page.goto(ORIGIN+'supabase/tests/visual/browser-harness.html?case='+encodeURIComponent(spec.id)+'&lang='+lang,
+    const res=await page.goto(ORIGIN+'/supabase/tests/visual/browser-harness.html?case='+encodeURIComponent(spec.id)+'&lang='+lang,
       {waitUntil:'domcontentloaded',timeout:25000})
     if(res?.status()!==200)throw Error('Local harness returned '+res?.status())
     await page.locator('[data-visual-surface="'+spec.id+'"]').waitFor({state:'attached',timeout:17000})
