@@ -19,12 +19,12 @@ REVOKE ALL ON TABLE supporter_private.pazo_live_production_reclassifications FRO
 
 DO $guard$
 DECLARE
- v_owner constant uuid:='f049cf84-4c21-48b1-8b74-13f49364c7e3'::uuid;
+ v_owner uuid;
  inserted integer;
 BEGIN
- IF (SELECT COUNT(*) FROM admin_private.admin_grants WHERE user_id=v_owner)<>1
- OR (SELECT COUNT(*) FROM admin_private.admin_grants)<>1
- THEN RAISE EXCEPTION 'expected_original_admin_not_verified'; END IF;
+ IF (SELECT COUNT(*) FROM admin_private.admin_grants)<>1
+ THEN RAISE EXCEPTION 'expected_exactly_one_production_admin'; END IF;
+ SELECT user_id INTO STRICT v_owner FROM admin_private.admin_grants;
  IF NOT EXISTS (
   SELECT 1 FROM auth.users u JOIN public.profiles p ON p.id=u.id
   WHERE u.id=v_owner AND u.email_confirmed_at IS NOT NULL
@@ -127,8 +127,9 @@ AS $sale$
 $sale$;
 
 DO $verify$
-DECLARE v_owner constant uuid:='f049cf84-4c21-48b1-8b74-13f49364c7e3'::uuid;
+DECLARE v_owner uuid;
 BEGIN
+ SELECT user_id INTO STRICT v_owner FROM admin_private.admin_grants;
  IF NOT supporter_private.public_supporter_eligible(v_owner) THEN
   RAISE EXCEPTION 'reclassified_production_admin_still_ineligible'; END IF;
  IF (SELECT COUNT(*) FROM supporter_private.pazo_live_production_reclassifications)<>1
