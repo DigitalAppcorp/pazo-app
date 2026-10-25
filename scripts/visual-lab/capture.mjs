@@ -17,6 +17,7 @@ assert.equal(u.username,'')
 assert.equal(u.password,'')
 assert.equal(u.pathname,'/')
 const scope=process.argv.find(s=>s.startsWith('--scope='))?.split('=')[1]||'pilot'
+const onlyViewport=process.argv.find(s=>s.startsWith('--viewport='))?.split('=')[1]||null
 assert.ok(['pilot','full'].includes(scope),'scope must be pilot or full')
 const base=resolve(process.env.PAZO_VISUAL_LAB_DIR||'artifacts/visual-lab')
 const axeFile=process.env.PAZO_AXE_CORE_PATH
@@ -35,7 +36,9 @@ const manifest={
 const browser=await chromium.launch({headless:true,args:['--no-sandbox'],
   ...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{})})
 const cases=selectVisualCases(scope)
-const viewports=selectVisualViewports(scope)
+const allViewports=selectVisualViewports(scope)
+assert.ok(!onlyViewport||Object.hasOwn(allViewports,onlyViewport),'requested viewport must be in selected scope')
+const viewports=onlyViewport?{[onlyViewport]:allViewports[onlyViewport]}:allViewports
 const record=(o)=>{manifest.captures.push(o)}
 const safeName=(v)=>v.replace(/[^a-z0-9_-]/gi,'_')
 function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
@@ -44,7 +47,8 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
   const id=spec.id+'-'+sizeName+'-'+lang
   const out={id,case:spec.id,group:spec.group,level:spec.level,lang,viewport,
     status:'NOT_TESTED',screenshot:null,errors:[],blocked_external:0,
-    blocked_non_get:0,overflow:null,axe:'NOT_TESTED',axe_findings:[],a11y_input_suspects:0}
+    blocked_non_get:0,overflow:null,axe:'NOT_TESTED',axe_findings:[],a11y_input_suspects:0,
+    interaction:null,scroll_region:null,screenshot_bottom:null}
   const ctx=await browser.newContext({viewport,deviceScaleFactor:1,
     locale:lang==='es'?'es-US':'en-US',timezoneId:'America/Los_Angeles',
     reducedMotion:'reduce',serviceWorkers:'block',
@@ -66,6 +70,32 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
     if(res?.status()!==200)throw Error('Local harness returned '+res?.status())
     await page.locator('[data-visual-surface="'+spec.id+'"]').waitFor({state:'attached',timeout:17000})
     await page.waitForTimeout(450)
+    // Read-only user-interface navigation, never submit forms, payments or decisions.
+    const safeClicks={
+      'feed-nearby':['Cerca','Nearby'],
+      'pet-settings':['Configuración','Settings'],
+      'pet-picker':['Cambiar','Switch'],
+      'pet-edit':['Editar','Edit'],
+      'care-history':['Historial','History'],
+      'care-create':['Añadir nuevo cuidado','Add care item'],
+      'notifications-community':['Avistamientos','Sightings'],
+      'messages-request':['Solicitudes','Requests'],
+      'search-filter-people':['Mascotas','Pets'],
+      'admin-users':['Usuarios','Users'],
+      'admin-pets':['Mascotas','Pets'],
+      'admin-finance':['Membresías','Memberships'],
+      'admin-ideas':['Fake Doors','Fake Doors'],
+      'admin-infra':['Supabase','Supabase'],
+      'admin-maintenance':['Mantenimiento','Maintenance'],
+      'admin-paypal':['Configuración · PayPal','Settings · PayPal'],
+    }
+    if(safeClicks[spec.id]){
+      const exact=['feed-nearby','care-create'].includes(spec.id)?false:true
+      const title=safeClicks[spec.id][lang==='es'?0:1]
+      await page.getByRole('button',{name:title,exact}).first().click({timeout:6500})
+      out.interaction='CLICKED_READ_ONLY:'+title
+      await page.waitForTimeout(200)
+    }
     const metrics=await page.evaluate(()=>{
       const root=document.querySelector('[data-visual-surface]')
       const visible=(e)=>{const s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'}
@@ -83,6 +113,19 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
     })
     out.overflow=metrics.documentWidth>metrics.viewportWidth+2
     out.a11y_input_suspects=metrics.a11yInputSuspects
+    // Internal scroll is independent of documentElement. Record it explicitly.
+    const scrollState=await page.evaluate(()=>{
+      const nodes=[...document.querySelectorAll('*')].filter(e=>{
+        const css=getComputedStyle(e)
+        return /(auto|scroll)/.test(css.overflowY)&&e.scrollHeight>e.clientHeight+12&&e.clientHeight>70
+      })
+      return nodes.map(e=>({
+        tag:e.tagName.toLowerCase(),role:e.getAttribute('role')||null,
+        clientHeight:e.clientHeight,scrollHeight:e.scrollHeight,
+        classToken:String(e.className||'').slice(0,60)
+      })).sort((a,b)=>(b.scrollHeight-b.clientHeight)-(a.scrollHeight-a.clientHeight))[0]||null
+    })
+    out.scroll_region=scrollState;
     out.interactive_count=metrics.interactiveCount
     out.app_shell_width=metrics.appShellWidth
     if(metrics.rootText<5)throw Error('Rendered fixture lacks visible content')
@@ -104,6 +147,23 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
     mkdirSync(join(base,'screenshots',safeName(spec.group),safeName(spec.id)),{recursive:true})
     await page.screenshot({path:join(base,screenshot),fullPage:true,animations:'disabled',timeout:15000})
     out.screenshot=screenshot
+    if(scrollState&&['320','390'].includes(sizeName)){
+      const didScroll=await page.evaluate(()=>{
+        const nodes=[...document.querySelectorAll('*')].filter(e=>{
+          const css=getComputedStyle(e)
+          return /(auto|scroll)/.test(css.overflowY)&&e.scrollHeight>e.clientHeight+12&&e.clientHeight>70
+        }).sort((a,b)=>(b.scrollHeight-b.clientHeight)-(a.scrollHeight-a.clientHeight))
+        if(!nodes.length)return false
+        nodes[0].scrollTop=nodes[0].scrollHeight
+        return true
+      })
+      if(didScroll){
+        await page.waitForTimeout(110)
+        const bottom='screenshots/'+safeName(spec.group)+'/'+safeName(spec.id)+'/'+id+'-scroll-bottom.png'
+        await page.screenshot({path:join(base,bottom),fullPage:true,animations:'disabled',timeout:15000})
+        out.screenshot_bottom=bottom
+      }
+    }
     out.status=out.overflow?'CAPTURED_WITH_LAYOUT_WARNING':'CAPTURED'
   }catch(err){
     out.status='CAPTURE_FAILED'
