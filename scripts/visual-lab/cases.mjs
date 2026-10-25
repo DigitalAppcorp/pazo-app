@@ -1,3 +1,4 @@
+import {EXTENDED_VISUAL_CASES} from './extended-cases.mjs'
 // Inventario inicial de escenas REALMENTE montadas por el laboratorio.
 // No representar estas escenas como las 86 superficies visualmente aprobadas.
 // "synthetic" indica datos de relleno; "blocked" prueba una recuperación, no mapa cargado.
@@ -27,7 +28,8 @@ export const VISUAL_CASES = Object.freeze([
   {id:'legal-privacy',    group:'legal',level:'component',title:'Política de privacidad, diálogo'},
   {id:'legal-terms',      group:'legal',level:'component',title:'Condiciones de uso, diálogo'},
   {id:'report-post',      group:'moderacion',level:'synthetic',title:'Denunciar publicación (sin enviar)'},
-  {id:'wall-empty',       group:'membresia',level:'synthetic',title:'Muro de agradecimiento sin mascotas'}
+  {id:'wall-empty',       group:'membresia',level:'synthetic',title:'Muro de agradecimiento sin mascotas'},
+  ...EXTENDED_VISUAL_CASES
 ]);
 export const VISUAL_VIEWPORTS = Object.freeze({
   '320':{width:320,height:568},
