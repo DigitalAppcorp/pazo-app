@@ -46,8 +46,8 @@ Nunca sumar los S como «nota estética».
 | Dimensión | Referencia |
 | --- | --- |
 | Código/estilo | [`main@a01b5686`](https://github.com/DigitalAppcorp/pazo-app/tree/a01b56861cc7d7e016efb9a5d109987c4ceeb33a) |
-| Reglas globales | [`src/index.css`](../../../../src/index.css): escalas, margin forzado, foco, superficies y barra |
-| Composición raíz | [`src/App.tsx`](../../../../src/App.tsx): marco móvil ≤430 px, rutas/tablas modales |
+| Reglas globales | [`src/index.css`](../../../src/index.css): escalas, margin forzado, foco, superficies y barra |
+| Composición raíz | [`src/App.tsx`](../../../src/App.tsx): marco móvil ≤430 px, rutas/tablas modales |
 | Preferencias F13 | [`docs/PAZO_F13_VISUAL_CHANGESET_20261012.md`](../../PAZO_F13_VISUAL_CHANGESET_20261012.md): revisar cronología; decisiones antiguas de mapa congelado superadas por aprobación posterior de diseño inmersivo |
 | Preferencias F18 | [`docs/PAZO_SUPPORTER_INVITATION_DESIGN_OPTIONS_20261024.md`](../../PAZO_SUPPORTER_INVITATION_DESIGN_OPTIONS_20261024.md): concepto G, invitación no pago; el documento mezcla historia antes y después de implementación |
 | Cambios NO integrados | [PR #106](https://github.com/DigitalAppcorp/pazo-app/pull/106): corrige margin global y tipografía en ejemplos, **no** está en main |
