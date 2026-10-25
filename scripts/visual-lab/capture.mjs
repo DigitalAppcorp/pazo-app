@@ -73,7 +73,7 @@ for(const spec of cases)for(const [sizeName,viewport] of Object.entries(viewport
       const unlabeled=[...document.querySelectorAll('input:not([type=hidden]),textarea,select')]
         .filter(e=>visible(e)&&!e.labels?.length&&!e.getAttribute('aria-label')&&!e.getAttribute('aria-labelledby'))
       return {
-        rootText:(root?.textContent||'').trim().length,
+        rootText:(root?.textContent||document.querySelector('[role="dialog"]')?.textContent||'').trim().length,
         documentWidth:document.documentElement.scrollWidth,
         viewportWidth:document.documentElement.clientWidth,
         appShellWidth:document.querySelector('[data-pazo-app-shell]')?.getBoundingClientRect().width||null,
