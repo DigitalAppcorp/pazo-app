@@ -32,6 +32,7 @@ jobs:
     env:
       PAZO_VISUAL_LAB_ORIGIN: http://127.0.0.1:5189
       PAZO_VISUAL_LAB_DIR: artifacts/visual-lab
+      PAZO_VISUAL_LAB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       # Vite's existing publicConfig requires this exact host. There are NO
       # credentials: the key is a known-invalid synthetic sentinel.
       # Chromium intercepts ALL remote requests before network access.
@@ -42,6 +43,7 @@ jobs:
       - name: Checkout exact source under audit
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - name: Node 22
         uses: actions/setup-node@v7
