@@ -58,7 +58,6 @@ const liveCode=transpile(liveSource).replace(/import \{([^}]+)\} from ['"]([^'"]
  }).replaceAll('import.meta.env',"({DEV:false})")
 writeFileSync(path.join(root,'account.mjs'),accountCode)
 writeFileSync(path.join(root,'live.mjs'),liveCode)
-const {SupporterAccountManagement}=await import(pathToFileURL(path.join(root,'account.mjs')).href)
 const offerEs=getPazoLiveOffer('es')
 const offerEn=getPazoLiveOffer('en')
 let checkoutGets=[],listCount=0,checkoutPosts=0
@@ -85,6 +84,7 @@ globalThis.fetch=async (url,opts={})=>{
  if(opts.method==='POST'){checkoutPosts++;throw Error('purchase must be user initiated')}
  throw Error('unexpected request '+url)
 }
+const {SupporterAccountManagement}=await import(pathToFileURL(path.join(root,'account.mjs')).href)
 const offered=ui=>ui.root.findAll(n=>n.type==='button'&&n.children.some(c=>c==='Continuar con PayPal'||c==='Continue with PayPal'))
 const kitten=ui=>ui.root.findAll(n=>n.props['data-kitten-preparing'])
 const visibleMain=ui=>ui.root.findAll(n=>n.type==='main'&&!n.props.hidden)
