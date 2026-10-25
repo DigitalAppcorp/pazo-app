@@ -167,6 +167,20 @@
     transform: translateY(0);
   }
 }
+/* R1 visual gate: on medium-height desktop windows, the taller headline
+   and more readable secondary text must not hide the opt-out action.
+   Preserve all three actions and the organic hero illustration. */
+@media (min-width: 1024px) and (min-height: 701px) and (max-height: 950px) {
+  .supporter-growth h2 {
+    margin: 10px auto 12px !important;
+  }
+  .supporter-growth-price {
+    padding-top: 12px;
+  }
+  .supporter-growth-actions {
+    padding-top: 12px;
+  }
+}
 @media (max-height: 700px) {
   .supporter-growth-art img {
     max-height: 190px;
