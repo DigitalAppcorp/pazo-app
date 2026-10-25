@@ -66,7 +66,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         operationInFlight.current=false
         setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
-        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setLiveOfferPhase('loading');setVoluntarySupport(false);setPromotionChoice('idle')
+        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setVoluntarySupport(false);setPromotionChoice('idle')
         setAccountRevision(n=>n+1)
       }
       lastOwner=nextOwner
@@ -89,12 +89,19 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     phase:'loading'|'ready'|'blocked';mode:'initial'|'retry'
   }>({phase:'loading',mode:'initial'})
   const [offerRefreshRevision,setOfferRefreshRevision] = useState(0)
-  // Live offer GET must settle under the yarn-kitten preparation overlay.
-  // No PayPal CREATE request is made until the explicit user click.
-  const [liveOfferPhase,setLiveOfferPhase]=useState<'loading'|'ready'|'blocked'>('loading')
+  // Each Live GET and published consent offer must settle behind the kitten,
+  // scoped to language, Auth account and explicit read-only retry. Never allow
+  // a completed response from a prior scope to reveal a different owner's offer.
+  const liveOfferScope=`${lang}:${accountRevision}:${offerRefreshRevision}`
+  const [liveOfferReadiness,setLiveOfferReadiness]=useState<{
+    scope:string;phase:'loading'|'ready'|'blocked'
+  }>({scope:'',phase:'loading'})
+  const liveOfferPhase=liveOfferReadiness.scope===liveOfferScope
+    ?liveOfferReadiness.phase:'loading'
   const receiveLiveOfferState=useCallback((phase:'loading'|'ready'|'blocked')=>{
-    setLiveOfferPhase(previous=>previous===phase?previous:phase)
-  },[])
+    setLiveOfferReadiness(previous=>previous.scope===liveOfferScope&&previous.phase===phase
+      ?previous:{scope:liveOfferScope,phase})
+  },[liveOfferScope])
   const receiveOfferState=useCallback((phase:'loading'|'ready'|'blocked',
     mode:'initial'|'retry')=>{
     setQaOfferState(previous=>previous.phase===phase&&previous.mode===mode
@@ -130,14 +137,20 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       (qaV2AccountState==='bound'&&qaPayAction==='retry_ready'))
   const offerMode=qaPayAction==='retry_ready'?'retry':'initial'
   const offerReadyForCurrentMode=qaOfferState.mode===offerMode
+  const liveOfferRequired=!qaV2Screen&&
+    (membership.kind==='inactive'||voluntarySupport)&&accounts?.length===0
+  // Never reveal the offer while its Live checkout GET is still checking.
+  // The consent/PayPal button must be present on the *first* offer paint.
   const preparationPending=membership.kind==='checking'||
     (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&!error)||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
-    (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
+    (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))||
+    (liveOfferRequired&&liveOfferPhase==='loading')
   const preparationUnavailable=membership.kind==='unavailable'||
     (!qaV2Screen&&membership.kind==='inactive'&&error)||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
-    (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
+    (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')||
+    (liveOfferRequired&&liveOfferPhase==='blocked')
   const preparing=preparationPending||preparationUnavailable
   useEffect(()=>{
     if(!preparationPending){setPreparationSlow(false);return}
@@ -157,8 +170,9 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       setQaReviewRevision(n=>n+1)
     }
     if(!qaV2Screen&&error)void refresh()
-    if(!qaV2Screen&&liveOfferPhase==='blocked'&&accounts?.length===0){
-      setLiveOfferPhase('loading')
+    if(liveOfferRequired&&liveOfferPhase==='blocked'){
+      // New scope atomically restores the kitten while a fresh GET runs.
+      // This retries READ only and never creates a PayPal subscription.
       setOfferRefreshRevision(n=>n+1)
     }
     if(offerRequired){
@@ -451,8 +465,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                       </p>}
                   </div>
             ) : accounts?.length===0 ? (
-              <SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}
-                availabilityRevision={String(publicStatus.value?.checkoutReady)}
+              <SupporterLiveCheckoutPanel lang={lang} key={liveOfferScope}
                 onAvailabilityChange={receiveLiveOfferState}/>
             ) : (
               <div data-pazo-live-existing-checkout="recover-original"
