@@ -117,3 +117,5 @@ run('docker', [
   'supabase/tests/f18/review-regressions.sql',
 ])
 run(process.execPath, ['scripts/f18-public-supporter-concurrency.mjs'])
+// Final isolated fixture verifies only the principal administrator is reclassified.
+run('docker', [...base, '-f', 'supabase/tests/f18/production-admin-reclassification-lab.sql'])

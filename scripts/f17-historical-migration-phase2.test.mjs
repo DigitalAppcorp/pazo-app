@@ -6,6 +6,7 @@ const folder=new URL('../supabase/migrations/',import.meta.url)
 const info=JSON.parse(readFileSync(new URL('../docs/PAZO_HISTORICAL_MIGRATION_PHASE2_MANIFEST_20261023.json',import.meta.url),'utf8'))
 const unpaired=['20261005101300','20261005110000','20261005114500','20261005123000','20261005134000','20261005150000','20261005154500','20261005165500']
 const prepared=JSON.parse(readFileSync(new URL('../docs/review/f18/NOT_APPLIED_MIGRATIONS.json',import.meta.url),'utf8'))
+const additional=prepared.additionalInstalledVersions??[]
 test('25 canonical hosted SQL files match SHA-256 snapshot digests',()=>{
   assert.equal(info.records.length,25)
   assert.equal(info.records.filter(r=>r.kind==='hosted_only_reconstructed').length,20)
@@ -42,9 +43,10 @@ test('eight prehistory SQL sources preserved in non-executable archive only (pro
   assert.equal(prepared.status,'APPLIED_HOSTED')
   assert.equal(prepared.installedVersion,'20261025073311')
   assert.ok(all.some(n=>n.startsWith(prepared.installedVersion+'_')),'F18 installed migration missing')
+  assert.ok(additional.every(v=>all.some(n=>n.startsWith(v+'_'))),'additional hosted migration source missing')
   assert.equal(prepared.productionPushAllowed,false)
-  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!prepared.versions.includes(n.slice(0,14))).length,122)
-  assert.equal(all.length,123+prepared.versions.length)
+  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))).length,122)
+  assert.equal(all.length,123+additional.length+prepared.versions.length)
   for(const version of unpaired){
     assert.ok(!all.some(n=>n.startsWith(version+'_')),'old SQL remains deployable: '+version)
     assert.ok(readdirSync(archived).some(n=>n.startsWith(version+'_')),'missing preserved historical SQL: '+version)
