@@ -38,7 +38,7 @@ const published=(raw:unknown,locale:Locale):raw is Offer=>{
   typeof o.consentLabel==='string'&&o.consentLabel.length>30&&
   digest.test(o.termsDigest||'')
 }
-export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange,availabilityRevision}:{lang:Locale;availabilityRevision?:string;onAvailabilityChange?:(phase:'loading'|'ready'|'blocked')=>void}){
+export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange}:{lang:Locale;onAvailabilityChange?:(phase:'loading'|'ready'|'blocked')=>void}){
  const [stage,setStage]=useState<Stage>('checking')
  const [offer,setOffer]=useState<Offer|null>(null)
  const [availabilityReason,setAvailabilityReason]=useState<AvailabilityReason>('general')
@@ -79,7 +79,7 @@ export function SupporterLiveCheckoutPanel({lang,onAvailabilityChange,availabili
    }catch{if(active.current&&!controller.signal.aborted){setAvailabilityReason('general');setStage('unavailable')}}
   })()
   return ()=>{active.current=false;controller.abort()}
- },[lang,revision,availabilityRevision])
+ },[lang,revision])
  const refresh=useCallback(()=>{
   if(attempted.current)return
   setRevision(x=>x+1)
