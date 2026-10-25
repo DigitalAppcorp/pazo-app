@@ -144,6 +144,8 @@ Medición admin: cuentas cualificadas, overlay efectivamente mostrado, CTR Conoc
 
 **Elección visual:** pendiente del PO. Ninguna opción implica permiso de desarrollo o despliegue.
 
+**Comparación detallada de variantes:** [A–D, composición y riesgos](PAZO_SUPPORTER_INVITATION_DESIGN_OPTIONS_20261024.md).
+
 ## 11. Cómo continuar este handoff
 
 1. Leer esta especificación **antes** de implementar cambios de promo/payment.
