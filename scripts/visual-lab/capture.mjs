@@ -25,7 +25,7 @@ mkdirSync(base,{recursive:true})
 const manifest={
   schema:'pazo.visual.audit.v1',
   disclaimer:'SYNTHETIC QA; NOT production metrics; NOT WCAG certification',
-  source_sha:process.env.GITHUB_SHA||process.env.PAZO_VISUAL_LAB_SHA||'LOCAL_UNPINNED',
+  source_sha:process.env.PAZO_VISUAL_LAB_SHA||process.env.GITHUB_SHA||'LOCAL_UNPINNED',
   scope, origin_kind:'local_loopback_only', created_at:new Date().toISOString(),
   inventory_target:86,
   implemented_scenes:VISUAL_CASES.length,
