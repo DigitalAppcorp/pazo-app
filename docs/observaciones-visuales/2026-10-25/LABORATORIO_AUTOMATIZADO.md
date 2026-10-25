@@ -1,4 +1,4 @@
-# PAZO · Visual Lab v0.1 — captura real, datos sintéticos y cero operaciones comerciales
+# PAZO · Visual Lab v0.2 — matriz completa renderizada, datos sintéticos y cero operaciones comerciales
 
 **Estado:** herramienta propuesta en rama / PR; no es una certificación de 86 pantallas ni un deploy de PAZO.
 
@@ -13,16 +13,16 @@ Generar imágenes **renderizadas por Chromium** a partir de componentes reales d
 - `.github/workflows/pazo-visual-lab.yml`: en PR, corre **piloto** cuando cambian los archivos del lab; una vez integrado a main y con aprobación independiente puede dispararse manualmente con alcance `full`. No habilita Vercel ni escrituras remotas.
 - Archivos de salida en GitHub Actions **Artifacts**, no commits binarios automáticos. GitHub conserva artifacts por 14 días; los reportes relevantes deben revisarse y documentarse en el PR de observaciones antes de caducar.
 
-## Escenas iniciales (18, no 86)
-`welcome`, `signup`, `pet-onboarding`, `interests`, `feed-one`, `feed-empty`, `communities-empty`, `search-disabled`, `pet-summary`, `create-menu`, `create-post`, `create-community`, `add-pet`, `care-empty`, `documents-empty`, `map-unavailable`, `nav`, `invitation`.
+## Escenas registradas (26, no 86)
+`welcome`, `signup`, `pet-onboarding`, `interests`, `feed-one`, `feed-empty`, `communities-empty`, `search-disabled`, `pet-summary`, `create-menu`, `create-post`, `create-community`, `add-pet`, `care-empty`, `documents-empty`, `map-unavailable`, `nav`, `invitation`, `lost-review`, `lost-active`, `password-expired`, `password-ready`, `legal-privacy`, `legal-terms`, `report-post`, `wall-empty`.
 
 **Lectura correcta**: `feed-one` utiliza una publicación ficticia sin propietario real y deliberadamente **no** ejecuta RPC de impresiones (`currentPetId` indefinido). `communities-empty` es estado sin sesión, NO la lista poblada. `map-unavailable` aborta las fuentes remotas y representa un error de mapa, **NO mapa 3D operativo**. `invitation` usa el componente verdadero de la invitación. Las capturas F18 existentes en `docs/review/f18/` completan oferta/admin visuales ya inspeccionados, pero no tienen por qué coincidir con este SHA. El resto del [inventario de 86 superficies](https://github.com/DigitalAppcorp/pazo-app/blob/audit/pazo-observaciones-visuales-20261025/docs/observaciones-visuales/2026-10-25/02_INVENTARIO_DE_PANTALLAS.md) permanece sin capturar/renderizar.
 
 ## Cómo ejecutar en GitHub
 1. Revisar el PR de Visual Lab en su rama; no hacer merge de forma automática.
-2. En la pestaña **Checks** del PR, consultar el workflow *PAZO Visual Lab (synthetic screenshots)* ejecutado por `pull_request` (piloto, 9 escenas × 390 × ES/EN).
+2. En la pestaña **Checks** del PR, consultar el workflow *PAZO Visual Lab (synthetic screenshots)*. El piloto anterior hizo 9 escenas × 390 × ES/EN; **la rama de auditoría actual ejecuta FULL 26 escenas × 5 tamaños × ES/EN, autorizado por el PO**.
 3. Abrir su ejecución en **Actions**, bajar el artifact `pazo-visual-lab-<run>` y abrir `index.html` en el ordenador; `manifest.json` incluye por escena `CAPTURED`, `CAPTURE_FAILED`, axe y límites.
-4. Para generar todas las escenas y anchos, se requiere que el workflow exista en la rama predeterminada **y GO específico para integrar el PR**. GitHub `workflow_dispatch` habitualmente solo está disponible si el workflow existe en la rama predeterminada. Seleccionar `scope=full` tras el gate. **No integrar automáticamente para obtener la galería**.
+4. **La matriz FULL ya se ejecutó sin integrar ni desplegar**, mediante disparador `pull_request` limitado a la rama de auditoría. Ver [evidencia 260/260](MATRIZ_COMPLETA_20261025.md) y [GitHub Actions #40232632578](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40232632578). Para futuros disparos manuales `workflow_dispatch`, GitHub habitualmente exige que el archivo de workflow exista en la rama predeterminada; esa futura integración requiere un GO diferente. **No integrar únicamente para habilitar la galería**.
 
 ### Ejecución local alternativa, sin merge
 En un clon de la rama y SOLO con las herramientas ya instaladas:
@@ -45,7 +45,13 @@ node --test scripts/visual-lab/contract.test.mjs
 node scripts/visual-lab/capture.mjs --scope=full
 ```
 
-El navegador rechaza TODA petición externa. El host de Supabase es solamente el requerido por la validación de configuración pública existente; el key es sintético e inválido y no se utiliza para ninguna autenticación real. No usar credenciales, tokens reales ni usuarios de producción.
+El navegador rechaza TODA petición externa; el escenario de mapa intentó diez peticiones externas que fueron bloqueadas, sin que se entregaran datos al proveedor. El host de Supabase es solamente el requerido por la validación de configuración pública existente; el key es sintético e inválido y no se utiliza para ninguna autenticación real. No usar credenciales, tokens reales ni usuarios de producción.
+
+## Resultado observado 25-oct-2026
+- 26 escenas, 5 viewports (320/390/430/768/1440) y ES/EN, **260/260 CAPTURED**, sin fallos.
+- **170 ocurrencias axe-core agrupadas en cuatro reglas**; no son 170 defectos únicos. Detalle por componente, SHA y criterio: [MATRIZ_COMPLETA_20261025.md](MATRIZ_COMPLETA_20261025.md).
+- `CI`, `F18 public supporter isolated gates` y `PAZO Visual Lab` resultaron SUCCESS para el código auditado.
+- Datos sintéticos: **26 escenas de 86 superficies inventariadas**, faltan estados autenticados/poblados y pruebas manuales. 
 
 ## Evidencia y requisitos de calidad
 Cada fila de `manifest.json` incluye escena, nivel de fidelidad, tamaño, idioma, SHA, si hay overflow horizontal, inputs que requieren comprobación de nombre accesible, hallazgos axe, errores y capturas disponibles. **Los resultados axe son señales automáticas, no sustituyen Tab, zoom, lector de pantalla ni juicio profesional.** Si el navegador no renderiza una escena se declara `CAPTURE_FAILED`; NO se sustituye con un mock genérico que parezca que el test pasó.
