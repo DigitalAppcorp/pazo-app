@@ -19,7 +19,15 @@ export const VISUAL_CASES = Object.freeze([
   {id:'documents-empty',  group:'servicios',level:'synthetic', title:'Documentos vacíos'},
   {id:'map-unavailable',  group:'lugares',  level:'blocked',   title:'Mapa sin conexión externa (NO mapa listo)'},
   {id:'nav',              group:'navegacion',level:'synthetic',title:'Cabecera y barra flotante'},
-  {id:'invitation',       group:'membresia',level:'component', title:'Invitación Amigo de PAZO'}
+  {id:'invitation',       group:'membresia',level:'component', title:'Invitación Amigo de PAZO'},
+  {id:'lost-review',      group:'rescate',level:'synthetic',title:'Revisión de aviso perdido antes de publicar'},
+  {id:'lost-active',      group:'rescate',level:'synthetic',title:'Panel de alerta perdida ya activa (token ficticio)'},
+  {id:'password-expired', group:'acceso',level:'synthetic',title:'Recuperación con enlace caducado'},
+  {id:'password-ready',   group:'acceso',level:'synthetic',title:'Formulario de nueva contraseña (sin enviar)'},
+  {id:'legal-privacy',    group:'legal',level:'component',title:'Política de privacidad, diálogo'},
+  {id:'legal-terms',      group:'legal',level:'component',title:'Condiciones de uso, diálogo'},
+  {id:'report-post',      group:'moderacion',level:'synthetic',title:'Denunciar publicación (sin enviar)'},
+  {id:'wall-empty',       group:'membresia',level:'synthetic',title:'Muro de agradecimiento sin mascotas'}
 ]);
 export const VISUAL_VIEWPORTS = Object.freeze({
   '320':{width:320,height:568},
