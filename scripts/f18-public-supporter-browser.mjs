@@ -97,7 +97,8 @@ async function fixture({
   let current = n,
     creates = 0,
     unknown = [],
-    adminCalls = 0
+    adminCalls = 0,
+    statusReads = 0
   const errors = []
   await context.route('**/*', async (route) => {
     const r = route.request(),
@@ -153,7 +154,10 @@ async function fixture({
           body.p_component ?? null,
         ])
       else if (u.pathname.endsWith('/rpc/pazo_supporter_my_account_status'))
-        value = { active: mode === 'courtesy' || mode === 'paid', milestone: 0 }
+        value = {
+          active: mode === 'courtesy' || mode === 'paid',
+          milestone: 0,
+        }
       else if (u.pathname.endsWith('/pazo-paypal-live-account'))
         value = {
           ok: true,
@@ -183,9 +187,12 @@ async function fixture({
             mayGrantBenefits: false,
             offer: getPazoLiveOffer(lang),
           }
-      } else if (u.pathname.endsWith('/rpc/pazo_admin_public_supporter_status'))
+      } else if (
+        u.pathname.endsWith('/rpc/pazo_admin_public_supporter_status')
+      ) {
+        statusReads++
         value = rpc(65535, 'pazo_admin_public_supporter_status')
-      else if (u.pathname.endsWith('/rpc/pazo_admin_supporter_member'))
+      } else if (u.pathname.endsWith('/rpc/pazo_admin_supporter_member'))
         value = rpc(65535, 'pazo_admin_supporter_member', [body.p_owner])
       else if (u.pathname.endsWith('/rpc/pazo_admin_supporter_payments'))
         value = rpc(65535, 'pazo_admin_supporter_payments')
@@ -293,6 +300,9 @@ async function fixture({
     },
     get adminCalls() {
       return adminCalls
+    },
+    get statusReads() {
+      return statusReads
     },
   }
 }
@@ -459,62 +469,267 @@ try {
     'pending request recovers original, no new offer',
   )
   await pending.context.close()
-  for (const width of [390, 1440]) {
-    const f = await fixture({ width, n: 65535 })
-    await f.goto('admin')
-    await f.page
-      .getByRole('heading', { name: 'Estado operativo', exact: true })
-      .waitFor()
-    await f.page.waitForTimeout(400)
-    check(
-      (await f.page
-        .getByText(
-          /L1_FIRST_REAL|Apertura gradual|Reservar generación|Lista de espera/,
+  for (const width of [320, 390, 768, 1440])
+    for (const lang of ['es', 'en']) {
+      // Explicit fixture preparation in the isolated DB, never an application
+      // incident-resolution path. The actual UI only calls the protected API.
+      sql(`UPDATE supporter_private.public_supporter_control SET checkouts_enabled=false,invitations_enabled=true,revision=revision+1;
+      INSERT INTO supporter_private.gradual_incident(code) VALUES('financial_review') ON CONFLICT(code) DO UPDATE SET resolved_at=NULL;`)
+      const f = await fixture({ width, lang, n: 65535 }),
+        t = (es, en) => (lang === 'es' ? es : en)
+      const page = f.page,
+        btn = (name) => page.getByRole('button', { name, exact: true })
+      const financialPause = t('Pausar nuevas compras', 'Pause new purchases'),
+        open = t('Habilitar checkout público', 'Enable public checkout')
+      const promoPause = t('Pausar invitaciones', 'Pause invitations'),
+        promoResume = t('Reanudar invitaciones', 'Resume invitations')
+      const refresh = async () => {
+        const reads = f.statusReads
+        await btn(t('Actualizar estado', 'Refresh status')).click()
+        await page.waitForFunction(
+          () =>
+            !Array.from(document.querySelectorAll('button')).find((b) =>
+              ['Actualizar estado', 'Refresh status'].includes(b.textContent),
+            )?.disabled,
         )
-        .count()) === 0,
-      'obsolete admin controls removed',
-    )
-    await f.page.screenshot({
-      path: `${out}/admin-summary-${width}.png`,
-      fullPage: true,
-    })
-    for (const name of [
-      'Invitaciones y conversiones',
-      'Pagos y conciliación',
-      'Suscripciones y miembros',
-      'Integración y seguridad',
-      'Configuración y controles',
-    ]) {
-      await f.page.getByRole('button', { name, exact: true }).click()
-      await f.page.waitForTimeout(500)
+        check(f.statusReads > reads, 'refresh re-reads authoritative state')
+      }
+      const choose = async (name, confirmation) => {
+        await btn(name).click()
+        await page.getByRole('textbox').fill(confirmation)
+      }
+      const confirm = () => btn(t('Confirmar cambio', 'Confirm change')).click()
+      const success = () =>
+        page
+          .getByText(
+            t(
+              'Cambio verificado en el servidor.',
+              'Change verified on the server.',
+            ),
+            { exact: true },
+          )
+          .waitFor()
+      const absent = async (name, message) =>
+        check((await btn(name).count()) === 0, message)
+      await f.goto('admin')
+      await page
+        .getByRole('heading', {
+          name: t('Estado operativo', 'Operational status'),
+          exact: true,
+        })
+        .waitFor()
+      await page
+        .locator('[data-pazo-live-metric]')
+        .filter({ hasText: t('Verificado', 'Verified') })
+        .first()
+        .waitFor()
+      await page
+        .locator('[data-pazo-live-metric]')
+        .last()
+        .filter({ hasText: /\d/ })
+        .waitFor()
+      const layout = await page
+        .locator('[data-pazo-live-metric]')
+        .evaluateAll((nodes) =>
+          nodes.map((el) => {
+            const text = el.firstChild,
+              words = el.textContent.matchAll(/\S+/gu),
+              bounds = el.getBoundingClientRect()
+            const splitWords = []
+            if (text?.nodeType === Node.TEXT_NODE)
+              for (const match of words) {
+                const range = document.createRange()
+                range.setStart(text, match.index)
+                range.setEnd(text, match.index + match[0].length)
+                if (range.getClientRects().length > 1) splitWords.push(match[0])
+              }
+            const css = getComputedStyle(el)
+            return {
+              splitWords,
+              overflow:
+                el.scrollWidth > el.clientWidth + 1 ||
+                bounds.right > innerWidth + 1,
+              outline:
+                css.outlineStyle !== 'none' && parseFloat(css.outlineWidth) > 0,
+              border: ['Top', 'Right', 'Bottom', 'Left'].some(
+                (side) =>
+                  !['none', 'hidden'].includes(css[`border${side}Style`]) &&
+                  parseFloat(css[`border${side}Width`]) > 0,
+              ),
+            }
+          }),
+        )
+      check(
+        layout.every((x) => !x.splitWords.length),
+        'metric words never split mid-word',
+      )
+      check(
+        layout.every((x) => !x.overflow),
+        'metric values remain within their cards',
+      )
+      check(
+        layout.every((x) => !x.outline && !x.border),
+        `no decorative metric contours: ${JSON.stringify(layout)}`,
+      )
+      check(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        'admin has no horizontal overflow',
+      )
+      await page.screenshot({
+        path: `${out}/admin-summary-${width}-${lang}.png`,
+        fullPage: true,
+      })
+      if (lang === 'es' && [390, 1440].includes(width))
+        await page.screenshot({
+          path: `${out}/admin-summary-${width}.png`,
+          fullPage: true,
+        })
+      for (const name of [
+        t('Invitaciones y conversiones', 'Invitations and conversions'),
+        t('Pagos y conciliación', 'Payments and reconciliation'),
+        t('Suscripciones y miembros', 'Subscriptions and members'),
+        t('Integración y seguridad', 'Integration and security'),
+        t('Configuración y controles', 'Settings and controls'),
+      ]) {
+        await btn(name).click()
+        await page.waitForTimeout(150)
+      }
+      await absent(open, 'unhealthy system never offers public opening')
+      await absent(
+        financialPause,
+        'paused checkout does not offer a redundant pause',
+      )
+      await absent(
+        promoResume,
+        'active invitations do not offer redundant resume',
+      )
+      check(
+        await page
+          .locator('[data-pazo-admin-open-blocker="health_requires_review"]')
+          .isVisible(),
+        'financial blocker explanation is visible',
+      )
+      check(
+        (await page
+          .getByRole('button', { name: /incidencias|incident review/i })
+          .count()) === 0,
+        'no mass incident resolution control',
+      )
+      check(
+        await btn(promoPause).isDisabled(),
+        'sensitive promotion action requires fresh MFA',
+      )
+      await btn('Fixture MFA').click()
+      const before = f.statusReads
+      await choose(promoPause, 'PAUSAR INVITACIONES')
+      await confirm()
+      await success()
+      await btn(promoResume).waitFor()
+      check(
+        f.statusReads > before,
+        'successful mutation reads the resulting server state',
+      )
+      await absent(promoPause, 'paused invitations offer only resume')
+      check(
+        sql(
+          'SELECT NOT checkouts_enabled AND NOT invitations_enabled FROM supporter_private.public_supporter_control',
+        ) === 't',
+        'promotion pause leaves checkout state unchanged',
+      )
+      await page.screenshot({
+        path: `${out}/admin-controls-${width}-${lang}.png`,
+        fullPage: true,
+      })
+      if (lang === 'es' && width === 390)
+        await page.screenshot({
+          path: `${out}/admin-controls-${width}.png`,
+          fullPage: true,
+        })
+      await choose(promoResume, 'REANUDAR INVITACIONES')
+      await confirm()
+      await success()
+      await btn(promoPause).waitFor()
+      check(
+        sql(
+          'SELECT NOT checkouts_enabled AND invitations_enabled FROM supporter_private.public_supporter_control',
+        ) === 't',
+        'promotion resume leaves financial pause unchanged',
+      )
+      sql(
+        'UPDATE supporter_private.public_supporter_control SET hosted_certified=false,revision=revision+1;',
+      )
+      await refresh()
+      await absent(open, 'uncertified deployment never offers opening')
+      check(
+        await page
+          .locator('[data-pazo-admin-open-blocker="hosted_gate_required"]')
+          .isVisible(),
+        'missing certificate has its own explanation',
+      )
+      // Simulate a remediated/certified healthy fixture, without invoking any
+      // resolution command. No financial row, receipt, hold or period is edited.
+      sql(`UPDATE supporter_private.gradual_incident SET resolved_at=clock_timestamp();
+      UPDATE supporter_private.pazo_paypal_live_worker_control SET last_heartbeat_at=clock_timestamp();
+      UPDATE supporter_private.public_supporter_control SET hosted_certified=true,webhook_ok_at=clock_timestamp(),revision=revision+1;`)
+      await refresh()
+      await btn(open).waitFor()
+      await absent(
+        financialPause,
+        'healthy paused checkout offers opening only',
+      )
+      await choose(open, 'AUTORIZO PUBLICAR CHECKOUT LIVE')
+      // A different admin changes the revision after the confirmation was read.
+      sql(
+        'UPDATE supporter_private.public_supporter_control SET revision=revision+1,invitations_enabled=true;',
+      )
+      await confirm()
+      await page
+        .getByText(
+          t(
+            'Cambio no confirmado. Actualiza el estado antes de repetir; puede requerir revisión técnica.',
+            'Change unconfirmed. Refresh status before retrying; technical review may be required.',
+          ),
+          { exact: true },
+        )
+        .waitFor()
+      await btn(promoPause).waitFor()
+      check(
+        sql(
+          'SELECT NOT checkouts_enabled FROM supporter_private.public_supporter_control',
+        ) === 't',
+        'stale opening cannot change checkout state',
+      )
+      check(
+        (await page.getByRole('textbox').count()) === 0,
+        'stale confirmation is discarded',
+      )
+      await choose(open, 'AUTORIZO PUBLICAR CHECKOUT LIVE')
+      await confirm()
+      await success()
+      await btn(financialPause).waitFor()
+      await absent(open, 'enabled checkout offers only pause')
+      await choose(financialPause, 'PAUSAR NUEVAS COMPRAS')
+      await confirm()
+      await success()
+      await btn(open).waitFor()
+      check(
+        sql(
+          'SELECT NOT checkouts_enabled AND invitations_enabled FROM supporter_private.public_supporter_control',
+        ) === 't',
+        'financial pause leaves invitations enabled',
+      )
+      check(
+        f.adminCalls === 5,
+        'five explicit API requests, including one safely rejected stale request',
+      )
+      check(
+        f.errors.length === 0 && f.unknown.length === 0,
+        JSON.stringify({ errors: f.errors, unknown: f.unknown }),
+      )
+      await f.context.close()
     }
-    await f.page
-      .getByRole('button', { name: 'Fixture MFA', exact: true })
-      .click()
-    await f.page
-      .getByRole('button', { name: 'Pausar invitaciones', exact: true })
-      .click()
-    await f.page.getByRole('textbox').fill('PAUSAR INVITACIONES')
-    await f.page
-      .getByRole('button', { name: 'Confirmar cambio', exact: true })
-      .click()
-    await f.page
-      .getByText('Cambio verificado en el servidor.', { exact: true })
-      .waitFor()
-    check(
-      f.adminCalls === 1,
-      'admin UI -> fresh proof handler -> actual CAS SQL -> readback',
-    )
-    await f.page.screenshot({
-      path: `${out}/admin-controls-${width}.png`,
-      fullPage: true,
-    })
-    check(
-      f.errors.length === 0 && f.unknown.length === 0,
-      JSON.stringify({ errors: f.errors, unknown: f.unknown }),
-    )
-    await f.context.close()
-  }
   console.log(
     `PASS F18 browser: ${assertions} assertions; actual local RPC persistence, 8 G screenshots, offer, courtesy, pending, admin mobile/desktop; no production requests.`,
   )

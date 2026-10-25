@@ -6,6 +6,8 @@ Implementación y evidencia: [informe F18](PAZO_F18_IMPLEMENTATION_REVIEW_202610
 
 Fuente de producto: PR103 head3570ff78bacb0d0325f56fec699ed05d4d3ef125 más la orden directa adjunta. Los estados NOT_IMPLEMENTED o graduales inferiores son historia para esta rama; no describen el código F18 ni conceden permisos de producción.
 
+Revisión PR104: [cuatro correcciones y evidencia](PAZO_F18_REVIEW_CORRECTIONS_20261025.md). Resolución masiva retirada; checkout independiente del helper canario histórico; controles por estado/certificado/salud; métricas ES/EN 320–1440 corregidas. No ejecutar resolución global de incidencias ni interpretar las pruebas sintéticas como validación de pagos reales.
+
 ---
 
 ## F17 PR #99 — F14 one-time SQL protected in active migrations (23-oct-2026 PDT)

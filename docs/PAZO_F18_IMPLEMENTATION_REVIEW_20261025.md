@@ -2,6 +2,8 @@
 
 **Estado:** código y laboratorio preparados para revisión. Sin merge, migración alojada, despliegue oficial, activación pública, secretos nuevos ni compra real. La aceptación visual y el GO de producción pertenecen al PO. Este informe no declara cierre global de F16/F17 ni de la fase histórica de Adopciones.
 
+Revisión posterior: [correcciones del comentario 6394513523 y evidencia reproducible](PAZO_F18_REVIEW_CORRECTIONS_20261025.md). La resolución masiva de incidencias se retiró; el inicio de checkout ya no hereda la condición canaria de una función histórica; los controles dependen del estado autorizado del servidor.
+
 La implementación sustituye la puerta comercial gradual por admisión financiera pública de cuentas elegibles. El acceso manual, la primera invitación, la bandeja interna y los regresos de PayPal usan la misma membresía. Se conserva el precio US$2.99 mensual, la renovación hasta cancelar, el consentimiento inmutable y PAZO gratuito. El diseño G usa el brote luminoso sobre una huella, con salida visible, foco sin contornos y movimiento reducido.
 
 ## Cambios relevantes
@@ -21,7 +23,7 @@ El agradecimiento depende del recibo firmado, venta conciliada, período vigente
 | Sección | Operación disponible |
 |---|---|
 | Resumen | Estado efectivo de nuevos cobros/publicidad, merchant, plan/precio, salud, miembros verificados, pendientes e incidencias; importes de ledger separados de saldo/neto PayPal |
-| Configuración y controles | Pausar/abrir checkout público; pausar/reanudar invitaciones; confirmar revisión de incidentes; confirmación literal, MFA reciente servidor, CAS/nonce y auditoría |
+| Configuración y controles | Solo pausar **o** abrir checkout según estado y prerrequisitos; solo pausar **o** reanudar invitaciones; confirmación literal, MFA reciente servidor, CAS/nonce y auditoría. Incidencias en lectura, sin acción de resolución |
 | Suscripciones y miembros | Búsqueda autorizada por cuenta/mascota, estado de suscripción, cancelación, períodos/cobertura y gestión de cortesías existente |
 | Pagos y conciliación | Resumen verificado, eventos recientes, pendientes, holds por reembolso/disputa y soporte privado |
 | Invitaciones y conversiones | Elegibilidad por señal, pantalla mostrada, último recordatorio, aperturas, descartes, conversiones verificadas y opt-outs; sin contar intentos como ventas |
@@ -34,12 +36,12 @@ Los datos se borran de la interfaz al cambiar de cuenta y las respuestas tardía
 | Verificación | Resultado local |
 |---|---|
 | `npm run verify:prepreview` | PASS: governance (incluye 511 pruebas de cierre), 1,195 pruebas financieras sintéticas, compilación TypeScript/Vite y cuatro comprobaciones del dist/PWA |
-| `npm run test:f18` | 7 PASS: controles MFA/input/origen/errores, tick, manifiesto completo de fuentes y ausencia de autodeploy |
+| `npm run test:f18` | 12 PASS: controles MFA/input/origen/errores, acción de resolución retirada, matriz de estados y bloqueos, tick, manifiesto completo de fuentes y ausencia de autodeploy |
 | `npm run test:gradual` | 68 PASS de límites financieros/recuperación y compatibilidad histórica, adaptadas a la nueva comunicación |
-| `npm run test:f18:pg17` | PASS: migración real, ensayo ROLLBACK, 74 comprobaciones F18, roles/RLS, señales/impresiones/14d, cuenta directa, cortesías, feedback, merchant/claims/pausa/certificado y resumen financiero |
+| `npm run test:f18:pg17` | PASS: migración real, ensayo ROLLBACK, 70 comprobaciones SQL previas + 26 de revisión + cuatro escenarios concurrentes; roles/RLS, señales/impresiones/14d, cuenta directa, cortesías, feedback, merchant/claims/pausa/certificado, resumen financiero e incidentes preservados |
 | Sesiones PostgreSQL concurrentes | 20 dispositivos: un permiso; 30 cuentas sin cupos; ocho workers: 31 avisos/31 cuentas; feedback simultáneo: un ticket |
-| `npm run test:f18:browser` | 66 comprobaciones PASS: React real → RPC PostgreSQL desechable → respuesta; Auth y proveedor simulados; todas las salidas externas interceptadas |
-| Historial alojado de migraciones | 2 guards PASS; no replay desde cero ni reconciliación/repair de producción |
+| `npm run test:f18:browser` | 260 comprobaciones PASS: React real → RPC PostgreSQL desechable → respuesta; Auth y proveedor simulados; todas las salidas externas interceptadas |
+| Historial alojado de migraciones | 7 pruebas de integridad/archivo PASS; no replay desde cero ni reconciliación/repair de producción |
 | `git diff --check` | PASS |
 
 El baseline financiero anterior se reproduce antes del SQL F18; no se está certificando el replay histórico completo de Supabase. La fuente se compara en [SOURCE_MANIFEST.json](review/f18/SOURCE_MANIFEST.json), generado por `node scripts/f18-release-manifest.mjs`; incluye la clausura completa de imports de los tres Edge afectados y hash SQL sobre los bytes LF de Git, sin credenciales. La conversión CRLF del checkout de Windows no modifica ese contrato; el archivo SQL a instalar debe tener exactamente los bytes/hash LF revisados. El inventario F18 NOT_APPLIED se separa de las 122 versiones históricas, sin reescribirlas ni autorizar push. La diferencia de conteo 1,197→1,195 elimina exclusivamente dos pruebas de la política promocional obsoleta; las pruebas financieras permanecen.
@@ -48,7 +50,7 @@ Las 18 rutas del encargo se cubren mediante composición de pruebas reales SQL y
 
 ## Revisión visual
 
-Inspeccionadas capturas G ES/EN a 320×568, 390×844, 768×1024 y 1440×900; oferta ES/EN; panel resumen y controles a 390 y 1440. Precio y salida, scroll en pantalla corta, ausencia de overflow horizontal, teclado/Escape y reduced-motion comprobados. El panel conserva superficies PAZO sin contornos. [Galería local estática](review/f18/index.html) y [dirección de arte/prompt](review/f18/ART_DIRECTION.md). Estas capturas son fixtures de laboratorio, no pagos ni clientes reales ni aprobación visual del PO.
+Inspeccionadas capturas G ES/EN a 320×568, 390×844, 768×1024 y 1440×900; oferta ES/EN; panel resumen y controles también en los cuatro tamaños e idiomas. Precio y salida, scroll en pantalla corta, ausencia de palabras partidas/overflow horizontal, teclado/Escape y reduced-motion comprobados. El panel conserva superficies PAZO sin contornos. [Galería local estática](review/f18/index.html) y [dirección de arte/prompt](review/f18/ART_DIRECTION.md). Estas capturas son fixtures de laboratorio, no pagos ni clientes reales ni aprobación visual del PO.
 
 ## Auditoría de producción, solo lectura
 

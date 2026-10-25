@@ -169,13 +169,37 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
  AND s.environment='live' AND s.live_enabled AND NOT s.kill_switch);
 $$;
 -- Keep the original per-owner lock, consent/version/digest, original merchant,
--- one open intent, origin and one provider claim. Remove only quota wrappers.
+-- one open intent, origin and one provider claim. Own the begin boundary rather
+-- than inheriting a historical helper whose canary predicate may have drifted.
 CREATE OR REPLACE FUNCTION public.pazo_f16_live_service_checkout_begin(p_owner uuid,p_request_key uuid,p_generation bigint,p_locale text,p_terms_version text,p_terms_digest text) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE current supporter_private.pazo_paypal_live_checkout_intents%ROWTYPE;
 BEGIN
  PERFORM supporter_private.gradual_require_service();
  PERFORM 1 FROM supporter_private.public_supporter_control WHERE singleton FOR SHARE;
- RETURN supporter_private.gradual_original_checkout_begin(p_owner,p_request_key,p_generation,p_locale,p_terms_version,p_terms_digest);
+ PERFORM 1 FROM admin_private.pazo_live_release_control WHERE singleton FOR SHARE;
+ IF p_owner IS NULL OR p_request_key IS NULL THEN RETURN jsonb_build_object('ok',false,'code','invalid_consent');END IF;
+ -- A real previous canary is never an account-wide quota in public mode.
+ IF EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control r
+  JOIN supporter_private.pazo_paypal_live_checkout_intents i ON i.owner_id=r.canary_owner
+   AND i.merchant_generation=r.merchant_generation AND i.provider_create_claimed_at>=r.canary_started_at
+  WHERE r.singleton AND r.mode='canary' AND i.provider_create_claimed_at IS NOT NULL AND i.request_key<>p_request_key)
+ THEN RETURN jsonb_build_object('ok',false,'code','canary_attempt_already_claimed');END IF;
+ IF NOT coalesce(admin_private.pazo_live_control_admits(p_owner,p_generation),false)
+ THEN RETURN jsonb_build_object('ok',false,'code','controlled_release_admission_denied');END IF;
+ PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_owner::text,1602));
+ SELECT * INTO current FROM supporter_private.pazo_paypal_live_checkout_intents WHERE owner_id=p_owner AND request_key=p_request_key;
+ IF FOUND AND current.closed_at IS NOT NULL THEN RETURN jsonb_build_object('ok',false,'code','closed_checkout_requires_new_consent');END IF;
+ SELECT * INTO current FROM supporter_private.pazo_paypal_live_checkout_intents WHERE owner_id=p_owner AND closed_at IS NULL;
+ IF FOUND AND current.request_key<>p_request_key THEN RETURN jsonb_build_object('ok',false,'code','owner_slot_occupied');END IF;
+ IF NOT EXISTS(SELECT 1 FROM supporter_private.pazo_live_offer_versions WHERE terms_version=p_terms_version AND locale=p_locale AND terms_digest=p_terms_digest)
+ THEN RETURN jsonb_build_object('ok',false,'code','published_terms_unverified');END IF;
+ IF current.intent_id IS NULL AND EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_paid_periods p
+  JOIN supporter_private.pazo_paypal_live_checkout_intents i ON i.intent_id=p.intent_id AND i.merchant_generation=p.merchant_generation
+  WHERE i.owner_id=p_owner AND p.service_start<=clock_timestamp() AND p.service_end>clock_timestamp()
+  AND NOT EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_period_holds h WHERE h.sale_id=p.sale_id AND h.released_at IS NULL))
+ THEN RETURN jsonb_build_object('ok',false,'code','verified_coverage_still_active');END IF;
+ RETURN supporter_private.pazo_live_intent_begin(p_owner,p_request_key,p_generation,p_locale,p_terms_version,p_terms_digest);
 END $$;
 CREATE OR REPLACE FUNCTION public.pazo_f16_live_service_provider_claim_with_origin(p_owner uuid,p_intent text,p_request_key uuid,p_generation bigint,p_origin text) RETURNS boolean
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
@@ -362,12 +386,28 @@ REVOKE ALL ON FUNCTION public.pazo_supporter_visit(),public.pazo_supporter_promo
 GRANT EXECUTE ON FUNCTION public.pazo_supporter_visit(),public.pazo_supporter_promotion(text,uuid,text),public.pazo_supporter_status(),public.pazo_supporter_feedback(text,text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.pazo_f18_supporter_tick(boolean,boolean) TO service_role;
 
+-- Shared authoritative opening prerequisite for the UI and the write boundary.
+CREATE FUNCTION supporter_private.public_supporter_open_blocker() RETURNS text LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM supporter_private.public_supporter_control WHERE singleton AND hosted_certified)
+  OR NOT EXISTS(SELECT 1 FROM admin_private.public_supporter_certificates c JOIN admin_private.pazo_live_release_control r ON r.singleton AND r.merchant_generation=c.merchant_generation)
+ THEN RETURN 'hosted_gate_required';END IF;
+ IF NOT supporter_private.public_supporter_health() THEN RETURN 'health_requires_review';END IF;
+ IF NOT EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control r
+  JOIN admin_private.pazo_paypal_merchant_generations g ON g.generation=r.merchant_generation
+  JOIN admin_private.paypal_gateway_settings s ON s.environment='live' AND s.plan_id=g.plan_id AND s.webhook_id=g.webhook_id AND s.client_id_vault=g.client_id_vault AND s.client_secret_vault=g.client_secret_vault
+  WHERE r.singleton AND g.environment='live' AND g.retired_at IS NULL AND g.credential_source='vault' AND s.validation_status='valid' AND s.price_minor=299 AND s.currency='USD' AND s.interval_unit='MONTH' AND s.return_origin='https://pazo-app.vercel.app')
+ THEN RETURN 'merchant_requires_review';END IF;
+ RETURN NULL;
+END $$;
+REVOKE ALL ON FUNCTION supporter_private.public_supporter_open_blocker() FROM PUBLIC,anon,authenticated,service_role;
 CREATE FUNCTION public.pazo_admin_public_supporter_status() RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE c supporter_private.public_supporter_control%ROWTYPE;
 BEGIN
  IF auth.uid() IS NULL OR NOT public.pazo_is_admin() THEN RAISE EXCEPTION 'Administrator required' USING ERRCODE='42501';END IF;
  SELECT * INTO c FROM supporter_private.public_supporter_control WHERE singleton;
- RETURN jsonb_build_object('source','public_supporter_admin_v1','revision',c.revision,'checkoutsEnabled',c.checkouts_enabled AND supporter_private.public_supporter_health() AND EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control r JOIN admin_private.pazo_paypal_new_checkout_switch s ON s.singleton AND s.revision=r.revision WHERE r.singleton AND r.mode='public' AND s.live_enabled AND NOT s.kill_switch AND s.active_generation=r.merchant_generation),
+ RETURN jsonb_build_object('source','public_supporter_admin_v1','revision',c.revision,'checkoutsEnabled',c.checkouts_enabled AND supporter_private.public_supporter_open_blocker() IS NULL AND EXISTS(SELECT 1 FROM admin_private.pazo_live_release_control r JOIN admin_private.pazo_paypal_new_checkout_switch s ON s.singleton AND s.revision=r.revision WHERE r.singleton AND r.mode='public' AND s.live_enabled AND NOT s.kill_switch AND s.active_generation=r.merchant_generation),
+ 'checkoutsRequested',c.checkouts_enabled,'openBlocker',supporter_private.public_supporter_open_blocker(),
  'invitationsEnabled',c.invitations_enabled,'certified',c.hosted_certified,'healthy',supporter_private.public_supporter_health(),'reminderDays',c.reminder_days,
  'activePaid',(SELECT count(*) FROM auth.users WHERE supporter_private.public_supporter_paid(id)),
  'pending',(SELECT count(*) FROM supporter_private.pazo_paypal_live_checkout_intents WHERE closed_at IS NULL AND state='pending'),
@@ -407,11 +447,11 @@ REVOKE ALL ON FUNCTION public.pazo_admin_supporter_payments() FROM PUBLIC,anon,a
 GRANT EXECUTE ON FUNCTION public.pazo_admin_supporter_payments() TO authenticated;
 CREATE FUNCTION public.pazo_f18_supporter_admin_action(p_actor uuid,p_action text,p_revision bigint,p_request uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE c supporter_private.public_supporter_control%ROWTYPE;a admin_private.public_supporter_audit%ROWTYPE;r admin_private.pazo_live_release_control%ROWTYPE;
+DECLARE c supporter_private.public_supporter_control%ROWTYPE;a admin_private.public_supporter_audit%ROWTYPE;r admin_private.pazo_live_release_control%ROWTYPE;blocker text;
 BEGIN
  PERFORM supporter_private.gradual_require_service();
  IF p_actor IS NULL OR NOT EXISTS(SELECT 1 FROM admin_private.admin_grants WHERE user_id=p_actor) THEN RAISE EXCEPTION 'Administrator required' USING ERRCODE='42501';END IF;
- IF p_request IS NULL OR p_action IS NULL OR p_action NOT IN('pause_checkouts','open_checkouts','pause_invitations','resume_invitations','resolve_incidents') OR p_revision IS NULL OR p_revision<0 THEN RETURN jsonb_build_object('code','invalid_request');END IF;
+ IF p_request IS NULL OR p_action IS NULL OR p_action NOT IN('pause_checkouts','open_checkouts','pause_invitations','resume_invitations') OR p_revision IS NULL OR p_revision<0 THEN RETURN jsonb_build_object('code','invalid_request');END IF;
  SELECT * INTO c FROM supporter_private.public_supporter_control WHERE singleton FOR UPDATE;
  SELECT * INTO a FROM admin_private.public_supporter_audit WHERE request_id=p_request;
  IF FOUND THEN
@@ -419,23 +459,19 @@ BEGIN
   RETURN jsonb_build_object('code','already_recorded','revision',c.revision);
  END IF;
  IF c.revision<>p_revision THEN RETURN jsonb_build_object('code','revision_changed','revision',c.revision);END IF;
+ IF (p_action='pause_checkouts' AND NOT c.checkouts_enabled) OR (p_action='open_checkouts' AND c.checkouts_enabled)
+  OR (p_action='pause_invitations' AND NOT c.invitations_enabled) OR (p_action='resume_invitations' AND c.invitations_enabled)
+ THEN RETURN jsonb_build_object('code','invalid_transition','revision',c.revision);END IF;
  IF p_action='open_checkouts' THEN
-  IF NOT c.hosted_certified THEN RETURN jsonb_build_object('code','hosted_gate_required');END IF;
-  IF NOT supporter_private.public_supporter_health() THEN RETURN jsonb_build_object('code','health_requires_review');END IF;
+  blocker:=supporter_private.public_supporter_open_blocker();
+  IF blocker IS NOT NULL THEN RETURN jsonb_build_object('code',blocker);END IF;
   SELECT * INTO r FROM admin_private.pazo_live_release_control WHERE singleton FOR UPDATE;
-  -- No creation/rotation of merchant resources. Require the existing pinned route.
-  IF r.merchant_generation IS NULL OR NOT EXISTS(SELECT 1 FROM admin_private.pazo_paypal_merchant_generations g
-   JOIN admin_private.paypal_gateway_settings s ON s.environment='live' AND s.plan_id=g.plan_id AND s.webhook_id=g.webhook_id AND s.client_id_vault=g.client_id_vault AND s.client_secret_vault=g.client_secret_vault
-   WHERE g.generation=r.merchant_generation AND g.environment='live' AND g.retired_at IS NULL AND g.credential_source='vault' AND s.validation_status='valid' AND s.price_minor=299 AND s.currency='USD' AND s.interval_unit='MONTH' AND s.return_origin='https://pazo-app.vercel.app')
-   THEN RETURN jsonb_build_object('code','merchant_requires_review');END IF;
   UPDATE admin_private.pazo_live_release_control SET mode='public',revision=revision+1 WHERE singleton;
   UPDATE admin_private.pazo_paypal_new_checkout_switch SET environment='live',live_enabled=true,kill_switch=false,active_generation=r.merchant_generation,revision=r.revision+1 WHERE singleton;
   UPDATE admin_private.paypal_gateway_runtime SET active_environment='live',live_checkout_enabled=true WHERE singleton;
  END IF;
- IF p_action='resolve_incidents' THEN
-  IF EXISTS(SELECT 1 FROM supporter_private.pazo_paypal_live_event_inbox WHERE processing_state='held') OR c.webhook_ok_at IS NULL OR c.webhook_ok_at<statement_timestamp()-interval '5 minutes' THEN RETURN jsonb_build_object('code','health_requires_review');END IF;
-  UPDATE supporter_private.gradual_incident SET resolved_at=clock_timestamp() WHERE resolved_at IS NULL;
- END IF;
+ -- Incident resolution is deliberately absent: global readiness is not
+ -- individual remediation evidence. Existing incidents/holds remain untouched.
  UPDATE supporter_private.public_supporter_control SET revision=revision+1,
  checkouts_enabled=CASE p_action WHEN 'pause_checkouts' THEN false WHEN 'open_checkouts' THEN true ELSE checkouts_enabled END,
  invitations_enabled=CASE p_action WHEN 'pause_invitations' THEN false WHEN 'resume_invitations' THEN true ELSE invitations_enabled END WHERE singleton;

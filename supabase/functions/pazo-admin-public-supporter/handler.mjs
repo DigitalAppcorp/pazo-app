@@ -1,5 +1,5 @@
 // Only a fresh GoTrue/admin/TOTP proof can reach the service-only CAS controller.
-export const PUBLIC_SUPPORTER_CONFIRMATIONS=Object.freeze({pause_checkouts:'PAUSAR NUEVAS COMPRAS',open_checkouts:'AUTORIZO PUBLICAR CHECKOUT LIVE',pause_invitations:'PAUSAR INVITACIONES',resume_invitations:'REANUDAR INVITACIONES',resolve_incidents:'CONFIRMO REVISAR INCIDENCIAS'})
+export const PUBLIC_SUPPORTER_CONFIRMATIONS=Object.freeze({pause_checkouts:'PAUSAR NUEVAS COMPRAS',open_checkouts:'AUTORIZO PUBLICAR CHECKOUT LIVE',pause_invitations:'PAUSAR INVITACIONES',resume_invitations:'REANUDAR INVITACIONES'})
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i
 const safeCodes=new Set(['updated','already_recorded','request_conflict','revision_changed','hosted_gate_required','legacy_intent_requires_reconciliation','health_requires_review','campaign_already_started','invalid_transition','public_go_not_ready','invalid_request','merchant_requires_review'])
 async function boundedJson(req){

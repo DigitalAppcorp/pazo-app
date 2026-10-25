@@ -8,6 +8,10 @@ import { AdminLiveReadiness } from './AdminLiveReadiness'
 import { AdminLiveFinanceSummary } from './AdminLiveFinanceSummary'
 import { AdminGiftBenefits } from '../../support/components/AdminGiftBenefits'
 import { AdminSupportInbox } from '../../support/components/AdminSupportInbox'
+import {
+  publicSupporterControls,
+  type OpenBlocker,
+} from '../publicSupporterControls.mjs'
 
 type Locale = 'es' | 'en'
 type Config = {
@@ -24,6 +28,8 @@ type Snapshot = {
   source: 'public_supporter_admin_v1'
   revision: number
   checkoutsEnabled: boolean
+  checkoutsRequested: boolean
+  openBlocker: OpenBlocker
   invitationsEnabled: boolean
   certified: boolean
   healthy: boolean
@@ -66,7 +72,6 @@ const actions = {
   open_checkouts: 'AUTORIZO PUBLICAR CHECKOUT LIVE',
   pause_invitations: 'PAUSAR INVITACIONES',
   resume_invitations: 'REANUDAR INVITACIONES',
-  resolve_incidents: 'CONFIRMO REVISAR INCIDENCIAS',
 }
 const surface = 'rounded-[24px] bg-white p-5 sm:p-6'
 const button =
@@ -90,9 +95,14 @@ function valid(raw: unknown): raw is Snapshot {
       'conversions',
       'optedOut',
     ].every((k) => Number.isSafeInteger(v[k]) && Number(v[k]) >= 0) &&
-    ['checkoutsEnabled', 'invitationsEnabled', 'certified', 'healthy'].every(
-      (k) => typeof v[k] === 'boolean',
-    ) &&
+    [
+      'checkoutsRequested',
+      'checkoutsEnabled',
+      'invitationsEnabled',
+      'certified',
+      'healthy',
+    ].every((k) => typeof v[k] === 'boolean') &&
+    publicSupporterControls(v).promotion !== null &&
     v.reminderDays === 14 &&
     Array.isArray(v.audit)
   )
@@ -132,8 +142,8 @@ export function AdminPaypalLiveConsole({
   const [action, setAction] = useState<keyof typeof actions | null>(null)
   const [message, setMessage] = useState('')
   const [owner, setOwner] = useState<string | null>(null)
-  const [memberRevision,setMemberRevision]=useState(0)
-  const readEpoch=useRef(0)
+  const [memberRevision, setMemberRevision] = useState(0)
+  const readEpoch = useRef(0)
   const [member, setMember] = useState<Member | null>(null)
   const [payments, setPayments] = useState<Payments | null>(null)
   const mutation = useRef<{
@@ -153,24 +163,24 @@ export function AdminPaypalLiveConsole({
     mutation.current = null
   })
   const load = useCallback(async () => {
-    const epoch=++readEpoch.current
+    const epoch = ++readEpoch.current
     const request = scope.capture()
     setReading(true)
     try {
       const r = await supabase
         .rpc('pazo_admin_public_supporter_status')
         .abortSignal(request.signal)
-      if (!request.isCurrent()||epoch!==readEpoch.current) return
+      if (!request.isCurrent() || epoch !== readEpoch.current) return
       if (r.error || !valid(r.data)) throw Error('read')
       setData(r.data)
       setFailed(false)
     } catch {
-      if (request.isCurrent()&&epoch===readEpoch.current) {
+      if (request.isCurrent() && epoch === readEpoch.current) {
         setData(null)
         setFailed(true)
       }
     } finally {
-      if (request.isCurrent()&&epoch===readEpoch.current) setReading(false)
+      if (request.isCurrent() && epoch === readEpoch.current) setReading(false)
     }
   }, [scope])
   useEffect(() => {
@@ -178,47 +188,55 @@ export function AdminPaypalLiveConsole({
   }, [load, config?.updated_at])
   useEffect(() => {
     if (!owner) return
-    let active=true
+    let active = true
     const request = scope.capture()
     setMember(null)
     void supabase
       .rpc('pazo_admin_supporter_member', { p_owner: owner })
       .abortSignal(request.signal)
       .then((r) => {
-        if (active&&request.isCurrent())
+        if (active && request.isCurrent())
           setMember(
             !r.error && r.data?.source === 'supporter_member_admin_v1'
               ? r.data
               : null,
           )
       })
-    return()=>{active=false}
-  }, [owner, scope,memberRevision])
+    return () => {
+      active = false
+    }
+  }, [owner, scope, memberRevision])
   useEffect(() => {
     if (section !== 'payments') return
-    let active=true
+    let active = true
     const request = scope.capture()
     setPayments(null)
     void supabase
       .rpc('pazo_admin_supporter_payments')
       .abortSignal(request.signal)
       .then((r) => {
-        if (active&&request.isCurrent())
+        if (active && request.isCurrent())
           setPayments(
             !r.error && r.data?.source === 'supporter_payments_admin_v1'
               ? r.data
               : null,
           )
       })
-    return()=>{active=false}
+    return () => {
+      active = false
+    }
   }, [section, scope])
+  const controls = publicSupporterControls(data)
+  const available = [controls.financial, controls.promotion]
   const change = async () => {
     if (
       !action ||
       !data ||
       busy ||
       confirmation !== actions[action] ||
-      !mfaRecentlyVerified
+      !mfaRecentlyVerified ||
+      reading ||
+      !available.includes(action)
     )
       return
     const request = scope.capture()
@@ -273,6 +291,8 @@ export function AdminPaypalLiveConsole({
     } finally {
       if (request.isCurrent()) {
         setBusy(false)
+        setAction(null)
+        setConfirmation('')
         void load()
       }
     }
@@ -280,7 +300,12 @@ export function AdminPaypalLiveConsole({
   const tile = (label: string, value: string | number) => (
     <div key={label} className="min-w-0 rounded-[21px] bg-[#F1F4E9] p-4">
       <p className="text-xs font-semibold text-[#5C7470]">{label}</p>
-      <p className="mt-2 break-words text-2xl font-black">{value}</p>
+      <p
+        data-pazo-live-metric={label}
+        className="mt-2 text-xl font-black [word-break:normal] [overflow-wrap:normal] sm:text-2xl"
+      >
+        {value}
+      </p>
     </div>
   )
   const yes = (v: boolean) =>
@@ -360,7 +385,7 @@ export function AdminPaypalLiveConsole({
             <h4 className="font-black">
               {t('Estado operativo', 'Operational status')}
             </h4>
-            <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 min-[560px]:grid-cols-2 lg:grid-cols-3">
               {tile(
                 t('Merchant conectado', 'Merchant connected'),
                 credentialsChecked
@@ -419,43 +444,109 @@ export function AdminPaypalLiveConsole({
               onVerified={onVerifyMfa}
             />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {(
-              [
-                'pause_checkouts',
-                'open_checkouts',
-                'pause_invitations',
-                'resume_invitations',
-                'resolve_incidents',
-              ] as const
-            ).map((key, i) => (
-              <button
-                key={key}
-                className={button}
-                type="button"
-                disabled={!data || busy || !mfaRecentlyVerified}
-                onClick={() => {
-                  setAction(key)
-                  setConfirmation('')
-                  setMessage('')
-                }}
-              >
-                {
-                  [
-                    t('Pausar nuevas compras', 'Pause new purchases'),
-                    t('Habilitar checkout público', 'Enable public checkout'),
-                    t('Pausar invitaciones', 'Pause invitations'),
-                    t('Reanudar invitaciones', 'Resume invitations'),
-                    t(
-                      'Confirmar revisión de incidencias',
-                      'Confirm incident review',
-                    ),
-                  ][i]
-                }
-              </button>
-            ))}
+          <div data-pazo-live-controls className="mt-4 space-y-4">
+            <div className="space-y-3 rounded-2xl bg-[#F1F4E9] p-4">
+              <h5 className="font-bold">
+                {t('Nuevas compras', 'New purchases')}
+              </h5>
+              {controls.financial === 'pause_checkouts' && (
+                <button
+                  type="button"
+                  className={button}
+                  disabled={busy || reading || !mfaRecentlyVerified}
+                  onClick={() => {
+                    setAction('pause_checkouts')
+                    setConfirmation('')
+                    setMessage('')
+                  }}
+                >
+                  {t('Pausar nuevas compras', 'Pause new purchases')}
+                </button>
+              )}
+              {controls.financial === 'open_checkouts' && (
+                <div className="space-y-3 rounded-2xl bg-[#FFF0DB] p-4">
+                  <p className="text-sm">
+                    {t(
+                      'Al habilitar esta opción, las cuentas elegibles podrán iniciar suscripciones con dinero real. Confirma solo después de la autorización de apertura.',
+                      'Enabling this allows eligible accounts to start subscriptions with real money. Confirm only after opening is authorized.',
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    className={button}
+                    disabled={busy || reading || !mfaRecentlyVerified}
+                    onClick={() => {
+                      setAction('open_checkouts')
+                      setConfirmation('')
+                      setMessage('')
+                    }}
+                  >
+                    {t('Habilitar checkout público', 'Enable public checkout')}
+                  </button>
+                </div>
+              )}
+              {data && !data.checkoutsRequested && data.openBlocker && (
+                <p
+                  data-pazo-admin-open-blocker={data.openBlocker}
+                  role="status"
+                  className="text-sm leading-relaxed"
+                >
+                  {data.openBlocker === 'hosted_gate_required'
+                    ? t(
+                        'La apertura permanece bloqueada: falta la certificación del despliegue.',
+                        'Opening is blocked: deployment certification is missing.',
+                      )
+                    : data.openBlocker === 'health_requires_review'
+                      ? t(
+                          'La apertura permanece bloqueada por la salud financiera o incidencias pendientes.',
+                          'Opening is blocked by financial health or unresolved incidents.',
+                        )
+                      : t(
+                          'La apertura permanece bloqueada: la integración del comercio requiere revisión.',
+                          'Opening is blocked: the merchant integration needs review.',
+                        )}
+                </p>
+              )}
+              {data?.checkoutsRequested && !data.checkoutsEnabled && (
+                <p role="status" className="text-sm">
+                  {t(
+                    'Los cobros nuevos están bloqueados por seguridad. Puedes mantenerlos pausados de forma explícita.',
+                    'New charges are blocked for safety. You can explicitly keep them paused.',
+                  )}
+                </p>
+              )}
+            </div>
+            <div className="space-y-3 rounded-2xl bg-[#F1F4E9] p-4">
+              <h5 className="font-bold">
+                {t('Invitaciones promocionales', 'Promotional invitations')}
+              </h5>
+              {controls.promotion && (
+                <button
+                  type="button"
+                  className={button}
+                  disabled={busy || reading || !mfaRecentlyVerified}
+                  onClick={() => {
+                    setAction(controls.promotion)
+                    setConfirmation('')
+                    setMessage('')
+                  }}
+                >
+                  {controls.promotion === 'pause_invitations'
+                    ? t('Pausar invitaciones', 'Pause invitations')
+                    : t('Reanudar invitaciones', 'Resume invitations')}
+                </button>
+              )}
+            </div>
+            {!!data && (data.incidents > 0 || data.heldEvents > 0) && (
+              <p className="rounded-2xl bg-[#FFF0DB] p-4 text-sm leading-relaxed">
+                {t(
+                  'Las incidencias financieras siguen retenidas y requieren revisión individual con evidencia. Este panel no las cierra ni libera pagos o beneficios.',
+                  'Financial incidents remain held and require individual evidence-based review. This panel does not close them or release payments or benefits.',
+                )}
+              </p>
+            )}
           </div>
-          {action && (
+          {action && available.includes(action) && (
             <div className="mt-4 space-y-3 rounded-2xl bg-[#F1F4E9] p-4">
               <label className="text-sm">
                 {t('Para confirmar, escribe: ', 'To confirm, type: ')}
@@ -473,6 +564,8 @@ export function AdminPaypalLiveConsole({
                   className={button}
                   disabled={
                     busy ||
+                    reading ||
+                    !available.includes(action) ||
                     confirmation !== actions[action] ||
                     !mfaRecentlyVerified
                   }
@@ -504,7 +597,13 @@ export function AdminPaypalLiveConsole({
       )}
       {section === 'members' && (
         <>
-          <AdminGiftBenefits lang={lang} onSelect={value=>{setOwner(value);setMemberRevision(n=>n+1)}} />
+          <AdminGiftBenefits
+            lang={lang}
+            onSelect={(value) => {
+              setOwner(value)
+              setMemberRevision((n) => n + 1)
+            }}
+          />
           {owner &&
             (member ? (
               <MemberDetails value={member} lang={lang} />

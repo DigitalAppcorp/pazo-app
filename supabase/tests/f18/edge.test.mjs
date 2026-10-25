@@ -26,7 +26,7 @@ const req = (value = input, options = {}) =>
       ...options,
     },
   )
-test('F18 all five operational controls require precise confirmation and fresh GoTrue admin MFA', async () => {
+test('F18 all four operational controls require precise confirmation and fresh GoTrue admin MFA', async () => {
   for (const [action, confirmation] of Object.entries(
     PUBLIC_SUPPORTER_CONFIRMATIONS,
   )) {
@@ -69,6 +69,28 @@ test('F18 all five operational controls require precise confirmation and fresh G
         403,
       )
   }
+})
+test('review: retired mass resolution cannot reach the service mutation, even with admin MFA and duplicate nonce', async () => {
+  let calls = 0
+  const h = createPublicSupporterAdminHandler({
+    authenticateAdmin: async () => actor,
+    change: async () => {
+      calls++
+      return { code: 'updated' }
+    },
+  })
+  const retired = {
+    ...input,
+    action: 'resolve_incidents',
+    confirmation: 'CONFIRMO REVISAR INCIDENCIAS',
+  }
+  assert.equal((await h(req(retired))).status, 400)
+  assert.equal((await h(req(retired))).status, 400)
+  assert.equal(calls, 0)
+  assert.equal(
+    Object.hasOwn(PUBLIC_SUPPORTER_CONFIRMATIONS, 'resolve_incidents'),
+    false,
+  )
 })
 test('F18 forged owner, revision, nonce, extra fields, oversized input and foreign origin are denied', async () => {
   let calls = 0

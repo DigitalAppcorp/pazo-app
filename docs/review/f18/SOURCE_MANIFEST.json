@@ -3,7 +3,7 @@
   "lineEndings": "git-lf",
   "sql": {
     "path": "supabase/migrations/20261025054548_pazo_f18_public_supporter_invitations.sql",
-    "sha256": "8acf95130be3d44d4ebeec952ddbce9c1d4b77bc30e4cb25cc41efc321b47443"
+    "sha256": "3dd5fc629bcecb1cfe8bf9ec075576ff5a44fafd984a9566cba87ff5369e9796"
   },
   "entries": [
     {
@@ -199,7 +199,7 @@
         },
         {
           "path": "supabase/functions/pazo-admin-public-supporter/handler.mjs",
-          "sha256": "32798024f9067c7f5a62812a436405c3605d71d4f87381e43de3def2655fe8b4"
+          "sha256": "b8498a23ea4b5e3718a5ad18ba06cea4c35a45ec707b9434c1c5e4725309332c"
         },
         {
           "path": "supabase/functions/pazo-admin-public-supporter/index.ts",
@@ -210,7 +210,7 @@
           "sha256": "cf123c231b4c9b551912a9dd5b42ed2444e71fd64ccdcb1fe59ec7ad020a6805"
         }
       ],
-      "sourceTreeSha256": "9b29c9504a0b5de86f2583ee36f12607b11b0568eb7a950cedece2cb98ee8515"
+      "sourceTreeSha256": "4bdf195ab7e39b7f1f426d1348474d5196d04fcbf63aa508657758a27d34a59e"
     }
   ]
 }

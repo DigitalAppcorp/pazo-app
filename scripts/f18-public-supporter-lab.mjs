@@ -113,5 +113,7 @@ run('docker', [
   'supabase/tests/f18/kernel.sql',
   '-f',
   'supabase/tests/f18/financial-gates.sql',
+  '-f',
+  'supabase/tests/f18/review-regressions.sql',
 ])
 run(process.execPath, ['scripts/f18-public-supporter-concurrency.mjs'])
