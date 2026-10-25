@@ -1,3 +1,9 @@
+## Encargo vigente F18
+
+Leer docs/PAZO_F18_IMPLEMENTATION_REVIEW_20261025.md antes de continuar. Implementación de Amigo de PAZO autorizada en rama, sin activación pública alojada ni merge. Los antecedentes graduales no son la especificación comercial nueva. Conservar historia, ledger, protecciones y gates de producción.
+
+---
+
 ## F17 PR #99 — F14 one-time SQL protected in active migrations (23-oct-2026 PDT)
 
 Code-only proposal: `supabase/migrations/20261010043307_f14_media_jwt_claim_compat_single_test.sql` now uses the previously-reviewed structural-only/redacted F14 source. Original hosted SQL checksums remain in audit manifests and Git history, **no target-specific DO mutation is executable** through the active migration folder. GitHub guard test requires exact safe source. **Still NO_GO_DB_PUSH** due unavailable initial schema/replay and no PO production authorization; PR #99 remains DRAFT and can cause host auto-deploy if merged. [Evidence](docs/PAZO_F17_F14_ONE_TIME_SAFETY_REVIEW_20261023.md).

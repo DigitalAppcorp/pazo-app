@@ -1,3 +1,15 @@
+## Encargo F18 — implementación autorizada en revisión (25-oct-2026 Guatemala)
+
+La orden directa del PO del 24-oct autoriza implementación integral, pruebas aisladas, commits, push y PR. Sustituye la apertura comercial gradual por acceso público para cuentas legítimas elegibles; conserva controles financieros. **No autoriza merge, SQL hosted, Edge/Vercel producción, secretos ni pagos reales.**
+
+Implementación y evidencia: [informe F18](PAZO_F18_IMPLEMENTATION_REVIEW_20261025.md). Diseño G implementado; aprobación visual PO pendiente. Migración preparada OFF y probada en PostgreSQL17 desechable; no usar db push/repair ni replay histórico. Este F18 identifica el encargo técnico de Amigo de PAZO, no activa el módulo de Adopciones numerado 18 en el roadmap histórico.
+
+Fuente de producto: PR103 head3570ff78bacb0d0325f56fec699ed05d4d3ef125 más la orden directa adjunta. Los estados NOT_IMPLEMENTED o graduales inferiores son historia para esta rama; no describen el código F18 ni conceden permisos de producción.
+
+Revisión PR104: [cuatro correcciones y evidencia](PAZO_F18_REVIEW_CORRECTIONS_20261025.md). Resolución masiva retirada; checkout independiente del helper canario histórico; controles por estado/certificado/salud; métricas ES/EN 320–1440 corregidas. No ejecutar resolución global de incidencias ni interpretar las pruebas sintéticas como validación de pagos reales.
+
+---
+
 # ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
 
 **Esta sección tiene prioridad temporal sobre las entradas históricas más abajo que aún dicen “L1 BLOCKED”, “canary/inactive” o exigen conciliar el checkout QA que ya fue eliminado.** Los límites permanentes de seguridad, privacidad, aprobaciones y no modificar main sin GO siguen vigentes.

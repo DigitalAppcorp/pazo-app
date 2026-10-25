@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto'
 const folder=new URL('../supabase/migrations/',import.meta.url)
 const info=JSON.parse(readFileSync(new URL('../docs/PAZO_HISTORICAL_MIGRATION_PHASE2_MANIFEST_20261023.json',import.meta.url),'utf8'))
 const unpaired=['20261005101300','20261005110000','20261005114500','20261005123000','20261005134000','20261005150000','20261005154500','20261005165500']
+const prepared=JSON.parse(readFileSync(new URL('../docs/review/f18/NOT_APPLIED_MIGRATIONS.json',import.meta.url),'utf8'))
 test('25 canonical hosted SQL files match SHA-256 snapshot digests',()=>{
   assert.equal(info.records.length,25)
   assert.equal(info.records.filter(r=>r.kind==='hosted_only_reconstructed').length,20)
@@ -38,7 +39,10 @@ test('eight prehistory SQL sources preserved in non-executable archive only (pro
   const all=readdirSync(folder).filter(n=>/^20[0-9]{12}_.+[.]sql$/.test(n))
   const archived=new URL('../supabase/history/pre_migration_untracked/',import.meta.url)
   assert.equal(new Set(all.map(n=>n.slice(0,14))).size,all.length)
-  assert.equal(all.length,122)
+  assert.equal(prepared.status,'PREPARED_NOT_APPLIED')
+  assert.equal(prepared.productionPushAllowed,false)
+  assert.equal(all.filter(n=>!prepared.versions.includes(n.slice(0,14))).length,122)
+  assert.equal(all.length,122+prepared.versions.length)
   for(const version of unpaired){
     assert.ok(!all.some(n=>n.startsWith(version+'_')),'old SQL remains deployable: '+version)
     assert.ok(readdirSync(archived).some(n=>n.startsWith(version+'_')),'missing preserved historical SQL: '+version)

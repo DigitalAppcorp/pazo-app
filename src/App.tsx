@@ -80,6 +80,7 @@ import { DocumentsModal } from './components/modals/DocumentsModal'
 import { AlertModal } from './components/modals/AlertModal'
 import { MessagesModal } from './components/modals/MessagesModal'
 import { NotificationsModal } from './components/modals/NotificationsModal'
+import {SupporterInvitationCoordinator} from './features/supporter/public/SupporterInvitationCoordinator'
 import { SightingDetailModal } from './components/modals/SightingDetailModal'
 
 const getPublicRescueRoute = () => {
@@ -1543,7 +1544,7 @@ function PazoMain() {
 
     setIsNotificationsOpen(false)
     if (supporterNotice) {
-      window.location.hash = '#/account/supporter'
+      window.location.hash = '#/account/supporter?from=notification'
     } else if (joinedCommunityId) {
       setCommunityTargetId(joinedCommunityId)
       setCommunityTargetKey((value) => value + 1)
@@ -1704,6 +1705,7 @@ function PazoMain() {
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
       <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0 sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
+        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (

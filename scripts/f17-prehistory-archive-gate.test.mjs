@@ -6,6 +6,7 @@ const root=new URL('../',import.meta.url)
 const archive=JSON.parse(readFileSync(new URL('docs/PAZO_F17_PREHISTORY_ARCHIVE_MANIFEST_20261023.json',root),'utf8'))
 const hosted=JSON.parse(readFileSync(new URL('docs/PAZO_F17_MIGRATION_HISTORY_CONTENT_INTEGRITY_20261023.json',root),'utf8'))
 const active=new URL('supabase/migrations/',root)
+const prepared=JSON.parse(readFileSync(new URL('docs/review/f18/NOT_APPLIED_MIGRATIONS.json',root),'utf8'))
 function sha(buffer) {
  const prefix=Buffer.concat([Buffer.from('blob '+buffer.length),Buffer.from([0])])
  return createHash('sha1').update(prefix).update(buffer).digest('hex')
@@ -20,13 +21,15 @@ test('legacy prehistory originals preserved byte-for-byte outside executable dir
   assert.equal(sha(readFileSync(new URL(r.archived_path,root))),r.original_git_blob_sha,'historical SQL mutated: '+r.archived_path)
  }
 })
-test('active migration versions exactly equal read-only hosted snapshot; never proof of safe db push',()=>{
+test('historical migration versions equal hosted snapshot; new F18 source is explicitly unapplied, never proof of safe db push',()=>{
  const names=readdirSync(active).filter(n=>/^20[0-9]{12}_[^/]+[.]sql$/.test(n))
  const actual=names.map(x=>x.slice(0,14)).sort()
  const expected=hosted.hosted_entries.map(x=>x.version).sort()
- assert.equal(actual.length,122)
- assert.deepEqual(actual,expected,'active migrations differ from historical hosted version inventory')
- assert.equal(new Set(actual).size,122)
+ assert.equal(prepared.productionPushAllowed,false)
+ assert.equal(prepared.status,'PREPARED_NOT_APPLIED')
+ assert.deepEqual(actual.filter(v=>!prepared.versions.includes(v)),expected,'historical hosted version inventory changed')
+ assert.deepEqual(actual,expected.concat(prepared.versions).sort(),'unexpected new executable SQL source')
+ assert.equal(new Set(actual).size,122+prepared.versions.length)
  assert.ok(hosted.hosted_entries.every(r=>existsSync(new URL(r.path,root))))
 })
 test('archive is deliberately non-deployable and remains fenced',()=>{

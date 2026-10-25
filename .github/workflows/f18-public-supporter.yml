@@ -1,0 +1,66 @@
+name: F18 public supporter isolated gates
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-supporter-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:f18
+      - run: npm run test:gradual
+      - run: npm run verify:prepreview
+  pg17-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Actual F18 migration, rollback, role isolation and real concurrent sessions
+        run: npm run test:f18:pg17
+      - name: Ephemeral pinned browser; no production dependency
+        run: |
+          npm install --prefix /tmp/f18-playwright --no-package-lock --ignore-scripts playwright@1.56.1
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            printf 'PAZO_CHROMIUM_PATH=%s\n' "$browser_path" >> "$GITHUB_ENV"
+          else
+            node /tmp/f18-playwright/node_modules/playwright/cli.js install --with-deps chromium
+          fi
+      - name: Real UI to disposable RPC to response; only provider/auth simulated
+        env:
+          VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_ONLY_BROWSER_FIXTURE
+          VITE_PAZO_F16_SANDBOX_QA_UI: 'false'
+          PAZO_PLAYWRIGHT_MODULE: /tmp/f18-playwright/node_modules/playwright
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5188 --strictPort >/tmp/f18-vite.log 2>&1 &
+          f18_vite_pid=$!
+          trap 'kill "$f18_vite_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5188/ >/dev/null
+          npm run test:f18:browser
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: f18-synthetic-ui
+          path: artifacts/f18-ui

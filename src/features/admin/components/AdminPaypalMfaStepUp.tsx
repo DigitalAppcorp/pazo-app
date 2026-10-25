@@ -3,10 +3,10 @@ import {supabase} from '../../../services/supabaseClient'
 
 // Requires a NEW MFA challenge; even an existing aal2 session is not fresh
 // enough to provision Live PayPal secrets. The server checks amr.totp time.
-type Props={lang:'es'|'en';onVerified:()=>void}
+type Props={lang:'es'|'en';onVerified:()=>void;purpose?:'credentials'|'operations'}
 const card='rounded-[17px] bg-[#F2F7E9] p-4 text-[#204E4A]'
 const button='min-h-11 rounded-[13px] bg-[#E1E53F] px-4 text-[13px] font-black text-[#204E4A] disabled:opacity-50'
-export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
+export function AdminPaypalMfaStepUp({lang,onVerified,purpose='credentials'}:Props){
  const t=(es:string,en:string)=>lang==='es'?es:en
  const [factorId,setFactorId]=useState('')
  const [pendingFactorId,setPendingFactorId]=useState('')
@@ -111,7 +111,8 @@ export function AdminPaypalMfaStepUp({lang,onVerified}:Props){
   <h4 className="text-[15px] font-black">{t(
    'Verificación reforzada de administrador','Administrator step-up verification')}</h4>
   <p className="mt-2 text-[12px] leading-relaxed">
-   {t('Para preparar credenciales Live se exige un código nuevo del autenticador. Una sesión iniciada anteriormente no cuenta como una nueva verificación.',
+   {purpose==='operations'?t('Los cambios operativos requieren un código nuevo del autenticador. El servidor comprobará tu sesión y permisos antes de guardar.',
+    'Operational changes require a fresh authenticator code. The server checks your session and permissions before saving.'):t('Para preparar credenciales Live se exige un código nuevo del autenticador. Una sesión iniciada anteriormente no cuenta como una nueva verificación.',
     'Staging Live credentials requires a fresh authenticator code. An older signed-in session is not a new verification.')}
   </p>
   {loading?<p className="mt-3 text-[12px]" role="status">{t('Comprobando…','Checking…')}</p>:

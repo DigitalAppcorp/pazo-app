@@ -1,7 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {createGradualAdminHandler,GRADUAL_CONFIRMATIONS} from '../../functions/pazo-admin-gradual-live/handler.mjs'
-import {createGradualMaintenance} from '../../functions/pazo-paypal-live-worker/gradualMaintenance.mjs'
 import {createPazoLiveServiceRpc} from '../../functions/pazo-paypal-live-checkout/liveSqlServiceAdapters.mjs'
 const id='82000000-0000-4000-8000-00000000ffff'
 const input={action:'start',confirmation:GRADUAL_CONFIRMATIONS.start,expectedRevision:0,requestId:id}
@@ -35,26 +34,10 @@ test('lost admin response never invents a successful release or leaks diagnostic
   assert.equal(r.status,503);assert.deepEqual(await r.json(),{code:'outcome_unknown',mayCharge:false})
  }
 })
-test('durable maintenance uses only fixed tick/notice RPCs and stops after ten notices',async()=>{
- const effects=[]
- await createGradualMaintenance({readWebhookReady:async()=>true,rpc:async(name,args)=>{effects.push([name,args]);return name==='gradualNoticeClaim'?{campaign:id,owner:id,kind:'verified',version:1,lease:id}:true}})({outcome:'processed'})
- assert.equal(effects.filter(([n])=>n==='gradualNoticeDeliver').length,10)
- assert.deepEqual(effects[0],['gradualTick',{p_webhook_ready:true,p_financial_review:false}])
- assert.ok(effects.every(([n])=>['gradualTick','gradualNoticeClaim','gradualNoticeDeliver'].includes(n)))
-})
-test('unhealthy webhook and ambiguous financial outcome persist a pause signal',async()=>{
- const effects=[];await createGradualMaintenance({readWebhookReady:async()=>{throw Error('timeout')},rpc:async(n,a)=>{effects.push([n,a]);return null}})({outcome:'unknown'})
- assert.deepEqual(effects,[['gradualTick',{p_webhook_ready:false,p_financial_review:true}],['gradualNoticeClaim',{}]])
-})
-test('delivery interruption exits for durable lease retry without repeating financial work',async()=>{
- const effects=[]
- await assert.rejects(createGradualMaintenance({readWebhookReady:async()=>true,rpc:async n=>{effects.push(n);if(n==='gradualNoticeClaim')return {campaign:id,owner:id,kind:'invitation',version:2,lease:id};if(n==='gradualNoticeDeliver')throw Error('ACK lost')}})({outcome:'idle'}),/ACK lost/)
- assert.deepEqual(effects,['gradualTick','gradualNoticeClaim','gradualNoticeDeliver'])
-})
-test('service adapter pins all four gradual operations to the original Supabase project',async()=>{
+test('service adapter pins the public supporter operations to the original Supabase project',async()=>{
  const paths=[];const rpc=createPazoLiveServiceRpc({projectUrl:'https://mrybvqdebbgcayuvgkkr.supabase.co',serviceRoleKey:'SYNTHETIC_SERVICE_ONLY_123456789012345',fetchImpl:async(url)=>{paths.push(new URL(url).pathname);return new Response('true',{headers:{'content-type':'application/json'}})}})
- for(const name of ['gradualAdmin','gradualTick','gradualNoticeClaim','gradualNoticeDeliver'])await rpc(name,{})
- assert.deepEqual(paths,['/rest/v1/rpc/pazo_f16_gradual_admin_action','/rest/v1/rpc/pazo_f16_gradual_tick','/rest/v1/rpc/pazo_f16_gradual_notice_claim','/rest/v1/rpc/pazo_f16_gradual_notice_deliver'])
+ for(const name of ['publicSupporterAdmin','publicSupporterTick'])await rpc(name,{})
+ assert.deepEqual(paths,['/rest/v1/rpc/pazo_f18_supporter_admin_action','/rest/v1/rpc/pazo_f18_supporter_tick'])
  await assert.rejects(rpc('gradualRawSql',{}))
 })
 
@@ -89,7 +72,7 @@ test('gradual delivery failure after original worker completion cannot replay th
   if(url.endsWith('worker_admit'))return Response.json({authenticated:true,enabled:true,busy:false,processingAllowed:true,leaseToken:id,expectedBuild:'pazo_live_worker_v2',event:null,monitorDue:false})
   if(url.endsWith('worker_complete'))return Response.json(true)
   if(url.endsWith('pazo-paypal-live-webhook'))return Response.json({source:'pazo_live_webhook_readiness_v1',ready:true,mayGrantBenefits:false})
-  if(url.endsWith('gradual_tick'))return Response.json({processed:true})
+  if(url.endsWith('pazo_f18_supporter_tick'))throw Error('response lost')
   if(url.endsWith('gradual_notice_claim'))throw Error('response lost')
   throw Error('Unexpected financial or credential read')
  }})

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import qrcode from 'qrcode-generator'
+import {recordVerifiedQrUse} from '../../features/supporter/public/recordVerifiedQrUse'
 import type { Pet } from '../../types/pazo'
 import {
   buildPublicRescueUrl,
@@ -74,6 +75,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
 
       try {
         const token = await getPetPublicToken(pet.id)
+        void recordVerifiedQrUse(pet.id)
         if (active) {
           setPublicToken(token)
           setPublicUrl(buildPublicRescueUrl(token))

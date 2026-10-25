@@ -1,5 +1,5 @@
-import {useGradualStatus} from '../gradual/useGradualStatus'
-import {GradualCampaignPanelView} from '../gradual/GradualCampaignPanel'
+import {usePublicSupporterStatus} from '../public/usePublicSupporterStatus'
+import {SupporterBenefitReview} from '../public/SupporterBenefitReview'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { getPublicSupabaseConfig } from '../../../lib/publicConfig'
@@ -11,7 +11,7 @@ import { SupporterBenefitsHome } from './SupporterBenefitsHome'
 import { SupporterOfferB } from './SupporterOfferB'
 import { SupporterLiveCheckoutPanel } from './SupporterLiveCheckoutPanel'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
-import { supporterPaypalReturnKind } from '../supporterAccountRoute.mjs'
+import { supporterPaypalReturnKind,supporterEntrySource } from '../supporterAccountRoute.mjs'
 import { SupporterPreparingScreen } from './SupporterPreparingScreen'
 import { useSupporterMembershipStatus } from '../useSupporterMembershipStatus'
 import {supporterBenefitsUiEnabled} from '../supporterUiRelease'
@@ -66,7 +66,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         operationInFlight.current=false
         setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
-        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setLiveOfferPhase('loading')
+        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setLiveOfferPhase('loading');setVoluntarySupport(false);setPromotionChoice('idle')
         setAccountRevision(n=>n+1)
       }
       lastOwner=nextOwner
@@ -115,7 +115,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   }
   const closeRef = useRef<HTMLButtonElement>(null)
   const {status: membership, refresh: refreshMembership} = useSupporterMembershipStatus()
-  const gradual=useGradualStatus(!qaV2Screen)
+  const publicStatus=usePublicSupporterStatus(!qaV2Screen)
+  const [voluntarySupport,setVoluntarySupport]=useState(false)
+  const [promotionChoice,setPromotionChoice]=useState<'idle'|'saved'|'error'>('idle')
+  useEffect(()=>{if(!qaV2Screen)void supabase.rpc('pazo_supporter_promotion',{p_action:'offer',p_source:supporterEntrySource(window.location.hash)})},[paypalReturnKind,accountRevision])
   const spanish = lang === 'es'
   const label = (es: string, en: string) => spanish ? es : en
   // One coherent first paint: server-owned membership, private Sandbox
@@ -129,12 +132,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const offerReadyForCurrentMode=qaOfferState.mode===offerMode
   const preparationPending=membership.kind==='checking'||
     (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&!error)||
-    (!qaV2Screen&&!gradual.value&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='loading')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
     (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))
   const preparationUnavailable=membership.kind==='unavailable'||
     (!qaV2Screen&&membership.kind==='inactive'&&error)||
-    (!qaV2Screen&&!gradual.value&&membership.kind==='inactive'&&accounts?.length===0&&liveOfferPhase==='blocked')||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
     (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')
   const preparing=preparationPending||preparationUnavailable
@@ -338,9 +339,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   }
 
   const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]/55 disabled:opacity-50'
-  if (membership.kind === 'verified'&&!showLiveManagement) {
+  if (membership.kind === 'verified'&&!showLiveManagement&&!voluntarySupport) {
     return <SupporterBenefitsHome lang={lang} onClose={onClose} pet={pet}
       onManageSubscription={()=>setShowLiveManagement(true)}
+      onSupport={publicStatus.value&&!publicStatus.value.paid&&!publicStatus.value.pending?()=>setVoluntarySupport(true):undefined}
       milestone={membership.milestone} qa={qaV2Screen}/>
   }
   return (
@@ -383,8 +385,9 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('Intentar de nuevo','Try again')}
           </button>
         </div>}
-        {!qaV2Screen&&membership.kind!=='checking'&&membership.kind!=='unavailable'&&<GradualCampaignPanelView lang={lang} status={gradual}/>}
-        {membership.kind === 'inactive' && <>
+        {!qaV2Screen&&<SupporterBenefitReview lang={lang}/>}
+        {(membership.kind === 'inactive'||voluntarySupport) && <>
+          {voluntarySupport&&<p className="rounded-2xl bg-white p-4 text-sm">{label('Tu cortesía se conserva. Si deseas apoyar PAZO, puedes contratar voluntariamente la suscripción mensual.','Your complimentary benefits remain. You may voluntarily support PAZO with a monthly subscription.')}</p>}
           {paypalReturnKind&&<p role="status" className="mx-auto mb-3 max-w-[420px] rounded-[16px] bg-[#EBF1E5] px-4 py-3 text-center text-[13px] font-medium leading-relaxed text-[#204E4A]">
             {paypalReturnKind==='cancel'
               ?label('Regresaste de PayPal sin completar el pago. Primero comprobaremos el intento anterior antes de ofrecer otro.',
@@ -449,7 +452,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   </div>
             ) : accounts?.length===0 ? (
               <SupporterLiveCheckoutPanel lang={lang} key={offerRefreshRevision}
-                availabilityRevision={String(gradual.value?.myCanCheckout)}
+                availabilityRevision={String(publicStatus.value?.checkoutReady)}
                 onAvailabilityChange={receiveLiveOfferState}/>
             ) : (
               <div data-pazo-live-existing-checkout="recover-original"
@@ -636,6 +639,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             </details>}
           </section>
         )}
+        {!qaV2Screen&&<div className="text-center"><button type="button" className="min-h-11 rounded-xl px-3 text-xs underline focus-visible:bg-[#E1E53F]" disabled={promotionChoice==='saved'} onClick={()=>{
+          void supabase.rpc('pazo_supporter_promotion',{p_action:'opt_out'}).then(r=>setPromotionChoice(r.error?'error':'saved'))
+        }}>{promotionChoice==='saved'?label('Invitaciones promocionales desactivadas','Promotional invitations disabled'):label('No recibir invitaciones promocionales','Stop promotional invitations')}</button>
+        {promotionChoice==='error'&&<p role="alert" className="text-xs">{label('No pudimos guardar tu preferencia. Intenta de nuevo.','Your preference could not be saved. Try again.')}</p>}</div>}
       </main>
     </div>
     </SupporterScreenPortal>

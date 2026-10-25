@@ -109,7 +109,7 @@ export function createPazoLiveHostedCheckout({
     throw Error('intake')
   }catch{return forbidden(503,'live_ingestion_unavailable')}
   if(req.method==='GET'){
-   if(pinned.releaseMode==='canary'||pinned.releaseMode==='limited'){
+   if(['canary','limited','public'].includes(pinned.releaseMode)){
     let ownerId,allowed=false
     try{
      ownerId=await resolveAuthenticatedOwner(req)
