@@ -259,7 +259,7 @@ export const HomeView = ({
               type="button"
               aria-pressed={feedFilter === 'following'}
               onClick={() => setFeedFilter('following')}
-              className={`min-w-0 flex-[1_1_40%] rounded-full px-1 text-[9.5px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+              className={`min-w-0 flex-[1_1_40%] rounded-full px-1 text-[12px] font-bold leading-tight transition-colors ${feedFilter === 'following' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
             >
               {lang === 'es' ? 'Para ti' : 'For you'}
             </button>
@@ -267,7 +267,7 @@ export const HomeView = ({
               type="button"
               aria-pressed={feedFilter === 'nearby'}
               onClick={handleSelectNearby}
-              className={`min-w-0 flex-[1_1_60%] rounded-full px-0.5 text-center text-[8.5px] font-bold leading-[1.2] transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
+              className={`min-w-0 flex-[1_1_60%] rounded-full px-0.5 text-center text-[11.5px] font-bold leading-[1.2] transition-colors ${feedFilter === 'nearby' ? 'bg-white text-[#204E4A] shadow-[0_3px_8px_rgba(32,78,74,0.12)]' : 'text-[#5C7470] hover:bg-white/60'}`}
             >
               {lang === 'es' ? <>Cerca ·<span className="block">Próximamente</span></> : <>Nearby ·<span className="block">Coming soon</span></>}
             </button>
