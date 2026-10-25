@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>PAZO QA · Laboratorio visual aislado</title>
+</head>
+<body style="margin:0;background:#efece4">
+<div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {AuthProvider} from '/src/context/AuthContext.tsx';
+import {OnboardingView} from '/src/components/views/OnboardingView.tsx';
+import {HomeView} from '/src/components/views/HomeView.tsx';
+import {CommunitiesView} from '/src/components/views/CommunitiesView.tsx';
+import {GlobalSearchView} from '/src/components/views/GlobalSearchView.tsx';
+import {PetView} from '/src/components/views/PetView.tsx';
+import {MapView} from '/src/components/views/MapView.tsx';
+import {CreateModal} from '/src/components/modals/CreateModal.tsx';
+import {CreatePostModal} from '/src/components/modals/CreatePostModal.tsx';
+import {CreateCommunityModal} from '/src/components/modals/CreateCommunityModal.tsx';
+import {AddPetModal} from '/src/components/modals/AddPetModal.tsx';
+import {CareModal} from '/src/components/modals/CareModal.tsx';
+import {DocumentsModal} from '/src/components/modals/DocumentsModal.tsx';
+import {HeaderBar} from '/src/components/HeaderBar.tsx';
+import {BottomNav} from '/src/components/BottomNav.tsx';
+import {SupporterInvitationPrompt} from '/src/features/supporter/components/SupporterInvitationPrompt.tsx';
+import {VISUAL_CASES} from '/scripts/visual-lab/cases.mjs';
+import '/src/index.css';
+
+// No export/import in a production bundle. Entry exists ONLY as dev-server HTML,
+// is NOT listed among vite.config.ts production HTML inputs and refuses non-local URLs.
+// Every non-loopback HTTP(S) request is blocked separately by the Playwright runner.
+if (!import.meta.env.DEV || !['127.0.0.1','localhost'].includes(location.hostname)) {
+  document.getElementById('root').textContent = 'Visual QA is available only on local development.';
+  throw new Error('Visual lab only permitted in local development');
+}
+const p=new URLSearchParams(location.search);
+const scene=p.get('case')||'welcome';
+const lang=p.get('lang')==='en'?'en':'es';
+if (!VISUAL_CASES.some(x=>x.id===scene)) throw new Error('Visual fixture not registered: '+scene);
+window.__PAZO_VISUAL_FIXTURE__={scene,lang,synthetic:true,readOnly:true};
+
+const syntheticPet={
+  id:'00000000-0000-4000-8000-000000000001',name:lang==='es'?'Luna de prueba':'Demo Luna',
+  species:'perro',age:'3',breed:lang==='es'?'Mestiza':'Mixed breed',
+  photoUrl:'',bio:lang==='es'?'Me gusta pasear y conocer mascotas.':'I like walks and meeting pets.',
+  zone:lang==='es'?'Zona de demostración':'Demo area',qrId:'SYNTHETIC-ONLY',
+  interests:['Comunidades de perros','Parques y paseos'],isLost:false
+};
+const examplePost={
+  id:'00000000-0000-4000-8000-000000000002',
+  petId:syntheticPet.id,petName:syntheticPet.name,petSpecies:'perro',petAvatar:'',
+  location:lang==='es'?'Zona de demostración':'Demo area',
+  timeAgo:lang==='es'?'Hace 2 horas':'2 hours ago',
+  text:lang==='es'?'Un paseo tranquilo. Esta publicación es ficticia y no pertenece a ninguna cuenta.':'A quiet walk. This post is synthetic and belongs to no account.',
+  photoUrl:null,likes:12,isLiked:false,isSaved:false,comments:[],commentsCount:0,commentsLoaded:true
+};
+const noop=()=>{};
+const neverWrite=async()=>{throw new Error('Visual fixture: write operations are not permitted')};
+const labels={
+  inicio:lang==='es'?'Inicio':'Home',comunidades:lang==='es'?'Comunidades':'Communities',
+  crear:lang==='es'?'Crear':'Create',mapa:lang==='es'?'Mapa':'Map',mascota:lang==='es'?'Mi mascota':'My pet'
+};
+const props={lang,onClose:noop};
+const node=(component,p={})=>React.createElement(component,{...props,...p});
+
+function Fixture(){
+  const [nav,setNav]=React.useState('inicio');
+  const [language,setLanguage]=React.useState(lang);
+  const onb=(step)=>node(OnboardingView,{
+    initialStep:step,lang:language,onToggleLang:()=>setLanguage(v=>v==='es'?'en':'es'),
+    onComplete:noop,onSkipToLogin:noop,onQuickDemo:noop
+  });
+  let body;
+  switch(scene){
+    case 'welcome': body=onb('A01');break;
+    case 'signup': body=onb('A02');break;
+    case 'pet-onboarding': body=onb('A03');break;
+    case 'interests': body=onb('A04');break;
+    case 'feed-one':
+    case 'feed-empty': body=node(HomeView,{
+      posts:scene==='feed-one'?[examplePost]:[],canReport:false,
+      onLikePost:noop,onSavePost:noop,onAddComment:neverWrite,onLoadComments:async()=>false,
+      ownedPetIds:[],onSelectPetProfile:noop
+    });break;
+    case 'communities-empty': body=node(CommunitiesView,{currentPet:null,canUseCommunities:false});break;
+    case 'search-disabled':body=node(GlobalSearchView,{canSearch:false,onSelectPet:noop,onSelectCommunity:noop,onSelectPlace:noop});break;
+    case 'pet-summary':body=node(PetView,{
+      currentPet:syntheticPet,canModerate:false,canManagePet:false,onRequireAccount:noop,
+      availablePets:[syntheticPet],onSelectPet:noop,onPetUpdated:noop,onAddPet:noop,
+      careItems:[],onCompleteCare:neverWrite,onOpenQRPassport:noop,onOpenCareAgenda:noop,
+      documentCount:0,onOpenDocuments:noop,onOpenLostAlert:noop,userPosts:[]
+    });break;
+    case 'create-menu':body=node(CreateModal,{isOpen:true,activePetName:syntheticPet.name,activePetSpecies:'perro',canCreate:false,onRequireAccount:noop,onSelectOption:noop});break;
+    case 'create-post':body=node(CreatePostModal,{isOpen:true,currentPet:syntheticPet,onPostCreated:noop});break;
+    case 'create-community':body=node(CreateCommunityModal,{isOpen:true,currentPet:syntheticPet,onCreated:noop});break;
+    case 'add-pet':body=node(AddPetModal,{isOpen:true,onPetCreated:noop});break;
+    case 'care-empty':body=node(CareModal,{
+      isOpen:true,petName:syntheticPet.name,careItems:[],careHistory:[],isLoading:false,error:'',
+      isHistoryLoading:false,hasMoreHistory:false,onLoadMoreHistory:noop,onRetry:noop,
+      onCreateCare:neverWrite,onUpdateCare:neverWrite,onArchiveCare:neverWrite,
+      onCompleteCare:neverWrite,onUndoCompletion:neverWrite
+    });break;
+    case 'documents-empty':body=node(DocumentsModal,{
+      isOpen:true,petName:syntheticPet.name,documents:[],total:0,isLoading:false,error:'',
+      isLoadingMore:false,hasMore:false,onLoadMore:noop,onRetry:noop,
+      onUpload:neverWrite,onUpdate:neverWrite,onDelete:neverWrite,onGetBlob:neverWrite
+    });break;
+    case 'map-unavailable':body=node(MapView,{currentPet:null,canUsePlaces:false});break;
+    case 'nav':body=React.createElement(React.Fragment,null,
+      node(HeaderBar,{lang,onToggleLang:noop,onOpenSearch:noop,onOpenMessages:noop,
+        onOpenNotifications:noop,unreadMessagesCount:2,unreadNotificationsCount:3}),
+      React.createElement('main',{className:'flex-1 p-5'},React.createElement('h1',{className:'text-xl font-black text-[#204E4A]'},lang==='es'?'Vista previa de navegación':'Navigation preview')),
+      node(BottomNav,{activeTab:nav,onSelectTab:setNav,onOpenCreate:noop,labels})
+    );break;
+    case 'invitation':body=node(SupporterInvitationPrompt,{onExplore:noop,onDismiss:noop,onOptOut:noop,previewOnly:true});break;
+  }
+  if(scene==='invitation')return React.createElement('div',{'data-visual-surface':scene},body);
+  return React.createElement('div',{'data-visual-surface':scene,
+    'data-pazo-app-shell':true,
+    className:'mx-auto flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#FAF8F5] text-[#204E4A] sm:h-[860px] sm:max-w-[430px] sm:rounded-[2.8rem] sm:shadow-xl'},
+    ['welcome','signup','pet-onboarding','interests','nav'].includes(scene)
+      ? body
+      : React.createElement('main',{className:'relative flex min-h-0 flex-1 flex-col overflow-y-auto'},body)
+  );
+}
+createRoot(document.getElementById('root')).render(
+  React.createElement(AuthProvider,null,React.createElement(Fixture))
+);
+</script>
+</body>
+</html>
