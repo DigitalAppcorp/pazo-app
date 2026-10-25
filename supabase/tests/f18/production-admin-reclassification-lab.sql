@@ -1,5 +1,15 @@
 \connect f14_synthetic
 DO $$ BEGIN IF current_database()<>'f14_synthetic' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
+-- This older disposable baseline predates the real hosted admin_grants.granted_at column.
+-- Bring only the *synthetic* admin-grant shape into parity with hosted PG.
+DO $synthetic_admin_schema$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_schema='admin_private'
+  AND table_name='admin_grants' AND column_name='granted_at') THEN
+  ALTER TABLE admin_private.admin_grants ADD COLUMN granted_at timestamptz NOT NULL DEFAULT clock_timestamp();
+ END IF;
+END
+$synthetic_admin_schema$;
 -- Isolated synthetic owner data. Never connected to hosted/PayPal.
 DO $fixture$
 DECLARE v_owner uuid;
