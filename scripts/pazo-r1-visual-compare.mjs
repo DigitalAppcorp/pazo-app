@@ -68,7 +68,10 @@ for(const scene of cases)for(const [width,height]of dimensions)for(const lang of
         const st=getComputedStyle(e)
         return /(auto|scroll)/.test(st.overflowY)&&e.scrollHeight>e.clientHeight+10
       }).length
-      return {textLength:text.length,
+      const optout=document.querySelector('.supporter-growth-optout')
+      const optoutBox=optout?.getBoundingClientRect()
+      const optoutVisible=optoutBox?optoutBox.top>=0&&optoutBox.bottom<=innerHeight:false
+      return {optoutVisible,textLength:text.length,
         documentWidth:document.documentElement.scrollWidth,
         viewportWidth:document.documentElement.clientWidth,
         overflowX:document.documentElement.scrollWidth>document.documentElement.clientWidth+2,
@@ -90,6 +93,8 @@ for(const scene of cases)for(const [width,height]of dimensions)for(const lang of
     textElementsBefore:b.metrics.elements.length,textElementsAfter:p.metrics.elements.length,
     positionsChanged:p.metrics.elements.filter((e,i)=>!b.metrics.elements[i]||
       ['x','y','w','h','marginTop','marginBottom','fontSize'].some(k=>e[k]!==b.metrics.elements[i][k])).length}
+  if(scene==='invitation'&&width===1440&&b.metrics.optoutVisible&&!p.metrics.optoutVisible)
+    report.errors.push({id,reason:'R1 desktop hides an opt-out that was visible on main'})
   report.captured+=2
  }else report.errors.push({id,baseline:b.errors,proposal:p.errors})
  report.pairs.push(pair)
