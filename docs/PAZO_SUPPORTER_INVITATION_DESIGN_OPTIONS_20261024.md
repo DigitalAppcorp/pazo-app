@@ -1,6 +1,14 @@
 # PAZO — Direcciones visuales para primera invitación a Amigo de PAZO
-**Fecha:** 24-oct-2026 · **Estado:** `DESIGN_OPTIONS_PRESENTED / PO_SELECTION_PENDING / NO_UI_COMMITTED`.
+**Fecha:** 24-oct-2026 · **Estado:** `DESIGN_CONCEPT_G_SELECTED_BY_PO / FINAL_DESIGN_PENDING / NO_UI_COMMITTED`.
 **Documento rector de UX y lógica:** [Amigo de PAZO Live público: invitaciones inteligentes](PAZO_SUPPORTER_PUBLIC_LIVE_INVITATIONS_UX_20261024.md).
+
+## Selección del Product Owner: opción G — Crecimiento de PAZO
+
+El PO revisó dos nuevos tableros con hasta ocho variantes y seleccionó literalmente **«la g»** de la comparativa de 8 diseños. Esta **G no es una de las cuatro propuestas A–D originales**: es una quinta dirección visual aprobada, denominada **Crecimiento y sostenibilidad** en el tablero, interpretada exclusivamente como crecimiento de PAZO, sus funcionalidades y su comunidad (NO alegar misión ecológica).
+
+**Composición guía del diseño seleccionado:** interfaz PWA móvil a pantalla completa, fondo verde bosque oscuro con degradados atmosféricos, una pequeña planta/brote luminoso creciendo sobre tierra y una huella de mascota grabada; puntos de luz suaves y discretos. Texto protagonista «Ayúdanos a seguir creciendo»; subtítulo sencillo sobre crear nuevas funciones, herramientas y experiencias para la comunidad. Precio visible **US$2.99 al mes**; botón principal grande «Conocer Amigo de PAZO» y secundario «Ahora no, seguir en PAZO»; control de cierre X accesible. No pago directo en esta vista. Contraste y área segura del teléfono indispensables, sin bordes decorativos; microanimación opcional con reducción de movimiento.
+
+**Estado de la aprobación:** seleccionado el concepto G, no se han validado mockup de alta fidelidad, tipografía final, espaciados ni copy exacto ES/EN. El referente de la imagen es dirección de arte y arquitectura visual, no pantalla final aprobada. La implementación requiere diseño final y autorización posterior. **No reemplazar G por A+C ni presentar A–D como decisiones actuales.**
 
 ## Invariantes de todas las opciones
 - Primera invitación a pantalla completa **una sola vez por cuenta/campaña**, disparada tras uso significativo, en momento no crítico, sin solicitud a PayPal obligatoria antes de mostrar.
@@ -40,7 +48,7 @@
 | C | Media/Alta | Muy alta | Baja/Media | Baja | CTA menos evidente |
 | D | Alta | Media | Muy alta | Media | Saturación móvil |
 
-**Recomendación del consultor, pendiente de GO:** **A** (medalla PAZO) con tono emocional de **C**, cuatro beneficios resumidos en la oferta real, no en la invitación. Mantener el primer contacto breve, amable y con una salida no escondida.
+**Nota histórica:** la recomendación inicial fue A+C, pero ha quedado **superada por la selección expresa del PO: G**. Mantener el primer contacto breve, amable y con salida visible.
 
 ## Gate antes de programar
-El Product Owner elige **A, B, C, D o combinación explícita** y aprueba copy ES/EN. Elaborar mockup móvil a escala real y estados pequeño/grande, revisión de espaciados sin contornos, animación reducida y transiciones. No confundir propuesta visual con interfaz productiva. No tocar PayPal, SQL, main ni producción por documentar estas alternativas.
+El Product Owner **ya eligió G**. Elaborar mockup G móvil a escala real y estados pequeño/grande; obtener aprobación de copy ES/EN, revisión de espaciados sin contornos, animación reducida y transiciones. No confundir propuesta visual con interfaz productiva. No tocar PayPal, SQL, main ni producción por documentar estas alternativas.
