@@ -1,5 +1,5 @@
 # PAZO — Amigo de PAZO Live público: invitaciones inteligentes y recorridos UX
-**Decisiones de producto del PO:** 24-oct-2026. **Estado:** `PRODUCT_RULES_APPROVED / DESIGN_OPTIONS_PENDING_SELECTION / IMPLEMENTATION_NOT_STARTED / HOSTED_NOT_CHANGED`.
+**Decisiones de producto del PO:** 24-oct-2026. **Estado:** `PRODUCT_RULES_APPROVED / VISUAL_CONCEPT_G_APPROVED / FINAL_MOBILE_DESIGN_PENDING / IMPLEMENTATION_NOT_STARTED / HOSTED_NOT_CHANGED`.
 
 > **Lectura obligatoria para cualquier agente que retome Amigo de PAZO:** este documento sustituye **como dirección futura de producto**, pero NO como estado actual de producción, al mecanismo comercial de apertura gradual `L1→L2→L3→L4`. No afirmar que Live público está activo. El PO solicitó conservar notificaciones e invitaciones; se definió el recorrido de dos intentos. Esta rama es documentación, no autorización para desplegar, fusionar ni actualizar SQL/PayPal.
 
@@ -142,9 +142,9 @@ Medición admin: cuentas cualificadas, overlay efectivamente mostrado, CTR Conoc
 - **C — Nota personal de PAZO**: carta amigable/editorial, valor de comunidad, animación de entrada mínima. Precio y voluntariedad claramente visibles.
 - **D — Cuatro beneficios en vistazo**: insignia central y mosaico legible de beneficios, mayor claridad racional, riesgo de saturación móvil.
 
-**Elección visual:** pendiente del PO. Ninguna opción implica permiso de desarrollo o despliegue.
+**Elección visual APROBADA por el PO:** **G — Crecimiento de PAZO** del tablero comparativo de ocho conceptos, seleccionada literalmente con «la g». Hero de brote pequeño luminoso que nace de tierra con una marca de huella en la base, entorno verde bosque profundo y partículas de luz discretas; mensaje de propósito «Ayúdanos a seguir creciendo». Composición vertical móvil inmersiva y limpia, sin apariencia de modal genérico ni medalla gigante como protagonista. Abajo: explicación breve de apoyo voluntario, **US$2.99 al mes**, CTA «Conocer Amigo de PAZO», opción visible «Ahora no, seguir en PAZO» y X de cierre. PAZO básico siempre gratis. **No asociar la ilustración a promesas ambientales que PAZO no hace**: la semilla simboliza el desarrollo de la app y la comunidad. Mantener UI sin contornos decorativos, accesible y con animación sutil opcional que respete reduced-motion. La imagen del tablero es referencia de concepto, NO arte final ni aprobación automática de su copy/píxeles. Los detalles finales de móvil y microcopy siguen por revisar.
 
-**Comparación detallada de variantes:** [A–D, composición y riesgos](PAZO_SUPPORTER_INVITATION_DESIGN_OPTIONS_20261024.md).
+**Variantes históricas A–D y selección G:** [comparativa actualizada](PAZO_SUPPORTER_INVITATION_DESIGN_OPTIONS_20261024.md). Ninguna elección implica permiso de desarrollo, merge o despliegue.
 
 ## 11. Cómo continuar este handoff
 
