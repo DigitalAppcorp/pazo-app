@@ -4,6 +4,10 @@ DO $$ BEGIN IF current_database()<>'f14_synthetic' OR current_user<>'postgres' T
 DO $fixture$
 DECLARE v_owner uuid;
 BEGIN
+ IF (SELECT count(*) FROM admin_private.admin_grants)=0 THEN
+  INSERT INTO admin_private.admin_grants(user_id,granted_at)
+  VALUES(f18_test.owner(180),clock_timestamp()-interval '2 days');
+ END IF;
  IF (SELECT count(*) FROM admin_private.admin_grants)<>1 THEN RAISE EXCEPTION 'synthetic_one_admin_expected';END IF;
  SELECT user_id INTO STRICT v_owner FROM admin_private.admin_grants;
  IF NOT EXISTS(SELECT 1 FROM auth.users WHERE id=v_owner) THEN RAISE EXCEPTION 'missing_synthetic_admin'; END IF;
