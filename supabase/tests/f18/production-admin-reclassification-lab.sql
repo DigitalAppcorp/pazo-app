@@ -1,5 +1,10 @@
-\connect f14_synthetic
-DO $$ BEGIN IF current_database()<>'f14_synthetic' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
+\connect f16_lab
+DO $ BEGIN IF current_database()<>'f16_lab' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $;
+-- Clone the fixture, leaving f14_synthetic unchanged for subsequent browser E2E.
+DROP DATABASE IF EXISTS f18_admin_synthetic WITH (FORCE);
+CREATE DATABASE f18_admin_synthetic WITH TEMPLATE f14_synthetic;
+\connect f18_admin_synthetic
+DO $ BEGIN IF current_database()<>'f18_admin_synthetic' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $;
 -- This older disposable baseline predates the real hosted admin_grants.granted_at column.
 -- Bring only the *synthetic* admin-grant shape into parity with hosted PG.
 DO $synthetic_admin_schema$
@@ -56,3 +61,7 @@ SELECT f18_test.check('QA_HISTORY_SNAPSHOTS_RETAINED',
  (SELECT original_gradual_qa->>'reason'='prebeta_20261023'
  AND original_sandbox_qa->>'test_purpose'='f16_four_benefits_sandbox'
  FROM supporter_private.pazo_live_production_reclassifications LIMIT 1));
+
+\connect f16_lab
+DO $$ BEGIN IF current_database()<>'f16_lab' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
+DROP DATABASE f18_admin_synthetic WITH (FORCE);
