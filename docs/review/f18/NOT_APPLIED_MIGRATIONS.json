@@ -1,5 +1,6 @@
 {
-  "status": "PREPARED_NOT_APPLIED",
+  "status": "APPLIED_HOSTED",
   "productionPushAllowed": false,
-  "versions": ["20261025054548"]
+  "versions": [],
+  "installedVersion": "20261025073311"
 }
