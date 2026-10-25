@@ -26,6 +26,12 @@ import {DocumentsModal} from '/src/components/modals/DocumentsModal.tsx';
 import {HeaderBar} from '/src/components/HeaderBar.tsx';
 import {BottomNav} from '/src/components/BottomNav.tsx';
 import {SupporterInvitationPrompt} from '/src/features/supporter/components/SupporterInvitationPrompt.tsx';
+import {LostAlertReview} from '/src/features/rescue/components/LostAlertReview.tsx';
+import {ActiveLostAlertPanel} from '/src/features/rescue/components/ActiveLostAlertPanel.tsx';
+import {PasswordRecoveryView} from '/src/features/auth/PasswordRecoveryView.tsx';
+import {LegalPreviewDialog} from '/src/features/legal/LegalPreviewDialog.tsx';
+import {ReportDialog} from '/src/features/moderation/ReportDialog.tsx';
+import {GratitudeWallScene} from '/src/features/supporter/components/GratitudeWallScene.tsx';
 import {VISUAL_CASES} from '/scripts/visual-lab/cases.mjs';
 import '/src/index.css';
 
@@ -116,8 +122,30 @@ function Fixture(){
       node(BottomNav,{activeTab:nav,onSelectTab:setNav,onOpenCreate:noop,labels})
     );break;
     case 'invitation':body=node(SupporterInvitationPrompt,{onExplore:noop,onDismiss:noop,onOptOut:noop,previewOnly:true});break;
+    case 'lost-review':body=node(LostAlertReview,{
+      pet:syntheticPet,lastSeen:lang==='es'?'Zona de demostración, Los Ángeles':'Demo area, Los Angeles',
+      dateTime:'2026-10-25T09:30',details:lang==='es'?'Última vez vista cerca del parque. Información sintética.':'Last seen near the park. Synthetic information.',
+      isSaving:false,onEdit:noop,onPublish:noop
+    });break;
+    case 'lost-active':body=node(ActiveLostAlertPanel,{
+      pet:syntheticPet,lastSeen:lang==='es'?'Zona de demostración':'Demo area',
+      details:lang==='es'?'Solo para probar la pantalla de alerta.':'For visual QA only.',
+      isSaving:false,publicUrl:'https://invalid.example/never-real',isLinkLoading:false,
+      linkError:'',shareFeedback:'',isLocalLink:true,onCopy:noop,onWhatsApp:noop,
+      onInstagram:noop,onMore:noop,onRetryLink:noop,onResolve:noop
+    });break;
+    case 'password-expired':body=node(PasswordRecoveryView,{sessionReady:false,onUpdatePassword:neverWrite,onExit:async()=>{}});break;
+    case 'password-ready':body=node(PasswordRecoveryView,{sessionReady:true,onUpdatePassword:neverWrite,onExit:async()=>{}});break;
+    case 'legal-privacy':body=node(LegalPreviewDialog,{kind:'privacy'});break;
+    case 'legal-terms':body=node(LegalPreviewDialog,{kind:'terms'});break;
+    case 'report-post':body=node(ReportDialog,{
+      target:{kind:'feed_post',id:examplePost.id,label:lang==='es'?'Publicación ficticia':'Synthetic post'}
+    });break;
+    case 'wall-empty':body=node(GratitudeWallScene,{
+      rows:[],tab:'all',onTabChange:noop,previewOnly:true,backToWelcome:true
+    });break;
   }
-  if(scene==='invitation')return React.createElement('div',{'data-visual-surface':scene},body);
+  if(['invitation','legal-privacy','legal-terms','report-post'].includes(scene))return React.createElement('div',{'data-visual-surface':scene},body);
   return React.createElement('div',{'data-visual-surface':scene,
     'data-pazo-app-shell':true,
     className:'mx-auto flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#FAF8F5] text-[#204E4A] sm:h-[860px] sm:max-w-[430px] sm:rounded-[2.8rem] sm:shadow-xl'},
