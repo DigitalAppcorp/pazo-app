@@ -98,7 +98,7 @@ const prerequisites = [
 ]
 run('docker', [...base, ...prerequisites.flatMap((f) => ['-f', f])])
 const source = readFileSync(
-  'supabase/migrations/20261025054548_pazo_f18_public_supporter_invitations.sql',
+  'supabase/migrations/20261025073311_pazo_f18_public_supporter_invitations.sql',
   'utf8',
 )
 writeFileSync(

@@ -21,15 +21,16 @@ test('legacy prehistory originals preserved byte-for-byte outside executable dir
   assert.equal(sha(readFileSync(new URL(r.archived_path,root))),r.original_git_blob_sha,'historical SQL mutated: '+r.archived_path)
  }
 })
-test('historical migration versions equal hosted snapshot; new F18 source is explicitly unapplied, never proof of safe db push',()=>{
+test('historical migration versions equal hosted snapshot; F18 individually installed; db push still forbidden',()=>{
  const names=readdirSync(active).filter(n=>/^20[0-9]{12}_[^/]+[.]sql$/.test(n))
  const actual=names.map(x=>x.slice(0,14)).sort()
  const expected=hosted.hosted_entries.map(x=>x.version).sort()
  assert.equal(prepared.productionPushAllowed,false)
- assert.equal(prepared.status,'PREPARED_NOT_APPLIED')
- assert.deepEqual(actual.filter(v=>!prepared.versions.includes(v)),expected,'historical hosted version inventory changed')
- assert.deepEqual(actual,expected.concat(prepared.versions).sort(),'unexpected new executable SQL source')
- assert.equal(new Set(actual).size,122+prepared.versions.length)
+ assert.equal(prepared.status,'APPLIED_HOSTED')
+ assert.equal(prepared.installedVersion,'20261025073311')
+ assert.deepEqual(actual.filter(v=>v!==prepared.installedVersion&&!prepared.versions.includes(v)),expected,'historical hosted version inventory changed')
+ assert.deepEqual(actual,expected.concat([prepared.installedVersion],prepared.versions).sort(),'unexpected new executable SQL source')
+ assert.equal(new Set(actual).size,123+prepared.versions.length)
  assert.ok(hosted.hosted_entries.every(r=>existsSync(new URL(r.path,root))))
 })
 test('archive is deliberately non-deployable and remains fenced',()=>{
