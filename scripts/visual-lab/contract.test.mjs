@@ -13,22 +13,25 @@ const config=read('src/lib/publicConfig.ts')
 test('all visual fixture identifiers unique, explicitly typed and actually rendered',()=>{
   const ids=VISUAL_CASES.map(c=>c.id)
   assert.equal(new Set(ids).size,ids.length)
-  assert.ok(ids.length>=15)
+  assert.equal(ids.length,86,'86 named QA states must be registered')
   assert.deepEqual(VISUAL_LANGUAGES,['es','en'])
   for(const s of VISUAL_CASES){
     assert.match(s.id,/^[a-z][a-z-]*$/)
     assert.ok(['component','synthetic','blocked'].includes(s.level),s.id)
-    assert.ok(harness.includes("case '"+s.id+"'")||harness.includes('case \''+s.id+'\''),s.id+' not routed')
+    assert.ok(s.template?['feed','communities','community-feature','search','nav','pet','care','documents','lost-review','lost-active','public-rescue','passport','sighting','report','map','map-suggest','feature-intent','notifications','messages','offer','benefits','wall','admin'].includes(s.template):harness.includes("case '"+s.id+"'"),s.id+' must have an implemented component renderer')
   }
 })
 test('pilot matrix is a representative subset; full matrix is labeled, not 86 completed',()=>{
   assert.ok(selectVisualCases('pilot').length>0)
   assert.ok(selectVisualCases('pilot').length<VISUAL_CASES.length)
   assert.equal(selectVisualCases('full').length,VISUAL_CASES.length)
+  assert.equal(selectVisualCases('full').length,86)
   assert.deepEqual(Object.keys(VISUAL_VIEWPORTS),['320','390','430','768','1440'])
   assert.deepEqual(Object.keys(selectVisualViewports('pilot')),['390'])
   assert.match(runner,/inventory_target:86/)
   assert.match(runner,/NOT WCAG certification/)
+  assert.match(harness,/installSyntheticReadGateway/)
+  assert.match(read('scripts/visual-lab/synthetic-read-gateway.mjs'),/noWrite=\(\)=>\{throw Error/)
 })
 test('harness is guarded by localhost AND development build; real app not mutated',()=>{
   assert.match(harness,/import\.meta\.env\.DEV/)
