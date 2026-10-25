@@ -2,5 +2,8 @@
   "status": "APPLIED_HOSTED",
   "productionPushAllowed": false,
   "versions": [],
-  "installedVersion": "20261025073311"
+  "installedVersion": "20261025073311",
+  "additionalInstalledVersions": [
+    "20261025231021"
+  ]
 }
