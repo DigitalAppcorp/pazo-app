@@ -67,6 +67,8 @@ import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
+import { DemoBanner, DemoCommunities, DemoExplore } from './features/demo/DemoExperience'
+import { createDemoPets, createDemoPosts, toggleDemoLike, toggleDemoSave, appendDemoComment } from './features/demo/demoExperience'
 import { PazoInstallControl } from './features/pwa/components/PazoInstallControl'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -317,7 +319,47 @@ function PazoMain() {
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
   const canUseAccount = canUseAccountFeatures(user?.id, isDemoUser)
+
+  const enterDemo = () => {
+    if (user) return
+    const demoPets = createDemoPets()
+    setPets(demoPets)
+    setCurrentPet(demoPets[0])
+    activePetIdRef.current = demoPets[0].id
+    setPosts(createDemoPosts())
+    setProfilePosts(createDemoPosts().filter((post) => post.petId === demoPets[0].id))
+    feedPaginationRef.current = { ...EMPTY_FEED_PAGINATION }
+    setIsFeedLoading(false)
+    setHasMoreFeed(false)
+    setFeedError(null)
+    setActiveTab('inicio')
+    setIsDemoUser(true)
+  }
+
+  const leaveDemo = (destination: 'welcome' | 'signup' = 'welcome') => {
+    setIsDemoUser(false)
+    setIsSearchOpen(false)
+    setSelectedPublicProfileId(null)
+    setIsCreateMenuOpen(false)
+    setIsMessagesOpen(false)
+    setIsNotificationsOpen(false)
+    setActiveTab('inicio')
+    setPosts([])
+    setProfilePosts([])
+    const demoPets = createDemoPets()
+    setPets(demoPets)
+    setCurrentPet(demoPets[0])
+    activePetIdRef.current = demoPets[0].id
+    setHasMoreFeed(false)
+    setIsFeedLoading(true)
+    setFeedError(null)
+    setAuthMode('onboarding')
+    setInitialOnboardingStep(destination === 'signup' ? 'A02' : 'A01')
+    setIsOnboardingActive(true)
+  }
+
   const requireAccount = () => {
+    if (isDemoUser) { leaveDemo('signup'); return }
     setIsCreateMenuOpen(false)
     setIsDemoUser(false)
     setIsOnboardingActive(false)
@@ -618,6 +660,7 @@ function PazoMain() {
   },[badgePetSignature,activeTab,currentPet.id])
 
   const loadMoreFeed = async () => {
+    if (isDemoUser) return
     if (
       feedLoadMoreInFlightRef.current
       || isFeedLoading
@@ -657,12 +700,22 @@ function PazoMain() {
   }
 
   useEffect(() => {
-    if (activeTab === 'mascota' && currentPet?.id) {
-      void loadProfilePostsForPet(currentPet.id)
+    if (activeTab !== 'mascota' || !currentPet?.id) return
+    if (isDemoUser) {
+      setProfilePosts(createDemoPosts().filter((post) => post.petId === currentPet.id))
+      return
     }
-  }, [activeTab, currentPet?.id])
+    if (user?.id) void loadProfilePostsForPet(currentPet.id)
+  }, [activeTab, currentPet?.id, isDemoUser, user?.id])
 
   const selectActivePet = (pet: Pet) => {
+    if (isDemoUser) {
+      activePetIdRef.current = pet.id
+      setCurrentPet(pet)
+      setProfilePosts(createDemoPosts().filter((post) => post.petId === pet.id))
+      setSelectedPublicProfileId(null)
+      return
+    }
     if (!user?.id) return
 
     localStorage.setItem(`active_pet_${user.id}`, pet.id)
@@ -824,6 +877,7 @@ function PazoMain() {
   }
 
   const handleLikePost = async (postId: string) => {
+    if (isDemoUser) { setPosts((previous) => toggleDemoLike(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
@@ -874,6 +928,7 @@ function PazoMain() {
   }
 
   const handleSavePost = async (postId: string) => {
+    if (isDemoUser) { setPosts((previous) => toggleDemoSave(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
@@ -922,6 +977,7 @@ function PazoMain() {
   }
 
   const loadCommentsForPost = async (postId: string): Promise<boolean> => {
+    if (isDemoUser) return posts.some((post) => post.id === postId)
     const targetPost = posts.find((post) => post.id === postId)
     if (!targetPost) return false
     if (targetPost.commentsLoaded) return true
@@ -998,6 +1054,19 @@ function PazoMain() {
   }
 
   const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    if (isDemoUser) {
+      const body = text.trim()
+      if (!body || !posts.some((post) => post.id === postId)) return false
+      setPosts((previous) => appendDemoComment(previous, postId, {
+        id: `demo-comment-${crypto.randomUUID()}`,
+        authorName: currentPet.name,
+        authorPet: currentPet.species,
+        authorAvatar: currentPet.photoUrl,
+        text: body,
+        timeAgo: lang === 'es' ? 'Ahora · ejemplo' : 'Now · sample',
+      }))
+      return true
+    }
     if (!canUseAccount) { requireAccount(); return false }
     const trimmedText = text.trim()
     if (!currentPet?.id || !postId || !trimmedText) return false
@@ -1533,7 +1602,7 @@ function PazoMain() {
 
   const handleOpenNotifications = () => {
     setIsNotificationsOpen(true)
-    void refreshNotifications()
+    if (!isDemoUser) void refreshNotifications()
   }
 
   const handleOpenNotification = async (notification: PazoNotification) => {
@@ -1753,7 +1822,7 @@ function PazoMain() {
                 setAuthMode('login')
                 setIsOnboardingActive(false)
               }}
-              onQuickDemo={() => setIsDemoUser(true)}
+              onQuickDemo={enterDemo}
               onComplete={(newPet) => {
                 ownedPetIdsRef.current = [newPet.id]
                 setPets([newPet])
@@ -1905,7 +1974,7 @@ function PazoMain() {
                 <div className="pt-2 text-center">
                   <button
                     type="button"
-                    onClick={() => setIsDemoUser(true)}
+                    onClick={enterDemo}
                     className="text-xs font-bold text-[#5C7470] hover:text-[#204E4A] underline decoration-[#E1E53F] decoration-2 underline-offset-4 cursor-pointer"
                   >
                     {lang === 'es' ? 'O entrar directamente en modo demo interactivo →' : 'Or enter directly in interactive demo mode →'}
