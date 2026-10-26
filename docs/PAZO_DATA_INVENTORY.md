@@ -1,3 +1,12 @@
+## Comunidades — navegación contextual, en rama (26-oct-2026)
+
+Reubica5fake doors conservando tablas/columnas de validación existentes, sesión,
+unidad cuenta/módulo y source `community_info_owner/member` por contratoRLS.
+Vista50% visible, interés explícito e intención opcional. Sin nuevos campos,
+comunidad específica, contenido, terceros o almacenamiento. La etiqueta legacy
+source ya no representa ubicación visual; no inferir comparabilidad por sección.
+Sin instalación alojada. [Detalle](PAZO_COMMUNITY_NAVIGATION_INTEGRATION_20261026.md).
+
 ## F18 — metadatos de invitaciones y apoyo público (preparado, NO alojado)
 
 Nuevas tablas privadas FORCE RLS, sin acceso directo cliente/servicio: fechas de primera utilización, retorno en otro día UTC y primera acción significativa validada por escrituras de posts/cuidados o QR propio habilitado; sin contenido de publicaciones, notas, QR, tokens QR, fotos, ubicación ni datos del pagador. Solo se envían UUID de mascota al verificar uso de un QR ya leído, y enums de acción/origen; SQL revalida propietario y artefacto.

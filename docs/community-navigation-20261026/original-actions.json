@@ -1,0 +1,1 @@
+{"likesAndCommentsVerifiedBeforeDelete":true,"reportOpenClose":true,"deleteConfirmed":true,"calls":[{"name":"load"},{"name":"comment","input":{"postId":"post-local","authorPetId":"pet-luna","body":"Comentario de prueba"}},{"name":"deletePost","input":"post-local"}]}

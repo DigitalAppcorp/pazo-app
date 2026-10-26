@@ -29,9 +29,8 @@ import {
   toggleCommunityPostLike,
   updateCommunity,
 } from '../../services/communityService'
-import { CommunityFeatureExperimentCard } from '../validation/CommunityFeatureExperimentCard'
-import { CommunityLifestyleHero } from '../../features/communities/components/CommunityLifestyleHero'
-import { LiquidChoiceTabs } from '../ui/LiquidChoiceTabs'
+import { CommunityWorkspace } from '../../features/communities/components/CommunityWorkspace'
+import type { CommunityPage } from '../../features/communities/components/CommunityWorkspace'
 import { ReportDialog } from '../../features/moderation/ReportDialog'
 import type { ReportTarget } from '../../features/moderation/reportingService'
 import { describeReportSubject } from '../../features/moderation/reportSubject'
@@ -58,7 +57,7 @@ interface CommunityDetailViewProps {
   lang: 'es' | 'en'
 }
 
-type DetailTab = 'posts' | 'info' | 'members'
+type DetailTab = CommunityPage
 
 const formatDate = (value: string, lang: 'es' | 'en') =>
   new Intl.DateTimeFormat(lang === 'es' ? 'es-US' : 'en-US', {
@@ -85,8 +84,10 @@ export const CommunityDetailView = ({
   const [posts, setPosts] = useState<CommunityPost[]>([])
   const [activeTab, setActiveTab] = useState<DetailTab>('posts')
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [isMembershipBusy, setIsMembershipBusy] = useState(false)
 
+  const [composerOpen, setComposerOpen] = useState(false)
   const [postText, setPostText] = useState('')
   const [postImage, setPostImage] = useState<File | null>(null)
   const [postPreview, setPostPreview] = useState('')
@@ -113,6 +114,7 @@ export const CommunityDetailView = ({
 
   const loadCommunity = useCallback(async () => {
     setIsLoading(true)
+    setLoadError(false)
     try {
       const [nextCommunity, nextMembers, nextPosts] = await Promise.all([
         fetchCommunityById(communityId),
@@ -139,6 +141,7 @@ export const CommunityDetailView = ({
         catch { setOwnershipOffer(null) }
       }
     } catch (error) {
+      setLoadError(true)
       console.error('Error loading community:', error)
     } finally {
       setIsLoading(false)
@@ -219,6 +222,7 @@ export const CommunityDetailView = ({
       })
 
       if (postPreview.startsWith('blob:')) URL.revokeObjectURL(postPreview)
+      setComposerOpen(false)
       setPostText('')
       setPostImage(null)
       setPostPreview('')
@@ -503,12 +507,12 @@ export const CommunityDetailView = ({
   if (isLoading) {
     return (
       <div className="flex min-h-[45vh] items-center justify-center">
-        <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#204E4A]/20 border-t-[#204E4A]" />
+        <span role="status" className="flex items-center gap-2 text-sm text-[#204E4A]"><IconPaw size={27} />{lang === 'es' ? 'Cargando comunidad…' : 'Loading community…'}</span>
       </div>
     )
   }
 
-  if (!community) {
+  if (loadError || !community) {
     return (
       <div className="space-y-4">
         <button onClick={onBack} className="text-xs font-bold text-[#204E4A]">
@@ -516,6 +520,7 @@ export const CommunityDetailView = ({
         </button>
         <div className="rounded-[2rem] pazo-glass-card p-5 text-xs text-[#5C7470] shadow-sm">
           {lang === 'es' ? 'No se pudo cargar la comunidad.' : 'Could not load the community.'}
+          <button type="button" onClick={() => void loadCommunity()} className="mt-3 rounded-full bg-[#E1E53F] px-4 py-3 font-bold text-[#204E4A]">{lang === 'es' ? 'Reintentar' : 'Retry'}</button>
         </div>
       </div>
     )
@@ -524,29 +529,7 @@ export const CommunityDetailView = ({
   const isOwner = community.role === 'owner'
   const canParticipate = community.isJoined && community.status === 'active'
 
-  return (
-    <div className="relative space-y-4 pb-8 animate-slide-up">
-      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
-      <CommunityLifestyleHero community={community} isOwner={isOwner}
-        postsCount={posts.length} canJoin={Boolean(currentPet)} isMembershipBusy={isMembershipBusy}
-        onMembership={() => void handleMembership()} onBack={onBack} lang={lang} />
-
-      <LiquidChoiceTabs
-        variant="community"
-        active={activeTab}
-        onChange={setActiveTab}
-        accessibleLabel={lang === 'es' ? 'Secciones de comunidad' : 'Community sections'}
-        choices={[
-          {id: 'posts', label: lang === 'es' ? 'Publicaciones' : 'Posts'},
-          {id: 'info', label: lang === 'es' ? 'Información' : 'Info'},
-          {id: 'members', label: lang === 'es' ? 'Miembros' : 'Members'},
-        ]}
-      />
-
-      {activeTab === 'posts' && (
-        <div className="space-y-4">
-          {canParticipate && currentPet && (
-            <form
+  const composer = canParticipate && currentPet ? (<form
               onSubmit={handleCreatePost}
               className="space-y-3 rounded-[2rem] bg-white/85 p-4 shadow-[0_9px_25px_rgba(32,78,74,0.055)] backdrop-blur-xl sm:p-5"
             >
@@ -571,6 +554,7 @@ export const CommunityDetailView = ({
               </div>
 
               <textarea
+                aria-label={lang === 'es' ? 'Texto de la publicación' : 'Post text'}
                 value={postText}
                 onChange={(event) => setPostText(event.target.value)}
                 rows={3}
@@ -638,8 +622,18 @@ export const CommunityDetailView = ({
                       : 'Post'}
                 </button>
               </div>
-            </form>
-          )}
+            </form>) : null
+
+  return (
+    <div className="relative pb-8">
+      {reportTarget && <ReportDialog key={reportTarget.kind + reportTarget.id} lang={lang} target={reportTarget} onClose={() => setReportTarget(null)} />}
+      <CommunityWorkspace community={community} currentPet={currentPet} active={activeTab} onChange={setActiveTab}
+        lang={lang} onBack={onBack} onMembership={() => void handleMembership()} membershipBusy={isMembershipBusy}
+        composer={composer} composerOpen={composerOpen} onCompose={() => setComposerOpen(true)}
+        onCloseComposer={() => setComposerOpen(false)} posting={isPosting}>
+      {activeTab === 'posts' && (
+        <div className="space-y-4">
+
 
           {!community.isJoined && community.status === 'active' && (
             <div className="rounded-[2rem] pazo-glass-card p-4 text-center shadow-sm">
@@ -871,6 +865,13 @@ export const CommunityDetailView = ({
         <section className="space-y-5 rounded-[2rem] bg-white/80 p-5 shadow-[0_8px_28px_rgba(32,78,74,0.055)] backdrop-blur-xl sm:p-6">
           {!isEditing ? (
             <>
+              <dl className="grid grid-cols-2 gap-3 text-[13px] text-[#5C7470]">
+                <div><dt>{lang === 'es' ? 'Categoría' : 'Category'}</dt><dd className="font-bold text-[#204E4A]">{community.category}</dd></div>
+                <div><dt>{lang === 'es' ? 'Publicaciones' : 'Posts'}</dt><dd className="font-bold text-[#204E4A]">{posts.length}</dd></div>
+                {community.species && <div><dt>{lang === 'es' ? 'Especie' : 'Species'}</dt><dd className="font-bold text-[#204E4A]">{community.species}</dd></div>}
+                {community.zone && <div><dt>{lang === 'es' ? 'Zona' : 'Area'}</dt><dd className="font-bold text-[#204E4A]">{community.zone}</dd></div>}
+              </dl>
+
               <div>
                 <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
                   {lang === 'es' ? 'Descripción' : 'Description'}
@@ -891,108 +892,6 @@ export const CommunityDetailView = ({
                       : 'This community has not posted additional rules yet.')}
                 </p>
               </div>
-
-              {community.isJoined && community.status === 'active' && (
-                <div className="space-y-3 rounded-[1.6rem] bg-[#F4F5ED] p-4">
-                  <div>
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[13px] font-extrabold uppercase tracking-wider text-[#5C7470]">
-                          {lang === 'es'
-                            ? 'Funciones en desarrollo'
-                            : 'Features in development'}
-                        </p>
-                        <h4 className="mt-1 text-sm font-black text-[#204E4A]">
-                          {lang === 'es'
-                            ? '¿Qué te gustaría usar aquí después?'
-                            : 'What would you like to use here next?'}
-                        </h4>
-                      </div>
-                    </div>
-                    <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
-                      {lang === 'es'
-                        ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en esta comunidad.'
-                        : 'These features are not active yet. Mark only the ones you would actually use in this community.'}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    <CommunityFeatureExperimentCard
-                      moduleKey="communities_events"
-                      title={lang === 'es' ? 'Eventos y caminatas' : 'Events and walks'}
-                      description={
-                        lang === 'es'
-                          ? 'Crear y descubrir caminatas, encuentros y actividades organizadas por esta comunidad.'
-                          : 'Create and discover walks, meetups, and activities organized by this community.'
-                      }
-                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
-                      lang={lang}
-                    />
-
-                    <CommunityFeatureExperimentCard
-                      moduleKey="communities_challenges"
-                      title={lang === 'es' ? 'Retos colectivos' : 'Group challenges'}
-                      description={
-                        lang === 'es'
-                          ? 'Participar en metas y retos compartidos para mantener activa a la comunidad.'
-                          : 'Join shared goals and challenges that keep the community active.'
-                      }
-                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
-                      lang={lang}
-                    />
-
-                    <CommunityFeatureExperimentCard
-                      moduleKey="communities_badges"
-                      title={
-                        lang === 'es'
-                          ? 'Insignias y reconocimiento'
-                          : 'Badges and recognition'
-                      }
-                      description={
-                        lang === 'es'
-                          ? 'Reconocer aportes, hitos y participación útil dentro de la comunidad.'
-                          : 'Recognize contributions, milestones, and useful participation inside the community.'
-                      }
-                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
-                      lang={lang}
-                    />
-
-                    <CommunityFeatureExperimentCard
-                      moduleKey="communities_qa"
-                      title={
-                        lang === 'es'
-                          ? 'Preguntas y respuestas'
-                          : 'Questions and answers'
-                      }
-                      description={
-                        lang === 'es'
-                          ? 'Hacer preguntas, destacar respuestas útiles y construir conocimiento que no se pierda en el feed.'
-                          : 'Ask questions, highlight useful answers, and build knowledge that does not disappear in the feed.'
-                      }
-                      source={isOwner ? 'community_info_owner' : 'community_info_member'}
-                      lang={lang}
-                    />
-
-                    {isOwner && (
-                      <CommunityFeatureExperimentCard
-                        moduleKey="communities_admin_tools"
-                        title={
-                          lang === 'es'
-                            ? 'Herramientas avanzadas de administración'
-                            : 'Advanced admin tools'
-                        }
-                        description={
-                          lang === 'es'
-                            ? 'Analytics, roles, automatizaciones y más control para hacer crecer y administrar la comunidad.'
-                            : 'Analytics, roles, automations, and more control to grow and manage the community.'
-                        }
-                        source="community_info_owner"
-                        lang={lang}
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
 
               {isOwner && (
                 <div className="flex flex-wrap gap-2 rounded-[1.6rem] bg-[#F4F5ED] p-4">
@@ -1324,6 +1223,7 @@ export const CommunityDetailView = ({
           )}
         </section>
       )}
+      </CommunityWorkspace>
     </div>
   )
 }

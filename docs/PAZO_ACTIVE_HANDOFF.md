@@ -1,3 +1,15 @@
+## Amigo de PAZO · UI aprobada, candidato a producción (26-oct-2026)
+
+El PO autoriza integrar y publicar la propuesta04, con el único acceso al final de Mi mascota, conservando la lógica funcional. Integración de presentación sobre controladores reales; no se cambian Supabase, contratos, pagos, flags o invitaciones. Ver [informe y gates](PAZO_SUPPORTER_APPROVED_UX_RELEASE_20261026.md). Aún pendiente CI del SHA exacto y postflight Vercel.
+
+## Comunidades — integración visual autorizada en rama, 26-oct-2026
+
+PO aprobó preview direccion-08 y ordenó integrarla conservando Supabase; cuatro
+destinos y fake doors contextuales, compositor original y animaciones aprobadas.
+Rama `feat/community-contextual-navigation-20261026`, sin merge ni publicación.
+Pruebas/build y límites: [informe de integración](PAZO_COMMUNITY_NAVIGATION_INTEGRATION_20261026.md).
+No declara cerrada F13 ni modifica el estado comercial/financiero inferior.
+
 ## Issue121 — autorización integral de release, en verificación (26-oct-2026)
 
 Orden directa del PO: implementar, integrar y publicar PayPal Live público con

@@ -1,3 +1,7 @@
+## Amigo de PAZO · UI aprobada, candidato a producción (26-oct-2026)
+
+El PO autoriza integrar y publicar la propuesta04, con el único acceso al final de Mi mascota, conservando la lógica funcional. Integración de presentación sobre controladores reales; no se cambian Supabase, contratos, pagos, flags o invitaciones. Ver [informe y gates](PAZO_SUPPORTER_APPROVED_UX_RELEASE_20261026.md). Aún pendiente CI del SHA exacto y postflight Vercel.
+
 # PAZO — Architecture Contract
 
 **Estado:** ACTIVO  
@@ -170,3 +174,12 @@ Migración incremental cuando:
 - moverlo reduce riesgo neto.
 
 El objetivo es **arquitectura legible sin churn innecesario**.
+
+
+## Comunidades — navegación contextual (26-oct-2026, rama)
+
+La presentación y fake doors nuevas pertenecen a
+`src/features/communities/components/CommunityWorkspace.tsx` y
+`CommunityFutureGate.tsx`, con CSS acotado. `CommunityDetailView` legacy conserva
+estado y mutaciones existentes; no se duplican services ni se traslada el módulo
+completo. Sin cambios al baseline de carpetas globales.

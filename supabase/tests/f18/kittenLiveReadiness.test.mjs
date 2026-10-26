@@ -40,6 +40,8 @@ function accountImports(_full,names,specifier) {
    return 'const SupporterScreenPortal=({children})=>children;'
  if(specifier.endsWith('SupporterOfferB'))
    return 'const SupporterOfferB=({children})=>children;'
+ if(specifier.endsWith('SupporterApprovedOffer'))
+   return 'const SupporterApprovedOffer=({children})=>children;'
  if(specifier.endsWith('SupporterPreparingScreen'))
    return "const SupporterPreparingScreen=({unavailable,onRetry})=>globalThis.__UI_REACT__.createElement('section',{'data-kitten-preparing':unavailable?'blocked':'loading'},globalThis.__UI_REACT__.createElement('button',{onClick:onRetry},'Retry'));"
  return names.split(',').map(n=>'const '+n.trim()+'=()=>null;').join('\n')
@@ -111,7 +113,7 @@ test('Live offer GET is completed during kitten preflight, not after first offer
    ready:true,mayGrantBenefits:false,offer:offerEs}))})
   assert.equal(kitten(ui).length,0,'kitten must finish after verified live offer')
   assert.equal(visibleMain(ui).length,1,'fully resolved offer must appear at once')
-  assert.equal(offered(ui).length,1,'PayPal button must be present on first reveal')
+  assert.equal(offered(ui).length,1,'single real checkout controller must already be mounted behind the approved journey')
   assert.equal(checkoutGets.length,1,'no post-paint redundant GET')
   assert.equal(checkoutPosts,0)
   await act(async()=>{ui.update(React.createElement(SupporterAccountManagement,{lang:'en',onClose(){}}))})

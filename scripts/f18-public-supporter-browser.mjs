@@ -320,13 +320,13 @@ try {
         .getByRole('heading', {
           name:
             lang === 'es'
-              ? 'Ayúdanos a seguir creciendo'
-              : 'Help us keep growing',
+              ? 'Tu apoyo mantiene PAZO en marcha.'
+              : 'Your support keeps PAZO going.',
         })
         .waitFor()
       check(
         (
-          await f.page.locator('.supporter-growth-price').textContent()
+          await f.page.locator('.invite-price').textContent()
         ).includes('2.99'),
         'price and cadence visible',
       )
@@ -335,7 +335,7 @@ try {
       )
       check(!overflow, 'no horizontal overflow')
       const animation = await f.page
-        .locator('.supporter-growth-art img')
+        .locator('.garden-water path').first()
         .evaluate((e) => getComputedStyle(e).animationName)
       check(animation === 'none', 'reduced motion respected')
       await f.page.screenshot({
@@ -386,6 +386,7 @@ try {
     'real rendered impression persisted',
   )
   await c.page.keyboard.press('Escape')
+  await c.page.getByRole('dialog').waitFor({state:'hidden',timeout:5000})
   check(
     (await c.page.getByRole('dialog').count()) === 0,
     'Escape exits invitation',
@@ -404,6 +405,8 @@ try {
   for (const lang of ['es', 'en']) {
     const f = await fixture({ lang, n: 174 })
     await f.goto('account')
+    await f.page.getByRole('button',{name:lang==='es'?'Conocer Amigo de PAZO':'Explore Friend of PAZO',exact:true}).click()
+    await f.page.getByRole('button',{name:lang==='es'?'Quiero apoyar a PAZO':'I want to support PAZO',exact:false}).click()
     const checkbox = f.page.getByRole('checkbox')
     await checkbox.waitFor()
     const pay = f.page.getByRole('button', {
@@ -451,6 +454,8 @@ try {
   await courtesy.page
     .getByRole('button', { name: 'Quiero apoyar voluntariamente a PAZO' })
     .click()
+  await courtesy.page.getByRole('button',{name:'Conocer Amigo de PAZO',exact:true}).click()
+  await courtesy.page.getByRole('button',{name:'Quiero apoyar a PAZO',exact:false}).click()
   await courtesy.page.getByRole('checkbox').waitFor()
   check(courtesy.creates === 0, 'courtesy voluntary entry never auto-purchases')
   check(

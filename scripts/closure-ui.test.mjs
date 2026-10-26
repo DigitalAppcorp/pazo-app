@@ -89,6 +89,7 @@ const {LiquidSearchFilters}=await load('features/search/components/LiquidSearchF
 const {MessagesModal}=await load('components/modals/MessagesModal.js')
 const {CommunitiesEmptyState}=await load('features/communities/components/CommunitiesEmptyState.js')
 const {CommunityLifestyleHero}=await load('features/communities/components/CommunityLifestyleHero.js')
+const {CommunityWorkspace}=await load('features/communities/components/CommunityWorkspace.js')
 const {ImmersivePlacesStage}=await load('features/places/components/ImmersivePlacesStage.js')
 const {RescuePassportHero}=await load('features/rescue/components/RescuePassportHero.js')
 const {LostAlertReview}=await load('features/rescue/components/LostAlertReview.js')
@@ -137,7 +138,7 @@ test('F13 liquid selector keeps both pet utility and three community tabs, in Sp
   }
   const community=fs.readFileSync('src/components/views/CommunityDetailView.tsx','utf8')
   const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
-  assert.ok(community.includes('variant="community"')&&community.includes('onChange={setActiveTab}'))
+  assert.ok(community.includes('<CommunityWorkspace')&&community.includes('onChange={setActiveTab}'))
   assert.ok(pet.includes('variant="pet"')&&pet.includes('onChange={setActiveTab}'))
   for(const tab of ["activeTab === 'posts'","activeTab === 'info'","activeTab === 'members'"])assert.ok(community.includes(tab))
   assert.ok(pet.includes("activeTab === 'myposts'"))
@@ -494,20 +495,22 @@ test('F13 Community Lifestyle Option 4 uses real cover, open identity, owner/mem
   assert.ok(!button(renderer.root,'Unirme a la comunidad'))
   await act(async()=>renderer.unmount())
   const view=fs.readFileSync('src/components/views/CommunityDetailView.tsx','utf8')
-  assert.ok(view.includes('<CommunityLifestyleHero'))
-  assert.ok(view.includes("postsCount={posts.length}"))
+  assert.ok(view.includes('<CommunityWorkspace'))
+  assert.ok(view.includes('{posts.length}</dd>'))
   assert.ok(view.includes('onMembership={() => void handleMembership()}'))
-  assert.ok(view.includes('<LiquidChoiceTabs'),'Community uses shared accessible slider')
-  assert.ok(view.includes('variant="community"'),'Community preserves three choices')
+  const workspace=fs.readFileSync('src/features/communities/components/CommunityWorkspace.tsx','utf8')
+  assert.ok(workspace.includes('<WorkspaceTabs'),'Community uses its controlled liquid slider')
+  assert.ok(workspace.includes("['posts', 'activities', 'questions', 'members']"),'Community follows the four destinations approved by PO')
   assert.ok(view.includes('active={activeTab}'),'The selected community section remains controlled by the view')
   assert.ok(view.includes('onChange={setActiveTab}'),'The same community section handler remains connected')
   const choice=fs.readFileSync('src/components/ui/LiquidChoiceTabs.tsx','utf8')
   assert.ok(choice.includes('aria-pressed={selected}'),'Moved selector keeps pressed semantics')
   assert.ok(choice.includes('onClick={() => onChange(id)}'),'Moved selector keeps original interactions')
-  for(const identifier of ['handleCreatePost','toggleComments','handleDeleteComment','handleLike','handleRemoveMember','handleSaveEdit','handleArchive','CommunityFeatureExperimentCard']){
+  for(const identifier of ['handleCreatePost','toggleComments','handleDeleteComment','handleLike','handleRemoveMember','handleSaveEdit','handleArchive']){
     assert.ok(view.includes(identifier),identifier)
   }
   assert.ok(view.includes('onSubmit={handleCreatePost}'))
+  assert.ok(workspace.includes('<CommunityFutureGate'),'Contextual gates replace the old grouped cards')
   assert.ok(!view.includes('rounded-[2.4rem] pazo-glass-card'))
 })
 
@@ -945,17 +948,18 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
 
 test('F16 supporter customization is routed through a verified membership, not a second upsell card',()=>{
   const petCode=fs.readFileSync('src/components/views/PetView.tsx','utf8')
-  const member=fs.readFileSync('src/features/supporter/components/SupporterBenefitsHome.tsx','utf8')
+  const member=fs.readFileSync('src/features/supporter/components/SupporterApprovedBenefits.tsx','utf8')
+  const entry=fs.readFileSync('src/features/supporter/components/SupporterProfileEntry.tsx','utf8')
   const hook=fs.readFileSync('src/features/supporter/useSupporterMembershipStatus.ts','utf8')
   const preview=fs.readFileSync('src/features/supporter/components/SupporterThemePreviewPanel.tsx','utf8')
   assert.ok(petCode.includes('setShowSupporterAccount(true)'),'One discoverable supporter entry under My Pet')
   assert.ok(petCode.includes('pet={currentPet}'),'Selected pet is passed to supporter home')
   assert.ok(!petCode.includes('setShowSupporterThemePreview(true)'),'No competing customization card')
   assert.ok(!petCode.includes('setShowGratitudeParticipation(true)'),'No duplicate supporter wall card')
-  assert.ok(petCode.includes("supporterStatus.kind==='verified'"),'Decorated entry needs server proof')
+  assert.ok(entry.includes("status.kind==='verified'"),'Decorated entry needs server proof')
   assert.ok(member.includes('<SupporterThemePreviewPanel pet={pet}'),'Member opens actual approved profile picker')
   assert.ok(member.includes('<SupporterWallConsentSettings lang={lang}'),'Existing wall consent is reused')
-  assert.ok(member.includes('<SupporterBadge active milestone={milestone}'),'No synthetic milestone')
+  assert.ok(member.includes('<OfficialBadge milestone={milestone}'),'No synthetic milestone')
   assert.ok(hook.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"),'Server is source of verified perks')
   assert.ok(!hook.includes('localStorage')&&!hook.includes('sessionStorage'),'Membership state is not stored in browser')
   assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'Preview itself never activates payment')
@@ -965,6 +969,17 @@ test('F16 supporter customization is routed through a verified membership, not a
   const css=fs.readFileSync('src/index.css','utf8')
   assert.ok(css.includes('@keyframes pazoSupporterGentleFloat'))
   assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion contract intact')
+})
+
+test('Amigo profile entry never presents unknown coverage as an invitation or verified benefits',async()=>{
+  const {SupporterProfileEntry}=await load('features/supporter/components/SupporterProfileEntry.js')
+  for(const lang of ['es','en'])for(const kind of ['checking','unavailable','inactive','verified']){
+    const html=renderToStaticMarkup(React.createElement(SupporterProfileEntry,{status:{kind,milestone:0},lang,onClick:()=>{},buttonRef:{current:null}}))
+    assert.equal(html.includes('amigo-pazo-inicio.png'),kind==='verified','Only verified proof decorates a member')
+    assert.equal(html.includes(lang==='es'?'Conocer el apoyo':'Explore support'),kind==='inactive','Unknown states never invite payment')
+    assert.equal(html.includes(lang==='es'?'Ver mis beneficios':'View my benefits'),kind==='verified','Unknown states never claim active benefits')
+    assert.equal((html.match(/<button/g)||[]).length,1,'One entry in every state')
+  }
 })
 
 test('A01 PO-approved welcome preserves sign-up, login, demo, locale and public wall', async()=>{
@@ -1176,7 +1191,8 @@ test('F16 per-pet consent notice approved in ES/EN never persists preview decisi
   }
   const src=fs.readFileSync('src/features/supporter/components/GratitudeParticipationPreview.tsx','utf8')
   const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
-  const member=fs.readFileSync('src/features/supporter/components/SupporterBenefitsHome.tsx','utf8')
+  const member=fs.readFileSync('src/features/supporter/components/SupporterApprovedBenefits.tsx','utf8')
+  const entry=fs.readFileSync('src/features/supporter/components/SupporterProfileEntry.tsx','utf8')
   assert.ok(!pet.includes('setShowGratitudeParticipation(true)'),'No duplicated wall card in My Pet')
   assert.ok(member.includes('<SupporterWallConsentSettings lang={lang}'),'Member manages live per-pet wall opt-in')
   assert.ok(!member.includes('<GratitudeParticipationPreview'),'Preview is not mistaken for saved consent')
@@ -1496,4 +1512,21 @@ test('F17 mobile: centered modal, brand typography, floating map nav and image c
   assert.ok(map.includes('data-pazo-place-details="true"') && map.includes('text-[22px]'),'Only the place detail dialog gets larger type')
   assert.ok(css.includes('.pazo-place-card:has(img[data-pazo-place-photo="true"])'))
   assert.ok(stage.includes('pazo-photo-credit'))
+})
+
+
+test('approved community workspace dispatches four destinations and keeps owner actions contextual in ES/EN', async()=>{
+ const community={id:'synthetic',name:'Community',category:'Care',status:'active',isJoined:true,role:'owner',membersCount:3};
+ for(const [lang,labels]of [['es',['Publicaciones','Actividades','Preguntas','Miembros']],['en',['Posts','Activities','Questions','Members']]]){
+  const calls=[],props={community,currentPet:{id:'pet',photoUrl:'synthetic.jpg'},active:'posts',onChange:id=>calls.push(id),lang,onBack(){},onMembership(){},membershipBusy:false,composer:null,composerOpen:false,onCompose(){},onCloseComposer(){},posting:false,children:React.createElement('p',null,'Existing posts')};
+  let ui;await act(async()=>{ui=create(React.createElement(CommunityWorkspace,props))});
+  const tabs=ui.root.findAllByType('button').filter(b=>b.props['data-workspace-page']);
+  assert.deepEqual(tabs.map(b=>b.props['data-workspace-page']),['posts','activities','questions','members']);
+  for(let i=0;i<tabs.length;i++){assert.ok(buttonText(tabs[i]).startsWith(labels[i]));await act(async()=>tabs[i].props.onClick());if(i)assert.equal(calls.at(-1),tabs[i].props['data-workspace-page'])}
+  assert.equal(tabs.filter(b=>b.props['aria-current']==='page').length,1);
+  assert.ok(button(ui.root,lang==='es'?'Administrar':'Manage'));
+  await act(async()=>ui.update(React.createElement(CommunityWorkspace,{...props,community:{...community,role:'member'}})));
+  assert.ok(!button(ui.root,lang==='es'?'Administrar':'Manage'));
+  await act(async()=>ui.unmount());
+ }
 })

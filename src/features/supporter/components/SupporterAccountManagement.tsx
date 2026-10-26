@@ -1,3 +1,4 @@
+import {exitSupporterScreen} from './supporterExit'
 import {usePublicSupporterStatus} from '../public/usePublicSupporterStatus'
 import {SupporterBenefitReview} from '../public/SupporterBenefitReview'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -7,8 +8,8 @@ import { SandboxCheckoutQaPanel } from './SandboxCheckoutQaPanel'
 import { SandboxV2AccountPanel } from './SandboxV2AccountPanel'
 import { SupporterWallConsentSettings } from './SupporterWallConsentSettings'
 import { SupporterSandboxBenefitsStatus } from './SupporterSandboxBenefitsStatus'
-import { SupporterBenefitsHome } from './SupporterBenefitsHome'
-import { SupporterOfferB } from './SupporterOfferB'
+import { SupporterApprovedBenefits } from './SupporterApprovedBenefits'
+import { SupporterApprovedOffer } from './SupporterApprovedOffer'
 import { SupporterLiveCheckoutPanel } from './SupporterLiveCheckoutPanel'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
 import { supporterPaypalReturnKind,supporterEntrySource } from '../supporterAccountRoute.mjs'
@@ -78,7 +79,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   },[])
   // An authenticated, already-bound V2 attempt must be managed, never offered a new request key.
   const [qaV2AccountState,setQaV2AccountState] = useState<'checking'|'none'|'pending'|'bound'|'unavailable'>('checking')
-  const [qaManagementOpen,setQaManagementOpen] = useState(!qaV2Screen)
+  const [qaManagementOpen,setQaManagementOpen] = useState(false)
   const [qaReviewRevision,setQaReviewRevision] = useState(0)
   const [qaResumeRevision,setQaResumeRevision] = useState(0)
   const [,setQaRecoveryStage] = useState('unverified')
@@ -196,7 +197,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !busy) {
         if(showLiveManagement)setShowLiveManagement(false)
-        else onClose()
+        else exitSupporterScreen(onClose)
       }
     }
     window.addEventListener('keydown', handleEscape)
@@ -368,25 +369,27 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
 
   const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]/55 disabled:opacity-50'
   if (membership.kind === 'verified'&&!showLiveManagement&&!voluntarySupport) {
-    return <SupporterBenefitsHome lang={lang} onClose={onClose} pet={pet}
+    return <SupporterScreenPortal motionKey="benefits" back><SupporterApprovedBenefits lang={lang} onClose={()=>exitSupporterScreen(onClose)} pet={pet}
       onManageSubscription={()=>setShowLiveManagement(true)}
       onSupport={publicStatus.value&&!publicStatus.value.paid&&!publicStatus.value.pending?()=>setVoluntarySupport(true):undefined}
-      milestone={membership.milestone} qa={qaV2Screen}/>
+      milestone={membership.milestone} qa={qaV2Screen}
+      courtesy={publicStatus.value?.paid===false}
+      showThanks={paypalReturnKind==='return'&&publicStatus.value?.paid===true}/></SupporterScreenPortal>
   }
   return (
-    <SupporterScreenPortal>
+    <SupporterScreenPortal motionKey={preparing?'preparing':showLiveManagement?'management':'account'} back={false}>
     <div role="dialog" aria-modal="true" aria-labelledby={preparing?undefined:'supporter-account-title'}
       aria-label={preparing?label('Preparando tu membresía de PAZO','Preparing your PAZO membership'):undefined}
-      className="relative h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5ED] text-[#204E4A]">
+      className="supporter-account-view relative h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5ED] text-[#204E4A]">
       {preparing&&<SupporterPreparingScreen lang={lang}
         unavailable={preparationUnavailable} slow={preparationSlow}
-        onRetry={retryPreparation} onClose={onClose}/>}
+        onRetry={retryPreparation} onClose={()=>exitSupporterScreen(onClose)}/>}
 
       <header hidden={preparing} style={{display:preparing?'none':undefined}} className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
         <div className="mx-auto grid min-h-11 max-w-xl grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
           <button ref={closeRef} type="button" onClick={()=>{
             if(showLiveManagement)setShowLiveManagement(false)
-            else onClose()
+            else exitSupporterScreen(onClose)
           }} disabled={busy}
             aria-label={label('Volver a PAZO','Back to PAZO')}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.06)] hover:bg-[#E7EDDC] focus-visible:bg-[#E1E53F]/50">
@@ -427,7 +430,18 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             {label('La solicitud de prueba anterior quedó archivada en PAZO (no cancelada en PayPal). Confirma otra vez los términos para iniciar un pago nuevo.',
               'Your earlier test request was archived in PAZO (not cancelled at PayPal). Accept the terms again to start a new checkout.')}
           </p>}
-          <SupporterOfferB lang={lang}>
+          <SupporterApprovedOffer lang={lang} qa={qaV2Screen} visible={!preparing} preferenceSaveFailed={promotionChoice==='error'}
+            pending={!qaV2Screen&&(accounts?.length??0)>0}
+            review={Boolean(accounts?.[0]?.needsReconciliation)}
+            returnedWithoutPay={paypalReturnKind==='cancel'}
+            initialPage={supporterEntrySource(window.location.hash)==='invitation'?'offer':'invitation'}
+            onClose={()=>exitSupporterScreen(onClose)} onOptOut={()=>{
+              const epoch=accountEpoch.current
+              void supabase.rpc('pazo_supporter_promotion',{p_action:'opt_out'}).then(r=>{
+                if(epoch!==accountEpoch.current)return
+                setPromotionChoice(r.error?'error':'saved');if(!r.error)onClose()
+              })
+            }}>
             {qaV2Screen ? (
               offerRequired
                 ? <SandboxCheckoutQaPanel lang={lang} inline
@@ -524,19 +538,19 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                 {recoveryMessage&&<p role="alert" className="rounded-[14px] bg-white p-3 text-[12px] leading-relaxed text-[#724927]">{recoveryMessage}</p>}
               </div>
             )}
-          </SupporterOfferB>
-          <p className="mx-auto max-w-[420px] px-1 pt-1 text-center text-[12px] leading-relaxed text-[#5C7470]">
+          </SupporterApprovedOffer>
+          <p className="supporter-account-free mx-auto max-w-[420px] px-1 pt-1 text-center text-[12px] leading-relaxed text-[#5C7470]">
             {label('PAZO seguirá siendo gratis para todos.','PAZO will remain free for everyone.')}
           </p>
           <button type="button" onClick={onClose}
-            className="min-h-11 w-full rounded-full px-4 py-2 text-center text-[13px] font-bold text-[#204E4A] underline decoration-[#A6BBB1] underline-offset-4 hover:bg-[#E9EEDC] focus-visible:bg-[#E1E53F]/30">
+            className="supporter-account-dismiss min-h-11 w-full rounded-full px-4 py-2 text-center text-[13px] font-bold text-[#204E4A] underline decoration-[#A6BBB1] underline-offset-4 hover:bg-[#E9EEDC] focus-visible:bg-[#E1E53F]/30">
             {label('Ahora no, seguir usando PAZO','Not now, keep using PAZO')}
           </button>
         </>}
         {recoveryMessage&&(qaV2Screen||!accounts?.length)&&<p role="status" className="rounded-2xl bg-[#F0F4E6] p-4 text-sm">{recoveryMessage}</p>}
         {(showLiveManagement || acceptances.length>0 || qaV2Screen || error || accounts === null || (accounts?.length ?? 0)>0) &&
           <section aria-labelledby="supporter-manage-title" className="space-y-3">
-          <details open={qaManagementOpen} onToggle={e=>setQaManagementOpen(e.currentTarget.open)}
+          <details open={showLiveManagement||qaManagementOpen} onToggle={e=>setQaManagementOpen(e.currentTarget.open)}
             className="rounded-[24px] bg-white p-4 shadow-[0_4px_16px_rgba(32,78,74,0.04)]">
             <summary className="min-h-11 cursor-pointer py-2 text-sm font-extrabold focus-visible:bg-[#E1E53F]/30">
               {qaV2Screen
@@ -673,7 +687,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             </details>}
           </section>
         )}
-        {!qaV2Screen&&<div className="text-center"><button type="button" className="min-h-11 rounded-xl px-3 text-xs underline focus-visible:bg-[#E1E53F]" disabled={promotionChoice==='saved'} onClick={()=>{
+        {!qaV2Screen&&<div className="supporter-account-promotion text-center"><button type="button" className="min-h-11 rounded-xl px-3 text-xs underline focus-visible:bg-[#E1E53F]" disabled={promotionChoice==='saved'} onClick={()=>{
           void supabase.rpc('pazo_supporter_promotion',{p_action:'opt_out'}).then(r=>setPromotionChoice(r.error?'error':'saved'))
         }}>{promotionChoice==='saved'?label('Invitaciones promocionales desactivadas','Promotional invitations disabled'):label('No recibir invitaciones promocionales','Stop promotional invitations')}</button>
         {promotionChoice==='error'&&<p role="alert" className="text-xs">{label('No pudimos guardar tu preferencia. Intenta de nuevo.','Your preference could not be saved. Try again.')}</p>}</div>}
