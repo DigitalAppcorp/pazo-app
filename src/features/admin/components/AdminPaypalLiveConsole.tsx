@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../../services/supabaseClient'
 import { useAccountRequestScope } from '../../auth/useAccountRequestScope'
 import { AdminPaypalMfaStepUp } from './AdminPaypalMfaStepUp'
+import { AdminPaypalOriginalAudit } from './AdminPaypalOriginalAudit'
 import { AdminPaypalLiveVaultSetup } from './AdminPaypalLiveVaultSetup'
 import { AdminPaypalLiveResourceCheck } from './AdminPaypalLiveResourceCheck'
 import { AdminLiveReadiness } from './AdminLiveReadiness'
@@ -740,6 +741,7 @@ export function AdminPaypalLiveConsole({
             mfaRecentlyVerified={mfaRecentlyVerified}
             onVerified={async () => onChanged()}
           />
+          <AdminPaypalOriginalAudit lang={lang} mfaRecentlyVerified={mfaRecentlyVerified}/>
           {credentialsChecked && !credentialsStored && (
             <AdminPaypalLiveVaultSetup
               lang={lang}
