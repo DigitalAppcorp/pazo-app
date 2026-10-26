@@ -21,6 +21,8 @@ ALTER TABLE supporter_private.pazo_paypal_live_checkout_intents
 
 CREATE TABLE supporter_private.pazo_f18_historical_qa_archive (
   intent_id text PRIMARY KEY REFERENCES supporter_private.pazo_paypal_live_checkout_intents(intent_id),
+  owner_id uuid NOT NULL REFERENCES auth.users(id),
+  released_at timestamptz,
   merchant_generation bigint NOT NULL,
   provider_event_id text NOT NULL,
   evidence_class text NOT NULL DEFAULT 'signed_created_verified_no_settlement_confirmed'
@@ -32,12 +34,50 @@ CREATE TABLE supporter_private.pazo_f18_historical_qa_archive (
   accounting_conclusion text NOT NULL DEFAULT 'financial_outcome_not_provider_certified'
     CHECK (accounting_conclusion='financial_outcome_not_provider_certified'),
   archived_at timestamptz NOT NULL DEFAULT pg_catalog.clock_timestamp(),
-  UNIQUE(merchant_generation,provider_event_id)
+  UNIQUE(merchant_generation,provider_event_id),
+  UNIQUE(owner_id)
 );
 ALTER TABLE supporter_private.pazo_f18_historical_qa_archive ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE supporter_private.pazo_f18_historical_qa_archive
  FROM PUBLIC,anon,authenticated,service_role;
 GRANT SELECT ON TABLE supporter_private.pazo_f18_historical_qa_archive TO service_role;
+
+-- The reclassified QA user must never get a second CREATE while the
+-- historical PayPal subscription has no provider-terminal confirmation.
+-- Preserve the present production eligibility semantics for all other users.
+CREATE OR REPLACE FUNCTION supporter_private.public_supporter_eligible(p_owner uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO '' AS $eligible$
+ SELECT EXISTS(SELECT 1 FROM auth.users u JOIN public.profiles p ON p.id=u.id
+  WHERE u.id=p_owner AND u.email_confirmed_at IS NOT NULL
+   AND u.is_anonymous IS DISTINCT FROM true AND p.onboarding_completed IS TRUE
+   AND (u.banned_until IS NULL OR u.banned_until<statement_timestamp()))
+ AND supporter_private.pazo_live_financial_identity_allowed(p_owner)
+ AND NOT EXISTS(SELECT 1 FROM account_requests_private.deletion_requests
+  WHERE subject_user_id=p_owner AND status IN('requested','processing'))
+ AND NOT EXISTS(SELECT 1 FROM supporter_private.pazo_f18_historical_qa_archive a
+  WHERE a.owner_id=p_owner AND a.released_at IS NULL);
+$eligible$;
+REVOKE ALL ON FUNCTION supporter_private.public_supporter_eligible(uuid)
+ FROM PUBLIC,anon,authenticated,service_role;
+
+-- An inserted, independently verified late event is never suppressed.
+-- Reopen the financial incident before processing the newly received event.
+CREATE FUNCTION supporter_private.pazo_f18_archive_late_event_review()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $late$
+BEGIN
+ IF EXISTS(SELECT 1 FROM supporter_private.pazo_f18_historical_qa_archive a
+  WHERE a.intent_id=NEW.linked_intent_id AND a.merchant_generation=NEW.merchant_generation
+   AND a.released_at IS NULL) THEN
+   INSERT INTO supporter_private.gradual_incident(code) VALUES ('financial_review')
+    ON CONFLICT(code) DO UPDATE SET resolved_at=NULL;
+ END IF;
+ RETURN NEW;
+END $late$;
+REVOKE ALL ON FUNCTION supporter_private.pazo_f18_archive_late_event_review()
+ FROM PUBLIC,anon,authenticated,service_role;
+CREATE TRIGGER pazo_f18_archive_late_event_review
+ AFTER INSERT ON supporter_private.pazo_paypal_live_event_inbox
+ FOR EACH ROW EXECUTE FUNCTION supporter_private.pazo_f18_archive_late_event_review();
 
 DO $archive$
 DECLARE
@@ -45,6 +85,11 @@ DECLARE
   ev supporter_private.pazo_paypal_live_event_inbox%ROWTYPE;
   c bigint;
 BEGIN
+  -- Serialize the one-time forensic snapshot against webhook/intention writers.
+  -- The lock is bounded by statement_timeout and releases at commit/rollback.
+  LOCK TABLE supporter_private.pazo_paypal_live_checkout_intents IN SHARE ROW EXCLUSIVE MODE;
+  LOCK TABLE supporter_private.pazo_paypal_live_event_inbox IN SHARE ROW EXCLUSIVE MODE;
+
   -- Financial pause must remain active, and no unrelated unresolved incident.
   IF NOT EXISTS (SELECT 1 FROM supporter_private.public_supporter_control p
     WHERE p.singleton AND p.checkouts_enabled IS FALSE AND p.invitations_enabled IS FALSE)
@@ -120,8 +165,8 @@ BEGIN
   -- This is only a CREATE event archive: not a provider verified termination
   -- and never a PAYMENT.SALE.COMPLETED or entitlement confirmation.
   INSERT INTO supporter_private.pazo_f18_historical_qa_archive
-    (intent_id,merchant_generation,provider_event_id)
-  VALUES (i.intent_id,i.merchant_generation,ev.provider_event_id);
+    (intent_id,owner_id,merchant_generation,provider_event_id)
+  VALUES (i.intent_id,i.owner_id,i.merchant_generation,ev.provider_event_id);
 
   UPDATE supporter_private.pazo_paypal_live_event_inbox
     SET processing_state='qa_archived',
