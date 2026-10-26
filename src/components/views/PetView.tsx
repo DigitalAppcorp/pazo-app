@@ -29,6 +29,8 @@ interface PetViewProps {
   currentPet: Pet
   canModerate: boolean
   canManagePet: boolean
+  isDemo?: boolean
+  onExitDemo?: () => void
   onRequireAccount: () => void
   availablePets: Pet[]
   onSelectPet: (pet: Pet) => void
@@ -50,6 +52,8 @@ export const PetView = ({
   currentPet,
   canModerate,
   canManagePet,
+  isDemo = false,
+  onExitDemo,
   onRequireAccount,
   availablePets,
   onSelectPet,
@@ -251,6 +255,7 @@ export const PetView = ({
   }
 
   const handleLogout = async () => {
+    if (isDemo) { onExitDemo?.(); return }
     const confirmMsg = lang === 'es' ? '¿Estás seguro de cerrar sesión?' : 'Are you sure you want to log out?'
     if (window.confirm(confirmMsg)) {
       await supabase.auth.signOut()
@@ -351,7 +356,8 @@ export const PetView = ({
             <button
               onClick={handleLogout}
               className="w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 focus-visible:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
-              title={lang === 'es' ? 'Cerrar sesión' : 'Log out'}
+              title={isDemo ? (lang === 'es' ? 'Salir de demo' : 'Exit demo') : (lang === 'es' ? 'Cerrar sesión' : 'Log out')}
+              aria-label={isDemo ? (lang === 'es' ? 'Salir de demo' : 'Exit demo') : (lang === 'es' ? 'Cerrar sesión' : 'Log out')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -372,7 +378,9 @@ export const PetView = ({
         <div className="p-3 pazo-glass-card rounded-[2rem] shadow-lg space-y-2 animate-slide-up">
           <div className="flex justify-between items-center px-2">
             <span className="text-[13px] font-extrabold uppercase text-[#5C7470] tracking-wider">
-              {lang === 'es' ? 'Tus mascotas registradas' : 'Your registered pets'}
+              {isDemo
+                ? (lang === 'es' ? 'Mascotas de ejemplo' : 'Sample pets')
+                : (lang === 'es' ? 'Tus mascotas registradas' : 'Your registered pets')}
             </span>
             <button
               onClick={onAddPet}
