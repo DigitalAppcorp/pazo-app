@@ -1,0 +1,47 @@
+[
+  {
+    "file": "pazo-marketing-attribution/index.ts",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "pazo-marketing-attribution/intakeCore.mjs",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "pazo-marketing-attribution/requestBody.mjs",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "pazo-marketing-attribution/intakeAdapter.mjs",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "functions/pazo-marketing-landing/index.ts",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "functions/pazo-marketing-landing/landingCore.mjs",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "functions/pazo-marketing-attribution/requestBody.mjs",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "functions/pazo-marketing-landing/landingAdapter.mjs",
+    "exact": true,
+    "lfEqual": true
+  },
+  {
+    "file": "functions/pazo-marketing-landing/challengeVerifier.mjs",
+    "exact": true,
+    "lfEqual": true
+  }
+]

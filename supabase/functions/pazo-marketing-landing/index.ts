@@ -1,10 +1,10 @@
-// PUBLIC function for future aggregate signals; always fails closed.
-// Deployment is NOT authorized. Endpoint explicitly returns 503 while OFF.
+// Issue130: validate the real provider while the independent DB gate stays OFF.
+// A valid challenge cannot collect until retention/collection pass their gates.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import {createMarketingLandingHandler} from './landingCore.mjs'
 import {createMarketingLandingSubmit} from './landingAdapter.mjs'
 import {createMarketingChallengeVerifier} from './challengeVerifier.mjs'
-const MARKETING_LANDING_RELEASED=false
+const MARKETING_LANDING_RELEASED=true
 function setup(){
   if(!MARKETING_LANDING_RELEASED)return createMarketingLandingHandler()
   try {

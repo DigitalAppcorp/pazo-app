@@ -1,3 +1,49 @@
+## Orden vigente #130 — cierre integral autorizado (26-oct-2026)
+
+El PO autoriza completar privacidad, Turnstile, retención14d/Cron, pruebas reales y medición propia tras sus controles; merge/deploy marketing incluidos. Esta orden sustituye los gates históricos de GO separado únicamente en ese alcance. No publicar anuncios ni gastar; no modificar PayPal/Auth/otros módulos. Fuente: https://github.com/DigitalAppcorp/pazo-app/issues/130.
+
+Verificado: PR129 integrado50ed9c55 y avisoOFF publicado en dpl_CGcRQ8nCvzNDUUvMAGPtTws18yWg READY/alias oficial; seis casos EN/ES320/390/1440 PASS. Retención14d/versionv1 instalada con colecciónOFF; Cronjob4 `pazo-marketing-retention-v1`, `17 */6 * * *`, idempotencia comprobada; jobs1/3 intactos. Dos ejecuciones periódicas reales todavía PENDIENTES. Landing Edge se prepara para validar Siteverify real manteniendo gate DB OFF y frontend OFF. No afirmar colección activa ni readiness Meta antes del postflight final. PR127 se reconcilia preservando evidencia histórica.
+
+---
+## Seguimiento privacidad y Turnstile — PR #129 preparado (26-oct-2026)
+
+Después del GO para continuar preparación, se abrió [PR #129](https://github.com/DigitalAppcorp/pazo-app/pull/129) **DRAFT** sobre `main`, exclusivamente para el aviso público bilingüe: seguimiento de anuncios actualmente OFF, ventana aprobada de 14 días, purga cada 6 horas (solo tras activación), advertencia de respaldos y enlace accesible al Turnstile Privacy Addendum. No fusionar ni publicar sin revisión y GO específicos. Los cambios son `legalCopy.ts`, `LegalPreviewDialog.tsx` y `legalCopy.test.mjs`. PR #127 sigue documental y contiene el runbook de instalación OFF. No almacenar anuncios. Plan Supabase observado **Free**; sin backup automático administrado por Supabase según condiciones oficiales, aunque podrían existir copias externas no verificadas. Extensión pg_cron instalada, job de marketing aún 0. El conector actual **no expone metadatos de Edge Secrets**, por lo que no está verificada la existencia de `PAZO_MARKETING_TURNSTILE_SECRET`; no intentar recuperarla o mostrar su valor. Antes de activar: verificar existencia por la interfaz segura, pruebas reales de Siteverify, aviso publicado y ejecución real de Cron en modo OFF. **Recopilación OFF y anuncios sin publicar.**
+
+---
+
+## Marketing PAZO — nuevo GO de privacidad limitada (26-oct-2026)
+
+El Product Owner **aprobó 14 días de retención en tablas activas para una futura recopilación** y autorizó **preparar** Cloudflare Turnstile Invisible y Cron de borrado (cada 6h). **No autorizó activar recopilación, instalar Cron nuevo/proveedor en producción, publicar política no verificada ni gastar presupuesto Meta.** Estado alojado verificado por SELECT: collection_gate.enabled=false, retention_days=0, policy_version=NULL. No ejecutar SQL/Edge/flags para abrir el gate sin aprobaciones separadas. Fuente operativa vigente: [Privacidad, período aprobado y ruta de activación](PAZO_MARKETING_PRIVACY_META_GATE_20261026.md) y [Runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). Auditar backup/PITR y el aviso ES/EN antes de instalar cron; verificar 2 ejecuciones periódicas reales. Tres anuncios están en borrador en Meta según PO; no han sido inspeccionados desde GitHub, y no hay gasto autorizado.
+
+---
+
+## PRIORIDAD VIGENTE — Marketing PAZO: herramientas primero (decisión PO 26-oct-2026)
+
+**Alcance:** handoff estratégico duradero para agentes. NO es una orden de publicar anuncios, activar recopilación o crear assets; los copies, imágenes, carruseles y vídeos publicitarios son material efímero y **NO deben guardarse en GitHub**. No duplicar archivos de anuncios ni crear carpetas de creativos.
+
+**Corrección explícita del Product Owner:** los primeros anuncios se enfocaron excesivamente en funciones sociales (feed, comunidades, perfiles). Eso omitió el valor funcional de PAZO. Para siguientes propuestas priorizar **herramientas que aportan utilidad individual** y sostienen la propuesta gratuita, dejando el componente social como complemento, no como argumento dominante. No reutilizar la misma composición para tres piezas diferentes: distinguir insight, promesa concreta, demostración, jerarquía visual, gancho y formato por creativo. Aplicar Marketing Brain y Design OS; validar disponibilidad antes de anunciar.
+
+**Funciones confirmadas en código main a esta fecha, sujetas a verificación funcional/alojada al producir piezas:**
+- **Pasaporte/QR de mascota:** `src/components/modals/PassportModal.tsx` genera, permite compartir y descargar QR, regenerar su enlace; ruta pública `PublicRescueView` permite enviar avistamientos. Presentarlo como identificación/medio de contacto, nunca como GPS ni garantía de recuperar mascotas.
+- **Cuidados y agenda:** `src/components/modals/CareModal.tsx` permite crear/editar cuidados, recurrencias, seleccionar «Recordarme», completar y consultar historial. No prometer notificaciones push automáticas sin prueba real.
+- **Alerta de mascota perdida:** `src/components/modals/AlertModal.tsx` permite activar/cerrar alerta y compartir enlace; `src/services/rescueService.ts` gestiona avistamientos. No prometer alertas masivas automáticas ni búsquedas garantizadas.
+- **Lugares:** `src/components/views/MapView.tsx` incluye categorías y check-in; se preparan direcciones. La instalación OFF solo verificó el catálogo público: el render visual del mapa tiene una limitación pendiente; **no convertirlo en promesa visual hasta que esa ruta pase QA real**.
+No presentar fake doors o funciones futuras como disponibles.
+
+**Marketing/medición verificados:** [PR #125](https://github.com/DigitalAppcorp/pazo-app/pull/125) integrado a `main` como `0ee700df99619dfe36b7a9848298297a7ead8bba`, 26-oct-2026. Dos migraciones marketing y ambas Edge instaladas, frontend publicado **con COLLECTION/LANDING/REPORT OFF**, `retention_days=0`, sin datos recabados, sin nuevo Cron, Turnstile, Meta Pixel ni CAPI. PWA/Auth públicos y checks alojados PASS; PayPal sin regresiones detectadas en los controles realizados; no afirmar compra PayPal real ni E2E completo de registro/mascota. [PR #127](https://github.com/DigitalAppcorp/pazo-app/pull/127) conserva evidencia de instalación OFF (PR documental en revisión al escribir esto). **No declarar tracking de conversiones activo**.
+
+**Decisión de adquisición (propuesta, no gasto autorizado):** primera prueba Meta Ads de **Tráfico → visitas a la página de destino**, Los Ángeles, inglés, una campaña/un conjunto y tres creativos distintos, presupuesto máximo tentativo USD 45 para 3 días. Los tres anuncios pueden prepararse como **borradores sin publicar ni gastar**. El GO de gasto sigue pendiente; antes de publicar faltan política de privacidad y retención, proveedores/seguridad, calendario de borrado y validación real del embudo alojado. Después evaluar Leads/conversiones verificadas, sin asumir transferencia automática de aprendizaje de Tráfico a Leads.
+
+**Contrato UTM:** fuente única `docs/marketing/traffic-pilot-urls.json` + `npm run marketing:validate-urls`; no crear variaciones a mano ni repetir las URLs aquí. La etiqueta técnica del carrusel (`qr_en`) es histórica, no prueba de que el creativo muestre QR; validar coherencia de nombre/arte al diseñar nuevos anuncios. Los anuncios en inglés deben enlazar con una experiencia móvil comprensible en inglés; la pantalla de entrada actualmente abre en español por defecto: verificar solución antes de publicar.
+
+**Próxima tarea del agente creativo:** elaborar y producir **nuevas alternativas verdaderamente distintas centradas en utilidades** (ej.: seguridad/QR, organización de cuidados, ayuda para mascota perdida), contrastando cada claim con el producto vivo. Presentar propuestas y materiales únicamente en el chat o en soportes explícitamente autorizados por el PO; **no almacenar creativos en el repositorio**. Conservar los anuncios ya diseñados, sin volver a generarlos salvo pedido expreso.
+
+---
+
+## Marketing instalado OFF — postflight 26-oct-2026
+
+PR125 integrado0ee700df, candidato3f050ead14/14checksPASS. SQL dirigido20261026201027/20261026201043, dosEdgev1 y frontendcanónicoREADYdpl_7vsKww6Jh3dwrobN1MiNvDbMohgJ. Colección/reportesOFF,retención0,filas0,Cronnuevo0;privacidad/proveedores/gasto separados. [Postflight y límites reales](PAZO_MARKETING_OFF_POSTFLIGHT_20261026.md), [URLs oficiales verificadas](marketing/traffic-pilot-urls.json). Demo se corrige aparte por indicaciónPO; no modificarla en este encargo. No repetir instalación ni activar colección.
+
 ## GO instalación Marketing OFF recibido — 26-oct-2026
 
 El PO autoriza integrar PR125 y exclusivamente dos migraciones, dos Edge y frontend OFF, retención0, sin Cron/proveedor/usuariosreales ni finanzas. Revalidar SHA/checks/producción. [Secuencia/contrato UTM corregido](PAZO_MARKETING_OFF_INSTALLATION_20261026.md). Esta autorización sustituye solo el gate de instalación anterior; privacidad, recopilación y presupuesto siguen separados.

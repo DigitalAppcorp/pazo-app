@@ -1,0 +1,112 @@
+[
+  {
+    "slug": "paypal-webhook",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f14-moderation-purge",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f14-moderation-reconcile",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f16-paypal-webhook",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f16-paypal-supporter-account",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f16-paypal-operator-read",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f16-paypal-supporter",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f16-paypal-sandbox-sale-review",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "f16-paypal-supporter-v2-qa",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-validate",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-paypal-live-checkout",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-paypal-live-webhook",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-provision",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-bootstrap",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-live-inspect",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-vault",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-paypal-live-worker",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-paypal-live-account",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-release",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-gradual-live",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-public-supporter",
+    "sameVersion": true,
+    "sameBundle": true
+  },
+  {
+    "slug": "pazo-admin-paypal-original-audit",
+    "sameVersion": true,
+    "sameBundle": true
+  }
+]
