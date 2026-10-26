@@ -17,7 +17,7 @@ El código administrativo reutilizaba la RPC F16 de **pre-campaña**,
 de modo que abortaba antes de leer PayPal o el evento. La interfaz
 ocultaba `auditCode`, y su resultado genérico parecía un fallo del proveedor.
 
-## Corrección aislada propuesta (requiere gate SQL)
+## Corrección aislada propuesta (migración SQL instalada con autorización del Product Owner)
 
 1. RPC nueva `pazo_f18_live_service_original_evidence_scope`: solo
 `service_role`, `STABLE`, `SECURITY DEFINER`, `search_path=''`,
@@ -39,9 +39,9 @@ intacto, filtrado de datos privados y barreras SQL.
 
 ## Gate de despliegue
 
-- **Este PR no modifica Supabase hospedado ni Vercel hasta autorización.**
+- **Autorización recibida:** migración de SOLO LECTURA instalada en Supabase; no se han alterado cobros ni eventos financieros.
 - Antes de aplicar SQL: revisar advisors/RPC grants, propuesta no ejecutable `PROPOSED_20261026043000`, CI/F18 PG17, conciliación exacta de archivos.
-- Tras aprobación específica, crear una migración oficial con la CLI y aplicar únicamente el SQL revisado, verificar
+- Permisos instalados verificados: `anon` y `authenticated` EXECUTE=false; `service_role` EXECUTE=true. Consulta SQL read-only de alcance original: PASS. verificar
 `EXECUTE` exclusivo para `service_role`, que la antigua RPC siga
 rechazando campaña iniciada y que no se modificaron datos financieros.
 - Desplegar solo nueva versión de la función administrativa con
