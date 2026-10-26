@@ -1,3 +1,9 @@
+## PRIORIDAD AGENTE — Marketing PAZO, 26-oct-2026
+
+Antes de generar nuevos anuncios de PAZO, leer la primera sección de [docs/PAZO_ACTIVE_HANDOFF.md](docs/PAZO_ACTIVE_HANDOFF.md): el Product Owner ordenó corregir el sesgo de creativos centrados en redes sociales y **priorizar herramientas reales** (QR/pasaporte, agenda de cuidados, ayuda para mascota perdida; Lugares sujeto a QA visual). Guardar en GitHub **solo contexto y decisiones duraderas**, nunca diseños, vídeos, copies ni assets de anuncios. Tracking alojado instalado **OFF**; preparar borradores Meta sin gasto está permitido, publicación/recopilación/privacidad tienen gates independientes. La fuente de UTMs es `docs/marketing/traffic-pilot-urls.json` (no improvisar otras).
+
+---
+
 ## GO instalación Marketing OFF recibido — 26-oct-2026
 
 El PO autoriza integrar PR125 y exclusivamente dos migraciones, dos Edge y frontend OFF, retención0, sin Cron/proveedor/usuariosreales ni finanzas. Revalidar SHA/checks/producción. [Secuencia/contrato UTM corregido](PAZO_MARKETING_OFF_INSTALLATION_20261026.md). Esta autorización sustituye solo el gate de instalación anterior; privacidad, recopilación y presupuesto siguen separados.
