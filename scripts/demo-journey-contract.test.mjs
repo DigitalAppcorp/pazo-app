@@ -51,9 +51,9 @@ test('guest exit avoids authenticated sign-out and offers a registration route',
 
 test('demo TypeScript modules have unique case-insensitive stems on Windows', () => {
   const names = readdirSync('src/features/demo')
-    .filter((name) => /\\.tsx?$/.test(name))
-    .map((name) => name.replace(/\\.tsx?$/, '').toLowerCase())
+    .filter((name) => name.endsWith('.ts') || name.endsWith('.tsx'))
+    .map((name) => name.slice(0, name.lastIndexOf('.')).toLowerCase())
   assert.equal(new Set(names).size, names.length, 'TS/TSX modules would collide in a Windows Vite import')
-  assert.match(app, /from '\\.\/features\\/demo\\/DemoGuestViews'/)
-  assert.doesNotMatch(app, /from '\\.\/features\\/demo\\/DemoExperience'/)
+  assert.ok(app.includes("from './features/demo/DemoGuestViews'"))
+  assert.ok(!app.includes("from './features/demo/DemoExperience'"))
 })
