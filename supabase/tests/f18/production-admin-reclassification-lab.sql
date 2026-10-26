@@ -62,6 +62,8 @@ SELECT f18_test.check('QA_HISTORY_SNAPSHOTS_RETAINED',
  AND original_sandbox_qa->>'test_purpose'='f16_four_benefits_sandbox'
  FROM supporter_private.pazo_live_production_reclassifications LIMIT 1));
 
+\i supabase/tests/f18/qa-archive-synthetic-pg17.sql
+
 \connect f16_lab
 DO $$ BEGIN IF current_database()<>'f16_lab' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
 DROP DATABASE f18_admin_synthetic WITH (FORCE);

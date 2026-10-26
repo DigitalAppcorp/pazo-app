@@ -1,4 +1,17 @@
-## Encargo F18 — implementación autorizada en revisión (25-oct-2026 Guatemala)
+## Issue121 — autorización integral de release, en verificación (26-oct-2026)
+
+Orden directa del PO: implementar, integrar y publicar PayPal Live público con
+gates, USD2.99/mes, invitaciones OFF. Preflight real: main95527e2f/VercelREADY,
+checkoutOFF, healthfalse por caso112, archivo no instalado. No confundir CI con
+apertura. PR120 revisado para conservar intención original abierta/gestionable,
+cuarentena individual, diagnóstico previo y eventos tardíos; incorpora fix115.
+Fuentes, pruebas, secuencia y rollback:
+[registro121](PAZO_ISSUE121_PUBLIC_LIVE_RELEASE_20261026.md).
+Siguiente: CI del candidato exacto, migración puntual permitida y postflight;
+después acción oficial de apertura con MFA. No abrir con blocker ni limpiar
+incidentes para aparentar salud. El resto de este documento conserva historia.
+
+## Encargo anterior F18 — implementación autorizada en revisión (25-oct-2026 Guatemala)
 
 La orden directa del PO del 24-oct autoriza implementación integral, pruebas aisladas, commits, push y PR. Sustituye la apertura comercial gradual por acceso público para cuentas legítimas elegibles; conserva controles financieros. **No autoriza merge, SQL hosted, Edge/Vercel producción, secretos ni pagos reales.**
 

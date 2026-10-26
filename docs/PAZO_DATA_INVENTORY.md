@@ -8,6 +8,18 @@ Aviso transaccional por cuenta y respuesta enum ok/issue/skipped; un problema en
 
 ---
 
+## Issue121 — archivo/cuarentena histórica privada (26-oct-2026, instalado 20261026071648)
+
+Referencias de intención/propietario/generación/evento originales; clase explícita
+de incertidumbre, diagnóstico/estado/attempts anteriores, fecha del incidente,
+fecha de archivo, referencia de decisión y liberación inicialmente nula.
+Sin payload, datos de pagador, credenciales, analytics ni tercero nuevo. Tabla
+privada con RLS y sin acceso de clientes; servicio solo SELECT, sin escritura.
+Se conserva junto al expediente financiero original y su retención/hold vigente;
+no certifica cancelación ni ausencia de cargos. No se cierra la intención original
+ni se ocultan sus controles de gestión. Estado instalado debe confirmarse por
+postflight y registrarse en el reporte de issue121.
+
 ## Issue85 — relectura QA y certificado técnico (24-oct-2026, instalado; gate cerrado)
 
 Una revisión autorizada puede conservar UUID de petición, generación/evento originales, diagnóstico/estado/attempts anteriores, status/timestamp reales del proveedor y digest de evidencia mínima. Sigue la retención/hold de su inbox financiero (FK que acompaña la purga lícita del padre), sin payload ni pagador. Ningún recheck borra firma o marca processed: solo retorna a pending con historial y tope original de intentos, tras GET auténtico y cero transacciones. El certificado técnico privado conserva commits/bundles/digest/origen/revisiones/fecha conforme al control financiero existente; solo postgres puede certificar, y no concede MFA ni inicia campaña. No nuevas categorías de terceros, secretos, publicidad o analytics.

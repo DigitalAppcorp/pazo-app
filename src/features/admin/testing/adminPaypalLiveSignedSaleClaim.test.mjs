@@ -67,9 +67,22 @@ test('provider event mismatch is held; transport failure releases only to bounde
  }
  const f=fixture({providerError:true});const r=await f.run(args)
  assert.equal(r.code,'signed_sale_provider_event_unavailable');assert.equal(r.leaseReleased,true)
- assert.equal(f.calls.at(-1)[1].result,'pending');assert.ok(!JSON.stringify(r).includes('PRIVATE'))
+ assert.equal(f.calls.at(-1)[1].result,'pending');assert.equal(r.retryable,true)
+ assert.ok(!JSON.stringify(r).includes('PRIVATE'))
 })
 test('uncertain finish remains visible for lease-expiry recovery and never records payment',async()=>{
  const f=fixture({providerError:true,lease:{finish:async()=>{throw Error('UNKNOWN')}}})
- const r=await f.run(args);assert.equal(r.leaseReleased,false);assert.equal(r.paymentRecorded,false)
+ const r=await f.run(args);assert.equal(r.leaseReleased,false);assert.equal(r.retryable,false)
+ assert.equal(r.paymentRecorded,false)
+})
+
+test('transient signed receipt read failure remains pending and retryable after the lease is released',async()=>{
+ const f=fixture({lease:{readSignedReceipt:async()=>{throw Error('PRIVATE_NETWORK_FAILURE')}}})
+ const r=await f.run(args)
+ assert.equal(r.code,'signed_sale_metadata_unavailable')
+ assert.equal(r.retryable,true);assert.equal(r.leaseReleased,true)
+ assert.equal(r.paymentRecorded,false);assert.equal(r.entitlementGranted,false)
+ assert.equal(f.calls.at(-1)[1].result,'pending')
+ assert.equal(f.calls.some(c=>c[0]==='provider'),false)
+ assert.ok(!JSON.stringify(r).includes('PRIVATE_NETWORK_FAILURE'))
 })

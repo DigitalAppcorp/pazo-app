@@ -1,4 +1,14 @@
-## Encargo F18 — implementación autorizada en revisión (25-oct-2026 Guatemala)
+## Issue121 — PayPal Live público, EN CURSO (26-oct-2026)
+
+Autorización directa del PO para implementación/integración/publicación tras
+gates; no pagos fabricados ni borrado de evidencias. Invitaciones OFF.
+[Matriz y release gate](PAZO_ISSUE121_PUBLIC_LIVE_RELEASE_20261026.md).
+Preflight: producción main95527e2f READY, checkoutsOFF/healthfalse. Candidato
+revisado desde PR120 con cuarentena y gestión original conservada; fix115
+incorporado. No declarar cierre hasta instalación reconciliada, despliegues
+verificados y apertura oficial con MFA y health/blocker correctos.
+
+## Encargo anterior F18 — implementación autorizada en revisión (25-oct-2026 Guatemala)
 
 La orden directa del PO del 24-oct autoriza implementación integral, pruebas aisladas, commits, push y PR. Sustituye la apertura comercial gradual por acceso público para cuentas legítimas elegibles; conserva controles financieros. **No autoriza merge, SQL hosted, Edge/Vercel producción, secretos ni pagos reales.**
 
