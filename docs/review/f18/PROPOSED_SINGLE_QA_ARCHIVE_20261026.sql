@@ -125,8 +125,7 @@ BEGIN
 
   UPDATE supporter_private.pazo_paypal_live_event_inbox
     SET processing_state='qa_archived',
-      last_diagnostic_code='qa_signed_created_archived_settlement_unverified',
-      retry_after=NULL
+      last_diagnostic_code='qa_signed_created_archived_settlement_unverified'
   WHERE merchant_generation=ev.merchant_generation
     AND provider_event_id=ev.provider_event_id
     AND processing_state='held';
