@@ -1,3 +1,11 @@
+## Comunidades — integración visual autorizada en rama, 26-oct-2026
+
+PO aprobó preview direccion-08 y ordenó integrarla conservando Supabase; cuatro
+destinos y fake doors contextuales, compositor original y animaciones aprobadas.
+Rama `feat/community-contextual-navigation-20261026`, sin merge ni publicación.
+Pruebas/build y límites: [informe de integración](PAZO_COMMUNITY_NAVIGATION_INTEGRATION_20261026.md).
+No declara cerrada F13 ni modifica el estado comercial/financiero inferior.
+
 ## Issue121 — autorización integral de release, en verificación (26-oct-2026)
 
 Orden directa del PO: implementar, integrar y publicar PayPal Live público con

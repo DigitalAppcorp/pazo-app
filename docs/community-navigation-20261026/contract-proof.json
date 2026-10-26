@@ -1,0 +1,81 @@
+{
+  "base": "5036f6d7024ace157c7dad96afc270ba4728d327",
+  "handlers": [
+    {
+      "name": "loadCommunity",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": "load error/retry state"
+    },
+    {
+      "name": "refreshPosts",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleMembership",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handlePostImage",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleCreatePost",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": "close composer on success"
+    },
+    {
+      "name": "handleLike",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleAddComment",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleDeleteComment",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleDeletePost",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleRemoveMember",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "setAdminFor",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "answerOffer",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "beginEdit",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleSaveEdit",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    },
+    {
+      "name": "handleArchive",
+      "serviceLogicPreserved": true,
+      "uiOnlyDelta": null
+    }
+  ],
+  "backendChanges": []
+}

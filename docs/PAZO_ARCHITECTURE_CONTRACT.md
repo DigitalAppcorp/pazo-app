@@ -170,3 +170,12 @@ Migración incremental cuando:
 - moverlo reduce riesgo neto.
 
 El objetivo es **arquitectura legible sin churn innecesario**.
+
+
+## Comunidades — navegación contextual (26-oct-2026, rama)
+
+La presentación y fake doors nuevas pertenecen a
+`src/features/communities/components/CommunityWorkspace.tsx` y
+`CommunityFutureGate.tsx`, con CSS acotado. `CommunityDetailView` legacy conserva
+estado y mutaciones existentes; no se duplican services ni se traslada el módulo
+completo. Sin cambios al baseline de carpetas globales.
