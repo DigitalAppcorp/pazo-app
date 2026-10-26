@@ -29,6 +29,7 @@ export const HeaderBar = ({
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <button
           onClick={onToggleLang}
+          aria-label={lang === 'es' ? 'Cambiar a inglés' : 'Switch to Spanish'}
           className="flex h-10 min-w-10 items-center justify-center rounded-full bg-[#FAF8F5]/90 px-2 text-[13px] font-extrabold text-[#204E4A] shadow-sm transition-colors hover:bg-[#E1E53F]/45"
         >
           {lang === 'es' ? 'ES' : 'EN'}

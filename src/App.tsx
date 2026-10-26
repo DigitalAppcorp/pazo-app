@@ -7,6 +7,7 @@ import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding } from './features/marketing/marketingRuntime'
 import { pazoBuildVersion } from './features/release/buildVersion'
+import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { PazoSplash } from './features/splash/PazoSplash'
 import { supabase } from './services/supabaseClient'
@@ -178,7 +179,15 @@ function PazoMain() {
     user, loading, signIn, isPasswordRecovery, recoverySessionVerified,
     requestPasswordReset, changePassword, finishPasswordRecovery,
   } = useAuth()
-  const [lang, setLang] = useState<'es' | 'en'>('es')
+  const [lang, setLang] = useState<PazoLanguage>(getInitialLanguage)
+  useEffect(() => {
+    applyDocumentLanguage(lang)
+  }, [lang])
+  const handleToggleLanguage = () => {
+    const next: PazoLanguage = lang === 'es' ? 'en' : 'es'
+    rememberLanguage(next)
+    setLang(next)
+  }
   const [publicRescueRoute, setPublicRescueRoute] = useState(getPublicRescueRoute)
   const [isSupporterAccountRoute, setSupporterAccountRoute] = useState(() => {
     normalizeSupporterPaypalCallback(window.location,window.history)
@@ -1754,7 +1763,7 @@ function PazoMain() {
             <OnboardingView
               initialStep={initialOnboardingStep}
               lang={lang}
-              onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+              onToggleLang={handleToggleLanguage}
               onSkipToLogin={() => {
                 setAuthMode('login')
                 setIsOnboardingActive(false)
@@ -1789,7 +1798,8 @@ function PazoMain() {
                   ← {lang === 'es' ? 'Volver' : 'Back'}
                 </button>
                 <button
-                  onClick={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+                  onClick={handleToggleLanguage}
+                  aria-label={lang === 'es' ? 'Cambiar a inglés' : 'Switch to Spanish'}
                   className="text-[11px] font-bold tracking-widest px-3 py-1.5 rounded-full border border-[#204E4A]/20 bg-white text-[#204E4A] cursor-pointer"
                 >
                   {lang === 'es' ? 'ES ▾' : 'EN ▾'}
@@ -1930,7 +1940,7 @@ function PazoMain() {
 
             <HeaderBar
               lang={lang}
-              onToggleLang={() => setLang((prev) => (prev === 'es' ? 'en' : 'es'))}
+              onToggleLang={handleToggleLanguage}
               onOpenSearch={() => setIsSearchOpen(true)}
               onOpenMessages={() => setIsMessagesOpen(true)}
               onOpenNotifications={handleOpenNotifications}
