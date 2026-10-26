@@ -1,3 +1,7 @@
+## Marketing instalado OFF — postflight 26-oct-2026
+
+PR125 integrado0ee700df, candidato3f050ead14/14checksPASS. SQL dirigido20261026201027/20261026201043, dosEdgev1 y frontendcanónicoREADYdpl_7vsKww6Jh3dwrobN1MiNvDbMohgJ. Colección/reportesOFF,retención0,filas0,Cronnuevo0;privacidad/proveedores/gasto separados. [Postflight y límites reales](PAZO_MARKETING_OFF_POSTFLIGHT_20261026.md), [URLs oficiales verificadas](marketing/traffic-pilot-urls.json). Demo se corrige aparte por indicaciónPO; no modificarla en este encargo. No repetir instalación ni activar colección.
+
 ## Actualización del candidato 26-oct-2026
 
 Usar [readiness E2E](PAZO_MARKETING_E2E_READINESS_20261026.md) como estado vigente y el SHA final del nuevo PR. Las dos migraciones de PR91 se preservan byte por byte; manifiesto y guard F17 separan explícitamente fuentes NOT_APPLIED del historial instalado. Intake JWT=true explícito en config. No instalar desde PR91 antiguo ni asumir que este preflight concede GO. Retención sugerida14d, sin aprobar/configurar. Sigue sin proveedor, Cron de marketing o recopilación.

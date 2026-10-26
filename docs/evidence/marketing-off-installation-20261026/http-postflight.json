@@ -1,0 +1,53 @@
+{
+  "mode": "HOSTED_OFF_NO_USER_NO_FIXTURE_ROWS",
+  "results": [
+    {
+      "name": "Auth health without user",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "Auth settings without user",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "Published map places readable without account, no identifiers requested",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "Landing OFF without challenge or user",
+      "status": 503,
+      "pass": true,
+      "collection_disabled": true
+    },
+    {
+      "name": "Intake gateway rejects absent credentials",
+      "status": 401,
+      "pass": true
+    },
+    {
+      "name": "Intake OFF with publishable API key and no user",
+      "status": 503,
+      "pass": true,
+      "collection_disabled": true
+    },
+    {
+      "name": "Intake OFF with public anon JWT, no person",
+      "status": 503,
+      "pass": true,
+      "collection_disabled": true
+    },
+    {
+      "name": "Anon denied aggregate report",
+      "status": 401,
+      "pass": true
+    },
+    {
+      "name": "Private schema excluded from anon Data API",
+      "status": 406,
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "kind": "HOSTED_PUBLIC_AND_DEMO_NO_USERS_NO_FORM_SUBMISSION",
+  "physicalInstalledPwa": false,
+  "results": [
+    {
+      "width": 320,
+      "format": "image",
+      "status": 200,
+      "authForm": true,
+      "legalVisible": true,
+      "overflow": false,
+      "noStaging": true,
+      "marketing": [],
+      "errors": [],
+      "blockedPostCount": 2,
+      "map": "BLOCKED_SEPARATE_DEMO_PROBE_FEED_LOADING"
+    },
+    {
+      "width": 390,
+      "format": "carousel",
+      "status": 200,
+      "authForm": true,
+      "legalVisible": true,
+      "overflow": false,
+      "noStaging": true,
+      "marketing": [],
+      "errors": [],
+      "blockedPostCount": 2,
+      "map": "BLOCKED_SEPARATE_DEMO_PROBE_FEED_LOADING"
+    },
+    {
+      "width": 1440,
+      "format": "video",
+      "status": 200,
+      "authForm": true,
+      "legalVisible": true,
+      "overflow": false,
+      "noStaging": true,
+      "marketing": [],
+      "errors": [],
+      "blockedPostCount": 2,
+      "map": "BLOCKED_SEPARATE_DEMO_PROBE_FEED_LOADING"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "dpl_7vsKww6Jh3dwrobN1MiNvDbMohgJ",
+  "state": "READY",
+  "url": "pazo-c9e5bdl0i-digitalapp.vercel.app",
+  "sha": "0ee700df99619dfe36b7a9848298297a7ead8bba",
+  "alias": [
+    "pazo-app.vercel.app",
+    "pazo-app-digitalapp.vercel.app",
+    "pazo-app-git-0ee700df99619dfe36b7a9848298297a-363df2-digitalapp.vercel.app"
+  ],
+  "target": "production",
+  "previousDeployment": "dpl_GeqCir3UT9hyKN8bDygQqiUW6N7F"
+}

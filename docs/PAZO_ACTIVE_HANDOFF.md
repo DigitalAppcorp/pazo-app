@@ -1,3 +1,7 @@
+## Marketing instalado OFF — postflight 26-oct-2026
+
+PR125 integrado0ee700df, candidato3f050ead14/14checksPASS. SQL dirigido20261026201027/20261026201043, dosEdgev1 y frontendcanónicoREADYdpl_7vsKww6Jh3dwrobN1MiNvDbMohgJ. Colección/reportesOFF,retención0,filas0,Cronnuevo0;privacidad/proveedores/gasto separados. [Postflight y límites reales](PAZO_MARKETING_OFF_POSTFLIGHT_20261026.md), [URLs oficiales verificadas](marketing/traffic-pilot-urls.json). Demo se corrige aparte por indicaciónPO; no modificarla en este encargo. No repetir instalación ni activar colección.
+
 ## GO instalación Marketing OFF recibido — 26-oct-2026
 
 El PO autoriza integrar PR125 y exclusivamente dos migraciones, dos Edge y frontend OFF, retención0, sin Cron/proveedor/usuariosreales ni finanzas. Revalidar SHA/checks/producción. [Secuencia/contrato UTM corregido](PAZO_MARKETING_OFF_INSTALLATION_20261026.md). Esta autorización sustituye solo el gate de instalación anterior; privacidad, recopilación y presupuesto siguen separados.
