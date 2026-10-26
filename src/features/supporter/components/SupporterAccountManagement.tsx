@@ -54,6 +54,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [showLiveManagement,setShowLiveManagement] = useState(false)
   const [recoveryMessage,setRecoveryMessage] = useState<string|null>(null)
   const [confirmLiveAbandon,setConfirmLiveAbandon] = useState(false)
+  const [showRestartHelp,setShowRestartHelp] = useState(false)
   const operationInFlight=useRef(false)
   const accountEpoch=useRef(0)
   const [accountRevision,setAccountRevision]=useState(0)
@@ -66,7 +67,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         operationInFlight.current=false
         setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
-        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowLiveManagement(false);setVoluntarySupport(false);setPromotionChoice('idle')
+        setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowRestartHelp(false);setShowLiveManagement(false);setVoluntarySupport(false);setPromotionChoice('idle')
         setAccountRevision(n=>n+1)
       }
       lastOwner=nextOwner
@@ -309,6 +310,10 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
         window.location.assign(target.toString())
       }else if(data.code==='live_checkout_slot_released'){
         released=true
+        // A retired intent changes eligibility: discard the previous Live GET
+        // before the next offer paint, so the kitten prepares the new checkout.
+        setOfferRefreshRevision(n=>n+1)
+        setShowRestartHelp(false)
         setConfirmLiveAbandon(false)
         setRecoveryMessage(label('El intento anterior terminó. Para iniciar otro, acepta nuevamente las condiciones.',
           'The earlier request has ended. Accept the terms again to start another.'))
@@ -319,8 +324,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       }else throw Error('recovery_unverified')
     }catch{
       if(epoch!==accountEpoch.current)return
-      setRecoveryMessage(label('No pudimos confirmar el intento anterior. No iniciamos otra suscripción; comprueba su estado antes de continuar.',
-        'We could not verify the earlier request. We did not start another subscription; check its status before continuing.'))
+      if(action==='resume')setShowRestartHelp(true)
+      setRecoveryMessage(action==='resume'
+        ?label('PayPal no permitió reanudar esta aprobación. Si tu tarjeta fue rechazada, utiliza «Comprobar cierre e intentar de nuevo» para verificar y cerrar únicamente una solicitud todavía pendiente. Después podrás elegir otro método de pago. No se creó otra suscripción.',
+          'PayPal could not resume this approval. If your card was declined, use Verify closure and retry to confirm and close only an unapproved request. You can then choose another payment method. No new subscription was created.')
+        :label('PayPal todavía no confirmó el cierre o el estado de esta solicitud. No creamos otra suscripción. Consulta «Administrar mi suscripción» antes de repetir la operación.',
+          'PayPal has not confirmed the closure or state of this request. No new subscription was created. Check Manage my subscription before repeating.'))
     }finally{if(epoch===accountEpoch.current){operationInFlight.current=false;setBusy(false)}}
     if(released&&epoch===accountEpoch.current)await refresh()
   }
@@ -484,13 +493,15 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                   {label('Si PayPal ya no permite recuperar la aprobación, consulta el estado en «Administrar mi suscripción». No se intentará otro cobro automáticamente.',
                     'If PayPal can no longer recover the approval, check its status under Manage my subscription. No other charge will be attempted automatically.')}
                 </p>
-                <details className="rounded-[14px] bg-white/70 px-3 py-2 text-left">
+                <details open={showRestartHelp}
+                  onToggle={event=>setShowRestartHelp(event.currentTarget.open)}
+                  className="rounded-[14px] bg-white/70 px-3 py-2 text-left">
                   <summary className="min-h-9 cursor-pointer py-2 text-[12px] font-bold text-[#204E4A]">
-                    {label('¿Prefieres comenzar de nuevo?','Would you rather start over?')}
+                    {label('¿Tu tarjeta fue rechazada? Volver a intentar','Was your card declined? Try again')}
                   </summary>
                   <p className="mb-2 text-[12px] leading-relaxed text-[#526F63]">
-                    {label('Solo cerraremos el intento sin pagar si PayPal confirma que seguía pendiente y después de verificar que no quedan cobros o eventos por conciliar. Si no podemos comprobarlo, conservaremos tu solicitud.',
-                      'We will close the unpaid request only if PayPal confirms it was still pending and no paid periods or events remain unresolved. Otherwise your request stays protected.')}
+                    {label('Para usar otra tarjeta, primero verificaremos en PayPal que esta aprobación sigue pendiente y cerraremos la solicitud original sin pagar. Si ya se aprobó o no podemos confirmar el cierre, conservaremos el intento para evitar cobros duplicados.',
+                      'To use another card, we first verify in PayPal that this approval is still pending and close the original unpaid request. If it was approved or closure cannot be verified, the original stays protected to prevent duplicate charges.')}
                   </p>
                   <label className="flex items-start gap-2 text-[12px] font-medium">
                     <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#204E4A]"
