@@ -1,0 +1,25 @@
+{
+  "id": "dpl_GeqCir3UT9hyKN8bDygQqiUW6N7F",
+  "state": "READY",
+  "target": "production",
+  "projectId": "prj_nk61nr5ZVpxlp8qbIvRCsua36iXI",
+  "teamId": "team_02Ax5UcD1OlLzpDBYyNMi6KO",
+  "sourceSha": "a8d837994eacaa8c90844c252ffd5131e17fdd4b",
+  "url": "pazo-53cur0150-digitalapp.vercel.app",
+  "alias": [
+    "pazo-app.vercel.app",
+    "pazo-app-digitalapp.vercel.app",
+    "pazo-app-git-a8d837994eacaa8c90844c252ffd5131-52cb94-digitalapp.vercel.app"
+  ],
+  "aliasReadback": {
+    "alias": "pazo-app.vercel.app",
+    "deploymentId": "dpl_GeqCir3UT9hyKN8bDygQqiUW6N7F",
+    "projectId": "prj_nk61nr5ZVpxlp8qbIvRCsua36iXI",
+    "deployment": {
+      "id": "dpl_GeqCir3UT9hyKN8bDygQqiUW6N7F",
+      "url": "pazo-53cur0150-digitalapp.vercel.app"
+    },
+    "updatedAt": 1793040861714
+  },
+  "rollback": "dpl_2R6ZGFrwfF1ShPHDMuWbC1Ybwrcb"
+}

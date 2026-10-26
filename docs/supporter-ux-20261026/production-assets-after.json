@@ -1,0 +1,59 @@
+{
+  "origin": "https://pazo-app.vercel.app",
+  "ready": true,
+  "checks": [
+    {
+      "file": "garden.png",
+      "sha256": "14c788eaea99389fdbffa31235abebf0a5659c10149303f7171df812e95a2471",
+      "match": true
+    },
+    {
+      "file": "gratitude.png",
+      "sha256": "c7f487ec82b0e01d718a5651bd0be84de200619506a49c85826aa5527e235dc5",
+      "match": true
+    },
+    {
+      "file": "benefit-scenes.png",
+      "sha256": "e963bd0b66e33128129b188e0d919a8bcea43662b42e2e9bae9b013d69947511",
+      "match": true
+    },
+    {
+      "marker": "Tu apoyo mantiene",
+      "present": true
+    },
+    {
+      "marker": "supporter-profile-entry",
+      "present": true
+    },
+    {
+      "marker": "/supporter/art/garden.png",
+      "present": true
+    },
+    {
+      "marker": "workspace-choice-indicator",
+      "present": true
+    }
+  ],
+  "bundles": [
+    {
+      "path": "/assets/app-BZB2lPFa.js",
+      "sha256": "149d127f0a81e9904a493757e0d0a1477bb258c11e4ed87f503241652d6359f0"
+    },
+    {
+      "path": "/assets/publicConfig-BuC15E42.js",
+      "sha256": "06eeb0d58bfa9e4c42f20b1ff21c8a8f454fd14f15ef3bf47efadac1c0bc4d2d"
+    },
+    {
+      "path": "/assets/app-Ysyr7TMg.css",
+      "sha256": "9924c2c956bc183441aa5ba81ebd2232353237964f18b004f50dd1f9c2be595d"
+    },
+    {
+      "path": "/assets/App-CpmyGppA.js",
+      "sha256": "2051e7066b7b31952968cb67d8c0ace29de4b8716506c602c1e232a5f5a4ef34"
+    },
+    {
+      "path": "/assets/App-B1YmqO11.css",
+      "sha256": "e29526ed3991f37fb8d87b2b84c437cc0bb9bfa8ef7052a0468f09516a5c47ec"
+    }
+  ]
+}

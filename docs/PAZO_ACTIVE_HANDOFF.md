@@ -1,3 +1,7 @@
+## UI aprobada publicada — 26-oct-2026
+
+Amigo de PAZO y Comunidades aprobados ya están en producción en pazo-app.vercel.app. PR124/mergea8d837994eacaa8c90844c252ffd5131e17fdd4b, VercelREADYdpl_GeqCir3UT9hyKN8bDygQqiUW6N7F y postflightPASS. Se preservan lógica funcional, contratos y Supabase; no se cambiaron flags de pagos/invitaciones. Ver [registro autoritativo de publicación](PAZO_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261026.md). Las secciones candidatas inferiores son históricas.
+
 ## Amigo de PAZO · UI aprobada, candidato a producción (26-oct-2026)
 
 El PO autoriza integrar y publicar la propuesta04, con el único acceso al final de Mi mascota, conservando la lógica funcional. Integración de presentación sobre controladores reales; no se cambian Supabase, contratos, pagos, flags o invitaciones. Ver [informe y gates](PAZO_SUPPORTER_APPROVED_UX_RELEASE_20261026.md). Aún pendiente CI del SHA exacto y postflight Vercel.
