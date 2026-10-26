@@ -8,7 +8,7 @@ Aviso transaccional por cuenta y respuesta enum ok/issue/skipped; un problema en
 
 ---
 
-## Issue121 — archivo/cuarentena histórica privada (26-oct-2026, propuesto)
+## Issue121 — archivo/cuarentena histórica privada (26-oct-2026, instalado 20261026071648)
 
 Referencias de intención/propietario/generación/evento originales; clase explícita
 de incertidumbre, diagnóstico/estado/attempts anteriores, fecha del incidente,

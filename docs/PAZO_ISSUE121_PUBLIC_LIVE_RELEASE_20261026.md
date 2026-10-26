@@ -39,3 +39,11 @@ Initial fixture failures (claim timestamp order, canonical ISO milliseconds and 
 6. Rollback: use the same official admin flow `pause_checkouts` with current revision; retain webhook/worker and legitimate cancellation/refund processing. Preserve archive, quarantine, signed receipts and all paid records. Do not undo reconciliation by deleting evidence or changing PayPal subscriptions. If a late event or any gate is unsafe, remain closed and investigate individually.
 
 **Status:** release candidate under verification; hosted archive, final deployment and public opening are NOT claimed by this document until an explicit postflight is appended.
+
+## Hosted archive postflight — 2026-10-26 07:17:32 UTC
+
+CI40284456994 and F1840284457000 SUCCESS for candidate8f1b1d50. Supabase apply_migration returned success, installed version `20261026071648_pazo_f18_historical_canary_quarantine_issue121`. The single recorded SQL statement matches the reviewed LF source exactly; the canonical installed migration is copied from that observed history entry, not a replay of other migrations.
+
+Readback: health=true, blocker=NULL, checkout=false, invitations=false. One owner quarantined and ineligible; one CREATED qa_archived; zero held, unresolved incidents or paid periods. Diagnostic and financial uncertainty retained. Original intent, original signed receipt and event immutable-field fingerprints are byte-for-byte unchanged from the preflight (same SQL JSON fingerprints); no local intent closure or provider status invented. Late-event trigger enabled. Archive RLS/role postflight is recorded separately before release.
+
+The financial gate is now healthy but new checkouts remain intentionally OFF until the official admin MFA/CAS action. This is not proof of a live sale or completion of issue121. Worker publication, integrated main/Vercel commit and public opening are still pending here.
