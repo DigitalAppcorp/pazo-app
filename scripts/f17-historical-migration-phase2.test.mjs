@@ -45,8 +45,10 @@ test('eight prehistory SQL sources preserved in non-executable archive only (pro
   assert.ok(all.some(n=>n.startsWith(prepared.installedVersion+'_')),'F18 installed migration missing')
   assert.ok(additional.every(v=>all.some(n=>n.startsWith(v+'_'))),'additional hosted migration source missing')
   assert.equal(prepared.productionPushAllowed,false)
-  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))).length,122)
-  assert.equal(all.length,123+additional.length+prepared.versions.length)
+  // One new, intentionally gated postcampaign READ-ONLY RPC migration.
+  assert.ok(all.some(n=>n.startsWith('20261026043000_pazo_f18_admin_original_evidence_postcampaign_scope.sql')))
+  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))).length,123)
+  assert.equal(all.length,124+additional.length+prepared.versions.length)
   for(const version of unpaired){
     assert.ok(!all.some(n=>n.startsWith(version+'_')),'old SQL remains deployable: '+version)
     assert.ok(readdirSync(archived).some(n=>n.startsWith(version+'_')),'missing preserved historical SQL: '+version)
