@@ -600,7 +600,7 @@ function PazoMain() {
   const displayedPostsRef=useRef(posts)
   displayedPostsRef.current=posts
   useEffect(()=>{
-    if(!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
+    if(isDemoUser||!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
     let alive=true
     let inFlight=false
     const refresh=async()=>{
@@ -652,7 +652,7 @@ function PazoMain() {
       document.removeEventListener('visibilitychange',onReturn)
       clearInterval(interval)
     }
-  },[badgePetSignature,activeTab,currentPet.id])
+  },[badgePetSignature,activeTab,currentPet.id,isDemoUser])
 
   const loadMoreFeed = async () => {
     if (isDemoUser) return
