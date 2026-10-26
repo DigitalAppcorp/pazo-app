@@ -386,6 +386,7 @@ try {
     'real rendered impression persisted',
   )
   await c.page.keyboard.press('Escape')
+  await c.page.getByRole('dialog').waitFor({state:'hidden',timeout:5000})
   check(
     (await c.page.getByRole('dialog').count()) === 0,
     'Escape exits invitation',
