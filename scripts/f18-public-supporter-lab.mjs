@@ -118,4 +118,11 @@ run('docker', [
 ])
 run(process.execPath, ['scripts/f18-public-supporter-concurrency.mjs'])
 // Final isolated fixture verifies only the principal administrator is reclassified.
+const archiveProposal=readFileSync('docs/review/f18/PROPOSED_SINGLE_QA_ARCHIVE_20261026.sql','utf8')
+if(!archiveProposal.trimEnd().endsWith('COMMIT;'))
+  throw Error('QA archive proposal is not a complete transaction')
+writeFileSync(
+  'supabase/tests/f18/qa-archive.rollback.generated.sql',
+  archiveProposal.replace(/COMMIT;\\s*$/, 'ROLLBACK;'),
+)
 run('docker', [...base, '-f', 'supabase/tests/f18/production-admin-reclassification-lab.sql'])
