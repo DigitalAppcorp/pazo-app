@@ -93,7 +93,7 @@ test('admin output strips provider debug IDs and sensitive evidence, showing onl
   'WH-PRIVATE','I-PRIVATE','owner_private'])assert.equal(raw.includes(secret),false)
 })
 test('SQL scope is service-only, uniquely pinned, read-only and does not weaken old pre-campaign gate',()=>{
- const sql=readFileSync('supabase/migrations/20261026043000_pazo_f18_admin_original_evidence_postcampaign_scope.sql','utf8')
+ const sql=readFileSync('docs/review/f18/PROPOSED_20261026043000_pazo_f18_admin_original_evidence_postcampaign_scope.sql','utf8')
  assert.match(sql,/CREATE FUNCTION public\.pazo_f18_live_service_original_evidence_scope\(\)/)
  assert.match(sql,/LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO ''/)
  assert.match(sql,/PERFORM supporter_private\.gradual_require_service\(\)/)
