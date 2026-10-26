@@ -1,10 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 
 const app = readFileSync('src/App.tsx', 'utf8')
 const pet = readFileSync('src/components/views/PetView.tsx', 'utf8')
-const demo = readFileSync('src/features/demo/DemoExperience.tsx', 'utf8')
+const demo = readFileSync('src/features/demo/DemoGuestViews.tsx', 'utf8')
 
 test('guest entry initializes a local feed and exits the loading state', () => {
   assert.match(app, /const enterDemo = \(\) => \{/)
@@ -47,4 +47,13 @@ test('guest exit avoids authenticated sign-out and offers a registration route',
   assert.match(app, /onExitDemo=\{\(\) => leaveDemo\('welcome'\)\}/)
   assert.match(app, /leaveDemo\('signup'\)/)
   assert.match(app, /setInitialOnboardingStep\(destination === 'signup' \? 'A02' : 'A01'\)/)
+})
+
+test('demo TypeScript modules have unique case-insensitive stems on Windows', () => {
+  const names = readdirSync('src/features/demo')
+    .filter((name) => /\\.tsx?$/.test(name))
+    .map((name) => name.replace(/\\.tsx?$/, '').toLowerCase())
+  assert.equal(new Set(names).size, names.length, 'TS/TSX modules would collide in a Windows Vite import')
+  assert.match(app, /from '\\.\/features\\/demo\\/DemoGuestViews'/)
+  assert.doesNotMatch(app, /from '\\.\/features\\/demo\\/DemoExperience'/)
 })
