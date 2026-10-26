@@ -1,6 +1,7 @@
 /**
  * PAZO marketing attribution: first-party, allowlisted campaign metadata only.
- * No IP, GPS, email, account IDs, external IDs or full URLs.
+ * No IP, GPS, email, external IDs or full URLs in campaign metadata.
+ * Local signup state binds an Auth UUID solely to prevent account crossover.
  *
  * Prepared behind a CLOSED release gate; client only stages sanitized UTM.
  * This state is NOT a source of truth for paid conversions.

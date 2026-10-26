@@ -1,3 +1,7 @@
+## GO instalación Marketing OFF recibido — 26-oct-2026
+
+El PO autoriza integrar PR125 y exclusivamente dos migraciones, dos Edge y frontend OFF, retención0, sin Cron/proveedor/usuariosreales ni finanzas. Revalidar SHA/checks/producción. [Secuencia/contrato UTM corregido](PAZO_MARKETING_OFF_INSTALLATION_20261026.md). Esta autorización sustituye solo el gate de instalación anterior; privacidad, recopilación y presupuesto siguen separados.
+
 ## Encargo vigente — marketing E2E, 26-oct-2026
 
 Seguir docs/PAZO_MARKETING_E2E_READINESS_20261026.md y la orden directa del PO. Código/pruebas/PR autorizados; instalación OFF, proveedores, recopilación y anuncios mantienen gates independientes. La instrucción histórica de responder solo Listo queda reemplazada por el informe verificable exigido ahora. No activar ni modificar PayPal con este encargo.

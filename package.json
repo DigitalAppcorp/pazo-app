@@ -31,7 +31,8 @@
     "test:f18:pg17": "node scripts/f18-public-supporter-lab.mjs",
     "test:f18:browser": "node scripts/f18-public-supporter-browser.mjs",
     "test:gradual:browser": "node scripts/f16-gradual-live-browser.mjs",
-    "test:marketing": "node --experimental-strip-types --test src/features/marketing/attribution.test.mjs src/features/marketing/accountBoundary.test.mjs supabase/functions/pazo-marketing-attribution/intakeCore.test.mjs supabase/functions/pazo-marketing-attribution/intakeAdapter.test.mjs supabase/functions/pazo-marketing-landing/landingCore.test.mjs src/features/marketing/landingSignal.test.mjs src/features/admin/testing/adminMarketingDashboard.test.mjs src/features/marketing/marketingRateRetention.test.mjs supabase/functions/pazo-marketing-landing/challengeVerifier.test.mjs src/features/marketing/adminSummary.test.mjs supabase/functions/pazo-marketing-attribution/requestBody.test.mjs",
+    "test:marketing": "node --experimental-strip-types --test src/features/marketing/attribution.test.mjs src/features/marketing/accountBoundary.test.mjs src/features/marketing/campaignContract.test.mjs supabase/functions/pazo-marketing-attribution/intakeCore.test.mjs supabase/functions/pazo-marketing-attribution/intakeAdapter.test.mjs supabase/functions/pazo-marketing-landing/landingCore.test.mjs src/features/marketing/landingSignal.test.mjs src/features/admin/testing/adminMarketingDashboard.test.mjs src/features/marketing/marketingRateRetention.test.mjs supabase/functions/pazo-marketing-landing/challengeVerifier.test.mjs src/features/marketing/adminSummary.test.mjs supabase/functions/pazo-marketing-attribution/requestBody.test.mjs",
+    "marketing:validate-urls": "node --experimental-strip-types scripts/marketing-validate-urls.mjs",
     "test:marketing:pg17": "node scripts/marketing-pg17.mjs",
     "test:marketing:e2e": "node scripts/marketing-browser.mjs"
   },

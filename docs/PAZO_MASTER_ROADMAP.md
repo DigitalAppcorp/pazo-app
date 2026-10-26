@@ -1,3 +1,7 @@
+## GO instalación Marketing OFF recibido — 26-oct-2026
+
+El PO autoriza integrar PR125 y exclusivamente dos migraciones, dos Edge y frontend OFF, retención0, sin Cron/proveedor/usuariosreales ni finanzas. Revalidar SHA/checks/producción. [Secuencia/contrato UTM corregido](PAZO_MARKETING_OFF_INSTALLATION_20261026.md). Esta autorización sustituye solo el gate de instalación anterior; privacidad, recopilación y presupuesto siguen separados.
+
 ## Marketing end-to-end — candidato 26-oct-2026, colección OFF
 
 Orden directa del PO: completar código, pruebas y PR sobre main actual; no concede GO de instalación, proveedores ni recopilación. Informe vigente: [readiness](PAZO_MARKETING_E2E_READINESS_20261026.md), [privacidad/Meta](PAZO_MARKETING_PRIVACY_META_GATE_20261026.md). PR91/Issue96 conservan evidencia histórica; sus referencias de base/cierre no certifican instalación. Producción observada a8d83799 y Supabase sin marketing. Próximo gate: candidato/CI exactos y GO de instalación OFF. No anuncios ni gasto.

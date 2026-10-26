@@ -79,4 +79,12 @@ check(sql("SELECT NOT has_function_privilege('service_role','marketing_private.i
 // Leave a healthy, empty synthetic system for browser E2E. This is a provider
 // mock, not hosted Cron evidence or approval of the fixture's 30-day policy.
 sql('SELECT marketing_private.install_retention_schedule()');runMockCron();sql('UPDATE marketing_private.collection_gate SET enabled=true,enabled_at=now()')
+const official=JSON.parse(readFileSync('docs/marketing/traffic-pilot-urls.json','utf8'))
+for(const [index,ad] of official.ads.entries()){
+ const creative=new URL(ad.url).searchParams.get('utm_content')
+ assert.match(creative,/^(perfil|qr|comunidad)_en$/)
+ const owner=`99999999-9999-4999-8999-${String(index+1).padStart(12,'0')}`
+ const accepted=sql(`BEGIN;INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES('${owner}',now(),now());INSERT INTO public.profiles(id,is_founder) VALUES('${owner}',false);SET LOCAL ROLE service_role;SELECT public.pazo_marketing_record_verified_v1('${owner}','${creative}',now()),public.pazo_marketing_record_landing_v1('${creative}');ROLLBACK;`)
+ check(accepted==='t|t',`Official ${ad.format} URL passes actual SQL attribution and landing; rolled back`)
+}
 console.log(`PASS ${checks} marketing PG17 checks plus legacy SQL; real concurrency, atomic deletion and explicit cron provider mock`)
