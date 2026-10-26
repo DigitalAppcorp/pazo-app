@@ -24,7 +24,7 @@ INSERT INTO supporter_private.pazo_paypal_live_checkout_intents
  (intent_id,owner_id,request_key,merchant_generation,source_environment,
   plan_id,locale,terms_version,terms_digest,affirmative_consent,provider_create_claimed_at,
   provider_subscription_id,state)
- SELECT 'intent-qa-archive-synthetic',f18_test.owner(180),gen_random_uuid(),1,'live',
+ SELECT 'intent-18000000-0000-4000-8000-000000000180',f18_test.owner(180),gen_random_uuid(),1,'live',
   g.plan_id,'es',o.terms_version,o.terms_digest,true,
   clock_timestamp(),'I-TEST-F18-ARCHIVE','bound'
  FROM admin_private.pazo_paypal_merchant_generations g
@@ -35,7 +35,7 @@ INSERT INTO supporter_private.pazo_paypal_live_event_inbox
  (merchant_generation,provider_event_id,event_type,source_environment,
   linked_intent_id,processing_state,claim_attempts,last_diagnostic_code)
  VALUES(1,'WH-F18-ARCHIVE-ORIGINAL','BILLING.SUBSCRIPTION.CREATED',
- 'live','intent-qa-archive-synthetic','held',3,'worker_review_required');
+ 'live','intent-18000000-0000-4000-8000-000000000180','held',3,'worker_review_required');
 INSERT INTO supporter_private.pazo_paypal_live_signed_receipts
  (merchant_generation,provider_event_id,event_type,proof_source,
   signed_body_sha256,signature_webhook_id,subscription_id,subject_id,
@@ -78,7 +78,7 @@ SELECT f18_test.check('ARCHIVE_FINANCIAL_REVIEW_RESOLVED_LOCALLY',
   WHERE code='financial_review' AND resolved_at IS NULL));
 SELECT f18_test.check('ARCHIVE_LATE_EVENT_ACCEPTED',
  supporter_private.pazo_live_queue_verified_event(f18_test.owner(180),
-  'intent-qa-archive-synthetic','I-TEST-F18-ARCHIVE',1,
+  'intent-18000000-0000-4000-8000-000000000180','I-TEST-F18-ARCHIVE',1,
   'WH-F18-ARCHIVE-LATE','BILLING.SUBSCRIPTION.PAYMENT.FAILED')='queued');
 SELECT f18_test.check('ARCHIVE_LATE_EVENT_REOPENS_REVIEW',
  (SELECT count(*)=1 FROM supporter_private.gradual_incident
