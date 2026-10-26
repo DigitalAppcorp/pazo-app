@@ -65,6 +65,18 @@ test('one admitted event is dispatched once to its exact financial/lifecycle wor
   assert.equal(calls[1].outcome,'processed');assert.ok(!JSON.stringify(result).includes(event.eventId))
  }
 })
+test('transient signed-event provider failure stays retryable and cannot be completed as financial review',async()=>{
+ const calls=[]
+ const worker=async()=>({state:'REVIEW_REQUIRED',code:'signed_sale_provider_event_unavailable',
+  retryable:true,leaseReleased:true,paymentRecorded:false,entitlementGranted:false})
+ const {http}=fixture({admit:async()=>({...admitted,event:{...event,eventType:'BILLING.SUBSCRIPTION.CREATED'}}),
+  workers:{sale:async()=>assert.fail('sale'),refund:async()=>assert.fail('refund'),lifecycle:worker},
+  complete:async p=>{calls.push(p);return true}})
+ const response=await (await http(request())).json()
+ assert.equal(response.outcome,'retry');assert.equal(response.code,'worker_event_pending')
+ assert.equal(response.processed,0);assert.equal(calls.length,1);assert.equal(calls[0].outcome,'retry')
+ assert.ok(!JSON.stringify(response).includes(event.eventId))
+})
 test('unknown writer outcome or exception has no automatic retry and no success claim',async()=>{
  let writes=0;const completions=[]
  const workers={sale:async()=>{writes++;throw Error('PRIVATE_PAYER_VALUE')},refund:async()=>{},lifecycle:async()=>{}}
