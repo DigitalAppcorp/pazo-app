@@ -85,7 +85,9 @@ const testViewport = async (width) => {
     await page.getByRole('button', { name: /Me gusta: 43/ }).first().waitFor()
     const save = page.getByRole('button', { name: 'Guardar publicación' }).first()
     await save.click()
-    assert.equal(await save.getAttribute('aria-pressed'), 'true')
+    // The accessible label changes to "Quitar de guardados"; do not
+    // re-resolve the old selector to the next unsaved card.
+    await page.getByRole('button', { name: 'Quitar de guardados' }).first().waitFor()
     await page.getByRole('navigation', { name: 'Navegación de PAZO' })
       .getByRole('button', { name: 'Comunidades' }).click()
     await page.getByRole('heading', { name: /Descubre comunidades/ }).waitFor()
