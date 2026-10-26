@@ -11,7 +11,16 @@ const command=ci?'psql':'docker'
 const dockerHost=process.platform==='win32'?'npipe:////./pipe/dockerDesktopLinuxEngine':'unix:///var/run/docker.sock'
 const args=database=>ci?['-X','-qAt','-v','ON_ERROR_STOP=1']:[`--host=${dockerHost}`,'exec','-i',container,'psql','-X','-qAt','-U','postgres','-d',database,'-v','ON_ERROR_STOP=1']
 export function sql(query){const result=spawnSync(command,args(db),{input:query,encoding:'utf8',maxBuffer:2e6});if(result.status!==0)throw Error(result.stderr||'Local PostgreSQL failed');return result.stdout.trim()}
-export async function sqlAsync(query){const result=await execute(command,[...args(db),'-c',query],{maxBuffer:2e6});return result.stdout.trim()}
+// Windows may refuse 40 simultaneous docker.exe children (spawn UNKNOWN).
+// Keep real SQL concurrency with eight workers there; Linux CI retains all 40.
+let active=0
+const waiting=[]
+export async function sqlAsync(query){
+ if(process.platform==='win32'&&active>=8)await new Promise(resolve=>waiting.push(resolve))
+ active++
+ try{const result=await execute(command,[...args(db),'-c',query],{maxBuffer:2e6});return result.stdout.trim()}
+ finally{active--;waiting.shift()?.()}
+}
 export function file(path){return sql(readFileSync(path,'utf8'))}
 export async function prepareMarketingLab(){
  if(!ci){

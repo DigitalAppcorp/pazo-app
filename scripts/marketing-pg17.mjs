@@ -92,4 +92,5 @@ for(const [index,ad] of official.ads.entries()){
  const accepted=sql(`BEGIN;INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES('${owner}',now(),now());INSERT INTO public.profiles(id,is_founder) VALUES('${owner}',false);SET LOCAL ROLE service_role;SELECT public.pazo_marketing_record_verified_v1('${owner}','${creative}',now()),public.pazo_marketing_record_landing_v1('${creative}');ROLLBACK;`)
  check(accepted==='t|t',`Official ${ad.format} URL passes actual SQL attribution and landing; rolled back`)
 }
+await import('./marketing-onboarding-regression.mjs')
 console.log(`PASS ${checks} marketing PG17 checks plus legacy SQL; real concurrency, atomic deletion and explicit cron provider mock`)
