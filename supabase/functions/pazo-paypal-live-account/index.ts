@@ -7,6 +7,7 @@ import {createPazoLiveOwnerAccountRead} from './liveAccountRead.mjs'
 import {createPazoLiveGoTrueOwnerResolver} from '../pazo-paypal-live-checkout/liveGoTrueOwner.mjs'
 import {createPazoLiveVaultGenerationSecretReader} from '../pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs'
 import {createPaypalLiveSubscriptionProvider} from '../pazo-paypal-live-checkout/liveSubscriptionProvider.mjs'
+import {createPazoOriginalSubscriptionReadDiagnostic} from './liveProviderReadDiagnostic.mjs'
 const PROJECT='https://mrybvqdebbgcayuvgkkr.supabase.co'
 const ACCOUNT_MANAGEMENT_RELEASED=true
 const unavailable=()=>createPazoLiveOwnerAccountRead()
@@ -35,12 +36,20 @@ function setup(){
   const readOriginalSecrets=createPazoLiveVaultGenerationSecretReader({
    supabaseUrl:url,serviceRoleKey:service
   })
+  const originalReadFetch=createPazoOriginalSubscriptionReadDiagnostic({
+    fetchImpl:fetch,
+    report:diagnostic=>console.info('pazo_live_original_subscription_read',JSON.stringify(diagnostic))
+  })
   const getOriginalProvider=async({merchantGeneration,planId,origin}:{
    merchantGeneration:number,planId:string,origin?:string
   })=>{
-   const credentials=await readOriginalSecrets({
+   let credentials
+   try{credentials=await readOriginalSecrets({
     merchantGeneration,sourceEnvironment:'live'
-   })
+   })}catch{
+    console.info('pazo_live_original_subscription_setup',JSON.stringify({result:'vault_unavailable'}))
+    throw Error('original_merchant_unavailable')
+   }
    if(credentials?.environment!=='live'||credentials.generation!==merchantGeneration||
     credentials.planId!==planId||credentials.credentialSource!=='vault')
     throw Error('original_merchant_unavailable')
@@ -48,7 +57,8 @@ function setup(){
    // The fallback is used only for historical GET/CANCEL, which never CREATE.
    return createPaypalLiveSubscriptionProvider({
     clientId:credentials.clientId,clientSecret:credentials.clientSecret,
-    planId,origin:origin||'https://pazo-app-t83r.vercel.app'
+    planId,origin:origin||'https://pazo-app-t83r.vercel.app',
+    fetchImpl:originalReadFetch
    })
   }
   const readProviderStatus=async({merchantGeneration,planId,subscriptionId}:{
