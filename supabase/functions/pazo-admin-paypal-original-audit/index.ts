@@ -21,7 +21,7 @@ function setup(){
   const historical=createPazoLiveVaultHistoricalVerification({
    supabaseUrl,serviceRoleKey,released:true
   })
-  const readOriginalAudit=createOriginalQaAudit({rpc,historical})
+  const readOriginalAudit=createOriginalQaAudit({rpc,historical,scopeVariant:'admin_postcampaign'})
   return createPazoF18AdminOriginalAuditHandler({
    released:true,authenticateAdmin,readOriginalAudit
   })
