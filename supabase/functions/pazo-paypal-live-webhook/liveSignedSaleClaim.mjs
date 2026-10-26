@@ -20,7 +20,7 @@ export function createPazoLiveSignedEventClaim({released=false,lease,
   const finish=async(code,result)=>{
    let released=false
    try{released=await lease.finish({merchantGeneration,eventId,leaseToken:claimed.leaseToken,result})===true}catch{/* Unknown: durable expiry recovery. */}
-   return deny(code,released)
+   return Object.freeze({...deny(code,released),retryable:result==='pending'&&released})
   }
   if(claimed?.eventId!==eventId||claimed.merchantGeneration!==merchantGeneration||
    !eventTypes.includes(claimed.eventType)||claimed.provider!=='paypal'||
