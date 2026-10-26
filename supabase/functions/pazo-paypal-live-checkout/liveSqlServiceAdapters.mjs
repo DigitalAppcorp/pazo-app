@@ -8,6 +8,7 @@ const ROLE_RPC=Object.freeze({
  qaOriginalRetry:'pazo_f16_live_service_qa_original_retry',
  terminalClose:'pazo_f16_live_service_terminal_checkout_close',
  qaOriginalScope:'pazo_f16_live_service_qa_original_scope',
+ adminOriginalScope:'pazo_f18_live_service_original_evidence_scope',
  gradualAdmin:'pazo_f16_gradual_admin_action',
  releaseRuntime:'pazo_f16_live_service_release_runtime',
  releaseAdmit:'pazo_f16_live_service_release_admit',
