@@ -40,6 +40,10 @@ export function LegalPreviewDialog({ kind, lang, onClose }: Props) {
             <section key={section.heading}>
               <h3 className="text-sm font-extrabold">{section.heading}</h3>
               <p className="mt-1 text-xs leading-relaxed text-[#5C7470]">{section.text}</p>
+              {section.link && <a href={section.link.href} rel="noreferrer"
+                className="mt-1 inline-block break-words text-xs font-semibold text-[#204E4A] underline underline-offset-4 focus-visible:bg-[#E1E53F]">
+                {section.link.label}
+              </a>}
             </section>
           ))}
         </div>
