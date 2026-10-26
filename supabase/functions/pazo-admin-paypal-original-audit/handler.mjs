@@ -13,6 +13,8 @@ const ERRORS=new Set(['RESOURCE_NOT_FOUND','NOT_AUTHORIZED','PERMISSION_DENIED',
  'UNPROCESSABLE_ENTITY','INVALID_REQUEST'])
 const FAILURES=new Set(['network','http','content_type','body','json','object'])
 const CODES=new Set(['qa_signed_event_unverified',
+ 'qa_scope_read_unavailable','qa_binding_read_unavailable','qa_generation_reader_unavailable',
+ 'qa_provider_read_input_unavailable',
  'qa_provider_read_subscription_get_unavailable','qa_provider_read_oauth_unavailable',
  'qa_provider_read_plan_get_unavailable','qa_provider_read_plan_terms_unavailable',
  'qa_provider_read_transactions_get_unavailable',
@@ -21,6 +23,8 @@ const CODES=new Set(['qa_signed_event_unverified',
  'qa_provider_read_transaction_coverage_unavailable',
  'qa_provider_read_binding_unavailable',
  'qa_provider_read_create_time_unavailable'])
+const EVENT_STAGES=new Set(['not_attempted','reader','provider_get','verified',
+ 'mismatch','reader_unavailable','provider_unavailable','event_absent'])
 const tri=v=>v===true?true:v===false?false:null
 const number=v=>Number.isSafeInteger(v)&&v>=0&&v<=500?v:null
 const response=(req,status,code,other={})=>{
@@ -64,6 +68,7 @@ function sanitize(a){
   originalPlanVerified:tri(a.originalPlanVerified),
   bindingVerified:tri(a.bindingVerified),
   originalGenerationVerified:tri(a.originalGenerationVerified),
+  eventReadStage:EVENT_STAGES.has(a.eventReadStage)?a.eventReadStage:null,
   eventReadable:tri(a.eventReadable),
   signedEventMatches:tri(a.signedEventMatches),
   providerStatus:STATES.has(a.status)?a.status:null,
