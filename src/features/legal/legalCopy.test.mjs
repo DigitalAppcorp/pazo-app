@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { LEGAL_RELEASE_READY, PAZO_LEGAL_EFFECTIVE_DATE, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, legalPreview, parseLegalEffectiveDate, resolveLegalCopy } from './legalCopy.ts'
+import { LEGAL_RELEASE_READY, PAZO_LEGAL_EFFECTIVE_DATE, PAZO_LEGAL_OPERATOR_NAME, PAZO_LEGAL_OPERATOR_REGISTRATION_STATE, PAZO_TURNSTILE_PRIVACY_ADDENDUM_URL, legalPreview, parseLegalEffectiveDate, resolveLegalCopy } from './legalCopy.ts'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact.ts'
 import { readFileSync } from 'node:fs'
 
@@ -148,4 +148,27 @@ test('both languages disclose restricted PayPal records and separate revocable w
     assert.match(wall, lang === 'es' ? /consentimiento separado que puedes retirar/ : /separate consent that you can withdraw/)
     assert.match(membership, lang === 'es' ? /no devuelve automáticamente pagos anteriores/ : /does not automatically refund earlier payments/)
   }
+})
+
+test('gated campaign privacy notice is bilingual and links Cloudflare addendum without claiming collection is live', () => {
+  assert.equal(PAZO_TURNSTILE_PRIVACY_ADDENDUM_URL, 'https://www.cloudflare.com/turnstile-privacy-policy/')
+  for (const lang of ['es','en']) {
+    const sections=legalPreview.privacy[lang].sections
+    const tracking=sections.find(s=>s.heading === (lang==='es'?'Atribución publicitaria (desactivada)':'Advertising attribution (currently disabled)'))
+    const turnstile=sections.find(s=>s.heading === (lang==='es'?'Turnstile y protección contra abusos':'Turnstile and abuse protection'))
+    assert.ok(tracking && turnstile)
+    assert.match(tracking.text,lang==='es'?/está desactivada actualmente/:/currently disabled/)
+    assert.match(tracking.text,/14/)
+    assert.match(tracking.text,lang==='es'?/cada 6 horas/:/every 6 hours/)
+    assert.match(tracking.text,lang==='es'?/72 horas/:/72 hours/)
+    assert.match(tracking.text,lang==='es'?/no envía conversiones individuales a Meta/:/does not send individual conversions to Meta/)
+    assert.match(turnstile.text,/Cloudflare Turnstile Invisible/)
+    assert.match(turnstile.text,lang==='es'?/no se ejecuta mientras/:/does not run while/)
+    assert.equal(turnstile.link?.href, PAZO_TURNSTILE_PRIVACY_ADDENDUM_URL)
+    assert.match(turnstile.link?.label??'',/Turnstile Privacy Addendum/)
+  }
+  const dialog=readFileSync(new URL('./LegalPreviewDialog.tsx',import.meta.url),'utf8')
+  assert.match(dialog,/href=\{section\.link\.href\}/)
+  assert.match(dialog,/section\.link\.label/)
+  assert.doesNotMatch(dialog,/target="_blank"/)
 })
