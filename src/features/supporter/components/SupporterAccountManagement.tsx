@@ -1,3 +1,4 @@
+import {exitSupporterScreen} from './supporterExit'
 import {usePublicSupporterStatus} from '../public/usePublicSupporterStatus'
 import {SupporterBenefitReview} from '../public/SupporterBenefitReview'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -196,7 +197,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !busy) {
         if(showLiveManagement)setShowLiveManagement(false)
-        else onClose()
+        else exitSupporterScreen(onClose)
       }
     }
     window.addEventListener('keydown', handleEscape)
@@ -368,7 +369,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
 
   const control = 'min-h-11 rounded-full bg-[#E1E53F]/50 px-4 py-2.5 text-[13px] font-bold text-[#204E4A] transition-colors hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F]/55 disabled:opacity-50'
   if (membership.kind === 'verified'&&!showLiveManagement&&!voluntarySupport) {
-    return <SupporterScreenPortal motionKey="benefits"><SupporterApprovedBenefits lang={lang} onClose={onClose} pet={pet}
+    return <SupporterScreenPortal motionKey="benefits" back><SupporterApprovedBenefits lang={lang} onClose={()=>exitSupporterScreen(onClose)} pet={pet}
       onManageSubscription={()=>setShowLiveManagement(true)}
       onSupport={publicStatus.value&&!publicStatus.value.paid&&!publicStatus.value.pending?()=>setVoluntarySupport(true):undefined}
       milestone={membership.milestone} qa={qaV2Screen}
@@ -376,19 +377,19 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       showThanks={paypalReturnKind==='return'&&publicStatus.value?.paid===true}/></SupporterScreenPortal>
   }
   return (
-    <SupporterScreenPortal motionKey={preparing?'preparing':showLiveManagement?'management':'account'} back={showLiveManagement===false}>
+    <SupporterScreenPortal motionKey={preparing?'preparing':showLiveManagement?'management':'account'} back={false}>
     <div role="dialog" aria-modal="true" aria-labelledby={preparing?undefined:'supporter-account-title'}
       aria-label={preparing?label('Preparando tu membresía de PAZO','Preparing your PAZO membership'):undefined}
       className="supporter-account-view relative h-full w-full min-h-0 overflow-y-auto overscroll-contain bg-[#F5F5ED] text-[#204E4A]">
       {preparing&&<SupporterPreparingScreen lang={lang}
         unavailable={preparationUnavailable} slow={preparationSlow}
-        onRetry={retryPreparation} onClose={onClose}/>}
+        onRetry={retryPreparation} onClose={()=>exitSupporterScreen(onClose)}/>}
 
       <header hidden={preparing} style={{display:preparing?'none':undefined}} className="sticky top-0 z-20 bg-[#F5F5ED]/95 px-4 py-2 backdrop-blur-xl">
         <div className="mx-auto grid min-h-11 max-w-xl grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2">
           <button ref={closeRef} type="button" onClick={()=>{
             if(showLiveManagement)setShowLiveManagement(false)
-            else onClose()
+            else exitSupporterScreen(onClose)
           }} disabled={busy}
             aria-label={label('Volver a PAZO','Back to PAZO')}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#204E4A] shadow-[0_3px_12px_rgba(32,78,74,0.06)] hover:bg-[#E7EDDC] focus-visible:bg-[#E1E53F]/50">
@@ -434,7 +435,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
             review={Boolean(accounts?.[0]?.needsReconciliation)}
             returnedWithoutPay={paypalReturnKind==='cancel'}
             initialPage={supporterEntrySource(window.location.hash)==='invitation'?'offer':'invitation'}
-            onClose={onClose} onOptOut={()=>{
+            onClose={()=>exitSupporterScreen(onClose)} onOptOut={()=>{
               const epoch=accountEpoch.current
               void supabase.rpc('pazo_supporter_promotion',{p_action:'opt_out'}).then(r=>{
                 if(epoch!==accountEpoch.current)return

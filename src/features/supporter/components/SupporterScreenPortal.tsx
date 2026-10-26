@@ -15,8 +15,8 @@ export function SupporterScreenPortal({children,motionKey='supporter',back=false
   return createPortal(
     <div data-supporter-screen-portal
       className={(shell ? 'absolute' : 'fixed') +
-        ' inset-0 z-[115] min-h-0 overflow-hidden bg-[#FAF8F5]'}>
-      <SupporterMotion motionKey={motionKey} back={back}>{children}</SupporterMotion>
+        ' inset-0 z-[115] min-h-0 overflow-hidden'}>
+      <SupporterMotion motionKey={motionKey} back={back} enter>{children}</SupporterMotion>
     </div>,
     target
   )

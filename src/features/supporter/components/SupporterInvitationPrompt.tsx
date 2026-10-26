@@ -1,3 +1,4 @@
+import {exitSupporterScreen} from './supporterExit'
 import { useEffect, useRef } from 'react'
 import { SupporterScreenPortal } from './SupporterScreenPortal'
 import {GardenStory} from './SupporterArt'
@@ -32,7 +33,7 @@ export function SupporterInvitationPrompt({
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        ;(onClose ?? onDismiss)()
+        ;exitSupporterScreen(onClose ?? onDismiss)
       }
       if (e.key === 'Tab') {
         const nodes = Array.from(
@@ -72,7 +73,7 @@ export function SupporterInvitationPrompt({
   }, [onDismiss, onClose, onShown])
   return <SupporterScreenPortal>
     <div ref={root} role="dialog" aria-modal="true" aria-labelledby="supporter-growth-title" aria-describedby="supporter-growth-description" className="amigo invitation" data-preview-only={previewOnly||undefined}>
-      <SupporterHeader lang={lang} title={t('Amigo de PAZO','Friend of PAZO')} buttonRef={close} onBack={onClose??onDismiss}/>
+      <SupporterHeader lang={lang} title={t('Amigo de PAZO','Friend of PAZO')} buttonRef={close} onBack={()=>exitSupporterScreen(onClose??onDismiss)}/>
       <main className="a-scroll"><div className="a-content">
         <GardenStory lang={lang} className="invitation-garden"/>
         <div className="invitation-copy"><h1 id="supporter-growth-title">{t('Tu apoyo mantiene','Your support keeps')}<br/>{t('PAZO en marcha.','PAZO going.')}</h1>
@@ -80,7 +81,7 @@ export function SupporterInvitationPrompt({
           <div className="invite-price"><strong>US$2.99</strong><span>{t('al mes','per month')}</span></div><p className="free-line">{t('PAZO sigue siendo gratis. Apoyar es tu decisión.','PAZO stays free. Supporting is your choice.')}</p>
         </div><div className="a-actions">
           <button type="button" className="a-button" onClick={onExplore}>{t('Conocer Amigo de PAZO','Explore Friend of PAZO')} <span aria-hidden="true">›</span></button>
-          <button type="button" className="a-button quiet" onClick={onDismiss}>{t('Ahora no, seguir en PAZO','Not now, continue in PAZO')}</button>
+          <button type="button" className="a-button quiet" onClick={()=>exitSupporterScreen(onDismiss)}>{t('Ahora no, seguir en PAZO','Not now, continue in PAZO')}</button>
           {onOptOut&&<button type="button" className="text-action" onClick={onOptOut}>{t('No recibir más invitaciones','Stop future invitations')}</button>}
           {saveFailed&&<p role="alert">{t('No pudimos guardar tu preferencia. Puedes intentarlo otra vez o cerrar.','Your preference could not be saved. Try again or close.')}</p>}
         </div>

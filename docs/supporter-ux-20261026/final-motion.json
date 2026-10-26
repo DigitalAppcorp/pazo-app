@@ -1,0 +1,1 @@
+{"checks":["consecutive forward/back slides retain the correct previous screen","root exit slides right and returns to original profile","switching reduced-motion during a slide cancels animation and snapshots"],"closing":321.209}
