@@ -133,7 +133,7 @@
         },
         {
           "path": "supabase/functions/pazo-paypal-live-webhook/liveSignedSaleClaim.mjs",
-          "sha256": "e1eeb91eea1f889524f1476b25934a9ea9d4b978a73ea6dfb08af372b6bd1cd6"
+          "sha256": "45ad6c63bd1bca51a14b3ff329b7e489f753b4ab0e536967d7232d7fbdcdcaf7"
         },
         {
           "path": "supabase/functions/pazo-paypal-live-webhook/liveVaultGenerationSecrets.mjs",
@@ -180,7 +180,7 @@
           "sha256": "a1620b2fc517b74f92b20f5bdeb951e448685962c725f5d453362d6b1316d162"
         }
       ],
-      "sourceTreeSha256": "bbb14d5cd3c6e628da18d155c4242d02b81d9f5ec4c19f95fde138601c6ded23"
+      "sourceTreeSha256": "0cfdc9fc6578a620e23192a3b0bc99856e16f3af34f5323ec5f49b4679bc626e"
     },
     {
       "entrypoint": "supabase/functions/pazo-admin-public-supporter/index.ts",
