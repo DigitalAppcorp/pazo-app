@@ -54,6 +54,9 @@ export function AdminPaypalOriginalAudit({lang,mfaRecentlyVerified}:Props){
    setState('complete')
   }catch{if(active.current)setState('unavailable')}
  }
+ // Do not show a nonfunctional control to administrators before the
+ // separately authorized Edge deployment and frontend release.
+ if(!PAZO_F18_ORIGINAL_ADMIN_AUDIT_RELEASED)return null
  const status=(v:Tri)=>v===true?t('Verificado','Verified'):
   v===false?t('No se pudo verificar','Could not verify'):t('Sin evidencia','No evidence')
  return <section data-pazo-f18-original-admin-audit className="mt-4 rounded-[18px] bg-[#F2F7E9] p-4 text-[#204E4A]">
