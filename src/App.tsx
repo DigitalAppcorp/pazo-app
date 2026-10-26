@@ -1788,7 +1788,19 @@ function PazoMain() {
           />
         )}
 
-        {isSearchOpen && (
+        {isSearchOpen && (isDemoUser ? (
+          <div className="absolute inset-0 z-40 overflow-y-auto bg-[#FAF8F5] p-5">
+            <button type="button" onClick={() => setIsSearchOpen(false)}
+              className="mb-5 min-h-11 rounded-full bg-white px-4 text-[13px] font-bold text-[#204E4A]">
+              {lang === 'es' ? 'Volver' : 'Back'}
+            </button>
+            <DemoExplore lang={lang}
+              onSelectPet={(pet) => { selectActivePet(pet); setIsSearchOpen(false); setActiveTab('mascota') }}
+              onOpenCommunities={() => { setIsSearchOpen(false); setActiveTab('comunidades') }}
+              onOpenPlaces={() => { setIsSearchOpen(false); setActiveTab('mapa') }}
+            />
+          </div>
+        ) : (
           <GlobalSearchView
             canSearch={Boolean(user?.id) && !isDemoUser}
             onClose={() => setIsSearchOpen(false)}
@@ -1810,7 +1822,7 @@ function PazoMain() {
             }}
             lang={lang}
           />
-        )}
+        ))}
 
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (
@@ -2001,6 +2013,10 @@ function PazoMain() {
               unreadNotificationsCount={unreadNotifications}
             />
 
+            {isDemoUser && (
+              <DemoBanner lang={lang} onCreateAccount={() => leaveDemo('signup')} onExit={() => leaveDemo('welcome')} />
+            )}
+
             {lostPets.length > 0 && reminderPet && (
               <button
                 type="button"
@@ -2090,7 +2106,14 @@ function PazoMain() {
                         lang={lang}
                         currentPetId={currentPet?.id}
                         ownedPetIds={pets.map((pet) => pet.id)}
-                        onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                        onSelectPetProfile={(petId) => {
+                          if (isDemoUser) {
+                            const sample = pets.find((pet) => pet.id === petId)
+                            if (sample) { selectActivePet(sample); setActiveTab('mascota') }
+                            return
+                          }
+                          setSelectedPublicProfileId(petId)
+                        }}
                       />
                       )}
                       {feedError === 'more' && (
@@ -2112,7 +2135,9 @@ function PazoMain() {
                     </>
                   )}
 
-                  {activeTab === 'comunidades' && (
+                  {activeTab === 'comunidades' && (isDemoUser ? (
+                    <DemoCommunities lang={lang} onCreateAccount={() => leaveDemo('signup')} />
+                  ) : (
                     <CommunitiesView
                       currentPet={currentPet}
                       canUseCommunities={Boolean(user?.id) && !isDemoUser}
@@ -2121,7 +2146,7 @@ function PazoMain() {
                       requestedCommunityKey={communityTargetKey}
                       lang={lang}
                     />
-                  )}
+                  ))}
 
                   {activeTab === 'mapa' && (
                     <MapView
@@ -2138,6 +2163,8 @@ function PazoMain() {
                     <PetView
                       currentPet={currentPet}
                       canManagePet={canUseAccount}
+                      isDemo={isDemoUser}
+                      onExitDemo={() => leaveDemo('welcome')}
                       onRequireAccount={requireAccount}
                       canModerate={Boolean(user?.id) && !isDemoUser}
                       availablePets={pets}
@@ -2317,8 +2344,8 @@ function PazoMain() {
             <MessagesModal
               isOpen={isMessagesOpen}
               onClose={() => setIsMessagesOpen(false)}
-              conversations={isDemoUser && !user ? conversations : []}
-              isDemo={isDemoUser && !user}
+              conversations={[]}
+              isDemo={false}
               onSendMessage={handleSendMessage}
               lang={lang}
             />
