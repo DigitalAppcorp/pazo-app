@@ -1,0 +1,87 @@
+{
+  "rls": [
+    {
+      "table": "acquisition",
+      "forced": true,
+      "enabled": true
+    },
+    {
+      "table": "collection_gate",
+      "forced": true,
+      "enabled": true
+    },
+    {
+      "table": "landing_daily",
+      "forced": true,
+      "enabled": true
+    },
+    {
+      "table": "landing_minute_budget",
+      "forced": true,
+      "enabled": true
+    },
+    {
+      "table": "retention_runtime",
+      "forced": true,
+      "enabled": true
+    }
+  ],
+  "gate": {
+    "enabled": false,
+    "singleton": true,
+    "enabled_at": null,
+    "policy_version": null,
+    "retention_days": 0
+  },
+  "rows": {
+    "landing": 0,
+    "acquisition": 0,
+    "minute_budget": 0
+  },
+  "migrations": [
+    {
+      "name": "pazo_marketing_firstparty_attribution",
+      "version": "20261026201027",
+      "statement_md5": "1f38e25c2fd0dd0b2057a7b1e9fcb77d",
+      "statement_count": 1
+    },
+    {
+      "name": "pazo_marketing_retention_health",
+      "version": "20261026201043",
+      "statement_md5": "a45b2a3b382cf621dd9d42ae7569992e",
+      "statement_count": 1
+    }
+  ],
+  "observed_at": "2026-10-26T20:21:31.654064+00:00",
+  "role_access": [
+    {
+      "role": "anon",
+      "schema_usage": false,
+      "any_private_execute": false,
+      "any_table_privilege": false
+    },
+    {
+      "role": "authenticated",
+      "schema_usage": false,
+      "any_private_execute": false,
+      "any_table_privilege": false
+    },
+    {
+      "role": "service_role",
+      "schema_usage": false,
+      "any_private_execute": false,
+      "any_table_privilege": false
+    }
+  ],
+  "financial_health": true,
+  "retention_runtime": {
+    "last_days": null,
+    "singleton": true,
+    "last_policy": null,
+    "last_success_at": null,
+    "acquisitions_removed": 0,
+    "aggregate_or_window_rows_removed": 0
+  },
+  "marketing_cron_jobs": 0,
+  "financial_functions_digest": "ab734013e83acb4e2880d50a35031da7"
+}

@@ -1,3 +1,14 @@
+## Orden vigente #130 — cierre integral autorizado (26-oct-2026)
+
+El PO autoriza completar privacidad, Turnstile, retención14d/Cron, pruebas reales y medición propia tras sus controles; merge/deploy marketing incluidos. Esta orden sustituye los gates históricos de GO separado únicamente en ese alcance. No publicar anuncios ni gastar; no modificar PayPal/Auth/otros módulos. Fuente: https://github.com/DigitalAppcorp/pazo-app/issues/130.
+
+Verificado: PR129 integrado50ed9c55 y avisoOFF publicado en dpl_CGcRQ8nCvzNDUUvMAGPtTws18yWg READY/alias oficial; seis casos EN/ES320/390/1440 PASS. Retención14d/versionv1 instalada con colecciónOFF; Cronjob4 `pazo-marketing-retention-v1`, `17 */6 * * *`, idempotencia comprobada; jobs1/3 intactos. Dos ejecuciones periódicas reales todavía PENDIENTES. Landing Edge se prepara para validar Siteverify real manteniendo gate DB OFF y frontend OFF. No afirmar colección activa ni readiness Meta antes del postflight final. PR127 se reconcilia preservando evidencia histórica.
+
+---
+## Marketing instalado OFF — postflight 26-oct-2026
+
+PR125 integrado0ee700df, candidato3f050ead14/14checksPASS. SQL dirigido20261026201027/20261026201043, dosEdgev1 y frontendcanónicoREADYdpl_7vsKww6Jh3dwrobN1MiNvDbMohgJ. Colección/reportesOFF,retención0,filas0,Cronnuevo0;privacidad/proveedores/gasto separados. [Postflight y límites reales](PAZO_MARKETING_OFF_POSTFLIGHT_20261026.md), [URLs oficiales verificadas](marketing/traffic-pilot-urls.json). Demo se corrige aparte por indicaciónPO; no modificarla en este encargo. No repetir instalación ni activar colección.
+
 ## GO instalación Marketing OFF recibido — 26-oct-2026
 
 El PO autoriza integrar PR125 y exclusivamente dos migraciones, dos Edge y frontend OFF, retención0, sin Cron/proveedor/usuariosreales ni finanzas. Revalidar SHA/checks/producción. [Secuencia/contrato UTM corregido](PAZO_MARKETING_OFF_INSTALLATION_20261026.md). Esta autorización sustituye solo el gate de instalación anterior; privacidad, recopilación y presupuesto siguen separados.
