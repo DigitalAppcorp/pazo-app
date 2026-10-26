@@ -1,3 +1,9 @@
+## Marketing PAZO — nuevo GO de privacidad limitada (26-oct-2026)
+
+El Product Owner **aprobó 14 días de retención en tablas activas para una futura recopilación** y autorizó **preparar** Cloudflare Turnstile Invisible y Cron de borrado (cada 6h). **No autorizó activar recopilación, instalar Cron nuevo/proveedor en producción, publicar política no verificada ni gastar presupuesto Meta.** Estado alojado verificado por SELECT: collection_gate.enabled=false, retention_days=0, policy_version=NULL. No ejecutar SQL/Edge/flags para abrir el gate sin aprobaciones separadas. Fuente operativa vigente: [Privacidad, período aprobado y ruta de activación](PAZO_MARKETING_PRIVACY_META_GATE_20261026.md) y [Runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). Auditar backup/PITR y el aviso ES/EN antes de instalar cron; verificar 2 ejecuciones periódicas reales. Tres anuncios están en borrador en Meta según PO; no han sido inspeccionados desde GitHub, y no hay gasto autorizado.
+
+---
+
 ## PRIORIDAD VIGENTE — Marketing PAZO: herramientas primero (decisión PO 26-oct-2026)
 
 **Alcance:** handoff estratégico duradero para agentes. NO es una orden de publicar anuncios, activar recopilación o crear assets; los copies, imágenes, carruseles y vídeos publicitarios son material efímero y **NO deben guardarse en GitHub**. No duplicar archivos de anuncios ni crear carpetas de creativos.
