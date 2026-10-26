@@ -51,13 +51,9 @@ import type {
   CareItemInput,
   DocumentCategory,
   PetDocument,
-  Conversation,
   PazoNotification,
 } from './types/pazo'
-import {
-  INITIAL_PETS,
-  INITIAL_CONVERSATIONS,
-} from './data/mockData'
+import { INITIAL_PETS } from './data/mockData'
 
 import { BottomNav, type NavTab } from './components/BottomNav'
 import { HeaderBar } from './components/HeaderBar'
@@ -69,6 +65,8 @@ import { PetView } from './components/views/PetView'
 import { SupporterAccountManagement } from './features/supporter/components/SupporterAccountManagement'
 import { isSupporterAccountHash, leaveSupporterAccountRoute, normalizeSupporterPaypalCallback } from './features/supporter/supporterAccountRoute.mjs'
 import { OnboardingView } from './components/views/OnboardingView'
+import { DemoBanner, DemoCommunities, DemoExplore } from './features/demo/DemoGuestViews'
+import { createDemoPets, createDemoPosts, toggleDemoLike, toggleDemoSave, appendDemoComment } from './features/demo/demoExperience'
 import { PazoInstallControl } from './features/pwa/components/PazoInstallControl'
 import { PublicProfileView } from './components/views/PublicProfileView'
 import { PublicRescueView } from './components/views/PublicRescueView'
@@ -276,7 +274,6 @@ function PazoMain() {
   const documentLoadVersionRef = useRef(0)
   const documentOffsetRef = useRef(0)
   const documentLoadMoreInFlightRef = useRef(false)
-  const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
   const [notifications, setNotifications] = useState<PazoNotification[]>([])
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true)
@@ -332,7 +329,47 @@ function PazoMain() {
   const [selectedSightingId, setSelectedSightingId] = useState<string | null>(null)
 
   const canUseAccount = canUseAccountFeatures(user?.id, isDemoUser)
+
+  const enterDemo = () => {
+    if (user) return
+    const demoPets = createDemoPets()
+    setPets(demoPets)
+    setCurrentPet(demoPets[0])
+    activePetIdRef.current = demoPets[0].id
+    setPosts(createDemoPosts())
+    setProfilePosts(createDemoPosts().filter((post) => post.petId === demoPets[0].id))
+    feedPaginationRef.current = { ...EMPTY_FEED_PAGINATION }
+    setIsFeedLoading(false)
+    setHasMoreFeed(false)
+    setFeedError(null)
+    setActiveTab('inicio')
+    setIsDemoUser(true)
+  }
+
+  const leaveDemo = (destination: 'welcome' | 'signup' = 'welcome') => {
+    setIsDemoUser(false)
+    setIsSearchOpen(false)
+    setSelectedPublicProfileId(null)
+    setIsCreateMenuOpen(false)
+    setIsMessagesOpen(false)
+    setIsNotificationsOpen(false)
+    setActiveTab('inicio')
+    setPosts([])
+    setProfilePosts([])
+    const demoPets = createDemoPets()
+    setPets(demoPets)
+    setCurrentPet(demoPets[0])
+    activePetIdRef.current = demoPets[0].id
+    setHasMoreFeed(false)
+    setIsFeedLoading(true)
+    setFeedError(null)
+    setAuthMode('onboarding')
+    setInitialOnboardingStep(destination === 'signup' ? 'A02' : 'A01')
+    setIsOnboardingActive(true)
+  }
+
   const requireAccount = () => {
+    if (isDemoUser) { leaveDemo('signup'); return }
     setIsCreateMenuOpen(false)
     setIsDemoUser(false)
     setIsOnboardingActive(false)
@@ -578,7 +615,7 @@ function PazoMain() {
   const displayedPostsRef=useRef(posts)
   displayedPostsRef.current=posts
   useEffect(()=>{
-    if(!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
+    if(isDemoUser||!supporterBenefitsUiEnabled||activeTab!=='inicio'||!badgePetSignature)return
     let alive=true
     let inFlight=false
     const refresh=async()=>{
@@ -630,9 +667,10 @@ function PazoMain() {
       document.removeEventListener('visibilitychange',onReturn)
       clearInterval(interval)
     }
-  },[badgePetSignature,activeTab,currentPet.id])
+  },[badgePetSignature,activeTab,currentPet.id,isDemoUser])
 
   const loadMoreFeed = async () => {
+    if (isDemoUser) return
     if (
       feedLoadMoreInFlightRef.current
       || isFeedLoading
@@ -672,12 +710,22 @@ function PazoMain() {
   }
 
   useEffect(() => {
-    if (activeTab === 'mascota' && currentPet?.id) {
-      void loadProfilePostsForPet(currentPet.id)
+    if (activeTab !== 'mascota' || !currentPet?.id) return
+    if (isDemoUser) {
+      setProfilePosts(createDemoPosts().filter((post) => post.petId === currentPet.id))
+      return
     }
-  }, [activeTab, currentPet?.id])
+    if (user?.id) void loadProfilePostsForPet(currentPet.id)
+  }, [activeTab, currentPet?.id, isDemoUser, user?.id])
 
   const selectActivePet = (pet: Pet) => {
+    if (isDemoUser) {
+      activePetIdRef.current = pet.id
+      setCurrentPet(pet)
+      setProfilePosts(createDemoPosts().filter((post) => post.petId === pet.id))
+      setSelectedPublicProfileId(null)
+      return
+    }
     if (!user?.id) return
 
     localStorage.setItem(`active_pet_${user.id}`, pet.id)
@@ -839,6 +887,7 @@ function PazoMain() {
   }
 
   const handleLikePost = async (postId: string) => {
+    if (isDemoUser) { setPosts((previous) => toggleDemoLike(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
@@ -889,6 +938,7 @@ function PazoMain() {
   }
 
   const handleSavePost = async (postId: string) => {
+    if (isDemoUser) { setPosts((previous) => toggleDemoSave(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
@@ -937,6 +987,7 @@ function PazoMain() {
   }
 
   const loadCommentsForPost = async (postId: string): Promise<boolean> => {
+    if (isDemoUser) return posts.some((post) => post.id === postId)
     const targetPost = posts.find((post) => post.id === postId)
     if (!targetPost) return false
     if (targetPost.commentsLoaded) return true
@@ -1013,6 +1064,19 @@ function PazoMain() {
   }
 
   const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    if (isDemoUser) {
+      const body = text.trim()
+      if (!body || !posts.some((post) => post.id === postId)) return false
+      setPosts((previous) => appendDemoComment(previous, postId, {
+        id: `demo-comment-${crypto.randomUUID()}`,
+        authorName: currentPet.name,
+        authorPet: currentPet.species,
+        authorAvatar: currentPet.photoUrl,
+        text: body,
+        timeAgo: lang === 'es' ? 'Ahora · ejemplo' : 'Now · sample',
+      }))
+      return true
+    }
     if (!canUseAccount) { requireAccount(); return false }
     const trimmedText = text.trim()
     if (!currentPet?.id || !postId || !trimmedText) return false
@@ -1454,26 +1518,6 @@ function PazoMain() {
     }
   }, [isDocumentsOpen, currentPet?.id])
 
-  const handleSendMessage = (convId: string, text: string) => {
-    setConversations((prev) =>
-      prev.map((c) => {
-        if (c.id !== convId) return c
-        const newMsg = {
-          id: `m-${Date.now()}`,
-          sender: 'me' as const,
-          text,
-          timestamp: 'Ahora',
-        }
-        return {
-          ...c,
-          lastMessage: text,
-          timeAgo: 'Ahora',
-          messages: [...c.messages, newMsg],
-        }
-      })
-    )
-  }
-
   const refreshLostPetSightingReminder = async () => {
     const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
 
@@ -1548,7 +1592,7 @@ function PazoMain() {
 
   const handleOpenNotifications = () => {
     setIsNotificationsOpen(true)
-    void refreshNotifications()
+    if (!isDemoUser) void refreshNotifications()
   }
 
   const handleOpenNotification = async (notification: PazoNotification) => {
@@ -1600,9 +1644,8 @@ function PazoMain() {
     }
   }, [user?.id, isOnboardingActive, pets.length])
 
-  const unreadMessages = isDemoUser && !user
-    ? conversations.filter((c) => c.isRequest).length
-    : 0
+  // Messaging is still in development for everyone: never display fictitious unread counts.
+  const unreadMessages = 0
   const unreadNotifications = unreadNotificationCount
   const lostPets = pets.filter((pet) => pet.isLost)
 
@@ -1734,7 +1777,19 @@ function PazoMain() {
           />
         )}
 
-        {isSearchOpen && (
+        {isSearchOpen && (isDemoUser ? (
+          <div className="absolute inset-0 z-40 overflow-y-auto bg-[#FAF8F5] p-5">
+            <button type="button" onClick={() => setIsSearchOpen(false)}
+              className="mb-5 min-h-11 rounded-full bg-white px-4 text-[13px] font-bold text-[#204E4A]">
+              {lang === 'es' ? 'Volver' : 'Back'}
+            </button>
+            <DemoExplore lang={lang}
+              onSelectPet={(pet) => { selectActivePet(pet); setIsSearchOpen(false); setActiveTab('mascota') }}
+              onOpenCommunities={() => { setIsSearchOpen(false); setActiveTab('comunidades') }}
+              onOpenPlaces={() => { setIsSearchOpen(false); setActiveTab('mapa') }}
+            />
+          </div>
+        ) : (
           <GlobalSearchView
             canSearch={Boolean(user?.id) && !isDemoUser}
             onClose={() => setIsSearchOpen(false)}
@@ -1756,7 +1811,7 @@ function PazoMain() {
             }}
             lang={lang}
           />
-        )}
+        ))}
 
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (
@@ -1768,7 +1823,7 @@ function PazoMain() {
                 setAuthMode('login')
                 setIsOnboardingActive(false)
               }}
-              onQuickDemo={() => setIsDemoUser(true)}
+              onQuickDemo={enterDemo}
               onComplete={(newPet) => {
                 ownedPetIdsRef.current = [newPet.id]
                 setPets([newPet])
@@ -1921,7 +1976,7 @@ function PazoMain() {
                 <div className="pt-2 text-center">
                   <button
                     type="button"
-                    onClick={() => setIsDemoUser(true)}
+                    onClick={enterDemo}
                     className="text-xs font-bold text-[#5C7470] hover:text-[#204E4A] underline decoration-[#E1E53F] decoration-2 underline-offset-4 cursor-pointer"
                   >
                     {lang === 'es' ? 'O entrar directamente en modo demo interactivo →' : 'Or enter directly in interactive demo mode →'}
@@ -1947,6 +2002,10 @@ function PazoMain() {
               unreadMessagesCount={unreadMessages}
               unreadNotificationsCount={unreadNotifications}
             />
+
+            {isDemoUser && (
+              <DemoBanner lang={lang} onCreateAccount={() => leaveDemo('signup')} onExit={() => leaveDemo('welcome')} />
+            )}
 
             {lostPets.length > 0 && reminderPet && (
               <button
@@ -2037,7 +2096,14 @@ function PazoMain() {
                         lang={lang}
                         currentPetId={currentPet?.id}
                         ownedPetIds={pets.map((pet) => pet.id)}
-                        onSelectPetProfile={(petId) => setSelectedPublicProfileId(petId)}
+                        onSelectPetProfile={(petId) => {
+                          if (isDemoUser) {
+                            const sample = pets.find((pet) => pet.id === petId)
+                            if (sample) { selectActivePet(sample); setActiveTab('mascota') }
+                            return
+                          }
+                          setSelectedPublicProfileId(petId)
+                        }}
                       />
                       )}
                       {feedError === 'more' && (
@@ -2059,7 +2125,9 @@ function PazoMain() {
                     </>
                   )}
 
-                  {activeTab === 'comunidades' && (
+                  {activeTab === 'comunidades' && (isDemoUser ? (
+                    <DemoCommunities lang={lang} onCreateAccount={() => leaveDemo('signup')} />
+                  ) : (
                     <CommunitiesView
                       currentPet={currentPet}
                       canUseCommunities={Boolean(user?.id) && !isDemoUser}
@@ -2068,7 +2136,7 @@ function PazoMain() {
                       requestedCommunityKey={communityTargetKey}
                       lang={lang}
                     />
-                  )}
+                  ))}
 
                   {activeTab === 'mapa' && (
                     <MapView
@@ -2085,6 +2153,8 @@ function PazoMain() {
                     <PetView
                       currentPet={currentPet}
                       canManagePet={canUseAccount}
+                      isDemo={isDemoUser}
+                      onExitDemo={() => leaveDemo('welcome')}
                       onRequireAccount={requireAccount}
                       canModerate={Boolean(user?.id) && !isDemoUser}
                       availablePets={pets}
@@ -2264,9 +2334,9 @@ function PazoMain() {
             <MessagesModal
               isOpen={isMessagesOpen}
               onClose={() => setIsMessagesOpen(false)}
-              conversations={isDemoUser && !user ? conversations : []}
-              isDemo={isDemoUser && !user}
-              onSendMessage={handleSendMessage}
+              conversations={[]}
+              isDemo={false}
+              onSendMessage={() => {}}
               lang={lang}
             />
 

@@ -549,3 +549,5 @@ jobs:
         env:
           PAZO_E2E_AUTH_LABELS_DEPLOYED: 'true'
         run: node scripts/f16-beta-canonical-chromium-e2e.mjs
+      - name: Exercise isolated Demo journey in real Chromium (no hosted writes)
+        run: node scripts/demo-guest-live-chromium-e2e.mjs
