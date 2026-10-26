@@ -13,6 +13,7 @@ test('Auth derives owner via verified Supabase endpoint; never decode token loca
   const calls=[]
   const client=createMarketingProvider({url:URL,anonKey,serviceKey,fetchImpl:async(u,o)=>{
     calls.push({url:u,method:o.method,headers:o.headers})
+    if(u.endsWith('/auth/v1/settings'))return {status:200,json:async()=>({mailer_autoconfirm:false})}
     return {status:200,json:async()=>({id:'00000000-0000-0000-0000-000000000101',created_at:'2026-10-24T00:00:00Z',email_confirmed_at:'2026-10-24T00:01:00Z'})}
   }})
   const user=await client.authenticate('synthetic.jwt.only')
@@ -20,6 +21,17 @@ test('Auth derives owner via verified Supabase endpoint; never decode token loca
   assert.equal(calls[0].url,URL+'/auth/v1/user')
   assert.equal(calls[0].headers.authorization,'Bearer synthetic.jwt.only')
   assert.equal(calls[0].headers.apikey,anonKey)
+  assert.equal(calls[1].url,URL+'/auth/v1/settings')
+  assert.equal(calls[1].headers.authorization,undefined)
+})
+
+test('auto-confirmed or unknown email policy cannot masquerade as verified registration',async()=>{
+  for(const settings of [{mailer_autoconfirm:true},{},null]){
+    const provider=createMarketingProvider({url:URL,anonKey,serviceKey,fetchImpl:async url=>({status:200,json:async()=>url.endsWith('/settings')?settings:{id:'00000000-0000-0000-0000-000000000101',email_confirmed_at:'2026-10-26T00:00:00Z'}})})
+    assert.equal(await provider.authenticate('synthetic.jwt.only'),null)
+  }
+  const provider=createMarketingProvider({url:URL,anonKey,serviceKey,fetchImpl:async url=>({status:url.endsWith('/settings')?503:200,json:async()=>({id:'synthetic'})})})
+  assert.equal(await provider.authenticate('synthetic.jwt.only'),null)
 })
 test('non-200 Auth responses never reach privileged sink',async()=>{
   const client=createMarketingProvider({url:URL,anonKey,serviceKey,fetchImpl:async()=>({

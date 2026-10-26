@@ -23,6 +23,7 @@ sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES(${q(adminId
 const session=value=>{const token=[Buffer.from('{"alg":"HS256"}').toString('base64url'),Buffer.from(JSON.stringify({sub:value.id,exp:Math.floor(Date.now()/1000)+3600,role:'authenticated'})).toString('base64url'),'SYNTHETIC'].join('.');sessions.set(token,value);return {access_token:token,refresh_token:'SYNTHETIC_ONLY',expires_in:3600,token_type:'bearer',user:value}}
 async function providerFetch(url,options={}){
  const path=new URL(url).pathname
+ if(path==='/auth/v1/settings')return Response.json({mailer_autoconfirm:false})
  if(path==='/auth/v1/user')return Response.json(sessions.get(options.headers.authorization?.slice(7))||null)
  const body=JSON.parse(options.body)
  if(path.endsWith('/pazo_marketing_record_verified_v1')){

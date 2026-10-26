@@ -142,3 +142,7 @@ GO de presupuesto y medición alojada verificable.
 ### Exclusión QA de producción (#130), preparada
 La prueba alojada utilizará cuentas con alias y mascotas inequívocamente QA. Una nueva función marketing añade exclusión por app_metadata servidor pazo_marketing_qa=true; nunca confía en user_metadata ni altera las listas QA financieras históricas. Tras una aceptación controlada con frontend aúnOFF, clasificar esas cuentas y comprobar exclusión retroactiva del reporte antes de abrir el cliente. Las cuentas QA clasificadas tampoco admiten nueva atribución. Sin modificar configuración/funciones de Auth, PayPal o datos de personas reales. Migración dirigida20261026233828 pendiente de CI y aplicación; los dos SQL originales permanecen byteidénticos. Sin dbpush/repair/reset.
 
+
+### Bloqueo encontrado en Auth real (#130)
+Signup QA real devolvió sesión y email_confirmed_at sin envío de correo; GET público Auth/settings confirma mailer_autoconfirm=true. Ese timestamp no demuestra verificación del correo bajo esa configuración. El adapter marketing ahora consulta settings públicos y rechaza la atribución si mailer_autoconfirm no es estrictamentefalse o settings falla. No modifica Auth. Se solicitó decisión explícita al PO porque activar Confirm email cambia el registro de todaPAZO; mantener colecciónOFF mientras no pueda certificarse la verificación real. QA_A creada/tagged app_metadata confiable,0atribuciones. No publicar identidad/contraseña/tokens.
+
