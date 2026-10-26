@@ -1,0 +1,77 @@
+{
+  "handlers": [
+    {
+      "name": "call",
+      "identical": true,
+      "sha256": "f4ee563faaf279b5823558fbfab8c905df5bff4df5647cbf0f994de830a1d3c2"
+    },
+    {
+      "name": "refresh",
+      "identical": true,
+      "sha256": "ca3fff75f89cc76d7c630c4d80020c21145a5f4692da644eb74bdc561440b2e7"
+    },
+    {
+      "name": "checkStatus",
+      "identical": true,
+      "sha256": "4fa462435138b43c499ac5641df296ebe652908ddb3d9159e7e029472fc404f2"
+    },
+    {
+      "name": "cancel",
+      "identical": true,
+      "sha256": "ad874de47e7f4bafb6b9f7091ab0bb5079d5eccae29ea1982428503bd00f6a65"
+    },
+    {
+      "name": "recover",
+      "identical": true,
+      "sha256": "3554194ae945601e35f8beb576c15db78d217869eb3ef16df7c1eb81695d02bd"
+    },
+    {
+      "name": "download",
+      "identical": true,
+      "sha256": "8cef9135f352399c9229a8eae0899da94a37c6c1336ed139259820423ad920f9"
+    },
+    {
+      "name": "retryPreparation",
+      "identical": true,
+      "sha256": "c125d8dcb9358d0362636fdaa581e224a69ea21179862c187788ef1b745202b8"
+    }
+  ],
+  "unchangedFiles": [
+    {
+      "path": "src/features/supporter/components/SupporterLiveCheckoutPanel.tsx",
+      "sha256": "05f22fa4edad7ba740ce554ff006a0befc55b279a755c20581181fdcb3cfa10d"
+    },
+    {
+      "path": "src/features/supporter/useSupporterMembershipStatus.ts",
+      "sha256": "a906a36de55bca58201154de0e427e363ca7a3eca71984115f130b0e137bcbe2"
+    },
+    {
+      "path": "src/features/supporter/public/usePublicSupporterStatus.ts",
+      "sha256": "d3d62e8e27b76e27656359bd643377a01bc073cd5d20cdeed7e7090877652d8f"
+    },
+    {
+      "path": "src/features/supporter/components/SupporterThemePreviewPanel.tsx",
+      "sha256": "cbb22ea4554100500c753dc037de16e83cdcc15817efb78a1e4680c4e2895f5a"
+    },
+    {
+      "path": "src/features/supporter/components/SupporterThemeSaveControl.tsx",
+      "sha256": "82759e4614951fa65e83501cee81686735217ecc6aed40c5d29fd99b6a46fd2a"
+    },
+    {
+      "path": "src/features/supporter/components/SupporterWallConsentSettings.tsx",
+      "sha256": "5570db3f23ce23996c7b7bf1ad965c4b34433987a4a5804af19947d3f7ff4447"
+    },
+    {
+      "path": "src/features/supporter/supporterAccountRoute.mjs",
+      "sha256": "707a1f650238c1669f0d03fe54a1febb41ebc84e2d1cbe4a6716a88c18999903"
+    },
+    {
+      "path": "supabase/functions/pazo-paypal-live-checkout/liveOfferRegistry.mjs",
+      "sha256": "d30a23a26e7e314a4397dd0e744981f564fd1d45e4be4cda3aa0a317f86fc006"
+    },
+    {
+      "path": "src/services/supabaseClient.ts",
+      "sha256": "f00bfedb4160296dc6a4df35e104104a55da42a87f32867e3da5d6f1689536fc"
+    }
+  ]
+}

@@ -948,17 +948,18 @@ test('F16 approved supporter themes have five distinct non-persistent visual pre
 
 test('F16 supporter customization is routed through a verified membership, not a second upsell card',()=>{
   const petCode=fs.readFileSync('src/components/views/PetView.tsx','utf8')
-  const member=fs.readFileSync('src/features/supporter/components/SupporterBenefitsHome.tsx','utf8')
+  const member=fs.readFileSync('src/features/supporter/components/SupporterApprovedBenefits.tsx','utf8')
+  const entry=fs.readFileSync('src/features/supporter/components/SupporterProfileEntry.tsx','utf8')
   const hook=fs.readFileSync('src/features/supporter/useSupporterMembershipStatus.ts','utf8')
   const preview=fs.readFileSync('src/features/supporter/components/SupporterThemePreviewPanel.tsx','utf8')
   assert.ok(petCode.includes('setShowSupporterAccount(true)'),'One discoverable supporter entry under My Pet')
   assert.ok(petCode.includes('pet={currentPet}'),'Selected pet is passed to supporter home')
   assert.ok(!petCode.includes('setShowSupporterThemePreview(true)'),'No competing customization card')
   assert.ok(!petCode.includes('setShowGratitudeParticipation(true)'),'No duplicate supporter wall card')
-  assert.ok(petCode.includes("supporterStatus.kind==='verified'"),'Decorated entry needs server proof')
+  assert.ok(entry.includes("status.kind==='verified'"),'Decorated entry needs server proof')
   assert.ok(member.includes('<SupporterThemePreviewPanel pet={pet}'),'Member opens actual approved profile picker')
   assert.ok(member.includes('<SupporterWallConsentSettings lang={lang}'),'Existing wall consent is reused')
-  assert.ok(member.includes('<SupporterBadge active milestone={milestone}'),'No synthetic milestone')
+  assert.ok(member.includes('<OfficialBadge milestone={milestone}'),'No synthetic milestone')
   assert.ok(hook.includes("supabase.rpc('pazo_supporter_public_pet_benefits'"),'Server is source of verified perks')
   assert.ok(!hook.includes('localStorage')&&!hook.includes('sessionStorage'),'Membership state is not stored in browser')
   assert.ok(!preview.includes('supabase')&&!preview.includes('localStorage')&&!preview.includes('paypal'),'Preview itself never activates payment')
@@ -968,6 +969,17 @@ test('F16 supporter customization is routed through a verified membership, not a
   const css=fs.readFileSync('src/index.css','utf8')
   assert.ok(css.includes('@keyframes pazoSupporterGentleFloat'))
   assert.ok(css.includes('.pazo-supporter-float { animation: none !important; }'),'Reduced-motion contract intact')
+})
+
+test('Amigo profile entry never presents unknown coverage as an invitation or verified benefits',async()=>{
+  const {SupporterProfileEntry}=await load('features/supporter/components/SupporterProfileEntry.js')
+  for(const lang of ['es','en'])for(const kind of ['checking','unavailable','inactive','verified']){
+    const html=renderToStaticMarkup(React.createElement(SupporterProfileEntry,{status:{kind,milestone:0},lang,onClick:()=>{},buttonRef:{current:null}}))
+    assert.equal(html.includes('amigo-pazo-inicio.png'),kind==='verified','Only verified proof decorates a member')
+    assert.equal(html.includes(lang==='es'?'Conocer el apoyo':'Explore support'),kind==='inactive','Unknown states never invite payment')
+    assert.equal(html.includes(lang==='es'?'Ver mis beneficios':'View my benefits'),kind==='verified','Unknown states never claim active benefits')
+    assert.equal((html.match(/<button/g)||[]).length,1,'One entry in every state')
+  }
 })
 
 test('A01 PO-approved welcome preserves sign-up, login, demo, locale and public wall', async()=>{
@@ -1179,7 +1191,8 @@ test('F16 per-pet consent notice approved in ES/EN never persists preview decisi
   }
   const src=fs.readFileSync('src/features/supporter/components/GratitudeParticipationPreview.tsx','utf8')
   const pet=fs.readFileSync('src/components/views/PetView.tsx','utf8')
-  const member=fs.readFileSync('src/features/supporter/components/SupporterBenefitsHome.tsx','utf8')
+  const member=fs.readFileSync('src/features/supporter/components/SupporterApprovedBenefits.tsx','utf8')
+  const entry=fs.readFileSync('src/features/supporter/components/SupporterProfileEntry.tsx','utf8')
   assert.ok(!pet.includes('setShowGratitudeParticipation(true)'),'No duplicated wall card in My Pet')
   assert.ok(member.includes('<SupporterWallConsentSettings lang={lang}'),'Member manages live per-pet wall opt-in')
   assert.ok(!member.includes('<GratitudeParticipationPreview'),'Preview is not mistaken for saved consent')

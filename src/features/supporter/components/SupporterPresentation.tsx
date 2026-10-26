@@ -1,0 +1,4 @@
+import type {ReactNode,Ref} from 'react'
+export const SupporterHeader=({title,onBack,buttonRef,lang}:{title:string;onBack:()=>void;buttonRef?:Ref<HTMLButtonElement>;lang:'es'|'en'})=><header className="a-header"><button ref={buttonRef} type="button" className="a-back" aria-label={lang==='es'?'Volver':'Back'} onClick={onBack}>‹</button><span>{title}</span><span className="a-wordmark" aria-label="PAZO">pazo<span>•</span></span></header>
+export const SupporterButton=({children,onClick,quiet=false,disabled=false}:{children:ReactNode;onClick:()=>void;quiet?:boolean;disabled?:boolean})=><button type="button" className={'a-button'+(quiet?' quiet':'')} onClick={onClick} disabled={disabled}>{children}</button>
+export const OfficialBadge=({milestone=0}:{milestone?:0|3|6|12})=><img className="official-badge" src={'/supporter/amigo-pazo-'+(milestone?milestone+'-meses':'inicio')+'.png'} alt="Amigo de PAZO" width="128" height="128"/>

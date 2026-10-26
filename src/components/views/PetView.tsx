@@ -1,3 +1,4 @@
+import {SupporterProfileEntry} from '../../features/supporter/components/SupporterProfileEntry'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
 import { useEffect, useState, useRef } from 'react'
@@ -668,29 +669,7 @@ export const PetView = ({
           </h3>
           <ModerationAccess enabled={canModerate} lang={lang} />
 
-          {canManagePet && (
-            <button ref={supporterAccountEntryRef} type="button"
-              onClick={() => setShowSupporterAccount(true)}
-              aria-label={supporterStatus.kind==='verified'
-                ? (lang==='es'?'Amigo de PAZO, gestionar mi membresía y beneficios':'PAZO Friend, manage membership and benefits')
-                : (lang==='es'?'Amigo de PAZO, membresía y beneficios':'PAZO Friend, membership and benefits')}
-              className="flex w-full items-center justify-between gap-3 rounded-[2rem] bg-white p-4 text-left shadow-[0_4px_16px_rgba(32,78,74,0.04)] transition-colors hover:bg-[#F5F7EE] focus-visible:bg-[#E1E53F]/45">
-              <span className="flex min-w-0 items-center gap-3">
-                <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E1E53F]/30">
-                  <IconPaw size={22}/>
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[16px] font-extrabold text-[#204E4A]">
-                    {lang === 'es' ? 'Amigo de PAZO' : 'Friend of PAZO'}
-                  </span>
-                  <span className="block text-[12px] font-medium text-[#5C7470]">
-                    {lang==='es'?'Tu membresía y beneficios':'Your membership and benefits'}
-                  </span>
-                </span>
-              </span>
-              <span aria-hidden="true" className="ml-2 text-xl font-extrabold text-[#5C7470]">›</span>
-            </button>
-          )}
+
 
           <div
             onClick={onOpenQRPassport}
@@ -814,6 +793,7 @@ export const PetView = ({
                 : 'Broadcasts a protected community alert'}
             </p>
           </div>
+          {canManagePet && <SupporterProfileEntry status={supporterStatus} lang={lang} buttonRef={supporterAccountEntryRef} onClick={() => setShowSupporterAccount(true)}/>}
         </div>
       )}
       {showSupporterAccount && (
