@@ -138,3 +138,7 @@ ni instalar Pixel por inferencia, y no usar fuentes secundarias como contrato AP
 Presupuesto45USD/3d, Los Ángeles, inglés, imagen/carrusel/video son propuesta del
 PO. No se creó campaña, borrador, conexión Meta o gasto. Publicar sigue requiriendo
 GO de presupuesto y medición alojada verificable.
+
+### Exclusión QA de producción (#130), preparada
+La prueba alojada utilizará cuentas con alias y mascotas inequívocamente QA. Una nueva función marketing añade exclusión por app_metadata servidor pazo_marketing_qa=true; nunca confía en user_metadata ni altera las listas QA financieras históricas. Tras una aceptación controlada con frontend aúnOFF, clasificar esas cuentas y comprobar exclusión retroactiva del reporte antes de abrir el cliente. Las cuentas QA clasificadas tampoco admiten nueva atribución. Sin modificar configuración/funciones de Auth, PayPal o datos de personas reales. Migración dirigida20261026233828 pendiente de CI y aplicación; los dos SQL originales permanecen byteidénticos. Sin dbpush/repair/reset.
+

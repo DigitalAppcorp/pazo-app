@@ -12,7 +12,9 @@ CREATE TABLE auth.users (
  id uuid PRIMARY KEY,
  created_at timestamptz NOT NULL,
  email_confirmed_at timestamptz,
- is_anonymous boolean NOT NULL DEFAULT false
+ is_anonymous boolean NOT NULL DEFAULT false,
+ raw_app_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb,
+ raw_user_meta_data jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 CREATE TABLE public.profiles (
  id uuid PRIMARY KEY,

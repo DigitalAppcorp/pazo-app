@@ -24,6 +24,10 @@ check(sql('SELECT bool_and(accepted<=30) FROM marketing_private.landing_minute_b
 check(Number(sql("SELECT sum(signals) FROM marketing_private.landing_daily"))===result.filter(x=>x==='t').length,'No counter divergence')
 const owner='96000000-0000-4000-8000-000000000001'
 sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES('${owner}',now()-interval '1 hour',now());INSERT INTO public.profiles VALUES('${owner}',false)`)
+sql(`UPDATE auth.users SET raw_app_meta_data='{"pazo_marketing_qa":true}' WHERE id='${owner}'`)
+check(sql(`SET ROLE service_role;SELECT public.pazo_marketing_record_verified_v1('${owner}','perfil_es',now()-interval '2 hours')`)==='f','Trusted QA classification excludes fresh acquisition')
+sql(`UPDATE auth.users SET raw_app_meta_data='{}',raw_user_meta_data='{"pazo_marketing_qa":true}' WHERE id='${owner}'`)
+check(sql(`SELECT marketing_private.is_eligible_owner('${owner}')`)==='t','User-editable metadata cannot control QA eligibility')
 const acquisitions=await Promise.all(Array.from({length:12},()=>sqlAsync(`SET ROLE service_role;SELECT public.pazo_marketing_record_verified_v1('${owner}','perfil_es',now()-interval '2 hours')`)))
 check(acquisitions.filter(x=>x==='t').length===1,'Unique attribution under concurrency')
 check(sql("SELECT NOT has_function_privilege('anon','public.pazo_admin_marketing_summary(integer)','EXECUTE') AND NOT has_function_privilege('service_role','public.pazo_admin_marketing_summary(integer)','EXECUTE')")==='t','Final reporting wrapper preserves anon/service denial')
@@ -35,6 +39,7 @@ check(sql('SELECT coalesce(sum(first_pet_within_7d),0) FROM marketing_private.co
 sql(`UPDATE public.pets SET created_at=created_at-interval '1 microsecond' WHERE owner_id='${owner}'`)
 check(sql('SELECT coalesce(sum(first_pet_within_7d),0) FROM marketing_private.cohort_snapshot()')==='1','First-pet window includes the instant before seven days')
 for(const [exclude,restore] of [
+ [`UPDATE auth.users SET raw_app_meta_data='{"pazo_marketing_qa":true}' WHERE id='${owner}'`,`UPDATE auth.users SET raw_app_meta_data='{}' WHERE id='${owner}'`],
  [`UPDATE public.profiles SET is_founder=true WHERE id='${owner}'`,`UPDATE public.profiles SET is_founder=false WHERE id='${owner}'`],
  [`INSERT INTO admin_private.admin_grants VALUES('${owner}')`,`DELETE FROM admin_private.admin_grants WHERE user_id='${owner}'`],
  [`INSERT INTO supporter_private.gradual_qa_accounts VALUES('${owner}','synthetic')`,`DELETE FROM supporter_private.gradual_qa_accounts WHERE owner_id='${owner}'`]]){

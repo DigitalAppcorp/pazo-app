@@ -30,6 +30,7 @@ export async function prepareMarketingLab(){
  assert.throws(()=>sql(forced))
  assert.equal(sql("SELECT to_regclass('marketing_private.retention_runtime') IS NULL AND to_regprocedure('public.pazo_admin_marketing_summary(integer)') IS NOT NULL"),'t','DDL failure must roll back moved RPCs/tables/grants')
  sql(hardened)
+ file('supabase/migrations/20261026233828_pazo_marketing_qa_metadata_exclusion.sql')
 }
 export function runMockCron(){
  const j=JSON.parse(sql("SELECT row_to_json(j) FROM cron.job j WHERE jobname='pazo-marketing-retention-v1'"));
