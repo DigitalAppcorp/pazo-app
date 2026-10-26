@@ -123,6 +123,6 @@ if(!archiveProposal.trimEnd().endsWith('COMMIT;'))
   throw Error('QA archive proposal is not a complete transaction')
 writeFileSync(
   'supabase/tests/f18/qa-archive.rollback.generated.sql',
-  archiveProposal.replace(/COMMIT;\\s*$/, 'ROLLBACK;'),
+  archiveProposal.replace(/COMMIT;\s*$/, 'ROLLBACK;'),
 )
 run('docker', [...base, '-f', 'supabase/tests/f18/production-admin-reclassification-lab.sql'])
