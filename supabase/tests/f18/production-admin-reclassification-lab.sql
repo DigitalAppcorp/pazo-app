@@ -1,5 +1,7 @@
+\i supabase/tests/f18/qa-archive-synthetic-pg17.sql
+
 \connect f16_lab
-DO $$ BEGIN IF current_database()<>'f16_lab' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
+DO $ BEGIN IF current_database()<>'f16_lab' OR current_user<>'postgres' THEN RAISE EXCEPTION 'Disposable only';END IF;END $$;
 -- Clone the fixture, leaving f14_synthetic unchanged for subsequent browser E2E.
 DROP DATABASE IF EXISTS f18_admin_synthetic WITH (FORCE);
 CREATE DATABASE f18_admin_synthetic WITH TEMPLATE f14_synthetic;
