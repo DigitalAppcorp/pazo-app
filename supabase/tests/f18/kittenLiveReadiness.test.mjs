@@ -61,6 +61,7 @@ writeFileSync(path.join(root,'live.mjs'),liveCode)
 const offerEs=getPazoLiveOffer('es')
 const offerEn=getPazoLiveOffer('en')
 let checkoutGets=[],listCount=0,checkoutPosts=0
+let ownerScenario='new',statusReadCalls=0
 let readyQueue=[]
 globalThis.__UI_REACT__=React
 globalThis.window={
@@ -73,9 +74,19 @@ globalThis.__UI_DB__={rpc:async()=>({data:null,error:null}),auth:{
 }}
 globalThis.fetch=async (url,opts={})=>{
  if(String(url).includes('/pazo-paypal-live-account')) {
+  const request=JSON.parse(opts.body)
+  if(request.action==='status'){
+   statusReadCalls++
+   return Response.json({ok:false,code:'live_provider_status_unavailable',
+     environment:'live',paidThrough:null,mayCharge:false,mayGrantBenefits:false},{status:503})
+  }
   listCount++
-  assert.equal(JSON.parse(opts.body).action,'list')
-  return Response.json({ok:true,paidThrough:null,accounts:[],acceptances:[]})
+  assert.equal(request.action,'list')
+  const accounts=ownerScenario==='bound'?[{
+   intentId:'intent-82000000-0000-4000-8000-000000000123',
+   state:'bound',canDownloadAcceptance:true
+  }]:[]
+  return Response.json({ok:true,paidThrough:null,accounts,acceptances:[]})
  }
  if(String(url).includes('/pazo-paypal-live-checkout?locale=')){
   checkoutGets.push(String(url))
@@ -134,6 +145,30 @@ test('blocked Live GET shows retry on kitten instead of partially rendered payme
   assert.equal(offered(ui).length,1)
   assert.equal(checkoutPosts,0)
  }finally{if(ui)await act(async()=>ui.unmount())}
+})
+test('A PayPal status 503 leaves existing bound request management visible; kitten cannot trap owner',async()=>{
+ ownerScenario='bound'
+ let ui
+ try{
+  const before=checkoutGets.length
+  await act(async()=>{
+   ui=create(React.createElement(SupporterAccountManagement,{lang:'es',onClose(){}}))
+  })
+  assert.equal(kitten(ui).length,0,'verified original request list does not need new checkout preflight')
+  assert.equal(visibleMain(ui).length,1)
+  assert.equal(checkoutGets.length,before,'never query checkout for owner with bound original')
+  const buttons=ui.root.findAll(n=>n.type==='button'&&n.children.some(x=>x==='Actualizar estado'))
+  assert.equal(buttons.length,1,'management status read is available')
+  await act(async()=>{buttons[0].props.onClick()})
+  assert.equal(statusReadCalls,1,'only original provider status is checked')
+  assert.equal(kitten(ui).length,0,'failed status read must not hide management')
+  assert.equal(visibleMain(ui).length,1)
+  assert.match(JSON.stringify(ui.toJSON()),/No pudimos consultar el estado de la solicitud en PayPal/)
+  assert.equal(checkoutPosts,0,'no new PayPal CREATE during status failure')
+ }finally{
+  if(ui)await act(async()=>ui.unmount())
+  ownerScenario='new'
+ }
 })
 test.after(()=>{
  globalThis.window=oldWindow
