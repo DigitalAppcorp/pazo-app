@@ -3,7 +3,7 @@ import {supabase} from '../../../services/supabaseClient'
 
 // This is an operator-only, nonfinancial read. No checkout, replay or closing
 // action is reachable from this component. Deployment remains gated separately.
-export const PAZO_F18_ORIGINAL_ADMIN_AUDIT_RELEASED=false
+export const PAZO_F18_ORIGINAL_ADMIN_AUDIT_RELEASED=true
 
 type Props={lang:'es'|'en';mfaRecentlyVerified:boolean}
 type Tri=boolean|null

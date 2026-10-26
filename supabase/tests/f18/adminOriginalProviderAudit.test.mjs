@@ -85,11 +85,11 @@ test('invalid original contract / provider exception fails closed without releas
  const malformed=harness({audit:{source:'forged_scope',complete:true}})
  assert.equal((await malformed.handler(request())).status,503)
 })
-test('new privileged diagnostic remains source-only with JWT enabled; UI action is disabled before deployment',()=>{
+test('approved admin diagnostic release retains JWT authentication and typed UI action',()=>{
  const config=readFileSync('supabase/config.toml','utf8')
- assert.match(config,/\[functions\.pazo-admin-paypal-original-audit\]\s+enabled = false\s+verify_jwt = true/)
+ assert.match(config,/\[functions\.pazo-admin-paypal-original-audit\]\s+enabled = true\s+verify_jwt = true/)
  const ui=readFileSync('src/features/admin/components/AdminPaypalOriginalAudit.tsx','utf8')
- assert.match(ui,/PAZO_F18_ORIGINAL_ADMIN_AUDIT_RELEASED=false/)
+ assert.match(ui,/PAZO_F18_ORIGINAL_ADMIN_AUDIT_RELEASED=true/)
  assert.match(ui,/confirmation:'CONSULTAR EVIDENCIA ORIGINAL'/)
  assert.ok(!ui.includes("pazo-paypal-live-checkout"))
  const entry=readFileSync('supabase/functions/pazo-admin-paypal-original-audit/index.ts','utf8')
