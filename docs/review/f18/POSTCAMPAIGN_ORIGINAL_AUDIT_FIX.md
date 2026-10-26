@@ -40,9 +40,8 @@ intacto, filtrado de datos privados y barreras SQL.
 ## Gate de despliegue
 
 - **Este PR no modifica Supabase hospedado ni Vercel hasta autorización.**
-- Antes de aplicar SQL: revisar advisors/RPC grants, migración
-`20261026043000`, CI/F18 PG17, conciliación exacta de archivos.
-- Aplicar la migración solo tras aprobación específica, verificar
+- Antes de aplicar SQL: revisar advisors/RPC grants, propuesta no ejecutable `PROPOSED_20261026043000`, CI/F18 PG17, conciliación exacta de archivos.
+- Tras aprobación específica, crear una migración oficial con la CLI y aplicar únicamente el SQL revisado, verificar
 `EXECUTE` exclusivo para `service_role`, que la antigua RPC siga
 rechazando campaña iniciada y que no se modificaron datos financieros.
 - Desplegar solo nueva versión de la función administrativa con
