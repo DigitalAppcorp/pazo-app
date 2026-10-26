@@ -12,19 +12,19 @@ ALTER TABLE supporter_private.pazo_paypal_live_event_inbox
 ALTER TABLE supporter_private.pazo_paypal_live_event_inbox
  ADD CONSTRAINT pazo_paypal_live_event_inbox_processing_state_check
  CHECK (processing_state IN ('pending','processing','processed','held','qa_archived'));
-ALTER TABLE supporter_private.pazo_paypal_live_checkout_intents
- DROP CONSTRAINT pazo_paypal_live_checkout_intents_closed_reason_check;
-ALTER TABLE supporter_private.pazo_paypal_live_checkout_intents
- ADD CONSTRAINT pazo_paypal_live_checkout_intents_closed_reason_check
- CHECK (closed_reason IN ('unclaimed_abandoned','provider_terminal_reconciled',
-  'qa_historical_unverified'));
 
-CREATE TABLE supporter_private.pazo_f18_historical_qa_archive (
+CREATE TABLE IF NOT EXISTS supporter_private.pazo_f18_historical_qa_archive (
   intent_id text PRIMARY KEY REFERENCES supporter_private.pazo_paypal_live_checkout_intents(intent_id),
   owner_id uuid NOT NULL REFERENCES auth.users(id),
   released_at timestamptz,
   merchant_generation bigint NOT NULL,
   provider_event_id text NOT NULL,
+  original_processing_state text NOT NULL CHECK (original_processing_state='held'),
+  original_diagnostic_code text NOT NULL,
+  original_claim_attempts integer NOT NULL,
+  incident_opened_at timestamptz NOT NULL,
+  decision_reference text NOT NULL DEFAULT 'pazo-app/issues/121'
+    CHECK (decision_reference='pazo-app/issues/121'),
   evidence_class text NOT NULL DEFAULT 'signed_created_verified_no_settlement_confirmed'
     CHECK (evidence_class='signed_created_verified_no_settlement_confirmed'),
   paypal_subscription_read text NOT NULL DEFAULT 'http_404_resource_not_found'
@@ -62,7 +62,7 @@ REVOKE ALL ON FUNCTION supporter_private.public_supporter_eligible(uuid)
 
 -- An inserted, independently verified late event is never suppressed.
 -- Reopen the financial incident before processing the newly received event.
-CREATE FUNCTION supporter_private.pazo_f18_archive_late_event_review()
+CREATE OR REPLACE FUNCTION supporter_private.pazo_f18_archive_late_event_review()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO '' AS $late$
 BEGIN
  IF EXISTS(SELECT 1 FROM supporter_private.pazo_f18_historical_qa_archive a
@@ -75,6 +75,8 @@ BEGIN
 END $late$;
 REVOKE ALL ON FUNCTION supporter_private.pazo_f18_archive_late_event_review()
  FROM PUBLIC,anon,authenticated,service_role;
+DROP TRIGGER IF EXISTS pazo_f18_archive_late_event_review
+ ON supporter_private.pazo_paypal_live_event_inbox;
 CREATE TRIGGER pazo_f18_archive_late_event_review
  AFTER INSERT ON supporter_private.pazo_paypal_live_event_inbox
  FOR EACH ROW EXECUTE FUNCTION supporter_private.pazo_f18_archive_late_event_review();
@@ -89,6 +91,16 @@ BEGIN
   -- The lock is bounded by statement_timeout and releases at commit/rollback.
   LOCK TABLE supporter_private.pazo_paypal_live_checkout_intents IN SHARE ROW EXCLUSIVE MODE;
   LOCK TABLE supporter_private.pazo_paypal_live_event_inbox IN SHARE ROW EXCLUSIVE MODE;
+
+  -- A repeat may never clear review reopened by a later real event.
+  IF EXISTS (SELECT 1 FROM supporter_private.pazo_f18_historical_qa_archive) THEN
+    IF (SELECT count(*) FROM supporter_private.pazo_f18_historical_qa_archive)<>1
+      OR EXISTS (SELECT 1 FROM supporter_private.pazo_f18_historical_qa_archive
+        WHERE decision_reference<>'pazo-app/issues/121')
+    THEN RAISE EXCEPTION 'qa_archive_existing_record_requires_review'; END IF;
+    RAISE NOTICE 'qa_archive_already_recorded_no_financial_changes';
+    RETURN;
+  END IF;
 
   -- Financial pause must remain active, and no unrelated unresolved incident.
   IF NOT EXISTS (SELECT 1 FROM supporter_private.public_supporter_control p
@@ -129,6 +141,9 @@ BEGIN
 
   SELECT count(*) INTO c FROM supporter_private.pazo_paypal_live_event_inbox;
   IF c<>1 THEN RAISE EXCEPTION 'qa_archive_other_webhook_events_exist'; END IF;
+  IF (SELECT count(*) FROM supporter_private.pazo_paypal_live_checkout_intents)<>1
+    OR (SELECT count(*) FROM supporter_private.pazo_paypal_live_signed_receipts)<>1
+  THEN RAISE EXCEPTION 'qa_archive_other_contracts_or_receipts_exist'; END IF;
   SELECT ev0.* INTO STRICT ev
   FROM supporter_private.pazo_paypal_live_event_inbox ev0
   JOIN supporter_private.pazo_paypal_live_signed_receipts s
@@ -165,8 +180,13 @@ BEGIN
   -- This is only a CREATE event archive: not a provider verified termination
   -- and never a PAYMENT.SALE.COMPLETED or entitlement confirmation.
   INSERT INTO supporter_private.pazo_f18_historical_qa_archive
-    (intent_id,owner_id,merchant_generation,provider_event_id)
-  VALUES (i.intent_id,i.owner_id,i.merchant_generation,ev.provider_event_id);
+    (intent_id,owner_id,merchant_generation,provider_event_id,
+     original_processing_state,original_diagnostic_code,original_claim_attempts,
+     incident_opened_at)
+  SELECT i.intent_id,i.owner_id,i.merchant_generation,ev.provider_event_id,
+    ev.processing_state,ev.last_diagnostic_code,ev.claim_attempts,f.opened_at
+  FROM supporter_private.gradual_incident f
+  WHERE f.code='financial_review' AND f.resolved_at IS NULL;
 
   UPDATE supporter_private.pazo_paypal_live_event_inbox
     SET processing_state='qa_archived',
@@ -176,12 +196,9 @@ BEGIN
     AND processing_state='held';
   IF NOT FOUND THEN RAISE EXCEPTION 'qa_archive_inbox_race'; END IF;
 
-  UPDATE supporter_private.pazo_paypal_live_checkout_intents
-    SET closed_at=pg_catalog.clock_timestamp(),
-      closed_reason='qa_historical_unverified',
-      recovery_lease=NULL,recovery_expires_at=NULL
-  WHERE intent_id=i.intent_id AND closed_at IS NULL;
-  IF NOT FOUND THEN RAISE EXCEPTION 'qa_archive_intent_race'; END IF;
+  -- Do not close the original contract locally: external status is unknown.
+  -- Owner status/recovery/cancellation continue to address this exact binding.
+  -- Both its open owner slot and the explicit quarantine prevent another CREATE.
 
   -- The global hold is superseded by an explicit, preserved QA archive record.
   -- Any NEW unresolved financial event still enters the ordinary inbox.

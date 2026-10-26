@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawn, spawnSync } from 'node:child_process'
-const container = 'pazo-f18-public-lab'
+const container = process.env.PAZO_F18_LAB_CONTAINER || 'pazo-f18-public-lab'
+assert.match(container, /^pazo-f18-public-lab(?:-issue121)?$/)
 const args = [
   'exec',
   '-i',

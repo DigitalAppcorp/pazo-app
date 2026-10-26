@@ -1,7 +1,10 @@
 // Only this named local Docker container/database. No connection-string input.
 import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
-const container = 'pazo-f18-public-lab'
+import { resolve } from 'node:path'
+const container = process.env.PAZO_F18_LAB_CONTAINER || 'pazo-f18-public-lab'
+if (!/^pazo-f18-public-lab(?:-issue121)?$/.test(container))
+  throw Error('Only the named F18 disposable containers are allowed')
 function run(command, args) {
   const r = spawnSync(command, args, { stdio: 'inherit' })
   if (r.status !== 0) throw Error(`${command} failed: ${r.status}`)
@@ -67,6 +70,11 @@ if (inspect.status !== 0) {
   }
 } else if (inspect.stdout.trim() !== 'f18:none')
   throw Error('Disposable label/network guard failed')
+const details = JSON.parse(spawnSync('docker', ['inspect', container], {encoding:'utf8'}).stdout)[0]
+const mount = details.Mounts.find(m => m.Destination === '/repo')
+if (!mount || mount.RW !== false || resolve(mount.Source).toLowerCase() !== resolve('.').toLowerCase())
+  throw Error('Disposable source mount does not match this reviewed checkout')
+if (!details.State.Running) run('docker', ['start', container])
 const base = [
   'exec',
   container,

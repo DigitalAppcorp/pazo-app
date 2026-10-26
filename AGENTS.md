@@ -1,4 +1,15 @@
-## Encargo vigente F18
+## Encargo vigente #121 — cierre público Live (26-oct-2026)
+
+El PO autorizó directamente implementar, integrar y publicar lo necesario para
+abrir Amigo de PAZO a todas las cuentas elegibles por USD2.99/mes, siguiendo
+gates verificables. Leer issue121, incidente112, PR120 y
+docs/PAZO_ISSUE121_PUBLIC_LIVE_RELEASE_20261026.md. Este permiso sustituye las
+prohibiciones históricas de hosted/main solo dentro de este encargo. Mantener
+invitaciones OFF. Apertura solo por acción admin oficial con MFA fresca,
+revisión actual, salud verdadera y blocker NULL; no UPDATE directo, pagos de
+prueba, cancelaciones externas, borrado de evidencias, db push ni migration repair.
+
+## Encargo anterior F18
 
 Leer docs/PAZO_F18_IMPLEMENTATION_REVIEW_20261025.md antes de continuar. Implementación de Amigo de PAZO autorizada en rama, sin activación pública alojada ni merge. Los antecedentes graduales no son la especificación comercial nueva. Conservar historia, ledger, protecciones y gates de producción.
 

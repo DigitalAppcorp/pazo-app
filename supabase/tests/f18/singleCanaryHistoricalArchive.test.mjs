@@ -22,13 +22,18 @@ test('the proposed closeout is gated and remains outside deployable migrations',
 
 test('archived original stays financially unverified, signed evidence preserved',()=>{
  assert.match(sql,/financial_outcome_not_provider_certified/)
- assert.match(sql,/qa_historical_unverified/)
+ assert.match(sql,/Do not close the original contract locally/)
  assert.match(sql,/qa_archived/)
  assert.match(sql,/last_diagnostic_code='qa_signed_created_archived_settlement_unverified'/)
  assert.doesNotMatch(sql,/SET provider_status=/)
  assert.doesNotMatch(sql,/SET processing_state='processed'/)
  assert.doesNotMatch(sql,/UPDATE supporter_private\.pazo_paypal_live_signed_receipts/i)
  assert.doesNotMatch(sql,/UPDATE supporter_private\.pazo_paypal_live_paid_periods/i)
+ assert.doesNotMatch(sql,/UPDATE supporter_private\.pazo_paypal_live_checkout_intents/i)
+ assert.match(sql,/original_processing_state/)
+ assert.match(sql,/original_diagnostic_code/)
+ assert.match(sql,/original_claim_attempts/)
+ assert.match(sql,/qa_archive_already_recorded_no_financial_changes/)
 })
 
 test('historical owner cannot start a second checkout while status is unresolved',()=>{

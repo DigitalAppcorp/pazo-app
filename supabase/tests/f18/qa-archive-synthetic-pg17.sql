@@ -22,10 +22,10 @@ INSERT INTO supporter_private.gradual_incident(code) VALUES('financial_review')
 
 INSERT INTO supporter_private.pazo_paypal_live_checkout_intents
  (intent_id,owner_id,request_key,merchant_generation,source_environment,
-  plan_id,locale,terms_version,terms_digest,affirmative_consent,provider_create_claimed_at,
+  plan_id,locale,terms_version,terms_digest,affirmative_consent,created_at,provider_create_claimed_at,
   provider_subscription_id,state)
  SELECT 'intent-18000000-0000-4000-8000-000000000180',f18_test.owner(180),gen_random_uuid(),1,'live',
-  g.plan_id,'es',o.terms_version,o.terms_digest,true,
+  g.plan_id,'es',o.terms_version,o.terms_digest,true,statement_timestamp()-interval '1 second',
   clock_timestamp(),'I-TEST-F18-ARCHIVE','bound'
  FROM admin_private.pazo_paypal_merchant_generations g
  CROSS JOIN supporter_private.pazo_live_offer_versions o
@@ -70,12 +70,29 @@ SELECT f18_test.check('ARCHIVE_PROOF_PRESERVED',
 SELECT f18_test.check('ARCHIVE_PAYMENT_NOT_CERTIFIED',
  (SELECT count(*)=0 FROM supporter_private.pazo_paypal_live_paid_periods)
  AND (SELECT count(*)=1 FROM supporter_private.pazo_paypal_live_checkout_intents
-  WHERE closed_reason='qa_historical_unverified' AND provider_status IS NULL));
+  WHERE closed_at IS NULL AND closed_reason IS NULL AND provider_status IS NULL));
+SELECT f18_test.check('ARCHIVE_ORIGINAL_DIAGNOSTIC_RETAINED',
+ (SELECT original_processing_state='held' AND original_diagnostic_code='worker_review_required'
+   AND original_claim_attempts=3 AND incident_opened_at IS NOT NULL
+ FROM supporter_private.pazo_f18_historical_qa_archive));
 SELECT f18_test.check('ARCHIVE_OWNER_IS_QUARANTINED',
  NOT supporter_private.public_supporter_eligible(f18_test.owner(180)));
 SELECT f18_test.check('ARCHIVE_FINANCIAL_REVIEW_RESOLVED_LOCALLY',
  (SELECT count(*)=0 FROM supporter_private.gradual_incident
   WHERE code='financial_review' AND resolved_at IS NULL));
+-- Test admission with the actual official opening action, in this offline lab.
+UPDATE supporter_private.pazo_paypal_live_worker_control SET last_heartbeat_at=clock_timestamp();
+UPDATE supporter_private.public_supporter_control SET webhook_ok_at=clock_timestamp();
+SELECT set_config('request.jwt.claims','{"role":"service_role"}',false);
+SELECT f18_test.check('ARCHIVE_OTHERS_CAN_OPEN_WITH_HEALTH_GATE',
+ public.pazo_f18_supporter_admin_action(f18_test.owner(180),'open_checkouts',
+  (SELECT revision FROM supporter_private.public_supporter_control WHERE singleton),gen_random_uuid())->>'code'='updated');
+SELECT f18_test.check('ARCHIVE_OWNER_CREATE_DENIED_OTHERS_ADMITTED',
+ (SELECT public.pazo_f16_live_service_checkout_begin(f18_test.owner(180),
+  gen_random_uuid(),1,'es',terms_version,terms_digest)->>'code'='controlled_release_admission_denied'
+  FROM supporter_private.pazo_live_offer_versions WHERE locale='es')
+ AND admin_private.pazo_live_control_admits(f18_test.owner(170),1)
+ AND (SELECT count(*)=1 FROM supporter_private.pazo_paypal_live_checkout_intents));
 SELECT f18_test.check('ARCHIVE_LATE_EVENT_ACCEPTED',
  supporter_private.pazo_live_queue_verified_event(f18_test.owner(180),
   'intent-18000000-0000-4000-8000-000000000180','I-TEST-F18-ARCHIVE',1,
@@ -85,8 +102,17 @@ SELECT f18_test.check('ARCHIVE_LATE_EVENT_REOPENS_REVIEW',
   WHERE code='financial_review' AND resolved_at IS NULL)
  AND (SELECT count(*)=1 FROM supporter_private.pazo_paypal_live_event_inbox
   WHERE provider_event_id='WH-F18-ARCHIVE-LATE' AND processing_state='pending'));
+SELECT f18_test.check('ARCHIVE_LATE_EVENT_BLOCKS_NEW_PUBLIC_BUYER',
+ NOT admin_private.pazo_live_control_admits(f18_test.owner(170),1));
+-- Reapplying the archive must not resolve the newly reopened incident.
+\i docs/review/f18/PROPOSED_SINGLE_QA_ARCHIVE_20261026.sql
+SELECT f18_test.check('ARCHIVE_REPEAT_PRESERVES_LATE_REVIEW',
+ (SELECT count(*)=1 FROM supporter_private.pazo_f18_historical_qa_archive)
+ AND (SELECT count(*)=1 FROM supporter_private.gradual_incident
+  WHERE code='financial_review' AND resolved_at IS NULL));
 SELECT f18_test.check('ARCHIVE_IS_PRIVATE',
  (SELECT relrowsecurity FROM pg_class
   WHERE oid='supporter_private.pazo_f18_historical_qa_archive'::regclass)
  AND NOT has_table_privilege('authenticated',
   'supporter_private.pazo_f18_historical_qa_archive','SELECT'));
+\i supabase/tests/f18/qa-archive-late-financial-pg17.sql
