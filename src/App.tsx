@@ -5,6 +5,7 @@ import { getNotificationCommunityId, getNotificationSightingId } from './feature
 import { useState, useEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { stageMarketingLanding } from './features/marketing/marketingRuntime'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
 import { PazoSplash } from './features/splash/PazoSplash'
@@ -195,6 +196,11 @@ function PazoMain() {
   }, [])
 
   const [showSplash, setShowSplash] = useState(true)
+
+  useEffect(() => {
+    // Code-only gate currently OFF. The welcome flow and analytics remain unchanged.
+    stageMarketingLanding()
+  }, [])
 
   useEffect(() => {
     // Keep the previously approved 2.5-second splash lifetime.

@@ -14,6 +14,7 @@ import {
   captureEvent,
   setObservabilityUser,
 } from '../services/observability'
+import { stageMarketingSignupRequested, stageMarketingSignupVerified, submitAutomaticMarketingAttribution, clearLocalMarketingAttribution } from '../features/marketing/marketingRuntime'
 
 interface AuthContextValue {
   user: User | null
@@ -49,6 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let cancelled = false
     let resolved = false
+    let observedUserId: string | null = null
 
     setLoading(true)
     setAuthBootstrapError(false)
@@ -62,6 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       resolved = true
       window.clearTimeout(watchdog)
       const nextUser = session?.user ?? null
+      if (observedUserId && observedUserId !== nextUser?.id) clearLocalMarketingAttribution()
+      observedUserId = nextUser?.id ?? null
       setUser(nextUser)
       setObservabilityUser(nextUser?.id ?? null)
       setAuthBootstrapError(false)
@@ -80,10 +84,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (event === 'SIGNED_OUT') {
+        clearLocalMarketingAttribution()
         setRecoverySessionVerified(false)
         captureEvent('auth_session_signed_out')
       }
-      if (event === 'SIGNED_IN') captureEvent('auth_session_signed_in')
+      if (event === 'SIGNED_IN') {
+        captureEvent('auth_session_signed_in')
+      }
+      if (['SIGNED_IN','INITIAL_SESSION','TOKEN_REFRESHED'].includes(event)) {
+        if (session?.user) {
+          stageMarketingSignupVerified(session.user.created_at, session.user.email_confirmed_at, session.user.id)
+          // Auth callback must return before invoking another Supabase method.
+          // Avoid a client session-lock deadlock; marketing remains fire-and-forget.
+          window.setTimeout(() => { void submitAutomaticMarketingAttribution(session.user.id, session.access_token) }, 0)
+        }
+      }
     })
 
     // INITIAL_SESSION usually arrives through onAuthStateChange; getSession
@@ -155,6 +170,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return 'failed'
     }
 
+    // A request accepted by Auth is not necessarily an email-confirmed account.
+    stageMarketingSignupRequested(data.user?.id)
+    if (outcome === 'authenticated') {
+      stageMarketingSignupVerified(data.user?.created_at, data.user?.email_confirmed_at, data.user?.id)
+      void submitAutomaticMarketingAttribution(data.user?.id, data.session?.access_token)
+    }
     captureEvent('auth_signup_succeeded')
     return outcome
   }

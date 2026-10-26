@@ -4,6 +4,7 @@ import type { Species, Pet } from '../../types/pazo'
 import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIcons'
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
+import { stageMarketingFirstPetCreated } from '../../features/marketing/marketingRuntime'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
@@ -151,6 +152,7 @@ export const OnboardingView = ({
         interests,
       })
 
+      stageMarketingFirstPetCreated()
       onComplete(createdPet)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'

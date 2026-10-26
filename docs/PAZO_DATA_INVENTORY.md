@@ -28,6 +28,13 @@ Se conserva junto al expediente financiero original y su retención/hold vigente
 no certifica cancelación ni ausencia de cargos. No se cierra la intención original
 ni se ocultan sus controles de gestión. Estado instalado debe confirmarse por
 postflight y registrarse en el reporte de issue121.
+## Issue96 — medición interna preparada, no recopilación activa (23-oct-2026)
+
+Código OFF en PR91. Atribución privada: UUID Auth obtenido en servidor, cuatro enums UTM, first-touch/confirmación y versión informativa; una por cuenta, exclusión retroactiva QA/fundador/admin y CASCADE de cuenta. Primera mascota y proxy D7 se derivan de datos existentes; panel solo agregados. Staging local72h y supresión de intentos24h sin UUID/click ID/URL/IP; no son visitantes únicos. Retención de cuenta/agregados sigue0, no30 aprobado. La purga se prepara para seguir con colección OFF; no se permite quitar política con filas pendientes. Backups/PITR/logs y aviso ES/EN requieren revisión antes del GO.
+
+**Proveedor propuesto, no activo:** Cloudflare Turnstile Invisible para señales anónimas, con Siteverify servidor; token efímero de un uso, hostname/acción/edad verificados antes de DB. No se guardan el token Turnstile, IP, fingerprint, user-agent ni payload del proveedor en tablas o logs de métricas de PAZO. El secreto solo corresponde a configuración privada Edge tras GO; nunca al cliente o a la evidencia. Logs nativos de infraestructura y sus cabeceras requieren revisión/redacción antes de activar. El navegador/proveedor podrá procesar metadatos de conexión y protección antibot conforme a sus términos; no afirmar anonimato total. Requiere autorización/configuración/revisión de privacidad antes de cargar el script o usar secreto. No cuenta nueva, SDK, plan ni proveedor activado en esta tarea. Fallo/configuración ausente: señal descartada sin afectar Auth. Ninguna conversión individual a Meta, CAPI, Pixel o PostHog.
+
+Última limpieza guarda solo fecha/política/conteos en singleton privado. Datos de pruebas son sintéticos en PostgreSQL17 local/CI; el Cron es un doble declarado, sin trabajos alojados. Ver [cierre](PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md) y [instalación/política/rollback](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md).
 
 ## Issue85 — relectura QA y certificado técnico (24-oct-2026, instalado; gate cerrado)
 
@@ -659,3 +666,6 @@ Los textos de privacidad/términos ES/EN explican interés sin cobro, revisión
 voluntaria y retención. No cambia consentimiento financiero inmutable, inventario
 PayPal existente ni proveedores. Evidencia y gates:
 `docs/PAZO_F16_GRADUAL_IMPLEMENTATION_EVIDENCE_20261023.md`.
+
+## Marketing E2E 26-oct: límite local de cuenta, preparado OFF
+Staging localStorage TTL72h añade signupOwnerId (UUID Auth devuelto por alta) solo para evitar cruce de cuentas; no cuerpo de evento, URL, reporte ni tercero. Envío usa token transitorio de esa sesión, nunca persistido por marketing. Sin nueva retención aprobada ni instalación. Ver PAZO_MARKETING_PRIVACY_META_GATE_20261026.md. Estado registrado: cero infraestructura marketing alojada, política0/colecciónOFF.

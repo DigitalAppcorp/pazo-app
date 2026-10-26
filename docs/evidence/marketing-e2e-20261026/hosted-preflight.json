@@ -1,0 +1,37 @@
+{
+  "marketing_schema_present": false,
+  "database_version": "17.11",
+  "vercel": {
+    "target": "production",
+    "state": "READY",
+    "sha": "a8d837994eacaa8c90844c252ffd5131e17fdd4b",
+    "deployment": "dpl_GeqCir3UT9hyKN8bDygQqiUW6N7F",
+    "alias": "pazo-app.vercel.app"
+  },
+  "paypal": {
+    "public_supporter_health": true,
+    "checkouts_enabled": true,
+    "hosted_certified": true,
+    "invitations_enabled": false,
+    "real_payment_executed": false
+  },
+  "pg_cron_version": "1.6.4",
+  "marketing_edges_installed": 0,
+  "marketing_cron_jobs": 0,
+  "marketing_migrations_installed": 0,
+  "project_id": "mrybvqdebbgcayuvgkkr",
+  "marketing_retention_bridge_present": false,
+  "observed_at_utc": "2026-10-26T19:26:55.726483Z",
+  "access": "SELECT_ONLY",
+  "prerequisites_present": [
+    "auth.users",
+    "public.profiles.is_founder",
+    "public.pets.owner_id",
+    "public.pets.created_at",
+    "supporter_private.gradual_qa_accounts",
+    "supporter_private.f16_sandbox_qa_owners",
+    "admin_private.admin_grants",
+    "admin_private.app_activity_daily",
+    "public.pazo_is_admin()"
+  ]
+}

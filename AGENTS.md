@@ -1,3 +1,7 @@
+## Encargo vigente — marketing E2E, 26-oct-2026
+
+Seguir docs/PAZO_MARKETING_E2E_READINESS_20261026.md y la orden directa del PO. Código/pruebas/PR autorizados; instalación OFF, proveedores, recopilación y anuncios mantienen gates independientes. La instrucción histórica de responder solo Listo queda reemplazada por el informe verificable exigido ahora. No activar ni modificar PayPal con este encargo.
+
 ## Encargo vigente #121 — cierre público Live (26-oct-2026)
 
 El PO autorizó directamente implementar, integrar y publicar lo necesario para
@@ -47,6 +51,11 @@ Auditoría SELECT y Git blob SHA1 sobre **122/122** versiones alojadas: **96 SQL
 **Pagos:** no fabricar una compra para cubrir el primer E2E Live; la conciliación de una venta real exige firma, evidencia de proveedor, ledger/período y beneficio. Marketing lo gestiona otro agente.
 
 ---
+## CODEX — ORDEN ACTIVA F17 MARKETING FIRST-PARTY (23-oct-2026)
+
+El Product Owner delegó a **Codex** toda la programación restante del módulo de medición de campañas de PAZO; **no** delegó creativos ni compra de anuncios. Ejecutar de principio a fin **`docs/CODEX_F17_MARKETING_PROGRAMMING_FINISH_ORDER_20261023.md`** en la rama aislada `feat/f17-marketing-firstparty-20261023` / PR #91: antiabuso confiable, retención/cron preparado, E2E, panel admin, reconciliación F17 y CI verde. Comunicar al PO solamente «Listo» al finalizar de verdad y guardar evidencia en GitHub; si existe bloqueo de autorización humana, pedir exclusivamente esa autorización sin afirmar instalación. Los anteriores mandatos F16/PayPal siguen rigiendo como precauciones de seguridad, **no** son una orden de abrir compras, desplegar o alterar finanzas con esta delegación. **Sin GO independiente no tocar main, Supabase alojado, Vercel oficial, Cron alojado, secretos, medición activa ni anuncios.**
+
+**Issue96 — cierre técnico autorizado (23-oct-2026 Guatemala):** F17 `19c0b659` conciliado en PR91 sin cambiar bytes financieros. Código antiabuso servidor, purga/calendario separado, E2E PG17/Chromium y validación del panel implementados; CI del código5cb0056f:13/13 jobs PASS;37 Node,26 PG17 y54 E2E. Cierre técnico documentado, sin fallos pendientes de programación. Todos los gates de marketing OFF, retención0 y sin instalación/activación alojada. [Matriz y evidencia](docs/PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md), [runbook](docs/PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). La configuración/GO de proveedor, aviso, retención y despliegue son gates futuros, no autorización implícita en este cierre de programación.
 
 ## F17 — pre-merge de main: reconciliación de migraciones (23-oct-2026 PDT)
 

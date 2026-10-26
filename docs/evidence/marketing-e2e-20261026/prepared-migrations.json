@@ -1,0 +1,16 @@
+{
+  "productionPushAllowed": false,
+  "records": [
+    {
+      "version": "20261024020632",
+      "sha256": "3259767f49e9b3be7dbe2dbe0a979c2a36a25ac21bcd74e3b8eaa5ec8ba85bee",
+      "path": "supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql"
+    },
+    {
+      "version": "20261024034549",
+      "sha256": "72e5edda023a49c44a81d742092c026359815765afc9ce8c8067372847c40a3e",
+      "path": "supabase/migrations/20261024034549_pazo_marketing_retention_health.sql"
+    }
+  ],
+  "status": "NOT_APPLIED"
+}

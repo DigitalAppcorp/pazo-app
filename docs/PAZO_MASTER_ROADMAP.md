@@ -1,3 +1,7 @@
+## Marketing end-to-end — candidato 26-oct-2026, colección OFF
+
+Orden directa del PO: completar código, pruebas y PR sobre main actual; no concede GO de instalación, proveedores ni recopilación. Informe vigente: [readiness](PAZO_MARKETING_E2E_READINESS_20261026.md), [privacidad/Meta](PAZO_MARKETING_PRIVACY_META_GATE_20261026.md). PR91/Issue96 conservan evidencia histórica; sus referencias de base/cierre no certifican instalación. Producción observada a8d83799 y Supabase sin marketing. Próximo gate: candidato/CI exactos y GO de instalación OFF. No anuncios ni gasto.
+
 ## Issue121 — PayPal Live público, EN CURSO (26-oct-2026)
 
 Autorización directa del PO para implementación/integración/publicación tras
@@ -19,6 +23,9 @@ Fuente de producto: PR103 head3570ff78bacb0d0325f56fec699ed05d4d3ef125 más la o
 Revisión PR104: [cuatro correcciones y evidencia](PAZO_F18_REVIEW_CORRECTIONS_20261025.md). Resolución masiva retirada; checkout independiente del helper canario histórico; controles por estado/certificado/salud; métricas ES/EN 320–1440 corregidas. No ejecutar resolución global de incidencias ni interpretar las pruebas sintéticas como validación de pagos reales.
 
 ---
+## F17 — Issue96, programación terminada en PR91 (gates de release abiertos)
+
+**Issue96 — cierre técnico autorizado (23-oct-2026 Guatemala):** F17 `19c0b659` conciliado en PR91 sin cambiar bytes financieros. Código antiabuso servidor, purga/calendario separado, E2E PG17/Chromium y validación del panel implementados; CI del código5cb0056f:13/13 jobs PASS;37 Node,26 PG17 y54 E2E. Cierre técnico documentado, sin fallos pendientes de programación. Todos los gates de marketing OFF, retención0 y sin instalación/activación alojada. [Matriz y evidencia](PAZO_MARKETING_TECHNICAL_COMPLETION_ISSUE96_20261023.md), [runbook](PAZO_MARKETING_INSTALLATION_RUNBOOK_20261023.md). La configuración/GO de proveedor, aviso, retención y despliegue son gates futuros, no autorización implícita en este cierre de programación.
 
 # ESTADO VIGENTE — PAZO F17 / PAYPAL LIVE L1 (23-oct-2026 18:50 PDT)
 

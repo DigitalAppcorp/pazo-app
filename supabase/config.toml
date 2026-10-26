@@ -486,3 +486,12 @@ entrypoint = "./functions/pazo-admin-paypal-original-audit/index.ts"
 
 [functions.pazo-admin-public-supporter]
 verify_jwt = true
+# Preparation only — code runtime is MARKETING_LANDING_RELEASED=false.
+# Unauthenticated aggregate signals are otherwise rejected by the runtime gate.
+# This is not a deployment approval; any later opening requires abuse review.
+[functions.pazo-marketing-landing]
+verify_jwt = false
+
+# Auth remains verified both at the gateway and independently inside intake.
+[functions.pazo-marketing-attribution]
+verify_jwt = true
