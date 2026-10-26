@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { INITIAL_COMMUNITIES, INITIAL_PETS } from '../../data/mockData'
+import { INITIAL_COMMUNITIES } from '../../data/mockData'
+import { createDemoPets } from './demoExperience'
 import type { Pet } from '../../types/pazo'
 
 type Language = 'es' | 'en'
@@ -88,7 +89,7 @@ export const DemoExplore = ({
 }) => {
   const [query, setQuery] = useState('')
   const needle = query.trim().toLocaleLowerCase()
-  const pets = INITIAL_PETS.filter((pet) =>
+  const pets = createDemoPets().filter((pet) =>
     [pet.name, pet.species, pet.bio ?? ''].some((value) => value.toLocaleLowerCase().includes(needle))
   )
   const communities = INITIAL_COMMUNITIES.filter((community) =>
