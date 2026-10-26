@@ -114,10 +114,10 @@ export function AdminPaypalOriginalAudit({lang,mfaRecentlyVerified}:Props){
    {report.providerHttpStatus&&<p>{t('Respuesta HTTP de PayPal: ',
     'PayPal HTTP response: ')}{report.providerHttpStatus}</p>}
    {report.providerErrorName&&<p>{t('Código del proveedor: ',
-    'Provider error code: ')}<code>{report.providerErrorName}</code></p>
+    'Provider error code: ')}<code>{report.providerErrorName}</code></p>}
    {report.providerHttpStatus===404&&<p>{t(
-    'PayPal respondió 404: no encontró la suscripción solicitada. Esto NO confirma que no exista un cobro.',
-    'PayPal returned 404: the subscription was not found. This does NOT prove no payment occurred.')}</p>}
+    'PayPal respondió 404 al consultar un recurso original. Esto NO confirma que no exista un cobro.',
+    'PayPal returned 404 while checking an original resource. This does NOT prove no payment occurred.')}</p>}
    {report.providerHttpStatus!==404&&<p>{t('Estado de suscripción verificado: ',
     'Verified subscription status: ')}{report.providerStatus||'—'}</p>}
    <p>{t('Evento original consultable: ','Original event readable: ')}{status(report.eventReadable)}</p>
