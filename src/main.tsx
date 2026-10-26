@@ -24,7 +24,12 @@ if (!getPublicSupabaseConfig(import.meta.env)) {
     initializeObservability()
     registerPazoPwa()
     root.render(<StrictMode><ErrorBoundary><MaintenanceGate><App /></MaintenanceGate></ErrorBoundary></StrictMode>)
-  }).catch(() => {
+  }).catch((error: unknown) => {
+    // Keep the public fallback generic. Only local developers should see the
+    // underlying failed module import or initialization exception.
+    if (import.meta.env.DEV) {
+      console.error('[PAZO local] App bootstrap failed:', error)
+    }
     root.render(<main role="alert" className="p-6 text-[#204E4A] bg-[#FAF8F5] min-h-screen">
       <p>{navigator.language.startsWith('en') ? 'PAZO could not load. Reload or contact support.'
         : 'PAZO no pudo cargar. Recarga o contacta con soporte.'}</p>
