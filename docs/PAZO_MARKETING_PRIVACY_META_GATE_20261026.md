@@ -1,15 +1,33 @@
-# Privacidad, retención y transición Meta — propuesta sin activar
+# Privacidad, retención y transición Meta — período aprobado; recopilación OFF
 
-26-oct-2026. PENDING PO. No consentimiento o aprobación legal inferidos.
+## Decisión del Product Owner — 26-oct-2026 (posterior a instalación OFF)
+
+**APROBADO: 14 días de retención en las tablas activas de atribución y señales agregadas, únicamente cuando la recopilación sea autorizada posteriormente.** El PO aprobó además **preparar** Cloudflare Turnstile y el mecanismo de borrado programado. Esto NO aprueba recopilar, enviar datos a Meta, registrar cuentas de prueba alojadas, crear claves/proveedores a su nombre, instalar un nuevo Cron en producción, fusionar cambios ni publicar anuncios. La protección de privacidad y sus comunicaciones deben ser verificables antes del GO de activación.
+
+**Estado verificado tras este GO:** `collection_gate.enabled=false`, `retention_days=0`, `policy_version=NULL`. La aprobación de plazo por sí sola NO establece que la política pública esté vigente. No interpretar el cero actual como aprobación revocada ni activar el gate para "arreglar" el dashboard.
+
+**Preparación operacional aprobada, aún sin ejecutar en producción:**
+1. Auditar primero las ventanas reales de backup/PITR, logs y restauración de Supabase y Vercel, los posibles registros técnicos de Turnstile y el canal de solicitudes de privacidad. La purga de tablas activas no equivale a la eliminación instantánea de copias.
+2. Preparar la publicación del aviso específico de marketing en ES/EN con el período **14 días en almacenamiento activo** y hasta **6 horas entre ciclos de purga**, los datos mínimos de UTM y el almacenamiento local temporal de hasta72 h. Mantener la redacción condicional hasta que tratamiento/proveedor/fecha efectiva estén revisados y publicados. Validar política efectiva con revisión legal según corresponda; una decisión operativa no certifica cumplimiento jurídico.
+3. Preparar Turnstile **Invisible** para `pazo-app.vercel.app` y `pazo_marketing_landing`, sin pre-clearance. Validar Siteverify real (hostname, acción, límite 300 s, un solo uso, fallo cerrado); no añadir Site Key/Secret a GitHub ni al chat. Secret exclusivamente en Edge y Site Key pública únicamente tras habilitación aprobada. Revisar cuota/abuso, CSP, proveedor y privacidad. Si no hay claves de proveedor, indicar el paso mínimo que requiere acción manual del PO.
+4. Preparar el SQL de operador existente `supabase/operations/marketing-retention-cron-activation.sql`: **solo** configurar el plazo=14 y `policy_version=pazo-marketing-attribution-notice-v1` una vez aprobado/publicado el aviso y con `enabled=false`; instalación Cron es un gate independiente. Cron previsto: `17 */6 * * *` UTC; `SELECT public.pazo_marketing_prune_all_v1();`. Observar 2 ejecuciones automáticas reales exitosas separadas, estado de job y heartbeat vigente ≤7 horas **antes** de abrir ingestión. Comprobar solicitud de borrado y restore sin datos personales públicos.
+5. Probar recorrido real de registro confirmado y primera mascota en entorno aislado o cuenta QA expresamente autorizada, preservando su exclusión de estadísticas. Distinguir pruebas negativas QA de atribuciones positivas de usuarios reales; no inventar conversiones.
+6. Solicitar separadamente el GO de publicar aviso/activar proveedor y Cron, el GO de recopilación y el GO de gastar publicidad. Mantener Meta Pixel/CAPI fuera de este piloto de Tráfico.
+
+**Límite exacto del plazo:** la atribución `marketing_private.acquisition` caduca por `recorded_at`; los contadores `landing_daily` se depuran por fecha de Los Ángeles, no por un timestamp individual. El plazo elegido es 14 días **más demora operativa de hasta un ciclo (6h) en condiciones normales** y no cubre automáticamente cachés, auditoría técnica ni PITR. Prometer únicamente lo que el mecanismo y los proveedores pueden cumplir.
+
+---
+
+
+26-oct-2026. Período de 14 días aprobado por el PO; aviso y proveedores pendientes. No consentimiento ni aprobación legal inferidos.
 La política pública ES/EN de `src/features/legal/legalCopy.ts` no incorpora todavía
 este tratamiento. No se modificó ni publicó una promesa de recopilación activa.
 
 ## Plazo propuesto y operaciones
 
-Propuesta: **14 días** para atribuciones desde recorded_at y agregados por fecha
+Plazo aprobado para futura activación: **14 días** para atribuciones desde recorded_at y agregados por fecha
 de Los Ángeles, purga cada6h. Cubre la campaña de tres días, confirmación hasta72h,
-activación primera mascota≤7d y observación D7 con margen de revisión. No configura
-14 ni30: el valor sigue0 hasta decisión explícita. Un reporte de30/90 días mostrará
+activación primera mascota≤7d y observación D7 con margen de revisión. El valor alojado sigue 0 y la recopilación OFF hasta que se apruebe y publique el aviso correspondiente. Un reporte de30/90 días mostrará
 solo el historial retenido; no reconstruirá lo borrado ni presentará cobertura completa.
 Staging local≤72h, incluye UUID de cuenta solo para impedir atribución cruzada;
 sin nombre, email, contenido, ubicación, fbclid o token persistido. Logout limpia staging.
@@ -43,7 +61,7 @@ ES: “Si llegas desde un anuncio de PAZO, podemos asociar a tu cuenta códigos
 limitados de campaña para medir el registro con correo confirmado, la primera
 mascota y una señal de navegación en el séptimo día. El dispositivo conserva
 temporalmente esos códigos y un identificador de cuenta para evitar confundir
-cuentas. No enviamos conversiones individuales a Meta. La propuesta es conservar
+cuentas. No enviamos conversiones individuales a Meta. La duración aprobada para la futura recopilación es conservar
 estos datos vivos durante14 días y retirarlos en una revisión cada6 horas; el plazo
 y el ciclo de respaldos se fijarán antes de activar. Para proteger las señales de
 llegada podemos utilizar Cloudflare Turnstile, que procesa información técnica.
@@ -53,7 +71,7 @@ EN: “If you arrive from a PAZO ad, we may associate limited campaign codes wit
 your account to measure email-confirmed registration, your first pet and a day-seven
 navigation signal. Your device temporarily stores these codes and an account
 identifier to prevent attribution across accounts. We do not send individual
-conversions to Meta. The proposal is to retain this live data for14 days, with
+conversions to Meta. The approved future retention window is14 days, with
 cleanup every6 hours; the retention period and backup handling will be finalized
 before collection starts. Cloudflare Turnstile may process technical information
 to protect arrival signals. You may request access, correction or deletion through
