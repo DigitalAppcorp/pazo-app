@@ -49,13 +49,9 @@ import type {
   CareItemInput,
   DocumentCategory,
   PetDocument,
-  Conversation,
   PazoNotification,
 } from './types/pazo'
-import {
-  INITIAL_PETS,
-  INITIAL_CONVERSATIONS,
-} from './data/mockData'
+import { INITIAL_PETS } from './data/mockData'
 
 import { BottomNav, type NavTab } from './components/BottomNav'
 import { HeaderBar } from './components/HeaderBar'
@@ -263,7 +259,6 @@ function PazoMain() {
   const documentLoadVersionRef = useRef(0)
   const documentOffsetRef = useRef(0)
   const documentLoadMoreInFlightRef = useRef(false)
-  const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS)
   const [notifications, setNotifications] = useState<PazoNotification[]>([])
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true)
@@ -1508,26 +1503,6 @@ function PazoMain() {
     }
   }, [isDocumentsOpen, currentPet?.id])
 
-  const handleSendMessage = (convId: string, text: string) => {
-    setConversations((prev) =>
-      prev.map((c) => {
-        if (c.id !== convId) return c
-        const newMsg = {
-          id: `m-${Date.now()}`,
-          sender: 'me' as const,
-          text,
-          timestamp: 'Ahora',
-        }
-        return {
-          ...c,
-          lastMessage: text,
-          timeAgo: 'Ahora',
-          messages: [...c.messages, newMsg],
-        }
-      })
-    )
-  }
-
   const refreshLostPetSightingReminder = async () => {
     const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
 
@@ -1654,9 +1629,8 @@ function PazoMain() {
     }
   }, [user?.id, isOnboardingActive, pets.length])
 
-  const unreadMessages = isDemoUser && !user
-    ? conversations.filter((c) => c.isRequest).length
-    : 0
+  // Messaging is still in development for everyone: never display fictitious unread counts.
+  const unreadMessages = 0
   const unreadNotifications = unreadNotificationCount
   const lostPets = pets.filter((pet) => pet.isLost)
 
@@ -2346,7 +2320,7 @@ function PazoMain() {
               onClose={() => setIsMessagesOpen(false)}
               conversations={[]}
               isDemo={false}
-              onSendMessage={handleSendMessage}
+              onSendMessage={() => {}}
               lang={lang}
             />
 
