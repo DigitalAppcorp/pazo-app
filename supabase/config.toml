@@ -480,7 +480,7 @@ verify_jwt = true
 # F18 private original evidence probe — SOURCE ONLY, NOT DEPLOYED.
 # Requires separate operator approval and Admin TOTP; never bypass JWT.
 [functions.pazo-admin-paypal-original-audit]
-enabled = false
+enabled = true
 verify_jwt = true
 entrypoint = "./functions/pazo-admin-paypal-original-audit/index.ts"
 
