@@ -47,6 +47,8 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const [acceptances,setAcceptances]=useState<{intentId:string;acceptedAt:string}[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
+  // Status read errors must not erase a separately verified owner account list.
+  const [statusReadError,setStatusReadError]=useState<string|null>(null)
   const [status, setStatus] = useState<Record<string, string>>({})
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null)
   const [cancelDone, setCancelDone] = useState<string | null>(null)
@@ -65,7 +67,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
       if(lastOwner!==undefined&&lastOwner!==nextOwner){
         accountEpoch.current++
         operationInFlight.current=false
-        setAccounts(null);setAcceptances([]);setStatus({});setError(false);setBusy(false)
+        setAccounts(null);setAcceptances([]);setStatus({});setError(false);setStatusReadError(null);setBusy(false)
         setCancelConfirm(null);setCancelDone(null);setCancelReview(null)
         setRecoveryMessage(null);setConfirmLiveAbandon(false);setShowRestartHelp(false);setShowLiveManagement(false);setVoluntarySupport(false);setPromotionChoice('idle')
         setAccountRevision(n=>n+1)
@@ -147,8 +149,11 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='checking')||
     (offerRequired&&(!offerReadyForCurrentMode||qaOfferState.phase==='loading'))||
     (liveOfferRequired&&liveOfferPhase==='loading')
-  const preparationUnavailable=membership.kind==='unavailable'||
-    (!qaV2Screen&&membership.kind==='inactive'&&error)||
+  // Keep the read-only management path available for a known original request.
+  // Never relax readiness or server gates for starting a new paid checkout.
+  const knownExistingLiveRequest=!qaV2Screen&&accounts?.length===1
+  const preparationUnavailable=(membership.kind==='unavailable'&&!knownExistingLiveRequest)||
+    (!qaV2Screen&&membership.kind==='inactive'&&accounts===null&&error)||
     (qaV2Screen&&membership.kind==='inactive'&&qaV2AccountState==='unavailable')||
     (offerRequired&&offerReadyForCurrentMode&&qaOfferState.phase==='blocked')||
     (liveOfferRequired&&liveOfferPhase==='blocked')
@@ -253,7 +258,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
   const checkStatus = async (intentId: string) => {
     const epoch=accountEpoch.current
     setBusy(true)
-    setError(false)
+    setStatusReadError(null)
     try {
       const data = await call({action:'status',intentId}) as AccountResult
       if(epoch!==accountEpoch.current)return
@@ -266,7 +271,7 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
           {...a,cancelInReview:false}:a)??null)
       }
       setCancelConfirm(null)
-    } catch {if(epoch===accountEpoch.current)setError(true)}
+    } catch {if(epoch===accountEpoch.current)setStatusReadError(intentId)}
     finally {if(epoch===accountEpoch.current)setBusy(false)}
   }
 
@@ -567,7 +572,12 @@ export function SupporterAccountManagement({lang, onClose, pet}: Props) {
                         :label('Vinculada a PayPal; período pagado no verificado.', 'Linked to PayPal; paid period unverified.')
                       : label('Solicitud pendiente de revisión', 'Pending review')}
                   </p>
-                  {status[account.intentId] && <p role="status" className="text-sm">
+                  {statusReadError===account.intentId&&<p role="alert"
+                     className="rounded-[14px] bg-[#FCE5D8] p-3 text-[12px] font-medium leading-relaxed text-[#724927]">
+                     {label('No pudimos consultar el estado de la solicitud en PayPal. La solicitud original se conserva; no se inició otro pago. Puedes intentar «Actualizar estado» más adelante o contactar con soporte.',
+                       'We could not check the request status with PayPal. Your original request is preserved; no new payment was initiated. You can retry Refresh status later or contact support.')}
+                   </p>}
+                   {status[account.intentId] && <p role="status" className="text-sm">
                     {label('Estado informado por PayPal: ','PayPal-reported status: ')}
                     <strong>{status[account.intentId]}</strong>
                   </p>}
