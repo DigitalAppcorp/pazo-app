@@ -4,7 +4,7 @@ import { INITIAL_PETS, INITIAL_POSTS } from '../../data/mockData.ts'
 // Examples live only in component memory. No Supabase identity, content or
 // engagement event can be created by these functions.
 export const createDemoPets = (): Pet[] => {
-  const pets = INITIAL_PETS.map((pet) => ({
+  const pets: Pet[] = INITIAL_PETS.map((pet) => ({
     ...pet, interests: pet.interests ? [...pet.interests] : undefined,
   }))
   // The rabbit already exists in the original sample feed; supply a
