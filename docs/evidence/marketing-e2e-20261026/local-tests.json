@@ -1,0 +1,140 @@
+{
+  "kind": "LOCAL_RESULTS_NOT_HOSTED_E2E",
+  "logs": [
+    {
+      "log": "unit-final.log",
+      "summary": [
+        "✔ allowlisted aggregate keeps no user fields and counts only a creative (4.507ms)",
+        "✔ rejects arbitrary parameters and PII before touching adapter (13.6104ms)",
+        "✔ no false success when DB rejects aggregate; no provider info leaked (1.7805ms)",
+        "✔ service RPC uses project allowlist and no identity beyond a creative code (1.7195ms)",
+        "ℹ tests 38",
+        "ℹ suites 0",
+        "ℹ pass 38",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1160.1665"
+      ],
+      "sha256": "c68dc333a7fe51fb248b8d4bf5d16b118552c77a59578eb061a76b0036863230"
+    },
+    {
+      "log": "pg17.log",
+      "summary": [
+        "",
+        "> pazo-app@0.0.0 test:marketing:pg17",
+        "> node scripts/marketing-pg17.mjs",
+        "",
+        "PASS 28 marketing PG17 checks plus legacy SQL; real concurrency, atomic deletion and explicit cron provider mock"
+      ],
+      "sha256": "9735f4c77bca4fe7d2087d4ae2d0b8baa07f52f643eef1c96762c30b408d1924"
+    },
+    {
+      "log": "browser-panel-final.log",
+      "summary": [
+        "",
+        "> pazo-app@0.0.0 test:marketing:e2e",
+        "> node scripts/marketing-browser.mjs",
+        "",
+        "PASS 54 marketing browser E2E checks: actual Auth/onboarding/Edge/PG17/admin, ES/EN mobile/desktop; synthetic email and challenge only; zero hosted writes"
+      ],
+      "sha256": "775329dbd3dfcedf99e0bffd098f9e128d605e993bf54b6ad54555d4d47d5a56"
+    },
+    {
+      "log": "governance.log",
+      "summary": [
+        "✔ allowlisted aggregate keeps no user fields and counts only a creative (2.3245ms)",
+        "✔ rejects arbitrary parameters and PII before touching adapter (6.3887ms)",
+        "✔ no false success when DB rejects aggregate; no provider info leaked (0.9114ms)",
+        "✔ service RPC uses project allowlist and no identity beyond a creative code (2.3539ms)",
+        "ℹ tests 38",
+        "ℹ suites 0",
+        "ℹ pass 38",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 582.5825"
+      ],
+      "sha256": "4695e5208da7020631ced8ed60dc539281933bf8f347ec55a0d0754b0e0e0560"
+    },
+    {
+      "log": "gradual.log",
+      "summary": [
+        "✔ persistent timeout is fail closed after only two bounded reads (1.0743ms)",
+        "✔ explicit HTTP 503 and explicit unhealthy response each stop without retry (3.1038ms)",
+        "✔ malformed body and benefit-granting reply do not qualify as readiness (8.5639ms)",
+        "✔ foreign origin, bad credentials, and missing transport fail without requests (0.8292ms)",
+        "ℹ tests 69",
+        "ℹ suites 0",
+        "ℹ pass 69",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1430.0192"
+      ],
+      "sha256": "1c46e78ffa913fbf416027412ef2ace8522a33726f308ccaa8a40502b266e5e4"
+    },
+    {
+      "log": "finance-final.log",
+      "summary": [
+        "✔ T12 payment attributed to B never credits A (0.3973ms)",
+        "✔ T13 revoked consent is never eligible for wall (1.0623ms)",
+        "✔ T14 reactivation requires fresh pet opt-in (0.4202ms)",
+        "✔ T15 overlapping periods from different providers do not double count (0.5105ms)",
+        "ℹ tests 1196",
+        "ℹ suites 0",
+        "ℹ pass 1196",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 9937.3697"
+      ],
+      "sha256": "0cd5f8427b26de1db3ed007e199ea79fa2f4f1f6da5349456d2a5cbf66dd18cd"
+    },
+    {
+      "log": "build-final.log",
+      "summary": [
+        "✓ built in 5.01s",
+        "[plugin builtin:vite-reporter] ",
+        "(!) Some chunks are larger than 500 kB after minification. Consider:",
+        "- Using dynamic import() to code-split the application",
+        "- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting",
+        "- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.",
+        "[PLUGIN_TIMINGS] JavaScript callbacks ran for 3.5s of this 5.0s build (69%).",
+        "2 callbacks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:",
+        "  - plugin vite:css transform (7 calls)",
+        "  - plugin vite:build-html transform (2 calls)",
+        "See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.",
+        ""
+      ],
+      "sha256": "8b1805d45d0f82d55a2736d0bf094134f24d2992f4f468556ab1d6008678fd8a"
+    },
+    {
+      "log": "f17-contracts-final.log",
+      "summary": [
+        "✔ a hung CDN request times out, removes pending tags and can recover (2.0912ms)",
+        "✔ a failed stylesheet retries without fetching an already loaded library again (2.6487ms)",
+        "✔ maintenance blocks all Sandbox CREATE/retry entrances without suppressing cancellation or evidence (2.0847ms)",
+        "✔ maintenance admission is server-only and follows no redirect or uncertain response (80.6086ms)",
+        "ℹ tests 35",
+        "ℹ suites 0",
+        "ℹ pass 35",
+        "ℹ fail 0",
+        "ℹ cancelled 0",
+        "ℹ skipped 0",
+        "ℹ todo 0",
+        "ℹ duration_ms 1256.0591"
+      ],
+      "sha256": "3f79e21cc6ff451b535a2dfc1964b2cf5fae414b6219ba95904a8e45346447dd"
+    },
+    {
+      "log": "eslint-final.log",
+      "summary": [],
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

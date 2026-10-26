@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1" /></head><body><div id="root"></div>
+<!-- LOCAL synthetic browser fixture. Not a build input or application route. -->
+<script type="module">
+import React from 'react';import {createRoot} from 'react-dom/client';
+import {AuthProvider,useAuth} from '/src/context/AuthContext.tsx';
+import {supabase} from '/src/services/supabaseClient.ts';
+import {OnboardingView} from '/src/components/views/OnboardingView.tsx';
+import {AdminDashboard} from '/src/features/admin/components/AdminDashboard.tsx';
+import {stageMarketingLanding} from '/src/features/marketing/marketingRuntime.ts';
+import '/src/index.css';
+const params=new URLSearchParams(location.search),lang=params.get('lang')==='en'?'en':'es';
+stageMarketingLanding();
+window.fixtureConfirm=()=>supabase.auth.verifyOtp({email:'fixture@synthetic.invalid',token:'111111',type:'signup'});
+window.fixtureAdmin=()=>supabase.auth.signInWithPassword({email:'admin@synthetic.invalid',password:'SyntheticOnly123!'});
+function Harness(){const {user,loading}=useAuth();const [done,setDone]=React.useState(false);const [admin,setAdmin]=React.useState(Boolean(window.fixtureAdminOpen));
+ if(loading)return React.createElement('p',null,'Fixture loading');
+ if(admin)return React.createElement(AdminDashboard,{lang,onClose:()=>setAdmin(false)});
+ return React.createElement(React.Fragment,null,
+  React.createElement('button',{onClick:()=>window.fixtureConfirm()},'Fixture confirm email'),
+  React.createElement('button',{onClick:async()=>{window.fixtureAdminOpen=true;await window.fixtureAdmin();setAdmin(true)}},'Fixture open admin'),
+  done?React.createElement('p',{role:'status'},'Fixture pet saved'):React.createElement(OnboardingView,{initialStep:user?'A03':'A02',lang,onToggleLang:()=>{},onComplete:()=>setDone(true),onSkipToLogin:()=>{},onQuickDemo:()=>{}}));
+}
+createRoot(document.getElementById('root')).render(React.createElement(AuthProvider,null,React.createElement(Harness)));
+</script></body></html>

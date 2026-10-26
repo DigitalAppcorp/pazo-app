@@ -1,4 +1,5 @@
 import { supabase } from '../../services/supabaseClient'
+import { parseMarketingSummary } from '../marketing/index'
 
 export interface AdminOverview {
   environment:'sandbox'
@@ -30,6 +31,37 @@ async function call<T>(fn:string,args?:Record<string,unknown>):Promise<T>{
  if(data===null||data===undefined)throw Error('PAZO_ADMIN_EMPTY_RESPONSE')
  return data as T
 }
+/** Marketing backend returns aggregates only after an explicit server admin
+ * check; no owner IDs, visit identifiers, IPs or raw event records. */
+export interface AdminMarketingDay {
+ day:string
+ campaign:string
+ creative:string
+ landing_signals:number
+ verified_signups:number
+ first_pet_within_7d:number
+ d7_matured_owners:number
+ d7_screen_activity_proxy:number
+}
+export interface AdminMarketingTotals {
+ landing_signals:number
+ verified_signups:number
+ first_pet_within_7d:number
+ d7_matured_owners:number
+ d7_screen_activity_proxy:number
+}
+export interface AdminMarketingSummary {
+ status:'not_configured'|'paused'|'collecting'
+ period_days:7|30|90
+ as_of:string
+ time_zone:'America/Los_Angeles'
+ totals:AdminMarketingTotals
+ daily:AdminMarketingDay[]
+}
+export const adminMarketingSummary=(days:7|30|90)=>call<AdminMarketingSummary>(
+ 'pazo_admin_marketing_summary',{p_days:days}
+).then(parseMarketingSummary)
+
 export const checkAdmin=()=>call<boolean>('pazo_is_admin')
 export const adminOverview=(days:7|30|90)=>call<AdminOverview>('pazo_admin_overview',{p_days:days})
 export const adminUsers=(offset:number)=>call<AdminUser[]>('pazo_admin_users',{p_limit:30,p_offset:offset})

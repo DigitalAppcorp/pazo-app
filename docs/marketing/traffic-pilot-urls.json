@@ -1,0 +1,15 @@
+{
+  "status": "DRAFT_NOT_PUBLISHED",
+  "objective": "traffic",
+  "region": "Los Angeles, California",
+  "language": "en",
+  "budget_proposal_usd": 45,
+  "days": 3,
+  "campaign": "pazo_beta_local_202610",
+  "supersedes": "pazo_us_pilot_30d and unvalidated legacy utm_content strings",
+  "ads": [
+    {"format":"image","tracking_label":"Profile · English","url":"https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_beta_local_202610&utm_content=perfil_en"},
+    {"format":"carousel","tracking_label":"QR · English","url":"https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_beta_local_202610&utm_content=qr_en"},
+    {"format":"video","tracking_label":"Communities · English","url":"https://pazo-app.vercel.app/?utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_beta_local_202610&utm_content=comunidad_en"}
+  ]
+}

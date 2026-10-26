@@ -1,0 +1,156 @@
+{
+  "scope": "Issue96 code-only; production and collection unchanged",
+  "source_commit": "5cb0056fcdb56abd144d5b8dce372becc6ad5953",
+  "base_f17": "19c0b659a4b722c878b9a77d48c7957756a6f579",
+  "ci_runs": [
+    {
+      "conclusion": "success",
+      "event": "workflow_dispatch",
+      "headSha": "5cb0056fcdb56abd144d5b8dce372becc6ad5953",
+      "id": 40061816438,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 120776767517,
+          "name": "f17-pg17",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776767655,
+          "name": "f17-browser",
+          "status": "completed"
+        }
+      ],
+      "name": "F17 beta isolated backend security",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "event": "pull_request",
+      "headSha": "5cb0056fcdb56abd144d5b8dce372becc6ad5953",
+      "id": 40061797116,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 120776701797,
+          "name": "gradual-browser",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701894,
+          "name": "gradual-pg17-and-regressions",
+          "status": "completed"
+        }
+      ],
+      "name": "F16 gradual Live isolated implementation gates",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "event": "pull_request",
+      "headSha": "5cb0056fcdb56abd144d5b8dce372becc6ad5953",
+      "id": 40061797088,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 120776701617,
+          "name": "f16-p21-worker-schema-rehearsal",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701727,
+          "name": "canonical-chromium-e2e",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701741,
+          "name": "f14-postgres",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701756,
+          "name": "f16-p12-staged-install",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701772,
+          "name": "f16-public-benefits-live-only",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701808,
+          "name": "public-beta-postflight-http",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "id": 120776701818,
+          "name": "verify",
+          "status": "completed"
+        }
+      ],
+      "name": "CI",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "event": "pull_request",
+      "headSha": "5cb0056fcdb56abd144d5b8dce372becc6ad5953",
+      "id": 40061797087,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 120776701634,
+          "name": "pg17-privacy-and-cohorts",
+          "status": "completed"
+        }
+      ],
+      "name": "PAZO Marketing private attribution draft (isolated)",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "event": "push",
+      "headSha": "5cb0056fcdb56abd144d5b8dce372becc6ad5953",
+      "id": 40061793986,
+      "jobs": [
+        {
+          "conclusion": "success",
+          "id": 120776692218,
+          "name": "pg17-privacy-and-cohorts",
+          "status": "completed"
+        }
+      ],
+      "name": "PAZO Marketing private attribution draft (isolated)",
+      "status": "completed"
+    }
+  ],
+  "verified_jobs": 13,
+  "marketing_node_tests": 37,
+  "marketing_pg17_assertions": 26,
+  "marketing_browser_checks": 54,
+  "financial_synthetic_tests": 1197,
+  "provider_boundaries": {
+    "emailAuth": "synthetic GoTrue transport; actual AuthProvider and server Auth adapter",
+    "challenge": "synthetic Siteverify single-use double; actual verifier",
+    "cron": "explicit SQL provider double; no hosted scheduler"
+  },
+  "hosted_actions": {
+    "migrations": false,
+    "edge_deploy": false,
+    "frontend_deploy": false,
+    "cron": false,
+    "secrets": false,
+    "collection": false,
+    "advertising": false,
+    "main_merge": false
+  },
+  "release_flags": "all OFF; retention_days=0"
+}

@@ -1,0 +1,79 @@
+{
+  "kind": "HOSTED_PUBLIC_READ_ONLY",
+  "authenticated": false,
+  "physicalInstalledPwa": false,
+  "cases": [
+    {
+      "width": 320,
+      "status": 200,
+      "overflow": false,
+      "errors": [],
+      "marketing": [],
+      "blocked": [
+        {
+          "method": "POST",
+          "host": "mrybvqdebbgcayuvgkkr.supabase.co"
+        },
+        {
+          "method": "POST",
+          "host": "mrybvqdebbgcayuvgkkr.supabase.co"
+        }
+      ],
+      "buttons": [
+        "ES ▾",
+        "Conoce a los Amigos de PAZO›",
+        "Comenzar",
+        "Ya tengo una cuenta",
+        "Demo"
+      ]
+    },
+    {
+      "width": 390,
+      "status": 200,
+      "overflow": false,
+      "errors": [],
+      "marketing": [],
+      "blocked": [
+        {
+          "method": "POST",
+          "host": "mrybvqdebbgcayuvgkkr.supabase.co"
+        },
+        {
+          "method": "POST",
+          "host": "mrybvqdebbgcayuvgkkr.supabase.co"
+        }
+      ],
+      "buttons": [
+        "ES ▾",
+        "Conoce a los Amigos de PAZO›",
+        "Comenzar",
+        "Ya tengo una cuenta",
+        "Demo"
+      ]
+    },
+    {
+      "width": 1440,
+      "status": 200,
+      "overflow": false,
+      "errors": [],
+      "marketing": [],
+      "blocked": [
+        {
+          "method": "POST",
+          "host": "mrybvqdebbgcayuvgkkr.supabase.co"
+        },
+        {
+          "method": "POST",
+          "host": "mrybvqdebbgcayuvgkkr.supabase.co"
+        }
+      ],
+      "buttons": [
+        "ES ▾",
+        "Conoce a los Amigos de PAZO›",
+        "Comenzar",
+        "Ya tengo una cuenta",
+        "Demo"
+      ]
+    }
+  ]
+}
