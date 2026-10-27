@@ -1,3 +1,36 @@
+# Issue130 — medición activa y preparación técnica completada (26-oct-2026 Guatemala)
+
+Este estado sustituye los snapshots OFF/HOLD que se conservan más abajo. El PO ordenó lanzar antes del segundo ciclo de purga tras explicar la diferencia entre medición y verificación repetida; la excepción consta en [issue130](https://github.com/DigitalAppcorp/pazo-app/issues/130#issuecomment-6431092022). No se publicó ningún anuncio ni se gastó en Meta.
+
+Producción [PAZO](https://pazo-app.vercel.app/), fuente9df24a1d52de28788aa212764ffe23c3721e0222, [PR135 integrado](https://github.com/DigitalAppcorp/pazo-app/pull/135), despliegue Vercel`dpl_47U5Q21kxWGDiiyLh5hU62Yurp3c` READY y alias canónico comprobados. Colección SQL ACTIVE desde27oct01:09:15UTC (26oct19:09 Guatemala),14d/policyv1. Edge atribuciónv4 JWTtrue,4/4archivos idénticos al upload; landingv5. Gates cliente, servidor y reporte habilitados después de verificar aviso publicado, proveedor y salud de purga.
+
+Aviso activo ES/EN, fecha efectiva26oct, seis casos320/390/1440 PASS sin overflow ni erroresJS. Siteverify real y replay403 verificados; visita humana confirmada por el PO produjo exactamente una señal perfil_en, observada01:20:28UTC. Las tres URLs fuente respondieron200 y sus tres creatives tuvieron atribución real: C comunidad_en/D qr_en con intake202, E perfil_en automático202 después de correo efectivamente entregado/confirmado y retorno canónico. C/D/E primera mascota200, una por cuenta. Duplicado409, QA trusted retroexcluida, reintake QA409; withdraw retiró únicamente las tres atribuciones de prueba y conservó sus mascotas. La única señal QA humana se retiró con guard de delta exacto1. Métricas finales sin conversiones QA fabricadas. No afirmar tres señales anónimas202: solo se observó una humana; el navegador automatizado no obtuvo las otras validaciones. [Cloudflare documenta estas limitaciones de automatización](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+
+Retención: primer run periódico27oct00:17:00.018493→00:17:00.031319UTC SUCCESS. Prueba real adicional01:02:05UTC eliminó1atribución QA vencida y1agregado QA vencido; NO se cuenta como run periódico. El segundo run06:17UTC (27oct00:17 Guatemala) permanece pendiente bajo seguimiento de este chat; el PO sustituyó su espera previa. Cron4único17 */6 * * * UTC, jobs1/3 intactos. Ingestión cierra si la salud de purga deja de ser válida; la purga sigue al detener recopilación.
+
+Reporte admin UI real7/30/90 collecting, sin PII; mostró E1registro/1mascota y luego0tras exclusión. HTTP8/8, PWA/HTTPS7/7, DemoMapa EN/ES mobile ready con mapa visual,0overflow/JSerror. Finanzas saludTRUE y digestab734013e83acb4e2880d50a35031da7 idénticos. CI del candidato4588db6f: [general](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40430310365), [marketing](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40430310449), [F17](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40430310361), [F18](https://github.com/DigitalAppcorp/pazo-app/actions/runs/40430310410), todos SUCCESS.44unit/9legal,38PG+regresiónA03, concurrenciaLinux40/Windows8 PASS.
+
+```text
+PRIVACY_NOTICE_PUBLIC: PASS
+CLOUDFLARE_SITEVERIFY_REAL: PASS
+RETENTION_14D_AND_CRON: PASS
+CRON_REAL_RUNS_2: BLOCKED
+MARKETING_COLLECTION: ACTIVE
+HOSTED_UTM_AUTH_FIRST_PET_E2E: PASS
+ENGLISH_LANDING: PASS
+ADMIN_REPORT: PASS
+PAYPAL_AUTH_PWA_NO_REGRESSION: VERIFIED
+READY_TO_PUBLISH_THREE_META_ADS: YES
+META_ADS_SPEND: NOT_STARTED
+```
+
+CRON_REAL_RUNS_2=BLOCKED describe exclusivamente la evidencia temporal pendiente; READY=YES aplica al criterio modificado por el PO, no al original de dos runs. No se alteró el calendario ni se inventó historial. Caducidad real cronometrada del token inconclusa; rechazo300s PASS en unidad de tiempo controlado. D7 solo simulado en tests, no siete días reales. PWA física instalada y compra PayPal real no probadas. No certificación legal. La aprobación/revisión de anuncios por Meta queda a Meta y la publicación al PO.
+
+Evidencia estructurada: [checkpoint existente](evidence/marketing-off-installation-20261026/issue130-checkpoint.json). Solo queda al PO la decisión de publicar sus borradores; el seguimiento del segundo Cron corresponde al agente y no exige otra acción del PO.
+
+---
+## Registro histórico anterior; no representa el estado actual
+
 ## #130 — cambio de criterio del PO: cierre ahora y segundo Cron bajo seguimiento
 
 El PO, informado de que la espera de dos ciclos no es necesaria para registrar llegadas, ordena continuar ahora. Sustituye únicamente la espera previa de dos runs por una ejecución periódica exitosa más una prueba adicional real de purga; el segundo run periódico permanece bajo seguimiento. No se cuenta una llamada manual como run periódico ni se cambia el calendario de seis horas. Resto de privacidad, protecciones, CI y E2E permanece obligatorio. Esta decisión sustituye los HOLD históricos de dos runs de este documento; no autoriza publicar anuncios ni gastar en Meta. Fecha de publicación prevista26-oct según Guatemala, conservando fecha de términos financieros.
