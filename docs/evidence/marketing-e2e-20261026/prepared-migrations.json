@@ -20,6 +20,11 @@
       "version": "20261026234503",
       "sha256": "67cb1fa22cd56413fe5c514c2bbadd6b5d09c5ffd68ece9ea282a2173c79a0ed",
       "path": "supabase/migrations/20261026234503_pazo_marketing_onboarding_invoker_fix.sql"
+    },
+    {
+      "version": "20261027000301",
+      "sha256": "028234f3477070c1791f5b0c78fd1c7ced9cd52414e6bfaa8a0efd18390d33c7",
+      "path": "supabase/migrations/20261027000301_pazo_marketing_single_use_challenge.sql"
     }
   ],
   "status": "NOT_APPLIED"

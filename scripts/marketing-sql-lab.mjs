@@ -11,15 +11,11 @@ const command=ci?'psql':'docker'
 const dockerHost=process.platform==='win32'?'npipe:////./pipe/dockerDesktopLinuxEngine':'unix:///var/run/docker.sock'
 const args=database=>ci?['-X','-qAt','-v','ON_ERROR_STOP=1']:[`--host=${dockerHost}`,'exec','-i',container,'psql','-X','-qAt','-U','postgres','-d',database,'-v','ON_ERROR_STOP=1']
 export function sql(query){const result=spawnSync(command,args(db),{input:query,encoding:'utf8',maxBuffer:2e6});if(result.status!==0)throw Error(result.stderr||'Local PostgreSQL failed');return result.stdout.trim()}
-// Windows may refuse 40 simultaneous docker.exe children (spawn UNKNOWN).
-// Keep real SQL concurrency with eight workers there; Linux CI retains all 40.
-let active=0
-const waiting=[]
+// Windows docker.exe async transport may refuse or stall child handles.
+// Local Windows validates serial SQL behavior; Linux CI is the concurrency proof.
 export async function sqlAsync(query){
- if(process.platform==='win32'&&active>=8)await new Promise(resolve=>waiting.push(resolve))
- active++
- try{const result=await execute(command,[...args(db),'-c',query],{maxBuffer:2e6});return result.stdout.trim()}
- finally{active--;waiting.shift()?.()}
+ if(process.platform==='win32')return sql(query)
+ const result=await execute(command,[...args(db),'-c',query],{maxBuffer:2e6,timeout:30000});return result.stdout.trim()
 }
 export function file(path){return sql(readFileSync(path,'utf8'))}
 export async function prepareMarketingLab(){
@@ -40,6 +36,7 @@ export async function prepareMarketingLab(){
  assert.equal(sql("SELECT to_regclass('marketing_private.retention_runtime') IS NULL AND to_regprocedure('public.pazo_admin_marketing_summary(integer)') IS NOT NULL"),'t','DDL failure must roll back moved RPCs/tables/grants')
  sql(hardened)
  file('supabase/migrations/20261026233828_pazo_marketing_qa_metadata_exclusion.sql')
+ file('supabase/migrations/20261027000301_pazo_marketing_single_use_challenge.sql')
 }
 export function runMockCron(){
  const j=JSON.parse(sql("SELECT row_to_json(j) FROM cron.job j WHERE jobname='pazo-marketing-retention-v1'"));

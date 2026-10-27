@@ -8,8 +8,9 @@ import {randomUUID} from 'node:crypto'
 import {mkdirSync} from 'node:fs'
 import {sql,runMockCron} from './marketing-sql-lab.mjs'
 import {createMarketingLandingHandler} from '../supabase/functions/pazo-marketing-landing/landingCore.mjs'
-import {createMarketingLandingSubmit} from '../supabase/functions/pazo-marketing-landing/landingAdapter.mjs'
+import {createMarketingLandingSubmit,createMarketingChallengeClaim} from '../supabase/functions/pazo-marketing-landing/landingAdapter.mjs'
 import {createMarketingChallengeVerifier} from '../supabase/functions/pazo-marketing-landing/challengeVerifier.mjs'
+import {createMarketingSingleUseVerifier} from '../supabase/functions/pazo-marketing-landing/singleUseVerifier.mjs'
 import {createMarketingIntakeHandler} from '../supabase/functions/pazo-marketing-attribution/intakeCore.mjs'
 import {createMarketingProvider} from '../supabase/functions/pazo-marketing-attribution/intakeAdapter.mjs'
 const {chromium}=createRequire(import.meta.url)(process.env.PAZO_PLAYWRIGHT_MODULE||'playwright')
@@ -17,7 +18,7 @@ const origin=process.env.PAZO_MARKETING_LOCAL_ORIGIN||'http://127.0.0.1:5185',pr
 assert.match(origin,/^http:\/\/127\.0\.0\.1:\d+$/)
 const q=value=>"'"+String(value).replaceAll("'","''")+"'",jsonQuery=s=>JSON.parse(sql(s)||'null')
 let owner,pet,user,adminId=randomUUID(),intakes=0,arrivals=0,reports=0,failReport=false,delayReport=false
-const sessions=new Map(),seenTokens=new Set()
+const sessions=new Map()
 const admin={id:adminId,email:'admin@synthetic.invalid',aud:'authenticated',role:'authenticated',created_at:new Date(Date.now()-864000000).toISOString(),email_confirmed_at:new Date(Date.now()-864000000).toISOString()}
 sql(`INSERT INTO auth.users(id,created_at,email_confirmed_at) VALUES(${q(adminId)},now()-interval '10 days',now()-interval '10 days');INSERT INTO public.profiles VALUES(${q(adminId)},false);INSERT INTO admin_private.admin_grants VALUES(${q(adminId)})`)
 const session=value=>{const token=[Buffer.from('{"alg":"HS256"}').toString('base64url'),Buffer.from(JSON.stringify({sub:value.id,exp:Math.floor(Date.now()/1000)+3600,role:'authenticated'})).toString('base64url'),'SYNTHETIC'].join('.');sessions.set(token,value);return {access_token:token,refresh_token:'SYNTHETIC_ONLY',expires_in:3600,token_type:'bearer',user:value}}
@@ -26,16 +27,18 @@ async function providerFetch(url,options={}){
  if(path==='/auth/v1/settings')return Response.json({mailer_autoconfirm:false})
  if(path==='/auth/v1/user')return Response.json(sessions.get(options.headers.authorization?.slice(7))||null)
  const body=JSON.parse(options.body)
+ if(path.endsWith('/pazo_marketing_claim_challenge_v1'))return Response.json(sql(`SET ROLE service_role;SELECT public.pazo_marketing_claim_challenge_v1(${q(body.p_digest)})`)==='t')
  if(path.endsWith('/pazo_marketing_record_verified_v1')){
   intakes++;return Response.json(sql(`SET ROLE service_role;SELECT public.pazo_marketing_record_verified_v1(${q(body.p_owner)},${q(body.p_creative)},${q(body.p_first_touch_at)}::timestamptz)`)==='t')
  }
  if(path.endsWith('/pazo_marketing_record_landing_v1')){arrivals++;return Response.json(sql(`SET ROLE service_role;SELECT public.pazo_marketing_record_landing_v1(${q(body.p_creative)})`)==='t')}
  throw Error('Unexpected provider route')
 }
-const verifyChallenge=createMarketingChallengeVerifier({secret:'SYNTHETIC_ONLY_CHALLENGE_SECRET',fetchImpl:async(_,options)=>{
- const token=new URLSearchParams(options.body).get('response'),accepted=token?.startsWith('SYNTHETIC_')&&!seenTokens.has(token);seenTokens.add(token)
+const verifyProvider=createMarketingChallengeVerifier({secret:'SYNTHETIC_ONLY_CHALLENGE_SECRET',fetchImpl:async(_,options)=>{
+ const token=new URLSearchParams(options.body).get('response'),accepted=token?.startsWith('SYNTHETIC_')
  return Response.json({success:accepted,hostname:'pazo-app.vercel.app',action:'pazo_marketing_landing',challenge_ts:new Date().toISOString()})
 }})
+const verifyChallenge=createMarketingSingleUseVerifier({verifyProvider,claimDigest:createMarketingChallengeClaim({url:project,serviceKey:'SYNTHETIC_ONLY_SERVICE_KEY',fetchImpl:providerFetch})})
 const landing=createMarketingLandingHandler({released:true,verifyChallenge,submit:createMarketingLandingSubmit({url:project,serviceKey:'SYNTHETIC_ONLY_SERVICE_KEY',fetchImpl:providerFetch})})
 const intake=createMarketingIntakeHandler({released:true,...createMarketingProvider({url:project,anonKey:'SYNTHETIC_ONLY_PUBLIC_KEY',serviceKey:'SYNTHETIC_ONLY_SERVICE_KEY',fetchImpl:providerFetch})})
 async function remote(path,method,headers,body){
