@@ -1,3 +1,8 @@
+## #130 — cambio de criterio del PO: cierre ahora y segundo Cron bajo seguimiento
+
+El PO, informado de que la espera de dos ciclos no es necesaria para registrar llegadas, ordena continuar ahora. Sustituye únicamente la espera previa de dos runs por una ejecución periódica exitosa más una prueba adicional real de purga; el segundo run periódico permanece bajo seguimiento. No se cuenta una llamada manual como run periódico ni se cambia el calendario de seis horas. Resto de privacidad, protecciones, CI y E2E permanece obligatorio. Esta decisión sustituye los HOLD históricos de dos runs de este documento; no autoriza publicar anuncios ni gastar en Meta. Fecha de publicación prevista26-oct según Guatemala, conservando fecha de términos financieros.
+
+---
 ## #130 — CANDIDATO FINAL RETENIDO HASTA DOS RUNS REALES
 
 Producción actual: SHA2ebc2f34, Verceldpl_HJL3YicGG56kgpBkWmuKbgMf6rC7 READY, avisoOFF/seguridad ESEN publicado. SQL14d/policyv1, Cron4 `17 */6 * * *`, primer run real27oct00:17UTC SUCCESS. Segundo06:17UTC pendiente. SQLsingleuseAPI20261027001529 y Edge landingv5 instalados: token real409(gateOFF), replay403, missing/invalid403. Colección y reporte cliente permanecenOFF en producción. AuthConfirmemail activado porGO específico, retorno canon corregido; C/Dcorreo confirmado real+primera mascota200. SaludfinancieraTRUE/digestab734013e83acb4e2880d50a35031da7 intacto.

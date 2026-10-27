@@ -1,7 +1,7 @@
 export type LegalKind = 'privacy' | 'terms'
 export type LegalLanguage = 'es' | 'en'
 // Candidate publication date: verify actual release date before deploying issue130.
-export const PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE = '2026-10-27' as const
+export const PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE = '2026-10-26' as const
 export const PAZO_TURNSTILE_PRIVACY_ADDENDUM_URL = 'https://www.cloudflare.com/turnstile-privacy-policy/' as const
 export interface LegalText {
   heading: string

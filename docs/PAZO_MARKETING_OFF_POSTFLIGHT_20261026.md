@@ -1,3 +1,8 @@
+## #130 — cambio de criterio del PO: cierre ahora y segundo Cron bajo seguimiento
+
+El PO, informado de que la espera de dos ciclos no es necesaria para registrar llegadas, ordena continuar ahora. Sustituye únicamente la espera previa de dos runs por una ejecución periódica exitosa más una prueba adicional real de purga; el segundo run periódico permanece bajo seguimiento. No se cuenta una llamada manual como run periódico ni se cambia el calendario de seis horas. Resto de privacidad, protecciones, CI y E2E permanece obligatorio. Esta decisión sustituye los HOLD históricos de dos runs de este documento; no autoriza publicar anuncios ni gastar en Meta. Fecha de publicación prevista26-oct según Guatemala, conservando fecha de términos financieros.
+
+---
 # Issue130 — postflight integral en curso (26-oct Guatemala)
 
 **No es el cierre ni el banderazo de Meta. ColecciónOFF; falta el segundo run periódico real.** La sección inferior conserva la instalaciónOFF histórica sin reinterpretarla como estado actual.
