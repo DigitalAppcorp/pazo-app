@@ -24,6 +24,15 @@ export function createMarketingProvider({
       })
       if (result.status !== 200) return null
       const data = await result.json()
+      // Auto-confirm can populate email_confirmed_at without an email challenge.
+      // A verified-registration metric must fail closed in that configuration.
+      // Inspect only public Auth settings; never change the Auth configuration.
+      const settings = await fetchImpl(expected + '/auth/v1/settings', {
+        method:'GET', redirect:'error', cache:'no-store',
+        signal:AbortSignal.timeout(5000),
+        headers:{'apikey':anonKey,'accept':'application/json'},
+      })
+      if (settings.status !== 200 || (await settings.json())?.mailer_autoconfirm !== false) return null
       return data && typeof data === 'object' ? data : null
     },
     submit: async ({ownerId,creative,firstTouchAt}) => {

@@ -10,6 +10,16 @@
       "version": "20261024034549",
       "sha256": "72e5edda023a49c44a81d742092c026359815765afc9ce8c8067372847c40a3e",
       "path": "supabase/migrations/20261024034549_pazo_marketing_retention_health.sql"
+    },
+    {
+      "version": "20261026233828",
+      "sha256": "6175e0f3703bb916a2ef96791e3dab6620e26ab1e7d6915bac3d283b281ea0ab",
+      "path": "supabase/migrations/20261026233828_pazo_marketing_qa_metadata_exclusion.sql"
+    },
+    {
+      "version": "20261026234503",
+      "sha256": "67cb1fa22cd56413fe5c514c2bbadd6b5d09c5ffd68ece9ea282a2173c79a0ed",
+      "path": "supabase/migrations/20261026234503_pazo_marketing_onboarding_invoker_fix.sql"
     }
   ],
   "status": "NOT_APPLIED"
