@@ -1,3 +1,31 @@
+## #130 — cambio de criterio del PO: cierre ahora y segundo Cron bajo seguimiento
+
+El PO, informado de que la espera de dos ciclos no es necesaria para registrar llegadas, ordena continuar ahora. Sustituye únicamente la espera previa de dos runs por una ejecución periódica exitosa más una prueba adicional real de purga; el segundo run periódico permanece bajo seguimiento. No se cuenta una llamada manual como run periódico ni se cambia el calendario de seis horas. Resto de privacidad, protecciones, CI y E2E permanece obligatorio. Esta decisión sustituye los HOLD históricos de dos runs de este documento; no autoriza publicar anuncios ni gastar en Meta. Fecha de publicación prevista26-oct según Guatemala, conservando fecha de términos financieros.
+
+---
+# Issue130 — postflight integral en curso (26-oct Guatemala)
+
+**No es el cierre ni el banderazo de Meta. ColecciónOFF; falta el segundo run periódico real.** La sección inferior conserva la instalaciónOFF histórica sin reinterpretarla como estado actual.
+
+Privacidad ES/EN publicada/verificada6casos320/390/1440, fuente2ebc2f34, Verceldpl_HJL3YicGG56kgpBkWmuKbgMf6rC7READY/aliascanon. Retención14d/policyv1, Cron4único `17 */6 * * *`, primer run27oct00:17UTC SUCCESS/heartbeat14d, segundo06:17UTC pendiente. No se modificó el calendario ni se inventaron ejecuciones.
+
+Siteverify real en Chrome habitual: token generado/validado; primera solicitud409porDBOFF, replay403/missing403/invalid403 después de protecciónatómica. Antes del arreglo el proveedor aceptaba replays: se conserva el hallazgo y se corrigió. Seis tablas marketing FORCE RLS y privadas; ledgerSHA256sin token/IP/cuenta, TTL5min/límite2048/purga6h. LandingEdgev5/JWTfalse/hashdb02fad2cc00e6d24e6d9677c909b3182864d1e8ce96ad20ba7dbd9a722d90af. No dato de atribución/landing recabado.
+
+E2E real encontró y corrigió: auto-confirmación de correo (POautorizóConfirmemailON), retornoaappantigua (SiteURLcanon+2URLs permitidas añadidas sin quitar7previas) y403A03 por lectura de columnaprivada (retirada condición redundante; SECURITYINVOKER/ACL/RLSconservados). QA_C/D: correosrealmenteentregados/confirmados,retornocanónico,primera mascota200cadauno,0overflow. No contraseñas/tokens/IDs privados en evidencia. Reporte con sesiónadminreal7/30/90HTTP200paused; UIlectura sigueOFF hasta candidato final.
+
+PR129merged50ed9c55; PR131d39d4db0; PR132a4fc2da7; PR1342ebc2f34. Candidatos132/134cincoCI SUCCESS; candidato135DRAFT933aead1cuatroCI SUCCESS,44unit/9legal/buildPASS. Candidato final todavía NOintegrado/publicado ni gatesabiertos. Debe completarE2EautomáticoE/atribuciónC-D/exclusiónQA/supresión/3UTM202/postflighttrasdosruns. D7soloaislado; no afirmar7dtranscurridos.
+
+Mapa de5fuentes→APIverificadoen `docs/evidence/marketing-e2e-20261026/prepared-migrations.json`, ahora catálogo HOSTED_TARGETED_MAPPED, no permiso dbpush. Originales2byteidénticos. Las3aplicacionesnuevas tienen únicamente CRLFfinal añadido por transportePowerShell; fuenteSHA256 y statementMD5 se verifican con esa transformación exacta. No repair/renombre/replay. SQL financiero y saludpreservados: digestab734013e83acb4e2880d50a35031da7/healthTRUE.
+
+Backups: SupabaseFree y UI sin backups/PITR; copiaslocales24octanterioresmarketing,offsite diferido porPO,no rehacer ni subir. No tareaWindowsPAZOencontrada; no se asegura ausencia de copias externas desconocidas. Cualquier export/restore futuro exige revisión, colecciónOFF y reaplicar purga/supresiones antes de reabrir. Logs API/DBFree1día,Authaudit1hora según [plan oficial](https://supabase.com/pricing); VercelHobby confirmado, runtime1hora según [documentación](https://vercel.com/docs/logs/runtime). No se modifican ni borran logs/backups históricos. La purga14d de tablas activas no elimina esas copias.
+
+Operación de privacidad: contacto existente publicado; verificar identidad en privado, limitar datos/ticket, ejecutar eliminación únicamente de atribución de la persona verificada, conservar obligacionesfinancieras y evidencia mínima de trámite bajo el ciclo existente de soporte. Objetivo operativo conservador: responder dentro45díascalendario, sin prórroga automática; respetar un plazo legal aplicable más corto. Referencia [CaliforniaAG](https://oag.ca.gov/privacy/ccpa), sin afirmar aplicabilidad global ni certificaciónlegal. Antes de restaurar, resolver solicitudes pendientes y comprobar que no vuelven filas retiradas; no reabrir si no se puede garantizarlo. No se crea un ledger perpetuo nuevo ni se interviene PayPal.
+
+**META_ADS_SPEND=NOT_STARTED. READY_TO_PUBLISH_THREE_META_ADS=NO hasta cierre comprobado.**
+
+Revalidación27oct00:48UTC: Cron conserva una sola ejecución periódica exitosa; segunda prevista06:17UTC (00:17 Guatemala). CandidatoPR135, HEADb02ac22f, cuatro workflows SUCCESS; lint dirigido PASS. La prueba de caducidad real del token quedó inconclusa por rechazo del challenge automatizado600010/300030; no llegó un token expirado al servidor. El rechazo estricto tras300s está probado únicamente con tiempo controlado en unidad. No se interpreta como PASS de caducidad real. Meta, inspección solo lectura: tres estados Borrador y cinco objetos pendientes de revisión/publicación; no se editaron ni publicaron ni se valida su aprobación por Meta.
+
+---
 # Marketing instalado OFF — postflight real, 26-oct-2026
 
 **Instalación dirigida ejecutada con GO explícito del PO. Recopilación y reportes

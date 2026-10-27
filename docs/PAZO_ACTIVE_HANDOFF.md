@@ -1,3 +1,17 @@
+## #130 — cambio de criterio del PO: cierre ahora y segundo Cron bajo seguimiento
+
+El PO, informado de que la espera de dos ciclos no es necesaria para registrar llegadas, ordena continuar ahora. Sustituye únicamente la espera previa de dos runs por una ejecución periódica exitosa más una prueba adicional real de purga; el segundo run periódico permanece bajo seguimiento. No se cuenta una llamada manual como run periódico ni se cambia el calendario de seis horas. Resto de privacidad, protecciones, CI y E2E permanece obligatorio. Esta decisión sustituye los HOLD históricos de dos runs de este documento; no autoriza publicar anuncios ni gastar en Meta. Fecha de publicación prevista26-oct según Guatemala, conservando fecha de términos financieros.
+
+---
+## #130 — CANDIDATO FINAL RETENIDO HASTA DOS RUNS REALES
+
+Producción actual: SHA2ebc2f34, Verceldpl_HJL3YicGG56kgpBkWmuKbgMf6rC7 READY, avisoOFF/seguridad ESEN publicado. SQL14d/policyv1, Cron4 `17 */6 * * *`, primer run real27oct00:17UTC SUCCESS. Segundo06:17UTC pendiente. SQLsingleuseAPI20261027001529 y Edge landingv5 instalados: token real409(gateOFF), replay403, missing/invalid403. Colección y reporte cliente permanecenOFF en producción. AuthConfirmemail activado porGO específico, retorno canon corregido; C/Dcorreo confirmado real+primera mascota200. SaludfinancieraTRUE/digestab734013e83acb4e2880d50a35031da7 intacto.
+
+Rama release/marketing-issue130-20261027 prepara flagsON, intakeconguardcorreoreal y avisoactivoESEN/fecha privacidad2026-10-27, preservando fecha/términosfinancieros. NO MERGE NI DEPLOY antes de comprobar2runs periódicos reales, latestSUCCESS/heartbeat≤7h, policy14/v1, Siteverify/replay y fuente/CIexactas. GO delPOya está delegado enissue130; no pedirlo de nuevo por operaciones ordinarias. No fake run/manual contado ni cambiarhorario paraacelerar. No publicar/gastarMeta.
+
+Después del gate: publicar candidato en orden seguro conservando DB OFF hasta aviso válido/Edge listos; después enabled=true conhealthvigente. Probar C/Datribuciónpropia/verificadacon1mascota, duplicados, QAretroexclusión y solicitud de supresión; helperlocal5340 mantienecredencialessolomemoria. Luegoalta nuevaE automática de puntaapunta mediante helper5341 y fuenteURLcanónica, sin mocks externos; clasificarE comoQA y verificar reporteadminreal0. Capturar3llegadasUTMreales202 y eliminarúnicamentedeltaQAexactomedianteoperador,sinborrartráficoreal. D7soloensayocontroladoaislado. RevisarPWA/idiomas/MapaDemo/pagos/hashEdge ySHAfinal. Actualizar este registro/postflight existente, issue130 y entregar matriz obligatoria solamente con evidencia. Cerrar helpers/Dockerpropios y desactivar seguimiento al terminar.
+
+---
 ## Orden vigente #130 — cierre integral autorizado (26-oct-2026)
 
 El PO autoriza completar privacidad, Turnstile, retención14d/Cron, pruebas reales y medición propia tras sus controles; merge/deploy marketing incluidos. Esta orden sustituye los gates históricos de GO separado únicamente en ese alcance. No publicar anuncios ni gastar; no modificar PayPal/Auth/otros módulos. Fuente: https://github.com/DigitalAppcorp/pazo-app/issues/130.

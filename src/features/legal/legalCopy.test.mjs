@@ -150,20 +150,22 @@ test('both languages disclose restricted PayPal records and separate revocable w
   }
 })
 
-test('gated campaign privacy notice is bilingual and links Cloudflare addendum without claiming collection is live', () => {
+test('released campaign notice is bilingual, accurate and links Cloudflare addendum', () => {
   assert.equal(PAZO_TURNSTILE_PRIVACY_ADDENDUM_URL, 'https://www.cloudflare.com/turnstile-privacy-policy/')
   for (const lang of ['es','en']) {
     const sections=legalPreview.privacy[lang].sections
-    const tracking=sections.find(s=>s.heading === (lang==='es'?'Atribución publicitaria (desactivada)':'Advertising attribution (currently disabled)'))
+    const tracking=sections.find(s=>s.heading === (lang==='es'?'Atribución publicitaria':'Advertising attribution'))
     const turnstile=sections.find(s=>s.heading === (lang==='es'?'Turnstile y protección contra abusos':'Turnstile and abuse protection'))
     assert.ok(tracking && turnstile)
-    assert.match(tracking.text,lang==='es'?/está desactivada actualmente/:/currently disabled/)
+    assert.match(tracking.text,lang==='es'?/medición propia de campañas/:/first-party campaign measurement/)
+    assert.doesNotMatch(tracking.text,/desactivada actualmente|currently disabled/)
     assert.match(tracking.text,/14/)
     assert.match(tracking.text,lang==='es'?/cada 6 horas/:/every 6 hours/)
     assert.match(tracking.text,lang==='es'?/72 horas/:/72 hours/)
     assert.match(tracking.text,lang==='es'?/no envía conversiones individuales a Meta/:/does not send individual conversions to Meta/)
     assert.match(turnstile.text,/Cloudflare Turnstile Invisible/)
-    assert.match(turnstile.text,lang==='es'?/no se ejecuta mientras/:/does not run while/)
+    assert.match(turnstile.text,lang==='es'?/resumen criptográfico irreversible/:/irreversible cryptographic digest/)
+    assert.match(turnstile.text,lang==='es'?/5 minutos/:/5 minutes/)
     assert.equal(turnstile.link?.href, PAZO_TURNSTILE_PRIVACY_ADDENDUM_URL)
     assert.match(turnstile.link?.label??'',/Turnstile Privacy Addendum/)
   }

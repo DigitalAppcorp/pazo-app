@@ -95,12 +95,13 @@ try{
   await context.route('**/*',async route=>{
    const request=route.request(),url=new URL(request.url())
    if(url.origin===origin){
-    if(enabled&&(url.pathname==='/src/features/marketing/marketingRuntime.ts'||url.pathname==='/src/features/admin/components/AdminMarketingPanel.tsx')){
+    if(url.pathname==='/src/features/marketing/marketingRuntime.ts'||url.pathname==='/src/features/admin/components/AdminMarketingPanel.tsx'){
      // Fetch only the already-validated loopback origin. Node's transport also
      // works on Windows hosts where APIRequestContext resets local requests.
      const response=await fetch(request.url());assert.equal(response.status,200);let source=await response.text()
      for(const flag of url.pathname.includes('marketingRuntime')?['PAZO_MARKETING_COLLECTION_ENABLED','PAZO_MARKETING_LANDING_ENABLED']:['PAZO_MARKETING_ADMIN_REPORT_ENABLED']){
-      const pattern=new RegExp('const '+flag+' ?= ?false');assert.ok(pattern.test(source));source=source.replace(pattern,'const '+flag+' = true')
+      // Test both states independently of the release candidate's literal flag.
+      const pattern=new RegExp('const '+flag+' ?= ?(?:true|false)');assert.ok(pattern.test(source));source=source.replace(pattern,'const '+flag+' = '+String(enabled))
      }
      return route.fulfill({status:200,contentType:'application/javascript',body:source})
     }
