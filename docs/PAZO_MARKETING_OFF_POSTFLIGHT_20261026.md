@@ -18,6 +18,8 @@ Operación de privacidad: contacto existente publicado; verificar identidad en p
 
 **META_ADS_SPEND=NOT_STARTED. READY_TO_PUBLISH_THREE_META_ADS=NO hasta cierre comprobado.**
 
+Revalidación27oct00:48UTC: Cron conserva una sola ejecución periódica exitosa; segunda prevista06:17UTC (00:17 Guatemala). CandidatoPR135, HEADb02ac22f, cuatro workflows SUCCESS; lint dirigido PASS. La prueba de caducidad real del token quedó inconclusa por rechazo del challenge automatizado600010/300030; no llegó un token expirado al servidor. El rechazo estricto tras300s está probado únicamente con tiempo controlado en unidad. No se interpreta como PASS de caducidad real. Meta, inspección solo lectura: tres estados Borrador y cinco objetos pendientes de revisión/publicación; no se editaron ni publicaron ni se valida su aprobación por Meta.
+
 ---
 # Marketing instalado OFF — postflight real, 26-oct-2026
 
