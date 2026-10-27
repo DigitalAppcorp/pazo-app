@@ -1,3 +1,8 @@
+## #130 — cierre activo verificado, con segundo Cron bajo seguimiento
+
+Tracking ACTIVE desde26oct19:09 Guatemala, producción9df24a1d/dpl_47U5Q21kxWGDiiyLh5hU62Yurp3c READY. Privacidad activa EN/ES, Siteverify humano, atribución automática por correo confirmado y primera mascota PASS; QA excluida/suprimida, reporte7/30/90, PWA/HTTP/DemoMapa y digest financiero PASS. [Postflight final y matriz](docs/PAZO_MARKETING_OFF_POSTFLIGHT_20261026.md). READY técnico YES bajo excepción PO a la espera previa de dos ciclos:1periódico SUCCESS+purga real adicional. Segundo run06:17UTC sigue pendiente, NO contado como PASS, bajo heartbeat pazo-130-completar-validaci-n-del-segundo-cron-y-cierre; verificar y retirar seguimiento al observarlo. No volver a desplegar/activar/crear QA ni repetir operaciones completadas. No publicar ni gastar Meta. Los HOLD/OFF inferiores son historia sustituida.
+
+---
 ## #130 — cambio de criterio del PO: cierre ahora y segundo Cron bajo seguimiento
 
 El PO, informado de que la espera de dos ciclos no es necesaria para registrar llegadas, ordena continuar ahora. Sustituye únicamente la espera previa de dos runs por una ejecución periódica exitosa más una prueba adicional real de purga; el segundo run periódico permanece bajo seguimiento. No se cuenta una llamada manual como run periódico ni se cambia el calendario de seis horas. Resto de privacidad, protecciones, CI y E2E permanece obligatorio. Esta decisión sustituye los HOLD históricos de dos runs de este documento; no autoriza publicar anuncios ni gastar en Meta. Fecha de publicación prevista26-oct según Guatemala, conservando fecha de términos financieros.

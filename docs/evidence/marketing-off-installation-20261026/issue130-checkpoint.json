@@ -1,9 +1,9 @@
 {
-  "kind": "ISSUE130_PROGRESS_NOT_FINAL_READINESS",
-  "productionSource": "2ebc2f3492b69771b2140b47c457b514bf5da729",
-  "deployment": "dpl_HJL3YicGG56kgpBkWmuKbgMf6rC7",
+  "kind": "ISSUE130_ACTIVE_POSTFLIGHT_UNDER_PO_AMENDED_CRON_CRITERION",
+  "productionSource": "9df24a1d52de28788aa212764ffe23c3721e0222",
+  "deployment": "dpl_47U5Q21kxWGDiiyLh5hU62Yurp3c",
   "canonicalHost": "pazo-app.vercel.app",
-  "collection": "OFF",
+  "collection": "ACTIVE",
   "retentionDays": 14,
   "policyVersion": "pazo-marketing-attribution-notice-v1",
   "cron": {
@@ -20,10 +20,97 @@
       1,
       3
     ],
-    "manualCallsCountedAsPeriodic": false
+    "manualCallsCountedAsPeriodic": false,
+    "additionalManualProof": {
+      "at": "2026-10-27T01:02:05.560371Z",
+      "expiredDesignatedQaAcquisitionRemoved": 1,
+      "expiredDesignatedQaAggregateRemoved": 1,
+      "remainingQaFixtureRows": 0,
+      "countsAsPeriodic": false
+    },
+    "followUpAutomation": "pazo-130-completar-validaci-n-del-segundo-cron-y-cierre"
   },
   "privacyBrowser": {
-    "cases": 6,
+    "cases": [
+      {
+        "width": 320,
+        "locale": "en-US",
+        "status": 200,
+        "lang": "en",
+        "notice": true,
+        "effectiveDate": true,
+        "retention": true,
+        "securityDigest": true,
+        "addendum": "https://www.cloudflare.com/turnstile-privacy-policy/",
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "width": 320,
+        "locale": "es-GT",
+        "status": 200,
+        "lang": "es",
+        "notice": true,
+        "effectiveDate": true,
+        "retention": true,
+        "securityDigest": true,
+        "addendum": "https://www.cloudflare.com/turnstile-privacy-policy/",
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "locale": "en-US",
+        "status": 200,
+        "lang": "en",
+        "notice": true,
+        "effectiveDate": true,
+        "retention": true,
+        "securityDigest": true,
+        "addendum": "https://www.cloudflare.com/turnstile-privacy-policy/",
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "width": 390,
+        "locale": "es-GT",
+        "status": 200,
+        "lang": "es",
+        "notice": true,
+        "effectiveDate": true,
+        "retention": true,
+        "securityDigest": true,
+        "addendum": "https://www.cloudflare.com/turnstile-privacy-policy/",
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "width": 1440,
+        "locale": "en-US",
+        "status": 200,
+        "lang": "en",
+        "notice": true,
+        "effectiveDate": true,
+        "retention": true,
+        "securityDigest": true,
+        "addendum": "https://www.cloudflare.com/turnstile-privacy-policy/",
+        "overflow": false,
+        "errors": []
+      },
+      {
+        "width": 1440,
+        "locale": "es-GT",
+        "status": 200,
+        "lang": "es",
+        "notice": true,
+        "effectiveDate": true,
+        "retention": true,
+        "securityDigest": true,
+        "addendum": "https://www.cloudflare.com/turnstile-privacy-policy/",
+        "overflow": false,
+        "errors": []
+      }
+    ],
     "languages": [
       "en-US",
       "es-GT"
@@ -36,7 +123,9 @@
     "noticePublished": true,
     "securityDigestDisclosure": true,
     "overflow": false,
-    "pageErrors": 0
+    "pageErrors": 0,
+    "activeNotice": true,
+    "effectiveDate": "2026-10-26"
   },
   "turnstile": {
     "realProvider": true,
@@ -52,38 +141,89 @@
     "rawTokensIpsSecretsInMarketingTablesOrEvidence": false,
     "initialSecretWasVisibleInUiInspection": true,
     "ownerConfirmedRotationAndSecureReplacement": true,
-    "expiryRealTest": "INCONCLUSIVE: automatic browser600010; later native challenge300030. No expired token reached server. Strict300s expiry rejection PASS in controlled-time unit tests."
+    "expiryRealTest": "INCONCLUSIVE: automatic browser600010; later native challenge300030. No expired token reached server. Strict300s expiry rejection PASS in controlled-time unit tests.",
+    "currentHumanProof": {
+      "ownerConfirmedNormalVisit": true,
+      "observedAt": "2026-10-27T01:20:28.371547Z",
+      "creative": "perfil_en",
+      "landingSignalsBefore": 0,
+      "landingSignalsAfter": 1,
+      "securityDigestCountAfter": 1,
+      "qaSignalRemovedWithExactDeltaGuard": true
+    },
+    "automatedLandingSignals": "Not accepted in automated browsers; production security was not weakened. A human visit passed.",
+    "automatedTestingReference": "https://developers.cloudflare.com/turnstile/troubleshooting/testing/"
   },
   "qa": {
     "labels": [
+      "A",
+      "B",
       "C",
-      "D"
+      "D",
+      "E"
     ],
-    "realEmailsDeliveredAndConfirmed": true,
-    "canonicalReturn": true,
-    "firstPetHttp": [
-      200,
-      200
+    "trustedAppMetadataExcluded": 5,
+    "realEmailAndFirstPetProofLabels": [
+      "C",
+      "D",
+      "E"
     ],
-    "firstPetCountEach": 1,
-    "automaticAttributionAfterRelease": "PENDING_QA_E",
-    "attributionAndLandingRowsSoFar": 0,
-    "d7": "isolated controlled-time tests only"
+    "creativeAssignment": {
+      "C": "comunidad_en",
+      "D": "qr_en",
+      "E": "perfil_en"
+    },
+    "controlledIntakeCAndD": {
+      "loginHttp": 200,
+      "intakeHttp": 202,
+      "duplicateHttp": 409
+    },
+    "newEAutomaticFrontend": {
+      "signupAt": "2026-10-27T01:09:42.908602Z",
+      "signupHttp": 200,
+      "sessionBeforeConfirmation": false,
+      "emailActuallyDelivered": true,
+      "confirmationCanonicalReturn": true,
+      "automaticIntakeAt": "2026-10-27T01:10:13.799635Z",
+      "automaticIntakeHttp": 202,
+      "firstPetHttp": 200,
+      "firstPetCount": 1,
+      "overflow": false
+    },
+    "retroactiveExclusionProvenBeforeWithdrawal": true,
+    "postQaIntakeRejectedHttp": 409,
+    "withdrawalBridgeRemovedOnlyThreeDesignatedQaAttributions": true,
+    "qaPetsPreserved": 3,
+    "remainingAcquisitions": 0,
+    "remainingLandingRowsAfterKnownQaDeltaRemoval": 0,
+    "d7OnlyControlledTimeTests": true,
+    "fabricatedRealUserConversions": false
   },
   "admin": {
     "realExistingAdminSession": true,
-    "periods": [
+    "initialPausedRpcHttp": [
+      200,
+      200,
+      200
+    ],
+    "activeUiPeriodsVerified": [
       7,
       30,
       90
     ],
-    "http": [
-      200,
-      200,
-      200
-    ],
-    "status": "paused",
-    "publicUiReportFlag": false,
+    "status": "collecting",
+    "publicUiReportFlag": true,
+    "showedQaEBeforeClassification": {
+      "verifiedSignups": 1,
+      "firstPets": 1
+    },
+    "afterQaExclusion": {
+      "verifiedSignups": 0,
+      "firstPets": 0,
+      "d7": 0
+    },
+    "anonymousDeniedHttp": 401,
+    "personLevelDataShown": false,
     "jwtExported": false
   },
   "financial": {
@@ -103,16 +243,159 @@
   },
   "releaseCandidate": {
     "pullRequest": "https://github.com/DigitalAppcorp/pazo-app/pull/135",
-    "functionalHead": "933aead1463662a6bbafe606a644b23af242e315",
-    "draft": true,
+    "functionalHead": "4588db6f328ce4421ef5524a8ba2f091269cb09d",
+    "merged": true,
+    "mergeCommit": "9df24a1d52de28788aa212764ffe23c3721e0222",
+    "workflowRuns": [
+      40430310361,
+      40430310449,
+      40430310410,
+      40430310365
+    ],
+    "allWorkflows": "success",
     "localMarketingTests": 44,
     "localLegalTests": 9,
     "localPgChecksPlusLegacy": 38,
     "linuxConcurrentWorkers": 40,
     "windowsConcurrentWorkers": 8,
     "build": "PASS",
-    "mergeAndDeployHeldUntilTwoRealCronRuns": true
+    "mergeAndDeployHeldUntilTwoRealCronRuns": false,
+    "amendedCriterionSatisfied": true
   },
   "metaAdsSpend": "NOT_STARTED",
-  "readyToPublishThreeMetaAds": false
+  "readyToPublishThreeMetaAds": true,
+  "collectionEnabledAt": "2026-10-27T01:09:15.382032Z",
+  "acceptanceAmendment": {
+    "ownerDirectedImmediateActivationAfterExplanation": true,
+    "original": "Two periodic successful runs before activation",
+    "replacement": "One successful periodic run plus an additional real purge; observe second periodic run after activation",
+    "issueComment": 6431092022,
+    "scheduleChanged": false,
+    "manualRunCountedAsPeriodic": false
+  },
+  "attributionEdge": {
+    "version": 4,
+    "verifyJwt": true,
+    "bundleSha256": "32407b6cdc21a1be4c8c0706bd11df55d58633177f7e92d2370d534b6dc3ee76",
+    "filesReadbackByteIdentical": 4,
+    "verifiedEmailAutoconfirmGuard": true
+  },
+  "publicPwa": {
+    "source": "pazo_public_https_pwa_gate_v1",
+    "origin": "https://pazo-app.vercel.app",
+    "ready": true,
+    "checks": [
+      {
+        "id": "home",
+        "code": "pass"
+      },
+      {
+        "id": "paypalReturn",
+        "code": "pass"
+      },
+      {
+        "id": "paypalCancel",
+        "code": "pass"
+      },
+      {
+        "id": "manifest",
+        "code": "pass"
+      },
+      {
+        "id": "serviceWorker",
+        "code": "pass"
+      },
+      {
+        "id": "icon192",
+        "code": "pass"
+      },
+      {
+        "id": "icon512",
+        "code": "pass"
+      }
+    ]
+  },
+  "publicHttp": [
+    {
+      "name": "Auth healthy",
+      "http": 200,
+      "pass": true
+    },
+    {
+      "name": "Email confirmation required",
+      "http": 200,
+      "pass": true
+    },
+    {
+      "name": "Public map catalog",
+      "http": 200,
+      "pass": true
+    },
+    {
+      "name": "Anonymous admin report denied",
+      "http": 401,
+      "pass": true
+    },
+    {
+      "name": "Private schema unavailable",
+      "http": 406,
+      "pass": true
+    },
+    {
+      "name": "Missing challenge rejected",
+      "http": 403,
+      "pass": true
+    },
+    {
+      "name": "Invalid challenge rejected",
+      "http": 403,
+      "pass": true
+    },
+    {
+      "name": "Missing user authentication rejected",
+      "http": 401,
+      "pass": true
+    }
+  ],
+  "demoMap": [
+    {
+      "locale": "en-US",
+      "http": 200,
+      "demo": true,
+      "mapState": "ready",
+      "overflow": false,
+      "errors": [],
+      "physicalInstalledPwa": false
+    },
+    {
+      "locale": "es-GT",
+      "http": 200,
+      "demo": true,
+      "mapState": "ready",
+      "overflow": false,
+      "errors": [],
+      "physicalInstalledPwa": false
+    }
+  ],
+  "limitations": [
+    "Second real periodic run remains pending and under follow-up; it is not falsely counted as passed.",
+    "Real expired-token timer experiment inconclusive; strict300s rejection passed controlled-time unit tests.",
+    "Only one anonymous human landing signal was observed; all three canonical URLs passed HTTP/browser checks and all three creatives had actual verified-account attribution.",
+    "Physical installed-device PWA testing and a real PayPal purchase were not performed.",
+    "Privacy publication is not a legal compliance certification."
+  ],
+  "matrix": {
+    "PRIVACY_NOTICE_PUBLIC": "PASS",
+    "CLOUDFLARE_SITEVERIFY_REAL": "PASS",
+    "RETENTION_14D_AND_CRON": "PASS",
+    "CRON_REAL_RUNS_2": "BLOCKED",
+    "MARKETING_COLLECTION": "ACTIVE",
+    "HOSTED_UTM_AUTH_FIRST_PET_E2E": "PASS",
+    "ENGLISH_LANDING": "PASS",
+    "ADMIN_REPORT": "PASS",
+    "PAYPAL_AUTH_PWA_NO_REGRESSION": "VERIFIED",
+    "READY_TO_PUBLISH_THREE_META_ADS": "YES",
+    "META_ADS_SPEND": "NOT_STARTED"
+  },
+  "readyScope": "Technical readiness under the Product Owner amended Cron criterion; no Meta publication or spend"
 }
