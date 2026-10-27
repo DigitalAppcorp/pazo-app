@@ -6,6 +6,16 @@ let checks=0
 const check=(value,message)=>{assert.ok(value,message);checks++}
 const reject=(query)=>assert.throws(()=>sql(query))
 check(sql("SELECT enabled::text||':'||retention_days FROM marketing_private.collection_gate")==='false:0','Default gate/policy untouched')
+const digest='b'.repeat(64)
+const claims=await Promise.all(Array.from({length:12},()=>sqlAsync(`SET ROLE service_role;SELECT public.pazo_marketing_claim_challenge_v1('${digest}')`)))
+check(claims.filter(v=>v==='t').length===1,'Exactly one concurrent claim of the same digest succeeds')
+reject(`SET ROLE authenticated;SELECT public.pazo_marketing_claim_challenge_v1('${'c'.repeat(64)}')`)
+check(sql("SET ROLE service_role;SELECT public.pazo_marketing_claim_challenge_v1('raw_token_is_not_a_digest')")==='f','Raw tokens cannot enter the security table')
+sql("UPDATE marketing_private.challenge_uses SET expires_at=now()-interval '1 second';SELECT public.pazo_marketing_prune_all_v1()")
+check(sql('SELECT count(*) FROM marketing_private.challenge_uses')==='0','Expired digests purge even with collection OFF and retention0')
+sql("INSERT INTO marketing_private.challenge_uses(digest) SELECT lpad(to_hex(n),64,'0') FROM generate_series(1,2048)n")
+check(sql(`SET ROLE service_role;SELECT public.pazo_marketing_claim_challenge_v1('${digest}')`)==='f','Security ledger is bounded at 2048 live records')
+sql('TRUNCATE marketing_private.challenge_uses')
 reject(readFileSync('supabase/operations/marketing-retention-cron-activation.sql','utf8'))
 reject("UPDATE marketing_private.collection_gate SET enabled=true,enabled_at=now(),retention_days=30,policy_version=NULL")
 reject('SELECT marketing_private.install_retention_schedule()')
@@ -93,4 +103,4 @@ for(const [index,ad] of official.ads.entries()){
  check(accepted==='t|t',`Official ${ad.format} URL passes actual SQL attribution and landing; rolled back`)
 }
 await import('./marketing-onboarding-regression.mjs')
-console.log(`PASS ${checks} marketing PG17 checks plus legacy SQL; real concurrency, atomic deletion and explicit cron provider mock`)
+console.log(`PASS ${checks} marketing PG17 checks plus legacy SQL; real concurrent SQL (${process.platform==='win32'?'8 Windows workers':'40 Linux workers'}), atomic deletion and explicit cron provider mock`)

@@ -16,3 +16,19 @@ export function createMarketingLandingSubmit({url,serviceKey,fetchImpl=fetch}={}
     return (await resp.json())===true
   }
 }
+
+export function createMarketingChallengeClaim({url,serviceKey,fetchImpl=fetch}={}){
+ const expected='https://mrybvqdebbgcayuvgkkr.supabase.co'
+ if(url!==expected||typeof serviceKey!=='string'||serviceKey.length<15)throw Error('marketing_replay_not_configured')
+ return async digest=>{
+  if(typeof digest!=='string'||! /^[a-f0-9]{64}$/.test(digest))return false
+  try{
+   const response=await fetchImpl(expected+'/rest/v1/rpc/pazo_marketing_claim_challenge_v1',{
+    method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(5000),
+    headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,'content-type':'application/json','accept':'application/json'},
+    body:JSON.stringify({p_digest:digest}),
+   })
+   return response.status===200&&(await response.json())===true
+  }catch{return false}
+ }
+}

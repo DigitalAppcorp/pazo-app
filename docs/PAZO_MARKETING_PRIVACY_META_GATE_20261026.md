@@ -150,3 +150,7 @@ Signup QA real devolvió sesión y email_confirmed_at sin envío de correo; GET 
 ### E2E: retorno oficial y A03 (#130)
 PO aprobó activarConfirmemail:ON y mailer_autoconfirm=false verificados. CorreoQA real entregado; primer enlace expuso configuración SiteURL antigua. Corregido SiteURL a https://pazo-app.vercel.app y añadidos root/recovery oficiales conservando7URLs previas. Verificar entrega/retorno con alta nueva. A03 devolvió403 porque el RPCinvoker leía onboarding_completed sinSELECT. SQLdirigido20261026234503 retira solo esa lectura redundante, sin nuevosgrants ni SECURITYDEFINER, conserva propietario yEXISTSmascota; ensayoalojadoROLLBACKPASS. RegressionPG17 reutiliza funciónF14+transformaciónF17 auténticas; no cambia SQLhistóricos/financieros. InstalaciónpendienteCI.
 
+
+### Siteverify real y anti-replay independiente (#130)
+Chrome habitual generó token válido; dos reusos (inmediato y tras1.5/5s) llegaron al gateDBOFF409. No certificar uso único por suponer contrato proveedor. Nueva protección solicita reclamo atómico de SHA256 irreversible tras Siteverify, sin almacenar token/IP/cuenta/URL. Tabla privadaFORCERLS,servicerole sinaccesodirecto,bridgeexclusivoservidor,2048digests máximo,vigencia5min,limpiezaenreclamosyenCron6h aunOFF. Token inválido no accede al ledger. SQLdirigido20261027000301 preparado;avisoESENactualizado26octexplica cicloseguridad. NohabilitarcolecciónhastaSQL/Edge+replayrealPASS.
+
