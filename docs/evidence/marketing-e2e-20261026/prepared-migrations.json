@@ -4,28 +4,43 @@
     {
       "version": "20261024020632",
       "sha256": "3259767f49e9b3be7dbe2dbe0a979c2a36a25ac21bcd74e3b8eaa5ec8ba85bee",
-      "path": "supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql"
+      "path": "supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql",
+      "hostedVersion": "20261026201027",
+      "hostedStatementMd5": "1f38e25c2fd0dd0b2057a7b1e9fcb77d",
+      "transportSuffix": ""
     },
     {
       "version": "20261024034549",
       "sha256": "72e5edda023a49c44a81d742092c026359815765afc9ce8c8067372847c40a3e",
-      "path": "supabase/migrations/20261024034549_pazo_marketing_retention_health.sql"
+      "path": "supabase/migrations/20261024034549_pazo_marketing_retention_health.sql",
+      "hostedVersion": "20261026201043",
+      "hostedStatementMd5": "a45b2a3b382cf621dd9d42ae7569992e",
+      "transportSuffix": ""
     },
     {
       "version": "20261026233828",
       "sha256": "6175e0f3703bb916a2ef96791e3dab6620e26ab1e7d6915bac3d283b281ea0ab",
-      "path": "supabase/migrations/20261026233828_pazo_marketing_qa_metadata_exclusion.sql"
+      "path": "supabase/migrations/20261026233828_pazo_marketing_qa_metadata_exclusion.sql",
+      "hostedVersion": "20261027000059",
+      "hostedStatementMd5": "f2060d45da647307cb889d683922dc24",
+      "transportSuffix": "\r\n"
     },
     {
       "version": "20261026234503",
       "sha256": "67cb1fa22cd56413fe5c514c2bbadd6b5d09c5ffd68ece9ea282a2173c79a0ed",
-      "path": "supabase/migrations/20261026234503_pazo_marketing_onboarding_invoker_fix.sql"
+      "path": "supabase/migrations/20261026234503_pazo_marketing_onboarding_invoker_fix.sql",
+      "hostedVersion": "20261027000101",
+      "hostedStatementMd5": "c559a88730e71126f36d544a917314f2",
+      "transportSuffix": "\r\n"
     },
     {
       "version": "20261027000301",
       "sha256": "028234f3477070c1791f5b0c78fd1c7ced9cd52414e6bfaa8a0efd18390d33c7",
-      "path": "supabase/migrations/20261027000301_pazo_marketing_single_use_challenge.sql"
+      "path": "supabase/migrations/20261027000301_pazo_marketing_single_use_challenge.sql",
+      "hostedVersion": "20261027001529",
+      "hostedStatementMd5": "e1a5fbd5c2d479236f74fe70cae94c9f",
+      "transportSuffix": "\r\n"
     }
   ],
-  "status": "NOT_APPLIED"
+  "status": "HOSTED_TARGETED_MAPPED"
 }

@@ -43,13 +43,16 @@ test('archive is deliberately non-deployable and remains fenced',()=>{
  assert.match(README,/SOURCE_BASELINE_PRE_20261005_UNAVAILABLE/)
 })
 
-test('exact reviewed marketing sources remain accounted for without global production push',()=>{
- assert.equal(marketing.status,'NOT_APPLIED')
+test('reviewed marketing source bytes match their explicitly recorded targeted API installations',()=>{
+ assert.equal(marketing.status,'HOSTED_TARGETED_MAPPED')
  assert.equal(marketing.productionPushAllowed,false)
  assert.deepEqual(pendingMarketing,['20261024020632','20261024034549','20261026233828','20261026234503','20261027000301'])
  for(const r of marketing.records){
   assert.match(r.path,new RegExp('^supabase/migrations/'+r.version+'_pazo_marketing_[a-z_]+[.]sql$'))
   assert.equal(createHash('sha256').update(readFileSync(new URL(r.path,root))).digest('hex'),r.sha256)
+  assert.match(r.hostedVersion,/^\d{14}$/)
+  assert.ok(['','\r\n'].includes(r.transportSuffix))
+  assert.equal(createHash('md5').update(Buffer.concat([readFileSync(new URL(r.path,root)),Buffer.from(r.transportSuffix)])).digest('hex'),r.hostedStatementMd5)
  }
 })
 
