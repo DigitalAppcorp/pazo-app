@@ -103,4 +103,4 @@ for(const [index,ad] of official.ads.entries()){
  check(accepted==='t|t',`Official ${ad.format} URL passes actual SQL attribution and landing; rolled back`)
 }
 await import('./marketing-onboarding-regression.mjs')
-console.log(`PASS ${checks} marketing PG17 checks plus legacy SQL; ${process.platform==='win32'?'serial Windows transport; concurrency requires Linux CI':'real concurrent SQL'}, atomic deletion and explicit cron provider mock`)
+console.log(`PASS ${checks} marketing PG17 checks plus legacy SQL; real concurrent SQL (${process.platform==='win32'?'8 Windows workers':'40 Linux workers'}), atomic deletion and explicit cron provider mock`)
