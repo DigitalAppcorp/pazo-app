@@ -4,7 +4,7 @@ import { requestLandingChallenge } from './landingChallenge'
 import { supabase } from '../../services/supabaseClient'
 
 /**
- * Issue130 candidate: deploy only after the second real retention run and
+ * Issue130 release: deploy only after the approved retention evidence and
  * provider/privacy checks. SQL collection and retention health remain separate.
  * First-party measurement only; no Pixel or individual Meta conversion upload.
  */
