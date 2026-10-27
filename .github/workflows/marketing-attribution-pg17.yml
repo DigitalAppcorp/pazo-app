@@ -70,11 +70,12 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
-      - name: Assert issue130 provider preflight preserves collection OFF
+      - name: Assert issue130 candidate flags preserve independent closed SQL installation defaults
         run: |
-          grep -Fq 'export const PAZO_MARKETING_COLLECTION_ENABLED = false' src/features/marketing/marketingRuntime.ts
-          grep -Fq 'export const PAZO_MARKETING_LANDING_ENABLED = false' src/features/marketing/marketingRuntime.ts
-          grep -Fq 'const MARKETING_INTAKE_RELEASED = false' supabase/functions/pazo-marketing-attribution/index.ts
+          grep -Fq 'export const PAZO_MARKETING_COLLECTION_ENABLED = true' src/features/marketing/marketingRuntime.ts
+          grep -Fq 'export const PAZO_MARKETING_LANDING_ENABLED = true' src/features/marketing/marketingRuntime.ts
+          grep -Fq 'const MARKETING_INTAKE_RELEASED = true' supabase/functions/pazo-marketing-attribution/index.ts
+          grep -Fq 'PAZO_MARKETING_ADMIN_REPORT_ENABLED=true' src/features/admin/components/AdminMarketingPanel.tsx
           grep -Fq 'const MARKETING_LANDING_RELEASED=true' supabase/functions/pazo-marketing-landing/index.ts
           grep -Fq 'AND marketing_private.retention_ready(retention_days,policy_version)' supabase/migrations/20261024034549_pazo_marketing_retention_health.sql
           grep -Fq 'enabled boolean NOT NULL DEFAULT false' supabase/migrations/20261024020632_pazo_marketing_firstparty_attribution.sql

@@ -20,8 +20,8 @@ test('Campaigns is a responsive section, not a separate public route',()=>{
  assert.ok(panel.includes('grid grid-cols-2 gap-3 xl:grid-cols-4'))
  assert.ok(panel.includes('overflow-x-auto'))
 })
-test('marketing admin reader is gated off without sample data',()=>{
- assert.ok(panel.includes('PAZO_MARKETING_ADMIN_REPORT_ENABLED=false'))
+test('authorized marketing admin reader uses real aggregates without sample data',()=>{
+ assert.ok(panel.includes('PAZO_MARKETING_ADMIN_REPORT_ENABLED=true'))
  assert.ok(panel.includes('if(!PAZO_MARKETING_ADMIN_REPORT_ENABLED)return'))
  assert.ok(panel.includes('No se muestran cifras ficticias'))
  assert.ok(panel.includes('Not unique visitors'))

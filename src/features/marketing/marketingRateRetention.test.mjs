@@ -36,9 +36,9 @@ test('retention cleanup is service-only and no automatic cron is installed by mi
  assert.ok(tests.includes('Old burst-budget record persisted with collection OFF'))
 })
 
-test('client collection stays OFF while released challenge transport retains the independent SQL gate',()=>{
- assert.ok(browser.includes('PAZO_MARKETING_COLLECTION_ENABLED = false'))
- assert.ok(browser.includes('PAZO_MARKETING_LANDING_ENABLED = false'))
+test('authorized issue130 release candidate retains independent SQL collection and retention controls',()=>{
+ assert.ok(browser.includes('PAZO_MARKETING_COLLECTION_ENABLED = true'))
+ assert.ok(browser.includes('PAZO_MARKETING_LANDING_ENABLED = true'))
  assert.ok(landing.includes('MARKETING_LANDING_RELEASED=true'))
  assert.ok(landing.includes('createMarketingChallengeVerifier'))
  assert.ok(hardened.includes('AND marketing_private.retention_ready(retention_days,policy_version)'))

@@ -4,13 +4,13 @@ import { requestLandingChallenge } from './landingChallenge'
 import { supabase } from '../../services/supabaseClient'
 
 /**
- * Explicit launch gate: OFF in this implementation. No provider SDK, Pixel,
- * external transport, cookie or database writer is active. A separate
- * privacy notice review, backend contract and Product Owner GO are required.
+ * Issue130 candidate: deploy only after the second real retention run and
+ * provider/privacy checks. SQL collection and retention health remain separate.
+ * First-party measurement only; no Pixel or individual Meta conversion upload.
  */
-export const PAZO_MARKETING_COLLECTION_ENABLED = false
+export const PAZO_MARKETING_COLLECTION_ENABLED = true
 /** Independent release control; landing signals never start implicitly. */
-export const PAZO_MARKETING_LANDING_ENABLED = false
+export const PAZO_MARKETING_LANDING_ENABLED = true
 
 const recorder = () => {
   if (!PAZO_MARKETING_COLLECTION_ENABLED || typeof window === 'undefined') return null

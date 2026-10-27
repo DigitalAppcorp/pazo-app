@@ -1,9 +1,10 @@
-// Prepared, NOT RELEASED. A deployment of this source remains inert.
+// Issue130 candidate. Deploy only with verified-email and retention controls.
+// The independent SQL collection gate and current purge health remain mandatory.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createMarketingIntakeHandler } from './intakeCore.mjs'
 import { createMarketingProvider } from './intakeAdapter.mjs'
 
-const MARKETING_INTAKE_RELEASED = false
+const MARKETING_INTAKE_RELEASED = true
 function setup(){
   if(!MARKETING_INTAKE_RELEASED) return createMarketingIntakeHandler()
   try {

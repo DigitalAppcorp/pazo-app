@@ -5,7 +5,7 @@ import { AdminGlyph } from './AdminVisuals'
 /** Read/collection are independently gated. No RPC call until the privacy,
  * migration and report-access review receive an explicit release GO.
  */
-export const PAZO_MARKETING_ADMIN_REPORT_ENABLED=false
+export const PAZO_MARKETING_ADMIN_REPORT_ENABLED=true
 
 const campaigns:Record<string,{es:string;en:string}>={
  perfil_es:{es:'Perfil · español',en:'Profile · Spanish'},
