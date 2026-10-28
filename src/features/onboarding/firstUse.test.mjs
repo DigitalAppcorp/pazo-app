@@ -14,7 +14,18 @@ async function load(file){const f=path.join(cache,path.basename(file).replace(/\
 const {shouldOfferFirstUse,isCurrentFirstUse}=await load('src/features/onboarding/firstUse.ts')
 const {FirstUsePrompt}=await load('src/features/onboarding/FirstUsePrompt.tsx')
 const {HomeFeedStatus}=await load('src/features/feed/HomeFeedStatus.tsx')
+const {petSpeciesLabel,petAgeLabel}=await load('src/features/i18n/petLabels.ts')
 test.after(()=>fs.rmSync(cache,{recursive:true,force:true}))
+test('species presentation is localized without rewriting enums or custom labels',()=>{
+ for(const [value,label] of Object.entries({gato:'Cat',perro:'Dog',conejo:'Rabbit',ave:'Bird',otro:'Other'})){
+  assert.equal(petSpeciesLabel(value,'en'),label);assert.equal(petSpeciesLabel(value,'es'),value)
+ }
+ assert.equal(petSpeciesLabel('custom owner label','en'),'custom owner label')
+})
+test('only the service empty-age placeholder is translated, owner-entered age stays intact',()=>{
+ assert.equal(petAgeLabel('Desconocida','en'),'Unknown');assert.equal(petAgeLabel('Desconocida','es'),'Desconocida')
+ for(const value of ['3 años','2 years','owner text',''])assert.equal(petAgeLabel(value,'en'),value)
+})
 test('only a successful first owned pet gets an offer; no guest, existing account or duplicate completion',()=>{
  assert.equal(shouldOfferFirstUse([],'owner','pet'),true)
  for(const args of [[['old'],'owner','pet'],[[],undefined,'pet'],[[],'owner',undefined],[[],'owner','pet',true]])assert.equal(shouldOfferFirstUse(...args),false)

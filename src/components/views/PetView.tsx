@@ -1,6 +1,7 @@
 import {SupporterProfileEntry} from '../../features/supporter/components/SupporterProfileEntry'
 import { FirstUsePrompt } from '../../features/onboarding/FirstUsePrompt'
 import type { FirstUseIntent } from '../../features/onboarding/firstUse'
+import { petSpeciesLabel, petAgeLabel } from '../../features/i18n/petLabels'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
 import { useEffect, useLayoutEffect, useState, useRef } from 'react'
@@ -110,7 +111,7 @@ export const PetView = ({
       const main=care?.closest('main')
       if (!qr||!care||!main) return
       qr.focus({preventScroll:true})
-      const dock=main.closest('[data-pazo-app-shell]')?.querySelector('nav')
+      const dock=main.closest('[data-pazo-app-shell]')?.querySelector('nav[data-pazo-floating-nav="true"]')
       const dockTop=dock?Math.min(dock.getBoundingClientRect().top,...Array.from(dock.querySelectorAll('button')).map(button=>button.getBoundingClientRect().top)):main.getBoundingClientRect().bottom
       const safeBottom=Math.min(main.getBoundingClientRect().bottom,dockTop-12)
       const coveredByDock=care.getBoundingClientRect().bottom-safeBottom
@@ -295,7 +296,7 @@ export const PetView = ({
           </h2>
           {!isEditing && (
             <p className="text-xs text-[#5C7470]">
-              {currentPet.species.toUpperCase()} • {currentPet.age}{currentPet.breed ? ` • ${currentPet.breed}` : ''}
+              {petSpeciesLabel(currentPet.species,lang).toUpperCase()} • {petAgeLabel(currentPet.age,lang)}{currentPet.breed ? ` • ${currentPet.breed}` : ''}
             </p>
           )}
         </div>
@@ -618,7 +619,7 @@ export const PetView = ({
                 <div className="flex flex-wrap items-center gap-1.5 pr-16">
                   <h3 className="text-lg font-black text-[#204E4A] truncate">{currentPet.name}</h3>
                   <span className="text-[13px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
-                    {currentPet.species}
+                    {petSpeciesLabel(currentPet.species,lang)}
                   </span>
                 </div>
                 <p className="text-xs text-[#5C7470] mt-0.5">{currentPet.bio}</p>
@@ -714,7 +715,7 @@ export const PetView = ({
                 <span className="block text-xs text-[#5C7470]">
                   {lang === 'es'
                     ? 'Identidad que puedes compartir públicamente'
-                    : 'Identity you can safely share'}
+                    : 'Public profile you can share'}
                 </span>
               </span>
             </span>

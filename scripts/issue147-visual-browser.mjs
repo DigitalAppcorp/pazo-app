@@ -68,7 +68,9 @@ try{
   if(context.routeWebSocket)await context.routeWebSocket('**/*',ws=>ws.close())
   await context.addInitScript(({session,lang})=>{localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language_preference_v1',lang)},{session,lang})
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')console.error('QA console:',m.text())})
-  await page.goto(origin)
+  // Hosted assets travel through authenticated CLI; DOM readiness, not the
+  // unrelated font-resource load event, is the navigation boundary.
+  await page.goto(origin,{waitUntil:'domcontentloaded',timeout:90000})
   await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
   await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
   await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
@@ -80,6 +82,9 @@ try{
   if(onPet){
    await toolsEntry.waitFor()
    await settle(page)
+   if(height===844)assert.equal(await page.locator('main').evaluate(e=>e.scrollTop),0,'first arrival must not jump past identity into loss/membership tools')
+   await page.getByText(lang==='es'?'gato':'Cat',{exact:true}).first().waitFor()
+   if(lang==='en')assert.equal(await page.locator('main').getByText('Desconocida',{exact:true}).count(),0)
    if(height!==844)await page.waitForFunction(()=>{
     const care=[...document.querySelectorAll('main button')].find(b=>/Cuidados y Agenda|Care & Agenda/.test(b.textContent))
     return care&&care.getBoundingClientRect().bottom<=innerHeight-103
