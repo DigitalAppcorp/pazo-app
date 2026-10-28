@@ -1,3 +1,7 @@
+## Lugares contextual —27-oct-2026
+
+Se reubican las seis fake doors sin nuevos datos, proveedores ni tablas. Se conservan module_key, sesión y fuente cerrada place_detail_<categoría>, interés explícito e intención opcional existentes; se evita instrumentar destinos ocultos. El cambio de contexto modifica la exposición y sus denominadores; no equivale a una nueva cohorte causalmente comparable. Ver PAZO_PLACES_APPROVED_UX_RELEASE_20261027.md.
+
 ## Comunidades — navegación contextual, en rama (26-oct-2026)
 
 Reubica5fake doors conservando tablas/columnas de validación existentes, sesión,

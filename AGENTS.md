@@ -1,3 +1,8 @@
+## Lugares — UX aprobada, integración y publicación autorizadas (27-oct-2026)
+
+PO aprueba propuesta02+idioma03 y ordena producción. Integración de presentación sobre controladores/servicios actuales; sin DB, Auth, finanzas ni marketing. [Alcance, invariantes y gates](docs/PAZO_PLACES_APPROVED_UX_RELEASE_20261027.md). Candidato en curso: CI exacto, merge y postflight pendientes. Los gates de otras tareas se conservan en su propio alcance.
+
+---
 ## #130 — seguimiento del segundo Cron completado
 
 Comprobado28oct00:19UTC (27oct18:19 Guatemala):5runsperiódicosSUCCESSjob4, incluido segundo27oct06:17UTC. Última salud14d/policyv1/retention_ready=true,trackingACTIVE,cron original17 */6 * * * UTC. CRON_REAL_RUNS_2=PASS;READY técnicoYES. La excepción de activación antes del segundo ciclo queda como historia; ya no existe este pendiente. No repetir release/QA/activación, no publicar ni gastar Meta. Ver postflight existente para timestamps y evidencia. Solo documentación actualizada, sin cambios de producto.

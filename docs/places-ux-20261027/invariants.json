@@ -1,0 +1,107 @@
+{
+  "base": "a946469e4838d1d5a3817758b8db4aa276b866b4",
+  "handlers": [
+    {
+      "name": "handledRequestedPlaceKeyRef",
+      "sha256": "a74da398b0445099d9730a5f5094e5b226d7cc2ff6fea6faba0acc139f83881a",
+      "unchanged": true
+    },
+    {
+      "name": "loadPlaces",
+      "sha256": "151ac7579920765e030c146a5f4b8b313950656b557b18e6d5f92b947e3a36a5",
+      "unchanged": true
+    },
+    {
+      "name": "loadCheckin",
+      "sha256": "1c578cd11e25fcf7aaf3d8fa07582e722087f00570719d609d23668fb1facb49",
+      "unchanged": true
+    },
+    {
+      "name": "refreshPresenceAndCheckin",
+      "sha256": "4382418831ed82bdb2bee16c08154e31f7193113df646378a77fae377d70376d",
+      "unchanged": true
+    },
+    {
+      "name": "handleFocusPlace",
+      "sha256": "557638a9e07011502961699d2564e7a53f9ab485f0a06f48c413ea311fc8386c",
+      "unchanged": true
+    },
+    {
+      "name": "handleSelectPlace",
+      "sha256": "b055d161dc4a2dd6bd7746f22328dc7c916d0e9400e048e2818e5ff1f6aac5c8",
+      "unchanged": true
+    },
+    {
+      "name": "handleCategory",
+      "sha256": "48721921ea4994c741f70950bdf595584349b1a64572f54fd6966fdbe8ebf673",
+      "unchanged": true
+    },
+    {
+      "name": "handleSearchCommit",
+      "sha256": "6a1b343ff0d76bce660133e147ccd61321526191b2f34ef0ff0e91d804ce23a7",
+      "unchanged": true
+    },
+    {
+      "name": "handleUseLocation",
+      "sha256": "8cb73776c18b8f10a1e7bf7cfe9dbaf683cbfe9498ddf8d5daa032312a7cbf08",
+      "unchanged": true
+    },
+    {
+      "name": "handleStartCheckin",
+      "sha256": "08b435062fa84a84fedfb02fa5158e796c9017a03c4e06a6437d1224572c5f0b",
+      "unchanged": true
+    },
+    {
+      "name": "handleEndCheckin",
+      "sha256": "968a65c3f1afa1a4f8c06c592ee69280d37873129a871ee4fdf89df2631567e8",
+      "unchanged": true
+    },
+    {
+      "name": "handleVisibility",
+      "sha256": "eabc3d5e11008dd604eda2409cdf116d2d026a0b7ab919a3ddb5e6a275acb3f4",
+      "unchanged": true
+    }
+  ],
+  "protectedFiles": [
+    {
+      "path": "src/services/placeService.ts",
+      "unchanged": true,
+      "sha256": "db502db3240e90d115042fc0b618ed5c015f8b25d22e72866b1b95702596ac67"
+    },
+    {
+      "path": "src/services/placeCheckinService.ts",
+      "unchanged": true,
+      "sha256": "1fce98b36c6fc7dc097feae0eca45f3d91ff044a2fcb926f19960d60f7c20b3c"
+    },
+    {
+      "path": "src/services/placeTelemetryService.ts",
+      "unchanged": true,
+      "sha256": "7e9a8bbc51392b9413635cea5bc81b3e353054c8cdbc925ccbe0d1255abb5c93"
+    },
+    {
+      "path": "src/services/featureExperimentService.ts",
+      "unchanged": true,
+      "sha256": "6c57090b9d4f29c98f34a0d7005106a00828943d72677dbd0f80526be01617e0"
+    },
+    {
+      "path": "src/features/places/components/ImmersivePlacesStage.tsx",
+      "unchanged": true,
+      "sha256": "e1cb34190ed849b057e20cfc5f53274e47491c2bd9ed15b3d72d25b74dd9d3b2"
+    },
+    {
+      "path": "src/features/places/components/PlaceCardPhoto.tsx",
+      "unchanged": true,
+      "sha256": "e0998d519f9cc7104907ef9b2f707168674cd6acbba83195819bd5f679760393"
+    },
+    {
+      "path": "src/App.tsx",
+      "unchanged": true,
+      "sha256": "46ff8a93b9bd5babc547d73e6b4c6fc6813e5706276c17ab9ac8837f489d7fbf"
+    },
+    {
+      "path": "src/services/supabaseClient.ts",
+      "unchanged": true,
+      "sha256": "f2100ce6dbc373f12b6dfe6ec2c0d9504a7c11bebaca7c249753b9461df87306"
+    }
+  ]
+}
