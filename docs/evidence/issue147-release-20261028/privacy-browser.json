@@ -1,0 +1,21 @@
+{
+  "origin": "https://pazo-app.vercel.app",
+  "results": [
+    {
+      "lang": "es",
+      "publicNoticeVisible": true,
+      "fixed14dRetentionVisible": true,
+      "noIndividualMetaEventsVisible": true,
+      "pageErrors": 0,
+      "signupSubmitted": false
+    },
+    {
+      "lang": "en",
+      "publicNoticeVisible": true,
+      "fixed14dRetentionVisible": true,
+      "noIndividualMetaEventsVisible": true,
+      "pageErrors": 0,
+      "signupSubmitted": false
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "version": "candidate",
+  "origin": "https://pazo-momenv2xm-digitalapp.vercel.app",
+  "frontend": "immutable Vercel assets via authenticated CLI",
+  "data": "synthetic controlled Auth/data; all feed states forced; not real hosted traffic",
+  "results": [
+    {
+      "lang": "es",
+      "width": 320,
+      "height": 568,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Ver pasaporte QR/",
+          "x": 28,
+          "y": 336,
+          "width": 264,
+          "height": 48
+        },
+        {
+          "name": "Abrir Agenda",
+          "x": 28,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        },
+        {
+          "name": "Explorar PAZO",
+          "x": 164,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "height": 568,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Ver pasaporte QR/",
+          "x": 28,
+          "y": 336,
+          "width": 264,
+          "height": 48
+        },
+        {
+          "name": "Abrir Agenda",
+          "x": 28,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        },
+        {
+          "name": "Explorar PAZO",
+          "x": 164,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "height": 568,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^View QR passport/",
+          "x": 28,
+          "y": 336,
+          "width": 264,
+          "height": 48
+        },
+        {
+          "name": "Open Agenda",
+          "x": 28,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        },
+        {
+          "name": "Explore PAZO",
+          "x": 164,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "height": 568,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^View QR passport/",
+          "x": 28,
+          "y": 336,
+          "width": 264,
+          "height": 48
+        },
+        {
+          "name": "Open Agenda",
+          "x": 28,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        },
+        {
+          "name": "Explore PAZO",
+          "x": 164,
+          "y": 392,
+          "width": 128,
+          "height": 48
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    }
+  ]
+}

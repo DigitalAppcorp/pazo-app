@@ -1,0 +1,794 @@
+[
+  {
+    "version": "20261006054510",
+    "name": "care_agenda",
+    "md5": "e66a7f13b6a84eaf0b3004200fcf2cf5",
+    "git_blob_sha": "b7977deb06cb185856819d12f307595c2f32420c"
+  },
+  {
+    "version": "20261006090551",
+    "name": "private_pet_documents",
+    "md5": "c07e050241f2f488a5432e769c7e1ff0",
+    "git_blob_sha": "c830cf9d06cd736587c8b5f19047526d792e49bd"
+  },
+  {
+    "version": "20261006090654",
+    "name": "fix_private_document_storage_policies",
+    "md5": "7303cb7f91866db9055c9c8f094c9962",
+    "git_blob_sha": "59eeece363d10a90e81d43ff8cd6e5b4db49bbbd"
+  },
+  {
+    "version": "20261006133534",
+    "name": "communities_validation_instrumentation",
+    "md5": "24dda28b934ffce0c64d4dfc0ebb802e",
+    "git_blob_sha": "e7780368fef3feb22cf6c4fc43753b8a5696ffac"
+  },
+  {
+    "version": "20261006133945",
+    "name": "trim_validation_indexes",
+    "md5": "55bea83350d2caee2833311319eb9d86",
+    "git_blob_sha": "6253a25110264802ef953f170df930f199f2ccda"
+  },
+  {
+    "version": "20261006134050",
+    "name": "restore_validation_fk_indexes",
+    "md5": "c3fff0161a6145946dc8ac8ea7a58a4e",
+    "git_blob_sha": "5db7119cd7ea011c36b7be1cb90cf5b43b2ae59f"
+  },
+  {
+    "version": "20261007014214",
+    "name": "communities_mvp_core",
+    "md5": "2defb40089482acbed740d331fd419ad",
+    "git_blob_sha": "a1975648ec6fc09f4bfe1ff13f36a0888a8cd17a"
+  },
+  {
+    "version": "20261007014624",
+    "name": "fix_community_storage_policies",
+    "md5": "e88432b33b1a418445f89fb95516a998",
+    "git_blob_sha": "2e84d9cd8178298e9103312f1950b0dad81066c4"
+  },
+  {
+    "version": "20261007023800",
+    "name": "community_extension_experiments",
+    "md5": "0bfe6aa63ab330c2c125220a452b4af3",
+    "git_blob_sha": "b0cc319a690006f4f6496463742d6f0a62eacbf6"
+  },
+  {
+    "version": "20261007023927",
+    "name": "harden_community_extension_experiment_eligibility",
+    "md5": "904dc3e8b2051652ad03bcf9e6c70e85",
+    "git_blob_sha": "954eac71e43f1fa43d690cb193d48651bd46623c"
+  },
+  {
+    "version": "20261007052747",
+    "name": "phase_8_places_map_core",
+    "md5": "e682464d6ddb3570eb7bb0856bb8826a",
+    "git_blob_sha": "8819f6b615867cd420a9ad7d89dcc119c5cfb5d3"
+  },
+  {
+    "version": "20261007052749",
+    "name": "phase_8_places_initial_catalog",
+    "md5": "4b3fff48ea01adcfffde177b58cc5bc6",
+    "git_blob_sha": "a0073156052765cc6e866b4ae0a0dccb46e519e7"
+  },
+  {
+    "version": "20261007053859",
+    "name": "fix_place_checkin_checkout_rls",
+    "md5": "48d804614527693d6fc8641702ac7950",
+    "git_blob_sha": "08721fcb874a7367279281647a82da004f4f6b93"
+  },
+  {
+    "version": "20261007072355",
+    "name": "place_extension_experiments",
+    "md5": "8ce025165c95978bc6d3e98b7f1c2034",
+    "git_blob_sha": "4141ae8205ea6513ec53870b937e0357739f6634"
+  },
+  {
+    "version": "20261007102632",
+    "name": "phase_12_search_telemetry",
+    "md5": "693249197080684d20af623adca78210",
+    "git_blob_sha": "292a75e330235ea420a128997032c2b476b77872"
+  },
+  {
+    "version": "20261007102748",
+    "name": "index_search_usage_events_user",
+    "md5": "6afab3260b69e67e44a8db1c4ac2c1e7",
+    "git_blob_sha": "44f3e83e589e4bb229f53faab4f4bbf31dc3278e"
+  },
+  {
+    "version": "20261007123638",
+    "name": "production_hardening_social_write_rate_limits",
+    "md5": "02efa6c9eff776fe3a9f74ef0dedae95",
+    "git_blob_sha": "1d95ee2a53d23f7e676f4a081149b4cc542561da"
+  },
+  {
+    "version": "20261007124041",
+    "name": "idempotent_pet_document_delete_finalize",
+    "md5": "bec08ac2f7ed2181a9944916f1178e5b",
+    "git_blob_sha": "5278d1aad633ba078737df188ba223f7b20f958a"
+  },
+  {
+    "version": "20261007124633",
+    "name": "move_rescue_security_definers_private",
+    "md5": "1dc32565e7b1849fd1734b28a63d3c6f",
+    "git_blob_sha": "22de15f6f48eb357ef3732161c14b1453b84c11a"
+  },
+  {
+    "version": "20261008010424",
+    "name": "fix_pet_document_delete_storage_visibility",
+    "md5": "759e66a3848425ef9edc443dc06ce6d8",
+    "git_blob_sha": "a2dd628a0aebe14ea3b0638e67d77d987d96d9a3"
+  },
+  {
+    "version": "20261008015255",
+    "name": "register_places_map_validation",
+    "md5": "b85932b860226d504e033b9a74e7f3a8",
+    "git_blob_sha": "8c527931109a9a3c7199731c5104f094134461a0"
+  },
+  {
+    "version": "20261008015603",
+    "name": "grant_module_validation_inserts",
+    "md5": "f67e1c883e65223d8d4a8b3086327301",
+    "git_blob_sha": "b2b887ba69e103308f3b6b7098d26873ded55129"
+  },
+  {
+    "version": "20261008112333",
+    "name": "f14_account_blocks_hidden_posts",
+    "md5": "bf4ca836100d1670d44bb571b3739704",
+    "git_blob_sha": "ccc5787b071d89889506de50e90baccaf2e73d47"
+  },
+  {
+    "version": "20261008120333",
+    "name": "f14_reports_moderation",
+    "md5": "855c30ead30cb88e50b78121f986a848",
+    "git_blob_sha": "b853f00ad222079021d49dece92e42282e135864"
+  },
+  {
+    "version": "20261008122907",
+    "name": "f14_comment_parent_guard",
+    "md5": "97db0041edfa0fdf46d13cb0dee7a092",
+    "git_blob_sha": "ec26b60c528372d11d7ce0c7b0432e3bdb452a09"
+  },
+  {
+    "version": "20261009010551",
+    "name": "f14_media_status_presence_guard",
+    "md5": "2e4be62f263f091fe64fb1a3bdc89ad0",
+    "git_blob_sha": "fb8779c7540f546b669404db96d19af7e72623a1"
+  },
+  {
+    "version": "20261009014616",
+    "name": "f14_media_claim_preflight",
+    "md5": "f4a841f2046a28051b9e03484ef17a67",
+    "git_blob_sha": "b063dfc09a210553ef29b8763d2cdde9c50307c3"
+  },
+  {
+    "version": "20261009040957",
+    "name": "f14_storage_held_media_guard",
+    "md5": "2c30f60c588fce94c96d9bc3954c4e7b",
+    "git_blob_sha": "04cad2ea05b211149a85fcb5a17f2ef31f7db8f8"
+  },
+  {
+    "version": "20261009054411",
+    "name": "f14_held_media_fail_closed_recheck_update_guard",
+    "md5": "2b3349dd38b7d8489fbc577b72e13338",
+    "git_blob_sha": "c020d20373569f9b148cf5b2dc153882965936e1"
+  },
+  {
+    "version": "20261009055801",
+    "name": "f14_held_media_copy_source_operation_guard",
+    "md5": "976cb3a39ef35dbe0056bd957ba1c662",
+    "git_blob_sha": "97e9baed00e8e1dce27c3f712af5e2e0b60df6cc"
+  },
+  {
+    "version": "20261009055955",
+    "name": "f14_disable_unverified_media_purge_confirmation",
+    "md5": "224bfc970c14a567e7892900da997cfc",
+    "git_blob_sha": "4bb62859fe59680cc742886cc2726501f6c9982a"
+  },
+  {
+    "version": "20261009061213",
+    "name": "f14_reject_unverified_purged_status",
+    "md5": "8bdc104b50e507fcd7f15613c36c8e7e",
+    "git_blob_sha": "1e8bbac7a8d2be51c2eec1d2b54d127746493f48"
+  },
+  {
+    "version": "20261009095635",
+    "name": "f14_service_only_media_evidence_reader",
+    "md5": "a091a3fa64c85e5f4e44f78657aed9f9",
+    "git_blob_sha": "3cbc363455d780e0295ee11e4d9127a56a1ef41a"
+  },
+  {
+    "version": "20261010033538",
+    "name": "f14_moderation_media_preflight_locked",
+    "md5": "c4a1db045ebfe519231c000a7aeca849",
+    "git_blob_sha": "4636ed3a3c9e39e2fb0f3f2cb3929a19a63c9dd5"
+  },
+  {
+    "version": "20261010034610",
+    "name": "f14_finalize_media_after_verified_claim",
+    "md5": "7f8b186f7a1dadc6d826490cade51ec5",
+    "git_blob_sha": "1f2d287a90d4aa31660d940e91bad6429e94995e"
+  },
+  {
+    "version": "20261010043307",
+    "name": "f14_media_jwt_claim_compat_single_test",
+    "md5": "a6bb99575e9c906bf5f3e7a4c6df1ed5",
+    "git_blob_sha": "0ea04fb492e2036753ac545ab7517e22650bf996"
+  },
+  {
+    "version": "20261010045708",
+    "name": "f14_account_request_intake",
+    "md5": "6884650b131fdfb2fe9a9e8a20ae8f06",
+    "git_blob_sha": "7ba298131518944e7a29fa93e0021a897ebb86f4"
+  },
+  {
+    "version": "20261010053708",
+    "name": "f14_community_ownership_continuity",
+    "md5": "0da26f6f84310e568c6f4b7798c09875",
+    "git_blob_sha": "e3c69697bfe68f15e0c54e1120b4bc8532b21931"
+  },
+  {
+    "version": "20261010072555",
+    "name": "f14_recover_missing_profile",
+    "md5": "76fba3aa1b4d029a633bfc679de9bca7",
+    "git_blob_sha": "3c605862ab0d7c4ec95859f3f67844247562b9de"
+  },
+  {
+    "version": "20261010222006",
+    "name": "f14_media_purge_retry_reconciliation",
+    "md5": "3724522e6e030564de332b62e7a1bc44",
+    "git_blob_sha": "1800cf4912efa7896cddaf4412fb8d75706d6455"
+  },
+  {
+    "version": "20261011022000",
+    "name": "f14_media_url_alias_guard",
+    "md5": "873010c99127aa834551b3d2ca1e2831",
+    "git_blob_sha": "595b9a88c69d5b52cb3586164b8702f81eaf7990"
+  },
+  {
+    "version": "20261012071140",
+    "name": "f14_one_object_admin_reconcile",
+    "md5": "e1950937264a96009e0ee34899d98ff9",
+    "git_blob_sha": "064cfb8d9b51c6603bfddf3d61001138e8f4820e"
+  },
+  {
+    "version": "20261013025451",
+    "name": "community_join_owner_notifications",
+    "md5": "0a8e78940cead9167dcacea57092bcdc",
+    "git_blob_sha": "a2aa29bf4d7f3698e1cc05b64510944378b59a4d"
+  },
+  {
+    "version": "20261013215221",
+    "name": "f16_supporter_wall_consents_foundation",
+    "md5": "3b59e0e19f0edbf5aab8d4b7920e4e2a",
+    "git_blob_sha": "f3869a24f24e8290ac48c2fb7da9761eb0f39595"
+  },
+  {
+    "version": "20261014042616",
+    "name": "f16_private_verified_event_inbox",
+    "md5": "4143d63059004b5370c0981d54e56788",
+    "git_blob_sha": "066fe6468c93a044652494ba984337ba052cc28a"
+  },
+  {
+    "version": "20261014042646",
+    "name": "f16_private_intents_financial_ledger",
+    "md5": "5dd563fc9bf66dc3b0a9b12338ef022c",
+    "git_blob_sha": "aa94266c9506c7c4533585a82126b3336fe90eec"
+  },
+  {
+    "version": "20261014073658",
+    "name": "f16_global_webhook_admission",
+    "md5": "cc34518bfd005ababff2164d07bdc3f1",
+    "git_blob_sha": "e0ccff8b3da1b9e549c7facfde997e4a1f3c19f8"
+  },
+  {
+    "version": "20261014094349",
+    "name": "f16_preserve_two_subscription_lifecycle_events",
+    "md5": "e96d977420c440b060f8fee9417f420e",
+    "git_blob_sha": "4ca50dbeb751500f1009978f8c06c6fd4f74de9a"
+  },
+  {
+    "version": "20261015170222",
+    "name": "f16_p12_private_checkout_schema_sandbox_no_offers",
+    "md5": "ce0a35c7e9dec36b5edd2eafce965a61",
+    "git_blob_sha": "0c3d4936e873a165b7488eba3d2fbd3ce837295f"
+  },
+  {
+    "version": "20261015170258",
+    "name": "f16_p14_owner_acceptance_read_only_rpc",
+    "md5": "45d00fd4c4811f33589af9f306a344a4",
+    "git_blob_sha": "c0f0492d8aac34772c2fafdd60246322818d51d7"
+  },
+  {
+    "version": "20261015170428",
+    "name": "f16_p15_owner_supporter_account_list_readonly",
+    "md5": "c967527afcc8d06c1b63294e33310144",
+    "git_blob_sha": "e4029747778ce9b4d6c3b98646ea3a2195323506"
+  },
+  {
+    "version": "20261015190239",
+    "name": "f16_p21_private_inbox_worker_schema_off",
+    "md5": "b998b34c54340bec512a2209bfdea639",
+    "git_blob_sha": "40277ae4d7487c809799f2389195fea1dff12eca"
+  },
+  {
+    "version": "20261016031846",
+    "name": "f16_p22_claim_scoped_bound_intent_read_only",
+    "md5": "d4bb490e2775f6f1e64f6dc90ee83f77",
+    "git_blob_sha": "49c83a6cdb1c10854488af203838391168afcefd"
+  },
+  {
+    "version": "20261016035851",
+    "name": "f16_p28_minimal_hmac_historical_admin_audit",
+    "md5": "aa24915f56d38bf82bcb91c950189482",
+    "git_blob_sha": "b645aff339164efcf0b77b6dca2836861f8c30f2"
+  },
+  {
+    "version": "20261016055145",
+    "name": "f16_p40_empty_private_activation_bindings",
+    "md5": "a30ef83f5c22ffb62dcab2f8cd83cfa9",
+    "git_blob_sha": "b4eff53a64a4a8f24c644eb284c17a265dc8fc1f"
+  },
+  {
+    "version": "20261016062849",
+    "name": "f16_p42_keys_and_writer_inert",
+    "md5": "b693af14d610a6b783fb297a365c1caf",
+    "git_blob_sha": "ceb24e4b38fb00f27f97d81b4aeb24d5b7d78ac4"
+  },
+  {
+    "version": "20261016234350",
+    "name": "f16_p37_service_only_claimed_activation_read",
+    "md5": "93fc314497724473856084077cfc312e",
+    "git_blob_sha": "c9e08abf1f2a911e245824d190145dabe188376a"
+  },
+  {
+    "version": "20261017160619",
+    "name": "f16_sandbox_benefits_v2_private_qa_staging",
+    "md5": "8d608ac9e739d922160e30096c42bb2c",
+    "git_blob_sha": "22ad344b8bddac310724c95ba61a86091fefd58c"
+  },
+  {
+    "version": "20261017161221",
+    "name": "f16_sandbox_qa_verified_benefits_reads",
+    "md5": "b811439c4099deced3e093495842d3a4",
+    "git_blob_sha": "b227bf8cf3f7370cca10e9f4e91536581df92ad5"
+  },
+  {
+    "version": "20261017162650",
+    "name": "f16_sandbox_qa_v2_second_checkout_same_owner",
+    "md5": "dd54d3f7bbdc8d315968ebef4c3cc4fd",
+    "git_blob_sha": "ec5f8875547bb1db4e572ead743c32770a7abeb5"
+  },
+  {
+    "version": "20261017165014",
+    "name": "f16_sandbox_qa_v2_owner_account_read_only",
+    "md5": "fe2ed1666a81480f1c74c0a6378d67bf",
+    "git_blob_sha": "62d565c71f847b60595a871c65d0da1eee5beb89"
+  },
+  {
+    "version": "20261017170437",
+    "name": "f16_qa_v2_merchant_verified_first_cycle",
+    "md5": "f96f270684223c9534360cad3e6493c4",
+    "git_blob_sha": "ecda0fb2c1ae44ceff38aa12ebcdfe56602dc34a"
+  },
+  {
+    "version": "20261017171146",
+    "name": "f16_qa_v2_checkout_owner_service_gate",
+    "md5": "c1a8f465bf5b2567627666cea55f4d20",
+    "git_blob_sha": "3458b99de1fa25e9eebb60b9ff54430a406e72a8"
+  },
+  {
+    "version": "20261017172411",
+    "name": "f16_sandbox_qa_v2_bilingual_offer_publication",
+    "md5": "974267d3e072b57e9e1d09af755c7f90",
+    "git_blob_sha": "5b2fd2fc2e143427061639c4a16e3b2ac25e001a"
+  },
+  {
+    "version": "20261018132808",
+    "name": "f16_sandbox_v2_append_only_checkout_retries",
+    "md5": "dbf2368576aaf9fd2318f5855c4622fd",
+    "git_blob_sha": "98d79af354878fde25cee58521f271084290568e"
+  },
+  {
+    "version": "20261018132828",
+    "name": "f16_sandbox_v2_multiattempt_account_read_and_finance",
+    "md5": "2af524f63231aed7b8c79935f759a395",
+    "git_blob_sha": "578169cc6964c8f40b27ee0aa284275c9dc3dbd9"
+  },
+  {
+    "version": "20261018154128",
+    "name": "f16_v2_created_webhook_candidate_readonly",
+    "md5": "80a0e15e198557a0ce23ccff1869b664",
+    "git_blob_sha": "e7faf832cbf4bd085e20e6a7acb442533a1db659"
+  },
+  {
+    "version": "20261018163723",
+    "name": "f16_sandbox_fresh_owner_qa_admission",
+    "md5": "8f8ba8698c2d5130af94ee970ca9fb5e",
+    "git_blob_sha": "2c08471a25fd50fa0f1693891ab56023f463cb85"
+  },
+  {
+    "version": "20261018170858",
+    "name": "f16_local_sandbox_automatic_qa_admission",
+    "md5": "ebd5ebeae8cac63e28fc457dfdb04f4b",
+    "git_blob_sha": "1501ba6853adf797a031f156891a7725265d4cc9"
+  },
+  {
+    "version": "20261018184603",
+    "name": "f16_sandbox_qa_owner_membership_read",
+    "md5": "54b646f6b08f462b70b8477980c850a5",
+    "git_blob_sha": "85b4bc8f1753eb8b9ef227e155e67247909fcb32"
+  },
+  {
+    "version": "20261018234721",
+    "name": "pazo_admin_observability_dashboard_20261018",
+    "md5": "0d8464df4e5f6694bc95a82402ddac91",
+    "git_blob_sha": "4e9918202f28a2891c09ce4d429b32214aa66089"
+  },
+  {
+    "version": "20261019042653",
+    "name": "f16_sandbox_v2_pending_abandonment_preflight",
+    "md5": "5d4e68d321f589a626cb75c4e38673ef",
+    "git_blob_sha": "71e19348db6df34061ebe69a4dd2a87dac340a8e"
+  },
+  {
+    "version": "20261019134346",
+    "name": "f16_sandbox_v2_automatic_reconciled_retry",
+    "md5": "7e5b87737da04e551a428e050b256d6b",
+    "git_blob_sha": "61f7e975220033bee0d18594685fcbf75287aa45"
+  },
+  {
+    "version": "20261019150118",
+    "name": "f16_sandbox_qa_two_abandoned_v2_reset",
+    "md5": "735d64aaa34eab957f0753acbb77c762",
+    "git_blob_sha": "485eabd4d394d15f361bf503351679528212e822"
+  },
+  {
+    "version": "20261019173620",
+    "name": "f16_qa_pending_approval_restart",
+    "md5": "3f6d1afb5fd1bf67bc9d2870a21c4749",
+    "git_blob_sha": "71682aee35ef27b8c3a1ca1fd0b3a59dbcf9eaa8"
+  },
+  {
+    "version": "20261019175722",
+    "name": "f16_qa_repeat_abandonment_restart",
+    "md5": "65db1e763facee6f168d35e6b5e099e7",
+    "git_blob_sha": "3457b012cb74f1c2281d1ed3038cd8d0f17b5292"
+  },
+  {
+    "version": "20261019183232",
+    "name": "pazo_admin_paypal_gateway_settings",
+    "md5": "686100c65f8326bc4b890041a5a4749c",
+    "git_blob_sha": "dac501dabb42b22196bdc6e1984e4537d7cb0024"
+  },
+  {
+    "version": "20261019235351",
+    "name": "pazo_f16_live_gateway_inert_private_staging",
+    "md5": "626374cb3eb84d4fa3c167384ea9fd6b",
+    "git_blob_sha": "b2ed5aeec5a9c15a2f9455d1c81e9cdfd8a79bb4"
+  },
+  {
+    "version": "20261019235426",
+    "name": "pazo_f16_live_intent_private_staging",
+    "md5": "4e9f170686eb3816ba7e25302d955800",
+    "git_blob_sha": "87b547d256673fcf7783d814764d3b94b79211d6"
+  },
+  {
+    "version": "20261019235455",
+    "name": "pazo_f16_live_verified_binding_and_receipts_private_staging",
+    "md5": "277e537e819bbc1390a597a0bd050ecb",
+    "git_blob_sha": "a6c6f0801eec85b74d8f5f89c2c7c75e20a07f96"
+  },
+  {
+    "version": "20261019235525",
+    "name": "pazo_f16_live_verified_refund_private_staging",
+    "md5": "8872520022ad7442ec803e129222dbb5",
+    "git_blob_sha": "3ee8c30073a801cf73bb9b8716d4fdb7c6de591d"
+  },
+  {
+    "version": "20261019235552",
+    "name": "pazo_f16_live_service_binding_readonly_bridge",
+    "md5": "549c29f7915f7b2d585b6964e9e41c8c",
+    "git_blob_sha": "e93ab695a99f82e50e157fd038c49512faaa6fcb"
+  },
+  {
+    "version": "20261020014049",
+    "name": "pazo_f16_live_edge_credential_source_metadata",
+    "md5": "fcc95a8352989f16c6a9802a7fb2d3e0",
+    "git_blob_sha": "9fc328b6f1b6605395b840d4dd765045e5929ebb"
+  },
+  {
+    "version": "20261020134900",
+    "name": "pazo_f16_live_service_role_rpc_bridges",
+    "md5": "31220554f1b15eb8f35ca332a41af922",
+    "git_blob_sha": "1c55da4466051d52659e5902503c867d8169bb50"
+  },
+  {
+    "version": "20261020142448",
+    "name": "pazo_f16_admin_owned_live_return_origin",
+    "md5": "9780baa982e23a9a4595950ad88ba368",
+    "git_blob_sha": "b7d0503ec4d08847771f08e5cff516ee5b85385d"
+  },
+  {
+    "version": "20261020200238",
+    "name": "pazo_f16_secret_provision_audit_guarded",
+    "md5": "be75f2aae5e15771ee61a73795ed4677",
+    "git_blob_sha": "17ffb4a11bdc0c446e4f7dad965a9e87c0925859"
+  },
+  {
+    "version": "20261020214807",
+    "name": "pazo_f16_live_bootstrap_generation_guarded",
+    "md5": "b1a1824d0166db514f97f7302979a821",
+    "git_blob_sha": "f8959be865b72442d0fbb2cad3ffd3668473ff0a"
+  },
+  {
+    "version": "20261020214838",
+    "name": "pazo_f16_live_durable_inbox_lease_guarded",
+    "md5": "5e1e8be6552e185cb058fd5ce304c800",
+    "git_blob_sha": "bd8d0aca8cb7085d021597754538466e01bb0dbb"
+  },
+  {
+    "version": "20261020234721",
+    "name": "pazo_f16_live_bootstrap_idempotent_retry_guarded",
+    "md5": "82db1ccb7a6b91cea5482e6e360142e8",
+    "git_blob_sha": "5acd13e25eca9637c2c631b66ed71f512553e505"
+  },
+  {
+    "version": "20261021012636",
+    "name": "pazo_f16_live_service_json_claims_guard",
+    "md5": "6fe7ad4b88b225caff0b90dec94cffc5",
+    "git_blob_sha": "508e2e62f5c338b83619bef8e9f3e024f964240b"
+  },
+  {
+    "version": "20261021014400",
+    "name": "pazo_f16_live_recorded_sale_reader",
+    "md5": "700ed40b1241b505da54ab6773b96512",
+    "git_blob_sha": "1a3874813250283a0d04f28653be3905491ba832"
+  },
+  {
+    "version": "20261021021050",
+    "name": "pazo_f16_live_resource_inspection",
+    "md5": "9568d510313e7492171cc8db16c544e3",
+    "git_blob_sha": "f251a10288102329e7ec2be44abc5915f694df9b"
+  },
+  {
+    "version": "20261021060506",
+    "name": "pazo_f16_live_vault_generation_backend",
+    "md5": "9dc5fa18495e3458e76821bb51a6e9a7",
+    "git_blob_sha": "c7038876ebc1a596475ba8819ff007fed1661a54"
+  },
+  {
+    "version": "20261021074014",
+    "name": "pazo_f16_live_signed_event_evidence",
+    "md5": "0340e8976ceb503f678ffe0fa5711a0a",
+    "git_blob_sha": "f3890ad13f23ce08b2afa7530c11b144c6686203"
+  },
+  {
+    "version": "20261021074024",
+    "name": "pazo_f16_live_atomic_leased_settlement",
+    "md5": "949d155ead28ae4ccaa989db577e3acf",
+    "git_blob_sha": "e41a777a2396939d084c1e18c78f7dced0be4256"
+  },
+  {
+    "version": "20261021074032",
+    "name": "pazo_f16_live_financial_context",
+    "md5": "1e1f16e4b525b8edc98c588db4f8493d",
+    "git_blob_sha": "52b5e54737a625b60ffa1877f671c0f8eafcfca0"
+  },
+  {
+    "version": "20261021142517",
+    "name": "pazo_f16_live_lifecycle_and_refund_scope",
+    "md5": "b47794956f5022a01cefb8d8f3f1e8dc",
+    "git_blob_sha": "d1289d7ae473c4af7f187b467a663d0f3234413b"
+  },
+  {
+    "version": "20261021144809",
+    "name": "pazo_f16_live_private_worker_control",
+    "md5": "723ea06101121dcfb157dcd9314b810b",
+    "git_blob_sha": "ff2a7c782797e4d457a355d2f4ce4aa791b3abc8"
+  },
+  {
+    "version": "20261021145500",
+    "name": "pazo_f16_live_private_worker_scheduler",
+    "md5": "c4777d52124370a558b9dcfcb37eaa8d",
+    "git_blob_sha": "f86224704614b420dcf91ce2d2b29d1efa4bd319"
+  },
+  {
+    "version": "20261021155429",
+    "name": "pazo_f16_live_worker_single_use_dispatch",
+    "md5": "92a2f04bd55185086235ce05855333b7",
+    "git_blob_sha": "215852b4a41815fd3821881662e96fd332692ae7"
+  },
+  {
+    "version": "20261021162301",
+    "name": "pazo_f16_live_dispute_monitor",
+    "md5": "30eb99fffd982c1e981d597ac01b57ce",
+    "git_blob_sha": "ea082d3ef175f867627b1eb73ccc7d77f2d15809"
+  },
+  {
+    "version": "20261021165838",
+    "name": "pazo_f16_live_immutable_bilingual_offer",
+    "md5": "2311163b921e0f6da33fb85831188fb0",
+    "git_blob_sha": "61b3c8020c9000377e7ba52611b8334195d8ab3c"
+  },
+  {
+    "version": "20261021174836",
+    "name": "pazo_f16_live_verified_benefit_projection",
+    "md5": "33e2f32686d33646f78a3b2f9ebba6f2",
+    "git_blob_sha": "a418e72ee1efdf437acba80d065ee772b2d1dc92"
+  },
+  {
+    "version": "20261021181431",
+    "name": "pazo_f16_live_owner_checkout_slot",
+    "md5": "3295ec40e1dad9306a35f044e4eac4a7",
+    "git_blob_sha": "f96c3d2c6a7b7eee239d529328a3458d3c5b6b5a"
+  },
+  {
+    "version": "20261021192951",
+    "name": "pazo_f16_live_cancel_finish",
+    "md5": "bb9f4cf18e1b4fd38577a8601f7fcaa0",
+    "git_blob_sha": "c64ce5ba21e360c294e9c48136b7d616f6de410f"
+  },
+  {
+    "version": "20261021210000",
+    "name": "pazo_f16_live_owner_recovery_finish",
+    "md5": "4fb2fa5156860722d61cf2dfee0a6688",
+    "git_blob_sha": "b3fdcb73e4a3ea3dc1de07dc4ec7708f82c1676b"
+  },
+  {
+    "version": "20261021213000",
+    "name": "pazo_f16_live_cosmetic_benefits",
+    "md5": "d49e92e5f0f9f22819ff9881eb974a8a",
+    "git_blob_sha": "e181c4660a66b8320457ff9069c88a0942f47623"
+  },
+  {
+    "version": "20261021220000",
+    "name": "pazo_f16_live_admin_finance_summary",
+    "md5": "0b85fa82ef7242d98f0bbd80e7639096",
+    "git_blob_sha": "59c7b86752a3a56c226ad1ceac9489c08e826be7"
+  },
+  {
+    "version": "20261021223000",
+    "name": "pazo_f16_live_admin_readiness",
+    "md5": "f1a6e5fbb75055c3c8d764b74dca8b54",
+    "git_blob_sha": "2d40ccc6623dd32a5c13485a9c00f5867a103db3"
+  },
+  {
+    "version": "20261021230000",
+    "name": "pazo_f16_live_controlled_release",
+    "md5": "5a12f33ab25486d1a7b4591dfdcc121c",
+    "git_blob_sha": "77a8424798a69d15598ff387ba264a65dd4cd210"
+  },
+  {
+    "version": "20261022021500",
+    "name": "pazo_f16_public_benefits_visibility",
+    "md5": "d3dbeccf2fe21a7afd57567204dbc722",
+    "git_blob_sha": "192beca6f5d0d58126ef4d686ba8e4d6b53e9feb"
+  },
+  {
+    "version": "20261022052854",
+    "name": "pazo_f16_public_benefits_live_only",
+    "md5": "21fbc4c0f6241edf4a5892bafa8946c8",
+    "git_blob_sha": "6eadf67ec4c8dce831212efb41a0f83a6db2f5d6"
+  },
+  {
+    "version": "20261022071240",
+    "name": "pazo_f16_live_vault_regex_2201b_fix_20261022",
+    "md5": "4a31af03297b927f2b6752b2f364f52a",
+    "git_blob_sha": "2598f6b9864bcbd465042128962b14c52e979079"
+  },
+  {
+    "version": "20261022103706",
+    "name": "pazo_f17_private_support",
+    "md5": "880c37ad9263d4b51f7791205c887073",
+    "git_blob_sha": "57984f50763c40ba7d8b567c28fcd09bc3b62226"
+  },
+  {
+    "version": "20261022103707",
+    "name": "pazo_f17_gift_benefits",
+    "md5": "a2a94b069441d52c63f3441e1c76fe92",
+    "git_blob_sha": "2d21dca8704fc8526afd4ebd3fb1eb34b444237a"
+  },
+  {
+    "version": "20261022103708",
+    "name": "pazo_f17_maintenance_guard",
+    "md5": "eef2c1b32d4a39af232cff4bdf0891b4",
+    "git_blob_sha": "c5a5c7350e8705289dcf1c5e59d76fa82d801e25"
+  },
+  {
+    "version": "20261022220000",
+    "name": "pazo_live_canonical_origin_guarded",
+    "md5": "547974d0781bd3efce23db7c661a3024",
+    "git_blob_sha": "105666aad1736d77fc53a7241263366200188fbb"
+  },
+  {
+    "version": "20261022222000",
+    "name": "pazo_f17_pet_onboarding_integrity",
+    "md5": "12baca2a1076e9fdcea1aed278856fd7",
+    "git_blob_sha": "8e7773891d43cc631ce5be511931d73a2ba1fbbd"
+  },
+  {
+    "version": "20261023224519",
+    "name": "pazo_f16_gradual_live_event_rollout",
+    "md5": "79280fd51dc8ac5f2b9a2b1fb331455b",
+    "git_blob_sha": "8e634ad3b228573d233df1c552b84169104f9acf"
+  },
+  {
+    "version": "20261023235424",
+    "name": "pazo_f16_qa_original_read_audit",
+    "md5": "e0f431e3b35f0fff2acfd4afb4eea422",
+    "git_blob_sha": "a7bcd72d449dadc360909c7d151c692d09fd9ec7"
+  },
+  {
+    "version": "20261024001615",
+    "name": "pazo_f16_real_cohort_initial_invitation_budget",
+    "md5": "ccdcd95b05c5c709a9f06877cce8677a",
+    "git_blob_sha": "d50dafe9f058086f5b4070612de8c08497ee5e93"
+  },
+  {
+    "version": "20261024003716",
+    "name": "pazo_f16_original_qa_recheck_and_hosted_gate_certificate",
+    "md5": "ad01c47ae737f14575b28b48b9d5a5df",
+    "git_blob_sha": "a6907374d79ed96351831a5a2c4b71060771abc5"
+  },
+  {
+    "version": "20261025073311",
+    "name": "pazo_f18_public_supporter_invitations",
+    "md5": "904aec74d5600996f2501fd2faa04b55",
+    "git_blob_sha": "32e98c86c0d784e63a7cc6b3a951c1a3577bbc9c"
+  },
+  {
+    "version": "20261025231021",
+    "name": "pazo_f18_production_admin_classification_correction",
+    "md5": "e8e816c2238416ee87378bcc48b3538e",
+    "git_blob_sha": "18618a3ace6862ff8aeb723f5bc373be9a805a9b"
+  },
+  {
+    "version": "20261026043459",
+    "name": "pazo_f18_admin_original_evidence_postcampaign_scope",
+    "md5": "ac85ffd0816959a21062734ea35f9a46",
+    "git_blob_sha": "6ce6a4f65151d76602f49150ac6374e6a3eb6222"
+  },
+  {
+    "version": "20261026071648",
+    "name": "pazo_f18_historical_canary_quarantine_issue121",
+    "md5": "77c2d1ff42efb976a60fa8cdeb12a421",
+    "git_blob_sha": "6bb2fd906222537a34905cb71885eb4dfcf8c6e7"
+  },
+  {
+    "version": "20261026201027",
+    "name": "pazo_marketing_firstparty_attribution",
+    "md5": "1f38e25c2fd0dd0b2057a7b1e9fcb77d",
+    "git_blob_sha": "747aa54901c6ed610e0aa06eeb9d65bca6561a73"
+  },
+  {
+    "version": "20261026201043",
+    "name": "pazo_marketing_retention_health",
+    "md5": "a45b2a3b382cf621dd9d42ae7569992e",
+    "git_blob_sha": "2d254a66f6aba84a6e7f9619e83dd3b5542d8c6d"
+  },
+  {
+    "version": "20261027000059",
+    "name": "pazo_marketing_qa_metadata_exclusion",
+    "md5": "f2060d45da647307cb889d683922dc24",
+    "git_blob_sha": "eea0ce5dbe64769fa9b6cceee7c3ae405b42c022"
+  },
+  {
+    "version": "20261027000101",
+    "name": "pazo_marketing_onboarding_invoker_fix",
+    "md5": "c559a88730e71126f36d544a917314f2",
+    "git_blob_sha": "d1f9c1972bfb5eb7a8a5e10afa686e3d792b37ea"
+  },
+  {
+    "version": "20261027001529",
+    "name": "pazo_marketing_single_use_challenge",
+    "md5": "e1a5fbd5c2d479236f74fe70cae94c9f",
+    "git_blob_sha": "b263bc0b8ac13c0c026a0479f1c7f7a1fe952a1f"
+  },
+  {
+    "version": "20261027174140",
+    "name": "classify_pazo_qa_130_accounts_20261026",
+    "md5": "009231756c4d4710c857bf4af95e85e2",
+    "git_blob_sha": "9170316736086f6d18867c1d582c0f3b960075e9"
+  }
+]

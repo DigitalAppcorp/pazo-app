@@ -1,4 +1,10 @@
-## Issue147 — dirección aclarada: pantallas ilustradas y aviso de primer uso (28-oct-2026)
+## Estado vigente: RELEASED_AND_VERIFIED — #142 / #147 (28-oct-2026)
+
+[Publicación y evidencia](PAZO_ISSUE147_RELEASE_20261028.md). GO147 ejecutado sin aprobaciones intermedias: PR148 MERGED4ce38450 y Brain13 MERGED84ce94f; producción real `dpl_GRzYRttARoYb6QaKX6fEuvWo2p4p` / Git4ce38450 / pazo-app.vercel.app. SQL único instalado con OFF y mapeo aditivo canónico20261028075145→alojado20261028185856,133 migraciones,132 anteriores intactas. Después de comprobar el aviso ES/EN se activó utilidad a2026-10-28T19:17:46.696036Z, noticev1; retención14d/Cron saludable y QA excluida. No repetir instalación/activación ni resetear cobertura. PayPal/invitaciones/Auth conservados. Fuente de reversión8dbf/dpl3Kr comprobada; laboratorio local detenido al cierre. Los estados inferiores de candidato/no publicación están superados. El cierre documental posterior no cambia el producto publicado; verificar ambos issues y CI final en GitHub antes de iniciar otra iniciativa.
+
+---
+
+## Histórico: Issue147 — dirección aclarada: pantallas ilustradas y aviso de primer uso (28-oct-2026)
 
 Leer el [informe147 vigente](PAZO_ISSUE147_FINAL_REPORT_20261028.md). El PO aclaró: **no confundir pantallas de carga/error con avisos de orientación inicial**. Inicio usa estados ilustrados propios enmain; solo primer uso usa capa flotante no modal fuera del scroll. Candidato39943f151ba0aaa8334eb437d4c37c66f8d65021 en PR148; Brain13head5abadf01 corrige alineación con brief y referencias. Las entradas previas sobre598/dd465829/PASS no son el candidato actual. Producción8dbf y SQL1B no instalado/mediciónOFF conservados; no merge/lanzamiento automático. Gates y evidencia finales en el informe y PR148.
 

@@ -1,0 +1,69 @@
+{
+  "qa": [
+    {
+      "folder": "visual",
+      "count": 24,
+      "status": "PASS"
+    },
+    {
+      "folder": "short",
+      "count": 4,
+      "status": "PASS"
+    },
+    {
+      "folder": "utility",
+      "count": 6,
+      "status": "PASS"
+    },
+    {
+      "folder": "navigation",
+      "count": 6,
+      "status": "PASS"
+    }
+  ],
+  "compiled": {
+    "origin": "https://pazo-momenv2xm-digitalapp.vercel.app",
+    "assets": [
+      {
+        "path": "/assets/app-H2ib5S4n.js",
+        "bytes": 229626,
+        "sha256": "0e0a7986f792484dd6b2011460b32836b355fce93ac6cdcffb3a30926d091f9a"
+      },
+      {
+        "path": "/assets/publicConfig-BuC15E42.js",
+        "bytes": 1217,
+        "sha256": "06eeb0d58bfa9e4c42f20b1ff21c8a8f454fd14f15ef3bf47efadac1c0bc4d2d"
+      },
+      {
+        "path": "/assets/App-BSGUfcyd.js",
+        "bytes": 908020,
+        "sha256": "5944e6f05c5a81052316ac47d2ba0ce66e89bb9a24fd28958551e8d8469e2bb5"
+      },
+      {
+        "path": "/assets/supabaseClient-DdHhuLL4.js",
+        "bytes": 2134,
+        "sha256": "3ee1e854a6bedc10695729a9ae9038a5a255dafc8101e22b02b4f7b30f7f02aa"
+      },
+      {
+        "path": "/assets/dist-Bl13M3oS.js",
+        "bytes": 214172,
+        "sha256": "deb639bda4bde2c386c8c1fb6e04a7c1bac087c10a9b1c1d792457a1c44e0f2d"
+      },
+      {
+        "path": "/assets/MaintenanceGate-CequWzF2.js",
+        "bytes": 4783,
+        "sha256": "da3c7824d9f08131581f079c7526f024d5d47fd92424d9deccd72d994f4fd18a"
+      }
+    ],
+    "supabaseProject": true,
+    "productionPublishableKeyMatches": true,
+    "illustratedState": true,
+    "pageStateMarker": true,
+    "welcomeMarker": true,
+    "noticeES": true,
+    "noticeEN": true,
+    "releaseVersions": [
+      "0.1.05038980.1"
+    ]
+  }
+}

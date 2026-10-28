@@ -1,5 +1,7 @@
 # Issue #147 — pantallas ilustradas y aviso de primer uso
 
+> **Publicado y verificado tras GO final:** [informe de release](PAZO_ISSUE147_RELEASE_20261028.md). Producción canónica Git4ce38450/dplGRz; PR148 y Brain13 integrados. SQL1B instalado y utilidad activa con retención14d/aviso validado. Este documento conserva la preparación previa; su sección «Publicación» no describe ya el estado vivo. No repetir instalación ni activación.
+
 ## Dirección vigente
 
 La aclaración directa del PO distingue dos superficies: **carga y error pertenecen a sus pantallas; la orientación inicial es un aviso independiente**. La referencia a cookies se aplica a la segunda, sin crear consentimiento, almacenamiento ni cookies nuevas.
