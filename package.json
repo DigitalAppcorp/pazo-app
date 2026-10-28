@@ -42,7 +42,10 @@
     "test:first-utility:pg17": "node scripts/first-utility-pg17.mjs",
     "test:first-utility:browser": "node scripts/first-utility-browser.mjs",
     "test:first-use": "node --test src/features/onboarding/*.test.mjs",
-    "test:first-use:browser": "node scripts/contextual-first-use-browser.mjs"
+    "test:first-use:browser": "node scripts/contextual-first-use-browser.mjs",
+    "test:behavior": "node --test src/features/marketing/behavior.test.mjs supabase/functions/pazo-marketing-landing/prereg.test.mjs",
+    "test:behavior:pg17": "node scripts/behavior-pg17.mjs",
+    "test:behavior:browser": "node scripts/behavior-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -1,3 +1,9 @@
+## Issue #150 — candidato de analítica en desarrollo, sin nuevo GO de release
+
+Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Consultar docs/PAZO_ISSUE150_CONTRACT.md y docs/PAZO_ISSUE150_PRIVACY_AND_RELEASE.md.
+
+Nueva colección OFF y migración20261028210000 PREPARED_NOT_APPLIED. No merge/publicación final, apply SQL alojado ni nuevos datos reales sin GO único150. Producción147, medición anterior y fechas se conservan. No reutilizar GO147 ni reabrir142/147. No crear branch Supabase facturable. Las entradas inferiores preservan historia.
+
 ## Estado vigente: RELEASED_AND_VERIFIED — #142 / #147 (28-oct-2026)
 
 [Publicación y evidencia](PAZO_ISSUE147_RELEASE_20261028.md). GO147 ejecutado sin aprobaciones intermedias: PR148 MERGED4ce38450 y Brain13 MERGED84ce94f; producción real `dpl_GRzYRttARoYb6QaKX6fEuvWo2p4p` / Git4ce38450 / pazo-app.vercel.app. SQL único instalado con OFF y mapeo aditivo canónico20261028075145→alojado20261028185856,133 migraciones,132 anteriores intactas. Después de comprobar el aviso ES/EN se activó utilidad a2026-10-28T19:17:46.696036Z, noticev1; retención14d/Cron saludable y QA excluida. No repetir instalación/activación ni resetear cobertura. PayPal/invitaciones/Auth conservados. Fuente de reversión8dbf/dpl3Kr comprobada; laboratorio local detenido al cierre. Los estados inferiores de candidato/no publicación están superados. El cierre documental posterior no cambia el producto publicado; verificar ambos issues y CI final en GitHub antes de iniciar otra iniciativa.

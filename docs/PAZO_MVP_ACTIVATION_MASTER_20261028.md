@@ -1,3 +1,9 @@
+## Issue #150 — candidato de analítica en desarrollo, sin nuevo GO de release
+
+Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Consultar docs/PAZO_ISSUE150_CONTRACT.md y docs/PAZO_ISSUE150_PRIVACY_AND_RELEASE.md.
+
+Nueva colección OFF y migración20261028210000 PREPARED_NOT_APPLIED. No merge/publicación final, apply SQL alojado ni nuevos datos reales sin GO único150. Producción147, medición anterior y fechas se conservan. No reutilizar GO147 ni reabrir142/147. No crear branch Supabase facturable. Las entradas inferiores preservan historia.
+
 # PAZO — Hoja maestra de mejora del MVP y activación real
 
 > **Estado actual: RELEASED_AND_VERIFIED.** [GO final147](https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521) ejecutado; [informe de publicación](PAZO_ISSUE147_RELEASE_20261028.md). PR148 y Brain13 integrados, producto4ce38450 en producción/canónico, SQL único mapeado20261028075145→20261028185856 y medición activa desde2026-10-28T19:17:46.696036Z tras aviso/retención verificados. Los132 antecedentes SQL se conservaron. Pagos/invitaciones/Auth sin cambios. No repetir instalación/activación ni interpretar los snapshots inferiores de OFF/no GO como estado vigente; no se autoriza trabajo nuevo por este cierre.

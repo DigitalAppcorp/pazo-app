@@ -46,3 +46,6 @@ supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
 
 /artifacts/issue142*/
 /artifacts/issue147/
+
+# Isolated behavior QA output
+artifacts/issue150/

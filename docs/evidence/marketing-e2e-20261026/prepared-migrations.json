@@ -43,7 +43,17 @@
     }
   ],
   "status": "HOSTED_TARGETED_MAPPED",
-  "pendingRecords": [],
+  "pendingRecords": [
+    {
+      "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/150",
+      "collectionEnabled": false,
+      "version": "20261028210000",
+      "sha256": "0949e6df8db196a7ed65239bdebb08c7f5a766dd89f6ec092caa489f614142c1",
+      "status": "PREPARED_NOT_APPLIED",
+      "productionPushAllowed": false,
+      "path": "supabase/migrations/20261028210000_pazo_behavior_observation.sql"
+    }
+  ],
   "historicalPreparedRecords": [
     {
       "version": "20261028075145",

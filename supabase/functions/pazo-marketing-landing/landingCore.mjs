@@ -13,6 +13,8 @@ const json=(body,status,extra={})=>new Response(JSON.stringify(body),{
 export function createMarketingLandingHandler({
   released=false,
   submit=null,
+  submitPrereg=null,
+  preregReleased=false,
   verifyChallenge=null,
   origin='https://pazo-app.vercel.app',
 }={}){
@@ -36,18 +38,20 @@ export function createMarketingLandingHandler({
     let data
     try{data=JSON.parse(raw)}catch{return json(FAIL,400,cors)}
     if(!data||typeof data!=='object'||Array.isArray(data)
-      ||Object.keys(data).length!==keys.size
-      ||Object.keys(data).some(k=>!keys.has(k))
+      ||Object.keys(data).length!==keys.size+(data.step===undefined?0:1)
+      ||Object.keys(data).some(k=>!keys.has(k)&&k!=='step')
       ||data.utm_source!=='meta'||data.utm_medium!=='paid_social'
       ||data.utm_campaign!==CAMPAIGN||!CREATIVES.has(data.utm_content))
       return json(FAIL,400,cors)
+    if(data.step!==undefined&&(!preregReleased||typeof submitPrereg!=='function'))return json(OFF,503,cors)
+    if(data.step!==undefined&&!['signup_cta','signup_start','signup_requested','signup_error'].includes(data.step))return json(FAIL,400,cors)
     // Origin and UTM cannot prove a human. Provider validates a short-lived,
     // single-use token against our exact hostname/action before ANY DB budget.
     try{if(await verifyChallenge(request.headers.get('x-pazo-challenge'))!==true)return json(FAIL,403,cors)}
     catch{return json(FAIL,503,cors)}
     // Only the allowlisted creative reaches the privileged aggregate RPC.
     try {
-      const accepted=await submit(data.utm_content)
+      const accepted=data.step===undefined?await submit(data.utm_content):await submitPrereg(data.utm_content,data.step)
       return json({status:accepted===true?'aggregated':'not_accepted'},accepted===true?202:409,cors)
     }catch{return json(FAIL,503,cors)}
   }

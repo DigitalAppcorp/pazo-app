@@ -113,8 +113,20 @@ export const legalPreview: Record<LegalKind, Record<LegalLanguage, LegalText>> =
 }
 
 /** Never infer publication from the clock, credentials, or the financial selector. */
+function prepareBehaviorCopy(kind:LegalKind,lang:LegalLanguage):LegalText {
+  const base = legalPreview[kind][lang]
+  const copy = kind==='privacy' ? {...base,sections:[...base.sections,{
+    heading:lang==='es'?'Recorridos y retorno · ampliación preparada':'Journeys and return · prepared extension',
+    text:lang==='es'
+      ? 'La nueva observación de recorridos aún no está activada. Al autorizar su publicación, PAZO podrá registrar pantallas de herramientas, categorías cerradas de espera/error y sesiones efímeras de cuentas verificadas para mejorar recorridos y retorno; sin contenido, ubicación, pagos ni identidad de dispositivo. Los registros vinculables duran como máximo 14 días desde el inicio de cada sesión; nuevas visitas no prolongan ese plazo y la purga habitual corre cada 6 horas. Solo Administración recibe agregados con protección de muestras pequeñas. Los hitos anónimos de registro serán contadores de solicitudes protegidas por Turnstile, sin unirlos a cuentas. No enviamos datos individuales a Meta. Cuando esté activa, podrás retirar esta medición y borrar registros activos desde este aviso; se conservará solo la preferencia mínima de exclusión hasta eliminar la cuenta. Para acceso, corrección o supresión usa el contacto de privacidad. Backups y registros técnicos tienen ciclos propios; no se promete borrado instantáneo de copias.'
+      : 'New journey observation has not been activated. Once publication is authorized, PAZO may record tool screens, closed loading/error categories and ephemeral sessions of verified accounts to improve journeys and return; without content, location, payments or device identity. Linkable records last at most 14 days from each session start; visits do not extend that deadline and scheduled deletion normally runs every 6 hours. Only Administration receives aggregates with small-sample protection. Anonymous signup milestones will be Turnstile-protected request counters without joining them to accounts. We do not send individual data to Meta. When active, you can withdraw this measurement and delete active records from this notice; only a minimal exclusion preference remains until account deletion. For access, correction or deletion use the privacy contact. Backups and technical logs have separate lifecycles; instant deletion of copies is not promised.',
+  }]} : base
+  return copy
+}
+for(const lang of ['es','en'] as const)legalPreview.privacy[lang]=prepareBehaviorCopy('privacy',lang)
+
 export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effectiveDate: unknown = PAZO_LEGAL_EFFECTIVE_DATE): LegalText {
-  const copy = legalPreview[kind][lang]
+  const copy=legalPreview[kind][lang]
   const date = parseLegalEffectiveDate(effectiveDate)
   if (!date) return copy
   const dateNotice = lang === 'es' ? `Fecha de vigencia: ${date}.` : `Effective date: ${date}.`

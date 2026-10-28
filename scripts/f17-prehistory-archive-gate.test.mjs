@@ -57,7 +57,11 @@ test('reviewed marketing source bytes match their explicitly recorded targeted A
 })
 
 test('first-utility targeted installation is byte-exact and additively mapped without enabling bulk push',()=>{
- assert.deepEqual(marketing.pendingRecords,[])
+ assert.ok(!marketing.pendingRecords.some(r=>r.version==='20261028075145'),'installed utility cannot remain pending')
+ for(const row of marketing.pendingRecords){
+  assert.equal(row.status,'PREPARED_NOT_APPLIED');assert.equal(row.productionPushAllowed,false)
+  assert.equal(createHash('sha256').update(readFileSync(new URL(row.path,root),'utf8').replace(/\r\n/g,'\n')).digest('hex'),row.sha256)
+ }
  assert.deepEqual(marketing.installedRecords.map(r=>r.version),['20261028075145'])
  for(const r of marketing.installedRecords){
   assert.equal(r.status,'HOSTED_TARGETED_APPLIED');assert.equal(r.productionPushAllowed,false)
