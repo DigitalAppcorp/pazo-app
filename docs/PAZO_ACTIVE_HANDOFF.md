@@ -1,4 +1,10 @@
-## Hoja maestra transversal — activación real del MVP (28-oct-2026)
+## Issue142 — paquete final para decisión única del PO (28-oct-2026)
+
+Leer primero el [informe final y candidato](PAZO_ISSUE142_FINAL_REPORT_20261028.md):1A alojado,1B yPR2 implementados/probados/integrados, matriz ES/EN móvil y evidencia de PostgreSQL aislado. Producción8dbf4ef5 conservada; sin SQL nuevo instalado ni colección nueva activa. Siguiente acción requiere decisión final del PO para publicar; no repetir implementación ni convertir los snapshots siguientes en bloqueos actuales. La hoja maestra incorpora esta actualización de forma aditiva. No hay trabajo de implementación pendiente de delegar al director técnico.
+
+---
+
+## Histórico: hoja maestra transversal — activación real del MVP (28-oct-2026)
 
 **Nuevo punto de entrada para el siguiente agente:** [PAZO_MVP_ACTIVATION_MASTER_20261028.md](PAZO_MVP_ACTIVATION_MASTER_20261028.md). Documenta el acuerdo PO + Codex + asesor IA + consultor: priorizar primera utilidad sobre nuevas funciones; tres entregas PR 1A (estabilidad), PR 1B (medición) y PR 2 (orientación contextual); criterios de aceptación, límites de privacidad, y permisos separados de consultar/preparar/implementar/fusionar/desplegar. **PR #140 listo para revisión, no integrado ni desplegado según la verificación 2026-10-28; 1B y 2 no autorizados.** Esta entrada es documental, no una orden de ejecución. Verificar el estado actual de GitHub y producción antes de actuar.
 

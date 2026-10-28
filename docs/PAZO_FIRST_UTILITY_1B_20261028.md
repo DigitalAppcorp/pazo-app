@@ -16,10 +16,10 @@ El panel administrativo existente incorpora resultados, estados de carga, pausa,
 
 ## Evidencia
 
-- 17 pruebas de cliente/parser +3 del panel PASS: payload mínimo, sesión fijada/cambio de cuenta, concurrencia, caída de red, reintento, rechazo de PII/segmentos no válidos/contadores imposibles, respuesta obsoleta y muestra insuficiente.
+- 21 pruebas de cliente/parser/panel e integridad del candidato PASS: payload mínimo, sesión fijada/cambio de cuenta, concurrencia, caída de red, reintento, rechazo de PII/segmentos no válidos/contadores imposibles, respuesta obsoleta, muestra insuficiente y hash de SQL pendiente.
 - 32 comprobaciones PostgreSQL17 PASS: ACL/FORCE RLS, cuenta ajena, QA retroactiva, idempotencia real con16 solicitudes concurrentes, cuidado persistido/rollback, fila de analítica bloqueada sin bloquear cuidado, D7 con reloj de fixture y borde de maduración, pausa global, supresión/recolección impedida, purga existente y baja de cuenta.
 - Browser real App/Auth/servicios → transporte interceptado → PostgreSQL17 real/RLS/trigger: ES/EN320/390/430. QR renderizado, Web Share cancelado no contado, promesa de compartir resuelta contada, descarga funcional con503 de métrica y cuidado efectivamente guardado. Sin compras ni escrituras alojadas. El API nativo de compartir se simula; no se prueba un destinatario ni se afirma entrega.
-- TypeScript/build, gobernanza y cierre heredado PASS; módulos nuevos sin diagnósticos ESLint. CI del PR será la evidencia del commit publicado, sin reutilizar un SHA anterior.
+- TypeScript/build, gobernanza y cierre heredado PASS; módulos nuevos sin diagnósticos ESLint. CI del head exacto del PR143 completo SUCCESS y merge verificado: [paquete final](PAZO_ISSUE142_FINAL_REPORT_20261028.md).
 
 [Resultados del laboratorio](evidence/issue142/utility-browser.json), [comprobaciones PG17](evidence/issue142/utility-pg17.json).
 

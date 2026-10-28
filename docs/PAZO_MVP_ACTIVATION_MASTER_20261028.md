@@ -1,5 +1,7 @@
 # PAZO — Hoja maestra de mejora del MVP y activación real
 
+> **Estado vigente de cierre de issue142:** implementación1A/1B/PR2 terminada, pruebas e integración técnica verificadas. [Paquete único final: candidato alojado, matriz, CI, Design OS, límites y publicación preparada](PAZO_ISSUE142_FINAL_REPORT_20261028.md). Producción se conserva en8dbf4ef5; no se instaló ni activó el SQL nuevo. **La única decisión pendiente es la aceptación/publicación final del PO.** Las entradas inferiores son snapshots históricos y no sustituyen esta actualización ni autorizan lanzar automáticamente.
+
 > **Actualización operativa posterior al snapshot:** [issue142](https://github.com/DigitalAppcorp/pazo-app/issues/142) y orden directa del PO autorizan la ejecución integral de1A alojado,1B yPR2, sus pruebas/integración y previews necesarias. Las restricciones de implementación del snapshot inferior quedan superadas para ese alcance. Publicación final reservada al PO. Main contiene1A/140 y141 en5c4635e5. Preview1A exacta verificada ES/EN móvil con frontend remoto y backend interceptado, sin producción. PR1B preparado con colecciónOFF y SQL no aplicado; PR2 en ejecución. [Contrato](PAZO_ISSUE142_ACCEPTANCE.md) y [evidencias1B](PAZO_FIRST_UTILITY_1B_20261028.md). Producción8dbf4ef5 preservada; verificar estado vivo al retomar.
 
 **Fecha de consolidación:** 2026-10-28 (snapshot; verificar estado vivo antes de actuar).

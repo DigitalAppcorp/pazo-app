@@ -1,0 +1,101 @@
+{
+  "issue": 142,
+  "date": "2026-10-28",
+  "status": "IMPLEMENTED_TESTED_INTEGRATED_READY_FOR_PO",
+  "finalReleaseExecuted": false,
+  "candidate": {
+    "sha": "b23d046a0f4c3e7192b38c6c1854783cfdf7763a",
+    "tree": "a0fa27a3eb9011c59967cdc47d61027c960c9585",
+    "integratedMerge": "ed1a64d49eeb656d6d4ac30c7a017b6f06d01283",
+    "deployment": "dpl_CtkXfusaJz8gm5V9uEKTx7vVQ5sb",
+    "url": "https://pazo-ljxboxg3v-digitalapp.vercel.app",
+    "state": "READY",
+    "target": "staging"
+  },
+  "production": {
+    "sha": "8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04",
+    "deployment": "dpl_3KrqGdJmijURjdirv1W1iwhkhSW7",
+    "alias": "https://pazo-app.vercel.app",
+    "unchanged": true
+  },
+  "database": {
+    "hostedMigrationCount": 132,
+    "newMigrationInstalled": false,
+    "newUtilityTableExists": false,
+    "existingMarketingGate": true,
+    "retentionDays": 14,
+    "retentionReady": true,
+    "newUtilityCollectionActivated": false,
+    "hostedWritesPerformed": 0
+  },
+  "tests": {
+    "governance": 759,
+    "closureIncluded": 527,
+    "firstUtilityIncluded": 21,
+    "firstUseIncluded": 13,
+    "firstUtilityPg17": 32,
+    "f16Synthetic": 1196,
+    "f14Linux": 53,
+    "dist": 4,
+    "hostedNavigationCases": 6,
+    "hostedContextualPg17Cases": 6,
+    "permanentHostedScreenshots": 36,
+    "pageErrors": 0,
+    "hostedWrites": 0,
+    "localBackend": "real disposable PostgreSQL17/RLS/trigger",
+    "hostedBackend": "intercepted synthetic Auth/data; no real hosted Auth/DB assertions",
+    "shareApi": "simulated; no recipient delivery asserted",
+    "lintGlobal": {
+      "errors": 148,
+      "warnings": 18,
+      "unchangedVs1B": true,
+      "newModulesDiagnostics": 0
+    }
+  },
+  "ci": {
+    "pr143": {
+      "sha": "e57fac0d41004e3245a5e8747c4b81894ca37b05",
+      "runs": [
+        40664021394,
+        40664021739,
+        40664021246,
+        40664021259,
+        40664021272,
+        40664021375
+      ],
+      "all": "SUCCESS"
+    },
+    "pr144": {
+      "sha": "bed5cf758d173bd7d49aa94431c15f1287fdf842",
+      "runs": [
+        40665503520,
+        40665503636,
+        40665503521,
+        40665503493,
+        40665503431
+      ],
+      "all": "SUCCESS"
+    },
+    "pr145": {
+      "sha": "b23d046a0f4c3e7192b38c6c1854783cfdf7763a",
+      "runs": [
+        40666706067,
+        40666706234,
+        40666706212,
+        40666706174
+      ],
+      "all": "SUCCESS"
+    }
+  },
+  "designOs": {
+    "version": "0.6.0",
+    "canonicalBlob": "f6580194f3908d56a5002f7210c045432a8e8c01",
+    "internalScopeReview": "PASS",
+    "finalPoVisualAcceptance": "PENDING"
+  },
+  "decision": {
+    "technical": "GO_FOR_PO_REVIEW",
+    "autonomousFinalLaunch": "NO_GO_REQUIRES_PO",
+    "implementationBlockers": []
+  }
+}
