@@ -51,7 +51,8 @@
       "sha256": "79c5d61424a90987b48dff0e1175b908b17358cc673cd80d627293dab823c766",
       "status": "PREPARED_NOT_APPLIED",
       "productionPushAllowed": false,
-      "path": "supabase/migrations/20261028210000_pazo_behavior_observation.sql"
+      "path": "supabase/migrations/20261028210000_pazo_behavior_observation.sql",
+      "retainedAsPreInstallSnapshot": true
     }
   ],
   "historicalPreparedRecords": [
@@ -74,6 +75,18 @@
       "status": "HOSTED_TARGETED_APPLIED",
       "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521",
       "utilityEnabledAtInstallation": false,
+      "productionPushAllowed": false
+    },
+    {
+      "version": "20261028210000",
+      "path": "supabase/migrations/20261028210000_pazo_behavior_observation.sql",
+      "sha256": "79c5d61424a90987b48dff0e1175b908b17358cc673cd80d627293dab823c766",
+      "hostedVersion": "20261028215020",
+      "hostedStatementMd5": "21eb26f69e070e4ff9d5934195998821",
+      "transportSuffix": "",
+      "status": "HOSTED_TARGETED_APPLIED",
+      "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/150",
+      "behaviorEnabledAtInstallation": false,
       "productionPushAllowed": false
     }
   ]
