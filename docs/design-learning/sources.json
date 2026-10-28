@@ -1,0 +1,21 @@
+{
+  "audited_at": "2026-10-26",
+  "decision_dates": "As stated in source documents; Git commit timezone may differ",
+  "source_pr": 44,
+  "source_head": "716ebcc081a1d54ecc4579860bee6f4ced3e47ed",
+  "sources": [
+    {
+      "path": "docs/PAZO_F13_VISUAL_CHANGESET_20261012.md",
+      "blob": "0f92df1d76fdb104995a20aedfcf9960bf6362fb",
+      "ref": "https://github.com/DigitalAppcorp/pazo-app/blob/716ebcc081a1d54ecc4579860bee6f4ced3e47ed/docs/PAZO_F13_VISUAL_CHANGESET_20261012.md"
+    },
+    {
+      "path": "docs/PAZO_ADMIN_VISUAL_FIDELITY_GATE_20261018.md",
+      "blob": "666979b33576e264a76b95601529316759ddaaf9",
+      "ref": "https://github.com/DigitalAppcorp/pazo-app/blob/716ebcc081a1d54ecc4579860bee6f4ced3e47ed/docs/PAZO_ADMIN_VISUAL_FIDELITY_GATE_20261018.md"
+    }
+  ],
+  "human_comment": "https://github.com/DigitalAppcorp/pazo-app/pull/44#issuecomment-6258307113",
+  "screenshots": "Original F13 PO screenshots and Library admin images were not accessible via connected file tools; no visual re-evaluation claimed",
+  "audit_scope": "Selective: two primary documents, PR44 metadata and six comments, selected linked commit metadata. Not all PR files or history."
+}
