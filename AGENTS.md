@@ -1,3 +1,11 @@
+## HOJA MAESTRA VIGENTE — próxima analítica global de PAZO (28-oct-2026)
+
+**Lectura obligatoria antes de retomar esta iniciativa:** [docs/PAZO_GLOBAL_ANALYTICS_IMPLEMENTATION_MASTER_20261028.md](docs/PAZO_GLOBAL_ANALYTICS_IMPLEMENTATION_MASTER_20261028.md) → [decisión estratégica](docs/PAZO_GLOBAL_PRODUCT_INTELLIGENCE_DECISION_20261028.md) → [issue #153](https://github.com/DigitalAppcorp/pazo-app/issues/153). Define el inventario exhaustivo por pantalla y control, eventos de intención/resultado/error, reutilización de feed y fake doors, privacidad, costes, Design Intelligence OS + Marketing Brain OS, fases y criterios de éxito. **NO confundir cobertura integral con captura indiscriminada de clics.**
+
+**ESTADO: HOJA MAESTRA DOCUMENTADA, SIN GO DE IMPLEMENTACIÓN.** Solo está autorizada la documentación/planificación de esta solicitud. No construir nuevas funciones, alterar ranking, crear migraciones, ampliar recogida, activar flags, fusionar PRs funcionales, contratar proveedores ni desplegar por leer este documento. Cuando haya un GO de implementación específico, ejecutar fases 0–6 y presentar candidato/único informe; **fase 7/publicación requiere GO final separado del PO**. No duplicar #150: ya publicado y activo. Verificar siempre main/producción y los permisos actuales.
+
+---
+
 ## DECISIÓN VIGENTE DEL PO — analítica global de PAZO (28-oct-2026)
 
 **Leer antes de proponer cualquier cambio de analítica, feed, Demo, fake doors, onboarding, UX o personalización:** [docs/PAZO_GLOBAL_PRODUCT_INTELLIGENCE_DECISION_20261028.md](docs/PAZO_GLOBAL_PRODUCT_INTELLIGENCE_DECISION_20261028.md).
