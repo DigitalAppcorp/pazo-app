@@ -1,6 +1,6 @@
-## Lugares — UX aprobada, integración y publicación autorizadas (27-oct-2026)
+## Lugares — UX aprobada publicada (27-oct-2026)
 
-PO aprueba propuesta02+idioma03 y ordena producción. Integración de presentación sobre controladores/servicios actuales; sin DB, Auth, finanzas ni marketing. [Alcance, invariantes y gates](PAZO_PLACES_APPROVED_UX_RELEASE_20261027.md). Candidato en curso: CI exacto, merge y postflight pendientes. Los gates de otras tareas se conservan en su propio alcance.
+Propuesta02+idioma03 aprobada por PO, integrada PR138/merge8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04, candidato3e6448f4 con9/9CI SUCCESS. VercelPROD dpl_3KrqGdJmijURjdirv1W1iwhkhSW7 READY/aliashttps://pazo-app.vercel.app, postflight público HTTP22PASS y demoMapa real ESEN sin erroresJS ni escrituras.12controladores y8archivosprotegidos intactos; sin SQL/Edge/Auth/pagos/marketing. [Cierre y límites](PAZO_PLACES_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261027.md). Cambios posteriores de documentación no requieren otro despliegue frontend.
 
 ---
 ## #130 — seguimiento del segundo Cron completado

@@ -1,0 +1,33 @@
+{
+  "candidate": "3e6448f44c56e5b04675240ee6dc6264f0969252",
+  "merge": "8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04",
+  "candidateAndMergeTreesIdentical": true,
+  "pullRequest": "https://github.com/DigitalAppcorp/pazo-app/pull/138",
+  "workflowRuns": [
+    {
+      "id": 40615616407,
+      "name": "CI",
+      "conclusion": "success",
+      "jobs": 7
+    },
+    {
+      "id": 40615616484,
+      "name": "F18 public supporter isolated gates",
+      "conclusion": "success",
+      "jobs": 2
+    }
+  ],
+  "deployment": {
+    "id": "dpl_3KrqGdJmijURjdirv1W1iwhkhSW7",
+    "url": "https://pazo-o7ggl0531-digitalapp.vercel.app",
+    "state": "READY",
+    "target": "production",
+    "project": "prj_nk61nr5ZVpxlp8qbIvRCsua36iXI",
+    "team": "team_02Ax5UcD1OlLzpDBYyNMi6KO",
+    "gitSha": "8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04",
+    "canonicalAlias": "https://pazo-app.vercel.app",
+    "aliasReadBack": true
+  },
+  "previousDeployment": "dpl_47U5Q21kxWGDiiyLh5hU62Yurp3c",
+  "rollbackPerformed": false
+}

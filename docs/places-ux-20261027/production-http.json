@@ -1,0 +1,101 @@
+{
+  "base": "https://pazo-app.vercel.app",
+  "checks": [
+    {
+      "name": "HTTP200 /",
+      "pass": true
+    },
+    {
+      "name": "Canonical app shell",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 /paypal/return?token=PAZO_NO_PAYMENT_QA",
+      "pass": true
+    },
+    {
+      "name": "PayPal route shell /paypal/return?token=PAZO_NO_PAYMENT_QA",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 /paypal/cancel?token=PAZO_NO_PAYMENT_QA",
+      "pass": true
+    },
+    {
+      "name": "PayPal route shell /paypal/cancel?token=PAZO_NO_PAYMENT_QA",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 /manifest.webmanifest",
+      "pass": true
+    },
+    {
+      "name": "Installable manifest",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 /pwa-icon-192.png",
+      "pass": true
+    },
+    {
+      "name": "PNG /pwa-icon-192.png",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 /pwa-icon-512.png",
+      "pass": true
+    },
+    {
+      "name": "PNG /pwa-icon-512.png",
+      "pass": true
+    },
+    {
+      "name": "HTTP200 /sw.js",
+      "pass": true
+    },
+    {
+      "name": "Service worker present",
+      "pass": true
+    },
+    {
+      "name": "Bundle /assets/app-D8X3zsWs.js",
+      "pass": true
+    },
+    {
+      "name": "Bundle /assets/publicConfig-BuC15E42.js",
+      "pass": true
+    },
+    {
+      "name": "Bundle /assets/app-BqxbE0me.css",
+      "pass": true
+    },
+    {
+      "name": "Bundle /assets/App-D2PzXUDU.js",
+      "pass": true
+    },
+    {
+      "name": "Published implementation marker place-future-gate",
+      "pass": true
+    },
+    {
+      "name": "Published implementation marker places_user_photos",
+      "pass": true
+    },
+    {
+      "name": "Published implementation marker Dogs on the patio",
+      "pass": true
+    },
+    {
+      "name": "Published implementation marker Municipal dog park",
+      "pass": true
+    }
+  ],
+  "bundles": [
+    "/assets/app-D8X3zsWs.js",
+    "/assets/publicConfig-BuC15E42.js",
+    "/assets/app-BqxbE0me.css",
+    "/assets/App-D2PzXUDU.js"
+  ],
+  "allPass": true,
+  "noAuthenticatedOrFinancialWrites": true
+}

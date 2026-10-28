@@ -1,3 +1,5 @@
+**PUBLICADO / POSTFLIGHT PASS.** Ver PAZO_PLACES_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261027.md para SHA, CI, alias y evidencia. Los gates pendientes descritos abajo son el registro previo al despliegue.
+
 # Lugares — integración de la UX aprobada
 
 27 octubre 2026, America/Guatemala. PO: «Listo, me gusta, implementalo a produccion». Aprobación de propuesta02 + corrección de idioma03; integración, merge y despliegue frontend autorizados. No autoriza desarrollar las seis funciones futuras ni cambios de DB, Auth, pagos o marketing. Base main `a946469e4838d1d5a3817758b8db4aa276b866b4`; producción de partida `9df24a1d52de28788aa212764ffe23c3721e0222` / `dpl_47U5Q21kxWGDiiyLh5hU62Yurp3c` READY.
