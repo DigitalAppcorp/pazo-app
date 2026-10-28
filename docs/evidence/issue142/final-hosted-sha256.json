@@ -5,8 +5,188 @@
     "bytes": 2603
   },
   {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-320-care.png",
+    "sha256": "50152413af337364af371c32fcb89e774611d9bffdeb3fb8714ed19f61805f98",
+    "bytes": 73601
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-320-first-use.png",
+    "sha256": "f8baa6530668302221914c80f4381e52e80b0b9a5c275be2af1ef9bbf9f372b6",
+    "bytes": 32915
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-320-qr.png",
+    "sha256": "49a4bd4318e524f2b70b1d0bc1d66fca3a0f7d49d13e175dde27b4444458cadc",
+    "bytes": 64758
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-390-care.png",
+    "sha256": "e7887253bd405fb81191709e2dde804470127b96bf65afbedb22cdcedb1b2fe4",
+    "bytes": 83719
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-390-first-use.png",
+    "sha256": "e59abd8d4f15ec2627888a3f5f8c5670cbbfb04c6782d4aa8341cf47a591eb0b",
+    "bytes": 30824
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-390-qr.png",
+    "sha256": "b5b6d40e72c40eefc9c04a04722c33035263d2886504ef6e40640ea82e1edbe0",
+    "bytes": 73385
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-430-care.png",
+    "sha256": "8a002acf91051a0e416b4be8a385bbe7e66b60a493ab1a22c49c431a95d28b3c",
+    "bytes": 85465
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-430-first-use.png",
+    "sha256": "275a061cb5871126e8d53e66605b31c1db11b5b0550b25ec66ee2fce820f3e07",
+    "bytes": 30593
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/en-430-qr.png",
+    "sha256": "d119d404deea173596739b5f6e8a175c73f510b1a1fdc0026427a409825fcb93",
+    "bytes": 77690
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-320-care.png",
+    "sha256": "bccd5bfc3d09b39e3888f95825aaec7a4c73e8fc74b862fa0e61b9e3bfbc35c5",
+    "bytes": 71215
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-320-first-use.png",
+    "sha256": "297c44d9feabf730d00fb5e0c720ccedab8b29ed32bfe8ef025c0b3d3d52e6ee",
+    "bytes": 29607
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-320-qr.png",
+    "sha256": "75c41a97ac6c6cfa302a5259b2b72a0123912e7e61d83d7ebcec27dfade257dd",
+    "bytes": 63871
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-390-care.png",
+    "sha256": "cd3c6e059e082bae81d0c3ed028cbe436dca0354a42a48ec47b5ca4afc8a609e",
+    "bytes": 87214
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-390-first-use.png",
+    "sha256": "56202db7cfd2106f48efd23845df1c403c32c58cffe8271baa9517b6d2f6a4d3",
+    "bytes": 30816
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-390-qr.png",
+    "sha256": "cd1b4f12c46d8144156d05db06753a94f08a5bcd0ef05a5dc4206003326f522a",
+    "bytes": 73951
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-430-care.png",
+    "sha256": "903fb9936d3775faff8dd2a6e058840edaf6132ccbb00edb2b6f67fbb0b54f20",
+    "bytes": 90334
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-430-first-use.png",
+    "sha256": "8286a3fe2c8a767ad007841285d1217d271d4d0c451fca44a03255f5866083d8",
+    "bytes": 30720
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-contextual/es-430-qr.png",
+    "sha256": "acf637ac0162cdf3e1580a44dc888c737e7d63cfd9e121629780e2e7802fa443",
+    "bytes": 79429
+  },
+  {
     "path": "docs/evidence/issue142/final-hosted-navigation.json",
     "sha256": "a78e37d84f89fb0ba5a618bedd6df9037b094b648a4001a7205ad71337226e36",
     "bytes": 2351
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-320-Communities.png",
+    "sha256": "01b1424672330495bace329677637f7f2c9b1f9389573e8f74ed625f14f93da0",
+    "bytes": 55444
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-320-Map.png",
+    "sha256": "df6cd379c502cccbe3aa2bf46ad5ad477687f7db3172e00f59891cf282bbc93d",
+    "bytes": 56622
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-320-My-Pet.png",
+    "sha256": "81359de573b6fa1a5837b4e17f58c64bb369a75e854b8e4e7b14e9f48cc09227",
+    "bytes": 64233
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-390-Communities.png",
+    "sha256": "c1c225d9189f65f3c57b81676a751aa80dc258af7e5743f5cef9a2a6da3250c2",
+    "bytes": 62915
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-390-Map.png",
+    "sha256": "29a6f517e875c1a05a7ab21a090b93bad81f4baad01d1080fb1f0dca7966797b",
+    "bytes": 58003
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-390-My-Pet.png",
+    "sha256": "1da52fdef23b718c4d4c9f37d03550317514c348555616cb1e0003121ab5f8d5",
+    "bytes": 67483
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-430-Communities.png",
+    "sha256": "0885e2ca402b96f6f5a7949c10f03b60c20146e2a13fef4ab124082235b99c8b",
+    "bytes": 66384
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-430-Map.png",
+    "sha256": "eaaed60f5dd0ccd9c7e3f1b4b70b4c26e530f3147160d9da72b005d318de9b44",
+    "bytes": 58835
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/en-430-My-Pet.png",
+    "sha256": "d4302262c3fd16af592e63223745cccafe3d0fa49fbb50f2403666b185be6326",
+    "bytes": 67592
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-320-Comunidades.png",
+    "sha256": "5e6e3a3e1748c4640e81825c0e9ee7134b87bcb78ece435e583571a54253b423",
+    "bytes": 54839
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-320-Mapa.png",
+    "sha256": "72a7dc203006b2e4e43354513691b6f9df5e4bdb6d30a8bdc9783b3e4d043bb1",
+    "bytes": 58239
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-320-Mi-mascota.png",
+    "sha256": "eb7ed4b8bb625bbeadd9016d50d8c0c0d584f11db6f0132dd29a52a1a1423ca6",
+    "bytes": 59399
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-390-Comunidades.png",
+    "sha256": "e54f8b3240f54668fa7b85e807ff0a4819f4ef810be08e0794303ac56ebf8f3d",
+    "bytes": 62493
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-390-Mapa.png",
+    "sha256": "288bce60c1222eb35482b39f326e843f010b8e4a1220af6cb57b5d0d96954af9",
+    "bytes": 58928
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-390-Mi-mascota.png",
+    "sha256": "eab0b4035d0724c7e6412bc1ffab8f1defe741c0478e89ca889570fe8cc10cd5",
+    "bytes": 69736
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-430-Comunidades.png",
+    "sha256": "84392c349d20a2162b1840cbd1393249cd6ee28554f5ebe504679c90da89f335",
+    "bytes": 66403
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-430-Mapa.png",
+    "sha256": "46c2d2e0c9ac0ac89ac539521f72494cea40a016a47e3f5c794512071b788f9b",
+    "bytes": 59618
+  },
+  {
+    "path": "docs/evidence/issue142/final-hosted-navigation/es-430-Mi-mascota.png",
+    "sha256": "da5082d2c5670bf3d934a07e3c17b11c4efca7725d6116c46d655ec616e0ac7a",
+    "bytes": 70080
   }
 ]
