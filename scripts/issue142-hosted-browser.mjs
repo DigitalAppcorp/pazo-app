@@ -79,7 +79,7 @@ try{
   for(const label of lang==='es'?['Comunidades','Mapa','Mi mascota']:['Communities','Map','My Pet']){
    await nav.getByRole('button',{name:label,exact:true}).click()
    assert.equal(await nav.getByRole('button',{name:label,exact:true}).getAttribute('aria-current'),'page')
-   assert.equal(await page.locator('main').getByText('Sincronizando feed...',{exact:true}).count(),0)
+   assert.equal(await page.locator('main').getByText(lang==='es'?'Sincronizando feed...':'Syncing feed...',{exact:true}).count(),0)
    await page.screenshot({path:path.join(out,`${lang}-${width}-${label.replaceAll(' ','-')}.png`)})
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
   }
@@ -98,7 +98,7 @@ try{
   feed='success'
   await nav.getByRole('button',{name:lang==='es'?'Inicio':'Home',exact:true}).click()
   await page.getByRole('button',{name:lang==='es'?'Reintentar':'Try again',exact:true}).click()
-  await page.waitForFunction(()=>!document.querySelector('main')?.textContent.includes('Sincronizando feed')&&!document.querySelector('main')?.textContent.includes('Could not load posts')&&!document.querySelector('main')?.textContent.includes('No pudimos cargar'))
+  await page.waitForFunction(()=>!document.querySelector('main')?.textContent.match(/Sincronizando feed|Syncing feed|Could not load posts|No pudimos cargar/))
   assert.deepEqual(errors,[]);assert.deepEqual(unexpectedWrites,[])
   results.push({lang,width,viewsWhileFeedPending:3,feedErrorRetry:'PASS',petABA:'PASS',offlineNavigation:'PASS',overflow:false,pageErrors:0,backendRequestsIntercepted:backend,externalBlocked:external,blockedExistingMetricWrites,hostedWrites:0})
   await context.close()
