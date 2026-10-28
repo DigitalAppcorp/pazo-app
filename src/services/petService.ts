@@ -171,7 +171,9 @@ export const fetchOwnedPet = async (petId: string): Promise<Pet> => {
   return mapPetRow(data, privateByPetId.get(petId))
 }
 
-export const createPetProfile = async (input: CreatePetProfileInput): Promise<Pet> => {
+export const createPetProfile = async (input: CreatePetProfileInput, isCurrent?: () => boolean): Promise<Pet> => {
+  const assertCurrent=()=>{if(isCurrent&&!isCurrent())throw new DOMException('Pet creation request retired','AbortError')}
+  assertCurrent()
   const {
     data: { user },
     error: userError,
@@ -179,6 +181,18 @@ export const createPetProfile = async (input: CreatePetProfileInput): Promise<Pe
 
   if (userError) throw userError
   if (!user) throw new Error('No se encontró una sesión activa.')
+
+  // First-onboarding requests carry an account lifetime. Pin the verified
+  // owner's token so fetchWithAuth cannot substitute another login midway.
+  let accessToken: string|undefined
+  if (isCurrent) {
+    assertCurrent()
+    const {data:{session},error}=await supabase.auth.getSession()
+    assertCurrent()
+    if(error)throw error
+    if(!session||session.user.id!==user.id)throw new DOMException('Pet creation session changed','AbortError')
+    accessToken=session.access_token
+  }
 
   let uploadedPath: string | null = null
   let finalPhotoUrl = normalizeOptional(input.photoUrl) || DEFAULT_PET_PHOTO
@@ -190,7 +204,8 @@ export const createPetProfile = async (input: CreatePetProfileInput): Promise<Pe
       finalPhotoUrl = uploaded.publicUrl
     }
 
-    const { data, error } = await supabase.rpc('create_pet_profile', {
+    assertCurrent()
+    const request = supabase.rpc('create_pet_profile', {
       p_name: input.name.trim(),
       p_species: input.species,
       p_age: input.age?.trim() || null,
@@ -202,10 +217,15 @@ export const createPetProfile = async (input: CreatePetProfileInput): Promise<Pe
       p_gender: input.gender || null,
     })
 
+    const {data,error}=await(accessToken?request.setHeader('Authorization',`Bearer ${accessToken}`):request)
+    assertCurrent()
+
     if (error) throw error
     if (!data) throw new Error('Supabase no devolvió el ID de la mascota creada.')
 
-    return await fetchOwnedPet(data as string)
+    const createdPet=await fetchOwnedPet(data as string)
+    assertCurrent()
+    return createdPet
   } catch (error) {
     if (uploadedPath) await removePetAvatar(uploadedPath)
     throw error

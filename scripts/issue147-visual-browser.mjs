@@ -24,6 +24,11 @@ const height=Number(process.env.PAZO_VISUAL_HEIGHT||844),smoke=process.env.PAZO_
 assert.ok([568,667,844].includes(height))
 const settle=page=>page.evaluate(async()=>{
  await document.fonts.ready
+ const images=[...document.images].filter(image=>{
+  const box=image.getBoundingClientRect();return box.width>0&&box.height>0&&box.bottom>0&&box.top<innerHeight
+ })
+ await Promise.all(images.map(image=>image.decode().catch(()=>{})))
+ if(images.some(image=>!image.complete||image.naturalWidth===0))throw Error('Visible runtime image has not loaded')
  await Promise.all(document.getAnimations().filter(a=>Number.isFinite(a.effect?.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{})))
 })
 try{

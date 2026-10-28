@@ -126,6 +126,22 @@ test('first persisted pet lands on existing tools and Explore dismisses guidance
  await nav('mascota');assert.equal(view('PetView').props.firstUseIntent,undefined)
  await flush(()=>pending.resolve({data:[],error:null}))
 })
+for(const sequence of ['other-account','A-B-A','same-id-session'])test(`old first-pet completion is rejected after ${sequence}`,async()=>{
+ let first=true
+ const other={...pets[1],id:'other-pet',ownerId:'other'}
+ await setup({fetchOwnedPets:id=>{if(first){first=false;return Promise.resolve([])}return Promise.resolve(id==='other'?[other]:[pets[1]])}})
+ const lateComplete=view('OnboardingView').props.onComplete
+ if(sequence==='same-id-session'){
+  await flush(()=>{listeners.forEach(fn=>fn('SIGNED_OUT'));auth={...auth,user:{id:'owner'}};root.update(React.createElement(App))})
+ }else{
+  await flush(()=>{auth={...auth,user:{id:'other'}};root.update(React.createElement(App))})
+  if(sequence==='A-B-A')await flush(()=>{auth={...auth,user:{id:'owner'}};root.update(React.createElement(App))})
+ }
+ const current=state().currentPet.id
+ await flush(()=>lateComplete({...pets[0],name:'OBSOLETE FIRST PET'}))
+ assert.equal(state().currentPet.id,current)
+ assert.doesNotMatch(JSON.stringify(root.toJSON()),/OBSOLETE FIRST PET/)
+})
 for(const sequence of [['B'],['B','A']])test(`stale care, documents and profile rejected after A -> ${sequence.join(' -> ')}`,async()=>{
  const care=deferred(),docs=deferred(),profile=deferred();let firstCare=true,firstDocs=true,firstProfile=true
  await setup({fetchActiveCareItems:id=>firstCare?(firstCare=false,care.promise):Promise.resolve([{id:'fresh-'+id,petId:id,dueDate:'2026-10-28'}]),

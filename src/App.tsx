@@ -2011,6 +2011,7 @@ function PazoMain() {
   }
 
   const isAuthenticated = (!!user && !isOnboardingActive) || isDemoUser
+  const isCurrentOnboardingCompletion = accountRequests.capture()
 
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
@@ -2068,6 +2069,7 @@ function PazoMain() {
         {!isAuthenticated ? (
           authMode === 'onboarding' ? (
             <OnboardingView
+              isCompletionCurrent={isCurrentOnboardingCompletion}
               initialStep={initialOnboardingStep}
               lang={lang}
               onToggleLang={handleToggleLanguage}
@@ -2077,6 +2079,7 @@ function PazoMain() {
               }}
               onQuickDemo={enterDemo}
               onComplete={(newPet) => {
+                if (!isCurrentOnboardingCompletion()) return
                 if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id) {
                   setFirstUseHint({ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)})
                   setActiveTab('mascota')
