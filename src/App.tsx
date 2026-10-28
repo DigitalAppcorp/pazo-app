@@ -8,6 +8,7 @@ import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/marketing/marketingRuntime'
 import { HomeFeedStatus } from './features/feed/HomeFeedStatus'
+import { FirstUsePrompt } from './features/onboarding/FirstUsePrompt'
 import { shouldOfferFirstUse, isCurrentFirstUse, type FirstUseHint } from './features/onboarding/firstUse'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
@@ -2012,6 +2013,7 @@ function PazoMain() {
 
   const isAuthenticated = (!!user && !isOnboardingActive) || isDemoUser
   const isCurrentOnboardingCompletion = accountRequests.capture()
+  const canShowAppNotice = !selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId
 
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
@@ -2414,8 +2416,6 @@ function PazoMain() {
                       careItems={careItems}
                       careReminderItem={currentPetCareReminder}
                       onCompleteCare={handleCompleteCare}
-                      firstUseIntent={isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)?firstUseHint?.intent:undefined}
-                      onExploreFirstUse={()=>{setFirstUseHint(null);setActiveTab('inicio')}}
                       onOpenQRPassport={() => {setFirstUseHint(null);openAccountAction(() => setIsPassportOpen(true))}}
                       onOpenCareAgenda={() => {setFirstUseHint(null);openAccountAction(() => setIsCareOpen(true))}}
                       documentCount={documentCount}
@@ -2428,6 +2428,14 @@ function PazoMain() {
                 </>
               )}
             </main>
+
+            {canShowAppNotice && isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)&&firstUseHint && (
+              <FirstUsePrompt petName={currentPet.name} intent={firstUseHint.intent} lang={lang}
+                onDismiss={()=>setFirstUseHint(null)}
+                onExplore={()=>{setFirstUseHint(null);setActiveTab('inicio')}}
+                onQr={()=>{setFirstUseHint(null);openAccountAction(()=>setIsPassportOpen(true))}}
+                onCare={()=>{setFirstUseHint(null);openAccountAction(()=>setIsCareOpen(true))}}/>
+            )}
 
             {(activeTab === 'inicio' || activeTab === 'comunidades' || activeTab === 'mascota') && (
               <div

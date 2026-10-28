@@ -1,10 +1,8 @@
 import {SupporterProfileEntry} from '../../features/supporter/components/SupporterProfileEntry'
-import { FirstUsePrompt } from '../../features/onboarding/FirstUsePrompt'
-import type { FirstUseIntent } from '../../features/onboarding/firstUse'
 import { petSpeciesLabel, petAgeLabel } from '../../features/i18n/petLabels'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
-import { useEffect, useLayoutEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../services/supabaseClient'
 import { updatePetProfile } from '../../services/petService'
 import { ModerationAccess } from '../../features/moderation/ModerationAccess'
@@ -49,8 +47,6 @@ interface PetViewProps {
   onOpenLostAlert: () => void
   lang: 'es' | 'en'
   userPosts?: Post[]
-  firstUseIntent?: FirstUseIntent
-  onExploreFirstUse?: () => void
 }
 
 export const PetView = ({
@@ -74,8 +70,6 @@ export const PetView = ({
   onOpenLostAlert,
   lang,
   userPosts = [],
-  firstUseIntent,
-  onExploreFirstUse,
 }: PetViewProps) => {
   const [showPetPicker, setShowPetPicker] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
@@ -102,23 +96,6 @@ export const PetView = ({
   const [editPhotoFile, setEditPhotoFile] = useState<File | null>(null)
   const [completingCareId, setCompletingCareId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const firstQrButtonRef = useRef<HTMLButtonElement>(null)
-  const firstCareButtonRef = useRef<HTMLButtonElement>(null)
-  useLayoutEffect(() => {
-    if (!firstUseIntent) return
-    const frame=requestAnimationFrame(()=>{
-      const qr=firstQrButtonRef.current, care=firstCareButtonRef.current
-      const main=care?.closest('main')
-      if (!qr||!care||!main) return
-      qr.focus({preventScroll:true})
-      const dock=main.closest('[data-pazo-app-shell]')?.querySelector('nav[data-pazo-floating-nav="true"]')
-      const dockTop=dock?Math.min(dock.getBoundingClientRect().top,...Array.from(dock.querySelectorAll('button')).map(button=>button.getBoundingClientRect().top)):main.getBoundingClientRect().bottom
-      const safeBottom=Math.min(main.getBoundingClientRect().bottom,dockTop-12)
-      const coveredByDock=care.getBoundingClientRect().bottom-safeBottom
-      if (coveredByDock>0) main.scrollTop+=coveredByDock
-    })
-    return ()=>cancelAnimationFrame(frame)
-  },[firstUseIntent,currentPet.id])
 
   const interestOptions = [
     'Comunidades de gatos',
@@ -696,11 +673,11 @@ export const PetView = ({
         </div>
       ) : !isEditing && (
         <div className="space-y-3 animate-fade-in">
-          {firstUseIntent&&onExploreFirstUse?<FirstUsePrompt petName={currentPet.name} intent={firstUseIntent} lang={lang} onExplore={onExploreFirstUse}/>:<h3 className="font-extrabold text-sm text-[#204E4A] px-1">
+          <h3 className="font-extrabold text-sm text-[#204E4A] px-1">
             {lang === 'es' ? `Todo sobre ${currentPet.name}` : `All about ${currentPet.name}`}
-          </h3>}
+          </h3>
           <ModerationAccess enabled={canModerate} lang={lang} />
-          <button type="button" ref={firstQrButtonRef}
+          <button type="button"
             onClick={onOpenQRPassport}
             className="w-full text-left p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group focus-visible:outline-2 focus-visible:outline-offset-2"
           >
@@ -724,7 +701,7 @@ export const PetView = ({
             </span>
           </button>
 
-          <button type="button" ref={firstCareButtonRef}
+          <button type="button"
             onClick={onOpenCareAgenda}
             className="w-full text-left p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group focus-visible:outline-2 focus-visible:outline-offset-2"
           >

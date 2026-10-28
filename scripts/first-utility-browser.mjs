@@ -126,7 +126,7 @@ try{
    if(width!==320)assert.ok((await hint.innerText()).includes(lang==='es'?'Abre su pasaporte':'Open their passport'))
    for(const b of await hint.getByRole('button').all()){const r=await b.boundingBox();assert.ok(r.height>=44);assert.ok(r.x>=0&&r.x+r.width<=width)}
    if(width===320)await hint.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true}).click()
-   else await page.getByText(width===390?(lang==='es'?'Pasaporte y QR':'Passport & QR'):(lang==='es'?'Cuidados y Agenda':'Care & Agenda'),{exact:true}).click()
+    else await hint.getByRole('button',{name:width===390?(lang==='es'?/^Ver pasaporte QR/:/^View QR passport/):(lang==='es'?'Abrir Agenda':'Open Agenda')}).click()
    await hint.waitFor({state:'detached'})
    if(width===390)await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    if(width===430)await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()

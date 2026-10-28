@@ -85,7 +85,7 @@ try{
   await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'});await nav.waitFor()
   const toolsEntry=page.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true})
-  // New tools-first structure: preserve the arrival before exploring Home.
+  // App-level notice: not a child of the scrolling page or a modal barrier.
   const onPet=await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current')==='page'
   const arrivalControls=[]
   if(onPet){
@@ -94,28 +94,45 @@ try{
    if(height===844)assert.equal(await page.locator('main').evaluate(e=>e.scrollTop),0,'first arrival must not jump past identity into loss/membership tools')
    await page.getByText(lang==='es'?'gato':'Cat',{exact:true}).first().waitFor()
    if(lang==='en')assert.equal(await page.locator('main').getByText('Desconocida',{exact:true}).count(),0)
-   if(height!==844)await page.waitForFunction(()=>{
-    const care=[...document.querySelectorAll('main button')].find(b=>/Cuidados y Agenda|Care & Agenda/.test(b.textContent))
-    return care&&care.getBoundingClientRect().bottom<=innerHeight-103
-   })
+   const notice=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
+   assert.equal(await notice.evaluate(e=>Boolean(e.closest('main'))),false)
+   assert.equal(await notice.getAttribute('aria-modal'),null)
+   assert.equal(await notice.evaluate(e=>e.scrollHeight>e.clientHeight),false,'notice actions fit without internal scrolling')
    const dock=await nav.boundingBox()
-   for(const name of [lang==='es'?/^Pasaporte y QR/:/^Passport & QR/,lang==='es'?/^Cuidados y Agenda/:/^Care & Agenda/]){
-    const button=page.getByRole('button',{name}),box=await button.boundingBox()
+   const primary=notice.locator('[data-notice-primary]')
+   assert.equal(await primary.evaluate(e=>e===document.activeElement),true,'first-use focus stays on its own primary action')
+   for(const name of [lang==='es'?/^Ver pasaporte QR/:/^View QR passport/,lang==='es'?'Abrir Agenda':'Open Agenda',lang==='es'?'Explorar PAZO':'Explore PAZO']){
+    const button=notice.getByRole('button',{name}),box=await button.boundingBox()
     assert.ok(box.height>=44&&box.width>=44)
-    if(height===844)assert.ok(box.y+box.height<dock.y,'first QR/care actions visible above dock')
+    assert.ok(box.y+box.height<dock.y,'notice QR/care/explore actions visible above dock')
+    assert.equal(await button.evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,'notice action is not covered')
     arrivalControls.push({name:String(name),...box})
    }
+   const agendaBox=arrivalControls[1],exploreBox=arrivalControls[2]
+   assert.ok(Math.abs(agendaBox.width-exploreBox.width)<1&&Math.abs(agendaBox.y-exploreBox.y)<1,'paired secondary actions have equal space')
    const edit=await page.getByRole('button',{name:lang==='es'?'Editar':'Edit',exact:true}).boundingBox()
    const title=await page.getByRole('heading',{name:'Luna',exact:true}).last().boundingBox()
    assert.ok(title.x+title.width<=edit.x||title.y>=edit.y+edit.height,'profile identity does not collide with Edit')
    await page.screenshot({path:path.join(out,`${lang}-${width}-${state}-arrival.png`)})
-   await toolsEntry.click()
+   if(state==='error'){
+    await page.keyboard.press('Escape');await notice.waitFor({state:'detached'})
+    await nav.getByRole('button',{name:lang==='es'?'Inicio':'Home',exact:true}).click()
+   }else await toolsEntry.click()
   }
-  if(state==='pending')await page.getByText(lang==='es'?'Sincronizando feed...':'Syncing feed...',{exact:true}).waitFor()
+  if(state==='pending')await page.locator('main [data-pazo-feed-state="loading"]').waitFor()
   if(state==='error')await page.getByRole('button',{name:lang==='es'?'Reintentar':'Try again',exact:true}).waitFor()
+  if(state==='pending'||state==='error'){
+   const screen=page.locator('main [data-pazo-feed-state]')
+   assert.equal(await screen.evaluate(e=>Boolean(e.closest('main'))),true)
+   assert.equal(await page.locator('[data-pazo-app-notice]').count(),0,'feed state never becomes an onboarding notice')
+  }
   if(state==='empty')await page.getByText(lang==='es'?'Todavía no hay publicaciones':'No posts yet',{exact:true}).waitFor()
   if(state==='content')await page.getByText(lang==='es'?/Hoy descubrimos un nuevo rincón del parque\./:/Today we found a new corner of the park\./).last().waitFor()
   await settle(page)
+  if(state==='pending'||state==='error')for(const button of await page.locator('main [data-pazo-feed-state] button').all()){
+   const r=await button.boundingBox();assert.ok(r.height>=44)
+   assert.ok(r.y+r.height<(await nav.boundingBox()).y,'page-state actions are visible above the dock')
+  }
   const font=await page.evaluate(()=>({family:getComputedStyle(document.body).fontFamily,faces:[...document.fonts].map(f=>({family:f.family,status:f.status}))}))
   await page.screenshot({path:path.join(out,`${lang}-${width}-${state}-home.png`)})
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
