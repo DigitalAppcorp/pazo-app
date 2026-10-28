@@ -1,3 +1,9 @@
+## CONTINUIDAD DE PRODUCTO PAZO — MVP / activación real (28-oct-2026)
+
+Antes de recomendar o ejecutar mejoras de primera sesión, feed, onboarding, medición o ads, leer [hoja maestra](docs/PAZO_MVP_ACTIVATION_MASTER_20261028.md): consenso entre PO, Codex, asistente IA y consultor. PR 1A [#140](https://github.com/DigitalAppcorp/pazo-app/pull/140) implementado en rama y en revisión; **no hay GO de merge/deploy**, ni autorización para implementar PR 1B/PR 2. Una consulta no autoriza preparar ni escribir; preparar, implementar, fusionar y desplegar tienen permisos separados. Verificar siempre estado actual, sin interpretar este snapshot como orden ejecutable.
+
+---
+
 ## Lugares — UX aprobada publicada (27-oct-2026)
 
 Propuesta02+idioma03 aprobada por PO, integrada PR138/merge8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04, candidato3e6448f4 con9/9CI SUCCESS. VercelPROD dpl_3KrqGdJmijURjdirv1W1iwhkhSW7 READY/aliashttps://pazo-app.vercel.app, postflight público HTTP22PASS y demoMapa real ESEN sin erroresJS ni escrituras.12controladores y8archivosprotegidos intactos; sin SQL/Edge/Auth/pagos/marketing. [Cierre y límites](docs/PAZO_PLACES_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261027.md). Cambios posteriores de documentación no requieren otro despliegue frontend.
