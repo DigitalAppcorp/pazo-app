@@ -81,6 +81,7 @@ try{
    await page.locator('.behavior-coverage').waitFor();check(await page.locator('.behavior-funnel li').count()===4,'local recovery without restarting Administration')
   }
   if(width===390&&state==='content'){
+   await page.locator('.behavior-filter-disclosure summary').click()
    const source=page.getByLabel(lang==='es'?'Origen de cuenta':'Account source');await source.selectOption('unknown');await page.locator('.behavior-coverage').waitFor();check(await page.locator('.behavior-funnel li').count()===0,'unknown source never paid funnel')
    await source.selectOption('paid_attributed');await page.locator('.behavior-coverage').waitFor();check(await page.locator('.behavior-funnel li').count()===4,'source filter refresh')
    await page.keyboard.press('Tab');check(await page.evaluate(()=>document.activeElement?.tagName==='SELECT'||document.activeElement?.tagName==='BUTTON'||document.activeElement?.tagName==='A'),'keyboard focus remains actionable')

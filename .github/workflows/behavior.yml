@@ -46,9 +46,18 @@ jobs:
             npx --no-install playwright install --with-deps chromium
           fi
       - run: npm run test:behavior:browser
+      - name: Enabled navigation to isolated database, with GPC check
+        env:
+          PGDATABASE: issue150_enabled
+          PAZO_BEHAVIOR_ENABLED_TEST: 'true'
+        run: |
+          createdb --maintenance-db=postgres issue150_enabled
+          node scripts/behavior-hosted.mjs
       - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: behavior-synthetic-es-en-${{ github.run_id }}
-          path: artifacts/issue150/browser/
+          path: |
+            artifacts/issue150/browser/
+            artifacts/issue150/enabled/
           retention-days: 14
