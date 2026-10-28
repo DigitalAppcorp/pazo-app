@@ -8,7 +8,7 @@ const unpaired=['20261005101300','20261005110000','20261005114500','202610051230
 const prepared=JSON.parse(readFileSync(new URL('../docs/review/f18/NOT_APPLIED_MIGRATIONS.json',import.meta.url),'utf8'))
 const additional=prepared.additionalInstalledVersions??[]
 const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-20261026/prepared-migrations.json',import.meta.url),'utf8'))
-const pendingMarketing=[...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version)
+const pendingMarketing=[...new Set([...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version))]
 test('25 canonical hosted SQL files match SHA-256 snapshot digests',()=>{
   assert.equal(info.records.length,25)
   assert.equal(info.records.filter(r=>r.kind==='hosted_only_reconstructed').length,20)
