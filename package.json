@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:issue147:visual": "node scripts/issue147-visual-browser.mjs",
     "dev": "node scripts/generate-pwa-icons.mjs && vite",
     "build": "node scripts/generate-pwa-icons.mjs && tsc -b && vite build",
     "lint": "eslint .",

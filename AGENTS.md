@@ -1,3 +1,7 @@
+## Issue147 — diseño autónomo y candidato aislado (28-oct-2026)
+
+Orden vigente [147](https://github.com/DigitalAppcorp/pazo-app/issues/147): corregir primera experiencia y proceso Design OS. UI nueva dentro del alcance se decide/critica/corrige profesionalmente sin pedir elecciones ni microaprobaciones estéticas. Separar DESIGN_QA_PASS de PO_VISUAL_ACCEPTED (NOT_REQUESTED si no hubo revisión voluntaria) y release. Rediseños dirigidos sobre intención previamente aceptada conservan su gate. Preservar1A/1B y main; ningún merge final, producción ni instalación/activación SQL por inferencia. [Decisión y evidencia de diseño](docs/PAZO_ISSUE147_DESIGN_REVIEW_20261028.md). Los snapshots siguientes conservan historia, no son el estado actual.
+
 ## CONTINUIDAD DE PRODUCTO PAZO — MVP / activación real (28-oct-2026)
 
 Antes de recomendar o ejecutar mejoras de primera sesión, feed, onboarding, medición o ads, leer [hoja maestra](docs/PAZO_MVP_ACTIVATION_MASTER_20261028.md): consenso entre PO, Codex, asistente IA y consultor. PR 1A [#140](https://github.com/DigitalAppcorp/pazo-app/pull/140) implementado en rama y en revisión; **no hay GO de merge/deploy**, ni autorización para implementar PR 1B/PR 2. Una consulta no autoriza preparar ni escribir; preparar, implementar, fusionar y desplegar tienen permisos separados. Verificar siempre estado actual, sin interpretar este snapshot como orden ejecutable.

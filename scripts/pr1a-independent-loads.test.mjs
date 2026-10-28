@@ -20,6 +20,7 @@ async function moduleFrom(source,name){
 const {createRequestScope}=await moduleFrom(fs.readFileSync('src/lib/requestScope.ts','utf8'),'scope')
 const {selectFeedPage}=await moduleFrom(fs.readFileSync('src/features/feed/selectFeedPage.ts','utf8'),'select')
 const {advanceFeedCursors}=await moduleFrom(fs.readFileSync('src/features/feed/advanceFeedCursors.ts','utf8'),'cursors')
+const {shouldOfferFirstUse,isCurrentFirstUse}=await moduleFrom(fs.readFileSync('src/features/onboarding/firstUse.ts','utf8'),'first-use')
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b});return {promise,resolve,reject}}
 const pets=['A','B'].map(id=>({id,name:id,species:'perro',isLost:false,photoUrl:'',ownerId:'owner',breed:'',age:''}))
 const services={}
@@ -28,7 +29,8 @@ let results={}
 const call=(name,...args)=>{calls.push([name,...args]);const fn=results[name];return typeof fn==='function'?fn(...args):Promise.resolve(fn)}
 const child=name=>props=>React.createElement('pazo-'+name,props)
 const base={
- createRequestScope,selectFeedPage,advanceFeedCursors,
+ createRequestScope,selectFeedPage,advanceFeedCursors,shouldOfferFirstUse,isCurrentFirstUse,
+ takeVerifiedFirstUseIntent:()=> 'neutral',
  useAuth:()=>auth,AuthProvider:({children})=>children,
  canUseAccountFeatures:(id,demo)=>Boolean(id)&&!demo,
  getInitialLanguage:()=> 'es', applyDocumentLanguage(){},rememberLanguage(){},
@@ -95,7 +97,7 @@ test('verified identity unlocks all three tools while feed remains pending',asyn
  const feed=deferred();await setup({follows:()=>feed.promise})
  assert.equal(root.root.findAllByType('pazo-BottomNav').length,1)
  for(const[tab,name]of [['comunidades','CommunitiesView'],['mapa','MapView'],['mascota','PetView']]){await nav(tab);assert.ok(view(name))}
- await nav('inicio');assert.match(JSON.stringify(root.toJSON()),/Sincronizando feed/)
+ await nav('inicio');assert.equal(view('HomeFeedStatus').props.status,'loading')
  await flush(()=>feed.resolve({data:[],error:null}));assert.ok(view('HomeView'))
 })
 test('failed care does not block documents, profile or feed; care retry recovers locally',async()=>{
@@ -109,10 +111,20 @@ test('failed care does not block documents, profile or feed; care retry recovers
 })
 test('feed error and retry preserve identity and other tools',async()=>{
  let fail=true;await setup({follows:()=>Promise.resolve({data:[],error:fail?Error('offline'):null})})
- assert.match(JSON.stringify(root.toJSON()),/No pudimos cargar/)
+ assert.equal(view('HomeFeedStatus').props.status,'error')
  await nav('mapa');assert.ok(view('MapView'));await nav('inicio')
- fail=false;await flush(()=>root.root.findAllByType('button').find(x=>x.children.includes('Reintentar')).props.onClick())
+ fail=false;await flush(()=>view('HomeFeedStatus').props.onRetry())
  assert.ok(view('HomeView'));assert.equal(calls.filter(x=>x[0]==='fetchOwnedPets').length,1)
+})
+test('first persisted pet lands on existing tools and Explore dismisses guidance without waiting for feed',async()=>{
+ const pending=deferred();await setup({fetchOwnedPets:[],follows:()=>pending.promise})
+ await flush(()=>view('OnboardingView').props.onComplete(pets[0]))
+ assert.equal(view('PetView').props.currentPet.id,'A')
+ assert.equal(view('PetView').props.firstUseIntent,'neutral')
+ await flush(()=>view('PetView').props.onExploreFirstUse())
+ assert.equal(view('HomeFeedStatus').props.status,'loading')
+ await nav('mascota');assert.equal(view('PetView').props.firstUseIntent,undefined)
+ await flush(()=>pending.resolve({data:[],error:null}))
 })
 for(const sequence of [['B'],['B','A']])test(`stale care, documents and profile rejected after A -> ${sequence.join(' -> ')}`,async()=>{
  const care=deferred(),docs=deferred(),profile=deferred();let firstCare=true,firstDocs=true,firstProfile=true

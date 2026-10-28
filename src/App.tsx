@@ -7,7 +7,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/marketing/marketingRuntime'
-import { FirstUsePrompt } from './features/onboarding/FirstUsePrompt'
+import { HomeFeedStatus } from './features/feed/HomeFeedStatus'
 import { shouldOfferFirstUse, isCurrentFirstUse, type FirstUseHint } from './features/onboarding/firstUse'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
@@ -801,6 +801,7 @@ function PazoMain() {
   }
 
   const selectActivePet = (pet: Pet) => {
+    setFirstUseHint(null)
     retirePetRequests()
     if (isDemoUser) {
       activePetIdRef.current = pet.id
@@ -2076,8 +2077,10 @@ function PazoMain() {
               }}
               onQuickDemo={enterDemo}
               onComplete={(newPet) => {
-                if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id)
+                if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id) {
                   setFirstUseHint({ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)})
+                  setActiveTab('mascota')
+                }
                 ownedPetIdsRef.current = [newPet.id]
                 setPets([newPet])
                 retirePetRequests()
@@ -2315,36 +2318,14 @@ function PazoMain() {
                 }
               }}
             >
-              {activeTab==='inicio'&&isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)&&firstUseHint&&(
-                <FirstUsePrompt petName={currentPet.name} intent={firstUseHint.intent} lang={lang}
-                  onQr={()=>{setFirstUseHint(null);setActiveTab('mascota');openAccountAction(()=>setIsPassportOpen(true))}}
-                  onCare={()=>{setFirstUseHint(null);setActiveTab('mascota');openAccountAction(()=>setIsCareOpen(true))}}
-                  onExplore={()=>setFirstUseHint(null)}/>
-              )}
               {activeTab === 'inicio' && isFeedLoading ? (
-                <div className="flex flex-col items-center justify-center h-full gap-3">
-                  <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
-                  <p className="text-xs font-bold text-[#5C7470] tracking-wider uppercase">{lang==='es'?'Sincronizando feed...':'Syncing feed...'}</p>
-                </div>
+                <HomeFeedStatus status="loading" lang={lang} onOpenPetTools={()=>setActiveTab('mascota')}/>
               ) : (
                 <>
                   {activeTab === 'inicio' && (
                     <>
                       {feedError === 'initial' ? (
-                        <section role="alert" className="rounded-[2rem] bg-white border border-[#204E4A]/10 p-6 text-center space-y-3">
-                          <h2 className="text-lg font-black text-[#204E4A]">
-                            {lang === 'es' ? 'No pudimos cargar las publicaciones' : 'Could not load posts'}
-                          </h2>
-                          <p className="text-xs text-[#5C7470]">
-                            {lang === 'es'
-                              ? 'Puede ser un problema de conexión. Inténtalo de nuevo; tus publicaciones no se han borrado.'
-                              : 'It might be a connection issue. Try again; your posts were not deleted.'}
-                          </p>
-                          <button type="button" onClick={() => void loadFeedForPet(currentPet)}
-                            className="rounded-full px-5 py-3 bg-[#204E4A] text-white font-extrabold text-xs cursor-pointer">
-                            {lang === 'es' ? 'Reintentar' : 'Try again'}
-                          </button>
-                        </section>
+                        <HomeFeedStatus status="error" lang={lang} onRetry={()=>void loadFeedForPet(currentPet)} onOpenPetTools={()=>setActiveTab('mascota')}/>
                       ) : (
                       <HomeView
                         onOpenPetTools={()=>setActiveTab('mascota')}
@@ -2430,8 +2411,10 @@ function PazoMain() {
                       careItems={careItems}
                       careReminderItem={currentPetCareReminder}
                       onCompleteCare={handleCompleteCare}
-                      onOpenQRPassport={() => openAccountAction(() => setIsPassportOpen(true))}
-                      onOpenCareAgenda={() => openAccountAction(() => setIsCareOpen(true))}
+                      firstUseIntent={isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)?firstUseHint?.intent:undefined}
+                      onExploreFirstUse={()=>{setFirstUseHint(null);setActiveTab('inicio')}}
+                      onOpenQRPassport={() => {setFirstUseHint(null);openAccountAction(() => setIsPassportOpen(true))}}
+                      onOpenCareAgenda={() => {setFirstUseHint(null);openAccountAction(() => setIsCareOpen(true))}}
                       documentCount={documentCount}
                       onOpenDocuments={() => openAccountAction(() => setIsDocumentsOpen(true))}
                       onOpenLostAlert={() => openAccountAction(() => setIsAlertOpen(true))}
@@ -2454,6 +2437,7 @@ function PazoMain() {
             <BottomNav
               activeTab={activeTab}
               onSelectTab={(tab) => {
+                setFirstUseHint(null)
                 const scrollContainer = mainScrollRef.current
                 if (scrollContainer) {
                   tabScrollPositionsRef.current[activeTab] = scrollContainer.scrollTop

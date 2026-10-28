@@ -45,3 +45,4 @@ supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
 .env*
 
 /artifacts/issue142*/
+/artifacts/issue147/
