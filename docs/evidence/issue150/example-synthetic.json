@@ -1,0 +1,118 @@
+{
+  "dataKind": "SYNTHETIC_ISOLATED_PG17_NOT_PAZO_USERS",
+  "source": "scripts/behavior-pg17.mjs",
+  "report": {
+    "as_of": "2026-10-28T21:37:18.46396+00:00",
+    "paths": [
+      {
+        "screen": "pet",
+        "accounts": 20,
+        "next_screen": "qr"
+      },
+      {
+        "screen": "agenda",
+        "accounts": 10,
+        "next_screen": null
+      },
+      {
+        "screen": "qr",
+        "accounts": 10,
+        "next_screen": null
+      }
+    ],
+    "funnel": [
+      {
+        "step": "verified",
+        "accounts": 20,
+        "denominator": 20
+      },
+      {
+        "step": "first_pet",
+        "accounts": 20,
+        "denominator": 20
+      },
+      {
+        "step": "tool_view",
+        "accounts": 20,
+        "denominator": 20
+      },
+      {
+        "step": "utility",
+        "accounts": 10,
+        "denominator": 20
+      }
+    ],
+    "issues": [],
+    "prereg": [
+      {
+        "step": "signup_cta",
+        "signals": 3000
+      }
+    ],
+    "status": "collecting",
+    "totals": {
+      "accounts": 20,
+      "sessions": 40,
+      "return_sessions": 20,
+      "useful_accounts": 10,
+      "active_account_days": 40,
+      "first_observed_sessions": 20
+    },
+    "segment": "paid_attributed",
+    "creative": "qr_es",
+    "outcomes": [
+      {
+        "event": "care_created",
+        "accounts": 10
+      }
+    ],
+    "timezone": "America/Los_Angeles",
+    "retention": [
+      {
+        "day": 1,
+        "useful": 0,
+        "matured": 20,
+        "reopened": 0
+      },
+      {
+        "day": 7,
+        "useful": 10,
+        "matured": 20,
+        "reopened": 20
+      }
+    ],
+    "period_days": 30,
+    "source_gaps": [
+      "organic_evidenced",
+      "direct",
+      "anonymous_unique_people",
+      "historical_sessions",
+      "self_reported_reason",
+      "repeat_qr_share"
+    ],
+    "coverage_since": "2026-10-15T21:34:59.577482+00:00",
+    "effective_days": 14,
+    "minimum_sample": 10,
+    "paid_retention": [
+      {
+        "day": 7,
+        "useful": 10,
+        "matured": 10,
+        "reopened": 10
+      }
+    ],
+    "return_actions": [
+      {
+        "event": "care_created",
+        "accounts": 10
+      }
+    ],
+    "return_modules": [
+      {
+        "screen": "agenda",
+        "accounts": 20
+      }
+    ],
+    "landing_signals": 0
+  }
+}

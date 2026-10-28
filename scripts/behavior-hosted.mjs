@@ -106,13 +106,17 @@ try{
   await page.getByRole('heading',{name:lang==='es'?'Qué usan al regresar':'What people use on return',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-return.png',fullPage:true})
   failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar datos':'Refresh data',exact:true}).click();await page.getByRole('alert').waitFor()
   failReport=false;await page.getByRole('button',{name:lang==='es'?'Reintentar informe':'Retry report',exact:true}).click();await page.locator('.behavior-coverage').waitFor()
+  await context.setOffline(true)
+  await page.getByText(lang==='es'?'Sin conexión. Comprueba la red y vuelve a actualizar.':'Offline. Check your connection and refresh again.',{exact:true}).waitFor()
+  await context.setOffline(false)
+  await page.getByRole('button',{name:lang==='es'?'Actualizar datos':'Refresh data',exact:true}).click();await page.locator('.behavior-coverage').waitFor()
   if(localEnabled&&!gpc&&lang==='en'){
    assert.equal(await page.evaluate(async()=>{const module=await import('/src/features/marketing/behaviorRuntime.ts');return module.withdrawBehavior()}),true)
    assert.equal(sql(`SELECT count(*) FROM marketing_private.behavior_sessions WHERE owner_id='${owner}'`),'0','actual browser withdrawal deletes active sessions')
   }
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth))
   if(gpc)assert.equal(newCollectionCalls,callsBefore,'GPC performs no new collection')
-  results.push({lang,width,gpc,status:'PASS',nativeAppAdmin:true,source:origin,backend:'disposable PG17',auth:'synthetic controlled',localRetry:true})
+  results.push({lang,width,gpc,status:'PASS',nativeAppAdmin:true,source:origin,backend:'disposable PG17',auth:'synthetic controlled',localRetry:true,offlineRecovery:true})
   await context.close();console.log(`PASS hosted ${lang} ${width}`)
  }
  assert.equal(errors.length,0);if(localEnabled)assert.ok(newCollectionCalls>0);else assert.equal(newCollectionCalls,0)

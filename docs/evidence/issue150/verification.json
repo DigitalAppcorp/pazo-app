@@ -1,0 +1,23 @@
+{
+  "frontendSource": "2b623bb84a0956f765b4d475fb4697a68d221e3a",
+  "sqlSha256": "79c5d61424a90987b48dff0e1175b908b17358cc673cd80d627293dab823c766",
+  "newUnitTests": 18,
+  "postgresChecks": 64,
+  "postgresDdlAtomicityAssertions": 2,
+  "uiMatrixCases": 48,
+  "uiMatrixChecks": 144,
+  "hostedFrontendCases": 4,
+  "enabledBrowserCases": 3,
+  "enabledBrowserRequests": 14,
+  "enabledBrowserGpcZeroWrites": true,
+  "hostedWrites": 0,
+  "hostedCollectionCalls": 0,
+  "designGate": "DESIGN_QA_PASS",
+  "poVisualAccepted": "NOT_REQUESTED",
+  "releaseAuthorized": false,
+  "sourceScopes": {
+    "matrix": "Native Admin, controlled Auth and actual isolated PG17 RPC; visual matrix/frontend source2b. Final continuation semantics verified by PostgreSQL and final hosted captures.",
+    "staging": "Immutable hosted frontend, intercepted Auth/domain services, actual final isolated PG17 RPC.",
+    "enabled": "Actual local App/hook/RPC with release flag replaced only in isolated test transport; GPC and withdrawal included."
+  }
+}

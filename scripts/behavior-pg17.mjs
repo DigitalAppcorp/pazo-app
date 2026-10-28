@@ -93,6 +93,7 @@ sql(`INSERT INTO marketing_private.behavior_events(session_id,seq,event,screen,r
 report=JSON.parse(sql(actor(31,"SELECT public.pazo_admin_behavior_summary_v1(30,'paid_attributed','qr_es')")))
 check(report.paid_retention[0]?.matured===10&&report.paid_retention[0]?.reopened===10&&report.paid_retention[0]?.useful===10,'D7 after confirmed utility uses its own mature compatible denominator')
 check(report.outcomes.find(x=>x.event==='care_created')?.accounts===10,'confirmed tool outcome accounts, no clicks counted')
+check(report.paths.find(x=>x.screen==='qr'&&x.next_screen===null)?.accounts===10,'confirmed useful action after a view is not counted as missing continuation')
 reject(actor(31,"SELECT public.pazo_admin_behavior_summary_v1(30,'organic_evidenced','all')"))
 reject(actor(31,"SELECT public.pazo_admin_behavior_summary_v1(1000)"))
 sql(`UPDATE marketing_private.acquisition SET creative='perfil_es' WHERE owner_id='${id(1000)}'`)

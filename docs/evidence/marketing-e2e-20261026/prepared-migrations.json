@@ -48,7 +48,7 @@
       "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/150",
       "collectionEnabled": false,
       "version": "20261028210000",
-      "sha256": "0949e6df8db196a7ed65239bdebb08c7f5a766dd89f6ec092caa489f614142c1",
+      "sha256": "79c5d61424a90987b48dff0e1175b908b17358cc673cd80d627293dab823c766",
       "status": "PREPARED_NOT_APPLIED",
       "productionPushAllowed": false,
       "path": "supabase/migrations/20261028210000_pazo_behavior_observation.sql"

@@ -19,6 +19,7 @@ Elegida: lectura por pregunta, síntesis fundada, filtros sencillos y después e
 ## Crítica adversarial y correcciones
 
 - Primera captura320: hero demasiado alto; reducidos título, copy y espaciado. Después, el feedback del PO motivó dividir por preguntas y añadir una lectura ejecutiva.
+- Segunda revisión móvil: los filtros completos empujaban el resumen demasiado abajo. Se sustituyeron por un control plegable con selección siempre visible, conservando teclado y contexto. Se recapturaron48 estados y se verificó el build alojado final.
 - Nombres de creatividad parecían identificadores internos: sustituidos por Pasaporte QR / Perfil de mascota / Comunidad + idioma; campaña con nombre legible.
 - Lista de hipótesis inicialmente genérica y repetitiva: sustituida por recomendaciones breves con evidencia de solicitudes, mayor tramo comparable y regreso. Falta de muestra se expresa como límite, no como diagnóstico inventado.
 - Riesgo semántico: una semana desde abrir PAZO no es una semana desde primera utilidad. Se muestran por separado, con denominadores maduros propios. El embudo ahora exige orden mascota → vista → utilidad.
@@ -32,6 +33,6 @@ Pasada adversarial separada del mismo agente; no se contrató ni simuló un segu
 
 Matriz48: ES/EN ×320/390/430/1440 ×contenido/pausado/insuficiente/error/cargando/MFA, con144 comprobaciones y0 pageerrors en el laboratorio. Capturas adicionales de embudo, rutas y regreso; navegación entre las dos preguntas, filtro/origen, reintento local y foco. Backend real PostgreSQL17 aislado, Auth controlada. Se inspeccionaron cuadros completos320 y1440 en ambas lenguas y estados, y capturas alojadas390/1440 con fuente Palo Seco real. La primera iteración se conserva operativamente para comparación.
 
-Staging inmutable86c6d363: navegación App → primera mascota → Mi mascota → Administración → Comportamiento, ES/EN390/1440 y recuperación del informe; backend PG17 interceptado, sin escrituras QA alojadas. Se vio la composición completa y los tramos intermedios, no solo un recorte de tarjeta. Las imágenes actuales se empaquetan con manifiesto y fuente en el informe final. El CI repite la matriz en checkout limpio.
+Staging final inmutable2b623bb8: navegación App → primera mascota → Mi mascota → Administración → Comportamiento, ES/EN390/1440 y recuperación del informe; backend PG17 interceptado, sin escrituras QA alojadas. Se vio la composición completa y los tramos intermedios, no solo un recorte de tarjeta. Las imágenes actuales se empaquetan con manifiesto y fuente en el informe final. El CI repite la matriz en checkout limpio.
 
 DESIGN_QA_PASS interno para esta superficie, sujeto a los gates funcionales/seguridad del informe final. RELEASE_AUTHORIZED=false; este gate no instala SQL, activa datos ni publica frontend en producción. La pregunta voluntaria de motivos se descarta por ahora: no es necesaria para observar comportamiento y añadiría fricción sin evidencia de muestra.

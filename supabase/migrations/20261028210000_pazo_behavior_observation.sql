@@ -203,9 +203,11 @@ BEGIN
   SELECT * FROM (SELECT 'verified' step,verified n,verified denominator FROM funnel UNION ALL
    SELECT 'first_pet',pet,verified FROM funnel UNION ALL SELECT 'tool_view',view,pet FROM funnel UNION ALL SELECT 'utility',utility,view FROM funnel) f
  ), ordered_views AS (
-  SELECT session_id,owner_id,screen,lead(screen) OVER(PARTITION BY session_id ORDER BY seq) next_screen FROM events WHERE event='screen_view' AND seq>0
+  SELECT session_id,owner_id,screen,received_at,lead(screen) OVER(PARTITION BY session_id ORDER BY seq) next_screen FROM events WHERE event='screen_view' AND seq>0
  ), paths AS (
-  SELECT screen,next_screen,count(DISTINCT owner_id) accounts FROM ordered_views GROUP BY screen,next_screen HAVING count(DISTINCT owner_id)>=10
+  SELECT screen,next_screen,count(DISTINCT owner_id) accounts FROM ordered_views v
+  WHERE next_screen IS NOT NULL OR NOT EXISTS(SELECT 1 FROM events e WHERE e.session_id=v.session_id AND e.event IN('care_created','qr_share_confirmed') AND e.received_at>=v.received_at)
+  GROUP BY screen,next_screen HAVING count(DISTINCT owner_id)>=10
  ), issues AS (
   SELECT screen,event,category,count(DISTINCT owner_id) accounts FROM events WHERE event IN('error','loading','retry') GROUP BY screen,event,category HAVING count(DISTINCT owner_id)>=10
  ), returning_modules AS (
@@ -239,14 +241,14 @@ BEGIN
   'period_days',p_days,'effective_days',CASE WHEN start_at IS NULL THEN 0 ELSE greatest(0,least(p_days,14,ceil(extract(epoch FROM cutoff-start_at)/86400)::integer)) END,'coverage_since',start_at,'as_of',cutoff,'timezone','America/Los_Angeles','minimum_sample',10,
   'segment',p_segment,'creative',p_creative,'source_gaps',jsonb_build_array('organic_evidenced','direct','anonymous_unique_people','historical_sessions','self_reported_reason','repeat_qr_share'),
   'totals',CASE WHEN safe.ok AND (returns=0 OR returns>=10) AND (firsts=0 OR firsts>=10) THEN jsonb_build_object('accounts',n,'sessions',sessions,'first_observed_sessions',firsts,'return_sessions',returns,'active_account_days',active_days,'useful_accounts',CASE WHEN (useful=0 OR useful>=10) AND (n-useful=0 OR n-useful>=10) THEN useful ELSE NULL END) ELSE NULL END,
-  'funnel',coalesce((SELECT jsonb_agg(jsonb_build_object('step',step,'accounts',CASE WHEN n=0 OR n>=10 THEN n ELSE NULL END,'denominator',CASE WHEN denominator=0 OR denominator>=10 THEN denominator ELSE NULL END)) FROM stages WHERE (SELECT verified FROM funnel)>=10 AND NOT EXISTS(SELECT 1 FROM stages WHERE n BETWEEN 1 AND 9 OR denominator-n BETWEEN 1 AND 9)),'[]'::jsonb),
+  'funnel',coalesce((SELECT jsonb_agg(jsonb_build_object('step',step,'accounts',CASE WHEN n=0 OR n>=10 THEN n ELSE NULL END,'denominator',CASE WHEN denominator=0 OR denominator>=10 THEN denominator ELSE NULL END) ORDER BY CASE step WHEN 'verified' THEN 1 WHEN 'first_pet' THEN 2 WHEN 'tool_view' THEN 3 ELSE 4 END) FROM stages WHERE (SELECT verified FROM funnel)>=10 AND NOT EXISTS(SELECT 1 FROM stages WHERE n BETWEEN 1 AND 9 OR denominator-n BETWEEN 1 AND 9)),'[]'::jsonb),
   'paths',CASE WHEN safe.ok THEN coalesce((SELECT jsonb_agg(to_jsonb(p)) FROM (SELECT * FROM paths ORDER BY accounts DESC,screen,next_screen LIMIT 12)p),'[]'::jsonb) ELSE '[]'::jsonb END,
   'issues',CASE WHEN safe.ok THEN coalesce((SELECT jsonb_agg(to_jsonb(i)) FROM (SELECT * FROM issues ORDER BY accounts DESC LIMIT 12)i),'[]'::jsonb) ELSE '[]'::jsonb END,
-  'return_modules',CASE WHEN safe.ok THEN coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM returning_modules r),'[]'::jsonb) ELSE '[]'::jsonb END,
+  'return_modules',CASE WHEN safe.ok THEN coalesce((SELECT jsonb_agg(to_jsonb(r) ORDER BY accounts DESC,screen) FROM returning_modules r),'[]'::jsonb) ELSE '[]'::jsonb END,
   'return_actions',CASE WHEN safe.ok THEN coalesce((SELECT jsonb_agg(to_jsonb(a)) FROM first_actions a),'[]'::jsonb) ELSE '[]'::jsonb END,
   'outcomes',CASE WHEN safe.ok THEN coalesce((SELECT jsonb_agg(to_jsonb(o)) FROM outcomes o),'[]'::jsonb) ELSE '[]'::jsonb END,
   'paid_retention',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM paid_retention r WHERE matured>=10 AND (reopened=0 OR reopened>=10) AND (useful=0 OR useful>=10) AND (matured-reopened=0 OR matured-reopened>=10) AND (reopened-useful=0 OR reopened-useful>=10)),'[]'::jsonb),
-  'retention',coalesce((SELECT jsonb_agg(to_jsonb(r)) FROM retention r WHERE matured>=10 AND (reopened=0 OR reopened>=10) AND (useful=0 OR useful>=10) AND (matured-reopened=0 OR matured-reopened>=10) AND (reopened-useful=0 OR reopened-useful>=10)),'[]'::jsonb),
+  'retention',coalesce((SELECT jsonb_agg(to_jsonb(r) ORDER BY r.day) FROM retention r WHERE matured>=10 AND (reopened=0 OR reopened>=10) AND (useful=0 OR useful>=10) AND (matured-reopened=0 OR matured-reopened>=10) AND (reopened-useful=0 OR reopened-useful>=10)),'[]'::jsonb),
   'prereg',coalesce((SELECT jsonb_agg(jsonb_build_object('step',step,'signals',signals)) FROM (
     SELECT step,sum(signals) signals FROM marketing_private.prereg_daily WHERE day>=(since_at AT TIME ZONE 'America/Los_Angeles')::date
     AND (p_creative='all' OR creative=p_creative) GROUP BY step)q),'[]'::jsonb),

@@ -1,6 +1,6 @@
-## Issue #150 — candidato de analítica en desarrollo, sin nuevo GO de release
+## Issue #150 — candidato de analítica preparado, sin GO de release
 
-Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Consultar docs/PAZO_ISSUE150_CONTRACT.md y docs/PAZO_ISSUE150_PRIVACY_AND_RELEASE.md.
+Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Informe único: docs/PAZO_ISSUE150_FINAL_REPORT_20261028.md. PR151 y staging pazo-7f4g5xiro-digitalapp.vercel.app, frontend2b623bb8. Consultar contrato y runbook de privacidad enlazados en el informe. El estado exacto de CI y revisión se registra en issue150 al entregar.
 
 Nueva colección OFF y migración20261028210000 PREPARED_NOT_APPLIED. No merge/publicación final, apply SQL alojado ni nuevos datos reales sin GO único150. Producción147, medición anterior y fechas se conservan. No reutilizar GO147 ni reabrir142/147. No crear branch Supabase facturable. Las entradas inferiores preservan historia.
 
