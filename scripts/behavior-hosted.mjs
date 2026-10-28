@@ -61,7 +61,7 @@ try{
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'});await nav.waitFor();await page.keyboard.press('Escape')
   await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
   await page.getByRole('button',{name:lang==='es'?'Centro de control':'Control center',exact:true}).click()
-  await page.locator('button:visible').filter({hasText:lang==='es'?/^Comportamiento$/:/^Behavior$/}).first().click()
+  await page.locator('button:visible').filter({hasText:lang==='es'?/^Comportamiento$/:/^Behavior$/}).first().click().catch(async e=>{await page.screenshot({path:out+'/failure.png',fullPage:true});console.error({errors,body:(await page.locator('body').innerText()).slice(0,3500)});throw e})
   await page.locator('.behavior-coverage').waitFor()
   assert.equal(await page.locator('.behavior-funnel li').count(),4)
   await page.evaluate(lang=>{const e=document.createElement('div');e.textContent=lang==='es'?'QA · Datos sintéticos · Backend aislado':'QA · Synthetic data · Isolated backend';e.style.cssText='position:fixed;bottom:0;right:0;z-index:10000;background:#f8edc9;color:#204e4a;font:600 11px system-ui;padding:6px 10px;pointer-events:none';document.body.append(e)},lang)
