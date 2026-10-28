@@ -39,8 +39,8 @@ try{
    const req=route.request(),url=new URL(req.url())
    if(url.origin===origin){
     if(localEnabled&&url.pathname==='/src/features/marketing/behaviorRuntime.ts'){
-     const r=await route.fetch(),source=await r.text();assert.match(source,/const BEHAVIOR_COLLECTION_ENABLED = false/)
-     return route.fulfill({response:r,body:source.replace('const BEHAVIOR_COLLECTION_ENABLED = false','const BEHAVIOR_COLLECTION_ENABLED = true')})
+     const r=await route.fetch(),source=await r.text();assert.match(source,/const BEHAVIOR_COLLECTION_ENABLED = (?:true|false)/)
+     return route.fulfill({response:r,body:source.replace(/const BEHAVIOR_COLLECTION_ENABLED = (?:true|false)/,'const BEHAVIOR_COLLECTION_ENABLED = true')})
     }
     return hosted?route.fulfill({status:200,...await hosted(url.href)}):route.continue()
    }
