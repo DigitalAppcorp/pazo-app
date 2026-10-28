@@ -4,7 +4,9 @@ export function HomeFeedStatus({status,lang,onRetry,onOpenPetTools}:{
 }) {
   const l=(es:string,en:string)=>lang==='es'?es:en
   return <section className="px-1 text-[#204E4A]">
-    <h2 className="text-[clamp(16px,4vw,20px)] font-black leading-tight tracking-tight">{l('Su pequeño mundo.','Their little world.')}</h2>
+    <div className="flex min-h-[42px] items-center max-[360px]:min-h-0">
+      <h2 className="text-[clamp(16px,4vw,20px)] font-black leading-tight tracking-tight">{l('Su pequeño mundo.','Their little world.')}</h2>
+    </div>
     <div role={status==='loading'?'status':'alert'} className="mt-5 space-y-2">
       <h3 className="flex items-center gap-2 text-[15px] font-bold">
         {status==='loading'&&<span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border-2 border-[#204E4A]/20 border-t-[#204E4A] motion-safe:animate-spin"/>}
