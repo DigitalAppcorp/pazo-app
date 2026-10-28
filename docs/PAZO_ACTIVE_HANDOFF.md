@@ -636,3 +636,8 @@ Exact requested repairs after physical Android screenshots:
 
 ## Activation for new chat
 "Activa Project Brain OS v1.4.1; lee `DigitalAppcorp/pazo-app/AGENTS.md`, `docs/PAZO_ACTIVE_HANDOFF.md`, `docs/PAZO_F17_VISUAL_MAP_FIX_20261022.md`; revalida PR #81 HEAD/CI, Vercel preview/production alias. Continúa aceptación visual del F17 publicado; no reimplementes SQL ni PayPal ni hagas más despliegues/merge a main sin el siguiente GO."
+
+## Issue142 — actualización de integración
+
+PR143/1B integrado913491839ff0b2a9b46f3696af587b5f13971aed con CI completo SUCCESS. PR2/contexto implementado; ver [autoauditoría y pruebas](PAZO_CONTEXTUAL_FIRST_USE_PR2_20261028.md). El siguiente gate es candidato integral alojado y aceptación única del PO; no lanzamiento automático. Las restricciones antiguas1B/2 quedan superadas solo por la orden142.
+

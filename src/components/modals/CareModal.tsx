@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useModalFocus } from '../../lib/useModalFocus'
 import type {
   CareCategory,
   CareCompletion,
@@ -143,6 +144,7 @@ export const CareModal = ({
   onUndoCompletion,
   lang,
 }: CareModalProps) => {
+  const dialogRef=useModalFocus(isOpen,onClose)
   const [activeTab, setActiveTab] = useState<AgendaTab>('proximos')
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -249,23 +251,26 @@ export const CareModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-        <div className="grid grid-cols-[32px_minmax(0,1fr)_32px] items-center gap-2 pb-2">
-          <span aria-hidden="true" className="h-8 w-8" />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="pazo-care-heading" tabIndex={-1} className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] soft-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 pb-2">
+          <span aria-hidden="true" className="h-11 w-11" />
           <div className="min-w-0 text-center">
-            <h3 className="mt-1 text-center text-xl font-black leading-snug text-[#204E4A]">
+            <h3 id="pazo-care-heading" className="mt-1 text-center text-xl font-black leading-snug text-[#204E4A]">
               {lang === 'es' ? `Cuidados de ${petName}` : `${petName}'s care`}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FAF8F5] text-[#5C7470] hover:text-[#204E4A] flex items-center justify-center font-bold text-sm cursor-pointer"
+            className="w-11 h-11 rounded-full bg-[#FAF8F5] text-[#5C7470] focus-visible:bg-[#E1E53F] hover:text-[#204E4A] flex items-center justify-center font-bold text-sm cursor-pointer"
             aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
           >
             ✕
           </button>
         </div>
 
+        <p className="text-[14px] leading-relaxed text-[#5C7470]">{lang==='es'
+          ?'Los recordatorios aparecen dentro de PAZO. No enviamos avisos push.'
+          :'Reminders appear inside PAZO. We do not send push notifications.'}</p>
         {!isEditing && (
           <div className="flex gap-1.5 p-1 bg-[#FAF8F5] rounded-full">
             <button
@@ -309,10 +314,10 @@ export const CareModal = ({
             </div>
 
             <div>
-              <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+              <label htmlFor="pazo-care-title" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                 {lang === 'es' ? 'Título' : 'Title'}
               </label>
-              <input
+              <input id="pazo-care-title"
                 required
                 minLength={2}
                 maxLength={120}
@@ -325,10 +330,10 @@ export const CareModal = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+                <label htmlFor="pazo-care-category" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Categoría' : 'Category'}
                 </label>
-                <select
+                <select id="pazo-care-category"
                   value={form.category}
                   onChange={(event) =>
                     setForm((prev) => ({
@@ -347,10 +352,10 @@ export const CareModal = ({
               </div>
 
               <div>
-                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+                <label htmlFor="pazo-care-dueDate" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Fecha' : 'Date'}
                 </label>
-                <input
+                <input id="pazo-care-dueDate"
                   required
                   type="date"
                   value={form.dueDate}
@@ -365,10 +370,10 @@ export const CareModal = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+                <label htmlFor="pazo-care-dueTime" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Hora opcional' : 'Optional time'}
                 </label>
-                <input
+                <input id="pazo-care-dueTime"
                   type="time"
                   value={form.dueTime || ''}
                   onClick={(event) => event.currentTarget.showPicker?.()}
@@ -383,10 +388,10 @@ export const CareModal = ({
               </div>
 
               <div>
-                <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+                <label htmlFor="pazo-care-recurrence" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                   {lang === 'es' ? 'Repetir' : 'Repeat'}
                 </label>
-                <select
+                <select id="pazo-care-recurrence"
                   value={form.recurrence}
                   onChange={(event) =>
                     setForm((prev) => ({
@@ -406,10 +411,10 @@ export const CareModal = ({
             </div>
 
             <div>
-              <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+              <label htmlFor="pazo-care-reminderDaysBefore" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                 {lang === 'es' ? 'Recordarme' : 'Remind me'}
               </label>
-              <select
+              <select id="pazo-care-reminderDaysBefore"
                 value={form.reminderDaysBefore === null ? 'none' : String(form.reminderDaysBefore)}
                 onChange={(event) =>
                   setForm((prev) => ({
@@ -434,10 +439,10 @@ export const CareModal = ({
             </div>
 
             <div>
-              <label className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
+              <label htmlFor="pazo-care-notes" className="block text-[13px] font-bold uppercase text-[#5C7470] mb-1">
                 {lang === 'es' ? 'Notas opcionales' : 'Optional notes'}
               </label>
-              <textarea
+              <textarea id="pazo-care-notes"
                 maxLength={1000}
                 rows={3}
                 value={form.notes || ''}

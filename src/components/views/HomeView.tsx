@@ -23,6 +23,7 @@ interface HomeViewProps {
   currentPetId?: string
   ownedPetIds: string[]
   onSelectPetProfile: (petId: string) => void
+  onOpenPetTools?: () => void
 }
 
 // Hook de observacion de visibilidad por tarjeta de post
@@ -164,7 +165,7 @@ const NearbyNeighborhoodArtwork = () => (
 )
 
 export const HomeView = ({
-  posts, canReport, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile,
+  posts, canReport, onLikePost, onSavePost, onAddComment, onLoadComments, lang, currentPetId = '', ownedPetIds, onSelectPetProfile, onOpenPetTools,
 }: HomeViewProps) => {
   const [reportTarget, setReportTarget] = useState<{kind: ReportTarget; id: string; label?: string} | null>(null)
   const [hiddenPostIds, setHiddenPostIds] = useState<Set<string>>(() => new Set())
@@ -333,9 +334,10 @@ export const HomeView = ({
               </h3>
               <p className="text-xs text-[#5C7470]">
                 {lang === 'es'
-                  ? 'Comparte un momento de tu mascota o explora las comunidades.'
-                  : 'Share a moment with your pet or explore communities.'}
+                  ? 'Comparte un momento, explora comunidades o usa las herramientas de Mi mascota.'
+                  : 'Share a moment, explore communities or use the tools in My Pet.'}
               </p>
+              {onOpenPetTools&&<button type="button" onClick={onOpenPetTools} className="mt-3 min-h-11 rounded-full bg-[#204E4A] px-5 py-2 text-[14px] font-bold text-white hover:bg-[#183D3A] focus-visible:underline">{lang==='es'?'Ver herramientas de mi mascota':'View my pet’s tools'}</button>}
             </div>
           )}
           {displayedPosts.map((post) => (

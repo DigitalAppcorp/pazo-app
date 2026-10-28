@@ -5,7 +5,9 @@ import {promisify} from 'node:util'
 import assert from 'node:assert/strict'
 const execute=promisify(execFile),container='pazo-marketing-lab',db='pazo_marketing_synthetic'
 const ci=process.env.PAZO_MARKETING_PG_MODE==='ci'
-if(ci&&!(process.env.CI==='true'&&process.env.PGHOST==='127.0.0.1'&&process.env.PGDATABASE==='postgres'))throw Error('Isolated CI PostgreSQL required')
+const allowedCiDatabase=process.env.PGDATABASE==='postgres'||
+ (process.env.PGDATABASE==='issue142_contextual'&&process.env.PAZO_CONTEXTUAL_TEST==='true')
+if(ci&&!(process.env.CI==='true'&&process.env.PGHOST==='127.0.0.1'&&allowedCiDatabase))throw Error('Isolated CI PostgreSQL required')
 const command=ci?'psql':'docker'
 // Explicit local sockets only; never inherit a remote Docker context.
 const dockerHost=process.platform==='win32'?'npipe:////./pipe/dockerDesktopLinuxEngine':'unix:///var/run/docker.sock'

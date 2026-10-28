@@ -199,6 +199,9 @@ export const AlertModal = ({ isOpen, onClose, pet, onPetUpdated, lang }: AlertMo
               <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#FAF8F5] text-[#5C7470] font-bold">✕</button>
             </div>
 
+            <p className="text-[14px] leading-relaxed text-[#5C7470]">{lang==='es'
+              ?'Úsala solo si tu mascota se ha perdido. El aviso permite recibir avistamientos; no garantiza difusión externa ni rescate.'
+              :'Use this only if your pet is missing. The alert lets you receive sightings; it does not guarantee external distribution or rescue.'}</p>
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-[#FAF8F5] rounded-2xl flex items-center gap-3">
                 <img src={pet.photoUrl} alt={pet.name} className="w-10 h-10 rounded-xl object-cover" />
