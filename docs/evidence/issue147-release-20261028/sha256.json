@@ -1,0 +1,656 @@
+{
+  "algorithm": "SHA256",
+  "scope": "Current release evidence only; no secrets/session files. Original PNGs and LF text.",
+  "files": [
+    {
+      "path": "docs/evidence/issue147-release-20261028/.gitattributes",
+      "sha256": "26dd06e77fcb17d46a63e564d86784214b961073f9b6398c654915f2b6ff9602",
+      "bytes": 63
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical/desktop_en-welcome.png",
+      "sha256": "2b5b47d9083809e52c0292d1467a883de5996fa2f44eb95931869fea9f9cc30e",
+      "bytes": 215193
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical/desktop_es-welcome.png",
+      "sha256": "e6f70e71c8f55346043c3f50023ead3da452d271041670a23af557ae95a221fe",
+      "bytes": 218514
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical/en-utility-notice.png",
+      "sha256": "11c95c46453065e215433a42fa3bb2b9ef93c09dcfe109a1eb5332e131f13ac5",
+      "bytes": 89970
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical/es-utility-notice.png",
+      "sha256": "a1b3119ca32a9040cfa2ade4819cadaa3f7c141992a3ef6129ecb01131afcf08",
+      "bytes": 82177
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical/mobile_en-welcome.png",
+      "sha256": "4d76a338df64da164d974fa9ed3c7aaab956e988634e653f4ea0a8ee09d6db53",
+      "bytes": 476278
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical/mobile_es-welcome.png",
+      "sha256": "e75c1fbda977df5868bd1cebfc57d3ae6b65792e451253d81a382c01a6f49820",
+      "bytes": 484556
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical-assets.json",
+      "sha256": "171ef01313436aac52e8cbbab39f94d66bf57b239501c4e5913cc313fb1a5d32",
+      "bytes": 1334
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/canonical-browser.json",
+      "sha256": "c52873114ac0a5b3a2360e6ded2516b5e002db420a95380288803cb532762685",
+      "bytes": 4328
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/history-before.json",
+      "sha256": "4e9b01dd72bbff3b4c471b1b0d9737b01226f5a1d0b54d38135509d05c985a7e",
+      "bytes": 26973
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/install-map.json",
+      "sha256": "dddbaf6907b45794a432e995c48f524a3511f1e4466ba6038439d9f7b0dd24e2",
+      "bytes": 699
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-320-Communities.png",
+      "sha256": "01b1424672330495bace329677637f7f2c9b1f9389573e8f74ed625f14f93da0",
+      "bytes": 55444
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-320-Map.png",
+      "sha256": "df6cd379c502cccbe3aa2bf46ad5ad477687f7db3172e00f59891cf282bbc93d",
+      "bytes": 56622
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-320-My-Pet.png",
+      "sha256": "9c967b258f2b6373517eff36b57cea40982f1066bbab94e17a466e6af108099c",
+      "bytes": 62043
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-390-Communities.png",
+      "sha256": "c1c225d9189f65f3c57b81676a751aa80dc258af7e5743f5cef9a2a6da3250c2",
+      "bytes": 62915
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-390-Map.png",
+      "sha256": "5e7ad7617fd35442d30997690d8a9c522d620ad4d1136b08d4a7670fbbdb4564",
+      "bytes": 58486
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-390-My-Pet.png",
+      "sha256": "2dcf5a93b49145f1bbc94a0d89ee1a93a94963a9cc982f17579accd2cf01b5fa",
+      "bytes": 67233
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-430-Communities.png",
+      "sha256": "282b3f3b3d3854356c212df1d4b005ea716d7e939f7369d022b9ad683d40595f",
+      "bytes": 66331
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-430-Map.png",
+      "sha256": "241fa0dc5fa20e5e4ee68587db1934f4a6c291e4c3a0aff122cea5bfab61cae7",
+      "bytes": 58436
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/en-430-My-Pet.png",
+      "sha256": "5cb2cdaff933a79aa8e05c341c174707a6287ed5baea31f4516352acb3dd13d5",
+      "bytes": 67326
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-320-Comunidades.png",
+      "sha256": "5e6e3a3e1748c4640e81825c0e9ee7134b87bcb78ece435e583571a54253b423",
+      "bytes": 54839
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-320-Mapa.png",
+      "sha256": "72a7dc203006b2e4e43354513691b6f9df5e4bdb6d30a8bdc9783b3e4d043bb1",
+      "bytes": 58239
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-320-Mi-mascota.png",
+      "sha256": "1ca5ced9bbc013cbd8bce0c2fc82013113bb6d661a0ca789748cfd03b1b12d20",
+      "bytes": 58865
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-390-Comunidades.png",
+      "sha256": "e54f8b3240f54668fa7b85e807ff0a4819f4ef810be08e0794303ac56ebf8f3d",
+      "bytes": 62493
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-390-Mapa.png",
+      "sha256": "bd632167536d0b356bbd012666ae053b4b8db3130446873ee5d088092286a17c",
+      "bytes": 58903
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-390-Mi-mascota.png",
+      "sha256": "f7336a55a2ded71bba64497b2df6b762d76c3ebeca043ef7df7d9696c435808d",
+      "bytes": 67879
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-430-Comunidades.png",
+      "sha256": "f69712ae196b01224c0bfc53f5e9e9e55b827f44e4eee94ed72826293865e9f8",
+      "bytes": 66350
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-430-Mapa.png",
+      "sha256": "46c2d2e0c9ac0ac89ac539521f72494cea40a016a47e3f5c794512071b788f9b",
+      "bytes": 59618
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/es-430-Mi-mascota.png",
+      "sha256": "7a383104631bb89fd8c07f0d202131136b61be4efc0f0a3cfae578cebb069000",
+      "bytes": 69890
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/navigation/results.json",
+      "sha256": "eefd566d4dc3ea67a8b906ee0e17eb35aabfb75ea2f8436604847a4d463d62fb",
+      "bytes": 2351
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/prepromotion.json",
+      "sha256": "765adad32bef23da486921d5e55b609918dc5005aa78ebda9d8ea9bc578f7244",
+      "bytes": 1752
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/privacy-browser.json",
+      "sha256": "893e06e04ccf595412d087473c7abe5c49571ee4258e1cf9890c8b5f1466723b",
+      "bytes": 479
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/public-postflight.json",
+      "sha256": "b5c2aab75ca39f516ddad4b861a21462a65ab277fa5d39c59ad9b79378dbe9ad",
+      "bytes": 1829
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/README.md",
+      "sha256": "3d5f807a05e19d37ebec21d9e98f8540d5589371410c383a817cb13c4f9557e7",
+      "bytes": 1608
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/release.json",
+      "sha256": "1385ed257f33a9302f7a0669af79c3ee3ce53d793e456f073ecb79f3a1a8c443",
+      "bytes": 9717
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/en-320-error-arrival.png",
+      "sha256": "6bd234e9578a68e44ce98f272741b1fb36f2cc69ad7e21d0c36b14f23f83e6c6",
+      "bytes": 56433
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/en-320-error-home.png",
+      "sha256": "b922b112c1917d4648f2be42f338e5acd270e5e9830c78164e60416714e86993",
+      "bytes": 32799
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/en-320-pending-arrival.png",
+      "sha256": "6bd234e9578a68e44ce98f272741b1fb36f2cc69ad7e21d0c36b14f23f83e6c6",
+      "bytes": 56433
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/en-320-pending-home.png",
+      "sha256": "6442b73373208d1e612deda7eb01c27a3c0b3c7a3196c23704f36f0b4c756d64",
+      "bytes": 33840
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/en-320-recovered-home.png",
+      "sha256": "7e7e9c328b1f0a7cbabbabc1a3770a0f6078ae339928ce5ec58b3147c7f736be",
+      "bytes": 36803
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/es-320-error-arrival.png",
+      "sha256": "b72e23c7d926f6cf36c42b14adfd39b17ae206a1e67acc99e0b3cce2131550ac",
+      "bytes": 55114
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/es-320-error-home.png",
+      "sha256": "ad83f7e9b16caa40ce3815c16bb3162cbbe1422b714d9b6c37af6f9c3c1b0b8a",
+      "bytes": 35407
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/es-320-pending-arrival.png",
+      "sha256": "b72e23c7d926f6cf36c42b14adfd39b17ae206a1e67acc99e0b3cce2131550ac",
+      "bytes": 55114
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/es-320-pending-home.png",
+      "sha256": "f1fafbaccf17dbc962667a963ba12a568101816b17aa4a097a37155d5c7ff0fd",
+      "bytes": 35349
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/es-320-recovered-home.png",
+      "sha256": "c50acc087265dc7bbe0d4d265bba38e21ba72b506e3e9e052c42a09cc3c1f856",
+      "bytes": 42330
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/short/results.json",
+      "sha256": "9416aee2734b0351025699b937572245f52b4928e0aa006ffde064d27c09cb8f",
+      "bytes": 5147
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-320-care.png",
+      "sha256": "811a14e7782ae746e21b923737e0901b6098d3d3f2bf4536e15d110c2ac01f99",
+      "bytes": 71501
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-320-first-use.png",
+      "sha256": "c7b1ada5250869499ce361f0f21d3dc14343c2e2035cb5648ee82270ab14597d",
+      "bytes": 63936
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-320-qr.png",
+      "sha256": "e45b820441cd486f6d495d211bda92ae74e8790a3ce4d97e49cd7dd5d6d583c2",
+      "bytes": 63664
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-390-care.png",
+      "sha256": "2f209ac0c366c82ddc949715a123061e17e2194c60684118c1a1a2f70383971f",
+      "bytes": 83153
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-390-first-use.png",
+      "sha256": "8ee2b557b64b2eaf7f6998a79c03b2c501d53c2863c9a97fc826901ab3e69e6b",
+      "bytes": 70209
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-390-qr.png",
+      "sha256": "8b0acfadc74eff181781a0fa833cc51966a28e0703d9007cb76f293f00ba64d3",
+      "bytes": 73322
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-430-care.png",
+      "sha256": "df9ce28170610cd0672ae68c95f6e164bfe7a71b9b4780f1997c40677c36db60",
+      "bytes": 84936
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-430-first-use.png",
+      "sha256": "742877d6af86d52d610a10d48d635ef34b9b969e8b9989bea946210c90b96bc0",
+      "bytes": 69232
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/en-430-qr.png",
+      "sha256": "2fb4c20053d2f88943f8d64e41092f8150c43eab83c8934cce80e5f597978365",
+      "bytes": 77792
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-320-care.png",
+      "sha256": "9442155bb86a4277f8f0fffc3c63bff05c04c01919e6ea4d0b801baa13b2fe1c",
+      "bytes": 71028
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-320-first-use.png",
+      "sha256": "e93e3911c1866e49a4e6836b623099fe0be9a47440b50506f67655077e962af9",
+      "bytes": 60124
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-320-qr.png",
+      "sha256": "9bca2c58d728f487aa80f9d3a1a998152b3ec18d6f55c4456171f9c640458fff",
+      "bytes": 63803
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-390-care.png",
+      "sha256": "b24c3e2637dcb143043095c30da6ed3292b1bc703ce0a5fda8563e20b1c03031",
+      "bytes": 86201
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-390-first-use.png",
+      "sha256": "71608facb5cf560bb0e97cd46741a1f33d7015197b5bc931e980dce32ea99f35",
+      "bytes": 72300
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-390-qr.png",
+      "sha256": "3e0ae67878cc1ab44ea77796200dc881e2940e0f9669383e978633adb5686eb4",
+      "bytes": 73284
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-430-care.png",
+      "sha256": "d906ec7402d8525dc754f0d121273f7019bac9b9ec746265658509e46dac4a64",
+      "bytes": 87867
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-430-first-use.png",
+      "sha256": "21cfc29ff89f9992b6080018cf2680a5eb1d5acbbe45e1f10ba683fe8ee9162c",
+      "bytes": 71023
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/es-430-qr.png",
+      "sha256": "12a7edcc5dacc30ab54fdcb43ce836e837d87fdeb9e6041f099ac7974c6ac16f",
+      "bytes": 79083
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/utility/results.json",
+      "sha256": "631e190b15bb04bc14a5e49bc38e386e4810c9b88eb597a783369924a2e96aed",
+      "bytes": 2603
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-content-arrival.png",
+      "sha256": "f59cff747e488677052d32ee84aaab758b689e735300f2e5486d97b509892f47",
+      "bytes": 74053
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-content-home.png",
+      "sha256": "6a297a403bb3cc887fdd805ec0d4af34279927ae44e16f3ffc45a5c5e39fefad",
+      "bytes": 37701
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-empty-arrival.png",
+      "sha256": "ce21d1dcfdff20aa4c0387943d85d143086260da47e5ad455e853531dff39458",
+      "bytes": 74326
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-empty-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "bytes": 38204
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-error-arrival.png",
+      "sha256": "ce21d1dcfdff20aa4c0387943d85d143086260da47e5ad455e853531dff39458",
+      "bytes": 74326
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-error-home.png",
+      "sha256": "63ff2116e767da3fea9acad4852c76924a49972b77cf435362b1d68286db366a",
+      "bytes": 35577
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-pending-arrival.png",
+      "sha256": "6f0e6df6455b48a03602f7d608b51cdc370cfb664c785dc1c8533fd048ce1dd7",
+      "bytes": 74364
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-pending-home.png",
+      "sha256": "784b438b021936ed7c96dcd6433b092b1057e266a557f8b7e73b9dc55043b750",
+      "bytes": 37318
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-320-recovered-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "bytes": 38204
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-content-arrival.png",
+      "sha256": "f0d3ea954b607d4d55f86afe61f9f30701b6ea6ad84a6a42c72c93b3cc89e180",
+      "bytes": 83899
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-content-home.png",
+      "sha256": "034bd4bb483133c4a2b4496074d4c712e76b787baeecd3849cc3cd92332da970",
+      "bytes": 38587
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-empty-arrival.png",
+      "sha256": "b343d000f8a45cb744f4b5d3640430f69f59fa4c3612ce6472edc468e9718e3f",
+      "bytes": 84219
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-empty-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "bytes": 39392
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-error-arrival.png",
+      "sha256": "a649408d7f02a17d92911b8506f05c9d885131593c2e3388e7bea6a43d53e1de",
+      "bytes": 84217
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-error-home.png",
+      "sha256": "bed5c6299151e8e7f79834f6927866c2befa391a64193951e9624e6b6fac754a",
+      "bytes": 36484
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-pending-arrival.png",
+      "sha256": "b343d000f8a45cb744f4b5d3640430f69f59fa4c3612ce6472edc468e9718e3f",
+      "bytes": 84219
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-pending-home.png",
+      "sha256": "e164a1a99c9a904a24365da7847aa814c10630f8fa6cd4d356089106bb9290cc",
+      "bytes": 38218
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-390-recovered-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "bytes": 39392
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-content-arrival.png",
+      "sha256": "66dd6fdb4592e2eec2dd8b5fb864e16e4a5482c35899709648580b532af2df59",
+      "bytes": 82952
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-content-home.png",
+      "sha256": "348828c4f75b8963f320d080253b8e478caf1dde5c2496c5aaba7092f6beec28",
+      "bytes": 38511
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-empty-arrival.png",
+      "sha256": "c190333d200a3da2a85ae068287cc9989392019069087e76743f5edd3586ad5a",
+      "bytes": 83277
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-empty-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "bytes": 39282
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-error-arrival.png",
+      "sha256": "c190333d200a3da2a85ae068287cc9989392019069087e76743f5edd3586ad5a",
+      "bytes": 83277
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-error-home.png",
+      "sha256": "6063ab40803043456c32e43af8fa638f1a28bbfdac6c5ce3c11b6a8a03c832a1",
+      "bytes": 36580
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-pending-arrival.png",
+      "sha256": "0f58e09a99bbc53d87487ada69384541670124639d909b5ac61ab804056105ef",
+      "bytes": 83356
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-pending-home.png",
+      "sha256": "fa7d3b5e3d4e1ec01c5643265d3d1c75a6e04563456c5d270211de00d61abece",
+      "bytes": 38294
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/en-430-recovered-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "bytes": 39282
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-content-arrival.png",
+      "sha256": "addd71015896ac87f95142a409c6f59a9723656b18240c16613819b76a2725fd",
+      "bytes": 74817
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-content-home.png",
+      "sha256": "8ad1f38665ff7f638f8c24161168fe58440a01743241a91364db93807d97772d",
+      "bytes": 39127
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-empty-arrival.png",
+      "sha256": "e1da7a06bd2e612d30208e5babc5902fa223cd960261fa343e4fc7b9138ab57f",
+      "bytes": 74997
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-empty-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "bytes": 43779
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-error-arrival.png",
+      "sha256": "e1da7a06bd2e612d30208e5babc5902fa223cd960261fa343e4fc7b9138ab57f",
+      "bytes": 74997
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-error-home.png",
+      "sha256": "35fab987e123e290bf21d5f9ac42cda9050db8d8a26c9738ac33a041aa7d781b",
+      "bytes": 38199
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-pending-arrival.png",
+      "sha256": "228a4babe8b397bf5b717bdd17a547b6e63bdca96c4dea9e0c404f1fd40ce4e3",
+      "bytes": 75002
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-pending-home.png",
+      "sha256": "a83b9789767bc4534ecee86bcebd0263e7824d70a611cf8faef27c60f4b832c3",
+      "bytes": 38815
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-320-recovered-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "bytes": 43779
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-content-arrival.png",
+      "sha256": "9ec4fbbd9819582e0f98d1854a9cc84a7d5e685aeff5474e36b4a37c0beedea1",
+      "bytes": 86935
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-content-home.png",
+      "sha256": "ac00a92d97a13555ee38514ef7a75fe3d376625380106713a0a33ee6b84965e0",
+      "bytes": 40388
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-empty-arrival.png",
+      "sha256": "1595a0ca3f8df7aa2a2e748470011f8acc3974c3c66b8350cdf49f5ca9d57eb2",
+      "bytes": 87142
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-empty-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "bytes": 43689
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-error-arrival.png",
+      "sha256": "1595a0ca3f8df7aa2a2e748470011f8acc3974c3c66b8350cdf49f5ca9d57eb2",
+      "bytes": 87142
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-error-home.png",
+      "sha256": "51fd2b046331c86e80067177f0850e027013e61f4cc0a829de281b4966ef1de1",
+      "bytes": 39118
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-pending-arrival.png",
+      "sha256": "1595a0ca3f8df7aa2a2e748470011f8acc3974c3c66b8350cdf49f5ca9d57eb2",
+      "bytes": 87142
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-pending-home.png",
+      "sha256": "b6037f3d7c6e5e53f7b0f84c63fa4e2b188c75d3ea8777a3f20be304d3b7a50c",
+      "bytes": 39195
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-390-recovered-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "bytes": 43689
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-content-arrival.png",
+      "sha256": "1b94117c8e77dbc0043ec2193520d9e864399d980f4e7ebd3dfb77e03ad73979",
+      "bytes": 90906
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-content-home.png",
+      "sha256": "39dba99abe933bfcb22f2517537efff29eb348073bb86742b6f192cdf8fbc67c",
+      "bytes": 40078
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-empty-arrival.png",
+      "sha256": "7dd0bc48d57183ae148f328163d3a9e28a0a9694742e169f8cf9826ad39c2f13",
+      "bytes": 91113
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-empty-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "bytes": 43456
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-error-arrival.png",
+      "sha256": "7dd0bc48d57183ae148f328163d3a9e28a0a9694742e169f8cf9826ad39c2f13",
+      "bytes": 91113
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-error-home.png",
+      "sha256": "2757a664d5fb841ee3c5633a700ac3a4b6e9c8b39d8b64f2ced861c580d56f04",
+      "bytes": 38968
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-pending-arrival.png",
+      "sha256": "7dd0bc48d57183ae148f328163d3a9e28a0a9694742e169f8cf9826ad39c2f13",
+      "bytes": 91113
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-pending-home.png",
+      "sha256": "6a4eecf4da6d33be96fcd8846bc39023209ffe34e384045850aa4e1003d061c6",
+      "bytes": 39028
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/es-430-recovered-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "bytes": 43456
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-arrival-en.png",
+      "sha256": "2ecd00aff50b61c525558f8cda2cec849e2940482fb1451de7f9922320a2eacd",
+      "bytes": 193073
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-arrival-es.png",
+      "sha256": "a26826c76b627b68ecbc0ff85410de25f1dab2b378dddece4d1e7c5fdab49501",
+      "bytes": 189916
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-en-320.png",
+      "sha256": "c430d0508f9aebdd6b059d79393622ae6cda11d53e19b06a8da93f178479c42d",
+      "bytes": 130807
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-en-390.png",
+      "sha256": "68e5bdede33b1942b91e649e30a762c69fdf7f38a97737298ec74cfcd786210d",
+      "bytes": 132743
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-en-430.png",
+      "sha256": "9b0be9f025b55dbd78c0603378e33de18d32976e88c853af7191febecb7d47a3",
+      "bytes": 133173
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-es-320.png",
+      "sha256": "ead91bfbb836510e9551d2096d33cbf4c69c079c6ff9958846f7ccef9b94933d",
+      "bytes": 144360
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-es-390.png",
+      "sha256": "f4e53ea882526480cdab61239c3c616c2892ad8abdec46e5398e0713bbdcf760",
+      "bytes": 143821
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-es-430.png",
+      "sha256": "793b9ea12cf4d3fbc8a99cfdf67990c7ae9e37f8b88bef00981fc5d92dc93a52",
+      "bytes": 143838
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-recovery-en.png",
+      "sha256": "b5e96279dfec12d7b3bb4e3688289087cc0eafa82d2045aea437f83313336631",
+      "bytes": 79722
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/gallery-recovery-es.png",
+      "sha256": "0d34b13ae91d849cd2625d5ab112bc3d319fa6e47d367c23098e18a301666a36",
+      "bytes": 99930
+    },
+    {
+      "path": "docs/evidence/issue147-release-20261028/visual/results.json",
+      "sha256": "2e71fa5514b5eed4013bb8b9517259798c9dbeb1398e014bc489326858cefd78",
+      "bytes": 29603
+    }
+  ]
+}

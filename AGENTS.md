@@ -1,4 +1,8 @@
-## Issue147 — diseño autónomo y candidato aislado (28-oct-2026)
+## GO #147 ejecutado — publicación verificada (28-oct-2026)
+
+Leer primero [informe de publicación](docs/PAZO_ISSUE147_RELEASE_20261028.md) y [GO del PO](https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521). PR148 y Brain13 integrados, producto4ce38450 publicado en canónico/dplGRz. Única SQL1B instalada por vía dirigida y mapeada `20261028075145`→`20261028185856`; utilidad activa desde2026-10-28T19:17:46.696036Z/noticev1, retención14d saludable. **No repetir instalación ni reiniciar utility_started_at.** Los «no GO/no publicado/OFF» inferiores son historia anterior a la autorización final. Mantener sin cambios flags de pagos/invitaciones y usar el rollback documentado ante un fallo crítico; no publicar nuevas mejoras por inferencia.
+
+## Histórico: Issue147 — diseño autónomo y candidato aislado (28-oct-2026)
 
 **Aclaración posterior expresa del PO:** carga/error son estados ilustrados de sus propias pantallas, nunca avisos flotantes. Solo la orientación inicial de herramientas usa aviso independiente, con acciones deliberadamente distribuidas. El cierre visual598 y el prototipo de error flotante están superados; usar el informe147 vigente y su evidencia `illustrated-states`. No interpretar la referencia a cookies como aplicable al error.
 

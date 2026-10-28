@@ -1,0 +1,16 @@
+{
+  "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521",
+  "canonicalVersion": "20261028075145",
+  "path": "supabase/migrations/20261028075145_pazo_first_utility_outcomes.sql",
+  "canonicalSha256": "3cd09d8a97c3f65644a2ac269d549c9b46c9c9da1b39cc7b4dd4ba73420bb83c",
+  "hostedVersion": "20261028185856",
+  "hostedStatementMd5": "f3b0162099ab76020db1bebee1942310",
+  "hostedStatementBytes": 11710,
+  "transportSuffix": "",
+  "status": "HOSTED_TARGETED_APPLIED",
+  "executor": "Supabase MCP apply_migration, exact reviewed SQL",
+  "utilityEnabledAtInstallation": false,
+  "historyCountBefore": 132,
+  "historyCountAfter": 133,
+  "historyRewritten": false
+}

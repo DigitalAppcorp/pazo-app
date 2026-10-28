@@ -1,0 +1,73 @@
+{
+  "origin": "https://pazo-app.vercel.app",
+  "existingLiveReadOnly": {
+    "scope": "hosted read-only and unauthenticated denials; zero valid financial requests",
+    "results": [
+      {
+        "name": "official HTTPS current index",
+        "status": 200
+      },
+      {
+        "name": "webhook existing read-only ready",
+        "status": 200
+      },
+      {
+        "name": "pazo-paypal-live-checkout unauth GET denied",
+        "status": 401
+      },
+      {
+        "name": "pazo-paypal-live-checkout unauth empty POST denied",
+        "status": 400
+      },
+      {
+        "name": "pazo-admin-gradual-live unauth GET denied",
+        "status": 405
+      },
+      {
+        "name": "pazo-admin-gradual-live unauth empty POST denied",
+        "status": 403
+      },
+      {
+        "name": "private worker GET cannot dispatch",
+        "status": 405
+      },
+      {
+        "name": "private worker invalid capability cannot dispatch",
+        "status": 403
+      },
+      {
+        "name": "anon cannot call service-only rollout RPC",
+        "status": 401
+      },
+      {
+        "name": "anon cannot read owner campaign status",
+        "status": 401
+      },
+      {
+        "name": "maintenance remains readable",
+        "status": 200
+      }
+    ]
+  },
+  "newMeasurementPermissions": [
+    {
+      "name": "pazo_marketing_record_utility_v1",
+      "status": 401,
+      "code": "42501",
+      "expected": "unauthenticated denied; function installed"
+    },
+    {
+      "name": "pazo_admin_first_utility_summary",
+      "status": 401,
+      "code": "42501",
+      "expected": "unauthenticated denied; function installed"
+    },
+    {
+      "name": "real Auth user without token",
+      "status": 401
+    }
+  ],
+  "noAccountsCreated": true,
+  "noValidFinancialRequests": true,
+  "noHostedCohortsCreated": true
+}

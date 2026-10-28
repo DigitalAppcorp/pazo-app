@@ -1,5 +1,7 @@
 # PR1B — medición mínima de primera utilidad (issue142)
 
+> **Actualización tras GO final147:** [release verificado](PAZO_ISSUE147_RELEASE_20261028.md). Migración canónica20261028075145 instalada con versión dirigida20261028185856, hash exacto, sin reescribir historia. Se instalóOFF y se activó explícitamente a2026-10-28T19:17:46.696036Z después de publicar el aviso ES/EN; retención14d/Cron saludables. Las referencias siguientes a «candidato/no instalado/OFF» describen la preparación histórica. No repetir la instalación ni reiniciar su fecha de cobertura.
+
 Implementado en rama desde `main@5c4635e5`. Backend nuevo **candidato, no instalado ni activado en producción**. [Contrato de definiciones y alcance](PAZO_ISSUE142_ACCEPTANCE.md). Producción continúa `8dbf4ef5` / `dpl_3KrqGdJmijURjdirv1W1iwhkhSW7`; no fue necesario publicar 1A para avanzar: se utilizó staging.
 
 ## Cambios y privacidad

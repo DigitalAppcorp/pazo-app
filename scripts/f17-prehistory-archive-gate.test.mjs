@@ -9,7 +9,7 @@ const active=new URL('supabase/migrations/',root)
 const prepared=JSON.parse(readFileSync(new URL('docs/review/f18/NOT_APPLIED_MIGRATIONS.json',root),'utf8'))
 const additional=prepared.additionalInstalledVersions??[]
 const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-20261026/prepared-migrations.json',import.meta.url),'utf8'))
-const pendingMarketing=[...marketing.records,...(marketing.pendingRecords??[])].map(r=>r.version)
+const pendingMarketing=[...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version)
 function sha(buffer) {
  const prefix=Buffer.concat([Buffer.from('blob '+buffer.length),Buffer.from([0])])
  return createHash('sha1').update(prefix).update(buffer).digest('hex')
@@ -56,13 +56,19 @@ test('reviewed marketing source bytes match their explicitly recorded targeted A
  }
 })
 
-test('first-utility candidate is explicitly pending, not an asserted hosted installation',()=>{
- assert.deepEqual(marketing.pendingRecords.map(r=>r.version),['20261028075145'])
- for(const r of marketing.pendingRecords){
-  assert.equal(r.status,'PREPARED_NOT_APPLIED');assert.equal(r.productionPushAllowed,false)
-  assert.equal(r.hostedVersion,undefined)
-  assert.equal(createHash('sha256').update(readFileSync(new URL(r.path,root),'utf8').replace(/\r\n/g,'\n')).digest('hex'),r.sha256)
+test('first-utility targeted installation is byte-exact and additively mapped without enabling bulk push',()=>{
+ assert.deepEqual(marketing.pendingRecords,[])
+ assert.deepEqual(marketing.installedRecords.map(r=>r.version),['20261028075145'])
+ for(const r of marketing.installedRecords){
+  assert.equal(r.status,'HOSTED_TARGETED_APPLIED');assert.equal(r.productionPushAllowed,false)
+  assert.equal(r.utilityEnabledAtInstallation,false)
+  assert.match(r.hostedVersion,/^\d{14}$/)
+  assert.match(r.authorization,/issues\/147#issuecomment-6477690521$/)
+  const source=readFileSync(new URL(r.path,root))
+  assert.equal(createHash('sha256').update(source).digest('hex'),r.sha256)
+  assert.equal(createHash('md5').update(Buffer.concat([source,Buffer.from(r.transportSuffix)])).digest('hex'),r.hostedStatementMd5)
  }
+ assert.equal(marketing.historicalPreparedRecords.find(r=>r.version==='20261028075145').status,'PREPARED_NOT_APPLIED')
 })
 
 

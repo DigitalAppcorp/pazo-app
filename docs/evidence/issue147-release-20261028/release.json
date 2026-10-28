@@ -1,0 +1,283 @@
+{
+  "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521",
+  "state": "RELEASED_AND_VERIFIED",
+  "date": "2026-10-28",
+  "appMerge": {
+    "sha": "4ce38450bd0e3b5dee3249525b56aaaef08eaece",
+    "merged": true,
+    "message": "Pull Request successfully merged"
+  },
+  "brainMerge": {
+    "sha": "84ce94f39f461e44cf320f10319612c5eedf0f03",
+    "merged": true,
+    "message": "Pull Request successfully merged"
+  },
+  "production": {
+    "id": "dpl_GRzYRttARoYb6QaKX6fEuvWo2p4p",
+    "url": "https://pazo-momenv2xm-digitalapp.vercel.app",
+    "canonical": "https://pazo-app.vercel.app",
+    "sha": "4ce38450bd0e3b5dee3249525b56aaaef08eaece",
+    "ready": "READY",
+    "target": "production",
+    "approvedProduct": "39943f151ba0aaa8334eb437d4c37c66f8d65021",
+    "productDiff": "none",
+    "previewWasNotPromoted": true,
+    "productionConfigBuild": true
+  },
+  "install": {
+    "authorization": "https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521",
+    "canonicalVersion": "20261028075145",
+    "path": "supabase/migrations/20261028075145_pazo_first_utility_outcomes.sql",
+    "canonicalSha256": "3cd09d8a97c3f65644a2ac269d549c9b46c9c9da1b39cc7b4dd4ba73420bb83c",
+    "hostedVersion": "20261028185856",
+    "hostedStatementMd5": "f3b0162099ab76020db1bebee1942310",
+    "hostedStatementBytes": 11710,
+    "transportSuffix": "",
+    "status": "HOSTED_TARGETED_APPLIED",
+    "executor": "Supabase MCP apply_migration, exact reviewed SQL",
+    "utilityEnabledAtInstallation": false,
+    "historyCountBefore": 132,
+    "historyCountAfter": 133,
+    "historyRewritten": false
+  },
+  "installedSchema": {
+    "migration_count": 133,
+    "installed": [
+      {
+        "name": "pazo_first_utility_outcomes",
+        "version": "20261028185856",
+        "statement_md5": "f3b0162099ab76020db1bebee1942310",
+        "statement_bytes": 11710,
+        "statement_sha256": "3cd09d8a97c3f65644a2ac269d549c9b46c9c9da1b39cc7b4dd4ba73420bb83c"
+      }
+    ],
+    "gate": {
+      "enabled": true,
+      "singleton": true,
+      "enabled_at": "2026-10-27T01:09:15.382032+00:00",
+      "policy_version": "pazo-marketing-attribution-notice-v1",
+      "retention_days": 14,
+      "utility_enabled": false,
+      "utility_started_at": null,
+      "utility_notice_version": null
+    },
+    "retention_ready": true,
+    "private_tables": [
+      {
+        "acl": [
+          "postgres=arwdDxtm/postgres"
+        ],
+        "rls": true,
+        "name": "utility_outcomes",
+        "forced": true
+      },
+      {
+        "acl": [
+          "postgres=arwdDxtm/postgres"
+        ],
+        "rls": true,
+        "name": "utility_suppression",
+        "forced": true
+      }
+    ],
+    "public_rpc_acl": [
+      {
+        "name": "pazo_admin_first_utility_summary",
+        "config": [
+          "search_path=\"\""
+        ],
+        "anon_exec": false,
+        "auth_exec": true,
+        "service_exec": false,
+        "security_definer": true
+      },
+      {
+        "name": "pazo_marketing_record_utility_v1",
+        "config": [
+          "search_path=\"\""
+        ],
+        "anon_exec": false,
+        "auth_exec": true,
+        "service_exec": false,
+        "security_definer": true
+      }
+    ],
+    "care_triggers": [
+      {
+        "name": "pazo_first_utility_care",
+        "enabled": "O"
+      },
+      {
+        "name": "trg_care_items_prepare",
+        "enabled": "O"
+      }
+    ]
+  },
+  "activation": {
+    "enabled": true,
+    "enabled_at": "2026-10-27 01:09:15.382032+00",
+    "policy_version": "pazo-marketing-attribution-notice-v1",
+    "retention_days": 14,
+    "utility_enabled": true,
+    "utility_started_at": "2026-10-28 19:17:46.696036+00",
+    "utility_notice_version": "pazo-first-utility-notice-v1"
+  },
+  "postflight": {
+    "real_outcome_rows": 0,
+    "trusted_qa_excluded": true,
+    "qa_signals_rejected": true,
+    "gate": {
+      "enabled": true,
+      "enabled_at": "2026-10-27T01:09:15.382032+00:00",
+      "policy_version": "pazo-marketing-attribution-notice-v1",
+      "retention_days": 14,
+      "retention_ready": true,
+      "utility_enabled": true,
+      "utility_started_at": "2026-10-28T19:17:46.696036+00:00",
+      "utility_notice_version": "pazo-first-utility-notice-v1"
+    },
+    "live_release": {
+      "mode": "public",
+      "revision": 3,
+      "generation": 1
+    },
+    "checkout": {
+      "revision": 3,
+      "generation": 1,
+      "environment": "live",
+      "kill_switch": false,
+      "live_enabled": true
+    },
+    "invitations": {
+      "hosted_certified": true,
+      "checkouts_enabled": true,
+      "invitations_enabled": true
+    },
+    "retention_cron": {
+      "active": true,
+      "schedule": "17 */6 * * *",
+      "command_md5": "f013fe40503aaabb8c60d81e8515d82d"
+    }
+  },
+  "advisors": {
+    "before": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 78
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "level": "WARN",
+        "count": 7
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 60
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "count": 1
+      }
+    ],
+    "after": [
+      {
+        "name": "rls_enabled_no_policy",
+        "level": "INFO",
+        "count": 80,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy"
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "level": "WARN",
+        "count": 7,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "level": "WARN",
+        "count": 62,
+        "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable"
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "level": "WARN",
+        "count": 1,
+        "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection"
+      }
+    ],
+    "interpretation": "Two new private FORCE RLS tables and two authenticated security-definer RPC warnings are expected and guarded; no anon widening. Existing compromised-password-protection warning unchanged; not altered under this release."
+  },
+  "logs": {
+    "windowUTC": [
+      "2026-10-28T19:00:00Z",
+      "2026-10-28T19:19:00Z"
+    ],
+    "aggregate": {
+      "result": [
+        {
+          "entries": 1,
+          "function_errors": 0,
+          "http_5xx": 0,
+          "postgres_errors": 0,
+          "source": "auth_logs"
+        },
+        {
+          "entries": 151,
+          "function_errors": 0,
+          "http_5xx": 0,
+          "postgres_errors": 0,
+          "source": "edge_logs"
+        },
+        {
+          "entries": 47,
+          "function_errors": 0,
+          "http_5xx": 0,
+          "postgres_errors": 0,
+          "source": "function_edge_logs"
+        },
+        {
+          "entries": 69,
+          "function_errors": 0,
+          "http_5xx": 0,
+          "postgres_errors": 0,
+          "source": "function_logs"
+        },
+        {
+          "entries": 50,
+          "function_errors": 0,
+          "http_5xx": 0,
+          "postgres_errors": 4,
+          "source": "postgres_logs"
+        }
+      ]
+    },
+    "sqlstates": {
+      "result": [
+        {
+          "entries": 4,
+          "severity": "ERROR",
+          "sqlstate": "42501"
+        }
+      ]
+    },
+    "vercelRuntime": "No runtime errors returned in inspected15m window. Static SPA/browser errors verified separately.",
+    "limits": "4 PostgreSQL ERROR entries are SQLSTATE42501 permission denials; negative permission probes were intentionally performed. No HTTP5xx or function errors returned; not a future availability guarantee."
+  },
+  "rollback": {
+    "deployment": "dpl_3KrqGdJmijURjdirv1W1iwhkhSW7",
+    "url": "https://pazo-o7ggl0531-digitalapp.vercel.app",
+    "sha": "8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04",
+    "measurementOffSQL": "UPDATE marketing_private.collection_gate SET utility_enabled=false WHERE singleton;",
+    "frontendCommand": "vercel rollback https://pazo-o7ggl0531-digitalapp.vercel.app --scope digitalapp --yes",
+    "preserve": "Keep new schema inert and existing purge/audit active; no DROP or financial/Auth changes."
+  },
+  "operationalNotes": [
+    "Initial local-upload build9fx had no provider Git commit metadata and was not selected for canonical release. Its automatic secondary generated alias was restored to old deployment before final promotion; canonical stayed8dbf until tested Git production build promotion.",
+    "Final build was created from exact merged Git commit with production target and autoAssignCustomDomains=false, then promoted without rebuild. API fallback used already-authenticated Vercel CLI; separate full MCP mutation connection lacked team scope.",
+    "Public privacy harness first expected Spanish on an English-locale context; fixture corrected to deterministic Spanish followed by UI language toggle. Both languages then passed; no product change."
+  ],
+  "limits": "Production browser forms/notice/PWA and backend denied/QA-excluded requests are real. First-pet, QR, care and offline/ABA journeys use real production assets with intercepted Auth/data and disposable PostgreSQL17. No real purchase, provider delivery, authenticated human MFA challenge, physical-device or actual cohort conversion was generated."
+}
