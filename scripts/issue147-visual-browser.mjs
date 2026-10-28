@@ -1,0 +1,165 @@
+// Runtime composition audit. Synthetic Auth/data, never hosted writes.
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import {createRequire} from 'node:module'
+import {createServer} from 'vite'
+import {hostedAssetTransport} from './hosted-asset-transport.mjs'
+const require=createRequire(import.meta.url)
+const {chromium}=require(process.env.PAZO_PLAYWRIGHT_MODULE||'../../continuidad/f18-browser-tools/node_modules/playwright')
+const version=process.env.PAZO_VISUAL_VERSION||'candidate'
+const out=path.resolve(process.env.PAZO_VISUAL_OUTPUT||'artifacts/issue147/'+version)
+fs.mkdirSync(out,{recursive:true})
+const origin=process.env.PAZO_HOSTED_ORIGIN||'http://127.0.0.1:5357'
+const hosted=process.env.PAZO_HOSTED_ORIGIN?hostedAssetTransport(origin):null
+process.env.VITE_SUPABASE_URL='https://mrybvqdebbgcayuvgkkr.supabase.co'
+process.env.VITE_SUPABASE_PUBLISHABLE_KEY='sb_publishable_synthetic'
+const server=hosted?null:await createServer({server:{host:'127.0.0.1',port:5357,strictPort:true}})
+const owner='97000000-0000-4000-8000-000000000001',pet='97000000-0000-4000-8000-000000000002'
+const now=new Date().toISOString(),user={id:owner,aud:'authenticated',role:'authenticated',email:'qa@invalid.example',created_at:now,email_confirmed_at:now,app_metadata:{provider:'email',providers:['email'],pazo_marketing_qa:true},user_metadata:{}}
+const token=[{alg:'HS256',typ:'JWT'},{sub:owner,role:'authenticated',aud:'authenticated',exp:Math.floor(Date.now()/1000)+3600,session_id:'synthetic'},'synthetic'].map(v=>Buffer.from(typeof v==='string'?v:JSON.stringify(v)).toString('base64url')).join('.')
+const session={access_token:token,refresh_token:'synthetic',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user}
+const results=[];let browser
+const height=Number(process.env.PAZO_VISUAL_HEIGHT||844),smoke=process.env.PAZO_VISUAL_SMOKE==='true'
+assert.ok([568,667,844].includes(height))
+const settle=page=>page.evaluate(async()=>{
+ await document.fonts.ready
+ const images=[...document.images].filter(image=>{
+  const box=image.getBoundingClientRect();return box.width>0&&box.height>0&&box.bottom>0&&box.top<innerHeight
+ })
+ await Promise.all(images.map(image=>image.decode().catch(()=>{})))
+ if(images.some(image=>!image.complete||image.naturalWidth===0))throw Error('Visible runtime image has not loaded')
+ // Flush the React commit's styles before enumerating CSS transitions. A status
+ // already present in Home can otherwise match before the nav color changes.
+ await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+ document.querySelector('nav[data-pazo-floating-nav]')?.getBoundingClientRect()
+ await Promise.all(document.getAnimations().filter(a=>Number.isFinite(a.effect?.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{})))
+})
+try{
+ await server?.listen();browser=await chromium.launch({headless:true,...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{channel:process.platform==='win32'?'msedge':undefined})})
+ for(const lang of ['es','en'])for(const width of smoke?[320]:[320,390,430])for(const state of smoke?['pending','error']:['pending','content','empty','error']){
+  let created=false,mode=state,releases=[],errors=[],blockedWrites=0
+  const context=await browser.newContext({viewport:{width,height},locale:lang==='es'?'es-GT':'en-US',isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'})
+  await context.route('**/*',async route=>{
+   const req=route.request(),url=new URL(req.url())
+   if(url.origin===origin)return hosted?route.fulfill({status:200,...await hosted(url.href)}):route.continue()
+   // Use real product fonts when reachable, with fallback recorded separately.
+   if(['fonts.googleapis.com','fonts.gstatic.com'].includes(url.hostname))return route.continue()
+   if(url.hostname!=='mrybvqdebbgcayuvgkkr.supabase.co')return route.abort()
+   const respond=(data,status=200)=>route.fulfill({status,contentType:'application/json',headers:{'content-range':'0-0/0'},body:JSON.stringify(data)})
+   const rpc=url.pathname.split('/rpc/')[1],table=url.pathname.split('/rest/v1/')[1]
+   if(url.pathname.startsWith('/auth/v1/user'))return respond(user)
+   if(url.pathname.startsWith('/auth/v1/token'))return respond(session)
+   if(rpc){
+    if(rpc==='pazo_supporter_public_badges_batch')return respond(JSON.parse(req.postData()).p_pet_ids.map(pet_id=>({pet_id,badge:false,milestone:0})))
+    if(rpc==='pazo_public_maintenance_status')return respond({enabled:false,message_es:'',message_en:'',updated_at:now})
+    if(rpc==='create_pet_profile'){created=true;return respond(pet)}
+    if(rpc==='pazo_ensure_my_profile')return respond(null)
+    if(['pazo_is_admin','f14_is_moderator','pazo_marketing_record_utility_v1'].includes(rpc))return respond(false)
+    if(rpc.includes('public_token'))return respond('97000000-0000-4000-8000-000000000003')
+    return respond([])
+   }
+   if(table==='pets'){
+    const row={id:pet,owner_id:owner,name:'Luna',species:'gato',breed:'',age:'',gender:'hembra',photo_url:origin+'/pwa-icon-192.png',is_lost:false,created_at:now}
+    return respond((req.headers().accept||'').includes('vnd.pgrst.object')?(created?row:null):(created?[row]:[]))
+   }
+   if(table==='pet_public_links')return respond({public_token:'97000000-0000-4000-8000-000000000003'})
+   if(table==='follows'){
+    if(mode==='pending')await new Promise(resolve=>releases.push(resolve))
+    if(mode==='error')return respond({message:'forced isolated network failure'},503)
+    return respond([])
+   }
+   if(table==='posts'&&req.method()==='GET')return respond(mode==='content'?[{id:'97000000-0000-4000-8000-000000000004',pet_id:pet,pet_name:'Luna',pet_species:'gato',pet_avatar:origin+'/pwa-icon-192.png',text:lang==='es'?'Hoy descubrimos un nuevo rincón del parque.':'Today we found a new corner of the park.',tags:[],likes:0,created_at:now}]:[])
+   if(req.method()!=='GET'&&req.method()!=='HEAD'){blockedWrites++;return respond({message:'QA hosted write refused'},403)}
+   if((req.headers().accept||'').includes('vnd.pgrst.object'))return respond(null)
+   return respond([])
+  })
+  if(context.routeWebSocket)await context.routeWebSocket('**/*',ws=>ws.close())
+  await context.addInitScript(({session,lang})=>{localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language_preference_v1',lang)},{session,lang})
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')console.error('QA console:',m.text())})
+  // Hosted assets travel through authenticated CLI; DOM readiness, not the
+  // unrelated font-resource load event, is the navigation boundary.
+  await page.goto(origin,{waitUntil:'domcontentloaded',timeout:90000})
+  await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
+  await page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}).click()
+  await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
+  const nav=page.getByRole('navigation',{name:'Navegación de PAZO'});await nav.waitFor()
+  const toolsEntry=page.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true})
+  // App-level notice: not a child of the scrolling page or a modal barrier.
+  const onPet=await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current')==='page'
+  const arrivalControls=[]
+  if(onPet){
+   await toolsEntry.waitFor()
+   await settle(page)
+   if(height===844)assert.equal(await page.locator('main').evaluate(e=>e.scrollTop),0,'first arrival must not jump past identity into loss/membership tools')
+   await page.getByText(lang==='es'?'gato':'Cat',{exact:true}).first().waitFor()
+   if(lang==='en')assert.equal(await page.locator('main').getByText('Desconocida',{exact:true}).count(),0)
+   const notice=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
+   assert.equal(await notice.evaluate(e=>Boolean(e.closest('main'))),false)
+   assert.equal(await notice.getAttribute('aria-modal'),null)
+   assert.equal(await notice.evaluate(e=>e.scrollHeight>e.clientHeight),false,'notice actions fit without internal scrolling')
+   const dock=await nav.boundingBox()
+   const primary=notice.locator('[data-notice-primary]')
+   assert.equal(await primary.evaluate(e=>e===document.activeElement),true,'first-use focus stays on its own primary action')
+   for(const name of [lang==='es'?/^Ver pasaporte QR/:/^View QR passport/,lang==='es'?'Abrir Agenda':'Open Agenda',lang==='es'?'Explorar PAZO':'Explore PAZO']){
+    const button=notice.getByRole('button',{name}),box=await button.boundingBox()
+    assert.ok(box.height>=44&&box.width>=44)
+    assert.ok(box.y+box.height<dock.y,'notice QR/care/explore actions visible above dock')
+    assert.equal(await button.evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,'notice action is not covered')
+    arrivalControls.push({name:String(name),...box})
+   }
+   const agendaBox=arrivalControls[1],exploreBox=arrivalControls[2]
+   assert.ok(Math.abs(agendaBox.width-exploreBox.width)<1&&Math.abs(agendaBox.y-exploreBox.y)<1,'paired secondary actions have equal space')
+   const edit=await page.getByRole('button',{name:lang==='es'?'Editar':'Edit',exact:true}).boundingBox()
+   const title=await page.getByRole('heading',{name:'Luna',exact:true}).last().boundingBox()
+   assert.ok(title.x+title.width<=edit.x||title.y>=edit.y+edit.height,'profile identity does not collide with Edit')
+   await page.screenshot({path:path.join(out,`${lang}-${width}-${state}-arrival.png`)})
+   if(state==='error'){
+    await page.keyboard.press('Escape');await notice.waitFor({state:'detached'})
+    await nav.getByRole('button',{name:lang==='es'?'Inicio':'Home',exact:true}).click()
+   }else await toolsEntry.click()
+  }
+  if(state==='pending')await page.locator('main [data-pazo-feed-state="loading"]').waitFor()
+  if(state==='error')await page.getByRole('button',{name:lang==='es'?'Reintentar':'Try again',exact:true}).waitFor()
+  if(state==='pending'||state==='error'){
+   const screen=page.locator('main [data-pazo-feed-state]')
+   assert.equal(await screen.evaluate(e=>Boolean(e.closest('main'))),true)
+   assert.equal(await page.locator('[data-pazo-app-notice]').count(),0,'feed state never becomes an onboarding notice')
+  }
+  if(state==='empty')await page.getByText(lang==='es'?'Todavía no hay publicaciones':'No posts yet',{exact:true}).waitFor()
+  if(state==='content')await page.getByText(lang==='es'?/Hoy descubrimos un nuevo rincón del parque\./:/Today we found a new corner of the park\./).last().waitFor()
+  await settle(page)
+  if(state==='pending'||state==='error')for(const button of await page.locator('main [data-pazo-feed-state] button').all()){
+   const r=await button.boundingBox();assert.ok(r.height>=44)
+   assert.ok(r.y+r.height<(await nav.boundingBox()).y,'page-state actions are visible above the dock')
+  }
+  const font=await page.evaluate(()=>({family:getComputedStyle(document.body).fontFamily,faces:[...document.fonts].map(f=>({family:f.family,status:f.status}))}))
+  await page.screenshot({path:path.join(out,`${lang}-${width}-${state}-home.png`)})
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
+  const main=page.locator('main');await main.evaluate(e=>e.scrollTop=e.scrollHeight)
+  assert.ok((await nav.boundingBox()).y<height);await main.evaluate(e=>e.scrollTop=0)
+  if(state==='error'){
+   mode='empty';await page.getByRole('button',{name:lang==='es'?'Reintentar':'Try again',exact:true}).click()
+   await page.getByText(lang==='es'?'Todavía no hay publicaciones':'No posts yet',{exact:true}).waitFor()
+   await settle(page)
+   await page.screenshot({path:path.join(out,`${lang}-${width}-recovered-home.png`)})
+  }
+  mode='empty';releases.splice(0).forEach(r=>r())
+  await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
+  const qr=page.getByRole('button',{name:lang==='es'?/^Pasaporte y QR/:/^Passport & QR/})
+  if(version==='candidate'){await qr.focus();await page.keyboard.press('Enter')}
+  else await page.getByText(lang==='es'?'Pasaporte y QR':'Passport & QR',{exact:true}).click()
+  await page.getByRole('img',{name:'Pazo · Luna',exact:true}).waitFor()
+  await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
+  if(version==='candidate'){await page.getByRole('button',{name:lang==='es'?/^Cuidados y Agenda/:/^Care & Agenda/}).focus();await page.keyboard.press('Enter')}
+  else await page.getByText(lang==='es'?'Cuidados y Agenda':'Care & Agenda',{exact:true}).click()
+  await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
+  await page.reload();await nav.waitFor()
+  if(version==='candidate')assert.equal(await page.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true}).count(),0,'returning account does not repeat first-use guidance')
+  assert.deepEqual(errors,[])
+  results.push({lang,width,height,state,arrival:onPet?'existing-pet-tools':'home',arrivalControls,font,pageErrors:errors.length,overflow:false,qr:'PASS',agenda:'PASS',retry:state==='error'?'PASS':'not needed',blockedWrites,hostedWrites:0})
+  await context.close()
+ }
+ fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({version,origin,frontend:hosted?'immutable Vercel assets via authenticated CLI':'real local App',data:'synthetic controlled Auth/data; all feed states forced; not real hosted traffic',results},null,2))
+ console.log(JSON.stringify(results))
+}finally{await browser?.close();await server?.close()}

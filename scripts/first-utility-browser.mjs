@@ -112,7 +112,7 @@ try{
    }
    Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{if(window.__shareMode==='cancel')throw new DOMException('cancelled','AbortError')}})
   },{session,lang,contextual,width,owner})
-  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin)
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
   if(contextual){
    await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')
@@ -120,12 +120,13 @@ try{
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
    const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
-   await page.getByText(lang==='es'?'Sincronizando feed...':'Syncing feed...',{exact:true}).waitFor()
+   assert.equal(await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).getAttribute('aria-current'),'page')
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
    await page.screenshot({path:path.join(out,`${lang}-${width}-first-use.png`)})
-   if(width!==320)assert.ok((await hint.innerText()).includes(lang==='es'?'Abre el pasaporte':'Open Luna'))
+   if(width!==320)assert.ok((await hint.innerText()).includes(lang==='es'?'Abre su pasaporte':'Open their passport'))
    for(const b of await hint.getByRole('button').all()){const r=await b.boundingBox();assert.ok(r.height>=44);assert.ok(r.x>=0&&r.x+r.width<=width)}
-   await hint.getByRole('button',{name:width===390?(lang==='es'?'Ver pasaporte QR':'View QR passport'):width===430?(lang==='es'?'Abrir Agenda':'Open care agenda'):(lang==='es'?'Explorar PAZO':'Explore PAZO'),exact:true}).click()
+   if(width===320)await hint.getByRole('button',{name:lang==='es'?'Explorar PAZO':'Explore PAZO',exact:true}).click()
+    else await hint.getByRole('button',{name:width===390?(lang==='es'?/^Ver pasaporte QR/:/^View QR passport/):(lang==='es'?'Abrir Agenda':'Open Agenda')}).click()
    await hint.waitFor({state:'detached'})
    if(width===390)await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()
    if(width===430)await page.getByRole('button',{name:lang==='es'?'Cerrar':'Close',exact:true}).click()

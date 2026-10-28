@@ -1,0 +1,416 @@
+{
+  "version": "baseline-rejected",
+  "origin": "http://127.0.0.1:5357",
+  "frontend": "real local App",
+  "data": "synthetic controlled Auth/data; all feed states forced; not real hosted traffic",
+  "results": [
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "pending",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "content",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "empty",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "error",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "pending",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "content",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "empty",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "error",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "pending",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "content",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "empty",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "error",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "pending",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "content",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "empty",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "error",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "pending",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "content",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "empty",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "error",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "pending",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "content",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "empty",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "error",
+      "arrival": "home",
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "loaded": true
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    }
+  ]
+}

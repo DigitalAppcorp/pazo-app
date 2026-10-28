@@ -1,0 +1,60 @@
+{
+  "product_sha": "39943f151ba0aaa8334eb437d4c37c66f8d65021",
+  "deployment": "dpl_HVSpTbnqckHQYFxqda4jdjDX7yCh",
+  "ready_state": "READY",
+  "environment": "staging",
+  "origin": "https://pazo-jgt7cf5k8-digitalapp.vercel.app",
+  "full_cases": 24,
+  "recoveries": 6,
+  "short_cases": 4,
+  "utility_pg17_cases": 6,
+  "navigation_cases": 6,
+  "pending_tools_visits": 18,
+  "page_errors": 0,
+  "hosted_writes": 0,
+  "tests": {
+    "governance": 776,
+    "app_included": 27,
+    "first_use_service_included": 24,
+    "closure_included": 527,
+    "f16_synthetic": 1196,
+    "f14_linux": 53,
+    "dist": 4,
+    "utility_pg17_assertions": 32,
+    "typescript": "PASS",
+    "build": "PASS",
+    "new_component_lint": "0 diagnostics",
+    "global_lint": "Inherited166 diagnostics,148 errors18 warnings; nonblocking debt, not a clean lint"
+  },
+  "source_ci": {
+    "ci": 40745553242,
+    "utility": 40745553267,
+    "marketing": 40745553299,
+    "f17": 40745553209,
+    "f18": 40745553230,
+    "status": "all completed success"
+  },
+  "source_ci_artifacts": {
+    "composition": 12841198076,
+    "utility": 12840339957,
+    "expires": "2026-11-11"
+  },
+  "brain": {
+    "sha": "5abadf01a5cc762a7d2748bbd205e1f32bbc9a76",
+    "ci": 40745078592,
+    "engine_tests": 13,
+    "record_tests": 12,
+    "status": "success, PR13 open, no global install"
+  },
+  "harness_limit": "First nav attempt exhausted20s while authenticated CLI assets were pending (empty body, no page error). Readiness90s rerun passed. This transport is not a product performance benchmark.",
+  "preserved": {
+    "production_sha": "8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04",
+    "pazo_main": "9cd497114c3b9e2f654dfa8dd6dee88ebb58bdcd",
+    "brain_main": "fab6ff1cc8dfbdfb79fe677ecc22e751d817a6d9",
+    "hosted_migrations": 132,
+    "new_utility_migration": "20261028075145",
+    "new_utility_migration_count": 0,
+    "new_measurement": "not installed or activated"
+  },
+  "final_pr_head": "Documentary/harness head gates linked in PR148; source remains identical to the validated product artifact."
+}

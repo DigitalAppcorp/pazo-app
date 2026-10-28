@@ -1,0 +1,8 @@
+{
+  "status": "RECORD_COMPLETE",
+  "errors": [],
+  "grants_release": false,
+  "limitation": "Completeness is not visual quality or proof of truthful review.",
+  "validator_sha": "251ba2438ddc70206ca1378b2d77c3ae79d42d32",
+  "command": "python knowledge/ui-ux-frontend/scripts/visual_review.py <record> --root <PAZO checkout>"
+}

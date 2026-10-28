@@ -1,4 +1,5 @@
 import {SupporterProfileEntry} from '../../features/supporter/components/SupporterProfileEntry'
+import { petSpeciesLabel, petAgeLabel } from '../../features/i18n/petLabels'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { DEMO_POST_MOTIFS } from '../../data/mockData'
 import { useEffect, useState, useRef } from 'react'
@@ -272,7 +273,7 @@ export const PetView = ({
           </h2>
           {!isEditing && (
             <p className="text-xs text-[#5C7470]">
-              {currentPet.species.toUpperCase()} • {currentPet.age}{currentPet.breed ? ` • ${currentPet.breed}` : ''}
+              {petSpeciesLabel(currentPet.species,lang).toUpperCase()} • {petAgeLabel(currentPet.age,lang)}{currentPet.breed ? ` • ${currentPet.breed}` : ''}
             </p>
           )}
         </div>
@@ -592,10 +593,10 @@ export const PetView = ({
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5 pr-16">
                   <h3 className="text-lg font-black text-[#204E4A] truncate">{currentPet.name}</h3>
                   <span className="text-[13px] font-bold px-2 py-0.5 bg-[#E1E53F] text-[#204E4A] rounded-full shrink-0 shadow-xs">
-                    {currentPet.species}
+                    {petSpeciesLabel(currentPet.species,lang)}
                   </span>
                 </div>
                 <p className="text-xs text-[#5C7470] mt-0.5">{currentPet.bio}</p>
@@ -676,56 +677,53 @@ export const PetView = ({
             {lang === 'es' ? `Todo sobre ${currentPet.name}` : `All about ${currentPet.name}`}
           </h3>
           <ModerationAccess enabled={canModerate} lang={lang} />
-
-
-
-          <div
+          <button type="button"
             onClick={onOpenQRPassport}
-            className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
+            className="w-full text-left p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#E1E53F]/40 text-[#204E4A] flex items-center justify-center text-xl font-bold group-hover:scale-105 transition-transform shadow-xs">
+            <span className="flex items-center gap-3.5">
+              <span className="w-12 h-12 rounded-2xl bg-[#E1E53F]/40 text-[#204E4A] flex items-center justify-center text-xl font-bold group-hover:scale-105 transition-transform shadow-xs">
                 <IconPaw size={22} />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-sm text-[#204E4A]">
+              </span>
+              <span>
+                <span className="block font-extrabold text-sm text-[#204E4A]">
                   {lang === 'es' ? 'Pasaporte y QR' : 'Passport & QR'}
-                </h4>
-                <p className="text-xs text-[#5C7470]">
+                </span>
+                <span className="block text-xs text-[#5C7470]">
                   {lang === 'es'
                     ? 'Identidad que puedes compartir públicamente'
-                    : 'Identity you can safely share'}
-                </p>
-              </div>
-            </div>
+                    : 'Public profile you can share'}
+                </span>
+              </span>
+            </span>
             <span className="text-lg text-[#5C7470] group-hover:translate-x-1 transition-transform font-bold">
               ›
             </span>
-          </div>
+          </button>
 
-          <div
+          <button type="button"
             onClick={onOpenCareAgenda}
-            className="p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group"
+            className="w-full text-left p-4 bg-white hover:bg-neutral-50 rounded-[2rem] shadow-[0_4px_16px_rgba(32,78,74,0.04)] flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-[#204E4A]/10 text-[#204E4A] flex items-center justify-center text-xl font-bold group-hover:scale-105 transition-transform shadow-xs">
+            <span className="flex items-center gap-3.5">
+              <span className="w-12 h-12 rounded-2xl bg-[#204E4A]/10 text-[#204E4A] flex items-center justify-center text-xl font-bold group-hover:scale-105 transition-transform shadow-xs">
                 <IconCalendar size={22} />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-sm text-[#204E4A]">
+              </span>
+              <span>
+                <span className="block font-extrabold text-sm text-[#204E4A]">
                   {lang === 'es' ? 'Cuidados y Agenda' : 'Care & Agenda'}
-                </h4>
-                <p className="text-xs text-[#5C7470]">
+                </span>
+                <span className="block text-xs text-[#5C7470]">
                   {lang === 'es'
                     ? `${careItems.length} cuidados agendados`
                     : `${careItems.length} scheduled care items`}
-                </p>
-              </div>
-            </div>
+                </span>
+              </span>
+            </span>
             <span className="text-lg text-[#5C7470] group-hover:translate-x-1 transition-transform font-bold">
               ›
             </span>
-          </div>
+          </button>
 
           <div
             onClick={onOpenDocuments}

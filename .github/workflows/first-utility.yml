@@ -90,3 +90,34 @@ jobs:
             artifacts/issue142-utility/
             artifacts/issue142-contextual/
           retention-days: 14
+  visual-composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PAZO_PLAYWRIGHT_MODULE: playwright
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - name: Use runner Chrome
+        run: |
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            echo "PAZO_CHROMIUM_PATH=$browser_path" >> "$GITHUB_ENV"
+          else
+            npx --no-install playwright install --with-deps chromium
+          fi
+      - run: PAZO_VISUAL_VERSION=candidate npm run test:issue147:visual
+      - run: node scripts/issue147-gallery.mjs artifacts/issue147/candidate
+      - name: Short mobile screen, ES and EN
+        run: PAZO_VISUAL_VERSION=candidate PAZO_VISUAL_HEIGHT=568 PAZO_VISUAL_SMOKE=true PAZO_VISUAL_OUTPUT=artifacts/issue147/short npm run test:issue147:visual
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: issue147-composition-${{ github.run_id }}
+          path: artifacts/issue147/
+          retention-days: 14

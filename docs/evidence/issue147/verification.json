@@ -1,0 +1,63 @@
+{
+  "artifact_sha": "dd46582915043a0a049b3673dfc89a4400f2bfa2",
+  "deployment": "dpl_9GhAAVUP6dYzSyDxudzCunBcRi5q",
+  "ready_state": "READY",
+  "target": "staging",
+  "url": "https://pazo-8bbqfm7ea-digitalapp.vercel.app",
+  "visual_cases": 24,
+  "recoveries": 6,
+  "short_cases": 2,
+  "utility_pg17_browser_cases": 6,
+  "navigation_cases": 6,
+  "pending_tools_visits": 18,
+  "hosted_writes": 0,
+  "page_errors": 0,
+  "governance_tests": 774,
+  "app_tests_included": 25,
+  "first_use_service_tests_included": 24,
+  "closure_tests_included": 527,
+  "f16_synthetic_tests": 1196,
+  "f14_linux_tests": 53,
+  "dist_tests": 4,
+  "utility_pg17_assertions": 32,
+  "source_ci": {
+    "ci": 40689238669,
+    "utility_composition_pg17": 40689238630,
+    "marketing": 40689238544,
+    "f17": 40689238745,
+    "f18": 40689238706,
+    "status": "all completed success"
+  },
+  "brain": {
+    "pr": 13,
+    "sha": "251ba2438ddc70206ca1378b2d77c3ae79d42d32",
+    "ci": 40679579376,
+    "engine_tests": 13,
+    "record_counterexamples": 11,
+    "status": "success; not merged or globally installed"
+  },
+  "artifacts": {
+    "composition": 12816810479,
+    "utility": 12816257619,
+    "expires": "2026-11-11",
+    "permanent_evidence": "This directory, SHA256 manifest"
+  },
+  "lint": {
+    "errors": 148,
+    "warnings": 18,
+    "total": 166,
+    "status": "Inherited nonblocking debt; not a clean global lint result"
+  },
+  "preserved": {
+    "pazo_main": "9cd497114c3b9e2f654dfa8dd6dee88ebb58bdcd",
+    "brain_main": "fab6ff1cc8dfbdfb79fe677ecc22e751d817a6d9",
+    "production_sha": "8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04",
+    "production_deployment": "dpl_3KrqGdJmijURjdirv1W1iwhkhSW7",
+    "hosted_migration_count": 132,
+    "new_utility_version": "20261028075145",
+    "new_utility_version_count": 0,
+    "new_utility_table": null,
+    "new_measurement": "not installed or activated"
+  },
+  "limits": "Functional data controlled/intercepted; real staging assets, disposable PostgreSQL. No claim of physical device/hosted login end-to-end, external Share delivery, universal accessibility certification, conversion improvement or measured speed. Final PR documentary head gates are linked in the PR, avoiding a self-referential commit hash."
+}

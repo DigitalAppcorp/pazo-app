@@ -73,9 +73,9 @@ try{
    localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language',lang);localStorage.setItem('active_pet_'+owner,pet)
   },{session,lang,owner,pet:pets[0].id})
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
-  await page.goto(origin,{waitUntil:'domcontentloaded'})
+  await page.goto(origin,{waitUntil:'domcontentloaded',timeout:90000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
-  try{await nav.waitFor({timeout:20000})}catch(e){console.error({lang,width,errors,body:await page.locator('body').innerText()});throw e}
+  try{await nav.waitFor({timeout:90000})}catch(e){console.error({lang,width,errors,body:await page.locator('body').innerText()});throw e}
   for(const label of lang==='es'?['Comunidades','Mapa','Mi mascota']:['Communities','Map','My Pet']){
    await nav.getByRole('button',{name:label,exact:true}).click()
    assert.equal(await nav.getByRole('button',{name:label,exact:true}).getAttribute('aria-current'),'page')
@@ -89,7 +89,7 @@ try{
   await page.getByRole('button',{name:/Luna/}).click()
   feed='error';releases.splice(0).forEach(fn=>fn())
   await nav.getByRole('button',{name:lang==='es'?'Inicio':'Home',exact:true}).click()
-  await page.getByText(lang==='es'?'No pudimos cargar las publicaciones':'Could not load posts',{exact:true}).waitFor()
+  await page.locator('main [data-pazo-feed-state="error"]').waitFor()
   await context.setOffline(true)
   await nav.getByRole('button',{name:lang==='es'?'Mi mascota':'My Pet',exact:true}).click()
   await nav.getByRole('button',{name:lang==='es'?'Comunidades':'Communities',exact:true}).click()
@@ -98,7 +98,7 @@ try{
   feed='success'
   await nav.getByRole('button',{name:lang==='es'?'Inicio':'Home',exact:true}).click()
   await page.getByRole('button',{name:lang==='es'?'Reintentar':'Try again',exact:true}).click()
-  await page.waitForFunction(()=>!document.querySelector('main')?.textContent.match(/Sincronizando feed|Syncing feed|Could not load posts|No pudimos cargar/))
+  await page.locator('main [data-pazo-feed-state]').waitFor({state:'detached'})
   assert.deepEqual(errors,[]);assert.deepEqual(unexpectedWrites,[])
   results.push({lang,width,viewsWhileFeedPending:3,feedErrorRetry:'PASS',petABA:'PASS',offlineNavigation:'PASS',overflow:false,pageErrors:0,backendRequestsIntercepted:backend,externalBlocked:external,blockedExistingMetricWrites,hostedWrites:0})
   await context.close()

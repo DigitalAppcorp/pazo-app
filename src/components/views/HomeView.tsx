@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { petSpeciesLabel } from '../../features/i18n/petLabels'
 import type { Post, SupporterBadgeEvidence } from '../../types/pazo'
 import { IconBookmark, IconPaw } from '../icons/PazoIcons'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
@@ -476,7 +477,7 @@ const PostCard = ({ post, supporterBadge, canReport, onReport, onHidePost, curre
                 </span>
               ) : (
                 <span className="max-w-full truncate rounded-full bg-[#FAF8F5] px-1.5 py-0.5 text-[11px] font-bold uppercase text-[#5C7470]">
-                  {post.petSpecies}
+                  {petSpeciesLabel(post.petSpecies,lang)}
                 </span>
               )}
             </div>

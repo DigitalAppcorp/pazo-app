@@ -59,7 +59,7 @@ try{
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
   await page.goto('http://127.0.0.1:5351/')
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
-  try {await nav.waitFor();await page.getByText('Sincronizando feed...',{exact:true}).waitFor()}
+  try {await nav.waitFor();await page.locator('main [data-pazo-feed-state="loading"]').waitFor()}
   catch(e){console.error('Fixture diagnostics:',errors,await page.locator('body').innerText());throw e}
   for(const label of ['Comunidades','Mapa','Mi mascota']){
    await nav.getByRole('button',{name:label,exact:true}).click()
@@ -73,7 +73,7 @@ try{
   // Force the pending feed request to fail, then recover only that service.
   feed='error';pending.splice(0).forEach(fn=>fn())
   await nav.getByRole('button',{name:'Inicio',exact:true}).click()
-  await page.getByText('No pudimos cargar las publicaciones',{exact:true}).waitFor()
+  await page.locator('main [data-pazo-feed-state="error"]').waitFor()
   await context.setOffline(true)
   await nav.getByRole('button',{name:'Mi mascota',exact:true}).click()
   await page.getByText('Luna',{exact:true}).first().waitFor()
@@ -83,7 +83,7 @@ try{
   await context.setOffline(false);feed='success';careFail=false
   await nav.getByRole('button',{name:'Inicio',exact:true}).click()
   await page.getByRole('button',{name:'Reintentar',exact:true}).click()
-  await page.waitForFunction(()=>!document.querySelector('main')?.textContent.includes('No pudimos cargar las publicaciones')&&!document.querySelector('main')?.textContent.includes('Sincronizando feed'))
+  await page.locator('main [data-pazo-feed-state]').waitFor({state:'detached'})
   await nav.getByRole('button',{name:'Mi mascota',exact:true}).click()
   // Passport remains accessible while unrelated services failed earlier.
   const passport=page.getByText('Pasaporte y QR',{exact:true})

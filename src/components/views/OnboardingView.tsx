@@ -20,6 +20,7 @@ interface OnboardingViewProps {
   onQuickDemo: () => void
   lang: 'es' | 'en'
   onToggleLang: () => void
+  isCompletionCurrent?: () => boolean
 }
 
 export const OnboardingView = ({
@@ -29,6 +30,7 @@ export const OnboardingView = ({
   onQuickDemo,
   lang,
   onToggleLang,
+  isCompletionCurrent,
 }: OnboardingViewProps) => {
   const [step, setStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>(initialStep)
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
@@ -132,6 +134,8 @@ export const OnboardingView = ({
 
   const handleFinishOnboarding = async () => {
     if (isSubmittingPet) return
+    const isCurrent=isCompletionCurrent??(()=>true)
+    if (!isCurrent()) return
 
     const normalizedName = petName.trim()
     if (!normalizedName) {
@@ -150,11 +154,17 @@ export const OnboardingView = ({
         photoFile: petPhotoFile,
         zone,
         interests,
-      })
+      },isCurrent)
 
+      if (!isCurrent()) return
       stageMarketingFirstPetCreated()
       onComplete(createdPet)
     } catch (error) {
+      if (!isCurrent()) return
+      if (error instanceof Error&&error.name==='AbortError') {
+        alert(lang==='es'?'Tu sesión cambió. Vuelve a intentarlo.':'Your session changed. Please try again.')
+        return
+      }
       const message = error instanceof Error ? error.message : 'Unknown error'
       alert(
         lang === 'es'
@@ -162,7 +172,7 @@ export const OnboardingView = ({
           : `There was a problem saving your pet: ${message}`
       )
     } finally {
-      setIsSubmittingPet(false)
+      if (isCurrent()) setIsSubmittingPet(false)
     }
   }
 

@@ -1,4 +1,16 @@
-## Issue142 — paquete final para decisión única del PO (28-oct-2026)
+## Issue147 — dirección aclarada: pantallas ilustradas y aviso de primer uso (28-oct-2026)
+
+Leer el [informe147 vigente](PAZO_ISSUE147_FINAL_REPORT_20261028.md). El PO aclaró: **no confundir pantallas de carga/error con avisos de orientación inicial**. Inicio usa estados ilustrados propios enmain; solo primer uso usa capa flotante no modal fuera del scroll. Candidato39943f151ba0aaa8334eb437d4c37c66f8d65021 en PR148; Brain13head5abadf01 corrige alineación con brief y referencias. Las entradas previas sobre598/dd465829/PASS no son el candidato actual. Producción8dbf y SQL1B no instalado/mediciónOFF conservados; no merge/lanzamiento automático. Gates y evidencia finales en el informe y PR148.
+
+---
+
+## Histórico: Issue147 — corrección visual y proceso terminados, candidato de publicación (28-oct-2026)
+
+Leer primero el [informe147](PAZO_ISSUE147_FINAL_REPORT_20261028.md). El PO rechazó la composición142; quedó sustituida en PR148 abierto por entrada directa a herramientas existentes y estados de Inicio integrados. **DESIGN_QA_PASS**, sin pedir aprobación estética rutinaria ni inventar aceptación del PO. Brain OS PR13 abierto corrige el protocolo y tiene evaluaciones reproducibles. Ambos candidatos están probados y preparados; ningún merge automático. Preview final de producto `dd46582915043a0a049b3673dfc89a4400f2bfa2`, staging `pazo-8bbqfm7ea-digitalapp.vercel.app`. Las actualizaciones documentales posteriores no cambian su producto. Main9cd/prod8dbf preservados, SQL1B no instalado, nueva medición OFF. Solo falta el GO final de publicación completo; después se ejecutan autónomamente los subpasos ya definidos en el runbook, revalidando estado vivo. No repetir alternativas ni escalar QA estético al PO. Las entradas siguientes son históricas.
+
+---
+
+## Histórico: Issue142 — paquete final para decisión única del PO (28-oct-2026)
 
 Leer primero el [informe final y candidato](PAZO_ISSUE142_FINAL_REPORT_20261028.md):1A alojado,1B yPR2 implementados/probados/integrados, matriz ES/EN móvil y evidencia de PostgreSQL aislado. Producción8dbf4ef5 conservada; sin SQL nuevo instalado ni colección nueva activa. Siguiente acción requiere decisión final del PO para publicar; no repetir implementación ni convertir los snapshots siguientes en bloqueos actuales. La hoja maestra incorpora esta actualización de forma aditiva. No hay trabajo de implementación pendiente de delegar al director técnico.
 
