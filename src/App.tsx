@@ -2324,7 +2324,7 @@ function PazoMain() {
               {activeTab === 'inicio' && isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
-                  <p className="text-xs font-bold text-[#5C7470] tracking-wider uppercase">Sincronizando feed...</p>
+                  <p className="text-xs font-bold text-[#5C7470] tracking-wider uppercase">{lang==='es'?'Sincronizando feed...':'Syncing feed...'}</p>
                 </div>
               ) : (
                 <>

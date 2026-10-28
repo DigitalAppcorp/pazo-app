@@ -120,6 +120,7 @@ try{
    await page.getByRole('button',{name:lang==='es'?'Crear perfil y entrar':'Create profile and enter',exact:true}).click()
    const hint=page.getByRole('region',{name:lang==='es'?'Para empezar':'To get started'})
    await hint.waitFor();assert.equal(feedPending,true)
+   await page.getByText(lang==='es'?'Sincronizando feed...':'Syncing feed...',{exact:true}).waitFor()
    assert.equal(sql(`SELECT count(*) FROM public.pets WHERE id='${pet}' AND owner_id='${owner}'`),'1')
    await page.screenshot({path:path.join(out,`${lang}-${width}-first-use.png`)})
    if(width!==320)assert.ok((await hint.innerText()).includes(lang==='es'?'Abre el pasaporte':'Open Luna'))
