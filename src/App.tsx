@@ -6,7 +6,9 @@ import { createRequestScope } from './lib/requestScope'
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import { stageMarketingLanding } from './features/marketing/marketingRuntime'
+import { stageMarketingLanding, takeVerifiedFirstUseIntent } from './features/marketing/marketingRuntime'
+import { FirstUsePrompt } from './features/onboarding/FirstUsePrompt'
+import { shouldOfferFirstUse, isCurrentFirstUse, type FirstUseHint } from './features/onboarding/firstUse'
 import { pazoBuildVersion } from './features/release/buildVersion'
 import { applyDocumentLanguage, getInitialLanguage, rememberLanguage, type PazoLanguage } from './features/i18n/languagePreference'
 import { PasswordRecoveryView } from './features/auth/PasswordRecoveryView'
@@ -232,6 +234,7 @@ function PazoMain() {
   const [feedError, setFeedError] = useState<'initial' | 'more' | null>(null)
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
+  const [firstUseHint, setFirstUseHint] = useState<FirstUseHint|null>(null)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
   const [accountRequests] = useState(createRequestScope)
   const [petRequests] = useState(createRequestScope)
@@ -837,6 +840,7 @@ function PazoMain() {
       const userId = user.id
       const initApp = async () => {
         setPetBootstrap({ userId, status: 'loading' })
+        setFirstUseHint(null)
         setIsFeedLoading(true)
         setPosts([])
         setProfilePosts([])
@@ -2010,7 +2014,7 @@ function PazoMain() {
   return (
     <div className="h-[100dvh] min-h-0 bg-[#EFECE4] text-[#204E4A] flex items-center justify-center p-0 sm:h-auto sm:min-h-screen sm:p-5 selection:bg-[#E1E53F] selection:text-[#204E4A]">
       <div data-pazo-app-shell className="w-full sm:max-w-[430px] h-full min-h-0 sm:h-[860px] bg-[#FAF8F5] sm:border sm:border-[#204E4A]/10 sm:rounded-[2.8rem] flex flex-col shadow-[0_20px_60px_-15px_rgba(32,78,74,0.18)] overflow-hidden relative transition-all duration-300">
-        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
+        <SupporterInvitationCoordinator lang={lang} safe={Boolean(user&&canUseAccount&&!isOnboardingActive&&petBootstrap?.status==='ready'&&!firstUseHint&&activeTab==='inicio'&&!isFeedLoading&&!feedError&&!pets.some(p=>p.isLost)&&!selectedPublicProfileId&&!isSearchOpen&&!isCreateMenuOpen&&!isCreatePostOpen&&!isAddPetOpen&&!isPassportOpen&&!isCareOpen&&!isDocumentsOpen&&!isAlertOpen&&!isMessagesOpen&&!isNotificationsOpen&&!selectedSightingId)}/>
 
         {/* Pantalla exclusiva de perfil público global (flota sobre todo el contenedor) */}
         {selectedPublicProfileId && (
@@ -2072,6 +2076,8 @@ function PazoMain() {
               }}
               onQuickDemo={enterDemo}
               onComplete={(newPet) => {
+                if (shouldOfferFirstUse(ownedPetIdsRef.current,user?.id,newPet.id,isDemoUser)&&user?.id)
+                  setFirstUseHint({ownerId:user.id,petId:newPet.id,intent:takeVerifiedFirstUseIntent(user.id)})
                 ownedPetIdsRef.current = [newPet.id]
                 setPets([newPet])
                 retirePetRequests()
@@ -2309,6 +2315,12 @@ function PazoMain() {
                 }
               }}
             >
+              {activeTab==='inicio'&&isCurrentFirstUse(firstUseHint,user?.id,currentPet.id)&&firstUseHint&&(
+                <FirstUsePrompt petName={currentPet.name} intent={firstUseHint.intent} lang={lang}
+                  onQr={()=>{setFirstUseHint(null);setActiveTab('mascota');openAccountAction(()=>setIsPassportOpen(true))}}
+                  onCare={()=>{setFirstUseHint(null);setActiveTab('mascota');openAccountAction(()=>setIsCareOpen(true))}}
+                  onExplore={()=>setFirstUseHint(null)}/>
+              )}
               {activeTab === 'inicio' && isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
@@ -2335,6 +2347,7 @@ function PazoMain() {
                         </section>
                       ) : (
                       <HomeView
+                        onOpenPetTools={()=>setActiveTab('mascota')}
                         posts={posts}
                         canReport={Boolean(user?.id) && !isDemoUser}
                         onLikePost={handleLikePost}

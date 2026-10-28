@@ -1424,7 +1424,9 @@ test('F17 mobile regression: dynamic viewport, discreet install, street basemap 
   assert.ok(map.includes('attributionControl: true'),'Mapbox must render provider attribution')
   for(const path of ['CareModal','PassportModal','CreateModal']){
     const ui=read('src/components/modals/'+path+'.tsx')
-    assert.ok(ui.includes('grid-cols-[32px_minmax(0,1fr)_32px]'),path+' title must be geometrically centered')
+    const target=path==='CreateModal'?32:44
+    assert.ok(ui.includes(`grid-cols-[${target}px_minmax(0,1fr)_${target}px]`),path+' title must be geometrically centered with symmetric action columns')
+    if(target===44)assert.ok(ui.includes('w-11 h-11'),'QR/Agenda close target remains at least44px')
   }
   assert.ok(!read('src/components/views/CommunitiesView.tsx').includes('Únete, comparte y participa con otras mascotas de PAZO.'))
   assert.ok(!read('src/components/modals/MessagesModal.tsx').includes("PAZO · {lang === 'es'"))

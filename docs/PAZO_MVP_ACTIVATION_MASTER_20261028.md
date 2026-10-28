@@ -135,3 +135,8 @@ Diseño y redacción por **Design Intelligence OS** con evidencia de flujos real
 ---
 
 **Cierre documental:** se conserva el consenso con distinción entre diagnóstico, implementación probada localmente, integración y producción. Próximo paso NO automático: decisión del PO sobre PR 1A. Cualquier nueva autorización deberá registrarse de forma trazable y específica.
+
+## Issue142 — avance verificado posterior al snapshot
+
+PR1B #143 integrado en913491839ff0b2a9b46f3696af587b5f13971aed tras seis workflows completos SUCCESS. PR2 implementado y probado ES/EN320/390/430: [decisión Design OS y evidencia](PAZO_CONTEXTUAL_FIRST_USE_PR2_20261028.md). Publicación final pendiente del paquete integral/PO; producción8dbf intacta y SQLnuevoOFF sin instalar. Historial inferior conservado.
+

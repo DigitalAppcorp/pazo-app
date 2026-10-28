@@ -1,4 +1,4 @@
-import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake, parsePazoCampaign } from './attribution'
+import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake, parsePazoCampaign, MARKETING_ATTRIBUTION_TTL_MS } from './attribution'
 import { shouldSendLandingSignal } from './landingSignal'
 import { requestLandingChallenge } from './landingChallenge'
 import { supabase } from '../../services/supabaseClient'
@@ -78,7 +78,16 @@ export function stageMarketingFirstPetCreated(): void {
  * browser body contains only vetted UTM identifiers and first-touch timestamp.
  */
 let submitting=false
+let attributionGeneration=0
+let verifiedFirstUseIntent: {ownerId:string;intent:'qr'|'neutral';expiresAt:number}|null=null
+/** Consume only a server-accepted campaign receipt, never a raw URL guess. */
+export function takeVerifiedFirstUseIntent(ownerId:string):'qr'|'neutral' {
+  const receipt=verifiedFirstUseIntent
+  verifiedFirstUseIntent=null
+  return receipt?.ownerId===ownerId&&receipt.expiresAt>=Date.now()?receipt.intent:'neutral'
+}
 export async function submitAutomaticMarketingAttribution(ownerId?: string, accessToken?: string): Promise<void> {
+  const generation=attributionGeneration
   if (!PAZO_MARKETING_COLLECTION_ENABLED) return
   if (!ownerId || !accessToken) return
   if (submitting) return
@@ -94,8 +103,12 @@ export async function submitAutomaticMarketingAttribution(ownerId?: string, acce
     const {data,error} = await supabase.functions.invoke('pazo-marketing-attribution', {
       headers: { Authorization: `Bearer ${accessToken}` }, body:payload,
     })
-    if (!error && data?.status === 'accepted' && instance.read()?.signupOwnerId === ownerId
-      && JSON.stringify(prepareAutomaticCampaignIntake(instance.read()))===JSON.stringify(payload)) instance.clear()
+    if (generation===attributionGeneration && !error && data?.status === 'accepted' && instance.read()?.signupOwnerId === ownerId
+      && JSON.stringify(prepareAutomaticCampaignIntake(instance.read()))===JSON.stringify(payload)) {
+      verifiedFirstUseIntent={ownerId,intent:payload.utm_content.startsWith('qr_')?'qr':'neutral',
+        expiresAt:Date.parse(payload.first_touch_at)+MARKETING_ATTRIBUTION_TTL_MS}
+      instance.clear()
+    }
   } catch {
     // A marketing failure never interrupts Auth or signup UX.
   } finally {submitting=false}
@@ -103,5 +116,7 @@ export async function submitAutomaticMarketingAttribution(ownerId?: string, acce
 
 /** Remove only local campaign staging for logout/withdrawal; no remote writes. */
 export function clearLocalMarketingAttribution(): void {
+  attributionGeneration++
+  verifiedFirstUseIntent=null
   recorder()?.clear()
 }

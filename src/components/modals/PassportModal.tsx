@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import qrcode from 'qrcode-generator'
 import {recordVerifiedQrUse} from '../../features/supporter/public/recordVerifiedQrUse'
 import { recordFirstUtility } from '../../features/marketing/firstUtility'
+import { useModalFocus } from '../../lib/useModalFocus'
 import type { Pet } from '../../types/pazo'
 import {
   buildPublicRescueUrl,
@@ -59,6 +60,7 @@ const PazoQr = ({ value, title }: { value: string; title: string }) => {
 }
 
 export const PassportModal = ({ isOpen, onClose, pet, lang, ownerId }: PassportModalProps) => {
+  const dialogRef = useModalFocus(isOpen,onClose)
   const [verifiedContext, setVerifiedContext] = useState<{petId:string;ownerId?:string}|null>(null)
   const [publicUrl, setPublicUrl] = useState('')
   const [publicToken, setPublicToken] = useState('')
@@ -182,22 +184,27 @@ export const PassportModal = ({ isOpen, onClose, pet, lang, ownerId }: PassportM
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-slide-up">
-      <div className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-        <div className="grid grid-cols-[32px_minmax(0,1fr)_32px] items-center gap-2 pb-2">
-          <span aria-hidden="true" className="h-8 w-8" />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="pazo-passport-title" tabIndex={-1} className="w-full max-w-sm pazo-glass-modal rounded-[2.8rem] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-2 pb-2">
+          <span aria-hidden="true" className="h-11 w-11" />
           <div className="min-w-0 text-center">
-            <h3 className="mt-1 text-center text-xl font-black leading-snug text-[#204E4A]">
+            <h3 id="pazo-passport-title" className="mt-1 text-center text-xl font-black leading-snug text-[#204E4A]">
               {lang === 'es' ? `Pasaporte de ${pet.name}` : `${pet.name}'s Passport`}
             </h3>
           </div>
           <button
+            type="button"
+            aria-label={lang==='es'?'Cerrar':'Close'}
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FAF8F5] text-[#5C7470] hover:text-[#204E4A] flex items-center justify-center font-bold text-sm cursor-pointer shadow-xs"
+            className="w-11 h-11 rounded-full bg-[#FAF8F5] text-[#5C7470] focus-visible:bg-[#E1E53F] hover:text-[#204E4A] flex items-center justify-center font-bold text-sm cursor-pointer shadow-xs"
           >
             <IconClose size={15} />
           </button>
         </div>
 
+        <p className="text-[14px] leading-relaxed text-[#5C7470]">{lang==='es'
+          ?'Quien tenga el QR o el enlace puede ver su ficha pública. No rastrea por GPS ni garantiza un rescate.'
+          :'Anyone with the QR or link can view the public profile. It does not track GPS or guarantee rescue.'}</p>
         <div className="p-6 bg-[#FAF8F5] rounded-[2.2rem] text-center space-y-4 shadow-xs">
           <div
             ref={qrContainerRef}
