@@ -7,6 +7,7 @@ import ts from 'typescript'
 import React from 'react'
 import {create,act} from 'react-test-renderer'
 globalThis.IS_REACT_ACT_ENVIRONMENT=true
+fs.mkdirSync(path.resolve('node_modules/.cache'),{recursive:true})
 let response,reads=[],root
 const metrics=['verified_registrations','first_pet_accounts','matured_first_pet_accounts','first_utility_accounts','qr_visible_accounts','qr_download_initiated_accounts','qr_share_confirmed_accounts','care_created_accounts','d7_matured_accounts','d7_return_accounts']
 globalThis.__UTILITY_PANEL__={utilityMetrics:metrics,firstUtilitySummary:days=>{reads.push(days);return response(days)}}

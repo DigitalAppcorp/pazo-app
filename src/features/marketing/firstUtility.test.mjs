@@ -4,6 +4,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {pathToFileURL} from 'node:url'
 import ts from 'typescript'
+import {createHash} from 'node:crypto'
+fs.mkdirSync(path.resolve('node_modules/.cache'),{recursive:true})
 const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/first-utility-'))
 const calls=[]
 let session={user:{id:'owner'},access_token:'pinned-synthetic'},response={data:true,error:null},sessionRead,reply
@@ -11,6 +13,12 @@ globalThis.__UTILITY_DB__={auth:{getSession:()=>sessionRead?sessionRead():Promis
 let source=fs.readFileSync('src/features/marketing/firstUtility.ts','utf8').replace(/import \{ supabase \} from '[^']+'/,'const supabase=globalThis.__UTILITY_DB__')
 const f=path.join(cache,'utility.mjs');fs.writeFileSync(f,ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText)
 const {recordFirstUtility,parseUtilitySummary,utilityMetrics}=await import(pathToFileURL(f).href)
+test('new SQL is explicitly pending with an immutable canonical source digest',()=>{
+ const manifest=JSON.parse(fs.readFileSync('docs/evidence/marketing-e2e-20261026/prepared-migrations.json','utf8'))
+ const row=manifest.pendingRecords.find(r=>r.version==='20261028075145')
+ assert.equal(row.status,'PREPARED_NOT_APPLIED');assert.equal(row.productionPushAllowed,false)
+ assert.equal(createHash('sha256').update(fs.readFileSync(row.path,'utf8').replace(/\r\n/g,'\n')).digest('hex'),row.sha256)
+})
 test.beforeEach(()=>{calls.length=0;session={user:{id:'owner'},access_token:'pinned-synthetic'};response={data:true,error:null};sessionRead=null;reply=null})
 test.after(()=>{delete globalThis.__UTILITY_DB__;fs.rmSync(cache,{recursive:true,force:true})})
 test('QR sends only enum/pet with pinned authorization and no UTM/content',async()=>{

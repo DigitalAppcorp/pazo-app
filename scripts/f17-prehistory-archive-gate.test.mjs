@@ -9,7 +9,7 @@ const active=new URL('supabase/migrations/',root)
 const prepared=JSON.parse(readFileSync(new URL('docs/review/f18/NOT_APPLIED_MIGRATIONS.json',root),'utf8'))
 const additional=prepared.additionalInstalledVersions??[]
 const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-20261026/prepared-migrations.json',import.meta.url),'utf8'))
-const pendingMarketing=marketing.records.map(r=>r.version)
+const pendingMarketing=[...marketing.records,...(marketing.pendingRecords??[])].map(r=>r.version)
 function sha(buffer) {
  const prefix=Buffer.concat([Buffer.from('blob '+buffer.length),Buffer.from([0])])
  return createHash('sha1').update(prefix).update(buffer).digest('hex')
@@ -46,13 +46,22 @@ test('archive is deliberately non-deployable and remains fenced',()=>{
 test('reviewed marketing source bytes match their explicitly recorded targeted API installations',()=>{
  assert.equal(marketing.status,'HOSTED_TARGETED_MAPPED')
  assert.equal(marketing.productionPushAllowed,false)
- assert.deepEqual(pendingMarketing,['20261024020632','20261024034549','20261026233828','20261026234503','20261027000301'])
+ assert.deepEqual(marketing.records.map(r=>r.version),['20261024020632','20261024034549','20261026233828','20261026234503','20261027000301'])
  for(const r of marketing.records){
   assert.match(r.path,new RegExp('^supabase/migrations/'+r.version+'_pazo_marketing_[a-z_]+[.]sql$'))
   assert.equal(createHash('sha256').update(readFileSync(new URL(r.path,root))).digest('hex'),r.sha256)
   assert.match(r.hostedVersion,/^\d{14}$/)
   assert.ok(['','\r\n'].includes(r.transportSuffix))
   assert.equal(createHash('md5').update(Buffer.concat([readFileSync(new URL(r.path,root)),Buffer.from(r.transportSuffix)])).digest('hex'),r.hostedStatementMd5)
+ }
+})
+
+test('first-utility candidate is explicitly pending, not an asserted hosted installation',()=>{
+ assert.deepEqual(marketing.pendingRecords.map(r=>r.version),['20261028075145'])
+ for(const r of marketing.pendingRecords){
+  assert.equal(r.status,'PREPARED_NOT_APPLIED');assert.equal(r.productionPushAllowed,false)
+  assert.equal(r.hostedVersion,undefined)
+  assert.equal(createHash('sha256').update(readFileSync(new URL(r.path,root),'utf8').replace(/\r\n/g,'\n')).digest('hex'),r.sha256)
  }
 })
 
