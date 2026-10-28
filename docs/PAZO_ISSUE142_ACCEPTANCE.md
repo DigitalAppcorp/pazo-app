@@ -27,9 +27,9 @@ Design OS v0.6.0 canónico verificado (`knowledge/ui-ux-frontend/SKILL.md`, blob
 
 Implementación autorizada por issue142; aceptación visual del PO queda pendiente para el paquete final. No atribuir aprobación visual automática al análisis o al CI. Comparar fuente/runtime ES/EN a320/390/430, foco/teclado, red lenta/offline, errores/reintentos y A→B→A/sesiones. No rediseño general.
 
-## Matriz de cierre (en ejecución)
+## Matriz de cierre
 
 - A: comprobar merge1A, preview de SHA exacto, navegación y recuperación alojadas. Separar frontend alojado de servicios sintéticos.
 - B: catálogo/denominadores/privacidad, SQL mínimo y pruebas PG17 de RLS/ACL/QA/idempotencia/retención/supresión/concurrencia; UI/API y cuidado realmente persistido en laboratorio seguro.
 - C: orientación contextual y claridad, Design OS, capturas e interacción ES/EN móvil y regresiones de funciones protegidas.
-- Final: PR1B y PR2 separados, CI exacto, candidato alojado para revisión, estado de producción/rollback y GO/NO GO documentado. Sin lanzamiento final.
+- Final: PR1B y PR2 separados, CI exacto, candidato alojado para revisión, estado de producción/rollback y GO/NO GO documentado. Sin lanzamiento final. [Matriz cerrada, evidencias y paquete de decisión del PO](PAZO_ISSUE142_FINAL_REPORT_20261028.md).
