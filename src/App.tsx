@@ -2,7 +2,8 @@ import {isSupporterNotification} from './features/notifications/supporterNotific
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
-import { useState, useEffect, useRef } from 'react'
+import { createRequestScope } from './lib/requestScope'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { wasAuthorDeleted } from './features/account/deletedAuthorThread'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { stageMarketingLanding } from './features/marketing/marketingRuntime'
@@ -232,6 +233,8 @@ function PazoMain() {
 
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS)
   const [currentPet, setCurrentPet] = useState<Pet>(INITIAL_PETS[0])
+  const [accountRequests] = useState(createRequestScope)
+  const [petRequests] = useState(createRequestScope)
   const activePetIdRef = useRef(INITIAL_PETS[0].id)
   const [posts, setPosts] = useState<Post[]>([])
   const [profilePosts, setProfilePosts] = useState<Post[]>([])
@@ -281,6 +284,38 @@ function PazoMain() {
   const [latestUnreadLostPetSighting, setLatestUnreadLostPetSighting] = useState<PazoNotification | null>(null)
   const notificationOffsetRef = useRef(0)
   const notificationLoadInFlightRef = useRef(false)
+
+  // Auth identity changes retire every outstanding read, including A -> B -> A.
+  // A token refresh for MFA keeps the same lifetime and mounted screens.
+  useLayoutEffect(() => {
+    accountRequests.invalidate()
+    petRequests.invalidate()
+    ++feedLoadVersionRef.current
+    ++careLoadVersionRef.current
+    ++documentLoadVersionRef.current
+    ownedPetIdsRef.current = []
+    notificationOffsetRef.current = 0
+    notificationLoadInFlightRef.current = false
+    return () => { accountRequests.invalidate(); petRequests.invalidate() }
+  }, [user?.id, loading, accountRequests, petRequests])
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        accountRequests.invalidate()
+        petRequests.invalidate()
+        ++feedLoadVersionRef.current
+        ++careLoadVersionRef.current
+        ++documentLoadVersionRef.current
+        notificationLoadInFlightRef.current = false
+        notificationOffsetRef.current = 0
+        // React may batch sign-out/sign-in to the same ID into one render.
+        // The new session must bootstrap even when that ID never changes.
+        setPetBootstrapRetry((value) => value + 1)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [accountRequests, petRequests])
 
   const [activeTab, setActiveTab] = useState<NavTab>('inicio')
 
@@ -335,6 +370,7 @@ function PazoMain() {
     const demoPets = createDemoPets()
     setPets(demoPets)
     setCurrentPet(demoPets[0])
+    retirePetRequests()
     activePetIdRef.current = demoPets[0].id
     setPosts(createDemoPosts())
     setProfilePosts(createDemoPosts().filter((post) => post.petId === demoPets[0].id))
@@ -452,11 +488,18 @@ function PazoMain() {
   })
 
   const loadFeedPageForPet = async (pet: Pet, reset: boolean) => {
+    const isCurrent = petRequests.capture('feed', reset)
+
     const loadVersion = reset
       ? ++feedLoadVersionRef.current
       : feedLoadVersionRef.current
 
     if (reset) {
+      feedLoadMoreInFlightRef.current = false
+      likingPostIdsRef.current.clear()
+      savingPostIdsRef.current.clear()
+      commentingPostIdsRef.current.clear()
+      setIsFeedLoadingMore(false)
       setIsFeedLoading(true)
       setHasMoreFeed(true)
       setFeedError(null)
@@ -480,6 +523,7 @@ function PazoMain() {
           .from('follows')
           .select('following_id')
           .eq('follower_id', pet.id)
+        if (!isCurrent()) return
 
         if (followsError) throw followsError
 
@@ -511,6 +555,7 @@ function PazoMain() {
             pagination.socialOffset,
             pagination.socialOffset + FEED_PAGE_SIZE - 1
           )
+        if (!isCurrent()) return
 
         if (error) {
           throw error
@@ -529,6 +574,7 @@ function PazoMain() {
             p_offset: pagination.recommendationOffset,
           }
         )
+        if (!isCurrent()) return
 
         if (error) {
           throw error
@@ -564,6 +610,8 @@ function PazoMain() {
           ?attachVerifiedFeedBadges(page,async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
           :Promise.resolve(page),
       ])
+      if (!isCurrent()) return
+
       const enrichedPage=interactionsPage.map((post,index)=>({
         ...post,supporterBadge:badgedPage[index].supporterBadge,
       }))
@@ -588,6 +636,8 @@ function PazoMain() {
         !(nextPagination.socialExhausted && nextPagination.recommendationExhausted)
       )
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error(`Error loading feed page for pet ${pet.id}:`, error)
 
       if (feedLoadVersionRef.current === loadVersion) {
@@ -596,8 +646,10 @@ function PazoMain() {
         setFeedError(reset ? 'initial' : 'more')
       }
     } finally {
-      if (reset && feedLoadVersionRef.current === loadVersion) {
-        setIsFeedLoading(false)
+      if (isCurrent()) {
+        if (reset && feedLoadVersionRef.current === loadVersion) {
+          setIsFeedLoading(false)
+        }
       }
     }
   }
@@ -670,6 +722,8 @@ function PazoMain() {
   },[badgePetSignature,activeTab,currentPet.id,isDemoUser])
 
   const loadMoreFeed = async () => {
+    const isCurrent = petRequests.capture('feed', false)
+
     if (isDemoUser) return
     if (
       feedLoadMoreInFlightRef.current
@@ -685,13 +739,19 @@ function PazoMain() {
 
     try {
       await loadFeedPageForPet(currentPet, false)
+      if (!isCurrent()) return
+
     } finally {
-      feedLoadMoreInFlightRef.current = false
-      setIsFeedLoadingMore(false)
+      if (isCurrent()) {
+        feedLoadMoreInFlightRef.current = false
+        setIsFeedLoadingMore(false)
+      }
     }
   }
 
   const loadProfilePostsForPet = async (petId: string) => {
+    const isCurrent = petRequests.capture('profile', true)
+
     try {
       const { data, error } = await supabase
         .from('posts')
@@ -699,12 +759,15 @@ function PazoMain() {
         .eq('pet_id', petId)
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
+      if (!isCurrent()) return
 
       if (error) throw error
 
       if (activePetIdRef.current !== petId) return
       setProfilePosts((data || []).map((post) => formatPostRow(post, false)))
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading pet profile posts:', error)
     }
   }
@@ -718,7 +781,24 @@ function PazoMain() {
     if (user?.id) void loadProfilePostsForPet(currentPet.id)
   }, [activeTab, currentPet?.id, isDemoUser, user?.id])
 
+  const retirePetRequests = () => {
+    petRequests.invalidate()
+    ++feedLoadVersionRef.current
+    ++careLoadVersionRef.current
+    ++documentLoadVersionRef.current
+    feedLoadMoreInFlightRef.current = false
+    careHistoryLoadInFlightRef.current = false
+    documentLoadMoreInFlightRef.current = false
+    setIsFeedLoadingMore(false)
+    setIsCareHistoryLoading(false)
+    setIsDocumentsLoadingMore(false)
+    likingPostIdsRef.current.clear()
+    savingPostIdsRef.current.clear()
+    commentingPostIdsRef.current.clear()
+  }
+
   const selectActivePet = (pet: Pet) => {
+    retirePetRequests()
     if (isDemoUser) {
       activePetIdRef.current = pet.id
       setCurrentPet(pet)
@@ -751,26 +831,38 @@ function PazoMain() {
 
   useEffect(() => {
     let cancelled = false
+    const isCurrent = accountRequests.capture()
 
     if (!loading && user) {
       const userId = user.id
       const initApp = async () => {
         setPetBootstrap({ userId, status: 'loading' })
         setIsFeedLoading(true)
+        setPosts([])
+        setProfilePosts([])
+        setCareItems([])
+        setCareHistory([])
+        setCareReminderItems([])
+        setDocuments([])
+        setDocumentCount(0)
+        setNotifications([])
+        setUnreadNotificationCount(0)
+        setLatestUnreadLostPetSighting(null)
+        setIsNotificationsLoadingMore(false)
 
         let ownedPets: Pet[] = []
         try {
           ownedPets = await fetchOwnedPets(userId)
         } catch (petError) {
           console.error('Error fetching pet profiles:', petError)
-          if (!cancelled) {
+          if (!cancelled && isCurrent()) {
             setPetBootstrap({ userId, status: 'error' })
             setIsFeedLoading(false)
           }
           return
         }
 
-        if (cancelled) return
+        if (cancelled || !isCurrent()) return
 
         if (ownedPets.length > 0) {
           setIsOnboardingActive(false)
@@ -782,22 +874,17 @@ function PazoMain() {
             ownedPets.find((pet) => pet.id === storedActivePetId)
             || ownedPets[0]
 
+          retirePetRequests()
           activePetIdRef.current = activePet.id
           setCurrentPet(activePet)
           localStorage.setItem(`active_pet_${userId}`, activePet.id)
 
-          try {
-            await Promise.all([
-              loadFeedForPet(activePet),
-              loadCareForPet(activePet.id),
-              loadDocumentsForPet(activePet.id),
-              refreshCareReminders(ownedPets),
-            ])
-          } catch (initialDataError) {
-            // Pet identity is already confirmed. Secondary data failures
-            // should not send the user back to account creation.
-            console.error('Error loading initial pet data:', initialDataError)
-          }
+          // Identity is verified; secondary services own their failures/retries.
+          setPetBootstrap({ userId, status: 'ready' })
+          void loadFeedForPet(activePet)
+          void loadCareForPet(activePet.id)
+          void loadDocumentsForPet(activePet.id)
+          void refreshCareReminders(ownedPets)
         } else {
           ownedPetIdsRef.current = []
           setPets([])
@@ -807,7 +894,7 @@ function PazoMain() {
           setIsFeedLoading(false)
         }
 
-        if (!cancelled) setPetBootstrap({ userId, status: 'ready' })
+        if (!cancelled && isCurrent()) setPetBootstrap({ userId, status: 'ready' })
       }
 
       void initApp()
@@ -887,6 +974,8 @@ function PazoMain() {
   }
 
   const handleLikePost = async (postId: string) => {
+    const isCurrent = petRequests.capture('feed')
+
     if (isDemoUser) { setPosts((previous) => toggleDemoLike(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
@@ -919,9 +1008,12 @@ function PazoMain() {
         p_target_id: postId,
         p_action_type: actionType,
       })
+      if (!isCurrent()) return
 
       if (error) throw error
     } catch (err) {
+      if (!isCurrent()) return
+
       console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
       if (activePetIdRef.current === actorPetId) {
         setPosts((prevPosts) =>
@@ -933,11 +1025,15 @@ function PazoMain() {
         )
       }
     } finally {
-      likingPostIdsRef.current.delete(operationKey)
+      if (isCurrent()) {
+        likingPostIdsRef.current.delete(operationKey)
+      }
     }
   }
 
   const handleSavePost = async (postId: string) => {
+    const isCurrent = petRequests.capture('feed')
+
     if (isDemoUser) { setPosts((previous) => toggleDemoSave(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
@@ -968,9 +1064,12 @@ function PazoMain() {
         p_target_id: postId,
         p_action_type: actionType,
       })
+      if (!isCurrent()) return
 
       if (error) throw error
     } catch (err) {
+      if (!isCurrent()) return
+
       console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
       if (activePetIdRef.current === actorPetId) {
         setPosts((prevPosts) =>
@@ -982,11 +1081,15 @@ function PazoMain() {
         )
       }
     } finally {
-      savingPostIdsRef.current.delete(operationKey)
+      if (isCurrent()) {
+        savingPostIdsRef.current.delete(operationKey)
+      }
     }
   }
 
   const loadCommentsForPost = async (postId: string): Promise<boolean> => {
+    const isCurrent = petRequests.capture('feed')
+
     if (isDemoUser) return posts.some((post) => post.id === postId)
     const targetPost = posts.find((post) => post.id === postId)
     if (!targetPost) return false
@@ -1009,6 +1112,7 @@ function PazoMain() {
         `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
+      if (!isCurrent()) return false
 
       if (error) throw error
 
@@ -1034,8 +1138,14 @@ function PazoMain() {
         try{
           loadedComments=await attachVerifiedCommentBadges(rawComments,
             async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+          if (!isCurrent()) return false
+
           await preloadVerifiedFeedBadgeArt(loadedComments)
+          if (!isCurrent()) return false
+
         }catch(error){
+          if (!isCurrent()) return false
+
           // Badge verification may fail, but reading comments must remain free.
           // A missing proof never produces a synthetic paid badge.
           console.error('PAZO comments badge evidence unavailable:',error)
@@ -1058,12 +1168,16 @@ function PazoMain() {
 
       return true
     } catch (err) {
+      if (!isCurrent()) return false
+
       console.error(`Error cargando comentarios del post ${postId}:`, err)
       return false
     }
   }
 
   const handleAddComment = async (postId: string, text: string): Promise<boolean> => {
+    const isCurrent = petRequests.capture('feed')
+
     if (isDemoUser) {
       const body = text.trim()
       if (!body || !posts.some((post) => post.id === postId)) return false
@@ -1102,9 +1216,15 @@ function PazoMain() {
         const verified=await attachVerifiedCommentBadges(
           [{authorPetId:actorPet.id,supporterBadge:undefined}],
           async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        if (!isCurrent()) return false
+
         await preloadVerifiedFeedBadgeArt(verified)
+        if (!isCurrent()) return false
+
         authorCommentBadge=verified[0].supporterBadge
       }catch(error){
+        if (!isCurrent()) return false
+
         // The optional badge cannot break a free commenting workflow.
         // Keep it absent until verification works; never claim paid membership.
         console.error('PAZO comment badge verification unavailable:',error)
@@ -1151,6 +1271,7 @@ function PazoMain() {
         })
         .select('id, created_at')
         .single()
+      if (!isCurrent()) return false
 
       if (error) throw error
 
@@ -1177,6 +1298,8 @@ function PazoMain() {
 
       return true
     } catch (err) {
+      if (!isCurrent()) return false
+
       console.error(`Error creando comentario en el post ${postId}:`, err)
       if (activePetIdRef.current === actorPet.id) {
         setPosts((prevPosts) =>
@@ -1194,11 +1317,15 @@ function PazoMain() {
       }
       return false
     } finally {
-      commentingPostIdsRef.current.delete(operationKey)
+      if (isCurrent()) {
+        commentingPostIdsRef.current.delete(operationKey)
+      }
     }
   }
 
   const handlePostCreated = async (newPost:Post) => {
+    const isCurrent = petRequests.capture('feed')
+
     const petAtCreation=currentPet.id
     const versionAtCreation=feedLoadVersionRef.current
     // Newly created posts also arrive with their verified author badge.
@@ -1208,9 +1335,15 @@ function PazoMain() {
       try{
         const resolved=await attachVerifiedFeedBadges([newPost],
           async ids=>await supabase.rpc('pazo_supporter_public_badges_batch',{p_pet_ids:ids}))
+        if (!isCurrent()) return
+
         await preloadVerifiedFeedBadgeArt(resolved)
+        if (!isCurrent()) return
+
         publishedPost=resolved[0]
       }catch(error){
+        if (!isCurrent()) return
+
         console.error('PAZO badge verification unavailable for newly created post:',error)
         setIsCreatePostOpen(false)
         setActiveTab('inicio')
@@ -1232,17 +1365,27 @@ function PazoMain() {
   }
 
   const refreshCareReminders = async (petsToCheck: Pet[] = pets) => {
+    const isCurrent = accountRequests.capture('reminders', true)
+
     try {
       const candidates = await fetchCareReminderCandidates(
         petsToCheck.map((pet) => pet.id)
       )
+      if (!isCurrent()) return
+
       setCareReminderItems(candidates.filter(isCareReminderRelevant))
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading Agenda reminders:', error)
     }
   }
 
   const loadCareForPet = async (petId: string) => {
+    const isCurrent = petRequests.capture('care', true)
+
+    careHistoryLoadInFlightRef.current = false
+    setIsCareHistoryLoading(false)
     const loadVersion = ++careLoadVersionRef.current
     setIsCareLoading(true)
     setCareError('')
@@ -1254,6 +1397,7 @@ function PazoMain() {
         fetchActiveCareItems(petId),
         fetchCareHistory(petId, 0, CARE_HISTORY_PAGE_SIZE),
       ])
+      if (!isCurrent()) return
 
       if (
         loadVersion !== careLoadVersionRef.current
@@ -1267,6 +1411,8 @@ function PazoMain() {
       careHistoryOffsetRef.current = history.length
       setHasMoreCareHistory(history.length === CARE_HISTORY_PAGE_SIZE)
     } catch (error: any) {
+      if (!isCurrent()) return
+
       console.error('Error loading Agenda:', error)
 
       if (
@@ -1278,15 +1424,20 @@ function PazoMain() {
         setCareError(error?.message || 'Agenda unavailable')
       }
     } finally {
-      if (loadVersion === careLoadVersionRef.current) {
-        setIsCareLoading(false)
+      if (isCurrent()) {
+        if (loadVersion === careLoadVersionRef.current) {
+          setIsCareLoading(false)
+        }
       }
     }
   }
 
   const loadMoreCareHistory = async () => {
+    const isCurrent = petRequests.capture('care', false)
+
     if (
       careHistoryLoadInFlightRef.current
+      || isCareLoading
       || !hasMoreCareHistory
       || !currentPet?.id
     ) {
@@ -1303,6 +1454,7 @@ function PazoMain() {
         careHistoryOffsetRef.current,
         CARE_HISTORY_PAGE_SIZE
       )
+      if (!isCurrent()) return
 
       if (activePetIdRef.current !== petId) return
 
@@ -1316,24 +1468,36 @@ function PazoMain() {
         ]
       })
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading more Agenda history:', error)
     } finally {
-      careHistoryLoadInFlightRef.current = false
-      setIsCareHistoryLoading(false)
+      if (isCurrent()) {
+        careHistoryLoadInFlightRef.current = false
+        setIsCareHistoryLoading(false)
+      }
     }
   }
 
   const refreshCareAfterMutation = async (petId: string) => {
+    const isCurrent = petRequests.capture()
+
     if (activePetIdRef.current === petId) {
       await loadCareForPet(petId)
+      if (!isCurrent()) return
+
     }
     await refreshCareReminders()
   }
 
   const handleCreateCare = async (input: CareItemInput) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await createCareItem(petId, input)
+    if (!isCurrent()) return
+
     await refreshCareAfterMutation(petId)
   }
 
@@ -1341,28 +1505,44 @@ function PazoMain() {
     careItemId: string,
     input: CareItemInput
   ) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await updateCareItem(careItemId, input)
+    if (!isCurrent()) return
+
     await refreshCareAfterMutation(petId)
   }
 
   const handleArchiveCare = async (careItemId: string) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await archiveCareItem(careItemId)
+    if (!isCurrent()) return
+
     await refreshCareAfterMutation(petId)
   }
 
   const handleCompleteCare = async (item: CareItem) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     await completeCareItem(item)
+    if (!isCurrent()) return
+
     await refreshCareAfterMutation(item.petId)
   }
 
   const handleUndoCareCompletion = async (completion: CareCompletion) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     await undoCareCompletion(completion.id)
+    if (!isCurrent()) return
+
     await refreshCareAfterMutation(completion.petId)
   }
 
@@ -1370,6 +1550,8 @@ function PazoMain() {
     if (isCareOpen && currentPet?.id) {
       void loadCareForPet(currentPet.id)
     }
+    // Loader identity changes each render; opening/changing pet owns this refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCareOpen, currentPet?.id])
 
   useEffect(() => {
@@ -1381,6 +1563,10 @@ function PazoMain() {
   }, [user?.id, isOnboardingActive, pets.length])
 
   const loadDocumentsForPet = async (petId: string) => {
+    const isCurrent = petRequests.capture('documents', true)
+
+    documentLoadMoreInFlightRef.current = false
+    setIsDocumentsLoadingMore(false)
     const loadVersion = ++documentLoadVersionRef.current
     setIsDocumentsLoading(true)
     setDocumentsError('')
@@ -1389,12 +1575,14 @@ function PazoMain() {
 
     try {
       await recoverPetDocumentOperations(petId)
+      if (!isCurrent()) return
 
       const page = await fetchPetDocumentsPage(
         petId,
         0,
         DOCUMENTS_PAGE_SIZE
       )
+      if (!isCurrent()) return
 
       if (
         loadVersion !== documentLoadVersionRef.current
@@ -1408,6 +1596,8 @@ function PazoMain() {
       documentOffsetRef.current = page.items.length
       setHasMoreDocuments(page.items.length < page.total)
     } catch (error: any) {
+      if (!isCurrent()) return
+
       console.error('Error loading private documents:', error)
 
       if (
@@ -1424,15 +1614,20 @@ function PazoMain() {
         )
       }
     } finally {
-      if (loadVersion === documentLoadVersionRef.current) {
-        setIsDocumentsLoading(false)
+      if (isCurrent()) {
+        if (loadVersion === documentLoadVersionRef.current) {
+          setIsDocumentsLoading(false)
+        }
       }
     }
   }
 
   const loadMoreDocuments = async () => {
+    const isCurrent = petRequests.capture('documents', false)
+
     if (
       documentLoadMoreInFlightRef.current
+      || isDocumentsLoading
       || !hasMoreDocuments
       || !currentPet?.id
     ) {
@@ -1449,6 +1644,7 @@ function PazoMain() {
         documentOffsetRef.current,
         DOCUMENTS_PAGE_SIZE
       )
+      if (!isCurrent()) return
 
       if (activePetIdRef.current !== petId) return
 
@@ -1463,16 +1659,24 @@ function PazoMain() {
         ]
       })
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading more private documents:', error)
     } finally {
-      documentLoadMoreInFlightRef.current = false
-      setIsDocumentsLoadingMore(false)
+      if (isCurrent()) {
+        documentLoadMoreInFlightRef.current = false
+        setIsDocumentsLoadingMore(false)
+      }
     }
   }
 
   const refreshDocumentsAfterMutation = async (petId: string) => {
+    const isCurrent = petRequests.capture()
+
     if (activePetIdRef.current === petId) {
       await loadDocumentsForPet(petId)
+      if (!isCurrent()) return
+
     }
   }
 
@@ -1481,9 +1685,13 @@ function PazoMain() {
     title: string,
     category: DocumentCategory
   ) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await uploadPetDocument(petId, file, title, category)
+    if (!isCurrent()) return
+
     await refreshDocumentsAfterMutation(petId)
   }
 
@@ -1492,15 +1700,22 @@ function PazoMain() {
     title: string,
     category: DocumentCategory
   ) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     const petId = currentPet.id
     await updatePetDocumentMetadata(documentId, title, category)
+    if (!isCurrent()) return
+
     await refreshDocumentsAfterMutation(petId)
   }
 
   const handleDeleteDocument = async (document: PetDocument) => {
+    const isCurrent = petRequests.capture()
+
     if (!canUseAccount) { requireAccount(); return }
     await deletePetDocument(document)
+    if (!isCurrent()) return
 
     if (activePetIdRef.current === document.petId) {
       setDocuments((previous) =>
@@ -1519,20 +1734,29 @@ function PazoMain() {
   }, [isDocumentsOpen, currentPet?.id])
 
   const refreshLostPetSightingReminder = async () => {
+    const isCurrent = accountRequests.capture('sighting', true)
+
     const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
 
     try {
       const latest = await fetchLatestUnreadSightingNotification(lostPetIds)
+      if (!isCurrent()) return
+
       setLatestUnreadLostPetSighting(latest)
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading latest unread lost-pet sighting:', error)
     }
   }
 
   const refreshNotifications = async () => {
+    const isCurrent = accountRequests.capture('notifications')
+
     if (!user?.id || notificationLoadInFlightRef.current) return
 
     notificationLoadInFlightRef.current = true
+    const isCurrentSighting = accountRequests.capture('sighting', true)
 
     try {
       const lostPetIds = pets.filter((pet) => pet.isLost).map((pet) => pet.id)
@@ -1541,20 +1765,27 @@ function PazoMain() {
         fetchUnreadNotificationCount(),
         fetchLatestUnreadSightingNotification(lostPetIds),
       ])
+      if (!isCurrent()) return
 
       setNotifications(latest)
       setUnreadNotificationCount(unreadCount)
-      setLatestUnreadLostPetSighting(latestLostPetSighting)
+      if (isCurrentSighting()) setLatestUnreadLostPetSighting(latestLostPetSighting)
       notificationOffsetRef.current = latest.length
       setHasMoreNotifications(latest.length === NOTIFICATIONS_PAGE_SIZE)
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading notifications:', error)
     } finally {
-      notificationLoadInFlightRef.current = false
+      if (isCurrent()) {
+        notificationLoadInFlightRef.current = false
+      }
     }
   }
 
   const loadMoreNotifications = async () => {
+    const isCurrent = accountRequests.capture('notifications', false)
+
     if (
       !user?.id
       || notificationLoadInFlightRef.current
@@ -1571,6 +1802,7 @@ function PazoMain() {
         notificationOffsetRef.current,
         NOTIFICATIONS_PAGE_SIZE
       )
+      if (!isCurrent()) return
 
       notificationOffsetRef.current += nextPage.length
       setHasMoreNotifications(nextPage.length === NOTIFICATIONS_PAGE_SIZE)
@@ -1583,10 +1815,14 @@ function PazoMain() {
         return [...previous, ...uniqueNext]
       })
     } catch (error) {
+      if (!isCurrent()) return
+
       console.error('Error loading more notifications:', error)
     } finally {
-      notificationLoadInFlightRef.current = false
-      setIsNotificationsLoadingMore(false)
+      if (isCurrent()) {
+        notificationLoadInFlightRef.current = false
+        setIsNotificationsLoadingMore(false)
+      }
     }
   }
 
@@ -1596,6 +1832,8 @@ function PazoMain() {
   }
 
   const handleOpenNotification = async (notification: PazoNotification) => {
+    const isCurrent = accountRequests.capture()
+
     const sightingId = getNotificationSightingId(notification)
     const joinedCommunityId = getNotificationCommunityId(notification)
     const supporterNotice = isSupporterNotification(notification)
@@ -1615,6 +1853,13 @@ function PazoMain() {
     if (!notification.read) {
       try {
         await markNotificationRead(notification.id)
+        if (!isCurrent()) return
+
+        accountRequests.invalidate('notifications')
+        accountRequests.invalidate('sighting')
+        notificationLoadInFlightRef.current = false
+        setIsNotificationsLoadingMore(false)
+
         setNotifications((prev) =>
           prev.map((item) =>
             item.id === notification.id ? { ...item, read: true } : item
@@ -1627,6 +1872,8 @@ function PazoMain() {
           void refreshLostPetSightingReminder()
         }
       } catch (error) {
+        if (!isCurrent()) return
+
         console.error('Error marking notification as read:', error)
       }
     }
@@ -1827,6 +2074,7 @@ function PazoMain() {
               onComplete={(newPet) => {
                 ownedPetIdsRef.current = [newPet.id]
                 setPets([newPet])
+                retirePetRequests()
                 activePetIdRef.current = newPet.id
                 setCurrentPet(newPet)
                 if (user?.id) {
@@ -2061,7 +2309,7 @@ function PazoMain() {
                 }
               }}
             >
-              {isFeedLoading ? (
+              {activeTab === 'inicio' && isFeedLoading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-3">
                   <div className="w-8 h-8 border-3 border-[#204E4A]/20 border-t-[#204E4A] rounded-full animate-spin"></div>
                   <p className="text-xs font-bold text-[#5C7470] tracking-wider uppercase">Sincronizando feed...</p>

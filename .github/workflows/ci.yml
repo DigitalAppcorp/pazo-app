@@ -543,6 +543,18 @@ jobs:
           else
             npx --no-install playwright install --with-deps chromium
           fi
+      - name: Verify independent loads and mobile navigation with local isolated services
+        env:
+          PAZO_PLAYWRIGHT_MODULE: playwright
+          PAZO_PR1A_OUTPUT: artifacts/pr1a
+        run: npm run test:pr1a:browser
+      - name: Preserve independent-load mobile evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: pr1a-mobile-${{ github.run_id }}
+          path: artifacts/pr1a/
+          retention-days: 14
       - name: Check associated email and login form labels in proposed code
         run: node --test scripts/f16-auth-field-label-contract.test.mjs
       - name: Exercise deployed production Auth and PWA in real Chromium
