@@ -21,8 +21,9 @@ import {
 import { recordPlaceUsageEvent } from '../../services/placeTelemetryService'
 import { ImmersivePlacesStage } from '../../features/places/components/ImmersivePlacesStage'
 import { SuggestPlaceModal } from '../modals/SuggestPlaceModal'
-import { PlaceFeatureExperimentCard } from '../validation/PlaceFeatureExperimentCard'
-import { IconClose } from '../icons/PazoIcons'
+import { PlacesWorkspace } from '../../features/places/components/PlacesWorkspace'
+import { localizePlaceContent } from '../../features/places/placeContent'
+import { IconCalendar } from '../icons/PazoIcons'
 import { buildPlaceDirectionsUrl } from '../../features/places/placeDirections'
 
 interface MapViewProps {
@@ -49,14 +50,6 @@ const categoryOptions: Array<{
   { value: 'grooming', es: 'Grooming', en: 'Grooming' },
   { value: 'pet_store', es: 'Tiendas', en: 'Stores' },
 ]
-
-const categoryLabel = (
-  category: PlaceCategory,
-  lang: 'es' | 'en'
-) =>
-  categoryOptions.find((item) => item.value === category)?.[
-    lang === 'es' ? 'es' : 'en'
-  ] || category
 
 const formatExpiry = (value: string, lang: 'es' | 'en') =>
   new Intl.DateTimeFormat(lang === 'es' ? 'es-US' : 'en-US', {
@@ -437,40 +430,7 @@ export const MapView = ({
           <div data-pazo-place-backdrop="true"
             className="fixed inset-0 z-[200] flex items-center justify-center bg-[#163A34]/50 px-4 py-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))] backdrop-blur-[2px]"
             onClick={(event) => { if (event.target === event.currentTarget) setSelectedPlaceId(null) }}>
-          <section
-            key={selectedPlace.id}
-            role="dialog"
-            aria-modal="true"
-            aria-label={lang === 'es' ? 'Detalle del lugar' : 'Place details'}
-            data-pazo-place-details="true"
-            className="flex w-full max-w-[430px] max-h-[min(88dvh,790px)] min-h-0 flex-col overflow-hidden rounded-[2.15rem] bg-[#FFFCF6] p-3 shadow-[0_18px_55px_rgba(15,50,42,0.22)] sm:p-4 motion-safe:animate-[slideUpFade_250ms_ease-out_both]"
-          >
-            <div data-pazo-place-fixed-header="true" className="relative z-10 flex shrink-0 items-start justify-between gap-3 rounded-2xl bg-[#FFFCF6] px-2 pb-3 pt-2">
-              <div className="min-w-0">
-                <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#5C7470]">
-                  {categoryLabel(selectedPlace.category, lang)}
-                </p>
-                <h3 className="mt-1 text-[22px] font-black text-[#204E4A]">
-                  {selectedPlace.name}
-                </h3>
-                <p className="mt-1 text-sm text-[#5C7470]">
-                  {selectedPlace.address}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedPlaceId(null)}
-                autoFocus
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FAF8F5] text-[#204E4A]"
-                aria-label={lang === 'es' ? 'Cerrar detalle' : 'Close details'}
-              >
-                <IconClose size={14} />
-              </button>
-            </div>
-
-            <div data-pazo-place-detail-scroll="true" className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-[calc(1rem+env(safe-area-inset-bottom))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+          <PlacesWorkspace key={selectedPlace.id+':'+(currentPet?.id||'guest')} place={selectedPlace} lang={lang} canParticipate={canUsePlaces} onClose={()=>setSelectedPlaceId(null)}>{({open})=><>            <div className="mt-2 flex flex-wrap items-center gap-2">
               <a
                 data-pazo-directions="true"
                 href={buildPlaceDirectionsUrl(selectedPlace,
@@ -487,6 +447,7 @@ export const MapView = ({
                 </svg>
                 {lang === 'es' ? 'Cómo llegar' : 'Directions'}
               </a>
+              {(selectedPlace.category==='park'||selectedPlace.category==='trail')&&<button type="button" className="place-route-entry" onClick={()=>open('routes')}>{lang==='es'?'Rutas y paseos':'Routes and walks'} <svg aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12 12 4M4 4h8v8"/></svg></button>}
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -509,7 +470,7 @@ export const MapView = ({
                       : 'Pets allowed'}
                   </p>
                   <p className="mt-1 text-sm font-bold text-[#204E4A]">
-                    {selectedPlace.speciesAllowed}
+                    {localizePlaceContent(selectedPlace,lang).speciesAllowed}
                   </p>
                 </div>
               )}
@@ -517,10 +478,12 @@ export const MapView = ({
 
             {selectedPlace.description && (
               <p className="mt-4 text-[15px] leading-relaxed text-[#5C7470]">
-                {selectedPlace.description}
+                {localizePlaceContent(selectedPlace,lang).description}
               </p>
             )}
 
+            <button type="button" className="place-review-entry place-context-entry" onClick={()=>open('reviews')}><span className="place-context-icon" aria-hidden="true">☆</span><span><strong>{lang==='es'?'Opiniones del lugar':'Place reviews'}</strong><small>{lang==='es'?'Experiencias de quienes vienen con su mascota':'Experiences from people visiting with their pets'}</small></span><span aria-hidden="true">›</span></button>
+            {!['park','trail'].includes(selectedPlace.category)&&<button type="button" className="place-offer-entry place-context-entry" onClick={()=>open('offers')}><span className="place-context-icon" aria-hidden="true">%</span><span><strong>{lang==='es'?'Promociones de este lugar':'Offers at this place'}</strong><small>{lang==='es'?'Un espacio para los beneficios del negocio':'A place for this business’s offers'}</small></span><span aria-hidden="true">›</span></button>}
             {selectedPlace.petRules && (
               <div className="mt-4 rounded-2xl bg-[#FAF8F5] p-3">
                 <p className="text-sm font-extrabold uppercase tracking-wider text-[#5C7470]">
@@ -529,11 +492,12 @@ export const MapView = ({
                     : 'Pet-friendly rules'}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[#204E4A]">
-                  {selectedPlace.petRules}
+                  {localizePlaceContent(selectedPlace,lang).petRules}
                 </p>
               </div>
             )}
 
+            <button type="button" className="place-event-entry place-context-entry" onClick={()=>open('events')}><IconCalendar size={22}/><span><strong>{lang==='es'?'Actividades aquí':'Activities here'}</strong><small>{lang==='es'?'Encuentros para compartir este lugar':'Meetups to enjoy this place together'}</small></span><span aria-hidden="true">›</span></button>
             <div className="mt-4 pt-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -690,118 +654,7 @@ export const MapView = ({
               )}
             </div>
 
-            {canUsePlaces && (
-              <div className="mt-5 border-t border-[#204E4A]/8 pt-4">
-                <div className="mb-3">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-[12px] font-extrabold uppercase tracking-wide text-[#5C7470]">
-                        {lang === 'es'
-                          ? 'Funciones en desarrollo'
-                          : 'Features in development'}
-                      </p>
-                      <h4 className="mt-1 text-[15px] font-black leading-snug text-[#204E4A]">
-                        {lang === 'es'
-                          ? '¿Qué te gustaría hacer aquí después?'
-                          : 'What would you like to do here next?'}
-                      </h4>
-                    </div>
-                    <span className="w-fit shrink-0 rounded-full bg-[#E1E53F]/45 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-[#204E4A]">
-                      {lang === 'es' ? 'Ayúdanos a priorizar' : 'Help us prioritize'}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[13px] leading-relaxed text-[#5C7470]">
-                    {lang === 'es'
-                      ? 'Estas funciones todavía no están activas. Marca solo las que realmente usarías en este tipo de lugar.'
-                      : 'These features are not active yet. Mark only the ones you would actually use for this type of place.'}
-                  </p>
-                </div>
-
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <PlaceFeatureExperimentCard
-                    moduleKey="places_reviews"
-                    title={
-                      lang === 'es'
-                        ? 'Reseñas y calificaciones'
-                        : 'Reviews and ratings'
-                    }
-                    description={
-                      lang === 'es'
-                        ? 'Leer experiencias de otros dueños y valorar qué tan pet-friendly es este lugar.'
-                        : 'Read other owners’ experiences and rate how pet-friendly this place is.'
-                    }
-                    source={`place_detail_${selectedPlace.category}`}
-                    lang={lang}
-                  />
-
-                  <PlaceFeatureExperimentCard
-                    moduleKey="places_favorites"
-                    title={lang === 'es' ? 'Guardar y crear listas' : 'Save and create lists'}
-                    description={
-                      lang === 'es'
-                        ? 'Guardar lugares favoritos y organizarlos para volver después.'
-                        : 'Save favorite places and organize them for later.'
-                    }
-                    source={`place_detail_${selectedPlace.category}`}
-                    lang={lang}
-                  />
-
-                  <PlaceFeatureExperimentCard
-                    moduleKey="places_user_photos"
-                    title={lang === 'es' ? 'Fotos de la comunidad' : 'Community photos'}
-                    description={
-                      lang === 'es'
-                        ? 'Ver y compartir fotos reales de mascotas y espacios dentro del lugar.'
-                        : 'See and share real photos of pets and spaces at this place.'
-                    }
-                    source={`place_detail_${selectedPlace.category}`}
-                    lang={lang}
-                  />
-
-                  <PlaceFeatureExperimentCard
-                    moduleKey="places_events"
-                    title={lang === 'es' ? 'Eventos en este lugar' : 'Events at this place'}
-                    description={
-                      lang === 'es'
-                        ? 'Descubrir encuentros, actividades y eventos pet-friendly organizados aquí.'
-                        : 'Discover meetups, activities, and pet-friendly events organized here.'
-                    }
-                    source={`place_detail_${selectedPlace.category}`}
-                    lang={lang}
-                  />
-
-                  <PlaceFeatureExperimentCard
-                    moduleKey="places_routes"
-                    title={lang === 'es' ? 'Rutas y caminatas' : 'Routes and walks'}
-                    description={
-                      lang === 'es'
-                        ? 'Encontrar o seguir rutas para caminar con tu mascota alrededor de este lugar.'
-                        : 'Find or follow routes for walking with your pet around this place.'
-                    }
-                    source={`place_detail_${selectedPlace.category}`}
-                    lang={lang}
-                  />
-
-                  <PlaceFeatureExperimentCard
-                    moduleKey="places_business_offers"
-                    title={
-                      lang === 'es'
-                        ? 'Ofertas del negocio'
-                        : 'Business offers'
-                    }
-                    description={
-                      lang === 'es'
-                        ? 'Recibir promociones o beneficios pet-friendly publicados por negocios verificados.'
-                        : 'Receive pet-friendly offers or benefits from verified businesses.'
-                    }
-                    source={`place_detail_${selectedPlace.category}`}
-                    lang={lang}
-                  />
-                </div>
-              </div>
-            )}
-            </div>
-          </section>
+</>}</PlacesWorkspace>
           </div>, document.body
         )}
         </ImmersivePlacesStage>
