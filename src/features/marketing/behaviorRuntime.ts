@@ -1,7 +1,7 @@
 import { supabase } from '../../services/supabaseClient'
 
 /** #150 candidate. Enable only in a separately authorized release after notice/retention. */
-export const BEHAVIOR_COLLECTION_ENABLED = false
+export const BEHAVIOR_COLLECTION_ENABLED = true
 export const behaviorScreens = ['home','pet','qr','agenda','communities','places','explore','first_pet'] as const
 export type BehaviorScreen = typeof behaviorScreens[number]
 type Event = 'screen_view'|'loading'|'error'|'retry'
