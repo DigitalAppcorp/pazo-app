@@ -673,3 +673,8 @@ PayPal existente ni proveedores. Evidencia y gates:
 
 ## Marketing E2E 26-oct: límite local de cuenta, preparado OFF
 Staging localStorage TTL72h añade signupOwnerId (UUID Auth devuelto por alta) solo para evitar cruce de cuentas; no cuerpo de evento, URL, reporte ni tercero. Envío usa token transitorio de esa sesión, nunca persistido por marketing. Sin nueva retención aprobada ni instalación. Ver PAZO_MARKETING_PRIVACY_META_GATE_20261026.md. Estado registrado: cero infraestructura marketing alojada, política0/colecciónOFF.
+# Issue142 — primera utilidad, candidato aislado (28-oct-2026)
+
+No instalado ni activado en producción. Extensión de `marketing_private`: por cuenta verificada, fechas de QR visible/descarga iniciada/compartición aceptada/cuidado persistido y retorno significativo D7. Sin datos del QR, texto/salud del cuidado, archivos, GPS, email o IDs externos. Owner UUID interno solo para permisos, deduplicación y supresión; ningún ID de mascota se conserva en resultados. Cuenta elegible por las exclusiones QA/admin/fundador actuales; segmentos solo de atribución validada, resto neutro. RPC admin devuelve agregados de grupos allowlisted, sin filas individuales.
+
+Gate de utilidad OFF por defecto, dentro del gate de colección existente; requiere aviso específico y retención saludable de14d. Caducidad14d desde verificación de cuenta, sin extensión por uso; purga existente cada6h y FK de baja. Supresión mantiene solo referencia de cuenta/expiración hasta el cierre de esa misma ventana, impide reingreso y se elimina con cuenta/purga. No nueva Edge, proveedor, Pixel/CAPI, Cron ni contenido clínico. Aviso ES/EN preparado y pruebas en PG17 descartable. [Contrato y evidencias](PAZO_ISSUE142_ACCEPTANCE.md).

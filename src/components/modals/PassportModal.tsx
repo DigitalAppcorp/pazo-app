@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import qrcode from 'qrcode-generator'
 import {recordVerifiedQrUse} from '../../features/supporter/public/recordVerifiedQrUse'
+import { recordFirstUtility } from '../../features/marketing/firstUtility'
 import type { Pet } from '../../types/pazo'
 import {
   buildPublicRescueUrl,
@@ -14,6 +15,7 @@ interface PassportModalProps {
   onClose: () => void
   pet: Pet
   lang: 'es' | 'en'
+  ownerId?: string
 }
 
 const PazoQr = ({ value, title }: { value: string; title: string }) => {
@@ -56,7 +58,8 @@ const PazoQr = ({ value, title }: { value: string; title: string }) => {
   )
 }
 
-export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps) => {
+export const PassportModal = ({ isOpen, onClose, pet, lang, ownerId }: PassportModalProps) => {
+  const [verifiedContext, setVerifiedContext] = useState<{petId:string;ownerId?:string}|null>(null)
   const [publicUrl, setPublicUrl] = useState('')
   const [publicToken, setPublicToken] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -79,6 +82,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
         if (active) {
           setPublicToken(token)
           setPublicUrl(buildPublicRescueUrl(token))
+          setVerifiedContext({petId:pet.id,ownerId})
         }
       } catch (err) {
         console.error('Error loading pet QR link:', err)
@@ -95,12 +99,17 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
     return () => {
       active = false
     }
-  }, [isOpen, pet.id, lang])
+  }, [isOpen, pet.id, lang, ownerId])
+
+  useEffect(() => {
+    if (isOpen && publicUrl && !isLoading && !error && verifiedContext?.petId===pet.id && verifiedContext?.ownerId===ownerId)
+      void recordFirstUtility('qr_visible', pet.id, ownerId)
+  }, [isOpen, publicUrl, isLoading, error, pet.id, ownerId, verifiedContext])
 
   if (!isOpen) return null
 
   const handleShare = async () => {
-    if (!publicUrl) return
+    if (!publicUrl || verifiedContext?.petId!==pet.id || verifiedContext.ownerId!==ownerId || isLoading || error) return
 
     try {
       if (navigator.share) {
@@ -109,6 +118,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
           text: lang === 'es' ? 'Pasaporte QR de Pazo' : 'Pazo QR passport',
           url: publicUrl,
         })
+        void recordFirstUtility('qr_share_confirmed', pet.id, ownerId)
       } else {
         await navigator.clipboard.writeText(publicUrl)
         alert(lang === 'es' ? 'Enlace copiado.' : 'Link copied.')
@@ -151,6 +161,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
   }
 
   const handleDownloadQr = () => {
+    if (verifiedContext?.petId!==pet.id || verifiedContext.ownerId!==ownerId || isLoading || error) return
     const svg = qrContainerRef.current?.querySelector('svg')
     if (!svg) return
 
@@ -164,6 +175,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang }: PassportModalProps
     link.download = `${pet.name.toLowerCase().replace(/\s+/g, '-')}-pazo-qr.svg`
     document.body.appendChild(link)
     link.click()
+    void recordFirstUtility('qr_download_initiated', pet.id, ownerId)
     link.remove()
     URL.revokeObjectURL(url)
   }

@@ -375,3 +375,6 @@ persiste su sesión. No usar fuente/CI como prueba de una sesión real alojada.
 El banner PWA solo guarda localmente la fecha de descarte7 días, sin identidad ni
 tracking. Fuente de verdad actual: `PAZO_F17_BETA_CLOSURE_GATE_20261022.md` y
 matriz F17 al inicio de `PAZO_DATA_INVENTORY.md`.
+# Issue142 — extensión candidata de medición propia, no activada
+
+El PO autorizó instrumentar resultados mínimos bajo los controles actuales. La migración nueva mantiene utilidad OFF; producción conserva su gate y aviso vigentes. Antes de activarla: instalar vía revisada y reversible, publicar el aviso ES/EN exacto, verificar Cron/retención14d y habilitar explícitamente el subgate. No ampliar retención ni datos de salud/ubicación/contacto, no transferir señales individuales a Meta. Excluir QA/equipo mediante metadatos confiables y roles actuales. Supresión/baja/purga cubren resultados y una referencia mínima de no recolección hasta el fin de la ventana14d. La aprobación final de publicación permanece pendiente del PO.

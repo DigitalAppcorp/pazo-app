@@ -1,0 +1,91 @@
+{
+  "origin": "https://pazo-i1ovmf22z-digitalapp.vercel.app",
+  "frontend": "immutable Vercel staging",
+  "backend": "synthetic intercepted Auth/data; not a real hosted Auth/DB test",
+  "results": [
+    {
+      "lang": "es",
+      "width": 320,
+      "viewsWhileFeedPending": 3,
+      "feedErrorRetry": "PASS",
+      "petABA": "PASS",
+      "offlineNavigation": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "backendRequestsIntercepted": 61,
+      "externalBlocked": 5,
+      "blockedExistingMetricWrites": 2,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "viewsWhileFeedPending": 3,
+      "feedErrorRetry": "PASS",
+      "petABA": "PASS",
+      "offlineNavigation": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "backendRequestsIntercepted": 61,
+      "externalBlocked": 5,
+      "blockedExistingMetricWrites": 2,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "viewsWhileFeedPending": 3,
+      "feedErrorRetry": "PASS",
+      "petABA": "PASS",
+      "offlineNavigation": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "backendRequestsIntercepted": 61,
+      "externalBlocked": 5,
+      "blockedExistingMetricWrites": 2,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "viewsWhileFeedPending": 3,
+      "feedErrorRetry": "PASS",
+      "petABA": "PASS",
+      "offlineNavigation": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "backendRequestsIntercepted": 61,
+      "externalBlocked": 5,
+      "blockedExistingMetricWrites": 2,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "viewsWhileFeedPending": 3,
+      "feedErrorRetry": "PASS",
+      "petABA": "PASS",
+      "offlineNavigation": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "backendRequestsIntercepted": 61,
+      "externalBlocked": 5,
+      "blockedExistingMetricWrites": 2,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "viewsWhileFeedPending": 3,
+      "feedErrorRetry": "PASS",
+      "petABA": "PASS",
+      "offlineNavigation": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "backendRequestsIntercepted": 61,
+      "externalBlocked": 5,
+      "blockedExistingMetricWrites": 2,
+      "hostedWrites": 0
+    }
+  ]
+}

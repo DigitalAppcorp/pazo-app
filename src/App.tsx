@@ -2520,6 +2520,7 @@ function PazoMain() {
             />
 
             <PassportModal
+              ownerId={user?.id}
               isOpen={isPassportOpen}
               onClose={() => setIsPassportOpen(false)}
               pet={currentPet}

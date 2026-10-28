@@ -1,5 +1,7 @@
 # PAZO — Hoja maestra de mejora del MVP y activación real
 
+> **Actualización operativa posterior al snapshot:** [issue142](https://github.com/DigitalAppcorp/pazo-app/issues/142) y orden directa del PO autorizan la ejecución integral de1A alojado,1B yPR2, sus pruebas/integración y previews necesarias. Las restricciones de implementación del snapshot inferior quedan superadas para ese alcance. Publicación final reservada al PO. Main contiene1A/140 y141 en5c4635e5. Preview1A exacta verificada ES/EN móvil con frontend remoto y backend interceptado, sin producción. PR1B preparado con colecciónOFF y SQL no aplicado; PR2 en ejecución. [Contrato](PAZO_ISSUE142_ACCEPTANCE.md) y [evidencias1B](PAZO_FIRST_UTILITY_1B_20261028.md). Producción8dbf4ef5 preservada; verificar estado vivo al retomar.
+
 **Fecha de consolidación:** 2026-10-28 (snapshot; verificar estado vivo antes de actuar).
 **Tipo:** hoja maestra de producto / continuidad interagente / NO ejecutable por sí sola.
 **Repositorio:** DigitalAppcorp/pazo-app.

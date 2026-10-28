@@ -4,6 +4,10 @@
 
 ---
 
+## Issue142 — ejecución integral autorizada, candidato en preparación (28-oct-2026)
+
+La orden única [#142](https://github.com/DigitalAppcorp/pazo-app/issues/142) autoriza completar1B/PR2, QA e integración; supera límites históricos de implementación inferiores.1A integrado5c4635e5 y validado en staging exacto, con frontend remoto y Auth/datos interceptados. Sin publicación intermedia a producción por no ser necesaria. [Contrato](PAZO_ISSUE142_ACCEPTANCE.md), [1B y evidencias](PAZO_FIRST_UTILITY_1B_20261028.md). Publicación final permanece reservada al PO, no activar subgate de utilidad ni ejecutarSQLalojado por inferencia. No rehacer1A, no campañas ni pagos nuevos.
+
 ## PR 1A — estabilidad implementada en rama, para revisión (28-oct-2026)
 
 Orden directa del PO: independencia del feed y servicios secundarios, integridad por solicitud y pruebas A → B → A/sesiones. Código y pruebas preparados sobre `main@c9045b9a`; 21 casos nuevos, regresiones y navegador móvil local verificados. [Entrega, matriz y límites](PAZO_PR1A_STABILITY_20261028.md). Sin merge ni despliegue; no iniciar PR 1B/PR 2. Auth/MFA/PayPal/invitaciones/QR/PWA y marketing conservan sus fuentes/flags. La fase no se declara cerrada en producción.
