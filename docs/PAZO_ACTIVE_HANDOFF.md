@@ -1,3 +1,9 @@
+## Hoja maestra transversal — activación real del MVP (28-oct-2026)
+
+**Nuevo punto de entrada para el siguiente agente:** [PAZO_MVP_ACTIVATION_MASTER_20261028.md](PAZO_MVP_ACTIVATION_MASTER_20261028.md). Documenta el acuerdo PO + Codex + asesor IA + consultor: priorizar primera utilidad sobre nuevas funciones; tres entregas PR 1A (estabilidad), PR 1B (medición) y PR 2 (orientación contextual); criterios de aceptación, límites de privacidad, y permisos separados de consultar/preparar/implementar/fusionar/desplegar. **PR #140 listo para revisión, no integrado ni desplegado según la verificación 2026-10-28; 1B y 2 no autorizados.** Esta entrada es documental, no una orden de ejecución. Verificar el estado actual de GitHub y producción antes de actuar.
+
+---
+
 ## Lugares — UX aprobada publicada (27-oct-2026)
 
 Propuesta02+idioma03 aprobada por PO, integrada PR138/merge8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04, candidato3e6448f4 con9/9CI SUCCESS. VercelPROD dpl_3KrqGdJmijURjdirv1W1iwhkhSW7 READY/aliashttps://pazo-app.vercel.app, postflight público HTTP22PASS y demoMapa real ESEN sin erroresJS ni escrituras.12controladores y8archivosprotegidos intactos; sin SQL/Edge/Auth/pagos/marketing. [Cierre y límites](PAZO_PLACES_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261027.md). Cambios posteriores de documentación no requieren otro despliegue frontend.
