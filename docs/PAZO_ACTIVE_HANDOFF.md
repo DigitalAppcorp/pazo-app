@@ -1,3 +1,9 @@
+## Hoja maestra transversal — activación real del MVP (28-oct-2026)
+
+**Nuevo punto de entrada para el siguiente agente:** [PAZO_MVP_ACTIVATION_MASTER_20261028.md](PAZO_MVP_ACTIVATION_MASTER_20261028.md). Documenta el acuerdo PO + Codex + asesor IA + consultor: priorizar primera utilidad sobre nuevas funciones; tres entregas PR 1A (estabilidad), PR 1B (medición) y PR 2 (orientación contextual); criterios de aceptación, límites de privacidad, y permisos separados de consultar/preparar/implementar/fusionar/desplegar. **PR #140 listo para revisión, no integrado ni desplegado según la verificación 2026-10-28; 1B y 2 no autorizados.** Esta entrada es documental, no una orden de ejecución. Verificar el estado actual de GitHub y producción antes de actuar.
+
+---
+
 ## PR 1A — estabilidad implementada en rama, para revisión (28-oct-2026)
 
 Orden directa del PO: independencia del feed y servicios secundarios, integridad por solicitud y pruebas A → B → A/sesiones. Código y pruebas preparados sobre `main@c9045b9a`; 21 casos nuevos, regresiones y navegador móvil local verificados. [Entrega, matriz y límites](PAZO_PR1A_STABILITY_20261028.md). Sin merge ni despliegue; no iniciar PR 1B/PR 2. Auth/MFA/PayPal/invitaciones/QR/PWA y marketing conservan sus fuentes/flags. La fase no se declara cerrada en producción.
