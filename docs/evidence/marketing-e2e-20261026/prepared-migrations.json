@@ -42,5 +42,14 @@
       "transportSuffix": "\r\n"
     }
   ],
-  "status": "HOSTED_TARGETED_MAPPED"
+  "status": "HOSTED_TARGETED_MAPPED",
+  "pendingRecords": [
+    {
+      "version": "20261028075145",
+      "path": "supabase/migrations/20261028075145_pazo_first_utility_outcomes.sql",
+      "sha256": "3cd09d8a97c3f65644a2ac269d549c9b46c9c9da1b39cc7b4dd4ba73420bb83c",
+      "status": "PREPARED_NOT_APPLIED",
+      "productionPushAllowed": false
+    }
+  ]
 }

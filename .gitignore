@@ -41,3 +41,7 @@ supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
 /supabase/tests/supporter/fixtures/f18-rollback.generated.sql
 /artifacts/f18-ui/
 /artifacts/pr1a/
+.vercel
+.env*
+
+/artifacts/issue142*/

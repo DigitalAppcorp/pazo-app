@@ -1,0 +1,77 @@
+{
+  "environment": "local real App, intercepted transport, real disposable PostgreSQL/RLS/trigger; no hosted Auth or writes",
+  "evidence": [
+    {
+      "lang": "es",
+      "width": 320,
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    }
+  ]
+}

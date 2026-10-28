@@ -1,6 +1,7 @@
 import { useCallback,useEffect,useState } from 'react'
 import { adminMarketingSummary,type AdminMarketingSummary } from '../adminDashboardService'
 import { AdminGlyph } from './AdminVisuals'
+import { FirstUtilityPanel } from '../../marketing/FirstUtilityPanel'
 
 /** Read/collection are independently gated. No RPC call until the privacy,
  * migration and report-access review receive an explicit release GO.
@@ -133,5 +134,6 @@ export function AdminMarketingPanel({lang,period}:{lang:'es'|'en';period:7|30|90
     'Directional internal counts only. Not official Meta results, advertising spend, financial returns or unique visitors. QA accounts are excluded from signup cohorts.'
    )}</p>
   </>}
+  {PAZO_MARKETING_ADMIN_REPORT_ENABLED&&<FirstUtilityPanel lang={lang} period={period}/>}
  </section>
 }
