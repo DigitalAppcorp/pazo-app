@@ -1,0 +1,166 @@
+{
+  "algorithm": "SHA256",
+  "scope": "Sanitized evidence only; original runtime PNGs and LF text. No tokens, sessions or real-user rows.",
+  "files": [
+    {
+      "path": "docs/evidence/issue150/.gitattributes",
+      "bytes": 36,
+      "sha256": "3f142fa4d164c2efd7c4a473db4bd894756df2063a4a721687383359130579de"
+    },
+    {
+      "path": "docs/evidence/issue150/README.md",
+      "bytes": 1620,
+      "sha256": "5075688d227dbbb05b3f1644b25ebba87fd0ba1f04d9d579f74aa0848537ef9a"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-en-1440.png",
+      "bytes": 189927,
+      "sha256": "404785c488fe955de1ef275d7fa93b8ddff039c69dbb0702f0402066af42e95f"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-en-320.png",
+      "bytes": 166187,
+      "sha256": "0e1cd9d2769f00d3e1b728731ee36f4f5afe93f4d25630f5298ea61e9206eff3"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-en-390.png",
+      "bytes": 180567,
+      "sha256": "44f533e5262d2321889eeea61f974a026a3029ffb7f9488548d9e62af83dee7e"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-en-430.png",
+      "bytes": 182605,
+      "sha256": "2bbccbf6e19a6cfcb40b187a1748ce0202cce6dd899eac092f214db66ce3a14b"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-es-1440.png",
+      "bytes": 206120,
+      "sha256": "da3f3b84c8ed439dea5e3eb6f6c98551b789dd94adc4391dff70edfb95b9865f"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-es-320.png",
+      "bytes": 175355,
+      "sha256": "f2a445eb84175b7e084651955701473e8e82ce357511e22f980bf9ceafecd152"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-es-390.png",
+      "bytes": 191188,
+      "sha256": "0a6dab4b921f4c5c8bc19398cebb1ac4b734aadf5ef09a72660b10823cd72d92"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/gallery-es-430.png",
+      "bytes": 196238,
+      "sha256": "5c266235baddb62d9029ab296cbd46799d982c3e2f27b72b18bdc4fb9bd7d9ad"
+    },
+    {
+      "path": "docs/evidence/issue150/browser/results.json",
+      "bytes": 10384,
+      "sha256": "fb7c68a215a310e7e7618c80b712dc04531c2388b9e4d17fa89d83a30fd2d8b8"
+    },
+    {
+      "path": "docs/evidence/issue150/deployments.json",
+      "bytes": 806,
+      "sha256": "39a7db2c4354edea601c7b00657111a27a79b190c5fb8aaddcb67e3fbc8569ef"
+    },
+    {
+      "path": "docs/evidence/issue150/enabled/results.json",
+      "bytes": 1012,
+      "sha256": "727de90aac20032fd03ab88c640428da8fc5b45e50759a5644f89c20849e2f50"
+    },
+    {
+      "path": "docs/evidence/issue150/example-synthetic.json",
+      "bytes": 2311,
+      "sha256": "578b25975ab0c09c104188b04b5e17c3ea2856f0aa525f4649f2efda287faa54"
+    },
+    {
+      "path": "docs/evidence/issue150/hosted-baseline.json",
+      "bytes": 13091,
+      "sha256": "714e85e18622e6646726916f85e7905bfe7be00e8919d5042c5edeff8170d193"
+    },
+    {
+      "path": "docs/evidence/issue150/migration.json",
+      "bytes": 433,
+      "sha256": "054dc0a8c6fb327d445c8aaea101539994d49188b423c9ac8b65ccfa60bad18f"
+    },
+    {
+      "path": "docs/evidence/issue150/production-preserved.json",
+      "bytes": 793,
+      "sha256": "35dde6545096fc29826eb3ec9388ecce496bd8f3a0b8c5ef324eec08ed1f78e5"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/assets.json",
+      "bytes": 1225,
+      "sha256": "04183a3295b64102081ba9adcf974d8361f0de5d10ac9b0eb4a812ca6ee40114"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/en-1440-funnel.png",
+      "bytes": 136385,
+      "sha256": "fa633a7c83ef3c6520e7ad998277c4d95f7fef7d0d2b538ba12d00ace4fd4df0"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/en-1440-overview.png",
+      "bytes": 142308,
+      "sha256": "2bbe3e6a907cc3dce77d18085029c94e90ffc0a265a9010602fbe34be5c78083"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/en-1440-return.png",
+      "bytes": 134328,
+      "sha256": "df72f1ecc27f79bacbf29e466da2f92269269541a3ae4daa937aeca3e6ace3df"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/en-390-funnel.png",
+      "bytes": 66893,
+      "sha256": "6515eba14194d0d3cfc47913f343a7313b3e9c3017c2a4e3806c44e8fa8ffd96"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/en-390-overview.png",
+      "bytes": 68797,
+      "sha256": "b502beb6c95f40238f6fd729eb6735012ca05899f1278329a7d1a4f68697328d"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/en-390-return.png",
+      "bytes": 65807,
+      "sha256": "94f6400f1da3f62e8ccefc8700dc57b00e8c50b0e64c5c2eb810f96f5ff95bc8"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/es-1440-funnel.png",
+      "bytes": 150238,
+      "sha256": "78599281e9f20dc90c4f6b5547bb5666229674013e13391737000eccbd3c1ac9"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/es-1440-overview.png",
+      "bytes": 151558,
+      "sha256": "8c6fba8ce457dca6dc469d60c9edfc3936edecd1995581db6a20fba1629aee49"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/es-1440-return.png",
+      "bytes": 147451,
+      "sha256": "748d3a30c547a5708ba87875102d2df6d769a91ab22d126ddf2b8a3d4089c476"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/es-390-funnel.png",
+      "bytes": 74568,
+      "sha256": "5d26b7deaf65431962a06132d71a9f02b9f6868c24c02c0c11a5b057470910a3"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/es-390-overview.png",
+      "bytes": 74426,
+      "sha256": "cec620e2811829db880e9cce16d6dae5e5fb991d12e515e7a93961c6f1360b72"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/es-390-return.png",
+      "bytes": 67801,
+      "sha256": "d5f8f8da4de662ef8b1ea16fe4a0e209d05afffce06e2a85f178d64fdd4f1b31"
+    },
+    {
+      "path": "docs/evidence/issue150/staging/results.json",
+      "bytes": 1484,
+      "sha256": "07eab1e75690545a3c647ec587e6b9ede9463a65ede6d08f7c538e362bd9b960"
+    },
+    {
+      "path": "docs/evidence/issue150/verification.json",
+      "bytes": 1021,
+      "sha256": "41209e4717afa818eca9cee0479759af8c69d61d49e9b23ffa24c019f5a56ac5"
+    }
+  ]
+}

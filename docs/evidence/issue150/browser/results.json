@@ -1,0 +1,442 @@
+{
+  "status": "PASS",
+  "checks": 144,
+  "cases": [
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "content",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-320-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-320-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-320-insufficient.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-320-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-320-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-320-mfa.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "content",
+      "calls": 3,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-390-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-390-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-390-insufficient.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-390-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-390-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-390-mfa.png"
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "content",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-430-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-430-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-430-insufficient.png"
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-430-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-430-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-430-mfa.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "content",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-1440-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-1440-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-1440-insufficient.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-1440-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-1440-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "es-1440-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "content",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-320-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-320-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-320-insufficient.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-320-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-320-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-320-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "content",
+      "calls": 3,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-390-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-390-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-390-insufficient.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-390-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-390-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-390-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "content",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-430-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-430-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-430-insufficient.png"
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-430-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-430-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-430-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "content",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-1440-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "paused",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-1440-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "insufficient",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-1440-insufficient.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "error",
+      "calls": 2,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-1440-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "loading",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-1440-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "mfa",
+      "calls": 1,
+      "status": "PASS",
+      "data": "synthetic isolated PG17, Auth double",
+      "capture": "en-1440-mfa.png"
+    }
+  ],
+  "errors": [],
+  "hostedWrites": 0,
+  "nativeAdmin": true,
+  "backend": "disposable PG17 real aggregate RPC"
+}

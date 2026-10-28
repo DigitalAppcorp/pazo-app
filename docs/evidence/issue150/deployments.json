@@ -1,0 +1,26 @@
+{
+  "staging": {
+    "requested": "dpl_5iaJKnb7FtRyhBXWRejWEL2ad3Rz",
+    "id": "dpl_5iaJKnb7FtRyhBXWRejWEL2ad3Rz",
+    "state": "READY",
+    "target": null,
+    "git": "2b623bb84a0956f765b4d475fb4697a68d221e3a",
+    "url": "pazo-7f4g5xiro-digitalapp.vercel.app"
+  },
+  "canonical": {
+    "requested": "pazo-app.vercel.app",
+    "id": "dpl_GRzYRttARoYb6QaKX6fEuvWo2p4p",
+    "state": "READY",
+    "target": "production",
+    "git": "4ce38450bd0e3b5dee3249525b56aaaef08eaece",
+    "url": "pazo-momenv2xm-digitalapp.vercel.app"
+  },
+  "secondary": {
+    "requested": "pazo-app-digitalapp.vercel.app",
+    "id": "dpl_GRzYRttARoYb6QaKX6fEuvWo2p4p",
+    "state": "READY",
+    "target": "production",
+    "git": "4ce38450bd0e3b5dee3249525b56aaaef08eaece",
+    "url": "pazo-momenv2xm-digitalapp.vercel.app"
+  }
+}

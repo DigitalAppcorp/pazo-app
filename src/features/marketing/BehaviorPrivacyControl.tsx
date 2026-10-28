@@ -1,0 +1,9 @@
+import {useState} from 'react'
+import {useAuth} from '../../context/AuthContext'
+import {BEHAVIOR_COLLECTION_ENABLED,withdrawBehavior} from './behaviorRuntime'
+export function BehaviorPrivacyControl({lang}:{lang:'es'|'en'}){
+ const {user}=useAuth();const [state,setState]=useState<'idle'|'busy'|'done'|'error'>('idle')
+ if(!user||!BEHAVIOR_COLLECTION_ENABLED)return null
+ const withdraw=async()=>{setState('busy');setState(await withdrawBehavior()?'done':'error')}
+ return <section className="mt-5 rounded-2xl bg-white p-4"><h3 className="text-sm font-extrabold">{lang==='es'?'Medición de recorridos':'Journey measurement'}</h3><p className="mt-2 text-xs leading-relaxed">{lang==='es'?'Puedes retirar la medición de navegación y borrar sus registros activos sin perder herramientas. Conservamos solo tu preferencia de exclusión hasta eliminar la cuenta.':'You can withdraw navigation measurement and delete its active records without losing tools. Only your exclusion preference remains until account deletion.'}</p><button type="button" disabled={state==='busy'||state==='done'} onClick={()=>void withdraw()} className="mt-3 min-h-11 rounded-full bg-[#E1E53F] px-4 py-2 text-xs font-bold focus-visible:bg-[#EAF079]">{state==='done'?(lang==='es'?'Medición retirada':'Measurement withdrawn'):state==='busy'?(lang==='es'?'Retirando…':'Withdrawing…'):(lang==='es'?'Retirar y borrar recorridos':'Withdraw and delete journeys')}</button>{state==='error'&&<p role="alert" className="mt-2 text-xs">{lang==='es'?'No se confirmó el borrado. Reintenta o contacta a privacidad.':'Deletion was not confirmed. Retry or contact privacy.'}</p>}{state==='done'&&<p role="status" className="mt-2 text-xs">{lang==='es'?'Registros activos eliminados y nuevas observaciones bloqueadas.':'Active records deleted and new observations blocked.'}</p>}</section>
+}

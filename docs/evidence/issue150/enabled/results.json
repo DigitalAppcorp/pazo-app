@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "origin": "http://127.0.0.1:5359",
+  "results": [
+    {
+      "lang": "es",
+      "width": 390,
+      "gpc": false,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "http://127.0.0.1:5359",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "gpc": false,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "http://127.0.0.1:5359",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "gpc": true,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "http://127.0.0.1:5359",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true
+    }
+  ],
+  "errors": [],
+  "newCollectionCalls": 14,
+  "hostedWrites": 0,
+  "collectionCandidate": "Enabled only by isolated test transport"
+}

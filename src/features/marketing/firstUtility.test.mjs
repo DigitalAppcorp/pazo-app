@@ -22,7 +22,7 @@ test('utility SQL retains its immutable digest and authorized targeted installat
  assert.equal(row.hostedStatementMd5,'f3b0162099ab76020db1bebee1942310')
  assert.equal(row.authorization,'https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521')
  assert.equal(row.utilityEnabledAtInstallation,false)
- assert.equal(manifest.pendingRecords.length,0)
+ assert.ok(!manifest.pendingRecords.some(r=>r.version===row.version))
  assert.equal(manifest.historicalPreparedRecords.find(r=>r.version===row.version).status,'PREPARED_NOT_APPLIED')
  assert.equal(createHash('sha256').update(fs.readFileSync(row.path,'utf8').replace(/\r\n/g,'\n')).digest('hex'),row.sha256)
 })

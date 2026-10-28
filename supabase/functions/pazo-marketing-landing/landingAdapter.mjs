@@ -32,3 +32,16 @@ export function createMarketingChallengeClaim({url,serviceKey,fetchImpl=fetch}={
   }catch{return false}
  }
 }
+
+export function createMarketingPreregSubmit({url,serviceKey,fetchImpl=fetch}={}){
+ const expected='https://mrybvqdebbgcayuvgkkr.supabase.co'
+ if(url!==expected||typeof serviceKey!=='string'||serviceKey.length<15)throw Error('prereg_config_unavailable')
+ return async(creative,step)=>{
+  const response=await fetchImpl(expected+'/rest/v1/rpc/pazo_marketing_prereg_signal_v1',{
+   method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(5000),
+   headers:{apikey:serviceKey,authorization:'Bearer '+serviceKey,'content-type':'application/json'},
+   body:JSON.stringify({p_creative:creative,p_step:step}),
+  })
+  return response.status===200&&(await response.json())===true
+ }
+}

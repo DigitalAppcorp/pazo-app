@@ -1,0 +1,35 @@
+{
+  "checked_at": "2026-10-28 21:28:34 UTC",
+  "historyCount": 133,
+  "historyMd5Unchanged": true,
+  "cron": {
+    "active": true,
+    "schedule": "17 */6 * * *",
+    "command_md5": "f013fe40503aaabb8c60d81e8515d82d"
+  },
+  "gate": {
+    "healthy": true,
+    "retention_days": 14,
+    "utility_enabled": true,
+    "utility_started_at": "2026-10-28T19:17:46.696036+00:00"
+  },
+  "paypal": {
+    "mode": "public",
+    "revision": 3,
+    "merchant_generation": 1
+  },
+  "checkout": {
+    "revision": 3,
+    "environment": "live",
+    "kill_switch": false,
+    "live_enabled": true,
+    "active_generation": 1
+  },
+  "supporter": {
+    "hosted_certified": true,
+    "checkouts_enabled": true,
+    "invitations_enabled": true
+  },
+  "behavior_flag_absent": true,
+  "behavior_schema_absent": true
+}

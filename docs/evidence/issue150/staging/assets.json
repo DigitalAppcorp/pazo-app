@@ -1,0 +1,42 @@
+{
+  "origin": "https://pazo-7f4g5xiro-digitalapp.vercel.app",
+  "assets": [
+    {
+      "path": "/assets/app-DDm6GAce.js",
+      "bytes": 229455,
+      "sha256": "cebf51e685b4beb35debf652a8af4ff2b128511192a248aedf12152819a79a3c"
+    },
+    {
+      "path": "/assets/publicConfig-BuC15E42.js",
+      "bytes": 1217,
+      "sha256": "06eeb0d58bfa9e4c42f20b1ff21c8a8f454fd14f15ef3bf47efadac1c0bc4d2d"
+    },
+    {
+      "path": "/assets/App-B7OkyD1W.js",
+      "bytes": 937197,
+      "sha256": "16ed7dae1b3b1d9148249de892d06e434564a2223a9c7899a20fddac4be02d13"
+    },
+    {
+      "path": "/assets/supabaseClient-Cdzfat4D.js",
+      "bytes": 1966,
+      "sha256": "31ab57e0d9e5e1a3b9860171f86c0f2fa72d2131a8048cbbdb966946bd73a445"
+    },
+    {
+      "path": "/assets/dist-Bl13M3oS.js",
+      "bytes": 214172,
+      "sha256": "deb639bda4bde2c386c8c1fb6e04a7c1bac087c10a9b1c1d792457a1c44e0f2d"
+    },
+    {
+      "path": "/assets/MaintenanceGate-13pmdblI.js",
+      "bytes": 4783,
+      "sha256": "5cdbcfc7046b192a1f76169d975d6b055188c06d8699b4a57bc064feed501da9"
+    }
+  ],
+  "newReportPresent": true,
+  "newScreenMarker": true,
+  "privateNotice": false,
+  "supabaseProject": true,
+  "releaseVersions": [
+    "0.1.02843195.1"
+  ]
+}

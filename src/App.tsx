@@ -1,6 +1,7 @@
 import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
+import {useBehaviorObservation} from './features/marketing/useBehaviorObservation'
 import { getNotificationCommunityId, getNotificationSightingId } from './features/notifications/notificationSource'
 import { createRequestScope } from './lib/requestScope'
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
@@ -1926,6 +1927,15 @@ function PazoMain() {
   const currentPetCareReminder = careReminderItems.find(
     (item) => item.petId === currentPet.id
   )
+
+  useBehaviorObservation(canUseAccount ? user?.id : undefined,
+    publicRescueRoute.token || selectedPublicProfileId || isDocumentsOpen || isAlertOpen || isMessagesOpen || isNotificationsOpen || isCreatePostOpen ? null
+      : petBootstrap?.status !== 'ready' ? 'first_pet'
+      : isPassportOpen ? 'qr' : isCareOpen ? 'agenda' : isSearchOpen ? 'explore'
+      : activeTab === 'inicio' ? 'home' : activeTab === 'mascota' ? 'pet'
+      : activeTab === 'comunidades' ? 'communities' : activeTab === 'mapa' ? 'places' : null,
+    isCareOpen ? careError ? 'error' : isCareLoading ? 'loading' : 'ready'
+      : activeTab === 'inicio' ? feedError ? 'error' : isFeedLoading ? 'loading' : 'ready' : 'ready')
 
   if (publicRescueRoute.token) {
     return (

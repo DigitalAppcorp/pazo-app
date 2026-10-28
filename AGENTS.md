@@ -1,3 +1,9 @@
+## Issue #150 — candidato de analítica preparado, sin GO de release
+
+Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Informe único: docs/PAZO_ISSUE150_FINAL_REPORT_20261028.md. PR151 y staging pazo-7f4g5xiro-digitalapp.vercel.app, frontend2b623bb8. Consultar contrato y runbook de privacidad enlazados en el informe. El estado exacto de CI y revisión se registra en issue150 al entregar.
+
+Nueva colección OFF y migración20261028210000 PREPARED_NOT_APPLIED. No merge/publicación final, apply SQL alojado ni nuevos datos reales sin GO único150. Producción147, medición anterior y fechas se conservan. No reutilizar GO147 ni reabrir142/147. No crear branch Supabase facturable. Las entradas inferiores preservan historia.
+
 ## GO #147 ejecutado — publicación verificada (28-oct-2026)
 
 Leer primero [informe de publicación](docs/PAZO_ISSUE147_RELEASE_20261028.md) y [GO del PO](https://github.com/DigitalAppcorp/pazo-app/issues/147#issuecomment-6477690521). PR148 y Brain13 integrados, producto4ce38450 publicado en canónico/dplGRz. Única SQL1B instalada por vía dirigida y mapeada `20261028075145`→`20261028185856`; utilidad activa desde2026-10-28T19:17:46.696036Z/noticev1, retención14d saludable. **No repetir instalación ni reiniciar utility_started_at.** Los «no GO/no publicado/OFF» inferiores son historia anterior a la autorización final. Mantener sin cambios flags de pagos/invitaciones y usar el rollback documentado ante un fallo crítico; no publicar nuevas mejoras por inferencia.

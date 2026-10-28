@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { resolveLegalCopy, PAZO_MARKETING_PRIVACY_EFFECTIVE_DATE, type LegalKind, type LegalLanguage } from './legalCopy'
 import { PAZO_PRIVACY_SUPPORT_EMAIL, PAZO_PRIVACY_SUPPORT_MAILTO } from './supportContact'
+import {BehaviorPrivacyControl} from '../marketing/BehaviorPrivacyControl'
 
 interface Props { kind: LegalKind; lang: LegalLanguage; onClose: () => void }
 
@@ -59,6 +60,7 @@ export function LegalPreviewDialog({ kind, lang, onClose }: Props) {
               : 'This inbox accepts privacy and support questions. Emailing us does not automatically delete your account.'}
           </p>
         </div>
+        {kind==='privacy'&&<BehaviorPrivacyControl lang={lang}/>}
         <button type="button" onClick={onClose}
           className="mt-6 w-full rounded-full bg-[#204E4A] py-3 text-xs font-extrabold text-white focus-visible:bg-[#356D67]">
           {lang === 'es' ? 'Entendido' : 'Got it'}

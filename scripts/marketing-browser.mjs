@@ -99,6 +99,14 @@ try{
   await context.route('**/*',async route=>{
    const request=route.request(),url=new URL(request.url())
    if(url.origin===origin){
+    // Existing marketing E2E tests attribution in isolation. The separate behavior
+    // suite tests prereg collection with the release flag enabled against PG17.
+    if(url.pathname==='/src/features/marketing/behaviorRuntime.ts'){
+     const response=await fetch(request.url());assert.equal(response.status,200)
+     const source=await response.text();const pattern=/export const BEHAVIOR_COLLECTION_ENABLED ?= ?(?:true|false)/
+     assert.ok(pattern.test(source))
+     return route.fulfill({status:200,contentType:'application/javascript',body:source.replace(pattern,'export const BEHAVIOR_COLLECTION_ENABLED = false')})
+    }
     if(url.pathname==='/src/features/marketing/marketingRuntime.ts'||url.pathname==='/src/features/admin/components/AdminMarketingPanel.tsx'){
      // Fetch only the already-validated loopback origin. Node's transport also
      // works on Windows hosts where APIRequestContext resets local requests.

@@ -2,6 +2,7 @@ import { useCallback,useEffect,useRef,useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AdminPayPalSettings } from './AdminPayPalSettings'
 import { AdminMarketingPanel } from './AdminMarketingPanel'
+import {BehaviorPanel} from '../../marketing/BehaviorPanel'
 import {AdminSupportInbox} from '../../support/components/AdminSupportInbox'
 import {AdminGiftBenefits} from '../../support/components/AdminGiftBenefits'
 import {AdminMaintenanceControls} from '../../maintenance/AdminMaintenanceControls'
@@ -12,7 +13,7 @@ import {
  type AdminOverview,type AdminUser,type AdminExperiment,type AdminVoter,type AdminAudience,
 } from '../adminDashboardService'
 
-type Section='summary'|'users'|'pets'|'finance'|'activity'|'marketing'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'|'support'|'gifts'|'maintenance'
+type Section='summary'|'users'|'pets'|'finance'|'activity'|'marketing'|'behavior'|'content'|'ideas'|'places'|'infra'|'reports'|'paypal'|'support'|'gifts'|'maintenance'
 const sections:{key:Section;es:string;en:string;icon:AdminGlyphName}[]=[
  {key:'summary',es:'Resumen',en:'Overview',icon:'chart'},
  {key:'users',es:'Usuarios',en:'Users',icon:'users'},
@@ -20,6 +21,7 @@ const sections:{key:Section;es:string;en:string;icon:AdminGlyphName}[]=[
  {key:'finance',es:'Membresías',en:'Memberships',icon:'crown'},
  {key:'activity',es:'Actividad',en:'Activity',icon:'activity'},
  {key:'marketing',es:'Campañas',en:'Campaigns',icon:'chart'},
+ {key:'behavior',es:'Comportamiento',en:'Behavior',icon:'activity'},
  {key:'content',es:'Contenido',en:'Content',icon:'layers'},
  {key:'ideas',es:'Fake Doors',en:'Fake Doors',icon:'compass'},
  {key:'places',es:'Lugares',en:'Places',icon:'pin'},
@@ -196,12 +198,12 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       <p className="mt-1 text-[13px] text-[#647C75] lg:text-[15px]">
        {section==='summary'?l('Así va PAZO, con los datos disponibles','PAZO at a glance, using available data'):l('Centro de administración de PAZO','PAZO administration center')}
       </p>
-      {section!=='marketing'&&overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
+      {section!=='marketing'&&section!=='behavior'&&overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
      </div>
      <div className="flex shrink-0 items-center gap-2">
       <div className="hidden items-center gap-2 lg:flex">
        {periodSelector}
-       {section!=='marketing'&&<><button type="button" onClick={()=>void refresh()} disabled={loading}
+       {section!=='marketing'&&section!=='behavior'&&<><button type="button" onClick={()=>void refresh()} disabled={loading}
         className="flex min-h-11 items-center gap-2 rounded-[15px] bg-white px-4 text-[13px] font-extrabold text-[#204E4A] shadow-sm hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-60">
         <AdminGlyph name="activity" size={17}/>{l('Actualizar','Refresh')}
        </button>
@@ -227,11 +229,11 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 lg:px-7 lg:pt-1">
     <div className="mx-auto max-w-[1600px] space-y-4 lg:space-y-4">
      <div className="flex flex-wrap items-center justify-between gap-3 lg:hidden">
-      {section!=='marketing'&&<p className="text-[12px] font-semibold text-[#6A8079]">
+      {section!=='marketing'&&section!=='behavior'&&<p className="text-[12px] font-semibold text-[#6A8079]">
        {overview?l('Actualizado: ','Updated: ')+new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US'):'—'}
       </p>}
       <div className="flex items-center gap-2">{periodSelector}
-       {section!=='marketing'&&<button type="button" onClick={()=>void refresh()} disabled={loading}
+       {section!=='marketing'&&section!=='behavior'&&<button type="button" onClick={()=>void refresh()} disabled={loading}
         className="min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-2 text-[12px] font-extrabold disabled:opacity-50 hover:bg-[#EAF079] focus-visible:bg-[#EAF079]">
         {l('Actualizar','Refresh')}
        </button>}
@@ -242,11 +244,12 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      {section==='gifts'&&<AdminGiftBenefits lang={lang}/>}
      {section==='maintenance'&&<AdminMaintenanceControls lang={lang}/>}
      {section==='marketing'&&<AdminMarketingPanel lang={lang} period={period}/>}
-     {section!=='paypal'&&section!=='marketing'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
-     {section!=='paypal'&&section!=='marketing'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
+     {section==='behavior'&&<BehaviorPanel lang={lang} period={period}/>}
+     {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
+     {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
        {l('No fue posible actualizar todos los datos.','Could not refresh all metrics.')} {error}
       </div>}
-    {overview&&section!=='paypal'&&section!=='marketing'&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
+    {overview&&section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
 
 
      {section==='summary'&&<>

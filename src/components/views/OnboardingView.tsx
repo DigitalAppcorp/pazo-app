@@ -5,6 +5,7 @@ import { IconCat, IconDog, IconRabbit, IconBird, IconPaw } from '../icons/PazoIc
 import { useAuth } from '../../context/AuthContext'
 import { createPetProfile } from '../../services/petService'
 import { stageMarketingFirstPetCreated } from '../../features/marketing/marketingRuntime'
+import {observePrereg} from '../../features/marketing/preregRuntime'
 import { isValidPazoPassword } from '../../features/auth/recoveryFlow'
 import { pazoBuildVersion } from '../../features/release/buildVersion'
 import { LegalPreviewDialog } from '../../features/legal/LegalPreviewDialog'
@@ -33,6 +34,7 @@ export const OnboardingView = ({
   isCompletionCurrent,
 }: OnboardingViewProps) => {
   const [step, setStep] = useState<'A01' | 'A02' | 'A03' | 'A04'>(initialStep)
+  useEffect(()=>{if(step==='A02')observePrereg('signup_start')},[step])
   const [legalKind, setLegalKind] = useState<LegalKind | null>(null)
   // Discoverable before account creation; this preview has no entitlement or consent.
   const [showGratitudeWall, setShowGratitudeWall] = useState(false)
@@ -116,6 +118,7 @@ export const OnboardingView = ({
     setIsSigningUp(true)
     try {
       const outcome = await signUp(email.trim(), password)
+      observePrereg(outcome==='failed'?'signup_error':'signup_requested')
       if (outcome === 'authenticated') {
         setPassword('')
         setStep('A03')
@@ -124,6 +127,7 @@ export const OnboardingView = ({
         setAwaitingEmailConfirmation(true)
       }
     } catch {
+      observePrereg('signup_error')
       alert(lang === 'es'
         ? 'No hay conexión. Inténtalo nuevamente.'
         : 'Connection error. Please try again.')
@@ -258,7 +262,7 @@ export const OnboardingView = ({
           </button>
 
           <div className="shrink-0 space-y-1.5 pb-0">
-            <button type="button" onClick={() => setStep('A02')}
+            <button type="button" onClick={() => {observePrereg('signup_cta');setStep('A02')}}
               className="flex min-h-11 w-full items-center justify-center rounded-full bg-[#E1E53F] px-4 py-2.5 text-[17px] font-extrabold text-[#204E4A] shadow-[0_7px_20px_rgba(225,229,63,0.28)] transition-colors hover:bg-[#EDF150] focus-visible:bg-[#EDF150]">
               {lang === 'es' ? 'Comenzar' : 'Get started'}
             </button>
