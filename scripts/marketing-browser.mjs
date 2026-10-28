@@ -64,6 +64,10 @@ async function remote(path,method,headers,body){
  if(path.startsWith('/rest/v1/pets?'))return Response.json(pet)
  if(path.startsWith('/rest/v1/pet_private_details?'))return Response.json([])
  if(path.includes('/rpc/pazo_is_admin'))return Response.json(actor?.id===adminId)
+ if(path.includes('/rpc/pazo_admin_first_utility_summary'))return Response.json({
+  status:'paused',period_days:Number(value.p_days),effective_days:Math.min(Number(value.p_days),14),
+  coverage_since:null,as_of:new Date().toISOString(),minimum_observational_sample:10,groups:[],
+ },{status:actor?.id===adminId?200:403})
  if(path.includes('/rpc/pazo_admin_marketing_summary')){
   reports++
   if(delayReport)await new Promise(r=>setTimeout(r,1000))

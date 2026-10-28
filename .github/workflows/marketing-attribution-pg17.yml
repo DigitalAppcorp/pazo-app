@@ -95,9 +95,9 @@ jobs:
           test "$(printf '%s\n' "$generated" | wc -l)" -eq 1
           echo "PAZO_SUPABASE_CLI_GENERATED_FILENAME=$generated"
           echo 'No SQL staged in production or linked Supabase project'
+      - run: npm ci --no-audit --no-fund
       - name: Run local front-end attribution unit contract
         run: npm run test:marketing
-      - run: npm ci --no-audit --no-fund
       - name: Ephemeral browser, no application dependency
         run: |
           npm install --prefix /tmp/marketing-playwright --no-package-lock --ignore-scripts playwright@1.56.1
