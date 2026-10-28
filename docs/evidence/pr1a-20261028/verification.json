@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-28",
+  "base": "c9045b9ad39443296b29f057550a677e6d9f013a",
+  "sourceSha256": {
+    "src/App.tsx": "4545f5389cff0c3a10c935b7dde49d4e2474666ea933e8ac2c3634ae7cb6c0c2",
+    "src/lib/requestScope.ts": "7b61c784a85c447870445d2b27c5147f8887356da8aecc70b9073f988feb0db9"
+  },
+  "newOrchestrationCases": 21,
+  "build": "PASS",
+  "staticReleaseGuard": "PASS",
+  "protectedSourceDiff": "EMPTY",
+  "suites": {
+    "governance": {
+      "tests": 725,
+      "pass": 725,
+      "fail": 0
+    },
+    "supporterSynthetic": {
+      "tests": 1196,
+      "pass": 1196,
+      "fail": 0
+    },
+    "f18": {
+      "tests": 33,
+      "pass": 33,
+      "fail": 0
+    },
+    "gradual": {
+      "tests": 69,
+      "pass": 69,
+      "fail": 0
+    },
+    "f14WithTemporaryLF": {
+      "tests": 53,
+      "pass": 53,
+      "fail": 0
+    },
+    "compiledPwa": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    }
+  },
+  "lint": {
+    "candidate": [
+      {
+        "file": "src/App.tsx",
+        "errors": 14,
+        "warnings": 6
+      },
+      {
+        "file": "src/lib/requestScope.ts",
+        "errors": 0,
+        "warnings": 0
+      }
+    ],
+    "baselineApp": {
+      "errors": 14,
+      "warnings": 6
+    },
+    "newDiagnostics": 0
+  },
+  "f14Windows": {
+    "rawCRLF": {
+      "pass": 52,
+      "fail": 1
+    },
+    "temporaryLF": {
+      "pass": 53,
+      "fail": 0
+    },
+    "originalBytesRestored": true
+  },
+  "browser": "browser-results.json",
+  "limits": [
+    "synthetic Auth and services; no hosted writes or financial transactions",
+    "Mapbox fallback, no real tiles/GPS",
+    "no physically installed PWA",
+    "no measured performance claim",
+    "legacy lint debt remains"
+  ]
+}

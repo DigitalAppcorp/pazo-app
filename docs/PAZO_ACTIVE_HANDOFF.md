@@ -4,6 +4,10 @@
 
 ---
 
+## PR 1A — estabilidad implementada en rama, para revisión (28-oct-2026)
+
+Orden directa del PO: independencia del feed y servicios secundarios, integridad por solicitud y pruebas A → B → A/sesiones. Código y pruebas preparados sobre `main@c9045b9a`; 21 casos nuevos, regresiones y navegador móvil local verificados. [Entrega, matriz y límites](PAZO_PR1A_STABILITY_20261028.md). Sin merge ni despliegue; no iniciar PR 1B/PR 2. Auth/MFA/PayPal/invitaciones/QR/PWA y marketing conservan sus fuentes/flags. La fase no se declara cerrada en producción.
+
 ## Lugares — UX aprobada publicada (27-oct-2026)
 
 Propuesta02+idioma03 aprobada por PO, integrada PR138/merge8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04, candidato3e6448f4 con9/9CI SUCCESS. VercelPROD dpl_3KrqGdJmijURjdirv1W1iwhkhSW7 READY/aliashttps://pazo-app.vercel.app, postflight público HTTP22PASS y demoMapa real ESEN sin erroresJS ni escrituras.12controladores y8archivosprotegidos intactos; sin SQL/Edge/Auth/pagos/marketing. [Cierre y límites](PAZO_PLACES_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261027.md). Cambios posteriores de documentación no requieren otro despliegue frontend.

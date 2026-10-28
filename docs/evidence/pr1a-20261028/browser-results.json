@@ -1,0 +1,50 @@
+{
+  "isolation": "real React views, synthetic Auth/services, external requests blocked; no hosted writes or payments",
+  "cases": [
+    {
+      "width": 320,
+      "viewsWhileFeedPending": 3,
+      "offlineNavigation": "PASS",
+      "feedErrorRetry": "PASS",
+      "passportQrRendered": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "blockedExternalRequests": 1,
+      "localServiceRequests": {
+        "care": 1,
+        "feed": 2
+      },
+      "mapTiles": "not tested; missing public Mapbox token uses existing fallback"
+    },
+    {
+      "width": 390,
+      "viewsWhileFeedPending": 3,
+      "offlineNavigation": "PASS",
+      "feedErrorRetry": "PASS",
+      "passportQrRendered": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "blockedExternalRequests": 1,
+      "localServiceRequests": {
+        "care": 1,
+        "feed": 2
+      },
+      "mapTiles": "not tested; missing public Mapbox token uses existing fallback"
+    },
+    {
+      "width": 430,
+      "viewsWhileFeedPending": 3,
+      "offlineNavigation": "PASS",
+      "feedErrorRetry": "PASS",
+      "passportQrRendered": "PASS",
+      "overflow": false,
+      "pageErrors": 0,
+      "blockedExternalRequests": 1,
+      "localServiceRequests": {
+        "care": 1,
+        "feed": 2
+      },
+      "mapTiles": "not tested; missing public Mapbox token uses existing fallback"
+    }
+  ]
+}

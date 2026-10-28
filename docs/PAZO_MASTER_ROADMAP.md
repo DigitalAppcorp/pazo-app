@@ -1,3 +1,7 @@
+## PR 1A — EN REVISIÓN, implementación de estabilidad (28-oct-2026)
+
+Scope autorizado: feed limitado a Inicio, bootstrap por identidad verificada, secundarios independientes y respuestas vigentes por cuenta/mascota/recurso. Implementación y evidencia en rama; [matriz de aceptación](PAZO_PR1A_STABILITY_20261028.md). Próximo gate: revisión del PR 1A y su CI. Sin merge/deploy autorizados, sin PR 1B/PR 2; no se cierra la fase de producto.
+
 ## Lugares — UX aprobada publicada (27-oct-2026)
 
 Propuesta02+idioma03 aprobada por PO, integrada PR138/merge8dbf4ef5fe7a926f1caee3a55ee3c60f31400c04, candidato3e6448f4 con9/9CI SUCCESS. VercelPROD dpl_3KrqGdJmijURjdirv1W1iwhkhSW7 READY/aliashttps://pazo-app.vercel.app, postflight público HTTP22PASS y demoMapa real ESEN sin erroresJS ni escrituras.12controladores y8archivosprotegidos intactos; sin SQL/Edge/Auth/pagos/marketing. [Cierre y límites](PAZO_PLACES_APPROVED_UX_PRODUCTION_POSTFLIGHT_20261027.md). Cambios posteriores de documentación no requieren otro despliegue frontend.
