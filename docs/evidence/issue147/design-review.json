@@ -1,0 +1,319 @@
+{
+  "lane": "new_authorized_ui",
+  "authorization_source": "https://github.com/DigitalAppcorp/pazo-app/issues/147 (updated 2026-10-28T10:30:00Z)",
+  "artifact_sha": "dd46582915043a0a049b3673dfc89a4400f2bfa2",
+  "deployment": "dpl_9GhAAVUP6dYzSyDxudzCunBcRi5q",
+  "origin": "https://pazo-8bbqfm7ea-digitalapp.vercel.app",
+  "languages": [
+    "es",
+    "en"
+  ],
+  "viewports": [
+    320,
+    390,
+    430
+  ],
+  "applicable_states": [
+    "pending",
+    "content",
+    "empty",
+    "error",
+    "recovery"
+  ],
+  "coverage": [
+    {
+      "language": "es",
+      "width": 320,
+      "state": "pending",
+      "path": "docs/evidence/issue147/final/es-320-pending-home.png",
+      "sha256": "17f59ebd5ace95ce952e0ebf04c691f473b47e3074adcfacbb8fc9e1f24dd8e8",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "content",
+      "path": "docs/evidence/issue147/final/es-320-content-home.png",
+      "sha256": "8ad1f38665ff7f638f8c24161168fe58440a01743241a91364db93807d97772d",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "empty",
+      "path": "docs/evidence/issue147/final/es-320-empty-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "error",
+      "path": "docs/evidence/issue147/final/es-320-error-home.png",
+      "sha256": "7a881250a8bcbe00c19513a61655e6786e6574be0a7be22dcbc9a1a57bf50cbe",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/final/es-320-recovered-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "pending",
+      "path": "docs/evidence/issue147/final/es-390-pending-home.png",
+      "sha256": "20acf5f18385b67a0e9d049dfc7b5b263a02af57990112c8a588a03f80d8921c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "content",
+      "path": "docs/evidence/issue147/final/es-390-content-home.png",
+      "sha256": "ac00a92d97a13555ee38514ef7a75fe3d376625380106713a0a33ee6b84965e0",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "empty",
+      "path": "docs/evidence/issue147/final/es-390-empty-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "error",
+      "path": "docs/evidence/issue147/final/es-390-error-home.png",
+      "sha256": "3776886e5c5b432188317199294cf02c1d9b94a5657aba97f2c43744e0b94858",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/final/es-390-recovered-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "pending",
+      "path": "docs/evidence/issue147/final/es-430-pending-home.png",
+      "sha256": "d2a114f9e5459c47316458b67a0992752949958086732ceb161246045c06d7ab",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "content",
+      "path": "docs/evidence/issue147/final/es-430-content-home.png",
+      "sha256": "39dba99abe933bfcb22f2517537efff29eb348073bb86742b6f192cdf8fbc67c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "empty",
+      "path": "docs/evidence/issue147/final/es-430-empty-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "error",
+      "path": "docs/evidence/issue147/final/es-430-error-home.png",
+      "sha256": "e2b60f4fa86418f6bc0c943ab67cf3e807c0935f66db5a7d32a82b841ed4b4b2",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/final/es-430-recovered-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "pending",
+      "path": "docs/evidence/issue147/final/en-320-pending-home.png",
+      "sha256": "d9dd1557225699a7ba67c3ad54c5cb9a915ec94194c2536c7a45a723656e6178",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "content",
+      "path": "docs/evidence/issue147/final/en-320-content-home.png",
+      "sha256": "6a297a403bb3cc887fdd805ec0d4af34279927ae44e16f3ffc45a5c5e39fefad",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "empty",
+      "path": "docs/evidence/issue147/final/en-320-empty-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "error",
+      "path": "docs/evidence/issue147/final/en-320-error-home.png",
+      "sha256": "1d75ff820cbfd37089003cf38c74afcbe72cd02f7f491bee268855f59bce26ad",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/final/en-320-recovered-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "pending",
+      "path": "docs/evidence/issue147/final/en-390-pending-home.png",
+      "sha256": "6e50c02d1f864eaadbfe3aed398da1d0d3030a92d726bb1e78914138e9dbd001",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "content",
+      "path": "docs/evidence/issue147/final/en-390-content-home.png",
+      "sha256": "034bd4bb483133c4a2b4496074d4c712e76b787baeecd3849cc3cd92332da970",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "empty",
+      "path": "docs/evidence/issue147/final/en-390-empty-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "error",
+      "path": "docs/evidence/issue147/final/en-390-error-home.png",
+      "sha256": "1a7ab9da977535e0fd8c29e920701540eab4a0a1717ddf678688ee6a1d43e04c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/final/en-390-recovered-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "pending",
+      "path": "docs/evidence/issue147/final/en-430-pending-home.png",
+      "sha256": "c80f6dae47d1d2ac35ada332ae2dd310165ab9de79637628ae2864b90e4da2f4",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "content",
+      "path": "docs/evidence/issue147/final/en-430-content-home.png",
+      "sha256": "348828c4f75b8963f320d080253b8e478caf1dde5c2496c5aaba7092f6beec28",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "empty",
+      "path": "docs/evidence/issue147/final/en-430-empty-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "error",
+      "path": "docs/evidence/issue147/final/en-430-error-home.png",
+      "sha256": "10a9c950067b849f1c5ca0b5d1aa9f687d2810db3d212cfd47604ff79c8bd22e",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/final/en-430-recovered-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "frame": "full_runtime",
+      "inspected_by": "Codex: full-frame runtime contact sheets, plus original arrival/short frames; separate adversarial pass by the same agent"
+    }
+  ],
+  "additional_review": "Six representative first arrivals at 844px and ES/EN 320x568 original frames inspected. All 24 arrivals and native keyboard QR/Agenda/Explore/return paths tested. Complete raw PNGs retained. Baseline six Home galleries and A representative galleries inspected during exploration; historical QA images are not final appearance approval.",
+  "forced_conditions_and_limits": "Real immutable staging assets via authenticated Vercel CLI; synthetic intercepted Auth/data. Pending, sample content, empty and error explicitly forced. No hosted writes. PG17 utility persistence is real disposable RLS/trigger; native Share confirmation simulated. Full mobile viewport Chromium/Edge emulation, not physical-device certification, real hosted login/DB, Mapbox tiles or business/performance measurement. Recovery inspected as complete empty runtime after local retry.",
+  "professional_review": {
+    "composition": "Choose B: reuse the existing My Pet tools after first pet creation. No added hero/card/tutorial in Home. Identity, profile tabs, tools heading and real QR/Agenda remain one hierarchy; Explore is a quiet secondary exit. A inline Home header still duplicated hierarchy, so it was rejected.",
+    "hierarchy": "On first arrival QR is first real utility, Agenda next, documents following in the existing tool list. Contextual QR receipt adds one sentence only when validated. At 320px Edit no longer collides with name/species. Loading/error title, copy and action form one reading group near the top of Home; content occupies its natural feed surface.",
+    "continuity": "Header, Quicksand, warm canvas, teal/lime palette, original profile and floating dock are retained. Home title keeps a consistent slot between pending and ready states; compact error keeps retry local. First-use navigation clears the ephemeral hint; returning accounts do not repeat it. The actual floating dock is measured to avoid an excessive first-arrival jump.",
+    "negative_space": "Pending/error leave honest unused feed space below a compact explanation/action group; it is not a separate full-height loader or an invitation panel above another screen. No fake posts or decorative skeletons fill missing real data. Empty retains its existing helpful surface; sample content demonstrates the post hierarchy without the rejected extra panel.",
+    "actions": "QR and Agenda are native buttons with focus-visible styling and Enter activation, not duplicate onboarding CTAs. Explore exits to Home in one action. Error retry is primary and tools is secondary. Minimum44px targets and 320x568 dock clearance tested. First QR focus does not open a modal automatically. No payment, loss alert or invitation activated.",
+    "identity": "PAZO existing wordmark, typography, round tool surfaces and color roles preserved. English presentation maps only known species enums and the service age placeholder; owner text remains untouched. QR caption makes public-profile meaning explicit; no added GPS/push promise or designer instructions shown to owners.",
+    "states": "Full-frame ES/EN 320/390/430 pending/content/empty/error and six recoveries reviewed. Six first arrivals plus two short arrivals reviewed as originals; QR/care/explore, scroll, reload, offline and pet ABA tested separately. Finite transitions/styles, loaded fonts and visible image decoding awaited before final capture. Footer color in earlier captures was transient; settled recaptures supersede them.",
+    "better_than_no_addition": "Keeping Home unchanged after creating the first pet avoids extra UI but still requires discovering the tools route while feed can be pending. B opens the existing meaningful destination without inventing another surface, then gives one secondary exit. This is a code/review-supported usability rationale, not measured conversion or speed."
+  },
+  "adversarial": {
+    "reviewer_or_separate_pass": "Separate adversarial pass by the same Codex agent; no independent reviewer claimed.",
+    "defects": "Original rejected panel competes with content and isolates loader. Alternative A still duplicates headings/actions. B initial pass exposed Edit/name collision at320. Hosted08 passed functional gates but jumped278px into loss/membership because it mistook profile nav for dock. English species/age needed presentation localization. Early screenshots captured nav color before style flush. Late first-pet completion could mutate another session.",
+    "corrections": "Selected existing tools-first B; compact Home status; reserved Edit space/wrapped identity; specific floating-nav marker and zero-scroll844 assertion; EN display-only labels; readiness waits for images/fonts, two rendered frames and CSS transitions; account epoch plus verified/pinned request guard and stale-callback tests.",
+    "recapture_comparison": "Baseline and A evidence retained, plus rejected08 original and negative control JSON. Updated harness fails against08 with278!=0, final dd passes. Final full-state/first-arrival/short recaptures show preserved identity, tools clear of dock, no added Home panel, integrated feed states, loaded images and settled nav. Three App and five service negative tests reproduced before lifetime fix, all current tests pass."
+  },
+  "design_decision": "DESIGN_QA_PASS",
+  "po_visual": {
+    "status": "NOT_REQUESTED"
+  },
+  "release_authorized": false,
+  "method_evaluation": "Brain OS PR13 record validator checks completeness/hashes, not beauty or truthful review. 13 engine tests +11 record counterexamples pass. Comparative independent model evaluation remains NOT_EVALUATED."
+}

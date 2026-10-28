@@ -32,6 +32,9 @@ Revisión separada del diseño inicial, con pasadas de dirección de arte, inter
 3. ¿Algo parece arbitrario o compite? Se eliminó la descripción neutra redundante: los nombres y textos de herramientas ya explican su función. Explorar es salida secundaria en el encabezado, no tercer CTA promocional.
 4. La primera pasada B detectó «Editar» sobre el nombre/especie a320px: se reservó espacio y permitió envolver la especie. Se recapturó, no se dispensó por ser un defecto heredado expuesto por la nueva llegada.
 5. En altura568px, se verificó foco/scroll y disponibilidad de QR/Agenda fuera del dock. Las capturas esperan animaciones finitas y fuentes: un dock capturado en transición no es su estado asentado.
+6. La inspección alojada rechazó la iteración08a934: el selector `nav` confundía pestañas del perfil con dock, desplazaba278px y promovía alerta/membresía en la llegada. Selector específico del dock y control de scroll0 a844 corrigen la causa. El harness actualizado falla contra08 y pasa contra el candidato final; no se dispensó porque su CI estuviera verde.
+7. Se localizaron especie/edad en inglés sin reescribir datos del dueño. La captura espera imágenes decodificadas y dos frames de estilos antes de enumerar transiciones: evita registrar el color del tab anterior como acabado final.
+8. La auditoría de regreso encontró una carrera funcional de primera mascota: su callback antiguo podía actualizar otra sesión. Se reprodujeron tres fallos de App y cinco contratos de servicio antes de corregirlos. El fence usa la época vigente, comprueba la sesión verificada y fija su autorización antes del RPC. No cambia SQL, AuthProvider ni reglas comerciales.
 
 El contraste calculado de los colores sólidos usados es4.73:1 para texto secundario sobre canvas,8.80:1 para tinta sobre canvas y9.33:1 para blanco sobre tinta. Son cálculos sRGB sobre esos pares, no certificación de toda la aplicación. El informe final debe distinguir imágenes realmente inspeccionadas, cobertura funcional, datos forzados y pruebas no realizadas.
 
@@ -46,3 +49,5 @@ El contraste calculado de los colores sólidos usados es4.73:1 para texto secund
 ## Estado del gate
 
 La decisión profesional final se registra con el SHA/capturas de cierre y el informe final147. La ingeniería, el juicio visual y la autorización de lanzamiento se verifican por separado. **PO_VISUAL_ACCEPTED=NOT_REQUESTED** para esta UI nueva autorizada; no es un bloqueo. **RELEASE_AUTHORIZED=NO**. La nueva medición continúa OFF/no instalada.
+
+[Registro situado de composición y evidencia](evidence/issue147/design-review.json) y [paquete único final](PAZO_ISSUE147_FINAL_REPORT_20261028.md): candidato `dd46582915043a0a049b3673dfc89a4400f2bfa2`, **DESIGN_QA_PASS** tras crítica, corrección y recaptura. La revisión adversarial fue una pasada separada del mismo agente; no se atribuye a un revisor independiente.

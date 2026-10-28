@@ -1,0 +1,90 @@
+{
+  "environment": "immutable Vercel frontend, intercepted Auth/data transport, real disposable PostgreSQL/RLS/trigger; no hosted Auth or writes",
+  "origin": "https://pazo-8bbqfm7ea-digitalapp.vercel.app",
+  "evidence": [
+    {
+      "lang": "es",
+      "width": 320,
+      "firstUse": "PASS",
+      "verifiedQrIntention": "neutral",
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "firstUse": "PASS",
+      "verifiedQrIntention": "PASS",
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "firstUse": "PASS",
+      "verifiedQrIntention": "PASS",
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "firstUse": "PASS",
+      "verifiedQrIntention": "neutral",
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "firstUse": "PASS",
+      "verifiedQrIntention": "PASS",
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "firstUse": "PASS",
+      "verifiedQrIntention": "PASS",
+      "qrVisible": "PASS",
+      "shareCancelledNotCounted": "PASS",
+      "nativeShareConfirmed": "PASS",
+      "downloadWorksWithMetricOffline": "PASS",
+      "carePersistedInPg17": "PASS",
+      "backendOutcomesConfirmed": true,
+      "pageErrors": 0,
+      "hostedWrites": 0
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "visual": {
+    "rejected_sha": "08a934acd09281571281c0eb27518b0463e32168",
+    "origin": "https://pazo-3tq8zfu0x-digitalapp.vercel.app",
+    "image": "rejected-08-arrival.png",
+    "status": "DESIGN_QA_FAIL",
+    "updated_harness_result": "EXPECTED_FAILURE",
+    "assertion": "first arrival must not jump past identity into loss/membership tools",
+    "actual_scroll_top": 278,
+    "expected_scroll_top": 0,
+    "cause": "Ambiguous nav selector selected profile tabs instead of floating dock.",
+    "fixed_sha": "dd46582915043a0a049b3673dfc89a4400f2bfa2",
+    "final_status": "PASS"
+  },
+  "first_pet_lifetime": {
+    "before_sha": "8f04fe4dca79a5e33d90cd3cbe87885e7c16e2ab",
+    "app_negative_tests": 3,
+    "app_before": "22 pass, 3 fail",
+    "sequences": [
+      "A -> B before first-pet callback",
+      "A -> B -> A before old callback",
+      "sign out -> sign in with same account ID before old callback"
+    ],
+    "service_negative_tests": 5,
+    "service_before": "5 fail before guarded and authorization-pinned contract",
+    "after_sha": "dd46582915043a0a049b3673dfc89a4400f2bfa2",
+    "app_after": "25 pass, 0 fail",
+    "first_use_and_service_after": "24 pass, 0 fail",
+    "method": "Actual App/service code executed with controlled services; no hosted writes. Epoch capture, current verified session and pinned RPC authorization; not ID comparison alone."
+  }
+}

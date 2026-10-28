@@ -112,7 +112,7 @@ try{
    }
    Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{if(window.__shareMode==='cancel')throw new DOMException('cancelled','AbortError')}})
   },{session,lang,contextual,width,owner})
-  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin)
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin,{waitUntil:'domcontentloaded',timeout:hostedAsset?90000:30000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
   if(contextual){
    await page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...').fill('Luna')

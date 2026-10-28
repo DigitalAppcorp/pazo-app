@@ -1,5 +1,7 @@
 # Issue 142 — paquete integral para decisión única del PO
 
+> **Superado por issue147:** el PO rechazó la composición visual de este candidato142. Usar el [paquete147 y candidato corregido](PAZO_ISSUE147_FINAL_REPORT_20261028.md) para publicación. Design OS resolvió autónomamente el diseño nuevo y su crítica; no requiere aceptación estética ordinaria del PO. Producción y nueva medición siguen sin cambios. Este documento conserva la evidencia y el runbook histórico, no autoriza publicar su antigua UI.
+
 Orden: [#142](https://github.com/DigitalAppcorp/pazo-app/issues/142). Implementación, pruebas e integración completadas; **la publicación final sigue reservada al PO**. Este informe no autoriza por sí mismo instalar SQL ni promover un deployment.
 
 ## Candidato y trazabilidad

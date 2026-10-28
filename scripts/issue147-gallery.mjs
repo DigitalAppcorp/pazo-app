@@ -18,4 +18,16 @@ try{
   await page.screenshot({path:path.join(folder,`gallery-${lang}-${width}.png`),fullPage:true})
   await page.close()
  }
+ for(const lang of ['es','en'])for(const view of ['arrival','recovery']){
+  const widths=[320,390,430]
+  const files=widths.map(width=>path.join(folder,`${lang}-${width}-${view==='arrival'?'pending-arrival':'recovered-home'}.png`))
+  if(!files.every(file=>fs.existsSync(file)))continue
+  const page=await browser.newPage({viewport:{width:1188,height:900},deviceScaleFactor:1})
+  await page.route('**/*',r=>r.abort())
+  const cells=files.map((file,i)=>`<figure><figcaption>${lang} ${widths[i]} — ${view} (forced QA)</figcaption><img width="${widths[i]}" src="data:image/png;base64,${fs.readFileSync(file).toString('base64')}"></figure>`)
+  await page.setContent(`<style>body{margin:12px;background:#dce3df;font:13px system-ui;display:flex;gap:12px;align-items:flex-start}figure{margin:0}figcaption{height:26px}img{display:block}</style>${cells.join('')}`)
+  await page.locator('img').evaluateAll(images=>Promise.all(images.map(i=>i.decode())))
+  await page.screenshot({path:path.join(folder,`gallery-${view}-${lang}.png`),fullPage:true})
+  await page.close()
+ }
 }finally{await browser.close()}

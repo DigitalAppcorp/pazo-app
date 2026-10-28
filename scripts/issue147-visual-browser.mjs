@@ -29,6 +29,10 @@ const settle=page=>page.evaluate(async()=>{
  })
  await Promise.all(images.map(image=>image.decode().catch(()=>{})))
  if(images.some(image=>!image.complete||image.naturalWidth===0))throw Error('Visible runtime image has not loaded')
+ // Flush the React commit's styles before enumerating CSS transitions. A status
+ // already present in Home can otherwise match before the nav color changes.
+ await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+ document.querySelector('nav[data-pazo-floating-nav]')?.getBoundingClientRect()
  await Promise.all(document.getAnimations().filter(a=>Number.isFinite(a.effect?.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{})))
 })
 try{

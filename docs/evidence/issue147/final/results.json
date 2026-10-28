@@ -1,0 +1,1136 @@
+{
+  "version": "candidate",
+  "origin": "https://pazo-8bbqfm7ea-digitalapp.vercel.app",
+  "frontend": "immutable Vercel assets via authenticated CLI",
+  "data": "synthetic controlled Auth/data; all feed states forced; not real hosted traffic",
+  "results": [
+    {
+      "lang": "es",
+      "width": 320,
+      "height": 844,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 488.984375,
+          "width": 288,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 597.28125,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "height": 844,
+      "state": "content",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 488.984375,
+          "width": 288,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 597.28125,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "height": 844,
+      "state": "empty",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 488.984375,
+          "width": 288,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 597.28125,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "height": 844,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 488.984375,
+          "width": 288,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 597.28125,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "height": 844,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 527.28125,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "height": 844,
+      "state": "content",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 527.28125,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "height": 844,
+      "state": "empty",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 527.28125,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "height": 844,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 527.28125,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "height": 844,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 513.890625,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "height": 844,
+      "state": "content",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 513.890625,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "height": 844,
+      "state": "empty",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 513.890625,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 430,
+      "height": 844,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Pasaporte y QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 96.296875
+        },
+        {
+          "name": "/^Cuidados y Agenda/",
+          "x": 16,
+          "y": 513.890625,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "height": 844,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 468.734375,
+          "width": 288,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 560.734375,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "height": 844,
+      "state": "content",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 468.734375,
+          "width": 288,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 560.734375,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "height": 844,
+      "state": "empty",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 468.734375,
+          "width": 288,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 560.734375,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "height": 844,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 468.734375,
+          "width": 288,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 560.734375,
+          "width": 288,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "height": 844,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 510.984375,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "height": 844,
+      "state": "content",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 510.984375,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "height": 844,
+      "state": "empty",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 510.984375,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "height": 844,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 418.984375,
+          "width": 358,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 510.984375,
+          "width": 358,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "height": 844,
+      "state": "pending",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 497.59375,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "height": 844,
+      "state": "content",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 497.59375,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "height": 844,
+      "state": "empty",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 497.59375,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "not needed",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 430,
+      "height": 844,
+      "state": "error",
+      "arrival": "existing-pet-tools",
+      "arrivalControls": [
+        {
+          "name": "/^Passport & QR/",
+          "x": 16,
+          "y": 405.59375,
+          "width": 398,
+          "height": 80
+        },
+        {
+          "name": "/^Care & Agenda/",
+          "x": 16,
+          "y": 497.59375,
+          "width": 398,
+          "height": 80
+        }
+      ],
+      "font": {
+        "family": "Quicksand, Nunito, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif",
+        "faces": [
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "unloaded"
+          },
+          {
+            "family": "Quicksand",
+            "status": "loaded"
+          }
+        ]
+      },
+      "pageErrors": 0,
+      "overflow": false,
+      "qr": "PASS",
+      "agenda": "PASS",
+      "retry": "PASS",
+      "blockedWrites": 0,
+      "hostedWrites": 0
+    }
+  ]
+}

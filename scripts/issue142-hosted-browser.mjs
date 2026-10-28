@@ -73,7 +73,7 @@ try{
    localStorage.clear();localStorage.setItem('sb-mrybvqdebbgcayuvgkkr-auth-token',JSON.stringify(session));localStorage.setItem('pazo_language',lang);localStorage.setItem('active_pet_'+owner,pet)
   },{session,lang,owner,pet:pets[0].id})
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
-  await page.goto(origin,{waitUntil:'domcontentloaded'})
+  await page.goto(origin,{waitUntil:'domcontentloaded',timeout:90000})
   const nav=page.getByRole('navigation',{name:'Navegación de PAZO'})
   try{await nav.waitFor({timeout:20000})}catch(e){console.error({lang,width,errors,body:await page.locator('body').innerText()});throw e}
   for(const label of lang==='es'?['Comunidades','Mapa','Mi mascota']:['Communities','Map','My Pet']){
