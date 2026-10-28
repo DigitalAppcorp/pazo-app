@@ -1,6 +1,6 @@
 {
   "algorithm": "SHA256",
-  "scope": "Every evidence file except this manifest; original PNG bytes and LF text preserved by scoped attributes.",
+  "scope": "All evidence files (historical and current) except this manifest. Original PNG bytes; scoped attributes preserve LF text.",
   "files": [
     {
       "path": "docs/evidence/issue147/.gitattributes",
@@ -713,6 +713,606 @@
       "bytes": 26679
     },
     {
+      "path": "docs/evidence/issue147/illustrated-states/design-review.json",
+      "sha256": "1d8bc4ad628f1a94b21203b0b6772256c5480e580515f5b8ed8d1dcb3ef7d28e",
+      "bytes": 19699
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-content-arrival.png",
+      "sha256": "f59cff747e488677052d32ee84aaab758b689e735300f2e5486d97b509892f47",
+      "bytes": 74053
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-content-home.png",
+      "sha256": "6a297a403bb3cc887fdd805ec0d4af34279927ae44e16f3ffc45a5c5e39fefad",
+      "bytes": 37701
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-empty-arrival.png",
+      "sha256": "f2dd04c299a31d5fa697a865b383729dae482c98e56fc061a8236c8642942a47",
+      "bytes": 74363
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-empty-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "bytes": 38204
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-error-arrival.png",
+      "sha256": "ce21d1dcfdff20aa4c0387943d85d143086260da47e5ad455e853531dff39458",
+      "bytes": 74326
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-error-home.png",
+      "sha256": "63ff2116e767da3fea9acad4852c76924a49972b77cf435362b1d68286db366a",
+      "bytes": 35577
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-pending-arrival.png",
+      "sha256": "ce21d1dcfdff20aa4c0387943d85d143086260da47e5ad455e853531dff39458",
+      "bytes": 74326
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-pending-home.png",
+      "sha256": "784b438b021936ed7c96dcd6433b092b1057e266a557f8b7e73b9dc55043b750",
+      "bytes": 37318
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-recovered-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "bytes": 38204
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-content-arrival.png",
+      "sha256": "f0d3ea954b607d4d55f86afe61f9f30701b6ea6ad84a6a42c72c93b3cc89e180",
+      "bytes": 83899
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-content-home.png",
+      "sha256": "034bd4bb483133c4a2b4496074d4c712e76b787baeecd3849cc3cd92332da970",
+      "bytes": 38587
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-empty-arrival.png",
+      "sha256": "b343d000f8a45cb744f4b5d3640430f69f59fa4c3612ce6472edc468e9718e3f",
+      "bytes": 84219
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-empty-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "bytes": 39392
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-error-arrival.png",
+      "sha256": "b343d000f8a45cb744f4b5d3640430f69f59fa4c3612ce6472edc468e9718e3f",
+      "bytes": 84219
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-error-home.png",
+      "sha256": "bed5c6299151e8e7f79834f6927866c2befa391a64193951e9624e6b6fac754a",
+      "bytes": 36484
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-pending-arrival.png",
+      "sha256": "b343d000f8a45cb744f4b5d3640430f69f59fa4c3612ce6472edc468e9718e3f",
+      "bytes": 84219
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-pending-home.png",
+      "sha256": "e164a1a99c9a904a24365da7847aa814c10630f8fa6cd4d356089106bb9290cc",
+      "bytes": 38218
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-recovered-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "bytes": 39392
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-content-arrival.png",
+      "sha256": "66dd6fdb4592e2eec2dd8b5fb864e16e4a5482c35899709648580b532af2df59",
+      "bytes": 82952
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-content-home.png",
+      "sha256": "348828c4f75b8963f320d080253b8e478caf1dde5c2496c5aaba7092f6beec28",
+      "bytes": 38511
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-empty-arrival.png",
+      "sha256": "c190333d200a3da2a85ae068287cc9989392019069087e76743f5edd3586ad5a",
+      "bytes": 83277
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-empty-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "bytes": 39282
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-error-arrival.png",
+      "sha256": "c190333d200a3da2a85ae068287cc9989392019069087e76743f5edd3586ad5a",
+      "bytes": 83277
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-error-home.png",
+      "sha256": "6063ab40803043456c32e43af8fa638f1a28bbfdac6c5ce3c11b6a8a03c832a1",
+      "bytes": 36580
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-pending-arrival.png",
+      "sha256": "c190333d200a3da2a85ae068287cc9989392019069087e76743f5edd3586ad5a",
+      "bytes": 83277
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-pending-home.png",
+      "sha256": "fa7d3b5e3d4e1ec01c5643265d3d1c75a6e04563456c5d270211de00d61abece",
+      "bytes": 38294
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-recovered-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "bytes": 39282
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-content-arrival.png",
+      "sha256": "addd71015896ac87f95142a409c6f59a9723656b18240c16613819b76a2725fd",
+      "bytes": 74817
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-content-home.png",
+      "sha256": "8ad1f38665ff7f638f8c24161168fe58440a01743241a91364db93807d97772d",
+      "bytes": 39127
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-empty-arrival.png",
+      "sha256": "e1da7a06bd2e612d30208e5babc5902fa223cd960261fa343e4fc7b9138ab57f",
+      "bytes": 74997
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-empty-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "bytes": 43779
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-error-arrival.png",
+      "sha256": "e1da7a06bd2e612d30208e5babc5902fa223cd960261fa343e4fc7b9138ab57f",
+      "bytes": 74997
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-error-home.png",
+      "sha256": "35fab987e123e290bf21d5f9ac42cda9050db8d8a26c9738ac33a041aa7d781b",
+      "bytes": 38199
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-pending-arrival.png",
+      "sha256": "228a4babe8b397bf5b717bdd17a547b6e63bdca96c4dea9e0c404f1fd40ce4e3",
+      "bytes": 75002
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-pending-home.png",
+      "sha256": "a83b9789767bc4534ecee86bcebd0263e7824d70a611cf8faef27c60f4b832c3",
+      "bytes": 38815
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-recovered-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "bytes": 43779
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-content-arrival.png",
+      "sha256": "9ec4fbbd9819582e0f98d1854a9cc84a7d5e685aeff5474e36b4a37c0beedea1",
+      "bytes": 86935
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-content-home.png",
+      "sha256": "ac00a92d97a13555ee38514ef7a75fe3d376625380106713a0a33ee6b84965e0",
+      "bytes": 40388
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-empty-arrival.png",
+      "sha256": "1595a0ca3f8df7aa2a2e748470011f8acc3974c3c66b8350cdf49f5ca9d57eb2",
+      "bytes": 87142
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-empty-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "bytes": 43689
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-error-arrival.png",
+      "sha256": "1595a0ca3f8df7aa2a2e748470011f8acc3974c3c66b8350cdf49f5ca9d57eb2",
+      "bytes": 87142
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-error-home.png",
+      "sha256": "51fd2b046331c86e80067177f0850e027013e61f4cc0a829de281b4966ef1de1",
+      "bytes": 39118
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-pending-arrival.png",
+      "sha256": "1595a0ca3f8df7aa2a2e748470011f8acc3974c3c66b8350cdf49f5ca9d57eb2",
+      "bytes": 87142
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-pending-home.png",
+      "sha256": "b6037f3d7c6e5e53f7b0f84c63fa4e2b188c75d3ea8777a3f20be304d3b7a50c",
+      "bytes": 39195
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-recovered-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "bytes": 43689
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-content-arrival.png",
+      "sha256": "1b94117c8e77dbc0043ec2193520d9e864399d980f4e7ebd3dfb77e03ad73979",
+      "bytes": 90906
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-content-home.png",
+      "sha256": "39dba99abe933bfcb22f2517537efff29eb348073bb86742b6f192cdf8fbc67c",
+      "bytes": 40078
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-empty-arrival.png",
+      "sha256": "7dd0bc48d57183ae148f328163d3a9e28a0a9694742e169f8cf9826ad39c2f13",
+      "bytes": 91113
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-empty-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "bytes": 43456
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-error-arrival.png",
+      "sha256": "7dd0bc48d57183ae148f328163d3a9e28a0a9694742e169f8cf9826ad39c2f13",
+      "bytes": 91113
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-error-home.png",
+      "sha256": "2757a664d5fb841ee3c5633a700ac3a4b6e9c8b39d8b64f2ced861c580d56f04",
+      "bytes": 38968
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-pending-arrival.png",
+      "sha256": "7dd0bc48d57183ae148f328163d3a9e28a0a9694742e169f8cf9826ad39c2f13",
+      "bytes": 91113
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-pending-home.png",
+      "sha256": "6a4eecf4da6d33be96fcd8846bc39023209ffe34e384045850aa4e1003d061c6",
+      "bytes": 39028
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-recovered-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "bytes": 43456
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-arrival-en.png",
+      "sha256": "9775f4570005c91b9db8c2aead1eacce52fc5ad3d2445c99e8f8ef57ba604746",
+      "bytes": 192953
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-arrival-es.png",
+      "sha256": "a26826c76b627b68ecbc0ff85410de25f1dab2b378dddece4d1e7c5fdab49501",
+      "bytes": 189916
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-en-320.png",
+      "sha256": "c430d0508f9aebdd6b059d79393622ae6cda11d53e19b06a8da93f178479c42d",
+      "bytes": 130807
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-en-390.png",
+      "sha256": "68e5bdede33b1942b91e649e30a762c69fdf7f38a97737298ec74cfcd786210d",
+      "bytes": 132743
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-en-430.png",
+      "sha256": "9b0be9f025b55dbd78c0603378e33de18d32976e88c853af7191febecb7d47a3",
+      "bytes": 133173
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-es-320.png",
+      "sha256": "ead91bfbb836510e9551d2096d33cbf4c69c079c6ff9958846f7ccef9b94933d",
+      "bytes": 144360
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-es-390.png",
+      "sha256": "f4e53ea882526480cdab61239c3c616c2892ad8abdec46e5398e0713bbdcf760",
+      "bytes": 143821
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-es-430.png",
+      "sha256": "793b9ea12cf4d3fbc8a99cfdf67990c7ae9e37f8b88bef00981fc5d92dc93a52",
+      "bytes": 143838
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-recovery-en.png",
+      "sha256": "b5e96279dfec12d7b3bb4e3688289087cc0eafa82d2045aea437f83313336631",
+      "bytes": 79722
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/gallery-recovery-es.png",
+      "sha256": "0d34b13ae91d849cd2625d5ab112bc3d319fa6e47d367c23098e18a301666a36",
+      "bytes": 99930
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/final/results.json",
+      "sha256": "6f8348b104ca39fe1ad25d3a91d331c773191c37918d2b5596f8967d4eaeb74a",
+      "bytes": 29603
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-320-Communities.png",
+      "sha256": "01b1424672330495bace329677637f7f2c9b1f9389573e8f74ed625f14f93da0",
+      "bytes": 55444
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-320-Map.png",
+      "sha256": "1996978f6c6fa985005af6431ea33332d0005ad8017314d489ddd2d45eaa24b1",
+      "bytes": 56150
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-320-My-Pet.png",
+      "sha256": "9c967b258f2b6373517eff36b57cea40982f1066bbab94e17a466e6af108099c",
+      "bytes": 62043
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-390-Communities.png",
+      "sha256": "c1c225d9189f65f3c57b81676a751aa80dc258af7e5743f5cef9a2a6da3250c2",
+      "bytes": 62915
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-390-Map.png",
+      "sha256": "5e7ad7617fd35442d30997690d8a9c522d620ad4d1136b08d4a7670fbbdb4564",
+      "bytes": 58486
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-390-My-Pet.png",
+      "sha256": "2dcf5a93b49145f1bbc94a0d89ee1a93a94963a9cc982f17579accd2cf01b5fa",
+      "bytes": 67233
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-430-Communities.png",
+      "sha256": "0885e2ca402b96f6f5a7949c10f03b60c20146e2a13fef4ab124082235b99c8b",
+      "bytes": 66384
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-430-Map.png",
+      "sha256": "e19a8ba9ea2b5e2ab44057fd81ec772e61e5ccfb5723351678e1f6b83e45658b",
+      "bytes": 58426
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/en-430-My-Pet.png",
+      "sha256": "5cb2cdaff933a79aa8e05c341c174707a6287ed5baea31f4516352acb3dd13d5",
+      "bytes": 67326
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-320-Comunidades.png",
+      "sha256": "5e6e3a3e1748c4640e81825c0e9ee7134b87bcb78ece435e583571a54253b423",
+      "bytes": 54839
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-320-Mapa.png",
+      "sha256": "72a7dc203006b2e4e43354513691b6f9df5e4bdb6d30a8bdc9783b3e4d043bb1",
+      "bytes": 58239
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-320-Mi-mascota.png",
+      "sha256": "4f974857228d3741cd2c9215744ecfe0ee71a6202182c83d5499c4bd20a2d46d",
+      "bytes": 58853
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-390-Comunidades.png",
+      "sha256": "e54f8b3240f54668fa7b85e807ff0a4819f4ef810be08e0794303ac56ebf8f3d",
+      "bytes": 62493
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-390-Mapa.png",
+      "sha256": "a011944b78bbaf9f770bc9dc471c528deaead72712d158b77c58132ccfa6c7b1",
+      "bytes": 58880
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-390-Mi-mascota.png",
+      "sha256": "07818aefa0b4c414f1ab34ca2e8d0004bf9907553030e1563dff0605409a8dc8",
+      "bytes": 69300
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-430-Comunidades.png",
+      "sha256": "84392c349d20a2162b1840cbd1393249cd6ee28554f5ebe504679c90da89f335",
+      "bytes": 66403
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-430-Mapa.png",
+      "sha256": "4fb258216146074d43f6a4354d14f9c8fe462d1aa6ef8ac5412bc91448eb8297",
+      "bytes": 60065
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/es-430-Mi-mascota.png",
+      "sha256": "5cc39e13d156edae1f97232d193d8d2e4c2e505c0746ab440d9204f6a5252999",
+      "bytes": 69895
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/navigation/results.json",
+      "sha256": "98414619f5974ef468be0ec5a61a88bda53abb6e580de66e8bb65502f6f3a5b3",
+      "bytes": 2351
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/README.md",
+      "sha256": "2f9e3e38e87f224f5e36e6368c9fdd9349facd5a5bc1c4f7db89b2d085c8ea14",
+      "bytes": 1151
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/record-validation.json",
+      "sha256": "b34305d84533c8106618ae29e25ed51262b3d897d949eba280a73ff78c6d799c",
+      "bytes": 223
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/separation-en.png",
+      "sha256": "4bd9adea3ed5f04b29bcfaca1b8cfdc69bbd64f86aa1855ce877fe23489e5e59",
+      "bytes": 128137
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/separation-es.png",
+      "sha256": "8b67333f52fee94e1dffacdedea41ff91a815459859e6249367b2b0bc490e18b",
+      "bytes": 137398
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/en-320-error-arrival.png",
+      "sha256": "c29ff02577a6e86ebb66b9253f0cad31335994245349dfe12da8d2ce73105121",
+      "bytes": 56422
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/en-320-error-home.png",
+      "sha256": "b922b112c1917d4648f2be42f338e5acd270e5e9830c78164e60416714e86993",
+      "bytes": 32799
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/en-320-pending-arrival.png",
+      "sha256": "c29ff02577a6e86ebb66b9253f0cad31335994245349dfe12da8d2ce73105121",
+      "bytes": 56422
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/en-320-pending-home.png",
+      "sha256": "6442b73373208d1e612deda7eb01c27a3c0b3c7a3196c23704f36f0b4c756d64",
+      "bytes": 33840
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/en-320-recovered-home.png",
+      "sha256": "7e7e9c328b1f0a7cbabbabc1a3770a0f6078ae339928ce5ec58b3147c7f736be",
+      "bytes": 36803
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/es-320-error-arrival.png",
+      "sha256": "b72e23c7d926f6cf36c42b14adfd39b17ae206a1e67acc99e0b3cce2131550ac",
+      "bytes": 55114
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/es-320-error-home.png",
+      "sha256": "ad83f7e9b16caa40ce3815c16bb3162cbbe1422b714d9b6c37af6f9c3c1b0b8a",
+      "bytes": 35407
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/es-320-pending-arrival.png",
+      "sha256": "b72e23c7d926f6cf36c42b14adfd39b17ae206a1e67acc99e0b3cce2131550ac",
+      "bytes": 55114
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/es-320-pending-home.png",
+      "sha256": "f1fafbaccf17dbc962667a963ba12a568101816b17aa4a097a37155d5c7ff0fd",
+      "bytes": 35349
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/es-320-recovered-home.png",
+      "sha256": "c50acc087265dc7bbe0d4d265bba38e21ba72b506e3e9e052c42a09cc3c1f856",
+      "bytes": 42330
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/short/results.json",
+      "sha256": "fe03c58c0e63406235d46e8690d8eb3e550c0400e939e9405d0c5741b8bfaadd",
+      "bytes": 5147
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-320-care.png",
+      "sha256": "6f88cd809cb7f762eb2dab4d23dec3643421e007a734ce92abb7506f41b09a45",
+      "bytes": 71509
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-320-first-use.png",
+      "sha256": "c7b1ada5250869499ce361f0f21d3dc14343c2e2035cb5648ee82270ab14597d",
+      "bytes": 63936
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-320-qr.png",
+      "sha256": "7c2a9b476f01a5082720a640132fd5f5439ae93f89dee65c43235502ec61f19b",
+      "bytes": 63382
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-390-care.png",
+      "sha256": "3029585e6a5f7ed5404244d958694babaa56f8990af0c38d10f472910a4d4256",
+      "bytes": 83139
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-390-first-use.png",
+      "sha256": "f564ab99026f7baebf4b72b55dd8d8b260326f6854e21f4cdb46eecbbeb52731",
+      "bytes": 70327
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-390-qr.png",
+      "sha256": "bdc8ebb2d8796559ee83689c11565721e00f5bc4dc0485b41b3eafe0cb8713c8",
+      "bytes": 73053
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-430-care.png",
+      "sha256": "df9ce28170610cd0672ae68c95f6e164bfe7a71b9b4780f1997c40677c36db60",
+      "bytes": 84936
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-430-first-use.png",
+      "sha256": "742877d6af86d52d610a10d48d635ef34b9b969e8b9989bea946210c90b96bc0",
+      "bytes": 69232
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/en-430-qr.png",
+      "sha256": "8e592736ee8aafb8c9d7ce4c2557c22f0f863c02bb14f3ad8a0869f48d8ef972",
+      "bytes": 77569
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-320-care.png",
+      "sha256": "9442155bb86a4277f8f0fffc3c63bff05c04c01919e6ea4d0b801baa13b2fe1c",
+      "bytes": 71028
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-320-first-use.png",
+      "sha256": "e93e3911c1866e49a4e6836b623099fe0be9a47440b50506f67655077e962af9",
+      "bytes": 60124
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-320-qr.png",
+      "sha256": "46b6a0b6ba06e6c063ebcf201eb5dc915c7e2fd54e1e0b2ab9afa35e566e3b9f",
+      "bytes": 63571
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-390-care.png",
+      "sha256": "73987baf65b4147aa68287c2d81d2f676f15a17324e902452b87296e439c46b9",
+      "bytes": 86191
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-390-first-use.png",
+      "sha256": "71608facb5cf560bb0e97cd46741a1f33d7015197b5bc931e980dce32ea99f35",
+      "bytes": 72300
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-390-qr.png",
+      "sha256": "189fb7ccf0648bd9a43bd16079cb1a24cf49013ebd044165ee1826bf22ad8876",
+      "bytes": 73080
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-430-care.png",
+      "sha256": "d906ec7402d8525dc754f0d121273f7019bac9b9ec746265658509e46dac4a64",
+      "bytes": 87867
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-430-first-use.png",
+      "sha256": "21cfc29ff89f9992b6080018cf2680a5eb1d5acbbe45e1f10ba683fe8ee9162c",
+      "bytes": 71023
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/es-430-qr.png",
+      "sha256": "1e3632af585cca2f7eb6482a60a1e79a8d88cf9de481dfecae551d56761da521",
+      "bytes": 78858
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/utility/results.json",
+      "sha256": "f908d44a5f4741d8bc48b9bf349eb2cc263c307217383086a14b3b08c089b81e",
+      "bytes": 2603
+    },
+    {
+      "path": "docs/evidence/issue147/illustrated-states/verification.json",
+      "sha256": "83ed0296a2f6139de46c76c87fb733c0d7fc913bac093e9a0c297001e48d2d09",
+      "bytes": 2060
+    },
+    {
       "path": "docs/evidence/issue147/navigation-browser.json",
       "sha256": "635fd28ab42fad7df734bc9d1429d7e8d5f898b701bb709b51b93bf1a6c5b92a",
       "bytes": 2351
@@ -724,8 +1324,8 @@
     },
     {
       "path": "docs/evidence/issue147/README.md",
-      "sha256": "c80db4e23f0425f13beb6288380fc7ebe5eb9c2aabdfd696cda101908fc2b17b",
-      "bytes": 2565
+      "sha256": "dcbd0a50d49be18b2232644a2ed4ec32e081a2f86ecc052235e083a842e593f8",
+      "bytes": 2982
     },
     {
       "path": "docs/evidence/issue147/record-validation.json",

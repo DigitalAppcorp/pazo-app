@@ -1,5 +1,7 @@
 # Evidence for issue147
 
+**Superseded historical evidence below.** The current candidate and corrected direction live in [illustrated-states](illustrated-states/): loading/error are illustrated page states inside main; only first-use orientation is an independent notice. Earlier artifacts and reviews remain for audit and do not represent the current visual decision. The root SHA256 manifest is regenerated for the complete evidence tree.
+
 Final product: `dd46582915043a0a049b3673dfc89a4400f2bfa2`, immutable protected [staging](https://pazo-8bbqfm7ea-digitalapp.vercel.app). [Final report](../../PAZO_ISSUE147_FINAL_REPORT_20261028.md) describes the professional decision, tests, release boundary and residual limits.
 
 - `final/`: 24 complete first-arrival/Home pairs, six retry recovery frames, original PNGs and full-frame contact sheets, ES/EN 320/390/430 at844. All four Home states deliberately forced with controlled synthetic data; the sample post is a test fixture.

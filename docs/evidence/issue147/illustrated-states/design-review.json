@@ -1,0 +1,320 @@
+{
+  "lane": "new_authorized_ui",
+  "authorization_source": "Issue147 autonomous design order plus subsequent direct PO feedback and explicit clarification in current chat, recorded in final report. No prior PO visual acceptance invented.",
+  "artifact_sha": "39943f151ba0aaa8334eb437d4c37c66f8d65021",
+  "deployment": "dpl_HVSpTbnqckHQYFxqda4jdjDX7yCh",
+  "origin": "https://pazo-jgt7cf5k8-digitalapp.vercel.app",
+  "languages": [
+    "es",
+    "en"
+  ],
+  "viewports": [
+    320,
+    390,
+    430
+  ],
+  "applicable_states": [
+    "pending",
+    "content",
+    "empty",
+    "error",
+    "recovery"
+  ],
+  "coverage": [
+    {
+      "language": "es",
+      "width": 320,
+      "state": "pending",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-pending-home.png",
+      "sha256": "a83b9789767bc4534ecee86bcebd0263e7824d70a611cf8faef27c60f4b832c3",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "content",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-content-home.png",
+      "sha256": "8ad1f38665ff7f638f8c24161168fe58440a01743241a91364db93807d97772d",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "empty",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-empty-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "error",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-error-home.png",
+      "sha256": "35fab987e123e290bf21d5f9ac42cda9050db8d8a26c9738ac33a041aa7d781b",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 320,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-320-recovered-home.png",
+      "sha256": "ab5f1205a6a95129bc394d8ba63d7f6951be6afbe706ccaae5d080d543ba0389",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "pending",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-pending-home.png",
+      "sha256": "b6037f3d7c6e5e53f7b0f84c63fa4e2b188c75d3ea8777a3f20be304d3b7a50c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "content",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-content-home.png",
+      "sha256": "ac00a92d97a13555ee38514ef7a75fe3d376625380106713a0a33ee6b84965e0",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "empty",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-empty-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "error",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-error-home.png",
+      "sha256": "51fd2b046331c86e80067177f0850e027013e61f4cc0a829de281b4966ef1de1",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 390,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-390-recovered-home.png",
+      "sha256": "3572749fced796f474e064f547053e66482661da44781a3874351f8a5186f451",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "pending",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-pending-home.png",
+      "sha256": "6a4eecf4da6d33be96fcd8846bc39023209ffe34e384045850aa4e1003d061c6",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "content",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-content-home.png",
+      "sha256": "39dba99abe933bfcb22f2517537efff29eb348073bb86742b6f192cdf8fbc67c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "empty",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-empty-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "error",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-error-home.png",
+      "sha256": "2757a664d5fb841ee3c5633a700ac3a4b6e9c8b39d8b64f2ced861c580d56f04",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "es",
+      "width": 430,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/illustrated-states/final/es-430-recovered-home.png",
+      "sha256": "6d4bb74ef38484fde5b13edab6a71e9d24b9d0321e0ae4a54725536376b6279c",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "pending",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-pending-home.png",
+      "sha256": "784b438b021936ed7c96dcd6433b092b1057e266a557f8b7e73b9dc55043b750",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "content",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-content-home.png",
+      "sha256": "6a297a403bb3cc887fdd805ec0d4af34279927ae44e16f3ffc45a5c5e39fefad",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "empty",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-empty-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "error",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-error-home.png",
+      "sha256": "63ff2116e767da3fea9acad4852c76924a49972b77cf435362b1d68286db366a",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 320,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-320-recovered-home.png",
+      "sha256": "8065a688ae17eaaccca0d2d8a52b1b693f2c17da8567702ade372b240d989dec",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "pending",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-pending-home.png",
+      "sha256": "e164a1a99c9a904a24365da7847aa814c10630f8fa6cd4d356089106bb9290cc",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "content",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-content-home.png",
+      "sha256": "034bd4bb483133c4a2b4496074d4c712e76b787baeecd3849cc3cd92332da970",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "empty",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-empty-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "error",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-error-home.png",
+      "sha256": "bed5c6299151e8e7f79834f6927866c2befa391a64193951e9624e6b6fac754a",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-390-recovered-home.png",
+      "sha256": "568fbdb07ba7dc7b007ea714d45356fa85ce27eab5f26a9eab021c7d12cb9431",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "pending",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-pending-home.png",
+      "sha256": "fa7d3b5e3d4e1ec01c5643265d3d1c75a6e04563456c5d270211de00d61abece",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "content",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-content-home.png",
+      "sha256": "348828c4f75b8963f320d080253b8e478caf1dde5c2496c5aaba7092f6beec28",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "empty",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-empty-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "error",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-error-home.png",
+      "sha256": "6063ab40803043456c32e43af8fa638f1a28bbfdac6c5ce3c11b6a8a03c832a1",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    },
+    {
+      "language": "en",
+      "width": 430,
+      "state": "recovery",
+      "path": "docs/evidence/issue147/illustrated-states/final/en-430-recovered-home.png",
+      "sha256": "988fe480a48e9494d6567db2b56a9054410d82d79d6d3a1a635e9633e93cd127",
+      "frame": "full_runtime",
+      "inspected_by": "Codex, complete runtime contact sheets and representative originals; separate adversarial pass by same agent"
+    }
+  ],
+  "additional_inspection": "Six first-arrival frames in two complete runtime galleries, six recovery frames, and six short originals (welcome ES/EN plus pending/error ES/EN at320x568) inspected. Functional coverage24 full cases, four short cases, native keyboard and independent navigation. Exact immutable frontend assets, fonts/images decoded and finite transitions settled.",
+  "forced_conditions_and_limits": "Auth/API data intercepted, all four feed states forced, one sample post explicitly synthetic. Real immutable protected staging assets transported by authenticated CLI. Utility persistence real isolated PostgreSQL17/RLS/trigger; Web Share simulated. No hosted writes, real hosted login/DB session mutations, physical-device or universal accessibility certification, conversion/performance/model-quality measurement. Only one PO attachment was available (old142 panel); no claim of seeing image2.",
+  "professional_review": {
+    "brief_alignment": "PO clarified that loading/error remain illustrated page states; the cookies reference applies only to independent first-use guidance. HomeFeedStatus is inside main and cannot be a notice. AppNotice accepts welcome only and is outside main. Three original SVG illustrations with different meanings; QR is primary full-width, Agenda/Explore secondary equal-width. Explicit code/runtime tests and full captures verify this distinction. The first floating-error prototype was a mistaken interpretation and was removed.",
+    "composition": "Loading and error use an illustration-led page composition, centered reading group and actions below copy within the feed page. They do not float over other screens. First use is a compact independent nonmodal surface above the dock and outside page scroll. Underlying identity/navigation remain visible. The previous inline minimal heading and early green142 card are historical alternatives, not final UI.",
+    "hierarchy": "Page title anchors Home; large postcards or reconnection artwork gives loading/error a deliberate visual center. Heading then short explanation then actions. Retry is the stronger error action, My Pet secondary. Welcome has a smaller passport illustration, owner name, concise copy, one full-width QR action and an equal pair of secondary actions; no arbitrary inline wrap of three buttons.",
+    "continuity": "Existing PAZO Quicksand, warm canvas, teal/lime identity, profile, feed content, empty-state card and floating dock preserved. State changes replace the Home state rather than stack a second full-height loader after guidance. Welcome does not contribute height to the main page; the previous first-use auto-scroll is removed. Navigation clears the ephemeral notice and reload does not repeat it.",
+    "negative_space": "Page-level breathing room frames the illustration/message/action group rather than isolating a spinner near the dock. No fake posts or decorative skeletons fill unavailable data. At568 the artwork reduces while text/actions keep usable size. Welcome overlays some underlying tools by design, as a transient independent notice; closing or navigating returns full access without a permanent added content block.",
+    "actions": "Error Retry/My Pet share one aligned row; loading offers one secondary route. Welcome QR spans the row, Agenda and Explore occupy equal columns. Runtime checks equal geometry,48px controls, unobstructed hit centers, placement above dock, initial primary focus, Escape dismissal and QR/Agenda operation. Close returns focus to current nav. No backdrop, focus trap, payment, invitation or automatic modal.",
+    "identity": "Postcards represent arriving stories; cloud/return arrow represents reconnection; passport/paw/check represents first identity ready. SVG artwork drawn in code, not external network assets or repurposed screenshots. Existing English species/age presentation preserved, owner data untouched. No cookie consent is implied by the presentation reference.",
+    "states": "All24 Home pending/content/empty/error ES/EN320/390/430 cases and six recoveries inspected in full-frame galleries. Six first-arrival originals/galleries and short welcome/loading/error inspected. Four568px cases pass. Other tools remain accessible during pending/offline states and retry recovers only feed. Hosted Auth/data is controlled; real persistence is in disposable PG17.",
+    "better_than_no_addition": "The PO requested an independent first-use invitation and illustrated state pages; removing all guidance or leaving bare status text would not meet that direction. The notice links existing tools once and is dismissible; the separate state composition explains pending/error without blocking unrelated tools. This is a professional rationale, not a measured business benefit."
+  },
+  "adversarial": {
+    "reviewer_or_separate_pass": "Separate adversarial critique by the same agent; no independent reviewer claimed.",
+    "defects": "Prior pass overvalued minimalism and functional checks. Initial reinterpretation incorrectly turned feed page errors into notices; PO explicitly corrected this. Previously arbitrary CTA wrapping lacked a primary/secondary structure. The old tools-embedded hint required scroll accommodation and the old loader lacked illustration/composition.",
+    "corrections": "Restored Home state ownership inside main; welcome-only app notice outside main. Added semantic type and actual App tests so loading/error cannot silently move into the notice layer. Three distinct original SVG illustrations; page art scales at short height. Welcome primary full width plus two equal secondary choices, close/Escape and focus return. Preserved request-epoch/session fences and all business behavior.",
+    "recapture_comparison": "Exact39943f15 staging recaptured24 cases +6 recoveries +4 short cases, QR/Agenda persistence6 and pending-tools/ABA/offline6. Whole-frame inspection confirms no floating feed errors, proper illustrated page states, independent welcome only, aligned actions, no dock occlusion or collision. Wrong floating-error prototype was discarded and is not presented as accepted. Historical598 evidence is explicitly superseded."
+  },
+  "design_decision": "DESIGN_QA_PASS",
+  "po_visual": {
+    "status": "NOT_REQUESTED"
+  },
+  "release_authorized": false,
+  "method_evaluation": "Brain5abadf01:13 engine tests +12 completeness/authority/brief counterexamples PASS. Validator cannot judge artistic quality or truth; comparative independent model evaluation NOT_EVALUATED."
+}

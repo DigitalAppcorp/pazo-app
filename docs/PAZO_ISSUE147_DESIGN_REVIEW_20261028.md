@@ -1,5 +1,7 @@
 # Issue147 — primera experiencia y revisión profesional de diseño
 
+> **Superado por la revisión posterior del PO:** el cierre598 y su dirección sobria fueron insuficientes. La aclaración distingue pantallas ilustradas de carga/error frente al aviso independiente de orientación inicial. [Decisión y evidencia actualizadas](PAZO_ISSUE147_FINAL_REPORT_20261028.md). El texto inferior conserva el diagnóstico y exploración anteriores; no acredita aceptación del PO ni el acabado del candidato39943f15.
+
 Autoridad: [issue147, regla vigente del28-oct-2026](https://github.com/DigitalAppcorp/pazo-app/issues/147) y orden directa del PO. UI nueva en mejora autorizada: Design OS selecciona, critica y corrige; no se solicita elección de alternativas ni aprobación estética rutinaria. Producción, SQL de1B y nueva medición siguen sin autorización de lanzamiento. Implementación en rama aislada, con PR verificable; ningún merge automático.
 
 ## Diagnóstico y causa raíz

@@ -37,7 +37,7 @@ const settle=page=>page.evaluate(async()=>{
 })
 try{
  await server?.listen();browser=await chromium.launch({headless:true,...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{channel:process.platform==='win32'?'msedge':undefined})})
- for(const lang of ['es','en'])for(const width of smoke?[320]:[320,390,430])for(const state of smoke?['pending']:['pending','content','empty','error']){
+ for(const lang of ['es','en'])for(const width of smoke?[320]:[320,390,430])for(const state of smoke?['pending','error']:['pending','content','empty','error']){
   let created=false,mode=state,releases=[],errors=[],blockedWrites=0
   const context=await browser.newContext({viewport:{width,height},locale:lang==='es'?'es-GT':'en-US',isMobile:true,hasTouch:true,reducedMotion:'reduce',serviceWorkers:'block'})
   await context.route('**/*',async route=>{
