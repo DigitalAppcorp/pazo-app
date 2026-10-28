@@ -1,3 +1,20 @@
+# Actualización27-oct-2026 Guatemala — segundo Cron real comprobado
+
+Lectura de producción28oct00:19:43UTC (27oct18:19 Guatemala): **cinco ejecuciones periódicas reales exitosas** del job4, sin cambiar el calendario ni contar la prueba manual. El segundo run real,8084, comenzó27oct06:17:00.017593UTC y terminó06:17:00.046273UTC (27oct00:17 Guatemala). También pasaron los runs8445(12:17UTC),8806(18:17UTC) y9167(28oct00:17UTC).
+
+Último heartbeat28oct00:17:00.017873UTC,retención14d/policyv1,retention_ready=true,enabled=true. Job activo con propietario/databasepostgres, comandoSELECT public.pazo_marketing_prune_all_v1(); y calendario17 */6 * * * UTC originales. Se satisface ahora la evidencia de dos ejecuciones periódicas; la excepción de activación previa se conserva únicamente como historia.
+
+```text
+CRON_REAL_RUNS_2: PASS
+MARKETING_COLLECTION: ACTIVE
+READY_TO_PUBLISH_THREE_META_ADS: YES
+```
+
+Este seguimiento queda concluido. Solo se actualizó documentación; no se repitieron despliegues, altasQA, activación ni pruebas anteriores. No se publicaron anuncios ni se realizaron gastos en Meta mediante este agente. Las referencias a segundo run pendiente en el registro inferior son snapshots históricos y quedan sustituidas por esta comprobación. Las demás limitaciones documentadas permanecen intactas.
+
+---
+## Postflight de activación anterior; conservar como historia
+
 # Issue130 — medición activa y preparación técnica completada (26-oct-2026 Guatemala)
 
 Este estado sustituye los snapshots OFF/HOLD que se conservan más abajo. El PO ordenó lanzar antes del segundo ciclo de purga tras explicar la diferencia entre medición y verificación repetida; la excepción consta en [issue130](https://github.com/DigitalAppcorp/pazo-app/issues/130#issuecomment-6431092022). No se publicó ningún anuncio ni se gastó en Meta.
