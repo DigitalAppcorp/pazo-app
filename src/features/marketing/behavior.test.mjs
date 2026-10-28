@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {pathToFileURL} from 'node:url'
 import ts from 'typescript'
+fs.mkdirSync(path.resolve('node_modules/.cache'),{recursive:true})
 const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/behavior-'))
 async function module(file){const source=fs.readFileSync(file,'utf8').replace(/import \{\s*supabase\s*\} from '[^']+'/,'const supabase={}');const target=path.join(cache,path.basename(file)+'.mjs');fs.writeFileSync(target,ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText);return import(pathToFileURL(target).href)}
 const {createBehaviorRecorder,BEHAVIOR_COLLECTION_ENABLED}=await module('src/features/marketing/behaviorRuntime.ts')
