@@ -1,0 +1,98 @@
+name: PAZO Visual Lab (synthetic screenshots)
+
+# This approved audit branch runs FULL on PR; other branches default to pilot.
+# All scenes synthetic, local-only, with no external writes.
+# After the workflow exists on main, operators can manually run the full matrix.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/visual-lab/**'
+      - 'supabase/tests/visual/**'
+      - '.github/workflows/pazo-visual-lab.yml'
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'pilot (9 scenes × 390 ES/EN) or full (all registered synthetic scenes × 5 sizes × ES/EN)'
+        type: choice
+        required: true
+        default: pilot
+        options: [pilot, full]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic-browser-gallery:
+    name: Visual QA — ${{ matrix.viewport }}px
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        viewport: ${{ fromJSON(((github.event_name == 'workflow_dispatch' && inputs.scope == 'full') || (github.event_name == 'pull_request' && github.head_ref == 'audit/pazo-visual-lab-20261025')) && '[320,390,430,768,1440]' || '[390]') }}
+    env:
+      PAZO_VISUAL_LAB_ORIGIN: http://127.0.0.1:5189
+      PAZO_VISUAL_LAB_DIR: artifacts/visual-lab
+      PAZO_VISUAL_LAB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      # Vite's existing publicConfig requires this exact host. There are NO
+      # credentials: the key is a known-invalid synthetic sentinel.
+      # Chromium intercepts ALL remote requests before network access.
+      VITE_SUPABASE_URL: https://mrybvqdebbgcayuvgkkr.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SYNTHETIC_VISUAL_LAB_NO_NETWORK
+      VITE_PAZO_F16_SANDBOX_QA_UI: 'false'
+    steps:
+      - name: Checkout exact source under audit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install existing PAZO dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check offline visual capture contract
+        run: |
+          node --check scripts/visual-lab/capture.mjs
+          node --check scripts/visual-lab/cases.mjs
+          node --test scripts/visual-lab/contract.test.mjs
+      - name: Install isolated pinned browser tools
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pazo-visual-tools" --no-package-lock --no-audit --no-fund --ignore-scripts playwright@1.56.1 axe-core@4.10.3
+          node "$RUNNER_TEMP/pazo-visual-tools/node_modules/playwright/cli.js" install --with-deps chromium
+          echo "PAZO_PLAYWRIGHT_MODULE=$RUNNER_TEMP/pazo-visual-tools/node_modules/playwright" >> "$GITHUB_ENV"
+          echo "PAZO_AXE_CORE_PATH=$RUNNER_TEMP/pazo-visual-tools/node_modules/axe-core/axe.min.js" >> "$GITHUB_ENV"
+      - name: Launch isolated localhost-only Vite
+        shell: bash
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 5189 --strictPort >/tmp/pazo-visual-vite.log 2>&1 &
+          echo $! >/tmp/pazo-visual-vite.pid
+          curl --fail --silent --retry 35 --retry-connrefused --retry-delay 1 http://127.0.0.1:5189/supabase/tests/visual/browser-harness.html >/dev/null
+      - name: Capture real components with external network blocked
+        shell: bash
+        env:
+          VISUAL_SCOPE: ${{ github.event_name == 'workflow_dispatch' && inputs.scope || (github.head_ref == 'audit/pazo-visual-lab-20261025' && 'full' || 'pilot') }}
+        run: |
+          node scripts/visual-lab/capture.mjs --scope="$VISUAL_SCOPE" --viewport=${{ matrix.viewport }}
+      - name: Store Vite logs when needed
+        if: failure()
+        run: |
+          mkdir -p artifacts/visual-lab
+          tail -n 180 /tmp/pazo-visual-vite.log > artifacts/visual-lab/vite-tail.log || true
+      - name: Upload synthetic screenshots, manifest and axe findings
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: pazo-visual-lab-${{ github.run_id }}-${{ matrix.viewport }}-${{ github.run_attempt }}
+          path: artifacts/visual-lab/
+          retention-days: 14
+          if-no-files-found: warn
