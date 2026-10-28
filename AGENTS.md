@@ -1,8 +1,16 @@
-## Issue #150 — candidato de analítica preparado, sin GO de release
+## DECISIÓN VIGENTE DEL PO — analítica global de PAZO (28-oct-2026)
 
-Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Informe único: docs/PAZO_ISSUE150_FINAL_REPORT_20261028.md. PR151 y staging pazo-7f4g5xiro-digitalapp.vercel.app, frontend2b623bb8. Consultar contrato y runbook de privacidad enlazados en el informe. El estado exacto de CI y revisión se registra en issue150 al entregar.
+**Leer antes de proponer cualquier cambio de analítica, feed, Demo, fake doors, onboarding, UX o personalización:** [docs/PAZO_GLOBAL_PRODUCT_INTELLIGENCE_DECISION_20261028.md](docs/PAZO_GLOBAL_PRODUCT_INTELLIGENCE_DECISION_20261028.md).
 
-Nueva colección OFF y migración20261028210000 PREPARED_NOT_APPLIED. No merge/publicación final, apply SQL alojado ni nuevos datos reales sin GO único150. Producción147, medición anterior y fechas se conservan. No reutilizar GO147 ni reabrir142/147. No crear branch Supabase facturable. Las entradas inferiores preservan historia.
+El PO **aprueba la dirección estratégica** de un sistema global de inteligencia de producto: cobertura de **todas las pantallas y acciones relevantes**, con eventos que distingan exposición, intención, éxito, fallo y reintento, reutilizando mediciones actuales. **No aprueba capturar indiscriminadamente cada clic ni enlazar clics brutos a los algoritmos.** Feed/intereses y fake doors siguen independientes: observar y validar antes de cualquier cambio de ranking. Respetar privacidad, GPC/retirada, QA, muestra mínima, límites de 14 días, rendimiento y semántica honesta. **Esta decisión NO autoriza programar, añadir datos, migrar, fusionar ni desplegar.** El siguiente agente debe realizar primero una auditoría/inventario por pantalla y control cuando el PO lo ordene.
+
+## Issue #150 — PUBLICADO, recopilación de comportamiento activa (28-oct-2026)
+
+El encabezado anterior «candidato sin GO», y las afirmaciones de «OFF / migración no instalada» quedaron **superados por el GO explícito del PO**. [PR #151](https://github.com/DigitalAppcorp/pazo-app/pull/151) fusionado en `main`, merge SHA `3dcd2e2e978bd9ea833c10efad0573d56ad57231`; producción `dpl_9uXdNs5HAXmLZAaDd7r2z59uQw8K` READY y alias `pazo-app.vercel.app`. Migración preparada fuente `20261028210000`, instalada en Supabase como versión alojada `20261028215020`, sin repetir; Edge landing v6. `behavior_enabled=true` desde 2026-10-28 22:04:51 UTC, aviso ES/EN `pazo-behavior-notice-v1`, retención 14 días y cron previo activos. Marketing y primera utilidad previos preservados. [Postflight y límites](https://github.com/DigitalAppcorp/pazo-app/issues/150#issuecomment-6481866259).
+
+**#150 ya no es una solicitud de publicar.** Las métricas iniciales carecen de muestra real y no se retroalimentan de forma automática al algoritmo. No crear QA artificial, no cambiar criterios de atribución, no reinstalar SQL, no reiniciar fechas ni extrapolar retroactividad. Los informes de #150 anteriores al GO son snapshots históricos de la fase de candidato, no el estado de producción. Las instrucciones antiguas de no-GO que aparezcan más abajo son históricas y no autorizan repetir operaciones.
+
+---
 
 ## GO #147 ejecutado — publicación verificada (28-oct-2026)
 
