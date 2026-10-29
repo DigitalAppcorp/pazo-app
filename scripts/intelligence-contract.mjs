@@ -10,7 +10,7 @@ assert.deepEqual(Object.keys(catalog.intelligenceTasks).sort(),vocabulary('intel
 assert.deepEqual([...catalog.anonymousSignals].sort(),vocabulary('experience_signal_valid'))
 assert.equal(catalog.INTELLIGENCE_COLLECTION_ENABLED,false)
 assert.match(fs.readFileSync('supabase/functions/pazo-marketing-landing/index.ts','utf8'),/INTELLIGENCE_EXPERIENCE_RELEASED=false/)
-assert.match(fs.readFileSync('src/features/legal/legalCopy.ts','utf8'),/INTELLIGENCE_NOTICE_RELEASED=false/)
+assert.match(fs.readFileSync('src/features/legal/legalCopy.ts','utf8'),/INTELLIGENCE_NOTICE_RELEASED=true/)
 assert.match(sql,/intelligence_enabled boolean NOT NULL DEFAULT false/)
 const base='98f6d599b622803bcf495d8f6d3fa0e0d8490f69'
 const mutableMarketing=new Set(['behaviorRuntime.ts','behavior.test.mjs','BehaviorPanel.tsx','BehaviorPanel.css','useBehaviorObservation.ts','preregRuntime.ts'])
