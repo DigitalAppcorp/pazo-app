@@ -67,7 +67,7 @@
   {"file":"src/features/marketing/BehaviorReadout.tsx","controls":0,"sha256":"9bd246d639c9ef7e632b1e7fe160a79393065b7684795ef76c9dbac6fc094b11"},
   {"file":"src/features/marketing/BehaviorRecommendations.tsx","controls":0,"sha256":"0599295a6604d5499a4b42a871f56b84b33df9e1c5063539a2dbef32cee0bd37"},
   {"file":"src/features/marketing/FirstUtilityPanel.tsx","controls":1,"sha256":"8d7b91b1de79dad9614d587388c14c6c84b150765d67fddf27411517009ceec9"},
-  {"file":"src/features/marketing/IntelligencePanel.tsx","controls":1,"sha256":"249b48a079e56636e34299fe8743645ddc457b15859dcc5d3ed5da752828f533"},
+  {"file":"src/features/marketing/IntelligencePanel.tsx","controls":1,"sha256":"f9b577ca377f9e545ddc316cf0b782d46a9ec187e7a96c4e736746d61c733fab"},
   {"file":"src/features/moderation/ModerationAccess.tsx","controls":4,"sha256":"41b524ca956892b1ae645512202882915b9306a5345b5b5a54bafcbcdc0832b5"},
   {"file":"src/features/moderation/ModerationMediaQueue.tsx","controls":3,"sha256":"14705c9d65797228b739fc5dd2b0ec29d5c291ce09ca0fbebf26b1512edc1c52"},
   {"file":"src/features/moderation/ModeratorQueue.tsx","controls":5,"sha256":"1132fcba3690e51f988e134b3d98e643e39ab09526c22111fc4c17717de47acd"},
