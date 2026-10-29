@@ -108,7 +108,8 @@ try{
    for(const screen of ['home','communities','places','pet'])assert.ok(screens.includes(screen))
   }
   await page.getByRole('button',{name:lang==='es'?'Centro de control':'Control center',exact:true}).click()
-  await page.locator('button:visible').filter({hasText:lang==='es'?/^Comportamiento$/:/^Behavior$/}).first().click().catch(async e=>{await page.screenshot({path:out+'/failure.png',fullPage:true});console.error({errors,body:(await page.locator('body').innerText()).slice(0,3500)});throw e})
+  if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
+  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click()
   await page.locator('.behavior-coverage').waitFor()
   assert.equal(await page.locator('.behavior-funnel li').count(),4)
   await page.evaluate(lang=>{const e=document.createElement('div');e.textContent=lang==='es'?'QA · Datos sintéticos · Backend aislado':'QA · Synthetic data · Isolated backend';e.style.cssText='position:fixed;bottom:0;right:0;z-index:10000;background:#f8edc9;color:#204e4a;font:600 11px system-ui;padding:6px 10px;pointer-events:none';document.body.append(e)},lang)
@@ -127,7 +128,7 @@ try{
   await page.locator('.behavior-funnel').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-funnel.png',fullPage:true})
   await page.getByRole('button',{name:lang==='es'?'¿Qué usan al volver?':'What do people use on return?',exact:true}).click()
   await page.getByRole('heading',{name:lang==='es'?'Qué usan al regresar':'What people use on return',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-return.png',fullPage:true})
-  failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar datos':'Refresh data',exact:true}).click();await page.getByRole('alert').waitFor()
+  failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar datos':'Refresh data',exact:true}).click();await page.getByTestId('behavior-panel').getByRole('alert').waitFor()
   failReport=false;await page.getByRole('button',{name:lang==='es'?'Reintentar informe':'Retry report',exact:true}).click();await page.locator('.behavior-coverage').waitFor()
   await context.setOffline(true)
   await page.getByText(lang==='es'?'Sin conexión. Comprueba la red y vuelve a actualizar.':'Offline. Check your connection and refresh again.',{exact:true}).waitFor()
