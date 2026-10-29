@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "url": "http://127.0.0.1:5364/supabase/tests/marketing/behavior-harness.html?lang=es",
+  "transport": "actual HTTP to isolated PG17",
+  "auth": "disclosed QA double",
+  "checks": [
+    "120 accounts",
+    "Ads80",
+    "All120",
+    "non-allowlisted write RPC503",
+    "no MFA widget",
+    "no runtime errors"
+  ],
+  "hostedWrites": 0
+}

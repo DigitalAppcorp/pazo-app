@@ -15,7 +15,8 @@ Este cambio no activa medición, modifica retención ni instala un proveedor. Lo
 2. Aplicar exclusivamente `20261029121000_pazo_admin_visual_summary.sql`. Añade una proyección de solo lectura y privilegios limitados a usuarios autenticados que además sean administradores. No añade tablas, eventos, escrituras, flags ni identidades a la respuesta.
 3. Registrar versión hospedada y hashes realmente instalados en el acta de lanzamiento, sin modificar el manifiesto histórico del candidato preparado.
 4. Publicar el frontend aprobado mediante el procedimiento habitual. No cambiar aliases ni promover previews de otro SHA.
-5. Probar con una sesión real de administrador AAL1: abrir Resumen/Comportamiento, filtrar, consultar el detalle y recuperar un fallo transitorio sin autenticador adicional. Verificar denegación a una cuenta ordinaria y sin sesión; comprobar que PayPal y operaciones sensibles mantienen su MFA. Confirmar que los flags y fechas no cambiaron.
+5. Activar explícitamente la exclusión local en el navegador/origen de producción del operador si desea excluir sus propios envíos: la preferencia de staging no se transfiere a producción. No autoexcluir a todos los visitantes.
+6. Probar con una sesión real de administrador AAL1: abrir Resumen/Comportamiento, filtrar, consultar el detalle y recuperar un fallo transitorio sin autenticador adicional. Verificar denegación a una cuenta ordinaria y sin sesión; comprobar que PayPal y operaciones sensibles mantienen su MFA. Confirmar que los flags y fechas no cambiaron.
 
 ## Reversión preparada
 
