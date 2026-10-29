@@ -1,3 +1,4 @@
+import {beginTask} from '../../features/marketing/intelligenceRuntime'
 import { useCallback, useEffect, useState } from 'react'
 import type { CommunitySummary, Pet } from '../../types/pazo'
 import {
@@ -36,6 +37,7 @@ export const CommunitiesView = ({
   const [membershipBusyId, setMembershipBusyId] = useState<string | null>(null)
 
   const loadCommunities = useCallback(async () => {
+    const finishObservation=beginTask('community_discover')
     if (!canUseCommunities) {
       setCommunities([])
       setIsLoading(false)
@@ -47,6 +49,7 @@ export const CommunitiesView = ({
       const rows = await fetchCommunitySummaries({ limit: 50 })
       setCommunities(rows)
     } catch (error) {
+      finishObservation('failure')
       console.error('Error loading Communities:', error)
     } finally {
       setIsLoading(false)

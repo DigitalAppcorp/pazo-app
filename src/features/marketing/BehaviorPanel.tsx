@@ -6,12 +6,14 @@ import {BehaviorReadout} from './BehaviorReadout'
 import {BehaviorRecommendations} from './BehaviorRecommendations'
 import {BehaviorOutcomes} from './BehaviorOutcomes'
 import {AdminPaypalMfaStepUp} from '../admin/components/AdminPaypalMfaStepUp'
+import {IntelligencePanel,type IntelligenceView} from './IntelligencePanel'
 
 export function BehaviorPanel({lang,period}:{lang:'es'|'en';period:7|30|90}){
  const l=(es:string,en:string)=>lang==='es'?es:en
  const [segment,setSegment]=useState<BehaviorSegment>('all'),[creative,setCreative]=useState('all'),[revision,setRevision]=useState(0)
  const [response,setResponse]=useState<{key:string;data:BehaviorSummary|null;error:boolean;mfa?:boolean}|null>(null)
- const [view,setView]=useState<'ads'|'return'>('ads')
+ const [view,setView]=useState<IntelligenceView>('ads')
+ const legacy=view==='ads'||view==='return'
  const key=`${period}:${segment}:${creative}:${revision}`
  const current=response?.key===key?response:null,data=current?.data
  const [online,setOnline]=useState(()=>typeof navigator==='undefined'||navigator.onLine)
@@ -29,14 +31,21 @@ export function BehaviorPanel({lang,period}:{lang:'es'|'en';period:7|30|90}){
  const empty=l('Aún no hay resultados suficientes para mostrar sin comprometer la privacidad.','There are not enough results to show while protecting privacy.')
  const section=(title:string,note:string,body:React.ReactNode)=><section className="behavior-section"><h3>{title}</h3><p className="behavior-caption">{note}</p>{body}</section>
  return <div className="behavior-panel" data-testid="behavior-panel">
-  <div className="behavior-intro"><div><p className="behavior-eyebrow">{l('RECORRIDOS OBSERVADOS','OBSERVED JOURNEYS')}</p><h3>{l('De la llegada al primer uso','From arrival to first use')}</h3><p>{l('Comprende las visitas desde anuncios y el uso al regresar.','Understand ad arrivals and use on return.')}</p></div><button type="button" onClick={()=>setRevision(x=>x+1)}>{l('Actualizar datos','Refresh data')}</button></div>
-  <div className="behavior-switch" role="group" aria-label={l('Pregunta a consultar','Question to explore')}><button type="button" aria-pressed={view==='ads'} onClick={()=>setView('ads')}>{l('¿Hasta dónde llegan los anuncios?','How far do ad arrivals get?')}</button><button type="button" aria-pressed={view==='return'} onClick={()=>setView('return')}>{l('¿Qué usan al volver?','What do people use on return?')}</button></div>
+  <div className="behavior-intro"><div><p className="behavior-eyebrow">{l('RECORRIDOS OBSERVADOS','OBSERVED JOURNEYS')}</p><h3>{l('Comprende cómo se usa PAZO','Understand how PAZO is used')}</h3><p>{l('Cinco preguntas para descubrir qué funciona y dónde conviene mejorar.','Five questions to see what works and where to improve.')}</p></div><button type="button" onClick={()=>setRevision(x=>x+1)}>{l('Actualizar datos','Refresh data')}</button></div>
+  <div className="behavior-switch intelligence-questions" role="group" aria-label={l('Pregunta a consultar','Question to explore')}>
+   <button type="button" aria-pressed={view==='ads'} onClick={()=>setView('ads')}>{l('¿Hasta dónde llegan los anuncios?','How far do ad arrivals get?')}</button>
+   <button type="button" aria-pressed={view==='friction'} onClick={()=>setView('friction')}>{l('¿Dónde se interrumpen las tareas?','Where do tasks get interrupted?')}</button>
+   <button type="button" aria-pressed={view==='social'} onClick={()=>setView('social')}>{l('¿El contenido genera participación?','Does content lead to participation?')}</button>
+   <button type="button" aria-pressed={view==='tools'} onClick={()=>setView('tools')}>{l('¿Qué herramientas despiertan interés?','Which tools attract interest?')}</button>
+   <button type="button" aria-pressed={view==='return'} onClick={()=>setView('return')}>{l('¿Qué usan al volver?','What do people use on return?')}</button>
+  </div>
   <BehaviorFilters lang={lang} segment={segment} creative={creative} onSegment={value=>{setSegment(value);if(value==='unknown')setCreative('all')}} onCreative={setCreative}/>
+  <IntelligencePanel lang={lang} period={period} segment={segment} creative={creative} revision={revision} view={view}/>
   {!online&&<p role="status" className="behavior-state">{l('Sin conexión. Comprueba la red y vuelve a actualizar.','Offline. Check your connection and refresh again.')}</p>}
-  {!current&&<div role="status" className="behavior-state behavior-loading"><span aria-hidden="true">···</span><h3>{l('Consultando recorridos agregados','Loading aggregate journeys')}</h3><p>{l('El resto de Administración sigue disponible.','The rest of Administration remains available.')}</p></div>}
-  {current?.error&&!current.mfa&&<div role="alert" className="behavior-state behavior-error"><h3>{l('No pudimos consultar este informe','This report could not be loaded')}</h3><p>{l('No se muestran ceros como si fueran resultados. Reintenta esta consulta.','Zeros are not shown as results. Retry this query.')}</p><button onClick={()=>setRevision(x=>x+1)} type="button">{l('Reintentar informe','Retry report')}</button></div>}
-  {current?.mfa&&<AdminPaypalMfaStepUp lang={lang} purpose="analytics" onVerified={()=>setRevision(x=>x+1)}/>}
-  {data&&<>
+  {legacy&&!current&&<div role="status" className="behavior-state behavior-loading"><span aria-hidden="true">···</span><h3>{l('Consultando recorridos agregados','Loading aggregate journeys')}</h3><p>{l('El resto de Administración sigue disponible.','The rest of Administration remains available.')}</p></div>}
+  {legacy&&current?.error&&!current.mfa&&<div role="alert" className="behavior-state behavior-error"><h3>{l('No pudimos consultar este informe','This report could not be loaded')}</h3><p>{l('No se muestran ceros como si fueran resultados. Reintenta esta consulta.','Zeros are not shown as results. Retry this query.')}</p><button onClick={()=>setRevision(x=>x+1)} type="button">{l('Reintentar informe','Retry report')}</button></div>}
+  {legacy&&current?.mfa&&<AdminPaypalMfaStepUp lang={lang} purpose="analytics" onVerified={()=>setRevision(x=>x+1)}/>}
+  {data&&(view==='ads'||view==='return')&&<>
    <div className="behavior-coverage"><strong>{data.status==='paused'?l('Colección nueva pausada','New collection paused'):data.status==='insufficient'?l('Muestra insuficiente','Insufficient sample'):l('Observación activa','Observation active')}</strong><span>{l('Cobertura desde','Coverage since')}: {date(data.coverage_since)}</span><span>{l('Actualizado','Updated')}: {date(data.as_of)} · Los Angeles</span><span>{data.effective_days}{l(' días efectivos · máximo 14',' effective days · maximum 14')}{period>14?l(' · histórico adicional no disponible',' · additional history unavailable'):''}</span></div>
    <BehaviorReadout data={data} lang={lang} view={view}/>
    <div className="behavior-kpis">{[[l('Cuentas observadas','Observed accounts'),data.totals?.accounts,l('Verificadas y elegibles','Verified and eligible')],[l('Sesiones observadas','Observed sessions'),data.totals?.sessions,l('No son visitantes únicos','Not unique visitors')],[l('Sesiones de regreso','Return sessions'),data.totals?.return_sessions,l('Con una sesión previa observada','With a prior observed session')],[l('Cuentas con utilidad','Accounts with utility'),data.totals?.useful_accounts,l('Cuidado guardado o Share resuelto','Care saved or Share resolved')]].map(([title,value,note])=><article key={String(title)}><p>{title}</p><strong>{format(value as number|undefined)}</strong><small>{note}</small></article>)}</div>

@@ -25,7 +25,7 @@ const fake={
  }
 }
 globalThis.__FIRST_PET_SERVICE__=fake
-const source=fs.readFileSync('src/services/petService.ts','utf8').replace("import { supabase } from './supabaseClient'",'const supabase=globalThis.__FIRST_PET_SERVICE__')
+const source=fs.readFileSync('src/services/petService.ts','utf8').replace("import { supabase } from './supabaseClient'",'const supabase=globalThis.__FIRST_PET_SERVICE__').replace("import {beginTask} from '../features/marketing/intelligenceRuntime'",'const beginTask=()=>()=>{}')
 const file=path.join(cache,'pet-service.mjs')
 fs.writeFileSync(file,ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText)
 const {createPetProfile}=await import(pathToFileURL(file).href)

@@ -1,13 +1,19 @@
 import {useEffect,useLayoutEffect,useRef} from 'react'
 import {supabase} from '../../services/supabaseClient'
-import {BEHAVIOR_COLLECTION_ENABLED,behaviorRecorder,type BehaviorScreen} from './behaviorRuntime'
+import {BEHAVIOR_COLLECTION_ENABLED,behaviorRecorder,withdrawBehavior,type BehaviorScreen} from './behaviorRuntime'
+import {INTELLIGENCE_COLLECTION_ENABLED} from './intelligenceCatalog'
 
-export function useBehaviorObservation(owner:string|undefined,screen:BehaviorScreen|null,state:'ready'|'loading'|'error'){
+export function useBehaviorObservation(owner:string|undefined,screen:BehaviorScreen|null,state:'ready'|'loading'|'error',petContext=''){
+ useLayoutEffect(()=>{behaviorRecorder.setContext(petContext)},[petContext])
  const latest=useRef(screen)
  const previous=useRef<{screen:BehaviorScreen;state:typeof state}|null>(null)
  useLayoutEffect(()=>{latest.current=screen},[screen])
  useEffect(()=>{
-  if(!BEHAVIOR_COLLECTION_ENABLED||(navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl===true)return
+  if(!BEHAVIOR_COLLECTION_ENABLED)return
+  if((navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl===true){
+   if(INTELLIGENCE_COLLECTION_ENABLED&&owner)void withdrawBehavior()
+   return
+  }
   let current=true,authVersion=0
   previous.current=null
   behaviorRecorder.bind(null)

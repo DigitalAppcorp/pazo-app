@@ -1,3 +1,4 @@
+import {beginTask} from '../../features/marketing/intelligenceRuntime'
 import { PazoMotifIcon } from '../icons/PazoMotifIcons'
 import { useEffect, useState } from 'react'
 import type { Pet, Post } from '../../types/pazo'
@@ -106,6 +107,7 @@ export const CreatePostModal = ({
         }
         setIsSubmitting(true)
 
+        const finishObservation=beginTask('feed_publish')
         let uploadedPath: string | null = null
 
         try {
@@ -203,6 +205,7 @@ export const CreatePostModal = ({
             setShareLocation(false)
             setPostLocation('')
         } catch (err: any) {
+            finishObservation('failure')
             if (uploadedPath) {
                 const { error: cleanupError } = await supabase.storage
                     .from('post-photos')

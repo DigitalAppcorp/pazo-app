@@ -1,3 +1,4 @@
+import {beginTask,observeTask} from '../../features/marketing/intelligenceRuntime'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import qrcode from 'qrcode-generator'
 import {recordVerifiedQrUse} from '../../features/supporter/public/recordVerifiedQrUse'
@@ -111,6 +112,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang, ownerId }: PassportM
   if (!isOpen) return null
 
   const handleShare = async () => {
+    const finishObservation=beginTask('qr_share')
     if (!publicUrl || verifiedContext?.petId!==pet.id || verifiedContext.ownerId!==ownerId || isLoading || error) return
 
     try {
@@ -126,6 +128,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang, ownerId }: PassportM
         alert(lang === 'es' ? 'Enlace copiado.' : 'Link copied.')
       }
     } catch (err: any) {
+      finishObservation(err?.name==='AbortError'?'cancel':'failure')
       if (err?.name !== 'AbortError') {
         console.error('Error sharing rescue link:', err)
       }
@@ -177,6 +180,7 @@ export const PassportModal = ({ isOpen, onClose, pet, lang, ownerId }: PassportM
     link.download = `${pet.name.toLowerCase().replace(/\s+/g, '-')}-pazo-qr.svg`
     document.body.appendChild(link)
     link.click()
+    observeTask('qr_download','attempt')
     void recordFirstUtility('qr_download_initiated', pet.id, ownerId)
     link.remove()
     URL.revokeObjectURL(url)

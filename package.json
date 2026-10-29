@@ -45,7 +45,13 @@
     "test:first-use:browser": "node scripts/contextual-first-use-browser.mjs",
     "test:behavior": "node --test src/features/marketing/behavior.test.mjs supabase/functions/pazo-marketing-landing/prereg.test.mjs",
     "test:behavior:pg17": "node scripts/behavior-pg17.mjs",
-    "test:behavior:browser": "node scripts/behavior-browser.mjs"
+    "test:behavior:browser": "node scripts/behavior-browser.mjs",
+    "test:intelligence": "node --test src/features/marketing/intelligence.test.mjs src/features/marketing/behavior.test.mjs supabase/functions/pazo-marketing-landing/*.test.mjs",
+    "test:intelligence:contract": "node scripts/intelligence-contract.mjs",
+    "test:intelligence:pg17": "node scripts/intelligence-pg17.mjs",
+    "test:intelligence:browser": "node scripts/intelligence-browser.mjs",
+    "test:intelligence:performance": "node scripts/intelligence-perf.mjs",
+    "test:intelligence:staging": "node scripts/behavior-hosted.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

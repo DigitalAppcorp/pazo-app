@@ -1,3 +1,4 @@
+import {beginTask} from '../features/marketing/intelligenceRuntime'
 import { supabase } from './supabaseClient'
 import type {
   PetPlace,
@@ -161,6 +162,8 @@ export const enrichPlacesWithPresence = async (
 export const submitPlaceSuggestion = async (
   input: PlaceSuggestionInput
 ) => {
+  const finishObservation=beginTask('map_suggest')
+  try {
   const { error } = await supabase.from('place_suggestions').insert({
     name: input.name.trim(),
     category: input.category,
@@ -170,6 +173,8 @@ export const submitPlaceSuggestion = async (
   })
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const haversineDistanceKm = (

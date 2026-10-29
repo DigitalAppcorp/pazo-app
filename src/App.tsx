@@ -1,3 +1,4 @@
+import {observeTask,beginTask,observeAnonymous} from './features/marketing/intelligenceRuntime'
 import {isSupporterNotification} from './features/notifications/supporterNotification'
 import { canUseAccountFeatures } from './features/auth/accountAccess'
 import { recordAdminActivity } from './features/admin/adminDashboardService'
@@ -187,6 +188,7 @@ function PazoMain() {
     applyDocumentLanguage(lang)
   }, [lang])
   const handleToggleLanguage = () => {
+    observeTask('language_change')
     const next: PazoLanguage = lang === 'es' ? 'en' : 'es'
     rememberLanguage(next)
     setLang(next)
@@ -372,6 +374,7 @@ function PazoMain() {
 
   const enterDemo = () => {
     if (user) return
+    observeAnonymous('demo_enter')
     const demoPets = createDemoPets()
     setPets(demoPets)
     setCurrentPet(demoPets[0])
@@ -388,6 +391,7 @@ function PazoMain() {
   }
 
   const leaveDemo = (destination: 'welcome' | 'signup' = 'welcome') => {
+    observeAnonymous(destination==='signup'?'demo_signup':'demo_exit')
     setIsDemoUser(false)
     setIsSearchOpen(false)
     setSelectedPublicProfileId(null)
@@ -927,6 +931,7 @@ function PazoMain() {
   const [resetRequestError, setResetRequestError] = useState(false)
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
+    observeAnonymous('login_attempt')
     e.preventDefault()
     setSubmittingLogin(true)
     setLoginMessage('')
@@ -936,9 +941,11 @@ function PazoMain() {
       if (success) {
         setPasswordInput('')
       } else {
+        observeAnonymous('login_error')
         setLoginMessage(lang === 'es' ? 'Credenciales incorrectas o error de acceso.' : 'Invalid credentials or login error.')
       }
     } catch {
+      observeAnonymous('login_error')
       setLoginMessage(lang === 'es' ? 'No hay conexión. Inténtalo nuevamente.' : 'Connection error. Please try again.')
     } finally {
       setSubmittingLogin(false)
@@ -948,11 +955,13 @@ function PazoMain() {
   const handleRequestPasswordReset = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!resetEmail.trim() || requestingPasswordReset) return
+    observeAnonymous('reset_attempt')
     setRequestingPasswordReset(true)
     setResetRequestMessage('')
     setResetRequestError(false)
     try {
       const ok = await requestPasswordReset(resetEmail.trim())
+      if(!ok)observeAnonymous('reset_error')
       setResetRequestError(!ok)
       setResetRequestMessage(ok
         ? (lang === 'es'
@@ -962,6 +971,7 @@ function PazoMain() {
           ? 'No pudimos enviar el correo. Inténtalo más tarde.'
           : 'We could not send the email. Please try again later.'))
     } catch {
+      observeAnonymous('reset_error')
       setResetRequestError(true)
       setResetRequestMessage(lang === 'es'
         ? 'Error de conexión. Inténtalo nuevamente.'
@@ -983,7 +993,7 @@ function PazoMain() {
   const handleLikePost = async (postId: string) => {
     const isCurrent = petRequests.capture('feed')
 
-    if (isDemoUser) { setPosts((previous) => toggleDemoLike(previous, postId)); return }
+    if (isDemoUser) { observeAnonymous('demo_action'); setPosts((previous) => toggleDemoLike(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
@@ -1009,6 +1019,7 @@ function PazoMain() {
       )
     )
 
+    const finishObservation=beginTask('feed_like')
     try {
       const { error } = await supabase.rpc('register_interaction_signal', {
         p_actor_pet_id: actorPetId,
@@ -1019,6 +1030,7 @@ function PazoMain() {
 
       if (error) throw error
     } catch (err) {
+      finishObservation('failure')
       if (!isCurrent()) return
 
       console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
@@ -1041,7 +1053,7 @@ function PazoMain() {
   const handleSavePost = async (postId: string) => {
     const isCurrent = petRequests.capture('feed')
 
-    if (isDemoUser) { setPosts((previous) => toggleDemoSave(previous, postId)); return }
+    if (isDemoUser) { observeAnonymous('demo_action'); setPosts((previous) => toggleDemoSave(previous, postId)); return }
     if (!canUseAccount) { requireAccount(); return }
     if (!currentPet?.id) return
     const actorPetId = currentPet.id
@@ -1065,6 +1077,7 @@ function PazoMain() {
       )
     )
 
+    const finishObservation=beginTask('feed_save')
     try {
       const { error } = await supabase.rpc('register_interaction_signal', {
         p_actor_pet_id: actorPetId,
@@ -1075,6 +1088,7 @@ function PazoMain() {
 
       if (error) throw error
     } catch (err) {
+      finishObservation('failure')
       if (!isCurrent()) return
 
       console.error(`Error procesando ${actionType} para el post ${postId}:`, err)
@@ -1186,6 +1200,7 @@ function PazoMain() {
     const isCurrent = petRequests.capture('feed')
 
     if (isDemoUser) {
+      observeAnonymous('demo_action')
       const body = text.trim()
       if (!body || !posts.some((post) => post.id === postId)) return false
       setPosts((previous) => appendDemoComment(previous, postId, {
@@ -1268,6 +1283,7 @@ function PazoMain() {
       )
     )
 
+    const finishObservation=beginTask('feed_comment')
     try {
       const { data, error } = await supabase
         .from('post_comments')
@@ -1305,6 +1321,7 @@ function PazoMain() {
 
       return true
     } catch (err) {
+      finishObservation('failure')
       if (!isCurrent()) return false
 
       console.error(`Error creando comentario en el post ${postId}:`, err)
@@ -1928,6 +1945,16 @@ function PazoMain() {
     (item) => item.petId === currentPet.id
   )
 
+  useEffect(()=>{
+    if(isDemoUser){
+      const signal=activeTab==='inicio'?'demo_home':activeTab==='mascota'?'demo_pet':activeTab==='comunidades'?'demo_communities':activeTab==='mapa'?'demo_places':null
+      if(signal)observeAnonymous(signal)
+      if(isSearchOpen)observeAnonymous('demo_explore')
+    }else if(!user)observeAnonymous(authMode==='login'?'login_open':'welcome')
+  },[isDemoUser,activeTab,isSearchOpen,user,authMode])
+
+  useEffect(()=>{if(selectedPublicProfileId)observeTask('profile_open','exposure')},[selectedPublicProfileId])
+
   useBehaviorObservation(canUseAccount ? user?.id : undefined,
     publicRescueRoute.token || selectedPublicProfileId || isDocumentsOpen || isAlertOpen || isMessagesOpen || isNotificationsOpen || isCreatePostOpen ? null
       : petBootstrap?.status !== 'ready' ? 'first_pet'
@@ -1935,7 +1962,7 @@ function PazoMain() {
       : activeTab === 'inicio' ? 'home' : activeTab === 'mascota' ? 'pet'
       : activeTab === 'comunidades' ? 'communities' : activeTab === 'mapa' ? 'places' : null,
     isCareOpen ? careError ? 'error' : isCareLoading ? 'loading' : 'ready'
-      : activeTab === 'inicio' ? feedError ? 'error' : isFeedLoading ? 'loading' : 'ready' : 'ready')
+      : activeTab === 'inicio' ? feedError ? 'error' : isFeedLoading ? 'loading' : 'ready' : 'ready',currentPet?.id||'')
 
   if (publicRescueRoute.token) {
     return (
