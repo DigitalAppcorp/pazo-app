@@ -1,3 +1,11 @@
+## #153 — GO FINAL EJECUTADO: inteligencia global publicada (28-oct-2026, Los Ángeles)
+
+**Fuente operativa vigente:** [postflight de #153](docs/product-intelligence/PRODUCTION_RELEASE_20261028.md) y [issue #153](https://github.com/DigitalAppcorp/pazo-app/issues/153). El PO aprobó la experiencia visual y autorizó el lanzamiento final. [PR #155](https://github.com/DigitalAppcorp/pazo-app/pull/155) integró la implementación, [PR #156](https://github.com/DigitalAppcorp/pazo-app/pull/156) publicó primero el aviso ES/EN con la nueva recogida OFF y [PR #157](https://github.com/DigitalAppcorp/pazo-app/pull/157) integró los flags activos tras **7/7 CI SUCCESS**. Dominio `pazo-app.vercel.app` READY: Vercel `dpl_6XNVw4afbDtim71jUPHjp76xDfiM` SHA `b70dff6c372b43d87389c5d5a0423a8f54455d3c`. Supabase: fuente SQL `20261029010000` instalada exactamente una vez como `20261029005231`; Edge landing v8 ACTIVE; `intelligence_enabled=true` desde `2026-10-29T01:09:01.761072Z`. #150, 14 días y sus fechas preservados; QA excluida.
+
+**Las instrucciones inferiores de «candidato», «SIN GO» y «fase 7 pendiente» quedan superadas y son historial.** No reinstalar SQL, no reiniciar ventanas, no crear datos sintéticos en producción y no reactivar pagos/invitaciones ni cambiar el feed. El Cron #4 permanece activo, pero **aún no hay ejecución periódica observada posterior a la migración nueva**, ni flujo humano real E2E demostrado; comprobarlos antes de afirmarlos. Posibles retoques estéticos van a **otra iniciativa** y no son motivo para reabrir #153.
+
+---
+
 ## Issue #153 — implementación autorizada, candidato de fases 0–6
 
 La orden humana adjunta en la conversación de Codex (28-oct-2026, «Implementación integral del sistema global de inteligencia») autoriza implementar, probar, documentar y preparar staging del #153. Supera el estado anterior de solo planificación que se conserva abajo como histórico. [Contrato y evidencia](docs/product-intelligence/FINAL_CANDIDATE_REPORT.md). No interpretar este registro como un GO de publicación: **fase 7, producción y nueva recopilación siguen sin autorización**. Mantener los tres interruptores frontend/Edge/aviso y el nuevo gate SQL OFF. No reinstalar #150, reiniciar sus fechas, modificar ranking, fake doors, pagos o invitaciones. Verificar siempre el informe final y el estado vivo antes de retomar.
