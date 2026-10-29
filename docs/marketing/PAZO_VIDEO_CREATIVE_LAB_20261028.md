@@ -1,5 +1,8 @@
 # PAZO — Laboratorio creativo de video | Ronda exploratoria 01
 
+> **ALERTA ACTUALIZADA 29-oct-2026:** la primera tanda de cuatro videos exportados **no demostró cuatro estilos** ni la calidad anunciada. Ver [auditoría crítica y correcciones](PAZO_VIDEO_BATCH_01_CRITICAL_REVIEW_20261029.md). Estado de esa tanda: `TECHNICAL_RENDER_VERIFIED / DIVERSITY_NOT_DEMONSTRATED / CREATIVE_REVIEW_FAILED`. Las instrucciones y conceptos inferiores son el brief histórico, **no una certificación del material entregado**. No repetir el template stock+captions para cumplir una cuota ni publicar automáticamente.
+
+
 **Decisión del Product Owner, 28-oct-2026:** experimentar con anuncios tipo televisión (escenas cotidianas), animación de personajes en 3D, contenido de mascotas natural y demostraciones reales. **No hay estilo ganador ni datos para fijar una línea audiovisual.** Los clips de otros creadores proporcionados al agente son referencias de *proceso*; no autorizan copiar personajes, escenas, voces, guiones ni reutilizar metraje ajeno.
 
 **Estado:** `BRIEF_READY / PILOTS_NOT_VALIDATED / NO_PUBLICATION_AUTHORIZED`. El GO actual autoriza construir la **habilidad y el laboratorio de planificación**; **no autoriza ads pagados, compras, nuevos proveedores, publicación automática, uso de cuentas de redes ni cambios de PAZO**.
