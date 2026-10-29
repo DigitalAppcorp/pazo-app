@@ -1,0 +1,262 @@
+{
+  "status": "PASS",
+  "checks": 200,
+  "cases": [
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "content",
+      "status": "PASS",
+      "capture": "es-320-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "paused",
+      "status": "PASS",
+      "capture": "es-320-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "protected",
+      "status": "PASS",
+      "capture": "es-320-protected.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "error",
+      "status": "PASS",
+      "capture": "es-320-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "loading",
+      "status": "PASS",
+      "capture": "es-320-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "state": "mfa",
+      "status": "PASS",
+      "capture": "es-320-mfa.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "content",
+      "status": "PASS",
+      "capture": "es-390-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "paused",
+      "status": "PASS",
+      "capture": "es-390-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "protected",
+      "status": "PASS",
+      "capture": "es-390-protected.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "error",
+      "status": "PASS",
+      "capture": "es-390-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "loading",
+      "status": "PASS",
+      "capture": "es-390-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "state": "mfa",
+      "status": "PASS",
+      "capture": "es-390-mfa.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "content",
+      "status": "PASS",
+      "capture": "es-1440-content.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "paused",
+      "status": "PASS",
+      "capture": "es-1440-paused.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "protected",
+      "status": "PASS",
+      "capture": "es-1440-protected.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "error",
+      "status": "PASS",
+      "capture": "es-1440-error.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "loading",
+      "status": "PASS",
+      "capture": "es-1440-loading.png"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "state": "mfa",
+      "status": "PASS",
+      "capture": "es-1440-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "content",
+      "status": "PASS",
+      "capture": "en-320-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "paused",
+      "status": "PASS",
+      "capture": "en-320-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "protected",
+      "status": "PASS",
+      "capture": "en-320-protected.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "error",
+      "status": "PASS",
+      "capture": "en-320-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "loading",
+      "status": "PASS",
+      "capture": "en-320-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 320,
+      "state": "mfa",
+      "status": "PASS",
+      "capture": "en-320-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "content",
+      "status": "PASS",
+      "capture": "en-390-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "paused",
+      "status": "PASS",
+      "capture": "en-390-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "protected",
+      "status": "PASS",
+      "capture": "en-390-protected.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "error",
+      "status": "PASS",
+      "capture": "en-390-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "loading",
+      "status": "PASS",
+      "capture": "en-390-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "state": "mfa",
+      "status": "PASS",
+      "capture": "en-390-mfa.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "content",
+      "status": "PASS",
+      "capture": "en-1440-content.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "paused",
+      "status": "PASS",
+      "capture": "en-1440-paused.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "protected",
+      "status": "PASS",
+      "capture": "en-1440-protected.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "error",
+      "status": "PASS",
+      "capture": "en-1440-error.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "loading",
+      "status": "PASS",
+      "capture": "en-1440-loading.png"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "state": "mfa",
+      "status": "PASS",
+      "capture": "en-1440-mfa.png"
+    }
+  ],
+  "errors": [],
+  "hostedWrites": 0,
+  "nativeAdmin": true,
+  "backend": "Isolated PostgreSQL17 actual RPC; Auth double; paused/protected/error/loading/MFA response scenarios"
+}

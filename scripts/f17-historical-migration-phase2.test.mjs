@@ -9,6 +9,8 @@ const prepared=JSON.parse(readFileSync(new URL('../docs/review/f18/NOT_APPLIED_M
 const additional=prepared.additionalInstalledVersions??[]
 const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-20261026/prepared-migrations.json',import.meta.url),'utf8'))
 const pendingMarketing=[...new Set([...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version))]
+const intelligence=JSON.parse(readFileSync(new URL('../docs/product-intelligence/PREPARED_MIGRATIONS.json',import.meta.url),'utf8'))
+const pendingIntelligence=intelligence.records.map(r=>r.version)
 test('25 canonical hosted SQL files match SHA-256 snapshot digests',()=>{
   assert.equal(info.records.length,25)
   assert.equal(info.records.filter(r=>r.kind==='hosted_only_reconstructed').length,20)
@@ -47,8 +49,15 @@ test('eight prehistory SQL sources preserved in non-executable archive only (pro
   assert.ok(all.some(n=>n.startsWith(prepared.installedVersion+'_')),'F18 installed migration missing')
   assert.ok(additional.every(v=>all.some(n=>n.startsWith(v+'_'))),'additional hosted migration source missing')
   assert.equal(prepared.productionPushAllowed,false)
-  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))&&!pendingMarketing.includes(n.slice(0,14))).length,122)
-  assert.equal(all.length,123+additional.length+prepared.versions.length+pendingMarketing.length)
+  assert.equal(intelligence.status,'PREPARED_NOT_APPLIED')
+  assert.equal(intelligence.productionPushAllowed,false)
+  assert.equal(intelligence.newCollectionEnabled,false)
+  for(const r of intelligence.records){
+    assert.equal(r.hostedVersion,null)
+    assert.equal(createHash('sha256').update(readFileSync(new URL('../'+r.path,import.meta.url),'utf8').replaceAll('\r\n','\n')).digest('hex'),r.sha256NormalizedLF)
+  }
+  assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))&&!pendingMarketing.includes(n.slice(0,14))&&!pendingIntelligence.includes(n.slice(0,14))).length,122)
+  assert.equal(all.length,123+additional.length+prepared.versions.length+pendingMarketing.length+pendingIntelligence.length)
   for(const version of unpaired){
     assert.ok(!all.some(n=>n.startsWith(version+'_')),'old SQL remains deployable: '+version)
     assert.ok(readdirSync(archived).some(n=>n.startsWith(version+'_')),'missing preserved historical SQL: '+version)

@@ -15,6 +15,8 @@ export function createMarketingLandingHandler({
   submit=null,
   submitPrereg=null,
   preregReleased=false,
+  experienceReleased=false,
+  submitExperience=null,
   verifyChallenge=null,
   origin='https://pazo-app.vercel.app',
 }={}){
@@ -37,7 +39,11 @@ export function createMarketingLandingHandler({
     }catch(error){return json(FAIL,[408,413].includes(error?.status)?error.status:400,cors)}
     let data
     try{data=JSON.parse(raw)}catch{return json(FAIL,400,cors)}
-    if(!data||typeof data!=='object'||Array.isArray(data)
+    const experience=data&&typeof data==='object'&&!Array.isArray(data)&&Object.hasOwn(data,'experience')
+    if(experience){
+      if(!experienceReleased||typeof submitExperience!=='function')return json(OFF,503,cors)
+      if(Object.keys(data).length!==1||!['welcome','login_open','login_attempt','login_error','reset_attempt','reset_error','demo_enter','demo_home','demo_pet','demo_communities','demo_places','demo_explore','demo_action','demo_signup','demo_exit','signup_cta','signup_start','signup_requested','signup_error'].includes(data.experience)||request.headers.get('sec-gpc')==='1')return json(FAIL,400,cors)
+    }else if(!data||typeof data!=='object'||Array.isArray(data)
       ||Object.keys(data).length!==keys.size+(data.step===undefined?0:1)
       ||Object.keys(data).some(k=>!keys.has(k)&&k!=='step')
       ||data.utm_source!=='meta'||data.utm_medium!=='paid_social'
@@ -51,7 +57,7 @@ export function createMarketingLandingHandler({
     catch{return json(FAIL,503,cors)}
     // Only the allowlisted creative reaches the privileged aggregate RPC.
     try {
-      const accepted=data.step===undefined?await submit(data.utm_content):await submitPrereg(data.utm_content,data.step)
+      const accepted=experience?await submitExperience(data.experience):data.step===undefined?await submit(data.utm_content):await submitPrereg(data.utm_content,data.step)
       return json({status:accepted===true?'aggregated':'not_accepted'},accepted===true?202:409,cors)
     }catch{return json(FAIL,503,cors)}
   }

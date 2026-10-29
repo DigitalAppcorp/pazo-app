@@ -1,0 +1,66 @@
+{
+  "gates": {
+    "enabled": true,
+    "retention_days": 14,
+    "utility_enabled": true,
+    "behavior_enabled": true,
+    "utility_started_at": "2026-10-28T19:17:46.696036+00:00",
+    "behavior_started_at": "2026-10-28T22:04:51.67516+00:00",
+    "behavior_notice_version": "pazo-behavior-notice-v1"
+  },
+  "cron_runs": [
+    {
+      "jobid": 4,
+      "status": "succeeded",
+      "end_time": "2026-10-28T18:17:00.063641+00:00",
+      "start_time": "2026-10-28T18:17:00.018457+00:00"
+    },
+    {
+      "jobid": 4,
+      "status": "succeeded",
+      "end_time": "2026-10-28T12:17:00.077284+00:00",
+      "start_time": "2026-10-28T12:17:00.024867+00:00"
+    },
+    {
+      "jobid": 4,
+      "status": "succeeded",
+      "end_time": "2026-10-28T06:17:00.049158+00:00",
+      "start_time": "2026-10-28T06:17:00.024646+00:00"
+    },
+    {
+      "jobid": 4,
+      "status": "succeeded",
+      "end_time": "2026-10-28T00:17:00.064901+00:00",
+      "start_time": "2026-10-28T00:17:00.017605+00:00"
+    },
+    {
+      "jobid": 4,
+      "status": "succeeded",
+      "end_time": "2026-10-27T18:17:00.099967+00:00",
+      "start_time": "2026-10-27T18:17:00.028908+00:00"
+    }
+  ],
+  "algorithms": [
+    {
+      "md5": "e93cbb17aa0e162a1f43695334f99360",
+      "name": "get_recommended_posts",
+      "signature": "p_actor_pet_id uuid, p_limit integer"
+    },
+    {
+      "md5": "fbf2451bd402ba304ad69e11c0f94cae",
+      "name": "register_interaction_signal",
+      "signature": "p_actor_pet_id uuid, p_target_id uuid, p_action_type text"
+    },
+    {
+      "md5": "72e9d3fea5411b86cc28cced5478eadf",
+      "name": "get_recommended_posts_page",
+      "signature": "p_actor_pet_id uuid, p_limit integer, p_offset integer"
+    },
+    {
+      "md5": "e07513321dd2d4c9f0a32b0d3719fd5d",
+      "name": "pazo_gradual_interest",
+      "signature": "p_action text"
+    }
+  ],
+  "intelligence_absent": true
+}

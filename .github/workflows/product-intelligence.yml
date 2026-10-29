@@ -1,0 +1,58 @@
+name: Product intelligence privacy and native dashboard
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: synthetic-intelligence-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: synthetic-intelligence-only
+      PAZO_MARKETING_PG_MODE: ci
+      PAZO_PLAYWRIGHT_MODULE: playwright
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:intelligence
+      - run: npm run test:intelligence:contract
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+      - name: Use runner Chromium
+        run: |
+          browser_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -n "$browser_path" ]; then
+            echo "PAZO_CHROMIUM_PATH=$browser_path" >> "$GITHUB_ENV"
+          else
+            npx --no-install playwright install --with-deps chromium
+          fi
+      - run: npm run test:intelligence:browser
+      - run: npm run test:intelligence:performance
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: product-intelligence-synthetic-${{ github.run_id }}
+          path: artifacts/issue153/
+          retention-days: 14

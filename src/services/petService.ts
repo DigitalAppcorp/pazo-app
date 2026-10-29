@@ -1,3 +1,4 @@
+import {beginTask} from '../features/marketing/intelligenceRuntime'
 import { supabase } from './supabaseClient'
 import type { Pet, Species } from '../types/pazo'
 
@@ -172,6 +173,8 @@ export const fetchOwnedPet = async (petId: string): Promise<Pet> => {
 }
 
 export const createPetProfile = async (input: CreatePetProfileInput, isCurrent?: () => boolean): Promise<Pet> => {
+  const finishObservation=beginTask('pet_create')
+  try {
   const assertCurrent=()=>{if(isCurrent&&!isCurrent())throw new DOMException('Pet creation request retired','AbortError')}
   assertCurrent()
   const {
@@ -230,9 +233,13 @@ export const createPetProfile = async (input: CreatePetProfileInput, isCurrent?:
     if (uploadedPath) await removePetAvatar(uploadedPath)
     throw error
   }
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const updatePetProfile = async (input: UpdatePetProfileInput): Promise<Pet> => {
+  const finishObservation=beginTask('pet_edit')
+  try {
   const {
     data: { user },
     error: userError,
@@ -273,4 +280,6 @@ export const updatePetProfile = async (input: UpdatePetProfileInput): Promise<Pe
     if (uploadedPath) await removePetAvatar(uploadedPath)
     throw error
   }
+
+  } catch (error) { finishObservation('failure'); throw error }
 }

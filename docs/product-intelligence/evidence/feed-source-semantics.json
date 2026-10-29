@@ -1,0 +1,12 @@
+{
+  "source": "Read-only pg_get_functiondef(public.register_interaction_signal), production, 2026-10-29 UTC",
+  "signature": "register_interaction_signal(uuid,uuid,text)",
+  "md5": "fbf2451bd402ba304ad69e11c0f94cae",
+  "findings": [
+    "impression and view share a 24-hour dedupe per actor pet/content; a persisted impression can suppress a later view",
+    "unlike/unsave delete the persisted like/save relationship; no removal history is created",
+    "Report uses current persisted like/save rows and authoritative post_comments, not interaction comment duplicates",
+    "No production source function, learning weight, trigger or algorithm is changed"
+  ],
+  "reportConsequence": "Exposure may be reused; retained view is incomplete for 3-second stays. Reading time and removal history are not measured. No cross-source success rate is inferred."
+}

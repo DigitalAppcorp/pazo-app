@@ -1,3 +1,4 @@
+import {beginTask} from '../features/marketing/intelligenceRuntime'
 import { supabase } from './supabaseClient'
 import type {
   DocumentCategory,
@@ -150,6 +151,8 @@ export const uploadPetDocument = async (
   title: string | undefined,
   category: DocumentCategory
 ) => {
+  const finishObservation=beginTask('document_upload')
+  try {
   validateDocumentFile(file)
 
   const reservation = await beginUpload(petId, file, title, category)
@@ -183,6 +186,8 @@ export const uploadPetDocument = async (
 
     throw error
   }
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const updatePetDocumentMetadata = async (
@@ -190,6 +195,8 @@ export const updatePetDocumentMetadata = async (
   title: string,
   category: DocumentCategory
 ) => {
+  const finishObservation=beginTask('document_edit')
+  try {
   const normalizedTitle = title.trim()
   if (!normalizedTitle) throw new Error('DOCUMENT_TITLE_REQUIRED')
 
@@ -203,17 +210,23 @@ export const updatePetDocumentMetadata = async (
     .eq('status', 'active')
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const downloadPetDocumentBlob = async (
   document: Pick<PetDocument, 'storagePath'>
 ) => {
+  const finishObservation=beginTask('document_download')
+  try {
   const { data, error } = await supabase.storage
     .from(DOCUMENT_BUCKET)
     .download(document.storagePath)
 
   if (error) throw error
   return data
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 const beginDelete = async (documentId: string): Promise<string> => {
@@ -277,6 +290,8 @@ const cancelDelete = async (documentId: string) => {
 }
 
 export const deletePetDocument = async (document: PetDocument) => {
+  const finishObservation=beginTask('document_delete')
+  try {
   const storagePath = await beginDelete(document.id)
 
   const { error: storageError } = await supabase.storage
@@ -302,6 +317,8 @@ export const deletePetDocument = async (document: PetDocument) => {
   }
 
   throw storageError
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const recoverPetDocumentOperations = async (petId: string) => {

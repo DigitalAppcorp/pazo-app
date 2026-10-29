@@ -10,6 +10,8 @@ const prepared=JSON.parse(readFileSync(new URL('docs/review/f18/NOT_APPLIED_MIGR
 const additional=prepared.additionalInstalledVersions??[]
 const marketing=JSON.parse(readFileSync(new URL('../docs/evidence/marketing-e2e-20261026/prepared-migrations.json',import.meta.url),'utf8'))
 const pendingMarketing=[...new Set([...marketing.records,...(marketing.pendingRecords??[]),...(marketing.installedRecords??[])].map(r=>r.version))]
+const intelligence=JSON.parse(readFileSync(new URL('docs/product-intelligence/PREPARED_MIGRATIONS.json',root),'utf8'))
+const pendingIntelligence=intelligence.records.map(r=>r.version)
 function sha(buffer) {
  const prefix=Buffer.concat([Buffer.from('blob '+buffer.length),Buffer.from([0])])
  return createHash('sha1').update(prefix).update(buffer).digest('hex')
@@ -31,9 +33,11 @@ test('historical migration versions equal hosted snapshot; F18 individually inst
  assert.equal(prepared.productionPushAllowed,false)
  assert.equal(prepared.status,'APPLIED_HOSTED')
  assert.equal(prepared.installedVersion,'20261025073311')
- assert.deepEqual(actual.filter(v=>v!==prepared.installedVersion&&!additional.includes(v)&&!prepared.versions.includes(v)&&!pendingMarketing.includes(v)),expected,'historical hosted version inventory changed')
- assert.deepEqual(actual,expected.concat([prepared.installedVersion],additional,prepared.versions,pendingMarketing).sort(),'unexpected new executable SQL source')
- assert.equal(new Set(actual).size,123+additional.length+prepared.versions.length+pendingMarketing.length)
+ assert.equal(intelligence.productionPushAllowed,false)
+ assert.equal(intelligence.status,'PREPARED_NOT_APPLIED')
+ assert.deepEqual(actual.filter(v=>v!==prepared.installedVersion&&!additional.includes(v)&&!prepared.versions.includes(v)&&!pendingMarketing.includes(v)&&!pendingIntelligence.includes(v)),expected,'historical hosted version inventory changed')
+ assert.deepEqual(actual,expected.concat([prepared.installedVersion],additional,prepared.versions,pendingMarketing,pendingIntelligence).sort(),'unexpected new executable SQL source')
+ assert.equal(new Set(actual).size,123+additional.length+prepared.versions.length+pendingMarketing.length+pendingIntelligence.length)
  assert.ok(hosted.hosted_entries.every(r=>existsSync(new URL(r.path,root))))
 })
 test('archive is deliberately non-deployable and remains fenced',()=>{

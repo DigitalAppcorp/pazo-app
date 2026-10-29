@@ -1,3 +1,4 @@
+import {beginTask} from '../features/marketing/intelligenceRuntime'
 import { prepareCommunityPostCleanup, retainUnconfirmedUpload } from '../features/communities/communityMediaCleanup'
 import { supabase } from './supabaseClient'
 import { wasAuthorDeleted } from '../features/account/deletedAuthorThread'
@@ -195,6 +196,8 @@ export const createCommunity = async (
   input: CommunityCreateInput,
   displayPetId: string
 ): Promise<string> => {
+  const finishObservation=beginTask('community_create')
+  try {
   const user = await getAuthUser()
 
   const { data, error } = await supabase.rpc('create_community', {
@@ -251,6 +254,8 @@ export const createCommunity = async (
   }
 
   return communityId
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const updateCommunity = async (
@@ -281,15 +286,21 @@ export const joinCommunity = async (
   communityId: string,
   displayPetId: string
 ) => {
+  const finishObservation=beginTask('community_join')
+  try {
   const { error } = await supabase.from('community_memberships').insert({
     community_id: communityId,
     display_pet_id: displayPetId,
   })
 
   if (error && error.code !== '23505') throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const leaveCommunity = async (communityId: string) => {
+  const finishObservation=beginTask('community_leave')
+  try {
   const user = await getAuthUser()
   const { error } = await supabase
     .from('community_memberships')
@@ -298,6 +309,8 @@ export const leaveCommunity = async (communityId: string) => {
     .eq('user_id', user.id)
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const removeCommunityMember = async (
@@ -416,6 +429,8 @@ export const createCommunityPost = async ({
   body: string
   imageFile?: File | null
 }) => {
+  const finishObservation=beginTask('community_publish')
+  try {
   const user = await getAuthUser()
   let storagePath: string | null = null
   let photoUrl: string | null = null
@@ -456,6 +471,8 @@ export const createCommunityPost = async ({
   } catch (error) {
     retainUnconfirmedUpload(storagePath, error)
   }
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const deleteCommunityPost = async (post: CommunityPost) => {
@@ -480,6 +497,8 @@ export const toggleCommunityPostLike = async ({
   actorPetId: string
   isLiked: boolean
 }) => {
+  const finishObservation=beginTask('community_like')
+  try {
   if (isLiked) {
     const { error } = await supabase
       .from('community_post_likes')
@@ -497,6 +516,8 @@ export const toggleCommunityPostLike = async ({
   })
 
   if (error && error.code !== '23505') throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const fetchCommunityPostComments = async (
@@ -577,6 +598,8 @@ export const addCommunityPostComment = async ({
   authorPetId: string
   body: string
 }) => {
+  const finishObservation=beginTask('community_comment')
+  try {
   const { error } = await supabase.from('community_post_comments').insert({
     post_id: postId,
     author_pet_id: authorPetId,
@@ -584,6 +607,8 @@ export const addCommunityPostComment = async ({
   })
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const deleteCommunityPostComment = async (commentId: string) => {

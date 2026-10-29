@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "origin": "https://pazo-7wiavkkjb-digitalapp.vercel.app",
+  "results": [
+    {
+      "lang": "es",
+      "width": 390,
+      "gpc": false,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "https://pazo-7wiavkkjb-digitalapp.vercel.app",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true,
+      "offlineRecovery": true
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "gpc": false,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "https://pazo-7wiavkkjb-digitalapp.vercel.app",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true,
+      "offlineRecovery": true
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "gpc": false,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "https://pazo-7wiavkkjb-digitalapp.vercel.app",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true,
+      "offlineRecovery": true
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "gpc": false,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "source": "https://pazo-7wiavkkjb-digitalapp.vercel.app",
+      "backend": "disposable PG17",
+      "auth": "synthetic controlled",
+      "localRetry": true,
+      "offlineRecovery": true
+    }
+  ],
+  "errors": [],
+  "newCollectionCalls": 0,
+  "hostedWrites": 0,
+  "collectionCandidate": "OFF"
+}

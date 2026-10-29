@@ -1,3 +1,4 @@
+import {observeTask,beginTask} from '../../features/marketing/intelligenceRuntime'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type {
@@ -94,6 +95,7 @@ export const MapView = ({
   const handledRequestedPlaceKeyRef = useRef(0)
 
   const loadPlaces = useCallback(async () => {
+    const finishObservation=beginTask('map_open')
     setIsLoading(true)
     setLoadError('')
 
@@ -109,6 +111,7 @@ export const MapView = ({
 
       setPlaces(enriched)
     } catch (error: any) {
+      finishObservation('failure')
       console.error('Error loading Places:', error)
       setLoadError(
         lang === 'es'
@@ -433,6 +436,7 @@ export const MapView = ({
           <PlacesWorkspace key={selectedPlace.id+':'+(currentPet?.id||'guest')} place={selectedPlace} lang={lang} canParticipate={canUsePlaces} onClose={()=>setSelectedPlaceId(null)}>{({open})=><>            <div className="mt-2 flex flex-wrap items-center gap-2">
               <a
                 data-pazo-directions="true"
+                onClick={()=>observeTask('map_route')}
                 href={buildPlaceDirectionsUrl(selectedPlace,
                   typeof navigator !== 'undefined' ? navigator.userAgent : '')}
                 target="_blank"

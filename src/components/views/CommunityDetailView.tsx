@@ -1,3 +1,4 @@
+import {beginTask} from '../../features/marketing/intelligenceRuntime'
 import { CommunityMediaPendingError, COMMUNITY_MEDIA_BUCKET } from '../../features/communities/communityMediaCleanup'
 import { supabase } from '../../services/supabaseClient'
 import { attachVerifiedCommentBadges, preloadVerifiedFeedBadgeArt } from '../../features/supporter/verifiedFeedPostBadges'
@@ -113,6 +114,7 @@ export const CommunityDetailView = ({
   const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   const loadCommunity = useCallback(async () => {
+    const finishObservation=beginTask('community_open')
     setIsLoading(true)
     setLoadError(false)
     try {
@@ -141,6 +143,7 @@ export const CommunityDetailView = ({
         catch { setOwnershipOffer(null) }
       }
     } catch (error) {
+      finishObservation('failure')
       setLoadError(true)
       console.error('Error loading community:', error)
     } finally {

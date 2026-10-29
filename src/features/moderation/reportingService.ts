@@ -1,3 +1,4 @@
+import {beginTask} from '../marketing/intelligenceRuntime'
 import { supabase } from '../../services/supabaseClient'
 
 export type ReportTarget = 'feed_post' | 'feed_comment' | 'pet_profile' | 'community_post' | 'community_comment'
@@ -12,10 +13,14 @@ export interface PendingReport {
 }
 
 export async function submitReport(targetKind: ReportTarget, targetId: string, reason: ReportReason, details: string) {
+  const finishObservation=beginTask('report_submit')
+  try {
   const { error } = await supabase.rpc('f14_submit_report', {
     p_kind: targetKind, p_target: targetId, p_reason: reason, p_details: details.trim(),
   })
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export async function isModerator(): Promise<boolean> {

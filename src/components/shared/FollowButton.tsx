@@ -1,3 +1,4 @@
+import {beginTask} from '../../features/marketing/intelligenceRuntime'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../services/supabaseClient'
 
@@ -57,6 +58,7 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
         setIsFollowing(newState)
         onFollowChange?.(newState)
 
+        const finishObservation=beginTask('profile_follow')
         try {
             if (!previousState) {
                 // Acción: Seguir
@@ -74,6 +76,7 @@ export const FollowButton = ({ currentPetId, targetPetId, lang = 'es', variant =
                 if (error) throw error
             }
         } catch (error) {
+            finishObservation('failure')
             console.error("Error toggling follow:", error)
             setIsFollowing(previousState) // Revertir si falla
             onFollowChange?.(previousState)

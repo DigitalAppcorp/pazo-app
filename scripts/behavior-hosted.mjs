@@ -1,6 +1,13 @@
 // Actual immutable staging assets -> native app/Admin -> disposable PG17 reports.
 // All Auth/domain services are intercepted. No remote QA account or event is created.
-import './behavior-pg17.mjs'
+const intelligenceHosted=process.env.PAZO_INTELLIGENCE_HOSTED_TEST==='true'
+if(intelligenceHosted&&process.env.PAZO_INTELLIGENCE_REUSE_LAB==='true'){
+ // sql transport is hard-fenced to the disposable local container/CI database.
+ assert.equal(sql("SELECT to_regclass('marketing_private.task_events') IS NOT NULL AND to_regprocedure('marketing_private.intelligence_cohort_safe(uuid[],uuid[])') IS NOT NULL AND NOT marketing_private.intelligence_task_valid('search_open')"),'t')
+}else{
+ await import('./behavior-pg17.mjs')
+ if(intelligenceHosted)await import('./intelligence-pg17.mjs')
+}
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -25,6 +32,7 @@ const session={access_token:token,refresh_token:'synthetic',expires_at:Math.floo
 sql("UPDATE marketing_private.acquisition SET creative='qr_es' WHERE owner_id='96000000-0000-4000-8000-000000001000'")
 const q=s=>"'"+String(s).replaceAll("'","''")+"'"
 const report=args=>JSON.parse(sql(`SET ROLE authenticated;SET "request.jwt.claim.sub"='96000000-0000-4000-8000-000000000031';SET "request.jwt.claims"='{"aal":"aal2"}';SELECT public.pazo_admin_behavior_summary_v1(${args.p_days},${q(args.p_segment)},${q(args.p_creative)})`))
+if(intelligenceHosted)sql("UPDATE marketing_private.retention_runtime SET last_success_at=now();UPDATE marketing_private.collection_gate SET intelligence_enabled=false,behavior_enabled=true")
 const results=[],errors=[];let browser,newCollectionCalls=0
 try{
  await server?.listen()
@@ -54,8 +62,13 @@ try{
     if(localEnabled&&rpc==='pazo_behavior_withdraw_v1')return respond(sql(`SET ROLE authenticated;SET "request.jwt.claim.sub"='${owner}';SELECT public.pazo_behavior_withdraw_v1()`)==='t')
     if(['pazo_admin_overview','pazo_admin_users','pazo_admin_experiments'].includes(rpc))return respond({code:'ISOLATED_OTHER_SECTION_OUTAGE'},503)
     if(rpc==='pazo_admin_behavior_summary_v1')return failReport?respond({code:'SYNTHETIC_DOWNTIME'},503):respond(report(JSON.parse(req.postData())))
+    if(intelligenceHosted&&rpc==='pazo_admin_intelligence_summary_v1'){
+     const a=JSON.parse(req.postData());return respond(JSON.parse(sql(`SET ROLE authenticated;SET "request.jwt.claim.sub"='96000000-0000-4000-8000-000000000031';SET "request.jwt.claims"='{"aal":"aal2"}';SELECT public.pazo_admin_intelligence_summary_v1(${Number(a.p_days)},${q(a.p_segment)},${q(a.p_creative)})`)))
+    }
+    if(rpc==='pazo_admin_intelligence_summary_v1')return respond({version:1,status:'paused',coverage_since:null,as_of:now,effective_days:14,tasks:[],facts:[],anonymous:[]})
+    if(intelligenceHosted&&rpc==='pazo_intelligence_record_v1'){newCollectionCalls++;return respond(false)}
     if(rpc==='pazo_behavior_record_v1'){
-     newCollectionCalls++;if(!localEnabled)return respond(false)
+     if(!intelligenceHosted)newCollectionCalls++;if(!localEnabled)return respond(false)
      assert.equal(req.headers().authorization,'Bearer '+token)
      const a=JSON.parse(req.postData());assert.ok(!('p_owner' in a));const accepted=sql(`SET ROLE authenticated;SET "request.jwt.claim.sub"='${owner}';SELECT public.pazo_behavior_record_v1(${q(a.p_session)},${Number(a.p_seq)},${q(a.p_screen)},${q(a.p_event)},${q(a.p_category)})`)==='t'
      return respond(accepted)
@@ -101,6 +114,16 @@ try{
   await page.evaluate(lang=>{const e=document.createElement('div');e.textContent=lang==='es'?'QA · Datos sintéticos · Backend aislado':'QA · Synthetic data · Isolated backend';e.style.cssText='position:fixed;bottom:0;right:0;z-index:10000;background:#f8edc9;color:#204e4a;font:600 11px system-ui;padding:6px 10px;pointer-events:none';document.body.append(e)},lang)
   const name=`${lang}-${width}`
   await page.screenshot({path:out+'/'+name+'-overview.png',fullPage:true})
+  if(intelligenceHosted){
+   assert.equal(await page.locator('.intelligence-questions button').count(),5)
+   for(let i=0;i<5;i++){
+    await page.locator('.intelligence-questions button').nth(i).click()
+    await page.getByTestId('intelligence-panel').locator('.intelligence-coverage').waitFor()
+    await page.getByTestId('intelligence-panel').scrollIntoViewIfNeeded()
+    await page.screenshot({path:out+'/'+name+'-question-'+i+'.png',fullPage:true})
+   }
+   await page.locator('.intelligence-questions button').first().click()
+  }
   await page.locator('.behavior-funnel').scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-funnel.png',fullPage:true})
   await page.getByRole('button',{name:lang==='es'?'¿Qué usan al volver?':'What do people use on return?',exact:true}).click()
   await page.getByRole('heading',{name:lang==='es'?'Qué usan al regresar':'What people use on return',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:out+'/'+name+'-return.png',fullPage:true})

@@ -1,4 +1,8 @@
-## HOJA MAESTRA VIGENTE — próxima analítica global de PAZO (28-oct-2026)
+## Issue #153 — implementación autorizada, candidato de fases 0–6
+
+La orden humana adjunta en la conversación de Codex (28-oct-2026, «Implementación integral del sistema global de inteligencia») autoriza implementar, probar, documentar y preparar staging del #153. Supera el estado anterior de solo planificación que se conserva abajo como histórico. [Contrato y evidencia](docs/product-intelligence/FINAL_CANDIDATE_REPORT.md). No interpretar este registro como un GO de publicación: **fase 7, producción y nueva recopilación siguen sin autorización**. Mantener los tres interruptores frontend/Edge/aviso y el nuevo gate SQL OFF. No reinstalar #150, reiniciar sus fechas, modificar ranking, fake doors, pagos o invitaciones. Verificar siempre el informe final y el estado vivo antes de retomar.
+
+## Histórico de entrada — hoja maestra de analítica global (28-oct-2026)
 
 **Lectura obligatoria antes de retomar esta iniciativa:** [docs/PAZO_GLOBAL_ANALYTICS_IMPLEMENTATION_MASTER_20261028.md](docs/PAZO_GLOBAL_ANALYTICS_IMPLEMENTATION_MASTER_20261028.md) → [decisión estratégica](docs/PAZO_GLOBAL_PRODUCT_INTELLIGENCE_DECISION_20261028.md) → [issue #153](https://github.com/DigitalAppcorp/pazo-app/issues/153). Define el inventario exhaustivo por pantalla y control, eventos de intención/resultado/error, reutilización de feed y fake doors, privacidad, costes, Design Intelligence OS + Marketing Brain OS, fases y criterios de éxito. **NO confundir cobertura integral con captura indiscriminada de clics.**
 

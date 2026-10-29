@@ -1,3 +1,4 @@
+import {observeTask} from '../../features/marketing/intelligenceRuntime'
 import { useState, useEffect, useRef } from 'react'
 import { petSpeciesLabel } from '../../features/i18n/petLabels'
 import type { Post, SupporterBadgeEvidence } from '../../types/pazo'
@@ -228,6 +229,7 @@ export const HomeView = ({
   }
 
   const handleHidePost = (postId: string) => {
+    observeTask('feed_hide')
     setHiddenPostIds((previous) => new Set(previous).add(postId))
     setLastHiddenPostId(postId)
   }

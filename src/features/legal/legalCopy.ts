@@ -1,3 +1,5 @@
+/** #153 prepared notice; release requires the final PO GO. */
+export const INTELLIGENCE_NOTICE_RELEASED=false
 export type LegalKind = 'privacy' | 'terms'
 export type LegalLanguage = 'es' | 'en'
 // Candidate publication date: verify actual release date before deploying issue130.
@@ -123,7 +125,13 @@ function prepareBehaviorCopy(kind:LegalKind,lang:LegalLanguage):LegalText {
   }]} : base
   return copy
 }
-for(const lang of ['es','en'] as const)legalPreview.privacy[lang]=prepareBehaviorCopy('privacy',lang)
+for(const lang of ['es','en'] as const){
+ legalPreview.privacy[lang]=prepareBehaviorCopy('privacy',lang)
+ if(INTELLIGENCE_NOTICE_RELEASED)legalPreview.privacy[lang]={...legalPreview.privacy[lang],sections:[...legalPreview.privacy[lang].sections,{
+ heading:lang==='es'?'Tareas de producto y Demo':'Product tasks and Demo',
+ text:lang==='es'?'La ampliación de medición registra tareas, intentos y fallos con categorías cerradas, sin texto, archivos, coordenadas, contenido o datos de pago. Reutiliza registros de uso y respuestas existentes para informes agregados, excluyendo administración y QA. Los nuevos registros vinculados a sesiones expiran a los 14 días de su inicio. La protección de Demo y acceso reutiliza Turnstile, con el tratamiento técnico descrito en el apartado de protección contra abusos de este aviso. Demo y acceso aportan únicamente contadores de solicitudes por día sin identificador anónimo ni enlace a cuentas, con un máximo de 14 días por fecha de Los Ángeles. La purga normal corre cada 6 horas; copias y registros técnicos tienen ciclos propios. Respetamos GPC para las nuevas señales; puedes retirar la medición y borrar las sesiones activas desde el control existente. La preferencia de exclusión se conserva hasta eliminar la cuenta. No se envían conversiones individuales a Meta.':'Extended measurement records tasks, attempts and failures using closed categories, without text, files, coordinates, content or payment data. It reuses existing usage and proposal-response records for aggregate reports, excluding administration and QA. New session-linked records expire 14 days after session start. Demo and access protection reuses Turnstile, with the technical processing described in this notice’s abuse-protection section. Demo and access provide daily request counters only, without an anonymous identifier or account link, retained for up to 14 Los Angeles calendar days. Normal deletion runs every 6 hours; backups and technical logs follow separate cycles. We respect GPC for new signals; you can withdraw measurement and delete active sessions through the existing control. The exclusion preference remains until account deletion. No individual conversions are sent to Meta.',
+ }]}
+}
 
 export function resolveLegalCopy(kind: LegalKind, lang: LegalLanguage, effectiveDate: unknown = PAZO_LEGAL_EFFECTIVE_DATE): LegalText {
   const copy=legalPreview[kind][lang]

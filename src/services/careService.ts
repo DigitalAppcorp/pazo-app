@@ -1,3 +1,4 @@
+import {beginTask} from '../features/marketing/intelligenceRuntime'
 import { supabase } from './supabaseClient'
 import type {
   CareCompletion,
@@ -98,6 +99,8 @@ export const createCareItem = async (
   petId: string,
   input: CareItemInput
 ): Promise<CareItem> => {
+  const finishObservation=beginTask('care_create')
+  try {
   const { data, error } = await supabase
     .from('care_items')
     .insert({
@@ -111,12 +114,16 @@ export const createCareItem = async (
 
   if (error) throw error
   return mapCareItem(data)
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const updateCareItem = async (
   careItemId: string,
   input: CareItemInput
 ): Promise<CareItem> => {
+  const finishObservation=beginTask('care_edit')
+  try {
   const { data, error } = await supabase
     .from('care_items')
     .update(toCareWritePayload(input))
@@ -129,17 +136,25 @@ export const updateCareItem = async (
 
   if (error) throw error
   return mapCareItem(data)
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const archiveCareItem = async (careItemId: string): Promise<void> => {
+  const finishObservation=beginTask('care_archive')
+  try {
   const { error } = await supabase.rpc('archive_care_item', {
     p_care_item_id: careItemId,
   })
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const completeCareItem = async (item: CareItem): Promise<void> => {
+  const finishObservation=beginTask('care_complete')
+  try {
   const { error } = await supabase.rpc('complete_care_item', {
     p_care_item_id: item.id,
     p_expected_due_date: item.dueDate,
@@ -147,14 +162,20 @@ export const completeCareItem = async (item: CareItem): Promise<void> => {
   })
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const undoCareCompletion = async (completionId: string): Promise<void> => {
+  const finishObservation=beginTask('care_undo')
+  try {
   const { error } = await supabase.rpc('undo_care_completion', {
     p_completion_id: completionId,
   })
 
   if (error) throw error
+
+  } catch (error) { finishObservation('failure'); throw error }
 }
 
 export const fetchCareReminderCandidates = async (

@@ -1,3 +1,4 @@
+import {observeTask} from '../../marketing/intelligenceRuntime'
 import { useEffect, useState } from 'react'
 import { readPazoInstallState, subscribePazoInstall, takePazoInstallPrompt } from '../installPromptBridge'
 
@@ -34,6 +35,8 @@ export function PazoInstallControl({ lang, placement = 'settings' }: {
     catch { /* Private browsing may not permit storage. */ }
   }
 
+  useEffect(()=>{if(!state.installed&&(state.pending||isIOS())&&!(placement==='banner'&&dismissed))observeTask('pwa_prompt','exposure')},[state.installed,state.pending,placement,dismissed])
+
   if (state.installed || (!state.pending && !isIOS())) return null
   if (placement === 'banner' && dismissed) return null
   const es = lang === 'es'
@@ -42,10 +45,12 @@ export function PazoInstallControl({ lang, placement = 'settings' }: {
     if (isPrompting) return
     const nativePrompt = takePazoInstallPrompt()
     if (!nativePrompt) return
+    observeTask('pwa_request','attempt')
     setIsPrompting(true)
     try {
       await nativePrompt.prompt()
       const choice = await nativePrompt.userChoice
+      observeTask(choice.outcome==='accepted'?'pwa_accepted':'pwa_dismissed','intent')
       // Only 'appinstalled' or standalone mode proves installation. A browser
       // prompt acceptance is not, by itself, proof that the app was installed.
       if (choice.outcome === 'accepted' && placement === 'banner') hideBanner()

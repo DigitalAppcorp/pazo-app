@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "build": "npm run build (TypeScript project references + Vite)",
+  "lint": "Scoped seven new/changed marketing TS/TSX files; global legacy lint is not claimed clean",
+  "unitTests": 56,
+  "governanceTests": 776,
+  "historicalGuards": 15,
+  "mobileViewports": [
+    320,
+    390,
+    430
+  ],
+  "assets": [
+    {
+      "name": "App-B4UMyUv5.js",
+      "bytes": 950209,
+      "gzipBytes": 265123
+    },
+    {
+      "name": "App-Bzfcj1g9.css",
+      "bytes": 58090,
+      "gzipBytes": 10881
+    },
+    {
+      "name": "app-CSMBpHLh.js",
+      "bytes": 227741,
+      "gzipBytes": 71238
+    },
+    {
+      "name": "app-CWQZkjLQ.css",
+      "bytes": 142512,
+      "gzipBytes": 23160
+    },
+    {
+      "name": "dist-Bl13M3oS.js",
+      "bytes": 214172,
+      "gzipBytes": 54585
+    },
+    {
+      "name": "maintenance-C0rv5o7r.js",
+      "bytes": 3745,
+      "gzipBytes": 1656
+    },
+    {
+      "name": "MaintenanceGate-Cepmbsow.js",
+      "bytes": 4783,
+      "gzipBytes": 1884
+    },
+    {
+      "name": "publicConfig-BuC15E42.js",
+      "bytes": 1217,
+      "gzipBytes": 706
+    },
+    {
+      "name": "supabaseClient-AP-Fcqo4.js",
+      "bytes": 255,
+      "gzipBytes": 224
+    }
+  ],
+  "limitations": [
+    "Build retains chunk-size warnings; no bundle-size or field-performance improvement is claimed.",
+    "Browser services/Auth are controlled; actual SQL runs in disposable PostgreSQL17."
+  ]
+}
