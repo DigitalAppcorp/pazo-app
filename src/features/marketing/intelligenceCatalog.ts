@@ -1,5 +1,5 @@
 /** #153 v1. Closed semantic vocabulary; no payload, content, IDs or inferred success. */
-export const INTELLIGENCE_COLLECTION_ENABLED = false
+export const INTELLIGENCE_COLLECTION_ENABLED = true
 export const intelligenceTasks = {
  pet_create:['Crear mascota','Create pet'],pet_edit:['Editar perfil','Edit profile'],
  feed_like:['Reaccionar al feed','React to feed'],feed_save:['Guardar publicación','Save post'],feed_comment:['Comentar en Inicio','Comment on Home'],feed_publish:['Publicar en Inicio','Publish on Home'],

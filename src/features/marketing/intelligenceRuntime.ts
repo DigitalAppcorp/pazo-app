@@ -2,7 +2,7 @@ import {behaviorRecorder} from './behaviorRuntime'
 import {INTELLIGENCE_COLLECTION_ENABLED,anonymousSignals,type AnonymousSignal,type IntelligenceTask,type IntelligenceKind} from './intelligenceCatalog'
 import {requestLandingChallenge} from './landingChallenge'
 import {supabase} from '../../services/supabaseClient'
-const allowed=()=>INTELLIGENCE_COLLECTION_ENABLED&&typeof navigator!=='undefined'&&(navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl!==true&&document.visibilityState==='visible'
+const allowed=()=>INTELLIGENCE_COLLECTION_ENABLED&&typeof window!=='undefined'&&typeof document!=='undefined'&&typeof navigator!=='undefined'&&(navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl!==true&&document.visibilityState==='visible'
 export function observeTask(task:IntelligenceTask,kind:IntelligenceKind='intent'){if(allowed())behaviorRecorder.task(task,kind)}
 /** Capture generation BEFORE operation. A→B→A cannot attribute an old failure to new A. */
 export function beginTask(task:IntelligenceTask):(kind:IntelligenceKind)=>void{
