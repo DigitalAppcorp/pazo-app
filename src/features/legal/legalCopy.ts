@@ -1,5 +1,5 @@
 /** #153 prepared notice; release requires the final PO GO. */
-export const INTELLIGENCE_NOTICE_RELEASED=false
+export const INTELLIGENCE_NOTICE_RELEASED=true
 export type LegalKind = 'privacy' | 'terms'
 export type LegalLanguage = 'es' | 'en'
 // Candidate publication date: verify actual release date before deploying issue130.
