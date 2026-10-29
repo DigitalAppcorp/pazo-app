@@ -1,6 +1,6 @@
 # Candidato — Administración visual y acceso a analíticas
 
-Estado: preparado para revisión, sin lanzamiento ni migraciones hospedadas. Base funcional: `ee10cd98`. Las evidencias son sintéticas salvo las consultas expresamente identificadas como baseline de producción.
+Estado: preparado para revisión, sin lanzamiento ni migraciones hospedadas. Base funcional: `ee10cd98`; integrada la documentación posterior de `main` en `4973c4a1` sin modificar su contenido audiovisual. Las evidencias son sintéticas salvo las consultas expresamente identificadas como baseline de producción.
 
 ## Implementado
 
