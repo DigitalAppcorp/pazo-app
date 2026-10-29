@@ -1,3 +1,9 @@
+## ESTADO ACTUAL — #153 inteligencia global publicada y activa (28-oct-2026 Los Ángeles)
+
+El PO aprobó el diseño y dio GO final. El [informe de postflight](product-intelligence/PRODUCTION_RELEASE_20261028.md) documenta PR #155/#156/#157 integrados, CI final 7/7, producción `dpl_6XNVw4afbDtim71jUPHjp76xDfiM` READY y nueva recopilación activa desde `2026-10-29T01:09:01.761072Z`. Supabase: única migración fuente `20261029010000` → alojada `20261029005231`; Edge landing v8, privacidad ES/EN activa, retención14d y #150 preservados. **No reinstalar ni ejecutar de nuevo fase 7.** El primer Cron periódico posterior al nuevo SQL y una señal real humana no se habían observado al momento del informe. Las secciones inferiores con «OFF», «sin GO», «candidato #150/#153» son snapshots antiguos.
+
+---
+
 ## Issue #150 — candidato de analítica preparado, sin GO de release
 
 Orden vigente: https://github.com/DigitalAppcorp/pazo-app/issues/150 y comentario6479704793. Implementación integral, pruebas, diseño autónomo y staging autorizados. Prioridad: tramo anuncio → landing → registro, separado de cuentas verificadas y regreso. Dashboard nativo, limpio y comprensible para el PO; decisiones primero, nombres legibles y definiciones secundarias. Informe único: docs/PAZO_ISSUE150_FINAL_REPORT_20261028.md. PR151 y staging pazo-7f4g5xiro-digitalapp.vercel.app, frontend2b623bb8. Consultar contrato y runbook de privacidad enlazados en el informe. El estado exacto de CI y revisión se registra en issue150 al entregar.

@@ -1,3 +1,5 @@
+> **ESTADO ACTUAL: fase 7 EJECUTADA.** El contenido de este runbook describe el procedimiento que se preparó antes del GO; sus «no ejecutar sin GO» son contexto histórico. Ver el [postflight real de 28-oct-2026](PRODUCTION_RELEASE_20261028.md) para versiones alojadas, hashes, flags, verificación y límites. **No repetir migración ni activar una segunda vez**. El rollback descrito conserva vigencia.
+
 # Runbook #153 — preparado, no ejecutado
 
 La entrega de fases 0–6 no autoriza fase 7. No fusionar ni publicar producción ni activar nueva recogida hasta GO final explícito del PO. Staging usa frontend de preview y servicios/Auth controlados con PostgreSQL 17 desechable; no existe una rama Supabase facturable ni una base de staging con datos reales.
