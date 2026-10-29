@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>PAZO R1 · A/B visual (QA only)</title></head>
+<body style="margin:0;background:#EFECE4"><div id="root"></div>
+<script type="module">
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {AuthProvider} from '/src/context/AuthContext.tsx';
+import {OnboardingView} from '/src/components/views/OnboardingView.tsx';
+import {HomeView} from '/src/components/views/HomeView.tsx';
+import {CommunitiesView} from '/src/components/views/CommunitiesView.tsx';
+import {SupporterInvitationPrompt} from '/src/features/supporter/components/SupporterInvitationPrompt.tsx';
+import '/src/index.css';
+
+// This file is intentionally NOT part of Vite's production build entries.
+// Baseline and candidate run this exact same harness using different source trees.
+if(!import.meta.env.DEV||!['localhost','127.0.0.1'].includes(location.hostname))throw Error('localhost DEV only');
+const qs=new URLSearchParams(location.search);
+const scene=qs.get('scene')||'welcome';
+const lang=qs.get('lang')==='en'?'en':'es';
+const valid=['welcome','signup','pet-form','feed','communities-empty','invitation'];
+if(!valid.includes(scene))throw Error('Unrecognized QA scene');
+const noop=()=>{};
+const neverWrite=()=>{throw Error('QA scene is read-only')};
+const fakePost={id:'00000000-0000-4000-8000-000000000021',
+  petId:'00000000-0000-4000-8000-000000000022',petName:'Luna QA',petSpecies:'perro',
+  petAvatar:'',location:'Área de prueba',timeAgo:lang==='es'?'Hace 2 horas':'2 hours ago',
+  text:lang==='es'?'Una publicación sintética para comparar la composición del Feed.':'Synthetic post used to compare the Feed layout.',
+  photoUrl:null,likes:8,isLiked:false,isSaved:false,comments:[],commentsCount:0,commentsLoaded:true};
+function Fixture(){
+  const node=(Cmp,props={})=>React.createElement(Cmp,{lang,...props});
+  let content;
+  if(['welcome','signup','pet-form'].includes(scene))content=node(OnboardingView,{
+    initialStep:scene==='welcome'?'A01':scene==='signup'?'A02':'A03',
+    onComplete:noop,onSkipToLogin:noop,onQuickDemo:noop,onToggleLang:noop});
+  else if(scene==='feed')content=node(HomeView,{
+    posts:[fakePost],canReport:false,ownedPetIds:[],onSelectPetProfile:noop,
+    onLikePost:noop,onSavePost:noop,onAddComment:async()=>false,onLoadComments:async()=>false});
+  else if(scene==='communities-empty')content=node(CommunitiesView,{
+    currentPet:null,canUseCommunities:false});
+  else content=node(SupporterInvitationPrompt,{
+    previewOnly:true,onExplore:noop,onDismiss:noop,onOptOut:noop});
+  const container=scene==='invitation'
+    ? React.createElement('div',{'data-r1-scene':scene},content)
+    : React.createElement('div',{'data-r1-scene':scene,
+        className:'mx-auto flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#FAF8F5] text-[#204E4A] sm:h-[860px] sm:max-w-[430px] sm:rounded-[2.8rem] sm:shadow-xl'},content);
+  return container;
+}
+createRoot(document.getElementById('root')).render(React.createElement(AuthProvider,null,React.createElement(Fixture)));
+</script></body></html>
