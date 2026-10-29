@@ -1,3 +1,9 @@
+## Nueva iniciativa — Video Creative Lab PAZO (28-oct-2026)
+
+Para trabajos de contenido audiovisual, anuncios o narrativa de mascotas, consultar [docs/marketing/PAZO_VIDEO_CREATIVE_LAB_20261028.md](docs/marketing/PAZO_VIDEO_CREATIVE_LAB_20261028.md) y la habilidad reusable [Video Production OS](https://github.com/DigitalAppcorp/project-brain-os/blob/main/knowledge/video-production/SKILL.md). El PO decidió **explorar** cuatro rutas (comercial cotidiano real, caricatura 3D, video natural de mascotas y demostración real de PAZO) sin estilo ganador ni datos concluyentes. **Esta autorización cubre crear el método y el brief, no publicar, comprar servicios, gastar en anuncios, cambiar la aplicación ni fingir el resultado de un piloto.** Material ajeno en videos de referencia no implica derechos de reutilización. Preservar las funciones reales, las métricas #153 y el resto de las instrucciones vigentes.
+
+---
+
 ## #153 — GO FINAL EJECUTADO: inteligencia global publicada (28-oct-2026, Los Ángeles)
 
 **Fuente operativa vigente:** [postflight de #153](docs/product-intelligence/PRODUCTION_RELEASE_20261028.md) y [issue #153](https://github.com/DigitalAppcorp/pazo-app/issues/153). El PO aprobó la experiencia visual y autorizó el lanzamiento final. [PR #155](https://github.com/DigitalAppcorp/pazo-app/pull/155) integró la implementación, [PR #156](https://github.com/DigitalAppcorp/pazo-app/pull/156) publicó primero el aviso ES/EN con la nueva recogida OFF y [PR #157](https://github.com/DigitalAppcorp/pazo-app/pull/157) integró los flags activos tras **7/7 CI SUCCESS**. Dominio `pazo-app.vercel.app` READY: Vercel `dpl_6XNVw4afbDtim71jUPHjp76xDfiM` SHA `b70dff6c372b43d87389c5d5a0423a8f54455d3c`. Supabase: fuente SQL `20261029010000` instalada exactamente una vez como `20261029005231`; Edge landing v8 ACTIVE; `intelligence_enabled=true` desde `2026-10-29T01:09:01.761072Z`. #150, 14 días y sus fechas preservados; QA excluida.
