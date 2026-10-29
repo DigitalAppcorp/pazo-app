@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "checks": 49,
+  "results": [
+    {
+      "lang": "es",
+      "width": 390,
+      "status": "PASS",
+      "adminLogoutLoginExcluded": true,
+      "explicitRevocationRestoresAnonymousRequests": true,
+      "falseAdConversions": 0,
+      "hostedWrites": 0,
+      "auth": "controlled double",
+      "challenge": "single-use controlled double",
+      "edge": "actual handlers",
+      "database": "isolated PostgreSQL17"
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "status": "PASS",
+      "adminLogoutLoginExcluded": true,
+      "explicitRevocationRestoresAnonymousRequests": true,
+      "falseAdConversions": 0,
+      "hostedWrites": 0,
+      "auth": "controlled double",
+      "challenge": "single-use controlled double",
+      "edge": "actual handlers",
+      "database": "isolated PostgreSQL17"
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "status": "PASS",
+      "adminLogoutLoginExcluded": true,
+      "explicitRevocationRestoresAnonymousRequests": true,
+      "falseAdConversions": 0,
+      "hostedWrites": 0,
+      "auth": "controlled double",
+      "challenge": "single-use controlled double",
+      "edge": "actual handlers",
+      "database": "isolated PostgreSQL17"
+    }
+  ],
+  "errors": [],
+  "hostedWrites": 0,
+  "limits": [
+    "Official-shaped browser origin fully intercepted; no production HTTP",
+    "Controlled Auth/domain/challenge provider; actual login form, App, Edge and isolated SQL"
+  ]
+}

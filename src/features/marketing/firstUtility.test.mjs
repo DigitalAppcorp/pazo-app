@@ -10,7 +10,8 @@ const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/first-utility-'))
 const calls=[]
 let session={user:{id:'owner'},access_token:'pinned-synthetic'},response={data:true,error:null},sessionRead,reply
 globalThis.__UTILITY_DB__={auth:{getSession:()=>sessionRead?sessionRead():Promise.resolve({data:{session}})},rpc(name,body){calls.push({name,body});return {setHeader(name,value){calls.at(-1).header=[name,value];return reply?reply():Promise.resolve(response)}}}}
-let source=fs.readFileSync('src/features/marketing/firstUtility.ts','utf8').replace(/import \{ supabase \} from '[^']+'/,'const supabase=globalThis.__UTILITY_DB__')
+fs.writeFileSync(path.join(cache,'analyticsPreference.mjs'),ts.transpileModule(fs.readFileSync('src/features/marketing/analyticsPreference.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText)
+let source=fs.readFileSync('src/features/marketing/firstUtility.ts','utf8').replace(/import \{ supabase \} from '[^']+'/,'const supabase=globalThis.__UTILITY_DB__').replace("'./analyticsPreference'","'./analyticsPreference.mjs'")
 const f=path.join(cache,'utility.mjs');fs.writeFileSync(f,ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText)
 const {recordFirstUtility,parseUtilitySummary,utilityMetrics}=await import(pathToFileURL(f).href)
 test('utility SQL retains its immutable digest and authorized targeted installation record',()=>{

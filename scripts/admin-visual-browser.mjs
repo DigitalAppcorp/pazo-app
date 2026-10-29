@@ -73,6 +73,12 @@ try{
   assert.equal(await page.locator('[data-pazo-admin-live-mfa]').count(),0);checks++
   await page.screenshot({path:`${out}/${lang}-${width}-summary.png`,fullPage:true})
   for(const [name,selector]of [['journeys','.pa-journeys-panel'],['creatives','.pa-creatives-panel']]){await page.locator(selector).scrollIntoViewIfNeeded();await page.screenshot({path:`${out}/${lang}-${width}-${name}.png`,fullPage:true})}
+  await page.locator('.pa-privacy summary').click()
+  const exclusion=page.getByRole('switch',{name:lang==='es'?'Excluir señales de este navegador':'Exclude signals from this browser'})
+  await exclusion.focus();await page.keyboard.press('Space');assert.equal(await exclusion.getAttribute('aria-checked'),'true');checks++
+  await page.keyboard.press('Space');assert.equal(await exclusion.getAttribute('aria-checked'),'false');checks++
+  assert.ok(await page.locator('.pa-exclusion').evaluate(e=>e.scrollWidth<=e.clientWidth+1));checks++
+  await page.locator('.pa-privacy summary').click()
   await page.getByRole('button',{name:/^Ads/}).click()
   await page.locator('.pa-kpi>strong').first().filter({hasText:'80'}).waitFor();checks++
   await page.getByRole('button',{name:lang==='es'?/^Orgánico/:/^Organic/}).click()

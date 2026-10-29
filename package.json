@@ -52,6 +52,7 @@
     "test:intelligence:browser": "node scripts/intelligence-browser.mjs",
     "test:intelligence:performance": "node scripts/intelligence-perf.mjs",
     "test:intelligence:staging": "node scripts/behavior-hosted.mjs",
+    "test:analytics-reliability": "node --test src/features/marketing/analyticsPreference.test.mjs",
     "test:admin-visual": "node --test src/features/marketing/visual.test.mjs",
     "test:admin-visual:contract": "node scripts/admin-visual-contract.mjs",
     "test:admin-visual:pg17": "node scripts/admin-visual-pg17.mjs",

@@ -25,3 +25,7 @@ La tendencia no conecta períodos sin observación. La comparación de creativid
 ## Evidencia y límites
 
 Las capturas finales y resultados se enlazan desde el informe del candidato. Se verifican ES/EN, 320/390/1440 px, contenido, espera, error, pausa, protección de cohortes, cifras grandes y recuperación de conexión. Los datos de las capturas proceden de PostgreSQL aislado y están marcados como sintéticos. La revisión es autocrítica del implementador con Design Intelligence OS; no se presenta como una auditoría independiente, aceptación del Product Owner ni estudio con usuarios.
+
+## Integración de confiabilidad #161
+
+Se conserva la composición visual. Se cambia el lenguaje de login y campaña para distinguir solicitudes de cuentas, y se muestra la falta de vínculo individual. La preferencia explícita está en «Mi actividad en los informes», con switch de 48 px y texto que delimita navegador, otras cuentas, datos previos y registros operativos. La crítica adversarial detectó que «excluir de analíticas» prometía más que un control local; se corrigió a «Excluir señales de este navegador». Los controles administrativos nuevos se excluyen expresamente de instrumentación en CONTROL_DELTA.json. Capturas posteriores deben mostrar el control, no solo el encabezado, y rotular sus datos sintéticos.

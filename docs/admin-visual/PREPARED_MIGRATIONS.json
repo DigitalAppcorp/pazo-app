@@ -2,7 +2,6 @@
   "initiative": "Admin visual overview and administrator aggregate read access",
   "status": "PREPARED_NOT_DEPLOYED",
   "productionPushAllowed": false,
-  "collectionChanges": false,
   "records": [
     {
       "version": "20261029120000",
@@ -16,5 +15,8 @@
       "hostedVersion": null,
       "sha256NormalizedLF": "c3336f481a1aaaa3c05badd665ef7541e618770902e6cb6672f7687e74205ded"
     }
-  ]
+  ],
+  "scope": "SQL migrations only",
+  "sqlCollectionChanges": false,
+  "browserCollectionSuppression": "Prepared explicit local exclusion; requires final release GO"
 }

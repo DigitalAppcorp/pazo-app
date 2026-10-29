@@ -1,6 +1,6 @@
 # Publicación preparada — requiere GO final
 
-Este cambio no activa medición, modifica retención ni instala un proveedor. Los colectores de #153 ya estaban publicados: no apagarlos, reinstalarlos ni reiniciar sus fechas. Este candidato cambia representación y acceso a lecturas agregadas.
+Este cambio no activa medición, modifica retención ni instala un proveedor. Los colectores de #153 ya estaban publicados: no apagarlos, reinstalarlos ni reiniciar sus fechas. Este candidato cambia representación y acceso a lecturas agregadas e incorpora la exclusión local explícita de envíos del navegador de #161. No amplía el vocabulario ni la recopilación. Esa corrección también requiere el GO de release.
 
 ## Antes del lanzamiento
 

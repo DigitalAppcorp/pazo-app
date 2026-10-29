@@ -41,3 +41,8 @@
 .pa-overview-state{background:white;border-radius:18px;padding:30px 20px;margin-top:16px;min-height:290px;display:flex;align-items:center;justify-content:center}.pa-overview-state .pa-chart-empty{min-height:230px}.pa-overview-state .pa-chart-empty svg{width:180px;height:78px}.pa-overview-state .pa-chart-empty strong{font-size:16px}.pa-overview-state .pa-chart-empty span{font-size:12px;max-width:360px}
 
 .pa-text-action{display:inline-flex;align-items:center;gap:10px}
+
+.pa-exclusion{font-size:12px;line-height:1.65}.pa-exclusion-row{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:10px}.pa-exclusion-row strong{font-size:14px}.pa-exclusion p{color:var(--pa-muted);margin:5px 0}.pa-exclusion-row button{flex:0 0 62px;min-height:48px;border:0;border-radius:15px;background:#edf1e5;display:flex;align-items:center;padding:0 8px}.pa-exclusion-row button[aria-checked="true"]{background:#204e4a}.pa-exclusion-row button span{width:21px;height:21px;border-radius:50%;background:#204e4a;transition:transform .15s}.pa-exclusion-row button span[data-active="true"]{transform:translateX(25px)}
+@media(prefers-reduced-motion:reduce){.pa-exclusion-row button span{transition:none}}
+
+.pa-exclusion-row button[aria-checked="true"] span{background:white}.pa-exclusion-row button:focus-visible span{background:#204e4a}

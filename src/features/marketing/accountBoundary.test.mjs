@@ -11,7 +11,7 @@ test('restored and interrupted attribution stays bound to signup account and cap
  globalThis.window={localStorage:storage}
  try{
   let source=readFileSync(new URL('./marketingRuntime.ts',import.meta.url),'utf8')
-  source=source.replace("from './attribution'",`from '${new URL('./attribution.ts',import.meta.url).href}'`)
+  source=source.replace("from './analyticsPreference'",`from '${new URL('./analyticsPreference.ts',import.meta.url).href}'`).replace("from './attribution'",`from '${new URL('./attribution.ts',import.meta.url).href}'`)
    .replace(/^import .*from '\.\/landingSignal'\r?\n/m,'const shouldSendLandingSignal=()=>false\n')
    .replace(/^import .*from '\.\/landingChallenge'\r?\n/m,'const requestLandingChallenge=async()=>null\n')
    .replace(/^import .*from '\.\.\/\.\.\/services\/supabaseClient'\r?\n/m,'const supabase=globalThis.__marketingBoundary\n')
