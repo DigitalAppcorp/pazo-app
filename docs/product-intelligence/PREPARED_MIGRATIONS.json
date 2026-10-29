@@ -1,13 +1,13 @@
 {
   "issue": 153,
-  "status": "PREPARED_NOT_APPLIED",
+  "status": "INSTALLED_OFF",
   "productionPushAllowed": false,
   "newCollectionEnabled": false,
   "records": [
     {
       "version": "20261029010000",
       "path": "supabase/migrations/20261029010000_pazo_product_intelligence.sql",
-      "hostedVersion": null,
+      "hostedVersion": "20261029005231",
       "sha256NormalizedLF": "7e3e12eb0968aa97c8f0d8f92cd32e46b18b5bf111e916758bc54468db87ba2f"
     }
   ]
