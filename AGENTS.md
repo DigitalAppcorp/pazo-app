@@ -1,3 +1,9 @@
+## Video Production OS: QA correctivo vigente (29-oct-2026)
+
+El PO detectó una brecha material entre anuncios prometidos y material entregado. **Obligatorio leer** [auditoría de primera tanda](docs/marketing/PAZO_VIDEO_BATCH_01_CRITICAL_REVIEW_20261029.md) y el gate [CREATIVE_EVIDENCE_GATE](https://github.com/DigitalAppcorp/project-brain-os/blob/fix/video-os-creative-qa-v0-2-20261029/knowledge/video-production/CREATIVE_EVIDENCE_GATE.md) antes de guionar/renderizar/recomendar publicidad. Los 4 MP4 anteriores comparten plantilla stock/captions/música/endcard y no son una comparación válida de cuatro estilos; 3D, spot actuado y demo dinámica **no están validados**. Revisar medios reales, no solo CI. No implicar que editar documentos "entrenó" una IA, ni sugerir publicación en lote o nuevos gastos sin nueva evidencia/autorización.
+
+---
+
 ## Nueva iniciativa — Video Creative Lab PAZO (28-oct-2026)
 
 Para trabajos de contenido audiovisual, anuncios o narrativa de mascotas, consultar [docs/marketing/PAZO_VIDEO_CREATIVE_LAB_20261028.md](docs/marketing/PAZO_VIDEO_CREATIVE_LAB_20261028.md) y la habilidad reusable [Video Production OS](https://github.com/DigitalAppcorp/project-brain-os/blob/main/knowledge/video-production/SKILL.md). El PO decidió **explorar** cuatro rutas (comercial cotidiano real, caricatura 3D, video natural de mascotas y demostración real de PAZO) sin estilo ganador ni datos concluyentes. **Esta autorización cubre crear el método y el brief, no publicar, comprar servicios, gastar en anuncios, cambiar la aplicación ni fingir el resultado de un piloto.** Material ajeno en videos de referencia no implica derechos de reutilización. Preservar las funciones reales, las métricas #153 y el resto de las instrucciones vigentes.
