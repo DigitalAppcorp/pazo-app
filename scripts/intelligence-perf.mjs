@@ -27,7 +27,7 @@ try{
   },configureServer(s){s.middlewares.use((req,res,next)=>{if(!req.url.startsWith('/__pr1a_api/'))return next();res.setHeader('content-type','application/json');setTimeout(()=>res.end(JSON.stringify(req.url.endsWith('/feed')?{data:[],error:null}:[])),250)})}}]})
   let context
   try{
-   await server.listen();context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce',serviceWorkers:'block'})
+   await server.listen();context=await browser.newContext({viewport:{width,height:900},locale:'es-GT',reducedMotion:'reduce',serviceWorkers:'block'})
    await context.route('**/*',r=>new URL(r.request().url()).origin==='http://127.0.0.1:5361'?r.continue():r.abort())
    const page=await context.newPage();page.on('pageerror',e=>errors.push(String(e)));await page.goto('http://127.0.0.1:5361');const nav=page.getByRole('navigation',{name:'Navegación de PAZO'});await nav.waitFor();await page.getByRole('button',{name:'Mi mascota',exact:true}).click();await page.getByText('Todo sobre Luna',{exact:true}).waitFor()
    await page.evaluate(()=>{window.__paints=[];document.querySelector('nav[aria-label="Navegación de PAZO"]').addEventListener('click',()=>{const at=performance.now();requestAnimationFrame(()=>requestAnimationFrame(()=>window.__paints.push(performance.now()-at)))})})
