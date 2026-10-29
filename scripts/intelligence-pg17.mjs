@@ -39,6 +39,10 @@ sql(`INSERT INTO public.pets SELECT ('97000000-0000-4000-8000-'||lpad((1000+n)::
 report=JSON.parse(sql(admin('SELECT public.pazo_admin_intelligence_summary_v1()')))
 check(report.facts.find(x=>x.metric==='feed_like').accounts===20,'reuses actual interaction rows')
 check(report.facts.find(x=>x.metric==='future_interest_communities_events').accounts===20,'reuses fake door rows, not a second store')
+sql(`DELETE FROM public.interactions WHERE actor_pet_id='${id(1001)}' AND action_type='like'`)
+const afterRemoval=JSON.parse(sql(admin('SELECT public.pazo_admin_intelligence_summary_v1()')))
+check(afterRemoval.facts.find(x=>x.metric==='feed_like').accounts===19&&!afterRemoval.facts.some(x=>x.metric==='feed_unlike'),'source deletion reduces current relation count; removal history never invented')
+sql(`INSERT INTO public.interactions(actor_pet_id,action_type) VALUES('${id(1001)}','like')`)
 check(!JSON.stringify(report).includes(id(1)),'no owner, session or target IDs in report')
 check(report.facts.find(x=>x.metric==='feed_like').returning===null,'unobserved return cohort not fabricated')
 const attribute=(from,to,creative)=>`INSERT INTO marketing_private.acquisition(owner_id,campaign,creative,first_touch_at,signup_verified_at,notice_version) SELECT id,'pazo_beta_local_202610','${creative}',email_confirmed_at-interval '1 hour',email_confirmed_at,'pazo-marketing-attribution-notice-v1' FROM auth.users WHERE id BETWEEN '${id(from)}' AND '${id(to)}'`

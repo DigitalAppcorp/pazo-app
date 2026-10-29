@@ -101,7 +101,7 @@ END $$;
 -- Current business rows can disappear: these counts are not immutable event totals.
 CREATE FUNCTION marketing_private.intelligence_facts(since_at timestamptz) RETURNS TABLE(owner uuid,at timestamptz,metric text)
 LANGUAGE sql STABLE SET search_path='' AS $$
- SELECT p.owner_id,i.created_at,'feed_'||i.action_type FROM public.interactions i JOIN public.pets p ON p.id=i.actor_pet_id WHERE i.created_at>=since_at AND i.action_type IN('impression','view','like','unlike','save','unsave')
+ SELECT p.owner_id,i.created_at,'feed_'||i.action_type FROM public.interactions i JOIN public.pets p ON p.id=i.actor_pet_id WHERE i.created_at>=since_at AND i.action_type IN('impression','view','like','save')
  UNION ALL SELECT user_id,created_at,'feed_publish' FROM public.posts WHERE created_at>=since_at
  UNION ALL SELECT p.owner_id,c.created_at,'feed_comment' FROM public.post_comments c JOIN public.pets p ON p.id=c.author_pet_id WHERE c.created_at>=since_at
  UNION ALL SELECT p.owner_id,f.created_at,'profile_follow' FROM public.follows f JOIN public.pets p ON p.id=f.follower_id WHERE f.created_at>=since_at
