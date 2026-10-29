@@ -14,7 +14,7 @@ const {createBehaviorRecorder}=await load('behaviorRuntime'),{parseIntelligenceS
 test.after(()=>fs.rmSync(cache,{recursive:true,force:true}))
 const actor={owner:'A',token:'A1'},tick=()=>new Promise(r=>setImmediate(r))
 const create=(options={})=>createBehaviorRecorder({enabled:true,taskEnabled:true,send:async()=>true,sendTasks:async()=>true,...options})
-test('new release gate OFF does not disable released #150',()=>assert.equal(INTELLIGENCE_COLLECTION_ENABLED,false))
+test('new release gate ON preserves released #150',()=>assert.equal(INTELLIGENCE_COLLECTION_ENABLED,true))
 test('bounded semantic batch, dedupe, exact retry and no values',async()=>{
  const calls=[];const r=create({sendTasks:async(a,s,items)=>{calls.push(items);return calls.length!==1}});r.bind(actor)
  for(let i=0;i<100;i++)r.task('care_create','attempt')
