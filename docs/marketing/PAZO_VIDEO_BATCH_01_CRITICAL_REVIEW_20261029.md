@@ -29,7 +29,7 @@
 
 ## Nueva regla de autoridad
 
-Aplicar [Creative Evidence Gate de Video Production OS](https://github.com/DigitalAppcorp/project-brain-os/blob/fix/video-os-creative-qa-v0-2-20261029/knowledge/video-production/CREATIVE_EVIDENCE_GATE.md) cuando esté integrado en `main`. No considerar las piezas #01–#04 una tanda de cuatro formatos. No publicar más variantes de la misma plantilla por defecto ni contratar servicios para compensar una historia mal construida.
+Aplicar [Creative Evidence Gate de Video Production OS](https://github.com/DigitalAppcorp/project-brain-os/blob/main/knowledge/video-production/CREATIVE_EVIDENCE_GATE.md) cuando esté integrado en `main`. No considerar las piezas #01–#04 una tanda de cuatro formatos. No publicar más variantes de la misma plantilla por defecto ni contratar servicios para compensar una historia mal construida.
 
 Antes de producir otra tanda, demostrar **una** pieza con medio y gramática audiovisual efectivamente diferentes:
 - **Spot actuado cotidiano:** escena continua real con persona/mascota, acción, conflicto/resolución, iluminación y sonido creíbles; no collage de stock;
