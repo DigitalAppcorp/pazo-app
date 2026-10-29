@@ -2,7 +2,7 @@ import { useCallback,useEffect,useRef,useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AdminPayPalSettings } from './AdminPayPalSettings'
 import { AdminMarketingPanel } from './AdminMarketingPanel'
-import {BehaviorPanel} from '../../marketing/BehaviorPanel'
+import {ExecutiveAnalytics} from '../../marketing/ExecutiveAnalytics'
 import {AdminSupportInbox} from '../../support/components/AdminSupportInbox'
 import {AdminGiftBenefits} from '../../support/components/AdminGiftBenefits'
 import {AdminMaintenanceControls} from '../../maintenance/AdminMaintenanceControls'
@@ -193,17 +193,17 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      <div className="min-w-0">
       <p className="text-[11px] font-black tracking-wide text-[#739087] lg:hidden">pazo. · ADMIN</p>
       <h2 className="text-[26px] font-black tracking-tight text-[#162B29] lg:text-[31px]">
-       {section==='summary'?l('Resumen general','General overview'):lang==='es'?sections.find(item=>item.key===section)?.es:sections.find(item=>item.key===section)?.en}
+       {section==='summary'?l('Así se usa PAZO','How PAZO is used'):lang==='es'?sections.find(item=>item.key===section)?.es:sections.find(item=>item.key===section)?.en}
       </h2>
       <p className="mt-1 text-[13px] text-[#647C75] lg:text-[15px]">
-       {section==='summary'?l('Así va PAZO, con los datos disponibles','PAZO at a glance, using available data'):l('Centro de administración de PAZO','PAZO administration center')}
+       {section==='summary'?l('Usuarios, recorridos y primeras utilidades','Users, journeys and first useful actions'):l('Centro de administración de PAZO','PAZO administration center')}
       </p>
-      {section!=='marketing'&&section!=='behavior'&&overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
+      {section!=='marketing'&&section!=='behavior'&&section!=='summary'&&overview&&<p className="mt-2 hidden text-[12px] font-semibold text-[#82938B] lg:block">{l('Actualizado: ','Updated: ')}{new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US')}</p>}
      </div>
      <div className="flex shrink-0 items-center gap-2">
       <div className="hidden items-center gap-2 lg:flex">
-       {periodSelector}
-       {section!=='marketing'&&section!=='behavior'&&<><button type="button" onClick={()=>void refresh()} disabled={loading}
+       {section!=='summary'&&section!=='behavior'&&periodSelector}
+       {section!=='marketing'&&section!=='behavior'&&section!=='summary'&&<><button type="button" onClick={()=>void refresh()} disabled={loading}
         className="flex min-h-11 items-center gap-2 rounded-[15px] bg-white px-4 text-[13px] font-extrabold text-[#204E4A] shadow-sm hover:bg-[#E1E53F] focus-visible:bg-[#E1E53F] disabled:opacity-60">
         <AdminGlyph name="activity" size={17}/>{l('Actualizar','Refresh')}
        </button>
@@ -216,24 +216,22 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
       </button>
      </div>
     </div>
-    <nav aria-label={l('Secciones del panel','Dashboard sections')}
-      className="mx-auto mt-4 flex max-w-[1600px] gap-2 overflow-x-auto pb-1 lg:hidden">
-     {visibleSections.map(item=><button key={item.key} type="button" aria-current={section===item.key?'page':undefined}
-       onClick={()=>selectSection(item.key)}
-       className={'flex min-h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[12px] font-bold transition-colors focus-visible:bg-[#E1E53F] '+
-        (section===item.key?'bg-[#204E4A] text-white':'bg-white text-[#204E4A] hover:bg-[#E5EDCE]')}>
-       <AdminNavIcon section={item.key}/>{lang==='es'?item.es:item.en}
-      </button>)}
+    <nav aria-label={l('Secciones del panel','Dashboard sections')} className="mx-auto mt-4 max-w-[1600px] lg:hidden">
+     <label htmlFor="pazo-admin-section" className="sr-only">{l('Sección del panel','Dashboard section')}</label>
+     <select id="pazo-admin-section" aria-label={l('Secciones del panel','Dashboard sections')} value={section} onChange={e=>selectSection(e.target.value as Section)}
+       className="min-h-11 w-full rounded-[14px] bg-white px-4 text-[13px] font-bold text-[#204E4A] focus-visible:bg-[#E1E53F]">
+      {visibleSections.map(item=><option key={item.key} value={item.key}>{lang==='es'?item.es:item.en}</option>)}
+     </select>
     </nav>
    </header>
    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 lg:px-7 lg:pt-1">
     <div className="mx-auto max-w-[1600px] space-y-4 lg:space-y-4">
      <div className="flex flex-wrap items-center justify-between gap-3 lg:hidden">
-      {section!=='marketing'&&section!=='behavior'&&<p className="text-[12px] font-semibold text-[#6A8079]">
+      {section!=='marketing'&&section!=='behavior'&&section!=='summary'&&<p className="text-[12px] font-semibold text-[#6A8079]">
        {overview?l('Actualizado: ','Updated: ')+new Date(overview.as_of).toLocaleString(lang==='es'?'es-US':'en-US'):'—'}
       </p>}
-      <div className="flex items-center gap-2">{periodSelector}
-       {section!=='marketing'&&section!=='behavior'&&<button type="button" onClick={()=>void refresh()} disabled={loading}
+      <div className="flex items-center gap-2">{section!=='summary'&&section!=='behavior'&&periodSelector}
+       {section!=='marketing'&&section!=='behavior'&&section!=='summary'&&<button type="button" onClick={()=>void refresh()} disabled={loading}
         className="min-h-11 rounded-[15px] bg-[#E1E53F] px-4 py-2 text-[12px] font-extrabold disabled:opacity-50 hover:bg-[#EAF079] focus-visible:bg-[#EAF079]">
         {l('Actualizar','Refresh')}
        </button>}
@@ -244,15 +242,15 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
      {section==='gifts'&&<AdminGiftBenefits lang={lang}/>}
      {section==='maintenance'&&<AdminMaintenanceControls lang={lang}/>}
      {section==='marketing'&&<AdminMarketingPanel lang={lang} period={period}/>}
-     {section==='behavior'&&<BehaviorPanel lang={lang} period={period}/>}
-     {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
-     {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
+     {(section==='summary'||section==='behavior')&&<ExecutiveAnalytics lang={lang} onOpenMarketing={()=>selectSection('marketing')}/>}
+     {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&section!=='summary'&&loading&&<p role="status" className="rounded-2xl bg-white p-5 text-[13px]">{l('Consultando datos autorizados…','Loading authorized data…')}</p>}
+     {section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&section!=='summary'&&error&&<div role="alert" className="rounded-[20px] bg-[#F9E7DE] p-4 text-[13px] text-[#823E2D]">
        {l('No fue posible actualizar todos los datos.','Could not refresh all metrics.')} {error}
       </div>}
     {overview&&section!=='paypal'&&section!=='marketing'&&section!=='behavior'&&<div className={loading?'pointer-events-none opacity-50':'space-y-5'}>
 
 
-     {section==='summary'&&<>
+     {section==='summary'&&<details className="pa-details"><summary tabIndex={0}>{l('Cuentas, mascotas y operación','Accounts, pets and operations')}<span aria-hidden="true">＋</span></summary><div className="pa-detail-body space-y-5"><div className="flex flex-wrap items-center gap-3"><p className="text-[12px] font-bold">{l('Período de informes operativos','Operational reporting period')}</p>{periodSelector}</div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
        <Stat icon="users" label={l('Usuarios registrados','Registered users')} value={n(overview.people.registered)}
         note={l('Nuevos últimos 30 días: ','New in last 30 days: ')+n(overview.people.new_30d)}/>
@@ -427,7 +425,7 @@ export function AdminDashboard({lang,onClose,onOpenReports}:{lang:'es'|'en';onCl
        </DashboardPanel>
       </div>
       <Note>{l('Datos de PAZO en pruebas. Los importes de PayPal Sandbox NO son recaudación real. Actividad medida solo desde que se instaló el registro diario.','Staging data. PayPal Sandbox payments are NOT real revenue. Activity is measured only since daily tracking started.')} {l('Medición desde','Tracking since')}: {overview.activity.tracking_since}.</Note>
-     </>}
+     </div></details>}
 
      {section==='pets'&&<>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

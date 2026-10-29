@@ -21,7 +21,7 @@ const check=(value,message)=>{assert.ok(value,message);checks++}
 let browser
 try{
  await server.listen();browser=await chromium.launch({headless:true,...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{channel:process.platform==='win32'?'msedge':undefined})})
- for(const lang of ['es','en'])for(const width of [320,390,430,1440])for(const state of ['content','paused','insufficient','error','loading','mfa']){
+ for(const lang of ['es','en'])for(const width of [320,390,430,1440])for(const state of ['content','paused','insufficient','error','loading','access']){
   let mode=state,releases=[],calls=0
   const context=await browser.newContext({viewport:{width,height:900},locale:lang==='es'?'es-GT':'en-US',reducedMotion:'reduce',serviceWorkers:'block'})
   await context.route('**/*',async route=>{
@@ -35,7 +35,7 @@ try{
     calls++;const args=JSON.parse(route.request().postData())
     if(mode==='loading')await new Promise(r=>releases.push(r))
     if(mode==='error')return respond({code:'SYNTHETIC_OUTAGE'},503)
-    if(mode==='mfa')return respond({code:'42501',message:'mfa_required'},403)
+    if(mode==='access')return respond({code:'42501',message:'admin_required'},403)
     if(mode==='paused'){
      sql('UPDATE marketing_private.collection_gate SET behavior_enabled=false');const r=report(args.p_days,args.p_segment,args.p_creative);sql('UPDATE marketing_private.collection_gate SET behavior_enabled=true');return respond(r)
     }
@@ -48,11 +48,12 @@ try{
   })
   const page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',e=>{errors.push(String(e));console.error(String(e))})
   await page.goto(`http://127.0.0.1:5358/supabase/tests/marketing/behavior-harness.html?lang=${lang}`)
-  await page.locator('button:visible').filter({hasText:lang==='es'?/^Comportamiento$/:/^Behavior$/}).first().click()
+  if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
+  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click()
   await page.getByTestId('behavior-panel').waitFor()
   if(state==='loading')await page.getByRole('status').filter({hasText:lang==='es'?'Consultando recorridos':'Loading aggregate'}).waitFor()
   else if(state==='error')await page.getByRole('alert').filter({hasText:lang==='es'?'No pudimos consultar este informe':'This report could not be loaded'}).waitFor()
-  else if(state==='mfa')await page.getByText(lang==='es'?'Verifica tu segundo factor para consultar los informes de comportamiento. El servidor comprobará también tu permiso de administrador.':'Verify your second factor to read behavior reports. The server will also check your administrator permission.').waitFor()
+  else if(state==='access'){await page.getByRole('alert').filter({hasText:lang==='es'?'No pudimos consultar este informe':'This report could not be loaded'}).waitFor();check(await page.locator('[data-pazo-admin-live-mfa]').count()===0,'admin denial never starts an authenticator challenge')}
   else await page.locator('.behavior-coverage').waitFor()
   await page.evaluate(()=>document.fonts.ready)
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no document overflow')
@@ -87,7 +88,7 @@ try{
    await page.keyboard.press('Tab');check(await page.evaluate(()=>document.activeElement?.tagName==='SELECT'||document.activeElement?.tagName==='BUTTON'||document.activeElement?.tagName==='A'),'keyboard focus remains actionable')
   }
   cases.push({lang,width,state,calls,status:'PASS',data:'synthetic isolated PG17, Auth double',capture:name+'.png'})
-  if(state==='mfa')console.log(`PASS ${lang} ${width}: six states`)
+  if(state==='access')console.log(`PASS ${lang} ${width}: six states`)
   await context.close()
  }
  check(errors.length===0,'zero page errors');check(hostedWrites===0,'zero hosted writes')

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": 24,
+  "hostedWrites": 0,
+  "environment": "disposable PostgreSQL17",
+  "adminAggregateReads": "aal1 allowed",
+  "nonAdmin": "denied",
+  "sensitiveFunctions": "unchanged",
+  "collectionGate": "unchanged"
+}

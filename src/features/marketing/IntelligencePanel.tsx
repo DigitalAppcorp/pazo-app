@@ -2,18 +2,17 @@ import {useEffect,useState} from 'react'
 import {adminIntelligenceSummary,factLabels,type IntelligenceSummary} from './intelligenceSummary'
 import {intelligenceTasks} from './intelligenceCatalog'
 import type {BehaviorSegment} from './behaviorSummary'
-import {AdminPaypalMfaStepUp} from '../admin/components/AdminPaypalMfaStepUp'
 export type IntelligenceView='ads'|'friction'|'social'|'tools'|'return'
 export function IntelligencePanel({lang,period,segment,creative,revision,view}:{lang:'es'|'en';period:7|30|90;segment:BehaviorSegment;creative:string;revision:number;view:IntelligenceView}){
  const l=(es:string,en:string)=>lang==='es'?es:en,index=lang==='es'?0:1
  const [retry,setRetry]=useState(0)
  const key=`${period}:${segment}:${creative}:${revision}:${retry}`
- const [response,setResponse]=useState<{key:string;data?:IntelligenceSummary;error?:boolean;mfa?:boolean}>()
+ const [response,setResponse]=useState<{key:string;data?:IntelligenceSummary;error?:boolean}>()
  const current=response?.key===key?response:undefined,data=current?.data
  useEffect(()=>{
   const controller=new AbortController();let active=true
   void adminIntelligenceSummary(period,segment,creative,AbortSignal.any([controller.signal,AbortSignal.timeout(10000)]))
-   .then(data=>{if(active)setResponse({key,data})}).catch(e=>{if(active)setResponse({key,error:true,mfa:e instanceof Error&&e.message==='mfa_required'})})
+   .then(data=>{if(active)setResponse({key,data})}).catch(()=>{if(active)setResponse({key,error:true})})
   return()=>{active=false;controller.abort()}
  },[key,period,segment,creative])
  const number=(n:number)=>n.toLocaleString(lang==='es'?'es-US':'en-US')
@@ -28,8 +27,7 @@ export function IntelligencePanel({lang,period,segment,creative,revision,view}:{
  return <section className="behavior-section intelligence-section" aria-label={titles[view]} data-testid="intelligence-panel">
   <p className="behavior-eyebrow">{l('MÁS ALLÁ DE LA PRIMERA VISITA','BEYOND THE FIRST VISIT')}</p><h3>{titles[view]}</h3><p className="behavior-caption">{hints[view]}</p>
   {!current&&<p role="status" className="behavior-empty">{l('Consultando tareas de producto…','Loading product tasks…')}</p>}
-  {current?.error&&!current.mfa&&<div role="alert" className="behavior-empty"><strong>{l('Este informe no está disponible','This report is unavailable')}</strong><p>{l('Puedes seguir usando los demás informes.','You can keep using the other reports.')}</p><button type="button" onClick={()=>setRetry(x=>x+1)}>{l('Reintentar tareas','Retry tasks')}</button></div>}
-  {current?.mfa&&<AdminPaypalMfaStepUp lang={lang} purpose="analytics" onVerified={()=>setRetry(x=>x+1)}/>}
+  {current?.error&&<div role="alert" className="behavior-empty"><strong>{l('Este informe no está disponible','This report is unavailable')}</strong><p>{l('Puedes seguir usando los demás informes.','You can keep using the other reports.')}</p><button type="button" onClick={()=>setRetry(x=>x+1)}>{l('Reintentar tareas','Retry tasks')}</button></div>}
   {data&&<>
    <div className="intelligence-coverage"><strong>{data.status==='paused'?l('Medición ampliada pausada','Extended measurement paused'):l('Observación de tareas activa','Task observation active')}</strong><p>{data.coverage_since?`${l('Desde','Since')} ${new Date(data.coverage_since).toLocaleString(lang==='es'?'es-US':'en-US',{timeZone:'America/Los_Angeles'})}`:l('Su cobertura comenzará al autorizar el lanzamiento. Los datos del informe anterior conservan sus fechas.','Coverage starts when launch is authorized. The earlier report keeps its own dates.')}</p><p>{l('Ventana máxima: 14 días. Tareas: mínimo 10 cuentas. Demo: solicitudes sin identidad.','Maximum window: 14 days. Tasks: at least 10 accounts. Demo: requests without identity.')}</p></div>
    {data.status!=='paused'&&<>

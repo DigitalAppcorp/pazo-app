@@ -23,6 +23,6 @@ export function parseIntelligenceSummary(v:unknown):IntelligenceSummary{
 }
 export async function adminIntelligenceSummary(days:7|30|90,segment:BehaviorSegment,creative:string,signal:AbortSignal){
  const {data,error}=await supabase.rpc('pazo_admin_intelligence_summary_v1',{p_days:days,p_segment:segment,p_creative:creative}).abortSignal(signal)
- if(error)throw Error(error.code==='42501'?'mfa_required':'report_unavailable')
+ if(error)throw Error(error.code==='42501'?'admin_required':'report_unavailable')
  return parseIntelligenceSummary(data)
 }

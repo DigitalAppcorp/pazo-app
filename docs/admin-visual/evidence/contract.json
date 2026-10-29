@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "protectedFiles": 926,
+  "base": "ee10cd98",
+  "controller": "unchanged outside return JSX",
+  "collection": "released settings preserved",
+  "migrations": "two prepared read-only/access projections",
+  "hostedWrites": 0
+}

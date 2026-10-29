@@ -51,7 +51,14 @@
     "test:intelligence:pg17": "node scripts/intelligence-pg17.mjs",
     "test:intelligence:browser": "node scripts/intelligence-browser.mjs",
     "test:intelligence:performance": "node scripts/intelligence-perf.mjs",
-    "test:intelligence:staging": "node scripts/behavior-hosted.mjs"
+    "test:intelligence:staging": "node scripts/behavior-hosted.mjs",
+    "test:admin-visual": "node --test src/features/marketing/visual.test.mjs",
+    "test:admin-visual:contract": "node scripts/admin-visual-contract.mjs",
+    "test:admin-visual:pg17": "node scripts/admin-visual-pg17.mjs",
+    "test:admin-visual:browser": "node scripts/admin-visual-browser.mjs",
+    "test:admin-visual:hosted": "node scripts/admin-visual-hosted.mjs",
+    "test:admin-visual:staging": "node scripts/admin-visual-staging-check.mjs",
+    "preview:admin-visual": "node scripts/admin-visual-staging.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

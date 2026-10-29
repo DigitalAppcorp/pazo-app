@@ -1,0 +1,201 @@
+{
+  "days": 14,
+  "as_of": "2026-10-29T09:48:35.153449+00:00",
+  "moves": [
+    {
+      "to": "pet",
+      "from": "home",
+      "accounts": 80
+    },
+    {
+      "to": "agenda",
+      "from": "pet",
+      "accounts": 40
+    },
+    {
+      "to": "places",
+      "from": "communities",
+      "accounts": 20
+    },
+    {
+      "to": "communities",
+      "from": "pet",
+      "accounts": 20
+    },
+    {
+      "to": "qr",
+      "from": "pet",
+      "accounts": 20
+    }
+  ],
+  "trend": [
+    {
+      "day": "2026-10-16",
+      "accounts": 60,
+      "returning": 0
+    },
+    {
+      "day": "2026-10-17",
+      "accounts": 30,
+      "returning": 30
+    },
+    {
+      "day": "2026-10-18",
+      "accounts": 120,
+      "returning": 60
+    },
+    {
+      "day": "2026-10-19",
+      "accounts": 90,
+      "returning": 90
+    },
+    {
+      "day": "2026-10-20",
+      "accounts": 60,
+      "returning": 60
+    },
+    {
+      "day": "2026-10-21",
+      "accounts": 30,
+      "returning": 30
+    },
+    {
+      "day": "2026-10-22",
+      "accounts": 120,
+      "returning": 120
+    },
+    {
+      "day": "2026-10-23",
+      "accounts": 90,
+      "returning": 90
+    },
+    {
+      "day": "2026-10-24",
+      "accounts": 60,
+      "returning": 60
+    },
+    {
+      "day": "2026-10-25",
+      "accounts": 30,
+      "returning": 30
+    },
+    {
+      "day": "2026-10-26",
+      "accounts": 120,
+      "returning": 120
+    },
+    {
+      "day": "2026-10-27",
+      "accounts": 90,
+      "returning": 90
+    },
+    {
+      "day": "2026-10-28",
+      "accounts": 60,
+      "returning": 60
+    },
+    {
+      "day": "2026-10-29",
+      "accounts": 30,
+      "returning": 30
+    }
+  ],
+  "funnel": [
+    {
+      "step": "verified",
+      "accounts": 80
+    },
+    {
+      "step": "first_pet",
+      "accounts": 60
+    },
+    {
+      "step": "tool_view",
+      "accounts": 40
+    },
+    {
+      "step": "utility",
+      "accounts": 20
+    }
+  ],
+  "status": "observing",
+  "totals": {
+    "useful": 40,
+    "accounts": 120,
+    "sessions": 990,
+    "returning": 120
+  },
+  "segment": "all",
+  "version": 1,
+  "audience": "all",
+  "creative": "all",
+  "segments": {
+    "all": 120,
+    "paid": 80,
+    "unknown": 40,
+    "returning": 120
+  },
+  "timezone": "America/Los_Angeles",
+  "creatives": [
+    {
+      "pet": 30,
+      "useful": 10,
+      "viewed": 20,
+      "creative": "perfil_es",
+      "verified": 40
+    },
+    {
+      "pet": 30,
+      "useful": 10,
+      "viewed": 20,
+      "creative": "qr_es",
+      "verified": 40
+    }
+  ],
+  "last_steps": [
+    {
+      "screen": "home",
+      "accounts": 40,
+      "sessions": 480
+    },
+    {
+      "screen": "places",
+      "accounts": 20,
+      "sessions": 240
+    },
+    {
+      "screen": "agenda",
+      "accounts": 40,
+      "sessions": 180
+    },
+    {
+      "screen": "qr",
+      "accounts": 20,
+      "sessions": 90
+    }
+  ],
+  "coverage_since": "2026-10-15T09:26:51.413899+00:00",
+  "return_modules": [
+    {
+      "screen": "pet",
+      "accounts": 80
+    },
+    {
+      "screen": "agenda",
+      "accounts": 40
+    },
+    {
+      "screen": "communities",
+      "accounts": 20
+    },
+    {
+      "screen": "places",
+      "accounts": 20
+    },
+    {
+      "screen": "qr",
+      "accounts": 20
+    }
+  ],
+  "landing_requests": 1280
+}

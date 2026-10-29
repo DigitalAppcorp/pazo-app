@@ -1,3 +1,9 @@
+## Candidato actual — Administración visual y lectura agregada sin AAL2
+
+Rama `feat/admin-visual-overview`, base `ee10cd98`. Esta iniciativa está preparada, NO publicada en producción. Ver `docs/admin-visual/RELEASE_RUNBOOK.md`, revisión de diseño y manifiesto de exactamente dos migraciones pendientes. No confundir con los GO históricos de #147/#153. No hacer `db push` global ni reinstalar #153: su versión fuente/hospedada ya está conciliada. Los cuatro flags publicados siguen activos y sus fechas deben conservarse. Las operaciones sensibles mantienen MFA; solo las lecturas agregadas de administrador se preparan para AAL1.
+
+Baseline de producción consultado sin escrituras el 29-oct-2026 09:48 UTC: 135 migraciones, gates/health de comportamiento e inteligencia activos, cron de retención #4 con ejecución exitosa 06:17:00Z después del SQL de #153. Este dato resuelve la incertidumbre histórica de cron, no autoriza un nuevo lanzamiento.
+
 ## Nueva iniciativa — Video Creative Lab PAZO (28-oct-2026)
 
 Para trabajos de contenido audiovisual, anuncios o narrativa de mascotas, consultar [docs/marketing/PAZO_VIDEO_CREATIVE_LAB_20261028.md](docs/marketing/PAZO_VIDEO_CREATIVE_LAB_20261028.md) y la habilidad reusable [Video Production OS](https://github.com/DigitalAppcorp/project-brain-os/blob/main/knowledge/video-production/SKILL.md). El PO decidió **explorar** cuatro rutas (comercial cotidiano real, caricatura 3D, video natural de mascotas y demostración real de PAZO) sin estilo ganador ni datos concluyentes. **Esta autorización cubre crear el método y el brief, no publicar, comprar servicios, gastar en anuncios, cambiar la aplicación ni fingir el resultado de un piloto.** Material ajeno en videos de referencia no implica derechos de reutilización. Preservar las funciones reales, las métricas #153 y el resto de las instrucciones vigentes.
