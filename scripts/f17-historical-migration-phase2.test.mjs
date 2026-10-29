@@ -49,11 +49,11 @@ test('eight prehistory SQL sources preserved in non-executable archive only (pro
   assert.ok(all.some(n=>n.startsWith(prepared.installedVersion+'_')),'F18 installed migration missing')
   assert.ok(additional.every(v=>all.some(n=>n.startsWith(v+'_'))),'additional hosted migration source missing')
   assert.equal(prepared.productionPushAllowed,false)
-  assert.equal(intelligence.status,'PREPARED_NOT_APPLIED')
+  assert.ok(['INSTALLED_OFF','ACTIVATED'].includes(intelligence.status),'issue153 hosted status must be explicit')
   assert.equal(intelligence.productionPushAllowed,false)
-  assert.equal(intelligence.newCollectionEnabled,false)
+  assert.equal(intelligence.newCollectionEnabled,intelligence.status==='ACTIVATED')
   for(const r of intelligence.records){
-    assert.equal(r.hostedVersion,null)
+    assert.equal(r.hostedVersion,'20261029005231')
     assert.equal(createHash('sha256').update(readFileSync(new URL('../'+r.path,import.meta.url),'utf8').replaceAll('\r\n','\n')).digest('hex'),r.sha256NormalizedLF)
   }
   assert.equal(all.filter(n=>n.slice(0,14)!==prepared.installedVersion&&!additional.includes(n.slice(0,14))&&!prepared.versions.includes(n.slice(0,14))&&!pendingMarketing.includes(n.slice(0,14))&&!pendingIntelligence.includes(n.slice(0,14))).length,122)
