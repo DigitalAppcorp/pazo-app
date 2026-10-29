@@ -30,7 +30,8 @@ try{
   const page=await context.newPage();page.on('pageerror',e=>errors.push(String(e)));await page.goto(`http://127.0.0.1:5362/supabase/tests/marketing/behavior-harness.html?lang=${lang}`)
   await page.addStyleTag({url:font});await page.evaluate(()=>document.fonts.load('700 16px Quicksand'))
   assert.equal(await page.evaluate(()=>document.fonts.check('700 16px Quicksand')),true)
-  await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click();await page.locator('.intelligence-coverage').waitFor()
+  if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
+  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click();await page.locator('.intelligence-coverage').waitFor()
   const captures=[]
   for(const q of [0,1,2,3,4]){
    await page.locator('.intelligence-questions button').nth(q).click();await page.locator('.behavior-intro').scrollIntoViewIfNeeded();const name=`${lang}-${width}-q${q}.png`;await page.screenshot({path:out+'/'+name,fullPage:true});captures.push(name)

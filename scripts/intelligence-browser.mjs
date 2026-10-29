@@ -19,7 +19,7 @@ const cases=[],errors=[];let checks=0,writes=0,browser
 const check=(v,m)=>{assert.ok(v,m);checks++}
 try{
  await server.listen();browser=await chromium.launch({headless:true,...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{channel:process.platform==='win32'?'msedge':undefined})})
- for(const lang of ['es','en'])for(const width of [320,390,1440])for(const state of ['content','paused','protected','error','loading','mfa']){
+ for(const lang of ['es','en'])for(const width of [320,390,1440])for(const state of ['content','paused','protected','error','loading','access']){
   let mode=state,releases=[]
   const context=await browser.newContext({viewport:{width,height:900},locale:lang==='es'?'es-GT':'en-US',reducedMotion:'reduce',serviceWorkers:'block'})
   await context.route('**/*',async route=>{
@@ -28,7 +28,7 @@ try{
    if(url.pathname.includes('/rpc/pazo_admin_intelligence_summary_v1')){
     if(mode==='loading')await new Promise(r=>releases.push(r))
     if(mode==='error')return reply({code:'SYNTHETIC_OUTAGE'},503)
-    if(mode==='mfa')return reply({code:'42501'},403)
+    if(mode==='access')return reply({code:'42501'},403)
     const args=JSON.parse(route.request().postData()),r=report('pazo_admin_intelligence_summary_v1',args)
     if(mode==='paused'){r.status='paused';r.tasks=[];r.facts=[];r.anonymous=[];r.coverage_since=null}
     if(mode==='protected'){r.tasks=[];r.facts=[];r.anonymous=[]}
@@ -41,13 +41,14 @@ try{
   })
   const page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',e=>errors.push(String(e)))
   await page.goto(`http://127.0.0.1:5360/supabase/tests/marketing/behavior-harness.html?lang=${lang}`)
-  await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
+  if(width<1024)await page.getByRole('combobox',{name:lang==='es'?'Secciones del panel':'Dashboard sections'}).selectOption('behavior');else await page.getByRole('button',{name:lang==='es'?'Comportamiento':'Behavior',exact:true}).click()
+  await page.locator('.pa-details').filter({has:page.locator('summary').filter({hasText:lang==='es'?'Explorar tareas':'Explore tasks'})}).locator('summary').first().click()
   const panel=page.getByTestId('intelligence-panel')
   await panel.waitFor();const buttons=page.locator('.intelligence-questions button');check(await buttons.count()===5,'five plain-language questions')
   await buttons.nth(1).click()
   if(state==='loading')await panel.getByRole('status').waitFor()
   else if(state==='error')await panel.getByRole('alert').waitFor()
-  else if(state==='mfa')await panel.getByText(lang==='es'?'Verifica tu segundo factor para consultar los informes de comportamiento. El servidor comprobará también tu permiso de administrador.':'Verify your second factor to read behavior reports. The server will also check your administrator permission.').waitFor()
+  else if(state==='access'){await panel.getByRole('alert').waitFor();check(await page.locator('[data-pazo-admin-live-mfa]').count()===0,'admin denial never starts an authenticator challenge')}
   else await panel.locator('.intelligence-coverage').waitFor()
   await page.evaluate(()=>document.fonts.ready)
   check(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1),'no panel overflow')
@@ -73,6 +74,6 @@ try{
   cases.push({lang,width,state,status:'PASS',capture:name+'.png'});await context.close()
  }
  check(errors.length===0,'zero page errors');check(writes===0,'zero hosted writes')
- fs.writeFileSync(out+'/results.json',JSON.stringify({status:'PASS',checks,cases,errors,hostedWrites:writes,nativeAdmin:true,backend:'Isolated PostgreSQL17 actual RPC; Auth double; paused/protected/error/loading/MFA response scenarios'},null,2)+'\n')
+ fs.writeFileSync(out+'/results.json',JSON.stringify({status:'PASS',checks,cases,errors,hostedWrites:writes,nativeAdmin:true,backend:'Isolated PostgreSQL17 actual RPC; Auth double; paused/protected/error/loading/authorization-denied response scenarios'},null,2)+'\n')
  console.log(JSON.stringify({status:'PASS',checks,cases:cases.length,hostedWrites:writes,errors}))
 }finally{await browser?.close();await server.close()}

@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "checks": 97,
+  "cases": [
+    {
+      "lang": "es",
+      "width": 1440,
+      "status": "PASS",
+      "font": "Quicksand",
+      "auth": "controlled double; RPC runs as admin aal1",
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "status": "PASS",
+      "font": "Quicksand",
+      "auth": "controlled double; RPC runs as admin aal1",
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 320,
+      "status": "PASS",
+      "font": "Quicksand",
+      "auth": "controlled double; RPC runs as admin aal1",
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "status": "PASS",
+      "font": "Quicksand",
+      "auth": "controlled double; RPC runs as admin aal1",
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "status": "PASS",
+      "font": "Quicksand",
+      "auth": "controlled double; RPC runs as admin aal1",
+      "hostedWrites": 0
+    }
+  ],
+  "errors": [],
+  "hostedWrites": 0,
+  "limits": [
+    "Auth and HTTP transport doubled; actual isolated PostgreSQL aggregates",
+    "No real production user session claimed"
+  ]
+}

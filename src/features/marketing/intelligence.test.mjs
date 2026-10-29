@@ -8,7 +8,8 @@ import {createMarketingLandingHandler} from '../../../supabase/functions/pazo-ma
 import {createExperienceSubmit} from '../../../supabase/functions/pazo-marketing-landing/landingAdapter.mjs'
 fs.mkdirSync('node_modules/.cache',{recursive:true})
 const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/intelligence-'))
-async function load(file){let s=fs.readFileSync('src/features/marketing/'+file+'.ts','utf8').replace(/import \{\s*supabase\s*\} from '[^']+'/,'const supabase={}').replaceAll("'./intelligenceCatalog'","'./intelligenceCatalog.mjs'");const target=path.join(cache,file+'.mjs');fs.writeFileSync(target,ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText);return import(pathToFileURL(target).href)}
+async function load(file){let s=fs.readFileSync('src/features/marketing/'+file+'.ts','utf8').replace(/import \{\s*supabase\s*\} from '[^']+'/,'const supabase={}').replaceAll("'./intelligenceCatalog'","'./intelligenceCatalog.mjs'").replaceAll("'./analyticsPreference'","'./analyticsPreference.mjs'");const target=path.join(cache,file+'.mjs');fs.writeFileSync(target,ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText);return import(pathToFileURL(target).href)}
+await load('analyticsPreference')
 const {INTELLIGENCE_COLLECTION_ENABLED,intelligenceTasks}=await load('intelligenceCatalog')
 const {createBehaviorRecorder}=await load('behaviorRuntime'),{parseIntelligenceSummary}=await load('intelligenceSummary')
 test.after(()=>fs.rmSync(cache,{recursive:true,force:true}))
@@ -49,7 +50,7 @@ test('new server bridge fixes the project, privileged identity and exact RPC con
  assert.equal(await falseReply('demo_enter'),false)
 })
 async function enabledRuntime(){
- let s=fs.readFileSync('src/features/marketing/intelligenceRuntime.ts','utf8').replace('import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY',"'sb_publishable_synthetic'")
+ let s=fs.readFileSync('src/features/marketing/intelligenceRuntime.ts','utf8').replace('import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY',"'sb_publishable_synthetic'").replace("'./analyticsPreference'","'./analyticsPreference.mjs'")
  s=s.replace(/import \{behaviorRecorder\}[^\n]+/,'const behaviorRecorder=globalThis.__recorder')
   .replace(/import \{INTELLIGENCE_COLLECTION_ENABLED[^\n]+/,`const INTELLIGENCE_COLLECTION_ENABLED=true,anonymousSignals=${JSON.stringify(['welcome','demo_enter','signup_start'])}`)
   .replace(/import \{requestLandingChallenge\}[^\n]+/,'const requestLandingChallenge=()=>globalThis.__challenge()')
@@ -59,7 +60,7 @@ async function enabledRuntime(){
 async function environment(work){
  const keys=['navigator','document','window','__recorder','__challenge','__telemetryClient'],prior=keys.map(k=>Object.getOwnPropertyDescriptor(globalThis,k)),calls=[]
  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{globalPrivacyControl:false,webdriver:false}})
- globalThis.document={visibilityState:'visible'};globalThis.window={location:{hostname:'pazo-app.vercel.app'}}
+ globalThis.document={visibilityState:'visible'};globalThis.window={location:{hostname:'pazo-app.vercel.app'},localStorage:{getItem:()=>null}}
  globalThis.__recorder={task:(...x)=>calls.push(['task',...x]),captureTask:()=>kind=>calls.push(['finish',kind])}
  globalThis.__challenge=async()=>{calls.push(['challenge']);return 'single-use'}
  globalThis.__telemetryClient={functions:{invoke:async(...x)=>{calls.push(['invoke',...x]);return {data:true}}}}

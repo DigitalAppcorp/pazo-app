@@ -119,7 +119,7 @@ test('responsive admin dashboard escapes mobile shell and exposes functional lay
  assert.ok(board.includes('lg:grid lg:grid-cols-[265px_minmax(0,1fr)]'),'Full-width desktop sidebar/main')
  assert.ok(board.includes('hidden min-h-0 flex-col')&&board.includes('lg:flex'),'Sidebar hidden on mobile')
  assert.ok(board.includes('lg:hidden'),'Mobile top navigation does not duplicate the sidebar')
- assert.ok(board.includes('overflow-x-auto'),'Small-screen tabs remain accessible')
+ assert.ok(board.includes('id="pazo-admin-section"')&&board.includes('onChange={e=>selectSection(e.target.value as Section)}'),'Native mobile selector exposes every section without clipped horizontal tabs')
  assert.ok(board.includes('md:grid-cols-4'),'Tablet KPI columns')
  assert.ok(board.includes('xl:grid-cols-12'),'Wide desktop mosaic layout')
  assert.ok(board.includes('min-w-0'),'Avoid horizontal overflow in grid panels')

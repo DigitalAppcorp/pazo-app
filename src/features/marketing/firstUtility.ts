@@ -1,3 +1,4 @@
+import {captureAnalyticsRequest} from './analyticsPreference'
 import { supabase } from '../../services/supabaseClient'
 
 export type QrOutcome = 'qr_visible' | 'qr_download_initiated' | 'qr_share_confirmed'
@@ -7,6 +8,7 @@ const pending = new Set<string>()
 
 /** First-party enum only. Never await this from a user's tool operation. */
 export async function recordFirstUtility(event: QrOutcome, petId: string, ownerId?: string): Promise<void> {
+  const current=captureAnalyticsRequest();if(!current())return
   if (!ownerId || !petId || !accepted.has(event)) return
   const key = `${ownerId}:${petId}:${event}:${new Date().toISOString().slice(0, 10)}`
   if (sent.has(key) || pending.has(key)) return
@@ -14,13 +16,13 @@ export async function recordFirstUtility(event: QrOutcome, petId: string, ownerI
   try {
     const { data } = await supabase.auth.getSession()
     const session = data.session
-    if (!session || session.user.id !== ownerId) return
+    if (!current() || !session || session.user.id !== ownerId) return
     // Supabase's fetchWithAuth preserves this explicit header. An account
     // switch cannot silently substitute a newer session during the request.
     const result = await supabase.rpc('pazo_marketing_record_utility_v1', {
       p_pet: petId, p_event: event,
     }).setHeader('Authorization', `Bearer ${session.access_token}`)
-    if (!result.error && result.data === true) {
+    if (current() && !result.error && result.data === true) {
       // Bound local deduplication; never write identity or tokens to storage.
       if (sent.size >= 256) sent.clear()
       sent.add(key)

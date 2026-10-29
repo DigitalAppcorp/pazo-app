@@ -50,3 +50,4 @@ supabase/tests/supporter/fixtures/f16-live-benefits-prerequisites.generated.sql
 # Isolated behavior QA output
 artifacts/issue150/
 artifacts/issue153/
+artifacts/admin-visual/

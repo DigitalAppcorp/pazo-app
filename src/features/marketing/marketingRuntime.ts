@@ -1,3 +1,4 @@
+import {browserAnalyticsAllowed,captureAnalyticsRequest,subscribeAnalyticsPreference} from './analyticsPreference'
 import { createPazoMarketingRecorder, prepareAutomaticCampaignIntake, parsePazoCampaign, MARKETING_ATTRIBUTION_TTL_MS } from './attribution'
 import { shouldSendLandingSignal } from './landingSignal'
 import { requestLandingChallenge } from './landingChallenge'
@@ -12,8 +13,8 @@ export const PAZO_MARKETING_COLLECTION_ENABLED = true
 /** Independent release control; landing signals never start implicitly. */
 export const PAZO_MARKETING_LANDING_ENABLED = true
 
-const recorder = () => {
-  if (!PAZO_MARKETING_COLLECTION_ENABLED || typeof window === 'undefined') return null
+const recorder = (clearing=false) => {
+  if (!PAZO_MARKETING_COLLECTION_ENABLED || typeof window === 'undefined'||(!clearing&&!browserAnalyticsAllowed())) return null
   try {
     return createPazoMarketingRecorder(window.localStorage, { enabled: true })
   } catch {
@@ -23,6 +24,7 @@ const recorder = () => {
 
 /** Record only a tightly validated paid-social UTM; never store a full URL. */
 export function stageMarketingLanding(search?: string): void {
+  const current=captureAnalyticsRequest();if(!current())return
   recorder()?.captureLanding(search ?? window.location.search)
   // A hit is a browser signal, not a unique person. No UUID, IP, fbclid or URL.
   if (!PAZO_MARKETING_LANDING_ENABLED || typeof window === 'undefined') return
@@ -35,7 +37,7 @@ export function stageMarketingLanding(search?: string): void {
     if (!shouldSendLandingSignal(last, attr.creative, Date.now())) return
     // Mark first, so reloads/React re-renders do not cause duplicate requests.
     window.sessionStorage.setItem(key, JSON.stringify({creative:attr.creative, sentAt:Date.now()}))
-    void requestLandingChallenge().then(token=>token?supabase.functions.invoke('pazo-marketing-landing', {
+    void requestLandingChallenge().then(token=>token&&current()?supabase.functions.invoke('pazo-marketing-landing', {
       headers:{'x-pazo-challenge':token},
       body:{
         utm_source:attr.source,
@@ -87,7 +89,8 @@ export function takeVerifiedFirstUseIntent(ownerId:string):'qr'|'neutral' {
   return receipt?.ownerId===ownerId&&receipt.expiresAt>=Date.now()?receipt.intent:'neutral'
 }
 export async function submitAutomaticMarketingAttribution(ownerId?: string, accessToken?: string): Promise<void> {
-  const generation=attributionGeneration
+  const generation=attributionGeneration,current=captureAnalyticsRequest()
+  if(!current())return
   if (!PAZO_MARKETING_COLLECTION_ENABLED) return
   if (!ownerId || !accessToken) return
   if (submitting) return
@@ -103,7 +106,7 @@ export async function submitAutomaticMarketingAttribution(ownerId?: string, acce
     const {data,error} = await supabase.functions.invoke('pazo-marketing-attribution', {
       headers: { Authorization: `Bearer ${accessToken}` }, body:payload,
     })
-    if (generation===attributionGeneration && !error && data?.status === 'accepted' && instance.read()?.signupOwnerId === ownerId
+    if (current() && generation===attributionGeneration && !error && data?.status === 'accepted' && instance.read()?.signupOwnerId === ownerId
       && JSON.stringify(prepareAutomaticCampaignIntake(instance.read()))===JSON.stringify(payload)) {
       verifiedFirstUseIntent={ownerId,intent:payload.utm_content.startsWith('qr_')?'qr':'neutral',
         expiresAt:Date.parse(payload.first_touch_at)+MARKETING_ATTRIBUTION_TTL_MS}
@@ -118,5 +121,8 @@ export async function submitAutomaticMarketingAttribution(ownerId?: string, acce
 export function clearLocalMarketingAttribution(): void {
   attributionGeneration++
   verifiedFirstUseIntent=null
-  recorder()?.clear()
+  recorder(true)?.clear()
 }
+
+// Exclusion and revocation both invalidate staged campaigns and late receipts.
+subscribeAnalyticsPreference(clearLocalMarketingAttribution)

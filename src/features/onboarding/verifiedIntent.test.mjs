@@ -12,7 +12,7 @@ let result={data:{status:'accepted'},error:null},reply,calls=[]
 const storage=new Map()
 const oldWindow=globalThis.window
 globalThis.window={localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},location:{search:''}}
-globalThis.__INTENT_RUNTIME__={...attr,shouldSendLandingSignal:()=>false,requestLandingChallenge:async()=>null,supabase:{functions:{invoke:async(name,args)=>{calls.push({name,args});return reply?reply():result}}}}
+globalThis.__INTENT_RUNTIME__={browserAnalyticsAllowed:()=>true,captureAnalyticsRequest:()=>()=>true,subscribeAnalyticsPreference:()=>()=>{},...attr,shouldSendLandingSignal:()=>false,requestLandingChallenge:async()=>null,supabase:{functions:{invoke:async(name,args)=>{calls.push({name,args});return reply?reply():result}}}}
 let source=fs.readFileSync('src/features/marketing/marketingRuntime.ts','utf8').replace(/import \{([^}]+)\} from '[^']+'/g,(_all,names)=>`const {${names}}=globalThis.__INTENT_RUNTIME__`)
 const runtime=await moduleFrom(source,'runtime')
 function stage(code='qr_es',owner='a'){

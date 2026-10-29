@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "checks": 22,
+  "environment": "disposable PostgreSQL17",
+  "cause": "anonymous requests have no account/campaign join; admin owner traffic already excluded",
+  "historicalDeletion": false,
+  "hostedWrites": 0
+}

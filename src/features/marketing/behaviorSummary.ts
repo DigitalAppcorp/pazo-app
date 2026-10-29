@@ -39,6 +39,6 @@ export function parseBehaviorSummary(v:unknown):BehaviorSummary{
 }
 export async function adminBehaviorSummary(days:7|30|90,segment:BehaviorSegment,creative:string,signal:AbortSignal){
  const {data,error}=await supabase.rpc('pazo_admin_behavior_summary_v1',{p_days:days,p_segment:segment,p_creative:creative}).abortSignal(signal)
- if(error)throw Error(error.code==='42501'&&error.message==='mfa_required'?'mfa_required':'behavior unavailable')
+ if(error)throw Error(error.code==='42501'?'admin_required':'behavior unavailable')
  return parseBehaviorSummary(data)
 }

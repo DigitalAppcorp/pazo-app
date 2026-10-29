@@ -5,13 +5,12 @@ import {BehaviorFilters} from './BehaviorFilters'
 import {BehaviorReadout} from './BehaviorReadout'
 import {BehaviorRecommendations} from './BehaviorRecommendations'
 import {BehaviorOutcomes} from './BehaviorOutcomes'
-import {AdminPaypalMfaStepUp} from '../admin/components/AdminPaypalMfaStepUp'
 import {IntelligencePanel,type IntelligenceView} from './IntelligencePanel'
 
 export function BehaviorPanel({lang,period}:{lang:'es'|'en';period:7|30|90}){
  const l=(es:string,en:string)=>lang==='es'?es:en
  const [segment,setSegment]=useState<BehaviorSegment>('all'),[creative,setCreative]=useState('all'),[revision,setRevision]=useState(0)
- const [response,setResponse]=useState<{key:string;data:BehaviorSummary|null;error:boolean;mfa?:boolean}|null>(null)
+ const [response,setResponse]=useState<{key:string;data:BehaviorSummary|null;error:boolean}|null>(null)
  const [view,setView]=useState<IntelligenceView>('ads')
  const legacy=view==='ads'||view==='return'
  const key=`${period}:${segment}:${creative}:${revision}`
@@ -21,7 +20,7 @@ export function BehaviorPanel({lang,period}:{lang:'es'|'en';period:7|30|90}){
  useEffect(()=>{
   const controller=new AbortController();let active=true
   void adminBehaviorSummary(period,segment,creative,AbortSignal.any([controller.signal,AbortSignal.timeout(10000)]))
-   .then(data=>{if(active)setResponse({key,data,error:false})}).catch(error=>{if(active)setResponse({key,data:null,error:true,mfa:error instanceof Error&&error.message==='mfa_required'})})
+   .then(data=>{if(active)setResponse({key,data,error:false})}).catch(()=>{if(active)setResponse({key,data:null,error:true})})
   return()=>{active=false;controller.abort()}
  },[key,period,segment,creative])
  const names:Record<string,string>={home:l('Inicio','Home'),pet:l('Mi mascota','My pet'),qr:l('Pasaporte QR','QR passport'),agenda:l('Agenda','Care planner'),communities:l('Comunidades','Communities'),places:l('Lugares','Places'),explore:l('Explorar','Explore'),first_pet:l('Primera mascota','First pet'),verified:l('Correo verificado','Verified email'),first_pet_stage:l('Primera mascota guardada','First pet saved'),tool_view:l('Primera vista de herramientas','First tool view'),utility:l('Primera utilidad confirmada','First confirmed utility'),care_created:l('Cuidado guardado','Care saved'),qr_share_confirmed:l('Compartición QR resuelta','QR share resolved'),signup_cta:l('Botón Crear cuenta','Create account button'),signup_start:l('Formulario abierto','Form opened'),signup_requested:l('Solicitud aceptada','Request accepted'),signup_error:l('Error de registro','Signup error'),loading:l('Espera observada','Observed loading'),error:l('Error','Error'),retry:l('Reintento','Retry'),network:l('Conexión','Connection'),unavailable:l('Servicio no disponible','Service unavailable')}
@@ -43,8 +42,7 @@ export function BehaviorPanel({lang,period}:{lang:'es'|'en';period:7|30|90}){
   <IntelligencePanel lang={lang} period={period} segment={segment} creative={creative} revision={revision} view={view}/>
   {!online&&<p role="status" className="behavior-state">{l('Sin conexión. Comprueba la red y vuelve a actualizar.','Offline. Check your connection and refresh again.')}</p>}
   {legacy&&!current&&<div role="status" className="behavior-state behavior-loading"><span aria-hidden="true">···</span><h3>{l('Consultando recorridos agregados','Loading aggregate journeys')}</h3><p>{l('El resto de Administración sigue disponible.','The rest of Administration remains available.')}</p></div>}
-  {legacy&&current?.error&&!current.mfa&&<div role="alert" className="behavior-state behavior-error"><h3>{l('No pudimos consultar este informe','This report could not be loaded')}</h3><p>{l('No se muestran ceros como si fueran resultados. Reintenta esta consulta.','Zeros are not shown as results. Retry this query.')}</p><button onClick={()=>setRevision(x=>x+1)} type="button">{l('Reintentar informe','Retry report')}</button></div>}
-  {legacy&&current?.mfa&&<AdminPaypalMfaStepUp lang={lang} purpose="analytics" onVerified={()=>setRevision(x=>x+1)}/>}
+  {legacy&&current?.error&&<div role="alert" className="behavior-state behavior-error"><h3>{l('No pudimos consultar este informe','This report could not be loaded')}</h3><p>{l('No se muestran ceros como si fueran resultados. Reintenta esta consulta.','Zeros are not shown as results. Retry this query.')}</p><button onClick={()=>setRevision(x=>x+1)} type="button">{l('Reintentar informe','Retry report')}</button></div>}
   {data&&(view==='ads'||view==='return')&&<>
    <div className="behavior-coverage"><strong>{data.status==='paused'?l('Colección nueva pausada','New collection paused'):data.status==='insufficient'?l('Muestra insuficiente','Insufficient sample'):l('Observación activa','Observation active')}</strong><span>{l('Cobertura desde','Coverage since')}: {date(data.coverage_since)}</span><span>{l('Actualizado','Updated')}: {date(data.as_of)} · Los Angeles</span><span>{data.effective_days}{l(' días efectivos · máximo 14',' effective days · maximum 14')}{period>14?l(' · histórico adicional no disponible',' · additional history unavailable'):''}</span></div>
    <BehaviorReadout data={data} lang={lang} view={view}/>

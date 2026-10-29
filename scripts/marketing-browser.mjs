@@ -76,6 +76,7 @@ async function remote(path,method,headers,body){
  }
  // Summary intentionally fails, proving that Campaigns remains usable.
  if(path.includes('/rpc/pazo_admin_overview'))return Response.json({code:'SYNTHETIC_OVERVIEW_FAILURE'},{status:503})
+ if(path.includes('/rpc/pazo_admin_visual_summary_v1'))return Response.json({code:'SYNTHETIC_VISUAL_SUMMARY_FAILURE'},{status:503})
  if(path.includes('/rpc/pazo_admin_users')||path.includes('/rpc/pazo_admin_experiments'))return Response.json([])
  throw Error('Unexpected synthetic route '+path)
 }
@@ -130,11 +131,12 @@ try{
    return route.abort()
   })
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
+  const openCampaigns=()=>width<1024?page.locator('#pazo-admin-section').selectOption('marketing'):page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true}).click()
   const utm='&utm_source=meta&utm_medium=paid_social&utm_campaign=pazo_beta_local_202610&utm_content=perfil_es&fbclid=NEVER_STORE'
   await page.goto(origin+`/supabase/tests/marketing/browser-harness.html?lang=${lang}`+utm)
   if(!enabled){
    const reportCount=reports
-   await page.getByRole('button',{name:'Fixture open admin'}).click();await page.getByRole('button',{name:'Campañas',exact:true}).click({timeout:10000}).catch(async error=>{await page.screenshot({path:out+'/failure.png'});console.error({errors,body:(await page.locator('body').innerText()).slice(0,1800)});throw error})
+   await page.getByRole('button',{name:'Fixture open admin'}).click();await openCampaigns().catch(async error=>{await page.screenshot({path:out+'/failure.png'});console.error({errors,body:(await page.locator('body').innerText()).slice(0,1800)});throw error})
    await page.getByText('En preparación · no hay recopilación activa',{exact:true}).waitFor()
    check(arrivals===beforeArrivals&&intakes===beforeIntakes&&reports===reportCount,'Default OFF performs zero marketing calls')
    check(await page.evaluate(()=>localStorage.getItem('pazo_marketing_firstparty_v1')===null&&sessionStorage.getItem('pazo_marketing_landing_daily_v1')===null),'Default OFF stores no campaign')
@@ -157,14 +159,14 @@ try{
   check(arrivals===beforeArrivals+1&&intakes===beforeIntakes+1,'One challenged landing / verified conversion')
   check(!(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).includes('NEVER_STORE'),'No fbclid or raw URL retained')
   await page.getByRole('button',{name:'Fixture open admin'}).click()
-  await page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true}).click()
+  await openCampaigns()
   await page.getByRole('table').waitFor()
   check(intakes===beforeIntakes+1,'Switching to admin cannot reuse prior account attribution')
   check(await page.getByText(lang==='es'?'No son visitantes únicos':'Not unique visitors',{exact:true}).isVisible(),'Honest arrival semantics')
   check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Page fits mobile viewport')
   await page.screenshot({path:`${out}/${width}-${lang}-marketing.png`,fullPage:true})
   failReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).click();await page.getByRole('alert').waitFor()
-  check(await page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true}).isEnabled(),'Campaign error isolated from navigation')
+  check(await (width<1024?page.locator('#pazo-admin-section'):page.getByRole('button',{name:lang==='es'?'Campañas':'Campaigns',exact:true})).isEnabled(),'Campaign error isolated from navigation')
   failReport=false;delayReport=true;await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).click()
   await page.waitForFunction(()=>[...document.querySelectorAll('button')].some(b=>/Actualizar métricas|Refresh metrics/.test(b.textContent)&&b.disabled))
   check(await page.getByRole('button',{name:lang==='es'?'Actualizar métricas':'Refresh metrics'}).isDisabled(),'Loading has disabled refresh')

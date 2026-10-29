@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "origin": "https://pazo-9tehl1xt8-digitalapp.vercel.app",
+  "results": [
+    {
+      "lang": "es",
+      "width": 390,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "localExclusion": "persisted and revoked through actual bundled control",
+      "assets": "https://pazo-9tehl1xt8-digitalapp.vercel.app",
+      "backend": "actual isolated PG17",
+      "auth": "controlled AAL1 double",
+      "retry": true,
+      "offlineRecovery": true,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "es",
+      "width": 1440,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "localExclusion": "persisted and revoked through actual bundled control",
+      "assets": "https://pazo-9tehl1xt8-digitalapp.vercel.app",
+      "backend": "actual isolated PG17",
+      "auth": "controlled AAL1 double",
+      "retry": true,
+      "offlineRecovery": true,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "localExclusion": "persisted and revoked through actual bundled control",
+      "assets": "https://pazo-9tehl1xt8-digitalapp.vercel.app",
+      "backend": "actual isolated PG17",
+      "auth": "controlled AAL1 double",
+      "retry": true,
+      "offlineRecovery": true,
+      "hostedWrites": 0
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "status": "PASS",
+      "nativeAppAdmin": true,
+      "localExclusion": "persisted and revoked through actual bundled control",
+      "assets": "https://pazo-9tehl1xt8-digitalapp.vercel.app",
+      "backend": "actual isolated PG17",
+      "auth": "controlled AAL1 double",
+      "retry": true,
+      "offlineRecovery": true,
+      "hostedWrites": 0
+    }
+  ],
+  "errors": [],
+  "collectionAttemptsIntercepted": 4,
+  "hostedWrites": 0,
+  "limits": [
+    "Auth/domain/HTTP transport controlled",
+    "Immutable preview assets, actual native App and isolated PG",
+    "New RPC not installed in production"
+  ]
+}

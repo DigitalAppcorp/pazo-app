@@ -1,3 +1,4 @@
+import {browserAnalyticsAllowed,subscribeAnalyticsPreference} from './analyticsPreference'
 import { supabase } from '../../services/supabaseClient'
 import {INTELLIGENCE_COLLECTION_ENABLED,intelligenceTasks,intelligenceKinds,type IntelligenceItem,type IntelligenceTask,type IntelligenceKind} from './intelligenceCatalog'
 
@@ -10,10 +11,10 @@ type Item = {seq:number;screen:BehaviorScreen;event:Event;category:'none'|'netwo
 type Identity = {owner:string;token:string}
 
 /** Memory only. Each auth boundary retires requests even if the account ID returns. */
-export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Date.now,random=()=>crypto.randomUUID(),enabled=false}:{
+export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Date.now,random=()=>crypto.randomUUID(),enabled=false,canRecord=()=>true}:{
  send:(identity:Identity,session:string,item:Item,signal:AbortSignal)=>Promise<boolean>;
  sendTasks?:(identity:Identity,session:string,items:IntelligenceItem[],signal:AbortSignal)=>Promise<boolean>;taskEnabled?:boolean;
- now?:()=>number;random?:()=>string;enabled?:boolean;
+ now?:()=>number;random?:()=>string;enabled?:boolean;canRecord?:()=>boolean;
 }) {
  let epoch=0,identity:Identity|null=null,session='',started=0,last=0,seq=0,busy=false,screen=''
  let queue:Item[]=[],controller=new AbortController()
@@ -25,7 +26,7 @@ export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Dat
  const bind=(next:Identity|null)=>{retire();identity=next}
  const refresh=(next:Identity)=>{if(identity?.owner===next.owner)identity=next}
  async function flush(){
-  if(!enabled||busy||!identity||!queue.length)return
+  if(!canRecord()||!enabled||busy||!identity||!queue.length)return
   const generation=epoch,actor={...identity},sid=session,signal=controller.signal
   busy=true
   try {
@@ -33,7 +34,7 @@ export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Dat
     const item=queue[0]
     // One timeout retry, identical sequence. No unbounded background upload.
     let accepted=false
-    for(let attempt=0;attempt<2&&!accepted&&generation===epoch;attempt++){
+    for(let attempt=0;attempt<2&&!accepted&&generation===epoch&&canRecord();attempt++){
      try{accepted=await send(actor,sid,item,signal)}catch{/* Optional telemetry */}
     }
     if(generation!==epoch)return
@@ -43,7 +44,7 @@ export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Dat
   }finally{if(generation===epoch)busy=false}
  }
  function observe(next:BehaviorScreen,event:Event='screen_view',category:Item['category']='none',visible=true){
-  if(!enabled||!identity||!visible||!behaviorScreens.includes(next)||!['screen_view','loading','error','retry'].includes(event)||!['none','network','unavailable'].includes(category))return
+  if(!canRecord()||!enabled||!identity||!visible||!behaviorScreens.includes(next)||!['screen_view','loading','error','retry'].includes(event)||!['none','network','unavailable'].includes(category))return
   const at=now()
   if(!session||at-last>30*60_000||at-started>4*60*60_000){retire();session=random();started=at}
   if(event==='screen_view'&&screen===next)return
@@ -54,13 +55,13 @@ export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Dat
  }
  async function flushTasks(){
   timer=undefined
-  if(!taskEnabled||!sendTasks||taskBusy||!identity||!tasks.length)return
+  if(!canRecord()||!taskEnabled||!sendTasks||taskBusy||!identity||!tasks.length)return
   const generation=epoch,actor={...identity},sid=session,signal=controller.signal
   taskBusy=true
   try{
    while(tasks.length&&generation===epoch){
     const batch=tasks.slice(0,8);let accepted=false
-    for(let attempt=0;attempt<2&&!accepted&&generation===epoch;attempt++)try{accepted=await sendTasks(actor,sid,batch,signal)}catch{/* Optional; never delays product. */}
+    for(let attempt=0;attempt<2&&!accepted&&generation===epoch&&canRecord();attempt++)try{accepted=await sendTasks(actor,sid,batch,signal)}catch{/* Optional; never delays product. */}
     if(generation!==epoch)return
     if(!accepted){tasks=[];taskSeq=64;return}
     tasks.splice(0,batch.length)
@@ -68,7 +69,7 @@ export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Dat
   }finally{if(generation===epoch)taskBusy=false}
  }
  function task(key:IntelligenceTask,kind:IntelligenceKind='intent'){
-  if(!taskEnabled||!enabled||!identity||!Object.hasOwn(intelligenceTasks,key)||!intelligenceKinds.includes(kind))return
+  if(!canRecord()||!taskEnabled||!enabled||!identity||!Object.hasOwn(intelligenceTasks,key)||!intelligenceKinds.includes(kind))return
   const at=now()
   if(!session||at-last>30*60_000||at-started>4*60*60_000){retire();session=random();started=at}
   // Once per task/kind/session: repeats are not an unbounded click stream.
@@ -81,20 +82,24 @@ export function createBehaviorRecorder({send,sendTasks,taskEnabled=false,now=Dat
   task(key,'attempt')
   if(seen.has(`${key}:failure`))task(key,'retry')
   const generation=epoch,context=contextVersion
-  return(kind:IntelligenceKind)=>{if(generation===epoch&&context===contextVersion)task(key,kind)}
+  return(kind:IntelligenceKind)=>{if(canRecord()&&generation===epoch&&context===contextVersion)task(key,kind)}
  }
  return {bind,refresh,observe,task,captureTask,setContext,retire,flush,flushTasks}
 }
-export const behaviorRecorder = createBehaviorRecorder({enabled:BEHAVIOR_COLLECTION_ENABLED,taskEnabled:INTELLIGENCE_COLLECTION_ENABLED,sendTasks:async(identity,session,items,signal)=>{
- if((navigator as Navigator&{globalPrivacyControl?:boolean}).globalPrivacyControl===true)return false
+export const behaviorRecorder = createBehaviorRecorder({enabled:BEHAVIOR_COLLECTION_ENABLED,canRecord:browserAnalyticsAllowed,taskEnabled:INTELLIGENCE_COLLECTION_ENABLED,sendTasks:async(identity,session,items,signal)=>{
+ if(!browserAnalyticsAllowed())return false
  const {data,error}=await supabase.rpc('pazo_intelligence_record_v1',{p_session:session,p_items:items})
   .setHeader('Authorization',`Bearer ${identity.token}`).abortSignal(AbortSignal.any([signal,AbortSignal.timeout(5000)]))
  return !error&&data===true
 },send:async(identity,session,item,signal)=>{
+ if(!browserAnalyticsAllowed())return false
  const {data,error}=await supabase.rpc('pazo_behavior_record_v1',{p_session:session,p_seq:item.seq,p_screen:item.screen,p_event:item.event,p_category:item.category})
   .setHeader('Authorization',`Bearer ${identity.token}`).abortSignal(AbortSignal.any([signal,AbortSignal.timeout(5000)]))
  return !error&&data===true
 }})
+
+// Retire queued/in-flight observations without deleting history or unbinding Auth.
+subscribeAnalyticsPreference(()=>behaviorRecorder.retire())
 
 export async function withdrawBehavior():Promise<boolean>{
  behaviorRecorder.bind(null)

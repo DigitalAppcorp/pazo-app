@@ -1,0 +1,20 @@
+{
+  "baseline": "docs/product-intelligence/EVENT_COVERAGE_MATRIX.json (published #153 inventory, unchanged)",
+  "scope": "new Administration controls; no additional event vocabulary",
+  "controls": [
+    {
+      "source": "src/features/marketing/AnalyticsExclusionControl.tsx",
+      "control": "Explicit browser exclusion switch",
+      "status": "EXCLUDED_WITH_REASON",
+      "reason": "Privacy preference is functional and local; never send its value, identity or toggle as an analytics event.",
+      "test": "src/features/marketing/analyticsPreference.test.mjs; scripts/analytics-reliability-browser.mjs"
+    },
+    {
+      "source": "src/features/marketing/ExecutiveAnalytics.tsx",
+      "control": "Admin filters, refresh, charts and disclosure controls",
+      "status": "EXCLUDED_WITH_REASON",
+      "reason": "Administrative analysis is not visitor interest or product usage. These controls only issue authorized read queries.",
+      "test": "scripts/admin-visual-browser.mjs; scripts/analytics-reliability-browser.mjs"
+    }
+  ]
+}

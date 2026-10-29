@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "checks": 73,
+  "hostedWrites": 0,
+  "environment": "disposable PostgreSQL17",
+  "coverage": "calendar, source, creative, returning, ordered funnel, last-by-sequence, strict filters, suppression, read-only, rollback"
+}

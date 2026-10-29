@@ -1,3 +1,10 @@
+## Candidato actual — Administración visual, confiabilidad #161 y lectura agregada sin AAL2
+
+Rama `feat/admin-visual-overview`, base `ee10cd98`. PR162 integra el rediseño y #161 en la misma rama, NO publicados en producción. #161 agrega preferencia local explícita sin identidad, guardas de vigencia y semántica de solicitudes; ver docs/admin-visual/ISSUE161_AUDIT.md. No tratar su GO de implementación como GO de release ni borrar historia anónima. Ver `docs/admin-visual/RELEASE_RUNBOOK.md`, revisión de diseño y manifiesto de exactamente dos migraciones pendientes. No confundir con los GO históricos de #147/#153. No hacer `db push` global ni reinstalar #153: su versión fuente/hospedada ya está conciliada. Los cuatro flags publicados siguen activos y sus fechas deben conservarse. Las operaciones sensibles mantienen MFA; solo las lecturas agregadas de administrador se preparan para AAL1.
+
+Baseline de producción consultado sin escrituras el 29-oct-2026 09:48 UTC: 135 migraciones, gates/health de comportamiento e inteligencia activos, cron de retención #4 con ejecución exitosa 06:17:00Z después del SQL de #153. Este dato resuelve la incertidumbre histórica de cron, no autoriza un nuevo lanzamiento.
+---
+
 ## Video Production OS: QA correctivo vigente (29-oct-2026)
 
 El PO detectó una brecha material entre anuncios prometidos y material entregado. **Obligatorio leer** [auditoría de primera tanda](docs/marketing/PAZO_VIDEO_BATCH_01_CRITICAL_REVIEW_20261029.md) y el gate [CREATIVE_EVIDENCE_GATE](https://github.com/DigitalAppcorp/project-brain-os/blob/main/knowledge/video-production/CREATIVE_EVIDENCE_GATE.md) antes de guionar/renderizar/recomendar publicidad. Los 4 MP4 anteriores comparten plantilla stock/captions/música/endcard y no son una comparación válida de cuatro estilos; 3D, spot actuado y demo dinámica **no están validados**. Revisar medios reales, no solo CI. No implicar que editar documentos "entrenó" una IA, ni sugerir publicación en lote o nuevos gastos sin nueva evidencia/autorización.
