@@ -7,7 +7,7 @@ import {createMarketingChallengeVerifier} from './challengeVerifier.mjs'
 import {createMarketingSingleUseVerifier} from './singleUseVerifier.mjs'
 const MARKETING_LANDING_RELEASED=true
 const BEHAVIOR_PREREG_RELEASED=true
-const INTELLIGENCE_EXPERIENCE_RELEASED=false
+const INTELLIGENCE_EXPERIENCE_RELEASED=true
 function setup(){
   if(!MARKETING_LANDING_RELEASED)return createMarketingLandingHandler()
   try {
