@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "checks": 69,
+  "hostedWrites": 0,
+  "environment": "disposable PostgreSQL17",
+  "migration": "supabase/migrations/20261029010000_pazo_product_intelligence.sql"
+}

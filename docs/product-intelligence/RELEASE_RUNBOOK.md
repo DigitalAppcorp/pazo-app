@@ -1,6 +1,6 @@
 # Runbook #153 — preparado, no ejecutado
 
-La entrega de fases 0–6 no autoriza fase 7. No fusionar ni publicar producción ni activar nueva recogida hasta GO final explícito del PO. Staging usa frontend de preview y servicios/Auth controlados con PostgreSQL17 desechable; no existe una rama Supabase facturable ni una base de staging con datos reales.
+La entrega de fases 0–6 no autoriza fase 7. No fusionar ni publicar producción ni activar nueva recogida hasta GO final explícito del PO. Staging usa frontend de preview y servicios/Auth controlados con PostgreSQL 17 desechable; no existe una rama Supabase facturable ni una base de staging con datos reales.
 
 ## Base protegida
 
@@ -9,9 +9,9 @@ Main de partida `98f6d599b622803bcf495d8f6d3fa0e0d8490f69`. #150 ya publicado: P
 ## Solo después del GO final
 
 1. Revalidar main, deployment, diff aprobado, CI, 134 versiones/MD5 previos, gates y hashes de funciones protegidas. Si hubo cambios externos, reconciliar; nunca `supabase db push` indiscriminado.
-2. Aplicar exclusivamente `supabase/migrations/20261029010000_pazo_product_intelligence.sql` en transacción, cotejando el SHA256 del informe final. Registrar versión alojada real y digest sin repetir la fuente. La instalación deja `intelligence_enabled=false`; no cambia fechas/gates previos, ranking, pagos o fake doors.
+2. Aplicar exclusivamente `supabase/migrations/20261029010000_pazo_product_intelligence.sql` en transacción, cotejando el SHA256 normalizado LF del Git blob del informe final y [manifest preparado](PREPARED_MIGRATIONS.json). Registrar versión alojada real y digest sin repetir la fuente; actualizar el mapeo preparado/instalado y sus guardas históricas en el commit de release. La instalación deja `intelligence_enabled=false`; no cambia fechas/gates previos, ranking, pagos o fake doors.
 3. Publicar aviso ES/EN preparado (`INTELLIGENCE_NOTICE_RELEASED=true`), frontend y Edge con sus gates nuevos todavía OFF. Revalidar funciones/grants/RLS, misma cadena Cron y purga saludable, campos del aviso, Auth/MFA/QR/PWA y rollback. La Edge conserva flags previos landing/prereg true, mismo Turnstile y `verify_jwt=false` existente; no sustituir configuración o secretos.
-4. En el commit de activación autorizado habilitar `INTELLIGENCE_COLLECTION_ENABLED` y `INTELLIGENCE_EXPERIENCE_RELEASED`; revalidar artefactos y aviso publicado. Registrar el inicio real, sin retroactividad, con `intelligence_notice_version='pazo-intelligence-notice-v1'` e `intelligence_started_at` real antes de `intelligence_enabled=true`. El orden puede perder señales mientras DB está OFF; nunca recoger antes del aviso.
+4. En el commit de activación autorizado actualizar las expectativas OFF de las pruebas solo con el GO y la evidencia de instalación/aviso; preservar denegaciones, privacidad y regresiones. Habilitar `INTELLIGENCE_COLLECTION_ENABLED` y `INTELLIGENCE_EXPERIENCE_RELEASED`; revalidar artefactos y aviso publicado. Registrar el inicio real, sin retroactividad, sin reiniciar el inicio si es una reactivación, con `intelligence_notice_version='pazo-intelligence-notice-v1'` e `intelligence_started_at` real antes de `intelligence_enabled=true`. El orden puede perder señales mientras DB está OFF; nunca recoger antes del aviso.
 5. Postflight: gates/fechas anteriores iguales, nueva cobertura correcta, RPC no-admin/AAL1 denegados, GPC/retirada, Cron saludable, límites/muestras, navegación móvil lenta/offline y recuperación. No crear QA artificial en producción ni activar cobros/invitaciones para comprobar analítica. Sin muestra real, mostrar observación insuficiente y esperar; no prometer demanda o retención.
 
 ## Reversión

@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "cases": [
+    {
+      "lang": "es",
+      "width": 320,
+      "font": "Quicksand loaded from existing product index.html link",
+      "captures": [
+        "es-320-q0.png",
+        "es-320-q1.png",
+        "es-320-q2.png",
+        "es-320-q3.png",
+        "es-320-proposals.png",
+        "es-320-q4.png"
+      ],
+      "status": "PASS"
+    },
+    {
+      "lang": "es",
+      "width": 390,
+      "font": "Quicksand loaded from existing product index.html link",
+      "captures": [
+        "es-390-q0.png",
+        "es-390-q1.png",
+        "es-390-q2.png",
+        "es-390-q3.png",
+        "es-390-proposals.png",
+        "es-390-q4.png"
+      ],
+      "status": "PASS"
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "font": "Quicksand loaded from existing product index.html link",
+      "captures": [
+        "en-1440-q0.png",
+        "en-1440-q1.png",
+        "en-1440-q2.png",
+        "en-1440-q3.png",
+        "en-1440-proposals.png",
+        "en-1440-q4.png"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "hostedWrites": 0,
+  "source": "Actual native dashboard and isolated PostgreSQL17; Auth double; existing primary font loaded"
+}

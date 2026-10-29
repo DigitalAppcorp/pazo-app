@@ -5,6 +5,7 @@ import path from 'node:path'
 import {pathToFileURL} from 'node:url'
 import ts from 'typescript'
 import {createMarketingLandingHandler} from '../../../supabase/functions/pazo-marketing-landing/landingCore.mjs'
+import {createExperienceSubmit} from '../../../supabase/functions/pazo-marketing-landing/landingAdapter.mjs'
 fs.mkdirSync('node_modules/.cache',{recursive:true})
 const cache=fs.mkdtempSync(path.resolve('node_modules/.cache/intelligence-'))
 async function load(file){let s=fs.readFileSync('src/features/marketing/'+file+'.ts','utf8').replace(/import \{\s*supabase\s*\} from '[^']+'/,'const supabase={}').replaceAll("'./intelligenceCatalog'","'./intelligenceCatalog.mjs'");const target=path.join(cache,file+'.mjs');fs.writeFileSync(target,ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2023}}).outputText);return import(pathToFileURL(target).href)}
@@ -35,6 +36,18 @@ for(const [name,change]of Object.entries({extra:v=>v.email='private',small:v=>v.
 const request=(body,extra={})=>new Request('https://isolated.invalid',{method:'POST',headers:{origin:'https://pazo-app.vercel.app','content-type':'application/json','x-pazo-challenge':'single-use',...extra},body:JSON.stringify(body)})
 test('anonymous extension OFF preserves old intake without contacting new adapter',async()=>{let calls=0;const h=createMarketingLandingHandler({released:true,submit:async()=>true,verifyChallenge:async()=>true,submitExperience:async()=>{calls++;return true}});assert.equal((await h(request({experience:'demo_enter'}))).status,503);assert.equal(calls,0);assert.equal((await h(request({utm_source:'meta',utm_medium:'paid_social',utm_campaign:'pazo_beta_local_202610',utm_content:'qr_es'}))).status,202)})
 test('anonymous requires single-use challenge, closed keys, GPC, no account bridge',async()=>{let calls=0,tokens=0;const h=createMarketingLandingHandler({released:true,submit:async()=>true,experienceReleased:true,submitExperience:async()=>{calls++;return true},verifyChallenge:async()=>++tokens===1});assert.equal((await h(request({experience:'demo_enter'}))).status,202);assert.equal((await h(request({experience:'demo_enter'}))).status,403);assert.equal((await h(request({experience:'demo_enter',owner:'A'}))).status,400);assert.equal((await h(request({experience:'demo_enter'},{'sec-gpc':'1'}))).status,400);assert.equal(calls,1)})
+test('new server bridge fixes the project, privileged identity and exact RPC contract',async()=>{
+ const url='https://mrybvqdebbgcayuvgkkr.supabase.co',serviceKey='synthetic_service_only',calls=[]
+ assert.throws(()=>createExperienceSubmit({url:'https://wrong.invalid',serviceKey}))
+ const send=createExperienceSubmit({url,serviceKey,fetchImpl:async(...args)=>{calls.push(args);return new Response('true',{status:200})}})
+ assert.equal(await send('demo_enter'),true)
+ assert.equal(calls[0][0],url+'/rest/v1/rpc/pazo_intelligence_experience_v1')
+ assert.equal(calls[0][1].headers.authorization,'Bearer '+serviceKey)
+ assert.equal(calls[0][1].redirect,'error')
+ assert.deepEqual(JSON.parse(calls[0][1].body),{p_signal:'demo_enter'})
+ const falseReply=createExperienceSubmit({url,serviceKey,fetchImpl:async()=>new Response('"true"',{status:200})})
+ assert.equal(await falseReply('demo_enter'),false)
+})
 async function enabledRuntime(){
  let s=fs.readFileSync('src/features/marketing/intelligenceRuntime.ts','utf8').replace('import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY',"'sb_publishable_synthetic'")
  s=s.replace(/import \{behaviorRecorder\}[^\n]+/,'const behaviorRecorder=globalThis.__recorder')

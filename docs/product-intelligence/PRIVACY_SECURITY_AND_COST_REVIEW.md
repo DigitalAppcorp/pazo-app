@@ -8,7 +8,7 @@ Tareas con vocabulario cerrado y estados exposición/intención/intento/fallo/re
 
 No se envían nombres, correos, consultas, biografías, archivos, IDs de mascotas/contenido, coordenadas, URL, importes, datos de pago, mensajes ni texto de error. Documentos/cuidados solo aportan categorías de tarea; su contenido no sale del servicio. Rescate, conversaciones, soporte privado, pagos, invitaciones y acciones administrativas se excluyen como conversiones.
 
-Demo/acceso/registro sin campaña: contadores diarios de solicitudes aceptadas, sin ID anónimo ni enlace a cuenta, sin porcentaje de conversión a personas. Los cuatro pasos de registro con campaña válida reutilizan #150: no se duplican en el contador nuevo. No se mide orgánico probado, visitantes únicos, abandono individual o causa de una salida.
+Demo/acceso/registro sin campaña: contadores diarios de solicitudes aceptadas, sin ID anónimo ni enlace a cuenta, sin porcentaje de conversión a personas. El envío fija explícitamente la autorización pública para que un challenge resuelto después de registro no herede el JWT de una cuenta. Los cuatro pasos de registro con campaña válida reutilizan #150: no se duplican en el contador nuevo. No se mide orgánico probado, visitantes únicos, abandono individual o causa de una salida.
 
 ## Controles de acceso y vigencia
 
@@ -21,7 +21,7 @@ Demo/acceso/registro sin campaña: contadores diarios de solicitudes aceptadas, 
 
 ## Anónimos y abuso
 
-Se reutiliza exclusivamente la Edge landing y Turnstile de un solo uso: origen/hostname/acción existentes, verificación antes de presupuesto SQL y claim de digest previo. No se almacena token crudo. El nuevo cuerpo admite solo `{experience: <enum>}`. `Sec-GPC:1` se rechaza; no se aceptan owner, sesión, UTM extra ni texto. El emisor anónimo solo opera en el canónico y excluye WebDriver. Preview/QA de esta entrega bloquea servicios alojados. Un humano anónimo con challenge válido no puede clasificarse como QA sin inventar identidad: límite explícito, no garantía de detección de toda prueba o fraude.
+Se reutiliza exclusivamente la Edge landing y Turnstile de un solo uso: origen/hostname/acción existentes, verificación antes de presupuesto SQL y claim de digest previo. No se almacena token crudo. El proveedor Turnstile puede tratar IP y señales del navegador según su aviso previo; PAZO no los añade al contador. El addendum ES/EN preparado vincula expresamente Demo/acceso con ese apartado de protección contra abusos. El nuevo cuerpo admite solo `{experience: <enum>}`. `Sec-GPC:1` se rechaza; no se aceptan owner, sesión, UTM extra ni texto. El emisor anónimo solo opera en el canónico y excluye WebDriver. Preview/QA de esta entrega bloquea servicios alojados. Un humano anónimo con challenge válido no puede clasificarse como QA sin inventar identidad: límite explícito, no garantía de detección de toda prueba o fraude.
 
 ## Retención y presupuestos
 
