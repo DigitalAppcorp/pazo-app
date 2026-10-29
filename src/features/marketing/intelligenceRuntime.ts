@@ -17,7 +17,9 @@ export function observeAnonymous(signal:AnonymousSignal){
  if(window.location.hostname!=='pazo-app.vercel.app'||navigator.webdriver===true)return
  anonymousSent.add(signal)
  void requestLandingChallenge().then(token=>{
-  if(!token||!allowed())return
-  return supabase.functions.invoke('pazo-marketing-landing',{headers:{'x-pazo-challenge':token},body:{experience:signal}})
+  const publicKey=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+  if(!token||!allowed()||typeof publicKey!=='string')return
+  // A challenge resolved after signup must never inherit the new account JWT.
+  return supabase.functions.invoke('pazo-marketing-landing',{headers:{Authorization:`Bearer ${publicKey}`,'x-pazo-challenge':token},body:{experience:signal}})
  }).catch(()=>{/* No UI dependency or diagnostic text. */})
 }
