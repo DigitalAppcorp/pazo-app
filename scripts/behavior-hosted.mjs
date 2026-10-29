@@ -1,8 +1,13 @@
 // Actual immutable staging assets -> native app/Admin -> disposable PG17 reports.
 // All Auth/domain services are intercepted. No remote QA account or event is created.
-import './behavior-pg17.mjs'
 const intelligenceHosted=process.env.PAZO_INTELLIGENCE_HOSTED_TEST==='true'
-if(intelligenceHosted)await import('./intelligence-pg17.mjs')
+if(intelligenceHosted&&process.env.PAZO_INTELLIGENCE_REUSE_LAB==='true'){
+ // sql transport is hard-fenced to the disposable local container/CI database.
+ assert.equal(sql("SELECT to_regclass('marketing_private.task_events') IS NOT NULL AND to_regprocedure('marketing_private.intelligence_cohort_safe(uuid[],uuid[])') IS NOT NULL AND NOT marketing_private.intelligence_task_valid('search_open')"),'t')
+}else{
+ await import('./behavior-pg17.mjs')
+ if(intelligenceHosted)await import('./intelligence-pg17.mjs')
+}
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
