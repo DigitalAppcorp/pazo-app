@@ -108,6 +108,13 @@ try{
   assert.equal(await page.locator('[data-pazo-admin-live-mfa]').count(),0)
   await page.evaluate(()=>{const b=document.createElement('div');b.textContent='QA · Datos sintéticos · Auth y transporte controlados · PostgreSQL aislado';b.style.cssText='position:fixed;bottom:0;right:0;z-index:10000;background:#f8edc9;color:#204e4a;font:600 11px system-ui;padding:6px 10px;pointer-events:none';document.body.append(b)})
   await page.screenshot({path:out+'/'+lang+'-'+width+'-overview.png',fullPage:true})
+  await page.locator('.pa-privacy summary').click()
+  const privacySwitch=page.getByRole('switch',{name:lang==='es'?'Excluir señales de este navegador':'Exclude signals from this browser'})
+  await privacySwitch.click();assert.equal(await privacySwitch.getAttribute('aria-checked'),'true')
+  assert.equal(await page.evaluate(()=>localStorage.getItem('pazo_analytics_excluded_v1')),'1')
+  await privacySwitch.click();assert.equal(await privacySwitch.getAttribute('aria-checked'),'false')
+  await page.locator('.pa-privacy summary').click()
+
   await page.getByRole('button',{name:/^Ads/}).click();await panel.locator('.pa-kpi>strong').first().filter({hasText:'80'}).waitFor()
   await page.getByRole('button',{name:lang==='es'?/^Recurrentes/:/^Returning/}).click();await panel.locator('.pa-kpi>strong').first().filter({hasText:'120'}).waitFor()
   if(width<1024)await page.locator('#pazo-admin-section').selectOption('behavior')
@@ -120,7 +127,7 @@ try{
   await context.setOffline(true);await page.getByRole('alert').filter({hasText:lang==='es'?'Sin conexión':'Offline'}).waitFor()
   await context.setOffline(false);await panel.locator('[aria-busy="false"]').count()
   assert.ok(await panel.evaluate(e=>e.scrollWidth<=e.clientWidth+1))
-  results.push({lang,width,status:'PASS',nativeAppAdmin:true,assets:origin,backend:'actual isolated PG17',auth:'controlled AAL1 double',retry:true,offlineRecovery:true,hostedWrites:0})
+  results.push({lang,width,status:'PASS',nativeAppAdmin:true,localExclusion:'persisted and revoked through actual bundled control',assets:origin,backend:'actual isolated PG17',auth:'controlled AAL1 double',retry:true,offlineRecovery:true,hostedWrites:0})
   await context.close();console.log(`PASS hosted ${lang} ${width}`)
  }
  assert.deepEqual(errors,[])

@@ -76,6 +76,7 @@ async function remote(path,method,headers,body){
  }
  // Summary intentionally fails, proving that Campaigns remains usable.
  if(path.includes('/rpc/pazo_admin_overview'))return Response.json({code:'SYNTHETIC_OVERVIEW_FAILURE'},{status:503})
+ if(path.includes('/rpc/pazo_admin_visual_summary_v1'))return Response.json({code:'SYNTHETIC_VISUAL_SUMMARY_FAILURE'},{status:503})
  if(path.includes('/rpc/pazo_admin_users')||path.includes('/rpc/pazo_admin_experiments'))return Response.json([])
  throw Error('Unexpected synthetic route '+path)
 }
