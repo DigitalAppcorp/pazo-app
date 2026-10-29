@@ -1,4 +1,16 @@
-## Candidato actual — Administración visual, confiabilidad #161 y lectura agregada sin AAL2
+## Producción vigente — Administración visual y confiabilidad #161 (29-oct-2026)
+
+GO explícito del PO: «sube todo a produccion». PR162 **merged**; runtime de producción `16b705d65e8de54afa2c1600a24e2bb23802b99a`, Vercel `dpl_BJ3xLUNFJf6HQJiQ5XydywM9pcHj` READY/production, alias `pazo-app.vercel.app`. [Acta de lanzamiento](docs/admin-visual/PRODUCTION_RELEASE_20261029.md) y [registro instalado](docs/admin-visual/PRODUCTION_RELEASE.json) son la referencia actual.
+
+SQL ya instalado: fuente `20261029120000` → hospedada `20261029125959`; fuente `20261029121000` → hospedada `20261029130004`. **No reinstalar ni ejecutar `db push` global.** El manifiesto PREPARED y las actas de candidato son históricos. #153 también conserva su mapping previo. Los cuatro flags, fechas originales y retención14d quedaron intactos; no se borró historia.
+
+Lecturas agregadas: administrador AAL1 sin autenticador adicional; operaciones sensibles/MFA/PayPal intactas. Exclusión de señales: opt-in local en Administración → Mi actividad en los informes; no se activa automáticamente ni se transfiere de staging a producción. Sin vínculo individual demostrado solicitud→cuenta; no inventar personas, conversiones Meta o abandonos. Postflight: Chromium público51, HTTP3lectoresdenegados, SQLadminAAL1/normaldenegado, parserreal y fingerprint sensible invariantes. No se afirma sesión humana de administrador (no había tab autenticada disponible).
+
+Las notas inferiores de candidato pendiente/no GO describen el estado anterior a este lanzamiento. Cualquier cambio funcional posterior necesita su autorización correspondiente.
+
+---
+
+## Histórico del candidato — Administración visual y #161
 
 Rama `feat/admin-visual-overview`, base `ee10cd98`. PR162 integra el rediseño y #161 en la misma rama, NO publicados en producción. #161 agrega preferencia local explícita sin identidad, guardas de vigencia y semántica de solicitudes; ver docs/admin-visual/ISSUE161_AUDIT.md. No tratar su GO de implementación como GO de release ni borrar historia anónima. Ver `docs/admin-visual/RELEASE_RUNBOOK.md`, revisión de diseño y manifiesto de exactamente dos migraciones pendientes. No confundir con los GO históricos de #147/#153. No hacer `db push` global ni reinstalar #153: su versión fuente/hospedada ya está conciliada. Los cuatro flags publicados siguen activos y sus fechas deben conservarse. Las operaciones sensibles mantienen MFA; solo las lecturas agregadas de administrador se preparan para AAL1.
 

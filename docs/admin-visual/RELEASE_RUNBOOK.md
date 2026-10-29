@@ -1,4 +1,7 @@
-# Publicación preparada — requiere GO final
+# Procedimiento de publicación y reversión
+
+
+> Este lanzamiento recibió GO y se ejecutó el 29-oct-2026: [acta](PRODUCTION_RELEASE_20261029.md). Los pasos siguientes documentan el procedimiento; no son una orden de repetir instalaciones.
 
 Este cambio no activa medición, modifica retención ni instala un proveedor. Los colectores de #153 ya estaban publicados: no apagarlos, reinstalarlos ni reiniciar sus fechas. Este candidato cambia representación y acceso a lecturas agregadas e incorpora la exclusión local explícita de envíos del navegador de #161. No amplía el vocabulario ni la recopilación. Esa corrección también requiere el GO de release.
 

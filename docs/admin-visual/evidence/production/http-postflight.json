@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "origin": "https://pazo-app.vercel.app",
+  "canonical": 200,
+  "currentBundle": true,
+  "lazyChunksVerified": 6,
+  "publicKeyNotLogged": true,
+  "checks": [
+    {
+      "name": "pazo_admin_visual_summary_v1",
+      "status": 401,
+      "code": "42501",
+      "anonymous": "denied"
+    },
+    {
+      "name": "pazo_admin_behavior_summary_v1",
+      "status": 401,
+      "code": "42501",
+      "anonymous": "denied"
+    },
+    {
+      "name": "pazo_admin_intelligence_summary_v1",
+      "status": 401,
+      "code": "42501",
+      "anonymous": "denied"
+    }
+  ],
+  "hostedDataWrites": 0
+}

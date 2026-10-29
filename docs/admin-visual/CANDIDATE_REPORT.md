@@ -1,5 +1,7 @@
 # Candidato — Administración visual y confiabilidad #161
 
+> Registro histórico del candidato. Publicado después del GO explícito del PO: ver [acta de producción](PRODUCTION_RELEASE_20261029.md) y [mapping instalado](PRODUCTION_RELEASE.json). No reinstalar las migraciones preparadas.
+
 Estado: listo para revisión, sin lanzamiento ni migraciones hospedadas. [Acta de cierre, staging y CI](CLOSURE_20261029.md). Base funcional: `ee10cd98`; integrada la documentación posterior de `main` en `4973c4a1` sin modificar su contenido audiovisual. Las evidencias son sintéticas salvo las consultas expresamente identificadas como baseline de producción.
 
 ## Implementado

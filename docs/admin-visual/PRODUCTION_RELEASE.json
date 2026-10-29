@@ -1,0 +1,43 @@
+{
+  "status": "PRODUCTION_RELEASED",
+  "authorization": "Product Owner: sube todo a produccion (2026-10-29)",
+  "pullRequest": "https://github.com/DigitalAppcorp/pazo-app/pull/162",
+  "approvedHead": "a901c4a154e7e7de71f798407f51206862769fe4",
+  "productionCommit": "16b705d65e8de54afa2c1600a24e2bb23802b99a",
+  "deploymentId": "dpl_BJ3xLUNFJf6HQJiQ5XydywM9pcHj",
+  "target": "production",
+  "canonical": "https://pazo-app.vercel.app",
+  "rollbackDeploymentId": "dpl_6XNVw4afbDtim71jUPHjp76xDfiM",
+  "projectId": "mrybvqdebbgcayuvgkkr",
+  "records": [
+    {
+      "sourceVersion": "20261029120000",
+      "hostedVersion": "20261029125959",
+      "path": "supabase/migrations/20261029120000_pazo_analytics_admin_read_access.sql",
+      "sha256NormalizedLF": "b5c803b2c2c62f30f4158a05a986e0a5560a53ed8db213a5b053fd645b1d9edc"
+    },
+    {
+      "sourceVersion": "20261029121000",
+      "hostedVersion": "20261029130004",
+      "path": "supabase/migrations/20261029121000_pazo_admin_visual_summary.sql",
+      "sha256NormalizedLF": "c3336f481a1aaaa3c05badd665ef7541e618770902e6cb6672f7687e74205ded"
+    }
+  ],
+  "schemaMigrationsAfter": 137,
+  "collectionGatesChanged": false,
+  "collectionStartDatesChanged": false,
+  "retentionDays": 14,
+  "historicalDataDeleted": false,
+  "sensitiveFunctionsFingerprintBefore": "2e7273db552abdb4ba31defeba5205ed",
+  "sensitiveFunctionsFingerprintAfter": "2e7273db552abdb4ba31defeba5205ed",
+  "verification": {
+    "publicChromiumChecks": 51,
+    "currentBundleChunks": 6,
+    "anonymousHttpReadersDenied": 3,
+    "adminAAL1SQLReadersAllowed": 3,
+    "ungrantedSQLReadersDenied": 3,
+    "actualProductionReportParsed": true,
+    "humanAdministratorSession": "not available; SQL request-context verification, no Auth credentials used"
+  },
+  "localExclusion": "Opt-in per production origin/browser; not automatically enabled by deployment"
+}
