@@ -2,10 +2,11 @@
 
 [Índice de biblioteca](README.md) · [Catálogo machine-readable](manifest.json) · [Cobertura](COBERTURA.md)
 
-**118 archivos** reutilizados de evidencias QA; **NO** equivalen a todas las pantallas de PAZO. El catálogo es consultable sin levantar ningún entorno de desarrollo.
+**270 PNG indexados**: **118 históricos de QA** y **152 nuevos** del cliente publicado con datos de muestra; **NO** equivalen a todas las pantallas de PAZO. El catálogo es consultable sin levantar ningún entorno de desarrollo.
 
 | Carpeta | Capturas | Qué buscar | Vista rápida |
 |---|---:|---|---|
+| [capturas nuevas](captures/2026-10-30/) | 152 | Cliente publicado con datos sintéticos; 38 estados ES/EN móvil y desktop | [Ejemplo](captures/2026-10-30/es-390/pet-passport.png) |
 | [canonical](snapshots/2026-10-28/canonical/) | 6 | Acceso y avisos iniciales | [Ejemplo](snapshots/2026-10-28/canonical/desktop_en-welcome.png) |
 | [navigation](snapshots/2026-10-28/navigation/) | 18 | Pestañas principales | [Ejemplo](snapshots/2026-10-28/navigation/en-320-Communities.png) |
 | [utility](snapshots/2026-10-28/utility/) | 18 | Herramientas QR y Agenda | [Ejemplo](snapshots/2026-10-28/utility/en-320-care.png) |
