@@ -2,25 +2,31 @@
 
 El objetivo final es fotografiar **todas las vistas y estados funcionales**, incluidas pantallas de acceso, onboarding, demo, módulos, modales, errores, vacíos, navegación secundaria, scroll y estados relevantes. No se consideran cubiertos los flujos simplemente porque exista un componente TSX.
 
-**Estado al 30/10/2026:** inventario inicial desde `src/App.tsx`, vistas y modales; evidencias del 28/10 organizadas. No se realizó una nueva sesión completa de navegador para certificar los faltantes. No afirmar 100% de cobertura.
+**Estado al 30/10/2026:** 270 PNG indexados en `main`: 118 de QA histórico y **152 tomados del cliente publicado** en 38 pantallas/estados distintos × ES/EN × móvil/escritorio. La nueva sesión usó **Supabase sintético**, no sesiones de personas reales; por tanto NO prueba que los datos/funcionalidades hospedadas operen end-to-end. Móvil de alta resolución 1170×2532, escritorio 2880×1800. **No hay cobertura total ni QA visual exhaustivo**. Los mapas vacíos están bloqueados para material promocional.
 
 | Área | Recorridos mínimos | Evidencia |
 |---|---|---|
-| Acceso | Splash, bienvenida, registro, validación correo, login, recuperar contraseña, términos y privacidad | PARCIAL (bienvenida ES/EN) |
-| Demo | Feed, likes, comentarios, guardados, perfil, comunidades, mapa, explorar, mensajería, salida | PENDIENTE |
+| Acceso | Splash, bienvenida, registro, validación correo, login, recuperar contraseña, términos y privacidad | PARCIAL (bienvenida, registro, login, recuperación y agradecimiento; falta correo confirmado, splash y legales) |
+| Demo | Feed, likes, comentarios, guardados, perfil, comunidades, mapa, explorar, mensajería, salida | PARCIAL (feed, pestañas, explorar, mensajes, notificaciones y crear; faltan estados interactivos y salida) |
 | Principal autenticado | Inicio/feed con contenido, vacío, error, carga; comunidades, mapa, mi mascota, búsqueda | PARCIAL (navegación, estados) |
 | Pasaporte QR | QR, preview público, compartir, descargar, alertas | PARCIAL (QR) |
-| Agenda | Lista, nuevo recordatorio, editar, historial, completar, error | PARCIAL (vista principal) |
-| Documentos | Listado, subida, detalle, editar, borrar, error | PENDIENTE |
-| Alertas | Crear, editar, perdida activa, avistamientos, recuperación, vista pública | PENDIENTE |
-| Publicaciones | Crear, detalle, comentar, guardar, reportar/ocultar | PENDIENTE |
-| Comunidades | Listado, crear, detalle, unirse, editar, estados vacíos | PARCIAL (listado) |
-| Lugares | Mapa, ficha de lugar, búsqueda, check-in, propuesta, cómo llegar | PARCIAL (mapa base) |
-| Perfil | Ver/editar, varias mascotas, perfil público, seguidores/seguidos | PARCIAL (Mi mascota) |
-| Notificaciones y mensajes | Bandeja, detalle, vacíos, mensajes en desarrollo | PENDIENTE |
+| Agenda | Lista, nuevo recordatorio, editar, historial, completar, error | PARCIAL (lista vacía, nuevo formulario, pestaña historial; falta registro existente/editar/completar/error) |
+| Documentos | Listado, subida, detalle, editar, borrar, error | PARCIAL (listado vacío; faltan subida/detalle/editar/borrar) |
+| Alertas | Crear, editar, perdida activa, avistamientos, recuperación, vista pública | PARCIAL (modal de alerta; sin estados activos/revisión/avistamientos/vista pública) |
+| Publicaciones | Crear, detalle, comentar, guardar, reportar/ocultar | PARCIAL (formulario de nueva publicación y feed demo; faltan acciones/estados secundarios) |
+| Comunidades | Listado, crear, detalle, unirse, editar, estados vacíos | PARCIAL (listado y formulario crear; faltan detalle/unirse/editar y muestras de comunidades reales) |
+| Lugares | Mapa, ficha de lugar, búsqueda, check-in, propuesta, cómo llegar | NO APTA PARA VIDEO (mapa vacío en nueva captura sintética y error en captura histórica; faltan lugares, detalles, check-in y rutas visibles) |
+| Perfil | Ver/editar, varias mascotas, perfil público, seguidores/seguidos | PARCIAL (perfil propio, editar, configuración; faltan selector/añadir otra, perfil público, seguidores/seguidos) |
+| Notificaciones y mensajes | Bandeja, detalle, vacíos, mensajes en desarrollo | PARCIAL (vistas principales capturadas; faltan detalle, paginación, casos con actividad real) |
 | Apoyo voluntario | Oferta, insignias, gestión de suscripción sin datos de pago | PENDIENTE |
 | Ajustes y cuenta | Idioma, controles de privacidad, eliminación/solicitudes, recuperación | PENDIENTE |
 | PWA | Instalación disponible/no disponible, offline, mantenimiento | PENDIENTE |
+
+## Rutas capturadas el 30/10/2026
+
+[Índice por estado](captures/2026-10-30/README.md) · [Manifiesto de sesión](captures/2026-10-30/manifest.json) · [Fallos del capturador](captures/2026-10-30/issues.json).
+
+La colección incluye **38 estados únicos** a cuatro combinaciones de idioma/viewport. Los menús `pet-add-another` y `places-search` no se pudieron capturar; la prueba de auto-captura bloqueó llamadas de escritura de prueba contra producción. Las capturas de `main-map` y `demo-map` muestran superficies vacías por datos sintéticos y no son evidencia válida de Lugares con mapa funcional. La cobertura funcional real permanece pendiente de auditoría manual en el sitio oficial y de fixtures adecuados.
 
 ## Contrato de cierre (QA)
 
