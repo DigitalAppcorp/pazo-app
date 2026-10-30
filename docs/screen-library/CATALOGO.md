@@ -11,7 +11,7 @@
 | [utility](snapshots/2026-10-28/utility/) | 18 | Herramientas QR y Agenda | [Ejemplo](snapshots/2026-10-28/utility/en-320-care.png) |
 | [visual](snapshots/2026-10-28/visual/) | 64 | Estados de carga, vacío y error | [Ejemplo](snapshots/2026-10-28/visual/en-320-content-arrival.png) |
 | [short](snapshots/2026-10-28/short/) | 10 | Estados compactos | [Ejemplo](snapshots/2026-10-28/short/en-320-error-arrival.png) |
-| [historical](snapshots/2026-10-28/historical/) | 2 | Comunidades (captura histórica) | [Ejemplo](snapshots/2026-10-28/historical/integrated-en-390.png) |
+| [historical](snapshots/2026-10-28/historical/) | 2 | Comunidades (captura histórica) | [Ejemplo](snapshots/2026-10-28/historical/community-navigation/integrated-en-390.png) |
 
 ## Imágenes clave
 
