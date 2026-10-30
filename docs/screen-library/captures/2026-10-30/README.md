@@ -45,7 +45,7 @@ Total: **152 capturas**. Incidencias/acciones sin cobertura: **12**. Revisar man
 | create-post | es | 390 | authenticated-synthetic | [create-post](es-390/create-post.png) |
 | create-suggest-place | es | 390 | authenticated-synthetic | [create-suggest-place](es-390/create-suggest-place.png) |
 | create-lost-alert | es | 390 | authenticated-synthetic | [create-lost-alert](es-390/create-lost-alert.png) |
-| places-search | es | 390 | authenticated-synthetic | [places-search](es-390/places-search.png) |
+| community-create | es | 390 | authenticated-synthetic | [community-create](es-390/community-create.png) |
 | access-welcome | es | 1440 | public | [access-welcome](es-1440/access-welcome.png) |
 | access-friends-wall | es | 1440 | public | [access-friends-wall](es-1440/access-friends-wall.png) |
 | access-signup | es | 1440 | public | [access-signup](es-1440/access-signup.png) |
@@ -83,7 +83,7 @@ Total: **152 capturas**. Incidencias/acciones sin cobertura: **12**. Revisar man
 | create-post | es | 1440 | authenticated-synthetic | [create-post](es-1440/create-post.png) |
 | create-suggest-place | es | 1440 | authenticated-synthetic | [create-suggest-place](es-1440/create-suggest-place.png) |
 | create-lost-alert | es | 1440 | authenticated-synthetic | [create-lost-alert](es-1440/create-lost-alert.png) |
-| places-search | es | 1440 | authenticated-synthetic | [places-search](es-1440/places-search.png) |
+| community-create | es | 1440 | authenticated-synthetic | [community-create](es-1440/community-create.png) |
 | access-welcome | en | 390 | public | [access-welcome](en-390/access-welcome.png) |
 | access-friends-wall | en | 390 | public | [access-friends-wall](en-390/access-friends-wall.png) |
 | access-signup | en | 390 | public | [access-signup](en-390/access-signup.png) |
@@ -121,7 +121,7 @@ Total: **152 capturas**. Incidencias/acciones sin cobertura: **12**. Revisar man
 | create-post | en | 390 | authenticated-synthetic | [create-post](en-390/create-post.png) |
 | create-suggest-place | en | 390 | authenticated-synthetic | [create-suggest-place](en-390/create-suggest-place.png) |
 | create-lost-alert | en | 390 | authenticated-synthetic | [create-lost-alert](en-390/create-lost-alert.png) |
-| places-search | en | 390 | authenticated-synthetic | [places-search](en-390/places-search.png) |
+| community-create | en | 390 | authenticated-synthetic | [community-create](en-390/community-create.png) |
 | access-welcome | en | 1440 | public | [access-welcome](en-1440/access-welcome.png) |
 | access-friends-wall | en | 1440 | public | [access-friends-wall](en-1440/access-friends-wall.png) |
 | access-signup | en | 1440 | public | [access-signup](en-1440/access-signup.png) |
@@ -159,6 +159,6 @@ Total: **152 capturas**. Incidencias/acciones sin cobertura: **12**. Revisar man
 | create-post | en | 1440 | authenticated-synthetic | [create-post](en-1440/create-post.png) |
 | create-suggest-place | en | 1440 | authenticated-synthetic | [create-suggest-place](en-1440/create-suggest-place.png) |
 | create-lost-alert | en | 1440 | authenticated-synthetic | [create-lost-alert](en-1440/create-lost-alert.png) |
-| places-search | en | 1440 | authenticated-synthetic | [places-search](en-1440/places-search.png) |
+| community-create | en | 1440 | authenticated-synthetic | [community-create](en-1440/community-create.png) |
 
 La existencia de un PNG no confirma pantalla funcional completa; quedan recorridos dinámicos, formularios con datos y QA visual. Administración está excluida.

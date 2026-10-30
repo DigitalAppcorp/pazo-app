@@ -30,7 +30,7 @@ Esta biblioteca guarda **imágenes reales de evidencias de QA existentes**, sin 
 
 ## Capturas nuevas del cliente publicado — 30/10/2026
 
-- **152 imágenes** nuevas (ES/EN, móvil 390px y escritorio 1440px), capturadas con Playwright navegando el **cliente publicado** y **datos API sintéticos**; **sin capturar sesiones ni datos de usuarios reales**.
+- **152 imágenes** nuevas (ES/EN; **390×844 CSS / 1170×2532 píxeles** en móvil y **1440×900 CSS / 2880×1800 píxeles** en escritorio), capturadas con Playwright navegando el **cliente publicado** y **datos API sintéticos**; **sin capturar sesiones ni datos de usuarios reales**.
 - [Catálogo de esta sesión](captures/2026-10-30/README.md) · [Manifiesto detallado](captures/2026-10-30/manifest.json) · [Incidencias y acciones no capturadas](captures/2026-10-30/issues.json).
 - Incluye acceso, Demo, primera mascota, feed, perfil, QR, Agenda, documentos, alertas, crear publicaciones, menú, búsqueda, mensajes, notificaciones y herramientas. Esta sesión todavía **NO es una auditoría completa de todas las subpantallas**.
 - **Mapa**: las imágenes nuevas usan API de ejemplo sin ubicaciones y muestran lienzo sin contenido; están explícitamente `video_ready:false`. No sirven como material promocional de un mapa operativo.

@@ -6,7 +6,7 @@
   },
   {
     "locale": "es-390",
-    "id": "community-create",
+    "id": "places-search",
     "message": "Target UI action not found"
   },
   {
@@ -21,13 +21,13 @@
   },
   {
     "locale": "es-1440",
-    "id": "community-create",
+    "id": "places-search",
     "message": "Target UI action not found"
   },
   {
     "locale": "es-1440",
     "id": "blocked-remote-writes",
-    "message": "Blocked 5 attempted writes; no production records were changed"
+    "message": "Blocked 4 attempted writes; no production records were changed"
   },
   {
     "locale": "en-390",
@@ -36,7 +36,7 @@
   },
   {
     "locale": "en-390",
-    "id": "community-create",
+    "id": "places-search",
     "message": "Target UI action not found"
   },
   {
@@ -51,7 +51,7 @@
   },
   {
     "locale": "en-1440",
-    "id": "community-create",
+    "id": "places-search",
     "message": "Target UI action not found"
   },
   {
