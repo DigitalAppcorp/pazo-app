@@ -173,7 +173,7 @@ async function publicSuite(browser,lang,width) {
     await page.getByRole('navigation',{name:'Navegación de PAZO'}).waitFor({timeout:18000})
     await screenshotSafely(page,lang,width,'demo','demo-home','feed')
     for (const key of ['communities','map','pet','home']) {
-      try { await navTo(page,lang,key); await screenshotSafely(page,lang,width,'demo','demo-'+key,key) }
+      try { await navTo(page,lang,key); await screenshotSafely(page,lang,width,'demo','demo-'+key+(key==='home'?'-return':''),key) }
       catch(e) {recordFailure(lang+'-'+width,'demo-'+key,e)}
     }
     if(await maybeClick(page.getByRole('button',{name:L.search,exact:true}))) {
@@ -216,7 +216,8 @@ async function authenticSuite(browser,lang,width) {
   try {
     await page.goto(origin,{waitUntil:'domcontentloaded',timeout:90000})
     const nameInput=page.getByPlaceholder(lang==='es'?'Ej: Luna, Bruno, Nube...':'E.g. Luna, Bruno, Cloud...')
-    if (await nameInput.count()) {
+    const firstPetReady = await nameInput.waitFor({timeout:12000}).then(()=>true).catch(()=>false)
+    if (firstPetReady) {
       await screenshotSafely(page,lang,width,tag,'onboarding-first-pet-name','pet-creation')
       await nameInput.fill('Luna')
       if(await maybeClick(page.getByRole('button',{name:lang==='es'?'Continuar':'Continue',exact:true}))) {
@@ -255,10 +256,16 @@ async function authenticSuite(browser,lang,width) {
       &&await maybeClick(page.getByRole('button',{name:lang==='es'?/Mi mascota está perdida/:/My pet is lost/})))
     await flow('communities','community-create',()=>maybeClick(page.getByRole('button',{name:lang==='es'?/Crear comunidad|Nueva comunidad/i:/Create community|New community/i})))
     await flow('map','places-search',()=>maybeClick(page.getByRole('button',{name:lang==='es'?/Buscar|Explorar/i:/Search|Explore/i})))
-  }catch(e){recordFailure(lang+'-'+width,'authenticated-suite',e)}
+  }catch(e){
+    recordFailure(lang+'-'+width,'authenticated-suite',e)
+    const diagnosticText=await page.locator('body').innerText({timeout:3000}).then(t=>t.slice(0,500)).catch(()=>'(unavailable)')
+    recordFailure(lang+'-'+width,'authenticated-diagnostic',diagnosticText)
+    await screenshotSafely(page,lang,width,tag,'diagnostic-auth-state','diagnostic-not-approved-for-video')
+  }
   if(getBlockedWrites()>0) recordFailure(lang+'-'+width,'blocked-remote-writes','Blocked '+getBlockedWrites()+' attempted writes; no production records were changed')
   await context.close()
 }
+await fs.rm(root,{recursive:true,force:true})
 await fs.mkdir(root,{recursive:true})
 const browser=await chromium.launch({headless:true,...(process.env.PAZO_CHROMIUM_PATH?{executablePath:process.env.PAZO_CHROMIUM_PATH}:{})})
 try {
