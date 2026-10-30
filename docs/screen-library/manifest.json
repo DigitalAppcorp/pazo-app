@@ -30,7 +30,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/canonical/desktop_en-welcome.png",
       "path": "docs/screen-library/snapshots/2026-10-28/canonical/desktop_en-welcome.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "welcome",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "welcome",
+        "default",
+        "canonical",
+        "en"
+      ]
     },
     {
       "id": "canonical--desktop_es-welcome",
@@ -40,7 +52,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/canonical/desktop_es-welcome.png",
       "path": "docs/screen-library/snapshots/2026-10-28/canonical/desktop_es-welcome.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "welcome",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "welcome",
+        "default",
+        "canonical",
+        "es"
+      ]
     },
     {
       "id": "canonical--en-utility-notice",
@@ -50,7 +74,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/canonical/en-utility-notice.png",
       "path": "docs/screen-library/snapshots/2026-10-28/canonical/en-utility-notice.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use-notice",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use-notice",
+        "default",
+        "canonical",
+        "en"
+      ]
     },
     {
       "id": "canonical--es-utility-notice",
@@ -60,7 +96,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/canonical/es-utility-notice.png",
       "path": "docs/screen-library/snapshots/2026-10-28/canonical/es-utility-notice.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use-notice",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use-notice",
+        "default",
+        "canonical",
+        "es"
+      ]
     },
     {
       "id": "canonical--mobile_en-welcome",
@@ -70,7 +118,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/canonical/mobile_en-welcome.png",
       "path": "docs/screen-library/snapshots/2026-10-28/canonical/mobile_en-welcome.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "welcome",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "welcome",
+        "default",
+        "canonical",
+        "en"
+      ]
     },
     {
       "id": "canonical--mobile_es-welcome",
@@ -80,7 +140,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/canonical/mobile_es-welcome.png",
       "path": "docs/screen-library/snapshots/2026-10-28/canonical/mobile_es-welcome.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "welcome",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "welcome",
+        "default",
+        "canonical",
+        "es"
+      ]
     },
     {
       "id": "navigation--en-320-Communities",
@@ -90,7 +162,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-320-Communities.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-320-Communities.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "navigation",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "navigation--en-320-Map",
@@ -100,7 +185,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-320-Map.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-320-Map.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "places-map",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "places-map",
+        "default",
+        "navigation",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "navigation--en-320-My-Pet",
@@ -110,7 +208,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-320-My-Pet.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-320-My-Pet.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "my-pet",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "my-pet",
+        "default",
+        "navigation",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "navigation--en-390-Communities",
@@ -120,7 +231,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-390-Communities.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-390-Communities.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "navigation",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "navigation--en-390-Map",
@@ -130,7 +254,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-390-Map.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-390-Map.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "places-map",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "places-map",
+        "default",
+        "navigation",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "navigation--en-390-My-Pet",
@@ -140,7 +277,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-390-My-Pet.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-390-My-Pet.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "my-pet",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "my-pet",
+        "default",
+        "navigation",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "navigation--en-430-Communities",
@@ -150,7 +300,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-430-Communities.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-430-Communities.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "navigation",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "navigation--en-430-Map",
@@ -160,7 +323,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-430-Map.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-430-Map.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "places-map",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "places-map",
+        "default",
+        "navigation",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "navigation--en-430-My-Pet",
@@ -170,7 +346,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/navigation/en-430-My-Pet.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-430-My-Pet.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "my-pet",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "my-pet",
+        "default",
+        "navigation",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "navigation--es-320-Comunidades",
@@ -180,7 +369,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-320-Comunidades.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-320-Comunidades.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "navigation",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "navigation--es-320-Mapa",
@@ -190,7 +392,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-320-Mapa.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-320-Mapa.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "places-map",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "places-map",
+        "default",
+        "navigation",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "navigation--es-320-Mi-mascota",
@@ -200,7 +415,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-320-Mi-mascota.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-320-Mi-mascota.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "my-pet",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "my-pet",
+        "default",
+        "navigation",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "navigation--es-390-Comunidades",
@@ -210,7 +438,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-390-Comunidades.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-390-Comunidades.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "navigation",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "navigation--es-390-Mapa",
@@ -220,7 +461,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-390-Mapa.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-390-Mapa.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "places-map",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "places-map",
+        "default",
+        "navigation",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "navigation--es-390-Mi-mascota",
@@ -230,7 +484,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-390-Mi-mascota.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-390-Mi-mascota.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "my-pet",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "my-pet",
+        "default",
+        "navigation",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "navigation--es-430-Comunidades",
@@ -240,7 +507,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-430-Comunidades.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-430-Comunidades.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "navigation",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "navigation--es-430-Mapa",
@@ -250,7 +530,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-430-Mapa.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-430-Mapa.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "places-map",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "places-map",
+        "default",
+        "navigation",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "navigation--es-430-Mi-mascota",
@@ -260,7 +553,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/navigation/es-430-Mi-mascota.png",
       "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-430-Mi-mascota.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "my-pet",
+      "state": "default",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "my-pet",
+        "default",
+        "navigation",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "short--en-320-error-arrival",
@@ -270,7 +576,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/en-320-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "short",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "short--en-320-error-home",
@@ -280,7 +599,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/en-320-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "short",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "short--en-320-pending-arrival",
@@ -290,7 +622,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/en-320-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "short",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "short--en-320-pending-home",
@@ -300,7 +645,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/en-320-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "short",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "short--en-320-recovered-home",
@@ -310,7 +668,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/en-320-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "short",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "short--es-320-error-arrival",
@@ -320,7 +691,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/es-320-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "short",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "short--es-320-error-home",
@@ -330,7 +714,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/es-320-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "short",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "short--es-320-pending-arrival",
@@ -340,7 +737,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/es-320-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "short",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "short--es-320-pending-home",
@@ -350,7 +760,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/es-320-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "short",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "short--es-320-recovered-home",
@@ -360,7 +783,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/short/es-320-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "short",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "utility--en-320-care",
@@ -370,7 +806,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/utility/en-320-care.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-320-care.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "care-agenda",
+      "state": "care",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "care-agenda",
+        "care",
+        "utility",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "utility--en-320-first-use",
@@ -380,7 +829,19 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/utility/en-320-first-use.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-320-first-use.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use",
+      "state": "first-use",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use",
+        "utility",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "utility--en-320-qr",
@@ -390,7 +851,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/utility/en-320-qr.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-320-qr.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "qr-passport",
+      "state": "qr",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "qr-passport",
+        "qr",
+        "utility",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "utility--en-390-care",
@@ -400,7 +874,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/utility/en-390-care.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-390-care.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "care-agenda",
+      "state": "care",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "care-agenda",
+        "care",
+        "utility",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "utility--en-390-first-use",
@@ -410,7 +897,19 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/utility/en-390-first-use.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-390-first-use.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use",
+      "state": "first-use",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use",
+        "utility",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "utility--en-390-qr",
@@ -420,7 +919,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/utility/en-390-qr.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-390-qr.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "qr-passport",
+      "state": "qr",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "qr-passport",
+        "qr",
+        "utility",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "utility--en-430-care",
@@ -430,7 +942,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/utility/en-430-care.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-430-care.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "care-agenda",
+      "state": "care",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "care-agenda",
+        "care",
+        "utility",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "utility--en-430-first-use",
@@ -440,7 +965,19 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/utility/en-430-first-use.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-430-first-use.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use",
+      "state": "first-use",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use",
+        "utility",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "utility--en-430-qr",
@@ -450,7 +987,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/utility/en-430-qr.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/en-430-qr.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "qr-passport",
+      "state": "qr",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "qr-passport",
+        "qr",
+        "utility",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "utility--es-320-care",
@@ -460,7 +1010,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/utility/es-320-care.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-320-care.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "care-agenda",
+      "state": "care",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "care-agenda",
+        "care",
+        "utility",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "utility--es-320-first-use",
@@ -470,7 +1033,19 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/utility/es-320-first-use.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-320-first-use.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use",
+      "state": "first-use",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use",
+        "utility",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "utility--es-320-qr",
@@ -480,7 +1055,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/utility/es-320-qr.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-320-qr.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "qr-passport",
+      "state": "qr",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "qr-passport",
+        "qr",
+        "utility",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "utility--es-390-care",
@@ -490,7 +1078,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/utility/es-390-care.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-390-care.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "care-agenda",
+      "state": "care",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "care-agenda",
+        "care",
+        "utility",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "utility--es-390-first-use",
@@ -500,7 +1101,19 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/utility/es-390-first-use.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-390-first-use.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use",
+      "state": "first-use",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use",
+        "utility",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "utility--es-390-qr",
@@ -510,7 +1123,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/utility/es-390-qr.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-390-qr.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "qr-passport",
+      "state": "qr",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "qr-passport",
+        "qr",
+        "utility",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "utility--es-430-care",
@@ -520,7 +1146,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/utility/es-430-care.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-430-care.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "care-agenda",
+      "state": "care",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "care-agenda",
+        "care",
+        "utility",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "utility--es-430-first-use",
@@ -530,7 +1169,19 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/utility/es-430-first-use.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-430-first-use.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-use",
+      "state": "first-use",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-use",
+        "utility",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "utility--es-430-qr",
@@ -540,7 +1191,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/utility/es-430-qr.png",
       "path": "docs/screen-library/snapshots/2026-10-28/utility/es-430-qr.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "qr-passport",
+      "state": "qr",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "qr-passport",
+        "qr",
+        "utility",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-320-content-arrival",
@@ -550,7 +1214,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-content-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-content-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "content",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-content-home",
@@ -560,7 +1237,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-content-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-content-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "content",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-empty-arrival",
@@ -570,7 +1260,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-empty-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-empty-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "empty",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-empty-home",
@@ -580,7 +1283,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-empty-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-empty-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "empty",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-error-arrival",
@@ -590,7 +1306,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-error-home",
@@ -600,7 +1329,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-pending-arrival",
@@ -610,7 +1352,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-pending-home",
@@ -620,7 +1375,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-320-recovered-home",
@@ -630,7 +1398,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/en-320-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--en-390-content-arrival",
@@ -640,7 +1421,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-content-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-content-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "content",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-content-home",
@@ -650,7 +1444,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-content-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-content-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "content",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-empty-arrival",
@@ -660,7 +1467,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-empty-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-empty-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "empty",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-empty-home",
@@ -670,7 +1490,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-empty-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-empty-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "empty",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-error-arrival",
@@ -680,7 +1513,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-error-home",
@@ -690,7 +1536,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-pending-arrival",
@@ -700,7 +1559,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-pending-home",
@@ -710,7 +1582,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-390-recovered-home",
@@ -720,7 +1605,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/en-390-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--en-430-content-arrival",
@@ -730,7 +1628,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-content-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-content-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "content",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-content-home",
@@ -740,7 +1651,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-content-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-content-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "content",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-empty-arrival",
@@ -750,7 +1674,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-empty-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-empty-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "empty",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-empty-home",
@@ -760,7 +1697,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-empty-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-empty-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "empty",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-error-arrival",
@@ -770,7 +1720,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-error-home",
@@ -780,7 +1743,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-pending-arrival",
@@ -790,7 +1766,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-pending-home",
@@ -800,7 +1789,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--en-430-recovered-home",
@@ -810,7 +1812,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/en-430-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-320-content-arrival",
@@ -820,7 +1835,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-content-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-content-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "content",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-content-home",
@@ -830,7 +1858,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-content-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-content-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "content",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-empty-arrival",
@@ -840,7 +1881,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-empty-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-empty-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "empty",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-empty-home",
@@ -850,7 +1904,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-empty-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-empty-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "empty",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-error-arrival",
@@ -860,7 +1927,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-error-home",
@@ -870,7 +1950,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-pending-arrival",
@@ -880,7 +1973,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-pending-home",
@@ -890,7 +1996,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-320-recovered-home",
@@ -900,7 +2019,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/es-320-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--es-390-content-arrival",
@@ -910,7 +2042,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-content-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-content-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "content",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-content-home",
@@ -920,7 +2065,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-content-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-content-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "content",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-empty-arrival",
@@ -930,7 +2088,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-empty-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-empty-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "empty",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-empty-home",
@@ -940,7 +2111,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-empty-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-empty-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "empty",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-error-arrival",
@@ -950,7 +2134,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-error-home",
@@ -960,7 +2157,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-pending-arrival",
@@ -970,7 +2180,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-pending-home",
@@ -980,7 +2203,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-390-recovered-home",
@@ -990,7 +2226,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/es-390-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--es-430-content-arrival",
@@ -1000,7 +2249,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-content-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-content-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "content",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-content-home",
@@ -1010,7 +2272,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-content-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-content-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "content",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "content",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-empty-arrival",
@@ -1020,7 +2295,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-empty-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-empty-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "empty",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-empty-home",
@@ -1030,7 +2318,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-empty-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-empty-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "empty",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "empty",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-error-arrival",
@@ -1040,7 +2341,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-error-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-error-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "error",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-error-home",
@@ -1050,7 +2364,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-error-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-error-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "error",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "error",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-pending-arrival",
@@ -1060,7 +2387,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-pending-arrival.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-pending-arrival.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "pending",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-pending-home",
@@ -1070,7 +2410,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-pending-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-pending-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "pending",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "pending",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--es-430-recovered-home",
@@ -1080,7 +2433,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/es-430-recovered-home.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-recovered-home.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "home-feed",
+      "state": "recovered",
+      "composite": false,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "home-feed",
+        "recovered",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--gallery-arrival-en",
@@ -1090,7 +2456,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-arrival-en.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-arrival-en.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "composite",
+        "visual",
+        "en"
+      ]
     },
     {
       "id": "visual--gallery-arrival-es",
@@ -1100,7 +2478,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-arrival-es.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-arrival-es.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "first-pet-arrival",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "first-pet-arrival",
+        "composite",
+        "visual",
+        "es"
+      ]
     },
     {
       "id": "visual--gallery-en-320",
@@ -1110,7 +2500,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-en-320.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-en-320.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "en",
+        "width-320"
+      ]
     },
     {
       "id": "visual--gallery-en-390",
@@ -1120,7 +2523,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-en-390.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-en-390.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "visual--gallery-en-430",
@@ -1130,7 +2546,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-en-430.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-en-430.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "en",
+        "width-430"
+      ]
     },
     {
       "id": "visual--gallery-es-320",
@@ -1140,7 +2569,20 @@
       "viewport_width": 320,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-es-320.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-es-320.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "es",
+        "width-320"
+      ]
     },
     {
       "id": "visual--gallery-es-390",
@@ -1150,7 +2592,20 @@
       "viewport_width": 390,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-es-390.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-es-390.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "es",
+        "width-390"
+      ]
     },
     {
       "id": "visual--gallery-es-430",
@@ -1160,7 +2615,20 @@
       "viewport_width": 430,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-es-430.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-es-430.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "es",
+        "width-430"
+      ]
     },
     {
       "id": "visual--gallery-recovery-en",
@@ -1170,7 +2638,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-recovery-en.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-recovery-en.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "en"
+      ]
     },
     {
       "id": "visual--gallery-recovery-es",
@@ -1180,7 +2660,19 @@
       "viewport_width": null,
       "source": "docs/evidence/issue147-release-20261028/visual/gallery-recovery-es.png",
       "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-recovery-es.png",
-      "provenance": "QA release 2026-10-28"
+      "provenance": "QA release 2026-10-28",
+      "screen": "composite-gallery",
+      "state": "composite",
+      "composite": true,
+      "historical": false,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "composite-gallery",
+        "composite",
+        "visual",
+        "es"
+      ]
     },
     {
       "id": "historical--community-navigation--integrated-en-390",
@@ -1190,7 +2682,20 @@
       "viewport_width": 390,
       "source": "docs/community-navigation-20261026/integrated-en-390.png",
       "path": "docs/screen-library/snapshots/2026-10-28/historical/community-navigation/integrated-en-390.png",
-      "provenance": "QA 2026-10-26"
+      "provenance": "QA 2026-10-26",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": true,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "historical",
+        "en",
+        "width-390"
+      ]
     },
     {
       "id": "historical--community-navigation--integrated-es-390",
@@ -1200,7 +2705,21 @@
       "viewport_width": 390,
       "source": "docs/community-navigation-20261026/integrated-es-390.png",
       "path": "docs/screen-library/snapshots/2026-10-28/historical/community-navigation/integrated-es-390.png",
-      "provenance": "QA 2026-10-26"
+      "provenance": "QA 2026-10-26",
+      "screen": "communities",
+      "state": "default",
+      "composite": false,
+      "historical": true,
+      "current_production_verified": false,
+      "sensitive_data_policy": "synthetic or public QA evidence only",
+      "tags": [
+        "communities",
+        "default",
+        "historical",
+        "es",
+        "width-390"
+      ]
     }
-  ]
+  ],
+  "description": "Reused QA image assets, searchable by screen/state/tags. Excludes administration; not proof of current production."
 }
