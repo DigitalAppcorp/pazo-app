@@ -179,13 +179,14 @@ async function publicSuite(browser,lang,width) {
     if(await maybeClick(page.getByRole('button',{name:L.search,exact:true}))) {
       await screenshotSafely(page,lang,width,'demo','demo-explore','search')
     }
-    await navTo(page,lang,'home').catch(()=>{})
     for(const [key,id] of [['messages','demo-messages'],['notifications','demo-notifications']]) {
-      await page.reload({waitUntil:'domcontentloaded'})
+      await gotoWelcome(page,lang)
+      if (!await maybeClick(page.getByRole('button',{name:'Demo',exact:true}))) continue
       await page.getByRole('navigation',{name:'Navegación de PAZO'}).waitFor({timeout:18000})
       if(await maybeClick(page.getByRole('button',{name:L[key],exact:true}))) await screenshotSafely(page,lang,width,'demo',id,key)
     }
-    await page.reload({waitUntil:'domcontentloaded'})
+    await gotoWelcome(page,lang)
+    await maybeClick(page.getByRole('button',{name:'Demo',exact:true}))
     await navTo(page,lang,'home')
     const nav = page.getByRole('navigation',{name:'Navegación de PAZO'})
     if(await maybeClick(nav.getByRole('button',{name:L.create,exact:true}))) await screenshotSafely(page,lang,width,'demo','demo-create-menu','create-menu')
