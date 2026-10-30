@@ -1,0 +1,1206 @@
+{
+  "schema_version": 1,
+  "library": "PAZO Video OS reusable screen capture library",
+  "as_of": "2026-10-30",
+  "capture_sources": [
+    {
+      "source": "release issue147",
+      "date": "2026-10-28",
+      "scope": "QA/hosted evidence"
+    },
+    {
+      "source": "community-navigation",
+      "date": "2026-10-26",
+      "scope": "historic QA"
+    }
+  ],
+  "not_currently_complete": true,
+  "excluded": [
+    "administracion",
+    "admin",
+    "private user data"
+  ],
+  "count": 118,
+  "assets": [
+    {
+      "id": "canonical--desktop_en-welcome",
+      "group": "canonical",
+      "title": "Acceso y avisos iniciales",
+      "language": "en",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/canonical/desktop_en-welcome.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/canonical/desktop_en-welcome.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "canonical--desktop_es-welcome",
+      "group": "canonical",
+      "title": "Acceso y avisos iniciales",
+      "language": "es",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/canonical/desktop_es-welcome.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/canonical/desktop_es-welcome.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "canonical--en-utility-notice",
+      "group": "canonical",
+      "title": "Acceso y avisos iniciales",
+      "language": "en",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/canonical/en-utility-notice.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/canonical/en-utility-notice.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "canonical--es-utility-notice",
+      "group": "canonical",
+      "title": "Acceso y avisos iniciales",
+      "language": "es",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/canonical/es-utility-notice.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/canonical/es-utility-notice.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "canonical--mobile_en-welcome",
+      "group": "canonical",
+      "title": "Acceso y avisos iniciales",
+      "language": "en",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/canonical/mobile_en-welcome.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/canonical/mobile_en-welcome.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "canonical--mobile_es-welcome",
+      "group": "canonical",
+      "title": "Acceso y avisos iniciales",
+      "language": "es",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/canonical/mobile_es-welcome.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/canonical/mobile_es-welcome.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-320-Communities",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-320-Communities.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-320-Communities.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-320-Map",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-320-Map.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-320-Map.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-320-My-Pet",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-320-My-Pet.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-320-My-Pet.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-390-Communities",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-390-Communities.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-390-Communities.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-390-Map",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-390-Map.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-390-Map.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-390-My-Pet",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-390-My-Pet.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-390-My-Pet.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-430-Communities",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-430-Communities.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-430-Communities.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-430-Map",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-430-Map.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-430-Map.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--en-430-My-Pet",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/navigation/en-430-My-Pet.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/en-430-My-Pet.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-320-Comunidades",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-320-Comunidades.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-320-Comunidades.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-320-Mapa",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-320-Mapa.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-320-Mapa.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-320-Mi-mascota",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-320-Mi-mascota.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-320-Mi-mascota.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-390-Comunidades",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-390-Comunidades.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-390-Comunidades.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-390-Mapa",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-390-Mapa.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-390-Mapa.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-390-Mi-mascota",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-390-Mi-mascota.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-390-Mi-mascota.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-430-Comunidades",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-430-Comunidades.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-430-Comunidades.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-430-Mapa",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-430-Mapa.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-430-Mapa.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "navigation--es-430-Mi-mascota",
+      "group": "navigation",
+      "title": "Pestañas principales",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/navigation/es-430-Mi-mascota.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/navigation/es-430-Mi-mascota.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--en-320-error-arrival",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/en-320-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--en-320-error-home",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/en-320-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--en-320-pending-arrival",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/en-320-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--en-320-pending-home",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/en-320-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--en-320-recovered-home",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/en-320-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/en-320-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--es-320-error-arrival",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/es-320-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--es-320-error-home",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/es-320-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--es-320-pending-arrival",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/es-320-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--es-320-pending-home",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/es-320-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "short--es-320-recovered-home",
+      "group": "short",
+      "title": "Estados compactos",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/short/es-320-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/short/es-320-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-320-care",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-320-care.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-320-care.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-320-first-use",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-320-first-use.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-320-first-use.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-320-qr",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-320-qr.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-320-qr.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-390-care",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-390-care.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-390-care.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-390-first-use",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-390-first-use.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-390-first-use.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-390-qr",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-390-qr.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-390-qr.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-430-care",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-430-care.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-430-care.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-430-first-use",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-430-first-use.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-430-first-use.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--en-430-qr",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/utility/en-430-qr.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/en-430-qr.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-320-care",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-320-care.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-320-care.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-320-first-use",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-320-first-use.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-320-first-use.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-320-qr",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-320-qr.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-320-qr.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-390-care",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-390-care.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-390-care.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-390-first-use",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-390-first-use.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-390-first-use.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-390-qr",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-390-qr.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-390-qr.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-430-care",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-430-care.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-430-care.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-430-first-use",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-430-first-use.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-430-first-use.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "utility--es-430-qr",
+      "group": "utility",
+      "title": "Herramientas QR y Agenda",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/utility/es-430-qr.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/utility/es-430-qr.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-content-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-content-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-content-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-content-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-content-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-content-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-empty-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-empty-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-empty-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-empty-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-empty-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-empty-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-error-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-error-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-pending-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-pending-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-320-recovered-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-320-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-320-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-content-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-content-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-content-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-content-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-content-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-content-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-empty-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-empty-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-empty-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-empty-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-empty-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-empty-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-error-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-error-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-pending-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-pending-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-390-recovered-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-390-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-390-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-content-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-content-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-content-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-content-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-content-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-content-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-empty-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-empty-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-empty-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-empty-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-empty-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-empty-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-error-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-error-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-pending-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-pending-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--en-430-recovered-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/en-430-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/en-430-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-content-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-content-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-content-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-content-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-content-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-content-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-empty-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-empty-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-empty-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-empty-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-empty-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-empty-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-error-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-error-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-pending-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-pending-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-320-recovered-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-320-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-320-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-content-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-content-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-content-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-content-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-content-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-content-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-empty-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-empty-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-empty-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-empty-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-empty-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-empty-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-error-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-error-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-pending-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-pending-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-390-recovered-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-390-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-390-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-content-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-content-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-content-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-content-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-content-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-content-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-empty-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-empty-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-empty-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-empty-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-empty-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-empty-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-error-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-error-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-error-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-error-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-error-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-error-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-pending-arrival",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-pending-arrival.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-pending-arrival.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-pending-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-pending-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-pending-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--es-430-recovered-home",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/es-430-recovered-home.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/es-430-recovered-home.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-arrival-en",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-arrival-en.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-arrival-en.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-arrival-es",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-arrival-es.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-arrival-es.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-en-320",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-en-320.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-en-320.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-en-390",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-en-390.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-en-390.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-en-430",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-en-430.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-en-430.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-es-320",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 320,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-es-320.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-es-320.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-es-390",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-es-390.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-es-390.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-es-430",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": 430,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-es-430.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-es-430.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-recovery-en",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "en",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-recovery-en.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-recovery-en.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "visual--gallery-recovery-es",
+      "group": "visual",
+      "title": "Estados de carga, vacío y error",
+      "language": "es",
+      "viewport_width": null,
+      "source": "docs/evidence/issue147-release-20261028/visual/gallery-recovery-es.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/visual/gallery-recovery-es.png",
+      "provenance": "QA release 2026-10-28"
+    },
+    {
+      "id": "historical--community-navigation--integrated-en-390",
+      "group": "historical",
+      "title": "Comunidades (captura histórica)",
+      "language": "en",
+      "viewport_width": 390,
+      "source": "docs/community-navigation-20261026/integrated-en-390.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/historical/community-navigation/integrated-en-390.png",
+      "provenance": "QA 2026-10-26"
+    },
+    {
+      "id": "historical--community-navigation--integrated-es-390",
+      "group": "historical",
+      "title": "Comunidades (captura histórica)",
+      "language": "es",
+      "viewport_width": 390,
+      "source": "docs/community-navigation-20261026/integrated-es-390.png",
+      "path": "docs/screen-library/snapshots/2026-10-28/historical/community-navigation/integrated-es-390.png",
+      "provenance": "QA 2026-10-26"
+    }
+  ]
+}
