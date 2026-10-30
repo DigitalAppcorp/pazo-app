@@ -42,7 +42,9 @@
         "default",
         "canonical",
         "en"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "canonical--desktop_es-welcome",
@@ -64,7 +66,9 @@
         "default",
         "canonical",
         "es"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "canonical--en-utility-notice",
@@ -86,7 +90,9 @@
         "default",
         "canonical",
         "en"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "canonical--es-utility-notice",
@@ -108,7 +114,9 @@
         "default",
         "canonical",
         "es"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "canonical--mobile_en-welcome",
@@ -130,7 +138,9 @@
         "default",
         "canonical",
         "en"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "canonical--mobile_es-welcome",
@@ -152,7 +162,9 @@
         "default",
         "canonical",
         "es"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--en-320-Communities",
@@ -175,7 +187,9 @@
         "navigation",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--en-320-Map",
@@ -198,7 +212,10 @@
         "navigation",
         "en",
         "width-320"
-      ]
+      ],
+      "visual_qa": "FAIL_MAP_LOAD_IN_QA_SCREENSHOT",
+      "video_ready": false,
+      "use_note": "Esta imagen muestra fallo del mapa; conservar como QA, NO insertar en video promocional. Necesita recaptura verificada."
     },
     {
       "id": "navigation--en-320-My-Pet",
@@ -221,7 +238,9 @@
         "navigation",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--en-390-Communities",
@@ -244,7 +263,9 @@
         "navigation",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--en-390-Map",
@@ -267,7 +288,10 @@
         "navigation",
         "en",
         "width-390"
-      ]
+      ],
+      "visual_qa": "FAIL_MAP_LOAD_IN_QA_SCREENSHOT",
+      "video_ready": false,
+      "use_note": "Esta imagen muestra fallo del mapa; conservar como QA, NO insertar en video promocional. Necesita recaptura verificada."
     },
     {
       "id": "navigation--en-390-My-Pet",
@@ -290,7 +314,9 @@
         "navigation",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--en-430-Communities",
@@ -313,7 +339,9 @@
         "navigation",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--en-430-Map",
@@ -336,7 +364,10 @@
         "navigation",
         "en",
         "width-430"
-      ]
+      ],
+      "visual_qa": "FAIL_MAP_LOAD_IN_QA_SCREENSHOT",
+      "video_ready": false,
+      "use_note": "Esta imagen muestra fallo del mapa; conservar como QA, NO insertar en video promocional. Necesita recaptura verificada."
     },
     {
       "id": "navigation--en-430-My-Pet",
@@ -359,7 +390,9 @@
         "navigation",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--es-320-Comunidades",
@@ -382,7 +415,9 @@
         "navigation",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--es-320-Mapa",
@@ -405,7 +440,10 @@
         "navigation",
         "es",
         "width-320"
-      ]
+      ],
+      "visual_qa": "FAIL_MAP_LOAD_IN_QA_SCREENSHOT",
+      "video_ready": false,
+      "use_note": "Esta imagen muestra fallo del mapa; conservar como QA, NO insertar en video promocional. Necesita recaptura verificada."
     },
     {
       "id": "navigation--es-320-Mi-mascota",
@@ -428,7 +466,9 @@
         "navigation",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--es-390-Comunidades",
@@ -451,7 +491,9 @@
         "navigation",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--es-390-Mapa",
@@ -474,7 +516,10 @@
         "navigation",
         "es",
         "width-390"
-      ]
+      ],
+      "visual_qa": "FAIL_MAP_LOAD_IN_QA_SCREENSHOT",
+      "video_ready": false,
+      "use_note": "Esta imagen muestra fallo del mapa; conservar como QA, NO insertar en video promocional. Necesita recaptura verificada."
     },
     {
       "id": "navigation--es-390-Mi-mascota",
@@ -497,7 +542,9 @@
         "navigation",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--es-430-Comunidades",
@@ -520,7 +567,9 @@
         "navigation",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "navigation--es-430-Mapa",
@@ -543,7 +592,10 @@
         "navigation",
         "es",
         "width-430"
-      ]
+      ],
+      "visual_qa": "FAIL_MAP_LOAD_IN_QA_SCREENSHOT",
+      "video_ready": false,
+      "use_note": "Esta imagen muestra fallo del mapa; conservar como QA, NO insertar en video promocional. Necesita recaptura verificada."
     },
     {
       "id": "navigation--es-430-Mi-mascota",
@@ -566,7 +618,9 @@
         "navigation",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--en-320-error-arrival",
@@ -589,7 +643,9 @@
         "short",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--en-320-error-home",
@@ -612,7 +668,9 @@
         "short",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--en-320-pending-arrival",
@@ -635,7 +693,9 @@
         "short",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--en-320-pending-home",
@@ -658,7 +718,9 @@
         "short",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--en-320-recovered-home",
@@ -681,7 +743,9 @@
         "short",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--es-320-error-arrival",
@@ -704,7 +768,9 @@
         "short",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--es-320-error-home",
@@ -727,7 +793,9 @@
         "short",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--es-320-pending-arrival",
@@ -750,7 +818,9 @@
         "short",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--es-320-pending-home",
@@ -773,7 +843,9 @@
         "short",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "short--es-320-recovered-home",
@@ -796,7 +868,9 @@
         "short",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-320-care",
@@ -819,7 +893,9 @@
         "utility",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-320-first-use",
@@ -841,7 +917,9 @@
         "utility",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-320-qr",
@@ -864,7 +942,9 @@
         "utility",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-390-care",
@@ -887,7 +967,9 @@
         "utility",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-390-first-use",
@@ -909,7 +991,9 @@
         "utility",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-390-qr",
@@ -932,7 +1016,9 @@
         "utility",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-430-care",
@@ -955,7 +1041,9 @@
         "utility",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-430-first-use",
@@ -977,7 +1065,9 @@
         "utility",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--en-430-qr",
@@ -1000,7 +1090,9 @@
         "utility",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-320-care",
@@ -1023,7 +1115,9 @@
         "utility",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-320-first-use",
@@ -1045,7 +1139,9 @@
         "utility",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-320-qr",
@@ -1068,7 +1164,9 @@
         "utility",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-390-care",
@@ -1091,7 +1189,9 @@
         "utility",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-390-first-use",
@@ -1113,7 +1213,9 @@
         "utility",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-390-qr",
@@ -1136,7 +1238,9 @@
         "utility",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-430-care",
@@ -1159,7 +1263,9 @@
         "utility",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-430-first-use",
@@ -1181,7 +1287,9 @@
         "utility",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "utility--es-430-qr",
@@ -1204,7 +1312,9 @@
         "utility",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-content-arrival",
@@ -1227,7 +1337,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-content-home",
@@ -1250,7 +1362,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-empty-arrival",
@@ -1273,7 +1387,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-empty-home",
@@ -1296,7 +1412,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-error-arrival",
@@ -1319,7 +1437,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-error-home",
@@ -1342,7 +1462,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-pending-arrival",
@@ -1365,7 +1487,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-pending-home",
@@ -1388,7 +1512,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-320-recovered-home",
@@ -1411,7 +1537,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-content-arrival",
@@ -1434,7 +1562,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-content-home",
@@ -1457,7 +1587,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-empty-arrival",
@@ -1480,7 +1612,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-empty-home",
@@ -1503,7 +1637,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-error-arrival",
@@ -1526,7 +1662,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-error-home",
@@ -1549,7 +1687,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-pending-arrival",
@@ -1572,7 +1712,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-pending-home",
@@ -1595,7 +1737,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-390-recovered-home",
@@ -1618,7 +1762,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-content-arrival",
@@ -1641,7 +1787,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-content-home",
@@ -1664,7 +1812,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-empty-arrival",
@@ -1687,7 +1837,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-empty-home",
@@ -1710,7 +1862,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-error-arrival",
@@ -1733,7 +1887,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-error-home",
@@ -1756,7 +1912,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-pending-arrival",
@@ -1779,7 +1937,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-pending-home",
@@ -1802,7 +1962,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--en-430-recovered-home",
@@ -1825,7 +1987,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-content-arrival",
@@ -1848,7 +2012,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-content-home",
@@ -1871,7 +2037,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-empty-arrival",
@@ -1894,7 +2062,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-empty-home",
@@ -1917,7 +2087,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-error-arrival",
@@ -1940,7 +2112,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-error-home",
@@ -1963,7 +2137,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-pending-arrival",
@@ -1986,7 +2162,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-pending-home",
@@ -2009,7 +2187,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-320-recovered-home",
@@ -2032,7 +2212,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-content-arrival",
@@ -2055,7 +2237,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-content-home",
@@ -2078,7 +2262,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-empty-arrival",
@@ -2101,7 +2287,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-empty-home",
@@ -2124,7 +2312,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-error-arrival",
@@ -2147,7 +2337,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-error-home",
@@ -2170,7 +2362,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-pending-arrival",
@@ -2193,7 +2387,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-pending-home",
@@ -2216,7 +2412,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-390-recovered-home",
@@ -2239,7 +2437,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-content-arrival",
@@ -2262,7 +2462,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-content-home",
@@ -2285,7 +2487,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-empty-arrival",
@@ -2308,7 +2512,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-empty-home",
@@ -2331,7 +2537,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-error-arrival",
@@ -2354,7 +2562,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-error-home",
@@ -2377,7 +2587,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-pending-arrival",
@@ -2400,7 +2612,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-pending-home",
@@ -2423,7 +2637,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--es-430-recovered-home",
@@ -2446,7 +2662,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-arrival-en",
@@ -2468,7 +2686,9 @@
         "composite",
         "visual",
         "en"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-arrival-es",
@@ -2490,7 +2710,9 @@
         "composite",
         "visual",
         "es"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-en-320",
@@ -2513,7 +2735,9 @@
         "visual",
         "en",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-en-390",
@@ -2536,7 +2760,9 @@
         "visual",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-en-430",
@@ -2559,7 +2785,9 @@
         "visual",
         "en",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-es-320",
@@ -2582,7 +2810,9 @@
         "visual",
         "es",
         "width-320"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-es-390",
@@ -2605,7 +2835,9 @@
         "visual",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-es-430",
@@ -2628,7 +2860,9 @@
         "visual",
         "es",
         "width-430"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-recovery-en",
@@ -2650,7 +2884,9 @@
         "composite",
         "visual",
         "en"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "visual--gallery-recovery-es",
@@ -2672,7 +2908,9 @@
         "composite",
         "visual",
         "es"
-      ]
+      ],
+      "video_ready": null,
+      "use_note": "Debe pasar inspección visual y verificación de versión antes de uso publicitario."
     },
     {
       "id": "historical--community-navigation--integrated-en-390",
@@ -2695,7 +2933,9 @@
         "historical",
         "en",
         "width-390"
-      ]
+      ],
+      "video_ready": false,
+      "use_note": "Referencia histórica: validar actualidad antes de reutilizar."
     },
     {
       "id": "historical--community-navigation--integrated-es-390",
@@ -2718,7 +2958,9 @@
         "historical",
         "es",
         "width-390"
-      ]
+      ],
+      "video_ready": false,
+      "use_note": "Referencia histórica: validar actualidad antes de reutilizar."
     }
   ],
   "description": "Reused QA image assets, searchable by screen/state/tags. Excludes administration; not proof of current production."
