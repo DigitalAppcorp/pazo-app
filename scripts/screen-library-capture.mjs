@@ -55,7 +55,7 @@ function response(route, data, status = 200) {
 async function newContext(browser, lang, width, authenticated) {
   const context = await browser.newContext({ viewport: { width, height: width < 600 ? 844 : 900 },
     locale: lang === 'es' ? 'es-US' : 'en-US', isMobile: width < 600, hasTouch: width < 600,
-    reducedMotion:'reduce', serviceWorkers:'block', deviceScaleFactor:1,
+    reducedMotion:'reduce', serviceWorkers:'block', deviceScaleFactor:width<600?3:2,
     permissions: [] })
   let createdPet = false
   let blockedWrites = 0
@@ -120,7 +120,12 @@ async function capture(page, lang, width, profile, id, originState) {
   const signature = crypto.createHash('sha256').update(bytes).digest('hex')
   const title = await page.title().catch(()=>null)
   const heading = await page.locator('h1,h2,[role="dialog"] h3').first().innerText({timeout:1500}).catch(()=>null)
-  items.push({ id:slug,language:lang,width,height:width<600?844:900,profile,
+  const dpr=width<600?3:2
+  const mapUnverified=/map|places/.test(slug)
+  items.push({ id:slug,language:lang,width,height:width<600?844:900,
+    pixel_width:width*dpr,pixel_height:(width<600?844:900)*dpr,device_pixel_ratio:dpr,
+    video_ready:mapUnverified?false:null,
+    qa_warning:mapUnverified?'MAP_VISUAL_NOT_VERIFIED_SYNTHETIC_EMPTY_DATA':null,profile,
     state:originState,path:'docs/screen-library/'+relative,origin,source_commit:buildSha,
     hash_sha256:signature,bytes:bytes.length,heading,title,captured_at:new Date().toISOString(),
     synthetic_data:profile==='authenticated-synthetic',admin:false })
@@ -245,7 +250,7 @@ async function authenticSuite(browser,lang,width) {
     ])
     await flow('pet','pet-documents',()=>maybeClick(page.getByText(L.docs,{exact:true})))
     await flow('pet','pet-lost-alert',()=>maybeClick(page.getByRole('button',{name:new RegExp(L.alert)})))
-    await flow('pet','pet-add-another',()=>maybeClick(page.getByRole('button',{name:lang==='es'?'Añadir mascota':'Add pet'})))
+    await flow('pet','pet-add-another',()=>maybeClick(page.getByRole('button',{name:lang==='es'?'Añadir otra':'Add another'})))
     const nav = () => page.getByRole('navigation',{name:'Navegación de PAZO'})
     await flow('home','create-menu',()=>maybeClick(nav().getByRole('button',{name:L.create,exact:true})))
     await flow('home','create-post',async()=>await maybeClick(nav().getByRole('button',{name:L.create,exact:true}))
@@ -254,7 +259,7 @@ async function authenticSuite(browser,lang,width) {
       &&await maybeClick(page.getByRole('button',{name:new RegExp(L.suggest)})))
     await flow('home','create-lost-alert',async()=>await maybeClick(nav().getByRole('button',{name:L.create,exact:true}))
       &&await maybeClick(page.getByRole('button',{name:lang==='es'?/Mi mascota está perdida/:/My pet is lost/})))
-    await flow('communities','community-create',()=>maybeClick(page.getByRole('button',{name:lang==='es'?/Crear comunidad|Nueva comunidad/i:/Create community|New community/i})))
+    await flow('communities','community-create',()=>maybeClick(page.getByRole('main').getByRole('button',{name:L.create,exact:true})))
     await flow('map','places-search',()=>maybeClick(page.getByRole('button',{name:lang==='es'?/Buscar|Explorar/i:/Search|Explore/i})))
   }catch(e){
     recordFailure(lang+'-'+width,'authenticated-suite',e)
