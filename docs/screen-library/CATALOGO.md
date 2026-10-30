@@ -13,6 +13,26 @@
 | [short](snapshots/2026-10-28/short/) | 10 | Estados compactos | [Ejemplo](snapshots/2026-10-28/short/en-320-error-arrival.png) |
 | [historical](snapshots/2026-10-28/historical/) | 2 | Comunidades (captura histórica) | [Ejemplo](snapshots/2026-10-28/historical/community-navigation/integrated-en-390.png) |
 
+## Capturas nuevas del 30/10/2026
+
+**152 PNG** (38 estados distintos × 2 idiomas × 2 tamaños CSS). Las áreas autenticadas muestran datos sintéticos; no es una sesión real. [Consultar galería completa e incidencias](captures/2026-10-30/README.md).
+
+| Pantalla | Español móvil | Inglés móvil |
+|---|---|---|
+| Inicio | [Ver](captures/2026-10-30/es-390/main-home.png) | [Ver](captures/2026-10-30/en-390/main-home.png) |
+| Mi mascota | [Ver](captures/2026-10-30/es-390/main-pet.png) | [Ver](captures/2026-10-30/en-390/main-pet.png) |
+| QR | [Ver](captures/2026-10-30/es-390/pet-passport.png) | [Ver](captures/2026-10-30/en-390/pet-passport.png) |
+| Agenda | [Ver](captures/2026-10-30/es-390/pet-care.png) | [Ver](captures/2026-10-30/en-390/pet-care.png) |
+| Nuevo cuidado | [Ver](captures/2026-10-30/es-390/pet-care-add.png) | [Ver](captures/2026-10-30/en-390/pet-care-add.png) |
+| Documentos | [Ver](captures/2026-10-30/es-390/pet-documents.png) | [Ver](captures/2026-10-30/en-390/pet-documents.png) |
+| Crear publicación | [Ver](captures/2026-10-30/es-390/create-post.png) | [Ver](captures/2026-10-30/en-390/create-post.png) |
+| Crear menú | [Ver](captures/2026-10-30/es-390/create-menu.png) | [Ver](captures/2026-10-30/en-390/create-menu.png) |
+| Comunidades | [Ver](captures/2026-10-30/es-390/main-communities.png) | [Ver](captures/2026-10-30/en-390/main-communities.png) |
+| Demo | [Ver](captures/2026-10-30/es-390/demo-home.png) | [Ver](captures/2026-10-30/en-390/demo-home.png) |
+| Acceso | [Ver](captures/2026-10-30/es-390/access-login.png) | [Ver](captures/2026-10-30/en-390/access-login.png) |
+
+**Mapa:** existe una captura sintética vacía, bloqueada para publicidad, no una imagen validada de lugares reales.
+
 ## Imágenes clave
 
 | Pantalla | Español | Inglés |

@@ -28,6 +28,15 @@ Esta biblioteca guarda **imágenes reales de evidencias de QA existentes**, sin 
 - Las composiciones `gallery-*.png` son resúmenes de auditoría, no capturas individuales listas para edición.
 - El estado `video_ready: null` significa **pendiente de revisión**, no aprobado. Para material promocional confirmar fecha, contenido, ausencia de PII, funcionamiento visual y continuidad.
 
+## Capturas nuevas del cliente publicado — 30/10/2026
+
+- **152 imágenes** nuevas (ES/EN, móvil 390px y escritorio 1440px), capturadas con Playwright navegando el **cliente publicado** y **datos API sintéticos**; **sin capturar sesiones ni datos de usuarios reales**.
+- [Catálogo de esta sesión](captures/2026-10-30/README.md) · [Manifiesto detallado](captures/2026-10-30/manifest.json) · [Incidencias y acciones no capturadas](captures/2026-10-30/issues.json).
+- Incluye acceso, Demo, primera mascota, feed, perfil, QR, Agenda, documentos, alertas, crear publicaciones, menú, búsqueda, mensajes, notificaciones y herramientas. Esta sesión todavía **NO es una auditoría completa de todas las subpantallas**.
+- **Mapa**: las imágenes nuevas usan API de ejemplo sin ubicaciones y muestran lienzo sin contenido; están explícitamente `video_ready:false`. No sirven como material promocional de un mapa operativo.
+- Las imágenes del 28/10 permanecen como referencias históricas separadas. El [manifest central](manifest.json) permite buscar ambas colecciones por ID, idioma, pantalla, estado y resolución.
+- Todo agente debe elegir `video_ready` después de QA visual; `null` = pendiente, nunca sinónimo de aprobado.
+
 ## Control de versiones
 
 El conjunto incorporado procede de evidencias del **28 de octubre de 2026** (y dos imágenes históricas del 26 de octubre). Se conservan inmutables con su origen para trazabilidad. No se ha podido verificar aquí que todas coincidan con la publicación del 30 de octubre; se necesita una pasada nueva antes de declarar cobertura completa.
