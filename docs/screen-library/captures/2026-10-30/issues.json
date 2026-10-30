@@ -1,0 +1,22 @@
+[
+  {
+    "locale": "es-390",
+    "id": "authenticated-suite",
+    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+  },
+  {
+    "locale": "es-1440",
+    "id": "authenticated-suite",
+    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+  },
+  {
+    "locale": "en-390",
+    "id": "authenticated-suite",
+    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+  },
+  {
+    "locale": "en-1440",
+    "id": "authenticated-suite",
+    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+  }
+]
