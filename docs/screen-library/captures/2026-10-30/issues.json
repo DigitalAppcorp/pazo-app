@@ -1,22 +1,62 @@
 [
   {
     "locale": "es-390",
-    "id": "authenticated-suite",
-    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+    "id": "pet-add-another",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "es-390",
+    "id": "community-create",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "es-390",
+    "id": "blocked-remote-writes",
+    "message": "Blocked 5 attempted writes; no production records were changed"
   },
   {
     "locale": "es-1440",
-    "id": "authenticated-suite",
-    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+    "id": "pet-add-another",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "es-1440",
+    "id": "community-create",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "es-1440",
+    "id": "blocked-remote-writes",
+    "message": "Blocked 5 attempted writes; no production records were changed"
   },
   {
     "locale": "en-390",
-    "id": "authenticated-suite",
-    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+    "id": "pet-add-another",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "en-390",
+    "id": "community-create",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "en-390",
+    "id": "blocked-remote-writes",
+    "message": "Blocked 5 attempted writes; no production records were changed"
   },
   {
     "locale": "en-1440",
-    "id": "authenticated-suite",
-    "message": "locator.waitFor: Timeout 18000ms exceeded.\nCall log:\n  - waiting for getByRole('navigation', { name: 'Navegación de PAZO' }) to be visible\n"
+    "id": "pet-add-another",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "en-1440",
+    "id": "community-create",
+    "message": "Target UI action not found"
+  },
+  {
+    "locale": "en-1440",
+    "id": "blocked-remote-writes",
+    "message": "Blocked 5 attempted writes; no production records were changed"
   }
 ]
