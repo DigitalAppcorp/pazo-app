@@ -21,6 +21,13 @@ Esta biblioteca guarda **imágenes reales de evidencias de QA existentes**, sin 
 4. **No inventar ni reconstruir** las pantallas que faltan: consultar `COBERTURA.md`. Para producción final de un video, pedir captura nueva solo del estado ausente.
 5. Nunca usar imágenes administrativas, credenciales, información de mascotas o personas reales, pagos, tokens o datos privados de producción.
 
+## Avisos de calidad para video
+
+- Las seis capturas históricas de **Mapa** en `navigation/` muestran un error de carga y **no son aptas para representar Lugares en un anuncio**. Están señaladas `video_ready: false` en el manifiesto. La falla de esa evidencia no prueba un error del mapa publicado hoy.
+- Las capturas de QA pueden usar mascotas/edades/especies distintas entre pantallas. No montar como recorrido continuo los activos de fixtures incongruentes, ni fingir que representan un usuario real.
+- Las composiciones `gallery-*.png` son resúmenes de auditoría, no capturas individuales listas para edición.
+- El estado `video_ready: null` significa **pendiente de revisión**, no aprobado. Para material promocional confirmar fecha, contenido, ausencia de PII, funcionamiento visual y continuidad.
+
 ## Control de versiones
 
 El conjunto incorporado procede de evidencias del **28 de octubre de 2026** (y dos imágenes históricas del 26 de octubre). Se conservan inmutables con su origen para trazabilidad. No se ha podido verificar aquí que todas coincidan con la publicación del 30 de octubre; se necesita una pasada nueva antes de declarar cobertura completa.
