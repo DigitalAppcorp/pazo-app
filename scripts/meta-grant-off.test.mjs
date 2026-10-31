@@ -111,6 +111,6 @@ test('auto-confirmed Auth settings block consent grant RPC',async()=>{
    throw Error('no RPC should be invoked')
   }})
  const handler=createMetaGrantHandler({released:true,privacyReviewed:true,...provider})
- assert.equal((await handler(makeReq())).status,401)
+ assert.equal((await handler(makeReq())).status,403)
  assert.equal(requests,2)
 })
