@@ -15,7 +15,8 @@ const privacy={
   record,trusted:true,gpc:false,sharingOptOut:false,
   accountExcluded:false,qaOrAdmin:false,verifiedRegistration:true,
 }
-const claim={kind:'new',claimWasInserted:true,eventId,eventTime:Math.floor(now/1000),hashedEmail}
+const leaseId='77777777-8888-4999-aaaa-bbbbbbbbbbbb'
+const claim={kind:'new',claimWasInserted:true,eventId,leaseId,eventTime:Math.floor(now/1000),hashedEmail}
 const base={
   releaseEnabled:true,privacyGateApproved:true,
   datasetId,apiVersion:'v24.0',serverToken:'synthetic-server-only-secret-long',
@@ -45,7 +46,7 @@ test('no release => no claim, no privacy query, no Meta call',async()=>{
 })
 test('claim repository must be complete, and duplicate verified owner is suppressed',async()=>{
   assert.equal((await deliverVerifiedMetaRegistration(base)).status,'not_configured')
-  const rep={leaseOne:async()=>({kind:'duplicate'}),checkPrivacy:async()=>privacy,settle:async()=>{}}
+  const rep={leaseOne:async()=>({kind:'duplicate'}),checkPrivacy:async()=>privacy,settle:async()=>true}
   assert.equal((await deliverVerifiedMetaRegistration({...base,repository:rep})).status,'not_eligible')
 })
 test('one lease + two privacy reads, same event_id, token only in header',async()=>{
@@ -53,7 +54,7 @@ test('one lease + two privacy reads, same event_id, token only in header',async(
   const repository={
     leaseOne:async()=>claim,
     checkPrivacy:async()=>{checks++;return privacy},
-    settle:async(id,state)=>{assert.equal(id,eventId);settled=state},
+    settle:async(id,lease,state)=>{assert.equal(id,eventId);assert.equal(lease,leaseId);settled=state;return true},
   }
   const out=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async(url,config)=>{
@@ -73,7 +74,7 @@ test('a late GPC/withdrawal change suppresses the provider call',async()=>{
   let calls=0,checks=0,settled
   const repository={leaseOne:async()=>claim,
     checkPrivacy:async()=>++checks===1?privacy:{...privacy,gpc:true},
-    settle:async(_,status)=>{settled=status}}
+    settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const out=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++;throw Error('never called')}})
   assert.equal(out.status,'suppressed')
@@ -83,7 +84,7 @@ test('a late GPC/withdrawal change suppresses the provider call',async()=>{
 test('server account exclusion and unknown purpose suppress before provider',async()=>{
   let calls=0,settled
   const repository={leaseOne:async()=>claim,checkPrivacy:async()=>({...privacy,qaOrAdmin:true}),
-    settle:async(_,status)=>{settled=status}}
+    settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const result=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++}})
   assert.equal(result.status,'suppressed')
@@ -93,7 +94,7 @@ test('server account exclusion and unknown purpose suppress before provider',asy
 test('provider failure keeps same event lease retryable; no duplicate is minted',async()=>{
   let settled,calls=0
   const repository={leaseOne:async()=>claim,checkPrivacy:async()=>privacy,
-    settle:async(_,status)=>{settled=status}}
+    settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const result=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++;return {ok:false}}})
   assert.equal(result.status,'provider_error')
@@ -103,7 +104,7 @@ test('provider failure keeps same event lease retryable; no duplicate is minted'
 test('absent match identifier, token or Meta dataset fails closed',async()=>{
   let calls=0,settled
   const repository={leaseOne:async()=>({...claim,hashedEmail:undefined}),
-    checkPrivacy:async()=>privacy,settle:async(_,status)=>{settled=status}}
+    checkPrivacy:async()=>privacy,settle:async(_,lease,status)=>{assert.equal(lease,leaseId);settled=status;return true}}
   const out=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async()=>{calls++}})
   assert.equal(out.status,'not_configured')
@@ -117,7 +118,7 @@ test('CAPI retry leases the original verified event ID rather than minting a sec
   const repository={
     leaseOne:async()=>({...claim,kind:'retry'}),
     checkPrivacy:async()=>privacy,
-    settle:async(id,state)=>settled.push([id,state]),
+    settle:async(id,lease,state)=>{settled.push([id,lease,state]);return true},
   }
   const result=await deliverVerifiedMetaRegistration({...base,repository,
     fetchImpl:async(url,config)=>{
@@ -126,5 +127,28 @@ test('CAPI retry leases the original verified event ID rather than minting a sec
     }})
   assert.equal(result.status,'accepted')
   assert.deepEqual(observed,[eventId])
-  assert.deepEqual(settled,[[eventId,'sent']])
+  assert.deepEqual(settled,[[eventId,leaseId,'sent']])
+})
+
+
+test('invalid or missing lease ID cannot trigger provider or privacy reads',async()=>{
+  for(const invalid of [undefined,'123','11111111-1111-1111-1111-111111111111']){
+    let privacyReads=0,network=0,settles=0
+    const repo={leaseOne:async()=>({...claim,leaseId:invalid}),
+      checkPrivacy:async()=>{privacyReads++;return privacy},
+      settle:async()=>{settles++;return true}}
+    const out=await deliverVerifiedMetaRegistration({...base,repository:repo,
+      fetchImpl:async()=>{network++;return {ok:true,json:async()=>({events_received:1})}}})
+    assert.equal(out.status,'not_eligible')
+    assert.equal(privacyReads+network+settles,0)
+  }
+})
+test('stale-worker settlement failure never reports successful completion',async()=>{
+  let sent=0
+  const repo={leaseOne:async()=>claim,checkPrivacy:async()=>privacy,
+    settle:async()=>false}
+  const out=await deliverVerifiedMetaRegistration({...base,repository:repo,
+    fetchImpl:async()=>{sent++;return {ok:true,json:async()=>({events_received:1})}}})
+  assert.equal(sent,1)
+  assert.equal(out.status,'unavailable','false settlement cannot be silently treated as saved')
 })
