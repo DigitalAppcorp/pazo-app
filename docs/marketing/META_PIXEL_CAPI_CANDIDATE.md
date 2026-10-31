@@ -96,3 +96,13 @@ The coordinator passes the original lease token into **both** policy reads (befo
 **Remaining blockers:** legally approved inventory of matching fields and lawful basis; robust server-side Auth and dynamic GPC/opt-out enforcement; migration promotion via reviewed tooling; secured worker scheduling; complete browser runtime E2E; actual Meta Test Events; dedicated no-real-user QA controls; independent final production and budget GO. The synthetic `v24.0` API version in tests is NOT a production version decision.
 
 **Status:** `CODE_PARTIAL`, `PG17_CANDIDATE_ONLY`, `META_PROVIDER_OFF`, `PROD_TRACKING_OFF`, `NO_HOSTED_SQL`, `NO_REAL_META_EVENTS`, `NO_AD_SPEND_CHANGES`.
+
+## CAPI worker HTTP boundary — isolated, 31 Oct 2026
+
+The future worker boundary is `supabase/functions/pazo-meta-worker/`, with an OFF-by-default `index.ts`, an injectable `workerCore.mjs` and a separate worker-key validator `workerAuth.mjs`. **None is deployed, scheduled or imported into a live Supabase function.** The Edge entrypoint deliberately returns disabled and does not even read credentials. CI enforces all four independent static false flags: endpoint release, privacy review, matching-field approval and provider approval.
+
+The handler requires a server-only POST with no Origin, cookies, body or browser identity. It uses a distinct `META_WORKER_DISPATCH_SECRET` schedule credential, **not** the Meta CAPI token or an ordinary user bearer. Authorization compares SHA-256 digests without early-exit byte matching; failures are status-only and reveal no provider IDs, tokens, emails or payloads. Its injected `run()` must use the separate lease-bound Meta outbox repository and live consent check. A cron job or external scheduler is **not configured**.
+
+Synthetic tests `scripts/meta-worker-off.test.mjs` cover default OFF, missing gates, incorrect service credential, browser-looking requests, body rejection, secret errors and response minimization. These tests do not prove scheduling, actual Meta delivery or external data-processing compliance.
+
+**Still BLOCKED:** approved legal ES/EN notice and Design OS, matching field inventory/approval, actual server-only approved matching field resolver, migration approval and staged installation, trusted GPC signal persistence, full production Auth E2E, Meta Events Manager deduplication, independent PO approval for live tracking/campaign. Never change the four constants from false solely because synthetic CI succeeds.
