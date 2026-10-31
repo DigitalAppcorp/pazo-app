@@ -30,7 +30,7 @@ export const OFF_FLAGS=Object.freeze({
   ['export const META_CHOICES_RELEASED=false'],
 })
 const forbidden=[
- /(?:metaConsentRegistrationFlow|metaConsentTransport|MetaConsentChoice|metaPixelLoader|metaPixel|metaCapi|metaServerGateway|metaOutboxRepository|metaDeliveryCoordinator)/,
+ /(?:metaConsentRegistrationFlow|metaConsentTransport|metaConsentController|MetaConsentChoice|metaPixelLoader|metaPixel|metaCapi|metaServerGateway|metaOutboxRepository|metaDeliveryCoordinator)/,
  /(?:connect\.facebook\.net|graph\.facebook\.com|facebook\.com\/tr|fbevents\.js)/,
  /\bfbq\s*\(/,
  /pazo-meta-(?:grant|receipt|worker|consent)/,
