@@ -124,10 +124,34 @@ try{
      const bbox=await button.boundingBox()
      assert.ok(bbox?.height>=44,'touch_target_too_small_'+lang+'_'+scenario)
     }
+    // Capture the actual INITIAL state before checking any consent box.
+    await page.screenshot({
+      path:DIR+'/'+lang+'-'+width+'-'+scenario+'-initial.png',fullPage:true,
+    })
     if(scenario==='default'){
      assert.equal(initial.checkbox,false)
      await page.keyboard.press('Tab')
      assert.notEqual(await page.evaluate(()=>document.activeElement?.tagName),'BODY')
+     // Keyboard users need an apparent focus cue despite the product's
+     // default 'no static outlines' presentation preference.
+     const firstFocus=await page.evaluate(()=>{
+       const node=document.activeElement
+       return {tag:node?.tagName,
+        background:getComputedStyle(node).backgroundColor}
+     })
+     assert.equal(firstFocus.tag,'BUTTON')
+     assert.notEqual(firstFocus.background,'rgba(0, 0, 0, 0)',
+       'keyboard-focused privacy link must visibly change background')
+     await page.keyboard.press('Tab')
+     assert.equal(await page.evaluate(()=>document.activeElement?.tagName),'INPUT')
+     await page.keyboard.press('Tab')
+     const finalFocus=await page.evaluate(()=>({
+       tag:document.activeElement?.tagName,
+       shadow:getComputedStyle(document.activeElement).boxShadow,
+     }))
+     assert.equal(finalFocus.tag,'BUTTON')
+     assert.notEqual(finalFocus.shadow,'none',
+       'continue action must have keyboard-only visible focus shadow')
      const permission=section.locator('input[type=checkbox]')
      await permission.check()
      assert.ok(await permission.isChecked())
@@ -157,7 +181,7 @@ try{
      }
     }
     // Proof of the rendered state, not aesthetic approval.
-    const evidence=DIR+'/'+lang+'-'+width+'-'+scenario+'.png'
+    const evidence=DIR+'/'+lang+'-'+width+'-'+scenario+'-result.png'
     await page.screenshot({path:evidence,fullPage:true})
     await context.close()
    }
@@ -169,12 +193,12 @@ try{
   candidateOnly:true,viewportWidths:[320,390,430],
   languages:['es','en'],
   scenarios:['default','gpc','gpc-error','grant-error'],
-  screenshots:24,externalRequests:blocked,findings,
+  screenshots:48,externalRequests:blocked,findings,
   limitations:['No hosted PAZO runtime or signed-in real-user UX',
    'No legal approval or independent human visual acceptance',
    'No actual Meta SDK, CAPI or consent provider network'],
  },null,2))
- console.log('META_CONSENT_VISUAL_DOM_PASS screenshots=24 no_external_requests')
+ console.log('META_CONSENT_VISUAL_DOM_PASS screenshots=48 no_external_requests')
 }finally{
  if(browser)await browser.close()
  await server.close()
