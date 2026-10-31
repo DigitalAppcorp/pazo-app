@@ -158,8 +158,8 @@ export async function runAuthenticatedMetaEdgeLab({api,key,ownerId,token}={}){
  assert.equal(pixelCallbacks,1)
  // After consent, a browser GPC request persists the opt-out even when
  // a browser receipt was consumed; future receipt is blocked.
- const gpc=await direct('pazo-meta-receipt',{},token,{'sec-gpc':'1'})
- assert.equal(gpc.status,403)
+ const gpcResult=await direct('pazo-meta-receipt',{},token,{'sec-gpc':'1'})
+ assert.equal(gpcResult.status,403)
  assert.equal(withdrawn,true)
  assert.equal((await direct('pazo-meta-receipt',{})).status,404)
  assert.deepEqual(await remove.requestWithdraw({
