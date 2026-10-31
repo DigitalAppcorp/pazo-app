@@ -90,9 +90,37 @@ assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_can
 create(withdrawn);pref(withdrawn)
 assert.equal(sql(record(withdrawn)),'t')
 assert.equal(count(withdrawn),'1')
-sql(`UPDATE marketing_private.meta_purpose_candidate SET
- decision='withdrawn',withdrawn_at=now() WHERE owner_id='${withdrawn}'`)
-assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()'),'','withdrawn grant suppresses pending event')
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_withdraw_candidate('${withdrawn}')`),'t')
+assert.equal(sql(`SELECT decision FROM marketing_private.meta_purpose_candidate
+ WHERE owner_id='${withdrawn}'`),'withdrawn')
+assert.equal(sql(`SELECT status FROM marketing_private.meta_outbox_candidate
+ WHERE owner_id='${withdrawn}'`),'suppressed','pending work is canceled atomically')
+assert.equal(sql('SET ROLE service_role;SELECT * FROM public.pazo_meta_lease_candidate()'),'','withdrawal suppresses pending event')
+const firstWithdrawTime=sql(`SELECT withdrawn_at::text FROM marketing_private.meta_purpose_candidate
+ WHERE owner_id='${withdrawn}'`)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_withdraw_candidate('${withdrawn}')`),'t',
+ 'withdrawal is idempotent')
+assert.equal(sql(`SELECT withdrawn_at::text FROM marketing_private.meta_purpose_candidate
+ WHERE owner_id='${withdrawn}'`),firstWithdrawTime,'repeated opt-out does not forget original revocation time')
+
+const noHistory='16900000-0000-4000-8000-000000000007'
+create(noHistory)
+assert.equal(sql(`SET ROLE service_role;
+ SELECT public.pazo_meta_withdraw_candidate('${noHistory}')`),'t',
+ 'no prior grant must not prevent withdrawal')
+assert.equal(sql(`SELECT decision='withdrawn' AND gpc_at_last_request
+ AND sharing_opt_out AND withdrawn_at IS NOT NULL
+ FROM marketing_private.meta_purpose_candidate
+ WHERE owner_id='${noHistory}'`),'t',
+ 'opt-out persists even if no conversion ever existed')
+assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_outbox_candidate
+ WHERE owner_id='${noHistory}'`),'0')
+assert.throws(()=>sql(`SET ROLE anon;
+ SELECT public.pazo_meta_withdraw_candidate('${owner}')`))
+assert.throws(()=>sql(`SET ROLE authenticated;
+ SELECT public.pazo_meta_withdraw_candidate('${owner}')`))
 
 for(const role of ['anon','authenticated','service_role']){
   assert.throws(()=>sql(`SET ROLE ${role};SELECT * FROM marketing_private.meta_outbox_candidate`))
@@ -111,6 +139,6 @@ assert.equal(sql(`SELECT count(*) FROM marketing_private.meta_purpose_candidate
 assert.equal(sql('SELECT row_to_json(g) FROM marketing_private.collection_gate g'),before)
 console.log(JSON.stringify({status:'PASS',environment:'disposable PG17',
  atomicSignupAndEvent:true,concurrentFirstParty:8,concurrentLeases:8,
- oneTimeClaims:1,leaseFence:true,stableRetryId:true,revocationStopsPending:true,
+ oneTimeClaims:1,leaseFence:true,stableRetryId:true,revocationStopsPending:true,withdrawalIdempotent:true,serverOnlyWithdrawal:true,
  independentGateDefaultsOff:true,gpcExclusion:true,qaExclusion:true,
  noBackfill:true,rlsForced:true,retentionCascade:true,hostedWrites:0}))
