@@ -140,3 +140,29 @@ test('real candidate adapters route a GPC POST to private withdrawal RPC only',a
   assert.equal(call.opts.body.includes(serviceKey),false)
  }
 })
+
+test('unconfirmed but authenticated owner can persist GPC; never requires verified signup',async()=>{
+ const url='https://mrybvqdebbgcayuvgkkr.supabase.co'
+ const anonKey='synthetic_anon_key_for_auth_1234567'
+ const serviceKey='synthetic_service_role_key_for_gpc_1234567'
+ for(const type of ['grant','receipt']){
+  const calls=[]
+  const fetchImpl=async(path,opts)=>{
+   calls.push(path)
+   if(path.endsWith('/auth/v1/user'))
+    return new Response(JSON.stringify({...user,email_confirmed_at:null}),{status:200})
+   if(path.endsWith('/rpc/pazo_meta_withdraw_candidate'))
+    return new Response('true',{status:200})
+   throw Error('an opt-out must not require confirmed signup or Auth settings')
+  }
+  const args={url,anonKey,serviceKey,fetchImpl}
+  const provider=type==='grant'?createMetaGrantProvider(args):
+   createMetaReceiptProvider({...args,datasetId:'1438916858347709'})
+  const handler=type==='grant'?
+   createMetaGrantHandler({released:true,privacyReviewed:true,...provider}):
+   createMetaReceiptHandler({released:true,privacyReviewed:true,...provider})
+  assert.equal((await handler(get(type))).status,403)
+  assert.equal(calls.length,2)
+  assert.equal(calls[1],url+'/rest/v1/rpc/pazo_meta_withdraw_candidate')
+ }
+})
